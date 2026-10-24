@@ -1,0 +1,43 @@
+{
+  "schema": "van.rebuild.candidate-source-receipt/1",
+  "scope": "PARTIAL_BE003_BE012_BE036_NOT_UNIT_ACCEPTANCE",
+  "source_parent": "c36d6a21bea1618707e353912d3f5b9508eca5ba",
+  "source_sha256": {
+    "trading/vati/app/cycle.py": "201ee2c47315b1db97b469c571cf93bfca0e00d898a5eb8147538154163afc9f",
+    "trading/vati/app/trade_lifecycle.py": "123c3c531571e8ba6853d57da648efe29b225d544cfdfaa01d44df437148c873",
+    "trading/vati/cognition/attribution.py": "bc02ac613733db7aa4309b4b8dda15b66dacbe325b7369f80cc8b68c05397c36",
+    "trading/vati/execution/paper.py": "9198cf40bce6d1343e77c87e2eabd2526954c90eeb82080c714aeda94a3bb157",
+    "trading/vati/execution/review.py": "f0e4f049dfaf73a0c15dc56fe63849cfaf51d01a6d3f1dfae6584837532be6fa",
+    "trading/vati/learning/episodes.py": "cfe5065d68b94d6aa3643210fe297f013e8b65bf7cf104ff7377cbc775a5cf6d",
+    "trading/tests/test_attribution_currency_invariants.py": "7d867139c35480e876aaca3de6272ba9a5d04b2c72b55c3d587e99757f003484",
+    "trading/tests/test_learning_projection_recovery.py": "0301051f2eda7349d2e2965952b6fd7890d5ae79cd6a1b4694ed3f234e78deb3",
+    "trading/tests/test_account_trade_lifecycle.py": "302535e9f4988ff1ee333e528a3a3f3ee2d9eef0e4a9ce54944e9ed1df4b22ac"
+  },
+  "test_command": "PYTHONPATH=backend:.:trading python -m pytest trading/tests/ -q --disable-warnings --maxfail=3",
+  "result": {
+    "passed": 1599,
+    "skipped": 2,
+    "warnings": 3,
+    "seconds": 45.89
+  },
+  "logs_sha256": {
+    "/tmp/van-attribution-before.txt": "52ba5fd4a0d67f68fd4a7fa25f3135bf46169ddfbf3d6fa5c8b86664edc1c81d",
+    "/tmp/van-net-risk-before.txt": "020ba5dce80526db87757e5af2edef614015e848e572cb63e278f3363015becd",
+    "/tmp/van-unknown-outcome-before.txt": "cb132842ba7a74a7b0474490189e974bb62d808ae05090ceb99a05bb9b25d020",
+    "/tmp/van-lessons-replay-before.txt": "ca21b04580c52ae2e2fa66d43a74e753ff4962bfd8e600fe2bced67744abffb3",
+    "/tmp/van-feedback-whole-trading-final.txt": "6c4b0467a6f96a58bc039778fd4d59b0b93a122db4ef2723836a7700f968fc98"
+  },
+  "coverage": [
+    "Actual account lifecycle FX contract scaling and recorded fees/carry",
+    "Immutable original approval risk and snapshot seals, entry-availability cutoff",
+    "Unknown nonlinear settlement excluded from lessons and strategy reinforcement",
+    "Actual lifecycle cold-start quality reduction parity",
+    "Native lesson and quality hashes, versions, environment and duplicate handling",
+    "Real subprocess death before durable lesson append and after append before index update"
+  ],
+  "limits": [
+    "Source fixtures; no live venue, profit or independent unit acceptance",
+    "Legacy unspecified reported PnL convention remains explicitly labelled",
+    "Higher source revisions, durable outcome contribution/cursor fold and positive qualified-policy loop remain incomplete"
+  ]
+}

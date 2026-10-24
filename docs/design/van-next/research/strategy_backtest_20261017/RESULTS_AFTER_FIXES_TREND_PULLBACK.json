@@ -1,0 +1,241 @@
+[
+ {
+  "strategy": "FX-TREND-PULLBACK-01",
+  "symbol": "EURUSD",
+  "tf": "H1",
+  "raw_lockout_disabled": true,
+  "chain_ok": true,
+  "period": "2018-07..2025-03",
+  "bars": 41051,
+  "seconds": 695.4,
+  "trades": 1129,
+  "win_rate": 0.496,
+  "expectancy_r": -0.008,
+  "total_r": -8.5,
+  "profit_factor": 0.99,
+  "max_drawdown_pct": 8.4,
+  "net_pnl_usd_on_10k": -78.0,
+  "sharpe_per_trade": -0.012,
+  "dsr_probability": 0.1731,
+  "pbo_probability": 0.4,
+  "years_positive": "4/8",
+  "by_year": {
+   "2018": {
+    "trades": 97,
+    "expectancy_r": -0.047,
+    "total_r": -4.5
+   },
+   "2019": {
+    "trades": 156,
+    "expectancy_r": 0.037,
+    "total_r": 5.8
+   },
+   "2020": {
+    "trades": 183,
+    "expectancy_r": 0.063,
+    "total_r": 11.5
+   },
+   "2021": {
+    "trades": 170,
+    "expectancy_r": -0.072,
+    "total_r": -12.2
+   },
+   "2022": {
+    "trades": 158,
+    "expectancy_r": 0.088,
+    "total_r": 13.8
+   },
+   "2023": {
+    "trades": 148,
+    "expectancy_r": -0.076,
+    "total_r": -11.2
+   },
+   "2024": {
+    "trades": 178,
+    "expectancy_r": -0.067,
+    "total_r": -11.9
+   },
+   "2025": {
+    "trades": 39,
+    "expectancy_r": 0.008,
+    "total_r": 0.3
+   }
+  },
+  "oos_2025_q1": {
+   "trades": 39,
+   "expectancy_r": 0.008
+  },
+  "validation_passed": false,
+  "validation_reasons": [
+   "dsr_probability:0.1731<0.95",
+   "pbo_probability:0.4000>0.1"
+  ],
+  "policy": "validation-policy/1.0.0",
+  "decisions": {
+   "NO_TRADE": 29665,
+   "REDUCED": 1003,
+   "REJECTED:MAX_POSITIONS_PER_INSTRUMENT": 10257,
+   "APPROVED": 126
+  }
+ },
+ {
+  "strategy": "FX-TREND-PULLBACK-01",
+  "symbol": "GBPUSD",
+  "tf": "H1",
+  "raw_lockout_disabled": true,
+  "chain_ok": true,
+  "period": "2018-07..2025-03",
+  "bars": 41033,
+  "seconds": 701.4,
+  "trades": 1123,
+  "win_rate": 0.487,
+  "expectancy_r": -0.009,
+  "total_r": -10.4,
+  "profit_factor": 0.97,
+  "max_drawdown_pct": 7.7,
+  "net_pnl_usd_on_10k": -346.0,
+  "sharpe_per_trade": -0.014,
+  "dsr_probability": 0.1548,
+  "pbo_probability": 0.4,
+  "years_positive": "3/8",
+  "by_year": {
+   "2018": {
+    "trades": 80,
+    "expectancy_r": 0.064,
+    "total_r": 5.1
+   },
+   "2019": {
+    "trades": 155,
+    "expectancy_r": -0.015,
+    "total_r": -2.3
+   },
+   "2020": {
+    "trades": 192,
+    "expectancy_r": 0.043,
+    "total_r": 8.2
+   },
+   "2021": {
+    "trades": 172,
+    "expectancy_r": -0.106,
+    "total_r": -18.1
+   },
+   "2022": {
+    "trades": 159,
+    "expectancy_r": 0.068,
+    "total_r": 10.8
+   },
+   "2023": {
+    "trades": 174,
+    "expectancy_r": -0.018,
+    "total_r": -3.2
+   },
+   "2024": {
+    "trades": 160,
+    "expectancy_r": -0.064,
+    "total_r": -10.3
+   },
+   "2025": {
+    "trades": 31,
+    "expectancy_r": -0.022,
+    "total_r": -0.7
+   }
+  },
+  "oos_2025_q1": {
+   "trades": 31,
+   "expectancy_r": -0.022
+  },
+  "validation_passed": false,
+  "validation_reasons": [
+   "dsr_probability:0.1548<0.95",
+   "pbo_probability:0.4000>0.1"
+  ],
+  "policy": "validation-policy/1.0.0",
+  "decisions": {
+   "NO_TRADE": 29687,
+   "APPROVED": 113,
+   "REJECTED:MAX_POSITIONS_PER_INSTRUMENT": 10213,
+   "REDUCED": 1010,
+   "REJECTED:SIZE_BELOW_VENUE_MIN": 10
+  }
+ },
+ {
+  "strategy": "FX-TREND-PULLBACK-01",
+  "symbol": "USDJPY",
+  "tf": "H1",
+  "raw_lockout_disabled": true,
+  "chain_ok": true,
+  "period": "2018-07..2025-03",
+  "bars": 41032,
+  "seconds": 710.5,
+  "trades": 976,
+  "win_rate": 0.507,
+  "expectancy_r": 0.017,
+  "total_r": 16.7,
+  "profit_factor": 1.08,
+  "max_drawdown_pct": 3.1,
+  "net_pnl_usd_on_10k": 734.0,
+  "sharpe_per_trade": 0.027,
+  "dsr_probability": 0.629,
+  "pbo_probability": 0.4,
+  "years_positive": "5/8",
+  "by_year": {
+   "2018": {
+    "trades": 80,
+    "expectancy_r": -0.01,
+    "total_r": -0.8
+   },
+   "2019": {
+    "trades": 137,
+    "expectancy_r": 0.052,
+    "total_r": 7.2
+   },
+   "2020": {
+    "trades": 146,
+    "expectancy_r": 0.021,
+    "total_r": 3.1
+   },
+   "2021": {
+    "trades": 151,
+    "expectancy_r": 0.055,
+    "total_r": 8.3
+   },
+   "2022": {
+    "trades": 146,
+    "expectancy_r": 0.001,
+    "total_r": 0.2
+   },
+   "2023": {
+    "trades": 139,
+    "expectancy_r": 0.006,
+    "total_r": 0.8
+   },
+   "2024": {
+    "trades": 149,
+    "expectancy_r": -0.01,
+    "total_r": -1.5
+   },
+   "2025": {
+    "trades": 28,
+    "expectancy_r": -0.016,
+    "total_r": -0.5
+   }
+  },
+  "oos_2025_q1": {
+   "trades": 28,
+   "expectancy_r": -0.016
+  },
+  "validation_passed": false,
+  "validation_reasons": [
+   "dsr_probability:0.6290<0.95",
+   "pbo_probability:0.4000>0.1"
+  ],
+  "policy": "validation-policy/1.0.0",
+  "decisions": {
+   "NO_TRADE": 29649,
+   "APPROVED": 90,
+   "REJECTED:MAX_POSITIONS_PER_INSTRUMENT": 10403,
+   "REDUCED": 886,
+   "REJECTED:SIZE_BELOW_VENUE_MIN": 4
+  }
+ }
+]

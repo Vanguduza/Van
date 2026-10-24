@@ -33,6 +33,7 @@ from van_gateway.browser.downloads import (
     DownloadBroker,
     DownloadError,
     DownloadState,
+    OwnerAction,
     owner_actions,
 )
 from van_gateway.browser.interactive_models import (
@@ -46,7 +47,9 @@ from van_gateway.browser.interactive_service import (
     InteractiveSessionService,
 )
 from van_gateway.browser.policy import BrowserPolicyError
+from van_gateway.browser.producer_service import BrowserProducerService, ProducerError
 from van_gateway.browser.stream_grants import StreamGrantError, StreamGrantService
+from van_gateway.browser.stream_routes import parse_profile_signal_urls, signal_url_for_profile
 from van_gateway.observability import instruments
 
 #: §34 / §6.1. One prefix, read by the router and by the two route classifiers in app.py,
@@ -84,14 +87,16 @@ class CreateSessionBody(BaseModel):
 class DelegateControlBody(BaseModel):
     #: Only the two Hermes holders are accepted; the service refuses anything else.
     holder: str
-    issued_for: str
+    issued_for: str | None = None
 
 
 class ViewportAckBody(BaseModel):
     revision: int
+    frame_sequence: int | None = Field(default=None, ge=1)
+    media_epoch: str | None = Field(default=None, min_length=16, max_length=128)
 
 
-def _session_json(session: InteractiveBrowserSession) -> dict[str, Any]:
+def _session_json(session: InteractiveBrowserSession, *, delegate_issued_for: str | None = None) -> dict[str, Any]:
     """What the device is told. Never the profile secret, never the URL in plaintext."""
     return {
         "session_id": session.session_id,
@@ -108,6 +113,7 @@ def _session_json(session: InteractiveBrowserSession) -> dict[str, Any]:
         "control_holder": session.control_holder.value,
         "control_lease_id": session.control_lease_id,
         "control_generation": session.control_generation,
+        "control_delegate_issued_for": delegate_issued_for,
         "active_target_id": session.active_target_id,
         "requested_fps": session.requested_fps,
         "mission_id": session.mission_id,
@@ -131,6 +137,9 @@ def build_interactive_router(
     mission_binder: Any | None = None,
     audit: Any | None = None,
     on_session_ended: Any | None = None,
+    producers: BrowserProducerService | None = None,
+    delegate_issued_for: str | None = None,
+    profile_signal_urls: str = "{}",
 ) -> APIRouter:
     """`on_session_ended` is called with a session id once it reaches a terminal state.
 
@@ -144,6 +153,12 @@ def build_interactive_router(
     have to add a second parameter.
     """
     router = APIRouter(prefix=INTERACTIVE_SESSION_PREFIX, tags=["browser-interactive"])
+    profile_urls = parse_profile_signal_urls(profile_signal_urls, manifest_base_url=signal_url)
+    for alias in profile_urls:
+        sessions.broker.policy.check_profile(alias)
+
+    def project(session: InteractiveBrowserSession) -> dict[str, Any]:
+        return _session_json(session, delegate_issued_for=delegate_issued_for)
 
     async def _owned(request: Request, session_id: str) -> InteractiveBrowserSession:
         """The device check every route shares.
@@ -247,11 +262,11 @@ def build_interactive_router(
                 result="ok", device_id=device_id, capability="browser.interactive.create",
                 after={"session_id": session.session_id, "profile_alias": body.profile_alias},
             )
-        return _session_json(session)
+        return project(session)
 
     @router.get("/{session_id}")
     async def read_session(request: Request, session_id: str):
-        return _session_json(await _owned(request, session_id))
+        return project(await _owned(request, session_id))
 
     @router.post("/{session_id}/stream-grant")
     async def mint_stream_grant(request: Request, session_id: str):
@@ -264,7 +279,8 @@ def build_interactive_router(
         session = await _owned(request, session_id)
         if session.state.is_terminal:
             raise HTTPException(status_code=409, detail="interactive_session_ended")
-        if not signal_url:
+        selected_signal_url = signal_url_for_profile(session.profile_alias, profile_urls=profile_urls, fallback_url=signal_url)
+        if not selected_signal_url:
             # GAP-F-016 — the router mounts on `browser_stream_signing_key_file` alone
             # (app.py), so a host with a signing key but no signal URL would otherwise
             # mint a verifiable-looking grant that points nowhere. A device that
@@ -298,7 +314,7 @@ def build_interactive_router(
             "session_id": session.session_id,
             "state": session.state.value,
             "stream_grant": token,
-            "signal_url": signal_url,
+            "signal_url": selected_signal_url,
             "ice_servers": ice_servers,
             "expires_at_ms": claims["expires_at_ms"],
         }
@@ -347,13 +363,18 @@ def build_interactive_router(
     async def delegate_control(request: Request, session_id: str, body: DelegateControlBody):
         """The owner hands actuation to Hermes. Only the owner may do this."""
         session = await _owned(request, session_id)
+        if delegate_issued_for is not None and body.issued_for not in (None, delegate_issued_for):
+            raise HTTPException(status_code=403, detail="control_delegate_service_identity_mismatch")
+        issued_for = delegate_issued_for or body.issued_for
+        if not issued_for:
+            raise HTTPException(status_code=503, detail="BROWSER_CONTROL_SERVICE_UNCONFIGURED")
         try:
             holder = BrowserControlHolder(body.holder)
         except ValueError as exc:
             raise HTTPException(status_code=400, detail="control_holder_unknown") from exc
         try:
             lease = await control.delegate(
-                session_id=session.session_id, holder=holder, issued_for=body.issued_for
+                session_id=session.session_id, holder=holder, issued_for=issued_for
             )
         except ControlLeaseError as exc:
             raise HTTPException(status_code=409, detail=str(exc)) from exc
@@ -387,7 +408,7 @@ def build_interactive_router(
             updated = await sessions.heartbeat(session_id=session.session_id)
         except InteractiveSessionError as exc:
             raise HTTPException(status_code=409, detail=str(exc)) from exc
-        return _session_json(updated)
+        return project(updated)
 
     @router.post("/{session_id}/viewport")
     async def propose_viewport(request: Request, session_id: str, body: ViewportBody):
@@ -409,12 +430,20 @@ def build_interactive_router(
     async def acknowledge_viewport(request: Request, session_id: str, body: ViewportAckBody):
         session = await _owned(request, session_id)
         try:
-            await sessions.acknowledge_viewport(
-                session_id=session.session_id, revision=body.revision
+            handled = False if producers is None else await producers.acknowledge_frame(
+                session_id=session.session_id, revision=body.revision,
+                frame_sequence=body.frame_sequence, media_epoch=body.media_epoch,
             )
-        except InteractiveSessionError as exc:
+            if not handled:
+                await sessions.acknowledge_viewport(
+                    session_id=session.session_id, revision=body.revision
+                )
+        except (InteractiveSessionError, ProducerError) as exc:
             raise HTTPException(status_code=409, detail=str(exc)) from exc
-        return {"session_id": session.session_id, "acked_viewport_revision": body.revision}
+        response = {"session_id": session.session_id, "acked_viewport_revision": body.revision}
+        if body.media_epoch is not None:
+            response.update(media_epoch=body.media_epoch, frame_sequence=body.frame_sequence)
+        return response
 
     @router.post("/{session_id}/suspend")
     async def suspend(request: Request, session_id: str):
@@ -426,13 +455,22 @@ def build_interactive_router(
             )
         except InteractiveSessionError as exc:
             raise HTTPException(status_code=409, detail=str(exc)) from exc
-        return _session_json(updated)
+        return project(updated)
+
+    @router.post("/{session_id}/resume")
+    async def resume(request: Request, session_id: str):
+        session = await _owned(request, session_id)
+        try:
+            updated = await sessions.resume(session_id=session.session_id)
+        except InteractiveSessionError as exc:
+            raise HTTPException(status_code=409, detail=str(exc)) from exc
+        return project(updated)
 
     @router.delete("/{session_id}")
     async def end_session(request: Request, session_id: str):
         session = await _owned(request, session_id)
         if session.state.is_terminal:
-            return _session_json(session)
+            return project(session)
         await grants.revoke_for_session(session.session_id)
         if session.state is not InteractiveSessionState.TERMINATING:
             await sessions.transition(
@@ -450,7 +488,7 @@ def build_interactive_router(
                 capability="browser.interactive.end",
                 after={"session_id": session.session_id},
             )
-        return _session_json(updated)
+        return project(updated)
 
     @router.get("/{session_id}/tabs")
     async def tabs(request: Request, session_id: str):
@@ -468,19 +506,33 @@ def build_interactive_router(
         """
         session = await _owned(request, session_id)
         rows = await sessions.store.fetchall(
-            "SELECT download_id, suggested_name, mime_type, byte_size, state, "
-            "failure_reason, created_at_ms, completed_at_ms "
+            "SELECT download_id, target_id, suggested_name, mime_type, byte_size, state, "
+            "failure_reason, content_sha256, producer_session_id, host_deleted_at_ms, created_at_ms, completed_at_ms "
             "FROM browser_downloads WHERE session_id = ? ORDER BY created_at_ms DESC",
             (session.session_id,),
         )
+        producer_active = False
+        if producers is not None:
+            binding = await sessions.store.fetchone(
+                "SELECT producer_session_id,producer_principal_sha256 FROM browser_stream_producers "
+                "WHERE session_id=? AND revoked_at_ms IS NULL", (session.session_id,),
+            )
+            if binding is not None:
+                try:
+                    await producers.authority(producer_session_id=binding["producer_session_id"], principal=binding["producer_principal_sha256"])
+                    producer_active = True
+                except ProducerError:
+                    pass
         return {
             "session_id": session.session_id,
             "downloads": [
                 {
                     "download_id": r["download_id"],
+                    "target_id": r["target_id"],
                     "suggested_name": r["suggested_name"],
                     "mime_type": r["mime_type"],
                     "byte_size": r["byte_size"],
+                    "content_sha256": r["content_sha256"],
                     "state": r["state"],
                     "failure_reason": r["failure_reason"],
                     # Stated, not inferred from `failure_reason` being non-empty by a
@@ -492,6 +544,23 @@ def build_interactive_router(
                             DownloadState(r["state"]), dangerous=bool(r["failure_reason"])
                         )
                     ],
+                    # Policy permission is distinct from a currently implemented route.
+                    # Byte transfer/analysis stays on the Stream Host; this gateway can
+                    # confirm only removal of the broker record, not physical cleanup.
+                    "executable_actions": [
+                        action.value
+                        for action in owner_actions(
+                            DownloadState(r["state"]), dangerous=bool(r["failure_reason"])
+                        )
+                        if action is OwnerAction.DELETE or (
+                            action in {OwnerAction.SEND_TO_PHONE, OwnerAction.OPEN_IN_VAN, OwnerAction.ANALYSE} and producer_active
+                            and r["producer_session_id"] is not None
+                            and r["content_sha256"] is not None and r["byte_size"] is not None
+                            and int(r["byte_size"]) <= 64 * 1024 * 1024
+                        )
+                    ],
+                    "record_removal_verifies_file_cleanup": r["host_deleted_at_ms"] is not None,
+                    "host_deleted_at_ms": r["host_deleted_at_ms"],
                     "created_at_ms": int(r["created_at_ms"]),
                     "completed_at_ms": (
                         int(r["completed_at_ms"]) if r["completed_at_ms"] is not None else None
@@ -500,6 +569,15 @@ def build_interactive_router(
                 for r in rows
             ],
         }
+
+    @router.get("/{session_id}/downloads/{download_id}/operations")
+    async def file_operations(request: Request, session_id: str, download_id: str):
+        session = await _owned(request, session_id)
+        row = await sessions.store.fetchone("SELECT 1 FROM browser_downloads WHERE session_id=? AND download_id=?", (session.session_id, download_id))
+        if row is None:
+            raise HTTPException(404, "download_unknown")
+        rows = await sessions.store.fetchall("SELECT value FROM runtime_meta WHERE key LIKE 'browser_file_operation:%' AND json_extract(value,'$.session_id')=? AND json_extract(value,'$.resource_id')=? ORDER BY updated_at_unix_ms DESC LIMIT 64", (session.session_id, download_id))
+        return {"download_id": download_id, "operations": [json.loads(row["value"]) for row in rows]}
 
     @router.delete("/{session_id}/downloads/{download_id}")
     async def delete_download(request: Request, session_id: str, download_id: str):

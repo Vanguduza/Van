@@ -1,0 +1,19 @@
+# Current dispatch controls and quote provenance
+
+Candidate source for BE-006; no whole-unit acceptance. Five counterexamples sent an order despite a later owner halt, a quote aging during heartbeat/guard acquisition, or a route being disabled during the guard. The same actual RiskAuthority/router/paper sender had a passing valid-boundary control.
+
+The router now repeats the mutable refusal checks immediately before consuming the idempotency key and publishing a command. It rechecks halt and runtime lease, ages the original market reference, reruns route/pre-trade controls and refuses if current venue quantisation differs from the already built command. It neither enlarges nor resizes an approved command. Refusal leaves its key unspent and publishes no command. Existing protective exit paths remain separate.
+
+The real single-symbol service carries its risk snapshot's accumulated quote age into the router. Both account entry/delta senders and the account RiskSnapshot use the market state's original timestamp, preserving time spent waiting and doing native reads. Unknown/future/bool origins and already negative ages never become fresh evidence. One original synthetic funding-clock fixture now explicitly states its original timestamp; its existing 3,017ms expected age is unchanged.
+
+The actual single-service slow-read control obtains an approved 1,500ms snapshot, then a 600ms guard delay; its 2,100ms quote is refused against the original 2,000ms limit with no command. Account entry and delta controls exercise the real sender path; the 30ms boundary passes and 31ms fails. A changed still-expressible lot contract is refused rather than silently changing the built order.
+
+`receipts/DISPATCH_CURRENT_CONTROLS_SOURCE_20261024.json` retains the five initial failures, 154 focused passes (one PostgreSQL-only case deferred in that process), all114 PostgreSQL cases executed with zero skips,17 CI/private-pin contracts and nine deliberate fault/restored-control pairs. The earlier parallel PostgreSQL attempt failed one native-thread creation; the final sequential run passes all114 and its fixture is stopped and removed.
+
+The exact previous commit ab981b85 passed all2,778 trading source tests with actual isolated PostgreSQL/pinned DDS and no skips. Its full backend run failed five Chromium startups after896passes; a second run was interrupted when repeated process/thread exhaustion affected unrelated tests and even new shells. These remain failed/interrupted results, with cleanup and source-storage evidence retained. They are not whole-backend passes.
+
+The existing fresh-worker browser job now selects all50 browser/harness files, retains the original11-case strict no-skip gate, runs the existing listener UID test under an isolated root fixture, and requires all10 original firewall contracts including five real disposable-network-namespace cases with no skips. The workflow/template remain byte-identical. This extension has not executed on the new source yet; it preserves both private-DDS and trusted-main gates. Namespace/kernel source tests do not attest to a deployed Van host.
+
+Full current-account/exposure RiskAuthority re-evaluation, joint funding/order reservations, complete flow-adjusted economics and provider/payment work remain open. Independent preparation, native identity/services, production security/recovery/signing and S24 acceptance remain required. The frozen package, canonical dependencies and feature/screen identities are preserved; no new frontend work precedes BG-001.
+
+Final review added two reproduced last-lease-read cases: a halt arriving during that read and a quote aging during it. Dispatch time and halt state are sampled after the lease read, while retaining mandate-expiry precedence. Both counterexamples are refused; the final focused154pass/onePG-onlyskip and actualPG114pass/zero-skip runs include the original mandate-expiry tests unchanged.

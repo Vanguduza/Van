@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.dial.van.session.SessionOutboxDurabilityTest" tests="11" skipped="0" failures="0" errors="0" timestamp="2026-10-07T22:11:47" hostname="052fefa249ff" time="0.01">
+  <properties/>
+  <testcase name="a command killed between the send and the forget is not delivered twice()" classname="com.dial.van.session.SessionOutboxDurabilityTest" time="0.004"/>
+  <testcase name="no kill during a persist can lose a command that was already on disk()" classname="com.dial.van.session.SessionOutboxDurabilityTest" time="0.0"/>
+  <testcase name="the record is keyed by the message id, so forgetting it finds it()" classname="com.dial.van.session.SessionOutboxDurabilityTest" time="0.001"/>
+  <testcase name="a reconfirmation replaces the record rather than being discarded()" classname="com.dial.van.session.SessionOutboxDurabilityTest" time="0.0"/>
+  <testcase name="a command awaiting the owner is restored rather than filtered away()" classname="com.dial.van.session.SessionOutboxDurabilityTest" time="0.001"/>
+  <testcase name="a persist is exactly one mutating operation()" classname="com.dial.van.session.SessionOutboxDurabilityTest" time="0.001"/>
+  <testcase name="a replaced session drops its work from the disk and tells the owner()" classname="com.dial.van.session.SessionOutboxDurabilityTest" time="0.0"/>
+  <testcase name="the previous two-step persist does lose the command, which is why the sweep exists()" classname="com.dial.van.session.SessionOutboxDurabilityTest" time="0.001"/>
+  <testcase name="persist then process death then restore then exactly-once delivery()" classname="com.dial.van.session.SessionOutboxDurabilityTest" time="0.0"/>
+  <testcase name="order is preserved across the real adapter()" classname="com.dial.van.session.SessionOutboxDurabilityTest" time="0.001"/>
+  <testcase name="a kill while forgetting leaves the record, and the next restart settles it()" classname="com.dial.van.session.SessionOutboxDurabilityTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

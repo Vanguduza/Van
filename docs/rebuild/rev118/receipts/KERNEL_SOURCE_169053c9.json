@@ -1,0 +1,61 @@
+{
+  "schema": "van.rebuild.kernel-source/1",
+  "run_id": 39898232618,
+  "source_head": "169053c9a45f820aa3123bbe46fcb91384963f78",
+  "tested_merge": "4296a6cccacb1f09dedcf8bfa384ed44116258fc",
+  "identical_tree": "80214ab5b03a3e05c32976d343862b24a2726ce1",
+  "counts": {
+    "tests": 6,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "tests": [
+    {
+      "classname": "tests.contracts.test_van_browser_core_firewall",
+      "name": "test_live_ruleset_drops_browser_udp_and_direct_tcp",
+      "time": "8.263"
+    },
+    {
+      "classname": "tests.contracts.test_van_browser_core_firewall",
+      "name": "test_live_dns_to_an_off_host_resolver_is_udp_only",
+      "time": "8.216"
+    },
+    {
+      "classname": "tests.contracts.test_van_browser_core_firewall",
+      "name": "test_live_qualify_reports_the_firewall_and_the_proxy_green",
+      "time": "8.961"
+    },
+    {
+      "classname": "tests.contracts.test_van_browser_core_firewall",
+      "name": "test_live_qualify_fails_without_the_ruleset",
+      "time": "7.500"
+    },
+    {
+      "classname": "tests.contracts.test_van_browser_core_firewall",
+      "name": "test_live_qualify_does_not_take_a_kernel_reset_for_the_ruleset",
+      "time": "0.488"
+    },
+    {
+      "classname": "backend.tests.test_browser_egress_proxy_i8",
+      "name": "test_only_the_configured_client_uid_may_use_a_listener",
+      "time": "0.730"
+    }
+  ],
+  "artifacts": {
+    "job.log": "302182c8710c9f0407fef6f351dd21b15e4b870922cca99b6244f0390076ba5f",
+    "results.xml": "10609604de5bc2a4882b5c19b55f15c43d65047b422d6a7b82542af5086ec27a",
+    "environment.txt": "314bb66fc8fc112aa55de72b85115eb2f574d394f3b33611d1593c6bebc00eb0",
+    "pytest.txt": "b784a9968d7c7e2f7c56942b8df87fde6761d3b2d4f8eeee178c87e0468e86b3",
+    "artifact.zip": "6cddde5673821d00e45cc817ce8dd39e9974dd0ac2d6399bba9050e3d3a8b3b6"
+  },
+  "environment": "4296a6cccacb1f09dedcf8bfa384ed44116258fc\nLinux runnervm8k3b6 6.17.0-1022-azure #22-Ubuntu SMP Mon Jul 27 17:24:03 UTC 2026 x86_64 x86_64 x86_64 GNU/Linux\nnftables v1.0.9 (Old Doc Yak #3)\nunshare from util-linux 2.39.3\nPython 3.12.15\n",
+  "qualification": "Actual disposable hosted VM kernel and real proxy UID source checks. The host nftables namespace is unchanged; fixture rules load only in throwaway network namespaces. No production DIAL firewall, provisioning or S24 acceptance.",
+  "prior_audit_a4_kernel_subset_unchanged": [
+    "tests/contracts/test_van_browser_core_firewall.py",
+    "deploy/van-browser-core/firewall/van-browser-core.nft",
+    "deploy/van-browser-core/qualify.sh",
+    "deploy/van-browser-core/browser/egress_proxy.py",
+    "backend/tests/test_browser_egress_proxy_i8.py"
+  ]
+}

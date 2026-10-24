@@ -11,6 +11,7 @@ from vati.core.canonical import canonical_hash
 
 
 class EventKind(str, Enum):
+    COGNITIVE_FABRIC = "COGNITIVE_FABRIC"  # domain-local advisory/learning evidence
     MARKET_TICK = "MARKET_TICK"
     MARKET_BAR = "MARKET_BAR"
     MARKET_STATE = "MARKET_STATE"
@@ -38,10 +39,12 @@ class EventKind(str, Enum):
     MARKET_DATA_DISAGREEMENT = "MARKET_DATA_DISAGREEMENT"
     ORDER_COMMAND = "ORDER_COMMAND"
     EXECUTION_RECEIPT = "EXECUTION_RECEIPT"
+    EXIT_ATTEMPT = "EXIT_ATTEMPT"                    # durable protective transport attempt, not new entry authority
     POSITION_CHANGE = "POSITION_CHANGE"
     RECONCILIATION_RESULT = "RECONCILIATION_RESULT"
     TCA_RECORD = "TCA_RECORD"
     TRADE_REVIEW = "TRADE_REVIEW"
+    TRADE_REVIEW_REVISION = "TRADE_REVIEW_REVISION"  # restated evidence only; never replays an original financial close
     TRADE_EXPERIENCE_ARTIFACT = "TRADE_EXPERIENCE_ARTIFACT"
     ACTIVATION_MANIFEST = "ACTIVATION_MANIFEST"
     KILL_SWITCH = "KILL_SWITCH"
@@ -49,7 +52,12 @@ class EventKind(str, Enum):
     CAPSULE_STATE = "CAPSULE_STATE"
     OWNER_TICKET = "OWNER_TICKET"
     SESSION = "SESSION"
+    FUNDING_STATEMENT = "FUNDING_STATEMENT"  # immutable native cash observations; never payment authority
+    FUNDING_DEAL_STATEMENT = "FUNDING_DEAL_STATEMENT"
+    FUNDING_MT5_STATEMENT = "FUNDING_MT5_STATEMENT"
+    FUNDING_MT5_QUERY = "FUNDING_MT5_QUERY"
     ACCOUNT_SNAPSHOT = "ACCOUNT_SNAPSHOT"   # equity/balance/margin as the venue reported them (portfolio truth for the owner surface)
+    ACCOUNT_OPERATION = "ACCOUNT_OPERATION"  # native account-control effects; never trade/outcome evidence
     MARKET_DATA_HEALTH = "MARKET_DATA_HEALTH"
 
     # ---- Rev 5.1 (TRD-REV51-090..133). Every kind below is produced by the

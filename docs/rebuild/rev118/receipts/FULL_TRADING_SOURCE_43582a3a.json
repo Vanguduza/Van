@@ -1,0 +1,30 @@
+{
+  "schema": "van.rebuild.full-trading-source/1",
+  "observed_at_utc": "2026-10-24T11:02:56.945799+00:00",
+  "source_head": "43582a3a5e80bbb4eb01b8c139bacfcd048b31d2",
+  "counts": {
+    "tests": 2676,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "seconds": 488.524,
+  "xml_sha256": "01d75a7f61a5b7b6794bb48e6af904cc65c6e1855bd3e9e8d250c5dbe9670739",
+  "source_clean_after": true,
+  "dds_pin": "64d6b7158c723b7700e5b53175ea8048d4e92d00",
+  "postgresql_major": 17,
+  "private_fixture_cleanup": {
+    "stopped": true,
+    "removed": true
+  },
+  "storage_audit": {
+    "schema": "van.source-storage-audit/1",
+    "forbidden_events": [],
+    "source_sha256": "d4e270150fb0da6e8d79b449dd0de68fd1f97b3ccea3d282f31d91297edbd495",
+    "root": "/workspace/van-autonomous-qualification-20261022/Van",
+    "scope": "SQLite opens, path-based writable opens and directory/link/rename/delete events under data and backend/data",
+    "limits": "Python audit events only; existing fd writes, native-library raw I/O and external processes are not an OS sandbox. Git state is checked separately."
+  },
+  "scope": "Complete trading/tests collection on exact committed source; actual isolated PostgreSQL, pinned DDS and original source. All tests executed with no skips.",
+  "qualification": "Source regression evidence only, not provider execution/economic settlement/whole-unit acceptance/full backend/deployment/native/S24/profitability qualification."
+}

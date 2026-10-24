@@ -30,6 +30,16 @@ from van_gateway.mtls.transport import (
 log = logging.getLogger("van_gateway.mtls")
 
 
+def _loopback_config(app, settings) -> uvicorn.Config:
+    return uvicorn.Config(
+        app,
+        host=settings.loopback_host,
+        port=int(settings.loopback_port),
+        proxy_headers=False,
+        log_level=os.environ.get("VAN_LOG_LEVEL", "info"),
+    )
+
+
 def _public_config(app, settings) -> uvicorn.Config:
     directory = settings.mtls_dir
     gate = MutualTLSGate(app, lambda: getattr(app.state, "device_ca", None))
@@ -40,7 +50,8 @@ def _public_config(app, settings) -> uvicorn.Config:
         lifespan="off",  # the loopback server runs the app's lifespan once
         http=PeerCertificateH11Protocol,
         ws=PeerCertificateWebSocketProtocol,
-        ssl_context_factory=lambda _config, _default: build_ssl_context(directory),
+        ssl_context_factory=lambda _config, _default: build_ssl_context(directory,
+            machine_client_ca_file=settings.mtls_machine_client_ca_file),
         ws_ping_interval=float(settings.mtls_ws_ping_seconds),
         ws_ping_timeout=float(settings.mtls_ws_ping_seconds),
         proxy_headers=False,  # nothing sits in front of this listener; never trust X-Forwarded-*
@@ -59,12 +70,7 @@ async def _run() -> None:
 
     settings = get_settings()
 
-    loopback = uvicorn.Server(uvicorn.Config(
-        app,
-        host=settings.loopback_host,
-        port=int(settings.loopback_port),
-        log_level=os.environ.get("VAN_LOG_LEVEL", "info"),
-    ))
+    loopback = uvicorn.Server(_loopback_config(app, settings))
     tasks = [asyncio.create_task(loopback.serve(), name="van-loopback")]
 
     public: uvicorn.Server | None = None

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.dial.van.design.ScreenStateTest" tests="7" skipped="0" failures="0" errors="0" timestamp="2026-10-07T22:35:26" hostname="052fefa249ff" time="0.014">
+  <properties/>
+  <testcase name="merge with no content and loading is Loading" classname="com.dial.van.design.ScreenStateTest" time="0.001"/>
+  <testcase name="malformed health json is an empty list, not a thrown exception" classname="com.dial.van.design.ScreenStateTest" time="0.004"/>
+  <testcase name="merge with plain content is Content" classname="com.dial.van.design.ScreenStateTest" time="0.0"/>
+  <testcase name="merge stale overrides both content and degraded" classname="com.dial.van.design.ScreenStateTest" time="0.0"/>
+  <testcase name="merge with content and degraded subsystems is Degraded" classname="com.dial.van.design.ScreenStateTest" time="0.005"/>
+  <testcase name="unknown degraded subsystem keys still get a sentence" classname="com.dial.van.design.ScreenStateTest" time="0.001"/>
+  <testcase name="health json array parses to rows in order" classname="com.dial.van.design.ScreenStateTest" time="0.002"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

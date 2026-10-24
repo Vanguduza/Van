@@ -1,0 +1,79 @@
+{
+  "schema": "van.rebuild.native-metaeditor-hosted-attempt/1",
+  "observed_at_utc": "2026-10-23T16:50:59.634402+00:00",
+  "source_head": "804ffe73c7117c1fa0624e857afcb2ae3d592ff4",
+  "tested_merge": "416fcd7ca51ed54ea830d2c66dcf9acba58d6130",
+  "identical_source_tree": "84cc8294f182f1197f78af8fae6f0b9fb69aadbb",
+  "run_id": 39986003602,
+  "conclusion": "SUCCESS",
+  "native_receipt": {
+    "schema": "van.mql-native-source/1",
+    "source_head": "416fcd7ca51ed54ea830d2c66dcf9acba58d6130",
+    "source_sha256": "dc9c2a4aa0989df1e1f07263c355bde87931bede71da64c417b0b90c831f4d56",
+    "phase": "SOURCE_COMPILED",
+    "qualification": "Source compilation only; no terminal account, broker order, deployed EA, financial or handset acceptance.",
+    "compile_cases": [
+      {
+        "name": "VanCompilerRejectionProbe",
+        "expected_success": false,
+        "process_exit_code": 0,
+        "errors": 4,
+        "warnings": 0,
+        "fresh_binary": false,
+        "started_at_utc": "2026-10-23T16:22:05.7216482Z",
+        "finished_at_utc": "2026-10-23T16:22:07.0239436Z",
+        "log_sha256": "12cd5cb41f9bb448d5266ee28390ead11a7102d114a36d7c400e2da4939c566d"
+      },
+      {
+        "name": "VanBridgeEA",
+        "expected_success": true,
+        "process_exit_code": 1,
+        "errors": 0,
+        "warnings": 0,
+        "fresh_binary": true,
+        "started_at_utc": "2026-10-23T16:22:07.0271341Z",
+        "finished_at_utc": "2026-10-23T16:22:08.6325212Z",
+        "log_sha256": "6f9eed8244443d2c54dee4b0c3c39b75278f0d12092f9c7f5d2fbfe6de64ae7a",
+        "binary_sha256": "120d17f1b267cb67472daa6215fc15aed0fcb84793a8a17ef2fd9256049af6fb"
+      }
+    ],
+    "source_blob_oid": "86c567a0a9f328bfb0d56b03181078e3494a5f24",
+    "checkout_blob_oid": "86c567a0a9f328bfb0d56b03181078e3494a5f24",
+    "installer_url": "https://download.terminal.free/cdn/web/metaquotes.ltd/mt5/mt5setup.exe?utm_source=www.metatrader5.com&utm_campaign=download",
+    "installer_sha256": "c8c0a73f86c58974df62fb48f8256a099d6698518cf2defc2b3f169773729e22",
+    "installer_bytes": 22902352,
+    "installer_signature": {
+      "status": "Valid",
+      "subject": "CN=MetaQuotes Ltd., O=MetaQuotes Ltd., S=Lemesos, C=CY",
+      "thumbprint": "5A64A7AED24C33DED342D01D01FA5286F06DA6DC"
+    },
+    "data_initialization": {
+      "editor_signature": {
+        "status": "Valid",
+        "subject": "CN=MetaQuotes Ltd., O=MetaQuotes Ltd., S=Lemesos, C=CY",
+        "thumbprint": "5A64A7AED24C33DED342D01D01FA5286F06DA6DC"
+      },
+      "terminal_started": true,
+      "terminal_signature": {
+        "status": "Valid",
+        "subject": "CN=MetaQuotes Ltd., O=MetaQuotes Ltd., S=Lemesos, C=CY",
+        "thumbprint": "5A64A7AED24C33DED342D01D01FA5286F06DA6DC"
+      },
+      "network_blocked_program": "D:\\a\\_temp\\van-mql-16dea826c6134301924ded32907e6a2f\\sdk\\terminal64.exe",
+      "firewall_profiles_enabled": true
+    },
+    "compiler_signature": {
+      "status": "Valid",
+      "subject": "CN=MetaQuotes Ltd., O=MetaQuotes Ltd., S=Lemesos, C=CY",
+      "thumbprint": "5A64A7AED24C33DED342D01D01FA5286F06DA6DC"
+    },
+    "compiler_sha256": "66fef88fe6a5d6071163a31ea46b3382ab482e19239b048f5fd578e8a13bd03a",
+    "compiler_file_version": "5.0.0.6281",
+    "standard_library_trade_sha256": "96e6781624534377fe7971cba52cca3d62d1b030bc10d5e4ebf3ed8c541399ed",
+    "finished_at_utc": "2026-10-23T16:22:08.6362110Z"
+  },
+  "raw_receipt_sha256": "6da9df440bff651d87e1ef074bac55b0ed37e247584b9c84405105ee1578e300",
+  "artifact_zip_sha256": "f36fcf2474ba57f63346231ccdd770f0a175f51b3ef2cfed5f2eaec3d68a38d4",
+  "job_log_sha256": "1c556d9c78b2a038228aaaac6c2ddcb7014cbe6dc886238616a72975908ede07",
+  "interpretation": "Actual signed MetaEditor compiled exact Git EA with zero errors/warnings and fresh EX5; deliberately invalid source produced native errors and no EX5. Native source compilation only; no EA execution, broker, financial, deployment, whole-unit or handset acceptance."
+}

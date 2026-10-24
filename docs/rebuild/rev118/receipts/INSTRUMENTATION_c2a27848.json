@@ -1,0 +1,52 @@
+{
+  "schema": "van.rebuild.android-instrumentation/1",
+  "run_id": 39725953372,
+  "job_id": 119649763845,
+  "source_head": "c2a278488f00bacaf912853ed6e711a5b1de986a",
+  "tested_merge": "9ae436abda2c26a3ea59dffb75c9f6d79b2ebcd0",
+  "tree": "42e4a6b001bf111372f795417aa74611ee5a6934",
+  "status": "PASS_CORE_MODE",
+  "tests": 20,
+  "passed": 16,
+  "failed": 0,
+  "skipped": 4,
+  "classes": [
+    {
+      "class": "com.dial.van.instrumentation.CommandCentreLaunchTest",
+      "tests": 4,
+      "failures": 0,
+      "skipped": 0
+    },
+    {
+      "class": "com.dial.van.instrumentation.FloatingOverlayServiceTest",
+      "tests": 1,
+      "failures": 0,
+      "skipped": 0
+    },
+    {
+      "class": "com.dial.van.instrumentation.NetworkSecurityRuntimeTest",
+      "tests": 2,
+      "failures": 0,
+      "skipped": 0
+    },
+    {
+      "class": "com.dial.van.instrumentation.RiveContractTest",
+      "tests": 11,
+      "failures": 0,
+      "skipped": 4
+    },
+    {
+      "class": "com.dial.van.instrumentation.TemplateRuntimeTest",
+      "tests": 2,
+      "failures": 0,
+      "skipped": 0
+    }
+  ],
+  "network_policy_runtime_tests": "2 passed: actual loopback HTTP, non-loopback refusal, exact policy domains and privileged debug rig",
+  "resident_deep_links": "PASS: both real Intent deliveries steer the same resident Activity, with bounded selected-destination waits and original Intent restored only for harness teardown",
+  "character_forge_core_gate": "PASS",
+  "full_or_production_rig_qualified": false,
+  "s24_tested": false,
+  "report_artifact": 12403895396,
+  "report_sha256": "c0a7ad15d677e6d20b393fa50339d867dd2b818bd308b4496feda469a7d84271"
+}

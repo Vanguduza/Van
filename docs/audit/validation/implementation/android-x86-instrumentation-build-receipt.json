@@ -1,0 +1,23 @@
+{
+  "android_test_apk": {
+    "bytes": 2291590,
+    "native_abis": [],
+    "path": "/workspace/Van/android/app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk",
+    "sha256": "698a269a8e35231eca1ecf6b152ff045eae56321f254d99b697911755a308d47"
+  },
+  "app_unit_test_results": null,
+  "changed_inputs": [],
+  "debug_apk": {
+    "bytes": 131010419,
+    "native_abis": [
+      "x86_64"
+    ],
+    "path": "/workspace/Van/android/app/build/outputs/apk/debug/app-debug.apk",
+    "sha256": "36a9df2dd3766ab017517c4aefe3cda16119e0ea3f05c0c8ca1c4a0487bc6610"
+  },
+  "emulator_executed": false,
+  "gradle_build_successful": true,
+  "live_device_executed": false,
+  "production_signed": false,
+  "source_inputs_unchanged": true
+}

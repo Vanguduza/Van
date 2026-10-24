@@ -1,0 +1,78 @@
+{
+  "count": 12,
+  "items": [
+    {
+      "current_sha256": "fd6253848683b46a555e6e7101b1ee046da3ac4ce1ec9ac69bccd8fc6493edca",
+      "parent_sha256": "f7d67fa0c76230f156eb147ae05bb54a52973e111f86453390c1bda927403e8c",
+      "path": "CANONICAL_AUTHORITY.json",
+      "preserved_at": "lineage/REV112_ORIGINAL_MEMBERS/CANONICAL_AUTHORITY.json"
+    },
+    {
+      "current_sha256": "8928201c40ff4f5f2ddd8cf7db4450094c43c2718e649bf1888be57088ef0ab4",
+      "parent_sha256": "912f5e5a1d844d8f0b5e30281986fb1e45dcdd92943fbe90502fd03093b5b4d3",
+      "path": "README_START_HERE.md",
+      "preserved_at": "lineage/REV112_ORIGINAL_MEMBERS/README_START_HERE.md"
+    },
+    {
+      "current_sha256": null,
+      "parent_sha256": "20463cd7a90426da811d6ccfe02f08d1649d43f1be36a9f5ad702201f63b0a65",
+      "path": "VAN_NEXT_UNIFIED_REBUILD_BLUEPRINT_REV1_12_20261017.html",
+      "preserved_at": "lineage/REV112_ORIGINAL_MEMBERS/VAN_NEXT_UNIFIED_REBUILD_BLUEPRINT_REV1_12_20261017.html"
+    },
+    {
+      "current_sha256": null,
+      "parent_sha256": "2cd2ccaa821cf8d2f561d50d272e62934140fc7dc33273deda97984cd95f4387",
+      "path": "VAN_NEXT_UNIFIED_REBUILD_BLUEPRINT_REV1_12_20261017.md",
+      "preserved_at": "lineage/REV112_ORIGINAL_MEMBERS/VAN_NEXT_UNIFIED_REBUILD_BLUEPRINT_REV1_12_20261017.md"
+    },
+    {
+      "current_sha256": "696cfdae77c5eb38f987508c98e8658ebf8d3a35f8e0b9398e64f911792002bc",
+      "parent_sha256": "cd5f1d8701d521cdf0705e11b52c9d37c12dfe3f1076ea7583fdac0cdd6ee810",
+      "path": "consolidation/GENERATED_SCOPE_COUNTS.json",
+      "preserved_at": "lineage/REV112_ORIGINAL_MEMBERS/consolidation/GENERATED_SCOPE_COUNTS.json"
+    },
+    {
+      "current_sha256": "0e86db29e045b89e17759215bbabd7275063f99f5ead5baf2f4f8730e37f7390",
+      "parent_sha256": "da3fc14b4cbbf956755b0af7472f6daaeb57a21e3d7c3d5e127cc400f1c911c6",
+      "path": "contracts/BACKEND_SERVICE_CATALOG.json",
+      "preserved_at": "lineage/REV112_ORIGINAL_MEMBERS/contracts/BACKEND_SERVICE_CATALOG.json"
+    },
+    {
+      "current_sha256": "2b7152fca522a423a44fc4f01b791d25ab72aaf143a17a96f87ebf39119e94ae",
+      "parent_sha256": "c396c1f8bcc448bfdd6ea5d4f82737365bccf933e85d1de76fdc613af1c02fdc",
+      "path": "design/ALL_SURFACE_CONTRACTS.json",
+      "preserved_at": "lineage/REV112_ORIGINAL_MEMBERS/design/ALL_SURFACE_CONTRACTS.json"
+    },
+    {
+      "current_sha256": "c1549dde7b97f6aaf781230f34f101a8e4b16a87e4920c4b3a310e56effbc670",
+      "parent_sha256": "ff047ac31e746967ee7c68f67eb0bc4abb0eb6dbae9acac3fcf56a51c88d6a70",
+      "path": "plan/DEVELOPMENT_PLAN.json",
+      "preserved_at": "lineage/REV112_ORIGINAL_MEMBERS/plan/DEVELOPMENT_PLAN.json"
+    },
+    {
+      "current_sha256": "7a33fb2505e74a93f3af1ca039ef215b095137ecf0d76e203f0e0ab9b1a65ce4",
+      "parent_sha256": "eae7347a68da9b6827fa47c860118084324884653bce9ca837da27ca5ba7d367",
+      "path": "plan/PLAN_INPUT_PROVENANCE.json",
+      "preserved_at": "lineage/REV112_ORIGINAL_MEMBERS/plan/PLAN_INPUT_PROVENANCE.json"
+    },
+    {
+      "current_sha256": null,
+      "parent_sha256": "8fe7fb677860cf8a60cbc368cc37d731b752bea74938f4e9c888cb66f079b3c9",
+      "path": "plan/VAN_NEXT_DETERMINISTIC_PLAN_REV1_12.md",
+      "preserved_at": "lineage/REV112_ORIGINAL_MEMBERS/plan/VAN_NEXT_DETERMINISTIC_PLAN_REV1_12.md"
+    },
+    {
+      "current_sha256": "50e994767df66fc852d05b3d4c01ae97a7d4302dd8dca033d669dc7544c79369",
+      "parent_sha256": "334129276cacb3fbe789f49bce2b98207a2f3f71cfadc6a21797584568d07e40",
+      "path": "plan/render_plan.py",
+      "preserved_at": "lineage/REV112_ORIGINAL_MEMBERS/plan/render_plan.py"
+    },
+    {
+      "current_sha256": "baf8a713caff8d2bfbde8adeb28b91e017ad4ef5695fe5d1c16b66b85e530e1d",
+      "parent_sha256": "c05456d087576d4e5ffff9db635cfcbdfceee1415a38b6e09b73bfc8f09ea628",
+      "path": "verification/TEST_CONTRACTS.json",
+      "preserved_at": "lineage/REV112_ORIGINAL_MEMBERS/verification/TEST_CONTRACTS.json"
+    }
+  ],
+  "scope": "Exact inherited originals, modified in candidate Rev1.13"
+}

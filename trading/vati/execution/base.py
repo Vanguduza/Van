@@ -7,7 +7,11 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from decimal import Decimal
 from enum import Enum
-from typing import Optional, Protocol
+from typing import Optional, Protocol, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from vati.funding.native import NativeAccountMark
+    from vati.funding.mt5 import Mt5FundingFrame
 
 from vati.core.canonical import canonical_hash
 from vati.risk.contracts import Direction, LossModel
@@ -39,7 +43,7 @@ class OrderCommand:
     loss_model: LossModel
     targets: tuple[Decimal, ...] = ()
     time_in_force: str = "DAY"  # DAY | GTC30
-    max_slippage: Optional[Decimal] = None
+    max_slippage: Optional[Decimal] = None   # price units of this instrument (router converts the template fraction)
     expires_at_ms: Optional[int] = None
     strategy_id: str = ""
     strategy_version: str = ""
@@ -123,6 +127,8 @@ class AccountState:
     #: equity / used_margin as a percentage. Below the broker's margin call level,
     #: positions start being closed by the venue rather than by VAN.
     margin_level_pct: Optional[Decimal] = None
+    # Native identity/valuation provenance; missing metadata is never a zero flow.
+    funding_mark: Optional[NativeAccountMark | Mt5FundingFrame] = None
 
 
 @dataclass(frozen=True)

@@ -1,0 +1,86 @@
+{
+  "backend_count": 74,
+  "backend_verifiers": 10,
+  "findings": [],
+  "graph_nodes": 121,
+  "graph_sha256": "46c95aa140b8855af05e4eea1a14377774b8b9e27aa32004b856e25e64d85ef1",
+  "host": "van-trading-core",
+  "mutation_cases": [
+    {
+      "case": "duplicate",
+      "caught": true,
+      "expected": "DUPLICATE_UNIT"
+    },
+    {
+      "case": "cycle",
+      "caught": true,
+      "expected": "CYCLE"
+    },
+    {
+      "case": "unknown",
+      "caught": true,
+      "expected": "MISSING_DEPENDENCY"
+    },
+    {
+      "case": "missing bg member",
+      "caught": true,
+      "expected": "BG_SCOPE"
+    },
+    {
+      "case": "wrong scope",
+      "caught": true,
+      "expected": "SCOPE_MISMATCH"
+    },
+    {
+      "case": "ux shortcut",
+      "caught": true,
+      "expected": "UI_BEFORE_BG"
+    },
+    {
+      "case": "frontend shortcut",
+      "caught": true,
+      "expected": "UI_BEFORE_BG"
+    },
+    {
+      "case": "code before f15",
+      "caught": true,
+      "expected": "NO_F15"
+    },
+    {
+      "case": "evaluator missing",
+      "caught": true,
+      "expected": "PRODUCER_ORDER"
+    },
+    {
+      "case": "catalog missing",
+      "caught": true,
+      "expected": "PRODUCER_ORDER"
+    },
+    {
+      "case": "backward ui",
+      "caught": true,
+      "expected": "BACKEND_AFTER_UI"
+    },
+    {
+      "case": "duplicate dependency",
+      "caught": true,
+      "expected": "DUPLICATE_DEPENDENCY"
+    },
+    {
+      "case": "parity skipped",
+      "caught": true,
+      "expected": "NO_PARITY"
+    },
+    {
+      "case": "training shortcut",
+      "caught": true,
+      "expected": "PRODUCER_ORDER"
+    }
+  ],
+  "plan_sha256": "a732f7a28c0aa7cae3cbce055e6e861a31fb4e6ee293cc6efded7a62df51b94e",
+  "prepared_execution_arguments_sha256": "c221c1adf51edb1a7d71ac44b858e6d9008041064de532967095717ce58b6c3c",
+  "receipt_transcription": "From successful Global DIAL prepared execution; no issuing key/nonce copied",
+  "schema": "van.vm.graph.review/1.0",
+  "scope": "Exact exported graph independently checked; not full-document semantic review, F15, BG or implementation",
+  "vm_receipt": "/home/ubuntu/work/van-canonical-reconciliation-20261017/CANONICAL_GRAPH_VM_RECEIPT.json"
+}

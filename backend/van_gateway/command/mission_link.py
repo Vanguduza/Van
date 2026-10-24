@@ -35,6 +35,7 @@ is whatever the command's class is, which the registry cannot express.
 from __future__ import annotations
 
 import time
+import sqlite3
 
 from van_gateway.mission.models import (
     AuthorityEnvelope,
@@ -138,36 +139,50 @@ class CommandMissionLink:
             requires_owner_presence=owner_approved,
             source_command_id=req.command_id,
         )
-        return await self.missions.create(
-            owner_principal_id=f"device:{req.device_id}",
-            origin=ORIGIN_FOR_CHANNEL.get(req.origin_channel, MissionOrigin.OWNER_UI),
-            origin_channel=req.origin_channel,
-            title=title_for(req.text),
-            goal=req.text,
-            project_id=req.project_id,
-            # P1-LEARN-003 — the kind of work, which is what a strategy is learned *for*.
-            # The resolver already established it; until now the command path computed it
-            # and threw it away, so `StrategyLearning` keyed everything on a value no
-            # mission carried and could not accumulate a single row.
-            mission_class=(resolution.intent_id if resolution is not None else "GENERAL_OWNER_INTENT"),
-            # §6 — an empty contract is legal and can never yield VERIFIED_SUCCESS. The
-            # gateway does not know how to check an arbitrary instruction, and inventing a
-            # postcondition it cannot observe is how a mission ends up "verified" on
-            # nothing.
-            #
-            # P1-VERIFY-003 — but it *does* know how to check some of them. When the typed
-            # resolver matched an exact action, that action's post-state is declared and,
-            # for the ones with an independent observation, checkable. Leaving the contract
-            # empty there meant no owner command could ever be verified, however exactly
-            # VAN had understood it. `contract_for` emits a contract only where an
-            # observation is registered, and an empty one everywhere else.
-            success_contract=(
-                contract_for(resolution) if resolution is not None else SuccessContract()
-            ),
-            constraints=self._with_unverifiable_note(constraints, resolution),
-            authority_envelope=envelope,
-            sensitivity=SENSITIVITY_FOR_CLASS.get(effective_action_class, Sensitivity.ROUTINE),
-        )
+        try:
+            return await self.missions.create(
+                owner_principal_id=f"device:{req.device_id}",
+                origin=ORIGIN_FOR_CHANNEL.get(req.origin_channel, MissionOrigin.OWNER_UI),
+                origin_channel=req.origin_channel,
+                title=title_for(req.text),
+                goal=req.text,
+                project_id=req.project_id,
+                # P1-LEARN-003 — the kind of work, which is what a strategy is learned *for*.
+                # The resolver already established it; until now the command path computed it
+                # and threw it away, so `StrategyLearning` keyed everything on a value no
+                # mission carried and could not accumulate a single row.
+                mission_class=(resolution.intent_id if resolution is not None else "GENERAL_OWNER_INTENT"),
+                # §6 — an empty contract is legal and can never yield VERIFIED_SUCCESS. The
+                # gateway does not know how to check an arbitrary instruction, and inventing a
+                # postcondition it cannot observe is how a mission ends up "verified" on
+                # nothing.
+                #
+                # P1-VERIFY-003 — but it *does* know how to check some of them. When the typed
+                # resolver matched an exact action, that action's post-state is declared and,
+                # for the ones with an independent observation, checkable. Leaving the contract
+                # empty there meant no owner command could ever be verified, however exactly
+                # VAN had understood it. `contract_for` emits a contract only where an
+                # observation is registered, and an empty one everywhere else.
+                success_contract=(
+                    contract_for(resolution) if resolution is not None else SuccessContract()
+                ),
+                constraints=self._with_unverifiable_note(constraints, resolution),
+                authority_envelope=envelope,
+                sensitivity=SENSITIVITY_FOR_CLASS.get(effective_action_class, Sensitivity.ROUTINE),
+            )
+        except sqlite3.IntegrityError as exc:
+            # Another writer can win after the optimistic lookup. The database
+            # fence already preserved one mission; return it rather than turning
+            # the safe duplicate into an owner-visible server error. Preserve any
+            # unrelated integrity error, including a learning/event write that
+            # failed after this caller's own mission insert had committed.
+            if (getattr(exc, "sqlite_errorcode", None) != sqlite3.SQLITE_CONSTRAINT_UNIQUE
+                    or "index 'idx_missions_source_command'" not in str(exc)):
+                raise
+            existing = await self.existing_for_command(req.command_id)
+            if existing is None:
+                raise
+            return existing
 
     @staticmethod
     def _with_unverifiable_note(
@@ -191,7 +206,16 @@ class CommandMissionLink:
         return await self._advance(mission, MissionState.PLANNED, summary=summary)
 
     async def authorized(self, mission: Mission, *, summary: str) -> Mission:
-        return await self._advance(mission, MissionState.AUTHORIZED, summary=summary)
+        current = await self._advance(mission, MissionState.AUTHORIZED, summary=summary)
+        if self.missions.learning is not None:
+            try:
+                delivery = await self.missions.store.fetchone("SELECT generation FROM mission_learning_outbox WHERE mission_id=? AND stage='OPENED'", (current.mission_id,))
+                await self.missions.learning.record_mission_opened(current)
+                if delivery is not None:
+                    await self.missions._ack_learning(current.mission_id, "OPENED", expected_generation=delivery["generation"])
+            except Exception as exc:
+                self.missions.report_learning_unavailable(current.mission_id,"owner_approval",exc)
+        return current
 
     async def running(self, mission: Mission, *, hermes_run_id: str | None) -> Mission:
         """One event, carrying the run it can be traced to, and a deadline.
@@ -210,6 +234,10 @@ class CommandMissionLink:
         deadline_ms = None
         if self.execution_deadline_seconds:
             deadline_ms = int(time.time() * 1000) + self.execution_deadline_seconds * 1000
+        if hermes_run_id:
+            return await self.missions.bind_hermes_run(
+                mission_id=mission.mission_id, hermes_run_id=hermes_run_id, deadline_ms=deadline_ms,
+            )
         advanced = await self._advance(
             mission,
             MissionState.RUNNING,

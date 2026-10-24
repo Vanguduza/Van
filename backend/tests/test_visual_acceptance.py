@@ -31,6 +31,7 @@ def _env(tmp_path, monkeypatch):
     monkeypatch.setenv("VAN_DEVICE_SECRET_FERNET_KEY", Fernet.generate_key().decode())
     monkeypatch.setenv("VAN_INTERNAL_CONTROL_TOKEN", "test-internal-token")
     monkeypatch.setenv("VAN_DEVICE_ENROLMENT_TOKEN", "test-device-enrolment-token")
+    monkeypatch.setenv("VAN_OWNER_DEVICE_SIGNING_CERT_SHA256", "a" * 64)
     get_settings.cache_clear()
     yield
     get_settings.cache_clear()
@@ -118,10 +119,16 @@ async def test_same_signed_acceptance_is_idempotent(client):
     assert len(rows) == 1
 
 
-def test_visual_acceptance_is_declared_device_proofed():
-    source = (Path(__file__).resolve().parents[1] / "van_gateway" / "app.py").read_text(encoding="utf-8")
-    predicate = source[source.index("def requires_device_proof"):source.index("async def enforce_device_proof")]
-    assert 'path == "/v1/visual/acceptance"' in predicate
+@pytest.mark.asyncio
+async def test_visual_acceptance_requires_actual_bound_device_proof(client):
+    from test_device_proof_enforcement import _bind
+    ac, app = client
+    await _bind(app, "visual-test-device")
+    token = OWNER.token(act="visual-accept", subject=f"sha256:{RIVE_SHA}")
+    unsigned = await ac.post("/v1/visual/acceptance", json=payload(token))
+    assert unsigned.status_code == 401
+    assert unsigned.json()["detail"] == "device_proof_required"
+    assert await app.state.store.fetchall("SELECT id FROM visual_acceptances") == []
 
 
 @pytest.mark.asyncio

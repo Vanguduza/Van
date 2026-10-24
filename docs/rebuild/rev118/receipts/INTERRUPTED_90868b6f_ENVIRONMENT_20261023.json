@@ -1,0 +1,10 @@
+{
+  "schema": "van.rebuild.run-interruption/1",
+  "source_head": "90868b6f0f5dfb6052d645b62f89417990da6474",
+  "observed_at_utc": "2026-10-23T00:50:25.925146+00:00",
+  "status": "INTERRUPTED_ENVIRONMENT_RESTART",
+  "scope": "frozen backend/tests and tests/contracts audit",
+  "observed": "Partial progress log around3percent; no audit process remained after reconnect. No completed JUnit or exit0 observed. Not a pass or a product failure.",
+  "partial_log_sha256": "68cf7170a11526bfda38cd790ac36d9d3cb46ac64eaaaa7a85c1362703485974",
+  "next": "Restart after restoring the actual historical DDS contract object; preserve working source."
+}

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.dial.van.trading.TradingReadModelsTest" tests="12" skipped="0" failures="0" errors="0" timestamp="2026-10-07T22:11:48" hostname="052fefa249ff" time="0.023">
+  <properties/>
+  <testcase name="ledger thesis states map onto the design system's closed set()" classname="com.dial.van.trading.TradingReadModelsTest" time="0.0"/>
+  <testcase name="assessment reports the invoker state honestly, including unconfigured()" classname="com.dial.van.trading.TradingReadModelsTest" time="0.008"/>
+  <testcase name="trust tier maps to a status role, never a raw colour()" classname="com.dial.van.trading.TradingReadModelsTest" time="0.001"/>
+  <testcase name="potential parses candidates with risk requirement and invalidation()" classname="com.dial.van.trading.TradingReadModelsTest" time="0.004"/>
+  <testcase name="quadrant label reads as English()" classname="com.dial.van.trading.TradingReadModelsTest" time="0.0"/>
+  <testcase name="history parses closed trades with quadrant, attribution and lessons()" classname="com.dial.van.trading.TradingReadModelsTest" time="0.005"/>
+  <testcase name="quadrant role never rewards a lucky bad decision as favourable()" classname="com.dial.van.trading.TradingReadModelsTest" time="0.0"/>
+  <testcase name="events parses both headline and calendar-release rows plus impacts()" classname="com.dial.van.trading.TradingReadModelsTest" time="0.002"/>
+  <testcase name="quadrant tally counts exactly the rows given, independent of a server total()" classname="com.dial.van.trading.TradingReadModelsTest" time="0.0"/>
+  <testcase name="health never reads more favourable than the thesis, only as bad or worse()" classname="com.dial.van.trading.TradingReadModelsTest" time="0.001"/>
+  <testcase name="positions parses the ledger's own shape, including a ledger-unavailable body()" classname="com.dial.van.trading.TradingReadModelsTest" time="0.002"/>
+  <testcase name="significant events keeps only materiality at or above threshold()" classname="com.dial.van.trading.TradingReadModelsTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

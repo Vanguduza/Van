@@ -1,0 +1,28 @@
+{
+  "activation_cursor": 0,
+  "activation_epoch": 0,
+  "activation_readback_ref": null,
+  "compatible_fallback_refs": [],
+  "environment": "FIXTURE",
+  "mandate_ref": "FIXTURE_MANDATE_REF",
+  "open_parent_migration_ref": null,
+  "operational_grant_ref": "FIXTURE_OPERATIONAL_GRANT_REF",
+  "policy_artifact_sha256": "1111111111111111111111111111111111111111111111111111111111111111",
+  "promotion_authorization_ref": "FIXTURE_PROMOTION_AUTHORIZATION_REF",
+  "qualification_ref": "FIXTURE_QUALIFICATION_REF",
+  "record_id": "FIXTURE_PolicyBinding",
+  "record_type": "PolicyBinding",
+  "revocation_epoch": 0,
+  "schema_version": 2,
+  "scope": {
+    "account_id": "FIXTURE_ACCOUNT",
+    "market_type": "CRYPTO_SPOT",
+    "ownership": "OWNER_MANUAL",
+    "product_id": "FIXTURE_PRODUCT_ID",
+    "scope_hash": "1111111111111111111111111111111111111111111111111111111111111111",
+    "strategy_id": "FIXTURE_STRATEGY_ID",
+    "venue_id": "FIXTURE_VENUE"
+  },
+  "state": "PROPOSED",
+  "valid_until_ms": 2000
+}

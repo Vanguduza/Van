@@ -1,0 +1,566 @@
+{
+  "checks": [
+    {
+      "elapsed_seconds": 59.75,
+      "exit_code": 0,
+      "failed": 0,
+      "log": "/workspace/van-audit/service-wiring-final-2026-10-07.log",
+      "log_sha256": "976cfaac9fb26de05312b7ff1674272f1fcc37182b6a87563a57b51d6234da9a",
+      "passed": 529,
+      "selection": "backend/tests/test_automation_*.py; test_standing_run_producer.py; test_n8n_invocation.py; test_gmail_mime_and_frozen_send.py; test_google_provider_http_contracts.py; test_hosted_provider_fault_boundaries.py; test_knowledge_runtime.py; test_knowledge_cloud_token_contract.py; test_dial_dev_credential_failure.py; test_extra_apis.py",
+      "validation_scope": "source and local integration with real-shaped provider mocks and durable canonical stores"
+    },
+    {
+      "elapsed_seconds": 0.89,
+      "exit_code": 0,
+      "failed": 0,
+      "log": "/workspace/van-audit/service-tls-final-2026-10-07.log",
+      "log_sha256": "8a21c81dbe43ac7bcd0159a8337c1624a73e4114369c4cbda2f923c9e476b7ee",
+      "passed": 45,
+      "selection": "services/browser_control_agent/tests/test_qualification_tls.py services/browser_control_agent/tests/test_stream_host_package.py",
+      "validation_scope": "real local TLS peers and packaged source contracts, using pinned browser runtime environment"
+    },
+    {
+      "elapsed_seconds": 0.24,
+      "exit_code": 0,
+      "failed": 0,
+      "log": "/workspace/van-audit/service-contract-final-2026-10-07.log",
+      "log_sha256": "8c7e6beddb6d831ddde19d2d00b67b9acaf0bee2cdbe8ed3c0fd7f5c52253004",
+      "passed": 33,
+      "selection": "tests/contracts/test_owner_runtime_mcp_contract.py tests/contracts/test_automation_browser_governance.py",
+      "validation_scope": "bounded shim/tool and governance contracts"
+    }
+  ],
+  "date": "2026-10-07",
+  "disjoint_final_selections": {
+    "failed": 0,
+    "passed": 607
+  },
+  "external_prerequisites": [
+    "Actual signed owner-core and isolated public/owner browser release installation on the admitted host.",
+    "Real machine/provider credentials, private HTTPS server/client identity and CA trust bindings.",
+    "Independent live Google/knowledge/research/n8n/browser callback and effect canaries.",
+    "Signed APK provisioning without in-app connection configuration and deferred S24 Artemis acceptance."
+  ],
+  "files": [
+    {
+      "bytes": 6485,
+      "path": "backend/tests/automation_runtime_fixture.py",
+      "sha256": "71bed117930a2b3cbbf7656f3ce1da2264b2a235bbaf9658425463aad2b2fb85"
+    },
+    {
+      "bytes": 29092,
+      "path": "backend/tests/test_automation_api.py",
+      "sha256": "2f4b7fb783cf717f7804938f17211ea3e7a796b28f19ef1219c9f61062ab1b9b"
+    },
+    {
+      "bytes": 5315,
+      "path": "backend/tests/test_automation_binding_validation.py",
+      "sha256": "984f7f6428469696cf9e788bfd148d063d960f6b4b13a0994649a7cf1302b1da"
+    },
+    {
+      "bytes": 17530,
+      "path": "backend/tests/test_automation_compiler.py",
+      "sha256": "5bd3b94b6e8b9e1e77d68068249bf6e218ee76d53fec43ed3d280d24daa8b908"
+    },
+    {
+      "bytes": 21589,
+      "path": "backend/tests/test_automation_dispatch.py",
+      "sha256": "fc97aad84055c5557f874cb143a927c7ae59c51702e3aff6018c3c1e7a6efb71"
+    },
+    {
+      "bytes": 7209,
+      "path": "backend/tests/test_automation_event_ingress.py",
+      "sha256": "daec03311e02b02581792c964796b8e4cd4e16c4a3216373d65ed1e86576a3b9"
+    },
+    {
+      "bytes": 7423,
+      "path": "backend/tests/test_automation_health_api.py",
+      "sha256": "2efb608642467ef52e5d122e6c1182cadebc069cfd54f3d35d0514517da0709e"
+    },
+    {
+      "bytes": 19287,
+      "path": "backend/tests/test_automation_hot_warm_cold.py",
+      "sha256": "2f64402de1a306ae8599252465c4f741fb4dfa1913fb4b0db0ed6c2589543e26"
+    },
+    {
+      "bytes": 19588,
+      "path": "backend/tests/test_automation_operations.py",
+      "sha256": "6cea840345667c6ea8b31948a17273261f6a2108ed13da4591ec1129518c2642"
+    },
+    {
+      "bytes": 6706,
+      "path": "backend/tests/test_automation_primitive_policy.py",
+      "sha256": "d915fdf3a64f8d179746e89f690b9fdddd2048981fa9ccb8e4c24ce1f25d7b79"
+    },
+    {
+      "bytes": 15449,
+      "path": "backend/tests/test_automation_provisioning.py",
+      "sha256": "ee71badbe82fd7ce17a2edd5b1fb0bf19f5664a7e790314971dd69a2e3754a17"
+    },
+    {
+      "bytes": 11042,
+      "path": "backend/tests/test_automation_run_grants.py",
+      "sha256": "70a1d6cdf35225560234eb8007a75c392e5fb0442d48f1147f4af9797fb4509a"
+    },
+    {
+      "bytes": 21890,
+      "path": "backend/tests/test_automation_security_contracts.py",
+      "sha256": "3e66d083babc611729dbd353b80a90bd1d58e0f62a24ee6398bbed37cc51ef93"
+    },
+    {
+      "bytes": 40294,
+      "path": "backend/tests/test_automation_worker_runtime.py",
+      "sha256": "1142c9d9b8ca4f1af8e1f860dc04bd9df980af29844c7cd2eb600c26cffb6e2b"
+    },
+    {
+      "bytes": 12712,
+      "path": "backend/tests/test_gmail_mime_and_frozen_send.py",
+      "sha256": "73bfa87269713ac6f31eb537774ba61357f06de7a6e6ab89f1571a3fcacff0c4"
+    },
+    {
+      "bytes": 5354,
+      "path": "backend/tests/test_hosted_provider_fault_boundaries.py",
+      "sha256": "cf7597f1d42cce093bc695295dc15384c22bfa28e0de11e0f75e274f480b7cdf"
+    },
+    {
+      "bytes": 11755,
+      "path": "backend/tests/test_standing_run_producer.py",
+      "sha256": "eb62ec3792c17699978979786b9ea4f911aa330e578c4da0a8fc52a0defc31be"
+    },
+    {
+      "bytes": 8615,
+      "path": "backend/van_gateway/action/registry.py",
+      "sha256": "f10612f272e24ea8ed0cd7324bcea46799b2fd225a5059d0132d0872d87ee7e2"
+    },
+    {
+      "bytes": 0,
+      "path": "backend/van_gateway/automation/__init__.py",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 46892,
+      "path": "backend/van_gateway/automation/api.py",
+      "sha256": "bc62e01ce99f15650a0ccde196b2dfc7b6ac2effd21e30c2203bc89dab5e9536"
+    },
+    {
+      "bytes": 2966,
+      "path": "backend/van_gateway/automation/canonical.py",
+      "sha256": "a0b11dad68fc241638858dda923b79ba3ff5868308f25f99dc0ce7180caaec7c"
+    },
+    {
+      "bytes": 13779,
+      "path": "backend/van_gateway/automation/cold.py",
+      "sha256": "8d3193a8b9a8635ad267e722ae6b947a58faf414296a07b976777e3dc40e7e9a"
+    },
+    {
+      "bytes": 19115,
+      "path": "backend/van_gateway/automation/compiler.py",
+      "sha256": "1de5d1e14e85e34521058ac06fdd36e14fba11f9d204b17b10d90d78ed39cc34"
+    },
+    {
+      "bytes": 5292,
+      "path": "backend/van_gateway/automation/credentials.py",
+      "sha256": "3718ae7598e148dc16bf082516a000bdf3847d55799ffbed0f55480168267232"
+    },
+    {
+      "bytes": 7401,
+      "path": "backend/van_gateway/automation/deadletter.py",
+      "sha256": "b423b351acf83f2dbd9f5fb3b9801390bd195732bc241f8925703dd0751f58e6"
+    },
+    {
+      "bytes": 24366,
+      "path": "backend/van_gateway/automation/dispatch.py",
+      "sha256": "a088a9a609329831d88bdf34f33362f5a67004e87b02d74448ba23f0574d2a9c"
+    },
+    {
+      "bytes": 9727,
+      "path": "backend/van_gateway/automation/events.py",
+      "sha256": "0e86be84c58b1681701ece59d0a19f1845ab20c7fc64d8f983cae45700beff8c"
+    },
+    {
+      "bytes": 7308,
+      "path": "backend/van_gateway/automation/external_runtime.py",
+      "sha256": "339cb911ab6bd4c0c23535a3866eb6dd56374887efb43f796a182ca75404a395"
+    },
+    {
+      "bytes": 15549,
+      "path": "backend/van_gateway/automation/grants.py",
+      "sha256": "2ddfbfb2f626d21de555dbd9a3557853d7c6021b00353d20a230ce07d4663aed"
+    },
+    {
+      "bytes": 12466,
+      "path": "backend/van_gateway/automation/health.py",
+      "sha256": "b4d9c64fe918856056cc039d63c3878db716eefaaf18155c1db2b9ac34f74603"
+    },
+    {
+      "bytes": 12195,
+      "path": "backend/van_gateway/automation/models.py",
+      "sha256": "2fb24bbefbdc20d9754cbfae691e293a2a4b5b1af2904666734499407511270a"
+    },
+    {
+      "bytes": 14626,
+      "path": "backend/van_gateway/automation/n8n_client.py",
+      "sha256": "5a7d6c324e7bff7e5c3484f30bfe7600e3d1172348f9552beb2a9adb51fcc3ca"
+    },
+    {
+      "bytes": 9912,
+      "path": "backend/van_gateway/automation/payments.py",
+      "sha256": "b7f8ef8f22caac8b50952231f3ec036c30500aacfa2b256e4cc986672098fb78"
+    },
+    {
+      "bytes": 13736,
+      "path": "backend/van_gateway/automation/policy.py",
+      "sha256": "0e7f4301a11ed9cde9f8f95f36704dc1dbc39d8b12b4aee1e19b2ba5542ce2ff"
+    },
+    {
+      "bytes": 4427,
+      "path": "backend/van_gateway/automation/primitive_policy.py",
+      "sha256": "7d275ea644649af7fa8b6ef7cb5636c5f6d5a6cceadb91a2bb8261fc4601dfc2"
+    },
+    {
+      "bytes": 10853,
+      "path": "backend/van_gateway/automation/provisioner.py",
+      "sha256": "44c431a6c75a145e4a5ca22243519122b79dec454ca7bb699418612a842967f5"
+    },
+    {
+      "bytes": 19461,
+      "path": "backend/van_gateway/automation/registry.py",
+      "sha256": "54a0c90f4a28bd2e679d7389aa72cacd70369abf58c974ea4a2c4204431ed205"
+    },
+    {
+      "bytes": 12039,
+      "path": "backend/van_gateway/automation/repair.py",
+      "sha256": "ad04d62ee99904d63a70aadcbc3f7686f50d06f616d21e321650d87c32115b90"
+    },
+    {
+      "bytes": 11448,
+      "path": "backend/van_gateway/automation/router.py",
+      "sha256": "62551d6b8a39dd1bc621b6f65c2163257c37b2485e3bf51259ea36ed884e0d0b"
+    },
+    {
+      "bytes": 4769,
+      "path": "backend/van_gateway/automation/runtime_bindings.py",
+      "sha256": "07bd1fa296241f471742da065a4ebac17da8cd8d35850797e92ff116b889c13d"
+    },
+    {
+      "bytes": 5414,
+      "path": "backend/van_gateway/automation/source_credentials.py",
+      "sha256": "a3b7bf889c3561253425100676cd621b8c2ee9e80c7d2ed3e3df2a1e773008c0"
+    },
+    {
+      "bytes": 13603,
+      "path": "backend/van_gateway/automation/standing_runner.py",
+      "sha256": "1fb055c268098115448ff7903b5e443bf3c206f65960c9c9e19d4aea2d1cd7c7"
+    },
+    {
+      "bytes": 10419,
+      "path": "backend/van_gateway/automation/telemetry.py",
+      "sha256": "32536ea7ac4b7ebc655dac47e811455a5e26f172f811f75681fc026c4f80580e"
+    },
+    {
+      "bytes": 18439,
+      "path": "backend/van_gateway/automation/templates.py",
+      "sha256": "8e234f634b90b49591eee6aa6d697add1d7231a79c2e14b99eb6851687d79ffa"
+    },
+    {
+      "bytes": 7228,
+      "path": "backend/van_gateway/automation/temporal_bridge.py",
+      "sha256": "ea95bbd860ebf86b8dad4ef9d3fa60877aedfb68718eedfb5d293aa13b454720"
+    },
+    {
+      "bytes": 18304,
+      "path": "backend/van_gateway/automation/validator.py",
+      "sha256": "c21727c1dbf9ded0be9d2eed20c4fe90d6ea25462b5152d5bfb4c5739e2904db"
+    },
+    {
+      "bytes": 6181,
+      "path": "backend/van_gateway/automation/verifier.py",
+      "sha256": "114e0ba0f1bf80378c9a59791c9a098c6327d5729b439346f696e63da9130bd0"
+    },
+    {
+      "bytes": 49729,
+      "path": "backend/van_gateway/automation/worker_runtime.py",
+      "sha256": "903a47c5066dc23c7195ed0bb429f8947ef9028ce68fdcc1e311bb164240b508"
+    },
+    {
+      "bytes": 14747,
+      "path": "backend/van_gateway/automation/workflow_health.py",
+      "sha256": "641e0c473024e2f8e7dd16af2bc15fe088d3acbc0b86493d9d19abb003290e40"
+    },
+    {
+      "bytes": 16158,
+      "path": "backend/van_gateway/browser/downloads.py",
+      "sha256": "d9f0fdcd92b6c456dbf089e7d223d9371a128280f2aeb41031913f392b3d8890"
+    },
+    {
+      "bytes": 7415,
+      "path": "backend/van_gateway/browser/downloads_api.py",
+      "sha256": "b224be3d4d8f84dc42be0a33bf6bc94b7004f5e5143ec9a4fc48db6248310d1d"
+    },
+    {
+      "bytes": 6988,
+      "path": "backend/van_gateway/dial_dev/client.py",
+      "sha256": "4ae2f2628009e24972bea1d1776352732495698b589cfdf00052ee3ae9c074df"
+    },
+    {
+      "bytes": 0,
+      "path": "backend/van_gateway/google/__init__.py",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 709,
+      "path": "backend/van_gateway/google/control.py",
+      "sha256": "0056620b243fbef70ae9ec10fb03ed74854504070e8908f9971e87cbc6f27a33"
+    },
+    {
+      "bytes": 9405,
+      "path": "backend/van_gateway/google/mail.py",
+      "sha256": "b4e49f6e28de1816e5b2d5e8b1b356d90ef47bc9b463f32cfa9d3d7e7dfcae3a"
+    },
+    {
+      "bytes": 25257,
+      "path": "backend/van_gateway/google/mesh.py",
+      "sha256": "40a96b730ca461a42bbe51fed44b8b3f51cf4ac216a5926f8ad7a5540e51391a"
+    },
+    {
+      "bytes": 11279,
+      "path": "backend/van_gateway/google/planes.py",
+      "sha256": "0d31c2187028a7d23e064eba139d1cbfd38561f5b3d420b9a29004da76620443"
+    },
+    {
+      "bytes": 22135,
+      "path": "backend/van_gateway/google/service.py",
+      "sha256": "b6eb1cfa909eb31330ea716d3aea6131c80af0509b3a20dff3830dfdc2456588"
+    },
+    {
+      "bytes": 15738,
+      "path": "backend/van_gateway/google/transport.py",
+      "sha256": "e3ece2e3abd57d8494de9f8488cd60061dcbb364012548788442bc691708b90c"
+    },
+    {
+      "bytes": 52478,
+      "path": "backend/van_gateway/knowledge/notebook.py",
+      "sha256": "22b41dfe44e885f062c0cae298e1582d956e5a4eb2921eee06d814789dd91a48"
+    },
+    {
+      "bytes": 14747,
+      "path": "backend/van_gateway/knowledge/service.py",
+      "sha256": "2bd552e9768ed1969ee8644b10ccb8f795d7c913d09733366d3a98dbfecb2282"
+    },
+    {
+      "bytes": 195,
+      "path": "backend/van_gateway/research/__init__.py",
+      "sha256": "322f4d8b845cd274a2c85cbc170178b1b8ef9657c6f3f11a23a48e3ba6b6e98e"
+    },
+    {
+      "bytes": 12307,
+      "path": "backend/van_gateway/research/exa.py",
+      "sha256": "073fc3bd3bb4c0ab317071690f992d670bb922b28499caf0860d3c4b9a6daa84"
+    },
+    {
+      "bytes": 2309,
+      "path": "backend/van_gateway/research/models.py",
+      "sha256": "c5a2bf6c7138845431d6245e213ce343f01b731ffff1ad12b6cce6711f168fc9"
+    },
+    {
+      "bytes": 44354,
+      "path": "backend/van_gateway/runtime_api.py",
+      "sha256": "c9e5a3e66115def0520a9c1b4f85c23c0891d91c003ea87e0363a8f46e4d726a"
+    },
+    {
+      "bytes": 9834,
+      "path": "deploy/van-browser-stream/qualify.sh",
+      "sha256": "1d1dba1cbba5561537a4052087cbda677cff825188e0329bcf29926adb26cea3"
+    },
+    {
+      "bytes": 4125,
+      "path": "deploy/van-browser-stream/qualify_tls.py",
+      "sha256": "ff9bdb0350588611e3fb48e9e72b3eeeb5e9484302638e36d5fc14cab27596b8"
+    },
+    {
+      "bytes": 5904,
+      "path": "docs/AUTOMATION_RUNTIME_BINDINGS.md",
+      "sha256": "9c2a605f7f6019555abe2c2482e4fb8de984325f37c8d931ee9dd9c1ff7c0f87"
+    },
+    {
+      "bytes": 7163,
+      "path": "docs/audit/VAN_HOSTED_SERVICE_WIRING_REVIEW_2026-10-07.md",
+      "sha256": "4b8ca8f18463c2fdec16a386c02f93308d1210eaec6af83b538513f368d49349"
+    },
+    {
+      "bytes": 40868,
+      "path": "hermes/mcp/owner_runtime_stdio.mjs",
+      "sha256": "8d4b3780f74f1d6153c099ffc6d2876f374d68cb83f59e1558341b845e4dd583"
+    },
+    {
+      "bytes": 6207,
+      "path": "services/browser_control_agent/tests/test_qualification_tls.py",
+      "sha256": "3cd24db996568719c943a69ac4332d0e58632d62bfa550b5a1e659bdf35dbac8"
+    },
+    {
+      "bytes": 4959,
+      "path": "tools/hermes/install_van_profile.sh",
+      "sha256": "6a59e58ad3424ad49439b9113a4c8534a2cbd88fcdf575fa4055d7c4bd5b2d22"
+    }
+  ],
+  "handset_tests_executed": 0,
+  "historical_validation": {
+    "checks": [
+      {
+        "elapsed_seconds": 70.81,
+        "exit_code": 0,
+        "failed": 0,
+        "log": "/workspace/van-audit/service-wiring-2026-10-07.log",
+        "log_sha256": "b03180d73e3c81620e63cf6ff7ac974d5350542d4a80623e2bbf1221739d2829",
+        "passed": 502,
+        "selection": "all backend/tests/test_automation_*.py plus test_google_provider_http_contracts.py, test_n8n_invocation.py, test_knowledge_runtime.py, test_knowledge_cloud_token_contract.py, test_dial_dev_credential_failure.py, test_browser_takeover_and_downloads.py, test_extra_apis.py, test_google_capabilities_have_routes.py, test_browser_flood_bounds.py, test_dial_dev_proxy.py"
+      },
+      {
+        "elapsed_seconds": 0.54,
+        "evidence": "observed exec tool output",
+        "exit_code": 0,
+        "failed": 0,
+        "passed": 168,
+        "selection": "services/browser_control_agent/tests services/browser_stream_host/tests tests/contracts/test_remote_browser_dependencies.py tests/contracts/test_remote_browser_matrix.py tests/contracts/test_browser_window_and_entry_contract.py"
+      },
+      {
+        "exit_code": 0,
+        "selection": "git diff --check on changed service/producer sources and tests"
+      },
+      {
+        "exit_code": 0,
+        "selection": "bash -n deploy/van-browser-stream/bootstrap.sh deploy/van-browser-stream/qualify.sh"
+      }
+    ],
+    "disjoint_final_selections": {
+      "failed": 0,
+      "passed": 670
+    },
+    "files": [
+      {
+        "bytes": 17785,
+        "path": "backend/van_gateway/google/service.py",
+        "sha256": "404d40d9c0f38d5ea5cb06ff0670d3695f61a5ca2b050960632668be289c91f3"
+      },
+      {
+        "bytes": 12741,
+        "path": "backend/van_gateway/google/transport.py",
+        "sha256": "41c45303990a0b0f4a80d76b0c360f1e5bddc867ad25b9161e9425a37ef329d9"
+      },
+      {
+        "bytes": 20274,
+        "path": "backend/van_gateway/automation/dispatch.py",
+        "sha256": "dd4340c91efd0f0abdd3bb059bac149ac7690788c35495412986f6ab3f451f84"
+      },
+      {
+        "bytes": 12964,
+        "path": "backend/van_gateway/automation/n8n_client.py",
+        "sha256": "9bd0f4ef570fb93331c47e814280fd9116e11685a5b30fe169f29ca5f15e9fda"
+      },
+      {
+        "bytes": 14747,
+        "path": "backend/van_gateway/knowledge/service.py",
+        "sha256": "2bd552e9768ed1969ee8644b10ccb8f795d7c913d09733366d3a98dbfecb2282"
+      },
+      {
+        "bytes": 52273,
+        "path": "backend/van_gateway/knowledge/notebook.py",
+        "sha256": "7ef8faf16de4b49c262677e182d066241885d263daad82ed7d82054761d739e7"
+      },
+      {
+        "bytes": 6988,
+        "path": "backend/van_gateway/dial_dev/client.py",
+        "sha256": "4ae2f2628009e24972bea1d1776352732495698b589cfdf00052ee3ae9c074df"
+      },
+      {
+        "bytes": 16158,
+        "path": "backend/van_gateway/browser/downloads.py",
+        "sha256": "d9f0fdcd92b6c456dbf089e7d223d9371a128280f2aeb41031913f392b3d8890"
+      },
+      {
+        "bytes": 7424,
+        "path": "backend/van_gateway/browser/downloads_api.py",
+        "sha256": "64ec6e6b9ec6292cfbef9ce3cef45cb6f93a95dbbc73657bf42624c65479eafe"
+      },
+      {
+        "bytes": 10000,
+        "path": "backend/tests/test_google_provider_http_contracts.py",
+        "sha256": "cfd338f5daa61be59df4a17b69887160a73365818261c87ee5a8b0d805d5004c"
+      },
+      {
+        "bytes": 10160,
+        "path": "backend/tests/test_n8n_invocation.py",
+        "sha256": "4ce5f5922a3c6099ee85929e0ba88678ff541cf2403843a2e738af4572010988"
+      },
+      {
+        "bytes": 16143,
+        "path": "backend/tests/test_automation_dispatch.py",
+        "sha256": "0fc70990ad9daddf2f23960dbc2352f472798b538f35d1964740628188ede500"
+      },
+      {
+        "bytes": 19706,
+        "path": "backend/tests/test_knowledge_runtime.py",
+        "sha256": "951139d81cd02948f5ac8761d1a0c9d50f2ca9700eb793866f8f15b69bdf42c1"
+      },
+      {
+        "bytes": 2728,
+        "path": "backend/tests/test_knowledge_cloud_token_contract.py",
+        "sha256": "3990e28b49860be04e65c93d95a865c5dcf3352cba766153a61ccb899061295a"
+      },
+      {
+        "bytes": 845,
+        "path": "backend/tests/test_dial_dev_credential_failure.py",
+        "sha256": "0211e26dd7129248bdeb2d9bfe96893bd8f178d00ff4890d99c025d569a65524"
+      },
+      {
+        "bytes": 37910,
+        "path": "backend/tests/test_browser_takeover_and_downloads.py",
+        "sha256": "df83b788220eb2ff7c415a53ca9e4aa7357d4fcd34bc3e51d5ea804ed3397881"
+      },
+      {
+        "bytes": 5763,
+        "path": "services/browser_control_agent/server.py",
+        "sha256": "a490de0f2975060b181a41abd7d3c51515b86b713fb92c5cf3ee3c4103f5f347"
+      },
+      {
+        "bytes": 13575,
+        "path": "services/browser_control_agent/tests/test_stream_host_package.py",
+        "sha256": "3cb558448d20373b10edec626e900118adb651ddcae1fd8c54345f2f0c0a24a9"
+      },
+      {
+        "bytes": 5345,
+        "path": "deploy/van-browser-stream/bootstrap.sh",
+        "sha256": "231c6f54dcad5b05c5a1f42ed6f242fa3ec6fbafd5765625304e22d198748071"
+      },
+      {
+        "bytes": 1207,
+        "path": "deploy/van-browser-stream/systemd/van-browser-control-agent.service",
+        "sha256": "44a85aa5c0a9bb4ee3d5f8bd750669d554dda7e78f9eb70b6c4e9416368b15c3"
+      },
+      {
+        "bytes": 9836,
+        "path": "deploy/van-browser-stream/README.md",
+        "sha256": "9025375e1f6e5c36a0f645d0d2d78bdab56601c40e9a48329257c8f814735a62"
+      },
+      {
+        "bytes": 7222,
+        "path": "docs/audit/VAN_HOSTED_SERVICE_WIRING_REVIEW_2026-10-07.md",
+        "sha256": "2226db27f156010df2a13ae33b693c1a00c2506e40bbb6b1615af0b86714cc16"
+      }
+    ]
+  },
+  "host_deployment_executed": false,
+  "integration_status": "Exact machine HTTPS callback gate source is implemented and separately tested; parent whole-repository receipt supersedes focused checks after all source agents freeze.",
+  "live_provider_observation": false,
+  "overlapping_focused_check": {
+    "elapsed_seconds": 8.96,
+    "failed": 0,
+    "log": "/workspace/van-audit/service-admission-final-2026-10-07.log",
+    "passed": 70,
+    "selection": "backend/tests/test_automation_provisioning.py backend/tests/test_automation_api.py backend/tests/test_automation_dispatch.py"
+  },
+  "schema_version": "van-hosted-service-wiring-validation.v2",
+  "source": "current shared local workspace, preserving prior implementation",
+  "validation_level": "SOURCE_AND_LOCAL_INTEGRATION"
+}

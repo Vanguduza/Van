@@ -17,8 +17,9 @@ from vati.core.canonical import canonical_hash
 from vati.core.events import EventKind, make_event
 from vati.core.ledger import Ledger
 from vati.execution.base import ExecutionReceipt, OrderCommand, StopMode, VenueAdapter
+from vati.execution.exit_journal import ExitJournal, ExitPending
 from vati.execution.protection import ProtectionManager
-from vati.execution.policy_templates import DO_NOT_EXECUTE, template as execution_template
+from vati.execution.policy_templates import DO_NOT_EXECUTE, LIMIT_AT_TOUCH, entry_compatible, slippage_bound_in_price, template as execution_template
 from vati.execution.pretrade import MarketReference, PreTradeControls
 from vati.execution.route_registry import RouteRegistry
 from vati.execution.style_selector import (
@@ -29,11 +30,16 @@ from vati.risk.authority import Decision, RiskDecision
 from vati.risk.contracts import KillSwitchTrigger, LossModel, TradeIntent
 from vati.risk.governor import KillSwitch
 from vati.risk.mandate import TradingMandate
+from vati.risk.serde import intent_binding_hash, mandate_binding_hash, RISK_APPROVAL_SCHEMA_VERSION
 
 ZERO = Decimal("0")
 
 
 class RouterError(RuntimeError):
+    pass
+
+
+class ExitInFlight(RouterError):
     pass
 
 
@@ -57,6 +63,11 @@ def resolve_execution_policy(decision, *, entry_type: str, max_slippage: Optiona
     if chosen_entry not in t.allowed_entry_types:
         raise RouterError(
             f"execution policy entry type {chosen_entry!r} is outside template {t.template_id}")
+    if entry_type and not entry_compatible(entry_type, chosen_entry):
+        # P1-TRADE-EXEC-004: the strategy's entry type is binding; a STOP entry is never
+        # quietly turned into a LIMIT (or anything else).
+        raise RouterError(
+            f"ENTRY_TYPE_NOT_PERMITTED: strategy requested {entry_type}, template {t.template_id} executes {chosen_entry}")
     bounded_slippage = t.max_slippage
     if max_slippage is not None:
         bounded_slippage = min(max_slippage, t.max_slippage)
@@ -70,7 +81,8 @@ class ExecutionRouter:
                  route_registry: Optional[RouteRegistry] = None,
                  pretrade_controls: Optional[PreTradeControls] = None,
                  style_selector: Optional[ExecutionStyleSelector] = None,
-                 enforce_rev51_controls: bool = False) -> None:
+                 enforce_rev51_controls: bool = False,
+                 clock: Optional[Callable[[], int]] = None) -> None:
         self.ledger, self.adapters, self.kill, self.protection, self.producer = ledger, adapters, kill_switch, protection, producer
         self.lease_fence = lease_fence
         self.lease_submission_guard = lease_submission_guard
@@ -78,6 +90,7 @@ class ExecutionRouter:
         self.pretrade_controls = pretrade_controls
         self.style_selector = style_selector
         self.enforce_rev51_controls = enforce_rev51_controls
+        self.clock = clock
         if enforce_rev51_controls and (
             route_registry is None or pretrade_controls is None or style_selector is None
         ):
@@ -86,9 +99,130 @@ class ExecutionRouter:
         if pretrade_controls is not None and route_registry is not None and pretrade_controls.routes is not route_registry:
             raise RouterError("pre-trade controls and router must share the same RouteRegistry")
         self._seen: set[str] = {e.payload["idempotency_key"] for e in ledger.iter(EventKind.ORDER_COMMAND)}
+        self.exit_journal = ExitJournal(ledger, producer)
+        for pending in self.exit_journal.unresolved():
+            if pending.payload.get("state", "UNKNOWN") != "ACCEPTED":
+                self.kill.trip(KillSwitchTrigger.RECONCILIATION_FAILURE, pending.received_time_ms)
 
-    def _log(self, kind: EventKind, payload: dict, *, now_ms: int, corr: str, decision_time: Optional[int] = None) -> None:
-        self.ledger.append(make_event(kind, self.producer, payload, event_time_ms=now_ms, received_time_ms=now_ms, decision_time_ms=decision_time, correlation_id=corr))
+    def _log(self, kind: EventKind, payload: dict, *, now_ms: int, corr: str, decision_time: Optional[int] = None) -> str:
+        event = make_event(kind, self.producer, payload, event_time_ms=now_ms, received_time_ms=now_ms, decision_time_ms=decision_time, correlation_id=corr)
+        self.ledger.append(event)
+        return event.hash
+
+    def _dispatch_time(self, mandate: TradingMandate, *, now_ms: int) -> int:
+        # Native service builders supply their current clock. Isolated replay
+        # callers supply their explicit event clock through now_ms.
+        observed=self.clock() if self.clock is not None else now_ms
+        if type(observed) is not int or type(now_ms) is not int or observed < 0 or observed < now_ms:
+            raise RouterError('mandate dispatch clock unavailable or moved backwards')
+        if not mandate.signed_at_unix*1000 <= observed < mandate.expires_at_unix*1000:
+            raise RouterError('mandate is outside its current validity interval; re-admission required')
+        if not mandate.owner_keys_current():
+            raise RouterError('current mandate owner signer is unavailable; re-admission required')
+        return observed
+
+    def _uncertain_exit(self, position_id: str, *, now_ms: int, request_ref: str) -> None:
+        if position_id in self.protection.rules:
+            self.protection.mark_close_pending(position_id)
+        if KillSwitchTrigger.RECONCILIATION_FAILURE not in self.kill.active:
+            self.kill.trip(KillSwitchTrigger.RECONCILIATION_FAILURE, now_ms)
+            self._log(EventKind.KILL_SWITCH, {"trigger": KillSwitchTrigger.RECONCILIATION_FAILURE.value,
+                "reason": "protective exit outcome unresolved", "exit_request_ref": request_ref},
+                now_ms=now_ms, corr=position_id)
+
+    def _send_close(self, venue: str, *, position_id: str, trade_intent_id: str,
+                    quantity: Optional[Decimal], action: str, reason: str, now_ms: int) -> ExecutionReceipt:
+        try:
+            request = self.exit_journal.begin(venue=venue, position_id=position_id,
+                trade_intent_id=trade_intent_id, action=action, quantity=quantity, reason=reason, now_ms=now_ms)
+        except ExitPending as exc:
+            raise ExitInFlight(str(exc)) from exc
+        if position_id in self.protection.rules:
+            self.protection.mark_close_pending(position_id)
+        try:
+            receipt = self.adapters[venue].close(position_id, quantity, now_ms=now_ms, reason=reason)
+            state = self.exit_journal.receipt_state(receipt, venue=venue,
+                position_id=position_id, trade_intent_id=trade_intent_id)
+            ticket = None
+            if state == "ACCEPTED" and receipt.execution_channel == "OWNER_TICKET":
+                ticket = getattr(self.adapters[venue], "tickets", {}).get(receipt.broker_order_id)
+                if ticket is None or ticket.side != "SELL" or ticket.source_position_id != position_id:
+                    state = "UNKNOWN"
+            with self.ledger.atomic():
+                receipt_ref = self._log(EventKind.EXECUTION_RECEIPT,
+                    {**{k:(v.value if hasattr(v, "value") else v) for k,v in asdict(receipt).items()},
+                     "exit_action": "CLOSE", "exit_reason": reason,
+                     "preservation_action": action, "exit_request_ref": request.hash},
+                    now_ms=now_ms, corr=receipt.trade_intent_id or trade_intent_id or position_id)
+                self.exit_journal.finish(request, state=state, receipt_event_ref=receipt_ref, now_ms=now_ms)
+                if state == "ACCEPTED" and ticket is not None:
+                    self._log(EventKind.OWNER_TICKET, {"ticket": receipt.broker_order_id,
+                        "symbol": ticket.symbol, "side": "SELL", "position_id": position_id,
+                        "trade_intent_id": receipt.trade_intent_id, "exit_reason": reason,
+                        "qty": str(ticket.quantity_shares), "limit_price": str(ticket.limit_price),
+                        "exit_request_ref": request.hash}, now_ms=now_ms,
+                        corr=receipt.trade_intent_id or trade_intent_id or position_id)
+        except BaseException:
+            # The request is already durable. Even a missing response or a
+            # receipt-persistence failure cannot authorize another send.
+            self._uncertain_exit(position_id, now_ms=now_ms, request_ref=request.hash)
+            raise
+        if state == "UNKNOWN":
+            self._uncertain_exit(position_id, now_ms=now_ms, request_ref=request.hash)
+            if receipt.status not in {"UNKNOWN", "PARTIAL"}:
+                raise RouterError("protective exit evidence incomplete or inconsistent; reconcile before retry")
+        elif state == "CONFIRMED":
+            if action == "FULL_CLOSE":
+                self.protection.close_confirmed(position_id)
+            else:
+                self.protection.close_failed(position_id)
+        elif state == "NOT_EXECUTED":
+            self.protection.close_failed(position_id)
+        return receipt
+
+    def confirm_owner_exit(self, receipt: ExecutionReceipt, *, now_ms: int) -> bool:
+        """Fold a durable native owner-ticket confirmation of this exact attempt.
+
+        AccountService verifies/adopts the original owner confirmation and
+        persists its receipt before this call. A different ticket, free-form
+        assertion or derived producer cannot settle the pending request.
+        """
+        pending = self.exit_journal.pending(receipt.venue, receipt.broker_position_id)
+        if pending is None:
+            return False  # legacy/non-journal owner recovery retains its existing path
+        request_ref = pending.payload.get("request_ref", pending.hash)
+        request = next((e for e in self.exit_journal._events(receipt.venue, receipt.broker_position_id)
+                        if e.hash == request_ref), None)
+        issued = None
+        confirmed = None
+        fields = asdict(receipt)
+        for event in self.ledger.iter(EventKind.EXECUTION_RECEIPT):
+            if event.hash != canonical_hash(event.body()):
+                continue
+            if event.hash == pending.payload.get("receipt_event_ref"):
+                issued = event
+            if (event.producer == "vati-account-service" and event.payload.get("receipt_hash") == receipt.receipt_hash
+                and canonical_hash({k:event.payload.get(k) for k in fields}) == canonical_hash(fields)):
+                confirmed = event
+        if (request is None or issued is None or confirmed is None
+            or issued.producer != self.producer or issued.payload.get("execution_channel") != "OWNER_TICKET"
+            or issued.payload.get("status") != "ACCEPTED" or not receipt.broker_order_id
+            or issued.payload.get("broker_order_id") != receipt.broker_order_id
+            or receipt.execution_channel != "OWNER_TICKET"
+            or self.exit_journal.receipt_state(receipt, venue=receipt.venue, position_id=receipt.broker_position_id,
+                trade_intent_id=request.payload["trade_intent_id"]) != "CONFIRMED"):
+            raise RouterError("owner exit confirmation lacks its native request/ticket/receipt binding; reconcile")
+        # The owner-ticket adapter's position projection has just applied this
+        # exact confirmation. A final partial ticket leaves residual protection.
+        remaining = [p for p in self.adapters[receipt.venue].positions() if p.position_id == receipt.broker_position_id]
+        with self.ledger.atomic():
+            self.exit_journal.finish(request, state="PARTIAL_CONFIRMED" if remaining else "CONFIRMED",
+                receipt_event_ref=confirmed.hash, now_ms=now_ms)
+        if remaining:
+            self.protection.close_failed(receipt.broker_position_id)
+        else:
+            self.protection.close_confirmed(receipt.broker_position_id)
+        return True
 
     def execute(self, intent: TradeIntent, decision: RiskDecision, mandate: TradingMandate, *, now_ms: int, stop_mode: StopMode = StopMode.VENUE,
                 targets: tuple[Decimal, ...] = (), time_in_force: str = "DAY", entry_type: str = "LIMIT", max_slippage: Optional[Decimal] = None,
@@ -97,6 +231,14 @@ class ExecutionRouter:
                 liquidity: Optional[LiquidityView] = None,
                 urgency: Urgency = Urgency.NORMAL) -> ExecutionReceipt:
         corr = intent.trade_intent_id
+        for pending in self.exit_journal.unresolved():
+            if pending.payload.get("state", "UNKNOWN") != "ACCEPTED":
+                self._uncertain_exit(pending.payload.get("position_id", pending.payload.get("broker_position_id")), now_ms=now_ms,
+                    request_ref=pending.payload.get("request_ref", pending.hash))
+        if not isinstance(urgency, Urgency):
+            raise RouterError("execution urgency must be a registered deterministic state")
+        if urgency is Urgency.IMMEDIATE:
+            raise RouterError("protective-exit urgency cannot authorize a new entry; use the protective reduction path")
         # --- gate chain (fail closed, first failure names the reason) ---
         if self.lease_fence is not None and not self.lease_fence(lease_epoch):
             raise RouterError(f"account runtime lease fence refused epoch {lease_epoch!r}")
@@ -108,10 +250,19 @@ class ExecutionRouter:
             raise RouterError(f"decision is {decision.decision.value}")
         if recompute_decision_hash(decision) != decision.decision_hash:
             raise RouterError("decision hash does not recompute; refusing")
+        if getattr(decision, "approval_schema_version", None) != RISK_APPROVAL_SCHEMA_VERSION or not getattr(decision, "intent_hash", None):
+            raise RouterError("risk approval lacks exact intent binding; re-evaluation required")
+        if decision.intent_hash != intent_binding_hash(intent):
+            raise RouterError("risk approval does not match the exact trade intent; re-evaluation required")
         if decision.mandate_id != mandate.mandate_id or decision.mandate_version != mandate.version:
             raise RouterError("decision was made under a different mandate")
         if not mandate.sends_orders():
             raise RouterError(f"mode {mandate.mode.value} does not send orders")
+        if getattr(decision, "mandate_hash", None) != mandate_binding_hash(mandate):
+            raise RouterError("risk approval does not match the current mandate; re-evaluation required")
+        if not mandate.authority_matches_policy():
+            raise RouterError("current mandate lacks its original policy-bound owner grant; re-admission required")
+        self._dispatch_time(mandate,now_ms=now_ms)
         if intent.idempotency_key in self._seen:
             raise RouterError("duplicate idempotency key")
         adapter = self.adapters.get(intent.venue)
@@ -143,25 +294,34 @@ class ExecutionRouter:
             command_stop = quantised.stop_price if intent.stop is not None else None
             route = self.route_registry.resolve(
                 intent.account_alias, intent.symbol, now_ms=now_ms, direction=intent.direction)
+            requested_entry = entry_type
             entry_type, max_slippage = resolve_execution_policy(
                 execution_policy_decision, entry_type=entry_type, max_slippage=max_slippage)
-            style = self.style_selector.select(
-                trade_intent_id=intent.trade_intent_id,
-                policy_decision=execution_policy_decision,
-                route=route,
-                quantity=quantity,
-                liquidity=liquidity or LiquidityView(),
-                urgency=urgency,
-                now_ms=now_ms,
-            )
+            try:
+                style = self.style_selector.select(
+                    trade_intent_id=intent.trade_intent_id,
+                    policy_decision=execution_policy_decision,
+                    route=route,
+                    quantity=quantity,
+                    liquidity=liquidity or LiquidityView(),
+                    urgency=urgency,
+                    now_ms=now_ms,
+                )
+            except StyleRefused as exc:
+                raise RouterError(f"execution style refused: {exc}") from exc
             if not style.seal_ok():
                 raise RouterError("execution style seal is invalid")
+            if style.total_quantity != quantity:
+                raise RouterError("execution style quantity differs from the approved quantised quantity")
             if style.slices != 1:
                 # The current router has one broker submission per intent. Silently
                 # ignoring a multi-slice plan would violate the selected style; refuse
                 # until a child-command protocol is explicitly admitted.
                 raise RouterError(
                     f"execution style requires {style.slices} slices; single-command router refuses")
+            if not entry_compatible(requested_entry, style.entry_type):
+                raise RouterError(
+                    f"ENTRY_TYPE_NOT_PERMITTED: strategy requested {requested_entry}, style chose {style.entry_type}")
             entry_type = style.entry_type
             max_slippage = (
                 style.max_slippage if max_slippage is None
@@ -170,6 +330,27 @@ class ExecutionRouter:
         else:
             entry_type, max_slippage = resolve_execution_policy(
                 execution_policy_decision, entry_type=entry_type, max_slippage=max_slippage)
+
+        # Venue capability (P1-TRADE-EXEC-004). A venue that declares what it can execute
+        # is held to it: an unsupported type is refused, not sent as something else. The
+        # one explicit, logged exception is an at-touch LIMIT on a venue that can only
+        # send market orders — that is what such a venue already did silently, and the
+        # slippage cap still bounds it.
+        requested_entry_type = entry_type
+        substituted = False
+        supported = getattr(adapter, "supported_entry_types", None)
+        if supported is not None and entry_type not in supported:
+            template_id = getattr(execution_policy_decision, "template_id", LIMIT_AT_TOUCH) if execution_policy_decision is not None else LIMIT_AT_TOUCH
+            if entry_type == "LIMIT" and "MARKET" in supported and template_id == LIMIT_AT_TOUCH:
+                entry_type, substituted = "MARKET", True
+            else:
+                raise RouterError(
+                    f"ENTRY_TYPE_NOT_SUPPORTED: venue {intent.venue} cannot execute {entry_type} (supports {sorted(supported)})")
+
+        # Template, style and caller bounds are fractions of price (policy_templates 1.1.0);
+        # the order command and every adapter work in price units of this instrument.
+        if max_slippage is not None:
+            max_slippage = slippage_bound_in_price(max_slippage, command_entry)
 
         if execution_policy_decision is not None:
             self._log(
@@ -208,10 +389,32 @@ class ExecutionRouter:
             if self.lease_submission_guard is not None
             else nullcontext(True)
         )
-        with guard as lease_guard_ok:
+        with guard as lease_guard_ok, mandate.owner_authority_submission_guard() as owner_key_ok:
             if not lease_guard_ok:
                 raise RouterError(
                     f"account runtime submission guard refused epoch {lease_epoch!r}")
+            if not owner_key_ok:
+                raise RouterError('current mandate owner signer is unavailable; re-admission required')
+            decision_time_ms=now_ms
+            now_ms=self._dispatch_time(mandate,now_ms=now_ms)
+            # Heartbeat and guard acquisition may have changed every mutable
+            # refusal fact checked above. Recheck before consuming the key or
+            # publishing a command; this never grants or increases risk.
+            lease_current=self.lease_fence(lease_epoch) if self.lease_fence is not None else True
+            now_ms=self._dispatch_time(mandate,now_ms=now_ms)
+            if self.kill.halted:
+                raise RouterError(f"kill switch active: {sorted(t.value for t in self.kill.active)}")
+            if not lease_current:
+                raise RouterError(f"account runtime lease fence refused epoch {lease_epoch!r}")
+            if self.enforce_rev51_controls:
+                current_mark = market_reference.aged(observed_at_ms=decision_time_ms,now_ms=now_ms) if market_reference is not None else None
+                final_check = self.pretrade_controls.check(intent=intent,decision=decision,mark=current_mark,now_ms=now_ms)
+                if not final_check.passed or final_check.quantised is None:
+                    raise RouterError(f"pre-trade refused {final_check.reason_code}: {final_check.reason_detail}")
+                current_order = final_check.quantised
+                if (current_order.quantity!=cmd.quantity or (current_order.entry_price or intent.entry)!=cmd.entry_price
+                    or (current_order.stop_price if intent.stop is not None else None)!=cmd.protective_stop):
+                    raise RouterError('current venue quantisation changed; re-evaluation required')
             self._seen.add(intent.idempotency_key)
             if self.enforce_rev51_controls:
                 assert self.pretrade_controls is not None
@@ -221,19 +424,30 @@ class ExecutionRouter:
                     quantity=cmd.quantity,
                     now_ms=now_ms,
                 )
-            self._log(EventKind.ORDER_COMMAND, {**asdict(cmd), "direction": cmd.direction.value, "stop_mode": cmd.stop_mode.value, "loss_model": cmd.loss_model.value}, now_ms=now_ms, corr=corr, decision_time=now_ms)
+            self._log(EventKind.ORDER_COMMAND, {**asdict(cmd), "direction": cmd.direction.value, "stop_mode": cmd.stop_mode.value, "loss_model": cmd.loss_model.value,
+                                                **({"requested_entry_type": requested_entry_type, "entry_type_substituted": True} if substituted else {})},
+                      now_ms=now_ms, corr=corr, decision_time=decision_time_ms)
             metrics.inc("vati_orders_sent_total", venue=intent.venue)
             receipt = adapter.submit(cmd, now_ms=now_ms)
             self._log(EventKind.EXECUTION_RECEIPT, {k: (v.value if hasattr(v, "value") else v) for k, v in asdict(receipt).items()}, now_ms=now_ms, corr=corr)
             # --- protection ---
             if receipt.status in ("FILLED", "PARTIAL") and receipt.filled_qty > ZERO:
                 if cmd.stop_mode is StopMode.VENUE and not receipt.protective_stop_confirmed:
-                    flat = adapter.close(receipt.broker_position_id, None, now_ms=now_ms, reason="STOP_REJECTED_FLATTEN")
                     self.kill.trip(KillSwitchTrigger.STOP_REJECTED, now_ms)
                     self._log(EventKind.KILL_SWITCH, {"trigger": "STOP_REJECTED", "position": receipt.broker_position_id}, now_ms=now_ms, corr=corr)
-                    self._log(EventKind.EXECUTION_RECEIPT, {k: (v.value if hasattr(v, "value") else v) for k, v in asdict(flat).items()}, now_ms=now_ms, corr=corr)
-                    metrics.inc("vati_unprotected_flatten_total", venue=intent.venue)
-                    raise RouterError("protective stop not confirmed; position flattened and kill switch tripped")
+                    try:
+                        flat = self._send_close(intent.venue, position_id=receipt.broker_position_id,
+                            trade_intent_id=corr, quantity=None, action="FULL_CLOSE",
+                            now_ms=now_ms, reason="STOP_REJECTED_FLATTEN")
+                    except Exception as exc:
+                        raise RouterError("protective stop not confirmed; protective recovery unresolved; reconcile before new risk") from exc
+                    if flat.status in ("FILLED", "OWNER_EXECUTED", "BROKER_CONFIRMED"):
+                        metrics.inc("vati_unprotected_flatten_total", venue=intent.venue)
+                        raise RouterError("protective stop not confirmed; position flattened and kill switch tripped")
+                    latest = self.exit_journal.latest(intent.venue, receipt.broker_position_id)
+                    self._uncertain_exit(receipt.broker_position_id, now_ms=now_ms,
+                        request_ref=latest.payload.get("request_ref", latest.hash))
+                    raise RouterError("protective stop not confirmed; protective recovery unresolved; reconcile before new risk")
                 if cmd.protective_stop is not None:
                     self.protection.register(receipt.broker_position_id, symbol=intent.symbol, direction=intent.direction, entry=receipt.average_fill or cmd.entry_price, stop=cmd.protective_stop,
                                              target=targets[0] if targets else None, opened_ms=now_ms, software_stop=(cmd.stop_mode is StopMode.SOFTWARE))
@@ -300,73 +514,54 @@ class ExecutionRouter:
         if action not in ("PARTIAL_CLOSE", "FULL_CLOSE"):
             raise RouterError(f"unsupported preservation action {action}")
         if action == "FULL_CLOSE":
-            self.protection.mark_close_pending(position_id)
             quantity = None
-        receipt = adapter.close(position_id, quantity, now_ms=now_ms, reason=reason)
-        self._log(
-            EventKind.EXECUTION_RECEIPT,
-            {**{k: (v.value if hasattr(v, "value") else v)
-                for k, v in asdict(receipt).items()},
-             "exit_action": "CLOSE", "exit_reason": reason,
-             "preservation_action": action},
-            now_ms=now_ms, corr=receipt.trade_intent_id or trade_intent_id,
-        )
-        if action == "FULL_CLOSE":
-            if receipt.status in ("FILLED", "OWNER_EXECUTED", "BROKER_CONFIRMED"):
-                self.protection.close_confirmed(position_id)
-            elif receipt.status in ("REJECTED", "CANCELLED", "EXPIRED", "UNKNOWN"):
-                self.protection.close_failed(position_id)
-        return receipt
+        return self._send_close(venue, position_id=position_id, trade_intent_id=trade_intent_id,
+            action=action, quantity=quantity, now_ms=now_ms, reason=reason)
 
     def apply_exits(self, venue: str, symbol: str, bid: Decimal, ask: Decimal, *, now_ms: int) -> list[ExecutionReceipt]:
         adapter = self.adapters[venue]
         out = []
+        # A fresh protection projection cannot erase an earlier transport
+        # attempt. Restore its fence before on_mark can emit another close.
+        for position_id, rule in list(self.protection.rules.items()):
+            if rule.symbol == symbol:
+                pending = self.exit_journal.pending(venue, position_id)
+                if pending is not None:
+                    self.protection.mark_close_pending(position_id)
+                    if pending.payload.get("state", "UNKNOWN") != "ACCEPTED":
+                        self._uncertain_exit(position_id, now_ms=now_ms, request_ref=pending.payload.get("request_ref", pending.hash))
         for ins in self.protection.on_mark(symbol, bid, ask, now_ms=now_ms):
             if ins.action == "CLOSE":
-                r = adapter.close(ins.position_id, None, now_ms=now_ms, reason=ins.reason)
+                try:
+                    r = self._send_close(venue, position_id=ins.position_id, trade_intent_id="",
+                        action="FULL_CLOSE", quantity=None, now_ms=now_ms, reason=ins.reason)
+                except ExitInFlight:
+                    # Another ledger writer committed the same position's
+                    # attempt after this mark was calculated.
+                    latest = self.exit_journal.latest(venue, ins.position_id)
+                    if latest is not None and latest.payload["state"] != "ACCEPTED":
+                        self._uncertain_exit(ins.position_id, now_ms=now_ms,
+                            request_ref=latest.payload.get("request_ref", latest.hash))
+                    continue
             else:
                 r = adapter.modify_stop(ins.position_id, ins.price, now_ms=now_ms)  # type: ignore[arg-type]
 
-            self._log(
-                EventKind.EXECUTION_RECEIPT,
-                {
-                    **{k: (v.value if hasattr(v, "value") else v) for k, v in asdict(r).items()},
-                    "exit_action": ins.action,
-                    "exit_reason": ins.reason,
-                },
-                now_ms=now_ms,
-                corr=r.trade_intent_id or ins.position_id,
-            )
+            if ins.action != "CLOSE":
+                self._log(
+                    EventKind.EXECUTION_RECEIPT,
+                    {
+                        **{k: (v.value if hasattr(v, "value") else v) for k, v in asdict(r).items()},
+                        "exit_action": ins.action,
+                        "exit_reason": ins.reason,
+                    },
+                    now_ms=now_ms,
+                    corr=r.trade_intent_id or ins.position_id,
+                )
 
             if ins.action == "CLOSE":
                 if r.status in ("FILLED", "OWNER_EXECUTED", "BROKER_CONFIRMED"):
                     self.protection.close_confirmed(ins.position_id)
-                elif r.status == "ACCEPTED" and r.execution_channel == "OWNER_TICKET":
-                    # The position is still open. Keep the rule in pending-close
-                    # state and expose the SELL ticket to the gateway/owner.
-                    ticket = getattr(adapter, "tickets", {}).get(r.broker_order_id)
-                    self._log(
-                        EventKind.OWNER_TICKET,
-                        {
-                            "ticket": r.broker_order_id,
-                            "symbol": symbol,
-                            "side": "SELL",
-                            "position_id": ins.position_id,
-                            "trade_intent_id": r.trade_intent_id,
-                            "exit_reason": ins.reason,
-                            "qty": (
-                                str(ticket.quantity_shares)
-                                if ticket is not None else None
-                            ),
-                            "limit_price": (
-                                str(ticket.limit_price)
-                                if ticket is not None else None
-                            ),
-                        },
-                        now_ms=now_ms,
-                        corr=r.trade_intent_id or ins.position_id,
-                    )
-                elif r.status in ("REJECTED", "CANCELLED", "EXPIRED", "UNKNOWN"):
+                elif r.status in ("REJECTED", "CANCELLED", "EXPIRED"):
                     self.protection.close_failed(ins.position_id)
             else:
                 # on_mark has already tentatively moved the in-memory stop. A

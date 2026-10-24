@@ -1,0 +1,59 @@
+{
+  "schema_version": 1,
+  "authorization_id": "auth-20260930-owner-explicit-guard-canary-origin",
+  "project": "van",
+  "authority": "OWNER_EXPLICIT",
+  "owner_instruction_sha256": "76df8fb31e23f8ae44e8d05d2ca94ece66ee8c8868e5d5f5ba9258c01c15ff37",
+  "owner_instruction_digest_input": "UTF-8 bytes of the verbatim selected answer label \"In-zone canary origin (Recommended)\", no quotes, no trailing newline",
+  "owner_instruction_record": "docs/decisions/OWNER-DECISION-20260930-BROWSER-TASK-SCOPE.md",
+  "owner_instruction_excerpt": "In-zone canary origin (Recommended)",
+  "source": {
+    "kind": "owner_session_instruction",
+    "channel": "claude_code",
+    "request_id": "claude-code-session_01ELKqm4GCPmPvF3ggKkgB1J-20260930",
+    "owner_attested": true,
+    "device_signature_claimed": false,
+    "cryptographic_signature_claimed": false,
+    "signed_ingress_claimed": false
+  },
+  "signature_note": "The owner selected this answer in the Claude Code session that asked (after unit G13); recorded first-hand by the integrator. No signature of any kind is claimed.",
+  "purpose": "Authorize unit G14's in-zone guard canary origin (a dedicated canary hostname on the zone's private overlay, the proxy's only allowed non-global upstream, checked by qualify.sh, never reachable by a task scope: every *.internal host is refused at the gateway, Harness and proxy) and the append recording the owner's answer.",
+  "authorized_paths": [
+    "backend/tests/test_browser_canary_origin.py",
+    "backend/van_gateway/browser/api.py",
+    "backend/van_gateway/browser/task_scope.py",
+    "deploy/van-browser-core/README.md",
+    "deploy/van-browser-core/bootstrap.sh",
+    "deploy/van-browser-core/browser/egress_proxy.py",
+    "deploy/van-browser-core/browser/guard_canary.py",
+    "deploy/van-browser-core/browser/harness_service.py",
+    "deploy/van-browser-core/qualify.sh",
+    "deploy/van-browser-core/runtime.env.example",
+    "deploy/van-browser-core/zone.json",
+    "docs/decisions/OWNER-DECISION-20260930-BROWSER-TASK-SCOPE.md",
+    "tests/contracts/test_van_browser_core_egress_proxy.py"
+  ],
+  "commit_scope": {
+    "commits": [
+      "8cd8c705ee30faf4b1b1ff94ee56d7b1e3520c6e",
+      "dfbabe453b4d3a0ef25902cc41e2d44107c4670d"
+    ]
+  },
+  "limits": [
+    "Covers only the listed paths in the listed commits.",
+    "May not redefine product, money, security or owner-control intent.",
+    "Opens no production gate; not reusable."
+  ],
+  "issued_at_utc": "2026-09-30T00:00:00Z",
+  "recorded_by": "integrator (session_01ELKqm4GCPmPvF3ggKkgB1J)",
+  "material_scope_expansion": false,
+  "feature_removal": false,
+  "business_model_change": false,
+  "security_authority_change": false,
+  "owner_control_boundary_change": false,
+  "legal_position_change": false,
+  "money_or_custody_model_change": false,
+  "locked_provider_change": false,
+  "reusable": false,
+  "revoked": false
+}

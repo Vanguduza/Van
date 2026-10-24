@@ -23,6 +23,7 @@ class VanNotificationListenerService : NotificationListenerService() {
         val app = application as VanApplication
         val policyStore = app.notificationPolicyStore
         val packageName = sbn.packageName
+        policyStore.recordObservedPackage(packageName)
 
         when (policyStore.policyFor(packageName)) {
             AppNotificationPolicy.MUTE -> return

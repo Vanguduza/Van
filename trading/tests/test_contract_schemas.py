@@ -27,7 +27,14 @@ def test_no_unregistered_schema_files():
 
 def test_risk_decision_schema_matches_dataclass():
     fields = {f.name for f in dataclasses.fields(RiskDecision)}
-    assert fields == required_keys("risk_decision")
+    schema = load_schema("risk_decision")
+    assert fields == set(schema["properties"])
+    # Historical v1 records omit these fields. V2 requires the complete binding
+    # as a group; promoting them to unconditional requirements would invalidate
+    # the immutable historical evidence rather than version it.
+    binding = {"intent_hash", "mandate_hash", "approval_schema_version"}
+    assert required_keys("risk_decision") == fields - binding
+    assert schema["properties"]["approval_schema_version"]["const"] == 2
 
 
 def test_risk_snapshot_schema_matches_dataclass():
@@ -60,10 +67,11 @@ def test_mandate_fractions_are_decimal_strings_not_floats():
         TradingMandate.from_mapping(example)
 
     from conftest import owner_authority
+    from vati.risk.mandate import mandate_subject
 
     example["owner_signature_ref"] = owner_authority().token(
         act="mandate-admit",
-        subject=f"{example['mandate_id']}:{example['version']}",
+        subject=mandate_subject(example),
         issued_at_unix=int(example["signed_at_unix"]),
         lifetime_seconds=int(example["expires_at_unix"]) - int(example["signed_at_unix"]),
     )

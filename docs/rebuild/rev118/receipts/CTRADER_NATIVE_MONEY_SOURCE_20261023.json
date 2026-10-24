@@ -1,0 +1,300 @@
+{
+  "schema": "van.rebuild.ctrader-native-money-source/1",
+  "observed_at_utc": "2026-10-23T13:28:54.186934+00:00",
+  "source_parent": "39807eff3c76841eed92f0a477751635b998f4d8",
+  "source_sha256": {
+    "trading/vati/execution/ctrader/adapter.py": "7217ea715eaca64fa2a654c69fb2e64451b1bbce145f4e1e4417354e7165853a",
+    "trading/tests/test_ctrader.py": "cc6cf962ff2abd2bd178f7b041d11130d448ddca198ae20bdb2d6ae79bc18e50",
+    "trading/tests/test_retirement_venue_observations.py": "de3840d10740ba93f9a443c34330b93d6d73b3df3f26f9cf77590a88501bcb2f",
+    "trading/tests/test_ctrader_money_precision.py": "e9cb47acb35f6b2f3ce27a85525669a860bd5216f720d09617a893c123e075a0"
+  },
+  "executions": {
+    "before": {
+      "tests": 15,
+      "failures": 14,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 0.316,
+      "sha256": "817194da0e305e7347fac40471d76e03308619c277058617e24a37fabaefa793"
+    },
+    "funds_drift_initial_instrument_attempt": {
+      "tests": 19,
+      "failures": 4,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 3.307,
+      "sha256": "49285790494e1181cc939648c2ae353d276e57655ef5587a935e64d63f749aca"
+    },
+    "funds_drift_valid_before": {
+      "tests": 19,
+      "failures": 3,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 0.378,
+      "sha256": "8291942a9f8b28127b67e07a41f53d9076e30ea0c01643a4d2746b056d4a4e57"
+    },
+    "focused": {
+      "tests": 44,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 1.713,
+      "sha256": "7143a87595251b0ef8cb8852ddd8bb4ca9f67f5f467ca8ff6a8e0420b1d6d193"
+    },
+    "full_trading_actual_pg": {
+      "tests": 2454,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 507.437,
+      "sha256": "91d00eaf98127743f898d96c288b13572b99215f745c9695f2b848408e611775"
+    }
+  },
+  "fault_campaign": {
+    "definitions": [
+      [
+        "round actual partial fill",
+        "return Decimal(volume) / Decimal(self.lot_size_cents)",
+        "return (Decimal(volume) / Decimal(self.lot_size_cents)).quantize(Decimal(\"0.01\"))"
+      ],
+      [
+        "substitute zero for native PnL",
+        "unrealised = self._native_unrealised()",
+        "unrealised = ZERO"
+      ],
+      [
+        "use gross instead of native net",
+        "observed.append(pid);total+=net",
+        "observed.append(pid);total+=gross"
+      ],
+      [
+        "accept missing or foreign positions",
+        "if len(set(observed))!=len(observed) or set(observed)!=set(expected):raise ValueError()",
+        "if False:raise ValueError()"
+      ],
+      [
+        "coerce malformed native precision",
+        "digits=r['moneyDigits'];rows=r.get('positionUnrealizedPnL',[])",
+        "digits=int(r['moneyDigits']);rows=r.get('positionUnrealizedPnL',[])"
+      ],
+      [
+        "ignore changing native funds",
+        "if any(type(latest['trader'][k]) is not int or latest['trader'][k]!=t[k] for k in fields):raise ValueError()",
+        "if False:raise ValueError()"
+      ],
+      [
+        "accept another account PnL",
+        "or r['ctidTraderAccountId']!=self.ctid_trader_account_id):raise ValueError()",
+        "or False):raise ValueError()"
+      ]
+    ],
+    "records": [
+      {
+        "case": 0,
+        "phase": "control",
+        "reason": "round actual partial fill",
+        "exit_code": 0,
+        "counts": {
+          "tests": 19,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "xml_sha256": "6389d60499b6a7a23fa11f290e187e8a48376e88fb885317194c923bc319b48c"
+      },
+      {
+        "case": 0,
+        "phase": "fault",
+        "reason": "round actual partial fill",
+        "exit_code": 1,
+        "counts": {
+          "tests": 19,
+          "failures": 4,
+          "errors": 0,
+          "skipped": 0
+        },
+        "xml_sha256": "460a461a1eae2140122a95439c6f002fdee24b33e55487693390d4e71ee63032"
+      },
+      {
+        "case": 1,
+        "phase": "control",
+        "reason": "substitute zero for native PnL",
+        "exit_code": 0,
+        "counts": {
+          "tests": 19,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "xml_sha256": "efc319bd1989de6eb685f794c72a4f0c50054f5038bc917bc81f9c48847fdf71"
+      },
+      {
+        "case": 1,
+        "phase": "fault",
+        "reason": "substitute zero for native PnL",
+        "exit_code": 1,
+        "counts": {
+          "tests": 19,
+          "failures": 15,
+          "errors": 0,
+          "skipped": 0
+        },
+        "xml_sha256": "c91814837c844e8d9b680fb6c0506283b0bb386ef9a079cb301c97735a8561fd"
+      },
+      {
+        "case": 2,
+        "phase": "control",
+        "reason": "use gross instead of native net",
+        "exit_code": 0,
+        "counts": {
+          "tests": 19,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "xml_sha256": "eb081dca585d8c4c2369289971101efba1aa4efdf3ffee8f4d639b19a9f8c6f2"
+      },
+      {
+        "case": 2,
+        "phase": "fault",
+        "reason": "use gross instead of native net",
+        "exit_code": 1,
+        "counts": {
+          "tests": 19,
+          "failures": 3,
+          "errors": 0,
+          "skipped": 0
+        },
+        "xml_sha256": "060a10546c162a955961ba4ea122087d1f78e4600a7614f15ae894a658243f6a"
+      },
+      {
+        "case": 3,
+        "phase": "control",
+        "reason": "accept missing or foreign positions",
+        "exit_code": 0,
+        "counts": {
+          "tests": 19,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "xml_sha256": "003adef86782d90d8746103421c36d990bf311491e1c088acd0502538d95bbbe"
+      },
+      {
+        "case": 3,
+        "phase": "fault",
+        "reason": "accept missing or foreign positions",
+        "exit_code": 1,
+        "counts": {
+          "tests": 19,
+          "failures": 3,
+          "errors": 0,
+          "skipped": 0
+        },
+        "xml_sha256": "7b43bfbb8c9e40abae152bb05abd9369ad0dd59a9e5080bfdc19f82cfd6a37f3"
+      },
+      {
+        "case": 4,
+        "phase": "control",
+        "reason": "coerce malformed native precision",
+        "exit_code": 0,
+        "counts": {
+          "tests": 19,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "xml_sha256": "d2f958bfda4d935a86710d39eb6ed439c5b62ece192f56cd40a8daa4e3bcc054"
+      },
+      {
+        "case": 4,
+        "phase": "fault",
+        "reason": "coerce malformed native precision",
+        "exit_code": 1,
+        "counts": {
+          "tests": 19,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "xml_sha256": "be67759d19c461362529591bab03198c89a74183c959fe032ba391f3b86838d7"
+      },
+      {
+        "case": 5,
+        "phase": "control",
+        "reason": "ignore changing native funds",
+        "exit_code": 0,
+        "counts": {
+          "tests": 19,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "xml_sha256": "a7feda25d3cdd9ac63a18f023b94c3e360090652a22611ec481e992785aafbcf"
+      },
+      {
+        "case": 5,
+        "phase": "fault",
+        "reason": "ignore changing native funds",
+        "exit_code": 1,
+        "counts": {
+          "tests": 19,
+          "failures": 3,
+          "errors": 0,
+          "skipped": 0
+        },
+        "xml_sha256": "cb1692b7d896e628a54043f3dc2cc7b486bb1b8f9b1cd4a5b59c856a782a26d1"
+      },
+      {
+        "case": 6,
+        "phase": "control",
+        "reason": "accept another account PnL",
+        "exit_code": 0,
+        "counts": {
+          "tests": 19,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "xml_sha256": "ecb822e744c33e234ac5c7a207ba3788c5fbc8cde7fe14b8da973e5b7db3fecb"
+      },
+      {
+        "case": 6,
+        "phase": "fault",
+        "reason": "accept another account PnL",
+        "exit_code": 1,
+        "counts": {
+          "tests": 19,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "xml_sha256": "c659ce36e59a9ff6d98f0eac4409d40988041a692dd834ab10bcb1b726a9ce62"
+      }
+    ],
+    "source_sha256": "7217ea715eaca64fa2a654c69fb2e64451b1bbce145f4e1e4417354e7165853a",
+    "source_restored": true
+  },
+  "protocol_provenance": {
+    "donor": "spotware/openapi-proto-messages",
+    "donor_ref": "main (raw.githubusercontent.com)",
+    "fetched_at_utc": "2026-09-16T13:49:41.379177+00:00",
+    "licence": "MIT (spotware/openapi-proto-messages)",
+    "modification": "NONE \u2014 parsed at import by vati.execution.ctrader.protoschema; no protoc, no generated code",
+    "files": {
+      "OpenApiCommonMessages.proto": "9816cd24b340dcc4eb28548eb4dd16735995d2a61889337591e5c4d8021652a2",
+      "OpenApiCommonModelMessages.proto": "b95d7df670a7e890a53ec08f676198ace7bb0a074a4b07ff0b493c4be00a0dea",
+      "OpenApiMessages.proto": "a84df9b528e69a494e197d48e21d6291b3d76db31396663a8188721eef9fcf35",
+      "OpenApiModelMessages.proto": "56338dcac45a149227678b7c23637d64f4e2b607f6649af82394ce5c0957fedf"
+    }
+  },
+  "private_pg_cleanup": {
+    "stopped": true,
+    "removed": true
+  },
+  "instrument_corrections": [
+    "The first new framed-protocol fixture omitted native required swap. It caused a server codec failure; fixture corrected before the valid drift baseline. Not credited as a product counterexample.",
+    "The in-memory native trader fixture now returns copies, matching independent decoded native responses instead of sharing mutable dictionaries across snapshots."
+  ],
+  "qualification": "Candidate source only, current broker net mark excludes potential closing commission. Visible funds/position-set drift refuses verification; separate native reads are not an atomic broker snapshot. No settled financial maturity, profitable strategy, provider, native, whole-unit, release or handset acceptance."
+}

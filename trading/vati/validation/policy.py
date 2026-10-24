@@ -16,10 +16,12 @@ stage text from here rather than restating it.
 from __future__ import annotations
 
 from dataclasses import dataclass
+import math
+from numbers import Real
 
-#: Bumped whenever a threshold changes. Sealed into every certificate so an old
+#: Bumped when thresholds, numerical validity or estimator semantics change. Sealed into every certificate so an old
 #: certificate cannot silently claim the current policy's authority.
-VALIDATION_POLICY_VERSION = "validation-policy/1.0.0"
+VALIDATION_POLICY_VERSION = "validation-policy/1.1.0"
 
 
 @dataclass(frozen=True)
@@ -76,6 +78,22 @@ class ValidationVerdict:
 def evaluate(stats: ValidationStatistics, policy: ValidationPolicy = DEFAULT_POLICY) -> ValidationVerdict:
     """Fail closed: every unmet condition is named, not just the first."""
     reasons: list[str] = []
+    # Threshold comparisons alone accept some impossible values (e.g. DSR=2,
+    # PBO=-1). No hash or owner signature makes malformed statistics evidence.
+    for name in ("dsr_probability", "pbo_probability"):
+        value = getattr(stats, name)
+        if not finite_number(value) or not 0 <= value <= 1:
+            reasons.append(f"invalid_probability:{name}")
+    for name, minimum in (("n_trials", 1), ("n_observations", 0), ("walk_forward_windows", 0)):
+        value = getattr(stats, name)
+        if type(value) is not int or value < minimum:
+            reasons.append(f"invalid_count:{name}")
+    if not finite_number(stats.observed_sharpe):
+        reasons.append("invalid_observed_sharpe")
+    if stats.validation_policy_version != policy.version:
+        reasons.append(f"statistics_policy_version:{stats.validation_policy_version}!={policy.version}")
+    if reasons:
+        return ValidationVerdict(False, tuple(reasons), policy.version)
     if stats.n_observations < policy.min_observations:
         reasons.append(
             f"insufficient_observations:{stats.n_observations}<{policy.min_observations}"
@@ -96,6 +114,10 @@ def evaluate(stats: ValidationStatistics, policy: ValidationPolicy = DEFAULT_POL
             f"pbo_probability:{stats.pbo_probability:.4f}>{policy.max_pbo_probability}"
         )
     return ValidationVerdict(not reasons, tuple(reasons), policy.version)
+
+
+def finite_number(value) -> bool:
+    return isinstance(value, Real) and not isinstance(value, bool) and math.isfinite(value)
 
 
 __all__ = [

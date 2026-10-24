@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.dial.van.browser.ActivityLifetimeContractTest" tests="3" skipped="0" failures="0" errors="0" timestamp="2026-10-07T22:11:46" hostname="052fefa249ff" time="0.037">
+  <properties/>
+  <testcase name="the session, the media and the cursors outlive it()" classname="com.dial.van.browser.ActivityLifetimeContractTest" time="0.028"/>
+  <testcase name="the Activity rebuilds only what it owns()" classname="com.dial.van.browser.ActivityLifetimeContractTest" time="0.004"/>
+  <testcase name="the two lists do not overlap()" classname="com.dial.van.browser.ActivityLifetimeContractTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

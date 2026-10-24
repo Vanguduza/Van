@@ -3,12 +3,8 @@ package com.dial.van.voice
 import android.content.Context
 import android.media.AudioAttributes
 import android.media.SoundPool
-import android.os.Bundle
-import android.speech.tts.TextToSpeech
-import android.speech.tts.UtteranceProgressListener
 import java.io.File
 import java.security.MessageDigest
-import java.util.Locale
 import java.util.concurrent.atomic.AtomicBoolean
 
 object WakeAcknowledgementPolicy {
@@ -26,15 +22,18 @@ data class WakeAcknowledgementStatus(
 )
 
 /**
- * Pre-renders the canonical wake acknowledgement into app-private storage and keeps it loaded
- * in SoundPool. Wake acceptance therefore does not wait on a cold TTS engine or network.
+ * Loads the genuine pre-rendered canonical acknowledgement from the admitted APK bundle.
+ * Wake acceptance never initializes a synthesizer or uses a cloud-capable platform voice.
  */
 class WakeAcknowledgementManager(
     context: Context,
     private val onReadyChanged: (WakeAcknowledgementStatus) -> Unit = {},
-) : TextToSpeech.OnInitListener {
+) {
     private val appContext = context.applicationContext
-    private val assetFile = File(appContext.filesDir, "voice/wake_ack_v${WakeAcknowledgementPolicy.ASSET_REVISION}.wav")
+    private val assetFile: File?
+        get() = VoiceAssetInstaller.installedOrNull()?.root?.let {
+            File(it, "critical_phrases/wake_acknowledgement.wav")
+        }
     private val ready = AtomicBoolean(false)
     private val soundPool = SoundPool.Builder()
         .setMaxStreams(1)
@@ -46,8 +45,6 @@ class WakeAcknowledgementManager(
         )
         .build()
     private var soundId: Int? = null
-    private var tts: TextToSpeech? = null
-    private var ttsEngine: String? = null
 
     init {
         soundPool.setOnLoadCompleteListener { _, sampleId, status ->
@@ -56,56 +53,27 @@ class WakeAcknowledgementManager(
                 publishStatus()
             }
         }
-        if (assetFile.isFile && assetFile.length() > MIN_ASSET_BYTES) {
-            loadAsset()
-        } else {
-            assetFile.parentFile?.mkdirs()
-            tts = TextToSpeech(appContext, this)
-        }
+        prepare()
     }
 
-    override fun onInit(status: Int) {
-        if (status != TextToSpeech.SUCCESS) {
-            publishStatus()
-            return
-        }
-        ttsEngine = tts?.defaultEngine
-        tts?.language = Locale.getDefault()
-        tts?.setOnUtteranceProgressListener(object : UtteranceProgressListener() {
-            override fun onStart(utteranceId: String?) = Unit
-            override fun onDone(utteranceId: String?) {
-                if (utteranceId == WakeAcknowledgementPolicy.UTTERANCE_ID && assetFile.isFile) {
-                    loadAsset()
-                    tts?.shutdown()
-                    tts = null
-                }
-            }
-            @Deprecated("Deprecated in API")
-            override fun onError(utteranceId: String?) {
-                publishStatus()
-            }
-        })
-        val params = Bundle().apply {
-            putFloat(TextToSpeech.Engine.KEY_PARAM_VOLUME, 1.0f)
-        }
-        val result = tts?.synthesizeToFile(
-            WakeAcknowledgementPolicy.TEXT,
-            params,
-            assetFile,
-            WakeAcknowledgementPolicy.UTTERANCE_ID,
-        ) ?: TextToSpeech.ERROR
-        if (result == TextToSpeech.ERROR) publishStatus()
+    /** Refresh after background APK bundle installation; SoundPool loads the real audio asynchronously. */
+    fun prepare(): Boolean {
+        val file = assetFile ?: return false
+        if (!file.isFile || file.length() <= MIN_ASSET_BYTES) return false
+        loadAsset()
+        return true
     }
 
     @Synchronized
     private fun loadAsset() {
-        if (!assetFile.isFile || assetFile.length() <= MIN_ASSET_BYTES) {
+        val file = assetFile
+        if (file == null || !file.isFile || file.length() <= MIN_ASSET_BYTES) {
             publishStatus()
             return
         }
         ready.set(false)
         soundId?.let { soundPool.unload(it) }
-        soundId = soundPool.load(assetFile.absolutePath, 1)
+        soundId = soundPool.load(file.absolutePath, 1)
     }
 
     fun play(): Boolean {
@@ -121,8 +89,8 @@ class WakeAcknowledgementManager(
         ready = ready.get(),
         text = WakeAcknowledgementPolicy.TEXT,
         assetRevision = WakeAcknowledgementPolicy.ASSET_REVISION,
-        assetSha256 = assetFile.takeIf { it.isFile }?.let(::sha256),
-        ttsEngine = ttsEngine,
+        assetSha256 = assetFile?.takeIf { it.isFile }?.let(::sha256),
+        ttsEngine = if (assetFile?.isFile == true) "bundled-sherpa-onnx-1.13.8" else null,
     )
 
     private fun publishStatus() {
@@ -147,8 +115,6 @@ class WakeAcknowledgementManager(
         soundId?.let { soundPool.unload(it) }
         soundId = null
         soundPool.release()
-        tts?.shutdown()
-        tts = null
     }
 
     companion object {

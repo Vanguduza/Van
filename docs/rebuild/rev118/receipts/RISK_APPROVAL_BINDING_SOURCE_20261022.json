@@ -1,0 +1,55 @@
+{
+  "schema": "van.rebuild.candidate-source-receipt/1",
+  "source_parent": "e68dd21003057250a72ac59c61684451f02d1ee7",
+  "scope": "PARTIAL_BE003_BE010_BE012_NOT_UNIT_ACCEPTANCE",
+  "source_sha256": {
+    "trading/vati/contracts/schemas/risk_decision.schema.json": "04739c3faeba994b6b6ec5242e8e460ca4247228ef75bcf1d7f954fec715bf7d",
+    "trading/vati/execution/pretrade.py": "f3afda15b1e5d1e325d8baac57bef5e624f6ece0b12791cc7f3004b87eeca9f3",
+    "trading/vati/execution/review.py": "a99919f99343b6853ede385f83e6434b4a3479d97d839605664215b43fcbc521",
+    "trading/vati/execution/router.py": "d89058bdfb078cae300d59a06911ebeded42dfdf0d9415ad949b165709e2bece",
+    "trading/vati/risk/authority.py": "8d4cdcb202cb03fa94672d6bfca2a106086e3893f43f81edec177bf5f5b2a64e",
+    "trading/vati/risk/serde.py": "8e1968eedc906d57810dcf79e8f8c4e0e3883f993fb36de7b9e044c04ea39591",
+    "trading/tests/test_risk_intent_binding.py": "f9a39703b644fd9de520128da76848dbae8f1c026f83b762041ac1105d91fd4d",
+    "trading/tests/test_contract_schemas.py": "5ad307c431eb2cda95a17b497ad54fd2ffc82c5b1b9c37b6b7a6763de27c270b",
+    "tests/rebuild/test_risk_approval_schema.py": "c1ed2153711972b3bab46c0d607bf4c8acc9c61a671db0badc9d89e92ed53c42"
+  },
+  "full_trading": {
+    "tests": 1713,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "passed": 1713,
+    "report_sha256": "cb92b2609bf62d46c6fe694df5658e404d84616159cf9df9524d21dc6a25ae4d"
+  },
+  "focused": {
+    "router_pretrade_schema": 82,
+    "new_source_cases": 22,
+    "independent_json_schema": 12,
+    "gateway_trading_and_tickets": 41
+  },
+  "initial_counterexamples": {
+    "changed_intent_reaches_broker": 10,
+    "unknown_emergency_flatten_reported_success": 1
+  },
+  "logs_sha256": {
+    "/tmp/van-risk-binding-before.txt": "db71f527ff069e68ebd5c4342f88052de53611fcb1a1d41c0728f661a3dded1a",
+    "/tmp/van-risk-binding-emergency-before.txt": "79de248e3375a3a4ad87e77e36292b0cefd76a7e5751c6d5ec40313377cfc87c",
+    "/tmp/van-risk-binding-full-first.txt": "90ff7cd50cc2d7773625f685d210b9d5c7f0c763d6cc503f377c9a85426e252d",
+    "/tmp/van-risk-binding-final-focused.txt": "6e6e63a7aae952f20f015bc8a75e6b41dfb901b770c7b94d3560a9195f904e44",
+    "/tmp/van-risk-binding-full-pg.txt": "0740f1ea77a4ee50435bb2513adbb26f7881ced75809d8027f148c7ec4055222",
+    "/tmp/van-risk-binding-full-pg.xml": "cb92b2609bf62d46c6fe694df5658e404d84616159cf9df9524d21dc6a25ae4d",
+    "/tmp/van-risk-binding-pg-cleanup.json": "b7f9e505b2dad306208e6e8b0a7c090a27d7c39402c0073fbf835afd740a10aa",
+    "/tmp/van-risk-binding-schema.txt": "ac2f36e71645a1de73da7440fcbb6859ffac97f0e92a46c130cee96e3a6add79",
+    "/tmp/van-risk-binding-architecture.txt": "f1deb5246f8a3b0b90848a916de3a857d39373acf45c5e343c3c13b92cfc52ac",
+    "/tmp/van-risk-binding-mutation-preflight.txt": "b1e8359648f88d5623789a3a98a4bb5e863bf64a12b7634789e76ca64f359f11",
+    "/tmp/van-risk-binding-rev51-final.txt": "82f1485502897f1d9f47c3309e722a974a0bf8786ecfad103ab7bb422c093d21"
+  },
+  "fixture_cleanup": {
+    "stopped": true,
+    "removed": true
+  },
+  "historical_replay": "STRICT_BYTES_NO_SILENT_V1_UPGRADE",
+  "owner_policy_thresholds_changed": false,
+  "external_eligibility": "NOT_ISSUED",
+  "remaining": "Native uncertainty reconciliation; actual account/runtime/readmodel scoping; full canonical unit exit."
+}

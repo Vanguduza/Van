@@ -19,10 +19,26 @@ import java.nio.ByteOrder
 object SherpaWakePipelineFactory {
     fun create(bundle: WakeSherpaBundle): WakePipeline {
         val candidate = SherpaKeywordDetector(bundle, bundle.candidateThreshold)
-        val verifier = SherpaKeywordDetector(bundle, bundle.verificationThreshold)
+        val verifier = try {
+            SherpaKeywordDetector(bundle, bundle.verificationThreshold)
+        } catch (failure: Throwable) {
+            candidate.release()
+            throw failure
+        }
+        try {
+            // A model may load but fail its first native ONNX decode (for example static
+            // mobile tensor shapes). Such a bundle must not report wake as READY.
+            candidate.selfTest()
+            verifier.selfTest()
+        } catch (failure: Throwable) {
+            candidate.release()
+            verifier.release()
+            throw failure
+        }
         return WakePipeline(
             kws = WakeWordEngine { pcm -> candidate.score(pcm) },
             verifier = WakePhraseVerifier { pcm -> verifier.score(pcm) },
+            resetEngines = { candidate.reset(); verifier.reset() },
         )
     }
 }
@@ -61,8 +77,17 @@ private class SherpaKeywordDetector(
             numTrailingBlanks = bundle.numTrailingBlanks,
         )
         spotter = KeywordSpotter(config = config)
-        stream = spotter.createStream()
-        check(stream.ptr != 0L) { "wake_sherpa_stream_unavailable" }
+        stream = try {
+            spotter.createStream().also { created ->
+                if (created.ptr == 0L) {
+                    created.release()
+                    error("wake_sherpa_stream_unavailable")
+                }
+            }
+        } catch (failure: Throwable) {
+            spotter.release()
+            throw failure
+        }
     }
 
     fun score(pcm16: ByteArray): Float = synchronized(lock) {
@@ -92,6 +117,21 @@ private class SherpaKeywordDetector(
         } else {
             0f
         }
+    }
+
+    fun selfTest() {
+        repeat(32) { check(score(ByteArray(3200)) == 0f) { "wake_silence_self_test_failed" } }
+        reset()
+    }
+
+    fun reset() = synchronized(lock) {
+        spotter.reset(stream)
+        detectionLatchFrames = 0
+    }
+
+    fun release() = synchronized(lock) {
+        runCatching { stream.release() }
+        runCatching { spotter.release() }
     }
 
     private fun pcm16ToFloat(pcm16: ByteArray): FloatArray {

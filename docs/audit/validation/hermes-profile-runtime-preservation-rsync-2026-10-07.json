@@ -1,0 +1,60 @@
+{
+  "schema_version": 1,
+  "scope": "HERMES_PROFILE_INSTALL_RUNTIME_STATE_PRESERVATION_WITH_ACTUAL_RSYNC",
+  "recorded_at_utc": "2026-10-07T23:28:25.899481+00:00",
+  "test_command": [
+    "/workspace/.onboarding/van-venv/bin/python",
+    "-m",
+    "pytest",
+    "-q",
+    "tests/hermes/test_profile_layout.py::test_install_profile_preserves_runtime_state_and_secrets",
+    "--junitxml=/workspace/Van/docs/audit/validation/hermes-profile-runtime-preservation-rsync-2026-10-07.xml"
+  ],
+  "returncode": 0,
+  "elapsed_seconds": 1.4805679819983197,
+  "junit_counts": {
+    "tests": 1,
+    "errors": 0,
+    "failures": 0,
+    "skipped": 0
+  },
+  "rsync_version": "rsync  version 3.4.1  protocol version 32\nCopyright (C) 1996-2025 by Andrew Tridgell, Wayne Davison, and others.\nWeb site: https://rsync.samba.org/\nCapabilities:\n    64-bit files, 64-bit inums, 64-bit timestamps, 64-bit long ints,\n    socketpairs, symlinks, symtimes, hardlinks, hardlink-specials,\n    hardlink-symlinks, IPv6, atimes, batchfiles, inplace, append, ACLs,\n    xattrs, optional secluded-args, iconv, prealloc, stop-at, no crtimes\nOptimizations:\n    SIMD-roll, no asm-roll, openssl-crypto, no asm-MD5\nChecksum list:\n    xxh128 xxh3 xxh64 (xxhash) md5 md4 sha1 none\nCompress list:\n    zstd lz4 zlibx zlib none\nDaemon auth list:\n    sha512 sha256 sha1 md5 md4\n\nrsync comes with ABSOLUTELY NO WARRANTY.  This is free software, and you\nare welcome to redistribute it under certain conditions.  See the GNU\nGeneral Public Licence for details.\n",
+  "binary_sha256": "a56c05b960beb734169619d5760b43ff495e84f85a93eb1f54fe58118262fb20",
+  "package_trust": {
+    "origin": "https://deb.debian.org/debian/",
+    "trusted_archive_keyring": "/usr/share/keyrings/debian-archive-keyring.gpg",
+    "release_signature_verified": true,
+    "index_size_and_sha256_match_signed_release": true,
+    "release_sha256": "0584fba32e13e0ab8285fb16c27adea1ec03a73669c18702821094fd6ca86675",
+    "index_sha256": "7778d3e3f303b7ddb8ce0fe7c8d57473a076c6bf2e8f241f75421d2396352498",
+    "packages": [
+      {
+        "Package": "rsync",
+        "Version": "3.4.1+ds1-5+deb13u4",
+        "Filename": "pool/main/r/rsync/rsync_3.4.1+ds1-5+deb13u4_amd64.deb",
+        "SHA256": "8aa122f6ba8d2ff112c72bb9814ee096ee516f0213b36b98bbe79c83c92fb226",
+        "Size": "432964",
+        "Depends": "libacl1 (>= 2.2.23), libc6 (>= 2.38), liblz4-1 (>= 0.0~r130), libpopt0 (>= 1.14), libssl3t64 (>= 3.0.0), libxxhash0 (>= 0.8.0), libzstd1 (>= 1.5.5), zlib1g (>= 1:1.1.4)"
+      },
+      {
+        "Package": "libpopt0",
+        "Version": "1.19+dfsg-2",
+        "Filename": "pool/main/p/popt/libpopt0_1.19+dfsg-2_amd64.deb",
+        "SHA256": "07f649b706852af937654295697dcfc7858f3295718ec18681dce1704663e4f2",
+        "Size": "43844"
+      }
+    ],
+    "extraction": "dpkg-deb -x under /workspace/.onboarding only; no package scripts/global installation"
+  },
+  "test_inputs_sha256": {
+    "tests/hermes/test_profile_layout.py": "3b7efa2065d4f8afbced68c9fbc3e98f0badabf230734e98f6c28c0379f8e9f5",
+    "tools/hermes/install_van_profile.sh": "6a59e58ad3424ad49439b9113a4c8534a2cbd88fcdf575fa4055d7c4bd5b2d22",
+    "tools/hermes/doctor_van_profile.sh": "451956f064e8ec2ba1d8eb1afcd29afb145a3c2df229e4d496fc07414eee93d3"
+  },
+  "test_effects": "isolated pytest temporary Hermes home; preserves sentinels for .env, database, sessions, memories, logs, pairing, cache and runtime-installed skill; removes stale source-managed provider",
+  "production_source_changed": false,
+  "registry_or_receipt_hashes_changed": false,
+  "host_executed": false,
+  "device_executed": false,
+  "live_qualified": false
+}

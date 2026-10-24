@@ -98,18 +98,25 @@ def deflated_sharpe(observed_sr: float, *, n_obs: int, skew: float, kurtosis: fl
 
 
 def pbo_cscv(returns_matrix: Sequence[Sequence[float]], *, partitions: int = 4) -> float:
-    """Probability of backtest overfitting via combinatorially symmetric CV.
+    """CSCV selection-instability diagnostic for the declared trial population.
     returns_matrix[trial][t]; each trial is one strategy configuration.
     Splits time into `partitions` blocks; for every half/half combination picks
     the in-sample best trial and measures its out-of-sample rank. PBO = share of
-    combinations where the IS-best is below median OOS."""
-    if not returns_matrix or partitions < 2 or partitions % 2:
+    combinations where the IS-best is below median OOS. This empirical fraction
+    is not a general probability of market skill or future profitability."""
+    if not returns_matrix or type(partitions) is not int or partitions < 2 or partitions % 2:
         raise ValueError("need ≥1 trial and an even partition count")
-    T = min(len(r) for r in returns_matrix)
+    T = len(returns_matrix[0])
+    if any(len(row) != T for row in returns_matrix):
+        raise ValueError("trial histories must be aligned; ragged rows cannot be truncated")
+    if any(isinstance(value, bool) or not isinstance(value, (int, float)) or not math.isfinite(value)
+           for row in returns_matrix for value in row):
+        raise ValueError("trial histories require finite numeric observations")
     if T < partitions:
         return 1.0
-    block = T // partitions
-    blocks = [(i * block, (i + 1) * block) for i in range(partitions)]
+    # Equal-width floor blocks dropped the final T % partitions observations.
+    # Balanced integer boundaries cover every observation exactly once.
+    blocks = [(i * T // partitions, (i + 1) * T // partitions) for i in range(partitions)]
     n_trials = len(returns_matrix)
     below = total = 0
     for is_idx in combinations(range(partitions), partitions // 2):

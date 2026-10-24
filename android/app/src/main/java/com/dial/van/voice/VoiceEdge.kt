@@ -8,6 +8,9 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.Job
+import java.util.concurrent.atomic.AtomicLong
 
 /**
  * Rev 1.5 §21 — the local voice edge, assembled.
@@ -37,6 +40,7 @@ class VoiceEdge(
         val bundleVersion: String? = null,
         val localTtsRuntimeReady: Boolean = false,
         val localTtsRuntimeError: String? = null,
+        val installing: Boolean = true,
     ) {
         fun ready(capability: VoiceCapability): Boolean =
             capabilities[capability]?.ready == true
@@ -50,6 +54,10 @@ class VoiceEdge(
          */
         val ownerSentences: List<String>
             get() = buildList {
+                if (installing) {
+                    add("I am preparing my offline voice assets")
+                    return@buildList
+                }
                 capabilities.values.filterNot { it.ready }.forEach { add(it.sentence) }
                 if (ready(VoiceCapability.LOCAL_TTS) && !localTtsRuntimeReady) {
                     add(
@@ -62,12 +70,19 @@ class VoiceEdge(
 
     private val audio = context.applicationContext
         .getSystemService(Context.AUDIO_SERVICE) as? AudioManager
-    private val assets = context.applicationContext.assets
 
+    private val assetLoadGeneration = AtomicLong()
     private val _readiness = MutableStateFlow(Readiness())
     val readiness: StateFlow<Readiness> = _readiness.asStateFlow()
 
-    private val speech = SpeechQueue()
+    private var speech = SpeechQueue()
+    var onSpeechFailure: () -> Unit = {}
+    var mayContinueSpeech: (String?) -> Boolean = { true }
+    private var yieldRetry: Job? = null
+    var onSpeechProgress: (SpeechCursors, Boolean) -> Unit = { _, _ -> }
+    private var browserAudioForSpeech = false
+    private var utteranceGeneration = 0L
+    private var activeUtterance: Pair<String, String>? = null
     private var currentDucking: DuckingAction = DuckingAction.NONE
 
     /**
@@ -77,29 +92,27 @@ class VoiceEdge(
      * until the owner supplies one, and it has to come up and say what it cannot do rather
      * than refuse to start.
      */
-    fun loadAssets() {
+    fun loadAssets(runtimeReadiness: () -> Map<VoiceCapability, Boolean> = { emptyMap() }) {
+        val generation = assetLoadGeneration.incrementAndGet()
         scope.launch(Dispatchers.IO) {
-            val manifestJson = runCatching {
-                assets.open(MANIFEST_PATH).bufferedReader().use { it.readText() }
-            }.getOrNull()
-
-            val bundle = manifestJson
-                ?.let { VoiceAssetManifest.parse(it) }
-                ?.let { it as? VoiceManifestVerdict.Accepted }
-                ?.bundle
-
-            val observed = buildMap {
-                bundle?.entries?.forEach { entry ->
-                    runCatching {
-                        assets.open(entry.path).use { stream ->
-                            val bytes = stream.readBytes()
-                            put(entry.path, sha256(bytes) to bytes.size.toLong())
-                        }
-                    }
+            val installed = VoiceAssetInstaller.installedOrNull()
+            val bundle = installed?.bundle
+            // The installer streamed and verified every exact file before atomic publication.
+            val observed = bundle?.entries?.associate { it.path to (it.sha256 to it.sizeBytes) }.orEmpty()
+            val capabilities = VoiceAssetManifest.classifyAll(bundle, observed).toMutableMap()
+            val runtime = runtimeReadiness()
+            for (capability in listOf(VoiceCapability.LOCAL_WAKE, VoiceCapability.LOCAL_ASR,
+                VoiceCapability.CRITICAL_PHRASES, VoiceCapability.LOCAL_SPEAKER)) {
+                if (capabilities[capability]?.ready == true && runtime[capability] != true) {
+                    capabilities[capability] = capabilities.getValue(capability).copy(state = VoiceAssetState.UNUSABLE)
                 }
             }
-
-            val capabilities = VoiceAssetManifest.classifyAll(bundle, observed)
+            // Actual RMS endpointing is built in; a declared but unused neural VAD is never READY.
+            capabilities[VoiceCapability.LOCAL_VAD] = VoiceAssetStatus(
+                VoiceCapability.LOCAL_VAD,
+                if (runtime[VoiceCapability.LOCAL_VAD] == true) VoiceAssetState.READY
+                else VoiceAssetState.NOT_DECLARED,
+            )
             // LOCAL_TTS is not READY merely because files exist. The runtime is prepared and
             // self-tested on this IO dispatcher before the router is allowed to select it.
             val localTtsRuntimeReady =
@@ -108,47 +121,37 @@ class VoiceEdge(
                 } else {
                     false
                 }
+            if (generation != assetLoadGeneration.get()) return@launch
             _readiness.value = Readiness(
                 capabilities = capabilities,
                 bundleVersion = bundle?.bundleVersion,
                 localTtsRuntimeReady = localTtsRuntimeReady,
                 localTtsRuntimeError =
                     if (localTtsRuntimeReady) null else tts.sherpaPreparationError(),
+                installing = installed == null && VoiceAssetInstaller.failure == null,
             )
+            android.util.Log.i("VanVoiceRuntime", "voice readiness: ${_readiness.value}; install=${VoiceAssetInstaller.failure}")
         }
     }
 
     /** Which engines can currently speak, as the router needs to see them. */
-    private fun engines(): Map<TtsEngineKind, TtsEngineReadiness> {
+    private fun engines(text: String? = null): Map<TtsEngineKind, TtsEngineReadiness> {
         val state = _readiness.value
+        val android = tts.androidOfflineReadiness()
         return mapOf(
             TtsEngineKind.SHERPA_ONNX to TtsEngineReadiness(
                 TtsEngineKind.SHERPA_ONNX,
                 installed = state.ready(VoiceCapability.LOCAL_TTS),
-                selfTestPassed = state.localTtsRuntimeReady && tts.sherpaReady(),
+                selfTestPassed = state.localTtsRuntimeReady && tts.sherpaReady() &&
+                    (text == null || tts.sherpaCanSpeak(text)),
             ),
-            // Android's engine is present on every device this build supports. Whether its
-            // *offline* data is there is the question §21.18 is about, and `isSpeaking` is
-            // not an answer to it — this reports what the platform says, and a device run
-            // is what settles it (RB-085).
-            TtsEngineKind.ANDROID_OFFLINE to TtsEngineReadiness(
-                TtsEngineKind.ANDROID_OFFLINE, installed = true,
-                offlineDataVerified = androidOfflineVoiceVerified,
-            ),
+            TtsEngineKind.ANDROID_OFFLINE to android.engineReadiness(),
             TtsEngineKind.CRITICAL_PHRASE_BANK to TtsEngineReadiness(
                 TtsEngineKind.CRITICAL_PHRASE_BANK,
                 installed = state.ready(VoiceCapability.CRITICAL_PHRASES),
             ),
         )
     }
-
-    /**
-     * Set once the platform has reported whether its offline voice data is installed.
-     *
-     * Defaults to false, which is the fail-closed direction: an engine assumed to work
-     * offline and then failing is §21.18's exact complaint.
-     */
-    var androidOfflineVoiceVerified: Boolean = false
 
     /** §21.5 — the acknowledgement, which must not wait for a synthesiser. */
     fun acknowledgeWake(): Boolean {
@@ -179,40 +182,109 @@ class VoiceEdge(
      * answer either way, which is the point of §21.18's fallback chain ending in text.
      */
     fun speak(segment: SpeechSegment, browserAudioPlaying: Boolean): String? {
-        val selection = LocalTtsRouter.select(SpeechKind.ASSISTANT_ANSWER, engines())
-        if (selection is TtsSelection.Silent) return selection.ownerSentence
+        val currentStream = speech.cursors().speechStreamId
+        if (currentStream != null && currentStream != segment.speechStreamId) {
+            tts.onBargeInRequested()
+            speech.bargeIn()
+            activeUtterance = null
+            speech = SpeechQueue()
+        }
+        if (!speech.offer(segment)) return null
+        onSpeechProgress(speech.cursors(), false)
+        browserAudioForSpeech = browserAudioPlaying
+        return playNext()
+    }
+
+    private fun playNext(): String? {
+        if (!mayContinueSpeech(speech.cursors().speechStreamId)) { bargeIn(); return null }
+        val segment = speech.nextForSynthesis() ?: return null
+        val selection = LocalTtsRouter.select(SpeechKind.ASSISTANT_ANSWER, engines(segment.text))
+        if (selection is TtsSelection.Silent) {
+            speech.mark(segment.segmentId, SpeechSegmentState.FAILED)
+            onSpeechProgress(speech.cursors(), true)
+            onSpeechFailure()
+            return selection.ownerSentence
+        }
         selection as TtsSelection.Engine
 
         currentDucking = AudioFocusPolicy.decide(
             vanIsSpeaking = true,
-            browserAudioPlaying = browserAudioPlaying,
-            callInProgress = audio?.mode == AudioManager.MODE_IN_CALL,
+            browserAudioPlaying = browserAudioForSpeech,
+            callInProgress = audio?.mode in setOf(AudioManager.MODE_IN_CALL, AudioManager.MODE_IN_COMMUNICATION),
             otherMediaHasFocus = audio?.isMusicActive == true,
         )
         if (currentDucking == DuckingAction.YIELD) {
             // Something with more right to the audio is using it. Not an error, and not a
             // failure to answer: the segment stays queued.
+            if (yieldRetry?.isActive != true) yieldRetry = scope.launch {
+                delay(500)
+                yieldRetry = null
+                playNext()
+            }
             return null
         }
+        speech.mark(segment.segmentId, SpeechSegmentState.SYNTHESIZING)
+        val utteranceId = "voice-edge-${++utteranceGeneration}"
+        activeUtterance = utteranceId to segment.segmentId
         val started = tts.speak(
             segment.text,
-            utteranceId = segment.segmentId,
+            utteranceId = utteranceId,
             cueTiming = segment.cueTiming,
             engine = selection.kind,
         )
         if (!started) {
+            if (activeUtterance?.first == utteranceId) activeUtterance = null
+            speech.mark(segment.segmentId, SpeechSegmentState.FAILED)
+            onSpeechProgress(speech.cursors(), true)
+            releaseAudio()
+            onSpeechFailure()
             return "I can't answer aloud right now — it's on the screen instead."
         }
-        speech.mark(segment.segmentId, SpeechSegmentState.SPEAKING)
         return null
+    }
+
+    fun onUtteranceStarted(utteranceId: String) {
+        val segmentId = activeUtterance?.takeIf { it.first == utteranceId }?.second ?: return
+        speech.mark(segmentId, SpeechSegmentState.SPEAKING)
+    }
+
+    fun onUtteranceDone(utteranceId: String) {
+        val segmentId = activeUtterance?.takeIf { it.first == utteranceId }?.second ?: return
+        activeUtterance = null
+        speech.mark(segmentId, SpeechSegmentState.SPOKEN)
+        onSpeechProgress(speech.cursors(), false)
+        releaseAudio()
+        playNext()
+    }
+
+    fun onUtteranceFailed(utteranceId: String) {
+        val segmentId = activeUtterance?.takeIf { it.first == utteranceId }?.second ?: return
+        activeUtterance = null
+        speech.mark(segmentId, SpeechSegmentState.FAILED)
+        onSpeechProgress(speech.cursors(), true)
+        onSpeechFailure()
+        releaseAudio()
+    }
+
+    fun onUtteranceInterrupted(utteranceId: String) {
+        if (activeUtterance?.first != utteranceId) return
+        activeUtterance = null
+        speech.bargeIn()
+        onSpeechProgress(speech.cursors(), true)
+        releaseAudio()
     }
 
     /** §21.21 — the owner spoke. Local first, always. */
     fun bargeIn(): Int {
+        yieldRetry?.cancel()
+        yieldRetry = null
+        val interrupted = speech.snapshot().count { it.state in setOf(SpeechSegmentState.RECEIVED,
+            SpeechSegmentState.SYNTHESIZING, SpeechSegmentState.READY, SpeechSegmentState.SPEAKING) }
         for (step in BargeInPolicy.sequence()) {
             when (step) {
                 BargeInStep.STOP_PLAYBACK -> tts.onBargeInRequested()
-                BargeInStep.MARK_SEGMENTS_INTERRUPTED -> return speech.bargeIn()
+                BargeInStep.MARK_SEGMENTS_INTERRUPTED -> { speech.bargeIn(); activeUtterance = null;
+                    onSpeechProgress(speech.cursors(), true); releaseAudio(); return interrupted }
                 else -> Unit
             }
         }
@@ -239,13 +311,17 @@ class VoiceEdge(
         return routing to OfflineCommandClassifier.offlineSentence(routing)
     }
 
+    fun acceptResponse(response: BoundSpeechResponse) {
+        if (response.interrupted) return
+        if (speech.cursors().speechStreamId != response.streamId) {
+            bargeIn()
+            speech = SpeechQueue()
+            speech.restoreHeardPrefix(response.responseId, response.streamId, response.heard)
+        }
+        response.segments.forEach { speak(it, browserAudioPlaying = false) }
+        playNext()
+    }
+
     fun queue(): SpeechQueue = speech
 
-    private fun sha256(bytes: ByteArray): String =
-        java.security.MessageDigest.getInstance("SHA-256").digest(bytes)
-            .joinToString("") { "%02x".format(it) }
-
-    private companion object {
-        const val MANIFEST_PATH = "voice/voice_asset_manifest.json"
-    }
 }

@@ -1,0 +1,219 @@
+{
+  "root": "/workspace/van-acoustic-assets/selected",
+  "runtime": "sherpa-onnx",
+  "runtime_version": "1.13.8",
+  "files": [
+    {
+      "path": "asr/decoder-epoch-30-avg-1.int8.onnx",
+      "size": 540688,
+      "sha256": "2b0580feb757696fa929922670b7126aaee609630349a1809fd5a2aee926d56e"
+    },
+    {
+      "path": "asr/encoder-epoch-30-avg-1.int8.onnx",
+      "size": 72850738,
+      "sha256": "d3eff4b1bd747bd781a47966795988539227d05638524b0313f26d3a166962d7"
+    },
+    {
+      "path": "asr/joiner-epoch-30-avg-1.int8.onnx",
+      "size": 259417,
+      "sha256": "80160e45cca71dd52f6b0a6d3d12be18126f5308b2d4ba03f001300fea377c64"
+    },
+    {
+      "path": "asr/tokens.txt",
+      "size": 5020,
+      "sha256": "0ef7d736bf4de3ef947292e4b119ef13f6808cd5f3aec225a843a7135ac1c2ce"
+    },
+    {
+      "path": "critical_phrases/wake_acknowledgement.wav",
+      "size": 35884,
+      "sha256": "eafd13b589803b7bc404c469b69e3ab1c808defb5c8ed7e8e963b11f7eb6759b"
+    },
+    {
+      "path": "licenses/APACHE-2.0.txt",
+      "size": 11358,
+      "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30"
+    },
+    {
+      "path": "licenses/ASIO-LICENSE.txt",
+      "size": 1338,
+      "sha256": "c9bff75738922193e67fa726fa225535870d2aa1059f91452c411736284ad566"
+    },
+    {
+      "path": "licenses/CC-BY-4.0.txt",
+      "size": 18657,
+      "sha256": "9ba9550ad48438d0836ddab3da480b3b69ffa0aac7b7878b5a0039e7ab429411"
+    },
+    {
+      "path": "licenses/CMU-DICTIONARY-NOTICE.txt",
+      "size": 1754,
+      "sha256": "bd4ce8e44170a5f9f481310ca85c51de3c4f851a65e679b40e603b143bd3542a"
+    },
+    {
+      "path": "licenses/EIGEN-MPL-2.0.txt",
+      "size": 16727,
+      "sha256": "66a3107d5ad6a058aab753eaac2047ccb2ed0e39465dd0fe5844da3e300d5172"
+    },
+    {
+      "path": "licenses/ESPEAK-APACHE-2.0.txt",
+      "size": 11358,
+      "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30"
+    },
+    {
+      "path": "licenses/ESPEAK-BSD2-NOTICE.txt",
+      "size": 1244,
+      "sha256": "a8b0c1c7d7af6c0415c068be8cf373799d1a42b0707b79dc4ccfcaf593cd902d"
+    },
+    {
+      "path": "licenses/ESPEAK-GPL-3.0.txt",
+      "size": 35147,
+      "sha256": "8ceb4b9ee5adedde47b31e975c1d90c73ad27b6b165a1dcd80c7c545eb65b903"
+    },
+    {
+      "path": "licenses/ESPEAK-UNICODE-NOTICE.txt",
+      "size": 2788,
+      "sha256": "be029c50df83105a810e391778b6edcb522d6cb4b4e142332aca54437a499bf7"
+    },
+    {
+      "path": "licenses/HCLUST-LICENSE.txt",
+      "size": 1483,
+      "sha256": "e361d842da1d290351860ad6dcce2673a1e42e4f873a3ae1ff4eb92c6adaa882"
+    },
+    {
+      "path": "licenses/KALDI-DECODER-LICENSE.txt",
+      "size": 11358,
+      "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30"
+    },
+    {
+      "path": "licenses/KALDI-NATIVE-FBANK-LICENSE.txt",
+      "size": 11358,
+      "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30"
+    },
+    {
+      "path": "licenses/KALDIFST-LICENSE.txt",
+      "size": 11728,
+      "sha256": "a682d6efd1ee5dee08a8e405c233c2c198ea70ae0718129daa83ab58cfe31c5d"
+    },
+    {
+      "path": "licenses/KISSFFT-LICENSE.txt",
+      "size": 246,
+      "sha256": "a2840585f8411be8e6826a31ef15ae65c950bd74a2437a73b013398a934ad0c6"
+    },
+    {
+      "path": "licenses/NATIVE-SOURCE-INPUTS.json",
+      "size": 4243,
+      "sha256": "cb920bc8d8138ba503dcafab403665e74a44b577b1808f5473aa9cc56eac1dbc"
+    },
+    {
+      "path": "licenses/NLOHMANN-JSON-LICENSE.txt",
+      "size": 1076,
+      "sha256": "46a65cffd1ea955132d95a8dd921640714a8d6b537d2e4e482d31145ae95b603"
+    },
+    {
+      "path": "licenses/NOTICE.txt",
+      "size": 2444,
+      "sha256": "738669d674344205ca6af0837bce4050b51c612d3938aeb752b96cb9833ace79"
+    },
+    {
+      "path": "licenses/ONNXRUNTIME-MIT.txt",
+      "size": 1073,
+      "sha256": "2f07c72751aed99790b8a4869cf2311df85a860b22ded05fa22803587a48922c"
+    },
+    {
+      "path": "licenses/ONNXRUNTIME-THIRD-PARTY-NOTICES.txt",
+      "size": 325054,
+      "sha256": "0e07b95f3a8d6230037707c5c4a2b554d12c4cb67369669ac255635528ffcee2"
+    },
+    {
+      "path": "licenses/OPENFST-LICENSE.txt",
+      "size": 559,
+      "sha256": "4300529197035fd3452350718a0b8cee984e9412c9932d7f35fcde849fc97a4b"
+    },
+    {
+      "path": "licenses/PIPER-MIT.txt",
+      "size": 1071,
+      "sha256": "13746d509d74e55ea2265fbef204bb7cdbf84a8315b0207e988326cb54387028"
+    },
+    {
+      "path": "licenses/PIPER-UNI-ALGO-NOTICE.txt",
+      "size": 2208,
+      "sha256": "c55648b02873556d6ab2de14938998101fda3a0f293337542af9196435def318"
+    },
+    {
+      "path": "licenses/SIMPLE-SENTENCEPIECE-LICENSE.txt",
+      "size": 11357,
+      "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4"
+    },
+    {
+      "path": "licenses/WEBSOCKETPP-LICENSE.txt",
+      "size": 7494,
+      "sha256": "5ba81a1ed402517dce2581fa2d4042baf6a9c8ca0fe94fa6a7043ce6ab23064f"
+    },
+    {
+      "path": "licenses/WESPEAKER-ATTRIBUTION.txt",
+      "size": 1961,
+      "sha256": "12b3c31733992e9f8aeef4b7de693195d4526b39c969ed7aebfdfea298b3ae1a"
+    },
+    {
+      "path": "licenses/WESPEAKER-CODE-APACHE-2.0.txt",
+      "size": 11357,
+      "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4"
+    },
+    {
+      "path": "speaker/model.onnx",
+      "size": 26534365,
+      "sha256": "5ef208a9da1453335308a6b6f4e6dfbd7e183a38b604de0a57664f45d257fe94"
+    },
+    {
+      "path": "speaker/source.json",
+      "size": 598,
+      "sha256": "6ea05fce40801c4be6cf121240994790d13f4bf7f94582de1b01f3c945426eb8"
+    },
+    {
+      "path": "tts/lexicon.txt",
+      "size": 3708195,
+      "sha256": "ade8c4ee074265004115178813429bf2c066e4321bbb0e7e42ec9db02ddf58ec"
+    },
+    {
+      "path": "tts/tokens.txt",
+      "size": 1084,
+      "sha256": "5fee2c6b238d712287f2ecb08f34a8a8b413bcb7390862ef6fb6fd6f0f8d3a17"
+    },
+    {
+      "path": "tts/vits-ljs.onnx",
+      "size": 114124456,
+      "sha256": "5bbd273797a9ecf8d94bd6ec02ad16cb41cbb85f055ad98d528ced3e44c9b31a"
+    },
+    {
+      "path": "wake/bpe.model",
+      "size": 244837,
+      "sha256": "c8a2a0129c4ab8e463164c142f82d25649661b122c8cd0b7aab5c9e80b90ad24"
+    },
+    {
+      "path": "wake/decoder-epoch-12-avg-2-chunk-16-left-64.onnx",
+      "size": 1063189,
+      "sha256": "f61ebd3eed3773a44d088d53dfae92dbb6aec4839f4dcaee2d402414741663a3"
+    },
+    {
+      "path": "wake/encoder-epoch-12-avg-2-chunk-16-left-64.int8.onnx",
+      "size": 4807159,
+      "sha256": "1e721676515bcd42a186979733981213c66c80db680e1cc582dfedf3be76e678"
+    },
+    {
+      "path": "wake/joiner-epoch-12-avg-2-chunk-16-left-64.int8.onnx",
+      "size": 163380,
+      "sha256": "eae9da0c7e1e6c6a3f4cc42d167899c388f6c6701b94cb96320e4f55df79624c"
+    },
+    {
+      "path": "wake/keywords.txt",
+      "size": 25,
+      "sha256": "ebead6200b36bcb653cd8517cc7050fbdf3a47cd867f3691c37c354fbd7dd1a2"
+    },
+    {
+      "path": "wake/tokens.txt",
+      "size": 5006,
+      "sha256": "fd2ded4050a55d2b1578870ba8697d02371980217806b7558bd0a5cc60f3ba53"
+    }
+  ],
+  "total_selected_bytes": 224850482,
+  "owner_embedding_or_profile_present": false
+}

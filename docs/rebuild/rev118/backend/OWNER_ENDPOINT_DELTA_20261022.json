@@ -1,0 +1,132 @@
+{
+  "status": "CANDIDATE_SOURCE_CONTRACT_NOT_HANDSET_ACCEPTANCE",
+  "owner_unit": "BE-025",
+  "existing_surfaces": [
+    "VNX-S-WORK-05",
+    "VNX-S-WORK-09",
+    "VNX-S-WORK-14",
+    "VNX-S-WORK-15"
+  ],
+  "endpoints": [
+    {
+      "endpoint_id": "VE-bf2780b003b0",
+      "method": "GET",
+      "path": "/v1/browser/tasks/{task_id}/resume-contract",
+      "authentication": "INGRESS_BEARER_AND_PAIRED_DEVICE",
+      "device_proof_required_when_bound": false,
+      "registration": "DEFAULT",
+      "condition": null,
+      "source": "backend/van_gateway/browser/api.py:1388",
+      "summary": "Resume Contract",
+      "tags": [
+        "browser"
+      ],
+      "parameters": [
+        {
+          "name": "task_id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "title": "Task Id"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ResumeContract"
+              }
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "openapi_components": "owner_endpoint_schemas.json",
+      "readiness": "REPOSITORY_DECLARATION_ONLY"
+    }
+  ],
+  "command_action": {
+    "action_id": "browser.task.resume",
+    "path": "/v1/commands",
+    "authority": "FRESH_EXACT_CANONICAL_OWNER_A4",
+    "parameters": [
+      "task_id",
+      "escalation_id",
+      "scope_sha256"
+    ]
+  },
+  "response_schema": {
+    "properties": {
+      "task_id": {
+        "type": "string",
+        "title": "Task Id"
+      },
+      "escalation_id": {
+        "type": "string",
+        "title": "Escalation Id"
+      },
+      "scope_sha256": {
+        "type": "string",
+        "pattern": "^[0-9a-f]{64}$",
+        "title": "Scope Sha256"
+      },
+      "scope": {
+        "additionalProperties": true,
+        "type": "object",
+        "title": "Scope"
+      },
+      "action_id": {
+        "type": "string",
+        "const": "browser.task.resume",
+        "title": "Action Id"
+      },
+      "action_class": {
+        "type": "string",
+        "const": "A4",
+        "title": "Action Class"
+      },
+      "approval_command": {
+        "type": "string",
+        "title": "Approval Command"
+      },
+      "grants_authority": {
+        "type": "boolean",
+        "const": false,
+        "title": "Grants Authority"
+      },
+      "single_use": {
+        "type": "boolean",
+        "const": true,
+        "title": "Single Use"
+      }
+    },
+    "additionalProperties": false,
+    "type": "object",
+    "required": [
+      "task_id",
+      "escalation_id",
+      "scope_sha256",
+      "scope",
+      "action_id",
+      "action_class",
+      "approval_command",
+      "grants_authority",
+      "single_use"
+    ],
+    "title": "ResumeContract"
+  }
+}

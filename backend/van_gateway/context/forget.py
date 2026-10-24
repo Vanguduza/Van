@@ -48,6 +48,7 @@ FORGETTABLE: tuple[ForgettableStore, ...] = (
     ForgettableStore("strategic_memory", None, "long-running context about the owner's direction"),
     ForgettableStore("decision_fingerprints", None, "patterns VAN has noticed in the owner's decisions"),
     ForgettableStore("shared_vocabulary", None, "words VAN has learned the owner's meaning for"),
+    ForgettableStore("cognitive_complement_map", None, "task collaboration patterns and explicit owner preferences"),
     ForgettableStore("intent_edges", None, "how VAN links the owner's intents over time"),
     ForgettableStore("intent_nodes", None, "the owner's intents as VAN recorded them"),
     ForgettableStore("intent_missions", None, "which missions VAN attached to which intent"),
@@ -56,6 +57,25 @@ FORGETTABLE: tuple[ForgettableStore, ...] = (
 #: Named, with the reason, rather than silently omitted. Someone auditing this list should
 #: be able to see that the omission was decided rather than forgotten.
 DELIBERATELY_KEPT: dict[str, str] = {
+    "mission_learning_delivery": (
+        "minimal native mission/stage delivery and strategy observation identities "
+        "prevent lost feedback and duplicate samples after restart. They contain "
+        "identities, outcomes and hashes rather than owner notes or goal text, and "
+        "remain with the original mission. Repair never recreates erased intent or "
+        "decision fingerprints from an old source."
+    ),
+    "intent_observation_source": (
+        "minimal original mission projection receipts in runtime_meta prevent duplicate "
+        "delivery from recreating erased intent. They retain opaque identities, a scope "
+        "hash and the native context revision, without goal text, notes or constraints. "
+        "The learned intent, its edges and mission links remain deletable."
+    ),
+    "chart_workspaces": (
+        "owner-authored chart settings and annotations, rather than inferred owner memory. "
+        "Delete a workspace through its revision-checked chart control to remove its saved "
+        "state and every revision body. Minimal original operation outcomes retain only "
+        "identities, revisions and hashes; they do not retain chart notes or settings."
+    ),
     "audit": (
         "records what VAN did on the owner's authority, not what it concluded about them. "
         "Erasing it would destroy the hash-chained evidence trail that makes every other "
@@ -115,6 +135,7 @@ class OwnerMemory:
                     else:
                         cursor = await db.execute(f"DELETE FROM {entry.table}", ())  # noqa: S608
                     removed[entry.table] = int(cursor.rowcount or 0)
+                await db.execute("DELETE FROM runtime_meta WHERE key GLOB 'owner_memory_declaration:*'")
             except BaseException:
                 await db.rollback()
                 raise
@@ -134,6 +155,7 @@ class OwnerMemory:
                 f"known stores are {sorted(e.table for e in FORGETTABLE)}"
             )
         async with self.store.connection() as db:
+            await db.execute("BEGIN IMMEDIATE")
             if entry.owner_column:
                 cursor = await db.execute(
                     f"DELETE FROM {entry.table} WHERE {entry.owner_column} = ?",  # noqa: S608
@@ -141,6 +163,9 @@ class OwnerMemory:
                 )
             else:
                 cursor = await db.execute(f"DELETE FROM {entry.table}", ())  # noqa: S608
+            if table in {"shared_vocabulary", "cognitive_complement_map"}:
+                kind = "vocabulary" if table == "shared_vocabulary" else "complement"
+                await db.execute("DELETE FROM runtime_meta WHERE key GLOB ?", (f"owner_memory_declaration:{kind}:*",))
             await db.commit()
             return int(cursor.rowcount or 0)
 

@@ -55,7 +55,7 @@ fun CognitionScreen(repo: TradingRepository) {
         item {
             SectionHeader(
                 title = "Trading Cognition",
-                detail = "Fable-led shadow cognition, research and evolution evidence. No control on this page can place or resize a trade.",
+                detail = "Independent cognition, shadow research and evolution evidence. No control on this page can place or resize a trade.",
                 trailing = { TradingRefreshAction { tick += 1 } },
             )
         }
@@ -90,6 +90,9 @@ private fun AuthorityHeader(model: CognitionSnapshot) {
                 StatusChip(label = "LIVE ADVISORY ${model.liveAdvisory}", role = StatusSemantics.ROLE_EVENT_RISK)
                 StatusChip(label = "LIVE ${model.liveStatus}", role = StatusSemantics.ROLE_DISABLED)
             }
+            Text("Pre-risk cognitive evidence: ${model.cognitiveRecords} records", style = tokens.type.body, color = tokens.color.textSecondary)
+            Text("Meta live analyst: ${model.metaT2State} · Paid Meta: ${model.paidMetaState}", style = tokens.type.body, color = tokens.color.textSecondary)
+            Text("Analysis requests VATI evaluation. VATI alone creates candidates; Risk Authority owns size.", style = tokens.type.body, color = tokens.color.textSecondary)
             Text(
                 if (model.ledgerAvailable) "Ledger evidence connected" else "Trading cognition ledger unavailable",
                 style = tokens.type.body,

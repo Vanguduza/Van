@@ -1,0 +1,19 @@
+{
+  "recorded_at_utc": "2026-10-07T11:14:54.874004+00:00",
+  "status": "PASSED",
+  "kind": "OFFLINE_FRONTEND_REGISTRY_RENDER_AND_INTERACTION",
+  "counts": {
+    "features": 42,
+    "screens": 68,
+    "endpoints": 285
+  },
+  "html_sha256": "2b30d72578f244abefd141de83cb5a6c24fbe4363be615b7151e7427d60e5b7e",
+  "checks": [
+    "three registry tabs",
+    "current/baseline coverage filtering",
+    "search including no matches",
+    "endpoint authority details"
+  ],
+  "page_errors": [],
+  "handset_screen_acceptance": false
+}

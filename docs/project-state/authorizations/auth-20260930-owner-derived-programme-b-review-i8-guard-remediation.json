@@ -1,0 +1,68 @@
+{
+  "schema_version": 1,
+  "authorization_id": "auth-20260930-owner-derived-programme-b-review-i8-guard-remediation",
+  "project": "van",
+  "authority": "OWNER_DERIVED",
+  "owner_instruction_sha256": "1fc63b2f9355a9c8534003a65e0bd8550288092795b4d07d2dcb2dec371107b0",
+  "owner_instruction_digest_input": "UTF-8 bytes of the verbatim selected answer label \"Network-effect guard (Recommended)\", no quotes, no trailing newline",
+  "owner_instruction_record": "docs/decisions/OWNER-DECISION-20260930-NETWORK-EFFECT-GUARD.md",
+  "owner_instruction_excerpt": "Network-effect guard (Recommended)",
+  "additional_owner_answers": {
+    "beacons": {
+      "label": "Block silently, continue (Recommended)",
+      "sha256": "64b65ff7f660819d6f5bcf153cc8eb6362f38ef7d0f02752bea00ada8b9d7158"
+    },
+    "ledger": {
+      "label": "Yes to owner derived treatment and  enforce van's ledger",
+      "sha256": "1fb51f92482bc51e4c6d7fc1ef508b3070a56c0d024dd773927367162ce72dfb"
+    }
+  },
+  "source": {
+    "kind": "owner_session_instruction",
+    "channel": "claude_code",
+    "request_id": "claude-code-session_01ELKqm4GCPmPvF3ggKkgB1J-20260930",
+    "owner_attested": true,
+    "device_signature_claimed": false,
+    "cryptographic_signature_claimed": false,
+    "signed_ingress_claimed": false
+  },
+  "signature_note": "Derived authority; no signature claimed. Review I8 reproduced that the network-effect guard the owner chose ('A blocked request goes to you') switched itself off when the renderer was busy for 20 s, letting a handler-driven POST reach the server, and that callers (/assignments, /leases/release, /complete, the watch runner, the notebook) discarded a late block instead of handing it to the owner. Breaking the lease when the guard is lost and routing every late block to the owner are necessary consequences of that choice; background-write handling keeps the owner's 'Block silently, continue' answer. The CI README ruleset note follows 'enforce van's ledger'. The owner did not review these diffs.",
+  "purpose": "Authorize unit G15's review-I8 remediation of the network guard (MAJOR-1: a lost guard breaks and freezes the lease and revokes egress) and of lease-release callers (MAJOR-2: late network blocks go to the owner), its tests and test-kit isolation, and the CI README ruleset note.",
+  "authorized_paths": [
+    "backend/tests/cdp_harness_kit.py",
+    "backend/tests/test_browser_guard_lost_regression.py",
+    "backend/tests/test_browser_late_block_callers.py",
+    "backend/tests/test_browser_review_i3.py",
+    "backend/van_gateway/browser/api.py",
+    "backend/van_gateway/browser/service.py",
+    "backend/van_gateway/goals/watch_runner.py",
+    "backend/van_gateway/knowledge/notebook.py",
+    "deploy/van-browser-core/browser/harness_service.py",
+    "tools/ci/README.md"
+  ],
+  "commit_scope": {
+    "commits": [
+      "819a7aa95dab9d3b1bef8ca2a6ef1307ba01423e",
+      "d6b72fbdb8aec448f8fd1c672a44ac6aa1c61992",
+      "6fbbb1d7b3137a9ed71b758e604faeb245c4bd2c",
+      "02d12292ecdcbb4795d02d2bb49e105e08398b24"
+    ]
+  },
+  "limits": [
+    "Covers only the listed paths in the listed commits.",
+    "May not redefine product, money, security or owner-control intent.",
+    "Opens no production gate; not reusable."
+  ],
+  "issued_at_utc": "2026-09-30T00:00:00Z",
+  "recorded_by": "integrator (session_01ELKqm4GCPmPvF3ggKkgB1J)",
+  "material_scope_expansion": false,
+  "feature_removal": false,
+  "business_model_change": false,
+  "security_authority_change": false,
+  "owner_control_boundary_change": false,
+  "legal_position_change": false,
+  "money_or_custody_model_change": false,
+  "locked_provider_change": false,
+  "reusable": false,
+  "revoked": false
+}

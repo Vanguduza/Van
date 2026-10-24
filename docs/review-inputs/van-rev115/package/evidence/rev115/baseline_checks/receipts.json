@@ -1,0 +1,100 @@
+{
+  "scope": "DOCUMENTARY_CHECKS_ONLY",
+  "application_tests_executed": 0,
+  "financial_experiments_executed": 0,
+  "commands": [
+    {
+      "id": "render",
+      "command": [
+        "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3",
+        "-B",
+        "plan/render_plan.py",
+        "--check"
+      ],
+      "exit_code": 0,
+      "seconds": 0.047,
+      "stdout_sha256": "0ec4f6bf704d3e7909f93ce436b19036a7174eae77a85b4a9d5bb9f39b10e92b",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "id": "core",
+      "command": [
+        "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3",
+        "-B",
+        "verification/verify_rev114.py",
+        "--json"
+      ],
+      "exit_code": 0,
+      "seconds": 0.415,
+      "stdout_sha256": "4435dad2d9006c3b8741b6e7beefb46fd4707e48be7fef49970f3dbdd993a832",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "id": "adversarial",
+      "command": [
+        "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3",
+        "-B",
+        "verification/verify_rev114.py",
+        "--selftest",
+        "--json"
+      ],
+      "exit_code": 0,
+      "seconds": 3.033,
+      "stdout_sha256": "b2bc0a57bb2524c2edb1db948101dee4c27a07c0d9c0807f3765e33e697e72d3",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "id": "package",
+      "command": [
+        "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3",
+        "-B",
+        "verification/verify_rev114.py",
+        "--check-package",
+        "--json"
+      ],
+      "exit_code": 0,
+      "seconds": 0.117,
+      "stdout_sha256": "3f2bb75642bf7b270c8dc3db217ff9b07a55cbc0862803999fffb0cb8904795f",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "id": "news",
+      "command": [
+        "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3",
+        "-B",
+        "verification/verify_news_readiness.py",
+        "--selftest"
+      ],
+      "exit_code": 0,
+      "seconds": 0.026,
+      "stdout_sha256": "6703ac7be53a613d04b1447769a006b08d1c133ae5b79cca35a539078a08266a",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "id": "forecast",
+      "command": [
+        "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3",
+        "-B",
+        "verification/verify_forecast_contracts.py",
+        "--selftest"
+      ],
+      "exit_code": 0,
+      "seconds": 0.201,
+      "stdout_sha256": "e8873fc9604715833c7671d1385c99b764d848c0c4939acb868868f5fe48cf99",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "id": "high_value",
+      "command": [
+        "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3",
+        "-B",
+        "verification/verify_hva_contracts.py",
+        "--selftest"
+      ],
+      "exit_code": 0,
+      "seconds": 0.151,
+      "stdout_sha256": "750d9a11dd3e6e21f94ca7b2a9521547baf65defa9595e68c73f2ea3ac106794",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ]
+}

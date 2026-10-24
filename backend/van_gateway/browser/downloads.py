@@ -169,9 +169,10 @@ def owner_actions(state: DownloadState, *, dangerous: bool) -> list[OwnerAction]
     A quarantined file is offered fewer, and the ones it loses are the ones that would put
     it somewhere it could run or be opened by something else: `OPEN_IN_VAN` and
     `SEND_TO_PHONE`. `ANALYSE` stays, because looking at a file is the whole point of
-    having quarantined it, and `DELETE` always stays.
+    having quarantined it. Record removal is offered only in states whose transition
+    table permits it; an in-progress transfer cannot be cancelled by this broker.
     """
-    if state is DownloadState.DELETED:
+    if state in {DownloadState.CREATED, DownloadState.IN_PROGRESS, DownloadState.DELETED}:
         return []
     if not state.owner_may_act:
         return [OwnerAction.DELETE]
@@ -289,6 +290,10 @@ class DownloadBroker:
         declared `text/plain` for an ELF binary is not a server to take a hint from.
         """
         now = int(time.time() * 1000) if now_ms is None else now_ms
+        if not isinstance(byte_size, int) or isinstance(byte_size, bool) or byte_size < 0:
+            raise DownloadError("download_byte_size_invalid")
+        if not isinstance(content_sha256, str) or re.fullmatch(r"[0-9a-fA-F]{64}", content_sha256) is None:
+            raise DownloadError("download_content_hash_invalid")
         row = await self._row(download_id)
         current = DownloadState(row["state"])
         if current is not DownloadState.IN_PROGRESS:
@@ -311,7 +316,7 @@ class DownloadBroker:
              WHERE download_id = ?
             """,
             (
-                target.value, byte_size, content_sha256,
+                target.value, byte_size, content_sha256.lower(),
                 observed_mime or row["mime_type"],
                 verdict.reason or row["failure_reason"], now, download_id,
             ),

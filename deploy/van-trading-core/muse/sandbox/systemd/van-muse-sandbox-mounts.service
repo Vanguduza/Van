@@ -1,0 +1,17 @@
+[Unit]
+Description=VAN Muse bounded persistent filesystems
+After=local-fs.target
+Before=van-muse-sandbox.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+EnvironmentFile=/etc/van-muse-sandbox.env
+ExecStart=/usr/local/sbin/van-muse-sandbox-mounts
+ExecStop=/bin/umount ${MUSE_SANDBOX_DOWNLOAD_DIR}
+ExecStop=/bin/umount ${MUSE_SANDBOX_PROFILE_DIR}
+TimeoutStartSec=90
+TimeoutStopSec=30
+
+[Install]
+WantedBy=multi-user.target

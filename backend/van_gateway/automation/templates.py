@@ -366,8 +366,8 @@ EVENT_FILTER_EMIT = WorkflowTemplate(
             "primitive": "VAN_EVENT",
             "operation": "emit_external_event",
             "input_bindings": {"payload": "$accepted", "event_type": "{{event_type}}"},
-            "effects": ["WRITE"],
-            "action_class": "A2",
+            "effects": ["NOTIFY"],
+            "action_class": "A3",
             "timeout_ms": 10_000,
             "retry_class": "IDEMPOTENT_WITH_KEY",
             "max_attempts": 2,
@@ -388,7 +388,7 @@ FETCH_MAP_VERIFY = WorkflowTemplate(
         TemplateHole("resource_label", "what is being read"),
         TemplateHole("source_domain", "admitted domain"),
         TemplateHole("source_path", "path to read"),
-        TemplateHole("credential_alias", "connector:// alias", required=False),
+        TemplateHole("credential_alias", "connector:// alias", required=False, default=""),
     ),
     steps=(
         {

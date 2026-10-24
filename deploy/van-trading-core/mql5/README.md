@@ -27,3 +27,11 @@ flattens an entry whose stop the server did not confirm.
   not for scalping, which the Risk Authority already gates on cost.
 - Signature-only trust on this seam (no client certificate): keep the signing key in the EA inputs on the VPS and
   rotate it from the app if the VPS is ever shared.
+
+## Physical account binding
+
+Production factory connections require the registered numeric login, exact server, account currency and demo/live identity. The EA reports these on every signed poll. The registered poll provider rechecks identity, key and entry permission under the same locks as account writers before claiming queued commands. An undelivered command with a changed identity or disabled entry profile is refused with zero effect; a previously taken command retains its uncertainty.
+
+Bound commands have 17 pipe-separated fields: the original 12 fields, explicit order type, numeric login, UTF-8 hex server name, UTF-8 hex currency and a boolean demo label. The EA checks the current native account against these fields before every operation. The order type comes from its explicit field. Server names containing Unicode or pipe characters remain unambiguous. Historical original-result reads do not supply a fresh account or position snapshot.
+
+Update core and EA together; an older EA without native identity fields cannot satisfy production admission. Native MetaEditor compilation and terminal acceptance are still required for this source change. Native monetary finality, precision, full deadline/epoch enforcement and the other original execution requirements remain separate obligations.

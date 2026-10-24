@@ -6,8 +6,6 @@ import android.util.Base64
 import android.util.Log
 import com.dial.van.VanApplication
 import com.dial.van.connectivity.ProvisioningVerdict
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import org.json.JSONObject
 
 /**
@@ -51,27 +49,14 @@ class ProvisioningActivity : Activity() {
             return
         }
 
-        when (val verdict = app.provisioning.verify(envelope)) {
+        when (val verdict = app.provisioning.stage(envelope)) {
             is ProvisioningVerdict.Refused -> finishWith(verdict.reason)
             is ProvisioningVerdict.Accepted -> {
                 // Launched on the application scope rather than this activity's: the
                 // activity finishes at once, and a provisioning run cancelled halfway
                 // would leave a device paired and unbound — the §0D.3 state where working
                 // tokens sit on a phone with no hardware identity.
-                app.appScope.launch(Dispatchers.IO) {
-                    val result = runCatching {
-                        app.gatewayClient.provisionThisDevice(verdict.payload)
-                    }
-                    if (result.isSuccess) {
-                        // Recorded only now. Marking it used before the network step
-                        // would make a payload that failed to reach the Gateway
-                        // permanently unusable on a phone that never enrolled.
-                        app.provisioning.consume(verdict.payload.provisioningId)
-                        Log.i(TAG, "provisioned ${verdict.payload.loggableFields}")
-                    } else {
-                        Log.w(TAG, "provisioning_failed: ${result.exceptionOrNull()?.message}")
-                    }
-                }
+                app.startVanSession()
                 finishWith("accepted")
             }
         }

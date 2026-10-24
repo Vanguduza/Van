@@ -15,7 +15,7 @@ class TimeParseError(ValueError):
     pass
 
 
-def parse_due_expression(expr: str, *, now: datetime | None = None) -> int:
+def _parse_due_expression(expr: str, *, now: datetime | None = None) -> int:
     """Parse relative/absolute owner phrases into unix seconds. Fail closed on ambiguity."""
     now = now or datetime.now(timezone.utc)
     if now.tzinfo is None:
@@ -36,7 +36,7 @@ def parse_due_expression(expr: str, *, now: datetime | None = None) -> int:
             delta = timedelta(hours=n)
         else:
             delta = timedelta(days=n)
-        return int((now + delta).timestamp())
+        return int(now.timestamp()) + int(delta.total_seconds())
 
     m = TOMORROW_RE.match(text)
     if m:
@@ -49,7 +49,7 @@ def parse_due_expression(expr: str, *, now: datetime | None = None) -> int:
             target = target.replace(hour=hour, minute=minute)
         else:
             target = target.replace(hour=9, minute=0)
-        return int(target.timestamp())
+        return _wall_timestamp(target)
 
     m = AT_RE.match(text)
     if m:
@@ -58,16 +58,50 @@ def parse_due_expression(expr: str, *, now: datetime | None = None) -> int:
         target = now.replace(hour=hour, minute=minute, second=0, microsecond=0)
         if target <= now:
             target = target + timedelta(days=1)
-        return int(target.timestamp())
+        return _wall_timestamp(target)
 
     raise TimeParseError(f"unrecognized_time_expression:{expr}")
 
 
 def _to_24h(hour: int, ampm: str) -> int:
-    if hour < 0 or hour > 23:
+    if hour < 0 or hour > 23 or (ampm and not 1 <= hour <= 12):
         raise TimeParseError("invalid_hour")
     if ampm == "pm" and hour < 12:
         return hour + 12
     if ampm == "am" and hour == 12:
         return 0
     return hour
+
+
+def _wall_timestamp(target: datetime) -> int:
+    # Roundtrip both folds through UTC. A gap has no valid instant; a repeated
+    # wall time has two. Neither is permission to silently choose a reminder.
+    wall = target.replace(tzinfo=None)
+    instants = set()
+    for fold in (0, 1):
+        candidate = target.replace(fold=fold)
+        stamp = candidate.timestamp()
+        if datetime.fromtimestamp(stamp, target.tzinfo).replace(tzinfo=None) == wall:
+            instants.add(int(stamp))
+    if not instants:
+        raise TimeParseError("nonexistent_local_time")
+    if len(instants) != 1:
+        raise TimeParseError("ambiguous_local_time")
+    return instants.pop()
+
+
+def parse_due_expression(expr: str, *, now: datetime | None = None) -> int:
+    """Relative phrases use elapsed time; wall times require a unique instant.
+
+    The existing default remains explicitly UTC. This does not infer the
+    handset's timezone or invent an owner daylight-saving preference.
+    """
+    try:
+        value = _parse_due_expression(expr, now=now)
+        if not 0 <= value <= 253402300799:
+            raise TimeParseError("time_out_of_range")
+        return value
+    except TimeParseError:
+        raise
+    except (ValueError, OverflowError, OSError) as exc:
+        raise TimeParseError("invalid_time_expression") from exc

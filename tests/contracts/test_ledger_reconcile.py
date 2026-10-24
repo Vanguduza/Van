@@ -192,6 +192,20 @@ def test_it_passes_on_a_ledger_that_is_right():
     assert "still unreached" in result.stdout
 
 
+def test_non_reachability_classes_are_not_judged_as_unreachability_claims():
+    # A live symbol and an entry without symbols distinguish the ignored class
+    # from both STALE and unverifiable. A clean real ledger cannot prove that.
+    result = _run_on({"components": [
+        _entry(component="AlreadyLive", maturity_class="CALLED_UNTESTED",
+               reachability_symbols=["MissionService"]),
+        _entry(component="NotAReachabilityClaim", maturity_class="CALLED_UNTESTED"),
+    ]}, "--strict")
+    assert result.returncode == 0, result.stdout + result.stderr
+    assert "0 unreached claims confirmed" in result.stdout
+    assert "STALE" not in result.stdout
+    assert "unverifiable" not in result.stdout
+
+
 def test_an_entry_with_no_symbols_is_never_counted_as_verified():
     """Silence is not agreement. An unverifiable entry reported as confirmed would make the
     summary count it among the things that were checked."""
@@ -259,10 +273,13 @@ def test_the_ci_tools_depend_on_no_binary_the_runner_may_not_have():
 
     `git` is exempt: `install_github_workflow.py` is a developer command that commits and
     pushes, and a git-less environment is not one where it has anything to do.
+    `project_truth_ledger.py` is exempt for the same binary: it verifies commits, so it walks
+    git history, and the CI job that runs it checks out with git at fetch-depth 0 first. It
+    runs nothing but git.
     """
     import ast
 
-    exempt = {"install_github_workflow.py"}
+    exempt = {"install_github_workflow.py", "project_truth_ledger.py"}
     offenders = []
     for tool in sorted((ROOT / "tools" / "ci").glob("*.py")):
         if tool.name in exempt:

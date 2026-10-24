@@ -1,0 +1,29 @@
+{
+  "schema_version": 1,
+  "authorization_id": "auth-20261021-owner-consolidation-asr-requalification",
+  "project": "van",
+  "authority": "OWNER_DERIVED",
+  "owner_instruction_sha256": "d508284fb40d041695230949a04dcc0ba03f30c942519cbf1cc4d24ef9c57d84",
+  "owner_instruction_excerpt": "Perform repository consolidation with all branches evaluated so opus 5.5 will start on a a clean unpolluted repository",
+  "derivation": "Repair a source-consolidation build prerequisite after the official ASR archive was republished on 2026-10-21. Verify publisher digest and all original selected model bytes before updating archive provenance.",
+  "source": {
+    "kind": "owner_session_instruction",
+    "channel": "codex",
+    "owner_attested": true,
+    "device_signature_claimed": false,
+    "cryptographic_signature_claimed": false,
+    "signed_ingress_claimed": false
+  },
+  "issued_at_utc": "2026-10-21T11:05:19.212497+00:00",
+  "branch_scope": "consolidation/opus-clean-rev118-20261021",
+  "authorized_paths": [
+    "android/voice/acquisition-lock.json"
+  ],
+  "reusable": true,
+  "revoked": false,
+  "limitations": [
+    "Only update official ASR archive size/digest provenance after exact selected-model equivalence is proven.",
+    "Do not change any selected model pin, APK manifest pin, voice capability, owner asset, or verification rule.",
+    "No new frontend work, live activation, signing authority or native qualification."
+  ]
+}

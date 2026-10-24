@@ -1,0 +1,20 @@
+{
+  "observed_at": "2026-10-07T09:33:07.998020+00:00",
+  "source": "cloud_environment_environment_status and callable tool metadata",
+  "observations_current": true,
+  "phase": "running",
+  "spec_revision": "2",
+  "network_policy": {
+    "mode": "unrestricted",
+    "state": "unknown"
+  },
+  "credential_bindings": [],
+  "outbound_identities": [],
+  "capabilities": [],
+  "runtime_variable_names": [
+    "ANDROID_HOME",
+    "ANDROID_USER_HOME"
+  ],
+  "global_dial_callable": false,
+  "secret_values_read_or_printed": false
+}

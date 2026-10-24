@@ -4,7 +4,7 @@ from __future__ import annotations
 import json
 from decimal import Decimal
 
-from conftest import mandate_dict
+from conftest import historical_mandate_dict
 from test_backtest_runner_cli import synthetic_bars
 from vati.accounts import Account, AccountRegistry
 from vati.app import account_states, lake_bars, market_state, portfolio, risk_view, trade_detail
@@ -19,7 +19,7 @@ D = Decimal
 def run_session(tmp_path, eurusd, steps=None):
     reg = AccountRegistry(tmp_path / "accounts.json"); reg.add(Account(alias="paper_lab", broker="PAPER", mode="DEMO_TRADER", currency="USD", label="Paper Lab"))
     lake = BarLake(tmp_path / "lake"); bars = synthetic_bars(); lake.write(bars, symbol="EURUSD", timeframe="H1", source="t", provenance="SYNTHETIC")
-    cfg = ServiceConfig(account_alias="paper_lab", symbol="EURUSD", base="EUR", quote="USD", timeframe="H1", contract=contract_to_dict(eurusd), mandate=mandate_dict(venue="paper", mode="DEMO_TRADER", account_alias="paper_lab", allowed_strategies=["FX-TREND-PULLBACK-01", "FX-LONDON-BREAKOUT-01"]),
+    cfg = ServiceConfig(account_alias="paper_lab", symbol="EURUSD", base="EUR", quote="USD", timeframe="H1", contract=contract_to_dict(eurusd), mandate=historical_mandate_dict(venue="paper", mode="DEMO_TRADER", account_alias="paper_lab", allowed_strategies=["FX-TREND-PULLBACK-01", "FX-LONDON-BREAKOUT-01"]),
                         capsules=["FX-TREND-PULLBACK-01", "FX-LONDON-BREAKOUT-01"], registry_path=str(tmp_path / "accounts.json"), ledger=str(tmp_path / "l.sqlite"), lake_root=str(tmp_path / "lake"), heartbeat_path=str(tmp_path / "hb.json"))
     clock = {"now": bars[100].end_ms}
     svc = SessionService(cfg, lake_bar_source(lake, "EURUSD", "H1"), clock=lambda: clock["now"]).build(); svc.start()

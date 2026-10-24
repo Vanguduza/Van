@@ -1,0 +1,431 @@
+{
+  "schema": "van.rebuild.execution-ledger/1",
+  "purpose": "Compact continuation index for the Rev1.18 programme. Subordinate to the package plan; never a second roadmap.",
+  "canonical_inputs": {
+    "package": "docs/review-inputs/van-rev115/package",
+    "package_tree": "ac0226a22a95f51642cfeb37b3709b40f7cacf10",
+    "archive_sha256": "6c7c7c1cb4fbd4748c0d63ceb2add9bd460778b66fb3b2302e16de09ac3a57a8",
+    "blueprint_delivery_commit": "3c3379bd791f7bda7ab66c21bba550d6077ba853",
+    "plan_revision": "1.18",
+    "plan": "plan/DEVELOPMENT_PLAN.json",
+    "effective_tests": "verification/EFFECTIVE_TEST_CONTRACTS_REV118.json",
+    "instructions": [
+      "CLAUDE.md",
+      "CONSOLIDATION_STATE.json",
+      "docs/consolidation/START_HERE.md",
+      "docs/consolidation/OPUS_BUILD_PROMPT.md"
+    ]
+  },
+  "source_baseline": {
+    "branch": "consolidation/opus-clean-rev118-20261021",
+    "commit": "b02075f327ea8180ab6d269eba358cf8c5479878",
+    "working_branch": "ccr-9e07e1af-8mgz1p"
+  },
+  "scope_counts": {
+    "requirements": 324,
+    "acceptance_identities": 1610,
+    "units": 131,
+    "backend_units": 82,
+    "backend_verification_units": 12,
+    "frontend_units": 23,
+    "contexts": 234,
+    "owner_actions": 349,
+    "features": 93,
+    "source_atoms": 171,
+    "truth_atoms": 22,
+    "domain_scenarios": 72
+  },
+  "status_vocabulary": [
+    "NOT_STARTED",
+    "IN_PROGRESS",
+    "SOURCE_IMPLEMENTED",
+    "SOURCE_TESTED",
+    "INTEGRATED",
+    "DEPLOYED",
+    "LIVE_VERIFIED",
+    "QUALIFIED",
+    "OWNER_ACCEPTED",
+    "BLOCKED"
+  ],
+  "units": {
+    "PRE-001": {
+      "packet": "VAN-PKT-001",
+      "binding": {
+        "plan_revision": "1.18",
+        "unit_id": "PRE-001",
+        "scope_digest": "package tree ac0226a2",
+        "source_commit": "b02075f327ea8180ab6d269eba358cf8c5479878"
+      },
+      "status": "EVIDENCE_COMPLETE_EXCEPT_AP001_PENDING_INDEPENDENT_REVIEW",
+      "evidence": [
+        "docs/rebuild/rev118/pre001/STATUS.json",
+        "docs/rebuild/rev118/pre001/DISPOSITIONS.json",
+        "docs/rebuild/rev118/pre001/TEST_EVIDENCE.json"
+      ],
+      "open": {
+        "refs": 0,
+        "overlap": 0,
+        "source_files_unclassified": "0/2131",
+        "trace_findings": 5
+      },
+      "acceptance": {
+        "T-NX-071": "oracle green except AP-001 trace findings; independent verification pending",
+        "T-BF-015": "selftest 15/15; independent verification pending",
+        "T-VAN-CX-002-POS/NEG/REC": "dispositions + induced rejection evidence; independent review pending",
+        "T-HVA-002-POS/NEG/REC": "34 overlap rows resolved with executed tests; independent review pending"
+      },
+      "exit_requires": "all rows dispositioned with evidence, then INDEPENDENT review of the no-loss mapping (not self-issued)"
+    },
+    "PRE-002": {
+      "status": "AUTHOR_WORK_COMPLETE_PENDING_INDEPENDENT_CHALLENGE",
+      "depends": [
+        "PRE-001"
+      ],
+      "evidence": [
+        "docs/rebuild/rev118/pre002/PRE002_STATUS.md",
+        "docs/rebuild/rev118/pre002/OWNER_DECISION_REGISTER.json",
+        "docs/rebuild/rev118/pre002/AP-001/"
+      ]
+    },
+    "PRE-003": {
+      "status": "BLOCKED",
+      "depends": [
+        "PRE-002"
+      ],
+      "blocker": "BLK-001",
+      "submission": "docs/rebuild/rev118/pre003/REVIEW_SUBMISSION.md"
+    },
+    "ALL_BE_BQ_UX_FE_QA_REL": {
+      "status": "IN_PROGRESS",
+      "reason": "Owner directs autonomous candidate source construction; formal unit acceptance remains pending canonical dependencies. See CANDIDATE_SOURCE_PROGRESS.json for all 131 original units; no complete unit claimed."
+    },
+    "BE-003": {
+      "status": "IN_PROGRESS",
+      "candidate_source_only": true,
+      "acceptance": "NOT_ISSUED",
+      "evidence": [
+        "backend/tests/test_gateway_startup_storage.py",
+        "docs/rebuild/rev118/CANDIDATE_SOURCE_PROGRESS.json",
+        "docs/rebuild/rev118/backend/BE-003_009_010_ORIGINAL_ENTRY_RECOVERY.md",
+        "docs/rebuild/rev118/receipts/ORIGINAL_ENTRY_RECOVERY_SOURCE_20261022.json"
+      ]
+    },
+    "BE-006": {
+      "status": "IN_PROGRESS",
+      "candidate_source_only": true,
+      "acceptance": "NOT_ISSUED",
+      "evidence": [
+        "backend/BE-006_NATIVE_FUNDING_OBSERVATIONS.md; backend/FUNDING_OWNER_READ_CONTRACT.md; receipts/NATIVE_FUNDING_OBSERVATIONS_SOURCE_20261024.json",
+        "backend/BE-006_NATIVE_BALANCE_RECONCILIATION.md; receipts/NATIVE_BALANCE_RECONCILIATION_SOURCE_20261024.json",
+        "backend/BE-006_NATIVE_FUNDING_RISK_FENCE.md; receipts/NATIVE_FUNDING_RISK_FENCE_SOURCE_20261024.json"
+      ]
+    }
+  },
+  "blockers": [
+    {
+      "id": "BLK-001",
+      "what": "PRE-003 F15: DDS predevelopment-forensic-gate.mjs on the DIAL control host over the registered 'van' project pack (fingerprinted certificate, not a signature) plus owner scope-lock signature (OQ-05) and independent reviewer populating pack evidence",
+      "blocks": "Formal PRE-003-dependent unit acceptance, integration and activation; candidate source development continues under the owner autonomous-build instruction.",
+      "needed_from": "owner + trusted independent verifier via native DIAL",
+      "not_substitutable": "pack checker, generated PASS or this agent"
+    },
+    {
+      "id": "BLK-002",
+      "what": "Trusted-base Project Truth bootstrap absent on main (PR #94); PR #104 ledger job fails before judging",
+      "blocks": "main admission of any branch",
+      "needed_from": "owner/code-owner adoption through PR #94 policy"
+    },
+    {
+      "id": "BLK-003",
+      "what": "Current cloud catalog has no DIAL/Commander/Artemis tools or native binding. Local Android SDK has no emulator or KVM.",
+      "blocks": "native identity readback, device evidence, S24 acceptance",
+      "needed_from": "Admitted native control-host entrypoint for registry, root signer/reviewer and handset operations"
+    },
+    {
+      "id": "BLK-004",
+      "what": "18 actual owner decisions / 49 requirement dependencies after semantic review; source values and activation permissions remain distinct",
+      "blocks": "those units' START even after F15",
+      "needed_from": "Concrete decisions in pre002/challenge/review/DECISION_REGISTER.json"
+    },
+    {
+      "id": "BLK-005",
+      "what": "Native UUID/slug mapping unverified, not an observed identity mismatch. Certifier compares native registry identity with native pack identity, not package UUID directly.",
+      "blocks": "F15",
+      "needed_from": "Read-only native registry/pack readback"
+    },
+    {
+      "id": "BLK-006",
+      "what": "Latest source CI39736489867 passes Android emulator/build/lint, all374mutation identities, Character Forge core and rebuild. Only DDS private read credential and trusted-main bootstrap fail. Neither gate is waived.",
+      "blocks": "Complete CI and trusted-base admission",
+      "needed_from": "DDS-only CI credential provisioning and documented trusted-base bootstrap/intake"
+    },
+    {
+      "id": "BLK-007",
+      "what": "AP-001 and AP-002 are verified proposals, not admitted. Original delivery remains unchanged.",
+      "blocks": "PRE-001/002 exit and PRE-003 submission admission",
+      "needed_from": "Owner/eligible independent amendment review through the documented procedure"
+    }
+  ],
+  "amendment_proposals": [
+    {
+      "id": "AP-001",
+      "finding": "Units BQ-003, BQ-004, QA-002, QA-003, REL-002 own zero acceptance identities (plan acceptance_test_ids empty; effective registry has no test with these units). The package's verify_review_contracts.py 79/79 does not detect it.",
+      "evidence": "docs/rebuild/rev118/pre002/AP-001/",
+      "proposal": "Bind explicit POS/NEG/REC acceptance identities to each unit (or record that each aggregates named existing IDs) through an admitted amendment; package left unchanged",
+      "status": "PROPOSED_NOT_ADMITTED",
+      "verifier": "tools/rebuild/ap001.py (13/13 selftest)"
+    }
+  ],
+  "delegation": {
+    "model_routing_available": "No delegation used in Codex continuation; complex work performed by lead",
+    "delegated_packets": [],
+    "note": "Opus unavailable; owner transferred build to Codex. No independent reviewer identity is inferred from another model or session."
+  },
+  "checkpoint": {
+    "updated_utc": "2026-10-24T11:44:12.362788+00:00",
+    "branch": "ccr-9e07e1af-8mgz1p",
+    "base": "b02075f327ea8180ab6d269eba358cf8c5479878",
+    "background_jobs": [],
+    "last_validation": [
+      "Project Truth verify at 1cab6b2f: GREEN, 533 commits, exit 0 (receipts/PROJECT_TRUTH_VERIFY_1cab6b2f.json; covers that range only)",
+      "pre001.py check/selftest 20/20; ap001.py check/selftest 13/13; pre002_dossiers check/selftest 11/11; neg/truth/decision review checks 0",
+      "AP-001 candidate: 10/10 package checks on an amended copy; ap001_candidate.py 30/30, digest 8eb76af5\u2026; four induced defects caught",
+      "pytest tests/rebuild: 11 passed; consolidation verify.py zero findings; package unchanged vs 3c3379bd",
+      "CI: Artemis 136/136 with pinned sibling (2 passed/134 errors without); test_ci_dds_contract_pin 7 tests, induced failures caught; services 198/198 in stream venv",
+      "Local backend job: all steps run; non-passes classified in ci/BACKEND_JOB_LOCAL.json",
+      "ICU regex patch: JVM harness 1,273/1,273 on patched tree; ICU test fails before, passes after",
+      "2026-10-22: 1273 JVM / 195 app unit tests passed; debug + instrumentation APKs assembled; lint 0 Error/Fatal, 80 warnings.",
+      "All 90 forecast requirement and 48 packet source hashes reproduced; original digests unchanged.",
+      "AP-002 standalone 1618 and cumulative 1632: ten documentary checks each; thirteen preservation regressions passed.",
+      "Isolated rebuild suite: 31 passed; focused CI/acquisition/ICU regressions: 14 passed.",
+      "Branch-local ledger: five commits 4fd466de..461186ef GREEN; source consolidation zero findings.",
+      "Hosted run 39710993846 at tested merge b2ed4481 (tree-identical to head 637eaf96): instrumentation 14 passed / 0 failed / 4 core-mode skips; Character Forge core gate PASS; Android build/lint, rebuild-documentary PASS; mutation result invalid (early abort masked by CI). Overall workflow still fails on DDS credential and main trusted-checker prerequisites.",
+      "Mutation controls: 20 focused tests pass; read-only preflight retains 374 cases and reports 36 invalid input findings (32 mutation descriptions), no corpus execution.",
+      "2026-10-22: all 32 retargeted mutation cases assertion-detected (23 Python, 2 browser, 7 JVM); controls passed; source restored and journal absent. Full 374-case corpus pending hosted run 39721114929.",
+      "2026-10-22: 35 focused control/CI/recovery regressions and 52 isolated rebuild regressions pass; complete identity-preserving six-shard CI partition checked; 45-record intake prepared, not admitted.",
+      "Confirmed baseline maintenance: debug cleartext narrowed to exact loopback, main HTTPS-only policy explicit, debug rig privileged; 3 host checks / 195 app units / APK and instrumentation assembly / lint pass. Release manifest processing correctly refuses the missing real deployment profile.",
+      "Confirmed mission-creation race: pre-fix 1 failed / 1 passed; post-fix 53 recovery/contract tests and 46 command API integration tests pass; one created mission/event and unrelated integrity errors preserved.",
+      "C35 and composite C11 follow-up mutants assertion-detected after passing controls. All 374 original identities remain, now 381 edits, partitioned into nine disjoint CI shards.",
+      "Full source run fca473cc: complete 374-case coverage verified from every job log; 371 detections and three survivors (C26 unknown kind, C18 class filter, C15 test-only reporting), preserved in ci/MUTATION_CORPUS_fca473cc.json. All three corrected cases now assertion-detected after passing controls.",
+      "Android fca473cc: 20 collected, 15 pass / 1 legacy deep-link timing assertion failure / 4 core-mode skips. Both new network-policy/real HTTP and debug-rig permission tests pass; all Rive core cases pass. Corrected bounded destination wait compiles.",
+      "Final mission integrity guard: 100 related backend tests pass; recover only the expected source-command unique constraint, never a post-insert learning/event integrity failure.",
+      "Production connection/policy checks: 54 passed; the single opt-in actual AGP production-signing refusal check was then explicitly enabled and passed (55 covered; no production signer/profile installed).",
+      "Python shard controls are no longer repeated on four runners: whole groups are balanced, with 59/58/58/57 cases and eight controls each; CI partition/oracle tests verify every original case and every Python control exactly once.",
+      "Final source c2a27848 / merge 9ae436ab (identical tree 42e4a6b0): all 374 legacy mutations detected, zero survivors, all original identities observed exactly once; 382 edits. Complete per-case receipt ci/MUTATION_CORPUS_c2a27848.json.",
+      "Final hosted instrumentation: 20 collected, 16 passed / zero failed / four explicit core-mode skips; both actual HTTP/policy tests and both resident Intent deliveries pass; Character Forge core gate PASS. receipts/INSTRUMENTATION_c2a27848.json.",
+      "Final source CI: Android build/lint and isolated rebuild (52 passed) PASS. Overall workflow remains blocked by DDS_CONTRACT_READ_DEPLOY_KEY and missing trusted/tools/ci/project_truth_ledger.py on main; those are not waived.",
+      "Branch-local ledger 4fd466de..c2a27848 GREEN over 15 commits. This is separate from trusted-main admission.",
+      "c36d6a21: backend/contracts 6535 passed / 166 skipped, zero forbidden storage events; 52 rebuild regressions passed. Hosted Android instrumentation16 passed/4 skipped and all374 mutation identities detected. Only DDS private credential and trusted-main bootstrap jobs fail.",
+      "Current candidate feedback source:1599 trading tests passed/2 skipped; contract scale, original approved money risk, unknown settlement and native cold-start replay covered.",
+      "Protective exit/health candidate:1629 trading pass/2skip;52 rebuild pass;30 new regression cases; four actual process-death windows and two ledger writers. All374 mutation anchors retained; full current hosted corpus pending.",
+      "Candidate validation integrity:1663 full trading pass/2skip before two additional passing test-only controls;36 latest integrity tests and88 gateway trading/activation tests pass. Numerical/version checks and CSCV coverage fixed; no market/native qualification issued.",
+      "Real PostgreSQL named-ledger/migration candidate:5 original failures reproduced;1680 full trading pass/1skip before final two test-only controls; latest zero-skip CI selection26/26;18 CI/deployer contract tests pass. Private fixture stopped/removed.",
+      "Current captured-availability source:1691 full trading pass, zero skips, with actual private PostgreSQL and pinned DDS source fixtures;102 learning/recovery,19 cutoff/CI,7 Ubuntu prerequisite controls pass. Hosted9e345 database job26/26 passes; Android acquisition blocked before tests by MicrosoftAPT403, helper fix pending new hosted source run.",
+      "Exact approval binding:1713 full trading pass/zero skips on private PostgreSQL plus pinned DDS;82 focused,22 new source cases;12 real JSON Schema controls pass. Fixture stopped/removed. Hosted e68dd210:374/374 mutation identities,16 instrumentation pass/4 explicit skips,26 PG and1690 public trading pass/one private-source skip; only DDS key and trusted-main jobs fail.",
+      "Account risk recovery:1741 full trading pass/zero skips on private PostgreSQL and pinned DDS,28 new cases;74 focused/one PG case covered in full,41 gateway,154 owner/Artemis-plan contracts pass. All foreign financial-state counterexamples fixed; unknown scope retains protection and owner-visible refusal. Private fixture stopped/removed.",
+      "Speech candidate:1290 JVM/195 app units/48 backend pass;debug and instrumentation APKs assemble;lint0Error/Fatal89warnings. Three affected Kotlin mutants assertion-detected after control, source restored;374 identities retained/383 edits. Two actual offline TTS/owner-turn instrumentation cases compile, awaiting hosted execution; no local emulator/native acceptance claim.",
+      "Bound result/voice foundations:102 backend zero skip,154owner contracts,7generation-preimage controls pass. Hosted7626:374/374mutations/383edits;public PG/trading/48voice pass. Native voice class did not run due non-void JUnit method; explicitUnit and localjavap fix verified, native retry remains required.",
+      "Authenticated speech delivery:155 backend,1302 JVM,195 app,44 owner/CI and78 rebuild pass;APKs/lint0Error/Fatal89warnings.437endpoints/254schemas;all feature/screen/function identities preserved. Delayed-context mutant detected/restored,374 identities retained. Hosted9573:374mutations pass,16 native pass/4core skips/2 voice readiness failures;new independent TTS startup/diagnostics await hosted run.",
+      "Learning/native packet:1754 full trading+one separate new PostgreSQL scope case all pass without skips;129 focused/66 owner-gateway/78 rebuild pass. Account/cohort bypass mutant caught/restored. VITS native diagnostic invalid_voice proved count-zero single-speaker metadata22050/0 from exact pinned weights and SDK11afbd00;1306 JVM/195 app/APKs/lint0Error/Fatal89warnings pass,next native run pending. Prior9599 hosted374mutants/publicPG/trading/117voice pass;16 native pass/4core skips/2real native-preparation failures. Frozen9573 fullbackend/contracts6557pass/166skip,no forbidden storage events.",
+      "Frozen9599 fullbackend/contracts:6571pass/166skip/one literal-shell ABI oracle failure,no forbidden storage events. Corrected oracle:20pass/zero skips including real AGP release-profile refusal;workflow unchanged.",
+      "Restated-learning source:1797 full trading tests pass/zero skips with real private PostgreSQL;27 gateway tests/78 rebuild pass;three new accounting/restatement/transaction mutants caught after seven valid controls,source restored. Existing account/portfolio endpoints expose scoped recorded views. Registry437endpoints/254schemas and original374mutations/383edits retained;fixture stopped/removed. Native2fb3actual18pass/4core skips and6580backend pass retained separately.",
+      "Account persistence:1825 full trading pass/zero skip with real private PostgreSQL;36 focused/46 gateway pass;8 original failures reproduced,4 custom mutants caught/restored after7validcontrols. Original374identities/383edits and437endpoints/254schemas retained;fixture stopped/removed. Safe exposure unlink and native provider identity/OAuth remain required.",
+      "OAuth exact state/broker/device:39gateway/192owner-registry+Artemis-plan/78rebuild pass;3 real pre-fix failures and3 bypass mutants verified,source restored. b1ab hosted39778638488 completes374legacy mutants,26PG/117voice,1796tradingpass+oneprivateDDSskip,18nativepass+4core skips. Separate cognitive-fabric workflow39778638515passes Python andAndroid.",
+      "Stateful OAuth effects:82 audited gateway tests/zero root storage violations,192 owner+Artemis-plan contracts/78rebuild pass.3 replay/result failures+2 cipher transplants reproduced;6 current mutations caught/restored after9controls. Actual child process death, cancellation, atomic faults, owner polling and APPLIED result recovery covered. Typed409/audit preserve UNKNOWN vs REFUSED.",
+      "Frozenb1ab fullbackend/contracts:6584pass166skip7warnings1595.22s;zero storage violations,clean tree. Hostedc4e0/39782539388:all374mutants/383edits,18nativepass4core skips,26PG117voice,1824publictradingpass1privateDDSskip. Native voice bothpass; only actual DDS-key and trusted-main-checker prerequisites fail. No source/unit/provider/handset/release gates bypassed.",
+      "Native account candidate:20 original counterexamples;83focused/82auditedgateway pass;1874fulltrading zero skips with actualPG and DDS,20later test-only controls pass.6currentmutants caught after67controls,source restored,fixture stopped/removed. Original374identities/383edits retained. No entire-unit/provider acceptance.",
+      "Hosted a027/39791051342:374legacy mutants,18nativepass4core skips,26PG117voice,1824publictradingpass1privateDDSskip. VITS bothpass. Actual backendDDS-key and trusted-main-checker failures retained. Tree-identical merge3627d293. Frozena027 broad backend audit ended without a live process,JUnit or exit receipt at93%;INTERRUPTED/UNCONFIRMED,not PASS; start new exact-source audit after commit.",
+      "Current registry entry source:10counterexamples fixed;1909fulltrading/zero skip with realPG/DDS,84focused;3mutants caught after15controls,source restored,fixture stopped/removed. Native protection and exact adapter types retained. Safe exposure unlink/distributed revocation remain original obligations.",
+      "Current resource-bound account source:5originalgatewaycounterexamples fixed;1926fulltrading/zero skip with privatePG/DDS,91auditedgateway and192owner/Artemis-plan pass.7mutants caught after38controls;source restored,private fixture stopped/removed. Native versions and ingress CAS do not issue whole-unit/provider/lease/unlink qualification.",
+      "Frozen79a4fullbackend/contracts:6609pass166skip1failure,1585.10s,zero forbidden storage events,clean tree. Failure is existing all-HTML-escaping check on a static title; current output html.escape(title),4original checks pass. Failure receipt retained,not reclassified as broad PASS.",
+      "Hosted79a4/39823714025 completes374legacy mutants/383edits,18nativepass4core-artworkskips,26PG117voice,1893publictradingpass1privateDDSskip. Both actual VITS methods pass. Tree-identical merge75a357ae. DDS-key/trusted-main bootstrap failures retained. Sourcea2f11642 pushed; its native run39826544689/job119991217074 remains running.",
+      "Native Commander dispatch source:actual blocked event-loop counterexample fixed.1931fulltrading/zero skip with realPG/DDS,26focused pass;5mutants caught after5controls,source restored,private fixture stopped/removed. Reads/halt responsive; bounded native writes preserve ordering/cancellation capacity and dispatch-time authorization; no durable operation claim.",
+      "Frozen4fb7 fullbackend/contracts:6619pass166skip0fail/1589.90s,zero forbidden storage events,clean tree. Existing static-title escaping failure resolved at that exact source; prior79a4failedreceipt retained. Source evidence only.",
+      "Factory account metadata:4original failures fixed;1935fulltrading zero skips with actualPG/DDS,28focused plus1PGopt-in skipped there and covered in full. Private fixture stopped/removed. Configured identity/denomination preserved without inventing provider verification or currency conversion.",
+      "Native account operations:1956fulltrading/zero skips with real privatePG and pinnedDDS;114focused +1PGopt-in (covered in full),202Androidapp JVM/192owner-plan/78rebuild/9wire pass;9source+2Android faults caught after valid controls and source restored. Two actual processes contend on bothSQLite/PG. Original native outcome readback and no secret-history exports; not whole-unit acceptance.",
+      "Hosteda2f11642/39826544689 and4fb7be1e/39829998652:374legacy faults each,18nativepass4core skips and bothVITS methods; source/merge trees verified identical.17f4bada/39835601715:374legacy faults/publicPG26/voice117/trading1930pass1privateDDSskip;native job FAIL/INCOMPLETE after Android12system_server display crash,12reported tests/1failure/1skip;missing methods not passes. Original DDS-key/trusted-main prerequisites retained.",
+      "Single-symbol native authority:4valid constructor/control counterexamples fixed;1968fulltrading zero skips on privatePG/DDS,61focused+3platform/PGopt-ins covered separately/full,78rebuild pass;7actualfaults caught after validPG controls and source restored. Both SQLite and PG native processes arbitrate; genuine strategy reaches final guard under late takeover/halt/stop. Physical identity/safe retirement/startup restoration remain.",
+      "Hosted396e0367/39841068638 completes374legacy faults/383edits;18nativepass4core skips andbothactualVITS cases2.784s/2.216s. PublicPG26/voice117/trading1955pass1privateDDSskip. Tree-identical testedmerge and actualDDSkey/trusted-main failures retained. Prior17f system crash failure retained.",
+      "Frozen886f fullbackend/contracts completed6619pass166skip0fail1747.97s,zero forbidden storage events,clean tree,exit0; receiptSOURCE_QUALIFICATION_886f2aea.json. New frozen396 audit stillrunning.",
+      "Account edit/review candidate:1990fulltrading zero skip privatePG/DDS;51restored focused/203appJVM and APKs/lint0errors/192owner-plan/78rebuild pass. Eight faults caught with passing control and restored source.439endpoints/262schemas preserve all original identities. No native migration, retirement or whole-unit acceptance.",
+      "Hosted45ec/39846328680 actual374legacy faults/383edits;18nativepass4explicitcore skips,real VITS2.384s/2.186s;publicPG26voice117trading1967pass1privateDDSskip. Tree-identical source/merge; actual privateDDS-key/trusted-main bootstrap failures retained.",
+      "Frozen396 fullbackend/contracts completed6628pass166skipzero failure1625.69s;zero forbidden storage events and clean tree. SOURCE_QUALIFICATION_396e0367.json; no skip promoted to pass.",
+      "Paper contract valuation:4valid counterexamples fixed;2001fulltrading zero skips realprivatePG/DDS,7source faults caught after11actualPG controls and restored,78rebuild pass. Both fixtures stopped/removed. Actual single/book/backtest consumers use configured contract account-currency units; no provider/payoff/profit acceptance.",
+      "Native position recovery scope:9valid counterexamples fixed;2017fulltrading zero skip realprivatePG/DDS before final chain-test-only tightening;28restored focus/78rebuild pass. Ten actual faults caught after16controls, source restored/journal absent;privatefixturestopped/removed. Actual account/command uniqueness/current stop replace matching-label adoption; single-symbol startup stillnext.",
+      "Frozen9ea broad audit FAIL:4842pass159skip5failure,stopped after5 at1024.34s;zero forbidden storage events,clean checkout. Five preflight/recovery regressions retained and corrected with43restored gateway/78rebuild/3faults after8controls. New exact-source broad audit required.",
+      "Hosted9ea/39853172032 actual374legacy faults/383edits;18nativepass4core skips,VITS3.189s/2.189s;publicPG26voice117trading1989pass1privateDDSskip;actual source/merge trees equal. Only actual privateDDS-key/trusted-main prerequisite jobs fail. Separate broad9ea failures remain retained.",
+      "Single-symbol startup/source:6initial+2additional counterexample cases fixed;2032fulltrading zero skip realprivatePG/DDS,54restored focused+2PGopt-ins covered in full,78rebuild pass;11actual faults caught after31passing controls and restored. Exact pre-dispatch setup, native entries/protection/thesis/health; unknown contexts cannot manufacture feedback. Registry unchanged439/262; fixture stopped/removed. No provider/finality/unit/handset acceptance.",
+      "Original UNKNOWN native entry retains risk and truthful status; read-only original result recovery, sealed queue claim, scoped producer identity/full-ID join, persistent thesis/cost publication and immediate-partial holds. 2118 full trading pass/zero skip with real privatePG/DDS;78rebuild;17 source faults caught after passing controls and source restored. Cold before-outcome/context preparation, partial progression and provider financial finality remain; no unit admission.",
+      "Frozen 9f4c and4e4a broad audits each6636pass166skip/zero failures,zero forbidden runtime storage and clean checkout; actual hosted4e4a374legacy cases383edits/18nativepass4explicit core-artwork skips, both real VITS methods,public PG26/voice117/trading2089+1privateDDSskip. DDS secret/trusted-main bootstrap failures retained.",
+      "Native outbox batch claim is atomic across independent bridge connections; actual signed HTTP race reproduced twice,23focused native protocol tests pass. Before-commit failure rolls back; lost successful commit remains TAKEN without redelivery. One source fault caught after passing control/restored. Source only, native worker/execution and full programme still required.",
+      "Pre-dispatch v2 context archives exact capsule/thesis and original risk/market facts; cold original-result readback reserves native quantity and restores actual protection/setup/cost without resend. Typed direction, native persisted-thesis lost-reply recovery, legacy zero-fill refusal, malformed setup preservation and actual-fill target-R verified. Final2134trading pass/zero skip realprivatePG/DDS;78rebuild;13faults caught after controls/restored. Owner kill latch is not auto-cleared; source only, original full programme retained.",
+      "Frozen32118b50 actual broad6636pass166skip/zero errors and forbidden runtime storage/clean tree, process exit0. Exact-source hosted39877043007:374legacy faults383edits,18emulatorpass4core-artworkskips, realVITS3.310s/2.594s, PG26voice117publictrading2117pass1privateDDSskip. Testedmerge8cdb81b8 treeequal. DDS key and trusted-main bootstrap failures retained.",
+      "Fresh persisted profile agrees with session permission/final outer fence and preserves native protection; harmless labels remain live, reenabling cannot clear signed halt. Typed sending-mode refusal is explicit zero effect. Signed native rejected/cancelled/expired outcomes no longer masquerade as prior risk approval.2146fulltrading pass0skip privatePG/DDS;78rebuild;8faults caught/restored. Source only; native physical identity and original whole-product obligations retained.",
+      "Actual908frozen backend/contracts audit6637pass165skip0fail1630.05s; zero forbidden runtime storage, clean checkout, actual exit0. Earlier environment-restart interruption preserved. Actual historical DDS39d3777object fetched without working-head change64d6b715; one dependency skip now executed.",
+      "Real-browser source supplement:422distinct passing case IDs across retained initial/followup runs,154previousChromium skips plus1DDS provenance pass. Initial373run372pass1timing-oracle failure, correctedlate20pass andremaining49pass. Runtimebrowserapplication908unchanged; test overlay hash/engine153.0.8010.12/Playwright1.63recorded. Root/namespace/AGP/B1 exclusions remain explicit.",
+      "Hosted908/39880083139 complete:374legacy cases383edits;18nativepass4core-artworkskips,VITS3.264s/2.652s,PG26voice117publictrading2133pass1privateDDSskip. Testedmergea2479719 treeequal; actualDDS-key/trusted-main failures retained.",
+      "Two formerly skipped actual AGP release/signing guard checks executedPASS with preparedGradle8.11.1/JDK21/SDK; missing target and missing signing each refuse directpackageRelease--dry-run. No signing/provisioning or phone qualification.",
+      "Owner device A4 exact-state recovery: three gateway-only native commands, five typed API routes, single-session account/lease/state/current-key/expiry/fact fences, atomic domain effect+original outcome, scoped halt cause release and durable gateway consumption+public dispatch receipt. Native duplicate/lost response/commit ACK/rollback/restart and other-account boundaries verified.2200full source cases pass0skip privatePG;29final typed-transport/approval and78rebuild pass;12meaningful faults caught/restored. New DTO declarations were added after full runtime run and verified separately. No blanket entry authority, new frontend or unit/live acceptance.",
+      "Frozen0ba broad actual-browser+AGP+bothDDS-env audit6793pass9skip2601.45s,6802cases,exit0,zero forbidden storage,clean checkout.154oldChromium and2AGP skips closed; root/nft/setpriv6 andB1closedset3 remain explicit.",
+      "Actual hosted0ba source tree equals merge0f79f6c2cac74f6e178eea2043b481909d6e2e60;374legacy cases caught;18native pass4explicit skips,realVITS2.356/2.061s,PG26voice117publictrading2145pass1DDSskip. Only failures missing DDS read key and trusted-main ledger bootstrap.",
+      "Owner source contract export444endpoints276schemas; existing feature/screen/function identity sets preserved.5recoveryextensions at OF-TRADING-005 / van.trading.halt, Android consumer pending.",
+      "Estimated unsettled profit cannot reset losses/probation in cycle/account/scalar close or cold fold; scalar flat close preserves counts. Explicit settled-profit opt-in, strict native flags/source/environment/net convention/currency, one maturity observation persisted. ActualPaperorder+cashclose positive control remains functional.4actual counterexamples fixed;2183fulltrading pass0skip realprivatePG/DDS;79restoredfocused,78rebuild;8faults caught/restored. Provider finality and learning-health admission remain separate original obligations.",
+      "Current connection repository metadata grants admin but GETVanActionssecret/publickey and DDSdeploykeys each403; no credential changes. Specific Kotlin2dependencyHTTP403 control rerun accepted201 on exacta4commit. Initial hosted345caught/29absent, not full corpus; retry active.",
+      "Owner export444endpoints276schemas remains unchanged;374legacy anchors valid. No source registry identities, frozen package or gates changed.",
+      "Closed private proof IDs/expiry before native journal lookup, including direct dataclass bypass and malformed original reads.10counterexamples inclauthenticated nativeHTTP500 fixed to403/noevent.65restored realprivatePG recovery pass0skip;78rebuild;4faults caught/restored. Valid owner signatures/expiry/replay/atomic outcomes retained; source only.",
+      "Actual hostedA4all374legacy cases caught from same-source original345andrerun29 after MavendependencyHTTP403; originalfailure retained. Native18pass4explicit skips,actualVITS2.709/1.874s,PG26voice117publictrading2162pass1DDSskip. Only retained final CI failures are DDSreadkey andtrustedmainbootstrap.",
+      "Mature native financial facts required for real-cohort health; immutable episodes retain maturity/net convention/broker/thesis basis/original review hash. Explicit historical studies retained.3original failures fixed;2213fulltrading zero skip actual privatePG/DDS,125affected/121restored focus/78rebuild;9faults caught/restored. Paper fixtures honestly DEMO with unchanged weighted minimum; provider finality/cohort identity remain.",
+      "FrozenA4broad6831pass9skip6840cases2621.62s/actual exit0, realprivatePG/browser/AGP, zero forbidden storage/clean checkout. Hosted9ffactual374faults/383edits;native18pass4explicit skips;realVITS2.959/1.899s;PG26voice117publictrading2182pass1privateDDSskip; tested merge94d1e36a treeequal. DDSreadkey/trustedmain failures retained.",
+      "Actual execution/research cohort independent from policy permission: Backtest rejects nonBACKTESThooks twice, Paper services stay simulated, sealed risk cohort drives cold scope and rejects simulatedLIVE/unknown binding.6validbeforefailures fixed; full2228pass1newfixturecleanupfailure retained, correctedactualPGcontrol passes;8faults caught/restored, focused55pass and1PGcase separatelyexecuted,78rebuild. Fresh clean exact-commit full run pending; no unit acceptance.",
+      "Kernel39898232618 actual6pass0skip, testedmerge4296a6cc treeequals169053c9; six fixture/application files identical toA4broad source. Separate productionhost firewall stillunverified.",
+      "Native worker source binds complete configured login/server/currency/demo to actual terminal facts, strict permission/mode/profile, server-aware login cache and serialized alias selection/readback/effect; signed timewindow rechecked afterlogin.5original+1delayeddispatchvalidfailures fixed;2249fulltrading0skip realprivatePG/DDS,45restored/78rebuild;8faults caught/restored. Native terminal/factory/PullEA/epoch/finality gates remain.",
+      "Frozen exactd6 source cleanfull2229pass0skip483.41s, actualdriverexit0. Separate backend/contracts audit continues; fixture cleanup not yet claimed. Hosted169/39898232568 all374mutations/383edits;18nativepass4artworkskips,VITS2.082/1.884s,PG26voice117publictrading2212pass1DDSskip; testedmerge4296a6cc treeequal. Only DDSreadkey andtrustedmainbootstrap failures retained.",
+      "Actual MT5push/pull factories bind physical login/server/currency/demo; signedworkerack and preflight rejectlegacy/foreign workers; independentnonce namespaces fixfresh/concurrent client collisions. Registeredpoll locks freshkey/identity/permission, onlyQUEUEDcanNoEffectrefuse; bound17fieldwire/explicitentrytype/hexidentity andMQLsourceguard, originalhistoricalread separatedfromcurrentstaleguard.2nonce+8factoryfailures fixed;2281fulltrading0skip realPG/DDS,15faults caught/restored,78rebuild. MQLnotnativecompiled; precision/epochs/deadlines/finalityremain.",
+      "Hosted4700/39900846394 complete374legacycases/383edits,native18pass4artworkskips,realVITS2.758/2.516s,PG26voice117publictrading2248pass1DDSskip. Actual source/merge trees equal; DDSreadkey andtrustedmain failures retained.",
+      "Existing Android data layer now wires all five exact native runtime-recovery endpoints, immutable A4 canonical body, strict timestamps/Base64 and durable original public IDs across uncertain responses/restarts.215app unit pass0skip incl12new, debug/instrumentationAPKs assembled, lint0Error/Fatal(91warnings22hints),9faults caught/restored,78rebuild/23owner contracts pass. No new UI; gateway durable dispatch/expired originals/device-key propagation/coordinator controls remain.",
+      "Frozen exactd6 source audit COMPLETE:2229tradingpass0skip,6841backend/contracts pass9explicit skips; zero forbidden storage, clean checkout, privatePGstopped/removed. Separate actual kernel6pass0skip evidence remains bound to equal source files.",
+      "Hosted2d/39903571744 complete374legacy regressions/383edits,native18pass4artworkmode skips,VITS2.383/2.529s,PG26voice117publictrading2280pass1DDSskip. Source/merge trees equal; only DDSreadkey/trustedmain prerequisites fail.",
+      "Durable gateway recovery dispatcher resumes exact consumed A4 receipts without another phone POST or renewed consent; current device/key/signature/metadata, fair bounded cursor, original native readback and durable delivery marker. Native expired-first-delivery signature/atomic absence yields terminal no-effect refusal with null unobserved risk state, never actor authority; previous original outcome always wins.5valid beforefailures fixed;2371fulltrading+recovery pass0skip realprivatePG,97focused+2keycontrols,78rebuild/19owner contracts/8Androidcompatibility pass;11faults caught/restored. Source only; native key propagation/coordinator/retirement remain.",
+      "Hosted882/39907152419 all374legacy faults/383edits,native18pass4artworkmode skips,realVITS3.516/2.488s,PG26voice117publictrading2280pass1DDSskip; actual source/merge trees equal. DDSreadkey/trustedmain prerequisites retained.",
+      "Current source Markdown registry generated from42features/78surfaces/444endpoints/276schemas; complete frozen93feature planned programme distinct. No UI redesign.",
+      "Paired-device revocation atomically persists native work with local device/grant disable; local actions/certs precede native IO. Gateway-only native command durably tombstones the exact P256 key across aliases, rejects stale reenrollment, serializes independent writers, preserves same-key policy labels/PEM equivalence and unrelated keys. Current Commander verification reloads keys without resetting consumed tokens; actor review binds actual native key-file identity. Typed PENDING/APPLIED/UNKNOWN plus readonly original GET under dedicated enrolment scope. Full2511pass0skip before final alias/status hardening,155final affectedpass,17source faults caught/restored,actual two-process race pass;78rebuild/19owner registry checks pass on final source. Fresh committed full qualification next; no whole-unit/live acceptance.",
+      "Frozen exactf3 clean auditedbackend/contracts6875pass9explicit skips6884cases2657.19s;2281tradingpass0skip478.14s; zero forbidden runtime storage, realPG/Chrome/AGP/bothDDS, privatePGstopped/removed/driverexit0. Separate kernel supplement6actualpass0skip bound to identical test/applicationfiles; productionhostfirewall unqualified.",
+      "Hostedf3/39908982147 all374legacy faults383edits,native18pass4artworkmode skips,VITS2.306/1.932s,PG26voice117publictrading2280pass1DDSskip; treeidentical testedmerge. Only DDSreadkey/trustedmain bootstrap prerequisites fail.",
+      "Standing policy admission binds the exact cryptographically verified signer and captured native source; current risk and final submission reject retirement, unreadable source or changed material. Same native key-file lock serializes actual send and revocation ACK. Independent temperament signer, equivalent PEM, explicit archived research, immutable policy/risk wire, real session/book status and retained protective exits covered.2535full trading/recovery pass0skip realprivatePG,78rebuild,7registry tests and unchanged contract derivation;9faults caught/restored. Source only; deferred providers and original gates remain.",
+      "Hostedf35/39915974290 all374legacy faults383edits,native18pass4artworkmode skips,VITS3.038/2.390s,PG26voice117publictrading2294pass1DDSskip; testedmerge treeidentical. DDSreadkey/trusted-main bootstrap failures retained. Kernel39915974384SUCCESS; six-check detailed supplement remains its prior source-bound receipt.",
+      "Actual multi-instrument account actor reuses signed recovery/journal and PostgreSQL atomic effects; state binds opaque current account/lease/specs/contracts identity. Account-scoped owner halts, idle lease renewal, current issuer file guard and decoded PEM equivalence; original unknown/partial/invalid-money commands block recovery and new risk, while genuine zero-effect readback supports fresh approval without resend. Actual pairedgateway->signedCommander->PGactor original replay and realPGrollback/lostACK covered.2560full trading/recovery pass0skip605.59s,269affected,78rebuild,12owner contracts;14faults caught/restored. Source only; original native/provider/release gates remain.",
+      "Frozen exactf35 source broad qualification complete:2295trading pass0skip494s;6906backend/contracts pass9explicit skips6915cases2740.96s. Zero forbidden runtime storage, clean checkout, realPG/Chrome/AGP/bothDDS, actual driverexit0/privatePGstoppedremoved. Source-bound6kernel supplement retained separately.",
+      "Hosted3b/39919882928 all374legacy faults383edits,native18pass4explicitartworkmode skips,VITS3.237/2.442s,PG26voice117publictrading2310pass1DDSskip; testedmerge treeidentical. Only DDSreadkey/trusted-main bootstrap prerequisites fail. Current source registry42features105functions78surfaces445endpoints279schemas;93plannedfeatures remain distinct.",
+      "Disposable Windows native MetaEditor source runner prepared: official SDK link, Authenticode publisher check, actual tool/source fingerprints, fresh logs/EX5, real invalid-source compiler oracle and bounded installer/process cleanup. PowerShell7.5.4 grammar/YAML pass; native compiler execution NOT_RUN until hosted artifact. Original precision/finality/provider/activation gates retained.",
+      "Native MT5 result completes only exact delivered TAKEN command under its authenticated alias; JSON IDs are positive signed64 integers, without bool/fraction/string coercion or overflow. Premature results preserve original unknown work and normal delivery; conflicting later result cannot replace original.4actual beforefailures1positivecontrol fixed;48affected protocols/factory/independentconsumer cases0skip,78rebuild,3faults caught/restored. Source only; no native broker/finality/whole-unit acceptance.",
+      "First actual Windows native SDK attempt verified official bootstrap+Authenticode but could not locate compiler/library, executed0compiler cases and returnedFAIL. Its input SHA matches deterministic Windows CRLF checkout conversion. Preserve actual artifact; correct split executable/data discovery, pin observed bootstrap, capture setup controls/files, disable checkout EOL conversion and require raw sourceblob identity. PowerShell parse passes; new native execution remains pending.",
+      "Hosted exacta1ee/39923342436 all374legacy faults383edits,native18pass4explicitartworkskips,VITS2.862/2.475s,PG26voice117publictrading2334pass1DDSskip;source/merge treeidentical. Account-runtime source included. Only DDSreadkey/trusted-main prerequisites fail; separateWindowsSDKprepare39923342558 failed with0compiler cases, retained.",
+      "Native SDK None/malformed collections are unavailable rather than knownempty; current terminal connection and account/expert/terminal/PythonAPI permissions gate entry. Lost SDK replies after entry/stop/close stayUNKNOWN; partialclosePARTIAL; no invented stop confirmation on unknownclose.14original beforefailures+1positivecontrol, laterunconfirmedstopfieldcounterexample fixed;54finalaffected,2581fulltrading/recovery0skip608.33s realPG/stoppedremoved,78rebuild;10semanticfaults caught/restored. SDKfixtureIO plusactualmTLS/HMAC; no realbroker/wholeunit acceptance.",
+      "NativeWindowsretry39925980276 proves exact rawGitinput and installed MetaEditor executable, but cannotlocatestdlib;0compiler cases, FAIL retained. Bounded signededitor/offlineTerminal data initialization prepared with enforcing program-specificoutboundblock, expertsdisabled andnocredentials; parserPASS, nativeinitialization/notcompiler success remainspending.",
+      "Exactclean8f7backend-only audit COMPLETE6907passed9explicit skips6916cases2747.61s,zero forbiddenruntime storage,actualPG/Chrome/AGP/bothDDS;privatePGstoppedremoved/exit0. Priorfull2560trading/recovery separate sourceboundreceipt, notQAtradingrerun.",
+      "Hosted8d/39925980199 completeall374legacy faults383edits,native18pass4artworkskips,VITS2.389/2.054s,PG26voice117publictrading2340pass1DDSskip;treeidentical. Only originalDDSreadkey/trustedmain failures; separateWindowsSDKprep FAIL retained.",
+      "OBS001 debugcleartext confirmed already closed by fca473cc: basefalse andexactlocalhost/127.0.0.1/::1 only; no newAndroidsource change or newverification claim.",
+      "Native EA exact numeric snapshots, deal-to-position identity, truthful partial/uncertain effects, observed stop protection and original fill retained across emergency close; final native entry guards. Pull consumer preserves null IDs and unconfirmed protection.18original+4entry+3consumer counterexamples fixed;56focused/78rebuild pass,9faults and9controls caught/restored. Full trading/recovery running; new actual MetaEditor compile pending. Source only; native finality/expiry/provider and original gates remain.",
+      "Hosted815/39930454915 all374legacycases383edits, Android18pass4existingartworkskips,VITS3.263/2.563s,PG26voice117publictrading2355pass1DDSskip; testedmerge54eb71c treeequal. Only DDSreadkey/trustedmain bootstrap fail. Separate native MetaEditor39930454950 SUCCESS0errors0warnings/invalid4errors.",
+      "Both MT5 channels preserve distinct native order/deal/position IDs, observed equally-strong stop confirmation and partial/uncertain outcomes. Python worker resolves exact native order-filtered deal to current position identifier; missing readback cannot erase known fill. Pending receipt null no longer crashes consumer. Six invalid-parameter cases refused before SDK; both routes prevent entries over existing/unknown netting exposure/pending orders while allowing first empty-account entry.12original+5netting+6parameter counterexamples fixed;81focused/2635full trading-recovery0skip realPG(cleaned)/78rebuild,11faults+controls caught/restored; initial neutral initializer fault retained and corrected. New EA netting guard native compile pending; no whole-unit/native-provider acceptance.",
+      "Exact625EA native39932985633 compiled0errors0warnings/freshEX5 with invalid4errors/noEX5; tree/log/EX5 fingerprints verified. Local exact6252610fulltrading-recovery0skip completed and PGcleaned; originalMQLreceiptupdated with actual result. Hosted62539932985638 all374legacyfaults/383edits;Android18pass4artworkskips,VITS2.135/2.312s,PG26voice117public2384pass1DDSskip; testedmergeebbc51a3treeequal. Only DDSreadkey/trustedmain fail.",
+      "Local account unlink binds exact resolved review/native funds/history/credential disposition; actual account lease row and submission guard exclude runtime, unresolved effects/exposure/stale facts retain profile. Shared/external credential references preserved, including late ownership drift. Typed gateway approval/native replay and existing Android confirmation wired; MT5 pending-orders and native cTrader/Deriv funding facts refuse missing observations. 2675 full trading/recovery pass0skip realPG(cleaned),91focused/29writer/3actualPG/78rebuild,16faults+controls caught/restored; Android222JVM/2APKs/lint0ErrorFatal. Source only; completed real-provider finality and all original gates remain.",
+      "Exact d88 MetaEditor run39935785223 compiled0errors0warnings/freshEX5; negative4errors/noEX5. Hosted39935785250 all374legacyfaults383edits/native18pass4existingartworkskips/VITS5.291s3.431s/PG26voice117/publictrading2409pass1DDSskip. Source and tested merge trees equal; DDSreadkey/trustedmain bootstrap still fail.",
+      "Mission activity wire preserves dependency/retry/verification contracts; transactional admission refuses invalid/orphan/foreign dependencies and terminal-race work. Owner graph reads one durable snapshot, stable IDs, owner-visible evidence and raw executor outcomes; cycles/orphans/conflicting bindings explicit, no layout authority or invented success/duration.2original failures fixed;157affected/166combined source cases,78rebuild,35owner contracts;10meaningful faults+controls caught/restored including actual concurrent-writer snapshot. Source only; project-wide CRUD/timed scheduling/native provider integration and whole-unit gates remain.",
+      "Reminder request-bound idempotency and actual concurrent create/fire are atomic; cancelled/resolved conflicts explicit, follow-up rollback/project/source preserved. Durable FIRED publication replays same event/attention after lost ACK, preserves original owner ACK and legacy events; server persistence never claims handset delivery. Attention concurrent upsert and persisted source/project corrected. Typed time errors/unique wall instants/elapsed DST arithmetic.12reminder+2attention beforefailures fixed;86focused/252combined pass0skip,78rebuild/35owner contracts;12faults+controls caught/restored, initial nondeterministic survivor retained and oracle corrected with actual independent owner write. Source only, original units/gates remain.",
+      "Encrypted Android original DIAL controls survive restart with original body/key/revision; exact owner-authenticated native action read beyond recent lists, scoped typed acknowledgements, stale/foreign/malformed/uncertain facts retain identity. Distinct protective controls retain native authorization; late observers cannot settle newer work. 163 affected backend,7 typed-read,1326 pure Kotlin,222 app JVM,2 debug APKs,lint zero Error/Fatal;15 faults+15 controls assertion-caught/restored.78 rebuild,29 registry,15 actual-PG/lease pass. Failed broad59 backend/trading executions retained with focused test-only corrections; source candidate, no unit/live certification.",
+      "Hosted exact59d5777e all374 legacyfaults383edits/native18pass4explicitartworkskips/MetaEditor0errors0warnings+invalid4errors/noEX5. Full local frozen59 backend6961pass9skip1old-onboardingtestfail; trading2434pass1lease-testCAS-oraclefail. Both retained; focused corrected expectations pass without relaxing production guards.",
+      "Native cTrader fill/position quantities preserve sub-centilot ratios; equity uses broker net PnL in deposit currency with its own exponent, complete native position identities and cross-read funds fence. Missing/foreign/malformed marks refuse verification; no missing-quote zero.14 original failures+1positive,3 funds-drift failures fixed;44 focused/2454 fulltrading pass0skip actualprivatePG/stoppedremoved,7faults+7controls caught/restored. Actual framed negative native mark exercised. Source only; no settled financial maturity/whole-unit/native/provider acceptance.",
+      "Native cTrader lost entry/close/stop replies/events stayUNKNOWN; close binds actual admission/account/order/position/closing-deal identity. No requested-volume/price substitution or bool/string quantity; partial fills remainexact/PARTIAL. Stop requires native matching readback; unsupported remaining protection staysfalse without discarding actual partialfill.22original failures+2positive controls fixed;54focused/2478fulltrading pass0skip actualPGstoppedremoved;11faults+11controls caught/restored. Source only, not settled financial maturity/whole-unit/provider/native/handset acceptance.",
+      "Exact39807eff hosted39959688518 all374legacy faults383edits;Android18pass4existingartworkskips,VITS5.300/2.311s,PG26voice117publictrading2434pass1DDSskip;merge2cd0316dtreeequal. Only originalDDSreadkey/trustedmainbootstrap fail. Native39959688543 MetaEditor0errors0warnings/freshEX5, invalid4errors/noEX5, receipt retained.",
+      "Original approved memory erasure replays its committed witness/counts read-only instead of deleting later owner facts, replacing proof or bumping revision. Exact-record absence/expired original reads/legacy witness supported under existing sealed scope and active-device checks; malformed/foreign witnesses and revoked devices refuse. New erasure still needs fresh exact approval.2valid initial failures and8of10 integrated baseline failures fixed;79combined+1legacy distinct source cases,78rebuild,29registry pass;5faults+5controls caught/restored, actual signedA4/domaincommit+lostreply/concurrency and independent post-state. Source only, no whole-unit privacy/native/production certification.",
+      "Native MT5 signed transport freshness/physical identity/permissions/connection rechecked after blocking native reads immediatelybeforeSDKentry. A failed private server-side dispatch guard refuseszero effect, preserving original issuedtime; no serializedcallback/host setting.4initialbeforefailures+1positive and5of6integratedbaseline failures fixed;58focused/2484fulltrading pass0skip realPGstoppedremoved;5faults+5controls caught/restored inclfinal native-account-readclock delay. ExistingmTLS/HMAC plusactualSDKfixture. Source only; explicit commanddeadline/leaseepoch/riskbudget envelopes and nativebroker/gates remain.",
+      "Frozen exact39807eff full backend/contracts:6967pass9explicit skips2stale route-contract failures/6978cases2833.39s. Added only existing owner/native original-action GET to expected-route set; exact-surface/GET-only/soleprovedPOST/leak/negative controls retained.20 affected boundary+native API tests pass; failed full run retained, zero observed SQLite/mkdir runtime-store violations, clean tree/privatePGstoppedremoved. Raw-file-write audit limitation stated explicitly.",
+      "Explicit OrderCommand expiry retained in signed MT5 body and checked before RPC/afterreadonlyprecheck/finalnativeSDKboundary. Typedorder_send_expiring fenceslegacy/rollback; strictinteger/missingdeadline refused, None retainsoriginalcontract.15of16beforefailures fixed;74focused/2500fulltrading pass0skip realPGstoppedremoved,79rebuild;7faults+7controls caught/restored. Initialnativeexpiry survivor retained; correctedsecond/sendquote oracle provesfinalnativecheck. RealmTLS/JSON/HMAC withSDKfixture. Storageguard14filesystemprobes and20DIALcontrolspass, limitations explicit. Sourceonly; nativeclock/finality/epoch/riskbudget/whole-unit/provider/production/handset obligations remain.",
+      "Native MT5 replay admission persists bounded nonce/clock metadata withSQLiteFULL/atomicclaim beforeSDK, sharedworkers/processrestarts cannot repeat same signed effect. Defaultbackendpath derives from existing signing profile, no in-memoryfallback. Clockrollback/purge, corrupt/missingclock, storelock/lostcommitACK failclosed; strictheaders/uint128 rollover.2original duplicateSDKeffects and1missing-clock counterexample fixed;91focused/2517fulltrading pass0skip realPGstoppedremoved;8faults+8controls caught/restored inclactualprocessSDKcounter. Nonceclaim is not brokeroutcome or native/whole-unit/production qualification.",
+      "Hosted exactc9dd2a9c/39964015528 all374legacyfaults383edits/native18pass4existingartworkskips/VITS2.335/1.900s/PG26voice117publictrading2477pass1DDSskip;testedmergecce39c4btreeequal. OnlyoriginalDDSreadkey/trustedmainbootstrapfail. Native39964015330 MetaEditor0errors0warnings/freshEX5, invalid4errors/noEX5;actualreceipt retained.",
+      "Atomic owner-watch observation/projection/history/publication intent; strict finite/boolean/text evidence, serialized edges/counters and owner pause. Restart/lost-alert-reply recovery preserves original project and acknowledged attention; monotonic failure versions survive history retention and late publishers. Actual owner.watches scheduler drains pending intent without due browser work; typed server publication result.133 affected cases including actual Chromium guards,2 typed gateway,29 owner contracts,79 rebuild pass without skips;8 fault/control pairs caught and source restored. Source evidence only; no device delivery or unit acceptance.",
+      "Frozen exact2e93ab52 broad run:6980backend/contracts pass9skips;2500trading pass0skip. Actual privatePG, Chromium, Android build dependencies and pinnedDDS; stronger storage audit0forbiddenevents, clean checkout, PGstoppedremoved. Later native nonce source independently2517fulltrading pass0skip; laterwatch source has separate receipt.",
+      "Hosted exact2e93ab52/39969793584 all374legacy cases383edits/native18pass4existingartworkskips/VITS2.811+2.208seconds/publicPG26voice117trading2499pass1DDSskip; onlymissingDDSreadcredential/trustedmainbootstrapfail. Native39969793548 MetaEditor0errors0warnings/freshEX5, invalid4errors/noEX5; kernel39969793563SUCCESS.",
+      "Research lake verifies and parses one captured blob; validates instrument/timeframe/finite market values, duplicates, manifest metadata and conflicting overlaps. Encoded contained partitions and slice paths, legacy twelve-character filename/hash compatibility, existing cross-process state-file lock and flushed atomic manifest replacement. Actual concurrent threads/processes and failed/lost-ACK publication retain original snapshots without duplicate history.11 reproduced failures;22 focused/audited and2539 full trading cases pass0skip with privatePG stopped/removed;8 deliberate fault/control pairs caught/restored. Real public historical probe returnedHTTP429 and stays unqualified. No source-use, provider, native, unit, profitability or handset acceptance.",
+      "Hosted exact7dacc007/39976400482 all374legacy cases383edits/native18pass4existingartworkskips/VITS3.185+2.175seconds/publicPG26voice117trading2516pass1DDSskip. Native39976400533 MetaEditor0errors0warnings/freshEX5, invalid4errors/noEX5; kernel39976400459SUCCESS. OnlyDDSreadcredential and trustedmainbootstrap CI failures remain, not waived.",
+      "Owner goals: atomic create/milestones, patches that preserve concurrent omitted-field edits, coherent goal/list snapshots, parent change timestamps atomic with milestone/link writes, idempotent real existing-mission links without dispatch or mission-state changes, nonblank inputs and strict boolean/price distinction. Typed goal/watch endpoint response schemas refreshed without newUI.13 reproduced failures;41 isolated/108 integrated audited/29 registry/79 rebuild cases pass0skip;11 deliberate fault/control pairs caught/restored. Legacy phantom-positive fixture now creates a real mission. Existing legacy references retained; original-request recovery for allCRUD and whole-unit/native/production/handset acceptance not claimed.",
+      "Hosted exact74fe2ea7/39979120825 all374legacy cases383edits; native18pass4existingartworkskips; source and tested merge trees equal; publicPG26voice117trading2516pass1DDSskip. Native39979120828 MetaEditor0errors0warnings/freshEX5, invalid4errors/noEX5; onlyDDSreadcredential/trustedmainbootstrap CI failures, no gate waiver. Voice method observations: {'cancellationBeforeNativeStartCannotCompleteOrDamageTheReplacementAnswer': 'PASS 2.935s', 'realOfflineAnswerReachesTheApplicationQueueAsSpoken': 'PASS 2.371s'}",
+      "PDF required-field metadata/strict flag types, typed corrupt-page refusals and independent requested-value readback before publication. Actual custom checkbox states and no-op/wrong writer outcomes; false success leaves original document/artifact untouched. Unicode-safe RFC5987 download headers, real PDF binary response and supported variant schema, typed document/field/proposal responses.6 reproduced failures;23 isolated/60 integrated audited/29 registry/79 rebuild pass0skip;7 fault/control pairs caught/restored. Initial reporting-helper failure retained and rerun. No newUI, external submission, physical rendering, unit/native/production/handset qualification;6 publication defects remain next.",
+      "Document publication: fsynced private immutable bytes before one nativeSQLite transaction for document/artifact/minimal commit witness. Rollback/cancellation cleans only new files, never prior versions; lost commit ACK returns captured original despite later writer, unavailable readback remains UNKNOWN withIDs. Canonical cards serialized/owner-scoped/sensitivity-bound. Partial/concurrent edits merge verified current values; nativeoutput readback and fields cache updated; stale proposal/context refused and empty required disclosed. Fullhash version refs and exact published/legacy readback respect expiry/SECRET_REF_ONLY.8initial+1required failures,2candidate policy guards corrected;53 isolated/224 integrated audited/29 registry/79 rebuild pass0skip;17 fault/control pairs caught/restored after initial timing survivor. No external submission, firstHTTPexactly-once, crash-reaper/completeprivacy, unit/native/production/handset claim.",
+      "Completed frozen74fe2ea7:6999backend/contracts pass9skips/7008cases,2517trading pass0skip, actualprivatePG/Chromium/AGP/pinnedDDS, strongerstorageaudit0forbiddenevents, cleancheckout, PGstoppedremoved. This is earlier exactsource, not a blanket qualification of later commits.",
+      "Hosted exact20125954/39982450483 all374legacy383edits/native18pass4existingartworkskips/VITS2.886+2.609s/publicPG26voice117trading2538pass1DDSskip. Native39982450472MetaEditor0errors0warnings/freshEX5, invalid4/noEX5. OnlyDDSreadcredential/trustedmainbootstrap CI failures remain; gates not waived.",
+      "Hosted exact804ffe73/39986003124 all374legacy383edits/native18pass4existingartworkskips/source-mergetrees equal/publicPG26voice117trading2538pass1DDSskip;native39986003602MetaEditor0errors0warningsfreshEX5,invalid4/noEX5.OnlyDDSreadcredential/trustedmainbootstrapfail.Voiceactualmethods {'cancellationBeforeNativeStartCannotCompleteOrDamageTheReplacementAnswer': 'PASS 4.021s', 'realOfflineAnswerReachesTheApplicationQueueAsSpoken': 'PASS 2.354s'}",
+      "Conversation integrity: serialized main creation and follow-up decisions; atomic message/draft/projection/follow-up parent updates; coherent thread snapshot; latest bounded history with actual total and scoped cursor paging, stable equal-time ordering; original canonical projection identity/scope, including late archived result without reopening. Typed API and existing Android SDK method added; UI paging consumer remains pending.8 original failures corrected;26 focused/169 integrated audited/29 owner contracts/79 rebuild pass0skip;12 fault/control pairs caught and source restored after an initial timing survivor. Android222 JVM pass0skip, debugAPK assembled and lint passes with pinned sealed voice assets. No history-as-authority, promotion dispatch, new frontend, whole-unit/native/production/S24 claim.",
+      "Hosted f124741f/39990636936 all374 inherited cases383edits caught, emulator18pass4existingartworkskips; nativeVITS methods3.818/2.381s are method durations, not latencySLO/S24. PublicPG26voice117trading2538pass1DDSskip. NativeMetaEditor39990637062 zeroerrors/warnings freshEX5, invalid4errors/noEX5. OriginalDDSreadkey andtrustedmain CI failures retained.",
+      "Owner-intent memory: one serialized native observation conserves concurrent counts/project context and all constraints, earliest/latest times; original mission link commits with its observation, verifies native goal/project/constraints and refuses replay as additional owner repetition. Legacy link verifies real mission and original goal. Superseding edge and retired status share one transaction; self/cyclic supersession refused.6 original failures plus1 unchanged legacy-method failure corrected;62 focused/241 integrated audited/29 owner contracts/79 rebuild pass0skip;10 introduced defects rejected after valid controls and exact source restoration. Initial same-size timestamp-bytecode survivor retained; final child processes clear only affected temporary caches. Existing horizon thresholds unchanged, no claim of market truth/authority, all-feed or whole-unit completion.",
+      "Chart workspace backend component: additive migration56, typed renderer-independent multi-panel settings, exact native product refs as unverified owner context, decimal-string price/time drawings and seven typed presentation/research indicator configurations. Revision-checked atomic CRUD, immutable snapshots/restore-as-new-revision, paged histories, owner-scoped original request identities/outcomes and failed-commit recovery; deletion removes live SQL state/revision bodies and retains no notes in minimal outcome receipts. Explicit original scope/hash/capacity refusals; authenticated current owner/device proof and private no-store responses.57 focused/144 integrated/10 privacy/1 real backup-restore/29 registry/79 rebuild pass0skip,15 fault/control pairs caught/restored. New9routes ->457endpoints333schemas;42features105functions78surfaces preserved. No newUI/Androidconsumer, certifiedindicatorcalc/nativebinding/export/renderqualification or wholeBE018 claim.",
+      "Approval learning source: presence requirement is not approval; native owner command/device/principal/origin/effectiveclass/request/context snapshot binding required. Genuine A1signed->A4exactapproval preserved with original signed class. Post-seal caller projects one original scoped fingerprint, preserves outcomes/reassessment on replay and never invents a reason. Existing native erasure witnesses suppress old/selectively erased sources and bulk pre-erasure contexts via native revisions; fresh consent remains learnable without wall-clock ordering. Optional capture/approval/terminal learning sink failures do not block canonical native work, hide its terminal result or suppress other sinks; stage/error-class diagnostics exclude raw error messages, cancellation propagates.2original bugs plus candidate/privacy/availability issues corrected;82focused/236integrated audited/29registry/80rebuild0skip;16 introduced faults caught/restored,6retainedC8+1RC4executed/caught;374cases383edits unchanged and actual preflight0findings. Prior hostedf2 all9mutation shards NOT_RUN due missing sourceanchor is retained; real-source preflight now part of default rebuild tests. No complete feedback/unit/live claim.",
+      "Hosted f2f541c9/39997193133:9mutation shards refused at preflight (RC4 source anchor) NOT_RUN; actual emulator18pass4artworkskips, VITS2.687/2.263 method seconds, PG26voice117trading2538pass1DDSskip. OriginalDDSreadcredential/trustedmain CI failures also retained. Native39997193097MetaEditor0errors0warnings/freshEX5, invalid4/noEX5. Source anchor restored without changing registry and actualRC4/C8 cases caught; defaultrebuild80 now checks all374anchors.",
+      "Owner intent source and privacy: exact native owner command/device/origin/context required for observations; automatic events cannot manufacture standing goals. Original mission scope/identity receipt commits with native node/count/link, survives uncertain commit/replay, and prevents old or erased requests attaching to fresh same-text intent. Existing erasure revision barriers hold delayed/ambiguous sources while fresh consent remains learnable. Minimal non-content receipt retention disclosed. Real observed-pattern readback now handles actual device principals and revalidates original native source/context coherently, rather than requiring historical owner literal.4 original failures plus integration/fixture/readback findings retained and corrected;79 isolated/242 audited integrated/26 registry/80 rebuild pass0skip;11 introduced fault/control pairs caught with exact restoration.374 original identities383edits unchanged; current preflight zero findings. No new endpoint/UI or complete durable-learning/all-memory/unit/native/live claim.",
+      "Exact f124741f retry completed:7062 backend/contracts PASS9skip,2539trading PASS0skip, zero forbidden storage events and private PG stopped/removed. Prior storage-aborted attempt retained.",
+      "Exact90e64452 first broad run found interrupted/zombie on resume, no counts/PASS claimed; recorded separate interrupted receipt and started clean same-source r1.",
+      "Exact90hosted40003045752:all374legacy cases actually caught; emulator18PASS4artworkskips,VITS2.710/2.083 method seconds;publicPG26voice117trading2538PASS1DDSskip. Only original DDS read credential/trusted-main CI failures. Native40003045832actualMetaEditor0errors0warningsfreshEX5; invalid4errors/noEX5. No provider/native execution or S24 claim.",
+      "Source815405e9 owner-intent packet committed/pushed; ProjectTruthGREEN100 and remote exact/clean before this new packet.",
+      "Exact90R1 failed after5 known tests:4155PASS5FAIL4SKIP in1821.67s, zero storage audit, private PGstopped/removed. Remaining tests/trading NOT_RUN. Failures are in native-event/legacy approval fixtures corrected815; failed historical evidence retained.",
+      "Hosted81540070199094:actualall374retained cases caught;18emulatorPASS4artworkskips,VITS3.995/2.516 methodseconds,PG26voice117trading2538PASS1DDSskip; originalDDSreadkey/trustedmainfailures remain. Native40070199122actual0errors0warningsfreshEX5; invalid4/noEX5.",
+      "Learning recovery isolated WIP:4genuinebeforefailures;137focusedPASS0skip;27recoveryPASS0skip including actualstartup/scheduler and two abrupt process exits;15introducedfaults caught/restored. Migration marker atomicity must be fixed/tested before source integration.",
+      "Durable local mission learning: additive atomic migration57; original mission/stage deliveries commit with capture and terminal lifecycle facts, fresh owner authorization has a new delivery generation. Bounded startup/scheduler repair uses fair native queue order and exact-generation success/failure acknowledgements, preserving pending work after restart, cancellation or uncertain reply. Native strategy class/envelope/state/activity reread under writer fence, atomic strategy/count/original receipt, one sample on concurrent replay/commit-ack loss; historical terminal samples explicitly LEGACY_UNRECONCILED rather than recounted. Original verification and late fingerprint outcome recovered; owner reassessment/erasure/fresh consent preserved. New queue/sample receipts have parent retention and non-content disclosure. Existing chart3table policies corrected; migration fixture now models real55-to-partial56 upgrade.4original+2migration+1generationrace failures reproduced;31native recovery/373audited integrated/26registry/80rebuild PASS0skip;19final fault/control pairs caught/restored. Earlier retainedC7eight/RC2five caught before final migration/generation changes; current374case383edit preflight0findings, full next-source corpus pending. No newAPI/UI or complete legacy/feedback/unit/live claim.",
+      "Native mission capture atomicity: original mission row, requiredMISSION_CREATEDevent and learning delivery share one transaction; failed event write rolls all back before optional learning. Publish only after commit/native event visibility. Original command join recovers same complete capture after lost commitACK or actual abrupt process exit, without duplicate event/mission or action dispatch.4genuine before failures;80focused/6oracles/379audited integrated/26registry/80rebuild PASS0skip;4deliberate fault/control pairs caught/restored;374case383edit preflight unchanged0findings. Native post-insert test nowrequireszeroorphanrows. Automatic busredelivery/historicalorphanrepair/wholeunit/live notclaimed.",
+      "Private-core import boundary source: sharedStore now imports byte-identicalMIGRATION56 SQL from storage.chart_migration rather than trading package; old chart schema path reexports for compatibility. Original private forbidden-prefix contract unchanged. Directbefore importclosureFAIL reproduced; old trading import reintroduction caught after passingcontrol/restoration. Six legacy45/46 migration fixtures now use explicitpre57 test-only native producer; currentorigin-rule/runtimeassertions preserved, no productionmissingtablefallback.172focused audited0storagewrites/26registry/80rebuild PASS0skip;1fault/control caught;374case383edit preflight0findings. Fullolder815run7202PASS2FAIL9skip retained; no nativehost/privateplacement/unit/live acceptance.",
+      "Exact815 fullbackend completed7213 cases:7202PASS2FAIL9SKIP2769.51s; storageaudit0 andprivatePGstoppedremoved. Retentionalreadyfixeda837 and importboundarycorrectedthispacket. FulltradingNOT_RUN. Oldcompletedownedfixturescleaned; frozenQA815nowinactive/clean.",
+      "2026-10-24 native funding component:103native/unitization/runtime,27realPG,182audited gateway/storage/backup,19registry+16runtime contracts,80rebuild and5Android parser tests PASS0skip;12behavioral fault pairs caught/restored. Current native return qualification NOT_ISSUED. Fullc0b run7240PASS1FAIL9skip retained; stale backup version expectation corrected, no whole-backend PASS.",
+      "2026-10-24 exact a1867: fulltrading2623PASS0skip actualPG/audit0/cleanup; hosted258legacy mutations detected and116Kotlin cases NOTRUN due confirmed harness dependency omission. Corrected pureharness1328PASS0skip. Hosted emulator18PASS4artworkskips, MetaEditor6283 zeroerrorswarnings. Backendresource failure and both unrelatedCI prerequisites retained."
+    ],
+    "environment_notes": [
+      "clone must be unshallowed (git fetch --unshallow) and PR heads fetched (+refs/pull/*/head:refs/remotes/origin/pr/*) before pre001.py",
+      "pytest from backend/requirements.txt in a venv",
+      "rsync needed for tests/hermes installer test",
+      "DDS sibling at /home/user/dial-development-system fetched origin/master 204f2f3b for F15 source reading",
+      "Gradle: repo.maven.apache.org returned 429 repeatedly; an init script adding https://maven-central.storage-download.googleapis.com/maven2/ resolved the same coordinates",
+      "Python 3.12 venv from backend/requirements.lock for CI-equivalent runs; stream-host venv from deploy/van-browser-stream/requirements.lock",
+      "Desktop Commander read-only device listing was refused by the session permission policy; native readback prepared as pre003/NATIVE_READBACK_REQUEST.md"
+    ],
+    "next_action": "Publish private-storage import and legacy fixture compatibility fix, then advance the inactive clean frozenQA815checkout to that exact new commit and run a fresh full backend/contracts+trading privatePG/storage-audit qualification with separate logs/headassert. Continue BE006/007 in /tmp/van-funding-work-20261024: native cTrader cash history reader plus immutable money/scope DTOs and67passing source tests are uncommitted/isolated; flow-neutral ledger, accounting, service ingestion and owner read contracts remain to implement. Explicit-copy only owned funding files later; rootprivatefix differs from its e22base and is not a reason to overwritecurrentroot. Preserve93features131units324req1610acceptanceIDs, nofrontendbeforeBG001, no newfinancialauthority/nativehost/production/S24 claims, no routinecheckpointstop.",
+    "previous_head": "e22a4e7cccca690df5b9cb197f440eb06fb03f06",
+    "current_packet": "Private-core storage import boundary source tested; continuing funding/accounting."
+  },
+  "observations": [
+    "OBS-001 BE-002 debug cleartext",
+    "OBS-002 BE-003 stale-claim retake reliance",
+    "OBS-003 BE-025 positive approval-resume test (corrected from BE-028)",
+    "OBS-004 BE-003 committed SQLite snapshot",
+    "OBS-005 legacy mutation registry and masked advisory failure"
+  ],
+  "obligations": "obligations/OBLIGATIONS.json: preserved observations with source implementation evidence and explicit remaining native/unit obligations.",
+  "pre002_challenge": "pre002/challenge/: 324 author-prepared dossiers (AUTHOR_CHALLENGED_PENDING_INDEPENDENT_REVIEW)",
+  "pre002_reviews": "pre002/challenge/review/: NEG_REC_REVIEW (37 adequate / 6 gaps), PRODUCT_TRUTH_TRACE_REVIEW (189 classified), DECISION_REGISTER (49 real dependencies, 18 owner decisions)",
+  "amendments": {
+    "AP-001": "Original verified proposal retained; not admitted.",
+    "AP-002": "Standalone candidate 1618 / cumulative 1632; ten checks pass each, thirteen preservation regressions; not admitted."
+  },
+  "ci_prerequisite_commits": [
+    "0c7fa8cf DDS sibling checkout",
+    "17a7cb81 services stream-host environment"
+  ],
+  "continuation": {
+    "owner_instruction": "opus is nolonger available finish building from the current state to completion",
+    "lead": "Codex",
+    "recovered_head": "2a10b7884b9bcf214395d5c15815ab6d96f56845",
+    "pr": 105,
+    "report": "docs/rebuild/rev118/CONTINUATION_20261022.md",
+    "application_rebuild_started": true,
+    "baseline_maintenance_commits": [
+      "6ba1fef7",
+      "eba674ac",
+      "461186ef",
+      "637eaf96",
+      "fca473cc",
+      "c2a27848"
+    ],
+    "tested_android_head": "637eaf96ff617c608401754a044145811b8fd318",
+    "hosted_result": "receipts/INSTRUMENTATION_637eaf96.json",
+    "mutation_reconciliation": "ci/MUTATION_RECONCILIATION.md and ci/MUTATION_RECONCILIATION_MAPPING.json",
+    "verified_source_head": "c2a278488f00bacaf912853ed6e711a5b1de986a",
+    "source_qualification_run": 39725953372,
+    "latest_checkpoint_report": "CHECKPOINT_c2a27848_20261022.md"
+  },
+  "provenance_correction": {
+    "finding": "90 forecast hashes previously reported unverifiable",
+    "resolution": "All 90 requirement and 48 packet hashes match original bundled records with sorted, non-ASCII-escaped JSON and default separators.",
+    "evidence": "pre002/challenge/review/FORECAST_PROVENANCE.json",
+    "qualification": "Documentary source provenance; independent review remains separate."
+  },
+  "resolved_blockers": [
+    {
+      "id": "BLK-008",
+      "what": "All 374 original legacy mutations pass in source run 39725953372; 382 edits, zero survivors, exact per-case coverage. Original stale inputs, misleading CI status, invalid mutants and three complete-corpus survivors corrected with retained failure evidence.",
+      "blocks": "No remaining legacy source-corpus execution gap; independent unit/admission review remains separate.",
+      "needed_from": "Finish the full hosted corpus, triage any survivors/invalid executions, and retain independent preparation review of the semantic mappings.",
+      "status": "RESOLVED_SOURCE_VERIFICATION",
+      "evidence": "ci/MUTATION_CORPUS_c2a27848.json"
+    }
+  ],
+  "current_action": "Publish final dispatch halt/lease/quote/route/quantisation source controls (154focused,114actualPG,17CI,9fault/controlpairs), then execute expanded fresh-worker50browser files and original UID/firewall source controls. Retain exactab98 full trading2778pass0skip, failed backend896pass5Chromium startup failures and interrupted resource-exhausted broad attempt; no whole-backend pass. Continue full current-account/exposure RiskAuthority revalidation, joint funding/order reservations, flow-adjusted economics and provider/payment/handoff. All131unit/admission/native/production/security/S24 obligations and BG-001 remain unissued.",
+  "updated_at_utc": "2026-10-24T14:06:17.175263+00:00"
+}

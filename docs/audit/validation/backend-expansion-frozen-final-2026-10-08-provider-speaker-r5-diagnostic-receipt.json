@@ -1,0 +1,26 @@
+{
+  "schema_version": 1,
+  "qualification": "DIAGNOSTIC_FAILURE_REQUIRES_R6_RETEST",
+  "suite": "backend/tests",
+  "counts": {
+    "cases": 3231,
+    "failures": 1,
+    "errors": 0,
+    "skipped": 0
+  },
+  "artifacts": {
+    "backend-expansion-frozen-final-2026-10-08-provider-speaker-r5.log": "f4a2d6080cb0a88604b715d8a4c223b2810e6c56986ad7208110cfb17d188e47",
+    "backend-expansion-frozen-final-2026-10-08-provider-speaker-r5.xml": "212acc54406a3b1bce7d7e3f4e9321e3996066456c905e4585e662d531bbab5a",
+    "backend-expansion-frozen-final-2026-10-08-provider-speaker-r5-inputs.json": "1b498e40639a1c6f6fdb840777d5505424c1fed977382d46581b775ba8bff98d",
+    "backend-expansion-frozen-final-2026-10-08-provider-speaker-r5-result.json": "09500d738c86630ea418fb2e25de68444bff1a4e374f44d9dbb69e02089397a3"
+  },
+  "production_manifest": "van-production-source-freeze-provider-speaker-2026-10-08.json",
+  "production_manifest_sha256": "7a2ea2642fb6ed0467e52c93344d4706c67cf98e211b9ebf5a7d01ea2e322c88",
+  "source_inputs": 1600,
+  "source_unchanged_during_test": true,
+  "sole_failure": "TestEveryRegisteredActionHasOneDescriptor::test_a_mutating_action_has_a_decided_reversibility",
+  "correction": "browser.file.provider.submit explicitly IRREVERSIBLE; requires separate revised manifest and full rerun",
+  "physical_tests_executed": 0,
+  "production_deployed": false,
+  "focused_counts_are_non_additive": true
+}

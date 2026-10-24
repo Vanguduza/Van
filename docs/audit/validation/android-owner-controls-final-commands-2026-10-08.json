@@ -1,0 +1,49 @@
+{
+  "cwd": "/workspace/Van",
+  "environment_overrides": {
+    "JAVA_HOME": "/workspace/.onboarding/jdk/usr/lib/jvm/java-21-openjdk-amd64",
+    "GRADLE_USER_HOME": "/workspace/.onboarding/gradle",
+    "ANDROID_HOME": "/workspace/.onboarding/android-sdk",
+    "ANDROID_USER_HOME": "/workspace/.onboarding/android-user"
+  },
+  "source_manifest_before": "docs/audit/validation/android-owner-controls-final-inputs-before-2026-10-08.json",
+  "runs": [
+    {
+      "kind": "app",
+      "argv": [
+        "/workspace/.onboarding/gradle-8.11.1/bin/gradle",
+        "-p",
+        "android",
+        ":app:assembleDebug",
+        ":app:testDebugUnitTest",
+        ":app:lintDebug",
+        "--rerun-tasks",
+        "--no-daemon",
+        "--max-workers=2",
+        "--console=plain"
+      ],
+      "log": "/workspace/van-audit/android-owner-controls-receipt-bound-app-2026-10-08.log",
+      "exit_code": 0,
+      "elapsed_seconds": 168.453
+    },
+    {
+      "kind": "jvm",
+      "argv": [
+        "/workspace/.onboarding/gradle-8.11.1/bin/gradle",
+        "-p",
+        "android/verification",
+        "test",
+        "--rerun-tasks",
+        "--offline",
+        "--no-daemon",
+        "--max-workers=2",
+        "--console=plain"
+      ],
+      "log": "/workspace/van-audit/android-owner-controls-receipt-bound-jvm-2026-10-08.log",
+      "exit_code": 0,
+      "elapsed_seconds": 36.781
+    }
+  ],
+  "source_manifest_after": "docs/audit/validation/android-owner-controls-final-inputs-after-2026-10-08.json",
+  "source_changed_during_final_validation": []
+}

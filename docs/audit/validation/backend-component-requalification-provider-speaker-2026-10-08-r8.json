@@ -1,0 +1,96 @@
+{
+  "schema_version": 1,
+  "status": "CURRENT_BACKEND_COMPONENT_AND_ANDROID_SOURCE_CONTRACT_PASS",
+  "full_suite": "backend/tests",
+  "full_command": [
+    "/workspace/.onboarding/van-venv/bin/python",
+    "-m",
+    "pytest",
+    "-q",
+    "backend/tests",
+    "--junitxml=/workspace/van-audit/backend-expansion-frozen-final-2026-10-08-provider-speaker-r6.xml"
+  ],
+  "full_run_started_at_utc": "2026-10-08T06:48:04.715770+00:00",
+  "full_run_finished_at_utc": "2026-10-08T06:59:33.212000+00:00",
+  "counts": {
+    "tests": 3231,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "passed": 3231
+  },
+  "full_junit_sha256": "dbbee3bf9bf398f5f02dc8f17c28b9394051447bf4ebeb8d804e28a81efb6612",
+  "full_junit": "docs/audit/validation/backend-expansion-frozen-final-2026-10-08-provider-speaker-r6.xml",
+  "full_run_production_manifest": "docs/audit/validation/van-production-source-freeze-provider-speaker-2026-10-08-r6.json",
+  "full_run_production_manifest_sha256": "dc43ff60417434956b624128086ed03e76538422b76ef6f09b1406e18704fb02",
+  "final_production_manifest": "docs/audit/validation/van-production-source-freeze-provider-speaker-2026-10-08-r8.json",
+  "final_production_manifest_sha256": "c55031c4be0cc6da94b86d103066b4b683d71be3c6d779a56bc3520fffb7b61e",
+  "production_files": 1413,
+  "full_source_input_files": 1600,
+  "changed_global_inputs": [
+    "android/app/src/main/java/com/dial/van/voice/SpeakerEnrollmentManager.kt",
+    "tools/ci/github-actions-ci.yml"
+  ],
+  "changed_inputs_during_full_test": [
+    "android/app/src/main/java/com/dial/van/voice/SpeakerEnrollmentManager.kt"
+  ],
+  "tooling_delta_excluded_from_runtime_component": [
+    "tools/ci/github-actions-ci.yml"
+  ],
+  "tooling_delta_occurred_after_full_backend_test": true,
+  "tooling_template_matches_live_ci": true,
+  "tooling_contract_revalidation_required_separately": true,
+  "global_source_unchanged_during_full_test": false,
+  "backend_runtime_and_tests_unchanged_during_full_test": true,
+  "non_android_dependency_inputs_unchanged_during_full_test": true,
+  "unchanged_non_android_runtime_dependency_inputs": 1192,
+  "unchanged_backend_runtime_and_test_inputs": 443,
+  "final_android_static_revalidation": {
+    "selection": [
+      "backend/tests/test_account_approval_contract.py",
+      "backend/tests/test_owner_status_kotlin_contract.py"
+    ],
+    "counts": {
+      "tests": 16,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "passed": 16
+    },
+    "junit": "docs/audit/validation/backend-android-static-provider-speaker-2026-10-08-r8.xml",
+    "junit_sha256": "49358033bc1a2a3d38296f30097de306b4da220a0930d895ed8f966097f99c3c",
+    "result": "docs/audit/validation/backend-android-static-provider-speaker-2026-10-08-r8-result.json",
+    "source_unchanged_during_test": true,
+    "source_inputs": 1600,
+    "included_in_full_total_already": true,
+    "counts_are_non_additive": true
+  },
+  "source_proof": "docs/audit/validation/backend-component-source-proof-provider-speaker-2026-10-08-r8.json",
+  "testcases": "docs/audit/validation/backend-component-testcases-provider-speaker-2026-10-08-r8.json",
+  "artifacts": {
+    "docs/audit/validation/backend-expansion-frozen-final-2026-10-08-provider-speaker-r6.log": "15f1aa9ff3b0855d7fb4591a5a47e19ba318efd6864293da93aec51fc227a94c",
+    "docs/audit/validation/backend-expansion-frozen-final-2026-10-08-provider-speaker-r6.xml": "dbbee3bf9bf398f5f02dc8f17c28b9394051447bf4ebeb8d804e28a81efb6612",
+    "docs/audit/validation/backend-expansion-frozen-final-2026-10-08-provider-speaker-r6-inputs.json": "8358153937cca85c495646484811ff6fcf808988394e2bbd05051a32937adbf1",
+    "docs/audit/validation/backend-expansion-frozen-final-2026-10-08-provider-speaker-r6-result.json": "bd924a469058bb9522904807788d0fa95ab8bdbda56db61abb4c97540479c930",
+    "docs/audit/validation/backend-android-static-provider-speaker-2026-10-08-r8.log": "4b26c7f618aab508ee5e48f8591bc3992d12557b916266eaf1a0db6846e4e075",
+    "docs/audit/validation/backend-android-static-provider-speaker-2026-10-08-r8.xml": "49358033bc1a2a3d38296f30097de306b4da220a0930d895ed8f966097f99c3c",
+    "docs/audit/validation/backend-android-static-provider-speaker-2026-10-08-r8-inputs-before.json": "f64200fb25c91adb04798561e1322b03e52875e05f73ba0e59884b870ae531f8",
+    "docs/audit/validation/backend-android-static-provider-speaker-2026-10-08-r8-inputs-after.json": "f64200fb25c91adb04798561e1322b03e52875e05f73ba0e59884b870ae531f8",
+    "docs/audit/validation/backend-android-static-provider-speaker-2026-10-08-r8-result.json": "f9a5b7cfb33fea8195c06a9f75f871cce87a6d6dca5fb5fe908b99523e993b0a",
+    "docs/audit/validation/run_provider_speaker_r6_final_suite.py": "c0a88df78e579869de4d508a9c1abc060b7bd5d8e8d507a5f6ed7e2cba0f0c62",
+    "docs/audit/validation/run_provider_speaker_android_static_r7.py": "141a02753a9579c44a626751a75fdbee85eb866cfe30c66f90028e6cfdc0d2f3",
+    "docs/audit/validation/backend-component-source-proof-provider-speaker-2026-10-08-r8.json": "1c0af102b7c3f707aee817e2a67b534685dad7206634323ce7583dc53c223b77",
+    "docs/audit/validation/backend-component-testcases-provider-speaker-2026-10-08-r8.json": "4575f1163e903719264cff43bc6096a4e42a3e659e6f290aa5d4fdcbc2a9d8bc"
+  },
+  "physical_tests_executed": 0,
+  "production_deployed": false,
+  "provider_target_live_qualified": false,
+  "artemis_device_live_qualified": false,
+  "focused_counts_included": false,
+  "r5_diagnostic_counts_included": false,
+  "external_prerequisites": [
+    "governed Oracle/VEKL target service and exact owner/project identity bindings",
+    "qualified deployed host ingress and release profile",
+    "governed Artemis pairing/current handset admission and actual native feature acceptance"
+  ]
+}

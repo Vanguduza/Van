@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.dial.van.security.OwnerAuthorityTokenTest" tests="3" skipped="0" failures="0" errors="0" timestamp="2026-10-08T06:57:30" hostname="052fefa249ff" time="0.066">
+  <properties/>
+  <testcase name="pythonWireVectorMatchesExactly" classname="com.dial.van.security.OwnerAuthorityTokenTest" time="0.051"/>
+  <testcase name="jsonEscapingMatchesPythonEnsureAsciiContract" classname="com.dial.van.security.OwnerAuthorityTokenTest" time="0.001"/>
+  <testcase name="actTokensCannotBecomeStandingAuthority" classname="com.dial.van.security.OwnerAuthorityTokenTest" time="0.014"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

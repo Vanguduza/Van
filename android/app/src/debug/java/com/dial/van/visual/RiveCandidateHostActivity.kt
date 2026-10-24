@@ -18,6 +18,7 @@ import androidx.compose.ui.unit.dp
 class RiveCandidateHostActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        lastSampleTimeMs = null
         val production = intent.getBooleanExtra(EXTRA_PRODUCTION, false)
         val asset = if (production) RiveBindingContract.ASSET_FILE else "van_candidate.riv"
         val bytes = runCatching { assets.open(asset).use { it.readBytes() } }.getOrNull()
@@ -67,7 +68,9 @@ class RiveCandidateHostActivity : ComponentActivity() {
                             }
                             else -> Box(Modifier.fillMaxSize().background(Color(0xFF0B0F14)))
                         }
-                        RiveCandidateFrame(
+                        if (intent.hasExtra(EXTRA_SAMPLE_TIME_MS)) {
+                            FixedTimeRiveFrame(bytes, intent)
+                        } else RiveCandidateFrame(
                             bytes = bytes,
                             size = intent.getIntExtra(EXTRA_SIZE_DP, 320).dp,
                             stateCode = intent.getIntExtra(EXTRA_STATE, 2),
@@ -83,7 +86,7 @@ class RiveCandidateHostActivity : ComponentActivity() {
                         )
                     }
                 } else {
-                    RiveCandidateHost(bytes = bytes, modifier = Modifier.fillMaxSize())
+                    CharacterRigLab(bytes = bytes)
                 }
             }
         }
@@ -92,6 +95,9 @@ class RiveCandidateHostActivity : ComponentActivity() {
     companion object {
         /** Last decision the production VanAvatar reported; read by RiveContractTest. */
         @Volatile var lastProductionDecision: VanRenderDecision? = null
+        /** Set by the debug renderer after drawing the requested fixed animation time. */
+        @Volatile var lastSampleTimeMs: Long? = null
+        const val EXTRA_SAMPLE_TIME_MS = "forge.sampleTimeMs"
         const val EXTRA_PRODUCTION_PATH = "forge.productionPath"
         const val EXTRA_TEST_MODE = "forge.test"
         const val EXTRA_PRODUCTION = "forge.production"

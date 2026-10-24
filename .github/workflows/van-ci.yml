@@ -13,6 +13,8 @@ on:
       # Character Forge candidates pushed by the bounded worker (`forge-push`); without this
       # a staged candidate would never reach RiveContractTest or character-forge-gate.
       - 'forge/**'
+      # Programme branches (review I6 m7): the ledger job verifies what was pushed, not only PRs.
+      - 'gpt/**'
   pull_request:
 
 concurrency:
@@ -20,13 +22,398 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  rebuild-documentary:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install isolated rebuild verification dependencies
+        run: python -m pip install -r tools/rebuild/requirements.lock
+      - name: Rebuild documentary and induced-failure regressions
+        run: python -m pytest -q tests/rebuild
+
+  # Owner decision 2026-09-30 ("enforce van's ledger"). Every commit a pull request (or a push to
+  # a programme branch) adds must carry a LOCAL_CHANGE_LEDGER.jsonl row whose diff digest matches
+  # the commit and whose owner authorization records cover every file it changes.
+  # Review I6 M2: the gate runs the TRUSTED side's checker — the PR base, or the branch head
+  # before the push — checked out into trusted/, against the pushed/PR head checked out into
+  # head/ (its real commits, not GitHub's synthetic merge commit, with full history). The
+  # checker reads its config, baselines and authorization records from that trusted ref, so a
+  # PR cannot edit the checker, its baseline, its authority set or its own authorization.
+  # This is only a gate if branch protection requires this job and code-owner review
+  # (.github/CODEOWNERS); that is a GitHub setting the owner enables, see tools/ci/README.md.
+  # Review I7 minor 9: on a push the trusted side is a PROTECTED ref, never the pushed history.
+  # github.event.before is only the branch's previous head: on an unprotected branch whoever
+  # pushes can push a checker edit first and then be judged by it. So a push to main or a
+  # programme branch (gpt/**, protected) is judged from that branch's own previous protected
+  # head (a fast-forward of it, nothing else), and a push to any other branch from the newest
+  # commit it shares with a protected branch (its protected upstream, else the default
+  # branch's merge-base). Pull requests keep their base.
+  project-truth-ledger:
+    if: github.event_name == 'pull_request' || github.event_name == 'push'
+    runs-on: ubuntu-latest
+    env:
+      HEAD_SHA: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
+      PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+      PUSHED_REF: ${{ github.ref_name }}
+      PUSHED_BEFORE: ${{ github.event.before }}
+      DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.HEAD_SHA }}
+          path: head
+          fetch-depth: 0
+      - name: Trusted ref (the PR base, or a protected branch; never the pushed history)
+        working-directory: head
+        run: |
+          set -euo pipefail
+          if [[ "$GITHUB_EVENT_NAME" == pull_request ]]; then
+            trusted="$PR_BASE_SHA"
+          else
+            git fetch --no-tags --quiet origin "+refs/heads/$DEFAULT_BRANCH:refs/protected/$DEFAULT_BRANCH" \
+              '+refs/heads/gpt/*:refs/protected/gpt/*'
+            case "$PUSHED_REF" in
+              "$DEFAULT_BRANCH"|gpt/*)
+                # A protected branch moves only by a reviewed merge: its previous head is its
+                # protected upstream. A force-push (previous head not an ancestor) is refused.
+                trusted="$PUSHED_BEFORE"
+                if [[ "$trusted" =~ ^0+$ ]] || ! git merge-base --is-ancestor "$trusted" HEAD; then
+                  echo "push to protected $PUSHED_REF: previous head missing or rewritten; refusing" >&2
+                  exit 1
+                fi
+                ;;
+              *)
+                # Unprotected: the newest commit this history shares with a protected branch.
+                trusted=""
+                for ref in $(git for-each-ref --format='%(refname)' refs/protected/); do
+                  base="$(git merge-base HEAD "$ref" || true)"
+                  [[ -n "$base" ]] || continue
+                  if [[ -z "$trusted" ]] || git merge-base --is-ancestor "$trusted" "$base"; then
+                    trusted="$base"
+                  fi
+                done
+                if [[ -z "$trusted" ]]; then
+                  echo "no protected branch shares history with $PUSHED_REF; open a pull request" >&2
+                  exit 1
+                fi
+                ;;
+            esac
+          fi
+          echo "trusted ref: $trusted"
+          echo "TRUSTED_SHA=$trusted" >> "$GITHUB_ENV"
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.TRUSTED_SHA }}
+          path: trusted
+          fetch-depth: 1
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Project Truth ledger (trusted checker, every new commit has an authorized row)
+        run: python trusted/tools/ci/project_truth_ledger.py --repo head verify-pr --base "$TRUSTED_SHA" --head "$HEAD_SHA"
+      - name: Project Truth ledger self-test (the head's own tests; informative, not the gate)
+        working-directory: head
+        run: pip install pytest && pytest -q tests/contracts/test_project_truth_ledger.py
+
+  postgres-ledger:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    services:
+      postgres:
+        # Disposable source-test database; no production credentials or data.
+        image: postgres:17.11-bookworm@sha256:858bb5e98eed02eb8cafbcdc007f9a65d1b613972028944a8ec2133ccaf80d27
+        env:
+          POSTGRES_USER: van_fixture
+          POSTGRES_PASSWORD: van_ephemeral_test_only
+          POSTGRES_DB: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U van_fixture -d postgres"
+          --health-interval 5s --health-timeout 5s --health-retries 12
+    env:
+      PYTHONPATH: backend:trading:.
+      VATI_TEST_PG_DSN: postgresql://van_fixture:van_ephemeral_test_only@127.0.0.1:5432/postgres
+      VATI_TEST_PG_ISOLATED_FIXTURE: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24.19.0"
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install pinned PostgreSQL verification dependencies
+        run: |
+          python -m pip install -r backend/requirements.lock
+          python -m pip install --no-deps psycopg==3.2.9 psycopg-binary==3.2.9
+      - name: Initialize the disposable test schema
+        run: |
+          python - <<'PY'
+          import os, psycopg
+          assert psycopg.__version__ == "3.2.9"
+          with psycopg.connect(os.environ["VATI_TEST_PG_DSN"]) as connection:
+              connection.execute("CREATE SCHEMA vati")
+          PY
+      - name: Real PostgreSQL isolation, migration, writer and recovery checks
+        run: >-
+          python -m pytest -q
+          trading/tests/test_postgres_ledger_isolation.py
+          trading/tests/test_consolidated_ledger_transactions.py
+          trading/tests/test_infra_live.py::test_postgres_ledger_matches_sqlite_chain_and_detects_tampering
+          --junitxml=postgres-ledger-report.xml
+      - name: Require executed PostgreSQL cases without skips
+        run: |
+          python - <<'PY'
+          import xml.etree.ElementTree as ET
+          suites = list(ET.parse("postgres-ledger-report.xml").getroot().iter("testsuite"))
+          counts = {key: sum(int(s.get(key, 0)) for s in suites) for key in ("tests", "failures", "errors", "skipped")}
+          assert counts["tests"] >= 26 and all(counts[k] == 0 for k in ("failures", "errors", "skipped")), counts
+          print(counts)
+          PY
+      - name: Public trading source regressions
+        run: python -m pytest -q trading/tests/ --junitxml=trading-source-report.xml
+      - name: Record the only private-source test unavailable to this public job
+        run: |
+          python - <<'PY'
+          import xml.etree.ElementTree as ET
+          root = ET.parse("trading-source-report.xml").getroot()
+          cases = list(root.iter("testcase"))
+          skipped = [f"{c.get('classname')}::{c.get('name')}" for c in cases if c.find("skipped") is not None]
+          allowed = {"trading.tests.test_vtil_borrow::test_dial_resolver_selects_trading_knowledge_from_van_registry"}
+          assert len(cases) >= 1691 and len(skipped) <= 1 and set(skipped) <= allowed, skipped
+          assert all("dial-new checkout not available (set DIAL_REPO)" in c.find("skipped").get("message", "") for c in cases if c.find("skipped") is not None), skipped
+          print({"source_cases": len(cases), "private_source_not_executed_here": skipped})
+          PY
+      - name: Public voice, speaker-authority and speech-continuity checks
+        run: >-
+          python -m pytest -q
+          backend/tests/test_voice_stream_continuity.py
+          backend/tests/test_voice_stream_binding.py
+          backend/tests/test_voice_response_api.py
+          backend/tests/test_voice_speech_stream.py
+          backend/tests/test_speech_sync.py
+          backend/tests/test_voice_speech_cues.py
+          backend/tests/test_voice_speaker_authority.py
+          backend/tests/test_command_execution_result.py
+          backend/tests/test_command_success_contract.py
+          --junitxml=voice-source-report.xml
+      - name: Require executed voice cases without skips
+        run: |
+          python - <<'PY'
+          import xml.etree.ElementTree as ET
+          suites = list(ET.parse("voice-source-report.xml").getroot().iter("testsuite"))
+          counts = {key: sum(int(s.get(key, 0)) for s in suites) for key in ("tests", "failures", "errors", "skipped")}
+          assert counts["tests"] >= 117 and all(counts[k] == 0 for k in ("failures", "errors", "skipped")), counts
+          print(counts)
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: van-postgres-ledger-report
+          path: |
+            postgres-ledger-report.xml
+            trading-source-report.xml
+            voice-source-report.xml
+
+  # Independent public source qualification: this does not replace the backend
+  # job or its private DDS/trusted-main prerequisites. A fresh worker separates
+  # real browser regressions from this session's native-thread exhaustion.
+  browser-guard-source:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    env:
+      PYTHONPATH: backend:backend/tests:trading:.
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24.19.0"
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install the original locked browser source dependencies
+        run: |
+          python -m pip install -r backend/requirements.lock
+          python -m playwright install chromium
+      - name: Resolve the lock-selected actual Chromium
+        run: |
+          python - <<'PYCODE'
+          import os
+          from pathlib import Path
+          from playwright.sync_api import sync_playwright
+          with sync_playwright() as p:
+              executable = Path(p.chromium.executable_path)
+          assert executable.is_file() and os.access(executable, os.X_OK), executable
+          assert Path("/usr/bin/openssl").is_file()
+          with open(os.environ["GITHUB_ENV"], "a") as env:
+              env.write(f"VAN_TEST_CHROMIUM={executable}\n")
+          PYCODE
+      - name: Execute all original lease-guard regressions against Chromium
+        run: |
+          mkdir -p artifacts/browser-guard-source
+          git rev-parse HEAD > artifacts/browser-guard-source/tested-commit.txt
+          "$VAN_TEST_CHROMIUM" --version > artifacts/browser-guard-source/chromium-version.txt
+          python tools/rebuild/source_storage_audit.py \
+            --report artifacts/browser-guard-source/storage-audit.json \
+            backend/tests/test_browser_guard_lost_regression.py \
+            --basetemp="$RUNNER_TEMP/van-browser-guard-source" \
+            --junitxml=artifacts/browser-guard-source/report.xml -q
+      - name: Require actual execution with no skip or failure
+        if: always()
+        run: |
+          python - <<'PYCODE'
+          import json
+          import xml.etree.ElementTree as ET
+          from pathlib import Path
+          base = Path("artifacts/browser-guard-source")
+          suites = list(ET.parse(base/"report.xml").getroot().iter("testsuite"))
+          counts = {k: sum(int(s.get(k, 0)) for s in suites) for k in ("tests", "failures", "errors", "skipped")}
+          assert counts["tests"] >= 11 and all(counts[k] == 0 for k in ("failures", "errors", "skipped")), counts
+          assert not json.loads((base/"storage-audit.json").read_text())["forbidden_events"]
+          print(counts)
+          PYCODE
+      - name: Execute the complete public browser and harness source suites
+        run: |
+          python - <<'PYCODE'
+          import json, os, subprocess, sys
+          from pathlib import Path
+          paths = sorted({*Path("backend/tests").glob("test_browser*.py"), *Path("backend/tests").glob("test_harness*.py")})
+          assert len(paths) >= 50, len(paths)
+          base = Path("artifacts/browser-guard-source")
+          (base/"full-suite-files.json").write_text(json.dumps([str(p) for p in paths], indent=2)+"\n")
+          subprocess.run([sys.executable, "tools/rebuild/source_storage_audit.py",
+              "--report", str(base/"full-storage-audit.json"), *map(str, paths),
+              "--basetemp="+str(Path(os.environ["RUNNER_TEMP"])/"van-browser-full-source"),
+              "--junitxml="+str(base/"full-report.xml"), "-q"], check=True)
+          PYCODE
+      - name: Execute the source listener UID boundary in an isolated root fixture
+        run: |
+          sudo env PYTHONPATH="$PYTHONPATH" "$(command -v python)" tools/rebuild/source_storage_audit.py \
+            --report artifacts/browser-guard-source/uid-storage-audit.json \
+            backend/tests/test_browser_egress_proxy_i8.py::test_only_the_configured_client_uid_may_use_a_listener \
+            --basetemp="$RUNNER_TEMP/van-browser-listener-uid-source" \
+            --junitxml=artifacts/browser-guard-source/uid-report.xml -q
+      - name: Install the namespace firewall test prerequisite from signed Ubuntu sources
+        run: |
+          ubuntu_list="$RUNNER_TEMP/van-browser-source-ubuntu.list"
+          cat > "$ubuntu_list" <<'APT'
+          deb [signed-by=/usr/share/keyrings/ubuntu-archive-keyring.gpg] https://archive.ubuntu.com/ubuntu noble main universe
+          deb [signed-by=/usr/share/keyrings/ubuntu-archive-keyring.gpg] https://archive.ubuntu.com/ubuntu noble-updates main universe
+          deb [signed-by=/usr/share/keyrings/ubuntu-archive-keyring.gpg] https://security.ubuntu.com/ubuntu noble-security main universe
+          APT
+          sudo apt-get -o Dir::Etc::sourcelist="$ubuntu_list" -o Dir::Etc::sourceparts=- update
+          sudo apt-get -o Dir::Etc::sourcelist="$ubuntu_list" -o Dir::Etc::sourceparts=- install --yes --no-install-recommends nftables
+          uname -sr > artifacts/browser-guard-source/kernel-version.txt
+          sudo nft --version > artifacts/browser-guard-source/nft-version.txt
+      - name: Execute original firewall controls in disposable network namespaces
+        run: |
+          sudo env PYTHONPATH="$PYTHONPATH" "$(command -v python)" tools/rebuild/source_storage_audit.py \
+            --report artifacts/browser-guard-source/firewall-storage-audit.json \
+            tests/contracts/test_van_browser_core_firewall.py \
+            --basetemp="$RUNNER_TEMP/van-browser-firewall-source" \
+            --junitxml=artifacts/browser-guard-source/firewall-report.xml -q
+      - name: Require complete browser coverage and the actual listener UID result
+        if: always()
+        run: |
+          python - <<'PYCODE'
+          import json
+          import xml.etree.ElementTree as ET
+          from pathlib import Path
+          base = Path("artifacts/browser-guard-source")
+          roots = {name: ET.parse(base/name).getroot() for name in ("full-report.xml", "uid-report.xml", "firewall-report.xml")}
+          cases = list(roots["full-report.xml"].iter("testcase"))
+          assert cases and not any(c.find("failure") is not None or c.find("error") is not None for c in cases)
+          skipped = [c for c in cases if c.find("skipped") is not None]
+          allowed = "backend.tests.test_browser_egress_proxy_i8::test_only_the_configured_client_uid_may_use_a_listener"
+          assert len(skipped) <= 1 and all(c.get("classname")+"::"+c.get("name")==allowed and c.find("skipped").get("message")=="needs root and setpriv" for c in skipped)
+          for source in json.loads((base/"full-suite-files.json").read_text()):
+              module = source.removesuffix(".py").replace("/", ".")
+              assert any(c.get("classname")==module or c.get("classname", "").startswith(module+".") for c in cases), source
+          uid = list(roots["uid-report.xml"].iter("testcase"))
+          assert len(uid)==1 and all(uid[0].find(k) is None for k in ("failure", "error", "skipped"))
+          assert uid[0].get("classname")+"::"+uid[0].get("name")==allowed
+          firewall = list(roots["firewall-report.xml"].iter("testcase"))
+          assert len(firewall) >= 10 and sum(c.get("name", "").startswith("test_live_") for c in firewall)==5
+          assert all(c.find(k) is None for c in firewall for k in ("failure", "error", "skipped"))
+          for name in ("full-storage-audit.json", "uid-storage-audit.json", "firewall-storage-audit.json"):
+              assert not json.loads((base/name).read_text())["forbidden_events"], name
+          print({"full_browser_cases": len(cases), "root_uid_case_reexecuted": len(uid), "firewall_cases": len(firewall), "remaining_unexecuted": 0})
+          PYCODE
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: van-browser-guard-source
+          path: artifacts/browser-guard-source/
+          if-no-files-found: error
+
   backend:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      # Artemis and VTIL tests read the bounded pinned DDS source contracts from the sibling
+      # ../dial-development-system (tools/certification/artemis_acceptance.py, test_artemis_*).
+      # Without it 134 of them error before asserting anything. DDS is private and this
+      # repository is public, so the files are not copied here: they are checked out at the
+      # pin in CONSOLIDATION_STATE.json native_dependency (a qualification baseline for source
+      # contract tests, not a deployment attestation) with a read-only deploy key scoped to DDS
+      # alone, and each blob is verified. A missing key fails this step; it never skips tests.
+      - name: Require the DDS contract read key
+        env:
+          DDS_KEY: ${{ secrets.DDS_CONTRACT_READ_DEPLOY_KEY }}
+        run: |
+          test -n "$DDS_KEY" || {
+            echo "::error::secret DDS_CONTRACT_READ_DEPLOY_KEY is not provisioned: add a read-only deploy key on Vanguduza/dial-development-system and store its private half in this repository's Actions secrets"
+            exit 1
+          }
+      - name: Check out pinned DDS source contracts (sibling)
+        uses: actions/checkout@v4
+        with:
+          repository: Vanguduza/dial-development-system
+          ref: 64d6b7158c723b7700e5b53175ea8048d4e92d00
+          ssh-key: ${{ secrets.DDS_CONTRACT_READ_DEPLOY_KEY }}
+          persist-credentials: false
+          path: .dds-contract-pin
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            agent-system/orchestration/android-testing-mcp.mjs
+            agent-system/orchestration/android-testing-plane.mjs
+            deploy/netcup/hermes-control/artemis/dial_artemis_mcp_bridge.py
+            agent-system/orchestration/engineering-resource-registry.mjs
+            agent-system/orchestration/engineering-resource-resolver.mjs
+            agent-system/orchestration/skill-registry.mjs
+            agent-system/orchestration/skill-resolver.mjs
+            agent-system/orchestration/state-store.mjs
+      - name: Verify pinned DDS contract blobs and place the sibling
+        run: |
+          set -euo pipefail
+          cd .dds-contract-pin
+          test "$(git rev-parse HEAD)" = 64d6b7158c723b7700e5b53175ea8048d4e92d00
+          while read -r blob path; do
+            test "$(git hash-object "$path")" = "$blob" || { echo "::error file=$path::DDS contract blob mismatch"; exit 1; }
+          done <<'EOF'
+          4aca852dea44cb07401ca92bf970eb3a78c1db2d agent-system/orchestration/android-testing-mcp.mjs
+          c99f02f3df35f6b9aa880923dd6b01ca3118d644 agent-system/orchestration/android-testing-plane.mjs
+          9134ddc864ab174c000b6e434d2675ba01352006 deploy/netcup/hermes-control/artemis/dial_artemis_mcp_bridge.py
+          ae3d794c69acedcc2aadcfe3c280d0456dc353ff agent-system/orchestration/engineering-resource-registry.mjs
+          2d7a6fe97753a080fc32763155dfb8959794ba84 agent-system/orchestration/engineering-resource-resolver.mjs
+          e51df40224a674f6a08d203bf89fffc88bc8a33b agent-system/orchestration/skill-registry.mjs
+          da029793d95407cdee21c4957f6483d8d3eb64a4 agent-system/orchestration/skill-resolver.mjs
+          a9af6f44d4d9dd9624f99d2677ec6ca1dbce200c agent-system/orchestration/state-store.mjs
+          EOF
+          cd ..
+          mv .dds-contract-pin ../dial-development-system
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24.19.0"
       - name: Install backend dependencies
         working-directory: backend
         # GAP-F-017 — installed from the exact-pinned lock, not the floating spec, so this
@@ -47,9 +434,7 @@ jobs:
 
       - name: Character Forge pinned Rive CLI authoring smoke
         run: |
-          sudo apt-get update
-          sudo apt-get install -y --no-install-recommends \
-            libgl1 libegl1 libgles2 libx11-6 libxkbcommon0 libfontconfig1 libfreetype6 libxcb1
+          python tools/rebuild/ci_ubuntu_libraries.py
           tmp="$(mktemp -d)"
           curl -fsSL https://releases.rive.app/cli/v1.1.1/rive-linux-x64.tar.gz -o "$tmp/rive.tar.gz"
           echo "41684e9d99fea98e01c2c155e07ec985130b95b640410dc0fbe4ca30c271a7d5  $tmp/rive.tar.gz" | sha256sum -c -
@@ -70,13 +455,33 @@ jobs:
         run: pytest -q
       - name: Contract tests
         run: pytest -q tests/contracts
+      - name: OpenMuse → VAN convergence repository certification
+        run: |
+          python tools/certification/openmuse_van_convergence.py \
+            --check \
+            --output artifacts/release/openmuse-van/convergence-certification.json
+      - name: Upload OpenMuse → VAN convergence evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: van-openmuse-convergence-certification
+          path: artifacts/release/openmuse-van/convergence-certification.json
+          if-no-files-found: error
+
 
       # Rev 1.5 §13.2 — the Browser Control Agent. It lives outside backend/ because it
       # runs on the Browser Stream Host rather than on the Gateway, so neither of the two
       # suites above reaches it. Its authority checks are pure and executed here; the CDP
       # transport behind them needs a Chromium and is RB-010/RB-117, a host gate.
+      # The stream host runs from a venv holding only deploy/van-browser-stream/requirements.lock
+      # (hash-pinned) with van_gateway on PYTHONPATH (bootstrap.sh). Its tests need aiortc/av/aiohttp,
+      # which the backend lock lacks, and that lock pins cryptography and pyee differently, so the
+      # services suite runs in the same isolated environment rather than altering the backend one.
       - name: Browser Control Agent and stream-host logic
-        run: pytest -q services
+        run: |
+          python -m venv "$RUNNER_TEMP/stream-venv"
+          "$RUNNER_TEMP/stream-venv/bin/pip" install --require-hashes -r deploy/van-browser-stream/requirements.lock
+          "$RUNNER_TEMP/stream-venv/bin/pip" install pytest==9.1.1 pytest-asyncio==1.4.0
+          PYTHONPATH="$PWD:$PWD/backend" "$RUNNER_TEMP/stream-venv/bin/python" -m pytest -q services
 
       # Protocol rule 31, Android half. A compiler finds code that does not build; this
       # finds code that builds, is tested, and nothing reaches — the class P0-AND-012 lived
@@ -139,6 +544,8 @@ jobs:
         run: python trading/tools/migrate_capsule_timeframes.py --check
 
       - name: Trading enhancement tests
+        env:
+          DIAL_REPO: ${{ github.workspace }}/../dial-development-system
         run: pytest -q trading/tests/
 
       # Rev 5.1 G15 / TRD-REV51-133. This certifies repository implementation
@@ -201,6 +608,9 @@ jobs:
         with:
           distribution: temurin
           java-version: "17"
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
       # Runs before the Android build because it needs no Android toolchain: it compiles
       # the app's own pure decision files (the owner status projection and the mission read
       # models) on the JVM and executes their tests. When the Android Gradle Plugin cannot
@@ -217,6 +627,31 @@ jobs:
         env:
           VAN_DEBUG_KEYSTORE_BASE64: ${{ secrets.VAN_DEBUG_KEYSTORE_BASE64 }}
         run: bash tools/ci/restore_debug_keystore.sh
+      - name: Prepare exact pinned generic offline voice assets
+        run: python3 android/tools/package_voice_assets.py --acquire
+      - name: Build Candidate B mechanics prototype
+        run: |
+          python -m pip install --disable-pip-version-check "Pillow==12.3.0" "vtracer==0.6.15" "PyYAML==6.0.2"
+          python tools/rebuild/ci_ubuntu_libraries.py
+          tmp="$(mktemp -d)"
+          curl -fsSL https://releases.rive.app/cli/v1.1.1/rive-linux-x64.tar.gz -o "$tmp/rive.tar.gz"
+          echo "41684e9d99fea98e01c2c155e07ec985130b95b640410dc0fbe4ca30c271a7d5  $tmp/rive.tar.gz" | sha256sum -c -
+          tar -xzf "$tmp/rive.tar.gz" -C "$tmp"
+          rive_bin="$(find "$tmp" -type f -name rive -perm -u+x -print -quit)"
+          test -n "$rive_bin"
+          mkdir -p "$RUNNER_TEMP/van-character-forge-bin"
+          install -m 0755 "$rive_bin" "$RUNNER_TEMP/van-character-forge-bin/rive"
+          export PATH="$RUNNER_TEMP/van-character-forge-bin:$PATH"
+          python -m tools.character_forge.build_candidate_b_rive_prototype
+          test -s visual-authority/character-forge/08-prototypes/candidate-b-mechanics/build/van_candidate_b_mechanics_proto.riv
+      - name: Stage Candidate B Character Rig Lab asset
+        run: |
+          candidate="visual-authority/character-forge/08-prototypes/candidate-b-mechanics/build/van_candidate_b_mechanics_proto.riv"
+          test -f "$candidate"
+          mkdir -p android/app/src/debug/assets
+          cp "$candidate" android/app/src/debug/assets/van_candidate.riv
+          printf '%s\n' core > android/app/src/debug/assets/forge_mode.txt
+          echo "Candidate B mechanics prototype staged into the debug-only Character Rig Lab."
       - name: Android unit tests, build and lint
         working-directory: android
         run: |
@@ -270,11 +705,42 @@ jobs:
         with:
           distribution: temurin
           java-version: "17"
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
       - name: Enable KVM for the emulator
         run: |
           echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
           sudo udevadm control --reload-rules
           sudo udevadm trigger --name-match=kvm
+      - name: Build Candidate B mechanics prototype
+        run: |
+          python -m pip install --disable-pip-version-check "Pillow==12.3.0" "vtracer==0.6.15" "PyYAML==6.0.2"
+          python tools/rebuild/ci_ubuntu_libraries.py
+          tmp="$(mktemp -d)"
+          curl -fsSL https://releases.rive.app/cli/v1.1.1/rive-linux-x64.tar.gz -o "$tmp/rive.tar.gz"
+          echo "41684e9d99fea98e01c2c155e07ec985130b95b640410dc0fbe4ca30c271a7d5  $tmp/rive.tar.gz" | sha256sum -c -
+          tar -xzf "$tmp/rive.tar.gz" -C "$tmp"
+          rive_bin="$(find "$tmp" -type f -name rive -perm -u+x -print -quit)"
+          test -n "$rive_bin"
+          mkdir -p "$RUNNER_TEMP/van-character-forge-bin"
+          install -m 0755 "$rive_bin" "$RUNNER_TEMP/van-character-forge-bin/rive"
+          export PATH="$RUNNER_TEMP/van-character-forge-bin:$PATH"
+          python -m tools.character_forge.build_candidate_b_rive_prototype
+          test -s visual-authority/character-forge/08-prototypes/candidate-b-mechanics/build/van_candidate_b_mechanics_proto.riv
+      - name: Bind Candidate B mechanics prototype for CI only
+        run: |
+          prototype="visual-authority/character-forge/08-prototypes/candidate-b-mechanics/build/van_candidate_b_mechanics_proto.riv"
+          test_candidate="android/app/src/androidTest/assets/van_candidate.riv"
+          debug_candidate="android/app/src/debug/assets/van_candidate.riv"
+          if [[ -f "$prototype" ]]; then
+            mkdir -p "$(dirname "$test_candidate")" "$(dirname "$debug_candidate")"
+            cp "$prototype" "$test_candidate"
+            cp "$prototype" "$debug_candidate"
+            printf '%s\n' core > android/app/src/androidTest/assets/forge_mode.txt
+            printf '%s\n' core > android/app/src/debug/assets/forge_mode.txt
+            echo "Bound Candidate B mechanics prototype to androidTest and the debug host used by RiveContractTest."
+          fi
       - name: Bind Character Forge validation input
         run: |
           mkdir -p artifacts/character-forge
@@ -290,6 +756,8 @@ jobs:
           else
             printf '%s\n' NO_RIVE_ASSET > artifacts/character-forge/van_production.sha256
           fi
+      - name: Prepare exact pinned generic offline voice assets
+        run: python3 android/tools/package_voice_assets.py --acquire
       - name: Instrumentation tests (owner surface, Floating VAN)
         uses: reactivecircus/android-emulator-runner@v2
         timeout-minutes: 40
@@ -303,7 +771,7 @@ jobs:
           working-directory: android
           script: |
             chmod +x gradlew
-            ./gradlew :app:connectedDebugAndroidTest --console=plain
+            bash -c 'set +e; ./gradlew :app:connectedDebugAndroidTest -PVAN_TEST_ABI=x86_64 --console=plain; result=$?; mkdir -p app/build/reports/voice-runtime; adb logcat -d -v threadtime VanVoiceRuntime:I AndroidRuntime:E "*:S" > app/build/reports/voice-runtime/logcat.txt; exit "$result"'
             find app/build/outputs/connected_android_test_additional_output -type f -print || echo "no screenshots captured"
       # The SHA files above say which bytes were checked out; this says what RiveContractTest
       # concluded about them. `cli rive record-validation` refuses a PASS this file does not state.
@@ -321,6 +789,13 @@ jobs:
         with:
           name: van-instrumentation-report
           path: android/app/build/reports/androidTests/connected
+          if-no-files-found: warn
+      - name: Upload native voice readiness diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: van-voice-runtime
+          path: android/app/build/reports/voice-runtime
           if-no-files-found: warn
       - name: Upload Character Forge validation binding
         if: always()
@@ -359,6 +834,41 @@ jobs:
   mutation:
     runs-on: ubuntu-latest
     continue-on-error: true
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - label: python-0
+            family: python
+            shard: 0/4
+          - label: python-1
+            family: python
+            shard: 1/4
+          - label: python-2
+            family: python
+            shard: 2/4
+          - label: python-3
+            family: python
+            shard: 3/4
+          - label: browser-agent
+            family: browser-agent
+            shard: 0/1
+          - label: kotlin-0
+            family: kotlin
+            shard: 0/4
+          - label: kotlin-1
+            family: kotlin
+            shard: 1/4
+          - label: kotlin-2
+            family: kotlin
+            shard: 2/4
+          - label: kotlin-3
+            family: kotlin
+            shard: 3/4
+    env:
+      MUTATION_FAMILY: ${{ matrix.family }}
+      MUTATION_SHARD: ${{ matrix.shard }}
+      PYTHONPATH: ${{ github.workspace }}:${{ github.workspace }}/backend:${{ github.workspace }}/trading
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -369,19 +879,35 @@ jobs:
           distribution: temurin
           java-version: "17"
       - name: Install backend dependencies
+        if: matrix.family == 'python'
         working-directory: backend
         run: pip install -r requirements.lock
+      - name: Install browser mutation dependencies
+        if: matrix.family == 'browser-agent'
+        run: |
+          pip install --require-hashes -r deploy/van-browser-stream/requirements.lock
+          pip install pytest==9.1.1 pytest-asyncio==1.4.0
+      - name: Install mutation Gradle
+        if: matrix.family == 'kotlin'
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.11.1'
+      - name: Resolve and prove the Kotlin control before offline mutations
+        if: matrix.family == 'kotlin'
+        working-directory: android/verification
+        run: gradle test --console=plain --rerun-tasks
       - name: Mutation testing (non-blocking)
         working-directory: backend
         timeout-minutes: 45
-        continue-on-error: true
         run: |
+          set -euo pipefail
           mkdir -p ../artifacts/mutation
-          python ../tools/audit/mutation_suite.py 2>&1 | tee ../artifacts/mutation/mutation-report.txt
+          python ../tools/rebuild/mutation_registry.py --check | tee ../artifacts/mutation/mutation-registry.json
+          python ../tools/audit/mutation_suite.py --family "$MUTATION_FAMILY" --shard "$MUTATION_SHARD" 2>&1 | tee ../artifacts/mutation/mutation-report.txt
       - name: Upload mutation report
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: van-mutation-report
-          path: artifacts/mutation/mutation-report.txt
+          name: van-mutation-report-${{ matrix.label }}
+          path: artifacts/mutation/
           if-no-files-found: warn

@@ -110,6 +110,22 @@ After mutation:
 4. Record provider/artifact provenance.
 5. Surface partial failures — never silent success.
 
+## Optional Jev System-1 judgments
+
+The `dial_jev` MCP server is an optional subordinate evidence source. Use only registered,
+bounded modules and only when the current task already has a legitimate VAN/Hermes reason
+to make that judgment.
+
+For owner intent, `van.intent.route.v1` may annotate the likely registered intent family
+and ambiguity. It does not resolve authority or create a command. For memory/context,
+`van.memory.relevance.v1` may order already-authorized candidate context; it never writes,
+promotes, deletes, or converts model output into memory truth.
+
+For every module, `apply_effect=false` means observe for shadow evaluation only and do not
+change the reasoning or workflow. Jev absence must preserve the normal VAN path exactly.
+Never send secrets or restricted data to Jev, and never use Jev output to weaken an owner,
+security, approval, browser, Project Truth, or VATI boundary.
+
 ## Secrets and prompts
 
 Never log, echo, or inject into prompts:

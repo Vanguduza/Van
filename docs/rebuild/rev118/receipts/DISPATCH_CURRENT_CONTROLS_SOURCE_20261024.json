@@ -1,0 +1,233 @@
+{
+  "schema": "van.rebuild.dispatch-current-controls-source/1",
+  "source_parent": "ab981b8573b0a7784ada912dc4910fde30855d58",
+  "observed_at_utc": "2026-10-24T14:15:44.254297+00:00",
+  "source_sha256": {
+    ".github/workflows/van-ci.yml": "13e66ad58019c6806841c5f77d7899992e1658ea5cd4ddbe8b5011f11f33d94a",
+    "tools/ci/github-actions-ci.yml": "13e66ad58019c6806841c5f77d7899992e1658ea5cd4ddbe8b5011f11f33d94a",
+    "trading/tests/test_funding_risk_fence.py": "76e6bb956fbbe9b508146ef21632239bc176e4f965c907ea3ec10688f18f0875",
+    "trading/vati/app/account_service.py": "8ede36774f79b12ee3a33a6fc8749c9c952fc150b3c853b3195cffd48bf3f7cb",
+    "trading/vati/app/cycle.py": "0bc3ca3e830bc2c1a2f34a14a9627264ee9e79b1aec5d3f7a8d1c4a9170b7c5b",
+    "trading/vati/execution/pretrade.py": "ea81974f4cea44519e80bfc28c7ce36e80d7401e8d6f6d62ffb18ac230e444f2",
+    "trading/vati/execution/router.py": "e2e89fd5936b62cf02c26dfb8b2c230a1c11286c8b14737ef735d91becfd84be",
+    "trading/tests/test_dispatch_current_controls.py": "dc9d72fd464e89021dbcac399163029b91fd13bcbdf08c8ad2f8433086bf6122"
+  },
+  "integration_preimages": {
+    ".github/workflows/van-ci.yml": "107537144e5b3b3b4d9d6e2a9ebf4cc44135621391076f19a3f209e4c8482a8f",
+    "tools/ci/github-actions-ci.yml": "107537144e5b3b3b4d9d6e2a9ebf4cc44135621391076f19a3f209e4c8482a8f",
+    "trading/tests/test_funding_risk_fence.py": "985ad71afe80fd194c055b7e6c1ccaec1e731d3a5e811dbe401578b1d8f47ed0",
+    "trading/vati/app/account_service.py": "3e88a0d73cae59d4730e2dc1c687c50435b109a6464df8dcf815aab08af3597a",
+    "trading/vati/app/cycle.py": "dbe1a091dc3db13292e13e4c7ecdb27a99f9eeeae47f06653d94053642fc7d70",
+    "trading/vati/execution/pretrade.py": "f3afda15b1e5d1e325d8baac57bef5e624f6ece0b12791cc7f3004b87eeca9f3",
+    "trading/vati/execution/router.py": "a7608280be50695249b76ea29867839a8cfed71cd0ef25e1aa1428c9d1dec73d",
+    "trading/tests/test_dispatch_current_controls.py": null
+  },
+  "baseline_counterexamples": {
+    "tests": 6,
+    "failures": 5,
+    "errors": 0,
+    "skipped": 0,
+    "passed": 1,
+    "xml_sha256": "9afd2a50f61ad800c521b709f4059e382f79f8fe5f002163e0e4bb3fc4e5187d"
+  },
+  "executions": {
+    "focused_sender_market_mandate_and_risk": {
+      "tests": 155,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 1,
+      "passed": 154,
+      "xml_sha256": "f4bcf6ead97f022cd2a2a7cb62b3676b68ac691c9a18ab49f6c0200a4aecdd03"
+    },
+    "actual_isolated_postgres_and_production_builders": {
+      "tests": 114,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "passed": 114,
+      "xml_sha256": "4c67caa13ffbd72b59edd61fc5fdae46ae6e3dac1e488e115052a322d014aff2"
+    },
+    "ci_artifact_private_pin_and_template_contracts": {
+      "tests": 17,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "passed": 17,
+      "xml_sha256": "250c41635962beaaec1cc2fbabac8ce793add32016d79291ba360151556f25cd"
+    }
+  },
+  "private_postgres_stopped_and_removed": true,
+  "fault_control_pairs": {
+    "baseline": {
+      "exit_code": 0,
+      "log_sha256": "0c46e4c44d44bf789204bb8d2da3a3bd630f83e5845b897f9f2e8ed892781990",
+      "xml_sha256": "bd727c763774beb15067764219cb523bfedbd4bdd0970945bbacc49f502de448"
+    },
+    "cases": [
+      {
+        "case": "late-kill-ignored",
+        "path": "trading/vati/execution/router.py",
+        "source_sha256": "e2e89fd5936b62cf02c26dfb8b2c230a1c11286c8b14737ef735d91becfd84be",
+        "fault": {
+          "exit_code": 1,
+          "log_sha256": "c6c8886b63a16b46f122c9e01048444a71753e6e59e001693bd14aecaffaaaf5",
+          "xml_sha256": "b55a86d540100c02ca48ee3db90f7fc39640ee63873fcfb24fd76e7060b4c089"
+        },
+        "restored": {
+          "exit_code": 0,
+          "log_sha256": "469fd07dce9b57b9dd9f8a615ab322d2a088b39c3dd493b6401ba9da209e76dd",
+          "xml_sha256": "ff8913ddc111a3fb901cb1e2d4c7094f1cb54046495de321bb6c0155adf55515"
+        }
+      },
+      {
+        "case": "dispatch-delay-does-not-age-mark",
+        "path": "trading/vati/execution/router.py",
+        "source_sha256": "e2e89fd5936b62cf02c26dfb8b2c230a1c11286c8b14737ef735d91becfd84be",
+        "fault": {
+          "exit_code": 1,
+          "log_sha256": "64dc065af5e444531d695e8c7a1ed655f194adeebc1c4750ee115c37ccd29e9b",
+          "xml_sha256": "82b53fe51de7fe54a0a9c7f466edcdeae35ce4417a0a99271a8d447f6dd01076"
+        },
+        "restored": {
+          "exit_code": 0,
+          "log_sha256": "c16c95b7de1beb34f66263c263fab0add8a7541a71cf910c40949f5e954bcc6a",
+          "xml_sha256": "0826b1bfbec0f010b8d49b51b4714556c4b9b423d49e1c17f68c54682a2f714a"
+        }
+      },
+      {
+        "case": "stale-pretrade-result-reused",
+        "path": "trading/vati/execution/router.py",
+        "source_sha256": "e2e89fd5936b62cf02c26dfb8b2c230a1c11286c8b14737ef735d91becfd84be",
+        "fault": {
+          "exit_code": 1,
+          "log_sha256": "dc0ca94e88953c3e3c1757c3c75fde8b8e24dc76b88c9bf7d41531a4e84211f7",
+          "xml_sha256": "7532c9d21256cebc5c5f94e86ab4c11b9d4a823d0e13e8ef1c48ddde41dc960e"
+        },
+        "restored": {
+          "exit_code": 0,
+          "log_sha256": "40aa8ae1bb1d6f6e3b045c0a2b9309fc9dbfc2b8c63935b973183171b0650d08",
+          "xml_sha256": "89f7dfb011bb2df767e993461ab4a1c99c7e41fbca8687564dac74ebf24e46e4"
+        }
+      },
+      {
+        "case": "single-cycle-age-reset",
+        "path": "trading/vati/app/cycle.py",
+        "source_sha256": "0bc3ca3e830bc2c1a2f34a14a9627264ee9e79b1aec5d3f7a8d1c4a9170b7c5b",
+        "fault": {
+          "exit_code": 1,
+          "log_sha256": "a9ea87acd84776c8f8bcabf449fd58a69479c0c52be75fabbc6bc8eb61b9157b",
+          "xml_sha256": "2b10368c718dfe2a6131685edb9fa8ee5b8fa05db498e376817ba190d78771ef"
+        },
+        "restored": {
+          "exit_code": 0,
+          "log_sha256": "613ee3d94bed7b527f9c431bd38b788a5e47bb42d50e4ab72e6448743ba8814b",
+          "xml_sha256": "5bb866d25f235d7b1e439e0e3f2ffb7600c3b0e81ad427cf77476ccf199e95f2"
+        }
+      },
+      {
+        "case": "book-delta-age-reset",
+        "path": "trading/vati/app/account_service.py",
+        "source_sha256": "8ede36774f79b12ee3a33a6fc8749c9c952fc150b3c853b3195cffd48bf3f7cb",
+        "fault": {
+          "exit_code": 1,
+          "log_sha256": "2a1fd7600a59b07370b250f60e2d067137a27c338832afd06a72d603e37f24a0",
+          "xml_sha256": "ef40c74210852af407b23fe7af21cdd3af97d4e9653009cd9584a5ddbef922be"
+        },
+        "restored": {
+          "exit_code": 0,
+          "log_sha256": "2b461ddf6f201b999840b0f7053854a9bdf41d89a3a50e36d9e8fbafbc33b119",
+          "xml_sha256": "6ffc397028bae097a68ce1a6721d886aaed7e54cfcd8756cf57c8b07b7a84f06"
+        }
+      },
+      {
+        "case": "book-entry-age-reset",
+        "path": "trading/vati/app/account_service.py",
+        "source_sha256": "8ede36774f79b12ee3a33a6fc8749c9c952fc150b3c853b3195cffd48bf3f7cb",
+        "fault": {
+          "exit_code": 1,
+          "log_sha256": "03899870def7d21fe92a8991bd39bc6de1cb7dc5595f6e2c50d2f73906e34053",
+          "xml_sha256": "1338af40d9809eac0ade0a8926dc1e8b11dab1023047face940316b67319ecfe"
+        },
+        "restored": {
+          "exit_code": 0,
+          "log_sha256": "469fd07dce9b57b9dd9f8a615ab322d2a088b39c3dd493b6401ba9da209e76dd",
+          "xml_sha256": "82c6001bce0eaf7e72ceecb074f03c275d5e1fdb954e0be64b689fae814b3abc"
+        }
+      },
+      {
+        "case": "book-risk-age-reset",
+        "path": "trading/vati/app/account_service.py",
+        "source_sha256": "8ede36774f79b12ee3a33a6fc8749c9c952fc150b3c853b3195cffd48bf3f7cb",
+        "fault": {
+          "exit_code": 1,
+          "log_sha256": "f145033c24633daa9f4cb2ef0549f578e27ab72335dcd90ef0e684d2e735ff9f",
+          "xml_sha256": "682c0229f621e657c97bf76bad764859a6303ed14f273381f91bd8e1023f4ee5"
+        },
+        "restored": {
+          "exit_code": 0,
+          "log_sha256": "613ee3d94bed7b527f9c431bd38b788a5e47bb42d50e4ab72e6448743ba8814b",
+          "xml_sha256": "d274dae640df875ce65011cecea01028820cf4f159921afe7f4ec5cfdac85f62"
+        }
+      },
+      {
+        "case": "changed-quantisation-ignored",
+        "path": "trading/vati/execution/router.py",
+        "source_sha256": "e2e89fd5936b62cf02c26dfb8b2c230a1c11286c8b14737ef735d91becfd84be",
+        "fault": {
+          "exit_code": 1,
+          "log_sha256": "c9294b8c08b09df996018a93f978a34a65fc01d3616fac88772ebfaec968adc3",
+          "xml_sha256": "71b4879fcfbb015889f213b573239b09c415a729035175951d10b7a03c593654"
+        },
+        "restored": {
+          "exit_code": 0,
+          "log_sha256": "73fe2684d0b852eab2790118e83ac8b19d65e430359dad4f94bfeae44426924d",
+          "xml_sha256": "e17758c3c29a150949556c486bb87aa3e12a5193abbc667651bb234dfc61ef3a"
+        }
+      },
+      {
+        "case": "future-market-origin-accepted",
+        "path": "trading/vati/execution/pretrade.py",
+        "source_sha256": "ea81974f4cea44519e80bfc28c7ce36e80d7401e8d6f6d62ffb18ac230e444f2",
+        "fault": {
+          "exit_code": 1,
+          "log_sha256": "7fd4949b9bdc319bf88497cbe75cb36475054ebf5442b4d11034cb790106c9b6",
+          "xml_sha256": "b1af3a7fe04ec9a2360663ce06e2da9543d8dfaf5f8b755f0489708f8ed7d1c1"
+        },
+        "restored": {
+          "exit_code": 0,
+          "log_sha256": "937cae0838f98cedcc85f333f1ecba8974762b64374f64f7b8e62794753a2469",
+          "xml_sha256": "8f791ecea8043597b4b77968725529732dd2f568df2c936261ca2a7e491e730d"
+        }
+      }
+    ],
+    "qualification": "Actual risk approvals, router, original market-source clocks and paper sender; no live broker or effect authority."
+  },
+  "retained_earlier_resource_attempt": {
+    "state": "PG112-case parallel invocation previously failed one native-thread creation,111passed; final sequential exact source114pass0skip. Earlier test XML shared its output path and was replaced by final run; retained driver log only.",
+    "driver_log_sha256": "bdcead1d56da039a61bc389f25c074d7572c54aea5612aa7539031f76676a594"
+  },
+  "fresh_worker_extension": {
+    "state": "NOT_EXECUTED_ON_THIS_SOURCE_YET",
+    "selected_public_browser_harness_files": 50,
+    "original_11_case_no_skip_gate": "UNCHANGED",
+    "listener_uid_control": "Same original source test rerun as root; full ordinary browser suite may skip this one case only.",
+    "firewall_controls": "All10 original contracts including5 actual disposable-network-namespace kernel cases require zero skips.",
+    "scope": "Ephemeral source-test worker only; no real host provisioning, firewall activation or native acceptance.",
+    "private_backend_dds_and_trusted_main_gates": "RETAINED"
+  },
+  "qualification": [
+    "RiskAuthority approvals, real router, actual runtime constructors and paper sender are exercised with controlled clocks and explicit source facts. No broker execution or financial permission.",
+    "Recheck halt, runtime lease, original quote age, route and built-command quantisation before consuming the idempotency key or publishing the order. Never enlarge or resize a command after approval.",
+    "Single service keeps age accumulated during its actual snapshot read; account entry/delta sender and risk snapshot age from the original market-state timestamp, including waiting before native I/O.",
+    "This is not full current-account/exposure RiskAuthority re-evaluation or joint funding/order reservation. Those remain open alongside flow-adjusted economics/provider work.",
+    "Frozen package,131units,324requirements,1610identities and source feature/screen registries remain unchanged; no F15/BG, whole-unit, production, provider financial, deployed-host or S24 claim."
+  ],
+  "last_lease_read_counterexamples": {
+    "tests": 2,
+    "failures": 2,
+    "errors": 0,
+    "skipped": 0,
+    "passed": 0,
+    "xml_sha256": "32281e5aa272b53c01f6bce8fe9a7d307018250af2065ffb278b0cab2027d55b"
+  }
+}

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.dial.van.session.SessionEnvelopeTest" tests="6" skipped="0" failures="0" errors="0" timestamp="2026-10-07T22:11:47" hostname="052fefa249ff" time="0.003">
+  <properties/>
+  <testcase name="re-addressing a message after a failover keeps its identity()" classname="com.dial.van.session.SessionEnvelopeTest" time="0.001"/>
+  <testcase name="the digest is computed from the payload rather than taken on trust()" classname="com.dial.van.session.SessionEnvelopeTest" time="0.001"/>
+  <testcase name="a different payload digests differently()" classname="com.dial.van.session.SessionEnvelopeTest" time="0.0"/>
+  <testcase name="optional identifiers are absent rather than null()" classname="com.dial.van.session.SessionEnvelopeTest" time="0.0"/>
+  <testcase name="key order in the payload does not change the digest()" classname="com.dial.van.session.SessionEnvelopeTest" time="0.001"/>
+  <testcase name="re-addressing does not mutate the message it was given()" classname="com.dial.van.session.SessionEnvelopeTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

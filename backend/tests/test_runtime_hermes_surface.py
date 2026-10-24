@@ -1,16 +1,14 @@
 """GAP-F-003/006/015 (RC-A) — the Hermes tool surface Hermes needs to observe trading
-state, propose memory candidates, create owner reminders on the owner's behalf, and read
-the attention/briefing state, all through the gateway, all read-or-proposal.
+state, propose memory candidates, create owner reminders and evidence-backed suggestions
+on the owner's behalf, and read the attention/briefing state, all through the gateway,
+all read-or-proposal.
 
 Every new route lives on `OwnerRuntimeApi` (`backend/van_gateway/runtime_api.py`) behind
 the same `_require_internal(ControlScope.RUNTIME)` guard every other runtime route uses.
 `create_app()` does not pass the new `trading=`/`reminders=`/`attention=`/`briefing=`
-constructor kwargs (that wiring is for the manager to add in `app.py`; see the module
-docstring above `OwnerRuntimeApi.__init__`), so against the real app every one of these
-routes answers 503 by construction. To exercise the wired, 200-shape behaviour this file
-follows `test_rev31_runtime_wiring.py`'s own pattern of monkeypatching the already
-constructed `app.state.owner_runtime` in place, the same technique that file uses for
-`context.compile_snapshot` — not a call into `app.py`.
+constructor kwargs were once intentionally left unwired; `create_app()` now supplies
+the canonical services. Individual tests still force a dependency to None to prove the
+fail-closed 503 posture rather than relying on an obsolete unwired deployment.
 """
 
 from __future__ import annotations
@@ -360,3 +358,66 @@ async def test_app_wires_the_hermes_surface_by_default(client):
     rt = app.state.owner_runtime
     assert rt.trading is not None and rt.reminders is not None
     assert rt.attention is not None and rt.briefing is not None
+    assert rt.suggestions is not None
+
+
+
+@pytest.mark.asyncio
+async def test_suggestion_create_requires_evidence_and_never_executes(client):
+    ac, app = client
+    before = await app.state.store.fetchone("SELECT COUNT(*) AS n FROM action_executions")
+
+    denied = await ac.post(
+        "/v1/runtime/suggestions",
+        headers=HDRS,
+        json={
+            "title":"Review supplier date",
+            "rationale":"A source changed",
+            "proposed_prompt":"Review the supplier delivery date",
+            "source_refs":[],
+        },
+    )
+    assert denied.status_code == 422
+
+    created = await ac.post(
+        "/v1/runtime/suggestions",
+        headers=HDRS,
+        json={
+            "title":"Review supplier date",
+            "rationale":"Mail m1 states a revised delivery date.",
+            "proposed_prompt":"Review the supplier delivery date",
+            "source_refs":["google://gmail/messages/m1"],
+            "project_id":"dial",
+        },
+    )
+    assert created.status_code == 200, created.text
+    body = created.json()
+    assert body["status"] == "NEW"
+    assert body["execution_created"] is False
+    assert body["owner_decision_required"] is True
+
+    after = await app.state.store.fetchone("SELECT COUNT(*) AS n FROM action_executions")
+    assert int(after["n"]) == int(before["n"])
+    attention = await ac.get("/v1/runtime/attention", headers=HDRS)
+    assert any(
+        item["payload"].get("suggestion_id") == body["suggestion_id"]
+        for item in attention.json()["items"]
+    )
+
+
+@pytest.mark.asyncio
+async def test_suggestion_create_503_when_unwired(client, monkeypatch):
+    ac, app = client
+    monkeypatch.setattr(app.state.owner_runtime, "suggestions", None)
+    response = await ac.post(
+        "/v1/runtime/suggestions",
+        headers=HDRS,
+        json={
+            "title":"Idea",
+            "rationale":"Evidence says so",
+            "proposed_prompt":"Inspect it",
+            "source_refs":["ev:1"],
+        },
+    )
+    assert response.status_code == 503
+    assert response.json()["detail"] == "suggestions_unwired"

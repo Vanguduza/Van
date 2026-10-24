@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.dial.van.browser.BrowserTransfersTest" tests="5" skipped="0" failures="0" errors="0" timestamp="2026-10-08T04:43:33" hostname="052fefa249ff" time="0.017">
+  <properties/>
+  <testcase name="transfer grant cannot cross session target peer operation resource or content()" classname="com.dial.van.browser.BrowserTransfersTest" time="0.001"/>
+  <testcase name="upload receipt needs actual attachment target epoch and identical bytes()" classname="com.dial.van.browser.BrowserTransfersTest" time="0.002"/>
+  <testcase name="download policy actions alone never admit actual phone transfer()" classname="com.dial.van.browser.BrowserTransfersTest" time="0.0"/>
+  <testcase name="clipboard bound uses UTF8 bytes and rejects oversized text()" classname="com.dial.van.browser.BrowserTransfersTest" time="0.009"/>
+  <testcase name="bytes are bounded during streaming and require exact content proof()" classname="com.dial.van.browser.BrowserTransfersTest" time="0.002"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

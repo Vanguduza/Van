@@ -1,0 +1,46 @@
+{
+  "schema_version": 1,
+  "kind": "DIRECT_KOTLIN_JUNIT_SOURCE_POLICY_PROOF",
+  "source_inputs_before": {
+    "android/app/src/main/java/com/dial/van/security/VanCanonicalJson.kt": "b0ff62237f2054bba5c8e77a64654eda4a4f0a6d374d9c1754e38caf90d97626",
+    "android/app/src/main/java/com/dial/van/voice/SpeakerEnrollmentPolicy.kt": "8983a36b36fa0895fb6dd5ef5640af1add1e2341a4c9680c1febdb15d1450689",
+    "android/verification/src/test/kotlin/com/dial/van/voice/SpeakerEnrollmentPolicyTest.kt": "58fe676df9dcf0c3a5cc9a3220b5a11b4e34b4050ffe0190b9683cc270d15ab3"
+  },
+  "source_inputs_after": {
+    "android/app/src/main/java/com/dial/van/security/VanCanonicalJson.kt": "b0ff62237f2054bba5c8e77a64654eda4a4f0a6d374d9c1754e38caf90d97626",
+    "android/app/src/main/java/com/dial/van/voice/SpeakerEnrollmentPolicy.kt": "8983a36b36fa0895fb6dd5ef5640af1add1e2341a4c9680c1febdb15d1450689",
+    "android/verification/src/test/kotlin/com/dial/van/voice/SpeakerEnrollmentPolicyTest.kt": "58fe676df9dcf0c3a5cc9a3220b5a11b4e34b4050ffe0190b9683cc270d15ab3"
+  },
+  "source_inputs_unchanged": true,
+  "compiler_command": [
+    "java",
+    "-cp",
+    "/workspace/.onboarding/gradle-8.11.1/lib/kotlin-compiler-embeddable-2.0.20.jar:/workspace/.onboarding/gradle-8.11.1/lib/kotlin-stdlib-2.0.20.jar:/workspace/.onboarding/gradle-8.11.1/lib/kotlin-script-runtime-2.0.20.jar:/workspace/.onboarding/gradle-8.11.1/lib/kotlin-reflect-2.0.20.jar:/workspace/.onboarding/gradle-8.11.1/lib/trove4j-1.0.20200330.jar:/workspace/.onboarding/gradle-8.11.1/lib/annotations-24.0.1.jar:/workspace/.onboarding/gradle-8.11.1/lib/kotlinx-coroutines-core-jvm-1.6.4.jar",
+    "org.jetbrains.kotlin.cli.jvm.K2JVMCompiler",
+    "-no-stdlib",
+    "-no-reflect",
+    "-classpath",
+    "/workspace/.onboarding/gradle-8.11.1/lib/kotlin-stdlib-2.0.20.jar:/workspace/.onboarding/gradle/caches/modules-2/files-2.1/org.json/json/20240303/ebb88e8fb5122b7506d5cf1d69f1ccdb790d22a/json-20240303.jar:/workspace/.onboarding/gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-test/1.9.24/e361ebc4889f48517d9de6453435e452d90e2415/kotlin-test-1.9.24.jar:/workspace/.onboarding/gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-test-junit/1.9.24/bc3c3133bd2a2e35fdf0e4324bd12dea846d1b52/kotlin-test-junit-1.9.24.jar:/workspace/.onboarding/gradle-8.11.1/lib/junit-4.13.2.jar:/workspace/.onboarding/gradle-8.11.1/lib/hamcrest-core-1.3.jar:/workspace/.onboarding/gradle-8.11.1/lib/annotations-24.0.1.jar",
+    "-jvm-target",
+    "17",
+    "-d",
+    "/tmp/van-speaker-policy-direct/classes",
+    "/workspace/Van/android/app/src/main/java/com/dial/van/security/VanCanonicalJson.kt",
+    "/workspace/Van/android/app/src/main/java/com/dial/van/voice/SpeakerEnrollmentPolicy.kt",
+    "/workspace/Van/android/verification/src/test/kotlin/com/dial/van/voice/SpeakerEnrollmentPolicyTest.kt"
+  ],
+  "test_command": [
+    "java",
+    "-cp",
+    "/tmp/van-speaker-policy-direct/classes:/workspace/.onboarding/gradle-8.11.1/lib/kotlin-stdlib-2.0.20.jar:/workspace/.onboarding/gradle/caches/modules-2/files-2.1/org.json/json/20240303/ebb88e8fb5122b7506d5cf1d69f1ccdb790d22a/json-20240303.jar:/workspace/.onboarding/gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-test/1.9.24/e361ebc4889f48517d9de6453435e452d90e2415/kotlin-test-1.9.24.jar:/workspace/.onboarding/gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-test-junit/1.9.24/bc3c3133bd2a2e35fdf0e4324bd12dea846d1b52/kotlin-test-junit-1.9.24.jar:/workspace/.onboarding/gradle-8.11.1/lib/junit-4.13.2.jar:/workspace/.onboarding/gradle-8.11.1/lib/hamcrest-core-1.3.jar:/workspace/.onboarding/gradle-8.11.1/lib/annotations-24.0.1.jar",
+    "org.junit.runner.JUnitCore",
+    "com.dial.van.voice.SpeakerEnrollmentPolicyTest"
+  ],
+  "compile_exit": 0,
+  "test_exit": 0,
+  "cases_passed": 22,
+  "gradle_executed": false,
+  "device_acceptance": "UNVERIFIED",
+  "speaker_identity_acceptance": "UNVERIFIED",
+  "acoustic_model_accuracy": "UNVERIFIED"
+}

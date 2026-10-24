@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.dial.van.browser.ViewportChromeClassTest" tests="2" skipped="0" failures="0" errors="0" timestamp="2026-10-07T22:11:46" hostname="052fefa249ff" time="0.001">
+  <properties/>
+  <testcase name="a tablet in split screen gets a phone's chrome()" classname="com.dial.van.browser.ViewportChromeClassTest" time="0.001"/>
+  <testcase name="the breakpoints are Android's own()" classname="com.dial.van.browser.ViewportChromeClassTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

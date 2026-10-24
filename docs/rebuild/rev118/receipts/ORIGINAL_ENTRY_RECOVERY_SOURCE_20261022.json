@@ -1,0 +1,601 @@
+{
+  "schema": "van.rebuild.original-entry-recovery-source/1",
+  "observed_at_utc": "2026-10-23T00:15:07.792547+00:00",
+  "source_parent": "4e4a60ae415f89fc0b978005fdd2d2b5cf9590b4",
+  "source_sha256": {
+    "trading/tests/test_mt5_original_entry_claim.py": "3ddc80e4896d5363c37b7afb90816c33429fd6d5b43977d127f51dca07901f60",
+    "trading/tests/test_mt5_pull.py": "48c55d51f82172bb04ccd94a5751c52387f3f3d14072e474fde8b1641e32827f",
+    "trading/tests/test_single_session_unknown_entry.py": "7723c8dd0a879f449396b8b103deffca425784da798c989196ab63ca1a257767",
+    "trading/tests/test_trade_intent_scope_identity.py": "a2e8f2d551a4429e7b5ae99d6d6bae54233cfdbebac415baaab27b35e9e8efc2",
+    "trading/vati/app/cycle.py": "3317a4e3c3a62fc3c3845514fbb6bb177387111612fee1b01655b0aa09d436de",
+    "trading/vati/app/entry_recovery.py": "26b6f5b64ae9b54f0ce6f0d7562ce3f1d647eab99bcfce779730999abb4701b2",
+    "trading/vati/app/service.py": "5893e2bc85f44877dfe3ef054baa94c39325224d00a886e2a90e0d13ba682bb4",
+    "trading/vati/app/session_recovery.py": "791f81ddafb78b7e1f456d986fa18b940d80539d13804061eef709e724a023d4",
+    "trading/vati/arbiter/opportunity.py": "8b3607dd4d38ebe3476a8e4cbf1ad6e88f4ab2c466e7335d57bd8847c51f873c",
+    "trading/vati/execution/mt5_pull.py": "fb63d1d943d230beaf8b43cb8c512b438d9784d8f7c17927e8fadc2b57df48c3",
+    "trading/vati/lifecycle/thesis.py": "1b0fff609ffa8727a23dea06116bf81eea740de3645a6e49a44dfbf3fe4690c4"
+  },
+  "counterexamples": {
+    "van-single-unknown-before-full-pg": {
+      "tests": 2,
+      "failures": 2,
+      "errors": 0,
+      "skipped": 0,
+      "sha256": "614cc6c1258a0946d95d2e2aad1e63f13c7b8f83cc8dc5b21c4224e3d89e80b5"
+    },
+    "van-single-unknown-late-before-full-pg": {
+      "tests": 4,
+      "failures": 2,
+      "errors": 0,
+      "skipped": 0,
+      "sha256": "bdfbf57704f418f79be57c2e5134501c726692b851296270dd56bc49f19c6e7e"
+    },
+    "van-intent-scope-before": {
+      "tests": 2,
+      "failures": 2,
+      "errors": 0,
+      "skipped": 0,
+      "sha256": "bbe8c3a7179803b8e98075b97d6ecd980c5218210b016d30acb63b7a72776edf"
+    },
+    "van-single-unknown-lost-before-full-pg": {
+      "tests": 5,
+      "failures": 1,
+      "errors": 0,
+      "skipped": 0,
+      "sha256": "e816946bd9ad34e2a9d9221c356239b0cfec87f7ccfc2e85f10e62a065ec595e"
+    },
+    "van-mt5-original-claim-before": {
+      "tests": 3,
+      "failures": 2,
+      "errors": 0,
+      "skipped": 0,
+      "sha256": "88d82da96684cb4abfed28c08b6a4f720d5785dd55c92f2b8f06d7ad3fd76639"
+    },
+    "van-single-unknown-publication-before-full-pg": {
+      "tests": 14,
+      "failures": 3,
+      "errors": 0,
+      "skipped": 0,
+      "sha256": "99bc1256380b6e4166f39032c6cd30529f1f71cd28c6e7b3d4d58dca6307004a"
+    },
+    "van-native-entry-replay-before-full-pg": {
+      "tests": 18,
+      "failures": 1,
+      "errors": 0,
+      "skipped": 0,
+      "sha256": "7d38bf4ba89058f918a5ecf6d6d44d9456f7cdcc8336f6a13329edfa4f3d834f"
+    },
+    "van-native-entry-quantity-before-full-pg": {
+      "tests": 1,
+      "failures": 1,
+      "errors": 0,
+      "skipped": 0,
+      "sha256": "581a09fea9ba931e9c5c519bbb61a1930ae1ed5a51b22495775cd7b63de64503"
+    },
+    "van-native-entry-initial-partial-before-full-pg": {
+      "tests": 2,
+      "failures": 2,
+      "errors": 0,
+      "skipped": 0,
+      "sha256": "7952a6d51abc94efdd3884b7039f040882d6094fa9d8b73917312b82a412afae"
+    }
+  },
+  "initial_full_existing_mt5_test_reused_completed_command": {
+    "tests": 2107,
+    "failures": 1,
+    "errors": 0,
+    "skipped": 0,
+    "sha256": "2457e05b00d5db560b1a537193496cc5ebc39f243494518bc96b6dacc99ab547"
+  },
+  "full_trading_real_private_postgresql": {
+    "tests": 2118,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "sha256": "cbcd19c6d686ab7f7d87efb5d69555e95ea41c5334e1037997c6ccfd8332bdfc"
+  },
+  "full_trading_log_sha256": "2c645c8ac2d7f427c48d5a4439add5b69231ad1868d4f1b3ba362d81b4ab1b5e",
+  "rebuild": {
+    "tests": 78,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "sha256": "a70285d02efb3f6dd6cc500527abbb5c57e5a62f0b606712fdd0f5c9f61ad647"
+  },
+  "source_faults": {
+    "records": [
+      {
+        "phase": "baseline",
+        "why": null,
+        "returncode": 0,
+        "log_sha256": "7fbc11c7465aa269d8c503214f22d91f0ee6ed6432d18d9dee707f79d0882a17"
+      },
+      {
+        "phase": "mutation",
+        "why": "release unknown reservation and both native admission fences",
+        "returncode": 1,
+        "log_sha256": "6817fe076430ea154edf788e50104c1cda50c0b6c1a99208638742ab9761916e"
+      },
+      {
+        "phase": "baseline",
+        "why": null,
+        "returncode": 0,
+        "log_sha256": "8b825a0ca09cbd58a9ec545662f1189bc76c04ed24d3a55be4929dfb392beb27"
+      },
+      {
+        "phase": "mutation",
+        "why": "report unknown native execution as its earlier risk approval",
+        "returncode": 1,
+        "log_sha256": "74fd01770aa92f84bcbcd39972984e496fa1983a9964be8e456d18d35506d412"
+      },
+      {
+        "phase": "baseline",
+        "why": null,
+        "returncode": 0,
+        "log_sha256": "c5fd9e074d1473cfc20aaf23f888273234019bd81b03e02be820eafbc8273b78"
+      },
+      {
+        "phase": "mutation",
+        "why": "omit original-result reconciliation while waiting for a bar",
+        "returncode": 1,
+        "log_sha256": "7329b3f281cd2f094008a6dfa1ddfde377b549d12eeaa2a2c6a947e1f29e9b7a"
+      },
+      {
+        "phase": "baseline",
+        "why": null,
+        "returncode": 0,
+        "log_sha256": "a79fcd9543c3ee7c7aa23d09e3e6fd3aa12257e3ff00f4b6d0827aa58c6163e6"
+      },
+      {
+        "phase": "mutation",
+        "why": "turn a missing original queue record into another native claim",
+        "returncode": 1,
+        "log_sha256": "b7ef352b3cd215dc47ae79cec86da1bcda62269086d968ecc937b32286fa1eeb"
+      },
+      {
+        "phase": "baseline",
+        "why": null,
+        "returncode": 0,
+        "log_sha256": "cace16cb9ee5224a073eb8fe4bfdc521a8af495dfaebad8e23f32940601c4976"
+      },
+      {
+        "phase": "mutation",
+        "why": "discard original setup before local publication completes",
+        "returncode": 1,
+        "log_sha256": "f45ae8e51fbd8da11d7e19a3547ca2a047395838eb203d4ab81d2f4b3798f05d"
+      },
+      {
+        "phase": "baseline",
+        "why": null,
+        "returncode": 0,
+        "log_sha256": "fe7bd641a8f2c746ef5fcbbca075fe9555bac2f179e9b9f16500cdce5dff50b4"
+      },
+      {
+        "phase": "mutation",
+        "why": "publish original cost twice after a lost write reply",
+        "returncode": 1,
+        "log_sha256": "216955cf9a9d539a5a48a2b72e3f9dcc123fd6a0b9090d3f4dfed20d72f6b2f0"
+      },
+      {
+        "phase": "baseline",
+        "why": null,
+        "returncode": 0,
+        "log_sha256": "9a3dabb147f0a4dd5cf00abae1e857aeb8bf7ecf08a870af5d3b0a21f95fd245"
+      },
+      {
+        "phase": "mutation",
+        "why": "accept a memory-only thesis before native persistence",
+        "returncode": 1,
+        "log_sha256": "86bc04df21f89cf76563767c2d474f87a377c91b98df98f88f7da3e63e7077a6"
+      },
+      {
+        "phase": "baseline",
+        "why": null,
+        "returncode": 0,
+        "log_sha256": "ef13bbf6c60bbdf48d0f3b6a6b7b60ad1b52fd3cc63e3b47e6199025600d8294"
+      },
+      {
+        "phase": "mutation",
+        "why": "release the original hold without a durable original thesis",
+        "returncode": 1,
+        "log_sha256": "1e4e6922012f8bf5352c55b6e6be418b43bc64495a0d0c77f702e113abb04339"
+      },
+      {
+        "phase": "baseline",
+        "why": null,
+        "returncode": 0,
+        "log_sha256": "ee0a008709f8a80aecfa3f91058fc60aa69c529a65b603a54069f5a0d38f8d84"
+      },
+      {
+        "phase": "mutation",
+        "why": "collide the same genuine setup across accounts and venues",
+        "returncode": 1,
+        "log_sha256": "abcbe489cbb27327b0908d7ada1082459ba73e537749ed6a833a8bb3c9ada4a8"
+      },
+      {
+        "phase": "baseline",
+        "why": null,
+        "returncode": 0,
+        "log_sha256": "46ffd956414104ad815384bc8adcde59e9651911b7354cef2448e294b9e5fcb7"
+      },
+      {
+        "phase": "mutation",
+        "why": "lose full native trade identity through broker comment truncation",
+        "returncode": 1,
+        "log_sha256": "59a996e55896663d93935a7c17334db42e413b802c3b6305c9e016afea67d088"
+      },
+      {
+        "phase": "baseline",
+        "why": null,
+        "returncode": 0,
+        "log_sha256": "5fbe96a3a4070dacb31d1d38443d99a7e35e263ec64ce6861181e47bc92ae540"
+      },
+      {
+        "phase": "mutation",
+        "why": "rewrite an existing unknown claim as a current preflight rejection",
+        "returncode": 1,
+        "log_sha256": "ec31b2dddcbdf72a11572563788147658eed87ea41d3f98da73c38c9077a4522"
+      },
+      {
+        "phase": "baseline",
+        "why": null,
+        "returncode": 0,
+        "log_sha256": "fcbcfbcf7d2ac2ec510a75293877244dd431228cc9954a0db12f8d866fd16731"
+      },
+      {
+        "phase": "mutation",
+        "why": "enqueue a foreign account command on the authenticated adapter",
+        "returncode": 1,
+        "log_sha256": "ea45775f2c1afdf8d1a7c165d4dece64d45eb10a782a5524a038c19a9352d0e6"
+      },
+      {
+        "phase": "baseline",
+        "why": null,
+        "returncode": 0,
+        "log_sha256": "854cd1c8a34191f2c63d4cd161d75de71f4169e490a3f9ebfb5e82068767f364"
+      },
+      {
+        "phase": "mutation",
+        "why": "drop the original atomic claim readback for independent clients",
+        "returncode": 1,
+        "log_sha256": "a5ce32b683eccda571670b28890c2c04d33597cad2e553f29ea2e69caa575332"
+      },
+      {
+        "phase": "baseline",
+        "why": null,
+        "returncode": 0,
+        "log_sha256": "7f9f5a84784fa93ea078ad018c0ea731714cb25b080cf6ba3c033fed9b926922"
+      },
+      {
+        "phase": "mutation",
+        "why": "keep a genuinely resolved native rejection unknown after restart",
+        "returncode": 1,
+        "log_sha256": "d11fef20288668ab8f8df1f36a642c0e05c38025ee6bcf8e162bc25ffcfd658e"
+      },
+      {
+        "phase": "baseline",
+        "why": null,
+        "returncode": 0,
+        "log_sha256": "2c0cee88eb71924f3a478fe7d07b300c89454fed8f12659dae75b5d4ada866f5"
+      },
+      {
+        "phase": "mutation",
+        "why": "erase earlier possible filled quantity with a later zero-fill refusal",
+        "returncode": 1,
+        "log_sha256": "8bacc7deef1fc21c73a3a2ea1b7f807e6fa9408963ac06bab5ed31567e885857"
+      },
+      {
+        "phase": "baseline",
+        "why": null,
+        "returncode": 0,
+        "log_sha256": "18447f35db58f93edbf82a333265100bd10f6b4afd76ae6a70c35808adc73201"
+      },
+      {
+        "phase": "mutation",
+        "why": "drop the original unfilled remainder hold on an immediate partial fill",
+        "returncode": 1,
+        "log_sha256": "5bad290f09a21b69091b7f981570ca1df510475448b96ff76df92ed1bbbcadd6"
+      },
+      {
+        "phase": "baseline",
+        "why": null,
+        "returncode": 0,
+        "log_sha256": "2c42bc601989c7e1100716937aabdc89d3cbc3d5e78cae04668d7249cb564c2e"
+      },
+      {
+        "phase": "mutation",
+        "why": "report less than original quantity as a completed native fill",
+        "returncode": 1,
+        "log_sha256": "c2f169a8a8bf208a631a0cee2a25ea9a4913a0c0903688eac2f200ab25f0edf0"
+      }
+    ],
+    "definitions": [
+      [
+        [
+          [
+            [
+              "trading/vati/app/cycle.py",
+              "if self.recovery_unresolved or self.unresolved_entry_attempts:",
+              "if self.recovery_unresolved:"
+            ],
+            [
+              "trading/vati/app/service.py",
+              "            and not self.runner.cycle.unresolved_entry_attempts\n",
+              ""
+            ],
+            [
+              "trading/vati/app/cycle.py",
+              "if row.get(\"pending\") and row.get(\"stop\") is not None:",
+              "if False:"
+            ]
+          ],
+          "release unknown reservation and both native admission fences"
+        ],
+        [
+          "trading/tests/test_single_session_unknown_entry.py::test_current_empty_positions_do_not_release_original_unresolved_entry_risk"
+        ]
+      ],
+      [
+        [
+          "trading/vati/app/cycle.py",
+          "'PARTIAL' if rec is not None and rec.status=='PARTIAL' else 'UNKNOWN'",
+          "decision.decision.value",
+          "report unknown native execution as its earlier risk approval"
+        ],
+        [
+          "trading/tests/test_single_session_unknown_entry.py::test_original_timed_out_native_entry_is_not_reported_as_executed_or_approved"
+        ]
+      ],
+      [
+        [
+          "trading/vati/app/service.py",
+          "reconcile_inflight_entries(self.runner.cycle,now_ms=now)",
+          "None",
+          "omit original-result reconciliation while waiting for a bar"
+        ],
+        [
+          "trading/tests/test_single_session_unknown_entry.py::test_late_original_native_rejection_releases_only_that_attempt_without_replaying_it"
+        ]
+      ],
+      [
+        [
+          "trading/vati/app/entry_recovery.py",
+          "reader=getattr(cycle.adapter,'recover_entry',None)",
+          "reader=getattr(cycle.adapter,'submit',None)",
+          "turn a missing original queue record into another native claim"
+        ],
+        [
+          "trading/tests/test_single_session_unknown_entry.py::test_loss_of_original_queue_record_is_unknown_and_cannot_create_a_replacement_command"
+        ]
+      ],
+      [
+        [
+          "trading/vati/app/cycle.py",
+          "approval = row.get(\"_approval\")",
+          "approval = row.pop(\"_approval\",None)",
+          "discard original setup before local publication completes"
+        ],
+        [
+          "trading/tests/test_single_session_unknown_entry.py::test_original_late_fill_recovery_retries_a_local_publication_failure_without_losing_context_or_double_cost[before-tca]"
+        ]
+      ],
+      [
+        [
+          "trading/vati/app/cycle.py",
+          "        if original:\n            core=tca.as_dict()",
+          "        if False:\n            core=tca.as_dict()",
+          "publish original cost twice after a lost write reply"
+        ],
+        [
+          "trading/tests/test_single_session_unknown_entry.py::test_original_late_fill_recovery_retries_a_local_publication_failure_without_losing_context_or_double_cost[after-tca]"
+        ]
+      ],
+      [
+        [
+          "trading/vati/lifecycle/thesis.py",
+          "        if self._ledger is not None:\n            t = now_ms if now_ms is not None else sealed.created_ms",
+          "        self._theses[sealed.trade_intent_id] = sealed\n        if self._ledger is not None:\n            t = now_ms if now_ms is not None else sealed.created_ms",
+          "accept a memory-only thesis before native persistence"
+        ],
+        [
+          "trading/tests/test_single_session_unknown_entry.py::test_native_thesis_write_failure_recovers_from_real_persistence_not_a_memory_only_claim[before-thesis]"
+        ]
+      ],
+      [
+        [
+          [
+            [
+              "trading/vati/app/entry_recovery.py",
+              "if len(claims)!=1:continue",
+              "if False:continue"
+            ],
+            [
+              "trading/vati/app/entry_recovery.py",
+              "cycle.thesis.adopt(next(iter(claims.values())))",
+              "None"
+            ]
+          ],
+          "release the original hold without a durable original thesis"
+        ],
+        [
+          "trading/tests/test_single_session_unknown_entry.py::test_native_thesis_write_failure_recovers_from_real_persistence_not_a_memory_only_claim[before-thesis]"
+        ]
+      ],
+      [
+        [
+          "trading/vati/arbiter/opportunity.py",
+          "'vati.intent/2:'+canonical_hash({\n                'account_alias':account_alias,'venue':venue,'decision_hash':decision_hash})",
+          "f'vati:{decision_hash}'",
+          "collide the same genuine setup across accounts and venues"
+        ],
+        [
+          "trading/tests/test_trade_intent_scope_identity.py"
+        ]
+      ],
+      [
+        [
+          "trading/vati/execution/mt5_pull.py",
+          "iid=body['trade_intent_id']",
+          "iid=comment[5:]",
+          "lose full native trade identity through broker comment truncation"
+        ],
+        [
+          "trading/tests/test_single_session_unknown_entry.py::test_late_original_native_fill_restores_full_trade_identity_and_protection_without_another_send"
+        ]
+      ],
+      [
+        [
+          "trading/vati/execution/mt5_pull.py",
+          "        if previous:\n",
+          "        if False:\n",
+          "rewrite an existing unknown claim as a current preflight rejection"
+        ],
+        [
+          "trading/tests/test_mt5_original_entry_claim.py::test_original_unknown_claim_is_not_misreported_rejected_when_current_state_goes_stale"
+        ]
+      ],
+      [
+        [
+          "trading/vati/execution/mt5_pull.py",
+          "if cmd.account_alias!=self.account_alias or cmd.venue!=self.venue:",
+          "if False:",
+          "enqueue a foreign account command on the authenticated adapter"
+        ],
+        [
+          "trading/tests/test_mt5_original_entry_claim.py::test_native_entry_cannot_be_redirected_to_the_adapters_other_account"
+        ]
+      ],
+      [
+        [
+          "trading/vati/execution/mt5_pull.py",
+          "if op=='ORDER_SEND' and body.get('native_command_hash'):",
+          "if False:",
+          "drop the original atomic claim readback for independent clients"
+        ],
+        [
+          "trading/tests/test_mt5_original_entry_claim.py::test_independent_queue_connections_claim_one_original_command"
+        ]
+      ],
+      [
+        [
+          "trading/vati/app/session_recovery.py",
+          "resolved=(bool(facts)",
+          "resolved=(False and bool(facts)",
+          "keep a genuinely resolved native rejection unknown after restart"
+        ],
+        [
+          "trading/tests/test_single_session_unknown_entry.py::test_already_resolved_original_result_replays_consistently_after_real_service_restart[REJECTED]"
+        ]
+      ],
+      [
+        [
+          "trading/vati/app/entry_recovery.py",
+          "if any(Decimal(str(e.payload.get('filled_qty','0')))!=0",
+          "if any(False",
+          "erase earlier possible filled quantity with a later zero-fill refusal"
+        ],
+        [
+          "trading/tests/test_single_session_unknown_entry.py::test_zero_fill_refusal_cannot_erase_an_earlier_native_report_of_possible_filled_quantity"
+        ]
+      ],
+      [
+        [
+          "trading/vati/app/cycle.py",
+          "uncertain=rec is None or rec.status in {'UNKNOWN','PARTIAL'}",
+          "uncertain=rec is None or rec.status=='UNKNOWN'",
+          "drop the original unfilled remainder hold on an immediate partial fill"
+        ],
+        [
+          "trading/tests/test_single_session_unknown_entry.py::test_initial_native_partial_fill_keeps_remaining_risk_and_truthful_status[PARTIAL]"
+        ]
+      ],
+      [
+        [
+          "trading/vati/execution/mt5_pull.py",
+          "            if qty<cmd.quantity:status='PARTIAL'\n",
+          "",
+          "report less than original quantity as a completed native fill"
+        ],
+        [
+          "trading/tests/test_single_session_unknown_entry.py::test_initial_native_partial_fill_keeps_remaining_risk_and_truthful_status[FILLED]"
+        ]
+      ]
+    ],
+    "source_before_sha256": {
+      "trading/vati/app/cycle.py": "3317a4e3c3a62fc3c3845514fbb6bb177387111612fee1b01655b0aa09d436de",
+      "trading/vati/app/entry_recovery.py": "26b6f5b64ae9b54f0ce6f0d7562ce3f1d647eab99bcfce779730999abb4701b2",
+      "trading/vati/app/service.py": "5893e2bc85f44877dfe3ef054baa94c39325224d00a886e2a90e0d13ba682bb4",
+      "trading/vati/app/session_recovery.py": "791f81ddafb78b7e1f456d986fa18b940d80539d13804061eef709e724a023d4",
+      "trading/vati/arbiter/opportunity.py": "8b3607dd4d38ebe3476a8e4cbf1ad6e88f4ab2c466e7335d57bd8847c51f873c",
+      "trading/vati/execution/mt5_pull.py": "fb63d1d943d230beaf8b43cb8c512b438d9784d8f7c17927e8fadc2b57df48c3",
+      "trading/vati/lifecycle/thesis.py": "1b0fff609ffa8727a23dea06116bf81eea740de3645a6e49a44dfbf3fe4690c4"
+    },
+    "source_after_sha256": {
+      "trading/vati/app/cycle.py": "3317a4e3c3a62fc3c3845514fbb6bb177387111612fee1b01655b0aa09d436de",
+      "trading/vati/app/entry_recovery.py": "26b6f5b64ae9b54f0ce6f0d7562ce3f1d647eab99bcfce779730999abb4701b2",
+      "trading/vati/app/service.py": "5893e2bc85f44877dfe3ef054baa94c39325224d00a886e2a90e0d13ba682bb4",
+      "trading/vati/app/session_recovery.py": "791f81ddafb78b7e1f456d986fa18b940d80539d13804061eef709e724a023d4",
+      "trading/vati/arbiter/opportunity.py": "8b3607dd4d38ebe3476a8e4cbf1ad6e88f4ab2c466e7335d57bd8847c51f873c",
+      "trading/vati/execution/mt5_pull.py": "fb63d1d943d230beaf8b43cb8c512b438d9784d8f7c17927e8fadc2b57df48c3",
+      "trading/vati/lifecycle/thesis.py": "1b0fff609ffa8727a23dea06116bf81eea740de3645a6e49a44dfbf3fe4690c4"
+    },
+    "source_restored": true,
+    "journal_present": false
+  },
+  "prior_15_faults_before_immediate_partial_fix": {
+    "evidence_sha256": "340aca9d0afc5d708057fa272c5aec16631c3aea854b4fa2f0dad68452303c08",
+    "caught": 15,
+    "controls": 15
+  },
+  "stronger_queue_loss_after_actual_ea_delivery": {
+    "records": [
+      {
+        "phase": "baseline",
+        "why": null,
+        "returncode": 0,
+        "log_sha256": "a987731e6e33bdc1226687aa0011325d9898b2270c636ecadf438e7748f8ad11"
+      },
+      {
+        "phase": "mutation",
+        "why": "turn a missing original queue record into another native claim",
+        "returncode": 1,
+        "log_sha256": "873c1b24d4eaa47fda4de76ce3bb2ed013defe6b2f1a8d0c0d85387cee7a78ba"
+      }
+    ],
+    "source_before_sha256": "f07977685c3ab76c71b81104c5bcc90960deee0ef2d7b84c8f727d9c47ba4b32",
+    "source_after_sha256": "f07977685c3ab76c71b81104c5bcc90960deee0ef2d7b84c8f727d9c47ba4b32",
+    "source_restored": true,
+    "journal_present": false
+  },
+  "full_fixture_cleanup": {
+    "stopped": true,
+    "removed": true
+  },
+  "mutation_fixture_cleanup": {
+    "stopped": true,
+    "removed": true
+  },
+  "owner_contracts": {
+    "changed": [],
+    "applied": false,
+    "scope": "SOURCE_CONTRACTS_ONLY"
+  },
+  "legacy_anchor_preflight": {
+    "schema": "van.rebuild.mutation-registry-preflight/1",
+    "registry_sha256": "35d10c7b0f2b8319b7f7305828262c972b2a6451139d75b9e83c7d0062282955",
+    "mutation_count": 374,
+    "edit_count": 383,
+    "findings": [],
+    "execution_state": "NOT_RUN",
+    "status": "ANCHORS_VALID_BASELINES_AND_MUTATIONS_NOT_EXECUTED"
+  },
+  "oracle_corrections": [
+    "Initial startup fixture exposed a genuine cross-account producer-ID collision; fixed IDs by scope rather than weakening history joins.",
+    "MT5 timeout test reused a completed command; explicitly checks original result and uses a distinct command for actual timeout.",
+    "Publication oracle corrected nonexistent count helper to actual iter protocol before passing controls.",
+    "Native claim tests include staged counterexamples after original claim API existed; not all are pristine-parent tests.",
+    "Queue-loss control now proves signed EA delivery before deleting the original queue row.",
+    "Passing full 2115 suite preceded one queue-loss testcase and two immediate-partial cases; current full suite is separately measured."
+  ],
+  "qualification": "Candidate source only. No native broker/S24/provider deployment, independent or unit acceptance, financial activation or profitability qualification. Cold before-outcome recovery, prepared thesis provenance, partial progression/finality, native identity/epoch/deadline and remaining original programme still required."
+}

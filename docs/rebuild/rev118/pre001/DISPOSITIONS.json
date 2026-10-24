@@ -1,0 +1,549 @@
+{
+ "observations": {
+  "OBS-001": {
+   "owner_unit": "BE-002",
+   "severity": "debug-build only; release manifest unaffected per comment \u2014 verify at release qualification",
+   "status": "OPEN_FOR_UNIT_REVIEW",
+   "what": "android/app/src/debug/AndroidManifest.xml sets usesCleartextTraffic=true app-wide for debug builds while its comment scopes intent to 127.0.0.1/localhost; also exports debug RiveCandidateHostActivity.",
+   "obligation": "OBL-001"
+  },
+  "OBS-002": {
+   "owner_unit": "BE-003",
+   "status": "OPEN_FOR_UNIT_REVIEW",
+   "what": "Idempotency stale-claim retake after a conflicting attempt relies on CommandMissionLink.existing_for_command to prevent duplicate missions; not verified in PRE-001.",
+   "obligation": "OBL-002"
+  },
+  "OBS-003": {
+   "owner_unit": "BE-025",
+   "status": "OPEN_FOR_UNIT_REVIEW",
+   "what": "No positive test found at HEAD that a genuine owner approval resumes the same browser task (only refusal/advisory tests).",
+   "owner_unit_correction": "Was BE-028 (automation); browser approval belongs to BE-025. See obligations/OBLIGATIONS.json OBL-003.",
+   "obligation": "OBL-003"
+  },
+  "OBS-004": {
+   "owner_unit": "BE-003",
+   "status": "OPEN_FOR_UNIT_REVIEW",
+   "what": "data/van_gateway.sqlite3 (1,064,960 bytes) is committed: 87 tables, seed rows only (20 migrations, 9 action definitions, 11 capability rows, FTS config); no owner/device rows. Confirm it is an intentional schema fixture and that runtime never writes to the tracked path. During this session's test runs (2026-10-21 ~16:30 UTC) an empty WAL and a shm file appeared beside the tracked database, so some test or helper opens data/van_gateway.sqlite3 itself; the tracked file stayed byte-identical (git diff clean) and the side files were removed.",
+   "root_cause": "Reproduced: app.py:3856 module-level create_app() with relative default database_path creates data/ and data/documents when imported from repo-root cwd (trigger: tests/contracts/test_artemis_console_boundary.py). See OBL-004.",
+   "obligation": "OBL-004"
+  }
+ },
+ "overlap": {
+  "OVL:android/app/src/main/java/com/dial/van/browser/BrowserActivity.kt:main": {
+   "basis": "OBSERVED",
+   "decision": "MOVED_AND_HARDENED",
+   "evidence": "Removed by 652ef3f3 'Complete VAN owner contracts and Android backend wiring'. Document choosing/upload now in browser/BrowserPhoneActions.kt (ActivityResultContracts.OpenDocument -> documentChosen; staged temp file; client.upload(admitted, ...)); page uploads require that page's chooser and a scoped grant (BrowserDownloadReview.UPLOAD_UNAVAILABLE). 'describe' was a local helper; equivalent mapping in degraded/GatewayDegradedMapping.kt.",
+   "evidence_grade": "OBSERVED"
+  },
+  "OVL:android/app/src/main/java/com/dial/van/browser/BrowserSessionController.kt:main": {
+   "basis": "OBSERVED",
+   "decision": "MOVED_AND_HARDENED",
+   "evidence": "Removed by 652ef3f3 'Complete VAN owner contracts and Android backend wiring'. acknowledgeViewport lives in browser/BrowserControlMutation.kt with BrowserControlMutationTest; upload start moved to BrowserPhoneActions (above).",
+   "evidence_grade": "OBSERVED"
+  },
+  "OVL:android/app/src/main/java/com/dial/van/command/CommandCentreActivity.kt:main": {
+   "basis": "OBSERVED",
+   "decision": "MOVED",
+   "evidence": "Removed by 6de14bf6; CommandBottomBar, CommandSideRail, MoreSheet, NavDestination defined in command/CommandNavigationChrome.kt and referenced from CommandCentreActivity.kt at HEAD (git grep -w).",
+   "evidence_grade": "OBSERVED"
+  },
+  "OVL:android/app/src/main/java/com/dial/van/command/connected/ConnectedRoute.kt:main": {
+   "basis": "OBSERVED",
+   "decision": "SUPERSEDED",
+   "evidence": "Removed by 652ef3f3. ConnectedData/load replaced by per-plane state in ConnectedRoute (health, planes, workspace, per-source failures, observedAt, revoke uncertainty) and ConnectedReadback.source (command/connected/ConnectedReadback.kt); verified per symbol in SYMBOL_VERIFICATION.json. The connected-services context remains a Rev1.18 obligation (BE-031/FE-022).",
+   "evidence_grade": "OBSERVED"
+  },
+  "OVL:android/app/src/main/java/com/dial/van/command/work/WorkRoute.kt:main": {
+   "basis": "OBSERVED",
+   "decision": "MOVED",
+   "evidence": "Removed by 652ef3f3 'Complete VAN owner contracts and Android backend wiring'; ConversationBubble, MissionRow, ReconfirmationPanel, WorkActivityRoute, formatTime defined in command/work/WorkDetails.kt and used by WorkRoute.kt/CommandCentreActivity.kt; severityRole/statusRole in CommandCentreComponents.kt and dev routes.",
+   "evidence_grade": "OBSERVED"
+  },
+  "OVL:android/app/src/main/java/com/dial/van/connectivity/ProvisioningPayload.kt:main": {
+   "basis": "OBSERVED",
+   "decision": "SUPERSEDED_STRENGTHENED",
+   "evidence": "Removed by 652ef3f3 'Complete VAN owner contracts and Android backend wiring'. Prefix check isAcceptableUrl (accepted e.g. 'http://127.0.0.1.evil.com') replaced by GatewayBaseUrl.accepts: URI parse with server authority, rejects user-info/query/fragment/path, validates DNS labels/IPv4, http only for exact localhost/127.0.0.1/::1 when loopback allowed; still refuses with provisioning_url_must_use_https. Tests: android/verification/.../connectivity/ProvisioningPayloadTest.kt.",
+   "evidence_grade": "OBSERVED"
+  },
+  "OVL:android/app/src/main/java/com/dial/van/notification/NotificationPolicy.kt:main": {
+   "basis": "OBSERVED",
+   "decision": "MOVED",
+   "evidence": "AppNotificationPolicy enum referenced from command/modules/NotificationPolicyModule.kt; NotificationPolicyStore.policyFor at HEAD returns AppNotificationPolicy (definition relocated).",
+   "evidence_grade": "OBSERVED"
+  },
+  "OVL:android/app/src/main/java/com/dial/van/onboarding/OnboardingActivity.kt:main": {
+   "basis": "OBSERVED",
+   "decision": "SUPERSEDED_BY_OWNER_DIRECTED_SHELL_CHANGE",
+   "evidence": "Removed by 8c192be7 'Open the current VAN shell directly and restore the approved Candidate B launcher identity': launcher intent moved off OnboardingActivity (now exported=false). Provisioning status shown in command/settings/SettingsRoute.kt ('Waiting for supported installer enrollment'); onboarding reachable from Settings (EXTRA_REVIEW_PERMISSIONS). First-run zero-config enrollment acceptance remains BE-002/BE-030/FE-002 work.",
+   "evidence_grade": "OBSERVED"
+  },
+  "OVL:android/app/src/main/java/com/dial/van/trading/TradingRepository.kt:main": {
+   "basis": "OBSERVED",
+   "decision": "MOVED",
+   "evidence": "Removed by 652ef3f3 'Complete VAN owner contracts and Android backend wiring'; Loaded<T> (Loading/Ready/Unavailable) still the return type of every TradingRepository method at HEAD via loadTradingData; sealed type relocated within the trading package.",
+   "evidence_grade": "OBSERVED"
+  },
+  "OVL:android/app/src/main/java/com/dial/van/visual/VanCanvasFallback.kt:main": {
+   "basis": "OBSERVED",
+   "decision": "RETIRED_EXPLICITLY",
+   "evidence": "Removed by 077bc517 'android: remove the retired strand engine and owner-art renderer'. Rev1.18 locked visuals govern new UI after BG-001.",
+   "evidence_grade": "OBSERVED"
+  },
+  "OVL:android/app/src/main/java/com/dial/van/voice/SherpaSpeakerSimilarity.kt:main": {
+   "basis": "OBSERVED",
+   "decision": "RETIRED_INSECURE_PATH_REPLACED",
+   "evidence": "Removed by 652ef3f3 'Complete VAN owner contracts and Android backend wiring'. Plaintext embedding loading (readEmbedding) deliberately refused: fromFiles returns null ('Historical plaintext self-described embeddings are deliberately not admitted'). Scoring via SherpaSpeakerSimilarityScorer with revocable reference and bindingStillCurrent check; enrollment via SpeakerEnrollmentManager/SpeakerEnrollmentPolicy (+Test). Consistent with Rev1.18: speaker similarity is never financial authorization.",
+   "evidence_grade": "OBSERVED"
+  },
+  "OVL:android/app/src/main/java/com/dial/van/voice/VoiceEdge.kt:main": {
+   "basis": "OBSERVED",
+   "decision": "MOVED",
+   "evidence": "Removed by 652ef3f3 'Complete VAN owner contracts and Android backend wiring'; local sha256 helper duplicated elsewhere (VanApplication.kt, BrowserFileProvider.kt). Helper only.",
+   "evidence_grade": "OBSERVED"
+  },
+  "OVL:android/app/src/main/java/com/dial/van/voice/WakeAcknowledgement.kt:main": {
+   "basis": "OBSERVED",
+   "decision": "SUPERSEDED",
+   "evidence": "Removed by 652ef3f3 'Complete VAN owner contracts and Android backend wiring'; system TextToSpeech callbacks replaced by WakeAcknowledgementManager playing a sealed local asset (prepare/loadAsset/play). Keeps acknowledgement local; no cloud substitution.",
+   "evidence_grade": "OBSERVED"
+  },
+  "OVL:android/verification/src/test/kotlin/com/dial/van/onboarding/OnboardingPlanTest.kt:main": {
+   "basis": "OBSERVED",
+   "decision": "INSTRUMENT_ARTEFACT_AND_SUPERSEDED",
+   "evidence": "'an' and 'pairing' are fragments of backtick Kotlin test names caught by the approximate declaration regex (KOTLIN_DECLARATION_REGEX_APPROXIMATE). Test file changed by 8c192be7 with the onboarding gate removal above.",
+   "evidence_grade": "OBSERVED"
+  },
+  "OVL:backend/tests/test_automation_api.py:main": {
+   "basis": "OBSERVED",
+   "decision": "TEST_HELPER_REPLACED",
+   "evidence": "_n8n_transport mock helper removed by 652ef3f3 'Complete VAN owner contracts and Android backend wiring'; tests now use the 'executable' fixture (e.g. test_hot_publish_requires_an_admitted_artifact retained; test_replacement_candidate_preserves_active_capability_and_action added).",
+   "evidence_grade": "OBSERVED"
+  },
+  "OVL:backend/tests/test_automation_compiler.py:main": {
+   "basis": "OBSERVED",
+   "decision": "SUPERSEDED_STRENGTHENED",
+   "evidence": "652ef3f3 'Complete VAN owner contracts and Android backend wiring': test_credentials_compile_to_identifier_never_value -> test_generic_credential_handle_cannot_invent_a_gateway_adapter (still asserts 'secret' absent from graph; adds non-deployable refusal). test_webhook_trigger_compiles_with_authentication -> test_engine_entry_requires_canonical_admission_before_any_steps (webhook entry routes to admission node with httpHeaderAuth credential and capability_grant; no scheduleTrigger).",
+   "evidence_grade": "OBSERVED"
+  },
+  "OVL:backend/tests/test_automation_dispatch.py:main": {
+   "basis": "OBSERVED",
+   "decision": "TEST_HELPER_REPLACED",
+   "evidence": "_transport mock helper removed (652ef3f3/7b09e398/f68022fd); dispatch tests now cover transport failure closing run/action/grant, unconfigured signer, unknown action, canonical action replacement.",
+   "evidence_grade": "OBSERVED"
+  },
+  "OVL:backend/tests/test_automation_health_api.py:main": {
+   "basis": "OBSERVED",
+   "decision": "SUPERSEDED_STRENGTHENED",
+   "evidence": "test_automation_health_reports_governance_approved -> ..._but_production_gated, plus Stagehand placement/per-capability gate tests (d7290f5e, e2d7ffbb, afa0d7c5).",
+   "evidence_grade": "OBSERVED"
+  },
+  "OVL:backend/tests/test_browser_api.py:main": {
+   "basis": "OBSERVED",
+   "decision": "SEMANTICS_CHANGED_REVIEW",
+   "evidence": "652ef3f3 'Complete VAN owner contracts and Android backend wiring': test_owner_approval_resumes_same_browser_task replaced by test_advisory_owner_answer_cannot_resume_or_widen_browser_task; HEAD retains test_owner_approval_cannot_widen_to_unapproved_domain and test_action_class_approval_cannot_be_exceeded. A positive 'genuine approval resumes the same task' test was not found at HEAD; the positive resume path is a BE-025 (browser) acceptance obligation, integrated by BQ-004 (corrected from BE-028; see OBL-003) (recorded OBS-003).",
+   "evidence_grade": "OBSERVED"
+  },
+  "OVL:backend/tests/test_browser_escalation_boundary.py:main": {
+   "basis": "OBSERVED",
+   "decision": "SUPERSEDED",
+   "evidence": "652ef3f3 'Complete VAN owner contracts and Android backend wiring': test_two_different_overruns_are_two_separate_questions -> test_advisory_answer_cannot_run_a_second_scope_overrun; HEAD also asserts approved A4 rows cannot become authorizations.",
+   "evidence_grade": "OBSERVED"
+  },
+  "OVL:backend/tests/test_interactive_browser_api.py:main": {
+   "basis": "OBSERVED",
+   "decision": "SEMANTICS_CHANGED_INVARIANT_KEPT",
+   "evidence": "652ef3f3 'Complete VAN owner contracts and Android backend wiring': 'no interactive-session routes without signing key' -> read-only file-provider readiness/request routes exist, but: unauthenticated/ingress/internal 401, other device 404/409, contracts executable=False/UNAVAILABLE/TARGET_CONTRACT_UNBOUND, live_effects_verified==0, browser_stream_grants/producers/action_plans None. Credential issuance remains impossible.",
+   "evidence_grade": "OBSERVED"
+  },
+  "OVL:backend/tests/test_knowledge_runtime.py:main": {
+   "basis": "OBSERVED",
+   "decision": "SUPERSEDED",
+   "evidence": "Removed by 8cea9d61/652ef3f3/7b09e398: consumer now reports UNAVAILABLE while Stagehand cannot actuate (test_consumer_is_unavailable_while_stagehand_cannot_actuate), plus transport-fault and credential-locus tests. The removed test exercised an actuating fake the product no longer claims.",
+   "evidence_grade": "OBSERVED"
+  },
+  "OVL:backend/tests/test_recovery_matrix.py:main": {
+   "basis": "OBSERVED",
+   "decision": "SEMANTICS_CHANGED_REVIEW",
+   "evidence": "652ef3f3 'Complete VAN owner contracts and Android backend wiring': test_a_conflict_is_never_retaken -> test_a_conflicting_attempt_does_not_poison_the_original_claim. backend/van_gateway/idempotency/service.py: a different-hash attempt raises IdempotencyConflict without overwriting the original row; the original's IN_FLIGHT claim can be retaken after STALE_CLAIM_SECONDS (P0-OPS-011), relying on CommandMissionLink.existing_for_command to avoid duplicate missions. That reliance is unverified here (OBS-002, BE-003).",
+   "evidence_grade": "OBSERVED"
+  },
+  "OVL:backend/tests/test_visual_acceptance.py:main": {
+   "basis": "OBSERVED",
+   "decision": "SUPERSEDED_STRENGTHENED",
+   "evidence": "652ef3f3 'Complete VAN owner contracts and Android backend wiring': declared device proof -> test_visual_acceptance_requires_actual_bound_device_proof.",
+   "evidence_grade": "OBSERVED"
+  },
+  "OVL:backend/van_gateway/automation/compiler.py:main": {
+   "basis": "OBSERVED",
+   "decision": "SUPERSEDED",
+   "evidence": "652ef3f3 'Complete VAN owner contracts and Android backend wiring': _compile_parameters/_position replaced by _runtime_graph/_binding_expression/_http_callback_parameters/_check_worker_endpoint (admission-first worker callback graph). Canvas position independence still tested (test_canvas_position_does_not_affect_semantic_digest).",
+   "evidence_grade": "OBSERVED"
+  },
+  "OVL:backend/van_gateway/browser/api.py:main": {
+   "basis": "OBSERVED",
+   "decision": "SUPERSEDED",
+   "evidence": "Removed by 6de14bf6; inline assert_lease_active replaced by adapters.broker_lease_fence/harness_lease_fence imported into api.py (tests in test_interactive_browser_session.py).",
+   "evidence_grade": "OBSERVED"
+  },
+  "OVL:backend/van_gateway/decisions/service.py:main": {
+   "basis": "OBSERVED",
+   "decision": "MOVED",
+   "evidence": "DecisionStatus, DecisionCreate, DecisionRecord defined in backend/van_gateway/decisions/models.py at HEAD and used by decisions/api.py and tests.",
+   "evidence_grade": "OBSERVED"
+  },
+  "OVL:tests/contracts/test_stored_command_is_deliverable.py:main": {
+   "basis": "OBSERVED",
+   "decision": "SUPERSEDED_STRENGTHENED",
+   "evidence": "652ef3f3: test_the_builder_is_the_one_the_offline_path_uses -> test_the_offline_path_stores_the_body_prepared_before_dispatch: builder still authoritative (buildCommandBody in dispatchCommand) and the failure path replays the exact prepared body (OfflineSubmission.preparedReplay), preserving command identity/signature across retries. 9 passed with sibling test file.",
+   "evidence_grade": "OBSERVED"
+  },
+  "OVL:tests/contracts/test_van_direct_mtls_deploy.py:main": {
+   "basis": "OBSERVED",
+   "decision": "SUPERSEDED_STRENGTHENED",
+   "evidence": "652ef3f3: test_the_app_ships_configured_for_the_direct_link -> test_debug_keeps_the_historical_direct_link_without_qualifying_release: same https/CA/no-private-key assertions, plus profile id 'historical-dial-control-debug' and gradle VanProductionTarget.requireReleaseProfile(. Passed.",
+   "evidence_grade": "OBSERVED"
+  },
+  "OVL:tests/test_artemis_subscription.py:accounts_3b2c9e04": {
+   "basis": "OBSERVED",
+   "decision": "MOVED_TO_DIAL_DEVELOPMENT_SYSTEM",
+   "evidence": "Removed from VAN by base-lineage commit 565fe2bb ('hand the subscription adapter to the DIAL Development System', owner decision DIAL DEC-079 amending DEC-051). Source files are byte-identical at dial-development-system origin/master 204f2f3b4e19 under deploy/netcup/hermes-control/artemis/subscription/ (git rev-parse blob comparison); the accounts input 3b2c9e04 still carried the pre-move copy. Not present at DDS 64d6b715, the pin used for VAN source-contract tests. VAN keeps backend/van_gateway/artemis/console.py. The test moved with it as deploy/netcup/hermes-control/artemis/subscription/test_artemis_subscription.py (content adapted to the new location; blob differs).",
+   "evidence_grade": "OBSERVED"
+  },
+  "OVL:tools/artemis_subscription/__init__.py:accounts_3b2c9e04": {
+   "basis": "OBSERVED",
+   "decision": "MOVED_TO_DIAL_DEVELOPMENT_SYSTEM",
+   "evidence": "Removed from VAN by base-lineage commit 565fe2bb ('hand the subscription adapter to the DIAL Development System', owner decision DIAL DEC-079 amending DEC-051). Source files are byte-identical at dial-development-system origin/master 204f2f3b4e19 under deploy/netcup/hermes-control/artemis/subscription/ (git rev-parse blob comparison); the accounts input 3b2c9e04 still carried the pre-move copy. Not present at DDS 64d6b715, the pin used for VAN source-contract tests. VAN keeps backend/van_gateway/artemis/console.py.",
+   "evidence_grade": "OBSERVED"
+  },
+  "OVL:tools/artemis_subscription/mcp_launcher.py:accounts_3b2c9e04": {
+   "basis": "OBSERVED",
+   "decision": "MOVED_TO_DIAL_DEVELOPMENT_SYSTEM",
+   "evidence": "Removed from VAN by base-lineage commit 565fe2bb ('hand the subscription adapter to the DIAL Development System', owner decision DIAL DEC-079 amending DEC-051). Source files are byte-identical at dial-development-system origin/master 204f2f3b4e19 under deploy/netcup/hermes-control/artemis/subscription/ (git rev-parse blob comparison); the accounts input 3b2c9e04 still carried the pre-move copy. Not present at DDS 64d6b715, the pin used for VAN source-contract tests. VAN keeps backend/van_gateway/artemis/console.py.",
+   "evidence_grade": "OBSERVED"
+  },
+  "OVL:tools/artemis_subscription/provider.py:accounts_3b2c9e04": {
+   "basis": "OBSERVED",
+   "decision": "MOVED_TO_DIAL_DEVELOPMENT_SYSTEM",
+   "evidence": "Removed from VAN by base-lineage commit 565fe2bb ('hand the subscription adapter to the DIAL Development System', owner decision DIAL DEC-079 amending DEC-051). Source files are byte-identical at dial-development-system origin/master 204f2f3b4e19 under deploy/netcup/hermes-control/artemis/subscription/ (git rev-parse blob comparison); the accounts input 3b2c9e04 still carried the pre-move copy. Not present at DDS 64d6b715, the pin used for VAN source-contract tests. VAN keeps backend/van_gateway/artemis/console.py.",
+   "evidence_grade": "OBSERVED"
+  },
+  "OVL:tools/artemis_subscription/sitecustomize.py:accounts_3b2c9e04": {
+   "basis": "OBSERVED",
+   "decision": "MOVED_TO_DIAL_DEVELOPMENT_SYSTEM",
+   "evidence": "Removed from VAN by base-lineage commit 565fe2bb ('hand the subscription adapter to the DIAL Development System', owner decision DIAL DEC-079 amending DEC-051). Source files are byte-identical at dial-development-system origin/master 204f2f3b4e19 under deploy/netcup/hermes-control/artemis/subscription/ (git rev-parse blob comparison); the accounts input 3b2c9e04 still carried the pre-move copy. Not present at DDS 64d6b715, the pin used for VAN source-contract tests. VAN keeps backend/van_gateway/artemis/console.py.",
+   "evidence_grade": "OBSERVED"
+  }
+ },
+ "refs": {
+  "PR-104": {
+   "basis": "OBSERVED",
+   "decision": "SAME_HEAD_AS_CONSOLIDATION_BRANCH",
+   "evidence": "refs/pull/104/head = b02075f327ea8180ab6d269eba358cf8c5479878 = consolidation/opus-clean-rev118-20261021 tip (REMOTE_REFS_20261021.txt). Its 'not preserved' blobs are the consolidation's own new content, preserved by that branch which postdates the evaluation. All 50 paths have identical blobs at PR-104 head and consolidation head (git rev-parse <sha>:<path>).",
+   "evidence_grade": "OBSERVED",
+   "paths": {
+    ".github/workflows/cognitive-fabric-r161-van.yml": "PRESERVED_BY_CONSOLIDATION_BRANCH",
+    ".github/workflows/van-owner-release.yml": "PRESERVED_BY_CONSOLIDATION_BRANCH",
+    "CLAUDE.md": "PRESERVED_BY_CONSOLIDATION_BRANCH",
+    "CONSOLIDATION_STATE.json": "PRESERVED_BY_CONSOLIDATION_BRANCH",
+    "README.md": "PRESERVED_BY_CONSOLIDATION_BRANCH",
+    "android/voice/acquisition-lock.json": "PRESERVED_BY_CONSOLIDATION_BRANCH",
+    "docs/consolidation/ASR_ARCHIVE_REQUALIFICATION.json": "PRESERVED_BY_CONSOLIDATION_BRANCH",
+    "docs/consolidation/BRANCH_EVALUATION.json": "PRESERVED_BY_CONSOLIDATION_BRANCH",
+    "docs/consolidation/BRANCH_EVALUATION.md": "PRESERVED_BY_CONSOLIDATION_BRANCH",
+    "docs/consolidation/LOCAL_BRANCH_EVALUATION.json": "PRESERVED_BY_CONSOLIDATION_BRANCH",
+    "docs/consolidation/MAIN_ADMISSION.md": "PRESERVED_BY_CONSOLIDATION_BRANCH",
+    "docs/consolidation/MAIN_AUTHORIZATION_INTAKE.json": "PRESERVED_BY_CONSOLIDATION_BRANCH",
+    "docs/consolidation/OPUS_BUILD_PROMPT.md": "PRESERVED_BY_CONSOLIDATION_BRANCH",
+    "docs/consolidation/START_HERE.md": "PRESERVED_BY_CONSOLIDATION_BRANCH",
+    "docs/consolidation/VALIDATION.md": "PRESERVED_BY_CONSOLIDATION_BRANCH",
+    "docs/consolidation/validation/MANIFEST.json": "PRESERVED_BY_CONSOLIDATION_BRANCH",
+    "docs/consolidation/validation/android-jvm-summary.json": "PRESERVED_BY_CONSOLIDATION_BRANCH",
+    "docs/consolidation/validation/authority-map.txt": "PRESERVED_BY_CONSOLIDATION_BRANCH",
+    "docs/consolidation/validation/backend-crash-retest.txt": "PRESERVED_BY_CONSOLIDATION_BRANCH",
+    "docs/consolidation/validation/backend-tests.txt": "PRESERVED_BY_CONSOLIDATION_BRANCH",
+    "docs/consolidation/validation/consolidation-check.json": "PRESERVED_BY_CONSOLIDATION_BRANCH",
+    "docs/consolidation/validation/contract-ledger-retest.txt": "PRESERVED_BY_CONSOLIDATION_BRANCH",
+    "docs/consolidation/validation/contracts-configured.txt": "PRESERVED_BY_CONSOLIDATION_BRANCH",
+    "docs/consolidation/validation/focused-tests.txt": "PRESERVED_BY_CONSOLIDATION_BRANCH",
+    "docs/consolidation/validation/integration-regressions.txt": "PRESERVED_BY_CONSOLIDATION_BRANCH",
+    "docs/consolidation/validation/ledger-baseline.txt": "PRESERVED_BY_CONSOLIDATION_BRANCH",
+    "docs/consolidation/validation/ledger-consolidation.txt": "PRESERVED_BY_CONSOLIDATION_BRANCH",
+    "docs/consolidation/validation/maturity.txt": "PRESERVED_BY_CONSOLIDATION_BRANCH",
+    "docs/consolidation/validation/original-checkout-final-check.json": "PRESERVED_BY_CONSOLIDATION_BRANCH",
+    "docs/consolidation/validation/release-workflow-tests.txt": "PRESERVED_BY_CONSOLIDATION_BRANCH",
+    "docs/consolidation/validation/rev51-harness.txt": "PRESERVED_BY_CONSOLIDATION_BRANCH",
+    "docs/consolidation/validation/services-tests.txt": "PRESERVED_BY_CONSOLIDATION_BRANCH",
+    "docs/consolidation/validation/trading-tests.txt": "PRESERVED_BY_CONSOLIDATION_BRANCH",
+    "docs/consolidation/validation/voice-requalification.txt": "PRESERVED_BY_CONSOLIDATION_BRANCH",
+    "docs/design/van-next/README.md": "PRESERVED_BY_CONSOLIDATION_BRANCH",
+    "docs/project-state/LOCAL_CHANGE_LEDGER.jsonl": "PRESERVED_BY_CONSOLIDATION_BRANCH",
+    "docs/project-state/authorizations/auth-20261021-owner-consolidation-asr-requalification.json": "PRESERVED_BY_CONSOLIDATION_BRANCH",
+    "docs/project-state/authorizations/auth-20261021-owner-consolidation-cognitive-ci.json": "PRESERVED_BY_CONSOLIDATION_BRANCH",
+    "docs/project-state/authorizations/auth-20261021-owner-consolidation-release-workflow.json": "PRESERVED_BY_CONSOLIDATION_BRANCH",
+    "docs/project-state/authorizations/auth-20261021-owner-consolidation-test-discovery.json": "PRESERVED_BY_CONSOLIDATION_BRANCH",
+    "docs/project-state/authorizations/auth-20261021-owner-repository-consolidation.json": "PRESERVED_BY_CONSOLIDATION_BRANCH",
+    "pytest.ini": "PRESERVED_BY_CONSOLIDATION_BRANCH",
+    "tools/consolidation/verify.py": "PRESERVED_BY_CONSOLIDATION_BRANCH",
+    "trading/tests/test_consolidated_ledger_transactions.py": "PRESERVED_BY_CONSOLIDATION_BRANCH",
+    "trading/vati/app/account_coordinator.py": "PRESERVED_BY_CONSOLIDATION_BRANCH",
+    "trading/vati/app/account_service.py": "PRESERVED_BY_CONSOLIDATION_BRANCH",
+    "trading/vati/app/cycle.py": "PRESERVED_BY_CONSOLIDATION_BRANCH",
+    "trading/vati/app/trade_lifecycle.py": "PRESERVED_BY_CONSOLIDATION_BRANCH",
+    "trading/vati/core/ledger.py": "PRESERVED_BY_CONSOLIDATION_BRANCH",
+    "trading/vati/core/ledger_pg.py": "PRESERVED_BY_CONSOLIDATION_BRANCH"
+   }
+  },
+  "PR-11": {
+   "basis": "OBSERVED",
+   "decision": "CONTENT_DISPOSITIONED_NO_MISSING_BEHAVIOUR",
+   "evidence": "docs/project-state/LOCAL_CHANGE_LEDGER.jsonl: 0 of the PR's lines absent at consolidation head (append-only rows preserved). Historical status/attestation records (docs/, artifacts/) later rewritten by subsequent merged work; HEAD carries the evolved file. Not executable; not a product obligation source under CLAUDE.md source boundaries. test_explicit_fallback_is_used_deterministically (asserted workspace_operation falls back to planned on workspace_studio) was deliberately inverted by 13cb39a8 'Gate 4' finding P2-GOOG-001: HEAD backend/tests/test_google_mesh.py::test_a_fallback_nothing_can_execute_is_not_a_fallback asserts status=='degraded' and capability!='workspace_studio', plus test_a_fallback_something_can_execute_still_works and test_every_capability_declares_an_executor. Restoring the old assertion would reintroduce a false 'planned' state.",
+   "evidence_grade": "OBSERVED",
+   "paths": {
+    "artifacts/google/stitch_live_attestation.json": "SUPERSEDED_HISTORICAL_RECORD",
+    "backend/tests/test_google_mesh.py": "SUPERSEDED_INTENTIONALLY",
+    "docs/EXTERNAL_GATES.md": "SUPERSEDED_HISTORICAL_RECORD",
+    "docs/GOOGLE_INTELLIGENCE_MESH.md": "SUPERSEDED_HISTORICAL_RECORD",
+    "docs/IMPLEMENTATION_LEDGER.md": "SUPERSEDED_HISTORICAL_RECORD",
+    "docs/OWNER_SUPPLY_FOR_V1.md": "SUPERSEDED_HISTORICAL_RECORD",
+    "docs/PRODUCTION_ACCEPTANCE_LEDGER.md": "SUPERSEDED_HISTORICAL_RECORD",
+    "docs/project-state/LOCAL_CHANGE_LEDGER.jsonl": "PRESERVED"
+   }
+  },
+  "PR-12": {
+   "basis": "OBSERVED",
+   "decision": "CONTENT_DISPOSITIONED_NO_MISSING_BEHAVIOUR",
+   "evidence": "docs/project-state/LOCAL_CHANGE_LEDGER.jsonl: 0 of the PR's lines absent at consolidation head (append-only rows preserved). Historical status/attestation records (docs/, artifacts/) later rewritten by subsequent merged work; HEAD carries the evolved file. Not executable; not a product obligation source under CLAUDE.md source boundaries. test_explicit_fallback_is_used_deterministically (asserted workspace_operation falls back to planned on workspace_studio) was deliberately inverted by 13cb39a8 'Gate 4' finding P2-GOOG-001: HEAD backend/tests/test_google_mesh.py::test_a_fallback_nothing_can_execute_is_not_a_fallback asserts status=='degraded' and capability!='workspace_studio', plus test_a_fallback_something_can_execute_still_works and test_every_capability_declares_an_executor. Restoring the old assertion would reintroduce a false 'planned' state.",
+   "evidence_grade": "OBSERVED",
+   "paths": {
+    "artifacts/google/stitch_live_attestation.json": "SUPERSEDED_HISTORICAL_RECORD",
+    "backend/tests/test_google_mesh.py": "SUPERSEDED_INTENTIONALLY",
+    "docs/EXTERNAL_GATES.md": "SUPERSEDED_HISTORICAL_RECORD",
+    "docs/GOOGLE_INTELLIGENCE_MESH.md": "SUPERSEDED_HISTORICAL_RECORD",
+    "docs/IMPLEMENTATION_LEDGER.md": "SUPERSEDED_HISTORICAL_RECORD",
+    "docs/OWNER_SUPPLY_FOR_V1.md": "SUPERSEDED_HISTORICAL_RECORD",
+    "docs/PRODUCTION_ACCEPTANCE_LEDGER.md": "SUPERSEDED_HISTORICAL_RECORD",
+    "docs/project-state/LOCAL_CHANGE_LEDGER.jsonl": "PRESERVED"
+   }
+  },
+  "PR-13": {
+   "basis": "OBSERVED",
+   "decision": "CONTENT_DISPOSITIONED_NO_MISSING_BEHAVIOUR",
+   "evidence": "docs/project-state/LOCAL_CHANGE_LEDGER.jsonl: 0 of the PR's lines absent at consolidation head (append-only rows preserved). Historical status/attestation records (docs/, artifacts/) later rewritten by subsequent merged work; HEAD carries the evolved file. Not executable; not a product obligation source under CLAUDE.md source boundaries. test_explicit_fallback_is_used_deterministically (asserted workspace_operation falls back to planned on workspace_studio) was deliberately inverted by 13cb39a8 'Gate 4' finding P2-GOOG-001: HEAD backend/tests/test_google_mesh.py::test_a_fallback_nothing_can_execute_is_not_a_fallback asserts status=='degraded' and capability!='workspace_studio', plus test_a_fallback_something_can_execute_still_works and test_every_capability_declares_an_executor. Restoring the old assertion would reintroduce a false 'planned' state.",
+   "evidence_grade": "OBSERVED",
+   "paths": {
+    "artifacts/google/stitch_live_attestation.json": "SUPERSEDED_HISTORICAL_RECORD",
+    "backend/tests/test_google_mesh.py": "SUPERSEDED_INTENTIONALLY",
+    "docs/EXTERNAL_GATES.md": "SUPERSEDED_HISTORICAL_RECORD",
+    "docs/GOOGLE_INTELLIGENCE_MESH.md": "SUPERSEDED_HISTORICAL_RECORD",
+    "docs/IMPLEMENTATION_LEDGER.md": "SUPERSEDED_HISTORICAL_RECORD",
+    "docs/OWNER_SUPPLY_FOR_V1.md": "SUPERSEDED_HISTORICAL_RECORD",
+    "docs/PRODUCTION_ACCEPTANCE_LEDGER.md": "SUPERSEDED_HISTORICAL_RECORD",
+    "docs/project-state/LOCAL_CHANGE_LEDGER.jsonl": "PRESERVED"
+   }
+  },
+  "PR-14": {
+   "basis": "OBSERVED",
+   "decision": "CONTENT_DISPOSITIONED_NO_MISSING_BEHAVIOUR",
+   "evidence": "docs/project-state/LOCAL_CHANGE_LEDGER.jsonl: 0 of the PR's lines absent at consolidation head (append-only rows preserved). Historical status/attestation records (docs/, artifacts/) later rewritten by subsequent merged work; HEAD carries the evolved file. Not executable; not a product obligation source under CLAUDE.md source boundaries.",
+   "evidence_grade": "OBSERVED",
+   "paths": {
+    "artifacts/google/stitch_live_attestation.json": "SUPERSEDED_HISTORICAL_RECORD",
+    "docs/EXTERNAL_GATES.md": "SUPERSEDED_HISTORICAL_RECORD",
+    "docs/GOOGLE_INTELLIGENCE_MESH.md": "SUPERSEDED_HISTORICAL_RECORD",
+    "docs/IMPLEMENTATION_LEDGER.md": "SUPERSEDED_HISTORICAL_RECORD",
+    "docs/OWNER_SUPPLY_FOR_V1.md": "SUPERSEDED_HISTORICAL_RECORD",
+    "docs/PRODUCTION_ACCEPTANCE_LEDGER.md": "SUPERSEDED_HISTORICAL_RECORD",
+    "docs/project-state/LOCAL_CHANGE_LEDGER.jsonl": "PRESERVED"
+   }
+  },
+  "PR-15": {
+   "basis": "OBSERVED",
+   "decision": "CONTENT_DISPOSITIONED_NO_MISSING_BEHAVIOUR",
+   "evidence": "docs/project-state/LOCAL_CHANGE_LEDGER.jsonl: 0 of the PR's lines absent at consolidation head (append-only rows preserved). Historical status/attestation records (docs/, artifacts/) later rewritten by subsequent merged work; HEAD carries the evolved file. Not executable; not a product obligation source under CLAUDE.md source boundaries.",
+   "evidence_grade": "OBSERVED",
+   "paths": {
+    "artifacts/google/stitch_live_attestation.json": "SUPERSEDED_HISTORICAL_RECORD",
+    "docs/EXTERNAL_GATES.md": "SUPERSEDED_HISTORICAL_RECORD",
+    "docs/GOOGLE_INTELLIGENCE_MESH.md": "SUPERSEDED_HISTORICAL_RECORD",
+    "docs/IMPLEMENTATION_LEDGER.md": "SUPERSEDED_HISTORICAL_RECORD",
+    "docs/OWNER_SUPPLY_FOR_V1.md": "SUPERSEDED_HISTORICAL_RECORD",
+    "docs/PRODUCTION_ACCEPTANCE_LEDGER.md": "SUPERSEDED_HISTORICAL_RECORD",
+    "docs/project-state/LOCAL_CHANGE_LEDGER.jsonl": "PRESERVED"
+   }
+  },
+  "PR-16": {
+   "basis": "OBSERVED",
+   "decision": "CONTENT_DISPOSITIONED_NO_MISSING_BEHAVIOUR",
+   "evidence": "docs/project-state/LOCAL_CHANGE_LEDGER.jsonl: 0 of the PR's lines absent at consolidation head (append-only rows preserved). Historical status/attestation records (docs/, artifacts/) later rewritten by subsequent merged work; HEAD carries the evolved file. Not executable; not a product obligation source under CLAUDE.md source boundaries. install_van_profile.sh: removed should_skip_file() was defined but never called in the PR-16 version (1 occurrence); SECRET_PATTERNS block byte-identical to HEAD; rsync --delete still limited to repository-managed subtrees; HEAD tests/hermes/test_profile_layout.py::test_install_profile_preserves_runtime_state_and_secrets covers the behaviour.",
+   "evidence_grade": "OBSERVED",
+   "paths": {
+    "artifacts/google/stitch_live_attestation.json": "SUPERSEDED_HISTORICAL_RECORD",
+    "docs/EXTERNAL_GATES.md": "SUPERSEDED_HISTORICAL_RECORD",
+    "docs/GOOGLE_INTELLIGENCE_MESH.md": "SUPERSEDED_HISTORICAL_RECORD",
+    "docs/IMPLEMENTATION_LEDGER.md": "SUPERSEDED_HISTORICAL_RECORD",
+    "docs/OWNER_SUPPLY_FOR_V1.md": "SUPERSEDED_HISTORICAL_RECORD",
+    "docs/PRODUCTION_ACCEPTANCE_LEDGER.md": "SUPERSEDED_HISTORICAL_RECORD",
+    "docs/project-state/LOCAL_CHANGE_LEDGER.jsonl": "PRESERVED",
+    "tests/hermes/test_profile_layout.py": "PRESERVED",
+    "tools/hermes/install_van_profile.sh": "PRESERVED"
+   }
+  },
+  "PR-17": {
+   "basis": "OBSERVED",
+   "decision": "CONTENT_DISPOSITIONED_NO_MISSING_BEHAVIOUR",
+   "evidence": "docs/project-state/LOCAL_CHANGE_LEDGER.jsonl: 0 of the PR's lines absent at consolidation head (append-only rows preserved). Historical status/attestation records (docs/, artifacts/) later rewritten by subsequent merged work; HEAD carries the evolved file. Not executable; not a product obligation source under CLAUDE.md source boundaries.",
+   "evidence_grade": "OBSERVED",
+   "paths": {
+    "artifacts/google/stitch_live_attestation.json": "SUPERSEDED_HISTORICAL_RECORD",
+    "docs/EXTERNAL_GATES.md": "SUPERSEDED_HISTORICAL_RECORD",
+    "docs/GOOGLE_INTELLIGENCE_MESH.md": "SUPERSEDED_HISTORICAL_RECORD",
+    "docs/IMPLEMENTATION_LEDGER.md": "SUPERSEDED_HISTORICAL_RECORD",
+    "docs/OWNER_SUPPLY_FOR_V1.md": "SUPERSEDED_HISTORICAL_RECORD",
+    "docs/PRODUCTION_ACCEPTANCE_LEDGER.md": "SUPERSEDED_HISTORICAL_RECORD",
+    "docs/project-state/LOCAL_CHANGE_LEDGER.jsonl": "PRESERVED"
+   }
+  },
+  "PR-18": {
+   "basis": "OBSERVED",
+   "decision": "CONTENT_DISPOSITIONED_NO_MISSING_BEHAVIOUR",
+   "evidence": "docs/project-state/LOCAL_CHANGE_LEDGER.jsonl: 0 of the PR's lines absent at consolidation head (append-only rows preserved). Historical status/attestation records (docs/, artifacts/) later rewritten by subsequent merged work; HEAD carries the evolved file. Not executable; not a product obligation source under CLAUDE.md source boundaries.",
+   "evidence_grade": "OBSERVED",
+   "paths": {
+    "artifacts/google/stitch_live_attestation.json": "SUPERSEDED_HISTORICAL_RECORD",
+    "docs/EXTERNAL_GATES.md": "SUPERSEDED_HISTORICAL_RECORD",
+    "docs/GOOGLE_INTELLIGENCE_MESH.md": "SUPERSEDED_HISTORICAL_RECORD",
+    "docs/IMPLEMENTATION_LEDGER.md": "SUPERSEDED_HISTORICAL_RECORD",
+    "docs/OWNER_SUPPLY_FOR_V1.md": "SUPERSEDED_HISTORICAL_RECORD",
+    "docs/PRODUCTION_ACCEPTANCE_LEDGER.md": "SUPERSEDED_HISTORICAL_RECORD",
+    "docs/project-state/LOCAL_CHANGE_LEDGER.jsonl": "PRESERVED"
+   }
+  },
+  "PR-22": {
+   "basis": "OBSERVED",
+   "decision": "SUPERSEDED_BY_MERGED_PR_23",
+   "evidence": "Closed unmerged 'gpt/trading-main-reconcile'; same-purpose 'gpt/trading-main-reconcile-v2' (PR-23) merged and its head is contained in evaluated history. PR-22 and PR-23 blobs for FloatingOverlayService.kt/TradingCommandCentreActivity.kt differ, so equivalence is inferred from the v2 replacement, not proven line by line; HEAD versions have since evolved (486/661 and 119/144 PR-22 lines absent). Blueprint docs are historical planning text superseded by Rev1.18. Line-level check: of the 186 distinct non-blank lines PR-22 added to FloatingOverlayService.kt and TradingCommandCentreActivity.kt, 185 are present in merged PR-23 (48e47fe9); the one difference is PR-23's own fix giving TradesWorkboardPanel a ColumnScope receiver ('Fix VATI trade panel column scope').",
+   "evidence_grade": "OBSERVED",
+   "paths": {
+    "android/app/src/main/java/com/dial/van/overlay/FloatingOverlayService.kt": "SUPERSEDED",
+    "android/app/src/main/java/com/dial/van/trading/TradingCommandCentreActivity.kt": "SUPERSEDED",
+    "docs/VAN_ADAPTIVE_TRADING_INTELLIGENCE_TECHNICAL_BLUEPRINT_REV2.md": "SUPERSEDED_HISTORICAL_RECORD",
+    "docs/VAN_ADAPTIVE_TRADING_INTELLIGENCE_TECHNICAL_BLUEPRINT_REV3.md": "SUPERSEDED_HISTORICAL_RECORD",
+    "docs/archive/VAN_ADAPTIVE_TRADING_INTELLIGENCE_TECHNICAL_BLUEPRINT_REV1.md": "SUPERSEDED_HISTORICAL_RECORD",
+    "docs/project-state/LOCAL_CHANGE_LEDGER.jsonl": "RETIRED"
+   }
+  },
+  "PR-35": {
+   "basis": "OBSERVED",
+   "decision": "SUPERSEDED_BY_STRONGER_HEAD_TEST",
+   "evidence": "Closed unmerged. Its Caddyfile multiline handle blocks are present at HEAD (deploy/van-trading-core/caddy/Caddyfile 'handle @ea {' multiline) and HEAD trading/tests/test_oci_trading_topology_bootstrap.py::test_caddyfile_uses_valid_multiline_handle_blocks_and_bootstrap_validates_it asserts the same layout plus 'caddy validate' in bootstrap.",
+   "evidence_grade": "OBSERVED",
+   "paths": {
+    "trading/tests/test_oci_trading_topology_bootstrap.py": "SUPERSEDED"
+   }
+  },
+  "PR-38": {
+   "basis": "OBSERVED",
+   "decision": "RETIRED_PLANNING_DOCUMENT",
+   "evidence": "Closed unmerged; sole change is a proposal blueprint absent at HEAD. Not authority under CANONICAL_AUTHORITY (Rev1.18 supersedes prior schedules/plans). Content remains retrievable at refs/pull/38/head. Its successor implementation matrix docs/project-state/UNIFIED_INTELLIGENCE_IMPLEMENTATION_MATRIX.json exists at HEAD. Whether any obligation is unrepresented in Rev1.18 is a PRE-002 semantic question, not a source-preservation loss.",
+   "evidence_grade": "OBSERVED",
+   "paths": {
+    "docs/VAN_UNIFIED_PERSONAL_INTELLIGENCE_IMPROVEMENT_BLUEPRINT_REV_1.md": "RETIRED"
+   }
+  },
+  "PR-4": {
+   "basis": "OBSERVED",
+   "decision": "RETIRED_WITH_CLOSED_PR",
+   "evidence": "Closed unmerged (PR_STATE). Only unpreserved path is LOCAL_CHANGE_LEDGER.jsonl rows (4 of 6) that record this PR's own never-merged commits; no executable path unpreserved.",
+   "evidence_grade": "OBSERVED",
+   "paths": {
+    "docs/project-state/LOCAL_CHANGE_LEDGER.jsonl": "RETIRED"
+   }
+  },
+  "PR-40": {
+   "basis": "OBSERVED",
+   "decision": "RETIRED_BUILD_EXPERIMENT",
+   "evidence": "Closed unmerged 'ci: retain debug APK for owner testing'. Diff adds only an actions/upload-artifact step for app-debug.apk.",
+   "evidence_grade": "OBSERVED",
+   "paths": {
+    ".github/workflows/van-ci.yml": "RETIRED"
+   }
+  },
+  "PR-41": {
+   "basis": "OBSERVED",
+   "decision": "RETIRED_BUILD_EXPERIMENT",
+   "evidence": "Closed unmerged 'ci: retain corrected S24 owner-test APK (icon); superseded by merged PR-42 fix/current-van-launcher-icon'. Diff adds a debug-APK upload plus applicationIdSuffix '.test'/versionNameSuffix '-owner-test' and an icon change; the suffix would break com.dial.van identity continuity, and the icon is superseded by merged PR-42.",
+   "evidence_grade": "OBSERVED",
+   "paths": {
+    ".github/workflows/van-ci.yml": "RETIRED",
+    "android/app/build.gradle.kts": "SUPERSEDED"
+   }
+  },
+  "PR-43": {
+   "basis": "OBSERVED",
+   "decision": "RETIRED_BUILD_EXPERIMENT",
+   "evidence": "Closed unmerged 'ci: retain canonical com.dial.van owner-debug APK'. Diff adds only an actions/upload-artifact step for app-debug.apk.",
+   "evidence_grade": "OBSERVED",
+   "paths": {
+    ".github/workflows/van-ci.yml": "RETIRED"
+   }
+  },
+  "PR-44": {
+   "basis": "OBSERVED",
+   "decision": "RETIRED_BUILD_EXPERIMENT",
+   "evidence": "Closed unmerged 'ci: certify Android APK installability (diagnostic)'. Diff removes the Automation/Browser Fabric certification steps from CI and adds APK sha256/aapt badging/signing/alignment diagnostics; merging would have weakened CI. The APK-identity idea is carried as an input to REL-001 exact-APK evidence, not as a lost obligation.",
+   "evidence_grade": "OBSERVED",
+   "paths": {
+    ".github/workflows/van-ci.yml": "RETIRED"
+   }
+  },
+  "PR-45": {
+   "basis": "OBSERVED",
+   "decision": "RETIRED_CONTRARY_TO_CONTRACT",
+   "evidence": "Closed unmerged. Adds android:usesCleartextTraffic and/or hard-coded backend endpoints (debug loopback cleartext) with ad-hoc versionName. Rev1.18 requires zero in-app backend configuration via signed provisioning with certificate verification (ARCHITECTURE_REV118 / CLAUDE.md); these approaches are contrary to the contract and correctly not merged. Owner-device connectivity remains a BE-002/BE-030 obligation.",
+   "evidence_grade": "OBSERVED",
+   "paths": {
+    "android/app/src/debug/AndroidManifest.xml": "RETIRED"
+   }
+  },
+  "PR-46": {
+   "basis": "OBSERVED",
+   "decision": "RETIRED_CONTRARY_TO_CONTRACT",
+   "evidence": "Closed unmerged. Adds android:usesCleartextTraffic and/or hard-coded backend endpoints (http://10.66.66.1:8787 WireGuard cleartext default) with ad-hoc versionName. Rev1.18 requires zero in-app backend configuration via signed provisioning with certificate verification (ARCHITECTURE_REV118 / CLAUDE.md); these approaches are contrary to the contract and correctly not merged. Owner-device connectivity remains a BE-002/BE-030 obligation.",
+   "evidence_grade": "OBSERVED",
+   "paths": {
+    "android/app/build.gradle.kts": "RETIRED",
+    "android/app/src/debug/AndroidManifest.xml": "RETIRED",
+    "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt": "RETIRED",
+    "android/app/src/main/java/com/dial/van/onboarding/OnboardingActivity.kt": "RETIRED"
+   }
+  },
+  "PR-47": {
+   "basis": "OBSERVED",
+   "decision": "RETIRED_CONTRARY_TO_CONTRACT",
+   "evidence": "Closed unmerged. Adds android:usesCleartextTraffic and/or hard-coded backend endpoints (https://idol-peninsula-various-priced.trycloudflare.com tunnel default) with ad-hoc versionName. Rev1.18 requires zero in-app backend configuration via signed provisioning with certificate verification (ARCHITECTURE_REV118 / CLAUDE.md); these approaches are contrary to the contract and correctly not merged. Owner-device connectivity remains a BE-002/BE-030 obligation.",
+   "evidence_grade": "OBSERVED",
+   "paths": {
+    ".github/workflows/owner-s24-direct-apk.yml": "RETIRED",
+    "android/app/build.gradle.kts": "RETIRED",
+    "android/app/src/main/java/com/dial/van/onboarding/OnboardingActivity.kt": "RETIRED",
+    "android/app/src/main/java/com/dial/van/onboarding/OnboardingPlan.kt": "RETIRED"
+   }
+  },
+  "ccr-9e07e1af-8mgz1p": {
+   "basis": "OBSERVED",
+   "decision": "REBUILD_WORK_BRANCH",
+   "evidence": "Created by this rebuild after the 70-branch evaluation; descends from consolidation tip b02075f3 (git merge-base --is-ancestor) and adds only docs/rebuild/**, tools/rebuild/**, tests/rebuild/**, one authorization record and ledger rows (git diff --stat b02075f3..33c6e818).",
+   "evidence_grade": "OBSERVED",
+   "paths": {}
+  },
+  "consolidation/opus-clean-rev118-20261021": {
+   "basis": "OBSERVED",
+   "decision": "SOURCE_BASELINE_OF_REV118_IMPLEMENTATION",
+   "evidence": "Created after the 70-branch evaluation as its integration result (CONSOLIDATION_STATE.json, docs/consolidation/VALIDATION.md). Working branch ccr-9e07e1af-8mgz1p descends from its tip b02075f327ea8180ab6d269eba358cf8c5479878 (git merge-base --is-ancestor).",
+   "evidence_grade": "OBSERVED"
+  }
+ },
+ "rule": "Hand-authored judgements only. Each entry needs a decision and evidence; INFERRED judgements may not claim OBSERVED grade. Rows absent here remain OPEN and block PRE-001.",
+ "schema": "van.rebuild.pre001.dispositions/1",
+ "source": {}
+}

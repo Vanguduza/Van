@@ -1,0 +1,181 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:van:ml:1.0:DeploymentBinding",
+  "title": "DeploymentBinding",
+  "description": "Proposed VAN interchange contract. Shape validity is not permission, factual evidence or runtime qualification. Cross-record semantic validation and independent trusted receipts are required.",
+  "type": "object",
+  "properties": {
+    "schema_version": {
+      "const": "van-ml/1.0"
+    },
+    "record_id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256
+    },
+    "authority_effect": {
+      "const": "NONE"
+    },
+    "scope": {
+      "type": "object",
+      "properties": {
+        "project_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "cohort_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "instrument_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "venue_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "environment": {
+          "enum": [
+            "FIXTURE",
+            "RESEARCH",
+            "SHADOW",
+            "LIVE_ADVISORY"
+          ]
+        }
+      },
+      "required": [
+        "project_id",
+        "cohort_id",
+        "instrument_id",
+        "venue_id",
+        "environment"
+      ],
+      "additionalProperties": false
+    },
+    "model_artifact_digest": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "feature_manifest_digest": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "target_spec_digest": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "calibration_artifact_digest": {
+      "anyOf": [
+        {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "fusion_policy_digest": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "use_policy_digest": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "strategy_capsule_digest": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "source_commit": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{40}$"
+    },
+    "epoch": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "previous_binding_digest": {
+      "anyOf": [
+        {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "qualification_receipt_refs": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 256
+      },
+      "minItems": 1
+    },
+    "owner_authority_ref": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256
+    },
+    "trusted_issuer_registry_ref": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "valid_until": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "state": {
+      "enum": [
+        "PROPOSED",
+        "ACTIVE",
+        "REVOKED",
+        "EXPIRED"
+      ]
+    },
+    "live_authorization_must_be_verified_externally": {
+      "const": true
+    },
+    "may_execute_orders": {
+      "const": false
+    }
+  },
+  "required": [
+    "schema_version",
+    "record_id",
+    "authority_effect",
+    "scope",
+    "model_artifact_digest",
+    "feature_manifest_digest",
+    "target_spec_digest",
+    "calibration_artifact_digest",
+    "fusion_policy_digest",
+    "use_policy_digest",
+    "strategy_capsule_digest",
+    "source_commit",
+    "epoch",
+    "previous_binding_digest",
+    "qualification_receipt_refs",
+    "owner_authority_ref",
+    "trusted_issuer_registry_ref",
+    "created_at",
+    "valid_until",
+    "state",
+    "live_authorization_must_be_verified_externally",
+    "may_execute_orders"
+  ],
+  "additionalProperties": false
+}

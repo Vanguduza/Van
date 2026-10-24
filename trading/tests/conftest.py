@@ -84,18 +84,36 @@ def mandate_dict(**overrides):
         "expires_at_unix": NOW + 30 * 86400,
     }
     base.update(overrides)
-    # Signed last, over the identity the caller ended up with: a mandate signed for
-    # version 1.0.0 must not admit an override that bumped the version.
+    # Sign the actual effective policy after the caller selects its scope and bounds.
+    from vati.risk.mandate import mandate_subject
+    try:
+        subject=mandate_subject(base)
+    except (ValueError,TypeError,KeyError):
+        # Negative parser fixtures must reach the real loader. This token
+        # cannot admit any effective policy if parsing is accidentally bypassed.
+        subject='invalid-test-policy'
     base.setdefault(
         "owner_signature_ref",
         owner_authority().token(
             act="mandate-admit",
-            subject=f"{base['mandate_id']}:{base['version']}",
+            subject=subject,
             issued_at_unix=int(base["signed_at_unix"]),
             lifetime_seconds=int(base["expires_at_unix"]) - int(base["signed_at_unix"]),
         ),
     )
     return base
+
+
+def historical_mandate_dict(**overrides):
+    """Owner-signed test grant covering the unchanged historical bar fixtures.
+
+    Historical simulation is evaluated at its event clock, not a later grant's
+    start date. Keep the original prices/calendar and every behavioural oracle.
+    """
+    start=1_757_980_800-3600
+    values={'signed_at_unix':start,'expires_at_unix':start+90*86400}
+    values.update(overrides)
+    return mandate_dict(**values)
 
 
 @pytest.fixture

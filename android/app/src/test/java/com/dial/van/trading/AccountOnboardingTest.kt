@@ -33,6 +33,25 @@ class AccountOnboardingTest {
         assertEquals("{\"a\":\"q\\\"b\\\\c\\n\"}", AccountOnboarding.canonicalJson(buildJsonObject { put("a", "q\"b\\c\n") }))
         assertEquals("{\"k\":\"\\t\"}", AccountOnboarding.canonicalJson(buildJsonObject { put("k", "\t") }))
         assertEquals("{\"a\":[],\"b\":2}", AccountOnboarding.canonicalJson(buildJsonObject { put("b", 2); put("a", buildJsonArray { }) }))
+        assertEquals("{\"notes\":\"a\\bb\\fc\"}", AccountOnboarding.canonicalJson(buildJsonObject { put("notes", "a\bb\u000Cc") }))
+    }
+
+    @Test
+    fun nativeReviewShowsEffectiveTargetAndChangesWithoutPrivateLocators() {
+        val before = buildJsonObject {
+            for (key in listOf("alias", "broker", "mode", "currency", "label", "server", "login", "venue", "bridge_url", "mandate_ref", "notes", "safety_identity"))
+                put(key, when (key) { "alias" -> "owner_account"; "broker" -> "DERIV"; "mode" -> "OBSERVE"; "currency" -> "EUR"; "label" -> "Original"; else -> "" })
+            put("demo", false); put("enabled", true)
+            put("credential_ref", buildJsonObject { put("kind", "file") })
+        }
+        val after = kotlinx.serialization.json.JsonObject(before + mapOf("label" to JsonPrimitive("New name"), "enabled" to JsonPrimitive(false)))
+        val review = buildJsonObject { put("schema", "vati.account-review/1"); put("action", "account_upsert"); put("before", before); put("after", after) }
+        val text = AccountOnboarding.resolvedReviewText(review)!!
+        assertTrue(text.contains("Original → New name")); assertTrue(text.contains("Enabled: Yes → No"))
+        assertTrue(text.contains("Broker: DERIV")); assertTrue(text.contains("Trading mode: observe")); assertTrue(text.contains("Currency: EUR"))
+        assertNull(AccountOnboarding.resolvedReviewText(buildJsonObject { put("schema", "vati.account-review/1"); put("action", "account_upsert"); put("after", buildJsonObject { put("alias", "incomplete") }) }))
+        val privateAfter = kotlinx.serialization.json.JsonObject(after + mapOf("credential_ref" to buildJsonObject { put("kind", "file"); put("secrets_file", "/private/owner.env") }))
+        assertNull(AccountOnboarding.resolvedReviewText(kotlinx.serialization.json.JsonObject(review + mapOf("after" to privateAfter))))
     }
 
     @Test

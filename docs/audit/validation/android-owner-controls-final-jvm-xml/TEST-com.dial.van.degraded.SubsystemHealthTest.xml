@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.dial.van.degraded.SubsystemHealthTest" tests="9" skipped="0" failures="0" errors="0" timestamp="2026-10-07T22:57:32" hostname="052fefa249ff" time="0.004">
+  <properties/>
+  <testcase name="working offline is not a broken queue()" classname="com.dial.van.degraded.SubsystemHealthTest" time="0.001"/>
+  <testcase name="a phone that has granted everything reports everything working()" classname="com.dial.van.degraded.SubsystemHealthTest" time="0.0"/>
+  <testcase name="every restore action renders words a person can read()" classname="com.dial.van.degraded.SubsystemHealthTest" time="0.001"/>
+  <testcase name="a queue that cannot send is broken and a queue that will not drain is broken()" classname="com.dial.van.degraded.SubsystemHealthTest" time="0.0"/>
+  <testcase name="an overlay the owner turned off is not a fault()" classname="com.dial.van.degraded.SubsystemHealthTest" time="0.0"/>
+  <testcase name="no owner-facing detail is written in VAN's own vocabulary()" classname="com.dial.van.degraded.SubsystemHealthTest" time="0.0"/>
+  <testcase name="each subsystem follows its own signal()" classname="com.dial.van.degraded.SubsystemHealthTest" time="0.0"/>
+  <testcase name="every broken subsystem carries something the owner can do()" classname="com.dial.van.degraded.SubsystemHealthTest" time="0.0"/>
+  <testcase name="a phone that has granted nothing does not report five healthy subsystems()" classname="com.dial.van.degraded.SubsystemHealthTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

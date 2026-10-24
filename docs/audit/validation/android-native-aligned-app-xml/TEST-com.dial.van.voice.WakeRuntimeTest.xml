@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.dial.van.voice.WakeRuntimeTest" tests="7" skipped="0" failures="0" errors="0" timestamp="2026-10-07T22:35:26" hostname="052fefa249ff" time="0.009">
+  <properties/>
+  <testcase name="energyVadRecognizesPcmSpeechEnergy" classname="com.dial.van.voice.WakeRuntimeTest" time="0.001"/>
+  <testcase name="silenceIsRejectedBeforeKws" classname="com.dial.van.voice.WakeRuntimeTest" time="0.002"/>
+  <testcase name="badPhraseVerifierRejectsDespiteHighKwsAndSpeaker" classname="com.dial.van.voice.WakeRuntimeTest" time="0.003"/>
+  <testcase name="borderlineWakeWithoutSpeakerSupportIsUncertain" classname="com.dial.van.voice.WakeRuntimeTest" time="0.001"/>
+  <testcase name="speakerSimilarityCanSupportBorderlineVerifiedWake" classname="com.dial.van.voice.WakeRuntimeTest" time="0.0"/>
+  <testcase name="strongPhraseAcceptsEvenWhenSpeakerSimilarityIsLow" classname="com.dial.van.voice.WakeRuntimeTest" time="0.001"/>
+  <testcase name="trailingSilenceStillFeedsBothKwsStagesAfterSpeech" classname="com.dial.van.voice.WakeRuntimeTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

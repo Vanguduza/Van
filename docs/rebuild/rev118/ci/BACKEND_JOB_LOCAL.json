@@ -1,0 +1,209 @@
+{
+ "schema": "van.rebuild.ci.backend-job-local/1",
+ "date_utc": "2026-10-21",
+ "layout": "detached worktree of ccr-9e07e1af-8mgz1p at the DDS-fix commit plus sibling ../dial-development-system produced by the workflow's own verify step from a sparse checkout at 64d6b715",
+ "python": "3.12.3 venv from backend/requirements.lock (CI: 3.12.15)",
+ "not_run_locally": [
+  "Steps 1–3 run separately: precondition needs the secret; checkout and verify executed against a local sparse clone (STEP_OK).",
+  "Step 8 Rive CLI smoke: needs sudo apt and download; unrelated to DDS."
+ ],
+ "steps": [
+  {
+   "step": 5,
+   "name": "Install backend dependencies",
+   "exit": 0,
+   "seconds": 1,
+   "tail": "Requirement already satisfied: websockets==17.1 in /tmp/claude-0/-home-user/f3a3bfd7-21b0-5b1c-98d2-aac534b0fd32/scratchpad/venv312/lib/python3.12/site-packages (from -r requirements.lock (line 53)) (17.1)"
+  },
+  {
+   "step": 6,
+   "name": "Maturity gate (truth and policy)",
+   "exit": 0,
+   "seconds": 0,
+   "tail": "MATURITY GATE PASSED — every claim in the ledgers is backed."
+  },
+  {
+   "step": 7,
+   "name": "Authority map (which document owns which invariant)",
+   "exit": 0,
+   "seconds": 0,
+   "tail": "AUTHORITY MAP PASSED — every invariant is owned once, implemented and tested."
+  },
+  {
+   "step": 8,
+   "name": "Character Forge pinned Rive CLI authoring smoke",
+   "result": "NOT_RUN_LOCALLY (needs sudo apt + Rive CLI download; independent of DDS)"
+  },
+  {
+   "step": 9,
+   "name": "Backend tests",
+   "exit": 1,
+   "seconds": 2598,
+   "tail": "5 failed, 5116 passed, 3 skipped, 336 warnings in 2587.84s (0:43:07)",
+   "result": "5 failed, 5116 passed, 3 skipped",
+   "classification": "ENVIRONMENT_OF_THIS_CONTAINER (CI passed this step on b02075f3)",
+   "detail": [
+    "3 Chromium WHATWG/CDP tests: container forces Chromium 141 build 1194 via PLAYWRIGHT_BROWSERS_PATH while Playwright is pinned at 1.63.0; Chromium 141 normalises '%2e%2e' in paths to '..'. Finding: these tests pin one Chromium's URL normalisation, so a browser upgrade will break them.",
+    "test_vendored_dds_files_are_the_audited_blobs: reads absolute DIAL_DDS_ROOT=/home/user/dial-development-system (this session's clone, lacking commit 39d3777). After fetching it passes; with the path absent (as on CI runners) it skips."
+   ]
+  },
+  {
+   "step": 10,
+   "name": "Contract tests",
+   "exit": 1,
+   "seconds": 639,
+   "tail": "1 failed, 1532 passed, 2 skipped in 638.44s (0:10:38)",
+   "result": "1 failed, 1532 passed, 2 skipped",
+   "classification": "LOCAL_LAYOUT_ARTEFACT",
+   "detail": [
+    "test_the_template_and_the_live_workflow_are_byte_identical: the local layout received only the edited live workflow; with the template copied too: 4 passed. Committed tree: identical (10/10 CI tests pass)."
+   ]
+  },
+  {
+   "step": 11,
+   "name": "OpenMuse → VAN convergence repository certification",
+   "exit": 0,
+   "seconds": 0,
+   "tail": "}"
+  },
+  {
+   "step": 13,
+   "name": "Browser Control Agent and stream-host logic",
+   "exit": 2,
+   "seconds": 1,
+   "tail": "3 errors in 0.47s",
+   "result": "3 collection errors (ModuleNotFoundError: aiortc)",
+   "classification": "REAL_CI_DEFECT_FIXED (17a7cb81)",
+   "detail": [
+    "Services need deploy/van-browser-stream/requirements.lock (aiortc/av/aiohttp), absent from the backend environment. Fixed by an isolated hash-locked venv mirroring bootstrap.sh: 198 passed executing the step's own script."
+   ]
+  },
+  {
+   "step": 14,
+   "name": "Kotlin reachability (what nothing in the app reaches)",
+   "exit": 0,
+   "seconds": 53,
+   "tail": "Candidates, not verdicts. Kotlin has reflection, Compose and DI."
+  },
+  {
+   "step": 15,
+   "name": "Ledger reconciliation (does the source still agree?)",
+   "exit": 0,
+   "seconds": 0,
+   "tail": "LEDGER RECONCILED — no component understates its own integration."
+  },
+  {
+   "step": 16,
+   "name": "Red-team register (§38)",
+   "exit": 0,
+   "seconds": 0,
+   "tail": "RED-TEAM REGISTER CHECKED — every PASS names evidence that exists."
+  },
+  {
+   "step": 17,
+   "name": "Red-team register self-test",
+   "exit": 0,
+   "seconds": 3,
+   "tail": "16 passed in 2.66s"
+  },
+  {
+   "step": 18,
+   "name": "Production acceptance (§43)",
+   "exit": 0,
+   "seconds": 0,
+   "tail": "PRODUCTION ACCEPTANCE CHECKED — the verdict follows from the rows."
+  },
+  {
+   "step": 19,
+   "name": "Production acceptance self-test",
+   "exit": 0,
+   "seconds": 10,
+   "tail": "15 passed in 9.58s"
+  },
+  {
+   "step": 20,
+   "name": "Maturity gate self-test",
+   "exit": 0,
+   "seconds": 5,
+   "tail": "22 passed in 4.21s"
+  },
+  {
+   "step": 21,
+   "name": "Authority map self-test",
+   "exit": 0,
+   "seconds": 3,
+   "tail": "14 passed in 2.32s"
+  },
+  {
+   "step": 22,
+   "name": "Hermes policy tests",
+   "exit": 0,
+   "seconds": 0,
+   "tail": "46 passed in 0.04s"
+  },
+  {
+   "step": 23,
+   "name": "Hermes profile layout tests",
+   "exit": 0,
+   "seconds": 2,
+   "tail": "35 passed in 1.50s"
+  },
+  {
+   "step": 24,
+   "name": "Trading stack-lock and adoption-proposal tests",
+   "exit": 0,
+   "seconds": 0,
+   "tail": "18 passed in 0.06s"
+  },
+  {
+   "step": 25,
+   "name": "Trading enhancement architecture guardrails",
+   "exit": 0,
+   "seconds": 1,
+   "tail": "Architecture guardrails OK (14 rules + confidence + store placement + production joins + active-trade joins + certificate producer)"
+  },
+  {
+   "step": 26,
+   "name": "Capsule timeframe migration is settled",
+   "exit": 0,
+   "seconds": 0,
+   "tail": "registry migration provenance reconciled"
+  },
+  {
+   "step": 27,
+   "name": "Trading enhancement tests",
+   "exit": 0,
+   "seconds": 65,
+   "tail": "1543 passed, 2 skipped, 3 warnings in 64.60s (0:01:04)"
+  },
+  {
+   "step": 28,
+   "name": "Trading Rev 5.1 certification harness",
+   "exit": 0,
+   "seconds": 1,
+   "tail": "}"
+  },
+  {
+   "step": 29,
+   "name": "Automation and browser fabric tests",
+   "exit": 0,
+   "seconds": 41,
+   "tail": "161 passed in 38.90s"
+  },
+  {
+   "step": 30,
+   "name": "Automation fail-closed proof",
+   "exit": 0,
+   "seconds": 1,
+   "tail": "automation and browser fabric correctly refuse to self-certify"
+  },
+  {
+   "step": 31,
+   "name": "Context retrieval latency evidence",
+   "exit": 0,
+   "seconds": 15,
+   "tail": "}"
+  }
+ ],
+ "summary": "Every backend step after 'Contract tests', which CI skipped, was run. The only real CI defect found (services environment) is fixed; the other non-passes are shown to be container or layout effects."
+}

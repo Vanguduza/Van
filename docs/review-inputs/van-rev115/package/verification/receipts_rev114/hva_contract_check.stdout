@@ -1,0 +1,6 @@
+{
+  "scope": "Local or VM document-schema and synthetic-fixture tests only, not VAN application tests or provider verification",
+  "schema_count": 12,
+  "fixture_count": 12,
+  "findings": {}
+}

@@ -1,5 +1,7 @@
 package com.dial.van.session
 
+import org.json.JSONObject
+
 /**
  * Rev 1.5 §§20.14, 20.15 — what happens to an owner command whose dispatch failed.
  *
@@ -26,6 +28,16 @@ package com.dial.van.session
  * wording is how the third one ends up reading like the first.
  */
 object OfflineSubmission {
+
+    /** Never re-sign an ambiguous attempt: preserve its command, nonce and issued time. */
+    fun preparedReplay(bodyText: String?, expectedIdempotencyKey: String): JSONObject? {
+        if (bodyText == null) return null
+        val body = runCatching { JSONObject(bodyText) }.getOrNull() ?: return null
+        if (body.optString("idempotency_key") != expectedIdempotencyKey ||
+            body.optString("command_id").isBlank() || body.optString("signature").isBlank() ||
+            body.optString("device_id").isBlank() || body.optLong("issued_at_unix", -1L) < 0L) return null
+        return body
+    }
 
     /** What to do, and what to say. */
     sealed interface Verdict {
@@ -89,7 +101,7 @@ object OfflineSubmission {
                 // Deliberately not "I'll try again". An A4 is irreversible and an A5 is
                 // approval-bearing; the honest sentence is that it did not happen and
                 // the owner has to ask again when they are online.
-                "Not sent — this one needs you online. Nothing was changed.",
+                "The response was lost. This action may already have happened; check its state before issuing it again. Nothing was queued.",
             )
             CommandStorability.REQUIRE_RECONFIRM_ON_RECONNECT -> Verdict.Store(
                 // Deliberately not "I'll check with you before I send it". §20.14 stores

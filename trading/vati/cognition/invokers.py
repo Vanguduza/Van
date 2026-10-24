@@ -396,6 +396,20 @@ Any of "approved_size", "lots", "stake", "order", "stop", "entry", "venue",
 "account_alias" or "mandate" present in your object will cause it to be
 refused: an assessment that carries order fields is trying to be an order.
 
+Optional Jev System-1 support:
+- If the Hermes runtime exposes the `dial_jev` MCP server, you MAY call
+  `jev_registered_batch` during this active cognition run with project_id `van`
+  and only registered `van.trading.*` modules.
+- Jev is subordinate evidence only (ANNOTATE, lifecycle ceiling SHADOW):
+  record it beside your reasoning as comparison evidence; it never changes
+  your conclusion. It cannot create this CognitiveAssessment or alter any of
+  its fields, and never touches a mandate or execution.
+- If Jev is unavailable, disabled, unqualified, abstains, or conflicts with your
+  reasoning, continue normally and increase uncertainty rather than inventing a
+  Jev answer. Never call Jev as an independent/background trading loop.
+- A Jev conflict may only increase your stated uncertainty; it is never a
+  reason to raise risk above the deterministic decision.
+
 Decision context (sealed, hash {context_hash}):
 {context_json}
 """

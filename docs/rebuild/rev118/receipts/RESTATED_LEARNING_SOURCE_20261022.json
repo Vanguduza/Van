@@ -1,0 +1,126 @@
+{
+  "schema": "van.rebuild.restated-learning-source/1",
+  "source_parent": "2fb3c8c6bd98cabcef5009d26a022cc0523af1fb",
+  "source_sha256": {
+    "backend/tests/test_trading_api.py": "e25da7b7584654d36b73d93504aef42a8189a4384457e89614ca805dc4be691f",
+    "trading/tests/test_learning_projection_store.py": "9c2095c285726bcc1a1abf0948fa51a892c62091b3c3b14516f4990849ce1851",
+    "trading/tests/test_parent_cash_and_unknown_close.py": "8a456e006bf3b007eefb9b1469a043632ec77acada886514f9eb9371de23383c",
+    "trading/tests/test_restated_trade_projection.py": "fd7ef39e1240fe739d3a3e2f89dc056943e75acf0001ea3193d1bba097f75576",
+    "trading/vati/app/account_service.py": "01272511f08863b983cb5dfe2d6734fa6161346ff2457a732cd3a72e5381953f",
+    "trading/vati/app/cycle.py": "f34a5d956d1e249b2c2a969227146098f11fbb9b5f638cbee547ea8cf87c991e",
+    "trading/vati/app/portfolio.py": "b5b1d8363c046118f78888fb53c9a3320391749b7b84972d38599a96f3dc99a2",
+    "trading/vati/app/service.py": "09c77b2cfcd78790c8cbd2a4d9d0007378c9f7cc51488dad1085b448e25db918",
+    "trading/vati/app/trade_lifecycle.py": "ad6fa89572c8f250c27e588b5dbbb26de96c2696a1c1a8e973d13aad56c17855",
+    "trading/vati/core/events.py": "6e8c62835520eb89d51002aaf5780decaf80449f42e7a604c31278e3b4d76e5a",
+    "trading/vati/execution/paper.py": "efb98221966ac395d2212e1a0ab8136e2f69148e4be31505f61af77dcc22e7b1",
+    "trading/vati/execution/review.py": "6cda8b29d60d058ef0260e3ab7e9a70bca9668c54a20a7d4272405c486f35694",
+    "trading/vati/learning/hooks.py": "ed8a2aa1ce7429c39e05bcc70d54bfe044373a8b75a8c8c5c42e85ce0583bf62",
+    "trading/vati/learning/projection_store.py": "20fff3ffbb9d7ef160a2d6ee3e98556e7f2b8d92c98746d82ac69a9a5ee053c5",
+    "trading/vati/learning/replay.py": "f42e75048adf4cdc5e466bcc8992711fd7f3ed25251dd70acb4965d7ecc8a5f4",
+    "trading/vati/learning/restatement.py": "416ca5d0bc2e083efa3d66def1439e1e3c90fd572d0a7bf4d13e476761d511a9",
+    "trading/vati/readmodels/learning.py": "23a7be442b105ec74496515e83248c53ca7b7c4651570b956fdc8dc3c87bb2f5",
+    "trading/vati/risk/history_scope.py": "07bf97bfef327459e8ba867553e963e50a5b6d459d56af086b29d33cabcad147",
+    "trading/vati/risk/lockouts.py": "afea00b6d679094cd2a521c8d368150c5b06ca156b814d97fee07d88dc5d682f"
+  },
+  "full_trading_real_postgresql": {
+    "tests": 1797,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "sha256": "f707023929f1d0b35ccf21b11bb86d2acf33bcec3ab4e96af92cf68f84e79007"
+  },
+  "full_trading_warnings": 3,
+  "full_trading_seconds": "75.91",
+  "gateway_accounts_portfolio_routes": {
+    "tests": 27,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "sha256": "4f503928e05b8054be50afb8b5b6d6978becb1f7c98d2fb0e38a309aaa678c73"
+  },
+  "rebuild": {
+    "tests": 78,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "sha256": "4fc992c11ca62814dec662d02d1fd9fd9b22b462f44278ec8d439b84556a5e17"
+  },
+  "custom_failure_injections": {
+    "detected": 3,
+    "survived": 0,
+    "source_restored": true,
+    "rows": [
+      {
+        "kind": "baseline",
+        "mutation": null,
+        "exit_code": 0,
+        "log": "/tmp/van-restatement-mutant-0.txt",
+        "sha256": "3d368ba43f0aad60365b9ab3dacfcdcd223774618d864a5e1377e1dd6be19bc8"
+      },
+      {
+        "kind": "mutation",
+        "mutation": "drop earlier native partial-close cash",
+        "exit_code": 1,
+        "log": "/tmp/van-restatement-mutant-1.txt",
+        "sha256": "30215c7500c609980cbe9b85b79a5069fdee9cd1a83c2c824357dada1b42cb12"
+      },
+      {
+        "kind": "mutation",
+        "mutation": "ignore corrected native parent contribution",
+        "exit_code": 1,
+        "log": "/tmp/van-restatement-mutant-2.txt",
+        "sha256": "748569908ee374e511e2c3963f809a46f7dd26423c0ebfe8341e1b7a5972839d"
+      },
+      {
+        "kind": "mutation",
+        "mutation": "write checkpoint history and cursor outside a transaction",
+        "exit_code": 1,
+        "log": "/tmp/van-restatement-mutant-3.txt",
+        "sha256": "4e0572bf31ccb49ebe0a3e374fc311b1eb97bb15d91120e7aa478631f96bd18e"
+      }
+    ]
+  },
+  "legacy_mutation_preflight": {
+    "schema": "van.rebuild.mutation-registry-preflight/1",
+    "registry_sha256": "35d10c7b0f2b8319b7f7305828262c972b2a6451139d75b9e83c7d0062282955",
+    "mutation_count": 374,
+    "edit_count": 383,
+    "findings": [],
+    "execution_state": "NOT_RUN",
+    "status": "ANCHORS_VALID_BASELINES_AND_MUTATIONS_NOT_EXECUTED"
+  },
+  "owner_registry_check": {
+    "changed": [],
+    "applied": false,
+    "scope": "SOURCE_CONTRACTS_ONLY"
+  },
+  "source_consolidation": {
+    "scope": "SOURCE_CONSOLIDATION_ONLY",
+    "branches_evaluated": 70,
+    "blueprint_archive_sha256": "6c7c7c1cb4fbd4748c0d63ceb2add9bd460778b66fb3b2302e16de09ac3a57a8",
+    "findings": [],
+    "runtime_qualification_issued": false
+  },
+  "private_fixture_cleanup": {
+    "stopped": true,
+    "removed": true
+  },
+  "initial_native_partial_cash_counterexample": {
+    "expected_parent_pnl": "-28.00000",
+    "old_last_reduction_measurement": "-114.00000",
+    "old_full_charges_measurement": "-117.00000",
+    "expected_after_fees_carry": "-31.00000"
+  },
+  "old_unknown_close_counterexamples": "Both actual runtimes lacked an unresolved-money fence; zero PnL itself did not reset the existing governor.",
+  "correction_evidence": "Native-envelope source fixtures, not provider-admitted correction streams",
+  "whole_unit_acceptance": "NOT_ISSUED",
+  "release_qualification": false,
+  "remaining": [
+    "Real provider settled fees/cash/correction identity and producers",
+    "Authoritative native conflict adjudication",
+    "Full population/policy/epoch scope",
+    "Large-history capacity/retention qualification",
+    "Qualified positive adaptation and independent admissions",
+    "Physical S24/Artemis and real production service/provider connectivity"
+  ]
+}

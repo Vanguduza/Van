@@ -1,0 +1,30 @@
+{
+  "BG_packet": "VAN-PKT-098",
+  "all_context_material_bindings": 234,
+  "application_tests_executed": 0,
+  "counts": {
+    "actions": 349,
+    "atoms": 171,
+    "backend": 82,
+    "backend_verification": 12,
+    "features": 93,
+    "forecast_aliases": 48,
+    "nodes": 131,
+    "requirements": 237,
+    "surfaces": 234,
+    "tests": 1328,
+    "truth": 18
+  },
+  "first_UX_packet": "VAN-PKT-099",
+  "material_recipe_count": 30,
+  "new_application_contracts": 102,
+  "new_principal_schemas": 12,
+  "new_requirements": 32,
+  "new_rev113_test_obligations": 41,
+  "new_synthetic_examples": 12,
+  "original_requirement_objects_preserved": 205,
+  "original_test_objects_preserved": 1185,
+  "original_unit_ids_preserved": 121,
+  "revision": "1.13",
+  "theme_variants": 2
+}

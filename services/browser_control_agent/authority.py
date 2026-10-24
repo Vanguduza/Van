@@ -3,7 +3,8 @@
 §13.2 lists six things: session id, control lease, control generation, task scope, step
 budget, caller service identity. This is that list as code, and it is a separate module
 from the CDP transport on purpose — the transport cannot be executed in this repository
-and this can, so the part that decides is the part that is tested.
+and this can, so policy remains independently testable. Production resolves durable task
+grants and current leases through the authenticated Trading Core producer adapter.
 
 Every refusal below is a named reason rather than a boolean, because the agent's caller is
 another service and "denied" with no reason is a service that retries forever.
@@ -32,6 +33,9 @@ class Operation(str, Enum):
     OBSERVE_NAVIGATION = "observe_navigation"
     OBSERVE_DOWNLOAD = "observe_download"
     CAPTURE_EVIDENCE = "capture_evidence"
+    CLICK_ELEMENT = "click_element"
+    FILL_ELEMENT = "fill_element"
+    OBSERVE_EFFECT = "observe_effect"
 
     @property
     def actuates(self) -> bool:
@@ -41,7 +45,7 @@ class Operation(str, Enum):
         would mean evidence capture fails at exactly the moment something has gone wrong
         and the lease has been preempted — which is when the evidence matters most.
         """
-        return self in {Operation.ATTACH, Operation.NAVIGATE, Operation.DISPATCH_INPUT}
+        return self in {Operation.ATTACH, Operation.NAVIGATE, Operation.DISPATCH_INPUT, Operation.CLICK_ELEMENT, Operation.FILL_ELEMENT}
 
 
 class Scope(str, Enum):
@@ -72,10 +76,14 @@ SCOPE_ALLOWS: dict[Scope, frozenset[Operation]] = {
             Operation.ATTACH,
             Operation.NAVIGATE,
             Operation.DISPATCH_INPUT,
+            Operation.CLICK_ELEMENT,
+            Operation.FILL_ELEMENT,
+            Operation.OBSERVE_EFFECT,
             Operation.QUERY_DOM,
             Operation.QUERY_ACCESSIBILITY,
             Operation.OBSERVE_NAVIGATION,
             Operation.OBSERVE_DOWNLOAD,
+            Operation.CAPTURE_EVIDENCE,
         }
     ),
     Scope.EVIDENCE: frozenset(
@@ -152,6 +160,7 @@ class TaskGrant:
     step_budget: int
     steps_used: int = 0
     finished: bool = False
+    allowed_domains: tuple[str, ...] = ()
     #: Every refusal and every admitted step, for the Mission's evidence trail.
     journal: list[tuple[int, str, str]] = field(default_factory=list)
 

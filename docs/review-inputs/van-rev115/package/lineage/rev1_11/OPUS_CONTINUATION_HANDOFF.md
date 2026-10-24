@@ -1,0 +1,13 @@
+# Opus continuation — use only the unified Rev 1.11 plan
+
+Read `CANONICAL_AUTHORITY.json`, the unified master, `plan/VAN_NEXT_DETERMINISTIC_PLAN_REV1_11.md`, the source admission register, corrective implementation contracts and the whole-product mappings. The current owner instruction is backend-first, with every desired backend capability complete before any new UX/frontend. The old early-UI-flow question is superseded.
+
+Retain your pinned source implementation and tests. Do not rebuild useful ledger, execution-scale, order-type, durable lockout, registry, lifecycle or preparation-checker capabilities from scratch. Apply the required corrective contracts, including independently diagnosed pending-order and simulator defects, through the scheduled post-F15 backend packets. Passing 43 focused tests is valuable source evidence, not a complete merge/production verdict.
+
+The weekly strategy-development loop and OD37–39 are fully included. OQ21 values are not reopened; signed runtime policy activation is still required. Separate autonomous/manual cooldown scopes while preserving every mandatory all-origin account hard limit. Research results are conditional on evaluator/data/cost assumptions. Only a qualified evaluator can qualify economic evidence. A reliable “no candidate qualifies” outcome is legitimate; the system must never create false winners.
+
+The existing forecasting addendum is integrated into this same graph: Qlib/LightGBM, admitted NeuralForecast models, Freqtrade/FreqAI pattern adoptions, exact target/data/model/calibration lineage, and prediction-market expectations plus offline valuation/arbitrage/market-making labs. Do not create another live risk/router or duplicate F15/backend/release gate. No new procurement or live prediction-market execution is authorised.
+
+PRE-001/002 complete the actual source-function and Product Truth mapping, with independent semantic admission. PRE-003 is independent F15, not an author self-certificate. Then backend and backend-verification work completes, BG-001 independently closes, and only then native whole-product UX, locked dark/light implementation, S24 acceptance and release proceed. UI-feedback that discovers a missing backend feature reopens BG; do not hide it in a view model.
+
+Every remaining B4 item is engineering-owned evidence closure at its appropriate gate, not an “accepted limitation.” The application acceptance ledger is NOT_RUN until real receipts establish otherwise. Keep the user informed of concrete changes, source hashes, executed tests, outcomes and pending gates; do not call planned tests completed or use historical proof for a new head.

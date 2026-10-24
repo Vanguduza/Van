@@ -155,11 +155,15 @@ class OwnerContextService:
         async with self.store.connection() as db:
             if candidate.supersedes_fact_id:
                 prior = await (await db.execute(
-                    "SELECT authority, valid_from_ms, valid_until_ms FROM owner_facts WHERE fact_id = ?",
+                    "SELECT authority, valid_from_ms, valid_until_ms, subject, predicate, scope FROM owner_facts WHERE fact_id = ?",
                     (candidate.supersedes_fact_id,),
                 )).fetchone()
                 if prior is None:
                     raise ContextAdmissionError("supersedes_fact_id does not exist")
+                if (prior["subject"], prior["predicate"], prior["scope"]) != (candidate.subject, candidate.predicate, candidate.scope):
+                    raise ContextAdmissionError("supersession must preserve subject, predicate and scope")
+                if candidate.valid_from_ms <= int(prior["valid_from_ms"]):
+                    raise ContextAdmissionError("supersession must advance valid_from_ms")
                 prior_authority = EpistemicState(str(prior["authority"]))
                 if _AUTHORITY_RANK[candidate.authority] < _AUTHORITY_RANK[prior_authority]:
                     raise ContextAdmissionError("lower-authority fact cannot supersede higher-authority fact")
@@ -175,7 +179,7 @@ class OwnerContextService:
                     )
                 except PromotionRefused as exc:
                     raise ContextAdmissionError(str(exc)) from exc
-                if prior["valid_until_ms"] is None:
+                if prior["valid_until_ms"] is None or int(prior["valid_until_ms"]) > candidate.valid_from_ms:
                     await db.execute(
                         "UPDATE owner_facts SET valid_until_ms = ?, updated_at_unix_ms = ? WHERE fact_id = ?",
                         (candidate.valid_from_ms, int(time.time() * 1000), candidate.supersedes_fact_id),
@@ -395,7 +399,7 @@ class OwnerContextService:
                     raise ContextAdmissionError("supersedes_edge_id does not exist")
                 if _AUTHORITY_RANK[candidate.authority] < _AUTHORITY_RANK[EpistemicState(str(prior["authority"]))]:
                     raise ContextAdmissionError("lower-authority edge cannot supersede higher-authority edge")
-                if prior["valid_until_ms"] is None:
+                if prior["valid_until_ms"] is None or int(prior["valid_until_ms"]) > candidate.valid_from_ms:
                     await db.execute(
                         "UPDATE owner_context_edges SET valid_until_ms = ? WHERE edge_id = ?",
                         (candidate.valid_from_ms, candidate.supersedes_edge_id),

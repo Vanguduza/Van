@@ -9,7 +9,7 @@ from __future__ import annotations
 
 import hashlib
 import json
-from dataclasses import asdict, dataclass, field
+from dataclasses import asdict, dataclass, field, fields
 from decimal import Decimal
 from enum import Enum
 from typing import Any, Optional
@@ -22,11 +22,14 @@ from vati.risk.contracts import (
     OpenPosition,
     RiskSnapshot,
     StrategyState,
+    SymbolContract,
     TradeIntent,
 )
 from vati.risk.conformal import ConformalAdmissionGate, ConformalAdmissionRefused
 from vati.risk.governor import drawdown_verdict
+from vati.risk.lockouts import at_or_above
 from vati.risk.heat import currency_leg_exposure, open_stop_risk
+from vati.risk.serde import intent_binding_hash, mandate_binding_hash, RISK_APPROVAL_SCHEMA_VERSION
 from vati.risk.mandate import AuthorizationMode, PlatformCeilings, TradingMandate
 from vati.risk.sizing import Multipliers, SizingRejected, size_illiquid_equity, size_stake_contract, size_stop_contract
 
@@ -49,6 +52,26 @@ STRATEGY_STATES_FOR_MODE = {
     AuthorizationMode.LIMITED_LIVE: frozenset({StrategyState.LIMITED_LIVE, StrategyState.CERTIFIED_LIVE}),
     AuthorizationMode.AUTONOMOUS_LIVE: frozenset({StrategyState.CERTIFIED_LIVE}),
 }
+
+# Native producers must publish an explicit boolean, never a truthy string,
+# integer, missing value or generic container. Derive the field lists from
+# the declared contracts so a new boolean fact cannot silently skip this gate.
+BOOLEAN_FACT_FIELDS = {
+    cls: tuple(f.name for f in fields(cls) if f.type in (bool, 'bool'))
+    for cls in (RiskSnapshot,TradeIntent,SymbolContract,OpenPosition)
+}
+
+
+def invalid_boolean_fact(intent, snapshot):
+    records=[('snapshot',snapshot,RiskSnapshot),('intent',intent,TradeIntent),
+             ('contract',snapshot.symbol_contract,SymbolContract)]
+    records.extend((f'open_positions[{index}]',position,OpenPosition)
+                   for index,position in enumerate(snapshot.open_positions))
+    for scope,record,contract in records:
+        for name in BOOLEAN_FACT_FIELDS[contract]:
+            if type(getattr(record,name)) is not bool:
+                return f'{scope}.{name} requires an explicit boolean source fact'
+    return None
 
 
 class Decision(str, Enum):
@@ -74,9 +97,17 @@ class RiskDecision:
     mandate_version: str
     risk_snapshot_hash: str
     decision_hash: str = ""
+    intent_hash: Optional[str] = None
+    mandate_hash: Optional[str] = None
+    approval_schema_version: Optional[int] = None
 
     def to_dict(self) -> dict[str, Any]:
         d = asdict(self)
+        # Historical v1 bodies remain byte-equivalent when decoded. They are
+        # readable evidence, but cannot authorize a new broker submission.
+        for key in ("intent_hash", "mandate_hash", "approval_schema_version"):
+            if d[key] is None:
+                d.pop(key)
         for k, v in list(d.items()):
             if isinstance(v, Decimal):
                 d[k] = str(v)
@@ -128,6 +159,9 @@ class RiskAuthority:
             mandate_id=self.mandate.mandate_id,
             mandate_version=self.mandate.version,
             risk_snapshot_hash=snap_hash,
+            intent_hash=intent_binding_hash(intent),
+            mandate_hash=mandate_binding_hash(self.mandate),
+            approval_schema_version=RISK_APPROVAL_SCHEMA_VERSION,
         )
         return self._seal(d)
 
@@ -159,6 +193,16 @@ class RiskAuthority:
         if snapshot.kill_switch_triggers:
             return rej("KILL_SWITCH", ",".join(sorted(t.value for t in snapshot.kill_switch_triggers)))
 
+        invalid_fact=invalid_boolean_fact(intent,snapshot)
+        if invalid_fact:
+            return rej('INVALID_BOOLEAN_FACT',invalid_fact)
+
+        if not m.authority_matches_policy():
+            return rej('MANDATE_AUTHORITY_MISMATCH','current effective policy lacks its original owner grant; re-admission required')
+
+        if not m.owner_keys_current():
+            return rej('MANDATE_SIGNER_UNAVAILABLE','current owner signer is not registered or changed; re-admission required')
+
         # 1b. Post-entry preservation has precedence over new risk. The
         # lifecycle may describe why, but only RiskAuthority turns that fact
         # into a refusal (INV-AUTH-001).
@@ -177,6 +221,8 @@ class RiskAuthority:
             return rej("VENUE_MISMATCH", f"mandate venue {m.venue}")
 
         # 3. Mandate validity & mode
+        if snapshot.now_unix < m.signed_at_unix:
+            return rej('MANDATE_NOT_YET_VALID',f'valid from {m.signed_at_unix}')
         if m.is_expired(snapshot.now_unix):
             return rej("MANDATE_EXPIRED", f"expired at {m.expires_at_unix}")
         if not m.sends_orders():
@@ -250,6 +296,9 @@ class RiskAuthority:
         # 8. Loss limits and drawdown governor
         if snapshot.consecutive_losses >= m.max_consecutive_losses:
             return rej("CONSECUTIVE_LOSSES", f"{snapshot.consecutive_losses} >= {m.max_consecutive_losses}")
+        if snapshot.loss_streak_lock:
+            # P1-TRADE-RISK-005: a cooldown or an owner-reset suspension, not a permanent lock.
+            return rej("CONSECUTIVE_LOSSES", snapshot.loss_streak_lock)
         if snapshot.day_start_equity > ZERO:
             day_loss = (snapshot.day_start_equity - snapshot.equity) / snapshot.day_start_equity
             if day_loss >= m.max_daily_loss:
@@ -265,8 +314,12 @@ class RiskAuthority:
         dd = drawdown_verdict(snapshot.peak_equity, snapshot.equity, m.drawdown_tiers)
         if dd.suspended:
             return rej("DRAWDOWN_SUSPENDED", f"drawdown {dd.drawdown}")
-        if dd.top_tier_only and intent.strategy_state is not StrategyState.CERTIFIED_LIVE:
-            return rej("DRAWDOWN_TOP_TIER_ONLY", f"drawdown {dd.drawdown}")
+        # P1-TRADE-RISK-005: "top tier" is the highest promotion state the mandate's
+        # strategies actually hold, so a restricted account keeps trading its best-proven
+        # strategies at the tier's reduced size and can recover. Legacy floor when unset.
+        top_floor = snapshot.drawdown_top_state or StrategyState.CERTIFIED_LIVE
+        if dd.top_tier_only and not at_or_above(intent.strategy_state, top_floor):
+            return rej("DRAWDOWN_TOP_TIER_ONLY", f"drawdown {dd.drawdown}; trading limited to {top_floor.value}")
 
         # 9. Position count limits
         same_symbol = sum(1 for p in snapshot.open_positions if p.symbol.upper() == symbol)
@@ -294,10 +347,12 @@ class RiskAuthority:
             liquidity=liquidity,
             event_risk=intent.event_risk_multiplier,
             correlation=intent.correlation_multiplier,
-            drawdown=dd.multiplier,
+            drawdown=dd.multiplier * min(ONE, max(ZERO, snapshot.loss_streak_multiplier)),
         )
         if dd.tier_index >= 0:
             constraints.append(f"DRAWDOWN_TIER_{dd.tier_index}")
+        if snapshot.loss_streak_multiplier < ONE:
+            constraints.append("LOSS_STREAK_PROBATION")
 
         # 10b. Edge must clear round-trip cost (Rev 3: cost is the first edge)
         if intent.expected_gross_move_pct is not None and contract.round_trip_cost_pct > ZERO:
@@ -395,5 +450,8 @@ class RiskAuthority:
             mandate_id=m.mandate_id,
             mandate_version=m.version,
             risk_snapshot_hash=snap_hash,
+            intent_hash=intent_binding_hash(intent),
+            mandate_hash=mandate_binding_hash(m),
+            approval_schema_version=RISK_APPROVAL_SCHEMA_VERSION,
         )
         return self._seal(d)

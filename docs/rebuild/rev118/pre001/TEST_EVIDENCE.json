@@ -1,0 +1,57 @@
+{
+ "schema": "van.rebuild.pre001.test-evidence/1",
+ "source_commit": "b02075f327ea8180ab6d269eba358cf8c5479878 (application roots unchanged on ccr-9e07e1af-8mgz1p)",
+ "environment": {
+  "python": "Python 3.13.16",
+  "pytest": "pytest 9.1.1",
+  "deps": "backend/requirements.txt in an isolated venv",
+  "container": "Claude Code cloud session, Linux",
+  "date_utc": "2026-10-21"
+ },
+ "runs": [
+  {
+   "purpose": "Behaviour cited by overlap and PR dispositions",
+   "cwd": "backend",
+   "command": "python -m pytest -q tests/test_google_mesh.py tests/test_automation_compiler.py tests/test_interactive_browser_api.py tests/test_recovery_matrix.py tests/test_browser_api.py tests/test_browser_escalation_boundary.py tests/test_visual_acceptance.py tests/test_knowledge_runtime.py tests/test_automation_health_api.py tests/test_automation_dispatch.py tests/test_automation_api.py tests/test_interactive_browser_session.py",
+   "result": "292 passed"
+  },
+  {
+   "purpose": "PR-16/PR-35 cited behaviour",
+   "cwd": ".",
+   "command": "python -m pytest -q trading/tests/test_oci_trading_topology_bootstrap.py tests/hermes/test_profile_layout.py",
+   "result": "47 passed, 1 skipped (rsync absent: installer state preservation NOT VERIFIED)"
+  },
+  {
+   "purpose": "Close the skip above",
+   "cwd": ".",
+   "command": "apt-get install rsync; python -m pytest -q tests/hermes/test_profile_layout.py::test_install_profile_preserves_runtime_state_and_secrets",
+   "result": "1 passed"
+  },
+  {
+   "purpose": "Android JVM verification harness (cited ProvisioningPayloadTest, BrowserControlMutationTest, SpeakerEnrollmentPolicyTest)",
+   "cwd": "android/verification",
+   "command": "gradle --no-daemon -q --init-script <scratch>/mirror.init.gradle test  (init script adds https://maven-central.storage-download.googleapis.com/maven2/ because repo.maven.apache.org returned HTTP 429 on 4 attempts; dependency coordinates unchanged)",
+   "result": "157 classes, 1273 tests, 0 failures, 0 errors, 0 skipped (summed from build/test-results/test/*.xml); the three cited classes are present and green",
+   "label": "JVM_HOST_TEST_ONLY: plain JVM harness compiled from android sources. Not an AGP unit-test run of the app module, not instrumentation, not an APK, not handset or S24 acceptance"
+  },
+  {
+   "purpose": "Artemis contract tests and their DDS sibling dependency (PR #104 backend failure)",
+   "cwd": ".",
+   "command": "python -m pytest -q tests/contracts/test_artemis_*.py in a CI-equivalent layout (Van/ plus sibling dial-development-system/)",
+   "result": "sibling absent: 2 passed, 134 errors (identical to CI); DDS at pin 64d6b715: 136 passed; DDS at master 204f2f3b: 136 passed; only the three pinned contract files: 136 passed",
+   "correction_20261021": "An earlier entry said 38 passed / 38 errors; that came from a narrower selection. The full test_artemis_* set is 136."
+  },
+  {
+   "purpose": "Android JVM harness on the ICU-regex-patched tree (ci/patches/0001)",
+   "cwd": "android/verification",
+   "command": "same Gradle invocation as the baseline JVM run, on a worktree with the patch applied",
+   "result": "1273 tests, 0 failures, 0 errors, 0 skipped (identical to baseline)",
+   "label": "JVM_HOST_TEST_ONLY"
+  }
+ ],
+ "not_run": [
+  "Android instrumentation (connectedAndroidTest) and handset acceptance: no emulator or device in this session; the S24 Ultra via Artemis is the only valid handset acceptance",
+  "PR #104 RiveContractTest.coreInputsDriveTheRig instrumentation failure: test-report artifact not downloadable here; not reproduced"
+ ],
+ "scope": "Source tests of the inherited baseline. Not Rev1.18 acceptance identities."
+}

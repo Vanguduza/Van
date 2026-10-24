@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.dial.van.dialdev.DialDevActionsTest" tests="13" skipped="0" failures="0" errors="0" timestamp="2026-10-08T04:43:33" hostname="052fefa249ff" time="0.008">
+  <properties/>
+  <testcase name="no action caption ever claims a pass()" classname="com.dial.van.dialdev.DialDevActionsTest" time="0.003"/>
+  <testcase name="every action carries an idempotency key and the revision it was decided against()" classname="com.dial.van.dialdev.DialDevActionsTest" time="0.001"/>
+  <testcase name="revoke and reject are destructive, everything else is not()" classname="com.dial.van.dialdev.DialDevActionsTest" time="0.0"/>
+  <testcase name="a rejection shows its reason inline()" classname="com.dial.van.dialdev.DialDevActionsTest" time="0.0"/>
+  <testcase name="the revoke consequence prefers DIAL's own sentence and otherwise says what it does not know()" classname="com.dial.van.dialdev.DialDevActionsTest" time="0.0"/>
+  <testcase name="409 is STALE_VIEW carrying the new revision, and its retry is a new decision()" classname="com.dial.van.dialdev.DialDevActionsTest" time="0.001"/>
+  <testcase name="a steer needs guidance and a decision needs approve or reject()" classname="com.dial.van.dialdev.DialDevActionsTest" time="0.0"/>
+  <testcase name="the projection's actions list parses and ignores rows without an id()" classname="com.dial.van.dialdev.DialDevActionsTest" time="0.001"/>
+  <testcase name="only the projection moves an accepted action, and only for its own id()" classname="com.dial.van.dialdev.DialDevActionsTest" time="0.0"/>
+  <testcase name="a settled action is not moved again by a later projection()" classname="com.dial.van.dialdev.DialDevActionsTest" time="0.0"/>
+  <testcase name="no revision on screen means no action, which is also why nothing is queued offline()" classname="com.dial.van.dialdev.DialDevActionsTest" time="0.0"/>
+  <testcase name="202 is ACCEPTED and pending, never done, even if the forwarder says APPLIED()" classname="com.dial.van.dialdev.DialDevActionsTest" time="0.0"/>
+  <testcase name="an unconfirmed send retries with the same key so DIAL cannot apply it twice()" classname="com.dial.van.dialdev.DialDevActionsTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

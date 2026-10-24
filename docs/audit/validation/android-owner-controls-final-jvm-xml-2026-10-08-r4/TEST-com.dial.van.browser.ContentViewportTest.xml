@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.dial.van.browser.ContentViewportTest" tests="3" skipped="0" failures="0" errors="0" timestamp="2026-10-08T06:59:30" hostname="052fefa249ff" time="0.002">
+  <properties/>
+  <testcase name="chrome and system insets both come off()" classname="com.dial.van.browser.ContentViewportTest" time="0.001"/>
+  <testcase name="the keyboard and the navigation bar are not subtracted twice()" classname="com.dial.van.browser.ContentViewportTest" time="0.0"/>
+  <testcase name="a window smaller than its insets reports zero rather than a negative()" classname="com.dial.van.browser.ContentViewportTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

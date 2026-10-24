@@ -5,18 +5,12 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
-/**
- * P1-AND-002 — onboarding covered five permissions and not pairing, and every step advanced
- * on `startActivity` rather than on a grant. A new owner could tap through the whole flow,
- * grant nothing, land on a dashboard where every call returned 401, and have no way to know
- * that the thing they had not done was several taps away under a menu they had never opened.
- */
+/** Permission grants remain observed OS state; enrollment never appears as an owner step. */
 class OnboardingPlanTest {
 
     private val nothing = OnboardingGrants()
 
     private val everything = OnboardingGrants(
-        paired = true,
         overlayGranted = true,
         displayAwarenessEnabled = true,
         notificationsGranted = true,
@@ -26,29 +20,22 @@ class OnboardingPlanTest {
     )
 
     @Test
-    fun `pairing is the first thing a new owner is asked for`() {
-        // Not a menu item under Home > Connections. Without it every screen is a 401.
-        assertEquals(OnboardingStep.PAIRING, OnboardingStep.entries.first())
-        assertEquals(OnboardingStep.PAIRING, OnboardingPlan.currentStep(nothing))
-    }
-
-    @Test
-    fun `an unpaired phone can never finish onboarding`() {
-        val everythingButPairing = everything.copy(paired = false)
-        assertFalse(OnboardingPlan.mayComplete(everythingButPairing))
-        assertTrue(OnboardingPlan.blockers(everythingButPairing).contains(OnboardingStep.PAIRING))
-        // Not even by skipping it.
-        assertEquals(
-            OnboardingStep.PAIRING,
-            OnboardingPlan.currentStep(everythingButPairing, skipped = OnboardingStep.entries.toSet()),
-        )
+    fun `permission review never requests pairing or connection data`() {
+        assertEquals(OnboardingStep.OVERLAY, OnboardingPlan.currentStep(nothing))
+        for (step in OnboardingStep.entries) {
+            val view = OnboardingPlan.view(step, nothing)
+            val words = (view.title + " " + view.body + " " + view.button).lowercase()
+            assertFalse(words.contains("pairing"), words)
+            assertFalse(words.contains("pair now"), words)
+            assertFalse(words.contains("gateway address"), words)
+        }
     }
 
     @Test
     fun `opening a settings screen is not granting a permission`() {
         // The finding, as a test: the step advances on the observed grant, and there is no
         // parameter here through which a fired intent could advance it.
-        var grants = nothing.copy(paired = true)
+        var grants = nothing
         assertEquals(OnboardingStep.OVERLAY, OnboardingPlan.currentStep(grants))
         assertEquals(OnboardingStep.OVERLAY, OnboardingPlan.currentStep(grants))
         grants = grants.copy(overlayGranted = true)
@@ -140,15 +127,7 @@ class OnboardingPlanTest {
         }
     }
 
-    @Test
-    fun `the pairing screen says what happens if it is not done`() {
-        val view = OnboardingPlan.view(OnboardingStep.PAIRING, nothing)
-        assertFalse(view.skippable)
-        assertTrue(view.body.contains("cannot reach"), view.body)
-    }
-
     private fun grant(grants: OnboardingGrants, step: OnboardingStep): OnboardingGrants = when (step) {
-        OnboardingStep.PAIRING -> grants.copy(paired = true)
         OnboardingStep.OVERLAY -> grants.copy(overlayGranted = true)
         OnboardingStep.DISPLAY_AWARENESS -> grants.copy(displayAwarenessEnabled = true)
         OnboardingStep.NOTIFICATIONS -> grants.copy(notificationsGranted = true)

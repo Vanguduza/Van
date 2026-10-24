@@ -1,0 +1,130 @@
+{
+  "schema": "van.rebuild.native-account-binding-source/1",
+  "source_parent": "a0270265f3c213d85be6c6a4173031681abbcc88",
+  "source_sha256": {
+    "backend/tests/test_trading_oauth_effects.py": "0ba63cbbfa7b09e773ce59b3cafa679edac7fa949c7e9ab69fe872998729a8c3",
+    "trading/commander/accounts.py": "06f96ef7b1ae424bda29300acbf405a5d4ec1a6df536e9b4ff5f784cc05f0d8e",
+    "trading/tests/test_account_credential_atomicity.py": "2551a623c486bef155518ef00dd51e4f42820145f1bb9ba131dee492fe64c667",
+    "trading/tests/test_account_mode_ceiling.py": "b78bfc7e1e9e86b5afa99e560f0e307c86ed8f094f6e9fc29e894dd62b0c9dfc",
+    "trading/tests/test_commander_accounts.py": "8653f03724168e416897866cce339f69e0472341d35d5ef9ea1574283bc61d28",
+    "trading/tests/test_deriv_credential_verification.py": "dd077b622422e38cbeeb25e3dd80569c17965dd17b80462047ef0e6844669c7a",
+    "trading/tests/test_deriv_native_identity.py": "50369bb4a131903bfab3ae2fba7204390678f969cb6c5a9d891c298b602ff1d9",
+    "trading/vati/accounts/access.py": "92ecd5aa85858da0fa393241b5ca67f8517bd67d3b029bda2891df2f8bc337d1",
+    "trading/vati/app/account_service.py": "d8bcc79821c1993cb5d1438a4e8c2f3d9c3ac900689c5a4026ba322799b0f8fa",
+    "trading/vati/app/service.py": "f6594e66a01c8b08a2245ae012691489b249db8afcd75d88bd12f21e92262838",
+    "trading/vati/execution/deriv.py": "dff9a1e3465aaaf3d80ab7f7e845b9e133f12e801747be0aa16c8acc66920526",
+    "trading/vati/execution/deriv_identity.py": "6dc255ddb38b33b003339fdbc649849c0a2cc3e4a05990afb97532e62e9b7677",
+    "trading/vati/execution/transports/deriv_ws.py": "23853c3b511a11166bd73a2107817442b9d7fbd77a361f106c5223a5fd5fbafd"
+  },
+  "initial_counterexamples": {
+    "native_identity_and_entry": 13,
+    "credential_and_alias": 7
+  },
+  "public_native_contract": {
+    "repository": "binary-com/deriv-developers-portal",
+    "commit": "406101967971450321434cb71d6de6e72742247f",
+    "file": "config/v3/authorize/receive.json",
+    "sha256": "65910bac7ac9aa1f7e39533a3f4ba380c68523cdad314af36b691ff5a360f914"
+  },
+  "focused_account_and_constructor": {
+    "tests": 83,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "sha256": "c701f1f9b67f40af7cdfe23bf6cf6fccdb054c1afe8f1c8d4e5e6eefbc73d1eb"
+  },
+  "gateway_a4_and_oauth": {
+    "tests": 82,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "sha256": "84d3048a7f6d24db6d6d7aebefe8b55f7cd13256e8b31972aa71fcafda523130"
+  },
+  "gateway_storage_audit": {
+    "forbidden_events": [],
+    "scope": "backend/tests plus tests/contracts; repo-root invocation; writes and SQLite opens under root/data or backend/data refused"
+  },
+  "custom_mutants": {
+    "detected": 6,
+    "survived": 0,
+    "source_restored": true,
+    "rows": [
+      {
+        "kind": "baseline",
+        "mutation": null,
+        "exit_code": 0,
+        "log": "/tmp/van-deriv-identity-mutant-0.txt",
+        "sha256": "86fb668d34d1350bfbbec6157851d72ece9b66195f4f43536c4d08e52a3145a9"
+      },
+      {
+        "kind": "mutation",
+        "mutation": "accept a token issued to another native login",
+        "exit_code": 1,
+        "log": "/tmp/van-deriv-identity-mutant-1.txt",
+        "sha256": "6deff6c480f66e56b5f8ec98f029271658e9bb50b233132b340feee1d7dd473a"
+      },
+      {
+        "kind": "mutation",
+        "mutation": "reuse an old principal after vault token rotation",
+        "exit_code": 1,
+        "log": "/tmp/van-deriv-identity-mutant-2.txt",
+        "sha256": "f43b7c5394286787b6160c58442fe82c1445237ada5b80c5ab96fe65fa4f3f0e"
+      },
+      {
+        "kind": "mutation",
+        "mutation": "allow registry mutation or disable to overtake native entry",
+        "exit_code": 1,
+        "log": "/tmp/van-deriv-identity-mutant-3.txt",
+        "sha256": "9a4dfb53206898da4d0144fbd03d301e1620947c63ed49a6d6231aed608b6c4f"
+      },
+      {
+        "kind": "mutation",
+        "mutation": "replace a credential without native profile verification",
+        "exit_code": 1,
+        "log": "/tmp/van-deriv-identity-mutant-4.txt",
+        "sha256": "71e641628722a73c9559e55337bb9f555e42b7b5aa5e47b67c7bb01bffa9b026"
+      },
+      {
+        "kind": "mutation",
+        "mutation": "let a signed mandate widen the registry mode",
+        "exit_code": 1,
+        "log": "/tmp/van-deriv-identity-mutant-5.txt",
+        "sha256": "26aa0145bb5aba1736e312c7ab560b59d1140fc7d9acc30ec8daf4fd55ec154c"
+      },
+      {
+        "kind": "mutation",
+        "mutation": "misreport failed native exposure readback as flat",
+        "exit_code": 1,
+        "log": "/tmp/van-deriv-identity-mutant-6.txt",
+        "sha256": "8c78346cdf50be7935a1e81a8cb1bd8e095422efbb3f6be7e9b22d8569c5924c"
+      }
+    ]
+  },
+  "private_fixture_cleanup": {
+    "stopped": true,
+    "removed": true
+  },
+  "original_mutations": {
+    "case_count": 374,
+    "edit_count": 383,
+    "identities_preserved": true,
+    "execution": "prior exact source a027 hosted receipt separate; current source anchors checked"
+  },
+  "whole_unit_acceptance": "NOT_ISSUED",
+  "live_provider_qualification": false,
+  "remaining": [
+    "Native exposure/funds/lease-safe unlink",
+    "Native resource-version and generic operation recovery",
+    "Product-specific Deriv order/settlement/protection binding",
+    "Other broker credential/permission qualification",
+    "Real eligible CEX spot and funds contracts",
+    "Independent and production/handset acceptance"
+  ],
+  "full_trading_real_postgresql_before_20_test_only_controls": {
+    "tests": 1874,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "sha256": "efb22c2125a2c2710381fd151294ce6bb8841ae46fb84001c7d2a33ad5a6cc7a"
+  }
+}

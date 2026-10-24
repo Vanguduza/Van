@@ -1,0 +1,170 @@
+{
+  "schema": "van.rebuild.runtime-recovery-proof-shape-source/1",
+  "observed_at_utc": "2026-10-23T03:20:49.846614+00:00",
+  "source_parent": "df947e1de57a5f0d78ea0e93c885115a24b4c7b7",
+  "source_sha256": {
+    "trading/vati/app/runtime_control_protocol.py": "9b104de125c8ec5c36b57ad4531ae65ea50c9516ac37e8af50bdc164e891cb9e",
+    "trading/vati/app/runtime_control_journal.py": "d0580ecd2ac229cf2669ece62662fd335a288305127398b6deb7b7a7f00f85ac",
+    "backend/tests/test_runtime_recovery_bad_proof.py": "c8c1fecd9d3ef5ab0fc2da6422b5b6d3614ee489a8d174d954e1fe4fc258605b"
+  },
+  "counterexamples": {
+    "tests": 10,
+    "failures": 10,
+    "errors": 0,
+    "skipped": 0,
+    "duration_seconds": 1.392,
+    "sha256": "6496f7689163de8955d0b0e5eaced316f73b0ce33b4027b290ce6b7b232d037d"
+  },
+  "first_controls_with_explicit_pg_skips": {
+    "tests": 48,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 5,
+    "duration_seconds": 12.748,
+    "sha256": "20609db08c0b41a8d2f71bd4392922c00e43426da74a166e1d0e62d9ac8a72ff"
+  },
+  "restored_full_recovery_real_private_pg": {
+    "tests": 65,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "duration_seconds": 14.227,
+    "sha256": "a8f9d80c9cf226c1a0d11ced05dab0fd0101eebff208e6101eca1f0e2bdd4dee"
+  },
+  "source_faults": {
+    "definitions": [
+      [
+        [
+          "trading/vati/app/runtime_control_protocol.py",
+          "        if (not isinstance(proof.operation_id,str)\n            or not re.fullmatch(r'[A-Za-z0-9_-]{20,128}',proof.operation_id)):\n            raise RuntimeControlError('runtime original operation identity is invalid')\n",
+          "",
+          "defer malformed native operation identity until it raises an internal HTTP error"
+        ],
+        [
+          "backend/tests/test_runtime_recovery_bad_proof.py::test_authenticated_native_http_reports_a_shape_refusal_instead_of_internal_error"
+        ]
+      ],
+      [
+        [
+          "trading/vati/app/runtime_control_protocol.py",
+          "        if type(proof.expires_at_unix) is not int or proof.expires_at_unix<0:\n            raise RuntimeControlError('runtime approval expiry is invalid')\n",
+          "",
+          "accept boolean expiry as a native integer contract"
+        ],
+        [
+          "backend/tests/test_runtime_recovery_bad_proof.py::test_closed_proof_contract_rejects_bad_original_identity_and_expiry[expires_at_unix-True]"
+        ]
+      ],
+      [
+        [
+          "trading/vati/app/runtime_control_journal.py",
+          "        RecoveryProof.from_mapping(proof.public_record())\n",
+          "",
+          "allow direct dataclass construction to bypass original native identity validation"
+        ],
+        [
+          "backend/tests/test_runtime_recovery_bad_proof.py::test_direct_dataclass_cannot_bypass_native_journal_identity_gate"
+        ]
+      ],
+      [
+        [
+          "trading/vati/app/runtime_control_journal.py",
+          "        if not isinstance(operation_id,str):return None\n",
+          "",
+          "raise an internal error for a malformed original-operation read"
+        ],
+        [
+          "backend/tests/test_runtime_recovery_bad_proof.py::test_direct_dataclass_cannot_bypass_native_journal_identity_gate"
+        ]
+      ]
+    ],
+    "records": [
+      {
+        "phase": "baseline",
+        "why": null,
+        "returncode": 0,
+        "log_sha256": "05b025b45ad8fe87dcfa06cfc5368cd43e67baea3f437df7db24e614d33611d6"
+      },
+      {
+        "phase": "mutation",
+        "why": "defer malformed native operation identity until it raises an internal HTTP error",
+        "returncode": 1,
+        "log_sha256": "3d3b52c1036cd37bf23857c8d8e4578bffb325b13c32fdbe1558afc19a3bcacf"
+      },
+      {
+        "phase": "baseline",
+        "why": null,
+        "returncode": 0,
+        "log_sha256": "543d940fb0f450268d4ff4c32858187e397422e38c1caf6caa5a8bdb498052d4"
+      },
+      {
+        "phase": "mutation",
+        "why": "accept boolean expiry as a native integer contract",
+        "returncode": 1,
+        "log_sha256": "d1d8f517cf096f0f4a1b0dc4dd9f3379f935ac383f5abe3580bc72530949f46c"
+      },
+      {
+        "phase": "baseline",
+        "why": null,
+        "returncode": 0,
+        "log_sha256": "cca5fcf4b228d93acf19ffad9188e1f658c6a27b83ec7e5ff8577b73b9e91842"
+      },
+      {
+        "phase": "mutation",
+        "why": "allow direct dataclass construction to bypass original native identity validation",
+        "returncode": 1,
+        "log_sha256": "ea78ec2b0e9b60431faf423f0cdec80b3000f77f495ccd9ed4d5178a475a4da9"
+      },
+      {
+        "phase": "baseline",
+        "why": null,
+        "returncode": 0,
+        "log_sha256": "340f948da248d17f86efbc48178726f919e0008db961c9189ade514d3f0759f1"
+      },
+      {
+        "phase": "mutation",
+        "why": "raise an internal error for a malformed original-operation read",
+        "returncode": 1,
+        "log_sha256": "34ac0d079babee3309102d0fc2e38df5f033bc2e54ce7d8fef83b2fa5b399b83"
+      }
+    ],
+    "source_before_sha256": {
+      "trading/vati/app/runtime_control_journal.py": "d0580ecd2ac229cf2669ece62662fd335a288305127398b6deb7b7a7f00f85ac",
+      "trading/vati/app/runtime_control_protocol.py": "9b104de125c8ec5c36b57ad4531ae65ea50c9516ac37e8af50bdc164e891cb9e"
+    },
+    "source_after_sha256": {
+      "trading/vati/app/runtime_control_journal.py": "d0580ecd2ac229cf2669ece62662fd335a288305127398b6deb7b7a7f00f85ac",
+      "trading/vati/app/runtime_control_protocol.py": "9b104de125c8ec5c36b57ad4531ae65ea50c9516ac37e8af50bdc164e891cb9e"
+    },
+    "source_restored": true,
+    "journal_present": false
+  },
+  "rebuild": {
+    "tests": 78,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "duration_seconds": 32.76,
+    "sha256": "d324434efb7fac56b14eb6660f273ded60b5dbc51619ab903bdb042584e071c1"
+  },
+  "private_fixture_cleanup": {
+    "stopped": true,
+    "removed": true
+  },
+  "owner_contract_check": {
+    "changed": [],
+    "applied": false,
+    "scope": "SOURCE_CONTRACTS_ONLY"
+  },
+  "legacy_anchor_preflight": {
+    "schema": "van.rebuild.mutation-registry-preflight/1",
+    "registry_sha256": "35d10c7b0f2b8319b7f7305828262c972b2a6451139d75b9e83c7d0062282955",
+    "mutation_count": 374,
+    "edit_count": 383,
+    "findings": [],
+    "execution_state": "NOT_RUN",
+    "status": "ANCHORS_VALID_BASELINES_AND_MUTATIONS_NOT_EXECUTED"
+  },
+  "scope": "Validate original operation identity/strict integer expiry before native lookup; revalidate direct dataclass construction; malformed original read returns no operation. Authenticated HMAC private HTTP403 instead of500 and no event writes. Existing real P256/device/session/state/current-key/lease/expiry/replay/atomic outcomes remain.",
+  "qualification": "Candidate source only;65recovery cases include actual private PostgreSQL after four caught/restored faults. Prior2183fulltrading financial-loss-limit evidence remains separate. No native estate, phone, production, independent or whole-unit acceptance."
+}

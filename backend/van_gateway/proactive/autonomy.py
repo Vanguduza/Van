@@ -151,11 +151,9 @@ class DomainTrust(BaseModel):
             # Demonstrated unreliability overrides a standing grant until the
             # domain recovers. The grant is not revoked, only suspended.
             return AutonomyLevel.S0_RESPOND_ONLY
-        return (
-            self.owner_granted_ceiling
-            if self.owner_granted_ceiling.ordinal >= earned.ordinal
-            else earned
-        )
+        # An explicit owner ceiling also limits earned preparation/suggestion.
+        # Reliable history cannot widen a ceiling the owner deliberately lowered.
+        return self.owner_granted_ceiling
 
     def permits(self, mission_type: ProactiveMissionType) -> bool:
         return self.effective_ceiling.ordinal >= mission_type.minimum_level.ordinal

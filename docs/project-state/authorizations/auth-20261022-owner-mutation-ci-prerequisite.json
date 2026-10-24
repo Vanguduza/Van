@@ -1,0 +1,28 @@
+{
+  "schema_version": 1,
+  "authorization_id": "auth-20261022-owner-mutation-ci-prerequisite",
+  "project": "van",
+  "authority": "OWNER_DERIVED",
+  "owner_instruction_sha256": "90d7fde72bcbd5524bfa567a69533bbbb99b8aea62cd5c30a9a3c4dc42e8083b",
+  "owner_instruction_excerpt": "opus is nolonger available finish building from the current state to completion",
+  "derivation": "Necessary verification correction discovered while completing the owner-directed build: hosted mutation job 119602030315 aborts at a stale anchor but its pipeline reports success. The harness also treats any test-process failure as a caught mutation without first proving the unmutated control passes. This scoped record permits baseline-control/error-reporting corrections to the existing harness; it does not permit dropping or weakening mutation cases.",
+  "source": {
+    "kind": "owner_session_instruction",
+    "channel": "codex",
+    "owner_attested": true,
+    "device_signature_claimed": false,
+    "cryptographic_signature_claimed": false,
+    "signed_ingress_claimed": false
+  },
+  "issued_at_utc": "2026-10-22T02:46:08.233707+00:00",
+  "branch_scope": "ccr-9e07e1af-8mgz1p",
+  "authorized_paths": [
+    "tools/audit/mutation.py"
+  ],
+  "reusable": true,
+  "revoked": false,
+  "limitations": [
+    "Verification harness only; preserve mutation identities and require valid negative controls.",
+    "No application behavior, financial effect, native authority, signature, gate bypass or independent admission authorized."
+  ]
+}

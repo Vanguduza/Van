@@ -102,6 +102,7 @@ data class MemoryConflictSide(
     val authority: String,
     val sourceTrust: String,
     val observedAtMs: Long,
+    val sourceRef: String = "",
 )
 
 data class MemoryConflict(
@@ -178,6 +179,7 @@ object MemoryReadModel {
                     authority = side.optString("authority"),
                     sourceTrust = side.optString("source_trust"),
                     observedAtMs = side.optLong("observed_at_ms", 0L),
+                    sourceRef = side.optString("source_ref"),
                 )
             }
             MemoryConflict(

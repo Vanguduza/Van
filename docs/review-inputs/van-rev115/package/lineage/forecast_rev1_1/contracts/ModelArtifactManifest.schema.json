@@ -1,0 +1,220 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:van:ml:1.0:ModelArtifactManifest",
+  "title": "ModelArtifactManifest",
+  "description": "Proposed VAN interchange contract. Shape validity is not permission, factual evidence or runtime qualification. Cross-record semantic validation and independent trusted receipts are required.",
+  "type": "object",
+  "properties": {
+    "schema_version": {
+      "const": "van-ml/1.0"
+    },
+    "record_id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256
+    },
+    "authority_effect": {
+      "const": "NONE"
+    },
+    "scope": {
+      "type": "object",
+      "properties": {
+        "project_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "cohort_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "instrument_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "venue_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "environment": {
+          "enum": [
+            "FIXTURE",
+            "RESEARCH",
+            "SHADOW",
+            "LIVE_ADVISORY"
+          ]
+        }
+      },
+      "required": [
+        "project_id",
+        "cohort_id",
+        "instrument_id",
+        "venue_id",
+        "environment"
+      ],
+      "additionalProperties": false
+    },
+    "provider": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256
+    },
+    "model_plugin": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256
+    },
+    "training_job_ref": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256
+    },
+    "source_commit": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{40}$"
+    },
+    "environment_lock_digest": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "dataset_manifest_digest": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "feature_manifest_digest": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "target_spec_digest": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "transform_digest": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "train_label_available_cutoff": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "model_file": {
+      "type": "object",
+      "properties": {
+        "artifact_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "media_type": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "size_bytes": {
+          "type": "integer",
+          "minimum": 1
+        }
+      },
+      "required": [
+        "artifact_id",
+        "sha256",
+        "media_type",
+        "size_bytes"
+      ],
+      "additionalProperties": false
+    },
+    "serialization": {
+      "enum": [
+        "LIGHTGBM_NATIVE",
+        "SAFETENSORS_JSON",
+        "XGBOOST_JSON_UBJSON",
+        "BASELINE_JSON"
+      ]
+    },
+    "calibration_artifact_digest": {
+      "anyOf": [
+        {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "output_capabilities": {
+      "type": "array",
+      "items": {
+        "enum": [
+          "MEAN",
+          "QUANTILES",
+          "RAW_EVENT_PROBABILITY",
+          "CALIBRATED_EVENT_PROBABILITY",
+          "RANK_SCORE",
+          "TEMPORAL_SAMPLES",
+          "JOINT_SAMPLES",
+          "EXPLANATION"
+        ]
+      },
+      "minItems": 1
+    },
+    "safe_load_report_ref": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256
+    },
+    "compatibility_report_ref": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256
+    },
+    "approval_state": {
+      "enum": [
+        "CANDIDATE",
+        "EVALUATED",
+        "REJECTED",
+        "INCONCLUSIVE"
+      ]
+    },
+    "may_execute_orders": {
+      "const": false
+    }
+  },
+  "required": [
+    "schema_version",
+    "record_id",
+    "authority_effect",
+    "scope",
+    "provider",
+    "model_plugin",
+    "training_job_ref",
+    "source_commit",
+    "environment_lock_digest",
+    "dataset_manifest_digest",
+    "feature_manifest_digest",
+    "target_spec_digest",
+    "transform_digest",
+    "train_label_available_cutoff",
+    "created_at",
+    "model_file",
+    "serialization",
+    "calibration_artifact_digest",
+    "output_capabilities",
+    "safe_load_report_ref",
+    "compatibility_report_ref",
+    "approval_state",
+    "may_execute_orders"
+  ],
+  "additionalProperties": false
+}

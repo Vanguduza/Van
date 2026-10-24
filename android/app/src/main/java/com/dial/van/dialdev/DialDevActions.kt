@@ -114,7 +114,7 @@ data class DialDevActionRequest(
             if (revision.isEmpty() || idempotencyKey.isBlank()) return null
             if (kind == DialDevActionKind.STEER_TASK && params["guidance"].isNullOrBlank()) return null
             if (kind == DialDevActionKind.DECIDE && params["decision"] !in setOf("approve", "reject")) return null
-            return DialDevActionRequest(kind, target, params, idempotencyKey, revision)
+            return DialDevActionRequest(kind, target, params.toMap(), idempotencyKey, revision)
         }
     }
 }
@@ -151,6 +151,10 @@ data class ProjectedAction(val actionId: String, val state: String, val reason: 
 
 object DialDevActionReducer {
 
+    fun uncertainNativeReason(reason: String?): Boolean = reason?.let {
+        it.startsWith("CONTROL_") || it.startsWith("NO_TYPED_CONTROL:") || it.startsWith("FORWARDER_ERROR:")
+    } == true
+
     /** The gateway's answer to the POST. */
     fun onResponse(httpStatus: Int, body: String): DialDevActionStatus {
         val json = try {
@@ -158,23 +162,32 @@ object DialDevActionReducer {
         } catch (_: JSONException) {
             JSONObject()
         }
+        val error = json.opt("error") as? String
+            ?: (json.opt("detail") as? JSONObject)?.opt("error") as? String
         return when {
-            httpStatus == 409 -> DialDevActionStatus.StaleView(
-                json.optString("projection_revision").takeIf { it.isNotBlank() }
-                    ?: (json.opt("detail") as? JSONObject)?.optString("projection_revision")?.takeIf { it.isNotBlank() },
+            httpStatus == 409 && error == "STALE_VIEW" -> DialDevActionStatus.StaleView(
+                (json.opt("current_projection_revision") as? String)?.takeIf { it.isNotBlank() }
+                    ?: json.optString("projection_revision").takeIf { it.isNotBlank() }
+                    ?: (json.opt("detail") as? JSONObject)?.let {
+                        (it.opt("current_projection_revision") as? String)?.takeIf { value -> value.isNotBlank() }
+                            ?: it.optString("projection_revision").takeIf { value -> value.isNotBlank() }
+                    },
             )
+            httpStatus == 409 -> DialDevActionStatus.Unconfirmed("The original request needs reconciliation; keep its identity." )
             httpStatus in 200..299 -> {
                 val actionId = json.optString("action_id").trim()
                 val state = json.optString("state").trim().uppercase()
                 when {
                     actionId.isEmpty() -> DialDevActionStatus.Unconfirmed("DIAL did not return an action id.")
+                    state == "REJECTED" && uncertainNativeReason(json.optString("reason")) ->
+                        DialDevActionStatus.Unconfirmed("The native control outcome still needs reconciliation.")
                     state == "REJECTED" -> DialDevActionStatus.Rejected(actionId, json.optString("reason").ifBlank { "No reason given." })
                     // Even an immediate "APPLIED" in the POST answer waits for the projection:
                     // the projection, not the forwarder, is what says a thing happened.
                     else -> DialDevActionStatus.Accepted(actionId)
                 }
             }
-            httpStatus == 503 -> DialDevActionStatus.NotSent("DIAL is unreachable; the action was not forwarded.")
+            httpStatus >= 500 -> DialDevActionStatus.Unconfirmed("DIAL's original outcome is unavailable.")
             else -> DialDevActionStatus.Rejected(
                 null,
                 DialDevScreenReducer.errorCode(body) ?: "The gateway refused the action ($httpStatus).",
@@ -188,11 +201,20 @@ object DialDevActionReducer {
         val seen = projected.firstOrNull { it.actionId == accepted.actionId } ?: return current
         return when (seen.state.trim().uppercase()) {
             "APPLIED" -> DialDevActionStatus.Applied(accepted.actionId)
-            "REJECTED" -> DialDevActionStatus.Rejected(accepted.actionId, seen.reason?.ifBlank { null } ?: "No reason given.")
+            "REJECTED" -> if (uncertainNativeReason(seen.reason))
+                DialDevActionStatus.Unconfirmed("The native control outcome still needs reconciliation.")
+            else DialDevActionStatus.Rejected(accepted.actionId, seen.reason?.ifBlank { null } ?: "No reason given.")
             "SUPERSEDED" -> DialDevActionStatus.Superseded(accepted.actionId)
             else -> current
         }
     }
+
+    fun reconcileDurable(current: DialDevActionStatus, projected: List<ProjectedAction>, pendingIds: Set<String>): DialDevActionStatus =
+        if (current is DialDevActionStatus.Accepted && current.actionId in pendingIds) current
+        else reconcile(current,projected)
+
+    fun observesCurrentOriginal(originalKey: String, pendingKey: String?): Boolean =
+        pendingKey == null || pendingKey == originalKey
 
     fun parseProjected(data: JSONObject): List<ProjectedAction> =
         data.optJSONArray("actions").objects().mapNotNull { item ->

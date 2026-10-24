@@ -1,0 +1,112 @@
+[
+  {
+    "intent": {
+      "schema": "vati.runtime-recovery/1",
+      "device_id": "owner-device",
+      "account_alias": "paper_lab",
+      "session_id": "paper_lab:EURUSD:1700000000",
+      "action": "clear_kill_switch",
+      "state_ref": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "issued_at_unix": 1700000000,
+      "args": {
+        "trigger": "MAX_DAILY_LOSS"
+      }
+    },
+    "operation_id": "original_recovery_id_123456",
+    "expires_at_unix": 1700000120,
+    "digest": "59958d8ca4eef4a677f7e14f6b89ee08764902fc092bada37be430adee017859",
+    "intent_digest": "c2a6e6d9ca3a9997c5041d17ec93d0fd84fc7b64b945560ca3d2f9b1e7b1b2a7",
+    "canonical": "van-a4-approval-v2|original_recovery_id_123456|owner-device|runtime:clear_kill_switch||trading.runtime.clear_kill_switch|c2a6e6d9ca3a9997c5041d17ec93d0fd84fc7b64b945560ca3d2f9b1e7b1b2a7|1700000120"
+  },
+  {
+    "intent": {
+      "schema": "vati.runtime-recovery/1",
+      "device_id": "owner-device",
+      "account_alias": "paper_lab",
+      "session_id": "session-東京",
+      "action": "clear_kill_switch",
+      "state_ref": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "issued_at_unix": 1700000000,
+      "args": {
+        "trigger": "MAX_DAILY_LOSS"
+      }
+    },
+    "operation_id": "original_recovery_id_123456",
+    "expires_at_unix": 1700000120,
+    "digest": "5e3aadc10f07acbf92f8f148877067456df4f034f2cd45bdbae8581902567b34",
+    "intent_digest": "4dd52fddc8094b5ea74fea1a5865d1ee03bd012ce2f3517d085ea61be651bb82",
+    "canonical": "van-a4-approval-v2|original_recovery_id_123456|owner-device|runtime:clear_kill_switch||trading.runtime.clear_kill_switch|4dd52fddc8094b5ea74fea1a5865d1ee03bd012ce2f3517d085ea61be651bb82|1700000120"
+  },
+  {
+    "intent": {
+      "schema": "vati.runtime-recovery/1",
+      "device_id": "owner-device",
+      "account_alias": "paper_lab",
+      "session_id": "paper_lab:EURUSD:1700000000",
+      "action": "reset_loss_streak",
+      "state_ref": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "issued_at_unix": 1700000000,
+      "args": {
+        "scope": "*ACCOUNT*"
+      }
+    },
+    "operation_id": "original_recovery_id_123456",
+    "expires_at_unix": 1700000120,
+    "digest": "a9f57ae8920f926e2949f72719136ea8d7b459f4a9d41ac19cac99b6c9863152",
+    "intent_digest": "c8ce40eb3aa91c51fa882a2e04f31091bd3e585c004fb22b9af6931d6ca7cd30",
+    "canonical": "van-a4-approval-v2|original_recovery_id_123456|owner-device|runtime:reset_loss_streak||trading.runtime.reset_loss_streak|c8ce40eb3aa91c51fa882a2e04f31091bd3e585c004fb22b9af6931d6ca7cd30|1700000120"
+  },
+  {
+    "intent": {
+      "schema": "vati.runtime-recovery/1",
+      "device_id": "owner-device",
+      "account_alias": "paper_lab",
+      "session_id": "session-東京",
+      "action": "reset_loss_streak",
+      "state_ref": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "issued_at_unix": 1700000000,
+      "args": {
+        "scope": "*ACCOUNT*"
+      }
+    },
+    "operation_id": "original_recovery_id_123456",
+    "expires_at_unix": 1700000120,
+    "digest": "90c5ae1b83483ffedd212eff7dcb58a2d24eea4240e8b2eabe48d5e39f6cf4dd",
+    "intent_digest": "b3f4ad8189721c57162a5e84c8a684a8c755ff182a64822e2528bbe244a6ea14",
+    "canonical": "van-a4-approval-v2|original_recovery_id_123456|owner-device|runtime:reset_loss_streak||trading.runtime.reset_loss_streak|b3f4ad8189721c57162a5e84c8a684a8c755ff182a64822e2528bbe244a6ea14|1700000120"
+  },
+  {
+    "intent": {
+      "schema": "vati.runtime-recovery/1",
+      "device_id": "owner-device",
+      "account_alias": "paper_lab",
+      "session_id": "paper_lab:EURUSD:1700000000",
+      "action": "resume_drawdown",
+      "state_ref": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "issued_at_unix": 1700000000,
+      "args": {}
+    },
+    "operation_id": "original_recovery_id_123456",
+    "expires_at_unix": 1700000120,
+    "digest": "1ecf4ed40b336b4d9bf7867dbb0b872fcf8eed901d319792b41f4b1894e34242",
+    "intent_digest": "e134441b89beec05c407589d313ec1859e400dc85e31befa2ea8f8b4bb6cf33e",
+    "canonical": "van-a4-approval-v2|original_recovery_id_123456|owner-device|runtime:resume_drawdown||trading.runtime.resume_drawdown|e134441b89beec05c407589d313ec1859e400dc85e31befa2ea8f8b4bb6cf33e|1700000120"
+  },
+  {
+    "intent": {
+      "schema": "vati.runtime-recovery/1",
+      "device_id": "owner-device",
+      "account_alias": "paper_lab",
+      "session_id": "session-東京",
+      "action": "resume_drawdown",
+      "state_ref": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "issued_at_unix": 1700000000,
+      "args": {}
+    },
+    "operation_id": "original_recovery_id_123456",
+    "expires_at_unix": 1700000120,
+    "digest": "84334e99be1ba6c7b5af6d9a853dcd99b43757993dde81b296d40f4feebedd8a",
+    "intent_digest": "4233fe7ee316529a43b5325610329942a14bbc0a04010bc60cf7c32246de49c8",
+    "canonical": "van-a4-approval-v2|original_recovery_id_123456|owner-device|runtime:resume_drawdown||trading.runtime.resume_drawdown|4233fe7ee316529a43b5325610329942a14bbc0a04010bc60cf7c32246de49c8|1700000120"
+  }
+]

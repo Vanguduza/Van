@@ -1,0 +1,48 @@
+{
+  "schema": "van.rebuild.mutation-reconciliation/1",
+  "part": "kotlin",
+  "reference": "e56a38c8d5b51b7c64d3d4ac04e2d8a59f6c9b36",
+  "preserved_case_count": 374,
+  "selected_case_count": 7,
+  "registry_sha256": "a7ec143ea39a525390a1aa015d28d812afb198b703f02d1e1b8c677fb2b94674",
+  "results": [
+    {
+      "kind": "baseline",
+      "mutation": null,
+      "exit": 0,
+      "verdict": "PASS",
+      "log_sha256": "d841bb43379f0dff3b68faa696e079648b1a8233a1994ae4a6e346e489640f6b",
+      "failed_oracles": [],
+      "summary": "d device missing its recognizer is not told to install Sherpa() PASSED\n\nVoiceSecondPassPolicyTest > an easy turn does not pay for a second pass() PASSED\n\nVoiceSecondPassPolicyTest > low confidence is a reason() PASSED\n\nVoiceSecondPassPolicyTest > a correction the owner has made before is a reason() PASSED\n\nVoiceSecondPassPolicyTest > nothing heard is a reason to try again() PASSED\n\nVoiceSecondPassPolicyTest > a confidence outside the valid range is ignored rather than treated as low() PASSED\n\nVoiceTurnLifecycleTest > cancelled turn cannot admit late final or processed transcript() PASSED\n\nVoiceTurnLifecycleTest > replacement rejects old callbacks even with same owner turn id() PASSED\n\nVoiceTurnLifecycleTest > finishing audio permits one final transcript while duplicate finals are rejected() PASSED\n\nVoiceTurnTest > only a completed answer counts as heard() PASSED\n\nVoiceTurnTest > a failover keeps the turn and the command() PASSED\n\nVoiceTurnTest > speaking survives a transport failover() PASSED\n\nWakeModelAssetTest > a plausible model with no pinned digest is accepted() PASSED\n\nWakeModelAssetTest > no model at all is absent, and says so() PASSED\n\nWakeModelAssetTest > a matching digest is accepted whatever its case() PASSED\n\nWakeModelAssetTest > a placeholder is not a model() PASSED\n\nWakeModelAssetTest > only READY reports ready() PASSED\n\nWakeModelAssetTest > a model that is not the one the release pinned is refused() PASSED\n\nWakeModelAssetTest > every state has a sentence and none of them names an enum or a path() PASSED\n\nBUILD SUCCESSFUL in 43s\n5 actionable tasks: 5 executed\n"
+    },
+    {
+      "kind": "mutation",
+      "mutation": "C40 nothing is ever taken out of flight, so a resume resends everything",
+      "exit": 1,
+      "verdict": "ASSERTION_DETECTED",
+      "log_sha256": "83417ea6d1a76da09ea20b86c35709d6d462e6c0291660574c299c67f9a12e08",
+      "failed_oracles": [
+        "HttpSessionCarrierTest > HTTP admission event pages and POST acknowledgement use existing frame identities() FAILED",
+        "SessionDownstreamTest > an acknowledgement is recognised by message id rather than by kind() FAILED",
+        "SessionDownstreamTest > a pending result is distinguished from a final refusal() FAILED",
+        "SessionDownstreamTest > a refusal is an answer, and carries its reason() FAILED",
+        "VanHermesSessionManagerTest > pending server result retains durable work and retries with its original identity() FAILED",
+        "VanHermesSessionManagerTest > queued write remains durable until gateway acknowledgement() FAILED",
+        "VanHermesSessionManagerTest > repeated pending results recover on WSS without misclassifying server delay as a failed handshake() FAILED"
+      ],
+      "summary": "ard is a reason to try again() PASSED\n\nVoiceSecondPassPolicyTest > a confidence outside the valid range is ignored rather than treated as low() PASSED\n\nVoiceTurnLifecycleTest > cancelled turn cannot admit late final or processed transcript() PASSED\n\nVoiceTurnLifecycleTest > replacement rejects old callbacks even with same owner turn id() PASSED\n\nVoiceTurnLifecycleTest > finishing audio permits one final transcript while duplicate finals are rejected() PASSED\n\nVoiceTurnTest > only a completed answer counts as heard() PASSED\n\nVoiceTurnTest > a failover keeps the turn and the command() PASSED\n\nVoiceTurnTest > speaking survives a transport failover() PASSED\n\nWakeModelAssetTest > a plausible model with no pinned digest is accepted() PASSED\n\nWakeModelAssetTest > no model at all is absent, and says so() PASSED\n\nWakeModelAssetTest > a matching digest is accepted whatever its case() PASSED\n\nWakeModelAssetTest > a placeholder is not a model() PASSED\n\nWakeModelAssetTest > only READY reports ready() PASSED\n\nWakeModelAssetTest > a model that is not the one the release pinned is refused() PASSED\n\nWakeModelAssetTest > every state has a sentence and none of them names an enum or a path() PASSED\n\n> Task :test FAILED\n5 actionable tasks: 5 executed\n\n1273 tests completed, 7 failed\n\nFAILURE: Build failed with an exception.\n\n* What went wrong:\nExecution failed for task ':test'.\n> There were failing tests. See the report at: file:///workspace/van-review-2026-10-18/publish/android/verification/build/reports/tests/test/index.html\n\n* Try:\n> Run with --scan to get full insights.\n\nBUILD FAILED in 26s\n"
+    },
+    {
+      "kind": "mutation",
+      "mutation": "C40 a socket page replaces the history instead of merging with it",
+      "exit": 1,
+      "verdict": "INVALID_EXECUTION",
+      "log_sha256": "4a9ac916ea7fa218a7cc948f0b8e6217a0bd59c17319fdc66485f849384a5d70",
+      "failed_oracles": [],
+      "summary": "> Task :checkKotlinGradlePluginConfigurationErrors SKIPPED\n> Task :processResources NO-SOURCE\n> Task :processTestResources\n\n> Task :compileKotlin FAILED\n2 actionable tasks: 2 executed\ne: file:///workspace/van-review-2026-10-18/publish/android/app/src/main/java/com/dial/van/events/VanEventStreamStore.kt:70:80 No parameter with name 'loaded' found.\n\nFAILURE: Build failed with an exception.\n\n* What went wrong:\nExecution failed for task ':compileKotlin'.\n> A failure occurred while executing org.jetbrains.kotlin.compilerRunner.GradleCompilerRunnerWithWorkers$GradleKotlinCompilerWorkAction\n   > Compilation error. See log for more details\n\n* Try:\n> Run with --stacktrace option to get the stack trace.\n> Run with --info or --debug option to get more log output.\n> Run with --scan to get full insights.\n> Get more help at https://help.gradle.org.\n\nBUILD FAILED in 3s\n"
+    }
+  ],
+  "status": "ERROR",
+  "error": "INVALID_EXECUTION: C40 a socket page replaces the history instead of merging with it; inspect /tmp/van-mutation-final-kotlin-20261022/002-mutation.txt",
+  "duration_seconds": 73.975
+}

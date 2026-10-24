@@ -1,0 +1,255 @@
+{
+  "observed_at": "2026-10-17T05:16:42.243485+00:00",
+  "host": "van-trading-core",
+  "scope": "Exact compressed packet graph and20 in-memory planning mutations; no application tests, no F15/BACKEND_COMPLETE issuance. Source-inventory mappings are a separate local artifact check.",
+  "graph_sha256": "c005caaef38935c849456ea983df923228e2b7e74a490302b8813d53727cd6c5",
+  "plan_file_sha256_reference": "391bde124e1015302ebbe6b7db2211303f8e888683782d2db08203fced7ba6bd",
+  "units": 76,
+  "baseline_findings": [],
+  "mutation_count": 20,
+  "mutations_caught": 20,
+  "mutations": [
+    {
+      "name": "remove required backend",
+      "expected": "SCOPE",
+      "changed": true,
+      "caught": true,
+      "findings": [
+        "ORDER_OR_CYCLE",
+        "SCOPE",
+        "UNKNOWN"
+      ]
+    },
+    {
+      "name": "remove global gate",
+      "expected": "SCOPE",
+      "changed": true,
+      "caught": true,
+      "findings": [
+        "FINAL_GAP",
+        "GLOBAL_INCOMPLETE",
+        "NO_F15",
+        "ORDER_OR_CYCLE",
+        "SCOPE",
+        "UNKNOWN"
+      ]
+    },
+    {
+      "name": "early UX",
+      "expected": "EARLY_UI",
+      "changed": true,
+      "caught": true,
+      "findings": [
+        "EARLY_UI"
+      ]
+    },
+    {
+      "name": "early renderer",
+      "expected": "EARLY_UI",
+      "changed": true,
+      "caught": true,
+      "findings": [
+        "EARLY_UI"
+      ]
+    },
+    {
+      "name": "UI disguised backend",
+      "expected": "DISGUISED_UI",
+      "changed": true,
+      "caught": true,
+      "findings": [
+        "BACKEND_PHASE",
+        "BE_DEP_UI",
+        "DISGUISED_UI"
+      ]
+    },
+    {
+      "name": "backend disguised preparation",
+      "expected": "DISGUISED_BACKEND",
+      "changed": true,
+      "caught": true,
+      "findings": [
+        "DISGUISED_BACKEND"
+      ]
+    },
+    {
+      "name": "partial backend",
+      "expected": "PARTIAL",
+      "changed": true,
+      "caught": true,
+      "findings": [
+        "PARTIAL"
+      ]
+    },
+    {
+      "name": "missing receipt",
+      "expected": "NO_RECEIPT",
+      "changed": true,
+      "caught": true,
+      "findings": [
+        "NO_RECEIPT"
+      ]
+    },
+    {
+      "name": "incomplete global scope",
+      "expected": "GLOBAL_INCOMPLETE",
+      "changed": true,
+      "caught": true,
+      "findings": [
+        "FINAL_GAP",
+        "GLOBAL_INCOMPLETE"
+      ]
+    },
+    {
+      "name": "backend before F15",
+      "expected": "NO_F15",
+      "changed": true,
+      "caught": true,
+      "findings": [
+        "NO_F15"
+      ]
+    },
+    {
+      "name": "F15 before reconciliation",
+      "expected": "EARLY_F15",
+      "changed": true,
+      "caught": true,
+      "findings": [
+        "EARLY_F15",
+        "FINAL_GAP"
+      ]
+    },
+    {
+      "name": "duplicate unit",
+      "expected": "DUPLICATE",
+      "changed": true,
+      "caught": true,
+      "findings": [
+        "DUPLICATE",
+        "DUP_PACKET"
+      ]
+    },
+    {
+      "name": "dependency cycle",
+      "expected": "ORDER_OR_CYCLE",
+      "changed": true,
+      "caught": true,
+      "findings": [
+        "ORDER_OR_CYCLE"
+      ]
+    },
+    {
+      "name": "unknown dependency",
+      "expected": "UNKNOWN",
+      "changed": true,
+      "caught": true,
+      "findings": [
+        "ORDER_OR_CYCLE",
+        "UNKNOWN"
+      ]
+    },
+    {
+      "name": "backward phase",
+      "expected": "UI_PHASE",
+      "changed": true,
+      "caught": true,
+      "findings": [
+        "PHASE",
+        "UI_PHASE"
+      ]
+    },
+    {
+      "name": "backend in frontend stage",
+      "expected": "BACKEND_PHASE",
+      "changed": true,
+      "caught": true,
+      "findings": [
+        "BACKEND_PHASE",
+        "PHASE"
+      ]
+    },
+    {
+      "name": "backend imports UI",
+      "expected": "BE_DEP_UI",
+      "changed": true,
+      "caught": true,
+      "findings": [
+        "BE_DEP_UI",
+        "ORDER_OR_CYCLE",
+        "PHASE"
+      ]
+    },
+    {
+      "name": "duplicate dependency",
+      "expected": "DUP_DEP",
+      "changed": true,
+      "caught": true,
+      "findings": [
+        "DUP_DEP"
+      ]
+    },
+    {
+      "name": "last qualification disconnected",
+      "expected": "FINAL_GAP",
+      "changed": true,
+      "caught": true,
+      "findings": [
+        "FINAL_GAP"
+      ]
+    },
+    {
+      "name": "duplicate packet",
+      "expected": "DUP_PACKET",
+      "changed": true,
+      "caught": true,
+      "findings": [
+        "DUP_PACKET"
+      ]
+    }
+  ],
+  "parent_checks": [
+    {
+      "command": [
+        "plan/generate_plan.py",
+        "--check"
+      ],
+      "exit_code": 0,
+      "stdout_sha256": "df882ef1707fc574b6f59c8d2ad663deaaf2702efc3bf22388cd4cbcc576bbf1",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_tail": "0 findings\n",
+      "stderr_tail": ""
+    },
+    {
+      "command": [
+        "plan/generate_plan.py",
+        "--selftest"
+      ],
+      "exit_code": 0,
+      "stdout_sha256": "ebe723230b63aa3415d4f2fada66dc2f9853488c42934fac93b37b37273ff668",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_tail": " upstream \u2192 ['REQ_NEEDS_NOT_UPSTREAM: VAN-NX-065 on DU-10d needs DU-14d, which is not upstream']\ncaught: money requirement deleted (VAN-NX-055) \u2192 ['REQ_REMOVED: VAN-NX-055 is locked but missing from \u00a716.1']\ncaught: visual requirement deleted (VAN-NX-004) \u2192 ['REQ_REMOVED: VAN-NX-004 is locked but missing from \u00a716.1']\ncaught: requirement text changed \u2192 ['REQ_CHANGED: VAN-NX-055 text differs from the locked row']\ncaught: requirement added without locking \u2192 ['REQ_NOT_LOCKED: VAN-NX-099 is not in the requirement lock']\ncaught: lock edited without re-approval \u2192 ['LOCK_CHANGED_WITHOUT_APPROVAL: pinned 7e102f249c89, actual 916274ae16f0']\ncaught: lock not pinned \u2192 ['LOCK_NOT_PINNED: no REQUIREMENT_LOCK hash in the owner decision record']\ncaught: legacy surface removed \u2192 ['SURFACE_REMOVED: van.home']\ncaught: legacy owner action dropped \u2192 ['SURFACE_OBLIGATIONS_CHANGED: van.home']\ncaught: requirement duplicated with contradictory text \u2192 ['REQ_DUPLICATE: VAN-NX-055 appears 2 times']\ncaught: open question duplicated \u2192 ['OQ_DUPLICATE: OQ-15 appears 2 times']\ncaught: DAG node with two labels \u2192 ['DAG_DUPLICATE: node N has 2 labels']\ncaught: legacy surface duplicated \u2192 ['SURFACE_DUPLICATE: van.home#DUPLICATE@78']\ncaught: code-bearing unit not downstream of the parity checker \u2192 ['PARITY_BEFORE_CHECKER: DU-02 does not depend on DU-00b, which builds the parity checker']\ncaught: stale plan \u2192 ['STALE_PLAN: the committed plan does not match its current inputs; regenerate it']\ncaught: requirement dropped before a direct validate() call \u2192 ['REQ_REMOVED: VAN-NX-055 is locked but missing from \u00a716.1']\n",
+      "stderr_tail": ""
+    },
+    {
+      "command": [
+        "contracts/check_state_machines.py"
+      ],
+      "exit_code": 0,
+      "stdout_sha256": "86f4ec1d8117c8e8d4eb138c3b21fd913305c36fa706c4ae1d5f24e9c905791e",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_tail": "0 findings in VAN_STATE_MACHINES_REV1_9.json\n",
+      "stderr_tail": ""
+    },
+    {
+      "command": [
+        "contracts/check_state_machines.py",
+        "--selftest"
+      ],
+      "exit_code": 0,
+      "stdout_sha256": "80617780745c86a86ed20ee6d0c221222a7788074f25b9afd689d02bca402dfb",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_tail": " PAID -> [\"VAN-SM-FUND_WITHDRAWAL: R8 PROVIDER_PENDING->PAID guard set ['broker_readback'] differs from approved WDR-T22 ['provider_settlement_receipt']\"]\ncaught: R8 approved transition removed -> ['VAN-SM-FUND_DEPOSIT: R8 approved transition DEP-T02 DRAFT->CANCELLED missing from the model']\ncaught: R9 untyped proof string -> [\"VAN-SM-FUND_WITHDRAWAL: R9 PROVIDER_PENDING->PAID requires untyped proof 'arbitrary_nonempty_string'\"]\ncaught: R10 deposit shortcut with edited approved list -> ['VAN-SM-FUND_DEPOSIT: R10 SETTLED reachable without passing QUOTED']\ncaught: R10 withdrawal shortcut with edited approved list -> ['VAN-SM-FUND_WITHDRAWAL: R10 PAID reachable without passing BENEFICIARY_VERIFIED']\ncaught: R10 order shortcut with edited approved list -> ['VAN-SM-TRADE_ORDER: R10 FILLED reachable without passing RISK_REVIEW']\ncaught: R10 news shortcut with edited approved list -> ['VAN-SM-NEWS_ARMED_TICKET: R10 USED reachable without passing SIGNED']\ncaught: R11 approved list edited without re-approval -> ['VAN_TRANSITION_GUARDS_REV1_9B.json: R11 approved list changed without re-approval (pinned 9da17bd95dce, actual e3cc6bd30956)']\ncaught: R0 duplicate machine ID -> ['VAN-SM-ACCOUNT_LIFECYCLE: R0 duplicate machine ID (2 definitions)']\ncaught: R0 duplicate state -> ['VAN-SM-TRADE_ORDER: R0 duplicate state FILLED']\ncaught: R0 duplicate transition with a different proof -> ['VAN-SM-FUND_WITHDRAWAL: R0 duplicate transition PROVIDER_PENDING->PAID (2 definitions)']\ncaught: R0 duplicate approved transition -> ['VAN-SM-FUND_DEPOSIT: R0 duplicate approved transition DRAFT->CANCELLED']\n",
+      "stderr_tail": ""
+    }
+  ]
+}

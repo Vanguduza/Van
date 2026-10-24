@@ -29,7 +29,10 @@
     "margin_level_pct",
     "free_margin",
     "preservation_blocks_new_risk",
-    "preservation_reason"
+    "preservation_reason",
+    "loss_streak_lock",
+    "loss_streak_multiplier",
+    "drawdown_top_state"
   ],
   "properties": {
     "now_unix": {
@@ -189,6 +192,21 @@
     "preservation_reason": {
       "type": "string",
       "description": "Owner/replay-visible deterministic reason for a preservation block. Empty when preservation_blocks_new_risk is false."
+    },
+    "loss_streak_lock": {
+      "type": "string",
+      "description": "P1-TRADE-RISK-005. Non-empty while this strategy or the account is in a losing-streak cooldown or an owner-reset suspension; the Risk Authority refuses new risk with CONSECUTIVE_LOSSES and this text. Rebuilt from the ledger, never reset by a restart."
+    },
+    "loss_streak_multiplier": {
+      "type": "string",
+      "description": "P1-TRADE-RISK-005. Decimal ≤ 1. Probation size after a cooldown, until the scope records a win."
+    },
+    "drawdown_top_state": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "P1-TRADE-RISK-005. Highest promotion state among the mandate's strategies. At a top-tier-only drawdown tier only strategies at or above it trade. null keeps the legacy CERTIFIED_LIVE floor."
     }
   }
 }

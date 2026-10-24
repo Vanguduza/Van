@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.dial.van.visual.VanFrameBudgetTest" tests="9" skipped="0" failures="0" errors="0" timestamp="2026-10-08T04:57:40" hostname="052fefa249ff" time="0.003">
+  <properties/>
+  <testcase name="a device that cools down gets its field back()" classname="com.dial.van.visual.VanFrameBudgetTest" time="0.0"/>
+  <testcase name="sustained misses are()" classname="com.dial.van.visual.VanFrameBudgetTest" time="0.001"/>
+  <testcase name="one slow frame is not a degraded device()" classname="com.dial.van.visual.VanFrameBudgetTest" time="0.0"/>
+  <testcase name="a pause is not a missed frame()" classname="com.dial.van.visual.VanFrameBudgetTest" time="0.0"/>
+  <testcase name="the miss ratio and p95 are inspectable()" classname="com.dial.van.visual.VanFrameBudgetTest" time="0.001"/>
+  <testcase name="no judgement before there is a window to judge on()" classname="com.dial.van.visual.VanFrameBudgetTest" time="0.0"/>
+  <testcase name="the default budget is one 60Hz frame()" classname="com.dial.van.visual.VanFrameBudgetTest" time="0.0"/>
+  <testcase name="the signal reaches the effect ladder()" classname="com.dial.van.visual.VanFrameBudgetTest" time="0.0"/>
+  <testcase name="it does not oscillate at the threshold()" classname="com.dial.van.visual.VanFrameBudgetTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

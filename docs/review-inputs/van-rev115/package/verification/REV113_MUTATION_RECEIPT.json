@@ -1,0 +1,81 @@
+{
+  "cases": [
+    {
+      "caught": true,
+      "diagnostic": "AssertionError",
+      "exit_code": 1,
+      "mutation": "BG_MISSING_REQUIRED_BACKEND"
+    },
+    {
+      "caught": true,
+      "diagnostic": "AssertionError: ('UX-001', 'UI before BG')",
+      "exit_code": 1,
+      "mutation": "FRONTEND_BEFORE_BG"
+    },
+    {
+      "caught": true,
+      "diagnostic": "AssertionError: ('BE-001', 'code before F15')",
+      "exit_code": 1,
+      "mutation": "BACKEND_BEFORE_F15"
+    },
+    {
+      "caught": true,
+      "diagnostic": "AssertionError",
+      "exit_code": 1,
+      "mutation": "DUPLICATE_PACKET"
+    },
+    {
+      "caught": true,
+      "diagnostic": "AssertionError",
+      "exit_code": 1,
+      "mutation": "DROPPED_CONTEXT"
+    },
+    {
+      "caught": true,
+      "diagnostic": "AssertionError",
+      "exit_code": 1,
+      "mutation": "MISSING_LIGHT_ROLE"
+    },
+    {
+      "caught": true,
+      "diagnostic": "AssertionError",
+      "exit_code": 1,
+      "mutation": "DUPLICATE_COMPONENT"
+    },
+    {
+      "caught": true,
+      "diagnostic": "AssertionError: ('light', 'text_muted', 'canvas', 1.0899405021019355)",
+      "exit_code": 1,
+      "mutation": "FAKE_LIGHT_CONTRAST"
+    },
+    {
+      "caught": true,
+      "diagnostic": "AssertionError",
+      "exit_code": 1,
+      "mutation": "FAKE_F15_READY"
+    },
+    {
+      "caught": true,
+      "diagnostic": "AssertionError: ('VNX-S-HOME-01', 'BE-010')",
+      "exit_code": 1,
+      "mutation": "MISROUTED_SCREEN"
+    },
+    {
+      "caught": true,
+      "diagnostic": "AssertionError",
+      "exit_code": 1,
+      "mutation": "DROPPED_TEST"
+    },
+    {
+      "caught": true,
+      "diagnostic": "AssertionError",
+      "exit_code": 1,
+      "mutation": "FORGED_OWNER_SIGNATURE"
+    }
+  ],
+  "caught": 12,
+  "count": 12,
+  "false_negatives": [],
+  "schema": "van.document.rev113.mutations/1.0",
+  "scope": "Document structural/role checks, not live risk test or independent F15"
+}

@@ -143,7 +143,7 @@ async def test_correlated_postcondition_required_for_verified_success(runtime):
     ok = await actions.verify(VerificationObservation(
         execution_id=second.execution_id, success=True, correlation={"remote_object_id": "note-456"},
         observed_postcondition={"title": "Dial Health"}, evidence_pointer="google://notebook/note-456",
-    ))
+    ), independent_observer=True)
     assert ok.status == ExecutionStatus.VERIFIED_SUCCESS
     assert ok.evidence_pointer == "google://notebook/note-456"
 

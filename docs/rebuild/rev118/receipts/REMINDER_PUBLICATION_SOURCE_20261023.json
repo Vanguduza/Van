@@ -1,0 +1,1038 @@
+{
+  "schema": "van.rebuild.reminder-publication-source/1",
+  "observed_at_utc": "2026-10-23T11:49:22.216547+00:00",
+  "source_parent": "b494acf8231e073864ed6efd5ef02f9cb235c2f4",
+  "source_sha256": {
+    "backend/van_gateway/app.py": "ed29e42135d517e46e20e35e4ed99abba0478869311802412b72d4327ede75c9",
+    "backend/van_gateway/attention/engine.py": "f7ba893bf64100362faaf854caf6b6f2921202b281f3cad93c6fc6d788b1ecad",
+    "backend/van_gateway/reminders/service.py": "f937b6349fb9810f4f750910d9ba239d95605231259abc0e78a26154f9590834",
+    "backend/van_gateway/reminders/timeparse.py": "fc6d923e5b81ae0f675c7ca8769a8fcb3a3a3424c8d29e55622c4202171db1f5",
+    "backend/tests/test_attention_concurrent_delivery.py": "a4384d96201dce0110f6932f182977abebf3a7fefcd201786941bd36ae45b4dd",
+    "backend/tests/test_reminder_state_integrity.py": "3876e8cafb2817fb3b511d9830f6b08f92b9de4ebf1b8909116706bfd89c133d",
+    "backend/tests/test_reminder_delivery_gateway.py": "4c080262eabd6701ffe11c62f76b38c39088df13345c760909513cad3197c622",
+    "tools/rebuild/refresh_owner_source_contracts.py": "5b762f26cbe47f5792589e02025a8b28c0d3c9ed4a07d80f8c320e4fcfb92828",
+    "registries/owner_features.json": "14d17cd226862b7796d036043af487b73a6be019b485836329956b63f1843f77",
+    "registries/owner_screens.json": "3f88775a444a39cbea640d0e9b7ca5a6e62a9b2d5a1196b87715c687f5ac071e",
+    "registries/owner_endpoints.json": "74279136649f58b47e782e8d5310dbebbde51f6e524bf53bad0800dda03765fc"
+  },
+  "executions": {
+    "before": {
+      "tests": 12,
+      "failures": 12,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 0.806,
+      "sha256": "f40908ac593cedd70fd1e57568758c50e55e10181bfdf7851b1ba8ea8ccdfb17"
+    },
+    "first": {
+      "tests": 14,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 0.716,
+      "sha256": "9c121d919b2430806ef1a782a2555f8531a993375d60014a17035a3764a1549a"
+    },
+    "focused": {
+      "tests": 34,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 11.282,
+      "sha256": "9d00a28db5cd69dd4a92ccde90348df08f44fc8b7151ae4008b339c930cd3320"
+    },
+    "final-focused": {
+      "tests": 41,
+      "failures": 1,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 15.246,
+      "sha256": "848622d423124e2d695ce2b4b8387ffd64d92d6ac1f340fd60f41e078abb385b"
+    },
+    "restored": {
+      "tests": 85,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 17.082,
+      "sha256": "7cd8717b9122cec43c18e86abe1878a60a8a4755476e8957ce185645ec7686b9"
+    },
+    "final-source": {
+      "tests": 86,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 17.39,
+      "sha256": "ce64c62bdb57604499547e82d2b1484aaa7be92b4d4233ad253bbc59a41dc228"
+    },
+    "combined": {
+      "tests": 252,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 57.109,
+      "sha256": "f8cf7ea34e6c770d41abee67a7adffaa8176f9acccb7df7a86860b090c7fc341"
+    },
+    "rebuild": {
+      "tests": 78,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 31.266,
+      "sha256": "2b6a2fef2093bf1339e244b8f2c4dd8c5d372641371d213a2d22d514d66e23d1"
+    },
+    "registry": {
+      "tests": 35,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 4.187,
+      "sha256": "d0cd07011ee57eb906e01238500c715ec406f0ef0f77fa0c5921972fae147b49"
+    },
+    "attention-before": {
+      "tests": 2,
+      "failures": 2,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 0.551,
+      "sha256": "35d8949fb141c4122aad44d74b4924ec9e59da964bd6dda76cb3e0f7c311f2bf"
+    },
+    "paired-gateway-first": {
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 2.329,
+      "sha256": "532a9242e6154ac3193141881100732e755cfa8bf8d485aa5e086e4cc65a725f"
+    }
+  },
+  "faults": {
+    "definitions": [
+      [
+        "changed request treated as original",
+        [
+          [
+            "backend/van_gateway/reminders/service.py",
+            "if original != fields:",
+            "if False:"
+          ]
+        ],
+        "backend/tests/test_reminder_state_integrity.py::test_same_key_with_changed_request_is_not_a_successful_replay"
+      ],
+      [
+        "resolve a cancelled reminder",
+        [
+          [
+            "backend/van_gateway/reminders/service.py",
+            "if row[\"status\"] == \"RESOLVED\":\n                return\n            if row[\"status\"] not in {\"OPEN\", \"FIRED\"}:",
+            "if row[\"status\"] == \"RESOLVED\":\n                return\n            if False:"
+          ]
+        ],
+        "backend/tests/test_reminder_state_integrity.py::test_cancelled_reminder_cannot_be_resolved_into_new_scheduled_work"
+      ],
+      [
+        "lose follow-up scope",
+        [
+          [
+            "backend/van_gateway/reminders/service.py",
+            "project_id=row[\"project_id\"],source=row[\"source\"])",
+            "project_id=None,source=\"owner_device\")"
+          ]
+        ],
+        "backend/tests/test_reminder_state_integrity.py::test_follow_up_retains_original_project_and_source_and_replays_without_new_work"
+      ],
+      [
+        "commit resolution before dependent effect",
+        [
+          [
+            "backend/van_gateway/reminders/service.py",
+            "await self._create_in_transaction(db,follow,now)",
+            "await db.commit()\n                await self._create_in_transaction(db,follow,now)"
+          ]
+        ],
+        "backend/tests/test_reminder_state_integrity.py::test_failed_follow_up_creation_rolls_back_the_original_resolution"
+      ],
+      [
+        "drop persisted fired delivery",
+        [
+          [
+            "backend/van_gateway/reminders/service.py",
+            "WHERE r.status='FIRED' AND m.key IS NULL",
+            "WHERE r.status='OPEN' AND m.key IS NULL"
+          ]
+        ],
+        "backend/tests/test_reminder_state_integrity.py::test_pending_delivery_recovers_original_effect_without_duplicate_owner_events[before_event]"
+      ],
+      [
+        "rebroadcast after lost acknowledgement",
+        [
+          [
+            "backend/van_gateway/reminders/service.py",
+            "if existing is None:\n                await events.publish",
+            "if True:\n                await events.publish"
+          ],
+          [
+            "backend/van_gateway/reminders/service.py",
+            "event_id='reminder-fired:'+row['id'],correlation_id=row['id']",
+            "correlation_id=row['id']"
+          ]
+        ],
+        "backend/tests/test_reminder_state_integrity.py::test_pending_delivery_recovers_original_effect_without_duplicate_owner_events[lost_event_ack]"
+      ],
+      [
+        "use wall arithmetic for elapsed duration",
+        [
+          [
+            "backend/van_gateway/reminders/timeparse.py",
+            "return int(now.timestamp()) + int(delta.total_seconds())",
+            "return int((now + delta).timestamp())"
+          ]
+        ],
+        "backend/tests/test_reminder_state_integrity.py::test_relative_time_means_elapsed_time_across_dst"
+      ],
+      [
+        "choose an ambiguous local fold",
+        [
+          [
+            "backend/van_gateway/reminders/timeparse.py",
+            "if len(instants) != 1:",
+            "if False:"
+          ]
+        ],
+        "backend/tests/test_reminder_state_integrity.py::test_nonexistent_or_ambiguous_local_wall_time_is_not_silently_chosen"
+      ],
+      [
+        "accept a 13pm clock phrase",
+        [
+          [
+            "backend/van_gateway/reminders/timeparse.py",
+            "or (ampm and not 1 <= hour <= 12)",
+            ""
+          ]
+        ],
+        "backend/tests/test_reminder_state_integrity.py::test_invalid_time_is_a_typed_refusal[at 13pm]"
+      ],
+      [
+        "allow overlapping attention insert",
+        [
+          [
+            "backend/van_gateway/attention/engine.py",
+            "await db.execute(\"BEGIN IMMEDIATE\")",
+            "await db.execute(\"SELECT 1\")"
+          ]
+        ],
+        "backend/tests/test_attention_concurrent_delivery.py::test_owner_ack_survives_an_actual_report_read_write_interleaving"
+      ],
+      [
+        "reopen owner acknowledged attention",
+        [
+          [
+            "backend/van_gateway/attention/engine.py",
+            "previous if state is AttentionState.OPEN and previous is not AttentionState.OPEN",
+            "state if True"
+          ]
+        ],
+        "backend/tests/test_reminder_state_integrity.py::test_legacy_delivery_and_owner_acknowledgement_are_preserved"
+      ],
+      [
+        "disconnect actual scheduler delivery",
+        [
+          [
+            "backend/van_gateway/app.py",
+            "published = await reminders.publish_pending(events, attention)",
+            "published = 0"
+          ]
+        ],
+        "backend/tests/test_reminder_delivery_gateway.py::test_gateway_sweep_recovers_lost_delivery_ack_without_refiring"
+      ]
+    ],
+    "records": [
+      {
+        "case": 0,
+        "reason": "changed request treated as original",
+        "phase": "control",
+        "returncode": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "xml_sha256": "ae462a8efb20e8aa562b9ddcce37288d12ce8b419dad4c429ad3e3950c413523",
+        "log_sha256": "b55e3964fe4f7284de74686d27b00bb12462ea7b499eabe3caf7613fc3e5f418"
+      },
+      {
+        "case": 0,
+        "reason": "changed request treated as original",
+        "phase": "fault",
+        "returncode": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "xml_sha256": "85fd12e4aaa1e49b2b3d6e23eba84406a5f50b2401f36dec007c47fa264fb2e1",
+        "log_sha256": "5ca9d90b94cdac1ebac5b2fb7321f3a6dbcd2ef86d4a86b8ea434b4eabb4b739"
+      },
+      {
+        "case": 1,
+        "reason": "resolve a cancelled reminder",
+        "phase": "control",
+        "returncode": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "xml_sha256": "d83e00e520a609e9a7f88509f08e188f6ebd9951e9e6f65c329997f885fec4ae",
+        "log_sha256": "3be62f393f5921607a873beb897436b1f6af7bf8e959115d728ee0ecc5bd3a34"
+      },
+      {
+        "case": 1,
+        "reason": "resolve a cancelled reminder",
+        "phase": "fault",
+        "returncode": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "xml_sha256": "b4e7e4e5b82bf73c6988e6424f36f4f9df04070b3a9c1c456e1738e94f528f6e",
+        "log_sha256": "8bc3fc9372e7d9b2914307837673c98dd8838eb17546889211f9a268e9153753"
+      },
+      {
+        "case": 2,
+        "reason": "lose follow-up scope",
+        "phase": "control",
+        "returncode": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "xml_sha256": "dc6bc57da79408bbdf4ce61e913d4083c7afd05544fa225fcf030cfee873680b",
+        "log_sha256": "3be62f393f5921607a873beb897436b1f6af7bf8e959115d728ee0ecc5bd3a34"
+      },
+      {
+        "case": 2,
+        "reason": "lose follow-up scope",
+        "phase": "fault",
+        "returncode": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "xml_sha256": "597c951f9d27ceda74429f994356e1044b3f71fb8267e56bfe88cb1a1c07515d",
+        "log_sha256": "ebfde856bc6d1c9a2ece460f3cc587784cb77e6c20449385c1c4a6ee7aa7d546"
+      },
+      {
+        "case": 3,
+        "reason": "commit resolution before dependent effect",
+        "phase": "control",
+        "returncode": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "xml_sha256": "beb6304f7f96a03a7039414fbe33776a5fc37b0be588a713cea68d9d04fee1cf",
+        "log_sha256": "b55e3964fe4f7284de74686d27b00bb12462ea7b499eabe3caf7613fc3e5f418"
+      },
+      {
+        "case": 3,
+        "reason": "commit resolution before dependent effect",
+        "phase": "fault",
+        "returncode": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "xml_sha256": "2394f1ea2fe214f708eed17cff2f137600276cde699d2595a28de21afcbba379",
+        "log_sha256": "f7876823b6cd99a2a3de8fe554cc8a80fdebbe7ece9e839268b2705062a3a825"
+      },
+      {
+        "case": 4,
+        "reason": "drop persisted fired delivery",
+        "phase": "control",
+        "returncode": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "xml_sha256": "5680c83ee7e50cf89bc51bb5da0ae2449452e88e00394ff6f2554bed408aa229",
+        "log_sha256": "036bb9390fb408c39eb19a61d865bc4044aa29eeea8139e62a988a5a83930a4d"
+      },
+      {
+        "case": 4,
+        "reason": "drop persisted fired delivery",
+        "phase": "fault",
+        "returncode": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "xml_sha256": "11e18f558fe7c1e92a2ee9098e547477ed3ae35972ae8c4257d9b2d5960a3870",
+        "log_sha256": "b384c501cfce837e9f7efd26eb0204061ee3fe181f6269752577228536f5482a"
+      },
+      {
+        "case": 5,
+        "reason": "rebroadcast after lost acknowledgement",
+        "phase": "control",
+        "returncode": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "xml_sha256": "2e3d1e89125f2be24708b10c905a0b1606f9090aae79d06a8d7d293bcea3ba18",
+        "log_sha256": "791acbb2840ecff621592488f8e65512e312896e3865560d4000495c22ef5d13"
+      },
+      {
+        "case": 5,
+        "reason": "rebroadcast after lost acknowledgement",
+        "phase": "fault",
+        "returncode": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "xml_sha256": "1574ee4799a5c13a79d302d9f53f4f1398b531e5f118077587f93a499910e375",
+        "log_sha256": "2f90c84540c28f7da566d29a295c8ffe25c059f936ee2503a3d697940313a585"
+      },
+      {
+        "case": 6,
+        "reason": "use wall arithmetic for elapsed duration",
+        "phase": "control",
+        "returncode": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "xml_sha256": "4c08d02d55149df478eeea9889118a9d4b9c56373c4df89765fb7ea9a94ff6c4",
+        "log_sha256": "c9bcb144c21494e85f380ae0032b056c0b060b27bbfcfada9bc048d41195af09"
+      },
+      {
+        "case": 6,
+        "reason": "use wall arithmetic for elapsed duration",
+        "phase": "fault",
+        "returncode": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "xml_sha256": "4cb5ef7ce097cd8c482145ac44584d1dcd652052c6b6f91c8b811e50e467b212",
+        "log_sha256": "2e8aeb69c89c885ce827870aad9b54c94e05abfb46319604b5bdb7434c93ad78"
+      },
+      {
+        "case": 7,
+        "reason": "choose an ambiguous local fold",
+        "phase": "control",
+        "returncode": 0,
+        "counts": {
+          "tests": 2,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "xml_sha256": "ceb1356dd7ff4a016dac1a62710fc2d1cced906cf45006dcb04d754b885599b7",
+        "log_sha256": "ed4e09caf2c123cc998a4a054db510aefa9991486486560067423d72e1530bca"
+      },
+      {
+        "case": 7,
+        "reason": "choose an ambiguous local fold",
+        "phase": "fault",
+        "returncode": 1,
+        "counts": {
+          "tests": 2,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "xml_sha256": "6cb963929c0b369f2a992540ee8fb7bcccdaedff67d763f9822a16bce51d4560",
+        "log_sha256": "6fb4660e1b96cc8e4591bf29cfde479439d4e4a8b59dda113df3d54d35b87951"
+      },
+      {
+        "case": 8,
+        "reason": "accept a 13pm clock phrase",
+        "phase": "control",
+        "returncode": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "xml_sha256": "5daec5c0089b7d83264fff9b22993a459ebe46aa9c30803bc6e3a759c581b5f3",
+        "log_sha256": "d2d744b6b2df2bbb0d73cb7a43f6675bd03881bc2a2c2a74e54ecf18667789e2"
+      },
+      {
+        "case": 8,
+        "reason": "accept a 13pm clock phrase",
+        "phase": "fault",
+        "returncode": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "xml_sha256": "996e3aadd9ec0728da43187aeacc71cdf3c5af6931966fca88008a848b0b838d",
+        "log_sha256": "56e18ab808095bfa58f8521a6a28b0b57695ede4cab33d5d69ce5e6162a68e92"
+      },
+      {
+        "case": 9,
+        "reason": "allow overlapping attention insert",
+        "phase": "control",
+        "returncode": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "xml_sha256": "bfb4121f287e32287cda560760c71610e3ab5acc767c432bee89f418becf36c1",
+        "log_sha256": "b6533422d1630740f5655134f45127452989eca69913155ff0cdf6331ecfe21d"
+      },
+      {
+        "case": 9,
+        "reason": "allow overlapping attention insert",
+        "phase": "fault",
+        "returncode": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "xml_sha256": "38199b75c8019f1b5e96c7f684183fbab67354b0513e4c38a7e6af2cd228cc09",
+        "log_sha256": "9bcc37fa9b40bea163ba2311968c7ecfc95f80c4bff5e8cfb38387f7096225ab"
+      },
+      {
+        "case": 10,
+        "reason": "reopen owner acknowledged attention",
+        "phase": "control",
+        "returncode": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "xml_sha256": "da49f3bdfa7ef3e1fc09c8bf8981cdf8c28b09c85710136c1a5150b24489f3af",
+        "log_sha256": "b4eb7be9000651a3e89c6a77e8b346d05d1d706d620aa6f8193e574a39b3ced1"
+      },
+      {
+        "case": 10,
+        "reason": "reopen owner acknowledged attention",
+        "phase": "fault",
+        "returncode": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "xml_sha256": "3882114396baefba9f013f127410d591bfeb0b37ec261ba647d87af0bbf61fdf",
+        "log_sha256": "a01bd6780b34e6740b7f53158fd699fe57570429f9d147558c65871f082895d7"
+      },
+      {
+        "case": 11,
+        "reason": "disconnect actual scheduler delivery",
+        "phase": "control",
+        "returncode": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "xml_sha256": "cf5bb3cbf6e1e09ebf8851de2aa825dc6c736d2565f64d8d6ada2a60450f4ba5",
+        "log_sha256": "3b4875dc515d55439d8abed80997ab1489b094e334bc63b66b9e80213b49f41e"
+      },
+      {
+        "case": 11,
+        "reason": "disconnect actual scheduler delivery",
+        "phase": "fault",
+        "returncode": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "xml_sha256": "50fa82d3d91eb67d66e5ccff50d1c092f308c322b0e085fd9f2bd59cc57afa11",
+        "log_sha256": "a094cfda6ff83a1dcfa0483ae22dab2e473b245b7dbcae144178081f21c1c8fe"
+      }
+    ],
+    "before": {
+      "backend/van_gateway/reminders/service.py": "f937b6349fb9810f4f750910d9ba239d95605231259abc0e78a26154f9590834",
+      "backend/van_gateway/reminders/timeparse.py": "fc6d923e5b81ae0f675c7ca8769a8fcb3a3a3424c8d29e55622c4202171db1f5",
+      "backend/van_gateway/attention/engine.py": "f7ba893bf64100362faaf854caf6b6f2921202b281f3cad93c6fc6d788b1ecad",
+      "backend/van_gateway/app.py": "ed29e42135d517e46e20e35e4ed99abba0478869311802412b72d4327ede75c9"
+    },
+    "after": {
+      "backend/van_gateway/reminders/service.py": "f937b6349fb9810f4f750910d9ba239d95605231259abc0e78a26154f9590834",
+      "backend/van_gateway/reminders/timeparse.py": "fc6d923e5b81ae0f675c7ca8769a8fcb3a3a3424c8d29e55622c4202171db1f5",
+      "backend/van_gateway/attention/engine.py": "f7ba893bf64100362faaf854caf6b6f2921202b281f3cad93c6fc6d788b1ecad",
+      "backend/van_gateway/app.py": "ed29e42135d517e46e20e35e4ed99abba0478869311802412b72d4327ede75c9"
+    },
+    "source_restored": true
+  },
+  "initial_fault_attempt": {
+    "definitions": [
+      [
+        "changed request treated as original",
+        [
+          [
+            "backend/van_gateway/reminders/service.py",
+            "if original != fields:",
+            "if False:"
+          ]
+        ],
+        "backend/tests/test_reminder_state_integrity.py::test_same_key_with_changed_request_is_not_a_successful_replay"
+      ],
+      [
+        "resolve a cancelled reminder",
+        [
+          [
+            "backend/van_gateway/reminders/service.py",
+            "if row[\"status\"] == \"RESOLVED\":\n                return\n            if row[\"status\"] not in {\"OPEN\", \"FIRED\"}:",
+            "if row[\"status\"] == \"RESOLVED\":\n                return\n            if False:"
+          ]
+        ],
+        "backend/tests/test_reminder_state_integrity.py::test_cancelled_reminder_cannot_be_resolved_into_new_scheduled_work"
+      ],
+      [
+        "lose follow-up scope",
+        [
+          [
+            "backend/van_gateway/reminders/service.py",
+            "project_id=row[\"project_id\"],source=row[\"source\"])",
+            "project_id=None,source=\"owner_device\")"
+          ]
+        ],
+        "backend/tests/test_reminder_state_integrity.py::test_follow_up_retains_original_project_and_source_and_replays_without_new_work"
+      ],
+      [
+        "commit resolution before dependent effect",
+        [
+          [
+            "backend/van_gateway/reminders/service.py",
+            "await self._create_in_transaction(db,follow,now)",
+            "await db.commit()\n                await self._create_in_transaction(db,follow,now)"
+          ]
+        ],
+        "backend/tests/test_reminder_state_integrity.py::test_failed_follow_up_creation_rolls_back_the_original_resolution"
+      ],
+      [
+        "drop persisted fired delivery",
+        [
+          [
+            "backend/van_gateway/reminders/service.py",
+            "WHERE r.status='FIRED' AND m.key IS NULL",
+            "WHERE r.status='OPEN' AND m.key IS NULL"
+          ]
+        ],
+        "backend/tests/test_reminder_state_integrity.py::test_pending_delivery_recovers_original_effect_without_duplicate_owner_events[before_event]"
+      ],
+      [
+        "rebroadcast after lost acknowledgement",
+        [
+          [
+            "backend/van_gateway/reminders/service.py",
+            "if existing is None:\n                await events.publish",
+            "if True:\n                await events.publish"
+          ],
+          [
+            "backend/van_gateway/reminders/service.py",
+            "event_id='reminder-fired:'+row['id'],correlation_id=row['id']",
+            "correlation_id=row['id']"
+          ]
+        ],
+        "backend/tests/test_reminder_state_integrity.py::test_pending_delivery_recovers_original_effect_without_duplicate_owner_events[lost_event_ack]"
+      ],
+      [
+        "use wall arithmetic for elapsed duration",
+        [
+          [
+            "backend/van_gateway/reminders/timeparse.py",
+            "return int(now.timestamp()) + int(delta.total_seconds())",
+            "return int((now + delta).timestamp())"
+          ]
+        ],
+        "backend/tests/test_reminder_state_integrity.py::test_relative_time_means_elapsed_time_across_dst"
+      ],
+      [
+        "choose an ambiguous local fold",
+        [
+          [
+            "backend/van_gateway/reminders/timeparse.py",
+            "if len(instants) != 1:",
+            "if False:"
+          ]
+        ],
+        "backend/tests/test_reminder_state_integrity.py::test_nonexistent_or_ambiguous_local_wall_time_is_not_silently_chosen"
+      ],
+      [
+        "accept a 13pm clock phrase",
+        [
+          [
+            "backend/van_gateway/reminders/timeparse.py",
+            "or (ampm and not 1 <= hour <= 12)",
+            ""
+          ]
+        ],
+        "backend/tests/test_reminder_state_integrity.py::test_invalid_time_is_a_typed_refusal[at 13pm]"
+      ],
+      [
+        "allow overlapping attention insert",
+        [
+          [
+            "backend/van_gateway/attention/engine.py",
+            "await db.execute(\"BEGIN IMMEDIATE\")",
+            "await db.execute(\"SELECT 1\")"
+          ]
+        ],
+        "backend/tests/test_attention_concurrent_delivery.py::test_concurrent_reports_share_one_attention_identity_and_preserve_owner_ack"
+      ],
+      [
+        "reopen owner acknowledged attention",
+        [
+          [
+            "backend/van_gateway/attention/engine.py",
+            "previous if state is AttentionState.OPEN and previous is not AttentionState.OPEN",
+            "state if True"
+          ]
+        ],
+        "backend/tests/test_reminder_state_integrity.py::test_legacy_delivery_and_owner_acknowledgement_are_preserved"
+      ],
+      [
+        "disconnect actual scheduler delivery",
+        [
+          [
+            "backend/van_gateway/app.py",
+            "delivered = await reminders.deliver_pending(events, attention)",
+            "delivered = 0"
+          ]
+        ],
+        "backend/tests/test_reminder_delivery_gateway.py::test_gateway_sweep_recovers_lost_delivery_ack_without_refiring"
+      ]
+    ],
+    "records": [
+      {
+        "case": 0,
+        "reason": "changed request treated as original",
+        "phase": "control",
+        "returncode": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "xml_sha256": "1c450e4ee9a58c16b269c69de773ccc7b3d6a462efc21cf8740d8c017877681b",
+        "log_sha256": "3a6504404ab639ac8fe2940ac1654603c072a999c0ae65ca7ef9701ab97a0954"
+      },
+      {
+        "case": 0,
+        "reason": "changed request treated as original",
+        "phase": "fault",
+        "returncode": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "xml_sha256": "1cdaf251f1f7a290af3af810b9d15a37001518b75e51820664525e5fc30b3f74",
+        "log_sha256": "4b4b2e04d875ca67b99c42fd0df3b821a00ac8400636422aea542b434b19aee2"
+      },
+      {
+        "case": 1,
+        "reason": "resolve a cancelled reminder",
+        "phase": "control",
+        "returncode": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "xml_sha256": "5dfdbefc0936c797364418517c0968277b9caf3a452133f88d8312cc88a47738",
+        "log_sha256": "fc4efa05ec8ff7ed11c8f5fb2578bb82b5de5a8d34ed02c3e116981f5db95c2e"
+      },
+      {
+        "case": 1,
+        "reason": "resolve a cancelled reminder",
+        "phase": "fault",
+        "returncode": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "xml_sha256": "0618ef8bf01c91e5c96d65d794e37bfd19e6d847010b3e8438a7f579aad8018d",
+        "log_sha256": "760764baea936f1d47917624c4e8cd841023600e119cac89847d83ac86729284"
+      },
+      {
+        "case": 2,
+        "reason": "lose follow-up scope",
+        "phase": "control",
+        "returncode": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "xml_sha256": "9bfe9d36e05e4e418361eee3db3511a6057968ba226391b090559ecac2843971",
+        "log_sha256": "b6533422d1630740f5655134f45127452989eca69913155ff0cdf6331ecfe21d"
+      },
+      {
+        "case": 2,
+        "reason": "lose follow-up scope",
+        "phase": "fault",
+        "returncode": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "xml_sha256": "06670c7277782000514e8f19f4a11b58918755f244d9d6e14773db2eb35e6294",
+        "log_sha256": "79ec6822e65a3e0d26ffb0257699129460f1c1b43a3394e76e0a263321a554b0"
+      },
+      {
+        "case": 3,
+        "reason": "commit resolution before dependent effect",
+        "phase": "control",
+        "returncode": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "xml_sha256": "0f5bd8db0d8b7e59aa23b83d57f990febd85e3e7a15e98ae1316284b1c0aeeb4",
+        "log_sha256": "3a6504404ab639ac8fe2940ac1654603c072a999c0ae65ca7ef9701ab97a0954"
+      },
+      {
+        "case": 3,
+        "reason": "commit resolution before dependent effect",
+        "phase": "fault",
+        "returncode": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "xml_sha256": "63f0d9a4e8d35da3685dedead35536e739ce7e092126f0aaa54c3c7082310589",
+        "log_sha256": "85c413404858e13d21286ced9c9be238f5a6b6c55783cd2f03f8c6c24e24fe84"
+      },
+      {
+        "case": 4,
+        "reason": "drop persisted fired delivery",
+        "phase": "control",
+        "returncode": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "xml_sha256": "6ee390f1d2e09f0461661c2cffd2058c7bb0b9d327d4dd0e67aab292a593e2cf",
+        "log_sha256": "b6533422d1630740f5655134f45127452989eca69913155ff0cdf6331ecfe21d"
+      },
+      {
+        "case": 4,
+        "reason": "drop persisted fired delivery",
+        "phase": "fault",
+        "returncode": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "xml_sha256": "3c8374304b660ac84fe15a689eeec289189618e0eeacacfdf3cd7405fcb072d3",
+        "log_sha256": "739aa0689282934e8b7fd02944afd80d6b98e9cf8c7699a935a4965190184721"
+      },
+      {
+        "case": 5,
+        "reason": "rebroadcast after lost acknowledgement",
+        "phase": "control",
+        "returncode": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "xml_sha256": "5333b25dfc8557cc72f771e7f7c67daf562f4a721ba20c8dee1cd09af629c5d3",
+        "log_sha256": "f6b6e232e0345fa742cf57cbc60c8884709a6f029bd43161ca6e812c9175f2a8"
+      },
+      {
+        "case": 5,
+        "reason": "rebroadcast after lost acknowledgement",
+        "phase": "fault",
+        "returncode": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "xml_sha256": "987d522306027b7454c3e6c4c522cebd001ed7aa299f74e3742bf5c29336c833",
+        "log_sha256": "30bef7cc47eeecf115c5960fb88f2d6ecdb668aaecc9b638f3c83f4160ba267e"
+      },
+      {
+        "case": 6,
+        "reason": "use wall arithmetic for elapsed duration",
+        "phase": "control",
+        "returncode": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "xml_sha256": "d886b5d554e1643ae5387e7e3e57463bb70cde17787ffbaeddb1163f31c4c10f",
+        "log_sha256": "364fae48cbe8f4ef8e995f8fb3224d43792e784eb9919ceefea2fe0106918edf"
+      },
+      {
+        "case": 6,
+        "reason": "use wall arithmetic for elapsed duration",
+        "phase": "fault",
+        "returncode": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "xml_sha256": "3bf5487a1e3950ce2eec29d9ec4431a5fbf2a86fda3778cedde53a4a97f67a88",
+        "log_sha256": "e077c01fca3a91275e337bf129dd46d5453fdf717484f628c0cc0ec47739b97e"
+      },
+      {
+        "case": 7,
+        "reason": "choose an ambiguous local fold",
+        "phase": "control",
+        "returncode": 0,
+        "counts": {
+          "tests": 2,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "xml_sha256": "3389075440e4ab4c34307384a562c0f4ea8b698245ecd5cbdf797cce239442a0",
+        "log_sha256": "92a008925f96648e3b59dfa05639da80fb0fe814a2b8c5ac4f49c054b800fd07"
+      },
+      {
+        "case": 7,
+        "reason": "choose an ambiguous local fold",
+        "phase": "fault",
+        "returncode": 1,
+        "counts": {
+          "tests": 2,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "xml_sha256": "407dde2a9ef92c4e53113146e68cdb3a823e2145bc9e82bd28aa7b33cc03f786",
+        "log_sha256": "6fb4660e1b96cc8e4591bf29cfde479439d4e4a8b59dda113df3d54d35b87951"
+      },
+      {
+        "case": 8,
+        "reason": "accept a 13pm clock phrase",
+        "phase": "control",
+        "returncode": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "xml_sha256": "27daa4cb1a76f40f9f7e84db68feab83b860cd3e34cd92f40c5cce84592044e3",
+        "log_sha256": "3b4ad3097d7020cd8b172384869bd1db1102ffc4c9316bde31fef1b3bcacf9c6"
+      },
+      {
+        "case": 8,
+        "reason": "accept a 13pm clock phrase",
+        "phase": "fault",
+        "returncode": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "xml_sha256": "ab26a85e8edc26d9071615f46ee64abaacfd1c4f8f6ad1adf9585de027d74d38",
+        "log_sha256": "617be4687cab0fb077852f3fabdc7be596213977a1771b12cf69b0f7c20fdba0"
+      },
+      {
+        "case": 9,
+        "reason": "allow overlapping attention insert",
+        "phase": "control",
+        "returncode": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "xml_sha256": "25ad8e0fec590fb32c0381d5a39ed3c20b6659572a7dacda9171bb3cf300079e",
+        "log_sha256": "036bb9390fb408c39eb19a61d865bc4044aa29eeea8139e62a988a5a83930a4d"
+      },
+      {
+        "case": 9,
+        "reason": "allow overlapping attention insert",
+        "phase": "fault",
+        "returncode": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "xml_sha256": "d43e0b23edfdb2372cc97800c97ffddd9d0f43cf10ff807e449146c4bc9e3621",
+        "log_sha256": "791acbb2840ecff621592488f8e65512e312896e3865560d4000495c22ef5d13"
+      }
+    ],
+    "before": {
+      "backend/van_gateway/reminders/service.py": "02c2295bcdd1b0796ca4fd11af21f341c36b65c6e8813ce7f4da707f071f59d6",
+      "backend/van_gateway/reminders/timeparse.py": "fc6d923e5b81ae0f675c7ca8769a8fcb3a3a3424c8d29e55622c4202171db1f5",
+      "backend/van_gateway/attention/engine.py": "f7ba893bf64100362faaf854caf6b6f2921202b281f3cad93c6fc6d788b1ecad",
+      "backend/van_gateway/app.py": "5ecfa5482de507a1cfecc41123aff3173148fd7176690647122cb763b229735d"
+    },
+    "after": {
+      "backend/van_gateway/reminders/service.py": "02c2295bcdd1b0796ca4fd11af21f341c36b65c6e8813ce7f4da707f071f59d6",
+      "backend/van_gateway/reminders/timeparse.py": "fc6d923e5b81ae0f675c7ca8769a8fcb3a3a3424c8d29e55622c4202171db1f5",
+      "backend/van_gateway/attention/engine.py": "f7ba893bf64100362faaf854caf6b6f2921202b281f3cad93c6fc6d788b1ecad",
+      "backend/van_gateway/app.py": "5ecfa5482de507a1cfecc41123aff3173148fd7176690647122cb763b229735d"
+    },
+    "source_restored": true
+  },
+  "instrument_correction": "Ordinary concurrent-report test caught the original attention UNIQUE race, but nondeterministically allowed removed transaction to survive. Kept that result; replaced its fault oracle with an actual independent SQLite owner ACK in the read/write gap. It permits a safe lock or CAS solution and catches a stale report overwriting the ACK. Final12faults/controls caught on combined root source and exact hashes restored.",
+  "qualification": "Actual SQLite transactions/concurrent writers, paired gateway HTTP/scheduler/server event replay, genuine rollback trigger and retained owner ACK. Controlled source tests only; publication is server persistence, not handset delivery. No native provider, whole-unit, production, profit or S24 acceptance. DefaultUTC preserved; owner device timezone, recurring calendars/misfire choices and original standing authority remain separate obligations."
+}

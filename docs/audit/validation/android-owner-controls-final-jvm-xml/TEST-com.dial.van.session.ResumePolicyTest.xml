@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.dial.van.session.ResumePolicyTest" tests="7" skipped="0" failures="0" errors="0" timestamp="2026-10-07T22:57:32" hostname="052fefa249ff" time="0.002">
+  <properties/>
+  <testcase name="an unknown session is replaced rather than silently emptied()" classname="com.dial.van.session.ResumePolicyTest" time="0.001"/>
+  <testcase name="a refusal the device cannot fix is not retried as a resume()" classname="com.dial.van.session.ResumePolicyTest" time="0.0"/>
+  <testcase name="a higher server epoch means anything unacknowledged must go again()" classname="com.dial.van.session.ResumePolicyTest" time="0.001"/>
+  <testcase name="the same epoch is a plain resume()" classname="com.dial.van.session.ResumePolicyTest" time="0.0"/>
+  <testcase name="a gateway that has gone backwards is refused()" classname="com.dial.van.session.ResumePolicyTest" time="0.0"/>
+  <testcase name="only unacknowledged events are resent()" classname="com.dial.van.session.ResumePolicyTest" time="0.0"/>
+  <testcase name="the last acknowledged event is not sent again()" classname="com.dial.van.session.ResumePolicyTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

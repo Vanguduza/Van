@@ -537,11 +537,10 @@ class TestSessionRouter:
     async def test_an_unknown_kind_does_not_consume_an_idempotency_key(self, tmp_path):
         """Why the kind is checked before admission rather than after.
 
-        A second refusal exists further down, where the delegate lookup fails, so deleting
-        the early check refuses the same message and every test still passed. The
-        difference only shows when the unknown kind carries an idempotency key: refused
-        late, the key has already been recorded, and the owner's *real* command arriving
-        under it is then answered ALREADY_KNOWN and silently never runs.
+        Historically the delegate refusal happened after admission, so removing the
+        early kind check could burn the real command's key. Delegate resolution now
+        independently refuses before admission. Keep this behavioral oracle: an unknown
+        kind never consumes the replacement command's identity, whichever guard refuses.
         """
         service, router = await self._router(tmp_path)
         session, epoch = await service.open(device_id=DEVICE, path=_path(), now_ms=1_000)

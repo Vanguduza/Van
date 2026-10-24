@@ -1,0 +1,134 @@
+{
+  "schema_version": 1,
+  "source": "VAN Next master blueprint sections 0–1, owner-locked images and conversation",
+  "count": 18,
+  "truth_atoms": [
+    {
+      "id": "VAN-PT-01",
+      "text": "New coherent Tactile Spatial visual identity across the entire Android app, with matched light/dark parity, real depth and restrained contrast. No generic stock dashboard or flattened reskin.",
+      "provenance": "OWNER_CONVERSATION_EXPANDED_CANONICAL_CANDIDATE",
+      "state": "PENDING_OWNER_FREEZE",
+      "acceptance": "Owner review + trace to feature/surface/action/test + product acceptance"
+    },
+    {
+      "id": "VAN-PT-02",
+      "text": "The central metallic VAN orb is visually sculpted, animated, state-aware, accessible and power-bounded. Home has no event-colour key or legend.",
+      "provenance": "OWNER_CONVERSATION_EXPANDED_CANONICAL_CANDIDATE",
+      "state": "PENDING_OWNER_FREEZE",
+      "acceptance": "Owner review + trace to feature/surface/action/test + product acceptance"
+    },
+    {
+      "id": "VAN-PT-03",
+      "text": "Tapping the Home orb opens a **short** attention/quick-action sheet: urgent event, compact position performance, relevant task/progress snapshot and a few deep-link actions. No dense miniature dashboard.",
+      "provenance": "OWNER_CONVERSATION_EXPANDED_CANONICAL_CANDIDATE",
+      "state": "PENDING_OWNER_FREEZE",
+      "acceptance": "Owner review + trace to feature/surface/action/test + product acceptance"
+    },
+    {
+      "id": "VAN-PT-04",
+      "text": "Floating VAN remains a persistent autonomous mobile assistant control surface. Reuse verified gestures, lifecycle, voice/chat, dock/minimise/expand/restore, Android policy and owner control behaviour while rebuilding its look.",
+      "provenance": "OWNER_CONVERSATION_EXPANDED_CANONICAL_CANDIDATE",
+      "state": "PENDING_OWNER_FREEZE",
+      "acceptance": "Owner review + trace to feature/surface/action/test + product acceptance"
+    },
+    {
+      "id": "VAN-PT-05",
+      "text": "Trading Home retains portfolio/risk snapshot, Markets, Watchlist, Opportunities **plus Charts and Intelligence** direct controls, with Accounts & Funds accessible, not buried.",
+      "provenance": "OWNER_CONVERSATION_EXPANDED_CANONICAL_CANDIDATE",
+      "state": "PENDING_OWNER_FREEZE",
+      "acceptance": "Owner review + trace to feature/surface/action/test + product acceptance"
+    },
+    {
+      "id": "VAN-PT-06",
+      "text": "Full chart workstation supports professional instrument/timeframe search, indicators, drawing/editing, chart types, replay, multichart, watchlist, depth where supported, position/order overlays, advanced precision/zoom and comprehensive accessible interactions.",
+      "provenance": "OWNER_CONVERSATION_EXPANDED_CANONICAL_CANDIDATE",
+      "state": "PENDING_OWNER_FREEZE",
+      "acceptance": "Owner review + trace to feature/surface/action/test + product acceptance"
+    },
+    {
+      "id": "VAN-PT-07",
+      "text": "Full Trading scope: markets, positions, pending orders, history, strategies, risk, execution/TCA, opportunities, analyst, alerts, account/funds and broker/device status. Never confuse presentation with execution.",
+      "provenance": "OWNER_CONVERSATION_EXPANDED_CANONICAL_CANDIDATE",
+      "state": "PENDING_OWNER_FREEZE",
+      "acceptance": "Owner review + trace to feature/surface/action/test + product acceptance"
+    },
+    {
+      "id": "VAN-PT-08",
+      "text": "Intelligence includes **News**, full causal/market-impact analysis, calendar, affected instruments/positions/strategies, source citations, contradiction, uncertainty, correction/revision, scenario and invalidation views.",
+      "provenance": "OWNER_CONVERSATION_EXPANDED_CANONICAL_CANDIDATE",
+      "state": "PENDING_OWNER_FREEZE",
+      "acceptance": "Owner review + trace to feature/surface/action/test + product acceptance"
+    },
+    {
+      "id": "VAN-PT-09",
+      "text": "Chart observations, user drawings, analyst notes and verified news can assist backend intelligence via typed provenance-aware, bounded read-only intake; never bypass VATI admission, Risk Authority or broker authorization.",
+      "provenance": "OWNER_CONVERSATION_EXPANDED_CANONICAL_CANDIDATE",
+      "state": "PENDING_OWNER_FREEZE",
+      "acceptance": "Owner review + trace to feature/surface/action/test + product acceptance"
+    },
+    {
+      "id": "VAN-PT-10",
+      "text": "Account management **within the app** across discovery, creation or connection, verification, editing, metadata, credential rotation, restrictions, safe unlink, remote closure when supported, deposit, withdrawal, transfer, methods, history, KYC and receipts, with qualified provider dependencies and clear honest fallbacks.",
+      "provenance": "OWNER_CONVERSATION_EXPANDED_CANONICAL_CANDIDATE",
+      "state": "PENDING_OWNER_FREEZE",
+      "acceptance": "Owner review + trace to feature/surface/action/test + product acceptance"
+    },
+    {
+      "id": "VAN-PT-11",
+      "text": "Work/Projects/Tasks include live diagrammatic DAG/workflow/agent views; node/edge truth, stage ownership, handoff, blockers, evidence, timestamps and deterministic progress. List alternative and meaningful mobile controls always exist.",
+      "provenance": "OWNER_CONVERSATION_EXPANDED_CANONICAL_CANDIDATE",
+      "state": "PENDING_OWNER_FREEZE",
+      "acceptance": "Owner review + trace to feature/surface/action/test + product acceptance"
+    },
+    {
+      "id": "VAN-PT-12",
+      "text": "VAN can interact with Muse, Hermes, ARTEMIS, DIAL Work Tracker, JEV and connected systems with native-feeling controls; browser/VNC fallback is not the primary mobile experience.",
+      "provenance": "OWNER_CONVERSATION_EXPANDED_CANONICAL_CANDIDATE",
+      "state": "PENDING_OWNER_FREEZE",
+      "acceptance": "Owner review + trace to feature/surface/action/test + product acceptance"
+    },
+    {
+      "id": "VAN-PT-13",
+      "text": "Account, trading, owner commands, resource grants and system administration require correct owner/device/authority boundaries and independent effect receipts.",
+      "provenance": "OWNER_CONVERSATION_EXPANDED_CANONICAL_CANDIDATE",
+      "state": "PENDING_OWNER_FREEZE",
+      "acceptance": "Owner review + trace to feature/surface/action/test + product acceptance"
+    },
+    {
+      "id": "VAN-PT-14",
+      "text": "Original functional capability is not lost merely because a presentation route is replaced; every legacy item receives ADOPT/ADAPT/REBUILD/REJECT plus proof.",
+      "provenance": "OWNER_CONVERSATION_EXPANDED_CANONICAL_CANDIDATE",
+      "state": "PENDING_OWNER_FREEZE",
+      "acceptance": "Owner review + trace to feature/surface/action/test + product acceptance"
+    },
+    {
+      "id": "VAN-PT-15",
+      "text": "No false chart prices, fake success, unverified broker balances, simulated progress as live, or synthetic personal details in production.",
+      "provenance": "OWNER_CONVERSATION_EXPANDED_CANONICAL_CANDIDATE",
+      "state": "PENDING_OWNER_FREEZE",
+      "acceptance": "Owner review + trace to feature/surface/action/test + product acceptance"
+    },
+    {
+      "id": "VAN-PT-16",
+      "text": "Physical Samsung S24 Ultra validation, accessibility, reduced motion, Android-native system bars, battery/thermal budgets, split-screen, dynamic type, landscape, tablet and process-death restoration.",
+      "provenance": "OWNER_CONVERSATION_EXPANDED_CANONICAL_CANDIDATE",
+      "state": "PENDING_OWNER_FREEZE",
+      "acceptance": "Owner review + trace to feature/surface/action/test + product acceptance"
+    },
+    {
+      "id": "VAN-PT-17",
+      "text": "Multiple trading modes Normal, Risky, Aggressive must be **intelligently quality-aware**, not blanket maximum leverage/risk. Selection is orthogonal to broker mandate and owner authorization.",
+      "provenance": "OWNER_CONVERSATION_EXPANDED_CANONICAL_CANDIDATE",
+      "state": "PENDING_OWNER_FREEZE",
+      "acceptance": "Owner review + trace to feature/surface/action/test + product acceptance"
+    },
+    {
+      "id": "VAN-PT-18",
+      "text": "A deterministic engineering programme: requirements → Product Truth → DUs → dependency DAG → source/authority → tests/receipts → Zuul independent qualification → owner approval, without accidental thinning or premature merge.",
+      "provenance": "OWNER_CONVERSATION_EXPANDED_CANONICAL_CANDIDATE",
+      "state": "PENDING_OWNER_FREEZE",
+      "acceptance": "Owner review + trace to feature/surface/action/test + product acceptance"
+    }
+  ],
+  "freeze_status": "PENDING_OWNER_REVIEW"
+}

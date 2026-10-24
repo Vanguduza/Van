@@ -33,6 +33,7 @@ from enum import Enum
 from typing import Any, Optional, Sequence
 
 from vati.core.canonical import canonical_hash
+from vati.risk.serde import intent_binding_hash, RISK_APPROVAL_SCHEMA_VERSION
 from vati.core.events import EventKind, make_event
 from vati.execution.route_registry import (
     QuantisationRefused,
@@ -78,6 +79,7 @@ class Verdict(str, Enum):
 PRETRADE_REASONS: dict[str, str] = {
     "DECISION_NOT_APPROVED": "the risk decision did not approve this intent",
     "DECISION_INTENT_MISMATCH": "the decision belongs to a different intent",
+    "DECISION_INTENT_UNBOUND": "the approval lacks an exact trade binding and requires re-evaluation",
     "DECISION_SEAL_INVALID": "the decision hash does not recompute",
     "APPROVED_SIZE_EMPTY": "the approved size is zero or negative",
     "IDEMPOTENCY_REPLAY": "this idempotency key has already been sent",
@@ -99,6 +101,17 @@ class PreTradeConfigError(ValueError):
     pass
 
 
+def quote_age_at(*, age_ms, observed_at_ms, now_ms):
+    """Age original evidence; a future/unknown observation never becomes fresh."""
+    if any(type(v) is not int for v in (age_ms,observed_at_ms,now_ms)):
+        return -1
+    if age_ms < 0:
+        return age_ms
+    if observed_at_ms < 0 or now_ms < observed_at_ms:
+        return -1
+    return age_ms + now_ms - observed_at_ms
+
+
 @dataclass(frozen=True)
 class MarketReference:
     """The venue's own last word on price, and how old it is."""
@@ -110,6 +123,11 @@ class MarketReference:
     @property
     def fresh(self) -> bool:
         return 0 <= self.mark_age_ms <= self.max_mark_age_ms
+
+    def aged(self, *, observed_at_ms, now_ms):
+        return MarketReference(self.last_price,
+            quote_age_at(age_ms=self.mark_age_ms,observed_at_ms=observed_at_ms,now_ms=now_ms),
+            self.max_mark_age_ms)
 
 
 @dataclass(frozen=True)
@@ -211,6 +229,10 @@ class PreTradeControls:
         ran.append("DECISION_SEAL_INVALID")
         if not _seal_recomputes(decision):
             return fail("DECISION_SEAL_INVALID", "recomputed hash does not match")
+        if getattr(decision, "approval_schema_version", None) != RISK_APPROVAL_SCHEMA_VERSION or not getattr(decision, "intent_hash", None):
+            return fail("DECISION_INTENT_UNBOUND", "risk approval requires exact intent re-evaluation")
+        if decision.intent_hash != intent_binding_hash(intent):
+            return fail("DECISION_INTENT_MISMATCH", "approved trade fields changed after risk evaluation")
 
         approved = Decimal(str(getattr(decision, "approved_size", ZERO)))
         ran.append("APPROVED_SIZE_EMPTY")

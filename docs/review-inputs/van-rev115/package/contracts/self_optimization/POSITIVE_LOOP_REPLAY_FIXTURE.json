@@ -1,0 +1,131 @@
+{
+  "events": [
+    {
+      "cursor": 1,
+      "environment": "FIXTURE",
+      "explicit_cost": "0.10",
+      "fill_price": "101.0",
+      "filled_base": "1",
+      "horizon_price": "101.5",
+      "id": "eA1",
+      "method": "A",
+      "observation_revision": 0,
+      "parent": "pA1",
+      "status": "MATURE"
+    },
+    {
+      "cursor": 2,
+      "environment": "FIXTURE",
+      "explicit_cost": "0.10",
+      "fill_price": "101.2",
+      "filled_base": "1",
+      "horizon_price": "101.5",
+      "id": "eA2",
+      "method": "A",
+      "observation_revision": 0,
+      "parent": "pA2",
+      "status": "MATURE"
+    },
+    {
+      "cursor": 3,
+      "environment": "FIXTURE",
+      "explicit_cost": "0.10",
+      "fill_price": "100.2",
+      "filled_base": "1",
+      "horizon_price": "101.0",
+      "id": "eB1",
+      "method": "B",
+      "observation_revision": 0,
+      "parent": "pB1",
+      "status": "MATURE"
+    },
+    {
+      "cursor": 4,
+      "environment": "FIXTURE",
+      "explicit_cost": "0",
+      "fill_price": null,
+      "filled_base": "0",
+      "horizon_price": null,
+      "id": "eB2-pending",
+      "method": "B",
+      "observation_revision": 0,
+      "parent": "pB2",
+      "status": "PENDING_MATURITY"
+    },
+    {
+      "cursor": 5,
+      "environment": "FIXTURE",
+      "explicit_cost": "0",
+      "fill_price": null,
+      "filled_base": "0",
+      "horizon_price": "101.0",
+      "id": "eB2-mature",
+      "method": "B",
+      "observation_revision": 1,
+      "parent": "pB2",
+      "status": "MATURE"
+    },
+    {
+      "cursor": 6,
+      "delivery_duplicate_of": 5,
+      "environment": "FIXTURE",
+      "explicit_cost": "0",
+      "fill_price": null,
+      "filled_base": "0",
+      "horizon_price": "101.0",
+      "id": "eB2-mature",
+      "method": "B",
+      "observation_revision": 1,
+      "parent": "pB2",
+      "status": "MATURE"
+    }
+  ],
+  "evidence_grade": "SYNTHETIC_SPECIFICATION_MODEL_ONLY",
+  "expected": {
+    "after_cursor_2": "A",
+    "after_cursor_4": "A",
+    "after_cursor_5": "B",
+    "after_cursor_6": "B",
+    "cold_replay_selection": "B",
+    "distinct_mature_parent_count": 4,
+    "duplicate_delivery_effects": 0,
+    "method_A_cost": "1.20",
+    "method_B_cost": "0.65",
+    "unknown_horizon_is_not_zero": true
+  },
+  "not_real_market_or_learning_result": true,
+  "policy": {
+    "estimator": "arithmetic_mean_total_benchmark_loss",
+    "fallback": "A",
+    "id": "fixture-fixed-selector-v1",
+    "minimum_mature_distinct_parents_per_method": 2,
+    "qualification": "SYNTHETIC_FIXTURE_NOT_A_REAL_GRANT",
+    "stable_tie_break": [
+      "A",
+      "B"
+    ]
+  },
+  "purpose": "Positive closed-loop contract example: integrate the actual VAN owners to satisfy equivalent causal behavior during implementation. This reference reducer/selector is a verification aid, not VATI production code.",
+  "qualified_algorithms": [
+    "A",
+    "B"
+  ],
+  "required_application_expansion": [
+    "Use actual registered outcome/TCA/reducer/selector callers and actual qualified policy/grant resolver; a test-only second pipeline is not accepted.",
+    "Assert byte-stable logical snapshot and decisions after checkpoint/restart, including source correction and policy epoch cases.",
+    "Confirm the environment admission boundary prevents FIXTURE/BACKTEST observations becoming live broker evidence.",
+    "Inject sink/caller removal, immature outcomes, duplicates, reward-policy change, revoked binding and stale quote; assert correct refusal/fallback with protection untouched.",
+    "Use independent expected-outcome calculations, not the production function as its own oracle.",
+    "The fixture min sample of2 and numbers are demonstration data, not a calibrated production policy or evidence of profit.",
+    "Late lower revisions never replace newer truth; equal revision conflicting payloads are quarantined; process-kill/checkpoint tests must use actual durable owners, not this reference model."
+  ],
+  "schema": "van.self-optimization.positive-loop-conformance-fixture/1.0",
+  "subject": {
+    "account": "fixture-account",
+    "cohort": "fixture-same-compatible-context",
+    "decision_reference": "100",
+    "product": "fixture-venue:spot:UNIT/USD",
+    "quantity_base": "1",
+    "side": "BUY"
+  }
+}

@@ -1,0 +1,176 @@
+{
+  "common_preregistered_study": "review/EVALUATION_PROTOCOL.md",
+  "new_mandatory_deployables": 0,
+  "rows": [
+    {
+      "ablation": "Safety invariants are not removed for economic optimization. Compare optional estimator/Jev/model features off versus on under identical authorized conditions; quantify actual burden.",
+      "concrete_consumer": "Lose cancel reply; authenticated lookup proves cancelled with partial fills; record fills once, retain protection and release only proven unused reservation.",
+      "failure_semantics": "Restart at cancel-send and query boundaries, then accept late fill/correction without resubmission.",
+      "id": "CL-001",
+      "measured_burden": "NOT_RUN",
+      "new_processes": 0,
+      "new_queues": 0,
+      "new_truth_stores": 0,
+      "owner_units": [
+        "BE-010",
+        "BE-012",
+        "BQ-002"
+      ],
+      "placement": "Existing VATI account/router/ledger or research owner; gateway remains projection/action adapter.",
+      "proposal": "DCP-001",
+      "reason": "Unknown child can recover only to working/fill/partial/rejected; cancellation timeout/terminal readback lacks explicit edges.",
+      "removal_rule": "Remove optional layer only with no required feature loss and no degradation of acceptance; retain mandatory model integration dormant if its economic challenger fails.",
+      "simpler_comparator": "Qualified fixed execution and current owner processes; optional diagnostics off; same account/objectives/data/costs."
+    },
+    {
+      "ablation": "Safety invariants are not removed for economic optimization. Compare optional estimator/Jev/model features off versus on under identical authorized conditions; quantify actual burden.",
+      "concrete_consumer": "Dispatch resolves current qualified policy, mandate, reservation, epoch and objective; positive decimal venue increments and complete mature costs validate.",
+      "failure_semantics": "Expiry/revocation at any preactivation or drain stage blocks new risk, reconciles in-flight effects and cannot reactivate revoked fallback.",
+      "id": "CL-002",
+      "measured_burden": "NOT_RUN",
+      "new_processes": 0,
+      "new_queues": 0,
+      "new_truth_stores": 0,
+      "owner_units": [
+        "BE-002",
+        "BE-010",
+        "BQ-001"
+      ],
+      "placement": "Existing VATI account/router/ledger or research owner; gateway remains projection/action adapter.",
+      "proposal": "DCP-002",
+      "reason": "Unsigned lock catches byte drift; critical dispatch proof subset omits POLICY_QUALIFIED; shape schema permits zero tick and MATURE null costs.",
+      "removal_rule": "Remove optional layer only with no required feature loss and no degradation of acceptance; retain mandatory model integration dormant if its economic challenger fails.",
+      "simpler_comparator": "Qualified fixed execution and current owner processes; optional diagnostics off; same account/objectives/data/costs."
+    },
+    {
+      "ablation": "Safety invariants are not removed for economic optimization. Compare optional estimator/Jev/model features off versus on under identical authorized conditions; quantify actual burden.",
+      "concrete_consumer": "Real registered consumer applies newer observation revision once, persists cursor/contribution/snapshot atomically, and later eligible selector consumes its fingerprint.",
+      "failure_semantics": "Kill actual process before/after commit, replay bounded journal and verify identical logical snapshot/selection with AS_DECIDED unchanged.",
+      "id": "CL-003",
+      "measured_burden": "NOT_RUN",
+      "new_processes": 0,
+      "new_queues": 0,
+      "new_truth_stores": 0,
+      "owner_units": [
+        "BE-003",
+        "BE-012",
+        "BE-036",
+        "BQ-007"
+      ],
+      "placement": "Existing VATI account/router/ledger or research owner; gateway remains projection/action adapter.",
+      "proposal": "DCP-003",
+      "reason": "Documentary fixture overwrites per-parent contribution by arrival order; production evidence map lacks demonstrated durable observe consumer.",
+      "removal_rule": "Remove optional layer only with no required feature loss and no degradation of acceptance; retain mandatory model integration dormant if its economic challenger fails.",
+      "simpler_comparator": "Qualified fixed execution and current owner processes; optional diagnostics off; same account/objectives/data/costs."
+    },
+    {
+      "ablation": "Safety invariants are not removed for economic optimization. Compare optional estimator/Jev/model features off versus on under identical authorized conditions; quantify actual burden.",
+      "concrete_consumer": "One gross base unit filled with 0.01 base fee consumes the entire one-unit execution budget; cash/base/fee-asset postings balance under explicit valuation.",
+      "failure_semantics": "Late fee and fill bust append compensating facts, preserve old decision snapshots and reconcile reservations without automatic re-entry.",
+      "id": "CL-004",
+      "measured_burden": "NOT_RUN",
+      "new_processes": 0,
+      "new_queues": 0,
+      "new_truth_stores": 0,
+      "owner_units": [
+        "BE-006",
+        "BE-009",
+        "BE-010",
+        "BE-012",
+        "BE-035",
+        "BQ-009"
+      ],
+      "placement": "Existing VATI account/router/ledger or research owner; gateway remains projection/action adapter.",
+      "proposal": "DCP-004",
+      "reason": "Ambiguous net-filled reservation term; source TCA decomposition does not reconcile to direct fill-reference economic cost.",
+      "removal_rule": "Remove optional layer only with no required feature loss and no degradation of acceptance; retain mandatory model integration dormant if its economic challenger fails.",
+      "simpler_comparator": "Qualified fixed execution and current owner processes; optional diagnostics off; same account/objectives/data/costs."
+    },
+    {
+      "ablation": "Safety invariants are not removed for economic optimization. Compare optional estimator/Jev/model features off versus on under identical authorized conditions; quantify actual burden.",
+      "concrete_consumer": "Quantized slices jointly satisfy parent quantity, fresh depth participation, minimum lot/notional, maximum slices, deadline and command budget.",
+      "failure_semantics": "Replanning uses newly observed depth/time under same grant; restart retains lifetime counters and does not repeat unconfirmed slices.",
+      "id": "CL-005",
+      "measured_burden": "NOT_RUN",
+      "new_processes": 0,
+      "new_queues": 0,
+      "new_truth_stores": 0,
+      "owner_units": [
+        "BE-009",
+        "BE-010",
+        "BE-035",
+        "BQ-002"
+      ],
+      "placement": "Existing VATI account/router/ledger or research owner; gateway remains projection/action adapter.",
+      "proposal": "DCP-005",
+      "reason": "Style selector caps count at eight, so per-slice participation can exceed its stated cap.",
+      "removal_rule": "Remove optional layer only with no required feature loss and no degradation of acceptance; retain mandatory model integration dormant if its economic challenger fails.",
+      "simpler_comparator": "Qualified fixed execution and current owner processes; optional diagnostics off; same account/objectives/data/costs."
+    },
+    {
+      "ablation": "Safety invariants are not removed for economic optimization. Compare optional estimator/Jev/model features off versus on under identical authorized conditions; quantify actual burden.",
+      "concrete_consumer": "Reconcile Opus lockout/execution/ledger fixes with canon Jev/temperament/evidence, PR-only Muse/owner controls and their callers; full parity holds.",
+      "failure_semantics": "Shared-store migrations restore learned state, lockout clocks and account owners; asynchronous Jev outage cannot delay protection.",
+      "id": "CL-006",
+      "measured_burden": "NOT_RUN",
+      "new_processes": 0,
+      "new_queues": 0,
+      "new_truth_stores": 0,
+      "owner_units": [
+        "BE-001",
+        "BE-003",
+        "BE-010",
+        "BE-036",
+        "BQ-007"
+      ],
+      "placement": "Existing VATI account/router/ledger or research owner; gateway remains projection/action adapter.",
+      "proposal": "DCP-006",
+      "reason": "Multiple incompatible source contributions; main/newest-input branch does not subsume Opus and canon improvements.",
+      "removal_rule": "Remove optional layer only with no required feature loss and no degradation of acceptance; retain mandatory model integration dormant if its economic challenger fails.",
+      "simpler_comparator": "Qualified fixed execution and current owner processes; optional diagnostics off; same account/objectives/data/costs."
+    },
+    {
+      "ablation": "Safety invariants are not removed for economic optimization. Compare optional estimator/Jev/model features off versus on under identical authorized conditions; quantify actual burden.",
+      "concrete_consumer": "Qualified event oracle, immutable licensed inputs, full trial census and availability-time features support matched objective and whole-account arms with predeclared costs and uncertainty.",
+      "failure_semantics": "Failed/pruned runs and corrections remain in census; evaluator changes invalidate dependent claims and rerun only affected studies.",
+      "id": "CL-007",
+      "measured_burden": "NOT_RUN",
+      "new_processes": 0,
+      "new_queues": 0,
+      "new_truth_stores": 0,
+      "owner_units": [
+        "BE-035",
+        "BE-036",
+        "BQ-009"
+      ],
+      "placement": "Existing VATI account/router/ledger or research owner; gateway remains projection/action adapter.",
+      "proposal": "DCP-007",
+      "reason": "Prior fixed-window/fixed-conversion/OHLC research and calendar-year scoring are not a qualified optimization oracle.",
+      "removal_rule": "Remove optional layer only with no required feature loss and no degradation of acceptance; retain mandatory model integration dormant if its economic challenger fails.",
+      "simpler_comparator": "Qualified fixed execution and current owner processes; optional diagnostics off; same account/objectives/data/costs."
+    },
+    {
+      "ablation": "Safety invariants are not removed for economic optimization. Compare optional estimator/Jev/model features off versus on under identical authorized conditions; quantify actual burden.",
+      "concrete_consumer": "Selected eligible CEX spot adapter demonstrates genuine matching, recovery and settlement/protection for its admitted scope; contextual app contracts expose exact state and receipts.",
+      "failure_semantics": "Private-stream gaps, API clock/rate-limit stress and account-wide cancellation recover without cancelling manual/protective orders outside scope; unavailable provider remains an explicit gate.",
+      "id": "CL-008",
+      "measured_burden": "NOT_RUN",
+      "new_processes": 0,
+      "new_queues": 0,
+      "new_truth_stores": 0,
+      "owner_units": [
+        "BE-004",
+        "BE-005",
+        "BE-010",
+        "BE-032",
+        "BQ-001",
+        "BQ-002"
+      ],
+      "placement": "Existing VATI account/router/ledger or research owner; gateway remains projection/action adapter.",
+      "proposal": "DCP-008",
+      "reason": "Spot engineering required but target eligibility, matching/protection and runtime proof unresolved.",
+      "removal_rule": "Remove optional layer only with no required feature loss and no degradation of acceptance; retain mandatory model integration dormant if its economic challenger fails.",
+      "simpler_comparator": "Qualified fixed execution and current owner processes; optional diagnostics off; same account/objectives/data/costs."
+    }
+  ]
+}

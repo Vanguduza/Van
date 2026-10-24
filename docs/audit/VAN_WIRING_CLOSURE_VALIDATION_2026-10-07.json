@@ -1,0 +1,200 @@
+{
+  "schema_version": 1,
+  "status": "CURRENT_SUPPORTED_SOURCE_LOCAL_VALIDATION_PASS",
+  "repository": "Vanguduza/Van",
+  "base_commit": "12feb9033dfc1dd68d7b4d41ac477f0d9dbbc4af",
+  "source_manifest": "docs/audit/validation/van-production-source-freeze-2026-10-07.json",
+  "source_manifest_sha256": "29c055fe86b0d3057b4975dc3a5a8fda1db74d8973de6f670096eedc16e86384",
+  "production_source_files": 1315,
+  "checks": [
+    {
+      "scope": "backend",
+      "selection": "backend/tests",
+      "status": "PASS",
+      "counts": {
+        "tests": 2806,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "passed": 2806
+      },
+      "skips": [],
+      "junit": "docs/audit/validation/backend-integrated-final-v2-2026-10-07.xml",
+      "junit_sha256": "3ac8c6b30554a60a18534bd7cd6c23389d223784ab6f74089fdc245510236205",
+      "log": "docs/audit/validation/backend-integrated-final-v2-2026-10-07.log",
+      "log_sha256": "6903c66a9477faa36ab11548f40837601d8fd2364032a772c4e25d37b0e78c48"
+    },
+    {
+      "scope": "contracts",
+      "selection": "tests/contracts",
+      "status": "PASS",
+      "counts": {
+        "tests": 880,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 4,
+        "passed": 876
+      },
+      "skips": [
+        {
+          "case": "tests.contracts.test_android_instrumentation_abi::test_actual_agp_direct_package_release_refuses_missing_core_deployment_profile",
+          "reason": "opt-in actual AGP release guard check"
+        },
+        {
+          "case": "tests.contracts.test_android_production_target::test_actual_agp_valid_target_still_refuses_missing_production_signing",
+          "reason": "opt-in actual AGP signing guard check"
+        },
+        {
+          "case": "tests.contracts.test_character_forge_reference_pack::test_crops_regenerate_byte_identically_from_the_board",
+          "reason": "could not import 'PIL.Image': No module named 'PIL'"
+        },
+        {
+          "case": "tests.contracts.test_character_forge_reference_pack::test_interim_art_is_the_bundled_asset_and_regenerates_from_candidate_b",
+          "reason": "could not import 'PIL.Image': No module named 'PIL'"
+        }
+      ],
+      "junit": "docs/audit/validation/contracts-integrated-final-v2-2026-10-07.xml",
+      "junit_sha256": "6faa3c4cbcd72098b5105de801d785290c143a76b6ddf879a23a82f1f1cd45a8",
+      "log": "docs/audit/validation/contracts-integrated-final-v2-2026-10-07.log",
+      "log_sha256": "9da9373f6c58a77d2ba0329abf16a81e5dda1f88f1d97f66ffe3cff9529f1aa2"
+    },
+    {
+      "scope": "trading",
+      "selection": "trading/tests",
+      "status": "PASS",
+      "counts": {
+        "tests": 1281,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 5,
+        "passed": 1276
+      },
+      "skips": [
+        {
+          "case": "trading.tests.test_infra_live::test_postgres_ledger_matches_sqlite_chain_and_detects_tampering",
+          "reason": "local PostgreSQL not reachable"
+        },
+        {
+          "case": "trading.tests.test_oci_trading_topology_bootstrap::test_firewall_verify_accepts_a_single_vcn_admin_source",
+          "reason": "the helper refuses to run unless it is root"
+        },
+        {
+          "case": "trading.tests.test_oci_trading_topology_bootstrap::test_firewall_verify_rejects_overlay_and_empty_admin_lists",
+          "reason": "the helper refuses to run unless it is root"
+        },
+        {
+          "case": "trading.tests.test_oci_trading_topology_bootstrap::test_firewall_verify_rejects_a_blank_admin_entry",
+          "reason": "the helper refuses to run unless it is root"
+        },
+        {
+          "case": "trading.tests.test_vtil_borrow::test_dial_resolver_selects_trading_knowledge_from_van_registry",
+          "reason": "dial-new checkout not available (set DIAL_REPO)"
+        }
+      ],
+      "junit": "docs/audit/validation/trading-final-wiring-2026-10-07.xml",
+      "junit_sha256": "b920feed0fa3d76be50af8183fb341c1895b9e3fec79e09562cca0d27654a713",
+      "log": "docs/audit/validation/trading-final-wiring-2026-10-07.log",
+      "log_sha256": "de0fe69d09748b5efdf2ded769c8faffbafcb787023ba65b853b776178d04f5b"
+    },
+    {
+      "scope": "native_browser_services",
+      "selection": "services",
+      "status": "PASS",
+      "counts": {
+        "tests": 154,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "passed": 154
+      },
+      "skips": [],
+      "junit": "docs/audit/validation/browser-services-final-wiring-v2-2026-10-07.xml",
+      "junit_sha256": "d9b8f35909c92d69c84dcab6694741913fc012703ed5fb2345032b284802176e",
+      "log": "docs/audit/validation/browser-services-final-wiring-v2-2026-10-07.log",
+      "log_sha256": "959fa31e4553e7295551edccbe780ecc0ad455005af79fd01c216a7e0eac356d"
+    },
+    {
+      "scope": "hermes_and_scenarios",
+      "selection": "tests/hermes hermes/policy/tests tests/scenarios",
+      "status": "PASS",
+      "counts": {
+        "tests": 89,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 1,
+        "passed": 88
+      },
+      "skips": [
+        {
+          "case": "tests.hermes.test_profile_layout::test_install_profile_preserves_runtime_state_and_secrets",
+          "reason": "install_van_profile.sh requires rsync; runtime-state preservation is NOT VERIFIED here"
+        }
+      ],
+      "junit": "docs/audit/validation/hermes-scenarios-final-wiring-2026-10-07.xml",
+      "junit_sha256": "34912816c812d5da84fbcec339a6d1bf6825aa1eedf451796cd689b96272580c",
+      "log": "docs/audit/validation/hermes-scenarios-final-wiring-2026-10-07.log",
+      "log_sha256": "c81c80d3a563963610b97b146eef06b3de3fa2962f2a8c4e07761f93006f8b44"
+    }
+  ],
+  "android": {
+    "receipt": "docs/audit/validation/android-owner-controls-final-receipt-2026-10-07.json",
+    "receipt_sha256": "443c57f152df18656c228c0cca5cd38737ab1aa6588d56ae49a7ebcc37175d28",
+    "jvm": {
+      "tests": 1171,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "passed": 1171
+    },
+    "app_unit": {
+      "tests": 203,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "passed": 203
+    },
+    "debug_apk": {
+      "path": "android/app/build/outputs/apk/debug/app-debug.apk",
+      "sha256": "886000533ba883987d72775281268a8ef9bca09cd418034af249c1d3db83ef9b",
+      "owner_release": false
+    },
+    "lint": {
+      "Warning": 80,
+      "Hint": 13
+    },
+    "arm64_native_libraries": 7,
+    "native_16k_page_alignment": "PASS",
+    "zipalign_16k": "PASS"
+  },
+  "disjoint_runner_executions": {
+    "passed": 6574,
+    "skipped": 10,
+    "failed": 0,
+    "errors": 0
+  },
+  "scope": "Local source validation. Focused checks overlap these suites and are not added. Native browser checks use actual TLS/CDP WebSocket/aiortc with controlled fixtures; nginx/systemd parsing uses local fixture selectors. No phone, production-host, live-provider or owner-release qualification.",
+  "native_parser_receipt": "docs/audit/validation/browser-deployment-native-parser-2026-10-07.json",
+  "registry": {
+    "features": 42,
+    "functions": 77,
+    "screens": 70,
+    "endpoints": 307,
+    "schemas": 165,
+    "prepared_acceptance_cases": 726
+  },
+  "deployment_choice": {
+    "gateway": "van-trading-core",
+    "hermes": "dial-control profile van",
+    "later_device_actuator": "NATIVE_ARTEMIS_VIA_DIAL_COMMANDER"
+  },
+  "physical_tests_executed": 0,
+  "owner_release_built": false,
+  "production_deployed": false,
+  "live_provider_canaries_run": false,
+  "remaining_contracts": "Explicit unsupported contracts and deployment/assets/physical gates remain recorded per feature; passing local tests does not implement or qualify those functions.",
+  "source_control": {
+    "committed": false,
+    "pushed": false,
+    "dds_modified": false
+  }
+}

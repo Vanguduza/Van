@@ -1,0 +1,356 @@
+{
+  "application_results_claimed": false,
+  "command_path_binding": "Validate operation_id against route, target_ref against the path entity, and actor/account against authenticated ingress; bind the canonical request and expected_revision to the idempotency key. Outcome unknown remains the original accepted command, polled via EL-OP-008; it is never a success status.",
+  "consumer_paths": [
+    {
+      "adaptation": "BE-036",
+      "consumer": "BE-013",
+      "diagnosis": "BE-022",
+      "end_to_end_tests": [
+        "EL-AT-004-POS",
+        "EL-AT-004-NEG",
+        "EL-AT-004-REC",
+        "EL-AT-012-POS",
+        "EL-AT-012-NEG",
+        "EL-AT-012-REC"
+      ],
+      "evaluator": "BE-035",
+      "lineage": "VAN-ML-PKT-027",
+      "producer": "BE-012",
+      "target": "STRATEGY"
+    },
+    {
+      "adaptation": "BE-036",
+      "consumer": "BE-010",
+      "diagnosis": "BE-022",
+      "end_to_end_tests": [
+        "EL-AT-003-POS",
+        "EL-AT-003-NEG",
+        "EL-AT-003-REC",
+        "EL-AT-012-POS",
+        "EL-AT-012-NEG",
+        "EL-AT-012-REC"
+      ],
+      "evaluator": "BE-035",
+      "lineage": "BE-003",
+      "producer": "BE-012",
+      "target": "EXECUTION"
+    }
+  ],
+  "context_bindings": "design/EXPERIENCE_LEARNING_CONTEXT_BINDINGS.json",
+  "http_binding_rule": "Proposed exact paths reuse existing gateway/domain owners; native source admission must detect conflicts and map existing operations, not create duplicate authority. Versioned binding updates require registry/render regeneration before acceptance. These routes are not asserted deployed.",
+  "http_error_status": {
+    "AUTHORITY_EXPIRED": 403,
+    "EVIDENCE_INCOMPLETE": 422,
+    "FORBIDDEN_SCOPE": 403,
+    "IDEMPOTENCY_CONFLICT": 409,
+    "NOT_FOUND": 404,
+    "OUTCOME_UNKNOWN": 202,
+    "QUALIFICATION_INVALID": 422,
+    "RATE_LIMITED": 429,
+    "SOURCE_UNAVAILABLE": 503,
+    "STALE_REVISION": 409,
+    "UNAUTHENTICATED": 401
+  },
+  "invariants": {
+    "all_trials_retained": true,
+    "automatic_state_update_within_qualified_bounds": true,
+    "causal_claim_requires_identification": true,
+    "dependence_and_selection_adjustment_required": true,
+    "live_randomized_exploration_enabled": false,
+    "llm_confidence_is_win_probability": false,
+    "null_and_power_controls_required": true,
+    "outcome_rewrites_original_decision": false,
+    "policy_evolution_requires_independent_qualification_and_authority": true,
+    "protected_confirmation_required": true,
+    "single_outcome_proves_edge": false,
+    "supported_state_requires_native_evidence_resolution": true,
+    "unknown_cost_equals_zero": false
+  },
+  "list_and_status_contract": "All lists are account-scoped, cursor-paginated and snapshot-versioned; expose pending, unsupported, stale, suspended and service-error separately. Cohort study output links LearningHypothesis and EvidenceAssessment and the full trial ledger; original and corrected revisions remain distinct.",
+  "no_new_deployables": true,
+  "operations": [
+    {
+      "acceptance_refs": [
+        "EL-AT-013-POS",
+        "EL-AT-013-NEG",
+        "EL-AT-013-REC"
+      ],
+      "authority": "Existing authenticated owner/account scope; effect additionally requires exact current native grant, revision and independent qualification where applicable.",
+      "binding_status": "REQUIRED_SOURCE_ROUTE_AND_ANDROID_CALLER_QUALIFICATION_BEFORE_BG",
+      "errors": [
+        "UNAUTHENTICATED",
+        "FORBIDDEN_SCOPE",
+        "NOT_FOUND",
+        "STALE_REVISION",
+        "EVIDENCE_INCOMPLETE",
+        "SOURCE_UNAVAILABLE",
+        "RATE_LIMITED"
+      ],
+      "gateway_unit": "BE-032",
+      "id": "EL-OP-001",
+      "implementation_status": "SPECIFIED_NOT_IMPLEMENTED",
+      "meaning": "Read the original experience and revision chain; query revision/as_of and retain source availability.",
+      "method": "GET",
+      "owner_unit": "BE-012",
+      "proposed_path": "/v1/trading/learning/opportunities/{opportunity_id}",
+      "request_record": null,
+      "response_record": "TradeExperience",
+      "transport_contract": "Account-scoped 200 typed record; list returns items with stable record type, next_cursor and snapshot_revision; explicit pending/unknown fields."
+    },
+    {
+      "acceptance_refs": [
+        "EL-AT-013-POS",
+        "EL-AT-013-NEG",
+        "EL-AT-013-REC"
+      ],
+      "authority": "Existing authenticated owner/account scope; effect additionally requires exact current native grant, revision and independent qualification where applicable.",
+      "binding_status": "REQUIRED_SOURCE_ROUTE_AND_ANDROID_CALLER_QUALIFICATION_BEFORE_BG",
+      "errors": [
+        "UNAUTHENTICATED",
+        "FORBIDDEN_SCOPE",
+        "NOT_FOUND",
+        "STALE_REVISION",
+        "EVIDENCE_INCOMPLETE",
+        "SOURCE_UNAVAILABLE",
+        "RATE_LIMITED"
+      ],
+      "gateway_unit": "BE-032",
+      "id": "EL-OP-002",
+      "implementation_status": "SPECIFIED_NOT_IMPLEMENTED",
+      "meaning": "Read financial versus causal claim types, competing explanations and exact evidence.",
+      "method": "GET",
+      "owner_unit": "BE-022",
+      "proposed_path": "/v1/trading/learning/diagnoses/{diagnosis_id}",
+      "request_record": null,
+      "response_record": "TradeDiagnosis",
+      "transport_contract": "Account-scoped 200 typed record; list returns items with stable record type, next_cursor and snapshot_revision; explicit pending/unknown fields."
+    },
+    {
+      "acceptance_refs": [
+        "EL-AT-013-POS",
+        "EL-AT-013-NEG",
+        "EL-AT-013-REC"
+      ],
+      "authority": "Existing authenticated owner/account scope; effect additionally requires exact current native grant, revision and independent qualification where applicable.",
+      "binding_status": "REQUIRED_SOURCE_ROUTE_AND_ANDROID_CALLER_QUALIFICATION_BEFORE_BG",
+      "errors": [
+        "UNAUTHENTICATED",
+        "FORBIDDEN_SCOPE",
+        "NOT_FOUND",
+        "STALE_REVISION",
+        "EVIDENCE_INCOMPLETE",
+        "SOURCE_UNAVAILABLE",
+        "RATE_LIMITED"
+      ],
+      "gateway_unit": "BE-032",
+      "id": "EL-OP-003",
+      "implementation_status": "SPECIFIED_NOT_IMPLEMENTED",
+      "meaning": "Paginated cohort hypotheses, complete trial census and assessments; include rejected and inconclusive studies.",
+      "method": "GET",
+      "owner_unit": "BE-035",
+      "proposed_path": "/v1/trading/learning/cohorts/{cohort_id}/studies",
+      "request_record": null,
+      "response_record": "EvidenceAssessment",
+      "transport_contract": "Account-scoped 200 typed record; list returns items with stable record type, next_cursor and snapshot_revision; explicit pending/unknown fields."
+    },
+    {
+      "acceptance_refs": [
+        "EL-AT-013-POS",
+        "EL-AT-013-NEG",
+        "EL-AT-013-REC"
+      ],
+      "authority": "Existing authenticated owner/account scope; effect additionally requires exact current native grant, revision and independent qualification where applicable.",
+      "binding_status": "REQUIRED_SOURCE_ROUTE_AND_ANDROID_CALLER_QUALIFICATION_BEFORE_BG",
+      "errors": [
+        "UNAUTHENTICATED",
+        "FORBIDDEN_SCOPE",
+        "NOT_FOUND",
+        "STALE_REVISION",
+        "EVIDENCE_INCOMPLETE",
+        "SOURCE_UNAVAILABLE",
+        "RATE_LIMITED"
+      ],
+      "gateway_unit": "BE-032",
+      "id": "EL-OP-004",
+      "implementation_status": "SPECIFIED_NOT_IMPLEMENTED",
+      "meaning": "Read exact diff, current binding, consumer receipt, monitoring and fallback.",
+      "method": "GET",
+      "owner_unit": "BE-036",
+      "proposed_path": "/v1/trading/learning/changes/{change_id}",
+      "request_record": null,
+      "response_record": "LearningChange",
+      "transport_contract": "Account-scoped 200 typed record; list returns items with stable record type, next_cursor and snapshot_revision; explicit pending/unknown fields."
+    },
+    {
+      "acceptance_refs": [
+        "EL-AT-013-POS",
+        "EL-AT-013-NEG",
+        "EL-AT-013-REC"
+      ],
+      "authority": "Existing authenticated owner/account scope; effect additionally requires exact current native grant, revision and independent qualification where applicable.",
+      "binding_status": "REQUIRED_SOURCE_ROUTE_AND_ANDROID_CALLER_QUALIFICATION_BEFORE_BG",
+      "errors": [
+        "UNAUTHENTICATED",
+        "FORBIDDEN_SCOPE",
+        "NOT_FOUND",
+        "STALE_REVISION",
+        "EVIDENCE_INCOMPLETE",
+        "SOURCE_UNAVAILABLE",
+        "RATE_LIMITED",
+        "IDEMPOTENCY_CONFLICT",
+        "AUTHORITY_EXPIRED",
+        "QUALIFICATION_INVALID",
+        "OUTCOME_UNKNOWN"
+      ],
+      "gateway_unit": "BE-032",
+      "id": "EL-OP-005",
+      "implementation_status": "SPECIFIED_NOT_IMPLEMENTED",
+      "meaning": "Request bounded research through existing scheduler/standing grant; does not activate a policy.",
+      "method": "POST",
+      "owner_unit": "BE-036",
+      "proposed_path": "/v1/trading/learning/hypotheses/{hypothesis_id}/research-requests",
+      "request_record": "LearningCommand",
+      "response_record": "LearningCommandReceipt",
+      "transport_contract": "202 accepted command receipt is not success; repeat same idempotency key and canonical payload returns original command; mismatched payload conflicts; final success requires authoritative readback."
+    },
+    {
+      "acceptance_refs": [
+        "EL-AT-013-POS",
+        "EL-AT-013-NEG",
+        "EL-AT-013-REC"
+      ],
+      "authority": "Existing authenticated owner/account scope; effect additionally requires exact current native grant, revision and independent qualification where applicable.",
+      "binding_status": "REQUIRED_SOURCE_ROUTE_AND_ANDROID_CALLER_QUALIFICATION_BEFORE_BG",
+      "errors": [
+        "UNAUTHENTICATED",
+        "FORBIDDEN_SCOPE",
+        "NOT_FOUND",
+        "STALE_REVISION",
+        "EVIDENCE_INCOMPLETE",
+        "SOURCE_UNAVAILABLE",
+        "RATE_LIMITED",
+        "IDEMPOTENCY_CONFLICT",
+        "AUTHORITY_EXPIRED",
+        "QUALIFICATION_INVALID",
+        "OUTCOME_UNKNOWN"
+      ],
+      "gateway_unit": "BE-032",
+      "id": "EL-OP-006",
+      "implementation_status": "SPECIFIED_NOT_IMPLEMENTED",
+      "meaning": "Delegate exact qualified candidate to existing promotion owner; never a direct model-written alias.",
+      "method": "POST",
+      "owner_unit": "BE-002",
+      "proposed_path": "/v1/trading/learning/changes/{change_id}/activation-requests",
+      "request_record": "LearningCommand",
+      "response_record": "LearningCommandReceipt",
+      "transport_contract": "202 accepted command receipt is not success; repeat same idempotency key and canonical payload returns original command; mismatched payload conflicts; final success requires authoritative readback."
+    },
+    {
+      "acceptance_refs": [
+        "EL-AT-013-POS",
+        "EL-AT-013-NEG",
+        "EL-AT-013-REC"
+      ],
+      "authority": "Existing authenticated owner/account scope; effect additionally requires exact current native grant, revision and independent qualification where applicable.",
+      "binding_status": "REQUIRED_SOURCE_ROUTE_AND_ANDROID_CALLER_QUALIFICATION_BEFORE_BG",
+      "errors": [
+        "UNAUTHENTICATED",
+        "FORBIDDEN_SCOPE",
+        "NOT_FOUND",
+        "STALE_REVISION",
+        "EVIDENCE_INCOMPLETE",
+        "SOURCE_UNAVAILABLE",
+        "RATE_LIMITED",
+        "IDEMPOTENCY_CONFLICT",
+        "AUTHORITY_EXPIRED",
+        "QUALIFICATION_INVALID",
+        "OUTCOME_UNKNOWN"
+      ],
+      "gateway_unit": "BE-032",
+      "id": "EL-OP-007",
+      "implementation_status": "SPECIFIED_NOT_IMPLEMENTED",
+      "meaning": "Delegate suspension to native binding owner; reconcile open parents and retain urgent protection.",
+      "method": "POST",
+      "owner_unit": "BE-002",
+      "proposed_path": "/v1/trading/learning/changes/{change_id}/suspension-requests",
+      "request_record": "LearningCommand",
+      "response_record": "LearningCommandReceipt",
+      "transport_contract": "202 accepted command receipt is not success; repeat same idempotency key and canonical payload returns original command; mismatched payload conflicts; final success requires authoritative readback."
+    },
+    {
+      "acceptance_refs": [
+        "EL-AT-013-POS",
+        "EL-AT-013-NEG",
+        "EL-AT-013-REC"
+      ],
+      "authority": "Existing authenticated owner/account scope; effect additionally requires exact current native grant, revision and independent qualification where applicable.",
+      "binding_status": "REQUIRED_SOURCE_ROUTE_AND_ANDROID_CALLER_QUALIFICATION_BEFORE_BG",
+      "errors": [
+        "UNAUTHENTICATED",
+        "FORBIDDEN_SCOPE",
+        "NOT_FOUND",
+        "STALE_REVISION",
+        "EVIDENCE_INCOMPLETE",
+        "SOURCE_UNAVAILABLE",
+        "RATE_LIMITED"
+      ],
+      "gateway_unit": "BE-032",
+      "id": "EL-OP-008",
+      "implementation_status": "SPECIFIED_NOT_IMPLEMENTED",
+      "meaning": "Reconcile the original command after timeout or lost reply; do not issue a replacement effect.",
+      "method": "GET",
+      "owner_unit": "BE-032",
+      "proposed_path": "/v1/trading/learning/commands/{command_id}",
+      "request_record": null,
+      "response_record": "LearningCommandReceipt",
+      "transport_contract": "Account-scoped 200 typed record; list returns items with stable record type, next_cursor and snapshot_revision; explicit pending/unknown fields."
+    }
+  ],
+  "owner_requirement": "VAN-OWNER-EL-001",
+  "record_ownership": {
+    "EvidenceAssessment": [
+      "BE-035",
+      "BQ-009"
+    ],
+    "LearningChange": [
+      "BE-002",
+      "BE-013",
+      "BE-036"
+    ],
+    "LearningCommand": [
+      "BE-032"
+    ],
+    "LearningCommandReceipt": [
+      "BE-003",
+      "BE-032"
+    ],
+    "LearningHypothesis": [
+      "BE-022",
+      "BE-036"
+    ],
+    "TradeDiagnosis": [
+      "BE-021",
+      "BE-022"
+    ],
+    "TradeExperience": [
+      "BE-003",
+      "BE-012",
+      "VAN-ML-PKT-027"
+    ]
+  },
+  "records_schema": "contracts/self_optimization/EXPERIENCE_LEARNING_RECORDS.schema.json",
+  "requirements": [
+    "VAN-EL-001",
+    "VAN-EL-002",
+    "VAN-EL-003",
+    "VAN-EL-004",
+    "VAN-EL-005",
+    "VAN-EL-006",
+    "VAN-EL-007"
+  ],
+  "revision": "1.16",
+  "runtime_resolution": "Validate schema, then resolve every referenced artifact and fact against the authenticated existing owner. Enforce account/environment, exact hash/version, cutoff, signature/issuer, freshness, revocation and support; a nonempty string or client-set SUPPORTED/ACTIVE is never evidence.",
+  "schema": "van.experience-learning.contract/1.0",
+  "status": "SPECIFIED_NOT_IMPLEMENTED"
+}

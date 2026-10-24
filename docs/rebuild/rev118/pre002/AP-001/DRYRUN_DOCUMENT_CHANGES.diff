@@ -1,0 +1,45 @@
+--- a/VAN_NEXT_UNIFIED_REBUILD_BLUEPRINT_REV1_18_20261021.md
++++ b/VAN_NEXT_UNIFIED_REBUILD_BLUEPRINT_REV1_18_20261021.md
+@@ -1003,6 +1003,8 @@
+ 
+ The current pack's checks are document-processing and synthetic contract tests only. They do not run VAN production code, execute a trading backtest, call a broker, change a mandate or publish an application. Source observations remain pinned and scoped. The new required architecture is ready for independent Astra review; it is not self-certified for implementation or financial use.
+ 
++**Rev1.18.1 amendment AP-001 (proposed, not admitted).** Adds 14 acceptance identities for the five gate units that had none (BQ-003, BQ-004, QA-002, QA-003, REL-002) and binds 39 existing identities to them. The active totals are 324 requirements and 1,624 planned application tests; the Rev1.17 paragraph above records that revision's totals and is preserved unchanged.
++
+ 
+ # Part B — Complete inherited VAN product specification
+ 
+--- a/VATI_SELF_OPTIMIZING_EXECUTION_AND_CRYPTO_BLUEPRINT_REV5_20261018.md
++++ b/VATI_SELF_OPTIMIZING_EXECUTION_AND_CRYPTO_BLUEPRINT_REV5_20261018.md
+@@ -807,3 +807,5 @@
+ The machine-readable contracts specify 12 strict record variants, five linked lifecycle machines, their typed proof predicates and independent semantic invariants. Passing a JSON Schema, a graph mutation test or a hash check does not verify money, source truth, an authentic grant, selector correctness, simulation fidelity, backtest profitability, F15, BG or a live production loop. A receipt containing those claims must be independently resolved against actual source/runtime/venue evidence.
+ 
+ The current pack's checks are document-processing and synthetic contract tests only. They do not run VAN production code, execute a trading backtest, call a broker, change a mandate or publish an application. Source observations remain pinned and scoped. The new required architecture is ready for independent Astra review; it is not self-certified for implementation or financial use.
++
++**Rev1.18.1 amendment AP-001 (proposed, not admitted).** Adds 14 acceptance identities for the five gate units that had none (BQ-003, BQ-004, QA-002, QA-003, REL-002) and binds 39 existing identities to them. The active totals are 324 requirements and 1,624 planned application tests; the Rev1.17 paragraph above records that revision's totals and is preserved unchanged.
+--- a/CANONICAL_AUTHORITY.json
++++ b/CANONICAL_AUTHORITY.json
+@@ -1,6 +1,6 @@
+ {
+   "acceptance_refinements": "contracts/whole_product/ACCEPTANCE_REFINEMENTS.json",
+-  "active_application_test_count": 1610,
++  "active_application_test_count": 1624,
+   "active_document_verifier": "verification/verify_whole_product.py",
+   "active_requirement_count": 324,
+   "actual_application_tests_executed_this_revision": 0,
+--- a/consolidation/GENERATED_SCOPE_COUNTS.json
++++ b/consolidation/GENERATED_SCOPE_COUNTS.json
+@@ -9,11 +9,11 @@
+     "nodes": 131,
+     "requirements": 324,
+     "surfaces": 234,
+-    "tests": 1610,
++    "tests": 1624,
+     "truth": 22
+   },
+   "domain_scenario_refinements": 72,
+-  "effective_acceptance_identities": 1610,
++  "effective_acceptance_identities": 1624,
+   "first_UX_packet": "VAN-PKT-099",
+   "historical_counts": "Earlier blueprints and receipts retain their historical scope; CANONICAL_AUTHORITY selects the active revision.",
+   "legacy_action_oracle_refinements": 349,

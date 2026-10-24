@@ -40,7 +40,11 @@ data class VoiceRecognitionCapabilityDecision(
  * actual device, and a build that supports API 31 still has to ask.
  */
 object VoiceRecognitionPolicy {
-    fun decide(apiLevel: Int, onDeviceAvailable: Boolean): VoiceRecognitionCapabilityDecision = when {
+    fun decide(
+        apiLevel: Int,
+        onDeviceAvailable: Boolean,
+        sherpaReady: Boolean = false,
+    ): VoiceRecognitionCapabilityDecision = when {
         apiLevel >= 34 && onDeviceAvailable -> VoiceRecognitionCapabilityDecision(
             backend = VoiceRecognitionBackend.ANDROID_ON_DEVICE_CALLER_AUDIO,
             callerAudioSupported = true,
@@ -61,6 +65,13 @@ object VoiceRecognitionPolicy {
             wordEvidenceSupported = false,
             onDeviceRecognizerRequired = true,
             requiresArbiterYield = true,
+        )
+        sherpaReady -> VoiceRecognitionCapabilityDecision(
+            backend = VoiceRecognitionBackend.SHERPA_PRIMARY,
+            callerAudioSupported = true,
+            wordEvidenceSupported = false,
+            onDeviceRecognizerRequired = false,
+            requiresArbiterYield = false,
         )
         // The designed tier: below API 31 there is no on-device recognizer API at all, so
         // Sherpa primary ASR was always the plan here. Unreachable in the current shipping

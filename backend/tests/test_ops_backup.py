@@ -249,3 +249,48 @@ async def test_the_drill_job_cleans_up_after_itself(monkeypatch, tmp_path):
         assert not (backups / "drill").exists()
     finally:
         get_settings.cache_clear()
+
+
+@pytest.mark.asyncio
+async def test_document_bytes_round_trip_with_database(tmp_path):
+    """OMV-001: a document row without its digested bytes is not a restorable artifact."""
+    store = await _populated(tmp_path)
+    documents = tmp_path / "documents"
+    documents.mkdir()
+    source = documents / "doc_1.source.pdf"
+    output = documents / "doc_1.filled-deadbeef.pdf"
+    source.write_bytes(b"%PDF-1.4\nsource\n")
+    output.write_bytes(b"%PDF-1.4\noutput\n")
+
+    backup_dir = tmp_path / "document-backup"
+    manifest = create_backup(
+        database_path=store.path, destination=backup_dir, document_dir=documents
+    )
+    document_entries = [e for e in manifest.entries if e.part == "DOCUMENTS"]
+    assert {e.relative_path for e in document_entries} == {
+        "documents/doc_1.source.pdf", "documents/doc_1.filled-deadbeef.pdf"
+    }
+    assert verify(backup_dir)["ok"] is True
+
+    restored_db = tmp_path / "restored" / "van.sqlite3"
+    restored_documents = tmp_path / "restored" / "documents"
+    report = restore(
+        backup_dir, database_path=restored_db, document_dir=restored_documents
+    )
+    assert report["documents_restored"] == 2
+    assert (restored_documents / source.name).read_bytes() == source.read_bytes()
+    assert (restored_documents / output.name).read_bytes() == output.read_bytes()
+
+
+@pytest.mark.asyncio
+async def test_backup_drill_includes_document_payloads(tmp_path):
+    store = await _populated(tmp_path)
+    documents = tmp_path / "documents"
+    documents.mkdir()
+    (documents / "doc.pdf").write_bytes(b"%PDF-1.4\nproof\n")
+    report = drill(
+        database_path=store.path, workspace=tmp_path / "document-drill",
+        document_dir=documents,
+    )
+    assert report["ok"] is True
+    assert report["documents_compared"] == 1

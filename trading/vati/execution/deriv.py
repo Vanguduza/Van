@@ -9,6 +9,7 @@ from decimal import Decimal
 from typing import Any, Callable, Optional
 
 from vati.execution.base import AccountState, ExecutionReceipt, Health, OrderCommand, VenuePosition, VenueUnavailable
+from vati.execution.deriv_identity import DerivIdentity, DerivIdentityError
 from vati.risk.contracts import Direction, LossModel
 
 ZERO = Decimal("0")
@@ -45,6 +46,8 @@ class DerivAdapter:
     transport: Optional[Callable[[dict], dict]] = None
     allow_synthetics: bool = False
     sent: list[dict] = field(default_factory=list)
+    identity: Optional[DerivIdentity] = None
+    entry_enabled: bool = True
 
     def _call(self, msg: dict) -> dict:
         if self.transport is None:
@@ -55,10 +58,29 @@ class DerivAdapter:
     def sync_account(self) -> AccountState:
         r = self._call({"authorize": "<token-from-vault-never-in-prompt>"})
         a = r.get("authorize", {})
-        return AccountState(self.account_alias, Decimal(str(a.get("balance", "0"))), Decimal(str(a.get("balance", "0"))), a.get("currency", "USD"), bool(a.get("loginid")))
+        if self.identity is not None:
+            try:
+                self.identity.validate(a)
+            except DerivIdentityError:
+                return AccountState(self.account_alias, ZERO, ZERO, self.identity.currency, False)
+        try:
+            balance=Decimal(str(a['balance']));currency=a['currency']
+            if not balance.is_finite() or not isinstance(currency,str) or not currency.strip():raise ValueError()
+        except (KeyError,TypeError,ValueError,ArithmeticError):
+            raise VenueUnavailable('Deriv native funds or currency observation unavailable') from None
+        return AccountState(self.account_alias,balance,balance,currency,bool(a.get('loginid')))
+
+    def orders(self) -> list[dict]:
+        # This immediate digital-contract route has no resting entry order.
+        # A proposal is only a quote; accepted financial contracts are exposed
+        # by the native portfolio, and in-flight buys remain in the journal.
+        self.positions()
+        return []
 
     def positions(self) -> list[VenuePosition]:
         r = self._call({"portfolio": 1})
+        if r.get("error") or not isinstance(r.get("portfolio"), dict) or not isinstance(r["portfolio"].get("contracts"), list):
+            raise VenueUnavailable("Deriv native portfolio is unavailable; exposure must be reconciled")
         out = []
         for c in r.get("portfolio", {}).get("contracts", []):
             out.append(VenuePosition(str(c["contract_id"]), c["symbol"], Direction.LONG, Decimal(str(c.get("buy_price", "0"))), Decimal(str(c.get("buy_price", "0"))), None, str(c.get("passthrough", {}).get("trade_intent_id", "")), LossModel.FULL_STAKE))
@@ -75,10 +97,12 @@ class DerivAdapter:
         loss_model, _ = map_deriv_contract(family)
         if loss_model is not cmd.loss_model:
             raise ValueError(f"contract family {family} implies {loss_model.value}, command carries {cmd.loss_model.value}")
-        return {"proposal": 1, "amount": str(cmd.quantity), "basis": "stake", "contract_type": "CALL" if cmd.direction is Direction.LONG else "PUT", "currency": "USD",
+        return {"proposal": 1, "amount": str(cmd.quantity), "basis": "stake", "contract_type": "CALL" if cmd.direction is Direction.LONG else "PUT", "currency": self.identity.currency if self.identity else "USD",
                 "duration": duration, "duration_unit": duration_unit, "symbol": cmd.symbol, "passthrough": {"trade_intent_id": cmd.trade_intent_id, "decision_hash": cmd.decision_hash}}
 
     def submit(self, cmd: OrderCommand, *, now_ms: int, family: str = "MULTIPLIERS", duration: int = 60) -> ExecutionReceipt:
+        if self.identity is not None and (not self.entry_enabled or cmd.account_alias != self.account_alias or cmd.venue != self.venue):
+            return ExecutionReceipt(cmd.trade_intent_id, cmd.decision_hash, self.venue, "REJECTED", ZERO, None, cmd.entry_price, cmd.entry_price, cmd.entry_price, False, now_ms, now_ms, reject_reason="Deriv command or configured mode does not match the bound account").sealed()
         if is_synthetic(cmd.symbol) and not self.allow_synthetics:
             return ExecutionReceipt(cmd.trade_intent_id, cmd.decision_hash, self.venue, "REJECTED", ZERO, None, cmd.entry_price, cmd.entry_price, cmd.entry_price, False, now_ms, now_ms, reject_reason="synthetic index: OBSERVE only (Rev 3 A.8)").sealed()
         prop = self._call(self.build_proposal(cmd, family=family, duration=duration))

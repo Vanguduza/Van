@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.dial.van.trading.TradingRuntimeReadModelTest" tests="5" skipped="0" failures="0" errors="0" timestamp="2026-10-07T22:11:48" hostname="052fefa249ff" time="0.004">
+  <properties/>
+  <testcase name="parse failures are source unavailable and independent loads still run()" classname="com.dial.van.trading.TradingRuntimeReadModelTest" time="0.002"/>
+  <testcase name="live requires available verified nonstale ledger with real current event time()" classname="com.dial.van.trading.TradingRuntimeReadModelTest" time="0.0"/>
+  <testcase name="halt state comes from owner trigger and never from another active switch()" classname="com.dial.van.trading.TradingRuntimeReadModelTest" time="0.0"/>
+  <testcase name="missing runtime fields remain unknown and do not become successful defaults()" classname="com.dial.van.trading.TradingRuntimeReadModelTest" time="0.0"/>
+  <testcase name="trading cancellation is not swallowed as an unavailable ledger()" classname="com.dial.van.trading.TradingRuntimeReadModelTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

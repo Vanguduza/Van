@@ -1,0 +1,320 @@
+{
+ "schema": "van.rebuild.ap001.candidate-verification/1",
+ "state": "CANDIDATE_VERIFIED_BY_AUTHOR_NOT_ADMITTED",
+ "admitted_package": {
+  "path": "docs/review-inputs/van-rev115/package",
+  "manifest_sha256": "0b8a94f546dcfe23acfe9d24a17f4cf9cfdf09d28b4df23440ac80b5a20cea34",
+  "file_tree_sha256": "5399fddd2093c0f80e38b369b9cbedf0bd11718021735f51a52bf3c486689fba"
+ },
+ "candidate_digest": {
+  "file_tree_sha256": "8eb76af51c41260c0e86ab4201a75339126367126ab3ada806ee0d2d89e10e49",
+  "definition": "sha256 over sorted lines 'path\\0sha256(file)\\n' for every file except __pycache__",
+  "manifest_sha256": "d20a858398e1a5746be4e7e901829a428be4c4824bab4b589e0b95d565eb795e",
+  "amendment_record_sha256": "1ec3663d34dad527fddc106ed55119291aaa4688d03e26ba339c89eaab22d571",
+  "patch_sha256": "69ef383bc6d402625c927167f064247ee055e57225a01bdb2fd272d32186a8db",
+  "generator_sha256": "48172f5b1c7b2be4ace715055d4756f58ace9d4152f881c1eeee6b05c4c3ebfe"
+ },
+ "changed_files": [
+  {
+   "path": "CANONICAL_AUTHORITY.json",
+   "admitted_sha256": "af0680b794cb9f5905b7851d24ff467f009ff359fa6cbfea026b1ccbe2f05610",
+   "candidate_sha256": "eb0c146e823435989ad6d3d26c6225563f2b7b03ef6020b73d826253759f192f"
+  },
+  {
+   "path": "MANIFEST.json",
+   "admitted_sha256": "0b8a94f546dcfe23acfe9d24a17f4cf9cfdf09d28b4df23440ac80b5a20cea34",
+   "candidate_sha256": "d20a858398e1a5746be4e7e901829a428be4c4824bab4b589e0b95d565eb795e"
+  },
+  {
+   "path": "VAN_NEXT_UNIFIED_REBUILD_BLUEPRINT_REV1_18_20261021.md",
+   "admitted_sha256": "8d8e5e7fa4bb06b0a111c9435223d27b0d4d4a597d6cee69849436a25b802f38",
+   "candidate_sha256": "254aa1b9a5934d237a571124b6b2c8e1862f1746a5cdc0952c84213df21f850d"
+  },
+  {
+   "path": "VATI_SELF_OPTIMIZING_EXECUTION_AND_CRYPTO_BLUEPRINT_REV5_20261018.md",
+   "admitted_sha256": "0d99a68ead6909821a18a0887a328a6eadc4ab53e544df6ec816d4df45747557",
+   "candidate_sha256": "a4baf845db40302328222c40db8b8ef5e3a168b2d233262adaab78bfcfdb7690"
+  },
+  {
+   "path": "amendments/AP-001.json",
+   "admitted_sha256": null,
+   "candidate_sha256": "1ec3663d34dad527fddc106ed55119291aaa4688d03e26ba339c89eaab22d571"
+  },
+  {
+   "path": "consolidation/GENERATED_SCOPE_COUNTS.json",
+   "admitted_sha256": "ee0c2b0cbd1f1cd4c99f32280e0735c5a59ab69752b195cf64a685ae83c2b364",
+   "candidate_sha256": "6dc1a96796c4afbb7edbaa210787b1b04f7c5c543b891b0c2ea1bf4a4193d8f4"
+  },
+  {
+   "path": "contracts/whole_product/ACCEPTANCE_REFINEMENTS.json",
+   "admitted_sha256": "ac43a2a0b907990435da7ecbb33061d547e88edd903614f25a4669a8019a7032",
+   "candidate_sha256": "3041d4957ab283f7f3cfb5883032e4cee68230c3364a2cab6fb0d0a824b4ba57"
+  },
+  {
+   "path": "plan/DEVELOPMENT_PLAN.json",
+   "admitted_sha256": "3e708a5ad3b92fd45767c22093d411d766b4fe86fb50f3d28741b4cbeb4c0f04",
+   "candidate_sha256": "5baa9ea26743a30dfb320d183ca917f61e0c537ff253326fd57caf43f0bc942c"
+  },
+  {
+   "path": "plan/PLAN_INPUT_PROVENANCE.json",
+   "admitted_sha256": "51014908aa2c04c2dd7932024abfe4c12ee9f8adc0018a4409e222ecb2a76a8b",
+   "candidate_sha256": "017f94ce7e6518c5a2242848ed2952f2f65ca807ed71f57854b6514eeee3b6b4"
+  },
+  {
+   "path": "plan/PROPOSED_SCOPE_LOCK.json",
+   "admitted_sha256": "86017be91a39dbc409e564e9ee8098b96d85c493ccd5d9373f2ecb6f847e2209",
+   "candidate_sha256": "338ddc187b918eb4ee2e59c369e83bd565d9d0e51144953a26a243ac17d1c046"
+  },
+  {
+   "path": "plan/VAN_NEXT_DETERMINISTIC_PLAN_REV1_18.md",
+   "admitted_sha256": "c99e17b5f332426310160fd95832600afa3a924960eb676154c8bfc368e09b14",
+   "candidate_sha256": "af72ebc97f12eee8100db57536d4c29c0133ffc6cc9aa60cdbddc7d77d928c47"
+  },
+  {
+   "path": "plan/compile_rev118.py",
+   "admitted_sha256": "9a3b2f7cb16a3e2dfe3809a97856d7e9d084bf31606bd10b4b50087be48fe8ce",
+   "candidate_sha256": "06b84f9037d02b17bba8284f68c06ea349f8e13e45da44a217e5c3474c5980d2"
+  },
+  {
+   "path": "verification/EFFECTIVE_TEST_CONTRACTS_REV118.json",
+   "admitted_sha256": "d8691ed3dfdc721154e758c454fe7f7c8502bae23d2d0b0a8e3991c25106d251",
+   "candidate_sha256": "d9ad94a70c6d3c736c3f966fe99ea0949862a0685bb5dceb7888ded05f266385"
+  },
+  {
+   "path": "verification/TEST_CONTRACTS.json",
+   "admitted_sha256": "8516439e5f58193efcd1df9f8c09f5f189126be978e29961261dea96808aaf62",
+   "candidate_sha256": "227e1bbb61e776972954b38b828b8cf9ae481ddd61852420f5dd0d6c8d7e67e1"
+  },
+  {
+   "path": "verification/verify_experience_learning.py",
+   "admitted_sha256": "8a057939b660974a76b2fcc6f4906d756a3c91f9657920412c5bf67470ed98ba",
+   "candidate_sha256": "3d6f82111a3bde74e8171b0f2398fe1dcc4d34d9ad561d95954032d2e5874c57"
+  },
+  {
+   "path": "verification/verify_model_hardening.py",
+   "admitted_sha256": "112f2a72c6216a4982039350f1a143487f70a3ccdeeef43dc28779f600eb53f7",
+   "candidate_sha256": "295cf1d7609b8235e73d713a9f769cfd382e9db692cf93ea4bb293125cd18e4e"
+  },
+  {
+   "path": "verification/verify_review_contracts.py",
+   "admitted_sha256": "8b99966ee0fc8ba4d06adcc217290ea38c87159ceed89fe80ea341cb5d2cd732",
+   "candidate_sha256": "3c71ed88df6238cfbace298519e0d3fef777a723ef867a98448b1e5011f8f7de"
+  },
+  {
+   "path": "verification/verify_whole_product.py",
+   "admitted_sha256": "98935fb3da2495858f24619b2ab09286b0f9d484a7116dd95eb1effa38f80aa4",
+   "candidate_sha256": "0f65e064beb71af5cde53940e631c62405ed9de7edce11f6664917c2adfda51e"
+  }
+ ],
+ "checks": {
+  "files.exact_changed_set": {
+   "passed": true,
+   "detail": {
+    "unexpected": [],
+    "missing": []
+   }
+  },
+  "files.none_removed": {
+   "passed": true,
+   "detail": []
+  },
+  "additive.unchanged:traceability/REQUIREMENTS_AND_DU_MAPPING.json": {
+   "passed": true,
+   "detail": null
+  },
+  "additive.unchanged:traceability/LEGACY_349_ACTIONS.json": {
+   "passed": true,
+   "detail": null
+  },
+  "additive.unchanged:traceability/PRODUCT_TRUTH.json": {
+   "passed": true,
+   "detail": null
+  },
+  "additive.unchanged:design/ALL_SURFACE_CONTRACTS.json": {
+   "passed": true,
+   "detail": null
+  },
+  "additive.unchanged:contracts/whole_product/FEATURE_CONTEXT_BINDINGS.json": {
+   "passed": true,
+   "detail": null
+  },
+  "additive.unchanged:contracts/whole_product/ACTION_CONTRACTS.json": {
+   "passed": true,
+   "detail": null
+  },
+  "additive.unchanged:contracts/whole_product/DOMAIN_SCENARIOS.json": {
+   "passed": true,
+   "detail": null
+  },
+  "additive.tests_preserved:verification/TEST_CONTRACTS.json": {
+   "passed": true,
+   "detail": []
+  },
+  "additive.only_declared_owner_additions:verification/TEST_CONTRACTS.json": {
+   "passed": true,
+   "detail": {
+    "identities_gaining_owners": 0
+   }
+  },
+  "additive.only_patch_tests_added:verification/TEST_CONTRACTS.json": {
+   "passed": true,
+   "detail": [
+    "T-BQ-003-HEADLESS-NEG",
+    "T-BQ-003-HEADLESS-POS",
+    "T-BQ-003-HEADLESS-REC",
+    "T-BQ-004-HEADLESS-NEG",
+    "T-BQ-004-HEADLESS-POS",
+    "T-BQ-004-HEADLESS-REC",
+    "T-QA-002-NEG",
+    "T-QA-002-POS",
+    "T-QA-002-REC",
+    "T-QA-003-NEG",
+    "T-QA-003-POS",
+    "T-QA-003-REC",
+    "T-REL-002-NEG",
+    "T-REL-002-REC"
+   ]
+  },
+  "additive.tests_preserved:verification/EFFECTIVE_TEST_CONTRACTS_REV118.json": {
+   "passed": true,
+   "detail": []
+  },
+  "additive.only_declared_owner_additions:verification/EFFECTIVE_TEST_CONTRACTS_REV118.json": {
+   "passed": true,
+   "detail": {
+    "identities_gaining_owners": 39
+   }
+  },
+  "additive.only_patch_tests_added:verification/EFFECTIVE_TEST_CONTRACTS_REV118.json": {
+   "passed": true,
+   "detail": [
+    "T-BQ-003-HEADLESS-NEG",
+    "T-BQ-003-HEADLESS-POS",
+    "T-BQ-003-HEADLESS-REC",
+    "T-BQ-004-HEADLESS-NEG",
+    "T-BQ-004-HEADLESS-POS",
+    "T-BQ-004-HEADLESS-REC",
+    "T-QA-002-NEG",
+    "T-QA-002-POS",
+    "T-QA-002-REC",
+    "T-QA-003-NEG",
+    "T-QA-003-POS",
+    "T-QA-003-REC",
+    "T-REL-002-NEG",
+    "T-REL-002-REC"
+   ]
+  },
+  "additive.no_unit_lost_acceptance": {
+   "passed": true,
+   "detail": {}
+  },
+  "additive.units_otherwise_unchanged": {
+   "passed": true,
+   "detail": []
+  },
+  "additive.owner_extensions_superset": {
+   "passed": true,
+   "detail": []
+  },
+  "additive.blueprints_insert_only": {
+   "passed": true,
+   "detail": {
+    "VAN_NEXT_UNIFIED_REBUILD_BLUEPRINT_REV1_18_20261021.md": [
+     "insert"
+    ],
+    "VATI_SELF_OPTIMIZING_EXECUTION_AND_CRYPTO_BLUEPRINT_REV5_20261018.md": [
+     "insert"
+    ],
+    "plan/VAN_NEXT_DETERMINISTIC_PLAN_REV1_18.md": [
+     "insert",
+     "replace"
+    ]
+   }
+  },
+  "lineage.rev117_sentence_kept": {
+   "passed": true,
+   "detail": null
+  },
+  "lineage.rev117_master_untouched": {
+   "passed": true,
+   "detail": null
+  },
+  "counts.authority": {
+   "passed": true,
+   "detail": {
+    "active_application_test_count": 1624,
+    "active_requirement_count": 324
+   }
+  },
+  "counts.effective_registry": {
+   "passed": true,
+   "detail": 1624
+  },
+  "counts.units": {
+   "passed": true,
+   "detail": 131
+  },
+  "counts.scope_counts_no_stale_1610": {
+   "passed": true,
+   "detail": {
+    "BG_packet": "VAN-PKT-098",
+    "all_context_material_bindings": 234,
+    "application_tests_executed": 0,
+    "domain_scenario_refinements": 72,
+    "effective_acceptance_identities": 1624,
+    "first_UX_packet": "VAN-PKT-099",
+    "historical_counts": "Earlier blueprints and receipts retain their historical scope; CANONICAL_AUTHORITY selects the active revision.",
+    "legacy_action_oracle_refinements": 349,
+    "new_application_contracts": 0,
+    "new_requirements": 0,
+    "original_requirement_objects_preserved": 324,
+    "original_test_objects_preserved": 1610,
+    "original_unit_ids_preserved": 131,
+    "revision": "1.18",
+    "theme_variants": 2,
+    "whole_product_issues_addressed_at_design_level": 16
+   }
+  },
+  "manifest.complete_and_true": {
+   "passed": true,
+   "detail": {
+    "wrong": [],
+    "unlisted": []
+   }
+  },
+  "lock.unsigned": {
+   "passed": true,
+   "detail": "PREPARED_PENDING_OWNER_SIGNATURE"
+  },
+  "lock.file_hashes_current": {
+   "passed": true,
+   "detail": []
+  },
+  "pointers.authority_targets_exist": {
+   "passed": true,
+   "detail": []
+  },
+  "gates.five_units_have_acceptance": {
+   "passed": true,
+   "detail": {
+    "BQ-003": 21,
+    "BQ-004": 23,
+    "QA-002": 3,
+    "QA-003": 3,
+    "REL-002": 3
+   }
+  }
+ },
+ "passed": true,
+ "reproduce": [
+  "cp -a docs/review-inputs/van-rev115/package <copy>",
+  "python3 tools/rebuild/ap001_dryrun.py <copy>   # all 10 package checks must exit 0",
+  "python3 tools/rebuild/ap001_candidate.py <copy>   # prints this result"
+ ],
+ "admission_action": [
+  "Independent reviewer reviews AP-001 (AP-001_REVIEW.md, AP-001_PATCH.json) and this verification, and approves or rejects.",
+  "Owner admits it through the package protocol (CONSOLIDATION_APPLY_PROTOCOL.md step 4): select the amended package as the one active candidate, update the authority selector and prepared scope fingerprints, keep old schedules historical.",
+  "Deliver the amended package as Rev1.18.1 in a new path with its own archive digest; the admitted Rev1.18 package (manifest above) stays byte-identical as lineage. Re-sign the scope lock over the Rev1.18.1 hashes (OQ-05).",
+  "Re-run PRE-001 trace (1,624 identities), ap001.py check, the ten package checks and manifest.py check at the frozen F15 baseline."
+ ]
+}

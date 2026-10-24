@@ -3,13 +3,10 @@ package com.dial.van.notification
 import android.content.Context
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import java.util.concurrent.ConcurrentHashMap
-
-enum class AppNotificationPolicy {
-    NORMAL,
-    PRIORITY,
-    MUTE,
-}
 
 data class QuietHoursConfig(
     val enabled: Boolean = false,
@@ -31,6 +28,8 @@ class NotificationPolicyStore(context: Context) {
     )
 
     private val recentHashes = ConcurrentHashMap<String, Long>()
+    private val _packages = MutableStateFlow(decidedPackages())
+    val packages: StateFlow<Map<String, AppNotificationPolicy>> = _packages.asStateFlow()
 
     fun policyFor(packageName: String): AppNotificationPolicy {
         val raw = prefs.getString(keyPolicy(packageName), AppNotificationPolicy.NORMAL.name)
@@ -39,6 +38,14 @@ class NotificationPolicyStore(context: Context) {
 
     fun setPolicy(packageName: String, policy: AppNotificationPolicy) {
         prefs.edit().putString(keyPolicy(packageName), policy.name).apply()
+        _packages.value = decidedPackages()
+    }
+
+    /** Discover a notification source without changing the owner's policy for it. */
+    fun recordObservedPackage(packageName: String) {
+        if (packageName.isBlank() || prefs.contains("$OBSERVED_PREFIX$packageName")) return
+        prefs.edit().putBoolean("$OBSERVED_PREFIX$packageName", true).apply()
+        _packages.value = decidedPackages()
     }
 
     fun quietHours(): QuietHoursConfig = QuietHoursConfig(
@@ -80,29 +87,34 @@ class NotificationPolicyStore(context: Context) {
     }
 
     /**
-     * Every app the owner has already decided about.
+     * Every app seen through notification access or explicitly configured by the owner.
      *
      * P2-AND-017 — the store could be written to and read per package, and could not say
      * what it held, so an owner control surface had nothing to list. Without this the
      * screen could only offer apps it happened to know about, which is the screen that
      * makes a setting look absent rather than unset.
      *
-     * NORMAL is the default, so an entry recorded as NORMAL is still a decision the owner
-     * made and is shown; only the never-touched are absent.
+     * Observation is stored separately from policy: discovering an app must not overwrite
+     * MUTE or PRIORITY. This inventory survives restart and needs no installed-app access.
      */
-    fun decidedPackages(): Map<String, AppNotificationPolicy> =
-        prefs.all.keys
-            .filter { it.startsWith(POLICY_PREFIX) }
+    fun decidedPackages(): Map<String, AppNotificationPolicy> {
+        val keys = prefs.all.keys
+        val observed = keys.filter { it.startsWith(OBSERVED_PREFIX) }
+            .map { it.removePrefix(OBSERVED_PREFIX) }.toSet()
+        val explicit = keys.filter { it.startsWith(POLICY_PREFIX) }
             .associate { key ->
                 val pkg = key.removePrefix(POLICY_PREFIX)
                 pkg to policyFor(pkg)
             }
+        return NotificationAppCatalogue.merge(observed, explicit)
+    }
 
     private fun keyPolicy(pkg: String) = "$POLICY_PREFIX$pkg"
 
     companion object {
         private const val PREFS_NAME = "van_notification_policy"
         private const val POLICY_PREFIX = "policy_"
+        private const val OBSERVED_PREFIX = "observed_"
         private const val KEY_QUIET_ENABLED = "quiet_enabled"
         private const val KEY_QUIET_START = "quiet_start"
         private const val KEY_QUIET_END = "quiet_end"

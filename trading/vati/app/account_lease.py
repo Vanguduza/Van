@@ -183,11 +183,18 @@ class PostgresLeaseStore:
                         "INSERT INTO vati.account_runtime_leases("
                         "account_alias, holder_instance_id, lease_epoch, acquired_at_ms, "
                         "heartbeat_at_ms, expires_at_ms, software_version, git_sha"
-                        ") VALUES (%s,%s,%s,%s,%s,%s,%s,%s)",
+                        ") VALUES (%s,%s,%s,%s,%s,%s,%s,%s) "
+                        "ON CONFLICT (account_alias) DO NOTHING RETURNING account_alias",
                         (new.account_alias, new.holder_instance_id, new.lease_epoch,
                          new.acquired_at_ms, new.heartbeat_at_ms, new.expires_at_ms,
                          new.software_version, new.git_sha),
                     )
+                    if cur.fetchone() is None:
+                        # SELECT FOR UPDATE cannot lock an absent row. A
+                        # simultaneous first insert is a healthy CAS loss,
+                        # not evidence that shared storage is unreachable.
+                        self._conn.rollback()
+                        return False
                 else:
                     cur.execute(
                         "UPDATE vati.account_runtime_leases SET holder_instance_id=%s, "

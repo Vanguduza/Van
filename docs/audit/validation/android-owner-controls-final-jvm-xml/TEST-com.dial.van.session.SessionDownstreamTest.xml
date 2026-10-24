@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.dial.van.session.SessionDownstreamTest" tests="9" skipped="0" failures="0" errors="0" timestamp="2026-10-07T22:57:32" hostname="052fefa249ff" time="0.006">
+  <properties/>
+  <testcase name="an acknowledgement is recognised by message id rather than by kind()" classname="com.dial.van.session.SessionDownstreamTest" time="0.0"/>
+  <testcase name="an acknowledgement without a boolean acceptance cannot settle work()" classname="com.dial.van.session.SessionDownstreamTest" time="0.001"/>
+  <testcase name="a pending result is distinguished from a final refusal()" classname="com.dial.van.session.SessionDownstreamTest" time="0.0"/>
+  <testcase name="a shape this build does not know is left alone()" classname="com.dial.van.session.SessionDownstreamTest" time="0.001"/>
+  <testcase name="the event is not mistaken for an acknowledgement()" classname="com.dial.van.session.SessionDownstreamTest" time="0.0"/>
+  <testcase name="an event with no sequence is refused rather than cursored at zero()" classname="com.dial.van.session.SessionDownstreamTest" time="0.001"/>
+  <testcase name="a refusal is an answer, and carries its reason()" classname="com.dial.van.session.SessionDownstreamTest" time="0.0"/>
+  <testcase name="successive events advance the stream without repeating one()" classname="com.dial.van.session.SessionDownstreamTest" time="0.001"/>
+  <testcase name="a downstream event becomes a page the stream can apply()" classname="com.dial.van.session.SessionDownstreamTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

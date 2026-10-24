@@ -1,0 +1,23 @@
+[Unit]
+Description=VAN Meta Muse Chromium sandbox (gVisor/Systrap)
+Requires=docker.service van-muse-sandbox-mounts.service van-muse-sandbox-firewall.service van-muse-sandbox-proxy.service
+After=docker.service van-muse-sandbox-mounts.service van-muse-sandbox-firewall.service van-muse-sandbox-proxy.service
+BindsTo=van-muse-sandbox-proxy.service
+
+[Service]
+Type=simple
+EnvironmentFile=/etc/van-muse-sandbox.env
+ExecStartPre=-/usr/bin/docker rm -f van-muse-browser
+ExecStart=/usr/bin/docker run --name van-muse-browser --runtime=runsc-muse --network=${MUSE_SANDBOX_NETWORK} --ip=${MUSE_SANDBOX_IP} --user=0:0 --cap-drop=ALL --cap-add=SETUID --cap-add=SETGID --cap-add=KILL --security-opt=no-new-privileges:true --read-only --cpus=${MUSE_SANDBOX_CPU} --cpu-shares=128 --memory=${MUSE_SANDBOX_MEMORY} --memory-reservation=${MUSE_SANDBOX_MEMORY_RESERVATION} --memory-swap=${MUSE_SANDBOX_MEMORY} --pids-limit=${MUSE_SANDBOX_PIDS} --ulimit nofile=8192:8192 --oom-score-adj=500 --hostname=muse-sandbox -e VAN_MUSE_CONTROL_BIND=${MUSE_SANDBOX_IP} -e VAN_MUSE_BROWSER_BIND=${MUSE_SANDBOX_IP} --tmpfs=/tmp:rw,noexec,nosuid,nodev,size=512m --tmpfs=/run:rw,noexec,nosuid,nodev,size=128m --tmpfs=/dev/shm:rw,nosuid,nodev,size=768m --mount=type=bind,src=${MUSE_SANDBOX_PROFILE_DIR},dst=/home/muse/profile,rw --mount=type=bind,src=${MUSE_SANDBOX_DOWNLOAD_DIR},dst=/home/muse/downloads,rw --mount=type=bind,src=${MUSE_SANDBOX_CONTROL_TOKEN_FILE},dst=/run/secrets/control-token,readonly ${MUSE_SANDBOX_IMAGE_ID}
+ExecStop=-/usr/bin/docker stop --time 10 van-muse-browser
+ExecStopPost=-/usr/bin/docker rm -f van-muse-browser
+Restart=on-failure
+RestartSec=3
+TimeoutStartSec=90
+TimeoutStopSec=20
+NoNewPrivileges=yes
+PrivateTmp=yes
+ProtectHome=yes
+
+[Install]
+WantedBy=multi-user.target

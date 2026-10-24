@@ -1,0 +1,21 @@
+{
+  "counts": {
+    "actions": 349,
+    "atoms": 171,
+    "backend": 74,
+    "backend_verification": 10,
+    "features": 93,
+    "forecast_aliases": 48,
+    "nodes": 121,
+    "requirements": 205,
+    "surfaces": 228,
+    "tests": 1185,
+    "truth": 18
+  },
+  "findings": [],
+  "schema": "van.document.check/1.0",
+  "scope_lock_sha256": "22d4d51ba522fc29e0ee8b67fa84712e109125a2d20200d0cc1c17e7c967afc9",
+  "scope_signature_status": "PREPARED_NOT_OWNER_SIGNED",
+  "source_head": "a39f241b0135cf92cc5a6b9a28af226aa294603d",
+  "status": "SPECIFICATION_STRUCTURAL_PASS_NOT_F15"
+}

@@ -1,0 +1,136 @@
+{
+  "schema": "van.rebuild.hosted-source-partial/1",
+  "observed_at_utc": "2026-10-24T13:08:34.842321+00:00",
+  "status": "PARTIAL_FAILED",
+  "run_id": 40091536186,
+  "source_head": "bd00483e969822c65bfd493c93fa5dd30920bcc5",
+  "tested_merge": "b707fc0f157d5f010c3d43840dd7b2a49464cb65",
+  "identical_source_tree": "c66a0c61467a8adbf4a9fb2bd0e7508b15f7eb7b",
+  "jobs": [
+    {
+      "databaseId": 120865046171,
+      "name": "rebuild-documentary",
+      "conclusion": "success"
+    },
+    {
+      "databaseId": 120865046234,
+      "name": "postgres-ledger",
+      "conclusion": "cancelled"
+    },
+    {
+      "databaseId": 120865046242,
+      "name": "mutation (python-3, python, 3/4)",
+      "conclusion": "success"
+    },
+    {
+      "databaseId": 120865046292,
+      "name": "project-truth-ledger",
+      "conclusion": "failure"
+    },
+    {
+      "databaseId": 120865046297,
+      "name": "browser-guard-source",
+      "conclusion": "success"
+    },
+    {
+      "databaseId": 120865046298,
+      "name": "android-instrumentation",
+      "conclusion": "success"
+    },
+    {
+      "databaseId": 120865046328,
+      "name": "backend",
+      "conclusion": "failure"
+    },
+    {
+      "databaseId": 120865046346,
+      "name": "mutation (kotlin-3, kotlin, 3/4)",
+      "conclusion": "success"
+    },
+    {
+      "databaseId": 120865046360,
+      "name": "android-and-visual-evidence",
+      "conclusion": "success"
+    },
+    {
+      "databaseId": 120865046393,
+      "name": "mutation (python-2, python, 2/4)",
+      "conclusion": "success"
+    },
+    {
+      "databaseId": 120865046403,
+      "name": "mutation (python-0, python, 0/4)",
+      "conclusion": "success"
+    },
+    {
+      "databaseId": 120865046408,
+      "name": "mutation (kotlin-0, kotlin, 0/4)",
+      "conclusion": "success"
+    },
+    {
+      "databaseId": 120865046420,
+      "name": "mutation (kotlin-2, kotlin, 2/4)",
+      "conclusion": "success"
+    },
+    {
+      "databaseId": 120865046447,
+      "name": "mutation (kotlin-1, kotlin, 1/4)",
+      "conclusion": "success"
+    },
+    {
+      "databaseId": 120865046479,
+      "name": "mutation (browser-agent, browser-agent, 0/1)",
+      "conclusion": "success"
+    },
+    {
+      "databaseId": 120865046542,
+      "name": "mutation (python-1, python, 1/4)",
+      "conclusion": "success"
+    },
+    {
+      "databaseId": 120867692651,
+      "name": "character-forge-gate",
+      "conclusion": "success"
+    }
+  ],
+  "legacy_mutations": {
+    "caught": 374,
+    "survived": 0,
+    "not_executed": 0,
+    "receipt": "ci/MUTATION_CORPUS_bd00483e.json"
+  },
+  "postgres_fixture_suite": {
+    "tests": 26,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "sha256": "0a4c0a76450eed9a56d9ef7f39acf0c271af98d91624262fc965609413acb154"
+  },
+  "full_public_trading": {
+    "state": "CANCELLED_NO_TERMINAL_XML",
+    "qualification": "Postgres job was cancelled; its26-case fixture pass is not full trading acceptance. Local full trading failure is separately retained."
+  },
+  "instrumentation": {
+    "collected": 22,
+    "passed": 18,
+    "failed": 0,
+    "skipped": 4,
+    "skip_reason": "existing core-artwork mode",
+    "voice_methods": {
+      "cancellationBeforeNativeStartCannotCompleteOrDamageTheReplacementAnswer": "3.384s",
+      "realOfflineAnswerReachesTheApplicationQueueAsSpoken": "2.642s"
+    },
+    "index_sha256": "8dc441000dcd322d64388ab159b060ae1ddd86c19bbff43f9fffe435e24127a9",
+    "voice_report_sha256": "9daf8003b45508f0e63cde416be880202ecbc7ff2ba6c61785d8d66b031d12a7"
+  },
+  "retained_failures": {
+    "backend": "DDS_CONTRACT_READ_DEPLOY_KEY is not provisioned",
+    "project-truth-ledger": "trusted main bootstrap checker absent",
+    "logs": {
+      "backend-job.log": "7869b1e1b573cf67a4989c6584e6d505efecad72cde42faf49ddcb84ede1a566",
+      "project-truth-ledger-job.log": "bc19a831f6c83d0eb9a2f1618987e7a5b19e3664e9ce13fe2c2176a80bda5c74",
+      "postgres-ledger-job.log": "36510419895ef48c5a1c6d140f43f52bf94f6c3f51a6267a25b1b32f7c655e6e"
+    }
+  },
+  "qualification": "Source/emulator evidence bound to the exact earlier head. The hosted overall workflow failed; no full backend/trading, native service, production, provider, S24, F15/BG or whole-unit claim."
+}

@@ -77,7 +77,7 @@ def _append_command(ledger, cmd, now=1_000):
     }
     ledger.append(make_event(
         EventKind.ORDER_COMMAND,
-        "test-router",
+        "vati-execution-router",
         payload,
         event_time_ms=now,
         received_time_ms=now,
@@ -318,7 +318,7 @@ def _zse_lifecycle(ledger, adapter):
 
 def _append_owner_ticket_event(ledger, payload, corr, now):
     ledger.append(make_event(
-        EventKind.OWNER_TICKET, "test",
+        EventKind.OWNER_TICKET, "van-gateway" if payload.get("action") == "CONFIRMED" else "vati-execution-router",
         payload, event_time_ms=now, received_time_ms=now,
         correlation_id=corr,
     ))

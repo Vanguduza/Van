@@ -1,0 +1,28 @@
+{
+  "action_set_ref": "FIXTURE_ACTION_SET_REF",
+  "all_attempt_refs": [],
+  "artifact_sha256": "1111111111111111111111111111111111111111111111111111111111111111",
+  "environment": "FIXTURE",
+  "feature_definition_ref": "FIXTURE_FEATURE_DEFINITION_REF",
+  "hypothesis_ref": "FIXTURE_HYPOTHESIS_REF",
+  "objective_definition_ref": "FIXTURE_OBJECTIVE_DEFINITION_REF",
+  "parent_policy_ref": "FIXTURE_PARENT_POLICY_REF",
+  "promotion_authorization_ref": null,
+  "qualification_ref": null,
+  "record_id": "FIXTURE_ExecutionPolicyCandidate",
+  "record_type": "ExecutionPolicyCandidate",
+  "research_only": true,
+  "schema_version": 2,
+  "scope": {
+    "account_id": "FIXTURE_ACCOUNT",
+    "market_type": "CRYPTO_SPOT",
+    "ownership": "OWNER_MANUAL",
+    "product_id": "FIXTURE_PRODUCT_ID",
+    "scope_hash": "1111111111111111111111111111111111111111111111111111111111111111",
+    "strategy_id": "FIXTURE_STRATEGY_ID",
+    "venue_id": "FIXTURE_VENUE"
+  },
+  "stage": "HYPOTHESIS_REGISTERED",
+  "study_refs": [],
+  "update_rule_ref": "FIXTURE_UPDATE_RULE_REF"
+}

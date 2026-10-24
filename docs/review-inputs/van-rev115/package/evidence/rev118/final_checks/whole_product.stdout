@@ -1,0 +1,140 @@
+{
+  "scope": "REV118_DOCUMENT_CONTRACT_COMPILATION_SCHEMA_AND_MUTATION_CHECKS",
+  "passed": 26,
+  "total": 26,
+  "findings": [],
+  "application_tests_executed": 0,
+  "native_or_economic_qualification_issued": false,
+  "cases": [
+    {
+      "id": "INTEGRATION",
+      "passed": true,
+      "detail": []
+    },
+    {
+      "id": "PRESERVE_requirements",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "id": "PRESERVE_tests",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "id": "PRESERVE_actions",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "id": "PRESERVE_surfaces",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "id": "UNIT_GRAPH_PRESERVED",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "id": "NORMATIVE_MASTER_INTEGRATION",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "id": "DISCOVERABLE_CONTEXT_EXTENSION",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "id": "plan/compile_rev118.py",
+      "passed": true,
+      "detail": "Effective acceptance registry matches\n"
+    },
+    {
+      "id": "plan/render_plan.py",
+      "passed": true,
+      "detail": "0 findings: rendered plan and input provenance match\n"
+    },
+    {
+      "id": "POSITIVE_SCHEMA_CapabilityBinding",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "id": "POSITIVE_SCHEMA_Command",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "id": "POSITIVE_SCHEMA_Outcome",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "id": "POSITIVE_SCHEMA_VoiceEvent",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "id": "REJECT_Outcome_postcondition_receipt_refs",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "id": "REJECT_Command_proof_ref",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "id": "REJECT_VoiceEvent_command_id",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "id": "UNKNOWN_CANNOT_BLIND_RETRY",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "id": "QUALIFIED_REQUIRES_RECEIPT",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "id": "SPOKEN_COMPLETION_NEEDS_EVIDENCE",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "id": "REJECT_OMITTED_ACTION",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "id": "REJECT_OMITTED_CAPABILITY",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "id": "REJECT_OMITTED_FINDING",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "id": "REJECT_VOICE_OWNER_OMISSION",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "id": "REJECT_UNKNOWN_REDISPATCH",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "id": "REJECT_FALSE_QUALIFICATION",
+      "passed": true,
+      "detail": null
+    }
+  ]
+}

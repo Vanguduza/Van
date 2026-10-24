@@ -1,0 +1,300 @@
+{
+  "schema": "van.rebuild.settled-profit-loss-limits-source/1",
+  "observed_at_utc": "2026-10-23T03:10:02.771503+00:00",
+  "source_parent": "a4a91e8e56120db6bd8433a1512f5d9963d5377e",
+  "source_sha256": {
+    "trading/vati/execution/review.py": "8d1c4ea59ba0e52b46f3995284875883f76589b40344f7f1a473d09a72098f0e",
+    "trading/vati/risk/lockouts.py": "ab1009af104641c6ad3febd51092c5a9b69c8633439aac241dbe7364935732ae",
+    "trading/vati/app/cycle.py": "5cecf30db8dd1bdb2418a010a006ac43b5ad179d7a5d5ad4ee8f0c0cf59e8f19",
+    "trading/vati/app/trade_lifecycle.py": "a8c9005cd6ee48a2779d85811f8d1322b2c860364fda45de9ea3ea9cd5bd2de5",
+    "trading/tests/test_unsettled_profit_risk.py": "fc3445c7dfa0cf91e5ee812b9486609b86975f3875d38012b20d21b262ea7006",
+    "trading/tests/test_recoverable_lockouts.py": "491c3b964520e31710293cba0834936332ed5fb11ddc15a7ee4a6b0662b3f7f2"
+  },
+  "initial_actual_counterexamples": {
+    "tests": 7,
+    "failures": 4,
+    "errors": 0,
+    "skipped": 0,
+    "duration_seconds": 0.278,
+    "sha256": "49c2c23a155a6dd6ea0163c40b0fede627a921ad2dff615173a76aa9461ff796"
+  },
+  "initial_misplaced_helper_patch": {
+    "tests": 66,
+    "failures": 7,
+    "errors": 0,
+    "skipped": 0,
+    "duration_seconds": 0.595,
+    "sha256": "21ffc12378dce19bcee18867b9e76ef045cb8fb51419d5e42f3d37fe63e174c1"
+  },
+  "first_fixed_controls": {
+    "tests": 66,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "duration_seconds": 0.421,
+    "sha256": "d9f85f14eb075f8b4b59421153510268e5cecc55500072a471c485bd7882fdc3"
+  },
+  "complete_finality_controls": {
+    "tests": 79,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "duration_seconds": 0.422,
+    "sha256": "184382e031b0724f0b2708cbb608c3998e45c4ce1b61e6d0b410601d25ad434f"
+  },
+  "full_trading_real_private_postgresql": {
+    "tests": 2183,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "duration_seconds": 475.83,
+    "sha256": "38f6f4788603c57e319dec5a2611c07590b1b69a325417ef708d58b33c777568"
+  },
+  "post_fault_restored_controls": {
+    "tests": 79,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "duration_seconds": 0.72,
+    "sha256": "b2fa14795795783e8e0f1a68ff6e818efbe910982ccc7fd3af5a8622a11a7dd3"
+  },
+  "rebuild": {
+    "tests": 78,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "duration_seconds": 30.749,
+    "sha256": "12df4f9134328f3570a6005b6a9fe21f32f695c395035dd9573884615a18b82d"
+  },
+  "source_faults": {
+    "definitions": [
+      [
+        [
+          "trading/vati/risk/lockouts.py",
+          "if pnl > ZERO and profit_final is True:",
+          "if pnl > ZERO:",
+          "let an unproven positive amount release losses"
+        ],
+        [
+          "trading/tests/test_unsettled_profit_risk.py::test_unsettled_or_flat_close_cannot_erase_prior_losses_live_or_cold[exit_price1-cycle]"
+        ]
+      ],
+      [
+        [
+          "trading/vati/app/cycle.py",
+          "profit_final=economic_outcome_final(maturity, measured.basis,\n                    account_currency=self.cfg.contract.account_currency)",
+          "profit_final=True",
+          "ignore actual monetary finality at the single-session close"
+        ],
+        [
+          "trading/tests/test_unsettled_profit_risk.py::test_unsettled_or_flat_close_cannot_erase_prior_losses_live_or_cold[exit_price1-cycle]"
+        ]
+      ],
+      [
+        [
+          "trading/vati/app/trade_lifecycle.py",
+          "self.streaks.on_close(entry[\"strategy_id\"], pnl, now_ms, profit_final=profit_final)",
+          "self.streaks.on_close(entry[\"strategy_id\"], pnl, now_ms, profit_final=True)",
+          "ignore actual monetary finality at account close"
+        ],
+        [
+          "trading/tests/test_unsettled_profit_risk.py::test_unsettled_or_flat_close_cannot_erase_prior_losses_live_or_cold[exit_price1-account]"
+        ]
+      ],
+      [
+        [
+          "trading/vati/app/trade_lifecycle.py",
+          "elif pnl > ZERO and profit_final:",
+          "else:",
+          "reset the scalar fallback after a flat or unproven gain"
+        ],
+        [
+          "trading/tests/test_unsettled_profit_risk.py::test_unsettled_or_flat_close_cannot_erase_prior_losses_live_or_cold[exit_price0-scalar-account]"
+        ]
+      ],
+      [
+        [
+          "trading/vati/risk/lockouts.py",
+          "profit_final=economic_outcome_final(ev.payload.get('maturity'), ev.payload.get('pnl_basis'))",
+          "profit_final=True",
+          "cold restart lets an immature native review erase settled losses"
+        ],
+        [
+          "trading/tests/test_unsettled_profit_risk.py::test_unsettled_or_flat_close_cannot_erase_prior_losses_live_or_cold[exit_price1-cycle]"
+        ]
+      ],
+      [
+        [
+          "trading/vati/execution/review.py",
+          "any(maturity.get(flag) is not True for flag in ('parent_final','fees_final','cash_reconciled'))",
+          "any(not maturity.get(flag) for flag in ('parent_final','fees_final','cash_reconciled'))",
+          "treat a truthy finality string as native cash settlement"
+        ],
+        [
+          "trading/tests/test_unsettled_profit_risk.py::test_cold_native_review_with_unproven_finality_cannot_release_losses[truthy-fees]"
+        ]
+      ],
+      [
+        [
+          "trading/vati/execution/review.py",
+          "maturity.get('source') != 'DETERMINISTIC_PAPER_SETTLEMENT'",
+          "False",
+          "admit made-up provider finality without an implemented native producer"
+        ],
+        [
+          "trading/tests/test_unsettled_profit_risk.py::test_cold_native_review_with_unproven_finality_cannot_release_losses[source]"
+        ]
+      ],
+      [
+        [
+          "trading/vati/risk/lockouts.py",
+          "if pnl > ZERO and profit_final is True:",
+          "if False:",
+          "prevent actual settled paper gains from ever releasing losses"
+        ],
+        [
+          "trading/tests/test_unsettled_profit_risk.py::test_actual_paper_settled_parent_gain_can_release_its_losses_and_cold_replay"
+        ]
+      ]
+    ],
+    "records": [
+      {
+        "phase": "baseline",
+        "why": null,
+        "returncode": 0,
+        "log_sha256": "63203b4ec2b29e7ab8c45616e4d500960794bb60488784fb13fb7fe05b0386bf"
+      },
+      {
+        "phase": "mutation",
+        "why": "let an unproven positive amount release losses",
+        "returncode": 1,
+        "log_sha256": "636f2e3bfa9cc91051bf19a2ce20cefe27adc8c55e62788964f604e2c182a586"
+      },
+      {
+        "phase": "baseline",
+        "why": null,
+        "returncode": 0,
+        "log_sha256": "3dd8a455f93386b2d78b9d5605f1c2f52fd55f0962f89b0bd7d602cae0ead952"
+      },
+      {
+        "phase": "mutation",
+        "why": "ignore actual monetary finality at the single-session close",
+        "returncode": 1,
+        "log_sha256": "3b5e5e9184c5e8ef02ae33aa231223a01c5277d207bff8ac073216449df7a2e2"
+      },
+      {
+        "phase": "baseline",
+        "why": null,
+        "returncode": 0,
+        "log_sha256": "0cddb2f9522c5fc98e9503738cea759bed811b3ad3b391083a46a5d5f403e174"
+      },
+      {
+        "phase": "mutation",
+        "why": "ignore actual monetary finality at account close",
+        "returncode": 1,
+        "log_sha256": "86747441ac014801bfb139739a30b1d944298e3c369708f474c7f92a6ff2a203"
+      },
+      {
+        "phase": "baseline",
+        "why": null,
+        "returncode": 0,
+        "log_sha256": "866432d567eb30f716ad0380ad29e9453b6fd80645780de4fbe94565dc3eab20"
+      },
+      {
+        "phase": "mutation",
+        "why": "reset the scalar fallback after a flat or unproven gain",
+        "returncode": 1,
+        "log_sha256": "72d294d5f065cee107cc23436f65f267d4320e93e37b2cc6db1ce3d9e55dbe5c"
+      },
+      {
+        "phase": "baseline",
+        "why": null,
+        "returncode": 0,
+        "log_sha256": "1ab9905d8b0f34f6d791ff7da4efa2de0f7f3e282a078758cc0496cc0230c0f0"
+      },
+      {
+        "phase": "mutation",
+        "why": "cold restart lets an immature native review erase settled losses",
+        "returncode": 1,
+        "log_sha256": "5d4b203d56be046e0db32e44e527ca65506bb945fa94f24e034e7923a2e94209"
+      },
+      {
+        "phase": "baseline",
+        "why": null,
+        "returncode": 0,
+        "log_sha256": "06254aecdf245cc6f8784e134e36703bcc595ac0578b8c5f7f3591bcb399781b"
+      },
+      {
+        "phase": "mutation",
+        "why": "treat a truthy finality string as native cash settlement",
+        "returncode": 1,
+        "log_sha256": "620cb2e38099b8f539838794d10699b8f93aef54207fc9288bd699af00094819"
+      },
+      {
+        "phase": "baseline",
+        "why": null,
+        "returncode": 0,
+        "log_sha256": "91ac28e87543203edb8fac4612b815f59bf36ac9a72ab315b86b2e36637fba30"
+      },
+      {
+        "phase": "mutation",
+        "why": "admit made-up provider finality without an implemented native producer",
+        "returncode": 1,
+        "log_sha256": "e2f94fb29b722a94fd64fa0cdecf504d992b5961354e21c117388bd5b275d958"
+      },
+      {
+        "phase": "baseline",
+        "why": null,
+        "returncode": 0,
+        "log_sha256": "866432d567eb30f716ad0380ad29e9453b6fd80645780de4fbe94565dc3eab20"
+      },
+      {
+        "phase": "mutation",
+        "why": "prevent actual settled paper gains from ever releasing losses",
+        "returncode": 1,
+        "log_sha256": "6311cdb13c97380b0094e69fdc2667d7a6d40904b537a3fa059fa2a91645d39f"
+      }
+    ],
+    "source_before_sha256": {
+      "trading/vati/app/cycle.py": "5cecf30db8dd1bdb2418a010a006ac43b5ad179d7a5d5ad4ee8f0c0cf59e8f19",
+      "trading/vati/app/trade_lifecycle.py": "a8c9005cd6ee48a2779d85811f8d1322b2c860364fda45de9ea3ea9cd5bd2de5",
+      "trading/vati/execution/review.py": "8d1c4ea59ba0e52b46f3995284875883f76589b40344f7f1a473d09a72098f0e",
+      "trading/vati/risk/lockouts.py": "ab1009af104641c6ad3febd51092c5a9b69c8633439aac241dbe7364935732ae"
+    },
+    "source_after_sha256": {
+      "trading/vati/app/cycle.py": "5cecf30db8dd1bdb2418a010a006ac43b5ad179d7a5d5ad4ee8f0c0cf59e8f19",
+      "trading/vati/app/trade_lifecycle.py": "a8c9005cd6ee48a2779d85811f8d1322b2c860364fda45de9ea3ea9cd5bd2de5",
+      "trading/vati/execution/review.py": "8d1c4ea59ba0e52b46f3995284875883f76589b40344f7f1a473d09a72098f0e",
+      "trading/vati/risk/lockouts.py": "ab1009af104641c6ad3febd51092c5a9b69c8633439aac241dbe7364935732ae"
+    },
+    "source_restored": true,
+    "journal_present": false
+  },
+  "private_fixture_cleanup": {
+    "stopped": true,
+    "removed": true
+  },
+  "owner_contract_check": {
+    "changed": [],
+    "applied": false,
+    "scope": "SOURCE_CONTRACTS_ONLY"
+  },
+  "legacy_anchor_preflight": {
+    "schema": "van.rebuild.mutation-registry-preflight/1",
+    "registry_sha256": "35d10c7b0f2b8319b7f7305828262c972b2a6451139d75b9e83c7d0062282955",
+    "mutation_count": 374,
+    "edit_count": 383,
+    "findings": [],
+    "execution_state": "NOT_RUN",
+    "status": "ANCHORS_VALID_BASELINES_AND_MUTATIONS_NOT_EXECUTED"
+  },
+  "scope": "Positive risk-release eligibility only: live cycle, account governor and scalar paths and cold historical fold; actual paper cash-close control; negative estimates remain conservative and flat closes preserve counters. Same native maturity observation persisted and used once. Known native paper settlement is the only implemented admitted source. No provider finality fabricated.",
+  "fixture_correction": "Focused tests caught the first block inserted into the legacy _realised_pnl helper rather than the actual account _on_close. Moved it to the actual close. The direct governor settled-win unit now explicitly opts in to profit_final=True; all other assertions remain.",
+  "original_obligations_retained": [
+    "Native provider monetary finality, fee/cash reconciliation and corrections",
+    "Learning-health finality admission and immutable episode economic provenance; explicit retrospective study semantics",
+    "Physical account/worker identity, epoch/deadline/precision, pending/partial outcomes, safe retirement",
+    "Coordinator/owner-device revocation and all original assistant/voice/browser/workflow/memory/resource/frontend features"
+  ],
+  "qualification": "Candidate source only.2183trading cases pass with actual private PostgreSQL and pinned DDS;20new finality cases,79focused controls,78rebuild checks and8meaningful regressions. No independent/native/whole-unit, live provider/funds, production/profitability or S24 acceptance."
+}

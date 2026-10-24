@@ -1,0 +1,75 @@
+{
+ "schema_version": 1,
+ "authorization_id": "auth-20261009-owner-audit-fix-van-canon-housekeeping",
+ "project": "van",
+ "authority": "OWNER_EXPLICIT",
+ "owner_instruction_sha256": "c2f15b2d950311104b5e0e1524cb04e1ec95063d03817916ad5952dae4236170",
+ "owner_instruction_excerpt": "Do housekeeping and fix all repository and implementation issues identified.",
+ "source": {
+  "kind": "owner_session_instruction",
+  "channel": "claude_code",
+  "request_id": "claude-code-20261009-van-canon-audit-fix",
+  "owner_attested": true,
+  "device_signature_claimed": false,
+  "cryptographic_signature_claimed": false,
+  "signed_ingress_claimed": false
+ },
+ "issued_at_utc": "2026-10-09T21:30:00Z",
+ "base_sha": "dfc1557ab99ad8d41cf84714e1bb671e89b045e6",
+ "branch_scope": "ccr-71397b02-lm6fid",
+ "commit_scope": {
+  "commits": [
+   "ce2dbb1b024f6516ef0509f26e5c653ef4aba154",
+   "e01180a7f25716632de00243b7b691ea0d5cf6ce",
+   "0e7aac83e450c643305a4b37753123f2db765d6a"
+  ]
+ },
+ "authorized_paths": [
+  "config/browser/domains.yaml",
+  "deploy/van-trading-core/README.md",
+  "deploy/van-trading-core/bootstrap.sh",
+  "deploy/van-trading-core/hermes/qualify-full-desktop-commander-mcp.sh",
+  "deploy/van-trading-core/hermes/register-commander-mcp.sh",
+  "deploy/van-trading-core/hermes/register-full-desktop-commander-mcp.sh",
+  "deploy/van-trading-core/oci/rebuild-van-trading-core.py",
+  "deploy/van-trading-core/qualify.sh",
+  "deploy/van-trading-core/spmrf/install-shared-memory-client.sh",
+  "docs/CURSOR_PATCH_PROMPT_VAN_AURA_SEMANTIC_ENVELOPE.md",
+  "docs/CURSOR_PROMPT_VAN_VISUAL_CORRECTIONS_REV_2_1.md",
+  "docs/VAN_GLASSMORPHIC_FLOATING_ASSISTANT_DESIGN.md",
+  "docs/VAN_PRODUCTION_VISUAL_FLOATING_UX_OWNER_ADMIN_REV_3_0.md",
+  "docs/VAN_REMEDIATION_PROGRAMME_REV_1.md",
+  "docs/VAN_VISUAL_ACCEPTANCE_MATRIX.md",
+  "docs/VAN_VISUAL_PRODUCTION_SYSTEM.md",
+  "docs/VAN_VISUAL_PRODUCTION_SYSTEM_REV_2_1_MASTER_BLUEPRINT.md",
+  "docs/VAN_VISUAL_PRODUCTION_SYSTEM_REV_2_2_ADDENDUM_AURA_SEMANTIC_ENVELOPE.md",
+  "docs/VAN_VISUAL_REV_2_1_IMPLEMENTATION.md",
+  "docs/VAN_WEB_ACQUISITION_FABRIC_REV_1.md",
+  "docs/decisions/VAN-ADOPT-CRAWLEE-001.yaml",
+  "docs/decisions/VAN-ADOPT-SCRAPLING-001.yaml",
+  "docs/decisions/VAN-ARTEMIS-OWNERSHIP-PROPOSAL-001.md",
+  "trading/tests/test_oci_trading_topology_bootstrap.py",
+  "visual-authority/van-visual-authority-v2.yaml"
+ ],
+ "change_classes": [
+  "canon_supersession_reconciliation",
+  "deploy_topology_correction",
+  "browser_scope_withdrawal",
+  "unsigned_decision_proposals"
+ ],
+ "material_scope_expansion": false,
+ "feature_removal": false,
+ "business_model_change": false,
+ "security_authority_change": false,
+ "owner_control_boundary_change": false,
+ "legal_position_change": false,
+ "money_or_custody_model_change": false,
+ "locked_provider_change": false,
+ "reusable": false,
+ "revoked": false,
+ "limitations": [
+  "Fixes the issues reported by the 2026-10-09 VAN canon audit of PR #93 only",
+  "Adoption and Artemis-ownership records are UNSIGNED proposals; this record does not sign them",
+  "No deployment, live host change or handset action"
+ ]
+}

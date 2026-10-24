@@ -14,6 +14,7 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -44,10 +45,9 @@ import com.dial.van.notification.QuietHoursConfig
  * permission, which is among the most invasive Android grants, and the controls that make
  * it tolerable existed only as functions.
  *
- * The screen lists apps the owner has already decided about rather than every installed
- * package: enumerating installed apps needs QUERY_ALL_PACKAGES, a permission Play treats as
- * sensitive and which VAN does not need — a package arrives here because a notification
- * from it did.
+ * The screen lists observed notification sources and explicitly configured apps rather
+ * than every installed package. It needs no QUERY_ALL_PACKAGES permission and observes
+ * the shared catalogue so a newly arriving source appears while the screen is open.
  */
 @Composable
 internal fun NotificationPolicyModule(
@@ -55,13 +55,12 @@ internal fun NotificationPolicyModule(
     glass: com.dial.van.visual.VanGlassStyle,
 ) {
     val store = app.notificationPolicyStore
-    var decided by remember { mutableStateOf(store.decidedPackages()) }
+    val decided by store.packages.collectAsState()
     var quiet by remember { mutableStateOf(store.quietHours()) }
     // Survives rotation: a half-typed package name is exactly what is lost otherwise.
     var draft by rememberSaveable { mutableStateOf("") }
 
     fun reload() {
-        decided = store.decidedPackages()
         quiet = store.quietHours()
     }
 

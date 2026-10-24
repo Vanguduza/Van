@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
-# Turn on the phone's direct mutual-TLS link to the VAN gateway on this (the Hermes) host.
+# Turn on device mutual TLS on the explicitly selected VAN gateway interface.
 #
 #   tools/runtime/enable_van_mtls.sh --san IP:203.0.113.7[,DNS:van.example] [--port 8443]
 #
 # Idempotent. On first run it creates the VAN device CA and a server certificate for --san;
 # later runs keep the CA (re-creating it would strand every enrolled phone) and only re-issue
-# the server certificate when --san changes. It then points gateway.env at the directory,
-# opens the port in ufw, restarts the gateway, and proves from outside the app what a
+# the server certificate when --san changes or it has less than 30 days remaining. It points gateway.env at the directory,
+# leaves firewall changes to the governed port-scoped deployment recipe, restarts the gateway, and proves what a
 # network client sees: TLS 1.3 only, and 403 without a client certificate.
 #
 # It prints the CA certificate in base64 at the end. That is public material: the app build
@@ -15,21 +15,37 @@ set -euo pipefail
 
 SAN=""
 PORT="8443"
+BIND=""
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --san) SAN="$2"; shift 2 ;;
     --port) PORT="$2"; shift 2 ;;
+    --bind) BIND="$2"; shift 2 ;;
     *) echo "FAIL unknown_argument:$1" >&2; exit 2 ;;
   esac
 done
 [[ -n "$SAN" ]] || { echo "FAIL missing --san" >&2; exit 2; }
-[[ "$PORT" =~ ^[0-9]+$ ]] && (( PORT >= 1024 )) || { echo "FAIL port_must_be_unprivileged:$PORT" >&2; exit 2; }
+[[ "$PORT" =~ ^[0-9]+$ ]] && (( PORT >= 1024 && PORT <= 65535 )) || { echo "FAIL port_must_be_unprivileged:$PORT" >&2; exit 2; }
+[[ -n "$BIND" ]] || { echo "FAIL explicit_bind_address_required" >&2; exit 2; }
+VAN_MTLS_SELECTED_BIND="$BIND" python3 - <<'BIND_CHECK'
+import ipaddress, os
+try:
+    address = ipaddress.ip_address(os.environ["VAN_MTLS_SELECTED_BIND"])
+    assert address.version == 4 and not address.is_unspecified and not address.is_multicast
+except (ValueError, AssertionError):
+    raise SystemExit("FAIL explicit_unicast_ipv4_bind_required")
+BIND_CHECK
 
 STATE_ROOT="${VAN_STATE_ROOT:-$HOME/.local/share/van}"
 CONFIG_ROOT="${VAN_CONFIG_ROOT:-$HOME/.config/van}"
 GATEWAY_ENV="$CONFIG_ROOT/gateway.env"
 VENV_PY="$STATE_ROOT/venv/bin/python"
 RUNTIME_BACKEND="$STATE_ROOT/runtime/backend"
+if [[ -f "$STATE_ROOT/runtime/RUNTIME_PYTHON_PATH" ]]; then
+  VENV_PY="$(cat "$STATE_ROOT/runtime/RUNTIME_PYTHON_PATH")"
+  [[ "$VENV_PY" == "$STATE_ROOT"/venvs/*/bin/python && "$VENV_PY" != *$'\n'* ]] \
+    || { echo "FAIL runtime_interpreter_binding_invalid" >&2; exit 2; }
+fi
 MTLS_DIR="$STATE_ROOT/mtls"
 
 for required in "$GATEWAY_ENV" "$VENV_PY" "$RUNTIME_BACKEND/van_gateway/mtls/serve.py"; do
@@ -47,33 +63,46 @@ if [[ ! -f "$MTLS_DIR/ca.crt" ]]; then
 else
   echo "PASS van_device_ca_kept"
 fi
-if [[ ! -f "$MTLS_DIR/server.crt" || "$(cat "$MTLS_DIR/server.san" 2>/dev/null)" != "$SAN" ]]; then
+server_current() {
+  MTLS_DIR="$MTLS_DIR" "$VENV_PY" - <<'EXPIRY'
+import datetime as dt
+import os
+from pathlib import Path
+from cryptography import x509
+
+try:
+    certificate = x509.load_pem_x509_certificate((Path(os.environ["MTLS_DIR"]) / "server.crt").read_bytes())
+except (OSError, ValueError):
+    raise SystemExit(1)
+raise SystemExit(0 if certificate.not_valid_after_utc > dt.datetime.now(dt.timezone.utc) + dt.timedelta(days=30) else 1)
+EXPIRY
+}
+if [[ ! -f "$MTLS_DIR/server.crt" || "$(cat "$MTLS_DIR/server.san" 2>/dev/null)" != "$SAN" ]] || ! server_current; then
   pki issue-server --dir "$MTLS_DIR" --san "$SAN"
   printf '%s\n' "$SAN" > "$MTLS_DIR/server.san"
   echo "PASS van_server_certificate_issued san=$SAN"
+else
+  echo "PASS van_server_certificate_kept"
 fi
 
 set_env() {
   local key="$1" value="$2" tmp
   tmp="$(mktemp "$CONFIG_ROOT/gateway.env.XXXXXX")"
   grep -Ev "^${key}=" "$GATEWAY_ENV" > "$tmp" || true
-  printf '%s=%s\n' "$key" "$value" >> "$tmp"
+  printf '%s=%q\n' "$key" "$value" >> "$tmp"
   install -m 0600 "$tmp" "$GATEWAY_ENV"
   rm -f "$tmp"
 }
 set_env VAN_MTLS_ENABLED true
 set_env VAN_MTLS_DIR "$MTLS_DIR"
 set_env VAN_MTLS_PORT "$PORT"
-
-if command -v ufw >/dev/null && sudo -n ufw status 2>/dev/null | grep -q '^Status: active'; then
-  sudo -n ufw allow "$PORT/tcp" comment 'van direct mtls' >/dev/null
-  echo "PASS ufw_allows:$PORT/tcp"
-fi
+set_env VAN_MTLS_BIND "$BIND"
+echo "INFO firewall_unchanged: governed source-and-port-scoped rules are required"
 
 systemctl --user daemon-reload
 systemctl --user restart van-gateway.service
 
-PROBE_HOST="127.0.0.1"
+PROBE_HOST="$BIND"
 for _ in {1..30}; do
   if (exec 3<>"/dev/tcp/$PROBE_HOST/$PORT") 2>/dev/null; then break; fi
   sleep 1

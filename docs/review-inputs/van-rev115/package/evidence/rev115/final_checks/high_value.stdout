@@ -1,0 +1,547 @@
+{
+  "scope": "Local or VM document-schema and synthetic-fixture tests only, not VAN application tests or provider verification",
+  "schema_count": 12,
+  "fixture_count": 12,
+  "findings": {},
+  "negative_cases": [
+    {
+      "case": "future:ChainAssetIdentity",
+      "expected": "FUTURE_AVAILABILITY",
+      "caught": true,
+      "observed": [
+        "FUTURE_AVAILABILITY"
+      ]
+    },
+    {
+      "case": "authority:ChainAssetIdentity",
+      "expected": "SCHEMA:",
+      "caught": true,
+      "observed": [
+        "SCHEMA:$.trade_authorized"
+      ]
+    },
+    {
+      "case": "grade:ChainAssetIdentity",
+      "expected": "FIXTURE_AS_QUALIFICATION",
+      "caught": true,
+      "observed": [
+        "FIXTURE_AS_QUALIFICATION"
+      ]
+    },
+    {
+      "case": "future:ChainSourceObservation",
+      "expected": "FUTURE_AVAILABILITY",
+      "caught": true,
+      "observed": [
+        "FUTURE_AVAILABILITY"
+      ]
+    },
+    {
+      "case": "authority:ChainSourceObservation",
+      "expected": "SCHEMA:",
+      "caught": true,
+      "observed": [
+        "SCHEMA:$.trade_authorized"
+      ]
+    },
+    {
+      "case": "grade:ChainSourceObservation",
+      "expected": "FIXTURE_AS_QUALIFICATION",
+      "caught": true,
+      "observed": [
+        "FIXTURE_AS_QUALIFICATION"
+      ]
+    },
+    {
+      "case": "future:DiscoveryCohortEvent",
+      "expected": "FUTURE_AVAILABILITY",
+      "caught": true,
+      "observed": [
+        "FUTURE_AVAILABILITY"
+      ]
+    },
+    {
+      "case": "authority:DiscoveryCohortEvent",
+      "expected": "SCHEMA:",
+      "caught": true,
+      "observed": [
+        "SCHEMA:$.trade_authorized"
+      ]
+    },
+    {
+      "case": "grade:DiscoveryCohortEvent",
+      "expected": "FIXTURE_AS_QUALIFICATION",
+      "caught": true,
+      "observed": [
+        "FIXTURE_AS_QUALIFICATION"
+      ]
+    },
+    {
+      "case": "future:ChainSecurityFinding",
+      "expected": "FUTURE_AVAILABILITY",
+      "caught": true,
+      "observed": [
+        "FUTURE_AVAILABILITY"
+      ]
+    },
+    {
+      "case": "authority:ChainSecurityFinding",
+      "expected": "SCHEMA:",
+      "caught": true,
+      "observed": [
+        "SCHEMA:$.trade_authorized"
+      ]
+    },
+    {
+      "case": "grade:ChainSecurityFinding",
+      "expected": "FIXTURE_AS_QUALIFICATION",
+      "caught": true,
+      "observed": [
+        "FIXTURE_AS_QUALIFICATION"
+      ]
+    },
+    {
+      "case": "future:WalletAttributionSnapshot",
+      "expected": "FUTURE_AVAILABILITY",
+      "caught": true,
+      "observed": [
+        "FUTURE_AVAILABILITY"
+      ]
+    },
+    {
+      "case": "authority:WalletAttributionSnapshot",
+      "expected": "SCHEMA:",
+      "caught": true,
+      "observed": [
+        "SCHEMA:$.trade_authorized"
+      ]
+    },
+    {
+      "case": "grade:WalletAttributionSnapshot",
+      "expected": "FIXTURE_AS_QUALIFICATION",
+      "caught": true,
+      "observed": [
+        "FIXTURE_AS_QUALIFICATION"
+      ]
+    },
+    {
+      "case": "future:SellabilitySimulation",
+      "expected": "FUTURE_AVAILABILITY",
+      "caught": true,
+      "observed": [
+        "FUTURE_AVAILABILITY"
+      ]
+    },
+    {
+      "case": "authority:SellabilitySimulation",
+      "expected": "SCHEMA:",
+      "caught": true,
+      "observed": [
+        "SCHEMA:$.trade_authorized"
+      ]
+    },
+    {
+      "case": "grade:SellabilitySimulation",
+      "expected": "FIXTURE_AS_QUALIFICATION",
+      "caught": true,
+      "observed": [
+        "FIXTURE_AS_QUALIFICATION"
+      ]
+    },
+    {
+      "case": "future:ExecutableQuoteFacts",
+      "expected": "FUTURE_AVAILABILITY",
+      "caught": true,
+      "observed": [
+        "FUTURE_AVAILABILITY"
+      ]
+    },
+    {
+      "case": "authority:ExecutableQuoteFacts",
+      "expected": "SCHEMA:",
+      "caught": true,
+      "observed": [
+        "SCHEMA:$.trade_authorized"
+      ]
+    },
+    {
+      "case": "grade:ExecutableQuoteFacts",
+      "expected": "FIXTURE_AS_QUALIFICATION",
+      "caught": true,
+      "observed": [
+        "FIXTURE_AS_QUALIFICATION"
+      ]
+    },
+    {
+      "case": "future:ExecutionEconomicsForecast",
+      "expected": "FUTURE_AVAILABILITY",
+      "caught": true,
+      "observed": [
+        "FUTURE_AVAILABILITY"
+      ]
+    },
+    {
+      "case": "authority:ExecutionEconomicsForecast",
+      "expected": "SCHEMA:",
+      "caught": true,
+      "observed": [
+        "SCHEMA:$.trade_authorized"
+      ]
+    },
+    {
+      "case": "grade:ExecutionEconomicsForecast",
+      "expected": "FIXTURE_AS_QUALIFICATION",
+      "caught": true,
+      "observed": [
+        "FIXTURE_AS_QUALIFICATION"
+      ]
+    },
+    {
+      "case": "future:NetEdgeAssessment",
+      "expected": "FUTURE_AVAILABILITY",
+      "caught": true,
+      "observed": [
+        "FUTURE_AVAILABILITY"
+      ]
+    },
+    {
+      "case": "authority:NetEdgeAssessment",
+      "expected": "SCHEMA:",
+      "caught": true,
+      "observed": [
+        "SCHEMA:$.trade_authorized"
+      ]
+    },
+    {
+      "case": "grade:NetEdgeAssessment",
+      "expected": "FIXTURE_AS_QUALIFICATION",
+      "caught": true,
+      "observed": [
+        "FIXTURE_AS_QUALIFICATION"
+      ]
+    },
+    {
+      "case": "future:MatchedOpportunityExperiment",
+      "expected": "FUTURE_AVAILABILITY",
+      "caught": true,
+      "observed": [
+        "FUTURE_AVAILABILITY"
+      ]
+    },
+    {
+      "case": "authority:MatchedOpportunityExperiment",
+      "expected": "SCHEMA:",
+      "caught": true,
+      "observed": [
+        "SCHEMA:$.trade_authorized"
+      ]
+    },
+    {
+      "case": "grade:MatchedOpportunityExperiment",
+      "expected": "FIXTURE_AS_QUALIFICATION",
+      "caught": true,
+      "observed": [
+        "FIXTURE_AS_QUALIFICATION"
+      ]
+    },
+    {
+      "case": "future:TypedTradingJudgment",
+      "expected": "FUTURE_AVAILABILITY",
+      "caught": true,
+      "observed": [
+        "FUTURE_AVAILABILITY"
+      ]
+    },
+    {
+      "case": "authority:TypedTradingJudgment",
+      "expected": "SCHEMA:",
+      "caught": true,
+      "observed": [
+        "SCHEMA:$.trade_authorized"
+      ]
+    },
+    {
+      "case": "grade:TypedTradingJudgment",
+      "expected": "FIXTURE_AS_QUALIFICATION",
+      "caught": true,
+      "observed": [
+        "FIXTURE_AS_QUALIFICATION"
+      ]
+    },
+    {
+      "case": "future:ResearchCapabilityReadModel",
+      "expected": "FUTURE_AVAILABILITY",
+      "caught": true,
+      "observed": [
+        "FUTURE_AVAILABILITY"
+      ]
+    },
+    {
+      "case": "authority:ResearchCapabilityReadModel",
+      "expected": "SCHEMA:",
+      "caught": true,
+      "observed": [
+        "SCHEMA:$.trade_authorized"
+      ]
+    },
+    {
+      "case": "grade:ResearchCapabilityReadModel",
+      "expected": "FIXTURE_AS_QUALIFICATION",
+      "caught": true,
+      "observed": [
+        "FIXTURE_AS_QUALIFICATION"
+      ]
+    },
+    {
+      "case": "asset-binding",
+      "expected": "IDENTITY_BINDING",
+      "caught": true,
+      "observed": [
+        "IDENTITY_BINDING"
+      ]
+    },
+    {
+      "case": "evm-length",
+      "expected": "EVM_ENCODING",
+      "caught": true,
+      "observed": [
+        "IDENTITY_BINDING",
+        "EVM_ENCODING"
+      ]
+    },
+    {
+      "case": "clock-order",
+      "expected": "SOURCE_CLOCK_ORDER",
+      "caught": true,
+      "observed": [
+        "SOURCE_CLOCK_ORDER"
+      ]
+    },
+    {
+      "case": "provider-receipt",
+      "expected": "FAKE_PROVIDER_RECEIPT",
+      "caught": true,
+      "observed": [
+        "FAKE_PROVIDER_RECEIPT"
+      ]
+    },
+    {
+      "case": "procurement",
+      "expected": "SCHEMA:",
+      "caught": true,
+      "observed": [
+        "SCHEMA:$.new_purchase_required"
+      ]
+    },
+    {
+      "case": "later-discovery",
+      "expected": "DISCOVERY_AFTER_DECISION",
+      "caught": true,
+      "observed": [
+        "DISCOVERY_AFTER_DECISION"
+      ]
+    },
+    {
+      "case": "string-boolean",
+      "expected": "SCHEMA:",
+      "caught": true,
+      "observed": [
+        "SCHEMA:$.mint_authority"
+      ]
+    },
+    {
+      "case": "unsafe-clear",
+      "expected": "UNSUPPORTED_AS_CLEAR",
+      "caught": true,
+      "observed": [
+        "UNSUPPORTED_AS_CLEAR"
+      ]
+    },
+    {
+      "case": "safe-to-buy",
+      "expected": "SCHEMA:",
+      "caught": true,
+      "observed": [
+        "SCHEMA:$.verdict"
+      ]
+    },
+    {
+      "case": "one-snapshot-growth",
+      "expected": "GROWTH_FROM_ONE_SNAPSHOT",
+      "caught": true,
+      "observed": [
+        "GROWTH_FROM_ONE_SNAPSHOT"
+      ]
+    },
+    {
+      "case": "adjusted-larger",
+      "expected": "ADJUSTMENT_INCREASES_HOLDINGS",
+      "caught": true,
+      "observed": [
+        "ADJUSTMENT_INCREASES_HOLDINGS"
+      ]
+    },
+    {
+      "case": "sell-guarantee",
+      "expected": "SCHEMA:",
+      "caught": true,
+      "observed": [
+        "SCHEMA:$.future_sell_guaranteed"
+      ]
+    },
+    {
+      "case": "chain-signing",
+      "expected": "SCHEMA:",
+      "caught": true,
+      "observed": [
+        "SCHEMA:$.submitted_transaction"
+      ]
+    },
+    {
+      "case": "probability-in-facts",
+      "expected": "SCHEMA:",
+      "caught": true,
+      "observed": [
+        "SCHEMA:$"
+      ]
+    },
+    {
+      "case": "expired-calibration",
+      "expected": "FORECAST_UNQUALIFIED_FOR_ECONOMIC_USE",
+      "caught": true,
+      "observed": [
+        "FORECAST_UNQUALIFIED_FOR_ECONOMIC_USE"
+      ]
+    },
+    {
+      "case": "nonfinite",
+      "expected": "NONFINITE_PROBABILITY",
+      "caught": true,
+      "observed": [
+        "NONFINITE_PROBABILITY"
+      ]
+    },
+    {
+      "case": "double-charge",
+      "expected": "DOUBLE_COUNTED_COST",
+      "caught": true,
+      "observed": [
+        "DOUBLE_COUNTED_COST"
+      ]
+    },
+    {
+      "case": "wrong-ev",
+      "expected": "NET_EV_IDENTITY",
+      "caught": true,
+      "observed": [
+        "NET_EV_IDENTITY"
+      ]
+    },
+    {
+      "case": "fake-economic",
+      "expected": "FIXTURE_AS_ECONOMIC_ADMISSION",
+      "caught": true,
+      "observed": [
+        "FIXTURE_AS_ECONOMIC_ADMISSION"
+      ]
+    },
+    {
+      "case": "survivors-only",
+      "expected": "SURVIVOR_COHORT",
+      "caught": true,
+      "observed": [
+        "SURVIVOR_COHORT",
+        "COHORT_COUNT_INCONSISTENT"
+      ]
+    },
+    {
+      "case": "future-outcome",
+      "expected": "EXPERIMENT_CHRONOLOGY",
+      "caught": true,
+      "observed": [
+        "EXPERIMENT_CHRONOLOGY"
+      ]
+    },
+    {
+      "case": "wrong-r",
+      "expected": "WRONG_COUNTERFACTUAL_BASIS",
+      "caught": true,
+      "observed": [
+        "WRONG_COUNTERFACTUAL_BASIS"
+      ]
+    },
+    {
+      "case": "fake-realized",
+      "expected": "SIMULATED_AS_OBSERVED",
+      "caught": true,
+      "observed": [
+        "SIMULATED_AS_OBSERVED"
+      ]
+    },
+    {
+      "case": "independent-row-bootstrap",
+      "expected": "SCHEMA:",
+      "caught": true,
+      "observed": [
+        "SCHEMA:$.resampling_unit"
+      ]
+    },
+    {
+      "case": "new-jev",
+      "expected": "SCHEMA:",
+      "caught": true,
+      "observed": [
+        "SCHEMA:$.service_owner"
+      ]
+    },
+    {
+      "case": "confidence-is-win",
+      "expected": "SCHEMA:",
+      "caught": true,
+      "observed": [
+        "SCHEMA:$.confidence_semantics"
+      ]
+    },
+    {
+      "case": "override-hardgate",
+      "expected": "SCHEMA:",
+      "caught": true,
+      "observed": [
+        "SCHEMA:$.hard_filter_override"
+      ]
+    },
+    {
+      "case": "exit-veto",
+      "expected": "SCHEMA:",
+      "caught": true,
+      "observed": [
+        "SCHEMA:$.mandatory_exit_veto"
+      ]
+    },
+    {
+      "case": "early-ui",
+      "expected": "SCHEMA:",
+      "caught": true,
+      "observed": [
+        "SCHEMA:$.new_frontend_gate"
+      ]
+    },
+    {
+      "case": "fake-runtime",
+      "expected": "FIXTURE_AS_RUNTIME",
+      "caught": true,
+      "observed": [
+        "FIXTURE_AS_RUNTIME"
+      ]
+    },
+    {
+      "case": "false-funnel",
+      "expected": "FUNNEL_MISMATCH",
+      "caught": true,
+      "observed": [
+        "FUNNEL_MISMATCH"
+      ]
+    }
+  ],
+  "negative_cases_caught": 67
+}

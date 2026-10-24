@@ -1,0 +1,324 @@
+{
+  "schema": "van.rebuild.mt5-original-cash-source/1",
+  "observed_at_utc": "2026-10-24T13:19:42.345561+00:00",
+  "source_parent": "bd00483e969822c65bfd493c93fa5dd30920bcc5",
+  "source_sha256": {
+    "android/app/src/main/java/com/dial/van/trading/FundingObservation.kt": "c15af09b6e649aca9e26fbedc8f7e55c965ae0ce762034aaf3a2585b4cc1763c",
+    "android/app/src/test/java/com/dial/van/trading/FundingObservationTest.kt": "d5d0ccad08850926db2104ace0a66acadf3639c091d81ec332074cd30980b8b8",
+    "android/verification/src/test/kotlin/com/dial/van/trading/FundingSourceContractTest.kt": "617dcc1349236db4e53d71543d2f9933d7f26696dab0db7c3842c95158c39faf",
+    "backend/tests/test_funding_owner_api.py": "0b846acb14a66081f455f438773ed17e7c57c24765d1dd36f508fa4bba3c94b0",
+    "deploy/van-trading-core/mql5/VanBridgeEA.mq5": "4aec4966abee9558b1fb4641e4824117a723b9f9db1c46afd1888f0f01914b97",
+    "deploy/van-trading-core/windows/mt5_worker/mt5_bridge_worker.py": "4d58b2a6abc8e4f894e6216899969ba76fcef4f551cad357e52ff31bfa097292",
+    "trading/tests/test_single_session_unknown_entry.py": "6b6354b941ae7949d3324c461d59583aebe79f0bd55c88c2664a6f7cb121a2b4",
+    "trading/vati/app/account_service.py": "3e88a0d73cae59d4730e2dc1c687c50435b109a6464df8dcf815aab08af3597a",
+    "trading/vati/app/cycle.py": "dbe1a091dc3db13292e13e4c7ecdb27a99f9eeeae47f06653d94053642fc7d70",
+    "trading/vati/app/portfolio.py": "eefb66f0e795ca91a50328a146eb3366cdb78b5834a5803c8df3d293579246e4",
+    "trading/vati/app/service.py": "debeb2476d1d41fd5bd936b64a3bc10e3065b8f581f15ea80078d6ca313f417b",
+    "trading/vati/core/events.py": "d2ef6a429810849098e8abe8265cce0bd2a8a16fac036ceae6b764e6a927a4f6",
+    "trading/vati/execution/base.py": "848b6e64af984ca04ba49be9e62c23c4c65481ab3e9b0d2efe1232a0937ae9b5",
+    "trading/vati/execution/mt5_bridge.py": "02ad03937004afc2f23caf7cc8b42e159b859b665244edab364958dd808fce34",
+    "trading/vati/execution/mt5_pull.py": "7801b4075304346dbf34b17cad6ac4698f8e2cf06fe58562e5fac94de36b0a94",
+    "trading/vati/funding/native.py": "fba8404d5686563b4587e6e55fab3594a21f5a70d9a9f47d765d3e1a102f7883",
+    "trading/vati/funding/risk_fence.py": "f612f8a0a25eba54b5d0a9a5d5fb4535176ab385ce64058ced0201f89f4d6f31",
+    "trading/vati/funding/runtime.py": "2e5c2e0c4bab4b293e49551a04f459afe3b293f91045c52a253daef2fd1ba1b5",
+    "trading/vati/funding/worker.py": "282773e60c0105fbfe4dc003bdaf1ddca1901fe06dd3837013d29e526714b516",
+    "trading/tests/mt5_cash_kit.py": "e963d50f00bd2a446152017a15d442777484533dc2d019752256d021f8610408",
+    "trading/tests/test_mt5_funding_contract.py": "c7fbeb985b105124b88e7caafc9e11368ed39e5e9fe9dc72f0385b9c0d840108",
+    "trading/tests/test_mt5_funding_runtime.py": "f3f7590f596fdf0373b1348ac902c974fb4b38d224ead311809ca28a751f6ece",
+    "trading/tests/test_mt5_worker_funding.py": "4c3ac48c3ef81697435a0bc0cce80b19f7c579d9eae0a75e116dd393b23e3be7",
+    "trading/vati/funding/mt5.py": "d9d31be2bbef043c96e3fc96e8d5d4abbffd5455de0ff93602652b92dc7fc272",
+    "trading/vati/funding/mt5_journal.py": "333d0f001eaa51c278af4c4c68a5cfd8890eb53735b90c109063fae015857388",
+    "trading/vati/funding/mt5_report.py": "2c36ffedd29434d1a23c0b3a5ea63508ce4aae31489b18661463c73c0e4e21c7",
+    "trading/vati/funding/mt5_runtime.py": "28eb54a075b38edc249e8351dfed8803d23ae7cc6a9151a42135424ae5f32955"
+  },
+  "executions": {
+    "final_focused_native_risk_and_owner_api": {
+      "tests": 133,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "passed": 133,
+      "xml_sha256": "5a3f7edb2336b415ce1befb75a0e0f1288a90ad3b389a4a50e3731bb390e66f1"
+    },
+    "compiled_full_kotlin_junit5": {
+      "tests": 1331,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "passed": 1331,
+      "xml_sha256": "39882159681323cd7dd45e08052753ade337cdaf072f3ad023a5b0bb6ea64f34"
+    },
+    "earlier_candidate_pg_unknown_entry_suite": {
+      "tests": 30,
+      "failures": 2,
+      "errors": 0,
+      "skipped": 0,
+      "passed": 28,
+      "xml_sha256": "42dd907a6a49bf59c8eadf7503efbd42e147e711895ee4c82962ead67626759f",
+      "failure_reason": "Two native-thread creation resource failures. Original 30-case run remains FAILED; no whole-run PASS inferred. Query validation and invalid-account error handling were subsequently strengthened, so this is not an exact final-head qualification."
+    },
+    "fresh_process_pg_terminal_outcomes": {
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "passed": 3,
+      "xml_sha256": "063f374062f121b837f71a1172dad6d81a8b1178faed52fe054513665f7d446e",
+      "qualification": "All three original terminal outcomes pass. Full final-head PostgreSQL/trading rerun remains required."
+    },
+    "rebuild_guards": {
+      "tests": 80,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "passed": 80,
+      "xml_sha256": "9f3b3b2faff3953c8fb431981fc71ca82d392d679e56b33cb48dad5d6a01cb03"
+    },
+    "owner_contracts": {
+      "tests": 35,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "passed": 35,
+      "xml_sha256": "a6a30b2cf0a065bffd72f1e100ef472f97b56ef7a7f222efdc0cd4adc85a232f"
+    },
+    "actual_agp_compiled_app_parsers_junit4": {
+      "exit_code": 0,
+      "five_tests_confirmed": true,
+      "runtime": "JUnit4.13.2 actual AGP compiled debug/debugUnitTest classes",
+      "tests": [
+        "com.dial.van.trading.FundingObservationTest",
+        "com.dial.van.trading.NativeBalancePeriodTest"
+      ],
+      "classpath_sha256": "4d4d38b0ef950b2e7ade1136e4188f0a325e8c20a804b10e87f72b804ed7022d",
+      "runtime_files_sha256": {
+        "/workspace/.onboarding/gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-test-junit5/2.0.21/9eff871dcc7b7cbc6050945b906dfdd6d5b76f02/kotlin-test-junit5-2.0.21.jar": "ac47de619b7d87e2bfdf7f6eec6a62a61d1bdc0c325740df52186b141936713d",
+        "/workspace/.onboarding/gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-test/2.0.21/c6ea143e356327ddfda57e53e829c553e3b45b64/kotlin-test-2.0.21.jar": "a897b28c6a3ea8ec8f00ed766941a0c0df993d7f65908875879868e08ceb8985",
+        "/workspace/.onboarding/gradle/caches/modules-2/files-2.1/org.jetbrains.kotlinx/kotlinx-serialization-core-jvm/1.7.3/1f226780b845ff9206474c05159245d861556249/kotlinx-serialization-core-jvm-1.7.3.jar": "f0adde45864144475385cf4aa7e0b7feb27f61fcf9472665ed98cc971b06b1eb",
+        "/workspace/.onboarding/gradle/caches/modules-2/files-2.1/org.jetbrains.kotlinx/kotlinx-serialization-json-jvm/1.7.3/6701e8c68d9e82387ce72ee96e8ddf058208d58f/kotlinx-serialization-json-jvm-1.7.3.jar": "b1e9138499ed8d20375edda3f2b1c95f3103a258eff6af9edc5ea07100f2b29c",
+        "/workspace/.onboarding/gradle/caches/modules-2/files-2.1/org.jetbrains.kotlinx/kotlinx-coroutines-core-jvm/1.8.1/bb0e192bd7c2b6b8217440d36e9758e377e450/kotlinx-coroutines-core-jvm-1.8.1.jar": "f3d4f5de1c391bbcc20f3b3435ccbac013521e76b6902d7d59635ec15c1f797e",
+        "/workspace/.onboarding/gradle/caches/modules-2/files-2.1/com.squareup.okhttp3/okhttp/4.12.0/2f4525d4a200e97e1b87449c2cd9bd2e25b7e8cd/okhttp-4.12.0.jar": "b1050081b14bb7a3a7e55a4d3ef01b5dcfabc453b4573a4fc019767191d5f4e0",
+        "/workspace/.onboarding/gradle/caches/modules-2/files-2.1/com.squareup.okio/okio-jvm/3.6.0/5600569133b7bdefe1daf9ec7f4abeb6d13e1786/okio-jvm-3.6.0.jar": "67543f0736fc422ae927ed0e504b98bc5e269fda0d3500579337cb713da28412",
+        "/workspace/.onboarding/gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-stdlib-jdk8/1.9.10/c7510d64a83411a649c76f2778304ddf71d7437b/kotlin-stdlib-jdk8-1.9.10.jar": "a4c74d94d64ce1abe53760fe0389dd941f6fc558d0dab35e47c085a11ec80f28",
+        "/workspace/.onboarding/gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-stdlib-jdk7/1.9.10/bc5bfc2690338defd5195b05c57562f2194eeb10/kotlin-stdlib-jdk7-1.9.10.jar": "ac6361bf9ad1ed382c2103d9712c47cdec166232b4903ed596e8876b0681c9b7",
+        "/workspace/.onboarding/gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-stdlib/2.0.21/618b539767b4899b4660a83006e052b63f1db551/kotlin-stdlib-2.0.21.jar": "f31cc53f105a7e48c093683bbd5437561d1233920513774b470805641bedbc09",
+        "/workspace/.onboarding/gradle/caches/modules-2/files-2.1/org.json/json/20240303/ebb88e8fb5122b7506d5cf1d69f1ccdb790d22a/json-20240303.jar": "3cf6cd6892e32e2b4c1c39e0f52f5248a2f5b37646fdfbb79a66b46b618414ed",
+        "/workspace/.onboarding/gradle/caches/modules-2/files-2.1/org.jetbrains/annotations/23.0.0/8cc20c07506ec18e0834947b84a864bfc094484e/annotations-23.0.0.jar": "7b0f19724082cbfcbc66e5abea2b9bc92cf08a1ea11e191933ed43801eb3cd05",
+        "/workspace/.onboarding/gradle/caches/modules-2/files-2.1/org.junit.platform/junit-platform-launcher/1.10.1/ce85bf5e38bee0989ded9bd468dd4ff78dc0cfa8/junit-platform-launcher-1.10.1.jar": "ded414c504e88d02270331071969084e1b2fd9bcf8443f35d44da2c6e3301bc2",
+        "/workspace/.onboarding/gradle/caches/modules-2/files-2.1/org.junit.platform/junit-platform-engine/1.10.1/f32ae4af74fde68414b8a3d2b7cf1fb43824a83a/junit-platform-engine-1.10.1.jar": "baa48e470d6dee7369a0a8820c51da89c1463279eda6e13a304d11f45922c760",
+        "/workspace/.onboarding/gradle/caches/modules-2/files-2.1/org.junit.jupiter/junit-jupiter-api/5.10.1/eb90c7d8bfaae8fdc97b225733fcb595ddd72843/junit-jupiter-api-5.10.1.jar": "60d5c398c32dc7039b99282514ad6064061d8417cf959a1f6bd2038cc907c913",
+        "/workspace/.onboarding/gradle/caches/modules-2/files-2.1/org.junit.platform/junit-platform-commons/1.10.1/2bfcd4a4e38b10c671b6916d7e543c20afe25579/junit-platform-commons-1.10.1.jar": "7d9855ee3f3f71f015eb1479559bf923783243c24fbfbd8b29bed8e8099b5672",
+        "/workspace/.onboarding/gradle/caches/modules-2/files-2.1/org.junit.jupiter/junit-jupiter-engine/5.10.1/6c9ff773f9aa842b91d1f2fe4658973252ce2428/junit-jupiter-engine-5.10.1.jar": "02930dfe495f93fe70b26550ace3a28f7e1b900c84426c2e4626ce020c7282d6",
+        "/workspace/.onboarding/gradle/caches/modules-2/files-2.1/org.opentest4j/opentest4j/1.3.0/152ea56b3a72f655d4fd677fc0ef2596c3dd5e6e/opentest4j-1.3.0.jar": "48e2df636cab6563ced64dcdff8abb2355627cb236ef0bf37598682ddf742f1b",
+        "/workspace/.onboarding/gradle/caches/modules-2/files-2.1/junit/junit/4.13.2/8ac9e16d933b6fb43bc7f576336b8f4d7eb5ba12/junit-4.13.2.jar": "8e495b634469d64fb8acfa3495a065cbacc8a0fff55ce1e31007be4c16dc57d3",
+        "/workspace/.onboarding/gradle/caches/modules-2/files-2.1/org.hamcrest/hamcrest-core/1.3/42a25dc3219429f0e5d060061f71acb49bf010a0/hamcrest-core-1.3.jar": "66fdef91e9739348df7a096aa384a5685f4e875584cce89386a7a47251c4d8e9"
+      },
+      "selected_compiled_classes_sha256": {
+        "android/app/build/tmp/kotlin-classes/debugUnitTest/com/dial/van/trading/FundingObservationTest.class": "13b8afd59fb1ca307cf0bdb785665bc0bee5dae256f633a84972baf0a70946ed",
+        "android/app/build/tmp/kotlin-classes/debugUnitTest/com/dial/van/trading/NativeBalancePeriodTest.class": "137de24976b8cbe9da8c81a59379409e2ec81854fef68b09f2c8c1b5c0d10494",
+        "android/app/build/tmp/kotlin-classes/debug/com/dial/van/trading/NativeBalancePeriod$Companion.class": "290cbf9dcf1010f1e72cdc0fe6ca6966fa63c84c6bd61dc604b0a32a5d68a91b",
+        "android/app/build/tmp/kotlin-classes/debug/com/dial/van/trading/NativeCashMovement$Companion.class": "38ddc52c00db1a8321020364c8720c00a420aefdca6d03c5eaabea9a9a5f2ea3",
+        "android/app/build/tmp/kotlin-classes/debug/com/dial/van/trading/TradingModelsKt.class": "00c7fed2bcda22f4bd66bdb4a3b7bd6bc00f85536648349fd7825fb9ed63ff35",
+        "android/app/build/tmp/kotlin-classes/debug/com/dial/van/trading/FundingObservation$Companion.class": "64f9f508e54a2b28da1c925bccdf756fc38a3ef3a2c1b343a800909f499945d0",
+        "android/app/build/tmp/kotlin-classes/debug/com/dial/van/trading/NativeBalancePeriod.class": "c1c3634f8f3d2874491147ce1252b2a99297738d25926b65a14d7045484c5a42",
+        "android/app/build/tmp/kotlin-classes/debug/com/dial/van/trading/TradingModelsKt$json$1.class": "07a641ab9b5cb03e4f5acb849ed1caa0a631a1a84be0fbc808dd74ac1db649bf",
+        "android/app/build/tmp/kotlin-classes/debug/com/dial/van/trading/FundingObservation.class": "1926f5be12253e2341e5bcca0168ebdb6dc2066aaffbb5dbdb1f1d8fc984b432",
+        "android/app/build/tmp/kotlin-classes/debug/com/dial/van/trading/NativeCashMovement.class": "5ea2e49576cbaf66bc1ae99f52337aceabe98e73ca814b9428fea311712377d6"
+      },
+      "log_sha256": "47753ba8339b754c7fcb7dc2d704488da44ee00235854baf47957ce7b8a55a36"
+    }
+  },
+  "resource_attempts": {
+    "gradle_kotlin_worker": {
+      "state": "FAILED_NATIVE_THREAD_CREATION",
+      "log_sha256": "f0e6b90ff2eacb47ff742f8a3cd327a7dd62d444fa05ca2170489166f555ea69",
+      "source_compilation": "SUCCEEDED",
+      "alternative": "Same compiled main/test classes and unchanged JUnit5 runtime engines executed directly,1331pass0skip. This is not a successful Gradle test invocation."
+    },
+    "kotlin_runtime": {
+      "exit_code": 0,
+      "classpath_sha256": "0c4639dd0319b0ca454d509cde41fc0f9c16ba4922cb09a7a48cbf64705697a7",
+      "runtime_files_sha256": {
+        "/workspace/.onboarding/gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-test-junit5/2.0.21/9eff871dcc7b7cbc6050945b906dfdd6d5b76f02/kotlin-test-junit5-2.0.21.jar": "ac47de619b7d87e2bfdf7f6eec6a62a61d1bdc0c325740df52186b141936713d",
+        "/workspace/.onboarding/gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-test/2.0.21/c6ea143e356327ddfda57e53e829c553e3b45b64/kotlin-test-2.0.21.jar": "a897b28c6a3ea8ec8f00ed766941a0c0df993d7f65908875879868e08ceb8985",
+        "/workspace/.onboarding/gradle/caches/modules-2/files-2.1/org.jetbrains.kotlinx/kotlinx-serialization-core-jvm/1.7.3/1f226780b845ff9206474c05159245d861556249/kotlinx-serialization-core-jvm-1.7.3.jar": "f0adde45864144475385cf4aa7e0b7feb27f61fcf9472665ed98cc971b06b1eb",
+        "/workspace/.onboarding/gradle/caches/modules-2/files-2.1/org.jetbrains.kotlinx/kotlinx-serialization-json-jvm/1.7.3/6701e8c68d9e82387ce72ee96e8ddf058208d58f/kotlinx-serialization-json-jvm-1.7.3.jar": "b1e9138499ed8d20375edda3f2b1c95f3103a258eff6af9edc5ea07100f2b29c",
+        "/workspace/.onboarding/gradle/caches/modules-2/files-2.1/org.jetbrains.kotlinx/kotlinx-coroutines-core-jvm/1.8.1/bb0e192bd7c2b6b8217440d36e9758e377e450/kotlinx-coroutines-core-jvm-1.8.1.jar": "f3d4f5de1c391bbcc20f3b3435ccbac013521e76b6902d7d59635ec15c1f797e",
+        "/workspace/.onboarding/gradle/caches/modules-2/files-2.1/com.squareup.okhttp3/okhttp/4.12.0/2f4525d4a200e97e1b87449c2cd9bd2e25b7e8cd/okhttp-4.12.0.jar": "b1050081b14bb7a3a7e55a4d3ef01b5dcfabc453b4573a4fc019767191d5f4e0",
+        "/workspace/.onboarding/gradle/caches/modules-2/files-2.1/com.squareup.okio/okio-jvm/3.6.0/5600569133b7bdefe1daf9ec7f4abeb6d13e1786/okio-jvm-3.6.0.jar": "67543f0736fc422ae927ed0e504b98bc5e269fda0d3500579337cb713da28412",
+        "/workspace/.onboarding/gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-stdlib-jdk8/1.9.10/c7510d64a83411a649c76f2778304ddf71d7437b/kotlin-stdlib-jdk8-1.9.10.jar": "a4c74d94d64ce1abe53760fe0389dd941f6fc558d0dab35e47c085a11ec80f28",
+        "/workspace/.onboarding/gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-stdlib-jdk7/1.9.10/bc5bfc2690338defd5195b05c57562f2194eeb10/kotlin-stdlib-jdk7-1.9.10.jar": "ac6361bf9ad1ed382c2103d9712c47cdec166232b4903ed596e8876b0681c9b7",
+        "/workspace/.onboarding/gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-stdlib/2.0.21/618b539767b4899b4660a83006e052b63f1db551/kotlin-stdlib-2.0.21.jar": "f31cc53f105a7e48c093683bbd5437561d1233920513774b470805641bedbc09",
+        "/workspace/.onboarding/gradle/caches/modules-2/files-2.1/org.json/json/20240303/ebb88e8fb5122b7506d5cf1d69f1ccdb790d22a/json-20240303.jar": "3cf6cd6892e32e2b4c1c39e0f52f5248a2f5b37646fdfbb79a66b46b618414ed",
+        "/workspace/.onboarding/gradle/caches/modules-2/files-2.1/org.jetbrains/annotations/23.0.0/8cc20c07506ec18e0834947b84a864bfc094484e/annotations-23.0.0.jar": "7b0f19724082cbfcbc66e5abea2b9bc92cf08a1ea11e191933ed43801eb3cd05",
+        "/workspace/.onboarding/gradle/caches/modules-2/files-2.1/org.junit.platform/junit-platform-launcher/1.10.1/ce85bf5e38bee0989ded9bd468dd4ff78dc0cfa8/junit-platform-launcher-1.10.1.jar": "ded414c504e88d02270331071969084e1b2fd9bcf8443f35d44da2c6e3301bc2",
+        "/workspace/.onboarding/gradle/caches/modules-2/files-2.1/org.junit.platform/junit-platform-engine/1.10.1/f32ae4af74fde68414b8a3d2b7cf1fb43824a83a/junit-platform-engine-1.10.1.jar": "baa48e470d6dee7369a0a8820c51da89c1463279eda6e13a304d11f45922c760",
+        "/workspace/.onboarding/gradle/caches/modules-2/files-2.1/org.junit.jupiter/junit-jupiter-api/5.10.1/eb90c7d8bfaae8fdc97b225733fcb595ddd72843/junit-jupiter-api-5.10.1.jar": "60d5c398c32dc7039b99282514ad6064061d8417cf959a1f6bd2038cc907c913",
+        "/workspace/.onboarding/gradle/caches/modules-2/files-2.1/org.junit.platform/junit-platform-commons/1.10.1/2bfcd4a4e38b10c671b6916d7e543c20afe25579/junit-platform-commons-1.10.1.jar": "7d9855ee3f3f71f015eb1479559bf923783243c24fbfbd8b29bed8e8099b5672",
+        "/workspace/.onboarding/gradle/caches/modules-2/files-2.1/org.junit.jupiter/junit-jupiter-engine/5.10.1/6c9ff773f9aa842b91d1f2fe4658973252ce2428/junit-jupiter-engine-5.10.1.jar": "02930dfe495f93fe70b26550ace3a28f7e1b900c84426c2e4626ce020c7282d6",
+        "/workspace/.onboarding/gradle/caches/modules-2/files-2.1/org.opentest4j/opentest4j/1.3.0/152ea56b3a72f655d4fd677fc0ef2596c3dd5e6e/opentest4j-1.3.0.jar": "48e2df636cab6563ced64dcdff8abb2355627cb236ef0bf37598682ddf742f1b"
+      },
+      "launcher_sha256": "d80f4f7c3a525d8bca4784f511c0e26b06c6c0ae0399952a3e22bb397719cd45",
+      "working_directory": "/tmp/van-mt5-worker-work-20261024/android/verification"
+    },
+    "launcher_source": "import java.io.*;\nimport java.nio.file.*;\nimport java.util.*;\nimport javax.xml.stream.*;\nimport org.junit.platform.engine.TestExecutionResult;\nimport org.junit.platform.engine.discovery.DiscoverySelectors;\nimport org.junit.platform.launcher.*;\nimport org.junit.platform.launcher.core.*;\nimport org.junit.platform.launcher.listeners.*;\n\n/** Uses the unchanged JUnit 5 engines and compiled Gradle runtime classpath. */\npublic final class VanQualifiedTestLauncher {\n  record Case(String id, String name, String state, String message, double seconds) {}\n  public static void main(String[] args) throws Exception {\n    var records = new ArrayList<Case>();\n    var starts = new HashMap<String,Long>();\n    var summary = new SummaryGeneratingListener();\n    var recorder = new TestExecutionListener() {\n      public void executionStarted(TestIdentifier t) { if(t.isTest()) starts.put(t.getUniqueId(),System.nanoTime()); }\n      public void executionSkipped(TestIdentifier t, String why) { if(t.isTest()) records.add(new Case(t.getUniqueId(),t.getDisplayName(),\"SKIPPED\",why,0)); }\n      public void executionFinished(TestIdentifier t, TestExecutionResult r) {\n        if(t.isTest()) records.add(new Case(t.getUniqueId(),t.getDisplayName(),r.getStatus().name(),r.getThrowable().map(Throwable::toString).orElse(\"\"),(System.nanoTime()-starts.getOrDefault(t.getUniqueId(),System.nanoTime()))/1e9));\n      }\n    };\n    var request = LauncherDiscoveryRequestBuilder.request().selectors(DiscoverySelectors.selectClasspathRoots(Set.of(Path.of(args[0]).toAbsolutePath()))).build();\n    var launcher=LauncherFactory.create();\n    launcher.registerTestExecutionListeners(summary,recorder);\n    launcher.execute(request);\n    var s=summary.getSummary();\n    s.printTo(new PrintWriter(System.out,true)); s.printFailuresTo(new PrintWriter(System.out,true));\n    try(var out=Files.newOutputStream(Path.of(args[1]))) {\n      var x=XMLOutputFactory.newFactory().createXMLStreamWriter(out,\"UTF-8\");\n      x.writeStartDocument(\"UTF-8\",\"1.0\");x.writeStartElement(\"testsuites\");x.writeStartElement(\"testsuite\");\n      x.writeAttribute(\"name\",\"unchanged-full-Kotlin-JUnit5-harness\");x.writeAttribute(\"tests\",Long.toString(s.getTestsFoundCount()));\n      x.writeAttribute(\"failures\",Long.toString(s.getTestsFailedCount()));x.writeAttribute(\"errors\",Long.toString(s.getContainersFailedCount()));\n      x.writeAttribute(\"skipped\",Long.toString(s.getTestsSkippedCount()+s.getTestsAbortedCount()));\n      x.writeAttribute(\"time\",Double.toString((s.getTimeFinished()-s.getTimeStarted())/1000.0));\n      for(var c:records) {\n        x.writeStartElement(\"testcase\");x.writeAttribute(\"name\",c.name);x.writeAttribute(\"classname\",c.id);x.writeAttribute(\"time\",Double.toString(c.seconds));\n        if(!c.state.equals(\"SUCCESSFUL\")) {x.writeStartElement(c.state.equals(\"SKIPPED\")||c.state.equals(\"ABORTED\")?\"skipped\":\"failure\");x.writeAttribute(\"message\",c.message);x.writeEndElement();}\n        x.writeEndElement();\n      }\n      x.writeEndElement();x.writeEndElement();x.writeEndDocument();x.close();\n    }\n    if(records.size()!=s.getTestsFoundCount() || s.getTestsFoundCount()!=1331 || s.getTestsSucceededCount()!=1331 || s.getContainersFailedCount()!=0 || s.getTestsAbortedCount()!=0 || s.getTestsSkippedCount()!=0) System.exit(1);\n  }\n}\n",
+    "android_gradle_worker": {
+      "state": "FAILED_TEST_WORKER_START",
+      "log_sha256": "b5d96fb64a2f99f921e0affb5ba18a1d1a82660ac534a3615ad48aaa8d1f9250",
+      "source_compilation": "SUCCEEDED; actual debug and debugUnitTest Kotlin classes ran through unchanged JUnit4.13.2,5pass. Not a successful Gradle test task."
+    },
+    "first_guard_invocations": {
+      "rebuild_wrong_interpreter_missing_jsonschema_log_sha256": "489b0fe93859b7cab1b12d5e3212380c35642a3fee63bc7b7cdb4231f421c0b0",
+      "rebuild_parallel_verifier_errors_log_sha256": "7474c8acf023af56fffc2b424e0cdfa205441a8de296ad753f374d623638cedc",
+      "owner_node_timeouts_log_sha256": "9a82955d54641b0ff2830fe1439ca630f15567005212b094cfe2948d716ed189",
+      "resolution": "Use existing rebuild venv; run sequentially after JVM work, preserve NODE_OPTIONS and append --v8-pool-size=1, UV_THREADPOOL_SIZE=1. Original tests and timeouts unchanged."
+    }
+  },
+  "deliberate_fault_control_pairs": {
+    "baseline": {
+      "exit_code": 0,
+      "log_sha256": "61b35724272b4cfc40cf999bcb2e879554053fde273e59dcb4e7b656938eb3cf",
+      "xml": "/tmp/van-mt5-cash-fault-results-r2-20261024/baseline-control.xml",
+      "xml_sha256": "aa3be9d35a765d9b66f8d5a781f28316b48b82a6aa19a3189a27164cb8832a61"
+    },
+    "cases": [
+      {
+        "case": "credit-as-risk-capital",
+        "file": "trading/vati/funding/mt5.py",
+        "preimage_sha256": "d9d31be2bbef043c96e3fc96e8d5d4abbffd5455de0ff93602652b92dc7fc272",
+        "fault": {
+          "exit_code": 1,
+          "log_sha256": "8f71ca6c66c2efb657ccb2365f046c82e0ac4e7b30588a44b4cc7d51e79281d7",
+          "xml": "/tmp/van-mt5-cash-fault-results-r2-20261024/credit-as-risk-capital-fault.xml",
+          "xml_sha256": "0c5a57cdb6bef9fdf5dc00ee29355a96f982f47c2854a3c9b0b5a01aab3827c2"
+        },
+        "restored": {
+          "exit_code": 0,
+          "log_sha256": "0b2bd6b22ea50e90d0b61ce9c682bc88cfc286b0dad5f7ae9797db798dffa68d",
+          "xml": "/tmp/van-mt5-cash-fault-results-r2-20261024/credit-as-risk-capital-restored.xml",
+          "xml_sha256": "df8b6e3336a4beb02e4814e8cd5629bd2e11b29c8130ded0455137347de11ff7"
+        }
+      },
+      {
+        "case": "missing-history-as-empty",
+        "file": "deploy/van-trading-core/windows/mt5_worker/mt5_bridge_worker.py",
+        "preimage_sha256": "4d58b2a6abc8e4f894e6216899969ba76fcef4f551cad357e52ff31bfa097292",
+        "fault": {
+          "exit_code": 1,
+          "log_sha256": "6a07eb821813c7e8a2f1c994bdabf75253d0356d14647be007a84c0292879188",
+          "xml": "/tmp/van-mt5-cash-fault-results-r2-20261024/missing-history-as-empty-fault.xml",
+          "xml_sha256": "dfc343ea117de49181813ea5fe143dec0b019836380d6f5619b462c547e16680"
+        },
+        "restored": {
+          "exit_code": 0,
+          "log_sha256": "9381e144c8ca948ec6c610e33ed188a3faf8a6c3531c0ce9bebcd5e8d61c5747",
+          "xml": "/tmp/van-mt5-cash-fault-results-r2-20261024/missing-history-as-empty-restored.xml",
+          "xml_sha256": "116e5f34bda5e203e551ddd9f34549a8cd261ec9e2e521c61517a44551bfe24b"
+        }
+      },
+      {
+        "case": "new-cash-not-held",
+        "file": "trading/vati/funding/mt5_runtime.py",
+        "preimage_sha256": "28eb54a075b38edc249e8351dfed8803d23ae7cc6a9151a42135424ae5f32955",
+        "fault": {
+          "exit_code": 1,
+          "log_sha256": "6a2ad92b0cd24826044678ac445a47f455d44906e569bd71d3445daa8d650f6a",
+          "xml": "/tmp/van-mt5-cash-fault-results-r2-20261024/new-cash-not-held-fault.xml",
+          "xml_sha256": "f9dab34a25ec7ed094bf9c915a700d922e39657a3ec9c741da6011f8507e205d"
+        },
+        "restored": {
+          "exit_code": 0,
+          "log_sha256": "033a62a3879d970d78b5e830e17d174a811fa5013fcee0ec4cbc2d0c61d9b689",
+          "xml": "/tmp/van-mt5-cash-fault-results-r2-20261024/new-cash-not-held-restored.xml",
+          "xml_sha256": "61a67f309f464c19e92c408ab6a3511f4459b22df57d38ff3c0fa961a5c8759f"
+        }
+      },
+      {
+        "case": "query-grants-authority",
+        "file": "trading/vati/funding/mt5_journal.py",
+        "preimage_sha256": "333d0f001eaa51c278af4c4c68a5cfd8890eb53735b90c109063fae015857388",
+        "fault": {
+          "exit_code": 1,
+          "log_sha256": "f42c1224b5481c392eae0c0a3098fc6cb9e1cf5a317e9ef943dff2ae4803e991",
+          "xml": "/tmp/van-mt5-cash-fault-results-r2-20261024/query-grants-authority-fault.xml",
+          "xml_sha256": "621074f5ab3efd1f574636663f89898f343198169d7b5b16d373e581a9f00de1"
+        },
+        "restored": {
+          "exit_code": 0,
+          "log_sha256": "afa7e8863f0f33be8f0385768460935e287a23167417905f9302316635373c65",
+          "xml": "/tmp/van-mt5-cash-fault-results-r2-20261024/query-grants-authority-restored.xml",
+          "xml_sha256": "446ca052b23148e8f0f286a9caebc5ee71124d1ddb139736ea1d243b10bd42e8"
+        }
+      },
+      {
+        "case": "snapshot-credit-as-pnl",
+        "file": "trading/vati/funding/mt5_report.py",
+        "preimage_sha256": "2c36ffedd29434d1a23c0b3a5ea63508ce4aae31489b18661463c73c0e4e21c7",
+        "fault": {
+          "exit_code": 1,
+          "log_sha256": "2bd53952ab768bff57486f778d122cf05b4236c4d12ae9b01ea30bfd6e33c448",
+          "xml": "/tmp/van-mt5-cash-fault-results-r2-20261024/snapshot-credit-as-pnl-fault.xml",
+          "xml_sha256": "1b386db8e0fa5722bc2edc59fab9139df5deab2361ce7fed8a8ce4152e88d5bb"
+        },
+        "restored": {
+          "exit_code": 0,
+          "log_sha256": "9c1d690524eada9249522678a754eedb8d3a390dcbfac93d26f53a6af7358727",
+          "xml": "/tmp/van-mt5-cash-fault-results-r2-20261024/snapshot-credit-as-pnl-restored.xml",
+          "xml_sha256": "4b80dd3ba18a1bbb0d5089a97434de74b24e3c4fe9a5cbcfc1525b4a38cc57ea"
+        }
+      },
+      {
+        "case": "missing-original-query-admitted",
+        "file": "trading/vati/funding/mt5_runtime.py",
+        "preimage_sha256": "28eb54a075b38edc249e8351dfed8803d23ae7cc6a9151a42135424ae5f32955",
+        "fault": {
+          "exit_code": 1,
+          "log_sha256": "3b9820f41928b7f722e96fcc49f06cec46ae6448f958b8ff99daa1a03d8b0d5c",
+          "xml": "/tmp/van-mt5-cash-fault-results-r2-20261024/missing-original-query-admitted-fault.xml",
+          "xml_sha256": "0c33149acac0857724b56086c9b0bc78e35432dd9930c2300338f0731aed5314"
+        },
+        "restored": {
+          "exit_code": 0,
+          "log_sha256": "0ac06466674de8022c297b42a5debf8adca6a6f4b72acf1ac4ca02d10a5cf29a",
+          "xml": "/tmp/van-mt5-cash-fault-results-r2-20261024/missing-original-query-admitted-restored.xml",
+          "xml_sha256": "28174f14100473a5e75b621cebef276407c51edd11e5526ffdbe2386e75cbdb0"
+        }
+      }
+    ],
+    "source_head": "bd00483e969822c65bfd493c93fa5dd30920bcc5",
+    "source_candidate_sha256": {
+      "trading/vati/funding/mt5_report.py": "2c36ffedd29434d1a23c0b3a5ea63508ce4aae31489b18661463c73c0e4e21c7",
+      "trading/vati/funding/mt5_runtime.py": "28eb54a075b38edc249e8351dfed8803d23ae7cc6a9151a42135424ae5f32955",
+      "trading/vati/funding/mt5_journal.py": "333d0f001eaa51c278af4c4c68a5cfd8890eb53735b90c109063fae015857388",
+      "trading/vati/funding/mt5.py": "d9d31be2bbef043c96e3fc96e8d5d4abbffd5455de0ff93602652b92dc7fc272"
+    }
+  },
+  "private_postgres_fixtures_stopped_and_removed": true,
+  "vendor_sources": {
+    "deal-properties": {
+      "url": "https://www.mql5.com/en/docs/constants/tradingconstants/dealproperties",
+      "sha256": "3e17c74eda0e98da5a537b808c216b603aa2344c93f71b5a52ee62538ac509df"
+    },
+    "account-properties": {
+      "url": "https://www.mql5.com/en/docs/constants/environment_state/accountinformation",
+      "sha256": "69ab83827be56ae5de6cacd115476ec95717edd3ad056ccd3c9f4bd90125df2c"
+    },
+    "python-history": {
+      "url": "https://www.mql5.com/en/docs/python_metatrader5/mt5historydealsget_py",
+      "sha256": "0c9a4fb68f3e882e51cf6a01441ad64826951edb3ad924e4ed20955cc67898f1"
+    },
+    "historyselect": {
+      "url": "https://www.mql5.com/en/docs/trading/historyselect",
+      "status": "HTTP403_NOT_READ"
+    }
+  },
+  "native_ea_compilation": "NOT_YET_RUN_ON_CHANGED_EA; historical bd00483e MetaEditor receipt applies only to unchanged previous EA source.",
+  "boundaries": [
+    "Candidate source and simulated terminal SDK/EA fixtures, not broker execution or financial permission.",
+    "Full cash rows deduplicate separately from each current authenticated point-query receipt. IDs stay exact; native money components are not rounded to invented settlement units.",
+    "EA terminal time and Python UTC host query time are distinct. No broker lifetime, settled-cash, realized-return or profitability certification.",
+    "Current query, native physical account identity, original availability, credit-excluded equity and no new cash facts are required before risk admission. New cash, corrections, shrinking history, credit change, unknown operations and missing/late evidence hold new risk.",
+    "Existing timeout, partial-fill, late-fill, unknown-effect, protection, original-identity and cold-restart assertions remain unchanged. Only explicit simulated cash telemetry and unique physical fixture identity were added.",
+    "Flow-adjusted risk/economics, dispatch revalidation/reservations, native services, production security/signing, independent F15/BG and S24 remain open; no unit acceptance issued."
+  ]
+}

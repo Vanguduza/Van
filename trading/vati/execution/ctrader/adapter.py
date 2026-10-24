@@ -10,8 +10,8 @@ from __future__ import annotations
 
 import time
 from dataclasses import dataclass, field
-from decimal import Decimal, ROUND_DOWN
-from typing import Any, Callable, Optional
+from decimal import Decimal, ROUND_DOWN, localcontext
+from typing import Any, Callable, Optional, ClassVar
 
 from vati.execution.base import AccountState, ExecutionReceipt, Health, OrderCommand, VenuePosition, VenueUnavailable
 from vati.execution.ctrader.transport import CtraderApiError, CtraderTransport
@@ -38,11 +38,16 @@ class SymbolInfo:
         return vol
 
     def volume_to_lots(self, volume: int) -> Decimal:
-        return (Decimal(volume) / Decimal(self.lot_size_cents)).quantize(Decimal("0.01"))
+        # Native steps and partial fills can be smaller than a centilot. The
+        # broker's actual quantity must not be rounded to the requested UI step.
+        return Decimal(volume) / Decimal(self.lot_size_cents)
 
 
 @dataclass
 class CtraderAdapter:
+    #: P1-TRADE-EXEC-004: the entry types this venue really executes (orderType is MARKET or LIMIT; no stop-entry request is built).
+    #: The router refuses anything else instead of sending it as a different order.
+    supported_entry_types: ClassVar[tuple] = ("MARKET", "LIMIT", "PASSIVE_LIMIT")
     transport: CtraderTransport
     client_id: str
     client_secret_provider: Callable[[], str]
@@ -86,26 +91,190 @@ class CtraderAdapter:
             raise VenueUnavailable(f"symbol {name} not available on this cTrader account") from None
 
     # ------------------------------------------------------------ reads
+    def funding_reader(self):
+        # An independent connection and adapter state keep slow cash history off
+        # the protective/order socket. It exposes only the read operation/close.
+        transport=CtraderTransport(host=self.transport.host,port=self.transport.port,
+            timeout_s=self.transport.timeout_s,connector=self.transport._connector)
+        adapter=CtraderAdapter(transport,self.client_id,self.client_secret_provider,self.access_token_provider,
+            self.ctid_trader_account_id,self.account_alias,self.venue,clock=self.clock)
+        class CashReader:
+            def _authenticate(self):
+                if not adapter._authed or not transport.connected:
+                    transport.connect()
+                    transport.call('ProtoOAApplicationAuthReq',{'clientId':adapter.client_id,'clientSecret':adapter.client_secret_provider()})
+                    transport.call('ProtoOAAccountAuthReq',{'ctidTraderAccountId':adapter.ctid_trader_account_id,'accessToken':adapter.access_token_provider()})
+                    adapter._authed=True
+            def cash_movements(self,**window):
+                self._authenticate()
+                return adapter.cash_movements(**window)
+            def deal_history(self,**window):
+                self._authenticate()
+                return adapter.deal_history(**window)
+            def close(self):transport.close()
+        return CashReader()
+
+    def deal_history(self,*,from_ms,to_ms):
+        from vati.funding.deals import collect_native_deals
+        return collect_native_deals(self,from_ms=from_ms,to_ms=to_ms)
+
+    def _native_trader_identity(self):
+        name, r = self.transport.call("ProtoOATraderReq", {"ctidTraderAccountId": self.ctid_trader_account_id})
+        try:
+            if name != "ProtoOATraderRes":raise ValueError()
+            t = dict(r["trader"])
+            digits=t['moneyDigits'];deposit=t['depositAssetId'];balance=t['balance']
+            if (type(self.ctid_trader_account_id) is not int or self.ctid_trader_account_id<=0
+                or type(r['ctidTraderAccountId']) is not int or type(t['ctidTraderAccountId']) is not int
+                or r['ctidTraderAccountId']!=self.ctid_trader_account_id or t['ctidTraderAccountId']!=self.ctid_trader_account_id
+                or type(digits) is not int or not 0<=digits<=18 or type(deposit) is not int or deposit<=0
+                or type(balance) is not int):raise ValueError()
+            asset_name,assets=self.transport.call('ProtoOAAssetListReq',{'ctidTraderAccountId':self.ctid_trader_account_id})
+            if asset_name!='ProtoOAAssetListRes' or type(assets['ctidTraderAccountId']) is not int or assets['ctidTraderAccountId']!=self.ctid_trader_account_id or not isinstance(assets.get('asset'),list):raise ValueError()
+            matches=[a for a in assets['asset'] if isinstance(a,dict) and type(a.get('assetId')) is int and a.get('assetId')==deposit]
+            if len(matches)!=1 or not isinstance(matches[0].get('name'),str) or not matches[0]['name'].strip():raise ValueError()
+            self._currency=matches[0]['name'];self._money_digits=digits
+        except (KeyError,TypeError,ValueError,ArithmeticError):
+            raise VenueUnavailable('cTrader native account identity, money precision or deposit currency unavailable') from None
+        return t
+
     def sync_account(self) -> AccountState:
+        from vati.funding.native import NativeAccountMark,native_int,native_money
         self._ensure_auth()
-        _, r = self.transport.call("ProtoOATraderReq", {"ctidTraderAccountId": self.ctid_trader_account_id})
-        t = r["trader"]
-        self._money_digits = int(t.get("moneyDigits", 2))
-        bal = Decimal(t["balance"]) / (Decimal(10) ** self._money_digits)
-        unrealised = ZERO
-        for p in self._positions_raw():
-            sym = next((s for s in self.symbols.values() if s.symbol_id == p["tradeData"]["symbolId"]), None)
-            spot = self._last_spot.get(p["tradeData"]["symbolId"])
-            if sym and spot and p.get("price"):
-                bid, ask = spot
-                units = Decimal(p["tradeData"]["volume"]) / 100
-                px = Decimal(str(p["price"]))
-                unrealised += (bid - px) * units if p["tradeData"]["tradeSide"] == "BUY" else (px - ask) * units
-        return AccountState(self.account_alias, bal + unrealised, bal, self._currency, True, t.get("accountType", "HEDGED") == "HEDGED", self.clock())
+        t = self._native_trader_identity()
+        bal = native_money(t['balance'],self._money_digits)
+        unrealised = self._native_unrealised()
+        # Separate native reads are not an atomic account snapshot. Refuse a
+        # visible funds/currency change across the position mark instead of
+        # combining old balance with newer PnL and reporting it verified.
+        try:
+            name,latest=self.transport.call('ProtoOATraderReq',{'ctidTraderAccountId':self.ctid_trader_account_id})
+            if (name!='ProtoOATraderRes' or type(latest.get('ctidTraderAccountId')) is not int
+                or latest['ctidTraderAccountId']!=self.ctid_trader_account_id):raise ValueError()
+            fields=('ctidTraderAccountId','balance','moneyDigits','depositAssetId')
+            if any(type(latest['trader'][k]) is not int or latest['trader'][k]!=t[k] for k in fields):raise ValueError()
+            for key in ('balanceVersion','registrationTimestamp','managerBonus','ibBonus','nonWithdrawableBonus'):
+                minimum=0 if key in {'balanceVersion','registrationTimestamp'} else -(2**63)
+                if key in t:native_int(t[key],minimum=minimum)
+                if key in latest['trader']:native_int(latest['trader'][key],minimum=minimum)
+                if latest['trader'].get(key)!=t.get(key) or (key in latest['trader'])!=(key in t):raise ValueError()
+        except (CtraderApiError,KeyError,TypeError,ValueError):
+            raise VenueUnavailable('cTrader native funds changed during position PnL observation; refresh required') from None
+        with localcontext() as context:
+            context.prec=80
+            equity=bal+unrealised
+        at=native_int(self.clock(),minimum=0)
+        from vati.execution.ctrader.transport import DEMO_HOST,LIVE_HOST
+        environment={DEMO_HOST:'DEMO',LIVE_HOST:'LIVE'}.get(getattr(self.transport,'host',None))
+        mark=None
+        if environment:
+            bonuses=[native_money(t[k],self._money_digits) if k in t else None for k in ('managerBonus','ibBonus','nonWithdrawableBonus')]
+            mark=NativeAccountMark('CTRADER',environment,self.account_alias,self.ctid_trader_account_id,t['depositAssetId'],self._currency,
+                at,bal,equity,t.get('balanceVersion'),*bonuses,registered_at_ms=t.get('registrationTimestamp'))
+        return AccountState(self.account_alias, equity, bal, self._currency, True, t.get("accountType", "HEDGED") == "HEDGED", at,funding_mark=mark)
+
+    def cash_movements(self, *, from_ms: int, to_ms: int):
+        """Read one documented native history window, with no payment operation.
+
+        cTrader's vendored protocol limits each request to one week. Every returned
+        row is retained or the statement is refused; unknown operation meanings stay
+        explicit for the accounting consumer. Provider notes are not copied.
+        """
+        from vati.funding.native import NativeCashMovement,NativeCashStatement,native_int,native_money
+        from vati.execution.ctrader.protoschema import SCHEMA
+        try:
+            observed=native_int(self.clock(),minimum=0)
+            native_int(from_ms,minimum=0);native_int(to_ms,minimum=0,maximum=2147483646000)
+            native_int(self.ctid_trader_account_id,minimum=1)
+            from vati.execution.ctrader.transport import DEMO_HOST,LIVE_HOST
+            environment={DEMO_HOST:'DEMO',LIVE_HOST:'LIVE'}.get(getattr(self.transport,'host',None))
+            if environment is None:raise ValueError()
+            if from_ms>to_ms or to_ms-from_ms>604800000 or to_ms>observed:raise ValueError()
+        except (TypeError,ValueError):
+            raise VenueUnavailable('cTrader cash history requires an exact closed past window of at most one week') from None
+        self._ensure_auth()
+        try:
+            original=self._native_trader_identity();currency=self._currency
+            if 'registrationTimestamp' in original and from_ms<native_int(original['registrationTimestamp'],minimum=0):raise ValueError()
+            name,response=self.transport.call('ProtoOACashFlowHistoryListReq',{'ctidTraderAccountId':self.ctid_trader_account_id,
+                'fromTimestamp':from_ms,'toTimestamp':to_ms})
+            if (name!='ProtoOACashFlowHistoryListRes' or type(response['ctidTraderAccountId']) is not int
+                or response['ctidTraderAccountId']!=self.ctid_trader_account_id):raise ValueError()
+            rows=response.get('depositWithdraw',[])
+            if not isinstance(rows,list):raise ValueError()
+            movements=[];identities={}
+            operations=SCHEMA.enum_reverse['ProtoOAChangeBalanceType']
+            for raw in rows:
+                identity=native_int(raw['balanceHistoryId'],minimum=1)
+                at=native_int(raw['changeBalanceTimestamp'],minimum=0)
+                if not from_ms<=at<=to_ms:raise ValueError()
+                digits=native_int(raw['moneyDigits'],minimum=0,maximum=18)
+                operation=raw['operationType']
+                if type(operation) is int:
+                    native_int(operation,minimum=0,maximum=2**31-1)
+                    operation=operations.get(operation,'NATIVE_UNKNOWN:'+str(operation))
+                elif not isinstance(operation,str) or operation not in SCHEMA.enums['ProtoOAChangeBalanceType']:
+                    raise ValueError()
+                version=raw.get('balanceVersion')
+                if version is not None:native_int(version,minimum=0)
+                entry=NativeCashMovement(identity,operation,native_money(raw['delta'],digits),native_money(raw['balance'],digits),
+                    native_money(raw['equity'],digits) if 'equity' in raw else None,version,at,digits)
+                if identity in identities:
+                    if identities[identity]!=entry:raise ValueError()
+                    continue
+                identities[identity]=entry;movements.append(entry)
+            latest=self._native_trader_identity()
+            if latest['depositAssetId']!=original['depositAssetId'] or self._currency!=currency:raise ValueError()
+            received=native_int(self.clock(),minimum=observed)
+            return NativeCashStatement('CTRADER',environment,self.account_alias,self.ctid_trader_account_id,original['depositAssetId'],currency,
+                from_ms,to_ms,received,tuple(movements))
+        except (CtraderApiError,KeyError,TypeError,ValueError,ArithmeticError):
+            raise VenueUnavailable('cTrader cash history identity, native precision or complete statement unavailable') from None
+
+    def _native_unrealised(self) -> Decimal:
+        """Broker net mark in deposit currency, never a missing-quote zero.
+
+        The native response defines its own decimal exponent and excludes
+        potential closing commission. This is current equity, not settled PnL.
+        A changed or incomplete position set needs a fresh read, not a guess.
+        """
+        try:
+            positions = self._positions_raw()
+            expected = [p['positionId'] for p in positions]
+            if (any(type(i) is not int or not 0<i<2**63 for i in expected)
+                or len(set(expected))!=len(expected)):raise ValueError()
+            name,r = self.transport.call('ProtoOAGetPositionUnrealizedPnLReq',
+                {'ctidTraderAccountId':self.ctid_trader_account_id})
+            if (name!='ProtoOAGetPositionUnrealizedPnLRes' or not isinstance(r,dict)
+                or type(r.get('ctidTraderAccountId')) is not int
+                or r['ctidTraderAccountId']!=self.ctid_trader_account_id):raise ValueError()
+            digits=r['moneyDigits'];rows=r.get('positionUnrealizedPnL',[])
+            if type(digits) is not int or not 0<=digits<=18 or not isinstance(rows,list):raise ValueError()
+            observed=[];total=0
+            for row in rows:
+                if not isinstance(row,dict):raise ValueError()
+                pid=row['positionId'];net=row['netUnrealizedPnL'];gross=row['grossUnrealizedPnL']
+                if (type(pid) is not int or not 0<pid<2**63
+                    or any(type(v) is not int or not -(2**63)<=v<2**63 for v in (net,gross))):raise ValueError()
+                observed.append(pid);total+=net
+            if len(set(observed))!=len(observed) or set(observed)!=set(expected):raise ValueError()
+            return Decimal(total)/(Decimal(10)**digits)
+        except (CtraderApiError,KeyError,TypeError,ValueError,ArithmeticError):
+            raise VenueUnavailable('cTrader native deposit-currency position PnL unavailable or inconsistent') from None
 
     def _positions_raw(self) -> list[dict]:
-        _, r = self.transport.call("ProtoOAReconcileReq", {"ctidTraderAccountId": self.ctid_trader_account_id})
-        return [p for p in r.get("position", []) if p.get("positionStatus") in ("POSITION_STATUS_OPEN", 1, None)]
+        return [p for p in self._reconcile_raw()['position'] if p.get("positionStatus") in ("POSITION_STATUS_OPEN", 1, None)]
+
+    def _reconcile_raw(self):
+        _, r = self.transport.call('ProtoOAReconcileReq',{'ctidTraderAccountId':self.ctid_trader_account_id})
+        if (not isinstance(r,dict) or r.get('ctidTraderAccountId')!=self.ctid_trader_account_id
+            or not isinstance(r.get('position',[]),list) or not isinstance(r.get('order',[]),list)):
+            raise VenueUnavailable('cTrader native positions or pending orders unavailable')
+        return {'position':r.get('position',[]),'order':r.get('order',[])}
+
+    def orders(self) -> list[dict]:
+        self._ensure_auth()
+        return self._reconcile_raw()['order']
 
     def positions(self) -> list[VenuePosition]:
         self._ensure_auth()
@@ -131,9 +300,17 @@ class CtraderAdapter:
             return Health(False, 0, now_ms)
 
     # ------------------------------------------------------------ writes
+    def _unknown(self, now_ms: int, reason: str, *, cmd: Optional[OrderCommand] = None,
+                 position_id: str = "") -> ExecutionReceipt:
+        price = cmd.entry_price if cmd is not None else ZERO
+        return ExecutionReceipt(cmd.trade_intent_id if cmd else "", cmd.decision_hash if cmd else "",
+            self.venue, "UNKNOWN", ZERO, None, price, price, price, False, now_ms, now_ms,
+            broker_position_id=position_id, reject_reason=reason).sealed()
+
     def _wait_execution(self, client_order_id: str, wanted: tuple[str, ...]) -> Optional[dict]:
         def pred(name: str, body: dict) -> bool:
-            if name != "ProtoOAExecutionEvent":
+            if (name != "ProtoOAExecutionEvent" or type(body.get('ctidTraderAccountId')) is not int
+                or body['ctidTraderAccountId'] != self.ctid_trader_account_id):
                 return False
             o = body.get("order") or {}
             return str(o.get("clientOrderId", "")) == client_order_id and body.get("executionType") in wanted
@@ -152,6 +329,8 @@ class CtraderAdapter:
         volume = sym.lots_to_volume(cmd.quantity)
         if volume < sym.min_volume:
             return rej(f"volume {volume} below venue minimum {sym.min_volume}")
+        if volume > sym.max_volume:
+            return rej(f"volume {volume} above venue maximum {sym.max_volume}")
         rel_sl = int((abs(cmd.entry_price - cmd.protective_stop) * PRICE_SCALE).to_integral_value())
         if rel_sl <= 0:
             return rej("protective stop equals entry")
@@ -170,25 +349,43 @@ class CtraderAdapter:
         except CtraderApiError as exc:
             return rej(f"{exc.code}: {exc.description}")
         except VenueUnavailable as exc:
-            return rej(f"venue unavailable: {exc}")
-        ev = self._wait_execution(cmd.trade_intent_id[:50], ("ORDER_FILLED", "ORDER_PARTIAL_FILL", "ORDER_REJECTED", "ORDER_ACCEPTED"))
+            return self._unknown(now_ms,"native entry reply unavailable; reconcile original before retrying",cmd=cmd)
+        try:
+            ev = self._wait_execution(cmd.trade_intent_id[:50], ("ORDER_FILLED", "ORDER_PARTIAL_FILL", "ORDER_REJECTED", "ORDER_ACCEPTED"))
+        except (VenueUnavailable,CtraderApiError):
+            return self._unknown(now_ms,"native entry event unavailable; reconcile original before retrying",cmd=cmd)
         if ev is None:
             return ExecutionReceipt(cmd.trade_intent_id, cmd.decision_hash, self.venue, "UNKNOWN", ZERO, None, cmd.entry_price, cmd.entry_price, cmd.entry_price, False, now_ms, now_ms, reject_reason="no execution event within timeout; reconcile before retrying").sealed()
         et = ev["executionType"]
         if et == "ORDER_REJECTED":
             return rej(str(ev.get("errorCode", "ORDER_REJECTED")))
         if et == "ORDER_ACCEPTED":
-            ev2 = self._wait_execution(cmd.trade_intent_id[:50], ("ORDER_FILLED", "ORDER_PARTIAL_FILL", "ORDER_REJECTED"))
+            try:
+                ev2 = self._wait_execution(cmd.trade_intent_id[:50], ("ORDER_FILLED", "ORDER_PARTIAL_FILL", "ORDER_REJECTED"))
+            except (VenueUnavailable,CtraderApiError):
+                return self._unknown(now_ms,"native fill event unavailable; reconcile original before retrying",cmd=cmd)
             if ev2 is None:
                 return ExecutionReceipt(cmd.trade_intent_id, cmd.decision_hash, self.venue, "ACCEPTED", ZERO, None, cmd.entry_price, cmd.entry_price, cmd.entry_price, False, now_ms, now_ms, broker_order_id=str((ev.get("order") or {}).get("orderId", ""))).sealed()
             ev, et = ev2, ev2["executionType"]
             if et == "ORDER_REJECTED":
                 return rej(str(ev.get("errorCode", "ORDER_REJECTED")))
         deal, pos = ev.get("deal") or {}, ev.get("position") or {}
-        filled = sym.volume_to_lots(int(deal.get("filledVolume", 0)))
-        px = Decimal(str(deal.get("executionPrice") or pos.get("price") or cmd.entry_price))
-        sl = Decimal(str(pos["stopLoss"])) if pos.get("stopLoss") else None
-        return ExecutionReceipt(cmd.trade_intent_id, cmd.decision_hash, self.venue, "FILLED" if et == "ORDER_FILLED" else "PARTIAL", filled, px, cmd.entry_price, px, cmd.entry_price, sl is not None,
+        try:
+            native_quantity=deal['filledVolume'];px=Decimal(str(deal['executionPrice']))
+            order=ev.get('order') or {};pid=deal['positionId'];oid=deal['orderId']
+            if (type(native_quantity) is not int or not 0<native_quantity<=volume or not px.is_finite() or px<=0
+                or type(pid) is not int or not 0<pid<2**63 or type(oid) is not int or not 0<oid<2**63
+                or deal.get('symbolId')!=sym.symbol_id or order.get('orderId')!=oid
+                or (pos and pos.get('positionId')!=pid)):raise ValueError()
+            filled=sym.volume_to_lots(native_quantity)
+        except (KeyError,TypeError,ValueError,ArithmeticError):
+            return self._unknown(now_ms,"native entry money/quantity identity incomplete",cmd=cmd)
+        try:
+            sl = Decimal(str(pos['stopLoss'])) if pos.get('stopLoss') else None
+            if sl is not None and (not sl.is_finite() or sl<=0):sl=None
+        except (TypeError,ValueError,ArithmeticError):sl=None
+        state='FILLED' if et=='ORDER_FILLED' and native_quantity==volume else 'PARTIAL'
+        return ExecutionReceipt(cmd.trade_intent_id, cmd.decision_hash, self.venue, state, filled, px, cmd.entry_price, px, cmd.entry_price, sl is not None,
                                 int(deal.get("executionTimestamp", now_ms)), now_ms, broker_order_id=str(deal.get("orderId", "")), broker_position_id=str(pos.get("positionId") or deal.get("positionId", "")),
                                 protective_stop_price=sl, fees=abs(Decimal(deal.get("commission", 0))) / (Decimal(10) ** int(deal.get("moneyDigits", self._money_digits)))).sealed()
 
@@ -205,24 +402,67 @@ class CtraderAdapter:
             self.transport.call("ProtoOAAmendPositionSLTPReq", {"ctidTraderAccountId": self.ctid_trader_account_id, "positionId": int(position_id), "stopLoss": float(new_stop), **({"takeProfit": float(cur["takeProfit"])} if cur.get("takeProfit") else {})})
         except CtraderApiError as exc:
             return ExecutionReceipt("", "", self.venue, "REJECTED", ZERO, None, ZERO, ZERO, ZERO, False, now_ms, now_ms, broker_position_id=position_id, reject_reason=f"{exc.code}: {exc.description}").sealed()
+        except VenueUnavailable:
+            return self._unknown(now_ms,"native stop reply unavailable; reconcile original before retrying",position_id=position_id)
+        try:
+            confirmed=next((p for p in self._positions_raw() if str(p['positionId'])==str(position_id)),None)
+            actual=Decimal(str(confirmed['stopLoss'])) if confirmed and confirmed.get('stopLoss') else None
+            if actual is None or not actual.is_finite() or actual!=new_stop:
+                return self._unknown(now_ms,"native stop has not been observed at the requested price",position_id=position_id)
+        except (VenueUnavailable,CtraderApiError,KeyError,TypeError,ValueError,ArithmeticError):
+            return self._unknown(now_ms,"native stop readback unavailable; reconcile original before retrying",position_id=position_id)
         return ExecutionReceipt("", "", self.venue, "ACCEPTED", ZERO, None, ZERO, ZERO, ZERO, True, now_ms, now_ms, broker_position_id=position_id, protective_stop_price=new_stop).sealed()
 
     def close(self, position_id: str, quantity: Optional[Decimal], *, now_ms: int, reason: str) -> ExecutionReceipt:
         self._ensure_auth()
         cur = next((p for p in self._positions_raw() if str(p["positionId"]) == str(position_id)), None)
         if cur is None:
-            return ExecutionReceipt("", "", self.venue, "UNKNOWN", ZERO, None, ZERO, ZERO, ZERO, True, now_ms, now_ms, broker_position_id=position_id, reject_reason="position not found").sealed()
+            return self._unknown(now_ms,"position not found; flat outcome unproven",position_id=position_id)
         sym = next((s for s in self.symbols.values() if s.symbol_id == cur["tradeData"]["symbolId"]), None)
+        if sym is None:
+            return self._unknown(now_ms,"native close quantity unit unavailable",position_id=position_id)
         vol = sym.lots_to_volume(quantity) if (quantity is not None and sym) else int(cur["tradeData"]["volume"])
+        if vol<=0 or vol>int(cur['tradeData']['volume']):
+            return ExecutionReceipt("", "", self.venue, "REJECTED", ZERO, None, ZERO, ZERO, ZERO, False,
+                now_ms,now_ms,broker_position_id=position_id,reject_reason="invalid native close volume; not dispatched").sealed()
         try:
-            self.transport.call("ProtoOAClosePositionReq", {"ctidTraderAccountId": self.ctid_trader_account_id, "positionId": int(position_id), "volume": vol})
+            name,reply=self.transport.call("ProtoOAClosePositionReq", {"ctidTraderAccountId": self.ctid_trader_account_id, "positionId": int(position_id), "volume": vol})
         except CtraderApiError as exc:
-            return ExecutionReceipt("", "", self.venue, "REJECTED", ZERO, None, ZERO, ZERO, ZERO, True, now_ms, now_ms, broker_position_id=position_id, reject_reason=f"{exc.code}: {exc.description}").sealed()
-        ev = self.transport.wait_event(lambda n, b: n == "ProtoOAExecutionEvent" and str((b.get("deal") or {}).get("positionId", "")) == str(position_id) and b.get("executionType") in ("ORDER_FILLED", "ORDER_PARTIAL_FILL"), timeout_s=self.fill_timeout_s)
+            return ExecutionReceipt("", "", self.venue, "REJECTED", ZERO, None, ZERO, ZERO, ZERO, False, now_ms, now_ms, broker_position_id=position_id, reject_reason=f"{exc.code}: {exc.description}").sealed()
+        except VenueUnavailable:
+            return self._unknown(now_ms,"native close reply unavailable; reconcile original before retrying",position_id=position_id)
+        order_id=(reply.get('order') or {}).get('orderId')
+        if (name!='ProtoOAExecutionEvent' or type(reply.get('ctidTraderAccountId')) is not int
+            or reply['ctidTraderAccountId']!=self.ctid_trader_account_id or type(order_id) is not int or order_id<=0):
+            return self._unknown(now_ms,"native close admission identity unavailable",position_id=position_id)
+        def matches(n,b):
+            deal=b.get('deal') or {};order=b.get('order') or {}
+            return (n=='ProtoOAExecutionEvent' and type(b.get('ctidTraderAccountId')) is int
+                and b['ctidTraderAccountId']==self.ctid_trader_account_id and type(deal.get('positionId')) is int
+                and str(deal['positionId'])==str(position_id) and type(deal.get('orderId')) is int
+                and deal['orderId']==order_id and order.get('closingOrder') is True
+                and order.get('orderId')==order_id and b.get('executionType') in ('ORDER_FILLED','ORDER_PARTIAL_FILL'))
+        try:
+            ev=(name,reply) if matches(name,reply) else self.transport.wait_event(matches,timeout_s=self.fill_timeout_s)
+        except (VenueUnavailable,CtraderApiError):
+            return self._unknown(now_ms,"native close event unavailable; reconcile original before retrying",position_id=position_id)
         if ev is None:
-            return ExecutionReceipt("", "", self.venue, "UNKNOWN", ZERO, None, ZERO, ZERO, ZERO, True, now_ms, now_ms, broker_position_id=position_id, reject_reason=f"{reason}; no close execution within timeout").sealed()
+            return self._unknown(now_ms,f"{reason}; no bound close execution within timeout",position_id=position_id)
         deal = ev[1].get("deal") or {}
-        return ExecutionReceipt("", "", self.venue, "FILLED", sym.volume_to_lots(int(deal.get("filledVolume", vol))) if sym else Decimal(vol), Decimal(str(deal.get("executionPrice", "0"))), ZERO, ZERO, ZERO, True, now_ms, now_ms, broker_position_id=position_id, reject_reason=reason).sealed()
+        try:
+            filled=deal['filledVolume'];price=Decimal(str(deal['executionPrice']))
+            if (type(filled) is not int or not 0<filled<=vol or not price.is_finite() or price<=0
+                or deal.get('symbolId')!=sym.symbol_id):raise ValueError()
+        except (KeyError,TypeError,ValueError,ArithmeticError):
+            return self._unknown(now_ms,"native close money/quantity facts incomplete",position_id=position_id)
+        state='FILLED' if ev[1]['executionType']=='ORDER_FILLED' and filled==vol else 'PARTIAL'
+        remaining=ev[1].get('position') or {};stop=remaining.get('stopLoss')
+        protected=filled==int(cur['tradeData']['volume'])
+        if not protected and remaining.get('positionId')==int(position_id):
+            try:protected=stop is not None and Decimal(str(stop)).is_finite() and Decimal(str(stop))>0
+            except (TypeError,ValueError,ArithmeticError):protected=False
+        return ExecutionReceipt("", "", self.venue, state, sym.volume_to_lots(filled), price, ZERO, ZERO, ZERO,
+            protected,now_ms,now_ms,broker_order_id=str(order_id),broker_position_id=position_id,reject_reason=reason).sealed()
 
     # ------------------------------------------------------------ market data
     def spot(self, symbol: str) -> Optional[tuple[Decimal, Decimal]]:

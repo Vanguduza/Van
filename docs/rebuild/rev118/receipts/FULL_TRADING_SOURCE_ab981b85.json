@@ -1,0 +1,22 @@
+{
+  "schema": "van.rebuild.full-trading-source-attempt/1",
+  "status": "PASS",
+  "observed_at_utc": "2026-10-24T13:38:42.308094+00:00",
+  "source_head": "ab981b8573b0a7784ada912dc4910fde30855d58",
+  "result": {
+    "tests": 2778,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "passed": 2778,
+    "seconds": 680.047
+  },
+  "xml_sha256": "d63a6fe5d4b128b19d9809ebcd4740e496e167c048618f584441ccfee7f11d28",
+  "log_sha256": "a0bd1a6a3b114752b25995ddde108a94c2cdb24b12b7e853b7c28e7e7406a1bf",
+  "storage_audit_sha256": "0de909d408ee984d89f6869cb6bad0472c4d593f3e1a499ec20de1abeb23fdb8",
+  "storage_forbidden_events": 0,
+  "private_postgres_stopped_and_removed": true,
+  "fixture_driver_sha256": "b2d91618c9c6b23b6d2e31ef1ec134def821f5bfa0529f85c3490f26bb44fa62",
+  "private_dds_head": "64d6b7158c723b7700e5b53175ea8048d4e92d00",
+  "qualification": "Complete trading source suite on this exact head using actual isolated PostgreSQL17 and pinned local DDS source. Controlled native models are not broker effects or handset tests. No entire-backend, unit, F15/BG, provider financial, deployment or production acceptance."
+}

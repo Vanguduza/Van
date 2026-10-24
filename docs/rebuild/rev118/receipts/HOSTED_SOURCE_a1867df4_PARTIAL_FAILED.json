@@ -1,0 +1,156 @@
+{
+  "schema": "van.rebuild.hosted-source-with-confirmed-build-defect/1",
+  "observed_at_utc": "2026-10-24T10:02:36.145406+00:00",
+  "run_id": 40079352646,
+  "source_head": "a1867df4312bd4d35299ec56b8368b2ba1280f05",
+  "tested_merge": "141628fe42342c976ce7512be9cf1651c66dcc3c",
+  "identical_source_tree": "962aee8afcbf9e61258ed5b8ad4c11612ff90985",
+  "jobs": [
+    {
+      "databaseId": 120829456785,
+      "name": "rebuild-documentary",
+      "conclusion": "success"
+    },
+    {
+      "databaseId": 120829456947,
+      "name": "project-truth-ledger",
+      "conclusion": "failure"
+    },
+    {
+      "databaseId": 120829456976,
+      "name": "postgres-ledger",
+      "conclusion": "success"
+    },
+    {
+      "databaseId": 120829456979,
+      "name": "backend",
+      "conclusion": "failure"
+    },
+    {
+      "databaseId": 120829456999,
+      "name": "android-and-visual-evidence",
+      "conclusion": "failure"
+    },
+    {
+      "databaseId": 120829457002,
+      "name": "android-instrumentation",
+      "conclusion": "success"
+    },
+    {
+      "databaseId": 120829457011,
+      "name": "mutation (python-0, python, 0/4)",
+      "conclusion": "success"
+    },
+    {
+      "databaseId": 120829457071,
+      "name": "mutation (python-1, python, 1/4)",
+      "conclusion": "success"
+    },
+    {
+      "databaseId": 120829457104,
+      "name": "mutation (python-2, python, 2/4)",
+      "conclusion": "success"
+    },
+    {
+      "databaseId": 120829457106,
+      "name": "mutation (kotlin-0, kotlin, 0/4)",
+      "conclusion": "failure"
+    },
+    {
+      "databaseId": 120829457126,
+      "name": "mutation (kotlin-2, kotlin, 2/4)",
+      "conclusion": "failure"
+    },
+    {
+      "databaseId": 120829457137,
+      "name": "mutation (browser-agent, browser-agent, 0/1)",
+      "conclusion": "success"
+    },
+    {
+      "databaseId": 120829457156,
+      "name": "mutation (python-3, python, 3/4)",
+      "conclusion": "success"
+    },
+    {
+      "databaseId": 120829457176,
+      "name": "mutation (kotlin-1, kotlin, 1/4)",
+      "conclusion": "failure"
+    },
+    {
+      "databaseId": 120829457406,
+      "name": "mutation (kotlin-3, kotlin, 3/4)",
+      "conclusion": "failure"
+    },
+    {
+      "databaseId": 120831772398,
+      "name": "character-forge-gate",
+      "conclusion": "success"
+    }
+  ],
+  "failed_jobs": [
+    "project-truth-ledger",
+    "backend",
+    "android-and-visual-evidence",
+    "mutation (kotlin-0, kotlin, 0/4)",
+    "mutation (kotlin-2, kotlin, 2/4)",
+    "mutation (kotlin-1, kotlin, 1/4)",
+    "mutation (kotlin-3, kotlin, 3/4)"
+  ],
+  "public_source": {
+    "voice-source-report.xml": {
+      "tests": 117,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "sha256": "6abe40f6ef9c8484c70dac982c9fb6b3b47d703bb0a4f58a4c12d4f161d7f7e6"
+    },
+    "trading-source-report.xml": {
+      "tests": 2623,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 1,
+      "sha256": "e898d6f725dedc2635d67febd3a9885637e87f805ee98c622e4ca7c291fd5fb7"
+    },
+    "postgres-ledger-report.xml": {
+      "tests": 26,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "sha256": "9cecaa13fe2e927769feccd2dcad105f54d0fc118bb727203282b4a664850ef6"
+    }
+  },
+  "legacy_mutations": {
+    "caught": 258,
+    "remaining_not_executed": 116,
+    "receipt": "ci/MUTATION_CORPUS_a1867df4_PARTIAL.json"
+  },
+  "instrumentation": {
+    "collected": 22,
+    "passed": 18,
+    "failed": 0,
+    "skipped": 4,
+    "skip_reason": "existing core artwork mode",
+    "voice_methods": {
+      "cancellationBeforeNativeStartCannotCompleteOrDamageTheReplacementAnswer": "3.038s",
+      "realOfflineAnswerReachesTheApplicationQueueAsSpoken": "2.410s"
+    },
+    "index_sha256": "468426686e54004db39519bd05a059d375f04597f3c64d14f6f7e4c349e57ef4",
+    "voice_report_sha256": "0af81e1d36ad56ee185beaa47d53853b9e1b35e5aac1dc32b6699412270ed043"
+  },
+  "source_defect": "android/verification/build.gradle.kts compiles TradingModels.kt without its new FundingObservation.kt dependency. Actual Gradle app compilation/emulator works; standalone harness and four Kotlin mutation baselines fail. Add the pure dependency and exercise the same parser in the harness.",
+  "remaining_gates": {
+    "backend": "DDS_CONTRACT_READ_DEPLOY_KEY is not provisioned",
+    "project_truth_ledger": "trusted/tools/ci/project_truth_ledger.py absent from main bootstrap"
+  },
+  "logs_sha256": {
+    "postgres-ledger-job.log": "3e41d82346c73fe71a1d66bc4f8fcf6be7b6d062dc0053a6479abd45a184ad9b",
+    "project-truth-ledger-job.log": "0039bdbb9dce79dc5d5317636a2bbd22d84b37b1461c4f478d720609e4d4b4dc",
+    "backend-job.log": "7dfb87398b9b40197bf87b08d61a13d463ff44dacd6e5701f1cc374e8f023188",
+    "failed-120829457406.log": "026609ca24d74f649181330f3f295c72f64577761a86df3d660993a67d717494",
+    "failed-120829457176.log": "a067ea8ff2fcc2d3417b3fb66dfc2b8de659b8257ac3a1c0fcdb63defca57b11",
+    "failed-120829457126.log": "552d4b2a8793120862a88f7a2583d41eed4015c8451902c84374d6bd23c4dc6e",
+    "failed-120829457106.log": "e6f8a8348cc91549cad644db3291e1a21fb7408f77eb860e844cab1c8f99c1a3",
+    "failed-120829456999.log": "62364c82d470eb53c25f14320a7637d8ea80c694b95aaeb38906186f67c62674"
+  },
+  "qualification": "Retained failed source run with actual partial passing artifacts. No full374 corpus, full backend, whole-unit/native/F15/BG, production/provider or S24 acceptance is issued."
+}

@@ -9,11 +9,13 @@ that asks for more than the ceiling is rejected at load time, never widened.
 from __future__ import annotations
 
 import time
+from contextlib import contextmanager, ExitStack
 
-from dataclasses import dataclass, field
+from dataclasses import asdict, dataclass, field, replace
 from decimal import Decimal, InvalidOperation
 from enum import Enum
 from typing import Any, Iterable, Mapping
+from vati.core.canonical import canonical_hash
 from vati.authority import (
     MAX_STANDING_LIFETIME_SECONDS,
     OwnerAuthorityError,
@@ -25,6 +27,12 @@ class MandateError(ValueError):
     """Raised when a mandate is malformed, unsigned, expired or exceeds ceilings."""
 
 
+def _boolean(value, name):
+    if type(value) is not bool:
+        raise MandateError(f'{name} must be an explicit boolean')
+    return value
+
+
 class AuthorizationMode(str, Enum):
     OBSERVE = "OBSERVE"
     ADVISOR = "ADVISOR"
@@ -33,6 +41,12 @@ class AuthorizationMode(str, Enum):
     LIMITED_LIVE = "LIMITED_LIVE"
     AUTONOMOUS_LIVE = "AUTONOMOUS_LIVE"
     HALTED = "HALTED"
+
+
+class TradingTemperament(str, Enum):
+    NORMAL = "NORMAL"
+    RISKY = "RISKY"
+    AGGRESSIVE = "AGGRESSIVE"
 
 
 ORDER_SENDING_MODES = frozenset(
@@ -140,6 +154,50 @@ class TradingMandate:
     #: Only an owner-signed new mandate version can change a value here: this
     #: is the single place in the system where a ceiling can rise.
     strategy_risk_budgets: Mapping[str, Decimal] = field(default_factory=dict)
+    #: Optional owner-selected behaviour. None preserves legacy execution.
+    #: These fields arrive only through an admitted owner mandate; no runtime
+    #: model or trading agent can switch profiles on an open account.
+    trading_temperament: TradingTemperament | None = None
+    strategy_temperaments: Mapping[str, TradingTemperament] = field(default_factory=dict)
+    temperament_owner_signature_ref: str = ""
+    # Verified effective policy identity; not supplied by a mapping or copied
+    # into a newly replaced policy. It is not an owner signature by itself.
+    owner_policy_subject: str = field(default="", init=False, repr=False)
+
+    def authority_matches_policy(self) -> bool:
+        return (bool(self.owner_policy_subject) and self.owner_signature_ref.startswith("owner-authority:")
+                and self.owner_policy_subject == mandate_subject(self))
+
+    def owner_keys_current(self) -> bool:
+        # Runtime trust handles are attached only after successful signature
+        # verification. They are not policy fields and never enter wire hashes,
+        # data exports or a newly replaced/unadmitted mandate.
+        bindings=getattr(self,'_verified_owner_key_bindings',())
+        return bool(bindings) and all(binding is not None and binding.is_current() for binding in bindings)
+
+    @contextmanager
+    def owner_authority_submission_guard(self):
+        from vati.core.file_lock import exclusive_state_lock
+        bindings=getattr(self,'_verified_owner_key_bindings',())
+        paths=sorted({binding.registry_path for binding in bindings if binding is not None and binding.registry_path is not None})
+        stack=ExitStack()
+        try:
+            for path in paths:stack.enter_context(exclusive_state_lock(path))
+        except (OSError,ValueError):
+            stack.close()
+            yield False
+            return
+        try:
+            yield self.owner_keys_current()
+        finally:
+            stack.close()
+
+    @property
+    def temperament_enabled(self) -> bool:
+        return self.trading_temperament is not None or bool(self.strategy_temperaments)
+
+    def temperament_for(self, strategy_id: str) -> TradingTemperament | None:
+        return self.strategy_temperaments.get(strategy_id, self.trading_temperament)
 
     def risk_budget_for(self, strategy_id: str) -> Decimal:
         """The live base risk for one strategy.
@@ -174,63 +232,67 @@ class TradingMandate:
             raise MandateError(f"mandate missing fields: {missing}")
 
         try:
-            mode = AuthorizationMode(str(data["mode"]))
+            AuthorizationMode(str(data["mode"]))
         except ValueError as exc:
             raise MandateError(f"invalid mode: {data['mode']!r}") from exc
 
-        # P0-TRADE-001 — "signed" meant "the field is not empty", so any mandate was
-        # admissible and only PlatformCeilings bounded what it could then do. The mandate
-        # id and version are the subject, so a signature over version 3 does not admit a
-        # version 4 that widened the risk limits.
+        policy = _effective_policy(data)
+
+        # A standing grant covers the complete effective policy, including
+        # defaults. An unchanged identity/version cannot authorize altered
+        # accounts, scope, bounds, expiry or later mutable allocation maps.
         verifier = authority if authority is not None else OwnerAuthorityVerifier()
         try:
             verified = verifier.verify(
                 str(data["owner_signature_ref"]),
                 act="mandate-admit",
-                subject=f"{data['mandate_id']}:{data['version']}",
+                subject=mandate_subject(policy),
                 now_unix=int(data.get("signed_at_unix") or time.time()),
                 # A mandate is a standing document, re-read on every process start, so it
-                # is not a one-shot act. Its replay bound is its own expiry plus the
-                # signature covering its version: widening the limits needs a new one.
+                # is not a one-shot act. Its complete policy and lifetime remain bound.
                 single_use=False,
                 max_lifetime_seconds=MAX_STANDING_LIFETIME_SECONDS,
             )
         except OwnerAuthorityError as exc:
             raise MandateError(f"mandate is not owner-signed: {exc}") from exc
 
+        # Retain the independently scoped temperament grant, in addition to
+        # the complete standing policy signature. Both must verify.
+        requested_profile = (data.get("trading_temperament") is not None or
+                             bool(data.get("strategy_temperaments")))
+        profile_ref = str(data.get("temperament_owner_signature_ref") or "")
+        if requested_profile and not profile_ref:
+            raise MandateError("owner-signed temperament grant required")
+        if not requested_profile and profile_ref:
+            raise MandateError("temperament signature without selected temperament")
+        verified_profile_ref = ""
+        verified_profile = None
+        if requested_profile:
+            try:
+                verified_profile = verifier.verify(
+                    profile_ref, act="trading-temperament-admit",
+                    subject=trading_temperament_subject(data),
+                    now_unix=int(data.get("signed_at_unix") or time.time()),
+                    single_use=False,
+                    max_lifetime_seconds=MAX_STANDING_LIFETIME_SECONDS,
+                )
+            except OwnerAuthorityError as exc:
+                raise MandateError(f"temperament profile is not owner-signed: {exc}") from exc
+            verified_profile_ref = verified_profile.ref
+
         forbidden = frozenset(str(x) for x in _as_iterable(data["forbidden"]))
         absent = HARD_FORBIDDEN_BEHAVIOURS - forbidden
         if absent:
             raise MandateError(f"mandate must forbid hard-prohibited behaviours; missing {sorted(absent)}")
 
-        tiers_raw = data.get("drawdown_tiers")
-        tiers = DEFAULT_DRAWDOWN_TIERS if tiers_raw is None else _parse_tiers(tiers_raw)
-
-        m = cls(
-            mandate_id=str(data["mandate_id"]),
-            version=str(data["version"]),
-            account_alias=str(data["account_alias"]),
-            venue=str(data["venue"]),
-            mode=mode,
-            instruments=frozenset(str(x).upper() for x in _as_iterable(data["instruments"])),
-            allowed_strategies=frozenset(str(x) for x in _as_iterable(data["allowed_strategies"])),
-            max_risk_per_trade=_fraction(data["max_risk_per_trade"], "max_risk_per_trade"),
-            max_open_stop_risk=_fraction(data["max_open_stop_risk"], "max_open_stop_risk"),
-            max_daily_loss=_fraction(data["max_daily_loss"], "max_daily_loss"),
-            max_weekly_drawdown=_fraction(data["max_weekly_drawdown"], "max_weekly_drawdown"),
-            max_currency_leg_exposure=_fraction(data["max_currency_leg_exposure"], "max_currency_leg_exposure"),
-            max_consecutive_losses=int(data["max_consecutive_losses"]),
-            max_positions_per_instrument=int(data["max_positions_per_instrument"]),
-            max_total_positions=int(data["max_total_positions"]),
-            tier1_event_policy=str(data["tier1_event_policy"]),
-            weekend_hold_allowed=bool(data["weekend_hold_allowed"]),
-            forbidden=forbidden,
-            owner_signature_ref=verified.ref,
-            signed_at_unix=int(data["signed_at_unix"]),
-            expires_at_unix=int(data["expires_at_unix"]),
-            drawdown_tiers=tiers,
-            strategy_risk_budgets=_parse_budgets(data.get("strategy_risk_budgets")),
-        )
+        m = replace(policy, owner_signature_ref=verified.ref,
+                    temperament_owner_signature_ref=verified_profile_ref)
+        object.__setattr__(m,"owner_policy_subject",verified.subject)
+        grants=(verified,) if verified_profile is None else (verified,verified_profile)
+        object.__setattr__(m,'_verified_owner_key_bindings',tuple(
+            getattr(grant,'_verified_key_binding',None) for grant in grants))
+        if m.expires_at_unix > verified.expires_at_unix:
+            raise MandateError("mandate expiry exceeds its owner-signed grant lifetime")
         m.validate(ceilings)
         return m
 
@@ -250,6 +312,20 @@ class TradingMandate:
                 raise MandateError(f"strategy_risk_budget for {sid}, which is not in allowed_strategies")
 
     def validate(self, ceilings: PlatformCeilings) -> None:
+        _boolean(self.weekend_hold_allowed,'weekend_hold_allowed')
+        for tier in self.drawdown_tiers:
+            _boolean(tier.top_tier_only,'drawdown_tier.top_tier_only')
+        if self.temperament_enabled and not self.temperament_owner_signature_ref.startswith("owner-authority:"):
+            raise MandateError("owner-verified temperament grant reference required")
+        if not self.temperament_enabled and self.temperament_owner_signature_ref:
+            raise MandateError("unexpected temperament owner grant without a profile")
+        if self.trading_temperament is not None and not isinstance(self.trading_temperament, TradingTemperament):
+            raise MandateError("invalid trading_temperament")
+        for sid, profile in self.strategy_temperaments.items():
+            if sid not in self.allowed_strategies:
+                raise MandateError(f"trading temperament for unapproved strategy {sid}")
+            if not isinstance(profile, TradingTemperament):
+                raise MandateError(f"invalid strategy temperament for {sid}")
         if self.tier1_event_policy not in ("flat", "strategy_specific"):
             raise MandateError(f"tier1_event_policy must be flat|strategy_specific, got {self.tier1_event_policy!r}")
         if self.max_consecutive_losses < 1 or self.max_positions_per_instrument < 1 or self.max_total_positions < 1:
@@ -295,6 +371,99 @@ def _as_iterable(value: Any) -> Iterable[Any]:
     return list(value)
 
 
+
+def _effective_policy(data: Mapping[str, Any]) -> TradingMandate:
+    """Parse unsigned policy once for both owner signing and admission.
+
+    This is not an authority or admission operation. Signature receipt fields
+    never determine effective defaults and cannot be supplied by the caller.
+    """
+    allowed=set(TradingMandate.__dataclass_fields__)-{'owner_policy_subject'}
+    unknown=set(data)-allowed
+    if unknown:
+        raise MandateError(f"unknown mandate fields: {sorted(unknown)}")
+    return TradingMandate(
+        mandate_id=str(data["mandate_id"]),
+        version=str(data["version"]),
+        account_alias=str(data["account_alias"]),
+        venue=str(data["venue"]),
+        mode=AuthorizationMode(str(data["mode"])),
+        instruments=frozenset(str(x).upper() for x in _as_iterable(data["instruments"])),
+        allowed_strategies=frozenset(str(x) for x in _as_iterable(data["allowed_strategies"])),
+        max_risk_per_trade=_fraction(data["max_risk_per_trade"], "max_risk_per_trade"),
+        max_open_stop_risk=_fraction(data["max_open_stop_risk"], "max_open_stop_risk"),
+        max_daily_loss=_fraction(data["max_daily_loss"], "max_daily_loss"),
+        max_weekly_drawdown=_fraction(data["max_weekly_drawdown"], "max_weekly_drawdown"),
+        max_currency_leg_exposure=_fraction(data["max_currency_leg_exposure"], "max_currency_leg_exposure"),
+        max_consecutive_losses=int(data["max_consecutive_losses"]),
+        max_positions_per_instrument=int(data["max_positions_per_instrument"]),
+        max_total_positions=int(data["max_total_positions"]),
+        tier1_event_policy=str(data["tier1_event_policy"]),
+        weekend_hold_allowed=_boolean(data["weekend_hold_allowed"],'weekend_hold_allowed'),
+        forbidden=frozenset(str(x) for x in _as_iterable(data["forbidden"])),
+        owner_signature_ref="",
+        signed_at_unix=int(data["signed_at_unix"]),
+        expires_at_unix=int(data["expires_at_unix"]),
+        drawdown_tiers=DEFAULT_DRAWDOWN_TIERS if data.get("drawdown_tiers") is None else _parse_tiers(data["drawdown_tiers"]),
+        strategy_risk_budgets=_parse_budgets(data.get("strategy_risk_budgets")),
+        trading_temperament=_parse_temperament(data.get("trading_temperament")),
+        strategy_temperaments=_parse_temperaments(data.get("strategy_temperaments")),
+        temperament_owner_signature_ref="",
+    )
+
+
+def mandate_subject(data: Mapping[str, Any] | TradingMandate) -> str:
+    """V2 owner-signing subject for all effective policy fields and defaults.
+
+    No token, receipt or runtime admission marker participates in its own
+    signature. Historical ID-only tokens are never upgraded into authority.
+    """
+    policy=data if isinstance(data,TradingMandate) else _effective_policy(data)
+    body=asdict(policy)
+    for key in ('owner_signature_ref','temperament_owner_signature_ref','owner_policy_subject'):
+        body.pop(key,None)
+    def normalized(value):
+        if isinstance(value,Decimal):
+            # Decimal.normalize() rounds through the ambient decimal context;
+            # distinct signed limits must never collapse to the same subject.
+            text=format(value,'f')
+            return text.rstrip('0').rstrip('.') if '.' in text else text
+        if isinstance(value,Mapping):return {k:normalized(v) for k,v in value.items()}
+        if isinstance(value,(list,tuple)):return [normalized(v) for v in value]
+        return value
+    return 'mandate-v2:'+canonical_hash(normalized(body))
+
+
+def trading_temperament_subject(data: Mapping[str, Any]) -> str:
+    """Content-bound subject for a second owner signature, not just an ID.
+
+    Covers the original owner grant, risk ceilings, scope, expiry, and all
+    new profile fields. Changing ANY of them invalidates the profile grant.
+    This helper is for the offline owner signing workflow and verifier.
+    """
+    return "temperament-v1:" + canonical_hash({
+        key: value for key, value in data.items()
+        if key != "temperament_owner_signature_ref"
+    })
+
+
+def _parse_temperament(raw: Any) -> TradingTemperament | None:
+    if raw is None:
+        return None
+    try:
+        return TradingTemperament(str(raw).upper())
+    except ValueError as exc:
+        raise MandateError(f"unknown trading temperament: {raw!r}") from exc
+
+
+def _parse_temperaments(raw: Any) -> dict[str, TradingTemperament]:
+    if raw is None:
+        return {}
+    if not isinstance(raw, Mapping):
+        raise MandateError("strategy_temperaments must be a mapping")
+    return {str(sid): _parse_temperament(profile) for sid, profile in raw.items()}
+
+
 def _parse_budgets(raw: Any) -> dict[str, Decimal]:
     """Budgets arrive as strings in the signed mandate document."""
     if raw is None:
@@ -313,7 +482,7 @@ def _parse_tiers(raw: Any) -> tuple[DrawdownTier, ...]:
             DrawdownTier(
                 threshold=_dec(item["threshold"], "drawdown_tier.threshold"),
                 multiplier=_dec(item["multiplier"], "drawdown_tier.multiplier"),
-                top_tier_only=bool(item.get("top_tier_only", False)),
+                top_tier_only=_boolean(item.get("top_tier_only", False),'drawdown_tier.top_tier_only'),
             )
         )
     return tuple(tiers)

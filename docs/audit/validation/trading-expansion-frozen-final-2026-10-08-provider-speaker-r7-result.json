@@ -1,0 +1,26 @@
+{
+  "schema_version": 1,
+  "suite": "trading",
+  "selection": [
+    "trading/tests"
+  ],
+  "command": [
+    "/workspace/.onboarding/van-venv/bin/python",
+    "-m",
+    "pytest",
+    "-q",
+    "trading/tests",
+    "--junitxml=/workspace/van-audit/trading-expansion-frozen-final-2026-10-08-provider-speaker-r7.xml"
+  ],
+  "cwd": "/workspace/Van",
+  "started_at_utc": "2026-10-08T06:57:18.006927+00:00",
+  "finished_at_utc": "2026-10-08T06:58:30.252399+00:00",
+  "exit_code": 0,
+  "source_unchanged_during_test": true,
+  "changed_inputs": [],
+  "input_files": 1484,
+  "inputs_sha256": "4d94a5e1955b505fbded22606a0b3e4bdda7a10b8a8938c0cfb00b13407e312a",
+  "production_manifest_sha256": "d2269cc6013b42138740d21efa5055e86f44d02de965be209308230d823c5947",
+  "physical_tests_executed": 0,
+  "production_deployed": false
+}

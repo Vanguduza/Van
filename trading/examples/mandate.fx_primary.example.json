@@ -60,6 +60,5 @@
       "threshold": "0.06",
       "multiplier": "0"
     }
-  ],
-  "_owner_signature_note": "P0-TRADE-001: this field is a van-oa1 owner authority token, not a reference string. It must be signed by a key registered in registries/owner_authority_keys.json, for act 'mandate-admit' and subject '<mandate_id>:<version>', with the token's validity matching signed_at_unix..expires_at_unix. A placeholder is refused at load, which is the intended behaviour for an example file."
+  ]
 }

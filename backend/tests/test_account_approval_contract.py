@@ -60,6 +60,14 @@ def test_the_credential_bearing_actions_are_all_guarded():
         assert requires_owner_approval(action), action
 
 
+def test_original_operation_recovery_sets_agree_at_native_and_android_boundaries():
+    from commander.account_effects import JOURNALED_COMMANDS
+    source=(ROOT/'android/app/src/main/java/com/dial/van/trading/AccountOperationRecovery.kt').read_text()
+    block=re.search(r'val JOURNALED_ACTIONS = setOf\((.*?)\)',source,re.S)
+    assert block and set(re.findall(r'"([a-z0-9_]+)"',block.group(1)))==JOURNALED_COMMANDS
+    assert JOURNALED_COMMANDS <= set(ACTIONS) - READ_ONLY_ACTIONS
+
+
 def test_the_read_only_actions_really_are_read_only():
     """A read that got into this set would be an approval quietly removed."""
     assert READ_ONLY_ACTIONS == {"account_verify", "oauth_pending", "ctrader_discover"}
