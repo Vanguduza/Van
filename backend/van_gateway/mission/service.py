@@ -17,6 +17,7 @@ succeeded. There is no argument a caller can make to get past that.
 from __future__ import annotations
 
 import json
+import asyncio
 import hashlib
 import logging
 import time
@@ -160,34 +161,39 @@ class MissionService:
             deadline_ms=deadline_ms,
             parent_mission_id=parent_mission_id,
         )
-        await self.store.execute(
-            """
-            INSERT INTO missions(
-              mission_id, owner_principal_id, project_id, origin, origin_channel, title, goal,
-              mission_class, success_contract_json, constraints_json, authority_envelope_json,
-              sensitivity, context_snapshot_id, state, priority, created_at_ms, updated_at_ms,
-              deadline_ms, attention_policy, plan_revision, current_phase, parent_mission_id,
-              final_outcome, verification_state, verification_record_json, learning_record_id
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NULL, ?, NULL,
-                      ?, NULL, NULL)
-            """,
-            (
-                mission.mission_id, owner_principal_id, project_id, origin.value,
-                origin_channel.value, mission.title, mission.goal, mission.mission_class,
-                Store.dumps(mission.success_contract.model_dump(mode="json")),
-                Store.dumps(mission.constraints),
-                Store.dumps(mission.authority_envelope.model_dump(mode="json")),
-                sensitivity.value, context_snapshot_id, mission.state.value, priority,
-                now, now, deadline_ms, mission.attention_policy, 0, parent_mission_id,
-                mission.verification_state.value,
-            ),
-        )
+        async with self.store.connection() as db:
+            await db.execute("BEGIN IMMEDIATE")
+            await db.execute(
+                """
+                INSERT INTO missions(
+                  mission_id, owner_principal_id, project_id, origin, origin_channel, title, goal,
+                  mission_class, success_contract_json, constraints_json, authority_envelope_json,
+                  sensitivity, context_snapshot_id, state, priority, created_at_ms, updated_at_ms,
+                  deadline_ms, attention_policy, plan_revision, current_phase, parent_mission_id,
+                  final_outcome, verification_state, verification_record_json, learning_record_id
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NULL, ?, NULL,
+                          ?, NULL, NULL)
+                """,
+                (
+                    mission.mission_id, owner_principal_id, project_id, origin.value,
+                    origin_channel.value, mission.title, mission.goal, mission.mission_class,
+                    Store.dumps(mission.success_contract.model_dump(mode="json")),
+                    Store.dumps(mission.constraints),
+                    Store.dumps(mission.authority_envelope.model_dump(mode="json")),
+                    sensitivity.value, context_snapshot_id, mission.state.value, priority,
+                    now, now, deadline_ms, mission.attention_policy, 0, parent_mission_id,
+                    mission.verification_state.value,
+                ),
+            )
+            capture_generation = await self._enqueue_learning(db, mission.mission_id, "OPENED", now)
+            await db.commit()
         if self.learning is not None:
             # P2-MEM-001 — a mission is a stated owner goal and, where it needed the
             # owner's presence, a decision they could have declined. Both stores existed
             # with no producer; this is the event they were waiting for.
             try:
                 await self.learning.record_mission_opened(mission, now_ms=now)
+                await self._ack_learning(mission.mission_id, "OPENED", expected_generation=capture_generation)
             except Exception as exc:
                 self.report_learning_unavailable(mission.mission_id,"capture",exc)
         await self.record_event(
@@ -269,6 +275,7 @@ class MissionService:
                                           MissionState.BLOCKED_UNSAFE) else "INFO",
             evidence_ref=(verification.evidence_refs[0] if verification and verification.evidence_refs else evidence_ref),
         ) if event_type is not None else None
+        learning_generations = {}
         async with self.store.connection() as db:
             changed = await db.execute(
                 "UPDATE missions SET state = ?, verification_state = ?, "
@@ -286,7 +293,11 @@ class MissionService:
                 raise MissionError("MISSION_STATE_PRECONDITION_FAILED", current.value)
             if event is not None:
                 await self._persist_event(db, event)
+            if target is MissionState.AUTHORIZED:
+                await self._enqueue_learning(db, mission_id, "OPENED", now)
             if target in TERMINAL_STATES:
+                for stage in ("MISSION_OUTCOME", "STRATEGY_OUTCOME", "DECISION_OUTCOME"):
+                    learning_generations[stage] = await self._enqueue_learning(db, mission_id, stage, now)
                 await db.execute(
                     "INSERT OR IGNORE INTO mission_projection_outbox(mission_id, created_at_ms) VALUES(?,?)",
                     (mission_id, now),
@@ -319,7 +330,9 @@ class MissionService:
                     goal=refreshed.goal,
                     verification_status=(verification.status.value if verification else None),
                     evidence_refs=(verification.evidence_refs if verification else []),
+                    now_ms=refreshed.updated_at_ms,
                 )
+                await self._ack_learning(mission_id, "MISSION_OUTCOME", expected_generation=learning_generations["MISSION_OUTCOME"])
             except Exception as exc:
                 self.report_learning_unavailable(mission_id,"mission_outcome",exc)
             # P1-LEARN-003 — the same terminal event, read as evidence about the approach
@@ -332,17 +345,88 @@ class MissionService:
             # of them would have demoted a strategy that had never once failed.
             try:
                 await self.learning.record_strategy_outcome(refreshed, state=refreshed.state)
+                await self._ack_learning(mission_id, "STRATEGY_OUTCOME", expected_generation=learning_generations["STRATEGY_OUTCOME"])
             except Exception as exc:
                 self.report_learning_unavailable(mission_id,"strategy_outcome",exc)
             # §12 — how the owner's decision actually turned out, which is the only thing
             # that can falsify what VAN inferred from it.
             try:
                 await self.learning.record_decision_outcome(refreshed, state=refreshed.state)
+                await self._ack_learning(mission_id, "DECISION_OUTCOME", expected_generation=learning_generations["DECISION_OUTCOME"])
             except Exception as exc:
                 self.report_learning_unavailable(mission_id,"decision_outcome",exc)
         if refreshed.is_terminal:
             await self.reconcile_terminal_projections(mission_id=mission_id)
         return refreshed
+
+    @staticmethod
+    async def _enqueue_learning(db, mission_id: str, stage: str, now: int) -> int:
+        await db.execute("INSERT INTO mission_learning_outbox(mission_id,stage,created_at_ms,queue_order) "
+            "VALUES(?,?,?,(SELECT COALESCE(MAX(queue_order),0)+1 FROM mission_learning_outbox)) "
+            "ON CONFLICT(mission_id,stage) DO UPDATE SET generation=generation+1,attempts=0,last_failure=NULL, "
+            "queue_order=excluded.queue_order,created_at_ms=excluded.created_at_ms", (mission_id,stage,now))
+        row = await (await db.execute("SELECT generation FROM mission_learning_outbox WHERE mission_id=? AND stage=?", (mission_id,stage))).fetchone()
+        return row["generation"]
+
+    async def _ack_learning(self, mission_id: str, stage: str, *, expected_generation: int) -> None:
+        if type(expected_generation) is not int or expected_generation < 1:
+            raise ValueError("learning_delivery_generation_invalid")
+        await self.store.execute("DELETE FROM mission_learning_outbox WHERE mission_id=? AND stage=? AND generation=?",
+            (mission_id,stage,expected_generation))
+
+    async def reconcile_learning_projections(self, *, limit: int = 32) -> int:
+        """Repair bounded original local projections, never rerun mission effects.
+
+        Queue order is native and moved to the tail after failure. A broken source
+        cannot starve other stages, and scheduling does not require clock ordering.
+        Each sink must be replay-safe before its delivery can be acknowledged.
+        """
+        if type(limit) is not int or not 1 <= limit <= 100:
+            raise ValueError("learning_repair_limit_invalid")
+        if self.learning is None:
+            return 0
+        rows = await self.store.fetchall("SELECT mission_id,stage,generation FROM mission_learning_outbox "
+            "ORDER BY queue_order,mission_id,stage LIMIT ?", (limit,))
+        completed = 0
+        for row in rows:
+            try:
+                mission = await self.get(row["mission_id"])
+                if mission is None:
+                    raise ValueError("LEARNING_NATIVE_SOURCE_MISSING")
+                await asyncio.wait_for(self._deliver_learning(mission, row["stage"]), timeout=2.0)
+                await self._ack_learning(mission.mission_id, row["stage"], expected_generation=row["generation"])
+            except Exception as exc:
+                self.report_learning_unavailable(row["mission_id"], row["stage"], exc)
+                await self.store.execute("UPDATE mission_learning_outbox SET attempts=attempts+1,last_failure=?, "
+                    "queue_order=(SELECT COALESCE(MAX(queue_order),0)+1 FROM mission_learning_outbox) "
+                    "WHERE mission_id=? AND stage=? AND generation=?", (type(exc).__name__,row["mission_id"],row["stage"],row["generation"]))
+                continue
+            completed += 1
+        return completed
+
+    async def _deliver_learning(self, mission: Mission, stage: str) -> None:
+        if stage == "OPENED":
+            await self.learning.record_mission_opened(mission, now_ms=mission.created_at_ms)
+            if mission.is_terminal:
+                # The decision stage may already have completed while owner-source
+                # publication was unavailable. Repair the newly created fingerprint
+                # from the same native terminal outcome before acknowledging OPENED.
+                await self.learning.record_decision_outcome(mission, state=mission.state, now_ms=mission.updated_at_ms)
+            return
+        if not mission.is_terminal:
+            raise ValueError("LEARNING_NATIVE_OUTCOME_CONFLICT")
+        if stage == "MISSION_OUTCOME":
+            verification = await self.verification_record(mission.mission_id)
+            await self.learning.record_mission_outcome(mission_id=mission.mission_id,
+                state=mission.state, goal=mission.goal,
+                verification_status=verification.status.value if verification else None,
+                evidence_refs=verification.evidence_refs if verification else [], now_ms=mission.updated_at_ms)
+        elif stage == "STRATEGY_OUTCOME":
+            await self.learning.record_strategy_outcome(mission, state=mission.state, now_ms=mission.updated_at_ms)
+        elif stage == "DECISION_OUTCOME":
+            await self.learning.record_decision_outcome(mission, state=mission.state, now_ms=mission.updated_at_ms)
+        else:
+            raise ValueError("learning_repair_stage_invalid")
 
     async def reconcile_terminal_projections(self, *, mission_id: str | None = None, limit: int = 32) -> int:
         """Retry local idempotent publication; never rerun an external effect."""

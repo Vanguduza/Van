@@ -57,6 +57,13 @@ FORGETTABLE: tuple[ForgettableStore, ...] = (
 #: Named, with the reason, rather than silently omitted. Someone auditing this list should
 #: be able to see that the omission was decided rather than forgotten.
 DELIBERATELY_KEPT: dict[str, str] = {
+    "mission_learning_delivery": (
+        "minimal native mission/stage delivery and strategy observation identities "
+        "prevent lost feedback and duplicate samples after restart. They contain "
+        "identities, outcomes and hashes rather than owner notes or goal text, and "
+        "remain with the original mission. Repair never recreates erased intent or "
+        "decision fingerprints from an old source."
+    ),
     "intent_observation_source": (
         "minimal original mission projection receipts in runtime_meta prevent duplicate "
         "delivery from recreating erased intent. They retain opaque identities, a scope "

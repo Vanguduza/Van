@@ -209,7 +209,10 @@ class CommandMissionLink:
         current = await self._advance(mission, MissionState.AUTHORIZED, summary=summary)
         if self.missions.learning is not None:
             try:
+                delivery = await self.missions.store.fetchone("SELECT generation FROM mission_learning_outbox WHERE mission_id=? AND stage='OPENED'", (current.mission_id,))
                 await self.missions.learning.record_mission_opened(current)
+                if delivery is not None:
+                    await self.missions._ack_learning(current.mission_id, "OPENED", expected_generation=delivery["generation"])
             except Exception as exc:
                 self.missions.report_learning_unavailable(current.mission_id,"owner_approval",exc)
         return current

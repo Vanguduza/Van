@@ -314,6 +314,16 @@ POLICIES: tuple[TablePolicy, ...] = (
     ),
 
     # ---- children -----------------------------------------------------------
+    _p("chart_workspaces", _OWNER,
+       note="Saved chart settings belong to the owner until revision-checked deletion."),
+    _p("chart_workspace_revisions", _OWNER,
+       note="Owner chart history is retained until workspace deletion; its composite owner/workspace foreign key cascades deletion."),
+    _p("chart_workspace_operations", _OWNER,
+       note="Minimal original operation outcomes must outlive deleted workspaces to prevent stale retries recreating them."),
+    _p("mission_learning_outbox", _CHILD, parent=("mission_id", "missions"),
+       note="Pending native learning delivery must survive restart and age sweeps."),
+    _p("mission_strategy_observations", _CHILD, parent=("mission_id", "missions"),
+       note="Original projection identities prevent retry from becoming extra experience."),
     _p("mission_projection_outbox", _CHILD, parent=("mission_id", "missions"),
        note="Undelivered terminal publication must survive retries and age sweeps."),
     _p("mission_events", _CHILD, parent=("mission_id", "missions")),

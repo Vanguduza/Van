@@ -172,18 +172,17 @@
     "note": "Opus unavailable; owner transferred build to Codex. No independent reviewer identity is inferred from another model or session."
   },
   "checkpoint": {
-    "updated_utc": "2026-10-24T06:25:19.915108+00:00",
+    "updated_utc": "2026-10-24T07:10:25.680569+00:00",
     "branch": "ccr-9e07e1af-8mgz1p",
     "base": "b02075f327ea8180ab6d269eba358cf8c5479878",
     "background_jobs": [
       {
-        "job": "exact90 r1 full backend/contracts then trading with private PostgreSQL and storage audit",
-        "session": 8981,
-        "source": "90e644522e96e554f0e18f3745af69fb16d7edcb",
+        "job": "exact815 full backend/contracts then trading with private PostgreSQL and source storage audit",
+        "session": 21708,
+        "source": "815405e9676407a38f43df0b2b9a8bd7bd87f74d",
         "worktree": "/workspace/van-autonomous-qualification-20261022/Van",
-        "stage_file": "/tmp/van-90e64452-r1-qualification-stage.txt",
-        "state": "RUNNING_NOT_A_PASS",
-        "scope": "Earlier frozen source; do not edit checkout while active. First interrupted attempt is separately recorded."
+        "stage_file": "/tmp/van-815405e9-qualification-stage.txt",
+        "state": "RUNNING_NOT_A_PASS"
       }
     ],
     "last_validation": [
@@ -345,7 +344,12 @@
       "Owner intent source and privacy: exact native owner command/device/origin/context required for observations; automatic events cannot manufacture standing goals. Original mission scope/identity receipt commits with native node/count/link, survives uncertain commit/replay, and prevents old or erased requests attaching to fresh same-text intent. Existing erasure revision barriers hold delayed/ambiguous sources while fresh consent remains learnable. Minimal non-content receipt retention disclosed. Real observed-pattern readback now handles actual device principals and revalidates original native source/context coherently, rather than requiring historical owner literal.4 original failures plus integration/fixture/readback findings retained and corrected;79 isolated/242 audited integrated/26 registry/80 rebuild pass0skip;11 introduced fault/control pairs caught with exact restoration.374 original identities383edits unchanged; current preflight zero findings. No new endpoint/UI or complete durable-learning/all-memory/unit/native/live claim.",
       "Exact f124741f retry completed:7062 backend/contracts PASS9skip,2539trading PASS0skip, zero forbidden storage events and private PG stopped/removed. Prior storage-aborted attempt retained.",
       "Exact90e64452 first broad run found interrupted/zombie on resume, no counts/PASS claimed; recorded separate interrupted receipt and started clean same-source r1.",
-      "Exact90hosted40003045752:all374legacy cases actually caught; emulator18PASS4artworkskips,VITS2.710/2.083 method seconds;publicPG26voice117trading2538PASS1DDSskip. Only original DDS read credential/trusted-main CI failures. Native40003045832actualMetaEditor0errors0warningsfreshEX5; invalid4errors/noEX5. No provider/native execution or S24 claim."
+      "Exact90hosted40003045752:all374legacy cases actually caught; emulator18PASS4artworkskips,VITS2.710/2.083 method seconds;publicPG26voice117trading2538PASS1DDSskip. Only original DDS read credential/trusted-main CI failures. Native40003045832actualMetaEditor0errors0warningsfreshEX5; invalid4errors/noEX5. No provider/native execution or S24 claim.",
+      "Source815405e9 owner-intent packet committed/pushed; ProjectTruthGREEN100 and remote exact/clean before this new packet.",
+      "Exact90R1 failed after5 known tests:4155PASS5FAIL4SKIP in1821.67s, zero storage audit, private PGstopped/removed. Remaining tests/trading NOT_RUN. Failures are in native-event/legacy approval fixtures corrected815; failed historical evidence retained.",
+      "Hosted81540070199094:actualall374retained cases caught;18emulatorPASS4artworkskips,VITS3.995/2.516 methodseconds,PG26voice117trading2538PASS1DDSskip; originalDDSreadkey/trustedmainfailures remain. Native40070199122actual0errors0warningsfreshEX5; invalid4/noEX5.",
+      "Learning recovery isolated WIP:4genuinebeforefailures;137focusedPASS0skip;27recoveryPASS0skip including actualstartup/scheduler and two abrupt process exits;15introducedfaults caught/restored. Migration marker atomicity must be fixed/tested before source integration.",
+      "Durable local mission learning: additive atomic migration57; original mission/stage deliveries commit with capture and terminal lifecycle facts, fresh owner authorization has a new delivery generation. Bounded startup/scheduler repair uses fair native queue order and exact-generation success/failure acknowledgements, preserving pending work after restart, cancellation or uncertain reply. Native strategy class/envelope/state/activity reread under writer fence, atomic strategy/count/original receipt, one sample on concurrent replay/commit-ack loss; historical terminal samples explicitly LEGACY_UNRECONCILED rather than recounted. Original verification and late fingerprint outcome recovered; owner reassessment/erasure/fresh consent preserved. New queue/sample receipts have parent retention and non-content disclosure. Existing chart3table policies corrected; migration fixture now models real55-to-partial56 upgrade.4original+2migration+1generationrace failures reproduced;31native recovery/373audited integrated/26registry/80rebuild PASS0skip;19final fault/control pairs caught/restored. Earlier retainedC7eight/RC2five caught before final migration/generation changes; current374case383edit preflight0findings, full next-source corpus pending. No newAPI/UI or complete legacy/feedback/unit/live claim."
     ],
     "environment_notes": [
       "clone must be unshallowed (git fetch --unshallow) and PR heads fetched (+refs/pull/*/head:refs/remotes/origin/pr/*) before pre001.py",
@@ -356,9 +360,9 @@
       "Python 3.12 venv from backend/requirements.lock for CI-equivalent runs; stream-host venv from deploy/van-browser-stream/requirements.lock",
       "Desktop Commander read-only device listing was refused by the session permission policy; native readback prepared as pre003/NATIVE_READBACK_REQUEST.md"
     ],
-    "next_action": "Commit/push source intent/privacy/readback component plus actual earlier-source qualifications and hosted90corpus/native artifacts; current source registry457endpoints333schemas42features105functions78surfaces unchanged. Keep frozen exact90 r1 QA untouched; collect its actual exit/XML/audit/privatePG cleanup, not assumed completion. Next implement durable optional-learning recovery from original native lifecycle evidence with idempotent strategy counts and erasure barriers. Continue full original131unit/93feature backend programme (provider/funds/market/news/watchlist/certifiedchart/forecast/strategy/chain and other assistant components); candidate evidence is not formal acceptance. No newfrontend beforeBG001 or fabricated native/service/provider/signature/S24 results.",
-    "previous_head": "90e644522e96e554f0e18f3745af69fb16d7edcb",
-    "current_packet": "Owner intent native source, erasure/replay and device-principal pattern readback source tested; whole backend incomplete."
+    "next_action": "Publish the tested durable local learning packet, retaining failed90R1 and actual hosted815 proofs. Continue immediately with native mission-created-event atomicity: /tmp/van-learning-recovery-work-20261024 has4reproduced failures, atomic creation/event fix and80focused PASS; not yet integrated. Root373source integration protects this first packet; do not copy the whole isolate or overwrite the corrected chart fixture. Finish source-bound fault checks, integrate only future core files from verified root preimages, test and publish. Current exact815 QA21708 remains protected and is not current-component/full-product acceptance. Then continue fundingBE006/007 and all original131unit/93feature scope; nofrontend beforeBG001 or fabricated native/service/signature/provider/S24 acceptance.",
+    "previous_head": "815405e9676407a38f43df0b2b9a8bd7bd87f74d",
+    "current_packet": "Durable local learning recovery source tested; isolated native mission-created-event atomicity fix is next."
   },
   "observations": [
     "OBS-001 BE-002 debug cleartext",
@@ -416,6 +420,6 @@
       "evidence": "ci/MUTATION_CORPUS_c2a27848.json"
     }
   ],
-  "current_action": "Commit/push source intent/privacy/readback component plus actual earlier-source qualifications and hosted90corpus/native artifacts; current source registry457endpoints333schemas42features105functions78surfaces unchanged. Keep frozen exact90 r1 QA untouched; collect its actual exit/XML/audit/privatePG cleanup, not assumed completion. Next implement durable optional-learning recovery from original native lifecycle evidence with idempotent strategy counts and erasure barriers. Continue full original131unit/93feature backend programme (provider/funds/market/news/watchlist/certifiedchart/forecast/strategy/chain and other assistant components); candidate evidence is not formal acceptance. No newfrontend beforeBG001 or fabricated native/service/provider/signature/S24 results.",
-  "updated_at_utc": "2026-10-24T06:25:19.915108+00:00"
+  "current_action": "Publish the tested durable local learning packet, retaining failed90R1 and actual hosted815 proofs. Continue immediately with native mission-created-event atomicity: /tmp/van-learning-recovery-work-20261024 has4reproduced failures, atomic creation/event fix and80focused PASS; not yet integrated. Root373source integration protects this first packet; do not copy the whole isolate or overwrite the corrected chart fixture. Finish source-bound fault checks, integrate only future core files from verified root preimages, test and publish. Current exact815 QA21708 remains protected and is not current-component/full-product acceptance. Then continue fundingBE006/007 and all original131unit/93feature scope; nofrontend beforeBG001 or fabricated native/service/signature/provider/S24 acceptance.",
+  "updated_at_utc": "2026-10-24T07:10:25.680569+00:00"
 }

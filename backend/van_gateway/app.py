@@ -1063,6 +1063,11 @@ def create_app() -> FastAPI:
     async def _reconcile_mission_publications() -> dict:
         return {"published": await missions.reconcile_terminal_projections()}
 
+    async def _repair_mission_learning() -> dict:
+        repaired = await missions.reconcile_learning_projections()
+        row = await store.fetchone("SELECT COUNT(*) AS pending,SUM(attempts>0) AS retry_pending FROM mission_learning_outbox")
+        return {"repaired": repaired, "pending": int(row["pending"]), "retry_pending": int(row["retry_pending"] or 0)}
+
     def _scheduler_jobs() -> tuple[ScheduledJob, ...]:
         jobs = [
             ScheduledJob("reminders.fire_due", settings.reminder_sweep_seconds, _sweep_reminders),
@@ -1072,6 +1077,8 @@ def create_app() -> FastAPI:
             ),
             ScheduledJob("missions.publish_terminal", settings.reminder_sweep_seconds,
                          _reconcile_mission_publications),
+            ScheduledJob("learning.repair_missions", settings.reminder_sweep_seconds,
+                         _repair_mission_learning),
             ScheduledJob("ops.retention", settings.retention_interval_seconds, _run_retention),
             ScheduledJob("proactive.follow_ups", settings.reminder_sweep_seconds, _run_proactive_followups),
             ScheduledJob("owner.watches", settings.reminder_sweep_seconds, _run_owner_watches),
@@ -1119,6 +1126,7 @@ def create_app() -> FastAPI:
         await oauth_pending.migrate()
         await owner_runtime.startup()
         await missions.reconcile_terminal_projections()
+        await missions.reconcile_learning_projections(limit=8)
         # §273 — the HOT index is a cache of durable state, so it is rebuilt on
         # every boot rather than trusted to survive a restart.
         await automation_hot_index.rebuild(store)

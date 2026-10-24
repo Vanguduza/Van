@@ -1,6 +1,6 @@
 {
   "schema": "van.rebuild.candidate-source-progress/1",
-  "updated_at_utc": "2026-10-24T06:25:19.915108+00:00",
+  "updated_at_utc": "2026-10-24T07:10:25.680569+00:00",
   "programme": "Rev1.18; original 131 unit IDs and dependencies retained",
   "authority": "auth-20261022-owner-autonomous-candidate-build",
   "meaning": "Candidate source progress is separate from admitted unit acceptance. Independent certificates, owner decisions, live effects and release gates remain unissued. No unit is declared complete by this record.",
@@ -295,6 +295,10 @@
         {
           "description": "Owner intent source and privacy: exact native owner command/device/origin/context required for observations; automatic events cannot manufacture standing goals. Original mission scope/identity receipt commits with native node/count/link, survives uncertain commit/replay, and prevents old or erased requests attaching to fresh same-text intent. Existing erasure revision barriers hold delayed/ambiguous sources while fresh consent remains learnable. Minimal non-content receipt retention disclosed. Real observed-pattern readback now handles actual device principals and revalidates original native source/context coherently, rather than requiring historical owner literal.4 original failures plus integration/fixture/readback findings retained and corrected;79 isolated/242 audited integrated/26 registry/80 rebuild pass0skip;11 introduced fault/control pairs caught with exact restoration.374 original identities383edits unchanged; current preflight zero findings. No new endpoint/UI or complete durable-learning/all-memory/unit/native/live claim.",
           "evidence": "backend/BE-003_027_036_OWNER_INTENT_SOURCE.md; receipts/OWNER_INTENT_SOURCE_20261024.json"
+        },
+        {
+          "description": "Durable local mission learning: additive atomic migration57; original mission/stage deliveries commit with capture and terminal lifecycle facts, fresh owner authorization has a new delivery generation. Bounded startup/scheduler repair uses fair native queue order and exact-generation success/failure acknowledgements, preserving pending work after restart, cancellation or uncertain reply. Native strategy class/envelope/state/activity reread under writer fence, atomic strategy/count/original receipt, one sample on concurrent replay/commit-ack loss; historical terminal samples explicitly LEGACY_UNRECONCILED rather than recounted. Original verification and late fingerprint outcome recovered; owner reassessment/erasure/fresh consent preserved. New queue/sample receipts have parent retention and non-content disclosure. Existing chart3table policies corrected; migration fixture now models real55-to-partial56 upgrade.4original+2migration+1generationrace failures reproduced;31native recovery/373audited integrated/26registry/80rebuild PASS0skip;19final fault/control pairs caught/restored. Earlier retainedC7eight/RC2five caught before final migration/generation changes; current374case383edit preflight0findings, full next-source corpus pending. No newAPI/UI or complete legacy/feedback/unit/live claim.",
+          "evidence": "backend/BE-003_018_027_036_LEARNING_RECOVERY.md; receipts/LEARNING_RECOVERY_SOURCE_20261024.json"
         }
       ]
     },
@@ -759,12 +763,16 @@
         "BE-008",
         "PRE-003"
       ],
-      "candidate_status": "NOT_STARTED",
+      "candidate_status": "IN_PROGRESS",
       "unit_acceptance": "NOT_ISSUED",
       "milestones": [
         {
           "description": "Chart workspace backend component: additive migration56, typed renderer-independent multi-panel settings, exact native product refs as unverified owner context, decimal-string price/time drawings and seven typed presentation/research indicator configurations. Revision-checked atomic CRUD, immutable snapshots/restore-as-new-revision, paged histories, owner-scoped original request identities/outcomes and failed-commit recovery; deletion removes live SQL state/revision bodies and retains no notes in minimal outcome receipts. Explicit original scope/hash/capacity refusals; authenticated current owner/device proof and private no-store responses.57 focused/144 integrated/10 privacy/1 real backup-restore/29 registry/79 rebuild pass0skip,15 fault/control pairs caught/restored. New9routes ->457endpoints333schemas;42features105functions78surfaces preserved. No newUI/Androidconsumer, certifiedindicatorcalc/nativebinding/export/renderqualification or wholeBE018 claim.",
           "evidence": "backend/BE-003_018_CHART_WORKSPACES.md; receipts/CHART_WORKSPACE_SOURCE_20261023.json"
+        },
+        {
+          "description": "The existing chart workspace component is partial source implementation, not a full chart calculation/market-data qualification. This packet assigns explicit owner retention to workspaces, composite-FK revision history and original operation receipts; an actual age sweep preserves state/retry identity. Upgrade fixture preserves real55-to-partial56-to-current migration and original owner metadata. Existing workspace tests are included in373passing integrated checks. Certified indicators, native data identities, replay and actual frontend consumption remain open.",
+          "evidence": "backend/BE-003_018_027_036_LEARNING_RECOVERY.md; receipts/LEARNING_RECOVERY_SOURCE_20261024.json"
         }
       ]
     },
@@ -932,6 +940,10 @@
         {
           "description": "Owner intent source and privacy: exact native owner command/device/origin/context required for observations; automatic events cannot manufacture standing goals. Original mission scope/identity receipt commits with native node/count/link, survives uncertain commit/replay, and prevents old or erased requests attaching to fresh same-text intent. Existing erasure revision barriers hold delayed/ambiguous sources while fresh consent remains learnable. Minimal non-content receipt retention disclosed. Real observed-pattern readback now handles actual device principals and revalidates original native source/context coherently, rather than requiring historical owner literal.4 original failures plus integration/fixture/readback findings retained and corrected;79 isolated/242 audited integrated/26 registry/80 rebuild pass0skip;11 introduced fault/control pairs caught with exact restoration.374 original identities383edits unchanged; current preflight zero findings. No new endpoint/UI or complete durable-learning/all-memory/unit/native/live claim.",
           "evidence": "backend/BE-003_027_036_OWNER_INTENT_SOURCE.md; receipts/OWNER_INTENT_SOURCE_20261024.json"
+        },
+        {
+          "description": "Durable local mission learning: additive atomic migration57; original mission/stage deliveries commit with capture and terminal lifecycle facts, fresh owner authorization has a new delivery generation. Bounded startup/scheduler repair uses fair native queue order and exact-generation success/failure acknowledgements, preserving pending work after restart, cancellation or uncertain reply. Native strategy class/envelope/state/activity reread under writer fence, atomic strategy/count/original receipt, one sample on concurrent replay/commit-ack loss; historical terminal samples explicitly LEGACY_UNRECONCILED rather than recounted. Original verification and late fingerprint outcome recovered; owner reassessment/erasure/fresh consent preserved. New queue/sample receipts have parent retention and non-content disclosure. Existing chart3table policies corrected; migration fixture now models real55-to-partial56 upgrade.4original+2migration+1generationrace failures reproduced;31native recovery/373audited integrated/26registry/80rebuild PASS0skip;19final fault/control pairs caught/restored. Earlier retainedC7eight/RC2five caught before final migration/generation changes; current374case383edit preflight0findings, full next-source corpus pending. No newAPI/UI or complete legacy/feedback/unit/live claim.",
+          "evidence": "backend/BE-003_018_027_036_LEARNING_RECOVERY.md; receipts/LEARNING_RECOVERY_SOURCE_20261024.json"
         }
       ]
     },
@@ -1830,6 +1842,10 @@
         {
           "description": "Owner intent source and privacy: exact native owner command/device/origin/context required for observations; automatic events cannot manufacture standing goals. Original mission scope/identity receipt commits with native node/count/link, survives uncertain commit/replay, and prevents old or erased requests attaching to fresh same-text intent. Existing erasure revision barriers hold delayed/ambiguous sources while fresh consent remains learnable. Minimal non-content receipt retention disclosed. Real observed-pattern readback now handles actual device principals and revalidates original native source/context coherently, rather than requiring historical owner literal.4 original failures plus integration/fixture/readback findings retained and corrected;79 isolated/242 audited integrated/26 registry/80 rebuild pass0skip;11 introduced fault/control pairs caught with exact restoration.374 original identities383edits unchanged; current preflight zero findings. No new endpoint/UI or complete durable-learning/all-memory/unit/native/live claim.",
           "evidence": "backend/BE-003_027_036_OWNER_INTENT_SOURCE.md; receipts/OWNER_INTENT_SOURCE_20261024.json"
+        },
+        {
+          "description": "Durable local mission learning: additive atomic migration57; original mission/stage deliveries commit with capture and terminal lifecycle facts, fresh owner authorization has a new delivery generation. Bounded startup/scheduler repair uses fair native queue order and exact-generation success/failure acknowledgements, preserving pending work after restart, cancellation or uncertain reply. Native strategy class/envelope/state/activity reread under writer fence, atomic strategy/count/original receipt, one sample on concurrent replay/commit-ack loss; historical terminal samples explicitly LEGACY_UNRECONCILED rather than recounted. Original verification and late fingerprint outcome recovered; owner reassessment/erasure/fresh consent preserved. New queue/sample receipts have parent retention and non-content disclosure. Existing chart3table policies corrected; migration fixture now models real55-to-partial56 upgrade.4original+2migration+1generationrace failures reproduced;31native recovery/373audited integrated/26registry/80rebuild PASS0skip;19final fault/control pairs caught/restored. Earlier retainedC7eight/RC2five caught before final migration/generation changes; current374case383edit preflight0findings, full next-source corpus pending. No newAPI/UI or complete legacy/feedback/unit/live claim.",
+          "evidence": "backend/BE-003_018_027_036_LEARNING_RECOVERY.md; receipts/LEARNING_RECOVERY_SOURCE_20261024.json"
         }
       ]
     },

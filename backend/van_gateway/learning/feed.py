@@ -173,14 +173,16 @@ class LearningFeed:
         kind = OUTCOME_KIND.get(state)
         if kind is None:
             return
-        rows = await self.store.fetchall(
-            "SELECT decision_id FROM decision_fingerprints WHERE mission_id = ?",
-            (mission.mission_id,),
-        )
-        for row in rows:
-            await self.fingerprints.record_outcome(
-                str(row["decision_id"]), outcome=kind, now_ms=now_ms,
-            )
+        async with self.store.connection() as db:
+            await db.execute("BEGIN IMMEDIATE")
+            native = await (await db.execute("SELECT state,updated_at_ms FROM missions WHERE mission_id=?", (mission.mission_id,))).fetchone()
+            if native is None or native["state"] != state.value:
+                raise ValueError("LEARNING_NATIVE_OUTCOME_CONFLICT")
+            # Only the native outcome is projected. An exact retry preserves a later
+            # owner reassessment and never recreates a deliberately erased record.
+            await db.execute("UPDATE decision_fingerprints SET outcome=?,updated_at_ms=? "
+                "WHERE mission_id=? AND outcome IS NOT ?", (kind,native["updated_at_ms"],mission.mission_id,kind))
+            await db.commit()
 
     #: P1-LEARN-005 — what each terminal state says about the *approach*, which is a
     #: different question from what it says about the mission.
@@ -229,6 +231,17 @@ class LearningFeed:
             # Not a terminal state, so there is no outcome to record. Defaulting to any of
             # the three would be inventing evidence.
             return None
+        async with self.store.connection() as db:
+            await db.execute("BEGIN IMMEDIATE")
+            return await self._project_strategy_outcome(db, mission, state, outcome, now_ms)
+
+    async def _project_strategy_outcome(self, db, mission, state, outcome, now_ms):
+        row = await (await db.execute("SELECT * FROM missions WHERE mission_id=?", (mission.mission_id,))).fetchone()
+        if row is None or row["state"] != state.value:
+            raise ValueError("LEARNING_NATIVE_OUTCOME_CONFLICT")
+        from van_gateway.mission.service import MissionService
+        mission = MissionService._row_to_mission(row)
+        # BEGIN IMMEDIATE holds the native writer fence throughout these reads.
         rows = await self.store.fetchall(
             "SELECT capability_id FROM mission_activities WHERE mission_id = ? "
             "ORDER BY started_at_ms, activity_id",
@@ -237,15 +250,31 @@ class LearningFeed:
         sequence = [str(r["capability_id"]) for r in rows]
         if not sequence:
             return None
-        strategy_id = await self.strategies.find_or_register(
-            mission_class=mission.mission_class,
-            capability_sequence=sequence,
-            # P1-LEARN-002 — the envelope this sequence was actually exercised under, so
-            # a strategy can never be offered to a mission the owner authorised for less.
-            max_action_class=mission.authority_envelope.max_action_class,
-            now_ms=now_ms,
+        native_rows = await (await db.execute("SELECT activity_id,capability_id,started_at_ms FROM mission_activities "
+            "WHERE mission_id=? ORDER BY started_at_ms,activity_id", (mission.mission_id,))).fetchall()
+        sequence = [str(item["capability_id"]) for item in native_rows]
+        scope = hashlib.sha256(Store.dumps({"mission_class": mission.mission_class,
+            "authority_envelope": mission.authority_envelope.model_dump(mode="json"),
+            "state": mission.state.value, "verification_state": mission.verification_state.value,
+            "verification_record": row["verification_record_json"],
+            "activities": [dict(item) for item in native_rows]}).encode()).hexdigest()
+        previous = await (await db.execute("SELECT * FROM mission_strategy_observations WHERE mission_id=?", (mission.mission_id,))).fetchone()
+        if previous is not None:
+            if previous["state"] == "LEGACY_UNRECONCILED":
+                return None
+            if previous["state"] != "OBSERVED" or previous["scope_sha256"] != scope or previous["outcome"] != outcome.value:
+                raise ValueError("LEARNING_NATIVE_SOURCE_CONFLICT")
+            return previous["strategy_id"]
+        strategies = StrategyLearning(self.store, _db=db)
+        strategy_id = await strategies.find_or_register(
+            mission_class=mission.mission_class, capability_sequence=sequence,
+            max_action_class=mission.authority_envelope.max_action_class, now_ms=now_ms,
         )
-        await self.strategies.record_outcome(strategy_id, outcome=outcome, now_ms=now_ms)
+        stamp = mission.updated_at_ms
+        await strategies.record_outcome(strategy_id, outcome=outcome, now_ms=stamp)
+        await db.execute("INSERT INTO mission_strategy_observations(mission_id,state,strategy_id,scope_sha256,outcome,recorded_at_ms) "
+            "VALUES(?,'OBSERVED',?,?,?,?)", (mission.mission_id,strategy_id,scope,outcome.value,stamp))
+        await db.commit()
         return strategy_id
 
     #: GAP-F-008 — promotion states that mean a strategy has cleared VanEval, not merely

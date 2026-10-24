@@ -287,12 +287,21 @@ async def test_same_symbol_keeps_disjoint_native_products_and_no_alias_remapping
     assert actual.state.panels[0].instrument.product_id!=actual.state.panels[1].instrument.product_id
 
 @pytest.mark.asyncio
-async def test_additive_migration_resumes_partial_table_creation_and_preserves_existing_owner_data(tmp_path):
-    s=await service(tmp_path)
-    await s.store.execute("INSERT INTO runtime_meta(key,value,updated_at_unix_ms) VALUES('fixture_previous_owner','unchanged',123)")
-    await s.store.execute('DROP TABLE chart_workspace_revisions');await s.store.execute('DROP TABLE chart_workspace_operations')
-    await s.store.execute('DELETE FROM schema_migrations WHERE version=56')
-    restarted=Store(s.store.path);await restarted.migrate();await restarted.migrate()
+async def test_additive_migration_resumes_partial_table_creation_and_preserves_existing_owner_data(tmp_path,monkeypatch):
+    import van_gateway.storage.db as storage
+    from van_gateway.trading.chart_schema import MIGRATION_56
+    store=Store(str(tmp_path/'partial-chart-migration.sqlite3'))
+    # Construct the actual interrupted upgrade boundary: schema55 plus only the
+    # first chart table, without pretending a later schema already completed.
+    with monkeypatch.context() as old:
+        old.setattr(storage,'MIGRATIONS',{k:v for k,v in storage.MIGRATIONS.items() if k<=55})
+        old.setattr(storage,'SCHEMA_VERSION',55)
+        await store.migrate()
+    await store.execute("INSERT INTO runtime_meta(key,value,updated_at_unix_ms) VALUES('fixture_previous_owner','unchanged',123)")
+    async with store.connection() as db:
+        await db.executescript(MIGRATION_56.split('CREATE TABLE IF NOT EXISTS chart_workspace_revisions')[0])
+        await db.commit()
+    restarted=Store(store.path);await restarted.migrate();await restarted.migrate()
     assert (await restarted.fetchone("SELECT value FROM runtime_meta WHERE key='fixture_previous_owner'"))['value']=='unchanged'
-    assert (await restarted.fetchone('SELECT max(version) v FROM schema_migrations'))['v']==56
+    assert (await restarted.fetchone('SELECT max(version) v FROM schema_migrations'))['v']==storage.SCHEMA_VERSION
     assert (await create(ChartWorkspaceService(restarted))).revision==1

@@ -3,9 +3,9 @@
   "source_receipt_sha256": "5d017b4cd5bd6b8fb0fe8ee63712907df89d44eaf533a36208158119dcd4a7a5",
   "outputs": {
     "registries/owner_endpoint_schemas.json": "10d2c2fc4ea1ca88599b21fdd2e3c72016c9d30dfeed84069c7a203b0f1915d4",
-    "registries/owner_endpoints.json": "2280f5c0a517f5091bd6a741d0769bdd708341e0f9191895347fc6c35276d6ab",
-    "registries/owner_features.json": "d26205d040ae614685eb39bade59c8cfef5d835770f4b9f3907d7152956a0b1a",
-    "registries/owner_screens.json": "e16c0f8d2e19af849e81fc4fe3d840028eeb14ceea9da5d212843e7b239533b3"
+    "registries/owner_endpoints.json": "fcdaecc7af451c2ca89a09ddcbcf19656cc176706432355e5fc2235b9fb509a2",
+    "registries/owner_features.json": "5adf3b695f37bbe239a3dde2018c7d74e8dd1308729d18a1499f2630445e130d",
+    "registries/owner_screens.json": "e9ebe5204569f6959b8dca698f795328e141421388f8008bf879d0a9bdf8a9da"
   },
   "qualification": "Derived source inventory only; no owner/native/admission signature."
 }
