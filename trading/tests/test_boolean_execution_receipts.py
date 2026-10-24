@@ -26,8 +26,13 @@ def native_flow(contract,*,check=True,stop=True,modify=True):
         return {**data,'status':'FILLED','volume':'0.18','price':'1.1001','order':'O1','position':'P1','sl_confirmed':stop}
     client=Mt5BridgeClient(signing_key=b'fixture-native-request-key',transport=transport)
     adapter=Mt5BridgeAdapter(client);mandate=TradingMandate.from_mapping(mandate_dict())
-    trade=intent();decision=RiskAuthority(mandate).evaluate_safe(trade,snapshot(contract))
-    router=ExecutionRouter(ledger=Ledger(),adapters={'mt5':adapter},kill_switch=KillSwitch(),protection=ProtectionManager())
+    trade=intent();native=snapshot(contract);authority=RiskAuthority(mandate);decision=authority.evaluate_safe(trade,native)
+    from vati.execution.risk_refresh import CurrentRiskFacts
+    # These native-parser fixtures state exact current facts; no truthy approval
+    # may bypass the real RiskAuthority or the new native dispatch boundary.
+    router=ExecutionRouter(ledger=Ledger(),adapters={'mt5':adapter},kill_switch=KillSwitch(),protection=ProtectionManager(),
+        current_risk_facts_provider=lambda *a,**kw:CurrentRiskFacts(native,NOW*1000),
+        current_risk_authority=authority)
     return adapter,router,trade,decision,mandate,calls
 
 
