@@ -36,6 +36,16 @@ fi
 if [[ -e "$UNIT" ]] && ! grep -Fq 'X-VAN-BRC-AGENT-MANAGED=1' "$UNIT"; then
   fail 'existing unit name is not managed by this installer'
 fi
+if [[ -e "$WORKSPACE" && ! -d "$WORKSPACE/.git" ]]; then
+  fail 'BRC workdir already exists and is not a Git workspace'
+fi
+if [[ -e "$ENV_PATH" ]]; then
+  [[ -f "$ENV_PATH" && ! -L "$ENV_PATH" ]] || fail 'BRC relay config must be a regular file'
+  [[ "$(stat -c '%u:%a' "$ENV_PATH")" == '0:600' ]] ||
+    fail 'existing BRC relay config must be root-owned mode 600'
+  grep -Eq '^BRC_RELAY=https://[^[:space:]]+$' "$ENV_PATH" ||
+    fail 'existing BRC relay config must use an HTTPS relay'
+fi
 cat <<INFO
 BRC_INSTALL_PLAN=READY
 host=$EXPECTED_HOST
