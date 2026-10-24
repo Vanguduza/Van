@@ -19,6 +19,7 @@ from decimal import Decimal
 from typing import Any, Callable, Iterator, Optional
 
 from vati.execution.base import VenueUnavailable
+from vati.execution.entry_deadline import EntryNotSent, require_entry_deadline
 from vati.execution.deriv_identity import DerivIdentity, DerivIdentityError
 from vati.accounts.registry import AccountRegistryError
 from vati.core.file_lock import StateFileLockError
@@ -84,11 +85,16 @@ class DerivWebSocketTransport:
                 self.authorized_profile = None
                 self._token_fingerprint = None
 
-    def _exchange_locked(self, msg: dict[str, Any]) -> dict[str, Any]:
+    def _exchange_locked(self, msg: dict[str, Any], *, expires_at_ms=None, clock=None) -> dict[str, Any]:
         self._req += 1
         req_id = self._req
+        wire=json.dumps({**msg, "req_id": req_id})
+        # Auth/reconnect/serialization have finished; this is the last check
+        # before the financial write. Never reclassify a later lost reply.
+        if expires_at_ms is not None:
+            require_entry_deadline(expires_at_ms,clock)
         try:
-            self._ws.send(json.dumps({**msg, "req_id": req_id}))
+            self._ws.send(wire)
             deadline = time.monotonic() + self.timeout_s
             while True:
                 remaining = deadline - time.monotonic()
@@ -131,17 +137,30 @@ class DerivWebSocketTransport:
         return response
 
     def __call__(self, msg: dict[str, Any]) -> dict[str, Any]:
+        return self._call(msg)
+
+    def call_entry(self, msg: dict[str, Any], *, expires_at_ms, clock) -> dict[str, Any]:
+        fields = {'buy': {'buy', 'price', 'passthrough'},
+                  'proposal': {'proposal', 'amount', 'basis', 'contract_type', 'currency',
+                               'duration', 'duration_unit', 'symbol', 'passthrough'}}
+        operations = self.ENTRY_CALLS.intersection(msg) if type(msg) is dict else set()
+        if len(operations) != 1 or set(msg) - fields[next(iter(operations))]:
+            raise EntryNotSent('bounded native entry operation differs; not sent')
+        require_entry_deadline(expires_at_ms,clock)
+        return self._call(msg,expires_at_ms=expires_at_ms,clock=clock)
+
+    def _call(self, msg, *, expires_at_ms=None, clock=None):
         with self._lock:
             # The entry fence is held through the broker send/response, sharing
             # Commander lock order. It does not fence reduce-only protection.
             scope = self.entry_scope() if self.entry_scope and self.ENTRY_CALLS.intersection(msg) else nullcontext()
             try:
                 with scope:
-                    return self._call_locked(msg)
+                    return self._call_locked(msg,expires_at_ms=expires_at_ms,clock=clock)
             except (AccountRegistryError, StateFileLockError):
                 return {"error": "Deriv account entry binding or mode changed", "error_code": "EntryBindingRefused"}
 
-    def _call_locked(self, msg: dict[str, Any]) -> dict[str, Any]:
+    def _call_locked(self, msg: dict[str, Any], *, expires_at_ms=None, clock=None) -> dict[str, Any]:
         private = bool(self.PRIVATE_CALLS.intersection(msg))
         # Bound proposals also require current native identity before quoting.
         needs_auth = "authorize" in msg or private or (self.identity is not None and bool(self.ENTRY_CALLS.intersection(msg)))
@@ -159,7 +178,7 @@ class DerivWebSocketTransport:
             authorized = self._authorize_locked(token)
             if "authorize" in msg or authorized.get("error"):
                 return authorized
-        return self._exchange_locked(msg)
+        return self._exchange_locked(msg,expires_at_ms=expires_at_ms,clock=clock)
 
 
 class DerivMarketFeed:

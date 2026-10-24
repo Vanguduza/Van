@@ -17,6 +17,7 @@ import uuid
 from typing import Any, Callable, Optional
 
 from vati.execution.base import VenueUnavailable
+from vati.execution.entry_deadline import EntryNotSent, require_entry_deadline
 from vati.execution.ctrader.protoschema import SCHEMA
 
 DEMO_HOST, LIVE_HOST, PORT = "demo.ctraderapi.com", "live.ctraderapi.com", 5035
@@ -75,9 +76,12 @@ class CtraderTransport:
         return self._sock is not None and self._alive
 
     # ------------------------------------------------------------ io
-    def _send_frame(self, payload: bytes) -> None:
+    def _send_frame(self, payload: bytes, *, expires_at_ms=None, clock=None) -> None:
+        frame=struct.pack(">I", len(payload)) + payload
         with self._lock:
-            self._sock.sendall(struct.pack(">I", len(payload)) + payload)
+            if expires_at_ms is not None:
+                require_entry_deadline(expires_at_ms, clock)
+            self._sock.sendall(frame)
             self.sent += 1
 
     def _recv_exact(self, n: int) -> bytes:
@@ -112,12 +116,26 @@ class CtraderTransport:
 
     def call(self, message: str, values: dict[str, Any], *, timeout_s: Optional[float] = None) -> tuple[str, dict[str, Any]]:
         """Send a request, wait for the response carrying the same clientMsgId. Errors come back as CtraderApiError."""
+        return self._request(message,values,timeout_s=timeout_s)
+
+    def call_entry(self, message: str, values: dict[str, Any], *, expires_at_ms, clock, timeout_s=None):
+        """A bounded new order. Auth/read/close requests use the ordinary path."""
+        if message != 'ProtoOANewOrderReq':
+            raise EntryNotSent('bounded entry operation differs; not sent')
+        require_entry_deadline(expires_at_ms,clock)
+        return self._request(message,values,timeout_s=timeout_s,expires_at_ms=expires_at_ms,clock=clock)
+
+    def _request(self, message, values, *, timeout_s=None, expires_at_ms=None, clock=None):
         self.connect()
         cid = uuid.uuid4().hex[:16]
         q: queue.Queue = queue.Queue()
         self._pending[cid] = q
         try:
-            self._send_frame(SCHEMA.wrap(message, values, cid))
+            payload=SCHEMA.wrap(message, values, cid)
+            if expires_at_ms is None:
+                self._send_frame(payload)
+            else:
+                self._send_frame(payload,expires_at_ms=expires_at_ms,clock=clock)
             try:
                 name, body = q.get(timeout=timeout_s or self.timeout_s)
             except queue.Empty:

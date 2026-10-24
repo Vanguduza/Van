@@ -15,6 +15,7 @@ from typing import Any, Callable, Optional, ClassVar
 
 from vati.execution.base import AccountState, ExecutionReceipt, Health, OrderCommand, VenuePosition, VenueUnavailable
 from vati.execution.ctrader.transport import CtraderApiError, CtraderTransport
+from vati.execution.entry_deadline import EntryNotSent, require_entry_deadline
 from vati.risk.contracts import Direction, LossModel
 
 ZERO = Decimal("0")
@@ -401,7 +402,16 @@ class CtraderAdapter:
             if cmd.targets:
                 req["takeProfit"] = float(cmd.targets[0])
         try:
-            self.transport.call("ProtoOANewOrderReq", req)
+            if cmd.expires_at_ms is None:
+                self.transport.call("ProtoOANewOrderReq", req)
+            else:
+                require_entry_deadline(cmd.expires_at_ms,self.clock)
+                bounded=getattr(self.transport,'call_entry',None)
+                if not callable(bounded):
+                    raise EntryNotSent('native transport cannot enforce the explicit entry deadline; not sent')
+                bounded("ProtoOANewOrderReq",req,expires_at_ms=cmd.expires_at_ms,clock=self.clock)
+        except EntryNotSent as exc:
+            return rej(str(exc))
         except CtraderApiError as exc:
             return rej(f"{exc.code}: {exc.description}")
         except VenueUnavailable as exc:

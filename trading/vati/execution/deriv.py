@@ -4,12 +4,14 @@ indices are refused unless the capsule is synthetic_only (Rev 3 A.8: OBSERVE).""
 
 from __future__ import annotations
 
+import time
 from dataclasses import dataclass, field
 from decimal import Decimal
 from typing import Any, Callable, Optional
 
 from vati.execution.base import AccountState, ExecutionReceipt, Health, OrderCommand, VenuePosition, VenueUnavailable
 from vati.execution.deriv_identity import DerivIdentity, DerivIdentityError
+from vati.execution.entry_deadline import EntryNotSent, require_entry_deadline
 from vati.risk.contracts import Direction, LossModel
 
 ZERO = Decimal("0")
@@ -48,6 +50,7 @@ class DerivAdapter:
     sent: list[dict] = field(default_factory=list)
     identity: Optional[DerivIdentity] = None
     entry_enabled: bool = True
+    clock: Callable[[], int] = field(default=lambda:int(time.time()*1000))
 
     def _call(self, msg: dict) -> dict:
         if self.transport is None:
@@ -105,11 +108,28 @@ class DerivAdapter:
             return ExecutionReceipt(cmd.trade_intent_id, cmd.decision_hash, self.venue, "REJECTED", ZERO, None, cmd.entry_price, cmd.entry_price, cmd.entry_price, False, now_ms, now_ms, reject_reason="Deriv command or configured mode does not match the bound account").sealed()
         if is_synthetic(cmd.symbol) and not self.allow_synthetics:
             return ExecutionReceipt(cmd.trade_intent_id, cmd.decision_hash, self.venue, "REJECTED", ZERO, None, cmd.entry_price, cmd.entry_price, cmd.entry_price, False, now_ms, now_ms, reject_reason="synthetic index: OBSERVE only (Rev 3 A.8)").sealed()
-        prop = self._call(self.build_proposal(cmd, family=family, duration=duration))
+        rej=lambda why,status="REJECTED":ExecutionReceipt(cmd.trade_intent_id,cmd.decision_hash,self.venue,status,ZERO,None,cmd.entry_price,cmd.entry_price,cmd.entry_price,False,now_ms,now_ms,reject_reason=why).sealed()
+        def entry(msg):
+            if cmd.expires_at_ms is None:
+                return self._call(msg)
+            require_entry_deadline(cmd.expires_at_ms,self.clock)
+            bounded=getattr(self.transport,'call_entry',None)
+            if not callable(bounded):
+                raise EntryNotSent('native transport cannot enforce the explicit entry deadline; not sent')
+            self.sent.append(msg)
+            return bounded(msg,expires_at_ms=cmd.expires_at_ms,clock=self.clock)
+        try:
+            prop = entry(self.build_proposal(cmd, family=family, duration=duration))
+        except EntryNotSent as exc:
+            return rej(str(exc))
         pid = prop.get("proposal", {}).get("id")
         if not pid:
             return ExecutionReceipt(cmd.trade_intent_id, cmd.decision_hash, self.venue, "REJECTED", ZERO, None, cmd.entry_price, cmd.entry_price, cmd.entry_price, False, now_ms, now_ms, reject_reason=str(prop.get("error", "no proposal"))).sealed()
-        buy = self._call({"buy": pid, "price": str(cmd.quantity), "passthrough": {"trade_intent_id": cmd.trade_intent_id, "decision_hash": cmd.decision_hash}})
+        try:
+            buy = entry({"buy": pid, "price": str(cmd.quantity), "passthrough": {"trade_intent_id": cmd.trade_intent_id, "decision_hash": cmd.decision_hash}})
+        except EntryNotSent as exc:
+            return rej(str(exc))
+
         b = buy.get("buy")
         if not b:
             return ExecutionReceipt(cmd.trade_intent_id, cmd.decision_hash, self.venue, "REJECTED", ZERO, None, cmd.entry_price, cmd.entry_price, cmd.entry_price, False, now_ms, now_ms, reject_reason=str(buy.get("error", "buy failed"))).sealed()

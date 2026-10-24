@@ -459,7 +459,9 @@ class ExecutionRouter:
             raise RouterError("stop-distance order without protective stop")
         from vati.execution.mt5_bridge import Mt5BridgeAdapter
         from vati.execution.mt5_pull import Mt5PullAdapter
-        native_deadline = mandate.expires_at_unix*1000 if isinstance(adapter,(Mt5BridgeAdapter,Mt5PullAdapter)) else None
+        from vati.execution.ctrader.adapter import CtraderAdapter
+        from vati.execution.deriv import DerivAdapter
+        native_deadline = mandate.expires_at_unix*1000 if isinstance(adapter,(Mt5BridgeAdapter,Mt5PullAdapter,CtraderAdapter,DerivAdapter)) else None
         if native_deadline is not None and market_reference is not None:
             if (type(market_reference.mark_age_ms) is not int or type(market_reference.max_mark_age_ms) is not int
                 or not 0<=market_reference.mark_age_ms<=market_reference.max_mark_age_ms):
