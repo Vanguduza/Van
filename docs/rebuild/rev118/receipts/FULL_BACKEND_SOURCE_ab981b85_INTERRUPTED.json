@@ -1,0 +1,22 @@
+{
+  "schema": "van.rebuild.full-backend-source-attempt/1",
+  "source_head": "ab981b8573b0a7784ada912dc4910fde30855d58",
+  "status": "INTERRUPTED_RESOURCE_EXHAUSTION",
+  "observed_at_utc": "2026-10-24T14:00:54.905015+00:00",
+  "private_postgres_stopped_and_removed": {
+    "stopped": true,
+    "removed": true
+  },
+  "interruption": "After repeated native thread/fork failures affected unrelated tests and new exec creation, interrupted this exact qualification. The primary driver stopped its disposable fixture; its detached audit/test child was then interrupted directly, and its10 recorded source-fixture proxy children were terminated. Some failures after primary-driver interruption can reflect unavailable fixture; they are not a backend source verdict. No complete-run pass or coverage inferred.",
+  "partial_result": {
+    "tests": 2422,
+    "failures": 157,
+    "errors": 225,
+    "skipped": 1
+  },
+  "xml_sha256": "f6a69b8184413eadcf5dfaeb80f729161a62e227d10e061496ac80a0a4d69a31",
+  "log_sha256": "6f56a75a09eb0b7ab44b9ed475c57376b8c966eba50a2986f0108d90db7b6ffd",
+  "cleanup_record_sha256": "3f566033925c35be382f81e341c0eea6bdd715cdea01451e094e1fa9b8c4196d",
+  "storage_forbidden_events": [],
+  "storage_audit_sha256": "0de909d408ee984d89f6869cb6bad0472c4d593f3e1a499ec20de1abeb23fdb8"
+}

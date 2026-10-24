@@ -441,7 +441,7 @@ class DecisionCycle:
                 lease_epoch=self.runtime_lease.epoch if self.runtime_lease else None,
                 market_reference=MarketReference(
                     last_price=state.features.close,
-                    mark_age_ms=state.quote_age_ms,
+                    mark_age_ms=snap.quote_age_ms,
                     max_mark_age_ms=cfg.max_quote_age_ms,
                 ),
                 liquidity=LiquidityView(),

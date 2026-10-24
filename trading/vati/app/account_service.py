@@ -578,9 +578,10 @@ class AccountCoordinatorService:
             account_alias=self.account.alias,
             adapter_id=str(getattr(self.account.broker, "value", self.account.broker)).lower(),
             contracts=self.contracts, now_ms=self.clock(), source="delta_intent_refresh")
+        dispatch_ms=self.clock()
         try:
             return self.router.execute(
-                intent, decision, self.mandate, now_ms=self.clock(),
+                intent, decision, self.mandate, now_ms=dispatch_ms,
                 stop_mode=StopMode.SOFTWARE if software else StopMode.VENUE,
                 targets=(), time_in_force=self.specs[symbol].time_in_force,
                 lease_epoch=self.lease.epoch if self.lease is not None else None,
@@ -589,7 +590,7 @@ class AccountCoordinatorService:
                     last_price=state.features.close,
                     mark_age_ms=state.quote_age_ms,
                     max_mark_age_ms=self.cfg.max_quote_age_ms,
-                ),
+                ).aged(observed_at_ms=state.as_of_ms,now_ms=dispatch_ms),
                 liquidity=LiquidityView(),
             )
         except RouterError as exc:
@@ -661,7 +662,7 @@ class AccountCoordinatorService:
         contract = self.contracts[candidate.symbol.upper()]
         started_ms = self.clock()
         acct = self.adapter.sync_account()
-        now_ms = self.clock()
+        now_ms = max(started_ms,self.clock())
         if self.peak_equity == 0:
             self.peak_equity = self.day_start_equity = self.week_start_equity = acct.equity
         self.peak_equity = max(self.peak_equity, acct.equity)
@@ -677,9 +678,8 @@ class AccountCoordinatorService:
         capture_cached_mt5(self._ledger, acct, now_ms=now_ms)
         funding = funding_risk_fence(self._ledger, self.adapter, acct, now_ms=now_ms)
         state = self.evaluators[candidate.symbol.upper()].last_state
-        quote_age = state.quote_age_ms if state is not None else self.cfg.max_quote_age_ms + 1
-        if quote_age >= 0:
-            quote_age += max(0, now_ms - started_ms)
+        from vati.execution.pretrade import quote_age_at
+        quote_age = quote_age_at(age_ms=state.quote_age_ms,observed_at_ms=getattr(state,'as_of_ms',None),now_ms=now_ms) if state is not None else -1
         blackout = bool(
             state is not None and
             state.event_window in (EventWindowState.PRE_BLACKOUT, EventWindowState.POST_BLACKOUT))
@@ -806,8 +806,9 @@ class AccountCoordinatorService:
             now_ms=self.clock(),
             source="pre_order_refresh",
         )
+        dispatch_ms=self.clock()
         receipt = self.router.execute(
-            intent, decision, self.mandate, now_ms=self.clock(),
+            intent, decision, self.mandate, now_ms=dispatch_ms,
             stop_mode=StopMode.SOFTWARE if software else StopMode.VENUE,
             targets=targets, time_in_force=self.specs[candidate.symbol.upper()].time_in_force,
             entry_type=candidate.entry_type,
@@ -816,7 +817,7 @@ class AccountCoordinatorService:
                 last_price=state.features.close,
                 mark_age_ms=state.quote_age_ms,
                 max_mark_age_ms=self.cfg.max_quote_age_ms,
-            ),
+            ).aged(observed_at_ms=state.as_of_ms,now_ms=dispatch_ms),
             # No venue depth is exposed by the current adapter contract. Passing
             # an explicit unknown view makes the selector choose one bounded order
             # rather than pretending depth exists.

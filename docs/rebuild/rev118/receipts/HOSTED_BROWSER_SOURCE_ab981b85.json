@@ -1,0 +1,42 @@
+{
+  "schema": "van.rebuild.hosted-browser-source/1",
+  "observed_at_utc": "2026-10-24T14:04:54.438955+00:00",
+  "run_id": 40098185124,
+  "job_id": 120885795882,
+  "job_url": "https://github.com/Vanguduza/Van/actions/runs/40098185124/job/120885795882",
+  "source_head": "ab981b8573b0a7784ada912dc4910fde30855d58",
+  "tested_merge": "75ac79d979ab1c31911b0f645744f05f76630a0a",
+  "identical_source_tree": "43d3257affcef5fa072be43c13a605020ad6c8b0",
+  "job_conclusion": "success",
+  "counts": {
+    "tests": 11,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "chromium": "Google Chrome for Testing 153.0.8010.12",
+  "archive_sha256": "c5242989a42c7f63637179a7093a444134a27ae5cba6989da415072f12f42334",
+  "report_sha256": "7a01c7baf50d584b1a2af55545a9500b39559504011207fb025331215a668e68",
+  "storage_audit": {
+    "schema": "van.source-storage-audit/1",
+    "forbidden_events": [],
+    "source_sha256": "d4e270150fb0da6e8d79b449dd0de68fd1f97b3ccea3d282f31d91297edbd495",
+    "root": "/home/runner/work/Van/Van",
+    "scope": "SQLite opens, path-based writable opens and directory/link/rename/delete events under data and backend/data",
+    "limits": "Python audit events only; existing fd writes, native-library raw I/O and external processes are not an OS sandbox. Git state is checked separately."
+  },
+  "tests": [
+    "tests.test_browser_guard_lost_regression::test_a_busy_renderer_cannot_make_the_lease_guard_forget_the_click[control-3s-read-only]",
+    "tests.test_browser_guard_lost_regression::test_a_busy_renderer_cannot_make_the_lease_guard_forget_the_click[busy-20s-read-only]",
+    "tests.test_browser_guard_lost_regression::test_a_busy_renderer_cannot_make_the_lease_guard_forget_the_click[busy-20s-mutating]",
+    "tests.test_browser_guard_lost_regression::test_a_navigation_started_outside_the_page_between_calls_keeps_its_guard",
+    "tests.test_browser_guard_lost_regression::test_a_freeze_that_did_not_land_is_retried",
+    "tests.test_browser_guard_lost_regression::test_a_page_that_navigates_itself_between_calls_keeps_its_guard",
+    "tests.test_browser_guard_lost_regression::test_a_lease_whose_guard_hands_back_nothing_mid_lease_is_broken_not_restarted",
+    "tests.test_browser_guard_lost_regression::test_a_guard_handed_back_broken_by_the_tick_is_recorded",
+    "tests.test_browser_guard_lost_regression::test_a_lease_the_guard_thread_gave_up_on_is_reported_at_release_and_resumed_not_replaced",
+    "tests.test_browser_guard_lost_regression::test_a_retired_lease_released_under_a_newer_lease_does_not_freeze_the_newer_page",
+    "tests.test_browser_guard_lost_regression::test_the_in_script_guard_carries_acted_and_pending_into_a_fresh_start"
+  ],
+  "limits": "Original11 real-Chromium lease regressions on a fresh worker only. Does not qualify the full backend, private DDS/main prerequisites, deployed host or S24; no overall workflow success claimed."
+}

@@ -225,8 +225,8 @@ jobs:
   # job or its private DDS/trusted-main prerequisites. A fresh worker separates
   # real browser regressions from this session's native-thread exhaustion.
   browser-guard-source:
-    runs-on: ubuntu-latest
-    timeout-minutes: 20
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
     env:
       PYTHONPATH: backend:backend/tests:trading:.
     steps:
@@ -277,6 +277,73 @@ jobs:
           assert counts["tests"] >= 11 and all(counts[k] == 0 for k in ("failures", "errors", "skipped")), counts
           assert not json.loads((base/"storage-audit.json").read_text())["forbidden_events"]
           print(counts)
+          PYCODE
+      - name: Execute the complete public browser and harness source suites
+        run: |
+          python - <<'PYCODE'
+          import json, os, subprocess, sys
+          from pathlib import Path
+          paths = sorted({*Path("backend/tests").glob("test_browser*.py"), *Path("backend/tests").glob("test_harness*.py")})
+          assert len(paths) >= 50, len(paths)
+          base = Path("artifacts/browser-guard-source")
+          (base/"full-suite-files.json").write_text(json.dumps([str(p) for p in paths], indent=2)+"\n")
+          subprocess.run([sys.executable, "tools/rebuild/source_storage_audit.py",
+              "--report", str(base/"full-storage-audit.json"), *map(str, paths),
+              "--basetemp="+str(Path(os.environ["RUNNER_TEMP"])/"van-browser-full-source"),
+              "--junitxml="+str(base/"full-report.xml"), "-q"], check=True)
+          PYCODE
+      - name: Execute the source listener UID boundary in an isolated root fixture
+        run: |
+          sudo env PYTHONPATH="$PYTHONPATH" "$(command -v python)" tools/rebuild/source_storage_audit.py \
+            --report artifacts/browser-guard-source/uid-storage-audit.json \
+            backend/tests/test_browser_egress_proxy_i8.py::test_only_the_configured_client_uid_may_use_a_listener \
+            --basetemp="$RUNNER_TEMP/van-browser-listener-uid-source" \
+            --junitxml=artifacts/browser-guard-source/uid-report.xml -q
+      - name: Install the namespace firewall test prerequisite from signed Ubuntu sources
+        run: |
+          ubuntu_list="$RUNNER_TEMP/van-browser-source-ubuntu.list"
+          cat > "$ubuntu_list" <<'APT'
+          deb [signed-by=/usr/share/keyrings/ubuntu-archive-keyring.gpg] https://archive.ubuntu.com/ubuntu noble main universe
+          deb [signed-by=/usr/share/keyrings/ubuntu-archive-keyring.gpg] https://archive.ubuntu.com/ubuntu noble-updates main universe
+          deb [signed-by=/usr/share/keyrings/ubuntu-archive-keyring.gpg] https://security.ubuntu.com/ubuntu noble-security main universe
+          APT
+          sudo apt-get -o Dir::Etc::sourcelist="$ubuntu_list" -o Dir::Etc::sourceparts=- update
+          sudo apt-get -o Dir::Etc::sourcelist="$ubuntu_list" -o Dir::Etc::sourceparts=- install --yes --no-install-recommends nftables
+          uname -sr > artifacts/browser-guard-source/kernel-version.txt
+          sudo nft --version > artifacts/browser-guard-source/nft-version.txt
+      - name: Execute original firewall controls in disposable network namespaces
+        run: |
+          sudo env PYTHONPATH="$PYTHONPATH" "$(command -v python)" tools/rebuild/source_storage_audit.py \
+            --report artifacts/browser-guard-source/firewall-storage-audit.json \
+            tests/contracts/test_van_browser_core_firewall.py \
+            --basetemp="$RUNNER_TEMP/van-browser-firewall-source" \
+            --junitxml=artifacts/browser-guard-source/firewall-report.xml -q
+      - name: Require complete browser coverage and the actual listener UID result
+        if: always()
+        run: |
+          python - <<'PYCODE'
+          import json
+          import xml.etree.ElementTree as ET
+          from pathlib import Path
+          base = Path("artifacts/browser-guard-source")
+          roots = {name: ET.parse(base/name).getroot() for name in ("full-report.xml", "uid-report.xml", "firewall-report.xml")}
+          cases = list(roots["full-report.xml"].iter("testcase"))
+          assert cases and not any(c.find("failure") is not None or c.find("error") is not None for c in cases)
+          skipped = [c for c in cases if c.find("skipped") is not None]
+          allowed = "backend.tests.test_browser_egress_proxy_i8::test_only_the_configured_client_uid_may_use_a_listener"
+          assert len(skipped) <= 1 and all(c.get("classname")+"::"+c.get("name")==allowed and c.find("skipped").get("message")=="needs root and setpriv" for c in skipped)
+          for source in json.loads((base/"full-suite-files.json").read_text()):
+              module = source.removesuffix(".py").replace("/", ".")
+              assert any(c.get("classname")==module or c.get("classname", "").startswith(module+".") for c in cases), source
+          uid = list(roots["uid-report.xml"].iter("testcase"))
+          assert len(uid)==1 and all(uid[0].find(k) is None for k in ("failure", "error", "skipped"))
+          assert uid[0].get("classname")+"::"+uid[0].get("name")==allowed
+          firewall = list(roots["firewall-report.xml"].iter("testcase"))
+          assert len(firewall) >= 10 and sum(c.get("name", "").startswith("test_live_") for c in firewall)==5
+          assert all(c.find(k) is None for c in firewall for k in ("failure", "error", "skipped"))
+          for name in ("full-storage-audit.json", "uid-storage-audit.json", "firewall-storage-audit.json"):
+              assert not json.loads((base/name).read_text())["forbidden_events"], name
+          print({"full_browser_cases": len(cases), "root_uid_case_reexecuted": len(uid), "firewall_cases": len(firewall), "remaining_unexecuted": 0})
           PYCODE
       - uses: actions/upload-artifact@v4
         if: always()

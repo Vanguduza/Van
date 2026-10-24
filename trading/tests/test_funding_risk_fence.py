@@ -216,7 +216,7 @@ def test_risk_capture_uses_post_native_io_clock_and_ages_quotes(tmp_path,eurusd,
         def opened():clock['now']+=500;return ()
         service._open_positions=opened;service._drawdown_top_state=lambda:None
         service.lifecycle=None;service.consecutive_losses=0;service.kill=N(active=[])
-        service.evaluators={'EURUSD':N(last_state=N(quote_age_ms=quote_age,event_window=None,integrity=MarketIntegrityState.NORMAL))}
+        service.evaluators={'EURUSD':N(last_state=N(as_of_ms=7000,quote_age_ms=quote_age,event_window=None,integrity=MarketIntegrityState.NORMAL))}
         value=service._snapshot_for(N(symbol='EURUSD',strategy_id=''))
     assert clock['now']==10000 and value.now_unix==10
     assert value.quote_age_ms==(quote_age+3000 if quote_age>=0 else quote_age)

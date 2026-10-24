@@ -397,6 +397,24 @@ class ExecutionRouter:
                 raise RouterError('current mandate owner signer is unavailable; re-admission required')
             decision_time_ms=now_ms
             now_ms=self._dispatch_time(mandate,now_ms=now_ms)
+            # Heartbeat and guard acquisition may have changed every mutable
+            # refusal fact checked above. Recheck before consuming the key or
+            # publishing a command; this never grants or increases risk.
+            lease_current=self.lease_fence(lease_epoch) if self.lease_fence is not None else True
+            now_ms=self._dispatch_time(mandate,now_ms=now_ms)
+            if self.kill.halted:
+                raise RouterError(f"kill switch active: {sorted(t.value for t in self.kill.active)}")
+            if not lease_current:
+                raise RouterError(f"account runtime lease fence refused epoch {lease_epoch!r}")
+            if self.enforce_rev51_controls:
+                current_mark = market_reference.aged(observed_at_ms=decision_time_ms,now_ms=now_ms) if market_reference is not None else None
+                final_check = self.pretrade_controls.check(intent=intent,decision=decision,mark=current_mark,now_ms=now_ms)
+                if not final_check.passed or final_check.quantised is None:
+                    raise RouterError(f"pre-trade refused {final_check.reason_code}: {final_check.reason_detail}")
+                current_order = final_check.quantised
+                if (current_order.quantity!=cmd.quantity or (current_order.entry_price or intent.entry)!=cmd.entry_price
+                    or (current_order.stop_price if intent.stop is not None else None)!=cmd.protective_stop):
+                    raise RouterError('current venue quantisation changed; re-evaluation required')
             self._seen.add(intent.idempotency_key)
             if self.enforce_rev51_controls:
                 assert self.pretrade_controls is not None

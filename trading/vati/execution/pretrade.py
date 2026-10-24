@@ -101,6 +101,17 @@ class PreTradeConfigError(ValueError):
     pass
 
 
+def quote_age_at(*, age_ms, observed_at_ms, now_ms):
+    """Age original evidence; a future/unknown observation never becomes fresh."""
+    if any(type(v) is not int for v in (age_ms,observed_at_ms,now_ms)):
+        return -1
+    if age_ms < 0:
+        return age_ms
+    if observed_at_ms < 0 or now_ms < observed_at_ms:
+        return -1
+    return age_ms + now_ms - observed_at_ms
+
+
 @dataclass(frozen=True)
 class MarketReference:
     """The venue's own last word on price, and how old it is."""
@@ -112,6 +123,11 @@ class MarketReference:
     @property
     def fresh(self) -> bool:
         return 0 <= self.mark_age_ms <= self.max_mark_age_ms
+
+    def aged(self, *, observed_at_ms, now_ms):
+        return MarketReference(self.last_price,
+            quote_age_at(age_ms=self.mark_age_ms,observed_at_ms=observed_at_ms,now_ms=now_ms),
+            self.max_mark_age_ms)
 
 
 @dataclass(frozen=True)
