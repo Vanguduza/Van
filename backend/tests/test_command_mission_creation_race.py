@@ -81,12 +81,12 @@ async def test_a_post_insert_integrity_failure_is_not_reported_as_successful_dup
     await store.migrate()
 
     class BrokenNativeEvent(MissionService):
-        async def record_event(self, **kwargs):
+        async def _persist_event(self, db, event):
             # A canonical mission event is required; optional learning is not. A
             # post-insert native write failure must not become duplicate recovery.
-            await store.execute("INSERT INTO missions(mission_id) VALUES (?)", ("incomplete-row",))
+            await db.execute("INSERT INTO missions(mission_id) VALUES (?)", ("incomplete-row",))
 
     link = CommandMissionLink(BrokenNativeEvent(store))
     with pytest.raises(sqlite3.IntegrityError, match="NOT NULL constraint failed"):
         await link.open(request(), effective_action_class=ActionClass.A1, owner_approved=False)
-    assert len(await store.fetchall("SELECT mission_id FROM missions")) == 1
+    assert not await store.fetchall("SELECT mission_id FROM missions")

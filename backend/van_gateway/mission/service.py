@@ -161,6 +161,14 @@ class MissionService:
             deadline_ms=deadline_ms,
             parent_mission_id=parent_mission_id,
         )
+        created_event = MissionEvent(
+            event_id=f"mev_{uuid.uuid4().hex}", mission_id=mission.mission_id,
+            event_type=MissionEventType.MISSION_CREATED,
+            actor=PrincipalType.OWNER_DEVICE
+            if origin in (MissionOrigin.OWNER_VOICE, MissionOrigin.OWNER_TEXT, MissionOrigin.OWNER_UI)
+            else PrincipalType.SYSTEM,
+            occurred_at_ms=now, summary=mission.title,
+        )
         async with self.store.connection() as db:
             await db.execute("BEGIN IMMEDIATE")
             await db.execute(
@@ -185,8 +193,10 @@ class MissionService:
                     mission.verification_state.value,
                 ),
             )
+            await self._persist_event(db, created_event)
             capture_generation = await self._enqueue_learning(db, mission.mission_id, "OPENED", now)
             await db.commit()
+        await self._publish_event(created_event)
         if self.learning is not None:
             # P2-MEM-001 — a mission is a stated owner goal and, where it needed the
             # owner's presence, a decision they could have declined. Both stores existed
@@ -196,16 +206,6 @@ class MissionService:
                 await self._ack_learning(mission.mission_id, "OPENED", expected_generation=capture_generation)
             except Exception as exc:
                 self.report_learning_unavailable(mission.mission_id,"capture",exc)
-        await self.record_event(
-            mission_id=mission.mission_id,
-            event_type=MissionEventType.MISSION_CREATED,
-            actor=PrincipalType.OWNER_DEVICE
-            if origin in (MissionOrigin.OWNER_VOICE, MissionOrigin.OWNER_TEXT,
-                          MissionOrigin.OWNER_UI)
-            else PrincipalType.SYSTEM,
-            summary=mission.title,
-            now_ms=now,
-        )
         return mission
 
     # ----------------------------------------------------------- transition

@@ -1,0 +1,257 @@
+{
+  "schema": "van.rebuild.mission-capture-atomicity-source/1",
+  "observed_at_utc": "2026-10-24T07:16:54.849819+00:00",
+  "source_parent": "a8374cc48ef25773270e9c049ed9d624b7af716d",
+  "source_sha256": {
+    "backend/van_gateway/mission/service.py": "8fdeefa9e7ac8f730c55d98cf035233646d58a0392e3b4cb0c2792412d3c3461",
+    "backend/tests/test_command_mission_creation_race.py": "f55f6202ee3e7f71c34284395037f5bef9d45572e2db86e55cfad078a8087664",
+    "backend/tests/test_mission_capture_atomicity.py": "3d2c93c9697637cd0535114ee940b7689b97c25196380058a2491ec6ee7ee892"
+  },
+  "executions": {
+    "original_before": {
+      "tests": 4,
+      "failures": 4,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 1.046,
+      "xml_sha256": "d33374c5574abaaaa5924132999bcd0165e0a00347a569fc936f3023e54e6f2b"
+    },
+    "isolated_focused": {
+      "tests": 80,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 29.717,
+      "xml_sha256": "e145e5afa9c116baf389af079bb361c23ef970d3e02fd6aa811a7b876623a2e2"
+    },
+    "isolated_oracle": {
+      "tests": 6,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 1.331,
+      "xml_sha256": "e2799c819ae341dfcf793ecc1836fcb1cca7fd7c384ae810cdd5d74f0bd25033"
+    },
+    "integrated_audited": {
+      "tests": 379,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 127.382,
+      "xml_sha256": "19d5ce2ef1c58119e1a8b53f873a55d3cad67a545ac1f7dd7dea67f8ad3db5e3"
+    },
+    "registry": {
+      "tests": 26,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 3.726,
+      "xml_sha256": "6fb0600aa3127e0169c4697d5f3a771d7761111829c37285617bbd40a356c9a9"
+    },
+    "rebuild": {
+      "tests": 80,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 33.312,
+      "xml_sha256": "c911120b3cd77971f918d7bdfb38b414faea075b8174f53f6c39110d343971fb"
+    }
+  },
+  "fault_campaign": {
+    "definitions": [
+      [
+        "omit the required original created event",
+        [
+          [
+            "backend/van_gateway/mission/service.py",
+            "            await self._persist_event(db, created_event)",
+            "            pass # omit native creation event",
+            1
+          ]
+        ],
+        "backend/tests/test_mission_capture_atomicity.py::test_rejected_native_created_event_rolls_back_mission_and_learning_delivery"
+      ],
+      [
+        "commit capture before its required native created event",
+        [
+          [
+            "backend/van_gateway/mission/service.py",
+            "            await self._persist_event(db, created_event)",
+            "            await db.commit()\n            await self._persist_event(db, created_event)",
+            1
+          ]
+        ],
+        "backend/tests/test_mission_capture_atomicity.py::test_rejected_native_created_event_rolls_back_mission_and_learning_delivery"
+      ],
+      [
+        "observe owner learning before native capture can commit",
+        [
+          [
+            "backend/van_gateway/mission/service.py",
+            "            await self._persist_event(db, created_event)",
+            "            if self.learning is not None:\n                await self.learning.record_mission_opened(mission, now_ms=now)\n            await self._persist_event(db, created_event)",
+            1
+          ]
+        ],
+        "backend/tests/test_mission_capture_atomicity.py::test_uncommitted_capture_cannot_feed_optional_owner_learning"
+      ],
+      [
+        "publish the capture before its native journal is committed",
+        [
+          [
+            "backend/van_gateway/mission/service.py",
+            "        await self._publish_event(created_event)\n",
+            "",
+            1
+          ],
+          [
+            "backend/van_gateway/mission/service.py",
+            "            capture_generation = await self._enqueue_learning(db, mission.mission_id, \"OPENED\", now)\n            await db.commit()",
+            "            capture_generation = await self._enqueue_learning(db, mission.mission_id, \"OPENED\", now)\n            await self._publish_event(created_event)\n            await db.commit()",
+            1
+          ]
+        ],
+        "backend/tests/test_mission_capture_atomicity.py::test_capture_is_published_only_after_its_original_native_event_is_visible"
+      ]
+    ],
+    "records": [
+      {
+        "case": 0,
+        "phase": "control",
+        "reason": "omit the required original created event",
+        "exit_code": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 0,
+        "xml_sha256": "ca2c608bd20c45220d9b72391947d3023afe38913e582294b4b5e2147145be81"
+      },
+      {
+        "case": 0,
+        "phase": "fault",
+        "reason": "omit the required original created event",
+        "exit_code": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 1,
+        "xml_sha256": "ba1dd211863f7abc13961122e4f51f349c001744a4da9fc96ddbe27624b41e67"
+      },
+      {
+        "case": 1,
+        "phase": "control",
+        "reason": "commit capture before its required native created event",
+        "exit_code": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 0,
+        "xml_sha256": "16ff64e677813785fb2467c7632c969ac64288373d89cf0f24981552875bd8c2"
+      },
+      {
+        "case": 1,
+        "phase": "fault",
+        "reason": "commit capture before its required native created event",
+        "exit_code": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 1,
+        "xml_sha256": "eb78e94ed890982d401cc1a86756ed52ff669e706a111e22cb9211121677bbcc"
+      },
+      {
+        "case": 2,
+        "phase": "control",
+        "reason": "observe owner learning before native capture can commit",
+        "exit_code": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 0,
+        "xml_sha256": "f1ed12ebe637e8019aabd0755c210e050285295dff11ff4f44c29653ad9a5422"
+      },
+      {
+        "case": 2,
+        "phase": "fault",
+        "reason": "observe owner learning before native capture can commit",
+        "exit_code": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 1,
+        "xml_sha256": "b9e3d8b6698973b11c735e52caded2fcbec9ff29fcee58b019df38f5dea394ea"
+      },
+      {
+        "case": 3,
+        "phase": "control",
+        "reason": "publish the capture before its native journal is committed",
+        "exit_code": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 0,
+        "xml_sha256": "52646c0dd8876cf56677575afb0792119f62f0009ef08638553a1634df8c688d"
+      },
+      {
+        "case": 3,
+        "phase": "fault",
+        "reason": "publish the capture before its native journal is committed",
+        "exit_code": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 1,
+        "xml_sha256": "0182126537754826b110bd69c655b66156c0b681796ec79f93bb9f59a5f22f89"
+      }
+    ],
+    "before": {
+      "backend/van_gateway/mission/service.py": "8fdeefa9e7ac8f730c55d98cf035233646d58a0392e3b4cb0c2792412d3c3461"
+    },
+    "after": {
+      "backend/van_gateway/mission/service.py": "8fdeefa9e7ac8f730c55d98cf035233646d58a0392e3b4cb0c2792412d3c3461"
+    },
+    "source_restored": true
+  },
+  "storage_audit": {
+    "schema": "van.source-storage-audit/1",
+    "forbidden_events": [],
+    "source_sha256": "d4e270150fb0da6e8d79b449dd0de68fd1f97b3ccea3d282f31d91297edbd495",
+    "root": "/workspace/van-review-2026-10-18/publish",
+    "scope": "SQLite opens, path-based writable opens and directory/link/rename/delete events under data and backend/data",
+    "limits": "Python audit events only; existing fd writes, native-library raw I/O and external processes are not an OS sandbox. Git state is checked separately."
+  },
+  "legacy_registry_preflight": {
+    "schema": "van.rebuild.mutation-registry-preflight/1",
+    "registry_sha256": "35d10c7b0f2b8319b7f7305828262c972b2a6451139d75b9e83c7d0062282955",
+    "mutation_count": 374,
+    "edit_count": 383,
+    "findings": [],
+    "execution_state": "NOT_RUN",
+    "status": "ANCHORS_VALID_BASELINES_AND_MUTATIONS_NOT_EXECUTED"
+  },
+  "qualification": "Atomic original capture source component only. No historical orphan-event migration, automatic bus-redelivery, whole lifecycle/unit, financial authority, deployment/service/provider, F15/BG or S24 acceptance. All original programme scope remains."
+}
