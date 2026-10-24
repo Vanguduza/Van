@@ -1012,6 +1012,8 @@ class AccountCoordinatorService:
         assert self.adapter is not None
         acct = self.adapter.sync_account()
         hb = self.adapter.heartbeat(now_ms=now_ms)
+        from vati.funding.worker import snapshot_funding
+        funding = snapshot_funding(self,self._ledger,self.adapter,acct,now_ms=now_ms)
         self._ledger.append(make_event(
             EventKind.ACCOUNT_SNAPSHOT, "vati-account-service",
             {
@@ -1020,6 +1022,7 @@ class AccountCoordinatorService:
                 "balance": str(acct.balance),
                 "currency": acct.currency,
                 "verified": acct.verified,
+                "funding_observation": funding,
                 "connected": hb.connected,
                 "server_offset_ms": hb.server_offset_ms,
                 "open_positions": len(self.adapter.positions()),
@@ -1390,8 +1393,8 @@ class AccountCoordinatorService:
             self.stop_requested = True
         signal.signal(signal.SIGTERM, stop)
         signal.signal(signal.SIGINT, stop)
-        self.start()
         try:
+            self.start()
             self._start_packet_worker()
             while not self.stop_requested:
                 try:
@@ -1408,6 +1411,8 @@ class AccountCoordinatorService:
                     self._heartbeat("FAULT", {"error": str(exc)[:200]})
                 time.sleep(self.cfg.poll_seconds)
         finally:
+            from vati.funding.worker import stop_funding
+            stop_funding(self)
             if self._packet_worker_stop is not None:
                 self._packet_worker_stop.set()
             if self._packet_worker is not None:

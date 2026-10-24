@@ -1,6 +1,6 @@
 {
   "schema": "van.rebuild.candidate-source-progress/1",
-  "updated_at_utc": "2026-10-24T07:43:02.790737+00:00",
+  "updated_at_utc": "2026-10-24T08:43:05.182413+00:00",
   "programme": "Rev1.18; original 131 unit IDs and dependencies retained",
   "authority": "auth-20261022-owner-autonomous-candidate-build",
   "meaning": "Candidate source progress is separate from admitted unit acceptance. Independent certificates, owner decisions, live effects and release gates remain unissued. No unit is declared complete by this record.",
@@ -436,9 +436,14 @@
         "BE-004",
         "PRE-003"
       ],
-      "candidate_status": "NOT_STARTED",
+      "candidate_status": "IN_PROGRESS",
       "unit_acceptance": "NOT_ISSUED",
-      "milestones": []
+      "milestones": [
+        {
+          "description": "Native cTrader cash statement reader, original append-only SQLite/PostgreSQL observations, explicit classifications, bounded separate-connection runtime ingestion, exact unitization source core and paired-owner/Android read contracts. Native historical normalized returns remain unmeasured; reconciliation, other rails, reversals/reservations and BE-007 are still open. No whole-unit/live or economic qualification.",
+          "evidence": "backend/BE-006_NATIVE_FUNDING_OBSERVATIONS.md; backend/FUNDING_OWNER_READ_CONTRACT.md; receipts/NATIVE_FUNDING_OBSERVATIONS_SOURCE_20261024.json"
+        }
+      ]
     },
     "BE-007": {
       "title": "Deposits, withdrawals, transfers and provider rails",
@@ -785,6 +790,10 @@
         {
           "description": "The existing chart workspace component is partial source implementation, not a full chart calculation/market-data qualification. This packet assigns explicit owner retention to workspaces, composite-FK revision history and original operation receipts; an actual age sweep preserves state/retry identity. Upgrade fixture preserves real55-to-partial56-to-current migration and original owner metadata. Existing workspace tests are included in373passing integrated checks. Certified indicators, native data identities, replay and actual frontend consumption remain open.",
           "evidence": "backend/BE-003_018_027_036_LEARNING_RECOVERY.md; receipts/LEARNING_RECOVERY_SOURCE_20261024.json"
+        },
+        {
+          "description": "Full c0b source run7240PASS1FAIL9skip found one stale backup fixture asserting schema56 after native migration57. Fixture now checks storage.SCHEMA_VERSION, preserving all backup/restore/original-retry/revision assertions;182final gateway/storage/backup integrations pass with zero source-data audit violations. This is not full chart or backend acceptance.",
+          "evidence": "receipts/SOURCE_QUALIFICATION_c0b57902_FAILED.json; receipts/NATIVE_FUNDING_OBSERVATIONS_SOURCE_20261024.json"
         }
       ]
     },

@@ -109,6 +109,14 @@
         "docs/rebuild/rev118/backend/BE-003_009_010_ORIGINAL_ENTRY_RECOVERY.md",
         "docs/rebuild/rev118/receipts/ORIGINAL_ENTRY_RECOVERY_SOURCE_20261022.json"
       ]
+    },
+    "BE-006": {
+      "status": "IN_PROGRESS",
+      "candidate_source_only": true,
+      "acceptance": "NOT_ISSUED",
+      "evidence": [
+        "backend/BE-006_NATIVE_FUNDING_OBSERVATIONS.md; backend/FUNDING_OWNER_READ_CONTRACT.md; receipts/NATIVE_FUNDING_OBSERVATIONS_SOURCE_20261024.json"
+      ]
     }
   },
   "blockers": [
@@ -172,7 +180,7 @@
     "note": "Opus unavailable; owner transferred build to Codex. No independent reviewer identity is inferred from another model or session."
   },
   "checkpoint": {
-    "updated_utc": "2026-10-24T07:43:02.790737+00:00",
+    "updated_utc": "2026-10-24T08:43:05.182413+00:00",
     "branch": "ccr-9e07e1af-8mgz1p",
     "base": "b02075f327ea8180ab6d269eba358cf8c5479878",
     "background_jobs": [],
@@ -343,7 +351,8 @@
       "Durable local mission learning: additive atomic migration57; original mission/stage deliveries commit with capture and terminal lifecycle facts, fresh owner authorization has a new delivery generation. Bounded startup/scheduler repair uses fair native queue order and exact-generation success/failure acknowledgements, preserving pending work after restart, cancellation or uncertain reply. Native strategy class/envelope/state/activity reread under writer fence, atomic strategy/count/original receipt, one sample on concurrent replay/commit-ack loss; historical terminal samples explicitly LEGACY_UNRECONCILED rather than recounted. Original verification and late fingerprint outcome recovered; owner reassessment/erasure/fresh consent preserved. New queue/sample receipts have parent retention and non-content disclosure. Existing chart3table policies corrected; migration fixture now models real55-to-partial56 upgrade.4original+2migration+1generationrace failures reproduced;31native recovery/373audited integrated/26registry/80rebuild PASS0skip;19final fault/control pairs caught/restored. Earlier retainedC7eight/RC2five caught before final migration/generation changes; current374case383edit preflight0findings, full next-source corpus pending. No newAPI/UI or complete legacy/feedback/unit/live claim.",
       "Native mission capture atomicity: original mission row, requiredMISSION_CREATEDevent and learning delivery share one transaction; failed event write rolls all back before optional learning. Publish only after commit/native event visibility. Original command join recovers same complete capture after lost commitACK or actual abrupt process exit, without duplicate event/mission or action dispatch.4genuine before failures;80focused/6oracles/379audited integrated/26registry/80rebuild PASS0skip;4deliberate fault/control pairs caught/restored;374case383edit preflight unchanged0findings. Native post-insert test nowrequireszeroorphanrows. Automatic busredelivery/historicalorphanrepair/wholeunit/live notclaimed.",
       "Private-core import boundary source: sharedStore now imports byte-identicalMIGRATION56 SQL from storage.chart_migration rather than trading package; old chart schema path reexports for compatibility. Original private forbidden-prefix contract unchanged. Directbefore importclosureFAIL reproduced; old trading import reintroduction caught after passingcontrol/restoration. Six legacy45/46 migration fixtures now use explicitpre57 test-only native producer; currentorigin-rule/runtimeassertions preserved, no productionmissingtablefallback.172focused audited0storagewrites/26registry/80rebuild PASS0skip;1fault/control caught;374case383edit preflight0findings. Fullolder815run7202PASS2FAIL9skip retained; no nativehost/privateplacement/unit/live acceptance.",
-      "Exact815 fullbackend completed7213 cases:7202PASS2FAIL9SKIP2769.51s; storageaudit0 andprivatePGstoppedremoved. Retentionalreadyfixeda837 and importboundarycorrectedthispacket. FulltradingNOT_RUN. Oldcompletedownedfixturescleaned; frozenQA815nowinactive/clean."
+      "Exact815 fullbackend completed7213 cases:7202PASS2FAIL9SKIP2769.51s; storageaudit0 andprivatePGstoppedremoved. Retentionalreadyfixeda837 and importboundarycorrectedthispacket. FulltradingNOT_RUN. Oldcompletedownedfixturescleaned; frozenQA815nowinactive/clean.",
+      "2026-10-24 native funding component:103native/unitization/runtime,27realPG,182audited gateway/storage/backup,19registry+16runtime contracts,80rebuild and5Android parser tests PASS0skip;12behavioral fault pairs caught/restored. Current native return qualification NOT_ISSUED. Fullc0b run7240PASS1FAIL9skip retained; stale backup version expectation corrected, no whole-backend PASS."
     ],
     "environment_notes": [
       "clone must be unshallowed (git fetch --unshallow) and PR heads fetched (+refs/pull/*/head:refs/remotes/origin/pr/*) before pre001.py",
@@ -414,6 +423,6 @@
       "evidence": "ci/MUTATION_CORPUS_c2a27848.json"
     }
   ],
-  "current_action": "Publish private-storage import and legacy fixture compatibility fix, then advance the inactive clean frozenQA815checkout to that exact new commit and run a fresh full backend/contracts+trading privatePG/storage-audit qualification with separate logs/headassert. Continue BE006/007 in /tmp/van-funding-work-20261024: native cTrader cash history reader plus immutable money/scope DTOs and67passing source tests are uncommitted/isolated; flow-neutral ledger, accounting, service ingestion and owner read contracts remain to implement. Explicit-copy only owned funding files later; rootprivatefix differs from its e22base and is not a reason to overwritecurrentroot. Preserve93features131units324req1610acceptanceIDs, nofrontendbeforeBG001, no newfinancialauthority/nativehost/production/S24 claims, no routinecheckpointstop.",
-  "updated_at_utc": "2026-10-24T07:43:02.790737+00:00"
+  "current_action": "Publish the native funding observation/owner-read component and backup fixture correction with original failed full-run evidence. Freeze the exact new commit for full backend/contracts and trading qualification, then continue BE-006 historical net-equity/credit normalization and complete native reconciliation, followed by BE-007 and the remaining original backend programme. No frontend before BG-001; no native, production, S24 or profitability acceptance is claimed. Continue autonomously through routine checkpoints.",
+  "updated_at_utc": "2026-10-24T08:43:05.182413+00:00"
 }

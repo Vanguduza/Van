@@ -19,7 +19,8 @@ ZERO = Decimal("0")
 
 def _d(v) -> Optional[Decimal]:
     try:
-        return None if v is None else Decimal(str(v))
+        value=None if v is None else Decimal(str(v))
+        return value if value is not None and value.is_finite() else None
     except Exception:
         return None
 
@@ -64,6 +65,18 @@ def account_states(ledger: Ledger, registry_public: list[dict]) -> list[dict[str
         row["learning_history_issue"] = p.get("learning_history_issue") or None
         from vati.readmodels.learning import reported_restated_learning
         row["restated_learning"] = reported_restated_learning(s, a["alias"])
+        from vati.funding.runtime import reported_funding
+        row['funding']=reported_funding(ledger,s,a)
+        row['raw_equity_change']={'day':row['day_pnl'],'week':row['week_pnl'],
+            'drawdown_from_raw_peak':row['drawdown_pct'],'basis':'UNADJUSTED_EQUITY_INCLUDES_CAPITAL_FLOWS'}
+        if a.get('broker')!='PAPER':
+            # Native deposits, withdrawals and restricted credit can change all
+            # three old metrics without any trade. Never label those changes PnL.
+            row['day_pnl']=row['week_pnl']=row['drawdown_pct']=None
+        row['performance_state']='SIMULATED_PAPER_EQUITY' if a.get('broker')=='PAPER' else 'UNMEASURED'
+        if row['funding']['reason']=='CURRENT_PROFILE_NATIVE_SCOPE_MISMATCH':
+            row.update(equity=None,balance=None,floating_pnl=None,connected=False,verified=False,connection_state='STALE',currency=a.get('currency'))
+            row['raw_equity_change']={**row['raw_equity_change'],'day':None,'week':None,'drawdown_from_raw_peak':None}
     return out
 
 
@@ -71,7 +84,10 @@ def portfolio(ledger: Ledger, registry_public: list[dict], *, reporting_currency
     accounts = account_states(ledger, registry_public)
     same = [a for a in accounts if a["currency"] == reporting_currency and a["equity"] is not None]
     other = [a["alias"] for a in accounts if a["equity"] is not None and a["currency"] != reporting_currency]
-    tot = lambda k: str(sum((Decimal(a[k]) for a in same if a.get(k) is not None), ZERO))  # noqa: E731
+    def tot(key):
+        if any(a.get(key) is None for a in same):return None
+        if not same and key in {'day_pnl','week_pnl'}:return None
+        return str(sum((Decimal(a[key]) for a in same),ZERO))
     chains, assessments = _collect(ledger)
     cur, past = current_trades(chains.values()), past_trades(chains.values())
     latest_dec = None

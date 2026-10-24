@@ -332,8 +332,11 @@ class SessionService:
         acct = r.cycle.adapter.sync_account()
         hb = r.cycle.adapter.heartbeat(now_ms=now_ms)
         positions = r.cycle.adapter.positions()
+        from vati.funding.worker import snapshot_funding
+        funding = snapshot_funding(self,r.cycle.ledger,r.cycle.adapter,acct,now_ms=now_ms)
         r.cycle.ledger.append(make_event(EventKind.ACCOUNT_SNAPSHOT, "vati-service", {
             "account_alias": acct.account_alias, "equity": str(acct.equity), "balance": str(acct.balance), "currency": acct.currency, "verified": acct.verified,
+            "funding_observation": funding,
             "connected": hb.connected, "server_offset_ms": hb.server_offset_ms, "open_positions": len(positions), "peak_equity": str(r.cycle.peak_equity), "day_start_equity": str(r.cycle.day_start_equity),
             "week_start_equity": str(r.cycle.week_start_equity), "kill_switch": sorted(t.value for t in r.cycle.kill.active), "mode": r.cycle.mandate.mode.value,
             "risk_history_issue": r.cycle.streaks.recovery_issue,
@@ -368,6 +371,8 @@ class SessionService:
         self._heartbeat("STARTED", {"reconciliation": rep.counts()})
 
     def close(self) -> None:
+        from vati.funding.worker import stop_funding
+        stop_funding(self)
         self._lease_allows_entry = False
         try:
             if self.lease is not None:
