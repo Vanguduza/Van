@@ -343,7 +343,7 @@ class DecisionCycle:
                             market_integrity=self.integrity,
                             tier1_event_blackout_active=self._tier1_blackout(now_ms=now_ms),
                             margin_level_pct=acct.margin_level_pct,
-                            free_margin=acct.free_margin,
+                            free_margin=acct.free_margin, used_margin=acct.used_margin,
                             preservation_blocks_new_risk=not funding.available,
                             preservation_reason=funding.reason,
                             kill_switch_triggers=frozenset(self.kill.active))

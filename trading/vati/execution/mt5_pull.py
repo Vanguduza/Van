@@ -275,10 +275,12 @@ class Mt5PullAdapter:
         except (KeyError,TypeError,ValueError,ArithmeticError):pass
         # This is a broker observation, never a fabricated missing-credit zero.
         # Unknown cash history still permits independent protection/reconciliation.
+        from vati.execution.native_margin import mt5_margin, mt5_risk_equity
+        used,free,level=mt5_margin(a)
         try:
-            equity=mark.net_equity if mark is not None else amount(str(a['equity']))
+            equity=mark.net_equity if mark is not None else mt5_risk_equity(a)
             return AccountState(self.account_alias,equity,amount(str(a['balance'])),text(a['currency']),allowed and bool(a.get('login')),
-                hedging,int(a.get('server_time_ms',0)),funding_mark=mark)
+                hedging,int(a.get('server_time_ms',0)),funding_mark=mark,used_margin=used,free_margin=free,margin_level_pct=level)
         except (KeyError,TypeError,ValueError,ArithmeticError):
             raise VenueUnavailable('MT5 native account amounts unavailable') from None
 

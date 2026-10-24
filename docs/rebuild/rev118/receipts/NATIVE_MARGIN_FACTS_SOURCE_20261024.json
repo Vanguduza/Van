@@ -1,0 +1,827 @@
+{
+  "schema": "van.rebuild.native-margin-facts-source/1",
+  "source_parent": "10ee9fcd185776713e10981dfdd36db5343b92b7",
+  "observed_at_utc": "2026-10-24T16:00:19.896171+00:00",
+  "integration_files": {
+    ".github/workflows/van-ci.yml": {
+      "preimage_sha256": "878bd16ecadf35ce87c724e2c616d1b32dc5012acb80fa60e9619fc07e48941e",
+      "source_sha256": "96087cac10efa81015f0fc58a57205121c63ff09928d447a309e52a2ea5bb971"
+    },
+    "android/app/src/main/java/com/dial/van/trading/TradingModels.kt": {
+      "preimage_sha256": "1d1c3f421dfc3e3cc4fc1523f0699361def08a2f60e416904b850ec9455b20de",
+      "source_sha256": "1407d215b37374785fac3ef87a3e243661f4fe4fab2c77c54981b23ac2d97d5d"
+    },
+    "android/verification/build.gradle.kts": {
+      "preimage_sha256": "e7b9a31e6c91a2ded9c24d0afd716b548f05dfca290564ffa643d56b756e3ff3",
+      "source_sha256": "fca3ee0f3931b7ed4c4a1bfca8b8ec758d8847d973bfa45c11fcfb0c40830156"
+    },
+    "deploy/van-trading-core/mql5/VanBridgeEA.mq5": {
+      "preimage_sha256": "4aec4966abee9558b1fb4641e4824117a723b9f9db1c46afd1888f0f01914b97",
+      "source_sha256": "20748f2e452506da28cff64eb07713eb8cd2d844b884295a11a065f6ba54ae1a"
+    },
+    "deploy/van-trading-core/windows/mt5_worker/mt5_bridge_worker.py": {
+      "preimage_sha256": "4d58b2a6abc8e4f894e6216899969ba76fcef4f551cad357e52ff31bfa097292",
+      "source_sha256": "796488d72099805efe687ed513e4279920e27d00781905c67f4e35c8038d23de"
+    },
+    "tools/ci/github-actions-ci.yml": {
+      "preimage_sha256": "878bd16ecadf35ce87c724e2c616d1b32dc5012acb80fa60e9619fc07e48941e",
+      "source_sha256": "96087cac10efa81015f0fc58a57205121c63ff09928d447a309e52a2ea5bb971"
+    },
+    "trading/tests/conftest.py": {
+      "preimage_sha256": "33296c6227458507873a528cedb9b73a5131274b94caa0526da3ee72aec19db2",
+      "source_sha256": "ce162aba75a30a958eeefa587b6508823797872559f4ab2d0224e7734e6b5e61"
+    },
+    "trading/tests/mql_terminal_fixture.cpp": {
+      "preimage_sha256": "f4b6830239cba319d734674991a07a933ffb0aa1bc312d9dec07a7de5d7c2c31",
+      "source_sha256": "7fb853edd8bf7d1897dda96cfbb2785512a0cd11c5d154b8c1cdc69607125062"
+    },
+    "trading/tests/test_dispatch_current_risk.py": {
+      "preimage_sha256": "751b54e5d4972bc8cdd2efbbd1676ab5edbe893416bc7b145025009ff77437a9",
+      "source_sha256": "93a2c4782ab8ebe1ff3e9dc3e04cb156bf9e18a2b30e8514b9616a3b195cd940"
+    },
+    "trading/tests/test_funding_risk_fence.py": {
+      "preimage_sha256": "76e6bb956fbbe9b508146ef21632239bc176e4f965c907ea3ec10688f18f0875",
+      "source_sha256": "f1651c7211bd39c5f90a3b8a3d102c1bf66caf7ec63f3080793d9b31806d4252"
+    },
+    "trading/tests/test_mql_native_function_bodies.py": {
+      "preimage_sha256": "fc0377a29bf499c5c3cf9c49ef29b8fb0e887397b31ea48aac6797a5c51cfeab",
+      "source_sha256": "95a017974d10ebdfae00b698b55b767fa8addb875e8d6e5a17e4d617c4c9999c"
+    },
+    "trading/tests/test_single_session_unknown_entry.py": {
+      "preimage_sha256": "6b6354b941ae7949d3324c461d59583aebe79f0bd55c88c2664a6f7cb121a2b4",
+      "source_sha256": "86de240f9bda008bf10660b6ffd007c98c86a018aa4caa1914590d9b1d1aef61"
+    },
+    "trading/vati/app/account_service.py": {
+      "preimage_sha256": "9e072db5ed93909addcd33497ceafcf3f299557127839cc18bbe5522fa58fbe4",
+      "source_sha256": "c30dbd387229075f0078af23a1e18b6ca279474526a90c8a2fb408f2d81b4c35"
+    },
+    "trading/vati/app/cycle.py": {
+      "preimage_sha256": "76e5c51847d6f9a5e1774e6d9773fb05d6eabe90f54025a3e274ab7cbdc9c2fb",
+      "source_sha256": "8ecdb1358dc4a6ddafbd4e6d20b1ffaa901033a8aa8599d9147ba3e43c857a34"
+    },
+    "trading/vati/app/portfolio.py": {
+      "preimage_sha256": "28e06650322876a2bbba87671a249a4214be65521eba457c2f3381c488a3f244",
+      "source_sha256": "a541b089b606c277e71597e862009e0fdabb3dcfe480bcd8287183d2be47bcc7"
+    },
+    "trading/vati/app/service.py": {
+      "preimage_sha256": "debeb2476d1d41fd5bd936b64a3bc10e3065b8f581f15ea80078d6ca313f417b",
+      "source_sha256": "436f8d175f24b70097078677b65b754cc7cd31a44291ac440facdf0399fb9451"
+    },
+    "trading/vati/execution/ctrader/adapter.py": {
+      "preimage_sha256": "e53cb2419de13c6c45d7e21376de22d48ef648449f762e36c7ca390ec774ef36",
+      "source_sha256": "bbac42208cb8d0957c2652507612f881be2145d7c717f20fa5d7fe643ec50293"
+    },
+    "trading/vati/execution/mt5_bridge.py": {
+      "preimage_sha256": "02ad03937004afc2f23caf7cc8b42e159b859b665244edab364958dd808fce34",
+      "source_sha256": "2008264cefd65139bb6888d66d3138e3374ccdd614941000503c61ed071c3967"
+    },
+    "trading/vati/execution/mt5_pull.py": {
+      "preimage_sha256": "7801b4075304346dbf34b17cad6ac4698f8e2cf06fe58562e5fac94de36b0a94",
+      "source_sha256": "e9de45c71986f5519f2e570ed7eade4ad10a6123d29a36eacc802f3e3ca574c4"
+    },
+    "trading/vati/execution/paper.py": {
+      "preimage_sha256": "ac0f9f206b444759521cb651930dee1e1ae7511a28e0e814997a78d6c829317d",
+      "source_sha256": "7bdc8544a8220c6edc0db0eef6a0afe55a671ca178c0a70d82c2246308f5b1a9"
+    },
+    "trading/vati/risk/authority.py": {
+      "preimage_sha256": "5f9138a434cc22dcdbd0493a01b0cb5d6bdc0726b9beab560ac8f6e8e8f62f15",
+      "source_sha256": "c65b46d035d919da44a108cc5fd84774a83fbea0c7af5432150f2773c7073dcb"
+    },
+    "trading/vati/risk/contracts.py": {
+      "preimage_sha256": "912798a79664c357178cb276bb995653cbae11f2a7435303b25129ef122e140d",
+      "source_sha256": "83173c1beac35afc5f9ba61e7b6be9bc142c57ed44c4cbfbdefb1aa3e8e723fb"
+    },
+    "trading/vati/risk/serde.py": {
+      "preimage_sha256": "8e1968eedc906d57810dcf79e8f8c4e0e3883f993fb36de7b9e044c04ea39591",
+      "source_sha256": "d704e182da46db4971ed300271da329b84adc25f762280424bef14760ba0bc87"
+    },
+    "android/app/src/main/java/com/dial/van/trading/AccountMargin.kt": {
+      "preimage_sha256": null,
+      "source_sha256": "b2d5f4312f1773435efb6575d8d6d99cbed3763d97cd590d5dd143ee7f909f7a"
+    },
+    "android/verification/src/test/kotlin/com/dial/van/trading/AccountMarginTest.kt": {
+      "preimage_sha256": null,
+      "source_sha256": "6b7618f53573b77becc3d505bf783e0c435175bc46a52c6756fe91a142db7ce5"
+    },
+    "trading/tests/test_native_margin_facts.py": {
+      "preimage_sha256": null,
+      "source_sha256": "f9a024e1652a58e70d6ed217f59588311df5540eb12a9e561aefbc56c35bdd04"
+    },
+    "trading/vati/execution/native_margin.py": {
+      "preimage_sha256": null,
+      "source_sha256": "35f99bbb17fb360e1b4fd0f25942edf5dfedc660f58fcd206f29f73a76b610ea"
+    },
+    "trading/vati/risk/margin.py": {
+      "preimage_sha256": null,
+      "source_sha256": "24110828d20ec5fb1e2f8601c72dfe4c68d3a226e3ca82e51b79263aa6da1470"
+    }
+  },
+  "executions": {
+    "before_fix": {
+      "tests": 2,
+      "passed": 0,
+      "failure": 2,
+      "error": 0,
+      "skipped": 0,
+      "sha256": "dda317769d614412ad3a3f2ba07812dae97ed9171e397c6927ed28db50fc8964"
+    },
+    "focused_native_and_actual_ea_bodies": {
+      "tests": 150,
+      "passed": 150,
+      "failure": 0,
+      "error": 0,
+      "skipped": 0,
+      "sha256": "15f58a7ccc17992417947740e696ccf26e72d806b6a0bfaf7ac46b9bbf27df1f"
+    },
+    "final_postgres_current_risk_funding_identity": {
+      "tests": 215,
+      "passed": 215,
+      "failure": 0,
+      "error": 0,
+      "skipped": 0,
+      "sha256": "369e77cb1fda071893692f3bbb750c9e292250093b35cd382d7700913a224f0b"
+    },
+    "original_restart_controls": {
+      "tests": 3,
+      "passed": 3,
+      "failure": 0,
+      "error": 0,
+      "skipped": 0,
+      "sha256": "043a7b94026987303e17fefcc5c58f9b8b38d16bbd70270ca9d00ed244310db2"
+    },
+    "remaining_recovery_batch": {
+      "tests": 10,
+      "passed": 10,
+      "failure": 0,
+      "error": 0,
+      "skipped": 0,
+      "sha256": "e9e7dfc938c8845f0e9fef0c652fda0d82d9c5150f74956c121c47dd6fe840f7"
+    },
+    "authenticated_api": {
+      "tests": 15,
+      "passed": 15,
+      "failure": 0,
+      "error": 0,
+      "skipped": 0,
+      "sha256": "cd1ff52da463367259f1d1e4a2eae497f43446274930183b5ca9f1d0f428793c"
+    },
+    "all_current_kotlin_tests": {
+      "tests": 1336,
+      "passed": 1336,
+      "failure": 0,
+      "error": 0,
+      "skipped": 0,
+      "sha256": "a808b692e1d315addfd1ff10f86ce060f22102c546d8eb93ca81367e6dc6b00b"
+    },
+    "workflow_template": {
+      "tests": 4,
+      "passed": 4,
+      "failure": 0,
+      "error": 0,
+      "skipped": 0,
+      "sha256": "fbc6157d7cac6c964247c8c669697efdd64f97542c94e119cf15b2723bd0224d"
+    },
+    "rebuild_source_contracts": {
+      "tests": 80,
+      "passed": 80,
+      "failure": 0,
+      "error": 0,
+      "skipped": 0,
+      "sha256": "2afb8d3d79c1b0dedd859505184756e465ad7d4e622aeea938b0202c100e11b3"
+    },
+    "owner_source_contracts": {
+      "tests": 35,
+      "passed": 35,
+      "failure": 0,
+      "error": 0,
+      "skipped": 0,
+      "sha256": "ec8ab861986a9ffaad89e956894269b09144e29e3283946ca4c546e2380afbeb"
+    }
+  },
+  "recovery_coverage": {
+    "distinct_collected": 30,
+    "distinct_observed_passing": 30,
+    "passing_names": [
+      "test_already_resolved_original_result_replays_consistently_after_real_service_restart[FILLED]",
+      "test_already_resolved_original_result_replays_consistently_after_real_service_restart[REJECTED]",
+      "test_contradictory_or_partial_native_evidence_cannot_release_the_original_hold[malformed-volume]",
+      "test_contradictory_or_partial_native_evidence_cannot_release_the_original_hold[oversized-fill]",
+      "test_contradictory_or_partial_native_evidence_cannot_release_the_original_hold[rejected-with-fill]",
+      "test_contradictory_or_partial_native_evidence_cannot_release_the_original_hold[stop-unconfirmed]",
+      "test_contradictory_or_partial_native_evidence_cannot_release_the_original_hold[wrong-symbol]",
+      "test_current_empty_positions_do_not_release_original_unresolved_entry_risk",
+      "test_initial_confirmed_native_no_effect_is_not_reported_as_a_risk_approval[CANCELLED]",
+      "test_initial_confirmed_native_no_effect_is_not_reported_as_a_risk_approval[EXPIRED]",
+      "test_initial_confirmed_native_no_effect_is_not_reported_as_a_risk_approval[REJECTED]",
+      "test_initial_native_partial_fill_keeps_remaining_risk_and_truthful_status[FILLED]",
+      "test_initial_native_partial_fill_keeps_remaining_risk_and_truthful_status[PARTIAL]",
+      "test_late_native_fill_keeps_original_setup_and_derives_target_r_from_actual_fill",
+      "test_late_original_fill_uses_approved_capsule_not_a_current_replacement",
+      "test_late_original_native_fill_restores_full_trade_identity_and_protection_without_another_send",
+      "test_late_original_native_rejection_releases_only_that_attempt_without_replaying_it",
+      "test_loss_of_original_queue_record_is_unknown_and_cannot_create_a_replacement_command",
+      "test_lost_enqueue_reply_can_read_the_original_native_refusal_without_repeating_the_write",
+      "test_missing_native_enqueue_reply_holds_the_durable_original_attempt",
+      "test_native_thesis_write_failure_recovers_from_real_persistence_not_a_memory_only_claim[after-thesis]",
+      "test_native_thesis_write_failure_recovers_from_real_persistence_not_a_memory_only_claim[before-thesis]",
+      "test_original_cold_refusal_does_not_require_missing_historical_thesis_inputs",
+      "test_original_late_fill_recovery_retries_a_local_publication_failure_without_losing_context_or_double_cost[after-tca]",
+      "test_original_late_fill_recovery_retries_a_local_publication_failure_without_losing_context_or_double_cost[before-tca]",
+      "test_original_timed_out_native_entry_is_not_reported_as_executed_or_approved",
+      "test_owner_heartbeat_reports_the_original_unknown_hold",
+      "test_process_restart_before_original_native_result_can_reconcile_without_resending[FILLED]",
+      "test_process_restart_before_original_native_result_can_reconcile_without_resending[REJECTED]",
+      "test_zero_fill_refusal_cannot_erase_an_earlier_native_report_of_possible_filled_quantity"
+    ],
+    "mode": "BATCHED_SOURCE_CASES_NOT_A_COMPLETE_COMBINED_RUN",
+    "interrupted_run": {
+      "schema": "van.rebuild.native-margin-recovery-interrupted/1",
+      "observed_at_utc": "2026-10-24T15:48:48.116774+00:00",
+      "status": "FAILED_INTERRUPTED",
+      "tests_recorded": 27,
+      "failures": [
+        [
+          "test_native_thesis_write_failure_recovers_from_real_persistence_not_a_memory_only_claim[before-thesis]",
+          "RuntimeError: can't start new thread"
+        ],
+        [
+          "test_native_thesis_write_failure_recovers_from_real_persistence_not_a_memory_only_claim[after-thesis]",
+          "RuntimeError: can't start new thread"
+        ],
+        [
+          "test_already_resolved_original_result_replays_consistently_after_real_service_restart[REJECTED]",
+          "RuntimeError: can't start new thread"
+        ],
+        [
+          "test_already_resolved_original_result_replays_consistently_after_real_service_restart[FILLED]",
+          "RuntimeError: can't start new thread"
+        ],
+        [
+          "test_zero_fill_refusal_cannot_erase_an_earlier_native_report_of_possible_filled_quantity",
+          "RuntimeError: can't start new thread"
+        ],
+        [
+          "test_loss_of_original_queue_record_is_unknown_and_cannot_create_a_replacement_command",
+          "RuntimeError: can't start new thread"
+        ]
+      ],
+      "junit_sha256": "e38898c4252c6b71168735d6cc16034be1c31360509b1f2757ba4e412f3e5a65",
+      "private_pg_cleanup": {
+        "stopped": true,
+        "removed": true
+      },
+      "owned_interruption": [
+        {
+          "pid": 29093,
+          "cwd": "/tmp/van-native-margin-work-20261024",
+          "argv": [
+            "/workspace/van-audit/canon-backend-venv-2026-10-09/bin/python",
+            "-m",
+            "pytest",
+            "trading/tests/test_single_session_unknown_entry.py",
+            "-vv",
+            "--durations=20",
+            "--disable-warnings",
+            "--basetemp=/tmp/van-native-margin-unknown-all-pg-pytest",
+            "--junitxml=/tmp/van-native-margin-unknown-all-pg.xml"
+          ]
+        }
+      ],
+      "stale_artifact_correction": "The 2026-10-22 startup-issues JSON was initially mistaken for current evidence. Current opportunity IDs are already account-scoped; no new identity defect or generator change. Existing scope tests are reexecuted.",
+      "qualification": "No complete recovery pass inferred. Six recorded failures are native thread-start errors; the exact failed pytest child alone was interrupted before its fixture was cleanly stopped/removed.",
+      "junit_cases_without_failure_tag": 21,
+      "completed_passes_from_verbose_terminal": 20,
+      "incomplete_test_without_verdict": [
+        null
+      ],
+      "counting_note": "Interrupted pytest emitted one testcase without an outcome tag; it is not counted as a completed pass."
+    }
+  },
+  "fault_control_pairs": {
+    "baseline": {
+      "exit_code": 0,
+      "failures": [],
+      "errors": 0,
+      "skipped": 0,
+      "tests": 110,
+      "log_sha256": "c0a2d42c80bff24dbead918a2c9666163457f9400aca3ed055be441a6fa855f0",
+      "xml_sha256": "39f0b75ddfb79566da583e6a0e6a16a4a01643c889e0f1ca51dafb1ab0388948"
+    },
+    "cases": [
+      {
+        "case": "missing-native-margin-accepted",
+        "path": "trading/vati/risk/authority.py",
+        "expected_failure": "test_missing_native_margin_is_not_an_approval",
+        "source_sha256": "c65b46d035d919da44a108cc5fd84774a83fbea0c7af5432150f2773c7073dcb",
+        "fault": {
+          "exit_code": 1,
+          "failures": [
+            "test_missing_native_margin_is_not_an_approval",
+            "test_partially_missing_leveraged_margin_cannot_be_filled_with_a_healthy_default[used_margin]",
+            "test_partially_missing_leveraged_margin_cannot_be_filled_with_a_healthy_default[free_margin]",
+            "test_partially_missing_leveraged_margin_cannot_be_filled_with_a_healthy_default[margin_level_pct]"
+          ],
+          "errors": 0,
+          "skipped": 0,
+          "tests": 110,
+          "log_sha256": "2c2028ea756e269ba6d1fea08e8db23019f89a520ad62c29d16bd0fe9f30e4e9",
+          "xml_sha256": "d7a11602cacd261fa4c65122779e26f9fc6060496f93486921cdd50246752b8a"
+        },
+        "restored": {
+          "exit_code": 0,
+          "failures": [],
+          "errors": 0,
+          "skipped": 0,
+          "tests": 110,
+          "log_sha256": "b92768f0374f913d85f49d4212f2b667633e4a00df42201c194558e81ee44693",
+          "xml_sha256": "9746c768b422a2f25b39462c6a771667d327439426f57a46400f160015203e90"
+        },
+        "caught_by_expected_behavioral_assertion": true
+      },
+      {
+        "case": "decimal-margin-lost-on-replay",
+        "path": "trading/vati/risk/serde.py",
+        "expected_failure": "test_original_decimal_margin_facts_survive_replay",
+        "source_sha256": "d704e182da46db4971ed300271da329b84adc25f762280424bef14760ba0bc87",
+        "fault": {
+          "exit_code": 1,
+          "failures": [
+            "test_original_decimal_margin_facts_survive_replay_without_turning_into_strings",
+            "test_flat_native_margin_has_a_real_zero_commitment_without_a_fabricated_healthy_ratio"
+          ],
+          "errors": 0,
+          "skipped": 0,
+          "tests": 110,
+          "log_sha256": "1ed75e9ccc6cdbfd5fb7dec70b770cde118b1bd571bc84f7cecd12b2415ee840",
+          "xml_sha256": "a08a619934d3482f8bde359313256c8b5c8fb21725c5a09d7059d7c3ba8503ee"
+        },
+        "restored": {
+          "exit_code": 0,
+          "failures": [],
+          "errors": 0,
+          "skipped": 0,
+          "tests": 110,
+          "log_sha256": "851e8120f2621b04a0b03898cb6e24b2d178da69ac9ce676a1b45dba8205c65f",
+          "xml_sha256": "3fd29239a3f8c1b3e2539df8208021e1b04c43e57ec4296b20aea99f70abea77"
+        },
+        "caught_by_expected_behavioral_assertion": true
+      },
+      {
+        "case": "credit-replenishes-margin",
+        "path": "trading/vati/risk/margin.py",
+        "expected_failure": "test_credit_in_reported_margin",
+        "source_sha256": "24110828d20ec5fb1e2f8601c72dfe4c68d3a226e3ca82e51b79263aa6da1470",
+        "fault": {
+          "exit_code": 1,
+          "failures": [
+            "test_credit_in_reported_margin_cannot_replenish_cash_backed_risk_capacity[150-100-1050-1150-MARGIN_FLOOR]",
+            "test_credit_in_reported_margin_cannot_replenish_cash_backed_risk_capacity[90-100-990-1090-MARGIN_CALL]",
+            "test_owner_margin_distinguishes_original_reported_amounts_and_cash_backed_bounds",
+            "test_owner_margin_rejects_unbound_or_invented_facts[invented_level_bound]"
+          ],
+          "errors": 0,
+          "skipped": 0,
+          "tests": 110,
+          "log_sha256": "895c8a205aab5d417bc84b3ddf39d915d01b4d010825737060de6ea4b3de2713",
+          "xml_sha256": "b8731ea65a2ece074258c7b57e495cc6c23cc56d3223a85eb8c24f4b72270446"
+        },
+        "restored": {
+          "exit_code": 0,
+          "failures": [],
+          "errors": 0,
+          "skipped": 0,
+          "tests": 110,
+          "log_sha256": "4a37884de4867131ee109bdae634c90dba2673d8a883bea6b89c72090ee37c67",
+          "xml_sha256": "b80aa6df2ea3dcbb8ce402f7bdde2d93e1fe0d938c13a11c71480af2fdc8f63b"
+        },
+        "caught_by_expected_behavioral_assertion": true
+      },
+      {
+        "case": "unknown-cash-credit-as-profit",
+        "path": "trading/vati/execution/native_margin.py",
+        "expected_failure": "test_missing_cash_history_does_not_make_known_broker_credit",
+        "source_sha256": "35f99bbb17fb360e1b4fd0f25942edf5dfedc660f58fcd206f29f73a76b610ea",
+        "fault": {
+          "exit_code": 1,
+          "failures": [
+            "test_missing_cash_history_does_not_make_known_broker_credit_into_risk_equity"
+          ],
+          "errors": 0,
+          "skipped": 0,
+          "tests": 110,
+          "log_sha256": "dedb3b77da50edcc3b3549de865df757517f942b53be18f51ec168109555dc88",
+          "xml_sha256": "6be4d002587a4713b224fceca0b22502911f5b157e240e3cef02c4184daaf769"
+        },
+        "restored": {
+          "exit_code": 0,
+          "failures": [],
+          "errors": 0,
+          "skipped": 0,
+          "tests": 110,
+          "log_sha256": "0fac4616cd66db8f3f39638a3d35bca7ee18764c4ecd7abcac74facebb527593",
+          "xml_sha256": "594ed06a9d4dd2257f37c147a44a225d98ab1582918eeed1e08615b5a246aa66"
+        },
+        "caught_by_expected_behavioral_assertion": true
+      },
+      {
+        "case": "algo-enum-used-as-openapi",
+        "path": "trading/vati/execution/ctrader/adapter.py",
+        "expected_failure": "test_ctrader_margin_uses_native_enum",
+        "source_sha256": "bbac42208cb8d0957c2652507612f881be2145d7c717f20fa5d7fe643ec50293",
+        "fault": {
+          "exit_code": 1,
+          "failures": [
+            "test_ctrader_margin_uses_native_enum_and_per_symbol_hedge_rules[0-12]",
+            "test_ctrader_margin_uses_native_enum_and_per_symbol_hedge_rules[1-17]"
+          ],
+          "errors": 0,
+          "skipped": 0,
+          "tests": 110,
+          "log_sha256": "95f149bd29d582ba2def9b64b87bb648a5c540f87ee6799704580dba4759e90c",
+          "xml_sha256": "871dfe9e21cdb8dca0aa1c10176123ba8d02ed39f4d7ba906c0d203307722136"
+        },
+        "restored": {
+          "exit_code": 0,
+          "failures": [],
+          "errors": 0,
+          "skipped": 0,
+          "tests": 110,
+          "log_sha256": "32a388e25290fcab598447f2be429947777cf3c2106ab521ff4e9cb6f5230fb4",
+          "xml_sha256": "ca6e724217e4913d26d24b6765b1718c823ee634a3300098cddf0127afeb83b8"
+        },
+        "caught_by_expected_behavioral_assertion": true
+      },
+      {
+        "case": "cross-symbol-netting",
+        "path": "trading/vati/execution/ctrader/adapter.py",
+        "expected_failure": "test_ctrader_margin_uses_native_enum",
+        "source_sha256": "bbac42208cb8d0957c2652507612f881be2145d7c717f20fa5d7fe643ec50293",
+        "fault": {
+          "exit_code": 1,
+          "failures": [
+            "test_ctrader_margin_uses_native_enum_and_per_symbol_hedge_rules[2-7]",
+            "test_ctrader_margin_uses_native_enum_and_per_symbol_hedge_rules[NET-7]"
+          ],
+          "errors": 0,
+          "skipped": 0,
+          "tests": 110,
+          "log_sha256": "9ff7184e1e0dbee0090bfb690e304923462b4649a24e7da90842e7309821a0dc",
+          "xml_sha256": "c3ddcea4d3c59dd16919eb52ee90350c7bba83292f68751394739739f907b3e4"
+        },
+        "restored": {
+          "exit_code": 0,
+          "failures": [],
+          "errors": 0,
+          "skipped": 0,
+          "tests": 110,
+          "log_sha256": "01b43839208219486856effe5d8c019fa6f3570227ba0ee9fdbfdc512959c35f",
+          "xml_sha256": "9d19826d2f9e78cf35c0101453ad59e86ba9c0abba89901083f318732d2baacf"
+        },
+        "caught_by_expected_behavioral_assertion": true
+      },
+      {
+        "case": "native-margin-precision-guessed",
+        "path": "trading/vati/execution/ctrader/adapter.py",
+        "expected_failure": "test_ctrader_native_position_margin",
+        "source_sha256": "bbac42208cb8d0957c2652507612f881be2145d7c717f20fa5d7fe643ec50293",
+        "fault": {
+          "exit_code": 1,
+          "failures": [
+            "test_ctrader_native_position_margin_keeps_independent_precision_and_credit_exclusion",
+            "test_unknown_or_changed_ctrader_margin_is_not_available_capacity[missing_digits]",
+            "test_ctrader_margin_uses_native_enum_and_per_symbol_hedge_rules[0-12]",
+            "test_ctrader_margin_uses_native_enum_and_per_symbol_hedge_rules[1-17]",
+            "test_ctrader_margin_uses_native_enum_and_per_symbol_hedge_rules[2-7]",
+            "test_ctrader_margin_uses_native_enum_and_per_symbol_hedge_rules[MAX-12]",
+            "test_ctrader_margin_uses_native_enum_and_per_symbol_hedge_rules[SUM-17]",
+            "test_ctrader_margin_uses_native_enum_and_per_symbol_hedge_rules[NET-7]"
+          ],
+          "errors": 0,
+          "skipped": 0,
+          "tests": 110,
+          "log_sha256": "b04a3a65e43a6887b85f05b06f598458fdeb03e4bd1fd98b84a91c7d8b02fdbc",
+          "xml_sha256": "191b03ab331545675314d47faf195160d304215f97c512f3ff2ad6e9155a8896"
+        },
+        "restored": {
+          "exit_code": 0,
+          "failures": [],
+          "errors": 0,
+          "skipped": 0,
+          "tests": 110,
+          "log_sha256": "afe2fdd1231fdff326f9cbc51100d2705f9f38e666770081e06310c4aacf9da7",
+          "xml_sha256": "f794eef202a531d50da3eba30d19bd7e8cdd4598850e6c4492ac918a75a133d8"
+        },
+        "caught_by_expected_behavioral_assertion": true
+      },
+      {
+        "case": "single-used-margin-not-supplied",
+        "path": "trading/vati/app/cycle.py",
+        "expected_failure": "test_actual_risk_snapshot_producers_preserve_native_used_margin[single]",
+        "source_sha256": "8ecdb1358dc4a6ddafbd4e6d20b1ffaa901033a8aa8599d9147ba3e43c857a34",
+        "fault": {
+          "exit_code": 1,
+          "failures": [
+            "test_actual_risk_snapshot_producers_preserve_native_used_margin[single]"
+          ],
+          "errors": 0,
+          "skipped": 0,
+          "tests": 110,
+          "log_sha256": "32955377989c42da2710d03210c82a7cd08b61c1cd1626e7ccc41bab34710094",
+          "xml_sha256": "cf6ddb09453c44e8ea0627e335ceb63fd1ff33ebb3647fdcdee4251b6cdce30d"
+        },
+        "restored": {
+          "exit_code": 0,
+          "failures": [],
+          "errors": 0,
+          "skipped": 0,
+          "tests": 110,
+          "log_sha256": "0bf773097df69b6a3cdef2ca38977ee2f7fdfab3257dfe67fd23222a4f88fc1b",
+          "xml_sha256": "b5cd8f3155f5e1d4d5625bac55d2f1b5f176fe1cebe1d55a0e9af9b363fcee45"
+        },
+        "caught_by_expected_behavioral_assertion": true
+      },
+      {
+        "case": "book-used-margin-not-supplied",
+        "path": "trading/vati/app/account_service.py",
+        "expected_failure": "test_actual_risk_snapshot_producers_preserve_native_used_margin[account]",
+        "source_sha256": "c30dbd387229075f0078af23a1e18b6ca279474526a90c8a2fb408f2d81b4c35",
+        "fault": {
+          "exit_code": 1,
+          "failures": [
+            "test_actual_risk_snapshot_producers_preserve_native_used_margin[account]"
+          ],
+          "errors": 0,
+          "skipped": 0,
+          "tests": 110,
+          "log_sha256": "8c265167d032bc00e3325d24b91d5317ba27dc7bd1217ce27f312ca590479010",
+          "xml_sha256": "9354b3d4df2608932ea2ce5fc440d2e3a59b4df4778747d9707eb1a4bf5584a9"
+        },
+        "restored": {
+          "exit_code": 0,
+          "failures": [],
+          "errors": 0,
+          "skipped": 0,
+          "tests": 110,
+          "log_sha256": "2fceab334e791a85fe7e87f4b6c5e6b78d894ddeffe8b3352583eb1e2efbe948",
+          "xml_sha256": "b57c4d5e3d0d0cb2c7ba65784a2dc7d55f1ffae88de492b77858343a8f5d20d0"
+        },
+        "caught_by_expected_behavioral_assertion": true
+      },
+      {
+        "case": "native-owner-scope-not-checked",
+        "path": "trading/vati/app/portfolio.py",
+        "expected_failure": "test_native_owner_margin_cannot_attach",
+        "source_sha256": "a541b089b606c277e71597e862009e0fdabb3dcfe480bcd8287183d2be47bcc7",
+        "fault": {
+          "exit_code": 1,
+          "failures": [
+            "test_native_owner_margin_cannot_attach_to_a_profile_without_a_physical_scope"
+          ],
+          "errors": 0,
+          "skipped": 0,
+          "tests": 110,
+          "log_sha256": "3a8fd705637c496a077006f9d9c0359314e1f676f9deadb8893ef0190b8da97e",
+          "xml_sha256": "709854c49ff17ecbb67bb621863f363c9c1a356a53e5bba7e2f5685345f769df"
+        },
+        "restored": {
+          "exit_code": 0,
+          "failures": [],
+          "errors": 0,
+          "skipped": 0,
+          "tests": 110,
+          "log_sha256": "8bcf6d811687b1a87196212a16b10ddfd68858f79f6aa02e308492c136c975bc",
+          "xml_sha256": "9ec881d184db2d289bc8f64500dbaf15824ef62a6cecd4aadd660d8dcd36f8bb"
+        },
+        "caught_by_expected_behavioral_assertion": true
+      },
+      {
+        "case": "book-original-observation-clock-lost",
+        "path": "trading/vati/app/account_service.py",
+        "expected_failure": "test_actual_book_account_snapshot_supplies_original_margin",
+        "source_sha256": "c30dbd387229075f0078af23a1e18b6ca279474526a90c8a2fb408f2d81b4c35",
+        "fault": {
+          "exit_code": 1,
+          "failures": [
+            "test_actual_book_account_snapshot_supplies_original_margin_to_owner"
+          ],
+          "errors": 0,
+          "skipped": 0,
+          "tests": 110,
+          "log_sha256": "2a777b7e69961ad86edb526344b4f1490a33063582642c258f6b47f0cf0fd104",
+          "xml_sha256": "706ee82d76798bd8d2780defdc9b02c99206191038324771d18dc4b091ab9c94"
+        },
+        "restored": {
+          "exit_code": 0,
+          "failures": [],
+          "errors": 0,
+          "skipped": 0,
+          "tests": 110,
+          "log_sha256": "195e0cf7a230cdf064c8d2d05055f1283ec8c3f9c5a1839168879f1e26327e58",
+          "xml_sha256": "201c3f5940192f6dd78b8ad144fae0579953709152e6d839e4d6fdeb468c0ecc"
+        },
+        "caught_by_expected_behavioral_assertion": true
+      },
+      {
+        "case": "ea-hardcodes-zero-used-margin",
+        "path": "deploy/van-trading-core/mql5/VanBridgeEA.mq5",
+        "expected_failure": "test_actual_ea_native_margin_fields_remain_original_decimal_observations",
+        "source_sha256": "20748f2e452506da28cff64eb07713eb8cd2d844b884295a11a065f6ba54ae1a",
+        "fault": {
+          "exit_code": 1,
+          "failures": [
+            "test_actual_ea_native_margin_fields_remain_original_decimal_observations"
+          ],
+          "errors": 0,
+          "skipped": 0,
+          "tests": 110,
+          "log_sha256": "034e46d3ae07d578b6dab5fcc4700451859c86490fc979c986916c859c8bce6f",
+          "xml_sha256": "bd0da185b76b496827e1de5ae9637099d9663adb5495ba47bfc3e2f6665f30dd"
+        },
+        "restored": {
+          "exit_code": 0,
+          "failures": [],
+          "errors": 0,
+          "skipped": 0,
+          "tests": 110,
+          "log_sha256": "4ce997cda7a47ea1a0e0c5725aefbf677e50ab4281a7fe043b72958866ea1ee3",
+          "xml_sha256": "aa60a851ef6d43fc7104017673f01099f0b5199209f7e666481980fd73966474"
+        },
+        "caught_by_expected_behavioral_assertion": true
+      },
+      {
+        "case": "ea-ignores-native-margin-read-error-r2",
+        "path": "deploy/van-trading-core/mql5/VanBridgeEA.mq5",
+        "expected_failure": "test_actual_ea_unknown_margin_cannot_be_serialized_as_healthy_zero[unavailable]",
+        "source_sha256": "20748f2e452506da28cff64eb07713eb8cd2d844b884295a11a065f6ba54ae1a",
+        "fault": {
+          "exit_code": 1,
+          "failures": [
+            "test_actual_ea_unknown_margin_cannot_be_serialized_as_healthy_zero[unavailable]"
+          ],
+          "errors": 0,
+          "skipped": 0,
+          "tests": 110,
+          "log_sha256": "6c2534999c76dd6f4e5d6b4a1d5484be1730e0bb01d91ac28303d6c94e8e8632",
+          "xml_sha256": "7ff3b09bc13a5eb4859979b1b864d7471e5b2bef0d46fa2248ba12609d397211"
+        },
+        "restored": {
+          "exit_code": 0,
+          "failures": [],
+          "errors": 0,
+          "skipped": 0,
+          "tests": 110,
+          "log_sha256": "7ee73be380767b6c8d4e486bb45ab395a847da0676345e89b282b862fe4800b2",
+          "xml_sha256": "c73739c1283fab99cc33046d302e5363a778002f68f2963085e82e0b37e23262"
+        },
+        "caught_by_expected_behavioral_assertion": true
+      }
+    ],
+    "scope": "Actual RiskAuthority, native MT5/ctrader parsers, current snapshots, actual EA function bodies and owner readback. Error/skip-only mutant failures do not count.",
+    "invalid_attempts": [
+      {
+        "case": "ea-ignores-native-margin-read-error",
+        "path": "deploy/van-trading-core/mql5/VanBridgeEA.mq5",
+        "expected_failure": "test_actual_ea_unknown_margin_cannot_be_serialized_as_healthy_zero[unavailable]",
+        "source_sha256": "20748f2e452506da28cff64eb07713eb8cd2d844b884295a11a065f6ba54ae1a",
+        "fault": {
+          "exit_code": 1,
+          "failures": [],
+          "errors": 52,
+          "skipped": 0,
+          "tests": 110,
+          "log_sha256": "b090c9e1dcf6a6f21e41bfa0923c73d5f8b3887d99451f298da17ec45ee5c5a2",
+          "xml_sha256": "f8f05b1fe9d213fe4f731dec5fd53727bccba1b03ca004aece760c84eacb34e1"
+        },
+        "restored": {
+          "exit_code": 0,
+          "failures": [],
+          "errors": 0,
+          "skipped": 0,
+          "tests": 110,
+          "log_sha256": "a9664ff0a02f9b1d760dd227807660cbfe9e6b9102f22129ac3b2dac8cb7d496",
+          "xml_sha256": "31b9efca65454b38bfd63858dada2c7b427cd47a7565843c776d6025379b28e3"
+        },
+        "caught_by_expected_behavioral_assertion": false
+      }
+    ]
+  },
+  "private_postgres_cleanup": {
+    "van-native-margin-pg-final-r3": {
+      "stopped": true,
+      "removed": true
+    },
+    "van-native-margin-unknown-pg": {
+      "stopped": true,
+      "removed": true
+    },
+    "van-native-margin-recovery-remaining-pg": {
+      "stopped": true,
+      "removed": true
+    }
+  },
+  "api_storage_audit": {
+    "schema": "van.source-storage-audit/1",
+    "forbidden_events": [],
+    "source_sha256": "d4e270150fb0da6e8d79b449dd0de68fd1f97b3ccea3d282f31d91297edbd495",
+    "root": "/tmp/van-native-margin-work-20261024",
+    "scope": "SQLite opens, path-based writable opens and directory/link/rename/delete events under data and backend/data",
+    "limits": "Python audit events only; existing fd writes, native-library raw I/O and external processes are not an OS sandbox. Git state is checked separately."
+  },
+  "kotlin": {
+    "exit_code": 0,
+    "mode": "Kotlin 2.0.21 direct production delta and all current test source compilation against original verified Gradle runtime",
+    "working_directory": "/tmp/van-native-margin-work-20261024/android/verification",
+    "runtime_files_sha256": {
+      "/workspace/.onboarding/gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-test-junit5/2.0.21/9eff871dcc7b7cbc6050945b906dfdd6d5b76f02/kotlin-test-junit5-2.0.21.jar": "ac47de619b7d87e2bfdf7f6eec6a62a61d1bdc0c325740df52186b141936713d",
+      "/workspace/.onboarding/gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-test/2.0.21/c6ea143e356327ddfda57e53e829c553e3b45b64/kotlin-test-2.0.21.jar": "a897b28c6a3ea8ec8f00ed766941a0c0df993d7f65908875879868e08ceb8985",
+      "/workspace/.onboarding/gradle/caches/modules-2/files-2.1/org.jetbrains.kotlinx/kotlinx-serialization-core-jvm/1.7.3/1f226780b845ff9206474c05159245d861556249/kotlinx-serialization-core-jvm-1.7.3.jar": "f0adde45864144475385cf4aa7e0b7feb27f61fcf9472665ed98cc971b06b1eb",
+      "/workspace/.onboarding/gradle/caches/modules-2/files-2.1/org.jetbrains.kotlinx/kotlinx-serialization-json-jvm/1.7.3/6701e8c68d9e82387ce72ee96e8ddf058208d58f/kotlinx-serialization-json-jvm-1.7.3.jar": "b1e9138499ed8d20375edda3f2b1c95f3103a258eff6af9edc5ea07100f2b29c",
+      "/workspace/.onboarding/gradle/caches/modules-2/files-2.1/org.jetbrains.kotlinx/kotlinx-coroutines-core-jvm/1.8.1/bb0e192bd7c2b6b8217440d36e9758e377e450/kotlinx-coroutines-core-jvm-1.8.1.jar": "f3d4f5de1c391bbcc20f3b3435ccbac013521e76b6902d7d59635ec15c1f797e",
+      "/workspace/.onboarding/gradle/caches/modules-2/files-2.1/com.squareup.okhttp3/okhttp/4.12.0/2f4525d4a200e97e1b87449c2cd9bd2e25b7e8cd/okhttp-4.12.0.jar": "b1050081b14bb7a3a7e55a4d3ef01b5dcfabc453b4573a4fc019767191d5f4e0",
+      "/workspace/.onboarding/gradle/caches/modules-2/files-2.1/com.squareup.okio/okio-jvm/3.6.0/5600569133b7bdefe1daf9ec7f4abeb6d13e1786/okio-jvm-3.6.0.jar": "67543f0736fc422ae927ed0e504b98bc5e269fda0d3500579337cb713da28412",
+      "/workspace/.onboarding/gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-stdlib-jdk8/1.9.10/c7510d64a83411a649c76f2778304ddf71d7437b/kotlin-stdlib-jdk8-1.9.10.jar": "a4c74d94d64ce1abe53760fe0389dd941f6fc558d0dab35e47c085a11ec80f28",
+      "/workspace/.onboarding/gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-stdlib-jdk7/1.9.10/bc5bfc2690338defd5195b05c57562f2194eeb10/kotlin-stdlib-jdk7-1.9.10.jar": "ac6361bf9ad1ed382c2103d9712c47cdec166232b4903ed596e8876b0681c9b7",
+      "/workspace/.onboarding/gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-stdlib/2.0.21/618b539767b4899b4660a83006e052b63f1db551/kotlin-stdlib-2.0.21.jar": "f31cc53f105a7e48c093683bbd5437561d1233920513774b470805641bedbc09",
+      "/workspace/.onboarding/gradle/caches/modules-2/files-2.1/org.json/json/20240303/ebb88e8fb5122b7506d5cf1d69f1ccdb790d22a/json-20240303.jar": "3cf6cd6892e32e2b4c1c39e0f52f5248a2f5b37646fdfbb79a66b46b618414ed",
+      "/workspace/.onboarding/gradle/caches/modules-2/files-2.1/org.jetbrains/annotations/23.0.0/8cc20c07506ec18e0834947b84a864bfc094484e/annotations-23.0.0.jar": "7b0f19724082cbfcbc66e5abea2b9bc92cf08a1ea11e191933ed43801eb3cd05",
+      "/workspace/.onboarding/gradle/caches/modules-2/files-2.1/org.junit.platform/junit-platform-launcher/1.10.1/ce85bf5e38bee0989ded9bd468dd4ff78dc0cfa8/junit-platform-launcher-1.10.1.jar": "ded414c504e88d02270331071969084e1b2fd9bcf8443f35d44da2c6e3301bc2",
+      "/workspace/.onboarding/gradle/caches/modules-2/files-2.1/org.junit.platform/junit-platform-engine/1.10.1/f32ae4af74fde68414b8a3d2b7cf1fb43824a83a/junit-platform-engine-1.10.1.jar": "baa48e470d6dee7369a0a8820c51da89c1463279eda6e13a304d11f45922c760",
+      "/workspace/.onboarding/gradle/caches/modules-2/files-2.1/org.junit.jupiter/junit-jupiter-api/5.10.1/eb90c7d8bfaae8fdc97b225733fcb595ddd72843/junit-jupiter-api-5.10.1.jar": "60d5c398c32dc7039b99282514ad6064061d8417cf959a1f6bd2038cc907c913",
+      "/workspace/.onboarding/gradle/caches/modules-2/files-2.1/org.junit.platform/junit-platform-commons/1.10.1/2bfcd4a4e38b10c671b6916d7e543c20afe25579/junit-platform-commons-1.10.1.jar": "7d9855ee3f3f71f015eb1479559bf923783243c24fbfbd8b29bed8e8099b5672",
+      "/workspace/.onboarding/gradle/caches/modules-2/files-2.1/org.junit.jupiter/junit-jupiter-engine/5.10.1/6c9ff773f9aa842b91d1f2fe4658973252ce2428/junit-jupiter-engine-5.10.1.jar": "02930dfe495f93fe70b26550ace3a28f7e1b900c84426c2e4626ce020c7282d6",
+      "/workspace/.onboarding/gradle/caches/modules-2/files-2.1/org.opentest4j/opentest4j/1.3.0/152ea56b3a72f655d4fd677fc0ef2596c3dd5e6e/opentest4j-1.3.0.jar": "48e2df636cab6563ced64dcdff8abb2355627cb236ef0bf37598682ddf742f1b"
+    },
+    "all_current_tests_compiled": true,
+    "source_sha256": {
+      "android/app/src/main/java/com/dial/van/trading/TradeBook.kt": "f00726b356062348cab0071ee1e81a26c522fd41b4662718c38ab0a0bc951afd",
+      "android/app/src/main/java/com/dial/van/trading/CurrentAccountRisk.kt": "f6373eb3112756ab9337b1242ba1ce9a0380d22f0869aae4e5f7f80b8985cd6d",
+      "android/verification/src/test/kotlin/com/dial/van/trading/CurrentAccountRiskTest.kt": "744dc174b4904c774dff381054263b1dc42b5b1d9d1c7016d5f76346aa0d8b5f",
+      "android/app/src/main/java/com/dial/van/trading/TradingModels.kt": "1407d215b37374785fac3ef87a3e243661f4fe4fab2c77c54981b23ac2d97d5d",
+      "android/app/src/main/java/com/dial/van/trading/AccountMargin.kt": "b2d5f4312f1773435efb6575d8d6d99cbed3763d97cd590d5dd143ee7f909f7a",
+      "android/verification/src/test/kotlin/com/dial/van/trading/AccountMarginTest.kt": "6b7618f53573b77becc3d505bf783e0c435175bc46a52c6756fe91a142db7ce5"
+    }
+  },
+  "primary_sources": [
+    {
+      "url": "https://www.mql5.com/en/docs/constants/environment_state/accountinformation",
+      "sha256": "69ab83827be56ae5de6cacd115476ec95717edd3ad056ccd3c9f4bd90125df2c",
+      "excerpts": {
+        "ACCOUNT_MARGIN_FREE": "ty in the deposit currency double ACCOUNT_MARGIN Account margin used in the deposit currency double ACCOUNT_MARGIN_FREE Free margin of an account in the deposit currency double ACCOUNT_MARGIN_LEVEL Account margin level in percents double ACCOUNT_MARGIN_SO_CALL Margin call level. Depending on the set ACCOUNT_MARGIN_SO_MODE is expressed in percents or in the deposit currency double ACCOUNT_MARGIN_SO_SO Margin stop out ",
+        "ACCOUNT_MARGIN_LEVEL": "eposit currency double ACCOUNT_MARGIN_FREE Free margin of an account in the deposit currency double ACCOUNT_MARGIN_LEVEL Account margin level in percents double ACCOUNT_MARGIN_SO_CALL Margin call level. Depending on the set ACCOUNT_MARGIN_SO_MODE is expressed in percents or in the deposit currency double ACCOUNT_MARGIN_SO_SO Margin stop out level. Depending on the set ACCOUNT_MARGIN_SO_MODE is expressed in percents o",
+        "ACCOUNT_MARGIN": "RAGE Account leverage long ACCOUNT_LIMIT_ORDERS Maximum allowed number of active pending orders int ACCOUNT_MARGIN_SO_MODE Mode for setting the minimal allowed margin ENUM_ACCOUNT_STOPOUT_MODE ACCOUNT_TRADE_ALLOWED Allowed trade for the current account bool ACCOUNT_TRADE_EXPERT Allowed trade for an Expert Advisor bool ACCOUNT_MARGIN_MODE Margin calculation mode ENUM_ACCOUNT_MARGIN_MODE ACCOUNT_CURRENCY_DIGITS The num",
+        "ACCOUNT_CREDIT": "O_DOUBLE Identifier Description Type ACCOUNT_BALANCE Account balance in the deposit currency double ACCOUNT_CREDIT Account credit in the deposit currency double ACCOUNT_PROFIT Current profit of an account in the deposit currency double ACCOUNT_EQUITY Account equity in the deposit currency double ACCOUNT_MARGIN Account margin used in the deposit currency double ACCOUNT_MARGIN_FREE Free margin of an account in the depo"
+      }
+    },
+    {
+      "url": "https://www.mql5.com/en/docs/python_metatrader5/mt5accountinfo_py",
+      "sha256": "0fae40344fd1e02ef8ff6a6f5316d3152fb01c809f60e4c914c36b104db15b2f",
+      "excerpts": {
+        "margin_free=": "ency_digits=2 fifo_close=False balance=99511.4 credit=0.0 profit=41.82 equity=99553.22 margin=98.18 margin_free=99455.04 margin_level=101398.67590140559 margin_so_call=50.0 margin_so_so=30.0 margin_initial=0.0 margin_maintenance=0.0 assets=0.0 liabilities=0.0 commission_blocked=0.0 server=MetaQuotes-Demo currency=USD company=MetaQuotes Software Corp. account_info() as dataframe property value 0 login 25115284 1 trade",
+        "margin_level=": "ose=False balance=99511.4 credit=0.0 profit=41.82 equity=99553.22 margin=98.18 margin_free=99455.04 margin_level=101398.67590140559 margin_so_call=50.0 margin_so_so=30.0 margin_initial=0.0 margin_maintenance=0.0 assets=0.0 liabilities=0.0 commission_blocked=0.0 server=MetaQuotes-Demo currency=USD company=MetaQuotes Software Corp. account_info() as dataframe property value 0 login 25115284 1 trade_mode 0 2 leverage 10",
+        "margin=": "n_mode=2 currency_digits=2 fifo_close=False balance=99511.4 credit=0.0 profit=41.82 equity=99553.22 margin=98.18 margin_free=99455.04 margin_level=101398.67590140559 margin_so_call=50.0 margin_so_so=30.0 margin_initial=0.0 margin_maintenance=0.0 assets=0.0 liabilities=0.0 commission_blocked=0.0 server=MetaQuotes-Demo currency=USD company=MetaQuotes Software Corp. account_info() as dataframe property value 0 login 251"
+      }
+    },
+    {
+      "url": "https://help.ctrader.com/ctrader-algo/references/Account/IAccount/TotalMarginCalculationType/",
+      "sha256": "735d32a7a83ca3789677fc9a4f777a02be394d9ac0c1e5128154c80fe0858a83",
+      "excerpt": " IAccount.TotalMarginCalculationType - cTrader Algo :root{--md-text-font:\"Roboto\";--md-code-font:\"Roboto Mono\"} __md_scope=new URL(\"../../../..\",location),__md_hash=e=>[...e].reduce(((e,_)=>(e JSON.parse(_.getItem(t.pathname+\".\"+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+\".\"+e,JSON.stringify(_))}catch(e){}} (function () { // DO-843: a broker-branded app embeds the Help Centre with ?ignore_geo, // and for its users Copy is available, so the gate is lifted. Handled here // rather than in configureStorage() because this must run in before // first paint, while extra.js only loads at the end of . Cloudflare // does the same thing at the edge via a geo_override cookie, so the pages // themselves open too. Only \"1\" and \"true\" count, and the Cloudflare rules // match the same two spellings so both layers agree. var flag; try { var q = new URLSearchParams(location.search).get('ignore_geo'); if (q !== null) sessionStorage.setItem('ignore_geo', q); flag = sessionStorage.getItem('ignore_geo'); } catch (e) { /* storage can throw in private mode; fall through to the gate */ } if (flag === '1' || flag === 'true') return; var path = location.pathname.replace(/^\\/[a-z]{2}(\\/|$)/, '/'); if (path === '/' && /(^|;\\s*)geo=GB(;|$)/.test(document.cookie)) { document.documentElement.classList.add('geo-gb'); } })(); Skip to content cTrader Store Join Discord Suggestions cTrader Algo IAccount.TotalMarginCalculationType var palette=__md_get(\"__palette\");if(palette&&palette.color){if(\"(prefers-color-scheme)\"===palette.color.media){var media=matchMedia(\"(prefers-color-scheme: light)\"),input=document.querySelector(media.matches?\"[data-md-color-media='(prefers-color-scheme: light)']\":\"[data-md-color-media='(prefers-color-scheme: dark)']\");palette.color.media=input.getAttribute(\"data-md-color-media\"),palette.color.scheme=input.getAttribute(\"data-md-color-scheme\"),palette.color.primary=input.getAttribute(\"data-md-color-primary\"),palette.color.accent=input.getAttribute(\"data-md-color-accent\")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute(\"data-md-color-\"+key,value)} English Espa\u00f1ol Portugu\u00eas \u0627\u0644\u0639\u0631\u0628\u064a\u0629 Indonesia Melayu \u0e44\u0e17\u0e22 Ti\u1ebfng Vi\u1ec7t \ud55c\uad6d\uc5b4 \u4e2d\u6587 \u65e5\u672c\u8a9e Initializing search Documentation How-tos API features Algo API references FAQ cTrader Algo Documentation How-tos API features Algo API references FAQ On this page Definition IAccount.TotalMarginCalculationType property \u00b7 IAccount \u00b7 cAlgo.API.Internals Desktop CLI Cloud Type of total margin requirements per Symbol. Definition C# Python TotalMarginCalculationType TotalMarginCalculationType { get ;} api . Account . TotalMarginCalculationType : TotalMarginCalculationType Returns TotalMarginCalculationType Examples C# Python Print ( \"Total margin calculation type: {0}\" , Account . TotalMarginCalculationType ); api . Print ( f \"Total margin calculation type: { api . Account . TotalMarginCalculationType } \" ) var tabs=__md_get(\"__tabs\");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(\".tabbed-set\")){var labels=set.querySelector(\".tabbed-labels\");for(var tab of tabs)for(var label of labels.getElementsByTagName(\"label\"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}} var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith(\"__tabbed_\")) Back to top Copyright \u00a9 2025 Spotware Systems Ltd . cTrader\u00ae, Traders First\u00ae, Open Trading Platform\u00ae. All rights reserved. {\"annotate\": null, \"base\": \"../../../..\", \"features\": [\"navigation.indexes\", \"navigation.instant\", \"navigation.tabs\", \"navigation.tabs.sticky\", \"navigation.top\", \"navigation.tracking\", \"navigation.prune\", \"search.highlight\", \"search.share\", \"search.suggest\", \"content.tabs.link\", \"content.code.copy\", \"i18n\"], \"search\": \"../../../../assets/javascripts/workers/search.2c215733.min.js\", \"tags\": null, \"translations\": {\"clipboard.copied\": \"Copied to clipboard\", \"clipboard.copy\": \"Copy to clipboard\", \"search.result.more.one\": \"1 more on this page\", \"search.result.more.other\": \"# more on this page\", \"search.result.none\": \"No matching documents\", \"search.result.one\": \"1 matching document\", \"search.result.other\": \"# matching documents\", \"search.result.placeholder\": \"Type to start searching\", \"search.result.term.missing\": \"Missing\", \"select.version\": \"Select version\"}, \"version\": null} window.dataLayer = window.dataLayer || []; function gtag() { dataLayer.push(arguments); } gtag('js', new Date()); gtag('config', 'UA-29054966-10'); (function () { try { var p = new URLSearchParams(location.search); if (p.has('hideAnnouncement')) { sessionStorage.setItem('hideAnnouncement', p.get('hideAnnouncement')); } if (sessionStorage.getItem('hideAnnouncement') === 'true') { document.documentElement.classList.add('hide-announcement'); } } catch (e) { } })(); .hide-announcement #announcement-banner { display: none } "
+    },
+    {
+      "url": "https://help.ctrader.com/ctrader-algo/references/Account/IAccount/Margin/",
+      "sha256": "cf450722fd8b6ddf6612aec9e0bfe8397c9cc2ab6d7faebef4523ffce9fb92bb",
+      "excerpt": " IAccount.Margin - cTrader Algo :root{--md-text-font:\"Roboto\";--md-code-font:\"Roboto Mono\"} __md_scope=new URL(\"../../../..\",location),__md_hash=e=>[...e].reduce(((e,_)=>(e JSON.parse(_.getItem(t.pathname+\".\"+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+\".\"+e,JSON.stringify(_))}catch(e){}} (function () { // DO-843: a broker-branded app embeds the Help Centre with ?ignore_geo, // and for its users Copy is available, so the gate is lifted. Handled here // rather than in configureStorage() because this must run in before // first paint, while extra.js only loads at the end of . Cloudflare // does the same thing at the edge via a geo_override cookie, so the pages // themselves open too. Only \"1\" and \"true\" count, and the Cloudflare rules // match the same two spellings so both layers agree. var flag; try { var q = new URLSearchParams(location.search).get('ignore_geo'); if (q !== null) sessionStorage.setItem('ignore_geo', q); flag = sessionStorage.getItem('ignore_geo'); } catch (e) { /* storage can throw in private mode; fall through to the gate */ } if (flag === '1' || flag === 'true') return; var path = location.pathname.replace(/^\\/[a-z]{2}(\\/|$)/, '/'); if (path === '/' && /(^|;\\s*)geo=GB(;|$)/.test(document.cookie)) { document.documentElement.classList.add('geo-gb'); } })(); Skip to content cTrader Store Join Discord Suggestions cTrader Algo IAccount.Margin var palette=__md_get(\"__palette\");if(palette&&palette.color){if(\"(prefers-color-scheme)\"===palette.color.media){var media=matchMedia(\"(prefers-color-scheme: light)\"),input=document.querySelector(media.matches?\"[data-md-color-media='(prefers-color-scheme: light)']\":\"[data-md-color-media='(prefers-color-scheme: dark)']\");palette.color.media=input.getAttribute(\"data-md-color-media\"),palette.color.scheme=input.getAttribute(\"data-md-color-scheme\"),palette.color.primary=input.getAttribute(\"data-md-color-primary\"),palette.color.accent=input.getAttribute(\"data-md-color-accent\")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute(\"data-md-color-\"+key,value)} English Espa\u00f1ol Portugu\u00eas \u0627\u0644\u0639\u0631\u0628\u064a\u0629 Indonesia Melayu \u0e44\u0e17\u0e22 Ti\u1ebfng Vi\u1ec7t \ud55c\uad6d\uc5b4 \u4e2d\u6587 \u65e5\u672c\u8a9e Initializing search Documentation How-tos API features Algo API references FAQ cTrader Algo Documentation How-tos API features Algo API references FAQ On this page Definition IAccount.Margin property \u00b7 IAccount \u00b7 cAlgo.API.Internals Desktop CLI Cloud Represents the margin of the current account. Definition C# Python double Margin { get ;} api . Account . Margin : float Returns double Examples C# Python Print ( \"The margin of this account is: {0}\" , Account . Margin ); api . Print ( f \"The margin of this account is: { api . Account . Margin } \" ) var tabs=__md_get(\"__tabs\");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(\".tabbed-set\")){var labels=set.querySelector(\".tabbed-labels\");for(var tab of tabs)for(var label of labels.getElementsByTagName(\"label\"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}} var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith(\"__tabbed_\")) Back to top Copyright \u00a9 2025 Spotware Systems Ltd . cTrader\u00ae, Traders First\u00ae, Open Trading Platform\u00ae. All rights reserved. {\"annotate\": null, \"base\": \"../../../..\", \"features\": [\"navigation.indexes\", \"navigation.instant\", \"navigation.tabs\", \"navigation.tabs.sticky\", \"navigation.top\", \"navigation.tracking\", \"navigation.prune\", \"search.highlight\", \"search.share\", \"search.suggest\", \"content.tabs.link\", \"content.code.copy\", \"i18n\"], \"search\": \"../../../../assets/javascripts/workers/search.2c215733.min.js\", \"tags\": null, \"translations\": {\"clipboard.copied\": \"Copied to clipboard\", \"clipboard.copy\": \"Copy to clipboard\", \"search.result.more.one\": \"1 more on this page\", \"search.result.more.other\": \"# more on this page\", \"search.result.none\": \"No matching documents\", \"search.result.one\": \"1 matching document\", \"search.result.other\": \"# matching documents\", \"search.result.placeholder\": \"Type to start searching\", \"search.result.term.missing\": \"Missing\", \"select.version\": \"Select version\"}, \"version\": null} window.dataLayer = window.dataLayer || []; function gtag() { dataLayer.push(arguments); } gtag('js', new Date()); gtag('config', 'UA-29054966-10'); (function () { try { var p = new URLSearchParams(location.search); if (p.has('hideAnnouncement')) { sessionStorage.setItem('hideAnnouncement', p.get('hideAnnouncement')); } if (sessionStorage.getItem('hideAnnouncement') === 'true') { document.documentElement.classList.add('hide-announcement'); } } catch (e) { } })(); .hide-announcement #announcement-banner { display: none } "
+    },
+    {
+      "url": "https://help.ctrader.com/ctrader-algo/references/Account/IAccount/FreeMargin/",
+      "sha256": "20abe6e3a874593474b869859253c61e14820c3c06cfd0b93b44e0e7965d804a",
+      "excerpt": " IAccount.FreeMargin - cTrader Algo :root{--md-text-font:\"Roboto\";--md-code-font:\"Roboto Mono\"} __md_scope=new URL(\"../../../..\",location),__md_hash=e=>[...e].reduce(((e,_)=>(e JSON.parse(_.getItem(t.pathname+\".\"+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+\".\"+e,JSON.stringify(_))}catch(e){}} (function () { // DO-843: a broker-branded app embeds the Help Centre with ?ignore_geo, // and for its users Copy is available, so the gate is lifted. Handled here // rather than in configureStorage() because this must run in before // first paint, while extra.js only loads at the end of . Cloudflare // does the same thing at the edge via a geo_override cookie, so the pages // themselves open too. Only \"1\" and \"true\" count, and the Cloudflare rules // match the same two spellings so both layers agree. var flag; try { var q = new URLSearchParams(location.search).get('ignore_geo'); if (q !== null) sessionStorage.setItem('ignore_geo', q); flag = sessionStorage.getItem('ignore_geo'); } catch (e) { /* storage can throw in private mode; fall through to the gate */ } if (flag === '1' || flag === 'true') return; var path = location.pathname.replace(/^\\/[a-z]{2}(\\/|$)/, '/'); if (path === '/' && /(^|;\\s*)geo=GB(;|$)/.test(document.cookie)) { document.documentElement.classList.add('geo-gb'); } })(); Skip to content cTrader Store Join Discord Suggestions cTrader Algo IAccount.FreeMargin var palette=__md_get(\"__palette\");if(palette&&palette.color){if(\"(prefers-color-scheme)\"===palette.color.media){var media=matchMedia(\"(prefers-color-scheme: light)\"),input=document.querySelector(media.matches?\"[data-md-color-media='(prefers-color-scheme: light)']\":\"[data-md-color-media='(prefers-color-scheme: dark)']\");palette.color.media=input.getAttribute(\"data-md-color-media\"),palette.color.scheme=input.getAttribute(\"data-md-color-scheme\"),palette.color.primary=input.getAttribute(\"data-md-color-primary\"),palette.color.accent=input.getAttribute(\"data-md-color-accent\")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute(\"data-md-color-\"+key,value)} English Espa\u00f1ol Portugu\u00eas \u0627\u0644\u0639\u0631\u0628\u064a\u0629 Indonesia Melayu \u0e44\u0e17\u0e22 Ti\u1ebfng Vi\u1ec7t \ud55c\uad6d\uc5b4 \u4e2d\u6587 \u65e5\u672c\u8a9e Initializing search Documentation How-tos API features Algo API references FAQ cTrader Algo Documentation How-tos API features Algo API references FAQ On this page Definition IAccount.FreeMargin property \u00b7 IAccount \u00b7 cAlgo.API.Internals Desktop CLI Cloud Represents the free margin of the current account. Definition C# Python double FreeMargin { get ;} api . Account . FreeMargin : float Returns double Examples C# Python Print ( \"The free margin of this account is: {0}\" , Account . FreeMargin ); api . Print ( f \"The free margin of this account is: { api . Account . FreeMargin } \" ) var tabs=__md_get(\"__tabs\");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(\".tabbed-set\")){var labels=set.querySelector(\".tabbed-labels\");for(var tab of tabs)for(var label of labels.getElementsByTagName(\"label\"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}} var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith(\"__tabbed_\")) Back to top Copyright \u00a9 2025 Spotware Systems Ltd . cTrader\u00ae, Traders First\u00ae, Open Trading Platform\u00ae. All rights reserved. {\"annotate\": null, \"base\": \"../../../..\", \"features\": [\"navigation.indexes\", \"navigation.instant\", \"navigation.tabs\", \"navigation.tabs.sticky\", \"navigation.top\", \"navigation.tracking\", \"navigation.prune\", \"search.highlight\", \"search.share\", \"search.suggest\", \"content.tabs.link\", \"content.code.copy\", \"i18n\"], \"search\": \"../../../../assets/javascripts/workers/search.2c215733.min.js\", \"tags\": null, \"translations\": {\"clipboard.copied\": \"Copied to clipboard\", \"clipboard.copy\": \"Copy to clipboard\", \"search.result.more.one\": \"1 more on this page\", \"search.result.more.other\": \"# more on this page\", \"search.result.none\": \"No matching documents\", \"search.result.one\": \"1 matching document\", \"search.result.other\": \"# matching documents\", \"search.result.placeholder\": \"Type to start searching\", \"search.result.term.missing\": \"Missing\", \"select.version\": \"Select version\"}, \"version\": null} window.dataLayer = window.dataLayer || []; function gtag() { dataLayer.push(arguments); } gtag('js', new Date()); gtag('config', 'UA-29054966-10'); (function () { try { var p = new URLSearchParams(location.search); if (p.has('hideAnnouncement')) { sessionStorage.setItem('hideAnnouncement', p.get('hideAnnouncement')); } if (sessionStorage.getItem('hideAnnouncement') === 'true') { document.documentElement.classList.add('hide-announcement'); } } catch (e) { } })(); .hide-announcement #announcement-banner { display: none } "
+    },
+    {
+      "url": "https://help.ctrader.com/ctrader-algo/references/Account/TotalMarginCalculationType/",
+      "sha256": "23f7e8a18902ca3e8ad506d7dd87b504de116b583eefa132f87314cb74f231c3",
+      "excerpt": " TotalMarginCalculationType - cTrader Algo :root{--md-text-font:\"Roboto\";--md-code-font:\"Roboto Mono\"} __md_scope=new URL(\"../../..\",location),__md_hash=e=>[...e].reduce(((e,_)=>(e JSON.parse(_.getItem(t.pathname+\".\"+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+\".\"+e,JSON.stringify(_))}catch(e){}} (function () { // DO-843: a broker-branded app embeds the Help Centre with ?ignore_geo, // and for its users Copy is available, so the gate is lifted. Handled here // rather than in configureStorage() because this must run in before // first paint, while extra.js only loads at the end of . Cloudflare // does the same thing at the edge via a geo_override cookie, so the pages // themselves open too. Only \"1\" and \"true\" count, and the Cloudflare rules // match the same two spellings so both layers agree. var flag; try { var q = new URLSearchParams(location.search).get('ignore_geo'); if (q !== null) sessionStorage.setItem('ignore_geo', q); flag = sessionStorage.getItem('ignore_geo'); } catch (e) { /* storage can throw in private mode; fall through to the gate */ } if (flag === '1' || flag === 'true') return; var path = location.pathname.replace(/^\\/[a-z]{2}(\\/|$)/, '/'); if (path === '/' && /(^|;\\s*)geo=GB(;|$)/.test(document.cookie)) { document.documentElement.classList.add('geo-gb'); } })(); Skip to content cTrader Store Join Discord Suggestions cTrader Algo TotalMarginCalculationType var palette=__md_get(\"__palette\");if(palette&&palette.color){if(\"(prefers-color-scheme)\"===palette.color.media){var media=matchMedia(\"(prefers-color-scheme: light)\"),input=document.querySelector(media.matches?\"[data-md-color-media='(prefers-color-scheme: light)']\":\"[data-md-color-media='(prefers-color-scheme: dark)']\");palette.color.media=input.getAttribute(\"data-md-color-media\"),palette.color.scheme=input.getAttribute(\"data-md-color-scheme\"),palette.color.primary=input.getAttribute(\"data-md-color-primary\"),palette.color.accent=input.getAttribute(\"data-md-color-accent\")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute(\"data-md-color-\"+key,value)} English Espa\u00f1ol Portugu\u00eas \u0627\u0644\u0639\u0631\u0628\u064a\u0629 Indonesia Melayu \u0e44\u0e17\u0e22 Ti\u1ebfng Vi\u1ec7t \ud55c\uad6d\uc5b4 \u4e2d\u6587 \u65e5\u672c\u8a9e Initializing search Documentation How-tos API features Algo API references FAQ cTrader Algo Documentation How-tos API features Algo API references Algo API references Account Account Transactions E AccountType I IAccount E TotalMarginCalculationType E TotalMarginCalculationType On this page Definition Examples Values AlgoRegistry Application Attributes Chart Collections Compilation Controls Dialogs EventArgs General HTTP Indicators Local storage Market Data Messages Notifications Optimization Period Permissions Plugin Price Alert Timer Trading Utility Watchlists WebSocket FAQ On this page Definition Examples Values TotalMarginCalculationType enum cAlgo.API.Internals Desktop CLI Cloud Defines types of total margin requirements per Symbol. Definition public enum TotalMarginCalculationType Namespace: cAlgo.API.Internals \u00b7 Group: Account Examples C# Python if ( Account . TotalMarginCalculationType == TotalMarginCalculationType . Max ) Print ( \"Hedged positions only use the margin of the larger side\" ); else Print ( \"Total margin calculation type: {0}\" , Account . TotalMarginCalculationType ); if api . Account . TotalMarginCalculationType == TotalMarginCalculationType . Max : api . Print ( \"Hedged positions only use the margin of the larger side\" ) else : api . Print ( f \"Total margin calculation type: { api . Account . TotalMarginCalculationType } \" ) Values Name Value Description Sum 0 Total margin requirements per Symbol are equal to Sum of all margin requirements of all positions of that Symbol. Max 1 Total margin requirements per Symbol are equal to Max margin requirements from all Long and all Short Positions of that Symbol. Net 2 Total margin requirements per Symbol are equal to the difference between margin requirements of all Long and all Short Positions of that Symbol. var tabs=__md_get(\"__tabs\");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(\".tabbed-set\")){var labels=set.querySelector(\".tabbed-labels\");for(var tab of tabs)for(var label of labels.getElementsByTagName(\"label\"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}} var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith(\"__tabbed_\")) Back to top Copyright \u00a9 2025 Spotware Systems Ltd . cTrader\u00ae, Traders First\u00ae, Open Trading Platform\u00ae. All rights reserved. {\"annotate\": null, \"base\": \"../../..\", \"features\": [\"navigation.indexes\", \"navigation.instant\", \"navigation.tabs\", \"navigation.tabs.sticky\", \"navigation.top\", \"navigation.tracking\", \"navigation.prune\", \"search.highlight\", \"search.share\", \"search.suggest\", \"content.tabs.link\", \"content.code.copy\", \"i18n\"], \"search\": \"../../../assets/javascripts/workers/search.2c215733.min.js\", \"tags\": null, \"translations\": {\"clipboard.copied\": \"Copied to clipboard\", \"clipboard.copy\": \"Copy to clipboard\", \"search.result.more.one\": \"1 more on this page\", \"search.result.more.other\": \"# more on this page\", \"search.result.none\": \"No matching documents\", \"search.result.one\": \"1 matching document\", \"search.result.other\": \"# matching documents\", \"search.result.placeholder\": \"Type to start searching\", \"search.result.term.missing\": \"Missing\", \"select.version\": \"Select version\"}, \"version\": null} window.dataLayer = window.dataLayer || []; function gtag() { dataLayer.push(arguments); } gtag('js', new Date()); gtag('config', 'UA-29054966-10'); (function () { try { var p = new URLSearchParams(location.search); if (p.has('hideAnnouncement')) { sessionStorage.setItem('hideAnnouncement', p.get('hideAnnouncement')); } if (sessionStorage.getItem('hideAnnouncement') === 'true') { document.documentElement.classList.add('hide-announcement'); } } catch (e) { } })(); .hide-announcement #announcement-banner { display: none } "
+    }
+  ],
+  "retained_postgres_attempts": {
+    "second_attempt_resource_failures": {
+      "report": {
+        "tests": 212,
+        "passed": 210,
+        "failure": 2,
+        "error": 0,
+        "skipped": 0,
+        "sha256": "323a887b1e5785653dbfba8f0d5e65b404258d75510c0897fa37ad9c9c3d0e79"
+      },
+      "note": "This retained XML is the second attempt:210passes/two native thread-start failures. The first attempt was observed as211passes/one deposit-fixture failure, but reused temporary output paths were overwritten by the second attempt. Its full original artifact is not retained. Final215-case execution uses unique paths and passes; no earlier failure is treated as a pass."
+    }
+  },
+  "limits": [
+    "Native MetaEditor compilation of new EA not yet executed",
+    "Full committed-source trading/backend qualification remains open",
+    "Broker-specific call/stop-out terms and prospective-order margin",
+    "Joint funding/order reservations, refreshed native contracts and normalized economics",
+    "Native general account binding independent of cash coverage and unknown-credit qualification",
+    "Private DDS/trusted-main, native deployment/security/recovery/signing and S24 acceptance"
+  ],
+  "certificates_issued": []
+}

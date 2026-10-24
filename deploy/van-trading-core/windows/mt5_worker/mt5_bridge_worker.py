@@ -143,7 +143,9 @@ class Terminal:
         return {"login": a.login, "server": getattr(a, "server", None), "demo": demo,
                 "equity": str(a.equity), "balance": str(a.balance), "currency": a.currency,
                 "credit": str(getattr(a, 'credit', None)), "currency_digits": getattr(a, 'currency_digits', None),
-                "margin_free": str(a.margin_free), "leverage": a.leverage,
+                "margin_used": str(getattr(a, "margin", None)),
+                "margin_free": str(getattr(a, "margin_free", None)),
+                "margin_level": str(getattr(a, "margin_level", None)), "leverage": a.leverage,
                 "hedging": getattr(a, "margin_mode", 2) == 2,
                 "trade_allowed": trading_allowed}
 

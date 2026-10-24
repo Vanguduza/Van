@@ -199,17 +199,35 @@ string NativeCashJson()
 //+------------------------------------------------------------------+
 //| snapshot                                                           |
 //+------------------------------------------------------------------+
+string NativeMarginJson()
+{
+   ResetLastError();
+   double used = AccountInfoDouble(ACCOUNT_MARGIN);
+   int usedError = GetLastError();
+   ResetLastError();
+   double free = AccountInfoDouble(ACCOUNT_MARGIN_FREE);
+   int freeError = GetLastError();
+   ResetLastError();
+   double level = AccountInfoDouble(ACCOUNT_MARGIN_LEVEL);
+   int levelError = GetLastError();
+   if(usedError != 0 || freeError != 0 || levelError != 0 || used < 0
+      || !MathIsValidNumber(used) || !MathIsValidNumber(free) || !MathIsValidNumber(level))
+      return "\"margin_used\":null,\"margin_free\":null,\"margin_level\":null";
+   return StringFormat("\"margin_used\":\"%s\",\"margin_free\":\"%s\",\"margin_level\":\"%s\"",
+      DoubleToString(used,-16), DoubleToString(free,-16), DoubleToString(level,-16));
+}
+
 string SnapshotJson()
 {
    string funding = NativeCashJson();
    long accountMode = AccountInfoInteger(ACCOUNT_TRADE_MODE);
    string accountDemo = accountMode == ACCOUNT_TRADE_MODE_DEMO ? "true" : accountMode == ACCOUNT_TRADE_MODE_REAL ? "false" : "null";
-   string acct = StringFormat("{\"login\":%I64d,\"server\":\"%s\",\"demo\":%s,\"equity\":\"%s\",\"balance\":\"%s\",\"credit\":\"%s\",\"currency_digits\":%I64d,\"currency\":\"%s\",\"trade_allowed\":%s,\"hedging\":%s,\"server_time_ms\":%I64d,\"funding\":%s}",
+   string acct = StringFormat("{\"login\":%I64d,\"server\":\"%s\",\"demo\":%s,\"equity\":\"%s\",\"balance\":\"%s\",\"credit\":\"%s\",\"currency_digits\":%I64d,\"currency\":\"%s\",\"trade_allowed\":%s,\"hedging\":%s,\"server_time_ms\":%I64d,\"funding\":%s,%s}",
       AccountInfoInteger(ACCOUNT_LOGIN), JsonEscape(AccountInfoString(ACCOUNT_SERVER)), accountDemo,
       DoubleToString(AccountInfoDouble(ACCOUNT_EQUITY),-16), DoubleToString(AccountInfoDouble(ACCOUNT_BALANCE),-16),
       DoubleToString(AccountInfoDouble(ACCOUNT_CREDIT),-16), AccountInfoInteger(ACCOUNT_CURRENCY_DIGITS), JsonEscape(AccountInfoString(ACCOUNT_CURRENCY)),
       (AccountInfoInteger(ACCOUNT_TRADE_ALLOWED) && AccountInfoInteger(ACCOUNT_TRADE_EXPERT) && TerminalInfoInteger(TERMINAL_CONNECTED) && TerminalInfoInteger(TERMINAL_TRADE_ALLOWED) && MQLInfoInteger(MQL_TRADE_ALLOWED)) ? "true" : "false",
-      AccountInfoInteger(ACCOUNT_MARGIN_MODE) == ACCOUNT_MARGIN_MODE_RETAIL_HEDGING ? "true" : "false", (long)TimeGMT() * 1000, funding);
+      AccountInfoInteger(ACCOUNT_MARGIN_MODE) == ACCOUNT_MARGIN_MODE_RETAIL_HEDGING ? "true" : "false", (long)TimeGMT() * 1000, funding, NativeMarginJson());
    string pos = "[";
    for(int i = 0; i < PositionsTotal(); i++)
    {

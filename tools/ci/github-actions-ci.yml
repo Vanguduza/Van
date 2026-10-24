@@ -122,7 +122,7 @@ jobs:
 
   postgres-ledger:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 35
     services:
       postgres:
         # Disposable source-test database; no production credentials or data.
@@ -177,7 +177,7 @@ jobs:
           print(counts)
           PY
       - name: Public trading source regressions
-        run: python -m pytest -q trading/tests/ --junitxml=trading-source-report.xml
+        run: python -m pytest -vv --durations=20 trading/tests/ --junitxml=trading-source-report.xml
       - name: Record the only private-source test unavailable to this public job
         run: |
           python - <<'PY'

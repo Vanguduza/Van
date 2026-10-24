@@ -125,7 +125,10 @@ def _canonical_hash(obj: Any) -> str:
         if isinstance(o, (set, frozenset)):
             return sorted(str(x) for x in o)
         if hasattr(o, "__dataclass_fields__"):
-            return asdict(o)
+            result = asdict(o)
+            if isinstance(o, RiskSnapshot) and o.used_margin is None:
+                result.pop("used_margin")  # original snapshot identities remain reproducible
+            return result
         raise TypeError(f"unhashable: {type(o)}")
 
     payload = json.dumps(obj, sort_keys=True, separators=(",", ":"), default=default)
@@ -258,21 +261,29 @@ class RiskAuthority:
         # None means the venue did not report it. That is treated as unknown rather than
         # healthy, and unknown is only acceptable where there is genuinely no margin to
         # report: a paper account, or a venue VAN does not place orders on.
-        if snapshot.margin_level_pct is not None:
-            if snapshot.margin_level_pct <= MARGIN_CALL_LEVEL_PCT:
-                return rej(
-                    "MARGIN_CALL",
-                    f"margin level {snapshot.margin_level_pct}% at or below "
-                    f"{MARGIN_CALL_LEVEL_PCT}%; the venue is closing positions",
-                )
-            if snapshot.margin_level_pct <= MARGIN_FLOOR_LEVEL_PCT:
-                return rej(
-                    "MARGIN_FLOOR",
-                    f"margin level {snapshot.margin_level_pct}% at or below the "
-                    f"{MARGIN_FLOOR_LEVEL_PCT}% floor; no new risk until it recovers",
-                )
-        if snapshot.free_margin is not None and snapshot.free_margin <= ZERO:
-            return rej("NO_FREE_MARGIN", "the account has no free margin for a new position")
+        native_margin = (snapshot.symbol_contract.loss_model is LossModel.STOP_DISTANCE
+                         and intent.venue != "paper")
+        amounts = (snapshot.used_margin, snapshot.free_margin, snapshot.margin_level_pct)
+        if any(value is not None and (type(value) is not Decimal or not value.is_finite()) for value in amounts):
+            return rej("MARGIN_INVALID", "margin facts require original finite decimal amounts")
+        if snapshot.used_margin is not None and snapshot.used_margin < ZERO:
+            return rej("MARGIN_INVALID", "native committed margin cannot be negative")
+        if native_margin and (snapshot.used_margin is None or snapshot.free_margin is None
+                              or snapshot.used_margin > ZERO and snapshot.margin_level_pct is None):
+            return rej("MARGIN_UNKNOWN", "native committed/free margin or applicable margin level unavailable")
+        # Credit/bonuses excluded from risk equity cannot restore margin capacity.
+        # These are conservative risk bounds, never newly reported broker money.
+        from vati.risk.margin import cash_margin_bounds
+        free,level=cash_margin_bounds(snapshot.equity,snapshot.used_margin,snapshot.free_margin,snapshot.margin_level_pct)
+        if snapshot.used_margin == ZERO and snapshot.margin_level_pct is not None:
+            return rej("MARGIN_INVALID", "zero committed margin has no defined equity/margin ratio")
+        if level is not None:
+            if level <= MARGIN_CALL_LEVEL_PCT:
+                return rej("MARGIN_CALL", f"risk margin level {level}% at or below {MARGIN_CALL_LEVEL_PCT}%")
+            if level <= MARGIN_FLOOR_LEVEL_PCT:
+                return rej("MARGIN_FLOOR", f"risk margin level {level}% at or below {MARGIN_FLOOR_LEVEL_PCT}%")
+        if free is not None and free <= ZERO:
+            return rej("NO_FREE_MARGIN", "the account has no cash-backed free margin for a new position")
 
         # 6. Instrument / strategy eligibility
         contract = snapshot.symbol_contract

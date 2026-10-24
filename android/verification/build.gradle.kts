@@ -165,6 +165,7 @@ sourceSets {
             "com/dial/van/trading/NativeBalancePeriod.kt",
             "com/dial/van/trading/TradeBook.kt",
             "com/dial/van/trading/CurrentAccountRisk.kt",
+            "com/dial/van/trading/AccountMargin.kt",
             "com/dial/van/trading/ChartGeometry.kt",
             "com/dial/van/trading/TradingReadModels.kt",
             "com/dial/van/trading/TradingLoading.kt",

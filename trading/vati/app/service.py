@@ -330,6 +330,10 @@ class SessionService:
         r = self.runner
         assert r is not None
         acct = r.cycle.adapter.sync_account()
+        observed_clock=self.clock()
+        account_observed_ms=observed_clock if type(observed_clock) is int and observed_clock>=now_ms else None
+        from vati.execution.native_margin import account_margin_body
+        margin=account_margin_body(r.cycle.adapter,acct,observed_at_ms=account_observed_ms)
         hb = r.cycle.adapter.heartbeat(now_ms=now_ms)
         positions = r.cycle.adapter.positions()
         from vati.funding.worker import snapshot_funding
@@ -340,6 +344,7 @@ class SessionService:
         r.cycle.ledger.append(make_event(EventKind.ACCOUNT_SNAPSHOT, "vati-service", {
             "account_alias": acct.account_alias, "equity": str(acct.equity), "balance": str(acct.balance), "currency": acct.currency, "verified": acct.verified,
             "funding_observation": funding,
+            "margin": margin,
             "native_account_mark": mark,
             "connected": hb.connected, "server_offset_ms": hb.server_offset_ms, "open_positions": len(positions), "peak_equity": str(r.cycle.peak_equity), "day_start_equity": str(r.cycle.day_start_equity),
             "week_start_equity": str(r.cycle.week_start_equity), "kill_switch": sorted(t.value for t in r.cycle.kill.active), "mode": r.cycle.mandate.mode.value,

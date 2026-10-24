@@ -714,7 +714,7 @@ class AccountCoordinatorService:
             clock_sync_ok=abs(hb.server_offset_ms) < 2000,
             risk_store_ok=store_ok, market_integrity=integrity,
             tier1_event_blackout_active=blackout,
-            margin_level_pct=acct.margin_level_pct, free_margin=acct.free_margin,
+            margin_level_pct=acct.margin_level_pct, free_margin=acct.free_margin, used_margin=acct.used_margin,
             kill_switch_triggers=frozenset(self.kill.active),
             preservation_blocks_new_risk=(
                 not funding.available or (self.lifecycle.preservation_blocks_new_risk
@@ -1031,6 +1031,10 @@ class AccountCoordinatorService:
             self.learning.update_projection(self._ledger)
         assert self.adapter is not None
         acct = self.adapter.sync_account()
+        observed_clock=self.clock()
+        account_observed_ms=observed_clock if type(observed_clock) is int and observed_clock>=now_ms else None
+        from vati.execution.native_margin import account_margin_body
+        margin=account_margin_body(self.adapter,acct,observed_at_ms=account_observed_ms)
         hb = self.adapter.heartbeat(now_ms=now_ms)
         positions=self.adapter.positions()
         from vati.funding.worker import snapshot_funding
@@ -1047,6 +1051,7 @@ class AccountCoordinatorService:
                 "currency": acct.currency,
                 "verified": acct.verified,
                 "funding_observation": funding,
+                "margin": margin,
                 "native_account_mark": mark,
                 "connected": hb.connected,
                 "server_offset_ms": hb.server_offset_ms,

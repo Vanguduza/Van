@@ -54,7 +54,8 @@ enum {
  POSITION_TP, POSITION_COMMENT, POSITION_MAGIC, POSITION_PROFIT, POSITION_IDENTIFIER,
  DEAL_POSITION_ID, ORDER_SL, ORDER_SYMBOL, ORDER_TYPE, ORDER_VOLUME_CURRENT, ORDER_PRICE_OPEN,
  ORDER_TP, ORDER_COMMENT, ORDER_MAGIC, ACCOUNT_CREDIT, ACCOUNT_CURRENCY_DIGITS,
- DEAL_TYPE, DEAL_TIME_MSC, DEAL_PROFIT, DEAL_COMMISSION, DEAL_SWAP, DEAL_FEE
+ DEAL_TYPE, DEAL_TIME_MSC, DEAL_PROFIT, DEAL_COMMISSION, DEAL_SWAP, DEAL_FEE,
+ ACCOUNT_MARGIN, ACCOUNT_MARGIN_FREE, ACCOUNT_MARGIN_LEVEL
 };
 const long ACCOUNT_TRADE_MODE_DEMO=20, ACCOUNT_TRADE_MODE_REAL=21;
 const long ACCOUNT_MARGIN_MODE_RETAIL_HEDGING=22, POSITION_TYPE_BUY=0, ORDER_TIME_GTC=0;
@@ -76,6 +77,8 @@ long margin_mode=ACCOUNT_MARGIN_MODE_RETAIL_HEDGING;
 int pending_count=0;
 int modify_calls=0, close_calls=0, entry_calls=0;
 double account_credit=200, account_balance=12344.12345678;
+double account_margin=1000, account_margin_free=11345.12345678, account_margin_level=1234.512345678;
+bool margin_available=true;
 bool funds_available=true, history_available=true, native_deal_available=true;
 bool cash_amount_available=true, change_funds_during_query=false, change_identity_during_query=false;
 bool expire_cash_query=false;
@@ -91,6 +94,10 @@ long AccountInfoInteger(int field) {
  return 1;
 }
 double AccountInfoDouble(int field) {
+ if(field==ACCOUNT_MARGIN || field==ACCOUNT_MARGIN_FREE || field==ACCOUNT_MARGIN_LEVEL) {
+  if(!margin_available) last_error=1;
+  return field==ACCOUNT_MARGIN ? account_margin : field==ACCOUNT_MARGIN_FREE ? account_margin_free : account_margin_level;
+ }
  if(!funds_available) last_error=1;
  return field==ACCOUNT_EQUITY ? 12345.12345678 : field==ACCOUNT_CREDIT ? account_credit : account_balance;
 }
@@ -167,6 +174,9 @@ std::vector<string> pendingResults;
 int main(int argc, char** argv) {
  string c=argv[1];
  if(c.rfind("snapshot",0)==0) {
+  if(c=="snapshot-margin-unavailable") margin_available=false;
+  if(c=="snapshot-margin-flat") { account_margin=0; account_margin_free=12345.12345678; account_margin_level=0; }
+  if(c=="snapshot-margin-nonfinite") account_margin_free=std::numeric_limits<double>::quiet_NaN();
   if(c=="snapshot-missing") selection_ok=false;
   if(c=="snapshot-escaped") positions[42].symbol="ABC\"Q\\R";
   if(c=="snapshot-pending" || c=="snapshot-order-unavailable") pending_count=1;

@@ -156,7 +156,7 @@ def test_actual_authority_cannot_admit_raw_equity_profit_created_by_a_deposit(tm
     mandate=TradingMandate.from_mapping(mandate_dict(account_alias='ctrader_primary',venue='ctrader'))
     intent=replace(make_intent(),account_alias='ctrader_primary',venue='ctrader',entry=D('1.1'),stop=D('1.0995'))
     raw=risk_snapshot(replace(eurusd,venue='ctrader',account_currency='EUR'),account_alias='ctrader_primary',equity=D('200'),balance=D('200'),
-        peak_equity=D('200'),day_start_equity=D('100'),week_start_equity=D('100'),free_margin=D('200'),margin_level_pct=D('1000'))
+        peak_equity=D('200'),day_start_equity=D('100'),week_start_equity=D('100'),used_margin=D('0'),free_margin=D('200'),margin_level_pct=None)
     unguarded=RiskAuthority(mandate).evaluate_safe(intent,raw)
     assert unguarded.decision in {Decision.APPROVED,Decision.REDUCED},unguarded
     guarded=RiskAuthority(mandate).evaluate_safe(intent,replace(raw,preservation_blocks_new_risk=not fence.available,preservation_reason=fence.reason))

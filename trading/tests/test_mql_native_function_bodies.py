@@ -21,7 +21,7 @@ def ea(tmp_path_factory):
     assert shutil.which('g++'), 'EA function-body controls require g++'
     source=EA.read_text()
     names={'JsonEscape','JsonNumber','NativeRefusal','ResolvePositionTicket',
-           'NativeBindingJson','CashUnavailable','NativeCashJson',
+           'NativeBindingJson','CashUnavailable','NativeCashJson','NativeMarginJson',
            'SnapshotJson','PushResult','ExecOrderSend','ExecModifySl','ExecClose'}
     bodies=[]
     for match in re.finditer(r'^(?:string|void|bool|ulong) (\w+)\([^\n]*\)\s*\{',source,re.M):
@@ -212,3 +212,24 @@ def test_native_cash_formatter_does_not_round_a_small_finite_fee_to_zero(ea):
     frame=frame_from_poll('controlled-terminal',account,received_ms=1700000000000,nonce='controlled-tiny-fee-poll')
     assert frame.movements[0].fee!=0
     assert abs(frame.movements[0].fee-Decimal('-1.2345678901234567e-30'))<Decimal('1e-45')
+
+
+def test_actual_ea_native_margin_fields_remain_original_decimal_observations(ea):
+    from vati.execution.native_margin import mt5_margin
+    account=ea('snapshot')['account'];used,free,level=mt5_margin(account)
+    assert used==1000 and abs(free-Decimal('11345.12345678'))<Decimal('1e-10')
+    assert abs(level-Decimal('1234.512345678'))<Decimal('1e-10')
+
+
+@pytest.mark.parametrize('case',['unavailable','nonfinite'])
+def test_actual_ea_unknown_margin_cannot_be_serialized_as_healthy_zero(ea,case):
+    from vati.execution.native_margin import mt5_margin
+    account=ea('snapshot-margin-'+case)['account']
+    assert mt5_margin(account)==(None,None,None)
+    assert account['margin_used'] is None and account['margin_free'] is None
+
+
+def test_actual_ea_flat_margin_preserves_zero_usage_and_undefined_ratio(ea):
+    from vati.execution.native_margin import mt5_margin
+    used,free,level=mt5_margin(ea('snapshot-margin-flat')['account'])
+    assert used==0 and free>0 and level is None

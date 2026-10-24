@@ -57,6 +57,7 @@ data class AccountCard(
     val alias: String, val label: String, val broker: String, val mode: String, val currency: String, val safety: SafetyIdentity, val equity: Money, val balance: Money,
     val floatingPnl: Money, val dayPnl: Money, val drawdown: Pct, val connection: DataState, val openPositions: Int, val killSwitch: List<String>, val lastSyncMs: Long?,
     val performanceState: String = "UNMEASURED", val funding: FundingObservation = FundingObservation.from(null),
+    val margin: AccountMargin = AccountMargin.from(null),
 ) {
     companion object {
         fun from(o: JsonObject) = AccountCard(
@@ -64,6 +65,7 @@ data class AccountCard(
             Money.of(o.str("equity")), Money.of(o.str("balance")), Money.of(o.str("floating_pnl")), Money.of(o.str("day_pnl")), Pct.of(o.str("drawdown_pct")),
             DataState.parse(o.str("connection_state")), o.long("open_positions")?.toInt() ?: 0, o.strList("kill_switch"), o.long("last_sync_ms"),
             o.str("performance_state") ?: "UNMEASURED", FundingObservation.from(o.obj("funding")),
+            AccountMargin.from(o.obj("margin")),
         )
     }
 }
@@ -155,7 +157,7 @@ data class PortfolioSummary(
             watchedInstruments = exposureBySymbol.size,
             pendingSetups = potential.size,
             unrealizedPnl = floatingPnl.value,
-            marginLevelPct = null,
+            marginLevelPct = accounts.mapNotNull { it.margin.riskMarginLevelBoundPct?.toDoubleOrNull() }.minOrNull(),
             riskRefusalsRecent = riskRefusalsRecent,
         )
     companion object {

@@ -38,6 +38,8 @@ def position_to_dict(p: OpenPosition) -> dict: return _enc(asdict(p))
 
 def snapshot_to_dict(s: RiskSnapshot) -> dict:
     d = _enc(asdict(s))
+    if s.used_margin is None:
+        d.pop("used_margin")  # preserve original legacy snapshot bytes/hash
     d["symbol_contract"] = contract_to_dict(s.symbol_contract)
     d["open_positions"] = [position_to_dict(p) for p in s.open_positions]
     return d
@@ -75,8 +77,9 @@ def position_from_dict(d: dict) -> OpenPosition:
 
 def snapshot_from_dict(d: dict) -> RiskSnapshot:
     kw = dict(d)
-    for k in ("equity", "balance", "peak_equity", "day_start_equity", "week_start_equity"):
-        kw[k] = _D(kw[k])
+    for k in ("equity", "balance", "peak_equity", "day_start_equity", "week_start_equity", "free_margin", "margin_level_pct", "used_margin"):
+        if k in kw:
+            kw[k] = _D(kw[k])
     kw["symbol_contract"] = contract_from_dict(kw["symbol_contract"])
     kw["open_positions"] = tuple(position_from_dict(p) for p in kw["open_positions"])
     kw["market_integrity"] = MarketIntegrityState(kw["market_integrity"])

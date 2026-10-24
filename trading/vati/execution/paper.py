@@ -82,7 +82,8 @@ class PaperAdapter:
 
     def sync_account(self) -> AccountState:
         unreal = sum((self._unrealised(p) for p in self._positions.values()), ZERO)
-        return AccountState(self.account_alias, self.equity + unreal, self.equity, self.currency, verified=not self.inject_disconnect)
+        return AccountState(self.account_alias, self.equity + unreal, self.equity, self.currency, verified=not self.inject_disconnect,
+                            used_margin=ZERO, free_margin=self.equity + unreal)
 
     def _unrealised(self, p: dict) -> Decimal:
         px = self.last_price.get(p["symbol"], p["entry"])

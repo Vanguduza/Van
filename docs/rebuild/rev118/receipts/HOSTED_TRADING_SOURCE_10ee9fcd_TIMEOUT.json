@@ -1,0 +1,90 @@
+{
+  "schema": "van.rebuild.hosted-trading-source-timeout/1",
+  "source_head": "10ee9fcd185776713e10981dfdd36db5343b92b7",
+  "run_id": 40106078647,
+  "job_id": 120908200818,
+  "job_conclusion": "cancelled",
+  "started_at": "2026-10-24T15:15:55Z",
+  "completed_at": "2026-10-24T15:31:13Z",
+  "steps": [
+    {
+      "name": "Set up job",
+      "conclusion": "success"
+    },
+    {
+      "name": "Initialize containers",
+      "conclusion": "success"
+    },
+    {
+      "name": "Run actions/checkout@v4",
+      "conclusion": "success"
+    },
+    {
+      "name": "Run actions/setup-node@v4",
+      "conclusion": "success"
+    },
+    {
+      "name": "Run actions/setup-python@v5",
+      "conclusion": "success"
+    },
+    {
+      "name": "Install pinned PostgreSQL verification dependencies",
+      "conclusion": "success"
+    },
+    {
+      "name": "Initialize the disposable test schema",
+      "conclusion": "success"
+    },
+    {
+      "name": "Real PostgreSQL isolation, migration, writer and recovery checks",
+      "conclusion": "success"
+    },
+    {
+      "name": "Require executed PostgreSQL cases without skips",
+      "conclusion": "success"
+    },
+    {
+      "name": "Public trading source regressions",
+      "conclusion": "cancelled"
+    },
+    {
+      "name": "Record the only private-source test unavailable to this public job",
+      "conclusion": "skipped"
+    },
+    {
+      "name": "Public voice, speaker-authority and speech-continuity checks",
+      "conclusion": "skipped"
+    },
+    {
+      "name": "Require executed voice cases without skips",
+      "conclusion": "skipped"
+    },
+    {
+      "name": "Run actions/upload-artifact@v4",
+      "conclusion": "success"
+    },
+    {
+      "name": "Post Run actions/setup-python@v5",
+      "conclusion": "skipped"
+    },
+    {
+      "name": "Post Run actions/setup-node@v4",
+      "conclusion": "skipped"
+    },
+    {
+      "name": "Post Run actions/checkout@v4",
+      "conclusion": "success"
+    },
+    {
+      "name": "Stop containers",
+      "conclusion": "success"
+    },
+    {
+      "name": "Complete job",
+      "conclusion": "success"
+    }
+  ],
+  "log_sha256": "7d953ccd80f9d07705299ecba6b150fc7de7d2368ed315b83b9e34a350d78dab",
+  "observed": "PostgreSQL26-case no-skip gate completed. Public trading reached88% and was canceled at the15-minute job budget; voice steps were not executed. No trading pass or application failure is inferred from incomplete progress.",
+  "correction": "The next source job retains all tests and no-skip gates, gives the combined PostgreSQL/trading/voice job a35-minute budget, and prints test identities plus durations for diagnosis. No private DDS, trusted-main or skipped-test gate is bypassed."
+}

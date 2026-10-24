@@ -143,7 +143,7 @@ class CtraderAdapter:
         self._ensure_auth()
         t = self._native_trader_identity()
         bal = native_money(t['balance'],self._money_digits)
-        unrealised = self._native_unrealised()
+        unrealised = self._native_unrealised(margin_mode=t.get("totalMarginCalculationType"))
         # Separate native reads are not an atomic account snapshot. Refuse a
         # visible funds/currency change across the position mark instead of
         # combining old balance with newer PnL and reporting it verified.
@@ -158,6 +158,9 @@ class CtraderAdapter:
                 if key in t:native_int(t[key],minimum=minimum)
                 if key in latest['trader']:native_int(latest['trader'][key],minimum=minimum)
                 if latest['trader'].get(key)!=t.get(key) or (key in latest['trader'])!=(key in t):raise ValueError()
+            for key in ('totalMarginCalculationType','accountType','isLimitedRisk','limitedRiskMarginCalculationStrategy'):
+                if latest['trader'].get(key)!=t.get(key) or type(latest['trader'].get(key)) is not type(t.get(key)):
+                    raise ValueError()
         except (CtraderApiError,KeyError,TypeError,ValueError):
             raise VenueUnavailable('cTrader native funds changed during position PnL observation; refresh required') from None
         with localcontext() as context:
@@ -171,7 +174,17 @@ class CtraderAdapter:
             bonuses=[native_money(t[k],self._money_digits) if k in t else None for k in ('managerBonus','ibBonus','nonWithdrawableBonus')]
             mark=NativeAccountMark('CTRADER',environment,self.account_alias,self.ctid_trader_account_id,t['depositAssetId'],self._currency,
                 at,bal,equity,t.get('balanceVersion'),*bonuses,registered_at_ms=t.get('registrationTimestamp'))
-        return AccountState(self.account_alias, equity, bal, self._currency, True, t.get("accountType", "HEDGED") == "HEDGED", at,funding_mark=mark)
+        used = getattr(self, "_native_used_margin", None)
+        with localcontext() as context:
+            context.prec = 80
+            free = equity - used if used is not None else None
+            level = equity / used * Decimal("100") if used is not None and used > 0 else None
+        # cTrader reports per-position usedMargin, not an account free-margin
+        # field. These bounds use that native margin and risk equity excluding
+        # separate bonuses; they are not settled money or a broker margin quote.
+        return AccountState(self.account_alias, equity, bal, self._currency, True,
+            t.get("accountType", "HEDGED") == "HEDGED", at,
+            funding_mark=mark,used_margin=used,free_margin=free,margin_level_pct=level)
 
     def cash_movements(self, *, from_ms: int, to_ms: int):
         """Read one documented native history window, with no payment operation.
@@ -231,13 +244,14 @@ class CtraderAdapter:
         except (CtraderApiError,KeyError,TypeError,ValueError,ArithmeticError):
             raise VenueUnavailable('cTrader cash history identity, native precision or complete statement unavailable') from None
 
-    def _native_unrealised(self) -> Decimal:
+    def _native_unrealised(self, *, margin_mode=None) -> Decimal:
         """Broker net mark in deposit currency, never a missing-quote zero.
 
         The native response defines its own decimal exponent and excludes
         potential closing commission. This is current equity, not settled PnL.
         A changed or incomplete position set needs a fresh read, not a guess.
         """
+        self._native_used_margin = None
         try:
             positions = self._positions_raw()
             expected = [p['positionId'] for p in positions]
@@ -258,9 +272,49 @@ class CtraderAdapter:
                     or any(type(v) is not int or not -(2**63)<=v<2**63 for v in (net,gross))):raise ValueError()
                 observed.append(pid);total+=net
             if len(set(observed))!=len(observed) or set(observed)!=set(expected):raise ValueError()
+            after = self._positions_raw()
+            if (len(after) != len(positions) or len({p['positionId'] for p in after}) != len(after)
+                or {p['positionId']:p for p in after} != {p['positionId']:p for p in positions}):
+                raise ValueError()
+            try:
+                self._native_used_margin = self._position_margin(positions, margin_mode)
+            except (KeyError,TypeError,ValueError,ArithmeticError):
+                self._native_used_margin = None
             return Decimal(total)/(Decimal(10)**digits)
         except (CtraderApiError,KeyError,TypeError,ValueError,ArithmeticError):
             raise VenueUnavailable('cTrader native deposit-currency position PnL unavailable or inconsistent') from None
+
+    @staticmethod
+    def _position_margin(positions, mode):
+        """Documented per-symbol aggregation using the Open API enum values.
+
+        Algo's enum has different integer values: its formulas are referenced
+        by name, never by copying those numeric values into this protocol.
+        """
+        from vati.funding.native import native_int
+        if not positions:
+            return ZERO
+        if type(mode) is int:
+            mode = {0:"MAX",1:"SUM",2:"NET"}.get(mode)
+        if type(mode) is not str or mode not in {"MAX","SUM","NET"}:
+            raise ValueError("native total margin calculation mode unavailable")
+        buckets = {}
+        with localcontext() as context:
+            context.prec = 80
+            for position in positions:
+                value = native_int(position['usedMargin'],minimum=0,maximum=2**64-1)
+                digits = native_int(position['moneyDigits'],minimum=0,maximum=18)
+                margin = Decimal((0,tuple(map(int,str(value))),-digits))
+                trade = position['tradeData']
+                symbol = native_int(trade['symbolId'],minimum=1)
+                side = trade['tradeSide']
+                if type(side) is int:side = {1:"BUY",2:"SELL"}.get(side)
+                if type(side) is not str or side not in {"BUY","SELL"}:raise ValueError()
+                bucket = buckets.setdefault(symbol,{"BUY":ZERO,"SELL":ZERO})
+                bucket[side] += margin
+            if mode == "SUM":return sum((b['BUY']+b['SELL'] for b in buckets.values()),ZERO)
+            if mode == "MAX":return sum((max(b['BUY'],b['SELL']) for b in buckets.values()),ZERO)
+            return sum((abs(b['BUY']-b['SELL']) for b in buckets.values()),ZERO)
 
     def _positions_raw(self) -> list[dict]:
         return [p for p in self._reconcile_raw()['position'] if p.get("positionStatus") in ("POSITION_STATUS_OPEN", 1, None)]

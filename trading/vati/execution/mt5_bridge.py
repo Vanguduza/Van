@@ -118,10 +118,12 @@ class Mt5BridgeAdapter:
             self._funding_issue = 'MT5_NATIVE_CASH_HISTORY_UNAVAILABLE'
         else:
             self._funding_issue = None
+        from vati.execution.native_margin import mt5_margin, mt5_risk_equity
+        used,free,level=mt5_margin(a)
         try:
-            equity = mark.net_equity if mark is not None else amount(a['equity'])
+            equity = mark.net_equity if mark is not None else mt5_risk_equity(a)
             return AccountState(self.account_alias, equity, amount(a['balance']), text(a['currency']),
-                                verified, hedging, int(a.get('server_time_ms', 0)), funding_mark=mark)
+                                verified, hedging, int(a.get('server_time_ms', 0)), funding_mark=mark,used_margin=used,free_margin=free,margin_level_pct=level)
         except (KeyError, TypeError, ValueError, ArithmeticError):
             raise VenueUnavailable('MT5 native account amounts unavailable') from None
 

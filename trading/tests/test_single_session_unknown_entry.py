@@ -31,8 +31,14 @@ def delayed_native_session(tmp_path,contract,*,lose_enqueue_reply=False,initial_
     def poll(*,results=(),positions=None):
         if positions is not None:terminal_positions[:]=positions
         nonces['n']+=1;ts=str(clock['ms']//1000);nonce='owner-ea-'+str(nonces['n'])
+        # Explicit simulated native margin: 1,000 deposit units per open position.
+        # An empty account has observed zero usage and an undefined ratio.
+        from decimal import Decimal
+        margin_used=Decimal('1000')*len(terminal_positions)
         account=cash_telemetry({'login':native_login,'server':'fixture-native-ea','demo':True,'equity':'10000','balance':'10000','currency':'USD',
-            'trade_allowed':True,'hedging':True,'server_time_ms':clock['ms']},credit='0',native_clock_ms=clock['ms'],movements=[],currency_digits=2)
+            'trade_allowed':True,'hedging':True,'server_time_ms':clock['ms'],
+            'margin_used':str(margin_used),'margin_free':str(Decimal('10000')-margin_used),
+            'margin_level':str(Decimal('1000000')/margin_used if margin_used else Decimal('0'))},credit='0',native_clock_ms=clock['ms'],movements=[],currency_digits=2)
         body=json.dumps({'account':account,'positions':terminal_positions,'results':list(results)}).encode()
         response=client.post('/ea/v1/'+alias+'/poll',content=body,headers={'x-van-ts':ts,'x-van-nonce':nonce,
             'x-van-signature':sign_poll(key,ts,nonce,alias,body),'content-type':'application/json'})

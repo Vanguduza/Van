@@ -70,6 +70,10 @@ def _account_states(ledger: Ledger, registry_public: list[dict]) -> list[dict[st
         row["restated_learning"] = reported_restated_learning(s, a["alias"])
         from vati.funding.runtime import reported_funding
         row['funding']=reported_funding(ledger,s,a)
+        from vati.execution.native_margin import reported_account_margin
+        row["margin"]=reported_account_margin(s,a["alias"])
+        if a.get("broker") in {"MT5","CTRADER"} and not row["funding"].get("scope_hash"):
+            row["margin"]={"state":"UNAVAILABLE","reason":"NATIVE_SCOPE_UNBOUND","execution_authority":False}
         if a.get('broker')=='MT5' and row['funding']['state'] not in {'OBSERVED','CONFLICT'}:
             # Legacy MT5 equity can include broker credit. Without the bound
             # credit-excluded account mark its difference is not floating PnL.
@@ -83,6 +87,7 @@ def _account_states(ledger: Ledger, registry_public: list[dict]) -> list[dict[st
         row['performance_state']='SIMULATED_PAPER_EQUITY' if a.get('broker')=='PAPER' else 'UNMEASURED'
         if row['funding']['reason']=='CURRENT_PROFILE_NATIVE_SCOPE_MISMATCH':
             row.update(equity=None,balance=None,floating_pnl=None,connected=False,verified=False,connection_state='STALE',currency=a.get('currency'))
+            row["margin"]={"state":"UNAVAILABLE","reason":"CURRENT_PROFILE_NATIVE_SCOPE_MISMATCH","execution_authority":False}
             row['raw_equity_change']={**row['raw_equity_change'],'day':None,'week':None,'drawdown_from_raw_peak':None}
     return out
 

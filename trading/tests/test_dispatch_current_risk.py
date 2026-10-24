@@ -30,6 +30,11 @@ def test_actual_single_service_revalidates_changed_equity_without_increasing_ori
             clock['ms']=bar.end_ms+1000;result=service.step_once()
             if entered:break
         assert entered
+        from vati.execution.native_margin import reported_account_margin
+        account_event=list(service._ledger.iter(EventKind.ACCOUNT_SNAPSHOT))[-1]
+        margin=reported_account_margin(account_event,cfg.account_alias)
+        assert margin['state']=='SIMULATED' and margin['used_margin']=='0'
+        assert margin['execution_authority'] is False and margin['snapshot_ref']==account_event.hash
         original=[e for e in service._ledger.iter(EventKind.RISK_DECISION) if e.payload['decision']['decision'] in {'APPROVED','REDUCED'}]
         assert original and Decimal(original[0].payload['inputs']['snapshot']['equity'])==original_equity
         commands=list(service._ledger.iter(EventKind.ORDER_COMMAND))
