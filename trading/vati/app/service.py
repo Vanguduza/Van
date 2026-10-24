@@ -334,8 +334,8 @@ class SessionService:
         positions = r.cycle.adapter.positions()
         from vati.funding.worker import snapshot_funding
         funding = snapshot_funding(self,r.cycle.ledger,r.cycle.adapter,acct,now_ms=now_ms)
-        from vati.funding.native import NativeAccountMark
-        mark=acct.funding_mark.body() if isinstance(getattr(acct,'funding_mark',None),NativeAccountMark) else None
+        from vati.funding.native import account_mark_body
+        mark=account_mark_body(acct)
         received_ms=max(now_ms,acct.server_time_unix_ms,self.clock())
         r.cycle.ledger.append(make_event(EventKind.ACCOUNT_SNAPSHOT, "vati-service", {
             "account_alias": acct.account_alias, "equity": str(acct.equity), "balance": str(acct.balance), "currency": acct.currency, "verified": acct.verified,

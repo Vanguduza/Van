@@ -15,6 +15,8 @@ from vati.app.service import ServiceConfig,SessionService
 from vati.core import EventKind
 from vati.execution.mt5_pull import BridgeQueue,Mt5PullAdapter,create_pull_app,sign_poll
 from vati.risk.serde import contract_to_dict
+from vati.execution.mt5_identity import Mt5Identity
+from mt5_cash_kit import cash_telemetry
 
 pytestmark=pytest.mark.skipif(not os.environ.get('VATI_TEST_PG_DSN') or os.environ.get('VATI_TEST_PG_ISOLATED_FIXTURE')!='1',
     reason='requires explicitly isolated native PostgreSQL fixture')
@@ -22,20 +24,21 @@ pytestmark=pytest.mark.skipif(not os.environ.get('VATI_TEST_PG_DSN') or os.envir
 
 @contextmanager
 def delayed_native_session(tmp_path,contract,*,lose_enqueue_reply=False,initial_partial_status=None,omit_context=False,initial_terminal_status=None):
-    alias='delayed_mt5_'+uuid.uuid4().hex[:12];key=b'local-source-fixture-key-32-bytes!'
+    alias='delayed_mt5_'+uuid.uuid4().hex[:12];native_login=10_000_000+uuid.uuid4().int%(2**53);key=b'local-source-fixture-key-32-bytes!'
     bars=synthetic_bars();clock={'ms':bars[100].end_ms};queue=BridgeQueue(tmp_path/'native-ea.sqlite')
     app=create_pull_app(queue,lambda who:key if who==alias else None,clock=lambda:clock['ms'])
     client=TestClient(app);delivered=[];nonces={'n':0};terminal_positions=[]
     def poll(*,results=(),positions=None):
         if positions is not None:terminal_positions[:]=positions
         nonces['n']+=1;ts=str(clock['ms']//1000);nonce='owner-ea-'+str(nonces['n'])
-        body=json.dumps({'account':{'login':12345678,'equity':'10000','balance':'10000','currency':'USD',
-            'trade_allowed':True,'hedging':True,'server_time_ms':clock['ms']},'positions':terminal_positions,'results':list(results)}).encode()
+        account=cash_telemetry({'login':native_login,'server':'fixture-native-ea','demo':True,'equity':'10000','balance':'10000','currency':'USD',
+            'trade_allowed':True,'hedging':True,'server_time_ms':clock['ms']},credit='0',native_clock_ms=clock['ms'],movements=[],currency_digits=2)
+        body=json.dumps({'account':account,'positions':terminal_positions,'results':list(results)}).encode()
         response=client.post('/ea/v1/'+alias+'/poll',content=body,headers={'x-van-ts':ts,'x-van-nonce':nonce,
             'x-van-signature':sign_poll(key,ts,nonce,alias,body),'content-type':'application/json'})
         assert response.status_code==200
         delivered.extend(response.text.splitlines())
-    adapter=Mt5PullAdapter(BridgeQueue(tmp_path/'native-ea.sqlite'),account_alias=alias,clock=lambda:clock['ms'],timeout_s=.003,poll_s=.001)
+    adapter=Mt5PullAdapter(BridgeQueue(tmp_path/'native-ea.sqlite'),account_alias=alias,clock=lambda:clock['ms'],timeout_s=.003,poll_s=.001,identity=Mt5Identity(str(native_login),'fixture-native-ea','USD',True))
     if initial_partial_status:
         def partial_reply(cid):
             from decimal import Decimal
@@ -60,7 +63,7 @@ def delayed_native_session(tmp_path,contract,*,lose_enqueue_reply=False,initial_
         adapter.queue.enqueue=lost_reply
     registry=AccountRegistry(tmp_path/'accounts.json')
     registry.add(Account(alias=alias,broker='MT5',mode='DEMO_TRADER',currency='USD',demo=True,
-        credential_ref=CredentialRef(env_var='SOURCE_FIXTURE_NOT_READ'),login='12345678',server='fixture-native-ea'))
+        credential_ref=CredentialRef(env_var='SOURCE_FIXTURE_NOT_READ'),login=str(native_login),server='fixture-native-ea'))
     cfg=ServiceConfig(account_alias=alias,symbol='EURUSD',base='EUR',quote='USD',timeframe='H1',
         contract=contract_to_dict(contract),mandate=historical_mandate_dict(account_alias=alias,venue='mt5',mode='DEMO_TRADER',
             allowed_strategies=['FX-TREND-PULLBACK-01']),capsules=['FX-TREND-PULLBACK-01'],registry_path=str(registry.path),

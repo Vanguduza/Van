@@ -673,6 +673,8 @@ class AccountCoordinatorService:
         store_ok = self._risk_store_ok()
         now_ms = max(now_ms, self.clock())
         from vati.funding.risk_fence import funding_risk_fence
+        from vati.funding.mt5_runtime import capture_cached_mt5
+        capture_cached_mt5(self._ledger, acct, now_ms=now_ms)
         funding = funding_risk_fence(self._ledger, self.adapter, acct, now_ms=now_ms)
         state = self.evaluators[candidate.symbol.upper()].last_state
         quote_age = state.quote_age_ms if state is not None else self.cfg.max_quote_age_ms + 1
@@ -1024,8 +1026,8 @@ class AccountCoordinatorService:
         positions=self.adapter.positions()
         from vati.funding.worker import snapshot_funding
         funding = snapshot_funding(self,self._ledger,self.adapter,acct,now_ms=now_ms)
-        from vati.funding.native import NativeAccountMark
-        mark=acct.funding_mark.body() if isinstance(getattr(acct,'funding_mark',None),NativeAccountMark) else None
+        from vati.funding.native import account_mark_body
+        mark=account_mark_body(acct)
         received_ms=max(now_ms,acct.server_time_unix_ms,self.clock())
         self._ledger.append(make_event(
             EventKind.ACCOUNT_SNAPSHOT, "vati-account-service",

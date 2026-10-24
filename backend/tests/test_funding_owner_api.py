@@ -36,3 +36,33 @@ async def test_native_cash_history_reaches_accounts_and_portfolio_without_profit
     assert ledger.count()==before and ledger.count(EventKind.FUNDING_STATEMENT)==1
     async with AsyncClient(transport=ASGITransport(app=app),base_url='http://test') as unpaired:
         assert (await unpaired.get('/v1/trading/accounts')).status_code in {401,403}
+
+
+@pytest.mark.asyncio
+async def test_signed_mt5_cash_query_reaches_owner_api_without_credit_as_profit(client,tmp_path):
+    from dataclasses import replace
+    from test_mt5_funding_runtime import setup as mt5_setup, publish
+    from test_mt5_funding_contract import cash
+    from vati.funding.mt5 import Mt5CashFact
+    from vati.funding.mt5_runtime import capture_cached_mt5
+    ac,app=client
+    ledger,adapter,account=mt5_setup(tmp_path)
+    account=replace(account,funding_mark=replace(account.funding_mark,movements=(Mt5CashFact.from_body(cash()),)))
+    funding=capture_cached_mt5(ledger,account,now_ms=10000);publish(ledger,account,funding)
+    registry=AccountRegistry(tmp_path/'accounts.json')
+    registry.add(Account(alias='native',broker='MT5',mode='DEMO_TRADER',currency='USD',demo=True,
+        login='12345678',server='Broker-Demo',credential_ref=CredentialRef(env_var='UNREAD_FIXTURE_CREDENTIAL_REFERENCE')))
+    app.state.trading.ledger_path=ledger.path;app.state.trading.accounts_registry=str(registry.path)
+    app.state.trading.reporting_currency='USD';before=ledger.count()
+    response=await ac.get('/v1/trading/accounts');assert response.status_code==200,response.text
+    row=response.json()['accounts'][0]
+    assert row['equity']=='10000' and row['floating_pnl']=='0' and row['day_pnl'] is None
+    observed=row['funding'];assert observed['query_ref']==funding['query_ref']
+    assert observed['return_qualification']=='NOT_ISSUED' and observed['execution_authority'] is False
+    cash_row=observed['movements'][0]['movement']
+    assert cash_row['native_id']==9007199254740993 and cash_row['fee']=='-1.3E-7' and 'delta' not in cash_row
+    portfolio=(await ac.get('/v1/trading/portfolio')).json()
+    assert portfolio['totals']['day_pnl'] is None and portfolio['totals']['floating_pnl']=='0'
+    assert ledger.count()==before
+    async with AsyncClient(transport=ASGITransport(app=app),base_url='http://test') as unpaired:
+        assert (await unpaired.get('/v1/trading/accounts')).status_code in {401,403}

@@ -70,6 +70,9 @@ class FundingIngestWorker:
             return self._condition.wait_for(lambda:not self._active and self._pending is None,timeout=timeout)
 
 def snapshot_funding(service,ledger,adapter,account,*,now_ms):
+    from vati.funding.mt5_runtime import capture_cached_mt5
+    cached=capture_cached_mt5(ledger,account,now_ms=now_ms)
+    if cached is not None:return cached
     mark=getattr(account,'funding_mark',None)
     if not isinstance(mark,NativeAccountMark):
         return {'state':'UNSUPPORTED','reason':'NATIVE_CASH_HISTORY_NOT_PROVIDED','return_qualification':'NOT_ISSUED','execution_authority':False}

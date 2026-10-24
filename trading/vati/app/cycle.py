@@ -317,6 +317,8 @@ class DecisionCycle:
         if quote_age_ms >= 0:
             quote_age_ms += now_ms - started_ms
         from vati.funding.risk_fence import funding_risk_fence
+        from vati.funding.mt5_runtime import capture_cached_mt5
+        capture_cached_mt5(self.ledger, acct, now_ms=now_ms)
         funding = funding_risk_fence(self.ledger, self.adapter, acct, now_ms=now_ms)
         streak = self.streaks.verdict(strategy_id, now_ms) if strategy_id or self.streaks.recovery_issue else None
         return RiskSnapshot(now_unix=now_ms // 1000, account_alias=acct.account_alias, account_verified=acct.verified, equity=acct.equity, balance=acct.balance,

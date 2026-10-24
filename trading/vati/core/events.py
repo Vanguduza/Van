@@ -54,6 +54,8 @@ class EventKind(str, Enum):
     SESSION = "SESSION"
     FUNDING_STATEMENT = "FUNDING_STATEMENT"  # immutable native cash observations; never payment authority
     FUNDING_DEAL_STATEMENT = "FUNDING_DEAL_STATEMENT"
+    FUNDING_MT5_STATEMENT = "FUNDING_MT5_STATEMENT"
+    FUNDING_MT5_QUERY = "FUNDING_MT5_QUERY"
     ACCOUNT_SNAPSHOT = "ACCOUNT_SNAPSHOT"   # equity/balance/margin as the venue reported them (portfolio truth for the owner surface)
     ACCOUNT_OPERATION = "ACCOUNT_OPERATION"  # native account-control effects; never trade/outcome evidence
     MARKET_DATA_HEALTH = "MARKET_DATA_HEALTH"

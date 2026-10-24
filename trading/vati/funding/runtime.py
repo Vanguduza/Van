@@ -80,6 +80,9 @@ def _reported_funding(ledger,event,account_record):
     if not isinstance(observation,dict):return unknown
     mark=p['native_account_mark'] if 'native_account_mark' in p else observation.get('native_mark')
     if not isinstance(mark,dict):return unknown|{'state':observation.get('state','UNMEASURED'),'reason':observation.get('reason','NO_NATIVE_FUNDING_OBSERVATION')}
+    if mark.get('schema')=='mt5-account-mark/1':
+        from vati.funding.mt5_report import reported_mt5
+        return reported_mt5(ledger,event,account_record,observation,mark,unknown)
     from vati.core.canonical import canonical_hash
     scope={k:mark.get(k) for k in ('provider','environment','native_account_id','deposit_asset_id','currency')}
     expected_environment='DEMO' if account_record.get('demo') is True else 'LIVE' if account_record.get('demo') is False else None

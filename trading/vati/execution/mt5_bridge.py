@@ -109,7 +109,21 @@ class Mt5BridgeAdapter:
         verified=a.get('verified',False);hedging=a.get('hedging',True)
         if type(verified) is not bool or type(hedging) is not bool:
             raise VenueUnavailable('MT5 account verification and topology require explicit boolean facts')
-        return AccountState(self.account_alias, Decimal(str(a["equity"])), Decimal(str(a["balance"])), a["currency"], verified, hedging, int(a.get("server_time_ms", 0)))
+        from vati.funding.mt5 import frame_from_poll, amount, text
+        mark = None
+        try:
+            mark = frame_from_poll(self.account_alias, a, received_ms=self.clock(),
+                                   nonce=str(r['nonce']), source_kind='MT5_SIGNED_MTLS_READ')
+        except (KeyError, TypeError, ValueError, ArithmeticError):
+            self._funding_issue = 'MT5_NATIVE_CASH_HISTORY_UNAVAILABLE'
+        else:
+            self._funding_issue = None
+        try:
+            equity = mark.net_equity if mark is not None else amount(a['equity'])
+            return AccountState(self.account_alias, equity, amount(a['balance']), text(a['currency']),
+                                verified, hedging, int(a.get('server_time_ms', 0)), funding_mark=mark)
+        except (KeyError, TypeError, ValueError, ArithmeticError):
+            raise VenueUnavailable('MT5 native account amounts unavailable') from None
 
     def positions(self) -> list[VenuePosition]:
         r = self._call("positions", {"alias": self.account_alias}, now_ms=self.clock())

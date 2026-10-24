@@ -137,3 +137,11 @@ def native_money(value, digits):
     value=native_int(value);digits=native_int(digits,minimum=0,maximum=18)
     # Tuple construction is exact even when a caller uses a low Decimal precision.
     return Decimal((int(value<0),tuple(int(x) for x in str(abs(value))),-digits))
+
+
+def account_mark_body(account):
+    from vati.funding.mt5 import Mt5FundingFrame
+    mark=getattr(account,'funding_mark',None)
+    if isinstance(mark,NativeAccountMark):return mark.body()
+    if isinstance(mark,Mt5FundingFrame):return mark.mark_body()
+    return None

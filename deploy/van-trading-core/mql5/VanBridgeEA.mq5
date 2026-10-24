@@ -134,18 +134,82 @@ bool NativeIdentityMatches(const string &f[])
       && f[16] == (mode == ACCOUNT_TRADE_MODE_DEMO ? "true" : "false");
 }
 
+// Native cash selection uses terminal time; it is not a UTC or settlement certificate.
+string NativeBindingJson()
+{
+   long mode = AccountInfoInteger(ACCOUNT_TRADE_MODE);
+   return StringFormat("{\"login\":%I64d,\"server\":\"%s\",\"currency\":\"%s\",\"demo\":%s}",
+      AccountInfoInteger(ACCOUNT_LOGIN), JsonEscape(AccountInfoString(ACCOUNT_SERVER)),
+      JsonEscape(AccountInfoString(ACCOUNT_CURRENCY)), mode == ACCOUNT_TRADE_MODE_DEMO ? "true" : mode == ACCOUNT_TRADE_MODE_REAL ? "false" : "null");
+}
+
+string CashUnavailable(const string reason)
+{
+   return "{\"schema\":\"van.mt5.cash-telemetry/1\",\"complete\":false,\"reason\":\"" + reason + "\"}";
+}
+
+string NativeCashJson()
+{
+   ResetLastError();
+   string bindingBefore = NativeBindingJson();
+   double balanceBefore = AccountInfoDouble(ACCOUNT_BALANCE);
+   double creditBefore = AccountInfoDouble(ACCOUNT_CREDIT);
+   if(GetLastError() != 0 || !MathIsValidNumber(balanceBefore) || !MathIsValidNumber(creditBefore))
+      return CashUnavailable("NATIVE_ACCOUNT_FUNDS_UNAVAILABLE");
+   datetime queryTo = TimeCurrent() + 1;
+   if(!HistorySelect((datetime)0, queryTo)) return CashUnavailable("HISTORY_SELECT_UNAVAILABLE");
+   int total = HistoryDealsTotal();
+   if(total < 0 || total > 200000) return CashUnavailable("HISTORY_SELECTION_RESOURCE_BOUND");
+   string rows = "["; int cashCount = 0;
+   for(int i = 0; i < total; i++)
+   {
+      ResetLastError();
+      ulong ticket = HistoryDealGetTicket(i);
+      if(ticket == 0 || GetLastError() != 0) return CashUnavailable("NATIVE_DEAL_UNAVAILABLE");
+      ResetLastError();
+      long rawType = HistoryDealGetInteger(ticket, DEAL_TYPE);
+      if(GetLastError() != 0) return CashUnavailable("NATIVE_DEAL_TYPE_UNAVAILABLE");
+      if(rawType == DEAL_TYPE_BUY || rawType == DEAL_TYPE_SELL) continue;
+      if(cashCount >= 4096) return CashUnavailable("CASH_FACT_RESOURCE_BOUND");
+      ResetLastError();
+      long at = HistoryDealGetInteger(ticket, DEAL_TIME_MSC);
+      double profit = HistoryDealGetDouble(ticket, DEAL_PROFIT);
+      double commission = HistoryDealGetDouble(ticket, DEAL_COMMISSION);
+      double swap = HistoryDealGetDouble(ticket, DEAL_SWAP);
+      double fee = HistoryDealGetDouble(ticket, DEAL_FEE);
+      if(GetLastError() != 0 || at < 0 || !MathIsValidNumber(profit) || !MathIsValidNumber(commission)
+         || !MathIsValidNumber(swap) || !MathIsValidNumber(fee)) return CashUnavailable("NATIVE_CASH_VALUES_UNAVAILABLE");
+      if(cashCount > 0) rows += ",";
+      rows += StringFormat("{\"native_id\":%I64u,\"operation\":\"%s\",\"native_time_ms\":%I64d,\"profit\":\"%s\",\"commission\":\"%s\",\"swap\":\"%s\",\"fee\":\"%s\"}",
+         ticket, JsonEscape(EnumToString((ENUM_DEAL_TYPE)rawType)), at, DoubleToString(profit,-16), DoubleToString(commission,-16), DoubleToString(swap,-16), DoubleToString(fee,-16));
+      cashCount++;
+   }
+   rows += "]";
+   long nativeClock = (long)TimeCurrent() * 1000;
+   ResetLastError();
+   string bindingAfter = NativeBindingJson();
+   double balanceAfter = AccountInfoDouble(ACCOUNT_BALANCE), creditAfter = AccountInfoDouble(ACCOUNT_CREDIT);
+   if(GetLastError() != 0 || bindingAfter != bindingBefore || balanceAfter != balanceBefore
+      || creditAfter != creditBefore || nativeClock > (long)queryTo*1000)
+      return CashUnavailable("ACCOUNT_CHANGED_DURING_CASH_READ");
+   return StringFormat("{\"schema\":\"van.mt5.cash-telemetry/1\",\"complete\":true,\"native_from_ms\":0,\"native_to_ms\":%I64d,\"native_clock_ms\":%I64d,\"binding_before\":%s,\"balance_before\":\"%s\",\"credit_before\":\"%s\",\"movements\":%s}",
+      (long)queryTo*1000, nativeClock, bindingBefore, DoubleToString(balanceBefore,-16), DoubleToString(creditBefore,-16), rows);
+}
+
 //+------------------------------------------------------------------+
 //| snapshot                                                           |
 //+------------------------------------------------------------------+
 string SnapshotJson()
 {
+   string funding = NativeCashJson();
    long accountMode = AccountInfoInteger(ACCOUNT_TRADE_MODE);
    string accountDemo = accountMode == ACCOUNT_TRADE_MODE_DEMO ? "true" : accountMode == ACCOUNT_TRADE_MODE_REAL ? "false" : "null";
-   string acct = StringFormat("{\"login\":%I64d,\"server\":\"%s\",\"demo\":%s,\"equity\":%s,\"balance\":%s,\"currency\":\"%s\",\"trade_allowed\":%s,\"hedging\":%s,\"server_time_ms\":%I64d}",
+   string acct = StringFormat("{\"login\":%I64d,\"server\":\"%s\",\"demo\":%s,\"equity\":\"%s\",\"balance\":\"%s\",\"credit\":\"%s\",\"currency_digits\":%I64d,\"currency\":\"%s\",\"trade_allowed\":%s,\"hedging\":%s,\"server_time_ms\":%I64d,\"funding\":%s}",
       AccountInfoInteger(ACCOUNT_LOGIN), JsonEscape(AccountInfoString(ACCOUNT_SERVER)), accountDemo,
-      JsonNumber(AccountInfoDouble(ACCOUNT_EQUITY)), JsonNumber(AccountInfoDouble(ACCOUNT_BALANCE)), JsonEscape(AccountInfoString(ACCOUNT_CURRENCY)),
+      DoubleToString(AccountInfoDouble(ACCOUNT_EQUITY),-16), DoubleToString(AccountInfoDouble(ACCOUNT_BALANCE),-16),
+      DoubleToString(AccountInfoDouble(ACCOUNT_CREDIT),-16), AccountInfoInteger(ACCOUNT_CURRENCY_DIGITS), JsonEscape(AccountInfoString(ACCOUNT_CURRENCY)),
       (AccountInfoInteger(ACCOUNT_TRADE_ALLOWED) && AccountInfoInteger(ACCOUNT_TRADE_EXPERT) && TerminalInfoInteger(TERMINAL_CONNECTED) && TerminalInfoInteger(TERMINAL_TRADE_ALLOWED) && MQLInfoInteger(MQL_TRADE_ALLOWED)) ? "true" : "false",
-      AccountInfoInteger(ACCOUNT_MARGIN_MODE) == ACCOUNT_MARGIN_MODE_RETAIL_HEDGING ? "true" : "false", (long)TimeGMT() * 1000);
+      AccountInfoInteger(ACCOUNT_MARGIN_MODE) == ACCOUNT_MARGIN_MODE_RETAIL_HEDGING ? "true" : "false", (long)TimeGMT() * 1000, funding);
    string pos = "[";
    for(int i = 0; i < PositionsTotal(); i++)
    {

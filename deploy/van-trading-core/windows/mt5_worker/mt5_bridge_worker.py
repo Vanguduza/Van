@@ -30,6 +30,7 @@ import ssl
 import sys
 import threading
 import time
+from datetime import datetime, timezone
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from typing import Any, Callable, Optional
@@ -141,9 +142,69 @@ class Terminal:
         demo = mode == 0 if type(mode) is int and mode in (0, 2) else None
         return {"login": a.login, "server": getattr(a, "server", None), "demo": demo,
                 "equity": str(a.equity), "balance": str(a.balance), "currency": a.currency,
+                "credit": str(getattr(a, 'credit', None)), "currency_digits": getattr(a, 'currency_digits', None),
                 "margin_free": str(a.margin_free), "leverage": a.leverage,
                 "hedging": getattr(a, "margin_mode", 2) == 2,
                 "trade_allowed": trading_allowed}
+
+    def cash_account(self, before: dict, *, query_ms: int, clock) -> dict:
+        """Read-only available-history query, bracketed by native account facts.
+
+        Python's period query uses UTC host time, not a broker clock. An SDK
+        failure is unavailable evidence and never a successfully empty history.
+        This observation does not certify settlement or all lifetime records.
+        """
+        unavailable = {"schema": "van.mt5.cash-telemetry/1", "complete": False}
+        try:
+            end_s = query_ms // 1000 + 1
+            rows = self._observed_rows(self.mt5.history_deals_get(
+                datetime.fromtimestamp(0, timezone.utc),
+                datetime.fromtimestamp(end_s, timezone.utc)), 'cash history')
+            if len(rows) > 200_000:
+                raise ValueError('native history bound')
+            names = ('BUY', 'SELL', 'BALANCE', 'CREDIT', 'CHARGE', 'CORRECTION', 'BONUS',
+                     'COMMISSION', 'COMMISSION_DAILY', 'COMMISSION_MONTHLY',
+                     'COMMISSION_AGENT_DAILY', 'COMMISSION_AGENT_MONTHLY', 'INTEREST',
+                     'BUY_CANCELED', 'SELL_CANCELED', 'DIVIDEND', 'DIVIDEND_FRANKED', 'TAX')
+            types = {getattr(self.mt5, 'DEAL_TYPE_' + name): 'DEAL_TYPE_' + name
+                     for name in names if type(getattr(self.mt5, 'DEAL_TYPE_' + name, None)) is int}
+            if types.get(getattr(self.mt5, 'DEAL_TYPE_BUY', None)) != 'DEAL_TYPE_BUY' or types.get(getattr(self.mt5, 'DEAL_TYPE_SELL', None)) != 'DEAL_TYPE_SELL':
+                raise ValueError('native deal enum unavailable')
+            cash = []
+            for row in rows:
+                kind = getattr(row, 'type', None)
+                if type(kind) is not int or kind < 0:
+                    raise ValueError('native deal type unavailable')
+                operation = types.get(kind, 'DEAL_TYPE_UNKNOWN_' + str(kind))
+                if operation in ('DEAL_TYPE_BUY', 'DEAL_TYPE_SELL'):
+                    continue
+                ticket = getattr(row, 'ticket', None)
+                native_time = getattr(row, 'time_msc', None)
+                if (type(ticket) is not int or not 0 < ticket < 2**64
+                        or type(native_time) is not int or not 0 <= native_time <= end_s * 1000):
+                    raise ValueError('native cash identity unavailable')
+                amounts = {}
+                for field in ('profit', 'commission', 'swap', 'fee'):
+                    value = getattr(row, field, None)
+                    if type(value) not in (int, float) or not math.isfinite(value):
+                        raise ValueError('native cash amount unavailable')
+                    amounts[field] = str(value)
+                cash.append({'native_id': ticket, 'operation': operation, 'native_time_ms': native_time, **amounts})
+                if len(cash) > 4096:
+                    raise ValueError('native cash bound')
+            after = self.account()
+            keys = ('login', 'server', 'currency', 'demo', 'balance', 'credit')
+            if any(before.get(k) != after.get(k) for k in keys) or clock() > end_s * 1000:
+                raise ValueError('native cash bracket changed')
+            funding = {'schema': 'van.mt5.cash-telemetry/1', 'complete': True,
+                       'native_from_ms': 0, 'native_to_ms': end_s * 1000, 'native_clock_ms': query_ms,
+                       'binding_before': {k: before[k] for k in keys[:4]},
+                       'balance_before': before['balance'], 'credit_before': before['credit'], 'movements': cash}
+            return {**after, 'funding': funding}
+        except (AttributeError, TypeError, ValueError, RuntimeError, OverflowError, OSError):
+            # Existing account/protective routes remain available. Linux holds
+            # new risk when this observation cannot be validated.
+            return {**before, 'funding': unavailable}
 
     @staticmethod
     def _observed_rows(rows,kind):
@@ -415,6 +476,7 @@ class Worker:
                     or expected != physical):
                     raise PermissionError('terminal account identity differs from the signed Linux binding')
                 if op == "sync_account":
+                    a = self.t.cash_account(a, query_ms=self.clock(), clock=self.clock)
                     out = {"account": {**a, "verified": True, "server_time_ms": self.clock()},
                            "entry_constraints":{"schema":"van.mt5.entry-constraints/1","explicit_deadline":True,"required_op":"order_send_expiring"}}
                 elif op == "sync_symbols":

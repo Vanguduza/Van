@@ -11,6 +11,7 @@ from typing import Optional, Protocol, TYPE_CHECKING
 
 if TYPE_CHECKING:
     from vati.funding.native import NativeAccountMark
+    from vati.funding.mt5 import Mt5FundingFrame
 
 from vati.core.canonical import canonical_hash
 from vati.risk.contracts import Direction, LossModel
@@ -127,7 +128,7 @@ class AccountState:
     #: positions start being closed by the venue rather than by VAN.
     margin_level_pct: Optional[Decimal] = None
     # Native identity/valuation provenance; missing metadata is never a zero flow.
-    funding_mark: Optional[NativeAccountMark] = None
+    funding_mark: Optional[NativeAccountMark | Mt5FundingFrame] = None
 
 
 @dataclass(frozen=True)

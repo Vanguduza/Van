@@ -7,6 +7,8 @@ data class NativeCashMovement(
     val nativeId: String?, val operation: String?, val delta: String?, val balanceAfter: String?,
     val equityAfter: String?, val originalStatementRef: String?, val classification: String?, val classificationState: String?,
     val observedAtMs: Long? = null, val receivedAtMs: Long? = null,
+    val nativeTimeMs: Long? = null, val profit: String? = null, val commission: String? = null,
+    val swap: String? = null, val fee: String? = null,
 ) {
     companion object {
         fun from(row: JsonObject): NativeCashMovement {
@@ -15,7 +17,9 @@ data class NativeCashMovement(
             // Keep provider IDs and money exact; a Double loses integer IDs above 2^53.
             return NativeCashMovement(movement?.str("native_id"), movement?.str("operation"), movement?.str("delta"),
                 movement?.str("balance_after"), movement?.str("equity_after"), row.str("original_statement_ref"),
-                classification?.str("category"), classification?.str("state"), row.str("observed_at_ms")?.toLongOrNull(), row.str("received_at_ms")?.toLongOrNull())
+                classification?.str("category"), classification?.str("state"), row.str("observed_at_ms")?.toLongOrNull(), row.str("received_at_ms")?.toLongOrNull(),
+                movement?.str("native_time_ms")?.toLongOrNull(), movement?.str("profit"), movement?.str("commission"),
+                movement?.str("swap"), movement?.str("fee"))
         }
     }
 }
@@ -25,6 +29,8 @@ data class FundingObservation(
     val snapshotRef: String?, val statementRef: String?, val collectorState: String?,
     val movementCount: Long?, val movementsTruncated: Boolean, val movements: List<NativeCashMovement>,
     val nativeDeals: NativeDealLedger = NativeDealLedger.from(null), val period: NativeBalancePeriod = NativeBalancePeriod.from(null),
+    val queryRef: String? = null, val nativeTimeBasis: String? = null, val moneyBasis: String? = null,
+    val coverageState: String? = null,
 ) {
     companion object {
         fun from(o: JsonObject?): FundingObservation = FundingObservation(
@@ -33,6 +39,7 @@ data class FundingObservation(
             o?.str("movement_count")?.toLongOrNull()?.takeIf { it >= 0 }, o?.bool("movements_truncated") ?: false,
             o?.arr("movements")?.map(NativeCashMovement::from) ?: emptyList(),
             NativeDealLedger.from(o?.obj("native_deals")), NativeBalancePeriod.from(o?.obj("period")),
+            o?.str("query_ref"), o?.str("native_time_basis"), o?.str("money_basis"), o?.str("coverage_state"),
         )
     }
 }

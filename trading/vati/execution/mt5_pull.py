@@ -162,10 +162,10 @@ class BridgeQueue:
                                (alias, json.dumps(account, sort_keys=True), json.dumps(positions, sort_keys=True), now_ms, nonce,json.dumps(orders,sort_keys=True) if orders is not None else None))
 
     def state(self, alias: str) -> Optional[dict]:
-        row = self._conn.execute("SELECT account_json, positions_json, updated_ms,orders_json FROM state WHERE alias = ?", (alias,)).fetchone()
+        row = self._conn.execute("SELECT account_json, positions_json, updated_ms,orders_json,last_nonce FROM state WHERE alias = ?", (alias,)).fetchone()
         if row is None:
             return None
-        return {"account": json.loads(row[0]), "positions": json.loads(row[1]), "updated_ms": row[2],"orders":json.loads(row[3]) if row[3] is not None else None}
+        return {"account": json.loads(row[0]), "positions": json.loads(row[1]), "updated_ms": row[2],"orders":json.loads(row[3]) if row[3] is not None else None,"source_nonce":row[4]}
 
     def nonce_fresh(self, alias: str, nonce: str, *, now_ms: int) -> bool:
         with self._lock:
@@ -247,7 +247,7 @@ class Mt5PullAdapter:
         st = self.queue.state(self.account_alias)
         if st is None:
             raise VenueUnavailable("MT5 EA has never reported; fail closed")
-        if self.clock() - st["updated_ms"] > STATE_FRESH_MS:
+        if not 0 <= self.clock() - st["updated_ms"] <= STATE_FRESH_MS:
             raise VenueUnavailable(f"MT5 EA snapshot stale ({(self.clock() - st['updated_ms']) // 1000}s); fail closed")
         if self.identity is not None:
             self.identity.validate(st.get('account'))
@@ -263,11 +263,24 @@ class Mt5PullAdapter:
         return None
 
     def sync_account(self) -> AccountState:
-        a = self._state()["account"]
+        st = self._state();a = st["account"]
         allowed=a.get('trade_allowed',False);hedging=a.get('hedging',True)
         if type(allowed) is not bool or type(hedging) is not bool:
             raise VenueUnavailable('MT5 EA account permissions and topology require explicit boolean facts')
-        return AccountState(self.account_alias, Decimal(str(a["equity"])), Decimal(str(a["balance"])), a.get("currency", "USD"), allowed and bool(a.get("login")), hedging, int(a.get("server_time_ms", 0)))
+        from vati.funding.mt5 import frame_from_poll,amount,text
+        mark=None;self._funding_issue='MT5_NATIVE_CASH_HISTORY_UNAVAILABLE'
+        try:
+            mark=frame_from_poll(self.account_alias,a,received_ms=st['updated_ms'],nonce=st['source_nonce'])
+            self._funding_issue=''
+        except (KeyError,TypeError,ValueError,ArithmeticError):pass
+        # This is a broker observation, never a fabricated missing-credit zero.
+        # Unknown cash history still permits independent protection/reconciliation.
+        try:
+            equity=mark.net_equity if mark is not None else amount(str(a['equity']))
+            return AccountState(self.account_alias,equity,amount(str(a['balance'])),text(a['currency']),allowed and bool(a.get('login')),
+                hedging,int(a.get('server_time_ms',0)),funding_mark=mark)
+        except (KeyError,TypeError,ValueError,ArithmeticError):
+            raise VenueUnavailable('MT5 native account amounts unavailable') from None
 
     def positions(self) -> list[VenuePosition]:
         out = []
