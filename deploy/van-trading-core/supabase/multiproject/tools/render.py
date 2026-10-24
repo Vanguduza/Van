@@ -8,17 +8,19 @@ from __future__ import annotations
 
 import argparse
 import hashlib
+import ipaddress
 import json
 import os
 import pathlib
 import re
 import sys
 import uuid
+import stat
 
 ROOT = "/opt/van-trading/supabase"
 SLUG_RE = re.compile(r"^[a-z][a-z0-9-]{2,30}$")
 DB_RE = re.compile(r"^[a-z][a-z0-9_]{2,47}$")
-HOST_RE = re.compile(r"^(?=.{1,253}$)[a-z0-9](?:[a-z0-9.-]*[a-z0-9])$")
+HOST_LABEL_RE = re.compile(r"^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$")
 BLOCKED_NAMES = {"van", "vati", "postgres", "supabase", "auth", "rest", "storage", "realtime", "pooler", "studio", "default", "template0", "template1"}
 TOP_KEYS = {"schema_version", "target_installation", "allowed_postgres_service", "projects"}
 PROJECT_KEYS = {"slug", "database", "project_uuid", "hostname", "loopback_port", "status"}
@@ -26,10 +28,24 @@ PROJECT_KEYS = {"slug", "database", "project_uuid", "hostname", "loopback_port",
 class CandidateError(ValueError):
     """Fail-closed manifest validation error."""
 
+def check_hostname(hostname: str) -> None:
+    if not isinstance(hostname, str) or not 3 <= len(hostname) <= 253:
+        raise CandidateError("INVALID_PROJECT_HOSTNAME")
+    labels = hostname.split(".")
+    if len(labels) < 2 or any(not HOST_LABEL_RE.fullmatch(label) for label in labels):
+        raise CandidateError("INVALID_PROJECT_HOSTNAME")
+    if labels[-1].isdigit() or labels[-1] == "localhost":
+        raise CandidateError("INVALID_PROJECT_HOSTNAME")
+    try:
+        ipaddress.ip_address(hostname)
+    except ValueError:
+        return
+    raise CandidateError("PROJECT_HOSTNAME_MUST_NOT_BE_IP")
+
 def validate(data: dict) -> list[dict]:
     if not isinstance(data, dict) or set(data) != TOP_KEYS:
         raise CandidateError("MANIFEST_FIELDS_MISMATCH")
-    if data["schema_version"] != 1 or data["target_installation"] != ROOT:
+    if type(data["schema_version"]) is not int or data["schema_version"] != 1 or data["target_installation"] != ROOT:
         raise CandidateError("TARGET_INSTALLATION_MISMATCH")
     if data["allowed_postgres_service"] != "db":
         raise CandidateError("POSTGRES_SERVICE_NOT_EXISTING_DB")
@@ -45,10 +61,11 @@ def validate(data: dict) -> list[dict]:
             raise CandidateError("INVALID_OR_RESERVED_PROJECT_SLUG")
         if not isinstance(database,str) or not DB_RE.fullmatch(database) or database in BLOCKED_NAMES:
             raise CandidateError("INVALID_OR_RESERVED_DATABASE")
-        if not isinstance(project["hostname"],str) or not HOST_RE.fullmatch(project["hostname"]) or "." not in project["hostname"]:
-            raise CandidateError("INVALID_PROJECT_HOSTNAME")
+        check_hostname(project["hostname"])
         if not isinstance(project["loopback_port"],int) or isinstance(project["loopback_port"],bool) or not 18000 <= project["loopback_port"] <= 18999:
             raise CandidateError("LOOPBACK_PORT_OUT_OF_SAFE_RANGE")
+        if not isinstance(project["project_uuid"], str):
+            raise CandidateError("INVALID_PROJECT_UUID")
         try:
             parsed_uuid = uuid.UUID(project["project_uuid"])
         except (TypeError, AttributeError, ValueError) as exc:
@@ -61,7 +78,7 @@ def validate(data: dict) -> list[dict]:
             if project[key] in used[key]:
                 raise CandidateError("DUPLICATE_"+key.upper())
             used[key].add(project[key])
-    return projects
+    return sorted((dict(p) for p in projects), key=lambda p: p["slug"])
 
 def q(value: str) -> str:
     return json.dumps(value,ensure_ascii=True)
@@ -88,6 +105,7 @@ def emit_compose(projects: list[dict]) -> str:
                 "  "+s+":",
                 "    image: "+q(image),
                 "    restart: unless-stopped",
+                "    security_opt: [\"no-new-privileges:true\"]",
                 "    depends_on:",
                 "      db:",
                 "        condition: service_healthy",
@@ -103,6 +121,7 @@ def emit_compose(projects: list[dict]) -> str:
             "  "+name+"-api:",
             "    image: "+q("nginx:1.27.5-alpine"),
             "    restart: unless-stopped",
+            "    security_opt: [\"no-new-privileges:true\"]",
             "    depends_on:",
             "      - "+name+"-auth",
             "      - "+name+"-rest",
@@ -115,38 +134,51 @@ def emit_compose(projects: list[dict]) -> str:
     return "\n".join(out)+"\n"
 
 def emit_nginx(project: dict) -> str:
-    name = "tenant-"+project["slug"]
-    # Deliberately no public direct ports, functions, realtime, internal Postgres or Studio.
-    return "\n".join([
-      "# GENERATED PRE-PRODUCTION PROJECT ROUTER. Not a TLS or public gateway.",
-      "server {",
-      "    listen 8080;",
-      "    server_name "+project["hostname"]+";",
-      "    server_tokens off;",
-      "    client_max_body_size 25m;",
-      "    add_header X-Content-Type-Options nosniff always;",
-      "    location = /_health { return 200 'candidate-router'; }",
-      "    location ^~ /auth/v1/ {",
-      "        proxy_set_header Host $host;",
-      "        proxy_set_header X-Forwarded-Proto https;",
-      "        proxy_pass http://"+name+"-auth:9999/;",
-      "    }",
-      "    location ^~ /rest/v1/ {",
-      "        proxy_set_header Host $host;",
-      "        proxy_set_header X-Forwarded-Proto https;",
-      "        proxy_pass http://"+name+"-rest:3000/;",
-      "    }",
-      "    location ^~ /storage/v1/ {",
-      "        proxy_set_header Host $host;",
-      "        proxy_set_header X-Forwarded-Proto https;",
-      "        proxy_pass http://"+name+"-storage:5000/;",
-      "    }",
-      "    location ^~ /functions/v1/ { return 503; }",
-      "    location ^~ /realtime/v1/ { return 503; }",
-      "    location / { return 404; }",
-      "}",
-      "",
+    """Candidate routing only; NOT API-key/JWT authorization or TLS termination."""
+    name = "tenant-" + project["slug"]
+    host = project["hostname"]
+    check_hostname(host)
+    host_pattern = "^" + re.escape(host) + "(?::[0-9]{1,5})?$"
+    lines = [
+        "# CANDIDATE ONLY: upstream stubs/credentials have not qualified Supabase.",
+        "# The upstream TLS/Envoy admission owner must validate API keys and quotas.",
+        "server { listen 8080 default_server; server_name _; return 421; }",
+        "server {",
+        "    listen 8080;",
+        "    server_name " + host + ";",
+        "    if ($http_host !~* \"" + host_pattern + "\") { return 421; }",
+        "    server_tokens off;",
+        "    client_max_body_size 25m;",
+        "    add_header X-Content-Type-Options nosniff always;",
+        "    location = /_health { return 503 'UNQUALIFIED_CANDIDATE'; }",
+    ]
+    for prefix, suffix, port in (("auth", "auth", 9999), ("rest", "rest", 3000), ("storage", "storage", 5000)):
+        lines.extend([
+            "    location ^~ /" + prefix + "/v1/ {",
+            "        proxy_set_header Host " + host + ";",
+            "        proxy_set_header X-Forwarded-Host " + host + ";",
+            "        proxy_set_header X-Forwarded-Proto https;",
+            "        proxy_set_header X-Forwarded-Port 443;",
+            "        proxy_set_header X-Forwarded-For $remote_addr;",
+            "        proxy_set_header X-Real-IP $remote_addr;",
+            "        proxy_set_header Forwarded \"\";",
+            "        proxy_set_header X-Tenant-ID \"\";",
+            "        proxy_set_header X-Project-ID \"\";",
+            "        proxy_set_header X-Forwarded-Prefix /" + prefix + "/v1;",
+            "        proxy_set_header X-Forwarded-Path \"\";",
+            "        proxy_set_header X-Dial-Project-ID " + project["project_uuid"] + ";",
+            "        proxy_connect_timeout 5s;",
+            "        proxy_read_timeout 30s;",
+            "        proxy_pass http://" + name + "-" + suffix + ":" + str(port) + "/;",
+            "    }",
+        ])
+    lines.extend([
+        "    location ^~ /functions/v1/ { return 503; }",
+        "    location ^~ /realtime/v1/ { return 503; }",
+        "    location / { return 404; }",
+        "}", "",
     ])
+    return "\n".join(lines)
 
 def secret_contract(slug: str, database: str, hostname: str) -> str:
     return "\n".join([
@@ -155,8 +187,10 @@ def secret_contract(slug: str, database: str, hostname: str) -> str:
       "/etc/dial-supabase/projects/"+slug+"/auth.env",
       "  GOTRUE_DB_DATABASE_URL -> restricted project auth DB login targeting ONLY "+database,
       "  GOTRUE_JWT_SECRET -> project-unique >=32-byte signing secret; never share VAN",
-      "  GOTRUE_JWT_ISSUER -> https://"+hostname,
-      "  GOTRUE_API_EXTERNAL_URL / GOTRUE_SITE_URL / GOTRUE_URI_ALLOW_LIST",
+      "  GOTRUE_JWT_ISSUER -> https://"+hostname+"/auth/v1",
+      "  API_EXTERNAL_URL -> https://"+hostname+"/auth/v1",
+      "  GOTRUE_API_HOST=0.0.0.0; GOTRUE_API_PORT=9999; GOTRUE_DB_DRIVER=postgres",
+      "  GOTRUE_SITE_URL / GOTRUE_URI_ALLOW_LIST -> project-specific site/redirect allow-list",
       "  GOTRUE_SMTP_* / GOTRUE_EXTERNAL_* / signup and hook configuration as applicable",
       "/etc/dial-supabase/projects/"+slug+"/rest.env",
       "  PGRST_DB_URI -> restricted project authenticator login targeting ONLY "+database,
@@ -166,18 +200,94 @@ def secret_contract(slug: str, database: str, hostname: str) -> str:
       "/etc/dial-supabase/projects/"+slug+"/storage.env",
       "  DATABASE_URL -> restricted project storage login targeting ONLY "+database,
       "  SERVICE_KEY / ANON_KEY -> project-unique keys, never VAN's",
-      "  PGRST_JWT_SECRET -> matching tenant signing secret",
+      "  AUTH_JWT_SECRET -> matching project signing secret (or qualified JWT_JWKS)",
+      "  POSTGREST_URL=http://tenant-"+slug+"-rest:3000",
+      "  STORAGE_PUBLIC_URL=https://"+hostname,
+      "  TENANT_ID -> immutable project UUID; GLOBAL_S3_BUCKET -> project-only namespace",
       "  STORAGE_BACKEND=file; FILE_STORAGE_BACKEND_PATH=/var/lib/storage",
-      "  IMGPROXY_URL and relevant Supabase storage settings from pinned donor",
+      "  ENABLE_IMAGE_TRANSFORMATION=false until shared imgproxy project access is qualified",
       "Mount /srv/dial-supabase/projects/"+slug+"/objects as private project-only storage path.",
       "PG roles, database privileges, Auth/Storage schemas and migrations MUST be provisioned and qualified separately.",
       "GTR cloud data, Auth identities, storage objects and RLS policies are NOT populated by rendering configs.",
       "",
     ])
 
-def load_manifest(path: pathlib.Path) -> tuple[list[dict],bytes]:
-    raw = path.read_bytes()
-    return validate(json.loads(raw)), raw
+def unique_object(pairs: list[tuple]) -> dict:
+    result = {}
+    for key, value in pairs:
+        if key in result:
+            raise CandidateError("DUPLICATE_JSON_KEY")
+        result[key] = value
+    return result
+
+
+def load_manifest(path: pathlib.Path) -> tuple[list[dict], bytes]:
+    with path.open("rb") as handle:
+        raw = handle.read(1048577)
+    if len(raw) > 1048576:
+        raise CandidateError("MANIFEST_TOO_LARGE")
+    try:
+        data = json.loads(raw, object_pairs_hook=unique_object)
+    except (UnicodeError, json.JSONDecodeError) as exc:
+        raise CandidateError("MANIFEST_INVALID_JSON") from exc
+    return validate(data), raw
+
+
+def write_bundle(out: pathlib.Path, artifacts: dict[str, str]) -> None:
+    """Write a NEW private directory. Receipt is last; no overwriting or symlinks.
+
+    Linux directory FDs pin every traversed parent. The operator must own the
+    output parent; this is an offline artifact writer, never an installer.
+    """
+    if not out.is_absolute() or ".." in out.parts or out.name in ("", "."):
+        raise CandidateError("OUTPUT_ABSOLUTE_NEW_PATH_REQUIRED")
+    for protected in (ROOT, "/etc/dial-supabase", "/srv/dial-supabase"):
+        if out == pathlib.Path(protected) or pathlib.Path(protected) in out.parents:
+            raise CandidateError("OUTPUT_MUST_NOT_BE_ACTIVE_INSTALLATION")
+    flags = os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW
+    parent_fd = os.open("/", flags)
+    output_fd = None
+    written = []
+    created = False
+    try:
+        for component in out.parts[1:-1]:
+            next_fd = os.open(component, flags, dir_fd=parent_fd)
+            os.close(parent_fd)
+            parent_fd = next_fd
+        parent_stat = os.fstat(parent_fd)
+        if parent_stat.st_uid != os.geteuid():
+            raise CandidateError("OUTPUT_PARENT_MUST_BE_OPERATOR_OWNED")
+        if parent_stat.st_mode & (stat.S_IWGRP | stat.S_IWOTH):
+            raise CandidateError("OUTPUT_PARENT_MUST_BE_PRIVATE")
+        try:
+            os.mkdir(out.name, mode=0o700, dir_fd=parent_fd)
+        except FileExistsError as exc:
+            raise CandidateError("OUTPUT_ALREADY_EXISTS") from exc
+        created = True
+        output_fd = os.open(out.name, flags, dir_fd=parent_fd)
+        for name, text in artifacts.items():
+            if pathlib.Path(name).name != name:
+                raise CandidateError("ARTIFACT_FILENAME_INVALID")
+            fd = os.open(name, os.O_WRONLY | os.O_CREAT | os.O_EXCL | os.O_NOFOLLOW,
+                         0o600, dir_fd=output_fd)
+            written.append(name)
+            with os.fdopen(fd, "w", encoding="utf-8") as handle:
+                handle.write(text)
+                handle.flush()
+                os.fsync(handle.fileno())
+        os.fsync(output_fd)
+        os.fsync(parent_fd)
+    except BaseException:
+        if output_fd is not None:
+            for name in reversed(written):
+                os.unlink(name, dir_fd=output_fd)
+        if created:
+            os.rmdir(out.name, dir_fd=parent_fd)
+        raise
+    finally:
+        if output_fd is not None:
+            os.close(output_fd)
+        os.close(parent_fd)
 
 def output_manifest(p: list[dict], digest: str) -> str:
     return json.dumps({
@@ -202,16 +312,19 @@ def main(argv=None) -> int:
             return 0
         if args.out is None:
             raise CandidateError("OUTPUT_PATH_REQUIRED_FOR_RENDER")
-        args.out.mkdir(mode=0o700,parents=True,exist_ok=True)
-        (args.out/"projects.overlay.yml").write_text(emit_compose(projects),encoding="utf-8")
+        artifacts = {"projects.overlay.yml": emit_compose(projects)}
         for p in projects:
-            (args.out/(p["slug"]+".nginx.conf")).write_text(emit_nginx(p),encoding="utf-8")
-            (args.out/(p["slug"]+".required-secrets.txt")).write_text(secret_contract(p["slug"],p["database"],p["hostname"]),encoding="utf-8")
-        (args.out/"candidate-receipt.json").write_text(output_manifest(projects,digest),encoding="utf-8")
+            artifacts[p["slug"]+".nginx.conf"] = emit_nginx(p)
+            artifacts[p["slug"]+".required-secrets.txt"] = secret_contract(p["slug"],p["database"],p["hostname"])
+        receipt = json.loads(output_manifest(projects,digest))
+        receipt["artifact_sha256"] = {name: hashlib.sha256(text.encode()).hexdigest() for name,text in artifacts.items()}
+        receipt["readiness"] = "UNQUALIFIED_CANDIDATE"
+        artifacts["candidate-receipt.json"] = json.dumps(receipt,sort_keys=True,indent=2)+"\n"
+        write_bundle(args.out, artifacts)
         print("GENERATED_CANDIDATE_ONLY "+str(args.out))
         return 0
-    except (CandidateError,ValueError,KeyError,OSError) as exc:
-        print("REFUSED: "+str(exc),file=sys.stderr)
+    except (CandidateError,ValueError,KeyError,OSError,TypeError) as exc:
+        print("REFUSED: " + (str(exc) if isinstance(exc, CandidateError) else type(exc).__name__), file=sys.stderr)
         return 2
 
 if __name__=="__main__":

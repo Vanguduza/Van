@@ -1,36 +1,43 @@
 # DIAL Supabase Multi-Project Fabric — additive candidate
 
-Status: **SOURCE CANDIDATE ONLY — NOT LIVE / NOT REA-QUALIFIED / NOT PRODUCTION-QUALIFIED**.
-Owner target: one EXISTING Supabase installation on van-trading-core, one PostgreSQL 17 cluster, separate PostgreSQL databases that expose independent Supabase Auth/REST/Storage projects. NO extra complete Supabase Docker stacks and NO change to VATI trading ledger.
+Status: **LOCAL SOURCE/ROUTING TESTED; NOT LIVE, NOT REA-QUALIFIED, NOT SUPABASE-RUNTIME-QUALIFIED.**
 
-## What this package does
+Owner target: one existing Supabase installation on `van-trading-core`, one PostgreSQL 17 cluster, and separate databases that function as independent Supabase Auth/API projects. No complete duplicated Supabase stacks; preserve the existing VAN/VATI database, credentials and ledger.
 
-- Pins independently reviewed open-source candidate revisions and ships exact REA investigation requests (not fabricated REA results).
-- Provides a deterministic dependency-free project manifest validator and Compose/router renderer.
-- Adds only GoTrue, PostgREST, Storage and an internal routing process per project **to the current Compose project**. PostgreSQL/Studio/Realtime/Edge runtime/Supavisor remain shared in the intended final design.
-- Emits loopback-only canary gateway endpoints, and intentionally refuses unqualified Realtime and Functions routes (HTTP 503).
-- Never creates DBs, credentials, containers, Docker networks, privileges, DNS or processes by itself.
-- Does NOT patch the active VAN Compose, service unit or proxy; those are future gate-controlled integration changes.
+## Implemented in this candidate
 
-## Commands: code generation and offline tests ONLY
+The offline generator validates project identities and emits project-specific GoTrue, PostgREST, Storage and internal router service declarations for the **existing Compose model**. It creates no database, credential, container, network, DNS record or running service. PostgreSQL and the intended shared infrastructure are not duplicated.
 
-    python3 -m unittest discover -s deploy/van-trading-core/supabase/multiproject/tests -v
-    python3 deploy/van-trading-core/supabase/multiproject/tools/render.py validate --manifest deploy/van-trading-core/supabase/multiproject/projects.example.json
-    python3 deploy/van-trading-core/supabase/multiproject/tools/render.py render --manifest deploy/van-trading-core/supabase/multiproject/projects.example.json --out /tmp/dial-supabase-candidate
+Host routing rejects unknown/foreign hosts and replaces or strips forwarded tenant headers. Unqualified Functions, Realtime and readiness endpoints return HTTP 503. API-key admission, Supabase JWT verification, TLS, DB bootstrap and real isolation are **not proved by the router tests**. The generated router is not a production gateway.
 
-DO NOT invoke Docker Compose with this candidate until all documents' hard gates have been met, a compatible per-project bootstrap is proved and the existing vati-supabase.service launch is extended atomically. That unit currently uses --remove-orphans; launching extra services before amending the full configured Compose model risks destroying the extra containers at next restart.
+Output is deterministic and written only to a new private directory, without following parent/output symlinks or overwriting files. Every artifact is bound to its manifest by a SHA-256 receipt. Output into active Supabase paths is refused.
 
-## Required production gates
+## Run local tests and generate review artifacts
 
-1. REA static source investigations with genuine native receipts and qualified provider; source review alone is not REA output.
-2. Fresh qualified VM and Compose inventory (including memory, disk, subnet, backups and production transaction load).
-3. Immutable whole-VAN physical backup and tested restoration; VATI invariants and trading services green.
-4. Database-per-project bootstrap from matching PostgreSQL/Supabase image, no copying VAN's VATI schema; unique unprivileged DB login roles and CONNECT denial for other tenants; per-project GoTrue migrations.
-5. Project Auth/REST/Storage isolated and backed by schema, role, RLS and negative cross-project tests.
-6. Shared Realtime, Edge, Supavisor, Storage and Studio integrations qualified per project before enabling routes.
-7. Nissan GTR hosted schema/auth/data/storage/R2/payment continuity and rollback qualified.
-8. Zuul admission + exact SHAs + signed immutable deploy receipt + runtime verification.
+From the repository root, with Python 3.10+:
 
-See ARCHITECTURE.md, NISSAN_GTR_CUTOVER.md, SOURCE_EVIDENCE.md and rea-requests.json.
+```sh
+BASE=deploy/van-trading-core/supabase/multiproject
+python3 -m unittest discover -s "$BASE/tests" -v
+python3 "$BASE/tools/render.py" validate --manifest "$BASE/projects.rehearsal.json"
+WORK=$(mktemp -d)
+python3 "$BASE/tools/render.py" render --manifest "$BASE/projects.rehearsal.json" --out "$WORK/candidate"
+```
 
-No project is currently provisioned by this package. No running VM or service was changed.
+The routing tests use a local Nginx executable and six labelled loopback HTTP stubs, not GoTrue/PostgREST/Storage. They skip when Nginx is unavailable; skipped routing tests are NOT routing qualification. They start only their own temporary local processes and clean them up. Nginx 1.26.3 and Python 3.13.5 were used for the recorded 29-test run; the pinned container images have not been executed.
+
+`projects.rehearsal.json` contains Nissan GTR and a disposable fixture project, with `.invalid` domains. These are test identities, not deployed projects. Do not change `PLANNED` to `LIVE` to bypass validation.
+
+## Deployment gates remain mandatory
+
+1. Complete the five pinned REA investigations through an admitted native runtime; prepared requests and direct source research are not REA results.
+2. Obtain real VM CPU/memory/disk/IO/connection inventory and a verified whole-VAN backup/restore drill.
+3. Bootstrap separate project databases from the matching Supabase version, without copying VAN's existing `postgres` database. Qualify project-only logins, cluster-global role handling and cross-database CONNECT denial.
+4. Prove independent GoTrue users, sessions, signing keys, OAuth configuration, REST/RPC/RLS and Storage behavior using actual services, including cross-project negative tests.
+5. Qualify shared Realtime/Edge/Studio/Supavisor integration, API-key admission, TLS, resource limits and recovery before enabling their routes.
+6. Include every project overlay in the canonical `vati-supabase.service` Compose model before starting services. The existing `--remove-orphans` launch can remove overlays omitted at boot. This patch does not alter that unit.
+7. Qualify Nissan GTR's hosted schema/Auth/Storage/R2/payment migration and rollback, then obtain exact-source Zuul and owner deployment receipts.
+
+See `QUALIFICATION_2026-10-24.md`, `ARCHITECTURE.md`, `INTEGRATION_GATES.md`, `NISSAN_GTR_CUTOVER.md`, `SOURCE_EVIDENCE.md` and `rea-requests.json`.
+
+**No live project has been provisioned. No running VAN service has been changed.**

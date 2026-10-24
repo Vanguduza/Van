@@ -2,6 +2,7 @@
 import copy
 import importlib.util
 import pathlib
+import re
 import tempfile
 import unittest
 
@@ -58,7 +59,7 @@ class ProjectTests(unittest.TestCase):
         p=mod.validate(copy.deepcopy(DEFAULT))
         out=mod.emit_compose(p)
         ng=mod.emit_nginx(p[0])
-        self.assertNotIn("  db:",out)
+        self.assertNotIn("db", re.findall(r"^  ([a-z0-9-]+):$", out, flags=re.MULTILINE))
         self.assertNotIn("    container_name:",out)
         self.assertIn("supabase/gotrue:v2.196.0",out)
         self.assertIn("postgrest/postgrest:v14.17",out)
