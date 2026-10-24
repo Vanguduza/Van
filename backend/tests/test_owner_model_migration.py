@@ -33,10 +33,10 @@ LEGACY = [
 
 async def _real_episodes(store) -> dict[str, str]:
     from van_gateway.mission.models import MissionOrigin
-    from van_gateway.mission.service import MissionService
+    from legacy_mission_fixtures import PreLearningMissionService
     from van_gateway.models import OriginChannel
 
-    missions = MissionService(store)
+    missions = PreLearningMissionService(store)
     ids = {}
     for name in ("a", "b", "c"):
         m = await missions.create(owner_principal_id="owner", origin=MissionOrigin.OWNER_VOICE,

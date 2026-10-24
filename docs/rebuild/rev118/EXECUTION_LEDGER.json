@@ -172,19 +172,10 @@
     "note": "Opus unavailable; owner transferred build to Codex. No independent reviewer identity is inferred from another model or session."
   },
   "checkpoint": {
-    "updated_utc": "2026-10-24T07:17:25.945464+00:00",
+    "updated_utc": "2026-10-24T07:43:02.790737+00:00",
     "branch": "ccr-9e07e1af-8mgz1p",
     "base": "b02075f327ea8180ab6d269eba358cf8c5479878",
-    "background_jobs": [
-      {
-        "job": "exact815 full backend/contracts then trading with private PostgreSQL and source storage audit",
-        "session": 21708,
-        "source": "815405e9676407a38f43df0b2b9a8bd7bd87f74d",
-        "worktree": "/workspace/van-autonomous-qualification-20261022/Van",
-        "stage_file": "/tmp/van-815405e9-qualification-stage.txt",
-        "state": "RUNNING_NOT_A_PASS"
-      }
-    ],
+    "background_jobs": [],
     "last_validation": [
       "Project Truth verify at 1cab6b2f: GREEN, 533 commits, exit 0 (receipts/PROJECT_TRUTH_VERIFY_1cab6b2f.json; covers that range only)",
       "pre001.py check/selftest 20/20; ap001.py check/selftest 13/13; pre002_dossiers check/selftest 11/11; neg/truth/decision review checks 0",
@@ -350,7 +341,9 @@
       "Hosted81540070199094:actualall374retained cases caught;18emulatorPASS4artworkskips,VITS3.995/2.516 methodseconds,PG26voice117trading2538PASS1DDSskip; originalDDSreadkey/trustedmainfailures remain. Native40070199122actual0errors0warningsfreshEX5; invalid4/noEX5.",
       "Learning recovery isolated WIP:4genuinebeforefailures;137focusedPASS0skip;27recoveryPASS0skip including actualstartup/scheduler and two abrupt process exits;15introducedfaults caught/restored. Migration marker atomicity must be fixed/tested before source integration.",
       "Durable local mission learning: additive atomic migration57; original mission/stage deliveries commit with capture and terminal lifecycle facts, fresh owner authorization has a new delivery generation. Bounded startup/scheduler repair uses fair native queue order and exact-generation success/failure acknowledgements, preserving pending work after restart, cancellation or uncertain reply. Native strategy class/envelope/state/activity reread under writer fence, atomic strategy/count/original receipt, one sample on concurrent replay/commit-ack loss; historical terminal samples explicitly LEGACY_UNRECONCILED rather than recounted. Original verification and late fingerprint outcome recovered; owner reassessment/erasure/fresh consent preserved. New queue/sample receipts have parent retention and non-content disclosure. Existing chart3table policies corrected; migration fixture now models real55-to-partial56 upgrade.4original+2migration+1generationrace failures reproduced;31native recovery/373audited integrated/26registry/80rebuild PASS0skip;19final fault/control pairs caught/restored. Earlier retainedC7eight/RC2five caught before final migration/generation changes; current374case383edit preflight0findings, full next-source corpus pending. No newAPI/UI or complete legacy/feedback/unit/live claim.",
-      "Native mission capture atomicity: original mission row, requiredMISSION_CREATEDevent and learning delivery share one transaction; failed event write rolls all back before optional learning. Publish only after commit/native event visibility. Original command join recovers same complete capture after lost commitACK or actual abrupt process exit, without duplicate event/mission or action dispatch.4genuine before failures;80focused/6oracles/379audited integrated/26registry/80rebuild PASS0skip;4deliberate fault/control pairs caught/restored;374case383edit preflight unchanged0findings. Native post-insert test nowrequireszeroorphanrows. Automatic busredelivery/historicalorphanrepair/wholeunit/live notclaimed."
+      "Native mission capture atomicity: original mission row, requiredMISSION_CREATEDevent and learning delivery share one transaction; failed event write rolls all back before optional learning. Publish only after commit/native event visibility. Original command join recovers same complete capture after lost commitACK or actual abrupt process exit, without duplicate event/mission or action dispatch.4genuine before failures;80focused/6oracles/379audited integrated/26registry/80rebuild PASS0skip;4deliberate fault/control pairs caught/restored;374case383edit preflight unchanged0findings. Native post-insert test nowrequireszeroorphanrows. Automatic busredelivery/historicalorphanrepair/wholeunit/live notclaimed.",
+      "Private-core import boundary source: sharedStore now imports byte-identicalMIGRATION56 SQL from storage.chart_migration rather than trading package; old chart schema path reexports for compatibility. Original private forbidden-prefix contract unchanged. Directbefore importclosureFAIL reproduced; old trading import reintroduction caught after passingcontrol/restoration. Six legacy45/46 migration fixtures now use explicitpre57 test-only native producer; currentorigin-rule/runtimeassertions preserved, no productionmissingtablefallback.172focused audited0storagewrites/26registry/80rebuild PASS0skip;1fault/control caught;374case383edit preflight0findings. Fullolder815run7202PASS2FAIL9skip retained; no nativehost/privateplacement/unit/live acceptance.",
+      "Exact815 fullbackend completed7213 cases:7202PASS2FAIL9SKIP2769.51s; storageaudit0 andprivatePGstoppedremoved. Retentionalreadyfixeda837 and importboundarycorrectedthispacket. FulltradingNOT_RUN. Oldcompletedownedfixturescleaned; frozenQA815nowinactive/clean."
     ],
     "environment_notes": [
       "clone must be unshallowed (git fetch --unshallow) and PR heads fetched (+refs/pull/*/head:refs/remotes/origin/pr/*) before pre001.py",
@@ -361,9 +354,9 @@
       "Python 3.12 venv from backend/requirements.lock for CI-equivalent runs; stream-host venv from deploy/van-browser-stream/requirements.lock",
       "Desktop Commander read-only device listing was refused by the session permission policy; native readback prepared as pre003/NATIVE_READBACK_REQUEST.md"
     ],
-    "next_action": "Publish tested atomic mission-capture packet and continue canonical funding/accountingBE006/007 source. Read native cTrader vendored cash-flow schema, existing account snapshot/portfolio and shared SQLite/PostgreSQL event-ledger writer boundaries; implement source-bound cash-flow ingestion, exact unitized flow-neutral accounting and owner read contracts before provider rail activation. Do not infer cash flow from equity movement, count withdrawals as losses, let deposits erase economic drawdown, or silently treat non-withdrawable credit as risk capital. Current exact815 QA21708 remains running on protected frozen checkout; collect actual final failures/XML/audit/privatePGcleanup and clean only owned inactive fixtures. New components are not whole-backend/native/provider/production/handset acceptance. Preserve all131units/93features/324requirements/1610identities, no newfrontend beforeBG001, and continue autonomous work without a routine-checkpoint stop.",
-    "previous_head": "a8374cc48ef25773270e9c049ed9d624b7af716d",
-    "current_packet": "Atomic original mission capture source tested; continuing funding and accounting next."
+    "next_action": "Publish private-storage import and legacy fixture compatibility fix, then advance the inactive clean frozenQA815checkout to that exact new commit and run a fresh full backend/contracts+trading privatePG/storage-audit qualification with separate logs/headassert. Continue BE006/007 in /tmp/van-funding-work-20261024: native cTrader cash history reader plus immutable money/scope DTOs and67passing source tests are uncommitted/isolated; flow-neutral ledger, accounting, service ingestion and owner read contracts remain to implement. Explicit-copy only owned funding files later; rootprivatefix differs from its e22base and is not a reason to overwritecurrentroot. Preserve93features131units324req1610acceptanceIDs, nofrontendbeforeBG001, no newfinancialauthority/nativehost/production/S24 claims, no routinecheckpointstop.",
+    "previous_head": "e22a4e7cccca690df5b9cb197f440eb06fb03f06",
+    "current_packet": "Private-core storage import boundary source tested; continuing funding/accounting."
   },
   "observations": [
     "OBS-001 BE-002 debug cleartext",
@@ -421,6 +414,6 @@
       "evidence": "ci/MUTATION_CORPUS_c2a27848.json"
     }
   ],
-  "current_action": "Publish tested atomic mission-capture packet and continue canonical funding/accountingBE006/007 source. Read native cTrader vendored cash-flow schema, existing account snapshot/portfolio and shared SQLite/PostgreSQL event-ledger writer boundaries; implement source-bound cash-flow ingestion, exact unitized flow-neutral accounting and owner read contracts before provider rail activation. Do not infer cash flow from equity movement, count withdrawals as losses, let deposits erase economic drawdown, or silently treat non-withdrawable credit as risk capital. Current exact815 QA21708 remains running on protected frozen checkout; collect actual final failures/XML/audit/privatePGcleanup and clean only owned inactive fixtures. New components are not whole-backend/native/provider/production/handset acceptance. Preserve all131units/93features/324requirements/1610identities, no newfrontend beforeBG001, and continue autonomous work without a routine-checkpoint stop.",
-  "updated_at_utc": "2026-10-24T07:17:25.945464+00:00"
+  "current_action": "Publish private-storage import and legacy fixture compatibility fix, then advance the inactive clean frozenQA815checkout to that exact new commit and run a fresh full backend/contracts+trading privatePG/storage-audit qualification with separate logs/headassert. Continue BE006/007 in /tmp/van-funding-work-20261024: native cTrader cash history reader plus immutable money/scope DTOs and67passing source tests are uncommitted/isolated; flow-neutral ledger, accounting, service ingestion and owner read contracts remain to implement. Explicit-copy only owned funding files later; rootprivatefix differs from its e22base and is not a reason to overwritecurrentroot. Preserve93features131units324req1610acceptanceIDs, nofrontendbeforeBG001, no newfinancialauthority/nativehost/production/S24 claims, no routinecheckpointstop.",
+  "updated_at_utc": "2026-10-24T07:43:02.790737+00:00"
 }

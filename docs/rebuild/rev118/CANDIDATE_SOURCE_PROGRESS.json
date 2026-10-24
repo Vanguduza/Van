@@ -1,6 +1,6 @@
 {
   "schema": "van.rebuild.candidate-source-progress/1",
-  "updated_at_utc": "2026-10-24T07:17:25.945464+00:00",
+  "updated_at_utc": "2026-10-24T07:43:02.790737+00:00",
   "programme": "Rev1.18; original 131 unit IDs and dependencies retained",
   "authority": "auth-20261022-owner-autonomous-candidate-build",
   "meaning": "Candidate source progress is separate from admitted unit acceptance. Independent certificates, owner decisions, live effects and release gates remain unissued. No unit is declared complete by this record.",
@@ -303,6 +303,10 @@
         {
           "description": "Native mission capture atomicity: original mission row, requiredMISSION_CREATEDevent and learning delivery share one transaction; failed event write rolls all back before optional learning. Publish only after commit/native event visibility. Original command join recovers same complete capture after lost commitACK or actual abrupt process exit, without duplicate event/mission or action dispatch.4genuine before failures;80focused/6oracles/379audited integrated/26registry/80rebuild PASS0skip;4deliberate fault/control pairs caught/restored;374case383edit preflight unchanged0findings. Native post-insert test nowrequireszeroorphanrows. Automatic busredelivery/historicalorphanrepair/wholeunit/live notclaimed.",
           "evidence": "backend/BE-003_MISSION_CAPTURE_ATOMICITY.md; receipts/MISSION_CAPTURE_ATOMICITY_SOURCE_20261024.json"
+        },
+        {
+          "description": "Private-core import boundary source: sharedStore now imports byte-identicalMIGRATION56 SQL from storage.chart_migration rather than trading package; old chart schema path reexports for compatibility. Original private forbidden-prefix contract unchanged. Directbefore importclosureFAIL reproduced; old trading import reintroduction caught after passingcontrol/restoration. Six legacy45/46 migration fixtures now use explicitpre57 test-only native producer; currentorigin-rule/runtimeassertions preserved, no productionmissingtablefallback.172focused audited0storagewrites/26registry/80rebuild PASS0skip;1fault/control caught;374case383edit preflight0findings. Fullolder815run7202PASS2FAIL9skip retained; no nativehost/privateplacement/unit/live acceptance.",
+          "evidence": "backend/BE-003_PRIVATE_STORAGE_IMPORT_BOUNDARY.md; receipts/PRIVATE_STORAGE_IMPORT_BOUNDARY_SOURCE_20261024.json"
         }
       ]
     },
@@ -367,6 +371,10 @@
         {
           "description": "Local account unlink binds exact resolved review/native funds/history/credential disposition; actual account lease row and submission guard exclude runtime, unresolved effects/exposure/stale facts retain profile. Shared/external credential references preserved, including late ownership drift. Typed gateway approval/native replay and existing Android confirmation wired; MT5 pending-orders and native cTrader/Deriv funding facts refuse missing observations. 2675 full trading/recovery pass0skip realPG(cleaned),91focused/29writer/3actualPG/78rebuild,16faults+controls caught/restored; Android222JVM/2APKs/lint0ErrorFatal. Source only; completed real-provider finality and all original gates remain.",
           "evidence": "backend/BE-004_ACCOUNT_RETIREMENT.md; receipts/ACCOUNT_RETIREMENT_SOURCE_20261023.json"
+        },
+        {
+          "description": "Private-core import boundary source: sharedStore now imports byte-identicalMIGRATION56 SQL from storage.chart_migration rather than trading package; old chart schema path reexports for compatibility. Original private forbidden-prefix contract unchanged. Directbefore importclosureFAIL reproduced; old trading import reintroduction caught after passingcontrol/restoration. Six legacy45/46 migration fixtures now use explicitpre57 test-only native producer; currentorigin-rule/runtimeassertions preserved, no productionmissingtablefallback.172focused audited0storagewrites/26registry/80rebuild PASS0skip;1fault/control caught;374case383edit preflight0findings. Fullolder815run7202PASS2FAIL9skip retained; no nativehost/privateplacement/unit/live acceptance.",
+          "evidence": "backend/BE-003_PRIVATE_STORAGE_IMPORT_BOUNDARY.md; receipts/PRIVATE_STORAGE_IMPORT_BOUNDARY_SOURCE_20261024.json"
         }
       ]
     },

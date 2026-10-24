@@ -11,7 +11,7 @@ import aiosqlite
 
 SCHEMA_VERSION = 57
 
-from van_gateway.trading.chart_schema import MIGRATION_56
+from van_gateway.storage.chart_migration import MIGRATION_56
 from van_gateway.learning.schema import MIGRATION_57
 
 MIGRATION_41 = """

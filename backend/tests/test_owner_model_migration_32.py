@@ -19,7 +19,7 @@ from van_gateway.understanding.personal_context import build_personal_capsule
 
 async def _missions(store, owner: str, *names: str, source_command_id: str | None = None):
     from van_gateway.mission.models import AuthorityEnvelope, MissionOrigin
-    from van_gateway.mission.service import MissionService
+    from legacy_mission_fixtures import PreLearningMissionService
     from van_gateway.models import OriginChannel
 
     kw = {}
@@ -27,7 +27,7 @@ async def _missions(store, owner: str, *names: str, source_command_id: str | Non
         kw["authority_envelope"] = AuthorityEnvelope(source_command_id=source_command_id)
     out = []
     for name in names:
-        m = await MissionService(store).create(
+        m = await PreLearningMissionService(store).create(
             owner_principal_id=owner, origin=MissionOrigin.OWNER_VOICE,
             origin_channel=OriginChannel.VOICE, title=name, goal=name, **kw)
         out.append(m.mission_id)
