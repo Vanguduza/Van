@@ -1,0 +1,967 @@
+{
+  "schema": "van.rebuild.native-funding-risk-fence-source/1",
+  "observed_at_utc": "2026-10-24T11:48:18.079106+00:00",
+  "source_parent": "edaebda2fc47aebb02cf2286a88f60b2068024aa",
+  "source_sha256": {
+    "trading/vati/app/account_service.py": "010ba29e1f81a43f13b9c2581c52738abb51abbe2d8d2436114917eb69c0ab03",
+    "trading/vati/app/cycle.py": "34d58fe61e7130a44d341a01d9563fc84ae3d5b945636264f0e85af4c5d299af",
+    "trading/tests/test_funding_risk_fence.py": "985ad71afe80fd194c055b7e6c1ccaec1e731d3a5e811dbe401578b1d8f47ed0",
+    "trading/tests/test_funding_risk_fence_postgres.py": "a0df510df9dd157eacc3f8bacc6bf1c84590bffd0562b8b4f2e65a88ea53d3c0",
+    "trading/vati/funding/risk_fence.py": "02bf74cc388966af2e66710e93b5cbc5e2d5196d413d6d4820fb720d28f02801"
+  },
+  "integration_preimages": {
+    "source_parent": "edaebda2fc47aebb02cf2286a88f60b2068024aa",
+    "files": {
+      "trading/vati/app/account_service.py": {
+        "preimage_sha256": "52a93052341881a72a7dc6fccc0eef7420e114ebcf011d48917805f18706c410",
+        "candidate_sha256": "010ba29e1f81a43f13b9c2581c52738abb51abbe2d8d2436114917eb69c0ab03",
+        "earlier_candidate_sha256": [
+          "035230e45f9b296f6df0d15692c5c1cf3ca931587223a9bc41e282df67c8054c"
+        ]
+      },
+      "trading/vati/app/cycle.py": {
+        "preimage_sha256": "359703a38bba7896dab0f4ff22682566bd6dddb06b64c0a5b002ab6a408573d6",
+        "candidate_sha256": "34d58fe61e7130a44d341a01d9563fc84ae3d5b945636264f0e85af4c5d299af",
+        "earlier_candidate_sha256": [
+          "961fa164377345b0795170f08f7b2567916bc17dd3b9d575fc093263086a84a6"
+        ]
+      },
+      "trading/tests/test_funding_risk_fence.py": {
+        "preimage_sha256": null,
+        "candidate_sha256": "985ad71afe80fd194c055b7e6c1ccaec1e731d3a5e811dbe401578b1d8f47ed0",
+        "earlier_candidate_sha256": [
+          "a9285d648790ce767227971e7ffbd091870ac774cc12dfc452e56a7e52057dc2"
+        ]
+      },
+      "trading/tests/test_funding_risk_fence_postgres.py": {
+        "preimage_sha256": null,
+        "candidate_sha256": "a0df510df9dd157eacc3f8bacc6bf1c84590bffd0562b8b4f2e65a88ea53d3c0",
+        "earlier_candidate_sha256": [
+          "a0df510df9dd157eacc3f8bacc6bf1c84590bffd0562b8b4f2e65a88ea53d3c0"
+        ]
+      },
+      "trading/vati/funding/risk_fence.py": {
+        "preimage_sha256": null,
+        "candidate_sha256": "02bf74cc388966af2e66710e93b5cbc5e2d5196d413d6d4820fb720d28f02801",
+        "earlier_candidate_sha256": [
+          "02bf74cc388966af2e66710e93b5cbc5e2d5196d413d6d4820fb720d28f02801"
+        ]
+      }
+    }
+  },
+  "executions": {
+    "focused_native_backtest_and_risk": {
+      "tests": 131,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "passed": 131,
+      "seconds": 7.144,
+      "xml_sha256": "738a67d44d2871bd2cc808a8190f7096f233eb8db2ced33a706e8d67a4126cdc"
+    },
+    "real_postgresql_native_fence_and_originals": {
+      "tests": 90,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "passed": 90,
+      "seconds": 1.32,
+      "xml_sha256": "9bc5e6ca7dc2ab4813e9ad5be7b97ee42e036dad3696e83ffe464b74ff8e8632"
+    },
+    "paired_gateway_recovery_tickets_and_native_api": {
+      "tests": 122,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "passed": 122,
+      "seconds": 47.997,
+      "xml_sha256": "57ac75d8fde774a60e42a2b7844cc0431de22b41cc6b90b62d69a0e88009203f"
+    },
+    "owner_registry_and_runtime_contracts": {
+      "tests": 35,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "passed": 35,
+      "seconds": 4.173,
+      "xml_sha256": "f9bd8ca32d4571bab5f0d846db98d951b37b7839d0ae07cf0973cf58d98f7b41"
+    },
+    "rebuild": {
+      "tests": 80,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "passed": 80,
+      "seconds": 29.757,
+      "xml_sha256": "ac2c22b4a662cea9d1f76b30e4f7779f61695968eda938874d8d5dae52fd9044"
+    }
+  },
+  "executions_overlap": true,
+  "pending_checks": [],
+  "storage_audit": {
+    "schema": "van.source-storage-audit/1",
+    "forbidden_events": [],
+    "source_sha256": "d4e270150fb0da6e8d79b449dd0de68fd1f97b3ccea3d282f31d91297edbd495",
+    "root": "/workspace/van-review-2026-10-18/publish",
+    "scope": "SQLite opens, path-based writable opens and directory/link/rename/delete events under data and backend/data",
+    "limits": "Python audit events only; existing fd writes, native-library raw I/O and external processes are not an OS sandbox. Git state is checked separately."
+  },
+  "private_pg_cleanup": {
+    "van-native-risk-fence-pg": {
+      "stopped": true,
+      "removed": true
+    },
+    "van-native-risk-fence-gateway-pg": {
+      "stopped": true,
+      "removed": true
+    }
+  },
+  "fault_campaign": {
+    "definitions": [
+      [
+        "let a deposit launder raw equity risk",
+        [
+          [
+            "trading/vati/funding/risk_fence.py",
+            "if period[\"external_flows\"]:",
+            "if False:"
+          ]
+        ],
+        "trading/tests/test_funding_risk_fence.py::test_actual_authority_cannot_admit_raw_equity_profit_created_by_a_deposit"
+      ],
+      [
+        "accept an uncovered new native balance",
+        [
+          [
+            "trading/vati/funding/risk_fence.py",
+            "mark.balance_version != closing.balance_version",
+            "False"
+          ],
+          [
+            "trading/vati/funding/risk_fence.py",
+            "mark.balance != closing.balance",
+            "False"
+          ]
+        ],
+        "trading/tests/test_funding_risk_fence.py::test_earlier_covered_statement_does_not_hide_a_new_native_deposit"
+      ],
+      [
+        "borrow native funding before original availability",
+        [
+          [
+            "trading/vati/funding/risk_fence.py",
+            "and period[\"knowledge_through_received_ms\"] > now_ms",
+            "and False"
+          ]
+        ],
+        "trading/tests/test_funding_risk_fence.py::test_original_availability_cannot_be_used_before_the_risk_decision"
+      ],
+      [
+        "borrow a future current native mark",
+        [
+          [
+            "trading/vati/funding/risk_fence.py",
+            "if now_ms < mark.observed_at_ms:",
+            "if False:"
+          ]
+        ],
+        "trading/tests/test_funding_risk_fence.py::test_unknown_or_incoherent_current_native_facts_hold_new_risk[future_mark]"
+      ],
+      [
+        "allow unrelated business income to remove a loss restriction",
+        [
+          [
+            "trading/vati/funding/risk_fence.py",
+            "and classify(row[\"operation\"], Decimal(row[\"delta\"]))[\"category\"] == \"OTHER_BUSINESS_INCOME_OR_EXPENSE\"",
+            "and False"
+          ]
+        ],
+        "trading/tests/test_funding_risk_fence.py::test_unrelated_ib_income_cannot_remove_a_daily_loss_limit"
+      ],
+      [
+        "reset original risk from a later first native observation",
+        [
+          [
+            "trading/vati/funding/risk_fence.py",
+            "if event.event_time_ms < baseline.observed_at_ms or event.received_time_ms < first.received_time_ms:",
+            "if False:"
+          ]
+        ],
+        "trading/tests/test_funding_risk_fence.py::test_preexisting_native_risk_cannot_be_rebaselined_from_later_first_observation"
+      ],
+      [
+        "forget a native order before the new baseline",
+        [
+          [
+            "trading/vati/funding/risk_fence.py",
+            "for event in ledger.iter(EventKind.ORDER_COMMAND):",
+            "for event in ():"
+          ]
+        ],
+        "trading/tests/test_funding_risk_fence.py::test_original_order_before_the_new_native_baseline_cannot_be_forgotten"
+      ],
+      [
+        "borrow future native risk history",
+        [
+          [
+            "trading/vati/funding/risk_fence.py",
+            "if max(event.event_time_ms, event.received_time_ms) > now_ms:",
+            "if False:"
+          ]
+        ],
+        "trading/tests/test_funding_risk_fence.py::test_future_native_risk_history_does_not_supply_decision_time_evidence"
+      ],
+      [
+        "treat a paper label as a simulated adapter",
+        [
+          [
+            "trading/vati/funding/risk_fence.py",
+            "if isinstance(adapter, PaperAdapter):",
+            "if getattr(adapter, \"venue\", None) == \"paper\":"
+          ]
+        ],
+        "trading/tests/test_funding_risk_fence.py::test_explicit_paper_cohort_is_preserved_but_a_venue_label_cannot_bypass_native_evidence"
+      ],
+      [
+        "admit equity that differs from the actual native account mark",
+        [
+          [
+            "trading/vati/funding/risk_fence.py",
+            "or mark.balance != account.balance or mark.net_equity != account.equity",
+            "or mark.balance != account.balance or False"
+          ]
+        ],
+        "trading/tests/test_funding_risk_fence.py::test_unknown_or_incoherent_current_native_facts_hold_new_risk[account_equity_mismatch]"
+      ],
+      [
+        "admit new risk after a journal failure",
+        [
+          [
+            "trading/vati/funding/risk_fence.py",
+            "return FundingRiskFence(False, \"FUNDING_RISK_EVIDENCE_UNAVAILABLE:\"",
+            "return FundingRiskFence(True, \"FUNDING_RISK_EVIDENCE_UNAVAILABLE:\""
+          ]
+        ],
+        "trading/tests/test_funding_risk_fence.py::test_evidence_failure_is_held_without_leaking_provider_error_notes"
+      ],
+      [
+        "disconnect the single-symbol native fence",
+        [
+          [
+            "trading/vati/app/cycle.py",
+            "preservation_blocks_new_risk=not funding.available,",
+            "preservation_blocks_new_risk=False,"
+          ]
+        ],
+        "trading/tests/test_funding_risk_fence.py::test_both_original_native_snapshot_producers_hold_capital_changed_risk[single]"
+      ],
+      [
+        "disconnect the account native fence",
+        [
+          [
+            "trading/vati/app/account_service.py",
+            "not funding.available or (self.lifecycle.preservation_blocks_new_risk",
+            "False or (self.lifecycle.preservation_blocks_new_risk"
+          ]
+        ],
+        "trading/tests/test_funding_risk_fence.py::test_both_original_native_snapshot_producers_hold_capital_changed_risk[account]"
+      ],
+      [
+        "thin the non-effect owner-ticket draft path",
+        [
+          [
+            "trading/vati/funding/risk_fence.py",
+            "if isinstance(adapter, OwnerTicketAdapter):",
+            "if False:"
+          ]
+        ],
+        "trading/tests/test_funding_risk_fence.py::test_owner_ticket_drafting_does_not_gain_a_native_accounting_certificate"
+      ],
+      [
+        "date single-runtime evidence before broker reads finish",
+        [
+          [
+            "trading/vati/app/cycle.py",
+            "now_ms = max(now_ms, self._lease_clock())",
+            "now_ms = now_ms"
+          ]
+        ],
+        "trading/tests/test_funding_risk_fence.py::test_risk_capture_uses_post_native_io_clock_and_ages_quotes"
+      ],
+      [
+        "date account evidence before all broker reads finish",
+        [
+          [
+            "trading/vati/app/account_service.py",
+            "now_ms = max(now_ms, self.clock())",
+            "now_ms = now_ms"
+          ]
+        ],
+        "trading/tests/test_funding_risk_fence.py::test_risk_capture_uses_post_native_io_clock_and_ages_quotes"
+      ],
+      [
+        "backdate the original risk record after a delayed native response",
+        [
+          [
+            "trading/vati/app/cycle.py",
+            "now_ms = max(now_ms, getattr(self, \"_risk_snapshot_ms\", now_ms))",
+            "now_ms = now_ms"
+          ]
+        ],
+        "trading/tests/test_funding_risk_fence.py::test_single_runtime_records_risk_after_the_facts_it_waited_for"
+      ],
+      [
+        "keep a single-runtime quote artificially fresh during broker IO",
+        [
+          [
+            "trading/vati/app/cycle.py",
+            "quote_age_ms += now_ms - started_ms",
+            "quote_age_ms += 0"
+          ]
+        ],
+        "trading/tests/test_funding_risk_fence.py::test_risk_capture_uses_post_native_io_clock_and_ages_quotes"
+      ],
+      [
+        "keep an account-runtime quote artificially fresh during broker IO",
+        [
+          [
+            "trading/vati/app/account_service.py",
+            "quote_age += max(0, now_ms - started_ms)",
+            "quote_age += 0"
+          ]
+        ],
+        "trading/tests/test_funding_risk_fence.py::test_risk_capture_uses_post_native_io_clock_and_ages_quotes"
+      ]
+    ],
+    "records": [
+      {
+        "case": 0,
+        "phase": "control",
+        "reason": "let a deposit launder raw equity risk",
+        "exit_code": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioral_assertion_failures": 0,
+        "xml_sha256": "6debdae118d0bc83df47473aaa01113d80624c06deefadaba6c72602333643b9"
+      },
+      {
+        "case": 0,
+        "phase": "fault",
+        "reason": "let a deposit launder raw equity risk",
+        "exit_code": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioral_assertion_failures": 1,
+        "xml_sha256": "9097c650fc4ce96b0785117fa10b9dbe9132a4957e5b50dfb5d0fc9c1b23a8d6"
+      },
+      {
+        "case": 1,
+        "phase": "control",
+        "reason": "accept an uncovered new native balance",
+        "exit_code": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioral_assertion_failures": 0,
+        "xml_sha256": "95877b0e7244b8d3777904f2eff02b6cc307df2e7ed6640d4710ff0df99d5941"
+      },
+      {
+        "case": 1,
+        "phase": "fault",
+        "reason": "accept an uncovered new native balance",
+        "exit_code": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioral_assertion_failures": 1,
+        "xml_sha256": "8f3f1baaf7a82b637eca0bf3f687a0dca8b34f9e993abe0446824e53d9506d41"
+      },
+      {
+        "case": 2,
+        "phase": "control",
+        "reason": "borrow native funding before original availability",
+        "exit_code": 0,
+        "counts": {
+          "tests": 2,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioral_assertion_failures": 0,
+        "xml_sha256": "8d8493f501cbb40118265243956c94c959fd820ad94fb20421d19c6067ebd64e"
+      },
+      {
+        "case": 2,
+        "phase": "fault",
+        "reason": "borrow native funding before original availability",
+        "exit_code": 1,
+        "counts": {
+          "tests": 2,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioral_assertion_failures": 1,
+        "xml_sha256": "9e749501057edf9a2389232b1f5b2e033c8d2db5cd39a6b956f473ce9cf48f4f"
+      },
+      {
+        "case": 3,
+        "phase": "control",
+        "reason": "borrow a future current native mark",
+        "exit_code": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioral_assertion_failures": 0,
+        "xml_sha256": "21c0ccb0659b5c95e97f2ccab87272b0158f293683bd3b76e32fba70a8130f0a"
+      },
+      {
+        "case": 3,
+        "phase": "fault",
+        "reason": "borrow a future current native mark",
+        "exit_code": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioral_assertion_failures": 1,
+        "xml_sha256": "c2b52e729e1369d7e59cbe5b96c274b21802694592a756638c3e0c76c57b1686"
+      },
+      {
+        "case": 4,
+        "phase": "control",
+        "reason": "allow unrelated business income to remove a loss restriction",
+        "exit_code": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioral_assertion_failures": 0,
+        "xml_sha256": "bdcbe1bf5c45a25f9a6f8f48cdef9ad6c1fc5866983dcde0761dd8e7f927d6f2"
+      },
+      {
+        "case": 4,
+        "phase": "fault",
+        "reason": "allow unrelated business income to remove a loss restriction",
+        "exit_code": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioral_assertion_failures": 1,
+        "xml_sha256": "2c2e879b34d972949d2f5766f9a97b026fe859b2c568c97382bcf838d507e7b1"
+      },
+      {
+        "case": 5,
+        "phase": "control",
+        "reason": "reset original risk from a later first native observation",
+        "exit_code": 0,
+        "counts": {
+          "tests": 2,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioral_assertion_failures": 0,
+        "xml_sha256": "9af1db4febd7f808dbdf79932c734751526f273a40782c509e90c9498e65af39"
+      },
+      {
+        "case": 5,
+        "phase": "fault",
+        "reason": "reset original risk from a later first native observation",
+        "exit_code": 1,
+        "counts": {
+          "tests": 2,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioral_assertion_failures": 1,
+        "xml_sha256": "4942b7efbffc81c7715b31794e8075f0d20acc65f383cf27a5f1b52663bbb2e1"
+      },
+      {
+        "case": 6,
+        "phase": "control",
+        "reason": "forget a native order before the new baseline",
+        "exit_code": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioral_assertion_failures": 0,
+        "xml_sha256": "f482a43f03f575af0d21dc768937cc21f234aaedfd5723a3092ebcee8e679fbf"
+      },
+      {
+        "case": 6,
+        "phase": "fault",
+        "reason": "forget a native order before the new baseline",
+        "exit_code": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioral_assertion_failures": 1,
+        "xml_sha256": "755b08d28e365d9c311ddae353eeb0c08a0e044a4b162e337bef9d095c9809b4"
+      },
+      {
+        "case": 7,
+        "phase": "control",
+        "reason": "borrow future native risk history",
+        "exit_code": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioral_assertion_failures": 0,
+        "xml_sha256": "a23ccc84aa1c271898692000447a3e247a281be5026e4ba73913f0d0b2acb63e"
+      },
+      {
+        "case": 7,
+        "phase": "fault",
+        "reason": "borrow future native risk history",
+        "exit_code": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioral_assertion_failures": 1,
+        "xml_sha256": "6eee203accfe18cbd38156adb6639cf943a35441440419efd53689cd63c80f57"
+      },
+      {
+        "case": 8,
+        "phase": "control",
+        "reason": "treat a paper label as a simulated adapter",
+        "exit_code": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioral_assertion_failures": 0,
+        "xml_sha256": "e1471aefdc4879a454b95a8734956bda4474a60e261be83343e86de381276b11"
+      },
+      {
+        "case": 8,
+        "phase": "fault",
+        "reason": "treat a paper label as a simulated adapter",
+        "exit_code": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioral_assertion_failures": 1,
+        "xml_sha256": "bc96802178890bbd3c154caa7758b4ffefbe6da610c71202b4d83d92311a33c8"
+      },
+      {
+        "case": 9,
+        "phase": "control",
+        "reason": "admit equity that differs from the actual native account mark",
+        "exit_code": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioral_assertion_failures": 0,
+        "xml_sha256": "6c67e72c231a3c1d24cbe44519bf84038733d30aeeca74c71deca4d19ec27e9d"
+      },
+      {
+        "case": 9,
+        "phase": "fault",
+        "reason": "admit equity that differs from the actual native account mark",
+        "exit_code": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioral_assertion_failures": 1,
+        "xml_sha256": "052f77c92c139a4b6a23f17a501bbae46f65ffcf16303bebf13e3bd73ffa6130"
+      },
+      {
+        "case": 10,
+        "phase": "control",
+        "reason": "admit new risk after a journal failure",
+        "exit_code": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioral_assertion_failures": 0,
+        "xml_sha256": "4135bb6e7c61ab1d80434c55ad1370b6d2a0657a4aed281f2d923a97f12b6a50"
+      },
+      {
+        "case": 10,
+        "phase": "fault",
+        "reason": "admit new risk after a journal failure",
+        "exit_code": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioral_assertion_failures": 1,
+        "xml_sha256": "f2e0146b927c107135eaf1445eda0ba27be4ccc24e369e44d67dd8e650d3ffc0"
+      },
+      {
+        "case": 11,
+        "phase": "control",
+        "reason": "disconnect the single-symbol native fence",
+        "exit_code": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioral_assertion_failures": 0,
+        "xml_sha256": "fd8bbdfd2514e4b7cf99ecf0b26ba0d0d876cbc88da6d31ecc7c3dea69ae62c7"
+      },
+      {
+        "case": 11,
+        "phase": "fault",
+        "reason": "disconnect the single-symbol native fence",
+        "exit_code": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioral_assertion_failures": 1,
+        "xml_sha256": "fc1c9c03ba92d2bd3df32e50e97fd3cbe92938dd1cdd64d1c90e54bcd7148546"
+      },
+      {
+        "case": 12,
+        "phase": "control",
+        "reason": "disconnect the account native fence",
+        "exit_code": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioral_assertion_failures": 0,
+        "xml_sha256": "9f8d7eb015d50bfdcff442be9c38cbebe7d3bf47d7bfa2ac251d7498047c4a51"
+      },
+      {
+        "case": 12,
+        "phase": "fault",
+        "reason": "disconnect the account native fence",
+        "exit_code": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioral_assertion_failures": 1,
+        "xml_sha256": "7e95780d24760061bf52e19bb24a2d1400bcf5b3204ee7606f9e8e2daeda14be"
+      },
+      {
+        "case": 13,
+        "phase": "control",
+        "reason": "thin the non-effect owner-ticket draft path",
+        "exit_code": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioral_assertion_failures": 0,
+        "xml_sha256": "d81947f9b33513fa25ddd65345c2120ca51731c5e699136527f9772ccc07e813"
+      },
+      {
+        "case": 13,
+        "phase": "fault",
+        "reason": "thin the non-effect owner-ticket draft path",
+        "exit_code": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioral_assertion_failures": 1,
+        "xml_sha256": "c0718164ad9d1bfa92be4c5a78725ba91f8434211f3fc4149d5ca45a42f7d4c4"
+      },
+      {
+        "case": 14,
+        "phase": "control",
+        "reason": "date single-runtime evidence before broker reads finish",
+        "exit_code": 0,
+        "counts": {
+          "tests": 3,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioral_assertion_failures": 0,
+        "xml_sha256": "f519b880046c28da9b878f9d9d87137cd5cdada741fe88a916ef9da2672a7632"
+      },
+      {
+        "case": 14,
+        "phase": "fault",
+        "reason": "date single-runtime evidence before broker reads finish",
+        "exit_code": 1,
+        "counts": {
+          "tests": 3,
+          "failures": 2,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioral_assertion_failures": 2,
+        "xml_sha256": "f004f74cd7668bd2b2bf154f7335cadefaa62192e40ed846f5a8fd32eb1f9e82"
+      },
+      {
+        "case": 15,
+        "phase": "control",
+        "reason": "date account evidence before all broker reads finish",
+        "exit_code": 0,
+        "counts": {
+          "tests": 3,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioral_assertion_failures": 0,
+        "xml_sha256": "9058186d64c95b439d848fbb9c0a74498c869496092d0ecd2a1203b59c4cc4d2"
+      },
+      {
+        "case": 15,
+        "phase": "fault",
+        "reason": "date account evidence before all broker reads finish",
+        "exit_code": 1,
+        "counts": {
+          "tests": 3,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioral_assertion_failures": 1,
+        "xml_sha256": "48bfcdcbfcf4257e7b23a1181c83f4216ec0dc2879e5fe3056a693b1b397bebf"
+      },
+      {
+        "case": 16,
+        "phase": "control",
+        "reason": "backdate the original risk record after a delayed native response",
+        "exit_code": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioral_assertion_failures": 0,
+        "xml_sha256": "3a5cbde8bb596a734bc0980493192f35c6f755c495f1849514fbecefd75f4cb5"
+      },
+      {
+        "case": 16,
+        "phase": "fault",
+        "reason": "backdate the original risk record after a delayed native response",
+        "exit_code": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioral_assertion_failures": 1,
+        "xml_sha256": "b9be153d53da5bf28e784e1bdd4fa38846e65812662910862864f99e028dfd66"
+      },
+      {
+        "case": 17,
+        "phase": "control",
+        "reason": "keep a single-runtime quote artificially fresh during broker IO",
+        "exit_code": 0,
+        "counts": {
+          "tests": 3,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioral_assertion_failures": 0,
+        "xml_sha256": "fc1dd8efcb3e896dc16a3ffa624a54f9bb419158a39be497cc6713ebb604ede8"
+      },
+      {
+        "case": 17,
+        "phase": "fault",
+        "reason": "keep a single-runtime quote artificially fresh during broker IO",
+        "exit_code": 1,
+        "counts": {
+          "tests": 3,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioral_assertion_failures": 1,
+        "xml_sha256": "87cf60e10420dc5c956dcd9a6e0b4a9c8f64ec626edf6e5866eaa61e65e2c96a"
+      },
+      {
+        "case": 18,
+        "phase": "control",
+        "reason": "keep an account-runtime quote artificially fresh during broker IO",
+        "exit_code": 0,
+        "counts": {
+          "tests": 3,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioral_assertion_failures": 0,
+        "xml_sha256": "34f699e8193a98342a635bad2567b5deb58c0946d1d91bd5d40aca5253473d72"
+      },
+      {
+        "case": 18,
+        "phase": "fault",
+        "reason": "keep an account-runtime quote artificially fresh during broker IO",
+        "exit_code": 1,
+        "counts": {
+          "tests": 3,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioral_assertion_failures": 1,
+        "xml_sha256": "33adecc22721e4eb0b06ef00bc7ade6c992bbd26858d23f1a342528214114b55"
+      }
+    ],
+    "before": {
+      "trading/vati/funding/risk_fence.py": "02bf74cc388966af2e66710e93b5cbc5e2d5196d413d6d4820fb720d28f02801",
+      "trading/vati/app/cycle.py": "34d58fe61e7130a44d341a01d9563fc84ae3d5b945636264f0e85af4c5d299af",
+      "trading/vati/app/account_service.py": "010ba29e1f81a43f13b9c2581c52738abb51abbe2d8d2436114917eb69c0ab03"
+    },
+    "after": {
+      "trading/vati/funding/risk_fence.py": "02bf74cc388966af2e66710e93b5cbc5e2d5196d413d6d4820fb720d28f02801",
+      "trading/vati/app/cycle.py": "34d58fe61e7130a44d341a01d9563fc84ae3d5b945636264f0e85af4c5d299af",
+      "trading/vati/app/account_service.py": "010ba29e1f81a43f13b9c2581c52738abb51abbe2d8d2436114917eb69c0ab03"
+    },
+    "source_restored": true
+  },
+  "original_committed_runtime_defects": {
+    "source_head": "43582a3a5e80bbb4eb01b8c139bacfcd048b31d2",
+    "runtime_sha256": {
+      "trading/vati/app/cycle.py": "359703a38bba7896dab0f4ff22682566bd6dddb06b64c0a5b002ab6a408573d6",
+      "trading/vati/app/account_service.py": "52a93052341881a72a7dc6fccc0eef7420e114ebcf011d48917805f18706c410"
+    },
+    "counts": {
+      "tests": 2,
+      "failures": 2,
+      "errors": 0,
+      "skipped": 0
+    },
+    "report_sha256": "2ddf23549af4d3e12d65e127ad75676705ebdc32a1bd95e8aa4e81f6b43f6f29",
+    "meaning": "Both original snapshot methods omit the native funding hold. The unchanged current fixture rejects both originals. Final candidate hashes and final fault controls are independently listed above."
+  },
+  "retained_nonpasses": {
+    "first_gateway_without_pg": {
+      "tests": 122,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 1,
+      "passed": 121,
+      "seconds": 46.534,
+      "xml_sha256": "e2e0d5f723db237051247f41f89b401408cf4dbee55b0d618a62bd86b193becc"
+    },
+    "first_fence_fixture": {
+      "tests": 17,
+      "failures": 1,
+      "errors": 0,
+      "skipped": 0,
+      "passed": 16,
+      "seconds": 0.74,
+      "xml_sha256": "4b1cd89833d9212c7bf4e0383ff7c7d4b21ac7eeb897064c8c5bfe8809bd7820"
+    },
+    "first_broader_integration": {
+      "tests": 27,
+      "passed": 25,
+      "failures": 1,
+      "errors": 1,
+      "skipped": 0,
+      "basis": "Terminal output; the original XML path was later reused by the separate gateway run.",
+      "log_sha256": "a8468d7d561a86a48bd82a14bd81abda38b12c9ccfb11d4f2cb71a13f3388bc7"
+    },
+    "notes": [
+      "The first native single-runtime test omitted its pre-deposit in-memory baseline. The real hold already passed; the explicit original baseline was then set in the fixture.",
+      "The initial broad fence blocked the non-effect OwnerTicketAdapter draft path. The unchanged original ZSE backtest caught it; explicit draft-only behavior is now preserved without certifying funds.",
+      "A new authority control initially used a nonexistent fixture, then a stop below the existing0.00030 minimum. It now uses the original intent helper and a valid0.00050 stop without changing production constraints.",
+      "The initial gateway run executed121 and skipped1 actual-PG recovery case because no database binding was supplied. The final isolated actual-PG run executes all122 without skips."
+    ]
+  },
+  "semantics": [
+    "Both native runtime risk snapshots use original scoped cash/deal/mark evidence and the existing sealed preservation gate. Deposits, withdrawals, business income, incomplete/conflicting/stale balance versions, missing provider accounting or future/unresolved information hold automated entries.",
+    "The fence reads the ledger only and sends no native request. A true PaperAdapter remains simulation; OwnerTicketAdapter remains a non-effect A4 draft, not a native funds/execution certificate. A venue label cannot claim either behavior.",
+    "Broker reads finish before risk capture; elapsed time ages quotes, negative quote ages stay invalid, and the single-symbol risk event uses the resulting capture time. Serialized snapshot fields and original mandate/threshold/lifecycle protection remain unchanged.",
+    "Native snapshots and monetary/API fixture tests are source verification only, not actual provider execution, signed financial authority or a claim of profitable trading."
+  ],
+  "original_mutation_preflight": {
+    "schema": "van.rebuild.mutation-registry-preflight/1",
+    "registry_sha256": "35d10c7b0f2b8319b7f7305828262c972b2a6451139d75b9e83c7d0062282955",
+    "mutation_count": 374,
+    "edit_count": 383,
+    "findings": [],
+    "execution_state": "NOT_RUN",
+    "status": "ANCHORS_VALID_BASELINES_AND_MUTATIONS_NOT_EXECUTED"
+  },
+  "historical_qualifications": [
+    "receipts/FULL_TRADING_SOURCE_43582a3a.json: actual complete2676pass0skip on that earlier exact source.",
+    "receipts/HOSTED_BROWSER_SOURCE_edaebda2.json: all11 actual original guard cases pass0skip on the earlier exact source; HOSTED_SOURCE_edaebda2_PARTIAL_FAILED.json retains368 actual catches with6 C12 cases not run, emulator18pass4skip and known DDS/main plus template failures.",
+    "receipts/CI_TEMPLATE_SOURCE_REPAIR_20261024.json: workflow/template identity restored;17 contracts and57/57 affected local-shard mutations pass. No whole374 current-source hosted claim."
+  ],
+  "remaining": [
+    "Complete flow-adjusted risk baselines after capital/business changes, day/week policy semantics, dispatch-time revalidation, joint order/funding reservations, historical normalized valuations/credit, other provider rails and corrections/reversals.",
+    "Full BE-007 quote/beneficiary/approval/reserve/submit/unknown-outcome reconciliation/settle/compensate/origin-bound hosted handoff.",
+    "Complete current-source backend/trading/hosted qualifications, private DDS CI credential and trusted-main intake; native F15/BG/policy/provider/deployment/security/recovery/provisioning and S24 acceptance."
+  ],
+  "qualifications": {
+    "whole_unit_acceptance": "NOT_ISSUED",
+    "funding_risk_policy_qualification": "NOT_ISSUED",
+    "execution_authority_granted": false,
+    "financial_effects_submitted": false,
+    "production_deployed": false,
+    "handset_tested": false,
+    "backend_complete": false,
+    "profitability_claimed": false
+  }
+}

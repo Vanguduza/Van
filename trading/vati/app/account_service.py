@@ -659,6 +659,7 @@ class AccountCoordinatorService:
     def _snapshot_for(self, candidate: CandidateOpportunity) -> RiskSnapshot:
         assert self.adapter is not None and self.account is not None
         contract = self.contracts[candidate.symbol.upper()]
+        started_ms = self.clock()
         acct = self.adapter.sync_account()
         now_ms = self.clock()
         if self.peak_equity == 0:
@@ -668,8 +669,15 @@ class AccountCoordinatorService:
         report = reconcile(self._ledger_positions(), self.adapter.positions(), account_verified=acct.verified)
         from vati.app.account_recovery import unresolved_account_entries
         originals_unresolved=bool(unresolved_account_entries(self))
+        positions = self._open_positions()
+        store_ok = self._risk_store_ok()
+        now_ms = max(now_ms, self.clock())
+        from vati.funding.risk_fence import funding_risk_fence
+        funding = funding_risk_fence(self._ledger, self.adapter, acct, now_ms=now_ms)
         state = self.evaluators[candidate.symbol.upper()].last_state
         quote_age = state.quote_age_ms if state is not None else self.cfg.max_quote_age_ms + 1
+        if quote_age >= 0:
+            quote_age += max(0, now_ms - started_ms)
         blackout = bool(
             state is not None and
             state.event_window in (EventWindowState.PRE_BLACKOUT, EventWindowState.POST_BLACKOUT))
@@ -690,20 +698,21 @@ class AccountCoordinatorService:
             loss_streak_lock=(self.learning.recovery_issue if getattr(self, "learning", None) else "") or (streak.lock if streak is not None else ""),
             loss_streak_multiplier=streak.risk_multiplier if streak is not None else Decimal("1"),
             drawdown_top_state=self._drawdown_top_state(),
-            open_positions=self._open_positions(), symbol_contract=contract,
+            open_positions=positions, symbol_contract=contract,
             quote_age_ms=quote_age, max_quote_age_ms=self.cfg.max_quote_age_ms,
             broker_connected=hb.connected, reconciliation_ok=report.permit_new_orders and not originals_unresolved,
             clock_sync_ok=abs(hb.server_offset_ms) < 2000,
-            risk_store_ok=self._risk_store_ok(), market_integrity=integrity,
+            risk_store_ok=store_ok, market_integrity=integrity,
             tier1_event_blackout_active=blackout,
             margin_level_pct=acct.margin_level_pct, free_margin=acct.free_margin,
             kill_switch_triggers=frozenset(self.kill.active),
             preservation_blocks_new_risk=(
-                self.lifecycle.preservation_blocks_new_risk
-                if self.lifecycle is not None else False),
+                not funding.available or (self.lifecycle.preservation_blocks_new_risk
+                if self.lifecycle is not None else False)),
             preservation_reason=(
-                self.lifecycle.preservation_reason
-                if self.lifecycle is not None else ""),
+                (self.lifecycle.preservation_reason if self.lifecycle is not None else "")
+                + ((";" if self.lifecycle is not None and self.lifecycle.preservation_reason else "")
+                   + funding.reason if funding.reason else "")),
         )
 
     def _risk(self, intent, snapshot: RiskSnapshot):

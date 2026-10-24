@@ -116,7 +116,8 @@
       "acceptance": "NOT_ISSUED",
       "evidence": [
         "backend/BE-006_NATIVE_FUNDING_OBSERVATIONS.md; backend/FUNDING_OWNER_READ_CONTRACT.md; receipts/NATIVE_FUNDING_OBSERVATIONS_SOURCE_20261024.json",
-        "backend/BE-006_NATIVE_BALANCE_RECONCILIATION.md; receipts/NATIVE_BALANCE_RECONCILIATION_SOURCE_20261024.json"
+        "backend/BE-006_NATIVE_BALANCE_RECONCILIATION.md; receipts/NATIVE_BALANCE_RECONCILIATION_SOURCE_20261024.json",
+        "backend/BE-006_NATIVE_FUNDING_RISK_FENCE.md; receipts/NATIVE_FUNDING_RISK_FENCE_SOURCE_20261024.json"
       ]
     }
   },
@@ -181,7 +182,7 @@
     "note": "Opus unavailable; owner transferred build to Codex. No independent reviewer identity is inferred from another model or session."
   },
   "checkpoint": {
-    "updated_utc": "2026-10-24T10:38:38.321356+00:00",
+    "updated_utc": "2026-10-24T11:44:12.362788+00:00",
     "branch": "ccr-9e07e1af-8mgz1p",
     "base": "b02075f327ea8180ab6d269eba358cf8c5479878",
     "background_jobs": [],
@@ -425,6 +426,6 @@
       "evidence": "ci/MUTATION_CORPUS_c2a27848.json"
     }
   ],
-  "current_action": "Publish the source-bound native deal/balance reconciliation component with actual source tests and retained local Android resource failures. Continue native cash-neutral risk baselines, funding/order reservations and BE-007 original provider/payment paths. The 12e2 hosted run now actually catches all374 retained mutations; DDS read-key and trusted-main jobs still fail. Complete current broad backend qualification and original programme; no new frontend before BG-001 or native/live/whole-unit acceptance.",
-  "updated_at_utc": "2026-10-24T10:38:38.321356+00:00"
+  "current_action": "Publish the source-tested native funding admission fence, actual broker-read clock/quote ageing correction and byte-identical CI workflow template repair. Requalify the resulting exact source, then continue dispatch-time risk revalidation, joint order/funding reservations, complete flow-adjusted risk/accounting and BE-007 provider/payment/handoff work. Earlier4358 full trading2676pass0skip and EDA fresh browser11pass0skip are retained source-bound evidence, not acceptance of new source. Keep all original programme/native/main/provider/deployment/S24 obligations and BG-001.",
+  "updated_at_utc": "2026-10-24T11:44:12.362788+00:00"
 }

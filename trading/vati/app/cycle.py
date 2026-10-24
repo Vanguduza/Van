@@ -297,6 +297,7 @@ class DecisionCycle:
         self._period_baselines_restored = True
 
     def snapshot(self, *, now_ms: int, quote_age_ms: int, strategy_id: str = "") -> RiskSnapshot:
+        started_ms = now_ms
         self.restore_risk_baselines(now_ms)
         acct = self.adapter.sync_account()
         if self.peak_equity == ZERO:
@@ -306,23 +307,35 @@ class DecisionCycle:
         if self.week_start_equity == ZERO:
             self.week_start_equity = acct.equity
         self.peak_equity = max(self.peak_equity, acct.equity)
-        streak = self.streaks.verdict(strategy_id, now_ms) if strategy_id or self.streaks.recovery_issue else None
         hb = self.adapter.heartbeat(now_ms=now_ms)
+        positions = self._open_positions()
+        reconciled = self._reconciliation_ok(account_verified=acct.verified)
+        store_ok = self._risk_store_ok()
+        if callable(getattr(self, "_lease_clock", None)):
+            now_ms = max(now_ms, self._lease_clock())
+        self._risk_snapshot_ms = now_ms
+        if quote_age_ms >= 0:
+            quote_age_ms += now_ms - started_ms
+        from vati.funding.risk_fence import funding_risk_fence
+        funding = funding_risk_fence(self.ledger, self.adapter, acct, now_ms=now_ms)
+        streak = self.streaks.verdict(strategy_id, now_ms) if strategy_id or self.streaks.recovery_issue else None
         return RiskSnapshot(now_unix=now_ms // 1000, account_alias=acct.account_alias, account_verified=acct.verified, equity=acct.equity, balance=acct.balance,
                             peak_equity=self.peak_equity, day_start_equity=self.day_start_equity, week_start_equity=self.week_start_equity,
                             consecutive_losses=streak.losses if streak else 0,
                             loss_streak_lock=(self.learning.recovery_issue if self.learning is not None else "") or (streak.lock if streak else ""),
                             loss_streak_multiplier=streak.risk_multiplier if streak else Decimal("1"),
                             drawdown_top_state=self._drawdown_top_state(),
-                            open_positions=self._open_positions(), symbol_contract=self.cfg.contract, quote_age_ms=quote_age_ms, max_quote_age_ms=self.cfg.max_quote_age_ms,
+                            open_positions=positions, symbol_contract=self.cfg.contract, quote_age_ms=quote_age_ms, max_quote_age_ms=self.cfg.max_quote_age_ms,
                             broker_connected=hb.connected,
-                            reconciliation_ok=self._reconciliation_ok(account_verified=acct.verified),
+                            reconciliation_ok=reconciled,
                             clock_sync_ok=abs(hb.server_offset_ms) < 2000,
-                            risk_store_ok=self._risk_store_ok(),
+                            risk_store_ok=store_ok,
                             market_integrity=self.integrity,
                             tier1_event_blackout_active=self._tier1_blackout(now_ms=now_ms),
                             margin_level_pct=acct.margin_level_pct,
                             free_margin=acct.free_margin,
+                            preservation_blocks_new_risk=not funding.available,
+                            preservation_reason=funding.reason,
                             kill_switch_triggers=frozenset(self.kill.active))
 
     def roll_day(self, equity: Decimal, *, new_week: bool = False) -> None:
@@ -358,6 +371,7 @@ class DecisionCycle:
             return CycleResult(state.as_of_ms, state.state_hash, oa.decision, oa.abstain_reason)
         intent = oa.intent
         snap = self.snapshot(now_ms=now_ms, quote_age_ms=state.quote_age_ms, strategy_id=intent.strategy_id)
+        now_ms = max(now_ms, getattr(self, "_risk_snapshot_ms", now_ms))
         decision = self.authority.evaluate_safe(intent, snap)
         self._log(EventKind.RISK_DECISION, {"inputs": {"intent": intent_to_dict(intent), "snapshot": snapshot_to_dict(snap), "mandate": cfg.mandate_dict}, "decision": decision.to_dict()}, now_ms=now_ms, corr=intent.trade_intent_id)
         metrics.inc("vati_decisions_total", outcome=decision.decision.value)
