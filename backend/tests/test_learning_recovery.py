@@ -366,7 +366,7 @@ async def test_failed_schema_version_marker_rolls_back_new_learning_tables_and_c
     assert (await store.fetchone('SELECT MAX(version) AS version FROM schema_migrations'))['version']==56
     await store.execute('DROP TRIGGER reject_learning_schema_version')
     await store.migrate()
-    assert (await store.fetchone('SELECT MAX(version) AS version FROM schema_migrations'))['version']==57
+    assert (await store.fetchone('SELECT MAX(version) AS version FROM schema_migrations'))['version']==storage.SCHEMA_VERSION
     assert not await store.fetchall('SELECT * FROM mission_learning_outbox')
 
 @pytest.mark.asyncio
@@ -404,7 +404,7 @@ asyncio.run(Store(sys.argv[1]).migrate())
     assert 'mission_learning_outbox' not in names and 'mission_strategy_observations' not in names
     assert (await store.fetchone('SELECT MAX(version) AS version FROM schema_migrations'))['version']==56
     await store.migrate()
-    assert (await store.fetchone('SELECT MAX(version) AS version FROM schema_migrations'))['version']==57
+    assert (await store.fetchone('SELECT MAX(version) AS version FROM schema_migrations'))['version']==storage.SCHEMA_VERSION
 
 @pytest.mark.asyncio
 @pytest.mark.parametrize('old_failure',[False,True])

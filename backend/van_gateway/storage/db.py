@@ -13,8 +13,7 @@ SCHEMA_VERSION = 59
 
 from van_gateway.storage.chart_migration import MIGRATION_56
 from van_gateway.learning.schema import MIGRATION_57
-from van_gateway.trading.monitor_schema import MIGRATION_58
-from van_gateway.trading.screener_migration import MIGRATION_59
+from van_gateway.storage.monitor_migrations import MIGRATION_58, MIGRATION_59
 
 MIGRATION_41 = """
 CREATE TABLE IF NOT EXISTS automation_owner_plans (

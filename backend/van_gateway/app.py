@@ -915,6 +915,7 @@ def create_app() -> FastAPI:
         owner_fact_author=owner_fact_author,
         reminders=reminders,
         trading=trading,
+        market_monitors=market_monitors,
         jev=jev_projection.client,
         learning=learning,
         google=google,

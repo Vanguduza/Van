@@ -309,6 +309,12 @@ def build_mission_registry(
     knowledge=owner_runtime.knowledge)` — pick up both new strategies with no wiring change.
     """
     registry = VerifierRegistry()
+    async def alert_control_observe(context):
+        from van_gateway.trading.monitor_commands import control_readback
+        command_id = (context.get("authority_envelope") or {}).get("source_command_id")
+        return await control_readback(store, command_id)
+    registry.register("market-alert-control-readback", ObservationVerifier(alert_control_observe,
+        verifier_version="market-alert-control-readback/1", evidence_prefix="market-monitor-operation://"))
     async def browser_resume_observe(context):
         from van_gateway.command.authority import CommandAuthorityService
         command_id = str((context.get("authority_envelope") or {}).get("source_command_id") or "")

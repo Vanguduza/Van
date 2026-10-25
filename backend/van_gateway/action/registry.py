@@ -224,6 +224,17 @@ BUILTIN_ACTIONS: tuple[ActionDefinition, ...] = (
             "properties": {"notebook_id": "string", "source_names": "array"},
         },
     ),
+    *[
+        ActionDefinition(
+            action_id="trading.alert." + operation,
+            action_class=ActionClass.A2, mutates_state=True,
+            allowed_principals={PrincipalType.OWNER_DEVICE},
+            verifier_type=VerifierType.STATE_PREDICATE,
+            no_stale_replay=True, max_age_seconds=30,
+            parameter_schema={"required": ["alert_id", "expected_revision"],
+                "properties": {"alert_id": "string", "expected_revision": "integer"}},
+        ) for operation in ("pause", "restart", "delete")
+    ],
     ActionDefinition(
         action_id="trading.halt",
         action_class=ActionClass.A4,

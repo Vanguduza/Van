@@ -1,6 +1,6 @@
 {
   "schema": "van.rebuild.candidate-source-progress/1",
-  "updated_at_utc": "2026-10-25T03:48:22.093160+00:00",
+  "updated_at_utc": "2026-10-25T16:35:49.259639+00:00",
   "programme": "Rev1.18; original 131 unit IDs and dependencies retained",
   "authority": "auth-20261022-owner-autonomous-candidate-build",
   "meaning": "Candidate source progress is separate from admitted unit acceptance. Independent certificates, owner decisions, live effects and release gates remain unissued. No unit is declared complete by this record.",
@@ -307,6 +307,10 @@
         {
           "description": "Private-core import boundary source: sharedStore now imports byte-identicalMIGRATION56 SQL from storage.chart_migration rather than trading package; old chart schema path reexports for compatibility. Original private forbidden-prefix contract unchanged. Directbefore importclosureFAIL reproduced; old trading import reintroduction caught after passingcontrol/restoration. Six legacy45/46 migration fixtures now use explicitpre57 test-only native producer; currentorigin-rule/runtimeassertions preserved, no productionmissingtablefallback.172focused audited0storagewrites/26registry/80rebuild PASS0skip;1fault/control caught;374case383edit preflight0findings. Fullolder815run7202PASS2FAIL9skip retained; no nativehost/privateplacement/unit/live acceptance.",
           "evidence": "backend/BE-003_PRIVATE_STORAGE_IMPORT_BOUNDARY.md; receipts/PRIVATE_STORAGE_IMPORT_BOUNDARY_SOURCE_20261024.json"
+        },
+        {
+          "description": "Reconstructed exact signed owner A2 alert pause/restart/delete commands with original request/revision binding, writer-lock expiry and independent historical control receipt verification; actual SQL and gateway44cases pass, six faults caught/restored. Private-core migration boundary and learning/reminder integration regressions repaired with unchanged original refusal/recovery assertions. Whole-unit, native/provider/Android acceptance remains unissued.",
+          "evidence": "backend/BE-003_MONITOR_INTEGRATION_RECOVERY.md; receipts/OWNER_ALERT_COMMANDS_SOURCE_20261025.json"
         }
       ]
     },
@@ -835,6 +839,10 @@
         {
           "description": "Captured-revision watchlist market rows with saved ordering/favourites, native identity filters and search; explicit closed-bar/previous-bar basis, source age/hash and null unsupported metrics.19pure cases pass;2actualSQL+1pairedHTTP separatelypass. Latest fresh22run19pass/3native-thread startup failures retained; no combinedgreenclaim. Nativefeed/spread/dynamic/voice/Android and provider obligations remain.",
           "evidence": "backend/BE-020_MARKET_MONITORS.md; receipts/WATCHLIST_MARKET_ROWS_SOURCE_20261025.json"
+        },
+        {
+          "description": "Reconstructed exact signed owner A2 alert pause/restart/delete commands with original request/revision binding, writer-lock expiry and independent historical control receipt verification; actual SQL and gateway44cases pass, six faults caught/restored. Private-core migration boundary and learning/reminder integration regressions repaired with unchanged original refusal/recovery assertions. Whole-unit, native/provider/Android acceptance remains unissued.",
+          "evidence": "backend/BE-003_MONITOR_INTEGRATION_RECOVERY.md; receipts/OWNER_ALERT_COMMANDS_SOURCE_20261025.json"
         }
       ]
     },
@@ -1041,6 +1049,10 @@
         {
           "description": "Conversation integrity: serialized main creation and follow-up decisions; atomic message/draft/projection/follow-up parent updates; coherent thread snapshot; latest bounded history with actual total and scoped cursor paging, stable equal-time ordering; original canonical projection identity/scope, including late archived result without reopening. Typed API and existing Android SDK method added; UI paging consumer remains pending.8 original failures corrected;26 focused/169 integrated audited/29 owner contracts/79 rebuild pass0skip;12 fault/control pairs caught and source restored after an initial timing survivor. Android222 JVM pass0skip, debugAPK assembled and lint passes with pinned sealed voice assets. No history-as-authority, promotion dispatch, new frontend, whole-unit/native/production/S24 claim.",
           "evidence": "backend/BE-003_029_CONVERSATION_STATE_INTEGRITY.md; receipts/CONVERSATION_STATE_SOURCE_20261023.json"
+        },
+        {
+          "description": "Reconstructed exact signed owner A2 alert pause/restart/delete commands with original request/revision binding, writer-lock expiry and independent historical control receipt verification; actual SQL and gateway44cases pass, six faults caught/restored. Private-core migration boundary and learning/reminder integration regressions repaired with unchanged original refusal/recovery assertions. Whole-unit, native/provider/Android acceptance remains unissued.",
+          "evidence": "backend/BE-003_MONITOR_INTEGRATION_RECOVERY.md; receipts/OWNER_ALERT_COMMANDS_SOURCE_20261025.json"
         }
       ]
     },
@@ -1971,6 +1983,10 @@
         {
           "description": "Current Markdown registry preserves all42currentfeatures/78surfaces/445endpoints/279schemas plus the complete93-feature frozen planned inventory, copied without newUI or implementation claims. README points to generated registry; all gaps/actions/states retained.",
           "evidence": "backend/OWNER_FRONTEND_SCREEN_REGISTRY.md; tools/rebuild/render_frontend_registry.py"
+        },
+        {
+          "description": "Reconstructed exact signed owner A2 alert pause/restart/delete commands with original request/revision binding, writer-lock expiry and independent historical control receipt verification; actual SQL and gateway44cases pass, six faults caught/restored. Private-core migration boundary and learning/reminder integration regressions repaired with unchanged original refusal/recovery assertions. Whole-unit, native/provider/Android acceptance remains unissued.",
+          "evidence": "backend/BE-003_MONITOR_INTEGRATION_RECOVERY.md; receipts/OWNER_ALERT_COMMANDS_SOURCE_20261025.json"
         }
       ]
     },

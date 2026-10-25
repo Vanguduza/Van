@@ -106,6 +106,7 @@ class CommandOrchestrator:
         browser_resume: Any | None = None,
         browser_artifacts: Any | None = None,
         automation: Any | None = None,
+        market_monitors: Any | None = None,
     ) -> None:
         self.auth = auth
         self.idempotency = idempotency
@@ -140,6 +141,7 @@ class CommandOrchestrator:
         self.browser_preparation = browser_preparation
         self.browser_artifacts = browser_artifacts
         self.automation = automation
+        self.market_monitors = market_monitors
         self.local_executors = dict(LOCAL_EXECUTORS)
         self.jev = jev
         # GAP-F-008 (strategies_for read-back) — what VAN has already learned that this
@@ -1451,6 +1453,7 @@ class CommandOrchestrator:
             now_ms=int(time.time() * 1000),
             browser_plans=self.browser_plans, browser_preparation=self.browser_preparation, browser_resume=self.browser_resume, execution_id=execution.execution_id,
             automation=self.automation,
+            market_monitors=self.market_monitors,
             browser_artifacts=self.browser_artifacts,
         )
         executor = self.local_executors[resolution.action_id]()

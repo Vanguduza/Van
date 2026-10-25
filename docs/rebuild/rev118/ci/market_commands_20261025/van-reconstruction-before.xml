@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="3" skipped="0" tests="5" time="10.514" timestamp="2026-10-25T16:20:07.869569+00:00" hostname="2c5a245e39f1"><testcase classname="backend.tests.test_learning_recovery" name="test_failed_schema_version_marker_rolls_back_new_learning_tables_and_can_retry" time="0.363"><failure message="assert 59 == 57">tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-0/test_failed_schema_version_mar0')
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x7fd750540170&gt;
+
+    @pytest.mark.asyncio
+    async def test_failed_schema_version_marker_rolls_back_new_learning_tables_and_can_retry(tmp_path,monkeypatch):
+        import van_gateway.storage.db as storage
+        store=storage.Store(str(tmp_path/'marker.sqlite3'))
+        with monkeypatch.context() as old:
+            old.setattr(storage,'MIGRATIONS',{k:v for k,v in storage.MIGRATIONS.items() if k&lt;=56})
+            old.setattr(storage,'SCHEMA_VERSION',56)
+            await store.migrate()
+        await store.execute("CREATE TRIGGER reject_learning_schema_version BEFORE INSERT ON schema_migrations WHEN NEW.version=57 BEGIN SELECT RAISE(ABORT,'schema marker unavailable'); END")
+        with pytest.raises(Exception,match='schema marker unavailable'):await store.migrate()
+        names=[r['name'] for r in await store.fetchall("SELECT name FROM sqlite_master WHERE type='table'")]
+        assert 'mission_learning_outbox' not in names and 'mission_strategy_observations' not in names
+        assert (await store.fetchone('SELECT MAX(version) AS version FROM schema_migrations'))['version']==56
+        await store.execute('DROP TRIGGER reject_learning_schema_version')
+        await store.migrate()
+&gt;       assert (await store.fetchone('SELECT MAX(version) AS version FROM schema_migrations'))['version']==57
+E       assert 59 == 57
+
+backend/tests/test_learning_recovery.py:369: AssertionError</failure></testcase><testcase classname="backend.tests.test_learning_recovery" name="test_process_death_before_schema_marker_leaves_a_retryable_original_database" time="0.359"><failure message="assert 59 == 57">tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-0/test_process_death_before_sche0')
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x7fd750309880&gt;
+
+    @pytest.mark.asyncio
+    async def test_process_death_before_schema_marker_leaves_a_retryable_original_database(tmp_path,monkeypatch):
+        import json,os,subprocess,sys
+        from pathlib import Path
+        import van_gateway.storage.db as storage
+        database=tmp_path/'migration-crash.sqlite3';store=storage.Store(str(database))
+        with monkeypatch.context() as old:
+            old.setattr(storage,'MIGRATIONS',{k:v for k,v in storage.MIGRATIONS.items() if k&lt;=56})
+            old.setattr(storage,'SCHEMA_VERSION',56)
+            await store.migrate()
+        code="""
+    import asyncio,os,sys
+    from contextlib import asynccontextmanager
+    from van_gateway.storage.db import Store
+    original=Store.connection
+    @asynccontextmanager
+    async def crashing(self):
+     async with original(self) as db:
+      class Connection:
+       def __getattr__(self,name):return getattr(db,name)
+       async def execute(self,sql,params=()):
+        if 'INSERT INTO schema_migrations(' in sql and params and params[0]==57:os._exit(32)
+        return await db.execute(sql,params)
+      yield Connection()
+    Store.connection=crashing
+    asyncio.run(Store(sys.argv[1]).migrate())
+    """
+        root=Path(__file__).resolve().parents[2]
+        result=await asyncio.to_thread(subprocess.run,[sys.executable,'-B','-c',code,str(database)],cwd=root,
+            env=dict(os.environ,PYTHONPATH='backend:backend/tests:.:trading'),stdout=subprocess.PIPE,stderr=subprocess.PIPE,text=True,timeout=30)
+        assert result.returncode==32,result.stderr
+        names=[r['name'] for r in await store.fetchall("SELECT name FROM sqlite_master WHERE type='table'")]
+        assert 'mission_learning_outbox' not in names and 'mission_strategy_observations' not in names
+        assert (await store.fetchone('SELECT MAX(version) AS version FROM schema_migrations'))['version']==56
+        await store.migrate()
+&gt;       assert (await store.fetchone('SELECT MAX(version) AS version FROM schema_migrations'))['version']==57
+E       assert 59 == 57
+
+backend/tests/test_learning_recovery.py:407: AssertionError</failure></testcase><testcase classname="tests.contracts.test_van_private_core_topology" name="test_private_core_app_import_closure_excludes_forbidden_code" time="1.044"><failure message="AssertionError: ['van_gateway.trading', 'van_gateway.trading.monitor_schema', 'van_gateway.trading.screener_migration', 'van_gateway.trading.service']&#10;assert ['van_gateway...ding.service'] == []&#10;  &#10;  Left contains 4 more items, first extra item: 'van_gateway.trading'&#10;  Use -v to get more diff">def test_private_core_app_import_closure_excludes_forbidden_code():
+        probe = (
+            "import sys, json\n"
+            f"sys.path.insert(0, {str(ROOT / 'backend')!r})\n"
+            "import van_gateway.private_core.app as m\n"
+            "m.create_private_core_app\n"
+            "print(json.dumps(sorted(sys.modules)))\n"
+        )
+        r = subprocess.run([sys.executable, "-c", probe], capture_output=True, text=True,
+                           cwd=str(ROOT / "backend"),
+                           env={"VAN_INTERNAL_CONTROL_SCOPED_TOKENS": "", "PATH": "/usr/bin:/bin"})
+        assert r.returncode == 0, r.stderr
+        modules = json.loads(r.stdout)
+        bad = [m for m in modules if m.startswith((
+            "van_gateway.browser", "van_gateway.automation", "van_gateway.computer_use",
+            "van_gateway.trading", "van_gateway.app", "services", "vati", "playwright",
+            "stagehand", "patchright", "browser_use",
+        )) or "jev" in m.lower()]
+&gt;       assert bad == [], bad
+E       AssertionError: ['van_gateway.trading', 'van_gateway.trading.monitor_schema', 'van_gateway.trading.screener_migration', 'van_gateway.trading.service']
+E       assert ['van_gateway...ding.service'] == []
+E         
+E         Left contains 4 more items, first extra item: 'van_gateway.trading'
+E         Use -v to get more diff
+
+tests/contracts/test_van_private_core_topology.py:271: AssertionError</failure></testcase><testcase classname="backend.tests.test_reminder_delivery_gateway" name="test_gateway_sweep_recovers_lost_delivery_ack_without_refiring" time="2.447" /><testcase classname="backend.tests.test_reminder_delivery_gateway" name="test_gateway_reminder_conflicts_and_bad_time_are_explicit_refusals" time="1.934" /></testsuite></testsuites>

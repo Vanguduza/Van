@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="1" time="2.659" timestamp="2026-10-25T16:33:02.410791+00:00" hostname="2c5a245e39f1"><testcase classname="tests.test_market_monitor_commands" name="test_corrupt_authority_key_or_changed_submitted_parameters_cannot_write" time="0.283"><failure message="Failed: DID NOT RAISE LocalExecutionError">tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-12/test_corrupt_authority_key_or_0')
+
+    @pytest.mark.asyncio
+    async def test_corrupt_authority_key_or_changed_submitted_parameters_cannot_write(tmp_path):
+        s=await service(tmp_path); alert=await create_alert(s); ctx=await command(s,alert.object_id)
+        ctx.parameters={**ctx.parameters,'expected_revision':2}
+        with pytest.raises(LocalExecutionError,match='exact sealed owner'):await AlertControlExecutor().execute(ctx)
+        record=await CommandAuthorityService(s.store).get(ctx.command_id)
+        await s.store.execute('UPDATE runtime_meta SET value=? WHERE key=?',
+            (record.model_copy(update={'command_id':'different-original-command'}).model_dump_json(),
+             CommandAuthorityService.PREFIX+ctx.command_id))
+        ctx.parameters=record.typed_parameter_constraints
+&gt;       with pytest.raises(LocalExecutionError,match='exact sealed owner'):await AlertControlExecutor().execute(ctx)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE LocalExecutionError
+
+backend/tests/test_market_monitor_commands.py:101: Failed</failure></testcase></testsuite></testsuites>

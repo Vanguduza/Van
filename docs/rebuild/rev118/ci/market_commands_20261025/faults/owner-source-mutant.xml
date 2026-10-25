@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="7" time="4.742" timestamp="2026-10-25T16:32:52.360558+00:00" hostname="2c5a245e39f1"><testcase classname="tests.test_market_monitor_commands" name="test_non_owner_or_different_sealed_authority_cannot_write[changes0]" time="0.324"><failure message="Failed: DID NOT RAISE LocalExecutionError">tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-10/test_non_owner_or_different_se0')
+changes = {'authority_source': 'STANDING_AUTOMATION'}
+
+    @pytest.mark.asyncio
+    @pytest.mark.parametrize('changes', [
+        {'authority_source':'STANDING_AUTOMATION'}, {'principal_type':'SYSTEM'},
+        {'effective_action_class':'A1'}, {'effective_action_class':'A4'}, {'device_id':'another-device'},
+        {'typed_action_id':'trading.halt'},
+        {'typed_parameter_constraints':{'alert_id':ALERT,'expected_revision':1,'order':'buy'}},
+    ])
+    async def test_non_owner_or_different_sealed_authority_cannot_write(tmp_path,changes):
+        s = await service(tmp_path); alert = await create_alert(s)
+        ctx = await command(s,alert.object_id,**changes)
+&gt;       with pytest.raises(LocalExecutionError,match='exact sealed owner'): await AlertControlExecutor().execute(ctx)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE LocalExecutionError
+
+backend/tests/test_market_monitor_commands.py:87: Failed</failure></testcase><testcase classname="tests.test_market_monitor_commands" name="test_non_owner_or_different_sealed_authority_cannot_write[changes1]" time="0.202" /><testcase classname="tests.test_market_monitor_commands" name="test_non_owner_or_different_sealed_authority_cannot_write[changes2]" time="0.275" /><testcase classname="tests.test_market_monitor_commands" name="test_non_owner_or_different_sealed_authority_cannot_write[changes3]" time="0.286" /><testcase classname="tests.test_market_monitor_commands" name="test_non_owner_or_different_sealed_authority_cannot_write[changes4]" time="0.854" /><testcase classname="tests.test_market_monitor_commands" name="test_non_owner_or_different_sealed_authority_cannot_write[changes5]" time="0.203" /><testcase classname="tests.test_market_monitor_commands" name="test_non_owner_or_different_sealed_authority_cannot_write[changes6]" time="0.258" /></testsuite></testsuites>

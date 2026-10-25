@@ -250,6 +250,12 @@ class TypedCommandResolver:
         raw_compact = re.sub(r"\s+", " ", text.strip())
         normalized = raw_compact.casefold()
 
+        alert = re.fullmatch(r"(?i:(pause|restart|delete) trading alert id) (mal_[0-9a-f]{32}) revision ([1-9][0-9]{0,18})", raw_compact)
+        if alert and int(alert[3]) < 2**63-1:
+            return _from_action("trading.alert."+alert[1].lower(), text=normalized,
+                intent_id="OWNER_ALERT_CONTROL", parameters={"alert_id": alert[2], "expected_revision": int(alert[3])},
+                rule_id="trading.alert.control.exact.v1")
+
         record = re.fullmatch(r"forget owner-derived memory record ([a-z_]+) (mr_[0-9a-f]{64}) ([0-9a-f]{64})",raw_compact)
         if record:
             from van_gateway.understanding.records import record_parameters

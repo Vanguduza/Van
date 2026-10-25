@@ -106,6 +106,7 @@ class LocalExecutionContext:
     browser_artifacts: Any | None = None
     automation: Any | None = None
     execution_id: str | None = None
+    market_monitors: Any | None = None
 
 
 class LocalActionExecutor(Protocol):
@@ -252,6 +253,12 @@ class ReminderCreateExecutor:
                 "reminder_id": created["id"], "due_at_unix": due_at_unix, "status": "OPEN",
             },
         )
+
+
+class AlertControlExecutor:
+    async def execute(self, ctx: LocalExecutionContext) -> LocalExecutionResult:
+        from van_gateway.trading.monitor_commands import execute_control
+        return await execute_control(ctx)
 
 
 class TradingHaltExecutor:
@@ -685,6 +692,7 @@ LOCAL_EXECUTORS: dict[str, type[LocalActionExecutor]] = {
     "memory.decision.record": MemoryDecisionRecordExecutor,
     "reminder.create": ReminderCreateExecutor,
     "trading.halt": TradingHaltExecutor,
+    **{ "trading.alert."+operation: AlertControlExecutor for operation in ("pause", "restart", "delete") },
     "trading.ticket.confirm": TradingTicketConfirmExecutor,
     "jev.module.transition": JevModuleTransitionExecutor,
     "jev.global.control": JevGlobalControlExecutor,

@@ -107,7 +107,7 @@ class MarketMonitorService:
             raise MonitorError('MONITOR_OPERATION_UNKNOWN', 404)
         return MonitorWrite.model_validate_json(row['result_json'])
 
-    async def write(self, owner, kind, operation, body, identity=None):
+    async def write(self, owner, kind, operation, body, identity=None, *, expires_at_ms=None):
         if kind not in {'WATCHLIST', 'ALERT', 'SCREEN_RULE'} or operation not in {'CREATE', 'REPLACE', 'DELETE', 'PAUSE', 'RESTART'}:
             raise MonitorError('MONITOR_INVALID_OPERATION', 422)
         if kind != 'ALERT' and operation in {'PAUSE', 'RESTART'}:
@@ -135,6 +135,8 @@ class MarketMonitorService:
                         raise MonitorError('MONITOR_OPERATION_SCOPE_CONFLICT')
                     return MonitorWrite.model_validate_json(old['result_json'])
                 now = self.now()
+                if expires_at_ms is not None and (type(expires_at_ms) is not int or now >= expires_at_ms):
+                    raise MonitorError('MONITOR_COMMAND_EXPIRED', 409)
                 if operation == 'CREATE':
                     count = await (await db.execute(
                         'SELECT count(*) n FROM market_monitor_objects WHERE owner_id=? AND kind=?',

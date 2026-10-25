@@ -194,6 +194,17 @@ def contract_for(resolution: CommandResolution) -> SuccessContract:
             evidence_required=True,
         )
 
+    if action_id in {"trading.alert.pause", "trading.alert.restart", "trading.alert.delete"}:
+        from van_gateway.trading.monitor_commands import parameters, ACTIONS, STATUSES
+        try:
+            pinned = parameters(resolution.parameters)
+        except ValueError:
+            return SuccessContract()
+        return SuccessContract(verifier_class="market-alert-control-readback", postconditions={
+            **pinned, "action_id": action_id, "control_status": STATUSES[ACTIONS[action_id]],
+            "control_revision": str(pinned["expected_revision"]+1), "control_completed": True,
+            "authority_effect": "NONE"}, evidence_required=True)
+
     if action_id == "trading.halt":
         # Not "the ledger accepted an event" — that is what `halt()` returns and it is the
         # claim, not the check. What must be true afterwards is that the kill switch is

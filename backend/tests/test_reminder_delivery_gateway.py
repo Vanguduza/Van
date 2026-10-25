@@ -7,6 +7,13 @@ from van_gateway.events.bus import EventBus
 pytestmark=pytest.mark.asyncio
 
 
+@pytest.fixture(autouse=True)
+def manual_reminder_sweep(monkeypatch):
+    # These cases call the real registered sweep, including its deliberate lost ACK.
+    # A competing optional periodic sweep would consume that one-shot fault first.
+    monkeypatch.setenv('VAN_SCHEDULER_ENABLED', 'false')
+
+
 async def test_gateway_sweep_recovers_lost_delivery_ack_without_refiring(client,monkeypatch):
     ac,app,hermes=client
     await _pair_for_test(ac,app,'dev-reminder','fixture-reminder-device-secret')

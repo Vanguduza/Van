@@ -20,6 +20,14 @@ The service rechecks freshness after acquiring the write lock, before publishing
 
 Screener requests have a closed typed vocabulary of level predicates, at most 64 distinct instruments and four conditions. An atomic, durable 256-instrument-per-minute owner budget survives service instances and restarts; rollback does not refill it. Reads return explicit unavailable rows with no invented price or age. Each measured row carries its own evaluation time and price age.
 
+## Signed owner command integration
+
+The registered A2 actions `trading.alert.pause`, `trading.alert.restart` and `trading.alert.delete` accept exact phrases such as `pause trading alert id mal_<32 lowercase hex characters> revision 3`. IDs are strict and revisions are positive SQL integers. Each action requires a sealed OWNER_COMMAND/OWNER_DEVICE authority for the exact action and parameters. The existing signed command envelope must provide its short expiry; no new authentication plane or order authority is created.
+
+The original command deterministically identifies the monitor operation. The existing monitor writer applies its original request binding, compare-and-swap and receipt replay protocol, and rechecks expiry after obtaining the SQL writer lock. Delayed commands cannot mutate after expiry. The local executor and separate mission verifier independently read the durable original control receipt. Completion is historical: a verified pause remains a completed control after a later restart, trigger or deletion, and does not claim the alert is currently paused. Missing/corrupt/conflicting receipts refuse verification; an executor return alone cannot prove success.
+
+This packet was reconstructed on the replacement worker after the original 55-file archive could not be retrieved. It is separately verified source, not a byte-for-byte restoration of that archive. See `receipts/WORKER_RECOVERY_RECONSTRUCTION_20261025.json` and `receipts/OWNER_ALERT_COMMANDS_SOURCE_20261025.json`.
+
 ## Existing runtime integration
 
 Migration 58 adds owner monitor state, minimal operation receipts, one quota row per owner and an event projection witness to the existing gateway Store. Migration from the actual version-57 migrations and real backup/restore are tested. Schema 59 adds saved-screen rules with an atomic table rebuild; injected SQL failure rolls back the original tables and data, and a missing post-commit version marker can be replayed without losing existing or saved-screen rules.
@@ -62,7 +70,7 @@ The current symbol/timeframe bar lake does **not** prove venue, environment, acc
 - BE-008/014: qualified native market/news producer readback, full instrument/entitlement binding, current source health and availability. No inference from a symbol or a VENUE label.
 - BE-018/020: independently qualified indicator semantics and live tick-price alert bases; native quote/spread/session-change producers for watchlist rows and dynamic candidate/exposure/news/near-alert lists. Closed-bar row projection, search and explicit identity-group filters are implemented in source.
 - BE-020: provider integration/failure/recovery and native postconditions beyond the recorded-ledger source path.
-- BE-029/032: voice and canonical typed-command/action-catalog consumption of monitor controls. The current interface is the paired-owner REST contract.
+- BE-029/032: exact signed pause/restart/delete typed controls are wired. Voice discovery, rule selection, natural-language drafting/clarification, broader monitor actions and Android consumers remain open. The paired-owner REST contract is preserved.
 - FE-006/007/013 and BE-030: Android consumer, exact chart/review deep links, orb/Attention presentation, actual OS notification dedupe, accessibility and S24 Artemis evidence. Alerts never authorize a trade.
 - Canonical admission, independent review and all unit/gate acceptance dependencies remain unissued.
 

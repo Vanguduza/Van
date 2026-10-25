@@ -682,3 +682,16 @@ Schema59 adds durable owner screener-rule CRUD and runs bound to the captured re
 
 
 Watchlist row follow-up: exact saved revision/hash, preference/search/native-scope filters, stable missing-last sorting, closed-bar source age and preceding-bar change with explicit interval. No synthetic quote or spread.19purecurrentcasesPASS; SQL2/pairedHTTP1separatelyPASS, latest retry3native-thread startupfailures retained. Registry479/369. See receipts/WATCHLIST_MARKET_ROWS_SOURCE_20261025.json. Continue nativefeed/sourcehealth/dynamic lists and typedvoicecatalog, with BE020IN_PROGRESS and BG/native/S24/financial acceptances unissued.
+
+
+## Replacement worker and reconstructed owner alert commands — 25 October
+
+The new worker executes and joins children/threads; initial8processes/0zombies. Old checkout and55-file recovery archive are absent; GitHub/connected artifacts did not supply the archive. These changes are explicitly reconstructed, not an exact restoration. See receipts/WORKER_RECOVERY_RECONSTRUCTION_20261025.json. No PID1 or unrelated process was killed.
+
+Exact owner A2 pause/restart/delete controls now reuse durable monitorCAS/replay; expiry is rechecked under theSQLwriterlock; local and mission verification independently read the original receipt, without claiming a current lifecycle after later edits/deletion.44current command cases pass;6deliberate faults caught with source restored;220prior integration/99rebuild/53compatibility pass,1DDS skip then7/7pinnedDDS checks pass. Final integrated rerun and canonical manifest/commit publication are the concrete next checks. All failed fixture attempts are retained.
+
+Three fresh-base failures reproduced and fixed: two final learning migration version assertions and private-core trading import closure. Reminder raced only in the retained originalc7hosted run; its fixture now disables the optional competing scheduler while invoking the actual sweep. Exactc7run40157818214 remainsFAILED(5694gatewaypass/4fail/7skip);53b02636run40167358216 remainsFAILED(5725/3/7), with198media passes each. All374actualc7mutation cases were recovered from nine original reports and remain historical only. The new additive fresh-worker market-monitor job preserves every old job/trigger/gate and is pending exact-source hosted execution.
+
+Continue autonomously through BE-008native instrument/feed identity and health, then remaining backend dependencies, forecast/research, crypto and economics, assistant integrations and all qualification packets. Preserve131units/324requirements/1610identities/234contexts/349actions/93plannedfeatures and source42groups/105functions/78surfaces/479endpoints/369schemas. Allunitacceptances/F15/BG-001/native/provider/deployment/signing/S24/economic qualifications remain unissued. No frontend redesign beforeBG-001.
+
+Final exact-source integrated selection completed: **229 passed, zero failures, errors or skips**, with no forbidden storage events. It includes all 44 command cases and the final authority-key guard. Canonical CLI checks, real-hook commit, committed ledger verification and normal push follow; then inspect the resulting hosted run while continuing backend source work.
