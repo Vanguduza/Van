@@ -1,0 +1,9 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+______ test_same_time_price_correction_cannot_become_a_new_level_trigger _______
+backend/tests/test_market_monitor_measurements.py:185: in test_same_time_price_correction_cannot_become_a_new_level_trigger
+    assert not fire and corrected.reason == 'CORRECTED_OBSERVATION_BASELINE'
+E   assert (not True)
+=========================== short test summary info ============================
+FAILED backend/tests/test_market_monitor_measurements.py::test_same_time_price_correction_cannot_become_a_new_level_trigger
+1 failed in 0.19s

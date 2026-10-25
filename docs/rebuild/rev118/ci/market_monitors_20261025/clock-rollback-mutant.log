@@ -1,0 +1,9 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+_ test_clock_rollback_cannot_publish_before_rule_arm_or_clear_its_durable_high_water _
+backend/tests/test_market_monitor_runtime.py:210: in test_clock_rollback_cannot_publish_before_rule_arm_or_clear_its_durable_high_water
+    assert (await s.run())['triggered'] == 0
+E   assert 1 == 0
+=========================== short test summary info ============================
+FAILED backend/tests/test_market_monitor_runtime.py::test_clock_rollback_cannot_publish_before_rule_arm_or_clear_its_durable_high_water
+1 failed in 0.33s

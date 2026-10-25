@@ -1,0 +1,12 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+_ test_competing_evaluators_cannot_overwrite_a_newer_baseline_or_emit_from_a_stale_view _
+backend/tests/test_market_monitor_runtime.py:92: in test_competing_evaluators_cannot_overwrite_a_newer_baseline_or_emit_from_a_stale_view
+    assert observed.evaluation.value == '9' and observed.evaluation.event_time_ms == 960000
+E   AssertionError: assert ('11' == '9'
+E     
+E     - 9
+E     + 11)
+=========================== short test summary info ============================
+FAILED backend/tests/test_market_monitor_runtime.py::test_competing_evaluators_cannot_overwrite_a_newer_baseline_or_emit_from_a_stale_view
+1 failed in 0.31s
