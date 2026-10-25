@@ -178,12 +178,38 @@ class HarnessSession:
         self.events: collections.deque = collections.deque(maxlen=self.BUFFER)
         self.lock = threading.Lock()
         threading.Thread(target=self._reader, daemon=True).start()
-        page = next(t for t in self.send("Target.getTargets")["targetInfos"] if t["type"] == "page")
-        self.session = self.send("Target.attachToTarget", {"targetId": page["targetId"], "flatten": True})["sessionId"]
-        for domain in ("Page", "DOM", "Runtime", "Network"):
-            self.send(f"{domain}.enable", session_id=self.session)
+        try:
+            page = self._wait_for_page_target()
+            self.session = self.send("Target.attachToTarget", {"targetId": page["targetId"], "flatten": True})["sessionId"]
+            for domain in ("Page", "DOM", "Runtime", "Network"):
+                self.send(f"{domain}.enable", session_id=self.session)
+        except BaseException:
+            # A failed constructor never reaches the fixture's session list/teardown.
+            # Closing its socket also releases the reader instead of leaking it.
+            self.close()
+            raise
         #: test hook: method -> callable(params) raising to simulate a CDP failure
         self.fail: dict[str, Callable[[dict], None]] = {}
+
+    def _wait_for_page_target(self) -> dict:
+        # DevToolsActivePort means the browser socket is ready, not that its
+        # command-line about:blank page has been created. Observe that original
+        # page within one deadline; never create a replacement or skip a test.
+        deadline = time.monotonic() + 10.0
+        while True:
+            remaining = deadline - time.monotonic()
+            if remaining <= 0:
+                raise TimeoutError("CHROMIUM_PAGE_TARGET_NOT_READY")
+            targets = self.send("Target.getTargets", timeout=remaining)["targetInfos"]
+            if time.monotonic() >= deadline:
+                raise TimeoutError("CHROMIUM_PAGE_TARGET_NOT_READY")
+            page = next((t for t in targets if t["type"] == "page"), None)
+            if page is not None:
+                return page
+            remaining = deadline - time.monotonic()
+            if remaining <= 0:
+                raise TimeoutError("CHROMIUM_PAGE_TARGET_NOT_READY")
+            time.sleep(min(0.05, remaining))
 
     def _reader(self) -> None:
         try:

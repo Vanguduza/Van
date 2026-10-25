@@ -1,6 +1,6 @@
 {
   "schema": "van.rebuild.candidate-source-progress/1",
-  "updated_at_utc": "2026-10-24T10:06:31.566032+00:00",
+  "updated_at_utc": "2026-10-25T01:53:28.635962+00:00",
   "programme": "Rev1.18; original 131 unit IDs and dependencies retained",
   "authority": "auth-20261022-owner-autonomous-candidate-build",
   "meaning": "Candidate source progress is separate from admitted unit acceptance. Independent certificates, owner decisions, live effects and release gates remain unissued. No unit is declared complete by this record.",
@@ -916,6 +916,10 @@
         {
           "description": "Document publication: fsynced private immutable bytes before one nativeSQLite transaction for document/artifact/minimal commit witness. Rollback/cancellation cleans only new files, never prior versions; lost commit ACK returns captured original despite later writer, unavailable readback remains UNKNOWN withIDs. Canonical cards serialized/owner-scoped/sensitivity-bound. Partial/concurrent edits merge verified current values; nativeoutput readback and fields cache updated; stale proposal/context refused and empty required disclosed. Fullhash version refs and exact published/legacy readback respect expiry/SECRET_REF_ONLY.8initial+1required failures,2candidate policy guards corrected;53 isolated/224 integrated audited/29 registry/79 rebuild pass0skip;17 fault/control pairs caught/restored after initial timing survivor. No external submission, firstHTTPexactly-once, crash-reaper/completeprivacy, unit/native/production/handset claim.",
           "evidence": "backend/BE-003_025_DOCUMENT_PUBLICATION.md; receipts/DOCUMENT_PUBLICATION_SOURCE_20261023.json"
+        },
+        {
+          "description": "Fresh df249 hosted browser readiness race reproduced: original11 scenarios10pass1setup error; four deterministic startup checks fail before repair, fivepass after. Bounded original-target wait, no replacement/skip/error suppression; failed constructor socketclosed. All original securityscenario bytes retained. Actual repaired Chromium still pending.",
+          "evidence": "backend/BE-025_CHROMIUM_PAGE_READINESS.md; receipts/CHROMIUM_PAGE_READINESS_SOURCE_20261025.json"
         }
       ]
     },

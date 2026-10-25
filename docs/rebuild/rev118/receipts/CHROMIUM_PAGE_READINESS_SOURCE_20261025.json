@@ -1,0 +1,49 @@
+{
+  "schema": "van.rebuild.chromium-page-readiness-source/1",
+  "parent_source_head": "df249c52e30cd5f188a77a12ebff7efaa3244266",
+  "hosted_run": 40130882019,
+  "browser_job": 120982140157,
+  "hosted_browser_result": {
+    "tests": 11,
+    "passed": 10,
+    "errors": 1,
+    "failures": 0,
+    "skipped": 0,
+    "failure": "StopIteration during original Chromium page discovery",
+    "full_browser_suite": "NOT_RUN",
+    "listener_uid": "NOT_RUN",
+    "firewall_namespaces": "NOT_RUN"
+  },
+  "local_cdptest_reports": {
+    "before": {
+      "tests": 5,
+      "passed": 1,
+      "failures": 4,
+      "errors": 0,
+      "skipped": 0,
+      "file": "docs/rebuild/rev118/ci/page_readiness_20261025/before.xml",
+      "sha256": "d0d50edf88919200ed40a7b212679f7d4f01a216dc179107fb9917ba902ab24b"
+    },
+    "after": {
+      "tests": 5,
+      "passed": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "file": "docs/rebuild/rev118/ci/page_readiness_20261025/after.xml",
+      "sha256": "2602735253862f0ead2fe413f5bcebb81526d31a80c9e3fc45fa082ffed1c40e"
+    }
+  },
+  "original_security_scenario_unchanged": {
+    "file": "backend/tests/test_browser_guard_lost_regression.py",
+    "sha256": "7198d5baee78e15415e706bfd3156db2c10d04dace91ad7d8bf131c719a6dbb3",
+    "byte_identical_to_parent": true
+  },
+  "changed_sources": {
+    "backend/tests/cdp_harness_kit.py": "1cb2a7a6ce98473e6b394bae2457f881cf0c4082fa5b5fa6374f1b50211d41d5",
+    "backend/tests/test_harness_page_startup.py": "8cf47b366c0ef80cdabfdb7e25b3912901d0af7b845c15efcec8ab9029861b96"
+  },
+  "local_real_chromium": "NOT_RUN_EXECUTABLE_ABSENT",
+  "formal_acceptances_issued": [],
+  "new_ui_implemented": false
+}
