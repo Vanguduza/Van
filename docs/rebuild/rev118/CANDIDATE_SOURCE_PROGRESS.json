@@ -1,6 +1,6 @@
 {
   "schema": "van.rebuild.candidate-source-progress/1",
-  "updated_at_utc": "2026-10-25T18:23:48.719827+00:00",
+  "updated_at_utc": "2026-10-25T18:53:10.284700+00:00",
   "programme": "Rev1.18; original 131 unit IDs and dependencies retained",
   "authority": "auth-20261022-owner-autonomous-candidate-build",
   "meaning": "Candidate source progress is separate from admitted unit acceptance. Independent certificates, owner decisions, live effects and release gates remain unissued. No unit is declared complete by this record.",
@@ -489,6 +489,10 @@
         {
           "description": "Native socket lifetime retirement, owned-reader shutdown/join, pending-call wakeup and replacement isolation; scoped authentication/contract/quote caches.810extended PostgreSQL/account/funding/execution cases pass0skip;9supplemental guards caught after a passing20case control. Failure attempts retained. No order replay, no native/provider/unit acceptance. Persistence/producer/entitlement/calendar/depth/monitor work remains.",
           "evidence": "backend/BE-008_NATIVE_CTRADER_CONNECTION_LIFETIME.md; receipts/CTRADER_CONNECTION_LIFETIME_SOURCE_20261025.json"
+        },
+        {
+          "description": "Captured immutable full native contract metadata, existing revision identity, scoped append-only raw market archive and independent selected-product reader/collector. Original record is durable at atomic rename; derived index recovery, typed integrity, original request replay, revision/as-of availability, real process death and concurrent writers tested.293focused/869actualPostgreSQL/account/funding/execution cases pass0skip with audit0. No live/source-use/provider/monitor/unit acceptance; scheduling, capacity/wire budgets, entitlements/calendar/quote/depth/other venues remain.",
+          "evidence": "backend/BE-008_NATIVE_MARKET_ARCHIVE.md; receipts/NATIVE_MARKET_ARCHIVE_SOURCE_20261025.json"
         }
       ]
     },

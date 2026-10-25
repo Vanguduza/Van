@@ -152,7 +152,7 @@ def test_invalid_request_refuses_before_native_io(kwargs):
 
 def registry_fixture():
     light=[{'symbolId':12,'symbolName':'EUR/USD','enabled':True}]
-    full=[dict(symbolId=12,digits=5,lotSize=10000000,minVolume=1000,stepVolume=1000,maxVolume=1000000000)]
+    full=[dict(symbolId=12,digits=5,pipPosition=4,lotSize=10000000,minVolume=1000,stepVolume=1000,maxVolume=1000000000)]
     responses={
         'ProtoOASymbolsListReq':['ProtoOASymbolsListRes',{'ctidTraderAccountId':123,'symbol':light}],
         'ProtoOASymbolByIdReq':['ProtoOASymbolByIdRes',{'ctidTraderAccountId':123,'symbol':full}]}

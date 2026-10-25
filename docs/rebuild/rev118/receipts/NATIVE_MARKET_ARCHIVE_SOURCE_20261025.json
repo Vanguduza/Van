@@ -1,0 +1,43 @@
+{
+  "schema": "van.rebuild.native-market-archive-source/1",
+  "status": "SOURCE_TESTED_COMPONENT_NOT_UNIT_ACCEPTANCE",
+  "base_head": "46474a6cf054bbecf4ab32ed6d3d394611f633b0",
+  "updated_at_utc": "2026-10-25T18:53:10.284700+00:00",
+  "source_sha256": {
+    "trading/vati/execution/ctrader/adapter.py": "6931e6da4b896e8650ae592abc1abba68af299796a1261301280965e8a3082b1",
+    "trading/vati/execution/ctrader/contracts.py": "fc719fecbc9fc032836ffddbd9900421e720fd9277ba6cb229f572f5c8d445d5",
+    "trading/vati/market_data/native_archive.py": "b3660db5da51e147199ab6eca4ed271c533f71ada00f786ee84034a3430bfc90",
+    "trading/vati/market_data/native_collector.py": "8c7f8396621afc18248ca2c040467f17d46e8d75fa75af35f5b7fe3d9067b1b1",
+    "trading/tests/test_ctrader_feed_contract.py": "6f240e5f5ac3c345f498abf8a4aa9bdfd71bf9af74b7e7d123709325c8da9cb6",
+    "trading/tests/test_native_market_archive.py": "f0cf0768ddbd07e90d3109cffee239ed159143fe49210eeed5a69026cdafae80",
+    "trading/tests/test_native_market_collector.py": "e0bea76a5761a9dee93d421d5e7ec82bed4709aecd686b6f662e70509e431c47"
+  },
+  "executed": {
+    "initial_contract": "115pass/0skip existing native regressions after metadata capture",
+    "initial_archive": "34pass/0skip",
+    "semantic_and_process_death": "161pass/0skip combined with native protocol regressions",
+    "first_collector": "171pass/1fixture failure; changed broker omitted required native pipPosition. Native codec refused before intended assertion; retained as failed. Fixture corrected against pinned protocol without weakening the contract-change/no-history-read assertion.",
+    "focused_final": "291pass/0skip, source audit0",
+    "extended_postgres": "867pass/0skip/audit0 before explicit collector index-repair readback refinement; actual fixture cleaned and children reconciled",
+    "final_replay_readback": "293pass/0skip/audit0 after explicit collector index reconciliation and independent readback",
+    "rebuild": "108pass/0skip",
+    "source_contracts": "No derived contract drift; original frontend identities preserved",
+    "mutation_registry": "374cases/383edits/preflight0findings; not execution for this later packet",
+    "extended_postgres_final": "869pass/0skip/audit0 on final source, actual pinned isolated PostgreSQL/canonical schema, owned fixture removed and children reconciled"
+  },
+  "runtime_binding": "Internal explicit source APIs only. Actual five-request native protocol collector uses independent connection and selected product; no automatic production worker or HTTP market-fact ingress.",
+  "qualification": {
+    "provider": false,
+    "native": false,
+    "economic": false,
+    "unit_acceptance": "NOT_ISSUED",
+    "android": "NOT_RUN",
+    "s24": "NOT_RUN"
+  },
+  "remaining": [
+    "Admitted service scheduling, total wire/collection budgets, source health and capacity qualification",
+    "Provider entitlements, gaps/corrections policy, calendars/closed-bar qualification, quote/depth/tick sources",
+    "Qualified monitor consumers, other venues and full BE-008/original backend/frontend/native acceptance"
+  ],
+  "evidence": "ci/native_market_archive_20261025"
+}

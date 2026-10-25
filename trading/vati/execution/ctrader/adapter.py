@@ -15,6 +15,7 @@ from typing import Any, Callable, Optional, ClassVar
 
 from vati.execution.base import AccountState, ExecutionReceipt, Health, OrderCommand, VenuePosition, VenueUnavailable
 from vati.execution.ctrader.transport import CtraderApiError, CtraderTransport
+from vati.execution.ctrader.contracts import NativeSymbolContract
 from vati.execution.entry_deadline import EntryNotSent, require_entry_deadline
 from vati.risk.contracts import Direction, LossModel
 
@@ -32,6 +33,7 @@ class SymbolInfo:
     step_volume: int
     max_volume: int
     contract_revision: str | None = None
+    native_contract: NativeSymbolContract | None = None
 
     def lots_to_volume(self, lots: Decimal) -> int:
         vol = int((lots * Decimal(self.lot_size_cents)).to_integral_value(rounding=ROUND_DOWN))
@@ -64,6 +66,7 @@ class CtraderAdapter:
     _auth_connection: int | None = None
     _symbol_snapshot_valid: bool = True
     _symbol_connection: int | None = None
+    _selected_native_symbols: tuple[int, ...] | None = None
     _money_digits: int = 2
     _currency: str = "USD"
     _last_spot: dict[int, tuple[Decimal, Decimal]] = field(default_factory=dict)
@@ -140,7 +143,12 @@ class CtraderAdapter:
                 if not alias or alias in aliases:raise ValueError("native symbol alias collision")
                 aliases.add(alias)
             enabled={k:v for k,v in light.items() if v.get("enabled",False)}
-            ids=list(enabled); current={}
+            if self._selected_native_symbols is not None:
+                selected={native_integer(value,minimum=1) for value in self._selected_native_symbols}
+                if not selected or not selected <= enabled.keys():
+                    raise ValueError("selected native product unavailable")
+                enabled={key:enabled[key] for key in selected}
+            ids=list(enabled); current={}; originals={}
             for offset in range(0,len(ids),50):
                 requested=ids[offset:offset+50]
                 kind, response=self.transport.call("ProtoOASymbolByIdReq", {"ctidTraderAccountId":account,"symbolId":requested})
@@ -164,9 +172,19 @@ class CtraderAdapter:
                     revision=canonical_hash({"schema":"vati.ctrader-symbol/1","native_account_id":account,
                         "transport_host":getattr(self.transport,"host",None),"light":original,"detail":row})
                     current[alias]=SymbolInfo(identity,name,digits,lot,minimum,step,maximum,revision)
+                    originals[alias]=(original,row)
                 if seen!=set(requested):raise ValueError("native symbol details incomplete")
             if getattr(self.transport, "connection_id", None) != connection:
                 raise ValueError("native symbol connection changed during refresh")
+            received=native_integer(self.clock(),maximum=253402300799000)
+            for alias, symbol in current.items():
+                light, detail = originals[alias]
+                contract=NativeSymbolContract.capture(account_id=account,
+                    transport_host=getattr(self.transport,"host",None),light=light,detail=detail,
+                    received_at_ms=received)
+                if contract.revision != symbol.contract_revision:
+                    raise ValueError("native symbol capture revision mismatch")
+                symbol.native_contract=contract
             self.symbols=current
             self._symbol_connection=connection
             self._symbol_snapshot_valid=True
@@ -183,6 +201,37 @@ class CtraderAdapter:
             raise VenueUnavailable(f"symbol {name} not available on this cTrader account") from None
 
     # ------------------------------------------------------------ reads
+    def market_reader(self):
+        """Independent read-only connection; never shares the protective socket."""
+        transport=CtraderTransport(host=self.transport.host,port=self.transport.port,
+            timeout_s=self.transport.timeout_s,connector=self.transport._connector)
+        adapter=CtraderAdapter(transport,self.client_id,self.client_secret_provider,self.access_token_provider,
+            self.ctid_trader_account_id,self.account_alias,self.venue,clock=self.clock)
+        class MarketReader:
+            def read_window(self,expected_contract,*,timeframe,from_ms,to_ms):
+                from vati.execution.ctrader.feed import read_trendbars,native_integer,PERIOD,MAX_TIMESTAMP
+                if not isinstance(expected_contract,NativeSymbolContract):
+                    raise VenueUnavailable('cTrader captured native contract required')
+                scope=expected_contract.native_scope
+                if (scope['native_account_id']!=adapter.ctid_trader_account_id
+                        or scope['transport_host']!=transport.host):
+                    raise VenueUnavailable('cTrader market reader account/environment differs')
+                if not isinstance(timeframe,str) or timeframe not in PERIOD:
+                    raise VenueUnavailable('cTrader market reader timeframe invalid')
+                native_integer(from_ms,maximum=MAX_TIMESTAMP)
+                native_integer(to_ms,minimum=from_ms,maximum=MAX_TIMESTAMP)
+                adapter._selected_native_symbols=(scope['native_symbol_id'],)
+                adapter._symbol_snapshot_valid=False
+                name=expected_contract.metadata['light']['symbolName']
+                adapter._ensure_auth()
+                original=adapter.symbol(name).native_contract
+                if original is None or original.revision!=expected_contract.revision:
+                    raise VenueUnavailable('cTrader native contract changed; refresh required')
+                observed=read_trendbars(adapter,name,timeframe,from_ms=from_ms,to_ms=to_ms,count=2001)
+                return original,observed
+            def close(self):transport.close()
+        return MarketReader()
+
     def funding_reader(self):
         # An independent connection and adapter state keep slow cash history off
         # the protective/order socket. It exposes only the read operation/close.

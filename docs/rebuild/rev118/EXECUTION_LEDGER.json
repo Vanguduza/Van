@@ -133,6 +133,17 @@
         "receipts/SAVED_SCREEN_RULES_SOURCE_20261025.json",
         "receipts/WATCHLIST_MARKET_ROWS_SOURCE_20261025.json"
       ]
+    },
+    "BE-008": {
+      "status": "IN_PROGRESS",
+      "candidate_source_only": true,
+      "acceptance": "NOT_ISSUED",
+      "evidence": [
+        "backend/BE-008_NATIVE_CTRADER_MARKET_READS.md",
+        "backend/BE-008_NATIVE_CTRADER_CONNECTION_LIFETIME.md",
+        "backend/BE-008_NATIVE_MARKET_ARCHIVE.md",
+        "receipts/NATIVE_MARKET_ARCHIVE_SOURCE_20261025.json"
+      ]
     }
   },
   "blockers": [
@@ -196,7 +207,7 @@
     "note": "Opus unavailable; owner transferred build to Codex. No independent reviewer identity is inferred from another model or session."
   },
   "checkpoint": {
-    "updated_utc": "2026-10-25T17:45:21.734078+00:00",
+    "updated_utc": "2026-10-25T18:53:10.284700+00:00",
     "branch": "ccr-9e07e1af-8mgz1p",
     "base": "b02075f327ea8180ab6d269eba358cf8c5479878",
     "background_jobs": [],
@@ -379,7 +390,10 @@
       "Watchlist row source:19currentpurePASS; unchangedSQL2+pairedHTTP1pass in separate run, latest3same-resource native-thread failures retained.479endpoints/369schemas,42groups/105functions/78surfaces retained. No fakequote/spread/live qualification, BE020IN_PROGRESS, allacceptanceNOT_ISSUED.",
       "Replacement-worker reconstruction:44final alert command cases pass0skip;220prior integrated pass0skip;6deliberate fault/control pairs caught and source restored;99rebuild pass;53compatibility pass1DDS skip followed by7/7actual pinned-DDS controls. Actual final integrated rerun still pending; see receipts/OWNER_ALERT_COMMANDS_SOURCE_20261025.json. Original55-file ZIP not retrieved, no exact restoration claimed. Hostedc7actual5694pass4fail7skip;53bactual5725pass3fail7skip retained, with198media passes each. c7all374unique mutations verified from nine original artifact reports; predates newcommands.",
       "Final reconstructed candidate:229integrated cases PASS with0failures/errors/skips;zero forbidden storage writes.44command cases included. Current code frozen for publication; six fault/control pairs caught/restored;99rebuild and7pinned-DDS checks pass. No hosted/current independent/native/unit qualification claimed.",
-      "Published4ef8fcf2/40212892336: market229PASS, gateway5771pass1descriptorFAIL7skip/media198PASS, trading3061PASS1privateDDSskip,PG26/voice117PASS, Android/browserPASS; mutation335caught39unexecutedPARTIAL_FAILED. All failed results retained. Current descriptor repair73focus/258integratedPASS;12originalC16faults caught/restored. Native cTrader173focusPASS, pinnedDDSresolver2PASS; full local corrected trading interrupted2836passes after24m26s, no fullPASS. Repaired audit10PASS/original14probes,108rebuildPASS; zero final forbidden events. Exact new hosted qualification pending publication."
+      "Published4ef8fcf2/40212892336: market229PASS, gateway5771pass1descriptorFAIL7skip/media198PASS, trading3061PASS1privateDDSskip,PG26/voice117PASS, Android/browserPASS; mutation335caught39unexecutedPARTIAL_FAILED. All failed results retained. Current descriptor repair73focus/258integratedPASS;12originalC16faults caught/restored. Native cTrader173focusPASS, pinnedDDSresolver2PASS; full local corrected trading interrupted2836passes after24m26s, no fullPASS. Repaired audit10PASS/original14probes,108rebuildPASS; zero final forbidden events. Exact new hosted qualification pending publication.",
+      "Hosted ac60c4d3/run40219703232: gateway5775pass/7declaredskip,media198pass,trading3108pass/1privateDDSskip,PostgreSQL26pass,voice117pass,258monitorpass/audit0; original374mutation identities caught once. Android emulator18pass/4declaredcore/production skips. OverallFAILURE on missing privateDDS credential and absent trusted-main checker; no waived gate.",
+      "Connection-lifetime source46474a6c:810extended actualPG/account/funding/execution cases pass0skip;9supplemental mutants caught after20case control, source restored. Actual hooks and committed GREEN133. Logs-only staging error retained in prior d5b1a620 row; implementation in46474a6c.",
+      "Uncommitted native archive/collector:293focused and869extended actualPG/account/funding/execution cases pass0skip/audit0, fixture container removed and children reconciled. Independent actual native codec connection tested; no actual provider or unit qualification."
     ],
     "environment_notes": [
       "clone must be unshallowed (git fetch --unshallow) and PR heads fetched (+refs/pull/*/head:refs/remotes/origin/pr/*) before pre001.py",
@@ -402,7 +416,11 @@
         "status": "IN_PROGRESS_LAST_OBSERVED",
         "scope": "browser repair source qualification, not monitor source or S24"
       }
-    ]
+    ],
+    "active_packet": "BE-008 scoped raw native contract/market archive and independent read-only collector; source-tested, not accepted",
+    "published_head": "ac60c4d3ba57ff488a39fa1962920ce4711c0ffc",
+    "local_base_head": "46474a6cf054bbecf4ab32ed6d3d394611f633b0",
+    "committed_ledger_verification": "GREEN133 through46474a6c against4fd466dec3910ed5de614bfbf95887ad619df5ca; next source commit not yet included"
   },
   "observations": [
     "OBS-001 BE-002 debug cleartext",
@@ -437,12 +455,20 @@
       "fca473cc",
       "c2a27848"
     ],
-    "tested_android_head": "637eaf96ff617c608401754a044145811b8fd318",
-    "hosted_result": "receipts/INSTRUMENTATION_637eaf96.json",
+    "tested_android_head": "ac60c4d3ba57ff488a39fa1962920ce4711c0ffc",
+    "hosted_result": "receipts/HOSTED_SOURCE_ac60c4d3.json",
     "mutation_reconciliation": "ci/MUTATION_RECONCILIATION.md and ci/MUTATION_RECONCILIATION_MAPPING.json",
-    "verified_source_head": "c2a278488f00bacaf912853ed6e711a5b1de986a",
-    "source_qualification_run": 39725953372,
-    "latest_checkpoint_report": "CHECKPOINT_c2a27848_20261022.md"
+    "verified_source_head": "ac60c4d3ba57ff488a39fa1962920ce4711c0ffc",
+    "source_qualification_run": 40219703232,
+    "latest_checkpoint_report": "CHECKPOINT_20261025_NATIVE_FEED.md",
+    "previous_verified_source": {
+      "verified_source_head": "c2a278488f00bacaf912853ed6e711a5b1de986a",
+      "source_qualification_run": 39725953372,
+      "tested_android_head": "637eaf96ff617c608401754a044145811b8fd318",
+      "hosted_result": "receipts/INSTRUMENTATION_637eaf96.json",
+      "latest_checkpoint_report": "CHECKPOINT_c2a27848_20261022.md"
+    },
+    "qualification_scope": "Public source tests only; mandatory/native/owner/production gates unissued."
   },
   "provenance_correction": {
     "finding": "90 forecast hashes previously reported unverifiable",

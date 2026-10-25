@@ -1,0 +1,67 @@
+........................................................F............... [ 41%]
+........................................................................ [ 83%]
+............................                                             [100%]
+=================================== FAILURES ===================================
+_ test_actual_native_contract_change_refuses_before_history_read_or_archive_publication _
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-71/test_actual_native_contract_ch0')
+
+    def test_actual_native_contract_change_refuses_before_history_read_or_archive_publication(tmp_path):
+        from test_ctrader import FakeCtrader,make_adapter
+        from vati.market_data.native_archive import NativeMarketArchive
+        primary=FakeCtrader();adapter=make_adapter(primary);adapter._ensure_auth()
+        expected=adapter.symbol('EURUSD').native_contract
+        class ChangedBroker(FakeCtrader):
+            def handle(self,name,body,cid):
+                if name=='ProtoOASymbolByIdReq':
+                    return self.send('ProtoOASymbolByIdRes',{'ctidTraderAccountId':12345,
+                        'symbol':[{'symbolId':1,'digits':5,'lotSize':10000000,'minVolume':200000,
+                                   'stepVolume':100000,'maxVolume':10**10}]},cid)
+                return super().handle(name,body,cid)
+        changed=ChangedBroker();adapter.transport._connector=changed.connector
+        book=NativeMarketArchive(tmp_path/'actual');collector=NativeMarketCollector(book,adapter.market_reader)
+>       with pytest.raises(VenueUnavailable,match='contract changed'):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AssertionError: Regex pattern did not match.
+E         Expected regex: 'contract changed'
+E         Actual message: 'cTrader timeout waiting for ProtoOASymbolByIdReq response'
+
+trading/tests/test_native_market_collector.py:126: AssertionError
+=============================== warnings summary ===============================
+trading/tests/test_native_market_collector.py::test_actual_native_contract_change_refuses_before_history_read_or_archive_publication
+  /workspace/van-backend-venv-20261025/lib/python3.12/site-packages/_pytest/threadexception.py:58: PytestUnhandledThreadExceptionWarning: Exception in thread Thread-9 (serve)
+  
+  Traceback (most recent call last):
+    File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/threading.py", line 1075, in _bootstrap_inner
+      self.run()
+    File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/threading.py", line 1012, in run
+      self._target(*self._args, **self._kwargs)
+    File "/workspace/van-review-2026-10-18/publish/trading/tests/test_ctrader.py", line 87, in serve
+      self.handle(name, body, cid)
+    File "/workspace/van-review-2026-10-18/publish/trading/tests/test_native_market_collector.py", line 120, in handle
+      return self.send('ProtoOASymbolByIdRes',{'ctidTraderAccountId':12345,
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    File "/workspace/van-review-2026-10-18/publish/trading/tests/test_ctrader.py", line 70, in send
+      payload = SCHEMA.wrap(name, body, cid)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    File "/workspace/van-review-2026-10-18/publish/trading/vati/execution/ctrader/protoschema.py", line 234, in wrap
+      env = {"payloadType": pt, "payload": self.encode(message, values)}
+                                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    File "/workspace/van-review-2026-10-18/publish/trading/vati/execution/ctrader/protoschema.py", line 144, in encode
+      out += self._encode_value(f, item)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    File "/workspace/van-review-2026-10-18/publish/trading/vati/execution/ctrader/protoschema.py", line 126, in _encode_value
+      b = self.encode(t, v); return self._tag(f.number, 2) + self._varint(len(b)) + b
+          ^^^^^^^^^^^^^^^^^
+    File "/workspace/van-review-2026-10-18/publish/trading/vati/execution/ctrader/protoschema.py", line 150, in encode
+      raise ProtoSchemaError(f"{message}: required field {f.name} missing")
+  vati.execution.ctrader.protoschema.ProtoSchemaError: ProtoOASymbol: required field pipPosition missing
+  
+  Enable tracemalloc to get traceback where the object was allocated.
+  See https://docs.pytest.org/en/stable/how-to/capture-warnings.html#resource-warnings for more info.
+    warnings.warn(pytest.PytestUnhandledThreadExceptionWarning(msg))
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED trading/tests/test_native_market_collector.py::test_actual_native_contract_change_refuses_before_history_read_or_archive_publication
+1 failed, 171 passed, 1 warning in 7.20s
