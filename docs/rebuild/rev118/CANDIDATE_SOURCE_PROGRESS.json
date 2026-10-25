@@ -1,6 +1,6 @@
 {
   "schema": "van.rebuild.candidate-source-progress/1",
-  "updated_at_utc": "2026-10-25T03:40:02.408042+00:00",
+  "updated_at_utc": "2026-10-25T03:48:22.093160+00:00",
   "programme": "Rev1.18; original 131 unit IDs and dependencies retained",
   "authority": "auth-20261022-owner-autonomous-candidate-build",
   "meaning": "Candidate source progress is separate from admitted unit acceptance. Independent certificates, owner decisions, live effects and release gates remain unissued. No unit is declared complete by this record.",
@@ -831,6 +831,10 @@
         {
           "description": "Saved screener CRUD with original-operation recovery and exact revision/state-hash run binding; same durable scan quota and explicit owner scope. Actual atomic schema58-to59 migration, failure rollback, lost-marker replay, restart/privacy/capacity and concurrent edit checks. All63 current monitor/source SQL and paired HTTP/device-proof cases pass0skip; six additive endpoints,478total/366API schemas; native feed, tick/dynamic projections, voice catalog and Android/provider qualification remain pending.",
           "evidence": "backend/BE-020_MARKET_MONITORS.md; receipts/SAVED_SCREEN_RULES_SOURCE_20261025.json"
+        },
+        {
+          "description": "Captured-revision watchlist market rows with saved ordering/favourites, native identity filters and search; explicit closed-bar/previous-bar basis, source age/hash and null unsupported metrics.19pure cases pass;2actualSQL+1pairedHTTP separatelypass. Latest fresh22run19pass/3native-thread startup failures retained; no combinedgreenclaim. Nativefeed/spread/dynamic/voice/Android and provider obligations remain.",
+          "evidence": "backend/BE-020_MARKET_MONITORS.md; receipts/WATCHLIST_MARKET_ROWS_SOURCE_20261025.json"
         }
       ]
     },

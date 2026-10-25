@@ -416,7 +416,7 @@
       "device_proof_required_when_bound": true,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/trading/monitor_api.py:66",
+      "source": "backend/van_gateway/trading/monitor_api.py:67",
       "summary": "Delete Alert",
       "tags": [
         "market-monitors"
@@ -525,7 +525,7 @@
       "device_proof_required_when_bound": true,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/trading/monitor_api.py:94",
+      "source": "backend/van_gateway/trading/monitor_api.py:95",
       "summary": "Delete Screen Rule",
       "tags": [
         "market-monitors"
@@ -634,7 +634,7 @@
       "device_proof_required_when_bound": true,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/trading/monitor_api.py:46",
+      "source": "backend/van_gateway/trading/monitor_api.py:47",
       "summary": "Delete List",
       "tags": [
         "market-monitors"
@@ -10814,7 +10814,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/trading/monitor_api.py:50",
+      "source": "backend/van_gateway/trading/monitor_api.py:51",
       "summary": "Alerts",
       "tags": [
         "market-monitors"
@@ -10933,7 +10933,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/trading/monitor_api.py:58",
+      "source": "backend/van_gateway/trading/monitor_api.py:59",
       "summary": "Get Alert",
       "tags": [
         "market-monitors"
@@ -11033,7 +11033,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/trading/monitor_api.py:22",
+      "source": "backend/van_gateway/trading/monitor_api.py:23",
       "summary": "Capabilities",
       "tags": [
         "market-monitors"
@@ -11113,7 +11113,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/trading/monitor_api.py:26",
+      "source": "backend/van_gateway/trading/monitor_api.py:27",
       "summary": "Operation",
       "tags": [
         "market-monitors"
@@ -11213,7 +11213,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/trading/monitor_api.py:78",
+      "source": "backend/van_gateway/trading/monitor_api.py:79",
       "summary": "Screen Rules",
       "tags": [
         "market-monitors"
@@ -11332,7 +11332,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/trading/monitor_api.py:86",
+      "source": "backend/van_gateway/trading/monitor_api.py:87",
       "summary": "Get Screen Rule",
       "tags": [
         "market-monitors"
@@ -11432,7 +11432,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/trading/monitor_api.py:30",
+      "source": "backend/van_gateway/trading/monitor_api.py:31",
       "summary": "Lists",
       "tags": [
         "market-monitors"
@@ -11551,7 +11551,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/trading/monitor_api.py:38",
+      "source": "backend/van_gateway/trading/monitor_api.py:39",
       "summary": "Get List",
       "tags": [
         "market-monitors"
@@ -24964,7 +24964,7 @@
       "device_proof_required_when_bound": true,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/trading/monitor_api.py:54",
+      "source": "backend/van_gateway/trading/monitor_api.py:55",
       "summary": "Create Alert",
       "tags": [
         "market-monitors"
@@ -25063,7 +25063,7 @@
       "device_proof_required_when_bound": true,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/trading/monitor_api.py:70",
+      "source": "backend/van_gateway/trading/monitor_api.py:71",
       "summary": "Pause Alert",
       "tags": [
         "market-monitors"
@@ -25172,7 +25172,7 @@
       "device_proof_required_when_bound": true,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/trading/monitor_api.py:74",
+      "source": "backend/van_gateway/trading/monitor_api.py:75",
       "summary": "Restart Alert",
       "tags": [
         "market-monitors"
@@ -25281,7 +25281,7 @@
       "device_proof_required_when_bound": true,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/trading/monitor_api.py:102",
+      "source": "backend/van_gateway/trading/monitor_api.py:107",
       "summary": "Screen",
       "tags": [
         "market-monitors"
@@ -25380,7 +25380,7 @@
       "device_proof_required_when_bound": true,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/trading/monitor_api.py:82",
+      "source": "backend/van_gateway/trading/monitor_api.py:83",
       "summary": "Create Screen Rule",
       "tags": [
         "market-monitors"
@@ -25479,7 +25479,7 @@
       "device_proof_required_when_bound": true,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/trading/monitor_api.py:98",
+      "source": "backend/van_gateway/trading/monitor_api.py:99",
       "summary": "Run Screen Rule",
       "tags": [
         "market-monitors"
@@ -25588,7 +25588,7 @@
       "device_proof_required_when_bound": true,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/trading/monitor_api.py:34",
+      "source": "backend/van_gateway/trading/monitor_api.py:35",
       "summary": "Create List",
       "tags": [
         "market-monitors"
@@ -25611,6 +25611,115 @@
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/MonitorWrite"
+              }
+            }
+          }
+        },
+        "404": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MonitorErrorResponse"
+              }
+            }
+          },
+          "description": "Not Found"
+        },
+        "409": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MonitorErrorResponse"
+              }
+            }
+          },
+          "description": "Conflict"
+        },
+        "413": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MonitorErrorResponse"
+              }
+            }
+          },
+          "description": "Request Entity Too Large"
+        },
+        "429": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MonitorErrorResponse"
+              }
+            }
+          },
+          "description": "Too Many Requests"
+        },
+        "503": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MonitorErrorResponse"
+              }
+            }
+          },
+          "description": "Service Unavailable"
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "openapi_components": "owner_endpoint_schemas.json",
+      "readiness": "REPOSITORY_DECLARATION_ONLY"
+    },
+    {
+      "endpoint_id": "VE-23948123dc88",
+      "method": "POST",
+      "path": "/v1/trading/monitors/watchlists/{object_id}/market",
+      "authentication": "INGRESS_BEARER_AND_PAIRED_DEVICE",
+      "device_proof_required_when_bound": true,
+      "registration": "DEFAULT",
+      "condition": null,
+      "source": "backend/van_gateway/trading/monitor_api.py:103",
+      "summary": "Watchlist Market",
+      "tags": [
+        "market-monitors"
+      ],
+      "parameters": [
+        {
+          "name": "object_id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "title": "Object Id"
+          }
+        }
+      ],
+      "request_body": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/WatchlistMarketRequest"
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WatchlistMarketResult"
               }
             }
           }
@@ -26803,7 +26912,7 @@
       "device_proof_required_when_bound": true,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/trading/monitor_api.py:62",
+      "source": "backend/van_gateway/trading/monitor_api.py:63",
       "summary": "Replace Alert",
       "tags": [
         "market-monitors"
@@ -26912,7 +27021,7 @@
       "device_proof_required_when_bound": true,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/trading/monitor_api.py:90",
+      "source": "backend/van_gateway/trading/monitor_api.py:91",
       "summary": "Replace Screen Rule",
       "tags": [
         "market-monitors"
@@ -27021,7 +27130,7 @@
       "device_proof_required_when_bound": true,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/trading/monitor_api.py:42",
+      "source": "backend/van_gateway/trading/monitor_api.py:43",
       "summary": "Replace List",
       "tags": [
         "market-monitors"

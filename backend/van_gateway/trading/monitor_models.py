@@ -192,6 +192,64 @@ class WatchlistPage(StrictModel):
     next_after_id: str | None
 
 
+class WatchlistMarketRequest(StrictModel):
+    expected_revision: int = Field(strict=True, ge=1)
+    timeframe: Timeframe = 'M1'
+    max_age_ms: int = Field(default=120000, strict=True, ge=1000, le=86400000)
+    search: Annotated[str, StringConstraints(strict=True, max_length=160)] = ''
+    venue: Identity | None = None
+    environment: Literal['LIVE', 'DEMO', 'HISTORICAL'] | None = None
+    api_family: Identity | None = None
+
+    @field_validator('search')
+    @classmethod
+    def visible_search(cls, value):
+        if any(ord(c) < 32 or ord(c) == 127 for c in value):
+            raise ValueError('search cannot contain control characters')
+        return value.strip()
+
+
+class WatchlistMarketRow(StrictModel):
+    instrument: InstrumentRef
+    favourite: bool
+    manual_index: int
+    state: Literal['AVAILABLE', 'UNAVAILABLE']
+    reason: str
+    evaluated_at_ms: Timestamp
+    measurement_basis: Literal['CLOSED_BAR_CLOSE'] = 'CLOSED_BAR_CLOSE'
+    price: Price | None = None
+    price_age_ms: int | None = None
+    event_time_ms: Timestamp | None = None
+    available_at_ms: Timestamp | None = None
+    sample_id: str | None = None
+    source_id: str | None = None
+    source_revision: str | None = None
+    change_basis: Literal['PREVIOUS_CONTIGUOUS_BAR'] = 'PREVIOUS_CONTIGUOUS_BAR'
+    change_state: Literal['AVAILABLE', 'HISTORY_UNAVAILABLE', 'ZERO_REFERENCE', 'SOURCE_UNAVAILABLE']
+    change_pct: ComputedValue | None = None
+    reference_price: Price | None = None
+    reference_time_ms: Timestamp | None = None
+    change_interval_ms: int | None = None
+    spread: None = None
+    spread_state: Literal['NOT_REPORTED_IN_CLOSED_BAR_SOURCE'] = 'NOT_REPORTED_IN_CLOSED_BAR_SOURCE'
+
+
+class WatchlistMarketResult(StrictModel):
+    object_id: str
+    revision: int
+    state_sha256: str
+    request: WatchlistMarketRequest
+    sort_by: Literal['MANUAL', 'SYMBOL', 'PRICE', 'CHANGE_PCT', 'SPREAD']
+    descending: bool
+    favourites_only: bool
+    sort_metric_state: Literal['AVAILABLE', 'PARTIAL', 'UNAVAILABLE', 'NOT_APPLICABLE']
+    selected_count: int
+    filtered_count: int
+    rows: list[WatchlistMarketRow]
+    evaluated_at_ms: Timestamp
+    authority_effect: Literal['NONE'] = 'NONE'
+
+
 class AlertPage(StrictModel):
     items: list[AlertView]
     total_count: int

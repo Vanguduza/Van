@@ -14049,6 +14049,394 @@
         ],
         "title": "WatchlistEntry"
       },
+      "WatchlistMarketRequest": {
+        "properties": {
+          "expected_revision": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Expected Revision"
+          },
+          "timeframe": {
+            "type": "string",
+            "enum": [
+              "M1",
+              "M5",
+              "M15",
+              "M30",
+              "H1",
+              "H4",
+              "D1"
+            ],
+            "title": "Timeframe",
+            "default": "M1"
+          },
+          "max_age_ms": {
+            "type": "integer",
+            "maximum": 86400000.0,
+            "minimum": 1000.0,
+            "title": "Max Age Ms",
+            "default": 120000
+          },
+          "search": {
+            "type": "string",
+            "maxLength": 160,
+            "title": "Search",
+            "default": ""
+          },
+          "venue": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 128,
+                "minLength": 1,
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Venue"
+          },
+          "environment": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "LIVE",
+                  "DEMO",
+                  "HISTORICAL"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Environment"
+          },
+          "api_family": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 128,
+                "minLength": 1,
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Api Family"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "expected_revision"
+        ],
+        "title": "WatchlistMarketRequest"
+      },
+      "WatchlistMarketResult": {
+        "properties": {
+          "object_id": {
+            "type": "string",
+            "title": "Object Id"
+          },
+          "revision": {
+            "type": "integer",
+            "title": "Revision"
+          },
+          "state_sha256": {
+            "type": "string",
+            "title": "State Sha256"
+          },
+          "request": {
+            "$ref": "#/components/schemas/WatchlistMarketRequest"
+          },
+          "sort_by": {
+            "type": "string",
+            "enum": [
+              "MANUAL",
+              "SYMBOL",
+              "PRICE",
+              "CHANGE_PCT",
+              "SPREAD"
+            ],
+            "title": "Sort By"
+          },
+          "descending": {
+            "type": "boolean",
+            "title": "Descending"
+          },
+          "favourites_only": {
+            "type": "boolean",
+            "title": "Favourites Only"
+          },
+          "sort_metric_state": {
+            "type": "string",
+            "enum": [
+              "AVAILABLE",
+              "PARTIAL",
+              "UNAVAILABLE",
+              "NOT_APPLICABLE"
+            ],
+            "title": "Sort Metric State"
+          },
+          "selected_count": {
+            "type": "integer",
+            "title": "Selected Count"
+          },
+          "filtered_count": {
+            "type": "integer",
+            "title": "Filtered Count"
+          },
+          "rows": {
+            "items": {
+              "$ref": "#/components/schemas/WatchlistMarketRow"
+            },
+            "type": "array",
+            "title": "Rows"
+          },
+          "evaluated_at_ms": {
+            "type": "integer",
+            "maximum": 253402300799000.0,
+            "minimum": 0.0,
+            "title": "Evaluated At Ms"
+          },
+          "authority_effect": {
+            "type": "string",
+            "const": "NONE",
+            "title": "Authority Effect",
+            "default": "NONE"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "object_id",
+          "revision",
+          "state_sha256",
+          "request",
+          "sort_by",
+          "descending",
+          "favourites_only",
+          "sort_metric_state",
+          "selected_count",
+          "filtered_count",
+          "rows",
+          "evaluated_at_ms"
+        ],
+        "title": "WatchlistMarketResult"
+      },
+      "WatchlistMarketRow": {
+        "properties": {
+          "instrument": {
+            "$ref": "#/components/schemas/InstrumentRef"
+          },
+          "favourite": {
+            "type": "boolean",
+            "title": "Favourite"
+          },
+          "manual_index": {
+            "type": "integer",
+            "title": "Manual Index"
+          },
+          "state": {
+            "type": "string",
+            "enum": [
+              "AVAILABLE",
+              "UNAVAILABLE"
+            ],
+            "title": "State"
+          },
+          "reason": {
+            "type": "string",
+            "title": "Reason"
+          },
+          "evaluated_at_ms": {
+            "type": "integer",
+            "maximum": 253402300799000.0,
+            "minimum": 0.0,
+            "title": "Evaluated At Ms"
+          },
+          "measurement_basis": {
+            "type": "string",
+            "const": "CLOSED_BAR_CLOSE",
+            "title": "Measurement Basis",
+            "default": "CLOSED_BAR_CLOSE"
+          },
+          "price": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 80,
+                "pattern": "^-?[0-9]+(?:\\.[0-9]+)?$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Price"
+          },
+          "price_age_ms": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Price Age Ms"
+          },
+          "event_time_ms": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "maximum": 253402300799000.0,
+                "minimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Event Time Ms"
+          },
+          "available_at_ms": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "maximum": 253402300799000.0,
+                "minimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Available At Ms"
+          },
+          "sample_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sample Id"
+          },
+          "source_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Id"
+          },
+          "source_revision": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Revision"
+          },
+          "change_basis": {
+            "type": "string",
+            "const": "PREVIOUS_CONTIGUOUS_BAR",
+            "title": "Change Basis",
+            "default": "PREVIOUS_CONTIGUOUS_BAR"
+          },
+          "change_state": {
+            "type": "string",
+            "enum": [
+              "AVAILABLE",
+              "HISTORY_UNAVAILABLE",
+              "ZERO_REFERENCE",
+              "SOURCE_UNAVAILABLE"
+            ],
+            "title": "Change State"
+          },
+          "change_pct": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 256,
+                "pattern": "^-?[0-9]+(?:\\.[0-9]+)?(?:[eE][+-]?[0-9]+)?$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Change Pct"
+          },
+          "reference_price": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 80,
+                "pattern": "^-?[0-9]+(?:\\.[0-9]+)?$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reference Price"
+          },
+          "reference_time_ms": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "maximum": 253402300799000.0,
+                "minimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reference Time Ms"
+          },
+          "change_interval_ms": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Change Interval Ms"
+          },
+          "spread": {
+            "type": "null",
+            "title": "Spread"
+          },
+          "spread_state": {
+            "type": "string",
+            "const": "NOT_REPORTED_IN_CLOSED_BAR_SOURCE",
+            "title": "Spread State",
+            "default": "NOT_REPORTED_IN_CLOSED_BAR_SOURCE"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "instrument",
+          "favourite",
+          "manual_index",
+          "state",
+          "reason",
+          "evaluated_at_ms",
+          "change_state"
+        ],
+        "title": "WatchlistMarketRow"
+      },
       "WatchlistPage": {
         "properties": {
           "items": {

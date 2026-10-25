@@ -130,7 +130,8 @@
       "evidence": [
         "backend/BE-020_MARKET_MONITORS.md",
         "receipts/MARKET_MONITORS_SOURCE_20261025.json",
-        "receipts/SAVED_SCREEN_RULES_SOURCE_20261025.json"
+        "receipts/SAVED_SCREEN_RULES_SOURCE_20261025.json",
+        "receipts/WATCHLIST_MARKET_ROWS_SOURCE_20261025.json"
       ]
     }
   },
@@ -195,7 +196,7 @@
     "note": "Opus unavailable; owner transferred build to Codex. No independent reviewer identity is inferred from another model or session."
   },
   "checkpoint": {
-    "updated_utc": "2026-10-25T03:40:02.410748+00:00",
+    "updated_utc": "2026-10-25T03:48:22.094647+00:00",
     "branch": "ccr-9e07e1af-8mgz1p",
     "base": "b02075f327ea8180ab6d269eba358cf8c5479878",
     "background_jobs": [],
@@ -374,7 +375,8 @@
       "Exactbe61 hosted40115383483:PG26PASS,trading2911PASS1DDSskip,voice117PASS0skip; full50browser1542ordinaryPASS1rootUIDskip plusseparateUID1PASS/firewall10PASS/audits0; emulator18PASS4declaredskips; all374retainedmutationscaught; nativeMetaEditor0errors/warningsfreshEX5,invalid4errorsnoEX5. Publicgateway5647cases5636PASS1JEVreferenceFAIL10SKIP;mediaNOTRUN; overallFAILED,originalDDSreadkey/trustedmainstillrequired. Nextsource preservesoriginalB0/private/trust/PG/browserchecks,canonicaltest-pathskipmetadata,Pillowpin,fullhistorySOURCEHEAD,2actualAGPrefusalcontrolsintheAndroidjob,independentmediaevenafterfailure. Nativeaccountpacket:5beforeFAIL,legacyalias-onlyvaluesLIVEwithoutscopeprobe;190finalnative/schema/funding/portfolioPASS,20auditedAPI0forbiddenwrites,96rebuild/30owner-workflow-pin/31JEV-gate/Pillow12PASS. Ninecurrentsemanticfault/restoredpairs caught;schema5valid35invalidshapes. AllcurrentKotlin1341testsourcecompiled;fullruntimeABORTEDnativecoroutinethreadEAGAINnotPASS;8focusedactualJunitPASS0skip.10originalfundingreportassertionspreservedwithexplicitnativephysicalmarkfixture. No newUI orunit/native/prod/S24 acceptance.",
       "df249 fresh hosted: trading3061PASS1declaredDDSskip; PG26PASS; voice117PASS; publicbackend5841PASS7declaredunexecuted; actualrelease2PASS; Android1369passed events; emulator18PASS4declaredskips;374mutationsCAUGHT. Browser10PASS1setupERROR, laterfull/UID/firewallNOT_RUN. New testkit deterministic before4FAIL1PASS/after5PASS; originalscenariosbyteidentical. No formalacceptances.",
       "BE020: original42groups105functions78surfaces preserved;457->472endpoints,333->357APIschemas(originalsetsallpreserved);55newtests observedacrosssourcephases, latest54PASS1threadsetupERROR retainedandretryerror; prior53allPASSplus2newhealthycontrols.9/9faultpairsCAUGHTwithhealthycontrols,10registryguardsPASS,source-contractcheck0changes,MDcurrent. Nativefeed/tick/dynamic/persistedscreen/voice/Androidconsumersnotqualified. Noformalunit/gateacceptance.",
-      "Schema59 saved-screen candidate:63monitor casesPASS0skip, including actual SQL migration failure/rollback/lost-marker replay, original CRUD receipts, run quotas/exact revision/hash/concurrent edits and paired HTTP. Registry478endpoints/366schemas with original42groups/105functions/78surfaces retained. Hostedc535all374mutants caught,PG26/publicgateway5841+7declaredskip/trading3061+1privateDDSskip/voice117/browser1547+1separateUIDpass/firewall10/JVM1369/emulator18+4declaredskip; exacttree-identicalmergeb2a9. Predates monitors58/59; onlyDDSkey/trusted-main CI prerequisites fail,neithergatewaived."
+      "Schema59 saved-screen candidate:63monitor casesPASS0skip, including actual SQL migration failure/rollback/lost-marker replay, original CRUD receipts, run quotas/exact revision/hash/concurrent edits and paired HTTP. Registry478endpoints/366schemas with original42groups/105functions/78surfaces retained. Hostedc535all374mutants caught,PG26/publicgateway5841+7declaredskip/trading3061+1privateDDSskip/voice117/browser1547+1separateUIDpass/firewall10/JVM1369/emulator18+4declaredskip; exacttree-identicalmergeb2a9. Predates monitors58/59; onlyDDSkey/trusted-main CI prerequisites fail,neithergatewaived.",
+      "Watchlist row source:19currentpurePASS; unchangedSQL2+pairedHTTP1pass in separate run, latest3same-resource native-thread failures retained.479endpoints/369schemas,42groups/105functions/78surfaces retained. No fakequote/spread/live qualification, BE020IN_PROGRESS, allacceptanceNOT_ISSUED."
     ],
     "environment_notes": [
       "clone must be unshallowed (git fetch --unshallow) and PR heads fetched (+refs/pull/*/head:refs/remotes/origin/pr/*) before pre001.py",

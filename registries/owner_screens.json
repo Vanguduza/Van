@@ -12557,7 +12557,7 @@
           "method": "DELETE",
           "path": "/v1/trading/monitors/alerts/{object_id}",
           "endpoint_id": "VE-5e08ae2b5f09",
-          "source_ref": "backend/van_gateway/trading/monitor_api.py:66",
+          "source_ref": "backend/van_gateway/trading/monitor_api.py:67",
           "authentication": "INGRESS_BEARER_AND_PAIRED_DEVICE",
           "device_proof_required_when_bound": true,
           "source_status": "CANDIDATE_BACKEND_COMPONENT_NATIVE_FEED_AND_ANDROID_CONSUMER_PENDING",
@@ -12576,10 +12576,10 @@
             "van.next.trading.alerts",
             "van.next.trading.screener"
           ],
-          "scope": "Durable owner watchlists, exact native instrument selections, favourites and sorting; CAS/idempotent alert controls, pause/restart/delete; one canonical trigger per explicit arm, atomic existing event stream and recoverable Attention projection. Server closed-bar price/indicator/pinned-level-or-trend measurements and literal news-keyword checks. Typed bounded level screening with persistent quotas and saved-screen CRUD; running requires an exact revision and binds results to that captured rule hash. Saved selections do not prove native feed binding. A symbol-only bar lake cannot trigger a live technical fact. No order path exists.",
+          "scope": "Durable owner watchlists, exact native instrument selections, favourites and sorting; CAS/idempotent alert controls, pause/restart/delete; one canonical trigger per explicit arm, atomic existing event stream and recoverable Attention projection. Server closed-bar price/indicator/pinned-level-or-trend measurements and literal news-keyword checks. Typed bounded level screening with persistent quotas and saved-screen CRUD; running requires an exact revision and binds results to that captured rule hash. Saved selections do not prove native feed binding. Revision-bound watchlist market rows apply saved ordering/favourites and literal search/native identity filters. Closed-bar close/previous-bar change include exact basis, reference interval, age and source hashes; unavailable quotes/spreads remain null. A symbol-only bar lake cannot trigger a live technical fact. No order path exists.",
           "remaining": [
             "Full qualified native feed and quote binding",
-            "Tick-price alerts and live row projections",
+            "Tick-price alerts and native quote/spread/session-change row producers",
             "Dynamic watchlists",
             "Typed voice/action-catalog wiring",
             "Provider and Android consumer qualification"
@@ -12592,7 +12592,7 @@
           "method": "DELETE",
           "path": "/v1/trading/monitors/screen-rules/{object_id}",
           "endpoint_id": "VE-c2694532380c",
-          "source_ref": "backend/van_gateway/trading/monitor_api.py:94",
+          "source_ref": "backend/van_gateway/trading/monitor_api.py:95",
           "authentication": "INGRESS_BEARER_AND_PAIRED_DEVICE",
           "device_proof_required_when_bound": true,
           "source_status": "CANDIDATE_BACKEND_COMPONENT_NATIVE_FEED_AND_ANDROID_CONSUMER_PENDING",
@@ -12611,10 +12611,10 @@
             "van.next.trading.alerts",
             "van.next.trading.screener"
           ],
-          "scope": "Durable owner watchlists, exact native instrument selections, favourites and sorting; CAS/idempotent alert controls, pause/restart/delete; one canonical trigger per explicit arm, atomic existing event stream and recoverable Attention projection. Server closed-bar price/indicator/pinned-level-or-trend measurements and literal news-keyword checks. Typed bounded level screening with persistent quotas and saved-screen CRUD; running requires an exact revision and binds results to that captured rule hash. Saved selections do not prove native feed binding. A symbol-only bar lake cannot trigger a live technical fact. No order path exists.",
+          "scope": "Durable owner watchlists, exact native instrument selections, favourites and sorting; CAS/idempotent alert controls, pause/restart/delete; one canonical trigger per explicit arm, atomic existing event stream and recoverable Attention projection. Server closed-bar price/indicator/pinned-level-or-trend measurements and literal news-keyword checks. Typed bounded level screening with persistent quotas and saved-screen CRUD; running requires an exact revision and binds results to that captured rule hash. Saved selections do not prove native feed binding. Revision-bound watchlist market rows apply saved ordering/favourites and literal search/native identity filters. Closed-bar close/previous-bar change include exact basis, reference interval, age and source hashes; unavailable quotes/spreads remain null. A symbol-only bar lake cannot trigger a live technical fact. No order path exists.",
           "remaining": [
             "Full qualified native feed and quote binding",
-            "Tick-price alerts and live row projections",
+            "Tick-price alerts and native quote/spread/session-change row producers",
             "Dynamic watchlists",
             "Typed voice/action-catalog wiring",
             "Provider and Android consumer qualification"
@@ -12627,7 +12627,7 @@
           "method": "DELETE",
           "path": "/v1/trading/monitors/watchlists/{object_id}",
           "endpoint_id": "VE-d978474c62a1",
-          "source_ref": "backend/van_gateway/trading/monitor_api.py:46",
+          "source_ref": "backend/van_gateway/trading/monitor_api.py:47",
           "authentication": "INGRESS_BEARER_AND_PAIRED_DEVICE",
           "device_proof_required_when_bound": true,
           "source_status": "CANDIDATE_BACKEND_COMPONENT_NATIVE_FEED_AND_ANDROID_CONSUMER_PENDING",
@@ -12646,10 +12646,10 @@
             "van.next.trading.alerts",
             "van.next.trading.screener"
           ],
-          "scope": "Durable owner watchlists, exact native instrument selections, favourites and sorting; CAS/idempotent alert controls, pause/restart/delete; one canonical trigger per explicit arm, atomic existing event stream and recoverable Attention projection. Server closed-bar price/indicator/pinned-level-or-trend measurements and literal news-keyword checks. Typed bounded level screening with persistent quotas and saved-screen CRUD; running requires an exact revision and binds results to that captured rule hash. Saved selections do not prove native feed binding. A symbol-only bar lake cannot trigger a live technical fact. No order path exists.",
+          "scope": "Durable owner watchlists, exact native instrument selections, favourites and sorting; CAS/idempotent alert controls, pause/restart/delete; one canonical trigger per explicit arm, atomic existing event stream and recoverable Attention projection. Server closed-bar price/indicator/pinned-level-or-trend measurements and literal news-keyword checks. Typed bounded level screening with persistent quotas and saved-screen CRUD; running requires an exact revision and binds results to that captured rule hash. Saved selections do not prove native feed binding. Revision-bound watchlist market rows apply saved ordering/favourites and literal search/native identity filters. Closed-bar close/previous-bar change include exact basis, reference interval, age and source hashes; unavailable quotes/spreads remain null. A symbol-only bar lake cannot trigger a live technical fact. No order path exists.",
           "remaining": [
             "Full qualified native feed and quote binding",
-            "Tick-price alerts and live row projections",
+            "Tick-price alerts and native quote/spread/session-change row producers",
             "Dynamic watchlists",
             "Typed voice/action-catalog wiring",
             "Provider and Android consumer qualification"
@@ -12662,7 +12662,7 @@
           "method": "GET",
           "path": "/v1/trading/monitors/alerts",
           "endpoint_id": "VE-36e83f3da416",
-          "source_ref": "backend/van_gateway/trading/monitor_api.py:50",
+          "source_ref": "backend/van_gateway/trading/monitor_api.py:51",
           "authentication": "INGRESS_BEARER_AND_PAIRED_DEVICE",
           "device_proof_required_when_bound": false,
           "source_status": "CANDIDATE_BACKEND_COMPONENT_NATIVE_FEED_AND_ANDROID_CONSUMER_PENDING",
@@ -12681,10 +12681,10 @@
             "van.next.trading.alerts",
             "van.next.trading.screener"
           ],
-          "scope": "Durable owner watchlists, exact native instrument selections, favourites and sorting; CAS/idempotent alert controls, pause/restart/delete; one canonical trigger per explicit arm, atomic existing event stream and recoverable Attention projection. Server closed-bar price/indicator/pinned-level-or-trend measurements and literal news-keyword checks. Typed bounded level screening with persistent quotas and saved-screen CRUD; running requires an exact revision and binds results to that captured rule hash. Saved selections do not prove native feed binding. A symbol-only bar lake cannot trigger a live technical fact. No order path exists.",
+          "scope": "Durable owner watchlists, exact native instrument selections, favourites and sorting; CAS/idempotent alert controls, pause/restart/delete; one canonical trigger per explicit arm, atomic existing event stream and recoverable Attention projection. Server closed-bar price/indicator/pinned-level-or-trend measurements and literal news-keyword checks. Typed bounded level screening with persistent quotas and saved-screen CRUD; running requires an exact revision and binds results to that captured rule hash. Saved selections do not prove native feed binding. Revision-bound watchlist market rows apply saved ordering/favourites and literal search/native identity filters. Closed-bar close/previous-bar change include exact basis, reference interval, age and source hashes; unavailable quotes/spreads remain null. A symbol-only bar lake cannot trigger a live technical fact. No order path exists.",
           "remaining": [
             "Full qualified native feed and quote binding",
-            "Tick-price alerts and live row projections",
+            "Tick-price alerts and native quote/spread/session-change row producers",
             "Dynamic watchlists",
             "Typed voice/action-catalog wiring",
             "Provider and Android consumer qualification"
@@ -12697,7 +12697,7 @@
           "method": "GET",
           "path": "/v1/trading/monitors/alerts/{object_id}",
           "endpoint_id": "VE-3da119731c08",
-          "source_ref": "backend/van_gateway/trading/monitor_api.py:58",
+          "source_ref": "backend/van_gateway/trading/monitor_api.py:59",
           "authentication": "INGRESS_BEARER_AND_PAIRED_DEVICE",
           "device_proof_required_when_bound": false,
           "source_status": "CANDIDATE_BACKEND_COMPONENT_NATIVE_FEED_AND_ANDROID_CONSUMER_PENDING",
@@ -12716,10 +12716,10 @@
             "van.next.trading.alerts",
             "van.next.trading.screener"
           ],
-          "scope": "Durable owner watchlists, exact native instrument selections, favourites and sorting; CAS/idempotent alert controls, pause/restart/delete; one canonical trigger per explicit arm, atomic existing event stream and recoverable Attention projection. Server closed-bar price/indicator/pinned-level-or-trend measurements and literal news-keyword checks. Typed bounded level screening with persistent quotas and saved-screen CRUD; running requires an exact revision and binds results to that captured rule hash. Saved selections do not prove native feed binding. A symbol-only bar lake cannot trigger a live technical fact. No order path exists.",
+          "scope": "Durable owner watchlists, exact native instrument selections, favourites and sorting; CAS/idempotent alert controls, pause/restart/delete; one canonical trigger per explicit arm, atomic existing event stream and recoverable Attention projection. Server closed-bar price/indicator/pinned-level-or-trend measurements and literal news-keyword checks. Typed bounded level screening with persistent quotas and saved-screen CRUD; running requires an exact revision and binds results to that captured rule hash. Saved selections do not prove native feed binding. Revision-bound watchlist market rows apply saved ordering/favourites and literal search/native identity filters. Closed-bar close/previous-bar change include exact basis, reference interval, age and source hashes; unavailable quotes/spreads remain null. A symbol-only bar lake cannot trigger a live technical fact. No order path exists.",
           "remaining": [
             "Full qualified native feed and quote binding",
-            "Tick-price alerts and live row projections",
+            "Tick-price alerts and native quote/spread/session-change row producers",
             "Dynamic watchlists",
             "Typed voice/action-catalog wiring",
             "Provider and Android consumer qualification"
@@ -12732,7 +12732,7 @@
           "method": "GET",
           "path": "/v1/trading/monitors/capabilities",
           "endpoint_id": "VE-66237ce2e987",
-          "source_ref": "backend/van_gateway/trading/monitor_api.py:22",
+          "source_ref": "backend/van_gateway/trading/monitor_api.py:23",
           "authentication": "INGRESS_BEARER_AND_PAIRED_DEVICE",
           "device_proof_required_when_bound": false,
           "source_status": "CANDIDATE_BACKEND_COMPONENT_NATIVE_FEED_AND_ANDROID_CONSUMER_PENDING",
@@ -12751,10 +12751,10 @@
             "van.next.trading.alerts",
             "van.next.trading.screener"
           ],
-          "scope": "Durable owner watchlists, exact native instrument selections, favourites and sorting; CAS/idempotent alert controls, pause/restart/delete; one canonical trigger per explicit arm, atomic existing event stream and recoverable Attention projection. Server closed-bar price/indicator/pinned-level-or-trend measurements and literal news-keyword checks. Typed bounded level screening with persistent quotas and saved-screen CRUD; running requires an exact revision and binds results to that captured rule hash. Saved selections do not prove native feed binding. A symbol-only bar lake cannot trigger a live technical fact. No order path exists.",
+          "scope": "Durable owner watchlists, exact native instrument selections, favourites and sorting; CAS/idempotent alert controls, pause/restart/delete; one canonical trigger per explicit arm, atomic existing event stream and recoverable Attention projection. Server closed-bar price/indicator/pinned-level-or-trend measurements and literal news-keyword checks. Typed bounded level screening with persistent quotas and saved-screen CRUD; running requires an exact revision and binds results to that captured rule hash. Saved selections do not prove native feed binding. Revision-bound watchlist market rows apply saved ordering/favourites and literal search/native identity filters. Closed-bar close/previous-bar change include exact basis, reference interval, age and source hashes; unavailable quotes/spreads remain null. A symbol-only bar lake cannot trigger a live technical fact. No order path exists.",
           "remaining": [
             "Full qualified native feed and quote binding",
-            "Tick-price alerts and live row projections",
+            "Tick-price alerts and native quote/spread/session-change row producers",
             "Dynamic watchlists",
             "Typed voice/action-catalog wiring",
             "Provider and Android consumer qualification"
@@ -12767,7 +12767,7 @@
           "method": "GET",
           "path": "/v1/trading/monitors/operations/{request_id}",
           "endpoint_id": "VE-7f325243c415",
-          "source_ref": "backend/van_gateway/trading/monitor_api.py:26",
+          "source_ref": "backend/van_gateway/trading/monitor_api.py:27",
           "authentication": "INGRESS_BEARER_AND_PAIRED_DEVICE",
           "device_proof_required_when_bound": false,
           "source_status": "CANDIDATE_BACKEND_COMPONENT_NATIVE_FEED_AND_ANDROID_CONSUMER_PENDING",
@@ -12786,10 +12786,10 @@
             "van.next.trading.alerts",
             "van.next.trading.screener"
           ],
-          "scope": "Durable owner watchlists, exact native instrument selections, favourites and sorting; CAS/idempotent alert controls, pause/restart/delete; one canonical trigger per explicit arm, atomic existing event stream and recoverable Attention projection. Server closed-bar price/indicator/pinned-level-or-trend measurements and literal news-keyword checks. Typed bounded level screening with persistent quotas and saved-screen CRUD; running requires an exact revision and binds results to that captured rule hash. Saved selections do not prove native feed binding. A symbol-only bar lake cannot trigger a live technical fact. No order path exists.",
+          "scope": "Durable owner watchlists, exact native instrument selections, favourites and sorting; CAS/idempotent alert controls, pause/restart/delete; one canonical trigger per explicit arm, atomic existing event stream and recoverable Attention projection. Server closed-bar price/indicator/pinned-level-or-trend measurements and literal news-keyword checks. Typed bounded level screening with persistent quotas and saved-screen CRUD; running requires an exact revision and binds results to that captured rule hash. Saved selections do not prove native feed binding. Revision-bound watchlist market rows apply saved ordering/favourites and literal search/native identity filters. Closed-bar close/previous-bar change include exact basis, reference interval, age and source hashes; unavailable quotes/spreads remain null. A symbol-only bar lake cannot trigger a live technical fact. No order path exists.",
           "remaining": [
             "Full qualified native feed and quote binding",
-            "Tick-price alerts and live row projections",
+            "Tick-price alerts and native quote/spread/session-change row producers",
             "Dynamic watchlists",
             "Typed voice/action-catalog wiring",
             "Provider and Android consumer qualification"
@@ -12802,7 +12802,7 @@
           "method": "GET",
           "path": "/v1/trading/monitors/screen-rules",
           "endpoint_id": "VE-e297d33d4b5c",
-          "source_ref": "backend/van_gateway/trading/monitor_api.py:78",
+          "source_ref": "backend/van_gateway/trading/monitor_api.py:79",
           "authentication": "INGRESS_BEARER_AND_PAIRED_DEVICE",
           "device_proof_required_when_bound": false,
           "source_status": "CANDIDATE_BACKEND_COMPONENT_NATIVE_FEED_AND_ANDROID_CONSUMER_PENDING",
@@ -12821,10 +12821,10 @@
             "van.next.trading.alerts",
             "van.next.trading.screener"
           ],
-          "scope": "Durable owner watchlists, exact native instrument selections, favourites and sorting; CAS/idempotent alert controls, pause/restart/delete; one canonical trigger per explicit arm, atomic existing event stream and recoverable Attention projection. Server closed-bar price/indicator/pinned-level-or-trend measurements and literal news-keyword checks. Typed bounded level screening with persistent quotas and saved-screen CRUD; running requires an exact revision and binds results to that captured rule hash. Saved selections do not prove native feed binding. A symbol-only bar lake cannot trigger a live technical fact. No order path exists.",
+          "scope": "Durable owner watchlists, exact native instrument selections, favourites and sorting; CAS/idempotent alert controls, pause/restart/delete; one canonical trigger per explicit arm, atomic existing event stream and recoverable Attention projection. Server closed-bar price/indicator/pinned-level-or-trend measurements and literal news-keyword checks. Typed bounded level screening with persistent quotas and saved-screen CRUD; running requires an exact revision and binds results to that captured rule hash. Saved selections do not prove native feed binding. Revision-bound watchlist market rows apply saved ordering/favourites and literal search/native identity filters. Closed-bar close/previous-bar change include exact basis, reference interval, age and source hashes; unavailable quotes/spreads remain null. A symbol-only bar lake cannot trigger a live technical fact. No order path exists.",
           "remaining": [
             "Full qualified native feed and quote binding",
-            "Tick-price alerts and live row projections",
+            "Tick-price alerts and native quote/spread/session-change row producers",
             "Dynamic watchlists",
             "Typed voice/action-catalog wiring",
             "Provider and Android consumer qualification"
@@ -12837,7 +12837,7 @@
           "method": "GET",
           "path": "/v1/trading/monitors/screen-rules/{object_id}",
           "endpoint_id": "VE-43f6d80dec2b",
-          "source_ref": "backend/van_gateway/trading/monitor_api.py:86",
+          "source_ref": "backend/van_gateway/trading/monitor_api.py:87",
           "authentication": "INGRESS_BEARER_AND_PAIRED_DEVICE",
           "device_proof_required_when_bound": false,
           "source_status": "CANDIDATE_BACKEND_COMPONENT_NATIVE_FEED_AND_ANDROID_CONSUMER_PENDING",
@@ -12856,10 +12856,10 @@
             "van.next.trading.alerts",
             "van.next.trading.screener"
           ],
-          "scope": "Durable owner watchlists, exact native instrument selections, favourites and sorting; CAS/idempotent alert controls, pause/restart/delete; one canonical trigger per explicit arm, atomic existing event stream and recoverable Attention projection. Server closed-bar price/indicator/pinned-level-or-trend measurements and literal news-keyword checks. Typed bounded level screening with persistent quotas and saved-screen CRUD; running requires an exact revision and binds results to that captured rule hash. Saved selections do not prove native feed binding. A symbol-only bar lake cannot trigger a live technical fact. No order path exists.",
+          "scope": "Durable owner watchlists, exact native instrument selections, favourites and sorting; CAS/idempotent alert controls, pause/restart/delete; one canonical trigger per explicit arm, atomic existing event stream and recoverable Attention projection. Server closed-bar price/indicator/pinned-level-or-trend measurements and literal news-keyword checks. Typed bounded level screening with persistent quotas and saved-screen CRUD; running requires an exact revision and binds results to that captured rule hash. Saved selections do not prove native feed binding. Revision-bound watchlist market rows apply saved ordering/favourites and literal search/native identity filters. Closed-bar close/previous-bar change include exact basis, reference interval, age and source hashes; unavailable quotes/spreads remain null. A symbol-only bar lake cannot trigger a live technical fact. No order path exists.",
           "remaining": [
             "Full qualified native feed and quote binding",
-            "Tick-price alerts and live row projections",
+            "Tick-price alerts and native quote/spread/session-change row producers",
             "Dynamic watchlists",
             "Typed voice/action-catalog wiring",
             "Provider and Android consumer qualification"
@@ -12872,7 +12872,7 @@
           "method": "GET",
           "path": "/v1/trading/monitors/watchlists",
           "endpoint_id": "VE-5c02bd4370d7",
-          "source_ref": "backend/van_gateway/trading/monitor_api.py:30",
+          "source_ref": "backend/van_gateway/trading/monitor_api.py:31",
           "authentication": "INGRESS_BEARER_AND_PAIRED_DEVICE",
           "device_proof_required_when_bound": false,
           "source_status": "CANDIDATE_BACKEND_COMPONENT_NATIVE_FEED_AND_ANDROID_CONSUMER_PENDING",
@@ -12891,10 +12891,10 @@
             "van.next.trading.alerts",
             "van.next.trading.screener"
           ],
-          "scope": "Durable owner watchlists, exact native instrument selections, favourites and sorting; CAS/idempotent alert controls, pause/restart/delete; one canonical trigger per explicit arm, atomic existing event stream and recoverable Attention projection. Server closed-bar price/indicator/pinned-level-or-trend measurements and literal news-keyword checks. Typed bounded level screening with persistent quotas and saved-screen CRUD; running requires an exact revision and binds results to that captured rule hash. Saved selections do not prove native feed binding. A symbol-only bar lake cannot trigger a live technical fact. No order path exists.",
+          "scope": "Durable owner watchlists, exact native instrument selections, favourites and sorting; CAS/idempotent alert controls, pause/restart/delete; one canonical trigger per explicit arm, atomic existing event stream and recoverable Attention projection. Server closed-bar price/indicator/pinned-level-or-trend measurements and literal news-keyword checks. Typed bounded level screening with persistent quotas and saved-screen CRUD; running requires an exact revision and binds results to that captured rule hash. Saved selections do not prove native feed binding. Revision-bound watchlist market rows apply saved ordering/favourites and literal search/native identity filters. Closed-bar close/previous-bar change include exact basis, reference interval, age and source hashes; unavailable quotes/spreads remain null. A symbol-only bar lake cannot trigger a live technical fact. No order path exists.",
           "remaining": [
             "Full qualified native feed and quote binding",
-            "Tick-price alerts and live row projections",
+            "Tick-price alerts and native quote/spread/session-change row producers",
             "Dynamic watchlists",
             "Typed voice/action-catalog wiring",
             "Provider and Android consumer qualification"
@@ -12907,7 +12907,7 @@
           "method": "GET",
           "path": "/v1/trading/monitors/watchlists/{object_id}",
           "endpoint_id": "VE-7addd97678fb",
-          "source_ref": "backend/van_gateway/trading/monitor_api.py:38",
+          "source_ref": "backend/van_gateway/trading/monitor_api.py:39",
           "authentication": "INGRESS_BEARER_AND_PAIRED_DEVICE",
           "device_proof_required_when_bound": false,
           "source_status": "CANDIDATE_BACKEND_COMPONENT_NATIVE_FEED_AND_ANDROID_CONSUMER_PENDING",
@@ -12926,10 +12926,10 @@
             "van.next.trading.alerts",
             "van.next.trading.screener"
           ],
-          "scope": "Durable owner watchlists, exact native instrument selections, favourites and sorting; CAS/idempotent alert controls, pause/restart/delete; one canonical trigger per explicit arm, atomic existing event stream and recoverable Attention projection. Server closed-bar price/indicator/pinned-level-or-trend measurements and literal news-keyword checks. Typed bounded level screening with persistent quotas and saved-screen CRUD; running requires an exact revision and binds results to that captured rule hash. Saved selections do not prove native feed binding. A symbol-only bar lake cannot trigger a live technical fact. No order path exists.",
+          "scope": "Durable owner watchlists, exact native instrument selections, favourites and sorting; CAS/idempotent alert controls, pause/restart/delete; one canonical trigger per explicit arm, atomic existing event stream and recoverable Attention projection. Server closed-bar price/indicator/pinned-level-or-trend measurements and literal news-keyword checks. Typed bounded level screening with persistent quotas and saved-screen CRUD; running requires an exact revision and binds results to that captured rule hash. Saved selections do not prove native feed binding. Revision-bound watchlist market rows apply saved ordering/favourites and literal search/native identity filters. Closed-bar close/previous-bar change include exact basis, reference interval, age and source hashes; unavailable quotes/spreads remain null. A symbol-only bar lake cannot trigger a live technical fact. No order path exists.",
           "remaining": [
             "Full qualified native feed and quote binding",
-            "Tick-price alerts and live row projections",
+            "Tick-price alerts and native quote/spread/session-change row producers",
             "Dynamic watchlists",
             "Typed voice/action-catalog wiring",
             "Provider and Android consumer qualification"
@@ -12942,7 +12942,7 @@
           "method": "POST",
           "path": "/v1/trading/monitors/alerts",
           "endpoint_id": "VE-a169063e428c",
-          "source_ref": "backend/van_gateway/trading/monitor_api.py:54",
+          "source_ref": "backend/van_gateway/trading/monitor_api.py:55",
           "authentication": "INGRESS_BEARER_AND_PAIRED_DEVICE",
           "device_proof_required_when_bound": true,
           "source_status": "CANDIDATE_BACKEND_COMPONENT_NATIVE_FEED_AND_ANDROID_CONSUMER_PENDING",
@@ -12961,10 +12961,10 @@
             "van.next.trading.alerts",
             "van.next.trading.screener"
           ],
-          "scope": "Durable owner watchlists, exact native instrument selections, favourites and sorting; CAS/idempotent alert controls, pause/restart/delete; one canonical trigger per explicit arm, atomic existing event stream and recoverable Attention projection. Server closed-bar price/indicator/pinned-level-or-trend measurements and literal news-keyword checks. Typed bounded level screening with persistent quotas and saved-screen CRUD; running requires an exact revision and binds results to that captured rule hash. Saved selections do not prove native feed binding. A symbol-only bar lake cannot trigger a live technical fact. No order path exists.",
+          "scope": "Durable owner watchlists, exact native instrument selections, favourites and sorting; CAS/idempotent alert controls, pause/restart/delete; one canonical trigger per explicit arm, atomic existing event stream and recoverable Attention projection. Server closed-bar price/indicator/pinned-level-or-trend measurements and literal news-keyword checks. Typed bounded level screening with persistent quotas and saved-screen CRUD; running requires an exact revision and binds results to that captured rule hash. Saved selections do not prove native feed binding. Revision-bound watchlist market rows apply saved ordering/favourites and literal search/native identity filters. Closed-bar close/previous-bar change include exact basis, reference interval, age and source hashes; unavailable quotes/spreads remain null. A symbol-only bar lake cannot trigger a live technical fact. No order path exists.",
           "remaining": [
             "Full qualified native feed and quote binding",
-            "Tick-price alerts and live row projections",
+            "Tick-price alerts and native quote/spread/session-change row producers",
             "Dynamic watchlists",
             "Typed voice/action-catalog wiring",
             "Provider and Android consumer qualification"
@@ -12977,7 +12977,7 @@
           "method": "POST",
           "path": "/v1/trading/monitors/alerts/{object_id}/pause",
           "endpoint_id": "VE-e639deda55f6",
-          "source_ref": "backend/van_gateway/trading/monitor_api.py:70",
+          "source_ref": "backend/van_gateway/trading/monitor_api.py:71",
           "authentication": "INGRESS_BEARER_AND_PAIRED_DEVICE",
           "device_proof_required_when_bound": true,
           "source_status": "CANDIDATE_BACKEND_COMPONENT_NATIVE_FEED_AND_ANDROID_CONSUMER_PENDING",
@@ -12996,10 +12996,10 @@
             "van.next.trading.alerts",
             "van.next.trading.screener"
           ],
-          "scope": "Durable owner watchlists, exact native instrument selections, favourites and sorting; CAS/idempotent alert controls, pause/restart/delete; one canonical trigger per explicit arm, atomic existing event stream and recoverable Attention projection. Server closed-bar price/indicator/pinned-level-or-trend measurements and literal news-keyword checks. Typed bounded level screening with persistent quotas and saved-screen CRUD; running requires an exact revision and binds results to that captured rule hash. Saved selections do not prove native feed binding. A symbol-only bar lake cannot trigger a live technical fact. No order path exists.",
+          "scope": "Durable owner watchlists, exact native instrument selections, favourites and sorting; CAS/idempotent alert controls, pause/restart/delete; one canonical trigger per explicit arm, atomic existing event stream and recoverable Attention projection. Server closed-bar price/indicator/pinned-level-or-trend measurements and literal news-keyword checks. Typed bounded level screening with persistent quotas and saved-screen CRUD; running requires an exact revision and binds results to that captured rule hash. Saved selections do not prove native feed binding. Revision-bound watchlist market rows apply saved ordering/favourites and literal search/native identity filters. Closed-bar close/previous-bar change include exact basis, reference interval, age and source hashes; unavailable quotes/spreads remain null. A symbol-only bar lake cannot trigger a live technical fact. No order path exists.",
           "remaining": [
             "Full qualified native feed and quote binding",
-            "Tick-price alerts and live row projections",
+            "Tick-price alerts and native quote/spread/session-change row producers",
             "Dynamic watchlists",
             "Typed voice/action-catalog wiring",
             "Provider and Android consumer qualification"
@@ -13012,7 +13012,7 @@
           "method": "POST",
           "path": "/v1/trading/monitors/alerts/{object_id}/restart",
           "endpoint_id": "VE-716bc8fa7b83",
-          "source_ref": "backend/van_gateway/trading/monitor_api.py:74",
+          "source_ref": "backend/van_gateway/trading/monitor_api.py:75",
           "authentication": "INGRESS_BEARER_AND_PAIRED_DEVICE",
           "device_proof_required_when_bound": true,
           "source_status": "CANDIDATE_BACKEND_COMPONENT_NATIVE_FEED_AND_ANDROID_CONSUMER_PENDING",
@@ -13031,10 +13031,10 @@
             "van.next.trading.alerts",
             "van.next.trading.screener"
           ],
-          "scope": "Durable owner watchlists, exact native instrument selections, favourites and sorting; CAS/idempotent alert controls, pause/restart/delete; one canonical trigger per explicit arm, atomic existing event stream and recoverable Attention projection. Server closed-bar price/indicator/pinned-level-or-trend measurements and literal news-keyword checks. Typed bounded level screening with persistent quotas and saved-screen CRUD; running requires an exact revision and binds results to that captured rule hash. Saved selections do not prove native feed binding. A symbol-only bar lake cannot trigger a live technical fact. No order path exists.",
+          "scope": "Durable owner watchlists, exact native instrument selections, favourites and sorting; CAS/idempotent alert controls, pause/restart/delete; one canonical trigger per explicit arm, atomic existing event stream and recoverable Attention projection. Server closed-bar price/indicator/pinned-level-or-trend measurements and literal news-keyword checks. Typed bounded level screening with persistent quotas and saved-screen CRUD; running requires an exact revision and binds results to that captured rule hash. Saved selections do not prove native feed binding. Revision-bound watchlist market rows apply saved ordering/favourites and literal search/native identity filters. Closed-bar close/previous-bar change include exact basis, reference interval, age and source hashes; unavailable quotes/spreads remain null. A symbol-only bar lake cannot trigger a live technical fact. No order path exists.",
           "remaining": [
             "Full qualified native feed and quote binding",
-            "Tick-price alerts and live row projections",
+            "Tick-price alerts and native quote/spread/session-change row producers",
             "Dynamic watchlists",
             "Typed voice/action-catalog wiring",
             "Provider and Android consumer qualification"
@@ -13047,7 +13047,7 @@
           "method": "POST",
           "path": "/v1/trading/monitors/screen",
           "endpoint_id": "VE-e1711e49e094",
-          "source_ref": "backend/van_gateway/trading/monitor_api.py:102",
+          "source_ref": "backend/van_gateway/trading/monitor_api.py:107",
           "authentication": "INGRESS_BEARER_AND_PAIRED_DEVICE",
           "device_proof_required_when_bound": true,
           "source_status": "CANDIDATE_BACKEND_COMPONENT_NATIVE_FEED_AND_ANDROID_CONSUMER_PENDING",
@@ -13066,10 +13066,10 @@
             "van.next.trading.alerts",
             "van.next.trading.screener"
           ],
-          "scope": "Durable owner watchlists, exact native instrument selections, favourites and sorting; CAS/idempotent alert controls, pause/restart/delete; one canonical trigger per explicit arm, atomic existing event stream and recoverable Attention projection. Server closed-bar price/indicator/pinned-level-or-trend measurements and literal news-keyword checks. Typed bounded level screening with persistent quotas and saved-screen CRUD; running requires an exact revision and binds results to that captured rule hash. Saved selections do not prove native feed binding. A symbol-only bar lake cannot trigger a live technical fact. No order path exists.",
+          "scope": "Durable owner watchlists, exact native instrument selections, favourites and sorting; CAS/idempotent alert controls, pause/restart/delete; one canonical trigger per explicit arm, atomic existing event stream and recoverable Attention projection. Server closed-bar price/indicator/pinned-level-or-trend measurements and literal news-keyword checks. Typed bounded level screening with persistent quotas and saved-screen CRUD; running requires an exact revision and binds results to that captured rule hash. Saved selections do not prove native feed binding. Revision-bound watchlist market rows apply saved ordering/favourites and literal search/native identity filters. Closed-bar close/previous-bar change include exact basis, reference interval, age and source hashes; unavailable quotes/spreads remain null. A symbol-only bar lake cannot trigger a live technical fact. No order path exists.",
           "remaining": [
             "Full qualified native feed and quote binding",
-            "Tick-price alerts and live row projections",
+            "Tick-price alerts and native quote/spread/session-change row producers",
             "Dynamic watchlists",
             "Typed voice/action-catalog wiring",
             "Provider and Android consumer qualification"
@@ -13082,7 +13082,7 @@
           "method": "POST",
           "path": "/v1/trading/monitors/screen-rules",
           "endpoint_id": "VE-dbc079757204",
-          "source_ref": "backend/van_gateway/trading/monitor_api.py:82",
+          "source_ref": "backend/van_gateway/trading/monitor_api.py:83",
           "authentication": "INGRESS_BEARER_AND_PAIRED_DEVICE",
           "device_proof_required_when_bound": true,
           "source_status": "CANDIDATE_BACKEND_COMPONENT_NATIVE_FEED_AND_ANDROID_CONSUMER_PENDING",
@@ -13101,10 +13101,10 @@
             "van.next.trading.alerts",
             "van.next.trading.screener"
           ],
-          "scope": "Durable owner watchlists, exact native instrument selections, favourites and sorting; CAS/idempotent alert controls, pause/restart/delete; one canonical trigger per explicit arm, atomic existing event stream and recoverable Attention projection. Server closed-bar price/indicator/pinned-level-or-trend measurements and literal news-keyword checks. Typed bounded level screening with persistent quotas and saved-screen CRUD; running requires an exact revision and binds results to that captured rule hash. Saved selections do not prove native feed binding. A symbol-only bar lake cannot trigger a live technical fact. No order path exists.",
+          "scope": "Durable owner watchlists, exact native instrument selections, favourites and sorting; CAS/idempotent alert controls, pause/restart/delete; one canonical trigger per explicit arm, atomic existing event stream and recoverable Attention projection. Server closed-bar price/indicator/pinned-level-or-trend measurements and literal news-keyword checks. Typed bounded level screening with persistent quotas and saved-screen CRUD; running requires an exact revision and binds results to that captured rule hash. Saved selections do not prove native feed binding. Revision-bound watchlist market rows apply saved ordering/favourites and literal search/native identity filters. Closed-bar close/previous-bar change include exact basis, reference interval, age and source hashes; unavailable quotes/spreads remain null. A symbol-only bar lake cannot trigger a live technical fact. No order path exists.",
           "remaining": [
             "Full qualified native feed and quote binding",
-            "Tick-price alerts and live row projections",
+            "Tick-price alerts and native quote/spread/session-change row producers",
             "Dynamic watchlists",
             "Typed voice/action-catalog wiring",
             "Provider and Android consumer qualification"
@@ -13117,7 +13117,7 @@
           "method": "POST",
           "path": "/v1/trading/monitors/screen-rules/{object_id}/run",
           "endpoint_id": "VE-af73db42769d",
-          "source_ref": "backend/van_gateway/trading/monitor_api.py:98",
+          "source_ref": "backend/van_gateway/trading/monitor_api.py:99",
           "authentication": "INGRESS_BEARER_AND_PAIRED_DEVICE",
           "device_proof_required_when_bound": true,
           "source_status": "CANDIDATE_BACKEND_COMPONENT_NATIVE_FEED_AND_ANDROID_CONSUMER_PENDING",
@@ -13136,10 +13136,10 @@
             "van.next.trading.alerts",
             "van.next.trading.screener"
           ],
-          "scope": "Durable owner watchlists, exact native instrument selections, favourites and sorting; CAS/idempotent alert controls, pause/restart/delete; one canonical trigger per explicit arm, atomic existing event stream and recoverable Attention projection. Server closed-bar price/indicator/pinned-level-or-trend measurements and literal news-keyword checks. Typed bounded level screening with persistent quotas and saved-screen CRUD; running requires an exact revision and binds results to that captured rule hash. Saved selections do not prove native feed binding. A symbol-only bar lake cannot trigger a live technical fact. No order path exists.",
+          "scope": "Durable owner watchlists, exact native instrument selections, favourites and sorting; CAS/idempotent alert controls, pause/restart/delete; one canonical trigger per explicit arm, atomic existing event stream and recoverable Attention projection. Server closed-bar price/indicator/pinned-level-or-trend measurements and literal news-keyword checks. Typed bounded level screening with persistent quotas and saved-screen CRUD; running requires an exact revision and binds results to that captured rule hash. Saved selections do not prove native feed binding. Revision-bound watchlist market rows apply saved ordering/favourites and literal search/native identity filters. Closed-bar close/previous-bar change include exact basis, reference interval, age and source hashes; unavailable quotes/spreads remain null. A symbol-only bar lake cannot trigger a live technical fact. No order path exists.",
           "remaining": [
             "Full qualified native feed and quote binding",
-            "Tick-price alerts and live row projections",
+            "Tick-price alerts and native quote/spread/session-change row producers",
             "Dynamic watchlists",
             "Typed voice/action-catalog wiring",
             "Provider and Android consumer qualification"
@@ -13152,7 +13152,7 @@
           "method": "POST",
           "path": "/v1/trading/monitors/watchlists",
           "endpoint_id": "VE-4f2f4e60b880",
-          "source_ref": "backend/van_gateway/trading/monitor_api.py:34",
+          "source_ref": "backend/van_gateway/trading/monitor_api.py:35",
           "authentication": "INGRESS_BEARER_AND_PAIRED_DEVICE",
           "device_proof_required_when_bound": true,
           "source_status": "CANDIDATE_BACKEND_COMPONENT_NATIVE_FEED_AND_ANDROID_CONSUMER_PENDING",
@@ -13171,10 +13171,45 @@
             "van.next.trading.alerts",
             "van.next.trading.screener"
           ],
-          "scope": "Durable owner watchlists, exact native instrument selections, favourites and sorting; CAS/idempotent alert controls, pause/restart/delete; one canonical trigger per explicit arm, atomic existing event stream and recoverable Attention projection. Server closed-bar price/indicator/pinned-level-or-trend measurements and literal news-keyword checks. Typed bounded level screening with persistent quotas and saved-screen CRUD; running requires an exact revision and binds results to that captured rule hash. Saved selections do not prove native feed binding. A symbol-only bar lake cannot trigger a live technical fact. No order path exists.",
+          "scope": "Durable owner watchlists, exact native instrument selections, favourites and sorting; CAS/idempotent alert controls, pause/restart/delete; one canonical trigger per explicit arm, atomic existing event stream and recoverable Attention projection. Server closed-bar price/indicator/pinned-level-or-trend measurements and literal news-keyword checks. Typed bounded level screening with persistent quotas and saved-screen CRUD; running requires an exact revision and binds results to that captured rule hash. Saved selections do not prove native feed binding. Revision-bound watchlist market rows apply saved ordering/favourites and literal search/native identity filters. Closed-bar close/previous-bar change include exact basis, reference interval, age and source hashes; unavailable quotes/spreads remain null. A symbol-only bar lake cannot trigger a live technical fact. No order path exists.",
           "remaining": [
             "Full qualified native feed and quote binding",
-            "Tick-price alerts and live row projections",
+            "Tick-price alerts and native quote/spread/session-change row producers",
+            "Dynamic watchlists",
+            "Typed voice/action-catalog wiring",
+            "Provider and Android consumer qualification"
+          ],
+          "specification": "docs/rebuild/rev118/backend/BE-020_MARKET_MONITORS.md",
+          "new_ui_implemented": false,
+          "live_qualified": false
+        },
+        {
+          "method": "POST",
+          "path": "/v1/trading/monitors/watchlists/{object_id}/market",
+          "endpoint_id": "VE-23948123dc88",
+          "source_ref": "backend/van_gateway/trading/monitor_api.py:103",
+          "authentication": "INGRESS_BEARER_AND_PAIRED_DEVICE",
+          "device_proof_required_when_bound": true,
+          "source_status": "CANDIDATE_BACKEND_COMPONENT_NATIVE_FEED_AND_ANDROID_CONSUMER_PENDING",
+          "authority": "OWNER_MONITOR_CONFIGURATION_AND_READ_ONLY_OBSERVATIONS_ALERTS_NEVER_TRADE",
+          "canonical_units": [
+            "BE-003",
+            "BE-020"
+          ],
+          "planned_feature_refs": [
+            "VNX-F-TRADE-03",
+            "VNX-F-TRADE-04",
+            "VNX-F-CHART-11"
+          ],
+          "planned_context_refs": [
+            "van.next.trading.markets",
+            "van.next.trading.alerts",
+            "van.next.trading.screener"
+          ],
+          "scope": "Durable owner watchlists, exact native instrument selections, favourites and sorting; CAS/idempotent alert controls, pause/restart/delete; one canonical trigger per explicit arm, atomic existing event stream and recoverable Attention projection. Server closed-bar price/indicator/pinned-level-or-trend measurements and literal news-keyword checks. Typed bounded level screening with persistent quotas and saved-screen CRUD; running requires an exact revision and binds results to that captured rule hash. Saved selections do not prove native feed binding. Revision-bound watchlist market rows apply saved ordering/favourites and literal search/native identity filters. Closed-bar close/previous-bar change include exact basis, reference interval, age and source hashes; unavailable quotes/spreads remain null. A symbol-only bar lake cannot trigger a live technical fact. No order path exists.",
+          "remaining": [
+            "Full qualified native feed and quote binding",
+            "Tick-price alerts and native quote/spread/session-change row producers",
             "Dynamic watchlists",
             "Typed voice/action-catalog wiring",
             "Provider and Android consumer qualification"
@@ -13187,7 +13222,7 @@
           "method": "PUT",
           "path": "/v1/trading/monitors/alerts/{object_id}",
           "endpoint_id": "VE-88366f209702",
-          "source_ref": "backend/van_gateway/trading/monitor_api.py:62",
+          "source_ref": "backend/van_gateway/trading/monitor_api.py:63",
           "authentication": "INGRESS_BEARER_AND_PAIRED_DEVICE",
           "device_proof_required_when_bound": true,
           "source_status": "CANDIDATE_BACKEND_COMPONENT_NATIVE_FEED_AND_ANDROID_CONSUMER_PENDING",
@@ -13206,10 +13241,10 @@
             "van.next.trading.alerts",
             "van.next.trading.screener"
           ],
-          "scope": "Durable owner watchlists, exact native instrument selections, favourites and sorting; CAS/idempotent alert controls, pause/restart/delete; one canonical trigger per explicit arm, atomic existing event stream and recoverable Attention projection. Server closed-bar price/indicator/pinned-level-or-trend measurements and literal news-keyword checks. Typed bounded level screening with persistent quotas and saved-screen CRUD; running requires an exact revision and binds results to that captured rule hash. Saved selections do not prove native feed binding. A symbol-only bar lake cannot trigger a live technical fact. No order path exists.",
+          "scope": "Durable owner watchlists, exact native instrument selections, favourites and sorting; CAS/idempotent alert controls, pause/restart/delete; one canonical trigger per explicit arm, atomic existing event stream and recoverable Attention projection. Server closed-bar price/indicator/pinned-level-or-trend measurements and literal news-keyword checks. Typed bounded level screening with persistent quotas and saved-screen CRUD; running requires an exact revision and binds results to that captured rule hash. Saved selections do not prove native feed binding. Revision-bound watchlist market rows apply saved ordering/favourites and literal search/native identity filters. Closed-bar close/previous-bar change include exact basis, reference interval, age and source hashes; unavailable quotes/spreads remain null. A symbol-only bar lake cannot trigger a live technical fact. No order path exists.",
           "remaining": [
             "Full qualified native feed and quote binding",
-            "Tick-price alerts and live row projections",
+            "Tick-price alerts and native quote/spread/session-change row producers",
             "Dynamic watchlists",
             "Typed voice/action-catalog wiring",
             "Provider and Android consumer qualification"
@@ -13222,7 +13257,7 @@
           "method": "PUT",
           "path": "/v1/trading/monitors/screen-rules/{object_id}",
           "endpoint_id": "VE-cd4835b7dd91",
-          "source_ref": "backend/van_gateway/trading/monitor_api.py:90",
+          "source_ref": "backend/van_gateway/trading/monitor_api.py:91",
           "authentication": "INGRESS_BEARER_AND_PAIRED_DEVICE",
           "device_proof_required_when_bound": true,
           "source_status": "CANDIDATE_BACKEND_COMPONENT_NATIVE_FEED_AND_ANDROID_CONSUMER_PENDING",
@@ -13241,10 +13276,10 @@
             "van.next.trading.alerts",
             "van.next.trading.screener"
           ],
-          "scope": "Durable owner watchlists, exact native instrument selections, favourites and sorting; CAS/idempotent alert controls, pause/restart/delete; one canonical trigger per explicit arm, atomic existing event stream and recoverable Attention projection. Server closed-bar price/indicator/pinned-level-or-trend measurements and literal news-keyword checks. Typed bounded level screening with persistent quotas and saved-screen CRUD; running requires an exact revision and binds results to that captured rule hash. Saved selections do not prove native feed binding. A symbol-only bar lake cannot trigger a live technical fact. No order path exists.",
+          "scope": "Durable owner watchlists, exact native instrument selections, favourites and sorting; CAS/idempotent alert controls, pause/restart/delete; one canonical trigger per explicit arm, atomic existing event stream and recoverable Attention projection. Server closed-bar price/indicator/pinned-level-or-trend measurements and literal news-keyword checks. Typed bounded level screening with persistent quotas and saved-screen CRUD; running requires an exact revision and binds results to that captured rule hash. Saved selections do not prove native feed binding. Revision-bound watchlist market rows apply saved ordering/favourites and literal search/native identity filters. Closed-bar close/previous-bar change include exact basis, reference interval, age and source hashes; unavailable quotes/spreads remain null. A symbol-only bar lake cannot trigger a live technical fact. No order path exists.",
           "remaining": [
             "Full qualified native feed and quote binding",
-            "Tick-price alerts and live row projections",
+            "Tick-price alerts and native quote/spread/session-change row producers",
             "Dynamic watchlists",
             "Typed voice/action-catalog wiring",
             "Provider and Android consumer qualification"
@@ -13257,7 +13292,7 @@
           "method": "PUT",
           "path": "/v1/trading/monitors/watchlists/{object_id}",
           "endpoint_id": "VE-e02148d751ad",
-          "source_ref": "backend/van_gateway/trading/monitor_api.py:42",
+          "source_ref": "backend/van_gateway/trading/monitor_api.py:43",
           "authentication": "INGRESS_BEARER_AND_PAIRED_DEVICE",
           "device_proof_required_when_bound": true,
           "source_status": "CANDIDATE_BACKEND_COMPONENT_NATIVE_FEED_AND_ANDROID_CONSUMER_PENDING",
@@ -13276,10 +13311,10 @@
             "van.next.trading.alerts",
             "van.next.trading.screener"
           ],
-          "scope": "Durable owner watchlists, exact native instrument selections, favourites and sorting; CAS/idempotent alert controls, pause/restart/delete; one canonical trigger per explicit arm, atomic existing event stream and recoverable Attention projection. Server closed-bar price/indicator/pinned-level-or-trend measurements and literal news-keyword checks. Typed bounded level screening with persistent quotas and saved-screen CRUD; running requires an exact revision and binds results to that captured rule hash. Saved selections do not prove native feed binding. A symbol-only bar lake cannot trigger a live technical fact. No order path exists.",
+          "scope": "Durable owner watchlists, exact native instrument selections, favourites and sorting; CAS/idempotent alert controls, pause/restart/delete; one canonical trigger per explicit arm, atomic existing event stream and recoverable Attention projection. Server closed-bar price/indicator/pinned-level-or-trend measurements and literal news-keyword checks. Typed bounded level screening with persistent quotas and saved-screen CRUD; running requires an exact revision and binds results to that captured rule hash. Saved selections do not prove native feed binding. Revision-bound watchlist market rows apply saved ordering/favourites and literal search/native identity filters. Closed-bar close/previous-bar change include exact basis, reference interval, age and source hashes; unavailable quotes/spreads remain null. A symbol-only bar lake cannot trigger a live technical fact. No order path exists.",
           "remaining": [
             "Full qualified native feed and quote binding",
-            "Tick-price alerts and live row projections",
+            "Tick-price alerts and native quote/spread/session-change row producers",
             "Dynamic watchlists",
             "Typed voice/action-catalog wiring",
             "Provider and Android consumer qualification"
@@ -16430,7 +16465,7 @@
           "method": "DELETE",
           "path": "/v1/trading/monitors/alerts/{object_id}",
           "endpoint_id": "VE-5e08ae2b5f09",
-          "source_ref": "backend/van_gateway/trading/monitor_api.py:66",
+          "source_ref": "backend/van_gateway/trading/monitor_api.py:67",
           "authentication": "INGRESS_BEARER_AND_PAIRED_DEVICE",
           "device_proof_required_when_bound": true,
           "source_status": "CANDIDATE_BACKEND_COMPONENT_NATIVE_FEED_AND_ANDROID_CONSUMER_PENDING",
@@ -16449,10 +16484,10 @@
             "van.next.trading.alerts",
             "van.next.trading.screener"
           ],
-          "scope": "Durable owner watchlists, exact native instrument selections, favourites and sorting; CAS/idempotent alert controls, pause/restart/delete; one canonical trigger per explicit arm, atomic existing event stream and recoverable Attention projection. Server closed-bar price/indicator/pinned-level-or-trend measurements and literal news-keyword checks. Typed bounded level screening with persistent quotas and saved-screen CRUD; running requires an exact revision and binds results to that captured rule hash. Saved selections do not prove native feed binding. A symbol-only bar lake cannot trigger a live technical fact. No order path exists.",
+          "scope": "Durable owner watchlists, exact native instrument selections, favourites and sorting; CAS/idempotent alert controls, pause/restart/delete; one canonical trigger per explicit arm, atomic existing event stream and recoverable Attention projection. Server closed-bar price/indicator/pinned-level-or-trend measurements and literal news-keyword checks. Typed bounded level screening with persistent quotas and saved-screen CRUD; running requires an exact revision and binds results to that captured rule hash. Saved selections do not prove native feed binding. Revision-bound watchlist market rows apply saved ordering/favourites and literal search/native identity filters. Closed-bar close/previous-bar change include exact basis, reference interval, age and source hashes; unavailable quotes/spreads remain null. A symbol-only bar lake cannot trigger a live technical fact. No order path exists.",
           "remaining": [
             "Full qualified native feed and quote binding",
-            "Tick-price alerts and live row projections",
+            "Tick-price alerts and native quote/spread/session-change row producers",
             "Dynamic watchlists",
             "Typed voice/action-catalog wiring",
             "Provider and Android consumer qualification"
@@ -16465,7 +16500,7 @@
           "method": "DELETE",
           "path": "/v1/trading/monitors/screen-rules/{object_id}",
           "endpoint_id": "VE-c2694532380c",
-          "source_ref": "backend/van_gateway/trading/monitor_api.py:94",
+          "source_ref": "backend/van_gateway/trading/monitor_api.py:95",
           "authentication": "INGRESS_BEARER_AND_PAIRED_DEVICE",
           "device_proof_required_when_bound": true,
           "source_status": "CANDIDATE_BACKEND_COMPONENT_NATIVE_FEED_AND_ANDROID_CONSUMER_PENDING",
@@ -16484,10 +16519,10 @@
             "van.next.trading.alerts",
             "van.next.trading.screener"
           ],
-          "scope": "Durable owner watchlists, exact native instrument selections, favourites and sorting; CAS/idempotent alert controls, pause/restart/delete; one canonical trigger per explicit arm, atomic existing event stream and recoverable Attention projection. Server closed-bar price/indicator/pinned-level-or-trend measurements and literal news-keyword checks. Typed bounded level screening with persistent quotas and saved-screen CRUD; running requires an exact revision and binds results to that captured rule hash. Saved selections do not prove native feed binding. A symbol-only bar lake cannot trigger a live technical fact. No order path exists.",
+          "scope": "Durable owner watchlists, exact native instrument selections, favourites and sorting; CAS/idempotent alert controls, pause/restart/delete; one canonical trigger per explicit arm, atomic existing event stream and recoverable Attention projection. Server closed-bar price/indicator/pinned-level-or-trend measurements and literal news-keyword checks. Typed bounded level screening with persistent quotas and saved-screen CRUD; running requires an exact revision and binds results to that captured rule hash. Saved selections do not prove native feed binding. Revision-bound watchlist market rows apply saved ordering/favourites and literal search/native identity filters. Closed-bar close/previous-bar change include exact basis, reference interval, age and source hashes; unavailable quotes/spreads remain null. A symbol-only bar lake cannot trigger a live technical fact. No order path exists.",
           "remaining": [
             "Full qualified native feed and quote binding",
-            "Tick-price alerts and live row projections",
+            "Tick-price alerts and native quote/spread/session-change row producers",
             "Dynamic watchlists",
             "Typed voice/action-catalog wiring",
             "Provider and Android consumer qualification"
@@ -16500,7 +16535,7 @@
           "method": "DELETE",
           "path": "/v1/trading/monitors/watchlists/{object_id}",
           "endpoint_id": "VE-d978474c62a1",
-          "source_ref": "backend/van_gateway/trading/monitor_api.py:46",
+          "source_ref": "backend/van_gateway/trading/monitor_api.py:47",
           "authentication": "INGRESS_BEARER_AND_PAIRED_DEVICE",
           "device_proof_required_when_bound": true,
           "source_status": "CANDIDATE_BACKEND_COMPONENT_NATIVE_FEED_AND_ANDROID_CONSUMER_PENDING",
@@ -16519,10 +16554,10 @@
             "van.next.trading.alerts",
             "van.next.trading.screener"
           ],
-          "scope": "Durable owner watchlists, exact native instrument selections, favourites and sorting; CAS/idempotent alert controls, pause/restart/delete; one canonical trigger per explicit arm, atomic existing event stream and recoverable Attention projection. Server closed-bar price/indicator/pinned-level-or-trend measurements and literal news-keyword checks. Typed bounded level screening with persistent quotas and saved-screen CRUD; running requires an exact revision and binds results to that captured rule hash. Saved selections do not prove native feed binding. A symbol-only bar lake cannot trigger a live technical fact. No order path exists.",
+          "scope": "Durable owner watchlists, exact native instrument selections, favourites and sorting; CAS/idempotent alert controls, pause/restart/delete; one canonical trigger per explicit arm, atomic existing event stream and recoverable Attention projection. Server closed-bar price/indicator/pinned-level-or-trend measurements and literal news-keyword checks. Typed bounded level screening with persistent quotas and saved-screen CRUD; running requires an exact revision and binds results to that captured rule hash. Saved selections do not prove native feed binding. Revision-bound watchlist market rows apply saved ordering/favourites and literal search/native identity filters. Closed-bar close/previous-bar change include exact basis, reference interval, age and source hashes; unavailable quotes/spreads remain null. A symbol-only bar lake cannot trigger a live technical fact. No order path exists.",
           "remaining": [
             "Full qualified native feed and quote binding",
-            "Tick-price alerts and live row projections",
+            "Tick-price alerts and native quote/spread/session-change row producers",
             "Dynamic watchlists",
             "Typed voice/action-catalog wiring",
             "Provider and Android consumer qualification"
@@ -16535,7 +16570,7 @@
           "method": "GET",
           "path": "/v1/trading/monitors/alerts",
           "endpoint_id": "VE-36e83f3da416",
-          "source_ref": "backend/van_gateway/trading/monitor_api.py:50",
+          "source_ref": "backend/van_gateway/trading/monitor_api.py:51",
           "authentication": "INGRESS_BEARER_AND_PAIRED_DEVICE",
           "device_proof_required_when_bound": false,
           "source_status": "CANDIDATE_BACKEND_COMPONENT_NATIVE_FEED_AND_ANDROID_CONSUMER_PENDING",
@@ -16554,10 +16589,10 @@
             "van.next.trading.alerts",
             "van.next.trading.screener"
           ],
-          "scope": "Durable owner watchlists, exact native instrument selections, favourites and sorting; CAS/idempotent alert controls, pause/restart/delete; one canonical trigger per explicit arm, atomic existing event stream and recoverable Attention projection. Server closed-bar price/indicator/pinned-level-or-trend measurements and literal news-keyword checks. Typed bounded level screening with persistent quotas and saved-screen CRUD; running requires an exact revision and binds results to that captured rule hash. Saved selections do not prove native feed binding. A symbol-only bar lake cannot trigger a live technical fact. No order path exists.",
+          "scope": "Durable owner watchlists, exact native instrument selections, favourites and sorting; CAS/idempotent alert controls, pause/restart/delete; one canonical trigger per explicit arm, atomic existing event stream and recoverable Attention projection. Server closed-bar price/indicator/pinned-level-or-trend measurements and literal news-keyword checks. Typed bounded level screening with persistent quotas and saved-screen CRUD; running requires an exact revision and binds results to that captured rule hash. Saved selections do not prove native feed binding. Revision-bound watchlist market rows apply saved ordering/favourites and literal search/native identity filters. Closed-bar close/previous-bar change include exact basis, reference interval, age and source hashes; unavailable quotes/spreads remain null. A symbol-only bar lake cannot trigger a live technical fact. No order path exists.",
           "remaining": [
             "Full qualified native feed and quote binding",
-            "Tick-price alerts and live row projections",
+            "Tick-price alerts and native quote/spread/session-change row producers",
             "Dynamic watchlists",
             "Typed voice/action-catalog wiring",
             "Provider and Android consumer qualification"
@@ -16570,7 +16605,7 @@
           "method": "GET",
           "path": "/v1/trading/monitors/alerts/{object_id}",
           "endpoint_id": "VE-3da119731c08",
-          "source_ref": "backend/van_gateway/trading/monitor_api.py:58",
+          "source_ref": "backend/van_gateway/trading/monitor_api.py:59",
           "authentication": "INGRESS_BEARER_AND_PAIRED_DEVICE",
           "device_proof_required_when_bound": false,
           "source_status": "CANDIDATE_BACKEND_COMPONENT_NATIVE_FEED_AND_ANDROID_CONSUMER_PENDING",
@@ -16589,10 +16624,10 @@
             "van.next.trading.alerts",
             "van.next.trading.screener"
           ],
-          "scope": "Durable owner watchlists, exact native instrument selections, favourites and sorting; CAS/idempotent alert controls, pause/restart/delete; one canonical trigger per explicit arm, atomic existing event stream and recoverable Attention projection. Server closed-bar price/indicator/pinned-level-or-trend measurements and literal news-keyword checks. Typed bounded level screening with persistent quotas and saved-screen CRUD; running requires an exact revision and binds results to that captured rule hash. Saved selections do not prove native feed binding. A symbol-only bar lake cannot trigger a live technical fact. No order path exists.",
+          "scope": "Durable owner watchlists, exact native instrument selections, favourites and sorting; CAS/idempotent alert controls, pause/restart/delete; one canonical trigger per explicit arm, atomic existing event stream and recoverable Attention projection. Server closed-bar price/indicator/pinned-level-or-trend measurements and literal news-keyword checks. Typed bounded level screening with persistent quotas and saved-screen CRUD; running requires an exact revision and binds results to that captured rule hash. Saved selections do not prove native feed binding. Revision-bound watchlist market rows apply saved ordering/favourites and literal search/native identity filters. Closed-bar close/previous-bar change include exact basis, reference interval, age and source hashes; unavailable quotes/spreads remain null. A symbol-only bar lake cannot trigger a live technical fact. No order path exists.",
           "remaining": [
             "Full qualified native feed and quote binding",
-            "Tick-price alerts and live row projections",
+            "Tick-price alerts and native quote/spread/session-change row producers",
             "Dynamic watchlists",
             "Typed voice/action-catalog wiring",
             "Provider and Android consumer qualification"
@@ -16605,7 +16640,7 @@
           "method": "GET",
           "path": "/v1/trading/monitors/capabilities",
           "endpoint_id": "VE-66237ce2e987",
-          "source_ref": "backend/van_gateway/trading/monitor_api.py:22",
+          "source_ref": "backend/van_gateway/trading/monitor_api.py:23",
           "authentication": "INGRESS_BEARER_AND_PAIRED_DEVICE",
           "device_proof_required_when_bound": false,
           "source_status": "CANDIDATE_BACKEND_COMPONENT_NATIVE_FEED_AND_ANDROID_CONSUMER_PENDING",
@@ -16624,10 +16659,10 @@
             "van.next.trading.alerts",
             "van.next.trading.screener"
           ],
-          "scope": "Durable owner watchlists, exact native instrument selections, favourites and sorting; CAS/idempotent alert controls, pause/restart/delete; one canonical trigger per explicit arm, atomic existing event stream and recoverable Attention projection. Server closed-bar price/indicator/pinned-level-or-trend measurements and literal news-keyword checks. Typed bounded level screening with persistent quotas and saved-screen CRUD; running requires an exact revision and binds results to that captured rule hash. Saved selections do not prove native feed binding. A symbol-only bar lake cannot trigger a live technical fact. No order path exists.",
+          "scope": "Durable owner watchlists, exact native instrument selections, favourites and sorting; CAS/idempotent alert controls, pause/restart/delete; one canonical trigger per explicit arm, atomic existing event stream and recoverable Attention projection. Server closed-bar price/indicator/pinned-level-or-trend measurements and literal news-keyword checks. Typed bounded level screening with persistent quotas and saved-screen CRUD; running requires an exact revision and binds results to that captured rule hash. Saved selections do not prove native feed binding. Revision-bound watchlist market rows apply saved ordering/favourites and literal search/native identity filters. Closed-bar close/previous-bar change include exact basis, reference interval, age and source hashes; unavailable quotes/spreads remain null. A symbol-only bar lake cannot trigger a live technical fact. No order path exists.",
           "remaining": [
             "Full qualified native feed and quote binding",
-            "Tick-price alerts and live row projections",
+            "Tick-price alerts and native quote/spread/session-change row producers",
             "Dynamic watchlists",
             "Typed voice/action-catalog wiring",
             "Provider and Android consumer qualification"
@@ -16640,7 +16675,7 @@
           "method": "GET",
           "path": "/v1/trading/monitors/operations/{request_id}",
           "endpoint_id": "VE-7f325243c415",
-          "source_ref": "backend/van_gateway/trading/monitor_api.py:26",
+          "source_ref": "backend/van_gateway/trading/monitor_api.py:27",
           "authentication": "INGRESS_BEARER_AND_PAIRED_DEVICE",
           "device_proof_required_when_bound": false,
           "source_status": "CANDIDATE_BACKEND_COMPONENT_NATIVE_FEED_AND_ANDROID_CONSUMER_PENDING",
@@ -16659,10 +16694,10 @@
             "van.next.trading.alerts",
             "van.next.trading.screener"
           ],
-          "scope": "Durable owner watchlists, exact native instrument selections, favourites and sorting; CAS/idempotent alert controls, pause/restart/delete; one canonical trigger per explicit arm, atomic existing event stream and recoverable Attention projection. Server closed-bar price/indicator/pinned-level-or-trend measurements and literal news-keyword checks. Typed bounded level screening with persistent quotas and saved-screen CRUD; running requires an exact revision and binds results to that captured rule hash. Saved selections do not prove native feed binding. A symbol-only bar lake cannot trigger a live technical fact. No order path exists.",
+          "scope": "Durable owner watchlists, exact native instrument selections, favourites and sorting; CAS/idempotent alert controls, pause/restart/delete; one canonical trigger per explicit arm, atomic existing event stream and recoverable Attention projection. Server closed-bar price/indicator/pinned-level-or-trend measurements and literal news-keyword checks. Typed bounded level screening with persistent quotas and saved-screen CRUD; running requires an exact revision and binds results to that captured rule hash. Saved selections do not prove native feed binding. Revision-bound watchlist market rows apply saved ordering/favourites and literal search/native identity filters. Closed-bar close/previous-bar change include exact basis, reference interval, age and source hashes; unavailable quotes/spreads remain null. A symbol-only bar lake cannot trigger a live technical fact. No order path exists.",
           "remaining": [
             "Full qualified native feed and quote binding",
-            "Tick-price alerts and live row projections",
+            "Tick-price alerts and native quote/spread/session-change row producers",
             "Dynamic watchlists",
             "Typed voice/action-catalog wiring",
             "Provider and Android consumer qualification"
@@ -16675,7 +16710,7 @@
           "method": "GET",
           "path": "/v1/trading/monitors/screen-rules",
           "endpoint_id": "VE-e297d33d4b5c",
-          "source_ref": "backend/van_gateway/trading/monitor_api.py:78",
+          "source_ref": "backend/van_gateway/trading/monitor_api.py:79",
           "authentication": "INGRESS_BEARER_AND_PAIRED_DEVICE",
           "device_proof_required_when_bound": false,
           "source_status": "CANDIDATE_BACKEND_COMPONENT_NATIVE_FEED_AND_ANDROID_CONSUMER_PENDING",
@@ -16694,10 +16729,10 @@
             "van.next.trading.alerts",
             "van.next.trading.screener"
           ],
-          "scope": "Durable owner watchlists, exact native instrument selections, favourites and sorting; CAS/idempotent alert controls, pause/restart/delete; one canonical trigger per explicit arm, atomic existing event stream and recoverable Attention projection. Server closed-bar price/indicator/pinned-level-or-trend measurements and literal news-keyword checks. Typed bounded level screening with persistent quotas and saved-screen CRUD; running requires an exact revision and binds results to that captured rule hash. Saved selections do not prove native feed binding. A symbol-only bar lake cannot trigger a live technical fact. No order path exists.",
+          "scope": "Durable owner watchlists, exact native instrument selections, favourites and sorting; CAS/idempotent alert controls, pause/restart/delete; one canonical trigger per explicit arm, atomic existing event stream and recoverable Attention projection. Server closed-bar price/indicator/pinned-level-or-trend measurements and literal news-keyword checks. Typed bounded level screening with persistent quotas and saved-screen CRUD; running requires an exact revision and binds results to that captured rule hash. Saved selections do not prove native feed binding. Revision-bound watchlist market rows apply saved ordering/favourites and literal search/native identity filters. Closed-bar close/previous-bar change include exact basis, reference interval, age and source hashes; unavailable quotes/spreads remain null. A symbol-only bar lake cannot trigger a live technical fact. No order path exists.",
           "remaining": [
             "Full qualified native feed and quote binding",
-            "Tick-price alerts and live row projections",
+            "Tick-price alerts and native quote/spread/session-change row producers",
             "Dynamic watchlists",
             "Typed voice/action-catalog wiring",
             "Provider and Android consumer qualification"
@@ -16710,7 +16745,7 @@
           "method": "GET",
           "path": "/v1/trading/monitors/screen-rules/{object_id}",
           "endpoint_id": "VE-43f6d80dec2b",
-          "source_ref": "backend/van_gateway/trading/monitor_api.py:86",
+          "source_ref": "backend/van_gateway/trading/monitor_api.py:87",
           "authentication": "INGRESS_BEARER_AND_PAIRED_DEVICE",
           "device_proof_required_when_bound": false,
           "source_status": "CANDIDATE_BACKEND_COMPONENT_NATIVE_FEED_AND_ANDROID_CONSUMER_PENDING",
@@ -16729,10 +16764,10 @@
             "van.next.trading.alerts",
             "van.next.trading.screener"
           ],
-          "scope": "Durable owner watchlists, exact native instrument selections, favourites and sorting; CAS/idempotent alert controls, pause/restart/delete; one canonical trigger per explicit arm, atomic existing event stream and recoverable Attention projection. Server closed-bar price/indicator/pinned-level-or-trend measurements and literal news-keyword checks. Typed bounded level screening with persistent quotas and saved-screen CRUD; running requires an exact revision and binds results to that captured rule hash. Saved selections do not prove native feed binding. A symbol-only bar lake cannot trigger a live technical fact. No order path exists.",
+          "scope": "Durable owner watchlists, exact native instrument selections, favourites and sorting; CAS/idempotent alert controls, pause/restart/delete; one canonical trigger per explicit arm, atomic existing event stream and recoverable Attention projection. Server closed-bar price/indicator/pinned-level-or-trend measurements and literal news-keyword checks. Typed bounded level screening with persistent quotas and saved-screen CRUD; running requires an exact revision and binds results to that captured rule hash. Saved selections do not prove native feed binding. Revision-bound watchlist market rows apply saved ordering/favourites and literal search/native identity filters. Closed-bar close/previous-bar change include exact basis, reference interval, age and source hashes; unavailable quotes/spreads remain null. A symbol-only bar lake cannot trigger a live technical fact. No order path exists.",
           "remaining": [
             "Full qualified native feed and quote binding",
-            "Tick-price alerts and live row projections",
+            "Tick-price alerts and native quote/spread/session-change row producers",
             "Dynamic watchlists",
             "Typed voice/action-catalog wiring",
             "Provider and Android consumer qualification"
@@ -16745,7 +16780,7 @@
           "method": "GET",
           "path": "/v1/trading/monitors/watchlists",
           "endpoint_id": "VE-5c02bd4370d7",
-          "source_ref": "backend/van_gateway/trading/monitor_api.py:30",
+          "source_ref": "backend/van_gateway/trading/monitor_api.py:31",
           "authentication": "INGRESS_BEARER_AND_PAIRED_DEVICE",
           "device_proof_required_when_bound": false,
           "source_status": "CANDIDATE_BACKEND_COMPONENT_NATIVE_FEED_AND_ANDROID_CONSUMER_PENDING",
@@ -16764,10 +16799,10 @@
             "van.next.trading.alerts",
             "van.next.trading.screener"
           ],
-          "scope": "Durable owner watchlists, exact native instrument selections, favourites and sorting; CAS/idempotent alert controls, pause/restart/delete; one canonical trigger per explicit arm, atomic existing event stream and recoverable Attention projection. Server closed-bar price/indicator/pinned-level-or-trend measurements and literal news-keyword checks. Typed bounded level screening with persistent quotas and saved-screen CRUD; running requires an exact revision and binds results to that captured rule hash. Saved selections do not prove native feed binding. A symbol-only bar lake cannot trigger a live technical fact. No order path exists.",
+          "scope": "Durable owner watchlists, exact native instrument selections, favourites and sorting; CAS/idempotent alert controls, pause/restart/delete; one canonical trigger per explicit arm, atomic existing event stream and recoverable Attention projection. Server closed-bar price/indicator/pinned-level-or-trend measurements and literal news-keyword checks. Typed bounded level screening with persistent quotas and saved-screen CRUD; running requires an exact revision and binds results to that captured rule hash. Saved selections do not prove native feed binding. Revision-bound watchlist market rows apply saved ordering/favourites and literal search/native identity filters. Closed-bar close/previous-bar change include exact basis, reference interval, age and source hashes; unavailable quotes/spreads remain null. A symbol-only bar lake cannot trigger a live technical fact. No order path exists.",
           "remaining": [
             "Full qualified native feed and quote binding",
-            "Tick-price alerts and live row projections",
+            "Tick-price alerts and native quote/spread/session-change row producers",
             "Dynamic watchlists",
             "Typed voice/action-catalog wiring",
             "Provider and Android consumer qualification"
@@ -16780,7 +16815,7 @@
           "method": "GET",
           "path": "/v1/trading/monitors/watchlists/{object_id}",
           "endpoint_id": "VE-7addd97678fb",
-          "source_ref": "backend/van_gateway/trading/monitor_api.py:38",
+          "source_ref": "backend/van_gateway/trading/monitor_api.py:39",
           "authentication": "INGRESS_BEARER_AND_PAIRED_DEVICE",
           "device_proof_required_when_bound": false,
           "source_status": "CANDIDATE_BACKEND_COMPONENT_NATIVE_FEED_AND_ANDROID_CONSUMER_PENDING",
@@ -16799,10 +16834,10 @@
             "van.next.trading.alerts",
             "van.next.trading.screener"
           ],
-          "scope": "Durable owner watchlists, exact native instrument selections, favourites and sorting; CAS/idempotent alert controls, pause/restart/delete; one canonical trigger per explicit arm, atomic existing event stream and recoverable Attention projection. Server closed-bar price/indicator/pinned-level-or-trend measurements and literal news-keyword checks. Typed bounded level screening with persistent quotas and saved-screen CRUD; running requires an exact revision and binds results to that captured rule hash. Saved selections do not prove native feed binding. A symbol-only bar lake cannot trigger a live technical fact. No order path exists.",
+          "scope": "Durable owner watchlists, exact native instrument selections, favourites and sorting; CAS/idempotent alert controls, pause/restart/delete; one canonical trigger per explicit arm, atomic existing event stream and recoverable Attention projection. Server closed-bar price/indicator/pinned-level-or-trend measurements and literal news-keyword checks. Typed bounded level screening with persistent quotas and saved-screen CRUD; running requires an exact revision and binds results to that captured rule hash. Saved selections do not prove native feed binding. Revision-bound watchlist market rows apply saved ordering/favourites and literal search/native identity filters. Closed-bar close/previous-bar change include exact basis, reference interval, age and source hashes; unavailable quotes/spreads remain null. A symbol-only bar lake cannot trigger a live technical fact. No order path exists.",
           "remaining": [
             "Full qualified native feed and quote binding",
-            "Tick-price alerts and live row projections",
+            "Tick-price alerts and native quote/spread/session-change row producers",
             "Dynamic watchlists",
             "Typed voice/action-catalog wiring",
             "Provider and Android consumer qualification"
@@ -16815,7 +16850,7 @@
           "method": "POST",
           "path": "/v1/trading/monitors/alerts",
           "endpoint_id": "VE-a169063e428c",
-          "source_ref": "backend/van_gateway/trading/monitor_api.py:54",
+          "source_ref": "backend/van_gateway/trading/monitor_api.py:55",
           "authentication": "INGRESS_BEARER_AND_PAIRED_DEVICE",
           "device_proof_required_when_bound": true,
           "source_status": "CANDIDATE_BACKEND_COMPONENT_NATIVE_FEED_AND_ANDROID_CONSUMER_PENDING",
@@ -16834,10 +16869,10 @@
             "van.next.trading.alerts",
             "van.next.trading.screener"
           ],
-          "scope": "Durable owner watchlists, exact native instrument selections, favourites and sorting; CAS/idempotent alert controls, pause/restart/delete; one canonical trigger per explicit arm, atomic existing event stream and recoverable Attention projection. Server closed-bar price/indicator/pinned-level-or-trend measurements and literal news-keyword checks. Typed bounded level screening with persistent quotas and saved-screen CRUD; running requires an exact revision and binds results to that captured rule hash. Saved selections do not prove native feed binding. A symbol-only bar lake cannot trigger a live technical fact. No order path exists.",
+          "scope": "Durable owner watchlists, exact native instrument selections, favourites and sorting; CAS/idempotent alert controls, pause/restart/delete; one canonical trigger per explicit arm, atomic existing event stream and recoverable Attention projection. Server closed-bar price/indicator/pinned-level-or-trend measurements and literal news-keyword checks. Typed bounded level screening with persistent quotas and saved-screen CRUD; running requires an exact revision and binds results to that captured rule hash. Saved selections do not prove native feed binding. Revision-bound watchlist market rows apply saved ordering/favourites and literal search/native identity filters. Closed-bar close/previous-bar change include exact basis, reference interval, age and source hashes; unavailable quotes/spreads remain null. A symbol-only bar lake cannot trigger a live technical fact. No order path exists.",
           "remaining": [
             "Full qualified native feed and quote binding",
-            "Tick-price alerts and live row projections",
+            "Tick-price alerts and native quote/spread/session-change row producers",
             "Dynamic watchlists",
             "Typed voice/action-catalog wiring",
             "Provider and Android consumer qualification"
@@ -16850,7 +16885,7 @@
           "method": "POST",
           "path": "/v1/trading/monitors/alerts/{object_id}/pause",
           "endpoint_id": "VE-e639deda55f6",
-          "source_ref": "backend/van_gateway/trading/monitor_api.py:70",
+          "source_ref": "backend/van_gateway/trading/monitor_api.py:71",
           "authentication": "INGRESS_BEARER_AND_PAIRED_DEVICE",
           "device_proof_required_when_bound": true,
           "source_status": "CANDIDATE_BACKEND_COMPONENT_NATIVE_FEED_AND_ANDROID_CONSUMER_PENDING",
@@ -16869,10 +16904,10 @@
             "van.next.trading.alerts",
             "van.next.trading.screener"
           ],
-          "scope": "Durable owner watchlists, exact native instrument selections, favourites and sorting; CAS/idempotent alert controls, pause/restart/delete; one canonical trigger per explicit arm, atomic existing event stream and recoverable Attention projection. Server closed-bar price/indicator/pinned-level-or-trend measurements and literal news-keyword checks. Typed bounded level screening with persistent quotas and saved-screen CRUD; running requires an exact revision and binds results to that captured rule hash. Saved selections do not prove native feed binding. A symbol-only bar lake cannot trigger a live technical fact. No order path exists.",
+          "scope": "Durable owner watchlists, exact native instrument selections, favourites and sorting; CAS/idempotent alert controls, pause/restart/delete; one canonical trigger per explicit arm, atomic existing event stream and recoverable Attention projection. Server closed-bar price/indicator/pinned-level-or-trend measurements and literal news-keyword checks. Typed bounded level screening with persistent quotas and saved-screen CRUD; running requires an exact revision and binds results to that captured rule hash. Saved selections do not prove native feed binding. Revision-bound watchlist market rows apply saved ordering/favourites and literal search/native identity filters. Closed-bar close/previous-bar change include exact basis, reference interval, age and source hashes; unavailable quotes/spreads remain null. A symbol-only bar lake cannot trigger a live technical fact. No order path exists.",
           "remaining": [
             "Full qualified native feed and quote binding",
-            "Tick-price alerts and live row projections",
+            "Tick-price alerts and native quote/spread/session-change row producers",
             "Dynamic watchlists",
             "Typed voice/action-catalog wiring",
             "Provider and Android consumer qualification"
@@ -16885,7 +16920,7 @@
           "method": "POST",
           "path": "/v1/trading/monitors/alerts/{object_id}/restart",
           "endpoint_id": "VE-716bc8fa7b83",
-          "source_ref": "backend/van_gateway/trading/monitor_api.py:74",
+          "source_ref": "backend/van_gateway/trading/monitor_api.py:75",
           "authentication": "INGRESS_BEARER_AND_PAIRED_DEVICE",
           "device_proof_required_when_bound": true,
           "source_status": "CANDIDATE_BACKEND_COMPONENT_NATIVE_FEED_AND_ANDROID_CONSUMER_PENDING",
@@ -16904,10 +16939,10 @@
             "van.next.trading.alerts",
             "van.next.trading.screener"
           ],
-          "scope": "Durable owner watchlists, exact native instrument selections, favourites and sorting; CAS/idempotent alert controls, pause/restart/delete; one canonical trigger per explicit arm, atomic existing event stream and recoverable Attention projection. Server closed-bar price/indicator/pinned-level-or-trend measurements and literal news-keyword checks. Typed bounded level screening with persistent quotas and saved-screen CRUD; running requires an exact revision and binds results to that captured rule hash. Saved selections do not prove native feed binding. A symbol-only bar lake cannot trigger a live technical fact. No order path exists.",
+          "scope": "Durable owner watchlists, exact native instrument selections, favourites and sorting; CAS/idempotent alert controls, pause/restart/delete; one canonical trigger per explicit arm, atomic existing event stream and recoverable Attention projection. Server closed-bar price/indicator/pinned-level-or-trend measurements and literal news-keyword checks. Typed bounded level screening with persistent quotas and saved-screen CRUD; running requires an exact revision and binds results to that captured rule hash. Saved selections do not prove native feed binding. Revision-bound watchlist market rows apply saved ordering/favourites and literal search/native identity filters. Closed-bar close/previous-bar change include exact basis, reference interval, age and source hashes; unavailable quotes/spreads remain null. A symbol-only bar lake cannot trigger a live technical fact. No order path exists.",
           "remaining": [
             "Full qualified native feed and quote binding",
-            "Tick-price alerts and live row projections",
+            "Tick-price alerts and native quote/spread/session-change row producers",
             "Dynamic watchlists",
             "Typed voice/action-catalog wiring",
             "Provider and Android consumer qualification"
@@ -16920,7 +16955,7 @@
           "method": "POST",
           "path": "/v1/trading/monitors/screen",
           "endpoint_id": "VE-e1711e49e094",
-          "source_ref": "backend/van_gateway/trading/monitor_api.py:102",
+          "source_ref": "backend/van_gateway/trading/monitor_api.py:107",
           "authentication": "INGRESS_BEARER_AND_PAIRED_DEVICE",
           "device_proof_required_when_bound": true,
           "source_status": "CANDIDATE_BACKEND_COMPONENT_NATIVE_FEED_AND_ANDROID_CONSUMER_PENDING",
@@ -16939,10 +16974,10 @@
             "van.next.trading.alerts",
             "van.next.trading.screener"
           ],
-          "scope": "Durable owner watchlists, exact native instrument selections, favourites and sorting; CAS/idempotent alert controls, pause/restart/delete; one canonical trigger per explicit arm, atomic existing event stream and recoverable Attention projection. Server closed-bar price/indicator/pinned-level-or-trend measurements and literal news-keyword checks. Typed bounded level screening with persistent quotas and saved-screen CRUD; running requires an exact revision and binds results to that captured rule hash. Saved selections do not prove native feed binding. A symbol-only bar lake cannot trigger a live technical fact. No order path exists.",
+          "scope": "Durable owner watchlists, exact native instrument selections, favourites and sorting; CAS/idempotent alert controls, pause/restart/delete; one canonical trigger per explicit arm, atomic existing event stream and recoverable Attention projection. Server closed-bar price/indicator/pinned-level-or-trend measurements and literal news-keyword checks. Typed bounded level screening with persistent quotas and saved-screen CRUD; running requires an exact revision and binds results to that captured rule hash. Saved selections do not prove native feed binding. Revision-bound watchlist market rows apply saved ordering/favourites and literal search/native identity filters. Closed-bar close/previous-bar change include exact basis, reference interval, age and source hashes; unavailable quotes/spreads remain null. A symbol-only bar lake cannot trigger a live technical fact. No order path exists.",
           "remaining": [
             "Full qualified native feed and quote binding",
-            "Tick-price alerts and live row projections",
+            "Tick-price alerts and native quote/spread/session-change row producers",
             "Dynamic watchlists",
             "Typed voice/action-catalog wiring",
             "Provider and Android consumer qualification"
@@ -16955,7 +16990,7 @@
           "method": "POST",
           "path": "/v1/trading/monitors/screen-rules",
           "endpoint_id": "VE-dbc079757204",
-          "source_ref": "backend/van_gateway/trading/monitor_api.py:82",
+          "source_ref": "backend/van_gateway/trading/monitor_api.py:83",
           "authentication": "INGRESS_BEARER_AND_PAIRED_DEVICE",
           "device_proof_required_when_bound": true,
           "source_status": "CANDIDATE_BACKEND_COMPONENT_NATIVE_FEED_AND_ANDROID_CONSUMER_PENDING",
@@ -16974,10 +17009,10 @@
             "van.next.trading.alerts",
             "van.next.trading.screener"
           ],
-          "scope": "Durable owner watchlists, exact native instrument selections, favourites and sorting; CAS/idempotent alert controls, pause/restart/delete; one canonical trigger per explicit arm, atomic existing event stream and recoverable Attention projection. Server closed-bar price/indicator/pinned-level-or-trend measurements and literal news-keyword checks. Typed bounded level screening with persistent quotas and saved-screen CRUD; running requires an exact revision and binds results to that captured rule hash. Saved selections do not prove native feed binding. A symbol-only bar lake cannot trigger a live technical fact. No order path exists.",
+          "scope": "Durable owner watchlists, exact native instrument selections, favourites and sorting; CAS/idempotent alert controls, pause/restart/delete; one canonical trigger per explicit arm, atomic existing event stream and recoverable Attention projection. Server closed-bar price/indicator/pinned-level-or-trend measurements and literal news-keyword checks. Typed bounded level screening with persistent quotas and saved-screen CRUD; running requires an exact revision and binds results to that captured rule hash. Saved selections do not prove native feed binding. Revision-bound watchlist market rows apply saved ordering/favourites and literal search/native identity filters. Closed-bar close/previous-bar change include exact basis, reference interval, age and source hashes; unavailable quotes/spreads remain null. A symbol-only bar lake cannot trigger a live technical fact. No order path exists.",
           "remaining": [
             "Full qualified native feed and quote binding",
-            "Tick-price alerts and live row projections",
+            "Tick-price alerts and native quote/spread/session-change row producers",
             "Dynamic watchlists",
             "Typed voice/action-catalog wiring",
             "Provider and Android consumer qualification"
@@ -16990,7 +17025,7 @@
           "method": "POST",
           "path": "/v1/trading/monitors/screen-rules/{object_id}/run",
           "endpoint_id": "VE-af73db42769d",
-          "source_ref": "backend/van_gateway/trading/monitor_api.py:98",
+          "source_ref": "backend/van_gateway/trading/monitor_api.py:99",
           "authentication": "INGRESS_BEARER_AND_PAIRED_DEVICE",
           "device_proof_required_when_bound": true,
           "source_status": "CANDIDATE_BACKEND_COMPONENT_NATIVE_FEED_AND_ANDROID_CONSUMER_PENDING",
@@ -17009,10 +17044,10 @@
             "van.next.trading.alerts",
             "van.next.trading.screener"
           ],
-          "scope": "Durable owner watchlists, exact native instrument selections, favourites and sorting; CAS/idempotent alert controls, pause/restart/delete; one canonical trigger per explicit arm, atomic existing event stream and recoverable Attention projection. Server closed-bar price/indicator/pinned-level-or-trend measurements and literal news-keyword checks. Typed bounded level screening with persistent quotas and saved-screen CRUD; running requires an exact revision and binds results to that captured rule hash. Saved selections do not prove native feed binding. A symbol-only bar lake cannot trigger a live technical fact. No order path exists.",
+          "scope": "Durable owner watchlists, exact native instrument selections, favourites and sorting; CAS/idempotent alert controls, pause/restart/delete; one canonical trigger per explicit arm, atomic existing event stream and recoverable Attention projection. Server closed-bar price/indicator/pinned-level-or-trend measurements and literal news-keyword checks. Typed bounded level screening with persistent quotas and saved-screen CRUD; running requires an exact revision and binds results to that captured rule hash. Saved selections do not prove native feed binding. Revision-bound watchlist market rows apply saved ordering/favourites and literal search/native identity filters. Closed-bar close/previous-bar change include exact basis, reference interval, age and source hashes; unavailable quotes/spreads remain null. A symbol-only bar lake cannot trigger a live technical fact. No order path exists.",
           "remaining": [
             "Full qualified native feed and quote binding",
-            "Tick-price alerts and live row projections",
+            "Tick-price alerts and native quote/spread/session-change row producers",
             "Dynamic watchlists",
             "Typed voice/action-catalog wiring",
             "Provider and Android consumer qualification"
@@ -17025,7 +17060,7 @@
           "method": "POST",
           "path": "/v1/trading/monitors/watchlists",
           "endpoint_id": "VE-4f2f4e60b880",
-          "source_ref": "backend/van_gateway/trading/monitor_api.py:34",
+          "source_ref": "backend/van_gateway/trading/monitor_api.py:35",
           "authentication": "INGRESS_BEARER_AND_PAIRED_DEVICE",
           "device_proof_required_when_bound": true,
           "source_status": "CANDIDATE_BACKEND_COMPONENT_NATIVE_FEED_AND_ANDROID_CONSUMER_PENDING",
@@ -17044,10 +17079,45 @@
             "van.next.trading.alerts",
             "van.next.trading.screener"
           ],
-          "scope": "Durable owner watchlists, exact native instrument selections, favourites and sorting; CAS/idempotent alert controls, pause/restart/delete; one canonical trigger per explicit arm, atomic existing event stream and recoverable Attention projection. Server closed-bar price/indicator/pinned-level-or-trend measurements and literal news-keyword checks. Typed bounded level screening with persistent quotas and saved-screen CRUD; running requires an exact revision and binds results to that captured rule hash. Saved selections do not prove native feed binding. A symbol-only bar lake cannot trigger a live technical fact. No order path exists.",
+          "scope": "Durable owner watchlists, exact native instrument selections, favourites and sorting; CAS/idempotent alert controls, pause/restart/delete; one canonical trigger per explicit arm, atomic existing event stream and recoverable Attention projection. Server closed-bar price/indicator/pinned-level-or-trend measurements and literal news-keyword checks. Typed bounded level screening with persistent quotas and saved-screen CRUD; running requires an exact revision and binds results to that captured rule hash. Saved selections do not prove native feed binding. Revision-bound watchlist market rows apply saved ordering/favourites and literal search/native identity filters. Closed-bar close/previous-bar change include exact basis, reference interval, age and source hashes; unavailable quotes/spreads remain null. A symbol-only bar lake cannot trigger a live technical fact. No order path exists.",
           "remaining": [
             "Full qualified native feed and quote binding",
-            "Tick-price alerts and live row projections",
+            "Tick-price alerts and native quote/spread/session-change row producers",
+            "Dynamic watchlists",
+            "Typed voice/action-catalog wiring",
+            "Provider and Android consumer qualification"
+          ],
+          "specification": "docs/rebuild/rev118/backend/BE-020_MARKET_MONITORS.md",
+          "new_ui_implemented": false,
+          "live_qualified": false
+        },
+        {
+          "method": "POST",
+          "path": "/v1/trading/monitors/watchlists/{object_id}/market",
+          "endpoint_id": "VE-23948123dc88",
+          "source_ref": "backend/van_gateway/trading/monitor_api.py:103",
+          "authentication": "INGRESS_BEARER_AND_PAIRED_DEVICE",
+          "device_proof_required_when_bound": true,
+          "source_status": "CANDIDATE_BACKEND_COMPONENT_NATIVE_FEED_AND_ANDROID_CONSUMER_PENDING",
+          "authority": "OWNER_MONITOR_CONFIGURATION_AND_READ_ONLY_OBSERVATIONS_ALERTS_NEVER_TRADE",
+          "canonical_units": [
+            "BE-003",
+            "BE-020"
+          ],
+          "planned_feature_refs": [
+            "VNX-F-TRADE-03",
+            "VNX-F-TRADE-04",
+            "VNX-F-CHART-11"
+          ],
+          "planned_context_refs": [
+            "van.next.trading.markets",
+            "van.next.trading.alerts",
+            "van.next.trading.screener"
+          ],
+          "scope": "Durable owner watchlists, exact native instrument selections, favourites and sorting; CAS/idempotent alert controls, pause/restart/delete; one canonical trigger per explicit arm, atomic existing event stream and recoverable Attention projection. Server closed-bar price/indicator/pinned-level-or-trend measurements and literal news-keyword checks. Typed bounded level screening with persistent quotas and saved-screen CRUD; running requires an exact revision and binds results to that captured rule hash. Saved selections do not prove native feed binding. Revision-bound watchlist market rows apply saved ordering/favourites and literal search/native identity filters. Closed-bar close/previous-bar change include exact basis, reference interval, age and source hashes; unavailable quotes/spreads remain null. A symbol-only bar lake cannot trigger a live technical fact. No order path exists.",
+          "remaining": [
+            "Full qualified native feed and quote binding",
+            "Tick-price alerts and native quote/spread/session-change row producers",
             "Dynamic watchlists",
             "Typed voice/action-catalog wiring",
             "Provider and Android consumer qualification"
@@ -17060,7 +17130,7 @@
           "method": "PUT",
           "path": "/v1/trading/monitors/alerts/{object_id}",
           "endpoint_id": "VE-88366f209702",
-          "source_ref": "backend/van_gateway/trading/monitor_api.py:62",
+          "source_ref": "backend/van_gateway/trading/monitor_api.py:63",
           "authentication": "INGRESS_BEARER_AND_PAIRED_DEVICE",
           "device_proof_required_when_bound": true,
           "source_status": "CANDIDATE_BACKEND_COMPONENT_NATIVE_FEED_AND_ANDROID_CONSUMER_PENDING",
@@ -17079,10 +17149,10 @@
             "van.next.trading.alerts",
             "van.next.trading.screener"
           ],
-          "scope": "Durable owner watchlists, exact native instrument selections, favourites and sorting; CAS/idempotent alert controls, pause/restart/delete; one canonical trigger per explicit arm, atomic existing event stream and recoverable Attention projection. Server closed-bar price/indicator/pinned-level-or-trend measurements and literal news-keyword checks. Typed bounded level screening with persistent quotas and saved-screen CRUD; running requires an exact revision and binds results to that captured rule hash. Saved selections do not prove native feed binding. A symbol-only bar lake cannot trigger a live technical fact. No order path exists.",
+          "scope": "Durable owner watchlists, exact native instrument selections, favourites and sorting; CAS/idempotent alert controls, pause/restart/delete; one canonical trigger per explicit arm, atomic existing event stream and recoverable Attention projection. Server closed-bar price/indicator/pinned-level-or-trend measurements and literal news-keyword checks. Typed bounded level screening with persistent quotas and saved-screen CRUD; running requires an exact revision and binds results to that captured rule hash. Saved selections do not prove native feed binding. Revision-bound watchlist market rows apply saved ordering/favourites and literal search/native identity filters. Closed-bar close/previous-bar change include exact basis, reference interval, age and source hashes; unavailable quotes/spreads remain null. A symbol-only bar lake cannot trigger a live technical fact. No order path exists.",
           "remaining": [
             "Full qualified native feed and quote binding",
-            "Tick-price alerts and live row projections",
+            "Tick-price alerts and native quote/spread/session-change row producers",
             "Dynamic watchlists",
             "Typed voice/action-catalog wiring",
             "Provider and Android consumer qualification"
@@ -17095,7 +17165,7 @@
           "method": "PUT",
           "path": "/v1/trading/monitors/screen-rules/{object_id}",
           "endpoint_id": "VE-cd4835b7dd91",
-          "source_ref": "backend/van_gateway/trading/monitor_api.py:90",
+          "source_ref": "backend/van_gateway/trading/monitor_api.py:91",
           "authentication": "INGRESS_BEARER_AND_PAIRED_DEVICE",
           "device_proof_required_when_bound": true,
           "source_status": "CANDIDATE_BACKEND_COMPONENT_NATIVE_FEED_AND_ANDROID_CONSUMER_PENDING",
@@ -17114,10 +17184,10 @@
             "van.next.trading.alerts",
             "van.next.trading.screener"
           ],
-          "scope": "Durable owner watchlists, exact native instrument selections, favourites and sorting; CAS/idempotent alert controls, pause/restart/delete; one canonical trigger per explicit arm, atomic existing event stream and recoverable Attention projection. Server closed-bar price/indicator/pinned-level-or-trend measurements and literal news-keyword checks. Typed bounded level screening with persistent quotas and saved-screen CRUD; running requires an exact revision and binds results to that captured rule hash. Saved selections do not prove native feed binding. A symbol-only bar lake cannot trigger a live technical fact. No order path exists.",
+          "scope": "Durable owner watchlists, exact native instrument selections, favourites and sorting; CAS/idempotent alert controls, pause/restart/delete; one canonical trigger per explicit arm, atomic existing event stream and recoverable Attention projection. Server closed-bar price/indicator/pinned-level-or-trend measurements and literal news-keyword checks. Typed bounded level screening with persistent quotas and saved-screen CRUD; running requires an exact revision and binds results to that captured rule hash. Saved selections do not prove native feed binding. Revision-bound watchlist market rows apply saved ordering/favourites and literal search/native identity filters. Closed-bar close/previous-bar change include exact basis, reference interval, age and source hashes; unavailable quotes/spreads remain null. A symbol-only bar lake cannot trigger a live technical fact. No order path exists.",
           "remaining": [
             "Full qualified native feed and quote binding",
-            "Tick-price alerts and live row projections",
+            "Tick-price alerts and native quote/spread/session-change row producers",
             "Dynamic watchlists",
             "Typed voice/action-catalog wiring",
             "Provider and Android consumer qualification"
@@ -17130,7 +17200,7 @@
           "method": "PUT",
           "path": "/v1/trading/monitors/watchlists/{object_id}",
           "endpoint_id": "VE-e02148d751ad",
-          "source_ref": "backend/van_gateway/trading/monitor_api.py:42",
+          "source_ref": "backend/van_gateway/trading/monitor_api.py:43",
           "authentication": "INGRESS_BEARER_AND_PAIRED_DEVICE",
           "device_proof_required_when_bound": true,
           "source_status": "CANDIDATE_BACKEND_COMPONENT_NATIVE_FEED_AND_ANDROID_CONSUMER_PENDING",
@@ -17149,10 +17219,10 @@
             "van.next.trading.alerts",
             "van.next.trading.screener"
           ],
-          "scope": "Durable owner watchlists, exact native instrument selections, favourites and sorting; CAS/idempotent alert controls, pause/restart/delete; one canonical trigger per explicit arm, atomic existing event stream and recoverable Attention projection. Server closed-bar price/indicator/pinned-level-or-trend measurements and literal news-keyword checks. Typed bounded level screening with persistent quotas and saved-screen CRUD; running requires an exact revision and binds results to that captured rule hash. Saved selections do not prove native feed binding. A symbol-only bar lake cannot trigger a live technical fact. No order path exists.",
+          "scope": "Durable owner watchlists, exact native instrument selections, favourites and sorting; CAS/idempotent alert controls, pause/restart/delete; one canonical trigger per explicit arm, atomic existing event stream and recoverable Attention projection. Server closed-bar price/indicator/pinned-level-or-trend measurements and literal news-keyword checks. Typed bounded level screening with persistent quotas and saved-screen CRUD; running requires an exact revision and binds results to that captured rule hash. Saved selections do not prove native feed binding. Revision-bound watchlist market rows apply saved ordering/favourites and literal search/native identity filters. Closed-bar close/previous-bar change include exact basis, reference interval, age and source hashes; unavailable quotes/spreads remain null. A symbol-only bar lake cannot trigger a live technical fact. No order path exists.",
           "remaining": [
             "Full qualified native feed and quote binding",
-            "Tick-price alerts and live row projections",
+            "Tick-price alerts and native quote/spread/session-change row producers",
             "Dynamic watchlists",
             "Typed voice/action-catalog wiring",
             "Provider and Android consumer qualification"
@@ -75641,7 +75711,7 @@
     "android_receipt": null,
     "android_receipt_sha256": null,
     "scope": "Bounded current source-citation/endpoint refresh; previous reviews retained. Whole-product, Android, deployment/provider and handset qualifications remain separate.",
-    "source_review_manifest_sha256": "853145197973b2fce97f99494920f9630ee4f5a2837846d23d4c1b267f59416c"
+    "source_review_manifest_sha256": "83ce7c03cadc0fef521ad45c66bce0c0c5ea0436e8c841afe817981fc90084e1"
   },
   "repaired_mutations": [
     {

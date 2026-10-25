@@ -4,7 +4,8 @@ from .chart_api import PrivateChartRoute
 from .monitor_models import (CreateWatchlist, ReplaceWatchlist, CreateAlert, ReplaceAlert,
     MonitorControl, MonitorWrite, WatchlistView, AlertView, WatchlistPage, AlertPage,
     MonitorCapabilities, MonitorErrorResponse, ScreenRequest, ScreenResult,
-    CreateScreenRule, ReplaceScreenRule, RunScreenRule, ScreenRuleView, ScreenRulePage)
+    CreateScreenRule, ReplaceScreenRule, RunScreenRule, ScreenRuleView, ScreenRulePage,
+    WatchlistMarketRequest, WatchlistMarketResult)
 from .monitor_service import MarketMonitorService, MonitorError
 
 
@@ -98,6 +99,10 @@ def build_monitor_router(service: MarketMonitorService) -> APIRouter:
     @router.post('/screen-rules/{object_id}/run', response_model=ScreenResult)
     async def run_screen_rule(object_id: str, body: RunScreenRule):
         return await call(service.run_screen_rule('owner', object_id, body))
+
+    @router.post('/watchlists/{object_id}/market', response_model=WatchlistMarketResult)
+    async def watchlist_market(object_id: str, body: WatchlistMarketRequest):
+        return await call(service.watchlist_market('owner', object_id, body))
 
     @router.post('/screen', response_model=ScreenResult)
     async def screen(body: ScreenRequest):

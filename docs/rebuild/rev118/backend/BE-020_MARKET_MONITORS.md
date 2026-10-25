@@ -8,6 +8,8 @@ Saved screener rules now persist an explicit instrument universe, timeframe and 
 
 Owner watchlists persist complete venue/environment/API-family/product/account/contract selections, favourites, manual ordering and sort/filter preferences. Matching symbols on different native scopes stay distinct. Saved selections are owner context, not evidence that a native feed has been bound.
 
+The market-row read contract captures an exact saved watchlist revision and hash before source reads. It applies favourites, literal symbol/product/venue search and explicit venue/environment/API-family filters, then the saved ordering and direction. Equal metrics retain owner order; missing metrics remain last in either direction. Closed-bar rows expose exact close, age, source revision/hash and availability. Percentage change means the preceding contiguous bar, with the reference price/time and interval supplied; it is not labelled a daily return or a tick quote. Missing history and a zero reference have distinct states. A closed-bar source supplies no bid/ask spread, so spread remains null with an explicit reason. Source failures, stale/future/mis-scoped observations and clock rollback cannot turn into current values. Reads create no commands, operations, alerts, missions or orders and cannot change saved preferences.
+
 Alert rules support closed-bar price levels/crossings; SMA, EMA, simple-window RSI/ATR, MACD, Bollinger and anchored VWAP measurements; crossings of an immutable level or trend drawing; and literal news keywords with ANY/ALL and declared T1/T2 trust thresholds. News instrument relevance requires an explicitly recorded symbol; no model infers it. Other drawing geometries and tick-price bases are refused rather than silently reinterpreted.
 
 Controls create, replace, pause, explicitly restart and delete rules. Every control binds its request ID to operation, kind, object, expected revision and exact payload. Repeating an original request returns its original minimal receipt, including after later edits or deletion. A changed payload or stale revision conflicts. Delete removes saved names, keywords, drawings and evaluation state; minimal receipts prevent delayed creates from resurrecting them. No rule text is copied to event history.
@@ -37,12 +39,13 @@ All operations are under `/v1/trading/monitors`; OpenAPI provides closed request
 | Capabilities and limits | GET /capabilities |
 | Original control receipt | GET /operations/{request_id} |
 | Watchlists | GET/POST /watchlists; GET/PUT/DELETE /watchlists/{object_id} |
+| Watchlist market rows | POST /watchlists/{object_id}/market |
 | Alerts | GET/POST /alerts; GET/PUT/DELETE /alerts/{object_id} |
 | Alert controls | POST /alerts/{object_id}/pause; POST /alerts/{object_id}/restart |
 | Saved screener rules | GET/POST /screen-rules; GET/PUT/DELETE /screen-rules/{object_id}; POST /screen-rules/{object_id}/run |
 | Typed level scan | POST /screen |
 
-DELETE and control operations carry `request_id` and `expected_revision`. The original receipt endpoint is the recovery path for uncertain responses. Conflict, unknown object/receipt, capacity, quota, invalid input, corrupt state and uncertain write outcomes remain distinct. Scans consume quota per request, including retries and unavailable data; they are read operations, not idempotent control commands.
+DELETE and control operations carry `request_id` and `expected_revision`. The original receipt endpoint is the recovery path for uncertain responses. Conflict, unknown object/receipt, capacity, quota, invalid input, corrupt state and uncertain write outcomes remain distinct. Scans consume quota per request, including retries and unavailable data; they are read operations, not idempotent control commands. Market-row reads require `expected_revision`, accept a timeframe, maximum age and bounded filters, and return the captured list revision and hash. They read at most the 128 saved entries, make no native subscription and do not consume the screener quota.
 
 Existing registry groups/surfaces receive additive backend contract bindings to VNX-F-TRADE-03, VNX-F-TRADE-04 and VNX-F-CHART-11 and their planned market/alert/screener contexts. Original functions, surface identities and historical qualifications remain intact. No redesigned screen or new Android consumer is claimed.
 
@@ -57,7 +60,7 @@ The current symbol/timeframe bar lake does **not** prove venue, environment, acc
 ## Remaining obligations retained
 
 - BE-008/014: qualified native market/news producer readback, full instrument/entitlement binding, current source health and availability. No inference from a symbol or a VENUE label.
-- BE-018/020: independently qualified indicator semantics and live tick-price alert bases; complete watchlist market-row projection, search/group filters and dynamic candidate/exposure/news/near-alert lists.
+- BE-018/020: independently qualified indicator semantics and live tick-price alert bases; native quote/spread/session-change producers for watchlist rows and dynamic candidate/exposure/news/near-alert lists. Closed-bar row projection, search and explicit identity-group filters are implemented in source.
 - BE-020: provider integration/failure/recovery and native postconditions beyond the recorded-ledger source path.
 - BE-029/032: voice and canonical typed-command/action-catalog consumption of monitor controls. The current interface is the paired-owner REST contract.
 - FE-006/007/013 and BE-030: Android consumer, exact chart/review deep links, orb/Attention presentation, actual OS notification dedupe, accessibility and S24 Artemis evidence. Alerts never authorize a trade.

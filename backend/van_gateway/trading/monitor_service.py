@@ -383,6 +383,22 @@ class MarketMonitorService:
         return result.model_copy(update={'saved_rule':ScreenRuleBinding(object_id=view.object_id,
             revision=view.revision, state_sha256=view.state_sha256)})
 
+    async def watchlist_market(self, owner, identity, body):
+        from .watchlist_projection import project_watchlist
+        view = await self.get(owner, 'WATCHLIST', identity)
+        if view.revision != body.expected_revision:
+            raise MonitorError('MONITOR_REVISION_CONFLICT', current_revision=view.revision)
+        high_water = self.now()
+        def checked_clock():
+            nonlocal high_water
+            now = self.now()
+            if now < high_water:
+                raise MonitorError('MONITOR_CLOCK_ROLLBACK', 503)
+            high_water = now
+            return now
+        return project_watchlist(view, body, source=self.source, qualify=self._qualified,
+                                 clock=checked_clock, digest=digest)
+
     async def screen(self, owner, body):
         now = self.now()
         window = now-now % 60000

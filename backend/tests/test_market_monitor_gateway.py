@@ -124,3 +124,28 @@ async def test_saved_screener_crud_and_exact_revision_run_use_real_owner_routes_
     assert (await ac.post(PREFIX+'/screen-rules',json={'request_id':'save-screen','state':state})).json() == saved.json()
     assert (await ac.get(PREFIX+'/screen-rules/'+identity)).status_code == 404
     assert hermes['create_run'] == 0
+
+
+async def test_watchlist_market_rows_use_saved_revision_owner_proof_and_explicit_unavailable_data(client):
+    ac,app,hermes = client
+    await _pair_for_test(ac,app,'dev-market-rows','fixture-market-rows')
+    saved = await ac.post(PREFIX+'/watchlists',json={'request_id':'save-row-list','state':{
+        'name':'Market rows','entries':[{'instrument':instrument(),'favourite':True}],
+        'sort_by':'PRICE','descending':True}})
+    assert saved.status_code == 200,saved.text
+    path = PREFIX+'/watchlists/'+saved.json()['object_id']+'/market'
+    stale = await ac.post(path,json={'expected_revision':2})
+    assert stale.status_code == 409 and stale.json()['detail']['code'] == 'MONITOR_REVISION_CONFLICT'
+    actual = await ac.post(path,json={'expected_revision':1})
+    assert actual.status_code == 200,actual.text
+    assert actual.headers['cache-control'] == 'no-store'
+    body = actual.json()
+    assert body['revision'] == 1 and body['state_sha256'] == saved.json()['state_sha256']
+    assert body['sort_metric_state'] == 'UNAVAILABLE' and body['authority_effect'] == 'NONE'
+    assert body['rows'][0]['state'] == 'UNAVAILABLE' and body['rows'][0]['price'] is None
+    assert body['rows'][0]['spread'] is None and body['rows'][0]['price_age_ms'] is None
+    filtered = await ac.post(path,json={'expected_revision':1,'environment':'LIVE'})
+    assert filtered.status_code == 200 and filtered.json()['rows'] == []
+    assert (await ac.post(path,json={'expected_revision':1,'owner_id':'foreign'})).status_code == 422
+    assert hermes['create_run'] == 0
+    assert not await app.state.store.fetchall('SELECT * FROM mission_activities')
