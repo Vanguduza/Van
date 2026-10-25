@@ -416,8 +416,117 @@
       "device_proof_required_when_bound": true,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/trading/monitor_api.py:65",
+      "source": "backend/van_gateway/trading/monitor_api.py:66",
       "summary": "Delete Alert",
+      "tags": [
+        "market-monitors"
+      ],
+      "parameters": [
+        {
+          "name": "object_id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "title": "Object Id"
+          }
+        }
+      ],
+      "request_body": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/MonitorControl"
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MonitorWrite"
+              }
+            }
+          }
+        },
+        "404": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MonitorErrorResponse"
+              }
+            }
+          },
+          "description": "Not Found"
+        },
+        "409": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MonitorErrorResponse"
+              }
+            }
+          },
+          "description": "Conflict"
+        },
+        "413": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MonitorErrorResponse"
+              }
+            }
+          },
+          "description": "Request Entity Too Large"
+        },
+        "429": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MonitorErrorResponse"
+              }
+            }
+          },
+          "description": "Too Many Requests"
+        },
+        "503": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MonitorErrorResponse"
+              }
+            }
+          },
+          "description": "Service Unavailable"
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "openapi_components": "owner_endpoint_schemas.json",
+      "readiness": "REPOSITORY_DECLARATION_ONLY"
+    },
+    {
+      "endpoint_id": "VE-c2694532380c",
+      "method": "DELETE",
+      "path": "/v1/trading/monitors/screen-rules/{object_id}",
+      "authentication": "INGRESS_BEARER_AND_PAIRED_DEVICE",
+      "device_proof_required_when_bound": true,
+      "registration": "DEFAULT",
+      "condition": null,
+      "source": "backend/van_gateway/trading/monitor_api.py:94",
+      "summary": "Delete Screen Rule",
       "tags": [
         "market-monitors"
       ],
@@ -525,7 +634,7 @@
       "device_proof_required_when_bound": true,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/trading/monitor_api.py:45",
+      "source": "backend/van_gateway/trading/monitor_api.py:46",
       "summary": "Delete List",
       "tags": [
         "market-monitors"
@@ -10705,7 +10814,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/trading/monitor_api.py:49",
+      "source": "backend/van_gateway/trading/monitor_api.py:50",
       "summary": "Alerts",
       "tags": [
         "market-monitors"
@@ -10824,7 +10933,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/trading/monitor_api.py:57",
+      "source": "backend/van_gateway/trading/monitor_api.py:58",
       "summary": "Get Alert",
       "tags": [
         "market-monitors"
@@ -10924,7 +11033,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/trading/monitor_api.py:21",
+      "source": "backend/van_gateway/trading/monitor_api.py:22",
       "summary": "Capabilities",
       "tags": [
         "market-monitors"
@@ -11004,7 +11113,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/trading/monitor_api.py:25",
+      "source": "backend/van_gateway/trading/monitor_api.py:26",
       "summary": "Operation",
       "tags": [
         "market-monitors"
@@ -11097,6 +11206,225 @@
       "readiness": "REPOSITORY_DECLARATION_ONLY"
     },
     {
+      "endpoint_id": "VE-e297d33d4b5c",
+      "method": "GET",
+      "path": "/v1/trading/monitors/screen-rules",
+      "authentication": "INGRESS_BEARER_AND_PAIRED_DEVICE",
+      "device_proof_required_when_bound": false,
+      "registration": "DEFAULT",
+      "condition": null,
+      "source": "backend/van_gateway/trading/monitor_api.py:78",
+      "summary": "Screen Rules",
+      "tags": [
+        "market-monitors"
+      ],
+      "parameters": [
+        {
+          "name": "limit",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "maximum": 128,
+            "minimum": 1,
+            "default": 100,
+            "title": "Limit"
+          }
+        },
+        {
+          "name": "after_id",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "After Id"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ScreenRulePage"
+              }
+            }
+          }
+        },
+        "404": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MonitorErrorResponse"
+              }
+            }
+          },
+          "description": "Not Found"
+        },
+        "409": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MonitorErrorResponse"
+              }
+            }
+          },
+          "description": "Conflict"
+        },
+        "413": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MonitorErrorResponse"
+              }
+            }
+          },
+          "description": "Request Entity Too Large"
+        },
+        "429": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MonitorErrorResponse"
+              }
+            }
+          },
+          "description": "Too Many Requests"
+        },
+        "503": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MonitorErrorResponse"
+              }
+            }
+          },
+          "description": "Service Unavailable"
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "openapi_components": "owner_endpoint_schemas.json",
+      "readiness": "REPOSITORY_DECLARATION_ONLY"
+    },
+    {
+      "endpoint_id": "VE-43f6d80dec2b",
+      "method": "GET",
+      "path": "/v1/trading/monitors/screen-rules/{object_id}",
+      "authentication": "INGRESS_BEARER_AND_PAIRED_DEVICE",
+      "device_proof_required_when_bound": false,
+      "registration": "DEFAULT",
+      "condition": null,
+      "source": "backend/van_gateway/trading/monitor_api.py:86",
+      "summary": "Get Screen Rule",
+      "tags": [
+        "market-monitors"
+      ],
+      "parameters": [
+        {
+          "name": "object_id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "title": "Object Id"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ScreenRuleView"
+              }
+            }
+          }
+        },
+        "404": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MonitorErrorResponse"
+              }
+            }
+          },
+          "description": "Not Found"
+        },
+        "409": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MonitorErrorResponse"
+              }
+            }
+          },
+          "description": "Conflict"
+        },
+        "413": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MonitorErrorResponse"
+              }
+            }
+          },
+          "description": "Request Entity Too Large"
+        },
+        "429": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MonitorErrorResponse"
+              }
+            }
+          },
+          "description": "Too Many Requests"
+        },
+        "503": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MonitorErrorResponse"
+              }
+            }
+          },
+          "description": "Service Unavailable"
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "openapi_components": "owner_endpoint_schemas.json",
+      "readiness": "REPOSITORY_DECLARATION_ONLY"
+    },
+    {
       "endpoint_id": "VE-5c02bd4370d7",
       "method": "GET",
       "path": "/v1/trading/monitors/watchlists",
@@ -11104,7 +11432,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/trading/monitor_api.py:29",
+      "source": "backend/van_gateway/trading/monitor_api.py:30",
       "summary": "Lists",
       "tags": [
         "market-monitors"
@@ -11223,7 +11551,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/trading/monitor_api.py:37",
+      "source": "backend/van_gateway/trading/monitor_api.py:38",
       "summary": "Get List",
       "tags": [
         "market-monitors"
@@ -24636,7 +24964,7 @@
       "device_proof_required_when_bound": true,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/trading/monitor_api.py:53",
+      "source": "backend/van_gateway/trading/monitor_api.py:54",
       "summary": "Create Alert",
       "tags": [
         "market-monitors"
@@ -24735,7 +25063,7 @@
       "device_proof_required_when_bound": true,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/trading/monitor_api.py:69",
+      "source": "backend/van_gateway/trading/monitor_api.py:70",
       "summary": "Pause Alert",
       "tags": [
         "market-monitors"
@@ -24844,7 +25172,7 @@
       "device_proof_required_when_bound": true,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/trading/monitor_api.py:73",
+      "source": "backend/van_gateway/trading/monitor_api.py:74",
       "summary": "Restart Alert",
       "tags": [
         "market-monitors"
@@ -24953,7 +25281,7 @@
       "device_proof_required_when_bound": true,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/trading/monitor_api.py:77",
+      "source": "backend/van_gateway/trading/monitor_api.py:102",
       "summary": "Screen",
       "tags": [
         "market-monitors"
@@ -25045,6 +25373,214 @@
       "readiness": "REPOSITORY_DECLARATION_ONLY"
     },
     {
+      "endpoint_id": "VE-dbc079757204",
+      "method": "POST",
+      "path": "/v1/trading/monitors/screen-rules",
+      "authentication": "INGRESS_BEARER_AND_PAIRED_DEVICE",
+      "device_proof_required_when_bound": true,
+      "registration": "DEFAULT",
+      "condition": null,
+      "source": "backend/van_gateway/trading/monitor_api.py:82",
+      "summary": "Create Screen Rule",
+      "tags": [
+        "market-monitors"
+      ],
+      "parameters": [],
+      "request_body": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/CreateScreenRule"
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MonitorWrite"
+              }
+            }
+          }
+        },
+        "404": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MonitorErrorResponse"
+              }
+            }
+          },
+          "description": "Not Found"
+        },
+        "409": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MonitorErrorResponse"
+              }
+            }
+          },
+          "description": "Conflict"
+        },
+        "413": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MonitorErrorResponse"
+              }
+            }
+          },
+          "description": "Request Entity Too Large"
+        },
+        "429": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MonitorErrorResponse"
+              }
+            }
+          },
+          "description": "Too Many Requests"
+        },
+        "503": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MonitorErrorResponse"
+              }
+            }
+          },
+          "description": "Service Unavailable"
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "openapi_components": "owner_endpoint_schemas.json",
+      "readiness": "REPOSITORY_DECLARATION_ONLY"
+    },
+    {
+      "endpoint_id": "VE-af73db42769d",
+      "method": "POST",
+      "path": "/v1/trading/monitors/screen-rules/{object_id}/run",
+      "authentication": "INGRESS_BEARER_AND_PAIRED_DEVICE",
+      "device_proof_required_when_bound": true,
+      "registration": "DEFAULT",
+      "condition": null,
+      "source": "backend/van_gateway/trading/monitor_api.py:98",
+      "summary": "Run Screen Rule",
+      "tags": [
+        "market-monitors"
+      ],
+      "parameters": [
+        {
+          "name": "object_id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "title": "Object Id"
+          }
+        }
+      ],
+      "request_body": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/RunScreenRule"
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ScreenResult"
+              }
+            }
+          }
+        },
+        "404": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MonitorErrorResponse"
+              }
+            }
+          },
+          "description": "Not Found"
+        },
+        "409": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MonitorErrorResponse"
+              }
+            }
+          },
+          "description": "Conflict"
+        },
+        "413": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MonitorErrorResponse"
+              }
+            }
+          },
+          "description": "Request Entity Too Large"
+        },
+        "429": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MonitorErrorResponse"
+              }
+            }
+          },
+          "description": "Too Many Requests"
+        },
+        "503": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MonitorErrorResponse"
+              }
+            }
+          },
+          "description": "Service Unavailable"
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "openapi_components": "owner_endpoint_schemas.json",
+      "readiness": "REPOSITORY_DECLARATION_ONLY"
+    },
+    {
       "endpoint_id": "VE-4f2f4e60b880",
       "method": "POST",
       "path": "/v1/trading/monitors/watchlists",
@@ -25052,7 +25588,7 @@
       "device_proof_required_when_bound": true,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/trading/monitor_api.py:33",
+      "source": "backend/van_gateway/trading/monitor_api.py:34",
       "summary": "Create List",
       "tags": [
         "market-monitors"
@@ -26267,7 +26803,7 @@
       "device_proof_required_when_bound": true,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/trading/monitor_api.py:61",
+      "source": "backend/van_gateway/trading/monitor_api.py:62",
       "summary": "Replace Alert",
       "tags": [
         "market-monitors"
@@ -26369,6 +26905,115 @@
       "readiness": "REPOSITORY_DECLARATION_ONLY"
     },
     {
+      "endpoint_id": "VE-cd4835b7dd91",
+      "method": "PUT",
+      "path": "/v1/trading/monitors/screen-rules/{object_id}",
+      "authentication": "INGRESS_BEARER_AND_PAIRED_DEVICE",
+      "device_proof_required_when_bound": true,
+      "registration": "DEFAULT",
+      "condition": null,
+      "source": "backend/van_gateway/trading/monitor_api.py:90",
+      "summary": "Replace Screen Rule",
+      "tags": [
+        "market-monitors"
+      ],
+      "parameters": [
+        {
+          "name": "object_id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "title": "Object Id"
+          }
+        }
+      ],
+      "request_body": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ReplaceScreenRule"
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MonitorWrite"
+              }
+            }
+          }
+        },
+        "404": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MonitorErrorResponse"
+              }
+            }
+          },
+          "description": "Not Found"
+        },
+        "409": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MonitorErrorResponse"
+              }
+            }
+          },
+          "description": "Conflict"
+        },
+        "413": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MonitorErrorResponse"
+              }
+            }
+          },
+          "description": "Request Entity Too Large"
+        },
+        "429": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MonitorErrorResponse"
+              }
+            }
+          },
+          "description": "Too Many Requests"
+        },
+        "503": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MonitorErrorResponse"
+              }
+            }
+          },
+          "description": "Service Unavailable"
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "openapi_components": "owner_endpoint_schemas.json",
+      "readiness": "REPOSITORY_DECLARATION_ONLY"
+    },
+    {
       "endpoint_id": "VE-e02148d751ad",
       "method": "PUT",
       "path": "/v1/trading/monitors/watchlists/{object_id}",
@@ -26376,7 +27021,7 @@
       "device_proof_required_when_bound": true,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/trading/monitor_api.py:41",
+      "source": "backend/van_gateway/trading/monitor_api.py:42",
       "summary": "Replace List",
       "tags": [
         "market-monitors"

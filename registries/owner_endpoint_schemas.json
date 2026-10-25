@@ -3994,6 +3994,27 @@
         ],
         "title": "CreateProviderRequest"
       },
+      "CreateScreenRule": {
+        "properties": {
+          "request_id": {
+            "type": "string",
+            "maxLength": 128,
+            "minLength": 1,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$",
+            "title": "Request Id"
+          },
+          "state": {
+            "$ref": "#/components/schemas/ScreenRuleState"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "request_id",
+          "state"
+        ],
+        "title": "CreateScreenRule"
+      },
       "CreateTaskBody": {
         "properties": {
           "profile_alias": {
@@ -8792,6 +8813,11 @@
             "title": "Max Alerts",
             "default": 128
           },
+          "max_screen_rules": {
+            "type": "integer",
+            "title": "Max Screen Rules",
+            "default": 128
+          },
           "max_entries_per_watchlist": {
             "type": "integer",
             "title": "Max Entries Per Watchlist",
@@ -8959,7 +8985,8 @@
             "type": "string",
             "enum": [
               "WATCHLIST",
-              "ALERT"
+              "ALERT",
+              "SCREEN_RULE"
             ],
             "title": "Kind"
           },
@@ -11148,6 +11175,33 @@
         ],
         "title": "ReplaceAlert"
       },
+      "ReplaceScreenRule": {
+        "properties": {
+          "request_id": {
+            "type": "string",
+            "maxLength": 128,
+            "minLength": 1,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$",
+            "title": "Request Id"
+          },
+          "state": {
+            "$ref": "#/components/schemas/ScreenRuleState"
+          },
+          "expected_revision": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Expected Revision"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "request_id",
+          "state",
+          "expected_revision"
+        ],
+        "title": "ReplaceScreenRule"
+      },
       "ReplaceWatchlist": {
         "properties": {
           "request_id": {
@@ -11629,6 +11683,21 @@
           "restored_from_revision"
         ],
         "title": "RevisionSummary"
+      },
+      "RunScreenRule": {
+        "properties": {
+          "expected_revision": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Expected Revision"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "expected_revision"
+        ],
+        "title": "RunScreenRule"
       },
       "RuntimeLossScope": {
         "properties": {
@@ -12323,6 +12392,118 @@
         ],
         "title": "RuntimeRecoveryUnknown"
       },
+      "ScanIndicatorCondition": {
+        "properties": {
+          "kind": {
+            "type": "string",
+            "const": "INDICATOR",
+            "title": "Kind"
+          },
+          "indicator": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/PeriodIndicator"
+              },
+              {
+                "$ref": "#/components/schemas/MacdIndicator"
+              },
+              {
+                "$ref": "#/components/schemas/BollingerIndicator"
+              },
+              {
+                "$ref": "#/components/schemas/VwapIndicator"
+              }
+            ],
+            "title": "Indicator",
+            "discriminator": {
+              "propertyName": "kind",
+              "mapping": {
+                "ATR": "#/components/schemas/PeriodIndicator",
+                "BOLLINGER": "#/components/schemas/BollingerIndicator",
+                "EMA": "#/components/schemas/PeriodIndicator",
+                "MACD": "#/components/schemas/MacdIndicator",
+                "RSI": "#/components/schemas/PeriodIndicator",
+                "SMA": "#/components/schemas/PeriodIndicator",
+                "VWAP": "#/components/schemas/VwapIndicator"
+              }
+            }
+          },
+          "component": {
+            "type": "string",
+            "enum": [
+              "VALUE",
+              "MACD",
+              "SIGNAL",
+              "HISTOGRAM",
+              "UPPER",
+              "MIDDLE",
+              "LOWER"
+            ],
+            "title": "Component",
+            "default": "VALUE"
+          },
+          "comparator": {
+            "type": "string",
+            "enum": [
+              "AT_OR_ABOVE",
+              "AT_OR_BELOW"
+            ],
+            "title": "Comparator"
+          },
+          "threshold": {
+            "type": "string",
+            "maxLength": 80,
+            "pattern": "^-?[0-9]+(?:\\.[0-9]+)?$",
+            "title": "Threshold"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "kind",
+          "indicator",
+          "comparator",
+          "threshold"
+        ],
+        "title": "ScanIndicatorCondition"
+      },
+      "ScanPriceCondition": {
+        "properties": {
+          "basis": {
+            "type": "string",
+            "const": "CLOSED_BAR_CLOSE",
+            "title": "Basis",
+            "default": "CLOSED_BAR_CLOSE"
+          },
+          "kind": {
+            "type": "string",
+            "const": "PRICE",
+            "title": "Kind"
+          },
+          "comparator": {
+            "type": "string",
+            "enum": [
+              "AT_OR_ABOVE",
+              "AT_OR_BELOW"
+            ],
+            "title": "Comparator"
+          },
+          "threshold": {
+            "type": "string",
+            "maxLength": 80,
+            "pattern": "^-?[0-9]+(?:\\.[0-9]+)?$",
+            "title": "Threshold"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "kind",
+          "comparator",
+          "threshold"
+        ],
+        "title": "ScanPriceCondition"
+      },
       "ScreenRequest": {
         "properties": {
           "instruments": {
@@ -12352,21 +12533,17 @@
             "items": {
               "oneOf": [
                 {
-                  "$ref": "#/components/schemas/PriceCondition"
+                  "$ref": "#/components/schemas/ScanPriceCondition"
                 },
                 {
-                  "$ref": "#/components/schemas/IndicatorCondition"
-                },
-                {
-                  "$ref": "#/components/schemas/DrawingCondition"
+                  "$ref": "#/components/schemas/ScanIndicatorCondition"
                 }
               ],
               "discriminator": {
                 "propertyName": "kind",
                 "mapping": {
-                  "DRAWING": "#/components/schemas/DrawingCondition",
-                  "INDICATOR": "#/components/schemas/IndicatorCondition",
-                  "PRICE": "#/components/schemas/PriceCondition"
+                  "INDICATOR": "#/components/schemas/ScanIndicatorCondition",
+                  "PRICE": "#/components/schemas/ScanPriceCondition"
                 }
               }
             },
@@ -12393,6 +12570,16 @@
       },
       "ScreenResult": {
         "properties": {
+          "saved_rule": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ScreenRuleBinding"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
           "evaluated_at_ms": {
             "type": "integer",
             "maximum": 253402300799000.0,
@@ -12487,6 +12674,182 @@
           "price_age_ms"
         ],
         "title": "ScreenRow"
+      },
+      "ScreenRuleBinding": {
+        "properties": {
+          "object_id": {
+            "type": "string",
+            "title": "Object Id"
+          },
+          "revision": {
+            "type": "integer",
+            "title": "Revision"
+          },
+          "state_sha256": {
+            "type": "string",
+            "title": "State Sha256"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "object_id",
+          "revision",
+          "state_sha256"
+        ],
+        "title": "ScreenRuleBinding"
+      },
+      "ScreenRulePage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/ScreenRuleView"
+            },
+            "type": "array",
+            "title": "Items"
+          },
+          "total_count": {
+            "type": "integer",
+            "title": "Total Count"
+          },
+          "next_after_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Next After Id"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "items",
+          "total_count",
+          "next_after_id"
+        ],
+        "title": "ScreenRulePage"
+      },
+      "ScreenRuleState": {
+        "properties": {
+          "instruments": {
+            "items": {
+              "$ref": "#/components/schemas/InstrumentRef"
+            },
+            "type": "array",
+            "maxItems": 64,
+            "minItems": 1,
+            "title": "Instruments"
+          },
+          "timeframe": {
+            "type": "string",
+            "enum": [
+              "M1",
+              "M5",
+              "M15",
+              "M30",
+              "H1",
+              "H4",
+              "D1"
+            ],
+            "title": "Timeframe",
+            "default": "M1"
+          },
+          "conditions": {
+            "items": {
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/ScanPriceCondition"
+                },
+                {
+                  "$ref": "#/components/schemas/ScanIndicatorCondition"
+                }
+              ],
+              "discriminator": {
+                "propertyName": "kind",
+                "mapping": {
+                  "INDICATOR": "#/components/schemas/ScanIndicatorCondition",
+                  "PRICE": "#/components/schemas/ScanPriceCondition"
+                }
+              }
+            },
+            "type": "array",
+            "maxItems": 4,
+            "minItems": 1,
+            "title": "Conditions"
+          },
+          "max_age_ms": {
+            "type": "integer",
+            "maximum": 86400000.0,
+            "minimum": 1000.0,
+            "title": "Max Age Ms",
+            "default": 120000
+          },
+          "name": {
+            "type": "string",
+            "maxLength": 160,
+            "minLength": 1,
+            "title": "Name"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "instruments",
+          "conditions",
+          "name"
+        ],
+        "title": "ScreenRuleState"
+      },
+      "ScreenRuleView": {
+        "properties": {
+          "object_id": {
+            "type": "string",
+            "title": "Object Id"
+          },
+          "kind": {
+            "type": "string",
+            "const": "SCREEN_RULE",
+            "title": "Kind",
+            "default": "SCREEN_RULE"
+          },
+          "revision": {
+            "type": "integer",
+            "title": "Revision"
+          },
+          "state": {
+            "$ref": "#/components/schemas/ScreenRuleState"
+          },
+          "state_sha256": {
+            "type": "string",
+            "title": "State Sha256"
+          },
+          "updated_at_ms": {
+            "type": "integer",
+            "maximum": 253402300799000.0,
+            "minimum": 0.0,
+            "title": "Updated At Ms"
+          },
+          "authority_effect": {
+            "type": "string",
+            "const": "NONE",
+            "title": "Authority Effect",
+            "default": "NONE"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "object_id",
+          "revision",
+          "state",
+          "state_sha256",
+          "updated_at_ms"
+        ],
+        "title": "ScreenRuleView"
       },
       "SemanticClass": {
         "type": "string",

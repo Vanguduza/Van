@@ -1,0 +1,78 @@
+{
+  "schema": "van.rebuild.saved-screen-rules-source/1",
+  "parent_source_head": "c7c3c56d5703c27621c11df2f2d90863fa4f8deb",
+  "status": "CANDIDATE_SOURCE_EVIDENCE",
+  "canonical_units": [
+    "BE-003",
+    "BE-020"
+  ],
+  "unit_acceptance": "NOT_ISSUED",
+  "source_sha256": {
+    "backend/van_gateway/trading/screener_migration.py": "a284fe5a074ebeb72be98627b12e079678f8d58d0172627cc7a0d5e0b2bb1079",
+    "backend/van_gateway/trading/monitor_models.py": "5660c15a2df3e17945d20fa088a85e9213256afbad11257e2149a4e2093db1b1",
+    "backend/van_gateway/trading/monitor_service.py": "0fc92b10168a0a1e540cf2325b11b400f5b51c9c8700db5d9a4f64eb25c4e87d",
+    "backend/van_gateway/trading/monitor_api.py": "7dde39c7535bb687065229bd2ede3129a318dafbcd125db8867fbd329e9aa954",
+    "backend/van_gateway/storage/db.py": "7864b76aec45ad2a56e6705d53953ddb56d30dd0a24f41485e820d6e881c1ead",
+    "backend/van_gateway/context/forget.py": "21a8d23f07b2d9d8b1c1b3b9ed78844f3f819fe96ab4171c1b178ae20c2cf027",
+    "backend/tests/test_saved_screen_rules.py": "90f5b40a6f2ee299938abe7659f47a98ea3fd18453795d3ded64220276dafa54",
+    "backend/tests/test_market_monitor_gateway.py": "042975010101871243796af7eea89348a0493e1efeba04886ea4ac78c3f6353e",
+    "backend/tests/test_market_monitor_persistence.py": "6a949a5eee7c646c7759c6a0d2de60e365a7f6cd4cc785455e647d70f0d7d50a",
+    "tools/rebuild/refresh_owner_source_contracts.py": "ad08c2f8dcfb194781269332598e0c9a65a7be12528fe16c18393e861f75a6db"
+  },
+  "reports": {
+    "integrated-r1.xml": {
+      "file": "docs/rebuild/rev118/ci/saved_screen_rules_20261025/integrated-r1.xml",
+      "sha256": "dd31e9746070f098f84d4654f0590563efdf531cc71e15c518e35aa16e56410c",
+      "tests": 63,
+      "passed": 63,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "registry-guards.xml": {
+      "file": "docs/rebuild/rev118/ci/saved_screen_rules_20261025/registry-guards.xml",
+      "sha256": "a4b8a97b509f9f16566e399140aca60ef1b1935db93182f41f048225f1ceadfa",
+      "tests": 10,
+      "passed": 10,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    }
+  },
+  "observed_scope": {
+    "saved_rule_owner_crud_original_receipt_and_privacy": true,
+    "exact_run_revision_before_quota_and_data_read": true,
+    "captured_result_hash_survives_concurrent_edit": true,
+    "durable_quota_shared_across_service_instances": true,
+    "actual_sql58_to59_preserves_all_row_bytes": true,
+    "actual_sql_failure_rollback_and_next_boot_recovery": true,
+    "actual_lost_schema_marker_replay_preserves_saved_rules": true,
+    "real_paired_http_and_bound_device": true,
+    "native_market_feed_qualified": false,
+    "new_android_consumer": false,
+    "physical_s24_tested": false
+  },
+  "registry": {
+    "feature_groups": 42,
+    "original_function_ids_preserved": 105,
+    "surfaces": 78,
+    "endpoints": 478,
+    "previous_endpoints_preserved": 472,
+    "new_saved_screen_rule_endpoints": 6,
+    "api_schemas": 366,
+    "original_schema_names_preserved": 333,
+    "source_contract_check": "PASS_ZERO_CHANGES",
+    "markdown": "backend/OWNER_FRONTEND_SCREEN_REGISTRY.md",
+    "new_consumer_status": "PENDING_BG_AND_FRONTEND_PROGRAMME"
+  },
+  "remaining": [
+    "Qualified native instrument/feed/source health; no technical facts fabricated from symbol-only bars.",
+    "Live ticks, qualified indicator semantics and complete/dynamic market-row projections.",
+    "Canonical typed voice/action catalog and new Android consumers/deep links/OS notifications.",
+    "Provider integration, native/independent acceptance and production/S24 qualification."
+  ],
+  "formal_acceptances_issued": [],
+  "financial_effects_authorized_or_performed": false,
+  "frozen_package_changed": false,
+  "verification_limits": "63 current monitor source cases pass with the documented scoped native-background HTTP fixture. Migration tests perform real SQL and injected SQL failure. Registry guard suite10pass. The older monitor packet failures remain unchanged historical evidence; no full unisolated/native/provider/UI acceptance claimed."
+}

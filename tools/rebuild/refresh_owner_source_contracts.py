@@ -338,8 +338,8 @@ def build(read=None):
             "canonical_units": ["BE-003", "BE-020"],
             "planned_feature_refs": ["VNX-F-TRADE-03", "VNX-F-TRADE-04", "VNX-F-CHART-11"],
             "planned_context_refs": ["van.next.trading.markets", "van.next.trading.alerts", "van.next.trading.screener"],
-            "scope": "Durable owner watchlists, exact native instrument selections, favourites and sorting; CAS/idempotent alert controls, pause/restart/delete; one canonical trigger per explicit arm, atomic existing event stream and recoverable Attention projection. Server closed-bar price/indicator/pinned-level-or-trend measurements and literal news-keyword checks. Typed bounded level screening with persistent quotas. Saved selections do not prove native feed binding. A symbol-only bar lake cannot trigger a live technical fact. No order path exists.",
-            "remaining": ["Full qualified native feed and quote binding", "Tick-price alerts and live row projections", "Dynamic watchlists", "Provider and Android consumer qualification"],
+            "scope": "Durable owner watchlists, exact native instrument selections, favourites and sorting; CAS/idempotent alert controls, pause/restart/delete; one canonical trigger per explicit arm, atomic existing event stream and recoverable Attention projection. Server closed-bar price/indicator/pinned-level-or-trend measurements and literal news-keyword checks. Typed bounded level screening with persistent quotas and saved-screen CRUD; running requires an exact revision and binds results to that captured rule hash. Saved selections do not prove native feed binding. A symbol-only bar lake cannot trigger a live technical fact. No order path exists.",
+            "remaining": ["Full qualified native feed and quote binding", "Tick-price alerts and live row projections", "Dynamic watchlists", "Typed voice/action-catalog wiring", "Provider and Android consumer qualification"],
             "specification": "docs/rebuild/rev118/backend/BE-020_MARKET_MONITORS.md",
             "new_ui_implemented": False, "live_qualified": False,
         }

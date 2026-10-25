@@ -184,7 +184,7 @@ async def test_schema57_upgrade_keeps_existing_chart_and_adds_monitor_tables(tmp
     saved = await charts.create('owner', CreateWorkspace(request_id='old-chart', state=state))
     await store.migrate()
     assert (await charts.get('owner', saved.workspace_id)).state == state
-    assert (await store.fetchone('SELECT MAX(version) n FROM schema_migrations'))['n'] == 58
+    assert (await store.fetchone('SELECT MAX(version) n FROM schema_migrations'))['n'] == module.SCHEMA_VERSION
     monitors = MarketMonitorService(store, Source(), clock=lambda: 1000000)
     assert (await create(monitors)).status == 'SAVED'
 

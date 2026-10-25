@@ -12,7 +12,8 @@ from pydantic import ValidationError
 from van_gateway.storage.db import Store
 from van_gateway.events.bus import EventBus
 from .monitor_models import (AlertState, AlertView, AlertPage, WatchlistState, WatchlistView,
-    WatchlistPage, MonitorWrite, MonitorCapabilities, EvaluationStatus, ScreenRow, ScreenResult)
+    WatchlistPage, MonitorWrite, MonitorCapabilities, EvaluationStatus, ScreenRow, ScreenResult,
+    ScreenRequest, ScreenRuleState, ScreenRuleView, ScreenRulePage, ScreenRuleBinding)
 from .monitor_source import MarketSnapshot, NewsObservation, PERIOD_MS
 from .monitor_calculations import measurement, matched, text
 
@@ -58,6 +59,8 @@ class MarketMonitorService:
         try:
             if row['kind'] == 'WATCHLIST':
                 return WatchlistView(**common, state=WatchlistState.model_validate_json(row['state_json']))
+            if row['kind'] == 'SCREEN_RULE':
+                return ScreenRuleView(**common, state=ScreenRuleState.model_validate_json(row['state_json']))
             return AlertView(**common, state=AlertState.model_validate_json(row['state_json']),
                              lifecycle=row['lifecycle'], arm_generation=row['arm_generation'],
                              armed_at_ms=row['armed_at_ms'],
@@ -92,7 +95,7 @@ class MarketMonitorService:
                 'SELECT count(*) n FROM market_monitor_objects WHERE owner_id=? AND kind=?',
                 (owner, kind))).fetchone()
             visible = rows[:limit]
-            cls = WatchlistPage if kind == 'WATCHLIST' else AlertPage
+            cls = {'WATCHLIST':WatchlistPage, 'ALERT':AlertPage, 'SCREEN_RULE':ScreenRulePage}[kind]
             return cls(items=[self._view(r) for r in visible], total_count=count['n'],
                        next_after_id=visible[-1]['object_id'] if len(rows)>limit else None)
 
@@ -105,16 +108,16 @@ class MarketMonitorService:
         return MonitorWrite.model_validate_json(row['result_json'])
 
     async def write(self, owner, kind, operation, body, identity=None):
-        if kind not in {'WATCHLIST', 'ALERT'} or operation not in {'CREATE', 'REPLACE', 'DELETE', 'PAUSE', 'RESTART'}:
+        if kind not in {'WATCHLIST', 'ALERT', 'SCREEN_RULE'} or operation not in {'CREATE', 'REPLACE', 'DELETE', 'PAUSE', 'RESTART'}:
             raise MonitorError('MONITOR_INVALID_OPERATION', 422)
-        if kind == 'WATCHLIST' and operation in {'PAUSE', 'RESTART'}:
+        if kind != 'ALERT' and operation in {'PAUSE', 'RESTART'}:
             raise MonitorError('MONITOR_INVALID_OPERATION', 422)
         if (operation == 'CREATE') != (identity is None):
             raise MonitorError('MONITOR_INVALID_OPERATION', 422)
         request_hash = digest({'kind': kind, 'operation': operation, 'object_id': identity,
                                'body': body.model_dump(mode='json')})
         if operation in {'CREATE', 'REPLACE'}:
-            cls = WatchlistState if kind == 'WATCHLIST' else AlertState
+            cls = {'WATCHLIST':WatchlistState, 'ALERT':AlertState, 'SCREEN_RULE':ScreenRuleState}[kind]
             state_json = cls.model_validate(body.state.model_dump(mode='json')).model_dump_json()
         else:
             state_json = None
@@ -136,10 +139,12 @@ class MarketMonitorService:
                     count = await (await db.execute(
                         'SELECT count(*) n FROM market_monitor_objects WHERE owner_id=? AND kind=?',
                         (owner, kind))).fetchone()
-                    cap = self.capabilities().max_watchlists if kind == 'WATCHLIST' else self.capabilities().max_alerts
+                    limits = self.capabilities()
+                    cap = {'WATCHLIST':limits.max_watchlists, 'ALERT':limits.max_alerts,
+                           'SCREEN_RULE':limits.max_screen_rules}[kind]
                     if count['n'] >= cap:
                         raise MonitorError('MONITOR_OBJECT_CAPACITY_REACHED', 429)
-                    identity = ('mwl_' if kind == 'WATCHLIST' else 'mal_')+uuid.uuid4().hex
+                    identity = {'WATCHLIST':'mwl_', 'ALERT':'mal_', 'SCREEN_RULE':'msr_'}[kind]+uuid.uuid4().hex
                     revision, generation, armed, lifecycle = 1, 1, now, 'ACTIVE'
                 else:
                     row = await self._head(db, owner, kind, identity)
@@ -368,6 +373,15 @@ class MarketMonitorService:
             await self.store.execute('UPDATE market_monitor_publications SET projected=1 WHERE event_seq=?', (row['seq'],))
             done += 1
         return done
+
+    async def run_screen_rule(self, owner, identity, body):
+        view = await self.get(owner, 'SCREEN_RULE', identity)
+        if view.revision != body.expected_revision:
+            raise MonitorError('MONITOR_REVISION_CONFLICT', current_revision=view.revision)
+        request = ScreenRequest.model_validate(view.state.model_dump(mode='json', exclude={'name'}))
+        result = await self.screen(owner, request)
+        return result.model_copy(update={'saved_rule':ScreenRuleBinding(object_id=view.object_id,
+            revision=view.revision, state_sha256=view.state_sha256)})
 
     async def screen(self, owner, body):
         now = self.now()

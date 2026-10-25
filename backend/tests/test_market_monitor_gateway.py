@@ -92,3 +92,35 @@ async def test_unqualified_technical_alert_and_scan_are_explicitly_unavailable_a
     assert bad.status_code == 422 and bad.headers['cache-control'] == 'no-store'
     assert not await app.state.store.fetchall("SELECT * FROM events WHERE event_type='trading.alert.triggered'")
     assert hermes['create_run'] == 0
+
+
+async def test_saved_screener_crud_and_exact_revision_run_use_real_owner_routes_without_dispatch(client):
+    ac,app,hermes = client
+    await _pair_for_test(ac,app,'dev-saved-screen','fixture-saved-screen')
+    state = {'name':'Owner saved screen','instruments':[instrument()],
+             'conditions':[{'kind':'PRICE','comparator':'AT_OR_ABOVE','threshold':'10'}]}
+    saved = await ac.post(PREFIX+'/screen-rules',json={'request_id':'save-screen','state':state})
+    assert saved.status_code == 200,saved.text
+    identity = saved.json()['object_id']
+    assert saved.json()['kind'] == 'SCREEN_RULE'
+    current = await ac.get(PREFIX+'/screen-rules/'+identity)
+    assert current.status_code == 200 and current.json()['state']['name'] == state['name']
+    assert current.headers['cache-control'] == 'no-store'
+    stale = await ac.post(PREFIX+'/screen-rules/'+identity+'/run',json={'expected_revision':2})
+    assert stale.status_code == 409
+    result = await ac.post(PREFIX+'/screen-rules/'+identity+'/run',json={'expected_revision':1})
+    assert result.status_code == 200,result.text
+    assert result.json()['saved_rule'] == {'object_id':identity,'revision':1,
+                                           'state_sha256':saved.json()['state_sha256']}
+    assert result.json()['rows'][0]['state'] == 'UNAVAILABLE'
+    edited = await ac.put(PREFIX+'/screen-rules/'+identity,json={
+        'request_id':'edit-screen','expected_revision':1,'state':state|{'name':'Changed screen'}})
+    assert edited.status_code == 200 and edited.json()['revision'] == 2
+    assert (await ac.get(PREFIX+'/screen-rules')).json()['total_count'] == 1
+    deleted = await ac.request('DELETE',PREFIX+'/screen-rules/'+identity,json={
+        'request_id':'delete-screen','expected_revision':2})
+    assert deleted.status_code == 200 and deleted.json()['status'] == 'DELETED'
+    assert (await ac.get(PREFIX+'/operations/save-screen')).json() == saved.json()
+    assert (await ac.post(PREFIX+'/screen-rules',json={'request_id':'save-screen','state':state})).json() == saved.json()
+    assert (await ac.get(PREFIX+'/screen-rules/'+identity)).status_code == 404
+    assert hermes['create_run'] == 0

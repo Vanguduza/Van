@@ -139,7 +139,7 @@ class MonitorControl(StrictModel):
 class MonitorWrite(StrictModel):
     request_id: str
     object_id: str
-    kind: Literal['WATCHLIST', 'ALERT']
+    kind: Literal['WATCHLIST', 'ALERT', 'SCREEN_RULE']
     revision: int
     state_sha256: str | None
     status: Literal['SAVED', 'PAUSED', 'RESTARTED', 'DELETED']
@@ -198,10 +198,21 @@ class AlertPage(StrictModel):
     next_after_id: str | None
 
 
+class ScanPriceCondition(PriceCondition):
+    comparator: Literal['AT_OR_ABOVE', 'AT_OR_BELOW']
+
+
+class ScanIndicatorCondition(IndicatorCondition):
+    comparator: Literal['AT_OR_ABOVE', 'AT_OR_BELOW']
+
+
+ScanCondition = Annotated[ScanPriceCondition | ScanIndicatorCondition, Field(discriminator='kind')]
+
+
 class ScreenRequest(StrictModel):
     instruments: list[InstrumentRef] = Field(min_length=1, max_length=64)
     timeframe: Timeframe = 'M1'
-    conditions: list[TechnicalCondition] = Field(min_length=1, max_length=4)
+    conditions: list[ScanCondition] = Field(min_length=1, max_length=4)
     max_age_ms: int = Field(default=120000, strict=True, ge=1000, le=86400000)
 
     @model_validator(mode='after')
@@ -212,6 +223,46 @@ class ScreenRequest(StrictModel):
         if any(c.comparator.startswith('CROSS_') for c in self.conditions):
             raise ValueError('screening uses level predicates, not unobserved crossings')
         return self
+
+
+class ScreenRuleState(ScreenRequest):
+    name: Name
+    _name_text = field_validator('name')(WatchlistState.nonblank_name.__func__)
+
+
+class CreateScreenRule(StrictModel):
+    request_id: Identity
+    state: ScreenRuleState
+
+
+class ReplaceScreenRule(CreateScreenRule):
+    expected_revision: int = Field(strict=True, ge=1)
+
+
+class RunScreenRule(StrictModel):
+    expected_revision: int = Field(strict=True, ge=1)
+
+
+class ScreenRuleView(StrictModel):
+    object_id: str
+    kind: Literal['SCREEN_RULE'] = 'SCREEN_RULE'
+    revision: int
+    state: ScreenRuleState
+    state_sha256: str
+    updated_at_ms: Timestamp
+    authority_effect: Literal['NONE'] = 'NONE'
+
+
+class ScreenRulePage(StrictModel):
+    items: list[ScreenRuleView]
+    total_count: int
+    next_after_id: str | None
+
+
+class ScreenRuleBinding(StrictModel):
+    object_id: str
+    revision: int
+    state_sha256: str
 
 
 class ScreenRow(StrictModel):
@@ -225,6 +276,7 @@ class ScreenRow(StrictModel):
 
 
 class ScreenResult(StrictModel):
+    saved_rule: ScreenRuleBinding | None = None
     evaluated_at_ms: Timestamp
     rows: list[ScreenRow]
     authority_effect: Literal['NONE'] = 'NONE'
@@ -235,6 +287,7 @@ class MonitorCapabilities(StrictModel):
     authority_effect: Literal['NONE'] = 'NONE'
     max_watchlists: int = 128
     max_alerts: int = 128
+    max_screen_rules: int = 128
     max_entries_per_watchlist: int = 128
     max_state_bytes: int = 131072
     max_scan_instruments: int = 64

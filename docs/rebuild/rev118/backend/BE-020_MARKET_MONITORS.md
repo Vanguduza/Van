@@ -4,6 +4,8 @@ Status: **IN_PROGRESS**. This packet adds real controls, persistence and server 
 
 ## Implemented source
 
+Saved screener rules now persist an explicit instrument universe, timeframe and closed level predicates. CRUD uses the same original-operation and revision protocol as other monitor settings. Running a saved rule requires its exact revision and returns the captured rule ID, revision and state hash with the measured rows; a later edit cannot relabel those results. Runs consume the existing durable quota per request and never create a mission, alert or order. Migration 59 preserves all version-58 rule bytes in one transaction and can replay after a lost version marker.
+
 Owner watchlists persist complete venue/environment/API-family/product/account/contract selections, favourites, manual ordering and sort/filter preferences. Matching symbols on different native scopes stay distinct. Saved selections are owner context, not evidence that a native feed has been bound.
 
 Alert rules support closed-bar price levels/crossings; SMA, EMA, simple-window RSI/ATR, MACD, Bollinger and anchored VWAP measurements; crossings of an immutable level or trend drawing; and literal news keywords with ANY/ALL and declared T1/T2 trust thresholds. News instrument relevance requires an explicitly recorded symbol; no model infers it. Other drawing geometries and tick-price bases are refused rather than silently reinterpreted.
@@ -18,7 +20,7 @@ Screener requests have a closed typed vocabulary of level predicates, at most 64
 
 ## Existing runtime integration
 
-Migration 58 adds owner monitor state, minimal operation receipts, one quota row per owner and an event projection witness to the existing gateway Store. Migration from the actual version-57 migrations and real backup/restore are tested.
+Migration 58 adds owner monitor state, minimal operation receipts, one quota row per owner and an event projection witness to the existing gateway Store. Migration from the actual version-57 migrations and real backup/restore are tested. Schema 59 adds saved-screen rules with an atomic table rebuild; injected SQL failure rolls back the original tables and data, and a missing post-commit version marker can be replayed without losing existing or saved-screen rules.
 
 The existing OpsScheduler registers `trading.market_monitors`. Rule transition, canonical `trading.alert.triggered` event and its projection witness commit in one SQLite transaction through the existing EventBus envelope. There is one event ID per owner/rule/arm, shared by all enrolled devices. Publishing cannot dispatch a command, mission or order.
 
@@ -37,6 +39,7 @@ All operations are under `/v1/trading/monitors`; OpenAPI provides closed request
 | Watchlists | GET/POST /watchlists; GET/PUT/DELETE /watchlists/{object_id} |
 | Alerts | GET/POST /alerts; GET/PUT/DELETE /alerts/{object_id} |
 | Alert controls | POST /alerts/{object_id}/pause; POST /alerts/{object_id}/restart |
+| Saved screener rules | GET/POST /screen-rules; GET/PUT/DELETE /screen-rules/{object_id}; POST /screen-rules/{object_id}/run |
 | Typed level scan | POST /screen |
 
 DELETE and control operations carry `request_id` and `expected_revision`. The original receipt endpoint is the recovery path for uncertain responses. Conflict, unknown object/receipt, capacity, quota, invalid input, corrupt state and uncertain write outcomes remain distinct. Scans consume quota per request, including retries and unavailable data; they are read operations, not idempotent control commands.
@@ -55,7 +58,7 @@ The current symbol/timeframe bar lake does **not** prove venue, environment, acc
 
 - BE-008/014: qualified native market/news producer readback, full instrument/entitlement binding, current source health and availability. No inference from a symbol or a VENUE label.
 - BE-018/020: independently qualified indicator semantics and live tick-price alert bases; complete watchlist market-row projection, search/group filters and dynamic candidate/exposure/news/near-alert lists.
-- BE-020: persistent screener-rule workflows, provider integration/failure/recovery and native postconditions beyond the recorded-ledger source path.
+- BE-020: provider integration/failure/recovery and native postconditions beyond the recorded-ledger source path.
 - BE-029/032: voice and canonical typed-command/action-catalog consumption of monitor controls. The current interface is the paired-owner REST contract.
 - FE-006/007/013 and BE-030: Android consumer, exact chart/review deep links, orb/Attention presentation, actual OS notification dedupe, accessibility and S24 Artemis evidence. Alerts never authorize a trade.
 - Canonical admission, independent review and all unit/gate acceptance dependencies remain unissued.

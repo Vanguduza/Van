@@ -58,7 +58,7 @@ FORGETTABLE: tuple[ForgettableStore, ...] = (
 #: be able to see that the omission was decided rather than forgotten.
 DELIBERATELY_KEPT: dict[str, str] = {
     "market_monitors": (
-        "Owner-authored watchlists and alert rules are explicit settings, deleted through "
+        "Owner-authored watchlists, alert rules and saved screener rules are explicit settings, deleted through "
         "their revision-checked endpoints. Deletion removes rule names, keywords and drawings. "
         "Minimal original operation receipts prevent a delayed retry recreating them. "
         "Triggered event and Attention evidence remains under their existing retention rules; "

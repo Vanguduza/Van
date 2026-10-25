@@ -3,7 +3,8 @@ from fastapi import APIRouter, HTTPException, Query
 from .chart_api import PrivateChartRoute
 from .monitor_models import (CreateWatchlist, ReplaceWatchlist, CreateAlert, ReplaceAlert,
     MonitorControl, MonitorWrite, WatchlistView, AlertView, WatchlistPage, AlertPage,
-    MonitorCapabilities, MonitorErrorResponse, ScreenRequest, ScreenResult)
+    MonitorCapabilities, MonitorErrorResponse, ScreenRequest, ScreenResult,
+    CreateScreenRule, ReplaceScreenRule, RunScreenRule, ScreenRuleView, ScreenRulePage)
 from .monitor_service import MarketMonitorService, MonitorError
 
 
@@ -73,6 +74,30 @@ def build_monitor_router(service: MarketMonitorService) -> APIRouter:
     @router.post('/alerts/{object_id}/restart', response_model=MonitorWrite)
     async def restart_alert(object_id: str, body: MonitorControl):
         return await call(service.write('owner', 'ALERT', 'RESTART', body, object_id))
+
+    @router.get('/screen-rules', response_model=ScreenRulePage)
+    async def screen_rules(limit: int = Query(100, ge=1, le=128), after_id: str | None = None):
+        return await call(service.listing('owner', 'SCREEN_RULE', limit=limit, after_id=after_id))
+
+    @router.post('/screen-rules', response_model=MonitorWrite)
+    async def create_screen_rule(body: CreateScreenRule):
+        return await call(service.write('owner', 'SCREEN_RULE', 'CREATE', body))
+
+    @router.get('/screen-rules/{object_id}', response_model=ScreenRuleView)
+    async def get_screen_rule(object_id: str):
+        return await call(service.get('owner', 'SCREEN_RULE', object_id))
+
+    @router.put('/screen-rules/{object_id}', response_model=MonitorWrite)
+    async def replace_screen_rule(object_id: str, body: ReplaceScreenRule):
+        return await call(service.write('owner', 'SCREEN_RULE', 'REPLACE', body, object_id))
+
+    @router.delete('/screen-rules/{object_id}', response_model=MonitorWrite)
+    async def delete_screen_rule(object_id: str, body: MonitorControl):
+        return await call(service.write('owner', 'SCREEN_RULE', 'DELETE', body, object_id))
+
+    @router.post('/screen-rules/{object_id}/run', response_model=ScreenResult)
+    async def run_screen_rule(object_id: str, body: RunScreenRule):
+        return await call(service.run_screen_rule('owner', object_id, body))
 
     @router.post('/screen', response_model=ScreenResult)
     async def screen(body: ScreenRequest):
