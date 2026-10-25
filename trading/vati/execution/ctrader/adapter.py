@@ -14,7 +14,7 @@ from decimal import Decimal, ROUND_DOWN, localcontext
 from typing import Any, Callable, Optional, ClassVar
 
 from vati.execution.base import AccountState, ExecutionReceipt, Health, OrderCommand, VenuePosition, VenueUnavailable
-from vati.execution.ctrader.transport import CtraderApiError, CtraderTransport
+from vati.execution.ctrader.transport import CtraderApiError, CtraderTransport, CtraderReadTransport
 from vati.execution.ctrader.contracts import NativeSymbolContract
 from vati.execution.entry_deadline import EntryNotSent, require_entry_deadline
 from vati.risk.contracts import Direction, LossModel
@@ -201,10 +201,11 @@ class CtraderAdapter:
             raise VenueUnavailable(f"symbol {name} not available on this cTrader account") from None
 
     # ------------------------------------------------------------ reads
-    def market_reader(self):
+    def market_reader(self, *, collection_timeout_s=30.0):
         """Independent read-only connection; never shares the protective socket."""
-        transport=CtraderTransport(host=self.transport.host,port=self.transport.port,
-            timeout_s=self.transport.timeout_s,connector=self.transport._connector)
+        transport=CtraderReadTransport(host=self.transport.host,port=self.transport.port,
+            timeout_s=self.transport.timeout_s,connector=self.transport._connector,
+            max_frame_bytes=self.transport.max_frame_bytes,operation_timeout_s=collection_timeout_s)
         adapter=CtraderAdapter(transport,self.client_id,self.client_secret_provider,self.access_token_provider,
             self.ctid_trader_account_id,self.account_alias,self.venue,clock=self.clock)
         class MarketReader:
@@ -228,6 +229,7 @@ class CtraderAdapter:
                 if original is None or original.revision!=expected_contract.revision:
                     raise VenueUnavailable('cTrader native contract changed; refresh required')
                 observed=read_trendbars(adapter,name,timeframe,from_ms=from_ms,to_ms=to_ms,count=2001)
+                transport.check_budget()  # Includes native observation parsing.
                 return original,observed
             def close(self):transport.close()
         return MarketReader()
@@ -236,7 +238,8 @@ class CtraderAdapter:
         # An independent connection and adapter state keep slow cash history off
         # the protective/order socket. It exposes only the read operation/close.
         transport=CtraderTransport(host=self.transport.host,port=self.transport.port,
-            timeout_s=self.transport.timeout_s,connector=self.transport._connector)
+            timeout_s=self.transport.timeout_s,connector=self.transport._connector,
+            max_frame_bytes=self.transport.max_frame_bytes)
         adapter=CtraderAdapter(transport,self.client_id,self.client_secret_provider,self.access_token_provider,
             self.ctid_trader_account_id,self.account_alias,self.venue,clock=self.clock)
         class CashReader:

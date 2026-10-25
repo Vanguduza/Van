@@ -7,7 +7,9 @@ access token) are held by the transport only; nothing here sizes or decides."""
 
 from __future__ import annotations
 
+from contextlib import contextmanager
 import queue
+import math
 import socket
 import ssl
 import struct
@@ -35,8 +37,11 @@ class CtraderApiError(RuntimeError):
 
 
 class CtraderTransport:
-    def __init__(self, *, host: str = DEMO_HOST, port: int = PORT, timeout_s: float = 10.0, connector: Optional[Callable[[str, int], Any]] = None, heartbeat_s: float = 10.0) -> None:
+    def __init__(self, *, host: str = DEMO_HOST, port: int = PORT, timeout_s: float = 10.0, connector: Optional[Callable[[str, int], Any]] = None, heartbeat_s: float = 10.0, max_frame_bytes: int = 8*1024*1024) -> None:
+        if type(max_frame_bytes) is not int or not 1 <= max_frame_bytes <= 64*1024*1024:
+            raise ValueError("cTrader frame capacity must be an integer from1byte through64MiB")
         self.host, self.port, self.timeout_s, self.heartbeat_s = host, port, timeout_s, heartbeat_s
+        self.max_frame_bytes = max_frame_bytes
         self._connector = connector
         self._sock = None
         self._lock = threading.Lock()
@@ -45,6 +50,7 @@ class CtraderTransport:
         self._pending_sockets: dict[str, Any] = {}
         self.events: queue.Queue = queue.Queue()
         self._reader: Optional[threading.Thread] = None
+        self._readers: set[threading.Thread] = set()
         self._alive = False
         self._connection_counter = 0
         self.sent = 0
@@ -56,20 +62,27 @@ class CtraderTransport:
         with self._state_lock:
             if self._sock is not None:
                 return
+            self._readers = {reader for reader in self._readers if reader.is_alive()}
             raw = sock = None
             try:
                 if self._connector is not None:
                     sock = self._connector(self.host, self.port)
                 else:
-                    raw = socket.create_connection((self.host, self.port), timeout=self.timeout_s)
+                    raw = socket.create_connection((self.host, self.port), timeout=self._io_timeout())
                     ctx = ssl.create_default_context(); ctx.minimum_version = ssl.TLSVersion.TLSv1_2
+                    self._prepare_io(raw)
                     sock = ctx.wrap_socket(raw, server_hostname=self.host)
+                if sock is None:
+                    raise CtraderError("cTrader connector returned no socket")
+                self._prepare_io(sock)
                 self._sock, self._alive = sock, True
                 self._connection_counter += 1
                 self._last_hb = time.monotonic()
                 self._reader = threading.Thread(target=self._read_loop, args=(sock,), daemon=True)
+                self._readers.add(self._reader)
                 self._reader.start()
             except Exception as exc:
+                self._readers.discard(self._reader)
                 self._sock, self._alive, self._reader = None, False, None
                 if sock is not None:
                     sock.close()
@@ -82,8 +95,22 @@ class CtraderTransport:
     def close(self) -> None:
         with self._state_lock:
             sock = self._sock
+            readers = list(self._readers)
         if sock is not None:
             self._retire(sock, "connection closed")
+        # A failed reader may already have detached itself while still releasing
+        # its socket. Retain/join that exact owner; never join a later replacement.
+        for reader in readers:
+            self._join_reader(reader)
+
+    def _join_reader(self, reader):
+        if reader is threading.current_thread():
+            return
+        reader.join(self.timeout_s)
+        if reader.is_alive():
+            raise CtraderError("cTrader reader did not terminate after socket shutdown")
+        with self._state_lock:
+            self._readers.discard(reader)
 
     def _retire(self, sock, error: str) -> None:
         """Retire only this socket; old failures cannot close a replacement.
@@ -113,9 +140,7 @@ class CtraderTransport:
                 pass
             finally:
                 if reader is not None and reader is not threading.current_thread():
-                    reader.join(self.timeout_s)
-                    if reader.is_alive():
-                        raise CtraderError("cTrader reader did not terminate after socket shutdown")
+                    self._join_reader(reader)
 
     @property
     def connected(self) -> bool:
@@ -129,26 +154,40 @@ class CtraderTransport:
             return self._connection_counter if self._sock is not None and self._alive else None
 
     # ------------------------------------------------------------ io
+    def _io_timeout(self):
+        return self.timeout_s
+
+    def _prepare_io(self, sock):
+        pass  # Financial transport retains its existing peer-timeout semantics.
+
+    def _response_timeout(self, timeout_s):
+        return timeout_s or self.timeout_s
+
+    def _send_guard(self):
+        return self._lock
+
     def _send_frame(self, payload: bytes, *, expires_at_ms=None, clock=None, expected_socket=None) -> None:
         frame=struct.pack(">I", len(payload)) + payload
-        with self._lock:
+        with self._send_guard():
             if expires_at_ms is not None:
                 require_entry_deadline(expires_at_ms, clock)
             with self._state_lock:
                 sock = self._sock
                 if sock is None or not self._alive or (expected_socket is not None and sock is not expected_socket):
                     raise CtraderError("cTrader connection changed before send")
+            self._prepare_io(sock)
             sock.sendall(frame)
             self.sent += 1
 
     def _recv_exact(self, sock, n: int) -> bytes:
-        buf = b""
+        buf = bytearray()
         while len(buf) < n:
+            self._prepare_io(sock)
             chunk = sock.recv(n - len(buf))
             if not chunk:
                 raise ConnectionError("socket closed")
-            buf += chunk
-        return buf
+            buf.extend(chunk)
+        return bytes(buf)
 
     def _read_loop(self, sock) -> None:
         try:
@@ -157,6 +196,8 @@ class CtraderTransport:
                     if self._sock is not sock:
                         return
                 (ln,) = struct.unpack(">I", self._recv_exact(sock, 4))
+                if not 1 <= ln <= self.max_frame_bytes:
+                    raise CtraderError("cTrader native frame length exceeds configured capacity")
                 name, body, cid = SCHEMA.unwrap(self._recv_exact(sock, ln))
                 with self._state_lock:
                     if self._sock is not sock:
@@ -206,7 +247,7 @@ class CtraderTransport:
             else:
                 self._send_frame(payload,expires_at_ms=expires_at_ms,clock=clock,expected_socket=sock)
             try:
-                name, body = q.get(timeout=timeout_s or self.timeout_s)
+                name, body = q.get(timeout=self._response_timeout(timeout_s))
             except queue.Empty:
                 raise CtraderError(f"cTrader timeout waiting for {message} response")
         except OSError as exc:
@@ -267,3 +308,95 @@ class CtraderTransport:
         finally:
             for s in stash:
                 self.events.put(s)
+
+
+class CtraderReadTransport(CtraderTransport):
+    """One native market-read operation; its budget cannot authorize an order.
+
+    Socket and response waits share a monotonic deadline. External DNS resolver
+    or custom connector code is not an interruptible OS sandbox: expiry is also
+    rechecked on return. A separately governed worker must bound that host work.
+    """
+    READ_MESSAGES = frozenset({"ProtoOAApplicationAuthReq", "ProtoOAAccountAuthReq",
+                              "ProtoOASymbolsListReq", "ProtoOASymbolByIdReq",
+                              "ProtoOAGetTrendbarsReq", "ProtoHeartbeatEvent"})
+
+    def __init__(self, *, operation_timeout_s=30.0, monotonic=None, **kwargs):
+        if (type(operation_timeout_s) not in (int, float) or not math.isfinite(operation_timeout_s)
+                or not 0 < operation_timeout_s <= 300):
+            raise ValueError("native read budget must be finite and positive, at most300seconds")
+        super().__init__(**kwargs)
+        if (type(self.timeout_s) not in (int, float) or not math.isfinite(self.timeout_s) or self.timeout_s <= 0):
+            raise ValueError("native read peer timeout must be finite and positive")
+        self.operation_timeout_s = operation_timeout_s
+        self._budget_clock = monotonic if monotonic is not None else time.monotonic
+        if not callable(self._budget_clock):
+            raise ValueError("native read monotonic clock required")
+        self._operation_deadline = None
+        self._last_budget_clock = None
+
+    def _io_timeout(self):
+        with self._state_lock:
+            try:
+                now = self._budget_clock()
+            except Exception as exc:
+                raise CtraderError("native read monotonic clock unavailable") from exc
+            if type(now) not in (int, float) or not math.isfinite(now):
+                raise CtraderError("native read monotonic clock unavailable")
+            if self._last_budget_clock is not None and now < self._last_budget_clock:
+                raise CtraderError("native read budget clock moved backwards")
+            self._last_budget_clock = now
+            if self._operation_deadline is None:
+                self._operation_deadline = now+self.operation_timeout_s
+            remaining = self._operation_deadline-now
+            if remaining <= 0:
+                raise CtraderError("native read operation budget exhausted")
+            return min(self.timeout_s, remaining)
+
+    def _prepare_io(self, sock):
+        remaining = self._io_timeout()
+        setter = getattr(sock, "settimeout", None)
+        if not callable(setter):
+            raise CtraderError("native read budget requires socket timeout support")
+        setter(remaining)
+
+    def _response_timeout(self, timeout_s):
+        return min(super()._response_timeout(timeout_s), self._io_timeout())
+
+    @contextmanager
+    def _send_guard(self):
+        if not self._lock.acquire(timeout=self._io_timeout()):
+            raise CtraderError("native read send lock unavailable within budget")
+        try:
+            yield
+        finally:
+            self._lock.release()
+
+    def check_budget(self):
+        self._io_timeout()
+
+    def connect(self):
+        try:
+            self.check_budget()  # Includes elapsed connector work, even before auth.
+            return super().connect()
+        except CtraderError:
+            self.close()
+            raise
+
+    def call(self, message, values, *, timeout_s=None):
+        if not isinstance(message, str) or message not in self.READ_MESSAGES:
+            raise CtraderError("read-only native source transport refuses this operation")
+        if timeout_s is not None and (type(timeout_s) not in (int, float)
+                or not math.isfinite(timeout_s) or timeout_s <= 0):
+            raise ValueError("native read response timeout must be finite and positive")
+        try:
+            self._io_timeout()  # Starts once; reconnect/later calls cannot reset it.
+            result = super().call(message, values, timeout_s=timeout_s)
+            self.check_budget()
+            return result
+        except CtraderError:
+            self.close()
+            raise
+
+    def call_entry(self, *args, **kwargs):
+        raise EntryNotSent("read-only native source cannot submit an order; not sent")

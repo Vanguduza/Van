@@ -1,6 +1,6 @@
 {
   "schema": "van.rebuild.candidate-source-progress/1",
-  "updated_at_utc": "2026-10-25T18:53:10.284700+00:00",
+  "updated_at_utc": "2026-10-25T19:37:37.950693+00:00",
   "programme": "Rev1.18; original 131 unit IDs and dependencies retained",
   "authority": "auth-20261022-owner-autonomous-candidate-build",
   "meaning": "Candidate source progress is separate from admitted unit acceptance. Independent certificates, owner decisions, live effects and release gates remain unissued. No unit is declared complete by this record.",
@@ -493,6 +493,10 @@
         {
           "description": "Captured immutable full native contract metadata, existing revision identity, scoped append-only raw market archive and independent selected-product reader/collector. Original record is durable at atomic rename; derived index recovery, typed integrity, original request replay, revision/as-of availability, real process death and concurrent writers tested.293focused/869actualPostgreSQL/account/funding/execution cases pass0skip with audit0. No live/source-use/provider/monitor/unit acceptance; scheduling, capacity/wire budgets, entitlements/calendar/quote/depth/other venues remain.",
           "evidence": "backend/BE-008_NATIVE_MARKET_ARCHIVE.md; receipts/NATIVE_MARKET_ARCHIVE_SOURCE_20261025.json"
+        },
+        {
+          "description": "Bounded framed input, explicit read-only native transport and one monotonic I/O/response/send-mutex budget across auth, selected metadata, history and parsing. Exact retired-reader ownership fixes detached cleanup.256focused/910selected actualPG/account/funding/execution cases pass0skip/audit0;108rebuild pass. Initial missing-API tests and corrected privacy oracle retained. DNS/arbitrary callbacks, persistence, host worker, live provider/capacity and qualified consumer remain open.",
+          "evidence": "backend/BE-008_NATIVE_READ_BUDGETS.md; receipts/NATIVE_READ_BUDGET_SOURCE_20261025.json"
         }
       ]
     },

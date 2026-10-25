@@ -142,7 +142,9 @@
         "backend/BE-008_NATIVE_CTRADER_MARKET_READS.md",
         "backend/BE-008_NATIVE_CTRADER_CONNECTION_LIFETIME.md",
         "backend/BE-008_NATIVE_MARKET_ARCHIVE.md",
-        "receipts/NATIVE_MARKET_ARCHIVE_SOURCE_20261025.json"
+        "receipts/NATIVE_MARKET_ARCHIVE_SOURCE_20261025.json",
+        "backend/BE-008_NATIVE_READ_BUDGETS.md",
+        "receipts/NATIVE_READ_BUDGET_SOURCE_20261025.json"
       ]
     }
   },
@@ -207,10 +209,18 @@
     "note": "Opus unavailable; owner transferred build to Codex. No independent reviewer identity is inferred from another model or session."
   },
   "checkpoint": {
-    "updated_utc": "2026-10-25T18:53:10.284700+00:00",
+    "updated_utc": "2026-10-25T19:37:37.950693+00:00",
     "branch": "ccr-9e07e1af-8mgz1p",
     "base": "b02075f327ea8180ab6d269eba358cf8c5479878",
-    "background_jobs": [],
+    "background_jobs": [
+      {
+        "kind": "hosted van-ci",
+        "id": 40224260205,
+        "head": "df75b6cf77752ec0ba4708b21951c2af47f67bfa",
+        "state": "IN_PROGRESS_LAST_READ",
+        "not_acceptance": true
+      }
+    ],
     "last_validation": [
       "Project Truth verify at 1cab6b2f: GREEN, 533 commits, exit 0 (receipts/PROJECT_TRUTH_VERIFY_1cab6b2f.json; covers that range only)",
       "pre001.py check/selftest 20/20; ap001.py check/selftest 13/13; pre002_dossiers check/selftest 11/11; neg/truth/decision review checks 0",
@@ -393,7 +403,8 @@
       "Published4ef8fcf2/40212892336: market229PASS, gateway5771pass1descriptorFAIL7skip/media198PASS, trading3061PASS1privateDDSskip,PG26/voice117PASS, Android/browserPASS; mutation335caught39unexecutedPARTIAL_FAILED. All failed results retained. Current descriptor repair73focus/258integratedPASS;12originalC16faults caught/restored. Native cTrader173focusPASS, pinnedDDSresolver2PASS; full local corrected trading interrupted2836passes after24m26s, no fullPASS. Repaired audit10PASS/original14probes,108rebuildPASS; zero final forbidden events. Exact new hosted qualification pending publication.",
       "Hosted ac60c4d3/run40219703232: gateway5775pass/7declaredskip,media198pass,trading3108pass/1privateDDSskip,PostgreSQL26pass,voice117pass,258monitorpass/audit0; original374mutation identities caught once. Android emulator18pass/4declaredcore/production skips. OverallFAILURE on missing privateDDS credential and absent trusted-main checker; no waived gate.",
       "Connection-lifetime source46474a6c:810extended actualPG/account/funding/execution cases pass0skip;9supplemental mutants caught after20case control, source restored. Actual hooks and committed GREEN133. Logs-only staging error retained in prior d5b1a620 row; implementation in46474a6c.",
-      "Uncommitted native archive/collector:293focused and869extended actualPG/account/funding/execution cases pass0skip/audit0, fixture container removed and children reconciled. Independent actual native codec connection tested; no actual provider or unit qualification."
+      "Uncommitted native archive/collector:293focused and869extended actualPG/account/funding/execution cases pass0skip/audit0, fixture container removed and children reconciled. Independent actual native codec connection tested; no actual provider or unit qualification.",
+      "Native budget candidate:256focused/910selected actualPG/account/funding/execution cases pass0skip/audit0;108rebuild and unchanged source contracts. Two actual socket/lifetime before gaps; new API specification failures and corrected generic financial privacy oracle retained. Native OS DNS/arbitrary host work and capacity qualification remain unbounded/unissued. Publisheddf75exact-head monitor258pass/audit0, broaderCI40224260205 still active; private/trusted gates explicitly fail."
     ],
     "environment_notes": [
       "clone must be unshallowed (git fetch --unshallow) and PR heads fetched (+refs/pull/*/head:refs/remotes/origin/pr/*) before pre001.py",
@@ -417,10 +428,10 @@
         "scope": "browser repair source qualification, not monitor source or S24"
       }
     ],
-    "active_packet": "BE-008 scoped raw native contract/market archive and independent read-only collector; source-tested, not accepted",
-    "published_head": "ac60c4d3ba57ff488a39fa1962920ce4711c0ffc",
+    "active_packet": "BE-008 native frame/read-only operation budgets and detached-reader cleanup; source-tested, not accepted",
+    "published_head": "df75b6cf77752ec0ba4708b21951c2af47f67bfa",
     "local_base_head": "46474a6cf054bbecf4ab32ed6d3d394611f633b0",
-    "committed_ledger_verification": "GREEN133 through46474a6c against4fd466dec3910ed5de614bfbf95887ad619df5ca; next source commit not yet included"
+    "committed_ledger_verification": "GREEN134 throughdf75b6cf against4fd466dec3910ed5de614bfbf95887ad619df5ca; new budget source not yet committed"
   },
   "observations": [
     "OBS-001 BE-002 debug cleartext",
