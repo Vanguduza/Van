@@ -40,79 +40,143 @@ class CtraderTransport:
         self._connector = connector
         self._sock = None
         self._lock = threading.Lock()
+        self._state_lock = threading.RLock()
         self._pending: dict[str, queue.Queue] = {}
+        self._pending_sockets: dict[str, Any] = {}
         self.events: queue.Queue = queue.Queue()
         self._reader: Optional[threading.Thread] = None
         self._alive = False
+        self._connection_counter = 0
         self.sent = 0
 
     # ------------------------------------------------------------ lifecycle
     def connect(self) -> None:
-        if self._sock is not None:
-            return
-        try:
-            if self._connector is not None:
-                self._sock = self._connector(self.host, self.port)
-            else:
-                raw = socket.create_connection((self.host, self.port), timeout=self.timeout_s)
-                ctx = ssl.create_default_context(); ctx.minimum_version = ssl.TLSVersion.TLSv1_2
-                self._sock = ctx.wrap_socket(raw, server_hostname=self.host)
-        except (OSError, ssl.SSLError) as exc:
-            raise CtraderError(f"cTrader connect failed: {exc}") from exc
-        self._alive = True
-        self._reader = threading.Thread(target=self._read_loop, daemon=True); self._reader.start()
-        self._last_hb = time.monotonic()
+        # One connection construction at a time. Reader I/O never holds this
+        # lock, so shutdown can interrupt a blocked receive/send.
+        with self._state_lock:
+            if self._sock is not None:
+                return
+            raw = sock = None
+            try:
+                if self._connector is not None:
+                    sock = self._connector(self.host, self.port)
+                else:
+                    raw = socket.create_connection((self.host, self.port), timeout=self.timeout_s)
+                    ctx = ssl.create_default_context(); ctx.minimum_version = ssl.TLSVersion.TLSv1_2
+                    sock = ctx.wrap_socket(raw, server_hostname=self.host)
+                self._sock, self._alive = sock, True
+                self._connection_counter += 1
+                self._last_hb = time.monotonic()
+                self._reader = threading.Thread(target=self._read_loop, args=(sock,), daemon=True)
+                self._reader.start()
+            except Exception as exc:
+                self._sock, self._alive, self._reader = None, False, None
+                if sock is not None:
+                    sock.close()
+                elif raw is not None:
+                    raw.close()
+                if isinstance(exc, (OSError, RuntimeError)):
+                    raise CtraderError(f"cTrader connect failed: {exc}") from exc
+                raise
 
     def close(self) -> None:
-        self._alive = False
-        if self._sock is not None:
+        with self._state_lock:
+            sock = self._sock
+        if sock is not None:
+            self._retire(sock, "connection closed")
+
+    def _retire(self, sock, error: str) -> None:
+        """Retire only this socket; old failures cannot close a replacement.
+
+        Disconnect is an unknown response/effect, never evidence that an order
+        was refused or safe to replay. Callers retain the existing reconciliation
+        contract. Wake pending calls before joining the original reader.
+        """
+        with self._state_lock:
+            if self._sock is not sock:
+                return
+            self._sock, self._alive = None, False
+            reader, self._reader = self._reader, None
+            for cid, pending in self._pending.items():
+                if self._pending_sockets.get(cid) is sock:
+                    pending.put(("__disconnect__", {"error": error}))
+        try:
+            shutdown = getattr(sock, "shutdown", None)
+            if shutdown is not None:
+                shutdown(socket.SHUT_RDWR)
+        except OSError:
+            pass  # Already disconnected; close and reader reconciliation remain.
+        finally:
             try:
-                self._sock.close()
+                sock.close()
+            except OSError:
+                pass
             finally:
-                self._sock = None
+                if reader is not None and reader is not threading.current_thread():
+                    reader.join(self.timeout_s)
+                    if reader.is_alive():
+                        raise CtraderError("cTrader reader did not terminate after socket shutdown")
 
     @property
     def connected(self) -> bool:
-        return self._sock is not None and self._alive
+        with self._state_lock:
+            return self._sock is not None and self._alive
+
+    @property
+    def connection_id(self) -> int | None:
+        """Process-local lifetime identity, not account authority or provenance."""
+        with self._state_lock:
+            return self._connection_counter if self._sock is not None and self._alive else None
 
     # ------------------------------------------------------------ io
-    def _send_frame(self, payload: bytes, *, expires_at_ms=None, clock=None) -> None:
+    def _send_frame(self, payload: bytes, *, expires_at_ms=None, clock=None, expected_socket=None) -> None:
         frame=struct.pack(">I", len(payload)) + payload
         with self._lock:
             if expires_at_ms is not None:
                 require_entry_deadline(expires_at_ms, clock)
-            self._sock.sendall(frame)
+            with self._state_lock:
+                sock = self._sock
+                if sock is None or not self._alive or (expected_socket is not None and sock is not expected_socket):
+                    raise CtraderError("cTrader connection changed before send")
+            sock.sendall(frame)
             self.sent += 1
 
-    def _recv_exact(self, n: int) -> bytes:
+    def _recv_exact(self, sock, n: int) -> bytes:
         buf = b""
         while len(buf) < n:
-            chunk = self._sock.recv(n - len(buf))
+            chunk = sock.recv(n - len(buf))
             if not chunk:
                 raise ConnectionError("socket closed")
             buf += chunk
         return buf
 
-    def _read_loop(self) -> None:
+    def _read_loop(self, sock) -> None:
         try:
-            while self._alive:
-                (ln,) = struct.unpack(">I", self._recv_exact(4))
-                name, body, cid = SCHEMA.unwrap(self._recv_exact(ln))
-                if cid and cid in self._pending:
-                    self._pending[cid].put((name, body))
-                elif name == "ProtoHeartbeatEvent":
-                    continue
-                else:
-                    self.events.put((name, body))
+            while True:
+                with self._state_lock:
+                    if self._sock is not sock:
+                        return
+                (ln,) = struct.unpack(">I", self._recv_exact(sock, 4))
+                name, body, cid = SCHEMA.unwrap(self._recv_exact(sock, ln))
+                with self._state_lock:
+                    if self._sock is not sock:
+                        return
+                    if cid and self._pending_sockets.get(cid) is sock:
+                        self._pending[cid].put((name, body))
+                    elif name != "ProtoHeartbeatEvent":
+                        self.events.put((sock, name, body))
         except Exception as exc:  # noqa: BLE001 — reader death = disconnected; requests then fail closed
-            self._alive = False
-            for q in list(self._pending.values()):
-                q.put(("__disconnect__", {"error": str(exc)}))
+            self._retire(sock, str(exc))
 
     def heartbeat_if_due(self) -> None:
-        if self.connected and time.monotonic() - self._last_hb >= self.heartbeat_s:
-            self._send_frame(SCHEMA.wrap("ProtoHeartbeatEvent", {}))
-            self._last_hb = time.monotonic()
+        with self._state_lock:
+            sock = self._sock
+            due = self._alive and sock is not None and time.monotonic() - self._last_hb >= self.heartbeat_s
+        if due:
+            self._send_frame(SCHEMA.wrap("ProtoHeartbeatEvent", {}), expected_socket=sock)
+            with self._state_lock:
+                if self._sock is sock:
+                    self._last_hb = time.monotonic()
 
     def call(self, message: str, values: dict[str, Any], *, timeout_s: Optional[float] = None) -> tuple[str, dict[str, Any]]:
         """Send a request, wait for the response carrying the same clientMsgId. Errors come back as CtraderApiError."""
@@ -129,53 +193,77 @@ class CtraderTransport:
         self.connect()
         cid = uuid.uuid4().hex[:16]
         q: queue.Queue = queue.Queue()
-        self._pending[cid] = q
+        with self._state_lock:
+            sock = self._sock
+            if sock is None or not self._alive:
+                raise CtraderError("cTrader disconnected before request registration")
+            self._pending[cid] = q
+            self._pending_sockets[cid] = sock
         try:
             payload=SCHEMA.wrap(message, values, cid)
             if expires_at_ms is None:
-                self._send_frame(payload)
+                self._send_frame(payload, expected_socket=sock)
             else:
-                self._send_frame(payload,expires_at_ms=expires_at_ms,clock=clock)
+                self._send_frame(payload,expires_at_ms=expires_at_ms,clock=clock,expected_socket=sock)
             try:
                 name, body = q.get(timeout=timeout_s or self.timeout_s)
             except queue.Empty:
                 raise CtraderError(f"cTrader timeout waiting for {message} response")
         except OSError as exc:
-            self.close(); raise CtraderError(f"cTrader socket failure: {exc}") from exc
+            self._retire(sock, str(exc))
+            raise CtraderError(f"cTrader socket failure: {exc}") from exc
         finally:
-            self._pending.pop(cid, None)
+            with self._state_lock:
+                if self._pending.get(cid) is q:
+                    self._pending.pop(cid, None)
+                    self._pending_sockets.pop(cid, None)
         if name == "__disconnect__":
-            self.close(); raise CtraderError(f"cTrader disconnected: {body.get('error')}")
+            raise CtraderError(f"cTrader disconnected: {body.get('error')}")
         if name in ("ProtoOAErrorRes", "ProtoErrorRes"):
             raise CtraderApiError(str(body.get("errorCode")), str(body.get("description", "")))
         if name == "ProtoOAExecutionEvent":
-            self.events.put((name, body))   # the API answers order requests with an execution event: it is both the reply and an event
+            self.events.put((sock, name, body))   # A real original effect remains evidence even after disconnect.
+        return name, body
+
+    def _event_value(self, item):
+        sock, name, body = item
+        # Quotes/depth from a retired subscription cannot seed the replacement
+        # connection's cache. Execution/error evidence remains for reconciliation.
+        if name in {"ProtoOASpotEvent", "ProtoOADepthEvent"}:
+            with self._state_lock:
+                if self._sock is not sock:
+                    return None
         return name, body
 
     def drain_events(self, max_items: int = 100) -> list[tuple[str, dict[str, Any]]]:
         out = []
         while len(out) < max_items:
             try:
-                out.append(self.events.get_nowait())
+                item = self._event_value(self.events.get_nowait())
+                if item is not None:
+                    out.append(item)
             except queue.Empty:
                 break
         return out
 
     def wait_event(self, predicate: Callable[[str, dict[str, Any]], bool], *, timeout_s: float) -> Optional[tuple[str, dict[str, Any]]]:
         deadline = time.monotonic() + timeout_s
-        stash: list[tuple[str, dict[str, Any]]] = []
+        stash = []
         try:
             while True:
                 remaining = deadline - time.monotonic()
                 if remaining <= 0:
                     return None
                 try:
-                    item = self.events.get(timeout=remaining)
+                    original = self.events.get(timeout=remaining)
                 except queue.Empty:
                     return None
+                item = self._event_value(original)
+                if item is None:
+                    continue
                 if predicate(*item):
                     return item
-                stash.append(item)
+                stash.append(original)
         finally:
             for s in stash:
                 self.events.put(s)

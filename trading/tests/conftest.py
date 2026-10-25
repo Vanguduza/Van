@@ -22,6 +22,31 @@ from vati.risk import (
 
 NOW = 1_800_000_000
 
+
+@pytest.fixture(autouse=True)
+def _reap_ctrader_fixture_sockets(monkeypatch):
+    """Close every native peer created by this test, including imported helpers."""
+    import threading
+    from test_ctrader import FakeCtrader
+
+    original = FakeCtrader.__init__
+    owned = []
+    def initialize(peer, *args, **kwargs):
+        original(peer, *args, **kwargs)
+        owned.append(peer)
+    monkeypatch.setattr(FakeCtrader, "__init__", initialize)
+    yield
+    sockets = [peer.a for peer in owned]
+    # Reader threads carry their exact owned socket, including connections
+    # constructed by funding readers through a connector closure.
+    readers = [thread for thread in threading.enumerate()
+               if any(arg is sock for arg in getattr(thread, "_args", ()) for sock in sockets)]
+    for peer in owned:
+        peer.close()
+    for reader in readers:
+        reader.join(3)
+        assert not reader.is_alive(), "owned cTrader transport reader did not terminate"
+
 #: P0-TRADE-001. Every suite used to hand the mandate the literal string
 #: "sig:owner-device:abc123" and it was admitted. A mandate is now admitted only against a
 #: registered owner key, so the fixtures hold one and sign for real — the tests exercise

@@ -1,6 +1,6 @@
 {
   "schema": "van.rebuild.candidate-source-progress/1",
-  "updated_at_utc": "2026-10-25T17:45:21.734078+00:00",
+  "updated_at_utc": "2026-10-25T18:23:48.719827+00:00",
   "programme": "Rev1.18; original 131 unit IDs and dependencies retained",
   "authority": "auth-20261022-owner-autonomous-candidate-build",
   "meaning": "Candidate source progress is separate from admitted unit acceptance. Independent certificates, owner decisions, live effects and release gates remain unissued. No unit is declared complete by this record.",
@@ -485,6 +485,10 @@
         {
           "description": "Native cTrader read scope, exact typed OHLC/window/receipt validation, explicit optional-delta defaults, tick volume/unknown spread and atomic native contract discovery with failed-refresh fencing.173native/account/funding integrations pass; broad local corrected run interrupted after2836passes and is partial. Native producer/persistence/entitlement/calendar/quote/depth/monitor wiring and complete unit acceptance remain open.",
           "evidence": "backend/BE-008_NATIVE_CTRADER_MARKET_READS.md; receipts/NATIVE_CTRADER_MARKET_READS_SOURCE_20261025.json"
+        },
+        {
+          "description": "Native socket lifetime retirement, owned-reader shutdown/join, pending-call wakeup and replacement isolation; scoped authentication/contract/quote caches.810extended PostgreSQL/account/funding/execution cases pass0skip;9supplemental guards caught after a passing20case control. Failure attempts retained. No order replay, no native/provider/unit acceptance. Persistence/producer/entitlement/calendar/depth/monitor work remains.",
+          "evidence": "backend/BE-008_NATIVE_CTRADER_CONNECTION_LIFETIME.md; receipts/CTRADER_CONNECTION_LIFETIME_SOURCE_20261025.json"
         }
       ]
     },

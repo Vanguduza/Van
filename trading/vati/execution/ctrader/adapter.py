@@ -61,23 +61,52 @@ class CtraderAdapter:
     fill_timeout_s: float = 10.0
     symbols: dict[str, SymbolInfo] = field(default_factory=dict)
     _authed: bool = False
+    _auth_connection: int | None = None
     _symbol_snapshot_valid: bool = True
+    _symbol_connection: int | None = None
     _money_digits: int = 2
     _currency: str = "USD"
     _last_spot: dict[int, tuple[Decimal, Decimal]] = field(default_factory=dict)
 
     # ------------------------------------------------------------ auth
+    def _auth_is_current(self) -> bool:
+        return (self._authed and self.transport.connected
+                and self._auth_connection == getattr(self.transport, "connection_id", None))
+
+    def _authenticate(self) -> None:
+        """Authenticate one connection without requiring market metadata reads."""
+        if self._auth_is_current():
+            return
+        from vati.execution.ctrader.feed import native_integer
+        self._authed = False
+        self._auth_connection = None
+        self._symbol_snapshot_valid = False
+        self._last_spot.clear()
+        try:
+            account = native_integer(self.ctid_trader_account_id, minimum=1)
+            self.transport.connect()
+            connection = getattr(self.transport, "connection_id", None)
+            kind, body = self.transport.call("ProtoOAApplicationAuthReq", {"clientId": self.client_id, "clientSecret": self.client_secret_provider()})
+            if (kind != "ProtoOAApplicationAuthRes" or not isinstance(body, dict)
+                    or not self.transport.connected or getattr(self.transport, "connection_id", None) != connection):
+                raise ValueError("application authentication response mismatch")
+            kind, body = self.transport.call("ProtoOAAccountAuthReq", {"ctidTraderAccountId": account, "accessToken": self.access_token_provider()})
+            if (kind != "ProtoOAAccountAuthRes" or not isinstance(body, dict)
+                    or native_integer(body["ctidTraderAccountId"], minimum=1) != account
+                    or not self.transport.connected or getattr(self.transport, "connection_id", None) != connection):
+                raise ValueError("account authentication response mismatch")
+        except (KeyError, TypeError, ValueError) as exc:
+            raise VenueUnavailable("cTrader native authentication response or connection scope unavailable") from exc
+        self._auth_connection = connection
+        self._authed = True
+
     def _ensure_auth(self) -> None:
-        if self._authed and self.transport.connected:
+        if self._auth_is_current():
             if not self._symbol_snapshot_valid:
                 self._load_symbols()
             return
-        self.transport.connect()
-        self.transport.call("ProtoOAApplicationAuthReq", {"clientId": self.client_id, "clientSecret": self.client_secret_provider()})
-        self.transport.call("ProtoOAAccountAuthReq", {"ctidTraderAccountId": self.ctid_trader_account_id, "accessToken": self.access_token_provider()})
-        self._authed = True
-        if not self.symbols:
-            self._load_symbols()
+        self._authenticate()
+        self._load_symbols()
 
     def _load_symbols(self) -> None:
         from vati.core.canonical import canonical_hash
@@ -87,6 +116,7 @@ class CtraderAdapter:
         # for diagnosis but fences their use until a successful native refresh.
         self._symbol_snapshot_valid = False
         try:
+            connection = getattr(self.transport, "connection_id", None)
             account = native_integer(self.ctid_trader_account_id,minimum=1)
             kind, response = self.transport.call("ProtoOASymbolsListReq", {"ctidTraderAccountId": account})
             if (kind != "ProtoOASymbolsListRes" or not isinstance(response,dict)
@@ -135,13 +165,17 @@ class CtraderAdapter:
                         "transport_host":getattr(self.transport,"host",None),"light":original,"detail":row})
                     current[alias]=SymbolInfo(identity,name,digits,lot,minimum,step,maximum,revision)
                 if seen!=set(requested):raise ValueError("native symbol details incomplete")
+            if getattr(self.transport, "connection_id", None) != connection:
+                raise ValueError("native symbol connection changed during refresh")
             self.symbols=current
+            self._symbol_connection=connection
             self._symbol_snapshot_valid=True
         except (KeyError,TypeError,ValueError,ArithmeticError) as exc:
             raise VenueUnavailable("cTrader native symbol registry unavailable; refresh required") from exc
 
     def symbol(self, name: str) -> SymbolInfo:
-        if not self._symbol_snapshot_valid:
+        if (not self._symbol_snapshot_valid
+                or self._symbol_connection != getattr(self.transport,"connection_id",None)):
             raise VenueUnavailable("cTrader native symbol registry unavailable; refresh required")
         try:
             return self.symbols[name.replace("/", "").upper()]
@@ -157,17 +191,9 @@ class CtraderAdapter:
         adapter=CtraderAdapter(transport,self.client_id,self.client_secret_provider,self.access_token_provider,
             self.ctid_trader_account_id,self.account_alias,self.venue,clock=self.clock)
         class CashReader:
-            def _authenticate(self):
-                if not adapter._authed or not transport.connected:
-                    transport.connect()
-                    transport.call('ProtoOAApplicationAuthReq',{'clientId':adapter.client_id,'clientSecret':adapter.client_secret_provider()})
-                    transport.call('ProtoOAAccountAuthReq',{'ctidTraderAccountId':adapter.ctid_trader_account_id,'accessToken':adapter.access_token_provider()})
-                    adapter._authed=True
             def cash_movements(self,**window):
-                self._authenticate()
                 return adapter.cash_movements(**window)
             def deal_history(self,**window):
-                self._authenticate()
                 return adapter.deal_history(**window)
             def close(self):transport.close()
         return CashReader()
@@ -263,7 +289,7 @@ class CtraderAdapter:
             if from_ms>to_ms or to_ms-from_ms>604800000 or to_ms>observed:raise ValueError()
         except (TypeError,ValueError):
             raise VenueUnavailable('cTrader cash history requires an exact closed past window of at most one week') from None
-        self._ensure_auth()
+        self._authenticate()
         try:
             original=self._native_trader_identity();currency=self._currency
             if 'registrationTimestamp' in original and from_ms<native_int(original['registrationTimestamp'],minimum=0):raise ValueError()

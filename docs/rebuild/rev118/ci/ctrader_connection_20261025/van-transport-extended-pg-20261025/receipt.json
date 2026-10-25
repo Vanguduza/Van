@@ -1,0 +1,22 @@
+{
+  "base_head": "ac60c4d3ba57ff488a39fa1962920ce4711c0ffc",
+  "source_state": "UNCOMMITTED_NATIVE_TRANSPORT_CANDIDATE",
+  "container": "van-transport-extended-pg-20261025",
+  "image": "postgres:17.11-bookworm@sha256:858bb5e98eed02eb8cafbcdc007f9a65d1b613972028944a8ec2133ccaf80d27",
+  "completed": true,
+  "cleaned": true,
+  "source_sha256": {
+    "trading/vati/execution/ctrader/transport.py": "94762a4b4db11f74d7f7e6ee33ec5378ff97fc868a3df825ea46abc5dbb4ae53",
+    "trading/vati/execution/ctrader/adapter.py": "fdbde5bcdcbcbe2d47e3be9a11db8f45425540f33b4273c6f156706e7db5ce28",
+    "trading/vati/funding/deals.py": "6d036085410710fa88583cbecf6a30487c79ba270f28d5ca8340b23fe1034f19",
+    "trading/tests/conftest.py": "7aac5662097f07f77f200dc4a13781f8db0c020298c6ff3760a5a99fe718f535",
+    "trading/tests/test_ctrader.py": "edfe74722a1e0c23e2d8c060e660e57960454e302514ee1b4c9bd48e5eeb74d8",
+    "trading/tests/test_provider_entry_deadline.py": "7617b3e811e391df027ee52d06c90f530ee79e44216219b14dc6321339080f1a",
+    "trading/tests/test_ctrader_transport_lifecycle.py": "ad3c726d7876d26464b7f85b98f0d9f13aaa7b598d15ea0fc317bbf6ba0722a1",
+    "trading/tests/test_ctrader_connection_auth.py": "ff646f8e5a01e71df661127ffccd369cf2ec653706056dff3ca48c70f1fafa1f"
+  },
+  "container_id": "0163b992f87b2296ac009540d8a3d710c350ad9d866b9ed6a83850f56743a07a",
+  "canonical_fixture_schema_initialized": true,
+  "exit": 0,
+  "adopted_children_reaped": []
+}

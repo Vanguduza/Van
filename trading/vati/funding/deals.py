@@ -131,7 +131,7 @@ def collect_native_deals(adapter,*,from_ms,to_ms):
         environment={DEMO_HOST:'DEMO',LIVE_HOST:'LIVE'}.get(getattr(adapter.transport,'host',None))
         if environment is None or from_ms>to_ms or to_ms>started or to_ms-from_ms>604800000:raise ValueError()
     except (TypeError,ValueError):raise VenueUnavailable('cTrader deals require an exact closed past window of at most one week') from None
-    adapter._ensure_auth()
+    adapter._authenticate()
     try:
         original=adapter._native_trader_identity();currency=adapter._currency
         if 'registrationTimestamp' in original and from_ms<native_int(original['registrationTimestamp'],minimum=0):raise ValueError()

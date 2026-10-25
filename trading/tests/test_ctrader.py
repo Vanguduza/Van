@@ -50,7 +50,18 @@ class FakeCtrader:
         self.positions: dict[int, dict] = {}
         self.next_pos = 100
         self.reject_next_order = False
-        threading.Thread(target=self.serve, daemon=True).start()
+        self.worker = threading.Thread(target=self.serve, daemon=True)
+        self.worker.start()
+
+    def close(self):
+        for sock in (self.a, self.b):
+            try:
+                sock.shutdown(socket.SHUT_RDWR)
+            except OSError:
+                pass
+            sock.close()
+        self.worker.join(3)
+        assert not self.worker.is_alive(), "owned fake cTrader peer did not terminate"
 
     def connector(self, host, port):
         self.host = host; return self.a

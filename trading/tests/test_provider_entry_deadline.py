@@ -32,7 +32,7 @@ def ctrader(*,late_lock=False,late_reply=False,lost=False):
     clock={'ms':1000};t=CtraderTransport();w=Wire(t,clock,late_reply,lost)
     t._sock=w;t._alive=True;t._last_hb=time.monotonic()
     if late_lock:t._lock=DelayLock(clock)
-    a=adapter(t);a.clock=lambda:clock['ms']
+    a=adapter(t);a._auth_connection=t.connection_id;a._symbol_connection=t.connection_id;a.clock=lambda:clock['ms']
     c=replace(cmd(),expires_at_ms=2000,command_hash='').sealed()
     return a,c,w,clock
 
