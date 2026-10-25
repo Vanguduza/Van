@@ -47263,9 +47263,9 @@
               },
               {
                 "file": "backend/van_gateway/authority/descriptor.py",
-                "line": 143,
+                "line": 144,
                 "ref": "WORKSPACE_PATCH",
-                "sha256": "6d0f61013c7facdeb439e854c7c9b033f714bd248b78d627259d969c7305adaa",
+                "sha256": "7f0b65ef97f2cf307e8278357ab11e1faf304b328f810de984c5ef4ad90a7e52",
                 "review_scope": "Reviewed current production entry."
               }
             ],
@@ -62121,9 +62121,9 @@
               },
               {
                 "file": "backend/van_gateway/authority/descriptor.py",
-                "line": 143,
+                "line": 144,
                 "ref": "WORKSPACE_PATCH",
-                "sha256": "6d0f61013c7facdeb439e854c7c9b033f714bd248b78d627259d969c7305adaa",
+                "sha256": "7f0b65ef97f2cf307e8278357ab11e1faf304b328f810de984c5ef4ad90a7e52",
                 "review_scope": "Reviewed current production entry."
               }
             ],
@@ -74619,9 +74619,9 @@
               },
               {
                 "file": "backend/van_gateway/authority/descriptor.py",
-                "line": 143,
+                "line": 144,
                 "ref": "WORKSPACE_PATCH",
-                "sha256": "6d0f61013c7facdeb439e854c7c9b033f714bd248b78d627259d969c7305adaa",
+                "sha256": "7f0b65ef97f2cf307e8278357ab11e1faf304b328f810de984c5ef4ad90a7e52",
                 "review_scope": "Reviewed current production entry."
               }
             ],
@@ -75711,7 +75711,7 @@
     "android_receipt": null,
     "android_receipt_sha256": null,
     "scope": "Bounded current source-citation/endpoint refresh; previous reviews retained. Whole-product, Android, deployment/provider and handset qualifications remain separate.",
-    "source_review_manifest_sha256": "83ce7c03cadc0fef521ad45c66bce0c0c5ea0436e8c841afe817981fc90084e1"
+    "source_review_manifest_sha256": "b4d7ca9187f8805ed0be1dc537694f0a370d1ad7f434fc7b866b2bdcc79d06b7"
   },
   "repaired_mutations": [
     {

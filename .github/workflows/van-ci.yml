@@ -381,6 +381,7 @@ jobs:
             backend/tests/test_saved_screen_rules.py \
             backend/tests/test_watchlist_market_projection.py \
             backend/tests/test_learning_recovery.py \
+            backend/tests/test_authority_descriptor.py \
             backend/tests/test_reminder_delivery_gateway.py \
             tests/contracts/test_van_private_core_topology.py \
             tests/rebuild/test_owner_registry_refresh.py \

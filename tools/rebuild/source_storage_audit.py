@@ -7,7 +7,6 @@ frozen product checkout; the instrument itself may be pinned independently.
 from __future__ import annotations
 
 import argparse
-import atexit
 import hashlib
 import json
 import os
@@ -30,18 +29,22 @@ class StorageAudit:
             return
         paths = ()
         if event == "sqlite3.connect":
-            paths = (args[0],)
+            paths = ((args[0], None),)
         elif event == "open":
             _, mode, flags = args
             writable = (isinstance(mode, str) and any(c in mode for c in "wax+")) or (
                 isinstance(flags, int) and flags & (os.O_WRONLY | os.O_RDWR | os.O_CREAT | os.O_TRUNC | os.O_APPEND))
             if writable:
-                paths = (args[0],)
-        elif event in {"os.mkdir", "os.remove", "os.rmdir"}:
-            paths = (args[0],)
-        elif event in {"os.rename", "os.link", "os.symlink"}:
-            paths = args[:2]
-        for raw in paths:
+                paths = ((args[0], None),)
+        elif event == "os.mkdir":
+            paths = ((args[0], args[2]),)
+        elif event in {"os.remove", "os.rmdir"}:
+            paths = ((args[0], args[1]),)
+        elif event in {"os.rename", "os.link"}:
+            paths = ((args[0], args[2]), (args[1], args[3]))
+        elif event == "os.symlink":
+            paths = ((args[0], args[2]), (args[1], args[2]))
+        for raw, directory_fd in paths:
             if isinstance(raw, int):
                 continue  # An existing fd has no path identity in this audit event.
             name = os.fsdecode(raw)
@@ -49,6 +52,15 @@ class StorageAudit:
                 continue
             if event=="sqlite3.connect" and name.startswith("file:"):
                 name=unquote(urlsplit(name).path)
+            if not os.path.isabs(name) and directory_fd not in (None, -1, -100):
+                try:
+                    # Native *at operations resolve relative to this directory,
+                    # including pytest's fd-based cleanup outside the checkout.
+                    parent = os.readlink(f"/proc/self/fd/{directory_fd}")
+                except OSError as exc:
+                    self.violations.append({"event": event, "path": "UNRESOLVED_DIRECTORY_FD"})
+                    raise AssertionError("source test directory-fd storage identity unavailable") from exc
+                name = os.path.join(parent, name)
             logical=Path(os.path.abspath(name))
             path=logical.resolve()
             if (any(logical==base or logical.is_relative_to(base) for base in self.forbidden)
@@ -117,16 +129,20 @@ def main():
     audit = StorageAudit(Path.cwd())
     report_path = args.report.resolve()
     sys.addaudithook(audit)
-    @atexit.register
+    tool_sha256 = hashlib.sha256(Path(__file__).read_bytes()).hexdigest()
     def report():
         report_path.write_text(json.dumps({
             "schema": "van.source-storage-audit/1", "forbidden_events": audit.violations,
-            "source_sha256": hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
+            "source_sha256": tool_sha256,
             "root": str(audit.root), "scope": "SQLite opens, path-based writable opens and directory/link/rename/delete events under data and backend/data",
-            "limits": "Python audit events only; existing fd writes, native-library raw I/O and external processes are not an OS sandbox. Git state is checked separately.",
+            "limits": "Python audit events only; directory-fd-relative open events lack their directory handle; existing fd writes, native-library raw I/O and external processes are not an OS sandbox. Git state is checked separately.",
         }, indent=2) + "\n")
-    import pytest
-    return pytest.main(pytest_args or ["backend/tests", "tests/contracts", "-q"])
+    try:
+        import pytest
+        return pytest.main(pytest_args or ["backend/tests", "tests/contracts", "-q"])
+    finally:
+        # Persist the actual instrument result before interpreter globals clear.
+        report()
 
 
 if __name__ == "__main__":

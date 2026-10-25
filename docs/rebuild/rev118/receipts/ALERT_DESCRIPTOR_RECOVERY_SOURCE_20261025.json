@@ -1,0 +1,28 @@
+{
+  "schema": "van.rebuild.alert-descriptor-recovery/1",
+  "status": "SOURCE_TESTED_COMPONENT_NOT_UNIT_ACCEPTANCE",
+  "base_head": "4ef8fcf2e8dc6ccb4592c69a91a49b51676f5733",
+  "source_sha256": {
+    "backend/van_gateway/authority/descriptor.py": "7f0b65ef97f2cf307e8278357ab11e1faf304b328f810de984c5ef4ad90a7e52",
+    "backend/van_gateway/verification/production.py": "2dd6d1156b117fd5c19907ea1a9a33484b444ba39cd84f21748e1bc570e34f79",
+    "backend/tests/test_market_monitor_commands.py": "0c92c04e39d9a1a25c9973a2a8c38cd93ad5a920e34a3fe312e8c802efe0d8d4"
+  },
+  "published_failure": {
+    "run_id": 40212892336,
+    "gateway": "5771pass/1descriptor failure/7declared skips",
+    "mutation_corpus": "PARTIAL_FAILED335caught/39unexecuted; Python3caught18before C16 baseline failure"
+  },
+  "local_before": "1failed/25passed original descriptor suite",
+  "repair": "Pause is reversible through explicit restart; restart creates a new arm whose notification cannot be recalled; delete erases content. A2 signed-device gates remain unchanged. Independent historical control verifier appears in the canonical inventory.",
+  "local_after": "73descriptor/command checks pass; final258integrated cases pass0skip under repaired storage auditor",
+  "c16_original_mutations": {
+    "caught": 12,
+    "survivors": 0,
+    "control": "PASS",
+    "source_restored": true,
+    "scope": "Current source subset; does not turn older failed335-case corpus into a complete current374-case PASS."
+  },
+  "ci_change": "Add original authority-descriptor suite to additive market job; preserve every previous gate and byte-identical installer template.",
+  "evidence": "ci/market_commands_20261025/descriptor_recovery",
+  "unit_acceptance": "NOT_ISSUED"
+}

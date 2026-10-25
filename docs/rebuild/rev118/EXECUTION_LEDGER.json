@@ -169,7 +169,7 @@
     },
     {
       "id": "BLK-006",
-      "what": "Exact53b02636/run40167358216 completed: public gateway5725pass3fail7declaredskip;198media pass. Three reproducible integration failures are addressed by separately tested reconstructed candidate, not yet hosted. DDS private CI read key and trusted-main checker bootstrap still fail.",
+      "what": "Published4ef8fcf2/run40212892336 is terminalFAILED: gateway descriptor omission reproduced and repaired locally; original mutation335caught39unexecuted. DDS private CI read-key and trusted-main checker bootstrap still fail and are not waived. Current new-source hosted execution pending.",
       "blocks": "Complete CI and trusted-base admission",
       "needed_from": "DDS-only CI credential provisioning and documented trusted-base bootstrap/intake"
     },
@@ -196,7 +196,7 @@
     "note": "Opus unavailable; owner transferred build to Codex. No independent reviewer identity is inferred from another model or session."
   },
   "checkpoint": {
-    "updated_utc": "2026-10-25T16:35:49.259639+00:00",
+    "updated_utc": "2026-10-25T17:45:21.734078+00:00",
     "branch": "ccr-9e07e1af-8mgz1p",
     "base": "b02075f327ea8180ab6d269eba358cf8c5479878",
     "background_jobs": [],
@@ -378,7 +378,8 @@
       "Schema59 saved-screen candidate:63monitor casesPASS0skip, including actual SQL migration failure/rollback/lost-marker replay, original CRUD receipts, run quotas/exact revision/hash/concurrent edits and paired HTTP. Registry478endpoints/366schemas with original42groups/105functions/78surfaces retained. Hostedc535all374mutants caught,PG26/publicgateway5841+7declaredskip/trading3061+1privateDDSskip/voice117/browser1547+1separateUIDpass/firewall10/JVM1369/emulator18+4declaredskip; exacttree-identicalmergeb2a9. Predates monitors58/59; onlyDDSkey/trusted-main CI prerequisites fail,neithergatewaived.",
       "Watchlist row source:19currentpurePASS; unchangedSQL2+pairedHTTP1pass in separate run, latest3same-resource native-thread failures retained.479endpoints/369schemas,42groups/105functions/78surfaces retained. No fakequote/spread/live qualification, BE020IN_PROGRESS, allacceptanceNOT_ISSUED.",
       "Replacement-worker reconstruction:44final alert command cases pass0skip;220prior integrated pass0skip;6deliberate fault/control pairs caught and source restored;99rebuild pass;53compatibility pass1DDS skip followed by7/7actual pinned-DDS controls. Actual final integrated rerun still pending; see receipts/OWNER_ALERT_COMMANDS_SOURCE_20261025.json. Original55-file ZIP not retrieved, no exact restoration claimed. Hostedc7actual5694pass4fail7skip;53bactual5725pass3fail7skip retained, with198media passes each. c7all374unique mutations verified from nine original artifact reports; predates newcommands.",
-      "Final reconstructed candidate:229integrated cases PASS with0failures/errors/skips;zero forbidden storage writes.44command cases included. Current code frozen for publication; six fault/control pairs caught/restored;99rebuild and7pinned-DDS checks pass. No hosted/current independent/native/unit qualification claimed."
+      "Final reconstructed candidate:229integrated cases PASS with0failures/errors/skips;zero forbidden storage writes.44command cases included. Current code frozen for publication; six fault/control pairs caught/restored;99rebuild and7pinned-DDS checks pass. No hosted/current independent/native/unit qualification claimed.",
+      "Published4ef8fcf2/40212892336: market229PASS, gateway5771pass1descriptorFAIL7skip/media198PASS, trading3061PASS1privateDDSskip,PG26/voice117PASS, Android/browserPASS; mutation335caught39unexecutedPARTIAL_FAILED. All failed results retained. Current descriptor repair73focus/258integratedPASS;12originalC16faults caught/restored. Native cTrader173focusPASS, pinnedDDSresolver2PASS; full local corrected trading interrupted2836passes after24m26s, no fullPASS. Repaired audit10PASS/original14probes,108rebuildPASS; zero final forbidden events. Exact new hosted qualification pending publication."
     ],
     "environment_notes": [
       "clone must be unshallowed (git fetch --unshallow) and PR heads fetched (+refs/pull/*/head:refs/remotes/origin/pr/*) before pre001.py",
@@ -459,6 +460,6 @@
       "evidence": "ci/MUTATION_CORPUS_c2a27848.json"
     }
   ],
-  "current_action": "Finish reconstructed owner-alert packet exact-source integrated checks, real canonical CLI/registry/manifest and hook commit; verify committed ledger against4fd466de and push normally. Inspect current exact hosted CI while continuing next BE-008 native instrument/feed identity and source-health source packet. Preserve all backend/forecast/crypto/economics obligations; no frontend redesign before BG-001.",
-  "updated_at_utc": "2026-10-25T16:35:49.259639+00:00"
+  "current_action": "Finish current canonical contract/manifest checks and real-hook commit, verify committed ledger against4fd466de, normal push and exact hosted qualification. Continue BE-008 native scoped durable market producer/persistence and BE-014 source health/entitlements, then all remaining backend/forecast/crypto/economics/assistant obligations. Keep historical failures, native admission, independent acceptance, production/signing/S24 gates distinct. No frontend redesign before BG-001.",
+  "updated_at_utc": "2026-10-25T17:45:21.734078+00:00"
 }

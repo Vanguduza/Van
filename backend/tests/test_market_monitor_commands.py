@@ -23,6 +23,19 @@ from van_gateway.verification.production import build_mission_registry
 ALERT = 'mal_'+'a'*32
 
 
+@pytest.mark.parametrize('operation,reversibility', [
+    ('pause','REVERSIBLE'), ('restart','IRREVERSIBLE'), ('delete','IRREVERSIBLE')])
+def test_catalogue_describes_actual_control_reversibility_and_independent_strategy(operation,reversibility):
+    from van_gateway.action.registry import BUILTIN_ACTIONS
+    from van_gateway.authority.descriptor import describe_action,canonical_verification
+    from van_gateway.verification.production import WIRED_MISSION_STRATEGIES
+    definition=next(d for d in BUILTIN_ACTIONS if d.action_id=='trading.alert.'+operation)
+    assert describe_action(definition).reversibility.value==reversibility
+    assert definition.action_class is ActionClass.A2
+    assert canonical_verification('market-alert-control-readback')=='market-alert-control-readback'
+    assert 'market-alert-control-readback' in WIRED_MISSION_STRATEGIES
+
+
 def owner_command(app, *, device_id, text, idempotency_key):
     now = int(time.time())
     return _signed_command(app, device_id=device_id, text=text, idempotency_key=idempotency_key,

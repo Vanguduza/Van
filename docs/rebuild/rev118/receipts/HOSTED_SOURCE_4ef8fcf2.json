@@ -1,0 +1,164 @@
+{
+  "schema": "van.rebuild.hosted-source/1",
+  "source_head": "4ef8fcf2e8dc6ccb4592c69a91a49b51676f5733",
+  "tested_merge": "9e23331bf71a0daa226eef7bedacd1301a436758",
+  "tested_tree": "20c5e7ab32e5e8799b40ca2e350829a06ddf585e",
+  "head_and_tested_merge_tree_equality_verified": true,
+  "run_id": 40212892336,
+  "conclusion": "failure",
+  "jobs": [
+    {
+      "conclusion": "success",
+      "id": 121227745260,
+      "name": "market-monitor-source",
+      "status": "completed"
+    },
+    {
+      "conclusion": "success",
+      "id": 121227745342,
+      "name": "rebuild-documentary",
+      "status": "completed"
+    },
+    {
+      "conclusion": "success",
+      "id": 121227745347,
+      "name": "mutation (python-0, python, 0/4)",
+      "status": "completed"
+    },
+    {
+      "conclusion": "success",
+      "id": 121227745377,
+      "name": "postgres-ledger",
+      "status": "completed"
+    },
+    {
+      "conclusion": "failure",
+      "id": 121227745390,
+      "name": "project-truth-ledger",
+      "status": "completed"
+    },
+    {
+      "conclusion": "success",
+      "id": 121227745428,
+      "name": "browser-guard-source",
+      "status": "completed"
+    },
+    {
+      "conclusion": "success",
+      "id": 121227745433,
+      "name": "android-instrumentation",
+      "status": "completed"
+    },
+    {
+      "conclusion": "failure",
+      "id": 121227745438,
+      "name": "backend-public-source",
+      "status": "completed"
+    },
+    {
+      "conclusion": "success",
+      "id": 121227745470,
+      "name": "mutation (kotlin-3, kotlin, 3/4)",
+      "status": "completed"
+    },
+    {
+      "conclusion": "success",
+      "id": 121227745489,
+      "name": "mutation (kotlin-2, kotlin, 2/4)",
+      "status": "completed"
+    },
+    {
+      "conclusion": "failure",
+      "id": 121227745500,
+      "name": "backend",
+      "status": "completed"
+    },
+    {
+      "conclusion": "success",
+      "id": 121227745518,
+      "name": "mutation (browser-agent, browser-agent, 0/1)",
+      "status": "completed"
+    },
+    {
+      "conclusion": "success",
+      "id": 121227745536,
+      "name": "mutation (python-2, python, 2/4)",
+      "status": "completed"
+    },
+    {
+      "conclusion": "failure",
+      "id": 121227745537,
+      "name": "mutation (python-3, python, 3/4)",
+      "status": "completed"
+    },
+    {
+      "conclusion": "success",
+      "id": 121227745549,
+      "name": "android-and-visual-evidence",
+      "status": "completed"
+    },
+    {
+      "conclusion": "success",
+      "id": 121227745572,
+      "name": "mutation (kotlin-1, kotlin, 1/4)",
+      "status": "completed"
+    },
+    {
+      "conclusion": "success",
+      "id": 121227745616,
+      "name": "mutation (kotlin-0, kotlin, 0/4)",
+      "status": "completed"
+    },
+    {
+      "conclusion": "success",
+      "id": 121227745633,
+      "name": "mutation (python-1, python, 1/4)",
+      "status": "completed"
+    },
+    {
+      "conclusion": "success",
+      "id": 121230649495,
+      "name": "character-forge-gate",
+      "status": "completed"
+    }
+  ],
+  "reports": {
+    "hosted-backend-4ef8fcf2/media-report.xml": {
+      "tests": 198,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "hosted-backend-4ef8fcf2/gateway-report.xml": {
+      "tests": 5779,
+      "failures": 1,
+      "errors": 0,
+      "skipped": 7
+    },
+    "hosted-trading-4ef8fcf2/trading-source-report.xml": {
+      "tests": 3062,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 1
+    },
+    "hosted-trading-4ef8fcf2/voice-source-report.xml": {
+      "tests": 117,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "hosted-trading-4ef8fcf2/postgres-ledger-report.xml": {
+      "tests": 26,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "hosted-4ef8fcf2/report.xml": {
+      "tests": 229,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    }
+  },
+  "scope": "Historical published alert source, before the descriptor repair and native feed packet. Full gateway5771pass/1descriptor failure/7declared skips, media198pass; market229pass; trading3061pass/1private-DDS skip; PG26pass; voice117pass. Mutation corpus PARTIAL_FAILED335caught/39unexecuted. Native/provider/production/S24/unit acceptance not issued."
+}

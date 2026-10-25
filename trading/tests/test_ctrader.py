@@ -170,7 +170,9 @@ def test_adapter_authenticates_reads_and_trades_with_stop_in_the_same_request():
     # spots + trendbars
     ad.subscribe_spots("EURUSD"); time.sleep(0.05)
     assert ad.spot("EURUSD") == (D("1.101"), D("1.10108"))
-    bars = trendbars(ad, "EURUSD", "H1", from_ms=0, to_ms=10)
+    # The fixture returns three 2023 bars: request that actual closed window.
+    ad.clock = lambda: (28_333_333+3*60)*60_000
+    bars = trendbars(ad, "EURUSD", "H1", from_ms=28_333_333*60_000, to_ms=(28_333_333+3*60)*60_000)
     assert len(bars) == 3 and bars[0].low == D("1.1") and bars[0].open == D("1.10005") and bars[0].close == D("1.10012") and bars[0].high == D("1.1002") and bars[1].start_ms - bars[0].start_ms == 3_600_000
     time.sleep(0.12); ad.heartbeat(now_ms=2)
     assert any(n == "ProtoHeartbeatEvent" for n, _ in fake.requests)

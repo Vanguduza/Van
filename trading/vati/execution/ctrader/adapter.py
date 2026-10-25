@@ -31,6 +31,7 @@ class SymbolInfo:
     min_volume: int
     step_volume: int
     max_volume: int
+    contract_revision: str | None = None
 
     def lots_to_volume(self, lots: Decimal) -> int:
         vol = int((lots * Decimal(self.lot_size_cents)).to_integral_value(rounding=ROUND_DOWN))
@@ -60,6 +61,7 @@ class CtraderAdapter:
     fill_timeout_s: float = 10.0
     symbols: dict[str, SymbolInfo] = field(default_factory=dict)
     _authed: bool = False
+    _symbol_snapshot_valid: bool = True
     _money_digits: int = 2
     _currency: str = "USD"
     _last_spot: dict[int, tuple[Decimal, Decimal]] = field(default_factory=dict)
@@ -67,6 +69,8 @@ class CtraderAdapter:
     # ------------------------------------------------------------ auth
     def _ensure_auth(self) -> None:
         if self._authed and self.transport.connected:
+            if not self._symbol_snapshot_valid:
+                self._load_symbols()
             return
         self.transport.connect()
         self.transport.call("ProtoOAApplicationAuthReq", {"clientId": self.client_id, "clientSecret": self.client_secret_provider()})
@@ -76,16 +80,69 @@ class CtraderAdapter:
             self._load_symbols()
 
     def _load_symbols(self) -> None:
-        _, lst = self.transport.call("ProtoOASymbolsListReq", {"ctidTraderAccountId": self.ctid_trader_account_id})
-        light = {s["symbolId"]: s for s in lst.get("symbol", []) if s.get("enabled", True)}
-        ids = list(light)
-        for i in range(0, len(ids), 50):
-            _, full = self.transport.call("ProtoOASymbolByIdReq", {"ctidTraderAccountId": self.ctid_trader_account_id, "symbolId": ids[i:i + 50]})
-            for s in full.get("symbol", []):
-                name = light[s["symbolId"]].get("symbolName", str(s["symbolId"]))
-                self.symbols[name.replace("/", "").upper()] = SymbolInfo(s["symbolId"], name, int(s.get("digits", 5)), int(s.get("lotSize", 10_000_000)), int(s.get("minVolume", 1000)), int(s.get("stepVolume", 1000)), int(s.get("maxVolume", 10**12)))
+        from vati.core.canonical import canonical_hash
+        from vati.execution.ctrader.feed import native_integer
+
+        # Publish one complete native registry. A failed refresh retains old bytes
+        # for diagnosis but fences their use until a successful native refresh.
+        self._symbol_snapshot_valid = False
+        try:
+            account = native_integer(self.ctid_trader_account_id,minimum=1)
+            kind, response = self.transport.call("ProtoOASymbolsListReq", {"ctidTraderAccountId": account})
+            if (kind != "ProtoOASymbolsListRes" or not isinstance(response,dict)
+                    or native_integer(response["ctidTraderAccountId"],minimum=1) != account):
+                raise ValueError("native symbol list scope mismatch")
+            rows=response.get("symbol",[])
+            if not isinstance(rows,list): raise ValueError("native symbol list invalid")
+            light, aliases = {}, set()
+            for row in rows:
+                identity=native_integer(row["symbolId"],minimum=1)
+                if identity in light: raise ValueError("duplicate native symbol")
+                # An omitted optional proto2 bool defaults to false; it must
+                # never manufacture permission to use an invisible instrument.
+                if type(row.get("enabled",False)) is not bool: raise ValueError("native visibility invalid")
+                light[identity]=row
+                if not row.get("enabled",False):continue
+                name=row["symbolName"]
+                if (not isinstance(name,str) or not name.strip() or len(name)>256
+                        or any(ord(c)<32 for c in name)):raise ValueError("native symbol name unavailable")
+                alias=name.replace("/","").upper()
+                if not alias or alias in aliases:raise ValueError("native symbol alias collision")
+                aliases.add(alias)
+            enabled={k:v for k,v in light.items() if v.get("enabled",False)}
+            ids=list(enabled); current={}
+            for offset in range(0,len(ids),50):
+                requested=ids[offset:offset+50]
+                kind, response=self.transport.call("ProtoOASymbolByIdReq", {"ctidTraderAccountId":account,"symbolId":requested})
+                if (kind!="ProtoOASymbolByIdRes" or not isinstance(response,dict)
+                        or native_integer(response["ctidTraderAccountId"],minimum=1)!=account):
+                    raise ValueError("native symbol detail scope mismatch")
+                details=response.get("symbol",[])
+                if not isinstance(details,list):raise ValueError("native symbol details unavailable")
+                seen=set()
+                for row in details:
+                    identity=native_integer(row["symbolId"],minimum=1)
+                    if identity not in requested or identity in seen:raise ValueError("native symbol detail identity mismatch")
+                    seen.add(identity)
+                    digits=native_integer(row["digits"],maximum=18)
+                    lot=native_integer(row["lotSize"],minimum=1)
+                    minimum=native_integer(row["minVolume"],minimum=1)
+                    step=native_integer(row["stepVolume"],minimum=1)
+                    maximum=native_integer(row["maxVolume"],minimum=minimum)
+                    if minimum>maximum or step>maximum:raise ValueError("native volume contract incoherent")
+                    original=enabled[identity];name=original["symbolName"];alias=name.replace("/","").upper()
+                    revision=canonical_hash({"schema":"vati.ctrader-symbol/1","native_account_id":account,
+                        "transport_host":getattr(self.transport,"host",None),"light":original,"detail":row})
+                    current[alias]=SymbolInfo(identity,name,digits,lot,minimum,step,maximum,revision)
+                if seen!=set(requested):raise ValueError("native symbol details incomplete")
+            self.symbols=current
+            self._symbol_snapshot_valid=True
+        except (KeyError,TypeError,ValueError,ArithmeticError) as exc:
+            raise VenueUnavailable("cTrader native symbol registry unavailable; refresh required") from exc
 
     def symbol(self, name: str) -> SymbolInfo:
+        if not self._symbol_snapshot_valid:
+            raise VenueUnavailable("cTrader native symbol registry unavailable; refresh required")
         try:
             return self.symbols[name.replace("/", "").upper()]
         except KeyError:

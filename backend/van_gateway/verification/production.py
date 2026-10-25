@@ -458,6 +458,7 @@ def build_mission_registry(
 #: Mission verification strategies a success contract may name today.
 WIRED_MISSION_STRATEGIES = (
     "domain-autonomy-readback",
+    "market-alert-control-readback",
     "ledger-event", "trading-halt", "trading-ticket-confirm", "gmail-sent-readback", "browser-evidence", "api-readback",
     "notebook-source-readback", "owner-fact-readback", "reminder-readback",
 )

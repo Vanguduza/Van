@@ -131,6 +131,7 @@ VERIFICATION_ALIASES: dict[str, str] = {
     # `trading-halt` is the mission registry's name for a halt read back from the VATI
     # ledger, which is the same kind of observation as a fill: the ledger says so.
     "trading-halt": "ledger-event",
+    "market-alert-control-readback": "market-alert-control-readback",
 }
 
 
@@ -173,6 +174,11 @@ ACTION_REVERSIBILITY: dict[str, Reversibility] = {
     # A broker fill confirmation appends immutable ledger evidence, once. There
     # is no undo or replacement; this records an existing fill and places no order.
     "trading.ticket.confirm": Reversibility.IRREVERSIBLE,
+    # Pause can be followed by an explicit restart. Restart creates a new arm;
+    # its notification cannot be recalled. Delete erases rule content permanently.
+    "trading.alert.pause": Reversibility.REVERSIBLE,
+    "trading.alert.restart": Reversibility.IRREVERSIBLE,
+    "trading.alert.delete": Reversibility.IRREVERSIBLE,
     # GAP-F-001 — a remembered fact or decision supersedes rather than destroys (the prior
     # row's `valid_until_ms` closes, it is not deleted) and `OwnerFactAuthor.forget` /
     # `DELETE /v1/context/facts` can end it, so the owner is never stuck with either.

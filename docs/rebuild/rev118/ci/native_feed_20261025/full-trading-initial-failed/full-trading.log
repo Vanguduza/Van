@@ -1,0 +1,2497 @@
+........................................................................ [  2%]
+..................................................EEE................... [  4%]
+........................................................................ [  6%]
+........................................................................ [  9%]
+........................................................................ [ 11%]
+........................................................................ [ 13%]
+........................................................................ [ 16%]
+........................................................................ [ 18%]
+........................................................................ [ 20%]
+........................................................................ [ 23%]
+........................................................................ [ 25%]
+........................................................................ [ 27%]
+........................................................................ [ 30%]
+........................................................................ [ 32%]
+....................................................F................... [ 34%]
+.................................F...................................... [ 37%]
+........................................................................ [ 39%]
+........................................................................ [ 41%]
+...................................F............F....................... [ 44%]
+........................................................................ [ 46%]
+........................................................................ [ 48%]
+........................................................................ [ 50%]
+........................................................................ [ 53%]
+...........F.F.......................................................... [ 55%]
+........................................................................ [ 57%]
+........................................................................ [ 60%]
+........................................................................ [ 62%]
+.....................................F.................................. [ 64%]
+........................................................................ [ 67%]
+........................................................................ [ 69%]
+.................................................F...................... [ 71%]
+........................................................................ [ 74%]
+........................................................................ [ 76%]
+........................................................................ [ 78%]
+........................................................................ [ 81%]
+........................................................................ [ 83%]
+........................................................................ [ 85%]
+......................................................................F. [ 88%]
+................................................FF...................... [ 90%]
+........FFFFFFFFFFFFFFFFFFFFFFFFFFFFFF.................................. [ 92%]
+........................................................................ [ 94%]
+........................................................................ [ 97%]
+........................................................s............... [ 99%]
+............                                                             [100%]
+==================================== ERRORS ====================================
+__ ERROR at setup of test_actual_pg_live_runtime_prevents_destructive_unlink ___
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-26/test_actual_pg_live_runtime_pr0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f5708198ce0>
+
+    @pytest.fixture
+    def pg_native(tmp_path,monkeypatch):
+        dsn=os.environ.get('VATI_TEST_PG_DSN')
+        if not dsn or os.environ.get('VATI_TEST_PG_ISOLATED_FIXTURE')!='1':
+            pytest.skip('actual isolated PostgreSQL fixture must be explicitly bound')
+        namespace='unlink_'+uuid.uuid4().hex;alias='unlink_'+uuid.uuid4().hex[:12]
+>       PostgresLedger(dsn,ledger_name=namespace).close()
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+trading/tests/test_account_retirement_pg.py:27: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+trading/vati/core/ledger_pg.py:78: in __init__
+    cur.execute(SCHEMA)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <psycopg.Cursor [closed] [BAD] at 0x7f57081a4e90>
+query = "\nCREATE TABLE IF NOT EXISTS vati.events (\n  seq BIGSERIAL PRIMARY KEY, ledger TEXT NOT NULL,\n  kind TEXT NOT NULL,...expires_at_ms BIGINT NOT NULL,\n  software_version TEXT NOT NULL DEFAULT '',\n  git_sha TEXT NOT NULL DEFAULT ''\n);\n"
+params = None, prepare = None, binary = None
+
+    def execute(
+        self,
+        query: Query,
+        params: Params | None = None,
+        *,
+        prepare: bool | None = None,
+        binary: bool | None = None,
+    ) -> Self:
+        """
+        Execute a query or command to the database.
+        """
+        try:
+            with self._conn.lock:
+                self._conn.wait(
+                    self._execute_gen(query, params, prepare=prepare, binary=binary)
+                )
+        except e._NO_TRACEBACK as ex:
+>           raise ex.with_traceback(None)
+E           psycopg.errors.InvalidSchemaName: schema "vati" does not exist
+E           LINE 2: CREATE TABLE IF NOT EXISTS vati.events (
+E                                              ^
+
+../../van-backend-venv-20261025/lib/python3.12/site-packages/psycopg/cursor.py:97: InvalidSchemaName
+_ ERROR at setup of test_actual_pg_first_retirement_owns_the_previously_absent_lease_row _
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-26/test_actual_pg_first_retiremen0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f570819b050>
+
+    @pytest.fixture
+    def pg_native(tmp_path,monkeypatch):
+        dsn=os.environ.get('VATI_TEST_PG_DSN')
+        if not dsn or os.environ.get('VATI_TEST_PG_ISOLATED_FIXTURE')!='1':
+            pytest.skip('actual isolated PostgreSQL fixture must be explicitly bound')
+        namespace='unlink_'+uuid.uuid4().hex;alias='unlink_'+uuid.uuid4().hex[:12]
+>       PostgresLedger(dsn,ledger_name=namespace).close()
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+trading/tests/test_account_retirement_pg.py:27: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+trading/vati/core/ledger_pg.py:78: in __init__
+    cur.execute(SCHEMA)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <psycopg.Cursor [closed] [BAD] at 0x7f57081a4dd0>
+query = "\nCREATE TABLE IF NOT EXISTS vati.events (\n  seq BIGSERIAL PRIMARY KEY, ledger TEXT NOT NULL,\n  kind TEXT NOT NULL,...expires_at_ms BIGINT NOT NULL,\n  software_version TEXT NOT NULL DEFAULT '',\n  git_sha TEXT NOT NULL DEFAULT ''\n);\n"
+params = None, prepare = None, binary = None
+
+    def execute(
+        self,
+        query: Query,
+        params: Params | None = None,
+        *,
+        prepare: bool | None = None,
+        binary: bool | None = None,
+    ) -> Self:
+        """
+        Execute a query or command to the database.
+        """
+        try:
+            with self._conn.lock:
+                self._conn.wait(
+                    self._execute_gen(query, params, prepare=prepare, binary=binary)
+                )
+        except e._NO_TRACEBACK as ex:
+>           raise ex.with_traceback(None)
+E           psycopg.errors.InvalidSchemaName: schema "vati" does not exist
+E           LINE 2: CREATE TABLE IF NOT EXISTS vati.events (
+E                                              ^
+
+../../van-backend-venv-20261025/lib/python3.12/site-packages/psycopg/cursor.py:97: InvalidSchemaName
+_ ERROR at setup of test_actual_pg_row_guard_fences_a_competing_actor_even_beyond_lease_ttl _
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-26/test_actual_pg_row_guard_fence0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f5708199d30>
+
+    @pytest.fixture
+    def pg_native(tmp_path,monkeypatch):
+        dsn=os.environ.get('VATI_TEST_PG_DSN')
+        if not dsn or os.environ.get('VATI_TEST_PG_ISOLATED_FIXTURE')!='1':
+            pytest.skip('actual isolated PostgreSQL fixture must be explicitly bound')
+        namespace='unlink_'+uuid.uuid4().hex;alias='unlink_'+uuid.uuid4().hex[:12]
+>       PostgresLedger(dsn,ledger_name=namespace).close()
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+trading/tests/test_account_retirement_pg.py:27: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+trading/vati/core/ledger_pg.py:78: in __init__
+    cur.execute(SCHEMA)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <psycopg.Cursor [closed] [BAD] at 0x7f57081a4b90>
+query = "\nCREATE TABLE IF NOT EXISTS vati.events (\n  seq BIGSERIAL PRIMARY KEY, ledger TEXT NOT NULL,\n  kind TEXT NOT NULL,...expires_at_ms BIGINT NOT NULL,\n  software_version TEXT NOT NULL DEFAULT '',\n  git_sha TEXT NOT NULL DEFAULT ''\n);\n"
+params = None, prepare = None, binary = None
+
+    def execute(
+        self,
+        query: Query,
+        params: Params | None = None,
+        *,
+        prepare: bool | None = None,
+        binary: bool | None = None,
+    ) -> Self:
+        """
+        Execute a query or command to the database.
+        """
+        try:
+            with self._conn.lock:
+                self._conn.wait(
+                    self._execute_gen(query, params, prepare=prepare, binary=binary)
+                )
+        except e._NO_TRACEBACK as ex:
+>           raise ex.with_traceback(None)
+E           psycopg.errors.InvalidSchemaName: schema "vati" does not exist
+E           LINE 2: CREATE TABLE IF NOT EXISTS vati.events (
+E                                              ^
+
+../../van-backend-venv-20261025/lib/python3.12/site-packages/psycopg/cursor.py:97: InvalidSchemaName
+=================================== FAILURES ===================================
+_______ test_postgres_ledger_matches_sqlite_chain_and_detects_tampering ________
+
+    @pytest.mark.skipif(not _pg_available(), reason="local PostgreSQL not reachable")
+    def test_postgres_ledger_matches_sqlite_chain_and_detects_tampering():
+        import psycopg
+        name = f"t{os.getpid()}_{id(object())}"
+>       pg = PostgresLedger(PG_DSN, ledger_name=name)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+trading/tests/test_infra_live.py:58: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+trading/vati/core/ledger_pg.py:78: in __init__
+    cur.execute(SCHEMA)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <psycopg.Cursor [closed] [BAD] at 0x7f57081a56d0>
+query = "\nCREATE TABLE IF NOT EXISTS vati.events (\n  seq BIGSERIAL PRIMARY KEY, ledger TEXT NOT NULL,\n  kind TEXT NOT NULL,...expires_at_ms BIGINT NOT NULL,\n  software_version TEXT NOT NULL DEFAULT '',\n  git_sha TEXT NOT NULL DEFAULT ''\n);\n"
+params = None, prepare = None, binary = None
+
+    def execute(
+        self,
+        query: Query,
+        params: Params | None = None,
+        *,
+        prepare: bool | None = None,
+        binary: bool | None = None,
+    ) -> Self:
+        """
+        Execute a query or command to the database.
+        """
+        try:
+            with self._conn.lock:
+                self._conn.wait(
+                    self._execute_gen(query, params, prepare=prepare, binary=binary)
+                )
+        except e._NO_TRACEBACK as ex:
+>           raise ex.with_traceback(None)
+E           psycopg.errors.InvalidSchemaName: schema "vati" does not exist
+E           LINE 2: CREATE TABLE IF NOT EXISTS vati.events (
+E                                              ^
+
+../../van-backend-venv-20261025/lib/python3.12/site-packages/psycopg/cursor.py:97: InvalidSchemaName
+______ test_postgres_native_learning_scope_uses_the_same_account_boundary ______
+
+    def test_postgres_native_learning_scope_uses_the_same_account_boundary():
+        import os,uuid
+        dsn=os.environ.get('VATI_TEST_PG_DSN')
+        if not dsn or os.environ.get('VATI_TEST_PG_ISOLATED_FIXTURE')!='1':
+            pytest.skip('explicit isolated PostgreSQL learning fixture not available')
+        from vati.core.ledger_pg import PostgresLedger
+        from vati.learning.hooks import LearningHooks
+        from vati.learning.episodes import Environment
+        from vati.learning.replay import restore_learning_runtime
+>       ledger=PostgresLedger(dsn,ledger_name='learn_'+uuid.uuid4().hex[:12])
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+trading/tests/test_learning_account_scope.py:179: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+trading/vati/core/ledger_pg.py:78: in __init__
+    cur.execute(SCHEMA)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <psycopg.Cursor [closed] [BAD] at 0x7f57068c3290>
+query = "\nCREATE TABLE IF NOT EXISTS vati.events (\n  seq BIGSERIAL PRIMARY KEY, ledger TEXT NOT NULL,\n  kind TEXT NOT NULL,...expires_at_ms BIGINT NOT NULL,\n  software_version TEXT NOT NULL DEFAULT '',\n  git_sha TEXT NOT NULL DEFAULT ''\n);\n"
+params = None, prepare = None, binary = None
+
+    def execute(
+        self,
+        query: Query,
+        params: Params | None = None,
+        *,
+        prepare: bool | None = None,
+        binary: bool | None = None,
+    ) -> Self:
+        """
+        Execute a query or command to the database.
+        """
+        try:
+            with self._conn.lock:
+                self._conn.wait(
+                    self._execute_gen(query, params, prepare=prepare, binary=binary)
+                )
+        except e._NO_TRACEBACK as ex:
+>           raise ex.with_traceback(None)
+E           psycopg.errors.InvalidSchemaName: schema "vati" does not exist
+E           LINE 2: CREATE TABLE IF NOT EXISTS vati.events (
+E                                              ^
+
+../../van-backend-venv-20261025/lib/python3.12/site-packages/psycopg/cursor.py:97: InvalidSchemaName
+_______ test_actual_account_coordinator_reports_the_current_signer_hold ________
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-26/test_actual_account_coordinato0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f5706785f40>
+eurusd = SymbolContract(symbol='EURUSD', venue='mt5', base_currency='EUR', quote_currency='USD', account_currency='USD', contra...=Decimal('0'), max_adv_participation=Decimal('0.10'), liquidity_haircut=Decimal('0'), round_trip_cost_pct=Decimal('0'))
+
+    def test_actual_account_coordinator_reports_the_current_signer_hold(tmp_path,monkeypatch,eurusd):
+        import os,uuid
+        from pathlib import Path
+        from test_single_session_lease import config
+        from vati.accounts import AccountRegistry
+        from vati.app.account_service import AccountCoordinatorService
+        from vati.core import EventKind
+        from vati.risk.serde import contract_to_dict
+        if not os.environ.get('VATI_TEST_PG_DSN'):pytest.skip('requires real isolated PostgreSQL fixture')
+        source=tmp_path/'book-owner.json'
+        source.write_text(json.dumps({'keys':{OWNER_KEY_ID:owner_authority().pem}}))
+        monkeypatch.setenv('VAN_OWNER_AUTHORITY_KEYS',str(source))
+        cfg=config(tmp_path,eurusd,ledger=os.environ['VATI_TEST_PG_DSN'])
+        registry=AccountRegistry(cfg.registry_path);account=registry.get(cfg.account_alias)
+        cfg.account_alias='signer_book_'+uuid.uuid4().hex[:12]
+        registry.add(replace(account,alias=cfg.account_alias))
+        cfg.mandate=mandate_dict(venue='paper',mode='DEMO_TRADER',account_alias=cfg.account_alias,
+            allowed_strategies=['FX-TREND-PULLBACK-01'])
+        cfg.lake_root=str(tmp_path/'lake')
+        cfg.instruments=[{'symbol':'GBPUSD','base':'GBP','quote':'USD',
+            'contract':contract_to_dict(replace(eurusd,symbol='GBPUSD',base_currency='GBP'))}]
+>       service=AccountCoordinatorService(cfg,clock=lambda:1800000000000).build()
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+trading/tests/test_mandate_current_signer.py:264: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+trading/vati/app/account_service.py:195: in build
+    self._ledger = open_ledger(c.ledger)
+                   ^^^^^^^^^^^^^^^^^^^^^
+trading/vati/core/ledger_pg.py:278: in open_ledger
+    return PostgresLedger(spec, **kw)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/core/ledger_pg.py:78: in __init__
+    cur.execute(SCHEMA)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <psycopg.Cursor [closed] [BAD] at 0x7f57068c3410>
+query = "\nCREATE TABLE IF NOT EXISTS vati.events (\n  seq BIGSERIAL PRIMARY KEY, ledger TEXT NOT NULL,\n  kind TEXT NOT NULL,...expires_at_ms BIGINT NOT NULL,\n  software_version TEXT NOT NULL DEFAULT '',\n  git_sha TEXT NOT NULL DEFAULT ''\n);\n"
+params = None, prepare = None, binary = None
+
+    def execute(
+        self,
+        query: Query,
+        params: Params | None = None,
+        *,
+        prepare: bool | None = None,
+        binary: bool | None = None,
+    ) -> Self:
+        """
+        Execute a query or command to the database.
+        """
+        try:
+            with self._conn.lock:
+                self._conn.wait(
+                    self._execute_gen(query, params, prepare=prepare, binary=binary)
+                )
+        except e._NO_TRACEBACK as ex:
+>           raise ex.with_traceback(None)
+E           psycopg.errors.InvalidSchemaName: schema "vati" does not exist
+E           LINE 2: CREATE TABLE IF NOT EXISTS vati.events (
+E                                              ^
+
+../../van-backend-venv-20261025/lib/python3.12/site-packages/psycopg/cursor.py:97: InvalidSchemaName
+___ test_actual_book_factory_rechecks_its_own_clock_before_the_native_sender ___
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-26/test_actual_book_factory_reche0')
+eurusd = SymbolContract(symbol='EURUSD', venue='mt5', base_currency='EUR', quote_currency='USD', account_currency='USD', contra...=Decimal('0'), max_adv_participation=Decimal('0.10'), liquidity_haircut=Decimal('0'), round_trip_cost_pct=Decimal('0'))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f5706785310>
+
+    def test_actual_book_factory_rechecks_its_own_clock_before_the_native_sender(tmp_path,eurusd,monkeypatch):
+        import os
+        import uuid
+        if not os.environ.get('VATI_TEST_PG_DSN'):pytest.skip('requires isolated PostgreSQL fixture')
+        from test_single_session_lease import config
+        from vati.app.account_service import AccountCoordinatorService
+        from vati.execution.policy import ExecutionBucket,ExecutionPolicyEngine
+        from vati.execution.pretrade import MarketReference
+        from vati.execution.style_selector import LiquidityView
+        from vati.execution import RouterError
+        from vati.risk.serde import contract_to_dict
+        from vati.accounts import AccountRegistry
+        from conftest import historical_mandate_dict
+        cfg=config(tmp_path,eurusd,ledger=os.environ['VATI_TEST_PG_DSN']);cfg.lake_root=str(tmp_path/'lake')
+        # The real lease table is shared by the suite. A different virtual clock
+        # must use its own account, preserving every earlier lease and epoch.
+        registry=AccountRegistry(cfg.registry_path);alias='dispatch_book_'+uuid.uuid4().hex[:12]
+        registry.add(replace(registry.get(cfg.account_alias),alias=alias));cfg.account_alias=alias
+        cfg.mandate=historical_mandate_dict(venue='paper',mode='DEMO_TRADER',account_alias=alias,
+            allowed_strategies=['FX-TREND-PULLBACK-01'])
+        other=replace(eurusd,symbol='GBPUSD',base_currency='GBP')
+        cfg.instruments=[{'symbol':'GBPUSD','base':'GBP','quote':'USD','contract':contract_to_dict(other)}]
+        clock={'now':cfg.mandate['expires_at_unix']*1000-1000}
+>       service=AccountCoordinatorService(cfg,clock=lambda:clock['now']).build()
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+trading/tests/test_mandate_dispatch_validity.py:162: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+trading/vati/app/account_service.py:195: in build
+    self._ledger = open_ledger(c.ledger)
+                   ^^^^^^^^^^^^^^^^^^^^^
+trading/vati/core/ledger_pg.py:278: in open_ledger
+    return PostgresLedger(spec, **kw)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/core/ledger_pg.py:78: in __init__
+    cur.execute(SCHEMA)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <psycopg.Cursor [closed] [BAD] at 0x7f5704640110>
+query = "\nCREATE TABLE IF NOT EXISTS vati.events (\n  seq BIGSERIAL PRIMARY KEY, ledger TEXT NOT NULL,\n  kind TEXT NOT NULL,...expires_at_ms BIGINT NOT NULL,\n  software_version TEXT NOT NULL DEFAULT '',\n  git_sha TEXT NOT NULL DEFAULT ''\n);\n"
+params = None, prepare = None, binary = None
+
+    def execute(
+        self,
+        query: Query,
+        params: Params | None = None,
+        *,
+        prepare: bool | None = None,
+        binary: bool | None = None,
+    ) -> Self:
+        """
+        Execute a query or command to the database.
+        """
+        try:
+            with self._conn.lock:
+                self._conn.wait(
+                    self._execute_gen(query, params, prepare=prepare, binary=binary)
+                )
+        except e._NO_TRACEBACK as ex:
+>           raise ex.with_traceback(None)
+E           psycopg.errors.InvalidSchemaName: schema "vati" does not exist
+E           LINE 2: CREATE TABLE IF NOT EXISTS vati.events (
+E                                              ^
+
+../../van-backend-venv-20261025/lib/python3.12/site-packages/psycopg/cursor.py:97: InvalidSchemaName
+_ test_postgres_original_operation_is_atomic_and_isolated_between_named_ledgers _
+
+    def test_postgres_original_operation_is_atomic_and_isolated_between_named_ledgers():
+        spec=os.environ.get('VATI_TEST_PG_DSN')
+        if not spec or os.environ.get('VATI_TEST_PG_ISOLATED_FIXTURE')!='1':
+            pytest.skip('requires explicitly isolated native PostgreSQL fixture')
+        from vati.core.ledger_pg import PostgresLedger
+        scope='native-effects-'+secrets.token_hex(8)
+>       led=PostgresLedger(spec,ledger_name=scope); other=PostgresLedger(spec,ledger_name=scope+'-other')
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+trading/tests/test_native_account_effects.py:200: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+trading/vati/core/ledger_pg.py:78: in __init__
+    cur.execute(SCHEMA)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <psycopg.Cursor [closed] [BAD] at 0x7f5704641790>
+query = "\nCREATE TABLE IF NOT EXISTS vati.events (\n  seq BIGSERIAL PRIMARY KEY, ledger TEXT NOT NULL,\n  kind TEXT NOT NULL,...expires_at_ms BIGINT NOT NULL,\n  software_version TEXT NOT NULL DEFAULT '',\n  git_sha TEXT NOT NULL DEFAULT ''\n);\n"
+params = None, prepare = None, binary = None
+
+    def execute(
+        self,
+        query: Query,
+        params: Params | None = None,
+        *,
+        prepare: bool | None = None,
+        binary: bool | None = None,
+    ) -> Self:
+        """
+        Execute a query or command to the database.
+        """
+        try:
+            with self._conn.lock:
+                self._conn.wait(
+                    self._execute_gen(query, params, prepare=prepare, binary=binary)
+                )
+        except e._NO_TRACEBACK as ex:
+>           raise ex.with_traceback(None)
+E           psycopg.errors.InvalidSchemaName: schema "vati" does not exist
+E           LINE 2: CREATE TABLE IF NOT EXISTS vati.events (
+E                                              ^
+
+../../van-backend-venv-20261025/lib/python3.12/site-packages/psycopg/cursor.py:97: InvalidSchemaName
+_ test_actual_concurrent_native_claim_writers_cannot_admit_two_effects_for_a_target[postgres] _
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-26/test_actual_concurrent_native_1')
+backend = 'postgres'
+
+    @pytest.mark.parametrize('backend',['sqlite','postgres'])
+    def test_actual_concurrent_native_claim_writers_cannot_admit_two_effects_for_a_target(tmp_path,backend):
+        from vati.core.ledger_pg import open_ledger
+        scope='native-concurrent-'+secrets.token_hex(8)
+        if backend=='postgres':
+            spec=os.environ.get('VATI_TEST_PG_DSN')
+            if not spec or os.environ.get('VATI_TEST_PG_ISOLATED_FIXTURE')!='1':
+                pytest.skip('requires explicitly isolated native PostgreSQL fixture')
+        else: spec=str(tmp_path/'concurrent.sqlite')
+>       led=open_ledger(spec,ledger_name=scope); led.close()
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+trading/tests/test_native_account_effects.py:247: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+trading/vati/core/ledger_pg.py:278: in open_ledger
+    return PostgresLedger(spec, **kw)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/core/ledger_pg.py:78: in __init__
+    cur.execute(SCHEMA)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <psycopg.Cursor [closed] [BAD] at 0x7f5704642510>
+query = "\nCREATE TABLE IF NOT EXISTS vati.events (\n  seq BIGSERIAL PRIMARY KEY, ledger TEXT NOT NULL,\n  kind TEXT NOT NULL,...expires_at_ms BIGINT NOT NULL,\n  software_version TEXT NOT NULL DEFAULT '',\n  git_sha TEXT NOT NULL DEFAULT ''\n);\n"
+params = None, prepare = None, binary = None
+
+    def execute(
+        self,
+        query: Query,
+        params: Params | None = None,
+        *,
+        prepare: bool | None = None,
+        binary: bool | None = None,
+    ) -> Self:
+        """
+        Execute a query or command to the database.
+        """
+        try:
+            with self._conn.lock:
+                self._conn.wait(
+                    self._execute_gen(query, params, prepare=prepare, binary=binary)
+                )
+        except e._NO_TRACEBACK as ex:
+>           raise ex.with_traceback(None)
+E           psycopg.errors.InvalidSchemaName: schema "vati" does not exist
+E           LINE 2: CREATE TABLE IF NOT EXISTS vati.events (
+E                                              ^
+
+../../van-backend-venv-20261025/lib/python3.12/site-packages/psycopg/cursor.py:97: InvalidSchemaName
+________ test_actual_book_factory_uses_each_instruments_own_money_units ________
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-26/test_actual_book_factory_uses_0')
+eurusd = SymbolContract(symbol='EURUSD', venue='mt5', base_currency='EUR', quote_currency='USD', account_currency='USD', contra...=Decimal('0'), max_adv_participation=Decimal('0.10'), liquidity_haircut=Decimal('0'), round_trip_cost_pct=Decimal('0'))
+
+    @pytest.mark.skipif(not os.environ.get('VATI_TEST_PG_DSN'),reason='requires isolated PostgreSQL fixture')
+    def test_actual_book_factory_uses_each_instruments_own_money_units(tmp_path,eurusd):
+        from vati.app.account_service import AccountCoordinatorService
+        first=replace(eurusd,tick_size=D('.01'),tick_value=D('1'))
+        second=replace(first,symbol='XAUUSD',base_currency='XAU',tick_value=D('2'))
+        cfg=config(tmp_path,first,ledger=os.environ['VATI_TEST_PG_DSN'])
+        cfg.lake_root=str(tmp_path/'lake')
+        cfg.instruments=[{'symbol':second.symbol,'base':second.base_currency,'quote':'USD','contract':contract_to_dict(second)}]
+>       service=AccountCoordinatorService(cfg,clock=lambda:1000).build()
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+trading/tests/test_paper_contract_valuation.py:108: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+trading/vati/app/account_service.py:195: in build
+    self._ledger = open_ledger(c.ledger)
+                   ^^^^^^^^^^^^^^^^^^^^^
+trading/vati/core/ledger_pg.py:278: in open_ledger
+    return PostgresLedger(spec, **kw)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/core/ledger_pg.py:78: in __init__
+    cur.execute(SCHEMA)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <psycopg.Cursor [closed] [BAD] at 0x7f57068c3f50>
+query = "\nCREATE TABLE IF NOT EXISTS vati.events (\n  seq BIGSERIAL PRIMARY KEY, ledger TEXT NOT NULL,\n  kind TEXT NOT NULL,...expires_at_ms BIGINT NOT NULL,\n  software_version TEXT NOT NULL DEFAULT '',\n  git_sha TEXT NOT NULL DEFAULT ''\n);\n"
+params = None, prepare = None, binary = None
+
+    def execute(
+        self,
+        query: Query,
+        params: Params | None = None,
+        *,
+        prepare: bool | None = None,
+        binary: bool | None = None,
+    ) -> Self:
+        """
+        Execute a query or command to the database.
+        """
+        try:
+            with self._conn.lock:
+                self._conn.wait(
+                    self._execute_gen(query, params, prepare=prepare, binary=binary)
+                )
+        except e._NO_TRACEBACK as ex:
+>           raise ex.with_traceback(None)
+E           psycopg.errors.InvalidSchemaName: schema "vati" does not exist
+E           LINE 2: CREATE TABLE IF NOT EXISTS vati.events (
+E                                              ^
+
+../../van-backend-venv-20261025/lib/python3.12/site-packages/psycopg/cursor.py:97: InvalidSchemaName
+__ test_postgres_native_projection_crash_restart_and_logical_ledger_isolation __
+
+eurusd = SymbolContract(symbol='EURUSD', venue='mt5', base_currency='EUR', quote_currency='USD', account_currency='USD', contra...=Decimal('0'), max_adv_participation=Decimal('0.10'), liquidity_haircut=Decimal('0'), round_trip_cost_pct=Decimal('0'))
+
+    def test_postgres_native_projection_crash_restart_and_logical_ledger_isolation(eurusd):
+        dsn = os.environ.get('VATI_TEST_PG_DSN')
+        if not dsn or os.environ.get('VATI_TEST_PG_ISOLATED_FIXTURE') != '1':
+            pytest.skip('explicit isolated PostgreSQL fixture required')
+        from vati.core.ledger_pg import PostgresLedger
+        name = 'restatement_'+uuid.uuid4().hex[:12]
+>       ledger = PostgresLedger(dsn, ledger_name=name)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+trading/tests/test_restated_trade_projection.py:229: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+trading/vati/core/ledger_pg.py:78: in __init__
+    cur.execute(SCHEMA)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <psycopg.Cursor [closed] [BAD] at 0x7f5704641310>
+query = "\nCREATE TABLE IF NOT EXISTS vati.events (\n  seq BIGSERIAL PRIMARY KEY, ledger TEXT NOT NULL,\n  kind TEXT NOT NULL,...expires_at_ms BIGINT NOT NULL,\n  software_version TEXT NOT NULL DEFAULT '',\n  git_sha TEXT NOT NULL DEFAULT ''\n);\n"
+params = None, prepare = None, binary = None
+
+    def execute(
+        self,
+        query: Query,
+        params: Params | None = None,
+        *,
+        prepare: bool | None = None,
+        binary: bool | None = None,
+    ) -> Self:
+        """
+        Execute a query or command to the database.
+        """
+        try:
+            with self._conn.lock:
+                self._conn.wait(
+                    self._execute_gen(query, params, prepare=prepare, binary=binary)
+                )
+        except e._NO_TRACEBACK as ex:
+>           raise ex.with_traceback(None)
+E           psycopg.errors.InvalidSchemaName: schema "vati" does not exist
+E           LINE 2: CREATE TABLE IF NOT EXISTS vati.events (
+E                                              ^
+
+../../van-backend-venv-20261025/lib/python3.12/site-packages/psycopg/cursor.py:97: InvalidSchemaName
+____ test_actual_book_builder_keeps_a_paper_live_policy_in_the_demo_cohort _____
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-26/test_actual_book_builder_keeps0')
+eurusd = SymbolContract(symbol='EURUSD', venue='mt5', base_currency='EUR', quote_currency='USD', account_currency='USD', contra...=Decimal('0'), max_adv_participation=Decimal('0.10'), liquidity_haircut=Decimal('0'), round_trip_cost_pct=Decimal('0'))
+
+    def test_actual_book_builder_keeps_a_paper_live_policy_in_the_demo_cohort(tmp_path,eurusd):
+        import os,uuid
+        from vati.app.account_service import AccountCoordinatorService
+        from vati.risk.serde import contract_to_dict
+        if not os.environ.get('VATI_TEST_PG_DSN'):pytest.skip('requires real isolated PostgreSQL fixture')
+        cfg=config(tmp_path,eurusd,ledger=os.environ['VATI_TEST_PG_DSN']);cfg.lake_root=str(tmp_path/'lake')
+        reg=AccountRegistry(cfg.registry_path);account=reg.get(cfg.account_alias);alias='cohort_book_'+uuid.uuid4().hex[:12]
+        reg.add(replace(account,alias=alias,mode='AUTONOMOUS_LIVE',demo=False,mandate_ref='fixture-signed-policy'))
+        cfg.account_alias=alias;cfg.mandate=historical_mandate_dict(venue='paper',mode='AUTONOMOUS_LIVE',account_alias=alias,
+            allowed_strategies=['FX-TREND-PULLBACK-01'])
+        other=replace(eurusd,symbol='GBPUSD',base_currency='GBP')
+        cfg.instruments=[{'symbol':'GBPUSD','base':'GBP','quote':'USD','contract':contract_to_dict(other)}]
+>       service=AccountCoordinatorService(cfg,clock=lambda:1000).build()
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+trading/tests/test_runtime_learning_cohort.py:137: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+trading/vati/app/account_service.py:195: in build
+    self._ledger = open_ledger(c.ledger)
+                   ^^^^^^^^^^^^^^^^^^^^^
+trading/vati/core/ledger_pg.py:278: in open_ledger
+    return PostgresLedger(spec, **kw)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/core/ledger_pg.py:78: in __init__
+    cur.execute(SCHEMA)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <psycopg.Cursor [closed] [BAD] at 0x7f5704640dd0>
+query = "\nCREATE TABLE IF NOT EXISTS vati.events (\n  seq BIGSERIAL PRIMARY KEY, ledger TEXT NOT NULL,\n  kind TEXT NOT NULL,...expires_at_ms BIGINT NOT NULL,\n  software_version TEXT NOT NULL DEFAULT '',\n  git_sha TEXT NOT NULL DEFAULT ''\n);\n"
+params = None, prepare = None, binary = None
+
+    def execute(
+        self,
+        query: Query,
+        params: Params | None = None,
+        *,
+        prepare: bool | None = None,
+        binary: bool | None = None,
+    ) -> Self:
+        """
+        Execute a query or command to the database.
+        """
+        try:
+            with self._conn.lock:
+                self._conn.wait(
+                    self._execute_gen(query, params, prepare=prepare, binary=binary)
+                )
+        except e._NO_TRACEBACK as ex:
+>           raise ex.with_traceback(None)
+E           psycopg.errors.InvalidSchemaName: schema "vati" does not exist
+E           LINE 2: CREATE TABLE IF NOT EXISTS vati.events (
+E                                              ^
+
+../../van-backend-venv-20261025/lib/python3.12/site-packages/psycopg/cursor.py:97: InvalidSchemaName
+_ test_actual_single_symbol_processes_arbitrate_before_startup_reconciliation[postgres] _
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-26/test_actual_single_symbol_proc1')
+eurusd = SymbolContract(symbol='EURUSD', venue='mt5', base_currency='EUR', quote_currency='USD', account_currency='USD', contra...=Decimal('0'), max_adv_participation=Decimal('0.10'), liquidity_haircut=Decimal('0'), round_trip_cost_pct=Decimal('0'))
+backend = 'postgres'
+
+    @pytest.mark.parametrize('backend',['sqlite','postgres'])
+    def test_actual_single_symbol_processes_arbitrate_before_startup_reconciliation(tmp_path,eurusd,backend):
+        from vati.core.ledger_pg import open_ledger
+        if backend=='postgres':
+            spec=os.environ.get('VATI_TEST_PG_DSN')
+            if not spec or os.environ.get('VATI_TEST_PG_ISOLATED_FIXTURE')!='1':
+                pytest.skip('requires an explicitly isolated native PostgreSQL fixture')
+        else: spec=None
+        cfg=config(tmp_path,eurusd,ledger=spec)
+>       led=open_ledger(cfg.ledger); led.close()
+            ^^^^^^^^^^^^^^^^^^^^^^^
+
+trading/tests/test_single_session_lease.py:193: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+trading/vati/core/ledger_pg.py:278: in open_ledger
+    return PostgresLedger(spec, **kw)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/core/ledger_pg.py:78: in __init__
+    cur.execute(SCHEMA)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <psycopg.Cursor [closed] [BAD] at 0x7f5704640e90>
+query = "\nCREATE TABLE IF NOT EXISTS vati.events (\n  seq BIGSERIAL PRIMARY KEY, ledger TEXT NOT NULL,\n  kind TEXT NOT NULL,...expires_at_ms BIGINT NOT NULL,\n  software_version TEXT NOT NULL DEFAULT '',\n  git_sha TEXT NOT NULL DEFAULT ''\n);\n"
+params = None, prepare = None, binary = None
+
+    def execute(
+        self,
+        query: Query,
+        params: Params | None = None,
+        *,
+        prepare: bool | None = None,
+        binary: bool | None = None,
+    ) -> Self:
+        """
+        Execute a query or command to the database.
+        """
+        try:
+            with self._conn.lock:
+                self._conn.wait(
+                    self._execute_gen(query, params, prepare=prepare, binary=binary)
+                )
+        except e._NO_TRACEBACK as ex:
+>           raise ex.with_traceback(None)
+E           psycopg.errors.InvalidSchemaName: schema "vati" does not exist
+E           LINE 2: CREATE TABLE IF NOT EXISTS vati.events (
+E                                              ^
+
+../../van-backend-venv-20261025/lib/python3.12/site-packages/psycopg/cursor.py:97: InvalidSchemaName
+_ test_simultaneous_first_postgres_insert_reports_healthy_arbitration_not_outage _
+
+    def test_simultaneous_first_postgres_insert_reports_healthy_arbitration_not_outage():
+        import secrets
+        from vati.core.ledger_pg import open_ledger
+        spec=os.environ.get('VATI_TEST_PG_DSN')
+        if not spec or os.environ.get('VATI_TEST_PG_ISOLATED_FIXTURE')!='1':
+            pytest.skip('requires an explicitly isolated native PostgreSQL fixture')
+>       led=open_ledger(spec); led.close()
+            ^^^^^^^^^^^^^^^^^
+
+trading/tests/test_single_session_lease.py:253: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+trading/vati/core/ledger_pg.py:278: in open_ledger
+    return PostgresLedger(spec, **kw)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/core/ledger_pg.py:78: in __init__
+    cur.execute(SCHEMA)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <psycopg.Cursor [closed] [BAD] at 0x7f5704641310>
+query = "\nCREATE TABLE IF NOT EXISTS vati.events (\n  seq BIGSERIAL PRIMARY KEY, ledger TEXT NOT NULL,\n  kind TEXT NOT NULL,...expires_at_ms BIGINT NOT NULL,\n  software_version TEXT NOT NULL DEFAULT '',\n  git_sha TEXT NOT NULL DEFAULT ''\n);\n"
+params = None, prepare = None, binary = None
+
+    def execute(
+        self,
+        query: Query,
+        params: Params | None = None,
+        *,
+        prepare: bool | None = None,
+        binary: bool | None = None,
+    ) -> Self:
+        """
+        Execute a query or command to the database.
+        """
+        try:
+            with self._conn.lock:
+                self._conn.wait(
+                    self._execute_gen(query, params, prepare=prepare, binary=binary)
+                )
+        except e._NO_TRACEBACK as ex:
+>           raise ex.with_traceback(None)
+E           psycopg.errors.InvalidSchemaName: schema "vati" does not exist
+E           LINE 2: CREATE TABLE IF NOT EXISTS vati.events (
+E                                              ^
+
+../../van-backend-venv-20261025/lib/python3.12/site-packages/psycopg/cursor.py:97: InvalidSchemaName
+_ test_original_timed_out_native_entry_is_not_reported_as_executed_or_approved _
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-26/test_original_timed_out_native0')
+eurusd = SymbolContract(symbol='EURUSD', venue='mt5', base_currency='EUR', quote_currency='USD', account_currency='USD', contra...=Decimal('0'), max_adv_participation=Decimal('0.10'), liquidity_haircut=Decimal('0'), round_trip_cost_pct=Decimal('0'))
+
+    def test_original_timed_out_native_entry_is_not_reported_as_executed_or_approved(tmp_path,eurusd):
+>       with delayed_native_session(tmp_path,eurusd) as (service,bars,index,clock,poll,orders,result,queue,delivered):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+trading/tests/test_single_session_unknown_entry.py:132: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/contextlib.py:137: in __enter__
+    return next(self.gen)
+           ^^^^^^^^^^^^^^
+trading/tests/test_single_session_unknown_entry.py:79: in delayed_native_session
+    poll();service=SessionService(cfg,lambda now:[b for b in bars if b.end_ms<=now],clock=lambda:clock['ms'],adapter=adapter).build()
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/app/service.py:213: in build
+    self._ledger = open_ledger(c.ledger)
+                   ^^^^^^^^^^^^^^^^^^^^^
+trading/vati/core/ledger_pg.py:278: in open_ledger
+    return PostgresLedger(spec, **kw)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/core/ledger_pg.py:78: in __init__
+    cur.execute(SCHEMA)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <psycopg.Cursor [closed] [BAD] at 0x7f5704642450>
+query = "\nCREATE TABLE IF NOT EXISTS vati.events (\n  seq BIGSERIAL PRIMARY KEY, ledger TEXT NOT NULL,\n  kind TEXT NOT NULL,...expires_at_ms BIGINT NOT NULL,\n  software_version TEXT NOT NULL DEFAULT '',\n  git_sha TEXT NOT NULL DEFAULT ''\n);\n"
+params = None, prepare = None, binary = None
+
+    def execute(
+        self,
+        query: Query,
+        params: Params | None = None,
+        *,
+        prepare: bool | None = None,
+        binary: bool | None = None,
+    ) -> Self:
+        """
+        Execute a query or command to the database.
+        """
+        try:
+            with self._conn.lock:
+                self._conn.wait(
+                    self._execute_gen(query, params, prepare=prepare, binary=binary)
+                )
+        except e._NO_TRACEBACK as ex:
+>           raise ex.with_traceback(None)
+E           psycopg.errors.InvalidSchemaName: schema "vati" does not exist
+E           LINE 2: CREATE TABLE IF NOT EXISTS vati.events (
+E                                              ^
+
+../../van-backend-venv-20261025/lib/python3.12/site-packages/psycopg/cursor.py:97: InvalidSchemaName
+__ test_current_empty_positions_do_not_release_original_unresolved_entry_risk __
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-26/test_current_empty_positions_d0')
+eurusd = SymbolContract(symbol='EURUSD', venue='mt5', base_currency='EUR', quote_currency='USD', account_currency='USD', contra...=Decimal('0'), max_adv_participation=Decimal('0.10'), liquidity_haircut=Decimal('0'), round_trip_cost_pct=Decimal('0'))
+
+    def test_current_empty_positions_do_not_release_original_unresolved_entry_risk(tmp_path,eurusd):
+>       with delayed_native_session(tmp_path,eurusd) as (service,bars,index,clock,poll,orders,result,queue,delivered):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+trading/tests/test_single_session_unknown_entry.py:138: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/contextlib.py:137: in __enter__
+    return next(self.gen)
+           ^^^^^^^^^^^^^^
+trading/tests/test_single_session_unknown_entry.py:79: in delayed_native_session
+    poll();service=SessionService(cfg,lambda now:[b for b in bars if b.end_ms<=now],clock=lambda:clock['ms'],adapter=adapter).build()
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/app/service.py:213: in build
+    self._ledger = open_ledger(c.ledger)
+                   ^^^^^^^^^^^^^^^^^^^^^
+trading/vati/core/ledger_pg.py:278: in open_ledger
+    return PostgresLedger(spec, **kw)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/core/ledger_pg.py:78: in __init__
+    cur.execute(SCHEMA)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <psycopg.Cursor [closed] [BAD] at 0x7f56ec3441d0>
+query = "\nCREATE TABLE IF NOT EXISTS vati.events (\n  seq BIGSERIAL PRIMARY KEY, ledger TEXT NOT NULL,\n  kind TEXT NOT NULL,...expires_at_ms BIGINT NOT NULL,\n  software_version TEXT NOT NULL DEFAULT '',\n  git_sha TEXT NOT NULL DEFAULT ''\n);\n"
+params = None, prepare = None, binary = None
+
+    def execute(
+        self,
+        query: Query,
+        params: Params | None = None,
+        *,
+        prepare: bool | None = None,
+        binary: bool | None = None,
+    ) -> Self:
+        """
+        Execute a query or command to the database.
+        """
+        try:
+            with self._conn.lock:
+                self._conn.wait(
+                    self._execute_gen(query, params, prepare=prepare, binary=binary)
+                )
+        except e._NO_TRACEBACK as ex:
+>           raise ex.with_traceback(None)
+E           psycopg.errors.InvalidSchemaName: schema "vati" does not exist
+E           LINE 2: CREATE TABLE IF NOT EXISTS vati.events (
+E                                              ^
+
+../../van-backend-venv-20261025/lib/python3.12/site-packages/psycopg/cursor.py:97: InvalidSchemaName
+_ test_late_original_native_rejection_releases_only_that_attempt_without_replaying_it _
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-26/test_late_original_native_reje0')
+eurusd = SymbolContract(symbol='EURUSD', venue='mt5', base_currency='EUR', quote_currency='USD', account_currency='USD', contra...=Decimal('0'), max_adv_participation=Decimal('0.10'), liquidity_haircut=Decimal('0'), round_trip_cost_pct=Decimal('0'))
+
+    def test_late_original_native_rejection_releases_only_that_attempt_without_replaying_it(tmp_path,eurusd):
+>       with delayed_native_session(tmp_path,eurusd) as (service,bars,index,clock,poll,orders,result,queue,delivered):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+trading/tests/test_single_session_unknown_entry.py:148: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/contextlib.py:137: in __enter__
+    return next(self.gen)
+           ^^^^^^^^^^^^^^
+trading/tests/test_single_session_unknown_entry.py:79: in delayed_native_session
+    poll();service=SessionService(cfg,lambda now:[b for b in bars if b.end_ms<=now],clock=lambda:clock['ms'],adapter=adapter).build()
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/app/service.py:213: in build
+    self._ledger = open_ledger(c.ledger)
+                   ^^^^^^^^^^^^^^^^^^^^^
+trading/vati/core/ledger_pg.py:278: in open_ledger
+    return PostgresLedger(spec, **kw)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/core/ledger_pg.py:78: in __init__
+    cur.execute(SCHEMA)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <psycopg.Cursor [closed] [BAD] at 0x7f56ec344950>
+query = "\nCREATE TABLE IF NOT EXISTS vati.events (\n  seq BIGSERIAL PRIMARY KEY, ledger TEXT NOT NULL,\n  kind TEXT NOT NULL,...expires_at_ms BIGINT NOT NULL,\n  software_version TEXT NOT NULL DEFAULT '',\n  git_sha TEXT NOT NULL DEFAULT ''\n);\n"
+params = None, prepare = None, binary = None
+
+    def execute(
+        self,
+        query: Query,
+        params: Params | None = None,
+        *,
+        prepare: bool | None = None,
+        binary: bool | None = None,
+    ) -> Self:
+        """
+        Execute a query or command to the database.
+        """
+        try:
+            with self._conn.lock:
+                self._conn.wait(
+                    self._execute_gen(query, params, prepare=prepare, binary=binary)
+                )
+        except e._NO_TRACEBACK as ex:
+>           raise ex.with_traceback(None)
+E           psycopg.errors.InvalidSchemaName: schema "vati" does not exist
+E           LINE 2: CREATE TABLE IF NOT EXISTS vati.events (
+E                                              ^
+
+../../van-backend-venv-20261025/lib/python3.12/site-packages/psycopg/cursor.py:97: InvalidSchemaName
+_ test_late_original_native_fill_restores_full_trade_identity_and_protection_without_another_send _
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-26/test_late_original_native_fill0')
+eurusd = SymbolContract(symbol='EURUSD', venue='mt5', base_currency='EUR', quote_currency='USD', account_currency='USD', contra...=Decimal('0'), max_adv_participation=Decimal('0.10'), liquidity_haircut=Decimal('0'), round_trip_cost_pct=Decimal('0'))
+
+    def test_late_original_native_fill_restores_full_trade_identity_and_protection_without_another_send(tmp_path,eurusd):
+>       with delayed_native_session(tmp_path,eurusd) as (service,bars,index,clock,poll,orders,result,queue,delivered):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+trading/tests/test_single_session_unknown_entry.py:159: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/contextlib.py:137: in __enter__
+    return next(self.gen)
+           ^^^^^^^^^^^^^^
+trading/tests/test_single_session_unknown_entry.py:79: in delayed_native_session
+    poll();service=SessionService(cfg,lambda now:[b for b in bars if b.end_ms<=now],clock=lambda:clock['ms'],adapter=adapter).build()
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/app/service.py:213: in build
+    self._ledger = open_ledger(c.ledger)
+                   ^^^^^^^^^^^^^^^^^^^^^
+trading/vati/core/ledger_pg.py:278: in open_ledger
+    return PostgresLedger(spec, **kw)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/core/ledger_pg.py:78: in __init__
+    cur.execute(SCHEMA)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <psycopg.Cursor [closed] [BAD] at 0x7f57081a6f90>
+query = "\nCREATE TABLE IF NOT EXISTS vati.events (\n  seq BIGSERIAL PRIMARY KEY, ledger TEXT NOT NULL,\n  kind TEXT NOT NULL,...expires_at_ms BIGINT NOT NULL,\n  software_version TEXT NOT NULL DEFAULT '',\n  git_sha TEXT NOT NULL DEFAULT ''\n);\n"
+params = None, prepare = None, binary = None
+
+    def execute(
+        self,
+        query: Query,
+        params: Params | None = None,
+        *,
+        prepare: bool | None = None,
+        binary: bool | None = None,
+    ) -> Self:
+        """
+        Execute a query or command to the database.
+        """
+        try:
+            with self._conn.lock:
+                self._conn.wait(
+                    self._execute_gen(query, params, prepare=prepare, binary=binary)
+                )
+        except e._NO_TRACEBACK as ex:
+>           raise ex.with_traceback(None)
+E           psycopg.errors.InvalidSchemaName: schema "vati" does not exist
+E           LINE 2: CREATE TABLE IF NOT EXISTS vati.events (
+E                                              ^
+
+../../van-backend-venv-20261025/lib/python3.12/site-packages/psycopg/cursor.py:97: InvalidSchemaName
+_____ test_missing_native_enqueue_reply_holds_the_durable_original_attempt _____
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-26/test_missing_native_enqueue_re0')
+eurusd = SymbolContract(symbol='EURUSD', venue='mt5', base_currency='EUR', quote_currency='USD', account_currency='USD', contra...=Decimal('0'), max_adv_participation=Decimal('0.10'), liquidity_haircut=Decimal('0'), round_trip_cost_pct=Decimal('0'))
+
+    def test_missing_native_enqueue_reply_holds_the_durable_original_attempt(tmp_path,eurusd):
+>       with delayed_native_session(tmp_path,eurusd,lose_enqueue_reply=True) as (service,bars,index,clock,poll,orders,result,queue,delivered):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+trading/tests/test_single_session_unknown_entry.py:179: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/contextlib.py:137: in __enter__
+    return next(self.gen)
+           ^^^^^^^^^^^^^^
+trading/tests/test_single_session_unknown_entry.py:79: in delayed_native_session
+    poll();service=SessionService(cfg,lambda now:[b for b in bars if b.end_ms<=now],clock=lambda:clock['ms'],adapter=adapter).build()
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/app/service.py:213: in build
+    self._ledger = open_ledger(c.ledger)
+                   ^^^^^^^^^^^^^^^^^^^^^
+trading/vati/core/ledger_pg.py:278: in open_ledger
+    return PostgresLedger(spec, **kw)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/core/ledger_pg.py:78: in __init__
+    cur.execute(SCHEMA)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <psycopg.Cursor [closed] [BAD] at 0x7f5704642450>
+query = "\nCREATE TABLE IF NOT EXISTS vati.events (\n  seq BIGSERIAL PRIMARY KEY, ledger TEXT NOT NULL,\n  kind TEXT NOT NULL,...expires_at_ms BIGINT NOT NULL,\n  software_version TEXT NOT NULL DEFAULT '',\n  git_sha TEXT NOT NULL DEFAULT ''\n);\n"
+params = None, prepare = None, binary = None
+
+    def execute(
+        self,
+        query: Query,
+        params: Params | None = None,
+        *,
+        prepare: bool | None = None,
+        binary: bool | None = None,
+    ) -> Self:
+        """
+        Execute a query or command to the database.
+        """
+        try:
+            with self._conn.lock:
+                self._conn.wait(
+                    self._execute_gen(query, params, prepare=prepare, binary=binary)
+                )
+        except e._NO_TRACEBACK as ex:
+>           raise ex.with_traceback(None)
+E           psycopg.errors.InvalidSchemaName: schema "vati" does not exist
+E           LINE 2: CREATE TABLE IF NOT EXISTS vati.events (
+E                                              ^
+
+../../van-backend-venv-20261025/lib/python3.12/site-packages/psycopg/cursor.py:97: InvalidSchemaName
+_ test_contradictory_or_partial_native_evidence_cannot_release_the_original_hold[wrong-symbol] _
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-26/test_contradictory_or_partial_0')
+eurusd = SymbolContract(symbol='EURUSD', venue='mt5', base_currency='EUR', quote_currency='USD', account_currency='USD', contra...=Decimal('0'), max_adv_participation=Decimal('0.10'), liquidity_haircut=Decimal('0'), round_trip_cost_pct=Decimal('0'))
+damage = 'wrong-symbol'
+
+    @pytest.mark.parametrize('damage',['wrong-symbol','oversized-fill','stop-unconfirmed','rejected-with-fill','malformed-volume'])
+    def test_contradictory_or_partial_native_evidence_cannot_release_the_original_hold(tmp_path,eurusd,damage):
+>       with delayed_native_session(tmp_path,eurusd) as (service,bars,index,clock,poll,orders,result,queue,delivered):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+trading/tests/test_single_session_unknown_entry.py:189: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/contextlib.py:137: in __enter__
+    return next(self.gen)
+           ^^^^^^^^^^^^^^
+trading/tests/test_single_session_unknown_entry.py:79: in delayed_native_session
+    poll();service=SessionService(cfg,lambda now:[b for b in bars if b.end_ms<=now],clock=lambda:clock['ms'],adapter=adapter).build()
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/app/service.py:213: in build
+    self._ledger = open_ledger(c.ledger)
+                   ^^^^^^^^^^^^^^^^^^^^^
+trading/vati/core/ledger_pg.py:278: in open_ledger
+    return PostgresLedger(spec, **kw)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/core/ledger_pg.py:78: in __init__
+    cur.execute(SCHEMA)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <psycopg.Cursor [closed] [BAD] at 0x7f57068c3a10>
+query = "\nCREATE TABLE IF NOT EXISTS vati.events (\n  seq BIGSERIAL PRIMARY KEY, ledger TEXT NOT NULL,\n  kind TEXT NOT NULL,...expires_at_ms BIGINT NOT NULL,\n  software_version TEXT NOT NULL DEFAULT '',\n  git_sha TEXT NOT NULL DEFAULT ''\n);\n"
+params = None, prepare = None, binary = None
+
+    def execute(
+        self,
+        query: Query,
+        params: Params | None = None,
+        *,
+        prepare: bool | None = None,
+        binary: bool | None = None,
+    ) -> Self:
+        """
+        Execute a query or command to the database.
+        """
+        try:
+            with self._conn.lock:
+                self._conn.wait(
+                    self._execute_gen(query, params, prepare=prepare, binary=binary)
+                )
+        except e._NO_TRACEBACK as ex:
+>           raise ex.with_traceback(None)
+E           psycopg.errors.InvalidSchemaName: schema "vati" does not exist
+E           LINE 2: CREATE TABLE IF NOT EXISTS vati.events (
+E                                              ^
+
+../../van-backend-venv-20261025/lib/python3.12/site-packages/psycopg/cursor.py:97: InvalidSchemaName
+_ test_contradictory_or_partial_native_evidence_cannot_release_the_original_hold[oversized-fill] _
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-26/test_contradictory_or_partial_1')
+eurusd = SymbolContract(symbol='EURUSD', venue='mt5', base_currency='EUR', quote_currency='USD', account_currency='USD', contra...=Decimal('0'), max_adv_participation=Decimal('0.10'), liquidity_haircut=Decimal('0'), round_trip_cost_pct=Decimal('0'))
+damage = 'oversized-fill'
+
+    @pytest.mark.parametrize('damage',['wrong-symbol','oversized-fill','stop-unconfirmed','rejected-with-fill','malformed-volume'])
+    def test_contradictory_or_partial_native_evidence_cannot_release_the_original_hold(tmp_path,eurusd,damage):
+>       with delayed_native_session(tmp_path,eurusd) as (service,bars,index,clock,poll,orders,result,queue,delivered):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+trading/tests/test_single_session_unknown_entry.py:189: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/contextlib.py:137: in __enter__
+    return next(self.gen)
+           ^^^^^^^^^^^^^^
+trading/tests/test_single_session_unknown_entry.py:79: in delayed_native_session
+    poll();service=SessionService(cfg,lambda now:[b for b in bars if b.end_ms<=now],clock=lambda:clock['ms'],adapter=adapter).build()
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/app/service.py:213: in build
+    self._ledger = open_ledger(c.ledger)
+                   ^^^^^^^^^^^^^^^^^^^^^
+trading/vati/core/ledger_pg.py:278: in open_ledger
+    return PostgresLedger(spec, **kw)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/core/ledger_pg.py:78: in __init__
+    cur.execute(SCHEMA)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <psycopg.Cursor [closed] [BAD] at 0x7f57046407d0>
+query = "\nCREATE TABLE IF NOT EXISTS vati.events (\n  seq BIGSERIAL PRIMARY KEY, ledger TEXT NOT NULL,\n  kind TEXT NOT NULL,...expires_at_ms BIGINT NOT NULL,\n  software_version TEXT NOT NULL DEFAULT '',\n  git_sha TEXT NOT NULL DEFAULT ''\n);\n"
+params = None, prepare = None, binary = None
+
+    def execute(
+        self,
+        query: Query,
+        params: Params | None = None,
+        *,
+        prepare: bool | None = None,
+        binary: bool | None = None,
+    ) -> Self:
+        """
+        Execute a query or command to the database.
+        """
+        try:
+            with self._conn.lock:
+                self._conn.wait(
+                    self._execute_gen(query, params, prepare=prepare, binary=binary)
+                )
+        except e._NO_TRACEBACK as ex:
+>           raise ex.with_traceback(None)
+E           psycopg.errors.InvalidSchemaName: schema "vati" does not exist
+E           LINE 2: CREATE TABLE IF NOT EXISTS vati.events (
+E                                              ^
+
+../../van-backend-venv-20261025/lib/python3.12/site-packages/psycopg/cursor.py:97: InvalidSchemaName
+_ test_contradictory_or_partial_native_evidence_cannot_release_the_original_hold[stop-unconfirmed] _
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-26/test_contradictory_or_partial_2')
+eurusd = SymbolContract(symbol='EURUSD', venue='mt5', base_currency='EUR', quote_currency='USD', account_currency='USD', contra...=Decimal('0'), max_adv_participation=Decimal('0.10'), liquidity_haircut=Decimal('0'), round_trip_cost_pct=Decimal('0'))
+damage = 'stop-unconfirmed'
+
+    @pytest.mark.parametrize('damage',['wrong-symbol','oversized-fill','stop-unconfirmed','rejected-with-fill','malformed-volume'])
+    def test_contradictory_or_partial_native_evidence_cannot_release_the_original_hold(tmp_path,eurusd,damage):
+>       with delayed_native_session(tmp_path,eurusd) as (service,bars,index,clock,poll,orders,result,queue,delivered):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+trading/tests/test_single_session_unknown_entry.py:189: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/contextlib.py:137: in __enter__
+    return next(self.gen)
+           ^^^^^^^^^^^^^^
+trading/tests/test_single_session_unknown_entry.py:79: in delayed_native_session
+    poll();service=SessionService(cfg,lambda now:[b for b in bars if b.end_ms<=now],clock=lambda:clock['ms'],adapter=adapter).build()
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/app/service.py:213: in build
+    self._ledger = open_ledger(c.ledger)
+                   ^^^^^^^^^^^^^^^^^^^^^
+trading/vati/core/ledger_pg.py:278: in open_ledger
+    return PostgresLedger(spec, **kw)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/core/ledger_pg.py:78: in __init__
+    cur.execute(SCHEMA)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <psycopg.Cursor [closed] [BAD] at 0x7f57068c2ed0>
+query = "\nCREATE TABLE IF NOT EXISTS vati.events (\n  seq BIGSERIAL PRIMARY KEY, ledger TEXT NOT NULL,\n  kind TEXT NOT NULL,...expires_at_ms BIGINT NOT NULL,\n  software_version TEXT NOT NULL DEFAULT '',\n  git_sha TEXT NOT NULL DEFAULT ''\n);\n"
+params = None, prepare = None, binary = None
+
+    def execute(
+        self,
+        query: Query,
+        params: Params | None = None,
+        *,
+        prepare: bool | None = None,
+        binary: bool | None = None,
+    ) -> Self:
+        """
+        Execute a query or command to the database.
+        """
+        try:
+            with self._conn.lock:
+                self._conn.wait(
+                    self._execute_gen(query, params, prepare=prepare, binary=binary)
+                )
+        except e._NO_TRACEBACK as ex:
+>           raise ex.with_traceback(None)
+E           psycopg.errors.InvalidSchemaName: schema "vati" does not exist
+E           LINE 2: CREATE TABLE IF NOT EXISTS vati.events (
+E                                              ^
+
+../../van-backend-venv-20261025/lib/python3.12/site-packages/psycopg/cursor.py:97: InvalidSchemaName
+_ test_contradictory_or_partial_native_evidence_cannot_release_the_original_hold[rejected-with-fill] _
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-26/test_contradictory_or_partial_3')
+eurusd = SymbolContract(symbol='EURUSD', venue='mt5', base_currency='EUR', quote_currency='USD', account_currency='USD', contra...=Decimal('0'), max_adv_participation=Decimal('0.10'), liquidity_haircut=Decimal('0'), round_trip_cost_pct=Decimal('0'))
+damage = 'rejected-with-fill'
+
+    @pytest.mark.parametrize('damage',['wrong-symbol','oversized-fill','stop-unconfirmed','rejected-with-fill','malformed-volume'])
+    def test_contradictory_or_partial_native_evidence_cannot_release_the_original_hold(tmp_path,eurusd,damage):
+>       with delayed_native_session(tmp_path,eurusd) as (service,bars,index,clock,poll,orders,result,queue,delivered):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+trading/tests/test_single_session_unknown_entry.py:189: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/contextlib.py:137: in __enter__
+    return next(self.gen)
+           ^^^^^^^^^^^^^^
+trading/tests/test_single_session_unknown_entry.py:79: in delayed_native_session
+    poll();service=SessionService(cfg,lambda now:[b for b in bars if b.end_ms<=now],clock=lambda:clock['ms'],adapter=adapter).build()
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/app/service.py:213: in build
+    self._ledger = open_ledger(c.ledger)
+                   ^^^^^^^^^^^^^^^^^^^^^
+trading/vati/core/ledger_pg.py:278: in open_ledger
+    return PostgresLedger(spec, **kw)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/core/ledger_pg.py:78: in __init__
+    cur.execute(SCHEMA)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <psycopg.Cursor [closed] [BAD] at 0x7f5704642210>
+query = "\nCREATE TABLE IF NOT EXISTS vati.events (\n  seq BIGSERIAL PRIMARY KEY, ledger TEXT NOT NULL,\n  kind TEXT NOT NULL,...expires_at_ms BIGINT NOT NULL,\n  software_version TEXT NOT NULL DEFAULT '',\n  git_sha TEXT NOT NULL DEFAULT ''\n);\n"
+params = None, prepare = None, binary = None
+
+    def execute(
+        self,
+        query: Query,
+        params: Params | None = None,
+        *,
+        prepare: bool | None = None,
+        binary: bool | None = None,
+    ) -> Self:
+        """
+        Execute a query or command to the database.
+        """
+        try:
+            with self._conn.lock:
+                self._conn.wait(
+                    self._execute_gen(query, params, prepare=prepare, binary=binary)
+                )
+        except e._NO_TRACEBACK as ex:
+>           raise ex.with_traceback(None)
+E           psycopg.errors.InvalidSchemaName: schema "vati" does not exist
+E           LINE 2: CREATE TABLE IF NOT EXISTS vati.events (
+E                                              ^
+
+../../van-backend-venv-20261025/lib/python3.12/site-packages/psycopg/cursor.py:97: InvalidSchemaName
+_ test_contradictory_or_partial_native_evidence_cannot_release_the_original_hold[malformed-volume] _
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-26/test_contradictory_or_partial_4')
+eurusd = SymbolContract(symbol='EURUSD', venue='mt5', base_currency='EUR', quote_currency='USD', account_currency='USD', contra...=Decimal('0'), max_adv_participation=Decimal('0.10'), liquidity_haircut=Decimal('0'), round_trip_cost_pct=Decimal('0'))
+damage = 'malformed-volume'
+
+    @pytest.mark.parametrize('damage',['wrong-symbol','oversized-fill','stop-unconfirmed','rejected-with-fill','malformed-volume'])
+    def test_contradictory_or_partial_native_evidence_cannot_release_the_original_hold(tmp_path,eurusd,damage):
+>       with delayed_native_session(tmp_path,eurusd) as (service,bars,index,clock,poll,orders,result,queue,delivered):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+trading/tests/test_single_session_unknown_entry.py:189: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/contextlib.py:137: in __enter__
+    return next(self.gen)
+           ^^^^^^^^^^^^^^
+trading/tests/test_single_session_unknown_entry.py:79: in delayed_native_session
+    poll();service=SessionService(cfg,lambda now:[b for b in bars if b.end_ms<=now],clock=lambda:clock['ms'],adapter=adapter).build()
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/app/service.py:213: in build
+    self._ledger = open_ledger(c.ledger)
+                   ^^^^^^^^^^^^^^^^^^^^^
+trading/vati/core/ledger_pg.py:278: in open_ledger
+    return PostgresLedger(spec, **kw)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/core/ledger_pg.py:78: in __init__
+    cur.execute(SCHEMA)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <psycopg.Cursor [closed] [BAD] at 0x7f57068c3a10>
+query = "\nCREATE TABLE IF NOT EXISTS vati.events (\n  seq BIGSERIAL PRIMARY KEY, ledger TEXT NOT NULL,\n  kind TEXT NOT NULL,...expires_at_ms BIGINT NOT NULL,\n  software_version TEXT NOT NULL DEFAULT '',\n  git_sha TEXT NOT NULL DEFAULT ''\n);\n"
+params = None, prepare = None, binary = None
+
+    def execute(
+        self,
+        query: Query,
+        params: Params | None = None,
+        *,
+        prepare: bool | None = None,
+        binary: bool | None = None,
+    ) -> Self:
+        """
+        Execute a query or command to the database.
+        """
+        try:
+            with self._conn.lock:
+                self._conn.wait(
+                    self._execute_gen(query, params, prepare=prepare, binary=binary)
+                )
+        except e._NO_TRACEBACK as ex:
+>           raise ex.with_traceback(None)
+E           psycopg.errors.InvalidSchemaName: schema "vati" does not exist
+E           LINE 2: CREATE TABLE IF NOT EXISTS vati.events (
+E                                              ^
+
+../../van-backend-venv-20261025/lib/python3.12/site-packages/psycopg/cursor.py:97: InvalidSchemaName
+_ test_lost_enqueue_reply_can_read_the_original_native_refusal_without_repeating_the_write _
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-26/test_lost_enqueue_reply_can_re0')
+eurusd = SymbolContract(symbol='EURUSD', venue='mt5', base_currency='EUR', quote_currency='USD', account_currency='USD', contra...=Decimal('0'), max_adv_participation=Decimal('0.10'), liquidity_haircut=Decimal('0'), round_trip_cost_pct=Decimal('0'))
+
+    def test_lost_enqueue_reply_can_read_the_original_native_refusal_without_repeating_the_write(tmp_path,eurusd):
+>       with delayed_native_session(tmp_path,eurusd,lose_enqueue_reply=True) as (service,bars,index,clock,poll,orders,result,queue,delivered):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+trading/tests/test_single_session_unknown_entry.py:207: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/contextlib.py:137: in __enter__
+    return next(self.gen)
+           ^^^^^^^^^^^^^^
+trading/tests/test_single_session_unknown_entry.py:79: in delayed_native_session
+    poll();service=SessionService(cfg,lambda now:[b for b in bars if b.end_ms<=now],clock=lambda:clock['ms'],adapter=adapter).build()
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/app/service.py:213: in build
+    self._ledger = open_ledger(c.ledger)
+                   ^^^^^^^^^^^^^^^^^^^^^
+trading/vati/core/ledger_pg.py:278: in open_ledger
+    return PostgresLedger(spec, **kw)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/core/ledger_pg.py:78: in __init__
+    cur.execute(SCHEMA)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <psycopg.Cursor [closed] [BAD] at 0x7f57046428d0>
+query = "\nCREATE TABLE IF NOT EXISTS vati.events (\n  seq BIGSERIAL PRIMARY KEY, ledger TEXT NOT NULL,\n  kind TEXT NOT NULL,...expires_at_ms BIGINT NOT NULL,\n  software_version TEXT NOT NULL DEFAULT '',\n  git_sha TEXT NOT NULL DEFAULT ''\n);\n"
+params = None, prepare = None, binary = None
+
+    def execute(
+        self,
+        query: Query,
+        params: Params | None = None,
+        *,
+        prepare: bool | None = None,
+        binary: bool | None = None,
+    ) -> Self:
+        """
+        Execute a query or command to the database.
+        """
+        try:
+            with self._conn.lock:
+                self._conn.wait(
+                    self._execute_gen(query, params, prepare=prepare, binary=binary)
+                )
+        except e._NO_TRACEBACK as ex:
+>           raise ex.with_traceback(None)
+E           psycopg.errors.InvalidSchemaName: schema "vati" does not exist
+E           LINE 2: CREATE TABLE IF NOT EXISTS vati.events (
+E                                              ^
+
+../../van-backend-venv-20261025/lib/python3.12/site-packages/psycopg/cursor.py:97: InvalidSchemaName
+____________ test_owner_heartbeat_reports_the_original_unknown_hold ____________
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-26/test_owner_heartbeat_reports_t0')
+eurusd = SymbolContract(symbol='EURUSD', venue='mt5', base_currency='EUR', quote_currency='USD', account_currency='USD', contra...=Decimal('0'), max_adv_participation=Decimal('0.10'), liquidity_haircut=Decimal('0'), round_trip_cost_pct=Decimal('0'))
+
+    def test_owner_heartbeat_reports_the_original_unknown_hold(tmp_path,eurusd):
+>       with delayed_native_session(tmp_path,eurusd) as (service,bars,index,clock,poll,orders,result,queue,delivered):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+trading/tests/test_single_session_unknown_entry.py:216: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/contextlib.py:137: in __enter__
+    return next(self.gen)
+           ^^^^^^^^^^^^^^
+trading/tests/test_single_session_unknown_entry.py:79: in delayed_native_session
+    poll();service=SessionService(cfg,lambda now:[b for b in bars if b.end_ms<=now],clock=lambda:clock['ms'],adapter=adapter).build()
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/app/service.py:213: in build
+    self._ledger = open_ledger(c.ledger)
+                   ^^^^^^^^^^^^^^^^^^^^^
+trading/vati/core/ledger_pg.py:278: in open_ledger
+    return PostgresLedger(spec, **kw)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/core/ledger_pg.py:78: in __init__
+    cur.execute(SCHEMA)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <psycopg.Cursor [closed] [BAD] at 0x7f57068c3410>
+query = "\nCREATE TABLE IF NOT EXISTS vati.events (\n  seq BIGSERIAL PRIMARY KEY, ledger TEXT NOT NULL,\n  kind TEXT NOT NULL,...expires_at_ms BIGINT NOT NULL,\n  software_version TEXT NOT NULL DEFAULT '',\n  git_sha TEXT NOT NULL DEFAULT ''\n);\n"
+params = None, prepare = None, binary = None
+
+    def execute(
+        self,
+        query: Query,
+        params: Params | None = None,
+        *,
+        prepare: bool | None = None,
+        binary: bool | None = None,
+    ) -> Self:
+        """
+        Execute a query or command to the database.
+        """
+        try:
+            with self._conn.lock:
+                self._conn.wait(
+                    self._execute_gen(query, params, prepare=prepare, binary=binary)
+                )
+        except e._NO_TRACEBACK as ex:
+>           raise ex.with_traceback(None)
+E           psycopg.errors.InvalidSchemaName: schema "vati" does not exist
+E           LINE 2: CREATE TABLE IF NOT EXISTS vati.events (
+E                                              ^
+
+../../van-backend-venv-20261025/lib/python3.12/site-packages/psycopg/cursor.py:97: InvalidSchemaName
+_ test_original_late_fill_recovery_retries_a_local_publication_failure_without_losing_context_or_double_cost[before-tca] _
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-26/test_original_late_fill_recove0')
+eurusd = SymbolContract(symbol='EURUSD', venue='mt5', base_currency='EUR', quote_currency='USD', account_currency='USD', contra...=Decimal('0'), max_adv_participation=Decimal('0.10'), liquidity_haircut=Decimal('0'), round_trip_cost_pct=Decimal('0'))
+when = 'before-tca'
+
+    @pytest.mark.parametrize('when',['before-tca','after-tca'])
+    def test_original_late_fill_recovery_retries_a_local_publication_failure_without_losing_context_or_double_cost(tmp_path,eurusd,when):
+>       with delayed_native_session(tmp_path,eurusd) as (service,bars,index,clock,poll,orders,result,queue,delivered):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+trading/tests/test_single_session_unknown_entry.py:225: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/contextlib.py:137: in __enter__
+    return next(self.gen)
+           ^^^^^^^^^^^^^^
+trading/tests/test_single_session_unknown_entry.py:79: in delayed_native_session
+    poll();service=SessionService(cfg,lambda now:[b for b in bars if b.end_ms<=now],clock=lambda:clock['ms'],adapter=adapter).build()
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/app/service.py:213: in build
+    self._ledger = open_ledger(c.ledger)
+                   ^^^^^^^^^^^^^^^^^^^^^
+trading/vati/core/ledger_pg.py:278: in open_ledger
+    return PostgresLedger(spec, **kw)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/core/ledger_pg.py:78: in __init__
+    cur.execute(SCHEMA)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <psycopg.Cursor [closed] [BAD] at 0x7f5704643350>
+query = "\nCREATE TABLE IF NOT EXISTS vati.events (\n  seq BIGSERIAL PRIMARY KEY, ledger TEXT NOT NULL,\n  kind TEXT NOT NULL,...expires_at_ms BIGINT NOT NULL,\n  software_version TEXT NOT NULL DEFAULT '',\n  git_sha TEXT NOT NULL DEFAULT ''\n);\n"
+params = None, prepare = None, binary = None
+
+    def execute(
+        self,
+        query: Query,
+        params: Params | None = None,
+        *,
+        prepare: bool | None = None,
+        binary: bool | None = None,
+    ) -> Self:
+        """
+        Execute a query or command to the database.
+        """
+        try:
+            with self._conn.lock:
+                self._conn.wait(
+                    self._execute_gen(query, params, prepare=prepare, binary=binary)
+                )
+        except e._NO_TRACEBACK as ex:
+>           raise ex.with_traceback(None)
+E           psycopg.errors.InvalidSchemaName: schema "vati" does not exist
+E           LINE 2: CREATE TABLE IF NOT EXISTS vati.events (
+E                                              ^
+
+../../van-backend-venv-20261025/lib/python3.12/site-packages/psycopg/cursor.py:97: InvalidSchemaName
+_ test_original_late_fill_recovery_retries_a_local_publication_failure_without_losing_context_or_double_cost[after-tca] _
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-26/test_original_late_fill_recove1')
+eurusd = SymbolContract(symbol='EURUSD', venue='mt5', base_currency='EUR', quote_currency='USD', account_currency='USD', contra...=Decimal('0'), max_adv_participation=Decimal('0.10'), liquidity_haircut=Decimal('0'), round_trip_cost_pct=Decimal('0'))
+when = 'after-tca'
+
+    @pytest.mark.parametrize('when',['before-tca','after-tca'])
+    def test_original_late_fill_recovery_retries_a_local_publication_failure_without_losing_context_or_double_cost(tmp_path,eurusd,when):
+>       with delayed_native_session(tmp_path,eurusd) as (service,bars,index,clock,poll,orders,result,queue,delivered):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+trading/tests/test_single_session_unknown_entry.py:225: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/contextlib.py:137: in __enter__
+    return next(self.gen)
+           ^^^^^^^^^^^^^^
+trading/tests/test_single_session_unknown_entry.py:79: in delayed_native_session
+    poll();service=SessionService(cfg,lambda now:[b for b in bars if b.end_ms<=now],clock=lambda:clock['ms'],adapter=adapter).build()
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/app/service.py:213: in build
+    self._ledger = open_ledger(c.ledger)
+                   ^^^^^^^^^^^^^^^^^^^^^
+trading/vati/core/ledger_pg.py:278: in open_ledger
+    return PostgresLedger(spec, **kw)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/core/ledger_pg.py:78: in __init__
+    cur.execute(SCHEMA)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <psycopg.Cursor [closed] [BAD] at 0x7f57068c3a10>
+query = "\nCREATE TABLE IF NOT EXISTS vati.events (\n  seq BIGSERIAL PRIMARY KEY, ledger TEXT NOT NULL,\n  kind TEXT NOT NULL,...expires_at_ms BIGINT NOT NULL,\n  software_version TEXT NOT NULL DEFAULT '',\n  git_sha TEXT NOT NULL DEFAULT ''\n);\n"
+params = None, prepare = None, binary = None
+
+    def execute(
+        self,
+        query: Query,
+        params: Params | None = None,
+        *,
+        prepare: bool | None = None,
+        binary: bool | None = None,
+    ) -> Self:
+        """
+        Execute a query or command to the database.
+        """
+        try:
+            with self._conn.lock:
+                self._conn.wait(
+                    self._execute_gen(query, params, prepare=prepare, binary=binary)
+                )
+        except e._NO_TRACEBACK as ex:
+>           raise ex.with_traceback(None)
+E           psycopg.errors.InvalidSchemaName: schema "vati" does not exist
+E           LINE 2: CREATE TABLE IF NOT EXISTS vati.events (
+E                                              ^
+
+../../van-backend-venv-20261025/lib/python3.12/site-packages/psycopg/cursor.py:97: InvalidSchemaName
+_ test_native_thesis_write_failure_recovers_from_real_persistence_not_a_memory_only_claim[before-thesis] _
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-26/test_native_thesis_write_failu0')
+eurusd = SymbolContract(symbol='EURUSD', venue='mt5', base_currency='EUR', quote_currency='USD', account_currency='USD', contra...=Decimal('0'), max_adv_participation=Decimal('0.10'), liquidity_haircut=Decimal('0'), round_trip_cost_pct=Decimal('0'))
+when = 'before-thesis'
+
+    @pytest.mark.parametrize('when',['before-thesis','after-thesis'])
+    def test_native_thesis_write_failure_recovers_from_real_persistence_not_a_memory_only_claim(tmp_path,eurusd,when):
+>       with delayed_native_session(tmp_path,eurusd) as (service,bars,index,clock,poll,orders,result,queue,delivered):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+trading/tests/test_single_session_unknown_entry.py:247: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/contextlib.py:137: in __enter__
+    return next(self.gen)
+           ^^^^^^^^^^^^^^
+trading/tests/test_single_session_unknown_entry.py:79: in delayed_native_session
+    poll();service=SessionService(cfg,lambda now:[b for b in bars if b.end_ms<=now],clock=lambda:clock['ms'],adapter=adapter).build()
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/app/service.py:213: in build
+    self._ledger = open_ledger(c.ledger)
+                   ^^^^^^^^^^^^^^^^^^^^^
+trading/vati/core/ledger_pg.py:278: in open_ledger
+    return PostgresLedger(spec, **kw)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/core/ledger_pg.py:78: in __init__
+    cur.execute(SCHEMA)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <psycopg.Cursor [closed] [BAD] at 0x7f57046428d0>
+query = "\nCREATE TABLE IF NOT EXISTS vati.events (\n  seq BIGSERIAL PRIMARY KEY, ledger TEXT NOT NULL,\n  kind TEXT NOT NULL,...expires_at_ms BIGINT NOT NULL,\n  software_version TEXT NOT NULL DEFAULT '',\n  git_sha TEXT NOT NULL DEFAULT ''\n);\n"
+params = None, prepare = None, binary = None
+
+    def execute(
+        self,
+        query: Query,
+        params: Params | None = None,
+        *,
+        prepare: bool | None = None,
+        binary: bool | None = None,
+    ) -> Self:
+        """
+        Execute a query or command to the database.
+        """
+        try:
+            with self._conn.lock:
+                self._conn.wait(
+                    self._execute_gen(query, params, prepare=prepare, binary=binary)
+                )
+        except e._NO_TRACEBACK as ex:
+>           raise ex.with_traceback(None)
+E           psycopg.errors.InvalidSchemaName: schema "vati" does not exist
+E           LINE 2: CREATE TABLE IF NOT EXISTS vati.events (
+E                                              ^
+
+../../van-backend-venv-20261025/lib/python3.12/site-packages/psycopg/cursor.py:97: InvalidSchemaName
+_ test_native_thesis_write_failure_recovers_from_real_persistence_not_a_memory_only_claim[after-thesis] _
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-26/test_native_thesis_write_failu1')
+eurusd = SymbolContract(symbol='EURUSD', venue='mt5', base_currency='EUR', quote_currency='USD', account_currency='USD', contra...=Decimal('0'), max_adv_participation=Decimal('0.10'), liquidity_haircut=Decimal('0'), round_trip_cost_pct=Decimal('0'))
+when = 'after-thesis'
+
+    @pytest.mark.parametrize('when',['before-thesis','after-thesis'])
+    def test_native_thesis_write_failure_recovers_from_real_persistence_not_a_memory_only_claim(tmp_path,eurusd,when):
+>       with delayed_native_session(tmp_path,eurusd) as (service,bars,index,clock,poll,orders,result,queue,delivered):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+trading/tests/test_single_session_unknown_entry.py:247: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/contextlib.py:137: in __enter__
+    return next(self.gen)
+           ^^^^^^^^^^^^^^
+trading/tests/test_single_session_unknown_entry.py:79: in delayed_native_session
+    poll();service=SessionService(cfg,lambda now:[b for b in bars if b.end_ms<=now],clock=lambda:clock['ms'],adapter=adapter).build()
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/app/service.py:213: in build
+    self._ledger = open_ledger(c.ledger)
+                   ^^^^^^^^^^^^^^^^^^^^^
+trading/vati/core/ledger_pg.py:278: in open_ledger
+    return PostgresLedger(spec, **kw)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/core/ledger_pg.py:78: in __init__
+    cur.execute(SCHEMA)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <psycopg.Cursor [closed] [BAD] at 0x7f5704643410>
+query = "\nCREATE TABLE IF NOT EXISTS vati.events (\n  seq BIGSERIAL PRIMARY KEY, ledger TEXT NOT NULL,\n  kind TEXT NOT NULL,...expires_at_ms BIGINT NOT NULL,\n  software_version TEXT NOT NULL DEFAULT '',\n  git_sha TEXT NOT NULL DEFAULT ''\n);\n"
+params = None, prepare = None, binary = None
+
+    def execute(
+        self,
+        query: Query,
+        params: Params | None = None,
+        *,
+        prepare: bool | None = None,
+        binary: bool | None = None,
+    ) -> Self:
+        """
+        Execute a query or command to the database.
+        """
+        try:
+            with self._conn.lock:
+                self._conn.wait(
+                    self._execute_gen(query, params, prepare=prepare, binary=binary)
+                )
+        except e._NO_TRACEBACK as ex:
+>           raise ex.with_traceback(None)
+E           psycopg.errors.InvalidSchemaName: schema "vati" does not exist
+E           LINE 2: CREATE TABLE IF NOT EXISTS vati.events (
+E                                              ^
+
+../../van-backend-venv-20261025/lib/python3.12/site-packages/psycopg/cursor.py:97: InvalidSchemaName
+_ test_already_resolved_original_result_replays_consistently_after_real_service_restart[REJECTED] _
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-26/test_already_resolved_original0')
+eurusd = SymbolContract(symbol='EURUSD', venue='mt5', base_currency='EUR', quote_currency='USD', account_currency='USD', contra...=Decimal('0'), max_adv_participation=Decimal('0.10'), liquidity_haircut=Decimal('0'), round_trip_cost_pct=Decimal('0'))
+outcome = 'REJECTED'
+
+    @pytest.mark.parametrize('outcome',['REJECTED','FILLED'])
+    def test_already_resolved_original_result_replays_consistently_after_real_service_restart(tmp_path,eurusd,outcome):
+>       with delayed_native_session(tmp_path,eurusd) as (service,bars,index,clock,poll,orders,result,queue,delivered):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+trading/tests/test_single_session_unknown_entry.py:272: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/contextlib.py:137: in __enter__
+    return next(self.gen)
+           ^^^^^^^^^^^^^^
+trading/tests/test_single_session_unknown_entry.py:79: in delayed_native_session
+    poll();service=SessionService(cfg,lambda now:[b for b in bars if b.end_ms<=now],clock=lambda:clock['ms'],adapter=adapter).build()
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/app/service.py:213: in build
+    self._ledger = open_ledger(c.ledger)
+                   ^^^^^^^^^^^^^^^^^^^^^
+trading/vati/core/ledger_pg.py:278: in open_ledger
+    return PostgresLedger(spec, **kw)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/core/ledger_pg.py:78: in __init__
+    cur.execute(SCHEMA)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <psycopg.Cursor [closed] [BAD] at 0x7f5704641cd0>
+query = "\nCREATE TABLE IF NOT EXISTS vati.events (\n  seq BIGSERIAL PRIMARY KEY, ledger TEXT NOT NULL,\n  kind TEXT NOT NULL,...expires_at_ms BIGINT NOT NULL,\n  software_version TEXT NOT NULL DEFAULT '',\n  git_sha TEXT NOT NULL DEFAULT ''\n);\n"
+params = None, prepare = None, binary = None
+
+    def execute(
+        self,
+        query: Query,
+        params: Params | None = None,
+        *,
+        prepare: bool | None = None,
+        binary: bool | None = None,
+    ) -> Self:
+        """
+        Execute a query or command to the database.
+        """
+        try:
+            with self._conn.lock:
+                self._conn.wait(
+                    self._execute_gen(query, params, prepare=prepare, binary=binary)
+                )
+        except e._NO_TRACEBACK as ex:
+>           raise ex.with_traceback(None)
+E           psycopg.errors.InvalidSchemaName: schema "vati" does not exist
+E           LINE 2: CREATE TABLE IF NOT EXISTS vati.events (
+E                                              ^
+
+../../van-backend-venv-20261025/lib/python3.12/site-packages/psycopg/cursor.py:97: InvalidSchemaName
+_ test_already_resolved_original_result_replays_consistently_after_real_service_restart[FILLED] _
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-26/test_already_resolved_original1')
+eurusd = SymbolContract(symbol='EURUSD', venue='mt5', base_currency='EUR', quote_currency='USD', account_currency='USD', contra...=Decimal('0'), max_adv_participation=Decimal('0.10'), liquidity_haircut=Decimal('0'), round_trip_cost_pct=Decimal('0'))
+outcome = 'FILLED'
+
+    @pytest.mark.parametrize('outcome',['REJECTED','FILLED'])
+    def test_already_resolved_original_result_replays_consistently_after_real_service_restart(tmp_path,eurusd,outcome):
+>       with delayed_native_session(tmp_path,eurusd) as (service,bars,index,clock,poll,orders,result,queue,delivered):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+trading/tests/test_single_session_unknown_entry.py:272: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/contextlib.py:137: in __enter__
+    return next(self.gen)
+           ^^^^^^^^^^^^^^
+trading/tests/test_single_session_unknown_entry.py:79: in delayed_native_session
+    poll();service=SessionService(cfg,lambda now:[b for b in bars if b.end_ms<=now],clock=lambda:clock['ms'],adapter=adapter).build()
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/app/service.py:213: in build
+    self._ledger = open_ledger(c.ledger)
+                   ^^^^^^^^^^^^^^^^^^^^^
+trading/vati/core/ledger_pg.py:278: in open_ledger
+    return PostgresLedger(spec, **kw)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/core/ledger_pg.py:78: in __init__
+    cur.execute(SCHEMA)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <psycopg.Cursor [closed] [BAD] at 0x7f57081a6f90>
+query = "\nCREATE TABLE IF NOT EXISTS vati.events (\n  seq BIGSERIAL PRIMARY KEY, ledger TEXT NOT NULL,\n  kind TEXT NOT NULL,...expires_at_ms BIGINT NOT NULL,\n  software_version TEXT NOT NULL DEFAULT '',\n  git_sha TEXT NOT NULL DEFAULT ''\n);\n"
+params = None, prepare = None, binary = None
+
+    def execute(
+        self,
+        query: Query,
+        params: Params | None = None,
+        *,
+        prepare: bool | None = None,
+        binary: bool | None = None,
+    ) -> Self:
+        """
+        Execute a query or command to the database.
+        """
+        try:
+            with self._conn.lock:
+                self._conn.wait(
+                    self._execute_gen(query, params, prepare=prepare, binary=binary)
+                )
+        except e._NO_TRACEBACK as ex:
+>           raise ex.with_traceback(None)
+E           psycopg.errors.InvalidSchemaName: schema "vati" does not exist
+E           LINE 2: CREATE TABLE IF NOT EXISTS vati.events (
+E                                              ^
+
+../../van-backend-venv-20261025/lib/python3.12/site-packages/psycopg/cursor.py:97: InvalidSchemaName
+_ test_zero_fill_refusal_cannot_erase_an_earlier_native_report_of_possible_filled_quantity _
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-26/test_zero_fill_refusal_cannot_0')
+eurusd = SymbolContract(symbol='EURUSD', venue='mt5', base_currency='EUR', quote_currency='USD', account_currency='USD', contra...=Decimal('0'), max_adv_participation=Decimal('0.10'), liquidity_haircut=Decimal('0'), round_trip_cost_pct=Decimal('0'))
+
+    def test_zero_fill_refusal_cannot_erase_an_earlier_native_report_of_possible_filled_quantity(tmp_path,eurusd):
+        from copy import deepcopy
+        from vati.core import make_event
+        from vati.core.canonical import canonical_hash
+>       with delayed_native_session(tmp_path,eurusd) as (service,bars,index,clock,poll,orders,result,queue,delivered):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+trading/tests/test_single_session_unknown_entry.py:295: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/contextlib.py:137: in __enter__
+    return next(self.gen)
+           ^^^^^^^^^^^^^^
+trading/tests/test_single_session_unknown_entry.py:79: in delayed_native_session
+    poll();service=SessionService(cfg,lambda now:[b for b in bars if b.end_ms<=now],clock=lambda:clock['ms'],adapter=adapter).build()
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/app/service.py:213: in build
+    self._ledger = open_ledger(c.ledger)
+                   ^^^^^^^^^^^^^^^^^^^^^
+trading/vati/core/ledger_pg.py:278: in open_ledger
+    return PostgresLedger(spec, **kw)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/core/ledger_pg.py:78: in __init__
+    cur.execute(SCHEMA)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <psycopg.Cursor [closed] [BAD] at 0x7f56ec344350>
+query = "\nCREATE TABLE IF NOT EXISTS vati.events (\n  seq BIGSERIAL PRIMARY KEY, ledger TEXT NOT NULL,\n  kind TEXT NOT NULL,...expires_at_ms BIGINT NOT NULL,\n  software_version TEXT NOT NULL DEFAULT '',\n  git_sha TEXT NOT NULL DEFAULT ''\n);\n"
+params = None, prepare = None, binary = None
+
+    def execute(
+        self,
+        query: Query,
+        params: Params | None = None,
+        *,
+        prepare: bool | None = None,
+        binary: bool | None = None,
+    ) -> Self:
+        """
+        Execute a query or command to the database.
+        """
+        try:
+            with self._conn.lock:
+                self._conn.wait(
+                    self._execute_gen(query, params, prepare=prepare, binary=binary)
+                )
+        except e._NO_TRACEBACK as ex:
+>           raise ex.with_traceback(None)
+E           psycopg.errors.InvalidSchemaName: schema "vati" does not exist
+E           LINE 2: CREATE TABLE IF NOT EXISTS vati.events (
+E                                              ^
+
+../../van-backend-venv-20261025/lib/python3.12/site-packages/psycopg/cursor.py:97: InvalidSchemaName
+_ test_loss_of_original_queue_record_is_unknown_and_cannot_create_a_replacement_command _
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-26/test_loss_of_original_queue_re0')
+eurusd = SymbolContract(symbol='EURUSD', venue='mt5', base_currency='EUR', quote_currency='USD', account_currency='USD', contra...=Decimal('0'), max_adv_participation=Decimal('0.10'), liquidity_haircut=Decimal('0'), round_trip_cost_pct=Decimal('0'))
+
+    def test_loss_of_original_queue_record_is_unknown_and_cannot_create_a_replacement_command(tmp_path,eurusd):
+>       with delayed_native_session(tmp_path,eurusd) as (service,bars,index,clock,poll,orders,result,queue,delivered):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+trading/tests/test_single_session_unknown_entry.py:311: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/contextlib.py:137: in __enter__
+    return next(self.gen)
+           ^^^^^^^^^^^^^^
+trading/tests/test_single_session_unknown_entry.py:79: in delayed_native_session
+    poll();service=SessionService(cfg,lambda now:[b for b in bars if b.end_ms<=now],clock=lambda:clock['ms'],adapter=adapter).build()
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/app/service.py:213: in build
+    self._ledger = open_ledger(c.ledger)
+                   ^^^^^^^^^^^^^^^^^^^^^
+trading/vati/core/ledger_pg.py:278: in open_ledger
+    return PostgresLedger(spec, **kw)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/core/ledger_pg.py:78: in __init__
+    cur.execute(SCHEMA)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <psycopg.Cursor [closed] [BAD] at 0x7f57046428d0>
+query = "\nCREATE TABLE IF NOT EXISTS vati.events (\n  seq BIGSERIAL PRIMARY KEY, ledger TEXT NOT NULL,\n  kind TEXT NOT NULL,...expires_at_ms BIGINT NOT NULL,\n  software_version TEXT NOT NULL DEFAULT '',\n  git_sha TEXT NOT NULL DEFAULT ''\n);\n"
+params = None, prepare = None, binary = None
+
+    def execute(
+        self,
+        query: Query,
+        params: Params | None = None,
+        *,
+        prepare: bool | None = None,
+        binary: bool | None = None,
+    ) -> Self:
+        """
+        Execute a query or command to the database.
+        """
+        try:
+            with self._conn.lock:
+                self._conn.wait(
+                    self._execute_gen(query, params, prepare=prepare, binary=binary)
+                )
+        except e._NO_TRACEBACK as ex:
+>           raise ex.with_traceback(None)
+E           psycopg.errors.InvalidSchemaName: schema "vati" does not exist
+E           LINE 2: CREATE TABLE IF NOT EXISTS vati.events (
+E                                              ^
+
+../../van-backend-venv-20261025/lib/python3.12/site-packages/psycopg/cursor.py:97: InvalidSchemaName
+_ test_initial_native_partial_fill_keeps_remaining_risk_and_truthful_status[PARTIAL] _
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-26/test_initial_native_partial_fi0')
+eurusd = SymbolContract(symbol='EURUSD', venue='mt5', base_currency='EUR', quote_currency='USD', account_currency='USD', contra...=Decimal('0'), max_adv_participation=Decimal('0.10'), liquidity_haircut=Decimal('0'), round_trip_cost_pct=Decimal('0'))
+native_status = 'PARTIAL'
+
+    @pytest.mark.parametrize('native_status',['PARTIAL','FILLED'])
+    def test_initial_native_partial_fill_keeps_remaining_risk_and_truthful_status(tmp_path,eurusd,native_status):
+>       with delayed_native_session(tmp_path,eurusd,initial_partial_status=native_status) as (service,bars,index,clock,poll,orders,result,queue,delivered):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+trading/tests/test_single_session_unknown_entry.py:323: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/contextlib.py:137: in __enter__
+    return next(self.gen)
+           ^^^^^^^^^^^^^^
+trading/tests/test_single_session_unknown_entry.py:79: in delayed_native_session
+    poll();service=SessionService(cfg,lambda now:[b for b in bars if b.end_ms<=now],clock=lambda:clock['ms'],adapter=adapter).build()
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/app/service.py:213: in build
+    self._ledger = open_ledger(c.ledger)
+                   ^^^^^^^^^^^^^^^^^^^^^
+trading/vati/core/ledger_pg.py:278: in open_ledger
+    return PostgresLedger(spec, **kw)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/core/ledger_pg.py:78: in __init__
+    cur.execute(SCHEMA)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <psycopg.Cursor [closed] [BAD] at 0x7f56ec3447d0>
+query = "\nCREATE TABLE IF NOT EXISTS vati.events (\n  seq BIGSERIAL PRIMARY KEY, ledger TEXT NOT NULL,\n  kind TEXT NOT NULL,...expires_at_ms BIGINT NOT NULL,\n  software_version TEXT NOT NULL DEFAULT '',\n  git_sha TEXT NOT NULL DEFAULT ''\n);\n"
+params = None, prepare = None, binary = None
+
+    def execute(
+        self,
+        query: Query,
+        params: Params | None = None,
+        *,
+        prepare: bool | None = None,
+        binary: bool | None = None,
+    ) -> Self:
+        """
+        Execute a query or command to the database.
+        """
+        try:
+            with self._conn.lock:
+                self._conn.wait(
+                    self._execute_gen(query, params, prepare=prepare, binary=binary)
+                )
+        except e._NO_TRACEBACK as ex:
+>           raise ex.with_traceback(None)
+E           psycopg.errors.InvalidSchemaName: schema "vati" does not exist
+E           LINE 2: CREATE TABLE IF NOT EXISTS vati.events (
+E                                              ^
+
+../../van-backend-venv-20261025/lib/python3.12/site-packages/psycopg/cursor.py:97: InvalidSchemaName
+_ test_initial_native_partial_fill_keeps_remaining_risk_and_truthful_status[FILLED] _
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-26/test_initial_native_partial_fi1')
+eurusd = SymbolContract(symbol='EURUSD', venue='mt5', base_currency='EUR', quote_currency='USD', account_currency='USD', contra...=Decimal('0'), max_adv_participation=Decimal('0.10'), liquidity_haircut=Decimal('0'), round_trip_cost_pct=Decimal('0'))
+native_status = 'FILLED'
+
+    @pytest.mark.parametrize('native_status',['PARTIAL','FILLED'])
+    def test_initial_native_partial_fill_keeps_remaining_risk_and_truthful_status(tmp_path,eurusd,native_status):
+>       with delayed_native_session(tmp_path,eurusd,initial_partial_status=native_status) as (service,bars,index,clock,poll,orders,result,queue,delivered):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+trading/tests/test_single_session_unknown_entry.py:323: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/contextlib.py:137: in __enter__
+    return next(self.gen)
+           ^^^^^^^^^^^^^^
+trading/tests/test_single_session_unknown_entry.py:79: in delayed_native_session
+    poll();service=SessionService(cfg,lambda now:[b for b in bars if b.end_ms<=now],clock=lambda:clock['ms'],adapter=adapter).build()
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/app/service.py:213: in build
+    self._ledger = open_ledger(c.ledger)
+                   ^^^^^^^^^^^^^^^^^^^^^
+trading/vati/core/ledger_pg.py:278: in open_ledger
+    return PostgresLedger(spec, **kw)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/core/ledger_pg.py:78: in __init__
+    cur.execute(SCHEMA)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <psycopg.Cursor [closed] [BAD] at 0x7f5707fd28d0>
+query = "\nCREATE TABLE IF NOT EXISTS vati.events (\n  seq BIGSERIAL PRIMARY KEY, ledger TEXT NOT NULL,\n  kind TEXT NOT NULL,...expires_at_ms BIGINT NOT NULL,\n  software_version TEXT NOT NULL DEFAULT '',\n  git_sha TEXT NOT NULL DEFAULT ''\n);\n"
+params = None, prepare = None, binary = None
+
+    def execute(
+        self,
+        query: Query,
+        params: Params | None = None,
+        *,
+        prepare: bool | None = None,
+        binary: bool | None = None,
+    ) -> Self:
+        """
+        Execute a query or command to the database.
+        """
+        try:
+            with self._conn.lock:
+                self._conn.wait(
+                    self._execute_gen(query, params, prepare=prepare, binary=binary)
+                )
+        except e._NO_TRACEBACK as ex:
+>           raise ex.with_traceback(None)
+E           psycopg.errors.InvalidSchemaName: schema "vati" does not exist
+E           LINE 2: CREATE TABLE IF NOT EXISTS vati.events (
+E                                              ^
+
+../../van-backend-venv-20261025/lib/python3.12/site-packages/psycopg/cursor.py:97: InvalidSchemaName
+_ test_process_restart_before_original_native_result_can_reconcile_without_resending[REJECTED] _
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-26/test_process_restart_before_or0')
+eurusd = SymbolContract(symbol='EURUSD', venue='mt5', base_currency='EUR', quote_currency='USD', account_currency='USD', contra...=Decimal('0'), max_adv_participation=Decimal('0.10'), liquidity_haircut=Decimal('0'), round_trip_cost_pct=Decimal('0'))
+outcome = 'REJECTED'
+
+    @pytest.mark.parametrize('outcome',['REJECTED','FILLED'])
+    def test_process_restart_before_original_native_result_can_reconcile_without_resending(tmp_path,eurusd,outcome):
+>       with delayed_native_session(tmp_path,eurusd) as (service,bars,index,clock,poll,orders,result,queue,delivered):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+trading/tests/test_single_session_unknown_entry.py:337: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/contextlib.py:137: in __enter__
+    return next(self.gen)
+           ^^^^^^^^^^^^^^
+trading/tests/test_single_session_unknown_entry.py:79: in delayed_native_session
+    poll();service=SessionService(cfg,lambda now:[b for b in bars if b.end_ms<=now],clock=lambda:clock['ms'],adapter=adapter).build()
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/app/service.py:213: in build
+    self._ledger = open_ledger(c.ledger)
+                   ^^^^^^^^^^^^^^^^^^^^^
+trading/vati/core/ledger_pg.py:278: in open_ledger
+    return PostgresLedger(spec, **kw)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/core/ledger_pg.py:78: in __init__
+    cur.execute(SCHEMA)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <psycopg.Cursor [closed] [BAD] at 0x7f56ec3447d0>
+query = "\nCREATE TABLE IF NOT EXISTS vati.events (\n  seq BIGSERIAL PRIMARY KEY, ledger TEXT NOT NULL,\n  kind TEXT NOT NULL,...expires_at_ms BIGINT NOT NULL,\n  software_version TEXT NOT NULL DEFAULT '',\n  git_sha TEXT NOT NULL DEFAULT ''\n);\n"
+params = None, prepare = None, binary = None
+
+    def execute(
+        self,
+        query: Query,
+        params: Params | None = None,
+        *,
+        prepare: bool | None = None,
+        binary: bool | None = None,
+    ) -> Self:
+        """
+        Execute a query or command to the database.
+        """
+        try:
+            with self._conn.lock:
+                self._conn.wait(
+                    self._execute_gen(query, params, prepare=prepare, binary=binary)
+                )
+        except e._NO_TRACEBACK as ex:
+>           raise ex.with_traceback(None)
+E           psycopg.errors.InvalidSchemaName: schema "vati" does not exist
+E           LINE 2: CREATE TABLE IF NOT EXISTS vati.events (
+E                                              ^
+
+../../van-backend-venv-20261025/lib/python3.12/site-packages/psycopg/cursor.py:97: InvalidSchemaName
+_ test_process_restart_before_original_native_result_can_reconcile_without_resending[FILLED] _
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-26/test_process_restart_before_or1')
+eurusd = SymbolContract(symbol='EURUSD', venue='mt5', base_currency='EUR', quote_currency='USD', account_currency='USD', contra...=Decimal('0'), max_adv_participation=Decimal('0.10'), liquidity_haircut=Decimal('0'), round_trip_cost_pct=Decimal('0'))
+outcome = 'FILLED'
+
+    @pytest.mark.parametrize('outcome',['REJECTED','FILLED'])
+    def test_process_restart_before_original_native_result_can_reconcile_without_resending(tmp_path,eurusd,outcome):
+>       with delayed_native_session(tmp_path,eurusd) as (service,bars,index,clock,poll,orders,result,queue,delivered):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+trading/tests/test_single_session_unknown_entry.py:337: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/contextlib.py:137: in __enter__
+    return next(self.gen)
+           ^^^^^^^^^^^^^^
+trading/tests/test_single_session_unknown_entry.py:79: in delayed_native_session
+    poll();service=SessionService(cfg,lambda now:[b for b in bars if b.end_ms<=now],clock=lambda:clock['ms'],adapter=adapter).build()
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/app/service.py:213: in build
+    self._ledger = open_ledger(c.ledger)
+                   ^^^^^^^^^^^^^^^^^^^^^
+trading/vati/core/ledger_pg.py:278: in open_ledger
+    return PostgresLedger(spec, **kw)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/core/ledger_pg.py:78: in __init__
+    cur.execute(SCHEMA)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <psycopg.Cursor [closed] [BAD] at 0x7f5707fd28d0>
+query = "\nCREATE TABLE IF NOT EXISTS vati.events (\n  seq BIGSERIAL PRIMARY KEY, ledger TEXT NOT NULL,\n  kind TEXT NOT NULL,...expires_at_ms BIGINT NOT NULL,\n  software_version TEXT NOT NULL DEFAULT '',\n  git_sha TEXT NOT NULL DEFAULT ''\n);\n"
+params = None, prepare = None, binary = None
+
+    def execute(
+        self,
+        query: Query,
+        params: Params | None = None,
+        *,
+        prepare: bool | None = None,
+        binary: bool | None = None,
+    ) -> Self:
+        """
+        Execute a query or command to the database.
+        """
+        try:
+            with self._conn.lock:
+                self._conn.wait(
+                    self._execute_gen(query, params, prepare=prepare, binary=binary)
+                )
+        except e._NO_TRACEBACK as ex:
+>           raise ex.with_traceback(None)
+E           psycopg.errors.InvalidSchemaName: schema "vati" does not exist
+E           LINE 2: CREATE TABLE IF NOT EXISTS vati.events (
+E                                              ^
+
+../../van-backend-venv-20261025/lib/python3.12/site-packages/psycopg/cursor.py:97: InvalidSchemaName
+___ test_late_original_fill_uses_approved_capsule_not_a_current_replacement ____
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-26/test_late_original_fill_uses_a0')
+eurusd = SymbolContract(symbol='EURUSD', venue='mt5', base_currency='EUR', quote_currency='USD', account_currency='USD', contra...=Decimal('0'), max_adv_participation=Decimal('0.10'), liquidity_haircut=Decimal('0'), round_trip_cost_pct=Decimal('0'))
+
+    def test_late_original_fill_uses_approved_capsule_not_a_current_replacement(tmp_path,eurusd):
+        from copy import deepcopy
+        from vati.strategies.capsule import Capsule
+>       with delayed_native_session(tmp_path,eurusd) as (service,bars,index,clock,poll,orders,result,queue,delivered):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+trading/tests/test_single_session_unknown_entry.py:367: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/contextlib.py:137: in __enter__
+    return next(self.gen)
+           ^^^^^^^^^^^^^^
+trading/tests/test_single_session_unknown_entry.py:79: in delayed_native_session
+    poll();service=SessionService(cfg,lambda now:[b for b in bars if b.end_ms<=now],clock=lambda:clock['ms'],adapter=adapter).build()
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/app/service.py:213: in build
+    self._ledger = open_ledger(c.ledger)
+                   ^^^^^^^^^^^^^^^^^^^^^
+trading/vati/core/ledger_pg.py:278: in open_ledger
+    return PostgresLedger(spec, **kw)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/core/ledger_pg.py:78: in __init__
+    cur.execute(SCHEMA)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <psycopg.Cursor [closed] [BAD] at 0x7f56ec344290>
+query = "\nCREATE TABLE IF NOT EXISTS vati.events (\n  seq BIGSERIAL PRIMARY KEY, ledger TEXT NOT NULL,\n  kind TEXT NOT NULL,...expires_at_ms BIGINT NOT NULL,\n  software_version TEXT NOT NULL DEFAULT '',\n  git_sha TEXT NOT NULL DEFAULT ''\n);\n"
+params = None, prepare = None, binary = None
+
+    def execute(
+        self,
+        query: Query,
+        params: Params | None = None,
+        *,
+        prepare: bool | None = None,
+        binary: bool | None = None,
+    ) -> Self:
+        """
+        Execute a query or command to the database.
+        """
+        try:
+            with self._conn.lock:
+                self._conn.wait(
+                    self._execute_gen(query, params, prepare=prepare, binary=binary)
+                )
+        except e._NO_TRACEBACK as ex:
+>           raise ex.with_traceback(None)
+E           psycopg.errors.InvalidSchemaName: schema "vati" does not exist
+E           LINE 2: CREATE TABLE IF NOT EXISTS vati.events (
+E                                              ^
+
+../../van-backend-venv-20261025/lib/python3.12/site-packages/psycopg/cursor.py:97: InvalidSchemaName
+_ test_original_cold_refusal_does_not_require_missing_historical_thesis_inputs _
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-26/test_original_cold_refusal_doe0')
+eurusd = SymbolContract(symbol='EURUSD', venue='mt5', base_currency='EUR', quote_currency='USD', account_currency='USD', contra...=Decimal('0'), max_adv_participation=Decimal('0.10'), liquidity_haircut=Decimal('0'), round_trip_cost_pct=Decimal('0'))
+
+    def test_original_cold_refusal_does_not_require_missing_historical_thesis_inputs(tmp_path,eurusd):
+        # Historical producer without ENTRY_CONTEXT; genuine command/risk/queue remain.
+>       with delayed_native_session(tmp_path,eurusd,omit_context=True) as (service,bars,index,clock,poll,orders,result,queue,delivered):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+trading/tests/test_single_session_unknown_entry.py:386: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/contextlib.py:137: in __enter__
+    return next(self.gen)
+           ^^^^^^^^^^^^^^
+trading/tests/test_single_session_unknown_entry.py:79: in delayed_native_session
+    poll();service=SessionService(cfg,lambda now:[b for b in bars if b.end_ms<=now],clock=lambda:clock['ms'],adapter=adapter).build()
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/app/service.py:213: in build
+    self._ledger = open_ledger(c.ledger)
+                   ^^^^^^^^^^^^^^^^^^^^^
+trading/vati/core/ledger_pg.py:278: in open_ledger
+    return PostgresLedger(spec, **kw)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/core/ledger_pg.py:78: in __init__
+    cur.execute(SCHEMA)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <psycopg.Cursor [closed] [BAD] at 0x7f5707fd28d0>
+query = "\nCREATE TABLE IF NOT EXISTS vati.events (\n  seq BIGSERIAL PRIMARY KEY, ledger TEXT NOT NULL,\n  kind TEXT NOT NULL,...expires_at_ms BIGINT NOT NULL,\n  software_version TEXT NOT NULL DEFAULT '',\n  git_sha TEXT NOT NULL DEFAULT ''\n);\n"
+params = None, prepare = None, binary = None
+
+    def execute(
+        self,
+        query: Query,
+        params: Params | None = None,
+        *,
+        prepare: bool | None = None,
+        binary: bool | None = None,
+    ) -> Self:
+        """
+        Execute a query or command to the database.
+        """
+        try:
+            with self._conn.lock:
+                self._conn.wait(
+                    self._execute_gen(query, params, prepare=prepare, binary=binary)
+                )
+        except e._NO_TRACEBACK as ex:
+>           raise ex.with_traceback(None)
+E           psycopg.errors.InvalidSchemaName: schema "vati" does not exist
+E           LINE 2: CREATE TABLE IF NOT EXISTS vati.events (
+E                                              ^
+
+../../van-backend-venv-20261025/lib/python3.12/site-packages/psycopg/cursor.py:97: InvalidSchemaName
+_ test_late_native_fill_keeps_original_setup_and_derives_target_r_from_actual_fill _
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-26/test_late_native_fill_keeps_or0')
+eurusd = SymbolContract(symbol='EURUSD', venue='mt5', base_currency='EUR', quote_currency='USD', account_currency='USD', contra...=Decimal('0'), max_adv_participation=Decimal('0.10'), liquidity_haircut=Decimal('0'), round_trip_cost_pct=Decimal('0'))
+
+    def test_late_native_fill_keeps_original_setup_and_derives_target_r_from_actual_fill(tmp_path,eurusd):
+        from decimal import Decimal as D
+>       with delayed_native_session(tmp_path,eurusd) as (service,bars,index,clock,poll,orders,result,queue,delivered):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+trading/tests/test_single_session_unknown_entry.py:403: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/contextlib.py:137: in __enter__
+    return next(self.gen)
+           ^^^^^^^^^^^^^^
+trading/tests/test_single_session_unknown_entry.py:79: in delayed_native_session
+    poll();service=SessionService(cfg,lambda now:[b for b in bars if b.end_ms<=now],clock=lambda:clock['ms'],adapter=adapter).build()
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/app/service.py:213: in build
+    self._ledger = open_ledger(c.ledger)
+                   ^^^^^^^^^^^^^^^^^^^^^
+trading/vati/core/ledger_pg.py:278: in open_ledger
+    return PostgresLedger(spec, **kw)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/core/ledger_pg.py:78: in __init__
+    cur.execute(SCHEMA)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <psycopg.Cursor [closed] [BAD] at 0x7f56ec345d90>
+query = "\nCREATE TABLE IF NOT EXISTS vati.events (\n  seq BIGSERIAL PRIMARY KEY, ledger TEXT NOT NULL,\n  kind TEXT NOT NULL,...expires_at_ms BIGINT NOT NULL,\n  software_version TEXT NOT NULL DEFAULT '',\n  git_sha TEXT NOT NULL DEFAULT ''\n);\n"
+params = None, prepare = None, binary = None
+
+    def execute(
+        self,
+        query: Query,
+        params: Params | None = None,
+        *,
+        prepare: bool | None = None,
+        binary: bool | None = None,
+    ) -> Self:
+        """
+        Execute a query or command to the database.
+        """
+        try:
+            with self._conn.lock:
+                self._conn.wait(
+                    self._execute_gen(query, params, prepare=prepare, binary=binary)
+                )
+        except e._NO_TRACEBACK as ex:
+>           raise ex.with_traceback(None)
+E           psycopg.errors.InvalidSchemaName: schema "vati" does not exist
+E           LINE 2: CREATE TABLE IF NOT EXISTS vati.events (
+E                                              ^
+
+../../van-backend-venv-20261025/lib/python3.12/site-packages/psycopg/cursor.py:97: InvalidSchemaName
+_ test_initial_confirmed_native_no_effect_is_not_reported_as_a_risk_approval[REJECTED] _
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-26/test_initial_confirmed_native_0')
+eurusd = SymbolContract(symbol='EURUSD', venue='mt5', base_currency='EUR', quote_currency='USD', account_currency='USD', contra...=Decimal('0'), max_adv_participation=Decimal('0.10'), liquidity_haircut=Decimal('0'), round_trip_cost_pct=Decimal('0'))
+native_status = 'REJECTED'
+
+    @pytest.mark.parametrize('native_status',['REJECTED','CANCELLED','EXPIRED'])
+    def test_initial_confirmed_native_no_effect_is_not_reported_as_a_risk_approval(tmp_path,eurusd,native_status):
+>       with delayed_native_session(tmp_path,eurusd,initial_terminal_status=native_status) as (service,bars,index,clock,poll,orders,result,queue,delivered):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+trading/tests/test_single_session_unknown_entry.py:419: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/contextlib.py:137: in __enter__
+    return next(self.gen)
+           ^^^^^^^^^^^^^^
+trading/tests/test_single_session_unknown_entry.py:79: in delayed_native_session
+    poll();service=SessionService(cfg,lambda now:[b for b in bars if b.end_ms<=now],clock=lambda:clock['ms'],adapter=adapter).build()
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/app/service.py:213: in build
+    self._ledger = open_ledger(c.ledger)
+                   ^^^^^^^^^^^^^^^^^^^^^
+trading/vati/core/ledger_pg.py:278: in open_ledger
+    return PostgresLedger(spec, **kw)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/core/ledger_pg.py:78: in __init__
+    cur.execute(SCHEMA)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <psycopg.Cursor [closed] [BAD] at 0x7f5707fd28d0>
+query = "\nCREATE TABLE IF NOT EXISTS vati.events (\n  seq BIGSERIAL PRIMARY KEY, ledger TEXT NOT NULL,\n  kind TEXT NOT NULL,...expires_at_ms BIGINT NOT NULL,\n  software_version TEXT NOT NULL DEFAULT '',\n  git_sha TEXT NOT NULL DEFAULT ''\n);\n"
+params = None, prepare = None, binary = None
+
+    def execute(
+        self,
+        query: Query,
+        params: Params | None = None,
+        *,
+        prepare: bool | None = None,
+        binary: bool | None = None,
+    ) -> Self:
+        """
+        Execute a query or command to the database.
+        """
+        try:
+            with self._conn.lock:
+                self._conn.wait(
+                    self._execute_gen(query, params, prepare=prepare, binary=binary)
+                )
+        except e._NO_TRACEBACK as ex:
+>           raise ex.with_traceback(None)
+E           psycopg.errors.InvalidSchemaName: schema "vati" does not exist
+E           LINE 2: CREATE TABLE IF NOT EXISTS vati.events (
+E                                              ^
+
+../../van-backend-venv-20261025/lib/python3.12/site-packages/psycopg/cursor.py:97: InvalidSchemaName
+_ test_initial_confirmed_native_no_effect_is_not_reported_as_a_risk_approval[CANCELLED] _
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-26/test_initial_confirmed_native_1')
+eurusd = SymbolContract(symbol='EURUSD', venue='mt5', base_currency='EUR', quote_currency='USD', account_currency='USD', contra...=Decimal('0'), max_adv_participation=Decimal('0.10'), liquidity_haircut=Decimal('0'), round_trip_cost_pct=Decimal('0'))
+native_status = 'CANCELLED'
+
+    @pytest.mark.parametrize('native_status',['REJECTED','CANCELLED','EXPIRED'])
+    def test_initial_confirmed_native_no_effect_is_not_reported_as_a_risk_approval(tmp_path,eurusd,native_status):
+>       with delayed_native_session(tmp_path,eurusd,initial_terminal_status=native_status) as (service,bars,index,clock,poll,orders,result,queue,delivered):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+trading/tests/test_single_session_unknown_entry.py:419: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/contextlib.py:137: in __enter__
+    return next(self.gen)
+           ^^^^^^^^^^^^^^
+trading/tests/test_single_session_unknown_entry.py:79: in delayed_native_session
+    poll();service=SessionService(cfg,lambda now:[b for b in bars if b.end_ms<=now],clock=lambda:clock['ms'],adapter=adapter).build()
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/app/service.py:213: in build
+    self._ledger = open_ledger(c.ledger)
+                   ^^^^^^^^^^^^^^^^^^^^^
+trading/vati/core/ledger_pg.py:278: in open_ledger
+    return PostgresLedger(spec, **kw)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/core/ledger_pg.py:78: in __init__
+    cur.execute(SCHEMA)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <psycopg.Cursor [closed] [BAD] at 0x7f56ec344290>
+query = "\nCREATE TABLE IF NOT EXISTS vati.events (\n  seq BIGSERIAL PRIMARY KEY, ledger TEXT NOT NULL,\n  kind TEXT NOT NULL,...expires_at_ms BIGINT NOT NULL,\n  software_version TEXT NOT NULL DEFAULT '',\n  git_sha TEXT NOT NULL DEFAULT ''\n);\n"
+params = None, prepare = None, binary = None
+
+    def execute(
+        self,
+        query: Query,
+        params: Params | None = None,
+        *,
+        prepare: bool | None = None,
+        binary: bool | None = None,
+    ) -> Self:
+        """
+        Execute a query or command to the database.
+        """
+        try:
+            with self._conn.lock:
+                self._conn.wait(
+                    self._execute_gen(query, params, prepare=prepare, binary=binary)
+                )
+        except e._NO_TRACEBACK as ex:
+>           raise ex.with_traceback(None)
+E           psycopg.errors.InvalidSchemaName: schema "vati" does not exist
+E           LINE 2: CREATE TABLE IF NOT EXISTS vati.events (
+E                                              ^
+
+../../van-backend-venv-20261025/lib/python3.12/site-packages/psycopg/cursor.py:97: InvalidSchemaName
+_ test_initial_confirmed_native_no_effect_is_not_reported_as_a_risk_approval[EXPIRED] _
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-26/test_initial_confirmed_native_2')
+eurusd = SymbolContract(symbol='EURUSD', venue='mt5', base_currency='EUR', quote_currency='USD', account_currency='USD', contra...=Decimal('0'), max_adv_participation=Decimal('0.10'), liquidity_haircut=Decimal('0'), round_trip_cost_pct=Decimal('0'))
+native_status = 'EXPIRED'
+
+    @pytest.mark.parametrize('native_status',['REJECTED','CANCELLED','EXPIRED'])
+    def test_initial_confirmed_native_no_effect_is_not_reported_as_a_risk_approval(tmp_path,eurusd,native_status):
+>       with delayed_native_session(tmp_path,eurusd,initial_terminal_status=native_status) as (service,bars,index,clock,poll,orders,result,queue,delivered):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+trading/tests/test_single_session_unknown_entry.py:419: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/contextlib.py:137: in __enter__
+    return next(self.gen)
+           ^^^^^^^^^^^^^^
+trading/tests/test_single_session_unknown_entry.py:79: in delayed_native_session
+    poll();service=SessionService(cfg,lambda now:[b for b in bars if b.end_ms<=now],clock=lambda:clock['ms'],adapter=adapter).build()
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/app/service.py:213: in build
+    self._ledger = open_ledger(c.ledger)
+                   ^^^^^^^^^^^^^^^^^^^^^
+trading/vati/core/ledger_pg.py:278: in open_ledger
+    return PostgresLedger(spec, **kw)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/core/ledger_pg.py:78: in __init__
+    cur.execute(SCHEMA)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <psycopg.Cursor [closed] [BAD] at 0x7f5707fd28d0>
+query = "\nCREATE TABLE IF NOT EXISTS vati.events (\n  seq BIGSERIAL PRIMARY KEY, ledger TEXT NOT NULL,\n  kind TEXT NOT NULL,...expires_at_ms BIGINT NOT NULL,\n  software_version TEXT NOT NULL DEFAULT '',\n  git_sha TEXT NOT NULL DEFAULT ''\n);\n"
+params = None, prepare = None, binary = None
+
+    def execute(
+        self,
+        query: Query,
+        params: Params | None = None,
+        *,
+        prepare: bool | None = None,
+        binary: bool | None = None,
+    ) -> Self:
+        """
+        Execute a query or command to the database.
+        """
+        try:
+            with self._conn.lock:
+                self._conn.wait(
+                    self._execute_gen(query, params, prepare=prepare, binary=binary)
+                )
+        except e._NO_TRACEBACK as ex:
+>           raise ex.with_traceback(None)
+E           psycopg.errors.InvalidSchemaName: schema "vati" does not exist
+E           LINE 2: CREATE TABLE IF NOT EXISTS vati.events (
+E                                              ^
+
+../../van-backend-venv-20261025/lib/python3.12/site-packages/psycopg/cursor.py:97: InvalidSchemaName
+=============================== warnings summary ===============================
+../../van-backend-venv-20261025/lib/python3.12/site-packages/fastapi/testclient.py:1
+  /workspace/van-backend-venv-20261025/lib/python3.12/site-packages/fastapi/testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+    from starlette.testclient import TestClient as TestClient  # noqa
+
+../../van-backend-venv-20261025/lib/python3.12/site-packages/starlette/testclient.py:53
+  /workspace/van-backend-venv-20261025/lib/python3.12/site-packages/starlette/testclient.py:53: DeprecationWarning: The anyio.abc.BlockingPortal alias is deprecated, use anyio.from_thread.BlockingPortal instead.
+    _PortalFactoryType = Callable[[], AbstractContextManager[anyio.abc.BlockingPortal]]
+
+trading/tests/test_infra_live.py::test_deriv_ws_transport_over_a_real_websocket_server
+  /workspace/van-review-2026-10-18/publish/trading/vati/execution/transports/deriv_ws.py:97: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+    self._ws.send(wire)
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED trading/tests/test_infra_live.py::test_postgres_ledger_matches_sqlite_chain_and_detects_tampering
+FAILED trading/tests/test_learning_account_scope.py::test_postgres_native_learning_scope_uses_the_same_account_boundary
+FAILED trading/tests/test_mandate_current_signer.py::test_actual_account_coordinator_reports_the_current_signer_hold
+FAILED trading/tests/test_mandate_dispatch_validity.py::test_actual_book_factory_rechecks_its_own_clock_before_the_native_sender
+FAILED trading/tests/test_native_account_effects.py::test_postgres_original_operation_is_atomic_and_isolated_between_named_ledgers
+FAILED trading/tests/test_native_account_effects.py::test_actual_concurrent_native_claim_writers_cannot_admit_two_effects_for_a_target[postgres]
+FAILED trading/tests/test_paper_contract_valuation.py::test_actual_book_factory_uses_each_instruments_own_money_units
+FAILED trading/tests/test_restated_trade_projection.py::test_postgres_native_projection_crash_restart_and_logical_ledger_isolation
+FAILED trading/tests/test_runtime_learning_cohort.py::test_actual_book_builder_keeps_a_paper_live_policy_in_the_demo_cohort
+FAILED trading/tests/test_single_session_lease.py::test_actual_single_symbol_processes_arbitrate_before_startup_reconciliation[postgres]
+FAILED trading/tests/test_single_session_lease.py::test_simultaneous_first_postgres_insert_reports_healthy_arbitration_not_outage
+FAILED trading/tests/test_single_session_unknown_entry.py::test_original_timed_out_native_entry_is_not_reported_as_executed_or_approved
+FAILED trading/tests/test_single_session_unknown_entry.py::test_current_empty_positions_do_not_release_original_unresolved_entry_risk
+FAILED trading/tests/test_single_session_unknown_entry.py::test_late_original_native_rejection_releases_only_that_attempt_without_replaying_it
+FAILED trading/tests/test_single_session_unknown_entry.py::test_late_original_native_fill_restores_full_trade_identity_and_protection_without_another_send
+FAILED trading/tests/test_single_session_unknown_entry.py::test_missing_native_enqueue_reply_holds_the_durable_original_attempt
+FAILED trading/tests/test_single_session_unknown_entry.py::test_contradictory_or_partial_native_evidence_cannot_release_the_original_hold[wrong-symbol]
+FAILED trading/tests/test_single_session_unknown_entry.py::test_contradictory_or_partial_native_evidence_cannot_release_the_original_hold[oversized-fill]
+FAILED trading/tests/test_single_session_unknown_entry.py::test_contradictory_or_partial_native_evidence_cannot_release_the_original_hold[stop-unconfirmed]
+FAILED trading/tests/test_single_session_unknown_entry.py::test_contradictory_or_partial_native_evidence_cannot_release_the_original_hold[rejected-with-fill]
+FAILED trading/tests/test_single_session_unknown_entry.py::test_contradictory_or_partial_native_evidence_cannot_release_the_original_hold[malformed-volume]
+FAILED trading/tests/test_single_session_unknown_entry.py::test_lost_enqueue_reply_can_read_the_original_native_refusal_without_repeating_the_write
+FAILED trading/tests/test_single_session_unknown_entry.py::test_owner_heartbeat_reports_the_original_unknown_hold
+FAILED trading/tests/test_single_session_unknown_entry.py::test_original_late_fill_recovery_retries_a_local_publication_failure_without_losing_context_or_double_cost[before-tca]
+FAILED trading/tests/test_single_session_unknown_entry.py::test_original_late_fill_recovery_retries_a_local_publication_failure_without_losing_context_or_double_cost[after-tca]
+FAILED trading/tests/test_single_session_unknown_entry.py::test_native_thesis_write_failure_recovers_from_real_persistence_not_a_memory_only_claim[before-thesis]
+FAILED trading/tests/test_single_session_unknown_entry.py::test_native_thesis_write_failure_recovers_from_real_persistence_not_a_memory_only_claim[after-thesis]
+FAILED trading/tests/test_single_session_unknown_entry.py::test_already_resolved_original_result_replays_consistently_after_real_service_restart[REJECTED]
+FAILED trading/tests/test_single_session_unknown_entry.py::test_already_resolved_original_result_replays_consistently_after_real_service_restart[FILLED]
+FAILED trading/tests/test_single_session_unknown_entry.py::test_zero_fill_refusal_cannot_erase_an_earlier_native_report_of_possible_filled_quantity
+FAILED trading/tests/test_single_session_unknown_entry.py::test_loss_of_original_queue_record_is_unknown_and_cannot_create_a_replacement_command
+FAILED trading/tests/test_single_session_unknown_entry.py::test_initial_native_partial_fill_keeps_remaining_risk_and_truthful_status[PARTIAL]
+FAILED trading/tests/test_single_session_unknown_entry.py::test_initial_native_partial_fill_keeps_remaining_risk_and_truthful_status[FILLED]
+FAILED trading/tests/test_single_session_unknown_entry.py::test_process_restart_before_original_native_result_can_reconcile_without_resending[REJECTED]
+FAILED trading/tests/test_single_session_unknown_entry.py::test_process_restart_before_original_native_result_can_reconcile_without_resending[FILLED]
+FAILED trading/tests/test_single_session_unknown_entry.py::test_late_original_fill_uses_approved_capsule_not_a_current_replacement
+FAILED trading/tests/test_single_session_unknown_entry.py::test_original_cold_refusal_does_not_require_missing_historical_thesis_inputs
+FAILED trading/tests/test_single_session_unknown_entry.py::test_late_native_fill_keeps_original_setup_and_derives_target_r_from_actual_fill
+FAILED trading/tests/test_single_session_unknown_entry.py::test_initial_confirmed_native_no_effect_is_not_reported_as_a_risk_approval[REJECTED]
+FAILED trading/tests/test_single_session_unknown_entry.py::test_initial_confirmed_native_no_effect_is_not_reported_as_a_risk_approval[CANCELLED]
+FAILED trading/tests/test_single_session_unknown_entry.py::test_initial_confirmed_native_no_effect_is_not_reported_as_a_risk_approval[EXPIRED]
+ERROR trading/tests/test_account_retirement_pg.py::test_actual_pg_live_runtime_prevents_destructive_unlink
+ERROR trading/tests/test_account_retirement_pg.py::test_actual_pg_first_retirement_owns_the_previously_absent_lease_row
+ERROR trading/tests/test_account_retirement_pg.py::test_actual_pg_row_guard_fences_a_competing_actor_even_beyond_lease_ttl
+41 failed, 3063 passed, 1 skipped, 3 warnings, 3 errors in 352.07s (0:05:52)

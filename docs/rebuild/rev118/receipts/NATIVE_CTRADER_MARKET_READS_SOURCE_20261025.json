@@ -1,0 +1,46 @@
+{
+  "schema": "van.rebuild.native-market-source/1",
+  "status": "SOURCE_TESTED_COMPONENT_NOT_UNIT_ACCEPTANCE",
+  "base_head": "4ef8fcf2e8dc6ccb4592c69a91a49b51676f5733",
+  "updated_at_utc": "2026-10-25T17:45:21.734078+00:00",
+  "source_sha256": {
+    "trading/vati/execution/ctrader/adapter.py": "ef5c9575e4ac38ebbd17e96e46b472525d5bdb8da28c34564844f7f51739b079",
+    "trading/vati/execution/ctrader/feed.py": "c68f047b379694eb22993c174c52f1644c91ab0545584d3617b551ad3c594cf8",
+    "trading/tests/test_ctrader.py": "2b8ad6ff95187b78e59666029c68c5f82e40945d5fe200695c0605927aeade19",
+    "trading/tests/test_ctrader_feed_contract.py": "37cc5933d9c9b1d08b83d981b4dcd278d0d8f5a7d13924c5f32444d39000061b"
+  },
+  "executed": {
+    "initial_characterization": "42failed on published parent; three optional-delta draft oracles later corrected against the pinned proto2 contract. Retained, not claimed as42confirmed production bugs.",
+    "first_integration": "46pass/1socket fixture failure: request1970but native fixture bars2023.",
+    "second_integration": "89pass/1socket fixture failure: captured native clock preceded later fixture bars.",
+    "third_integration": "172pass/0skip before final protocol-default refinement.",
+    "final": "173pass/0skip under repaired storage instrument; zero forbidden events.",
+    "rebuild": "108pass/0skip",
+    "pinned_dds_resolver": "2pass/0skip",
+    "full_initial": "FAILED:3063pass/41fail/3error/1skip; all44nonpasses are missing disposable PostgreSQL schema setup. Container removed.",
+    "full_corrected": "INTERRUPTED exit2 after2836passes/24m26s, no complete-suite PASS. PostgreSQL initialized exactly as CI, actual pinned DDS bound, owned container removed; adopted-child supervisor completed.",
+    "full_current_hosted": "NOT_RUN until next exact-source publication"
+  },
+  "primary_protocol_references": [
+    {
+      "url": "https://protobuf.dev/programming-guides/proto2/#default",
+      "observed_date": "2026-10-25",
+      "fact": "Unset optional scalar defaults; valid optional zero deltas retain provenance."
+    },
+    {
+      "url": "https://help.ctrader.com/open-api/symbol-data/",
+      "observed_date": "2026-10-25",
+      "fact": "Native relative price reconstruction and separate live bars/quotes/depth subscription contracts."
+    }
+  ],
+  "native_qualification": false,
+  "economic_qualification": false,
+  "unit_acceptance": "NOT_ISSUED",
+  "remaining": [
+    "Native scoped persistence and bounded producer wiring",
+    "Provider entitlement, health, corrections, gaps and authoritative session/closed-bar semantics",
+    "Actual quote/spread/depth/tick sources and monitor consumers",
+    "Other venues, full BE-008 and all original backend/frontend/native gates"
+  ],
+  "evidence": "ci/native_feed_20261025"
+}

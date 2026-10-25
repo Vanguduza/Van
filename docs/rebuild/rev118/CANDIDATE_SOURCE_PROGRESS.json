@@ -1,6 +1,6 @@
 {
   "schema": "van.rebuild.candidate-source-progress/1",
-  "updated_at_utc": "2026-10-25T16:35:49.259639+00:00",
+  "updated_at_utc": "2026-10-25T17:45:21.734078+00:00",
   "programme": "Rev1.18; original 131 unit IDs and dependencies retained",
   "authority": "auth-20261022-owner-autonomous-candidate-build",
   "meaning": "Candidate source progress is separate from admitted unit acceptance. Independent certificates, owner decisions, live effects and release gates remain unissued. No unit is declared complete by this record.",
@@ -311,6 +311,10 @@
         {
           "description": "Reconstructed exact signed owner A2 alert pause/restart/delete commands with original request/revision binding, writer-lock expiry and independent historical control receipt verification; actual SQL and gateway44cases pass, six faults caught/restored. Private-core migration boundary and learning/reminder integration regressions repaired with unchanged original refusal/recovery assertions. Whole-unit, native/provider/Android acceptance remains unissued.",
           "evidence": "backend/BE-003_MONITOR_INTEGRATION_RECOVERY.md; receipts/OWNER_ALERT_COMMANDS_SOURCE_20261025.json"
+        },
+        {
+          "description": "Source storage-audit directory-FD bypass/false-positive and missing-report recovery:9before failures,10guard checks and108rebuild pass;258monitor+173native integrations pass with zero forbidden events. Instrumentation limits remain explicit; no native security acceptance.",
+          "evidence": "backend/BE-003_STORAGE_AUDIT_DIRECTORY_FDS.md; receipts/STORAGE_AUDIT_DIRECTORY_FDS_20261025.json"
         }
       ]
     },
@@ -471,12 +475,16 @@
         "BE-005",
         "PRE-003"
       ],
-      "candidate_status": "SOURCE_TESTED",
+      "candidate_status": "IN_PROGRESS",
       "unit_acceptance": "NOT_ISSUED",
       "milestones": [
         {
           "description": "Research lake verifies and parses one captured blob; validates instrument/timeframe/finite market values, duplicates, manifest metadata and conflicting overlaps. Encoded contained partitions and slice paths, legacy twelve-character filename/hash compatibility, existing cross-process state-file lock and flushed atomic manifest replacement. Actual concurrent threads/processes and failed/lost-ACK publication retain original snapshots without duplicate history.11 reproduced failures;22 focused/audited and2539 full trading cases pass0skip with privatePG stopped/removed;8 deliberate fault/control pairs caught/restored. Real public historical probe returnedHTTP429 and stays unqualified. No source-use, provider, native, unit, profitability or handset acceptance.",
           "evidence": "backend/BE-008_015_RESEARCH_LAKE_INTEGRITY.md; receipts/RESEARCH_LAKE_INTEGRITY_SOURCE_20261023.json"
+        },
+        {
+          "description": "Native cTrader read scope, exact typed OHLC/window/receipt validation, explicit optional-delta defaults, tick volume/unknown spread and atomic native contract discovery with failed-refresh fencing.173native/account/funding integrations pass; broad local corrected run interrupted after2836passes and is partial. Native producer/persistence/entitlement/calendar/quote/depth/monitor wiring and complete unit acceptance remain open.",
+          "evidence": "backend/BE-008_NATIVE_CTRADER_MARKET_READS.md; receipts/NATIVE_CTRADER_MARKET_READS_SOURCE_20261025.json"
         }
       ]
     },
@@ -843,6 +851,10 @@
         {
           "description": "Reconstructed exact signed owner A2 alert pause/restart/delete commands with original request/revision binding, writer-lock expiry and independent historical control receipt verification; actual SQL and gateway44cases pass, six faults caught/restored. Private-core migration boundary and learning/reminder integration regressions repaired with unchanged original refusal/recovery assertions. Whole-unit, native/provider/Android acceptance remains unissued.",
           "evidence": "backend/BE-003_MONITOR_INTEGRATION_RECOVERY.md; receipts/OWNER_ALERT_COMMANDS_SOURCE_20261025.json"
+        },
+        {
+          "description": "Actual hosted descriptor failure reproduced and repaired with explicit alert-control reversibility and canonical historical receipt verifier inventory.73focused/258integrated pass; all12original C16faults caught/restored. Older hosted corpus remainsPARTIAL_FAILED335caught/39unexecuted; no whole-unit acceptance.",
+          "evidence": "receipts/ALERT_DESCRIPTOR_RECOVERY_SOURCE_20261025.json"
         }
       ]
     },
@@ -1987,6 +1999,10 @@
         {
           "description": "Reconstructed exact signed owner A2 alert pause/restart/delete commands with original request/revision binding, writer-lock expiry and independent historical control receipt verification; actual SQL and gateway44cases pass, six faults caught/restored. Private-core migration boundary and learning/reminder integration regressions repaired with unchanged original refusal/recovery assertions. Whole-unit, native/provider/Android acceptance remains unissued.",
           "evidence": "backend/BE-003_MONITOR_INTEGRATION_RECOVERY.md; receipts/OWNER_ALERT_COMMANDS_SOURCE_20261025.json"
+        },
+        {
+          "description": "Actual hosted descriptor failure reproduced and repaired with explicit alert-control reversibility and canonical historical receipt verifier inventory.73focused/258integrated pass; all12original C16faults caught/restored. Older hosted corpus remainsPARTIAL_FAILED335caught/39unexecuted; no whole-unit acceptance.",
+          "evidence": "receipts/ALERT_DESCRIPTOR_RECOVERY_SOURCE_20261025.json"
         }
       ]
     },
