@@ -9,13 +9,15 @@ only tighten. The label carries the intent id so reconciliation can find orphans
 from __future__ import annotations
 
 import time
-from dataclasses import dataclass, field
+import threading
+from dataclasses import dataclass, field, replace
 from decimal import Decimal, ROUND_DOWN, localcontext
 from typing import Any, Callable, Optional, ClassVar
 
 from vati.execution.base import AccountState, ExecutionReceipt, Health, OrderCommand, VenuePosition, VenueUnavailable
 from vati.execution.ctrader.transport import CtraderApiError, CtraderTransport, CtraderReadTransport
 from vati.execution.ctrader.contracts import NativeSymbolContract
+from vati.execution.ctrader.spots import SpotBook
 from vati.execution.entry_deadline import EntryNotSent, require_entry_deadline
 from vati.risk.contracts import Direction, LossModel
 
@@ -70,6 +72,10 @@ class CtraderAdapter:
     _money_digits: int = 2
     _currency: str = "USD"
     _last_spot: dict[int, tuple[Decimal, Decimal]] = field(default_factory=dict)
+    _spot_book: SpotBook = field(default_factory=SpotBook)
+    _spot_subscriptions: set = field(default_factory=set)
+    _spot_control_states: dict = field(default_factory=dict)
+    _spot_lock: Any = field(default_factory=threading.RLock,repr=False)
 
     # ------------------------------------------------------------ auth
     def _auth_is_current(self) -> bool:
@@ -85,6 +91,9 @@ class CtraderAdapter:
         self._auth_connection = None
         self._symbol_snapshot_valid = False
         self._last_spot.clear()
+        self._spot_book=SpotBook()
+        self._spot_subscriptions=set()
+        self._spot_control_states={}
         try:
             account = native_integer(self.ctid_trader_account_id, minimum=1)
             self.transport.connect()
@@ -209,18 +218,13 @@ class CtraderAdapter:
         adapter=CtraderAdapter(transport,self.client_id,self.client_secret_provider,self.access_token_provider,
             self.ctid_trader_account_id,self.account_alias,self.venue,clock=self.clock)
         class MarketReader:
-            def read_window(self,expected_contract,*,timeframe,from_ms,to_ms):
-                from vati.execution.ctrader.feed import read_trendbars,native_integer,PERIOD,MAX_TIMESTAMP
+            def _select(self,expected_contract):
                 if not isinstance(expected_contract,NativeSymbolContract):
                     raise VenueUnavailable('cTrader captured native contract required')
                 scope=expected_contract.native_scope
                 if (scope['native_account_id']!=adapter.ctid_trader_account_id
                         or scope['transport_host']!=transport.host):
                     raise VenueUnavailable('cTrader market reader account/environment differs')
-                if not isinstance(timeframe,str) or timeframe not in PERIOD:
-                    raise VenueUnavailable('cTrader market reader timeframe invalid')
-                native_integer(from_ms,maximum=MAX_TIMESTAMP)
-                native_integer(to_ms,minimum=from_ms,maximum=MAX_TIMESTAMP)
                 adapter._selected_native_symbols=(scope['native_symbol_id'],)
                 adapter._symbol_snapshot_valid=False
                 name=expected_contract.metadata['light']['symbolName']
@@ -228,9 +232,30 @@ class CtraderAdapter:
                 original=adapter.symbol(name).native_contract
                 if original is None or original.revision!=expected_contract.revision:
                     raise VenueUnavailable('cTrader native contract changed; refresh required')
+                return name,original
+            def read_window(self,expected_contract,*,timeframe,from_ms,to_ms):
+                from vati.execution.ctrader.feed import read_trendbars,native_integer,PERIOD,MAX_TIMESTAMP
+                if not isinstance(timeframe,str) or timeframe not in PERIOD:
+                    raise VenueUnavailable('cTrader market reader timeframe invalid')
+                native_integer(from_ms,maximum=MAX_TIMESTAMP)
+                native_integer(to_ms,minimum=from_ms,maximum=MAX_TIMESTAMP)
+                name,original=self._select(expected_contract)
                 observed=read_trendbars(adapter,name,timeframe,from_ms=from_ms,to_ms=to_ms,count=2001)
                 transport.check_budget()  # Includes native observation parsing.
                 return original,observed
+            def read_quote(self,expected_contract,*,max_age_ms=5000):
+                from vati.execution.ctrader.feed import native_integer
+                native_integer(max_age_ms,minimum=1)
+                name,original=self._select(expected_contract)
+                adapter.subscribe_spots(name)
+                while True:
+                    observed=adapter.spot_observation(name,max_age_ms=max_age_ms)
+                    transport.check_budget()
+                    if observed.prices is not None:return original,observed
+                    if observed.state not in {'WAITING_NATIVE_BID','WAITING_NATIVE_ASK','NATIVE_QUOTE_BACKLOG_UNPROCESSED'}:
+                        raise VenueUnavailable('cTrader native quote unavailable: '+observed.state)
+                    if not transport.wait_for_event_kind('ProtoOASpotEvent'):
+                        raise VenueUnavailable('cTrader native spot subscription queued but no complete fresh quote delivered')
             def close(self):transport.close()
         return MarketReader()
 
@@ -666,14 +691,82 @@ class CtraderAdapter:
             protected,now_ms,now_ms,broker_order_id=str(order_id),broker_position_id=position_id,reject_reason=reason).sealed()
 
     # ------------------------------------------------------------ market data
-    def spot(self, symbol: str) -> Optional[tuple[Decimal, Decimal]]:
-        self._ensure_auth()
-        sym = self.symbol(symbol)
-        for name, body in self.transport.drain_events():
-            if name == "ProtoOASpotEvent" and body.get("bid") and body.get("ask"):
-                self._last_spot[body["symbolId"]] = (Decimal(body["bid"]) / PRICE_SCALE, Decimal(body["ask"]) / PRICE_SCALE)
-        return self._last_spot.get(sym.symbol_id)
+    def spot_observation(self,symbol: str,*,max_age_ms=5000):
+        """Scoped raw native sides and freshness; never a tradability claim."""
+        from vati.execution.ctrader.feed import native_integer
+        native_integer(max_age_ms,minimum=1)
+        with self._spot_lock:
+            self._ensure_auth();sym=self.symbol(symbol)
+            if sym.native_contract is None:
+                raise VenueUnavailable('cTrader native quote contract unavailable')
+            connection=getattr(self.transport,'connection_id',None)
+            book=self._spot_book
+            pending=self.transport.drain_events_kind('ProtoOASpotEvent')
+            try:now=self.clock()
+            except Exception:now=None
+            known={item.symbol_id:item for item in self.symbols.values()}
+            for _,body in pending:
+                product=body.get('symbolId') if isinstance(body,dict) else None
+                if type(product) is not int or product not in known:continue
+                if (connection,product) not in self._spot_subscriptions:continue
+                item=known[product]
+                if item.native_contract is not None:book.observe(item.native_contract,connection,body,now)
+            if (not self._auth_is_current() or connection!=getattr(self.transport,'connection_id',None)
+                    or book is not self._spot_book or self.symbol(symbol).contract_revision!=sym.contract_revision):
+                raise VenueUnavailable('cTrader native quote context changed')
+            try:evaluated=self.clock()
+            except Exception:evaluated=None
+            result=book.snapshot(sym.native_contract,connection,now_ms=evaluated,max_age_ms=max_age_ms,
+                subscribed=(connection,sym.symbol_id) in self._spot_subscriptions)
+            result=replace(result,control_state=self._spot_control_states.get((connection,sym.symbol_id),'NOT_REQUESTED'))
+            if self.transport.has_events_kind('ProtoOASpotEvent'):
+                result=replace(result,state='NATIVE_QUOTE_BACKLOG_UNPROCESSED')
+            if result.prices is None:self._last_spot.pop(sym.symbol_id,None)
+            else:self._last_spot[sym.symbol_id]=result.prices
+            return result
+
+    def spot(self,symbol: str,*,max_age_ms=5000) -> Optional[tuple[Decimal,Decimal]]:
+        """Legacy price-pair adapter. A raw pair is not a live/trading certificate."""
+        return self.spot_observation(symbol,max_age_ms=max_age_ms).prices
 
     def subscribe_spots(self, symbol: str) -> None:
-        self._ensure_auth()
-        self.transport.call("ProtoOASubscribeSpotsReq", {"ctidTraderAccountId": self.ctid_trader_account_id, "symbolId": [self.symbol(symbol).symbol_id]})
+        from vati.execution.ctrader.feed import native_integer
+        with self._spot_lock:
+            self._ensure_auth();sym=self.symbol(symbol)
+            connection=getattr(self.transport,'connection_id',None);key=(connection,sym.symbol_id)
+            if key in self._spot_subscriptions:return
+            self._spot_control_states[key]='SUBSCRIBE_REQUESTED_UNCONFIRMED'
+            name,body=self.transport.call('ProtoOASubscribeSpotsReq',{'ctidTraderAccountId':self.ctid_trader_account_id,
+                'symbolId':[sym.symbol_id],'subscribeToSpotTimestamp':True})
+            try:
+                if (name!='ProtoOASubscribeSpotsRes' or not isinstance(body,dict)
+                        or native_integer(body['ctidTraderAccountId'],minimum=1)!=self.ctid_trader_account_id
+                        or connection!=getattr(self.transport,'connection_id',None) or not self._auth_is_current()):
+                    raise ValueError()
+            except (KeyError,TypeError,ValueError) as exc:
+                self._spot_control_states[key]='SUBSCRIBE_ACKNOWLEDGEMENT_INVALID'
+                raise VenueUnavailable('cTrader native spot subscription acknowledgement mismatch') from exc
+            self._spot_subscriptions.add(key)  # ACK is queued subscription, not a delivered quote.
+            self._spot_control_states[key]='SUBSCRIBE_ACKNOWLEDGED_QUEUED'
+
+    def unsubscribe_spots(self,symbol: str) -> None:
+        from vati.execution.ctrader.feed import native_integer
+        with self._spot_lock:
+            self._ensure_auth();sym=self.symbol(symbol)
+            connection=getattr(self.transport,'connection_id',None);key=(connection,sym.symbol_id)
+            # Local stop takes effect before native I/O. A queued/unknown ACK
+            # cannot keep old prices usable or admit residual provider updates.
+            self._spot_subscriptions.discard(key);self._last_spot.pop(sym.symbol_id,None)
+            self._spot_book.forget(sym.symbol_id)
+            self._spot_control_states[key]='UNSUBSCRIBE_REQUESTED_UNCONFIRMED'
+            name,body=self.transport.call('ProtoOAUnsubscribeSpotsReq',{'ctidTraderAccountId':self.ctid_trader_account_id,
+                'symbolId':[sym.symbol_id]})
+            try:
+                if (name!='ProtoOAUnsubscribeSpotsRes' or not isinstance(body,dict)
+                        or native_integer(body['ctidTraderAccountId'],minimum=1)!=self.ctid_trader_account_id
+                        or connection!=getattr(self.transport,'connection_id',None) or not self._auth_is_current()):
+                    raise ValueError()
+            except (KeyError,TypeError,ValueError) as exc:
+                self._spot_control_states[key]='UNSUBSCRIBE_ACKNOWLEDGEMENT_INVALID'
+                raise VenueUnavailable('cTrader native spot unsubscription acknowledgement mismatch') from exc
+            self._spot_control_states[key]='UNSUBSCRIBE_ACKNOWLEDGED_QUEUED'

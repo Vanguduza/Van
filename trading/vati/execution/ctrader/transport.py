@@ -127,6 +127,8 @@ class CtraderTransport:
             for cid, pending in self._pending.items():
                 if self._pending_sockets.get(cid) is sock:
                     pending.put(("__disconnect__", {"error": error}))
+        with self.events.not_empty:
+            self.events.not_empty.notify_all()
         try:
             shutdown = getattr(sock, "shutdown", None)
             if shutdown is not None:
@@ -287,6 +289,34 @@ class CtraderTransport:
                 break
         return out
 
+    def drain_events_kind(self, kind: str, max_items: int = 100) -> list[tuple[str, dict[str, Any]]]:
+        """Consume this native event kind while preserving all other deliveries.
+
+        No caller predicate or transport-state lock runs under the queue mutex;
+        the reader publishes in the opposite state/queue order. Existing queue
+        capacity and full tick-history qualification remain separate obligations.
+        """
+        if not isinstance(kind,str) or type(max_items) is not int or max_items<1:
+            raise ValueError('native event kind and positive bound required')
+        with self._state_lock:
+            sock=self._sock
+        output=[];remove=[]
+        with self.events.mutex:
+            for index,original in enumerate(self.events.queue):
+                source,name,body=original
+                if name!=kind:continue
+                remove.append(index)
+                if name not in {'ProtoOASpotEvent','ProtoOADepthEvent'} or source is sock:
+                    output.append((name,body))
+                if len(remove)>=max_items:break
+            for index in reversed(remove):del self.events.queue[index]
+            if remove:self.events.not_full.notify_all()
+        return output
+
+    def has_events_kind(self,kind: str) -> bool:
+        with self.events.mutex:
+            return any(original[1]==kind for original in self.events.queue)
+
     def wait_event(self, predicate: Callable[[str, dict[str, Any]], bool], *, timeout_s: float) -> Optional[tuple[str, dict[str, Any]]]:
         deadline = time.monotonic() + timeout_s
         stash = []
@@ -319,7 +349,8 @@ class CtraderReadTransport(CtraderTransport):
     """
     READ_MESSAGES = frozenset({"ProtoOAApplicationAuthReq", "ProtoOAAccountAuthReq",
                               "ProtoOASymbolsListReq", "ProtoOASymbolByIdReq",
-                              "ProtoOAGetTrendbarsReq", "ProtoHeartbeatEvent"})
+                              "ProtoOAGetTrendbarsReq", "ProtoOASubscribeSpotsReq",
+                              "ProtoOAUnsubscribeSpotsReq", "ProtoHeartbeatEvent"})
 
     def __init__(self, *, operation_timeout_s=30.0, monotonic=None, **kwargs):
         if (type(operation_timeout_s) not in (int, float) or not math.isfinite(operation_timeout_s)
@@ -400,3 +431,39 @@ class CtraderReadTransport(CtraderTransport):
 
     def call_entry(self, *args, **kwargs):
         raise EntryNotSent("read-only native source cannot submit an order; not sent")
+
+    def wait_event(self,predicate,*,timeout_s):
+        if type(timeout_s) not in (int,float) or not math.isfinite(timeout_s) or timeout_s<=0:
+            raise ValueError('native read event timeout must be finite and positive')
+        try:
+            result=super().wait_event(predicate,timeout_s=min(timeout_s,self._io_timeout()))
+            self.check_budget()
+            return result
+        except CtraderError:
+            self.close()
+            raise
+
+    def wait_for_event_kind(self,kind: str,*,timeout_s=None):
+        """Wait for source data without consuming a financial/other delivery."""
+        if not isinstance(kind,str) or (timeout_s is not None and
+                (type(timeout_s) not in (int,float) or not math.isfinite(timeout_s) or timeout_s<=0)):
+            raise ValueError('native read event kind/timeout invalid')
+        try:
+            wait=min(timeout_s,self._io_timeout()) if timeout_s is not None else self._io_timeout()
+            deadline=time.monotonic()+wait
+            while True:
+                self.check_budget()
+                with self._state_lock:
+                    sock=self._sock
+                if sock is None:return False
+                with self.events.not_empty:
+                    if any(item[0] is sock and item[1]==kind for item in self.events.queue):return True
+                    remaining=deadline-time.monotonic()
+                    if remaining<=0:
+                        break
+                    self.events.not_empty.wait(remaining)
+            self.check_budget()
+            return False
+        except CtraderError:
+            self.close()
+            raise

@@ -140,7 +140,10 @@ class FakeCtrader:
             return self.send("ProtoOAGetTrendbarsRes", {"ctidTraderAccountId": acct, "period": body["period"], "timestamp": body["toTimestamp"], "trendbar": bars, "symbolId": body["symbolId"]}, cid)
         if name == "ProtoOASubscribeSpotsReq":
             self.send("ProtoOASubscribeSpotsRes", {"ctidTraderAccountId": acct}, cid)
-            return self.send("ProtoOASpotEvent", {"ctidTraderAccountId": acct, "symbolId": body["symbolId"][0], "bid": 110100, "ask": 110108})
+            extra={'timestamp':1700000000000} if body.get('subscribeToSpotTimestamp') else {}
+            return self.send("ProtoOASpotEvent", {"ctidTraderAccountId": acct, "symbolId": body["symbolId"][0], "bid": 110100, "ask": 110108,**extra})
+        if name == 'ProtoOAUnsubscribeSpotsReq':
+            return self.send('ProtoOAUnsubscribeSpotsRes',{'ctidTraderAccountId':acct},cid)
         self.send("ProtoOAErrorRes", {"errorCode": "UNSUPPORTED", "description": name}, cid)
 
 

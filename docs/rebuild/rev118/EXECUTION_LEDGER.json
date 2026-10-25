@@ -144,7 +144,9 @@
         "backend/BE-008_NATIVE_MARKET_ARCHIVE.md",
         "receipts/NATIVE_MARKET_ARCHIVE_SOURCE_20261025.json",
         "backend/BE-008_NATIVE_READ_BUDGETS.md",
-        "receipts/NATIVE_READ_BUDGET_SOURCE_20261025.json"
+        "receipts/NATIVE_READ_BUDGET_SOURCE_20261025.json",
+        "backend/BE-008_NATIVE_SPOT_CONTRACT.md",
+        "receipts/NATIVE_SPOT_SOURCE_20261025.json"
       ]
     }
   },
@@ -191,6 +193,12 @@
       "what": "AP-001 and AP-002 are verified proposals, not admitted. Original delivery remains unchanged.",
       "blocks": "PRE-001/002 exit and PRE-003 submission admission",
       "needed_from": "Owner/eligible independent amendment review through the documented procedure"
+    },
+    {
+      "id": "BLK-GH-CLI-20261025",
+      "what": "Injected GH_TOKEN invalid (actual HTTP401 and gh auth status); no supported worker refresh binding/helper exposed. Connected GitHub app can read CI but normal new git pushes require restored CLI access. No injected identity replacement or hook bypass attempted.",
+      "blocks": "Publication of new local source commits after3c6969eb; local source/testing/normal-hook commits and connected CI reads continue.",
+      "needed_from": "Supported worker GitHub CLI credential refresh; owner request pending."
     }
   ],
   "amendment_proposals": [
@@ -209,15 +217,15 @@
     "note": "Opus unavailable; owner transferred build to Codex. No independent reviewer identity is inferred from another model or session."
   },
   "checkpoint": {
-    "updated_utc": "2026-10-25T19:37:37.950693+00:00",
+    "updated_utc": "2026-10-25T20:39:10.436596+00:00",
     "branch": "ccr-9e07e1af-8mgz1p",
     "base": "b02075f327ea8180ab6d269eba358cf8c5479878",
     "background_jobs": [
       {
-        "kind": "hosted van-ci",
-        "id": 40224260205,
-        "head": "df75b6cf77752ec0ba4708b21951c2af47f67bfa",
-        "state": "IN_PROGRESS_LAST_READ",
+        "kind": "van-ci",
+        "id": 40228254162,
+        "head": "3c6969ebbec39f2ad9f2836a6bd8acdb487adc34",
+        "state": "TERMINAL_ALL17PUBLIC_SOURCE_JOBS_SUCCESS_TWO_MANDATORY_PREREQUISITE_FAILURES",
         "not_acceptance": true
       }
     ],
@@ -404,7 +412,9 @@
       "Hosted ac60c4d3/run40219703232: gateway5775pass/7declaredskip,media198pass,trading3108pass/1privateDDSskip,PostgreSQL26pass,voice117pass,258monitorpass/audit0; original374mutation identities caught once. Android emulator18pass/4declaredcore/production skips. OverallFAILURE on missing privateDDS credential and absent trusted-main checker; no waived gate.",
       "Connection-lifetime source46474a6c:810extended actualPG/account/funding/execution cases pass0skip;9supplemental mutants caught after20case control, source restored. Actual hooks and committed GREEN133. Logs-only staging error retained in prior d5b1a620 row; implementation in46474a6c.",
       "Uncommitted native archive/collector:293focused and869extended actualPG/account/funding/execution cases pass0skip/audit0, fixture container removed and children reconciled. Independent actual native codec connection tested; no actual provider or unit qualification.",
-      "Native budget candidate:256focused/910selected actualPG/account/funding/execution cases pass0skip/audit0;108rebuild and unchanged source contracts. Two actual socket/lifetime before gaps; new API specification failures and corrected generic financial privacy oracle retained. Native OS DNS/arbitrary host work and capacity qualification remain unbounded/unissued. Publisheddf75exact-head monitor258pass/audit0, broaderCI40224260205 still active; private/trusted gates explicitly fail."
+      "Native budget candidate:256focused/910selected actualPG/account/funding/execution cases pass0skip/audit0;108rebuild and unchanged source contracts. Two actual socket/lifetime before gaps; new API specification failures and corrected generic financial privacy oracle retained. Native OS DNS/arbitrary host work and capacity qualification remain unbounded/unissued. Publisheddf75exact-head monitor258pass/audit0, broaderCI40224260205 still active; private/trusted gates explicitly fail.",
+      "Native spot packet:10actual source regressions after corrected ordered native RPC barrier,367focused/943final actualPG/account/funding/execution cases pass0skip/audit0;108rebuild/source contracts. Queued ACK is not quote delivery, current metadata is not proven effective at native tick, prices remain unqualified/session unknown. Credential failure: worker GH_TOKEN returns401; actual gh auth status invalid, no credential helper, current cloud bindings empty and OIC selector absent. Connected GitHub app reads still work; requested supported worker credential refresh while continuing local work.",
+      "Exact3c6969ebCI40228254162 terminal:17public source jobs success; gateway5775pass/7skip,media198,trading3228pass/1privateDDSskip,PG26,voice117,monitor258;374original mutation identities caught once/0survivors/383edits. Actual overallFAILURE remains2unwaived privateDDS/trusted-main prerequisites. Not qualification for local quote packet."
     ],
     "environment_notes": [
       "clone must be unshallowed (git fetch --unshallow) and PR heads fetched (+refs/pull/*/head:refs/remotes/origin/pr/*) before pre001.py",
@@ -428,10 +438,10 @@
         "scope": "browser repair source qualification, not monitor source or S24"
       }
     ],
-    "active_packet": "BE-008 native frame/read-only operation budgets and detached-reader cleanup; source-tested, not accepted",
-    "published_head": "df75b6cf77752ec0ba4708b21951c2af47f67bfa",
+    "active_packet": "BE-008 native spot scope/partial updates/freshness/financial-event preservation and read-only quote reader; source-tested, not accepted",
+    "published_head": "3c6969ebbec39f2ad9f2836a6bd8acdb487adc34",
     "local_base_head": "46474a6cf054bbecf4ab32ed6d3d394611f633b0",
-    "committed_ledger_verification": "GREEN134 throughdf75b6cf against4fd466dec3910ed5de614bfbf95887ad619df5ca; new budget source not yet committed"
+    "committed_ledger_verification": "GREEN135 through3c6969eb against4fd466dec3910ed5de614bfbf95887ad619df5ca; quote packet not yet committed"
   },
   "observations": [
     "OBS-001 BE-002 debug cleartext",

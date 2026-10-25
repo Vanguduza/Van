@@ -1,0 +1,166 @@
+{
+  "schema": "van.rebuild.hosted-source/1",
+  "source_head": "3c6969ebbec39f2ad9f2836a6bd8acdb487adc34",
+  "tested_merge": "824ff072c020271d77c654f9be533e2fd7aad7ff",
+  "tested_tree": "39db4b2a166d30925cd45bf29a9000ed679b772a",
+  "head_and_tested_merge_tree_equality_verified": true,
+  "tree_verification": "Direct GitHub tree SHA readback fordf75; complete empty GitHub compare head..merge and local head tree for3c6969eb (connector does not expose remote tree SHA).",
+  "run_id": 40228254162,
+  "conclusion": "failure",
+  "jobs": [
+    {
+      "id": 121274245839,
+      "name": "rebuild-documentary",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 121274245977,
+      "name": "market-monitor-source",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 121274245981,
+      "name": "project-truth-ledger",
+      "status": "completed",
+      "conclusion": "failure"
+    },
+    {
+      "id": 121274246018,
+      "name": "browser-guard-source",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 121274246024,
+      "name": "backend",
+      "status": "completed",
+      "conclusion": "failure"
+    },
+    {
+      "id": 121274246028,
+      "name": "android-and-visual-evidence",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 121274246046,
+      "name": "mutation (python-3, python, 3/4)",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 121274246090,
+      "name": "backend-public-source",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 121274246107,
+      "name": "mutation (browser-agent, browser-agent, 0/1)",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 121274246112,
+      "name": "postgres-ledger",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 121274246120,
+      "name": "android-instrumentation",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 121274246128,
+      "name": "mutation (python-0, python, 0/4)",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 121274246129,
+      "name": "mutation (kotlin-0, kotlin, 0/4)",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 121274246166,
+      "name": "mutation (kotlin-3, kotlin, 3/4)",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 121274246191,
+      "name": "mutation (python-1, python, 1/4)",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 121274246226,
+      "name": "mutation (kotlin-2, kotlin, 2/4)",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 121274246251,
+      "name": "mutation (python-2, python, 2/4)",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 121274246320,
+      "name": "mutation (kotlin-1, kotlin, 1/4)",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 121277105415,
+      "name": "character-forge-gate",
+      "status": "completed",
+      "conclusion": "success"
+    }
+  ],
+  "counts": {
+    "media-report.xml": {
+      "tests": 198,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "passed": 198
+    },
+    "gateway-report.xml": {
+      "tests": 5782,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 7,
+      "passed": 5775
+    },
+    "trading-source-report.xml": {
+      "tests": 3229,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 1,
+      "passed": 3228
+    },
+    "voice-source-report.xml": {
+      "tests": 117,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "passed": 117
+    },
+    "postgres-ledger-report.xml": {
+      "tests": 26,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "passed": 26
+    }
+  },
+  "mutation_corpus": "ci/MUTATION_CORPUS_3c6969eb.json",
+  "qualification": "All17public source jobs success. Actual overall run failed on2unwaived privateDDS/trusted-main prerequisites. Not a pass for later uncommitted quote code or native/unit/provider/production acceptance.",
+  "evidence": "ci/hosted_3c6969eb_20261025"
+}

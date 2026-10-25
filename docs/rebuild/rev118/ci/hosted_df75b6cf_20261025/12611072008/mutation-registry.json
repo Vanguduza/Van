@@ -1,0 +1,9 @@
+{
+  "schema": "van.rebuild.mutation-registry-preflight/1",
+  "registry_sha256": "35d10c7b0f2b8319b7f7305828262c972b2a6451139d75b9e83c7d0062282955",
+  "mutation_count": 374,
+  "edit_count": 383,
+  "findings": [],
+  "execution_state": "NOT_RUN",
+  "status": "ANCHORS_VALID_BASELINES_AND_MUTATIONS_NOT_EXECUTED"
+}

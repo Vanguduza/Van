@@ -1,0 +1,40 @@
+{
+  "schema": "van.rebuild.native-spot-source/1",
+  "status": "SOURCE_TESTED_COMPONENT_NOT_UNIT_ACCEPTANCE",
+  "base_head": "3c6969ebbec39f2ad9f2836a6bd8acdb487adc34",
+  "updated_at_utc": "2026-10-25T20:39:10.436596+00:00",
+  "source_sha256": {
+    "trading/vati/execution/ctrader/spots.py": "474eab1961c091f4780919b2250c7a41de96011d408ecbb40162fabe57eadad8",
+    "trading/vati/execution/ctrader/adapter.py": "a2702980bd53b114926aebdfeeb90f4f408c4870dc90b956b995f1e337ce7af0",
+    "trading/vati/execution/ctrader/transport.py": "6b3669134d52e3b0fcd0f6bc4d11bfda86af47fb05a4623ee24ffe8328e3a20e",
+    "trading/tests/test_ctrader.py": "b137ee346d0412839c18e6c48500ee8f8440ce33f12b5dca90c23d26409d1533",
+    "trading/tests/test_ctrader_spot_contract.py": "268d8b42703599c1c719757e12b9e61a5386cbc3eb3f5c11f3960fc597e53d3f"
+  },
+  "executed": {
+    "draft_before": "10failed; most did not reach intended oracle because heartbeat fixture is unsolicited, not correlated RPC. Retained, not source proof.",
+    "valid_barrier_before": "10intended source regressions failed after actual ordered symbol-detail RPC barrier",
+    "initial_integration": "266pass/0skip/audit0",
+    "raw_scope_and_side_time": "275pass/0skip/audit0",
+    "read_only_reader_and_controls": "280pass/0skip/audit0",
+    "focused_final": "367pass/0skip/audit0 after host processing/evaluation clock sampling refinement",
+    "extended_postgres_initial": "943pass/0skip/audit0 before final host-clock sampling refinement; actual owned fixture cleaned",
+    "extended_postgres_final": "943pass/0skip/audit0 on current source, actual pinned isolated PostgreSQL and canonical schema, owned container removed and children reconciled",
+    "rebuild": "108pass/0skip",
+    "source_contracts": "No derived drift; original feature/screen/function coverage retained",
+    "mutation_registry": "374cases/383edits/preflight0findings; not full execution on this packet"
+  },
+  "qualification": {
+    "unit_acceptance": "NOT_ISSUED",
+    "provider": false,
+    "native": false,
+    "economic": false,
+    "production": false,
+    "s24": false
+  },
+  "limits": [
+    "Raw observations have immutable copied scope; host processing is not network receipt, metadata at processing is not proven effective at original tick",
+    "No native spot sequence/session guarantee, no tradability certificate, no automatic live monitor activation",
+    "Full tick/live-bar fanout, durable quote capture, source error journals, capacity, host/service isolation, entitlements/depth/calendars and qualified consumers remain"
+  ],
+  "evidence": "ci/native_spot_20261025"
+}
