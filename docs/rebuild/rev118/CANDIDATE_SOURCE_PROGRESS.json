@@ -1,6 +1,6 @@
 {
   "schema": "van.rebuild.candidate-source-progress/1",
-  "updated_at_utc": "2026-10-25T21:04:30.348392+00:00",
+  "updated_at_utc": "2026-10-25T22:14:16.701534+00:00",
   "programme": "Rev1.18; original 131 unit IDs and dependencies retained",
   "authority": "auth-20261022-owner-autonomous-candidate-build",
   "meaning": "Candidate source progress is separate from admitted unit acceptance. Independent certificates, owner decisions, live effects and release gates remain unissued. No unit is declared complete by this record.",
@@ -509,6 +509,10 @@
         {
           "description": "Cumulative native read header/frame and encoded-byte reservations before body reads; includes heartbeat/RPCs, latched failure, pending wakeup, no refunds on drain/close/reconnect. Independent market-reader limits and copied diagnostics; financial transport policy preserved.982 unique actualPG cases0skip/audit0/exact hashes,113focus,24final controls,3supplemental faults caught/restored,108rebuild. Failed setup and wrong optional-field oracle retained. No process/service capacity or full-unit acceptance.",
           "evidence": "backend/BE-008_NATIVE_READ_CAPACITY.md; receipts/NATIVE_READ_CAPACITY_SOURCE_20261025.json"
+        },
+        {
+          "description": "Scoped immutable historical quote snapshots and exact original-policy replay on independent read-only native socket; final budget after join, full contract and causal values validated, no current-freshness claim. Shared chain/index recovery preserves actual baseline bar bytes; lostACK, actual record-commit processdeath and8concurrent collectors covered.1019final actualPG0skip/audit0/exact hashes,129focus,4supplemental assertion faults/restored,108initialrebuild.3338unique positive case identities across3072streamingprefix+266finaltail; two fullruns TIMEOUT withmissingfinalaudit, first unexplainedF retained. No full-run/unit acceptance.",
+          "evidence": "backend/BE-008_NATIVE_QUOTE_ARCHIVE.md; receipts/NATIVE_QUOTE_ARCHIVE_SOURCE_20261025.json"
         }
       ]
     },

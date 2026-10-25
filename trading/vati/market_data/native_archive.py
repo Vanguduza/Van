@@ -141,6 +141,18 @@ def _capture(contract_body, observation):
 
 
 class NativeMarketArchive:
+    observation_type = TrendbarObservation
+    _validate_capture = staticmethod(_capture)
+
+    @staticmethod
+    def _validate_timeframe(timeframe):
+        if not isinstance(timeframe, str) or timeframe not in PERIOD:
+            raise ValueError('native market archive timeframe invalid')
+
+    @staticmethod
+    def _observation_available_at(observation):
+        return observation['received_at_ms']
+
     def __init__(self, root, *, clock=None):
         if not Path(root).is_absolute():
             raise NativeArchiveError('native market archive requires an explicit absolute storage root')
@@ -149,8 +161,7 @@ class NativeMarketArchive:
 
     def _partition(self, scope, timeframe, *, create=False):
         _scope(scope)
-        if not isinstance(timeframe, str) or timeframe not in PERIOD:
-            raise ValueError('native market archive timeframe invalid')
+        self._validate_timeframe(timeframe)
         key = canonical_hash({'scope': scope, 'timeframe': timeframe})
         part = self.root/key
         if self.root.resolve() != self.root or part.is_symlink() or not part.resolve().is_relative_to(self.root):
@@ -194,10 +205,10 @@ class NativeMarketArchive:
                     or body['previous_hash'] != previous or not isinstance(body['request_id'], str)
                     or not REQUEST_ID.fullmatch(body['request_id']) or body['request_id'] in requests):
                 raise ValueError('native market archive sequence, hash or scope invalid')
-            _, captured_scope, captured_timeframe = _capture(body['contract'], body['observation'])
+            _, captured_scope, captured_timeframe = self._validate_capture(body['contract'], body['observation'])
             if captured_scope != scope or captured_timeframe != timeframe:
                 raise ValueError('native market archive captured scope mismatch')
-            recorded = native_integer(body['recorded_at_ms'], minimum=body['observation']['received_at_ms'], maximum=253402300799000)
+            recorded = native_integer(body['recorded_at_ms'], minimum=self._observation_available_at(body['observation']), maximum=253402300799000)
             if rows and recorded < rows[-1][0]['recorded_at_ms']:
                 raise ValueError('native market archive availability moved backwards')
             requests.add(body['request_id'])
@@ -238,10 +249,10 @@ class NativeMarketArchive:
         try:
             if not isinstance(request_id, str) or not REQUEST_ID.fullmatch(request_id):
                 raise ValueError('native market request identity invalid')
-            if not isinstance(contract, NativeSymbolContract) or not isinstance(observation, TrendbarObservation):
+            if not isinstance(contract, NativeSymbolContract) or not isinstance(observation, self.observation_type):
                 raise ValueError('native market captured objects required')
             original_contract, original_observation = contract.body(), observation.body()
-            _, scope, timeframe = _capture(original_contract, original_observation)
+            _, scope, timeframe = self._validate_capture(original_contract, original_observation)
             part = self._partition(scope, timeframe, create=True)
             with exclusive_state_lock(part/'head.json'):
                 rows, index_state = self._load(part, scope, timeframe)
@@ -255,7 +266,7 @@ class NativeMarketArchive:
                     return self.lookup(scope, timeframe, request_id)
                 if len(rows) >= MAX_RECORDS:
                     raise ValueError('native market archive capacity exhausted; explicit retention decision required')
-                received = native_integer(self.clock(), minimum=observation.received_at_ms, maximum=253402300799000)
+                received = native_integer(self.clock(), minimum=self._observation_available_at(original_observation), maximum=253402300799000)
                 if rows and received < rows[-1][0]['recorded_at_ms']:
                     raise ValueError('native market archive clock moved backwards')
                 body = {'schema': 'vati.native-market-record/1', 'scope': scope, 'timeframe': timeframe,

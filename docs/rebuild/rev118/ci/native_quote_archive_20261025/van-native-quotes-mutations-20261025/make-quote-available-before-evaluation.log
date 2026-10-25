@@ -1,0 +1,16 @@
+.........................F...........                                    [100%]
+=================================== FAILURES ===================================
+___ test_quote_cannot_be_available_in_the_archive_before_its_host_evaluation ___
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-124/test_quote_cannot_be_available0')
+
+    def test_quote_cannot_be_available_in_the_archive_before_its_host_evaluation(tmp_path):
+        c=contract()
+>       with pytest.raises(NativeArchiveError):archive(tmp_path,now=199999).record('before-evaluation',c,sample(c))
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE NativeArchiveError
+
+trading/tests/test_native_quote_archive.py:112: Failed
+=========================== short test summary info ============================
+FAILED trading/tests/test_native_quote_archive.py::test_quote_cannot_be_available_in_the_archive_before_its_host_evaluation
+1 failed, 36 passed in 1.68s
