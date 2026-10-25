@@ -1,6 +1,6 @@
 {
   "schema": "van.rebuild.candidate-source-progress/1",
-  "updated_at_utc": "2026-10-25T23:21:42.039363+00:00",
+  "updated_at_utc": "2026-10-25T23:34:56.429870+00:00",
   "programme": "Rev1.18; original 131 unit IDs and dependencies retained",
   "authority": "auth-20261022-owner-autonomous-candidate-build",
   "meaning": "Candidate source progress is separate from admitted unit acceptance. Independent certificates, owner decisions, live effects and release gates remain unissued. No unit is declared complete by this record.",
@@ -808,6 +808,10 @@
         {
           "description": "Calendar file arrays/envelopes, explicit original keys and conflicting-scope refusal; exact signed UTC milliseconds without worker-zone guesses or silent long-fraction truncation. Final532 actual PostgreSQL cases/0 skips/audit0/exact hashes,25 controls,6 final supplemental faults caught/restored. Report distinguishes declared label agreement from native qualification. Whole BE014 remains IN_PROGRESS; native clocks, schedule availability, ingestion, source health and entitlements remain.",
           "evidence": "backend/BE-014_CALENDAR_FEED_BOUNDARIES.md; receipts/CALENDAR_FEED_SOURCE_20261025.json"
+        },
+        {
+          "description": "In-memory headline decisions/reports and relay evidence respect declared and supplied ingress availability; exact replay cannot backdate original capture. Feed row trust capped by registry label, finite reduce-only multiplier floor/input, exact explicit typed millisecond parsing and subject-kind impact identities.16 distinct reproduced failures,617 final actualPG0skip/audit0/exact hashes,51 controls,9 final faults caught/restored. Durable observations/recovery, source health/native provider admission remain.",
+          "evidence": "backend/BE-014_NEWS_CAUSAL_BOUNDARIES.md; receipts/NEWS_CAUSAL_SOURCE_20261025.json"
         }
       ]
     },

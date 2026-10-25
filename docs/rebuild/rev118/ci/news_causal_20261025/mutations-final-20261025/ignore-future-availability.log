@@ -1,0 +1,47 @@
+FF............F..........                                                [100%]
+=================================== FAILURES ===================================
+_ test_future_publication_or_observation_cannot_affect_an_earlier_subject[changes0] _
+
+changes = {'observed_ms': 1800000001000}
+
+    @pytest.mark.parametrize('changes',[
+        {'observed_ms':NOW+1000}, {'published_ms':NOW+1000},
+    ])
+    def test_future_publication_or_observation_cannot_affect_an_earlier_subject(changes):
+        news=NewsIngress();h=story(**changes);news.ingest(h)
+>       assert news.assess(h,subject_kind='POSITION',subject_id='p',symbol='EURUSD',now_ms=NOW) is None
+E       AssertionError: assert EventImpactAssessment(impact_id='c509c4d168802183e0cd9e38', headline_id='138bd873f2a6c652858d8f2f466ac369', subject_ki...652858d8f2f466ac369cd194fb68ff43f2a00a3d50a892ec36f',), assessed_ms=1800000000000, impact_version='event-impact/5.1.1') is None
+E        +  where EventImpactAssessment(impact_id='c509c4d168802183e0cd9e38', headline_id='138bd873f2a6c652858d8f2f466ac369', subject_ki...652858d8f2f466ac369cd194fb68ff43f2a00a3d50a892ec36f',), assessed_ms=1800000000000, impact_version='event-impact/5.1.1') = assess(Headline(source_id='publisher', trust=<SourceTrust.T1_PRIMARY: 'T1_PRIMARY'>, published_ms=1800000000000, observed_ms=...bols=('EURUSD',), event_class='', severity=Decimal('1'), concern=<Concern.UNCLEAR: 'UNCLEAR'>, url='', body_excerpt=''), subject_kind='POSITION', subject_id='p', symbol='EURUSD', now_ms=1800000000000)
+E        +    where assess = <vati.events.news_ingress.NewsIngress object at 0x7f83949c7680>.assess
+
+trading/tests/test_news_causal_boundaries.py:25: AssertionError
+_ test_future_publication_or_observation_cannot_affect_an_earlier_subject[changes1] _
+
+changes = {'published_ms': 1800000001000}
+
+    @pytest.mark.parametrize('changes',[
+        {'observed_ms':NOW+1000}, {'published_ms':NOW+1000},
+    ])
+    def test_future_publication_or_observation_cannot_affect_an_earlier_subject(changes):
+        news=NewsIngress();h=story(**changes);news.ingest(h)
+>       assert news.assess(h,subject_kind='POSITION',subject_id='p',symbol='EURUSD',now_ms=NOW) is None
+E       AssertionError: assert EventImpactAssessment(impact_id='c84e3cc558c2951fdd7a97c7', headline_id='4a2346a632316dbc6532f0fb0c88e8e2', subject_ki...c88e8e2887f92bb4c4e9e3d731be31bbead8341', 'publisher'), assessed_ms=1800000000000, impact_version='event-impact/5.1.1') is None
+E        +  where EventImpactAssessment(impact_id='c84e3cc558c2951fdd7a97c7', headline_id='4a2346a632316dbc6532f0fb0c88e8e2', subject_ki...c88e8e2887f92bb4c4e9e3d731be31bbead8341', 'publisher'), assessed_ms=1800000000000, impact_version='event-impact/5.1.1') = assess(Headline(source_id='publisher', trust=<SourceTrust.T1_PRIMARY: 'T1_PRIMARY'>, published_ms=1800000001000, observed_ms=...bols=('EURUSD',), event_class='', severity=Decimal('1'), concern=<Concern.UNCLEAR: 'UNCLEAR'>, url='', body_excerpt=''), subject_kind='POSITION', subject_id='p', symbol='EURUSD', now_ms=1800000000000)
+E        +    where assess = <vati.events.news_ingress.NewsIngress object at 0x7f8394794e60>.assess
+
+trading/tests/test_news_causal_boundaries.py:25: AssertionError
+_ test_supplied_ingress_clock_prevents_a_backdated_claim_from_entering_earlier_decisions _
+
+    def test_supplied_ingress_clock_prevents_a_backdated_claim_from_entering_earlier_decisions():
+        news=NewsIngress();h=story();news.ingest(h,now_ms=NOW+1000)
+>       assert news.assess(h,subject_kind='POSITION',subject_id='p',symbol='EURUSD',now_ms=NOW) is None
+E       AssertionError: assert EventImpactAssessment(impact_id='c509c4d168802183e0cd9e38', headline_id='138bd873f2a6c652858d8f2f466ac369', subject_ki...652858d8f2f466ac369cd194fb68ff43f2a00a3d50a892ec36f',), assessed_ms=1800000000000, impact_version='event-impact/5.1.1') is None
+E        +  where EventImpactAssessment(impact_id='c509c4d168802183e0cd9e38', headline_id='138bd873f2a6c652858d8f2f466ac369', subject_ki...652858d8f2f466ac369cd194fb68ff43f2a00a3d50a892ec36f',), assessed_ms=1800000000000, impact_version='event-impact/5.1.1') = assess(Headline(source_id='publisher', trust=<SourceTrust.T1_PRIMARY: 'T1_PRIMARY'>, published_ms=1800000000000, observed_ms=...bols=('EURUSD',), event_class='', severity=Decimal('1'), concern=<Concern.UNCLEAR: 'UNCLEAR'>, url='', body_excerpt=''), subject_kind='POSITION', subject_id='p', symbol='EURUSD', now_ms=1800000000000)
+E        +    where assess = <vati.events.news_ingress.NewsIngress object at 0x7f8394795f40>.assess
+
+trading/tests/test_news_causal_boundaries.py:84: AssertionError
+=========================== short test summary info ============================
+FAILED trading/tests/test_news_causal_boundaries.py::test_future_publication_or_observation_cannot_affect_an_earlier_subject[changes0]
+FAILED trading/tests/test_news_causal_boundaries.py::test_future_publication_or_observation_cannot_affect_an_earlier_subject[changes1]
+FAILED trading/tests/test_news_causal_boundaries.py::test_supplied_ingress_clock_prevents_a_backdated_claim_from_entering_earlier_decisions
+3 failed, 22 passed in 0.42s

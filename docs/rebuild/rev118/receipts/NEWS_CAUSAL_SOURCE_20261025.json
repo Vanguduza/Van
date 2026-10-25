@@ -1,0 +1,29 @@
+{
+  "schema": "van.rebuild.news-causal-source/1",
+  "status": "SOURCE_TESTED_COMPONENT_NOT_UNIT_ACCEPTANCE",
+  "base_head": "0b3f7601dca725a7495767c1838f099eb81f1e3a",
+  "updated_at_utc": "2026-10-25T23:34:56.429870+00:00",
+  "source_sha256": {
+    "trading/vati/events/news_ingress.py": "8389e2a44e1e583204d9443aa8c78c9bff97fece9345642f4c50d29d4b6e419a",
+    "trading/tests/test_news_causal_boundaries.py": "64fa1c6e6772c1c06e28b35cd7e86bb4ddddd21b05cf98f912c334257f9fb74e"
+  },
+  "executed": {
+    "initial_before": "12 failed / 2 healthy controls / no setup errors",
+    "capture_clock_before": "3 failed / 21 passed; actual supplied receipt time and report cutoffs ignored",
+    "replay_clock_before": "1 failed / 24 deselected; exact replay backdated relay evidence",
+    "intermediate": "40 initial controls;125 related integration passes/audit0",
+    "initial_postgres": "617 passed/0skip/audit0/exact then-current hashes; one redundant report field removed afterward",
+    "final_postgres": "617 passed/0skip/audit0/exact final source hashes, pinned actual isolated PostgreSQL, owned container removed and client children waited",
+    "final_faults": "9/9 assertion-caught,0setup errors,audit0,exact restoration; earlier9 kept separately",
+    "final_controls": "51 passed/0skip/audit0 after final restoration",
+    "contracts": "Owner/frontend source contracts no drift, mutation registry preflight0findings, consolidation0findings",
+    "rebuild": "108 documentary regression cases passed after final progress/ledger updates"
+  },
+  "evidence": "ci/news_causal_20261025",
+  "limits": [
+    "In-memory chronology component only; supplied ingress time is not independently admitted native clock",
+    "Direct typed Headline API retains internal declared trust; feed rows cannot raise registry trust",
+    "Durable relay observations/publication-before-memory/cold replay/recovery and service source health remain",
+    "Whole BE014 IN_PROGRESS; no unit/native/owner/F15/BG001/provider/economic/production/S24 acceptance"
+  ]
+}

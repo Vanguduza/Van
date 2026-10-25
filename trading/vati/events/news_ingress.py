@@ -62,12 +62,13 @@ from pathlib import Path
 from typing import Any, Iterable, Mapping, Optional, Sequence
 
 from vati.core.canonical import canonical_hash, dec
+from vati.core.calendar_time import parse_calendar_ms
 from vati.core.events import EventKind, make_event
 from vati.events.registry import AssetClass, EventRegistry, InstrumentExposure
 
 PRODUCER = "vati-news-ingress"
-INGRESS_VERSION = "news-ingress/5.1.0"
-IMPACT_VERSION = "event-impact/5.1.0"
+INGRESS_VERSION = "news-ingress/5.1.1"
+IMPACT_VERSION = "event-impact/5.1.1"
 
 ZERO, ONE = Decimal("0"), Decimal("1")
 
@@ -97,6 +98,22 @@ DEFAULT_RELEVANCE_WINDOW_MS = 6 * 3_600_000
 
 class NewsIngressError(ValueError):
     pass
+
+
+def _finite_decimal(value: Any, name: str) -> Decimal:
+    try:
+        result=dec(value)
+    except (ValueError,TypeError,ArithmeticError) as exc:
+        raise NewsIngressError(f'{name} must be a finite number') from exc
+    if not result.is_finite():
+        raise NewsIngressError(f'{name} must be a finite number')
+    return result
+
+
+def _milliseconds(value: Any) -> int:
+    if type(value) is not int or not -(2**63)<=value<=2**63-1:
+        raise NewsIngressError('news milliseconds must be a signed integer')
+    return value
 
 
 class SourceTrust(str, Enum):
@@ -166,8 +183,13 @@ class Headline:
             raise NewsIngressError("a headline with no source cannot be weighted")
         if not self.title.strip():
             raise NewsIngressError("a headline with no title carries nothing")
-        if self.severity is not None and not (ZERO <= self.severity <= ONE):
-            raise NewsIngressError(f"severity {self.severity} is outside [0, 1]")
+        _milliseconds(self.published_ms)
+        _milliseconds(self.observed_ms)
+        if self.severity is not None:
+            severity=_finite_decimal(self.severity,'severity')
+            if not ZERO<=severity<=ONE:
+                raise NewsIngressError(f"severity {self.severity} is outside [0, 1]")
+            object.__setattr__(self,'severity',severity)
 
     @property
     def normalised_title(self) -> str:
@@ -274,7 +296,10 @@ def event_risk_multiplier_for(materiality: Decimal, *,
     raise risk" is a property of the arithmetic rather than of a table somebody
     might extend.
     """
-    m = max(ZERO, min(ONE, materiality))
+    floor=_finite_decimal(floor,'event multiplier floor')
+    if not ZERO<=floor<=ONE:
+        raise NewsIngressError('event multiplier floor is outside [0, 1]')
+    m = max(ZERO, min(ONE, _finite_decimal(materiality,'materiality')))
     if m < MATERIALITY_ACTIONABLE:
         return ONE
     reduction = (ONE - floor) * m
@@ -348,6 +373,8 @@ class NewsIngress:
         self._sources: dict[str, NewsSource] = {s.source_id: s for s in (sources or ())}
         self._headlines: dict[str, Headline] = {}
         self._observations: dict[str, list[str]] = {}
+        self._relay_times: dict[str, dict[str, int]] = {}
+        self._claims: dict[str, list[tuple[Headline,int]]] = {}
         self._impacts: dict[str, list[EventImpactAssessment]] = {}
         self.skipped: list[dict[str, str]] = []
 
@@ -368,6 +395,17 @@ class NewsIngress:
         carried it" is a fact about reach, not about corroboration.
         """
         hid = headline.headline_id
+        if now_ms is not None:
+            _milliseconds(now_ms)
+        available_ms=max(headline.observed_ms,now_ms) if now_ms is not None else headline.observed_ms
+        claims=self._claims.setdefault(hid,[])
+        original_capture=next((at for h,at in claims if h==headline),None)
+        if original_capture is not None:
+            available_ms=original_capture
+        relayed=self._relay_times.setdefault(hid,{})
+        relayed[headline.source_id]=min(relayed.get(headline.source_id,available_ms),available_ms)
+        if original_capture is None:
+            claims.append((headline,available_ms))
         relayers = self._observations.setdefault(hid, [])
         if hid in self._headlines:
             if headline.source_id not in relayers:
@@ -404,10 +442,11 @@ class NewsIngress:
         if not source_id:
             raise NewsIngressError("headline row has no source")
         declared = row.get("trust")
-        trust = (SourceTrust(str(declared).upper()) if declared
-                 else self.trust_for(source_id))
-        published = _parse_ms(row.get("published") or row.get("published_ms") or row["observed"])
-        observed = _parse_ms(row.get("observed") or row.get("observed_ms") or published)
+        registered=self.trust_for(source_id)
+        requested=SourceTrust(str(declared).upper()) if declared else registered
+        trust=min((requested,registered),key=lambda state:state.weight)
+        published=_row_time(row,('published','published_ms','observed','observed_ms'))
+        observed=_row_time(row,('observed','observed_ms'),default=published)
         severity = row.get("severity")
         return Headline(
             source_id=source_id,
@@ -427,16 +466,37 @@ class NewsIngress:
         )
 
     # -------------------------------------------------------------- reading
-    def headlines(self, *, since_ms: int = 0, limit: Optional[int] = None) -> list[Headline]:
+    def headlines(self, *, since_ms: int = 0, limit: Optional[int] = None,
+                  as_of_ms: Optional[int] = None) -> list[Headline]:
+        if as_of_ms is not None:
+            _milliseconds(as_of_ms)
+        available=[]
+        for hid,original in self._headlines.items():
+            if as_of_ms is None:
+                available.append(original)
+                continue
+            claims=[(h,available_ms) for h,available_ms in self._claims.get(hid,())
+                    if h.published_ms<=as_of_ms and available_ms<=as_of_ms]
+            if claims:
+                available.append(min(claims,key=lambda claim:claim[1])[0])
         rows = sorted(
-            (h for h in self._headlines.values() if h.published_ms >= since_ms),
+            (h for h in available if h.published_ms >= since_ms),
             key=lambda h: (h.published_ms, h.headline_id), reverse=True)
         return rows[:limit] if limit else rows
 
-    def relayed_by(self, headline_id: str) -> tuple[str, ...]:
-        return tuple(self._observations.get(headline_id, ()))
+    def relayed_by(self, headline_id: str, *, as_of_ms: Optional[int] = None) -> tuple[str, ...]:
+        if as_of_ms is not None:
+            _milliseconds(as_of_ms)
+        return tuple(source for source in self._observations.get(headline_id, ())
+                     if as_of_ms is None or self._relay_times[headline_id][source]<=as_of_ms)
 
     # ------------------------------------------------------------ materiality
+    def _available_at(self,headline: Headline,now_ms: int) -> bool:
+        if headline.published_ms>now_ms or headline.observed_ms>now_ms:
+            return False
+        captures=[at for h,at in self._claims.get(headline.headline_id,()) if h==headline]
+        return not captures or min(captures)<=now_ms
+
     def materiality(self, headline: Headline, *, basis: str,
                     now_ms: int) -> tuple[Decimal, Decimal]:
         """(materiality, uncertainty), both in [0, 1].
@@ -447,6 +507,9 @@ class NewsIngress:
         relevance window, so an old headline stops arguing rather than arguing
         forever.
         """
+        _milliseconds(now_ms)
+        if not self._available_at(headline,now_ms):
+            return ZERO,ONE
         severity = headline.severity if headline.severity is not None else Decimal("0.5")
         basis_weight = {
             "DECLARED_SYMBOL": ONE,
@@ -473,6 +536,9 @@ class NewsIngress:
         None means "not relevant to this instrument", which is a different fact
         from "relevant with materiality zero" and is not written to the ledger.
         """
+        _milliseconds(now_ms)
+        if not self._available_at(headline,now_ms):
+            return None
         relevant, basis = self.mapper.relevance(headline, symbol)
         if not relevant:
             return None
@@ -480,6 +546,7 @@ class NewsIngress:
         impact = EventImpactAssessment(
             impact_id=canonical_hash({
                 "headline": headline.headline_id, "subject": subject_id,
+                "subject_kind":subject_kind,
                 "symbol": symbol.upper(), "at": now_ms,
             })[:24],
             headline_id=headline.headline_id,
@@ -491,7 +558,7 @@ class NewsIngress:
             uncertainty=uncertainty,
             relevance_basis=basis,
             evidence_refs=tuple(dict.fromkeys(
-                (headline.dedupe_hash,) + tuple(self.relayed_by(headline.headline_id))
+                (headline.dedupe_hash,) + self.relayed_by(headline.headline_id,as_of_ms=now_ms)
                 + tuple(extra_evidence))),
             assessed_ms=now_ms,
         )
@@ -537,7 +604,7 @@ class NewsIngress:
         }
         wanted = adverse_for.get((direction or "").upper())
         out: list[EventImpactAssessment] = []
-        for headline in self.headlines(since_ms=max(0, floor)):
+        for headline in self.headlines(since_ms=floor,as_of_ms=now_ms):
             if wanted is not None and headline.concern not in wanted:
                 continue
             impact = self.assess(
@@ -598,19 +665,24 @@ class NewsIngress:
 
     # --------------------------------------------------------------- report
     def report(self, *, now_ms: int) -> dict[str, Any]:
+        available=self.headlines(since_ms=-(2**63),as_of_ms=now_ms)
         by_trust: dict[str, int] = {}
-        for h in self._headlines.values():
+        for h in available:
             by_trust[h.trust.value] = by_trust.get(h.trust.value, 0) + 1
         return {
             "ingress_version": INGRESS_VERSION,
-            "headlines": len(self._headlines),
+            "headlines": len(available),
             "by_trust": dict(sorted(by_trust.items())),
             "sources": [s.body() for s in sorted(self._sources.values(),
                                                  key=lambda s: s.source_id)],
-            "impacts": sum(len(v) for v in self._impacts.values()),
+            "impacts": sum(i.assessed_ms<=now_ms for v in self._impacts.values() for i in v),
             "skipped": self.skipped,
             "relevance_window_ms": self.relevance_window_ms,
             "authority": "REDUCE_ONLY_CALENDAR_REMAINS_BLACKOUT_AUTHORITY",
+            "provider_qualified":False,
+            "authority_effect":"NONE",
+            "availability_basis":"DECLARED_OBSERVATION_AND_SUPPLIED_INGRESS_CLOCK_NOT_NATIVE_CLOCK_ADMISSION",
+            "timing_unqualified":[h.headline_id for h in available if h.observed_ms<h.published_ms],
             "now_ms": now_ms,
         }
 
@@ -627,13 +699,22 @@ def _split(value: Any) -> set[str]:
 
 
 def _parse_ms(value: Any) -> int:
-    from datetime import datetime, timezone
+    return parse_calendar_ms(value)
 
-    s = str(value).strip()
-    if s.isdigit():
-        return int(s) * (1000 if len(s) <= 10 else 1)
-    return int(datetime.fromisoformat(s.replace("Z", "+00:00"))
-               .astimezone(timezone.utc).timestamp() * 1000)
+
+def _row_time(row: Mapping[str, Any], names: tuple[str,...], *, default=None) -> int:
+    for name in names:
+        value=row.get(name)
+        if value is not None and value!='':
+            if name.endswith('_ms'):
+                # A field explicitly named milliseconds has no seconds heuristic.
+                if isinstance(value,str) and value.lstrip('-').isascii() and value.lstrip('-').isdigit():
+                    value=int(value)
+                return _milliseconds(value)
+            return _parse_ms(value)
+    if default is not None:
+        return _milliseconds(default)
+    raise NewsIngressError('headline timestamp unavailable')
 
 
 def rows_from_file(path: str | Path, key: str = "headlines") -> list[dict]:

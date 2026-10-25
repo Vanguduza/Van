@@ -731,3 +731,8 @@ Published budget source3c6969eb verified via normal remote ref and GREEN135; exa
 ## 25 October: calendar feed source and actual Windows compilation
 
 Published623779fd has genuine GREEN141 and actual signed-SDK compilation of the pinned EA source, with a rejected bad-source probe and matching artifact/source hashes. This is source compilation, not production or device acceptance. Current calendar-feed component passes532 actual PostgreSQL cases/0 skips/audit0/exact hashes and25 final controls; six final supplemental faults are assertion-caught/restored. Keep every initial failure and intermediate run. See CHECKPOINT_20261025_NATIVE_FEED.md and backend/BE-014_CALENDAR_FEED_BOUNDARIES.md. Exact623 hosted backend/browser qualification is still pending at this checkpoint, with two mandatory prerequisite failures; previous5fa CI was canceled/partial. Finish genuine commit/ledger/publication and continue the original backend programme.
+
+
+## 25 October: headline causal availability component
+
+Calendar0b3f7601 is genuinely committed/GREEN142; publication awaits terminal623 CI. Current headline component has617 final actual PostgreSQL passes/0 skips/audit0/exact hashes,51 final controls and9 final assertion-caught faults/restoration. All16 distinct reproduced failures remain in evidence. See backend/BE-014_NEWS_CAUSAL_BOUNDARIES.md; chronology is in memory, with durable original/relay publication, cold recovery and service health next. No whole-unit/native/provider/production/device acceptance.
