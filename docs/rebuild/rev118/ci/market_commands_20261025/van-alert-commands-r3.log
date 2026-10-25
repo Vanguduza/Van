@@ -1,0 +1,25 @@
+...........................F.......                                      [100%]
+=================================== FAILURES ===================================
+______ test_old_pause_verifies_its_receipt_after_later_restart_and_delete ______
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-4/test_old_pause_verifies_its_re0')
+
+    @pytest.mark.asyncio
+    async def test_old_pause_verifies_its_receipt_after_later_restart_and_delete(tmp_path):
+        s = await service(tmp_path); alert = await create_alert(s)
+        ctx = await command(s,alert.object_id)
+        original = await AlertControlExecutor().execute(ctx)
+        await s.write('owner','ALERT','RESTART',MonitorControl(request_id='later-restart',expected_revision=2),alert.object_id)
+        assert (await s.get('owner','ALERT',alert.object_id)).lifecycle=='ACTIVE'
+        await s.write('owner','ALERT','DELETE',MonitorControl(request_id='later-delete',expected_revision=3),alert.object_id)
+        assert await control_readback(s.store,ctx.command_id)==original.observed_postcondition
+        registry=build_mission_registry(store=s.store,trading=None,knowledge=None)
+        resolved=TypedCommandResolver().resolve(f'pause trading alert id {alert.object_id} revision 1')
+>       observed=await registry.verify(contract_for(resolved),{'authority_envelope':{'source_command_id':ctx.command_id}})
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       TypeError: VerifierRegistry.verify() takes 1 positional argument but 3 were given
+
+backend/tests/test_market_monitor_commands.py:121: TypeError
+=========================== short test summary info ============================
+FAILED backend/tests/test_market_monitor_commands.py::test_old_pause_verifies_its_receipt_after_later_restart_and_delete
+1 failed, 34 passed in 15.25s

@@ -1,0 +1,46 @@
+..................................F                                      [100%]
+=================================== FAILURES ===================================
+______ test_signed_stale_revision_and_missing_service_are_named_failures _______
+
+client = (<httpx.AsyncClient object at 0x7f7bdc1a1730>, <fastapi.applications.FastAPI object at 0x7f7bdc11c2c0>, {'create_run': 0})
+
+    @pytest.mark.asyncio
+    async def test_signed_stale_revision_and_missing_service_are_named_failures(client):
+        ac,app,_=client;await _pair_for_test(ac,app,'dev-alert-refusal','fixture-alert-refusal-secret')
+        from test_market_monitor_persistence import alert
+        r=await ac.post('/v1/trading/monitors/alerts',json={'request_id':'create','state':alert().model_dump(mode='json')})
+        identity=r.json()['object_id']
+        body=owner_command(app,device_id='dev-alert-refusal',text=f'pause trading alert id {identity} revision 3',idempotency_key='stale')
+        response=await ac.post('/v1/commands',json=body)
+        assert response.status_code==200,response.text
+        assert response.json()['status']=='denied' and 'MONITOR_REVISION_CONFLICT' in response.text
+        app.state.orchestrator.market_monitors=None
+        body=owner_command(app,device_id='dev-alert-refusal',text=f'pause trading alert id {identity} revision 1',idempotency_key='unavailable')
+        response=await ac.post('/v1/commands',json=body)
+        assert response.status_code==200,response.text
+>       assert response.json()['status']=='degraded' and 'market_monitors_unavailable' in response.text
+E       assert ('degraded' == 'degraded'
+E         
+E           degraded and 'market_monitors_unavailable' in '{"status":"degraded","command_id":"5e5ae197-0456-43c0-9d95-1f35305b3852","idempotency_key":"unavailable","message":"A...,{"subject":"OWNER","predicate":"trading_account","scope":"global","state":"MISSING","label":"your trading account"}]}')
+E        +  where '{"status":"degraded","command_id":"5e5ae197-0456-43c0-9d95-1f35305b3852","idempotency_key":"unavailable","message":"A...,{"subject":"OWNER","predicate":"trading_account","scope":"global","state":"MISSING","label":"your trading account"}]}' = <Response [200 OK]>.text
+
+backend/tests/test_market_monitor_commands.py:206: AssertionError
+----------------------------- Captured stdout call -----------------------------
+{"action_class": null, "command_id": null, "correlation_id": null, "degraded_code": null, "detail": {"duration_ms": 300.13, "method": "POST", "route": "/v1/trading/monitors/alerts"}, "device_id": null, "error_class": null, "level": "INFO", "logger": "van.request", "message": "request", "mission_id": null, "principal": null, "result": "200", "service": "van-gateway", "ts": "2026-10-25T16:24:38.228Z"}
+{"action_class": null, "command_id": null, "correlation_id": "corr_e49ef053f177", "degraded_code": null, "detail": {"duration_ms": 368, "verification_state": "PENDING"}, "device_id": null, "error_class": null, "level": "INFO", "logger": "van.mission", "message": "mission finished", "mission_id": "msn_f6ace18d3ac54884925a7cb6fb7c60ff", "principal": null, "result": "FAILED", "service": "van-gateway", "ts": "2026-10-25T16:24:38.905Z"}
+{"action_class": "A2", "command_id": "f69126f3-b8a2-40ce-8235-6a4764aa9976", "correlation_id": "corr_e49ef053f177", "degraded_code": null, "detail": {"hermes_run_id": null, "origin_channel": "VOICE", "requires_approval": false, "resolved_action_id": "trading.alert.pause"}, "device_id": "dev-alert-refusal", "error_class": null, "level": "WARNING", "logger": "van.command", "message": "command outcome", "mission_id": "msn_f6ace18d3ac54884925a7cb6fb7c60ff", "principal": "OWNER_DEVICE", "result": "denied", "service": "van-gateway", "ts": "2026-10-25T16:24:39.053Z"}
+{"action_class": null, "command_id": null, "correlation_id": null, "degraded_code": null, "detail": {"duration_ms": 839.76, "method": "POST", "route": "/v1/commands"}, "device_id": null, "error_class": null, "level": "INFO", "logger": "van.request", "message": "request", "mission_id": null, "principal": null, "result": "200", "service": "van-gateway", "ts": "2026-10-25T16:24:39.079Z"}
+{"action_class": null, "command_id": null, "correlation_id": "corr_75eabef78d23", "degraded_code": null, "detail": {"duration_ms": 338, "verification_state": "PENDING"}, "device_id": null, "error_class": null, "level": "INFO", "logger": "van.mission", "message": "mission finished", "mission_id": "msn_a00545ce085a40d1bddd083842b3d24c", "principal": null, "result": "FAILED", "service": "van-gateway", "ts": "2026-10-25T16:24:39.495Z"}
+{"action_class": "A2", "command_id": "5e5ae197-0456-43c0-9d95-1f35305b3852", "correlation_id": "corr_75eabef78d23", "degraded_code": null, "detail": {"hermes_run_id": null, "origin_channel": "VOICE", "requires_approval": false, "resolved_action_id": "trading.alert.pause"}, "device_id": "dev-alert-refusal", "error_class": null, "level": "WARNING", "logger": "van.command", "message": "command outcome", "mission_id": "msn_a00545ce085a40d1bddd083842b3d24c", "principal": "OWNER_DEVICE", "result": "degraded", "service": "van-gateway", "ts": "2026-10-25T16:24:39.614Z"}
+{"action_class": null, "command_id": null, "correlation_id": null, "degraded_code": null, "detail": {"duration_ms": 546.19, "method": "POST", "route": "/v1/commands"}, "device_id": null, "error_class": null, "level": "INFO", "logger": "van.request", "message": "request", "mission_id": null, "principal": null, "result": "200", "service": "van-gateway", "ts": "2026-10-25T16:24:39.636Z"}
+------------------------------ Captured log call -------------------------------
+INFO     van.request:logging.py:112 request
+INFO     van.mission:logging.py:112 mission finished
+WARNING  van.command:logging.py:112 command outcome
+INFO     van.request:logging.py:112 request
+INFO     van.mission:logging.py:112 mission finished
+WARNING  van.command:logging.py:112 command outcome
+INFO     van.request:logging.py:112 request
+=========================== short test summary info ============================
+FAILED backend/tests/test_market_monitor_commands.py::test_signed_stale_revision_and_missing_service_are_named_failures
+1 failed, 34 passed in 17.63s

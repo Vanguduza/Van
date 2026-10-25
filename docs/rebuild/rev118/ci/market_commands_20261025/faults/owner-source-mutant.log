@@ -1,0 +1,25 @@
+F......                                                                  [100%]
+=================================== FAILURES ===================================
+_____ test_non_owner_or_different_sealed_authority_cannot_write[changes0] ______
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-10/test_non_owner_or_different_se0')
+changes = {'authority_source': 'STANDING_AUTOMATION'}
+
+    @pytest.mark.asyncio
+    @pytest.mark.parametrize('changes', [
+        {'authority_source':'STANDING_AUTOMATION'}, {'principal_type':'SYSTEM'},
+        {'effective_action_class':'A1'}, {'effective_action_class':'A4'}, {'device_id':'another-device'},
+        {'typed_action_id':'trading.halt'},
+        {'typed_parameter_constraints':{'alert_id':ALERT,'expected_revision':1,'order':'buy'}},
+    ])
+    async def test_non_owner_or_different_sealed_authority_cannot_write(tmp_path,changes):
+        s = await service(tmp_path); alert = await create_alert(s)
+        ctx = await command(s,alert.object_id,**changes)
+>       with pytest.raises(LocalExecutionError,match='exact sealed owner'): await AlertControlExecutor().execute(ctx)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE LocalExecutionError
+
+backend/tests/test_market_monitor_commands.py:87: Failed
+=========================== short test summary info ============================
+FAILED backend/tests/test_market_monitor_commands.py::test_non_owner_or_different_sealed_authority_cannot_write[changes0]
+1 failed, 6 passed in 4.90s
