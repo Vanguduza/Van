@@ -1,0 +1,18 @@
+......F............................                                      [100%]
+=================================== FAILURES ===================================
+__________ test_equal_exact_values_with_different_decimal_scale_agree __________
+
+    def test_equal_exact_values_with_different_decimal_scale_agree():
+        recorder=CalendarRecorder();scheduled=_sched(recorder)
+        recorder.observe(_obs(scheduled.event_key,'a','1.0',SCHED_MS+100))
+        recorder.observe(_obs(scheduled.event_key,'b','1.00',SCHED_MS+100))
+        result=recorder.record(scheduled.event_key)
+>       assert result.status is ReleaseStatus.VERIFIED and result.agreed_actual==Decimal('1')
+E       AssertionError: assert (<ReleaseStatus.DISPUTED: 'DISPUTED'> is <ReleaseStatus.VERIFIED: 'VERIFIED'>)
+E        +  where <ReleaseStatus.DISPUTED: 'DISPUTED'> = ReleaseRecord(scheduled=ScheduledRelease(event_key='NFP:1700000000000', name='NFP', scheduled_ms=1700000000000, curren... 'DISPUTED'>, agreed_actual=None, agreeing_sources=('b',), dissenting=(('a', '1.0'),), first_observed_ms=1700000000100).status
+E        +  and   <ReleaseStatus.VERIFIED: 'VERIFIED'> = ReleaseStatus.VERIFIED
+
+trading/tests/test_calendar_causal_boundaries.py:59: AssertionError
+=========================== short test summary info ============================
+FAILED trading/tests/test_calendar_causal_boundaries.py::test_equal_exact_values_with_different_decimal_scale_agree
+1 failed, 34 passed, 2 deselected in 1.01s

@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="14" skipped="0" tests="14" time="0.989" timestamp="2026-10-25T21:51:32.767849+00:00" hostname="2c5a245e39f1"><testcase classname="trading.tests.test_calendar_causal_boundaries" name="test_future_observations_cannot_supply_an_actual_before_their_declared_availability" time="0.563"><failure message="AssertionError: assert (Decimal('150000') is None)&#10; +  where Decimal('150000') = ReleaseRecord(scheduled=ScheduledRelease(event_key='NFP:1700000000000', name='NFP', scheduled_ms=1700000000000, curren...RIFIED'&gt;, agreed_actual=Decimal('150000'), agreeing_sources=('a', 'b'), dissenting=(), first_observed_ms=1700000000500).agreed_actual">def test_future_observations_cannot_supply_an_actual_before_their_declared_availability():
+        recorder=CalendarRecorder();scheduled=_sched(recorder)
+        for source in ('a','b'):recorder.observe(_obs(scheduled.event_key,source,'150000',SCHED_MS+500))
+        past=recorder.record(scheduled.event_key,now_ms=SCHED_MS+100)
+&gt;       assert past.agreed_actual is None and past.observations==()
+E       AssertionError: assert (Decimal('150000') is None)
+E        +  where Decimal('150000') = ReleaseRecord(scheduled=ScheduledRelease(event_key='NFP:1700000000000', name='NFP', scheduled_ms=1700000000000, curren...RIFIED'&gt;, agreed_actual=Decimal('150000'), agreeing_sources=('a', 'b'), dissenting=(), first_observed_ms=1700000000500).agreed_actual
+
+trading/tests/test_calendar_causal_boundaries.py:17: AssertionError</failure></testcase><testcase classname="trading.tests.test_calendar_causal_boundaries" name="test_future_revision_does_not_erase_the_original_agreement_at_an_earlier_cutoff" time="0.004"><failure message="AssertionError: assert (&lt;ReleaseStatus.DISPUTED: 'DISPUTED'&gt; is &lt;ReleaseStatus.VERIFIED: 'VERIFIED'&gt;)&#10; +  where &lt;ReleaseStatus.DISPUTED: 'DISPUTED'&gt; = ReleaseRecord(scheduled=ScheduledRelease(event_key='NFP:1700000000000', name='NFP', scheduled_ms=1700000000000, curren...ISPUTED'&gt;, agreed_actual=None, agreeing_sources=('b',), dissenting=(('a', '142000'),), first_observed_ms=1700000000100).status&#10; +  and   &lt;ReleaseStatus.VERIFIED: 'VERIFIED'&gt; = ReleaseStatus.VERIFIED">def test_future_revision_does_not_erase_the_original_agreement_at_an_earlier_cutoff():
+        recorder=CalendarRecorder();scheduled=_sched(recorder)
+        first=recorder.observe(_obs(scheduled.event_key,'a','150000',SCHED_MS+100))
+        recorder.observe(_obs(scheduled.event_key,'b','150000',SCHED_MS+100))
+        recorder.observe(replace(first,actual=Decimal('142000'),observed_ms=SCHED_MS+9000,
+            revision_of=first.observation_id))
+        past=recorder.record(scheduled.event_key,now_ms=SCHED_MS+200)
+&gt;       assert past.status is ReleaseStatus.VERIFIED and past.agreed_actual==Decimal('150000')
+E       AssertionError: assert (&lt;ReleaseStatus.DISPUTED: 'DISPUTED'&gt; is &lt;ReleaseStatus.VERIFIED: 'VERIFIED'&gt;)
+E        +  where &lt;ReleaseStatus.DISPUTED: 'DISPUTED'&gt; = ReleaseRecord(scheduled=ScheduledRelease(event_key='NFP:1700000000000', name='NFP', scheduled_ms=1700000000000, curren...ISPUTED'&gt;, agreed_actual=None, agreeing_sources=('b',), dissenting=(('a', '142000'),), first_observed_ms=1700000000100).status
+E        +  and   &lt;ReleaseStatus.VERIFIED: 'VERIFIED'&gt; = ReleaseStatus.VERIFIED
+
+trading/tests/test_calendar_causal_boundaries.py:29: AssertionError</failure></testcase><testcase classname="trading.tests.test_calendar_causal_boundaries" name="test_revision_cannot_supersede_another_publishers_original_claim" time="0.002"><failure message="Failed: DID NOT RAISE ObservationConflict">def test_revision_cannot_supersede_another_publishers_original_claim():
+        recorder=CalendarRecorder();scheduled=_sched(recorder)
+        first=recorder.observe(_obs(scheduled.event_key,'a','150000',SCHED_MS+100))
+        other=recorder.observe(_obs(scheduled.event_key,'b','150000',SCHED_MS+100))
+&gt;       with pytest.raises(ObservationConflict):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ObservationConflict
+
+trading/tests/test_calendar_causal_boundaries.py:37: Failed</failure></testcase><testcase classname="trading.tests.test_calendar_causal_boundaries" name="test_nonfinite_actual_cannot_enter_a_calendar_record[NaN]" time="0.001"><failure message="Failed: DID NOT RAISE ValueError">number = 'NaN'
+
+    @pytest.mark.parametrize('number',['NaN','Infinity','-Infinity'])
+    def test_nonfinite_actual_cannot_enter_a_calendar_record(number):
+        recorder=CalendarRecorder();scheduled=_sched(recorder)
+&gt;       with pytest.raises(ValueError):recorder.observe(_obs(scheduled.event_key,'a',number,SCHED_MS+100))
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+trading/tests/test_calendar_causal_boundaries.py:46: Failed</failure></testcase><testcase classname="trading.tests.test_calendar_causal_boundaries" name="test_nonfinite_actual_cannot_enter_a_calendar_record[Infinity]" time="0.001"><failure message="Failed: DID NOT RAISE ValueError">number = 'Infinity'
+
+    @pytest.mark.parametrize('number',['NaN','Infinity','-Infinity'])
+    def test_nonfinite_actual_cannot_enter_a_calendar_record(number):
+        recorder=CalendarRecorder();scheduled=_sched(recorder)
+&gt;       with pytest.raises(ValueError):recorder.observe(_obs(scheduled.event_key,'a',number,SCHED_MS+100))
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+trading/tests/test_calendar_causal_boundaries.py:46: Failed</failure></testcase><testcase classname="trading.tests.test_calendar_causal_boundaries" name="test_nonfinite_actual_cannot_enter_a_calendar_record[-Infinity]" time="0.001"><failure message="Failed: DID NOT RAISE ValueError">number = '-Infinity'
+
+    @pytest.mark.parametrize('number',['NaN','Infinity','-Infinity'])
+    def test_nonfinite_actual_cannot_enter_a_calendar_record(number):
+        recorder=CalendarRecorder();scheduled=_sched(recorder)
+&gt;       with pytest.raises(ValueError):recorder.observe(_obs(scheduled.event_key,'a',number,SCHED_MS+100))
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+trading/tests/test_calendar_causal_boundaries.py:46: Failed</failure></testcase><testcase classname="trading.tests.test_calendar_causal_boundaries" name="test_equal_exact_values_with_different_decimal_scale_agree" time="0.002"><failure message="AssertionError: assert (&lt;ReleaseStatus.DISPUTED: 'DISPUTED'&gt; is &lt;ReleaseStatus.VERIFIED: 'VERIFIED'&gt;)&#10; +  where &lt;ReleaseStatus.DISPUTED: 'DISPUTED'&gt; = ReleaseRecord(scheduled=ScheduledRelease(event_key='NFP:1700000000000', name='NFP', scheduled_ms=1700000000000, curren... 'DISPUTED'&gt;, agreed_actual=None, agreeing_sources=('b',), dissenting=(('a', '1.0'),), first_observed_ms=1700000000100).status&#10; +  and   &lt;ReleaseStatus.VERIFIED: 'VERIFIED'&gt; = ReleaseStatus.VERIFIED">def test_equal_exact_values_with_different_decimal_scale_agree():
+        recorder=CalendarRecorder();scheduled=_sched(recorder)
+        recorder.observe(_obs(scheduled.event_key,'a','1.0',SCHED_MS+100))
+        recorder.observe(_obs(scheduled.event_key,'b','1.00',SCHED_MS+100))
+        result=recorder.record(scheduled.event_key)
+&gt;       assert result.status is ReleaseStatus.VERIFIED and result.agreed_actual==Decimal('1')
+E       AssertionError: assert (&lt;ReleaseStatus.DISPUTED: 'DISPUTED'&gt; is &lt;ReleaseStatus.VERIFIED: 'VERIFIED'&gt;)
+E        +  where &lt;ReleaseStatus.DISPUTED: 'DISPUTED'&gt; = ReleaseRecord(scheduled=ScheduledRelease(event_key='NFP:1700000000000', name='NFP', scheduled_ms=1700000000000, curren... 'DISPUTED'&gt;, agreed_actual=None, agreeing_sources=('b',), dissenting=(('a', '1.0'),), first_observed_ms=1700000000100).status
+E        +  and   &lt;ReleaseStatus.VERIFIED: 'VERIFIED'&gt; = ReleaseStatus.VERIFIED
+
+trading/tests/test_calendar_causal_boundaries.py:55: AssertionError</failure></testcase><testcase classname="trading.tests.test_calendar_causal_boundaries" name="test_ledger_availability_is_the_actual_declared_observation_time" time="0.008"><failure message="AssertionError: assert 1700000000000 == 1700000003000&#10; +  where 1700000000000 = Event(kind=&lt;EventKind.CALENDAR_RELEASE: 'CALENDAR_RELEASE'&gt;, producer='vati-calendar-recorder', event_time_ms=17000000...e_ms=None, correlation_id='NFP:1700000000000', hash='06c548f44828ca0de99eef9db2e2cfa28a7a28524ab0ff6b15be331294d41310').received_time_ms&#10; +  and   1700000003000 = ReleaseObservation(event_key='NFP:1700000000000', source='a', actual=Decimal('1'), observed_ms=1700000003000, released_ms=1700000000000, forecast=None, previous=None, revision_of='').observed_ms">tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-130/test_ledger_availability_is_th0')
+
+    def test_ledger_availability_is_the_actual_declared_observation_time(tmp_path):
+        ledger=Ledger(tmp_path/'calendar.sqlite')
+        try:
+            recorder=CalendarRecorder(ledger=ledger);scheduled=_sched(recorder)
+            observed=recorder.observe(_obs(scheduled.event_key,'a','1',SCHED_MS+3000))
+            event=next(ledger.iter(EventKind.CALENDAR_RELEASE))
+&gt;           assert event.received_time_ms==observed.observed_ms
+E           AssertionError: assert 1700000000000 == 1700000003000
+E            +  where 1700000000000 = Event(kind=&lt;EventKind.CALENDAR_RELEASE: 'CALENDAR_RELEASE'&gt;, producer='vati-calendar-recorder', event_time_ms=17000000...e_ms=None, correlation_id='NFP:1700000000000', hash='06c548f44828ca0de99eef9db2e2cfa28a7a28524ab0ff6b15be331294d41310').received_time_ms
+E            +  and   1700000003000 = ReleaseObservation(event_key='NFP:1700000000000', source='a', actual=Decimal('1'), observed_ms=1700000003000, released_ms=1700000000000, forecast=None, previous=None, revision_of='').observed_ms
+
+trading/tests/test_calendar_causal_boundaries.py:64: AssertionError</failure></testcase><testcase classname="trading.tests.test_calendar_causal_boundaries" name="test_failed_ledger_publication_cannot_be_remembered_as_success[schedule]" time="0.006"><failure message="AssertionError: assert 0 == 1&#10; +  where 0 = count(&lt;EventKind.CALENDAR_SCHEDULE: 'CALENDAR_SCHEDULE'&gt;)&#10; +    where count = &lt;vati.core.ledger.Ledger object at 0x7f5938d9f860&gt;.count&#10; +    and   &lt;EventKind.CALENDAR_SCHEDULE: 'CALENDAR_SCHEDULE'&gt; = EventKind.CALENDAR_SCHEDULE">tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-130/test_failed_ledger_publication0')
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x7f5938d9f590&gt;
+phase = 'schedule'
+
+    @pytest.mark.parametrize('phase',['schedule','observe'])
+    def test_failed_ledger_publication_cannot_be_remembered_as_success(tmp_path,monkeypatch,phase):
+        ledger=Ledger(tmp_path/'calendar.sqlite');recorder=CalendarRecorder(ledger=ledger)
+        try:
+            if phase=='observe':scheduled=_sched(recorder)
+            write=ledger.append
+            def fail(event):raise OSError('fixture publication unavailable before write')
+            with monkeypatch.context() as patch:
+                patch.setattr(ledger,'append',fail)
+                with pytest.raises(OSError):
+                    if phase=='schedule':_sched(recorder)
+                    else:recorder.observe(_obs(scheduled.event_key,'a','1',SCHED_MS+100))
+&gt;           if phase=='schedule':_sched(recorder);assert ledger.count(EventKind.CALENDAR_SCHEDULE)==1
+                                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           AssertionError: assert 0 == 1
+E            +  where 0 = count(&lt;EventKind.CALENDAR_SCHEDULE: 'CALENDAR_SCHEDULE'&gt;)
+E            +    where count = &lt;vati.core.ledger.Ledger object at 0x7f5938d9f860&gt;.count
+E            +    and   &lt;EventKind.CALENDAR_SCHEDULE: 'CALENDAR_SCHEDULE'&gt; = EventKind.CALENDAR_SCHEDULE
+
+trading/tests/test_calendar_causal_boundaries.py:81: AssertionError</failure></testcase><testcase classname="trading.tests.test_calendar_causal_boundaries" name="test_failed_ledger_publication_cannot_be_remembered_as_success[observe]" time="0.005"><failure message="AssertionError: assert 0 == 1&#10; +  where 0 = count(&lt;EventKind.CALENDAR_RELEASE: 'CALENDAR_RELEASE'&gt;)&#10; +    where count = &lt;vati.core.ledger.Ledger object at 0x7f5938d9e720&gt;.count&#10; +    and   &lt;EventKind.CALENDAR_RELEASE: 'CALENDAR_RELEASE'&gt; = EventKind.CALENDAR_RELEASE">tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-130/test_failed_ledger_publication1')
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x7f5938d9e420&gt;
+phase = 'observe'
+
+    @pytest.mark.parametrize('phase',['schedule','observe'])
+    def test_failed_ledger_publication_cannot_be_remembered_as_success(tmp_path,monkeypatch,phase):
+        ledger=Ledger(tmp_path/'calendar.sqlite');recorder=CalendarRecorder(ledger=ledger)
+        try:
+            if phase=='observe':scheduled=_sched(recorder)
+            write=ledger.append
+            def fail(event):raise OSError('fixture publication unavailable before write')
+            with monkeypatch.context() as patch:
+                patch.setattr(ledger,'append',fail)
+                with pytest.raises(OSError):
+                    if phase=='schedule':_sched(recorder)
+                    else:recorder.observe(_obs(scheduled.event_key,'a','1',SCHED_MS+100))
+            if phase=='schedule':_sched(recorder);assert ledger.count(EventKind.CALENDAR_SCHEDULE)==1
+            else:
+                recorder.observe(_obs(scheduled.event_key,'a','1',SCHED_MS+100))
+&gt;               assert ledger.count(EventKind.CALENDAR_RELEASE)==1
+E               AssertionError: assert 0 == 1
+E                +  where 0 = count(&lt;EventKind.CALENDAR_RELEASE: 'CALENDAR_RELEASE'&gt;)
+E                +    where count = &lt;vati.core.ledger.Ledger object at 0x7f5938d9e720&gt;.count
+E                +    and   &lt;EventKind.CALENDAR_RELEASE: 'CALENDAR_RELEASE'&gt; = EventKind.CALENDAR_RELEASE
+
+trading/tests/test_calendar_causal_boundaries.py:84: AssertionError</failure></testcase><testcase classname="trading.tests.test_calendar_causal_boundaries" name="test_a_cold_recorder_does_not_publish_the_same_original_observation_twice" time="0.006"><failure message="AssertionError: assert 2 == 1&#10; +  where 2 = count(&lt;EventKind.CALENDAR_SCHEDULE: 'CALENDAR_SCHEDULE'&gt;)&#10; +    where count = &lt;vati.core.ledger.Ledger object at 0x7f5938d9dc10&gt;.count&#10; +    and   &lt;EventKind.CALENDAR_SCHEDULE: 'CALENDAR_SCHEDULE'&gt; = EventKind.CALENDAR_SCHEDULE">tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-130/test_a_cold_recorder_does_not_0')
+
+    def test_a_cold_recorder_does_not_publish_the_same_original_observation_twice(tmp_path):
+        ledger=Ledger(tmp_path/'calendar.sqlite')
+        try:
+            for _ in range(2):
+                recorder=CalendarRecorder(ledger=ledger);scheduled=_sched(recorder)
+                recorder.observe(_obs(scheduled.event_key,'a','1',SCHED_MS+100))
+&gt;           assert ledger.count(EventKind.CALENDAR_SCHEDULE)==1
+E           AssertionError: assert 2 == 1
+E            +  where 2 = count(&lt;EventKind.CALENDAR_SCHEDULE: 'CALENDAR_SCHEDULE'&gt;)
+E            +    where count = &lt;vati.core.ledger.Ledger object at 0x7f5938d9dc10&gt;.count
+E            +    and   &lt;EventKind.CALENDAR_SCHEDULE: 'CALENDAR_SCHEDULE'&gt; = EventKind.CALENDAR_SCHEDULE
+
+trading/tests/test_calendar_causal_boundaries.py:94: AssertionError</failure></testcase><testcase classname="trading.tests.test_calendar_causal_boundaries" name="test_clock_defect_claims_remain_visible_but_cannot_verify_an_actual" time="0.002"><failure message="AssertionError: assert (&lt;ReleaseStatus.VERIFIED: 'VERIFIED'&gt; is not &lt;ReleaseStatus.VERIFIED: 'VERIFIED'&gt;)&#10; +  where &lt;ReleaseStatus.VERIFIED: 'VERIFIED'&gt; = ReleaseRecord(scheduled=ScheduledRelease(event_key='NFP:1700000000000', name='NFP', scheduled_ms=1700000000000, curren...: 'VERIFIED'&gt;, agreed_actual=Decimal('1'), agreeing_sources=('a', 'b'), dissenting=(), first_observed_ms=1699999999999).status&#10; +  and   &lt;ReleaseStatus.VERIFIED: 'VERIFIED'&gt; = ReleaseStatus.VERIFIED">def test_clock_defect_claims_remain_visible_but_cannot_verify_an_actual():
+        recorder=CalendarRecorder();scheduled=_sched(recorder)
+        for source in ('a','b'):recorder.observe(_obs(scheduled.event_key,source,'1',SCHED_MS-1))
+        result=recorder.record(scheduled.event_key)
+        assert len(result.observations)==2 and result.latency_ms==-1
+&gt;       assert result.status is not ReleaseStatus.VERIFIED and result.agreed_actual is None
+E       AssertionError: assert (&lt;ReleaseStatus.VERIFIED: 'VERIFIED'&gt; is not &lt;ReleaseStatus.VERIFIED: 'VERIFIED'&gt;)
+E        +  where &lt;ReleaseStatus.VERIFIED: 'VERIFIED'&gt; = ReleaseRecord(scheduled=ScheduledRelease(event_key='NFP:1700000000000', name='NFP', scheduled_ms=1700000000000, curren...: 'VERIFIED'&gt;, agreed_actual=Decimal('1'), agreeing_sources=('a', 'b'), dissenting=(), first_observed_ms=1699999999999).status
+E        +  and   &lt;ReleaseStatus.VERIFIED: 'VERIFIED'&gt; = ReleaseStatus.VERIFIED
+
+trading/tests/test_calendar_causal_boundaries.py:104: AssertionError</failure></testcase><testcase classname="trading.tests.test_calendar_causal_boundaries" name="test_forecast_only_observation_is_not_the_first_actual_release_latency" time="0.004"><failure message="AssertionError: assert -1 is None&#10; +  where -1 = ReleaseRecord(scheduled=ScheduledRelease(event_key='NFP:1700000000000', name='NFP', scheduled_ms=1700000000000, curren...tatus.SCHEDULED: 'SCHEDULED'&gt;, agreed_actual=None, agreeing_sources=(), dissenting=(), first_observed_ms=1699999999999).latency_ms&#10; +    where ReleaseRecord(scheduled=ScheduledRelease(event_key='NFP:1700000000000', name='NFP', scheduled_ms=1700000000000, curren...tatus.SCHEDULED: 'SCHEDULED'&gt;, agreed_actual=None, agreeing_sources=(), dissenting=(), first_observed_ms=1699999999999) = record('NFP:1700000000000')&#10; +      where record = &lt;vati.calendar.recorder.CalendarRecorder object at 0x7f5938e76f60&gt;.record&#10; +      and   'NFP:1700000000000' = ScheduledRelease(event_key='NFP:1700000000000', name='NFP', scheduled_ms=1700000000000, currencies=('USD',), tier=1, unit='', forecast=Decimal('160000'), previous=None).event_key">def test_forecast_only_observation_is_not_the_first_actual_release_latency():
+        recorder=CalendarRecorder();scheduled=_sched(recorder)
+        recorder.observe(replace(_obs(scheduled.event_key,'a','1',SCHED_MS-1),actual=None,forecast=Decimal('1')))
+&gt;       assert recorder.record(scheduled.event_key).latency_ms is None
+E       AssertionError: assert -1 is None
+E        +  where -1 = ReleaseRecord(scheduled=ScheduledRelease(event_key='NFP:1700000000000', name='NFP', scheduled_ms=1700000000000, curren...tatus.SCHEDULED: 'SCHEDULED'&gt;, agreed_actual=None, agreeing_sources=(), dissenting=(), first_observed_ms=1699999999999).latency_ms
+E        +    where ReleaseRecord(scheduled=ScheduledRelease(event_key='NFP:1700000000000', name='NFP', scheduled_ms=1700000000000, curren...tatus.SCHEDULED: 'SCHEDULED'&gt;, agreed_actual=None, agreeing_sources=(), dissenting=(), first_observed_ms=1699999999999) = record('NFP:1700000000000')
+E        +      where record = &lt;vati.calendar.recorder.CalendarRecorder object at 0x7f5938e76f60&gt;.record
+E        +      and   'NFP:1700000000000' = ScheduledRelease(event_key='NFP:1700000000000', name='NFP', scheduled_ms=1700000000000, currencies=('USD',), tier=1, unit='', forecast=Decimal('160000'), previous=None).event_key
+
+trading/tests/test_calendar_causal_boundaries.py:110: AssertionError</failure></testcase><testcase classname="trading.tests.test_calendar_causal_boundaries" name="test_malformed_actual_is_skipped_with_error_instead_of_silently_becoming_missing" time="0.002"><failure message="assert (1 == 0)">def test_malformed_actual_is_skipped_with_error_instead_of_silently_becoming_missing():
+        recorder=CalendarRecorder();scheduled=_sched(recorder)
+        n=recorder.ingest_observations([{'event_key':scheduled.event_key,'release':str(SCHED_MS),
+            'observed':str(SCHED_MS+100),'source':'a','actual':'not-a-number'}])
+&gt;       assert n==0 and len(recorder.skipped)==1
+E       assert (1 == 0)
+
+trading/tests/test_calendar_causal_boundaries.py:117: AssertionError</failure></testcase></testsuite></testsuites>

@@ -1,0 +1,33 @@
+{
+  "schema": "van.supplemental-source-faults/1",
+  "control_sha256": "d6c4ea9b4583e1b130fcfe771c79189b80d2fe7e1b53dbe26eac222b76040c64",
+  "source_restored": true,
+  "cases": [
+    {
+      "case": "ignore-declared-cutoff",
+      "exit": 1,
+      "mutated_sha256": "a911a54b3e403af2ab3842aae49201112c21e55082161ba19c30d5091e619d95"
+    },
+    {
+      "case": "compare-decimal-text",
+      "exit": 1,
+      "mutated_sha256": "3d35cc3951e88e35b9018aaf55cfc1a2d1e34618adbde29c7bd1d3b0833b3432"
+    },
+    {
+      "case": "admit-clock-defect-values",
+      "exit": 1,
+      "mutated_sha256": "471cdb722f632f94111ea61e6a4e3d91128e9fefa241437e9dcfdc77cd2f15f2"
+    },
+    {
+      "case": "lose-observation-availability",
+      "exit": 1,
+      "mutated_sha256": "e7dcaa92e968c9ea13f6f94f7a0c80e09379582b9b7036a34859d62681da23e2"
+    },
+    {
+      "case": "repeat-original-publication",
+      "exit": 1,
+      "mutated_sha256": "3e4bda8a465db774fdd4f08ea0823ab0c69c84da3340b624e4cbb54375a11b89"
+    }
+  ],
+  "not_canonical_corpus": true
+}

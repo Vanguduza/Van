@@ -154,6 +154,15 @@
         "backend/BE-008_NATIVE_QUOTE_ARCHIVE.md",
         "receipts/NATIVE_QUOTE_ARCHIVE_SOURCE_20261025.json"
       ]
+    },
+    "BE-014": {
+      "status": "IN_PROGRESS",
+      "candidate_source_only": true,
+      "acceptance": "NOT_ISSUED",
+      "evidence": [
+        "backend/BE-014_CALENDAR_CAUSAL_PUBLICATION.md",
+        "receipts/CALENDAR_CAUSAL_SOURCE_20261025.json"
+      ]
     }
   },
   "blockers": [
@@ -223,7 +232,7 @@
     "note": "Opus unavailable; owner transferred build to Codex. No independent reviewer identity is inferred from another model or session."
   },
   "checkpoint": {
-    "updated_utc": "2026-10-25T22:14:16.701534+00:00",
+    "updated_utc": "2026-10-25T22:34:31.636665+00:00",
     "branch": "ccr-9e07e1af-8mgz1p",
     "base": "b02075f327ea8180ab6d269eba358cf8c5479878",
     "background_jobs": [
@@ -423,7 +432,8 @@
       "Exact3c6969ebCI40228254162 terminal:17public source jobs success; gateway5775pass/7skip,media198,trading3228pass/1privateDDSskip,PG26,voice117,monitor258;374original mutation identities caught once/0survivors/383edits. Actual overallFAILURE remains2unwaived privateDDS/trusted-main prerequisites. Not qualification for local quote packet.",
       "Event selector source:3actual before failures,958 actualPG cases0skip/audit0,15final controls,6/6supplemental faults assertion-caught/restored,108rebuild. Production source hashes match; test-only unused-import cleanup timing explicitly disclosed. Candidate source only.",
       "Native cumulative read capacity:982 unique actualPG cases0skip/audit0 with exact hashes,113focus,24final controls,3/3supplemental assertion faults/restored,108rebuild. First failed fixture setup and wrong optional-field oracle retained. Child/thread probes healthy,14PID1 zombies observed, no unrelated process killed.",
-      "Quote archive:1019final unique actualPG0skip/audit0/exact hashes,129focus,4supplemental faults caught/restored,108initialrebuild, actual baseline bar bytes/receipt unchanged. Broad600s+1800s attempts TIMEOUT/no finalJUnit/audit; unknown firstF provisionallySQLitelease passes isolated and unchanged retry.3072explicitstreamingcompletedpass+266finaltailPGpass0skip/audit0=3338unique positive case identities; not overallFullRunPASS, prefixauditUNKNOWN."
+      "Quote archive:1019final unique actualPG0skip/audit0/exact hashes,129focus,4supplemental faults caught/restored,108initialrebuild, actual baseline bar bytes/receipt unchanged. Broad600s+1800s attempts TIMEOUT/no finalJUnit/audit; unknown firstF provisionallySQLitelease passes isolated and unchanged retry.3072explicitstreamingcompletedpass+266finaltailPGpass0skip/audit0=3338unique positive case identities; not overallFullRunPASS, prefixauditUNKNOWN.",
+      "Calendar declared causality/publication:14actual beforefailures;498final actualPG0skip/audit0/exact hashes,35local controls+2PGdeselected explicitlyexecuted in finalPG,5supplemental faults assertion-caught/restored,108rebuild. Originalnegativeclockdiagnostics retained, no publisher/native qualification. Quote047dacc6 genuine committed ledger GREEN139; local-only."
     ],
     "environment_notes": [
       "clone must be unshallowed (git fetch --unshallow) and PR heads fetched (+refs/pull/*/head:refs/remotes/origin/pr/*) before pre001.py",
@@ -434,7 +444,7 @@
       "Python 3.12 venv from backend/requirements.lock for CI-equivalent runs; stream-host venv from deploy/van-browser-stream/requirements.lock",
       "Desktop Commander read-only device listing was refused by the session permission policy; native readback prepared as pre003/NATIVE_READBACK_REQUEST.md"
     ],
-    "next_action": "Genuine hook commit/committed ledger of quote component, normal publication/exact hosted qualification after supported CLI refresh. Apply/review isolated BE-014 candidate only after preserving its source/test evidence and testing integration on this branch. Complete qualified native feeds/source health and all remaining backend units, no new frontend before BG-001.",
+    "next_action": "Commit calendar source/evidence through genuine hooks and committed ledger verification; preserve missing CLI publication capability and exact hosted qualification requirement. Continue BE-014 feed shape/explicit time/identity/source health, qualified native producer/consumer and all remaining backend/ML/assistant obligations. No new frontend before BG-001.",
     "previous_head": "c5350284949b73ca52370ce81592efd7aee5ef54",
     "current_packet": "BE-020 durable monitor controls, server evaluator, contracts and source evidence; unit remains IN_PROGRESS.",
     "ci_credential_capability": "receipts/CI_CREDENTIAL_CAPABILITY_20261024.json: repo admin metadata available, integration secret/deploy-key reads403; no credential changes.",
@@ -447,7 +457,7 @@
         "scope": "browser repair source qualification, not monitor source or S24"
       }
     ],
-    "active_packet": "BE-008 durable quote snapshot component; isolated BE-014 calendar causality/publication candidate next",
+    "active_packet": "BE-014 declared calendar causality/publication source-tested; next canonical calendar-feed shape/timezone/identity and source-health integration",
     "published_head": "3c6969ebbec39f2ad9f2836a6bd8acdb487adc34",
     "local_base_head": "46474a6cf054bbecf4ab32ed6d3d394611f633b0",
     "committed_ledger_verification": "GREEN135 through3c6969eb against4fd466dec3910ed5de614bfbf95887ad619df5ca; quote packet not yet committed"
@@ -460,7 +470,8 @@
     "OBS-005 legacy mutation registry and masked advisory failure",
     "2026-10-25T20:55:24.803079+00:00: a921d0f2 committed through genuine hooks/GREEN136, still unpushed. Verified recovery ZIP SHA25694a927e727da70700c6daef52a19d272013ff454c9713e42c9dcb4fcb2dd0b59; genuine bundle requires3c6969eb, SHA25613687c41242eecac55661d1181137ee886ac946424d033ad9040f7d8e1e20c65. Connected GitHub recovery-only JSON blob88b03f8a54e9732d5a8e49b8a14bdc07d641f643 read back exactly; unreferenced blob is not normal branch publication or guaranteed long-term retention. Binary blob fetch was unsupported UTF8; JSON representation verified. DIAL checkpoint63449318-ad8b-4d6a-9b83-36dd078d65e7 reports source, accepts nothing.",
     "2026-10-25T21:04:30.348392+00:00: Event selector5934d427 committed through genuine hooks/GREEN137. Verified55-file candidate ZIP272903bytes SHA25698fab1c910e5ff4252d5aee4d4e600d6e47b669b4a3d8773fb6112e8660f65c0. No normal push due invalid injected CLI credential. Current cloud observation still running/connected but secrets/outbound identities/runtime bindings/capabilities empty; no supported refresh tool discovered. Connected GitHub source metadata/recovery tools work, no commit/ref substitute.",
-    "2026-10-25T22:14:16.701534+00:00: Verified genuine three-commit bundle requires published3c6969eb,564737bytes SHA256f81eff58486bd4b3de64d855a60e8b80489f57cb0f966b2098bda544614d3f36. Recovery-only unreferenced JSON blob b4fbb38edd0f5e52db6da121a3ec53c552f5f071 read back exactly; not branch publication or guaranteed retention. DIAL checkpointd80b8879-84d9-49e4-89e7-c04734b332e2 reports source, accepts nothing. Remote3c6969eb readback unchanged; CLI refresh pending. Calendar candidate isolated at/workspace/van-calendar-source-20261025 onad1d3941, not yet applied to this checkout;14before failures and83focused pass/audit0; source-only pending integration, no unit milestone issued here."
+    "2026-10-25T22:14:16.701534+00:00: Verified genuine three-commit bundle requires published3c6969eb,564737bytes SHA256f81eff58486bd4b3de64d855a60e8b80489f57cb0f966b2098bda544614d3f36. Recovery-only unreferenced JSON blob b4fbb38edd0f5e52db6da121a3ec53c552f5f071 read back exactly; not branch publication or guaranteed retention. DIAL checkpointd80b8879-84d9-49e4-89e7-c04734b332e2 reports source, accepts nothing. Remote3c6969eb readback unchanged; CLI refresh pending. Calendar candidate isolated at/workspace/van-calendar-source-20261025 onad1d3941, not yet applied to this checkout;14before failures and83focused pass/audit0; source-only pending integration, no unit milestone issued here.",
+    "2026-10-25T22:34:31.636665+00:00: Quote component genuinely committed047dacc6/GREEN139;1258-file manifest0mismatches. Verified89-file precommit ZIP836995bytes SHA256b692e47a332eadd77ea295e9e52ef4f4e0f140b24b7a997625bd62d6afb6fa6e. Calendar isolated candidate originalbytes checked and copied into main checkout after quote commit; current evidence498actualPG0skip/audit0, no unit acceptance. Source independence/entitlement/native availability remain unqualified; no actual financial/provider/production/device effects."
   ],
   "obligations": "obligations/OBLIGATIONS.json: preserved observations with source implementation evidence and explicit remaining native/unit obligations.",
   "pre002_challenge": "pre002/challenge/: 324 author-prepared dossiers (AUTHOR_CHALLENGED_PENDING_INDEPENDENT_REVIEW)",
@@ -491,7 +502,7 @@
     "tested_android_head": "ac60c4d3ba57ff488a39fa1962920ce4711c0ffc",
     "hosted_result": "receipts/HOSTED_SOURCE_ac60c4d3.json",
     "mutation_reconciliation": "ci/MUTATION_RECONCILIATION.md and ci/MUTATION_RECONCILIATION_MAPPING.json",
-    "verified_source_head": "ad1d3941d6a0257ee9966fd66f02eddb76af04de LOCAL_ONLY; genuine committed ledger GREEN138",
+    "verified_source_head": "047dacc6b006e16b382e6f510725af364dc2b0bb LOCAL_ONLY; genuine committed ledger GREEN139",
     "source_qualification_run": 40219703232,
     "latest_checkpoint_report": "CHECKPOINT_20261025_NATIVE_FEED.md",
     "previous_verified_source": "3c6969ebbec39f2ad9f2836a6bd8acdb487adc34 published; exact CI40228254162 all17public jobs pass, two unchanged prerequisite failures",
@@ -513,6 +524,6 @@
       "evidence": "ci/MUTATION_CORPUS_c2a27848.json"
     }
   ],
-  "current_action": "Genuine hook commit/committed ledger of quote component, normal publication/exact hosted qualification after supported CLI refresh. Apply/review isolated BE-014 candidate only after preserving its source/test evidence and testing integration on this branch. Complete qualified native feeds/source health and all remaining backend units, no new frontend before BG-001.",
-  "updated_at_utc": "2026-10-25T22:14:16.701534+00:00"
+  "current_action": "Commit calendar source/evidence through genuine hooks and committed ledger verification; preserve missing CLI publication capability and exact hosted qualification requirement. Continue BE-014 feed shape/explicit time/identity/source health, qualified native producer/consumer and all remaining backend/ML/assistant obligations. No new frontend before BG-001.",
+  "updated_at_utc": "2026-10-25T22:34:31.636665+00:00"
 }

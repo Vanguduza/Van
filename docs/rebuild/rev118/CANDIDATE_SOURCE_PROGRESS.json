@@ -1,6 +1,6 @@
 {
   "schema": "van.rebuild.candidate-source-progress/1",
-  "updated_at_utc": "2026-10-25T22:14:16.701534+00:00",
+  "updated_at_utc": "2026-10-25T22:34:31.636665+00:00",
   "programme": "Rev1.18; original 131 unit IDs and dependencies retained",
   "authority": "auth-20261022-owner-autonomous-candidate-build",
   "meaning": "Candidate source progress is separate from admitted unit acceptance. Independent certificates, owner decisions, live effects and release gates remain unissued. No unit is declared complete by this record.",
@@ -798,9 +798,14 @@
         "BE-008",
         "PRE-003"
       ],
-      "candidate_status": "NOT_STARTED",
+      "candidate_status": "IN_PROGRESS",
       "unit_acceptance": "NOT_ISSUED",
-      "milestones": []
+      "milestones": [
+        {
+          "description": "Declared calendar observation cutoff before revisions/aggregation, same-event/source latest revision, finite exact numeric agreement; bad-clock diagnostics retained without actual agreement, forecast-only latency removed. Writer/original-readback publication before memory, actualSQLcommitlostACK, concurrentSQLite/PG publishers and read-onlycold recovery preserve originals/legacy unknown availability.14actualbefore failures;498final actualPG0skip/audit0/exact hashes,35local controls+2PGdeselected executedfinal,5faults caught/restored,108rebuild. Labels are not publisher/native qualification; schedule/clock/source ingestion/entitlements and full unit remain.",
+          "evidence": "backend/BE-014_CALENDAR_CAUSAL_PUBLICATION.md; receipts/CALENDAR_CAUSAL_SOURCE_20261025.json"
+        }
+      ]
     },
     "BE-015": {
       "title": "Event analysis, history, analogues and expectations",
