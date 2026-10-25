@@ -723,6 +723,10 @@ def create_app() -> FastAPI:
     # Closed trades become owner-visible events (Activity feed, embodiment CELEBRATE
     # on GOOD_DECISION_GOOD_OUTCOME only). A projection of the ledger, never an authority.
     trading_event_bridge = TradingEventBridge(store, trading, events)
+    from van_gateway.trading.monitor_service import MarketMonitorService
+    from van_gateway.trading.monitor_source import LedgerMonitorSource
+    market_monitors = MarketMonitorService(store, LedgerMonitorSource(trading), events=events, attention=attention)
+
     # Rev 1.5 §§5, 6 — the interactive browser session.
     #
     # It shares the Browser Fabric's broker and policy engine rather than constructing its
@@ -1050,6 +1054,9 @@ def create_app() -> FastAPI:
     async def _run_trading_events() -> dict:
         return await trading_event_bridge.run(int(time.time() * 1000))
 
+    async def _run_market_monitors() -> dict:
+        return await market_monitors.run()
+
     async def _run_proactive_followups() -> dict:
         return await proactive_followups.run(int(time.time() * 1000))
 
@@ -1083,6 +1090,7 @@ def create_app() -> FastAPI:
             ScheduledJob("proactive.follow_ups", settings.reminder_sweep_seconds, _run_proactive_followups),
             ScheduledJob("owner.watches", settings.reminder_sweep_seconds, _run_owner_watches),
             ScheduledJob("trading.publish_closed", settings.reminder_sweep_seconds, _run_trading_events),
+            ScheduledJob("trading.market_monitors", settings.reminder_sweep_seconds, _run_market_monitors),
         ]
         if settings.automation_enabled:
             jobs.append(ScheduledJob(
@@ -1248,6 +1256,9 @@ def create_app() -> FastAPI:
     chart_workspaces = ChartWorkspaceService(store)
     app.state.chart_workspaces = chart_workspaces
     app.include_router(build_chart_router(chart_workspaces))
+    from van_gateway.trading.monitor_api import build_monitor_router
+    app.state.market_monitors = market_monitors
+    app.include_router(build_monitor_router(market_monitors))
     app.include_router(build_suggestion_router(suggestions))
     app.include_router(build_conversation_router(conversations))
     app.include_router(build_computer_use_router(computer_use))

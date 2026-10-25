@@ -362,7 +362,8 @@
       "Exact31a726ca hosted: publicPG26PASS, trading2898PASS1schemaFAIL1privateDDSskip; voice source NOT_RUN. All374retained mutants caught; full50browser files1542PASS1rootUIDskip with rootUID separately1PASS and firewall10PASS. Emulator18PASS4declaredskips; actual margin EA MetaEditor0errors0warningsfreshEX5/invalid4errorsnoEX5. Overall CI FAILED, originalDDSreadkey/trustedmain prerequisites retained. Nextsource fixes schema and adds native target guards:11originalbeforeFAIL,227actualPGPASS0skipcleanupTRUE,121nativePASS,83schemaPASS,7fault/restoredpairs caught; external schema31negativecases rejected. Media198auditedPASS,privateDDS274sourcePASS,94rebuildPASS,30owner/workflow/pinPASS. Supplemental public source job370modules uses separate backend/media locks; first complete hosted execution pending.",
       "Funding baseline packet:6original snapshot failures and2historical replay failures reproduced. Both producers/startup and owner recovery require usable funding before rebasing; original ledger remains immutable.125focused/75final rootPASS;5semanticfault/restoredpairs caught. FinalactualPG225case batch223PASS2explicitthread/forkexhaustionfailures, allnewPGbaseline/startup casesPASS; cleanupTRUE. Startupfault control failed nativeforksetup, mutantNOTRUN/notcounted. Hostedbe61 run40115383483 executing prior schema/target/public-backend source; avoidcanceling before usable results. No whole-backend/unit/prod/device claims.",
       "Exactbe61 hosted40115383483:PG26PASS,trading2911PASS1DDSskip,voice117PASS0skip; full50browser1542ordinaryPASS1rootUIDskip plusseparateUID1PASS/firewall10PASS/audits0; emulator18PASS4declaredskips; all374retainedmutationscaught; nativeMetaEditor0errors/warningsfreshEX5,invalid4errorsnoEX5. Publicgateway5647cases5636PASS1JEVreferenceFAIL10SKIP;mediaNOTRUN; overallFAILED,originalDDSreadkey/trustedmainstillrequired. Nextsource preservesoriginalB0/private/trust/PG/browserchecks,canonicaltest-pathskipmetadata,Pillowpin,fullhistorySOURCEHEAD,2actualAGPrefusalcontrolsintheAndroidjob,independentmediaevenafterfailure. Nativeaccountpacket:5beforeFAIL,legacyalias-onlyvaluesLIVEwithoutscopeprobe;190finalnative/schema/funding/portfolioPASS,20auditedAPI0forbiddenwrites,96rebuild/30owner-workflow-pin/31JEV-gate/Pillow12PASS. Ninecurrentsemanticfault/restoredpairs caught;schema5valid35invalidshapes. AllcurrentKotlin1341testsourcecompiled;fullruntimeABORTEDnativecoroutinethreadEAGAINnotPASS;8focusedactualJunitPASS0skip.10originalfundingreportassertionspreservedwithexplicitnativephysicalmarkfixture. No newUI orunit/native/prod/S24 acceptance.",
-      "df249 fresh hosted: trading3061PASS1declaredDDSskip; PG26PASS; voice117PASS; publicbackend5841PASS7declaredunexecuted; actualrelease2PASS; Android1369passed events; emulator18PASS4declaredskips;374mutationsCAUGHT. Browser10PASS1setupERROR, laterfull/UID/firewallNOT_RUN. New testkit deterministic before4FAIL1PASS/after5PASS; originalscenariosbyteidentical. No formalacceptances."
+      "df249 fresh hosted: trading3061PASS1declaredDDSskip; PG26PASS; voice117PASS; publicbackend5841PASS7declaredunexecuted; actualrelease2PASS; Android1369passed events; emulator18PASS4declaredskips;374mutationsCAUGHT. Browser10PASS1setupERROR, laterfull/UID/firewallNOT_RUN. New testkit deterministic before4FAIL1PASS/after5PASS; originalscenariosbyteidentical. No formalacceptances.",
+      "BE020: original42groups105functions78surfaces preserved;457->472endpoints,333->357APIschemas(originalsetsallpreserved);55newtests observedacrosssourcephases, latest54PASS1threadsetupERROR retainedandretryerror; prior53allPASSplus2newhealthycontrols.9/9faultpairsCAUGHTwithhealthycontrols,10registryguardsPASS,source-contractcheck0changes,MDcurrent. Nativefeed/tick/dynamic/persistedscreen/voice/Androidconsumersnotqualified. Noformalunit/gateacceptance."
     ],
     "environment_notes": [
       "clone must be unshallowed (git fetch --unshallow) and PR heads fetched (+refs/pull/*/head:refs/remotes/origin/pr/*) before pre001.py",
@@ -373,10 +374,19 @@
       "Python 3.12 venv from backend/requirements.lock for CI-equivalent runs; stream-host venv from deploy/van-browser-stream/requirements.lock",
       "Desktop Commander read-only device listing was refused by the session permission policy; native readback prepared as pre003/NATIVE_READBACK_REQUEST.md"
     ],
-    "next_action": "Publish hooked Chromium original-target readiness repair and request no new permission; obtain fresh full browser/UID/namespace source evidence, then continue BE-020 persistent market monitor implementation with full provenance and no trading authority. Retain native/private DDS/trusted-main prerequisites and all programme obligations.",
-    "previous_head": "df249c52e30cd5f188a77a12ebff7efaa3244266",
-    "current_packet": "Repair Chromium original-page readiness; continue BE-020 server market monitors.",
-    "ci_credential_capability": "receipts/CI_CREDENTIAL_CAPABILITY_20261024.json: repo admin metadata available, integration secret/deploy-key reads403; no credential changes."
+    "next_action": "Finish canonical checks, commit/publish monitor component with unchanged real hook and committed ledger verification; keep fresh c535 CI useful browser qualification running until completion. Then continue BE-020 stored screener/dynamic projections and BE-008/014 actual native feed/source identity/health, followed by remaining backend/forecast/crypto/economics programme. No frontend redesign before BG-001; no implicit financial, native or production activation.",
+    "previous_head": "c5350284949b73ca52370ce81592efd7aee5ef54",
+    "current_packet": "BE-020 durable monitor controls, server evaluator, contracts and source evidence; unit remains IN_PROGRESS.",
+    "ci_credential_capability": "receipts/CI_CREDENTIAL_CAPABILITY_20261024.json: repo admin metadata available, integration secret/deploy-key reads403; no credential changes.",
+    "current_background_jobs": [
+      {
+        "kind": "github_actions",
+        "run_id": 40154817679,
+        "source_head": "c5350284949b73ca52370ce81592efd7aee5ef54",
+        "status": "IN_PROGRESS_LAST_OBSERVED",
+        "scope": "browser repair source qualification, not monitor source or S24"
+      }
+    ]
   },
   "observations": [
     "OBS-001 BE-002 debug cleartext",
@@ -434,6 +444,6 @@
       "evidence": "ci/MUTATION_CORPUS_c2a27848.json"
     }
   ],
-  "current_action": "Publish hooked Chromium original-target readiness repair and request no new permission; obtain fresh full browser/UID/namespace source evidence, then continue BE-020 persistent market monitor implementation with full provenance and no trading authority. Retain native/private DDS/trusted-main prerequisites and all programme obligations.",
-  "updated_at_utc": "2026-10-25T01:53:28.635962+00:00"
+  "current_action": "Finish canonical checks, commit/publish monitor component with unchanged real hook and committed ledger verification; keep fresh c535 CI useful browser qualification running until completion. Then continue BE-020 stored screener/dynamic projections and BE-008/014 actual native feed/source identity/health, followed by remaining backend/forecast/crypto/economics programme. No frontend redesign before BG-001; no implicit financial, native or production activation.",
+  "updated_at_utc": "2026-10-25T02:45:53.709404+00:00"
 }

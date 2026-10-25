@@ -64,7 +64,10 @@ def render():
             lines.extend(['','**Backend/client extensions — consumer status is explicit**','', '| Method / path | Client | Status | Scope |','| --- | --- | --- | --- |'])
             for item in ext:
                 current=endpoint_map[item['endpoint_id']]
-                lines.append('| '+' | '.join(cell(x) for x in (current['method']+' '+current['path'],str(item.get('client_namespace',''))+'.'+str(item.get('client_function','UNWIRED')),item.get('source_status','UNSPECIFIED'),item.get('scope','')))+' |')
+                scope=item.get('scope','')
+                if item.get('remaining'):
+                    scope+=' Remaining prerequisites: '+'; '.join(item['remaining'])+'.'
+                lines.append('| '+' | '.join(cell(x) for x in (current['method']+' '+current['path'],str(item.get('client_namespace',''))+'.'+str(item.get('client_function','UNWIRED')),item.get('source_status','UNSPECIFIED'),scope))+' |')
         listing('Service dependencies (not Android owner access)',row.get('service_endpoint_ids',[]))
         listing('External dependencies',row.get('external_endpoint_ids',[]))
     lines+=['','## Screens and hosted surfaces']

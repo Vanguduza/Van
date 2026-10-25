@@ -56,3 +56,33 @@ def test_an_arbitrary_committed_registry_is_not_automatically_a_generated_preima
     path="registries/owner_features.json"
     assert not module.approved_preimage(path,originals["HEAD",path],read)
     assert not module.approved_preimage("registries/other.json",b"anything",read)
+
+
+@pytest.mark.parametrize("corruption", ["none", "owner_edit", "source_receipt"])
+def test_main_uses_supplied_object_reader_and_keeps_all_preimage_checks(tmp_path, monkeypatch, corruption):
+    originals, _, read = fixture()
+    for path in module.REGISTRIES:
+        target = tmp_path/path
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_bytes(originals["HEAD", path])
+    if corruption == "owner_edit":
+        target = tmp_path/"registries/owner_screens.json"
+        target.write_bytes(target.read_bytes()+b"owner edit")
+    elif corruption == "source_receipt":
+        originals["HEAD", module.RECEIPT] = b"changed committed receipt"
+    outputs = {path: b"new derived bytes:"+path.encode() for path in module.REGISTRIES}
+    def build(*, read):
+        assert read is supplied
+        return outputs
+    supplied = read
+    monkeypatch.setattr(module, "ROOT", tmp_path)
+    monkeypatch.setattr(module, "build", build)
+    monkeypatch.setattr(module.sys, "argv", ["refresh_owner_source_contracts.py", "--apply"])
+    before = {p: (tmp_path/p).read_bytes() for p in module.REGISTRIES}
+    if corruption == "none":
+        assert module.main(read=supplied) == 0
+        assert all((tmp_path/p).read_bytes() == data for p, data in outputs.items())
+    else:
+        with pytest.raises(ValueError, match="Unexpected registry edits"):
+            module.main(read=supplied)
+        assert all((tmp_path/p).read_bytes() == data for p, data in before.items())

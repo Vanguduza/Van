@@ -1,0 +1,392 @@
+{
+  "schema": "van.rebuild.market-monitor-source-fault-controls/1",
+  "expected": 9,
+  "caught": 9,
+  "pairs": [
+    {
+      "case": "native-scope",
+      "status": "CAUGHT",
+      "mutant": {
+        "case": "native-scope",
+        "phase": "mutant",
+        "exit_code": 1,
+        "counts": {
+          "tests": 4,
+          "failures": 3,
+          "errors": 0,
+          "skipped": 0
+        },
+        "report_sha256": "a6200876ab215c727116fc4c386e9992fe52469b4a60f782226ca017aabcf922",
+        "log_sha256": "a74ee9144cdf21c62c553f3a5a2e58f9660886f6989fd23c28012f38f27dadc7",
+        "restored_sha256": {
+          "backend/van_gateway/trading/monitor_service.py": "8e6c6da8e69a5a73f18993428dd89260adaf35848d00eeb2aaebef850c4f0585",
+          "backend/van_gateway/trading/monitor_calculations.py": "98eaf7e63ddfc94c6188a33d2410ad82a91bf677f4dc53d968d11a4bb1814fba",
+          "backend/van_gateway/events/bus.py": "50c824c5d28169199cbefde92e25555339bd321806c872fddfbdf77935b775c4"
+        },
+        "semantic_failure": true
+      },
+      "control": {
+        "case": "native-scope",
+        "phase": "control",
+        "exit_code": 0,
+        "counts": {
+          "tests": 4,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "report_sha256": "8b732ee06777011f51fd55502c19087a53962cbbabd6d1b282a9c3749a68b16b",
+        "log_sha256": "44091516c6f7d278c9900d796163d45f95d1ad1819370ffeeaf887bc704f2e38",
+        "restored_sha256": {
+          "backend/van_gateway/trading/monitor_service.py": "8e6c6da8e69a5a73f18993428dd89260adaf35848d00eeb2aaebef850c4f0585",
+          "backend/van_gateway/trading/monitor_calculations.py": "98eaf7e63ddfc94c6188a33d2410ad82a91bf677f4dc53d968d11a4bb1814fba",
+          "backend/van_gateway/events/bus.py": "50c824c5d28169199cbefde92e25555339bd321806c872fddfbdf77935b775c4"
+        },
+        "semantic_failure": false
+      }
+    },
+    {
+      "case": "stale-source",
+      "status": "CAUGHT",
+      "mutant": {
+        "case": "stale-source",
+        "phase": "mutant",
+        "exit_code": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "report_sha256": "c1308423953bef7faa2357cbf9391c82259b6a2e577b361f35c623e92ce8524a",
+        "log_sha256": "3bca4902fba1e10e006d9c3991f64c696e03096be904902889eedbbb4ba4fc59",
+        "restored_sha256": {
+          "backend/van_gateway/trading/monitor_service.py": "8e6c6da8e69a5a73f18993428dd89260adaf35848d00eeb2aaebef850c4f0585",
+          "backend/van_gateway/trading/monitor_calculations.py": "98eaf7e63ddfc94c6188a33d2410ad82a91bf677f4dc53d968d11a4bb1814fba",
+          "backend/van_gateway/events/bus.py": "50c824c5d28169199cbefde92e25555339bd321806c872fddfbdf77935b775c4"
+        },
+        "semantic_failure": true
+      },
+      "control": {
+        "case": "stale-source",
+        "phase": "control",
+        "exit_code": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "report_sha256": "e5790d0fa4b6ce04a2f4c55142f485d65ce8fbe52b7d9dc62f09013d5e190c5b",
+        "log_sha256": "016a4093788648644b08006f7d1d171ca7639313677f5aa929f004d4a3e52465",
+        "restored_sha256": {
+          "backend/van_gateway/trading/monitor_service.py": "8e6c6da8e69a5a73f18993428dd89260adaf35848d00eeb2aaebef850c4f0585",
+          "backend/van_gateway/trading/monitor_calculations.py": "98eaf7e63ddfc94c6188a33d2410ad82a91bf677f4dc53d968d11a4bb1814fba",
+          "backend/van_gateway/events/bus.py": "50c824c5d28169199cbefde92e25555339bd321806c872fddfbdf77935b775c4"
+        },
+        "semantic_failure": false
+      }
+    },
+    {
+      "case": "news-trust",
+      "status": "CAUGHT",
+      "mutant": {
+        "case": "news-trust",
+        "phase": "mutant",
+        "exit_code": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "report_sha256": "bd7cd318e336b21f4997c25a309959afc4fa07daecbfbd0fa7a86d5563470dc7",
+        "log_sha256": "796e41e599623e4933d9265e39fa04e4243c4c93095fc66239e7c7409af7b126",
+        "restored_sha256": {
+          "backend/van_gateway/trading/monitor_service.py": "8e6c6da8e69a5a73f18993428dd89260adaf35848d00eeb2aaebef850c4f0585",
+          "backend/van_gateway/trading/monitor_calculations.py": "98eaf7e63ddfc94c6188a33d2410ad82a91bf677f4dc53d968d11a4bb1814fba",
+          "backend/van_gateway/events/bus.py": "50c824c5d28169199cbefde92e25555339bd321806c872fddfbdf77935b775c4"
+        },
+        "semantic_failure": true
+      },
+      "control": {
+        "case": "news-trust",
+        "phase": "control",
+        "exit_code": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "report_sha256": "3d61078f5aad2ecaa4fcbfdad1655c437eb502c1bd3bdd396863d4ae6d6adb12",
+        "log_sha256": "7fefcaf66f6e7137767bc25d16d128cbf7b8617ad0b6f14fbf9a0b8e7fdd81cd",
+        "restored_sha256": {
+          "backend/van_gateway/trading/monitor_service.py": "8e6c6da8e69a5a73f18993428dd89260adaf35848d00eeb2aaebef850c4f0585",
+          "backend/van_gateway/trading/monitor_calculations.py": "98eaf7e63ddfc94c6188a33d2410ad82a91bf677f4dc53d968d11a4bb1814fba",
+          "backend/van_gateway/events/bus.py": "50c824c5d28169199cbefde92e25555339bd321806c872fddfbdf77935b775c4"
+        },
+        "semantic_failure": false
+      }
+    },
+    {
+      "case": "corrected-price",
+      "status": "CAUGHT",
+      "mutant": {
+        "case": "corrected-price",
+        "phase": "mutant",
+        "exit_code": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "report_sha256": "d06ece68017d0da866d1d08f4401fac64d5e0da58f2ab56ef71072502b6f1e0c",
+        "log_sha256": "9927f0092447a7506c8aa41e4c41e0f7be1e110785a1a84a6fb8f2895f6078e2",
+        "restored_sha256": {
+          "backend/van_gateway/trading/monitor_service.py": "8e6c6da8e69a5a73f18993428dd89260adaf35848d00eeb2aaebef850c4f0585",
+          "backend/van_gateway/trading/monitor_calculations.py": "98eaf7e63ddfc94c6188a33d2410ad82a91bf677f4dc53d968d11a4bb1814fba",
+          "backend/van_gateway/events/bus.py": "50c824c5d28169199cbefde92e25555339bd321806c872fddfbdf77935b775c4"
+        },
+        "semantic_failure": true
+      },
+      "control": {
+        "case": "corrected-price",
+        "phase": "control",
+        "exit_code": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "report_sha256": "9bbd84415a5734cb4421f79d7133a966e6759eb2e0983692231057da303a3792",
+        "log_sha256": "7fefcaf66f6e7137767bc25d16d128cbf7b8617ad0b6f14fbf9a0b8e7fdd81cd",
+        "restored_sha256": {
+          "backend/van_gateway/trading/monitor_service.py": "8e6c6da8e69a5a73f18993428dd89260adaf35848d00eeb2aaebef850c4f0585",
+          "backend/van_gateway/trading/monitor_calculations.py": "98eaf7e63ddfc94c6188a33d2410ad82a91bf677f4dc53d968d11a4bb1814fba",
+          "backend/van_gateway/events/bus.py": "50c824c5d28169199cbefde92e25555339bd321806c872fddfbdf77935b775c4"
+        },
+        "semantic_failure": false
+      }
+    },
+    {
+      "case": "unobserved-cross",
+      "status": "CAUGHT",
+      "mutant": {
+        "case": "unobserved-cross",
+        "phase": "mutant",
+        "exit_code": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "report_sha256": "907b771f6a922371a9ee469f9ff3f93a488fa4648b312e93051fc93c3767981f",
+        "log_sha256": "5ff087fc316998ef87d2ebe91b14808422c4623e52a7cc210d2d13caa776549a",
+        "restored_sha256": {
+          "backend/van_gateway/trading/monitor_service.py": "8e6c6da8e69a5a73f18993428dd89260adaf35848d00eeb2aaebef850c4f0585",
+          "backend/van_gateway/trading/monitor_calculations.py": "98eaf7e63ddfc94c6188a33d2410ad82a91bf677f4dc53d968d11a4bb1814fba",
+          "backend/van_gateway/events/bus.py": "50c824c5d28169199cbefde92e25555339bd321806c872fddfbdf77935b775c4"
+        },
+        "semantic_failure": true
+      },
+      "control": {
+        "case": "unobserved-cross",
+        "phase": "control",
+        "exit_code": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "report_sha256": "f0c3fd541b74958a7f7cba9c9564eb786ba5621f5c89887413f130bb578cf17e",
+        "log_sha256": "fa8e3e1f0a4b084326a7027307e5cc3a94f799f9733ea598c3b878fa3c70f37c",
+        "restored_sha256": {
+          "backend/van_gateway/trading/monitor_service.py": "8e6c6da8e69a5a73f18993428dd89260adaf35848d00eeb2aaebef850c4f0585",
+          "backend/van_gateway/trading/monitor_calculations.py": "98eaf7e63ddfc94c6188a33d2410ad82a91bf677f4dc53d968d11a4bb1814fba",
+          "backend/van_gateway/events/bus.py": "50c824c5d28169199cbefde92e25555339bd321806c872fddfbdf77935b775c4"
+        },
+        "semantic_failure": false
+      }
+    },
+    {
+      "case": "clock-rollback",
+      "status": "CAUGHT",
+      "mutant": {
+        "case": "clock-rollback",
+        "phase": "mutant",
+        "exit_code": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "report_sha256": "7d7e75755966c8dd90ef85da38e99bb175500e010670bdbc2cebc764cc4c39a3",
+        "log_sha256": "a4b4fc1372e5ad15b2d676fcf49c3553e3bad343d82c6b2548cff0767c772fc7",
+        "restored_sha256": {
+          "backend/van_gateway/trading/monitor_service.py": "8e6c6da8e69a5a73f18993428dd89260adaf35848d00eeb2aaebef850c4f0585",
+          "backend/van_gateway/trading/monitor_calculations.py": "98eaf7e63ddfc94c6188a33d2410ad82a91bf677f4dc53d968d11a4bb1814fba",
+          "backend/van_gateway/events/bus.py": "50c824c5d28169199cbefde92e25555339bd321806c872fddfbdf77935b775c4"
+        },
+        "semantic_failure": true
+      },
+      "control": {
+        "case": "clock-rollback",
+        "phase": "control",
+        "exit_code": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "report_sha256": "a841cf3f631403716ade2b55dc195825c8f60b0df4bdb06925c266d0be2e6ec9",
+        "log_sha256": "3a6504404ab639ac8fe2940ac1654603c072a999c0ae65ca7ef9701ab97a0954",
+        "restored_sha256": {
+          "backend/van_gateway/trading/monitor_service.py": "8e6c6da8e69a5a73f18993428dd89260adaf35848d00eeb2aaebef850c4f0585",
+          "backend/van_gateway/trading/monitor_calculations.py": "98eaf7e63ddfc94c6188a33d2410ad82a91bf677f4dc53d968d11a4bb1814fba",
+          "backend/van_gateway/events/bus.py": "50c824c5d28169199cbefde92e25555339bd321806c872fddfbdf77935b775c4"
+        },
+        "semantic_failure": false
+      }
+    },
+    {
+      "case": "evaluation-cas",
+      "status": "CAUGHT",
+      "mutant": {
+        "case": "evaluation-cas",
+        "phase": "mutant",
+        "exit_code": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "report_sha256": "25e7e8bca025392f1b36161d94b5a6be944488ef1a350bdc416d0c525602928b",
+        "log_sha256": "4749e24990089c92020d8f90eb76b21596b49d09a054984247edb435d419d212",
+        "restored_sha256": {
+          "backend/van_gateway/trading/monitor_service.py": "8e6c6da8e69a5a73f18993428dd89260adaf35848d00eeb2aaebef850c4f0585",
+          "backend/van_gateway/trading/monitor_calculations.py": "98eaf7e63ddfc94c6188a33d2410ad82a91bf677f4dc53d968d11a4bb1814fba",
+          "backend/van_gateway/events/bus.py": "50c824c5d28169199cbefde92e25555339bd321806c872fddfbdf77935b775c4"
+        },
+        "semantic_failure": true
+      },
+      "control": {
+        "case": "evaluation-cas",
+        "phase": "control",
+        "exit_code": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "report_sha256": "bf98a63b6e7ffe234f64533e957b697f81c19b824b192b4c00141ce70ce434eb",
+        "log_sha256": "7d42ef5504b9f8dea803cd978f146b4a7a910815a154ed9e4e59883957d8862e",
+        "restored_sha256": {
+          "backend/van_gateway/trading/monitor_service.py": "8e6c6da8e69a5a73f18993428dd89260adaf35848d00eeb2aaebef850c4f0585",
+          "backend/van_gateway/trading/monitor_calculations.py": "98eaf7e63ddfc94c6188a33d2410ad82a91bf677f4dc53d968d11a4bb1814fba",
+          "backend/van_gateway/events/bus.py": "50c824c5d28169199cbefde92e25555339bd321806c872fddfbdf77935b775c4"
+        },
+        "semantic_failure": false
+      }
+    },
+    {
+      "case": "atomic-event",
+      "status": "CAUGHT",
+      "mutant": {
+        "case": "atomic-event",
+        "phase": "mutant",
+        "exit_code": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "report_sha256": "cb35fe2b06b50db1d5acfdd0f21c7f8b7bea9d3138a091653e7b36ef7bb995d7",
+        "log_sha256": "0fe068944afa62ca1a60f9b43c0b6d9c61b1ddcc494fc69284c1d852caaa6df2",
+        "restored_sha256": {
+          "backend/van_gateway/trading/monitor_service.py": "8e6c6da8e69a5a73f18993428dd89260adaf35848d00eeb2aaebef850c4f0585",
+          "backend/van_gateway/trading/monitor_calculations.py": "98eaf7e63ddfc94c6188a33d2410ad82a91bf677f4dc53d968d11a4bb1814fba",
+          "backend/van_gateway/events/bus.py": "50c824c5d28169199cbefde92e25555339bd321806c872fddfbdf77935b775c4"
+        },
+        "semantic_failure": true
+      },
+      "control": {
+        "case": "atomic-event",
+        "phase": "control",
+        "exit_code": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "report_sha256": "d57c7edbd655a6368a84e42a7fec1cd9f316aae1f909cc89ac0c44da6f36632e",
+        "log_sha256": "3a6504404ab639ac8fe2940ac1654603c072a999c0ae65ca7ef9701ab97a0954",
+        "restored_sha256": {
+          "backend/van_gateway/trading/monitor_service.py": "8e6c6da8e69a5a73f18993428dd89260adaf35848d00eeb2aaebef850c4f0585",
+          "backend/van_gateway/trading/monitor_calculations.py": "98eaf7e63ddfc94c6188a33d2410ad82a91bf677f4dc53d968d11a4bb1814fba",
+          "backend/van_gateway/events/bus.py": "50c824c5d28169199cbefde92e25555339bd321806c872fddfbdf77935b775c4"
+        },
+        "semantic_failure": false
+      }
+    },
+    {
+      "case": "scan-budget",
+      "status": "CAUGHT",
+      "mutant": {
+        "case": "scan-budget",
+        "phase": "mutant",
+        "exit_code": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "report_sha256": "2934223af5e720704d6a6fb8fe88833a2a36859709aeb96e53c908851fb5f9ea",
+        "log_sha256": "b444e492ab7e42842e2efb12c90fbbf5fb42e734bc7d47850c48f36dc7f8b41d",
+        "restored_sha256": {
+          "backend/van_gateway/trading/monitor_service.py": "8e6c6da8e69a5a73f18993428dd89260adaf35848d00eeb2aaebef850c4f0585",
+          "backend/van_gateway/trading/monitor_calculations.py": "98eaf7e63ddfc94c6188a33d2410ad82a91bf677f4dc53d968d11a4bb1814fba",
+          "backend/van_gateway/events/bus.py": "50c824c5d28169199cbefde92e25555339bd321806c872fddfbdf77935b775c4"
+        },
+        "semantic_failure": true
+      },
+      "control": {
+        "case": "scan-budget",
+        "phase": "control",
+        "exit_code": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "report_sha256": "08aa732d4129a9524e24a900510c463b944c24fe7fa2b0c40c93b696668688a7",
+        "log_sha256": "f574bf83729b682055fea4742e2eec06cd32be9f8694d8319d5361875228ed00",
+        "restored_sha256": {
+          "backend/van_gateway/trading/monitor_service.py": "8e6c6da8e69a5a73f18993428dd89260adaf35848d00eeb2aaebef850c4f0585",
+          "backend/van_gateway/trading/monitor_calculations.py": "98eaf7e63ddfc94c6188a33d2410ad82a91bf677f4dc53d968d11a4bb1814fba",
+          "backend/van_gateway/events/bus.py": "50c824c5d28169199cbefde92e25555339bd321806c872fddfbdf77935b775c4"
+        },
+        "semantic_failure": false
+      }
+    }
+  ],
+  "source_sha256": {
+    "backend/van_gateway/trading/monitor_service.py": "8e6c6da8e69a5a73f18993428dd89260adaf35848d00eeb2aaebef850c4f0585",
+    "backend/van_gateway/trading/monitor_calculations.py": "98eaf7e63ddfc94c6188a33d2410ad82a91bf677f4dc53d968d11a4bb1814fba",
+    "backend/van_gateway/events/bus.py": "50c824c5d28169199cbefde92e25555339bd321806c872fddfbdf77935b775c4"
+  },
+  "source_restored": true,
+  "scope": "Fresh actual source tests, not canonical unit/native/provider acceptance."
+}

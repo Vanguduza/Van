@@ -68,7 +68,10 @@ def approved_preimage(path, current, read=git_file):
         return False
 
 
-def build():
+def build(read=None):
+    # A caller may supply real immutable Git-object reads without a child process.
+    # All citation and generation/preimage checks still run against those bytes.
+    read = git_file if read is None else read
     endpoint_doc = export()
     schemas = endpoint_doc.pop("schemas")
     endpoints = {r["endpoint_id"]: r for r in endpoint_doc["endpoints"]}
@@ -81,7 +84,7 @@ def build():
                 data = (ROOT/file).read_bytes()
                 sources[file] = sha(data)
                 if value.get("sha256") != sha(data):
-                    old = git_file(CITATION_BASE, file)
+                    old = read(CITATION_BASE, file)
                     if sha(old) != value.get("sha256"):
                         raise ValueError("Unreviewed citation source: "+file)
                     anchor = old.decode().splitlines()[value["line"]-1]
@@ -106,7 +109,7 @@ def build():
             for child in value:
                 walk(child)
 
-    documents = {name: json.loads(git_file(INPUT, "registries/"+name+".json"))
+    documents = {name: json.loads(read(INPUT, "registries/"+name+".json"))
                  for name in ("owner_features", "owner_screens")}
     preserved = {}
     for name, document in documents.items():
@@ -320,6 +323,28 @@ def build():
         }
         for row in (chart_feature, chart_screen):
             row.setdefault("backend_contract_extensions", []).append(copy.deepcopy(extension))
+    monitor_rows = [chart_feature]
+    monitor_rows += [r for r in documents["owner_screens"]["screens"] if r["id"] in {
+        "van.trading", "van.trading.positions.detail"}]
+    for endpoint in endpoint_doc["endpoints"]:
+        if not endpoint["path"].startswith("/v1/trading/monitors/"):
+            continue
+        extension = {
+            "method": endpoint["method"], "path": endpoint["path"], "endpoint_id": endpoint["endpoint_id"],
+            "source_ref": endpoint["source"], "authentication": endpoint["authentication"],
+            "device_proof_required_when_bound": endpoint["device_proof_required_when_bound"],
+            "source_status": "CANDIDATE_BACKEND_COMPONENT_NATIVE_FEED_AND_ANDROID_CONSUMER_PENDING",
+            "authority": "OWNER_MONITOR_CONFIGURATION_AND_READ_ONLY_OBSERVATIONS_ALERTS_NEVER_TRADE",
+            "canonical_units": ["BE-003", "BE-020"],
+            "planned_feature_refs": ["VNX-F-TRADE-03", "VNX-F-TRADE-04", "VNX-F-CHART-11"],
+            "planned_context_refs": ["van.next.trading.markets", "van.next.trading.alerts", "van.next.trading.screener"],
+            "scope": "Durable owner watchlists, exact native instrument selections, favourites and sorting; CAS/idempotent alert controls, pause/restart/delete; one canonical trigger per explicit arm, atomic existing event stream and recoverable Attention projection. Server closed-bar price/indicator/pinned-level-or-trend measurements and literal news-keyword checks. Typed bounded level screening with persistent quotas. Saved selections do not prove native feed binding. A symbol-only bar lake cannot trigger a live technical fact. No order path exists.",
+            "remaining": ["Full qualified native feed and quote binding", "Tick-price alerts and live row projections", "Dynamic watchlists", "Provider and Android consumer qualification"],
+            "specification": "docs/rebuild/rev118/backend/BE-020_MARKET_MONITORS.md",
+            "new_ui_implemented": False, "live_qualified": False,
+        }
+        for row in monitor_rows:
+            row.setdefault("backend_contract_extensions", []).append(copy.deepcopy(extension))
     receipt = {"scope": "BOUNDED_SOURCE_REFERENCE_REFRESH_NOT_FULL_PRODUCT_REVIEW",
         "input_registry_commit": INPUT, "citation_source_commit": CITATION_BASE,
         "preserved_identity_sets": preserved, "citation_changes": changes,
@@ -347,18 +372,19 @@ def build():
     return result
 
 
-def main():
+def main(read=None):
+    read = git_file if read is None else read
     if sys.argv[1:] not in (["--check"], ["--apply"]):
         raise SystemExit("Use --check or --apply")
-    outputs = build()
+    outputs = build(read=read)
     changed = [p for p, data in outputs.items() if not (ROOT/p).is_file() or (ROOT/p).read_bytes() != data]
     if sys.argv[1] == "--apply":
         for path in changed:
-            if path.startswith("registries/") and not approved_preimage(path, (ROOT/path).read_bytes()):
+            if path.startswith("registries/") and not approved_preimage(path, (ROOT/path).read_bytes(), read=read):
                 raise ValueError("Unexpected registry edits require review: "+path)
             if not path.startswith("registries/") and (ROOT/path).exists():
                 try:
-                    old = git_file("HEAD", path)
+                    old = read("HEAD", path)
                 except subprocess.CalledProcessError:
                     old = None
                 if (ROOT/path).read_bytes() != old:

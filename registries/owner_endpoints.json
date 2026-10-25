@@ -125,7 +125,7 @@
       "device_proof_required_when_bound": true,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:2773",
+      "source": "backend/van_gateway/app.py:2784",
       "summary": "Forget Owner Fact",
       "tags": [],
       "parameters": [
@@ -190,7 +190,7 @@
       "device_proof_required_when_bound": true,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:2709",
+      "source": "backend/van_gateway/app.py:2720",
       "summary": "Owner Memory Forget",
       "tags": [],
       "parameters": [
@@ -409,6 +409,224 @@
       "readiness": "REPOSITORY_DECLARATION_ONLY"
     },
     {
+      "endpoint_id": "VE-5e08ae2b5f09",
+      "method": "DELETE",
+      "path": "/v1/trading/monitors/alerts/{object_id}",
+      "authentication": "INGRESS_BEARER_AND_PAIRED_DEVICE",
+      "device_proof_required_when_bound": true,
+      "registration": "DEFAULT",
+      "condition": null,
+      "source": "backend/van_gateway/trading/monitor_api.py:65",
+      "summary": "Delete Alert",
+      "tags": [
+        "market-monitors"
+      ],
+      "parameters": [
+        {
+          "name": "object_id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "title": "Object Id"
+          }
+        }
+      ],
+      "request_body": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/MonitorControl"
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MonitorWrite"
+              }
+            }
+          }
+        },
+        "404": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MonitorErrorResponse"
+              }
+            }
+          },
+          "description": "Not Found"
+        },
+        "409": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MonitorErrorResponse"
+              }
+            }
+          },
+          "description": "Conflict"
+        },
+        "413": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MonitorErrorResponse"
+              }
+            }
+          },
+          "description": "Request Entity Too Large"
+        },
+        "429": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MonitorErrorResponse"
+              }
+            }
+          },
+          "description": "Too Many Requests"
+        },
+        "503": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MonitorErrorResponse"
+              }
+            }
+          },
+          "description": "Service Unavailable"
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "openapi_components": "owner_endpoint_schemas.json",
+      "readiness": "REPOSITORY_DECLARATION_ONLY"
+    },
+    {
+      "endpoint_id": "VE-d978474c62a1",
+      "method": "DELETE",
+      "path": "/v1/trading/monitors/watchlists/{object_id}",
+      "authentication": "INGRESS_BEARER_AND_PAIRED_DEVICE",
+      "device_proof_required_when_bound": true,
+      "registration": "DEFAULT",
+      "condition": null,
+      "source": "backend/van_gateway/trading/monitor_api.py:45",
+      "summary": "Delete List",
+      "tags": [
+        "market-monitors"
+      ],
+      "parameters": [
+        {
+          "name": "object_id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "title": "Object Id"
+          }
+        }
+      ],
+      "request_body": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/MonitorControl"
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MonitorWrite"
+              }
+            }
+          }
+        },
+        "404": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MonitorErrorResponse"
+              }
+            }
+          },
+          "description": "Not Found"
+        },
+        "409": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MonitorErrorResponse"
+              }
+            }
+          },
+          "description": "Conflict"
+        },
+        "413": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MonitorErrorResponse"
+              }
+            }
+          },
+          "description": "Request Entity Too Large"
+        },
+        "429": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MonitorErrorResponse"
+              }
+            }
+          },
+          "description": "Too Many Requests"
+        },
+        "503": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MonitorErrorResponse"
+              }
+            }
+          },
+          "description": "Service Unavailable"
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "openapi_components": "owner_endpoint_schemas.json",
+      "readiness": "REPOSITORY_DECLARATION_ONLY"
+    },
+    {
       "endpoint_id": "VE-24ce7a0ad2b5",
       "method": "GET",
       "path": "/api/{resource_path}",
@@ -416,7 +634,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:2066",
+      "source": "backend/van_gateway/app.py:2077",
       "summary": "Proxy Artemis Console Api",
       "tags": [],
       "parameters": [
@@ -462,7 +680,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:1987",
+      "source": "backend/van_gateway/app.py:1998",
       "summary": "Health",
       "tags": [],
       "parameters": [],
@@ -488,7 +706,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:2069",
+      "source": "backend/van_gateway/app.py:2080",
       "summary": "Proxy Artemis Console Images",
       "tags": [],
       "parameters": [
@@ -534,7 +752,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:2075",
+      "source": "backend/van_gateway/app.py:2086",
       "summary": "Proxy Artemis Console Local File",
       "tags": [],
       "parameters": [
@@ -629,7 +847,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:2063",
+      "source": "backend/van_gateway/app.py:2074",
       "summary": "Proxy Artemis Console",
       "tags": [],
       "parameters": [
@@ -676,7 +894,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:2063",
+      "source": "backend/van_gateway/app.py:2074",
       "summary": "Proxy Artemis Console",
       "tags": [],
       "parameters": [
@@ -723,7 +941,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:2052",
+      "source": "backend/van_gateway/app.py:2063",
       "summary": "Launch Artemis Console",
       "tags": [],
       "parameters": [
@@ -769,7 +987,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:2063",
+      "source": "backend/van_gateway/app.py:2074",
       "summary": "Proxy Artemis Console",
       "tags": [],
       "parameters": [
@@ -962,7 +1180,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:3129",
+      "source": "backend/van_gateway/app.py:3140",
       "summary": "List Attention",
       "tags": [],
       "parameters": [],
@@ -1337,7 +1555,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:2569",
+      "source": "backend/van_gateway/app.py:2580",
       "summary": "Get Briefing",
       "tags": [],
       "parameters": [],
@@ -1638,7 +1856,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:1272",
+      "source": "backend/van_gateway/app.py:1283",
       "summary": "Interaction Router Status",
       "tags": [],
       "parameters": [],
@@ -2773,7 +2991,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:2565",
+      "source": "backend/van_gateway/app.py:2576",
       "summary": "Command Status",
       "tags": [],
       "parameters": [
@@ -2922,7 +3140,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:2554",
+      "source": "backend/van_gateway/app.py:2565",
       "summary": "Connectivity Manifest",
       "tags": [],
       "parameters": [
@@ -2969,7 +3187,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:2759",
+      "source": "backend/van_gateway/app.py:2770",
       "summary": "Owner Context Conflicts",
       "tags": [],
       "parameters": [],
@@ -2995,7 +3213,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:2719",
+      "source": "backend/van_gateway/app.py:2730",
       "summary": "Owner Context Export",
       "tags": [],
       "parameters": [],
@@ -3021,7 +3239,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:2742",
+      "source": "backend/van_gateway/app.py:2753",
       "summary": "Owner Context History",
       "tags": [],
       "parameters": [
@@ -3086,7 +3304,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:2701",
+      "source": "backend/van_gateway/app.py:2712",
       "summary": "Owner Memory Inventory",
       "tags": [],
       "parameters": [],
@@ -3596,7 +3814,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:2635",
+      "source": "backend/van_gateway/app.py:2646",
       "summary": "List Decisions",
       "tags": [],
       "parameters": [],
@@ -3672,7 +3890,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:3380",
+      "source": "backend/van_gateway/app.py:3391",
       "summary": "Get Degraded",
       "tags": [],
       "parameters": [],
@@ -3698,7 +3916,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:2502",
+      "source": "backend/van_gateway/app.py:2513",
       "summary": "Device Binding Status",
       "tags": [],
       "parameters": [],
@@ -3724,7 +3942,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:2208",
+      "source": "backend/van_gateway/app.py:2219",
       "summary": "Device Revocation Original",
       "tags": [],
       "parameters": [
@@ -5005,7 +5223,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:3392",
+      "source": "backend/van_gateway/app.py:3403",
       "summary": "Get Events",
       "tags": [],
       "parameters": [
@@ -5239,7 +5457,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:2960",
+      "source": "backend/van_gateway/app.py:2971",
       "summary": "Calendar Agenda",
       "tags": [],
       "parameters": [
@@ -5292,7 +5510,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:2871",
+      "source": "backend/van_gateway/app.py:2882",
       "summary": "Calendar Review",
       "tags": [],
       "parameters": [
@@ -5354,7 +5572,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:3075",
+      "source": "backend/van_gateway/app.py:3086",
       "summary": "Google Capabilities",
       "tags": [],
       "parameters": [],
@@ -5380,7 +5598,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:2989",
+      "source": "backend/van_gateway/app.py:3000",
       "summary": "Contacts Resolve",
       "tags": [],
       "parameters": [
@@ -5442,7 +5660,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:2981",
+      "source": "backend/van_gateway/app.py:2992",
       "summary": "Drive Search",
       "tags": [],
       "parameters": [
@@ -5504,7 +5722,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:2912",
+      "source": "backend/van_gateway/app.py:2923",
       "summary": "Gmail Internal Draft Preview",
       "tags": [],
       "parameters": [
@@ -5566,7 +5784,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:2804",
+      "source": "backend/van_gateway/app.py:2815",
       "summary": "Gmail Search",
       "tags": [],
       "parameters": [
@@ -5628,7 +5846,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:2831",
+      "source": "backend/van_gateway/app.py:2842",
       "summary": "Gmail Thread",
       "tags": [],
       "parameters": [
@@ -5690,7 +5908,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:3085",
+      "source": "backend/van_gateway/app.py:3096",
       "summary": "Get Google Job",
       "tags": [],
       "parameters": [
@@ -5752,7 +5970,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:3071",
+      "source": "backend/van_gateway/app.py:3082",
       "summary": "Google Mesh",
       "tags": [],
       "parameters": [],
@@ -5778,7 +5996,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:3009",
+      "source": "backend/van_gateway/app.py:3020",
       "summary": "Google Credential Planes",
       "tags": [],
       "parameters": [],
@@ -5804,7 +6022,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:3005",
+      "source": "backend/van_gateway/app.py:3016",
       "summary": "Google Status",
       "tags": [],
       "parameters": [],
@@ -5830,7 +6048,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:2997",
+      "source": "backend/van_gateway/app.py:3008",
       "summary": "Tasks List",
       "tags": [],
       "parameters": [
@@ -7012,7 +7230,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:3342",
+      "source": "backend/van_gateway/app.py:3353",
       "summary": "Observability Alert State",
       "tags": [],
       "parameters": [
@@ -7065,7 +7283,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:3357",
+      "source": "backend/van_gateway/app.py:3368",
       "summary": "Observability Health",
       "tags": [],
       "parameters": [
@@ -7118,7 +7336,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:3318",
+      "source": "backend/van_gateway/app.py:3329",
       "summary": "Metrics Scrape",
       "tags": [],
       "parameters": [
@@ -7171,7 +7389,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:3369",
+      "source": "backend/van_gateway/app.py:3380",
       "summary": "Observability Trace",
       "tags": [],
       "parameters": [
@@ -7601,7 +7819,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:2924",
+      "source": "backend/van_gateway/app.py:2935",
       "summary": "Gmail Owner Draft Preview",
       "tags": [],
       "parameters": [
@@ -7853,7 +8071,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:3384",
+      "source": "backend/van_gateway/app.py:3395",
       "summary": "List Projects",
       "tags": [],
       "parameters": [],
@@ -7927,7 +8145,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:3388",
+      "source": "backend/van_gateway/app.py:3399",
       "summary": "Project Truth",
       "tags": [],
       "parameters": [
@@ -7973,7 +8191,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:2592",
+      "source": "backend/van_gateway/app.py:2603",
       "summary": "List Reminders",
       "tags": [],
       "parameters": [],
@@ -9501,7 +9719,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:3465",
+      "source": "backend/van_gateway/app.py:3476",
       "summary": "Trading Accounts",
       "tags": [],
       "parameters": [],
@@ -9527,7 +9745,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:3536",
+      "source": "backend/van_gateway/app.py:3547",
       "summary": "Trading Account Catalog",
       "tags": [],
       "parameters": [],
@@ -9555,7 +9773,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:3606",
+      "source": "backend/van_gateway/app.py:3617",
       "summary": "Trading Account Operation",
       "tags": [],
       "parameters": [
@@ -9613,7 +9831,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:3461",
+      "source": "backend/van_gateway/app.py:3472",
       "summary": "Trading Assessment",
       "tags": [],
       "parameters": [],
@@ -9639,7 +9857,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:3500",
+      "source": "backend/van_gateway/app.py:3511",
       "summary": "Trading Bars",
       "tags": [],
       "parameters": [
@@ -10268,7 +10486,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:3488",
+      "source": "backend/van_gateway/app.py:3499",
       "summary": "Trading Cognition",
       "tags": [],
       "parameters": [],
@@ -10294,7 +10512,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:3477",
+      "source": "backend/van_gateway/app.py:3488",
       "summary": "Trading Cognitive Fabric",
       "tags": [],
       "parameters": [
@@ -10340,7 +10558,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:3449",
+      "source": "backend/van_gateway/app.py:3460",
       "summary": "Trading Events",
       "tags": [],
       "parameters": [
@@ -10387,7 +10605,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:3457",
+      "source": "backend/van_gateway/app.py:3468",
       "summary": "Trading History",
       "tags": [],
       "parameters": [
@@ -10434,7 +10652,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:3469",
+      "source": "backend/van_gateway/app.py:3480",
       "summary": "Trading Market State",
       "tags": [],
       "parameters": [
@@ -10480,6 +10698,624 @@
       "readiness": "REPOSITORY_DECLARATION_ONLY"
     },
     {
+      "endpoint_id": "VE-36e83f3da416",
+      "method": "GET",
+      "path": "/v1/trading/monitors/alerts",
+      "authentication": "INGRESS_BEARER_AND_PAIRED_DEVICE",
+      "device_proof_required_when_bound": false,
+      "registration": "DEFAULT",
+      "condition": null,
+      "source": "backend/van_gateway/trading/monitor_api.py:49",
+      "summary": "Alerts",
+      "tags": [
+        "market-monitors"
+      ],
+      "parameters": [
+        {
+          "name": "limit",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "maximum": 128,
+            "minimum": 1,
+            "default": 100,
+            "title": "Limit"
+          }
+        },
+        {
+          "name": "after_id",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "After Id"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AlertPage"
+              }
+            }
+          }
+        },
+        "404": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MonitorErrorResponse"
+              }
+            }
+          },
+          "description": "Not Found"
+        },
+        "409": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MonitorErrorResponse"
+              }
+            }
+          },
+          "description": "Conflict"
+        },
+        "413": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MonitorErrorResponse"
+              }
+            }
+          },
+          "description": "Request Entity Too Large"
+        },
+        "429": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MonitorErrorResponse"
+              }
+            }
+          },
+          "description": "Too Many Requests"
+        },
+        "503": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MonitorErrorResponse"
+              }
+            }
+          },
+          "description": "Service Unavailable"
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "openapi_components": "owner_endpoint_schemas.json",
+      "readiness": "REPOSITORY_DECLARATION_ONLY"
+    },
+    {
+      "endpoint_id": "VE-3da119731c08",
+      "method": "GET",
+      "path": "/v1/trading/monitors/alerts/{object_id}",
+      "authentication": "INGRESS_BEARER_AND_PAIRED_DEVICE",
+      "device_proof_required_when_bound": false,
+      "registration": "DEFAULT",
+      "condition": null,
+      "source": "backend/van_gateway/trading/monitor_api.py:57",
+      "summary": "Get Alert",
+      "tags": [
+        "market-monitors"
+      ],
+      "parameters": [
+        {
+          "name": "object_id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "title": "Object Id"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AlertView"
+              }
+            }
+          }
+        },
+        "404": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MonitorErrorResponse"
+              }
+            }
+          },
+          "description": "Not Found"
+        },
+        "409": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MonitorErrorResponse"
+              }
+            }
+          },
+          "description": "Conflict"
+        },
+        "413": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MonitorErrorResponse"
+              }
+            }
+          },
+          "description": "Request Entity Too Large"
+        },
+        "429": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MonitorErrorResponse"
+              }
+            }
+          },
+          "description": "Too Many Requests"
+        },
+        "503": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MonitorErrorResponse"
+              }
+            }
+          },
+          "description": "Service Unavailable"
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "openapi_components": "owner_endpoint_schemas.json",
+      "readiness": "REPOSITORY_DECLARATION_ONLY"
+    },
+    {
+      "endpoint_id": "VE-66237ce2e987",
+      "method": "GET",
+      "path": "/v1/trading/monitors/capabilities",
+      "authentication": "INGRESS_BEARER_AND_PAIRED_DEVICE",
+      "device_proof_required_when_bound": false,
+      "registration": "DEFAULT",
+      "condition": null,
+      "source": "backend/van_gateway/trading/monitor_api.py:21",
+      "summary": "Capabilities",
+      "tags": [
+        "market-monitors"
+      ],
+      "parameters": [],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MonitorCapabilities"
+              }
+            }
+          }
+        },
+        "404": {
+          "description": "Not Found",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MonitorErrorResponse"
+              }
+            }
+          }
+        },
+        "409": {
+          "description": "Conflict",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MonitorErrorResponse"
+              }
+            }
+          }
+        },
+        "413": {
+          "description": "Request Entity Too Large",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MonitorErrorResponse"
+              }
+            }
+          }
+        },
+        "429": {
+          "description": "Too Many Requests",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MonitorErrorResponse"
+              }
+            }
+          }
+        },
+        "503": {
+          "description": "Service Unavailable",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MonitorErrorResponse"
+              }
+            }
+          }
+        }
+      },
+      "openapi_components": "owner_endpoint_schemas.json",
+      "readiness": "REPOSITORY_DECLARATION_ONLY"
+    },
+    {
+      "endpoint_id": "VE-7f325243c415",
+      "method": "GET",
+      "path": "/v1/trading/monitors/operations/{request_id}",
+      "authentication": "INGRESS_BEARER_AND_PAIRED_DEVICE",
+      "device_proof_required_when_bound": false,
+      "registration": "DEFAULT",
+      "condition": null,
+      "source": "backend/van_gateway/trading/monitor_api.py:25",
+      "summary": "Operation",
+      "tags": [
+        "market-monitors"
+      ],
+      "parameters": [
+        {
+          "name": "request_id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "title": "Request Id"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MonitorWrite"
+              }
+            }
+          }
+        },
+        "404": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MonitorErrorResponse"
+              }
+            }
+          },
+          "description": "Not Found"
+        },
+        "409": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MonitorErrorResponse"
+              }
+            }
+          },
+          "description": "Conflict"
+        },
+        "413": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MonitorErrorResponse"
+              }
+            }
+          },
+          "description": "Request Entity Too Large"
+        },
+        "429": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MonitorErrorResponse"
+              }
+            }
+          },
+          "description": "Too Many Requests"
+        },
+        "503": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MonitorErrorResponse"
+              }
+            }
+          },
+          "description": "Service Unavailable"
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "openapi_components": "owner_endpoint_schemas.json",
+      "readiness": "REPOSITORY_DECLARATION_ONLY"
+    },
+    {
+      "endpoint_id": "VE-5c02bd4370d7",
+      "method": "GET",
+      "path": "/v1/trading/monitors/watchlists",
+      "authentication": "INGRESS_BEARER_AND_PAIRED_DEVICE",
+      "device_proof_required_when_bound": false,
+      "registration": "DEFAULT",
+      "condition": null,
+      "source": "backend/van_gateway/trading/monitor_api.py:29",
+      "summary": "Lists",
+      "tags": [
+        "market-monitors"
+      ],
+      "parameters": [
+        {
+          "name": "limit",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "maximum": 128,
+            "minimum": 1,
+            "default": 100,
+            "title": "Limit"
+          }
+        },
+        {
+          "name": "after_id",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "After Id"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WatchlistPage"
+              }
+            }
+          }
+        },
+        "404": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MonitorErrorResponse"
+              }
+            }
+          },
+          "description": "Not Found"
+        },
+        "409": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MonitorErrorResponse"
+              }
+            }
+          },
+          "description": "Conflict"
+        },
+        "413": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MonitorErrorResponse"
+              }
+            }
+          },
+          "description": "Request Entity Too Large"
+        },
+        "429": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MonitorErrorResponse"
+              }
+            }
+          },
+          "description": "Too Many Requests"
+        },
+        "503": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MonitorErrorResponse"
+              }
+            }
+          },
+          "description": "Service Unavailable"
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "openapi_components": "owner_endpoint_schemas.json",
+      "readiness": "REPOSITORY_DECLARATION_ONLY"
+    },
+    {
+      "endpoint_id": "VE-7addd97678fb",
+      "method": "GET",
+      "path": "/v1/trading/monitors/watchlists/{object_id}",
+      "authentication": "INGRESS_BEARER_AND_PAIRED_DEVICE",
+      "device_proof_required_when_bound": false,
+      "registration": "DEFAULT",
+      "condition": null,
+      "source": "backend/van_gateway/trading/monitor_api.py:37",
+      "summary": "Get List",
+      "tags": [
+        "market-monitors"
+      ],
+      "parameters": [
+        {
+          "name": "object_id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "title": "Object Id"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WatchlistView"
+              }
+            }
+          }
+        },
+        "404": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MonitorErrorResponse"
+              }
+            }
+          },
+          "description": "Not Found"
+        },
+        "409": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MonitorErrorResponse"
+              }
+            }
+          },
+          "description": "Conflict"
+        },
+        "413": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MonitorErrorResponse"
+              }
+            }
+          },
+          "description": "Request Entity Too Large"
+        },
+        "429": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MonitorErrorResponse"
+              }
+            }
+          },
+          "description": "Too Many Requests"
+        },
+        "503": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MonitorErrorResponse"
+              }
+            }
+          },
+          "description": "Service Unavailable"
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "openapi_components": "owner_endpoint_schemas.json",
+      "readiness": "REPOSITORY_DECLARATION_ONLY"
+    },
+    {
       "endpoint_id": "VE-78837b67b4b1",
       "method": "GET",
       "path": "/v1/trading/oauth/{broker}/callback",
@@ -10487,7 +11323,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:3901",
+      "source": "backend/van_gateway/app.py:3912",
       "summary": "Trading Oauth Callback",
       "tags": [],
       "parameters": [
@@ -10533,7 +11369,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:3438",
+      "source": "backend/van_gateway/app.py:3449",
       "summary": "Trading Portfolio",
       "tags": [],
       "parameters": [],
@@ -10559,7 +11395,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:3445",
+      "source": "backend/van_gateway/app.py:3456",
       "summary": "Trading Positions",
       "tags": [],
       "parameters": [],
@@ -10585,7 +11421,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:3453",
+      "source": "backend/van_gateway/app.py:3464",
       "summary": "Trading Potential",
       "tags": [],
       "parameters": [],
@@ -10611,7 +11447,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:3473",
+      "source": "backend/van_gateway/app.py:3484",
       "summary": "Trading Risk",
       "tags": [],
       "parameters": [],
@@ -10778,7 +11614,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:3427",
+      "source": "backend/van_gateway/app.py:3438",
       "summary": "Trading Status",
       "tags": [],
       "parameters": [],
@@ -10804,7 +11640,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:3755",
+      "source": "backend/van_gateway/app.py:3766",
       "summary": "Trading Strategy Promotion Candidates",
       "tags": [],
       "parameters": [],
@@ -10830,7 +11666,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:3954",
+      "source": "backend/van_gateway/app.py:3965",
       "summary": "Trading Tickets",
       "tags": [],
       "parameters": [
@@ -10883,7 +11719,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:3431",
+      "source": "backend/van_gateway/app.py:3442",
       "summary": "Trading Trades",
       "tags": [],
       "parameters": [
@@ -10940,7 +11776,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:3493",
+      "source": "backend/van_gateway/app.py:3504",
       "summary": "Trading Trade Detail",
       "tags": [],
       "parameters": [
@@ -11401,7 +12237,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:3945",
+      "source": "backend/van_gateway/app.py:3956",
       "summary": "Latest Visual Acceptance",
       "tags": [],
       "parameters": [],
@@ -11596,7 +12432,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:2072",
+      "source": "backend/van_gateway/app.py:2083",
       "summary": "Proxy Artemis Console Videos",
       "tags": [],
       "parameters": [
@@ -11642,7 +12478,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:2066",
+      "source": "backend/van_gateway/app.py:2077",
       "summary": "Proxy Artemis Console Api",
       "tags": [],
       "parameters": [
@@ -11688,7 +12524,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:2069",
+      "source": "backend/van_gateway/app.py:2080",
       "summary": "Proxy Artemis Console Images",
       "tags": [],
       "parameters": [
@@ -11734,7 +12570,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:2075",
+      "source": "backend/van_gateway/app.py:2086",
       "summary": "Proxy Artemis Console Local File",
       "tags": [],
       "parameters": [
@@ -11780,7 +12616,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:2063",
+      "source": "backend/van_gateway/app.py:2074",
       "summary": "Proxy Artemis Console",
       "tags": [],
       "parameters": [
@@ -11827,7 +12663,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:2063",
+      "source": "backend/van_gateway/app.py:2074",
       "summary": "Proxy Artemis Console",
       "tags": [],
       "parameters": [
@@ -11874,7 +12710,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:2063",
+      "source": "backend/van_gateway/app.py:2074",
       "summary": "Proxy Artemis Console",
       "tags": [],
       "parameters": [
@@ -11920,7 +12756,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:2072",
+      "source": "backend/van_gateway/app.py:2083",
       "summary": "Proxy Artemis Console Videos",
       "tags": [],
       "parameters": [
@@ -11966,7 +12802,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:2066",
+      "source": "backend/van_gateway/app.py:2077",
       "summary": "Proxy Artemis Console Api",
       "tags": [],
       "parameters": [
@@ -12012,7 +12848,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:2069",
+      "source": "backend/van_gateway/app.py:2080",
       "summary": "Proxy Artemis Console Images",
       "tags": [],
       "parameters": [
@@ -12058,7 +12894,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:2075",
+      "source": "backend/van_gateway/app.py:2086",
       "summary": "Proxy Artemis Console Local File",
       "tags": [],
       "parameters": [
@@ -12104,7 +12940,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:2063",
+      "source": "backend/van_gateway/app.py:2074",
       "summary": "Proxy Artemis Console",
       "tags": [],
       "parameters": [
@@ -12151,7 +12987,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:2063",
+      "source": "backend/van_gateway/app.py:2074",
       "summary": "Proxy Artemis Console",
       "tags": [],
       "parameters": [
@@ -12198,7 +13034,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:2063",
+      "source": "backend/van_gateway/app.py:2074",
       "summary": "Proxy Artemis Console",
       "tags": [],
       "parameters": [
@@ -12244,7 +13080,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:2072",
+      "source": "backend/van_gateway/app.py:2083",
       "summary": "Proxy Artemis Console Videos",
       "tags": [],
       "parameters": [
@@ -12526,7 +13362,7 @@
       "device_proof_required_when_bound": true,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:2066",
+      "source": "backend/van_gateway/app.py:2077",
       "summary": "Proxy Artemis Console Api",
       "tags": [],
       "parameters": [
@@ -12572,7 +13408,7 @@
       "device_proof_required_when_bound": true,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:2063",
+      "source": "backend/van_gateway/app.py:2074",
       "summary": "Proxy Artemis Console",
       "tags": [],
       "parameters": [
@@ -12619,7 +13455,7 @@
       "device_proof_required_when_bound": true,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:2063",
+      "source": "backend/van_gateway/app.py:2074",
       "summary": "Proxy Artemis Console",
       "tags": [],
       "parameters": [
@@ -12666,7 +13502,7 @@
       "device_proof_required_when_bound": true,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:2039",
+      "source": "backend/van_gateway/app.py:2050",
       "summary": "Create Artemis Console Session",
       "tags": [],
       "parameters": [],
@@ -12692,7 +13528,7 @@
       "device_proof_required_when_bound": true,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:2063",
+      "source": "backend/van_gateway/app.py:2074",
       "summary": "Proxy Artemis Console",
       "tags": [],
       "parameters": [
@@ -12738,7 +13574,7 @@
       "device_proof_required_when_bound": true,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:3117",
+      "source": "backend/van_gateway/app.py:3128",
       "summary": "Upsert Attention",
       "tags": [],
       "parameters": [],
@@ -12783,7 +13619,7 @@
       "device_proof_required_when_bound": true,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:3133",
+      "source": "backend/van_gateway/app.py:3144",
       "summary": "Ack Attention",
       "tags": [],
       "parameters": [
@@ -12829,7 +13665,7 @@
       "device_proof_required_when_bound": true,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:3138",
+      "source": "backend/van_gateway/app.py:3149",
       "summary": "Snooze Attention",
       "tags": [],
       "parameters": [
@@ -17562,7 +18398,7 @@
       "device_proof_required_when_bound": true,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:2283",
+      "source": "backend/van_gateway/app.py:2294",
       "summary": "Commands",
       "tags": [],
       "parameters": [],
@@ -17654,7 +18490,7 @@
       "device_proof_required_when_bound": true,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:2674",
+      "source": "backend/van_gateway/app.py:2685",
       "summary": "State Owner Fact",
       "tags": [],
       "parameters": [],
@@ -17699,7 +18535,7 @@
       "device_proof_required_when_bound": true,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:3174",
+      "source": "backend/van_gateway/app.py:3185",
       "summary": "Ingest Captured Context",
       "tags": [],
       "parameters": [],
@@ -17981,7 +18817,7 @@
       "device_proof_required_when_bound": true,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:2629",
+      "source": "backend/van_gateway/app.py:2640",
       "summary": "Escalate Decision",
       "tags": [],
       "parameters": [],
@@ -18085,7 +18921,7 @@
       "device_proof_required_when_bound": true,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:2639",
+      "source": "backend/van_gateway/app.py:2650",
       "summary": "Resolve Decision",
       "tags": [],
       "parameters": [
@@ -18140,7 +18976,7 @@
       "device_proof_required_when_bound": true,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:2487",
+      "source": "backend/van_gateway/app.py:2498",
       "summary": "Certify Binding",
       "tags": [],
       "parameters": [],
@@ -18185,7 +19021,7 @@
       "device_proof_required_when_bound": true,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:2405",
+      "source": "backend/van_gateway/app.py:2416",
       "summary": "Bootstrap Attest",
       "tags": [],
       "parameters": [],
@@ -18230,7 +19066,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:2382",
+      "source": "backend/van_gateway/app.py:2393",
       "summary": "Bootstrap Challenge",
       "tags": [],
       "parameters": [],
@@ -18275,7 +19111,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:2315",
+      "source": "backend/van_gateway/app.py:2326",
       "summary": "Create Bootstrap",
       "tags": [],
       "parameters": [],
@@ -18320,7 +19156,7 @@
       "device_proof_required_when_bound": true,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:2465",
+      "source": "backend/van_gateway/app.py:2476",
       "summary": "Bootstrap Recover",
       "tags": [],
       "parameters": [],
@@ -18365,7 +19201,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:2196",
+      "source": "backend/van_gateway/app.py:2207",
       "summary": "Enroll",
       "tags": [],
       "parameters": [
@@ -18427,7 +19263,7 @@
       "device_proof_required_when_bound": true,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:2106",
+      "source": "backend/van_gateway/app.py:2117",
       "summary": "Pair Device",
       "tags": [],
       "parameters": [],
@@ -18472,7 +19308,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:2091",
+      "source": "backend/van_gateway/app.py:2102",
       "summary": "Create Pairing Ticket",
       "tags": [],
       "parameters": [
@@ -18534,7 +19370,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:2324",
+      "source": "backend/van_gateway/app.py:2335",
       "summary": "Create Provisioning Payload",
       "tags": [],
       "parameters": [
@@ -18596,7 +19432,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:2391",
+      "source": "backend/van_gateway/app.py:2402",
       "summary": "Owner Device Provisioning Status",
       "tags": [],
       "parameters": [
@@ -18658,7 +19494,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:2541",
+      "source": "backend/van_gateway/app.py:2552",
       "summary": "Rebind Owner Device",
       "tags": [],
       "parameters": [],
@@ -18703,7 +19539,7 @@
       "device_proof_required_when_bound": true,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:2248",
+      "source": "backend/van_gateway/app.py:2259",
       "summary": "Issue Tls Client Certificate",
       "tags": [],
       "parameters": [],
@@ -18729,7 +19565,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:2223",
+      "source": "backend/van_gateway/app.py:2234",
       "summary": "Revoke",
       "tags": [],
       "parameters": [
@@ -19078,7 +19914,7 @@
       "device_proof_required_when_bound": true,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:4018",
+      "source": "backend/van_gateway/app.py:4029",
       "summary": "Reset Events",
       "tags": [],
       "parameters": [
@@ -19300,7 +20136,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:2885",
+      "source": "backend/van_gateway/app.py:2896",
       "summary": "Execute Google Action",
       "tags": [],
       "parameters": [
@@ -19362,7 +20198,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:2968",
+      "source": "backend/van_gateway/app.py:2979",
       "summary": "Calendar Reschedule",
       "tags": [],
       "parameters": [
@@ -19442,7 +20278,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:3037",
+      "source": "backend/van_gateway/app.py:3048",
       "summary": "Google Connect",
       "tags": [],
       "parameters": [
@@ -19504,7 +20340,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:2842",
+      "source": "backend/van_gateway/app.py:2853",
       "summary": "Gmail Attachment Import Pdf",
       "tags": [],
       "parameters": [
@@ -19649,7 +20485,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:2946",
+      "source": "backend/van_gateway/app.py:2957",
       "summary": "Gmail Draft",
       "tags": [],
       "parameters": [
@@ -19729,7 +20565,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:2899",
+      "source": "backend/van_gateway/app.py:2910",
       "summary": "Gmail Send",
       "tags": [],
       "parameters": [
@@ -19809,7 +20645,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:3080",
+      "source": "backend/van_gateway/app.py:3091",
       "summary": "Plan Google Job",
       "tags": [],
       "parameters": [
@@ -19871,7 +20707,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:3093",
+      "source": "backend/van_gateway/app.py:3104",
       "summary": "Record Google Artifact",
       "tags": [],
       "parameters": [
@@ -19942,7 +20778,7 @@
       "device_proof_required_when_bound": true,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:3052",
+      "source": "backend/van_gateway/app.py:3063",
       "summary": "Google Owner Revoke",
       "tags": [],
       "parameters": [],
@@ -19968,7 +20804,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:3046",
+      "source": "backend/van_gateway/app.py:3057",
       "summary": "Google Revoke",
       "tags": [],
       "parameters": [
@@ -20641,7 +21477,7 @@
       "device_proof_required_when_bound": true,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:3157",
+      "source": "backend/van_gateway/app.py:3168",
       "summary": "Ingest Notification",
       "tags": [],
       "parameters": [],
@@ -20686,7 +21522,7 @@
       "device_proof_required_when_bound": true,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:3292",
+      "source": "backend/van_gateway/app.py:3303",
       "summary": "Ingest Device Telemetry",
       "tags": [],
       "parameters": [],
@@ -20883,7 +21719,7 @@
       "device_proof_required_when_bound": true,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:2585",
+      "source": "backend/van_gateway/app.py:2596",
       "summary": "Create Reminder",
       "tags": [],
       "parameters": [],
@@ -20928,7 +21764,7 @@
       "device_proof_required_when_bound": true,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:2616",
+      "source": "backend/van_gateway/app.py:2627",
       "summary": "Parse Reminder",
       "tags": [],
       "parameters": [],
@@ -20973,7 +21809,7 @@
       "device_proof_required_when_bound": true,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:2606",
+      "source": "backend/van_gateway/app.py:2617",
       "summary": "Cancel Reminder",
       "tags": [],
       "parameters": [
@@ -21019,7 +21855,7 @@
       "device_proof_required_when_bound": true,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:2596",
+      "source": "backend/van_gateway/app.py:2607",
       "summary": "Resolve Reminder",
       "tags": [],
       "parameters": [
@@ -23362,7 +24198,7 @@
       "device_proof_required_when_bound": true,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:3631",
+      "source": "backend/van_gateway/app.py:3642",
       "summary": "Trading Account Action",
       "tags": [],
       "parameters": [],
@@ -23417,7 +24253,7 @@
       "device_proof_required_when_bound": true,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:3573",
+      "source": "backend/van_gateway/app.py:3584",
       "summary": "Trading Account Challenge",
       "tags": [],
       "parameters": [],
@@ -23672,7 +24508,7 @@
       "device_proof_required_when_bound": true,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:3481",
+      "source": "backend/van_gateway/app.py:3492",
       "summary": "Trading Cognitive Candidate",
       "tags": [],
       "parameters": [
@@ -23738,7 +24574,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:3958",
+      "source": "backend/van_gateway/app.py:3969",
       "summary": "Trading Halt",
       "tags": [],
       "parameters": [
@@ -23777,6 +24613,521 @@
               "schema": {}
             }
           }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "openapi_components": "owner_endpoint_schemas.json",
+      "readiness": "REPOSITORY_DECLARATION_ONLY"
+    },
+    {
+      "endpoint_id": "VE-a169063e428c",
+      "method": "POST",
+      "path": "/v1/trading/monitors/alerts",
+      "authentication": "INGRESS_BEARER_AND_PAIRED_DEVICE",
+      "device_proof_required_when_bound": true,
+      "registration": "DEFAULT",
+      "condition": null,
+      "source": "backend/van_gateway/trading/monitor_api.py:53",
+      "summary": "Create Alert",
+      "tags": [
+        "market-monitors"
+      ],
+      "parameters": [],
+      "request_body": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/CreateAlert"
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MonitorWrite"
+              }
+            }
+          }
+        },
+        "404": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MonitorErrorResponse"
+              }
+            }
+          },
+          "description": "Not Found"
+        },
+        "409": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MonitorErrorResponse"
+              }
+            }
+          },
+          "description": "Conflict"
+        },
+        "413": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MonitorErrorResponse"
+              }
+            }
+          },
+          "description": "Request Entity Too Large"
+        },
+        "429": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MonitorErrorResponse"
+              }
+            }
+          },
+          "description": "Too Many Requests"
+        },
+        "503": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MonitorErrorResponse"
+              }
+            }
+          },
+          "description": "Service Unavailable"
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "openapi_components": "owner_endpoint_schemas.json",
+      "readiness": "REPOSITORY_DECLARATION_ONLY"
+    },
+    {
+      "endpoint_id": "VE-e639deda55f6",
+      "method": "POST",
+      "path": "/v1/trading/monitors/alerts/{object_id}/pause",
+      "authentication": "INGRESS_BEARER_AND_PAIRED_DEVICE",
+      "device_proof_required_when_bound": true,
+      "registration": "DEFAULT",
+      "condition": null,
+      "source": "backend/van_gateway/trading/monitor_api.py:69",
+      "summary": "Pause Alert",
+      "tags": [
+        "market-monitors"
+      ],
+      "parameters": [
+        {
+          "name": "object_id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "title": "Object Id"
+          }
+        }
+      ],
+      "request_body": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/MonitorControl"
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MonitorWrite"
+              }
+            }
+          }
+        },
+        "404": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MonitorErrorResponse"
+              }
+            }
+          },
+          "description": "Not Found"
+        },
+        "409": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MonitorErrorResponse"
+              }
+            }
+          },
+          "description": "Conflict"
+        },
+        "413": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MonitorErrorResponse"
+              }
+            }
+          },
+          "description": "Request Entity Too Large"
+        },
+        "429": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MonitorErrorResponse"
+              }
+            }
+          },
+          "description": "Too Many Requests"
+        },
+        "503": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MonitorErrorResponse"
+              }
+            }
+          },
+          "description": "Service Unavailable"
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "openapi_components": "owner_endpoint_schemas.json",
+      "readiness": "REPOSITORY_DECLARATION_ONLY"
+    },
+    {
+      "endpoint_id": "VE-716bc8fa7b83",
+      "method": "POST",
+      "path": "/v1/trading/monitors/alerts/{object_id}/restart",
+      "authentication": "INGRESS_BEARER_AND_PAIRED_DEVICE",
+      "device_proof_required_when_bound": true,
+      "registration": "DEFAULT",
+      "condition": null,
+      "source": "backend/van_gateway/trading/monitor_api.py:73",
+      "summary": "Restart Alert",
+      "tags": [
+        "market-monitors"
+      ],
+      "parameters": [
+        {
+          "name": "object_id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "title": "Object Id"
+          }
+        }
+      ],
+      "request_body": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/MonitorControl"
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MonitorWrite"
+              }
+            }
+          }
+        },
+        "404": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MonitorErrorResponse"
+              }
+            }
+          },
+          "description": "Not Found"
+        },
+        "409": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MonitorErrorResponse"
+              }
+            }
+          },
+          "description": "Conflict"
+        },
+        "413": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MonitorErrorResponse"
+              }
+            }
+          },
+          "description": "Request Entity Too Large"
+        },
+        "429": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MonitorErrorResponse"
+              }
+            }
+          },
+          "description": "Too Many Requests"
+        },
+        "503": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MonitorErrorResponse"
+              }
+            }
+          },
+          "description": "Service Unavailable"
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "openapi_components": "owner_endpoint_schemas.json",
+      "readiness": "REPOSITORY_DECLARATION_ONLY"
+    },
+    {
+      "endpoint_id": "VE-e1711e49e094",
+      "method": "POST",
+      "path": "/v1/trading/monitors/screen",
+      "authentication": "INGRESS_BEARER_AND_PAIRED_DEVICE",
+      "device_proof_required_when_bound": true,
+      "registration": "DEFAULT",
+      "condition": null,
+      "source": "backend/van_gateway/trading/monitor_api.py:77",
+      "summary": "Screen",
+      "tags": [
+        "market-monitors"
+      ],
+      "parameters": [],
+      "request_body": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ScreenRequest"
+            }
+          }
+        },
+        "required": true
+      },
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ScreenResult"
+              }
+            }
+          }
+        },
+        "404": {
+          "description": "Not Found",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MonitorErrorResponse"
+              }
+            }
+          }
+        },
+        "409": {
+          "description": "Conflict",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MonitorErrorResponse"
+              }
+            }
+          }
+        },
+        "413": {
+          "description": "Request Entity Too Large",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MonitorErrorResponse"
+              }
+            }
+          }
+        },
+        "429": {
+          "description": "Too Many Requests",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MonitorErrorResponse"
+              }
+            }
+          }
+        },
+        "503": {
+          "description": "Service Unavailable",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MonitorErrorResponse"
+              }
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "openapi_components": "owner_endpoint_schemas.json",
+      "readiness": "REPOSITORY_DECLARATION_ONLY"
+    },
+    {
+      "endpoint_id": "VE-4f2f4e60b880",
+      "method": "POST",
+      "path": "/v1/trading/monitors/watchlists",
+      "authentication": "INGRESS_BEARER_AND_PAIRED_DEVICE",
+      "device_proof_required_when_bound": true,
+      "registration": "DEFAULT",
+      "condition": null,
+      "source": "backend/van_gateway/trading/monitor_api.py:33",
+      "summary": "Create List",
+      "tags": [
+        "market-monitors"
+      ],
+      "parameters": [],
+      "request_body": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/CreateWatchlist"
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MonitorWrite"
+              }
+            }
+          }
+        },
+        "404": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MonitorErrorResponse"
+              }
+            }
+          },
+          "description": "Not Found"
+        },
+        "409": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MonitorErrorResponse"
+              }
+            }
+          },
+          "description": "Conflict"
+        },
+        "413": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MonitorErrorResponse"
+              }
+            }
+          },
+          "description": "Request Entity Too Large"
+        },
+        "429": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MonitorErrorResponse"
+              }
+            }
+          },
+          "description": "Too Many Requests"
+        },
+        "503": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MonitorErrorResponse"
+              }
+            }
+          },
+          "description": "Service Unavailable"
         },
         "422": {
           "description": "Validation Error",
@@ -23904,7 +25255,7 @@
       "device_proof_required_when_bound": true,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:3790",
+      "source": "backend/van_gateway/app.py:3801",
       "summary": "Trading Strategy Promote",
       "tags": [],
       "parameters": [],
@@ -23949,7 +25300,7 @@
       "device_proof_required_when_bound": true,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:3768",
+      "source": "backend/van_gateway/app.py:3779",
       "summary": "Trading Strategy Promotion Challenge",
       "tags": [],
       "parameters": [],
@@ -23994,7 +25345,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:3982",
+      "source": "backend/van_gateway/app.py:3993",
       "summary": "Trading Confirm Ticket",
       "tags": [],
       "parameters": [
@@ -24378,7 +25729,7 @@
       "device_proof_required_when_bound": true,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:3930",
+      "source": "backend/van_gateway/app.py:3941",
       "summary": "Record Visual Acceptance",
       "tags": [],
       "parameters": [],
@@ -24736,7 +26087,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:2648",
+      "source": "backend/van_gateway/app.py:2659",
       "summary": "Put Project Truth",
       "tags": [],
       "parameters": [
@@ -24889,6 +26240,224 @@
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/ChartErrorResponse"
+              }
+            }
+          },
+          "description": "Service Unavailable"
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "openapi_components": "owner_endpoint_schemas.json",
+      "readiness": "REPOSITORY_DECLARATION_ONLY"
+    },
+    {
+      "endpoint_id": "VE-88366f209702",
+      "method": "PUT",
+      "path": "/v1/trading/monitors/alerts/{object_id}",
+      "authentication": "INGRESS_BEARER_AND_PAIRED_DEVICE",
+      "device_proof_required_when_bound": true,
+      "registration": "DEFAULT",
+      "condition": null,
+      "source": "backend/van_gateway/trading/monitor_api.py:61",
+      "summary": "Replace Alert",
+      "tags": [
+        "market-monitors"
+      ],
+      "parameters": [
+        {
+          "name": "object_id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "title": "Object Id"
+          }
+        }
+      ],
+      "request_body": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ReplaceAlert"
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MonitorWrite"
+              }
+            }
+          }
+        },
+        "404": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MonitorErrorResponse"
+              }
+            }
+          },
+          "description": "Not Found"
+        },
+        "409": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MonitorErrorResponse"
+              }
+            }
+          },
+          "description": "Conflict"
+        },
+        "413": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MonitorErrorResponse"
+              }
+            }
+          },
+          "description": "Request Entity Too Large"
+        },
+        "429": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MonitorErrorResponse"
+              }
+            }
+          },
+          "description": "Too Many Requests"
+        },
+        "503": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MonitorErrorResponse"
+              }
+            }
+          },
+          "description": "Service Unavailable"
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "openapi_components": "owner_endpoint_schemas.json",
+      "readiness": "REPOSITORY_DECLARATION_ONLY"
+    },
+    {
+      "endpoint_id": "VE-e02148d751ad",
+      "method": "PUT",
+      "path": "/v1/trading/monitors/watchlists/{object_id}",
+      "authentication": "INGRESS_BEARER_AND_PAIRED_DEVICE",
+      "device_proof_required_when_bound": true,
+      "registration": "DEFAULT",
+      "condition": null,
+      "source": "backend/van_gateway/trading/monitor_api.py:41",
+      "summary": "Replace List",
+      "tags": [
+        "market-monitors"
+      ],
+      "parameters": [
+        {
+          "name": "object_id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "title": "Object Id"
+          }
+        }
+      ],
+      "request_body": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ReplaceWatchlist"
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MonitorWrite"
+              }
+            }
+          }
+        },
+        "404": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MonitorErrorResponse"
+              }
+            }
+          },
+          "description": "Not Found"
+        },
+        "409": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MonitorErrorResponse"
+              }
+            }
+          },
+          "description": "Conflict"
+        },
+        "413": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MonitorErrorResponse"
+              }
+            }
+          },
+          "description": "Request Entity Too Large"
+        },
+        "429": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MonitorErrorResponse"
+              }
+            }
+          },
+          "description": "Too Many Requests"
+        },
+        "503": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MonitorErrorResponse"
               }
             }
           },

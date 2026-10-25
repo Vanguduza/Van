@@ -1,6 +1,6 @@
 {
   "schema": "van.rebuild.candidate-source-progress/1",
-  "updated_at_utc": "2026-10-25T01:53:28.635962+00:00",
+  "updated_at_utc": "2026-10-25T02:45:53.709404+00:00",
   "programme": "Rev1.18; original 131 unit IDs and dependencies retained",
   "authority": "auth-20261022-owner-autonomous-candidate-build",
   "meaning": "Candidate source progress is separate from admitted unit acceptance. Independent certificates, owner decisions, live effects and release gates remain unissued. No unit is declared complete by this record.",
@@ -821,9 +821,14 @@
         "BE-018",
         "PRE-003"
       ],
-      "candidate_status": "NOT_STARTED",
+      "candidate_status": "IN_PROGRESS",
       "unit_acceptance": "NOT_ISSUED",
-      "milestones": []
+      "milestones": [
+        {
+          "description": "Persistent owner watchlist preferences and alert CAS/original controls; typed server closed-bar/recorded-news evaluation, canonical atomic shared event and durable Attention repair; typed quota-backed scans. Real SQLite/migration/backup/lostACK/CAS/eventrollback and paired HTTP/device-proof/two-device replay source checks.53newcases passed in r4;2additional guard controls pass;9/9 source faults caught with healthy controls. Latest55 suite54PASS1native-thread setupERROR and failed same-resource retry retained; no combined green claim. Default native technical feed held unavailable; live rows/tick/dynamic/persisted-screen rules/voice/Android/provider qualification pending.",
+          "evidence": "backend/BE-020_MARKET_MONITORS.md; receipts/MARKET_MONITORS_SOURCE_20261025.json"
+        }
+      ]
     },
     "BE-021": {
       "title": "Analyst, chart observations and cross-signal intelligence",

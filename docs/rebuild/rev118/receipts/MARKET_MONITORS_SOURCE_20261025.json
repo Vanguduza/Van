@@ -1,0 +1,182 @@
+{
+  "schema": "van.rebuild.market-monitors-source/1",
+  "parent_source_head": "c5350284949b73ca52370ce81592efd7aee5ef54",
+  "status": "CANDIDATE_SOURCE_EVIDENCE",
+  "canonical_units": [
+    "BE-003",
+    "BE-020"
+  ],
+  "unit_acceptance": "NOT_ISSUED",
+  "source_sha256": {
+    "backend/van_gateway/trading/monitor_api.py": "5d40b93398363eab09206644feac27a978d1633d7c9debcdff0a4ca13394da3a",
+    "backend/van_gateway/trading/monitor_calculations.py": "98eaf7e63ddfc94c6188a33d2410ad82a91bf677f4dc53d968d11a4bb1814fba",
+    "backend/van_gateway/trading/monitor_models.py": "8186a3a83e12e72c27ee5ac2dff1e94da941d0ecd98ab271e7b0e051b3f97423",
+    "backend/van_gateway/trading/monitor_schema.py": "806ad5cce03a4712e07123dc45a58a9860e289fb820de0b7b0fbc028774ff9d4",
+    "backend/van_gateway/trading/monitor_service.py": "8e6c6da8e69a5a73f18993428dd89260adaf35848d00eeb2aaebef850c4f0585",
+    "backend/van_gateway/trading/monitor_source.py": "7da7f60c7f940539077ce49468ae3ea5490e78fb85d5c82b3e3c0fb432f7dd2a",
+    "backend/van_gateway/events/bus.py": "50c824c5d28169199cbefde92e25555339bd321806c872fddfbdf77935b775c4",
+    "backend/van_gateway/storage/db.py": "31a1f61f86d00b5672e5bb543c69b449a0f3f986b47cbc2a5abfba9f2fb329a4",
+    "backend/van_gateway/app.py": "dfdda010417ea9b6426c7e5fb95d8b2eb279689e5be0e564409bddf225c37389",
+    "backend/van_gateway/context/forget.py": "5eb321d1907abbd2b62ec30fdeb6f7d48d946ed6ff78a4f29b8a5c2973b92a46",
+    "backend/van_gateway/ops/retention.py": "69d5c7c120fabeb596607fda785b1bd711b5f4986885ceb63c2f2d1ebce1b18b",
+    "backend/tests/test_market_monitor_bound_device.py": "c9fd23b811b9d70179d468022d24d0a466547f78f3ca43fa6ad1ebe92ca377eb",
+    "backend/tests/test_market_monitor_gateway.py": "baace3a8b752b26e5e7979484bce870f6c1681784c9a22107f72d6fb6cd7ff01",
+    "backend/tests/test_market_monitor_measurements.py": "ed56d301cf329c13b1cf01d71e032588688de75e15cec28e54dbfad841a8c3c7",
+    "backend/tests/test_market_monitor_persistence.py": "31409fb088008cdae59bcdec0bd3a24e9898524db74c63aa51c35098be5683a5",
+    "backend/tests/test_market_monitor_runtime.py": "080385688dea5663dd41e92dfaaad847f4f94569c3e12fc74f27f2bdc03ba3be",
+    "backend/tests/conftest_market_monitors.py": "b1c74f97023a6397b17d4aecd06f8680ac4851c33aaaf27809485df9f53f0774"
+  },
+  "reports": {
+    "van-market-monitor-http-r3.xml": {
+      "tests": 4,
+      "passed": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "file": "docs/rebuild/rev118/ci/market_monitors_20261025/van-market-monitor-http-r3.xml",
+      "sha256": "f60142e362b4ede6afd00de76badbaa278081c2e536a485b4ba2e78cf3d15244"
+    },
+    "van-market-monitor-measurements-r1.xml": {
+      "tests": 29,
+      "passed": 26,
+      "failures": 3,
+      "errors": 0,
+      "skipped": 0,
+      "file": "docs/rebuild/rev118/ci/market_monitors_20261025/van-market-monitor-measurements-r1.xml",
+      "sha256": "c570380110caf056a6e01cdcb640a103d764d9830144709df0beb947b5e42839"
+    },
+    "van-market-monitor-registry-guards.xml": {
+      "tests": 10,
+      "passed": 10,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "file": "docs/rebuild/rev118/ci/market_monitors_20261025/van-market-monitor-registry-guards.xml",
+      "sha256": "4224a9d712457b56b80513f4a46a269b2f081aac0b0578cf89cc8c03a99468e4"
+    },
+    "van-market-monitors-final-r5.xml": {
+      "tests": 55,
+      "passed": 54,
+      "failures": 0,
+      "errors": 1,
+      "skipped": 0,
+      "file": "docs/rebuild/rev118/ci/market_monitors_20261025/van-market-monitors-final-r5.xml",
+      "sha256": "f59e32fc3149f82af6df37e336a9148cc1c74ecea3e02ab2d87cd1aaeee6ea54"
+    },
+    "van-market-monitors-http-thread-retry-r6.xml": {
+      "tests": 1,
+      "passed": 0,
+      "failures": 0,
+      "errors": 1,
+      "skipped": 0,
+      "file": "docs/rebuild/rev118/ci/market_monitors_20261025/van-market-monitors-http-thread-retry-r6.xml",
+      "sha256": "a5630620beb527a10534992c1f4d76cfdabbe944190855371dc083d92b19fcab"
+    },
+    "van-market-monitors-integrated-r2.xml": {
+      "tests": 72,
+      "passed": 68,
+      "failures": 3,
+      "errors": 1,
+      "skipped": 0,
+      "file": "docs/rebuild/rev118/ci/market_monitors_20261025/van-market-monitors-integrated-r2.xml",
+      "sha256": "7dcfe220d6cfe6bbb3d4721ce881e7e66d73373595f7a6dd041b7264dd21e904"
+    },
+    "van-market-monitors-integrated-r4.xml": {
+      "tests": 74,
+      "passed": 73,
+      "failures": 1,
+      "errors": 0,
+      "skipped": 0,
+      "file": "docs/rebuild/rev118/ci/market_monitors_20261025/van-market-monitors-integrated-r4.xml",
+      "sha256": "0418376801d18ad00f4b06ec90d2dbb2a198972e6bd6a476a74fcc57352244b7"
+    },
+    "van-market-monitors-persistence-r1.xml": {
+      "tests": 10,
+      "passed": 0,
+      "failures": 10,
+      "errors": 0,
+      "skipped": 0,
+      "file": "docs/rebuild/rev118/ci/market_monitors_20261025/van-market-monitors-persistence-r1.xml",
+      "sha256": "371f6891b66d1167174e578d93bb61c27e8b3da5f9628cbc6810c70d864a49e6"
+    },
+    "van-market-monitors-retention-thread-retry.xml": {
+      "tests": 1,
+      "passed": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "file": "docs/rebuild/rev118/ci/market_monitors_20261025/van-market-monitors-retention-thread-retry.xml",
+      "sha256": "1e7c06edebcd1172938bc77fc0fe550e306d546d0cd2343dcbb3476f4878ab8a"
+    }
+  },
+  "fault_controls": {
+    "file": "docs/rebuild/rev118/ci/market_monitors_20261025/fault_controls.json",
+    "sha256": "eab49d56e22584f7737aa896e2f9d4c2e06e0fc79c09c8057511c64d3d436920",
+    "expected": 9,
+    "caught": 9,
+    "survived": 0,
+    "invalid": 0,
+    "source_restored": true
+  },
+  "observed_scope": {
+    "persistent_sqlite_watchlists_and_alert_controls": true,
+    "actual_schema57_to58_migration": true,
+    "actual_backup_restore": true,
+    "original_operations_and_lost_commit_acknowledgement": true,
+    "atomic_event_state_and_projection_witness": true,
+    "attention_repair_after_rule_deletion_preserves_acknowledgement": true,
+    "paired_owner_http": true,
+    "real_bound_device_signature": true,
+    "same_canonical_event_on_two_gateway_device_identities": true,
+    "actual_registered_scheduler_job_invoked": true,
+    "actual_existing_headline_ledger_read": true,
+    "native_market_source": "UNAVAILABLE_FULL_FEED_BINDING_REQUIRED",
+    "live_provider_qualification": false,
+    "android_consumer_implemented": false,
+    "new_ui_implemented": false,
+    "physical_s24_tested": false
+  },
+  "test_interpretation": {
+    "integrated_r4": "73 passed and one original retention test failed at native worker-thread creation. All 53 then-present monitor tests passed; the unchanged original test separately passed.",
+    "additional_regressions": "Two first-crossing/corrected-level source tests were added; both pass as fresh restored controls. Nine deliberately broken source guards all fail semantically; all nine healthy controls pass.",
+    "http_r3": "Four actual app-startup/auth/middleware/storage HTTP tests passed; optional periodic scheduler off, unrelated native actors idle, actual registered monitor job called.",
+    "latest_r5": "54 passed, one HTTP fixture setup error from inability to create aiosqlite worker. No monitor postcondition failed.",
+    "latest_r6": "The single HTTP retry again failed in startup from native thread exhaustion. Retained; no combined green 55-test suite is claimed. The same HTTP case passed in r3 and r4 before these resource failures.",
+    "initial_measurement_r1": "26 passed, three exact MACD assertions failed on rounding residues. Corrected with exact rational EMA/MACD intermediates, unchanged independent expected values.",
+    "initial_persistence_r1": "All ten failed before migration could start because no native worker thread could be created; these were not counted as product defects or successful executions.",
+    "registry_guards": "10 passed, including real preimage-check flow through the supplied Git reader with valid bytes, owner edits and corrupt committed generation evidence."
+  },
+  "registry": {
+    "feature_groups": 42,
+    "original_function_ids_preserved": 105,
+    "surfaces": 78,
+    "endpoints": 472,
+    "original_endpoints_preserved": 457,
+    "new_monitor_endpoints": 15,
+    "api_schemas": 357,
+    "original_schema_names_preserved": 333,
+    "source_contract_check": "PASS_ZERO_CHANGES",
+    "reader": "Real immutable Git blobs with canonical citation, generation and overwrite checks; no guard replacement.",
+    "markdown": "backend/OWNER_FRONTEND_SCREEN_REGISTRY.md",
+    "new_consumer_status": "PENDING_BG_AND_FRONTEND_PROGRAMME"
+  },
+  "remaining": [
+    "Qualified BE-008 native instrument/feed and quote source; declared news trust is not corroborated truth.",
+    "Live tick alert bases and qualified indicator semantics.",
+    "Dynamic watchlists, complete live market-row projection and persisted screener-rule workflows.",
+    "Canonical typed voice/command catalog and Android consumers/deep links/OS notifications.",
+    "Full unisolated application/provider integration, capacity/failure/recovery and independent/native acceptance."
+  ],
+  "formal_acceptances_issued": [],
+  "financial_effects_authorized_or_performed": false,
+  "frozen_package_changed": false,
+  "formatting": {
+    "test_eof_normalized": {
+      "file": "backend/tests/test_market_monitor_gateway.py",
+      "before_sha256": "485f4c30fb1f5313d781ad97514e5098b628338750d9e829240cbbeb22a39039",
+      "after_sha256": "baace3a8b752b26e5e7979484bce870f6c1681784c9a22107f72d6fb6cd7ff01",
+      "assertions_and_complete_ast_identical": true
+    },
+    "raw_ci_evidence": "Original pytest XML/log bytes retain their literal traceback whitespace and hashes; excluded only from source whitespace checking."
+  }
+}

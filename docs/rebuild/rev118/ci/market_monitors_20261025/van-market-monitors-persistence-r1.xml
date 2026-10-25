@@ -1,0 +1,517 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="10" skipped="0" tests="10" time="0.510" timestamp="2026-10-25T02:01:34.039164+00:00" hostname="56ae90b2c83c"><testcase classname="tests.test_market_monitor_persistence" name="test_exact_native_identity_preferences_and_favourites_survive_restart" time="0.003"><failure message="RuntimeError: can't start new thread">tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-2642/test_exact_native_identity_pre0')
+
+    @pytest.mark.asyncio
+    async def test_exact_native_identity_preferences_and_favourites_survive_restart(tmp_path):
+&gt;       s = await service(tmp_path)
+            ^^^^^^^^^^^^^^^^^^^^^^^
+
+backend/tests/test_market_monitor_persistence.py:56: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+backend/tests/test_market_monitor_persistence.py:42: in service
+    await store.migrate()
+backend/van_gateway/storage/db.py:2660: in migrate
+    async with self.connection() as db:
+               ^^^^^^^^^^^^^^^^^
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/contextlib.py:210: in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+backend/van_gateway/storage/db.py:2566: in connection
+    db = await asyncio.shield(opening)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/asyncio/tasks.py:684: in _wrap_awaitable
+    return await awaitable
+           ^^^^^^^^^^^^^^^
+../../van-audit/canon-backend-venv-2026-10-09/lib/python3.12/site-packages/aiosqlite/core.py:177: in __await__
+    self._thread.start()
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;Thread(Thread-1 (_connection_worker_thread), initial)&gt;
+
+    def start(self):
+        """Start the thread's activity.
+    
+        It must be called at most once per thread object. It arranges for the
+        object's run() method to be invoked in a separate thread of control.
+    
+        This method will raise a RuntimeError if called more than once on the
+        same thread object.
+    
+        """
+        if not self._initialized:
+            raise RuntimeError("thread.__init__() not called")
+    
+        if self._started.is_set():
+            raise RuntimeError("threads can only be started once")
+    
+        with _active_limbo_lock:
+            _limbo[self] = self
+        try:
+&gt;           _start_new_thread(self._bootstrap, ())
+E           RuntimeError: can't start new thread
+
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/threading.py:994: RuntimeError</failure></testcase><testcase classname="tests.test_market_monitor_persistence" name="test_original_receipt_survives_edit_delete_and_lost_response_retry_without_resurrection" time="0.001"><failure message="RuntimeError: can't start new thread">tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-2642/test_original_receipt_survives0')
+
+    @pytest.mark.asyncio
+    async def test_original_receipt_survives_edit_delete_and_lost_response_retry_without_resurrection(tmp_path):
+&gt;       s = await service(tmp_path)
+            ^^^^^^^^^^^^^^^^^^^^^^^
+
+backend/tests/test_market_monitor_persistence.py:69: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+backend/tests/test_market_monitor_persistence.py:42: in service
+    await store.migrate()
+backend/van_gateway/storage/db.py:2660: in migrate
+    async with self.connection() as db:
+               ^^^^^^^^^^^^^^^^^
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/contextlib.py:210: in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+backend/van_gateway/storage/db.py:2566: in connection
+    db = await asyncio.shield(opening)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/asyncio/tasks.py:684: in _wrap_awaitable
+    return await awaitable
+           ^^^^^^^^^^^^^^^
+../../van-audit/canon-backend-venv-2026-10-09/lib/python3.12/site-packages/aiosqlite/core.py:177: in __await__
+    self._thread.start()
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;Thread(Thread-2 (_connection_worker_thread), initial)&gt;
+
+    def start(self):
+        """Start the thread's activity.
+    
+        It must be called at most once per thread object. It arranges for the
+        object's run() method to be invoked in a separate thread of control.
+    
+        This method will raise a RuntimeError if called more than once on the
+        same thread object.
+    
+        """
+        if not self._initialized:
+            raise RuntimeError("thread.__init__() not called")
+    
+        if self._started.is_set():
+            raise RuntimeError("threads can only be started once")
+    
+        with _active_limbo_lock:
+            _limbo[self] = self
+        try:
+&gt;           _start_new_thread(self._bootstrap, ())
+E           RuntimeError: can't start new thread
+
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/threading.py:994: RuntimeError</failure></testcase><testcase classname="tests.test_market_monitor_persistence" name="test_request_identity_is_bound_to_payload_kind_target_and_operation" time="0.001"><failure message="RuntimeError: can't start new thread">tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-2642/test_request_identity_is_bound0')
+
+    @pytest.mark.asyncio
+    async def test_request_identity_is_bound_to_payload_kind_target_and_operation(tmp_path):
+&gt;       s = await service(tmp_path)
+            ^^^^^^^^^^^^^^^^^^^^^^^
+
+backend/tests/test_market_monitor_persistence.py:86: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+backend/tests/test_market_monitor_persistence.py:42: in service
+    await store.migrate()
+backend/van_gateway/storage/db.py:2660: in migrate
+    async with self.connection() as db:
+               ^^^^^^^^^^^^^^^^^
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/contextlib.py:210: in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+backend/van_gateway/storage/db.py:2566: in connection
+    db = await asyncio.shield(opening)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/asyncio/tasks.py:684: in _wrap_awaitable
+    return await awaitable
+           ^^^^^^^^^^^^^^^
+../../van-audit/canon-backend-venv-2026-10-09/lib/python3.12/site-packages/aiosqlite/core.py:177: in __await__
+    self._thread.start()
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;Thread(Thread-3 (_connection_worker_thread), initial)&gt;
+
+    def start(self):
+        """Start the thread's activity.
+    
+        It must be called at most once per thread object. It arranges for the
+        object's run() method to be invoked in a separate thread of control.
+    
+        This method will raise a RuntimeError if called more than once on the
+        same thread object.
+    
+        """
+        if not self._initialized:
+            raise RuntimeError("thread.__init__() not called")
+    
+        if self._started.is_set():
+            raise RuntimeError("threads can only be started once")
+    
+        with _active_limbo_lock:
+            _limbo[self] = self
+        try:
+&gt;           _start_new_thread(self._bootstrap, ())
+E           RuntimeError: can't start new thread
+
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/threading.py:994: RuntimeError</failure></testcase><testcase classname="tests.test_market_monitor_persistence" name="test_stale_cas_and_foreign_owner_cannot_change_or_read_rule_or_receipt" time="0.001"><failure message="RuntimeError: can't start new thread">tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-2642/test_stale_cas_and_foreign_own0')
+
+    @pytest.mark.asyncio
+    async def test_stale_cas_and_foreign_owner_cannot_change_or_read_rule_or_receipt(tmp_path):
+&gt;       s = await service(tmp_path)
+            ^^^^^^^^^^^^^^^^^^^^^^^
+
+backend/tests/test_market_monitor_persistence.py:100: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+backend/tests/test_market_monitor_persistence.py:42: in service
+    await store.migrate()
+backend/van_gateway/storage/db.py:2660: in migrate
+    async with self.connection() as db:
+               ^^^^^^^^^^^^^^^^^
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/contextlib.py:210: in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+backend/van_gateway/storage/db.py:2566: in connection
+    db = await asyncio.shield(opening)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/asyncio/tasks.py:684: in _wrap_awaitable
+    return await awaitable
+           ^^^^^^^^^^^^^^^
+../../van-audit/canon-backend-venv-2026-10-09/lib/python3.12/site-packages/aiosqlite/core.py:177: in __await__
+    self._thread.start()
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;Thread(Thread-4 (_connection_worker_thread), initial)&gt;
+
+    def start(self):
+        """Start the thread's activity.
+    
+        It must be called at most once per thread object. It arranges for the
+        object's run() method to be invoked in a separate thread of control.
+    
+        This method will raise a RuntimeError if called more than once on the
+        same thread object.
+    
+        """
+        if not self._initialized:
+            raise RuntimeError("thread.__init__() not called")
+    
+        if self._started.is_set():
+            raise RuntimeError("threads can only be started once")
+    
+        with _active_limbo_lock:
+            _limbo[self] = self
+        try:
+&gt;           _start_new_thread(self._bootstrap, ())
+E           RuntimeError: can't start new thread
+
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/threading.py:994: RuntimeError</failure></testcase><testcase classname="tests.test_market_monitor_persistence" name="test_pause_and_explicit_restart_are_revision_checked_and_rearm_once" time="0.001"><failure message="RuntimeError: can't start new thread">tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-2642/test_pause_and_explicit_restar0')
+
+    @pytest.mark.asyncio
+    async def test_pause_and_explicit_restart_are_revision_checked_and_rearm_once(tmp_path):
+&gt;       s = await service(tmp_path)
+            ^^^^^^^^^^^^^^^^^^^^^^^
+
+backend/tests/test_market_monitor_persistence.py:116: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+backend/tests/test_market_monitor_persistence.py:42: in service
+    await store.migrate()
+backend/van_gateway/storage/db.py:2660: in migrate
+    async with self.connection() as db:
+               ^^^^^^^^^^^^^^^^^
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/contextlib.py:210: in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+backend/van_gateway/storage/db.py:2566: in connection
+    db = await asyncio.shield(opening)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/asyncio/tasks.py:684: in _wrap_awaitable
+    return await awaitable
+           ^^^^^^^^^^^^^^^
+../../van-audit/canon-backend-venv-2026-10-09/lib/python3.12/site-packages/aiosqlite/core.py:177: in __await__
+    self._thread.start()
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;Thread(Thread-5 (_connection_worker_thread), initial)&gt;
+
+    def start(self):
+        """Start the thread's activity.
+    
+        It must be called at most once per thread object. It arranges for the
+        object's run() method to be invoked in a separate thread of control.
+    
+        This method will raise a RuntimeError if called more than once on the
+        same thread object.
+    
+        """
+        if not self._initialized:
+            raise RuntimeError("thread.__init__() not called")
+    
+        if self._started.is_set():
+            raise RuntimeError("threads can only be started once")
+    
+        with _active_limbo_lock:
+            _limbo[self] = self
+        try:
+&gt;           _start_new_thread(self._bootstrap, ())
+E           RuntimeError: can't start new thread
+
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/threading.py:994: RuntimeError</failure></testcase><testcase classname="tests.test_market_monitor_persistence" name="test_pagination_is_stable_owner_scoped_and_checks_cursor_scope" time="0.002"><failure message="RuntimeError: can't start new thread">tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-2642/test_pagination_is_stable_owne0')
+
+    @pytest.mark.asyncio
+    async def test_pagination_is_stable_owner_scoped_and_checks_cursor_scope(tmp_path):
+&gt;       s = await service(tmp_path)
+            ^^^^^^^^^^^^^^^^^^^^^^^
+
+backend/tests/test_market_monitor_persistence.py:133: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+backend/tests/test_market_monitor_persistence.py:42: in service
+    await store.migrate()
+backend/van_gateway/storage/db.py:2660: in migrate
+    async with self.connection() as db:
+               ^^^^^^^^^^^^^^^^^
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/contextlib.py:210: in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+backend/van_gateway/storage/db.py:2566: in connection
+    db = await asyncio.shield(opening)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/asyncio/tasks.py:684: in _wrap_awaitable
+    return await awaitable
+           ^^^^^^^^^^^^^^^
+../../van-audit/canon-backend-venv-2026-10-09/lib/python3.12/site-packages/aiosqlite/core.py:177: in __await__
+    self._thread.start()
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;Thread(Thread-6 (_connection_worker_thread), initial)&gt;
+
+    def start(self):
+        """Start the thread's activity.
+    
+        It must be called at most once per thread object. It arranges for the
+        object's run() method to be invoked in a separate thread of control.
+    
+        This method will raise a RuntimeError if called more than once on the
+        same thread object.
+    
+        """
+        if not self._initialized:
+            raise RuntimeError("thread.__init__() not called")
+    
+        if self._started.is_set():
+            raise RuntimeError("threads can only be started once")
+    
+        with _active_limbo_lock:
+            _limbo[self] = self
+        try:
+&gt;           _start_new_thread(self._bootstrap, ())
+E           RuntimeError: can't start new thread
+
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/threading.py:994: RuntimeError</failure></testcase><testcase classname="tests.test_market_monitor_persistence" name="test_corrupt_saved_state_is_explicit_unavailable_not_a_healthy_empty_list" time="0.001"><failure message="RuntimeError: can't start new thread">tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-2642/test_corrupt_saved_state_is_ex0')
+
+    @pytest.mark.asyncio
+    async def test_corrupt_saved_state_is_explicit_unavailable_not_a_healthy_empty_list(tmp_path):
+&gt;       s = await service(tmp_path)
+            ^^^^^^^^^^^^^^^^^^^^^^^
+
+backend/tests/test_market_monitor_persistence.py:146: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+backend/tests/test_market_monitor_persistence.py:42: in service
+    await store.migrate()
+backend/van_gateway/storage/db.py:2660: in migrate
+    async with self.connection() as db:
+               ^^^^^^^^^^^^^^^^^
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/contextlib.py:210: in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+backend/van_gateway/storage/db.py:2566: in connection
+    db = await asyncio.shield(opening)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/asyncio/tasks.py:684: in _wrap_awaitable
+    return await awaitable
+           ^^^^^^^^^^^^^^^
+../../van-audit/canon-backend-venv-2026-10-09/lib/python3.12/site-packages/aiosqlite/core.py:177: in __await__
+    self._thread.start()
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;Thread(Thread-7 (_connection_worker_thread), initial)&gt;
+
+    def start(self):
+        """Start the thread's activity.
+    
+        It must be called at most once per thread object. It arranges for the
+        object's run() method to be invoked in a separate thread of control.
+    
+        This method will raise a RuntimeError if called more than once on the
+        same thread object.
+    
+        """
+        if not self._initialized:
+            raise RuntimeError("thread.__init__() not called")
+    
+        if self._started.is_set():
+            raise RuntimeError("threads can only be started once")
+    
+        with _active_limbo_lock:
+            _limbo[self] = self
+        try:
+&gt;           _start_new_thread(self._bootstrap, ())
+E           RuntimeError: can't start new thread
+
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/threading.py:994: RuntimeError</failure></testcase><testcase classname="tests.test_market_monitor_persistence" name="test_capacity_and_invalid_clock_do_not_create_partial_objects_or_receipts" time="0.001"><failure message="RuntimeError: can't start new thread">tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-2642/test_capacity_and_invalid_cloc0')
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x7fc3d13a1f40&gt;
+
+    @pytest.mark.asyncio
+    async def test_capacity_and_invalid_clock_do_not_create_partial_objects_or_receipts(tmp_path, monkeypatch):
+&gt;       s = await service(tmp_path)
+            ^^^^^^^^^^^^^^^^^^^^^^^
+
+backend/tests/test_market_monitor_persistence.py:157: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+backend/tests/test_market_monitor_persistence.py:42: in service
+    await store.migrate()
+backend/van_gateway/storage/db.py:2660: in migrate
+    async with self.connection() as db:
+               ^^^^^^^^^^^^^^^^^
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/contextlib.py:210: in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+backend/van_gateway/storage/db.py:2566: in connection
+    db = await asyncio.shield(opening)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/asyncio/tasks.py:684: in _wrap_awaitable
+    return await awaitable
+           ^^^^^^^^^^^^^^^
+../../van-audit/canon-backend-venv-2026-10-09/lib/python3.12/site-packages/aiosqlite/core.py:177: in __await__
+    self._thread.start()
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;Thread(Thread-8 (_connection_worker_thread), initial)&gt;
+
+    def start(self):
+        """Start the thread's activity.
+    
+        It must be called at most once per thread object. It arranges for the
+        object's run() method to be invoked in a separate thread of control.
+    
+        This method will raise a RuntimeError if called more than once on the
+        same thread object.
+    
+        """
+        if not self._initialized:
+            raise RuntimeError("thread.__init__() not called")
+    
+        if self._started.is_set():
+            raise RuntimeError("threads can only be started once")
+    
+        with _active_limbo_lock:
+            _limbo[self] = self
+        try:
+&gt;           _start_new_thread(self._bootstrap, ())
+E           RuntimeError: can't start new thread
+
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/threading.py:994: RuntimeError</failure></testcase><testcase classname="tests.test_market_monitor_persistence" name="test_schema57_upgrade_keeps_existing_chart_and_adds_monitor_tables" time="0.002"><failure message="RuntimeError: can't start new thread">tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-2642/test_schema57_upgrade_keeps_ex0')
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x7fc3d138da90&gt;
+
+    @pytest.mark.asyncio
+    async def test_schema57_upgrade_keeps_existing_chart_and_adds_monitor_tables(tmp_path, monkeypatch):
+        import van_gateway.storage.db as module
+        from van_gateway.trading.chart_models import CreateWorkspace, WorkspaceState
+        from van_gateway.trading.chart_workspaces import ChartWorkspaceService
+        store = Store(str(tmp_path/'old57.sqlite3'))
+        with monkeypatch.context() as patch:
+            patch.setattr(module, 'MIGRATIONS', {k: v for k, v in module.MIGRATIONS.items() if k &lt;= 57})
+&gt;           await store.migrate()
+
+backend/tests/test_market_monitor_persistence.py:178: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+backend/van_gateway/storage/db.py:2660: in migrate
+    async with self.connection() as db:
+               ^^^^^^^^^^^^^^^^^
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/contextlib.py:210: in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+backend/van_gateway/storage/db.py:2566: in connection
+    db = await asyncio.shield(opening)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/asyncio/tasks.py:684: in _wrap_awaitable
+    return await awaitable
+           ^^^^^^^^^^^^^^^
+../../van-audit/canon-backend-venv-2026-10-09/lib/python3.12/site-packages/aiosqlite/core.py:177: in __await__
+    self._thread.start()
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;Thread(Thread-9 (_connection_worker_thread), initial)&gt;
+
+    def start(self):
+        """Start the thread's activity.
+    
+        It must be called at most once per thread object. It arranges for the
+        object's run() method to be invoked in a separate thread of control.
+    
+        This method will raise a RuntimeError if called more than once on the
+        same thread object.
+    
+        """
+        if not self._initialized:
+            raise RuntimeError("thread.__init__() not called")
+    
+        if self._started.is_set():
+            raise RuntimeError("threads can only be started once")
+    
+        with _active_limbo_lock:
+            _limbo[self] = self
+        try:
+&gt;           _start_new_thread(self._bootstrap, ())
+E           RuntimeError: can't start new thread
+
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/threading.py:994: RuntimeError</failure></testcase><testcase classname="tests.test_market_monitor_persistence" name="test_real_backup_and_restore_preserve_lists_alert_arms_and_original_results" time="0.004"><failure message="RuntimeError: can't start new thread">tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-2642/test_real_backup_and_restore_p0')
+
+    @pytest.mark.asyncio
+    async def test_real_backup_and_restore_preserve_lists_alert_arms_and_original_results(tmp_path):
+        from van_gateway.ops.backup import create_backup, restore, verify
+&gt;       s = await service(tmp_path)
+            ^^^^^^^^^^^^^^^^^^^^^^^
+
+backend/tests/test_market_monitor_persistence.py:195: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+backend/tests/test_market_monitor_persistence.py:42: in service
+    await store.migrate()
+backend/van_gateway/storage/db.py:2660: in migrate
+    async with self.connection() as db:
+               ^^^^^^^^^^^^^^^^^
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/contextlib.py:210: in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+backend/van_gateway/storage/db.py:2566: in connection
+    db = await asyncio.shield(opening)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/asyncio/tasks.py:684: in _wrap_awaitable
+    return await awaitable
+           ^^^^^^^^^^^^^^^
+../../van-audit/canon-backend-venv-2026-10-09/lib/python3.12/site-packages/aiosqlite/core.py:177: in __await__
+    self._thread.start()
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;Thread(Thread-10 (_connection_worker_thread), initial)&gt;
+
+    def start(self):
+        """Start the thread's activity.
+    
+        It must be called at most once per thread object. It arranges for the
+        object's run() method to be invoked in a separate thread of control.
+    
+        This method will raise a RuntimeError if called more than once on the
+        same thread object.
+    
+        """
+        if not self._initialized:
+            raise RuntimeError("thread.__init__() not called")
+    
+        if self._started.is_set():
+            raise RuntimeError("threads can only be started once")
+    
+        with _active_limbo_lock:
+            _limbo[self] = self
+        try:
+&gt;           _start_new_thread(self._bootstrap, ())
+E           RuntimeError: can't start new thread
+
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/threading.py:994: RuntimeError</failure></testcase></testsuite></testsuites>

@@ -314,6 +314,14 @@ POLICIES: tuple[TablePolicy, ...] = (
     ),
 
     # ---- children -----------------------------------------------------------
+    _p("market_monitor_objects", _OWNER,
+       note="Owner-authored watchlists and alert rules persist until revision-checked explicit deletion."),
+    _p("market_monitor_operations", _OWNER,
+       note="Minimal original request outcomes prevent stale retries recreating deleted owner rules."),
+    _p("market_monitor_scan_budget", _OWNER,
+       note="One bounded quota row per owner survives workers/restart and rolls forward by its fixed window."),
+    _p("market_monitor_publications", _CHILD, parent=("event_seq", "events"),
+       note="Existing canonical-event Attention projection; cascades with its source event."),
     _p("chart_workspaces", _OWNER,
        note="Saved chart settings belong to the owner until revision-checked deletion."),
     _p("chart_workspace_revisions", _OWNER,
@@ -547,6 +555,7 @@ class RetentionService:
 #: is how the first version of the Remote Browser policies was caught: the classes were
 #: assigned, the map was not extended, and the orphan sweep failed on the first run.
 _PRIMARY_KEY = {
+    "events": "seq",
     "decisions": "id",
     "devices": "device_id",
     "missions": "mission_id",
