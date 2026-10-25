@@ -1,0 +1,81 @@
+..........F......F.F                                                     [100%]
+=================================== FAILURES ===================================
+_ test_replacement_connection_reauthenticates_and_refreshes_contracts_before_use _
+
+    def test_replacement_connection_reauthenticates_and_refreshes_contracts_before_use():
+        adapter, transport, responses, calls = fixture()
+        adapter._ensure_auth()
+        old_revision = adapter.symbol('EURUSD').contract_revision
+        adapter._last_spot[12] = (Decimal('1.1'), Decimal('1.2'))
+        calls.clear()
+        transport.connection_id = 2
+        responses['ProtoOASymbolByIdReq'][1]['symbol'][0]['minVolume'] = 2000
+        adapter._ensure_auth()
+        assert calls[:2] == ['ProtoOAApplicationAuthReq', 'ProtoOAAccountAuthReq']
+        assert adapter.symbol('EURUSD').min_volume == 2000
+        assert adapter.symbol('EURUSD').contract_revision != old_revision
+>       assert adapter._last_spot == {}, 'original connection quote cache survived reconnect'
+E       AssertionError: original connection quote cache survived reconnect
+E       assert {12: (Decimal...cimal('1.2'))} == {}
+E         
+E         Left contains 1 more item:
+E         {12: (Decimal('1.1'), Decimal('1.2'))}
+E         Use -v to get more diff
+
+trading/tests/test_ctrader_connection_auth.py:40: AssertionError
+__ test_failed_reauthentication_fences_the_previous_contract_and_quote_cache ___
+
+    def test_failed_reauthentication_fences_the_previous_contract_and_quote_cache():
+        adapter, transport, responses, calls = fixture()
+        adapter._ensure_auth()
+        previous = dict(adapter.symbols)
+        adapter._last_spot[12] = (Decimal('1.1'), Decimal('1.2'))
+        transport.connection_id = 2
+        responses['ProtoOAAccountAuthReq'][0] = 'ProtoHeartbeatEvent'
+        with pytest.raises(VenueUnavailable):
+            adapter._ensure_auth()
+>       assert adapter.symbols == previous and adapter._last_spot == {}
+E       AssertionError: assert ({'EURUSD': Sy...5b6d6043e74')} == {'EURUSD': Sy...5b6d6043e74')}
+E         
+E         Omitting 1 identical items, use -vv to show
+E         Use -v to get more diff and {12: (Decimal...cimal('1.2'))} == {}
+E         
+E         Left contains 1 more item:
+E         {12: (Decimal('1.1'), Decimal('1.2'))}
+E         Use -v to get more diff)
+
+trading/tests/test_ctrader_connection_auth.py:102: AssertionError
+_ test_actual_protocol_reconnect_reauthenticates_the_new_peer_and_refreshes_native_contracts _
+
+    def test_actual_protocol_reconnect_reauthenticates_the_new_peer_and_refreshes_native_contracts():
+        from test_ctrader import FakeCtrader, make_adapter
+        first, second = FakeCtrader(), FakeCtrader()
+        adapter = make_adapter(first)
+        adapter._ensure_auth()
+        first_id = adapter.transport.connection_id
+        adapter._last_spot[1] = (Decimal('1'), Decimal('2'))
+        adapter.transport.close()
+        adapter.transport._connector = second.connector
+        adapter.transport.connect()  # A connected socket alone grants no cached auth.
+        adapter._ensure_auth()
+        assert adapter.transport.connection_id > first_id
+        assert [name for name, _ in second.requests[:4]] == [
+            'ProtoOAApplicationAuthReq', 'ProtoOAAccountAuthReq',
+            'ProtoOASymbolsListReq', 'ProtoOASymbolByIdReq',
+        ]
+>       assert adapter.symbol('EURUSD').symbol_id == 1 and adapter._last_spot == {}
+E       AssertionError: assert (1 == 1 and {1: (Decimal(...Decimal('2'))} == {}
+E        +  where 1 = SymbolInfo(symbol_id=1, name='EURUSD', digits=5, lot_size_cents=10000000, min_volume=100000, step_volume=100000, max_volume=10000000000, contract_revision='673bf09ebd451ad8fd45bcf433bb3ce19e275a56173d7409ec3452290d3a5bba').symbol_id
+E        +    where SymbolInfo(symbol_id=1, name='EURUSD', digits=5, lot_size_cents=10000000, min_volume=100000, step_volume=100000, max_volume=10000000000, contract_revision='673bf09ebd451ad8fd45bcf433bb3ce19e275a56173d7409ec3452290d3a5bba') = symbol('EURUSD')
+E        +      where symbol = CtraderAdapter(transport=<vati.execution.ctrader.transport.CtraderTransport object at 0x7ffaa643b440>, client_id='app-...pshot_valid=True, _symbol_connection=2, _money_digits=2, _currency='USD', _last_spot={1: (Decimal('1'), Decimal('2'))}).symbol
+E         
+E         Left contains 1 more item:
+E         {1: (Decimal('1'), Decimal('2'))}
+E         Use -v to get more diff)
+
+trading/tests/test_ctrader_connection_auth.py:132: AssertionError
+=========================== short test summary info ============================
+FAILED trading/tests/test_ctrader_connection_auth.py::test_replacement_connection_reauthenticates_and_refreshes_contracts_before_use
+FAILED trading/tests/test_ctrader_connection_auth.py::test_failed_reauthentication_fences_the_previous_contract_and_quote_cache
+FAILED trading/tests/test_ctrader_connection_auth.py::test_actual_protocol_reconnect_reauthenticates_the_new_peer_and_refreshes_native_contracts
+3 failed, 17 passed in 0.87s

@@ -1,0 +1,575 @@
+........................................................................ [ 31%]
+........................................................................ [ 62%]
+.............................................FFFF....FFFFFF......FFFF... [ 93%]
+.F.FFF........                                                           [100%]
+=================================== FAILURES ===================================
+_____ test_ctrader_expiry_during_final_send_lock_prevents_any_native_write _____
+
+    def test_ctrader_expiry_during_final_send_lock_prevents_any_native_write():
+        a,c,w,_=ctrader(late_lock=True);r=a.submit(c,now_ms=1000)
+>       assert r.status=='REJECTED' and w.sent==[], 'expired entry reached the actual native framed send'
+E       AssertionError: expired entry reached the actual native framed send
+E       assert ('REJECTED' == 'REJECTED'
+E         
+E           REJECTED and [('ProtoOAApp...: 'fixture'})] == []
+E         
+E         Left contains one more item: ('ProtoOAApplicationAuthReq', {'payloadType': 'PROTO_OA_APPLICATION_AUTH_REQ', 'clientId': 'fixture', 'clientSecret': 'fixture'})
+E         Use -v to get more diff)
+
+trading/tests/test_provider_entry_deadline.py:41: AssertionError
+_________ test_ctrader_current_bounded_entry_still_fills_exactly_once __________
+
+    def test_ctrader_current_bounded_entry_still_fills_exactly_once():
+        a,c,w,_=ctrader();r=a.submit(c,now_ms=1000)
+>       assert r.status=='FILLED' and len(w.sent)==1 and r.filled_qty==D('.1')
+E       AssertionError: assert ('REJECTED' == 'FILLED'
+E         
+E         - FILLED
+E         + REJECTED)
+
+trading/tests/test_provider_entry_deadline.py:45: AssertionError
+_____ test_ctrader_expiry_after_native_write_cannot_rewrite_a_genuine_fill _____
+
+    def test_ctrader_expiry_after_native_write_cannot_rewrite_a_genuine_fill():
+        a,c,w,_=ctrader(late_reply=True);r=a.submit(c,now_ms=1000)
+>       assert r.status=='FILLED' and len(w.sent)==1
+E       AssertionError: assert ('REJECTED' == 'FILLED'
+E         
+E         - FILLED
+E         + REJECTED)
+
+trading/tests/test_provider_entry_deadline.py:49: AssertionError
+__ test_ctrader_lost_response_after_native_write_is_unknown_not_a_new_refusal __
+
+    def test_ctrader_lost_response_after_native_write_is_unknown_not_a_new_refusal():
+        a,c,w,_=ctrader(lost=True);r=a.submit(c,now_ms=1000)
+>       assert r.status=='UNKNOWN' and len(w.sent)==1
+E       AssertionError: assert ('REJECTED' == 'UNKNOWN'
+E         
+E         - UNKNOWN
+E         + REJECTED)
+
+trading/tests/test_provider_entry_deadline.py:53: AssertionError
+__ test_malformed_explicit_deadline_never_reaches_native_entry[ctrader-True] ___
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-52/test_malformed_explicit_deadli0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7fedf0155fd0>
+bad = True, provider = 'ctrader'
+
+    @pytest.mark.parametrize('bad',[True,False,0,-1,2**63,'2000'])
+    @pytest.mark.parametrize('provider',['ctrader','deriv'])
+    def test_malformed_explicit_deadline_never_reaches_native_entry(tmp_path,monkeypatch,bad,provider):
+        if provider=='ctrader':
+            a,c,w,_=ctrader();c=replace(c,expires_at_ms=bad,command_hash='').sealed()
+            r=a.submit(c,now_ms=1000);sent=w.sent
+        else:
+            a,sockets,_=factory(tmp_path,monkeypatch,native());a.clock=lambda:1000
+            r=a.submit(replace(command(),expires_at_ms=bad,command_hash='').sealed(),now_ms=1000)
+            sent=[q for sock in sockets for q in sock.requests if 'buy'in q]
+>       assert r.status=='REJECTED' and sent==[]
+E       AssertionError: assert ('REJECTED' == 'REJECTED'
+E         
+E           REJECTED and [('ProtoOAApp...: 'fixture'})] == []
+E         
+E         Left contains one more item: ('ProtoOAApplicationAuthReq', {'payloadType': 'PROTO_OA_APPLICATION_AUTH_REQ', 'clientId': 'fixture', 'clientSecret': 'fixture'})
+E         Use -v to get more diff)
+
+trading/tests/test_provider_entry_deadline.py:92: AssertionError
+__ test_malformed_explicit_deadline_never_reaches_native_entry[ctrader-False] __
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-52/test_malformed_explicit_deadli1')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7fedf0156e10>
+bad = False, provider = 'ctrader'
+
+    @pytest.mark.parametrize('bad',[True,False,0,-1,2**63,'2000'])
+    @pytest.mark.parametrize('provider',['ctrader','deriv'])
+    def test_malformed_explicit_deadline_never_reaches_native_entry(tmp_path,monkeypatch,bad,provider):
+        if provider=='ctrader':
+            a,c,w,_=ctrader();c=replace(c,expires_at_ms=bad,command_hash='').sealed()
+            r=a.submit(c,now_ms=1000);sent=w.sent
+        else:
+            a,sockets,_=factory(tmp_path,monkeypatch,native());a.clock=lambda:1000
+            r=a.submit(replace(command(),expires_at_ms=bad,command_hash='').sealed(),now_ms=1000)
+            sent=[q for sock in sockets for q in sock.requests if 'buy'in q]
+>       assert r.status=='REJECTED' and sent==[]
+E       AssertionError: assert ('REJECTED' == 'REJECTED'
+E         
+E           REJECTED and [('ProtoOAApp...: 'fixture'})] == []
+E         
+E         Left contains one more item: ('ProtoOAApplicationAuthReq', {'payloadType': 'PROTO_OA_APPLICATION_AUTH_REQ', 'clientId': 'fixture', 'clientSecret': 'fixture'})
+E         Use -v to get more diff)
+
+trading/tests/test_provider_entry_deadline.py:92: AssertionError
+____ test_malformed_explicit_deadline_never_reaches_native_entry[ctrader-0] ____
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-52/test_malformed_explicit_deadli2')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7fedf0156660>
+bad = 0, provider = 'ctrader'
+
+    @pytest.mark.parametrize('bad',[True,False,0,-1,2**63,'2000'])
+    @pytest.mark.parametrize('provider',['ctrader','deriv'])
+    def test_malformed_explicit_deadline_never_reaches_native_entry(tmp_path,monkeypatch,bad,provider):
+        if provider=='ctrader':
+            a,c,w,_=ctrader();c=replace(c,expires_at_ms=bad,command_hash='').sealed()
+            r=a.submit(c,now_ms=1000);sent=w.sent
+        else:
+            a,sockets,_=factory(tmp_path,monkeypatch,native());a.clock=lambda:1000
+            r=a.submit(replace(command(),expires_at_ms=bad,command_hash='').sealed(),now_ms=1000)
+            sent=[q for sock in sockets for q in sock.requests if 'buy'in q]
+>       assert r.status=='REJECTED' and sent==[]
+E       AssertionError: assert ('REJECTED' == 'REJECTED'
+E         
+E           REJECTED and [('ProtoOAApp...: 'fixture'})] == []
+E         
+E         Left contains one more item: ('ProtoOAApplicationAuthReq', {'payloadType': 'PROTO_OA_APPLICATION_AUTH_REQ', 'clientId': 'fixture', 'clientSecret': 'fixture'})
+E         Use -v to get more diff)
+
+trading/tests/test_provider_entry_deadline.py:92: AssertionError
+___ test_malformed_explicit_deadline_never_reaches_native_entry[ctrader--1] ____
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-52/test_malformed_explicit_deadli3')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7fedf0157ad0>
+bad = -1, provider = 'ctrader'
+
+    @pytest.mark.parametrize('bad',[True,False,0,-1,2**63,'2000'])
+    @pytest.mark.parametrize('provider',['ctrader','deriv'])
+    def test_malformed_explicit_deadline_never_reaches_native_entry(tmp_path,monkeypatch,bad,provider):
+        if provider=='ctrader':
+            a,c,w,_=ctrader();c=replace(c,expires_at_ms=bad,command_hash='').sealed()
+            r=a.submit(c,now_ms=1000);sent=w.sent
+        else:
+            a,sockets,_=factory(tmp_path,monkeypatch,native());a.clock=lambda:1000
+            r=a.submit(replace(command(),expires_at_ms=bad,command_hash='').sealed(),now_ms=1000)
+            sent=[q for sock in sockets for q in sock.requests if 'buy'in q]
+>       assert r.status=='REJECTED' and sent==[]
+E       AssertionError: assert ('REJECTED' == 'REJECTED'
+E         
+E           REJECTED and [('ProtoOAApp...: 'fixture'})] == []
+E         
+E         Left contains one more item: ('ProtoOAApplicationAuthReq', {'payloadType': 'PROTO_OA_APPLICATION_AUTH_REQ', 'clientId': 'fixture', 'clientSecret': 'fixture'})
+E         Use -v to get more diff)
+
+trading/tests/test_provider_entry_deadline.py:92: AssertionError
+_ test_malformed_explicit_deadline_never_reaches_native_entry[ctrader-9223372036854775808] _
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-52/test_malformed_explicit_deadli4')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7fedf0128440>
+bad = 9223372036854775808, provider = 'ctrader'
+
+    @pytest.mark.parametrize('bad',[True,False,0,-1,2**63,'2000'])
+    @pytest.mark.parametrize('provider',['ctrader','deriv'])
+    def test_malformed_explicit_deadline_never_reaches_native_entry(tmp_path,monkeypatch,bad,provider):
+        if provider=='ctrader':
+            a,c,w,_=ctrader();c=replace(c,expires_at_ms=bad,command_hash='').sealed()
+            r=a.submit(c,now_ms=1000);sent=w.sent
+        else:
+            a,sockets,_=factory(tmp_path,monkeypatch,native());a.clock=lambda:1000
+            r=a.submit(replace(command(),expires_at_ms=bad,command_hash='').sealed(),now_ms=1000)
+            sent=[q for sock in sockets for q in sock.requests if 'buy'in q]
+>       assert r.status=='REJECTED' and sent==[]
+E       AssertionError: assert ('REJECTED' == 'REJECTED'
+E         
+E           REJECTED and [('ProtoOAApp...: 'fixture'})] == []
+E         
+E         Left contains one more item: ('ProtoOAApplicationAuthReq', {'payloadType': 'PROTO_OA_APPLICATION_AUTH_REQ', 'clientId': 'fixture', 'clientSecret': 'fixture'})
+E         Use -v to get more diff)
+
+trading/tests/test_provider_entry_deadline.py:92: AssertionError
+__ test_malformed_explicit_deadline_never_reaches_native_entry[ctrader-2000] ___
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-52/test_malformed_explicit_deadli5')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7fedf00e17c0>
+bad = '2000', provider = 'ctrader'
+
+    @pytest.mark.parametrize('bad',[True,False,0,-1,2**63,'2000'])
+    @pytest.mark.parametrize('provider',['ctrader','deriv'])
+    def test_malformed_explicit_deadline_never_reaches_native_entry(tmp_path,monkeypatch,bad,provider):
+        if provider=='ctrader':
+            a,c,w,_=ctrader();c=replace(c,expires_at_ms=bad,command_hash='').sealed()
+            r=a.submit(c,now_ms=1000);sent=w.sent
+        else:
+            a,sockets,_=factory(tmp_path,monkeypatch,native());a.clock=lambda:1000
+            r=a.submit(replace(command(),expires_at_ms=bad,command_hash='').sealed(),now_ms=1000)
+            sent=[q for sock in sockets for q in sock.requests if 'buy'in q]
+>       assert r.status=='REJECTED' and sent==[]
+E       AssertionError: assert ('REJECTED' == 'REJECTED'
+E         
+E           REJECTED and [('ProtoOAApp...: 'fixture'})] == []
+E         
+E         Left contains one more item: ('ProtoOAApplicationAuthReq', {'payloadType': 'PROTO_OA_APPLICATION_AUTH_REQ', 'clientId': 'fixture', 'clientSecret': 'fixture'})
+E         Use -v to get more diff)
+
+trading/tests/test_provider_entry_deadline.py:92: AssertionError
+__ test_unqualified_current_clock_cannot_authorize_native_entry[ctrader-True] __
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-52/test_unqualified_current_clock0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7fedf00e1340>
+bad = True, provider = 'ctrader'
+
+    @pytest.mark.parametrize('bad',[True,None,'1000',-1])
+    @pytest.mark.parametrize('provider',['ctrader','deriv'])
+    def test_unqualified_current_clock_cannot_authorize_native_entry(tmp_path,monkeypatch,bad,provider):
+        if provider=='ctrader':
+            a,c,w,_=ctrader();a.clock=lambda:bad;r=a.submit(c,now_ms=1000);sent=w.sent
+        else:
+            a,sockets,_=factory(tmp_path,monkeypatch,native());a.clock=lambda:bad
+            r=a.submit(replace(command(),expires_at_ms=2000,command_hash='').sealed(),now_ms=1000)
+            sent=[q for sock in sockets for q in sock.requests if 'buy'in q]
+>       assert r.status=='REJECTED' and sent==[]
+E       AssertionError: assert ('REJECTED' == 'REJECTED'
+E         
+E           REJECTED and [('ProtoOAApp...: 'fixture'})] == []
+E         
+E         Left contains one more item: ('ProtoOAApplicationAuthReq', {'payloadType': 'PROTO_OA_APPLICATION_AUTH_REQ', 'clientId': 'fixture', 'clientSecret': 'fixture'})
+E         Use -v to get more diff)
+
+trading/tests/test_provider_entry_deadline.py:103: AssertionError
+__ test_unqualified_current_clock_cannot_authorize_native_entry[ctrader-None] __
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-52/test_unqualified_current_clock1')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7fedf00e0d70>
+bad = None, provider = 'ctrader'
+
+    @pytest.mark.parametrize('bad',[True,None,'1000',-1])
+    @pytest.mark.parametrize('provider',['ctrader','deriv'])
+    def test_unqualified_current_clock_cannot_authorize_native_entry(tmp_path,monkeypatch,bad,provider):
+        if provider=='ctrader':
+            a,c,w,_=ctrader();a.clock=lambda:bad;r=a.submit(c,now_ms=1000);sent=w.sent
+        else:
+            a,sockets,_=factory(tmp_path,monkeypatch,native());a.clock=lambda:bad
+            r=a.submit(replace(command(),expires_at_ms=2000,command_hash='').sealed(),now_ms=1000)
+            sent=[q for sock in sockets for q in sock.requests if 'buy'in q]
+>       assert r.status=='REJECTED' and sent==[]
+E       AssertionError: assert ('REJECTED' == 'REJECTED'
+E         
+E           REJECTED and [('ProtoOAApp...: 'fixture'})] == []
+E         
+E         Left contains one more item: ('ProtoOAApplicationAuthReq', {'payloadType': 'PROTO_OA_APPLICATION_AUTH_REQ', 'clientId': 'fixture', 'clientSecret': 'fixture'})
+E         Use -v to get more diff)
+
+trading/tests/test_provider_entry_deadline.py:103: AssertionError
+__ test_unqualified_current_clock_cannot_authorize_native_entry[ctrader-1000] __
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-52/test_unqualified_current_clock2')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7fedf00e0260>
+bad = '1000', provider = 'ctrader'
+
+    @pytest.mark.parametrize('bad',[True,None,'1000',-1])
+    @pytest.mark.parametrize('provider',['ctrader','deriv'])
+    def test_unqualified_current_clock_cannot_authorize_native_entry(tmp_path,monkeypatch,bad,provider):
+        if provider=='ctrader':
+            a,c,w,_=ctrader();a.clock=lambda:bad;r=a.submit(c,now_ms=1000);sent=w.sent
+        else:
+            a,sockets,_=factory(tmp_path,monkeypatch,native());a.clock=lambda:bad
+            r=a.submit(replace(command(),expires_at_ms=2000,command_hash='').sealed(),now_ms=1000)
+            sent=[q for sock in sockets for q in sock.requests if 'buy'in q]
+>       assert r.status=='REJECTED' and sent==[]
+E       AssertionError: assert ('REJECTED' == 'REJECTED'
+E         
+E           REJECTED and [('ProtoOAApp...: 'fixture'})] == []
+E         
+E         Left contains one more item: ('ProtoOAApplicationAuthReq', {'payloadType': 'PROTO_OA_APPLICATION_AUTH_REQ', 'clientId': 'fixture', 'clientSecret': 'fixture'})
+E         Use -v to get more diff)
+
+trading/tests/test_provider_entry_deadline.py:103: AssertionError
+___ test_unqualified_current_clock_cannot_authorize_native_entry[ctrader--1] ___
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-52/test_unqualified_current_clock3')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7fedf00e0230>
+bad = -1, provider = 'ctrader'
+
+    @pytest.mark.parametrize('bad',[True,None,'1000',-1])
+    @pytest.mark.parametrize('provider',['ctrader','deriv'])
+    def test_unqualified_current_clock_cannot_authorize_native_entry(tmp_path,monkeypatch,bad,provider):
+        if provider=='ctrader':
+            a,c,w,_=ctrader();a.clock=lambda:bad;r=a.submit(c,now_ms=1000);sent=w.sent
+        else:
+            a,sockets,_=factory(tmp_path,monkeypatch,native());a.clock=lambda:bad
+            r=a.submit(replace(command(),expires_at_ms=2000,command_hash='').sealed(),now_ms=1000)
+            sent=[q for sock in sockets for q in sock.requests if 'buy'in q]
+>       assert r.status=='REJECTED' and sent==[]
+E       AssertionError: assert ('REJECTED' == 'REJECTED'
+E         
+E           REJECTED and [('ProtoOAApp...: 'fixture'})] == []
+E         
+E         Left contains one more item: ('ProtoOAApplicationAuthReq', {'payloadType': 'PROTO_OA_APPLICATION_AUTH_REQ', 'clientId': 'fixture', 'clientSecret': 'fixture'})
+E         Use -v to get more diff)
+
+trading/tests/test_provider_entry_deadline.py:103: AssertionError
+_____ test_ctrader_expiry_during_native_transport_connect_is_also_checked ______
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7fedf0155f70>
+
+    def test_ctrader_expiry_during_native_transport_connect_is_also_checked(monkeypatch):
+        a,c,w,clock=ctrader();original=a.transport.connect
+        def connect():original();clock['ms']=2000
+        monkeypatch.setattr(a.transport,'connect',connect)
+>       assert a.submit(c,now_ms=1000).status=='REJECTED' and w.sent==[]
+E       AssertionError: assert ('REJECTED' == 'REJECTED'
+E         
+E           REJECTED and [('ProtoOAApp...: 'fixture'})] == []
+E         
+E         Left contains one more item: ('ProtoOAApplicationAuthReq', {'payloadType': 'PROTO_OA_APPLICATION_AUTH_REQ', 'clientId': 'fixture', 'clientSecret': 'fixture'})
+E         Use -v to get more diff)
+
+trading/tests/test_provider_entry_deadline.py:109: AssertionError
+_ test_actual_router_binds_ctrader_mandate_and_original_quote_through_wire_dispatch[False] _
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-52/test_actual_router_binds_ctrad0')
+eurusd = SymbolContract(symbol='EURUSD', venue='mt5', base_currency='EUR', quote_currency='USD', account_currency='USD', contra...=Decimal('0'), max_adv_participation=Decimal('0.10'), liquidity_haircut=Decimal('0'), round_trip_cost_pct=Decimal('0'))
+late = False
+
+    @pytest.mark.parametrize('late',[False,True])
+    def test_actual_router_binds_ctrader_mandate_and_original_quote_through_wire_dispatch(tmp_path,eurusd,late):
+        from conftest import NOW,mandate_dict,snapshot,intent
+        from vati.core import Ledger,EventKind
+        from vati.execution import ExecutionRouter,ProtectionManager
+        from vati.execution.risk_refresh import CurrentRiskFacts
+        from vati.execution.pretrade import MarketReference
+        from vati.risk import RiskAuthority,TradingMandate,KillSwitch,Decision
+        a,_,wire,clock=ctrader();clock['ms']=NOW*1000
+        m=TradingMandate.from_mapping(mandate_dict(venue='ctrader',account_alias=a.account_alias,expires_at_unix=NOW+1))
+        trade=intent(venue='ctrader',account_alias=a.account_alias)
+        facts=snapshot(replace(eurusd,venue='ctrader'),account_alias=a.account_alias)
+        authority=RiskAuthority(m);approved=authority.evaluate_safe(trade,facts)
+        assert approved.decision in {Decision.APPROVED,Decision.REDUCED}
+        ledger=Ledger();router=ExecutionRouter(ledger=ledger,adapters={'ctrader':a},kill_switch=KillSwitch(),protection=ProtectionManager(),clock=lambda:clock['ms'],current_risk_authority=authority,current_risk_facts_provider=lambda *args,**kwargs:CurrentRiskFacts(facts,clock['ms']))
+        if late:
+            class LastWriteLock:
+                def __enter__(self):clock['ms']=NOW*1000+101
+                def __exit__(self,*args):pass
+            a.transport._lock=LastWriteLock()
+>       result=router.execute(trade,approved,m,now_ms=clock['ms'],entry_type='MARKET',market_reference=MarketReference(trade.entry,0,100))
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+trading/tests/test_provider_entry_deadline.py:143: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <vati.execution.router.ExecutionRouter object at 0x7fedf0111550>
+intent = TradeIntent(trade_intent_id='ti-1', idempotency_key='idem-1', account_alias='ct_native', venue='ctrader', symbol='EURU...cimal('1'), liquidity_multiplier=Decimal('1'), event_risk_multiplier=Decimal('1'), correlation_multiplier=Decimal('1'))
+decision = RiskDecision(trade_intent_id='ti-1', decision=<Decision.APPROVED: 'APPROVED'>, reason_code='OK', reason_detail='', app...78a79a192', mandate_hash='3ce447f9a8efe04700336023b692ed13903fad84b2a328fff761480c995c2afc', approval_schema_version=2)
+mandate = TradingMandate(mandate_id='mandate-fx-primary', version='1.0.0', account_alias='ct_native', venue='ctrader', mode=<Aut...se)), strategy_risk_budgets={}, trading_temperament=None, strategy_temperaments={}, temperament_owner_signature_ref='')
+now_ms = 1800000000000, stop_mode = <StopMode.VENUE: 'VENUE'>, targets = ()
+time_in_force = 'DAY', entry_type = 'MARKET', max_slippage = None
+lease_epoch = None, execution_policy_decision = None
+market_reference = MarketReference(last_price=Decimal('1.10010'), mark_age_ms=0, max_mark_age_ms=100)
+liquidity = None, urgency = <Urgency.NORMAL: 'NORMAL'>
+setup_valid_until_ms = None
+
+    def execute(self, intent: TradeIntent, decision: RiskDecision, mandate: TradingMandate, *, now_ms: int, stop_mode: StopMode = StopMode.VENUE,
+                targets: tuple[Decimal, ...] = (), time_in_force: str = "DAY", entry_type: str = "LIMIT", max_slippage: Optional[Decimal] = None,
+                lease_epoch: Optional[int] = None, execution_policy_decision=None,
+                market_reference: Optional[MarketReference] = None,
+                liquidity: Optional[LiquidityView] = None,
+                urgency: Urgency = Urgency.NORMAL,
+                setup_valid_until_ms: Optional[int] = None) -> ExecutionReceipt:
+        corr = intent.trade_intent_id
+        for pending in self.exit_journal.unresolved():
+            if pending.payload.get("state", "UNKNOWN") != "ACCEPTED":
+                self._uncertain_exit(pending.payload.get("position_id", pending.payload.get("broker_position_id")), now_ms=now_ms,
+                    request_ref=pending.payload.get("request_ref", pending.hash))
+        if not isinstance(urgency, Urgency):
+            raise RouterError("execution urgency must be a registered deterministic state")
+        if urgency is Urgency.IMMEDIATE:
+            raise RouterError("protective-exit urgency cannot authorize a new entry; use the protective reduction path")
+        # --- gate chain (fail closed, first failure names the reason) ---
+        if self.lease_fence is not None and not self.lease_fence(lease_epoch):
+            raise RouterError(f"account runtime lease fence refused epoch {lease_epoch!r}")
+        if self.kill.halted:
+            raise RouterError(f"kill switch active: {sorted(t.value for t in self.kill.active)}")
+        if decision.trade_intent_id != intent.trade_intent_id:
+            raise RouterError("decision does not belong to this intent")
+        if decision.decision not in (Decision.APPROVED, Decision.REDUCED):
+            raise RouterError(f"decision is {decision.decision.value}")
+        if recompute_decision_hash(decision) != decision.decision_hash:
+            raise RouterError("decision hash does not recompute; refusing")
+        if getattr(decision, "approval_schema_version", None) != RISK_APPROVAL_SCHEMA_VERSION or not getattr(decision, "intent_hash", None):
+            raise RouterError("risk approval lacks exact intent binding; re-evaluation required")
+        if decision.intent_hash != intent_binding_hash(intent):
+            raise RouterError("risk approval does not match the exact trade intent; re-evaluation required")
+        if decision.mandate_id != mandate.mandate_id or decision.mandate_version != mandate.version:
+            raise RouterError("decision was made under a different mandate")
+        if not mandate.sends_orders():
+            raise RouterError(f"mode {mandate.mode.value} does not send orders")
+        if getattr(decision, "mandate_hash", None) != mandate_binding_hash(mandate):
+            raise RouterError("risk approval does not match the current mandate; re-evaluation required")
+        if not mandate.authority_matches_policy():
+            raise RouterError("current mandate lacks its original policy-bound owner grant; re-admission required")
+        self._dispatch_time(mandate,now_ms=now_ms)
+        if intent.idempotency_key in self._seen:
+            raise RouterError("duplicate idempotency key")
+        adapter = self.adapters.get(intent.venue)
+        if adapter is None:
+            raise RouterError(f"no adapter for venue {intent.venue}")
+        from vati.execution.paper import PaperAdapter
+        # Legacy isolated simulation can represent a caller's chosen venue;
+        # native and owner-ticket targets must be bound before any provider I/O.
+        if not isinstance(adapter, PaperAdapter) and (
+            getattr(adapter, 'account_alias', None) != intent.account_alias
+            or getattr(adapter, 'venue', None) != intent.venue):
+            raise RouterError('execution adapter target differs from the intent account or venue')
+        hb = adapter.heartbeat(now_ms=now_ms)
+        if not hb.connected:
+            self.kill.trip(KillSwitchTrigger.VENUE_DISCONNECT, now_ms)
+            self._log(EventKind.KILL_SWITCH, {"trigger": "VENUE_DISCONNECT", "venue": intent.venue}, now_ms=now_ms, corr=corr)
+>           raise RouterError("venue heartbeat failed; kill switch tripped")
+E           vati.execution.router.RouterError: venue heartbeat failed; kill switch tripped
+
+trading/vati/execution/router.py:370: RouterError
+_ test_actual_router_binds_ctrader_mandate_and_original_quote_through_wire_dispatch[True] _
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-52/test_actual_router_binds_ctrad1')
+eurusd = SymbolContract(symbol='EURUSD', venue='mt5', base_currency='EUR', quote_currency='USD', account_currency='USD', contra...=Decimal('0'), max_adv_participation=Decimal('0.10'), liquidity_haircut=Decimal('0'), round_trip_cost_pct=Decimal('0'))
+late = True
+
+    @pytest.mark.parametrize('late',[False,True])
+    def test_actual_router_binds_ctrader_mandate_and_original_quote_through_wire_dispatch(tmp_path,eurusd,late):
+        from conftest import NOW,mandate_dict,snapshot,intent
+        from vati.core import Ledger,EventKind
+        from vati.execution import ExecutionRouter,ProtectionManager
+        from vati.execution.risk_refresh import CurrentRiskFacts
+        from vati.execution.pretrade import MarketReference
+        from vati.risk import RiskAuthority,TradingMandate,KillSwitch,Decision
+        a,_,wire,clock=ctrader();clock['ms']=NOW*1000
+        m=TradingMandate.from_mapping(mandate_dict(venue='ctrader',account_alias=a.account_alias,expires_at_unix=NOW+1))
+        trade=intent(venue='ctrader',account_alias=a.account_alias)
+        facts=snapshot(replace(eurusd,venue='ctrader'),account_alias=a.account_alias)
+        authority=RiskAuthority(m);approved=authority.evaluate_safe(trade,facts)
+        assert approved.decision in {Decision.APPROVED,Decision.REDUCED}
+        ledger=Ledger();router=ExecutionRouter(ledger=ledger,adapters={'ctrader':a},kill_switch=KillSwitch(),protection=ProtectionManager(),clock=lambda:clock['ms'],current_risk_authority=authority,current_risk_facts_provider=lambda *args,**kwargs:CurrentRiskFacts(facts,clock['ms']))
+        if late:
+            class LastWriteLock:
+                def __enter__(self):clock['ms']=NOW*1000+101
+                def __exit__(self,*args):pass
+            a.transport._lock=LastWriteLock()
+>       result=router.execute(trade,approved,m,now_ms=clock['ms'],entry_type='MARKET',market_reference=MarketReference(trade.entry,0,100))
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+trading/tests/test_provider_entry_deadline.py:143: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <vati.execution.router.ExecutionRouter object at 0x7fedf012b9b0>
+intent = TradeIntent(trade_intent_id='ti-1', idempotency_key='idem-1', account_alias='ct_native', venue='ctrader', symbol='EURU...cimal('1'), liquidity_multiplier=Decimal('1'), event_risk_multiplier=Decimal('1'), correlation_multiplier=Decimal('1'))
+decision = RiskDecision(trade_intent_id='ti-1', decision=<Decision.APPROVED: 'APPROVED'>, reason_code='OK', reason_detail='', app...78a79a192', mandate_hash='44cb02d1b29a328bbeaf4323b94e22ff7bc2446bf1f486cb3eebad42f890a5cf', approval_schema_version=2)
+mandate = TradingMandate(mandate_id='mandate-fx-primary', version='1.0.0', account_alias='ct_native', venue='ctrader', mode=<Aut...se)), strategy_risk_budgets={}, trading_temperament=None, strategy_temperaments={}, temperament_owner_signature_ref='')
+now_ms = 1800000000000, stop_mode = <StopMode.VENUE: 'VENUE'>, targets = ()
+time_in_force = 'DAY', entry_type = 'MARKET', max_slippage = None
+lease_epoch = None, execution_policy_decision = None
+market_reference = MarketReference(last_price=Decimal('1.10010'), mark_age_ms=0, max_mark_age_ms=100)
+liquidity = None, urgency = <Urgency.NORMAL: 'NORMAL'>
+setup_valid_until_ms = None
+
+    def execute(self, intent: TradeIntent, decision: RiskDecision, mandate: TradingMandate, *, now_ms: int, stop_mode: StopMode = StopMode.VENUE,
+                targets: tuple[Decimal, ...] = (), time_in_force: str = "DAY", entry_type: str = "LIMIT", max_slippage: Optional[Decimal] = None,
+                lease_epoch: Optional[int] = None, execution_policy_decision=None,
+                market_reference: Optional[MarketReference] = None,
+                liquidity: Optional[LiquidityView] = None,
+                urgency: Urgency = Urgency.NORMAL,
+                setup_valid_until_ms: Optional[int] = None) -> ExecutionReceipt:
+        corr = intent.trade_intent_id
+        for pending in self.exit_journal.unresolved():
+            if pending.payload.get("state", "UNKNOWN") != "ACCEPTED":
+                self._uncertain_exit(pending.payload.get("position_id", pending.payload.get("broker_position_id")), now_ms=now_ms,
+                    request_ref=pending.payload.get("request_ref", pending.hash))
+        if not isinstance(urgency, Urgency):
+            raise RouterError("execution urgency must be a registered deterministic state")
+        if urgency is Urgency.IMMEDIATE:
+            raise RouterError("protective-exit urgency cannot authorize a new entry; use the protective reduction path")
+        # --- gate chain (fail closed, first failure names the reason) ---
+        if self.lease_fence is not None and not self.lease_fence(lease_epoch):
+            raise RouterError(f"account runtime lease fence refused epoch {lease_epoch!r}")
+        if self.kill.halted:
+            raise RouterError(f"kill switch active: {sorted(t.value for t in self.kill.active)}")
+        if decision.trade_intent_id != intent.trade_intent_id:
+            raise RouterError("decision does not belong to this intent")
+        if decision.decision not in (Decision.APPROVED, Decision.REDUCED):
+            raise RouterError(f"decision is {decision.decision.value}")
+        if recompute_decision_hash(decision) != decision.decision_hash:
+            raise RouterError("decision hash does not recompute; refusing")
+        if getattr(decision, "approval_schema_version", None) != RISK_APPROVAL_SCHEMA_VERSION or not getattr(decision, "intent_hash", None):
+            raise RouterError("risk approval lacks exact intent binding; re-evaluation required")
+        if decision.intent_hash != intent_binding_hash(intent):
+            raise RouterError("risk approval does not match the exact trade intent; re-evaluation required")
+        if decision.mandate_id != mandate.mandate_id or decision.mandate_version != mandate.version:
+            raise RouterError("decision was made under a different mandate")
+        if not mandate.sends_orders():
+            raise RouterError(f"mode {mandate.mode.value} does not send orders")
+        if getattr(decision, "mandate_hash", None) != mandate_binding_hash(mandate):
+            raise RouterError("risk approval does not match the current mandate; re-evaluation required")
+        if not mandate.authority_matches_policy():
+            raise RouterError("current mandate lacks its original policy-bound owner grant; re-admission required")
+        self._dispatch_time(mandate,now_ms=now_ms)
+        if intent.idempotency_key in self._seen:
+            raise RouterError("duplicate idempotency key")
+        adapter = self.adapters.get(intent.venue)
+        if adapter is None:
+            raise RouterError(f"no adapter for venue {intent.venue}")
+        from vati.execution.paper import PaperAdapter
+        # Legacy isolated simulation can represent a caller's chosen venue;
+        # native and owner-ticket targets must be bound before any provider I/O.
+        if not isinstance(adapter, PaperAdapter) and (
+            getattr(adapter, 'account_alias', None) != intent.account_alias
+            or getattr(adapter, 'venue', None) != intent.venue):
+            raise RouterError('execution adapter target differs from the intent account or venue')
+        hb = adapter.heartbeat(now_ms=now_ms)
+        if not hb.connected:
+            self.kill.trip(KillSwitchTrigger.VENUE_DISCONNECT, now_ms)
+            self._log(EventKind.KILL_SWITCH, {"trigger": "VENUE_DISCONNECT", "venue": intent.venue}, now_ms=now_ms, corr=corr)
+>           raise RouterError("venue heartbeat failed; kill switch tripped")
+E           vati.execution.router.RouterError: venue heartbeat failed; kill switch tripped
+
+trading/vati/execution/router.py:370: RouterError
+____________ test_broken_clock_is_a_known_no_send_refusal[ctrader] _____________
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-52/test_broken_clock_is_a_known_n0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7fedf0110410>
+provider = 'ctrader'
+
+    @pytest.mark.parametrize('provider',['ctrader','deriv'])
+    def test_broken_clock_is_a_known_no_send_refusal(tmp_path,monkeypatch,provider):
+        def unavailable():raise RuntimeError('fixture clock unavailable')
+        if provider=='ctrader':
+            a,c,w,_=ctrader();a.clock=unavailable;r=a.submit(c,now_ms=1000);sent=w.sent
+        else:
+            a,sockets,_=factory(tmp_path,monkeypatch,native());a.clock=unavailable
+            r=a.submit(replace(command(),expires_at_ms=2000,command_hash='').sealed(),now_ms=1000)
+            sent=[q for sock in sockets for q in sock.requests if 'buy'in q]
+>       assert r.status=='REJECTED' and sent==[]
+E       AssertionError: assert ('REJECTED' == 'REJECTED'
+E         
+E           REJECTED and [('ProtoOAApp...: 'fixture'})] == []
+E         
+E         Left contains one more item: ('ProtoOAApplicationAuthReq', {'payloadType': 'PROTO_OA_APPLICATION_AUTH_REQ', 'clientId': 'fixture', 'clientSecret': 'fixture'})
+E         Use -v to get more diff)
+
+trading/tests/test_provider_entry_deadline.py:157: AssertionError
+=============================== warnings summary ===============================
+../../van-backend-venv-20261025/lib/python3.12/site-packages/fastapi/testclient.py:1
+  /workspace/van-backend-venv-20261025/lib/python3.12/site-packages/fastapi/testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+    from starlette.testclient import TestClient as TestClient  # noqa
+
+../../van-backend-venv-20261025/lib/python3.12/site-packages/starlette/testclient.py:53
+  /workspace/van-backend-venv-20261025/lib/python3.12/site-packages/starlette/testclient.py:53: DeprecationWarning: The anyio.abc.BlockingPortal alias is deprecated, use anyio.from_thread.BlockingPortal instead.
+    _PortalFactoryType = Callable[[], AbstractContextManager[anyio.abc.BlockingPortal]]
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED trading/tests/test_provider_entry_deadline.py::test_ctrader_expiry_during_final_send_lock_prevents_any_native_write
+FAILED trading/tests/test_provider_entry_deadline.py::test_ctrader_current_bounded_entry_still_fills_exactly_once
+FAILED trading/tests/test_provider_entry_deadline.py::test_ctrader_expiry_after_native_write_cannot_rewrite_a_genuine_fill
+FAILED trading/tests/test_provider_entry_deadline.py::test_ctrader_lost_response_after_native_write_is_unknown_not_a_new_refusal
+FAILED trading/tests/test_provider_entry_deadline.py::test_malformed_explicit_deadline_never_reaches_native_entry[ctrader-True]
+FAILED trading/tests/test_provider_entry_deadline.py::test_malformed_explicit_deadline_never_reaches_native_entry[ctrader-False]
+FAILED trading/tests/test_provider_entry_deadline.py::test_malformed_explicit_deadline_never_reaches_native_entry[ctrader-0]
+FAILED trading/tests/test_provider_entry_deadline.py::test_malformed_explicit_deadline_never_reaches_native_entry[ctrader--1]
+FAILED trading/tests/test_provider_entry_deadline.py::test_malformed_explicit_deadline_never_reaches_native_entry[ctrader-9223372036854775808]
+FAILED trading/tests/test_provider_entry_deadline.py::test_malformed_explicit_deadline_never_reaches_native_entry[ctrader-2000]
+FAILED trading/tests/test_provider_entry_deadline.py::test_unqualified_current_clock_cannot_authorize_native_entry[ctrader-True]
+FAILED trading/tests/test_provider_entry_deadline.py::test_unqualified_current_clock_cannot_authorize_native_entry[ctrader-None]
+FAILED trading/tests/test_provider_entry_deadline.py::test_unqualified_current_clock_cannot_authorize_native_entry[ctrader-1000]
+FAILED trading/tests/test_provider_entry_deadline.py::test_unqualified_current_clock_cannot_authorize_native_entry[ctrader--1]
+FAILED trading/tests/test_provider_entry_deadline.py::test_ctrader_expiry_during_native_transport_connect_is_also_checked
+FAILED trading/tests/test_provider_entry_deadline.py::test_actual_router_binds_ctrader_mandate_and_original_quote_through_wire_dispatch[False]
+FAILED trading/tests/test_provider_entry_deadline.py::test_actual_router_binds_ctrader_mandate_and_original_quote_through_wire_dispatch[True]
+FAILED trading/tests/test_provider_entry_deadline.py::test_broken_clock_is_a_known_no_send_refusal[ctrader]
+18 failed, 212 passed, 2 warnings in 3.88s

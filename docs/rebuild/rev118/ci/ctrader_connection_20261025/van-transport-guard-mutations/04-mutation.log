@@ -1,0 +1,28 @@
+......F.............                                                     [100%]
+=================================== FAILURES ===================================
+_____ test_tls_failure_closes_the_raw_socket_before_reporting_unavailable ______
+
+harness = <test_ctrader_transport_lifecycle.Harness object at 0x7f3e04f31a00>
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f3e04f322a0>
+
+    def test_tls_failure_closes_the_raw_socket_before_reporting_unavailable(harness, monkeypatch):
+        raw, _ = harness.pair()
+        class FailedTLS:
+            def wrap_socket(self, *_args, **_kwargs):
+                raise ssl.SSLError("fixture TLS refusal")
+        monkeypatch.setattr(transport_module.socket, "create_connection", lambda *_args, **_kwargs: raw)
+        monkeypatch.setattr(transport_module.ssl, "create_default_context", FailedTLS)
+        transport = CtraderTransport()
+        harness.transports.append(transport)
+        with pytest.raises(CtraderError, match="connect failed"):
+            transport.connect()
+>       assert raw.fileno() == -1, "TLS failure leaked the original TCP socket"
+E       AssertionError: TLS failure leaked the original TCP socket
+E       assert 11 == -1
+E        +  where 11 = <built-in method fileno of socket object at 0x7f3e04e60670>()
+E        +    where <built-in method fileno of socket object at 0x7f3e04e60670> = <socket.socket fd=11, family=1, type=1, proto=0>.fileno
+
+trading/tests/test_ctrader_transport_lifecycle.py:218: AssertionError
+=========================== short test summary info ============================
+FAILED trading/tests/test_ctrader_transport_lifecycle.py::test_tls_failure_closes_the_raw_socket_before_reporting_unavailable
+1 failed, 19 passed in 0.84s

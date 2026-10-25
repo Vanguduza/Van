@@ -1,0 +1,63 @@
+..........F......F.F                                                     [100%]
+=================================== FAILURES ===================================
+_ test_replacement_connection_reauthenticates_and_refreshes_contracts_before_use _
+
+    def test_replacement_connection_reauthenticates_and_refreshes_contracts_before_use():
+        adapter, transport, responses, calls = fixture()
+        adapter._ensure_auth()
+        old_revision = adapter.symbol('EURUSD').contract_revision
+        adapter._last_spot[12] = (Decimal('1.1'), Decimal('1.2'))
+        calls.clear()
+        transport.connection_id = 2
+        responses['ProtoOASymbolByIdReq'][1]['symbol'][0]['minVolume'] = 2000
+        adapter._ensure_auth()
+>       assert calls[:2] == ['ProtoOAApplicationAuthReq', 'ProtoOAAccountAuthReq']
+E       AssertionError: assert [] == ['ProtoOAAppl...countAuthReq']
+E         
+E         Right contains 2 more items, first extra item: 'ProtoOAApplicationAuthReq'
+E         Use -v to get more diff
+
+trading/tests/test_ctrader_connection_auth.py:37: AssertionError
+__ test_failed_reauthentication_fences_the_previous_contract_and_quote_cache ___
+
+    def test_failed_reauthentication_fences_the_previous_contract_and_quote_cache():
+        adapter, transport, responses, calls = fixture()
+        adapter._ensure_auth()
+        previous = dict(adapter.symbols)
+        adapter._last_spot[12] = (Decimal('1.1'), Decimal('1.2'))
+        transport.connection_id = 2
+        responses['ProtoOAAccountAuthReq'][0] = 'ProtoHeartbeatEvent'
+>       with pytest.raises(VenueUnavailable):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE VenueUnavailable
+
+trading/tests/test_ctrader_connection_auth.py:100: Failed
+_ test_actual_protocol_reconnect_reauthenticates_the_new_peer_and_refreshes_native_contracts _
+
+    def test_actual_protocol_reconnect_reauthenticates_the_new_peer_and_refreshes_native_contracts():
+        from test_ctrader import FakeCtrader, make_adapter
+        first, second = FakeCtrader(), FakeCtrader()
+        adapter = make_adapter(first)
+        adapter._ensure_auth()
+        first_id = adapter.transport.connection_id
+        adapter._last_spot[1] = (Decimal('1'), Decimal('2'))
+        adapter.transport.close()
+        adapter.transport._connector = second.connector
+        adapter.transport.connect()  # A connected socket alone grants no cached auth.
+        adapter._ensure_auth()
+        assert adapter.transport.connection_id > first_id
+>       assert [name for name, _ in second.requests[:4]] == [
+            'ProtoOAApplicationAuthReq', 'ProtoOAAccountAuthReq',
+            'ProtoOASymbolsListReq', 'ProtoOASymbolByIdReq',
+        ]
+E       AssertionError: assert [] == ['ProtoOAAppl...ymbolByIdReq']
+E         
+E         Right contains 4 more items, first extra item: 'ProtoOAApplicationAuthReq'
+E         Use -v to get more diff
+
+trading/tests/test_ctrader_connection_auth.py:128: AssertionError
+=========================== short test summary info ============================
+FAILED trading/tests/test_ctrader_connection_auth.py::test_replacement_connection_reauthenticates_and_refreshes_contracts_before_use
+FAILED trading/tests/test_ctrader_connection_auth.py::test_failed_reauthentication_fences_the_previous_contract_and_quote_cache
+FAILED trading/tests/test_ctrader_connection_auth.py::test_actual_protocol_reconnect_reauthenticates_the_new_peer_and_refreshes_native_contracts
+3 failed, 17 passed in 1.08s

@@ -1,0 +1,78 @@
+....FF..............                                                     [100%]
+=================================== FAILURES ===================================
+______ test_old_reader_failure_cannot_disconnect_a_replacement_connection ______
+
+harness = <test_ctrader_transport_lifecycle.Harness object at 0x7f33a48697c0>
+
+    def test_old_reader_failure_cannot_disconnect_a_replacement_connection(harness):
+        original = DelayedSocket(harness.pair()[0], read=True)
+        replacement = harness.pair()[0]
+        harness.release.append(original.release)
+        sockets = iter([original, replacement])
+        transport = harness.transport(lambda *_: next(sockets))
+        transport.connect()
+        reader = transport._reader
+        assert original.entered.wait(1)
+        closer, close_result = harness.worker(transport.close)
+        assert original.closed.wait(1)
+        closer.join(.1)
+        assert closer.is_alive(), "close returned before its original reader terminated"
+        transport.connect()
+        original.release.set()
+        reader.join(1); closer.join(1)
+>       assert close_result.get_nowait() is None
+E       AssertionError: assert CtraderError('cTrader reader did not terminate after socket shutdown') is None
+E        +  where CtraderError('cTrader reader did not terminate after socket shutdown') = get_nowait()
+E        +    where get_nowait = <queue.Queue object at 0x7f33a4869c10>.get_nowait
+
+trading/tests/test_ctrader_transport_lifecycle.py:187: AssertionError
+__________ test_old_request_failure_cannot_close_a_replacement_socket __________
+
+harness = <test_ctrader_transport_lifecycle.Harness object at 0x7f33a4869d60>
+
+    def test_old_request_failure_cannot_close_a_replacement_socket(harness):
+        original = DelayedSocket(harness.pair()[0], write=True)
+        replacement = harness.pair()[0]
+        harness.release.append(original.release)
+        sockets = iter([original, replacement])
+        transport = harness.transport(lambda *_: next(sockets))
+        caller, result = harness.worker(lambda: transport.call("ProtoOATraderReq", {"ctidTraderAccountId": 12345}))
+        assert original.entered.wait(1)
+        transport.close()
+        transport.connect()
+        original.release.set()
+        caller.join(1)
+>       assert isinstance(result.get_nowait(), CtraderError)
+                          ^^^^^^^^^^^^^^^^^^^
+
+trading/tests/test_ctrader_transport_lifecycle.py:203: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/queue.py:199: in get_nowait
+    return self.get(block=False)
+           ^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <queue.Queue object at 0x7f33a4869100>, block = False, timeout = None
+
+    def get(self, block=True, timeout=None):
+        '''Remove and return an item from the queue.
+    
+        If optional args 'block' is true and 'timeout' is None (the default),
+        block if necessary until an item is available. If 'timeout' is
+        a non-negative number, it blocks at most 'timeout' seconds and raises
+        the Empty exception if no item was available within that time.
+        Otherwise ('block' is false), return an item if one is immediately
+        available, else raise the Empty exception ('timeout' is ignored
+        in that case).
+        '''
+        with self.not_empty:
+            if not block:
+                if not self._qsize():
+>                   raise Empty
+E                   _queue.Empty
+
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/queue.py:168: Empty
+=========================== short test summary info ============================
+FAILED trading/tests/test_ctrader_transport_lifecycle.py::test_old_reader_failure_cannot_disconnect_a_replacement_connection
+FAILED trading/tests/test_ctrader_transport_lifecycle.py::test_old_request_failure_cannot_close_a_replacement_socket
+2 failed, 18 passed in 3.77s
