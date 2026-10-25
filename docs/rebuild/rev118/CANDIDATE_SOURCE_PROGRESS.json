@@ -1,6 +1,6 @@
 {
   "schema": "van.rebuild.candidate-source-progress/1",
-  "updated_at_utc": "2026-10-25T20:39:10.436596+00:00",
+  "updated_at_utc": "2026-10-25T20:55:24.803079+00:00",
   "programme": "Rev1.18; original 131 unit IDs and dependencies retained",
   "authority": "auth-20261022-owner-autonomous-candidate-build",
   "meaning": "Candidate source progress is separate from admitted unit acceptance. Independent certificates, owner decisions, live effects and release gates remain unissued. No unit is declared complete by this record.",
@@ -501,6 +501,10 @@
         {
           "description": "Scoped exact native spot sides, native-side freshness and immutable raw observation; preserve financial events on quote reads; validate/deduplicate timestamped subscription ACK and fence local stops/residual packets. Independent selected-product read-only quote reader, queued/no-data and native-read budgets.10actual before regressions;367focused/943final actualPG/account/funding/execution cases pass0skip/audit0;108rebuild. Initial heartbeat barrier failure retained. Raw data remains unqualified: no native session/sequence assertion, tick/live-bar fanout/durable capture, service/capacity/provider/qualified consumer remain.",
           "evidence": "backend/BE-008_NATIVE_SPOT_CONTRACT.md; receipts/NATIVE_SPOT_SOURCE_20261025.json"
+        },
+        {
+          "description": "Three actual framed-native delivery failures repaired: exception loss, reordering and concurrent selector invisibility. Nondestructive copied-payload selection and exact original claim; expiry/retirement checked.958 actualPG source cases0skip/audit0,15final controls,6supplemental assertion-caught faults/restored,108rebuild. Test-only unused-import hash timing discrepancy retained and final controls rerun. No complete-unit acceptance.",
+          "evidence": "backend/BE-008_NATIVE_EVENT_SELECTION.md; receipts/NATIVE_EVENT_SELECTION_SOURCE_20261025.json"
         }
       ]
     },

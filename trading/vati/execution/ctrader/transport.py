@@ -8,6 +8,7 @@ access token) are held by the transport only; nothing here sizes or decides."""
 from __future__ import annotations
 
 from contextlib import contextmanager
+from copy import deepcopy
 import queue
 import math
 import socket
@@ -318,26 +319,57 @@ class CtraderTransport:
             return any(original[1]==kind for original in self.events.queue)
 
     def wait_event(self, predicate: Callable[[str, dict[str, Any]], bool], *, timeout_s: float) -> Optional[tuple[str, dict[str, Any]]]:
+        """Claim one match without hiding, reordering or mutating other evidence.
+
+        Predicates receive a copy outside queue/state locks. An exception or
+        elapsed timeout leaves the original delivery queued. Competing selectors
+        must claim the same original by identity; only one can receive it.
+        Arbitrary callback execution is not an interruptible host sandbox.
+        """
+        if (not callable(predicate) or type(timeout_s) not in (int,float)
+                or not math.isfinite(timeout_s) or timeout_s<0):
+            raise ValueError('native event selector and finite nonnegative timeout required')
         deadline = time.monotonic() + timeout_s
-        stash = []
-        try:
-            while True:
-                remaining = deadline - time.monotonic()
-                if remaining <= 0:
-                    return None
-                try:
-                    original = self.events.get(timeout=remaining)
-                except queue.Empty:
-                    return None
-                item = self._event_value(original)
+        examined = {}
+
+        def claim(original):
+            with self.events.mutex:
+                for index,candidate in enumerate(self.events.queue):
+                    if candidate is original:
+                        del self.events.queue[index]
+                        self.events.not_full.notify_all()
+                        return True
+            return False
+
+        while time.monotonic()<deadline:
+            with self.events.mutex:
+                snapshot=list(self.events.queue)
+            # Retain references only to entries still in this snapshot, avoiding
+            # object-ID reuse and accumulation of already-consumed deliveries.
+            examined={id(original):original for original in snapshot if id(original) in examined}
+            for original in snapshot:
+                if time.monotonic()>=deadline:return None
+                if id(original) in examined:continue
+                examined[id(original)]=original
+                item=self._event_value(original)
                 if item is None:
+                    claim(original)  # Only retired market data, never financial evidence.
                     continue
-                if predicate(*item):
-                    return item
-                stash.append(original)
-        finally:
-            for s in stash:
-                self.events.put(s)
+                name,body=item
+                matches=predicate(name,deepcopy(body))
+                if time.monotonic()>=deadline:return None
+                if matches and claim(original):
+                    # The connection can retire while a callback runs. Such a
+                    # quote cannot seed its replacement; financial evidence stays valid.
+                    current=self._event_value(original)
+                    if current is not None:return current[0],deepcopy(current[1])
+            with self.events.not_empty:
+                if any(id(original) not in examined for original in self.events.queue):
+                    continue  # A delivery arrived after the unlocked snapshot.
+                remaining=deadline-time.monotonic()
+                if remaining<=0:return None
+                self.events.not_empty.wait(remaining)
+        return None
 
 
 class CtraderReadTransport(CtraderTransport):
