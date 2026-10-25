@@ -1,6 +1,6 @@
 {
   "schema": "van.rebuild.hosted-source/1",
-  "status": "IN_PROGRESS_WITH_TWO_MANDATORY_PREREQUISITE_FAILURES",
+  "status": "FAILED_MANDATORY_PREREQUISITES_ALL_17_PUBLIC_SOURCE_JOBS_PASS",
   "source_head": "623779fd54d0e1a48ae00c59620e0175671d597b",
   "run_id": 40242295555,
   "tested_merge": "72315fe117fe72a2d2ac560ff33ad486b32f62db",
@@ -45,8 +45,8 @@
     {
       "id": 121316700578,
       "name": "backend-public-source",
-      "status": "in_progress",
-      "conclusion": null
+      "status": "completed",
+      "conclusion": "success"
     },
     {
       "id": 121316700585,
@@ -99,8 +99,8 @@
     {
       "id": 121316700636,
       "name": "browser-guard-source",
-      "status": "in_progress",
-      "conclusion": null
+      "status": "completed",
+      "conclusion": "success"
     },
     {
       "id": 121316700771,
@@ -145,6 +145,42 @@
       "failures": 0,
       "errors": 0,
       "skipped": 0
+    },
+    "docs/rebuild/rev118/ci/hosted_623779fd_20261025/12618002323/uid-report.xml": {
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "docs/rebuild/rev118/ci/hosted_623779fd_20261025/12618002323/full-report.xml": {
+      "tests": 1548,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 1
+    },
+    "docs/rebuild/rev118/ci/hosted_623779fd_20261025/12618002323/report.xml": {
+      "tests": 11,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "docs/rebuild/rev118/ci/hosted_623779fd_20261025/12618002323/firewall-report.xml": {
+      "tests": 10,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "docs/rebuild/rev118/ci/hosted_623779fd_20261025/12617823985/media-report.xml": {
+      "tests": 198,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "docs/rebuild/rev118/ci/hosted_623779fd_20261025/12617823985/gateway-report.xml": {
+      "tests": 5782,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 7
     }
   },
   "android": "Actual HTML:22 tests,0 failures,4 declared skips=18 passed; emulator source only",
@@ -160,8 +196,13 @@
     "reason": "Original van-ci cancel-in-progress policy on623 push; never overallPASS"
   },
   "limits": [
-    "Snapshot only: backend-public-source and browser-guard-source still running",
-    "Results apply to623, not later calendar edits",
-    "No mandatory-gate waiver, native/unit/production/economic/S24 acceptance"
-  ]
+    "Actual overall failure on the original two mandatory prerequisites; no waived gates",
+    "Exact623 source reports do not validate later calendar0b3f7601 or headline08375724 source",
+    "Emulator/source compilation are not S24/production qualification",
+    "No unit/native/owner/F15/BG001/provider/economic/production/S24 acceptance"
+  ],
+  "final_at_utc": "2026-10-25T23:39:34.125237+00:00",
+  "workflow_conclusion": "failure",
+  "public_source_job_successes": 17,
+  "source_result": "5775 gateway passes/7 declared skips;198 media;3374 trading/1 declared privateDDS skip;26PostgreSQL;117voice;258monitor/audit0;374 original mutation identities caught exactly once;Android18pass/4declared skips;browser1547pass/1declared skip,foreground11,UID1,firewall10. Counts are separate job scopes, not a sum of unique programme acceptance cases."
 }

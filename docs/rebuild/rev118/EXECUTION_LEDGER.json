@@ -239,7 +239,7 @@
     "note": "Opus unavailable; owner transferred build to Codex. No independent reviewer identity is inferred from another model or session."
   },
   "checkpoint": {
-    "updated_utc": "2026-10-25T23:34:56.429870+00:00",
+    "updated_utc": "2026-10-25T23:39:34.227884+00:00",
     "branch": "ccr-9e07e1af-8mgz1p",
     "base": "b02075f327ea8180ab6d269eba358cf8c5479878",
     "background_jobs": [
@@ -459,9 +459,9 @@
       "Python 3.12 venv from backend/requirements.lock for CI-equivalent runs; stream-host venv from deploy/van-browser-stream/requirements.lock",
       "Desktop Commander read-only device listing was refused by the session permission policy; native readback prepared as pre003/NATIVE_READBACK_REQUEST.md"
     ],
-    "next_action": "Finish documentary checks/manifest/backup and genuine hook commit/committed ledger; preserve exact623 hosted backend job until terminal before routine normal push. Continue durable headline original/relay publication and cold recovery, service source health and canonical backend programme.",
-    "previous_head": "0b3f7601dca725a7495767c1838f099eb81f1e3a",
-    "current_packet": "Headline causal availability/trust/arithmetic component; final617 actualPG0skip/audit0/exact hashes,51 controls,9 final faults; genuine commit pending",
+    "next_action": "Commit final hosted evidence through genuine hooks, verify committed ledger, push normally/read back, inspect exact new hosted revision. Continue durable news original/relay publication, cold recovery, service source health and original canonical backend programme.",
+    "previous_head": "0837572499dd6f47ef0d8ef17d6194f800a5db6d",
+    "current_packet": "Exact623 completed public source qualification and retained mandatory failures; evidence checkpoint before normal publication of calendar/news components",
     "ci_credential_capability": "receipts/CI_CREDENTIAL_CAPABILITY_20261024.json: repo admin metadata available, integration secret/deploy-key reads403; no credential changes.",
     "current_background_jobs": [
       {
@@ -496,7 +496,8 @@
     "2026-10-25T22:34:31.636665+00:00: Quote component genuinely committed047dacc6/GREEN139;1258-file manifest0mismatches. Verified89-file precommit ZIP836995bytes SHA256b692e47a332eadd77ea295e9e52ef4f4e0f140b24b7a997625bd62d6afb6fa6e. Calendar isolated candidate originalbytes checked and copied into main checkout after quote commit; current evidence498actualPG0skip/audit0, no unit acceptance. Source independence/entitlement/native availability remain unqualified; no actual financial/provider/production/device effects.",
     "2026-10-25T22:50:16.851349+00:00: Publication blocker resolved by actual APIexit0, normalgitlsremote, normalpush and readback5fa19136. Refreshmechanism notestablished; no injectedtoken replacement or APIcommit/ref workaround. DIALcheckpoint1194ee96-a61f-46f6-bbdd-d8de21fdaae2 reports publishedsource/accepted0. NativeMQLcheckout failedSourceLog121313801954 preserved; no compilerexecution is claimed.",
     "2026-10-25T23:21:42.039363+00:00: Calendar final532 actualPG0skip/audit0/exact hashes and25 controls;6 final supplemental faults caught/restored. Initial10assertionfailures and extra4long-fractionfailures retained, as is old qualification-oracle failure. Exact623 native SDK compilation passed; full van-ci still running with original2mandatory prerequisite failures. Prior5fa run40241410394 canceled by existing concurrency policy on623 push; partial only.",
-    "2026-10-25T23:34:56.429870+00:00: News source617 final actualPG0skip/audit0/exact hashes;51 finalcontrols and9 final faults assertion-caught/restored.16 distinct reproduced failures retained. In-memory component only, durable publication/recovery/sourcehealth remain."
+    "2026-10-25T23:34:56.429870+00:00: News source617 final actualPG0skip/audit0/exact hashes;51 finalcontrols and9 final faults assertion-caught/restored.16 distinct reproduced failures retained. In-memory component only, durable publication/recovery/sourcehealth remain.",
+    "2026-10-25T23:39:34.227884+00:00: Exact623 van-ci40242295555 terminalFAILURE on2 unwaived prerequisites; all17 public source jobs PASS. Actual reports/archives verified: gateway5775pass7skip,media198,trading3374pass1privateDDSskip,PG26,voice117,monitor258;374original mutants once;Android18pass4skip;browser1547pass1skip/foreground11/UID1/firewall10. Subsequent0b3f7601/08375724 unvalidated by623; both genuine local commits/GREEN143 ready for normal publication."
   ],
   "obligations": "obligations/OBLIGATIONS.json: preserved observations with source implementation evidence and explicit remaining native/unit obligations.",
   "pre002_challenge": "pre002/challenge/: 324 author-prepared dossiers (AUTHOR_CHALLENGED_PENDING_INDEPENDENT_REVIEW)",
@@ -524,11 +525,11 @@
       "fca473cc",
       "c2a27848"
     ],
-    "tested_android_head": "ac60c4d3ba57ff488a39fa1962920ce4711c0ffc",
-    "hosted_result": "receipts/HOSTED_SOURCE_ac60c4d3.json",
+    "tested_android_head": "623779fd54d0e1a48ae00c59620e0175671d597b",
+    "hosted_result": "receipts/HOSTED_SOURCE_623779fd.json",
     "mutation_reconciliation": "ci/MUTATION_RECONCILIATION.md and ci/MUTATION_RECONCILIATION_MAPPING.json",
-    "verified_source_head": "0b3f7601dca725a7495767c1838f099eb81f1e3a local genuine commit/GREEN142; remote remains623779fd until currentCI terminal",
-    "source_qualification_run": 40219703232,
+    "verified_source_head": "0837572499dd6f47ef0d8ef17d6194f800a5db6d local genuine commit/GREEN143; normal publication now ready after terminal623 CI",
+    "source_qualification_run": 40242295555,
     "latest_checkpoint_report": "CHECKPOINT_20261025_NATIVE_FEED.md",
     "previous_verified_source": "3c6969ebbec39f2ad9f2836a6bd8acdb487adc34 published; exact CI40228254162 all17public jobs pass, two unchanged prerequisite failures",
     "qualification_scope": "Public source tests only; mandatory/native/owner/production gates unissued."
@@ -549,6 +550,6 @@
       "evidence": "ci/MUTATION_CORPUS_c2a27848.json"
     }
   ],
-  "current_action": "Finish documentary checks/manifest/backup and genuine hook commit/committed ledger; preserve exact623 hosted backend job until terminal before routine normal push. Continue durable headline original/relay publication and cold recovery, service source health and canonical backend programme.",
-  "updated_at_utc": "2026-10-25T23:34:56.429870+00:00"
+  "current_action": "Commit final hosted evidence through genuine hooks, verify committed ledger, push normally/read back, inspect exact new hosted revision. Continue durable news original/relay publication, cold recovery, service source health and original canonical backend programme.",
+  "updated_at_utc": "2026-10-25T23:39:34.227884+00:00"
 }
