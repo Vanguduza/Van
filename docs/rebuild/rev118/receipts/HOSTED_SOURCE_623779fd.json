@@ -1,0 +1,167 @@
+{
+  "schema": "van.rebuild.hosted-source/1",
+  "status": "IN_PROGRESS_WITH_TWO_MANDATORY_PREREQUISITE_FAILURES",
+  "source_head": "623779fd54d0e1a48ae00c59620e0175671d597b",
+  "run_id": 40242295555,
+  "tested_merge": "72315fe117fe72a2d2ac560ff33ad486b32f62db",
+  "snapshot_at_utc": "2026-10-25T23:22:42.475111+00:00",
+  "jobs": [
+    {
+      "id": 121316700447,
+      "name": "postgres-ledger",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 121316700517,
+      "name": "project-truth-ledger",
+      "status": "completed",
+      "conclusion": "failure"
+    },
+    {
+      "id": 121316700536,
+      "name": "mutation (kotlin-0, kotlin, 0/4)",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 121316700562,
+      "name": "android-instrumentation",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 121316700567,
+      "name": "mutation (browser-agent, browser-agent, 0/1)",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 121316700570,
+      "name": "android-and-visual-evidence",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 121316700578,
+      "name": "backend-public-source",
+      "status": "in_progress",
+      "conclusion": null
+    },
+    {
+      "id": 121316700585,
+      "name": "mutation (python-0, python, 0/4)",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 121316700591,
+      "name": "mutation (kotlin-1, kotlin, 1/4)",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 121316700592,
+      "name": "market-monitor-source",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 121316700594,
+      "name": "rebuild-documentary",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 121316700598,
+      "name": "mutation (kotlin-3, kotlin, 3/4)",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 121316700606,
+      "name": "mutation (kotlin-2, kotlin, 2/4)",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 121316700616,
+      "name": "mutation (python-1, python, 1/4)",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 121316700634,
+      "name": "backend",
+      "status": "completed",
+      "conclusion": "failure"
+    },
+    {
+      "id": 121316700636,
+      "name": "browser-guard-source",
+      "status": "in_progress",
+      "conclusion": null
+    },
+    {
+      "id": 121316700771,
+      "name": "mutation (python-2, python, 2/4)",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 121316700901,
+      "name": "mutation (python-3, python, 3/4)",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 121319768392,
+      "name": "character-forge-gate",
+      "status": "completed",
+      "conclusion": "success"
+    }
+  ],
+  "reports": {
+    "docs/rebuild/rev118/ci/hosted_623779fd_20261025/12617286486/report.xml": {
+      "tests": 258,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "docs/rebuild/rev118/ci/hosted_623779fd_20261025/12617437822/trading-source-report.xml": {
+      "tests": 3375,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 1
+    },
+    "docs/rebuild/rev118/ci/hosted_623779fd_20261025/12617437822/voice-source-report.xml": {
+      "tests": 117,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "docs/rebuild/rev118/ci/hosted_623779fd_20261025/12617437822/postgres-ledger-report.xml": {
+      "tests": 26,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    }
+  },
+  "android": "Actual HTML:22 tests,0 failures,4 declared skips=18 passed; emulator source only",
+  "mutations": "374 original identities caught exactly once,0 survivors/duplicates/unexecuted; see ci/MUTATION_CORPUS_623779fd.json",
+  "mandatory_failures": {
+    "121316700517": "Trusted base8eb18898 has no tools/ci/project_truth_ledger.py; actual exit2",
+    "121316700634": "DDS_CONTRACT_READ_DEPLOY_KEY absent; actual exit1 before backend tests"
+  },
+  "previous_run": {
+    "run_id": 40241410394,
+    "head": "5fa1913631c0ee033be6c18113dfad7cf8f09f9e",
+    "conclusion": "CANCELLED_PARTIAL",
+    "reason": "Original van-ci cancel-in-progress policy on623 push; never overallPASS"
+  },
+  "limits": [
+    "Snapshot only: backend-public-source and browser-guard-source still running",
+    "Results apply to623, not later calendar edits",
+    "No mandatory-gate waiver, native/unit/production/economic/S24 acceptance"
+  ]
+}

@@ -308,7 +308,7 @@ def test_sealed_but_malformed_legacy_record_returns_controlled_recovery_failure(
     finally:ledger.close()
 
 
-@pytest.mark.parametrize('cutoff',[True,-1,1.5,'1700000000000'])
+@pytest.mark.parametrize('cutoff',[True,-(2**63)-1,1.5,'1700000000000'])
 def test_empty_calendar_cannot_accept_an_invalid_as_of_query(cutoff):
     with pytest.raises(ValueError):CalendarRecorder().records(now_ms=cutoff)
 

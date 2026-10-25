@@ -32,7 +32,6 @@ from __future__ import annotations
 import csv
 import json
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
 from decimal import Decimal
 from enum import Enum
 from pathlib import Path
@@ -40,6 +39,7 @@ from typing import Any, Iterable, Iterator, Mapping, Optional
 
 from vati.core.canonical import canonical_hash, dec
 from vati.core.events import EventKind, make_event
+from vati.core.calendar_time import parse_calendar_ms
 
 PRODUCER = "vati-calendar-recorder"
 RECORDER_VERSION = "calendar-recorder/5.1.1"
@@ -66,10 +66,7 @@ class ObservationConflict(ValueError):
 
 
 def _parse_ms(v: Any) -> int:
-    s = str(v).strip()
-    if s.isdigit():
-        return int(s) * (1000 if len(s) <= 10 else 1)
-    return int(datetime.fromisoformat(s.replace("Z", "+00:00")).astimezone(timezone.utc).timestamp() * 1000)
+    return parse_calendar_ms(v)
 
 
 def _opt_dec(v: Any) -> Optional[Decimal]:
@@ -81,8 +78,8 @@ def _opt_dec(v: Any) -> Optional[Decimal]:
 
 
 def _milliseconds(value):
-    if type(value) is not int or not 0<=value<=2**63-1:
-        raise ObservationConflict('calendar milliseconds must be a nonnegative integer')
+    if type(value) is not int or not -(2**63)<=value<=2**63-1:
+        raise ObservationConflict('calendar milliseconds must be a signed integer')
     return value
 
 
@@ -449,6 +446,15 @@ def event_key(name: str, scheduled_ms: int) -> str:
     return f"{name.upper().replace(' ', '_')}:{scheduled_ms}"
 
 
+def declared_event_key(row,name,scheduled_ms):
+    explicit=row.get('event_key')
+    if explicit is None or explicit=='':return event_key(name,scheduled_ms)
+    if (not isinstance(explicit,str) or not explicit.strip() or len(explicit)>512
+            or any(ord(char)<32 for char in explicit)):
+        raise ValueError('calendar explicit event key invalid')
+    return explicit.strip()
+
+
 def scheduled_from_row(row: Mapping[str, Any]) -> ScheduledRelease:
     name = str(row["name"]).upper().replace(" ", "_")
     ms = _parse_ms(row.get("scheduled") or row["release"])
@@ -456,15 +462,15 @@ def scheduled_from_row(row: Mapping[str, Any]) -> ScheduledRelease:
     if not ccy:
         raise ValueError("no currencies")
     return ScheduledRelease(
-        event_key=event_key(name, ms), name=name, scheduled_ms=ms, currencies=ccy,
+        event_key=declared_event_key(row,name,ms), name=name, scheduled_ms=ms, currencies=ccy,
         tier=int(row.get("tier", 1)), unit=str(row.get("unit", "")),
         forecast=_opt_dec(row.get("forecast")), previous=_opt_dec(row.get("previous")))
 
 
 def observation_from_row(row: Mapping[str, Any]) -> ReleaseObservation:
-    key = str(row.get("event_key") or "").strip()
-    if not key:
-        key = event_key(str(row["name"]), _parse_ms(row.get("scheduled") or row["release"]))
+    explicit=row.get('event_key')
+    key=declared_event_key(row,'',0) if explicit is not None and explicit!='' else declared_event_key(
+        row,str(row['name']),_parse_ms(row.get('scheduled') or row['release']))
     released = _parse_ms(row.get("released") or row.get("scheduled") or row["release"])
     observed = _parse_ms(row["observed"]) if row.get("observed") else released
     source = str(row.get("source", "")).strip()
@@ -481,8 +487,11 @@ def rows_from_file(path: str | Path, key: str = "events") -> list[dict]:
     p = Path(path)
     if p.suffix.lower() == ".json":
         data = json.loads(p.read_text(encoding="utf-8"))
-        if isinstance(data, list):
-            return list(data)
-        return list(data.get(key, []))
+        if isinstance(data,list):rows=data
+        elif isinstance(data,dict) and key in data:rows=data[key]
+        else:raise ValueError('calendar file requires a row array or '+key+' array')
+        if not isinstance(rows,list) or any(not isinstance(row,dict) for row in rows):
+            raise ValueError('calendar file requires an array of row objects')
+        return list(rows)
     with open(p, newline="", encoding="utf-8") as f:
         return list(csv.DictReader(f))

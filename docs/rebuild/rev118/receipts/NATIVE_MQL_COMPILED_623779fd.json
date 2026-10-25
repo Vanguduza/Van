@@ -1,0 +1,67 @@
+{
+  "schema": "van.native-mql-source-qualified-compile/1",
+  "source_head": "623779fd54d0e1a48ae00c59620e0175671d597b",
+  "tested_merge": "72315fe117fe72a2d2ac560ff33ad486b32f62db",
+  "head_merge_equivalence": "Complete GitHubcompare head..merge: ahead1/behind0/filesempty, preserved separately; not directremoteGitTreeAPIreadback",
+  "run": 40242295641,
+  "job": 121316487243,
+  "artifact_id": 12617730021,
+  "artifact_zip_bytes": 73103,
+  "artifact_zip_sha256": "81cfe28c564e269af4bbd9e3884bc32c13baa4eab5712f9ac105a5b5c9aab53b",
+  "artifact_digest_matches": true,
+  "source_blob_matches": true,
+  "source_sha256": "88d45cefd1ef766370cce39817317585b993af607123d89efec301ef0bf05189",
+  "local_source_sha_matches": true,
+  "compiler_signature": {
+    "status": "Valid",
+    "subject": "CN=MetaQuotes Ltd., O=MetaQuotes Ltd., S=Lemesos, C=CY",
+    "thumbprint": "5A64A7AED24C33DED342D01D01FA5286F06DA6DC"
+  },
+  "compiler_sha256": "bb480fb66ca56118167f5a1bf398602de5541cd639b7882f91196014c496175a",
+  "compile_cases": [
+    {
+      "name": "VanCompilerRejectionProbe",
+      "expected_success": false,
+      "process_exit_code": 0,
+      "errors": 4,
+      "warnings": 0,
+      "fresh_binary": false,
+      "started_at_utc": "2026-10-25T22:54:46.7894448Z",
+      "finished_at_utc": "2026-10-25T22:54:47.7863597Z",
+      "log_sha256": "ab83eb1773493c3cdf9271443fd797b873babc275e783ace2970aa14508e8342"
+    },
+    {
+      "name": "VanBridgeEA",
+      "expected_success": true,
+      "process_exit_code": 1,
+      "errors": 0,
+      "warnings": 0,
+      "fresh_binary": true,
+      "started_at_utc": "2026-10-25T22:54:47.7898942Z",
+      "finished_at_utc": "2026-10-25T22:54:49.6424975Z",
+      "log_sha256": "836f8d94e843c6ddc4c34393be1d0b64e3b4ea5bc0f38e358de8ee1ac6071594",
+      "binary_sha256": "e1ad75bddca6445566d8a5e5b47220454e97815ce4568bc90d8f580d7d5b3a4f"
+    }
+  ],
+  "qualification": "Source compilation only; no terminal account, broker order, deployed EA, financial or handset acceptance.",
+  "data_initialization": {
+    "editor_signature": {
+      "status": "Valid",
+      "subject": "CN=MetaQuotes Ltd., O=MetaQuotes Ltd., S=Lemesos, C=CY",
+      "thumbprint": "5A64A7AED24C33DED342D01D01FA5286F06DA6DC"
+    },
+    "terminal_started": true,
+    "terminal_signature": {
+      "status": "Valid",
+      "subject": "CN=MetaQuotes Ltd., O=MetaQuotes Ltd., S=Lemesos, C=CY",
+      "thumbprint": "5A64A7AED24C33DED342D01D01FA5286F06DA6DC"
+    },
+    "network_blocked_program": "D:\\a\\_temp\\van-mql-17c6fdb2598947a6be3b441b8cfca68e\\sdk\\terminal64.exe",
+    "firewall_profiles_enabled": true
+  },
+  "limits": [
+    "Source compilation only",
+    "OfflineSDKinitialization terminalstarted withnetworkblocked; no terminalaccount/brokerorder/deployedEA/financial/handsetacceptance",
+    "Deliberately invalid probe rejected4errors/nobinary; validEA0errors0warnings/freshbinary; process exitcode alone is not compileroracle"
+  ]
+}

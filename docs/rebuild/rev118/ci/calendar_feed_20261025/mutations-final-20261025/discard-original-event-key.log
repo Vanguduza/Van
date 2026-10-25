@@ -1,0 +1,59 @@
+..........FFF...........                                                 [100%]
+=================================== FAILURES ===================================
+_______ test_explicit_native_keys_preserve_two_same_name_and_time_series _______
+
+    def test_explicit_native_keys_preserve_two_same_name_and_time_series():
+>       result=events_from_records([row(event_key='provider:US:CPI:2026-10',currencies='USD'),
+            row(event_key='provider:CA:CPI:2026-10',currencies='CAD')])
+
+trading/tests/test_calendar_feed_boundaries.py:42: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+records = [{'name': 'CPI', 'release': '2026-10-14T12:30:00Z', 'currencies': 'USD', 'source': 'declared-a', ...}, {'name': 'CPI', 'release': '2026-10-14T12:30:00Z', 'currencies': 'CAD', 'source': 'declared-a', ...}]
+
+    def events_from_records(records: Iterable[dict]) -> list[Tier1Event]:
+        out: list[Tier1Event] = []
+        seen: dict[str, dict] = {}
+        for r in records:
+            if not isinstance(r,dict):raise ValueError('calendar schedule row must be an object')
+            name = str(r.get("name", "")).upper().replace(" ", "_")
+            if name not in TIER1_NAMES and str(r.get("tier", "1")) != "1":
+                continue
+            release = _parse_ms(r['release'])
+            currencies = frozenset(c.strip().upper() for c in str(r.get("currencies", "USD")).split("|") if c.strip())
+            if not name or not currencies:raise ValueError('calendar event name and currency scope required')
+            source = str(r.get("source", "owner")).strip()
+            if not source:raise ValueError('calendar declared source label required')
+            key = declared_event_key(r,name,release)
+            e = seen.setdefault(key, {"name": name, "release": release, "currencies": currencies, "sources": set()})
+            if (e['name'],e['release'],e['currencies'])!=(name,release,currencies):
+>               raise ValueError('calendar event key has conflicting time/name/currency scope; use original distinct keys')
+E               ValueError: calendar event key has conflicting time/name/currency scope; use original distinct keys
+
+trading/vati/intelligence/calendar_feed.py:39: ValueError
+_ test_schedule_and_observation_rows_keep_the_same_original_explicit_event_key _
+
+    def test_schedule_and_observation_rows_keep_the_same_original_explicit_event_key():
+        original=row(event_key='provider:US:CPI:2026-10')
+        scheduled=scheduled_from_row(original)
+        observed=observation_from_row(original|{'actual':'3.1'})
+>       assert scheduled.event_key==observed.event_key=='provider:US:CPI:2026-10'
+E       AssertionError: assert 'CPI:1791981000000' == ':0'
+E         
+E         - :0
+E         + CPI:1791981000000
+
+trading/tests/test_calendar_feed_boundaries.py:53: AssertionError
+__ test_one_explicit_key_cannot_silently_change_its_original_release_or_scope __
+
+    def test_one_explicit_key_cannot_silently_change_its_original_release_or_scope():
+>       with pytest.raises(ValueError):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+trading/tests/test_calendar_feed_boundaries.py:57: Failed
+=========================== short test summary info ============================
+FAILED trading/tests/test_calendar_feed_boundaries.py::test_explicit_native_keys_preserve_two_same_name_and_time_series
+FAILED trading/tests/test_calendar_feed_boundaries.py::test_schedule_and_observation_rows_keep_the_same_original_explicit_event_key
+FAILED trading/tests/test_calendar_feed_boundaries.py::test_one_explicit_key_cannot_silently_change_its_original_release_or_scope
+3 failed, 21 passed in 0.45s

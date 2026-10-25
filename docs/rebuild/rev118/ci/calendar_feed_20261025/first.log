@@ -1,0 +1,52 @@
+.......................................s.s.............................. [ 13%]
+........................................................................ [ 27%]
+........................................................................ [ 41%]
+........................................................................ [ 55%]
+........................................................................ [ 69%]
+........................................................................ [ 83%]
+........................................................................ [ 96%]
+......s......F..                                                         [100%]
+=================================== FAILURES ===================================
+_____________ test_calendar_needs_two_sources_for_live_eligibility _____________
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-147/test_calendar_needs_two_source0')
+
+    def test_calendar_needs_two_sources_for_live_eligibility(tmp_path):
+        p = tmp_path / "cal.json"
+        p.write_text(json.dumps({"events": [
+            {"name": "NFP", "release": "2026-10-02T12:30:00Z", "currencies": "USD", "source": "bls"},
+            {"name": "NFP", "release": "2026-10-02T12:30:00Z", "currencies": "USD", "source": "vendor"},
+            {"name": "CPI", "release": "2026-10-14T12:30:00Z", "currencies": "USD", "source": "bls"},
+            {"name": "Coffee talk", "release": "2026-10-14T12:30:00Z", "currencies": "USD", "source": "x", "tier": "3"},
+        ]}))
+        evs = load_calendar(p)
+        assert [e.name for e in evs] == ["NFP", "CPI"] and evs[0].verified_sources == 2 and evs[1].verified_sources == 1
+        m = build_matrix(p)
+        nfp, cpi = evs
+        assert m.state_at(nfp.release_ms - 2 * 60_000, "EUR", "USD")[0] is EventWindowState.PRE_BLACKOUT
+        assert m.state_at(nfp.release_ms - 30 * 60_000, "EUR", "USD")[0] is EventWindowState.NONE          # verified: only the 5-minute blackout applies
+        assert m.state_at(nfp.release_ms + 60 * 60_000, "EUR", "USD")[0] is EventWindowState.DRIFT
+        assert m.state_at(cpi.release_ms - 4 * 60_000, "GBP", "USD")[0] is EventWindowState.PRE_BLACKOUT     # unverified: fails closed
+        rep = calendar_report(evs, now_ms=nfp.release_ms - 3_600_000)
+>       assert rep == {"events": 2, "upcoming": 2, "live_eligible": 1, "unverified": [cpi.event_id], "next": {"event_id": nfp.event_id, "in_minutes": 60}}
+E       AssertionError: assert {'events': 2,...ment': 1, ...} == {'events': 2,...000000'], ...}
+E         
+E         Omitting 4 identical items, use -vv to show
+E         Differing items:
+E         {'live_eligible': 0} != {'live_eligible': 1}
+E         Left contains 4 more items:
+E         {'authority_effect': 'NONE',
+E          'declared_agreement': 1,...
+E         
+E         ...Full output truncated (3 lines hidden), use '-vv' to show
+
+trading/tests/test_infra_live.py:300: AssertionError
+=============================== warnings summary ===============================
+trading/tests/test_infra_live.py::test_deriv_ws_transport_over_a_real_websocket_server
+  /workspace/van-review-2026-10-18/publish/trading/vati/execution/transports/deriv_ws.py:97: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+    self._ws.send(wire)
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED trading/tests/test_infra_live.py::test_calendar_needs_two_sources_for_live_eligibility
+1 failed, 516 passed, 3 skipped, 1 warning in 32.22s

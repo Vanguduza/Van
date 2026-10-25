@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="3" skipped="0" tests="20" time="0.287" timestamp="2026-10-25T23:08:53.564154+00:00" hostname="2c5a245e39f1"><testcase classname="trading.tests.test_calendar_feed_boundaries" name="test_bare_json_array_keeps_the_same_records_as_the_documented_object" time="0.105" /><testcase classname="trading.tests.test_calendar_feed_boundaries" name="test_naive_release_time_is_rejected_instead_of_using_the_worker_timezone[_parse_ms0]" time="0.001" /><testcase classname="trading.tests.test_calendar_feed_boundaries" name="test_naive_release_time_is_rejected_instead_of_using_the_worker_timezone[_parse_ms1]" time="0.001" /><testcase classname="trading.tests.test_calendar_feed_boundaries" name="test_sub_millisecond_time_is_not_silently_made_available_earlier[_parse_ms0]" time="0.001" /><testcase classname="trading.tests.test_calendar_feed_boundaries" name="test_sub_millisecond_time_is_not_silently_made_available_earlier[_parse_ms1]" time="0.000" /><testcase classname="trading.tests.test_calendar_feed_boundaries" name="test_different_currency_scopes_cannot_silently_share_a_legacy_event_key" time="0.001" /><testcase classname="trading.tests.test_calendar_feed_boundaries" name="test_explicit_native_keys_preserve_two_same_name_and_time_series" time="0.001"><failure message="ValueError: calendar event key has conflicting time/name/currency scope; use original distinct keys">def test_explicit_native_keys_preserve_two_same_name_and_time_series():
+&gt;       result=events_from_records([row(event_key='provider:US:CPI:2026-10',currencies='USD'),
+            row(event_key='provider:CA:CPI:2026-10',currencies='CAD')])
+
+trading/tests/test_calendar_feed_boundaries.py:37: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+records = [{'name': 'CPI', 'release': '2026-10-14T12:30:00Z', 'currencies': 'USD', 'source': 'declared-a', ...}, {'name': 'CPI', 'release': '2026-10-14T12:30:00Z', 'currencies': 'CAD', 'source': 'declared-a', ...}]
+
+    def events_from_records(records: Iterable[dict]) -&gt; list[Tier1Event]:
+        out: list[Tier1Event] = []
+        seen: dict[str, dict] = {}
+        for r in records:
+            if not isinstance(r,dict):raise ValueError('calendar schedule row must be an object')
+            name = str(r.get("name", "")).upper().replace(" ", "_")
+            if name not in TIER1_NAMES and str(r.get("tier", "1")) != "1":
+                continue
+            release = _parse_ms(r['release'])
+            currencies = frozenset(c.strip().upper() for c in str(r.get("currencies", "USD")).split("|") if c.strip())
+            if not name or not currencies:raise ValueError('calendar event name and currency scope required')
+            source = str(r.get("source", "owner")).strip()
+            if not source:raise ValueError('calendar declared source label required')
+            key = declared_event_key(r,name,release)
+            e = seen.setdefault(key, {"name": name, "release": release, "currencies": currencies, "sources": set()})
+            if (e['name'],e['release'],e['currencies'])!=(name,release,currencies):
+&gt;               raise ValueError('calendar event key has conflicting time/name/currency scope; use original distinct keys')
+E               ValueError: calendar event key has conflicting time/name/currency scope; use original distinct keys
+
+trading/vati/intelligence/calendar_feed.py:39: ValueError</failure></testcase><testcase classname="trading.tests.test_calendar_feed_boundaries" name="test_schedule_and_observation_rows_keep_the_same_original_explicit_event_key" time="0.002"><failure message="AssertionError: assert 'CPI:1791981000000' == ':0'&#10;  &#10;  - :0&#10;  + CPI:1791981000000">def test_schedule_and_observation_rows_keep_the_same_original_explicit_event_key():
+        original=row(event_key='provider:US:CPI:2026-10')
+        scheduled=scheduled_from_row(original)
+        observed=observation_from_row(original|{'actual':'3.1'})
+&gt;       assert scheduled.event_key==observed.event_key=='provider:US:CPI:2026-10'
+E       AssertionError: assert 'CPI:1791981000000' == ':0'
+E         
+E         - :0
+E         + CPI:1791981000000
+
+trading/tests/test_calendar_feed_boundaries.py:48: AssertionError</failure></testcase><testcase classname="trading.tests.test_calendar_feed_boundaries" name="test_one_explicit_key_cannot_silently_change_its_original_release_or_scope" time="0.002"><failure message="Failed: DID NOT RAISE ValueError">def test_one_explicit_key_cannot_silently_change_its_original_release_or_scope():
+&gt;       with pytest.raises(ValueError):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+trading/tests/test_calendar_feed_boundaries.py:52: Failed</failure></testcase><testcase classname="trading.tests.test_calendar_feed_boundaries" name="test_two_transport_labels_cannot_make_an_unqualified_file_live_eligible" time="0.001" /><testcase classname="trading.tests.test_calendar_feed_boundaries" name="test_explicit_offsets_and_legacy_epoch_units_keep_their_original_instant[_parse_ms0]" time="0.001" /><testcase classname="trading.tests.test_calendar_feed_boundaries" name="test_explicit_offsets_and_legacy_epoch_units_keep_their_original_instant[_parse_ms1]" time="0.001" /><testcase classname="trading.tests.test_calendar_feed_boundaries" name="test_historical_dates_before_the_unix_epoch_retain_exact_signed_milliseconds[_parse_ms0]" time="0.001" /><testcase classname="trading.tests.test_calendar_feed_boundaries" name="test_historical_dates_before_the_unix_epoch_retain_exact_signed_milliseconds[_parse_ms1]" time="0.001" /><testcase classname="trading.tests.test_calendar_feed_boundaries" name="test_malformed_file_envelopes_cannot_become_an_empty_success[None]" time="0.002" /><testcase classname="trading.tests.test_calendar_feed_boundaries" name="test_malformed_file_envelopes_cannot_become_an_empty_success[bad1]" time="0.003" /><testcase classname="trading.tests.test_calendar_feed_boundaries" name="test_malformed_file_envelopes_cannot_become_an_empty_success[bad2]" time="0.003" /><testcase classname="trading.tests.test_calendar_feed_boundaries" name="test_malformed_file_envelopes_cannot_become_an_empty_success[bad3]" time="0.002" /><testcase classname="trading.tests.test_calendar_feed_boundaries" name="test_malformed_file_envelopes_cannot_become_an_empty_success[bad4]" time="0.004" /><testcase classname="trading.tests.test_calendar_feed_boundaries" name="test_no_explicit_key_keeps_the_original_legacy_identity" time="0.001" /></testsuite></testsuites>

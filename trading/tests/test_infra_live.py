@@ -280,7 +280,7 @@ def test_bar_lake_hashes_slices_and_refuses_tampered_bytes(tmp_path):
 
 
 # ------------------------------------------------------------- calendar
-def test_calendar_needs_two_sources_for_live_eligibility(tmp_path):
+def test_calendar_file_labels_preserve_blackouts_without_native_live_qualification(tmp_path):
     p = tmp_path / "cal.json"
     p.write_text(json.dumps({"events": [
         {"name": "NFP", "release": "2026-10-02T12:30:00Z", "currencies": "USD", "source": "bls"},
@@ -297,7 +297,10 @@ def test_calendar_needs_two_sources_for_live_eligibility(tmp_path):
     assert m.state_at(nfp.release_ms + 60 * 60_000, "EUR", "USD")[0] is EventWindowState.DRIFT
     assert m.state_at(cpi.release_ms - 4 * 60_000, "GBP", "USD")[0] is EventWindowState.PRE_BLACKOUT     # unverified: fails closed
     rep = calendar_report(evs, now_ms=nfp.release_ms - 3_600_000)
-    assert rep == {"events": 2, "upcoming": 2, "live_eligible": 1, "unverified": [cpi.event_id], "next": {"event_id": nfp.event_id, "in_minutes": 60}}
+    assert rep == {"events": 2, "upcoming": 2, "live_eligible": 0, "declared_agreement": 1,
+                   "provider_qualified":False,"authority_effect":"NONE",
+                   "source_state":"DECLARED_SCHEDULE_ONLY_NOT_NATIVE_FEED_ADMISSION",
+                   "unverified": [cpi.event_id], "next": {"event_id": nfp.event_id, "in_minutes": 60}}
     csvp = tmp_path / "cal.csv"; csvp.write_text("name,release,currencies,source\nFOMC,1790000000,USD,fed\n")
     assert load_calendar(csvp)[0].release_ms == 1_790_000_000_000
 

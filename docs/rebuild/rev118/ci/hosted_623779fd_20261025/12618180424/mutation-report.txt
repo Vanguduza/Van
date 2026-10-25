@@ -1,0 +1,92 @@
+
+### ['../tests/contracts/test_encrypted_queue_writes_are_off_the_main_thread.py']
+CAUGHT             C39 the outbox says saved before the bytes are down
+CAUGHT             C39 a burst of notifications writes to an encrypted disk on the thread that draws
+CAUGHT             C39 discarding the queue is one synchronous write per command, from a button
+
+3/3 caught
+
+### ['../tests/contracts/test_stored_command_is_deliverable.py']
+CAUGHT             C38 the body stored offline is unsigned, and is refused on the flush
+CAUGHT             C38 the stored command has no id for the Gateway to admit it by
+CAUGHT             C38 the offline path assembles its own payload again
+
+3/3 caught
+
+### ['tests/test_session_transport_api.py', 'tests/test_van_hermes_session.py']
+CAUGHT             C36 the owner cancels a mission over the session and nothing happens
+CAUGHT             C36 a refused message keeps its idempotency key and the corrected resend is refused
+CAUGHT             C36 an envelope nobody can carry out is written into the admission table first
+CAUGHT             C36 the Gateway holds the message and tells the phone to send it again
+CAUGHT             C36 a new session is told it already holds the abandoned one's work
+CAUGHT             C36 a malformed command reads as a server fault and is retried forever
+
+6/6 caught
+
+### ['tests/test_owner_memory_has_a_producer.py']
+CAUGHT             C8 stop observing the goal
+CAUGHT             C8 ordinary use recorded as a decision
+CAUGHT             C8 infer a reason the owner never gave
+CAUGHT             C8 never record the decision outcome
+CAUGHT             C8 sweep the goals just mentioned
+CAUGHT             C8 drop the stale-intent sweep
+
+6/6 caught
+
+### ['tests/test_irreversible_work_waits_on_assumptions.py', 'tests/test_authority_descriptor.py']
+CAUGHT             C16 drop the gate from the execution ingress
+CAUGHT             C16 an undeclared reversibility is assumed reversible
+CAUGHT             C16 an action with no mission is waved through
+CAUGHT             C16 falsifying needs no evidence again
+CAUGHT             C16 a caller may assert expiry
+CAUGHT             C16 supersession need not name a replacement
+CAUGHT             C16 cite another mission's assumption as the replacement
+CAUGHT             C16 an assumption supersedes itself
+CAUGHT             C16 expiry reports a count that is always zero
+CAUGHT             C16 the orchestrator stops asking the descriptor
+CAUGHT             C16 A4 no longer needs owner approval
+CAUGHT             C16 A5 is no longer refused
+
+12/12 caught
+
+### ['tests/test_browser_input_protocol.py']
+CAUGHT             C25 a packet from another protocol version is parsed anyway
+CAUGHT             C25 trailing bytes are ignored, so two packets decode alike
+CAUGHT             C25 the duplicated edge becomes a second tap
+CAUGHT             C25 a late DOWN reopens a gesture that has moved on
+CAUGHT             C25 a reordered MOVE is applied, so the page jumps backwards
+CAUGHT             C25 a new gesture starts without cancelling the one it replaces
+CAUGHT             C25 a gesture can stay pressed forever after the phone vanishes
+CAUGHT             C25 a metered session reports high-quality certification
+CAUGHT             C25 metered data gets the unmetered bitrate ladder by default
+CAUGHT             C25 quality climbs on a single good sample
+CAUGHT             C25 an unusable round trip is reported as an encoder problem
+
+11/11 caught
+
+### ['tests/test_owner_device_provisioning.py', 'tests/test_browser_flood_bounds.py']
+CAUGHT             C34 the installer points the owner's phone at a plain-http gateway
+CAUGHT             C34 a payload read out of a log an hour later still provisions the phone
+CAUGHT             C34 a standing credential is signed into a payload sent over a channel that logs
+CAUGHT             C34 the provisioning window is a year instead of ten minutes
+CAUGHT             C34 a stopped flood keeps the owner's session refused
+CAUGHT             C34 the input window never slides, so one busy second is permanent
+CAUGHT             C34 one session under attack throttles the owner's own
+CAUGHT             C34 a page navigating in a tab it already owns is counted as a new one
+CAUGHT             C34 a session that has ever finished sixteen downloads accepts no more
+CAUGHT             C34 a download for a session nobody created reads as already reported
+
+10/10 caught
+
+### ['tests/contracts/test_the_apk_leaves_ci.py', 'tests/contracts/test_ci_workflow_is_what_it_claims.py']
+CAUGHT             C12 drop the APK upload entirely
+CAUGHT             C12 publish an empty artefact instead of failing
+CAUGHT             C12 point the upload at a variant the build never assembles
+CAUGHT             C12 stop assembling the APK but keep uploading it
+CAUGHT             C12 rename the module out from under the artifact path
+CAUGHT             C12 a module that emits an AAR, not an APK
+
+6/6 caught
+
+================ SURVIVORS ================
+none

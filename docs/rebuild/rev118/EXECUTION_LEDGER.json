@@ -161,7 +161,9 @@
       "acceptance": "NOT_ISSUED",
       "evidence": [
         "backend/BE-014_CALENDAR_CAUSAL_PUBLICATION.md",
-        "receipts/CALENDAR_CAUSAL_SOURCE_20261025.json"
+        "receipts/CALENDAR_CAUSAL_SOURCE_20261025.json",
+        "backend/BE-014_CALENDAR_FEED_BOUNDARIES.md",
+        "receipts/CALENDAR_FEED_SOURCE_20261025.json"
       ]
     }
   },
@@ -235,7 +237,7 @@
     "note": "Opus unavailable; owner transferred build to Codex. No independent reviewer identity is inferred from another model or session."
   },
   "checkpoint": {
-    "updated_utc": "2026-10-25T22:50:16.851349+00:00",
+    "updated_utc": "2026-10-25T23:21:42.039363+00:00",
     "branch": "ccr-9e07e1af-8mgz1p",
     "base": "b02075f327ea8180ab6d269eba358cf8c5479878",
     "background_jobs": [
@@ -455,9 +457,9 @@
       "Python 3.12 venv from backend/requirements.lock for CI-equivalent runs; stream-host venv from deploy/van-browser-stream/requirements.lock",
       "Desktop Commander read-only device listing was refused by the session permission policy; native readback prepared as pre003/NATIVE_READBACK_REQUEST.md"
     ],
-    "next_action": "Commit calendar source/evidence through genuine hooks and committed ledger verification; preserve missing CLI publication capability and exact hosted qualification requirement. Continue BE-014 feed shape/explicit time/identity/source health, qualified native producer/consumer and all remaining backend/ML/assistant obligations. No new frontend before BG-001.",
-    "previous_head": "c5350284949b73ca52370ce81592efd7aee5ef54",
-    "current_packet": "BE-020 durable monitor controls, server evaluator, contracts and source evidence; unit remains IN_PROGRESS.",
+    "next_action": "Finish manifest/verified backup, genuine hook commit and committed ledger verification; preserve exact623 hosted qualification until terminal before routine push. Continue BE014 source health/ingestion and canonical backend programme. No frontend redesign before BG001.",
+    "previous_head": "623779fd54d0e1a48ae00c59620e0175671d597b",
+    "current_packet": "Calendar file shape, explicit original identity and exact declared UTC milliseconds; source-tested component, pending genuine hook commit and publication",
     "ci_credential_capability": "receipts/CI_CREDENTIAL_CAPABILITY_20261024.json: repo admin metadata available, integration secret/deploy-key reads403; no credential changes.",
     "current_background_jobs": [
       {
@@ -471,7 +473,14 @@
     "active_packet": "SourceCIWindowslongpath checkout recovery, then BE014calendarfeedshape/timezone/scopedidentity",
     "published_head": "3c6969ebbec39f2ad9f2836a6bd8acdb487adc34",
     "local_base_head": "46474a6cf054bbecf4ab32ed6d3d394611f633b0",
-    "committed_ledger_verification": "GREEN135 through3c6969eb against4fd466dec3910ed5de614bfbf95887ad619df5ca; quote packet not yet committed"
+    "committed_ledger_verification": "GREEN135 through3c6969eb against4fd466dec3910ed5de614bfbf95887ad619df5ca; quote packet not yet committed",
+    "native_mql_source_compile": {
+      "head": "623779fd54d0e1a48ae00c59620e0175671d597b",
+      "run": 40242295641,
+      "status": "SOURCE_COMPILED",
+      "evidence": "receipts/NATIVE_MQL_COMPILED_623779fd.json",
+      "qualification": "Valid vendor compiler signature, deliberate bad source rejected, EA zero errors/warnings with fresh binary. Offline SDK initialization starts network-blocked terminal; no account/broker/order/deployment/device acceptance."
+    }
   },
   "observations": [
     "OBS-001 BE-002 debug cleartext",
@@ -483,7 +492,8 @@
     "2026-10-25T21:04:30.348392+00:00: Event selector5934d427 committed through genuine hooks/GREEN137. Verified55-file candidate ZIP272903bytes SHA25698fab1c910e5ff4252d5aee4d4e600d6e47b669b4a3d8773fb6112e8660f65c0. No normal push due invalid injected CLI credential. Current cloud observation still running/connected but secrets/outbound identities/runtime bindings/capabilities empty; no supported refresh tool discovered. Connected GitHub source metadata/recovery tools work, no commit/ref substitute.",
     "2026-10-25T22:14:16.701534+00:00: Verified genuine three-commit bundle requires published3c6969eb,564737bytes SHA256f81eff58486bd4b3de64d855a60e8b80489f57cb0f966b2098bda544614d3f36. Recovery-only unreferenced JSON blob b4fbb38edd0f5e52db6da121a3ec53c552f5f071 read back exactly; not branch publication or guaranteed retention. DIAL checkpointd80b8879-84d9-49e4-89e7-c04734b332e2 reports source, accepts nothing. Remote3c6969eb readback unchanged; CLI refresh pending. Calendar candidate isolated at/workspace/van-calendar-source-20261025 onad1d3941, not yet applied to this checkout;14before failures and83focused pass/audit0; source-only pending integration, no unit milestone issued here.",
     "2026-10-25T22:34:31.636665+00:00: Quote component genuinely committed047dacc6/GREEN139;1258-file manifest0mismatches. Verified89-file precommit ZIP836995bytes SHA256b692e47a332eadd77ea295e9e52ef4f4e0f140b24b7a997625bd62d6afb6fa6e. Calendar isolated candidate originalbytes checked and copied into main checkout after quote commit; current evidence498actualPG0skip/audit0, no unit acceptance. Source independence/entitlement/native availability remain unqualified; no actual financial/provider/production/device effects.",
-    "2026-10-25T22:50:16.851349+00:00: Publication blocker resolved by actual APIexit0, normalgitlsremote, normalpush and readback5fa19136. Refreshmechanism notestablished; no injectedtoken replacement or APIcommit/ref workaround. DIALcheckpoint1194ee96-a61f-46f6-bbdd-d8de21fdaae2 reports publishedsource/accepted0. NativeMQLcheckout failedSourceLog121313801954 preserved; no compilerexecution is claimed."
+    "2026-10-25T22:50:16.851349+00:00: Publication blocker resolved by actual APIexit0, normalgitlsremote, normalpush and readback5fa19136. Refreshmechanism notestablished; no injectedtoken replacement or APIcommit/ref workaround. DIALcheckpoint1194ee96-a61f-46f6-bbdd-d8de21fdaae2 reports publishedsource/accepted0. NativeMQLcheckout failedSourceLog121313801954 preserved; no compilerexecution is claimed.",
+    "2026-10-25T23:21:42.039363+00:00: Calendar final532 actualPG0skip/audit0/exact hashes and25 controls;6 final supplemental faults caught/restored. Initial10assertionfailures and extra4long-fractionfailures retained, as is old qualification-oracle failure. Exact623 native SDK compilation passed; full van-ci still running with original2mandatory prerequisite failures. Prior5fa run40241410394 canceled by existing concurrency policy on623 push; partial only."
   ],
   "obligations": "obligations/OBLIGATIONS.json: preserved observations with source implementation evidence and explicit remaining native/unit obligations.",
   "pre002_challenge": "pre002/challenge/: 324 author-prepared dossiers (AUTHOR_CHALLENGED_PENDING_INDEPENDENT_REVIEW)",
@@ -514,7 +524,7 @@
     "tested_android_head": "ac60c4d3ba57ff488a39fa1962920ce4711c0ffc",
     "hosted_result": "receipts/HOSTED_SOURCE_ac60c4d3.json",
     "mutation_reconciliation": "ci/MUTATION_RECONCILIATION.md and ci/MUTATION_RECONCILIATION_MAPPING.json",
-    "verified_source_head": "5fa1913631c0ee033be6c18113dfad7cf8f09f9e published normally and remote-ref verified; genuine committed ledger GREEN140",
+    "verified_source_head": "623779fd54d0e1a48ae00c59620e0175671d597b published normally and remote-ref verified; genuine committed ledger GREEN141",
     "source_qualification_run": 40219703232,
     "latest_checkpoint_report": "CHECKPOINT_20261025_NATIVE_FEED.md",
     "previous_verified_source": "3c6969ebbec39f2ad9f2836a6bd8acdb487adc34 published; exact CI40228254162 all17public jobs pass, two unchanged prerequisite failures",
@@ -536,6 +546,6 @@
       "evidence": "ci/MUTATION_CORPUS_c2a27848.json"
     }
   ],
-  "current_action": "Genuinehookcommit/pushWindowscheckoutfix and inspect freshactualnativeSDKjob. Preserve5faCIqualification and originalfailure, then continue BE014calendarfeedshape/explicittime/scopedidentity/sourcehealth and allremaining canonicalbackendprogramme. No newfrontend beforeBG001.",
-  "updated_at_utc": "2026-10-25T22:50:16.851349+00:00"
+  "current_action": "Finish manifest/verified backup, genuine hook commit and committed ledger verification; preserve exact623 hosted qualification until terminal before routine push. Continue BE014 source health/ingestion and canonical backend programme. No frontend redesign before BG001.",
+  "updated_at_utc": "2026-10-25T23:21:42.039363+00:00"
 }
