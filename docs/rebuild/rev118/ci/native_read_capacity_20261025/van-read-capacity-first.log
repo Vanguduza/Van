@@ -1,0 +1,30 @@
+..............F......................................................... [ 93%]
+.....                                                                    [100%]
+=================================== FAILURES ===================================
+__________ test_frame_limit_retires_before_waiting_for_the_next_body ___________
+
+harness = <test_ctrader_transport_lifecycle.Harness object at 0x7f7b6436a8d0>
+
+    def test_frame_limit_retires_before_waiting_for_the_next_body(harness):
+        transport,server=source(harness,max_read_frames=1)
+        transport.connect();worker=transport._reader
+        first=send(server,'ProtoOAExecutionEvent',{'ctidTraderAccountId':12345,'executionType':'ORDER_FILLED'})
+        # Only a valid second header, no body. Capacity must fence before receiving it.
+        server.sendall(struct.pack('>I',first))
+        worker.join(.5)
+        assert not worker.is_alive() and not transport.connected
+        state=transport.read_capacity_snapshot()
+        assert state['state']=='EXHAUSTED' and state['admitted_frame_headers']==1
+        assert state['reserved_encoded_bytes']==first and state['refused_frame_length']==first
+>       assert transport.drain_events()==[('ProtoOAExecutionEvent',{
+            'payloadType':'PROTO_OA_EXECUTION_EVENT','ctidTraderAccountId':12345,'executionType':'ORDER_FILLED',
+            'isServerEvent':False})]
+E       AssertionError: assert [('ProtoOAExe...DER_FILLED'})] == [('ProtoOAExe...ent': False})]
+E         
+E         At index 0 diff: ('ProtoOAExecutionEvent', {'payloadType': 'PROTO_OA_EXECUTION_EVENT', 'ctidTraderAccountId': 12345, 'executionType': 'ORDER_FILLED'}) != ('ProtoOAExecutionEvent', {'payloadType': 'PROTO_OA_EXECUTION_EVENT', 'ctidTraderAccountId': 12345, 'executionType': 'ORDER_FILLED', 'isServerEvent': False})
+E         Use -v to get more diff
+
+trading/tests/test_ctrader_read_capacity.py:40: AssertionError
+=========================== short test summary info ============================
+FAILED trading/tests/test_ctrader_read_capacity.py::test_frame_limit_retires_before_waiting_for_the_next_body
+1 failed, 76 passed in 1.53s

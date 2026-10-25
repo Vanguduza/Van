@@ -192,6 +192,9 @@ class CtraderTransport:
             buf.extend(chunk)
         return bytes(buf)
 
+    def _admit_frame_header(self, length: int) -> None:
+        """Ordinary financial transport retains its existing per-frame policy."""
+
     def _read_loop(self, sock) -> None:
         try:
             while True:
@@ -201,6 +204,7 @@ class CtraderTransport:
                 (ln,) = struct.unpack(">I", self._recv_exact(sock, 4))
                 if not 1 <= ln <= self.max_frame_bytes:
                     raise CtraderError("cTrader native frame length exceeds configured capacity")
+                self._admit_frame_header(ln)
                 name, body, cid = SCHEMA.unwrap(self._recv_exact(sock, ln))
                 with self._state_lock:
                     if self._sock is not sock:
@@ -384,10 +388,15 @@ class CtraderReadTransport(CtraderTransport):
                               "ProtoOAGetTrendbarsReq", "ProtoOASubscribeSpotsReq",
                               "ProtoOAUnsubscribeSpotsReq", "ProtoHeartbeatEvent"})
 
-    def __init__(self, *, operation_timeout_s=30.0, monotonic=None, **kwargs):
+    def __init__(self, *, operation_timeout_s=30.0, monotonic=None,
+                 max_read_frames=4096, max_read_bytes=16*1024*1024, **kwargs):
         if (type(operation_timeout_s) not in (int, float) or not math.isfinite(operation_timeout_s)
                 or not 0 < operation_timeout_s <= 300):
             raise ValueError("native read budget must be finite and positive, at most300seconds")
+        if type(max_read_frames) is not int or not 1<=max_read_frames<=65536:
+            raise ValueError('native read frame capacity must be an integer from1through65536')
+        if type(max_read_bytes) is not int or not 1<=max_read_bytes<=256*1024*1024:
+            raise ValueError('native read encoded capacity must be an integer from1byte through256MiB')
         super().__init__(**kwargs)
         if (type(self.timeout_s) not in (int, float) or not math.isfinite(self.timeout_s) or self.timeout_s <= 0):
             raise ValueError("native read peer timeout must be finite and positive")
@@ -397,9 +406,37 @@ class CtraderReadTransport(CtraderTransport):
             raise ValueError("native read monotonic clock required")
         self._operation_deadline = None
         self._last_budget_clock = None
+        self.max_read_frames,self.max_read_bytes=max_read_frames,max_read_bytes
+        self._admitted_frame_headers=self._reserved_encoded_bytes=0
+        self._refused_frame_length=None
+
+    def _admit_frame_header(self,length):
+        # Charge before reading/decoding the body, including heartbeats and RPC
+        # replies. Drain, close and reconnect cannot refund this operation.
+        with self._state_lock:
+            if (self._refused_frame_length is not None
+                    or self._admitted_frame_headers>=self.max_read_frames
+                    or length>self.max_read_bytes-self._reserved_encoded_bytes):
+                if self._refused_frame_length is None:self._refused_frame_length=length
+                raise CtraderError('native read cumulative frame/encoded-byte capacity exhausted')
+            self._admitted_frame_headers+=1
+            self._reserved_encoded_bytes+=length
+
+    def read_capacity_snapshot(self):
+        with self._state_lock:
+            return {'schema':'vati.ctrader-read-capacity/1',
+                    'state':'EXHAUSTED' if self._refused_frame_length is not None else 'WITHIN_LIMIT',
+                    'max_read_frames':self.max_read_frames,'max_read_bytes':self.max_read_bytes,
+                    'admitted_frame_headers':self._admitted_frame_headers,
+                    'reserved_encoded_bytes':self._reserved_encoded_bytes,
+                    'refused_frame_length':self._refused_frame_length,
+                    'accounting_basis':'ADMITTED_PROTOBUF_LENGTH_EXCLUDING_PREFIX_NOT_DECODED_DELIVERY_OR_PROCESS_MEMORY',
+                    'provider_qualified':False,'authority_effect':'NONE'}
 
     def _io_timeout(self):
         with self._state_lock:
+            if self._refused_frame_length is not None:
+                raise CtraderError('native read cumulative frame/encoded-byte capacity exhausted')
             try:
                 now = self._budget_clock()
             except Exception as exc:

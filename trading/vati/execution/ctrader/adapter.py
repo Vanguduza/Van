@@ -210,11 +210,13 @@ class CtraderAdapter:
             raise VenueUnavailable(f"symbol {name} not available on this cTrader account") from None
 
     # ------------------------------------------------------------ reads
-    def market_reader(self, *, collection_timeout_s=30.0):
+    def market_reader(self, *, collection_timeout_s=30.0,
+                      max_read_frames=4096,max_read_bytes=16*1024*1024):
         """Independent read-only connection; never shares the protective socket."""
         transport=CtraderReadTransport(host=self.transport.host,port=self.transport.port,
             timeout_s=self.transport.timeout_s,connector=self.transport._connector,
-            max_frame_bytes=self.transport.max_frame_bytes,operation_timeout_s=collection_timeout_s)
+            max_frame_bytes=self.transport.max_frame_bytes,operation_timeout_s=collection_timeout_s,
+            max_read_frames=max_read_frames,max_read_bytes=max_read_bytes)
         adapter=CtraderAdapter(transport,self.client_id,self.client_secret_provider,self.access_token_provider,
             self.ctid_trader_account_id,self.account_alias,self.venue,clock=self.clock)
         class MarketReader:
@@ -257,6 +259,7 @@ class CtraderAdapter:
                     if not transport.wait_for_event_kind('ProtoOASpotEvent'):
                         raise VenueUnavailable('cTrader native spot subscription queued but no complete fresh quote delivered')
             def close(self):transport.close()
+            def read_capacity_snapshot(self):return transport.read_capacity_snapshot()
         return MarketReader()
 
     def funding_reader(self):
