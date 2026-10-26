@@ -1,0 +1,24 @@
+..................F...............                                       [100%]
+=================================== FAILURES ===================================
+______ test_atomic_origin_marker_refuses_deleted_lineage_after_cold_start ______
+
+ledger = <vati.core.ledger.Ledger object at 0x7f3b7972f050>
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f3b7972ee10>
+
+    def test_atomic_origin_marker_refuses_deleted_lineage_after_cold_start(ledger, monkeypatch):
+        news = NewsIngress(ledger=ledger); news.ingest_rows([row()], now_ms=NOW)
+        iterate = ledger.iter
+        def hide(kind=None, **kwargs):
+            if kind is not None and kind.value == 'NEWS_LINEAGE':
+                return iter(())
+            return iterate(kind, **kwargs)
+        with monkeypatch.context() as patch:
+            patch.setattr(ledger, 'iter', hide)
+>           with pytest.raises(ValueError, match='lineage.*missing'):
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           Failed: DID NOT RAISE ValueError
+
+trading/tests/test_news_publisher_lineage.py:197: Failed
+=========================== short test summary info ============================
+FAILED trading/tests/test_news_publisher_lineage.py::test_atomic_origin_marker_refuses_deleted_lineage_after_cold_start
+1 failed, 33 passed, 2 deselected in 1.19s

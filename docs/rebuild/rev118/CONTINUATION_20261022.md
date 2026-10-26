@@ -749,3 +749,10 @@ Final durable-news follow-up: two cold missing-receipt assertions reproduced rec
 ## 26 October: news runtime source health and owner heartbeat
 
 Current source component wires real builder recovery, declared file/clock/capacity/error states, profile-bound durable health receipts and both owner heartbeats.698 final actualPG0skip/audit0/exact hashes,119 controls with4PGdeselected executedfixture and10 supplemental faults caught/restored. Broader1059 selection TIMEOUT1800 after1057 completed passes/audit0; interruptedCANCELLED and unstartedEXPIRED are included in final selection, no broad-runPASS. See CHECKPOINT_20261026_NEWS.md and backend/BE-014_NEWS_RUNTIME_HEALTH.md. Genuine prior7e84277c is GREEN145/local; exactpublishedEA CI is terminal17publicpass/2unwaived prerequisite failures. Commit/ledger/publish normally and continue provider-neutral/public-official source work and canonical programme.
+
+
+## 2026-10-26T02:01:26.332512+00:00 — publisher lineage component
+
+Separate versioned durable publisher/story declarations bind original observation receipts without rewriting headline IDs/claims/history. Atomic publication/readback, marker-bound missing/conflicting/orphan recovery refusal;late declaration as-of clocks,rewritten syndicated clusters count once,unknown/conflicting origins visible,qualified independent sources0.734final actualPG0skip/audit0/exact source+test hashes;153controls+6PGdeselected executedfixture;8faults caught/restored.11baseline+2followup+1orphan failures and harness diagnostics retained. Full BE014 remains IN_PROGRESS. See backend/BE-014_NEWS_PUBLISHER_LINEAGE.md; receipts/NEWS_PUBLISHER_LINEAGE_SOURCE_20261026.json. Published752d265b/GREEN146/manifest1887 verified by normal push/readback. Current lineage packet remains uncommitted.
+
+Next: Finish current source documentary checks/manifest/verified backup and genuine hook commit;inspect exact752 hosted CI until terminal before routine next push. Continue BE014 provider-neutral official RSS parsing/raw capture and scheduled-value crosschecks under OQ06;no purchase/native admission.

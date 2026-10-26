@@ -1,6 +1,6 @@
 {
   "schema": "van.rebuild.candidate-source-progress/1",
-  "updated_at_utc": "2026-10-26T01:33:27.917947+00:00",
+  "updated_at_utc": "2026-10-26T02:01:26.332512+00:00",
   "programme": "Rev1.18; original 131 unit IDs and dependencies retained",
   "authority": "auth-20261022-owner-autonomous-candidate-build",
   "meaning": "Candidate source progress is separate from admitted unit acceptance. Independent certificates, owner decisions, live effects and release gates remain unissued. No unit is declared complete by this record.",
@@ -820,6 +820,10 @@
         {
           "description": "Real session/account builders recover original history; explicit file/clock/config/capacity/recovery/publication source states, typed JSONL row errors preserve neighbors, current batch diagnostics retain cumulative legacy counters. Scoped profile-bound durable health transitions/readback; nullable unknown partial effects, original clock versus current check distinct. Both owner heartbeats surface source health without changing native owner/hold/lease fields.698 final actualPG0skip/audit0/exact hashes;119 controls+4PGdeselected executedfixture;10 faults caught/restored. Broader1059 selection TIMEOUT1800 after1057completed passes/audit0,2remaining coveredfinal; not full-runPASS. Licensed/native provider/worker capacity qualification and complete BE014 remain.",
           "evidence": "backend/BE-014_NEWS_RUNTIME_HEALTH.md; receipts/NEWS_RUNTIME_SOURCE_20261026.json"
+        },
+        {
+          "description": "Separate versioned durable publisher/story declarations bind original observation receipts without rewriting headline IDs/claims/history. Atomic publication/readback, marker-bound missing/conflicting/orphan recovery refusal;late declaration as-of clocks,rewritten syndicated clusters count once,unknown/conflicting origins visible,qualified independent sources0.734final actualPG0skip/audit0/exact source+test hashes;153controls+6PGdeselected executedfixture;8faults caught/restored.11baseline+2followup+1orphan failures and harness diagnostics retained. Full BE014 remains IN_PROGRESS.",
+          "evidence": "backend/BE-014_NEWS_PUBLISHER_LINEAGE.md; receipts/NEWS_PUBLISHER_LINEAGE_SOURCE_20261026.json"
         }
       ]
     },

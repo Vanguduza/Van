@@ -1,0 +1,496 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="31" skipped="0" tests="34" time="1.389" timestamp="2026-10-26T01:56:48.853009+00:00" hostname="2c5a245e39f1"><testcase classname="trading.tests.test_news_publisher_lineage" name="test_rewritten_syndicated_stories_form_one_declared_cluster" time="0.147"><failure message="assert 2 == 1">ledger = &lt;vati.core.ledger.Ledger object at 0x7f90a3a9a3f0&gt;
+
+    def test_rewritten_syndicated_stories_form_one_declared_cluster(ledger):
+        news = NewsIngress(ledger=ledger)
+        assert news.ingest_rows([row(), row('wire-b', 'Central bank publishes its policy decision')], now_ms=NOW)['accepted'] == 2
+        report = lineage(news)
+&gt;       assert report['story_clusters'] == 1
+E       assert 2 == 1
+
+trading/tests/test_news_publisher_lineage.py:42: AssertionError</failure></testcase><testcase classname="trading.tests.test_news_publisher_lineage" name="test_invalid_explicit_origin_is_skipped_without_publishing_a_headline[None]" time="0.008"><failure message="AssertionError: assert {'accepted': ... 'skipped': 0} == {'accepted': ... 'skipped': 1}&#10;  &#10;  Omitting 1 identical items, use -vv to show&#10;  Differing items:&#10;  {'accepted': 1} != {'accepted': 0}&#10;  {'skipped': 0} != {'skipped': 1}&#10;  Use -v to get more diff">ledger = &lt;vati.core.ledger.Ledger object at 0x7f90a3a00890&gt;, origin = None
+
+    @pytest.mark.parametrize('origin', [None, {}, {'publisher_id': 'bank'},
+        {'publisher_id': True, 'story_id': 'r'}, {'publisher_id': 'bank', 'story_id': ''},
+        {'publisher_id': 'bank', 'story_id': 'r', 'qualified': True}])
+    def test_invalid_explicit_origin_is_skipped_without_publishing_a_headline(ledger, origin):
+        news = NewsIngress(ledger=ledger)
+        counts = news.ingest_rows([row(original_publisher=origin)], now_ms=NOW)
+&gt;       assert counts == {'accepted': 0, 'duplicates': 0, 'skipped': 1}
+E       AssertionError: assert {'accepted': ... 'skipped': 0} == {'accepted': ... 'skipped': 1}
+E         
+E         Omitting 1 identical items, use -vv to show
+E         Differing items:
+E         {'accepted': 1} != {'accepted': 0}
+E         {'skipped': 0} != {'skipped': 1}
+E         Use -v to get more diff
+
+trading/tests/test_news_publisher_lineage.py:57: AssertionError</failure></testcase><testcase classname="trading.tests.test_news_publisher_lineage" name="test_invalid_explicit_origin_is_skipped_without_publishing_a_headline[origin1]" time="0.006"><failure message="AssertionError: assert {'accepted': ... 'skipped': 0} == {'accepted': ... 'skipped': 1}&#10;  &#10;  Omitting 1 identical items, use -vv to show&#10;  Differing items:&#10;  {'accepted': 1} != {'accepted': 0}&#10;  {'skipped': 0} != {'skipped': 1}&#10;  Use -v to get more diff">ledger = &lt;vati.core.ledger.Ledger object at 0x7f90a3a9a870&gt;, origin = {}
+
+    @pytest.mark.parametrize('origin', [None, {}, {'publisher_id': 'bank'},
+        {'publisher_id': True, 'story_id': 'r'}, {'publisher_id': 'bank', 'story_id': ''},
+        {'publisher_id': 'bank', 'story_id': 'r', 'qualified': True}])
+    def test_invalid_explicit_origin_is_skipped_without_publishing_a_headline(ledger, origin):
+        news = NewsIngress(ledger=ledger)
+        counts = news.ingest_rows([row(original_publisher=origin)], now_ms=NOW)
+&gt;       assert counts == {'accepted': 0, 'duplicates': 0, 'skipped': 1}
+E       AssertionError: assert {'accepted': ... 'skipped': 0} == {'accepted': ... 'skipped': 1}
+E         
+E         Omitting 1 identical items, use -vv to show
+E         Differing items:
+E         {'accepted': 1} != {'accepted': 0}
+E         {'skipped': 0} != {'skipped': 1}
+E         Use -v to get more diff
+
+trading/tests/test_news_publisher_lineage.py:57: AssertionError</failure></testcase><testcase classname="trading.tests.test_news_publisher_lineage" name="test_invalid_explicit_origin_is_skipped_without_publishing_a_headline[origin2]" time="0.005"><failure message="AssertionError: assert {'accepted': ... 'skipped': 0} == {'accepted': ... 'skipped': 1}&#10;  &#10;  Omitting 1 identical items, use -vv to show&#10;  Differing items:&#10;  {'accepted': 1} != {'accepted': 0}&#10;  {'skipped': 0} != {'skipped': 1}&#10;  Use -v to get more diff">ledger = &lt;vati.core.ledger.Ledger object at 0x7f90a3949dc0&gt;
+origin = {'publisher_id': 'bank'}
+
+    @pytest.mark.parametrize('origin', [None, {}, {'publisher_id': 'bank'},
+        {'publisher_id': True, 'story_id': 'r'}, {'publisher_id': 'bank', 'story_id': ''},
+        {'publisher_id': 'bank', 'story_id': 'r', 'qualified': True}])
+    def test_invalid_explicit_origin_is_skipped_without_publishing_a_headline(ledger, origin):
+        news = NewsIngress(ledger=ledger)
+        counts = news.ingest_rows([row(original_publisher=origin)], now_ms=NOW)
+&gt;       assert counts == {'accepted': 0, 'duplicates': 0, 'skipped': 1}
+E       AssertionError: assert {'accepted': ... 'skipped': 0} == {'accepted': ... 'skipped': 1}
+E         
+E         Omitting 1 identical items, use -vv to show
+E         Differing items:
+E         {'accepted': 1} != {'accepted': 0}
+E         {'skipped': 0} != {'skipped': 1}
+E         Use -v to get more diff
+
+trading/tests/test_news_publisher_lineage.py:57: AssertionError</failure></testcase><testcase classname="trading.tests.test_news_publisher_lineage" name="test_invalid_explicit_origin_is_skipped_without_publishing_a_headline[origin3]" time="0.008"><failure message="AssertionError: assert {'accepted': ... 'skipped': 0} == {'accepted': ... 'skipped': 1}&#10;  &#10;  Omitting 1 identical items, use -vv to show&#10;  Differing items:&#10;  {'accepted': 1} != {'accepted': 0}&#10;  {'skipped': 0} != {'skipped': 1}&#10;  Use -v to get more diff">ledger = &lt;vati.core.ledger.Ledger object at 0x7f90a394a7b0&gt;
+origin = {'publisher_id': True, 'story_id': 'r'}
+
+    @pytest.mark.parametrize('origin', [None, {}, {'publisher_id': 'bank'},
+        {'publisher_id': True, 'story_id': 'r'}, {'publisher_id': 'bank', 'story_id': ''},
+        {'publisher_id': 'bank', 'story_id': 'r', 'qualified': True}])
+    def test_invalid_explicit_origin_is_skipped_without_publishing_a_headline(ledger, origin):
+        news = NewsIngress(ledger=ledger)
+        counts = news.ingest_rows([row(original_publisher=origin)], now_ms=NOW)
+&gt;       assert counts == {'accepted': 0, 'duplicates': 0, 'skipped': 1}
+E       AssertionError: assert {'accepted': ... 'skipped': 0} == {'accepted': ... 'skipped': 1}
+E         
+E         Omitting 1 identical items, use -vv to show
+E         Differing items:
+E         {'accepted': 1} != {'accepted': 0}
+E         {'skipped': 0} != {'skipped': 1}
+E         Use -v to get more diff
+
+trading/tests/test_news_publisher_lineage.py:57: AssertionError</failure></testcase><testcase classname="trading.tests.test_news_publisher_lineage" name="test_invalid_explicit_origin_is_skipped_without_publishing_a_headline[origin4]" time="0.008"><failure message="AssertionError: assert {'accepted': ... 'skipped': 0} == {'accepted': ... 'skipped': 1}&#10;  &#10;  Omitting 1 identical items, use -vv to show&#10;  Differing items:&#10;  {'accepted': 1} != {'accepted': 0}&#10;  {'skipped': 0} != {'skipped': 1}&#10;  Use -v to get more diff">ledger = &lt;vati.core.ledger.Ledger object at 0x7f90a394b2c0&gt;
+origin = {'publisher_id': 'bank', 'story_id': ''}
+
+    @pytest.mark.parametrize('origin', [None, {}, {'publisher_id': 'bank'},
+        {'publisher_id': True, 'story_id': 'r'}, {'publisher_id': 'bank', 'story_id': ''},
+        {'publisher_id': 'bank', 'story_id': 'r', 'qualified': True}])
+    def test_invalid_explicit_origin_is_skipped_without_publishing_a_headline(ledger, origin):
+        news = NewsIngress(ledger=ledger)
+        counts = news.ingest_rows([row(original_publisher=origin)], now_ms=NOW)
+&gt;       assert counts == {'accepted': 0, 'duplicates': 0, 'skipped': 1}
+E       AssertionError: assert {'accepted': ... 'skipped': 0} == {'accepted': ... 'skipped': 1}
+E         
+E         Omitting 1 identical items, use -vv to show
+E         Differing items:
+E         {'accepted': 1} != {'accepted': 0}
+E         {'skipped': 0} != {'skipped': 1}
+E         Use -v to get more diff
+
+trading/tests/test_news_publisher_lineage.py:57: AssertionError</failure></testcase><testcase classname="trading.tests.test_news_publisher_lineage" name="test_invalid_explicit_origin_is_skipped_without_publishing_a_headline[origin5]" time="0.006"><failure message="AssertionError: assert {'accepted': ... 'skipped': 0} == {'accepted': ... 'skipped': 1}&#10;  &#10;  Omitting 1 identical items, use -vv to show&#10;  Differing items:&#10;  {'accepted': 1} != {'accepted': 0}&#10;  {'skipped': 0} != {'skipped': 1}&#10;  Use -v to get more diff">ledger = &lt;vati.core.ledger.Ledger object at 0x7f90a398af90&gt;
+origin = {'publisher_id': 'bank', 'story_id': 'r', 'qualified': True}
+
+    @pytest.mark.parametrize('origin', [None, {}, {'publisher_id': 'bank'},
+        {'publisher_id': True, 'story_id': 'r'}, {'publisher_id': 'bank', 'story_id': ''},
+        {'publisher_id': 'bank', 'story_id': 'r', 'qualified': True}])
+    def test_invalid_explicit_origin_is_skipped_without_publishing_a_headline(ledger, origin):
+        news = NewsIngress(ledger=ledger)
+        counts = news.ingest_rows([row(original_publisher=origin)], now_ms=NOW)
+&gt;       assert counts == {'accepted': 0, 'duplicates': 0, 'skipped': 1}
+E       AssertionError: assert {'accepted': ... 'skipped': 0} == {'accepted': ... 'skipped': 1}
+E         
+E         Omitting 1 identical items, use -vv to show
+E         Differing items:
+E         {'accepted': 1} != {'accepted': 0}
+E         {'skipped': 0} != {'skipped': 1}
+E         Use -v to get more diff
+
+trading/tests/test_news_publisher_lineage.py:57: AssertionError</failure></testcase><testcase classname="trading.tests.test_news_publisher_lineage" name="test_originless_legacy_rows_stay_unknown_and_do_not_infer_publisher_from_transport" time="0.005" /><testcase classname="trading.tests.test_news_publisher_lineage" name="test_cold_recovery_restores_lineage_without_republishing_originals" time="0.007"><failure message="assert 0 == 2&#10; +  where 0 = len([])&#10; +    where [] = records(&lt;vati.core.ledger.Ledger object at 0x7f90a3988fe0&gt;)">ledger = &lt;vati.core.ledger.Ledger object at 0x7f90a3988fe0&gt;
+
+    def test_cold_recovery_restores_lineage_without_republishing_originals(ledger):
+        news = NewsIngress(ledger=ledger)
+        news.ingest_rows([row(), row('wire-b', 'Policy announcement')], now_ms=NOW)
+        head = ledger.head(); count = ledger.count()
+        expected = lineage(news)
+        restored = NewsIngress.from_ledger(ledger)
+        assert lineage(restored) == expected
+        restored.ingest_rows([row()], now_ms=NOW+1000)
+        assert ledger.head() == head and ledger.count() == count
+&gt;       assert len(records(ledger)) == 2
+E       assert 0 == 2
+E        +  where 0 = len([])
+E        +    where [] = records(&lt;vati.core.ledger.Ledger object at 0x7f90a3988fe0&gt;)
+
+trading/tests/test_news_publisher_lineage.py:80: AssertionError</failure></testcase><testcase classname="trading.tests.test_news_publisher_lineage" name="test_declared_origin_does_not_backdate_earlier_unknown_observation" time="0.005"><failure message="assert 1 == 0">ledger = &lt;vati.core.ledger.Ledger object at 0x7f90a398a150&gt;
+
+    def test_declared_origin_does_not_backdate_earlier_unknown_observation(ledger):
+        news = NewsIngress(ledger=ledger)
+        value = row(); value.pop('original_publisher')
+        news.ingest_rows([value], now_ms=NOW)
+        news.ingest_rows([row()], now_ms=NOW+10)
+        assert lineage(news, NOW)['unknown_origin_observations'] == 1
+&gt;       assert lineage(news, NOW+10)['unknown_origin_observations'] == 0
+E       assert 1 == 0
+
+trading/tests/test_news_publisher_lineage.py:89: AssertionError</failure></testcase><testcase classname="trading.tests.test_news_publisher_lineage" name="test_lineage_result_cannot_mutate_original_evidence" time="0.005" /><testcase classname="trading.tests.test_news_publisher_lineage" name="test_origin_enrichment_cannot_precede_the_original_observations_availability" time="0.005"><failure message="IndexError: list index out of range">ledger = &lt;vati.core.ledger.Ledger object at 0x7f90a398aea0&gt;
+
+    def test_origin_enrichment_cannot_precede_the_original_observations_availability(ledger):
+        news = NewsIngress(ledger=ledger)
+        value = row(); value.pop('original_publisher')
+        news.ingest_rows([value], now_ms=NOW+20)
+        news.ingest_rows([row()], now_ms=NOW)
+&gt;       assert records(ledger)[0].payload['available_ms'] == NOW+20
+               ^^^^^^^^^^^^^^^^^^
+E       IndexError: list index out of range
+
+trading/tests/test_news_publisher_lineage.py:105: IndexError</failure></testcase><testcase classname="trading.tests.test_news_publisher_lineage" name="test_lineage_append_failure_rolls_back_headline_and_observation_before_memory" time="0.004"><failure message="Failed: DID NOT RAISE OSError">ledger = &lt;vati.core.ledger.Ledger object at 0x7f90a398a9c0&gt;
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x7f90a398a9f0&gt;
+
+    def test_lineage_append_failure_rolls_back_headline_and_observation_before_memory(ledger, monkeypatch):
+        news = NewsIngress(ledger=ledger); append = ledger.append
+        def fail(event):
+            if event.kind.value == 'NEWS_LINEAGE':
+                raise OSError('fixture lineage writer unavailable')
+            return append(event)
+        with monkeypatch.context() as patch:
+            patch.setattr(ledger, 'append', fail)
+&gt;           with pytest.raises(OSError):
+                 ^^^^^^^^^^^^^^^^^^^^^^
+E           Failed: DID NOT RAISE OSError
+
+trading/tests/test_news_publisher_lineage.py:117: Failed</failure></testcase><testcase classname="trading.tests.test_news_publisher_lineage" name="test_lost_sql_commit_reply_keeps_memory_unknown_and_cold_replay_reads_original" time="0.005"><failure message="ValueError: not enough values to unpack (expected 1, got 0)">ledger = &lt;vati.core.ledger.Ledger object at 0x7f90a3800080&gt;
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x7f90a3801670&gt;
+
+    def test_lost_sql_commit_reply_keeps_memory_unknown_and_cold_replay_reads_original(ledger, monkeypatch):
+        news = NewsIngress(ledger=ledger); atomic = ledger.atomic
+        @contextmanager
+        def lose_reply():
+            outer = not ledger._conn.in_transaction
+            with atomic():
+                yield ledger
+            if outer:
+                raise OSError('fixture committed reply lost')
+        with monkeypatch.context() as patch:
+            patch.setattr(ledger, 'atomic', lose_reply)
+            with pytest.raises(OSError):
+                news.ingest_rows([row()], now_ms=NOW)
+&gt;       original, = records(ledger); head = ledger.head()
+        ^^^^^^^^^
+E       ValueError: not enough values to unpack (expected 1, got 0)
+
+trading/tests/test_news_publisher_lineage.py:137: ValueError</failure></testcase><testcase classname="trading.tests.test_news_publisher_lineage" name="test_lineage_requires_independent_readback_before_memory_success" time="0.007"><failure message="Failed: DID NOT RAISE OSError">ledger = &lt;vati.core.ledger.Ledger object at 0x7f90a38009b0&gt;
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x7f90a3800530&gt;
+
+    def test_lineage_requires_independent_readback_before_memory_success(ledger, monkeypatch):
+        news = NewsIngress(ledger=ledger); iterate = ledger.iter; atomic = ledger.atomic; committed = False
+        @contextmanager
+        def note_commit():
+            nonlocal committed
+            with atomic():
+                yield ledger
+            committed = True
+        def hide(kind=None, **kwargs):
+            if committed and kind is not None and kind.value == 'NEWS_LINEAGE':
+                return iter(())
+            return iterate(kind, **kwargs)
+        with monkeypatch.context() as patch:
+            patch.setattr(ledger, 'atomic', note_commit); patch.setattr(ledger, 'iter', hide)
+&gt;           with pytest.raises(OSError, match='lineage.*not confirmed'):
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           Failed: DID NOT RAISE OSError
+
+trading/tests/test_news_publisher_lineage.py:158: Failed</failure></testcase><testcase classname="trading.tests.test_news_publisher_lineage" name="test_conflicting_origin_cannot_rewrite_an_original_observation" time="0.009"><failure message="Failed: DID NOT RAISE ValueError">ledger = &lt;vati.core.ledger.Ledger object at 0x7f90a3801910&gt;
+
+    def test_conflicting_origin_cannot_rewrite_an_original_observation(ledger):
+        news = NewsIngress(ledger=ledger); news.ingest_rows([row()], now_ms=NOW)
+        head = ledger.head()
+&gt;       with pytest.raises(ValueError, match='publisher.*conflicts'):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+trading/tests/test_news_publisher_lineage.py:167: Failed</failure></testcase><testcase classname="trading.tests.test_news_publisher_lineage" name="test_exact_title_with_contradictory_origins_is_one_conflicted_cluster" time="0.007"><failure message="AssertionError: assert 'UNKNOWN_ORIGIN' == 'CONFLICTING_ORIGIN'&#10;  &#10;  - CONFLICTING_ORIGIN&#10;  + UNKNOWN_ORIGIN">ledger = &lt;vati.core.ledger.Ledger object at 0x7f90a398b9e0&gt;
+
+    def test_exact_title_with_contradictory_origins_is_one_conflicted_cluster(ledger):
+        news = NewsIngress(ledger=ledger)
+        news.ingest_rows([row(), row('wire-b', original_publisher={'publisher_id':'other', 'story_id':'x'})], now_ms=NOW)
+        report = lineage(news); cluster, = report['clusters']
+&gt;       assert cluster['state'] == 'CONFLICTING_ORIGIN'
+E       AssertionError: assert 'UNKNOWN_ORIGIN' == 'CONFLICTING_ORIGIN'
+E         
+E         - CONFLICTING_ORIGIN
+E         + UNKNOWN_ORIGIN
+
+trading/tests/test_news_publisher_lineage.py:176: AssertionError</failure></testcase><testcase classname="trading.tests.test_news_publisher_lineage" name="test_future_origin_does_not_reveal_future_publisher_or_transport" time="0.005" /><testcase classname="trading.tests.test_news_publisher_lineage" name="test_atomic_origin_marker_refuses_deleted_lineage_after_cold_start" time="0.006"><failure message="Failed: DID NOT RAISE ValueError">ledger = &lt;vati.core.ledger.Ledger object at 0x7f90a3c11a60&gt;
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x7f90a3c12e10&gt;
+
+    def test_atomic_origin_marker_refuses_deleted_lineage_after_cold_start(ledger, monkeypatch):
+        news = NewsIngress(ledger=ledger); news.ingest_rows([row()], now_ms=NOW)
+        iterate = ledger.iter
+        def hide(kind=None, **kwargs):
+            if kind is not None and kind.value == 'NEWS_LINEAGE':
+                return iter(())
+            return iterate(kind, **kwargs)
+        with monkeypatch.context() as patch:
+            patch.setattr(ledger, 'iter', hide)
+&gt;           with pytest.raises(ValueError, match='lineage.*missing'):
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           Failed: DID NOT RAISE ValueError
+
+trading/tests/test_news_publisher_lineage.py:197: Failed</failure></testcase><testcase classname="trading.tests.test_news_publisher_lineage" name="test_even_correctly_sealed_invalid_or_orphaned_lineage_is_refused[change0]" time="0.004"><failure message="ValueError: not enough values to unpack (expected 1, got 0)">ledger = &lt;vati.core.ledger.Ledger object at 0x7f90a3c35340&gt;
+change = {'observation_id': 'ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff'}
+
+    @pytest.mark.parametrize('change', [
+        {'observation_id': 'f'*64}, {'headline_id': 'f'*32}, {'available_ms': NOW-1},
+        {'provider_qualified': True}, {'independence_qualified': True},
+        {'authority_effect': 'ORDER'}, {'format': 'news-publisher-lineage/99'},
+    ])
+    def test_even_correctly_sealed_invalid_or_orphaned_lineage_is_refused(ledger, change):
+        from vati.core.events import make_event
+        news = NewsIngress(ledger=ledger); news.ingest_rows([row()], now_ms=NOW)
+&gt;       original, = records(ledger)
+        ^^^^^^^^^
+E       ValueError: not enough values to unpack (expected 1, got 0)
+
+trading/tests/test_news_publisher_lineage.py:212: ValueError</failure></testcase><testcase classname="trading.tests.test_news_publisher_lineage" name="test_even_correctly_sealed_invalid_or_orphaned_lineage_is_refused[change1]" time="0.005"><failure message="ValueError: not enough values to unpack (expected 1, got 0)">ledger = &lt;vati.core.ledger.Ledger object at 0x7f90a3c37770&gt;
+change = {'headline_id': 'ffffffffffffffffffffffffffffffff'}
+
+    @pytest.mark.parametrize('change', [
+        {'observation_id': 'f'*64}, {'headline_id': 'f'*32}, {'available_ms': NOW-1},
+        {'provider_qualified': True}, {'independence_qualified': True},
+        {'authority_effect': 'ORDER'}, {'format': 'news-publisher-lineage/99'},
+    ])
+    def test_even_correctly_sealed_invalid_or_orphaned_lineage_is_refused(ledger, change):
+        from vati.core.events import make_event
+        news = NewsIngress(ledger=ledger); news.ingest_rows([row()], now_ms=NOW)
+&gt;       original, = records(ledger)
+        ^^^^^^^^^
+E       ValueError: not enough values to unpack (expected 1, got 0)
+
+trading/tests/test_news_publisher_lineage.py:212: ValueError</failure></testcase><testcase classname="trading.tests.test_news_publisher_lineage" name="test_even_correctly_sealed_invalid_or_orphaned_lineage_is_refused[change2]" time="0.006"><failure message="ValueError: not enough values to unpack (expected 1, got 0)">ledger = &lt;vati.core.ledger.Ledger object at 0x7f90a3c399d0&gt;
+change = {'available_ms': 1799999999999}
+
+    @pytest.mark.parametrize('change', [
+        {'observation_id': 'f'*64}, {'headline_id': 'f'*32}, {'available_ms': NOW-1},
+        {'provider_qualified': True}, {'independence_qualified': True},
+        {'authority_effect': 'ORDER'}, {'format': 'news-publisher-lineage/99'},
+    ])
+    def test_even_correctly_sealed_invalid_or_orphaned_lineage_is_refused(ledger, change):
+        from vati.core.events import make_event
+        news = NewsIngress(ledger=ledger); news.ingest_rows([row()], now_ms=NOW)
+&gt;       original, = records(ledger)
+        ^^^^^^^^^
+E       ValueError: not enough values to unpack (expected 1, got 0)
+
+trading/tests/test_news_publisher_lineage.py:212: ValueError</failure></testcase><testcase classname="trading.tests.test_news_publisher_lineage" name="test_even_correctly_sealed_invalid_or_orphaned_lineage_is_refused[change3]" time="0.005"><failure message="ValueError: not enough values to unpack (expected 1, got 0)">ledger = &lt;vati.core.ledger.Ledger object at 0x7f90a3bf2300&gt;
+change = {'provider_qualified': True}
+
+    @pytest.mark.parametrize('change', [
+        {'observation_id': 'f'*64}, {'headline_id': 'f'*32}, {'available_ms': NOW-1},
+        {'provider_qualified': True}, {'independence_qualified': True},
+        {'authority_effect': 'ORDER'}, {'format': 'news-publisher-lineage/99'},
+    ])
+    def test_even_correctly_sealed_invalid_or_orphaned_lineage_is_refused(ledger, change):
+        from vati.core.events import make_event
+        news = NewsIngress(ledger=ledger); news.ingest_rows([row()], now_ms=NOW)
+&gt;       original, = records(ledger)
+        ^^^^^^^^^
+E       ValueError: not enough values to unpack (expected 1, got 0)
+
+trading/tests/test_news_publisher_lineage.py:212: ValueError</failure></testcase><testcase classname="trading.tests.test_news_publisher_lineage" name="test_even_correctly_sealed_invalid_or_orphaned_lineage_is_refused[change4]" time="0.005"><failure message="ValueError: not enough values to unpack (expected 1, got 0)">ledger = &lt;vati.core.ledger.Ledger object at 0x7f90a39894c0&gt;
+change = {'independence_qualified': True}
+
+    @pytest.mark.parametrize('change', [
+        {'observation_id': 'f'*64}, {'headline_id': 'f'*32}, {'available_ms': NOW-1},
+        {'provider_qualified': True}, {'independence_qualified': True},
+        {'authority_effect': 'ORDER'}, {'format': 'news-publisher-lineage/99'},
+    ])
+    def test_even_correctly_sealed_invalid_or_orphaned_lineage_is_refused(ledger, change):
+        from vati.core.events import make_event
+        news = NewsIngress(ledger=ledger); news.ingest_rows([row()], now_ms=NOW)
+&gt;       original, = records(ledger)
+        ^^^^^^^^^
+E       ValueError: not enough values to unpack (expected 1, got 0)
+
+trading/tests/test_news_publisher_lineage.py:212: ValueError</failure></testcase><testcase classname="trading.tests.test_news_publisher_lineage" name="test_even_correctly_sealed_invalid_or_orphaned_lineage_is_refused[change5]" time="0.004"><failure message="ValueError: not enough values to unpack (expected 1, got 0)">ledger = &lt;vati.core.ledger.Ledger object at 0x7f90a39889e0&gt;
+change = {'authority_effect': 'ORDER'}
+
+    @pytest.mark.parametrize('change', [
+        {'observation_id': 'f'*64}, {'headline_id': 'f'*32}, {'available_ms': NOW-1},
+        {'provider_qualified': True}, {'independence_qualified': True},
+        {'authority_effect': 'ORDER'}, {'format': 'news-publisher-lineage/99'},
+    ])
+    def test_even_correctly_sealed_invalid_or_orphaned_lineage_is_refused(ledger, change):
+        from vati.core.events import make_event
+        news = NewsIngress(ledger=ledger); news.ingest_rows([row()], now_ms=NOW)
+&gt;       original, = records(ledger)
+        ^^^^^^^^^
+E       ValueError: not enough values to unpack (expected 1, got 0)
+
+trading/tests/test_news_publisher_lineage.py:212: ValueError</failure></testcase><testcase classname="trading.tests.test_news_publisher_lineage" name="test_even_correctly_sealed_invalid_or_orphaned_lineage_is_refused[change6]" time="0.005"><failure message="ValueError: not enough values to unpack (expected 1, got 0)">ledger = &lt;vati.core.ledger.Ledger object at 0x7f90a39892e0&gt;
+change = {'format': 'news-publisher-lineage/99'}
+
+    @pytest.mark.parametrize('change', [
+        {'observation_id': 'f'*64}, {'headline_id': 'f'*32}, {'available_ms': NOW-1},
+        {'provider_qualified': True}, {'independence_qualified': True},
+        {'authority_effect': 'ORDER'}, {'format': 'news-publisher-lineage/99'},
+    ])
+    def test_even_correctly_sealed_invalid_or_orphaned_lineage_is_refused(ledger, change):
+        from vati.core.events import make_event
+        news = NewsIngress(ledger=ledger); news.ingest_rows([row()], now_ms=NOW)
+&gt;       original, = records(ledger)
+        ^^^^^^^^^
+E       ValueError: not enough values to unpack (expected 1, got 0)
+
+trading/tests/test_news_publisher_lineage.py:212: ValueError</failure></testcase><testcase classname="trading.tests.test_news_publisher_lineage" name="test_ambiguous_duplicate_lineage_refuses_recovery_and_replay" time="0.005"><failure message="IndexError: list index out of range">ledger = &lt;vati.core.ledger.Ledger object at 0x7f90a3a01670&gt;
+
+    def test_ambiguous_duplicate_lineage_refuses_recovery_and_replay(ledger):
+        news = NewsIngress(ledger=ledger); news.ingest_rows([row()], now_ms=NOW)
+&gt;       ledger.append(records(ledger)[0]); count = ledger.count()
+                      ^^^^^^^^^^^^^^^^^^
+E       IndexError: list index out of range
+
+trading/tests/test_news_publisher_lineage.py:225: IndexError</failure></testcase><testcase classname="trading.tests.test_news_publisher_lineage" name="test_recovery_capacity_includes_lineage_receipts" time="0.005"><failure message="assert 2 == 3&#10; +  where 2 = count()&#10; +    where count = &lt;vati.core.ledger.Ledger object at 0x7f90a3949e20&gt;.count">ledger = &lt;vati.core.ledger.Ledger object at 0x7f90a3949e20&gt;
+
+    def test_recovery_capacity_includes_lineage_receipts(ledger):
+        news = NewsIngress(ledger=ledger); news.ingest_rows([row()], now_ms=NOW)
+&gt;       assert ledger.count() == 3
+E       assert 2 == 3
+E        +  where 2 = count()
+E        +    where count = &lt;vati.core.ledger.Ledger object at 0x7f90a3949e20&gt;.count
+
+trading/tests/test_news_publisher_lineage.py:235: AssertionError</failure></testcase><testcase classname="trading.tests.test_news_publisher_lineage" name="test_actual_service_file_builder_exposes_lineage_and_recovers_it" time="0.009"><failure message="assert 2 == 1">tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-270/test_actual_service_file_build0')
+ledger = &lt;vati.core.ledger.Ledger object at 0x7f90a394bb90&gt;
+
+    def test_actual_service_file_builder_exposes_lineage_and_recovers_it(tmp_path, ledger):
+        import json
+        from vati.events.news_runtime import build_news_file, news_heartbeat
+        path = tmp_path/'headlines.json'; path.write_text(json.dumps([row(), row('b', 'Rewritten')]))
+        cfg = {'path':str(path)}
+        news = build_news_file(cfg, ledger=ledger, scope='acct/EURUSD', now_ms=NOW)
+&gt;       assert lineage(news)['story_clusters'] == 1
+E       assert 2 == 1
+
+trading/tests/test_news_publisher_lineage.py:247: AssertionError</failure></testcase><testcase classname="trading.tests.test_news_publisher_lineage" name="test_real_sql_lineage_commit_reply_loss_is_reconciled[sqlite]" time="0.003"><failure message="ValueError: not enough values to unpack (expected 1, got 0)">backend = 'sqlite'
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-270/test_real_sql_lineage_commit_r0')
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x7f90a394a930&gt;
+
+    @pytest.mark.parametrize('backend', ['sqlite', 'postgres'])
+    def test_real_sql_lineage_commit_reply_loss_is_reconciled(backend, tmp_path, monkeypatch):
+        import os
+        if backend == 'sqlite':
+            value = Ledger(tmp_path/'native-lineage.sqlite')
+        else:
+            dsn = os.environ.get('VATI_TEST_PG_DSN')
+            if not dsn or os.environ.get('VATI_TEST_PG_ISOLATED_FIXTURE') != '1':
+                pytest.skip('requires isolated PostgreSQL fixture')
+            import uuid
+            from vati.core.ledger_pg import PostgresLedger
+            value = PostgresLedger(dsn, ledger_name='lineage_' + uuid.uuid4().hex)
+        try:
+            atomic = value.atomic; news = NewsIngress(ledger=value)
+            @contextmanager
+            def lost():
+                outer = value._atomic_depth == 0 if backend == 'postgres' else not value._conn.in_transaction
+                with atomic():
+                    yield value
+                if outer:
+                    raise OSError('fixture native committed lineage reply lost')
+            with monkeypatch.context() as patch:
+                patch.setattr(value, 'atomic', lost)
+                with pytest.raises(OSError):
+                    news.ingest_rows([row()], now_ms=NOW)
+&gt;           head = value.head(); original, = records(value)
+                                 ^^^^^^^^^
+E           ValueError: not enough values to unpack (expected 1, got 0)
+
+trading/tests/test_news_publisher_lineage.py:279: ValueError</failure></testcase><testcase classname="trading.tests.test_news_publisher_lineage" name="test_concurrent_native_publishers_retain_one_original_lineage[sqlite]" time="0.037"><failure message="assert (1 == 1 and 2 == 3)&#10; +  where 1 = sum([1, 0, 0, 0])&#10; +  and   2 = count()&#10; +    where count = &lt;vati.core.ledger.Ledger object at 0x7f90a3e1d640&gt;.count">backend = 'sqlite'
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-270/test_concurrent_native_publish0')
+
+    @pytest.mark.parametrize('backend', ['sqlite', 'postgres'])
+    def test_concurrent_native_publishers_retain_one_original_lineage(backend, tmp_path):
+        from concurrent.futures import ThreadPoolExecutor
+        from test_news_durable_publication import native_factory
+        factory = native_factory(tmp_path, backend); seed = factory(); seed.close()
+        def publish(_):
+            value = factory()
+            try:
+                return NewsIngress(ledger=value).ingest_rows([row()], now_ms=NOW)['accepted']
+            finally:
+                value.close()
+        with ThreadPoolExecutor(max_workers=2) as pool:
+            accepted = list(pool.map(publish, range(4)))
+        value = factory()
+        try:
+&gt;           assert sum(accepted) == 1 and value.count() == 3
+E           assert (1 == 1 and 2 == 3)
+E            +  where 1 = sum([1, 0, 0, 0])
+E            +  and   2 = count()
+E            +    where count = &lt;vati.core.ledger.Ledger object at 0x7f90a3e1d640&gt;.count
+
+trading/tests/test_news_publisher_lineage.py:304: AssertionError</failure></testcase><testcase classname="trading.tests.test_news_publisher_lineage" name="test_actual_child_death_after_sql_commit_restores_lineage_once" time="0.328"><failure message="ValueError: not enough values to unpack (expected 1, got 0)">tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-270/test_actual_child_death_after_0')
+
+    def test_actual_child_death_after_sql_commit_restores_lineage_once(tmp_path):
+        import json
+        import subprocess
+        import sys
+        path = tmp_path/'death.sqlite'
+        script = '''
+    import os, sys, json
+    from vati.core.ledger import Ledger
+    from vati.core.events import EventKind
+    from vati.events.news_ingress import NewsIngress
+    ledger=Ledger(sys.argv[1]); read=ledger.iter
+    def die(kind=None, correlation_id=None):
+        if kind is EventKind.NEWS_HEADLINE and not ledger._conn.in_transaction: os._exit(77)
+        return read(kind,correlation_id=correlation_id)
+    ledger.iter=die
+    NewsIngress(ledger=ledger).ingest_rows([json.loads(sys.argv[2])],now_ms=1800000000000)
+    '''
+        child = subprocess.run([sys.executable, '-c', script, str(path), json.dumps(row())],
+                               capture_output=True, text=True, timeout=20)
+        assert child.returncode == 77, child.stderr
+        value = Ledger(path)
+        try:
+&gt;           original, = records(value); head = value.head()
+            ^^^^^^^^^
+E           ValueError: not enough values to unpack (expected 1, got 0)
+
+trading/tests/test_news_publisher_lineage.py:333: ValueError</failure></testcase><testcase classname="trading.tests.test_news_publisher_lineage" name="test_sealed_backdated_lineage_cannot_be_replayed_as_a_valid_original" time="0.008"><failure message="Failed: DID NOT RAISE ValueError">ledger = &lt;vati.core.ledger.Ledger object at 0x7f90a3bf12b0&gt;
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-270/test_sealed_backdated_lineage_0')
+
+    def test_sealed_backdated_lineage_cannot_be_replayed_as_a_valid_original(ledger, tmp_path):
+        from vati.core.events import make_event
+        NewsIngress(ledger=ledger).ingest_rows([row()], now_ms=NOW+10)
+        value = Ledger(tmp_path/'backdated.sqlite')
+        try:
+            for event in ledger.iter():
+                if event.kind is not EventKind.NEWS_LINEAGE:
+                    value.append(event)
+                else:
+                    value.append(make_event(event.kind, event.producer, event.payload | {'available_ms':NOW},
+                        event_time_ms=NOW, received_time_ms=NOW, correlation_id=event.correlation_id))
+            assert value.verify_chain()[0]; head = value.head()
+&gt;           with pytest.raises(ValueError, match='lineage.*(backdated|availability)'):
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           Failed: DID NOT RAISE ValueError
+
+trading/tests/test_news_publisher_lineage.py:354: Failed</failure></testcase><testcase classname="trading.tests.test_news_publisher_lineage" name="test_orphaned_lineage_cannot_recreate_missing_headline_and_observation" time="0.006"><failure message="IndexError: list index out of range">ledger = &lt;vati.core.ledger.Ledger object at 0x7f90a3c34b60&gt;
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-270/test_orphaned_lineage_cannot_r0')
+
+    def test_orphaned_lineage_cannot_recreate_missing_headline_and_observation(ledger, tmp_path):
+        NewsIngress(ledger=ledger).ingest_rows([row()], now_ms=NOW)
+        value = Ledger(tmp_path/'orphan.sqlite')
+        try:
+&gt;           value.append(records(ledger)[0]); head = value.head()
+                         ^^^^^^^^^^^^^^^^^^
+E           IndexError: list index out of range
+
+trading/tests/test_news_publisher_lineage.py:367: IndexError</failure></testcase></testsuite></testsuites>

@@ -1,0 +1,6 @@
+{
+  "attempt": "post-mutation evidence reader",
+  "status": "HARNESS_KEY_ERROR",
+  "reason": "Used violations instead of the actual source audit field forbidden_events; failed before qualified fixture launch",
+  "correction": "Read actual audit schema and assert forbidden_events is empty; no test assertions or source changed"
+}

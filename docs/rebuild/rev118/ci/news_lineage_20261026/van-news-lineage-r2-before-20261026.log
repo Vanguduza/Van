@@ -1,0 +1,38 @@
+...........F......F                                                      [100%]
+=================================== FAILURES ===================================
+_ test_origin_enrichment_cannot_precede_the_original_observations_availability _
+
+ledger = <vati.core.ledger.Ledger object at 0x7f3205c4f6e0>
+
+    def test_origin_enrichment_cannot_precede_the_original_observations_availability(ledger):
+        news = NewsIngress(ledger=ledger)
+        value = row(); value.pop('original_publisher')
+        news.ingest_rows([value], now_ms=NOW+20)
+        news.ingest_rows([row()], now_ms=NOW)
+>       assert records(ledger)[0].payload['available_ms'] == NOW+20
+E       assert 1800000000000 == (1800000000000 + 20)
+
+trading/tests/test_news_publisher_lineage.py:105: AssertionError
+______ test_atomic_origin_marker_refuses_deleted_lineage_after_cold_start ______
+
+ledger = <vati.core.ledger.Ledger object at 0x7f3205f02d50>
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f3205f01970>
+
+    def test_atomic_origin_marker_refuses_deleted_lineage_after_cold_start(ledger, monkeypatch):
+        news = NewsIngress(ledger=ledger); news.ingest_rows([row()], now_ms=NOW)
+        iterate = ledger.iter
+        def hide(kind=None, **kwargs):
+            if kind is not None and kind.value == 'NEWS_LINEAGE':
+                return iter(())
+            return iterate(kind, **kwargs)
+        with monkeypatch.context() as patch:
+            patch.setattr(ledger, 'iter', hide)
+>           with pytest.raises(ValueError, match='lineage.*missing'):
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           Failed: DID NOT RAISE ValueError
+
+trading/tests/test_news_publisher_lineage.py:197: Failed
+=========================== short test summary info ============================
+FAILED trading/tests/test_news_publisher_lineage.py::test_origin_enrichment_cannot_precede_the_original_observations_availability
+FAILED trading/tests/test_news_publisher_lineage.py::test_atomic_origin_marker_refuses_deleted_lineage_after_cold_start
+2 failed, 17 passed in 1.45s
