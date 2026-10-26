@@ -157,11 +157,14 @@ class NativeMarketArchive:
     def _observation_available_at(observation):
         return observation['received_at_ms']
 
-    def __init__(self, root, *, clock=None):
+    def __init__(self, root, *, clock=None, max_history_bytes=None):
         if not Path(root).is_absolute():
             raise NativeArchiveError('native market archive requires an explicit absolute storage root')
+        if max_history_bytes is not None and (type(max_history_bytes) is not int or not 1<=max_history_bytes<=256*1024**2):
+            raise ValueError('native market archive history byte budget invalid')
         self.root = Path(root).resolve()
         self.clock = clock or (lambda: int(time.time()*1000))
+        self.max_history_bytes=max_history_bytes
 
     def _partition(self, scope, timeframe, *, create=False):
         _scope(scope)
@@ -175,11 +178,15 @@ class NativeMarketArchive:
         return part
 
     @staticmethod
-    def _read(path):
-        if path.is_symlink() or path.stat().st_size > MAX_RECORD_BYTES:
+    def _read(path, *, max_bytes=None):
+        if max_bytes is not None and (type(max_bytes) is not int or max_bytes<1):
+            raise ValueError('native market archive history byte capacity exhausted')
+        bound=MAX_RECORD_BYTES if max_bytes is None else min(MAX_RECORD_BYTES,max_bytes)
+        if path.is_symlink() or path.stat().st_size > bound:
             raise ValueError('native market archive path or resource bound')
-        blob = path.read_bytes()
-        if len(blob) > MAX_RECORD_BYTES:
+        # A file can grow after stat. Bound the actual read, not only its result.
+        with path.open('rb') as source:blob=source.read(bound+1)
+        if len(blob) > bound:
             raise ValueError('native market archive resource bound')
         body = json.loads(blob)
         if canonical_json(body).encode() != blob:
@@ -188,6 +195,7 @@ class NativeMarketArchive:
 
     def _load(self, part, scope, timeframe):
         rows, previous, requests = [], None, set()
+        used=0
         paths = sorted(part.glob('*.json')) if part.exists() else []
         files = [p for p in paths if p.name != 'head.json']
         if len(files) > MAX_RECORDS:
@@ -196,7 +204,9 @@ class NativeMarketArchive:
             match = RECORD_FILE.fullmatch(path.name)
             if match is None:
                 raise ValueError('native market archive unexpected record path')
-            body, digest = self._read(path)
+            remaining=None if self.max_history_bytes is None else self.max_history_bytes-used
+            body, digest = self._read(path,max_bytes=remaining)
+            if self.max_history_bytes is not None:used+=len(canonical_json(body).encode())
             revision = len(rows)+1
             if isinstance(body, dict):
                 _scope(body.get('scope'))
@@ -221,7 +231,8 @@ class NativeMarketArchive:
         head = part/'head.json'
         state = 'MISSING' if rows else 'EMPTY'
         if head.exists() or head.is_symlink():
-            index, _ = self._read(head)
+            remaining=None if self.max_history_bytes is None else self.max_history_bytes-used
+            index, _ = self._read(head,max_bytes=remaining)
             if isinstance(index, dict):
                 _scope(index.get('scope'))
             if (not isinstance(index, dict) or set(index) != {'schema', 'scope', 'timeframe', 'revision', 'record_hash'}
@@ -243,11 +254,22 @@ class NativeMarketArchive:
                 'state': 'OBSERVED_UNQUALIFIED' if body['observation']['bars'] else 'EMPTY_UNQUALIFIED',
                 'provider_qualified': False, 'authority_effect': 'NONE'}
 
-    def _write_head(self, part, scope, timeframe, rows):
+    @staticmethod
+    def _head_blob(scope,timeframe,rows):
         body, digest = rows[-1]
         head = {'schema': 'vati.native-market-head/1', 'scope': scope, 'timeframe': timeframe,
                 'revision': body['revision'], 'record_hash': digest}
-        BarLake._atomic_write(part/'head.json', canonical_json(head).encode())
+        return canonical_json(head).encode()
+
+    def _require_history_capacity(self,rows,head_blob):
+        if self.max_history_bytes is not None:
+            size=len(head_blob)+sum(len(canonical_json(body).encode()) for body,_ in rows)
+            if size>self.max_history_bytes:raise ValueError('native market archive history byte capacity exhausted')
+
+    def _write_head(self, part, scope, timeframe, rows):
+        blob=self._head_blob(scope,timeframe,rows)
+        self._require_history_capacity(rows,blob)
+        BarLake._atomic_write(part/'head.json',blob)
 
     def record(self, request_id, contract, observation):
         try:
@@ -282,6 +304,9 @@ class NativeMarketArchive:
                     raise ValueError('native market archive record resource bound')
                 digest = hashlib.sha256(blob).hexdigest()
                 path = part/f'{body["revision"]:020d}-{digest}.json'
+                if self.max_history_bytes is not None:
+                    prospective=rows+[(body,digest)]
+                    self._require_history_capacity(prospective,self._head_blob(scope,timeframe,prospective))
                 BarLake._atomic_write(path, blob)
                 rows.append((body, digest))
                 self._write_head(part, scope, timeframe, rows)

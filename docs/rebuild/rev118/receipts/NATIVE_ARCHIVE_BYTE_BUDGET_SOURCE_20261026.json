@@ -1,0 +1,38 @@
+{
+  "schema": "van.rebuild.native-archive-byte-budget/1",
+  "base_head": "c08ea48674647311c46e0c1853c1d7b9f9afc4e6",
+  "updated_at_utc": "2026-10-26T21:59:22.280440+00:00",
+  "unit": "BE-008",
+  "status": "SOURCE_TESTED_COMPONENT_NOT_UNIT_NATIVE_OR_PRODUCTION_ACCEPTANCE",
+  "acceptance": "NOT_ISSUED",
+  "source_sha256": {
+    "trading/vati/market_data/native_archive.py": "6551356e82cd61dfcbaec836098c861df93575c97cb61635331e75439bda9b3d",
+    "trading/tests/test_native_archive_read_budget.py": "89064c522b76478c5bc806cb6827cabfd6b7554cc1bec00eba91e2202831aed1"
+  },
+  "confirmed_failure": "Controlled stat/read growth-window probe on unchanged committedc08 source:real5000bytefile/64bytebound/smallstat;actual original read(-1) was unbounded before eventual refusal. No natural race, OOM or platformquota claimed.",
+  "implementation": "Actual file read bounded to record/remaining-byte limit plus sentinel. Optional cumulative immutable-record/index budget;defaultNone preserveslegacy. Prospective publication and index repair refuse capacity before writes;no truncation, eviction, recapture or new commit protocol.",
+  "actual_tests": {
+    "before": "1actualbounded-readfailure plus8new optionalAPI TypeErrors;not9existingproductregressions",
+    "initial_after": 153,
+    "focused_final": 155,
+    "new_cases": 11,
+    "final_actual_SQLite_Postgres": 797,
+    "skips": 0,
+    "audit_violations": 0,
+    "runtime_test_hashes_verified": 495,
+    "owned_fixture_independently_absent": true,
+    "supplemental_assertion_faults_caught": 4,
+    "positive_and_restored_controls": 11,
+    "supplemental_source_exactly_restored": true,
+    "rebuild_workflow_T0_boundary": 122,
+    "counts_overlap": true
+  },
+  "canonical_checks": {
+    "owner_frontend_drift": false,
+    "registry_cases": 374,
+    "registry_edits": 383,
+    "registry_validation_is_execution": false
+  },
+  "qualification": "Encoded-byte source policy only;notRSS/CPU/network/hostcapacity,price-scale/provider/native/unit/production/economic/S24acceptance. Historical owner API stillnotimplemented.",
+  "evidence": "ci/native_archive_byte_budget_20261026"
+}

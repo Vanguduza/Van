@@ -1,6 +1,6 @@
 {
   "schema": "van.rebuild.candidate-source-progress/1",
-  "updated_at_utc": "2026-10-26T21:26:10.061482+00:00",
+  "updated_at_utc": "2026-10-26T21:59:22.280440+00:00",
   "programme": "Rev1.18; original 131 unit IDs and dependencies retained",
   "authority": "auth-20261022-owner-autonomous-candidate-build",
   "meaning": "Candidate source progress is separate from admitted unit acceptance. Independent certificates, owner decisions, live effects and release gates remain unissued. No unit is declared complete by this record.",
@@ -565,6 +565,10 @@
         {
           "description": "Durable partial native depth now extends existing NativeMarketArchive commit/revision/request/index owner, with bounded canonical exact raw values, original captured policy, independent readback, cold/as-of history, actual child-crash/lost-head recovery and one native read across concurrent collectors. Source reader closes before final capacity/publication; foreign/failed/untyped results and corrupt history refuse without new native read or empty success.48newcases/175focused/786finalactualSQLitePostgres passes0skip/audit0/all494runtime-testhashesmatch/ownedfixtureabsent;6assertionfaults/48positive48restored/allsourceexact/122rebuildT0checks. Source consistency only;no native origin/entitlement/price-scale/completeness/authority/acceptance. BE008 remains IN_PROGRESS.",
           "evidence": "backend/BE-008_NATIVE_DEPTH_ARCHIVE.md;receipts/NATIVE_DEPTH_ARCHIVE_SOURCE_20261026.json"
+        },
+        {
+          "description": "NativeMarketArchive actual read now bounded through stat/read growth;optional positive<=256MiB cumulative record/index budget(defaultNone preserveslegacy) checks prospective publication and indexrepair before writes,never truncates/evicts/recaptures. Controlled committedc08 read(-1) failure retained;other8beforefailures unimplementednewAPI.11newcases/155focused/797finalactualSQLitePostgres passes0skip/audit0/all495runtime-testhashesmatch/ownedfixtureabsent;4assertionfaults11positive11restored/sourceexact/122rebuildT0checks. Encodedbytepolicy only;BE008 IN_PROGRESS,acceptanceNOT_ISSUED;historicalservice/API next.",
+          "evidence": "backend/BE-008_NATIVE_ARCHIVE_BYTE_BUDGET.md;receipts/NATIVE_ARCHIVE_BYTE_BUDGET_SOURCE_20261026.json"
         }
       ]
     },

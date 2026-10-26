@@ -1,0 +1,21 @@
+.F
+=================================== FAILURES ===================================
+_ test_request_budget_refuses_valid_history_without_modifying_or_recapturing_it _
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-563/test_request_budget_refuses_va0')
+
+    def test_request_budget_refuses_valid_history_without_modifying_or_recapturing_it(tmp_path):
+        c=contract();root=tmp_path/'depth';writer=NativeDepthArchive(root,clock=lambda:250000)
+        first=writer.record('original',c,sample(c));part=writer._partition(c.native_scope,'DEPTH')
+        files={p.name:p.read_bytes() for p in part.glob('*.json')};size=sum(map(len,files.values()))
+        bounded=NativeDepthArchive(root,clock=lambda:500000,max_history_bytes=size-1)
+        def never():raise AssertionError('read-budget refusal performed a replacement native read')
+>       with pytest.raises(NativeArchiveError,match='capacity|resource bound'):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE NativeArchiveError
+
+trading/tests/test_native_archive_read_budget.py:40: Failed
+=========================== short test summary info ============================
+FAILED trading/tests/test_native_archive_read_budget.py::test_request_budget_refuses_valid_history_without_modifying_or_recapturing_it
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 1 passed in 0.90s
