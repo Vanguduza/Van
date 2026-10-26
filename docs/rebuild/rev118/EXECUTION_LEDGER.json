@@ -176,7 +176,9 @@
         "backend/BE-008_005_INACTIVE_HISTORY.md",
         "receipts/INACTIVE_HISTORY_SOURCE_20261026.json",
         "backend/BE-008_NATIVE_RAW_DEPTH.md",
-        "receipts/NATIVE_RAW_DEPTH_SOURCE_20261026.json"
+        "receipts/NATIVE_RAW_DEPTH_SOURCE_20261026.json",
+        "backend/BE-008_NATIVE_DEPTH_ARCHIVE.md",
+        "receipts/NATIVE_DEPTH_ARCHIVE_SOURCE_20261026.json"
       ]
     },
     "BE-014": {
@@ -314,7 +316,7 @@
     "note": "Opus unavailable; owner transferred build to Codex. No independent reviewer identity is inferred from another model or session."
   },
   "checkpoint": {
-    "updated_utc": "2026-10-26T20:55:23.862666+00:00",
+    "updated_utc": "2026-10-26T21:26:10.061482+00:00",
     "branch": "ccr-9e07e1af-8mgz1p",
     "base": "b02075f327ea8180ab6d269eba358cf8c5479878",
     "background_jobs": [
@@ -333,7 +335,7 @@
         "not_acceptance": true
       }
     ],
-    "last_validation": "Original raw cTrader depth now uses bounded exact uint64 quote changes and cents, sticky gap/control recovery, processing-age/backlog holds and existing isolated read transport. No normalized price/native timestamp/sequence/snapshot-complete/provider qualification inferred.31newcases,171focused and738final actualSQLite/Postgres passes,0skip/audit0/all492runtime-testhashesmatch/ownedfixtureabsent;5assertionfaults/31positive+31restoredcontrols/122rebuild-T0checks. Ephemeral component only; durable capture and service consumers remain, BE008 IN_PROGRESS/acceptance NOT_ISSUED.",
+    "last_validation": "Durable partial native depth now extends existing NativeMarketArchive commit/revision/request/index owner, with bounded canonical exact raw values, original captured policy, independent readback, cold/as-of history, actual child-crash/lost-head recovery and one native read across concurrent collectors. Source reader closes before final capacity/publication; foreign/failed/untyped results and corrupt history refuse without new native read or empty success.48newcases/175focused/786finalactualSQLitePostgres passes0skip/audit0/all494runtime-testhashesmatch/ownedfixtureabsent;6assertionfaults/48positive48restored/allsourceexact/122rebuildT0checks. Source consistency only;no native origin/entitlement/price-scale/completeness/authority/acceptance. BE008 remains IN_PROGRESS.",
     "environment_notes": [
       "clone must be unshallowed (git fetch --unshallow) and PR heads fetched (+refs/pull/*/head:refs/remotes/origin/pr/*) before pre001.py",
       "pytest from backend/requirements.txt in a venv",
@@ -420,9 +422,9 @@
     "tested_android_head": "752d265b11ba643ed309481b110248f8b7fe323b",
     "hosted_result": "receipts/HOSTED_SOURCE_752d265b.json",
     "mutation_reconciliation": "ci/MUTATION_RECONCILIATION.md and ci/MUTATION_RECONCILIATION_MAPPING.json",
-    "verified_source_head": "52a9daa5a2515684fa9223b0a2db859abe239629 local/genuineGREEN162/manifest4632; published733b7ac93e403048f2807df80f56b7038a4f5d48 GREEN161; depth uncommitted",
+    "verified_source_head": "0c1344f5f0b3c6cfb5cf437f80234d36812fd94e published through genuinehooks/normalpush/remote-refreadback/GREEN163/manifest4867;durable-depth candidate uncommitted",
     "source_qualification_run": 40383599951,
-    "latest_checkpoint_report": "docs/rebuild/rev118/CHECKPOINT_20261026_NATIVE_RAW_DEPTH.md",
+    "latest_checkpoint_report": "docs/rebuild/rev118/CHECKPOINT_20261026_NATIVE_DEPTH_ARCHIVE.md",
     "previous_verified_source": "3c6969ebbec39f2ad9f2836a6bd8acdb487adc34 published; exact CI40228254162 all17public jobs pass, two unchanged prerequisite failures",
     "qualification_scope": "Public source tests only; mandatory/native/owner/production gates unissued."
   },
@@ -442,6 +444,6 @@
       "evidence": "ci/MUTATION_CORPUS_c2a27848.json"
     }
   ],
-  "current_action": "Finish raw-depth manifest/staged ZIP/genuine hook commit and committed baseline verification;parent733bmain is terminal with full raw proof. Normally push local arithmetic52a and depth as combined head and independently read back remote ref/exact new CI. Continue durable depth capture with existing archive owner and full dependency-ready backend/ML/assistant/financial work.0formalunitacceptances.",
-  "updated_at_utc": "2026-10-26T20:58:26.642300+00:00"
+  "current_action": "Finish durable-depth manifest/staged ZIP/genuine hook commit/committed baseline verification. Preserve running published0c main40402195836 and inspect exact results;normally push next candidate only after parent main terminal/readback/exact new CI. Continue service/existing-screen source consumption and complete remaining dependency-ready backend/ML/financial/assistant units before Android/native acceptance.0formalunitacceptances.",
+  "updated_at_utc": "2026-10-26T21:26:10.061482+00:00"
 }

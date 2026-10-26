@@ -1,0 +1,60 @@
+...........................F
+=================================== FAILURES ===================================
+_ test_rehashed_corrupt_or_overclaiming_depth_is_refused_before_publication[capacity] _
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-554/test_rehashed_corrupt_or_overc26')
+bad = 'capacity'
+
+    @pytest.mark.parametrize('bad',['authority','complete','false_number','normalized','native_time','sequence','price_scale',
+                                  'scope','contract','age_bool','age','clock_order','events_bool','count_bool',
+                                  'side_count','display_limit','truncation_number','side_state','crossed_number',
+                                  'duplicate','price_float','price_leading_zero','size_overflow','cent_amount',
+                                  'quote_hash','capture_hash','capacity','capacity_bool','policy_bool'])
+    def test_rehashed_corrupt_or_overclaiming_depth_is_refused_before_publication(tmp_path,bad):
+        c=contract();capture=sample(c);body=capture.body();depth=body['depth']
+        if bad=='authority':depth['authority_effect']='ORDER'
+        elif bad=='complete':depth['complete_book']=True
+        elif bad=='false_number':depth['complete_book']=0
+        elif bad=='normalized':depth['normalized_prices_available']=True
+        elif bad=='native_time':depth['native_timestamp_ms']=199999
+        elif bad=='sequence':depth['native_sequence']=1
+        elif bad=='price_scale':depth['price_scale']=5
+        elif bad=='scope':depth['scope']['native_account_id']=124
+        elif bad=='contract':depth['contract_revision']='0'*64
+        elif bad=='age_bool':depth['processing_age_ms']=False
+        elif bad=='age':depth['processing_age_ms']=1
+        elif bad=='clock_order':depth['processed_at_ms']=99999
+        elif bad=='events_bool':depth['native_change_events_processed']=True
+        elif bad=='count_bool':depth['observed_quote_count']=True
+        elif bad=='side_count':depth['observed_bid_count']=2
+        elif bad=='display_limit':depth['display_limit_per_side']=99
+        elif bad=='truncation_number':depth['display_truncated']=0
+        elif bad=='side_state':depth['side_state']='EMPTY'
+        elif bad=='crossed_number':depth['crossed_observed_levels']=0
+        elif bad=='duplicate':depth['asks'][0]['native_quote_id']=depth['bids'][0]['native_quote_id']
+        elif bad=='price_float':depth['bids'][0]['native_price']=110100.0
+        elif bad=='price_leading_zero':depth['bids'][0]['native_price']='0110100'
+        elif bad=='size_overflow':depth['bids'][0]['native_size_cents']=str(2**64)
+        elif bad=='cent_amount':depth['bids'][0]['native_size']='123.45'
+        elif bad=='capacity':body['read_capacity']['state']='EXHAUSTED'
+        elif bad=='capacity_bool':body['read_capacity']['admitted_frame_headers']=True
+        elif bad=='policy_bool':body['limit']=True
+        depth['observation_sha256']=canonical_hash({k:v for k,v in depth.items() if k!='observation_sha256'})
+        if bad=='quote_hash':depth['observation_sha256']='0'*64
+        body['capture_sha256']=canonical_hash({k:v for k,v in body.items() if k!='capture_sha256'})
+        if bad=='capture_hash':body['capture_sha256']='0'*64
+        forged=NativeDepthCapture(body['max_age_ms'],body['limit'],canonical_json(depth),canonical_json(body['read_capacity']))
+        # Keep an intentionally invalid outer digest visible to the real archive validator.
+        if bad=='capture_hash':
+            class WrongDigest(NativeDepthCapture):
+                def body(self):return body
+            forged=WrongDigest(body['max_age_ms'],body['limit'],canonical_json(depth),canonical_json(body['read_capacity']))
+>       with pytest.raises(NativeArchiveError):archive(tmp_path).record('invalid',c,forged)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE NativeArchiveError
+
+trading/tests/test_native_depth_archive.py:91: Failed
+=========================== short test summary info ============================
+FAILED trading/tests/test_native_depth_archive.py::test_rehashed_corrupt_or_overclaiming_depth_is_refused_before_publication[capacity]
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 27 passed in 0.55s

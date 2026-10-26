@@ -1,0 +1,20 @@
+..............................F
+=================================== FAILURES ===================================
+_ test_original_collection_replay_never_reads_native_again_or_changes_capture_policy _
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-552/test_original_collection_repla0')
+
+    def test_original_collection_replay_never_reads_native_again_or_changes_capture_policy(tmp_path):
+        c=contract();first=archive(tmp_path).record('original',c,sample(c))
+        def forbidden():raise AssertionError('original depth replay performed new native I/O')
+        collector=NativeDepthCollector(archive(tmp_path,now=500000),forbidden)
+        assert collector.collect('original',c)==first
+>       with pytest.raises(NativeArchiveError,match='conflicts'):collector.collect('original',c,limit=99)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE NativeArchiveError
+
+trading/tests/test_native_depth_archive.py:100: Failed
+=========================== short test summary info ============================
+FAILED trading/tests/test_native_depth_archive.py::test_original_collection_replay_never_reads_native_again_or_changes_capture_policy
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 30 passed in 0.83s

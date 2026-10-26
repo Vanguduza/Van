@@ -1,6 +1,6 @@
 {
   "schema": "van.rebuild.candidate-source-progress/1",
-  "updated_at_utc": "2026-10-26T20:55:23.862666+00:00",
+  "updated_at_utc": "2026-10-26T21:26:10.061482+00:00",
   "programme": "Rev1.18; original 131 unit IDs and dependencies retained",
   "authority": "auth-20261022-owner-autonomous-candidate-build",
   "meaning": "Candidate source progress is separate from admitted unit acceptance. Independent certificates, owner decisions, live effects and release gates remain unissued. No unit is declared complete by this record.",
@@ -561,6 +561,10 @@
         {
           "description": "Original raw cTrader depth now uses bounded exact uint64 quote changes and cents, sticky gap/control recovery, processing-age/backlog holds and existing isolated read transport. No normalized price/native timestamp/sequence/snapshot-complete/provider qualification inferred.31newcases,171focused and738final actualSQLite/Postgres passes,0skip/audit0/all492runtime-testhashesmatch/ownedfixtureabsent;5assertionfaults/31positive+31restoredcontrols/122rebuild-T0checks. Ephemeral component only; durable capture and service consumers remain, BE008 IN_PROGRESS/acceptance NOT_ISSUED.",
           "evidence": "backend/BE-008_NATIVE_RAW_DEPTH.md;receipts/NATIVE_RAW_DEPTH_SOURCE_20261026.json"
+        },
+        {
+          "description": "Durable partial native depth now extends existing NativeMarketArchive commit/revision/request/index owner, with bounded canonical exact raw values, original captured policy, independent readback, cold/as-of history, actual child-crash/lost-head recovery and one native read across concurrent collectors. Source reader closes before final capacity/publication; foreign/failed/untyped results and corrupt history refuse without new native read or empty success.48newcases/175focused/786finalactualSQLitePostgres passes0skip/audit0/all494runtime-testhashesmatch/ownedfixtureabsent;6assertionfaults/48positive48restored/allsourceexact/122rebuildT0checks. Source consistency only;no native origin/entitlement/price-scale/completeness/authority/acceptance. BE008 remains IN_PROGRESS.",
+          "evidence": "backend/BE-008_NATIVE_DEPTH_ARCHIVE.md;receipts/NATIVE_DEPTH_ARCHIVE_SOURCE_20261026.json"
         }
       ]
     },
