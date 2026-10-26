@@ -11,6 +11,8 @@ from vati.events.news_ingress import (
     DEFAULT_RELEVANCE_WINDOW_MS,NewsIngress,NewsIngressError,_milliseconds,
     rows_from_text,sources_from_config,
 )
+from vati.events.news_feed import FeedCapacityError,capture_snapshot,rss_rows
+from vati.events.news_lineage import PublisherOrigin
 
 HEALTH_PRODUCER='vati-news-file-health'
 
@@ -50,13 +52,28 @@ def _options(config):
         prior=seen.setdefault(source.source_id,source)
         if prior!=source:raise NewsIngressError('news source declaration conflicts')
     out['sources']=sources
+    input_format=config.get('input_format','json')
+    if input_format not in ('json','rss2'):raise NewsIngressError('unsupported news input format')
+    out['input_format']=input_format
+    if input_format=='rss2':
+        PublisherOrigin(config.get('publisher_id'),config.get('source_id'))
+        out.update(publisher_id=config['publisher_id'],source_id=config['source_id'])
+        relevance=config.get('relevance',{})
+        if not isinstance(relevance,dict) or set(relevance)-{'currencies','asset_classes','symbols','event_class'}:
+            raise NewsIngressError('unsupported RSS relevance declaration')
+        NewsIngress().headline_from_row({'source_id':out['source_id'],'title':'profile validation',
+            'published_ms':0,'observed_ms':0,**relevance})
+        out['relevance']=dict(relevance)
     return out
 
 
 def _profile(options):
-    return {'path_ref':None if options['path'] is None else canonical_hash({'path':str(options['path'])}),
+    value={'path_ref':None if options['path'] is None else canonical_hash({'path':str(options['path'])}),
         'sources':[source.body() for source in sorted(options['sources'],key=lambda source:source.source_id)],
         **{name:options[name] for name in ('max_file_bytes','max_rows','max_recovery_events','relevance_window_ms')}}
+    if options['input_format']=='rss2':
+        value['adapter']={name:options[name] for name in ('input_format','source_id','publisher_id','relevance')}
+    return value
 
 
 def _durable_health(ledger,scope,material,checked_ms):
@@ -95,6 +112,8 @@ def _health(news,ledger,scope,state,now_ms,*,source_ref=None,input_hash=None,row
         'source_profile':getattr(news,'_file_profile',None),
         'records_in_input':rows,'skipped_in_batch':skipped,'error_code':error,
         'provider_qualified':False,'live_eligible':False,'authority_effect':'NONE'}
+    if getattr(news,'source_snapshot',None) is not None:
+        material['last_known_source_snapshot']=dict(news.source_snapshot)
     health=dict(material,checked_ms=now_ms,clock_basis='SUPPLIED_SERVICE_CLOCK_NOT_NATIVE_PUBLISHER_ADMISSION',
         last_known_headlines=None if now_ms is None else len(news.headlines(since_ms=-(2**63),as_of_ms=now_ms)),
         durable_health='NOT_REQUESTED')
@@ -166,12 +185,29 @@ def refresh_news_file(news,config,*,ledger,scope,now_ms,registry=None):
         if len(data)>options['max_file_bytes']:
             return counts|{'source_health':_health(news,ledger,scope,'CAPACITY_EXCEEDED',now_ms,source_ref=source_ref,error='FILE_BYTES')}
         digest=hashlib.sha256(data).hexdigest()
-        rows=rows_from_text(data.decode('utf-8'),suffix=path.suffix)
+        if options['input_format']=='rss2':
+            try:
+                news.source_snapshot=capture_snapshot(ledger,scope=scope,profile=news._file_profile,
+                    raw=data,now_ms=now_ms,known=news._feed_snapshots)
+                news._feed_snapshots[news.source_snapshot['snapshot_key']]=news.source_snapshot['receipt_hash']
+            except Exception as exc:
+                corrupt=isinstance(exc,ValueError)
+                health=_health(news,ledger,scope,'RECOVERY_UNAVAILABLE' if corrupt else 'PUBLICATION_UNKNOWN',
+                    now_ms,source_ref=source_ref,input_hash=digest,error=type(exc).__name__,persist=not corrupt)
+                return {'accepted':None,'duplicates':None,'skipped':None,'reconcile_required':True,'source_health':health}
+            rows=rss_rows(data,source_id=options['source_id'],publisher_id=options['publisher_id'],
+                observed_ms=news.source_snapshot['captured_ms'],max_rows=options['max_rows'],relevance=options['relevance'])
+        else:
+            news.source_snapshot=None
+            rows=rows_from_text(data.decode('utf-8'),suffix=path.suffix)
         if len(rows)>options['max_rows']:
             return counts|{'source_health':_health(news,ledger,scope,'CAPACITY_EXCEEDED',now_ms,
                 source_ref=source_ref,input_hash=digest,error='ROW_COUNT')}
     except FileNotFoundError:
         return counts|{'source_health':_health(news,ledger,scope,'MISSING',now_ms,source_ref=source_ref)}
+    except FeedCapacityError:
+        return counts|{'source_health':_health(news,ledger,scope,'CAPACITY_EXCEEDED',now_ms,
+            source_ref=source_ref,input_hash=digest,error='RSS_CAPACITY')}
     except Exception as exc:
         return counts|{'source_health':_health(news,ledger,scope,'UNREADABLE',now_ms,source_ref=source_ref,error=type(exc).__name__)}
     before=len(news.skipped)

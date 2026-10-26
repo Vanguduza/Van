@@ -1,0 +1,93 @@
+.F........F..........FF.........                                         [100%]
+=================================== FAILURES ===================================
+_ test_repeated_same_rss_bytes_reuse_first_capture_and_observation_after_cold_recovery _
+
+setup = (<vati.core.ledger.Ledger object at 0x7fb29e6a7440>, PosixPath('/tmp/pytest-of-agent/pytest-282/test_repeated_same_rss...t_repeated_same_rss_bytes_r0/feed.xml', 'input_format': 'rss2', 'source_id': 'transport', 'publisher_id': 'publisher'})
+
+    def test_repeated_same_rss_bytes_reuse_first_capture_and_observation_after_cold_recovery(setup):
+        ledger, path, config = setup; news = build(ledger, config)
+        snapshot, = snapshots(ledger); head = ledger.head()
+        refresh_news_file(news, config, ledger=ledger, scope='acct/EURUSD', now_ms=NOW+100)
+>       assert snapshots(ledger) == [snapshot] and ledger.head() == head
+E       AssertionError: assert ([Event(kind=<...903b6297f67')] == [Event(kind=<...903b6297f67')]
+E         
+E         Use -v to get more diff and 'ebd757040e1b...88a08492d9169' == '063d17d7a7a7...93aba5d76d47d'
+E         
+E         - 063d17d7a7a70c8e74e7e6313d66d10ba119887f17b6ee6941c93aba5d76d47d
+E         + ebd757040e1b89890d2450b0cc47a1b4743f7d1d3d82133a6c088a08492d9169)
+
+trading/tests/test_news_rss_feed.py:57: AssertionError
+_ test_lost_snapshot_commit_reply_publishes_no_headline_then_reuses_original_capture _
+
+setup = (<vati.core.ledger.Ledger object at 0x7fb29e570770>, PosixPath('/tmp/pytest-of-agent/pytest-282/test_lost_snapshot_com...t_lost_snapshot_commit_repl0/feed.xml', 'input_format': 'rss2', 'source_id': 'transport', 'publisher_id': 'publisher'})
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7fb29e5700b0>
+
+    def test_lost_snapshot_commit_reply_publishes_no_headline_then_reuses_original_capture(setup, monkeypatch):
+        ledger, path, config = setup; atomic = ledger.atomic
+        @contextmanager
+        def lost():
+            outer = not ledger._conn.in_transaction; before = len(snapshots(ledger))
+            with atomic():
+                yield ledger
+            if outer and len(snapshots(ledger)) > before:
+                raise OSError('fixture snapshot commit reply lost')
+        with monkeypatch.context() as patch:
+            patch.setattr(ledger, 'atomic', lost); news = build(ledger, config)
+        original, = snapshots(ledger)
+        assert news.source_health['state'] == 'PUBLICATION_UNKNOWN' and news.headlines() == []
+        assert ledger.count(EventKind.NEWS_HEADLINE) == 0
+        result = refresh_news_file(news, config, ledger=ledger, scope='acct/EURUSD', now_ms=NOW+100)
+        assert result['source_health']['state'] == 'READY_DECLARED'
+        assert snapshots(ledger) == [original]
+        assert news.headlines(since_ms=-(2**63), as_of_ms=NOW) == []
+>       assert news.headlines(since_ms=-(2**63), as_of_ms=NOW+100)[0].observed_ms == NOW
+E       AssertionError: assert 1800000000100 == 1800000000000
+E        +  where 1800000000100 = Headline(source_id='transport', trust=<SourceTrust.UNTRUSTED: 'UNTRUSTED'>, published_ms=1792162800000, observed_ms=18... event_class='', severity=None, concern=<Concern.UNCLEAR: 'UNCLEAR'>, url='https://publisher.test/r7', body_excerpt='').observed_ms
+
+trading/tests/test_news_rss_feed.py:120: AssertionError
+__ test_actual_service_news_builder_wires_rss_ingestion_and_refresh[session] ___
+
+setup = (<vati.core.ledger.Ledger object at 0x7fb29e570d10>, PosixPath('/tmp/pytest-of-agent/pytest-282/test_actual_service_ne...t_actual_service_news_build0/feed.xml', 'input_format': 'rss2', 'source_id': 'transport', 'publisher_id': 'publisher'})
+kind = 'session'
+
+    @pytest.mark.parametrize('kind',['session','account'])
+    def test_actual_service_news_builder_wires_rss_ingestion_and_refresh(setup,kind):
+        from test_news_runtime_health import service,build as service_build
+        ledger,path,config=setup;value=service(kind,ledger,config);news=service_build(value,kind)
+        assert len(news.headlines(since_ms=-(2**63),as_of_ms=NOW))==1
+        assert value.refresh_news(NOW+1)['source_health']['state']=='READY_DECLARED'
+>       assert len(snapshots(ledger))==1 and ledger.count(EventKind.NEWS_OBSERVATION)==1
+E       AssertionError: assert (1 == 1 and 2 == 1)
+E        +  where 1 = len([Event(kind=<EventKind.NEWS_SOURCE_SNAPSHOT: 'NEWS_SOURCE_SNAPSHOT'>, producer='vati-news-feed-snapshot', event_time_m...a5c337597ab1f8a1267fe5d9160301f00cde3928fa1', hash='79582d443685c36222d3bb06f93e9a1f1e5b55c235bb5f979fc7f992c390e6a8')])
+E        +    where [Event(kind=<EventKind.NEWS_SOURCE_SNAPSHOT: 'NEWS_SOURCE_SNAPSHOT'>, producer='vati-news-feed-snapshot', event_time_m...a5c337597ab1f8a1267fe5d9160301f00cde3928fa1', hash='79582d443685c36222d3bb06f93e9a1f1e5b55c235bb5f979fc7f992c390e6a8')] = snapshots(<vati.core.ledger.Ledger object at 0x7fb29e570d10>)
+E        +  and   2 = count(<EventKind.NEWS_OBSERVATION: 'NEWS_OBSERVATION'>)
+E        +    where count = <vati.core.ledger.Ledger object at 0x7fb29e570d10>.count
+E        +    and   <EventKind.NEWS_OBSERVATION: 'NEWS_OBSERVATION'> = EventKind.NEWS_OBSERVATION
+
+trading/tests/test_news_rss_feed.py:229: AssertionError
+__ test_actual_service_news_builder_wires_rss_ingestion_and_refresh[account] ___
+
+setup = (<vati.core.ledger.Ledger object at 0x7fb29e351970>, PosixPath('/tmp/pytest-of-agent/pytest-282/test_actual_service_ne...t_actual_service_news_build1/feed.xml', 'input_format': 'rss2', 'source_id': 'transport', 'publisher_id': 'publisher'})
+kind = 'account'
+
+    @pytest.mark.parametrize('kind',['session','account'])
+    def test_actual_service_news_builder_wires_rss_ingestion_and_refresh(setup,kind):
+        from test_news_runtime_health import service,build as service_build
+        ledger,path,config=setup;value=service(kind,ledger,config);news=service_build(value,kind)
+        assert len(news.headlines(since_ms=-(2**63),as_of_ms=NOW))==1
+        assert value.refresh_news(NOW+1)['source_health']['state']=='READY_DECLARED'
+>       assert len(snapshots(ledger))==1 and ledger.count(EventKind.NEWS_OBSERVATION)==1
+E       AssertionError: assert (1 == 1 and 2 == 1)
+E        +  where 1 = len([Event(kind=<EventKind.NEWS_SOURCE_SNAPSHOT: 'NEWS_SOURCE_SNAPSHOT'>, producer='vati-news-feed-snapshot', event_time_m...88053bed5e98ee31a5045326c14ae4b38776d185e67', hash='bdb67c94374baba13ab3516f54f7e38496a87b1c658022288779444fae97d591')])
+E        +    where [Event(kind=<EventKind.NEWS_SOURCE_SNAPSHOT: 'NEWS_SOURCE_SNAPSHOT'>, producer='vati-news-feed-snapshot', event_time_m...88053bed5e98ee31a5045326c14ae4b38776d185e67', hash='bdb67c94374baba13ab3516f54f7e38496a87b1c658022288779444fae97d591')] = snapshots(<vati.core.ledger.Ledger object at 0x7fb29e351970>)
+E        +  and   2 = count(<EventKind.NEWS_OBSERVATION: 'NEWS_OBSERVATION'>)
+E        +    where count = <vati.core.ledger.Ledger object at 0x7fb29e351970>.count
+E        +    and   <EventKind.NEWS_OBSERVATION: 'NEWS_OBSERVATION'> = EventKind.NEWS_OBSERVATION
+
+trading/tests/test_news_rss_feed.py:229: AssertionError
+=========================== short test summary info ============================
+FAILED trading/tests/test_news_rss_feed.py::test_repeated_same_rss_bytes_reuse_first_capture_and_observation_after_cold_recovery
+FAILED trading/tests/test_news_rss_feed.py::test_lost_snapshot_commit_reply_publishes_no_headline_then_reuses_original_capture
+FAILED trading/tests/test_news_rss_feed.py::test_actual_service_news_builder_wires_rss_ingestion_and_refresh[session]
+FAILED trading/tests/test_news_rss_feed.py::test_actual_service_news_builder_wires_rss_ingestion_and_refresh[account]
+4 failed, 28 passed, 2 deselected in 3.46s

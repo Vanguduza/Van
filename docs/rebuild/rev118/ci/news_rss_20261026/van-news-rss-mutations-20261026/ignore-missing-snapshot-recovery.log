@@ -1,0 +1,24 @@
+...................F............                                         [100%]
+=================================== FAILURES ===================================
+_ test_cold_recovery_refuses_hidden_original_snapshot_instead_of_appending_another _
+
+setup = (<vati.core.ledger.Ledger object at 0x7f3ac5b5c8c0>, PosixPath('/tmp/pytest-of-agent/pytest-288/test_cold_recovery_ref...t_cold_recovery_refuses_hid0/feed.xml', 'input_format': 'rss2', 'source_id': 'transport', 'publisher_id': 'publisher'})
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f3ac5b5c5f0>
+
+    def test_cold_recovery_refuses_hidden_original_snapshot_instead_of_appending_another(setup,monkeypatch):
+        ledger,path,config=setup;build(ledger,config);iterate=ledger.iter;head=ledger.head()
+        def hidden(kind=None,**kwargs):
+            if kind is not None and kind.value=='NEWS_SOURCE_SNAPSHOT':return iter(())
+            return iterate(kind,**kwargs)
+        with monkeypatch.context() as patch:
+            patch.setattr(ledger,'iter',hidden);news=build(ledger,config,NOW+1)
+>       assert news.source_health['state']=='RECOVERY_UNAVAILABLE'
+E       AssertionError: assert 'PUBLICATION_UNKNOWN' == 'RECOVERY_UNAVAILABLE'
+E         
+E         - RECOVERY_UNAVAILABLE
+E         + PUBLICATION_UNKNOWN
+
+trading/tests/test_news_rss_feed.py:208: AssertionError
+=========================== short test summary info ============================
+FAILED trading/tests/test_news_rss_feed.py::test_cold_recovery_refuses_hidden_original_snapshot_instead_of_appending_another
+1 failed, 31 passed, 2 deselected in 1.41s

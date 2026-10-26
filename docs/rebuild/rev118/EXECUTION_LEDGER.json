@@ -171,7 +171,9 @@
         "backend/BE-014_NEWS_RUNTIME_HEALTH.md",
         "receipts/NEWS_RUNTIME_SOURCE_20261026.json",
         "backend/BE-014_NEWS_PUBLISHER_LINEAGE.md",
-        "receipts/NEWS_PUBLISHER_LINEAGE_SOURCE_20261026.json"
+        "receipts/NEWS_PUBLISHER_LINEAGE_SOURCE_20261026.json",
+        "backend/BE-014_RSS_SOURCE_SNAPSHOTS.md",
+        "receipts/RSS_SOURCE_SNAPSHOTS_20261026.json"
       ]
     }
   },
@@ -245,7 +247,7 @@
     "note": "Opus unavailable; owner transferred build to Codex. No independent reviewer identity is inferred from another model or session."
   },
   "checkpoint": {
-    "updated_utc": "2026-10-26T02:01:26.332512+00:00",
+    "updated_utc": "2026-10-26T02:29:43.145840+00:00",
     "branch": "ccr-9e07e1af-8mgz1p",
     "base": "b02075f327ea8180ab6d269eba358cf8c5479878",
     "background_jobs": [
@@ -264,7 +266,7 @@
         "not_acceptance": true
       }
     ],
-    "last_validation": "734final actualPG0skip/audit0/exact hashes;153local controls+6PGdeselected executedfixture;8 supplemental faults assertion-caught/restored;108 rebuild. Owner/frontend contracts unchanged;mutation registry consistency374/383/0findings(not execution);consolidation0findings.",
+    "last_validation": "Explicit RSS2 profile wired through actual session/account news builders;original raw bytes/profile/parser/capture identity durably serialized/read back before parsing,stable first capture across replay,actual later ingress availability across lost commit replies. GUID/publisher declared lineage,explicit relevance,partial item diagnostics,DTD refusal/capacity/clock guards;cold raw integrity/visible-record checks and independent owner snapshots.768final actualPG0skip/audit0/exact hashes;185controls+8PGdeselected executedfixture;8supplemental faults caught/restored. Actual saved public Fed20-headline replay stable;latestOct16 remainsold;no native qualification.11baseline+2product followup failures and1stale-fixture error retained. Full BE014 remains IN_PROGRESS.",
     "environment_notes": [
       "clone must be unshallowed (git fetch --unshallow) and PR heads fetched (+refs/pull/*/head:refs/remotes/origin/pr/*) before pre001.py",
       "pytest from backend/requirements.txt in a venv",
@@ -274,29 +276,21 @@
       "Python 3.12 venv from backend/requirements.lock for CI-equivalent runs; stream-host venv from deploy/van-browser-stream/requirements.lock",
       "Desktop Commander read-only device listing was refused by the session permission policy; native readback prepared as pre003/NATIVE_READBACK_REQUEST.md"
     ],
-    "next_action": "Finish current source documentary checks/manifest/verified backup and genuine hook commit;inspect exact752 hosted CI until terminal before routine next push. Continue BE014 provider-neutral official RSS parsing/raw capture and scheduled-value crosschecks under OQ06;no purchase/native admission.",
-    "previous_head": "752d265b11ba643ed309481b110248f8b7fe323b",
-    "current_packet": "BE014 durable declared publisher lineage;734final actualPG/153controls/8faults;component only",
+    "next_action": "Finish final RSS source documentary checks/manifest/verified backup and genuine hook commit/ledger;push normally/read back now exact752CI is terminal. Inspect exact new-head qualification,then continue canonical backend dependency-ready work including remaining scheduled-value and source/provider contracts;no procurement/native acceptance inferred.",
+    "previous_head": "02ff56b996a7b894a7e3e070f2d90ef197db5aaa",
+    "current_packet": "BE014 RSS2 original source snapshots;768final actualPG/185controls/8faults;component only",
     "ci_credential_capability": "receipts/CI_CREDENTIAL_CAPABILITY_20261024.json: repo admin metadata available, integration secret/deploy-key reads403; no credential changes.",
-    "current_background_jobs": [
-      {
-        "kind": "github_actions",
-        "run_id": 40255331558,
-        "source_head": "752d265b11ba643ed309481b110248f8b7fe323b",
-        "status": "IN_PROGRESS_LAST_OBSERVED",
-        "scope": "Exact published source;two mandatory prerequisites failed,remaining source jobs running"
-      }
-    ],
-    "active_packet": "BE014 publisher lineage then official source crosschecks",
+    "current_background_jobs": [],
+    "active_packet": "BE014 official RSS snapshots then canonical dependency-ready backend",
     "published_head": "752d265b11ba643ed309481b110248f8b7fe323b",
-    "local_base_head": "752d265b11ba643ed309481b110248f8b7fe323b",
-    "committed_ledger_verification": "GREEN146 through752d265b against4fd466dec3910ed5de614bfbf95887ad619df5ca;current lineage uncommitted",
+    "local_base_head": "02ff56b996a7b894a7e3e070f2d90ef197db5aaa",
+    "committed_ledger_verification": "GREEN147 through02ff56b9 against4fd466dec3910ed5de614bfbf95887ad619df5ca;RSS packet uncommitted",
     "native_mql_source_compile": {
-      "head": "ea272bf834445bf9f2369dbc4377f3aea548892c",
-      "run": 40246053604,
+      "head": "752d265b11ba643ed309481b110248f8b7fe323b",
+      "run": 40255331586,
       "status": "SOURCE_COMPILED",
-      "evidence": "receipts/NATIVE_MQL_COMPILED_ea272bf8.json",
-      "qualification": "Actual signed compiler/bad-source probe/source blob/artifact verified; network-blocked SDK terminal initialization only, no broker/account/order/deployment/device acceptance"
+      "evidence": "receipts/NATIVE_MQL_COMPILED_752d265b.json",
+      "qualification": "Signed compiler and deliberate invalid probe/source blob/artifact checks;network-blocked SDK initialization only;no account/broker/order/deployment/device acceptance"
     }
   },
   "observations": [
@@ -316,7 +310,8 @@
     "2026-10-26T00:02:50.712194+00:00: Durable news644 final actualPG0skip/audit0/exact hashes,76 controls with2PGdeselected executednative,8 supplemental faults assertion-caught/restored.13 functional failures+6 missingAPI contracts and1 harness NameError after24 passes retained. NativeMQL exactEA source compile verified, mainCI pending. No accepted units.",
     "2026-10-26T00:10:29.246687+00:00: Final cold missing-receipt guards add2 actual regressions; finalR3 executes646 cases/0skip/audit0/exact source and test hashes.78 final controls plus2PGdeselected executed in PostgreSQL;8 final faults assertion-caught/restored. Earlier644/76/8 receipts retain their prior hashes and scope. PublishedEA artifact confirms3423trading pass/1privateDDSskip,PG26,voice117,monitor258 and374 original mutation identities caught once; mainbackend/browser still pending.",
     "2026-10-26T01:33:27.917947+00:00: Runtime news final698 actualPG0skip/audit0/exact hashes,119controls with4PGdeselected executedfixture,10faults assertion-caught/restored. Broad1059 selection TIMEOUT1800 exit2,1057completed passes,audit0,2unfinished nowincludedfinal; XML1058 includesinterrupted, not1058passes. Before final heartbeat-only delta original broad hashes retained. ExactEA CI terminal17public pass/2unwaived mandatory prerequisite failures, actualcomplete raw reports preserved. No accepted unit.",
-    "2026-10-26T02:01:26.332512+00:00: Separate versioned durable publisher/story declarations bind original observation receipts without rewriting headline IDs/claims/history. Atomic publication/readback, marker-bound missing/conflicting/orphan recovery refusal;late declaration as-of clocks,rewritten syndicated clusters count once,unknown/conflicting origins visible,qualified independent sources0.734final actualPG0skip/audit0/exact source+test hashes;153controls+6PGdeselected executedfixture;8faults caught/restored.11baseline+2followup+1orphan failures and harness diagnostics retained. Full BE014 remains IN_PROGRESS. Published752d265b/normal readback/GREEN146;exact CI still running with2 unwaived mandatory failures;accepted0."
+    "2026-10-26T02:01:26.332512+00:00: Separate versioned durable publisher/story declarations bind original observation receipts without rewriting headline IDs/claims/history. Atomic publication/readback, marker-bound missing/conflicting/orphan recovery refusal;late declaration as-of clocks,rewritten syndicated clusters count once,unknown/conflicting origins visible,qualified independent sources0.734final actualPG0skip/audit0/exact source+test hashes;153controls+6PGdeselected executedfixture;8faults caught/restored.11baseline+2followup+1orphan failures and harness diagnostics retained. Full BE014 remains IN_PROGRESS. Published752d265b/normal readback/GREEN146;exact CI still running with2 unwaived mandatory failures;accepted0.",
+    "2026-10-26T02:29:43.145840+00:00: Explicit RSS2 profile wired through actual session/account news builders;original raw bytes/profile/parser/capture identity durably serialized/read back before parsing,stable first capture across replay,actual later ingress availability across lost commit replies. GUID/publisher declared lineage,explicit relevance,partial item diagnostics,DTD refusal/capacity/clock guards;cold raw integrity/visible-record checks and independent owner snapshots.768final actualPG0skip/audit0/exact hashes;185controls+8PGdeselected executedfixture;8supplemental faults caught/restored. Actual saved public Fed20-headline replay stable;latestOct16 remainsold;no native qualification.11baseline+2product followup failures and1stale-fixture error retained. Full BE014 remains IN_PROGRESS. Exact752 hostedCI terminal17public success/2unwaived mandatory failure;gateway5775/7skip,media198,trading3495/1DDSskip,PG26,voice117,monitor258,374canonicalmutants caughtonce,Android18/4emulator,browser1547/1+foreground11/UID1/firewall10. SignedMQLcompile exactsource verified. accepted0."
   ],
   "obligations": "obligations/OBLIGATIONS.json: preserved observations with source implementation evidence and explicit remaining native/unit obligations.",
   "pre002_challenge": "pre002/challenge/: 324 author-prepared dossiers (AUTHOR_CHALLENGED_PENDING_INDEPENDENT_REVIEW)",
@@ -344,10 +339,10 @@
       "fca473cc",
       "c2a27848"
     ],
-    "tested_android_head": "ea272bf834445bf9f2369dbc4377f3aea548892c",
-    "hosted_result": "receipts/HOSTED_SOURCE_ea272bf8.json",
+    "tested_android_head": "752d265b11ba643ed309481b110248f8b7fe323b",
+    "hosted_result": "receipts/HOSTED_SOURCE_752d265b.json",
     "mutation_reconciliation": "ci/MUTATION_RECONCILIATION.md and ci/MUTATION_RECONCILIATION_MAPPING.json",
-    "verified_source_head": "752d265b11ba643ed309481b110248f8b7fe323b published normally/readback;GREEN146",
+    "verified_source_head": "02ff56b996a7b894a7e3e070f2d90ef197db5aaa local genuine commit/GREEN147;published752,ready for normal push afterRSS",
     "source_qualification_run": 40255331558,
     "latest_checkpoint_report": "CHECKPOINT_20261026_NEWS.md",
     "previous_verified_source": "3c6969ebbec39f2ad9f2836a6bd8acdb487adc34 published; exact CI40228254162 all17public jobs pass, two unchanged prerequisite failures",
@@ -369,6 +364,6 @@
       "evidence": "ci/MUTATION_CORPUS_c2a27848.json"
     }
   ],
-  "current_action": "Finish current source documentary checks/manifest/verified backup and genuine hook commit;inspect exact752 hosted CI until terminal before routine next push. Continue BE014 provider-neutral official RSS parsing/raw capture and scheduled-value crosschecks under OQ06;no purchase/native admission.",
-  "updated_at_utc": "2026-10-26T02:01:26.332512+00:00"
+  "current_action": "Finish final RSS source documentary checks/manifest/verified backup and genuine hook commit/ledger;push normally/read back now exact752CI is terminal. Inspect exact new-head qualification,then continue canonical backend dependency-ready work including remaining scheduled-value and source/provider contracts;no procurement/native acceptance inferred.",
+  "updated_at_utc": "2026-10-26T02:29:43.145840+00:00"
 }

@@ -1,0 +1,58 @@
+.............F....FF..                                                   [100%]
+=================================== FAILURES ===================================
+_ test_declared_rss_relevance_is_used_without_inferring_currency_from_publisher _
+
+setup = (<vati.core.ledger.Ledger object at 0x7f2a657403e0>, PosixPath('/tmp/pytest-of-agent/pytest-278/test_declared_rss_rele...lared_rss_relevance_is0/feed.xml', 'input_format': 'rss2', 'source_id': 'transport', 'publisher_id': 'publisher', ...})
+
+    def test_declared_rss_relevance_is_used_without_inferring_currency_from_publisher(setup):
+        ledger, path, config = setup
+        config |= {'relevance':{'currencies':['USD'],'symbols':['EURUSD']},
+                   'sources':[{'source_id':'transport','trust':'T1_PRIMARY'}]}
+        news = build(ledger, config); h, = news.headlines(since_ms=-(2**63),as_of_ms=NOW)
+        assert h.currencies == ('USD',) and h.symbols == ('EURUSD',)
+>       assert news.candidate_risk('EURUSD',now_ms=NOW,persist=False)[0] < 1
+E       AssertionError: assert Decimal('1') < 1
+
+trading/tests/test_news_rss_feed.py:136: AssertionError
+_ test_cold_recovery_refuses_hidden_original_snapshot_instead_of_appending_another _
+
+setup = (<vati.core.ledger.Ledger object at 0x7f2a65742540>, PosixPath('/tmp/pytest-of-agent/pytest-278/test_cold_recovery_ref...t_cold_recovery_refuses_hid0/feed.xml', 'input_format': 'rss2', 'source_id': 'transport', 'publisher_id': 'publisher'})
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f2a65742d20>
+
+    def test_cold_recovery_refuses_hidden_original_snapshot_instead_of_appending_another(setup,monkeypatch):
+        ledger,path,config=setup;build(ledger,config);iterate=ledger.iter;head=ledger.head()
+        def hidden(kind=None,**kwargs):
+            if kind is not None and kind.value=='NEWS_SOURCE_SNAPSHOT':return iter(())
+            return iterate(kind,**kwargs)
+        with monkeypatch.context() as patch:
+            patch.setattr(ledger,'iter',hidden);news=build(ledger,config,NOW+1)
+>       assert news.source_health['state']=='RECOVERY_UNAVAILABLE'
+E       AssertionError: assert 'PUBLICATION_UNKNOWN' == 'RECOVERY_UNAVAILABLE'
+E         
+E         - RECOVERY_UNAVAILABLE
+E         + PUBLICATION_UNKNOWN
+
+trading/tests/test_news_rss_feed.py:194: AssertionError
+____ test_report_cannot_mutate_last_known_raw_snapshot_or_captured_profile _____
+
+setup = (<vati.core.ledger.Ledger object at 0x7f2a65741e20>, PosixPath('/tmp/pytest-of-agent/pytest-278/test_report_cannot_mut...t_report_cannot_mutate_last0/feed.xml', 'input_format': 'rss2', 'source_id': 'transport', 'publisher_id': 'publisher'})
+
+    def test_report_cannot_mutate_last_known_raw_snapshot_or_captured_profile(setup):
+        ledger,path,config=setup;news=build(ledger,config)
+        report=news.report(now_ms=NOW)
+        report['source_health']['last_known_source_snapshot']['receipt_hash']='forged'
+        report['source_health']['source_profile']['adapter']['publisher_id']='forged'
+        original,=snapshots(ledger)
+        current=news.report(now_ms=NOW)['source_health']
+>       assert current['last_known_source_snapshot']['receipt_hash']==original.hash
+E       AssertionError: assert 'forged' == 'cae503791c80...fb9366833de7d'
+E         
+E         - cae503791c80e26bf27f3eeb9787a465160f237d5e9bb3c1b8afb9366833de7d
+E         + forged
+
+trading/tests/test_news_rss_feed.py:205: AssertionError
+=========================== short test summary info ============================
+FAILED trading/tests/test_news_rss_feed.py::test_declared_rss_relevance_is_used_without_inferring_currency_from_publisher
+FAILED trading/tests/test_news_rss_feed.py::test_cold_recovery_refuses_hidden_original_snapshot_instead_of_appending_another
+FAILED trading/tests/test_news_rss_feed.py::test_report_cannot_mutate_last_known_raw_snapshot_or_captured_profile
+3 failed, 19 passed in 3.42s

@@ -55,6 +55,7 @@ as excess caution rather than silent exposure.
 from __future__ import annotations
 
 import json
+from copy import deepcopy
 from dataclasses import dataclass, field
 from decimal import Decimal
 from enum import Enum
@@ -389,6 +390,7 @@ class NewsIngress:
         self._published_observations: set[str] = set()
         self._published_impacts: set[str] = set()
         self._origins: dict[str, dict[str, Any]] = {}
+        self._feed_snapshots: dict[str,str] = {}
         self._recovered=False
         self._legacy_headlines: set[str] = set()
         self._legacy_relays: dict[str,list[str]] = {}
@@ -406,11 +408,23 @@ class NewsIngress:
             raise NewsIngressError('news recovery capacity must be a positive bounded integer')
         try:
             recovered=cls(**kwargs)
-            kinds=(EventKind.NEWS_HEADLINE,EventKind.NEWS_OBSERVATION,EventKind.NEWS_LINEAGE,EventKind.EVENT_IMPACT)
+            kinds=(EventKind.NEWS_HEADLINE,EventKind.NEWS_OBSERVATION,EventKind.NEWS_LINEAGE,
+                   EventKind.NEWS_SOURCE_SNAPSHOT,EventKind.EVENT_IMPACT)
             with ledger.read_snapshot():
                 if sum(ledger.count(kind) for kind in kinds)>max_events:
                     raise NewsIngressError('news recovery capacity exhausted')
                 if not ledger.verify_chain()[0]:raise NewsIngressError('news recovery ledger integrity unavailable')
+                from vati.events.news_feed import SNAPSHOT_PRODUCER,checked_snapshot
+                snapshots_seen=0
+                for event in ledger.iter(EventKind.NEWS_SOURCE_SNAPSHOT):
+                    snapshots_seen+=1
+                    if event.producer!=SNAPSHOT_PRODUCER:continue
+                    value=checked_snapshot(event);key=value['snapshot_key']
+                    if key in recovered._feed_snapshots:
+                        raise NewsIngressError('news source snapshot original is ambiguous')
+                    recovered._feed_snapshots[key]=event.hash
+                if snapshots_seen!=ledger.count(EventKind.NEWS_SOURCE_SNAPSHOT):
+                    raise NewsIngressError('news source snapshot original readback missing')
                 originals={}
                 for event in ledger.iter(EventKind.NEWS_HEADLINE):
                     if event.producer!=recovered._producer:continue
@@ -929,7 +943,7 @@ class NewsIngress:
             "legacy_envelope_availability_unqualified":sorted(self._legacy_headlines & {h.headline_id for h in available}),
             "legacy_unqualified_relays":{h.headline_id:list(self._legacy_relays[h.headline_id])
                 for h in available if self._legacy_relays.get(h.headline_id)},
-            "source_health":None if self.source_health is None else dict(self.source_health),
+            "source_health":None if self.source_health is None else deepcopy(self.source_health),
             "now_ms": now_ms,
         }
 

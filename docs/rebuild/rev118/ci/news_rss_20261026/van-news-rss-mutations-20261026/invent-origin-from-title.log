@@ -1,0 +1,25 @@
+....F...........................                                         [100%]
+=================================== FAILURES ===================================
+_ test_missing_publication_or_original_key_is_partial_without_a_guessed_clock[<item><title>No original key</title><pubDate>16 Oct 2026 15:00:00 GMT</pubDate></item>] _
+
+setup = (<vati.core.ledger.Ledger object at 0x7fc6c3ac62d0>, PosixPath('/tmp/pytest-of-agent/pytest-285/test_missing_publicati...t_missing_publication_or_or2/feed.xml', 'input_format': 'rss2', 'source_id': 'transport', 'publisher_id': 'publisher'})
+items = '<item><title>No original key</title><pubDate>16 Oct 2026 15:00:00 GMT</pubDate></item>'
+
+    @pytest.mark.parametrize('items', [
+        '<item><title>Missing publication</title><guid>x</guid></item>',
+        '<item><title>Unzoned</title><guid>x</guid><pubDate>16 Oct 2026 15:00:00</pubDate></item>',
+        '<item><title>No original key</title><pubDate>16 Oct 2026 15:00:00 GMT</pubDate></item>',
+    ])
+    def test_missing_publication_or_original_key_is_partial_without_a_guessed_clock(setup, items):
+        ledger, path, config = setup; path.write_bytes(rss(items))
+        news = build(ledger, config)
+>       assert news.headlines() == []
+E       AssertionError: assert [Headline(sou...y_excerpt='')] == []
+E         
+E         Left contains one more item: Headline(source_id='transport', trust=<SourceTrust.UNTRUSTED: 'UNTRUSTED'>, published_ms=1792162800000, observed_ms=18...t_classes=(), symbols=(), event_class='', severity=None, concern=<Concern.UNCLEAR: 'UNCLEAR'>, url='', body_excerpt='')
+E         Use -v to get more diff
+
+trading/tests/test_news_rss_feed.py:71: AssertionError
+=========================== short test summary info ============================
+FAILED trading/tests/test_news_rss_feed.py::test_missing_publication_or_original_key_is_partial_without_a_guessed_clock[<item><title>No original key</title><pubDate>16 Oct 2026 15:00:00 GMT</pubDate></item>]
+1 failed, 31 passed, 2 deselected in 1.37s

@@ -1,0 +1,18 @@
+{
+  "url": "https://www.federalreserve.gov/feeds/press_all.xml",
+  "observed_at_utc": "2026-10-26T01:38:10.469112+00:00",
+  "qualification": "PUBLIC_HTTP_OBSERVATION_ONLY_NOT_PROVIDER_LICENCE_LATENCY_OR_NATIVE_FEED_ADMISSION",
+  "status": 200,
+  "final_url": "https://www.federalreserve.gov/feeds/press_all.xml",
+  "headers": {
+    "date": "Mon, 26 Oct 2026 01:38:10 GMT",
+    "content-type": "text/xml",
+    "content-length": "14813",
+    "etag": "\"dae62af7f5ddd1:0\"",
+    "last-modified": "Fri, 16 Oct 2026 15:00:18 GMT"
+  },
+  "bytes": 14813,
+  "over_limit": false,
+  "body_sha256": "529e889a916423a3979c1bebdd94c2b8d402889700d8c85cc4d125b7f538d327",
+  "elapsed_seconds": 0.269
+}

@@ -1,0 +1,39 @@
+{
+  "schema": "van.rebuild.rss-source-snapshots/1",
+  "status": "SOURCE_TESTED_COMPONENT_NOT_UNIT_ACCEPTANCE",
+  "base_head": "02ff56b996a7b894a7e3e070f2d90ef197db5aaa",
+  "updated_at_utc": "2026-10-26T02:29:43.145840+00:00",
+  "source_sha256": {
+    "trading/vati/core/events.py": "b503ad279241c91ecfb8bdfa3817ad83adf653e09d5f9321649d297c89c3b18f",
+    "trading/vati/events/news_ingress.py": "a5da30fe05cc7974c735be4173e858e30044fd8620a991457365932cb67e5cf2",
+    "trading/vati/events/news_runtime.py": "8939bb0b8c1c20d9a8cedf3ee462eeece919c022c25d7fa7267f9ac2ea151fd3",
+    "trading/vati/events/news_feed.py": "18497f7014acccbd3eb3126ec0dde96a61012eab15d3c428538e28a956522011",
+    "trading/tests/test_news_rss_feed.py": "7867501726ef246776d1a6bcb03006fe5faf64de5b2261b514e72b65b603a7ab"
+  },
+  "executed": {
+    "baseline": "11 actual RSS builder/profile/capture failures",
+    "follow_up": "2 product failures:hidden cold snapshot and mutable report;19 controls. Separate relevance fixture error expected stale publication to affect current risk;fresh fixture preserves assertion and stale-control asserts no effect",
+    "initial_integration": "113pass/6PGdeselected before additive fault controls",
+    "earlier_postgres": "765pass actual isolatedPG/0skip/audit0/exact then-current source/test snapshot",
+    "final_postgres": "768pass/0skip/audit0/exact final source+test hashes;pytestexit0/owned database fixture removed",
+    "final_controls": "185pass/0skip;8PG cases explicitly deselected locally and executed in final database fixture",
+    "supplemental_faults": "8 assertion-caught/0setup errors/skips/audit violations/exact restoration;not canonical374",
+    "public_official": "Actual saved FedHTTP200 bytes20 headlines;newestpub2026-10-16T15:00:00Z;actual worker first-file-capture clock retained;unchanged ledger on replay;no freshness/licence/latency/native qualification",
+    "rebuild": "108 passed after final source/continuation updates",
+    "contracts": "Owner/frontend contracts no drift;mutation registry preflight374cases383edits0findings(not execution);consolidation0findings"
+  },
+  "published_reference": {
+    "source_head": "752d265b11ba643ed309481b110248f8b7fe323b",
+    "run": 40255331558,
+    "result": "17 public source jobs success;overallfailure2 mandatory prerequisites,unwaived",
+    "evidence": "receipts/HOSTED_SOURCE_752d265b.json",
+    "does_not_qualify_later_lineage_rss": true
+  },
+  "evidence": "ci/news_rss_20261026",
+  "remaining": [
+    "Regular/provider transport and licensed/native source/clock/consumer/entitlement admission",
+    "Scheduled-value semantic crosschecks;forecast/revision/actual distinctions remain mandatory",
+    "Total host memory/interruptible I/O/capacity/latency not qualified",
+    "OQ06 procurement unresolved;no purchase;no unit/owner/F15/BG001/economic/production/S24 acceptance"
+  ]
+}

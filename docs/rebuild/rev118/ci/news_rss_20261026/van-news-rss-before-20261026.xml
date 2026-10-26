@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="11" skipped="0" tests="11" time="0.666" timestamp="2026-10-26T02:09:45.350702+00:00" hostname="2c5a245e39f1"><testcase classname="trading.tests.test_news_rss_feed" name="test_real_file_builder_ingests_rss_with_declared_guid_and_original_publication_clock" time="0.158"><failure message="ValueError: not enough values to unpack (expected 1, got 0)">setup = (&lt;vati.core.ledger.Ledger object at 0x7f643e207d40&gt;, PosixPath('/tmp/pytest-of-agent/pytest-275/test_real_file_builder...t_real_file_builder_ingests0/feed.xml', 'input_format': 'rss2', 'source_id': 'transport', 'publisher_id': 'publisher'})
+
+    def test_real_file_builder_ingests_rss_with_declared_guid_and_original_publication_clock(setup):
+        ledger, path, config = setup; news = build(ledger, config)
+&gt;       h, = news.headlines(since_ms=-(2**63), as_of_ms=NOW)
+        ^^
+E       ValueError: not enough values to unpack (expected 1, got 0)
+
+trading/tests/test_news_rss_feed.py:40: ValueError</failure></testcase><testcase classname="trading.tests.test_news_rss_feed" name="test_repeated_same_rss_bytes_reuse_first_capture_and_observation_after_cold_recovery" time="0.009"><failure message="ValueError: not enough values to unpack (expected 1, got 0)">setup = (&lt;vati.core.ledger.Ledger object at 0x7f643e09f0b0&gt;, PosixPath('/tmp/pytest-of-agent/pytest-275/test_repeated_same_rss...t_repeated_same_rss_bytes_r0/feed.xml', 'input_format': 'rss2', 'source_id': 'transport', 'publisher_id': 'publisher'})
+
+    def test_repeated_same_rss_bytes_reuse_first_capture_and_observation_after_cold_recovery(setup):
+        ledger, path, config = setup; news = build(ledger, config)
+&gt;       snapshot, = snapshots(ledger); head = ledger.head()
+        ^^^^^^^^^
+E       ValueError: not enough values to unpack (expected 1, got 0)
+
+trading/tests/test_news_rss_feed.py:53: ValueError</failure></testcase><testcase classname="trading.tests.test_news_rss_feed" name="test_missing_publication_or_original_key_is_partial_without_a_guessed_clock[&lt;item&gt;&lt;title&gt;Missing publication&lt;/title&gt;&lt;guid&gt;x&lt;/guid&gt;&lt;/item&gt;]" time="0.006"><failure message="AssertionError: assert ('UNREADABLE' == 'PARTIAL'&#10;  &#10;  - PARTIAL&#10;  + UNREADABLE)">setup = (&lt;vati.core.ledger.Ledger object at 0x7f643e09e7e0&gt;, PosixPath('/tmp/pytest-of-agent/pytest-275/test_missing_publicati...t_missing_publication_or_or0/feed.xml', 'input_format': 'rss2', 'source_id': 'transport', 'publisher_id': 'publisher'})
+items = '&lt;item&gt;&lt;title&gt;Missing publication&lt;/title&gt;&lt;guid&gt;x&lt;/guid&gt;&lt;/item&gt;'
+
+    @pytest.mark.parametrize('items', [
+        '&lt;item&gt;&lt;title&gt;Missing publication&lt;/title&gt;&lt;guid&gt;x&lt;/guid&gt;&lt;/item&gt;',
+        '&lt;item&gt;&lt;title&gt;Unzoned&lt;/title&gt;&lt;guid&gt;x&lt;/guid&gt;&lt;pubDate&gt;16 Oct 2026 15:00:00&lt;/pubDate&gt;&lt;/item&gt;',
+        '&lt;item&gt;&lt;title&gt;No original key&lt;/title&gt;&lt;pubDate&gt;16 Oct 2026 15:00:00 GMT&lt;/pubDate&gt;&lt;/item&gt;',
+    ])
+    def test_missing_publication_or_original_key_is_partial_without_a_guessed_clock(setup, items):
+        ledger, path, config = setup; path.write_bytes(rss(items))
+        news = build(ledger, config)
+        assert news.headlines() == []
+&gt;       assert news.source_health['state'] == 'PARTIAL' and len(news.skipped) == 1
+E       AssertionError: assert ('UNREADABLE' == 'PARTIAL'
+E         
+E         - PARTIAL
+E         + UNREADABLE)
+
+trading/tests/test_news_rss_feed.py:70: AssertionError</failure></testcase><testcase classname="trading.tests.test_news_rss_feed" name="test_missing_publication_or_original_key_is_partial_without_a_guessed_clock[&lt;item&gt;&lt;title&gt;Unzoned&lt;/title&gt;&lt;guid&gt;x&lt;/guid&gt;&lt;pubDate&gt;16 Oct 2026 15:00:00&lt;/pubDate&gt;&lt;/item&gt;]" time="0.007"><failure message="AssertionError: assert ('UNREADABLE' == 'PARTIAL'&#10;  &#10;  - PARTIAL&#10;  + UNREADABLE)">setup = (&lt;vati.core.ledger.Ledger object at 0x7f643e09f1d0&gt;, PosixPath('/tmp/pytest-of-agent/pytest-275/test_missing_publicati...t_missing_publication_or_or1/feed.xml', 'input_format': 'rss2', 'source_id': 'transport', 'publisher_id': 'publisher'})
+items = '&lt;item&gt;&lt;title&gt;Unzoned&lt;/title&gt;&lt;guid&gt;x&lt;/guid&gt;&lt;pubDate&gt;16 Oct 2026 15:00:00&lt;/pubDate&gt;&lt;/item&gt;'
+
+    @pytest.mark.parametrize('items', [
+        '&lt;item&gt;&lt;title&gt;Missing publication&lt;/title&gt;&lt;guid&gt;x&lt;/guid&gt;&lt;/item&gt;',
+        '&lt;item&gt;&lt;title&gt;Unzoned&lt;/title&gt;&lt;guid&gt;x&lt;/guid&gt;&lt;pubDate&gt;16 Oct 2026 15:00:00&lt;/pubDate&gt;&lt;/item&gt;',
+        '&lt;item&gt;&lt;title&gt;No original key&lt;/title&gt;&lt;pubDate&gt;16 Oct 2026 15:00:00 GMT&lt;/pubDate&gt;&lt;/item&gt;',
+    ])
+    def test_missing_publication_or_original_key_is_partial_without_a_guessed_clock(setup, items):
+        ledger, path, config = setup; path.write_bytes(rss(items))
+        news = build(ledger, config)
+        assert news.headlines() == []
+&gt;       assert news.source_health['state'] == 'PARTIAL' and len(news.skipped) == 1
+E       AssertionError: assert ('UNREADABLE' == 'PARTIAL'
+E         
+E         - PARTIAL
+E         + UNREADABLE)
+
+trading/tests/test_news_rss_feed.py:70: AssertionError</failure></testcase><testcase classname="trading.tests.test_news_rss_feed" name="test_missing_publication_or_original_key_is_partial_without_a_guessed_clock[&lt;item&gt;&lt;title&gt;No original key&lt;/title&gt;&lt;pubDate&gt;16 Oct 2026 15:00:00 GMT&lt;/pubDate&gt;&lt;/item&gt;]" time="0.012"><failure message="AssertionError: assert ('UNREADABLE' == 'PARTIAL'&#10;  &#10;  - PARTIAL&#10;  + UNREADABLE)">setup = (&lt;vati.core.ledger.Ledger object at 0x7f643e09f4d0&gt;, PosixPath('/tmp/pytest-of-agent/pytest-275/test_missing_publicati...t_missing_publication_or_or2/feed.xml', 'input_format': 'rss2', 'source_id': 'transport', 'publisher_id': 'publisher'})
+items = '&lt;item&gt;&lt;title&gt;No original key&lt;/title&gt;&lt;pubDate&gt;16 Oct 2026 15:00:00 GMT&lt;/pubDate&gt;&lt;/item&gt;'
+
+    @pytest.mark.parametrize('items', [
+        '&lt;item&gt;&lt;title&gt;Missing publication&lt;/title&gt;&lt;guid&gt;x&lt;/guid&gt;&lt;/item&gt;',
+        '&lt;item&gt;&lt;title&gt;Unzoned&lt;/title&gt;&lt;guid&gt;x&lt;/guid&gt;&lt;pubDate&gt;16 Oct 2026 15:00:00&lt;/pubDate&gt;&lt;/item&gt;',
+        '&lt;item&gt;&lt;title&gt;No original key&lt;/title&gt;&lt;pubDate&gt;16 Oct 2026 15:00:00 GMT&lt;/pubDate&gt;&lt;/item&gt;',
+    ])
+    def test_missing_publication_or_original_key_is_partial_without_a_guessed_clock(setup, items):
+        ledger, path, config = setup; path.write_bytes(rss(items))
+        news = build(ledger, config)
+        assert news.headlines() == []
+&gt;       assert news.source_health['state'] == 'PARTIAL' and len(news.skipped) == 1
+E       AssertionError: assert ('UNREADABLE' == 'PARTIAL'
+E         
+E         - PARTIAL
+E         + UNREADABLE)
+
+trading/tests/test_news_rss_feed.py:70: AssertionError</failure></testcase><testcase classname="trading.tests.test_news_rss_feed" name="test_bad_rss_item_preserves_its_valid_neighbors" time="0.013"><failure message="assert 0 == 2&#10; +  where 0 = len([])&#10; +    where [] = headlines(since_ms=-(2 ** 63), as_of_ms=1800000000000)&#10; +      where headlines = &lt;vati.events.news_ingress.NewsIngress object at 0x7f643e37d280&gt;.headlines">setup = (&lt;vati.core.ledger.Ledger object at 0x7f643e37d310&gt;, PosixPath('/tmp/pytest-of-agent/pytest-275/test_bad_rss_item_pres...t_bad_rss_item_preserves_it0/feed.xml', 'input_format': 'rss2', 'source_id': 'transport', 'publisher_id': 'publisher'})
+
+    def test_bad_rss_item_preserves_its_valid_neighbors(setup):
+        ledger, path, config = setup
+        valid = rss().decode().split('&lt;item&gt;',1)[1].split('&lt;/item&gt;',1)[0]
+        path.write_bytes(rss('&lt;item&gt;'+valid+'&lt;/item&gt;&lt;item&gt;&lt;title&gt;Bad&lt;/title&gt;&lt;/item&gt;&lt;item&gt;'+valid.replace('release-7','release-8').replace('Policy decision','Next decision')+'&lt;/item&gt;'))
+        news = build(ledger, config)
+&gt;       assert len(news.headlines(since_ms=-(2**63), as_of_ms=NOW)) == 2
+E       assert 0 == 2
+E        +  where 0 = len([])
+E        +    where [] = headlines(since_ms=-(2 ** 63), as_of_ms=1800000000000)
+E        +      where headlines = &lt;vati.events.news_ingress.NewsIngress object at 0x7f643e37d280&gt;.headlines
+
+trading/tests/test_news_rss_feed.py:79: AssertionError</failure></testcase><testcase classname="trading.tests.test_news_rss_feed" name="test_raw_snapshot_bytes_survive_malformed_feed_without_fabricated_coverage" time="0.007"><failure message="ValueError: not enough values to unpack (expected 1, got 0)">setup = (&lt;vati.core.ledger.Ledger object at 0x7f643e37d6d0&gt;, PosixPath('/tmp/pytest-of-agent/pytest-275/test_raw_snapshot_byte...t_raw_snapshot_bytes_surviv0/feed.xml', 'input_format': 'rss2', 'source_id': 'transport', 'publisher_id': 'publisher'})
+
+    def test_raw_snapshot_bytes_survive_malformed_feed_without_fabricated_coverage(setup):
+        import base64
+        ledger, path, config = setup; raw = b'&lt;rss version="2.0"&gt;&lt;broken'; path.write_bytes(raw)
+        news = build(ledger, config)
+&gt;       original, = snapshots(ledger)
+        ^^^^^^^^^
+E       ValueError: not enough values to unpack (expected 1, got 0)
+
+trading/tests/test_news_rss_feed.py:87: ValueError</failure></testcase><testcase classname="trading.tests.test_news_rss_feed" name="test_bad_adapter_profile_is_configuration_error_before_capture[change0]" time="0.008"><failure message="AssertionError: assert 'UNREADABLE' == 'CONFIGURATION_ERROR'&#10;  &#10;  - CONFIGURATION_ERROR&#10;  + UNREADABLE">setup = (&lt;vati.core.ledger.Ledger object at 0x7f643e3a0440&gt;, PosixPath('/tmp/pytest-of-agent/pytest-275/test_bad_adapter_profi...t_bad_adapter_profile_is_co0/feed.xml', 'input_format': 'rss2', 'source_id': 'transport', 'publisher_id': 'publisher'})
+change = {'input_format': 'invented'}
+
+    @pytest.mark.parametrize('change', [{'input_format':'invented'}, {'publisher_id':''}, {'source_id':True}])
+    def test_bad_adapter_profile_is_configuration_error_before_capture(setup, change):
+        ledger, path, config = setup; news = build(ledger, config | change)
+&gt;       assert news.source_health['state'] == 'CONFIGURATION_ERROR'
+E       AssertionError: assert 'UNREADABLE' == 'CONFIGURATION_ERROR'
+E         
+E         - CONFIGURATION_ERROR
+E         + UNREADABLE
+
+trading/tests/test_news_rss_feed.py:96: AssertionError</failure></testcase><testcase classname="trading.tests.test_news_rss_feed" name="test_bad_adapter_profile_is_configuration_error_before_capture[change1]" time="0.008"><failure message="AssertionError: assert 'UNREADABLE' == 'CONFIGURATION_ERROR'&#10;  &#10;  - CONFIGURATION_ERROR&#10;  + UNREADABLE">setup = (&lt;vati.core.ledger.Ledger object at 0x7f643e3a1f40&gt;, PosixPath('/tmp/pytest-of-agent/pytest-275/test_bad_adapter_profi...t_bad_adapter_profile_is_co1/feed.xml', 'input_format': 'rss2', 'source_id': 'transport', 'publisher_id': 'publisher'})
+change = {'publisher_id': ''}
+
+    @pytest.mark.parametrize('change', [{'input_format':'invented'}, {'publisher_id':''}, {'source_id':True}])
+    def test_bad_adapter_profile_is_configuration_error_before_capture(setup, change):
+        ledger, path, config = setup; news = build(ledger, config | change)
+&gt;       assert news.source_health['state'] == 'CONFIGURATION_ERROR'
+E       AssertionError: assert 'UNREADABLE' == 'CONFIGURATION_ERROR'
+E         
+E         - CONFIGURATION_ERROR
+E         + UNREADABLE
+
+trading/tests/test_news_rss_feed.py:96: AssertionError</failure></testcase><testcase classname="trading.tests.test_news_rss_feed" name="test_bad_adapter_profile_is_configuration_error_before_capture[change2]" time="0.006"><failure message="AssertionError: assert 'UNREADABLE' == 'CONFIGURATION_ERROR'&#10;  &#10;  - CONFIGURATION_ERROR&#10;  + UNREADABLE">setup = (&lt;vati.core.ledger.Ledger object at 0x7f643e3a6900&gt;, PosixPath('/tmp/pytest-of-agent/pytest-275/test_bad_adapter_profi...t_bad_adapter_profile_is_co2/feed.xml', 'input_format': 'rss2', 'source_id': 'transport', 'publisher_id': 'publisher'})
+change = {'source_id': True}
+
+    @pytest.mark.parametrize('change', [{'input_format':'invented'}, {'publisher_id':''}, {'source_id':True}])
+    def test_bad_adapter_profile_is_configuration_error_before_capture(setup, change):
+        ledger, path, config = setup; news = build(ledger, config | change)
+&gt;       assert news.source_health['state'] == 'CONFIGURATION_ERROR'
+E       AssertionError: assert 'UNREADABLE' == 'CONFIGURATION_ERROR'
+E         
+E         - CONFIGURATION_ERROR
+E         + UNREADABLE
+
+trading/tests/test_news_rss_feed.py:96: AssertionError</failure></testcase><testcase classname="trading.tests.test_news_rss_feed" name="test_lost_snapshot_commit_reply_publishes_no_headline_then_reuses_original_capture" time="0.005"><failure message="ValueError: not enough values to unpack (expected 1, got 0)">setup = (&lt;vati.core.ledger.Ledger object at 0x7f643e35c740&gt;, PosixPath('/tmp/pytest-of-agent/pytest-275/test_lost_snapshot_com...t_lost_snapshot_commit_repl0/feed.xml', 'input_format': 'rss2', 'source_id': 'transport', 'publisher_id': 'publisher'})
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x7f643e3a60c0&gt;
+
+    def test_lost_snapshot_commit_reply_publishes_no_headline_then_reuses_original_capture(setup, monkeypatch):
+        ledger, path, config = setup; atomic = ledger.atomic
+        @contextmanager
+        def lost():
+            outer = not ledger._conn.in_transaction; before = len(snapshots(ledger))
+            with atomic():
+                yield ledger
+            if outer and len(snapshots(ledger)) &gt; before:
+                raise OSError('fixture snapshot commit reply lost')
+        with monkeypatch.context() as patch:
+            patch.setattr(ledger, 'atomic', lost); news = build(ledger, config)
+&gt;       original, = snapshots(ledger)
+        ^^^^^^^^^
+E       ValueError: not enough values to unpack (expected 1, got 0)
+
+trading/tests/test_news_rss_feed.py:111: ValueError</failure></testcase></testsuite></testsuites>
