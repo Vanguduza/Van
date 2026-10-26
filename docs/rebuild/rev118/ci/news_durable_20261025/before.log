@@ -1,0 +1,147 @@
+FFFFFFFF                                                                 [100%]
+=================================== FAILURES ===================================
+_______ test_failed_headline_publication_does_not_become_memory_success ________
+
+ledger = <vati.core.ledger.Ledger object at 0x7fc50ae514f0>
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7fc50b04e150>
+
+    def test_failed_headline_publication_does_not_become_memory_success(ledger,monkeypatch):
+        news=NewsIngress(ledger=ledger);h=story()
+        def unavailable(_event):raise OSError('fixture writer unavailable')
+        with monkeypatch.context() as patch:
+            patch.setattr(ledger,'append',unavailable)
+            with pytest.raises(OSError):news.ingest(h,now_ms=NOW)
+>       assert news.headlines()==[] and news.relayed_by(h.headline_id)==()
+E       AssertionError: assert ([Headline(sou...y_excerpt='')] == []
+E         
+E         Left contains one more item: Headline(source_id='publisher', trust=<SourceTrust.T1_PRIMARY: 'T1_PRIMARY'>, published_ms=1800000000000, observed_ms=...bols=('EURUSD',), event_class='', severity=Decimal('1'), concern=<Concern.UNCLEAR: 'UNCLEAR'>, url='', body_excerpt='')
+E         Use -v to get more diff)
+
+trading/tests/test_news_durable_publication.py:33: AssertionError
+___ test_cold_replay_reads_the_original_instead_of_appending_a_new_headline ____
+
+ledger = <vati.core.ledger.Ledger object at 0x7fc50aecbb60>
+
+    def test_cold_replay_reads_the_original_instead_of_appending_a_new_headline(ledger):
+        h=story();NewsIngress(ledger=ledger).ingest(h,now_ms=NOW)
+        original=next(ledger.iter(EventKind.NEWS_HEADLINE));head=ledger.head()
+>       assert NewsIngress(ledger=ledger).ingest(h,now_ms=NOW+1000) is None
+E       AssertionError: assert Headline(source_id='publisher', trust=<SourceTrust.T1_PRIMARY: 'T1_PRIMARY'>, published_ms=1800000000000, observed_ms=...bols=('EURUSD',), event_class='', severity=Decimal('1'), concern=<Concern.UNCLEAR: 'UNCLEAR'>, url='', body_excerpt='') is None
+E        +  where Headline(source_id='publisher', trust=<SourceTrust.T1_PRIMARY: 'T1_PRIMARY'>, published_ms=1800000000000, observed_ms=...bols=('EURUSD',), event_class='', severity=Decimal('1'), concern=<Concern.UNCLEAR: 'UNCLEAR'>, url='', body_excerpt='') = ingest(Headline(source_id='publisher', trust=<SourceTrust.T1_PRIMARY: 'T1_PRIMARY'>, published_ms=1800000000000, observed_ms=...bols=('EURUSD',), event_class='', severity=Decimal('1'), concern=<Concern.UNCLEAR: 'UNCLEAR'>, url='', body_excerpt=''), now_ms=(1800000000000 + 1000))
+E        +    where ingest = <vati.events.news_ingress.NewsIngress object at 0x7fc50aecbc80>.ingest
+E        +      where <vati.events.news_ingress.NewsIngress object at 0x7fc50aecbc80> = NewsIngress(ledger=<vati.core.ledger.Ledger object at 0x7fc50aecbb60>)
+
+trading/tests/test_news_durable_publication.py:41: AssertionError
+_ test_lost_actual_sql_commit_reply_does_not_advance_memory_and_replay_preserves_original _
+
+ledger = <vati.core.ledger.Ledger object at 0x7fc50af0c860>
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7fc50af0ee40>
+
+    def test_lost_actual_sql_commit_reply_does_not_advance_memory_and_replay_preserves_original(ledger,monkeypatch):
+        news=NewsIngress(ledger=ledger);h=story();atomic=ledger.atomic
+        @contextmanager
+        def commit_then_lose_reply():
+            outer=not ledger._conn.in_transaction
+            with atomic():yield ledger
+            if outer:raise OSError('fixture ACK lost after actual SQL commit')
+        with monkeypatch.context() as patch:
+            patch.setattr(ledger,'atomic',commit_then_lose_reply)
+            with pytest.raises(OSError,match='actual SQL commit'):news.ingest(h,now_ms=NOW)
+        original=next(ledger.iter(EventKind.NEWS_HEADLINE));head=ledger.head()
+>       assert news.headlines()==[] and news.relayed_by(h.headline_id)==()
+E       AssertionError: assert ([Headline(sou...y_excerpt='')] == []
+E         
+E         Left contains one more item: Headline(source_id='publisher', trust=<SourceTrust.T1_PRIMARY: 'T1_PRIMARY'>, published_ms=1800000000000, observed_ms=...bols=('EURUSD',), event_class='', severity=Decimal('1'), concern=<Concern.UNCLEAR: 'UNCLEAR'>, url='', body_excerpt='')
+E         Use -v to get more diff)
+
+trading/tests/test_news_durable_publication.py:57: AssertionError
+____ test_independent_original_readback_is_required_before_headline_success ____
+
+ledger = <vati.core.ledger.Ledger object at 0x7fc50af0d520>
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7fc50af0ca10>
+
+    def test_independent_original_readback_is_required_before_headline_success(ledger,monkeypatch):
+        news=NewsIngress(ledger=ledger);h=story();read=ledger.iter
+        def unavailable_after_commit(kind=None,correlation_id=None):
+            if kind is EventKind.NEWS_HEADLINE and not ledger._conn.in_transaction:return iter(())
+            return read(kind,correlation_id=correlation_id)
+        with monkeypatch.context() as patch:
+            patch.setattr(ledger,'iter',unavailable_after_commit)
+>           with pytest.raises(OSError,match='not confirmed'):news.ingest(h,now_ms=NOW)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           Failed: DID NOT RAISE OSError
+
+trading/tests/test_news_durable_publication.py:71: Failed
+_____ test_missing_known_original_cannot_be_recreated_or_reported_complete _____
+
+ledger = <vati.core.ledger.Ledger object at 0x7fc50aecb8c0>
+
+    def test_missing_known_original_cannot_be_recreated_or_reported_complete(ledger):
+        news=NewsIngress(ledger=ledger);h=story();news.ingest(h)
+        ledger._conn.execute('DELETE FROM events WHERE kind=?',(EventKind.NEWS_HEADLINE.value,))
+>       with pytest.raises(NewsIngressError,match='missing'):news.ingest(h)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE NewsIngressError
+
+trading/tests/test_news_durable_publication.py:78: Failed
+_________ test_corrupt_original_cannot_be_ignored_by_a_cold_publisher __________
+
+ledger = <vati.core.ledger.Ledger object at 0x7fc50b1c07d0>
+
+    def test_corrupt_original_cannot_be_ignored_by_a_cold_publisher(ledger):
+        h=story();NewsIngress(ledger=ledger).ingest(h)
+        ledger._conn.execute("UPDATE events SET payload_json='{}' WHERE kind=?",(EventKind.NEWS_HEADLINE.value,))
+        head=ledger.head()
+>       with pytest.raises(NewsIngressError):NewsIngress(ledger=ledger).ingest(h)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE NewsIngressError
+
+trading/tests/test_news_durable_publication.py:86: Failed
+______ test_failed_impact_publication_does_not_become_remembered_success _______
+
+ledger = <vati.core.ledger.Ledger object at 0x7fc50b1c2840>
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7fc50b1c0a70>
+
+    def test_failed_impact_publication_does_not_become_remembered_success(ledger,monkeypatch):
+        news=NewsIngress(ledger=ledger);h=story();news.ingest(h);append=ledger.append
+        def unavailable(event):
+            if event.kind is EventKind.EVENT_IMPACT:raise OSError('fixture impact writer unavailable')
+            return append(event)
+        with monkeypatch.context() as patch:
+            patch.setattr(ledger,'append',unavailable)
+            with pytest.raises(OSError):news.assess(h,subject_kind='POSITION',subject_id='p',symbol='EURUSD',now_ms=NOW)
+>       assert news.impacts_for('p')==[] and ledger.count(EventKind.EVENT_IMPACT)==0
+E       AssertionError: assert ([EventImpactA...mpact/5.1.1')] == []
+E         
+E         Left contains one more item: EventImpactAssessment(impact_id='c509c4d168802183e0cd9e38', headline_id='138bd873f2a6c652858d8f2f466ac369', subject_ki...66ac369cd194fb68ff43f2a00a3d50a892ec36f', 'publisher'), assessed_ms=1800000000000, impact_version='event-impact/5.1.1')
+E         Use -v to get more diff)
+
+trading/tests/test_news_durable_publication.py:98: AssertionError
+__ test_identical_impact_replay_keeps_one_original_receipt_and_memory_record ___
+
+ledger = <vati.core.ledger.Ledger object at 0x7fc50b1e9580>
+
+    def test_identical_impact_replay_keeps_one_original_receipt_and_memory_record(ledger):
+        news=NewsIngress(ledger=ledger);h=story();news.ingest(h)
+        a=news.assess(h,subject_kind='POSITION',subject_id='p',symbol='EURUSD',now_ms=NOW)
+        original=next(ledger.iter(EventKind.EVENT_IMPACT));head=ledger.head()
+        b=news.assess(h,subject_kind='POSITION',subject_id='p',symbol='EURUSD',now_ms=NOW)
+>       assert a==b and ledger.count(EventKind.EVENT_IMPACT)==1 and ledger.head()==head
+E       AssertionError: assert (EventImpactAs...impact/5.1.1') == EventImpactAs...impact/5.1.1')
+E         
+E         Omitting 12 identical items, use -vv to show and 2 == 1)
+E        +  where 2 = count(<EventKind.EVENT_IMPACT: 'EVENT_IMPACT'>)
+E        +    where count = <vati.core.ledger.Ledger object at 0x7fc50b1e9580>.count
+E        +    and   <EventKind.EVENT_IMPACT: 'EVENT_IMPACT'> = EventKind.EVENT_IMPACT
+
+trading/tests/test_news_durable_publication.py:106: AssertionError
+=========================== short test summary info ============================
+FAILED trading/tests/test_news_durable_publication.py::test_failed_headline_publication_does_not_become_memory_success
+FAILED trading/tests/test_news_durable_publication.py::test_cold_replay_reads_the_original_instead_of_appending_a_new_headline
+FAILED trading/tests/test_news_durable_publication.py::test_lost_actual_sql_commit_reply_does_not_advance_memory_and_replay_preserves_original
+FAILED trading/tests/test_news_durable_publication.py::test_independent_original_readback_is_required_before_headline_success
+FAILED trading/tests/test_news_durable_publication.py::test_missing_known_original_cannot_be_recreated_or_reported_complete
+FAILED trading/tests/test_news_durable_publication.py::test_corrupt_original_cannot_be_ignored_by_a_cold_publisher
+FAILED trading/tests/test_news_durable_publication.py::test_failed_impact_publication_does_not_become_remembered_success
+FAILED trading/tests/test_news_durable_publication.py::test_identical_impact_replay_keeps_one_original_receipt_and_memory_record
+8 failed in 0.70s

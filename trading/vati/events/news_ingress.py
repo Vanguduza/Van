@@ -67,8 +67,8 @@ from vati.core.events import EventKind, make_event
 from vati.events.registry import AssetClass, EventRegistry, InstrumentExposure
 
 PRODUCER = "vati-news-ingress"
-INGRESS_VERSION = "news-ingress/5.1.1"
-IMPACT_VERSION = "event-impact/5.1.1"
+INGRESS_VERSION = "news-ingress/5.1.2"
+IMPACT_VERSION = "event-impact/5.1.2"
 
 ZERO, ONE = Decimal("0"), Decimal("1")
 
@@ -373,10 +373,80 @@ class NewsIngress:
         self._sources: dict[str, NewsSource] = {s.source_id: s for s in (sources or ())}
         self._headlines: dict[str, Headline] = {}
         self._observations: dict[str, list[str]] = {}
-        self._relay_times: dict[str, dict[str, int]] = {}
+        self._relay_times: dict[str, dict[str, Optional[int]]] = {}
         self._claims: dict[str, list[tuple[Headline,int]]] = {}
         self._impacts: dict[str, list[EventImpactAssessment]] = {}
+        self._published_observations: set[str] = set()
+        self._published_impacts: set[str] = set()
+        self._recovered=False
+        self._legacy_headlines: set[str] = set()
+        self._legacy_relays: dict[str,list[str]] = {}
         self.skipped: list[dict[str, str]] = []
+
+    @classmethod
+    def from_ledger(cls,ledger,*,max_events: int=100000,**kwargs):
+        """Restore a consistent checked snapshot without republishing originals.
+
+        Full chain verification is deliberately a recovery operation, not an
+        interruptible per-decision host budget or native feed qualification.
+        """
+        if type(max_events) is not int or not 1<=max_events<=1000000:
+            raise NewsIngressError('news recovery capacity must be a positive bounded integer')
+        try:
+            recovered=cls(**kwargs)
+            kinds=(EventKind.NEWS_HEADLINE,EventKind.NEWS_OBSERVATION,EventKind.EVENT_IMPACT)
+            with ledger.read_snapshot():
+                if sum(ledger.count(kind) for kind in kinds)>max_events:
+                    raise NewsIngressError('news recovery capacity exhausted')
+                if not ledger.verify_chain()[0]:raise NewsIngressError('news recovery ledger integrity unavailable')
+                originals={}
+                for event in ledger.iter(EventKind.NEWS_HEADLINE):
+                    if event.producer!=recovered._producer:continue
+                    if event.hash!=canonical_hash(event.body()):raise NewsIngressError('news original seal invalid')
+                    headline=_headline_from_original(event.payload);hid=headline.headline_id
+                    if (hid in originals or event.correlation_id!=hid
+                            or event.event_time_ms!=headline.published_ms):
+                        raise NewsIngressError('news original identity/scope is ambiguous')
+                    at=_original_available_ms(event,headline);originals[hid]=event
+                    recovered.ingest(headline,now_ms=at)
+                    if 'full_claim' not in event.payload:
+                        recovered._legacy_headlines.add(hid)
+                        relays=event.payload.get('relayed_by',[headline.source_id])
+                        if not isinstance(relays,list) or any(not isinstance(s,str) or not s.strip() for s in relays):
+                            raise NewsIngressError('news legacy relay labels invalid')
+                        for source in relays:
+                            if source not in recovered._observations[hid]:
+                                recovered._observations[hid].append(source)
+                                recovered._relay_times[hid][source]=None
+                                recovered._legacy_relays.setdefault(hid,[]).append(source)
+                seen={}
+                for event in ledger.iter(EventKind.NEWS_OBSERVATION):
+                    if event.producer!=recovered._producer:continue
+                    headline,at=_observation_from_event(event);oid=event.payload['observation_id'];hid=headline.headline_id
+                    if oid in seen or hid not in originals:
+                        raise NewsIngressError('news observation original is ambiguous or orphaned')
+                    original=_headline_from_original(originals[hid].payload)
+                    if original.dedupe_hash!=headline.dedupe_hash:
+                        raise NewsIngressError('news observation original scope conflicts')
+                    recovered.ingest(headline,now_ms=at);seen[oid]=at
+                for hid,event in originals.items():
+                    if 'full_claim' in event.payload:
+                        headline=recovered._headlines[hid];oid=_observation_id(headline)
+                        if seen.get(oid)!=_original_available_ms(event,headline):
+                            raise NewsIngressError('news original observation missing or availability conflicts')
+                recovered._published_observations=set(seen)
+                for event in ledger.iter(EventKind.EVENT_IMPACT):
+                    if event.producer!=recovered._producer:continue
+                    impact=_impact_from_event(event)
+                    if impact.headline_id not in originals or impact.impact_id in recovered._published_impacts:
+                        raise NewsIngressError('news impact original is orphaned or ambiguous')
+                    recovered._impacts.setdefault(impact.subject_id,[]).append(impact)
+                    recovered._published_impacts.add(impact.impact_id)
+            recovered._ledger=ledger;recovered._recovered=True
+            return recovered
+        except NewsIngressError:raise
+        except (KeyError,TypeError,ValueError,ArithmeticError) as exc:
+            raise NewsIngressError('news recovery original format unavailable: '+str(exc)) from exc
 
     # ------------------------------------------------------------- sources
     def register_source(self, source: NewsSource) -> NewsSource:
@@ -398,29 +468,96 @@ class NewsIngress:
         if now_ms is not None:
             _milliseconds(now_ms)
         available_ms=max(headline.observed_ms,now_ms) if now_ms is not None else headline.observed_ms
+        created=hid not in self._headlines
+        original=headline
+        original_available_ms=available_ms
+        if self._ledger is not None:
+            event,created,available_ms=self._publish_headline(headline,available_ms,now_ms)
+            original=_headline_from_original(event.payload)
+            original_available_ms=_original_available_ms(event,original)
+            self._published_observations.add(_observation_id(headline))
+        if hid not in self._headlines:
+            self._headlines[hid]=original
+            self._claims[hid]=[(original,original_available_ms)]
+            self._relay_times[hid]={original.source_id:original_available_ms}
+            self._observations[hid]=[original.source_id]
         claims=self._claims.setdefault(hid,[])
         original_capture=next((at for h,at in claims if h==headline),None)
         if original_capture is not None:
             available_ms=original_capture
         relayed=self._relay_times.setdefault(hid,{})
-        relayed[headline.source_id]=min(relayed.get(headline.source_id,available_ms),available_ms)
+        prior_relay=relayed.get(headline.source_id)
+        relayed[headline.source_id]=available_ms if prior_relay is None else min(prior_relay,available_ms)
+        legacy=self._legacy_relays.get(hid,[])
+        if headline.source_id in legacy:legacy.remove(headline.source_id)
         if original_capture is None:
             claims.append((headline,available_ms))
         relayers = self._observations.setdefault(hid, [])
-        if hid in self._headlines:
-            if headline.source_id not in relayers:
-                relayers.append(headline.source_id)
-            return None
-        relayers.append(headline.source_id)
-        self._headlines[hid] = headline
-        if self._ledger is not None:
-            t = now_ms if now_ms is not None else headline.observed_ms
-            self._ledger.append(make_event(
-                EventKind.NEWS_HEADLINE, self._producer,
-                headline.body() | {"relayed_by": list(relayers)},
-                event_time_ms=headline.published_ms, received_time_ms=t,
-                correlation_id=hid))
-        return headline
+        if headline.source_id not in relayers:
+            relayers.append(headline.source_id)
+        return headline if created else None
+
+    def _publish_headline(self,headline: Headline,available_ms: int,ingress_ms):
+        hid=headline.headline_id
+        oid=_observation_id(headline)
+        def read():
+            found=None
+            for event in self._ledger.iter(EventKind.NEWS_HEADLINE,correlation_id=hid):
+                if event.producer!=self._producer:continue
+                if event.hash!=canonical_hash(event.body()):
+                    raise NewsIngressError('news original publication is corrupt')
+                stored=_headline_from_original(event.payload)
+                if (stored.dedupe_hash!=headline.dedupe_hash or event.event_time_ms!=stored.published_ms):
+                    raise NewsIngressError('news original publication scope conflicts')
+                _original_available_ms(event,stored)
+                if found is not None:
+                    raise NewsIngressError('news original publication is ambiguous')
+                found=event
+            return found
+        created=False
+        def read_observation(target_id=oid,expected=headline):
+            found=None
+            for event in self._ledger.iter(EventKind.NEWS_OBSERVATION,correlation_id=hid):
+                if event.producer!=self._producer:continue
+                stored,at=_observation_from_event(event)
+                if event.payload['observation_id']!=target_id:continue
+                if stored!=expected:
+                    raise NewsIngressError('news observation original terms conflict')
+                if found is not None:raise NewsIngressError('news observation original is ambiguous')
+                found=(event,at)
+            return found
+        with self._ledger.atomic():
+            original=read()
+            if original is None:
+                orphaned=any(event.producer==self._producer for event in
+                    self._ledger.iter(EventKind.NEWS_OBSERVATION,correlation_id=hid))
+                if hid in self._headlines or orphaned:
+                    raise NewsIngressError('news original publication missing; not recreated')
+                self._ledger.append(make_event(EventKind.NEWS_HEADLINE,self._producer,
+                    headline.body()|{'relayed_by':[headline.source_id],
+                    'full_claim':_full_claim(headline),'original_available_ms':available_ms,
+                    'native_clock_qualified':False},event_time_ms=headline.published_ms,
+                    received_time_ms=available_ms,correlation_id=hid))
+                created=True
+            elif 'full_claim' in original.payload:
+                first=_headline_from_original(original.payload)
+                if read_observation(_observation_id(first),first) is None:
+                    raise NewsIngressError('news required original observation missing; not recreated')
+            if read_observation() is None:
+                if oid in self._published_observations:
+                    raise NewsIngressError('news observation original missing; not recreated')
+                self._ledger.append(make_event(EventKind.NEWS_OBSERVATION,self._producer,
+                    {'format':'news-observation/1','observation_id':oid,
+                     'headline_id':hid,'dedupe_hash':headline.dedupe_hash,
+                     'full_claim':_full_claim(headline),'available_ms':available_ms,
+                     'supplied_ingress_ms':ingress_ms,'provider_qualified':False,'authority_effect':'NONE'},
+                    event_time_ms=headline.published_ms,received_time_ms=available_ms,correlation_id=hid))
+        original=read()
+        if original is None:
+            raise OSError('news original durable publication not confirmed')
+        observation=read_observation()
+        if observation is None:raise OSError('news observation original durable publication not confirmed')
+        return original,created,observation[1]
 
     def ingest_rows(self, rows: Iterable[Mapping[str, Any]], *,
                     now_ms: Optional[int] = None) -> dict[str, int]:
@@ -488,7 +625,8 @@ class NewsIngress:
         if as_of_ms is not None:
             _milliseconds(as_of_ms)
         return tuple(source for source in self._observations.get(headline_id, ())
-                     if as_of_ms is None or self._relay_times[headline_id][source]<=as_of_ms)
+                     if as_of_ms is None or (self._relay_times[headline_id].get(source) is not None
+                         and self._relay_times[headline_id][source]<=as_of_ms))
 
     # ------------------------------------------------------------ materiality
     def _available_at(self,headline: Headline,now_ms: int) -> bool:
@@ -543,11 +681,17 @@ class NewsIngress:
         if not relevant:
             return None
         materiality, uncertainty = self.materiality(headline, basis=basis, now_ms=now_ms)
+        evidence_refs=tuple(dict.fromkeys(
+            (headline.dedupe_hash,) + self.relayed_by(headline.headline_id,as_of_ms=now_ms)
+            + tuple(extra_evidence)))
         impact = EventImpactAssessment(
             impact_id=canonical_hash({
-                "headline": headline.headline_id, "subject": subject_id,
+                "headline_claim":_full_claim(headline),"subject": subject_id,
                 "subject_kind":subject_kind,
                 "symbol": symbol.upper(), "at": now_ms,
+                "basis":basis,"evidence_refs":evidence_refs,
+                "materiality":str(materiality),"uncertainty":str(uncertainty),
+                "impact_version":IMPACT_VERSION,
             })[:24],
             headline_id=headline.headline_id,
             subject_kind=subject_kind,
@@ -557,14 +701,17 @@ class NewsIngress:
             materiality=materiality,
             uncertainty=uncertainty,
             relevance_basis=basis,
-            evidence_refs=tuple(dict.fromkeys(
-                (headline.dedupe_hash,) + self.relayed_by(headline.headline_id,as_of_ms=now_ms)
-                + tuple(extra_evidence))),
+            evidence_refs=evidence_refs,
             assessed_ms=now_ms,
         )
-        self._impacts.setdefault(subject_id, []).append(impact)
         if persist:
             self.persist_impact(impact, headline, now_ms=now_ms)
+        existing=self._impacts.setdefault(subject_id,[])
+        prior=next((item for item in existing if item.impact_id==impact.impact_id),None)
+        if prior is not None and prior!=impact:
+            raise NewsIngressError('news impact identity conflicts with original terms')
+        if prior is None:
+            existing.append(impact)
         return impact
 
     def persist_impact(self, impact: EventImpactAssessment, headline: Headline,
@@ -579,12 +726,32 @@ class NewsIngress:
         if self._ledger is None:
             return
         at = now_ms if now_ms is not None else impact.assessed_ms
-        self._ledger.append(make_event(
-            EventKind.EVENT_IMPACT, self._producer,
-            impact.body() | {"impact_hash": impact.digest,
-                             "headline_title": headline.title[:300]},
-            event_time_ms=at, received_time_ms=at,
-            correlation_id=impact.subject_id))
+        _milliseconds(at)
+        self.ingest(headline,now_ms=at)
+        payload=impact.body()|{'impact_hash':impact.digest,'headline_title':headline.title[:300]}
+        def read():
+            found=None
+            for event in self._ledger.iter(EventKind.EVENT_IMPACT,correlation_id=impact.subject_id):
+                if event.producer!=self._producer:continue
+                if not isinstance(event.payload,dict) or event.hash!=canonical_hash(event.body()):
+                    raise NewsIngressError('news impact original is corrupt')
+                if event.payload.get('impact_id')!=impact.impact_id:continue
+                if event.payload!=payload or event.event_time_ms!=impact.assessed_ms:
+                    raise NewsIngressError('news impact original terms conflict')
+                if found is not None:raise NewsIngressError('news impact original is ambiguous')
+                found=event
+            return found
+        with self._ledger.atomic():
+            if read() is None:
+                # persist=False assessments may be recorded later. They are not
+                # evidence that a durable original already existed.
+                if impact.impact_id in self._published_impacts:
+                    raise NewsIngressError('news impact original missing; not recreated')
+                self._ledger.append(make_event(EventKind.EVENT_IMPACT,self._producer,payload,
+                    event_time_ms=impact.assessed_ms,received_time_ms=max(at,impact.assessed_ms),
+                    correlation_id=impact.subject_id))
+        if read() is None:raise OSError('news impact original durable publication not confirmed')
+        self._published_impacts.add(impact.impact_id)
 
     def assess_subject(self, *, subject_kind: str, subject_id: str, symbol: str,
                        direction: Optional[str] = None, now_ms: int,
@@ -683,11 +850,119 @@ class NewsIngress:
             "authority_effect":"NONE",
             "availability_basis":"DECLARED_OBSERVATION_AND_SUPPLIED_INGRESS_CLOCK_NOT_NATIVE_CLOCK_ADMISSION",
             "timing_unqualified":[h.headline_id for h in available if h.observed_ms<h.published_ms],
+            "recovered_from_ledger":self._recovered,
+            "legacy_envelope_availability_unqualified":sorted(self._legacy_headlines & {h.headline_id for h in available}),
+            "legacy_unqualified_relays":{h.headline_id:list(self._legacy_relays[h.headline_id])
+                for h in available if self._legacy_relays.get(h.headline_id)},
             "now_ms": now_ms,
         }
 
 
 # --------------------------------------------------------------------- parsing
+def _full_claim(headline: Headline) -> dict[str, Any]:
+    """Lossless internal claim; the existing display body remains bounded."""
+    return {name:(value.value if isinstance(value,Enum) else
+                  str(value) if isinstance(value,Decimal) else
+                  [item.value if isinstance(item,Enum) else item for item in value]
+                  if isinstance(value,tuple) else value)
+            for name,value in vars(headline).items()}
+
+
+def _headline_from_original(payload: dict[str,Any]) -> Headline:
+    try:
+        if not isinstance(payload,dict):raise ValueError('original payload must be an object')
+        raw=payload.get('full_claim',payload)
+        headline=_headline_from_claim(raw)
+        expected=headline.body();expected.pop('ingress_version')
+        if any(payload.get(name)!=value for name,value in expected.items()):
+            raise ValueError('original headline terms or identity differ')
+        if payload.get('ingress_version') not in {'news-ingress/5.1.0','news-ingress/5.1.1',INGRESS_VERSION}:
+            raise ValueError('original headline version unavailable')
+        if 'full_claim' in payload and _full_claim(headline)!=raw:
+            raise ValueError('original full claim format differs')
+        if 'full_claim' in payload and payload.get('native_clock_qualified') is not False:
+            raise ValueError('raw news receipt cannot declare native clock qualification')
+        return headline
+    except (KeyError,TypeError,ValueError,ArithmeticError) as exc:
+        raise NewsIngressError('news original format unavailable: '+str(exc)) from exc
+
+
+def _headline_from_claim(raw) -> Headline:
+    if not isinstance(raw,dict):raise ValueError('news claim must be an object')
+    for name in ('source_id','title','event_class','url','body_excerpt'):
+        if not isinstance(raw[name],str):raise ValueError('news claim text field invalid: '+name)
+    for name in ('currencies','asset_classes','symbols'):
+        if not isinstance(raw[name],list) or any(not isinstance(item,str) for item in raw[name]):
+            raise ValueError('news claim scope field invalid: '+name)
+    return Headline(source_id=raw['source_id'],trust=SourceTrust(raw['trust']),
+        published_ms=raw['published_ms'],observed_ms=raw['observed_ms'],title=raw['title'],
+        currencies=tuple(raw['currencies']),asset_classes=tuple(AssetClass(x) for x in raw['asset_classes']),
+        symbols=tuple(raw['symbols']),event_class=raw['event_class'],
+        severity=None if raw['severity'] is None else _finite_decimal(raw['severity'],'severity'),
+        concern=Concern(raw['concern']),url=raw['url'],body_excerpt=raw['body_excerpt'])
+
+
+def _observation_id(headline: Headline) -> str:
+    return canonical_hash(_full_claim(headline))
+
+
+def _observation_from_event(event):
+    try:
+        payload=event.payload
+        if not isinstance(payload,dict) or event.hash!=canonical_hash(event.body()):
+            raise ValueError('original observation seal invalid')
+        headline=_headline_from_claim(payload['full_claim'])
+        available=_milliseconds(payload['available_ms'])
+        supplied=payload['supplied_ingress_ms']
+        if supplied is not None:_milliseconds(supplied)
+        expected_available=max(headline.observed_ms,supplied) if supplied is not None else headline.observed_ms
+        expected={'format':'news-observation/1','observation_id':_observation_id(headline),
+            'headline_id':headline.headline_id,'dedupe_hash':headline.dedupe_hash,
+            'full_claim':_full_claim(headline),'available_ms':available,'supplied_ingress_ms':supplied,
+            'provider_qualified':False,'authority_effect':'NONE'}
+        if (payload!=expected or event.event_time_ms!=headline.published_ms
+                or event.correlation_id!=headline.headline_id or event.received_time_ms!=available
+                or expected_available!=available):
+            raise ValueError('original observation scope/availability/format differs')
+        return headline,available
+    except (KeyError,TypeError,ValueError,ArithmeticError) as exc:
+        raise NewsIngressError('news observation original unavailable: '+str(exc)) from exc
+
+
+def _impact_from_event(event) -> EventImpactAssessment:
+    try:
+        payload=event.payload
+        if not isinstance(payload,dict) or event.hash!=canonical_hash(event.body()):
+            raise ValueError('original impact seal invalid')
+        impact=EventImpactAssessment(impact_id=payload['impact_id'],headline_id=payload['headline_id'],
+            subject_kind=payload['subject_kind'],subject_id=payload['subject_id'],symbol=payload['symbol'],
+            concern=Concern(payload['concern']),materiality=_finite_decimal(payload['materiality'],'materiality'),
+            uncertainty=_finite_decimal(payload['uncertainty'],'uncertainty'),relevance_basis=payload['relevance_basis'],
+            evidence_refs=tuple(payload['evidence_refs']),assessed_ms=_milliseconds(payload['assessed_ms']),
+            impact_version=payload['impact_version'])
+        for name in ('impact_id','headline_id','subject_kind','subject_id','symbol','relevance_basis'):
+            if not isinstance(payload[name],str) or not payload[name]:raise ValueError('original impact identity invalid')
+        if not isinstance(payload['evidence_refs'],list) or any(not isinstance(ref,str) for ref in payload['evidence_refs']):
+            raise ValueError('original impact references invalid')
+        if (payload!=impact.body()|{'impact_hash':impact.digest,'headline_title':payload['headline_title']}
+                or event.correlation_id!=impact.subject_id or event.event_time_ms!=impact.assessed_ms
+                or impact.impact_version not in {'event-impact/5.1.0','event-impact/5.1.1',IMPACT_VERSION}
+                or not isinstance(payload['headline_title'],str) or len(payload['headline_title'])>300):
+            raise ValueError('original impact terms/scope/format differ')
+        return impact
+    except (KeyError,TypeError,ValueError,ArithmeticError) as exc:
+        raise NewsIngressError('news impact original unavailable: '+str(exc)) from exc
+
+
+def _original_available_ms(event,headline: Headline) -> int:
+    if 'original_available_ms' in event.payload:
+        available=_milliseconds(event.payload['original_available_ms'])
+        if available!=event.received_time_ms or available<headline.observed_ms:
+            raise NewsIngressError('news original availability conflicts')
+        return available
+    return max(_milliseconds(event.received_time_ms),headline.observed_ms)
+
+
 def _split(value: Any) -> set[str]:
     if value is None:
         return set()

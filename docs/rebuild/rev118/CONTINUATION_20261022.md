@@ -736,3 +736,11 @@ Published623779fd has genuine GREEN141 and actual signed-SDK compilation of the 
 ## 25 October: headline causal availability component
 
 Calendar0b3f7601 is genuinely committed/GREEN142; publication awaits terminal623 CI. Current headline component has617 final actual PostgreSQL passes/0 skips/audit0/exact hashes,51 final controls and9 final assertion-caught faults/restoration. All16 distinct reproduced failures remain in evidence. See backend/BE-014_NEWS_CAUSAL_BOUNDARIES.md; chronology is in memory, with durable original/relay publication, cold recovery and service health next. No whole-unit/native/provider/production/device acceptance.
+
+
+## 26 October: durable news and original relay recovery
+
+Published ea272bf8 is normally pushed/read back and GREEN144. Current durable-news component passes644 final actual PostgreSQL cases/0 skips/audit0/exact hashes,76 final controls and8 supplemental faults caught/restored. Preserve13 actual functional regressions,6 initially missing recovery API contracts and1 misplaced-test-block failure after24 passes. See CHECKPOINT_20261026_NEWS.md and backend/BE-014_NEWS_DURABLE_PUBLICATION.md. Runtime recovery/source-health wiring is next; no whole-unit/native/provider/production/device qualification. ExactEA native MQL/kernel/cognitive workflows pass; main CI40246053603 still running.
+
+
+Final durable-news follow-up: two cold missing-receipt assertions reproduced recreation after restart. Final R3 passes646 actual PostgreSQL cases/0 skips/audit0/exact final source and test hashes;78 final controls and8 final faults caught/restored. Preserve prior644 and all failed attempts with original scope. PublishedEA artifact separately confirms3423 trading passes/1privateDDS skip,PG26,voice117,monitor258 and all374 original mutation identities caught once; remaining main CI jobs pending.

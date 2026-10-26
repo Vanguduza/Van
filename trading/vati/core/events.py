@@ -104,6 +104,7 @@ class EventKind(str, Enum):
     THESIS_ASSESSMENT = "THESIS_ASSESSMENT"          # per-cycle thesis state change
     POSITION_ADJUSTMENT = "POSITION_ADJUSTMENT"      # adaptive management proposal
     NEWS_HEADLINE = "NEWS_HEADLINE"                  # T1/T2 headline ingress record
+    NEWS_OBSERVATION = "NEWS_OBSERVATION"            # immutable relay claim and original availability; no order authority
     EVENT_IMPACT = "EVENT_IMPACT"                    # headline -> position/candidate impact
     DECISION_QUADRANT = "DECISION_QUADRANT"          # decision quality x outcome
     TRADE_LESSON = "TRADE_LESSON"                    # retrievable lesson record

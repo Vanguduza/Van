@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="25" time="0.774" timestamp="2026-10-25T23:58:32.032962+00:00" hostname="2c5a245e39f1"><testcase classname="trading.tests.test_news_durable_publication" name="test_failed_headline_publication_does_not_become_memory_success" time="0.096" /><testcase classname="trading.tests.test_news_durable_publication" name="test_cold_replay_reads_the_original_instead_of_appending_a_new_headline" time="0.004" /><testcase classname="trading.tests.test_news_durable_publication" name="test_lost_actual_sql_commit_reply_does_not_advance_memory_and_replay_preserves_original" time="0.005" /><testcase classname="trading.tests.test_news_durable_publication" name="test_independent_original_readback_is_required_before_headline_success" time="0.004" /><testcase classname="trading.tests.test_news_durable_publication" name="test_missing_known_original_cannot_be_recreated_or_reported_complete" time="0.004" /><testcase classname="trading.tests.test_news_durable_publication" name="test_corrupt_original_cannot_be_ignored_by_a_cold_publisher" time="0.004" /><testcase classname="trading.tests.test_news_durable_publication" name="test_failed_impact_publication_does_not_become_remembered_success" time="0.005" /><testcase classname="trading.tests.test_news_durable_publication" name="test_identical_impact_replay_keeps_one_original_receipt_and_memory_record" time="0.005" /><testcase classname="trading.tests.test_news_durable_publication" name="test_a_distinct_relay_observation_is_durable_without_rewriting_the_original" time="0.004" /><testcase classname="trading.tests.test_news_durable_publication" name="test_cold_relay_replay_keeps_its_original_availability_instead_of_retry_time" time="0.006" /><testcase classname="trading.tests.test_news_durable_publication" name="test_failed_relay_publication_cannot_become_remembered_provenance" time="0.004" /><testcase classname="trading.tests.test_news_durable_publication" name="test_missing_known_observation_receipt_cannot_be_recreated" time="0.004" /><testcase classname="trading.tests.test_news_durable_publication" name="test_read_only_cold_recovery_restores_full_claims_and_relay_clocks" time="0.009" /><testcase classname="trading.tests.test_news_durable_publication" name="test_legacy_original_and_untimed_relay_labels_are_preserved_without_inventing_clocks" time="0.003" /><testcase classname="trading.tests.test_news_durable_publication" name="test_invalid_or_incomplete_recovery_refuses_partial_success_without_rewriting[corruption]" time="0.004" /><testcase classname="trading.tests.test_news_durable_publication" name="test_invalid_or_incomplete_recovery_refuses_partial_success_without_rewriting[missing-observation]" time="0.007" /><testcase classname="trading.tests.test_news_durable_publication" name="test_invalid_or_incomplete_recovery_refuses_partial_success_without_rewriting[capacity]" time="0.004" /><testcase classname="trading.tests.test_news_durable_publication" name="test_invalid_or_incomplete_recovery_refuses_partial_success_without_rewriting[chain]" time="0.006" /><testcase classname="trading.tests.test_news_durable_publication" name="test_two_actual_sql_writers_keep_one_original_and_one_observation" time="0.016" /><testcase classname="trading.tests.test_news_durable_publication" name="test_same_time_assessment_with_new_original_evidence_gets_a_distinct_impact" time="0.006"><failure message="vati.events.news_ingress.NewsIngressError: news impact original terms conflict">ledger = &lt;vati.core.ledger.Ledger object at 0x7ff1f6231400&gt;
+
+    def test_same_time_assessment_with_new_original_evidence_gets_a_distinct_impact(ledger):
+        news=NewsIngress(ledger=ledger);h=story();news.ingest(h,now_ms=NOW)
+        a=news.assess(h,subject_kind='POSITION',subject_id='p',symbol='EURUSD',now_ms=NOW)
+        original=next(ledger.iter(EventKind.EVENT_IMPACT))
+        news.ingest(story(source_id='relay'),now_ms=NOW)
+&gt;       b=news.assess(h,subject_kind='POSITION',subject_id='p',symbol='EURUSD',now_ms=NOW)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+trading/tests/test_news_durable_publication.py:216: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+trading/vati/events/news_ingress.py:702: in assess
+    self.persist_impact(impact, headline, now_ms=now_ms)
+trading/vati/events/news_ingress.py:739: in persist_impact
+    if read() is None:
+       ^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def read():
+        found=None
+        for event in self._ledger.iter(EventKind.EVENT_IMPACT,correlation_id=impact.subject_id):
+            if event.producer!=self._producer:continue
+            if not isinstance(event.payload,dict) or event.hash!=canonical_hash(event.body()):
+                raise NewsIngressError('news impact original is corrupt')
+            if event.payload.get('impact_id')!=impact.impact_id:continue
+            if event.payload!=payload or event.event_time_ms!=impact.assessed_ms:
+&gt;               raise NewsIngressError('news impact original terms conflict')
+E               vati.events.news_ingress.NewsIngressError: news impact original terms conflict
+
+trading/vati/events/news_ingress.py:734: NewsIngressError</failure></testcase><testcase classname="trading.tests.test_news_durable_publication" name="test_actual_process_death_after_commit_recovers_without_duplicate_publication" time="0.264" /><testcase classname="trading.tests.test_news_durable_publication" name="test_actual_native_writer_arbitration_and_cold_recovery[sqlite]" time="0.018" /><testcase classname="trading.tests.test_news_durable_publication" name="test_actual_native_commit_reply_loss_preserves_original_observation[sqlite]" time="0.009" /><testcase classname="trading.tests.test_news_durable_publication" name="test_observation_and_impact_readback_failure_keeps_completion_unknown_until_reconciled[NEWS_OBSERVATION]" time="0.007" /><testcase classname="trading.tests.test_news_durable_publication" name="test_observation_and_impact_readback_failure_keeps_completion_unknown_until_reconciled[EVENT_IMPACT]" time="0.010" /></testsuite></testsuites>

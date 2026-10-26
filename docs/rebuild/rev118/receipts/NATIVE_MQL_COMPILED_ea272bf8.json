@@ -1,0 +1,69 @@
+{
+  "schema": "van.native-mql-source-qualified-compile/1",
+  "source_head": "ea272bf834445bf9f2369dbc4377f3aea548892c",
+  "tested_merge": "6c0ec945390a9bd427effa70cd93005cac111d3b",
+  "head_merge_equivalence": "Complete GitHubcompare ahead1/behind0/filesempty; not directremoteGitTreeAPI",
+  "run": 40246053604,
+  "job": 121327731556,
+  "artifact_id": 12618921942,
+  "artifact_zip_bytes": 72377,
+  "artifact_zip_sha256": "967a294f43ef68f5c71bad75967baaa3a0db24f042b5e9a865eb4961a7a3c1aa",
+  "artifact_digest_matches": true,
+  "source_blob_matches": true,
+  "local_source_sha_matches": true,
+  "source_sha256": "88d45cefd1ef766370cce39817317585b993af607123d89efec301ef0bf05189",
+  "compile_cases": [
+    {
+      "name": "VanCompilerRejectionProbe",
+      "expected_success": false,
+      "process_exit_code": 0,
+      "errors": 4,
+      "warnings": 0,
+      "fresh_binary": false,
+      "started_at_utc": "2026-10-25T23:44:26.0078928Z",
+      "finished_at_utc": "2026-10-25T23:44:27.0765159Z",
+      "log_sha256": "346b7abf2a8cddacfa40633e764bb3da5b808c50998114da50cbb2b734cb37a4"
+    },
+    {
+      "name": "VanBridgeEA",
+      "expected_success": true,
+      "process_exit_code": 1,
+      "errors": 0,
+      "warnings": 0,
+      "fresh_binary": true,
+      "started_at_utc": "2026-10-25T23:44:27.0800726Z",
+      "finished_at_utc": "2026-10-25T23:44:29.0820966Z",
+      "log_sha256": "1ea4e6dccd3108bd7188d072a4e18a228f9879c76234c225dcccdcd4759bceff",
+      "binary_sha256": "b8c207bd721edff71bb09dc318d39c8c29ce96ad31267319ee1fd111bf862a7a"
+    }
+  ],
+  "data_initialization": {
+    "editor_signature": {
+      "status": "Valid",
+      "subject": "CN=MetaQuotes Ltd., O=MetaQuotes Ltd., S=Lemesos, C=CY",
+      "thumbprint": "5A64A7AED24C33DED342D01D01FA5286F06DA6DC"
+    },
+    "terminal_started": true,
+    "terminal_signature": {
+      "status": "Valid",
+      "subject": "CN=MetaQuotes Ltd., O=MetaQuotes Ltd., S=Lemesos, C=CY",
+      "thumbprint": "5A64A7AED24C33DED342D01D01FA5286F06DA6DC"
+    },
+    "network_blocked_program": "D:\\a\\_temp\\van-mql-144a760a15f74a9f9aaf1c978ae411d4\\sdk\\terminal64.exe",
+    "firewall_profiles_enabled": true
+  },
+  "qualification": "Source compilation only; no terminal account, broker order, deployed EA, financial or handset acceptance.",
+  "limits": [
+    "Source compilation only; no broker/account/order/deployedEA/financial/handset qualification",
+    "Offline SDK initialization started a network-blocked terminal",
+    "Actual deliberately invalid probe rejected; valid EA zero errors/warnings and fresh binary; process exit code alone is not the oracle"
+  ],
+  "compiler_signature": {
+    "status": "Valid",
+    "subject": "CN=MetaQuotes Ltd., O=MetaQuotes Ltd., S=Lemesos, C=CY",
+    "thumbprint": "5A64A7AED24C33DED342D01D01FA5286F06DA6DC"
+  },
+  "compiler_sha256": "bb480fb66ca56118167f5a1bf398602de5541cd639b7882f91196014c496175a",
+  "compiler_file_version": "5.0.0.6285",
+  "standard_library_trade_sha256": "96e6781624534377fe7971cba52cca3d62d1b030bc10d5e4ebf3ed8c541399ed"
+}
