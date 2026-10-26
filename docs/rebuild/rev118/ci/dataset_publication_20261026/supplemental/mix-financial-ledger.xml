@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="1" time="1.430" timestamp="2026-10-26T11:15:25.215214+00:00" hostname="2c5a245e39f1"><testcase classname="trading.worker_tests.test_dataset_candidate_archive" name="test_financial_or_other_event_kinds_are_not_a_candidate_metadata_store[sqlite]" time="0.210"><failure message="Failed: DID NOT RAISE DatasetContractError">publication = (&lt;vati.core.ledger.Ledger object at 0x7f18bc3f3800&gt;, &lt;vati.research.dataset_archive.DatasetCandidateArchive object at ...tive_account_id":123,"schema":"vati.ctrader-symbol/1","transport_host":"demo.ctraderapi.com"}', received_at_ms=100000))
+
+    def test_financial_or_other_event_kinds_are_not_a_candidate_metadata_store(publication):
+        ledger,archive,record,c=publication
+        ledger.append(make_event(EventKind.SESSION,'test-unrelated',{'preserve':True},
+            event_time_ms=1,received_time_ms=1,correlation_id='unrelated'))
+        head=state(ledger)[0]
+&gt;       with pytest.raises(DatasetContractError,match='DEDICATED_SOURCE_LEDGER'):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE DatasetContractError
+
+trading/worker_tests/test_dataset_candidate_archive.py:118: Failed</failure></testcase></testsuite></testsuites>

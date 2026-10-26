@@ -61,6 +61,7 @@ class EventKind(str, Enum):
     ACCOUNT_OPERATION = "ACCOUNT_OPERATION"  # native account-control effects; never trade/outcome evidence
     MARKET_DATA_HEALTH = "MARKET_DATA_HEALTH"
     NATIVE_SYMBOL_CATALOG = "NATIVE_SYMBOL_CATALOG"  # original catalog vintages; no dataset or execution admission
+    DATASET_MANIFEST_CANDIDATE = "DATASET_MANIFEST_CANDIDATE"
 
     # ---- Rev 5.1 (TRD-REV51-090..133). Every kind below is produced by the
     # offline-evolution or shadow-live path. None of them is an order.

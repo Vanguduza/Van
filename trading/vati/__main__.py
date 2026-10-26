@@ -171,9 +171,10 @@ def cmd_research(a: argparse.Namespace) -> int:
         partition_path = getattr(a, 'source_partitions', None)
         if archive_path or partition_path:
             from vati_forecast_worker.source_partitions import SourcePartitionError
-            if (spec.get('operation') not in {'native_bar_source_partition', 'dataset_source_inspect'} or not archive_path
+            if (spec.get('operation') not in {'native_bar_source_partition', 'dataset_source_inspect',
+                    'dataset_candidate_publish','dataset_candidate_inspect'} or not archive_path
                     or not partition_path or not Path(archive_path).is_dir()
-                    or (spec.get('operation') == 'dataset_source_inspect' and not Path(partition_path).is_dir())):
+                    or (spec.get('operation') != 'native_bar_source_partition' and not Path(partition_path).is_dir())):
                 raise SourcePartitionError('PARTITION_EXPLICIT_EXISTING_SOURCE_AND_OUTPUT_REQUIRED')
             from vati.market_data.native_archive import NativeMarketArchive
             from vati.market_data.native_windows import NativeBarWindowReader

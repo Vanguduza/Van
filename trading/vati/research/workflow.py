@@ -158,6 +158,22 @@ class TradingResearchWorkflow:
         """
         op = str(spec.get("operation", "")).strip().lower()
 
+        if op in {'dataset_candidate_publish','dataset_candidate_lookup','dataset_candidate_inspect'}:
+            from vati.research.dataset_archive import DatasetCandidateArchive
+            from vati.research.dataset_manifest import DatasetManifestCandidate, DatasetContractError, _json
+            from vati.research.dataset_sources import NativeDatasetSourceInspector
+            required={'operation','request_id'}
+            if op=='dataset_candidate_publish':required|={'manifest','expected_scope'}
+            if set(spec)!=required:raise DatasetContractError('DATASET_EXACT_OPERATION_FIELDS_REQUIRED')
+            inspector=NativeDatasetSourceInspector(self.native_bar_partitions) if self.native_bar_partitions is not None else None
+            archive=DatasetCandidateArchive(self.ledger,inspector,clock=self.clock)
+            if op=='dataset_candidate_publish':
+                result=archive.publish(spec['request_id'],DatasetManifestCandidate(_json(spec['manifest'])),
+                    expected_scope=spec['expected_scope'])
+            elif op=='dataset_candidate_lookup':result=archive.lookup(spec['request_id'])
+            else:result=archive.inspect(spec['request_id'])
+            return {'operation':op,'candidate_publication':result}
+
         if op == "dataset_manifest_check":
             from vati.research.dataset_manifest import DatasetManifestCandidate, DatasetContractError, _json
             if set(spec) != {'operation', 'manifest'}:

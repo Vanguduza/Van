@@ -1,0 +1,117 @@
+{
+  "schema": "van.supplemental-source-faults/1",
+  "not_canonical_374": true,
+  "selection": "SQLite only; PostgreSQL parameterizations deselected, separately executed in broad actual PostgreSQL fixture",
+  "positive_control": {
+    "exit": 0,
+    "cases": 23,
+    "failures": 0,
+    "assertions": 0,
+    "errors": 0,
+    "skips": 0,
+    "storage_audit_violations": 0
+  },
+  "restored_control": {
+    "exit": 0,
+    "cases": 23,
+    "failures": 0,
+    "assertions": 0,
+    "errors": 0,
+    "skips": 0,
+    "storage_audit_violations": 0
+  },
+  "cases": [
+    {
+      "case": "self-grant-research",
+      "mutant_sha256": "fda29cbc4c5e14025412d8e37cb463855665fe2ffed512448bc0fdcb8a057602",
+      "exit": 1,
+      "cases": 1,
+      "failures": 1,
+      "assertions": 1,
+      "errors": 0,
+      "skips": 0,
+      "storage_audit_violations": 0
+    },
+    {
+      "case": "lookup-uncommitted",
+      "mutant_sha256": "3464362f626ad5a2f904cc9b0c3aabf4ab7046b4d3892e13961d1cad14ca4c62",
+      "exit": 1,
+      "cases": 1,
+      "failures": 1,
+      "assertions": 1,
+      "errors": 0,
+      "skips": 0,
+      "storage_audit_violations": 0
+    },
+    {
+      "case": "mix-financial-ledger",
+      "mutant_sha256": "fe116d9aad3b77918af4d7e44cc4b6576e481f232a551e979be895546bfee766",
+      "exit": 1,
+      "cases": 1,
+      "failures": 1,
+      "assertions": 1,
+      "errors": 0,
+      "skips": 0,
+      "storage_audit_violations": 0
+    },
+    {
+      "case": "ignore-record-identity",
+      "mutant_sha256": "52fa341035dd5d1887dc72aa45be3ea4f4fb89d6b006011e231506e75cc1a6d2",
+      "exit": 1,
+      "cases": 1,
+      "failures": 1,
+      "assertions": 1,
+      "errors": 0,
+      "skips": 0,
+      "storage_audit_violations": 0
+    },
+    {
+      "case": "ignore-request-fingerprint",
+      "mutant_sha256": "3c6315edc53671c02aae524fdba47ee840a866d5144f82967cbd4bdfc6288bbf",
+      "exit": 1,
+      "cases": 1,
+      "failures": 1,
+      "assertions": 1,
+      "errors": 0,
+      "skips": 0,
+      "storage_audit_violations": 0
+    },
+    {
+      "case": "skip-original-bytes",
+      "mutant_sha256": "13beb6c12ca47c35d9fc7fdb5b96b4183d5a8ad1cae883840395c5e2a8dbfbe8",
+      "exit": 1,
+      "cases": 2,
+      "failures": 2,
+      "assertions": 2,
+      "errors": 0,
+      "skips": 0,
+      "storage_audit_violations": 0
+    },
+    {
+      "case": "hide-readback-success",
+      "mutant_sha256": "3b30c78a735df8c996f59617c518712b91c5d043df04cfcc4815fc2022624f4c",
+      "exit": 1,
+      "cases": 1,
+      "failures": 1,
+      "assertions": 1,
+      "errors": 0,
+      "skips": 0,
+      "storage_audit_violations": 0
+    },
+    {
+      "case": "accept-decision-envelope",
+      "mutant_sha256": "9a6bc4415c88099118c2d0049413e6c3c93fcb3553c01adf423dbbaeb4ec9b1a",
+      "exit": 1,
+      "cases": 6,
+      "failures": 1,
+      "assertions": 1,
+      "errors": 0,
+      "skips": 0,
+      "storage_audit_violations": 0
+    }
+  ],
+  "restored": true,
+  "source_sha256": {
+    "trading/vati/research/dataset_archive.py": "d1691ba7185d7e706d754ec3866859820580a720e340fb03db481a30eb918af7"
+  }
+}

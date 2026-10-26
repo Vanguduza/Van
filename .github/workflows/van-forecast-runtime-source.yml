@@ -27,6 +27,20 @@ jobs:
   native-source-parquet:
     runs-on: ubuntu-24.04
     timeout-minutes: 10
+    services:
+      postgres:
+        image: postgres:17.11-bookworm@sha256:858bb5e98eed02eb8cafbcdc007f9a65d1b613972028944a8ec2133ccaf80d27
+        env:
+          POSTGRES_USER: van_fixture
+          POSTGRES_PASSWORD: van_fixture_test_only
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U van_fixture -d postgres"
+          --health-interval 5s --health-timeout 3s --health-retries 20
+    env:
+      VATI_TEST_PG_DSN: postgresql://van_fixture:van_fixture_test_only@127.0.0.1:5432/postgres
+      VATI_TEST_PG_ISOLATED_FIXTURE: '1'
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -43,6 +57,13 @@ jobs:
           Path('/tmp/van-source-arrow.lock').write_text(lines[0]+'\n')
           PY
           python -m pip install --no-deps --require-hashes -r /tmp/van-source-arrow.lock
+      - name: Initialize only the disposable candidate source database
+        run: |
+          python - <<'PY'
+          import os,psycopg
+          with psycopg.connect(os.environ['VATI_TEST_PG_DSN'],autocommit=True) as db:
+              db.execute('CREATE SCHEMA vati')
+          PY
       - name: Execute actual archive, Parquet, cold readback and CLI source cases
         run: |
           mkdir -p /tmp/van-native-parquet-source
