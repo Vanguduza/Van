@@ -92,6 +92,8 @@ def test_actual_period_resolves_original_valuation_lineage_without_creating_new_
     assert values['baseline']['source_ref']==result['baseline_ref']==event.hash
     assert values['closing']['source_ref']==result['closing_ref']==last.hash
     assert result['performance']['input_refs']==[event.hash,last.hash]
+    assert result['flow_adjusted_risk']['state']=='MEASURED'
+    assert result['flow_adjusted_risk']['calculation']['flow_neutral_return']==result['performance']['flow_neutral_return']
     assert values['closing']['risk_capital_qualified'] is values['closing']['execution_authority'] is False
     assert (ledger.head(),ledger.count())==before
 
@@ -107,6 +109,24 @@ def test_incomplete_independent_source_readback_cannot_claim_a_complete_original
     monkeypatch.setattr(ledger,'iter',missing)
     assert ledger.verify_chain()[0]
     with pytest.raises(UnitError,match='READBACK_COUNT_INVALID'):read(original)
+
+
+def test_actual_period_keeps_intermediate_drawdown_in_the_immutable_calculation(original):
+    from test_native_balance_reconciliation import observe
+    from vati.funding.reconciliation import period_report
+    ledger,event,point=original
+    trough=snapshot(ledger,replace(point,observed_at_ms=2000,net_equity=Decimal('4503599627370496.50500000005')),received=2100)
+    peak=snapshot(ledger,replace(point,observed_at_ms=3000,net_equity=Decimal('18014398509481986.0200000002')),received=3100)
+    last=snapshot(ledger,replace(point,observed_at_ms=4000),received=4100)
+    scope=observe(ledger,to_ms=4000);before=ledger.head(),ledger.count()
+    result=period_report(ledger,scope);calculation=result['flow_adjusted_risk']
+    assert result['state']==calculation['state']=='MEASURED'
+    assert Decimal(result['performance']['flow_neutral_return'])==0
+    assert Decimal(result['performance']['worst_observed_drawdown'])==Decimal('.5')
+    assert calculation['source_refs']==[event.hash,trough.hash,peak.hash,last.hash]
+    assert calculation['calculation']['worst_observed_drawdown']==result['performance']['worst_observed_drawdown']
+    assert calculation['risk_capital_qualified'] is calculation['execution_authority'] is False
+    assert (ledger.head(),ledger.count())==before
 
 
 @pytest.mark.parametrize('damage',['producer','kind','schema','decision','verified','alias','currency',

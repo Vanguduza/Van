@@ -12,8 +12,10 @@ from vati.funding.classification import classify
 from vati.funding.deal_journal import DealBook
 from vati.funding.journal import FundingBook
 from vati.funding.native import NativeAccountMark
-from vati.funding.unitization import unitize,_render
+from vati.funding.unitization import _render
 from vati.funding.valuation import ValuationSnapshot
+from vati.funding.flow_risk import FlowAdjustedRisk
+from vati.core.units import UnitError
 
 POLICY_VERSION='native-balance-period/1.0.0'
 
@@ -49,6 +51,7 @@ def period_report(ledger,scope_hash,*,baseline_ref=None,closing_ref=None):
         'trade_cost_settlement_qualification':'NOT_ISSUED',
         'execution_authority':False,'performance':None,'external_flows':[],'evidence_refs':[],
         'valuation_snapshots':None,
+        'flow_adjusted_risk':None,
         'cash_neutral_net_account_pnl':None,'separate_business_income_or_expense':None,
         'net_account_pnl_excluding_capital_and_separate_business':None}
     with ledger.read_snapshot():
@@ -135,12 +138,20 @@ def period_report(ledger,scope_hash,*,baseline_ref=None,closing_ref=None):
             net_account_pnl_excluding_capital_and_separate_business=_render(neutral_pnl-business),
             cash_neutral_pnl_basis='NATIVE_NET_MARKS_MINUS_RECONCILED_EXTERNAL_CAPITAL_NOT_SETTLED_TRADE_ALPHA')
         if external:return result|{'reason':'NORMALIZED_HISTORICAL_FLOW_EQUITY_UNAVAILABLE'}
-        performance=unitize(first_valuation.equity_point(),last_valuation.equity_point())
+        # Repeated original observations remain in the outer audit refs. They
+        # cannot create a second economic point in the immutable calculation.
+        unique={source.hash:source for source,_ in samples[1:-1]
+            if source.hash not in {first.hash,last.hash}}
+        try:
+            calculation=FlowAdjustedRisk(first_valuation.equity_point(),last_valuation.equity_point(),
+                samples=[ValuationSnapshot(source).equity_point() for source in unique.values()]).body()
+        except UnitError:
+            return result|{'reason':'FLOW_RISK_CALCULATION_SOURCE_OR_CAPACITY_INVALID'}
+        result['flow_adjusted_risk']=calculation
+        # The legacy performance view keeps its original full coverage refs;
+        # the immutable calculation separately identifies its numeric inputs.
+        performance=dict(calculation['calculation'])
         if performance['status']=='MEASURED':
-            peak=Fraction(b.net_equity);worst=Fraction(0)
-            for source,mark in samples:
-                net=Fraction(mark.net_equity);peak=max(peak,net);worst=max(worst,(peak-net)/peak)
-            performance['worst_observed_drawdown']=_render(worst)
             performance['input_refs']=[source.hash for source,_ in samples]
             performance['evidence_refs']=result['evidence_refs']
         return result|{'state':performance['status'],'reason':performance.get('reason'),

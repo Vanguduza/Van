@@ -1,6 +1,6 @@
 {
   "schema": "van.rebuild.candidate-source-progress/1",
-  "updated_at_utc": "2026-10-26T18:37:01.533855+00:00",
+  "updated_at_utc": "2026-10-26T19:16:21.414143+00:00",
   "programme": "Rev1.18; original 131 unit IDs and dependencies retained",
   "authority": "auth-20261022-owner-autonomous-candidate-build",
   "meaning": "Candidate source progress is separate from admitted unit acceptance. Independent certificates, owner decisions, live effects and release gates remain unissued. No unit is declared complete by this record.",
@@ -466,6 +466,10 @@
         {
           "description": "Typed immutable ValuationSnapshot preserves exact native deposit-asset net equity/cash, optional separate credits, original snapshot/source clocks and balance version. Existing period_report consumes original typed valuations and exposes baseline/closing lineage; independent bounded SQL reader refuses caller-owned writers, missing/foreign sources and incomplete readback. Confirmed sampled-drawdown ambient rounding defect has retained actual failure and now reuses existing fixed renderer. 376 final actual-PG checks including45 new valuation cases,0skip/audit0/all485runtime-testhashesmatch/ownedfixtureabsent;7 supplemental assertion faults/20positive+20restoredcontrols;122 rebuild/workflow/T0-boundary checks. All risk/settlement/flow-normalization refusals retained;wholeBE006 IN_PROGRESS.",
           "evidence": "backend/BE-006_NATIVE_VALUATION_LINEAGE.md;receipts/NATIVE_VALUATION_SOURCE_20261026.json"
+        },
+        {
+          "description": "Immutable FlowAdjustedRisk combines exactexistingunitizationwithintermediatetypednet-equitysamples,retainslossacrosscapitalchanges/redemption/replacement,andpreservesknownprefixonmissingflowfacts. Realperiod_report consumes originalValuationSnapshots;originalcoveragerefs andexternal-flow holdsretained. Typedsourceidentity/pointcapacity/nativeorder/floatguards and immutablebody;no native/riskcapital/settlement/executionqualification. 394finalactual-PGchecks0skip/audit0/all487runtime-testhashesmatch/ownedfixtureabsent;7supplementalassertionfaults/10positive+10restoredcontrols;122rebuild/workflow/T0boundarychecks. WholeBE006remainsIN_PROGRESS.",
+          "evidence": "backend/BE-006_SAMPLED_FLOW_ADJUSTED_RISK.md;receipts/SAMPLED_FLOW_RISK_SOURCE_20261026.json"
         }
       ]
     },
