@@ -1,0 +1,69 @@
+{
+  "schema": "van.ml004.two-process-environments-source/1",
+  "status": "SOURCE_FIXTURE_RESEARCH_AND_COLD_INFERENCE_PASS_NOT_ADMISSION",
+  "data_environment": "FIXTURE",
+  "economic_evidence": false,
+  "execution_authority": false,
+  "image_id": "sha256:07722805aed602c59b8250b8b08d6da005211ac72385964b9d78813329cab5da",
+  "source_sha256": {
+    "__init__.py": "b391b2113172c91b478ab3e84f2705eccafc8bfdd573e151e0c8682c84c4a67e",
+    "artifacts.py": "ecae9d896972e99ae94b1ddf901c10588b12cc3d0ff2be9f9ed29c822a69a34f",
+    "environment.json": "e0d018057dc17371fafcd97a6a025c1dae0707cb6123e925fe927c9e88f32724",
+    "inference_smoke.py": "4b96fee5a03cd1ead58b56de7256bb61d1cd00a892364a2be2d5c31ada23c200",
+    "locks/build-cp312-linux-x86_64.lock": "0496f2e6a919f0b7391a91009453b77d9a641b5b8045593d7fa22762e6765a52",
+    "locks/research-cp312-linux-x86_64.source.lock": "16e8f762d29ddac81b4b7024f9e5c675a988815c45b62fbbc97032bccd1db0c5",
+    "locks/research-cp312-linux-x86_64.wheel.lock": "cb7658179c9fc4b2f27b48af512f3e74f282b34187a63c095a610cb2fbef1b1e",
+    "locks/wheel-manifest-cp312-linux-x86_64.json": "bce548621103b5f7239c5de61d44e51b65dbbb7f4e20468f9d0ac2226ee1e04e",
+    "policy.py": "1217c358fe804a38fb75ec1cb24b86e9a2721a0e37cb114c69de62ce40897680",
+    "smoke.py": "283d92f9053fd4238ce4861c4e63257ce5ff6468c4cb36326a7fe70ee7b39443",
+    "verify_wheels.py": "44a23fb7b68161e10fb0f751408c59042af8b5dfa0193d245d96355341de2b20"
+  },
+  "controller_sha256": "76a66fe42df34c3c1d68c89e99ee256dacb62cff212324c0381ff1cd264a987d",
+  "output": "/workspace/van-ml004-active-source-r2-20261026",
+  "research_report_sha256": "828df679fa1879eaafa917395647f50b9d7cbc56fe217147ceb6cd1642c8f1b1",
+  "inference_report_sha256": "8bd8493eb728b808c14d8bc17fe3f61928566e7115b46a1023bb6e2c39dcb436",
+  "research": {
+    "container": "van-ml004-4f8a695927404c4cbba637419ff88f07",
+    "image_id": "sha256:07722805aed602c59b8250b8b08d6da005211ac72385964b9d78813329cab5da",
+    "role": "RESEARCH_FIXTURE_SMOKE",
+    "status": "SOURCE_REPORT_VERIFIED_NOT_ADMISSION",
+    "removed": true,
+    "container_id": "94e43e09dcc8c4ccad3bf931270efcd245cb4da5dbf09ce7414d95d111d340b2",
+    "creation_seconds": 134.9396162500052,
+    "exit": 0,
+    "container_exit": 0,
+    "oom_killed": false,
+    "limit_reason": null,
+    "declared_kernel_configuration": {
+      "NanoCpus": 2000000000,
+      "Memory": 6442450944,
+      "PidsLimit": 256,
+      "ReadonlyRootfs": true,
+      "NetworkMode": "none",
+      "Init": true
+    }
+  },
+  "inference": {
+    "container": "van-ml004-07294a4d49874f059579884f5576959e",
+    "image_id": "sha256:07722805aed602c59b8250b8b08d6da005211ac72385964b9d78813329cab5da",
+    "role": "INFERENCE_FIXTURE_SMOKE",
+    "status": "SOURCE_REPORT_VERIFIED_NOT_ADMISSION",
+    "removed": true,
+    "container_id": "563ef4ab6f1c47e7739a32c4a18ffb45c002e26c7fc5c5cc8e385e1284306438",
+    "creation_seconds": 206.07095285099786,
+    "exit": 0,
+    "container_exit": 0,
+    "oom_killed": false,
+    "limit_reason": null,
+    "declared_kernel_configuration": {
+      "NanoCpus": 2000000000,
+      "Memory": 6442450944,
+      "PidsLimit": 256,
+      "ReadonlyRootfs": true,
+      "NetworkMode": "none",
+      "Init": true
+    }
+  },
+  "source_snapshot_unchanged": true,
+  "owned_adopted_children_reaped": []
+}

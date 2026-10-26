@@ -175,6 +175,21 @@
         "backend/BE-014_RSS_SOURCE_SNAPSHOTS.md",
         "receipts/RSS_SOURCE_SNAPSHOTS_20261026.json"
       ]
+    },
+    "VAN-ML-PKT-004": {
+      "status": "IN_PROGRESS",
+      "candidate_source_only": true,
+      "acceptance": "NOT_ISSUED",
+      "depends": [
+        "BE-001",
+        "BE-002",
+        "BE-003",
+        "PRE-003"
+      ],
+      "evidence": [
+        "backend/VAN-ML-PKT-004_ISOLATED_SOURCE_RUNTIME.md",
+        "receipts/FORECAST_RUNTIME_SOURCE_20261026.json"
+      ]
     }
   },
   "blockers": [
@@ -247,26 +262,19 @@
     "note": "Opus unavailable; owner transferred build to Codex. No independent reviewer identity is inferred from another model or session."
   },
   "checkpoint": {
-    "updated_utc": "2026-10-26T02:29:43.145840+00:00",
+    "updated_utc": "2026-10-26T04:59:32.685390+00:00",
     "branch": "ccr-9e07e1af-8mgz1p",
     "base": "b02075f327ea8180ab6d269eba358cf8c5479878",
     "background_jobs": [
       {
         "kind": "van-ci",
-        "id": 40241410394,
-        "head": "5fa1913631c0ee033be6c18113dfad7cf8f09f9e",
-        "state": "IN_PROGRESS_WITH_ORIGINAL_PRIVATE_DDS_AND_TRUSTED_MAIN_FAILURES",
-        "not_acceptance": true
-      },
-      {
-        "kind": "van-mql-native-source",
-        "id": 40241410215,
-        "head": "5fa1913631c0ee033be6c18113dfad7cf8f09f9e",
-        "state": "FAILED_WINDOWS_CHECKOUT_FILENAME_TOO_LONG_COMPILER_SKIPPED",
+        "id": 40260186741,
+        "head": "1f4ecbf748b870b3187ac33ccdac734e375e541c",
+        "state": "TERMINAL_FAILURE_17_PUBLIC_JOBS_PASS_TWO_UNWAIVED_PREREQUISITE_FAILURES",
         "not_acceptance": true
       }
     ],
-    "last_validation": "Explicit RSS2 profile wired through actual session/account news builders;original raw bytes/profile/parser/capture identity durably serialized/read back before parsing,stable first capture across replay,actual later ingress availability across lost commit replies. GUID/publisher declared lineage,explicit relevance,partial item diagnostics,DTD refusal/capacity/clock guards;cold raw integrity/visible-record checks and independent owner snapshots.768final actualPG0skip/audit0/exact hashes;185controls+8PGdeselected executedfixture;8supplemental faults caught/restored. Actual saved public Fed20-headline replay stable;latestOct16 remainsold;no native qualification.11baseline+2product followup failures and1stale-fixture error retained. Full BE014 remains IN_PROGRESS.",
+    "last_validation": "Locked232 upstream CPU distributions;actual isolated Qlib/LightGBM,XGBoost,NHiTS train/export/load,Optuna/Feast/MLflow native readback;separate cold inference10/10/2rows/parity0/no training;kernel2CPU6GiB256pids/offline/readOnly/noNewPriv and independent cleanup. Real serve import guard reproduces9before failures. Complete startup/authority selection116actualPG passes/0skip/audit0. 49current guard controlsPASS after exact restoration;8 supplemental assertion-caught faults/0errors/skips/audit0,not canonical374. 108rebuild checksPASS;owner/frontend registry no drift;canonical374/383 registry preflight0findings(not execution);consolidation0findings. ML004 remains IN_PROGRESS/NOT_ISSUED;fresh committed Docker recipe and native/independent/economic/device qualification remain.",
     "environment_notes": [
       "clone must be unshallowed (git fetch --unshallow) and PR heads fetched (+refs/pull/*/head:refs/remotes/origin/pr/*) before pre001.py",
       "pytest from backend/requirements.txt in a venv",
@@ -276,7 +284,7 @@
       "Python 3.12 venv from backend/requirements.lock for CI-equivalent runs; stream-host venv from deploy/van-browser-stream/requirements.lock",
       "Desktop Commander read-only device listing was refused by the session permission policy; native readback prepared as pre003/NATIVE_READBACK_REQUEST.md"
     ],
-    "next_action": "Finish final RSS source documentary checks/manifest/verified backup and genuine hook commit/ledger;push normally/read back now exact752CI is terminal. Inspect exact new-head qualification,then continue canonical backend dependency-ready work including remaining scheduled-value and source/provider contracts;no procurement/native acceptance inferred.",
+    "next_action": "Finish source fault controls and canonical checks;commit through genuinehooks,verify committedbaseline,push normally,qualify exact sourceDockerrecipe on freshhostedworker;continue original backend programme. No admission claimed.",
     "previous_head": "02ff56b996a7b894a7e3e070f2d90ef197db5aaa",
     "current_packet": "BE014 RSS2 original source snapshots;768final actualPG/185controls/8faults;component only",
     "ci_credential_capability": "receipts/CI_CREDENTIAL_CAPABILITY_20261024.json: repo admin metadata available, integration secret/deploy-key reads403; no credential changes.",
@@ -291,7 +299,8 @@
       "status": "SOURCE_COMPILED",
       "evidence": "receipts/NATIVE_MQL_COMPILED_752d265b.json",
       "qualification": "Signed compiler and deliberate invalid probe/source blob/artifact checks;network-blocked SDK initialization only;no account/broker/order/deployment/device acceptance"
-    }
+    },
+    "head": "1f4ecbf748b870b3187ac33ccdac734e375e541c"
   },
   "observations": [
     "OBS-001 BE-002 debug cleartext",
@@ -344,7 +353,7 @@
     "mutation_reconciliation": "ci/MUTATION_RECONCILIATION.md and ci/MUTATION_RECONCILIATION_MAPPING.json",
     "verified_source_head": "02ff56b996a7b894a7e3e070f2d90ef197db5aaa local genuine commit/GREEN147;published752,ready for normal push afterRSS",
     "source_qualification_run": 40255331558,
-    "latest_checkpoint_report": "CHECKPOINT_20261026_NEWS.md",
+    "latest_checkpoint_report": "docs/rebuild/rev118/CHECKPOINT_20261026_FORECAST_RUNTIME.md",
     "previous_verified_source": "3c6969ebbec39f2ad9f2836a6bd8acdb487adc34 published; exact CI40228254162 all17public jobs pass, two unchanged prerequisite failures",
     "qualification_scope": "Public source tests only; mandatory/native/owner/production gates unissued."
   },
@@ -364,6 +373,6 @@
       "evidence": "ci/MUTATION_CORPUS_c2a27848.json"
     }
   ],
-  "current_action": "Finish final RSS source documentary checks/manifest/verified backup and genuine hook commit/ledger;push normally/read back now exact752CI is terminal. Inspect exact new-head qualification,then continue canonical backend dependency-ready work including remaining scheduled-value and source/provider contracts;no procurement/native acceptance inferred.",
-  "updated_at_utc": "2026-10-26T02:29:43.145840+00:00"
+  "current_action": "Finish source fault controls and canonical checks;commit through genuinehooks,verify committedbaseline,push normally,qualify exact sourceDockerrecipe on freshhostedworker;continue original backend programme. No admission claimed.",
+  "updated_at_utc": "2026-10-26T04:59:32.685390+00:00"
 }

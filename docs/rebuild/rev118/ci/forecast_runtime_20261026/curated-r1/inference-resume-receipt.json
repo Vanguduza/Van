@@ -1,0 +1,36 @@
+{
+  "schema": "van.ml004.unknown-create-reconciliation/1",
+  "original_name": "van-ml004-3cbef2112a4e45f0954466bcc00e02cc",
+  "original_status": "CREATE_UNKNOWN_RECONCILE_ORIGINAL_NAME",
+  "status": "RECONCILED_ORIGINAL_COLD_INFERENCE_PASS_NOT_ADMISSION",
+  "removed": true,
+  "before_start": {
+    "Status": "created",
+    "Running": false,
+    "Paused": false,
+    "Restarting": false,
+    "OOMKilled": false,
+    "Dead": false,
+    "Pid": 0,
+    "ExitCode": 0,
+    "Error": "",
+    "StartedAt": "0001-01-01T00:00:00Z",
+    "FinishedAt": "0001-01-01T00:00:00Z"
+  },
+  "exit": 0,
+  "state": {
+    "Status": "exited",
+    "Running": false,
+    "Paused": false,
+    "Restarting": false,
+    "OOMKilled": false,
+    "Dead": false,
+    "Pid": 0,
+    "ExitCode": 0,
+    "Error": "",
+    "StartedAt": "2026-10-26T04:34:37.782262351Z",
+    "FinishedAt": "2026-10-26T04:35:39.302277928Z"
+  },
+  "report_sha256": "8bd8493eb728b808c14d8bc17fe3f61928566e7115b46a1023bb6e2c39dcb436",
+  "owned_adopted_children_reaped": []
+}

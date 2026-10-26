@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="2" skipped="0" tests="11" time="0.367" timestamp="2026-10-26T04:59:04.703750+00:00" hostname="2c5a245e39f1"><testcase classname="trading.tests.test_forecast_fixture_artifacts" name="test_loader_receives_verified_private_bytes_even_if_incoming_files_change" time="0.146" /><testcase classname="trading.tests.test_forecast_fixture_artifacts" name="test_fixture_metadata_cannot_self_issue_market_or_execution_permission[change0]" time="0.007" /><testcase classname="trading.tests.test_forecast_fixture_artifacts" name="test_fixture_metadata_cannot_self_issue_market_or_execution_permission[change1]" time="0.007" /><testcase classname="trading.tests.test_forecast_fixture_artifacts" name="test_fixture_metadata_cannot_self_issue_market_or_execution_permission[change2]" time="0.006" /><testcase classname="trading.tests.test_forecast_fixture_artifacts" name="test_fixture_metadata_cannot_self_issue_market_or_execution_permission[change3]" time="0.007" /><testcase classname="trading.tests.test_forecast_fixture_artifacts" name="test_fixture_metadata_cannot_self_issue_market_or_execution_permission[change4]" time="0.006" /><testcase classname="trading.tests.test_forecast_fixture_artifacts" name="test_legacy_pickle_is_rejected_without_executing_its_payload" time="0.014"><failure message="Failed: legacy pickle entered loader">bundle = (PosixPath('/tmp/pytest-of-agent/pytest-308/test_legacy_pickle_is_rejected0/bundle'), {'format': 'van.fixed-fixture-model-bundle/1', 'data_environment': 'FIXTURE', 'execution_authority': False, 'economic_admission': False, ...})
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-308/test_legacy_pickle_is_rejected0')
+
+    def test_legacy_pickle_is_rejected_without_executing_its_payload(bundle,tmp_path):
+        import pickle
+        root,manifest=bundle;marker=tmp_path/'executed'
+        class Poison:
+            def __reduce__(self):return (Path.write_text,(marker,'executed'))
+        (root/'neuralforecast/dataset.pkl').write_bytes(pickle.dumps(Poison()))
+        with pytest.raises(WorkerBoundaryError,match='UNSUPPORTED'):
+&gt;           with verified_fixture_bundle(root):pytest.fail('legacy pickle entered loader')
+                                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           Failed: legacy pickle entered loader
+
+trading/tests/test_forecast_fixture_artifacts.py:54: Failed</failure></testcase><testcase classname="trading.tests.test_forecast_fixture_artifacts" name="test_hash_mismatch_and_symlink_refuse_before_native_loading" time="0.013"><failure message="Failed: DID NOT RAISE WorkerBoundaryError">bundle = (PosixPath('/tmp/pytest-of-agent/pytest-308/test_hash_mismatch_and_symlink0/bundle'), {'format': 'van.fixed-fixture-model-bundle/1', 'data_environment': 'FIXTURE', 'execution_authority': False, 'economic_admission': False, ...})
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-308/test_hash_mismatch_and_symlink0')
+
+    def test_hash_mismatch_and_symlink_refuse_before_native_loading(bundle,tmp_path):
+        root,manifest=bundle;original=(root/'xgboost.json').read_bytes()
+        (root/'xgboost.json').write_bytes(b'corrupt')
+        with pytest.raises(WorkerBoundaryError,match='HASH_MISMATCH'):
+            with verified_fixture_bundle(root):pass
+        other=tmp_path/'outside.json';other.write_bytes(original)
+        (root/'xgboost.json').unlink();(root/'xgboost.json').symlink_to(other)
+&gt;       with pytest.raises(WorkerBoundaryError,match='LINKED'):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE WorkerBoundaryError
+
+trading/tests/test_forecast_fixture_artifacts.py:65: Failed</failure></testcase><testcase classname="trading.tests.test_forecast_fixture_artifacts" name="test_unknown_neuralforecast_format_does_not_fall_back_to_legacy_loading" time="0.008" /><testcase classname="trading.tests.test_forecast_fixture_artifacts" name="test_nonfinite_or_duplicate_manifest_keys_cannot_be_normalized_into_success" time="0.006" /><testcase classname="trading.tests.test_forecast_fixture_artifacts" name="test_manifest_and_aggregate_artifact_caps_are_checked_before_loading" time="0.007" /></testsuite></testsuites>

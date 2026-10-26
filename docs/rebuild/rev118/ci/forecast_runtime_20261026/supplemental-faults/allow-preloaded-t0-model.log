@@ -1,0 +1,27 @@
+........F                                                                [100%]
+=================================== FAILURES ===================================
+__ test_serve_refuses_a_preloaded_model_before_loading_account_configuration ___
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-304/test_serve_refuses_a_preloaded0')
+
+    def test_serve_refuses_a_preloaded_model_before_loading_account_configuration(tmp_path):
+        code='''
+    from argparse import Namespace
+    import json,sys,types
+    sys.modules['torch']=types.ModuleType('torch')
+    from vati.__main__ import cmd_serve
+    try:result=cmd_serve(Namespace(config=sys.argv[1],once=True))
+    except FileNotFoundError:result='CONFIGURATION_WAS_READ'
+    print(json.dumps({'result':result}))
+    '''
+        child=subprocess.run([sys.executable,'-c',code,str(tmp_path/'absent-profile.json')],
+            env=dict(os.environ,PYTHONPATH=str(Path(__file__).resolve().parents[1])),
+            capture_output=True,text=True,timeout=30)
+        assert child.returncode==0,child.stderr
+>       assert json.loads(child.stdout.splitlines()[-1])['result']==2
+E       AssertionError: assert 'CONFIGURATION_WAS_READ' == 2
+
+trading/tests/test_ml_runtime_boundary.py:49: AssertionError
+=========================== short test summary info ============================
+FAILED trading/tests/test_ml_runtime_boundary.py::test_serve_refuses_a_preloaded_model_before_loading_account_configuration
+1 failed, 8 passed in 6.36s

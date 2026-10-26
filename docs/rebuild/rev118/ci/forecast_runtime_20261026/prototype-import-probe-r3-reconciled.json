@@ -1,0 +1,103 @@
+{
+  "status": "EIGHT_IMPORTS_PASS_KERNEL_LIMITS_CONFIRMED_NOT_TRAINING_OR_QUALIFICATION",
+  "container": "van-ml004-import-r3-20261026",
+  "image_id": "sha256:07722805aed602c59b8250b8b08d6da005211ac72385964b9d78813329cab5da",
+  "created": true,
+  "removed": true,
+  "exit": 0,
+  "state": {
+    "Status": "exited",
+    "Running": false,
+    "Paused": false,
+    "Restarting": false,
+    "OOMKilled": false,
+    "Dead": false,
+    "Pid": 0,
+    "ExitCode": 0,
+    "Error": "",
+    "StartedAt": "2026-10-26T03:33:35.710157665Z",
+    "FinishedAt": "2026-10-26T03:34:13.417330583Z"
+  },
+  "enforced_configuration": {
+    "Memory": 6442450944,
+    "NanoCpus": 2000000000,
+    "PidsLimit": 256,
+    "ReadonlyRootfs": true,
+    "NetworkMode": "none",
+    "CapDrop": [
+      "ALL"
+    ],
+    "SecurityOpt": [
+      "no-new-privileges"
+    ]
+  },
+  "owned_adopted_children_reaped": [],
+  "observations": {
+    "status": "IMPORT_PROBE_NOT_TRAIN_OR_QUALIFICATION",
+    "versions": {
+      "torch": {
+        "version": "2.14.1+cpu",
+        "import_seconds": 4.930123600002844
+      },
+      "pyqlib": {
+        "version": "0.9.7",
+        "import_seconds": 1.374316130997613
+      },
+      "lightgbm": {
+        "version": "4.7.0",
+        "import_seconds": 2.2745583770010853
+      },
+      "neuralforecast": {
+        "version": "3.3.0",
+        "import_seconds": 8.72190708600101
+      },
+      "xgboost-cpu": {
+        "version": "3.4.1",
+        "import_seconds": 0.031186004001938272
+      },
+      "optuna": {
+        "version": "5.0.0",
+        "import_seconds": 0.179647708995617
+      },
+      "feast": {
+        "version": "0.67.0",
+        "import_seconds": 14.39633682299609
+      },
+      "mlflow": {
+        "version": "3.17.2",
+        "import_seconds": 1.6964950950059574
+      }
+    },
+    "environment_names": [
+      "CUDA_VISIBLE_DEVICES",
+      "GPG_KEY",
+      "HF_HUB_OFFLINE",
+      "HOME",
+      "HOSTNAME",
+      "HTTPS_PROXY",
+      "HTTP_PROXY",
+      "LANG",
+      "MKL_NUM_THREADS",
+      "MPLCONFIGDIR",
+      "NO_PROXY",
+      "NUMEXPR_NUM_THREADS",
+      "OMP_NUM_THREADS",
+      "OPENBLAS_NUM_THREADS",
+      "PATH",
+      "PYTHONDONTWRITEBYTECODE",
+      "PYTHON_SHA256",
+      "PYTHON_VERSION",
+      "http_proxy",
+      "https_proxy",
+      "no_proxy"
+    ],
+    "cgroup": {
+      "cpu.max": "200000 100000",
+      "memory.max": "6442450944",
+      "pids.max": "256",
+      "memory.current": "16384000"
+    },
+    "cuda_available": false,
+    "elapsed_seconds": 33.619983561999106
+  }
+}

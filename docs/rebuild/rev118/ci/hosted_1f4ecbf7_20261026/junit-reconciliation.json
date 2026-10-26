@@ -1,0 +1,90 @@
+[
+  {
+    "path": "van-market-monitor-source/report.xml",
+    "tests": 258,
+    "failures": 0,
+    "errors": 0,
+    "skips": 0,
+    "passed": 258
+  },
+  {
+    "path": "van-browser-guard-source/uid-report.xml",
+    "tests": 1,
+    "failures": 0,
+    "errors": 0,
+    "skips": 0,
+    "passed": 1
+  },
+  {
+    "path": "van-browser-guard-source/full-report.xml",
+    "tests": 1548,
+    "failures": 0,
+    "errors": 0,
+    "skips": 1,
+    "passed": 1547
+  },
+  {
+    "path": "van-browser-guard-source/report.xml",
+    "tests": 11,
+    "failures": 0,
+    "errors": 0,
+    "skips": 0,
+    "passed": 11
+  },
+  {
+    "path": "van-browser-guard-source/firewall-report.xml",
+    "tests": 10,
+    "failures": 0,
+    "errors": 0,
+    "skips": 0,
+    "passed": 10
+  },
+  {
+    "path": "van-postgres-ledger-report/trading-source-report.xml",
+    "tests": 3566,
+    "failures": 0,
+    "errors": 0,
+    "skips": 1,
+    "passed": 3565
+  },
+  {
+    "path": "van-postgres-ledger-report/voice-source-report.xml",
+    "tests": 117,
+    "failures": 0,
+    "errors": 0,
+    "skips": 0,
+    "passed": 117
+  },
+  {
+    "path": "van-postgres-ledger-report/postgres-ledger-report.xml",
+    "tests": 26,
+    "failures": 0,
+    "errors": 0,
+    "skips": 0,
+    "passed": 26
+  },
+  {
+    "path": "van-actual-release-guards/report.xml",
+    "tests": 2,
+    "failures": 0,
+    "errors": 0,
+    "skips": 0,
+    "passed": 2
+  },
+  {
+    "path": "van-backend-public-source/media-report.xml",
+    "tests": 198,
+    "failures": 0,
+    "errors": 0,
+    "skips": 0,
+    "passed": 198
+  },
+  {
+    "path": "van-backend-public-source/gateway-report.xml",
+    "tests": 5782,
+    "failures": 0,
+    "errors": 0,
+    "skips": 7,
+    "passed": 5775
+  }
+]

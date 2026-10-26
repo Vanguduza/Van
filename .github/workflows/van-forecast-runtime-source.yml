@@ -1,0 +1,59 @@
+name: van-forecast-runtime-source
+on:
+  pull_request:
+    paths:
+      - 'trading/vati_forecast_worker/**'
+      - 'trading/vati/core/model_boundary.py'
+      - 'trading/vati/__main__.py'
+      - 'trading/tests/test_forecast_*'
+      - 'trading/tests/test_ml_runtime_boundary.py'
+      - 'tools/rebuild/run_forecast_runtime_smoke.py'
+      - '.github/workflows/van-forecast-runtime-source.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  cpu-source-runtime:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - name: Record exact source and runtime inputs
+        run: |
+          mkdir -p /tmp/van-forecast-source-evidence
+          git rev-parse HEAD > /tmp/van-forecast-source-evidence/tested-head.txt
+          sha256sum trading/vati_forecast_worker/locks/* > /tmp/van-forecast-source-evidence/lock-digests.txt
+          python3 -m trading.vati_forecast_worker.inventory \
+            --output /tmp/van-forecast-source-evidence/source-wheel-sbom.json
+      - name: Build the locked CPU worker with actual wheel verification
+        run: |
+          docker build --secret id=system_ca,src=/etc/ssl/certs/ca-certificates.crt --progress plain \
+            --tag van-forecast-source:${{ github.run_id }} trading/vati_forecast_worker
+          docker image inspect van-forecast-source:${{ github.run_id }} --format '{{.Id}}' \
+            > /tmp/van-forecast-source-evidence/image-id.txt
+      - name: Actual fixture training, native export and separate cold inference
+        run: |
+          image_id="$(cat /tmp/van-forecast-source-evidence/image-id.txt)"
+          python3 tools/rebuild/run_forecast_runtime_smoke.py --image "$image_id" \
+            --output /tmp/van-forecast-source-evidence/runtime
+      - name: Require all declared source cases and bounded separate workers
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import json
+          root=Path('/tmp/van-forecast-source-evidence/runtime')
+          record=json.loads((root/'receipt.json').read_text())
+          assert record['status']=='SOURCE_FIXTURE_RESEARCH_AND_COLD_INFERENCE_PASS_NOT_ADMISSION'
+          assert record['source_snapshot_unchanged']
+          assert record['research']['removed'] and record['inference']['removed']
+          assert record['research']['container_id']!=record['inference']['container_id']
+          for role in ('research','inference'):
+              observed=record[role]['declared_kernel_configuration']
+              assert observed['NetworkMode']=='none' and observed['ReadonlyRootfs'] and observed['Init']
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: van-forecast-runtime-source-report
+          path: /tmp/van-forecast-source-evidence/
+          if-no-files-found: error

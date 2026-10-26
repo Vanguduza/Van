@@ -226,6 +226,12 @@ def cmd_news_ingest(a: argparse.Namespace) -> int:
 
 
 def cmd_serve(a: argparse.Namespace) -> int:
+    from vati.core.model_boundary import install_t0_model_guard,T0ModelImportError
+    try:
+        install_t0_model_guard()
+    except T0ModelImportError as exc:
+        print(json.dumps({'error':'T0_MODEL_BOUNDARY_UNAVAILABLE','detail':str(exc)}))
+        return 2
     from vati.app.process_lock import SessionAlreadyRunning, SessionLock
     from vati.app.service import ServiceConfig, SessionService, lake_bar_source
     from vati.market_data.feeds import BarLake

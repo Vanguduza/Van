@@ -1,6 +1,6 @@
 {
   "schema": "van.rebuild.candidate-source-progress/1",
-  "updated_at_utc": "2026-10-26T02:29:43.145840+00:00",
+  "updated_at_utc": "2026-10-26T04:59:32.685390+00:00",
   "programme": "Rev1.18; original 131 unit IDs and dependencies retained",
   "authority": "auth-20261022-owner-autonomous-candidate-build",
   "meaning": "Candidate source progress is separate from admitted unit acceptance. Independent certificates, owner decisions, live effects and release gates remain unissued. No unit is declared complete by this record.",
@@ -1321,9 +1321,14 @@
         "BE-003",
         "PRE-003"
       ],
-      "candidate_status": "NOT_STARTED",
+      "candidate_status": "IN_PROGRESS",
       "unit_acceptance": "NOT_ISSUED",
-      "milestones": []
+      "milestones": [
+        {
+          "description": "Locked232 upstream CPU distributions;actual isolated Qlib/LightGBM,XGBoost,NHiTS train/export/load,Optuna/Feast/MLflow native readback;separate cold inference10/10/2rows/parity0/no training;kernel2CPU6GiB256pids/offline/readOnly/noNewPriv and independent cleanup. Real serve import guard reproduces9before failures. Complete startup/authority selection116actualPG passes/0skip/audit0. 49current guard controlsPASS after exact restoration;8 supplemental assertion-caught faults/0errors/skips/audit0,not canonical374. 108rebuild checksPASS;owner/frontend registry no drift;canonical374/383 registry preflight0findings(not execution);consolidation0findings. ML004 remains IN_PROGRESS/NOT_ISSUED;fresh committed Docker recipe and native/independent/economic/device qualification remain.",
+          "evidence": "backend/VAN-ML-PKT-004_ISOLATED_SOURCE_RUNTIME.md; receipts/FORECAST_RUNTIME_SOURCE_20261026.json"
+        }
+      ]
     },
     "VAN-ML-PKT-005": {
       "title": "Point-in-time market dataset and universe snapshots",

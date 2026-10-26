@@ -1,0 +1,40 @@
+{
+  "schema": "van.model-worker.environment/1",
+  "status": "CANDIDATE_SOURCE_ENVIRONMENT_NOT_ADMITTED",
+  "python": "3.12.15",
+  "implementation": "CPython",
+  "platform": "Linux",
+  "architecture": "x86_64",
+  "device": "CPU",
+  "base_image": "python@sha256:6a0e06f5ba0b373d051aabd3fffb9b873f27f9a2a3a14bcbe37dee6f0e3bbc70",
+  "required_versions": {
+    "pyqlib": "0.9.7",
+    "lightgbm": "4.7.0",
+    "neuralforecast": "3.3.0",
+    "optuna": "5.0.0",
+    "feast": "0.67.0",
+    "mlflow": "3.17.2",
+    "xgboost-cpu": "3.4.1",
+    "torch": "2.14.1+cpu"
+  },
+  "shared_native_runtime": "Pinned CPU Torch initializes its bundled OpenMP before LightGBM;verified by actual imports/train/export/load fixture",
+  "source_lock_sha256": "16e8f762d29ddac81b4b7024f9e5c675a988815c45b62fbbc97032bccd1db0c5",
+  "wheel_lock_sha256": "cb7658179c9fc4b2f27b48af512f3e74f282b34187a63c095a610cb2fbef1b1e",
+  "architecture_matrix": [
+    {
+      "platform": "linux-x86_64",
+      "python": "cp312",
+      "local_prototype": "6FIXTURE_CASES_PASS",
+      "curated_worker": "PENDING"
+    },
+    {
+      "platform": "linux-aarch64",
+      "python": "cp312",
+      "status": "NOT_EXECUTED_NOT_QUALIFIED"
+    }
+  ],
+  "data_scope": "FIXTURE",
+  "execution_authority": false,
+  "native_admission": false,
+  "economic_admission": false
+}
