@@ -107,7 +107,9 @@
         "backend/tests/test_gateway_startup_storage.py",
         "docs/rebuild/rev118/CANDIDATE_SOURCE_PROGRESS.json",
         "docs/rebuild/rev118/backend/BE-003_009_010_ORIGINAL_ENTRY_RECOVERY.md",
-        "docs/rebuild/rev118/receipts/ORIGINAL_ENTRY_RECOVERY_SOURCE_20261022.json"
+        "docs/rebuild/rev118/receipts/ORIGINAL_ENTRY_RECOVERY_SOURCE_20261022.json",
+        "backend/BE-003_006_COMMITTED_FUNDING_READS.md",
+        "receipts/COMMITTED_FUNDING_READS_SOURCE_20261026.json"
       ]
     },
     "BE-006": {
@@ -128,7 +130,9 @@
         "backend/BE-006_NATIVE_VALUATION_LINEAGE.md",
         "receipts/NATIVE_VALUATION_SOURCE_20261026.json",
         "backend/BE-006_SAMPLED_FLOW_ADJUSTED_RISK.md",
-        "receipts/SAMPLED_FLOW_RISK_SOURCE_20261026.json"
+        "receipts/SAMPLED_FLOW_RISK_SOURCE_20261026.json",
+        "backend/BE-003_006_COMMITTED_FUNDING_READS.md",
+        "receipts/COMMITTED_FUNDING_READS_SOURCE_20261026.json"
       ]
     },
     "BE-020": {
@@ -306,7 +310,7 @@
     "note": "Opus unavailable; owner transferred build to Codex. No independent reviewer identity is inferred from another model or session."
   },
   "checkpoint": {
-    "updated_utc": "2026-10-26T19:16:21.414143+00:00",
+    "updated_utc": "2026-10-26T20:09:20.126908+00:00",
     "branch": "ccr-9e07e1af-8mgz1p",
     "base": "b02075f327ea8180ab6d269eba358cf8c5479878",
     "background_jobs": [
@@ -325,7 +329,7 @@
         "not_acceptance": true
       }
     ],
-    "last_validation": "Immutable FlowAdjustedRisk combines exactexistingunitizationwithintermediatetypednet-equitysamples,retainslossacrosscapitalchanges/redemption/replacement,andpreservesknownprefixonmissingflowfacts. Realperiod_report consumes originalValuationSnapshots;originalcoveragerefs andexternal-flow holdsretained. Typedsourceidentity/pointcapacity/nativeorder/floatguards and immutablebody;no native/riskcapital/settlement/executionqualification. 394finalactual-PGchecks0skip/audit0/all487runtime-testhashesmatch/ownedfixtureabsent;7supplementalassertionfaults/10positive+10restoredcontrols;122rebuild/workflow/T0boundarychecks. WholeBE006remainsIN_PROGRESS.",
+    "last_validation": "Confirmedactualclean-baselined844SQLrollback exposeduncommittednativeperiod/readiness/ownerlineageandfalseincremental-cachecorruptionalarm. SharedexistingLedgercommittedreadcontextnowrejectscaller-ownedwritersbefore/afteracquisition;nativecTrader/MT5consumershold/refusewithoutproviderIO. OwnedSQLite/Postgreswriterabortinvalidatesstagedcacheanchor;full/incremental/tamperchecksretained. 444finalactual-PGchecks0skip/audit0/all488runtime-testhashesmatch/ownedfixtureabsent;14newboundarycases;6assertionfaultsincludingactualPGcache/guardfailures/14positive+14restoreddual-enginecontrols;122rebuild/workflow/T0boundary. Componentonly;unitacceptanceNOT_ISSUED.",
     "environment_notes": [
       "clone must be unshallowed (git fetch --unshallow) and PR heads fetched (+refs/pull/*/head:refs/remotes/origin/pr/*) before pre001.py",
       "pytest from backend/requirements.txt in a venv",
@@ -410,9 +414,9 @@
     "tested_android_head": "752d265b11ba643ed309481b110248f8b7fe323b",
     "hosted_result": "receipts/HOSTED_SOURCE_752d265b.json",
     "mutation_reconciliation": "ci/MUTATION_RECONCILIATION.md and ci/MUTATION_RECONCILIATION_MAPPING.json",
-    "verified_source_head": "9bf1acc4ed0239540d1ffffcc8cf9cf7eec16f82 published;genuineGREEN159;current sampledflowriskcandidateuncommitted",
+    "verified_source_head": "d844aa437e83623d2ff5975927bff4f12849d10e local,genuineGREEN160;published9bf1acc4GREEN159;committed-readfixuncommitted",
     "source_qualification_run": 40383599951,
-    "latest_checkpoint_report": "docs/rebuild/rev118/CHECKPOINT_20261026_SAMPLED_FLOW_RISK.md",
+    "latest_checkpoint_report": "docs/rebuild/rev118/CHECKPOINT_20261026_COMMITTED_FUNDING_READS.md",
     "previous_verified_source": "3c6969ebbec39f2ad9f2836a6bd8acdb487adc34 published; exact CI40228254162 all17public jobs pass, two unchanged prerequisite failures",
     "qualification_scope": "Public source tests only; mandatory/native/owner/production gates unissued."
   },
@@ -432,6 +436,6 @@
       "evidence": "ci/MUTATION_CORPUS_c2a27848.json"
     }
   ],
-  "current_action": "Finish sampledflowrisk evidence/manifest/verifiedstagedbackup/genuinehookcommit/committedbaselineverify. Preservepublished9bf1acc4CI40383599951untilterminalbefore nextnormalpush/readback;inspectactualsubsequentCI. ContinuefullBE006sharedreservations/reversals/nativeflowqualification,BE007andcanonicalML/backendprogramme.0formalunitacceptances.",
-  "updated_at_utc": "2026-10-26T19:16:21.414143+00:00"
+  "current_action": "Finishcommitted-readfixmanifest/stagedbackup/genuinehookcommit/committedbaselineverify. Publishsampledflowd844andthisconfirmedfixasreviewablefixedheadonce9bfmain40383599951terminal;normalpush/readback/exactnewCI. Continueactualcanonicaldependency-readybackendimplementationandqualification;0formalunitacceptances.",
+  "updated_at_utc": "2026-10-26T20:09:20.126908+00:00"
 }

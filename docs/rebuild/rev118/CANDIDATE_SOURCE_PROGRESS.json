@@ -1,6 +1,6 @@
 {
   "schema": "van.rebuild.candidate-source-progress/1",
-  "updated_at_utc": "2026-10-26T19:16:21.414143+00:00",
+  "updated_at_utc": "2026-10-26T20:09:20.126908+00:00",
   "programme": "Rev1.18; original 131 unit IDs and dependencies retained",
   "authority": "auth-20261022-owner-autonomous-candidate-build",
   "meaning": "Candidate source progress is separate from admitted unit acceptance. Independent certificates, owner decisions, live effects and release gates remain unissued. No unit is declared complete by this record.",
@@ -315,6 +315,10 @@
         {
           "description": "Source storage-audit directory-FD bypass/false-positive and missing-report recovery:9before failures,10guard checks and108rebuild pass;258monitor+173native integrations pass with zero forbidden events. Instrumentation limits remain explicit; no native security acceptance.",
           "evidence": "backend/BE-003_STORAGE_AUDIT_DIRECTORY_FDS.md; receipts/STORAGE_AUDIT_DIRECTORY_FDS_20261025.json"
+        },
+        {
+          "description": "Confirmedactualclean-baselined844SQLrollback exposeduncommittednativeperiod/readiness/ownerlineageandfalseincremental-cachecorruptionalarm. SharedexistingLedgercommittedreadcontextnowrejectscaller-ownedwritersbefore/afteracquisition;nativecTrader/MT5consumershold/refusewithoutproviderIO. OwnedSQLite/Postgreswriterabortinvalidatesstagedcacheanchor;full/incremental/tamperchecksretained. 444finalactual-PGchecks0skip/audit0/all488runtime-testhashesmatch/ownedfixtureabsent;14newboundarycases;6assertionfaultsincludingactualPGcache/guardfailures/14positive+14restoreddual-enginecontrols;122rebuild/workflow/T0boundary. Componentonly;unitacceptanceNOT_ISSUED.",
+          "evidence": "backend/BE-003_006_COMMITTED_FUNDING_READS.md;receipts/COMMITTED_FUNDING_READS_SOURCE_20261026.json"
         }
       ]
     },
@@ -470,6 +474,10 @@
         {
           "description": "Immutable FlowAdjustedRisk combines exactexistingunitizationwithintermediatetypednet-equitysamples,retainslossacrosscapitalchanges/redemption/replacement,andpreservesknownprefixonmissingflowfacts. Realperiod_report consumes originalValuationSnapshots;originalcoveragerefs andexternal-flow holdsretained. Typedsourceidentity/pointcapacity/nativeorder/floatguards and immutablebody;no native/riskcapital/settlement/executionqualification. 394finalactual-PGchecks0skip/audit0/all487runtime-testhashesmatch/ownedfixtureabsent;7supplementalassertionfaults/10positive+10restoredcontrols;122rebuild/workflow/T0boundarychecks. WholeBE006remainsIN_PROGRESS.",
           "evidence": "backend/BE-006_SAMPLED_FLOW_ADJUSTED_RISK.md;receipts/SAMPLED_FLOW_RISK_SOURCE_20261026.json"
+        },
+        {
+          "description": "Confirmedactualclean-baselined844SQLrollback exposeduncommittednativeperiod/readiness/ownerlineageandfalseincremental-cachecorruptionalarm. SharedexistingLedgercommittedreadcontextnowrejectscaller-ownedwritersbefore/afteracquisition;nativecTrader/MT5consumershold/refusewithoutproviderIO. OwnedSQLite/Postgreswriterabortinvalidatesstagedcacheanchor;full/incremental/tamperchecksretained. 444finalactual-PGchecks0skip/audit0/all488runtime-testhashesmatch/ownedfixtureabsent;14newboundarycases;6assertionfaultsincludingactualPGcache/guardfailures/14positive+14restoreddual-enginecontrols;122rebuild/workflow/T0boundary. Componentonly;unitacceptanceNOT_ISSUED.",
+          "evidence": "backend/BE-003_006_COMMITTED_FUNDING_READS.md;receipts/COMMITTED_FUNDING_READS_SOURCE_20261026.json"
         }
       ]
     },

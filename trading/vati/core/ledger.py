@@ -34,6 +34,32 @@ class LedgerError(RuntimeError):
     pass
 
 
+def require_committed_source_read(ledger):
+    """An owned writer's staged rows are not committed source evidence."""
+    connection=getattr(ledger,'_conn',None)
+    if connection is None:
+        raise LedgerError('committed_source_transaction_state_unavailable')
+    if hasattr(connection,'in_transaction'):
+        active=connection.in_transaction
+    elif hasattr(connection,'info'):
+        active=connection.info.transaction_status!=0
+    else:
+        raise LedgerError('committed_source_transaction_state_unavailable')
+    depth=getattr(ledger,'_read_snapshot_depth',0)
+    if active and not (type(depth) is int and depth>0):
+        raise LedgerError('committed_source_read_requires_idle_or_readonly_snapshot')
+
+
+@contextmanager
+def committed_source_snapshot(ledger):
+    require_committed_source_read(ledger)
+    with ledger.read_snapshot():
+        # Recheck after acquisition; a nested writer must never masquerade as
+        # the committed read snapshot requested at this boundary.
+        require_committed_source_read(ledger)
+        yield ledger
+
+
 def history_through(ledger, correlation_id: str, anchor: str):
     """Fully read a subject's journal, then retain its original availability.
 
@@ -146,7 +172,12 @@ class Ledger:
             yield self
             self._conn.commit()
         except BaseException:
-            self._conn.rollback()
+            try:
+                self._conn.rollback()
+            finally:
+                # A verifier may have observed staged rows in this writer.
+                # Their rolled-back head cannot remain a durable cache anchor.
+                self._incremental=None
             raise
 
     @contextmanager

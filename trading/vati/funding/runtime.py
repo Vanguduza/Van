@@ -10,6 +10,7 @@ from vati.execution.ctrader.transport import CtraderApiError
 from vati.funding.journal import FundingBook
 from vati.funding.native import NativeAccountMark,native_int
 from vati.core.units import UnitError
+from vati.core.ledger import committed_source_snapshot
 from vati.funding.movement_journal import FinancialMovementBook,MovementPublicationUnknown,STORAGE_ERRORS
 
 WEEK_MS=604800000
@@ -93,7 +94,7 @@ def capture_funding(ledger,adapter,account,*,now_ms):
         'catch_up_state':'PENDING' if end<mark.observed_at_ms else 'CURRENT_WINDOW_READ'}
 
 def reported_funding(ledger,event,account_record):
-    with ledger.read_snapshot():return _reported_funding(ledger,event,account_record)
+    with committed_source_snapshot(ledger):return _reported_funding(ledger,event,account_record)
 
 def _reported_funding(ledger,event,account_record):
     """Read only facts linked by the original account snapshot and native scope."""

@@ -7,7 +7,7 @@ from decimal import Decimal
 from fractions import Fraction
 from vati.core.canonical import canonical_hash
 from vati.core.events import EventKind
-from vati.core.ledger import LedgerError
+from vati.core.ledger import LedgerError,committed_source_snapshot
 from vati.funding.classification import classify
 from vati.funding.deal_journal import DealBook
 from vati.funding.journal import FundingBook
@@ -54,7 +54,7 @@ def period_report(ledger,scope_hash,*,baseline_ref=None,closing_ref=None):
         'flow_adjusted_risk':None,
         'cash_neutral_net_account_pnl':None,'separate_business_income_or_expense':None,
         'net_account_pnl_excluding_capital_and_separate_business':None}
-    with ledger.read_snapshot():
+    with committed_source_snapshot(ledger):
         if not ledger.verify_incremental()[0]:raise LedgerError('native_period_journal_invalid')
         marks=_marks(ledger,scope_hash)
         if not marks:return result

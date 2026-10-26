@@ -9,6 +9,7 @@ from dataclasses import dataclass
 from decimal import Decimal
 
 from vati.core.events import EventKind
+from vati.core.ledger import committed_source_snapshot
 from vati.funding.classification import classify
 from vati.funding.journal import FundingBook
 from vati.funding.native import NativeAccountMark, native_int
@@ -33,12 +34,13 @@ def funding_risk_fence(ledger, adapter, account, *, now_ms):
         # and fills zero quantity. Signed owner reconciliation is separate.
         return FundingRiskFence(True, "OWNER_TICKET_DRAFT_ONLY_NO_NATIVE_SUBMISSION")
     try:
-        from vati.execution.mt5_pull import Mt5PullAdapter
-        from vati.execution.mt5_bridge import Mt5BridgeAdapter
-        if isinstance(adapter,(Mt5PullAdapter,Mt5BridgeAdapter)):
-            from vati.funding.mt5_runtime import mt5_risk_fence
-            return mt5_risk_fence(ledger,adapter,account,now_ms=now_ms)
-        return _native_fence(ledger, adapter, account, now_ms=now_ms)
+        with committed_source_snapshot(ledger):
+            from vati.execution.mt5_pull import Mt5PullAdapter
+            from vati.execution.mt5_bridge import Mt5BridgeAdapter
+            if isinstance(adapter,(Mt5PullAdapter,Mt5BridgeAdapter)):
+                from vati.funding.mt5_runtime import mt5_risk_fence
+                return mt5_risk_fence(ledger,adapter,account,now_ms=now_ms)
+            return _native_fence(ledger, adapter, account, now_ms=now_ms)
     except Exception as exc:
         # A journal/read failure holds new risk without leaking provider notes
         # or disabling the independent position-protection path.

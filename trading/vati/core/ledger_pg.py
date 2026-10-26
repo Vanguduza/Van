@@ -102,7 +102,10 @@ class PostgresLedger:
                 self._conn.commit()
         except BaseException:
             if outer:
-                self._conn.rollback()
+                try:
+                    self._conn.rollback()
+                finally:
+                    self._incremental=None
             raise
         finally:
             self._atomic_depth -= 1

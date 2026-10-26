@@ -24,6 +24,8 @@ The paired-owner routes are `GET /v1/trading/accounts` and `GET /v1/trading/port
 
 Financial display must keep unknown/unavailable/pending/conflict distinct from an observed empty cash window. Do not calculate profit from balance or equity differences. Do not sum a missing account PnL as zero. A native profile change produces stale/unavailable data until the current identity is observed. Restricted broker credit, converted bonuses, negative-balance support, rebates, account charges and IB income retain their economic categories and must not be presented together as proven trading alpha.
 
+Native funding projections and period reads require an idle ledger connection or an owned committed read snapshot. A caller-owned writer is a transaction-boundary error, not a completed source observation. Native risk readiness holds with its existing evidence-unavailable reason; staged cTrader/MT5 source references cannot establish readiness or owner lineage. Genuine nested committed reads remain supported. A failed writer rollback invalidates its owned verification cache so a removed staged head cannot be mistaken for durable corruption on the next read.
+
 Android `FundingObservation` and `NativeCashMovement`, attached to `AccountCard`, preserve ID and monetary strings. Values above 2^53 are not converted to floating-point IDs. Existing clients remain compatible with the additive fields. The screen redesign, full cash-history export, source-normalized performance displays and actual provider/device acceptance remain under the canonical programme.
 
 
