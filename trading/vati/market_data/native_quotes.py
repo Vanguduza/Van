@@ -95,6 +95,7 @@ def _validate_capture(contract_body, capture):
 
 class NativeQuoteArchive(NativeMarketArchive):
     observation_type=NativeQuoteCapture
+    contract_types=(NativeSymbolContract,)
     _validate_capture=staticmethod(_validate_capture)
 
     @staticmethod

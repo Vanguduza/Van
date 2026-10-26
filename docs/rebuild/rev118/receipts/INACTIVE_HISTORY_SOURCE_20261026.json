@@ -1,0 +1,47 @@
+{
+  "schema": "van.rebuild.inactive-native-history/1",
+  "base_head": "83f2688a6414b5e81358c051418d0fe85ee0a3fb",
+  "updated_at_utc": "2026-10-26T10:38:34.439115+00:00",
+  "status": "SOURCE_TESTED_COMPONENT_NOT_PROVIDER_OR_UNIT_ACCEPTANCE",
+  "units": [
+    "BE-008",
+    "VAN-ML-PKT-005"
+  ],
+  "unit_status": "IN_PROGRESS",
+  "acceptance": "NOT_ISSUED",
+  "source_sha256": {
+    ".github/workflows/van-forecast-runtime-source.yml": "e64eb3ee8bb5c565597cb1f764d33d46153150b6f9e6aae8e7b3cae1c42f9477",
+    "trading/vati/execution/ctrader/read_identity.py": "5d96b88c7c2cd5e1176ef3d6ba21a804a9a5b09dc972027fc30cd218d0cf0e11",
+    "trading/vati/execution/ctrader/adapter.py": "01e1a0f2d6c69dfb79b8cfbdeed3dd4e6547811ba55019a85ddf55960db2c815",
+    "trading/vati/market_data/native_archive.py": "202b6c5b16ac2b7e26a0dfb31ee46eb663045942bf1dc1132604f894b16a9416",
+    "trading/vati/market_data/native_collector.py": "318b83222cafc5ecefa8fe8f87160acc3e55b1eda38d612ad028b31330fd5526",
+    "trading/vati/market_data/native_quotes.py": "729b5d11c54e9fd202960ea5fd34cc41b7131759d085a7edf17301ea3f618aa7",
+    "trading/tests/test_native_read_identity.py": "46ac1f053c72bdac4b78887be9d125da6a416fbf0384564eb2ef959249d1d3d2",
+    "trading/worker_tests/test_inactive_source_parquet.py": "c9e954ecf071f47c2fe5218081711b1a75efacaac4b3e6cfd20d974f8241ba9c"
+  },
+  "tests": {
+    "R1": "121 passed/5 fixture failures/4 mocked-peer thread warnings;invalid blank archived-name positive fixture and duplicated response keyword arguments. Existing catalog guard preserved;valid nameless LIGHT case and explicit invalid archived-name refusal added. All original reports retained.",
+    "R2": "127 passed/0 skips/audit0/no warnings",
+    "R3": "234 passed/1 fixture wrong exception-base failure. Native API correctly returned CtraderApiError;test now requires that exact class and SYMBOL_NOT_FOUND code.",
+    "R4": "235 passed/0 skips/audit0",
+    "first_postgres_selection": "518 passed/0skip/audit0/ownedfixtureabsent; before additional provider-flag assertion",
+    "final_postgres_selection": "518 passed/0skip/audit0/all final source and test hashes match/owned isolated fixture independently absent",
+    "supplemental": "8 assertion-caught faults/37 positive and restored controls/0 errors,skips,audit violations/exact restoration;not canonical374",
+    "rebuild": 108
+  },
+  "canonical_checks": {
+    "owner_frontend_drift": false,
+    "registry_cases": 374,
+    "registry_edits": 383,
+    "registry_findings": [],
+    "canonical_mutations_for_this_uncommitted_source": "NOT_RUN",
+    "consolidation_findings": []
+  },
+  "qualification": "Framed native source peers only; actual provider support/rights/clock/capacity/native/unit/owner/production/economic/S24 unqualified",
+  "remaining": [
+    "Full DatasetManifest publication with real scope/universe/calendar/feature/target/consent/entitlement resolution",
+    "Licensed joins,reconstructed/corrected-research paths and effective lifecycle/calendar/gap policy",
+    "Runtime native producer scheduling/capacity,other venues/depth/feeds and independent admission"
+  ],
+  "evidence": "ci/inactive_history_20261026"
+}

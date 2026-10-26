@@ -1,0 +1,620 @@
+....F.................FFFF.............................................. [ 57%]
+......................................................                   [100%]
+=================================== FAILURES ===================================
+_ test_unknown_or_unusable_display_label_retains_native_identity_without_truncating_data[] _
+
+name = ''
+
+    @pytest.mark.parametrize('name',['','/','x'*300])
+    def test_unknown_or_unusable_display_label_retains_native_identity_without_truncating_data(name):
+        body=response();body['archivedSymbol'][0]['name']=name
+>       value=NativeReadIdentity.capture(captured(response=body),4)
+                                         ^^^^^^^^^^^^^^^^^^^^^^^
+
+trading/tests/test_native_read_identity.py:47: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+trading/tests/test_native_symbol_catalog.py:25: in captured
+    return NativeSymbolCatalog.capture(**({'scope':SCOPE,'response':response(),'received_at_ms':NOW,'include_archived_symbols':True}|changes))
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/execution/ctrader/catalog.py:95: in capture
+    return cls(canonical_json(metadata),received_at_ms)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+<string>:5: in __init__
+    ???
+trading/vati/execution/ctrader/catalog.py:88: in __post_init__
+    _validate_response(metadata['response'],scope['native_account_id'],self.received_at_ms,metadata['include_archived_symbols'])
+trading/vati/execution/ctrader/catalog.py:65: in _validate_response
+    _text(row['name'])
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+value = '', allow_empty = False
+
+    def _text(value,*,allow_empty=False):
+        if not isinstance(value,str) or (not allow_empty and not value.strip()) or len(value)>4096 or any(ord(c)<32 for c in value):
+>           raise ValueError('native catalog text invalid')
+E           ValueError: native catalog text invalid
+
+trading/vati/execution/ctrader/catalog.py:32: ValueError
+_ test_actual_inactive_native_history_uses_catalog_id_without_loading_execution_metadata[2] _
+
+self = <vati.execution.ctrader.transport.CtraderReadTransport object at 0x7ff773f70770>
+message = 'ProtoOAGetTrendbarsReq'
+values = {'ctidTraderAccountId': 12345, 'fromTimestamp': 120000, 'toTimestamp': 300000, 'period': 'M1', ...}
+timeout_s = None, expires_at_ms = None, clock = None
+
+    def _request(self, message, values, *, timeout_s=None, expires_at_ms=None, clock=None):
+        self.connect()
+        cid = uuid.uuid4().hex[:16]
+        q: queue.Queue = queue.Queue()
+        with self._state_lock:
+            sock = self._sock
+            if sock is None or not self._alive:
+                raise CtraderError("cTrader disconnected before request registration")
+            self._pending[cid] = q
+            self._pending_sockets[cid] = sock
+        try:
+            payload=SCHEMA.wrap(message, values, cid)
+            if expires_at_ms is None:
+                self._send_frame(payload, expected_socket=sock)
+            else:
+                self._send_frame(payload,expires_at_ms=expires_at_ms,clock=clock,expected_socket=sock)
+            try:
+>               name, body = q.get(timeout=self._response_timeout(timeout_s))
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+trading/vati/execution/ctrader/transport.py:257: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <queue.Queue object at 0x7ff773f70d10>, block = True, timeout = 3
+
+    def get(self, block=True, timeout=None):
+        '''Remove and return an item from the queue.
+    
+        If optional args 'block' is true and 'timeout' is None (the default),
+        block if necessary until an item is available. If 'timeout' is
+        a non-negative number, it blocks at most 'timeout' seconds and raises
+        the Empty exception if no item was available within that time.
+        Otherwise ('block' is false), return an item if one is immediately
+        available, else raise the Empty exception ('timeout' is ignored
+        in that case).
+        '''
+        with self.not_empty:
+            if not block:
+                if not self._qsize():
+                    raise Empty
+            elif timeout is None:
+                while not self._qsize():
+                    self.not_empty.wait()
+            elif timeout < 0:
+                raise ValueError("'timeout' must be a non-negative number")
+            else:
+                endtime = time() + timeout
+                while not self._qsize():
+                    remaining = endtime - time()
+                    if remaining <= 0.0:
+>                       raise Empty
+E                       _queue.Empty
+
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/queue.py:179: Empty
+
+During handling of the above exception, another exception occurred:
+
+native_id = 2
+
+    @pytest.mark.parametrize('native_id',[2,3,4])
+    def test_actual_inactive_native_history_uses_catalog_id_without_loading_execution_metadata(native_id):
+        expected=identity(native_id,wire=True);peer=HistoryPeer();parent=make_adapter(peer);parent.clock=lambda:NOW
+        reader=parent.market_reader()
+        try:
+>           original,observed=reader.read_window(expected,timeframe='M1',from_ms=120000,to_ms=300000)
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+trading/tests/test_native_read_identity.py:94: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+trading/vati/execution/ctrader/adapter.py:261: in read_window
+    return self.read_identity_window(expected_contract,timeframe=timeframe,from_ms=from_ms,to_ms=to_ms)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/execution/ctrader/adapter.py:302: in read_identity_window
+    observed=read_trendbars(source,original.series_label,timeframe,from_ms=from_ms,to_ms=to_ms,count=2001)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/execution/ctrader/feed.py:78: in read_trendbars
+    name, response = adapter.transport.call("ProtoOAGetTrendbarsReq", {
+trading/vati/execution/ctrader/transport.py:494: in call
+    result = super().call(message, values, timeout_s=timeout_s)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/execution/ctrader/transport.py:231: in call
+    return self._request(message,values,timeout_s=timeout_s)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <vati.execution.ctrader.transport.CtraderReadTransport object at 0x7ff773f70770>
+message = 'ProtoOAGetTrendbarsReq'
+values = {'ctidTraderAccountId': 12345, 'fromTimestamp': 120000, 'toTimestamp': 300000, 'period': 'M1', ...}
+timeout_s = None, expires_at_ms = None, clock = None
+
+    def _request(self, message, values, *, timeout_s=None, expires_at_ms=None, clock=None):
+        self.connect()
+        cid = uuid.uuid4().hex[:16]
+        q: queue.Queue = queue.Queue()
+        with self._state_lock:
+            sock = self._sock
+            if sock is None or not self._alive:
+                raise CtraderError("cTrader disconnected before request registration")
+            self._pending[cid] = q
+            self._pending_sockets[cid] = sock
+        try:
+            payload=SCHEMA.wrap(message, values, cid)
+            if expires_at_ms is None:
+                self._send_frame(payload, expected_socket=sock)
+            else:
+                self._send_frame(payload,expires_at_ms=expires_at_ms,clock=clock,expected_socket=sock)
+            try:
+                name, body = q.get(timeout=self._response_timeout(timeout_s))
+            except queue.Empty:
+>               raise CtraderError(f"cTrader timeout waiting for {message} response")
+E               vati.execution.ctrader.transport.CtraderError: cTrader timeout waiting for ProtoOAGetTrendbarsReq response
+
+trading/vati/execution/ctrader/transport.py:259: CtraderError
+_ test_actual_inactive_native_history_uses_catalog_id_without_loading_execution_metadata[3] _
+
+self = <vati.execution.ctrader.transport.CtraderReadTransport object at 0x7ff773f72630>
+message = 'ProtoOAGetTrendbarsReq'
+values = {'ctidTraderAccountId': 12345, 'fromTimestamp': 120000, 'toTimestamp': 300000, 'period': 'M1', ...}
+timeout_s = None, expires_at_ms = None, clock = None
+
+    def _request(self, message, values, *, timeout_s=None, expires_at_ms=None, clock=None):
+        self.connect()
+        cid = uuid.uuid4().hex[:16]
+        q: queue.Queue = queue.Queue()
+        with self._state_lock:
+            sock = self._sock
+            if sock is None or not self._alive:
+                raise CtraderError("cTrader disconnected before request registration")
+            self._pending[cid] = q
+            self._pending_sockets[cid] = sock
+        try:
+            payload=SCHEMA.wrap(message, values, cid)
+            if expires_at_ms is None:
+                self._send_frame(payload, expected_socket=sock)
+            else:
+                self._send_frame(payload,expires_at_ms=expires_at_ms,clock=clock,expected_socket=sock)
+            try:
+>               name, body = q.get(timeout=self._response_timeout(timeout_s))
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+trading/vati/execution/ctrader/transport.py:257: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <queue.Queue object at 0x7ff773f735c0>, block = True, timeout = 3
+
+    def get(self, block=True, timeout=None):
+        '''Remove and return an item from the queue.
+    
+        If optional args 'block' is true and 'timeout' is None (the default),
+        block if necessary until an item is available. If 'timeout' is
+        a non-negative number, it blocks at most 'timeout' seconds and raises
+        the Empty exception if no item was available within that time.
+        Otherwise ('block' is false), return an item if one is immediately
+        available, else raise the Empty exception ('timeout' is ignored
+        in that case).
+        '''
+        with self.not_empty:
+            if not block:
+                if not self._qsize():
+                    raise Empty
+            elif timeout is None:
+                while not self._qsize():
+                    self.not_empty.wait()
+            elif timeout < 0:
+                raise ValueError("'timeout' must be a non-negative number")
+            else:
+                endtime = time() + timeout
+                while not self._qsize():
+                    remaining = endtime - time()
+                    if remaining <= 0.0:
+>                       raise Empty
+E                       _queue.Empty
+
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/queue.py:179: Empty
+
+During handling of the above exception, another exception occurred:
+
+native_id = 3
+
+    @pytest.mark.parametrize('native_id',[2,3,4])
+    def test_actual_inactive_native_history_uses_catalog_id_without_loading_execution_metadata(native_id):
+        expected=identity(native_id,wire=True);peer=HistoryPeer();parent=make_adapter(peer);parent.clock=lambda:NOW
+        reader=parent.market_reader()
+        try:
+>           original,observed=reader.read_window(expected,timeframe='M1',from_ms=120000,to_ms=300000)
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+trading/tests/test_native_read_identity.py:94: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+trading/vati/execution/ctrader/adapter.py:261: in read_window
+    return self.read_identity_window(expected_contract,timeframe=timeframe,from_ms=from_ms,to_ms=to_ms)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/execution/ctrader/adapter.py:302: in read_identity_window
+    observed=read_trendbars(source,original.series_label,timeframe,from_ms=from_ms,to_ms=to_ms,count=2001)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/execution/ctrader/feed.py:78: in read_trendbars
+    name, response = adapter.transport.call("ProtoOAGetTrendbarsReq", {
+trading/vati/execution/ctrader/transport.py:494: in call
+    result = super().call(message, values, timeout_s=timeout_s)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/execution/ctrader/transport.py:231: in call
+    return self._request(message,values,timeout_s=timeout_s)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <vati.execution.ctrader.transport.CtraderReadTransport object at 0x7ff773f72630>
+message = 'ProtoOAGetTrendbarsReq'
+values = {'ctidTraderAccountId': 12345, 'fromTimestamp': 120000, 'toTimestamp': 300000, 'period': 'M1', ...}
+timeout_s = None, expires_at_ms = None, clock = None
+
+    def _request(self, message, values, *, timeout_s=None, expires_at_ms=None, clock=None):
+        self.connect()
+        cid = uuid.uuid4().hex[:16]
+        q: queue.Queue = queue.Queue()
+        with self._state_lock:
+            sock = self._sock
+            if sock is None or not self._alive:
+                raise CtraderError("cTrader disconnected before request registration")
+            self._pending[cid] = q
+            self._pending_sockets[cid] = sock
+        try:
+            payload=SCHEMA.wrap(message, values, cid)
+            if expires_at_ms is None:
+                self._send_frame(payload, expected_socket=sock)
+            else:
+                self._send_frame(payload,expires_at_ms=expires_at_ms,clock=clock,expected_socket=sock)
+            try:
+                name, body = q.get(timeout=self._response_timeout(timeout_s))
+            except queue.Empty:
+>               raise CtraderError(f"cTrader timeout waiting for {message} response")
+E               vati.execution.ctrader.transport.CtraderError: cTrader timeout waiting for ProtoOAGetTrendbarsReq response
+
+trading/vati/execution/ctrader/transport.py:259: CtraderError
+_ test_actual_inactive_native_history_uses_catalog_id_without_loading_execution_metadata[4] _
+
+self = <vati.execution.ctrader.transport.CtraderReadTransport object at 0x7ff773f71670>
+message = 'ProtoOAGetTrendbarsReq'
+values = {'ctidTraderAccountId': 12345, 'fromTimestamp': 120000, 'toTimestamp': 300000, 'period': 'M1', ...}
+timeout_s = None, expires_at_ms = None, clock = None
+
+    def _request(self, message, values, *, timeout_s=None, expires_at_ms=None, clock=None):
+        self.connect()
+        cid = uuid.uuid4().hex[:16]
+        q: queue.Queue = queue.Queue()
+        with self._state_lock:
+            sock = self._sock
+            if sock is None or not self._alive:
+                raise CtraderError("cTrader disconnected before request registration")
+            self._pending[cid] = q
+            self._pending_sockets[cid] = sock
+        try:
+            payload=SCHEMA.wrap(message, values, cid)
+            if expires_at_ms is None:
+                self._send_frame(payload, expected_socket=sock)
+            else:
+                self._send_frame(payload,expires_at_ms=expires_at_ms,clock=clock,expected_socket=sock)
+            try:
+>               name, body = q.get(timeout=self._response_timeout(timeout_s))
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+trading/vati/execution/ctrader/transport.py:257: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <queue.Queue object at 0x7ff773f70170>, block = True, timeout = 3
+
+    def get(self, block=True, timeout=None):
+        '''Remove and return an item from the queue.
+    
+        If optional args 'block' is true and 'timeout' is None (the default),
+        block if necessary until an item is available. If 'timeout' is
+        a non-negative number, it blocks at most 'timeout' seconds and raises
+        the Empty exception if no item was available within that time.
+        Otherwise ('block' is false), return an item if one is immediately
+        available, else raise the Empty exception ('timeout' is ignored
+        in that case).
+        '''
+        with self.not_empty:
+            if not block:
+                if not self._qsize():
+                    raise Empty
+            elif timeout is None:
+                while not self._qsize():
+                    self.not_empty.wait()
+            elif timeout < 0:
+                raise ValueError("'timeout' must be a non-negative number")
+            else:
+                endtime = time() + timeout
+                while not self._qsize():
+                    remaining = endtime - time()
+                    if remaining <= 0.0:
+>                       raise Empty
+E                       _queue.Empty
+
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/queue.py:179: Empty
+
+During handling of the above exception, another exception occurred:
+
+native_id = 4
+
+    @pytest.mark.parametrize('native_id',[2,3,4])
+    def test_actual_inactive_native_history_uses_catalog_id_without_loading_execution_metadata(native_id):
+        expected=identity(native_id,wire=True);peer=HistoryPeer();parent=make_adapter(peer);parent.clock=lambda:NOW
+        reader=parent.market_reader()
+        try:
+>           original,observed=reader.read_window(expected,timeframe='M1',from_ms=120000,to_ms=300000)
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+trading/tests/test_native_read_identity.py:94: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+trading/vati/execution/ctrader/adapter.py:261: in read_window
+    return self.read_identity_window(expected_contract,timeframe=timeframe,from_ms=from_ms,to_ms=to_ms)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/execution/ctrader/adapter.py:302: in read_identity_window
+    observed=read_trendbars(source,original.series_label,timeframe,from_ms=from_ms,to_ms=to_ms,count=2001)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/execution/ctrader/feed.py:78: in read_trendbars
+    name, response = adapter.transport.call("ProtoOAGetTrendbarsReq", {
+trading/vati/execution/ctrader/transport.py:494: in call
+    result = super().call(message, values, timeout_s=timeout_s)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/execution/ctrader/transport.py:231: in call
+    return self._request(message,values,timeout_s=timeout_s)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <vati.execution.ctrader.transport.CtraderReadTransport object at 0x7ff773f71670>
+message = 'ProtoOAGetTrendbarsReq'
+values = {'ctidTraderAccountId': 12345, 'fromTimestamp': 120000, 'toTimestamp': 300000, 'period': 'M1', ...}
+timeout_s = None, expires_at_ms = None, clock = None
+
+    def _request(self, message, values, *, timeout_s=None, expires_at_ms=None, clock=None):
+        self.connect()
+        cid = uuid.uuid4().hex[:16]
+        q: queue.Queue = queue.Queue()
+        with self._state_lock:
+            sock = self._sock
+            if sock is None or not self._alive:
+                raise CtraderError("cTrader disconnected before request registration")
+            self._pending[cid] = q
+            self._pending_sockets[cid] = sock
+        try:
+            payload=SCHEMA.wrap(message, values, cid)
+            if expires_at_ms is None:
+                self._send_frame(payload, expected_socket=sock)
+            else:
+                self._send_frame(payload,expires_at_ms=expires_at_ms,clock=clock,expected_socket=sock)
+            try:
+                name, body = q.get(timeout=self._response_timeout(timeout_s))
+            except queue.Empty:
+>               raise CtraderError(f"cTrader timeout waiting for {message} response")
+E               vati.execution.ctrader.transport.CtraderError: cTrader timeout waiting for ProtoOAGetTrendbarsReq response
+
+trading/vati/execution/ctrader/transport.py:259: CtraderError
+_ test_actual_collector_persists_inactive_source_and_replay_never_reads_native_again _
+
+self = <vati.execution.ctrader.transport.CtraderReadTransport object at 0x7ff773fecc50>
+message = 'ProtoOAGetTrendbarsReq'
+values = {'ctidTraderAccountId': 12345, 'fromTimestamp': 120000, 'toTimestamp': 300000, 'period': 'M1', ...}
+timeout_s = None, expires_at_ms = None, clock = None
+
+    def _request(self, message, values, *, timeout_s=None, expires_at_ms=None, clock=None):
+        self.connect()
+        cid = uuid.uuid4().hex[:16]
+        q: queue.Queue = queue.Queue()
+        with self._state_lock:
+            sock = self._sock
+            if sock is None or not self._alive:
+                raise CtraderError("cTrader disconnected before request registration")
+            self._pending[cid] = q
+            self._pending_sockets[cid] = sock
+        try:
+            payload=SCHEMA.wrap(message, values, cid)
+            if expires_at_ms is None:
+                self._send_frame(payload, expected_socket=sock)
+            else:
+                self._send_frame(payload,expires_at_ms=expires_at_ms,clock=clock,expected_socket=sock)
+            try:
+>               name, body = q.get(timeout=self._response_timeout(timeout_s))
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+trading/vati/execution/ctrader/transport.py:257: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <queue.Queue object at 0x7ff773fed760>, block = True, timeout = 3
+
+    def get(self, block=True, timeout=None):
+        '''Remove and return an item from the queue.
+    
+        If optional args 'block' is true and 'timeout' is None (the default),
+        block if necessary until an item is available. If 'timeout' is
+        a non-negative number, it blocks at most 'timeout' seconds and raises
+        the Empty exception if no item was available within that time.
+        Otherwise ('block' is false), return an item if one is immediately
+        available, else raise the Empty exception ('timeout' is ignored
+        in that case).
+        '''
+        with self.not_empty:
+            if not block:
+                if not self._qsize():
+                    raise Empty
+            elif timeout is None:
+                while not self._qsize():
+                    self.not_empty.wait()
+            elif timeout < 0:
+                raise ValueError("'timeout' must be a non-negative number")
+            else:
+                endtime = time() + timeout
+                while not self._qsize():
+                    remaining = endtime - time()
+                    if remaining <= 0.0:
+>                       raise Empty
+E                       _queue.Empty
+
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/queue.py:179: Empty
+
+During handling of the above exception, another exception occurred:
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-406/test_actual_collector_persists0')
+
+    def test_actual_collector_persists_inactive_source_and_replay_never_reads_native_again(tmp_path):
+        expected=identity(wire=True);book=NativeMarketArchive(tmp_path/'native',clock=lambda:NOW+1000)
+        peers=[]
+        def factory():
+            peer=HistoryPeer();peers.append(peer);parent=make_adapter(peer);parent.clock=lambda:NOW
+            return parent.market_reader()
+        collector=NativeMarketCollector(book,factory)
+        try:
+>           first=collector.collect('inactive-history',expected,timeframe='M1',from_ms=120000,to_ms=300000)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+trading/tests/test_native_read_identity.py:114: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+trading/vati/market_data/native_collector.py:39: in collect
+    contract,observation=reader.read_window(expected_contract,timeframe=timeframe,from_ms=from_ms,to_ms=to_ms)
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/execution/ctrader/adapter.py:261: in read_window
+    return self.read_identity_window(expected_contract,timeframe=timeframe,from_ms=from_ms,to_ms=to_ms)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/execution/ctrader/adapter.py:302: in read_identity_window
+    observed=read_trendbars(source,original.series_label,timeframe,from_ms=from_ms,to_ms=to_ms,count=2001)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/execution/ctrader/feed.py:78: in read_trendbars
+    name, response = adapter.transport.call("ProtoOAGetTrendbarsReq", {
+trading/vati/execution/ctrader/transport.py:494: in call
+    result = super().call(message, values, timeout_s=timeout_s)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/execution/ctrader/transport.py:231: in call
+    return self._request(message,values,timeout_s=timeout_s)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <vati.execution.ctrader.transport.CtraderReadTransport object at 0x7ff773fecc50>
+message = 'ProtoOAGetTrendbarsReq'
+values = {'ctidTraderAccountId': 12345, 'fromTimestamp': 120000, 'toTimestamp': 300000, 'period': 'M1', ...}
+timeout_s = None, expires_at_ms = None, clock = None
+
+    def _request(self, message, values, *, timeout_s=None, expires_at_ms=None, clock=None):
+        self.connect()
+        cid = uuid.uuid4().hex[:16]
+        q: queue.Queue = queue.Queue()
+        with self._state_lock:
+            sock = self._sock
+            if sock is None or not self._alive:
+                raise CtraderError("cTrader disconnected before request registration")
+            self._pending[cid] = q
+            self._pending_sockets[cid] = sock
+        try:
+            payload=SCHEMA.wrap(message, values, cid)
+            if expires_at_ms is None:
+                self._send_frame(payload, expected_socket=sock)
+            else:
+                self._send_frame(payload,expires_at_ms=expires_at_ms,clock=clock,expected_socket=sock)
+            try:
+                name, body = q.get(timeout=self._response_timeout(timeout_s))
+            except queue.Empty:
+>               raise CtraderError(f"cTrader timeout waiting for {message} response")
+E               vati.execution.ctrader.transport.CtraderError: cTrader timeout waiting for ProtoOAGetTrendbarsReq response
+
+trading/vati/execution/ctrader/transport.py:259: CtraderError
+=============================== warnings summary ===============================
+trading/tests/test_native_read_identity.py::test_actual_inactive_native_history_uses_catalog_id_without_loading_execution_metadata[2]
+  /workspace/van-backend-venv-20261025/lib/python3.12/site-packages/_pytest/threadexception.py:58: PytestUnhandledThreadExceptionWarning: Exception in thread Thread-1 (serve)
+  
+  Traceback (most recent call last):
+    File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/threading.py", line 1075, in _bootstrap_inner
+      self.run()
+    File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/threading.py", line 1012, in run
+      self._target(*self._args, **self._kwargs)
+    File "/workspace/van-review-2026-10-18/publish/trading/tests/test_ctrader.py", line 87, in serve
+      self.handle(name, body, cid)
+    File "/workspace/van-review-2026-10-18/publish/trading/tests/test_native_read_identity.py", line 84, in handle
+      return self.send('ProtoOAGetTrendbarsRes',bar_response(ctidTraderAccountId=12345,
+                                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    File "/workspace/van-review-2026-10-18/publish/trading/tests/test_ctrader_feed_contract.py", line 22, in response
+      return dict(ctidTraderAccountId=123, symbolId=12, period='M1',
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  TypeError: dict() got multiple values for keyword argument 'ctidTraderAccountId'
+  
+  Enable tracemalloc to get traceback where the object was allocated.
+  See https://docs.pytest.org/en/stable/how-to/capture-warnings.html#resource-warnings for more info.
+    warnings.warn(pytest.PytestUnhandledThreadExceptionWarning(msg))
+
+trading/tests/test_native_read_identity.py::test_actual_inactive_native_history_uses_catalog_id_without_loading_execution_metadata[3]
+  /workspace/van-backend-venv-20261025/lib/python3.12/site-packages/_pytest/threadexception.py:58: PytestUnhandledThreadExceptionWarning: Exception in thread Thread-3 (serve)
+  
+  Traceback (most recent call last):
+    File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/threading.py", line 1075, in _bootstrap_inner
+      self.run()
+    File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/threading.py", line 1012, in run
+      self._target(*self._args, **self._kwargs)
+    File "/workspace/van-review-2026-10-18/publish/trading/tests/test_ctrader.py", line 87, in serve
+      self.handle(name, body, cid)
+    File "/workspace/van-review-2026-10-18/publish/trading/tests/test_native_read_identity.py", line 84, in handle
+      return self.send('ProtoOAGetTrendbarsRes',bar_response(ctidTraderAccountId=12345,
+                                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    File "/workspace/van-review-2026-10-18/publish/trading/tests/test_ctrader_feed_contract.py", line 22, in response
+      return dict(ctidTraderAccountId=123, symbolId=12, period='M1',
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  TypeError: dict() got multiple values for keyword argument 'ctidTraderAccountId'
+  
+  Enable tracemalloc to get traceback where the object was allocated.
+  See https://docs.pytest.org/en/stable/how-to/capture-warnings.html#resource-warnings for more info.
+    warnings.warn(pytest.PytestUnhandledThreadExceptionWarning(msg))
+
+trading/tests/test_native_read_identity.py::test_actual_inactive_native_history_uses_catalog_id_without_loading_execution_metadata[4]
+  /workspace/van-backend-venv-20261025/lib/python3.12/site-packages/_pytest/threadexception.py:58: PytestUnhandledThreadExceptionWarning: Exception in thread Thread-5 (serve)
+  
+  Traceback (most recent call last):
+    File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/threading.py", line 1075, in _bootstrap_inner
+      self.run()
+    File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/threading.py", line 1012, in run
+      self._target(*self._args, **self._kwargs)
+    File "/workspace/van-review-2026-10-18/publish/trading/tests/test_ctrader.py", line 87, in serve
+      self.handle(name, body, cid)
+    File "/workspace/van-review-2026-10-18/publish/trading/tests/test_native_read_identity.py", line 84, in handle
+      return self.send('ProtoOAGetTrendbarsRes',bar_response(ctidTraderAccountId=12345,
+                                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    File "/workspace/van-review-2026-10-18/publish/trading/tests/test_ctrader_feed_contract.py", line 22, in response
+      return dict(ctidTraderAccountId=123, symbolId=12, period='M1',
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  TypeError: dict() got multiple values for keyword argument 'ctidTraderAccountId'
+  
+  Enable tracemalloc to get traceback where the object was allocated.
+  See https://docs.pytest.org/en/stable/how-to/capture-warnings.html#resource-warnings for more info.
+    warnings.warn(pytest.PytestUnhandledThreadExceptionWarning(msg))
+
+trading/tests/test_native_read_identity.py::test_actual_collector_persists_inactive_source_and_replay_never_reads_native_again
+  /workspace/van-backend-venv-20261025/lib/python3.12/site-packages/_pytest/threadexception.py:58: PytestUnhandledThreadExceptionWarning: Exception in thread Thread-7 (serve)
+  
+  Traceback (most recent call last):
+    File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/threading.py", line 1075, in _bootstrap_inner
+      self.run()
+    File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/threading.py", line 1012, in run
+      self._target(*self._args, **self._kwargs)
+    File "/workspace/van-review-2026-10-18/publish/trading/tests/test_ctrader.py", line 87, in serve
+      self.handle(name, body, cid)
+    File "/workspace/van-review-2026-10-18/publish/trading/tests/test_native_read_identity.py", line 84, in handle
+      return self.send('ProtoOAGetTrendbarsRes',bar_response(ctidTraderAccountId=12345,
+                                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    File "/workspace/van-review-2026-10-18/publish/trading/tests/test_ctrader_feed_contract.py", line 22, in response
+      return dict(ctidTraderAccountId=123, symbolId=12, period='M1',
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  TypeError: dict() got multiple values for keyword argument 'ctidTraderAccountId'
+  
+  Enable tracemalloc to get traceback where the object was allocated.
+  See https://docs.pytest.org/en/stable/how-to/capture-warnings.html#resource-warnings for more info.
+    warnings.warn(pytest.PytestUnhandledThreadExceptionWarning(msg))
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED trading/tests/test_native_read_identity.py::test_unknown_or_unusable_display_label_retains_native_identity_without_truncating_data[]
+FAILED trading/tests/test_native_read_identity.py::test_actual_inactive_native_history_uses_catalog_id_without_loading_execution_metadata[2]
+FAILED trading/tests/test_native_read_identity.py::test_actual_inactive_native_history_uses_catalog_id_without_loading_execution_metadata[3]
+FAILED trading/tests/test_native_read_identity.py::test_actual_inactive_native_history_uses_catalog_id_without_loading_execution_metadata[4]
+FAILED trading/tests/test_native_read_identity.py::test_actual_collector_persists_inactive_source_and_replay_never_reads_native_again
+5 failed, 121 passed, 4 warnings in 20.46s

@@ -256,6 +256,9 @@ class CtraderAdapter:
                     raise VenueUnavailable('cTrader native contract changed; refresh required')
                 return name,original
             def read_window(self,expected_contract,*,timeframe,from_ms,to_ms):
+                from vati.execution.ctrader.read_identity import NativeReadIdentity
+                if isinstance(expected_contract,NativeReadIdentity):
+                    return self.read_identity_window(expected_contract,timeframe=timeframe,from_ms=from_ms,to_ms=to_ms)
                 from vati.execution.ctrader.feed import read_trendbars,native_integer,PERIOD,MAX_TIMESTAMP
                 if not isinstance(timeframe,str) or timeframe not in PERIOD:
                     raise VenueUnavailable('cTrader market reader timeframe invalid')
@@ -264,6 +267,40 @@ class CtraderAdapter:
                 name,original=self._select(expected_contract)
                 observed=read_trendbars(adapter,name,timeframe,from_ms=from_ms,to_ms=to_ms,count=2001)
                 transport.check_budget()  # Includes native observation parsing.
+                return original,observed
+            def read_identity_window(self,expected_identity,*,timeframe,from_ms,to_ms):
+                from types import SimpleNamespace
+                from vati.execution.ctrader.read_identity import NativeReadIdentity
+                from vati.execution.ctrader.feed import read_trendbars,native_integer,PERIOD,MAX_TIMESTAMP
+                if not isinstance(expected_identity,NativeReadIdentity):
+                    raise VenueUnavailable('cTrader readonly source identity required')
+                if not isinstance(timeframe,str) or timeframe not in PERIOD:
+                    raise VenueUnavailable('cTrader readonly source timeframe invalid')
+                native_integer(from_ms,maximum=MAX_TIMESTAMP)
+                native_integer(to_ms,minimum=from_ms,maximum=MAX_TIMESTAMP)
+                scope=expected_identity.native_scope
+                catalog_scope={key:value for key,value in scope.items() if key!='native_symbol_id'}
+                catalog=self.read_catalog(catalog_scope)
+                try:
+                    original=NativeReadIdentity.capture(catalog,scope['native_symbol_id'])
+                    if original.revision!=expected_identity.revision:
+                        raise ValueError('native source catalog identity changed')
+                except (KeyError,TypeError,ValueError) as error:
+                    raise VenueUnavailable('cTrader readonly source identity changed or unavailable') from error
+                connection=getattr(transport,'connection_id',None)
+                def current():
+                    if connection!=getattr(transport,'connection_id',None) or not adapter._auth_is_current():
+                        raise VenueUnavailable('cTrader readonly source session changed')
+                def symbol(name):
+                    if name!=original.series_label:
+                        raise VenueUnavailable('cTrader readonly source label differs')
+                    # Only the two fields consumed by the native history codec.
+                    # No invented order-volume or execution metadata is supplied.
+                    return SimpleNamespace(symbol_id=scope['native_symbol_id'],contract_revision=original.revision)
+                source=SimpleNamespace(_ensure_auth=current,ctid_trader_account_id=scope['native_account_id'],
+                    symbol=symbol,transport=transport,clock=adapter.clock)
+                observed=read_trendbars(source,original.series_label,timeframe,from_ms=from_ms,to_ms=to_ms,count=2001)
+                current();transport.check_budget()
                 return original,observed
             def read_quote(self,expected_contract,*,max_age_ms=5000):
                 from vati.execution.ctrader.feed import native_integer

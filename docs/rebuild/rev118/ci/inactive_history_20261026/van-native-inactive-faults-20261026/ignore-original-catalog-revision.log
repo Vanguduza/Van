@@ -1,0 +1,18 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+____________ test_changed_catalog_refuses_before_historical_request ____________
+
+    def test_changed_catalog_refuses_before_historical_request():
+        expected=identity(wire=True)
+        body=expected.body();body['metadata']['catalog_metadata']['response']['archivedSymbol'][0]['name']='different'
+        changed=NativeReadIdentity(canonical_json(body['metadata']),NOW)
+        peer=HistoryPeer();parent=make_adapter(peer);parent.clock=lambda:NOW;reader=parent.market_reader()
+        try:
+>           with pytest.raises(VenueUnavailable,match='changed or unavailable'):
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           Failed: DID NOT RAISE VenueUnavailable
+
+trading/tests/test_native_read_identity.py:151: Failed
+=========================== short test summary info ============================
+FAILED trading/tests/test_native_read_identity.py::test_changed_catalog_refuses_before_historical_request
+1 failed in 0.82s

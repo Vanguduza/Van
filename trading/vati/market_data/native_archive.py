@@ -16,6 +16,7 @@ from decimal import Decimal, localcontext
 from vati.core.canonical import canonical_hash, canonical_json
 from vati.core.file_lock import exclusive_state_lock
 from vati.execution.ctrader.contracts import NativeSymbolContract
+from vati.execution.ctrader.read_identity import NativeReadIdentity
 from vati.execution.ctrader.feed import MAX_TIMESTAMP, PERIOD, TrendbarObservation, native_integer
 from vati.execution.ctrader.transport import DEMO_HOST, LIVE_HOST
 from vati.market_data.feeds.lake import BarLake
@@ -42,7 +43,9 @@ def _scope(scope):
 
 
 def _capture(contract_body, observation):
-    contract = NativeSymbolContract.from_body(contract_body)
+    contract = (NativeReadIdentity.from_body(contract_body)
+        if isinstance(contract_body,dict) and contract_body.get('schema')=='vati.ctrader-read-identity-capture/1'
+        else NativeSymbolContract.from_body(contract_body))
     scope = contract.native_scope
     if not isinstance(observation, dict):
         raise ValueError('native bar observation unavailable')
@@ -67,7 +70,7 @@ def _capture(contract_body, observation):
             raise ValueError('native bar observation product/account mismatch')
     if body['transport_host'] != scope['transport_host'] or body['contract_revision'] != contract.revision:
         raise ValueError('native bar observation contract mismatch')
-    name = contract.metadata['light']['symbolName']
+    name = contract.series_label if isinstance(contract,NativeReadIdentity) else contract.metadata['light']['symbolName']
     if (not isinstance(body['symbol'], str) or body['symbol'] != body['symbol'].upper()
             or body['symbol'].replace('/', '') != name.upper().replace('/', '')):
         raise ValueError('native bar observation alias mismatch')
@@ -142,6 +145,7 @@ def _capture(contract_body, observation):
 
 class NativeMarketArchive:
     observation_type = TrendbarObservation
+    contract_types = (NativeSymbolContract, NativeReadIdentity)
     _validate_capture = staticmethod(_capture)
 
     @staticmethod
@@ -249,7 +253,7 @@ class NativeMarketArchive:
         try:
             if not isinstance(request_id, str) or not REQUEST_ID.fullmatch(request_id):
                 raise ValueError('native market request identity invalid')
-            if not isinstance(contract, NativeSymbolContract) or not isinstance(observation, self.observation_type):
+            if not isinstance(contract, self.contract_types) or not isinstance(observation, self.observation_type):
                 raise ValueError('native market captured objects required')
             original_contract, original_observation = contract.body(), observation.body()
             _, scope, timeframe = self._validate_capture(original_contract, original_observation)

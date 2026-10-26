@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="3" skipped="0" tests="3" time="0.588" timestamp="2026-10-26T10:30:20.727236+00:00" hostname="2c5a245e39f1"><testcase classname="trading.tests.test_native_read_identity" name="test_unknown_or_unusable_display_label_retains_native_identity_without_truncating_data[]" time="0.025"><failure message="assert ('' == '' and 'UNKNOWN' == 'CTRADER_NATIVE_2'&#10; +  where '' = NativeReadIdentity(metadata_json='{&quot;catalog_metadata&quot;:{&quot;include_archived_symbols&quot;:true,&quot;protocol_schema_sha256&quot;:&quot;3f452...&quot;:&quot;demo.ctraderapi.com&quot;}},&quot;native_symbol_id&quot;:2,&quot;schema&quot;:&quot;vati.ctrader-read-identity/1&quot;}', received_at_ms=1800000000000).display_name&#10;  &#10;  - CTRADER_NATIVE_2&#10;  + UNKNOWN)">name = ''
+
+    @pytest.mark.parametrize('name',['','/','x'*300])
+    def test_unknown_or_unusable_display_label_retains_native_identity_without_truncating_data(name):
+        body=response();body['symbol'][1]['symbolName']=name
+        value=NativeReadIdentity.capture(captured(response=body),2)
+&gt;       assert value.display_name==name and value.series_label=='CTRADER_NATIVE_2'
+E       assert ('' == '' and 'UNKNOWN' == 'CTRADER_NATIVE_2'
+E        +  where '' = NativeReadIdentity(metadata_json='{"catalog_metadata":{"include_archived_symbols":true,"protocol_schema_sha256":"3f452...":"demo.ctraderapi.com"}},"native_symbol_id":2,"schema":"vati.ctrader-read-identity/1"}', received_at_ms=1800000000000).display_name
+E         
+E         - CTRADER_NATIVE_2
+E         + UNKNOWN)
+
+trading/tests/test_native_read_identity.py:50: AssertionError</failure></testcase><testcase classname="trading.tests.test_native_read_identity" name="test_unknown_or_unusable_display_label_retains_native_identity_without_truncating_data[/]" time="0.005"><failure message="AssertionError: assert ('/' == '/'&#10;  &#10;    / and '/' == 'CTRADER_NATIVE_2'&#10;  &#10;  - CTRADER_NATIVE_2&#10;  + /)">name = '/'
+
+    @pytest.mark.parametrize('name',['','/','x'*300])
+    def test_unknown_or_unusable_display_label_retains_native_identity_without_truncating_data(name):
+        body=response();body['symbol'][1]['symbolName']=name
+        value=NativeReadIdentity.capture(captured(response=body),2)
+&gt;       assert value.display_name==name and value.series_label=='CTRADER_NATIVE_2'
+E       AssertionError: assert ('/' == '/'
+E         
+E           / and '/' == 'CTRADER_NATIVE_2'
+E         
+E         - CTRADER_NATIVE_2
+E         + /)
+
+trading/tests/test_native_read_identity.py:50: AssertionError</failure></testcase><testcase classname="trading.tests.test_native_read_identity" name="test_unknown_or_unusable_display_label_retains_native_identity_without_truncating_data[xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx]" time="0.004"><failure message="AssertionError: assert ('xxxxxxxxxxxx...xxxxxxxxxxxxx' == 'xxxxxxxxxxxx...xxxxxxxxxxxxx'&#10;  &#10;  Skipping 289 identical leading characters in diff, use -v to show&#10;    xxxxxxxxxxx and 'xxxxxxxxxxxx...xxxxxxxxxxxxx' == 'CTRADER_NATIVE_2'&#10;  &#10;  - CTRADER_NATIVE_2&#10;  + xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx)">name = 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx...xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'
+
+    @pytest.mark.parametrize('name',['','/','x'*300])
+    def test_unknown_or_unusable_display_label_retains_native_identity_without_truncating_data(name):
+        body=response();body['symbol'][1]['symbolName']=name
+        value=NativeReadIdentity.capture(captured(response=body),2)
+&gt;       assert value.display_name==name and value.series_label=='CTRADER_NATIVE_2'
+E       AssertionError: assert ('xxxxxxxxxxxx...xxxxxxxxxxxxx' == 'xxxxxxxxxxxx...xxxxxxxxxxxxx'
+E         
+E         Skipping 289 identical leading characters in diff, use -v to show
+E           xxxxxxxxxxx and 'xxxxxxxxxxxx...xxxxxxxxxxxxx' == 'CTRADER_NATIVE_2'
+E         
+E         - CTRADER_NATIVE_2
+E         + xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx)
+
+trading/tests/test_native_read_identity.py:50: AssertionError</failure></testcase></testsuite></testsuites>

@@ -158,7 +158,9 @@
         "backend/VAN-ML-PKT-005_SOURCE_PARQUET.md",
         "receipts/SOURCE_PARQUET_20261026.json",
         "backend/VAN-ML-PKT-005_DATASET_SOURCE_RESOLUTION.md",
-        "receipts/DATASET_SOURCE_RESOLUTION_20261026.json"
+        "receipts/DATASET_SOURCE_RESOLUTION_20261026.json",
+        "backend/BE-008_005_INACTIVE_HISTORY.md",
+        "receipts/INACTIVE_HISTORY_SOURCE_20261026.json"
       ]
     },
     "BE-014": {
@@ -218,7 +220,9 @@
         "backend/VAN-ML-PKT-005_SOURCE_PARQUET.md",
         "receipts/SOURCE_PARQUET_20261026.json",
         "backend/VAN-ML-PKT-005_DATASET_SOURCE_RESOLUTION.md",
-        "receipts/DATASET_SOURCE_RESOLUTION_20261026.json"
+        "receipts/DATASET_SOURCE_RESOLUTION_20261026.json",
+        "backend/BE-008_005_INACTIVE_HISTORY.md",
+        "receipts/INACTIVE_HISTORY_SOURCE_20261026.json"
       ]
     }
   },
@@ -292,26 +296,26 @@
     "note": "Opus unavailable; owner transferred build to Codex. No independent reviewer identity is inferred from another model or session."
   },
   "checkpoint": {
-    "updated_utc": "2026-10-26T09:39:59.702059+00:00",
+    "updated_utc": "2026-10-26T10:39:22.036648+00:00",
     "branch": "ccr-9e07e1af-8mgz1p",
     "base": "b02075f327ea8180ab6d269eba358cf8c5479878",
     "background_jobs": [
       {
         "kind": "van-ci",
-        "id": 40296406059,
-        "head": "4637de1bb67e311a4ba2cf75600d50dd77c62955",
+        "id": 40302746537,
+        "head": "83f2688a6414b5e81358c051418d0fe85ee0a3fb",
         "state": "TERMINAL_FAILURE_17_PUBLIC_SOURCE_SUCCESS_TWO_UNWAIVED_PREREQUISITES",
         "not_acceptance": true
       },
       {
         "kind": "van-forecast-runtime-source",
-        "id": 40296406014,
-        "head": "4637de1bb67e311a4ba2cf75600d50dd77c62955",
-        "state": "SUCCESS_BOTH_NATIVE_PARQUET_AND_CPU_FIXTURE_JOBS;actual2archives/hash/source/cleanup verified",
+        "id": 40302746531,
+        "head": "83f2688a6414b5e81358c051418d0fe85ee0a3fb",
+        "state": "SUCCESS_BOTH_JOBS;68nativeParquetcases0skip/audit0;6upstreamfixturecases/3coldmodels/232versions/bothworkersremoved;actual2archives/source/controller/report/treeverified",
         "not_acceptance": true
       }
     ],
-    "last_validation": "Exact canonical DatasetManifest schema registered in existing owner; bounded immutable candidate parser checks strict fields/references,exact fractional chronology,ASCII RFC3339,correction-policy boundaries and duplicate CLI keys. Existing slow workflow/CLI checks and source inspector resolve original native Parquet bytes,source manifest,row IDs/count/order and actual local availability through the existing archive owner; compound source objects,canonical scope/origin,creation/current policy,calendar/universe/feature/target/consent/entitlement remain explicitly unresolved.375 final actual-PG-available regressions0skip/audit0/exacthash/ownedfixtureindependentlyabsent;9final assertion faults caught/restored with163positive/restored controls;108rebuild. Original duplicate-key/Unicode regressions and malformed first test envelope retained. No complete DatasetManifest or unit admission.",
+    "last_validation": "Separate immutable NativeReadIdentity anchors hidden/nameless LIGHT/archived native IDs to the exact original catalog without execution fields or grants. Independent readonly reader refreshes exact catalog revision,queries native ID without active execution metadata/protective cache,and fences post-parse session/budget. Existing archive/collector/cold windows/Parquet consume the explicit new source type;quote owner and enabled NativeSymbolContract guard preserved.518final actual-PG-available regressions0skip/audit0/all final source/test hashesmatch/ownedfixtureindependentlyabsent;8assertionfaultscaught/restored/37controls;108rebuild. Fixture keyword/invalidarchivedname/exceptionbase failures retained. No provider/native/unit/owner/production/economic/S24 acceptance.",
     "environment_notes": [
       "clone must be unshallowed (git fetch --unshallow) and PR heads fetched (+refs/pull/*/head:refs/remotes/origin/pr/*) before pre001.py",
       "pytest from backend/requirements.txt in a venv",
@@ -360,7 +364,8 @@
     "2026-10-26T02:29:43.145840+00:00: Explicit RSS2 profile wired through actual session/account news builders;original raw bytes/profile/parser/capture identity durably serialized/read back before parsing,stable first capture across replay,actual later ingress availability across lost commit replies. GUID/publisher declared lineage,explicit relevance,partial item diagnostics,DTD refusal/capacity/clock guards;cold raw integrity/visible-record checks and independent owner snapshots.768final actualPG0skip/audit0/exact hashes;185controls+8PGdeselected executedfixture;8supplemental faults caught/restored. Actual saved public Fed20-headline replay stable;latestOct16 remainsold;no native qualification.11baseline+2product followup failures and1stale-fixture error retained. Full BE014 remains IN_PROGRESS. Exact752 hostedCI terminal17public success/2unwaived mandatory failure;gateway5775/7skip,media198,trading3495/1DDSskip,PG26,voice117,monitor258,374canonicalmutants caughtonce,Android18/4emulator,browser1547/1+foreground11/UID1/firewall10. SignedMQLcompile exactsource verified. accepted0.",
     "2026-10-26T08:54:55.365480+00:00: Derived native bar Parquet publication and cold original-source readback preserve exact prices, scope/row/revision identity and unknown native facts. Existing archive/file-lock/atomic writer owners reused; stable original-window replay and lost-ACK/orphan reconciliation; global output capacity refuses before write. Existing slow research workflow/CLI wired; ledger closed on all exits; actual T0 rejects Arrow. 48 native source controls,70 public research controls,302 final actual-PG-available regressions,0 skips/audit violations/exact source hashes/owned fixture independently absent;8 supplemental assertion faults caught/restored;108 rebuild passes. Selections overlap. Full DatasetManifest, real rights/consent, universe/calendar/gap and licensed joins remain open;no formal acceptance.",
     "2026-10-26T09:35:22.715614+00:00: Exact canonical DatasetManifest schema registered in existing owner; bounded immutable candidate parser checks strict fields/references,exact fractional chronology,ASCII RFC3339,correction-policy boundaries and duplicate CLI keys. Existing slow workflow/CLI checks and source inspector resolve original native Parquet bytes,source manifest,row IDs/count/order and actual local availability through the existing archive owner; compound source objects,canonical scope/origin,creation/current policy,calendar/universe/feature/target/consent/entitlement remain explicitly unresolved.375 final actual-PG-available regressions0skip/audit0/exacthash/ownedfixtureindependentlyabsent;9final assertion faults caught/restored with163positive/restored controls;108rebuild. Original duplicate-key/Unicode regressions and malformed first test envelope retained. No complete DatasetManifest or unit admission.",
-    "2026-10-26T09:39:59.702059+00:00: Exact4637main40296406059 is terminalFAILURE:17publicjobsSUCCESS,2unwaived missing-private-DDS-key/trusted-main-checker failures. All15selected raw archives checkedsize/SHA/CRC/path/symlink;gateway5775passes/7declaredskips,media198,trading3744passes/1privateDDSskip,PG26,voice117,monitor258,browser1547/1+11/1/10,Androidemulator18/4,374canonicalidentities caughtonce/383edits. Exactforecast/Parquet40296406014bothjobsSUCCESS/actual48Parquetpasses0skip/audit0 and6upstreamfixedfixtures+3separatecoldmodelsparity0,232versions,bothcontainersremoved. These qualify published4637source components only,not this later uncommittedDatasetManifest/source-inspection packet or native/unit/production/S24."
+    "2026-10-26T09:39:59.702059+00:00: Exact4637main40296406059 is terminalFAILURE:17publicjobsSUCCESS,2unwaived missing-private-DDS-key/trusted-main-checker failures. All15selected raw archives checkedsize/SHA/CRC/path/symlink;gateway5775passes/7declaredskips,media198,trading3744passes/1privateDDSskip,PG26,voice117,monitor258,browser1547/1+11/1/10,Androidemulator18/4,374canonicalidentities caughtonce/383edits. Exactforecast/Parquet40296406014bothjobsSUCCESS/actual48Parquetpasses0skip/audit0 and6upstreamfixedfixtures+3separatecoldmodelsparity0,232versions,bothcontainersremoved. These qualify published4637source components only,not this later uncommittedDatasetManifest/source-inspection packet or native/unit/production/S24.",
+    "2026-10-26T10:39:22.036648+00:00: Separate immutable NativeReadIdentity anchors hidden/nameless LIGHT/archived native IDs to the exact original catalog without execution fields or grants. Independent readonly reader refreshes exact catalog revision,queries native ID without active execution metadata/protective cache,and fences post-parse session/budget. Existing archive/collector/cold windows/Parquet consume the explicit new source type;quote owner and enabled NativeSymbolContract guard preserved.518final actual-PG-available regressions0skip/audit0/all final source/test hashesmatch/ownedfixtureindependentlyabsent;8assertionfaultscaught/restored/37controls;108rebuild. Fixture keyword/invalidarchivedname/exceptionbase failures retained. No provider/native/unit/owner/production/economic/S24 acceptance."
   ],
   "obligations": "obligations/OBLIGATIONS.json: preserved observations with source implementation evidence and explicit remaining native/unit obligations.",
   "pre002_challenge": "pre002/challenge/: 324 author-prepared dossiers (AUTHOR_CHALLENGED_PENDING_INDEPENDENT_REVIEW)",
@@ -413,6 +418,6 @@
       "evidence": "ci/MUTATION_CORPUS_c2a27848.json"
     }
   ],
-  "current_action": "Canonical manifest/stagedbackup/genuinehookcommit/committedbaselineverify; original4637mainCI nowterminal; normalpushaftercommittedbaselineverify. Continue full ML005 immutable publication,actualrights/consent/universe/calendar/licensedjoins and inactive-instrument readonly source history without loosening execution. 0formalacceptances.",
-  "updated_at_utc": "2026-10-26T09:39:59.702059+00:00"
+  "current_action": "Manifest/stagedbackup/genuinehookcommit/committedbaselineverify/normalpush/readback now83fCIterminal;inspectnewexactCI. Continue fullML005 actualDatasetManifestpublication andcanonicalscope/rights/consent/universe/calendar/licensedjoins,readonly source scheduling/capacity andremainingcanonicalbackendprogramme. All131units andoriginalcontracts preserved;0formalacceptance.",
+  "updated_at_utc": "2026-10-26T10:39:22.036648+00:00"
 }

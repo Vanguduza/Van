@@ -2,6 +2,7 @@
 from vati.core.canonical import canonical_hash
 from vati.core.file_lock import exclusive_state_lock
 from vati.execution.ctrader.contracts import NativeSymbolContract
+from vati.execution.ctrader.read_identity import NativeReadIdentity
 from vati.execution.ctrader.feed import MAX_TIMESTAMP, PERIOD, native_integer
 from vati.market_data.native_archive import NativeArchiveError, REQUEST_ID
 
@@ -12,7 +13,7 @@ class NativeMarketCollector:
 
     def collect(self, request_id, expected_contract, *, timeframe, from_ms, to_ms):
         if (not isinstance(request_id,str) or not REQUEST_ID.fullmatch(request_id)
-                or not isinstance(expected_contract,NativeSymbolContract)):
+                or not isinstance(expected_contract,(NativeSymbolContract,NativeReadIdentity))):
             raise NativeArchiveError('native market collection identity or contract invalid')
         scope=expected_contract.native_scope
         if not isinstance(timeframe,str) or timeframe not in PERIOD:
