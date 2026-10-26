@@ -173,7 +173,9 @@
         "backend/BE-014_NEWS_PUBLISHER_LINEAGE.md",
         "receipts/NEWS_PUBLISHER_LINEAGE_SOURCE_20261026.json",
         "backend/BE-014_RSS_SOURCE_SNAPSHOTS.md",
-        "receipts/RSS_SOURCE_SNAPSHOTS_20261026.json"
+        "receipts/RSS_SOURCE_SNAPSHOTS_20261026.json",
+        "backend/BE-014_RSS_CLI_SOURCE.md",
+        "receipts/NEWS_CLI_SOURCE_20261026.json"
       ]
     },
     "VAN-ML-PKT-004": {
@@ -188,7 +190,9 @@
       ],
       "evidence": [
         "backend/VAN-ML-PKT-004_ISOLATED_SOURCE_RUNTIME.md",
-        "receipts/FORECAST_RUNTIME_SOURCE_20261026.json"
+        "receipts/FORECAST_RUNTIME_SOURCE_20261026.json",
+        "backend/VAN-ML-PKT-004_WHEEL_REPRODUCIBILITY.md",
+        "receipts/FORECAST_BUILD_RECOVERY_20261026.json"
       ]
     }
   },
@@ -262,19 +266,26 @@
     "note": "Opus unavailable; owner transferred build to Codex. No independent reviewer identity is inferred from another model or session."
   },
   "checkpoint": {
-    "updated_utc": "2026-10-26T04:59:32.685390+00:00",
+    "updated_utc": "2026-10-26T05:26:36.282873+00:00",
     "branch": "ccr-9e07e1af-8mgz1p",
     "base": "b02075f327ea8180ab6d269eba358cf8c5479878",
     "background_jobs": [
       {
         "kind": "van-ci",
-        "id": 40260186741,
-        "head": "1f4ecbf748b870b3187ac33ccdac734e375e541c",
-        "state": "TERMINAL_FAILURE_17_PUBLIC_JOBS_PASS_TWO_UNWAIVED_PREREQUISITE_FAILURES",
+        "id": 40272681203,
+        "head": "156473fcaf28c5407fc558d04de09c3643e34a9c",
+        "state": "IN_PROGRESS_TWO_KNOWN_UNWAIVED_PREREQUISITE_FAILURES",
+        "not_acceptance": true
+      },
+      {
+        "kind": "van-forecast-runtime-source",
+        "id": 40272681283,
+        "head": "156473fcaf28c5407fc558d04de09c3643e34a9c",
+        "state": "FAILED_STRICT_GYM_WHEEL_HASH_MODELS_SKIPPED",
         "not_acceptance": true
       }
     ],
-    "last_validation": "Locked232 upstream CPU distributions;actual isolated Qlib/LightGBM,XGBoost,NHiTS train/export/load,Optuna/Feast/MLflow native readback;separate cold inference10/10/2rows/parity0/no training;kernel2CPU6GiB256pids/offline/readOnly/noNewPriv and independent cleanup. Real serve import guard reproduces9before failures. Complete startup/authority selection116actualPG passes/0skip/audit0. 49current guard controlsPASS after exact restoration;8 supplemental assertion-caught faults/0errors/skips/audit0,not canonical374. 108rebuild checksPASS;owner/frontend registry no drift;canonical374/383 registry preflight0findings(not execution);consolidation0findings. ML004 remains IN_PROGRESS/NOT_ISSUED;fresh committed Docker recipe and native/independent/economic/device qualification remain.",
+    "last_validation": "ExistingRSSCLI uses shared single-batch durable file path/cold recovery;originalJSON optionalledger/counts preserved;typedpartial/unavailable/recovery/lostACK states and ownledgerclose.9beforefailures/1legacypositive;114local+4PGdeselected executed in832actualPG0skip/audit0/exact hashes/ownedfixture absent.5supplemental faults caught/restored after15controls. Published156forecastrecipeFAILEDstrictGymhash beforemodels;fixedseed artifact buildsbyte-identical62ee4cd5...,212othermembers match original,metadata multiset/order only;hashesremainstrict,newfullimage/model executionPENDING. Finalcanonicalchecks108PASS,owner/frontendno drift,canonical374/383mutationregistry0findings(notexecution),consolidation0findings.",
     "environment_notes": [
       "clone must be unshallowed (git fetch --unshallow) and PR heads fetched (+refs/pull/*/head:refs/remotes/origin/pr/*) before pre001.py",
       "pytest from backend/requirements.txt in a venv",
@@ -284,7 +295,7 @@
       "Python 3.12 venv from backend/requirements.lock for CI-equivalent runs; stream-host venv from deploy/van-browser-stream/requirements.lock",
       "Desktop Commander read-only device listing was refused by the session permission policy; native readback prepared as pre003/NATIVE_READBACK_REQUEST.md"
     ],
-    "next_action": "Finish source fault controls and canonical checks;commit through genuinehooks,verify committedbaseline,push normally,qualify exact sourceDockerrecipe on freshhostedworker;continue original backend programme. No admission claimed.",
+    "next_action": "Finalcanonicalchecks/manifest/backup,genuinehookcommit/baselineverify;keep156mainCI untilterminalbefore nextnormalpush;qualify newfixedseedprofile onfreshhostedworker,thencontinuecanonicalbackendwork.",
     "previous_head": "02ff56b996a7b894a7e3e070f2d90ef197db5aaa",
     "current_packet": "BE014 RSS2 original source snapshots;768final actualPG/185controls/8faults;component only",
     "ci_credential_capability": "receipts/CI_CREDENTIAL_CAPABILITY_20261024.json: repo admin metadata available, integration secret/deploy-key reads403; no credential changes.",
@@ -300,7 +311,7 @@
       "evidence": "receipts/NATIVE_MQL_COMPILED_752d265b.json",
       "qualification": "Signed compiler and deliberate invalid probe/source blob/artifact checks;network-blocked SDK initialization only;no account/broker/order/deployment/device acceptance"
     },
-    "head": "1f4ecbf748b870b3187ac33ccdac734e375e541c"
+    "head": "156473fcaf28c5407fc558d04de09c3643e34a9c"
   },
   "observations": [
     "OBS-001 BE-002 debug cleartext",
@@ -373,6 +384,6 @@
       "evidence": "ci/MUTATION_CORPUS_c2a27848.json"
     }
   ],
-  "current_action": "Finish source fault controls and canonical checks;commit through genuinehooks,verify committedbaseline,push normally,qualify exact sourceDockerrecipe on freshhostedworker;continue original backend programme. No admission claimed.",
-  "updated_at_utc": "2026-10-26T04:59:32.685390+00:00"
+  "current_action": "Finalcanonicalchecks/manifest/backup,genuinehookcommit/baselineverify;keep156mainCI untilterminalbefore nextnormalpush;qualify newfixedseedprofile onfreshhostedworker,thencontinuecanonicalbackendwork.",
+  "updated_at_utc": "2026-10-26T05:26:36.282873+00:00"
 }

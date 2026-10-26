@@ -1,0 +1,2 @@
+FROM scratch
+COPY --from=van-ml004-research-probe:20261026 /wheelhouse/gym-0.26.2-py3-none-any.whl /gym-0.26.2-py3-none-any.whl

@@ -11,3 +11,12 @@ Original30s creation/import failure and R1curated creation timeout remain failed
 No original unit,PRE/BQ/F15/BG001,production,owner,profitability or S24 acceptance issued. ML004formal prerequisites unchanged. Remaining includes fresh locked wheel reproducibility/native authorized host/architecture/capacity/bootstrap,granted jobs/dataset entitlement,production parser/artifact lifecycle and all subsequent forecast units. Preserve original plan and all131units. Known RSS CLI news-ingest compatibility gap remains to wire through existing adapter;fullBE014 and scheduled values/provider source admission remain open.
 
 Next:finish fault/canonical checks and verifiedbackup,genuinecommit/committedbaselineverification/normalpush;inspect newforecastworkflow and every existingexact-headjob to terminal. Fix actual failures,retain original evidence;continue dependency-ready backend work. Do not touch /workspace/Van or redesign frontend beforeBG001.
+
+
+## 2026-10-26T05:26:36.282873+00:00 — RSS CLI and strict wheel recovery
+
+ExistingRSSCLI uses shared single-batch durable file path/cold recovery;originalJSON optionalledger/counts preserved;typedpartial/unavailable/recovery/lostACK states and ownledgerclose.9beforefailures/1legacypositive;114local+4PGdeselected executed in832actualPG0skip/audit0/exact hashes/ownedfixture absent.5supplemental faults caught/restored after15controls. Published156forecastrecipeFAILEDstrictGymhash beforemodels;fixedseed artifact buildsbyte-identical62ee4cd5...,212othermembers match original,metadata multiset/order only;hashesremainstrict,newfullimage/model executionPENDING.
+
+Next: finish canonicalchecks/manifest/verifiedbackup and genuinecommit/committedledger;normalpush after156mainCIterminal;newexacthostedforecastbuild must executeallmodelsteps before any newprofilequalification. Continue originalbackendprogramme;allindependent/owner/native/production/S24acceptances unissued.
+
+ Finalcanonicalchecks108PASS,owner/frontendno drift,canonical374/383mutationregistry0findings(notexecution),consolidation0findings.

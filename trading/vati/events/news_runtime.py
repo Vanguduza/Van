@@ -131,7 +131,18 @@ def _health(news,ledger,scope,state,now_ms,*,source_ref=None,input_hash=None,row
 
 
 def build_news_file(config,*,ledger,scope,now_ms,registry=None):
-    if not config:return None
+    news,_result=ingest_news_file(config,ledger=ledger,scope=scope,now_ms=now_ms,registry=registry)
+    return news
+
+
+def ingest_news_file(config,*,ledger,scope,now_ms,registry=None):
+    """Recover and consume one file batch, retaining its original counts/outcome.
+
+    Service construction and the existing CLI share this path. Recovery errors
+    cannot become a fresh empty history or an acknowledged zero-record batch.
+    """
+    counts={'accepted':0,'duplicates':0,'skipped':0}
+    if not config:return None,counts
     options_error=None
     try:options=_options(config)
     except Exception as exc:
@@ -145,13 +156,14 @@ def build_news_file(config,*,ledger,scope,now_ms,registry=None):
         news=NewsIngress(ledger=ledger,registry=registry,sources=options['sources'],
             relevance_window_ms=options['relevance_window_ms'])
         news._file_recovery_required=True
-        _health(news,ledger,scope,'RECOVERY_UNAVAILABLE',now_ms,error=type(exc).__name__,persist=False)
-        return news
+        health=_health(news,ledger,scope,'RECOVERY_UNAVAILABLE',now_ms,error=type(exc).__name__,persist=False)
+        return news,{'accepted':None,'duplicates':None,'skipped':None,
+            'reconcile_required':True,'source_health':health}
     if options_error is not None:
-        _health(news,ledger,scope,'CONFIGURATION_ERROR',now_ms,error=type(options_error).__name__)
-        return news
-    refresh_news_file(news,config,ledger=ledger,scope=scope,now_ms=now_ms,registry=registry)
-    return news
+        health=_health(news,ledger,scope,'CONFIGURATION_ERROR',now_ms,error=type(options_error).__name__)
+        return news,counts|{'source_health':health}
+    result=refresh_news_file(news,config,ledger=ledger,scope=scope,now_ms=now_ms,registry=registry)
+    return news,result
 
 
 def refresh_news_file(news,config,*,ledger,scope,now_ms,registry=None):

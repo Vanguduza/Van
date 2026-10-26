@@ -8,7 +8,7 @@ COPY verify_wheels.py ./verify_wheels.py
 # The caller provides the current combined CA as a BuildKit secret. No session
 # certificate, registry credential, broker profile or repository is copied.
 RUN --mount=type=secret,id=system_ca,required=true \
-    export SOURCE_DATE_EPOCH=315532800 PIP_DISABLE_PIP_VERSION_CHECK=1 PIP_PROGRESS_BAR=off && \
+    export SOURCE_DATE_EPOCH=315532800 PYTHONHASHSEED=0 PIP_DISABLE_PIP_VERSION_CHECK=1 PIP_PROGRESS_BAR=off && \
     PIP_CERT=/run/secrets/system_ca python -m pip install --no-deps --require-hashes \
       -r locks/build-cp312-linux-x86_64.lock && \
     PIP_CERT=/run/secrets/system_ca python -m pip wheel --no-deps --no-build-isolation --require-hashes \

@@ -768,3 +768,12 @@ Next: Finish final RSS source documentary checks/manifest/verified backup and ge
 ## 2026-10-26T04:59:32.685390+00:00 — isolated forecast source component
 
 Locked232 upstream CPU distributions;actual isolated Qlib/LightGBM,XGBoost,NHiTS train/export/load,Optuna/Feast/MLflow native readback;separate cold inference10/10/2rows/parity0/no training;kernel2CPU6GiB256pids/offline/readOnly/noNewPriv and independent cleanup. Real serve import guard reproduces9before failures. Complete startup/authority selection116actualPG passes/0skip/audit0. 49current guard controlsPASS after exact restoration;8 supplemental assertion-caught faults/0errors/skips/audit0,not canonical374. 108rebuild checksPASS;owner/frontend registry no drift;canonical374/383 registry preflight0findings(not execution);consolidation0findings. ML004 remains IN_PROGRESS/NOT_ISSUED;fresh committed Docker recipe and native/independent/economic/device qualification remain. See CHECKPOINT_20261026_FORECAST_RUNTIME.md.
+
+
+## 2026-10-26T05:26:36.282873+00:00 — RSS CLI and strict wheel recovery
+
+ExistingRSSCLI uses shared single-batch durable file path/cold recovery;originalJSON optionalledger/counts preserved;typedpartial/unavailable/recovery/lostACK states and ownledgerclose.9beforefailures/1legacypositive;114local+4PGdeselected executed in832actualPG0skip/audit0/exact hashes/ownedfixture absent.5supplemental faults caught/restored after15controls. Published156forecastrecipeFAILEDstrictGymhash beforemodels;fixedseed artifact buildsbyte-identical62ee4cd5...,212othermembers match original,metadata multiset/order only;hashesremainstrict,newfullimage/model executionPENDING.
+
+Next: finish canonicalchecks/manifest/verifiedbackup and genuinecommit/committedledger;normalpush after156mainCIterminal;newexacthostedforecastbuild must executeallmodelsteps before any newprofilequalification. Continue originalbackendprogramme;allindependent/owner/native/production/S24acceptances unissued.
+
+ Finalcanonicalchecks108PASS,owner/frontendno drift,canonical374/383mutationregistry0findings(notexecution),consolidation0findings.

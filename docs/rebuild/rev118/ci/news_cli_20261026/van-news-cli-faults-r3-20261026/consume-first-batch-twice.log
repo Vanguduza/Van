@@ -1,0 +1,106 @@
+F....F..F..FF..                                                          [100%]
+=================================== FAILURES ===================================
+_____ test_actual_cli_records_original_rss_and_reports_first_batch_counts ______
+
+files = (PosixPath('/tmp/pytest-of-agent/pytest-325/test_actual_cli_records_origin0/news.json'), PosixPath('/tmp/pytest-of-age...records_origin0/feed.xml'), PosixPath('/tmp/pytest-of-agent/pytest-325/test_actual_cli_records_origin0/ledger.sqlite'))
+capsys = <_pytest.capture.CaptureFixture object at 0x7f9946406420>
+
+    def test_actual_cli_records_original_rss_and_reports_first_batch_counts(files,capsys):
+        code,report=invoke(files,capsys)
+>       assert code==0 and report['counts']=={'accepted':1,'duplicates':0,'skipped':0}
+E       AssertionError: assert (0 == 0 and {'accepted': ... 'skipped': 0} == {'accepted': ... 'skipped': 0}
+E         
+E         Omitting 1 identical items, use -vv to show
+E         Differing items:
+E         {'accepted': 0} != {'accepted': 1}
+E         {'duplicates': 1} != {'duplicates': 0}
+E         Use -v to get more diff)
+
+trading/tests/test_news_cli_source.py:32: AssertionError
+______ test_actual_cli_preserves_valid_neighbor_and_nonzero_partial_exit _______
+
+files = (PosixPath('/tmp/pytest-of-agent/pytest-325/test_actual_cli_preserves_vali0/news.json'), PosixPath('/tmp/pytest-of-age...preserves_vali0/feed.xml'), PosixPath('/tmp/pytest-of-agent/pytest-325/test_actual_cli_preserves_vali0/ledger.sqlite'))
+capsys = <_pytest.capture.CaptureFixture object at 0x7f99462fa5a0>
+
+    def test_actual_cli_preserves_valid_neighbor_and_nonzero_partial_exit(files,capsys):
+        valid=rss().decode().split('<item>',1)[1].split('</item>',1)[0]
+        files[1].write_bytes(rss('<item>'+valid+'</item><item><title>Missing original identity</title></item>'))
+        code,report=invoke(files,capsys)
+>       assert code==1 and report['counts']=={'accepted':1,'duplicates':0,'skipped':1}
+E       AssertionError: assert (1 == 1 and {'accepted': ... 'skipped': 2} == {'accepted': ... 'skipped': 1}
+E         
+E         Differing items:
+E         {'accepted': 0} != {'accepted': 1}
+E         {'duplicates': 1} != {'duplicates': 0}
+E         {'skipped': 2} != {'skipped': 1}
+E         Use -v to get more diff)
+
+trading/tests/test_news_cli_source.py:75: AssertionError
+___ test_actual_cli_lost_raw_ack_remains_unknown_and_recovers_original_once ____
+
+files = (PosixPath('/tmp/pytest-of-agent/pytest-325/test_actual_cli_lost_raw_ack_r0/news.json'), PosixPath('/tmp/pytest-of-age...lost_raw_ack_r0/feed.xml'), PosixPath('/tmp/pytest-of-agent/pytest-325/test_actual_cli_lost_raw_ack_r0/ledger.sqlite'))
+capsys = <_pytest.capture.CaptureFixture object at 0x7f99462f94f0>
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f99462fb6b0>
+
+    def test_actual_cli_lost_raw_ack_remains_unknown_and_recovers_original_once(files,capsys,monkeypatch):
+        atomic=Ledger.atomic
+        @contextmanager
+        def lost(self):
+            outer=not self._conn.in_transaction;before=self.count(EventKind.NEWS_SOURCE_SNAPSHOT)
+            with atomic(self):yield self
+            if outer and self.count(EventKind.NEWS_SOURCE_SNAPSHOT)>before:raise OSError('fixture raw commit ACK lost')
+        with monkeypatch.context() as patch:
+            patch.setattr(Ledger,'atomic',lost);code,report=invoke(files,capsys)
+>       assert code==2 and report['source_health']['state']=='PUBLICATION_UNKNOWN'
+E       assert (0 == 2)
+
+trading/tests/test_news_cli_source.py:101: AssertionError
+_____ test_actual_cli_corrupt_original_refuses_recreation_or_health_append _____
+
+files = (PosixPath('/tmp/pytest-of-agent/pytest-325/test_actual_cli_corrupt_origin0/news.json'), PosixPath('/tmp/pytest-of-age...corrupt_origin0/feed.xml'), PosixPath('/tmp/pytest-of-agent/pytest-325/test_actual_cli_corrupt_origin0/ledger.sqlite'))
+capsys = <_pytest.capture.CaptureFixture object at 0x7f99462ec4d0>
+
+    def test_actual_cli_corrupt_original_refuses_recreation_or_health_append(files,capsys):
+        assert invoke(files,capsys)[0]==0
+        with closing(Ledger(files[2])) as ledger:
+            ledger._conn.execute("UPDATE events SET payload_json='{}' WHERE kind='NEWS_SOURCE_SNAPSHOT'")
+            before=ledger.count();head=ledger.head()
+        code,report=invoke(files,capsys,now=NOW+100)
+        assert code==2 and report['source_health']['state']=='RECOVERY_UNAVAILABLE'
+>       assert report['counts']=={'accepted':None,'duplicates':None,'skipped':None} and report['reconcile_required'] is True
+E       AssertionError: assert ({'accepted': ... 'skipped': 0} == {'accepted': ...kipped': None}
+E         
+E         Differing items:
+E         {'accepted': 0} != {'accepted': None}
+E         {'duplicates': 0} != {'duplicates': None}
+E         {'skipped': 0} != {'skipped': None}
+E         Use -v to get more diff)
+
+trading/tests/test_news_cli_source.py:138: AssertionError
+_ test_actual_cli_health_publication_failure_does_not_acknowledge_ready_source _
+
+files = (PosixPath('/tmp/pytest-of-agent/pytest-325/test_actual_cli_health_publica0/news.json'), PosixPath('/tmp/pytest-of-age...health_publica0/feed.xml'), PosixPath('/tmp/pytest-of-agent/pytest-325/test_actual_cli_health_publica0/ledger.sqlite'))
+capsys = <_pytest.capture.CaptureFixture object at 0x7f9946312150>
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f99462ef740>
+
+    def test_actual_cli_health_publication_failure_does_not_acknowledge_ready_source(files,capsys,monkeypatch):
+        append=Ledger.append
+        def fail(self,event):
+            if event.kind is EventKind.MARKET_DATA_HEALTH:raise OSError('fixture health storage unavailable')
+            return append(self,event)
+        monkeypatch.setattr(Ledger,'append',fail)
+        code,report=invoke(files,capsys)
+        assert code==2 and report['source_health']['state']=='PERSISTENCE_UNAVAILABLE'
+>       assert report['source_health']['durable_health']=='UNKNOWN' and report['counts']['accepted']==1
+E       AssertionError: assert ('UNKNOWN' == 'UNKNOWN'
+E         
+E           UNKNOWN and 0 == 1)
+
+trading/tests/test_news_cli_source.py:150: AssertionError
+=========================== short test summary info ============================
+FAILED trading/tests/test_news_cli_source.py::test_actual_cli_records_original_rss_and_reports_first_batch_counts
+FAILED trading/tests/test_news_cli_source.py::test_actual_cli_preserves_valid_neighbor_and_nonzero_partial_exit
+FAILED trading/tests/test_news_cli_source.py::test_actual_cli_lost_raw_ack_remains_unknown_and_recovers_original_once
+FAILED trading/tests/test_news_cli_source.py::test_actual_cli_corrupt_original_refuses_recreation_or_health_append
+FAILED trading/tests/test_news_cli_source.py::test_actual_cli_health_publication_failure_does_not_acknowledge_ready_source
+5 failed, 10 passed in 1.19s

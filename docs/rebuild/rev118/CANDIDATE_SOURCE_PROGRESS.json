@@ -1,6 +1,6 @@
 {
   "schema": "van.rebuild.candidate-source-progress/1",
-  "updated_at_utc": "2026-10-26T04:59:32.685390+00:00",
+  "updated_at_utc": "2026-10-26T05:26:36.282873+00:00",
   "programme": "Rev1.18; original 131 unit IDs and dependencies retained",
   "authority": "auth-20261022-owner-autonomous-candidate-build",
   "meaning": "Candidate source progress is separate from admitted unit acceptance. Independent certificates, owner decisions, live effects and release gates remain unissued. No unit is declared complete by this record.",
@@ -828,6 +828,10 @@
         {
           "description": "Explicit RSS2 profile wired through actual session/account news builders;original raw bytes/profile/parser/capture identity durably serialized/read back before parsing,stable first capture across replay,actual later ingress availability across lost commit replies. GUID/publisher declared lineage,explicit relevance,partial item diagnostics,DTD refusal/capacity/clock guards;cold raw integrity/visible-record checks and independent owner snapshots.768final actualPG0skip/audit0/exact hashes;185controls+8PGdeselected executedfixture;8supplemental faults caught/restored. Actual saved public Fed20-headline replay stable;latestOct16 remainsold;no native qualification.11baseline+2product followup failures and1stale-fixture error retained. Full BE014 remains IN_PROGRESS.",
           "evidence": "backend/BE-014_RSS_SOURCE_SNAPSHOTS.md; receipts/RSS_SOURCE_SNAPSHOTS_20261026.json"
+        },
+        {
+          "description": "ExistingRSSCLI uses shared single-batch durable file path/cold recovery;originalJSON optionalledger/counts preserved;typedpartial/unavailable/recovery/lostACK states and ownledgerclose.9beforefailures/1legacypositive;114local+4PGdeselected executed in832actualPG0skip/audit0/exact hashes/ownedfixture absent.5supplemental faults caught/restored after15controls. Published156forecastrecipeFAILEDstrictGymhash beforemodels;fixedseed artifact buildsbyte-identical62ee4cd5...,212othermembers match original,metadata multiset/order only;hashesremainstrict,newfullimage/model executionPENDING.",
+          "evidence": "backend/BE-014_RSS_CLI_SOURCE.md; receipts/NEWS_CLI_SOURCE_20261026.json"
         }
       ]
     },
@@ -1327,6 +1331,10 @@
         {
           "description": "Locked232 upstream CPU distributions;actual isolated Qlib/LightGBM,XGBoost,NHiTS train/export/load,Optuna/Feast/MLflow native readback;separate cold inference10/10/2rows/parity0/no training;kernel2CPU6GiB256pids/offline/readOnly/noNewPriv and independent cleanup. Real serve import guard reproduces9before failures. Complete startup/authority selection116actualPG passes/0skip/audit0. 49current guard controlsPASS after exact restoration;8 supplemental assertion-caught faults/0errors/skips/audit0,not canonical374. 108rebuild checksPASS;owner/frontend registry no drift;canonical374/383 registry preflight0findings(not execution);consolidation0findings. ML004 remains IN_PROGRESS/NOT_ISSUED;fresh committed Docker recipe and native/independent/economic/device qualification remain.",
           "evidence": "backend/VAN-ML-PKT-004_ISOLATED_SOURCE_RUNTIME.md; receipts/FORECAST_RUNTIME_SOURCE_20261026.json"
+        },
+        {
+          "description": "Exact156hostedimagebuildFAILEDstrictGymwheelhash beforemodelsteps;2fixed-seed actualbuildsbyte-identical,other212members unchanged vs original,dependency-metadata order only. Newcandidatewheelprofilepinned;upstream/buildtools/versions unchanged;freshimage/model native runPENDING;unit remainsIN_PROGRESS.",
+          "evidence": "backend/VAN-ML-PKT-004_WHEEL_REPRODUCIBILITY.md; receipts/FORECAST_BUILD_RECOVERY_20261026.json"
         }
       ]
     },

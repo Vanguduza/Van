@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="5" skipped="0" tests="15" time="1.150" timestamp="2026-10-26T05:22:00.777680+00:00" hostname="2c5a245e39f1"><testcase classname="trading.tests.test_news_cli_source" name="test_actual_cli_records_original_rss_and_reports_first_batch_counts" time="0.136"><failure message="AssertionError: assert (0 == 0 and {'accepted': ... 'skipped': 0} == {'accepted': ... 'skipped': 0}&#10;  &#10;  Omitting 1 identical items, use -vv to show&#10;  Differing items:&#10;  {'accepted': 0} != {'accepted': 1}&#10;  {'duplicates': 1} != {'duplicates': 0}&#10;  Use -v to get more diff)">files = (PosixPath('/tmp/pytest-of-agent/pytest-325/test_actual_cli_records_origin0/news.json'), PosixPath('/tmp/pytest-of-age...records_origin0/feed.xml'), PosixPath('/tmp/pytest-of-agent/pytest-325/test_actual_cli_records_origin0/ledger.sqlite'))
+capsys = &lt;_pytest.capture.CaptureFixture object at 0x7f9946406420&gt;
+
+    def test_actual_cli_records_original_rss_and_reports_first_batch_counts(files,capsys):
+        code,report=invoke(files,capsys)
+&gt;       assert code==0 and report['counts']=={'accepted':1,'duplicates':0,'skipped':0}
+E       AssertionError: assert (0 == 0 and {'accepted': ... 'skipped': 0} == {'accepted': ... 'skipped': 0}
+E         
+E         Omitting 1 identical items, use -vv to show
+E         Differing items:
+E         {'accepted': 0} != {'accepted': 1}
+E         {'duplicates': 1} != {'duplicates': 0}
+E         Use -v to get more diff)
+
+trading/tests/test_news_cli_source.py:32: AssertionError</failure></testcase><testcase classname="trading.tests.test_news_cli_source" name="test_actual_cli_cold_replay_reuses_original_capture_without_growing_ledger" time="0.039" /><testcase classname="trading.tests.test_news_cli_source" name="test_actual_cli_uses_explicit_file_override_in_snapshot_profile" time="0.018" /><testcase classname="trading.tests.test_news_cli_source" name="test_actual_cli_retains_bad_original_bytes_and_refuses_empty_success[&lt;rss&gt;&lt;broken]" time="0.013" /><testcase classname="trading.tests.test_news_cli_source" name="test_actual_cli_retains_bad_original_bytes_and_refuses_empty_success[&lt;!DOCTYPE rss SYSTEM &quot;file:///etc/passwd&quot;&gt;&lt;rss/&gt;]" time="0.024" /><testcase classname="trading.tests.test_news_cli_source" name="test_actual_cli_preserves_valid_neighbor_and_nonzero_partial_exit" time="0.020"><failure message="AssertionError: assert (1 == 1 and {'accepted': ... 'skipped': 2} == {'accepted': ... 'skipped': 1}&#10;  &#10;  Differing items:&#10;  {'accepted': 0} != {'accepted': 1}&#10;  {'duplicates': 1} != {'duplicates': 0}&#10;  {'skipped': 2} != {'skipped': 1}&#10;  Use -v to get more diff)">files = (PosixPath('/tmp/pytest-of-agent/pytest-325/test_actual_cli_preserves_vali0/news.json'), PosixPath('/tmp/pytest-of-age...preserves_vali0/feed.xml'), PosixPath('/tmp/pytest-of-agent/pytest-325/test_actual_cli_preserves_vali0/ledger.sqlite'))
+capsys = &lt;_pytest.capture.CaptureFixture object at 0x7f99462fa5a0&gt;
+
+    def test_actual_cli_preserves_valid_neighbor_and_nonzero_partial_exit(files,capsys):
+        valid=rss().decode().split('&lt;item&gt;',1)[1].split('&lt;/item&gt;',1)[0]
+        files[1].write_bytes(rss('&lt;item&gt;'+valid+'&lt;/item&gt;&lt;item&gt;&lt;title&gt;Missing original identity&lt;/title&gt;&lt;/item&gt;'))
+        code,report=invoke(files,capsys)
+&gt;       assert code==1 and report['counts']=={'accepted':1,'duplicates':0,'skipped':1}
+E       AssertionError: assert (1 == 1 and {'accepted': ... 'skipped': 2} == {'accepted': ... 'skipped': 1}
+E         
+E         Differing items:
+E         {'accepted': 0} != {'accepted': 1}
+E         {'duplicates': 1} != {'duplicates': 0}
+E         {'skipped': 2} != {'skipped': 1}
+E         Use -v to get more diff)
+
+trading/tests/test_news_cli_source.py:75: AssertionError</failure></testcase><testcase classname="trading.tests.test_news_cli_source" name="test_rss_cli_requires_original_durable_sink_before_reading_feed" time="0.008" /><testcase classname="trading.tests.test_news_cli_source" name="test_unknown_cli_input_format_is_explicit_configuration_error" time="0.013" /><testcase classname="trading.tests.test_news_cli_source" name="test_actual_cli_lost_raw_ack_remains_unknown_and_recovers_original_once" time="0.035"><failure message="assert (0 == 2)">files = (PosixPath('/tmp/pytest-of-agent/pytest-325/test_actual_cli_lost_raw_ack_r0/news.json'), PosixPath('/tmp/pytest-of-age...lost_raw_ack_r0/feed.xml'), PosixPath('/tmp/pytest-of-agent/pytest-325/test_actual_cli_lost_raw_ack_r0/ledger.sqlite'))
+capsys = &lt;_pytest.capture.CaptureFixture object at 0x7f99462f94f0&gt;
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x7f99462fb6b0&gt;
+
+    def test_actual_cli_lost_raw_ack_remains_unknown_and_recovers_original_once(files,capsys,monkeypatch):
+        atomic=Ledger.atomic
+        @contextmanager
+        def lost(self):
+            outer=not self._conn.in_transaction;before=self.count(EventKind.NEWS_SOURCE_SNAPSHOT)
+            with atomic(self):yield self
+            if outer and self.count(EventKind.NEWS_SOURCE_SNAPSHOT)&gt;before:raise OSError('fixture raw commit ACK lost')
+        with monkeypatch.context() as patch:
+            patch.setattr(Ledger,'atomic',lost);code,report=invoke(files,capsys)
+&gt;       assert code==2 and report['source_health']['state']=='PUBLICATION_UNKNOWN'
+E       assert (0 == 2)
+
+trading/tests/test_news_cli_source.py:101: AssertionError</failure></testcase><testcase classname="trading.tests.test_news_cli_source" name="test_json_cli_keeps_optional_ledger_and_original_counts" time="0.012" /><testcase classname="trading.tests.test_news_cli_source" name="test_actual_cli_missing_file_retains_history_with_nonzero_unavailable_state" time="0.023" /><testcase classname="trading.tests.test_news_cli_source" name="test_actual_cli_corrupt_original_refuses_recreation_or_health_append" time="0.062"><failure message="AssertionError: assert ({'accepted': ... 'skipped': 0} == {'accepted': ...kipped': None}&#10;  &#10;  Differing items:&#10;  {'accepted': 0} != {'accepted': None}&#10;  {'duplicates': 0} != {'duplicates': None}&#10;  {'skipped': 0} != {'skipped': None}&#10;  Use -v to get more diff)">files = (PosixPath('/tmp/pytest-of-agent/pytest-325/test_actual_cli_corrupt_origin0/news.json'), PosixPath('/tmp/pytest-of-age...corrupt_origin0/feed.xml'), PosixPath('/tmp/pytest-of-agent/pytest-325/test_actual_cli_corrupt_origin0/ledger.sqlite'))
+capsys = &lt;_pytest.capture.CaptureFixture object at 0x7f99462ec4d0&gt;
+
+    def test_actual_cli_corrupt_original_refuses_recreation_or_health_append(files,capsys):
+        assert invoke(files,capsys)[0]==0
+        with closing(Ledger(files[2])) as ledger:
+            ledger._conn.execute("UPDATE events SET payload_json='{}' WHERE kind='NEWS_SOURCE_SNAPSHOT'")
+            before=ledger.count();head=ledger.head()
+        code,report=invoke(files,capsys,now=NOW+100)
+        assert code==2 and report['source_health']['state']=='RECOVERY_UNAVAILABLE'
+&gt;       assert report['counts']=={'accepted':None,'duplicates':None,'skipped':None} and report['reconcile_required'] is True
+E       AssertionError: assert ({'accepted': ... 'skipped': 0} == {'accepted': ...kipped': None}
+E         
+E         Differing items:
+E         {'accepted': 0} != {'accepted': None}
+E         {'duplicates': 0} != {'duplicates': None}
+E         {'skipped': 0} != {'skipped': None}
+E         Use -v to get more diff)
+
+trading/tests/test_news_cli_source.py:138: AssertionError</failure></testcase><testcase classname="trading.tests.test_news_cli_source" name="test_actual_cli_health_publication_failure_does_not_acknowledge_ready_source" time="0.023"><failure message="AssertionError: assert ('UNKNOWN' == 'UNKNOWN'&#10;  &#10;    UNKNOWN and 0 == 1)">files = (PosixPath('/tmp/pytest-of-agent/pytest-325/test_actual_cli_health_publica0/news.json'), PosixPath('/tmp/pytest-of-age...health_publica0/feed.xml'), PosixPath('/tmp/pytest-of-agent/pytest-325/test_actual_cli_health_publica0/ledger.sqlite'))
+capsys = &lt;_pytest.capture.CaptureFixture object at 0x7f9946312150&gt;
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x7f99462ef740&gt;
+
+    def test_actual_cli_health_publication_failure_does_not_acknowledge_ready_source(files,capsys,monkeypatch):
+        append=Ledger.append
+        def fail(self,event):
+            if event.kind is EventKind.MARKET_DATA_HEALTH:raise OSError('fixture health storage unavailable')
+            return append(self,event)
+        monkeypatch.setattr(Ledger,'append',fail)
+        code,report=invoke(files,capsys)
+        assert code==2 and report['source_health']['state']=='PERSISTENCE_UNAVAILABLE'
+&gt;       assert report['source_health']['durable_health']=='UNKNOWN' and report['counts']['accepted']==1
+E       AssertionError: assert ('UNKNOWN' == 'UNKNOWN'
+E         
+E           UNKNOWN and 0 == 1)
+
+trading/tests/test_news_cli_source.py:150: AssertionError</failure></testcase><testcase classname="trading.tests.test_news_cli_source" name="test_actual_cli_valid_empty_channel_is_only_an_empty_declared_snapshot" time="0.012" /><testcase classname="trading.tests.test_news_cli_source" name="test_actual_cli_closes_its_own_durable_connection" time="0.018" /></testsuite></testsuites>

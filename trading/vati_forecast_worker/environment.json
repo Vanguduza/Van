@@ -19,7 +19,7 @@
   },
   "shared_native_runtime": "Pinned CPU Torch initializes its bundled OpenMP before LightGBM;verified by actual imports/train/export/load fixture",
   "source_lock_sha256": "16e8f762d29ddac81b4b7024f9e5c675a988815c45b62fbbc97032bccd1db0c5",
-  "wheel_lock_sha256": "cb7658179c9fc4b2f27b48af512f3e74f282b34187a63c095a610cb2fbef1b1e",
+  "wheel_lock_sha256": "1c607285f9cad2f82dafce1494b8056e1c4ceb23956166bf351d602111b80283",
   "architecture_matrix": [
     {
       "platform": "linux-x86_64",
@@ -36,5 +36,10 @@
   "data_scope": "FIXTURE",
   "execution_authority": false,
   "native_admission": false,
-  "economic_admission": false
+  "economic_admission": false,
+  "gym_build": {
+    "source_date_epoch": 315532800,
+    "python_hash_seed": 0,
+    "reproducibility": "Two independent local upstream builds match;original wheel differs only in metadata ordering/RECORD;fresh hosted model execution pending"
+  }
 }

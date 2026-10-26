@@ -203,26 +203,44 @@ def cmd_news_ingest(a: argparse.Namespace) -> int:
     from vati.events.news_ingress import NewsIngress, rows_from_file, sources_from_config
 
     config = json.loads(Path(a.config).read_text(encoding="utf-8"))
-    ledger = Ledger(a.ledger) if a.ledger else None
-    ingress = NewsIngress(
-        ledger=ledger,
-        sources=sources_from_config(config),
-        relevance_window_ms=int(config.get("relevance_window_ms", 6 * 3_600_000)),
-    )
-    now_ms = int(a.now) if a.now else int(_t.time() * 1000)
     path = a.file or config.get("path")
     if not path:
         print(json.dumps({"error": "no headline file given by --file or config `path`"}))
         return 2
-    counts = ingress.ingest_rows(rows_from_file(path), now_ms=now_ms)
-    report = ingress.report(now_ms=now_ms) | {"counts": counts}
-    report["headlines_recorded"] = [
-        h.body() for h in ingress.headlines(limit=int(a.limit))
-    ]
-    print(json.dumps(report, indent=2))
-    if a.out:
-        Path(a.out).write_text(json.dumps(report, indent=2))
-    return 1 if ingress.skipped else 0
+    input_format=config.get('input_format','json')
+    if input_format=='rss2' and not a.ledger:
+        print(json.dumps({'error':'RSS_DURABLE_LEDGER_REQUIRED'}))
+        return 2
+    ledger = Ledger(a.ledger) if a.ledger else None
+    try:
+        now_ms = int(a.now) if a.now else int(_t.time() * 1000)
+        if input_format=='json':
+            ingress = NewsIngress(
+                ledger=ledger,
+                sources=sources_from_config(config),
+                relevance_window_ms=int(config.get("relevance_window_ms", 6 * 3_600_000)),
+            )
+            counts = ingress.ingest_rows(rows_from_file(path), now_ms=now_ms)
+            result={}
+            exit_code=1 if ingress.skipped else 0
+        else:
+            from vati.events.news_runtime import ingest_news_file
+            ingress,result=ingest_news_file(config|{'path':path},ledger=ledger,
+                scope='news-ingest-cli',now_ms=now_ms)
+            counts={name:result[name] for name in ('accepted','duplicates','skipped')}
+            state=result['source_health']['state']
+            exit_code=0 if state in {'READY_DECLARED','EMPTY_DECLARED'} else 1 if state=='PARTIAL' else 2
+        report = ingress.report(now_ms=now_ms) | {"counts": counts}
+        if result.get('reconcile_required'):report['reconcile_required']=True
+        report["headlines_recorded"] = [
+            h.body() for h in ingress.headlines(limit=int(a.limit))
+        ]
+        print(json.dumps(report, indent=2))
+        if a.out:
+            Path(a.out).write_text(json.dumps(report, indent=2))
+        return exit_code
+    finally:
+        if ledger is not None:ledger.close()
 
 
 def cmd_serve(a: argparse.Namespace) -> int:
