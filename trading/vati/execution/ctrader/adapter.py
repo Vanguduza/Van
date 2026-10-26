@@ -12,6 +12,7 @@ import time
 import threading
 from dataclasses import dataclass, field, replace
 from decimal import Decimal, ROUND_DOWN, localcontext
+from vati.core.decimal_context import native_decimal_context
 from typing import Any, Callable, Optional, ClassVar
 
 from vati.execution.base import AccountState, ExecutionReceipt, Health, OrderCommand, VenuePosition, VenueUnavailable
@@ -384,8 +385,7 @@ class CtraderAdapter:
                     raise ValueError()
         except (CtraderApiError,KeyError,TypeError,ValueError):
             raise VenueUnavailable('cTrader native funds changed during position PnL observation; refresh required') from None
-        with localcontext() as context:
-            context.prec=80
+        with localcontext(native_decimal_context()):
             equity=bal+unrealised
         at=native_int(self.clock(),minimum=0)
         from vati.execution.ctrader.transport import DEMO_HOST,LIVE_HOST
@@ -396,8 +396,7 @@ class CtraderAdapter:
             mark=NativeAccountMark('CTRADER',environment,self.account_alias,self.ctid_trader_account_id,t['depositAssetId'],self._currency,
                 at,bal,equity,t.get('balanceVersion'),*bonuses,registered_at_ms=t.get('registrationTimestamp'))
         used = getattr(self, "_native_used_margin", None)
-        with localcontext() as context:
-            context.prec = 80
+        with localcontext(native_decimal_context()):
             free = equity - used if used is not None else None
             level = equity / used * Decimal("100") if used is not None and used > 0 else None
         # cTrader reports per-position usedMargin, not an account free-margin
@@ -501,7 +500,11 @@ class CtraderAdapter:
                 self._native_used_margin = self._position_margin(positions, margin_mode)
             except (KeyError,TypeError,ValueError,ArithmeticError):
                 self._native_used_margin = None
-            return Decimal(total)/(Decimal(10)**digits)
+            # Preserve the existing exact division's decimal text without doing
+            # arithmetic in the caller's context or rounding a native amount.
+            while digits and total%10==0:
+                total//=10;digits-=1
+            return Decimal((int(total<0),tuple(map(int,str(abs(total)))),-digits))
         except (CtraderApiError,KeyError,TypeError,ValueError,ArithmeticError):
             raise VenueUnavailable('cTrader native deposit-currency position PnL unavailable or inconsistent') from None
 
@@ -520,8 +523,7 @@ class CtraderAdapter:
         if type(mode) is not str or mode not in {"MAX","SUM","NET"}:
             raise ValueError("native total margin calculation mode unavailable")
         buckets = {}
-        with localcontext() as context:
-            context.prec = 80
+        with localcontext(native_decimal_context()):
             for position in positions:
                 value = native_int(position['usedMargin'],minimum=0,maximum=2**64-1)
                 digits = native_int(position['moneyDigits'],minimum=0,maximum=18)

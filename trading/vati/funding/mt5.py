@@ -6,6 +6,7 @@ settled money, fee allocation or cash-flow-adjusted percentage returns.
 """
 from dataclasses import dataclass
 from decimal import Decimal, localcontext
+from vati.core.decimal_context import native_decimal_context
 from vati.core.canonical import canonical_hash
 from vati.funding.native import native_int
 
@@ -77,8 +78,7 @@ class Mt5FundingFrame:
         return canonical_hash({'provider':'MT5','login':self.login,'server':self.server,'currency':self.currency,'demo':self.demo})
     @property
     def net_equity(self):
-        with localcontext() as c:
-            c.prec=512
+        with localcontext(native_decimal_context(precision=512)):
             return self.reported_equity-self.credit
     @property
     def source_ref(self):

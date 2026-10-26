@@ -1,5 +1,6 @@
 """Original complete native deal observations share the financial journal fence."""
 from decimal import Decimal,localcontext
+from vati.core.decimal_context import native_decimal_context
 from vati.core.canonical import canonical_hash
 from vati.core.events import EventKind
 from vati.funding.deals import NativeDealStatement,NativeDeal,NativeCloseBalance
@@ -34,8 +35,7 @@ class DealBook(FundingBook):
             native_int(digits,minimum=0,maximum=18)
             if not isinstance(value,Decimal) or not value.is_finite():raise ValueError('funding_native_deal_money_invalid')
             if not native_money(-(2**63),digits)<=value<=native_money(2**63-1,digits):raise ValueError('funding_native_deal_money_invalid')
-            with localcontext() as ctx:
-                ctx.prec=80
+            with localcontext(native_decimal_context()):
                 if value.quantize(native_money(1,digits))!=value:raise ValueError('funding_native_deal_precision_invalid')
         def price(value):
             if not isinstance(value,Decimal) or not value.is_finite() or value<=0 or len(str(value))>128:raise ValueError('funding_native_deal_price_invalid')

@@ -1,6 +1,6 @@
 {
   "schema": "van.rebuild.candidate-source-progress/1",
-  "updated_at_utc": "2026-10-26T20:09:20.126908+00:00",
+  "updated_at_utc": "2026-10-26T20:30:55.250193+00:00",
   "programme": "Rev1.18; original 131 unit IDs and dependencies retained",
   "authority": "auth-20261022-owner-autonomous-candidate-build",
   "meaning": "Candidate source progress is separate from admitted unit acceptance. Independent certificates, owner decisions, live effects and release gates remain unissued. No unit is declared complete by this record.",
@@ -478,6 +478,10 @@
         {
           "description": "Confirmedactualclean-baselined844SQLrollback exposeduncommittednativeperiod/readiness/ownerlineageandfalseincremental-cachecorruptionalarm. SharedexistingLedgercommittedreadcontextnowrejectscaller-ownedwritersbefore/afteracquisition;nativecTrader/MT5consumershold/refusewithoutproviderIO. OwnedSQLite/Postgreswriterabortinvalidatesstagedcacheanchor;full/incremental/tamperchecksretained. 444finalactual-PGchecks0skip/audit0/all488runtime-testhashesmatch/ownedfixtureabsent;14newboundarycases;6assertionfaultsincludingactualPGcache/guardfailures/14positive+14restoreddual-enginecontrols;122rebuild/workflow/T0boundary. Componentonly;unitacceptanceNOT_ISSUED.",
           "evidence": "backend/BE-003_006_COMMITTED_FUNDING_READS.md;receipts/COMMITTED_FUNDING_READS_SOURCE_20261026.json"
+        },
+        {
+          "description": "Native source arithmetic now isolates caller/default Decimal settings and flags, preserving exact source values, original PnL decimal text and native precision refusals. Clean published733b baseline9failures/2controls retained. Final567actualSQLite/Postgres passes,0skip/audit violations,all490runtime-testhashesmatch/ownedfixtureabsent;18newcases and122rebuild/workflow/T0checks. Initial invalid test fixture and failed attempts retained. Source component only; BE006 IN_PROGRESS and acceptance NOT_ISSUED.",
+          "evidence": "backend/BE-006_NATIVE_ARITHMETIC_CONTEXT.md;receipts/NATIVE_ARITHMETIC_CONTEXT_SOURCE_20261026.json"
         }
       ]
     },

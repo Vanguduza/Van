@@ -132,7 +132,9 @@
         "backend/BE-006_SAMPLED_FLOW_ADJUSTED_RISK.md",
         "receipts/SAMPLED_FLOW_RISK_SOURCE_20261026.json",
         "backend/BE-003_006_COMMITTED_FUNDING_READS.md",
-        "receipts/COMMITTED_FUNDING_READS_SOURCE_20261026.json"
+        "receipts/COMMITTED_FUNDING_READS_SOURCE_20261026.json",
+        "backend/BE-006_NATIVE_ARITHMETIC_CONTEXT.md",
+        "receipts/NATIVE_ARITHMETIC_CONTEXT_SOURCE_20261026.json"
       ]
     },
     "BE-020": {
@@ -310,7 +312,7 @@
     "note": "Opus unavailable; owner transferred build to Codex. No independent reviewer identity is inferred from another model or session."
   },
   "checkpoint": {
-    "updated_utc": "2026-10-26T20:09:20.126908+00:00",
+    "updated_utc": "2026-10-26T20:30:55.250193+00:00",
     "branch": "ccr-9e07e1af-8mgz1p",
     "base": "b02075f327ea8180ab6d269eba358cf8c5479878",
     "background_jobs": [
@@ -329,7 +331,7 @@
         "not_acceptance": true
       }
     ],
-    "last_validation": "Confirmedactualclean-baselined844SQLrollback exposeduncommittednativeperiod/readiness/ownerlineageandfalseincremental-cachecorruptionalarm. SharedexistingLedgercommittedreadcontextnowrejectscaller-ownedwritersbefore/afteracquisition;nativecTrader/MT5consumershold/refusewithoutproviderIO. OwnedSQLite/Postgreswriterabortinvalidatesstagedcacheanchor;full/incremental/tamperchecksretained. 444finalactual-PGchecks0skip/audit0/all488runtime-testhashesmatch/ownedfixtureabsent;14newboundarycases;6assertionfaultsincludingactualPGcache/guardfailures/14positive+14restoreddual-enginecontrols;122rebuild/workflow/T0boundary. Componentonly;unitacceptanceNOT_ISSUED.",
+    "last_validation": "Native source arithmetic now isolates caller/default Decimal settings and flags, preserving exact source values, original PnL decimal text and native precision refusals. Clean published733b baseline9failures/2controls retained. Final567actualSQLite/Postgres passes,0skip/audit violations,all490runtime-testhashesmatch/ownedfixtureabsent;18newcases and122rebuild/workflow/T0checks. Initial invalid test fixture and failed attempts retained. Source component only; BE006 IN_PROGRESS and acceptance NOT_ISSUED.",
     "environment_notes": [
       "clone must be unshallowed (git fetch --unshallow) and PR heads fetched (+refs/pull/*/head:refs/remotes/origin/pr/*) before pre001.py",
       "pytest from backend/requirements.txt in a venv",
@@ -383,7 +385,8 @@
     "Immutable DatasetManifest candidate publication reuses dedicated existing SQLite/PostgreSQL ledgers, original native source inspection, writer-created time, request/record CAS, independent durable readback and historical replay. Lost ACK/current-byte failure/corrupt records/caller transactions/global capacity refuse truthfully. Existing slow workflow/CLI wired; always CANDIDATE_PUBLISHED_NOT_ADMITTED.45 new publication cases,563 final broad actual-PG-available passes,0 skips/audit violations,final hashes match/owned fixture independently absent;8 assertion-caught supplemental faults/23 positive plus23 restored controls;108 rebuild passes. R1 fixture and R3 actual error-reason failure retained. Full ML005 remains open.",
     "Published e690d530/GREEN155/manifest3502 remotely verified. Parent164 main timed out full trading at35min,16public success/2unwaived mandatory failures;14raw archives and374 canonical cases/383edits independently reconciled. Currente690 forecastFAILED before Parquet tests due missing psycopg;CPU fixture artifact independentlyverified. Local recreated fixed source job114pass0skip/audit0/owned fixture absent;source shell cleanup/failure controls verified. Profile crash retained;original unprofiled native session1PASS82.41s. CI fixes uncommitted;all admission gates remain unissued.",
     "Confirmed ambient Decimal rounding/traps/exponent settings changed or broke identical native-scoped unitization reports. Explicit report Context now fixes80-digit ROUND_HALF_EVEN and standard bounds/traps while exact Fraction calculations,normal outputs and all risk/unknown states remain unchanged.9actual regressions retained;24focused and219final actual-PG funding/cash/balance passes,0skips/audit0/final runtime-test hashes match/owned fixture independently absent. Startup-only refusal retained. Component only;fullBE006 remains IN_PROGRESS.",
-    "Exact6698 main40322142900 terminalFAILED on2unwaivedmandatoryprerequisites;all17publicjobsSUCCESS.15rawarchivesverified;trading3819+1privateDDSskip,PG26,voice117,gateway5775+7skips,media198,monitor258,browser/emulator originalchecks;374canonicalidentitiescaughtonce383edits. Dedicatedforecast40322141956bothSUCCESS actual114Parquet/SQL0skip/audit0 plus6synthetic/3coldparity0/232versions/kernel/cleanup/sourcehash/tree verified. Parent results do not qualify later funding-renderer source."
+    "Exact6698 main40322142900 terminalFAILED on2unwaivedmandatoryprerequisites;all17publicjobsSUCCESS.15rawarchivesverified;trading3819+1privateDDSskip,PG26,voice117,gateway5775+7skips,media198,monitor258,browser/emulator originalchecks;374canonicalidentitiescaughtonce383edits. Dedicatedforecast40322141956bothSUCCESS actual114Parquet/SQL0skip/audit0 plus6synthetic/3coldparity0/232versions/kernel/cleanup/sourcehash/tree verified. Parent results do not qualify later funding-renderer source.",
+    "Exact9bf main40383599951 terminalFAILED only on two mandatory privateDDS/trusted-main prerequisites;17publicSUCCESS,3985trading+1declaredprivateDDSskip/PG26/voice117/gateway5775+7skip/media198/monitor258/browser/emulator and374canonicalidentitiescaughtonce383edits. Forecast40383599772SUCCESS114native+6synthetic+3cold parity0/232versions/kernel/cleanup/hashes/tree.16main+forecastarchives size/SHA/CRC verified; published9bf only."
   ],
   "obligations": "obligations/OBLIGATIONS.json: preserved observations with source implementation evidence and explicit remaining native/unit obligations.",
   "pre002_challenge": "pre002/challenge/: 324 author-prepared dossiers (AUTHOR_CHALLENGED_PENDING_INDEPENDENT_REVIEW)",
@@ -414,9 +417,9 @@
     "tested_android_head": "752d265b11ba643ed309481b110248f8b7fe323b",
     "hosted_result": "receipts/HOSTED_SOURCE_752d265b.json",
     "mutation_reconciliation": "ci/MUTATION_RECONCILIATION.md and ci/MUTATION_RECONCILIATION_MAPPING.json",
-    "verified_source_head": "d844aa437e83623d2ff5975927bff4f12849d10e local,genuineGREEN160;published9bf1acc4GREEN159;committed-readfixuncommitted",
+    "verified_source_head": "733b7ac93e403048f2807df80f56b7038a4f5d48 published/readback/GREEN161/manifest4476; native arithmetic candidate uncommitted",
     "source_qualification_run": 40383599951,
-    "latest_checkpoint_report": "docs/rebuild/rev118/CHECKPOINT_20261026_COMMITTED_FUNDING_READS.md",
+    "latest_checkpoint_report": "docs/rebuild/rev118/CHECKPOINT_20261026_NATIVE_ARITHMETIC.md",
     "previous_verified_source": "3c6969ebbec39f2ad9f2836a6bd8acdb487adc34 published; exact CI40228254162 all17public jobs pass, two unchanged prerequisite failures",
     "qualification_scope": "Public source tests only; mandatory/native/owner/production gates unissued."
   },
@@ -436,6 +439,6 @@
       "evidence": "ci/MUTATION_CORPUS_c2a27848.json"
     }
   ],
-  "current_action": "Finishcommitted-readfixmanifest/stagedbackup/genuinehookcommit/committedbaselineverify. Publishsampledflowd844andthisconfirmedfixasreviewablefixedheadonce9bfmain40383599951terminal;normalpush/readback/exactnewCI. Continueactualcanonicaldependency-readybackendimplementationandqualification;0formalunitacceptances.",
-  "updated_at_utc": "2026-10-26T20:09:20.126908+00:00"
+  "current_action": "Finish arithmetic packet manifest, staged backup, genuine hook commit and committed baseline verification. Preserve running published733b main40394743701 until terminal, then normally push fixed source and read back exact ref. Continue full dependency-ready backend, financial accounting/reservations/payment and ML/assistant operations; zero formal accepted units.",
+  "updated_at_utc": "2026-10-26T20:30:55.250193+00:00"
 }

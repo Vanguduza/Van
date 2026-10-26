@@ -4,6 +4,7 @@ Observation is not settlement approval, spendable capital or a qualified return.
 Conflicting provider history is retained and quarantined, never silently restated.
 """
 from decimal import Decimal,localcontext
+from vati.core.decimal_context import native_decimal_context
 import time
 from vati.core.canonical import canonical_hash
 from vati.core.events import EventKind,make_event
@@ -49,8 +50,7 @@ class FundingBook:
                 if value is None:continue
                 if not isinstance(value,Decimal) or not value.is_finite():raise ValueError('funding_native_money_invalid')
                 if not native_money(-(2**63),row.money_digits)<=value<=native_money(2**63-1,row.money_digits):raise ValueError('funding_native_money_invalid')
-                with localcontext() as context:
-                    context.prec=80
+                with localcontext(native_decimal_context()):
                     if value.quantize(native_money(1,row.money_digits))!=value:raise ValueError('funding_native_precision_invalid')
             if row.balance_version is not None:native_int(row.balance_version,minimum=0)
             seen.add(row.native_id)
