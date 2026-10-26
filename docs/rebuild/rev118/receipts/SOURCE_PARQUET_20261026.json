@@ -1,0 +1,50 @@
+{
+  "schema": "van.rebuild.native-source-parquet/1",
+  "base_head": "b070ede371980f7596d116c3e585023f9b4bf57a",
+  "updated_at_utc": "2026-10-26T08:54:09.905694+00:00",
+  "status": "SOURCE_TESTED_COMPONENT_NOT_DATASET_OR_UNIT_ACCEPTANCE",
+  "units": [
+    "VAN-ML-PKT-005",
+    "BE-008"
+  ],
+  "unit_status": "IN_PROGRESS",
+  "acceptance": "NOT_ISSUED",
+  "source_sha256": {
+    "trading/vati_forecast_worker/source_partitions.py": "6afc0f9c010e0e6e8cdeaae0c8ea974027a74a5d01a9e9a4d4b333639cda2870",
+    "trading/vati/research/bar_partitions.py": "830201365b7917b42466ef108a52ee006143eece411bbb4e8187564dad4170ae",
+    "trading/vati/research/workflow.py": "37fe1eaf9c105c9a8390b7c47077db89e7ceb3285009a4f89eb7483157d4f95d",
+    "trading/vati/__main__.py": "1d8ce4d899a0bef1a221b861c75713dfd113074454821655625254f1119b4d7d",
+    "trading/vati/core/model_boundary.py": "d941a58c4ccbfc5a41ecff8c21e2eaa1b3e1659a8b0b7c12564d99c475163abc",
+    "trading/tests/test_ml_runtime_boundary.py": "f659ef596700e0cabee98d4f5e8b44a1e855b40179ca973c4a98637cd608265b",
+    "trading/tests/test_forecast_source_partitions.py": "3a6f17deb1d4adddbc9d3fb4839c331835b2affdb0b96b7a2e14aebf533bbcd0",
+    "trading/worker_tests/test_native_source_parquet.py": "e12da73d7ad24ba775e9b0c5966c0db78f86b504f75835ee885694d541535275",
+    ".github/workflows/van-forecast-runtime-source.yml": "0603f65f6c63ddf73805a2285ca7d2d4422bf87e1b1c76ab4ed0b2e11b99ea4e"
+  },
+  "tests": {
+    "initial_native": "38 passed;2 missing optional pytest-asyncio configuration warnings in minimal test env; plugin installed from declared rebuild lock for later runs",
+    "harness_errors": "R2 native and R1 public passed literal -- through audit wrapper;0 tests executed;retained unchanged. Invocation fixed in CLI and additive workflow, no assertions weakened.",
+    "native_r3": "46 passed;0 skips/audit violations",
+    "native_final": "48 passed;0 skips/audit violations",
+    "public_research": "70 passed;0 skips/audit violations; gateway environment did not need Arrow at this stage",
+    "final_postgres_selection": "302 passed;0 skips/audit violations; all source/test hashes match; owned isolated PG fixture independently absent; source selections overlap",
+    "supplemental": "8 assertion-caught faults;0 setup errors/skips/audit violations; exact restoration;48 positive/restored control passes; not canonical374",
+    "fault_reader": "First harness stopped on a caught assertion formatted assert True is False; original report and exact restoration retained. Reader corrected to recognize actual assertion traceback; all8 rerun.",
+    "rebuild": 108
+  },
+  "source_dependency": "Exact PyArrow25.0.1 cp312 Linux wheel from existing worker lock installed using --require-hashes --no-deps; local Python3.12.14 source testing is not pinned interpreter3.12.15 worker or native host qualification",
+  "evidence": "ci/source_parquet_20261026",
+  "canonical_checks": {
+    "owner_frontend_contract_drift": false,
+    "mutation_registry_cases": 374,
+    "mutation_registry_edits": 383,
+    "registry_findings": [],
+    "canonical_mutation_execution": "NOT_RUN_FOR_THIS_UNCOMMITTED_SOURCE",
+    "consolidation_findings": []
+  },
+  "remaining": [
+    "Full immutable DatasetManifest producer/consumer and resolved artifact/feature/target references",
+    "Real source-use entitlements and consent;PIT universe and lifecycle/calendar/gap policy",
+    "Licensed news/expectation joins;observed/reconstructed availability and corrected-research policy",
+    "General isolated research/native/independent/unit/owner/production/economic/S24 qualification"
+  ]
+}

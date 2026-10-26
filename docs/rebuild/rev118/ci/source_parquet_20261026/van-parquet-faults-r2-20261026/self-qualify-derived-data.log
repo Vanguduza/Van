@@ -1,0 +1,21 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+________ test_actual_parquet_readback_is_typed_exact_and_deterministic _________
+
+source = (<vati.market_data.native_archive.NativeMarketArchive object at 0x7f1672639eb0>, NativeSymbolContract(metadata_json='{...transport_host': 'demo.ctraderapi.com', 'native_account_id': 123, ...}, 'timeframe': 'M1', 'through_revision': 1, ...})
+arrow = <module 'pyarrow' from '/workspace/van-parquet-source-venv-20261026/lib/python3.12/site-packages/pyarrow/__init__.py'>
+
+    def test_actual_parquet_readback_is_typed_exact_and_deterministic(source, arrow):
+        window = source[3]
+        data = encode_native_bar_partition(window)
+        assert data.startswith(b'PAR1') and data.endswith(b'PAR1')
+        assert data == encode_native_bar_partition(window)
+        result = verify_native_bar_partition(data, window)
+        assert result['sha256'] == hashlib.sha256(data).hexdigest() and result['row_count'] == 3
+>       assert result['qualified_for_research'] is False and result['authority_effect'] == 'NONE'
+E       assert (True is False)
+
+trading/worker_tests/test_native_source_parquet.py:41: AssertionError
+=========================== short test summary info ============================
+FAILED trading/worker_tests/test_native_source_parquet.py::test_actual_parquet_readback_is_typed_exact_and_deterministic
+1 failed in 1.70s

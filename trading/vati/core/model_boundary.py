@@ -11,7 +11,7 @@ import threading
 MODEL_FRAMEWORK_ROOTS=frozenset({
     'qlib','lightgbm','neuralforecast','xgboost','optuna','feast','mlflow',
     'torch','torchvision','torchaudio','pytorch_lightning','lightning',
-    'tensorflow','keras','sklearn','ray','safetensors',
+    'tensorflow','keras','sklearn','ray','safetensors','pyarrow',
 })
 _lock=threading.RLock()
 

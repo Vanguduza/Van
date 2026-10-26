@@ -154,7 +154,9 @@
         "backend/BE-008_NATIVE_QUOTE_ARCHIVE.md",
         "receipts/NATIVE_QUOTE_ARCHIVE_SOURCE_20261025.json",
         "backend/VAN-ML-PKT-005_NATIVE_CATALOG_WINDOWS.md",
-        "receipts/NATIVE_DATASET_SOURCE_20261026.json"
+        "receipts/NATIVE_DATASET_SOURCE_20261026.json",
+        "backend/VAN-ML-PKT-005_SOURCE_PARQUET.md",
+        "receipts/SOURCE_PARQUET_20261026.json"
       ]
     },
     "BE-014": {
@@ -210,7 +212,9 @@
       ],
       "evidence": [
         "backend/VAN-ML-PKT-005_NATIVE_CATALOG_WINDOWS.md",
-        "receipts/NATIVE_DATASET_SOURCE_20261026.json"
+        "receipts/NATIVE_DATASET_SOURCE_20261026.json",
+        "backend/VAN-ML-PKT-005_SOURCE_PARQUET.md",
+        "receipts/SOURCE_PARQUET_20261026.json"
       ]
     }
   },
@@ -284,26 +288,26 @@
     "note": "Opus unavailable; owner transferred build to Codex. No independent reviewer identity is inferred from another model or session."
   },
   "checkpoint": {
-    "updated_utc": "2026-10-26T08:18:35.046514+00:00",
+    "updated_utc": "2026-10-26T08:54:55.365480+00:00",
     "branch": "ccr-9e07e1af-8mgz1p",
     "base": "b02075f327ea8180ab6d269eba358cf8c5479878",
     "background_jobs": [
       {
         "kind": "van-ci",
-        "id": 40276672885,
-        "head": "a66096fdabc8eef1ecbcf7140dc071d8f65f1d16",
-        "state": "TERMINAL_FAILURE_17_PUBLIC_SOURCE_JOBS_SUCCESS_TWO_UNWAIVED_PREREQUISITES",
+        "id": 40292596048,
+        "head": "b070ede371980f7596d116c3e585023f9b4bf57a",
+        "state": "RUNNING_PUBLIC_BACKEND_BROWSER;other15publicjobsSUCCESS;twoUNWAIVEDmandatoryprerequisiteFAILURES",
         "not_acceptance": true
       },
       {
         "kind": "van-forecast-runtime-source",
-        "id": 40276672824,
-        "head": "a66096fdabc8eef1ecbcf7140dc071d8f65f1d16",
-        "state": "SUCCESS_EXACT_SOURCE_FIXTURE_NOT_UNIT_ACCEPTANCE",
+        "id": 40292596591,
+        "head": "b070ede371980f7596d116c3e585023f9b4bf57a",
+        "state": "SUCCESS_EXACT_SOURCE_FIXTURE_NOT_UNIT_ADMISSION;artifact12636473856 verified",
         "not_acceptance": true
       }
     ],
-    "last_validation": "Native archived/hidden/visible catalog viaactualpinnedreadonlyprotobuf reader;canonical capture/schema/scope/clock metadata;dedicatedSQLite/PostgreSQL originalcatalogstore and collector withindependentreadback,replay/unknown/corrupt/missing states. Pinned nativebar windows preserveexplicitordinal+ref+cutoff,perbar corrections andunknowncoverage/spread.1042broadPG0skip/audit0;212finalPG0skip/audit0/exacthash/independentcleanup withspawnedprocesses;8supplementalassertionfaultscaught/restored. FullML005dataset/Parquet/entitlement/calendar/joins/producerconsumer andindependentacceptance remain. 108rebuildPASS;owner/frontendnodrift;canonical374/383registrypreflight0findings(notexecution);consolidation0findings.",
+    "last_validation": "Derived native bar Parquet publication and cold original-source readback preserve exact prices, scope/row/revision identity and unknown native facts. Existing archive/file-lock/atomic writer owners reused; stable original-window replay and lost-ACK/orphan reconciliation; global output capacity refuses before write. Existing slow research workflow/CLI wired; ledger closed on all exits; actual T0 rejects Arrow. 48 native source controls,70 public research controls,302 final actual-PG-available regressions,0 skips/audit violations/exact source hashes/owned fixture independently absent;8 supplemental assertion faults caught/restored;108 rebuild passes. Selections overlap. Full DatasetManifest, real rights/consent, universe/calendar/gap and licensed joins remain open;no formal acceptance.",
     "environment_notes": [
       "clone must be unshallowed (git fetch --unshallow) and PR heads fetched (+refs/pull/*/head:refs/remotes/origin/pr/*) before pre001.py",
       "pytest from backend/requirements.txt in a venv",
@@ -349,7 +353,8 @@
     "2026-10-26T00:10:29.246687+00:00: Final cold missing-receipt guards add2 actual regressions; finalR3 executes646 cases/0skip/audit0/exact source and test hashes.78 final controls plus2PGdeselected executed in PostgreSQL;8 final faults assertion-caught/restored. Earlier644/76/8 receipts retain their prior hashes and scope. PublishedEA artifact confirms3423trading pass/1privateDDSskip,PG26,voice117,monitor258 and374 original mutation identities caught once; mainbackend/browser still pending.",
     "2026-10-26T01:33:27.917947+00:00: Runtime news final698 actualPG0skip/audit0/exact hashes,119controls with4PGdeselected executedfixture,10faults assertion-caught/restored. Broad1059 selection TIMEOUT1800 exit2,1057completed passes,audit0,2unfinished nowincludedfinal; XML1058 includesinterrupted, not1058passes. Before final heartbeat-only delta original broad hashes retained. ExactEA CI terminal17public pass/2unwaived mandatory prerequisite failures, actualcomplete raw reports preserved. No accepted unit.",
     "2026-10-26T02:01:26.332512+00:00: Separate versioned durable publisher/story declarations bind original observation receipts without rewriting headline IDs/claims/history. Atomic publication/readback, marker-bound missing/conflicting/orphan recovery refusal;late declaration as-of clocks,rewritten syndicated clusters count once,unknown/conflicting origins visible,qualified independent sources0.734final actualPG0skip/audit0/exact source+test hashes;153controls+6PGdeselected executedfixture;8faults caught/restored.11baseline+2followup+1orphan failures and harness diagnostics retained. Full BE014 remains IN_PROGRESS. Published752d265b/normal readback/GREEN146;exact CI still running with2 unwaived mandatory failures;accepted0.",
-    "2026-10-26T02:29:43.145840+00:00: Explicit RSS2 profile wired through actual session/account news builders;original raw bytes/profile/parser/capture identity durably serialized/read back before parsing,stable first capture across replay,actual later ingress availability across lost commit replies. GUID/publisher declared lineage,explicit relevance,partial item diagnostics,DTD refusal/capacity/clock guards;cold raw integrity/visible-record checks and independent owner snapshots.768final actualPG0skip/audit0/exact hashes;185controls+8PGdeselected executedfixture;8supplemental faults caught/restored. Actual saved public Fed20-headline replay stable;latestOct16 remainsold;no native qualification.11baseline+2product followup failures and1stale-fixture error retained. Full BE014 remains IN_PROGRESS. Exact752 hostedCI terminal17public success/2unwaived mandatory failure;gateway5775/7skip,media198,trading3495/1DDSskip,PG26,voice117,monitor258,374canonicalmutants caughtonce,Android18/4emulator,browser1547/1+foreground11/UID1/firewall10. SignedMQLcompile exactsource verified. accepted0."
+    "2026-10-26T02:29:43.145840+00:00: Explicit RSS2 profile wired through actual session/account news builders;original raw bytes/profile/parser/capture identity durably serialized/read back before parsing,stable first capture across replay,actual later ingress availability across lost commit replies. GUID/publisher declared lineage,explicit relevance,partial item diagnostics,DTD refusal/capacity/clock guards;cold raw integrity/visible-record checks and independent owner snapshots.768final actualPG0skip/audit0/exact hashes;185controls+8PGdeselected executedfixture;8supplemental faults caught/restored. Actual saved public Fed20-headline replay stable;latestOct16 remainsold;no native qualification.11baseline+2product followup failures and1stale-fixture error retained. Full BE014 remains IN_PROGRESS. Exact752 hostedCI terminal17public success/2unwaived mandatory failure;gateway5775/7skip,media198,trading3495/1DDSskip,PG26,voice117,monitor258,374canonicalmutants caughtonce,Android18/4emulator,browser1547/1+foreground11/UID1/firewall10. SignedMQLcompile exactsource verified. accepted0.",
+    "2026-10-26T08:54:55.365480+00:00: Derived native bar Parquet publication and cold original-source readback preserve exact prices, scope/row/revision identity and unknown native facts. Existing archive/file-lock/atomic writer owners reused; stable original-window replay and lost-ACK/orphan reconciliation; global output capacity refuses before write. Existing slow research workflow/CLI wired; ledger closed on all exits; actual T0 rejects Arrow. 48 native source controls,70 public research controls,302 final actual-PG-available regressions,0 skips/audit violations/exact source hashes/owned fixture independently absent;8 supplemental assertion faults caught/restored;108 rebuild passes. Selections overlap. Full DatasetManifest, real rights/consent, universe/calendar/gap and licensed joins remain open;no formal acceptance."
   ],
   "obligations": "obligations/OBLIGATIONS.json: preserved observations with source implementation evidence and explicit remaining native/unit obligations.",
   "pre002_challenge": "pre002/challenge/: 324 author-prepared dossiers (AUTHOR_CHALLENGED_PENDING_INDEPENDENT_REVIEW)",
@@ -402,6 +407,6 @@
       "evidence": "ci/MUTATION_CORPUS_c2a27848.json"
     }
   ],
-  "current_action": "Canonicalchecks/manifest/verifiedbackup,genuinehookcommit/baselineverify/normalpush;exacta660CIterminal17publicpass/2unwaivedmandatoryfailures andforecastSUCCESS retained. ContinuefullML005immutableDatasetManifest/Parquet/actualownerreferences/entitlements/calendar/joins;do not markunitcomplete.",
-  "updated_at_utc": "2026-10-26T08:18:35.046514+00:00"
+  "current_action": "Manifest/backup/genuine hook commit and committed-baseline verification; preserve original running b070 CI before next normal push; inspect exact new hosted source and Parquet job. Continue full ML005 DatasetManifest/rights/consent/calendar/universe/joins and canonical backend programme;0 formal acceptances.",
+  "updated_at_utc": "2026-10-26T08:54:55.365480+00:00"
 }

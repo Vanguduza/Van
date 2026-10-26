@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="2" skipped="0" tests="2" time="0.967" timestamp="2026-10-26T08:47:33.371073+00:00" hostname="2c5a245e39f1"><testcase classname="trading.tests.test_forecast_source_partitions" name="test_research_cli_closes_real_sqlite_connection_on_success_and_failure[coverage]" time="0.254"><failure message="Failed: DID NOT RAISE ProgrammingError">tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-372/test_research_cli_closes_real_0')
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x7f0b0b512840&gt;
+operation = 'coverage'
+
+    @pytest.mark.parametrize('operation', ['coverage', 'invalid_operation'])
+    def test_research_cli_closes_real_sqlite_connection_on_success_and_failure(tmp_path, monkeypatch, operation):
+        import sqlite3
+        from argparse import Namespace
+        from vati.__main__ import cmd_research
+        from vati.core.ledger import Ledger
+        from vati.core import ledger_pg
+        ledger = Ledger(tmp_path/'actual.sqlite'); monkeypatch.setattr(ledger_pg, 'open_ledger', lambda _:ledger)
+        spec = tmp_path/'spec.json'; spec.write_text(json.dumps({'operation':operation}))
+        if operation == 'coverage': assert cmd_research(Namespace(spec=str(spec), ledger='configured')) == 0
+        else:
+            with pytest.raises(ValueError, match='unknown trading research'):
+                cmd_research(Namespace(spec=str(spec), ledger='configured'))
+&gt;       with pytest.raises(sqlite3.ProgrammingError, match='closed'):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ProgrammingError
+
+trading/tests/test_forecast_source_partitions.py:102: Failed</failure></testcase><testcase classname="trading.tests.test_forecast_source_partitions" name="test_research_cli_closes_real_sqlite_connection_on_success_and_failure[invalid_operation]" time="0.005"><failure message="Failed: DID NOT RAISE ProgrammingError">tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-372/test_research_cli_closes_real_1')
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x7f0b0b1cbc50&gt;
+operation = 'invalid_operation'
+
+    @pytest.mark.parametrize('operation', ['coverage', 'invalid_operation'])
+    def test_research_cli_closes_real_sqlite_connection_on_success_and_failure(tmp_path, monkeypatch, operation):
+        import sqlite3
+        from argparse import Namespace
+        from vati.__main__ import cmd_research
+        from vati.core.ledger import Ledger
+        from vati.core import ledger_pg
+        ledger = Ledger(tmp_path/'actual.sqlite'); monkeypatch.setattr(ledger_pg, 'open_ledger', lambda _:ledger)
+        spec = tmp_path/'spec.json'; spec.write_text(json.dumps({'operation':operation}))
+        if operation == 'coverage': assert cmd_research(Namespace(spec=str(spec), ledger='configured')) == 0
+        else:
+            with pytest.raises(ValueError, match='unknown trading research'):
+                cmd_research(Namespace(spec=str(spec), ledger='configured'))
+&gt;       with pytest.raises(sqlite3.ProgrammingError, match='closed'):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ProgrammingError
+
+trading/tests/test_forecast_source_partitions.py:102: Failed</failure></testcase></testsuite></testsuites>

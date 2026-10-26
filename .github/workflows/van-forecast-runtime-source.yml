@@ -7,12 +7,58 @@ on:
       - 'trading/vati/__main__.py'
       - 'trading/tests/test_forecast_*'
       - 'trading/tests/test_ml_runtime_boundary.py'
+      - 'trading/vati/research/bar_partitions.py'
+      - 'trading/vati/research/workflow.py'
+      - 'trading/vati/market_data/native_*.py'
+      - 'trading/worker_tests/**'
       - 'tools/rebuild/run_forecast_runtime_smoke.py'
       - '.github/workflows/van-forecast-runtime-source.yml'
   workflow_dispatch:
 permissions:
   contents: read
 jobs:
+  native-source-parquet:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install declared source dependencies and the exact locked Arrow wheel
+        run: |
+          python -m pip install -r backend/requirements.lock -r tools/rebuild/requirements.lock
+          python - <<'PY'
+          from pathlib import Path
+          source=Path('trading/vati_forecast_worker/locks/research-cp312-linux-x86_64.wheel.lock').read_text()
+          lines=[line for line in source.splitlines() if line.startswith('pyarrow==')]
+          assert len(lines)==1
+          Path('/tmp/van-source-arrow.lock').write_text(lines[0]+'\n')
+          PY
+          python -m pip install --no-deps --require-hashes -r /tmp/van-source-arrow.lock
+      - name: Execute actual archive, Parquet, cold readback and CLI source cases
+        run: |
+          mkdir -p /tmp/van-native-parquet-source
+          git rev-parse HEAD > /tmp/van-native-parquet-source/tested-head.txt
+          python tools/rebuild/source_storage_audit.py --report /tmp/van-native-parquet-source/storage-audit.json \
+            trading/worker_tests trading/tests/test_forecast_source_partitions.py trading/tests/test_ml_runtime_boundary.py \
+            --junitxml=/tmp/van-native-parquet-source/report.xml
+      - name: Require executed source cases without skips
+        run: |
+          python - <<'PY'
+          import json,xml.etree.ElementTree as ET
+          from pathlib import Path
+          root=Path('/tmp/van-native-parquet-source')
+          cases=list(ET.parse(root/'report.xml').getroot().iter('testcase'))
+          assert len(cases)>=38 and not any(c.find(k) is not None for c in cases for k in ('failure','error','skipped'))
+          assert not json.loads((root/'storage-audit.json').read_text())['forbidden_events']
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: van-native-source-parquet-report
+          path: /tmp/van-native-parquet-source/
+          if-no-files-found: error
   cpu-source-runtime:
     runs-on: ubuntu-24.04
     timeout-minutes: 45

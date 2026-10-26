@@ -1,0 +1,9 @@
+# Native source Parquet continuation
+
+2026-10-26T08:54:55.365480+00:00
+
+Derived native bar Parquet publication and cold original-source readback preserve exact prices, scope/row/revision identity and unknown native facts. Existing archive/file-lock/atomic writer owners reused; stable original-window replay and lost-ACK/orphan reconciliation; global output capacity refuses before write. Existing slow research workflow/CLI wired; ledger closed on all exits; actual T0 rejects Arrow. 48 native source controls,70 public research controls,302 final actual-PG-available regressions,0 skips/audit violations/exact source hashes/owned fixture independently absent;8 supplemental assertion faults caught/restored;108 rebuild passes. Selections overlap. Full DatasetManifest, real rights/consent, universe/calendar/gap and licensed joins remain open;no formal acceptance.
+
+Published parent:b070ede371980f7596d116c3e585023f9b4bf57a,genuine GREEN151 against4fd466dec3910ed5de614bfbf95887ad619df5ca. Source Parquet candidate remains uncommitted until genuine hook and verification. Raw reports:ci/source_parquet_20261026. Exact parent forecast40292596591 succeeded and artifact/tree/source/controller/report hashes are independently checked. Exact parent main40292596048 remains running with2unwaived mandatory prerequisite failures. Preserve this original run before next push;never call partial results full pass.
+
+Next: canonical manifest,verified staged backup,real precommit hook,committed ledger verification,normalpush/readback,exact hosted job evidence. Continue full ML005 DatasetManifest/rights/consent/universe/calendar/gap/licensed joins,remaining forecast/backend units and Android only at canonical prerequisites. Preserve all131units and original contracts;0formal unit acceptances,no newfrontend design beforeBG001,no /workspace/Van changes,no delegation.

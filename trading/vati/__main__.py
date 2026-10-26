@@ -158,9 +158,25 @@ def cmd_research(a: argparse.Namespace) -> int:
     from vati.research.workflow import TradingResearchWorkflow
     spec = json.loads(Path(a.spec).read_text())
     ledger = open_ledger(a.ledger) if a.ledger else None
-    result = TradingResearchWorkflow(ledger=ledger).run_spec(spec)
-    print(json.dumps(result, indent=2, default=str))
-    return 0
+    try:
+        partitions = None
+        archive_path = getattr(a, 'native_archive', None)
+        partition_path = getattr(a, 'source_partitions', None)
+        if archive_path or partition_path:
+            from vati_forecast_worker.source_partitions import SourcePartitionError
+            if (spec.get('operation') != 'native_bar_source_partition' or not archive_path
+                    or not partition_path or not Path(archive_path).is_dir()):
+                raise SourcePartitionError('PARTITION_EXPLICIT_EXISTING_SOURCE_AND_OUTPUT_REQUIRED')
+            from vati.market_data.native_archive import NativeMarketArchive
+            from vati.market_data.native_windows import NativeBarWindowReader
+            from vati.research.bar_partitions import NativeBarPartitionService
+            partitions = NativeBarPartitionService(NativeBarWindowReader(NativeMarketArchive(archive_path)), partition_path)
+        result = TradingResearchWorkflow(ledger=ledger, native_bar_partitions=partitions).run_spec(spec)
+        print(json.dumps(result, indent=2, default=str))
+        return 0
+    finally:
+        if ledger is not None:
+            ledger.close()
 
 
 def cmd_calendar_record(a: argparse.Namespace) -> int:
@@ -297,7 +313,8 @@ def main(argv=None) -> int:
     cal = sub.add_parser("calendar"); cal.add_argument("--file", required=True); cal.set_defaults(fn=cmd_calendar)
     cr = sub.add_parser("calendar-record"); cr.add_argument("--schedule", required=True); cr.add_argument("--releases"); cr.add_argument("--ledger")
     cr.add_argument("--out"); cr.add_argument("--now"); cr.set_defaults(fn=cmd_calendar_record)
-    rs = sub.add_parser("research"); rs.add_argument("--spec", required=True); rs.add_argument("--ledger"); rs.set_defaults(fn=cmd_research)
+    rs = sub.add_parser("research"); rs.add_argument("--spec", required=True); rs.add_argument("--ledger")
+    rs.add_argument("--native-archive"); rs.add_argument("--source-partitions"); rs.set_defaults(fn=cmd_research)
     ni = sub.add_parser("news-ingest"); ni.add_argument("--config", required=True); ni.add_argument("--file"); ni.add_argument("--ledger")
     ni.add_argument("--out"); ni.add_argument("--now"); ni.add_argument("--limit", default="20"); ni.set_defaults(fn=cmd_news_ingest)
     sv = sub.add_parser("serve"); sv.add_argument("--config", required=True); sv.add_argument("--once", action="store_true"); sv.set_defaults(fn=cmd_serve)

@@ -8,7 +8,7 @@ import sys
 import pytest
 
 
-@pytest.mark.parametrize('module',['qlib','lightgbm','neuralforecast','xgboost','optuna','feast','mlflow','torch'])
+@pytest.mark.parametrize('module',['qlib','lightgbm','neuralforecast','xgboost','optuna','feast','mlflow','torch','pyarrow'])
 def test_actual_serve_entrypoint_refuses_model_import_before_model_code_executes(tmp_path,module):
     marker=tmp_path/'model-executed'
     fake=tmp_path/'packages';package=fake/module;package.mkdir(parents=True)

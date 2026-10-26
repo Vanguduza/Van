@@ -1,0 +1,900 @@
+FF                                                                       [100%]
+=================================== FAILURES ===================================
+_ test_research_cli_closes_real_sqlite_connection_on_success_and_failure[coverage] _
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-372/test_research_cli_closes_real_0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f0b0b512840>
+operation = 'coverage'
+
+    @pytest.mark.parametrize('operation', ['coverage', 'invalid_operation'])
+    def test_research_cli_closes_real_sqlite_connection_on_success_and_failure(tmp_path, monkeypatch, operation):
+        import sqlite3
+        from argparse import Namespace
+        from vati.__main__ import cmd_research
+        from vati.core.ledger import Ledger
+        from vati.core import ledger_pg
+        ledger = Ledger(tmp_path/'actual.sqlite'); monkeypatch.setattr(ledger_pg, 'open_ledger', lambda _:ledger)
+        spec = tmp_path/'spec.json'; spec.write_text(json.dumps({'operation':operation}))
+        if operation == 'coverage': assert cmd_research(Namespace(spec=str(spec), ledger='configured')) == 0
+        else:
+            with pytest.raises(ValueError, match='unknown trading research'):
+                cmd_research(Namespace(spec=str(spec), ledger='configured'))
+>       with pytest.raises(sqlite3.ProgrammingError, match='closed'):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ProgrammingError
+
+trading/tests/test_forecast_source_partitions.py:102: Failed
+----------------------------- Captured stdout call -----------------------------
+{
+  "operation": "coverage",
+  "map_hash": "c88835398b1a29db1c437d9a52249dba52b816e31d1730fff409e76e5cdb82be",
+  "gap_count": 61,
+  "cells": [
+    {
+      "market": "FX",
+      "instrument": "EURUSD",
+      "horizon": "INTRADAY",
+      "regime": "BEAR",
+      "state": "COVERED_RESEARCH",
+      "strategy_ids": [
+        "FX-LONDON-BREAKOUT-01"
+      ],
+      "note": ""
+    },
+    {
+      "market": "FX",
+      "instrument": "EURUSD",
+      "horizon": "INTRADAY",
+      "regime": "BULL",
+      "state": "COVERED_RESEARCH",
+      "strategy_ids": [
+        "FX-LONDON-BREAKOUT-01"
+      ],
+      "note": ""
+    },
+    {
+      "market": "FX",
+      "instrument": "EURUSD",
+      "horizon": "INTRADAY",
+      "regime": "RANGE",
+      "state": "COVERED_RESEARCH",
+      "strategy_ids": [
+        "FX-LONDON-BREAKOUT-01"
+      ],
+      "note": ""
+    },
+    {
+      "market": "FX",
+      "instrument": "EURUSD",
+      "horizon": "INTRADAY",
+      "regime": "TRANSITION",
+      "state": "UNRESEARCHED",
+      "strategy_ids": [],
+      "note": ""
+    },
+    {
+      "market": "FX",
+      "instrument": "EURUSD",
+      "horizon": "SESSION",
+      "regime": "BEAR",
+      "state": "COVERED_RESEARCH",
+      "strategy_ids": [
+        "FX-EVENT-DRIFT-01"
+      ],
+      "note": ""
+    },
+    {
+      "market": "FX",
+      "instrument": "EURUSD",
+      "horizon": "SESSION",
+      "regime": "BULL",
+      "state": "COVERED_RESEARCH",
+      "strategy_ids": [
+        "FX-EVENT-DRIFT-01"
+      ],
+      "note": ""
+    },
+    {
+      "market": "FX",
+      "instrument": "EURUSD",
+      "horizon": "SESSION",
+      "regime": "RANGE",
+      "state": "COVERED_RESEARCH",
+      "strategy_ids": [
+        "FX-EVENT-DRIFT-01"
+      ],
+      "note": ""
+    },
+    {
+      "market": "FX",
+      "instrument": "EURUSD",
+      "horizon": "SESSION",
+      "regime": "TRANSITION",
+      "state": "UNRESEARCHED",
+      "strategy_ids": [],
+      "note": ""
+    },
+    {
+      "market": "FX",
+      "instrument": "EURUSD",
+      "horizon": "SWING",
+      "regime": "BEAR",
+      "state": "COVERED_RESEARCH",
+      "strategy_ids": [
+        "FX-TREND-PULLBACK-01"
+      ],
+      "note": ""
+    },
+    {
+      "market": "FX",
+      "instrument": "EURUSD",
+      "horizon": "SWING",
+      "regime": "BULL",
+      "state": "COVERED_RESEARCH",
+      "strategy_ids": [
+        "FX-TREND-PULLBACK-01"
+      ],
+      "note": ""
+    },
+    {
+      "market": "FX",
+      "instrument": "EURUSD",
+      "horizon": "SWING",
+      "regime": "RANGE",
+      "state": "UNRESEARCHED",
+      "strategy_ids": [],
+      "note": ""
+    },
+    {
+      "market": "FX",
+      "instrument": "EURUSD",
+      "horizon": "SWING",
+      "regime": "TRANSITION",
+      "state": "INTENTIONALLY_ABSTAIN",
+      "strategy_ids": [],
+      "note": "FX-TREND-PULLBACK-01 forbids TRANSITION"
+    },
+    {
+      "market": "FX",
+      "instrument": "GBPUSD",
+      "horizon": "INTRADAY",
+      "regime": "BEAR",
+      "state": "COVERED_RESEARCH",
+      "strategy_ids": [
+        "FX-LONDON-BREAKOUT-01"
+      ],
+      "note": ""
+    },
+    {
+      "market": "FX",
+      "instrument": "GBPUSD",
+      "horizon": "INTRADAY",
+      "regime": "BULL",
+      "state": "COVERED_RESEARCH",
+      "strategy_ids": [
+        "FX-LONDON-BREAKOUT-01"
+      ],
+      "note": ""
+    },
+    {
+      "market": "FX",
+      "instrument": "GBPUSD",
+      "horizon": "INTRADAY",
+      "regime": "RANGE",
+      "state": "COVERED_RESEARCH",
+      "strategy_ids": [
+        "FX-LONDON-BREAKOUT-01"
+      ],
+      "note": ""
+    },
+    {
+      "market": "FX",
+      "instrument": "GBPUSD",
+      "horizon": "INTRADAY",
+      "regime": "TRANSITION",
+      "state": "UNRESEARCHED",
+      "strategy_ids": [],
+      "note": ""
+    },
+    {
+      "market": "FX",
+      "instrument": "GBPUSD",
+      "horizon": "SWING",
+      "regime": "BEAR",
+      "state": "COVERED_RESEARCH",
+      "strategy_ids": [
+        "FX-TREND-PULLBACK-01"
+      ],
+      "note": ""
+    },
+    {
+      "market": "FX",
+      "instrument": "GBPUSD",
+      "horizon": "SWING",
+      "regime": "BULL",
+      "state": "COVERED_RESEARCH",
+      "strategy_ids": [
+        "FX-TREND-PULLBACK-01"
+      ],
+      "note": ""
+    },
+    {
+      "market": "FX",
+      "instrument": "GBPUSD",
+      "horizon": "SWING",
+      "regime": "RANGE",
+      "state": "UNRESEARCHED",
+      "strategy_ids": [],
+      "note": ""
+    },
+    {
+      "market": "FX",
+      "instrument": "GBPUSD",
+      "horizon": "SWING",
+      "regime": "TRANSITION",
+      "state": "INTENTIONALLY_ABSTAIN",
+      "strategy_ids": [],
+      "note": "FX-TREND-PULLBACK-01 forbids TRANSITION"
+    },
+    {
+      "market": "FX",
+      "instrument": "USDJPY",
+      "horizon": "SESSION",
+      "regime": "BEAR",
+      "state": "COVERED_RESEARCH",
+      "strategy_ids": [
+        "FX-EVENT-DRIFT-01"
+      ],
+      "note": ""
+    },
+    {
+      "market": "FX",
+      "instrument": "USDJPY",
+      "horizon": "SESSION",
+      "regime": "BULL",
+      "state": "COVERED_RESEARCH",
+      "strategy_ids": [
+        "FX-EVENT-DRIFT-01"
+      ],
+      "note": ""
+    },
+    {
+      "market": "FX",
+      "instrument": "USDJPY",
+      "horizon": "SESSION",
+      "regime": "RANGE",
+      "state": "COVERED_RESEARCH",
+      "strategy_ids": [
+        "FX-EVENT-DRIFT-01"
+      ],
+      "note": ""
+    },
+    {
+      "market": "FX",
+      "instrument": "USDJPY",
+      "horizon": "SESSION",
+      "regime": "TRANSITION",
+      "state": "UNRESEARCHED",
+      "strategy_ids": [],
+      "note": ""
+    },
+    {
+      "market": "FX",
+      "instrument": "USDJPY",
+      "horizon": "SWING",
+      "regime": "BEAR",
+      "state": "COVERED_RESEARCH",
+      "strategy_ids": [
+        "FX-TREND-PULLBACK-01"
+      ],
+      "note": ""
+    },
+    {
+      "market": "FX",
+      "instrument": "USDJPY",
+      "horizon": "SWING",
+      "regime": "BULL",
+      "state": "COVERED_RESEARCH",
+      "strategy_ids": [
+        "FX-TREND-PULLBACK-01"
+      ],
+      "note": ""
+    },
+    {
+      "market": "FX",
+      "instrument": "USDJPY",
+      "horizon": "SWING",
+      "regime": "RANGE",
+      "state": "UNRESEARCHED",
+      "strategy_ids": [],
+      "note": ""
+    },
+    {
+      "market": "FX",
+      "instrument": "USDJPY",
+      "horizon": "SWING",
+      "regime": "TRANSITION",
+      "state": "INTENTIONALLY_ABSTAIN",
+      "strategy_ids": [],
+      "note": "FX-TREND-PULLBACK-01 forbids TRANSITION"
+    },
+    {
+      "market": "FX",
+      "instrument": "XAUUSD",
+      "horizon": "POSITION",
+      "regime": "BEAR",
+      "state": "COVERED_RESEARCH",
+      "strategy_ids": [
+        "GOLD-TREND-POSITION-01"
+      ],
+      "note": ""
+    },
+    {
+      "market": "FX",
+      "instrument": "XAUUSD",
+      "horizon": "POSITION",
+      "regime": "BULL",
+      "state": "COVERED_RESEARCH",
+      "strategy_ids": [
+        "GOLD-TREND-POSITION-01"
+      ],
+      "note": ""
+    },
+    {
+      "market": "FX",
+      "instrument": "XAUUSD",
+      "horizon": "POSITION",
+      "regime": "RANGE",
+      "state": "UNRESEARCHED",
+      "strategy_ids": [],
+      "note": ""
+    },
+    {
+      "market": "FX",
+      "instrument": "XAUUSD",
+      "horizon": "POSITION",
+      "regime": "TRANSITION",
+      "state": "INTENTIONALLY_ABSTAIN",
+      "strategy_ids": [],
+      "note": "GOLD-TREND-POSITION-01 forbids TRANSITION"
+    },
+    {
+      "market": "FX",
+      "instrument": "XAUUSD",
+      "horizon": "SESSION",
+      "regime": "BEAR",
+      "state": "COVERED_RESEARCH",
+      "strategy_ids": [
+        "FX-EVENT-DRIFT-01"
+      ],
+      "note": ""
+    },
+    {
+      "market": "FX",
+      "instrument": "XAUUSD",
+      "horizon": "SESSION",
+      "regime": "BULL",
+      "state": "COVERED_RESEARCH",
+      "strategy_ids": [
+        "FX-EVENT-DRIFT-01"
+      ],
+      "note": ""
+    },
+    {
+      "market": "FX",
+      "instrument": "XAUUSD",
+      "horizon": "SESSION",
+      "regime": "RANGE",
+      "state": "COVERED_RESEARCH",
+      "strategy_ids": [
+        "FX-EVENT-DRIFT-01"
+      ],
+      "note": ""
+    },
+    {
+      "market": "FX",
+      "instrument": "XAUUSD",
+      "horizon": "SESSION",
+      "regime": "TRANSITION",
+      "state": "UNRESEARCHED",
+      "strategy_ids": [],
+      "note": ""
+    },
+    {
+      "market": "ZSE",
+      "instrument": "BAT",
+      "horizon": "POSITION",
+      "regime": "BEAR",
+      "state": "UNRESEARCHED",
+      "strategy_ids": [],
+      "note": ""
+    },
+    {
+      "market": "ZSE",
+      "instrument": "BAT",
+      "horizon": "POSITION",
+      "regime": "BULL",
+      "state": "UNRESEARCHED",
+      "strategy_ids": [],
+      "note": ""
+    },
+    {
+      "market": "ZSE",
+      "instrument": "BAT",
+      "horizon": "POSITION",
+      "regime": "RANGE",
+      "state": "UNRESEARCHED",
+      "strategy_ids": [],
+      "note": ""
+    },
+    {
+      "market": "ZSE",
+      "instrument": "BAT",
+      "horizon": "POSITION",
+      "regime": "TRANSITION",
+      "state": "UNRESEARCHED",
+      "strategy_ids": [],
+      "note": ""
+    },
+    {
+      "market": "ZSE",
+      "instrument": "CBZ",
+      "horizon": "POSITION",
+      "regime": "BEAR",
+      "state": "UNRESEARCHED",
+      "strategy_ids": [],
+      "note": ""
+    },
+    {
+      "market": "ZSE",
+      "instrument": "CBZ",
+      "horizon": "POSITION",
+      "regime": "BULL",
+      "state": "UNRESEARCHED",
+      "strategy_ids": [],
+      "note": ""
+    },
+    {
+      "market": "ZSE",
+      "instrument": "CBZ",
+      "horizon": "POSITION",
+      "regime": "RANGE",
+      "state": "UNRESEARCHED",
+      "strategy_ids": [],
+      "note": ""
+    },
+    {
+      "market": "ZSE",
+      "instrument": "CBZ",
+      "horizon": "POSITION",
+      "regime": "TRANSITION",
+      "state": "UNRESEARCHED",
+      "strategy_ids": [],
+      "note": ""
+    },
+    {
+      "market": "ZSE",
+      "instrument": "CBZ",
+      "horizon": "SWING",
+      "regime": "BEAR",
+      "state": "UNRESEARCHED",
+      "strategy_ids": [],
+      "note": ""
+    },
+    {
+      "market": "ZSE",
+      "instrument": "CBZ",
+      "horizon": "SWING",
+      "regime": "BULL",
+      "state": "UNRESEARCHED",
+      "strategy_ids": [],
+      "note": ""
+    },
+    {
+      "market": "ZSE",
+      "instrument": "CBZ",
+      "horizon": "SWING",
+      "regime": "RANGE",
+      "state": "UNRESEARCHED",
+      "strategy_ids": [],
+      "note": ""
+    },
+    {
+      "market": "ZSE",
+      "instrument": "CBZ",
+      "horizon": "SWING",
+      "regime": "TRANSITION",
+      "state": "UNRESEARCHED",
+      "strategy_ids": [],
+      "note": ""
+    },
+    {
+      "market": "ZSE",
+      "instrument": "DELTA",
+      "horizon": "POSITION",
+      "regime": "BEAR",
+      "state": "UNRESEARCHED",
+      "strategy_ids": [],
+      "note": ""
+    },
+    {
+      "market": "ZSE",
+      "instrument": "DELTA",
+      "horizon": "POSITION",
+      "regime": "BULL",
+      "state": "UNRESEARCHED",
+      "strategy_ids": [],
+      "note": ""
+    },
+    {
+      "market": "ZSE",
+      "instrument": "DELTA",
+      "horizon": "POSITION",
+      "regime": "RANGE",
+      "state": "UNRESEARCHED",
+      "strategy_ids": [],
+      "note": ""
+    },
+    {
+      "market": "ZSE",
+      "instrument": "DELTA",
+      "horizon": "POSITION",
+      "regime": "TRANSITION",
+      "state": "UNRESEARCHED",
+      "strategy_ids": [],
+      "note": ""
+    },
+    {
+      "market": "ZSE",
+      "instrument": "DELTA",
+      "horizon": "SWING",
+      "regime": "BEAR",
+      "state": "UNRESEARCHED",
+      "strategy_ids": [],
+      "note": ""
+    },
+    {
+      "market": "ZSE",
+      "instrument": "DELTA",
+      "horizon": "SWING",
+      "regime": "BULL",
+      "state": "UNRESEARCHED",
+      "strategy_ids": [],
+      "note": ""
+    },
+    {
+      "market": "ZSE",
+      "instrument": "DELTA",
+      "horizon": "SWING",
+      "regime": "RANGE",
+      "state": "UNRESEARCHED",
+      "strategy_ids": [],
+      "note": ""
+    },
+    {
+      "market": "ZSE",
+      "instrument": "DELTA",
+      "horizon": "SWING",
+      "regime": "TRANSITION",
+      "state": "UNRESEARCHED",
+      "strategy_ids": [],
+      "note": ""
+    },
+    {
+      "market": "ZSE",
+      "instrument": "FBC",
+      "horizon": "POSITION",
+      "regime": "BEAR",
+      "state": "UNRESEARCHED",
+      "strategy_ids": [],
+      "note": ""
+    },
+    {
+      "market": "ZSE",
+      "instrument": "FBC",
+      "horizon": "POSITION",
+      "regime": "BULL",
+      "state": "UNRESEARCHED",
+      "strategy_ids": [],
+      "note": ""
+    },
+    {
+      "market": "ZSE",
+      "instrument": "FBC",
+      "horizon": "POSITION",
+      "regime": "RANGE",
+      "state": "UNRESEARCHED",
+      "strategy_ids": [],
+      "note": ""
+    },
+    {
+      "market": "ZSE",
+      "instrument": "FBC",
+      "horizon": "POSITION",
+      "regime": "TRANSITION",
+      "state": "UNRESEARCHED",
+      "strategy_ids": [],
+      "note": ""
+    },
+    {
+      "market": "ZSE",
+      "instrument": "FBC",
+      "horizon": "SWING",
+      "regime": "BEAR",
+      "state": "UNRESEARCHED",
+      "strategy_ids": [],
+      "note": ""
+    },
+    {
+      "market": "ZSE",
+      "instrument": "FBC",
+      "horizon": "SWING",
+      "regime": "BULL",
+      "state": "UNRESEARCHED",
+      "strategy_ids": [],
+      "note": ""
+    },
+    {
+      "market": "ZSE",
+      "instrument": "FBC",
+      "horizon": "SWING",
+      "regime": "RANGE",
+      "state": "UNRESEARCHED",
+      "strategy_ids": [],
+      "note": ""
+    },
+    {
+      "market": "ZSE",
+      "instrument": "FBC",
+      "horizon": "SWING",
+      "regime": "TRANSITION",
+      "state": "UNRESEARCHED",
+      "strategy_ids": [],
+      "note": ""
+    },
+    {
+      "market": "ZSE",
+      "instrument": "INNSCOR",
+      "horizon": "POSITION",
+      "regime": "BEAR",
+      "state": "UNRESEARCHED",
+      "strategy_ids": [],
+      "note": ""
+    },
+    {
+      "market": "ZSE",
+      "instrument": "INNSCOR",
+      "horizon": "POSITION",
+      "regime": "BULL",
+      "state": "UNRESEARCHED",
+      "strategy_ids": [],
+      "note": ""
+    },
+    {
+      "market": "ZSE",
+      "instrument": "INNSCOR",
+      "horizon": "POSITION",
+      "regime": "RANGE",
+      "state": "UNRESEARCHED",
+      "strategy_ids": [],
+      "note": ""
+    },
+    {
+      "market": "ZSE",
+      "instrument": "INNSCOR",
+      "horizon": "POSITION",
+      "regime": "TRANSITION",
+      "state": "UNRESEARCHED",
+      "strategy_ids": [],
+      "note": ""
+    },
+    {
+      "market": "ZSE",
+      "instrument": "MASIMBA",
+      "horizon": "SWING",
+      "regime": "BEAR",
+      "state": "UNRESEARCHED",
+      "strategy_ids": [],
+      "note": ""
+    },
+    {
+      "market": "ZSE",
+      "instrument": "MASIMBA",
+      "horizon": "SWING",
+      "regime": "BULL",
+      "state": "UNRESEARCHED",
+      "strategy_ids": [],
+      "note": ""
+    },
+    {
+      "market": "ZSE",
+      "instrument": "MASIMBA",
+      "horizon": "SWING",
+      "regime": "RANGE",
+      "state": "UNRESEARCHED",
+      "strategy_ids": [],
+      "note": ""
+    },
+    {
+      "market": "ZSE",
+      "instrument": "MASIMBA",
+      "horizon": "SWING",
+      "regime": "TRANSITION",
+      "state": "UNRESEARCHED",
+      "strategy_ids": [],
+      "note": ""
+    },
+    {
+      "market": "ZSE",
+      "instrument": "OKZIM",
+      "horizon": "SWING",
+      "regime": "BEAR",
+      "state": "UNRESEARCHED",
+      "strategy_ids": [],
+      "note": ""
+    },
+    {
+      "market": "ZSE",
+      "instrument": "OKZIM",
+      "horizon": "SWING",
+      "regime": "BULL",
+      "state": "UNRESEARCHED",
+      "strategy_ids": [],
+      "note": ""
+    },
+    {
+      "market": "ZSE",
+      "instrument": "OKZIM",
+      "horizon": "SWING",
+      "regime": "RANGE",
+      "state": "UNRESEARCHED",
+      "strategy_ids": [],
+      "note": ""
+    },
+    {
+      "market": "ZSE",
+      "instrument": "OKZIM",
+      "horizon": "SWING",
+      "regime": "TRANSITION",
+      "state": "UNRESEARCHED",
+      "strategy_ids": [],
+      "note": ""
+    },
+    {
+      "market": "ZSE",
+      "instrument": "PADENGA",
+      "horizon": "POSITION",
+      "regime": "BEAR",
+      "state": "UNRESEARCHED",
+      "strategy_ids": [],
+      "note": ""
+    },
+    {
+      "market": "ZSE",
+      "instrument": "PADENGA",
+      "horizon": "POSITION",
+      "regime": "BULL",
+      "state": "UNRESEARCHED",
+      "strategy_ids": [],
+      "note": ""
+    },
+    {
+      "market": "ZSE",
+      "instrument": "PADENGA",
+      "horizon": "POSITION",
+      "regime": "RANGE",
+      "state": "UNRESEARCHED",
+      "strategy_ids": [],
+      "note": ""
+    },
+    {
+      "market": "ZSE",
+      "instrument": "PADENGA",
+      "horizon": "POSITION",
+      "regime": "TRANSITION",
+      "state": "UNRESEARCHED",
+      "strategy_ids": [],
+      "note": ""
+    },
+    {
+      "market": "ZSE",
+      "instrument": "SEEDCO",
+      "horizon": "POSITION",
+      "regime": "BEAR",
+      "state": "UNRESEARCHED",
+      "strategy_ids": [],
+      "note": ""
+    },
+    {
+      "market": "ZSE",
+      "instrument": "SEEDCO",
+      "horizon": "POSITION",
+      "regime": "BULL",
+      "state": "UNRESEARCHED",
+      "strategy_ids": [],
+      "note": ""
+    },
+    {
+      "market": "ZSE",
+      "instrument": "SEEDCO",
+      "horizon": "POSITION",
+      "regime": "RANGE",
+      "state": "UNRESEARCHED",
+      "strategy_ids": [],
+      "note": ""
+    },
+    {
+      "market": "ZSE",
+      "instrument": "SEEDCO",
+      "horizon": "POSITION",
+      "regime": "TRANSITION",
+      "state": "UNRESEARCHED",
+      "strategy_ids": [],
+      "note": ""
+    },
+    {
+      "market": "ZSE",
+      "instrument": "SIMBISA",
+      "horizon": "POSITION",
+      "regime": "BEAR",
+      "state": "UNRESEARCHED",
+      "strategy_ids": [],
+      "note": ""
+    },
+    {
+      "market": "ZSE",
+      "instrument": "SIMBISA",
+      "horizon": "POSITION",
+      "regime": "BULL",
+      "state": "UNRESEARCHED",
+      "strategy_ids": [],
+      "note": ""
+    },
+    {
+      "market": "ZSE",
+      "instrument": "SIMBISA",
+      "horizon": "POSITION",
+      "regime": "RANGE",
+      "state": "UNRESEARCHED",
+      "strategy_ids": [],
+      "note": ""
+    },
+    {
+      "market": "ZSE",
+      "instrument": "SIMBISA",
+      "horizon": "POSITION",
+      "regime": "TRANSITION",
+      "state": "UNRESEARCHED",
+      "strategy_ids": [],
+      "note": ""
+    }
+  ]
+}
+_ test_research_cli_closes_real_sqlite_connection_on_success_and_failure[invalid_operation] _
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-372/test_research_cli_closes_real_1')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f0b0b1cbc50>
+operation = 'invalid_operation'
+
+    @pytest.mark.parametrize('operation', ['coverage', 'invalid_operation'])
+    def test_research_cli_closes_real_sqlite_connection_on_success_and_failure(tmp_path, monkeypatch, operation):
+        import sqlite3
+        from argparse import Namespace
+        from vati.__main__ import cmd_research
+        from vati.core.ledger import Ledger
+        from vati.core import ledger_pg
+        ledger = Ledger(tmp_path/'actual.sqlite'); monkeypatch.setattr(ledger_pg, 'open_ledger', lambda _:ledger)
+        spec = tmp_path/'spec.json'; spec.write_text(json.dumps({'operation':operation}))
+        if operation == 'coverage': assert cmd_research(Namespace(spec=str(spec), ledger='configured')) == 0
+        else:
+            with pytest.raises(ValueError, match='unknown trading research'):
+                cmd_research(Namespace(spec=str(spec), ledger='configured'))
+>       with pytest.raises(sqlite3.ProgrammingError, match='closed'):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ProgrammingError
+
+trading/tests/test_forecast_source_partitions.py:102: Failed
+=========================== short test summary info ============================
+FAILED trading/tests/test_forecast_source_partitions.py::test_research_cli_closes_real_sqlite_connection_on_success_and_failure[coverage]
+FAILED trading/tests/test_forecast_source_partitions.py::test_research_cli_closes_real_sqlite_connection_on_success_and_failure[invalid_operation]
+2 failed in 0.98s

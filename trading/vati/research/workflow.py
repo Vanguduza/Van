@@ -33,7 +33,7 @@ from vati.validation.builder import (
 class TradingResearchWorkflow:
     """Reachable slow-loop orchestrator with no live trading authority."""
 
-    def __init__(self, *, ledger=None, clock=None) -> None:
+    def __init__(self, *, ledger=None, clock=None, native_bar_partitions=None) -> None:
         self.ledger = ledger
         self.clock = clock or (lambda: int(time.time() * 1000))
         self.overlap = StrategyOverlapDetector()
@@ -42,6 +42,7 @@ class TradingResearchWorkflow:
         self.exit_research = ExitPolicyResearchEngine()
         self.evidence = TradingEvidenceCollector()
         self.disagreement = MarketDataDisagreementDetector()
+        self.native_bar_partitions = native_bar_partitions
 
     def _log(self, kind: EventKind, payload: dict, *, correlation_id: str = "") -> None:
         if self.ledger is None:
@@ -156,6 +157,15 @@ class TradingResearchWorkflow:
         TradingMandate mutation, capsule promotion, or protection mutation.
         """
         op = str(spec.get("operation", "")).strip().lower()
+
+        if op == "native_bar_source_partition":
+            from vati_forecast_worker.source_partitions import SourcePartitionError
+            if set(spec) != {"operation", "window", "expected_scope"}:
+                raise SourcePartitionError("PARTITION_EXACT_OPERATION_FIELDS_REQUIRED")
+            if self.native_bar_partitions is None:
+                raise SourcePartitionError("PARTITION_SOURCE_OWNER_UNAVAILABLE")
+            return {"operation": op, "partition": self.native_bar_partitions.publish(
+                spec["window"], expected_scope=spec["expected_scope"])}
 
         if op == "strategy_certificate":
             raw = dict(spec["validation"])
