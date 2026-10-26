@@ -9,8 +9,30 @@ from vati.execution.base import VenueUnavailable
 from vati.execution.ctrader.transport import CtraderApiError
 from vati.funding.journal import FundingBook
 from vati.funding.native import NativeAccountMark,native_int
+from vati.core.units import UnitError
+from vati.funding.movement_journal import FinancialMovementBook,MovementPublicationUnknown,STORAGE_ERRORS
 
 WEEK_MS=604800000
+
+def _financial_projection(ledger,scope_hash,*,materialize=False):
+    book=FinancialMovementBook(ledger)
+    try:
+        if not materialize:return book.projection(scope_hash)
+        result=book.materialize(scope_hash)
+        # Repeated account snapshots retain a bounded receipt summary. The
+        # current owner read model independently resolves original detail.
+        rows=result.pop('movements')
+        result['last_publication']=rows[-1]['publication'] if rows else None
+        return result
+    except MovementPublicationUnknown as error:
+        return {'state':'UNKNOWN','reason':'FINANCIAL_PUBLICATION_UNKNOWN_RECONCILE_ORIGINAL_REQUEST',
+            'original_request_id':error.request_id,'scope_hash':scope_hash,
+            'current_original_source_verified':False,'settlement_qualification':'NOT_ISSUED',
+            'risk_capital_qualified':False,'execution_authority':False}
+    except (UnitError,*STORAGE_ERRORS):
+        return {'state':'UNAVAILABLE','reason':'FINANCIAL_PROJECTION_UNAVAILABLE','scope_hash':scope_hash,
+            'current_original_source_verified':False,'settlement_qualification':'NOT_ISSUED',
+            'risk_capital_qualified':False,'execution_authority':False}
 
 def _capture_deals(ledger,adapter,mark):
     from vati.funding.deal_journal import DealBook
@@ -62,10 +84,12 @@ def capture_funding(ledger,adapter,account,*,now_ms):
     # Journal failures propagate: an observation must never appear saved after a
     # failed commit. Repeating the original window recovers a lost commit ACK.
     receipt=book.record_statement(statement)
+    financial_movements=_financial_projection(ledger,mark.scope_hash,materialize=True)
     deal_observation=_capture_deals(ledger,adapter,mark)
     return result|{'state':'CONFLICT' if receipt['state']=='CONFLICT' or prior['state']=='CONFLICT' else 'OBSERVED',
         'statement':receipt,'coverage_from_ms':start,'coverage_to_ms':end,
         'deal_observation':deal_observation,
+        'financial_movements':financial_movements,
         'catch_up_state':'PENDING' if end<mark.observed_at_ms else 'CURRENT_WINDOW_READ'}
 
 def reported_funding(ledger,event,account_record):
@@ -74,7 +98,10 @@ def reported_funding(ledger,event,account_record):
 def _reported_funding(ledger,event,account_record):
     """Read only facts linked by the original account snapshot and native scope."""
     unknown={'state':'UNMEASURED','reason':'NO_NATIVE_FUNDING_OBSERVATION','return_qualification':'NOT_ISSUED',
-        'execution_authority':False,'movements':[],'movement_count':0}
+        'execution_authority':False,'movements':[],'movement_count':0,
+        'financial_movements':{'state':'UNSUPPORTED','reason':'NATIVE_EXACT_CASH_POSTING_NOT_PROVIDED',
+            'current_original_source_verified':False,'settlement_qualification':'NOT_ISSUED',
+            'risk_capital_qualified':False,'execution_authority':False}}
     if event is None:return unknown
     p=event.payload;observation=p.get('funding_observation')
     if not isinstance(observation,dict):return unknown
@@ -111,4 +138,5 @@ def _reported_funding(ledger,event,account_record):
             'deals':deal_facts['deals'][-100:],'deals_truncated':len(deal_facts['deals'])>100,
             'coverage_windows':deal_facts['coverage_windows'],'conflicts':deal_facts['conflicts']},
         'period':period_report(ledger,mark['scope_hash']),
+        'financial_movements':_financial_projection(ledger,mark['scope_hash']),
         'catch_up_state':observation.get('catch_up_state','UNKNOWN')}

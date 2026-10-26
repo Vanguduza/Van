@@ -109,7 +109,8 @@ def test_corrected_research_cannot_be_presented_as_as_observed_advisory(environm
 
 
 @pytest.mark.parametrize('raw', [b'{"scope":{},"scope":{}}', b'{"row_count":NaN}', b'{"row_count":Infinity}',
-    b'\xff', b'[]', b'x'*(MAX_MANIFEST_BYTES+1)])
+    b'\xff', b'[]', b'x'*(MAX_MANIFEST_BYTES+1)],
+    ids=['duplicate-key','nan','infinity','invalid-utf8','wrong-shape','over-byte-capacity'])
 def test_raw_byte_boundary_refuses_duplicate_keys_nonfinite_invalid_and_oversize_input(raw):
     with pytest.raises(DatasetContractError): DatasetManifestCandidate(raw)
 

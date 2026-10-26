@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="1" time="2.409" timestamp="2026-10-26T18:11:39.114000+00:00" hostname="2c5a245e39f1"><testcase classname="trading.tests.test_financial_movement_journal" name="test_unknown_and_caller_owned_transactions_cannot_claim_committed_projection[sqlite]" time="0.042"><failure message="Failed: DID NOT RAISE UnitError">book = (&lt;vati.core.ledger.Ledger object at 0x7fe5e79ec350&gt;, &lt;vati.funding.movement_journal.FinancialMovementBook object at 0x...version=9, occurred_at_ms=1500, money_digits=8),)), 'becc530bc24b7acd785ad72793add5a1d0c2418a4b5148c93c3e97d5ab89c68b')
+
+    def test_unknown_and_caller_owned_transactions_cannot_claim_committed_projection(book):
+        ledger,journal,native,ref=book
+        with ledger.atomic():
+&gt;           with pytest.raises(UnitError,match='OWN_WRITER'):publish(book)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           Failed: DID NOT RAISE UnitError
+
+trading/tests/test_financial_movement_journal.py:65: Failed</failure></testcase></testsuite></testsuites>

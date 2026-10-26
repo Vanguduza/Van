@@ -122,7 +122,9 @@
         "backend/BE-006_FUNDING_BASELINE_PRESERVATION.md; receipts/FUNDING_BASELINE_PRESERVATION_SOURCE_20261024.json",
         "backend/BE-004_006_NATIVE_ACCOUNT_OBSERVATION.md; receipts/NATIVE_ACCOUNT_OBSERVATION_SOURCE_20261024.json",
         "backend/BE-006_DETERMINISTIC_REPORT_CONTEXT.md",
-        "receipts/FUNDING_REPORT_CONTEXT_SOURCE_20261026.json"
+        "receipts/FUNDING_REPORT_CONTEXT_SOURCE_20261026.json",
+        "backend/BE-006_EXACT_NATIVE_POSTINGS.md",
+        "receipts/EXACT_NATIVE_POSTINGS_SOURCE_20261026.json"
       ]
     },
     "BE-020": {
@@ -300,26 +302,26 @@
     "note": "Opus unavailable; owner transferred build to Codex. No independent reviewer identity is inferred from another model or session."
   },
   "checkpoint": {
-    "updated_utc": "2026-10-26T12:36:10.774469+00:00",
+    "updated_utc": "2026-10-26T18:13:30.506993+00:00",
     "branch": "ccr-9e07e1af-8mgz1p",
     "base": "b02075f327ea8180ab6d269eba358cf8c5479878",
     "background_jobs": [
       {
         "kind": "van-ci",
-        "id": 40302746537,
-        "head": "83f2688a6414b5e81358c051418d0fe85ee0a3fb",
-        "state": "TERMINAL_FAILURE_17_PUBLIC_SOURCE_SUCCESS_TWO_UNWAIVED_PREREQUISITES",
+        "id": 40367094242,
+        "head": "3205594c907665732e69dcac26852ff28078c48a",
+        "state": "TERMINALFAILED16publicSUCCESS/twomandatoryunwaived/postgrescancelled35min;actualtrading3828/1privateDDSskip+PG26;voicenotexecuted;374canonicalcaughtonce/383edits;15archivesverified",
         "not_acceptance": true
       },
       {
         "kind": "van-forecast-runtime-source",
-        "id": 40302746531,
-        "head": "83f2688a6414b5e81358c051418d0fe85ee0a3fb",
-        "state": "SUCCESS_BOTH_JOBS;68nativeParquetcases0skip/audit0;6upstreamfixturecases/3coldmodels/232versions/bothworkersremoved;actual2archives/source/controller/report/treeverified",
+        "id": 40367094028,
+        "head": "3205594c907665732e69dcac26852ff28078c48a",
+        "state": "SUCCESSbothjobs114nativeParquetSQL0skip/audit0;6syntheticfixtures/3coldmodels10-10-2parity0/232versions/kernelcaps/cleanup/source-controller-reporthashes/tree-equivalentactualmerge8d50404f49304c80e59dd93bcf95a33ad8cb8c3e verified",
         "not_acceptance": true
       }
     ],
-    "last_validation": "Confirmed ambient Decimal rounding/traps/exponent settings changed or broke identical native-scoped unitization reports. Explicit report Context now fixes80-digit ROUND_HALF_EVEN and standard bounds/traps while exact Fraction calculations,normal outputs and all risk/unknown states remain unchanged.9actual regressions retained;24focused and219final actual-PG funding/cash/balance passes,0skips/audit0/final runtime-test hashes match/owned fixture independently absent. Startup-only refusal retained. Component only;fullBE006 remains IN_PROGRESS.",
+    "last_validation": "Exact scoped Money/Quantity/Posting/FinancialMovement derives native cTrader cash into the existing SQL ledger with original request/native identity, writer CAS, globalcapacity, independent readback and historical-vs-current conflict state. Actual separate funding worker resumes bounded older-window backfill; owner reads independently resolve exact detail and never write. Restrictedcredit uses memorandum/control,unknown/sign conflicts use suspense,MT5 remainsunsupported,no risk/settlement/alpha/authority claim. Five real JSONtype failures fixed with canonical comparison;331 final actual-PG checks0skip/audit0/all483runtime-testhashesmatch/ownedfixtureabsent,9supplementalassertionfaults/36positive+36restoredcontrols,112rebuild/workflowchecks. WholeBE006 remainsIN_PROGRESS.",
     "environment_notes": [
       "clone must be unshallowed (git fetch --unshallow) and PR heads fetched (+refs/pull/*/head:refs/remotes/origin/pr/*) before pre001.py",
       "pytest from backend/requirements.txt in a venv",
@@ -404,9 +406,9 @@
     "tested_android_head": "752d265b11ba643ed309481b110248f8b7fe323b",
     "hosted_result": "receipts/HOSTED_SOURCE_752d265b.json",
     "mutation_reconciliation": "ci/MUTATION_RECONCILIATION.md and ci/MUTATION_RECONCILIATION_MAPPING.json",
-    "verified_source_head": "16414d3f4d413a75736a65ddeaaee2f04dcfa7ab published; genuine GREEN154; current candidate publication uncommitted",
-    "source_qualification_run": 40255331558,
-    "latest_checkpoint_report": "docs/rebuild/rev118/CHECKPOINT_20261026_FUNDING_REPORT_CONTEXT.md",
+    "verified_source_head": "3205594c907665732e69dcac26852ff28078c48a published;genuineGREEN157;current exactnativepostingscandidate uncommitted",
+    "source_qualification_run": 40367094242,
+    "latest_checkpoint_report": "docs/rebuild/rev118/CHECKPOINT_20261026_EXACT_NATIVE_POSTINGS.md",
     "previous_verified_source": "3c6969ebbec39f2ad9f2836a6bd8acdb487adc34 published; exact CI40228254162 all17public jobs pass, two unchanged prerequisite failures",
     "qualification_scope": "Public source tests only; mandatory/native/owner/production gates unissued."
   },
@@ -426,6 +428,6 @@
       "evidence": "ci/MUTATION_CORPUS_c2a27848.json"
     }
   ],
-  "current_action": "Finish funding report fix checks/evidence/manifest/verified stagedbackup/genuine hook commit/committed baseline verification;wait parent6698 main terminal before normal push/readback. Inspect exact new CI and continue full funding/account/payment and ML005/backend work. No formal acceptances.",
-  "updated_at_utc": "2026-10-26T12:36:10.774469+00:00"
+  "current_action": "Finish exactnativepostingsevidence/manifest/verifiedstagedbackup/genuinehookcommit/committedbaselineverification;normalpush/readbackandinspectexactfreshhostedCI. ContinueBE006/BE007/ML005andfullcanonicalbackendprogramme,thenAndroidandactualArtemisS24acceptancewhenprerequisites/bindingpermit.0formalacceptances.",
+  "updated_at_utc": "2026-10-26T18:13:30.506993+00:00"
 }

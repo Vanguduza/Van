@@ -1,0 +1,3 @@
+trading/tests/test_exact_units.py
+trading/tests/test_financial_movement_projection.py
+trading/tests/test_financial_movement_journal.py
