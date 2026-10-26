@@ -1,0 +1,77 @@
+F.................F..................................................... [ 78%]
+....................                                                     [100%]
+=================================== FAILURES ===================================
+_ test_pinned_codec_preserves_hidden_archived_and_omitted_fields_without_execution_contracts _
+
+    def test_pinned_codec_preserves_hidden_archived_and_omitted_fields_without_execution_contracts():
+        source=SCHEMA.decode('ProtoOASymbolsListRes',SCHEMA.encode('ProtoOASymbolsListRes',response()))
+>       value=captured(response=source);members=value.members()
+              ^^^^^^^^^^^^^^^^^^^^^^^^^
+
+trading/tests/test_native_symbol_catalog.py:30: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+trading/tests/test_native_symbol_catalog.py:25: in captured
+    return NativeSymbolCatalog.capture(**({'scope':SCOPE,'response':response(),'received_at_ms':NOW,'include_archived_symbols':True}|changes))
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/execution/ctrader/catalog.py:92: in capture
+    return cls(canonical_json(metadata),received_at_ms)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+<string>:5: in __init__
+    ???
+trading/vati/execution/ctrader/catalog.py:85: in __post_init__
+    _validate_response(metadata['response'],scope['native_account_id'],self.received_at_ms,metadata['include_archived_symbols'])
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+response = {'archivedSymbol': [{'name': 'Old', 'symbolId': 4, 'utcLastUpdateTimestamp': 1799999900000}], 'ctidTraderAccountId': 1...2, 'symbolId': 1, ...}, {'description': '', 'enabled': False, 'symbolId': 2, 'symbolName': 'Hidden'}, {'symbolId': 3}]}
+account = 12345, received = 1800000000000, include_archived = True
+
+    def _validate_response(response,account,received,include_archived):
+        if not isinstance(response,dict) or set(response)-{f.name for f in SCHEMA.messages['ProtoOASymbolsListRes']}:
+            raise ValueError('native catalog response format incompatible')
+        if native_integer(response['ctidTraderAccountId'],minimum=1)!=account:
+            raise ValueError('native catalog response account differs')
+        if 'payloadType' in response and (type(response['payloadType']) is not int
+                or response['payloadType']!=SCHEMA.payload_type['ProtoOASymbolsListRes']):
+>           raise ValueError('native catalog response payload type differs')
+E           ValueError: native catalog response payload type differs
+
+trading/vati/execution/ctrader/catalog.py:42: ValueError
+_ test_actual_independent_native_reader_requests_archived_rows_and_no_order_messages _
+
+    def test_actual_independent_native_reader_requests_archived_rows_and_no_order_messages():
+        peer=CatalogPeer();parent=make_adapter(peer);reader=parent.market_reader()
+        try:
+>           value=reader.read_catalog(SCOPE)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+trading/tests/test_native_symbol_catalog.py:95: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+trading/vati/execution/ctrader/adapter.py:236: in read_catalog
+    captured=NativeSymbolCatalog.capture(scope=scope,response=body,
+trading/vati/execution/ctrader/catalog.py:92: in capture
+    return cls(canonical_json(metadata),received_at_ms)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+<string>:5: in __init__
+    ???
+trading/vati/execution/ctrader/catalog.py:85: in __post_init__
+    _validate_response(metadata['response'],scope['native_account_id'],self.received_at_ms,metadata['include_archived_symbols'])
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+response = {'archivedSymbol': [{'name': 'Old', 'symbolId': 4, 'utcLastUpdateTimestamp': 1799999900000}], 'ctidTraderAccountId': 1...2, 'symbolId': 1, ...}, {'description': '', 'enabled': False, 'symbolId': 2, 'symbolName': 'Hidden'}, {'symbolId': 3}]}
+account = 12345, received = 1700000000000, include_archived = True
+
+    def _validate_response(response,account,received,include_archived):
+        if not isinstance(response,dict) or set(response)-{f.name for f in SCHEMA.messages['ProtoOASymbolsListRes']}:
+            raise ValueError('native catalog response format incompatible')
+        if native_integer(response['ctidTraderAccountId'],minimum=1)!=account:
+            raise ValueError('native catalog response account differs')
+        if 'payloadType' in response and (type(response['payloadType']) is not int
+                or response['payloadType']!=SCHEMA.payload_type['ProtoOASymbolsListRes']):
+>           raise ValueError('native catalog response payload type differs')
+E           ValueError: native catalog response payload type differs
+
+trading/vati/execution/ctrader/catalog.py:42: ValueError
+=========================== short test summary info ============================
+FAILED trading/tests/test_native_symbol_catalog.py::test_pinned_codec_preserves_hidden_archived_and_omitted_fields_without_execution_contracts
+FAILED trading/tests/test_native_symbol_catalog.py::test_actual_independent_native_reader_requests_archived_rows_and_no_order_messages
+2 failed, 90 passed in 6.00s

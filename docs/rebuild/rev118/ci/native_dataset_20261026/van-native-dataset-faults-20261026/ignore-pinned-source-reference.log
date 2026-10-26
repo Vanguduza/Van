@@ -1,0 +1,71 @@
+...FFF..........F.........                                               [100%]
+=================================== FAILURES ===================================
+_ test_same_ticker_from_other_native_scope_cannot_supply_a_boundary[account_id-999] _
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-343/test_same_ticker_from_other_na0')
+field = 'account_id', value = 999
+
+    @pytest.mark.parametrize('field,value',[('account_id',999),('transport_host','live.ctraderapi.com'),
+        ('light',{'symbolId':13,'symbolName':'EUR/USD','enabled':True})])
+    def test_same_ticker_from_other_native_scope_cannot_supply_a_boundary(tmp_path,field,value):
+        book,c,sample,first=original(tmp_path);change={field:value}
+        if field=='light':change['detail']=dict(c.metadata['detail'],symbolId=13)
+        other=contract(**change);second=book.record('other-native-scope',other,replace(observation(other),has_more=False))
+>       with pytest.raises(NativeArchiveError,match='BOUNDARY_CONFLICT'):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE NativeArchiveError
+
+trading/tests/test_native_bar_windows.py:63: Failed
+_ test_same_ticker_from_other_native_scope_cannot_supply_a_boundary[transport_host-live.ctraderapi.com] _
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-343/test_same_ticker_from_other_na1')
+field = 'transport_host', value = 'live.ctraderapi.com'
+
+    @pytest.mark.parametrize('field,value',[('account_id',999),('transport_host','live.ctraderapi.com'),
+        ('light',{'symbolId':13,'symbolName':'EUR/USD','enabled':True})])
+    def test_same_ticker_from_other_native_scope_cannot_supply_a_boundary(tmp_path,field,value):
+        book,c,sample,first=original(tmp_path);change={field:value}
+        if field=='light':change['detail']=dict(c.metadata['detail'],symbolId=13)
+        other=contract(**change);second=book.record('other-native-scope',other,replace(observation(other),has_more=False))
+>       with pytest.raises(NativeArchiveError,match='BOUNDARY_CONFLICT'):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE NativeArchiveError
+
+trading/tests/test_native_bar_windows.py:63: Failed
+_ test_same_ticker_from_other_native_scope_cannot_supply_a_boundary[light-value2] _
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-343/test_same_ticker_from_other_na2')
+field = 'light'
+value = {'symbolId': 13, 'symbolName': 'EUR/USD', 'enabled': True}
+
+    @pytest.mark.parametrize('field,value',[('account_id',999),('transport_host','live.ctraderapi.com'),
+        ('light',{'symbolId':13,'symbolName':'EUR/USD','enabled':True})])
+    def test_same_ticker_from_other_native_scope_cannot_supply_a_boundary(tmp_path,field,value):
+        book,c,sample,first=original(tmp_path);change={field:value}
+        if field=='light':change['detail']=dict(c.metadata['detail'],symbolId=13)
+        other=contract(**change);second=book.record('other-native-scope',other,replace(observation(other),has_more=False))
+>       with pytest.raises(NativeArchiveError,match='BOUNDARY_CONFLICT'):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE NativeArchiveError
+
+trading/tests/test_native_bar_windows.py:63: Failed
+_ test_unknown_revision_scope_clock_or_interval_never_becomes_empty_success[changes2] _
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-343/test_unknown_revision_scope_cl2')
+changes = {'boundary_ref': 'ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff'}
+
+    @pytest.mark.parametrize('changes',[{'through_revision':True},{'through_revision':2},{'boundary_ref':'f'*64},
+        {'as_of_ms':400001},{'from_ms':True},{'to_ms':120000}])
+    def test_unknown_revision_scope_clock_or_interval_never_becomes_empty_success(tmp_path,changes):
+        book,c,sample,first=original(tmp_path)
+>       with pytest.raises(NativeArchiveError):capture(book,c,first,**changes)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE NativeArchiveError
+
+trading/tests/test_native_bar_windows.py:113: Failed
+=========================== short test summary info ============================
+FAILED trading/tests/test_native_bar_windows.py::test_same_ticker_from_other_native_scope_cannot_supply_a_boundary[account_id-999]
+FAILED trading/tests/test_native_bar_windows.py::test_same_ticker_from_other_native_scope_cannot_supply_a_boundary[transport_host-live.ctraderapi.com]
+FAILED trading/tests/test_native_bar_windows.py::test_same_ticker_from_other_native_scope_cannot_supply_a_boundary[light-value2]
+FAILED trading/tests/test_native_bar_windows.py::test_unknown_revision_scope_clock_or_interval_never_becomes_empty_success[changes2]
+4 failed, 22 passed in 1.42s

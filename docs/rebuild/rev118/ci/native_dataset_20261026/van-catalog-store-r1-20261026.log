@@ -1,0 +1,23 @@
+.....F........................................................           [100%]
+=================================== FAILURES ===================================
+______ test_global_byte_capacity_is_checked_before_new_scope_publication _______
+
+source = (<vati.core.ledger.Ledger object at 0x7f338215d3d0>, <vati.market_data.catalog_store.NativeCatalogStore object at 0x7f338215e4b0>)
+
+    def test_global_byte_capacity_is_checked_before_new_scope_publication(source):
+        ledger,store=source;store.record('one',captured())
+        other=captured(scope=SCOPE|{'native_account_id':999},response=response()|{'ctidTraderAccountId':999})
+        store.record('other-account',other)
+        original_bytes=sum(len(canonical_json(e.body()).encode()) for e in ledger.iter())
+        store.max_bytes=original_bytes+200
+        before=ledger.count();head=ledger.head()
+        with pytest.raises(CatalogArchiveError,match='byte capacity'):store.record('new-for-first-account',captured())
+>       assert ledger.count()==before and ledger.head()==head
+E       assert (3 == 2)
+E        +  where 3 = count()
+E        +    where count = <vati.core.ledger.Ledger object at 0x7f338215d3d0>.count
+
+trading/tests/test_native_catalog_store.py:75: AssertionError
+=========================== short test summary info ============================
+FAILED trading/tests/test_native_catalog_store.py::test_global_byte_capacity_is_checked_before_new_scope_publication
+1 failed, 61 passed in 1.16s

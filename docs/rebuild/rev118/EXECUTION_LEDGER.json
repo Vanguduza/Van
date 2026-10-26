@@ -152,7 +152,9 @@
         "backend/BE-008_NATIVE_READ_CAPACITY.md",
         "receipts/NATIVE_READ_CAPACITY_SOURCE_20261025.json",
         "backend/BE-008_NATIVE_QUOTE_ARCHIVE.md",
-        "receipts/NATIVE_QUOTE_ARCHIVE_SOURCE_20261025.json"
+        "receipts/NATIVE_QUOTE_ARCHIVE_SOURCE_20261025.json",
+        "backend/VAN-ML-PKT-005_NATIVE_CATALOG_WINDOWS.md",
+        "receipts/NATIVE_DATASET_SOURCE_20261026.json"
       ]
     },
     "BE-014": {
@@ -193,6 +195,22 @@
         "receipts/FORECAST_RUNTIME_SOURCE_20261026.json",
         "backend/VAN-ML-PKT-004_WHEEL_REPRODUCIBILITY.md",
         "receipts/FORECAST_BUILD_RECOVERY_20261026.json"
+      ]
+    },
+    "VAN-ML-PKT-005": {
+      "status": "IN_PROGRESS",
+      "candidate_source_only": true,
+      "acceptance": "NOT_ISSUED",
+      "depends": [
+        "BE-001",
+        "BE-008",
+        "BE-010",
+        "PRE-003",
+        "VAN-ML-PKT-004"
+      ],
+      "evidence": [
+        "backend/VAN-ML-PKT-005_NATIVE_CATALOG_WINDOWS.md",
+        "receipts/NATIVE_DATASET_SOURCE_20261026.json"
       ]
     }
   },
@@ -266,26 +284,26 @@
     "note": "Opus unavailable; owner transferred build to Codex. No independent reviewer identity is inferred from another model or session."
   },
   "checkpoint": {
-    "updated_utc": "2026-10-26T05:26:36.282873+00:00",
+    "updated_utc": "2026-10-26T08:18:35.046514+00:00",
     "branch": "ccr-9e07e1af-8mgz1p",
     "base": "b02075f327ea8180ab6d269eba358cf8c5479878",
     "background_jobs": [
       {
         "kind": "van-ci",
-        "id": 40272681203,
-        "head": "156473fcaf28c5407fc558d04de09c3643e34a9c",
-        "state": "IN_PROGRESS_TWO_KNOWN_UNWAIVED_PREREQUISITE_FAILURES",
+        "id": 40276672885,
+        "head": "a66096fdabc8eef1ecbcf7140dc071d8f65f1d16",
+        "state": "TERMINAL_FAILURE_17_PUBLIC_SOURCE_JOBS_SUCCESS_TWO_UNWAIVED_PREREQUISITES",
         "not_acceptance": true
       },
       {
         "kind": "van-forecast-runtime-source",
-        "id": 40272681283,
-        "head": "156473fcaf28c5407fc558d04de09c3643e34a9c",
-        "state": "FAILED_STRICT_GYM_WHEEL_HASH_MODELS_SKIPPED",
+        "id": 40276672824,
+        "head": "a66096fdabc8eef1ecbcf7140dc071d8f65f1d16",
+        "state": "SUCCESS_EXACT_SOURCE_FIXTURE_NOT_UNIT_ACCEPTANCE",
         "not_acceptance": true
       }
     ],
-    "last_validation": "ExistingRSSCLI uses shared single-batch durable file path/cold recovery;originalJSON optionalledger/counts preserved;typedpartial/unavailable/recovery/lostACK states and ownledgerclose.9beforefailures/1legacypositive;114local+4PGdeselected executed in832actualPG0skip/audit0/exact hashes/ownedfixture absent.5supplemental faults caught/restored after15controls. Published156forecastrecipeFAILEDstrictGymhash beforemodels;fixedseed artifact buildsbyte-identical62ee4cd5...,212othermembers match original,metadata multiset/order only;hashesremainstrict,newfullimage/model executionPENDING. Finalcanonicalchecks108PASS,owner/frontendno drift,canonical374/383mutationregistry0findings(notexecution),consolidation0findings.",
+    "last_validation": "Native archived/hidden/visible catalog viaactualpinnedreadonlyprotobuf reader;canonical capture/schema/scope/clock metadata;dedicatedSQLite/PostgreSQL originalcatalogstore and collector withindependentreadback,replay/unknown/corrupt/missing states. Pinned nativebar windows preserveexplicitordinal+ref+cutoff,perbar corrections andunknowncoverage/spread.1042broadPG0skip/audit0;212finalPG0skip/audit0/exacthash/independentcleanup withspawnedprocesses;8supplementalassertionfaultscaught/restored. FullML005dataset/Parquet/entitlement/calendar/joins/producerconsumer andindependentacceptance remain. 108rebuildPASS;owner/frontendnodrift;canonical374/383registrypreflight0findings(notexecution);consolidation0findings.",
     "environment_notes": [
       "clone must be unshallowed (git fetch --unshallow) and PR heads fetched (+refs/pull/*/head:refs/remotes/origin/pr/*) before pre001.py",
       "pytest from backend/requirements.txt in a venv",
@@ -295,7 +313,7 @@
       "Python 3.12 venv from backend/requirements.lock for CI-equivalent runs; stream-host venv from deploy/van-browser-stream/requirements.lock",
       "Desktop Commander read-only device listing was refused by the session permission policy; native readback prepared as pre003/NATIVE_READBACK_REQUEST.md"
     ],
-    "next_action": "Finalcanonicalchecks/manifest/backup,genuinehookcommit/baselineverify;keep156mainCI untilterminalbefore nextnormalpush;qualify newfixedseedprofile onfreshhostedworker,thencontinuecanonicalbackendwork.",
+    "next_action": "Canonicalchecks/manifest/verifiedbackup,genuinehookcommit/baselineverify/normalpush;exacta660CIterminal17publicpass/2unwaivedmandatoryfailures andforecastSUCCESS retained. ContinuefullML005immutableDatasetManifest/Parquet/actualownerreferences/entitlements/calendar/joins;do not markunitcomplete.",
     "previous_head": "02ff56b996a7b894a7e3e070f2d90ef197db5aaa",
     "current_packet": "BE014 RSS2 original source snapshots;768final actualPG/185controls/8faults;component only",
     "ci_credential_capability": "receipts/CI_CREDENTIAL_CAPABILITY_20261024.json: repo admin metadata available, integration secret/deploy-key reads403; no credential changes.",
@@ -311,7 +329,7 @@
       "evidence": "receipts/NATIVE_MQL_COMPILED_752d265b.json",
       "qualification": "Signed compiler and deliberate invalid probe/source blob/artifact checks;network-blocked SDK initialization only;no account/broker/order/deployment/device acceptance"
     },
-    "head": "156473fcaf28c5407fc558d04de09c3643e34a9c"
+    "head": "a66096fdabc8eef1ecbcf7140dc071d8f65f1d16"
   },
   "observations": [
     "OBS-001 BE-002 debug cleartext",
@@ -364,7 +382,7 @@
     "mutation_reconciliation": "ci/MUTATION_RECONCILIATION.md and ci/MUTATION_RECONCILIATION_MAPPING.json",
     "verified_source_head": "02ff56b996a7b894a7e3e070f2d90ef197db5aaa local genuine commit/GREEN147;published752,ready for normal push afterRSS",
     "source_qualification_run": 40255331558,
-    "latest_checkpoint_report": "docs/rebuild/rev118/CHECKPOINT_20261026_FORECAST_RUNTIME.md",
+    "latest_checkpoint_report": "docs/rebuild/rev118/CHECKPOINT_20261026_NATIVE_DATASETS.md",
     "previous_verified_source": "3c6969ebbec39f2ad9f2836a6bd8acdb487adc34 published; exact CI40228254162 all17public jobs pass, two unchanged prerequisite failures",
     "qualification_scope": "Public source tests only; mandatory/native/owner/production gates unissued."
   },
@@ -384,6 +402,6 @@
       "evidence": "ci/MUTATION_CORPUS_c2a27848.json"
     }
   ],
-  "current_action": "Finalcanonicalchecks/manifest/backup,genuinehookcommit/baselineverify;keep156mainCI untilterminalbefore nextnormalpush;qualify newfixedseedprofile onfreshhostedworker,thencontinuecanonicalbackendwork.",
-  "updated_at_utc": "2026-10-26T05:26:36.282873+00:00"
+  "current_action": "Canonicalchecks/manifest/verifiedbackup,genuinehookcommit/baselineverify/normalpush;exacta660CIterminal17publicpass/2unwaivedmandatoryfailures andforecastSUCCESS retained. ContinuefullML005immutableDatasetManifest/Parquet/actualownerreferences/entitlements/calendar/joins;do not markunitcomplete.",
+  "updated_at_utc": "2026-10-26T08:18:35.046514+00:00"
 }

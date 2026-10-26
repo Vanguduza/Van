@@ -1,0 +1,55 @@
+......F................................................................  [100%]
+=================================== FAILURES ===================================
+____ test_contract_enabled_revision_remains_exact_in_past_source_membership ____
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-330/test_contract_enabled_revision0')
+
+    def test_contract_enabled_revision_remains_exact_in_past_source_membership(tmp_path):
+        book,c,sample,first=original(tmp_path);past=capture(book,c,first)
+>       disabled=contract(light=dict(c.metadata['light'],enabled=False),received_at_ms=200000)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+trading/tests/test_native_bar_windows.py:72: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+trading/tests/test_native_market_archive.py:28: in contract
+    return NativeSymbolContract.capture(**fields)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/execution/ctrader/contracts.py:80: in capture
+    return cls(canonical_json(metadata), received_at_ms)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+<string>:5: in __init__
+    ???
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = NativeSymbolContract(metadata_json='{"detail":{"digits":5,"lotSize":10000000,"maxVolume":1000000000,"minVolume":1000,"...ative_account_id":123,"schema":"vati.ctrader-symbol/1","transport_host":"demo.ctraderapi.com"}', received_at_ms=200000)
+
+    def __post_init__(self):
+        native_integer(self.received_at_ms, maximum=253402300799000)
+        if not isinstance(self.metadata_json, str) or len(self.metadata_json.encode()) > 262144:
+            raise ValueError('native contract metadata resource bound')
+        metadata = json.loads(self.metadata_json)
+        _finite_json(metadata)
+        if (not isinstance(metadata, dict) or set(metadata) != {
+                'schema', 'native_account_id', 'transport_host', 'light', 'detail'}
+                or metadata['schema'] != 'vati.ctrader-symbol/1'
+                or canonical_json(metadata) != self.metadata_json):
+            raise ValueError('native contract metadata format invalid')
+        native_integer(metadata['native_account_id'], minimum=1)
+        host = metadata['transport_host']
+        if host is not None and (not isinstance(host, str) or not host or len(host) > 253):
+            raise ValueError('native contract host invalid')
+        light, detail = metadata['light'], metadata['detail']
+        if not isinstance(light, dict) or not isinstance(detail, dict):
+            raise ValueError('native contract original metadata unavailable')
+        if (not {'symbolId', 'symbolName', 'enabled'} <= light.keys()
+                or not {'symbolId', 'digits', 'pipPosition', 'lotSize', 'minVolume', 'maxVolume', 'stepVolume'} <= detail.keys()):
+            raise ValueError('native contract mandatory metadata unavailable')
+        product = native_integer(light['symbolId'], minimum=1)
+        if native_integer(detail['symbolId'], minimum=1) != product or light.get('enabled') is not True:
+>           raise ValueError('native contract product scope invalid')
+E           ValueError: native contract product scope invalid
+
+trading/vati/execution/ctrader/contracts.py:64: ValueError
+=========================== short test summary info ============================
+FAILED trading/tests/test_native_bar_windows.py::test_contract_enabled_revision_remains_exact_in_past_source_membership
+1 failed, 70 passed in 3.05s

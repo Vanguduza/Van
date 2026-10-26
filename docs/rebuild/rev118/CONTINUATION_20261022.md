@@ -777,3 +777,10 @@ ExistingRSSCLI uses shared single-batch durable file path/cold recovery;original
 Next: finish canonicalchecks/manifest/verifiedbackup and genuinecommit/committedledger;normalpush after156mainCIterminal;newexacthostedforecastbuild must executeallmodelsteps before any newprofilequalification. Continue originalbackendprogramme;allindependent/owner/native/production/S24acceptances unissued.
 
  Finalcanonicalchecks108PASS,owner/frontendno drift,canonical374/383mutationregistry0findings(notexecution),consolidation0findings.
+
+
+## 2026-10-26T08:18:35.046514+00:00 — native catalog and pinned window component
+
+Native archived/hidden/visible catalog viaactualpinnedreadonlyprotobuf reader;canonical capture/schema/scope/clock metadata;dedicatedSQLite/PostgreSQL originalcatalogstore and collector withindependentreadback,replay/unknown/corrupt/missing states. Pinned nativebar windows preserveexplicitordinal+ref+cutoff,perbar corrections andunknowncoverage/spread.1042broadPG0skip/audit0;212finalPG0skip/audit0/exacthash/independentcleanup withspawnedprocesses;8supplementalassertionfaultscaught/restored. FullML005dataset/Parquet/entitlement/calendar/joins/producerconsumer andindependentacceptance remain. See CHECKPOINT_20261026_NATIVE_DATASETS.md.
+
+Finalsourcechecks108PASS,owner/frontendnodrift,canonical374/383registry0findings(notexecution),consolidation0findings.

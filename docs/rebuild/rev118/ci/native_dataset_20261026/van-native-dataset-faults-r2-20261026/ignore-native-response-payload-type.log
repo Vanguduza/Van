@@ -1,0 +1,40 @@
+....................FFF...                                               [100%]
+=================================== FAILURES ===================================
+_ test_catalog_payload_type_cannot_be_relabelled_from_another_native_response[True] _
+
+payload = True
+
+    @pytest.mark.parametrize("payload",[True,"PROTO_OA_SYMBOL_BY_ID_RES",999999])
+    def test_catalog_payload_type_cannot_be_relabelled_from_another_native_response(payload):
+>       with pytest.raises(ValueError,match="payload type differs"):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+trading/tests/test_native_symbol_catalog.py:113: Failed
+_ test_catalog_payload_type_cannot_be_relabelled_from_another_native_response[PROTO_OA_SYMBOL_BY_ID_RES] _
+
+payload = 'PROTO_OA_SYMBOL_BY_ID_RES'
+
+    @pytest.mark.parametrize("payload",[True,"PROTO_OA_SYMBOL_BY_ID_RES",999999])
+    def test_catalog_payload_type_cannot_be_relabelled_from_another_native_response(payload):
+>       with pytest.raises(ValueError,match="payload type differs"):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+trading/tests/test_native_symbol_catalog.py:113: Failed
+_ test_catalog_payload_type_cannot_be_relabelled_from_another_native_response[999999] _
+
+payload = 999999
+
+    @pytest.mark.parametrize("payload",[True,"PROTO_OA_SYMBOL_BY_ID_RES",999999])
+    def test_catalog_payload_type_cannot_be_relabelled_from_another_native_response(payload):
+>       with pytest.raises(ValueError,match="payload type differs"):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+trading/tests/test_native_symbol_catalog.py:113: Failed
+=========================== short test summary info ============================
+FAILED trading/tests/test_native_symbol_catalog.py::test_catalog_payload_type_cannot_be_relabelled_from_another_native_response[True]
+FAILED trading/tests/test_native_symbol_catalog.py::test_catalog_payload_type_cannot_be_relabelled_from_another_native_response[PROTO_OA_SYMBOL_BY_ID_RES]
+FAILED trading/tests/test_native_symbol_catalog.py::test_catalog_payload_type_cannot_be_relabelled_from_another_native_response[999999]
+3 failed, 23 passed in 0.46s

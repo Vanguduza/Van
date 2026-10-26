@@ -1,6 +1,6 @@
 {
   "schema": "van.rebuild.candidate-source-progress/1",
-  "updated_at_utc": "2026-10-26T05:26:36.282873+00:00",
+  "updated_at_utc": "2026-10-26T08:18:35.046514+00:00",
   "programme": "Rev1.18; original 131 unit IDs and dependencies retained",
   "authority": "auth-20261022-owner-autonomous-candidate-build",
   "meaning": "Candidate source progress is separate from admitted unit acceptance. Independent certificates, owner decisions, live effects and release gates remain unissued. No unit is declared complete by this record.",
@@ -513,6 +513,10 @@
         {
           "description": "Scoped immutable historical quote snapshots and exact original-policy replay on independent read-only native socket; final budget after join, full contract and causal values validated, no current-freshness claim. Shared chain/index recovery preserves actual baseline bar bytes; lostACK, actual record-commit processdeath and8concurrent collectors covered.1019final actualPG0skip/audit0/exact hashes,129focus,4supplemental assertion faults/restored,108initialrebuild.3338unique positive case identities across3072streamingprefix+266finaltail; two fullruns TIMEOUT withmissingfinalaudit, first unexplainedF retained. No full-run/unit acceptance.",
           "evidence": "backend/BE-008_NATIVE_QUOTE_ARCHIVE.md; receipts/NATIVE_QUOTE_ARCHIVE_SOURCE_20261025.json"
+        },
+        {
+          "description": "Native archived/hidden/visible catalog viaactualpinnedreadonlyprotobuf reader;canonical capture/schema/scope/clock metadata;dedicatedSQLite/PostgreSQL originalcatalogstore and collector withindependentreadback,replay/unknown/corrupt/missing states. Pinned nativebar windows preserveexplicitordinal+ref+cutoff,perbar corrections andunknowncoverage/spread.1042broadPG0skip/audit0;212finalPG0skip/audit0/exacthash/independentcleanup withspawnedprocesses;8supplementalassertionfaultscaught/restored. FullML005dataset/Parquet/entitlement/calendar/joins/producerconsumer andindependentacceptance remain.",
+          "evidence": "backend/VAN-ML-PKT-005_NATIVE_CATALOG_WINDOWS.md; receipts/NATIVE_DATASET_SOURCE_20261026.json"
         }
       ]
     },
@@ -1335,6 +1339,10 @@
         {
           "description": "Exact156hostedimagebuildFAILEDstrictGymwheelhash beforemodelsteps;2fixed-seed actualbuildsbyte-identical,other212members unchanged vs original,dependency-metadata order only. Newcandidatewheelprofilepinned;upstream/buildtools/versions unchanged;freshimage/model native runPENDING;unit remainsIN_PROGRESS.",
           "evidence": "backend/VAN-ML-PKT-004_WHEEL_REPRODUCIBILITY.md; receipts/FORECAST_BUILD_RECOVERY_20261026.json"
+        },
+        {
+          "description": "Exacta660freshhosted40276672824SUCCESS:232actualwheelhashes,strictreproGym62ee4cd5,pipcheck,6actualnative-libraryresearchfixturecases,separatecold3modelparity0/no training;actual2CPU6GiB256pids/offline/readOnly/nonroot/noNewPriv,distinctworkersremoved;source/controllerhashesandartifactdigestverified. Original156forecastfailure/modelskipsretained. Source-only;ML004IN_PROGRESS/acceptanceNOT_ISSUED.",
+          "evidence": "ci/forecast_hosted_a66096fd_20261026/independent-reconciliation.json"
         }
       ]
     },
@@ -1347,9 +1355,14 @@
         "PRE-003",
         "VAN-ML-PKT-004"
       ],
-      "candidate_status": "NOT_STARTED",
+      "candidate_status": "IN_PROGRESS",
       "unit_acceptance": "NOT_ISSUED",
-      "milestones": []
+      "milestones": [
+        {
+          "description": "Native archived/hidden/visible catalog viaactualpinnedreadonlyprotobuf reader;canonical capture/schema/scope/clock metadata;dedicatedSQLite/PostgreSQL originalcatalogstore and collector withindependentreadback,replay/unknown/corrupt/missing states. Pinned nativebar windows preserveexplicitordinal+ref+cutoff,perbar corrections andunknowncoverage/spread.1042broadPG0skip/audit0;212finalPG0skip/audit0/exacthash/independentcleanup withspawnedprocesses;8supplementalassertionfaultscaught/restored. FullML005dataset/Parquet/entitlement/calendar/joins/producerconsumer andindependentacceptance remain.",
+          "evidence": "backend/VAN-ML-PKT-005_NATIVE_CATALOG_WINDOWS.md; receipts/NATIVE_DATASET_SOURCE_20261026.json"
+        }
+      ]
     },
     "BE-037": {
       "title": "Chain-aware identity and permitted read-only discovery adapters",

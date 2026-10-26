@@ -220,6 +220,26 @@ class CtraderAdapter:
         adapter=CtraderAdapter(transport,self.client_id,self.client_secret_provider,self.access_token_provider,
             self.ctid_trader_account_id,self.account_alias,self.venue,clock=self.clock)
         class MarketReader:
+            def read_catalog(self,expected_scope):
+                from vati.execution.ctrader.catalog import NativeSymbolCatalog,catalog_scope
+                scope=catalog_scope(expected_scope)
+                if (scope['native_account_id']!=adapter.ctid_trader_account_id
+                        or scope['transport_host']!=transport.host):
+                    raise VenueUnavailable('cTrader catalog reader account/environment differs')
+                adapter._authenticate()
+                connection=getattr(transport,'connection_id',None)
+                kind,body=transport.call('ProtoOASymbolsListReq',
+                    {'ctidTraderAccountId':adapter.ctid_trader_account_id,'includeArchivedSymbols':True})
+                if (kind!='ProtoOASymbolsListRes' or connection!=getattr(transport,'connection_id',None)
+                        or not adapter._auth_is_current()):
+                    raise VenueUnavailable('cTrader catalog response or connection scope differs')
+                try:
+                    captured=NativeSymbolCatalog.capture(scope=scope,response=body,
+                        received_at_ms=adapter.clock(),include_archived_symbols=True)
+                except (KeyError,TypeError,ValueError,ArithmeticError) as error:
+                    raise VenueUnavailable('cTrader native catalog response invalid') from error
+                transport.check_budget()
+                return captured
             def _select(self,expected_contract):
                 if not isinstance(expected_contract,NativeSymbolContract):
                     raise VenueUnavailable('cTrader captured native contract required')
