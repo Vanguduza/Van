@@ -14,6 +14,7 @@ from __future__ import annotations
 
 import json
 import os
+import uuid
 import signal
 import time
 from dataclasses import asdict, dataclass
@@ -236,7 +237,7 @@ class AccountCoordinatorService:
         self.lease = AccountRuntimeLease(
             self._lease_store,
             account_alias=account.alias,
-            instance_id=f"{os.uname().nodename}:{os.getpid()}",
+            instance_id=f"{os.uname().nodename}:{os.getpid()}:{uuid.uuid4().hex}",
             software_version="vati-account-coordinator/1",
             git_sha=os.environ.get("VAN_GIT_SHA", ""),
         )

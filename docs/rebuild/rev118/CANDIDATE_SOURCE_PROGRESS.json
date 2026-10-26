@@ -1,6 +1,6 @@
 {
   "schema": "van.rebuild.candidate-source-progress/1",
-  "updated_at_utc": "2026-10-26T22:56:37.224446+00:00",
+  "updated_at_utc": "2026-10-26T23:13:55.642450+00:00",
   "programme": "Rev1.18; original 131 unit IDs and dependencies retained",
   "authority": "auth-20261022-owner-autonomous-candidate-build",
   "meaning": "Candidate source progress is separate from admitted unit acceptance. Independent certificates, owner decisions, live effects and release gates remain unissued. No unit is declared complete by this record.",
@@ -319,6 +319,10 @@
         {
           "description": "Confirmedactualclean-baselined844SQLrollback exposeduncommittednativeperiod/readiness/ownerlineageandfalseincremental-cachecorruptionalarm. SharedexistingLedgercommittedreadcontextnowrejectscaller-ownedwritersbefore/afteracquisition;nativecTrader/MT5consumershold/refusewithoutproviderIO. OwnedSQLite/Postgreswriterabortinvalidatesstagedcacheanchor;full/incremental/tamperchecksretained. 444finalactual-PGchecks0skip/audit0/all488runtime-testhashesmatch/ownedfixtureabsent;14newboundarycases;6assertionfaultsincludingactualPGcache/guardfailures/14positive+14restoreddual-enginecontrols;122rebuild/workflow/T0boundary. Componentonly;unitacceptanceNOT_ISSUED.",
           "evidence": "backend/BE-003_006_COMMITTED_FUNDING_READS.md;receipts/COMMITTED_FUNDING_READS_SOURCE_20261026.json"
+        },
+        {
+          "description": "Two actual coordinator builders in one process previously shared hostname/PID lease identity. Real PostgreSQL reproduced a peer acquiring the live owner lease and peer shutdown releasing its authority: two failures and one expiry control. Each coordinator now gets a UUID instance suffix, matching the single-session runtime; logical account aliases, signed mandates, store CAS, epochs and submission guards are unchanged. Three focused cases and 1213 final SQL/HTTP/runtime/authority/recovery cases pass, with no skips or storage-audit violations. All 1,150 pinned backend/trading runtime and test hashes match; the owned PostgreSQL fixture is independently absent. This is a source component, not whole-unit, provider, native, production or owner acceptance. Physical-account aliases and shared financial reservations remain separate open work.",
+          "evidence": "backend/BE-003_009_COORDINATOR_INSTANCE_ARBITRATION.md;receipts/COORDINATOR_INSTANCE_SOURCE_20261026.json"
         }
       ]
     },
@@ -702,6 +706,10 @@
         {
           "description": "Native cTrader fill/position quantities preserve sub-centilot ratios; equity uses broker net PnL in deposit currency with its own exponent, complete native position identities and cross-read funds fence. Missing/foreign/malformed marks refuse verification; no missing-quote zero.14 original failures+1positive,3 funds-drift failures fixed;44 focused/2454 fulltrading pass0skip actualprivatePG/stoppedremoved,7faults+7controls caught/restored. Actual framed negative native mark exercised. Source only; no settled financial maturity/whole-unit/native/provider acceptance.",
           "evidence": "backend/BE-009_010_012_CTRADER_NATIVE_MONEY.md; receipts/CTRADER_NATIVE_MONEY_SOURCE_20261023.json"
+        },
+        {
+          "description": "Two actual coordinator builders in one process previously shared hostname/PID lease identity. Real PostgreSQL reproduced a peer acquiring the live owner lease and peer shutdown releasing its authority: two failures and one expiry control. Each coordinator now gets a UUID instance suffix, matching the single-session runtime; logical account aliases, signed mandates, store CAS, epochs and submission guards are unchanged. Three focused cases and 1213 final SQL/HTTP/runtime/authority/recovery cases pass, with no skips or storage-audit violations. All 1,150 pinned backend/trading runtime and test hashes match; the owned PostgreSQL fixture is independently absent. This is a source component, not whole-unit, provider, native, production or owner acceptance. Physical-account aliases and shared financial reservations remain separate open work.",
+          "evidence": "backend/BE-003_009_COORDINATOR_INSTANCE_ARBITRATION.md;receipts/COORDINATOR_INSTANCE_SOURCE_20261026.json"
         }
       ]
     },

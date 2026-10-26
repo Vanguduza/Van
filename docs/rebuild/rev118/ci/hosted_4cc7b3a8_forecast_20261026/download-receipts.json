@@ -1,0 +1,18 @@
+[
+  {
+    "id": 12695117030,
+    "name": "van-native-source-parquet-report",
+    "bytes": 3210,
+    "sha256": "5f650f6294a35229fc14d58330df142edd9e279320edb902c524c443022f57de",
+    "github_digest_verified": true,
+    "zip_crc_path_symlink_verified": true
+  },
+  {
+    "id": 12695066915,
+    "name": "van-forecast-runtime-source-report",
+    "bytes": 148653,
+    "sha256": "1b44ab19461ca046a5ddfb9a9eb5724e41f592b6fd9ed41f7f05a9843f381680",
+    "github_digest_verified": true,
+    "zip_crc_path_symlink_verified": true
+  }
+]

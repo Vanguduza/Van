@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="2" skipped="0" tests="3" time="2.796" timestamp="2026-10-26T23:00:48.926003+00:00" hostname="2c5a245e39f1"><testcase classname="trading.tests.test_coordinator_instance_arbitration" name="test_same_process_coordinator_peer_cannot_displace_its_live_owner" time="0.900"><failure message="AssertionError: assert &lt;LeaseOutcome.GRANTED: 'GRANTED'&gt; is &lt;LeaseOutcome.REFUSED_HELD_BY_OTHER: 'REFUSED_HELD_BY_OTHER'&gt;&#10; +  where &lt;LeaseOutcome.GRANTED: 'GRANTED'&gt; = LeaseResult(outcome=&lt;LeaseOutcome.GRANTED: 'GRANTED'&gt;, lease=AccountLease(account_alias='paper_lease', holder_instance...000, expires_at_ms=31000, software_version='vati-account-coordinator/1', git_sha=''), holder_instance_id='', detail='').outcome&#10; +    where LeaseResult(outcome=&lt;LeaseOutcome.GRANTED: 'GRANTED'&gt;, lease=AccountLease(account_alias='paper_lease', holder_instance...000, expires_at_ms=31000, software_version='vati-account-coordinator/1', git_sha=''), holder_instance_id='', detail='') = acquire(now_ms=1000)&#10; +      where acquire = &lt;vati.app.account_lease.AccountRuntimeLease object at 0x7f2dd7d3ee40&gt;.acquire&#10; +        where &lt;vati.app.account_lease.AccountRuntimeLease object at 0x7f2dd7d3ee40&gt; = &lt;vati.app.account_service.AccountCoordinatorService object at 0x7f2dd7d69130&gt;.lease&#10; +  and   &lt;LeaseOutcome.REFUSED_HELD_BY_OTHER: 'REFUSED_HELD_BY_OTHER'&gt; = LeaseOutcome.REFUSED_HELD_BY_OTHER">coordinators = ([&lt;vati.app.account_service.AccountCoordinatorService object at 0x7f2dd937daf0&gt;, &lt;vati.app.account_service.AccountCoordinatorService object at 0x7f2dd7d69130&gt;], {'now': 1000})
+
+    def test_same_process_coordinator_peer_cannot_displace_its_live_owner(coordinators):
+        (first,second),clock=coordinators
+        assert first.lease.acquire(now_ms=clock['now']).outcome is LeaseOutcome.GRANTED
+        epoch=first.lease.epoch
+&gt;       assert second.lease.acquire(now_ms=clock['now']).outcome is LeaseOutcome.REFUSED_HELD_BY_OTHER
+E       AssertionError: assert &lt;LeaseOutcome.GRANTED: 'GRANTED'&gt; is &lt;LeaseOutcome.REFUSED_HELD_BY_OTHER: 'REFUSED_HELD_BY_OTHER'&gt;
+E        +  where &lt;LeaseOutcome.GRANTED: 'GRANTED'&gt; = LeaseResult(outcome=&lt;LeaseOutcome.GRANTED: 'GRANTED'&gt;, lease=AccountLease(account_alias='paper_lease', holder_instance...000, expires_at_ms=31000, software_version='vati-account-coordinator/1', git_sha=''), holder_instance_id='', detail='').outcome
+E        +    where LeaseResult(outcome=&lt;LeaseOutcome.GRANTED: 'GRANTED'&gt;, lease=AccountLease(account_alias='paper_lease', holder_instance...000, expires_at_ms=31000, software_version='vati-account-coordinator/1', git_sha=''), holder_instance_id='', detail='') = acquire(now_ms=1000)
+E        +      where acquire = &lt;vati.app.account_lease.AccountRuntimeLease object at 0x7f2dd7d3ee40&gt;.acquire
+E        +        where &lt;vati.app.account_lease.AccountRuntimeLease object at 0x7f2dd7d3ee40&gt; = &lt;vati.app.account_service.AccountCoordinatorService object at 0x7f2dd7d69130&gt;.lease
+E        +  and   &lt;LeaseOutcome.REFUSED_HELD_BY_OTHER: 'REFUSED_HELD_BY_OTHER'&gt; = LeaseOutcome.REFUSED_HELD_BY_OTHER
+
+trading/tests/test_coordinator_instance_arbitration.py:41: AssertionError</failure></testcase><testcase classname="trading.tests.test_coordinator_instance_arbitration" name="test_same_process_peer_shutdown_cannot_release_another_coordinators_authority" time="0.465"><failure message="assert False is True&#10; +  where False = &lt;function AccountCoordinatorService.build.&lt;locals&gt;.&lt;lambda&gt; at 0x7f2dd7dd91c0&gt;(1)&#10; +    where &lt;function AccountCoordinatorService.build.&lt;locals&gt;.&lt;lambda&gt; at 0x7f2dd7dd91c0&gt; = &lt;vati.execution.router.ExecutionRouter object at 0x7f2dd7dbb6e0&gt;.lease_fence&#10; +      where &lt;vati.execution.router.ExecutionRouter object at 0x7f2dd7dbb6e0&gt; = &lt;vati.app.account_service.AccountCoordinatorService object at 0x7f2dd7dbacc0&gt;.router">coordinators = ([&lt;vati.app.account_service.AccountCoordinatorService object at 0x7f2dd7dbacc0&gt;, &lt;vati.app.account_service.AccountCoordinatorService object at 0x7f2dd932b3b0&gt;], {'now': 1000})
+
+    def test_same_process_peer_shutdown_cannot_release_another_coordinators_authority(coordinators):
+        (first,second),clock=coordinators
+        assert first.lease.acquire(now_ms=clock['now']).permits_orders
+        epoch=first.lease.epoch
+        second.lease.acquire(now_ms=clock['now']);second.lease.release(now_ms=clock['now'])
+&gt;       assert first.router.lease_fence(epoch) is True
+E       assert False is True
+E        +  where False = &lt;function AccountCoordinatorService.build.&lt;locals&gt;.&lt;lambda&gt; at 0x7f2dd7dd91c0&gt;(1)
+E        +    where &lt;function AccountCoordinatorService.build.&lt;locals&gt;.&lt;lambda&gt; at 0x7f2dd7dd91c0&gt; = &lt;vati.execution.router.ExecutionRouter object at 0x7f2dd7dbb6e0&gt;.lease_fence
+E        +      where &lt;vati.execution.router.ExecutionRouter object at 0x7f2dd7dbb6e0&gt; = &lt;vati.app.account_service.AccountCoordinatorService object at 0x7f2dd7dbacc0&gt;.router
+
+trading/tests/test_coordinator_instance_arbitration.py:52: AssertionError</failure></testcase><testcase classname="trading.tests.test_coordinator_instance_arbitration" name="test_expired_owner_stays_fenced_after_real_peer_takeover_and_late_shutdown" time="0.407" /></testsuite></testsuites>
