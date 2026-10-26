@@ -1,0 +1,35 @@
+{
+  "schema": "van.rebuild.bar-aggregation-source/1",
+  "base_head": "4cc7b3a841054b326958edc30bc3a6cd42196105",
+  "updated_at_utc": "2026-10-26T22:56:37.224446+00:00",
+  "unit": "BE-008",
+  "status": "SOURCE_TESTED_COMPONENT_NOT_UNIT_NATIVE_OR_PRODUCTION_ACCEPTANCE",
+  "acceptance": "NOT_ISSUED",
+  "source_sha256": {
+    "trading/vati/market_data/bars.py": "35931986fad0a3a2bd0a824b9c7f5c85a985b8c624ec368203ace2ac4aac6c7d",
+    "trading/tests/test_bar_aggregation_boundaries.py": "8f5d7278d8354155681affdd5d06e270106e5e9f1b46693acb7df3ff2596384e"
+  },
+  "implementation": "Existing BarAggregator now rejects regressed source timestamps, malformed/nonfinite/crossed ticks, negative volume and noninteger intervals before changing or publishing original state. Explicit fresh80digit contexts isolate midpoint/OHLC/volume/spread/range from caller settings; staged arithmetic preserves the original bar on overflow. Equal-time arrival order, negative prices/epochs and missing intervals without synthetic bars remain supported. finish() seals its emitted interval against reopening. Committed baseline17failures/4controls plus3later closed-interval failures retained.29newcases;965final actual SQLite/PostgreSQL/HTTP/private-topology passes0skip/audit0/all1149 runtime-testhashes match/ownedfixture independently absent;5supplemental behavioral faults caught29positive29restored/sourceexact;122rebuild/workflow/T0 checks. Source component only;BE008 IN_PROGRESS and all acceptance unissued.",
+  "actual_tests": {
+    "committed_baseline_failed": 17,
+    "committed_baseline_positive": 4,
+    "initial_integration_passed": 46,
+    "initial_integration_declared_PG_skip": 1,
+    "intermediate_actual_SQLite_Postgres_HTTP": 962,
+    "additional_closed_interval_before_failures": 3,
+    "new_cases": 29,
+    "final_actual_SQLite_Postgres_HTTP": 965,
+    "final_skips": 0,
+    "final_audit_violations": 0,
+    "runtime_test_hashes_verified": 1149,
+    "owned_fixture_independently_absent": true,
+    "supplemental_behavioral_faults_caught": 5,
+    "positive_and_restored_controls": 29,
+    "supplemental_source_exactly_restored": true,
+    "rebuild_workflow_T0_boundary": 122,
+    "counts_overlap": true
+  },
+  "harness_correction": "First supplemental harness rejected a genuine DID NOT RAISE test failure because it looked for the literal word assert. The failed controller and restored original remain retained. Revised harness requires AssertionError or DID NOT RAISE, zero setup errors/skips and actual exit1; all final faults caught.",
+  "qualification": "Deterministic UTC aggregation source policy,not provider sequence/health/rights,physical instrument identity,complete intervals,revision/gap recovery,native liquidity,financial authority,unit/native/production/economic/S24 acceptance. No source tick is fabricated.",
+  "evidence": "ci/bar_aggregation_20261026"
+}

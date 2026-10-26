@@ -1,0 +1,11 @@
+{
+  "base_head": "4cc7b3a841054b326958edc30bc3a6cd42196105",
+  "source_file": "trading/vati/market_data/bars.py",
+  "source_sha256": "1c6dd9510d911ba7b0630510b0b727ec025b2c8c212ac36b897fa630c23fcf1c",
+  "confirmed_behavior": {
+    "reverse_input": "bar starts [60000,0] accepted",
+    "ambient_precision3": "same original ticks change mid/OHLC from1.123457/1.234568 to1.12/1.23"
+  },
+  "qualification": "Controlled actual committed source probes;no live/native/unit acceptance",
+  "recorded_at_utc": "2026-10-26T22:41:36.985796+00:00"
+}

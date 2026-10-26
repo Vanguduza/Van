@@ -182,7 +182,9 @@
         "backend/BE-008_NATIVE_ARCHIVE_BYTE_BUDGET.md",
         "receipts/NATIVE_ARCHIVE_BYTE_BUDGET_SOURCE_20261026.json",
         "backend/BE-008_NATIVE_DEPTH_HISTORY_HTTP.md",
-        "receipts/NATIVE_DEPTH_HISTORY_HTTP_SOURCE_20261026.json"
+        "receipts/NATIVE_DEPTH_HISTORY_HTTP_SOURCE_20261026.json",
+        "backend/BE-008_BAR_AGGREGATION_BOUNDARIES.md",
+        "receipts/BAR_AGGREGATION_SOURCE_20261026.json"
       ]
     },
     "BE-014": {
@@ -320,7 +322,7 @@
     "note": "Opus unavailable; owner transferred build to Codex. No independent reviewer identity is inferred from another model or session."
   },
   "checkpoint": {
-    "updated_utc": "2026-10-26T22:36:21.837174+00:00",
+    "updated_utc": "2026-10-26T22:56:37.224446+00:00",
     "branch": "ccr-9e07e1af-8mgz1p",
     "base": "b02075f327ea8180ab6d269eba358cf8c5479878",
     "background_jobs": [
@@ -339,7 +341,7 @@
         "not_acceptance": true
       }
     ],
-    "last_validation": "Registered paired-owner GET /v1/trading/market/depth-history reads original physical-scope DEPTH captures through existing TradingService/NativeDepthArchive. Server-only root/byte budget;strict selectors, explicit private refusal/NO_CAPTURE, original policy/revision/as-of, no repair/broker I/O/normalized prices/current freshness/rights or execution grant. Two active verification slots remain occupied across caller cancellation. 32 new cases;910 final actual SQLite/PostgreSQL/HTTP/private-topology passes,0 skips/audit violations,1148 final backend/trading runtime-test hashes match,owned fixture independently absent;3 assertion faults caught/6 positive+6 restored controls/exact source restored;122 rebuild/workflow/T0 checks. Original integration failed1/106 on exact service-surface allowlist;only3 new read-only names added,authority tripwires retained,focused2 and final910 passed. Counts overlap;BE008 IN_PROGRESS,unit/native/production acceptance NOT_ISSUED.",
+    "last_validation": "Existing BarAggregator now rejects regressed source timestamps, malformed/nonfinite/crossed ticks, negative volume and noninteger intervals before changing or publishing original state. Explicit fresh80digit contexts isolate midpoint/OHLC/volume/spread/range from caller settings; staged arithmetic preserves the original bar on overflow. Equal-time arrival order, negative prices/epochs and missing intervals without synthetic bars remain supported. finish() seals its emitted interval against reopening. Committed baseline17failures/4controls plus3later closed-interval failures retained.29newcases;965final actual SQLite/PostgreSQL/HTTP/private-topology passes0skip/audit0/all1149 runtime-testhashes match/ownedfixture independently absent;5supplemental behavioral faults caught29positive29restored/sourceexact;122rebuild/workflow/T0 checks. Source component only;BE008 IN_PROGRESS and all acceptance unissued.",
     "environment_notes": [
       "clone must be unshallowed (git fetch --unshallow) and PR heads fetched (+refs/pull/*/head:refs/remotes/origin/pr/*) before pre001.py",
       "pytest from backend/requirements.txt in a venv",
@@ -397,7 +399,9 @@
     "Exact9bf main40383599951 terminalFAILED only on two mandatory privateDDS/trusted-main prerequisites;17publicSUCCESS,3985trading+1declaredprivateDDSskip/PG26/voice117/gateway5775+7skip/media198/monitor258/browser/emulator and374canonicalidentitiescaughtonce383edits. Forecast40383599772SUCCESS114native+6synthetic+3cold parity0/232versions/kernel/cleanup/hashes/tree.16main+forecastarchives size/SHA/CRC verified; published9bf only.",
     "Exact733b main40394743701 terminalFAILED on2unwaived mandatory privateDDS/trusted-main prerequisites;all17publicjobsSUCCESS.16main+forecastarchivesverified;trading4017+1declaredprivateDDSskip/PG26/voice117/gateway5775+7skip/media198/monitor258/browser1547+1skipplus11/1/10/emulator18+4skips.374canonicalidentitiescaughtonce383edits across9actualreports. Forecast40394743715SUCCESS114native/6synthetic/3coldparity0/232versions/kernel/cleanup/source-controller-reporthashes/tree-equivalent actualmerge96cd9f894123a5aab80b49ec6affac47ada89633. Published733b only;later arithmetic/depth not qualified by parent.",
     "Exact0c main40402195836 terminalFAILED2unwaivedmandatoryprivateDDS/trusted-main prerequisites;all17publicSUCCESS.16archivesZIP/CRC/SHAverifiedandretained;4066trading+1privateDDSskip/PG26/voice117/gateway5775+7skip/media198/monitor258/browser/emulator and374canonicalidentitiescaughtonce383edits. Forecast40402195860SUCCESS114native+6synthetic+3cold/parity0/232versions/kernel/cleanup/source-controller-reporthashes/tree-equivalent testedmerge1a5dc32a04cd5bae15cc4c2feaf3c2eeec1a056b. Published0c only;laterdurabledepth/budget notqualified.",
-    "Registered paired-owner GET /v1/trading/market/depth-history reads original physical-scope DEPTH captures through existing TradingService/NativeDepthArchive. Server-only root/byte budget;strict selectors, explicit private refusal/NO_CAPTURE, original policy/revision/as-of, no repair/broker I/O/normalized prices/current freshness/rights or execution grant. Two active verification slots remain occupied across caller cancellation. 32 new cases;910 final actual SQLite/PostgreSQL/HTTP/private-topology passes,0 skips/audit violations,1148 final backend/trading runtime-test hashes match,owned fixture independently absent;3 assertion faults caught/6 positive+6 restored controls/exact source restored;122 rebuild/workflow/T0 checks. Original integration failed1/106 on exact service-surface allowlist;only3 new read-only names added,authority tripwires retained,focused2 and final910 passed. Counts overlap;BE008 IN_PROGRESS,unit/native/production acceptance NOT_ISSUED."
+    "Registered paired-owner GET /v1/trading/market/depth-history reads original physical-scope DEPTH captures through existing TradingService/NativeDepthArchive. Server-only root/byte budget;strict selectors, explicit private refusal/NO_CAPTURE, original policy/revision/as-of, no repair/broker I/O/normalized prices/current freshness/rights or execution grant. Two active verification slots remain occupied across caller cancellation. 32 new cases;910 final actual SQLite/PostgreSQL/HTTP/private-topology passes,0 skips/audit violations,1148 final backend/trading runtime-test hashes match,owned fixture independently absent;3 assertion faults caught/6 positive+6 restored controls/exact source restored;122 rebuild/workflow/T0 checks. Original integration failed1/106 on exact service-surface allowlist;only3 new read-only names added,authority tripwires retained,focused2 and final910 passed. Counts overlap;BE008 IN_PROGRESS,unit/native/production acceptance NOT_ISSUED.",
+    "Existing BarAggregator now rejects regressed source timestamps, malformed/nonfinite/crossed ticks, negative volume and noninteger intervals before changing or publishing original state. Explicit fresh80digit contexts isolate midpoint/OHLC/volume/spread/range from caller settings; staged arithmetic preserves the original bar on overflow. Equal-time arrival order, negative prices/epochs and missing intervals without synthetic bars remain supported. finish() seals its emitted interval against reopening. Committed baseline17failures/4controls plus3later closed-interval failures retained.29newcases;965final actual SQLite/PostgreSQL/HTTP/private-topology passes0skip/audit0/all1149 runtime-testhashes match/ownedfixture independently absent;5supplemental behavioral faults caught29positive29restored/sourceexact;122rebuild/workflow/T0 checks. Source component only;BE008 IN_PROGRESS and all acceptance unissued.",
+    "Exact9255 main40411152887 terminalFAILED2mandatory/all17publicSUCCESS;19archives independentlysize/SHA/CRCverified;4125trading+1DDSskip/PG26/voice117/gateway5775+7/media198/monitor258/browser/emulator18+4,374identitiescaughtonce383edits. Forecast40411152890 independentlyverified114native/6synthetic/3cold/parity0/232versions/kernel/cleanup/source-controller-reporthashes/tree-equivalentmergecb9c7f2f9ade8e50bc8b21843cae2189b298dd21. LaterHTTP/aggregation not qualified by parent."
   ],
   "obligations": "obligations/OBLIGATIONS.json: preserved observations with source implementation evidence and explicit remaining native/unit obligations.",
   "pre002_challenge": "pre002/challenge/: 324 author-prepared dossiers (AUTHOR_CHALLENGED_PENDING_INDEPENDENT_REVIEW)",
@@ -428,9 +432,9 @@
     "tested_android_head": "752d265b11ba643ed309481b110248f8b7fe323b",
     "hosted_result": "receipts/HOSTED_SOURCE_752d265b.json",
     "mutation_reconciliation": "ci/MUTATION_RECONCILIATION.md and ci/MUTATION_RECONCILIATION_MAPPING.json",
-    "verified_source_head": "9255b23d07ce976fa48c2f2e452b70113e6e6458 published/genuineGREEN165/manifest5090;historical-depth HTTP candidate uncommitted",
+    "verified_source_head": "4cc7b3a841054b326958edc30bc3a6cd42196105 published/genuineGREEN166/manifest5139;aggregation candidate uncommitted",
     "source_qualification_run": 40383599951,
-    "latest_checkpoint_report": "docs/rebuild/rev118/CHECKPOINT_20261026_NATIVE_DEPTH_HISTORY_HTTP.md",
+    "latest_checkpoint_report": "docs/rebuild/rev118/CHECKPOINT_20261026_BAR_AGGREGATION.md",
     "previous_verified_source": "3c6969ebbec39f2ad9f2836a6bd8acdb487adc34 published; exact CI40228254162 all17public jobs pass, two unchanged prerequisite failures",
     "qualification_scope": "Public source tests only; mandatory/native/owner/production gates unissued."
   },
@@ -450,6 +454,6 @@
       "evidence": "ci/MUTATION_CORPUS_c2a27848.json"
     }
   ],
-  "current_action": "Finish historical-depth HTTP packet manifest/staged backup/genuine hook commit/actual committed verification. Preserve published9255 main40411152887 until terminal, reconcile exact raw results, normally publish/readback HTTP source and inspect its exact CI. Continue dependency-ready canonical backend functionality; all unit/native/production/Android/S24 gates remain unissued.",
-  "updated_at_utc": "2026-10-26T22:36:21.837174+00:00"
+  "current_action": "Finish aggregation realmanifest/stagedZIP/genuinehook commit/actual committedbaselineverify. Published4cc7 HTTP passedGREEN166/5139manifest/normalpush+remotereadback;main40415113142 andforecast40415113329started,outcomespending,preserveuntilterminal. Continue canonical dependency-ready backend functionality and full native/independent qualification. No unit acceptance issued.",
+  "updated_at_utc": "2026-10-26T22:56:37.224446+00:00"
 }

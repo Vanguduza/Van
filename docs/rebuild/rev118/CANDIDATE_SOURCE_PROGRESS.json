@@ -1,6 +1,6 @@
 {
   "schema": "van.rebuild.candidate-source-progress/1",
-  "updated_at_utc": "2026-10-26T22:36:21.837174+00:00",
+  "updated_at_utc": "2026-10-26T22:56:37.224446+00:00",
   "programme": "Rev1.18; original 131 unit IDs and dependencies retained",
   "authority": "auth-20261022-owner-autonomous-candidate-build",
   "meaning": "Candidate source progress is separate from admitted unit acceptance. Independent certificates, owner decisions, live effects and release gates remain unissued. No unit is declared complete by this record.",
@@ -573,6 +573,10 @@
         {
           "description": "Registered paired-owner GET /v1/trading/market/depth-history reads original physical-scope DEPTH captures through existing TradingService/NativeDepthArchive. Server-only root/byte budget;strict selectors, explicit private refusal/NO_CAPTURE, original policy/revision/as-of, no repair/broker I/O/normalized prices/current freshness/rights or execution grant. Two active verification slots remain occupied across caller cancellation. 32 new cases;910 final actual SQLite/PostgreSQL/HTTP/private-topology passes,0 skips/audit violations,1148 final backend/trading runtime-test hashes match,owned fixture independently absent;3 assertion faults caught/6 positive+6 restored controls/exact source restored;122 rebuild/workflow/T0 checks. Original integration failed1/106 on exact service-surface allowlist;only3 new read-only names added,authority tripwires retained,focused2 and final910 passed. Counts overlap;BE008 IN_PROGRESS,unit/native/production acceptance NOT_ISSUED.",
           "evidence": "backend/BE-008_NATIVE_DEPTH_HISTORY_HTTP.md;receipts/NATIVE_DEPTH_HISTORY_HTTP_SOURCE_20261026.json"
+        },
+        {
+          "description": "Existing BarAggregator now rejects regressed source timestamps, malformed/nonfinite/crossed ticks, negative volume and noninteger intervals before changing or publishing original state. Explicit fresh80digit contexts isolate midpoint/OHLC/volume/spread/range from caller settings; staged arithmetic preserves the original bar on overflow. Equal-time arrival order, negative prices/epochs and missing intervals without synthetic bars remain supported. finish() seals its emitted interval against reopening. Committed baseline17failures/4controls plus3later closed-interval failures retained.29newcases;965final actual SQLite/PostgreSQL/HTTP/private-topology passes0skip/audit0/all1149 runtime-testhashes match/ownedfixture independently absent;5supplemental behavioral faults caught29positive29restored/sourceexact;122rebuild/workflow/T0 checks. Source component only;BE008 IN_PROGRESS and all acceptance unissued.",
+          "evidence": "backend/BE-008_BAR_AGGREGATION_BOUNDARIES.md;receipts/BAR_AGGREGATION_SOURCE_20261026.json"
         }
       ]
     },

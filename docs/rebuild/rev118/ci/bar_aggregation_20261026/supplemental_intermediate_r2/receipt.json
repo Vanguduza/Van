@@ -1,0 +1,67 @@
+{
+  "qualification": "Supplemental aggregation assertion faults;not canonical374 or native/unit acceptance",
+  "positive": {
+    "exit": 0,
+    "cases": 26,
+    "failures": 0,
+    "errors": 0,
+    "skips": 0,
+    "failure_text": []
+  },
+  "faults": [
+    {
+      "name": "accept-regressed-clock",
+      "exit": 1,
+      "cases": 1,
+      "failures": 1,
+      "errors": 0,
+      "skips": 0,
+      "failure_text": [
+        "late = 1\n\n    @pytest.mark.parametrize('late',[1,60000])\n    def test_out_of_order_tick_refuses_before_publishing_or_changing_a_bar(late):\n        agg=BarAggregator('EURUSD',60000);agg.push(Tick(60001,Decimal('1'),Decimal('2')))\n>       with pytest.raises(ValueError,match='order'):agg.push(Tick(late,Decimal('3'),Decimal('4')))\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nE       Failed: DID NOT RAISE ValueError\n\ntrading/tests/test_bar_aggregation_boundaries.py:38: Failed"
+      ]
+    },
+    {
+      "name": "ambient-arithmetic",
+      "exit": 1,
+      "cases": 1,
+      "failures": 1,
+      "errors": 0,
+      "skips": 0,
+      "failure_text": [
+        "setting = 'precision'\n\n    @pytest.mark.parametrize('setting',['precision','rounding','exponents','traps','mutable-default'])\n    def test_original_tick_aggregation_is_independent_of_caller_context(setting):\n        expected=list(BarAggregator('EURUSD',60000).run(ticks()))\n        default=DefaultContext.copy()\n        try:\n            with localcontext() as context:\n                if setting=='precision':context.prec=3\n                elif setting=='rounding':context.prec=6;context.rounding=ROUND_DOWN\n                elif setting=='exponents':context.Emax=0;context.Emin=0\n                elif setting=='traps':context.prec=3;context.traps[Inexact]=True\n                else:DefaultContext.prec=3;DefaultContext.rounding=ROUND_DOWN;DefaultContext.Emax=0\n                before=context.copy()\n                actual=list(BarAggregator('EURUSD',60000).run(ticks()))\n>               assert actual==expected\nE               AssertionError: assert [Bar(symbol='...('0.000002'))] == [Bar(symbol='...('0.000002'))]\nE                 \nE                 At index 0 diff: Bar(symbol='EURUSD', start_ms=0, end_ms=60000, open=Decimal('1.12'), high=Decimal('1.24'), low=Decimal('1.12'), close=Decimal('1.24'), volume=Decimal('0.358'), ticks=2, avg_spread=Decimal('0.000002')) != Bar(symbol='EURUSD', start_ms=0, end_ms=60000, open=Decimal('1.123457'), high=Decimal('1.234568'), low=Decimal('1.123457'), close=Decimal('1.234568'), volume=Decimal('0.358023'), ticks=2, avg_spread=Decimal('0.000002'))\nE                 Use -v to get more diff\n\ntrading/tests/test_bar_aggregation_boundaries.py:27: AssertionError"
+      ]
+    },
+    {
+      "name": "mutate-current-before-arithmetic",
+      "exit": 1,
+      "cases": 4,
+      "failures": 1,
+      "errors": 0,
+      "skips": 0,
+      "failure_text": [
+        "same_interval = True, field = 'volume'\n\n    @pytest.mark.parametrize('same_interval',[False,True])\n    @pytest.mark.parametrize('field',['price','volume'])\n    def test_failed_arithmetic_neither_flushes_nor_partially_updates_original_state(same_interval,field):\n        agg=BarAggregator('EURUSD',60000);agg.push(Tick(1,Decimal('1'),Decimal('2'),Decimal('3')))\n        bid,ask,volume=(Decimal('1e999999999'),Decimal('1e999999999'),Decimal('0')) if field=='price' else (Decimal('3'),Decimal('4'),Decimal('1e999999999'))\n        with pytest.raises(Overflow):\n            agg.push(Tick(2 if same_interval else 60001,bid,ask,volume))\n        bar=agg.finish()\n>       assert (bar.start_ms,bar.ticks,bar.volume,bar.open,bar.close)==(0,1,Decimal('3'),Decimal('1.5'),Decimal('1.5'))\nE       AssertionError: assert (0, 1, Decima...ecimal('3.5')) == (0, 1, Decima...ecimal('1.5'))\nE         \nE         At index 4 diff: Decimal('3.5') != Decimal('1.5')\nE         Use -v to get more diff\n\ntrading/tests/test_bar_aggregation_boundaries.py:89: AssertionError"
+      ]
+    },
+    {
+      "name": "flush-before-validating",
+      "exit": 1,
+      "cases": 2,
+      "failures": 1,
+      "errors": 0,
+      "skips": 0,
+      "failure_text": [
+        "field = 'ts_ms', value = 1.5\n\n    @pytest.mark.parametrize('field,value',[\n        ('ts_ms',True),('ts_ms',1.5),('bid',1.0),('ask',Decimal('NaN')),\n        ('bid',Decimal('Infinity')),('volume',Decimal('-1')),('volume',Decimal('sNaN')),\n        ('bid',Decimal('4')),\n    ])\n    def test_invalid_new_interval_cannot_flush_the_current_original(field,value):\n        agg=BarAggregator('EURUSD',60000);agg.push(Tick(1,Decimal('1'),Decimal('2')))\n        row={'ts_ms':60001,'bid':Decimal('2'),'ask':Decimal('3'),'volume':Decimal('0')};row[field]=value\n        with pytest.raises(ValueError):agg.push(Tick(**row))\n>       bar=agg.finish();assert bar is not None\n                         ^^^^^^^^^^^^^^^^^^^^^^\nE       assert None is not None\n\ntrading/tests/test_bar_aggregation_boundaries.py:59: AssertionError"
+      ]
+    }
+  ],
+  "all_restored": true,
+  "restored": {
+    "exit": 0,
+    "cases": 26,
+    "failures": 0,
+    "errors": 0,
+    "skips": 0,
+    "failure_text": []
+  },
+  "source_sha256": "1696a9535cf30d8260b5868ac3c28bc48e17ea60c92deccfe3ae45789e474526"
+}
