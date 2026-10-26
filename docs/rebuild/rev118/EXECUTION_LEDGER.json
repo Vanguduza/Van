@@ -120,7 +120,9 @@
         "backend/BE-006_NATIVE_FUNDING_RISK_FENCE.md; receipts/NATIVE_FUNDING_RISK_FENCE_SOURCE_20261024.json",
         "backend/BE-006_NATIVE_COMMAND_SCOPE_AND_SCHEMAS.md; receipts/NATIVE_COMMAND_SCOPE_AND_SCHEMA_SOURCE_20261024.json",
         "backend/BE-006_FUNDING_BASELINE_PRESERVATION.md; receipts/FUNDING_BASELINE_PRESERVATION_SOURCE_20261024.json",
-        "backend/BE-004_006_NATIVE_ACCOUNT_OBSERVATION.md; receipts/NATIVE_ACCOUNT_OBSERVATION_SOURCE_20261024.json"
+        "backend/BE-004_006_NATIVE_ACCOUNT_OBSERVATION.md; receipts/NATIVE_ACCOUNT_OBSERVATION_SOURCE_20261024.json",
+        "backend/BE-006_DETERMINISTIC_REPORT_CONTEXT.md",
+        "receipts/FUNDING_REPORT_CONTEXT_SOURCE_20261026.json"
       ]
     },
     "BE-020": {
@@ -298,7 +300,7 @@
     "note": "Opus unavailable; owner transferred build to Codex. No independent reviewer identity is inferred from another model or session."
   },
   "checkpoint": {
-    "updated_utc": "2026-10-26T11:51:50.085348+00:00",
+    "updated_utc": "2026-10-26T12:36:10.774469+00:00",
     "branch": "ccr-9e07e1af-8mgz1p",
     "base": "b02075f327ea8180ab6d269eba358cf8c5479878",
     "background_jobs": [
@@ -317,7 +319,7 @@
         "not_acceptance": true
       }
     ],
-    "last_validation": "CI repair:final equivalent source-job114PASS0skip/audit0/finalruntime-testhashesmatch/ownedPGfixtureabsent;native unknown-entry module30plusPGisolation16=46PASS0skip/audit0/2deprecationwarnings/finalhashesmatch/ownedfixtureabsent;112rebuild+workflowPASS;owner/frontendno drift;registry374/383consistencyonly;consolidationno findings. No new hosted repair qualification or unit acceptance. Exact e690 main now terminalFAILED:16publicSUCCESS,2unwaived mandatoryfailures,1timed-outtradingjob;14rawarchives independentlyverified.",
+    "last_validation": "Confirmed ambient Decimal rounding/traps/exponent settings changed or broke identical native-scoped unitization reports. Explicit report Context now fixes80-digit ROUND_HALF_EVEN and standard bounds/traps while exact Fraction calculations,normal outputs and all risk/unknown states remain unchanged.9actual regressions retained;24focused and219final actual-PG funding/cash/balance passes,0skips/audit0/final runtime-test hashes match/owned fixture independently absent. Startup-only refusal retained. Component only;fullBE006 remains IN_PROGRESS.",
     "environment_notes": [
       "clone must be unshallowed (git fetch --unshallow) and PR heads fetched (+refs/pull/*/head:refs/remotes/origin/pr/*) before pre001.py",
       "pytest from backend/requirements.txt in a venv",
@@ -329,13 +331,13 @@
     ],
     "next_action": "Finish CI qualification repair evidence/checks/manifest/verified staged backup/genuine hook commit/committed baseline verify;wait exacte690 main terminal before normal push/readback. Inspect exact new hosted Parquet114 and full trading/voice results. Continue full ML005 owner/reference/rights/lifecycle/calendar/joins and dependency-ready funding/account/payment/backend implementation;0formalacceptedunits.",
     "previous_head": "83f2688a6414b5e81358c051418d0fe85ee0a3fb",
-    "current_packet": "CI driver,timeout evidence and native-history test isolation;local qualification complete,uncommitted",
+    "current_packet": "BE006 deterministic unitization report context;source-tested,uncommitted",
     "ci_credential_capability": "receipts/CI_CREDENTIAL_CAPABILITY_20261024.json: repo admin metadata available, integration secret/deploy-key reads403; no credential changes.",
     "current_background_jobs": [],
-    "active_packet": "CI source recovery;local114pass,uncommitted",
-    "published_head": "e690d5300c2cc2cdba82beb2f71eabe6eaf30846",
-    "local_base_head": "e690d5300c2cc2cdba82beb2f71eabe6eaf30846",
-    "committed_ledger_verification": "GREEN155 through e690d530 against4fd466dec3910ed5de614bfbf95887ad619df5ca",
+    "active_packet": "BE006 report context then complete remaining funding/payment/backend",
+    "published_head": "6698a9dfb4dd25b8d761b93006ea2e40e81cbf5c",
+    "local_base_head": "6698a9dfb4dd25b8d761b93006ea2e40e81cbf5c",
+    "committed_ledger_verification": "GREEN156 through6698 against4fd466dec3910ed5de614bfbf95887ad619df5ca",
     "native_mql_source_compile": {
       "head": "752d265b11ba643ed309481b110248f8b7fe323b",
       "run": 40255331586,
@@ -343,7 +345,7 @@
       "evidence": "receipts/NATIVE_MQL_COMPILED_752d265b.json",
       "qualification": "Signed compiler and deliberate invalid probe/source blob/artifact checks;network-blocked SDK initialization only;no account/broker/order/deployment/device acceptance"
     },
-    "head": "e690d5300c2cc2cdba82beb2f71eabe6eaf30846"
+    "head": "6698a9dfb4dd25b8d761b93006ea2e40e81cbf5c"
   },
   "observations": [
     "OBS-001 BE-002 debug cleartext",
@@ -369,7 +371,9 @@
     "2026-10-26T09:39:59.702059+00:00: Exact4637main40296406059 is terminalFAILURE:17publicjobsSUCCESS,2unwaived missing-private-DDS-key/trusted-main-checker failures. All15selected raw archives checkedsize/SHA/CRC/path/symlink;gateway5775passes/7declaredskips,media198,trading3744passes/1privateDDSskip,PG26,voice117,monitor258,browser1547/1+11/1/10,Androidemulator18/4,374canonicalidentities caughtonce/383edits. Exactforecast/Parquet40296406014bothjobsSUCCESS/actual48Parquetpasses0skip/audit0 and6upstreamfixedfixtures+3separatecoldmodelsparity0,232versions,bothcontainersremoved. These qualify published4637source components only,not this later uncommittedDatasetManifest/source-inspection packet or native/unit/production/S24.",
     "2026-10-26T10:39:22.036648+00:00: Separate immutable NativeReadIdentity anchors hidden/nameless LIGHT/archived native IDs to the exact original catalog without execution fields or grants. Independent readonly reader refreshes exact catalog revision,queries native ID without active execution metadata/protective cache,and fences post-parse session/budget. Existing archive/collector/cold windows/Parquet consume the explicit new source type;quote owner and enabled NativeSymbolContract guard preserved.518final actual-PG-available regressions0skip/audit0/all final source/test hashesmatch/ownedfixtureindependentlyabsent;8assertionfaultscaught/restored/37controls;108rebuild. Fixture keyword/invalidarchivedname/exceptionbase failures retained. No provider/native/unit/owner/production/economic/S24 acceptance.",
     "Immutable DatasetManifest candidate publication reuses dedicated existing SQLite/PostgreSQL ledgers, original native source inspection, writer-created time, request/record CAS, independent durable readback and historical replay. Lost ACK/current-byte failure/corrupt records/caller transactions/global capacity refuse truthfully. Existing slow workflow/CLI wired; always CANDIDATE_PUBLISHED_NOT_ADMITTED.45 new publication cases,563 final broad actual-PG-available passes,0 skips/audit violations,final hashes match/owned fixture independently absent;8 assertion-caught supplemental faults/23 positive plus23 restored controls;108 rebuild passes. R1 fixture and R3 actual error-reason failure retained. Full ML005 remains open.",
-    "Published e690d530/GREEN155/manifest3502 remotely verified. Parent164 main timed out full trading at35min,16public success/2unwaived mandatory failures;14raw archives and374 canonical cases/383edits independently reconciled. Currente690 forecastFAILED before Parquet tests due missing psycopg;CPU fixture artifact independentlyverified. Local recreated fixed source job114pass0skip/audit0/owned fixture absent;source shell cleanup/failure controls verified. Profile crash retained;original unprofiled native session1PASS82.41s. CI fixes uncommitted;all admission gates remain unissued."
+    "Published e690d530/GREEN155/manifest3502 remotely verified. Parent164 main timed out full trading at35min,16public success/2unwaived mandatory failures;14raw archives and374 canonical cases/383edits independently reconciled. Currente690 forecastFAILED before Parquet tests due missing psycopg;CPU fixture artifact independentlyverified. Local recreated fixed source job114pass0skip/audit0/owned fixture absent;source shell cleanup/failure controls verified. Profile crash retained;original unprofiled native session1PASS82.41s. CI fixes uncommitted;all admission gates remain unissued.",
+    "Confirmed ambient Decimal rounding/traps/exponent settings changed or broke identical native-scoped unitization reports. Explicit report Context now fixes80-digit ROUND_HALF_EVEN and standard bounds/traps while exact Fraction calculations,normal outputs and all risk/unknown states remain unchanged.9actual regressions retained;24focused and219final actual-PG funding/cash/balance passes,0skips/audit0/final runtime-test hashes match/owned fixture independently absent. Startup-only refusal retained. Component only;fullBE006 remains IN_PROGRESS.",
+    "Exact6698 main40322142900 terminalFAILED on2unwaivedmandatoryprerequisites;all17publicjobsSUCCESS.15rawarchivesverified;trading3819+1privateDDSskip,PG26,voice117,gateway5775+7skips,media198,monitor258,browser/emulator originalchecks;374canonicalidentitiescaughtonce383edits. Dedicatedforecast40322141956bothSUCCESS actual114Parquet/SQL0skip/audit0 plus6synthetic/3coldparity0/232versions/kernel/cleanup/sourcehash/tree verified. Parent results do not qualify later funding-renderer source."
   ],
   "obligations": "obligations/OBLIGATIONS.json: preserved observations with source implementation evidence and explicit remaining native/unit obligations.",
   "pre002_challenge": "pre002/challenge/: 324 author-prepared dossiers (AUTHOR_CHALLENGED_PENDING_INDEPENDENT_REVIEW)",
@@ -402,7 +406,7 @@
     "mutation_reconciliation": "ci/MUTATION_RECONCILIATION.md and ci/MUTATION_RECONCILIATION_MAPPING.json",
     "verified_source_head": "16414d3f4d413a75736a65ddeaaee2f04dcfa7ab published; genuine GREEN154; current candidate publication uncommitted",
     "source_qualification_run": 40255331558,
-    "latest_checkpoint_report": "docs/rebuild/rev118/CHECKPOINT_20261026_SOURCE_CI_RECOVERY.md",
+    "latest_checkpoint_report": "docs/rebuild/rev118/CHECKPOINT_20261026_FUNDING_REPORT_CONTEXT.md",
     "previous_verified_source": "3c6969ebbec39f2ad9f2836a6bd8acdb487adc34 published; exact CI40228254162 all17public jobs pass, two unchanged prerequisite failures",
     "qualification_scope": "Public source tests only; mandatory/native/owner/production gates unissued."
   },
@@ -422,6 +426,6 @@
       "evidence": "ci/MUTATION_CORPUS_c2a27848.json"
     }
   ],
-  "current_action": "Finish CI qualification repair evidence/checks/manifest/verified staged backup/genuine hook commit/committed baseline verify;wait exacte690 main terminal before normal push/readback. Inspect exact new hosted Parquet114 and full trading/voice results. Continue full ML005 owner/reference/rights/lifecycle/calendar/joins and dependency-ready funding/account/payment/backend implementation;0formalacceptedunits.",
-  "updated_at_utc": "2026-10-26T11:51:50.085348+00:00"
+  "current_action": "Finish funding report fix checks/evidence/manifest/verified stagedbackup/genuine hook commit/committed baseline verification;wait parent6698 main terminal before normal push/readback. Inspect exact new CI and continue full funding/account/payment and ML005/backend work. No formal acceptances.",
+  "updated_at_utc": "2026-10-26T12:36:10.774469+00:00"
 }

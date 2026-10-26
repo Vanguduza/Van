@@ -5,7 +5,7 @@ excluded by the provider normalizer). Missing valuation or ordering stays unknow
 The journal/collector supplies coverage; this calculator cannot certify a statement.
 """
 from dataclasses import dataclass
-from decimal import Decimal,localcontext
+from decimal import Context,Decimal,DivisionByZero,InvalidOperation,Overflow,ROUND_HALF_EVEN,localcontext
 from enum import Enum
 from fractions import Fraction
 from itertools import groupby
@@ -46,8 +46,10 @@ def _number(value):
 
 def _render(value):
     if value is None:return None
-    with localcontext() as context:
-        context.prec=80
+    # Exact fractions above are unchanged. Report serialization uses a fixed
+    # context rather than inheriting another caller's rounding, traps or limits.
+    with localcontext(Context(prec=80,rounding=ROUND_HALF_EVEN,Emin=-999999,Emax=999999,
+            capitals=1,clamp=0,flags=[],traps=[InvalidOperation,DivisionByZero,Overflow])):
         return str(Decimal(value.numerator)/Decimal(value.denominator))
 
 

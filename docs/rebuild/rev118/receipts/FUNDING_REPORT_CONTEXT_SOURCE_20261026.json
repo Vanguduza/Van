@@ -1,0 +1,36 @@
+{
+  "schema": "van.rebuild.funding-report-context/1",
+  "base_head": "6698a9dfb4dd25b8d761b93006ea2e40e81cbf5c",
+  "updated_at_utc": "2026-10-26T12:36:10.774469+00:00",
+  "status": "SOURCE_TESTED_COMPONENT_NOT_ECONOMIC_OR_UNIT_ACCEPTANCE",
+  "units": [
+    "BE-006"
+  ],
+  "unit_status": "IN_PROGRESS",
+  "acceptance": "NOT_ISSUED",
+  "source_sha256": {
+    "trading/vati/funding/unitization.py": "67ebf3d93e3911db5c121461cbac42afdcf1fa67713f8a11d33553ccd3f29d77",
+    "trading/tests/test_funding_unitization.py": "4ec1a445ff40b1d3c33f1518c82d2ffacffcc06caf3f31f349fd2529c8f0cfe7"
+  },
+  "confirmed_failure": "Identical3->4 original valuations produced different80-digit reports under ambient ROUND_UP/ROUND_DOWN;ambient inexact traps and exponent limits also raised valid-source reporting errors",
+  "fix": "Explicit80-digit ROUND_HALF_EVEN report Context with fixed exponent limits,flags and standard arithmetic error traps;internal Fraction arithmetic,normal default outputs,policy version,status/refusal states,source refs and execution_authority=False unchanged",
+  "actual_tests": {
+    "before": "9failed/15passed;actual Inexact/Rounded/Overflow regressions retained",
+    "focused_after": "24passed/0skips/audit0",
+    "final_pg": "219passed/0skips/audit0/21.20seconds/all final runtime-test hashes match/owned actual isolated PostgreSQL fixture independently absent",
+    "startup_attempt": "First owned fixture readiness probe timed out before tests;completedFalse/0 tests;owned fixture independently absent. Retry records actual probe timeout and then genuine readiness;no assertion weakened",
+    "counts_overlap": true,
+    "rebuild": 108
+  },
+  "qualification": "Report determinism only;no native/provider/economic/risk/data-use/unit/owner/production/S24 acceptance",
+  "evidence": "ci/funding_rounding_20261026",
+  "remaining": "Full funding postings/reversals/flow-adjusted risk/shared reservations,BE007 native rails and full canonical backend/forecast/assistant programme remain open",
+  "canonical_checks": {
+    "owner_frontend_drift": false,
+    "registry_cases": 374,
+    "registry_edits": 383,
+    "registry_findings": [],
+    "registry_execution_for_current_uncommitted_source": "NOT_RUN",
+    "consolidation_findings": []
+  }
+}

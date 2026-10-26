@@ -84,3 +84,35 @@ def test_unmeasured_results_do_not_publish_zero_drawdown_as_if_it_were_a_complet
     assert result['worst_observed_drawdown'] is None and result['evidence_refs']==[]
     assert result['units'] is None and result['external_net_flow'] is None
     assert 'native-flow' in result['input_refs']
+
+
+@pytest.mark.parametrize('rounding',[
+    'ROUND_CEILING','ROUND_DOWN','ROUND_FLOOR','ROUND_HALF_DOWN',
+    'ROUND_HALF_EVEN','ROUND_HALF_UP','ROUND_UP','ROUND_05UP'])
+def test_reporting_does_not_inherit_ambient_rounding_or_inexact_traps(rounding):
+    from decimal import Context,Inexact,Rounded,localcontext
+    with localcontext(Context()):
+        expected=unitize(valuation(1,'3','start'),valuation(3,'4','end'))
+    assert expected['flow_neutral_return']=='0.'+'3'*80
+    with localcontext() as ambient:
+        ambient.prec=5;ambient.rounding=rounding
+        ambient.traps[Inexact]=ambient.traps[Rounded]=True
+        before=ambient.copy()
+        actual=unitize(valuation(1,'3','start'),valuation(3,'4','end'))
+        assert actual==expected
+        assert ambient.prec==before.prec and ambient.rounding==before.rounding
+        assert ambient.traps==before.traps and ambient.flags==before.flags
+
+
+def test_valid_source_money_is_not_overflowed_by_an_unrelated_decimal_context():
+    from decimal import Context,localcontext
+    with localcontext(Context()):
+        expected=unitize(valuation(1,'3E12','start'),valuation(3,'4E12','end'))
+    assert D(expected['net_account_pnl'])==D('1E12')
+    with localcontext() as ambient:
+        ambient.Emax=9;ambient.Emin=-9;ambient.prec=3
+        before=ambient.copy()
+        actual=unitize(valuation(1,'3E12','start'),valuation(3,'4E12','end'))
+        assert actual==expected
+        assert (ambient.prec,ambient.Emax,ambient.Emin)==(before.prec,before.Emax,before.Emin)
+        assert ambient.flags==before.flags

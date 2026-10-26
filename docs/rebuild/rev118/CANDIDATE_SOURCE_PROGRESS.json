@@ -1,6 +1,6 @@
 {
   "schema": "van.rebuild.candidate-source-progress/1",
-  "updated_at_utc": "2026-10-26T11:20:54.403950+00:00",
+  "updated_at_utc": "2026-10-26T12:36:10.774469+00:00",
   "programme": "Rev1.18; original 131 unit IDs and dependencies retained",
   "authority": "auth-20261022-owner-autonomous-candidate-build",
   "meaning": "Candidate source progress is separate from admitted unit acceptance. Independent certificates, owner decisions, live effects and release gates remain unissued. No unit is declared complete by this record.",
@@ -454,6 +454,10 @@
         {
           "description": "Standalone JVM source set now includes the actual app funding parser. Hosted missing-dependency failure retained;1328 pure Kotlin tests pass0skip after bounded resource setup/owned daemon cleanup. Exact a1867 full trading2623PASS0skip; hosted258 mutations caught/116 Kotlin cases not executed. No whole-backend, full374 corpus, native/payment or unit acceptance.",
           "evidence": "backend/BE-006_FUNDING_HARNESS_INTEGRATION.md; receipts/FUNDING_HARNESS_INTEGRATION_20261024.json; receipts/FULL_TRADING_SOURCE_a1867df4.json; receipts/HOSTED_SOURCE_a1867df4_PARTIAL_FAILED.json"
+        },
+        {
+          "description": "Confirmed ambient Decimal rounding/traps/exponent settings changed or broke identical native-scoped unitization reports. Explicit report Context now fixes80-digit ROUND_HALF_EVEN and standard bounds/traps while exact Fraction calculations,normal outputs and all risk/unknown states remain unchanged.9actual regressions retained;24focused and219final actual-PG funding/cash/balance passes,0skips/audit0/final runtime-test hashes match/owned fixture independently absent. Startup-only refusal retained. Component only;fullBE006 remains IN_PROGRESS.",
+          "evidence": "backend/BE-006_DETERMINISTIC_REPORT_CONTEXT.md; receipts/FUNDING_REPORT_CONTEXT_SOURCE_20261026.json"
         }
       ]
     },
