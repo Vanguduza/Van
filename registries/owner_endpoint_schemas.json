@@ -9034,6 +9034,158 @@
         ],
         "title": "MonitorWrite"
       },
+      "NativeDepthHistoryErrorResponse": {
+        "properties": {
+          "detail": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "required": [
+          "detail"
+        ],
+        "title": "NativeDepthHistoryErrorResponse"
+      },
+      "NativeDepthHistoryResponse": {
+        "properties": {
+          "schema": {
+            "type": "string",
+            "const": "van.trading.native-depth-history/1",
+            "title": "Schema"
+          },
+          "state": {
+            "type": "string",
+            "enum": [
+              "NO_CAPTURE",
+              "HISTORICAL_PARTIAL_DEPTH_CAPTURE_UNQUALIFIED"
+            ],
+            "title": "State"
+          },
+          "scope": {
+            "$ref": "#/components/schemas/NativeDepthScope"
+          },
+          "requested_revision": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Requested Revision"
+          },
+          "requested_as_of_ms": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Requested As Of Ms"
+          },
+          "snapshot": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Snapshot"
+          },
+          "current_freshness": {
+            "type": "string",
+            "const": "NOT_EVALUATED_HISTORICAL_RECORD",
+            "title": "Current Freshness"
+          },
+          "normalized_prices_available": {
+            "type": "boolean",
+            "const": false,
+            "title": "Normalized Prices Available"
+          },
+          "provider_qualified": {
+            "type": "boolean",
+            "const": false,
+            "title": "Provider Qualified"
+          },
+          "authority_effect": {
+            "type": "string",
+            "const": "NONE",
+            "title": "Authority Effect"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "schema",
+          "state",
+          "scope",
+          "requested_revision",
+          "requested_as_of_ms",
+          "snapshot",
+          "current_freshness",
+          "normalized_prices_available",
+          "provider_qualified",
+          "authority_effect"
+        ],
+        "title": "NativeDepthHistoryResponse"
+      },
+      "NativeDepthScope": {
+        "properties": {
+          "provider": {
+            "type": "string",
+            "const": "CTRADER",
+            "title": "Provider"
+          },
+          "environment": {
+            "type": "string",
+            "enum": [
+              "DEMO",
+              "LIVE"
+            ],
+            "title": "Environment"
+          },
+          "transport_host": {
+            "type": "string",
+            "enum": [
+              "demo.ctraderapi.com",
+              "live.ctraderapi.com"
+            ],
+            "title": "Transport Host"
+          },
+          "native_account_id": {
+            "type": "integer",
+            "maximum": 9.223372036854776e+18,
+            "minimum": 1.0,
+            "title": "Native Account Id"
+          },
+          "native_symbol_id": {
+            "type": "integer",
+            "maximum": 9.223372036854776e+18,
+            "minimum": 1.0,
+            "title": "Native Symbol Id"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "provider",
+          "environment",
+          "transport_host",
+          "native_account_id",
+          "native_symbol_id"
+        ],
+        "title": "NativeDepthScope"
+      },
       "NativeOwnerKeyRevocationReceipt": {
         "properties": {
           "schema": {

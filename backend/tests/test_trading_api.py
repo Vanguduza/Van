@@ -249,7 +249,10 @@ def test_service_never_exposes_an_order_path():
     # a capability, which the banned-substring check below still proves.
     assert names == {"available", "status", "tickets", "halt", "confirm_ticket", "trade_book", "portfolio", "accounts", "market_state", "risk", "cognition", "trade_detail", "bars", "producer", "accounts_registry", "lake_root", "reporting_currency", "owner_authority",
                      "positions", "events", "potential_trades", "history", "assessment",
-                     "cognitive_fabric", "cognitive_slice", "cognitive_import"}
+                     "cognitive_fabric", "cognitive_slice", "cognitive_import",
+                     "native_depth_history", "native_source_root", "native_history_max_bytes"}
+    # Historical native captures use only the provisioned archive reader and
+    # its byte policy; the registered HTTP suite trips any broker collection.
     # Cognitive projections are read-only; imports append bounded evidence only.
     # Their effects are independently checked by the authority-tripwire regression below.
     for banned in ("order", "submit", "size", "cancel", "modify", "credential", "token"):

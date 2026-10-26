@@ -180,7 +180,9 @@
         "backend/BE-008_NATIVE_DEPTH_ARCHIVE.md",
         "receipts/NATIVE_DEPTH_ARCHIVE_SOURCE_20261026.json",
         "backend/BE-008_NATIVE_ARCHIVE_BYTE_BUDGET.md",
-        "receipts/NATIVE_ARCHIVE_BYTE_BUDGET_SOURCE_20261026.json"
+        "receipts/NATIVE_ARCHIVE_BYTE_BUDGET_SOURCE_20261026.json",
+        "backend/BE-008_NATIVE_DEPTH_HISTORY_HTTP.md",
+        "receipts/NATIVE_DEPTH_HISTORY_HTTP_SOURCE_20261026.json"
       ]
     },
     "BE-014": {
@@ -318,7 +320,7 @@
     "note": "Opus unavailable; owner transferred build to Codex. No independent reviewer identity is inferred from another model or session."
   },
   "checkpoint": {
-    "updated_utc": "2026-10-26T21:59:22.280440+00:00",
+    "updated_utc": "2026-10-26T22:36:21.837174+00:00",
     "branch": "ccr-9e07e1af-8mgz1p",
     "base": "b02075f327ea8180ab6d269eba358cf8c5479878",
     "background_jobs": [
@@ -337,7 +339,7 @@
         "not_acceptance": true
       }
     ],
-    "last_validation": "NativeMarketArchive actual read now bounded through stat/read growth;optional positive<=256MiB cumulative record/index budget(defaultNone preserveslegacy) checks prospective publication and indexrepair before writes,never truncates/evicts/recaptures. Controlled committedc08 read(-1) failure retained;other8beforefailures unimplementednewAPI.11newcases/155focused/797finalactualSQLitePostgres passes0skip/audit0/all495runtime-testhashesmatch/ownedfixtureabsent;4assertionfaults11positive11restored/sourceexact/122rebuildT0checks. Encodedbytepolicy only;BE008 IN_PROGRESS,acceptanceNOT_ISSUED;historicalservice/API next.",
+    "last_validation": "Registered paired-owner GET /v1/trading/market/depth-history reads original physical-scope DEPTH captures through existing TradingService/NativeDepthArchive. Server-only root/byte budget;strict selectors, explicit private refusal/NO_CAPTURE, original policy/revision/as-of, no repair/broker I/O/normalized prices/current freshness/rights or execution grant. Two active verification slots remain occupied across caller cancellation. 32 new cases;910 final actual SQLite/PostgreSQL/HTTP/private-topology passes,0 skips/audit violations,1148 final backend/trading runtime-test hashes match,owned fixture independently absent;3 assertion faults caught/6 positive+6 restored controls/exact source restored;122 rebuild/workflow/T0 checks. Original integration failed1/106 on exact service-surface allowlist;only3 new read-only names added,authority tripwires retained,focused2 and final910 passed. Counts overlap;BE008 IN_PROGRESS,unit/native/production acceptance NOT_ISSUED.",
     "environment_notes": [
       "clone must be unshallowed (git fetch --unshallow) and PR heads fetched (+refs/pull/*/head:refs/remotes/origin/pr/*) before pre001.py",
       "pytest from backend/requirements.txt in a venv",
@@ -394,7 +396,8 @@
     "Exact6698 main40322142900 terminalFAILED on2unwaivedmandatoryprerequisites;all17publicjobsSUCCESS.15rawarchivesverified;trading3819+1privateDDSskip,PG26,voice117,gateway5775+7skips,media198,monitor258,browser/emulator originalchecks;374canonicalidentitiescaughtonce383edits. Dedicatedforecast40322141956bothSUCCESS actual114Parquet/SQL0skip/audit0 plus6synthetic/3coldparity0/232versions/kernel/cleanup/sourcehash/tree verified. Parent results do not qualify later funding-renderer source.",
     "Exact9bf main40383599951 terminalFAILED only on two mandatory privateDDS/trusted-main prerequisites;17publicSUCCESS,3985trading+1declaredprivateDDSskip/PG26/voice117/gateway5775+7skip/media198/monitor258/browser/emulator and374canonicalidentitiescaughtonce383edits. Forecast40383599772SUCCESS114native+6synthetic+3cold parity0/232versions/kernel/cleanup/hashes/tree.16main+forecastarchives size/SHA/CRC verified; published9bf only.",
     "Exact733b main40394743701 terminalFAILED on2unwaived mandatory privateDDS/trusted-main prerequisites;all17publicjobsSUCCESS.16main+forecastarchivesverified;trading4017+1declaredprivateDDSskip/PG26/voice117/gateway5775+7skip/media198/monitor258/browser1547+1skipplus11/1/10/emulator18+4skips.374canonicalidentitiescaughtonce383edits across9actualreports. Forecast40394743715SUCCESS114native/6synthetic/3coldparity0/232versions/kernel/cleanup/source-controller-reporthashes/tree-equivalent actualmerge96cd9f894123a5aab80b49ec6affac47ada89633. Published733b only;later arithmetic/depth not qualified by parent.",
-    "Exact0c main40402195836 terminalFAILED2unwaivedmandatoryprivateDDS/trusted-main prerequisites;all17publicSUCCESS.16archivesZIP/CRC/SHAverifiedandretained;4066trading+1privateDDSskip/PG26/voice117/gateway5775+7skip/media198/monitor258/browser/emulator and374canonicalidentitiescaughtonce383edits. Forecast40402195860SUCCESS114native+6synthetic+3cold/parity0/232versions/kernel/cleanup/source-controller-reporthashes/tree-equivalent testedmerge1a5dc32a04cd5bae15cc4c2feaf3c2eeec1a056b. Published0c only;laterdurabledepth/budget notqualified."
+    "Exact0c main40402195836 terminalFAILED2unwaivedmandatoryprivateDDS/trusted-main prerequisites;all17publicSUCCESS.16archivesZIP/CRC/SHAverifiedandretained;4066trading+1privateDDSskip/PG26/voice117/gateway5775+7skip/media198/monitor258/browser/emulator and374canonicalidentitiescaughtonce383edits. Forecast40402195860SUCCESS114native+6synthetic+3cold/parity0/232versions/kernel/cleanup/source-controller-reporthashes/tree-equivalent testedmerge1a5dc32a04cd5bae15cc4c2feaf3c2eeec1a056b. Published0c only;laterdurabledepth/budget notqualified.",
+    "Registered paired-owner GET /v1/trading/market/depth-history reads original physical-scope DEPTH captures through existing TradingService/NativeDepthArchive. Server-only root/byte budget;strict selectors, explicit private refusal/NO_CAPTURE, original policy/revision/as-of, no repair/broker I/O/normalized prices/current freshness/rights or execution grant. Two active verification slots remain occupied across caller cancellation. 32 new cases;910 final actual SQLite/PostgreSQL/HTTP/private-topology passes,0 skips/audit violations,1148 final backend/trading runtime-test hashes match,owned fixture independently absent;3 assertion faults caught/6 positive+6 restored controls/exact source restored;122 rebuild/workflow/T0 checks. Original integration failed1/106 on exact service-surface allowlist;only3 new read-only names added,authority tripwires retained,focused2 and final910 passed. Counts overlap;BE008 IN_PROGRESS,unit/native/production acceptance NOT_ISSUED."
   ],
   "obligations": "obligations/OBLIGATIONS.json: preserved observations with source implementation evidence and explicit remaining native/unit obligations.",
   "pre002_challenge": "pre002/challenge/: 324 author-prepared dossiers (AUTHOR_CHALLENGED_PENDING_INDEPENDENT_REVIEW)",
@@ -425,9 +428,9 @@
     "tested_android_head": "752d265b11ba643ed309481b110248f8b7fe323b",
     "hosted_result": "receipts/HOSTED_SOURCE_752d265b.json",
     "mutation_reconciliation": "ci/MUTATION_RECONCILIATION.md and ci/MUTATION_RECONCILIATION_MAPPING.json",
-    "verified_source_head": "c08ea48674647311c46e0c1853c1d7b9f9afc4e6 local/genuineGREEN164/manifest4915;published0c1344f5f0b3c6cfb5cf437f80234d36812fd94e GREEN163;bytebudget candidate uncommitted",
+    "verified_source_head": "9255b23d07ce976fa48c2f2e452b70113e6e6458 published/genuineGREEN165/manifest5090;historical-depth HTTP candidate uncommitted",
     "source_qualification_run": 40383599951,
-    "latest_checkpoint_report": "docs/rebuild/rev118/CHECKPOINT_20261026_NATIVE_ARCHIVE_BUDGET.md",
+    "latest_checkpoint_report": "docs/rebuild/rev118/CHECKPOINT_20261026_NATIVE_DEPTH_HISTORY_HTTP.md",
     "previous_verified_source": "3c6969ebbec39f2ad9f2836a6bd8acdb487adc34 published; exact CI40228254162 all17public jobs pass, two unchanged prerequisite failures",
     "qualification_scope": "Public source tests only; mandatory/native/owner/production gates unissued."
   },
@@ -447,6 +450,6 @@
       "evidence": "ci/MUTATION_CORPUS_c2a27848.json"
     }
   ],
-  "current_action": "Finish bounded-read packet manifest/staged ZIP/genuine hook commit/committed baselineverify. Published0c main is terminal with exact fullsourceproof;normally push c08 durabledepth+budget as combinedhead/readback/exactCI. Continue existing-owner historical depth service/readmodels/API with explicit source root, bounded verification and no nativeI/O/live-liquidity/rightsclaim, then full dependency-ready backend/ML/financial/assistant operations.0formalacceptedunits.",
-  "updated_at_utc": "2026-10-26T21:59:22.280440+00:00"
+  "current_action": "Finish historical-depth HTTP packet manifest/staged backup/genuine hook commit/actual committed verification. Preserve published9255 main40411152887 until terminal, reconcile exact raw results, normally publish/readback HTTP source and inspect its exact CI. Continue dependency-ready canonical backend functionality; all unit/native/production/Android/S24 gates remain unissued.",
+  "updated_at_utc": "2026-10-26T22:36:21.837174+00:00"
 }

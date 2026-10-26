@@ -91,6 +91,14 @@ class TradingService:
     #: host with no registered owner key gets a verifier that refuses everything, which is
     #: the correct default for a process that can halt live trading.
     owner_authority: Any = None
+    native_source_root: str = ""
+    native_history_max_bytes: int = 64*1024**2
+
+    def native_depth_history(self,*,environment,native_account_id,native_symbol_id,revision=None,as_of_ms=None):
+        from van_gateway.trading.native_depth_history import read_history
+        return read_history(root=self.native_source_root,max_history_bytes=self.native_history_max_bytes,
+            environment=environment,native_account_id=native_account_id,native_symbol_id=native_symbol_id,
+            revision=revision,as_of_ms=as_of_ms)
 
     # ---------------------------------------------------------------- state
     def available(self) -> bool:

@@ -79,6 +79,9 @@ class Settings(BaseSettings):
     vati_lake_root: str = "data/vati_lake"
     vati_reporting_currency: str = "USD"
     vati_secrets_dir: str = "data/vati_secrets"
+    # Provisioned on the application host; never supplied by an owner HTTP request.
+    vati_native_source_root: str = ""
+    vati_native_history_max_bytes: int = Field(64*1024**2,ge=1,le=256*1024**2)
     # These fields predate the global VAN_ settings prefix and therefore retain a
     # "van_" Python name. Explicit aliases prevent the accidental VAN_VAN_* environment
     # spelling while accepting it for backwards compatibility.

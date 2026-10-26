@@ -306,6 +306,20 @@ def build(read=None):
         row.setdefault("backend_contract_extensions", []).append(copy.deepcopy(conversation_history))
     chart_feature = next(r for r in documents["owner_features"]["features"] if r["id"] == "OF-TRADING-002")
     chart_screen = next(r for r in documents["owner_screens"]["screens"] if r["id"] == "van.trading.positions.detail")
+    depth_history = next(r for r in endpoint_doc["endpoints"] if r["path"] == "/v1/trading/market/depth-history")
+    depth_extension = {
+        "method": depth_history["method"], "path": depth_history["path"], "endpoint_id": depth_history["endpoint_id"],
+        "source_ref": depth_history["source"], "authentication": depth_history["authentication"],
+        "device_proof_required_when_bound": depth_history["device_proof_required_when_bound"],
+        "source_status": "CANDIDATE_HISTORICAL_SOURCE_READ_ANDROID_CONSUMER_PENDING",
+        "authority": "HISTORICAL_SOURCE_READ_ONLY_NO_BROKER_IO_EXECUTION_OR_ENTITLEMENT_AUTHORITY",
+        "canonical_units": ["BE-008"], "planned_feature_refs": ["VNX-F-CHART-10"],
+        "scope": "Original partial-depth captures by exact native realm/account/symbol scope, revision or as-of boundary. Configured server storage, cumulative byte verification and two original read slots; cancellation cannot reopen capacity before completion. No broker refresh or query-supplied path/policy. Unavailable/corrupt/over-budget sources refuse and missing captures remain null. Complete original versioned capture/receipt retained; no current freshness, normalized price, complete book, provider right or frontend implementation is claimed.",
+        "specification": "docs/rebuild/rev118/backend/BE-008_NATIVE_DEPTH_HISTORY_HTTP.md",
+        "new_ui_implemented": False, "live_qualified": False,
+    }
+    for row in (chart_feature,chart_screen):
+        row.setdefault("backend_contract_extensions",[]).append(copy.deepcopy(depth_extension))
     for endpoint in endpoint_doc["endpoints"]:
         if not endpoint["path"].startswith("/v1/trading/charts/"):
             continue

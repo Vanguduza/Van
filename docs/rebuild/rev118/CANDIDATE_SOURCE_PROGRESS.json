@@ -1,6 +1,6 @@
 {
   "schema": "van.rebuild.candidate-source-progress/1",
-  "updated_at_utc": "2026-10-26T21:59:22.280440+00:00",
+  "updated_at_utc": "2026-10-26T22:36:21.837174+00:00",
   "programme": "Rev1.18; original 131 unit IDs and dependencies retained",
   "authority": "auth-20261022-owner-autonomous-candidate-build",
   "meaning": "Candidate source progress is separate from admitted unit acceptance. Independent certificates, owner decisions, live effects and release gates remain unissued. No unit is declared complete by this record.",
@@ -569,6 +569,10 @@
         {
           "description": "NativeMarketArchive actual read now bounded through stat/read growth;optional positive<=256MiB cumulative record/index budget(defaultNone preserveslegacy) checks prospective publication and indexrepair before writes,never truncates/evicts/recaptures. Controlled committedc08 read(-1) failure retained;other8beforefailures unimplementednewAPI.11newcases/155focused/797finalactualSQLitePostgres passes0skip/audit0/all495runtime-testhashesmatch/ownedfixtureabsent;4assertionfaults11positive11restored/sourceexact/122rebuildT0checks. Encodedbytepolicy only;BE008 IN_PROGRESS,acceptanceNOT_ISSUED;historicalservice/API next.",
           "evidence": "backend/BE-008_NATIVE_ARCHIVE_BYTE_BUDGET.md;receipts/NATIVE_ARCHIVE_BYTE_BUDGET_SOURCE_20261026.json"
+        },
+        {
+          "description": "Registered paired-owner GET /v1/trading/market/depth-history reads original physical-scope DEPTH captures through existing TradingService/NativeDepthArchive. Server-only root/byte budget;strict selectors, explicit private refusal/NO_CAPTURE, original policy/revision/as-of, no repair/broker I/O/normalized prices/current freshness/rights or execution grant. Two active verification slots remain occupied across caller cancellation. 32 new cases;910 final actual SQLite/PostgreSQL/HTTP/private-topology passes,0 skips/audit violations,1148 final backend/trading runtime-test hashes match,owned fixture independently absent;3 assertion faults caught/6 positive+6 restored controls/exact source restored;122 rebuild/workflow/T0 checks. Original integration failed1/106 on exact service-surface allowlist;only3 new read-only names added,authority tripwires retained,focused2 and final910 passed. Counts overlap;BE008 IN_PROGRESS,unit/native/production acceptance NOT_ISSUED.",
+          "evidence": "backend/BE-008_NATIVE_DEPTH_HISTORY_HTTP.md;receipts/NATIVE_DEPTH_HISTORY_HTTP_SOURCE_20261026.json"
         }
       ]
     },

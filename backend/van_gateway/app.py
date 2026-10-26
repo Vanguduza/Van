@@ -661,6 +661,8 @@ def create_app() -> FastAPI:
         accounts_registry=settings.vati_accounts_registry,
         lake_root=settings.vati_lake_root,
         reporting_currency=settings.vati_reporting_currency,
+        native_source_root=settings.vati_native_source_root,
+        native_history_max_bytes=settings.vati_native_history_max_bytes,
     )
     visual_acceptance = VisualAcceptanceService(store)
     # GAP-F-003: Hermes reads the same trading read models the owner sees, through
@@ -1257,6 +1259,8 @@ def create_app() -> FastAPI:
     chart_workspaces = ChartWorkspaceService(store)
     app.state.chart_workspaces = chart_workspaces
     app.include_router(build_chart_router(chart_workspaces))
+    from van_gateway.trading.native_depth_history import build_depth_history_router
+    app.include_router(build_depth_history_router(trading))
     from van_gateway.trading.monitor_api import build_monitor_router
     app.state.market_monitors = market_monitors
     app.include_router(build_monitor_router(market_monitors))
