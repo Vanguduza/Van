@@ -1,0 +1,22 @@
+# Funding and payment implementation continuation
+
+Read-only source inspection on published e690d530; this inventory is not implementation or acceptance evidence.
+
+The canonical BE-006 operations are native cash ingestion, classification/reconciliation, reversals, flow-adjusted return/drawdown and statement lineage. BE-007 depends on BE-005/006 and retains quote, beneficiary verification, exact approval, reservation, submission, reconciliation, settlement, compensation and verified hosted handoff. VAN-CX-016 requires atomic protection against outgoing funding racing an order or account removal. Unknown sends must retain their original identity, and redirects never settle money.
+
+Existing owners inspected:
+
+- `trading/vati/funding/journal.py`: FundingBook retains original native statements in the existing financial ledger, rejects source conflicts and deduplicates repeated source sets. DealBook extends that owner for native closing facts; Mt5FundingBook retains original MT5 cash sets and current query receipts.
+- `funding/classification.py`: versioned native-operation meaning separates external/support capital, restricted credit, business income and account income/expense. Unknown operations and native sign conflicts are unresolved; provider notes do not determine meaning.
+- `funding/unitization.py`: exact Decimal/Fraction unitization preserves sampled drawdown across cash flows. Missing original valuations or ordering yields UNMEASURED; historical total equity is not silently treated as normalized net equity.
+- `funding/reconciliation.py`, `runtime.py`, `mt5_runtime.py`, `mt5_report.py`: original scope-bound observations, coverage, version/lineage reconciliation and owner read models already exist. A source fact is not payment authority or settled trade alpha.
+- `funding/risk_fence.py`: native external flows explicitly hold new risk with FLOW_ADJUSTED_RISK_NOT_QUALIFIED. Protective management remains independent. This refusal must remain until the actual economic accounting is implemented and qualified.
+- `app/account_lease.py`, `app/sqlite_lease.py`, `execution/router.py`: existing account submission guards, current owner-key checks, exact command identity and fresh risk revalidation are the concurrency boundaries to reuse. Native submissions require the shared PostgreSQL authority. Local SQLite fencing is explicitly narrower.
+- `backend/van_gateway/trading/account_operations.py`: payment operations correctly expose PROVIDER_ADMISSION_REQUIRED/UNSUPPORTED. A documented provider API is not an admitted adapter. Current labels must not be enabled by source presence.
+- `backend/van_gateway/automation/payments.py`: payments require a fresh exact A4 owner action and cannot be scheduled or automated; payment instruments cannot be retained. Opaque provider references must not become stored instruments or reusable payment authority.
+
+The inspected active backend/trading sources contained no implemented PaymentIntent, PaymentQuote, BeneficiaryRef or SettlementReceipt owners, nor a shared outgoing-collateral reservation implementation. These remain real software obligations. The source milestones for BE-006 are partial; BE-007 has no implementation milestones. Existing files and endpoints do not close either unit.
+
+Continue by extending the existing financial/account/approval owners, preserving exact source-scaled money and immutable postings/movement lineage, real reconciliation and append-only reversals, shared order/funding reservations, exact beneficiary/quote approval and original-request unknown-effect recovery. Do not create a parallel financial ledger or grant format. Do not infer a compensating reversal merely from opposite amounts, a licence from a digest, or settlement from a hosted redirect. Implement source fixtures and integration without claiming actual provider access. Real provider/admission/owner and production gates remain separate.
+
+Full ML005 scope/rights/consent/universe/calendar/feature/target/lifecycle/gap/joins and runtime work remains open while this independent backend work progresses. Preserve every canonical operation, error state and frontend contract; no new frontend design before BG-001.

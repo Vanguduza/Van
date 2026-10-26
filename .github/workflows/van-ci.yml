@@ -177,7 +177,11 @@ jobs:
           print(counts)
           PY
       - name: Public trading source regressions
-        run: python -m pytest -vv --durations=20 trading/tests/ --junitxml=trading-source-report.xml
+        run: |
+          set -o pipefail
+          timeout --signal=INT --kill-after=30s 28m \
+            python -m pytest -vv --durations=20 \
+            trading/tests/ --junitxml=trading-source-report.xml 2>&1 | tee trading-source.log
       - name: Record the only private-source test unavailable to this public job
         run: |
           python - <<'PY'
@@ -219,6 +223,7 @@ jobs:
           path: |
             postgres-ledger-report.xml
             trading-source-report.xml
+            trading-source.log
             voice-source-report.xml
 
   # Independent public source qualification: this does not replace the backend

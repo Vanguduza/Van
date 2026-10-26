@@ -57,6 +57,7 @@ jobs:
           Path('/tmp/van-source-arrow.lock').write_text(lines[0]+'\n')
           PY
           python -m pip install --no-deps --require-hashes -r /tmp/van-source-arrow.lock
+          python -m pip install --no-deps psycopg==3.2.9 psycopg-binary==3.2.9
       - name: Initialize only the disposable candidate source database
         run: |
           python - <<'PY'

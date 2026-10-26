@@ -17,9 +17,26 @@ from vati.execution.mt5_pull import BridgeQueue,Mt5PullAdapter,create_pull_app,s
 from vati.risk.serde import contract_to_dict
 from vati.execution.mt5_identity import Mt5Identity
 from mt5_cash_kit import cash_telemetry
+from test_postgres_ledger_isolation import pg_dsn
 
 pytestmark=pytest.mark.skipif(not os.environ.get('VATI_TEST_PG_DSN') or os.environ.get('VATI_TEST_PG_ISOLATED_FIXTURE')!='1',
     reason='requires explicitly isolated native PostgreSQL fixture')
+
+
+@pytest.fixture(autouse=True)
+def isolated_native_history(pg_dsn,monkeypatch):
+    """Each recovery scenario owns its complete history, including restarts.
+
+    Sharing the default financial ledger across unrelated scenarios made every
+    full-chain check rescan earlier tests' native snapshots. Reuse the actual
+    disposable database fixture; keep all source/authority/integrity checks.
+    """
+    from urllib.parse import urlsplit,urlunsplit
+    from psycopg.conninfo import conninfo_to_dict
+    original=urlsplit(os.environ['VATI_TEST_PG_DSN'])
+    assert original.scheme in {'postgres','postgresql'}
+    database=conninfo_to_dict(pg_dsn)['dbname']
+    monkeypatch.setenv('VATI_TEST_PG_DSN',urlunsplit(original._replace(path='/'+database)))
 
 
 @contextmanager

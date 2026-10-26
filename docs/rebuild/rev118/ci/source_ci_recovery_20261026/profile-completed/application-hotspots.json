@@ -1,0 +1,322 @@
+[
+  {
+    "file": "/workspace/van-review-2026-10-18/publish/trading/vati/app/service.py",
+    "line": 425,
+    "name": "step_once",
+    "calls": 219,
+    "own_seconds": 0.10098081,
+    "cumulative_seconds": 167.004650061
+  },
+  {
+    "file": "/workspace/van-review-2026-10-18/publish/trading/vati/core/ledger_pg.py",
+    "line": 200,
+    "name": "verify_chain",
+    "calls": 662,
+    "own_seconds": 0.6628610020000001,
+    "cumulative_seconds": 80.171972205
+  },
+  {
+    "file": "/workspace/van-review-2026-10-18/publish/trading/vati/core/ledger_pg.py",
+    "line": 220,
+    "name": "_verify_from",
+    "calls": 967,
+    "own_seconds": 3.245094646,
+    "cumulative_seconds": 75.980030055
+  },
+  {
+    "file": "/workspace/van-review-2026-10-18/publish/trading/vati/learning/hooks.py",
+    "line": 68,
+    "name": "update_projection",
+    "calls": 441,
+    "own_seconds": 0.057104367,
+    "cumulative_seconds": 70.834441556
+  },
+  {
+    "file": "/workspace/van-review-2026-10-18/publish/trading/vati/learning/restatement.py",
+    "line": 194,
+    "name": "catch_up",
+    "calls": 441,
+    "own_seconds": 0.057980562000000006,
+    "cumulative_seconds": 70.76188053300001
+  },
+  {
+    "file": "/workspace/van-review-2026-10-18/publish/trading/vati/app/service.py",
+    "line": 306,
+    "name": "_account_snapshot",
+    "calls": 220,
+    "own_seconds": 0.10076773700000001,
+    "cumulative_seconds": 68.356189782
+  },
+  {
+    "file": "/workspace/van-review-2026-10-18/publish/trading/vati/core/ledger.py",
+    "line": 63,
+    "name": "_check_row",
+    "calls": 380148,
+    "own_seconds": 4.151068375,
+    "cumulative_seconds": 52.961075553
+  },
+  {
+    "file": "/workspace/van-review-2026-10-18/publish/trading/vati/app/service.py",
+    "line": 285,
+    "name": "_heartbeat",
+    "calls": 220,
+    "own_seconds": 0.071492835,
+    "cumulative_seconds": 42.518248169
+  },
+  {
+    "file": "/workspace/van-review-2026-10-18/publish/trading/vati/core/canonical.py",
+    "line": 45,
+    "name": "canonical_hash",
+    "calls": 821205,
+    "own_seconds": 2.5091462190000002,
+    "cumulative_seconds": 40.671282862000005
+  },
+  {
+    "file": "/workspace/van-review-2026-10-18/publish/trading/vati/core/canonical.py",
+    "line": 41,
+    "name": "canonical_json",
+    "calls": 823226,
+    "own_seconds": 1.265069295,
+    "cumulative_seconds": 33.785274917
+  },
+  {
+    "file": "/workspace/van-review-2026-10-18/publish/trading/vati/funding/mt5_runtime.py",
+    "line": 10,
+    "name": "capture_cached_mt5",
+    "calls": 248,
+    "own_seconds": 0.018090197000000002,
+    "cumulative_seconds": 33.376560363
+  },
+  {
+    "file": "/workspace/van-review-2026-10-18/publish/trading/vati/funding/mt5_journal.py",
+    "line": 29,
+    "name": "capture",
+    "calls": 248,
+    "own_seconds": 0.319673824,
+    "cumulative_seconds": 33.278566804
+  },
+  {
+    "file": "/workspace/van-review-2026-10-18/publish/trading/vati/funding/worker.py",
+    "line": 72,
+    "name": "snapshot_funding",
+    "calls": 220,
+    "own_seconds": 0.004541702,
+    "cumulative_seconds": 29.036071147
+  },
+  {
+    "file": "/workspace/van-review-2026-10-18/publish/trading/vati/app/runtime_control_actor.py",
+    "line": 128,
+    "name": "process_recovery_requests",
+    "calls": 219,
+    "own_seconds": 0.006853751000000001,
+    "cumulative_seconds": 27.801578168000002
+  },
+  {
+    "file": "/workspace/van-review-2026-10-18/publish/trading/vati/app/runtime_control_journal.py",
+    "line": 180,
+    "name": "pending_account",
+    "calls": 219,
+    "own_seconds": 0.025817173000000002,
+    "cumulative_seconds": 27.793730483
+  },
+  {
+    "file": "/workspace/van-review-2026-10-18/publish/trading/vati/funding/mt5_journal.py",
+    "line": 42,
+    "name": "_queries",
+    "calls": 276,
+    "own_seconds": 1.497457832,
+    "cumulative_seconds": 26.848994750000003
+  },
+  {
+    "file": "/workspace/van-review-2026-10-18/publish/trading/vati/app/runtime_control_journal.py",
+    "line": 79,
+    "name": "_states",
+    "calls": 219,
+    "own_seconds": 0.025452473000000003,
+    "cumulative_seconds": 26.172970828
+  },
+  {
+    "file": "/workspace/van-review-2026-10-18/publish/trading/vati/app/runner.py",
+    "line": 60,
+    "name": "on_bar",
+    "calls": 219,
+    "own_seconds": 0.030162002,
+    "cumulative_seconds": 21.716845301000003
+  },
+  {
+    "file": "/workspace/van-review-2026-10-18/publish/trading/vati/app/cycle.py",
+    "line": 360,
+    "name": "step",
+    "calls": 219,
+    "own_seconds": 0.102857324,
+    "cumulative_seconds": 21.651019803
+  },
+  {
+    "file": "/workspace/van-review-2026-10-18/publish/trading/vati/core/ledger_pg.py",
+    "line": 164,
+    "name": "iter",
+    "calls": 49519,
+    "own_seconds": 0.21065978200000002,
+    "cumulative_seconds": 13.164648583
+  },
+  {
+    "file": "/workspace/van-review-2026-10-18/publish/trading/vati/app/cycle.py",
+    "line": 307,
+    "name": "snapshot",
+    "calls": 28,
+    "own_seconds": 0.025461888000000002,
+    "cumulative_seconds": 12.304861123
+  },
+  {
+    "file": "/workspace/van-review-2026-10-18/publish/trading/vati/core/ledger_pg.py",
+    "line": 133,
+    "name": "append",
+    "calls": 1139,
+    "own_seconds": 0.110957043,
+    "cumulative_seconds": 11.563231081000001
+  },
+  {
+    "file": "/workspace/van-review-2026-10-18/publish/trading/vati/funding/mt5.py",
+    "line": 101,
+    "name": "from_body",
+    "calls": 62133,
+    "own_seconds": 3.370388065,
+    "cumulative_seconds": 9.599378307
+  },
+  {
+    "file": "/workspace/van-review-2026-10-18/publish/trading/vati/learning/projection_store.py",
+    "line": 58,
+    "name": "_query",
+    "calls": 3971,
+    "own_seconds": 0.062536229,
+    "cumulative_seconds": 8.246786924
+  },
+  {
+    "file": "/workspace/van-review-2026-10-18/publish/trading/vati/learning/projection_store.py",
+    "line": 146,
+    "name": "save",
+    "calls": 441,
+    "own_seconds": 0.07015295,
+    "cumulative_seconds": 8.106685834
+  },
+  {
+    "file": "/workspace/van-review-2026-10-18/publish/trading/vati/learning/projection_store.py",
+    "line": 66,
+    "name": "_read",
+    "calls": 2646,
+    "own_seconds": 0.055981558,
+    "cumulative_seconds": 7.749913256
+  },
+  {
+    "file": "/workspace/van-review-2026-10-18/publish/trading/vati/learning/projection_store.py",
+    "line": 113,
+    "name": "load",
+    "calls": 882,
+    "own_seconds": 0.036658367000000004,
+    "cumulative_seconds": 7.617672785000001
+  },
+  {
+    "file": "/workspace/van-review-2026-10-18/publish/trading/vati/funding/risk_fence.py",
+    "line": 25,
+    "name": "funding_risk_fence",
+    "calls": 28,
+    "own_seconds": 0.03074266,
+    "cumulative_seconds": 7.453757260000001
+  },
+  {
+    "file": "/workspace/van-review-2026-10-18/publish/trading/vati/funding/mt5_runtime.py",
+    "line": 19,
+    "name": "mt5_risk_fence",
+    "calls": 28,
+    "own_seconds": 0.09318303,
+    "cumulative_seconds": 7.422972588
+  },
+  {
+    "file": "/workspace/van-review-2026-10-18/publish/trading/vati/funding/mt5.py",
+    "line": 83,
+    "name": "source_ref",
+    "calls": 90986,
+    "own_seconds": 0.21713426200000002,
+    "cumulative_seconds": 7.1010758560000005
+  },
+  {
+    "file": "/workspace/van-review-2026-10-18/publish/trading/vati/funding/mt5.py",
+    "line": 75,
+    "name": "scope_hash",
+    "calls": 278224,
+    "own_seconds": 0.44999851,
+    "cumulative_seconds": 6.955493333000001
+  },
+  {
+    "file": "/workspace/van-review-2026-10-18/publish/trading/vati/funding/mt5_journal.py",
+    "line": 24,
+    "name": "_validate",
+    "calls": 31073,
+    "own_seconds": 0.226340179,
+    "cumulative_seconds": 6.149327085
+  },
+  {
+    "file": "/workspace/van-review-2026-10-18/publish/trading/vati/core/ledger_pg.py",
+    "line": 129,
+    "name": "_finish_read",
+    "calls": 8554,
+    "own_seconds": 0.046541148000000004,
+    "cumulative_seconds": 5.859512571000001
+  },
+  {
+    "file": "/workspace/van-review-2026-10-18/publish/trading/vati/funding/mt5.py",
+    "line": 87,
+    "name": "body",
+    "calls": 122515,
+    "own_seconds": 1.9277786550000002,
+    "cumulative_seconds": 5.3802958400000005
+  },
+  {
+    "file": "/workspace/van-review-2026-10-18/publish/trading/vati/core/ledger_pg.py",
+    "line": 192,
+    "name": "head",
+    "calls": 967,
+    "own_seconds": 0.056386074,
+    "cumulative_seconds": 4.857884018
+  },
+  {
+    "file": "/workspace/van-review-2026-10-18/publish/trading/vati/funding/mt5.py",
+    "line": 95,
+    "name": "mark_body",
+    "calls": 30714,
+    "own_seconds": 0.513321459,
+    "cumulative_seconds": 4.530618464000001
+  },
+  {
+    "file": "/workspace/van-review-2026-10-18/publish/trading/vati/app/cycle.py",
+    "line": 195,
+    "name": "_log",
+    "calls": 467,
+    "own_seconds": 0.56990728,
+    "cumulative_seconds": 4.485982577000001
+  },
+  {
+    "file": "/workspace/van-review-2026-10-18/publish/trading/vati/core/ledger_pg.py",
+    "line": 88,
+    "name": "atomic",
+    "calls": 2316,
+    "own_seconds": 0.036752313,
+    "cumulative_seconds": 4.2334323540000005
+  },
+  {
+    "file": "/workspace/van-review-2026-10-18/publish/trading/vati/risk/history_scope.py",
+    "line": 37,
+    "name": "risk_history_for_account",
+    "calls": 31,
+    "own_seconds": 0.076170627,
+    "cumulative_seconds": 3.8751903490000004
+  },
+  {
+    "file": "/workspace/van-review-2026-10-18/publish/trading/vati/app/runtime_control_actor.py",
+    "line": 64,
+    "name": "recovery_review",
+    "calls": 220,
+    "own_seconds": 0.044822970000000004,
+    "cumulative_seconds": 3.677103923
+  }
+]

@@ -1,0 +1,5 @@
+Traceback (most recent call last):
+  File "/tmp/van-timeout-control-bf9bjos2/owned_fixture.py", line 4, in <module>
+    try:time.sleep(60)
+        ^^^^^^^^^^^^^^
+KeyboardInterrupt
