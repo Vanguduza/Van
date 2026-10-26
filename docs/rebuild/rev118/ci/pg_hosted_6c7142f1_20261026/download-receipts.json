@@ -1,0 +1,17 @@
+[
+  {
+    "id": 12676411256,
+    "name": "van-postgres-ledger-report",
+    "bytes": 157748,
+    "sha256": "bdabc4cf6d05d48cd9af8aa93c113531a6e20067a7f01ebe349b79fc11d96174",
+    "workflow_run": {
+      "id": 40377218997,
+      "repository_id": 1369211561,
+      "head_repository_id": 1369211561,
+      "head_branch": "ccr-9e07e1af-8mgz1p",
+      "head_sha": "6c7142f126b206ba7f6aeefccb922cc51545c27c"
+    },
+    "root": "/workspace/van-6c7142f1-hosted",
+    "verified_zip_crc_paths_symlinks": true
+  }
+]

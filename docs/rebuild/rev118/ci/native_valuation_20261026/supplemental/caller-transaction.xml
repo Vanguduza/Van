@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="1" time="1.180" timestamp="2026-10-26T18:30:51.088574+00:00" hostname="2c5a245e39f1"><testcase classname="trading.tests.test_native_valuation" name="test_source_reference_and_native_scope_cannot_be_replaced_by_matching_alias[sqlite]" time="0.535"><failure message="Failed: DID NOT RAISE UnitError">original = (&lt;vati.core.ledger.Ledger object at 0x7eff15bf2c00&gt;, Event(kind=&lt;EventKind.ACCOUNT_SNAPSHOT: 'ACCOUNT_SNAPSHOT'&gt;, prod...ce_version=1, manager_bonus=Decimal('3.01'), ib_bonus=None, nonwithdrawable_bonus=Decimal('5'), registered_at_ms=None))
+
+    def test_source_reference_and_native_scope_cannot_be_replaced_by_matching_alias(original):
+        ledger,event,point=original;before=ledger.head(),ledger.count()
+        with pytest.raises(UnitError,match='SOURCE_UNAVAILABLE'):read(original,source_ref='0'*64)
+        with pytest.raises(UnitError,match='SCOPE_MISMATCH'):read(original,scope_hash='f'*64)
+        with ledger.atomic():
+&gt;           with pytest.raises(UnitError,match='OWN_WRITER'):read(original)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           Failed: DID NOT RAISE UnitError
+
+trading/tests/test_native_valuation.py:64: Failed</failure></testcase></testsuite></testsuites>

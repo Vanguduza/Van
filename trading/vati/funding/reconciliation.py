@@ -3,7 +3,7 @@
 No historical bonus is guessed from current bonuses. Returns spanning external
 flows require normalized historical flow valuations; otherwise they are unknown.
 """
-from decimal import Decimal,localcontext
+from decimal import Decimal
 from fractions import Fraction
 from vati.core.canonical import canonical_hash
 from vati.core.events import EventKind
@@ -12,7 +12,8 @@ from vati.funding.classification import classify
 from vati.funding.deal_journal import DealBook
 from vati.funding.journal import FundingBook
 from vati.funding.native import NativeAccountMark
-from vati.funding.unitization import NetEquityPoint,unitize
+from vati.funding.unitization import unitize,_render
+from vati.funding.valuation import ValuationSnapshot
 
 POLICY_VERSION='native-balance-period/1.0.0'
 
@@ -34,12 +35,9 @@ def _marks(ledger,scope):
         candidate=canonical_hash({k:body.get(k) for k in ('provider','environment','native_account_id','deposit_asset_id','currency')})
         if scope not in {candidate,body.get('scope_hash')}:continue
         try:
-            mark=NativeAccountMark.from_body(body)
-            if (mark.scope_hash!=scope or event.producer not in {'vati-account-service','vati-service'}
-                or event.hash!=canonical_hash(event.body()) or p.get('verified') is not True
-                or p.get('account_alias')!=mark.account_alias or p.get('currency')!=mark.currency
-                or Decimal(p['balance'])!=mark.balance or Decimal(p['equity'])!=mark.net_equity
-                or event.received_time_ms<mark.observed_at_ms):raise ValueError()
+            valuation=ValuationSnapshot(event)
+            mark=NativeAccountMark.from_body(valuation.body()['native_mark'])
+            if mark.scope_hash!=scope:raise ValueError()
         except (KeyError,TypeError,ValueError,ArithmeticError) as exc:raise LedgerError('native_account_mark_source_invalid') from exc
         rows.append((event,mark))
     return rows
@@ -50,6 +48,7 @@ def period_report(ledger,scope_hash,*,baseline_ref=None,closing_ref=None):
         'balance_reconciliation_basis':'NATIVE_BALANCE_VERSIONS_AND_POST_OPERATION_BALANCES',
         'trade_cost_settlement_qualification':'NOT_ISSUED',
         'execution_authority':False,'performance':None,'external_flows':[],'evidence_refs':[],
+        'valuation_snapshots':None,
         'cash_neutral_net_account_pnl':None,'separate_business_income_or_expense':None,
         'net_account_pnl_excluding_capital_and_separate_business':None}
     with ledger.read_snapshot():
@@ -72,8 +71,10 @@ def period_report(ledger,scope_hash,*,baseline_ref=None,closing_ref=None):
         closing=next((row for row in covered if row[0].hash==closing_ref),None) if closing_ref else (covered[-1] if covered else None)
         if closing is None:return result|{'reason':'NATIVE_PERIOD_COVERAGE_INCOMPLETE','baseline_ref':first.hash}
         last,c=closing
+        first_valuation,last_valuation=ValuationSnapshot(first),ValuationSnapshot(last)
         result.update(baseline_ref=first.hash,closing_ref=last.hash,from_ms=b.observed_at_ms,to_ms=c.observed_at_ms,
             latest_mark_ms=marks[-1][1].observed_at_ms,
+            valuation_snapshots={'baseline':first_valuation.body(),'closing':last_valuation.body()},
             baseline_balance=str(b.balance),closing_balance=str(c.balance))
         result['coverage_state']='CURRENT_MARK_COVERED' if last.hash==marks[-1][0].hash else 'OLDER_COVERED_MARK'
         if first.hash==last.hash:return result|{'reason':'NO_COVERED_LATER_MARK'}
@@ -130,23 +131,16 @@ def period_report(ledger,scope_hash,*,baseline_ref=None,closing_ref=None):
         result.update(balance_state='RECONCILED',external_flows=sorted(external,key=lambda row:row['balance_version']),evidence_refs=list(dict.fromkeys(refs)))
         external_total=sum((Fraction(Decimal(row['delta'])) for row in external),Fraction(0))
         neutral_pnl=Fraction(c.net_equity)-Fraction(b.net_equity)-external_total
-        def render(value):
-            with localcontext() as ctx:
-                ctx.prec=80
-                return str(Decimal(value.numerator)/Decimal(value.denominator))
-        result.update(cash_neutral_net_account_pnl=render(neutral_pnl),separate_business_income_or_expense=render(business),
-            net_account_pnl_excluding_capital_and_separate_business=render(neutral_pnl-business),
+        result.update(cash_neutral_net_account_pnl=_render(neutral_pnl),separate_business_income_or_expense=_render(business),
+            net_account_pnl_excluding_capital_and_separate_business=_render(neutral_pnl-business),
             cash_neutral_pnl_basis='NATIVE_NET_MARKS_MINUS_RECONCILED_EXTERNAL_CAPITAL_NOT_SETTLED_TRADE_ALPHA')
         if external:return result|{'reason':'NORMALIZED_HISTORICAL_FLOW_EQUITY_UNAVAILABLE'}
-        performance=unitize(NetEquityPoint(scope_hash,b.observed_at_ms,b.net_equity,first.hash,b.balance_version),
-            NetEquityPoint(scope_hash,c.observed_at_ms,c.net_equity,last.hash,c.balance_version))
+        performance=unitize(first_valuation.equity_point(),last_valuation.equity_point())
         if performance['status']=='MEASURED':
             peak=Fraction(b.net_equity);worst=Fraction(0)
             for source,mark in samples:
                 net=Fraction(mark.net_equity);peak=max(peak,net);worst=max(worst,(peak-net)/peak)
-            with localcontext() as ctx:
-                ctx.prec=80
-                performance['worst_observed_drawdown']=str(Decimal(worst.numerator)/Decimal(worst.denominator))
+            performance['worst_observed_drawdown']=_render(worst)
             performance['input_refs']=[source.hash for source,_ in samples]
             performance['evidence_refs']=result['evidence_refs']
         return result|{'state':performance['status'],'reason':performance.get('reason'),

@@ -124,7 +124,9 @@
         "backend/BE-006_DETERMINISTIC_REPORT_CONTEXT.md",
         "receipts/FUNDING_REPORT_CONTEXT_SOURCE_20261026.json",
         "backend/BE-006_EXACT_NATIVE_POSTINGS.md",
-        "receipts/EXACT_NATIVE_POSTINGS_SOURCE_20261026.json"
+        "receipts/EXACT_NATIVE_POSTINGS_SOURCE_20261026.json",
+        "backend/BE-006_NATIVE_VALUATION_LINEAGE.md",
+        "receipts/NATIVE_VALUATION_SOURCE_20261026.json"
       ]
     },
     "BE-020": {
@@ -302,26 +304,26 @@
     "note": "Opus unavailable; owner transferred build to Codex. No independent reviewer identity is inferred from another model or session."
   },
   "checkpoint": {
-    "updated_utc": "2026-10-26T18:13:30.506993+00:00",
+    "updated_utc": "2026-10-26T18:37:01.533855+00:00",
     "branch": "ccr-9e07e1af-8mgz1p",
     "base": "b02075f327ea8180ab6d269eba358cf8c5479878",
     "background_jobs": [
       {
         "kind": "van-ci",
-        "id": 40367094242,
-        "head": "3205594c907665732e69dcac26852ff28078c48a",
-        "state": "TERMINALFAILED16publicSUCCESS/twomandatoryunwaived/postgrescancelled35min;actualtrading3828/1privateDDSskip+PG26;voicenotexecuted;374canonicalcaughtonce/383edits;15archivesverified",
+        "id": 40377218997,
+        "head": "6c7142f126b206ba7f6aeefccb922cc51545c27c",
+        "state": "RUNNING_AT_CAPTURE;postgres/trading/voicejobSUCCESS withactualJUnit3940+1privateDDSskip/26/117 and archiveverified;two mandatoryprivateDDS/trusted-mainfailuresunwaived;otherjobsnotyetterminal",
         "not_acceptance": true
       },
       {
         "kind": "van-forecast-runtime-source",
-        "id": 40367094028,
-        "head": "3205594c907665732e69dcac26852ff28078c48a",
-        "state": "SUCCESSbothjobs114nativeParquetSQL0skip/audit0;6syntheticfixtures/3coldmodels10-10-2parity0/232versions/kernelcaps/cleanup/source-controller-reporthashes/tree-equivalentactualmerge8d50404f49304c80e59dd93bcf95a33ad8cb8c3e verified",
+        "id": 40377220064,
+        "head": "6c7142f126b206ba7f6aeefccb922cc51545c27c",
+        "state": "SUCCESSbothjobs;114nativeParquetSQL0skip/audit0;6syntheticfixtures/3coldmodels10-10-2parity0/232versions/kernelcaps/cleanup/source-controller-reporthashes/tree-equivalentactualmerge1ce296b7ed777fb3b458876e267e5081b48e632dverified",
         "not_acceptance": true
       }
     ],
-    "last_validation": "Exact scoped Money/Quantity/Posting/FinancialMovement derives native cTrader cash into the existing SQL ledger with original request/native identity, writer CAS, globalcapacity, independent readback and historical-vs-current conflict state. Actual separate funding worker resumes bounded older-window backfill; owner reads independently resolve exact detail and never write. Restrictedcredit uses memorandum/control,unknown/sign conflicts use suspense,MT5 remainsunsupported,no risk/settlement/alpha/authority claim. Five real JSONtype failures fixed with canonical comparison;331 final actual-PG checks0skip/audit0/all483runtime-testhashesmatch/ownedfixtureabsent,9supplementalassertionfaults/36positive+36restoredcontrols,112rebuild/workflowchecks. WholeBE006 remainsIN_PROGRESS.",
+    "last_validation": "Typed immutable ValuationSnapshot preserves exact native deposit-asset net equity/cash, optional separate credits, original snapshot/source clocks and balance version. Existing period_report consumes original typed valuations and exposes baseline/closing lineage; independent bounded SQL reader refuses caller-owned writers, missing/foreign sources and incomplete readback. Confirmed sampled-drawdown ambient rounding defect has retained actual failure and now reuses existing fixed renderer. 376 final actual-PG checks including45 new valuation cases,0skip/audit0/all485runtime-testhashesmatch/ownedfixtureabsent;7 supplemental assertion faults/20positive+20restoredcontrols;122 rebuild/workflow/T0-boundary checks. All risk/settlement/flow-normalization refusals retained;wholeBE006 IN_PROGRESS.",
     "environment_notes": [
       "clone must be unshallowed (git fetch --unshallow) and PR heads fetched (+refs/pull/*/head:refs/remotes/origin/pr/*) before pre001.py",
       "pytest from backend/requirements.txt in a venv",
@@ -406,9 +408,9 @@
     "tested_android_head": "752d265b11ba643ed309481b110248f8b7fe323b",
     "hosted_result": "receipts/HOSTED_SOURCE_752d265b.json",
     "mutation_reconciliation": "ci/MUTATION_RECONCILIATION.md and ci/MUTATION_RECONCILIATION_MAPPING.json",
-    "verified_source_head": "3205594c907665732e69dcac26852ff28078c48a published;genuineGREEN157;current exactnativepostingscandidate uncommitted",
-    "source_qualification_run": 40367094242,
-    "latest_checkpoint_report": "docs/rebuild/rev118/CHECKPOINT_20261026_EXACT_NATIVE_POSTINGS.md",
+    "verified_source_head": "6c7142f126b206ba7f6aeefccb922cc51545c27c published;genuineGREEN158;currentnativevaluationcandidate uncommitted",
+    "source_qualification_run": 40377218997,
+    "latest_checkpoint_report": "docs/rebuild/rev118/CHECKPOINT_20261026_NATIVE_VALUATION.md",
     "previous_verified_source": "3c6969ebbec39f2ad9f2836a6bd8acdb487adc34 published; exact CI40228254162 all17public jobs pass, two unchanged prerequisite failures",
     "qualification_scope": "Public source tests only; mandatory/native/owner/production gates unissued."
   },
@@ -428,6 +430,6 @@
       "evidence": "ci/MUTATION_CORPUS_c2a27848.json"
     }
   ],
-  "current_action": "Finish exactnativepostingsevidence/manifest/verifiedstagedbackup/genuinehookcommit/committedbaselineverification;normalpush/readbackandinspectexactfreshhostedCI. ContinueBE006/BE007/ML005andfullcanonicalbackendprogramme,thenAndroidandactualArtemisS24acceptancewhenprerequisites/bindingpermit.0formalacceptances.",
-  "updated_at_utc": "2026-10-26T18:13:30.506993+00:00"
+  "current_action": "Finish native valuation evidence/manifest/verified staged backup/genuine hook commit/committed baseline verification. Preserve running6c71 mainCI until terminal before next normalpush/readback. Inspect exact subsequent CI;continue fullBE006/BE007/ML005/backend programme and laterAndroid/ArtemisS24.0formalunitacceptances.",
+  "updated_at_utc": "2026-10-26T18:37:01.533855+00:00"
 }
