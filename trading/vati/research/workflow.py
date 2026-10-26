@@ -158,6 +158,25 @@ class TradingResearchWorkflow:
         """
         op = str(spec.get("operation", "")).strip().lower()
 
+        if op == "dataset_manifest_check":
+            from vati.research.dataset_manifest import DatasetManifestCandidate, DatasetContractError, _json
+            if set(spec) != {'operation', 'manifest'}:
+                raise DatasetContractError('DATASET_EXACT_OPERATION_FIELDS_REQUIRED')
+            # A local check deliberately returns unresolved, never READY. The
+            # actual owner resolvers and current policy are separate duties.
+            return {'operation': op, 'candidate': DatasetManifestCandidate(_json(spec['manifest'])).unresolved()}
+
+        if op == 'dataset_source_inspect':
+            from vati.research.dataset_manifest import DatasetManifestCandidate, DatasetContractError, _json
+            from vati.research.dataset_sources import NativeDatasetSourceInspector
+            if set(spec) != {'operation', 'manifest', 'expected_scope'}:
+                raise DatasetContractError('DATASET_EXACT_OPERATION_FIELDS_REQUIRED')
+            if self.native_bar_partitions is None:
+                raise DatasetContractError('DATASET_SOURCE_OWNER_UNAVAILABLE')
+            result = NativeDatasetSourceInspector(self.native_bar_partitions).inspect(
+                DatasetManifestCandidate(_json(spec['manifest'])), expected_scope=spec['expected_scope'])
+            return {'operation': op, 'candidate': result}
+
         if op == "native_bar_source_partition":
             from vati_forecast_worker.source_partitions import SourcePartitionError
             if set(spec) != {"operation", "window", "expected_scope"}:

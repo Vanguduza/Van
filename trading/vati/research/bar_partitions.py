@@ -32,6 +32,22 @@ class PartitionBudget:
             raise SourcePartitionError('PARTITION_STORAGE_BUDGET_INVALID')
 
 
+@dataclass(frozen=True)
+class NativeSourcePartition:
+    """Verified private bytes and source view, without any use permission."""
+    window_json: bytes
+    parquet: bytes
+    descriptor_json: bytes
+
+    def window(self):
+        return json.loads(self.window_json)
+
+    def receipt(self):
+        value = json.loads(self.descriptor_json)
+        return value | {'publication_ref': self.window()['window_sha256'], 'original_source_resolved': True,
+            'dataset_manifest_admitted': False, 'research_use_state': 'UNKNOWN_REFUSED'}
+
+
 class NativeBarPartitionService:
     def __init__(self, reader, root, *, budget=None):
         if not isinstance(reader, NativeBarWindowReader):
@@ -87,7 +103,7 @@ class NativeBarPartitionService:
         if len(publications) > self.budget.publications or sum(existing.values()) > self.budget.stored_bytes:
             raise SourcePartitionError('PARTITION_STORAGE_CAPACITY_REFUSED')
 
-    def get(self, window_ref, *, expected_scope):
+    def read(self, window_ref, *, expected_scope):
         window_ref = self._ref(window_ref)
         manifest_path = self._file(window_ref + '.json')
         if not manifest_path.exists():
@@ -111,10 +127,13 @@ class NativeBarPartitionService:
             data = self._read(path)
             if verify_native_bar_partition(data, actual) != descriptor:
                 raise SourcePartitionError('PARTITION_READBACK_CONFLICT')
-            return descriptor | {'publication_ref': window_ref, 'original_source_resolved': True,
-                'dataset_manifest_admitted': False, 'research_use_state': 'UNKNOWN_REFUSED'}
+            return NativeSourcePartition(canonical(actual), data, canonical(descriptor))
         except (KeyError, TypeError, ValueError) as error:
             raise SourcePartitionError('PARTITION_PUBLICATION_INVALID:' + str(error)) from error
+
+    def get(self, window_ref, *, expected_scope):
+        original = self.read(window_ref, expected_scope=expected_scope)
+        return None if original is None else original.receipt()
 
     def publish(self, window, *, expected_scope):
         # The hash/envelope is not provenance: resolve original archive facts.

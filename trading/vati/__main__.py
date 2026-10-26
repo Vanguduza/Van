@@ -156,7 +156,14 @@ def cmd_research(a: argparse.Namespace) -> int:
     """Run one non-authoritative trading research operation from JSON."""
     from vati.core.ledger_pg import open_ledger
     from vati.research.workflow import TradingResearchWorkflow
-    spec = json.loads(Path(a.spec).read_text())
+    def pairs(items):
+        result = {}
+        for key, value in items:
+            if key in result:
+                raise ValueError('RESEARCH_DUPLICATE_JSON_KEY')
+            result[key] = value
+        return result
+    spec = json.loads(Path(a.spec).read_text(), object_pairs_hook=pairs)
     ledger = open_ledger(a.ledger) if a.ledger else None
     try:
         partitions = None
@@ -164,8 +171,9 @@ def cmd_research(a: argparse.Namespace) -> int:
         partition_path = getattr(a, 'source_partitions', None)
         if archive_path or partition_path:
             from vati_forecast_worker.source_partitions import SourcePartitionError
-            if (spec.get('operation') != 'native_bar_source_partition' or not archive_path
-                    or not partition_path or not Path(archive_path).is_dir()):
+            if (spec.get('operation') not in {'native_bar_source_partition', 'dataset_source_inspect'} or not archive_path
+                    or not partition_path or not Path(archive_path).is_dir()
+                    or (spec.get('operation') == 'dataset_source_inspect' and not Path(partition_path).is_dir())):
                 raise SourcePartitionError('PARTITION_EXPLICIT_EXISTING_SOURCE_AND_OUTPUT_REQUIRED')
             from vati.market_data.native_archive import NativeMarketArchive
             from vati.market_data.native_windows import NativeBarWindowReader

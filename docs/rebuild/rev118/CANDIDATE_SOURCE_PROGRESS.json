@@ -1,6 +1,6 @@
 {
   "schema": "van.rebuild.candidate-source-progress/1",
-  "updated_at_utc": "2026-10-26T08:54:55.365480+00:00",
+  "updated_at_utc": "2026-10-26T09:35:22.715614+00:00",
   "programme": "Rev1.18; original 131 unit IDs and dependencies retained",
   "authority": "auth-20261022-owner-autonomous-candidate-build",
   "meaning": "Candidate source progress is separate from admitted unit acceptance. Independent certificates, owner decisions, live effects and release gates remain unissued. No unit is declared complete by this record.",
@@ -521,6 +521,10 @@
         {
           "description": "Derived native bar Parquet publication and cold original-source readback preserve exact prices, scope/row/revision identity and unknown native facts. Existing archive/file-lock/atomic writer owners reused; stable original-window replay and lost-ACK/orphan reconciliation; global output capacity refuses before write. Existing slow research workflow/CLI wired; ledger closed on all exits; actual T0 rejects Arrow. 48 native source controls,70 public research controls,302 final actual-PG-available regressions,0 skips/audit violations/exact source hashes/owned fixture independently absent;8 supplemental assertion faults caught/restored;108 rebuild passes. Selections overlap. Full DatasetManifest, real rights/consent, universe/calendar/gap and licensed joins remain open;no formal acceptance.",
           "evidence": "backend/VAN-ML-PKT-005_SOURCE_PARQUET.md; receipts/SOURCE_PARQUET_20261026.json"
+        },
+        {
+          "description": "Exact canonical DatasetManifest schema registered in existing owner; bounded immutable candidate parser checks strict fields/references,exact fractional chronology,ASCII RFC3339,correction-policy boundaries and duplicate CLI keys. Existing slow workflow/CLI checks and source inspector resolve original native Parquet bytes,source manifest,row IDs/count/order and actual local availability through the existing archive owner; compound source objects,canonical scope/origin,creation/current policy,calendar/universe/feature/target/consent/entitlement remain explicitly unresolved.375 final actual-PG-available regressions0skip/audit0/exacthash/ownedfixtureindependentlyabsent;9final assertion faults caught/restored with163positive/restored controls;108rebuild. Original duplicate-key/Unicode regressions and malformed first test envelope retained. No complete DatasetManifest or unit admission.",
+          "evidence": "backend/VAN-ML-PKT-005_DATASET_SOURCE_RESOLUTION.md; receipts/DATASET_SOURCE_RESOLUTION_20261026.json"
         }
       ]
     },
@@ -1369,6 +1373,10 @@
         {
           "description": "Derived native bar Parquet publication and cold original-source readback preserve exact prices, scope/row/revision identity and unknown native facts. Existing archive/file-lock/atomic writer owners reused; stable original-window replay and lost-ACK/orphan reconciliation; global output capacity refuses before write. Existing slow research workflow/CLI wired; ledger closed on all exits; actual T0 rejects Arrow. 48 native source controls,70 public research controls,302 final actual-PG-available regressions,0 skips/audit violations/exact source hashes/owned fixture independently absent;8 supplemental assertion faults caught/restored;108 rebuild passes. Selections overlap. Full DatasetManifest, real rights/consent, universe/calendar/gap and licensed joins remain open;no formal acceptance.",
           "evidence": "backend/VAN-ML-PKT-005_SOURCE_PARQUET.md; receipts/SOURCE_PARQUET_20261026.json"
+        },
+        {
+          "description": "Exact canonical DatasetManifest schema registered in existing owner; bounded immutable candidate parser checks strict fields/references,exact fractional chronology,ASCII RFC3339,correction-policy boundaries and duplicate CLI keys. Existing slow workflow/CLI checks and source inspector resolve original native Parquet bytes,source manifest,row IDs/count/order and actual local availability through the existing archive owner; compound source objects,canonical scope/origin,creation/current policy,calendar/universe/feature/target/consent/entitlement remain explicitly unresolved.375 final actual-PG-available regressions0skip/audit0/exacthash/ownedfixtureindependentlyabsent;9final assertion faults caught/restored with163positive/restored controls;108rebuild. Original duplicate-key/Unicode regressions and malformed first test envelope retained. No complete DatasetManifest or unit admission.",
+          "evidence": "backend/VAN-ML-PKT-005_DATASET_SOURCE_RESOLUTION.md; receipts/DATASET_SOURCE_RESOLUTION_20261026.json"
         }
       ]
     },

@@ -16,6 +16,7 @@ SCHEMA_NAMES = (
     "execution_receipt",
     "strategy_capsule",
     "native_account_observation",
+    "dataset_manifest",
 )
 
 
