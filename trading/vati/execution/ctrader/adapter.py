@@ -19,6 +19,7 @@ from vati.execution.base import AccountState, ExecutionReceipt, Health, OrderCom
 from vati.execution.ctrader.transport import CtraderApiError, CtraderTransport, CtraderReadTransport
 from vati.execution.ctrader.contracts import NativeSymbolContract
 from vati.execution.ctrader.spots import SpotBook
+from vati.execution.ctrader.depth import DepthBook
 from vati.execution.entry_deadline import EntryNotSent, require_entry_deadline
 from vati.risk.contracts import Direction, LossModel
 
@@ -77,6 +78,10 @@ class CtraderAdapter:
     _spot_subscriptions: set = field(default_factory=set)
     _spot_control_states: dict = field(default_factory=dict)
     _spot_lock: Any = field(default_factory=threading.RLock,repr=False)
+    _depth_book: DepthBook = field(default_factory=DepthBook)
+    _depth_subscriptions: dict = field(default_factory=dict)
+    _depth_control_states: dict = field(default_factory=dict)
+    _depth_retired: set = field(default_factory=set)
 
     # ------------------------------------------------------------ auth
     def _auth_is_current(self) -> bool:
@@ -95,6 +100,10 @@ class CtraderAdapter:
         self._spot_book=SpotBook()
         self._spot_subscriptions=set()
         self._spot_control_states={}
+        self._depth_book=DepthBook()
+        self._depth_subscriptions={}
+        self._depth_control_states={}
+        self._depth_retired=set()
         try:
             account = native_integer(self.ctid_trader_account_id, minimum=1)
             self.transport.connect()
@@ -318,6 +327,19 @@ class CtraderAdapter:
                         raise VenueUnavailable('cTrader native spot subscription queued but no complete fresh quote delivered')
             def close(self):transport.close()
             def read_capacity_snapshot(self):return transport.read_capacity_snapshot()
+            def read_depth(self,expected_contract,*,max_age_ms=5000,limit=100):
+                from vati.execution.ctrader.feed import native_integer
+                native_integer(max_age_ms,minimum=1);native_integer(limit,minimum=1,maximum=4096)
+                name,original=self._select(expected_contract)
+                adapter.subscribe_depth(name)
+                while True:
+                    observed=adapter.depth_observation(name,max_age_ms=max_age_ms,limit=limit)
+                    transport.check_budget()
+                    if observed.state=='OBSERVED_PARTIAL_NATIVE_DEPTH':return original,observed
+                    if observed.state not in {'WAITING_NATIVE_DEPTH','NATIVE_DEPTH_BACKLOG_UNPROCESSED'}:
+                        raise VenueUnavailable('cTrader native depth unavailable: '+observed.state)
+                    if not transport.wait_for_event_kind('ProtoOADepthEvent'):
+                        raise VenueUnavailable('cTrader native depth subscription queued but no native changes delivered')
         return MarketReader()
 
     def funding_reader(self):
@@ -753,6 +775,80 @@ class CtraderAdapter:
             protected,now_ms,now_ms,broker_order_id=str(order_id),broker_position_id=position_id,reject_reason=reason).sealed()
 
     # ------------------------------------------------------------ market data
+    def subscribe_depth(self,symbol: str) -> None:
+        from vati.execution.ctrader.feed import native_integer
+        with self._spot_lock:
+            self._ensure_auth();sym=self.symbol(symbol)
+            if sym.native_contract is None:raise VenueUnavailable('cTrader native depth contract unavailable')
+            connection=getattr(self.transport,'connection_id',None);key=(connection,sym.symbol_id)
+            if key in self._depth_subscriptions:
+                if self._depth_subscriptions[key]==sym.contract_revision:return
+                self._depth_subscriptions.pop(key,None);self._depth_retired.add(key)
+            if key in self._depth_retired:
+                raise VenueUnavailable('cTrader native depth recovery requires a fresh connection')
+            if len(self._depth_subscriptions)>=64:raise VenueUnavailable('cTrader native depth product capacity')
+            self._depth_retired.add(key)  # An unknown control reply cannot reopen this session.
+            self._depth_control_states[key]='SUBSCRIBE_REQUESTED_UNCONFIRMED'
+            name,body=self.transport.call('ProtoOASubscribeDepthQuotesReq',{
+                'ctidTraderAccountId':self.ctid_trader_account_id,'symbolId':[sym.symbol_id]})
+            try:
+                if (name!='ProtoOASubscribeDepthQuotesRes' or not isinstance(body,dict)
+                        or native_integer(body['ctidTraderAccountId'],minimum=1)!=self.ctid_trader_account_id
+                        or connection!=getattr(self.transport,'connection_id',None) or not self._auth_is_current()):raise ValueError()
+            except (KeyError,TypeError,ValueError) as exc:
+                self._depth_control_states[key]='SUBSCRIBE_ACKNOWLEDGEMENT_INVALID'
+                raise VenueUnavailable('cTrader native depth subscription acknowledgement mismatch') from exc
+            self._depth_subscriptions[key]=sym.contract_revision;self._depth_retired.discard(key)
+            self._depth_control_states[key]='SUBSCRIBE_ACKNOWLEDGED_QUEUED'
+
+    def unsubscribe_depth(self,symbol: str) -> None:
+        from vati.execution.ctrader.feed import native_integer
+        with self._spot_lock:
+            self._ensure_auth();sym=self.symbol(symbol)
+            connection=getattr(self.transport,'connection_id',None);key=(connection,sym.symbol_id)
+            self._depth_subscriptions.pop(key,None);self._depth_retired.add(key)
+            self._depth_book.forget(sym.symbol_id)
+            self._depth_control_states[key]='UNSUBSCRIBE_REQUESTED_UNCONFIRMED'
+            name,body=self.transport.call('ProtoOAUnsubscribeDepthQuotesReq',{
+                'ctidTraderAccountId':self.ctid_trader_account_id,'symbolId':[sym.symbol_id]})
+            try:
+                if (name!='ProtoOAUnsubscribeDepthQuotesRes' or not isinstance(body,dict)
+                        or native_integer(body['ctidTraderAccountId'],minimum=1)!=self.ctid_trader_account_id
+                        or connection!=getattr(self.transport,'connection_id',None) or not self._auth_is_current()):raise ValueError()
+            except (KeyError,TypeError,ValueError) as exc:
+                self._depth_control_states[key]='UNSUBSCRIBE_ACKNOWLEDGEMENT_INVALID'
+                raise VenueUnavailable('cTrader native depth unsubscription acknowledgement mismatch') from exc
+            self._depth_control_states[key]='UNSUBSCRIBE_ACKNOWLEDGED_QUEUED'
+
+    def depth_observation(self,symbol: str,*,max_age_ms=5000,limit=100):
+        from vati.execution.ctrader.feed import native_integer
+        native_integer(max_age_ms,minimum=1);native_integer(limit,minimum=1,maximum=4096)
+        with self._spot_lock:
+            self._ensure_auth();sym=self.symbol(symbol)
+            if sym.native_contract is None:raise VenueUnavailable('cTrader native depth contract unavailable')
+            connection=getattr(self.transport,'connection_id',None);book=self._depth_book
+            pending=self.transport.drain_events_kind('ProtoOADepthEvent')
+            try:now=self.clock()
+            except Exception:now=None
+            known={item.symbol_id:item for item in self.symbols.values()}
+            for _,body in pending:
+                product=body.get('symbolId') if isinstance(body,dict) else None
+                if type(product) is not int or product not in known:continue
+                item=known[product]
+                if (self._depth_subscriptions.get((connection,product))!=item.contract_revision
+                        or item.native_contract is None):continue
+                book.observe(item.native_contract,connection,body,now)
+            if (not self._auth_is_current() or connection!=getattr(self.transport,'connection_id',None)
+                    or book is not self._depth_book or self.symbol(symbol).contract_revision!=sym.contract_revision):
+                raise VenueUnavailable('cTrader native depth context changed')
+            try:evaluated=self.clock()
+            except Exception:evaluated=None
+            key=(connection,sym.symbol_id)
+            return book.snapshot(sym.native_contract,connection,now_ms=evaluated,max_age_ms=max_age_ms,limit=limit,
+                subscribed=self._depth_subscriptions.get(key)==sym.contract_revision,
+                control_state=self._depth_control_states.get(key,'NOT_REQUESTED'),
+                backlog=self.transport.has_events_kind('ProtoOADepthEvent'))
+
     def spot_observation(self,symbol: str,*,max_age_ms=5000):
         """Scoped raw native sides and freshness; never a tradability claim."""
         from vati.execution.ctrader.feed import native_integer

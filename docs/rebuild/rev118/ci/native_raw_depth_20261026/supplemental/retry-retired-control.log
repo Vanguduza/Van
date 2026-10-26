@@ -1,0 +1,21 @@
+....................F
+=================================== FAILURES ===================================
+_____ test_wrong_native_ack_refuses_and_cannot_be_blindly_retried[account] _____
+
+wrong = 'account'
+
+    @pytest.mark.parametrize('wrong',['account','type'])
+    def test_wrong_native_ack_refuses_and_cannot_be_blindly_retried(wrong):
+        peer=DepthPeer();peer.wrong_ack=wrong;adapter=make_adapter(peer)
+        with pytest.raises(VenueUnavailable,match='acknowledgement'):adapter.subscribe_depth('EURUSD')
+>       with pytest.raises(VenueUnavailable,match='fresh connection'):adapter.subscribe_depth('EURUSD')
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AssertionError: Regex pattern did not match.
+E         Expected regex: 'fresh connection'
+E         Actual message: 'cTrader native depth subscription acknowledgement mismatch'
+
+trading/tests/test_ctrader_native_depth.py:145: AssertionError
+=========================== short test summary info ============================
+FAILED trading/tests/test_ctrader_native_depth.py::test_wrong_native_ack_refuses_and_cannot_be_blindly_retried[account]
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 20 passed in 0.72s

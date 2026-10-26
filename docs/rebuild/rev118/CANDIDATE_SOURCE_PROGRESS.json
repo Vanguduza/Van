@@ -1,6 +1,6 @@
 {
   "schema": "van.rebuild.candidate-source-progress/1",
-  "updated_at_utc": "2026-10-26T20:30:55.250193+00:00",
+  "updated_at_utc": "2026-10-26T20:55:23.862666+00:00",
   "programme": "Rev1.18; original 131 unit IDs and dependencies retained",
   "authority": "auth-20261022-owner-autonomous-candidate-build",
   "meaning": "Candidate source progress is separate from admitted unit acceptance. Independent certificates, owner decisions, live effects and release gates remain unissued. No unit is declared complete by this record.",
@@ -557,6 +557,10 @@
         {
           "description": "Separate immutable NativeReadIdentity anchors hidden/nameless LIGHT/archived native IDs to the exact original catalog without execution fields or grants. Independent readonly reader refreshes exact catalog revision,queries native ID without active execution metadata/protective cache,and fences post-parse session/budget. Existing archive/collector/cold windows/Parquet consume the explicit new source type;quote owner and enabled NativeSymbolContract guard preserved.518final actual-PG-available regressions0skip/audit0/all final source/test hashesmatch/ownedfixtureindependentlyabsent;8assertionfaultscaught/restored/37controls;108rebuild. Fixture keyword/invalidarchivedname/exceptionbase failures retained. No provider/native/unit/owner/production/economic/S24 acceptance.",
           "evidence": "backend/BE-008_005_INACTIVE_HISTORY.md; receipts/INACTIVE_HISTORY_SOURCE_20261026.json"
+        },
+        {
+          "description": "Original raw cTrader depth now uses bounded exact uint64 quote changes and cents, sticky gap/control recovery, processing-age/backlog holds and existing isolated read transport. No normalized price/native timestamp/sequence/snapshot-complete/provider qualification inferred.31newcases,171focused and738final actualSQLite/Postgres passes,0skip/audit0/all492runtime-testhashesmatch/ownedfixtureabsent;5assertionfaults/31positive+31restoredcontrols/122rebuild-T0checks. Ephemeral component only; durable capture and service consumers remain, BE008 IN_PROGRESS/acceptance NOT_ISSUED.",
+          "evidence": "backend/BE-008_NATIVE_RAW_DEPTH.md;receipts/NATIVE_RAW_DEPTH_SOURCE_20261026.json"
         }
       ]
     },

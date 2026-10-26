@@ -386,7 +386,8 @@ class CtraderReadTransport(CtraderTransport):
     READ_MESSAGES = frozenset({"ProtoOAApplicationAuthReq", "ProtoOAAccountAuthReq",
                               "ProtoOASymbolsListReq", "ProtoOASymbolByIdReq",
                               "ProtoOAGetTrendbarsReq", "ProtoOASubscribeSpotsReq",
-                              "ProtoOAUnsubscribeSpotsReq", "ProtoHeartbeatEvent"})
+                              "ProtoOAUnsubscribeSpotsReq", "ProtoOASubscribeDepthQuotesReq",
+                              "ProtoOAUnsubscribeDepthQuotesReq", "ProtoHeartbeatEvent"})
 
     def __init__(self, *, operation_timeout_s=30.0, monotonic=None,
                  max_read_frames=4096, max_read_bytes=16*1024*1024, **kwargs):

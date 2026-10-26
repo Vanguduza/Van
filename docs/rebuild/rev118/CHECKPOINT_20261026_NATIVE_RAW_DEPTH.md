@@ -1,0 +1,19 @@
+# Native raw depth continuation
+
+2026-10-26T20:55:23.862666+00:00
+
+Branch `ccr-9e07e1af-8mgz1p`, draft PR105. Local parent `52a9daa5a2515684fa9223b0a2db859abe239629` passed genuine hooks and actual committed GREEN162 against `4fd466dec3910ed5de614bfbf95887ad619df5ca`; manifest4632/zero mismatches/all tracked. It contains the tested arithmetic fix and is not yet pushed. Published `733b7ac93e403048f2807df80f56b7038a4f5d48` was normally pushed/read back and passed GREEN161. This depth packet is uncommitted at documentation generation; inspect actual Git for newer state.
+
+Original raw cTrader depth now uses bounded exact uint64 quote changes and cents, sticky gap/control recovery, processing-age/backlog holds and existing isolated read transport. No normalized price/native timestamp/sequence/snapshot-complete/provider qualification inferred.31newcases,171focused and738final actualSQLite/Postgres passes,0skip/audit0/all492runtime-testhashesmatch/ownedfixtureabsent;5assertionfaults/31positive+31restoredcontrols/122rebuild-T0checks. Ephemeral component only; durable capture and service consumers remain, BE008 IN_PROGRESS/acceptance NOT_ISSUED.
+
+Published733b main40394743701 remains running at capture. Its PostgreSQL job121824675130 is SUCCESS with4017trading passes/one declared privateDDSskip,26PostgreSQL and117voice passes; exact raw reports are retained. Forecast40394743715 is SUCCESS with114native SQL/Parquet cases and six synthetic upstream fixtures/three separate cold models/parity0/232versions/kernel/cleanup/source/controller/report hashes verified. Actual tested merge96cd9f894123a5aab80b49ec6affac47ada89633 is tree-equivalent to733b (ahead1/behind0/files[]). Three early archives are verified; this is not complete main-CI reconciliation. Preserve earlier failed/partial and exact parent9bf evidence.
+
+Next finish actual manifest/staged ZIP/hook commit/committed verification. Keep running parent main CI until terminal, then push arithmetic+depth normally and read back exact remote ref. Do not claim the intermediate arithmetic commit has an independent hosted run if only the combined head is tested. Continue durable depth capture/revisions/as-of recovery through the existing NativeMarketArchive, verified depth price semantics and service/existing-screen consumers; full BE008 and every remaining backend/ML/assistant/financial requirement remains required. Native flow normalization, account-wide shared reservations, multiasset fees/reversals and BE007 exact approval/unknown sends/provider settlement remain open.
+
+Zero formal unit acceptances. Frozen131 units/324 requirements/1610 acceptance identities/234 contexts/349 actions/93 features and original frontend42 groups/105 functions/78 surfaces remain preserved; backend479 endpoints/369 schemas. No frontend redesign before BG001, no /workspace/Van access or delegation. Trading core is chosen host. Native admission, production-profile provisioning/signing/deployment, economic evaluation and actual Android/Artemis/S24 acceptance remain unissued. Profitability requires evidence and is never guaranteed.
+
+## Later terminal CI readback
+
+Exact733b main40394743701 terminalFAILED on2unwaived mandatory privateDDS/trusted-main prerequisites;all17publicjobsSUCCESS.16main+forecastarchivesverified;trading4017+1declaredprivateDDSskip/PG26/voice117/gateway5775+7skip/media198/monitor258/browser1547+1skipplus11/1/10/emulator18+4skips.374canonicalidentitiescaughtonce383edits across9actualreports. Forecast40394743715SUCCESS114native/6synthetic/3coldparity0/232versions/kernel/cleanup/source-controller-reporthashes/tree-equivalent actualmerge96cd9f894123a5aab80b49ec6affac47ada89633. Published733b only;later arithmetic/depth not qualified by parent.
+
+The full receipt is `receipts/HOSTED_SOURCE_733b7ac9.json`. Earlier partial receipts remain historical. Parent CI is terminal, so normal publication can proceed after the genuine hook and committed verification.
