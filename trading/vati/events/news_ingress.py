@@ -100,6 +100,13 @@ class NewsIngressError(ValueError):
     pass
 
 
+@dataclass(frozen=True)
+class NewsRowFailure:
+    position: str
+    excerpt: str
+    error: str
+
+
 def _finite_decimal(value: Any, name: str) -> Decimal:
     try:
         result=dec(value)
@@ -381,6 +388,7 @@ class NewsIngress:
         self._recovered=False
         self._legacy_headlines: set[str] = set()
         self._legacy_relays: dict[str,list[str]] = {}
+        self.source_health: Optional[dict[str,Any]] = None
         self.skipped: list[dict[str, str]] = []
 
     @classmethod
@@ -559,10 +567,13 @@ class NewsIngress:
         if observation is None:raise OSError('news observation original durable publication not confirmed')
         return original,created,observation[1]
 
-    def ingest_rows(self, rows: Iterable[Mapping[str, Any]], *,
+    def ingest_rows(self, rows: Iterable[Mapping[str, Any] | NewsRowFailure], *,
                     now_ms: Optional[int] = None) -> dict[str, int]:
         accepted = duplicates = 0
         for row in rows:
+            if isinstance(row,NewsRowFailure):
+                self.skipped.append({'row':row.excerpt,'error':row.position+': '+row.error})
+                continue
             try:
                 headline = self.headline_from_row(row)
             except Exception as exc:  # noqa: BLE001 — a bad row is skipped, never guessed
@@ -854,6 +865,7 @@ class NewsIngress:
             "legacy_envelope_availability_unqualified":sorted(self._legacy_headlines & {h.headline_id for h in available}),
             "legacy_unqualified_relays":{h.headline_id:list(self._legacy_relays[h.headline_id])
                 for h in available if self._legacy_relays.get(h.headline_id)},
+            "source_health":None if self.source_health is None else dict(self.source_health),
             "now_ms": now_ms,
         }
 
@@ -992,7 +1004,7 @@ def _row_time(row: Mapping[str, Any], names: tuple[str,...], *, default=None) ->
     raise NewsIngressError('headline timestamp unavailable')
 
 
-def rows_from_file(path: str | Path, key: str = "headlines") -> list[dict]:
+def rows_from_file(path: str | Path, key: str = "headlines") -> list[dict | NewsRowFailure]:
     """JSON array, `{"headlines": [...]}`, or JSON Lines.
 
     JSON Lines is the shape a tailing transport produces, and a malformed line
@@ -1000,18 +1012,31 @@ def rows_from_file(path: str | Path, key: str = "headlines") -> list[dict]:
     """
     p = Path(path)
     text = p.read_text(encoding="utf-8")
-    if p.suffix.lower() in (".jsonl", ".ndjson"):
+    return rows_from_text(text,suffix=p.suffix,key=key)
+
+
+def rows_from_text(text: str,*,suffix: str,key: str='headlines') -> list[dict | NewsRowFailure]:
+    if suffix.lower() in (".jsonl", ".ndjson"):
         out = []
-        for line in text.splitlines():
+        for number,line in enumerate(text.splitlines(),1):
             line = line.strip()
             if not line or line.startswith("#"):
                 continue
-            out.append(json.loads(line))
+            try:
+                row=json.loads(line)
+                if not isinstance(row,dict):raise ValueError('row must be an object')
+                out.append(row)
+            except (ValueError,TypeError) as exc:
+                out.append(NewsRowFailure(f'line {number}',line[:200],
+                    'invalid JSON' if isinstance(exc,json.JSONDecodeError) else 'row must be an object'))
         return out
     data = json.loads(text)
-    if isinstance(data, list):
-        return list(data)
-    return list(data.get(key, []))
+    if isinstance(data,list):rows=data
+    elif isinstance(data,dict) and key in data:rows=data[key]
+    else:raise NewsIngressError('news file requires a row array or '+key+' array')
+    if not isinstance(rows,list):raise NewsIngressError('news file rows must be an array')
+    return [row if isinstance(row,dict) else NewsRowFailure(f'row {index}',str(row)[:200],
+        'row must be an object') for index,row in enumerate(rows,1)]
 
 
 def sources_from_config(config: Mapping[str, Any]) -> list[NewsSource]:

@@ -1,0 +1,14 @@
+{
+  "status": "TIMED_OUT_NOT_FULL_PASS",
+  "timeout_seconds": 1800,
+  "pytest_exit": 2,
+  "expected": 1059,
+  "completed_pass_and_teardown": 1057,
+  "remaining": [
+    "trading/tests/test_single_session_unknown_entry.py::test_initial_confirmed_native_no_effect_is_not_reported_as_a_risk_approval[CANCELLED]",
+    "trading/tests/test_single_session_unknown_entry.py::test_initial_confirmed_native_no_effect_is_not_reported_as_a_risk_approval[EXPIRED]"
+  ],
+  "extra": {},
+  "storage_audit_forbidden_events": [],
+  "cleaned": true
+}

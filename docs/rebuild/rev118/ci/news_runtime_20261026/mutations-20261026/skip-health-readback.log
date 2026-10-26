@@ -1,0 +1,25 @@
+............................F............                                [100%]
+=================================== FAILURES ===================================
+_ test_independent_health_readback_failure_does_not_turn_a_committed_row_into_success _
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-247/test_independent_health_readba0')
+ledger = <vati.core.ledger.Ledger object at 0x7f157ee8ec00>
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f157ee8f740>
+
+    def test_independent_health_readback_failure_does_not_turn_a_committed_row_into_success(tmp_path,ledger,monkeypatch):
+        path=tmp_path/'news.json';path.write_text(json.dumps([row()]));value=service('account',ledger,configured(path));read=ledger.iter
+        def unavailable_after_commit(kind=None,correlation_id=None):
+            if kind is EventKind.MARKET_DATA_HEALTH and not ledger._conn.in_transaction:return iter(())
+            return read(kind,correlation_id=correlation_id)
+        with monkeypatch.context() as patch:
+            patch.setattr(ledger,'iter',unavailable_after_commit);news=build(value,'account')
+>       assert news.source_health['state']=='PERSISTENCE_UNAVAILABLE'
+E       AssertionError: assert 'READY_DECLARED' == 'PERSISTENCE_UNAVAILABLE'
+E         
+E         - PERSISTENCE_UNAVAILABLE
+E         + READY_DECLARED
+
+trading/tests/test_news_runtime_health.py:225: AssertionError
+=========================== short test summary info ============================
+FAILED trading/tests/test_news_runtime_health.py::test_independent_health_readback_failure_does_not_turn_a_committed_row_into_success
+1 failed, 40 passed, 2 deselected in 1.34s

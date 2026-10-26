@@ -1,0 +1,174 @@
+FF............FF.............FFF......F..                                [100%]
+=================================== FAILURES ===================================
+_ test_service_builder_restores_durable_history_when_the_file_is_missing[session] _
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-246/test_service_builder_restores_0')
+ledger = <vati.core.ledger.Ledger object at 0x7fe008e1b320>, kind = 'session'
+
+    @pytest.mark.parametrize('kind',['session','account'])
+    def test_service_builder_restores_durable_history_when_the_file_is_missing(tmp_path,ledger,kind):
+        h=Headline(source_id='publisher',trust=SourceTrust.T1_PRIMARY,published_ms=NOW,
+            observed_ms=NOW,title='Original policy decision',symbols=('EURUSD',),severity=Decimal('1'))
+        NewsIngress(ledger=ledger).ingest(h,now_ms=NOW)
+        value=service(kind,ledger,configured(tmp_path/'missing.jsonl'));news=build(value,kind)
+        assert news.headlines()==[h]
+        health=news.report(now_ms=NOW)['source_health']
+        assert health['state']=='MISSING' and health['coverage']=='UNKNOWN'
+>       assert health['provider_qualified'] is False
+E       assert True is False
+
+trading/tests/test_news_runtime_health.py:59: AssertionError
+_ test_service_builder_restores_durable_history_when_the_file_is_missing[account] _
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-246/test_service_builder_restores_1')
+ledger = <vati.core.ledger.Ledger object at 0x7fe008e1b380>, kind = 'account'
+
+    @pytest.mark.parametrize('kind',['session','account'])
+    def test_service_builder_restores_durable_history_when_the_file_is_missing(tmp_path,ledger,kind):
+        h=Headline(source_id='publisher',trust=SourceTrust.T1_PRIMARY,published_ms=NOW,
+            observed_ms=NOW,title='Original policy decision',symbols=('EURUSD',),severity=Decimal('1'))
+        NewsIngress(ledger=ledger).ingest(h,now_ms=NOW)
+        value=service(kind,ledger,configured(tmp_path/'missing.jsonl'));news=build(value,kind)
+        assert news.headlines()==[h]
+        health=news.report(now_ms=NOW)['source_health']
+        assert health['state']=='MISSING' and health['coverage']=='UNKNOWN'
+>       assert health['provider_qualified'] is False
+E       assert True is False
+
+trading/tests/test_news_runtime_health.py:59: AssertionError
+_ test_repeated_snapshot_check_retains_original_health_receipt_without_publisher_freshness[session] _
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-246/test_repeated_snapshot_check_r0')
+ledger = <vati.core.ledger.Ledger object at 0x7fe008d1a540>, kind = 'session'
+
+    @pytest.mark.parametrize('kind',['session','account'])
+    def test_repeated_snapshot_check_retains_original_health_receipt_without_publisher_freshness(tmp_path,ledger,kind):
+        path=tmp_path/'news.json';path.write_text(json.dumps([row()]))
+        value=service(kind,ledger,configured(path));build(value,kind)
+        original=health_records(ledger)[0]
+        result=value.refresh_news(NOW+1000);health=result['source_health']
+        assert health_records(ledger)==[original]
+        assert health['receipt_hash']==original.hash and health['transition_observed_ms']==NOW
+        assert health['checked_ms']==NOW+1000 and health['coverage']=='DECLARED_SNAPSHOT_ONLY'
+>       assert health['provider_qualified'] is False and health['live_eligible'] is False
+E       assert (True is False)
+
+trading/tests/test_news_runtime_health.py:127: AssertionError
+_ test_repeated_snapshot_check_retains_original_health_receipt_without_publisher_freshness[account] _
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-246/test_repeated_snapshot_check_r1')
+ledger = <vati.core.ledger.Ledger object at 0x7fe008d1b3b0>, kind = 'account'
+
+    @pytest.mark.parametrize('kind',['session','account'])
+    def test_repeated_snapshot_check_retains_original_health_receipt_without_publisher_freshness(tmp_path,ledger,kind):
+        path=tmp_path/'news.json';path.write_text(json.dumps([row()]))
+        value=service(kind,ledger,configured(path));build(value,kind)
+        original=health_records(ledger)[0]
+        result=value.refresh_news(NOW+1000);health=result['source_health']
+        assert health_records(ledger)==[original]
+        assert health['receipt_hash']==original.hash and health['transition_observed_ms']==NOW
+        assert health['checked_ms']==NOW+1000 and health['coverage']=='DECLARED_SNAPSHOT_ONLY'
+>       assert health['provider_qualified'] is False and health['live_eligible'] is False
+E       assert (True is False)
+
+trading/tests/test_news_runtime_health.py:127: AssertionError
+_______ test_noncovering_inputs_keep_their_distinct_source_states[empty] _______
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-246/test_noncovering_inputs_keep_t0')
+ledger = <vati.core.ledger.Ledger object at 0x7fe008d44f50>, mode = 'empty'
+
+    @pytest.mark.parametrize('mode',['empty','unconfigured','invalid-utf8'])
+    def test_noncovering_inputs_keep_their_distinct_source_states(tmp_path,ledger,mode):
+        path=tmp_path/'news.json';config=configured(path)
+        if mode=='empty':path.write_text('[]');expected='EMPTY_DECLARED'
+        elif mode=='unconfigured':config.pop('path');expected='UNCONFIGURED'
+        else:path.write_bytes(b'\xff');expected='UNREADABLE'
+        value=service('account',ledger,config);news=build(value,'account')
+        assert news.source_health['state']==expected
+>       assert news.source_health['provider_qualified'] is False and news.source_health['live_eligible'] is False
+E       assert (True is False)
+
+trading/tests/test_news_runtime_health.py:239: AssertionError
+___ test_noncovering_inputs_keep_their_distinct_source_states[unconfigured] ____
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-246/test_noncovering_inputs_keep_t1')
+ledger = <vati.core.ledger.Ledger object at 0x7fe008d44d10>
+mode = 'unconfigured'
+
+    @pytest.mark.parametrize('mode',['empty','unconfigured','invalid-utf8'])
+    def test_noncovering_inputs_keep_their_distinct_source_states(tmp_path,ledger,mode):
+        path=tmp_path/'news.json';config=configured(path)
+        if mode=='empty':path.write_text('[]');expected='EMPTY_DECLARED'
+        elif mode=='unconfigured':config.pop('path');expected='UNCONFIGURED'
+        else:path.write_bytes(b'\xff');expected='UNREADABLE'
+        value=service('account',ledger,config);news=build(value,'account')
+        assert news.source_health['state']==expected
+>       assert news.source_health['provider_qualified'] is False and news.source_health['live_eligible'] is False
+E       assert (True is False)
+
+trading/tests/test_news_runtime_health.py:239: AssertionError
+___ test_noncovering_inputs_keep_their_distinct_source_states[invalid-utf8] ____
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-246/test_noncovering_inputs_keep_t2')
+ledger = <vati.core.ledger.Ledger object at 0x7fe008d451c0>
+mode = 'invalid-utf8'
+
+    @pytest.mark.parametrize('mode',['empty','unconfigured','invalid-utf8'])
+    def test_noncovering_inputs_keep_their_distinct_source_states(tmp_path,ledger,mode):
+        path=tmp_path/'news.json';config=configured(path)
+        if mode=='empty':path.write_text('[]');expected='EMPTY_DECLARED'
+        elif mode=='unconfigured':config.pop('path');expected='UNCONFIGURED'
+        else:path.write_bytes(b'\xff');expected='UNREADABLE'
+        value=service('account',ledger,config);news=build(value,'account')
+        assert news.source_health['state']==expected
+>       assert news.source_health['provider_qualified'] is False and news.source_health['live_eligible'] is False
+E       assert (True is False)
+
+trading/tests/test_news_runtime_health.py:239: AssertionError
+_ test_full_paper_session_builder_survives_bad_news_and_keeps_the_same_cycle_binding _
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-246/test_full_paper_session_builde0')
+eurusd = SymbolContract(symbol='EURUSD', venue='mt5', base_currency='EUR', quote_currency='USD', account_currency='USD', contra...=Decimal('0'), max_adv_participation=Decimal('0.10'), liquidity_haircut=Decimal('0'), round_trip_cost_pct=Decimal('0'))
+
+    def test_full_paper_session_builder_survives_bad_news_and_keeps_the_same_cycle_binding(tmp_path,eurusd):
+        from conftest import mandate_dict
+        from test_backtest_runner_cli import synthetic_bars
+        from vati.accounts import Account,AccountRegistry
+        from vati.app.service import ServiceConfig,lake_bar_source
+        from vati.market_data.feeds import BarLake
+        from vati.risk.serde import contract_to_dict
+        AccountRegistry(tmp_path/'accounts.json').add(Account(alias='paper_lab',broker='PAPER',mode='DEMO_TRADER',currency='USD'))
+        lake=BarLake(tmp_path/'lake');bars=synthetic_bars();lake.write(bars,symbol='EURUSD',timeframe='H1',source='fixture',provenance='SYNTHETIC')
+        path=tmp_path/'news.json';path.write_text('{');at=bars[100].end_ms
+        cfg=ServiceConfig(account_alias='paper_lab',symbol='EURUSD',base='EUR',quote='USD',timeframe='H1',
+            contract=contract_to_dict(eurusd),mandate=mandate_dict(venue='paper',mode='DEMO_TRADER',account_alias='paper_lab',allowed_strategies=['FX-TREND-PULLBACK-01']),
+            capsules=['FX-TREND-PULLBACK-01'],registry_path=str(tmp_path/'accounts.json'),ledger=str(tmp_path/'session.sqlite'),
+            lake_root=str(tmp_path/'lake'),heartbeat_path=str(tmp_path/'heartbeat.json'),news=configured(path))
+        value=SessionService(cfg,lake_bar_source(lake,'EURUSD','H1'),clock=lambda:at)
+        try:
+            value.build()
+            assert value.news.source_health['state']=='UNREADABLE' and value.runner.cycle.news is value.news
+            value._heartbeat('BUILT')
+            heartbeat=json.loads(Path(cfg.heartbeat_path).read_text())
+            assert heartbeat.get('news',{}).get('source_health',{}).get('state')=='UNREADABLE'
+            assert heartbeat['account_alias']=='paper_lab'
+            path.write_text(json.dumps([row()|{'published_ms':at,'observed_ms':at}]))
+            assert value.refresh_news(at)['source_health']['state']=='READY_DECLARED'
+>           assert value.runner.cycle.news is value.news and value.news.source_health['provider_qualified'] is False
+E           AssertionError: assert (<vati.events.news_ingress.NewsIngress object at 0x7fe008d580e0> is <vati.events.news_ingress.NewsIngress object at 0x7fe008d580e0> and True is False)
+E            +  where <vati.events.news_ingress.NewsIngress object at 0x7fe008d580e0> = <vati.app.cycle.DecisionCycle object at 0x7fe008a80080>.news
+E            +    where <vati.app.cycle.DecisionCycle object at 0x7fe008a80080> = SessionRunner(cycle=<vati.app.cycle.DecisionCycle object at 0x7fe008a80080>, started=False, permit_new_orders=False, startup_report=None, authority=<vati.authority.OwnerAuthorityVerifier object at 0x7fe008d5bd70>).cycle
+E            +      where SessionRunner(cycle=<vati.app.cycle.DecisionCycle object at 0x7fe008a80080>, started=False, permit_new_orders=False, startup_report=None, authority=<vati.authority.OwnerAuthorityVerifier object at 0x7fe008d5bd70>) = SessionService(cfg=ServiceConfig(account_alias='paper_lab', symbol='EURUSD', base='EUR', quote='USD', timeframe='H1', ...='', credential_ref=CredentialRef(env_var=None, secrets_file=None), demo=True, enabled=True, mandate_ref='', notes='')).runner
+E            +  and   <vati.events.news_ingress.NewsIngress object at 0x7fe008d580e0> = SessionService(cfg=ServiceConfig(account_alias='paper_lab', symbol='EURUSD', base='EUR', quote='USD', timeframe='H1', ...='', credential_ref=CredentialRef(env_var=None, secrets_file=None), demo=True, enabled=True, mandate_ref='', notes='')).news
+
+trading/tests/test_news_runtime_health.py:344: AssertionError
+=========================== short test summary info ============================
+FAILED trading/tests/test_news_runtime_health.py::test_service_builder_restores_durable_history_when_the_file_is_missing[session]
+FAILED trading/tests/test_news_runtime_health.py::test_service_builder_restores_durable_history_when_the_file_is_missing[account]
+FAILED trading/tests/test_news_runtime_health.py::test_repeated_snapshot_check_retains_original_health_receipt_without_publisher_freshness[session]
+FAILED trading/tests/test_news_runtime_health.py::test_repeated_snapshot_check_retains_original_health_receipt_without_publisher_freshness[account]
+FAILED trading/tests/test_news_runtime_health.py::test_noncovering_inputs_keep_their_distinct_source_states[empty]
+FAILED trading/tests/test_news_runtime_health.py::test_noncovering_inputs_keep_their_distinct_source_states[unconfigured]
+FAILED trading/tests/test_news_runtime_health.py::test_noncovering_inputs_keep_their_distinct_source_states[invalid-utf8]
+FAILED trading/tests/test_news_runtime_health.py::test_full_paper_session_builder_survives_bad_news_and_keeps_the_same_cycle_binding
+8 failed, 33 passed, 2 deselected in 1.51s

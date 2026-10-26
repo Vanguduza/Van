@@ -167,7 +167,9 @@
         "backend/BE-014_NEWS_CAUSAL_BOUNDARIES.md",
         "receipts/NEWS_CAUSAL_SOURCE_20261025.json",
         "backend/BE-014_NEWS_DURABLE_PUBLICATION.md",
-        "receipts/NEWS_DURABLE_SOURCE_20261025.json"
+        "receipts/NEWS_DURABLE_SOURCE_20261025.json",
+        "backend/BE-014_NEWS_RUNTIME_HEALTH.md",
+        "receipts/NEWS_RUNTIME_SOURCE_20261026.json"
       ]
     }
   },
@@ -241,7 +243,7 @@
     "note": "Opus unavailable; owner transferred build to Codex. No independent reviewer identity is inferred from another model or session."
   },
   "checkpoint": {
-    "updated_utc": "2026-10-26T00:02:50.712194+00:00",
+    "updated_utc": "2026-10-26T01:33:27.917947+00:00",
     "branch": "ccr-9e07e1af-8mgz1p",
     "base": "b02075f327ea8180ab6d269eba358cf8c5479878",
     "background_jobs": [
@@ -461,9 +463,9 @@
       "Python 3.12 venv from backend/requirements.lock for CI-equivalent runs; stream-host venv from deploy/van-browser-stream/requirements.lock",
       "Desktop Commander read-only device listing was refused by the session permission policy; native readback prepared as pre003/NATIVE_READBACK_REQUEST.md"
     ],
-    "next_action": "Finish documentary checks/manifest/verified backup, genuine hook commit and committed ledger; preserve exactEA40246053603 until terminal before routine push. Continue runtime recovery/source-health/error wiring and canonical backend programme.",
-    "previous_head": "ea272bf834445bf9f2369dbc4377f3aea548892c",
-    "current_packet": "Durable news original/relay/impact publication and read-only cold recovery, including cold missing-receipt refusal;646 actualPG/78controls/8final faults; genuine commit pending",
+    "next_action": "Finish documentary/manifest/verified backup, genuine hook commit/committed ledger; push normally/read back nowEA CI is terminal, inspect exact new-head hosted qualification. Continue provider-neutral/public-official source crosschecks/lineage and canonical backend programme; OQ06 owner procurement permits this work before selection, no purchase.",
+    "previous_head": "7e84277c70a2f1a4115196dcc8cd7da1151a1598",
+    "current_packet": "News runtime recovery/source health and both owner heartbeat contracts;698 final actualPG0skip/audit0/exact hashes,119controls,10faults; broader timeout retained",
     "ci_credential_capability": "receipts/CI_CREDENTIAL_CAPABILITY_20261024.json: repo admin metadata available, integration secret/deploy-key reads403; no credential changes.",
     "current_background_jobs": [
       {
@@ -501,7 +503,8 @@
     "2026-10-25T23:34:56.429870+00:00: News source617 final actualPG0skip/audit0/exact hashes;51 finalcontrols and9 final faults assertion-caught/restored.16 distinct reproduced failures retained. In-memory component only, durable publication/recovery/sourcehealth remain.",
     "2026-10-25T23:39:34.227884+00:00: Exact623 van-ci40242295555 terminalFAILURE on2 unwaived prerequisites; all17 public source jobs PASS. Actual reports/archives verified: gateway5775pass7skip,media198,trading3374pass1privateDDSskip,PG26,voice117,monitor258;374original mutants once;Android18pass4skip;browser1547pass1skip/foreground11/UID1/firewall10. Subsequent0b3f7601/08375724 unvalidated by623; both genuine local commits/GREEN143 ready for normal publication.",
     "2026-10-26T00:02:50.712194+00:00: Durable news644 final actualPG0skip/audit0/exact hashes,76 controls with2PGdeselected executednative,8 supplemental faults assertion-caught/restored.13 functional failures+6 missingAPI contracts and1 harness NameError after24 passes retained. NativeMQL exactEA source compile verified, mainCI pending. No accepted units.",
-    "2026-10-26T00:10:29.246687+00:00: Final cold missing-receipt guards add2 actual regressions; finalR3 executes646 cases/0skip/audit0/exact source and test hashes.78 final controls plus2PGdeselected executed in PostgreSQL;8 final faults assertion-caught/restored. Earlier644/76/8 receipts retain their prior hashes and scope. PublishedEA artifact confirms3423trading pass/1privateDDSskip,PG26,voice117,monitor258 and374 original mutation identities caught once; mainbackend/browser still pending."
+    "2026-10-26T00:10:29.246687+00:00: Final cold missing-receipt guards add2 actual regressions; finalR3 executes646 cases/0skip/audit0/exact source and test hashes.78 final controls plus2PGdeselected executed in PostgreSQL;8 final faults assertion-caught/restored. Earlier644/76/8 receipts retain their prior hashes and scope. PublishedEA artifact confirms3423trading pass/1privateDDSskip,PG26,voice117,monitor258 and374 original mutation identities caught once; mainbackend/browser still pending.",
+    "2026-10-26T01:33:27.917947+00:00: Runtime news final698 actualPG0skip/audit0/exact hashes,119controls with4PGdeselected executedfixture,10faults assertion-caught/restored. Broad1059 selection TIMEOUT1800 exit2,1057completed passes,audit0,2unfinished nowincludedfinal; XML1058 includesinterrupted, not1058passes. Before final heartbeat-only delta original broad hashes retained. ExactEA CI terminal17public pass/2unwaived mandatory prerequisite failures, actualcomplete raw reports preserved. No accepted unit."
   ],
   "obligations": "obligations/OBLIGATIONS.json: preserved observations with source implementation evidence and explicit remaining native/unit obligations.",
   "pre002_challenge": "pre002/challenge/: 324 author-prepared dossiers (AUTHOR_CHALLENGED_PENDING_INDEPENDENT_REVIEW)",
@@ -529,11 +532,11 @@
       "fca473cc",
       "c2a27848"
     ],
-    "tested_android_head": "623779fd54d0e1a48ae00c59620e0175671d597b",
-    "hosted_result": "receipts/HOSTED_SOURCE_623779fd.json",
+    "tested_android_head": "ea272bf834445bf9f2369dbc4377f3aea548892c",
+    "hosted_result": "receipts/HOSTED_SOURCE_ea272bf8.json",
     "mutation_reconciliation": "ci/MUTATION_RECONCILIATION.md and ci/MUTATION_RECONCILIATION_MAPPING.json",
-    "verified_source_head": "ea272bf834445bf9f2369dbc4377f3aea548892c normally pushed/read back, genuine GREEN144",
-    "source_qualification_run": 40242295555,
+    "verified_source_head": "7e84277c70a2f1a4115196dcc8cd7da1151a1598 local genuine commit/GREEN145; published remainsEA, ready to publish after runtime packet",
+    "source_qualification_run": 40246053603,
     "latest_checkpoint_report": "CHECKPOINT_20261026_NEWS.md",
     "previous_verified_source": "3c6969ebbec39f2ad9f2836a6bd8acdb487adc34 published; exact CI40228254162 all17public jobs pass, two unchanged prerequisite failures",
     "qualification_scope": "Public source tests only; mandatory/native/owner/production gates unissued."
@@ -554,6 +557,6 @@
       "evidence": "ci/MUTATION_CORPUS_c2a27848.json"
     }
   ],
-  "current_action": "Finish documentary checks/manifest/verified backup, genuine hook commit and committed ledger; preserve exactEA40246053603 until terminal before routine push. Continue runtime recovery/source-health/error wiring and canonical backend programme.",
-  "updated_at_utc": "2026-10-26T00:10:29.246687+00:00"
+  "current_action": "Finish documentary/manifest/verified backup, genuine hook commit/committed ledger; push normally/read back nowEA CI is terminal, inspect exact new-head hosted qualification. Continue provider-neutral/public-official source crosschecks/lineage and canonical backend programme; OQ06 owner procurement permits this work before selection, no purchase.",
+  "updated_at_utc": "2026-10-26T01:33:27.917947+00:00"
 }

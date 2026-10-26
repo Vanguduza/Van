@@ -1,0 +1,153 @@
+..............FF...F........F.......FF...                                [100%]
+=================================== FAILURES ===================================
+_ test_repeated_snapshot_check_retains_original_health_receipt_without_publisher_freshness[session] _
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-248/test_repeated_snapshot_check_r0')
+ledger = <vati.core.ledger.Ledger object at 0x7f2e71c76330>, kind = 'session'
+
+    @pytest.mark.parametrize('kind',['session','account'])
+    def test_repeated_snapshot_check_retains_original_health_receipt_without_publisher_freshness(tmp_path,ledger,kind):
+        path=tmp_path/'news.json';path.write_text(json.dumps([row()]))
+        value=service(kind,ledger,configured(path));build(value,kind)
+        original=health_records(ledger)[0]
+        result=value.refresh_news(NOW+1000);health=result['source_health']
+>       assert health_records(ledger)==[original]
+E       AssertionError: assert [Event(kind=<...82e018ac5bf')] == [Event(kind=<...b7f396dc05a')]
+E         
+E         Left contains one more item: Event(kind=<EventKind.MARKET_DATA_HEALTH: 'MARKET_DATA_HEALTH'>, producer='vati-news-file-health', event_time_ms=18000..., correlation_id='account:acct:symbol:EURUSD', hash='bb04e7e86356c73faf1ea0884c39d288055109ca814f58d871f5a82e018ac5bf')
+E         Use -v to get more diff
+
+trading/tests/test_news_runtime_health.py:124: AssertionError
+_ test_repeated_snapshot_check_retains_original_health_receipt_without_publisher_freshness[account] _
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-248/test_repeated_snapshot_check_r1')
+ledger = <vati.core.ledger.Ledger object at 0x7f2e71c76930>, kind = 'account'
+
+    @pytest.mark.parametrize('kind',['session','account'])
+    def test_repeated_snapshot_check_retains_original_health_receipt_without_publisher_freshness(tmp_path,ledger,kind):
+        path=tmp_path/'news.json';path.write_text(json.dumps([row()]))
+        value=service(kind,ledger,configured(path));build(value,kind)
+        original=health_records(ledger)[0]
+        result=value.refresh_news(NOW+1000);health=result['source_health']
+>       assert health_records(ledger)==[original]
+E       AssertionError: assert [Event(kind=<...babaf53bc92')] == [Event(kind=<...d29009d2234')]
+E         
+E         Left contains one more item: Event(kind=<EventKind.MARKET_DATA_HEALTH: 'MARKET_DATA_HEALTH'>, producer='vati-news-file-health', event_time_ms=18000...n_time_ms=None, correlation_id='account:acct', hash='fdb08786db9a9680177a0895e6a63c43610272acfbc7caa1977c4babaf53bc92')
+E         Use -v to get more diff
+
+trading/tests/test_news_runtime_health.py:124: AssertionError
+___ test_actual_health_commit_reply_loss_reads_back_the_original_transition ____
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-248/test_actual_health_commit_repl0')
+ledger = <vati.core.ledger.Ledger object at 0x7f2e71ca3f50>
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f2e71ca2ae0>
+
+    def test_actual_health_commit_reply_loss_reads_back_the_original_transition(tmp_path,ledger,monkeypatch):
+        from contextlib import contextmanager
+        path=tmp_path/'news.json';path.write_text(json.dumps([row()]));value=service('account',ledger,configured(path));atomic=ledger.atomic
+        @contextmanager
+        def lose_health_reply():
+            outer=not ledger._conn.in_transaction;before=len(health_records(ledger))
+            with atomic():yield ledger
+            if outer and len(health_records(ledger))>before:raise OSError('fixture lost committed health reply')
+        with monkeypatch.context() as patch:
+            patch.setattr(ledger,'atomic',lose_health_reply);news=build(value,'account')
+        assert news.source_health['state']=='PERSISTENCE_UNAVAILABLE'
+        original=health_records(ledger)[0]
+>       assert value.refresh_news(NOW+1)['source_health']['receipt_hash']==original.hash
+E       AssertionError: assert '4ed5bf8a3ea0...287c4649f1857' == 'bc53d10b374b...530a39e273ab8'
+E         
+E         - bc53d10b374b4b486281ab4ccc75ca4359dd45e9c43c5b5cb65530a39e273ab8
+E         + 4ed5bf8a3ea02f1cf8ab8d6c7c66b9b6e59818e33b70c22340d287c4649f1857
+
+trading/tests/test_news_runtime_health.py:169: AssertionError
+_ test_independent_health_readback_failure_does_not_turn_a_committed_row_into_success _
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-248/test_independent_health_readba0')
+ledger = <vati.core.ledger.Ledger object at 0x7f2e71ca1460>
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f2e71ca1c70>
+
+    def test_independent_health_readback_failure_does_not_turn_a_committed_row_into_success(tmp_path,ledger,monkeypatch):
+        path=tmp_path/'news.json';path.write_text(json.dumps([row()]));value=service('account',ledger,configured(path));read=ledger.iter
+        def unavailable_after_commit(kind=None,correlation_id=None):
+            if kind is EventKind.MARKET_DATA_HEALTH and not ledger._conn.in_transaction:return iter(())
+            return read(kind,correlation_id=correlation_id)
+        with monkeypatch.context() as patch:
+            patch.setattr(ledger,'iter',unavailable_after_commit);news=build(value,'account')
+        assert news.source_health['state']=='PERSISTENCE_UNAVAILABLE'
+        original=health_records(ledger)[0]
+>       assert value.refresh_news(NOW+1)['source_health']['receipt_hash']==original.hash
+E       AssertionError: assert '2fa1c14eaa7b...343d6cc02bab6' == '1768acdaa841...367e9b394705c'
+E         
+E         - 1768acdaa8416d76d49b81a4e0d3c30b37c348c56d3ffeff267367e9b394705c
+E         + 2fa1c14eaa7b847dd3a38f4e9ec96902ca719df3a9ada855288343d6cc02bab6
+
+trading/tests/test_news_runtime_health.py:227: AssertionError
+_ test_actual_native_health_writers_preserve_one_unchanged_snapshot_receipt[sqlite] _
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-248/test_actual_native_health_writ0')
+backend = 'sqlite'
+
+    @pytest.mark.parametrize('backend',['sqlite','postgres'])
+    def test_actual_native_health_writers_preserve_one_unchanged_snapshot_receipt(tmp_path,backend):
+        from concurrent.futures import ThreadPoolExecutor
+        from test_news_durable_publication import native_factory
+        factory=native_factory(tmp_path,backend);seed=factory();seed.close()
+        path=tmp_path/'news.json';path.write_text(json.dumps([row()]))
+        def check(_):
+            value=factory()
+            try:
+                instance=service('account',value,configured(path));news=build(instance,'account')
+                return news.source_health['receipt_hash']
+            finally:value.close()
+        with ThreadPoolExecutor(max_workers=2) as pool:hashes=list(pool.map(check,range(4)))
+        value=factory()
+        try:
+>           assert len(set(hashes))==1 and len(health_records(value))==1
+E           AssertionError: assert (4 == 1)
+E            +  where 4 = len({'368757aa1ee375ce6f9c7a5d7850a5937d000fb6bd3937bed052fb7603778991', '5249620fbd1e7498a07d0b04cef0cc55bf171aac82a26673...2f8ed107e13d5b7acb4e5a0b7df4982c9e8a7f997eb7975f7', 'a53d3c770d06259c2e165be371de71b97b50a83508036db9bd24775ff42df84f'})
+E            +    where {'368757aa1ee375ce6f9c7a5d7850a5937d000fb6bd3937bed052fb7603778991', '5249620fbd1e7498a07d0b04cef0cc55bf171aac82a26673...2f8ed107e13d5b7acb4e5a0b7df4982c9e8a7f997eb7975f7', 'a53d3c770d06259c2e165be371de71b97b50a83508036db9bd24775ff42df84f'} = set(['5249620fbd1e7498a07d0b04cef0cc55bf171aac82a26673fd8d167eaa746c39', '368757aa1ee375ce6f9c7a5d7850a5937d000fb6bd3937be...c2e165be371de71b97b50a83508036db9bd24775ff42df84f', '5eccdb992a0f6f32f8ed107e13d5b7acb4e5a0b7df4982c9e8a7f997eb7975f7'])
+
+trading/tests/test_news_runtime_health.py:288: AssertionError
+_ test_actual_native_health_commit_reply_loss_reconciles_the_original[sqlite] __
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-248/test_actual_native_health_comm0')
+backend = 'sqlite'
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f2e71cb7b60>
+
+    @pytest.mark.parametrize('backend',['sqlite','postgres'])
+    def test_actual_native_health_commit_reply_loss_reconciles_the_original(tmp_path,backend,monkeypatch):
+        from contextlib import contextmanager
+        from test_news_durable_publication import native_factory
+        factory=native_factory(tmp_path,backend);value=factory();path=tmp_path/'news.json';path.write_text(json.dumps([row()]));atomic=value.atomic
+        @contextmanager
+        def lose_reply():
+            outer=value._atomic_depth==0 if backend=='postgres' else not value._conn.in_transaction
+            before=len(health_records(value))
+            with atomic():yield value
+            if outer and len(health_records(value))>before:raise OSError('fixture actual native health reply lost')
+        try:
+            instance=service('account',value,configured(path))
+            with monkeypatch.context() as patch:
+                patch.setattr(value,'atomic',lose_reply);news=build(instance,'account')
+            assert news.source_health['state']=='PERSISTENCE_UNAVAILABLE'
+            original=health_records(value)[0]
+        finally:value.close()
+        value=factory()
+        try:
+            cold=build(service('account',value,configured(path)),'account')
+>           assert cold.source_health['receipt_hash']==original.hash and health_records(value)==[original]
+E           AssertionError: assert ('79da7e6a582c...fd8878c79dfc6' == 'a5df49e43668...920f4e732d3b4'
+E             
+E             - a5df49e43668df5fb3324686fc92a11cc13915be9d75e842df2920f4e732d3b4
+E             + 79da7e6a582c20dc89371012be91f31c379b0a6c9c848aa3840fd8878c79dfc6)
+
+trading/tests/test_news_runtime_health.py:315: AssertionError
+=========================== short test summary info ============================
+FAILED trading/tests/test_news_runtime_health.py::test_repeated_snapshot_check_retains_original_health_receipt_without_publisher_freshness[session]
+FAILED trading/tests/test_news_runtime_health.py::test_repeated_snapshot_check_retains_original_health_receipt_without_publisher_freshness[account]
+FAILED trading/tests/test_news_runtime_health.py::test_actual_health_commit_reply_loss_reads_back_the_original_transition
+FAILED trading/tests/test_news_runtime_health.py::test_independent_health_readback_failure_does_not_turn_a_committed_row_into_success
+FAILED trading/tests/test_news_runtime_health.py::test_actual_native_health_writers_preserve_one_unchanged_snapshot_receipt[sqlite]
+FAILED trading/tests/test_news_runtime_health.py::test_actual_native_health_commit_reply_loss_reconciles_the_original[sqlite]
+6 failed, 35 passed, 2 deselected in 1.45s

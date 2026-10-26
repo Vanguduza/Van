@@ -254,21 +254,9 @@ class SessionService:
 
     def _build_news(self):
         """Headline ingress from `cfg.news`, or None. Reduce-only everywhere."""
-        cfg = dict(getattr(self.cfg, "news", None) or {})
-        if not cfg:
-            return None
-        from vati.events.news_ingress import (
-            NewsIngress, rows_from_file, sources_from_config,
-        )
-        ingress = NewsIngress(
-            ledger=self._ledger,
-            sources=sources_from_config(cfg),
-            relevance_window_ms=int(cfg.get("relevance_window_ms", 6 * 3_600_000)),
-        )
-        path = cfg.get("path")
-        if path and Path(path).is_file():
-            ingress.ingest_rows(rows_from_file(path), now_ms=self.clock())
-        return ingress
+        from vati.events.news_runtime import build_news_file
+        return build_news_file(getattr(self.cfg,'news',None) or {},ledger=self._ledger,
+            scope=f'account:{self.cfg.account_alias}:symbol:{self.cfg.symbol.upper()}',now_ms=self.clock())
 
     def refresh_news(self, now_ms: int) -> dict:
         """Re-read the headline file and push candidate event risk into sizing.
@@ -280,32 +268,22 @@ class SessionService:
         news = getattr(self, "news", None)
         if news is None:
             return {}
-        cfg = dict(getattr(self.cfg, "news", None) or {})
-        path = cfg.get("path")
-        counts: dict = {}
-        if path and Path(path).is_file():
-            from vati.events.news_ingress import rows_from_file
-            try:
-                counts = news.ingest_rows(rows_from_file(path), now_ms=now_ms)
-            except Exception as exc:  # noqa: BLE001 — a bad news file never stops a cycle
-                self.runner.cycle.ledger.append(make_event(
-                    EventKind.MARKET_DATA_HEALTH, "vati-service",
-                    {"source": "news", "state": "UNREADABLE", "error": str(exc)[:200]},
-                    event_time_ms=now_ms, received_time_ms=now_ms,
-                    correlation_id=self.cfg.symbol))
-                return {"skipped": 1}
+        from vati.events.news_runtime import refresh_news_file
+        counts=refresh_news_file(news,getattr(self.cfg,'news',None) or {},ledger=self._ledger,
+            scope=f'account:{self.cfg.account_alias}:symbol:{self.cfg.symbol.upper()}',now_ms=now_ms)
         try:
             multiplier, _materiality, _refs = news.candidate_risk(
                 self.cfg.symbol, now_ms=now_ms)
             self.runner.cycle.engine.m.news_event_risk[
                 self.cfg.symbol.upper()] = multiplier
             counts = dict(counts) | {"event_risk_multiplier": str(multiplier)}
-        except Exception:  # noqa: BLE001
-            pass
+        except Exception as exc:  # noqa: BLE001 — optional news cannot stop protective work
+            counts=dict(counts)|{'risk_state':'UNAVAILABLE','risk_error_code':type(exc).__name__}
         return counts
 
     # ------------------------------------------------------------------ loop
     def _heartbeat(self, status: str, extra: Optional[dict] = None) -> None:
+        from vati.events.news_runtime import news_heartbeat
         if getattr(self, "learning", None) is not None and getattr(self, "_ledger", None) is not None:
             self.learning.update_projection(self._ledger)
         hb = {"account_alias": self.cfg.account_alias, "symbol": self.cfg.symbol, "session_id": self.runner.cycle.cfg.session_id if self.runner else None, "status": status, "cycles": self.cycles, "last_bar_end_ms": self.last_bar_end_ms,
@@ -318,6 +296,7 @@ class SessionService:
               "unresolved_entry_ids": sorted(self.runner.cycle.unresolved_entry_attempts) if self.runner else [],
               "learning_history_issue": self.learning.recovery_issue if getattr(self, "learning", None) else "",
               "restated_learning": self.learning.projection_summary if getattr(self, "learning", None) else {"status":"NOT_CONSTRUCTED"},
+              "news":news_heartbeat(self.news),
               "updated_ms": self.clock(), "pid": os.getpid(), **(extra or {})}
         if self.runner and self.lease:
             from vati.app.runtime_control_actor import recovery_review

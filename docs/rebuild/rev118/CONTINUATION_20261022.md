@@ -744,3 +744,8 @@ Published ea272bf8 is normally pushed/read back and GREEN144. Current durable-ne
 
 
 Final durable-news follow-up: two cold missing-receipt assertions reproduced recreation after restart. Final R3 passes646 actual PostgreSQL cases/0 skips/audit0/exact final source and test hashes;78 final controls and8 final faults caught/restored. Preserve prior644 and all failed attempts with original scope. PublishedEA artifact separately confirms3423 trading passes/1privateDDS skip,PG26,voice117,monitor258 and all374 original mutation identities caught once; remaining main CI jobs pending.
+
+
+## 26 October: news runtime source health and owner heartbeat
+
+Current source component wires real builder recovery, declared file/clock/capacity/error states, profile-bound durable health receipts and both owner heartbeats.698 final actualPG0skip/audit0/exact hashes,119 controls with4PGdeselected executedfixture and10 supplemental faults caught/restored. Broader1059 selection TIMEOUT1800 after1057 completed passes/audit0; interruptedCANCELLED and unstartedEXPIRED are included in final selection, no broad-runPASS. See CHECKPOINT_20261026_NEWS.md and backend/BE-014_NEWS_RUNTIME_HEALTH.md. Genuine prior7e84277c is GREEN145/local; exactpublishedEA CI is terminal17publicpass/2unwaived prerequisite failures. Commit/ledger/publish normally and continue provider-neutral/public-official source work and canonical programme.

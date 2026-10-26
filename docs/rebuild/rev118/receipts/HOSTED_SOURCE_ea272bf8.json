@@ -1,0 +1,200 @@
+{
+  "schema": "van.rebuild.hosted-source/1",
+  "status": "FAILED_MANDATORY_PREREQUISITES_ALL_17_PUBLIC_SOURCE_JOBS_PASS",
+  "source_head": "ea272bf834445bf9f2369dbc4377f3aea548892c",
+  "tested_merge": "6c0ec945390a9bd427effa70cd93005cac111d3b",
+  "run_id": 40246053603,
+  "workflow_conclusion": "failure",
+  "public_source_job_successes": 17,
+  "recorded_at_utc": "2026-10-26T00:46:43.734102+00:00",
+  "jobs": [
+    {
+      "id": 121327731568,
+      "name": "browser-guard-source",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 121327731708,
+      "name": "backend-public-source",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 121327731712,
+      "name": "rebuild-documentary",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 121327731722,
+      "name": "postgres-ledger",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 121327731733,
+      "name": "mutation (python-1, python, 1/4)",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 121327731747,
+      "name": "market-monitor-source",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 121327731752,
+      "name": "android-instrumentation",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 121327731755,
+      "name": "mutation (kotlin-2, kotlin, 2/4)",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 121327731760,
+      "name": "backend",
+      "status": "completed",
+      "conclusion": "failure"
+    },
+    {
+      "id": 121327731774,
+      "name": "mutation (python-0, python, 0/4)",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 121327731775,
+      "name": "mutation (kotlin-3, kotlin, 3/4)",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 121327731779,
+      "name": "mutation (kotlin-0, kotlin, 0/4)",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 121327731781,
+      "name": "mutation (browser-agent, browser-agent, 0/1)",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 121327731782,
+      "name": "mutation (python-3, python, 3/4)",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 121327731828,
+      "name": "project-truth-ledger",
+      "status": "completed",
+      "conclusion": "failure"
+    },
+    {
+      "id": 121327731844,
+      "name": "mutation (python-2, python, 2/4)",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 121327731854,
+      "name": "mutation (kotlin-1, kotlin, 1/4)",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 121327731864,
+      "name": "android-and-visual-evidence",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 121330454528,
+      "name": "character-forge-gate",
+      "status": "completed",
+      "conclusion": "success"
+    }
+  ],
+  "reports": {
+    "docs/rebuild/rev118/ci/hosted_ea272bf8_20261026/12619067621/trading-source-report.xml": {
+      "tests": 3424,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 1
+    },
+    "docs/rebuild/rev118/ci/hosted_ea272bf8_20261026/12619067621/voice-source-report.xml": {
+      "tests": 117,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "docs/rebuild/rev118/ci/hosted_ea272bf8_20261026/12619067621/postgres-ledger-report.xml": {
+      "tests": 26,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "docs/rebuild/rev118/ci/hosted_ea272bf8_20261026/12618233941/report.xml": {
+      "tests": 258,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "docs/rebuild/rev118/ci/hosted_ea272bf8_20261026/12620081644/media-report.xml": {
+      "tests": 198,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "docs/rebuild/rev118/ci/hosted_ea272bf8_20261026/12620081644/gateway-report.xml": {
+      "tests": 5782,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 7
+    },
+    "docs/rebuild/rev118/ci/hosted_ea272bf8_20261026/12618968052/uid-report.xml": {
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "docs/rebuild/rev118/ci/hosted_ea272bf8_20261026/12618968052/full-report.xml": {
+      "tests": 1548,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 1
+    },
+    "docs/rebuild/rev118/ci/hosted_ea272bf8_20261026/12618968052/report.xml": {
+      "tests": 11,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "docs/rebuild/rev118/ci/hosted_ea272bf8_20261026/12618968052/firewall-report.xml": {
+      "tests": 10,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    }
+  },
+  "android": "Actual HTML22 tests/0 failures/4 declared skips=18 passes; emulator source only",
+  "mutations": "374 original case identities caught exactly once/0 survivors/duplicates/unexecuted;383 edits; see ci/MUTATION_CORPUS_ea272bf8.json",
+  "mandatory_failures": {
+    "121327731760": "DDS_CONTRACT_READ_DEPLOY_KEY absent, actual exit1 before private backend source tests",
+    "121327731828": "Trusted base8eb18898 lacks tools/ci/project_truth_ledger.py, actual exit2"
+  },
+  "source_result": "5775gateway/7declaredskips;198media;3423trading/1privateDDSskip;PG26;voice117;monitor258/audit0;Android18pass4skip;browser1547pass1skip/foreground11/UID1/firewall10. Separate scopes, not unique programme acceptance counts.",
+  "limits": [
+    "Actual overallFAILURE; the two mandatory gates remain unwaived",
+    "ExactEA reports do not validate later7e84277c durable news or current uncommitted runtime wiring",
+    "No unit/native/owner/F15/BG001/provider/economic/production/S24 acceptance"
+  ]
+}

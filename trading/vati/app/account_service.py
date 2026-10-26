@@ -458,44 +458,21 @@ class AccountCoordinatorService:
         (`calendar/recorder.py` -> `tier1_event_blackout_active`) remains the
         blackout authority and is untouched.
         """
-        cfg = dict(getattr(self.cfg, "news", None) or {})
-        if not cfg:
-            return None
-        from vati.events.news_ingress import (
-            NewsIngress, rows_from_file, sources_from_config,
-        )
+        from vati.events.news_runtime import build_news_file
         registry = (
             self.event_research.registry
             if self.event_research is not None else None)
-        ingress = NewsIngress(
-            registry=registry,
-            ledger=self._ledger,
-            sources=sources_from_config(cfg),
-            relevance_window_ms=int(
-                cfg.get("relevance_window_ms", 6 * 3_600_000)),
-        )
-        path = cfg.get("path")
-        if path and Path(path).is_file():
-            ingress.ingest_rows(rows_from_file(path), now_ms=self.clock())
-        return ingress
+        return build_news_file(getattr(self.cfg,'news',None) or {},ledger=self._ledger,
+            registry=registry,scope=f'account:{self.cfg.account_alias}',now_ms=self.clock())
 
     def refresh_news(self, now_ms: int) -> dict:
         """Re-read the headline file. Called from the VERIFY DATA stage."""
-        cfg = dict(getattr(self.cfg, "news", None) or {})
-        path = cfg.get("path")
-        if self.news is None or not path or not Path(path).is_file():
+        if self.news is None:
             return {"accepted": 0, "duplicates": 0, "skipped": 0}
-        from vati.events.news_ingress import rows_from_file
-
-        try:
-            return self.news.ingest_rows(rows_from_file(path), now_ms=now_ms)
-        except Exception as exc:  # noqa: BLE001 — a bad news file never stops a cycle
-            self._ledger.append(make_event(
-                EventKind.MARKET_DATA_HEALTH, "vati-account-service",
-                {"source": "news", "state": "UNREADABLE", "error": str(exc)[:200]},
-                event_time_ms=now_ms, received_time_ms=now_ms,
-                correlation_id=self.cfg.account_alias))
-            return {"accepted": 0, "duplicates": 0, "skipped": 1}
+        from vati.events.news_runtime import refresh_news_file
+        registry=self.event_research.registry if self.event_research is not None else None
+        return refresh_news_file(self.news,getattr(self.cfg,'news',None) or {},ledger=self._ledger,
+            registry=registry,scope=f'account:{self.cfg.account_alias}',now_ms=now_ms)
 
     def _apply_news_event_risk(self, now_ms: int) -> dict:
         """Push recorded headlines into every evaluator's meta-labeller.
@@ -517,7 +494,8 @@ class AccountCoordinatorService:
             try:
                 multiplier, materiality, refs = self.news.candidate_risk(
                     symbol, now_ms=now_ms)
-            except Exception:  # noqa: BLE001 — a news fault never stops a cycle
+            except Exception as exc:  # noqa: BLE001 — preserve protection and the previous reduction
+                applied[symbol.upper()]={'state':'UNAVAILABLE','error_code':type(exc).__name__}
                 continue
             evaluator.engine.m.news_event_risk[symbol.upper()] = multiplier
             if multiplier < Decimal("1"):
@@ -1126,6 +1104,7 @@ class AccountCoordinatorService:
                 decision_time_ms=now_ms, correlation_id=outcome.candidate_id,
             ))
     def _heartbeat(self, status: str, extra: Optional[dict] = None) -> None:
+        from vati.events.news_runtime import news_heartbeat
         if getattr(self, "learning", None) is not None and getattr(self, "_ledger", None) is not None:
             self.learning.update_projection(self._ledger)
         payload = {
@@ -1147,6 +1126,7 @@ class AccountCoordinatorService:
                 }
                 for symbol, mtf in sorted(self.mtf_shadow.items())
             },
+            "news":news_heartbeat(self.news),
             "updated_ms": self.clock(), "pid": os.getpid(), **(extra or {})}
         from vati.app.runtime_control_actor import recovery_review
         if self.lease is not None and self.mandate is not None and self.lifecycle is not None:

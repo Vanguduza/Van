@@ -1,6 +1,6 @@
 {
   "schema": "van.rebuild.candidate-source-progress/1",
-  "updated_at_utc": "2026-10-26T00:10:29.225274+00:00",
+  "updated_at_utc": "2026-10-26T01:33:27.917947+00:00",
   "programme": "Rev1.18; original 131 unit IDs and dependencies retained",
   "authority": "auth-20261022-owner-autonomous-candidate-build",
   "meaning": "Candidate source progress is separate from admitted unit acceptance. Independent certificates, owner decisions, live effects and release gates remain unissued. No unit is declared complete by this record.",
@@ -816,6 +816,10 @@
         {
           "description": "Atomic original headline/relay observations before memory, independent receipt readback, original capture replay across actual commit-reply loss/concurrent SQLite/PostgreSQL writers/process death. Input/evidence-bound versioned impacts, bounded read-only cold recovery and legacy untimed-relay diagnostics without row rewrites.646 final actualPG0skip/audit0/exact hashes;78 final controls+2PGdeselected executednative;8 faults caught/restored.15 functional regressions,6 missing-API recovery contracts and1 misplaced-test-block failure retained. Runtime recovery/source health/provider admission remain.",
           "evidence": "backend/BE-014_NEWS_DURABLE_PUBLICATION.md; receipts/NEWS_DURABLE_SOURCE_20261025.json"
+        },
+        {
+          "description": "Real session/account builders recover original history; explicit file/clock/config/capacity/recovery/publication source states, typed JSONL row errors preserve neighbors, current batch diagnostics retain cumulative legacy counters. Scoped profile-bound durable health transitions/readback; nullable unknown partial effects, original clock versus current check distinct. Both owner heartbeats surface source health without changing native owner/hold/lease fields.698 final actualPG0skip/audit0/exact hashes;119 controls+4PGdeselected executedfixture;10 faults caught/restored. Broader1059 selection TIMEOUT1800 after1057completed passes/audit0,2remaining coveredfinal; not full-runPASS. Licensed/native provider/worker capacity qualification and complete BE014 remain.",
+          "evidence": "backend/BE-014_NEWS_RUNTIME_HEALTH.md; receipts/NEWS_RUNTIME_SOURCE_20261026.json"
         }
       ]
     },
