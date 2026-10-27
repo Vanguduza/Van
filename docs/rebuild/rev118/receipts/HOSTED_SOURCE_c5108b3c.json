@@ -1,0 +1,230 @@
+{
+  "head": "c5108b3ce1a15caffac107de4eeff588bb33ce66",
+  "main": {
+    "id": 40494913171,
+    "conclusion": "failure",
+    "run_attempt": 1,
+    "updated_at": "2026-10-27T12:01:40Z",
+    "jobs": [
+      {
+        "id": 122157803388,
+        "name": "backend-public-source",
+        "status": "completed",
+        "conclusion": "success",
+        "failed_steps": []
+      },
+      {
+        "id": 122157803474,
+        "name": "mutation (kotlin-3, kotlin, 3/4)",
+        "status": "completed",
+        "conclusion": "success",
+        "failed_steps": []
+      },
+      {
+        "id": 122157803545,
+        "name": "market-monitor-source",
+        "status": "completed",
+        "conclusion": "success",
+        "failed_steps": []
+      },
+      {
+        "id": 122157803566,
+        "name": "rebuild-documentary",
+        "status": "completed",
+        "conclusion": "success",
+        "failed_steps": []
+      },
+      {
+        "id": 122157803591,
+        "name": "backend",
+        "status": "completed",
+        "conclusion": "failure",
+        "failed_steps": [
+          "Require the DDS contract read key"
+        ]
+      },
+      {
+        "id": 122157803629,
+        "name": "browser-guard-source",
+        "status": "completed",
+        "conclusion": "success",
+        "failed_steps": []
+      },
+      {
+        "id": 122157803640,
+        "name": "android-instrumentation",
+        "status": "completed",
+        "conclusion": "success",
+        "failed_steps": []
+      },
+      {
+        "id": 122157803677,
+        "name": "android-and-visual-evidence",
+        "status": "completed",
+        "conclusion": "success",
+        "failed_steps": []
+      },
+      {
+        "id": 122157803700,
+        "name": "mutation (python-1, python, 1/4)",
+        "status": "completed",
+        "conclusion": "success",
+        "failed_steps": []
+      },
+      {
+        "id": 122157803768,
+        "name": "postgres-ledger",
+        "status": "completed",
+        "conclusion": "success",
+        "failed_steps": []
+      },
+      {
+        "id": 122157803793,
+        "name": "mutation (kotlin-0, kotlin, 0/4)",
+        "status": "completed",
+        "conclusion": "success",
+        "failed_steps": []
+      },
+      {
+        "id": 122157803967,
+        "name": "project-truth-ledger",
+        "status": "completed",
+        "conclusion": "failure",
+        "failed_steps": [
+          "Project Truth ledger (trusted checker, every new commit has an authorized row)"
+        ]
+      },
+      {
+        "id": 122157803979,
+        "name": "mutation (kotlin-1, kotlin, 1/4)",
+        "status": "completed",
+        "conclusion": "success",
+        "failed_steps": []
+      },
+      {
+        "id": 122157803985,
+        "name": "mutation (kotlin-2, kotlin, 2/4)",
+        "status": "completed",
+        "conclusion": "success",
+        "failed_steps": []
+      },
+      {
+        "id": 122157803998,
+        "name": "mutation (python-2, python, 2/4)",
+        "status": "completed",
+        "conclusion": "success",
+        "failed_steps": []
+      },
+      {
+        "id": 122157804038,
+        "name": "mutation (browser-agent, browser-agent, 0/1)",
+        "status": "completed",
+        "conclusion": "success",
+        "failed_steps": []
+      },
+      {
+        "id": 122157804078,
+        "name": "mutation (python-3, python, 3/4)",
+        "status": "completed",
+        "conclusion": "success",
+        "failed_steps": []
+      },
+      {
+        "id": 122157804114,
+        "name": "mutation (python-0, python, 0/4)",
+        "status": "completed",
+        "conclusion": "success",
+        "failed_steps": []
+      },
+      {
+        "id": 122163366517,
+        "name": "character-forge-gate",
+        "status": "completed",
+        "conclusion": "success",
+        "failed_steps": []
+      }
+    ]
+  },
+  "supporting_workflows": [
+    {
+      "id": 40494913212,
+      "name": "van-forecast-runtime-source",
+      "conclusion": "success",
+      "status": "completed"
+    },
+    {
+      "id": 40494913245,
+      "name": "cognitive-fabric-r161-van",
+      "conclusion": "success",
+      "status": "completed"
+    },
+    {
+      "id": 40494913158,
+      "name": "van-mql-native-source",
+      "conclusion": "success",
+      "status": "completed"
+    },
+    {
+      "id": 40494913243,
+      "name": "van-kernel-source",
+      "conclusion": "success",
+      "status": "completed"
+    }
+  ],
+  "artifact_scope": "Only original PostgreSQL/trading/voice archive and voice runtime log were downloaded and independently inspected here. Other successes are GitHub metadata observations, not independently reconciled case-level claims.",
+  "schema": "van.rebuild.selected-hosted-source/1",
+  "selected_original_archives": [
+    {
+      "artifact_id": 12729694388,
+      "name": "van-postgres-ledger-report",
+      "bytes": 174609,
+      "sha256": "047ef8f586ecab61e33eac1370a5f3ec7d60ca871e6f90899940c7adb83b3f8f",
+      "github_digest_matched": true,
+      "zip_crc_paths_symlinks_checked": true,
+      "members": [
+        "postgres-ledger-report.xml",
+        "trading-source.log",
+        "trading-source-report.xml",
+        "voice-source-report.xml"
+      ],
+      "junit": [
+        {
+          "path": "postgres-ledger-report.xml",
+          "cases": 26,
+          "failures": 0,
+          "errors": 0,
+          "skips": 0
+        },
+        {
+          "path": "trading-source-report.xml",
+          "cases": 4460,
+          "failures": 0,
+          "errors": 0,
+          "skips": 1
+        },
+        {
+          "path": "voice-source-report.xml",
+          "cases": 117,
+          "failures": 0,
+          "errors": 0,
+          "skips": 0
+        }
+      ]
+    },
+    {
+      "artifact_id": 12730399246,
+      "name": "van-voice-runtime",
+      "bytes": 794,
+      "sha256": "4378534ea8ec56ab39d6115ccae95799bd8893b6c44d92daa6aa12ff0ac964cd",
+      "github_digest_matched": true,
+      "zip_crc_paths_symlinks_checked": true,
+      "members": [
+        "logcat.txt"
+      ],
+      "junit": []
+    }
+  ],
+  "interpretation": "Exact c510 main remains FAILED2mandatoryprerequisites;all17publicjobsSUCCESS. Selected originalJUnit verifies4459tradingPASS1declaredDDSskip,26PGPASS,117voicePASS. Does not qualify new uncommitted history source.",
+  "raw": "ci/native_history_20261027/published-c510",
+  "acceptance_issued": false
+}

@@ -1,0 +1,49 @@
+..................................F..................................... [ 48%]
+........................................................................ [ 97%]
+...                                                                      [100%]
+=================================== FAILURES ===================================
+_ test_original_physical_history_survives_reopen_and_original_commit_ack_loss[True] _
+
+pg_dsn = 'user=van_fixture password=van_ephemeral_test_only dbname=van_ledger_fixture_ba65a574c8e3431fa216fa5b8a216c72 host=127.0.0.1 port=32878'
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-707/test_original_physical_history1')
+eurusd = SymbolContract(symbol='EURUSD', venue='mt5', base_currency='EUR', quote_currency='USD', account_currency='USD', contra...=Decimal('0'), max_adv_participation=Decimal('0.10'), liquidity_haircut=Decimal('0'), round_trip_cost_pct=Decimal('0'))
+lost_ack = True
+
+    @pytest.mark.parametrize('lost_ack', [False, True])
+    def test_original_physical_history_survives_reopen_and_original_commit_ack_loss(pg_dsn, tmp_path, eurusd, lost_ack):
+        unused, adapter, account = setup(tmp_path)
+        unused.close()
+        ledger = PostgresLedger(pg_dsn, ledger_name='physical-history')
+        other = PostgresLedger(pg_dsn, ledger_name='unrelated-history')
+        try:
+            capture = capture_cached_mt5(ledger, account, now_ms=10000)
+            context = context_for_account(ledger, adapter, account, now_ms=10000, mt5_capture=capture)
+            facts = snapshot(eurusd, account_alias=account.account_alias,
+                balance=account.balance, equity=account.equity, native_account_context=context)
+            first = record(ledger, facts)
+            current = other_context(ledger, adapter, account, facts, alias='another_label')
+            atomic = ledger.atomic
+            depth = 0
+            @contextmanager
+            def lose_original_reply():
+                nonlocal depth
+                outer = depth == 0
+                depth += 1
+                try:
+                    with atomic():
+                        yield
+                finally:
+                    depth -= 1
+                if outer:
+                    raise OSError('isolated original commit reply lost')
+            if lost_ack:
+                ledger.atomic = lose_original_reply
+                try:
+>                   with pytest.raises(OSError, match='original commit reply lost'):
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E                   Failed: DID NOT RAISE OSError
+
+trading/tests/test_native_risk_history_postgres.py:50: Failed
+=========================== short test summary info ============================
+FAILED trading/tests/test_native_risk_history_postgres.py::test_original_physical_history_survives_reopen_and_original_commit_ack_loss[True]
+1 failed, 146 passed in 40.59s

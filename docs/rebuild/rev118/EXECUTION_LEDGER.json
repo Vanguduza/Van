@@ -261,6 +261,14 @@
         "backend/BE-007_IMMUTABLE_FUNDING_DRAFTS.md",
         "receipts/FUNDING_DRAFTS_SOURCE_20261027.json"
       ]
+    },
+    "BE-009": {
+      "status": "IN_PROGRESS",
+      "candidate_source_only": true,
+      "acceptance": "NOT_ISSUED",
+      "evidence": [
+        "receipts/ORIGINAL_NATIVE_HISTORY_SOURCE_20261027.json"
+      ]
     }
   },
   "blockers": [
@@ -468,11 +476,11 @@
     "tested_android_head": "752d265b11ba643ed309481b110248f8b7fe323b",
     "hosted_result": "receipts/HOSTED_SOURCE_752d265b.json",
     "mutation_reconciliation": "ci/MUTATION_RECONCILIATION.md and ci/MUTATION_RECONCILIATION_MAPPING.json",
-    "verified_source_head": "b58bb578418ac1d49dc67078f616ac4c3eb8b3ef published genuineGREEN175; current original-position/native-margin source locally1467pass and uncommitted at this generation",
-    "source_qualification_run": 40463198811,
-    "latest_checkpoint_report": "docs/rebuild/rev118/CHECKPOINT_20261027_NATIVE_RISK_SCHEMA.md",
+    "verified_source_head": "c5108b3ce1a15caffac107de4eeff588bb33ce66",
+    "source_qualification_run": 40494913171,
+    "latest_checkpoint_report": "docs/rebuild/rev118/CHECKPOINT_20261027_ORIGINAL_NATIVE_HISTORY.md",
     "previous_verified_source": "3c6969ebbec39f2ad9f2836a6bd8acdb487adc34 published; exact CI40228254162 all17public jobs pass, two unchanged prerequisite failures",
-    "qualification_scope": "Publishedb58 main16publicsuccess/1publicfail2stringassertions/two mandatoryfailures; cognitivefailedsame2uniqueassertions, voicefollowupunexecuted; forecast114+6+3 independentlyverified. Current uncommitted correction separately1467localactualSQL/HTTPcases0skip/audit0/1172pyhashes+1legacyJSON/PGabsent;0formal/native/productionacceptance."
+    "qualification_scope": "Publishedc510 genuineGREEN178/all17publicjobsSUCCESS2mandatoryFAIL; selectedoriginalPGarchive4459tradingPASS1DDSskip26PG117voice. Current candidate history147SQL0skip/audit0/1179hashesmatch/PGabsent and215rebuild0skip. Source only,0formal/native/production/S24acceptance."
   },
   "provenance_correction": {
     "finding": "90 forecast hashes previously reported unverifiable",
@@ -490,6 +498,11 @@
       "evidence": "ci/MUTATION_CORPUS_c2a27848.json"
     }
   ],
-  "current_action": "Complete realmanifest, verifiedfullstagedbackup, genuinehookcommit andactualcommittedledgerverification against4fd466dec3910ed5de614bfbf95887ad619df5ca; normalpush/readback/exactCI. Then restore the two hash-verified native-history WIP files held outside checkout and continue original physical financial history/collateral/all-origin reservations and all backend features. Preserve alias-scoped owner controls. Vantradingcore remainshost; Android usesprovisionedproductionprofile withoutowner-enteredaddresses. BG001/nativeadmission/provisioning/signing/ArtemisS24 remainrequired.",
-  "updated_at_utc": "2026-10-27T10:56:08.126519+00:00"
+  "current_action": "Publish through genuine hooks, verify committed ledger at required baseline, normalpush/readback/exactCI; continue whole-workflow risk integration under BUILD_EXECUTION_PLAN.md. Vantradingcore host; provisioned Android without owner-entered backend address; BG001 before frontend redesign; actual provisioning/signing/native/Artemis/S24 remain required.",
+  "updated_at_utc": "2026-10-27T13:50:49.623582+00:00",
+  "execution_method": {
+    "path": "BUILD_EXECUTION_PLAN.md",
+    "scope_index": "SOURCE_WORKMAP.json",
+    "meaning": "Owner directs source reuse, full workflow completion, explicit gaps and compact evidence under the unchanged canonical programme. No omitted functions or silently weakened states/controls."
+  }
 }

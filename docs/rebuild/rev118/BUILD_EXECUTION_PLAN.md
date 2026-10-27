@@ -1,0 +1,47 @@
+# Rev1.18 execution method: reuse source and close full workflows
+
+This is an execution method for the unchanged [canonical plan](../../review-inputs/van-rev115/package/plan/DEVELOPMENT_PLAN.json), not a replacement programme, scope amendment or acceptance certificate. The owner's 27 October direction is to build efficiently while omitting no feature or function and silently weakening no contract. Existing source is the starting point. Absence of a rebuild milestone does not mean absence of code.
+
+## Scope that must survive
+
+The frozen package tree remains `ac0226a22a95f51642cfeb37b3709b40f7cacf10`: 131 units, 324 requirements, 1,610 acceptance identities, 234 contexts, 349 owner actions and 93 planned features. Preserve the current 42 feature groups, 105 located functions and 78 surfaces as the Android migration baseline. Full state, failure, refusal, privacy, authority, recovery and independent-readback contracts remain attached to their original identities. Proposed amendments remain separate and unadmitted.
+
+[SOURCE_WORKMAP.json](SOURCE_WORKMAP.json) indexes every original unit, requirement, acceptance identity, context, action, planned feature and inherited function. It retains full-row contract hashes, original dependency edges and the existing PRE-001 source-discovery leads. These leads require inspection; neither a file nor a hash establishes working functionality. The original contract text at the fingerprinted path governs every row. No unit is accepted by generating this index.
+
+## Repeatable workflow
+
+1. Select the earliest dependency-ready source workflow from the canonical plan and current execution ledger. Formal admission dependencies remain unchanged; the existing owner authorization permits candidate source work while admission is pending. Keep one implementation workflow active, with a concrete next dependency. Record blockers against their dependent operation and continue independent source work.
+2. Inspect its existing producer, service owner, store, real caller and readback. Reuse working components. Classify each required operation as existing and verified, present but unverified, integration missing, implementation missing, or externally blocked. Record exact gaps, rather than treating the entire unit as absent or complete.
+3. Close a complete caller-to-owner-to-durable-result path, retaining its required positive behavior, unavailable/empty/loading/stale/refused/unknown/reconciling/error states, owner controls and recovery. Preserve original-operation identities, expiry, CAS, revocation and side-effect boundaries. A generic refusal, stub endpoint or reduced read-only substitute cannot close an originally required effectful operation.
+4. Run checks selected from the changed behavior and actual consumers. Use real SQLite/PostgreSQL/HTTP where they are the boundary. Include a positive path, meaningful negative cases and restart/replay/uncertain-effect recovery. Preserve inherited assertions; fix an incorrect fixture only with independently established original behavior. Record failures and skips as such. Native/provider/device acceptance uses its required real environment separately.
+5. Refresh only derived contracts affected by the change. Run the workmap guard, manifest and mandatory repository checks once on the final packet. Group related integration changes into a reviewable commit; do not make a commit for every small helper. Keep genuine hooks and authorization records, then required-baseline committed verification, normal push, independent remote readback and exact-head CI. Repair actual source failures without waiving admission prerequisites.
+6. Update the existing candidate progress and execution ledger with the result and remaining full-unit obligations. Store one compact packet receipt and source-bound check summaries; retain original raw evidence without copying unchanged archives into every later packet. Successful checks are reused only for unchanged inputs and conditions, with their original revision explicit. Re-run when changes, failures or unresolved risks justify it.
+7. Move directly to the next eligible workflow. Stop only for a genuinely missing decision/capability that blocks the dependent operation; do not repeatedly ask whether to continue. Source, integration, independent acceptance, deployment and production qualification remain separate fields.
+
+## Order within the original dependency graph
+
+The following are work fronts, not substitute packets or permission to skip dependencies. Every original unit remains in the workmap and canonical plan.
+
+| Work front | Existing owners and required completion |
+| --- | --- |
+| Current: account-wide financial safety | BE-003/004/006/009/010/012: original native identity/history, flow-adjusted baselines, collateral and all-origin reservations, pending/uncertain exposure, exact arithmetic and restart; preserve alias-scoped signed owner controls. Then BE-005/007/011 complete authentication, funding/payment settlement, manual trading and handover/reconciliation. |
+| Market and trading intelligence | BE-008/014/015/016/017/018/019/020/021/022: instruments, feeds, depth/history, entitlement/source health, news D1–D7, armed tickets, complete chart semantics, alerts/screening, replay/practice and diagnostics. Required existing markets and capabilities remain. |
+| Assistant integration | BE-023 through BE-031 and BE-034: projects/tasks/missions, Hermes/Muse/JEV and interventions, browser/artifacts/share, Artemis, memory/knowledge/goals/privacy/erasure, automation/reminders, conversation/voice/speaker consent, attention/notifications/providers/devices/settings. |
+| Governed learning and forecast research | BE-013/035/036 and every canonical VAN-ML backend unit: original outcomes and causal limits, features/labels/chronology, replay/accounting, every required model family and baseline, calibration/drift/retraining, safe artifacts/serving/fusion, governed promotion and actual consumer effects. Learning policy changes retain their own authority. Profitability is evaluated against costs and null/baseline controls, never guaranteed. |
+| Crypto and event research | BE-037 through BE-044 and prediction-market VAN-ML units: every discovery/chain/capability/wallet/finality obligation, selected eligible CEX spot execution, event semantics/distributions/calibration and required replay/research consumers. Read-only chain research does not replace required CEX execution. |
+| Operations and complete backend | BE-001/002/003/032/033 and applicable VAN-ML operations: security, capacity, deployment/recovery, backups, complete catalog/contracts and operational qualification. All 82 backend units and all 12 original backend-verification packets must meet their full contracts. |
+| Android and owner acceptance | After the real BG-001 gate, execute all original UX/FE/QA/REL units. Preserve existing Android compatibility work before that gate. Van trading core is the chosen host; Android uses its provisioned production profile without owner-entered backend addresses. Production signing, independent admission and actual Artemis/Samsung S24 Ultra acceptance remain explicit requirements. |
+
+## Current concrete gap and next result
+
+At published `c5108b3c`, both native risk-snapshot producers preserve original account context, but baseline/streak folding still selects logical aliases. Two executed baseline probes show that a second alias on the same proven physical account loses the first alias's recorded baseline/streak. Physical writer arbitration alone cannot solve financial sharing. The restored two-file reader verifies original sealed native inputs and MT5 query receipts; its 19 focused tests pass, but it is not yet a shared-history integration.
+
+The active result is therefore a source-bound physical-history integration feeding the existing risk owners, followed by collateral/reservations across every origin. Old facts without original identity remain explicitly unresolved; current configuration cannot assign ownership. Existing owner controls retain their signed alias scope and cannot silently erase another alias's losses. Preserve positive protective-position behavior and every original owner recovery control while completing this integration.
+
+The latest exact published CI has 17 public jobs successful. Its two mandatory failures (DDS read-key provisioning and absent trusted-base Project Truth checker) remain unwaived. These block their admission operations, not the separately authorized candidate source work. No new formal acceptance is issued.
+
+## Commands and evidence economy
+
+Run `python3 tools/rebuild/workmap.py --check` to detect identity, full-contract, dependency or source-index drift. `--apply` only regenerates the derived workmap; inspect the actual diff. Use the existing manifest, consolidation verifier, owner/frontend registry checks and genuine Project Truth hooks. Verify committed history against `4fd466dec3910ed5de614bfbf95887ad619df5ca` as required. The workmap guard is a scope consistency check; it is not execution of the 1,610 native acceptance identities or the 374 mutation cases.
+
+Progress reports identify delivered behavior, affected source, actual checks, remaining integration and the next concrete result. Do not report milestone counts as a completion percentage. No feature retirement, weakened assertion, authority grant, live connectivity, signing, deployment or device evidence may be inferred from this plan.

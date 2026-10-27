@@ -1,0 +1,19 @@
+{
+  "state": "INTERRUPTED_WORKER_LOSS_NO_TERMINAL_EXIT",
+  "original_receipts_unchanged": true,
+  "checks": [
+    "van-workmap-history-rebuild-final-20261027",
+    "van-workmap-history-owner-registry-20261027"
+  ],
+  "old_controller_and_command_pids_independently_absent_after_recovery": [
+    1223659,
+    1223663,
+    1224199,
+    1224213
+  ],
+  "replacement_checks": [
+    "van-workmap-history-rebuild-recovered-20261027",
+    "van-workmap-history-owner-registry-recovered-20261027"
+  ],
+  "meaning": "Original RUNNING receipts are stale and are not passing results. Root cause of worker loss is unknown."
+}
