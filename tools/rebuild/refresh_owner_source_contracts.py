@@ -320,6 +320,22 @@ def build(read=None):
     }
     for row in (chart_feature,chart_screen):
         row.setdefault("backend_contract_extensions",[]).append(copy.deepcopy(depth_extension))
+    funding_rows=[accounts,next(r for r in documents['owner_screens']['screens'] if r['id']=='van.trading.accounts')]
+    for endpoint in endpoint_doc['endpoints']:
+        if not endpoint['path'].startswith('/v1/trading/funding/drafts'):
+            continue
+        extension={
+            'method':endpoint['method'],'path':endpoint['path'],'endpoint_id':endpoint['endpoint_id'],
+            'source_ref':endpoint['source'],'authentication':endpoint['authentication'],
+            'device_proof_required_when_bound':endpoint['device_proof_required_when_bound'],
+            'source_status':'CANDIDATE_UNAPPROVED_FUNDING_DRAFT_ANDROID_CONSUMER_PENDING',
+            'authority':'DRAFT_STORAGE_ONLY_NO_PAYMENT_APPROVAL_RESERVATION_SEND_OR_SETTLEMENT',
+            'canonical_units':['BE-007'],'planned_feature_refs':['VNX-F-ACCOUNTS-11','VNX-F-ACCOUNTS-12','VNX-F-ACCOUNTS-13'],
+            'scope':'Immutable exact owner/request funding inputs and original committed receipts in the existing VATI ledger. Current payment eligibility remains NOT_ADMITTED. Quote/beneficiary digests are unverified references; strict wire, retention, original-request, expiry and capacity refusal apply. Bound request proof stores a draft and does not authorize a payment. Existing provider admission and unsupported funding states remain required. No frontend implementation or native financial effect is claimed.',
+            'specification':'docs/rebuild/rev118/backend/BE-007_IMMUTABLE_FUNDING_DRAFTS.md',
+            'new_ui_implemented':False,'live_qualified':False,
+        }
+        for row in funding_rows:row.setdefault('backend_contract_extensions',[]).append(copy.deepcopy(extension))
     for endpoint in endpoint_doc["endpoints"]:
         if not endpoint["path"].startswith("/v1/trading/charts/"):
             continue

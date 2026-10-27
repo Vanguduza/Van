@@ -252,6 +252,15 @@
         "backend/VAN-ML-PKT-005_DATASET_CANDIDATE_PUBLICATION.md",
         "receipts/DATASET_CANDIDATE_PUBLICATION_20261026.json"
       ]
+    },
+    "BE-007": {
+      "status": "IN_PROGRESS",
+      "candidate_source_only": true,
+      "acceptance": "NOT_ISSUED",
+      "evidence": [
+        "backend/BE-007_IMMUTABLE_FUNDING_DRAFTS.md",
+        "receipts/FUNDING_DRAFTS_SOURCE_20261027.json"
+      ]
     }
   },
   "blockers": [
@@ -324,7 +333,7 @@
     "note": "Opus unavailable; owner transferred build to Codex. No independent reviewer identity is inferred from another model or session."
   },
   "checkpoint": {
-    "updated_utc": "2026-10-26T23:13:55.642450+00:00",
+    "updated_utc": "2026-10-27T00:30:25.738199+00:00",
     "branch": "ccr-9e07e1af-8mgz1p",
     "base": "b02075f327ea8180ab6d269eba358cf8c5479878",
     "background_jobs": [
@@ -343,7 +352,7 @@
         "not_acceptance": true
       }
     ],
-    "last_validation": "Two actual coordinator builders in one process previously shared hostname/PID lease identity. Real PostgreSQL reproduced a peer acquiring the live owner lease and peer shutdown releasing its authority: two failures and one expiry control. Each coordinator now gets a UUID instance suffix, matching the single-session runtime; logical account aliases, signed mandates, store CAS, epochs and submission guards are unchanged. Three focused cases and 1213 final SQL/HTTP/runtime/authority/recovery cases pass, with no skips or storage-audit violations. All 1,150 pinned backend/trading runtime and test hashes match; the owned PostgreSQL fixture is independently absent. This is a source component, not whole-unit, provider, native, production or owner acceptance. Physical-account aliases and shared financial reservations remain separate open work.",
+    "last_validation": "Immutable unapproved funding drafts now bind exact Money, owner/account claims, beneficiary/quote references, all fee assets, conversion reference, operation, original request, revision and expiry. The existing VATI ledger owner stores original drafts with SQL serialization, writer-lock expiry recheck, committed source reads, independent cold readback, lost-ACK/rollback recovery and explicit capacity refusal. Three paired-owner HTTP routes retain original receipts; bound request proof is not payment approval. Existing instrument and owner credential screens reject unsafe metadata before storage; strict JSON/encoded body limits and cancellation-safe worker admission apply. Native draft retention/deletion is explicitly excluded from inferred-memory erasure and remains unqualified. Final377 actual SQLite/PostgreSQL/HTTP/privacy/authority cases pass with0skips/audit violations, all1158 pinned source/test hashes match and owned fixture independently absent;122rebuild/workflow/T0 checks pass. New cases:45value,58dual-engine journal,18gateway and1bound-proof executions; counts overlap. Earlier fixture failures and the uncommitted prototype credential gap remain retained. BE007 is IN_PROGRESS; no payment/provider/native/unit/production/owner acceptance is issued.",
     "environment_notes": [
       "clone must be unshallowed (git fetch --unshallow) and PR heads fetched (+refs/pull/*/head:refs/remotes/origin/pr/*) before pre001.py",
       "pytest from backend/requirements.txt in a venv",
@@ -404,7 +413,10 @@
     "Registered paired-owner GET /v1/trading/market/depth-history reads original physical-scope DEPTH captures through existing TradingService/NativeDepthArchive. Server-only root/byte budget;strict selectors, explicit private refusal/NO_CAPTURE, original policy/revision/as-of, no repair/broker I/O/normalized prices/current freshness/rights or execution grant. Two active verification slots remain occupied across caller cancellation. 32 new cases;910 final actual SQLite/PostgreSQL/HTTP/private-topology passes,0 skips/audit violations,1148 final backend/trading runtime-test hashes match,owned fixture independently absent;3 assertion faults caught/6 positive+6 restored controls/exact source restored;122 rebuild/workflow/T0 checks. Original integration failed1/106 on exact service-surface allowlist;only3 new read-only names added,authority tripwires retained,focused2 and final910 passed. Counts overlap;BE008 IN_PROGRESS,unit/native/production acceptance NOT_ISSUED.",
     "Existing BarAggregator now rejects regressed source timestamps, malformed/nonfinite/crossed ticks, negative volume and noninteger intervals before changing or publishing original state. Explicit fresh80digit contexts isolate midpoint/OHLC/volume/spread/range from caller settings; staged arithmetic preserves the original bar on overflow. Equal-time arrival order, negative prices/epochs and missing intervals without synthetic bars remain supported. finish() seals its emitted interval against reopening. Committed baseline17failures/4controls plus3later closed-interval failures retained.29newcases;965final actual SQLite/PostgreSQL/HTTP/private-topology passes0skip/audit0/all1149 runtime-testhashes match/ownedfixture independently absent;5supplemental behavioral faults caught29positive29restored/sourceexact;122rebuild/workflow/T0 checks. Source component only;BE008 IN_PROGRESS and all acceptance unissued.",
     "Exact9255 main40411152887 terminalFAILED2mandatory/all17publicSUCCESS;19archives independentlysize/SHA/CRCverified;4125trading+1DDSskip/PG26/voice117/gateway5775+7/media198/monitor258/browser/emulator18+4,374identitiescaughtonce383edits. Forecast40411152890 independentlyverified114native/6synthetic/3cold/parity0/232versions/kernel/cleanup/source-controller-reporthashes/tree-equivalentmergecb9c7f2f9ade8e50bc8b21843cae2189b298dd21. LaterHTTP/aggregation not qualified by parent.",
-    "Two actual coordinator builders in one process previously shared hostname/PID lease identity. Real PostgreSQL reproduced a peer acquiring the live owner lease and peer shutdown releasing its authority: two failures and one expiry control. Each coordinator now gets a UUID instance suffix, matching the single-session runtime; logical account aliases, signed mandates, store CAS, epochs and submission guards are unchanged. Three focused cases and 1213 final SQL/HTTP/runtime/authority/recovery cases pass, with no skips or storage-audit violations. All 1,150 pinned backend/trading runtime and test hashes match; the owned PostgreSQL fixture is independently absent. This is a source component, not whole-unit, provider, native, production or owner acceptance. Physical-account aliases and shared financial reservations remain separate open work."
+    "Two actual coordinator builders in one process previously shared hostname/PID lease identity. Real PostgreSQL reproduced a peer acquiring the live owner lease and peer shutdown releasing its authority: two failures and one expiry control. Each coordinator now gets a UUID instance suffix, matching the single-session runtime; logical account aliases, signed mandates, store CAS, epochs and submission guards are unchanged. Three focused cases and 1213 final SQL/HTTP/runtime/authority/recovery cases pass, with no skips or storage-audit violations. All 1,150 pinned backend/trading runtime and test hashes match; the owned PostgreSQL fixture is independently absent. This is a source component, not whole-unit, provider, native, production or owner acceptance. Physical-account aliases and shared financial reservations remain separate open work.",
+    "Immutable unapproved funding drafts now bind exact Money, owner/account claims, beneficiary/quote references, all fee assets, conversion reference, operation, original request, revision and expiry. The existing VATI ledger owner stores original drafts with SQL serialization, writer-lock expiry recheck, committed source reads, independent cold readback, lost-ACK/rollback recovery and explicit capacity refusal. Three paired-owner HTTP routes retain original receipts; bound request proof is not payment approval. Existing instrument and owner credential screens reject unsafe metadata before storage; strict JSON/encoded body limits and cancellation-safe worker admission apply. Native draft retention/deletion is explicitly excluded from inferred-memory erasure and remains unqualified. Final377 actual SQLite/PostgreSQL/HTTP/privacy/authority cases pass with0skips/audit violations, all1158 pinned source/test hashes match and owned fixture independently absent;122rebuild/workflow/T0 checks pass. New cases:45value,58dual-engine journal,18gateway and1bound-proof executions; counts overlap. Earlier fixture failures and the uncommitted prototype credential gap remain retained. BE007 is IN_PROGRESS; no payment/provider/native/unit/production/owner acceptance is issued.",
+    "Exact4cc7 main40415113142 terminalFAILED2mandatory/all17publicSUCCESS;19rawarchives verified,4125trading+1DDSskip/PG26/voice117/gateway5807+7/media198/monitor258/browser/emulator18+4,374canonicalidentities caught once383edits. Forecast40415113329 independentlyverified114native+6synthetic+3cold/parity0/232versions/kernel/cleanup/source-controller-reporthashes/tree-equivalentce864a6c59a0fdd59f0d874ef9e78985b03d2b78. Exact2a forecast40421043611 independentlyverified114+6+3/tree76184cd978eee3dc558a2778ecb5501f2685546d; whole2a main outcome separate. Later funding drafts not qualified by parent runs.",
+    "Exact2a main40421043580 is terminalFAILED;16public jobSUCCESS, public backend121915259747 CANCELLED at45minute boundary after successful actual5807gateway/7declaredskips+198media/coverageverify/artifactupload steps;2mandatory privateDDSkey/trustedmainchecker failures. Rawartifact reconciliation pending; preserve cancellation. Later funding source not validated by this run."
   ],
   "obligations": "obligations/OBLIGATIONS.json: preserved observations with source implementation evidence and explicit remaining native/unit obligations.",
   "pre002_challenge": "pre002/challenge/: 324 author-prepared dossiers (AUTHOR_CHALLENGED_PENDING_INDEPENDENT_REVIEW)",
@@ -435,9 +447,9 @@
     "tested_android_head": "752d265b11ba643ed309481b110248f8b7fe323b",
     "hosted_result": "receipts/HOSTED_SOURCE_752d265b.json",
     "mutation_reconciliation": "ci/MUTATION_RECONCILIATION.md and ci/MUTATION_RECONCILIATION_MAPPING.json",
-    "verified_source_head": "a7485a9a1ca6b3b11c96436b04fa2e1c05397029 local/genuine GREEN167/manifest5367; published4cc7 GREEN166; coordinator UUID source uncommitted",
+    "verified_source_head": "2a1186ee1199f56c0ae9fce06d13b27f9098d3c3 published/genuine GREEN168/manifest5453/normal push+remote readback; funding draft candidate uncommitted",
     "source_qualification_run": 40383599951,
-    "latest_checkpoint_report": "docs/rebuild/rev118/CHECKPOINT_20261026_COORDINATOR_INSTANCE.md",
+    "latest_checkpoint_report": "docs/rebuild/rev118/CHECKPOINT_20261027_FUNDING_DRAFTS.md",
     "previous_verified_source": "3c6969ebbec39f2ad9f2836a6bd8acdb487adc34 published; exact CI40228254162 all17public jobs pass, two unchanged prerequisite failures",
     "qualification_scope": "Public source tests only; mandatory/native/owner/production gates unissued."
   },
@@ -457,6 +469,6 @@
       "evidence": "ci/MUTATION_CORPUS_c2a27848.json"
     }
   ],
-  "current_action": "Finish coordinator instance source manifest, verified staged backup, genuine candidate-build hook commit and actual committed baseline verification. Preserve published4cc7 main40415113142 until terminal; inspect/reconcile exact results, normally push combined local head and verify remote readback/exact CI. Continue canonical backend functionality; no unit acceptance issued.",
-  "updated_at_utc": "2026-10-26T23:13:55.642450+00:00"
+  "current_action": "Finish funding draft real manifest, verified staged backup, genuine hook commit using BOTH existing candidate-build and owner-contract-refresh auth IDs, then actual committed verification against required4fd baseline. Published2a main40421043580 is terminalFAILED with public backend cancellation and2mandatory failures; inspect/reconcile exact raw outcomes, normal push/readback/exact new CI. Continue complete canonical backend financial/provider/assistant/ML work;0formal unit acceptances.",
+  "updated_at_utc": "2026-10-27T00:30:25.738199+00:00"
 }

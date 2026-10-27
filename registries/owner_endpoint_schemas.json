@@ -6274,6 +6274,146 @@
         ],
         "title": "FollowUpStatus"
       },
+      "FundingDraftCreate": {
+        "properties": {
+          "intent": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Intent"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "intent"
+        ],
+        "title": "FundingDraftCreate"
+      },
+      "FundingDraftErrorResponse": {
+        "properties": {
+          "detail": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "required": [
+          "detail"
+        ],
+        "title": "FundingDraftErrorResponse"
+      },
+      "FundingDraftReceipt": {
+        "properties": {
+          "schema": {
+            "type": "string",
+            "const": "vati.payment-draft-receipt/1",
+            "title": "Schema"
+          },
+          "record_ref": {
+            "type": "string",
+            "title": "Record Ref"
+          },
+          "request_id": {
+            "type": "string",
+            "title": "Request Id"
+          },
+          "owner_ref": {
+            "type": "string",
+            "title": "Owner Ref"
+          },
+          "account_scope_ref": {
+            "type": "string",
+            "title": "Account Scope Ref"
+          },
+          "intent_hash": {
+            "type": "string",
+            "title": "Intent Hash"
+          },
+          "quote_hash": {
+            "type": "string",
+            "title": "Quote Hash"
+          },
+          "available_at_ms": {
+            "type": "integer",
+            "title": "Available At Ms"
+          },
+          "state": {
+            "type": "string",
+            "const": "DRAFT_STORED_NOT_APPROVED",
+            "title": "State"
+          },
+          "provider_qualified": {
+            "type": "boolean",
+            "const": false,
+            "title": "Provider Qualified"
+          },
+          "execution_authority": {
+            "type": "boolean",
+            "const": false,
+            "title": "Execution Authority"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "schema",
+          "record_ref",
+          "request_id",
+          "owner_ref",
+          "account_scope_ref",
+          "intent_hash",
+          "quote_hash",
+          "available_at_ms",
+          "state",
+          "provider_qualified",
+          "execution_authority"
+        ],
+        "title": "FundingDraftReceipt"
+      },
+      "FundingDraftView": {
+        "properties": {
+          "receipt": {
+            "$ref": "#/components/schemas/FundingDraftReceipt"
+          },
+          "intent": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Intent"
+          },
+          "claimed_quote_time_state": {
+            "type": "string",
+            "enum": [
+              "NOT_YET_ISSUED",
+              "EXPIRED",
+              "WITHIN_CLAIMED_WINDOW"
+            ],
+            "title": "Claimed Quote Time State"
+          },
+          "current_payment_eligibility": {
+            "type": "string",
+            "const": "NOT_ADMITTED",
+            "title": "Current Payment Eligibility"
+          },
+          "execution_authority": {
+            "type": "boolean",
+            "const": false,
+            "title": "Execution Authority"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "receipt",
+          "intent",
+          "claimed_quote_time_state",
+          "current_payment_eligibility",
+          "execution_authority"
+        ],
+        "title": "FundingDraftView"
+      },
       "GenerateBody": {
         "properties": {
           "goal": {

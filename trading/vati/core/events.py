@@ -63,6 +63,7 @@ class EventKind(str, Enum):
     NATIVE_SYMBOL_CATALOG = "NATIVE_SYMBOL_CATALOG"  # original catalog vintages; no dataset or execution admission
     DATASET_MANIFEST_CANDIDATE = "DATASET_MANIFEST_CANDIDATE"
     FINANCIAL_MOVEMENT = "FINANCIAL_MOVEMENT"  # source-bound balanced postings; no spend/settlement authority
+    PAYMENT_DRAFT = "PAYMENT_DRAFT"  # immutable unapproved funding input; no reservation, send or settlement
 
     # ---- Rev 5.1 (TRD-REV51-090..133). Every kind below is produced by the
     # offline-evolution or shadow-live path. None of them is an order.

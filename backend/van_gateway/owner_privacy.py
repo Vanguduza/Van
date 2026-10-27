@@ -6,7 +6,8 @@ from urllib.parse import urlsplit, urlunsplit
 
 _SECRET = re.compile(
     r"(?i)(?:\b(?:api[_-]?key|access[_-]?token|refresh[_-]?token|client[_-]?secret|"
-    r"password|passwd|authorization|(?:set-)?cookie|session[_-]?id)\b[\"']?\s*[:=]"
+    r"password|passwd|authorization|(?:set-)?cookie|session[_-]?id|"
+    r"(?:wallet[_ -]?)?private[_ -]?key|(?:seed|recovery)[_ -]?phrase|mnemonic)\b[\"']?\s*[:=]"
     r"|\bbearer\s+\S+|\bsk-[A-Za-z0-9_-]{16,}|-----BEGIN .*PRIVATE KEY-----|secretref://"
     r"|\b(?:otp|one[- ]time password|verification code)\b.{0,32}\b\d{4,8}\b"
     r"|\b\d{4,8}\b\s*(?:is your|otp|verification code))"

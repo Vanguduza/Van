@@ -1,6 +1,6 @@
 {
   "schema": "van.rebuild.candidate-source-progress/1",
-  "updated_at_utc": "2026-10-26T23:13:55.642450+00:00",
+  "updated_at_utc": "2026-10-27T00:30:25.738199+00:00",
   "programme": "Rev1.18; original 131 unit IDs and dependencies retained",
   "authority": "auth-20261022-owner-autonomous-candidate-build",
   "meaning": "Candidate source progress is separate from admitted unit acceptance. Independent certificates, owner decisions, live effects and release gates remain unissued. No unit is declared complete by this record.",
@@ -496,9 +496,14 @@
         "BE-006",
         "PRE-003"
       ],
-      "candidate_status": "NOT_STARTED",
+      "candidate_status": "IN_PROGRESS",
       "unit_acceptance": "NOT_ISSUED",
-      "milestones": []
+      "milestones": [
+        {
+          "description": "Immutable unapproved funding drafts now bind exact Money, owner/account claims, beneficiary/quote references, all fee assets, conversion reference, operation, original request, revision and expiry. The existing VATI ledger owner stores original drafts with SQL serialization, writer-lock expiry recheck, committed source reads, independent cold readback, lost-ACK/rollback recovery and explicit capacity refusal. Three paired-owner HTTP routes retain original receipts; bound request proof is not payment approval. Existing instrument and owner credential screens reject unsafe metadata before storage; strict JSON/encoded body limits and cancellation-safe worker admission apply. Native draft retention/deletion is explicitly excluded from inferred-memory erasure and remains unqualified. Final377 actual SQLite/PostgreSQL/HTTP/privacy/authority cases pass with0skips/audit violations, all1158 pinned source/test hashes match and owned fixture independently absent;122rebuild/workflow/T0 checks pass. New cases:45value,58dual-engine journal,18gateway and1bound-proof executions; counts overlap. Earlier fixture failures and the uncommitted prototype credential gap remain retained. BE007 is IN_PROGRESS; no payment/provider/native/unit/production/owner acceptance is issued.",
+          "evidence": "backend/BE-007_IMMUTABLE_FUNDING_DRAFTS.md;receipts/FUNDING_DRAFTS_SOURCE_20261027.json"
+        }
+      ]
     },
     "BE-008": {
       "title": "Instrument identity, conventional/crypto market feeds, bars and depth",

@@ -57,6 +57,12 @@ FORGETTABLE: tuple[ForgettableStore, ...] = (
 #: Named, with the reason, rather than silently omitted. Someone auditing this list should
 #: be able to see that the omission was decided rather than forgotten.
 DELIBERATELY_KEPT: dict[str, str] = {
+    "native_funding_drafts": (
+        "Saved funding drafts are explicit owner work, outside this inferred-memory erasure. "
+        "They remain unapproved and cannot authorize a payment. Their separate native "
+        "retention/deletion controls are not yet qualified; this operation does not claim "
+        "those records were deleted."
+    ),
     "market_monitors": (
         "Owner-authored watchlists, alert rules and saved screener rules are explicit settings, deleted through "
         "their revision-checked endpoints. Deletion removes rule names, keywords and drawings. "

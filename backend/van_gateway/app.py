@@ -1261,6 +1261,9 @@ def create_app() -> FastAPI:
     app.include_router(build_chart_router(chart_workspaces))
     from van_gateway.trading.native_depth_history import build_depth_history_router
     app.include_router(build_depth_history_router(trading))
+    from van_gateway.trading.payment_draft_api import FundingDraftService,build_funding_draft_router
+    app.state.funding_drafts=FundingDraftService(trading)
+    app.include_router(build_funding_draft_router(app.state.funding_drafts))
     from van_gateway.trading.monitor_api import build_monitor_router
     app.state.market_monitors = market_monitors
     app.include_router(build_monitor_router(market_monitors))
