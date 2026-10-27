@@ -1,0 +1,4 @@
+{
+  "historical_partial_snapshot": "../hosted_b0a61313_pending_20261027",
+  "meaning": "The older partial-reconciliation file hashes apply to the immutable18archive pending snapshot. The workspace download receipt later advanced to19archives. Final reconciliation covers the final raw tree; source helpers and the separately labelled local abaf ledger log are additional evidence, not hosted b0 test results."
+}
