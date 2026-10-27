@@ -1,0 +1,37 @@
+..........F                                                              [100%]
+=================================== FAILURES ===================================
+_ test_new_position_heat_uses_original_tick_terms_not_rounded_value_per_price __
+
+eurusd = SymbolContract(symbol='EURUSD', venue='mt5', base_currency='EUR', quote_currency='USD', account_currency='USD', contra...=Decimal('0'), max_adv_participation=Decimal('0.10'), liquidity_haircut=Decimal('0'), round_trip_cost_pct=Decimal('0'))
+mandate = TradingMandate(mandate_id='mandate-fx-primary', version='1.0.0', account_alias='fx_primary', venue='mt5', mode=<Author...se)), strategy_risk_budgets={}, trading_temperament=None, strategy_temperaments={}, temperament_owner_signature_ref='')
+
+    def test_new_position_heat_uses_original_tick_terms_not_rounded_value_per_price(eurusd, mandate):
+        contract = replace(eurusd, tick_size=Decimal('3'), tick_value=Decimal('1'))
+        positions = tuple(OpenPosition('GBPUSD', side, Decimal('1'), Decimal('0.000550075'),
+            Decimal('100000'), 'GBP', 'USD', has_broker_side_stop=True)
+            for side in (Direction.LONG, Direction.SHORT))
+        positions += (OpenPosition('AUDNZD', Direction.LONG, Decimal('1'), Decimal('1e-100'),
+                                 Decimal('1'), 'AUD', 'NZD', has_broker_side_stop=True),)
+        facts = snapshot(contract, equity=Decimal('10001'), balance=Decimal('10001'),
+            peak_equity=Decimal('10001'), day_start_equity=Decimal('10001'),
+            week_start_equity=Decimal('10001'), open_positions=positions)
+        request = intent(entry=Decimal('6'), stop=Decimal('3'))
+        with localcontext(native_decimal_context()):
+            sized = size_stop_contract(equity=facts.equity, allowed_risk_pct=request.requested_risk_pct,
+                entry=request.entry, stop=request.stop, direction=request.direction,
+                contract=contract, multipliers=Multipliers())
+            result = RiskAuthority(mandate).evaluate_safe(request, facts)
+        assert sized.size == Decimal('40')
+        existing = sum((Fraction(p.lots) * Fraction(p.stop_distance)
+                        * Fraction(p.value_per_price_unit_per_lot) for p in positions), Fraction())
+        actual_new_loss = Fraction(sized.size) * 3 * Fraction(contract.tick_value) / Fraction(contract.tick_size)
+        assert (existing + actual_new_loss) / Fraction(facts.equity) > Fraction(mandate.max_open_stop_risk)
+>       assert result.decision is Decision.REJECTED
+E       AssertionError: assert <Decision.APPROVED: 'APPROVED'> is <Decision.REJECTED: 'REJECTED'>
+E        +  where <Decision.APPROVED: 'APPROVED'> = RiskDecision(trade_intent_id='ti-1', decision=<Decision.APPROVED: 'APPROVED'>, reason_code='OK', reason_detail='', app...a9cba6787', mandate_hash='6cfd980fcae513844c68fbe6e03b6ede92eb9bdc978b477d8a0f868e10bcbf27', approval_schema_version=2).decision
+E        +  and   <Decision.REJECTED: 'REJECTED'> = Decision.REJECTED
+
+trading/tests/test_risk_arithmetic_context.py:128: AssertionError
+=========================== short test summary info ============================
+FAILED trading/tests/test_risk_arithmetic_context.py::test_new_position_heat_uses_original_tick_terms_not_rounded_value_per_price
+1 failed, 10 passed in 0.49s

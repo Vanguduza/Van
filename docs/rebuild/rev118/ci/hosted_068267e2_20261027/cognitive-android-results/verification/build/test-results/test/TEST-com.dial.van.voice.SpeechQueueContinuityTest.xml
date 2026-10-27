@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.dial.van.voice.SpeechQueueContinuityTest" tests="8" skipped="0" failures="0" errors="0" timestamp="2026-10-27T05:23:25" hostname="runnervmtai0g" time="0.004">
+  <properties/>
+  <testcase name="a late completion cannot acknowledge a sentence interrupted by the owner()" classname="com.dial.van.voice.SpeechQueueContinuityTest" time="0.0"/>
+  <testcase name="a different id at an existing index is not a second sentence()" classname="com.dial.van.voice.SpeechQueueContinuityTest" time="0.001"/>
+  <testcase name="ready later audio cannot skip an earlier unfinished sentence()" classname="com.dial.van.voice.SpeechQueueContinuityTest" time="0.0"/>
+  <testcase name="a shared stream id cannot merge different responses()" classname="com.dial.van.voice.SpeechQueueContinuityTest" time="0.001"/>
+  <testcase name="reusing a segment id at a different index is also refused()" classname="com.dial.van.voice.SpeechQueueContinuityTest" time="0.0"/>
+  <testcase name="new unheard speech cannot inherit an earlier completed final marker()" classname="com.dial.van.voice.SpeechQueueContinuityTest" time="0.0"/>
+  <testcase name="nothing heard resumes with segment zero()" classname="com.dial.van.voice.SpeechQueueContinuityTest" time="0.0"/>
+  <testcase name="completion advances only the contiguous heard prefix()" classname="com.dial.van.voice.SpeechQueueContinuityTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

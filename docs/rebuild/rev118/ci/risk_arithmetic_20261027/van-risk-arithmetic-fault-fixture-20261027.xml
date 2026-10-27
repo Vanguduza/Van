@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="1" time="80.457" timestamp="2026-10-27T05:50:15.260275+00:00" hostname="2c5a245e39f1"><testcase classname="van-risk-arithmetic-fault-fixture-20261027" name="test_existing_gate_probes_have_valid_controls_and_no_crash_credit" time="80.076"><failure message="AssertionError: a probe exception is not semantic mutation evidence&#10;assert 'fuzz CRASHED' not in 'OK   contro...s expected\n'&#10;  &#10;  'fuzz CRASHED' is contained here:&#10;              fuzz CRASHED (KeyError: fail-closed by exception)&#10;  ?           ++++++++++++&#10;    OK   break: stop-required check                                 fuzz CRASHED (TypeError: fail-closed by exception)&#10;    &#10;    13/13 probes behaved as expected">capsys = &lt;_pytest.capture.CaptureFixture object at 0x7f3c370b1d30&gt;
+
+    def test_existing_gate_probes_have_valid_controls_and_no_crash_credit(capsys):
+        path = Path('/workspace/van-review-2026-10-18/publish/trading/tools/induce_gate_failures.py')
+        spec = importlib.util.spec_from_file_location('van_risk_fault_probes', path)
+        module = importlib.util.module_from_spec(spec)
+        sys.modules[spec.name] = module
+        spec.loader.exec_module(module)
+        code = module.main()
+        output = capsys.readouterr().out
+        Path('/workspace/van-risk-arithmetic-invariant-faults-valid-owner-20261027.txt').write_text(output)
+&gt;       assert 'fuzz CRASHED' not in output, 'a probe exception is not semantic mutation evidence'
+E       AssertionError: a probe exception is not semantic mutation evidence
+E       assert 'fuzz CRASHED' not in 'OK   contro...s expected\n'
+E         
+E         'fuzz CRASHED' is contained here:
+E                     fuzz CRASHED (KeyError: fail-closed by exception)
+E         ?           ++++++++++++
+E           OK   break: stop-required check                                 fuzz CRASHED (TypeError: fail-closed by exception)
+E           
+E           13/13 probes behaved as expected
+
+../../van-risk-arithmetic-fault-fixture-20261027.py:16: AssertionError</failure></testcase></testsuite></testsuites>

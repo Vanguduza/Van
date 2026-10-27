@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.dial.van.trading.AccountOperationRecoveryTest" tests="7" skipped="0" failures="0" errors="0" timestamp="2026-10-27T05:29:00" hostname="runnervmtai0g" time="0.017">
+  <properties/>
+  <testcase name="failureToSaveAConfirmedReadbackStillKeepsTheOriginalIdentity" classname="com.dial.van.trading.AccountOperationRecoveryTest" time="0.008"/>
+  <testcase name="refusalCanClearButAnUnreadableOrMissingHistoryCannotBeReplaced" classname="com.dial.van.trading.AccountOperationRecoveryTest" time="0.001"/>
+  <testcase name="coldReaderRetainsOriginalIdentityAndNeverStoresArgumentsProofOrCredentials" classname="com.dial.van.trading.AccountOperationRecoveryTest" time="0.0"/>
+  <testcase name="recoveryDoesNotInventAnotherCredentialExportOrTreatUnknownAsAnOrdinaryFailure" classname="com.dial.van.trading.AccountOperationRecoveryTest" time="0.001"/>
+  <testcase name="failedDurableWritePreventsDispatchAndPreservesEarlierIdentities" classname="com.dial.van.trading.AccountOperationRecoveryTest" time="0.001"/>
+  <testcase name="onlyBoundConfirmedOutcomeClearsTheOriginal" classname="com.dial.van.trading.AccountOperationRecoveryTest" time="0.003"/>
+  <testcase name="rememberingAnOriginalOrNewApprovalForItsAliasCannotBecomeASendRetry" classname="com.dial.van.trading.AccountOperationRecoveryTest" time="0.002"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

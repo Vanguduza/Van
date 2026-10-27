@@ -1,15 +1,13 @@
 """Cash-equity bounds calculated from native margin observations, never funds."""
-from decimal import Decimal, localcontext
+from vati.core.decimal_context import native_financial_arithmetic
+from vati.risk.arithmetic import fraction, decimal
 
 
+@native_financial_arithmetic
 def cash_margin_bounds(equity, used, free, level):
     if used is None:
         return free,level
-    with localcontext() as context:
-        context.prec=512
-        free=min(free,equity-used) if free is not None else None
+    free=decimal(min(fraction(free),fraction(equity)-fraction(used))) if free is not None else None
     if used>0 and level is not None:
-        with localcontext() as context:
-            context.prec=80
-            level=min(level,equity/used*Decimal('100'))
+        level=decimal(min(fraction(level),fraction(equity)/fraction(used)*100))
     return free,level

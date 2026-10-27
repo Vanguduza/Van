@@ -1,0 +1,21 @@
+.......................F                                                 [100%]
+=================================== FAILURES ===================================
+____ test_cost_permission_compares_original_cost_beyond_reporting_precision ____
+
+eurusd = SymbolContract(symbol='EURUSD', venue='mt5', base_currency='EUR', quote_currency='USD', account_currency='USD', contra...=Decimal('0'), max_adv_participation=Decimal('0.10'), liquidity_haircut=Decimal('0'), round_trip_cost_pct=Decimal('0'))
+mandate = TradingMandate(mandate_id='mandate-fx-primary', version='1.0.0', account_alias='fx_primary', venue='mt5', mode=<Author...se)), strategy_risk_budgets={}, trading_temperament=None, strategy_temperaments={}, temperament_owner_signature_ref='')
+
+    def test_cost_permission_compares_original_cost_beyond_reporting_precision(eurusd, mandate):
+        cost = Decimal('0.001' + '0' * 100 + '1')
+        request = intent(expected_gross_move_pct=Decimal('0.002'))
+        assert Fraction(request.expected_gross_move_pct) < Fraction(cost) * 2
+        result = RiskAuthority(mandate).evaluate_safe(request, snapshot(replace(eurusd, round_trip_cost_pct=cost)))
+>       assert result.decision is Decision.REJECTED
+E       AssertionError: assert <Decision.APPROVED: 'APPROVED'> is <Decision.REJECTED: 'REJECTED'>
+E        +  where <Decision.APPROVED: 'APPROVED'> = RiskDecision(trade_intent_id='ti-1', decision=<Decision.APPROVED: 'APPROVED'>, reason_code='OK', reason_detail='', app...7b8eb11f1', mandate_hash='bfa20e705038a3d837e47f9e20f4ccd70f36c16b15b3f3488dd2a8b38e948de6', approval_schema_version=2).decision
+E        +  and   <Decision.REJECTED: 'REJECTED'> = Decision.REJECTED
+
+trading/tests/test_risk_arithmetic_context.py:227: AssertionError
+=========================== short test summary info ============================
+FAILED trading/tests/test_risk_arithmetic_context.py::test_cost_permission_compares_original_cost_beyond_reporting_precision
+1 failed, 23 passed in 1.04s

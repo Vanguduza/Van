@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="7" skipped="0" tests="8" time="0.412" timestamp="2026-10-27T05:31:52.235568+00:00" hostname="2c5a245e39f1"><testcase classname="trading.tests.test_risk_arithmetic_context" name="test_portfolio_loss_and_leg_reports_do_not_inherit_caller_rounding[ROUND_DOWN]" time="0.162"><failure message="AssertionError: assert Decimal('9E+3') == Decimal('9999')&#10; +  where Decimal('9E+3') = position_risk(OpenPosition(symbol='GBPUSD', direction=&lt;Direction.LONG: 'LONG'&gt;, lots=Decimal('1'), stop_distance=Decimal('1'), value...ue, loss_model=&lt;LossModel.STOP_DISTANCE: 'STOP_DISTANCE'&gt;, stake=Decimal('0'), liquidity_haircut_per_unit=Decimal('0')))&#10; +  and   Decimal('9999') = Decimal('9999')">rounding = 'ROUND_DOWN'
+
+    @pytest.mark.parametrize('rounding', [ROUND_DOWN, ROUND_UP])
+    def test_portfolio_loss_and_leg_reports_do_not_inherit_caller_rounding(rounding):
+        position = OpenPosition('GBPUSD', Direction.LONG, Decimal('1'), Decimal('1'),
+                                Decimal('9999'), 'GBP', 'USD', has_broker_side_stop=True)
+        with localcontext() as context:
+            context.prec = 1; context.rounding = rounding
+&gt;           assert position_risk(position) == Decimal('9999')
+E           AssertionError: assert Decimal('9E+3') == Decimal('9999')
+E            +  where Decimal('9E+3') = position_risk(OpenPosition(symbol='GBPUSD', direction=&lt;Direction.LONG: 'LONG'&gt;, lots=Decimal('1'), stop_distance=Decimal('1'), value...ue, loss_model=&lt;LossModel.STOP_DISTANCE: 'STOP_DISTANCE'&gt;, stake=Decimal('0'), liquidity_haircut_per_unit=Decimal('0')))
+E            +  and   Decimal('9999') = Decimal('9999')
+
+trading/tests/test_risk_arithmetic_context.py:21: AssertionError</failure></testcase><testcase classname="trading.tests.test_risk_arithmetic_context" name="test_portfolio_loss_and_leg_reports_do_not_inherit_caller_rounding[ROUND_UP]" time="0.001"><failure message="AssertionError: assert Decimal('1E+4') == Decimal('9999')&#10; +  where Decimal('1E+4') = position_risk(OpenPosition(symbol='GBPUSD', direction=&lt;Direction.LONG: 'LONG'&gt;, lots=Decimal('1'), stop_distance=Decimal('1'), value...ue, loss_model=&lt;LossModel.STOP_DISTANCE: 'STOP_DISTANCE'&gt;, stake=Decimal('0'), liquidity_haircut_per_unit=Decimal('0')))&#10; +  and   Decimal('9999') = Decimal('9999')">rounding = 'ROUND_UP'
+
+    @pytest.mark.parametrize('rounding', [ROUND_DOWN, ROUND_UP])
+    def test_portfolio_loss_and_leg_reports_do_not_inherit_caller_rounding(rounding):
+        position = OpenPosition('GBPUSD', Direction.LONG, Decimal('1'), Decimal('1'),
+                                Decimal('9999'), 'GBP', 'USD', has_broker_side_stop=True)
+        with localcontext() as context:
+            context.prec = 1; context.rounding = rounding
+&gt;           assert position_risk(position) == Decimal('9999')
+E           AssertionError: assert Decimal('1E+4') == Decimal('9999')
+E            +  where Decimal('1E+4') = position_risk(OpenPosition(symbol='GBPUSD', direction=&lt;Direction.LONG: 'LONG'&gt;, lots=Decimal('1'), stop_distance=Decimal('1'), value...ue, loss_model=&lt;LossModel.STOP_DISTANCE: 'STOP_DISTANCE'&gt;, stake=Decimal('0'), liquidity_haircut_per_unit=Decimal('0')))
+E            +  and   Decimal('9999') = Decimal('9999')
+
+trading/tests/test_risk_arithmetic_context.py:21: AssertionError</failure></testcase><testcase classname="trading.tests.test_risk_arithmetic_context" name="test_native_sizing_keeps_exact_budget_and_venue_round_down[ROUND_DOWN]" time="0.002"><failure message="AssertionError: approved native quantity exceeds its original exact risk budget&#10;assert Fraction(44, 1) &lt;= Fraction(40, 1)&#10; +  where Fraction(40, 1) = Fraction(40)">eurusd = SymbolContract(symbol='EURUSD', venue='mt5', base_currency='EUR', quote_currency='USD', account_currency='USD', contra...=Decimal('0'), max_adv_participation=Decimal('0.10'), liquidity_haircut=Decimal('0'), round_trip_cost_pct=Decimal('0'))
+rounding = 'ROUND_DOWN'
+
+    @pytest.mark.parametrize('rounding', [ROUND_DOWN, ROUND_UP])
+    def test_native_sizing_keeps_exact_budget_and_venue_round_down(eurusd, rounding):
+        with localcontext() as context:
+            context.prec = 1; context.rounding = rounding
+            sized = size_stop_contract(equity=Decimal('10000'), allowed_risk_pct=Decimal('0.004'),
+                entry=Decimal('1.10010'), stop=Decimal('1.09790'), direction=Direction.LONG,
+                contract=eurusd, multipliers=Multipliers())
+            actual_loss = Fraction(sized.size) * (Fraction(Decimal('1.10010')) - Fraction(Decimal('1.09790'))) * Fraction(eurusd.tick_value) / Fraction(eurusd.tick_size)
+&gt;           assert actual_loss &lt;= Fraction(40), 'approved native quantity exceeds its original exact risk budget'
+E           AssertionError: approved native quantity exceeds its original exact risk budget
+E           assert Fraction(44, 1) &lt;= Fraction(40, 1)
+E            +  where Fraction(40, 1) = Fraction(40)
+
+trading/tests/test_risk_arithmetic_context.py:36: AssertionError</failure></testcase><testcase classname="trading.tests.test_risk_arithmetic_context" name="test_native_sizing_keeps_exact_budget_and_venue_round_down[ROUND_UP]" time="0.001"><failure message="vati.risk.sizing.SizingRejected: RISK_EXCEEDS_ALLOWED: 6E+1 &gt; 4E+1">eurusd = SymbolContract(symbol='EURUSD', venue='mt5', base_currency='EUR', quote_currency='USD', account_currency='USD', contra...=Decimal('0'), max_adv_participation=Decimal('0.10'), liquidity_haircut=Decimal('0'), round_trip_cost_pct=Decimal('0'))
+rounding = 'ROUND_UP'
+
+    @pytest.mark.parametrize('rounding', [ROUND_DOWN, ROUND_UP])
+    def test_native_sizing_keeps_exact_budget_and_venue_round_down(eurusd, rounding):
+        with localcontext() as context:
+            context.prec = 1; context.rounding = rounding
+&gt;           sized = size_stop_contract(equity=Decimal('10000'), allowed_risk_pct=Decimal('0.004'),
+                entry=Decimal('1.10010'), stop=Decimal('1.09790'), direction=Direction.LONG,
+                contract=eurusd, multipliers=Multipliers())
+
+trading/tests/test_risk_arithmetic_context.py:32: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+equity = Decimal('10000'), allowed_risk_pct = Decimal('0.004')
+entry = Decimal('1.10010'), stop = Decimal('1.09790')
+direction = &lt;Direction.LONG: 'LONG'&gt;
+contract = SymbolContract(symbol='EURUSD', venue='mt5', base_currency='EUR', quote_currency='USD', account_currency='USD', contra...=Decimal('0'), max_adv_participation=Decimal('0.10'), liquidity_haircut=Decimal('0'), round_trip_cost_pct=Decimal('0'))
+multipliers = Multipliers(regime=Decimal('1'), confidence=Decimal('1'), volatility=Decimal('1'), liquidity=Decimal('1'), event_risk=Decimal('1'), correlation=Decimal('1'), drawdown=Decimal('1'))
+
+    def size_stop_contract(
+        *,
+        equity: Decimal,
+        allowed_risk_pct: Decimal,
+        entry: Decimal,
+        stop: Decimal,
+        direction: Direction,
+        contract: SymbolContract,
+        multipliers: Multipliers,
+    ) -&gt; SizingResult:
+        """Size a stop-protected position. Raises SizingRejected on any fail-closed path."""
+        if contract.loss_model is not LossModel.STOP_DISTANCE:
+            raise SizingRejected("LOSS_MODEL_MISMATCH", "contract is not stop-distance protected")
+        if equity &lt;= ZERO:
+            raise SizingRejected("EQUITY_NON_POSITIVE", f"equity={equity}")
+        if allowed_risk_pct &lt;= ZERO:
+            raise SizingRejected("RISK_NON_POSITIVE", f"allowed_risk_pct={allowed_risk_pct}")
+        if direction is Direction.LONG and not stop &lt; entry:
+            raise SizingRejected("STOP_WRONG_SIDE", "LONG stop must be below entry")
+        if direction is Direction.SHORT and not stop &gt; entry:
+            raise SizingRejected("STOP_WRONG_SIDE", "SHORT stop must be above entry")
+    
+        stop_distance = abs(entry - stop)
+        if stop_distance &lt; contract.min_stop_distance:
+            raise SizingRejected(
+                "STOP_TOO_TIGHT",
+                f"stop distance {stop_distance} &lt; venue minimum {contract.min_stop_distance}",
+            )
+    
+        vppu = contract.value_per_price_unit_per_lot
+        if vppu &lt;= ZERO:
+            raise SizingRejected("VENUE_VALUE_INVALID", "value per price unit per lot must be &gt; 0")
+    
+        risk_capital = equity * allowed_risk_pct
+        raw_size = risk_capital / (stop_distance * vppu)
+        product = multipliers.product()
+        adjusted = raw_size * product
+        rounded = _round_down(adjusted, contract.volume_step)
+    
+        if rounded &gt; contract.volume_max:
+            rounded = _round_down(contract.volume_max, contract.volume_step)
+        if rounded &lt; contract.volume_min or rounded &lt;= ZERO:
+            raise SizingRejected(
+                "SIZE_BELOW_VENUE_MIN",
+                f"rounded size {rounded} &lt; volume_min {contract.volume_min}; NO_TRADE rather than round up",
+            )
+    
+        risk_amount = rounded * stop_distance * vppu
+        risk_pct = risk_amount / equity
+        if risk_amount &gt; risk_capital:
+            # Cannot happen with round-down, but the check is the contract, not the arithmetic.
+&gt;           raise SizingRejected("RISK_EXCEEDS_ALLOWED", f"{risk_amount} &gt; {risk_capital}")
+E           vati.risk.sizing.SizingRejected: RISK_EXCEEDS_ALLOWED: 6E+1 &gt; 4E+1
+
+trading/vati/risk/sizing.py:143: SizingRejected</failure></testcase><testcase classname="trading.tests.test_risk_arithmetic_context" name="test_bounded_multiplier_product_preserves_original_joint_parameters[ROUND_DOWN]" time="0.002"><failure message="AssertionError: assert Decimal('0.8') == Decimal('0.81')&#10; +  where Decimal('0.8') = product()&#10; +    where product = Multipliers(regime=Decimal('0.9'), confidence=Decimal('0.9'), volatility=Decimal('1'), liquidity=Decimal('1'), event_risk=Decimal('1'), correlation=Decimal('1'), drawdown=Decimal('1')).product&#10; +      where Multipliers(regime=Decimal('0.9'), confidence=Decimal('0.9'), volatility=Decimal('1'), liquidity=Decimal('1'), event_risk=Decimal('1'), correlation=Decimal('1'), drawdown=Decimal('1')) = Multipliers(regime=Decimal('0.9'), confidence=Decimal('0.9'))&#10; +        where Decimal('0.9') = Decimal('0.9')&#10; +        and   Decimal('0.9') = Decimal('0.9')&#10; +  and   Decimal('0.81') = Decimal('0.81')">rounding = 'ROUND_DOWN'
+
+    @pytest.mark.parametrize('rounding', [ROUND_DOWN, ROUND_UP])
+    def test_bounded_multiplier_product_preserves_original_joint_parameters(rounding):
+        with localcontext() as context:
+            context.prec = 1; context.rounding = rounding
+&gt;           assert Multipliers(regime=Decimal('0.9'), confidence=Decimal('0.9')).product() == Decimal('0.81')
+E           AssertionError: assert Decimal('0.8') == Decimal('0.81')
+E            +  where Decimal('0.8') = product()
+E            +    where product = Multipliers(regime=Decimal('0.9'), confidence=Decimal('0.9'), volatility=Decimal('1'), liquidity=Decimal('1'), event_risk=Decimal('1'), correlation=Decimal('1'), drawdown=Decimal('1')).product
+E            +      where Multipliers(regime=Decimal('0.9'), confidence=Decimal('0.9'), volatility=Decimal('1'), liquidity=Decimal('1'), event_risk=Decimal('1'), correlation=Decimal('1'), drawdown=Decimal('1')) = Multipliers(regime=Decimal('0.9'), confidence=Decimal('0.9'))
+E            +        where Decimal('0.9') = Decimal('0.9')
+E            +        and   Decimal('0.9') = Decimal('0.9')
+E            +  and   Decimal('0.81') = Decimal('0.81')
+
+trading/tests/test_risk_arithmetic_context.py:46: AssertionError</failure></testcase><testcase classname="trading.tests.test_risk_arithmetic_context" name="test_bounded_multiplier_product_preserves_original_joint_parameters[ROUND_UP]" time="0.002"><failure message="AssertionError: assert Decimal('0.9') == Decimal('0.81')&#10; +  where Decimal('0.9') = product()&#10; +    where product = Multipliers(regime=Decimal('0.9'), confidence=Decimal('0.9'), volatility=Decimal('1'), liquidity=Decimal('1'), event_risk=Decimal('1'), correlation=Decimal('1'), drawdown=Decimal('1')).product&#10; +      where Multipliers(regime=Decimal('0.9'), confidence=Decimal('0.9'), volatility=Decimal('1'), liquidity=Decimal('1'), event_risk=Decimal('1'), correlation=Decimal('1'), drawdown=Decimal('1')) = Multipliers(regime=Decimal('0.9'), confidence=Decimal('0.9'))&#10; +        where Decimal('0.9') = Decimal('0.9')&#10; +        and   Decimal('0.9') = Decimal('0.9')&#10; +  and   Decimal('0.81') = Decimal('0.81')">rounding = 'ROUND_UP'
+
+    @pytest.mark.parametrize('rounding', [ROUND_DOWN, ROUND_UP])
+    def test_bounded_multiplier_product_preserves_original_joint_parameters(rounding):
+        with localcontext() as context:
+            context.prec = 1; context.rounding = rounding
+&gt;           assert Multipliers(regime=Decimal('0.9'), confidence=Decimal('0.9')).product() == Decimal('0.81')
+E           AssertionError: assert Decimal('0.9') == Decimal('0.81')
+E            +  where Decimal('0.9') = product()
+E            +    where product = Multipliers(regime=Decimal('0.9'), confidence=Decimal('0.9'), volatility=Decimal('1'), liquidity=Decimal('1'), event_risk=Decimal('1'), correlation=Decimal('1'), drawdown=Decimal('1')).product
+E            +      where Multipliers(regime=Decimal('0.9'), confidence=Decimal('0.9'), volatility=Decimal('1'), liquidity=Decimal('1'), event_risk=Decimal('1'), correlation=Decimal('1'), drawdown=Decimal('1')) = Multipliers(regime=Decimal('0.9'), confidence=Decimal('0.9'))
+E            +        where Decimal('0.9') = Decimal('0.9')
+E            +        and   Decimal('0.9') = Decimal('0.9')
+E            +  and   Decimal('0.81') = Decimal('0.81')
+
+trading/tests/test_risk_arithmetic_context.py:46: AssertionError</failure></testcase><testcase classname="trading.tests.test_risk_arithmetic_context" name="test_real_authority_cannot_admit_over_heat_by_lowering_callers_precision" time="0.027"><failure message="AssertionError: assert &lt;Decision.APPROVED: 'APPROVED'&gt; is &lt;Decision.REJECTED: 'REJECTED'&gt;&#10; +  where &lt;Decision.APPROVED: 'APPROVED'&gt; = RiskDecision(trade_intent_id='ti-1', decision=&lt;Decision.APPROVED: 'APPROVED'&gt;, reason_code='OK', reason_detail='', app...e7eb6c80c', mandate_hash='f447b95f4c106d839f54281fa1e1d666419bae42a1a05d1665ee52aeed8295dd', approval_schema_version=2).decision&#10; +  and   &lt;Decision.REJECTED: 'REJECTED'&gt; = Decision.REJECTED">eurusd = SymbolContract(symbol='EURUSD', venue='mt5', base_currency='EUR', quote_currency='USD', account_currency='USD', contra...=Decimal('0'), max_adv_participation=Decimal('0.10'), liquidity_haircut=Decimal('0'), round_trip_cost_pct=Decimal('0'))
+mandate = TradingMandate(mandate_id='mandate-fx-primary', version='1.0.0', account_alias='fx_primary', venue='mt5', mode=&lt;Author...se)), strategy_risk_budgets={}, trading_temperament=None, strategy_temperaments={}, temperament_owner_signature_ref='')
+
+    def test_real_authority_cannot_admit_over_heat_by_lowering_callers_precision(eurusd, mandate):
+        existing = OpenPosition('GBPUSD', Direction.LONG, Decimal('1'), Decimal('0.001499'),
+                                Decimal('100000'), 'GBP', 'USD', has_broker_side_stop=True)
+        facts = snapshot(eurusd, open_positions=(existing,))
+        request = intent()
+        with localcontext(native_decimal_context()):
+            reference = RiskAuthority(mandate).evaluate_safe(request, facts)
+        assert reference.decision is Decision.REJECTED and reference.reason_code == 'PORTFOLIO_HEAT'
+        with localcontext() as context:
+            context.prec = 1; context.rounding = ROUND_DOWN
+            actual = RiskAuthority(mandate).evaluate_safe(request, facts)
+&gt;           assert actual.decision is Decision.REJECTED
+E           AssertionError: assert &lt;Decision.APPROVED: 'APPROVED'&gt; is &lt;Decision.REJECTED: 'REJECTED'&gt;
+E            +  where &lt;Decision.APPROVED: 'APPROVED'&gt; = RiskDecision(trade_intent_id='ti-1', decision=&lt;Decision.APPROVED: 'APPROVED'&gt;, reason_code='OK', reason_detail='', app...e7eb6c80c', mandate_hash='f447b95f4c106d839f54281fa1e1d666419bae42a1a05d1665ee52aeed8295dd', approval_schema_version=2).decision
+E            +  and   &lt;Decision.REJECTED: 'REJECTED'&gt; = Decision.REJECTED
+
+trading/tests/test_risk_arithmetic_context.py:60: AssertionError</failure></testcase><testcase classname="trading.tests.test_risk_arithmetic_context" name="test_normal_context_positive_control_still_produces_bound_native_approval" time="0.005" /></testsuite></testsuites>

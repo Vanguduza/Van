@@ -98,7 +98,10 @@ class SymbolContract:
 
     @property
     def value_per_price_unit_per_lot(self) -> Decimal:
-        return self.tick_value / self.tick_size
+        from decimal import localcontext
+        from vati.core.decimal_context import native_decimal_context
+        with localcontext(native_decimal_context()):
+            return self.tick_value / self.tick_size
 
     def allows(self, direction: Direction) -> bool:
         if self.trade_mode == "FULL":

@@ -28,10 +28,12 @@ from vati.risk.contracts import (
 from vati.risk.conformal import ConformalAdmissionGate, ConformalAdmissionRefused
 from vati.risk.governor import drawdown_verdict
 from vati.risk.lockouts import at_or_above
-from vati.risk.heat import currency_leg_exposure, open_stop_risk
+from vati.risk.heat import currency_leg_exposure, open_stop_risk, exact_open_stop_risk, exact_currency_leg_exposure
+from vati.risk.arithmetic import fraction, decimal, exact_loss_amount
 from vati.risk.serde import intent_binding_hash, mandate_binding_hash, RISK_APPROVAL_SCHEMA_VERSION
 from vati.risk.mandate import AuthorizationMode, PlatformCeilings, TradingMandate
 from vati.risk.sizing import Multipliers, SizingRejected, size_illiquid_equity, size_stake_contract, size_stop_contract
+from vati.core.decimal_context import native_financial_arithmetic
 
 ZERO = Decimal("0")
 
@@ -185,6 +187,7 @@ class RiskAuthority:
             return self._reject(intent, "0" * 64, Decimal("1"), "AUTHORITY_FAULT", f"{type(exc).__name__}: {exc}"[:200])
 
     # ---------------------------------------------------------------- evaluate
+    @native_financial_arithmetic
     def evaluate(self, intent: TradeIntent, snapshot: RiskSnapshot) -> RiskDecision:
         m = self.mandate
         snap_hash = _canonical_hash(snapshot)
@@ -311,15 +314,15 @@ class RiskAuthority:
             # P1-TRADE-RISK-005: a cooldown or an owner-reset suspension, not a permanent lock.
             return rej("CONSECUTIVE_LOSSES", snapshot.loss_streak_lock)
         if snapshot.day_start_equity > ZERO:
-            day_loss = (snapshot.day_start_equity - snapshot.equity) / snapshot.day_start_equity
+            day_loss = (fraction(snapshot.day_start_equity) - fraction(snapshot.equity)) / fraction(snapshot.day_start_equity)
             if day_loss >= m.max_daily_loss:
-                return rej("MAX_DAILY_LOSS", f"{day_loss}")
+                return rej("MAX_DAILY_LOSS", f"{decimal(day_loss)}")
         else:
             return rej("EQUITY_BASELINE_MISSING", "day_start_equity unknown")
         if snapshot.week_start_equity > ZERO:
-            week_dd = (snapshot.week_start_equity - snapshot.equity) / snapshot.week_start_equity
+            week_dd = (fraction(snapshot.week_start_equity) - fraction(snapshot.equity)) / fraction(snapshot.week_start_equity)
             if week_dd >= m.max_weekly_drawdown:
-                return rej("MAX_WEEKLY_DRAWDOWN", f"{week_dd}")
+                return rej("MAX_WEEKLY_DRAWDOWN", f"{decimal(week_dd)}")
         else:
             return rej("EQUITY_BASELINE_MISSING", "week_start_equity unknown")
         dd = drawdown_verdict(snapshot.peak_equity, snapshot.equity, m.drawdown_tiers)
@@ -358,7 +361,7 @@ class RiskAuthority:
             liquidity=liquidity,
             event_risk=intent.event_risk_multiplier,
             correlation=intent.correlation_multiplier,
-            drawdown=dd.multiplier * min(ONE, max(ZERO, snapshot.loss_streak_multiplier)),
+            drawdown=decimal(fraction(dd.multiplier) * fraction(min(ONE, max(ZERO, snapshot.loss_streak_multiplier)))),
         )
         if dd.tier_index >= 0:
             constraints.append(f"DRAWDOWN_TIER_{dd.tier_index}")
@@ -367,7 +370,7 @@ class RiskAuthority:
 
         # 10b. Edge must clear round-trip cost (Rev 3: cost is the first edge)
         if intent.expected_gross_move_pct is not None and contract.round_trip_cost_pct > ZERO:
-            if intent.expected_gross_move_pct < contract.round_trip_cost_pct * Decimal("2"):
+            if fraction(intent.expected_gross_move_pct) < fraction(contract.round_trip_cost_pct) * 2:
                 return rej("EDGE_BELOW_COST", f"expected move {intent.expected_gross_move_pct} < 2 × round-trip cost {contract.round_trip_cost_pct}")
 
         # 10c. Optional conformal admission. Only strategies explicitly registered
@@ -418,28 +421,22 @@ class RiskAuthority:
             return rej(exc.code, exc.detail)
 
         # 12. Portfolio heat and currency legs *after* the trade
-        if contract.loss_model is LossModel.FULL_STAKE:
-            new_pos = OpenPosition(symbol, intent.direction, ZERO, ZERO, ZERO, contract.base_currency,
-                                   contract.quote_currency, intent.strategy_id, True, LossModel.FULL_STAKE, sized.size)
-        elif contract.loss_model is LossModel.ILLIQUID_EQUITY:
-            new_pos = OpenPosition(symbol, intent.direction, sized.size, intent.entry - intent.stop,  # type: ignore[operator]
-                                   Decimal("1"), contract.base_currency, contract.quote_currency, intent.strategy_id,
-                                   False, LossModel.ILLIQUID_EQUITY, ZERO, intent.entry * contract.liquidity_haircut)
-        else:
-            new_pos = OpenPosition(symbol, intent.direction, sized.size, abs(intent.entry - intent.stop),  # type: ignore[arg-type]
-                                   contract.value_per_price_unit_per_lot, contract.base_currency,
-                                   contract.quote_currency, intent.strategy_id, True)
-        after = snapshot.open_positions + (new_pos,)
-        heat_after = open_stop_risk(after, snapshot.equity)
+        new_loss = exact_loss_amount(sized.size, contract, entry=intent.entry, stop=intent.stop)
+        # Reporting ratios may repeat. Compare unrounded source arithmetic to
+        # the signed ceiling; even a tiny positive excess must still refuse.
+        heat_after = exact_open_stop_risk(snapshot.open_positions, snapshot.equity, additional_loss=new_loss)
         if heat_after > m.max_open_stop_risk:
-            return rej("PORTFOLIO_HEAT", f"heat after {heat_after} > {m.max_open_stop_risk}")
-        legs = currency_leg_exposure(after, snapshot.equity)
+            return rej("PORTFOLIO_HEAT", f"entry would exceed portfolio risk limit {m.max_open_stop_risk}; reported heat {decimal(heat_after)}")
+        legs = exact_currency_leg_exposure(snapshot.open_positions, snapshot.equity,
+            additional_loss=new_loss, base_currency=contract.base_currency,
+            quote_currency=contract.quote_currency, direction=intent.direction)
         hot = {c: v for c, v in legs.items() if v > m.max_currency_leg_exposure}
         if hot:
-            return rej("CURRENCY_LEG_EXPOSURE", ",".join(f"{c}={v}" for c, v in sorted(hot.items())))
+            return rej("CURRENCY_LEG_EXPOSURE", ",".join(f"{c}={decimal(v)}" for c, v in sorted(hot.items())))
 
         # 13. Final invariant re-check (the contract, restated)
-        if sized.risk_pct > m.max_risk_per_trade or sized.risk_pct > intent.requested_risk_pct:
+        exact_risk_pct = new_loss / fraction(snapshot.equity)
+        if exact_risk_pct > m.max_risk_per_trade or exact_risk_pct > intent.requested_risk_pct:
             return rej("RISK_INVARIANT", f"{sized.risk_pct}")
 
         decision = Decision.APPROVED
@@ -455,7 +452,7 @@ class RiskAuthority:
             approved_risk_pct=sized.risk_pct,
             requested_risk_pct=intent.requested_risk_pct,
             portfolio_heat_before=heat_before_out,
-            portfolio_heat_after=heat_after,
+            portfolio_heat_after=decimal(heat_after),
             constraints=tuple(constraints),
             risk_policy_version=self.ceilings.policy_version,
             mandate_id=m.mandate_id,

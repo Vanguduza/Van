@@ -1,0 +1,9 @@
+{
+  "scope": "Unit-level original position projection only; no native connectivity, provider verification, execution or end-to-end financial bypass claimed. Separate uncorrected producer work; current core-only risk packet does not fix it.",
+  "base_head": "068267e2901d0e1d62c29d101e83860916461bec",
+  "causal_sources": {
+    "trading/vati/app/account_service.py": "de5471b861e0e11a6cc56fc8f455d4d7e67aec09c01c00c4862120e008a79a3b",
+    "trading/vati/app/cycle.py": "d46b43e9c31aec81bd9edcd0f466f1e6465f710208c85ed95487b23eecdf3387"
+  },
+  "original_causal_bytes_match_head": true
+}

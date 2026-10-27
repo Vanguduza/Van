@@ -14,45 +14,69 @@ from decimal import Decimal
 from typing import Iterable
 
 from vati.risk.contracts import Direction, LossModel, OpenPosition
+from vati.risk.arithmetic import fraction, decimal
+from fractions import Fraction
 
 ZERO = Decimal("0")
 
 
-def position_risk(position: OpenPosition) -> Decimal:
+def exact_position_risk(position: OpenPosition):
     """Account-currency loss if the protective level of `position` is hit.
 
     A position without a broker-side stop has *undefined* risk; it is reported
     as infinite so every heat check fails closed until the stop is restored.
     """
     if position.loss_model is LossModel.FULL_STAKE:
-        return position.stake
+        return fraction(position.stake)
     if position.loss_model is LossModel.ILLIQUID_EQUITY:
         # No venue stop exists; the software stop plus the haircut IS the protection.
         if position.stop_distance <= ZERO or position.liquidity_haircut_per_unit < ZERO:
-            return Decimal("Infinity")
-        return position.lots * (position.stop_distance + position.liquidity_haircut_per_unit) * position.value_per_price_unit_per_lot
+            return None
+        return fraction(position.lots) * (fraction(position.stop_distance) + fraction(position.liquidity_haircut_per_unit)) * fraction(position.value_per_price_unit_per_lot)
     if not position.has_broker_side_stop:
-        return Decimal("Infinity")
-    return position.lots * position.stop_distance * position.value_per_price_unit_per_lot
+        return None
+    return fraction(position.lots) * fraction(position.stop_distance) * fraction(position.value_per_price_unit_per_lot)
+
+
+def position_risk(position: OpenPosition) -> Decimal:
+    value = exact_position_risk(position)
+    return Decimal('Infinity') if value is None else decimal(value)
+
+
+def exact_open_stop_risk(positions: Iterable[OpenPosition], equity: Decimal, *, additional_loss=Fraction(0)):
+    if equity <= ZERO:
+        return None
+    values = [exact_position_risk(p) for p in positions]
+    if any(value is None for value in values):
+        return None
+    return (sum(values, Fraction(0)) + Fraction(additional_loss)) / fraction(equity)
 
 
 def open_stop_risk(positions: Iterable[OpenPosition], equity: Decimal) -> Decimal:
+    value = exact_open_stop_risk(positions, equity)
+    return Decimal('Infinity') if value is None else decimal(value)
+
+
+def exact_currency_leg_exposure(positions: Iterable[OpenPosition], equity: Decimal, *,
+                               additional_loss=None, base_currency=None, quote_currency=None, direction=None):
+    """Net stop-risk per currency leg as a fraction of equity (absolute value)."""
     if equity <= ZERO:
-        return Decimal("Infinity")
-    total = sum((position_risk(p) for p in positions), ZERO)
-    return total / equity
+        return None
+    legs = defaultdict(Fraction)
+    for p in positions:
+        r = exact_position_risk(p)
+        if r is None:
+            return None
+        sign = 1 if p.direction is Direction.LONG else -1
+        legs[p.base_currency] += sign * r
+        legs[p.quote_currency] -= sign * r
+    if additional_loss is not None:
+        sign = 1 if direction is Direction.LONG else -1
+        legs[base_currency] += sign * Fraction(additional_loss)
+        legs[quote_currency] -= sign * Fraction(additional_loss)
+    return {ccy: abs(v) / fraction(equity) for ccy, v in legs.items()}
 
 
 def currency_leg_exposure(positions: Iterable[OpenPosition], equity: Decimal) -> dict[str, Decimal]:
-    """Net stop-risk per currency leg as a fraction of equity (absolute value)."""
-    if equity <= ZERO:
-        return {"*": Decimal("Infinity")}
-    legs: dict[str, Decimal] = defaultdict(lambda: ZERO)
-    for p in positions:
-        r = position_risk(p)
-        if not r.is_finite():
-            return {"*": Decimal("Infinity")}
-        sign = Decimal("1") if p.direction is Direction.LONG else Decimal("-1")
-        legs[p.base_currency] += sign * r
-        legs[p.quote_currency] -= sign * r
-    return {ccy: abs(v) / equity for ccy, v in legs.items()}
+    values = exact_currency_leg_exposure(positions, equity)
+    return {'*': Decimal('Infinity')} if values is None else {key: decimal(value) for key, value in values.items()}

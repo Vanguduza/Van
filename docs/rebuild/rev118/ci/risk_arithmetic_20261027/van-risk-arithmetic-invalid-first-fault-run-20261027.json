@@ -1,0 +1,9 @@
+{
+  "state": "INVALID_RUN_MISSING_CANONICAL_TEST_OWNER_REGISTRY",
+  "process_exit": 1,
+  "reported_10_of_13_is_not_semantic_proof": true,
+  "semantic_faults_qualified": 0,
+  "cause": "MandateError occurred before every fault boundary, including unmutated controls.",
+  "retained_log": "/workspace/van-risk-arithmetic-invariant-faults-20261027.log",
+  "next": "Run same13probes under unchanged canonical pytest owner-key fixture; reject any fuzz CRASHED output."
+}

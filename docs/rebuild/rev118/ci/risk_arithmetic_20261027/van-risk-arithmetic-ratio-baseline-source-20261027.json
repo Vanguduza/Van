@@ -1,0 +1,16 @@
+{
+  "base_head": "068267e2901d0e1d62c29d101e83860916461bec",
+  "source_snapshot": "UNCOMMITTED_FIRST_CONTEXT_AND_FRACTION_SIZING_REPAIR",
+  "passed_controls": 9,
+  "failed_exact_reporting_ratio_boundary": 1,
+  "qualification": "Intermediate native80 report must not serve as a permission comparison. No acceptance.",
+  "source_sha256": {
+    "trading/vati/core/decimal_context.py": "15dc1aae40fe48525b0b1e4e753c925f7ee206b1865b0b36962349cc74319d8c",
+    "trading/vati/risk/arithmetic.py": "e83e5802cba13785dcd4bbdc6d2023e131f2caed82c617bfa57dc9907c6d31cc",
+    "trading/vati/risk/heat.py": "09e0b2e0751b9c8a0fa27677671ae8af9492a40dd464b99b5c15498bf50f32e4",
+    "trading/vati/risk/sizing.py": "46341b76147cd4456c5505c4267c1a0faaf29e018c6f14b5f4ee18f49b4374f7",
+    "trading/vati/risk/authority.py": "7e44f7731aaee4542eb5f9fb3ec3d08725a36340f79b6b1f55d0b89f4dd23959",
+    "trading/vati/risk/contracts.py": "73c0a80c1a31d43190d153f05a7337ca149676cf88c033adf69e43c8e090eea8",
+    "trading/tests/test_risk_arithmetic_context.py": "e4dfba2127c5937041144ce8797520684e36b1824fbd65d1d8afe8ab0dafb96a"
+  }
+}
