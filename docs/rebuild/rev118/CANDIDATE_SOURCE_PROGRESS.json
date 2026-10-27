@@ -1,6 +1,6 @@
 {
   "schema": "van.rebuild.candidate-source-progress/1",
-  "updated_at_utc": "2026-10-27T00:30:25.738199+00:00",
+  "updated_at_utc": "2026-10-27T01:04:00.742348+00:00",
   "programme": "Rev1.18; original 131 unit IDs and dependencies retained",
   "authority": "auth-20261022-owner-autonomous-candidate-build",
   "meaning": "Candidate source progress is separate from admitted unit acceptance. Independent certificates, owner decisions, live effects and release gates remain unissued. No unit is declared complete by this record.",
@@ -111,6 +111,10 @@
         {
           "description": "Local account unlink binds exact resolved review/native funds/history/credential disposition; actual account lease row and submission guard exclude runtime, unresolved effects/exposure/stale facts retain profile. Shared/external credential references preserved, including late ownership drift. Typed gateway approval/native replay and existing Android confirmation wired; MT5 pending-orders and native cTrader/Deriv funding facts refuse missing observations. 2675 full trading/recovery pass0skip realPG(cleaned),91focused/29writer/3actualPG/78rebuild,16faults+controls caught/restored; Android222JVM/2APKs/lint0ErrorFatal. Source only; completed real-provider finality and all original gates remain.",
           "evidence": "backend/BE-004_ACCOUNT_RETIREMENT.md; receipts/ACCOUNT_RETIREMENT_SOURCE_20261023.json"
+        },
+        {
+          "description": "The existing A4 approval owner rechecks the original half-open expiry after its actual SQL writer wait and immediately before one-use consumption/atomic recovery receipt. It reconstructs the unchanged signedv2 challenge from exact request/record fields, refuses changed lineage/expiry/parameters, and uses a structured internal intent digest to remove legacy delimiter collisions. Unambiguous signed legacy challenges retain original encoding; ambiguous legacy text requests fresh proof. The existing device signature/enrolment/revocation/one-use controls remain. Malformed challenge lineage receives a private durable gateway denial. Four expiry regressions plus seven canonical-rebinding regressions reproduced; valid controls remain. Final514 actual SQLite/PostgreSQL/HTTP/privacy/authority cases pass0skip/audit0, all1160 pinned hashes match and owned fixture independently absent;27focused/124rebuild checks pass. The public backend CI job now has60minutes for its unchanged selected assertions/evidence/cleanup after exact2a cancellation at45minutes. No unit/native/production/economic/S24 acceptance.",
+          "evidence": "backend/BE-002_A4_EXPIRY_AND_CANONICAL_BINDING.md;receipts/A4_BINDING_SOURCE_20261027.json"
         }
       ]
     },

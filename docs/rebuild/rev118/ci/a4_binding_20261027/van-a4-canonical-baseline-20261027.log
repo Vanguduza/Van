@@ -1,0 +1,333 @@
+FFFFFFF                                                                  [100%]
+=================================== FAILURES ===================================
+____ test_corrupt_record_cannot_repurpose_original_signed_canonical[action] ____
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-618/test_corrupt_record_cannot_rep0')
+changed = 'action'
+
+    @pytest.mark.asyncio
+    @pytest.mark.parametrize('changed', ['action', 'turn', 'command', 'parameters', 'unbound', 'expiry', 'challenge'])
+    async def test_corrupt_record_cannot_repurpose_original_signed_canonical(tmp_path, changed):
+        original_parameters = {'account': 'Demo', 'scope': 'autonomous'}
+        service, challenge, identity, proof = await _approval(tmp_path, original_parameters)
+        key = service.PREFIX + challenge.challenge_id
+        row = await service.store.fetchone('SELECT value FROM runtime_meta WHERE key=?', (key,))
+        original = row['value']
+        record = json.loads(original)
+        requested = dict(identity)
+        parameters = dict(original_parameters)
+        now = 1001
+        if changed == 'action':
+            requested['action_id'] = record['action_id'] = 'trading.owner_halt'
+        elif changed == 'turn':
+            requested['turn_id'] = record['turn_id'] = 'another-turn'
+        elif changed == 'command':
+            requested['source_command_id'] = record['source_command_id'] = 'another-command'
+        elif changed == 'parameters':
+            parameters = {'account': 'Live', 'scope': 'all'}
+            record['parameters'] = parameters
+        elif changed == 'unbound':
+            parameters = None
+            record['parameters_bound'] = False
+            record['parameters'] = None
+        elif changed == 'expiry':
+            now = challenge.expires_at_unix + 1
+            record['expires_at_unix'] += 60
+        elif changed == 'challenge':
+            record['challenge_id'] = 'another-challenge'
+        record['intent_digest'] = service.intent_digest(
+            device_id=requested['device_id'], action_id=requested['action_id'], text=requested['text'],
+            project_id=requested['project_id'], parameters=parameters)
+        # Original canonical and genuine test-key signature remain byte-identical.
+        assert record['canonical'] == challenge.canonical
+        await service.store.execute('UPDATE runtime_meta SET value=? WHERE key=?', (json.dumps(record), key))
+>       with pytest.raises(OwnerApprovalError, match='approval_challenge_binding_corrupt'):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE OwnerApprovalError
+
+backend/tests/test_owner_approval_canonical_binding.py:46: Failed
+_____ test_corrupt_record_cannot_repurpose_original_signed_canonical[turn] _____
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-618/test_corrupt_record_cannot_rep1')
+changed = 'turn'
+
+    @pytest.mark.asyncio
+    @pytest.mark.parametrize('changed', ['action', 'turn', 'command', 'parameters', 'unbound', 'expiry', 'challenge'])
+    async def test_corrupt_record_cannot_repurpose_original_signed_canonical(tmp_path, changed):
+        original_parameters = {'account': 'Demo', 'scope': 'autonomous'}
+        service, challenge, identity, proof = await _approval(tmp_path, original_parameters)
+        key = service.PREFIX + challenge.challenge_id
+        row = await service.store.fetchone('SELECT value FROM runtime_meta WHERE key=?', (key,))
+        original = row['value']
+        record = json.loads(original)
+        requested = dict(identity)
+        parameters = dict(original_parameters)
+        now = 1001
+        if changed == 'action':
+            requested['action_id'] = record['action_id'] = 'trading.owner_halt'
+        elif changed == 'turn':
+            requested['turn_id'] = record['turn_id'] = 'another-turn'
+        elif changed == 'command':
+            requested['source_command_id'] = record['source_command_id'] = 'another-command'
+        elif changed == 'parameters':
+            parameters = {'account': 'Live', 'scope': 'all'}
+            record['parameters'] = parameters
+        elif changed == 'unbound':
+            parameters = None
+            record['parameters_bound'] = False
+            record['parameters'] = None
+        elif changed == 'expiry':
+            now = challenge.expires_at_unix + 1
+            record['expires_at_unix'] += 60
+        elif changed == 'challenge':
+            record['challenge_id'] = 'another-challenge'
+        record['intent_digest'] = service.intent_digest(
+            device_id=requested['device_id'], action_id=requested['action_id'], text=requested['text'],
+            project_id=requested['project_id'], parameters=parameters)
+        # Original canonical and genuine test-key signature remain byte-identical.
+        assert record['canonical'] == challenge.canonical
+        await service.store.execute('UPDATE runtime_meta SET value=? WHERE key=?', (json.dumps(record), key))
+>       with pytest.raises(OwnerApprovalError, match='approval_challenge_binding_corrupt'):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE OwnerApprovalError
+
+backend/tests/test_owner_approval_canonical_binding.py:46: Failed
+___ test_corrupt_record_cannot_repurpose_original_signed_canonical[command] ____
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-618/test_corrupt_record_cannot_rep2')
+changed = 'command'
+
+    @pytest.mark.asyncio
+    @pytest.mark.parametrize('changed', ['action', 'turn', 'command', 'parameters', 'unbound', 'expiry', 'challenge'])
+    async def test_corrupt_record_cannot_repurpose_original_signed_canonical(tmp_path, changed):
+        original_parameters = {'account': 'Demo', 'scope': 'autonomous'}
+        service, challenge, identity, proof = await _approval(tmp_path, original_parameters)
+        key = service.PREFIX + challenge.challenge_id
+        row = await service.store.fetchone('SELECT value FROM runtime_meta WHERE key=?', (key,))
+        original = row['value']
+        record = json.loads(original)
+        requested = dict(identity)
+        parameters = dict(original_parameters)
+        now = 1001
+        if changed == 'action':
+            requested['action_id'] = record['action_id'] = 'trading.owner_halt'
+        elif changed == 'turn':
+            requested['turn_id'] = record['turn_id'] = 'another-turn'
+        elif changed == 'command':
+            requested['source_command_id'] = record['source_command_id'] = 'another-command'
+        elif changed == 'parameters':
+            parameters = {'account': 'Live', 'scope': 'all'}
+            record['parameters'] = parameters
+        elif changed == 'unbound':
+            parameters = None
+            record['parameters_bound'] = False
+            record['parameters'] = None
+        elif changed == 'expiry':
+            now = challenge.expires_at_unix + 1
+            record['expires_at_unix'] += 60
+        elif changed == 'challenge':
+            record['challenge_id'] = 'another-challenge'
+        record['intent_digest'] = service.intent_digest(
+            device_id=requested['device_id'], action_id=requested['action_id'], text=requested['text'],
+            project_id=requested['project_id'], parameters=parameters)
+        # Original canonical and genuine test-key signature remain byte-identical.
+        assert record['canonical'] == challenge.canonical
+        await service.store.execute('UPDATE runtime_meta SET value=? WHERE key=?', (json.dumps(record), key))
+>       with pytest.raises(OwnerApprovalError, match='approval_challenge_binding_corrupt'):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE OwnerApprovalError
+
+backend/tests/test_owner_approval_canonical_binding.py:46: Failed
+__ test_corrupt_record_cannot_repurpose_original_signed_canonical[parameters] __
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-618/test_corrupt_record_cannot_rep3')
+changed = 'parameters'
+
+    @pytest.mark.asyncio
+    @pytest.mark.parametrize('changed', ['action', 'turn', 'command', 'parameters', 'unbound', 'expiry', 'challenge'])
+    async def test_corrupt_record_cannot_repurpose_original_signed_canonical(tmp_path, changed):
+        original_parameters = {'account': 'Demo', 'scope': 'autonomous'}
+        service, challenge, identity, proof = await _approval(tmp_path, original_parameters)
+        key = service.PREFIX + challenge.challenge_id
+        row = await service.store.fetchone('SELECT value FROM runtime_meta WHERE key=?', (key,))
+        original = row['value']
+        record = json.loads(original)
+        requested = dict(identity)
+        parameters = dict(original_parameters)
+        now = 1001
+        if changed == 'action':
+            requested['action_id'] = record['action_id'] = 'trading.owner_halt'
+        elif changed == 'turn':
+            requested['turn_id'] = record['turn_id'] = 'another-turn'
+        elif changed == 'command':
+            requested['source_command_id'] = record['source_command_id'] = 'another-command'
+        elif changed == 'parameters':
+            parameters = {'account': 'Live', 'scope': 'all'}
+            record['parameters'] = parameters
+        elif changed == 'unbound':
+            parameters = None
+            record['parameters_bound'] = False
+            record['parameters'] = None
+        elif changed == 'expiry':
+            now = challenge.expires_at_unix + 1
+            record['expires_at_unix'] += 60
+        elif changed == 'challenge':
+            record['challenge_id'] = 'another-challenge'
+        record['intent_digest'] = service.intent_digest(
+            device_id=requested['device_id'], action_id=requested['action_id'], text=requested['text'],
+            project_id=requested['project_id'], parameters=parameters)
+        # Original canonical and genuine test-key signature remain byte-identical.
+        assert record['canonical'] == challenge.canonical
+        await service.store.execute('UPDATE runtime_meta SET value=? WHERE key=?', (json.dumps(record), key))
+>       with pytest.raises(OwnerApprovalError, match='approval_challenge_binding_corrupt'):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE OwnerApprovalError
+
+backend/tests/test_owner_approval_canonical_binding.py:46: Failed
+___ test_corrupt_record_cannot_repurpose_original_signed_canonical[unbound] ____
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-618/test_corrupt_record_cannot_rep4')
+changed = 'unbound'
+
+    @pytest.mark.asyncio
+    @pytest.mark.parametrize('changed', ['action', 'turn', 'command', 'parameters', 'unbound', 'expiry', 'challenge'])
+    async def test_corrupt_record_cannot_repurpose_original_signed_canonical(tmp_path, changed):
+        original_parameters = {'account': 'Demo', 'scope': 'autonomous'}
+        service, challenge, identity, proof = await _approval(tmp_path, original_parameters)
+        key = service.PREFIX + challenge.challenge_id
+        row = await service.store.fetchone('SELECT value FROM runtime_meta WHERE key=?', (key,))
+        original = row['value']
+        record = json.loads(original)
+        requested = dict(identity)
+        parameters = dict(original_parameters)
+        now = 1001
+        if changed == 'action':
+            requested['action_id'] = record['action_id'] = 'trading.owner_halt'
+        elif changed == 'turn':
+            requested['turn_id'] = record['turn_id'] = 'another-turn'
+        elif changed == 'command':
+            requested['source_command_id'] = record['source_command_id'] = 'another-command'
+        elif changed == 'parameters':
+            parameters = {'account': 'Live', 'scope': 'all'}
+            record['parameters'] = parameters
+        elif changed == 'unbound':
+            parameters = None
+            record['parameters_bound'] = False
+            record['parameters'] = None
+        elif changed == 'expiry':
+            now = challenge.expires_at_unix + 1
+            record['expires_at_unix'] += 60
+        elif changed == 'challenge':
+            record['challenge_id'] = 'another-challenge'
+        record['intent_digest'] = service.intent_digest(
+            device_id=requested['device_id'], action_id=requested['action_id'], text=requested['text'],
+            project_id=requested['project_id'], parameters=parameters)
+        # Original canonical and genuine test-key signature remain byte-identical.
+        assert record['canonical'] == challenge.canonical
+        await service.store.execute('UPDATE runtime_meta SET value=? WHERE key=?', (json.dumps(record), key))
+>       with pytest.raises(OwnerApprovalError, match='approval_challenge_binding_corrupt'):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE OwnerApprovalError
+
+backend/tests/test_owner_approval_canonical_binding.py:46: Failed
+____ test_corrupt_record_cannot_repurpose_original_signed_canonical[expiry] ____
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-618/test_corrupt_record_cannot_rep5')
+changed = 'expiry'
+
+    @pytest.mark.asyncio
+    @pytest.mark.parametrize('changed', ['action', 'turn', 'command', 'parameters', 'unbound', 'expiry', 'challenge'])
+    async def test_corrupt_record_cannot_repurpose_original_signed_canonical(tmp_path, changed):
+        original_parameters = {'account': 'Demo', 'scope': 'autonomous'}
+        service, challenge, identity, proof = await _approval(tmp_path, original_parameters)
+        key = service.PREFIX + challenge.challenge_id
+        row = await service.store.fetchone('SELECT value FROM runtime_meta WHERE key=?', (key,))
+        original = row['value']
+        record = json.loads(original)
+        requested = dict(identity)
+        parameters = dict(original_parameters)
+        now = 1001
+        if changed == 'action':
+            requested['action_id'] = record['action_id'] = 'trading.owner_halt'
+        elif changed == 'turn':
+            requested['turn_id'] = record['turn_id'] = 'another-turn'
+        elif changed == 'command':
+            requested['source_command_id'] = record['source_command_id'] = 'another-command'
+        elif changed == 'parameters':
+            parameters = {'account': 'Live', 'scope': 'all'}
+            record['parameters'] = parameters
+        elif changed == 'unbound':
+            parameters = None
+            record['parameters_bound'] = False
+            record['parameters'] = None
+        elif changed == 'expiry':
+            now = challenge.expires_at_unix + 1
+            record['expires_at_unix'] += 60
+        elif changed == 'challenge':
+            record['challenge_id'] = 'another-challenge'
+        record['intent_digest'] = service.intent_digest(
+            device_id=requested['device_id'], action_id=requested['action_id'], text=requested['text'],
+            project_id=requested['project_id'], parameters=parameters)
+        # Original canonical and genuine test-key signature remain byte-identical.
+        assert record['canonical'] == challenge.canonical
+        await service.store.execute('UPDATE runtime_meta SET value=? WHERE key=?', (json.dumps(record), key))
+>       with pytest.raises(OwnerApprovalError, match='approval_challenge_binding_corrupt'):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE OwnerApprovalError
+
+backend/tests/test_owner_approval_canonical_binding.py:46: Failed
+__ test_corrupt_record_cannot_repurpose_original_signed_canonical[challenge] ___
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-618/test_corrupt_record_cannot_rep6')
+changed = 'challenge'
+
+    @pytest.mark.asyncio
+    @pytest.mark.parametrize('changed', ['action', 'turn', 'command', 'parameters', 'unbound', 'expiry', 'challenge'])
+    async def test_corrupt_record_cannot_repurpose_original_signed_canonical(tmp_path, changed):
+        original_parameters = {'account': 'Demo', 'scope': 'autonomous'}
+        service, challenge, identity, proof = await _approval(tmp_path, original_parameters)
+        key = service.PREFIX + challenge.challenge_id
+        row = await service.store.fetchone('SELECT value FROM runtime_meta WHERE key=?', (key,))
+        original = row['value']
+        record = json.loads(original)
+        requested = dict(identity)
+        parameters = dict(original_parameters)
+        now = 1001
+        if changed == 'action':
+            requested['action_id'] = record['action_id'] = 'trading.owner_halt'
+        elif changed == 'turn':
+            requested['turn_id'] = record['turn_id'] = 'another-turn'
+        elif changed == 'command':
+            requested['source_command_id'] = record['source_command_id'] = 'another-command'
+        elif changed == 'parameters':
+            parameters = {'account': 'Live', 'scope': 'all'}
+            record['parameters'] = parameters
+        elif changed == 'unbound':
+            parameters = None
+            record['parameters_bound'] = False
+            record['parameters'] = None
+        elif changed == 'expiry':
+            now = challenge.expires_at_unix + 1
+            record['expires_at_unix'] += 60
+        elif changed == 'challenge':
+            record['challenge_id'] = 'another-challenge'
+        record['intent_digest'] = service.intent_digest(
+            device_id=requested['device_id'], action_id=requested['action_id'], text=requested['text'],
+            project_id=requested['project_id'], parameters=parameters)
+        # Original canonical and genuine test-key signature remain byte-identical.
+        assert record['canonical'] == challenge.canonical
+        await service.store.execute('UPDATE runtime_meta SET value=? WHERE key=?', (json.dumps(record), key))
+>       with pytest.raises(OwnerApprovalError, match='approval_challenge_binding_corrupt'):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE OwnerApprovalError
+
+backend/tests/test_owner_approval_canonical_binding.py:46: Failed
+=========================== short test summary info ============================
+FAILED backend/tests/test_owner_approval_canonical_binding.py::test_corrupt_record_cannot_repurpose_original_signed_canonical[action]
+FAILED backend/tests/test_owner_approval_canonical_binding.py::test_corrupt_record_cannot_repurpose_original_signed_canonical[turn]
+FAILED backend/tests/test_owner_approval_canonical_binding.py::test_corrupt_record_cannot_repurpose_original_signed_canonical[command]
+FAILED backend/tests/test_owner_approval_canonical_binding.py::test_corrupt_record_cannot_repurpose_original_signed_canonical[parameters]
+FAILED backend/tests/test_owner_approval_canonical_binding.py::test_corrupt_record_cannot_repurpose_original_signed_canonical[unbound]
+FAILED backend/tests/test_owner_approval_canonical_binding.py::test_corrupt_record_cannot_repurpose_original_signed_canonical[expiry]
+FAILED backend/tests/test_owner_approval_canonical_binding.py::test_corrupt_record_cannot_repurpose_original_signed_canonical[challenge]
+7 failed in 6.46s

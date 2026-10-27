@@ -417,7 +417,9 @@ jobs:
   # requires pinned private DDS contracts and remains an independent required gate.
   backend-public-source:
     runs-on: ubuntu-24.04
-    timeout-minutes: 45
+    # Exact2a completed all source assertions and uploaded evidence at the
+    # previous45minute boundary, but GitHub cancelled its job during cleanup.
+    timeout-minutes: 60
     services:
       postgres:
         image: postgres:17.11-bookworm@sha256:858bb5e98eed02eb8cafbcdc007f9a65d1b613972028944a8ec2133ccaf80d27

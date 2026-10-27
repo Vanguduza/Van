@@ -40,6 +40,7 @@ class OwnerApprovalService:
     PREFIX = "owner_approval:"
     ALGORITHM = "ECDSA_P256_SHA256"
     DEFAULT_TTL_SECONDS = 60
+    INTENT_SCHEMA = "van-a4-intent-json-v2"
 
     def __init__(self, store: Store) -> None:
         self.store = store
@@ -47,6 +48,17 @@ class OwnerApprovalService:
     @staticmethod
     def intent_digest(*, device_id: str, action_id: str, text: str, project_id: str | None,
                       parameters: dict[str, Any] | None = None) -> str:
+        # The digest is opaque to the device, which signs the unchanged v2
+        # challenge. Structured encoding prevents text/project/parameter pipes
+        # from moving field boundaries inside this hash.
+        canonical = json.dumps([OwnerApprovalService.INTENT_SCHEMA, device_id, action_id,
+                                project_id, " ".join(text.split()), parameters],
+                               sort_keys=True, separators=(",", ":"), allow_nan=False)
+        return hashlib.sha256(canonical.encode("utf-8")).hexdigest()
+
+    @staticmethod
+    def _legacy_intent_digest(*, device_id: str, action_id: str, text: str, project_id: str | None,
+                              parameters: dict[str, Any] | None = None) -> str:
         canonical = "|".join(
             [
                 "van-a4-intent-v1",
@@ -61,6 +73,17 @@ class OwnerApprovalService:
             # The owner's biometric proof also binds the exact displayed values.
             canonical += "|" + json.dumps(parameters, sort_keys=True, separators=(",", ":"), allow_nan=False)
         return hashlib.sha256(canonical.encode("utf-8")).hexdigest()
+
+    @staticmethod
+    def _canonical_challenge(*, challenge_id, device_id, source_command_id, turn_id,
+                             action_id, intent_digest, expires_at_unix):
+        fields = [challenge_id, device_id, source_command_id, turn_id or "", action_id, intent_digest]
+        if ((turn_id is not None and not isinstance(turn_id, str))
+                or any(not isinstance(value, str) or "|" in value or any(ord(c)<32 or ord(c)==127 for c in value)
+                for value in fields) or any(not fields[i] for i in (0,1,2,4,5))
+                or type(expires_at_unix) is not int):
+            raise OwnerApprovalError("approval_challenge_binding_corrupt")
+        return "|".join(["van-a4-approval-v2", *fields, str(expires_at_unix)])
 
     async def issue(
         self,
@@ -86,18 +109,9 @@ class OwnerApprovalService:
             project_id=project_id,
             parameters=parameters,
         )
-        canonical = "|".join(
-            [
-                "van-a4-approval-v2",
-                challenge_id,
-                device_id,
-                source_command_id,
-                turn_id or "",
-                action_id,
-                digest,
-                str(expires),
-            ]
-        )
+        canonical = self._canonical_challenge(challenge_id=challenge_id, device_id=device_id,
+            source_command_id=source_command_id, turn_id=turn_id, action_id=action_id,
+            intent_digest=digest, expires_at_unix=expires)
         record = {
             "challenge_id": challenge_id,
             "device_id": device_id,
@@ -105,6 +119,7 @@ class OwnerApprovalService:
             "turn_id": turn_id,
             "action_id": action_id,
             "intent_digest": digest,
+            "intent_digest_schema": self.INTENT_SCHEMA,
             "parameters_bound": parameters is not None,
             "parameters": parameters,
             "canonical": canonical,
@@ -136,12 +151,14 @@ class OwnerApprovalService:
         now_unix: int | None = None,
         durable_receipt: dict[str, Any] | None = None,
     ) -> dict:
-        now = int(time.time()) if now_unix is None else now_unix
         if not challenge_id or not signature_b64:
             raise OwnerApprovalError("approval_proof_missing")
 
         async with self.store.connection() as db:
             await db.execute("BEGIN IMMEDIATE")
+            # The SQL writer may have waited behind another transaction. The
+            # original owner deadline must not be extended by that queue.
+            now = int(time.time()) if now_unix is None else now_unix
             cur = await db.execute(
                 "SELECT value FROM runtime_meta WHERE key = ?",
                 (self.PREFIX + challenge_id,),
@@ -177,7 +194,19 @@ class OwnerApprovalService:
                 record.get("parameters") != parameters):
                 await db.rollback()
                 raise OwnerApprovalError("approval_parameters_changed")
-            expected_digest = self.intent_digest(
+            schema = record.get("intent_digest_schema", "van-a4-intent-v1")
+            if (not isinstance(schema, str) or schema not in {self.INTENT_SCHEMA, "van-a4-intent-v1"}
+                    or type(record.get("parameters_bound", False)) is not bool):
+                await db.rollback()
+                raise OwnerApprovalError("approval_challenge_binding_corrupt")
+            if schema == "van-a4-intent-v1" and any("|" in value for value in
+                    (device_id, action_id, project_id or "", text)):
+                # Old short-lived challenges keep their original encoding only
+                # when it is unambiguous. Request a fresh proof for other text.
+                await db.rollback()
+                raise OwnerApprovalError("approval_challenge_binding_corrupt")
+            digest = self.intent_digest if schema == self.INTENT_SCHEMA else self._legacy_intent_digest
+            expected_digest = digest(
                 device_id=device_id,
                 action_id=action_id,
                 text=text,
@@ -190,6 +219,17 @@ class OwnerApprovalService:
             if record.get("intent_digest") != expected_digest:
                 await db.rollback()
                 raise OwnerApprovalError("approval_intent_mismatch")
+
+            try:
+                expected_canonical = self._canonical_challenge(challenge_id=challenge_id,
+                    device_id=device_id, source_command_id=record.get("source_command_id"), turn_id=turn_id,
+                    action_id=action_id, intent_digest=expected_digest,
+                    expires_at_unix=record.get("expires_at_unix"))
+                if (record.get("challenge_id") != challenge_id or record.get("canonical") != expected_canonical):
+                    raise OwnerApprovalError("approval_challenge_binding_corrupt")
+            except OwnerApprovalError:
+                await db.rollback()
+                raise
 
             device_cur = await db.execute(
                 "SELECT public_key_pem, revoked_at_unix FROM devices WHERE device_id = ?",
@@ -219,6 +259,15 @@ class OwnerApprovalService:
             except (ValueError, InvalidSignature) as exc:
                 await db.rollback()
                 raise OwnerApprovalError("approval_signature_invalid") from exc
+
+            # Reading the enrolled device and checking its proof can cross the
+            # same deadline too. Consume only within the original half-open
+            # window, including when a durable recovery receipt is requested.
+            now = int(time.time()) if now_unix is None else now_unix
+            if int(record.get("expires_at_unix", 0)) <= now:
+                await db.execute("DELETE FROM runtime_meta WHERE key = ?", (self.PREFIX + challenge_id,))
+                await db.commit()
+                raise OwnerApprovalError("approval_challenge_expired")
 
             deleted = await db.execute(
                 "DELETE FROM runtime_meta WHERE key = ?",

@@ -1,0 +1,67 @@
+{
+  "schema": "van.rebuild.a4-binding-source/1",
+  "base_head": "f00495cf996aaf9adb0a177db61c083640c2965e",
+  "updated_at_utc": "2026-10-27T01:04:00.742348+00:00",
+  "units": [
+    "BE-002",
+    "BE-007"
+  ],
+  "status": "SOURCE_TESTED_COMPONENT_NOT_UNIT_ACCEPTANCE",
+  "acceptance": "NOT_ISSUED",
+  "implementation": "The existing A4 approval owner rechecks the original half-open expiry after its actual SQL writer wait and immediately before one-use consumption/atomic recovery receipt. It reconstructs the unchanged signedv2 challenge from exact request/record fields, refuses changed lineage/expiry/parameters, and uses a structured internal intent digest to remove legacy delimiter collisions. Unambiguous signed legacy challenges retain original encoding; ambiguous legacy text requests fresh proof. The existing device signature/enrolment/revocation/one-use controls remain. Malformed challenge lineage receives a private durable gateway denial. Four expiry regressions plus seven canonical-rebinding regressions reproduced; valid controls remain. Final514 actual SQLite/PostgreSQL/HTTP/privacy/authority cases pass0skip/audit0, all1160 pinned hashes match and owned fixture independently absent;27focused/124rebuild checks pass. The public backend CI job now has60minutes for its unchanged selected assertions/evidence/cleanup after exact2a cancellation at45minutes. No unit/native/production/economic/S24 acceptance.",
+  "source_sha256": {
+    "backend/van_gateway/approval/service.py": "2fdcbc2d4614fe92b274303dcb0dd3e38fe5e9804530823b670a6855438f0eaa",
+    "backend/van_gateway/orchestrator.py": "4da1c20d817ecdbbb2e0f0166a17bac383cd85617faa38e15aabd49109f9b24a",
+    "backend/tests/test_owner_approval_expiry_boundaries.py": "43e49b33767c9c3df4c7cdef49df118b4845501a56e2396a083dd9abca1638b2",
+    "backend/tests/test_owner_approval_canonical_binding.py": "e4ab1a3403b690eef97823322d092be9aa03aacba40e4174c68924f8db3fa6ec",
+    ".github/workflows/van-ci.yml": "dac912c785c2993a2498f00f9073842efdb3646a46ae70faf0b9f95c24792535",
+    "tools/ci/github-actions-ci.yml": "dac912c785c2993a2498f00f9073842efdb3646a46ae70faf0b9f95c24792535"
+  },
+  "tests": {
+    "expiry_baseline": {
+      "failed": 4,
+      "passed": 1,
+      "source_matches_committed_f004": true
+    },
+    "canonical_baseline": {
+      "failed": 7,
+      "source": "expiry-only uncommitted repair; original canonical verifier logic unchanged"
+    },
+    "focused_expiry": 8,
+    "expiry_only_integration": 495,
+    "focused_binding_r1": 15,
+    "focused_binding_r2": 25,
+    "focused_final_SQL_HTTP": 27,
+    "intermediate_binding_integration": 512,
+    "final_actual_SQLite_Postgres_HTTP_privacy": 514,
+    "new_tests": 24,
+    "final_skips": 0,
+    "final_audit_violations": 0,
+    "pinned_hashes": 1160,
+    "owned_fixture_independently_absent": true,
+    "rebuild_workflow": 124,
+    "bad_initial_rebuild_selection": {
+      "exit": 4,
+      "tests_run": 0,
+      "status": "NOT_RUN_BAD_SELECTION_RETAINED"
+    },
+    "counts_overlap": true
+  },
+  "compatibility": "Existing van-a4-approval-v2 device envelope and biometric signature remain; internal structured digest is schema-labelled. Existing benign signed legacy challenges retain original v1 digest. Ambiguous legacy challenges refuse and need a fresh owner command. Already consumed recovery receipts are not rewritten. No new grant authority or payment dispatch is issued.",
+  "CI": "Only backend-public-source timeout increases45to60 in byte-identical live/template files. All jobs/triggers/gates/permissions/selections/assertions/artifacts remain. Exact2a job cancellation and two mandatory failures remain failed, never relabelled.",
+  "qualification": "Public fake test keys/SQL/source fixtures only. No production credential, certificate, signing, financial effect, deployment or S24 evidence. Funding drafts remain unapproved; provider rails, shared reservations, settlement, native privacy/cohort and independent programme remain required.",
+  "evidence": "ci/a4_binding_20261027",
+  "canonical_checks": {
+    "owner_frontend_drift": false,
+    "endpoints": 483,
+    "schemas": 376,
+    "original_feature_groups": 42,
+    "original_function_ids": 105,
+    "original_surfaces": 78,
+    "mutation_registry_cases": 374,
+    "mutation_registry_edits": 383,
+    "registry_check_execution": "NOT_RUN",
+    "consolidation_findings": [],
+    "canonical_baseline_source_equals_verified_expiry_WIP_archive": true
+  }
+}

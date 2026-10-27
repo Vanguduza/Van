@@ -527,15 +527,25 @@ class CommandOrchestrator:
                     return result
 
             if req.approval_proof is None:
-                challenge = await self.approvals.issue(
-                    device_id=req.device_id,
-                    source_command_id=req.command_id,
-                    turn_id=req.turn_id,
-                    action_id=resolution.action_id,
-                    text=req.text,
-                    project_id=req.project_id,
-                    parameters=resolution.parameters,
-                )
+                try:
+                    challenge = await self.approvals.issue(
+                        device_id=req.device_id,
+                        source_command_id=req.command_id,
+                        turn_id=req.turn_id,
+                        action_id=resolution.action_id,
+                        text=req.text,
+                        project_id=req.project_id,
+                        parameters=resolution.parameters,
+                    )
+                except OwnerApprovalError as exc:
+                    result = CommandResult(status="denied", command_id=req.command_id,
+                        idempotency_key=req.idempotency_key,
+                        message="Owner approval could not be bound to this command; submit a fresh command",
+                        resolved_action_id=resolution.action_id, effective_action_class=effective_action_class)
+                    await self.audit.record(result="denied", command_id=req.command_id, device_id=req.device_id,
+                        approval="not_issued", failure_reason=str(exc))
+                    await self.idempotency.complete(req.idempotency_key, result.model_dump())
+                    return result
                 result = CommandResult(
                     status="approval_required",
                     command_id=req.command_id,
