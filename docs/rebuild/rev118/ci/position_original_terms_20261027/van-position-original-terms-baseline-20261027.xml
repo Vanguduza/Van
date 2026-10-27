@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="6" skipped="0" tests="8" time="2.370" timestamp="2026-10-27T06:41:12.998399+00:00" hostname="2c5a245e39f1"><testcase classname="van-position-original-terms-baseline-20261027" name="test_original_position_projection_keeps_original_stop_distance[False-account]" time="0.215" /><testcase classname="van-position-original-terms-baseline-20261027" name="test_original_position_projection_keeps_original_stop_distance[False-cycle]" time="0.005" /><testcase classname="van-position-original-terms-baseline-20261027" name="test_original_position_projection_keeps_original_stop_distance[True-account]" time="0.006"><failure message="AssertionError: assert Fraction(1, 500) == Fraction(11, 5000)&#10; +  where Fraction(1, 500) = Fraction(Decimal('0.002'))&#10; +    where Decimal('0.002') = OpenPosition(symbol='EURUSD', direction=&lt;Direction.LONG: 'LONG'&gt;, lots=Decimal('1'), stop_distance=Decimal('0.002'), v...ue, loss_model=&lt;LossModel.STOP_DISTANCE: 'STOP_DISTANCE'&gt;, stake=Decimal('0'), liquidity_haircut_per_unit=Decimal('0')).stop_distance">eurusd = SymbolContract(symbol='EURUSD', venue='mt5', base_currency='EUR', quote_currency='USD', account_currency='USD', contra...=Decimal('0'), max_adv_participation=Decimal('0.10'), liquidity_haircut=Decimal('0'), round_trip_cost_pct=Decimal('0'))
+producer = 'account', hostile = True
+
+    @pytest.mark.parametrize('producer', ['account', 'cycle'])
+    @pytest.mark.parametrize('hostile', [False, True])
+    def test_original_position_projection_keeps_original_stop_distance(eurusd, producer, hostile):
+        position = SimpleNamespace(symbol='EURUSD', position_id='source-fixture-only',
+            direction=Direction.LONG, quantity=Decimal('1'), entry_price=Decimal('1.10010'),
+            stop_price=Decimal('1.09790'), loss_model=LossModel.STOP_DISTANCE)
+        fixture = SimpleNamespace(adapter=SimpleNamespace(positions=lambda: [position]),
+            protection=SimpleNamespace(rules={}), contracts={'EURUSD': eurusd},
+            cfg=SimpleNamespace(contract=eurusd), _entries={})
+        project = (AccountCoordinatorService._open_positions if producer == 'account'
+                   else DecisionCycle._open_positions)
+        original_distance = abs(Fraction(position.entry_price) - Fraction(position.stop_price))
+        with localcontext() as caller:
+            if hostile:
+                caller.prec = 1
+                caller.rounding = ROUND_DOWN
+            projected = project(fixture)
+            assert len(projected) == 1
+&gt;           assert Fraction(projected[0].stop_distance) == original_distance
+E           AssertionError: assert Fraction(1, 500) == Fraction(11, 5000)
+E            +  where Fraction(1, 500) = Fraction(Decimal('0.002'))
+E            +    where Decimal('0.002') = OpenPosition(symbol='EURUSD', direction=&lt;Direction.LONG: 'LONG'&gt;, lots=Decimal('1'), stop_distance=Decimal('0.002'), v...ue, loss_model=&lt;LossModel.STOP_DISTANCE: 'STOP_DISTANCE'&gt;, stake=Decimal('0'), liquidity_haircut_per_unit=Decimal('0')).stop_distance
+
+../../van-position-original-terms-baseline-20261027.py:31: AssertionError</failure></testcase><testcase classname="van-position-original-terms-baseline-20261027" name="test_original_position_projection_keeps_original_stop_distance[True-cycle]" time="0.004"><failure message="AssertionError: assert Fraction(1, 500) == Fraction(11, 5000)&#10; +  where Fraction(1, 500) = Fraction(Decimal('0.002'))&#10; +    where Decimal('0.002') = OpenPosition(symbol='EURUSD', direction=&lt;Direction.LONG: 'LONG'&gt;, lots=Decimal('1'), stop_distance=Decimal('0.002'), v...ue, loss_model=&lt;LossModel.STOP_DISTANCE: 'STOP_DISTANCE'&gt;, stake=Decimal('0'), liquidity_haircut_per_unit=Decimal('0')).stop_distance">eurusd = SymbolContract(symbol='EURUSD', venue='mt5', base_currency='EUR', quote_currency='USD', account_currency='USD', contra...=Decimal('0'), max_adv_participation=Decimal('0.10'), liquidity_haircut=Decimal('0'), round_trip_cost_pct=Decimal('0'))
+producer = 'cycle', hostile = True
+
+    @pytest.mark.parametrize('producer', ['account', 'cycle'])
+    @pytest.mark.parametrize('hostile', [False, True])
+    def test_original_position_projection_keeps_original_stop_distance(eurusd, producer, hostile):
+        position = SimpleNamespace(symbol='EURUSD', position_id='source-fixture-only',
+            direction=Direction.LONG, quantity=Decimal('1'), entry_price=Decimal('1.10010'),
+            stop_price=Decimal('1.09790'), loss_model=LossModel.STOP_DISTANCE)
+        fixture = SimpleNamespace(adapter=SimpleNamespace(positions=lambda: [position]),
+            protection=SimpleNamespace(rules={}), contracts={'EURUSD': eurusd},
+            cfg=SimpleNamespace(contract=eurusd), _entries={})
+        project = (AccountCoordinatorService._open_positions if producer == 'account'
+                   else DecisionCycle._open_positions)
+        original_distance = abs(Fraction(position.entry_price) - Fraction(position.stop_price))
+        with localcontext() as caller:
+            if hostile:
+                caller.prec = 1
+                caller.rounding = ROUND_DOWN
+            projected = project(fixture)
+            assert len(projected) == 1
+&gt;           assert Fraction(projected[0].stop_distance) == original_distance
+E           AssertionError: assert Fraction(1, 500) == Fraction(11, 5000)
+E            +  where Fraction(1, 500) = Fraction(Decimal('0.002'))
+E            +    where Decimal('0.002') = OpenPosition(symbol='EURUSD', direction=&lt;Direction.LONG: 'LONG'&gt;, lots=Decimal('1'), stop_distance=Decimal('0.002'), v...ue, loss_model=&lt;LossModel.STOP_DISTANCE: 'STOP_DISTANCE'&gt;, stake=Decimal('0'), liquidity_haircut_per_unit=Decimal('0')).stop_distance
+
+../../van-position-original-terms-baseline-20261027.py:31: AssertionError</failure></testcase><testcase classname="van-position-original-terms-baseline-20261027" name="test_existing_stop_loss_uses_original_tick_ratio[account]" time="0.002"><failure message="AssertionError: assert Decimal('39.9999999999999999999999999999999999999999999999999999999999999999999999999999996') == Decimal('40')&#10; +  where Decimal('39.9999999999999999999999999999999999999999999999999999999999999999999999999999996') = &lt;function position_risk at 0x7f9d676e8400&gt;(OpenPosition(symbol='EURUSD', direction=&lt;Direction.LONG: 'LONG'&gt;, lots=Decimal('40'), stop_distance=Decimal('3'), valu...ue, loss_model=&lt;LossModel.STOP_DISTANCE: 'STOP_DISTANCE'&gt;, stake=Decimal('0'), liquidity_haircut_per_unit=Decimal('0')))&#10; +  and   Decimal('40') = Decimal('40')">eurusd = SymbolContract(symbol='EURUSD', venue='mt5', base_currency='EUR', quote_currency='USD', account_currency='USD', contra...=Decimal('0'), max_adv_participation=Decimal('0.10'), liquidity_haircut=Decimal('0'), round_trip_cost_pct=Decimal('0'))
+producer = 'account'
+
+    @pytest.mark.parametrize('producer', ['account', 'cycle'])
+    def test_existing_stop_loss_uses_original_tick_ratio(eurusd, producer):
+        from dataclasses import replace
+        from vati.risk.heat import position_risk
+        contract = replace(eurusd, tick_size=Decimal('3'), tick_value=Decimal('1'))
+        position = SimpleNamespace(symbol='EURUSD', position_id='source-fixture-only',
+            direction=Direction.LONG, quantity=Decimal('40'), entry_price=Decimal('6'),
+            stop_price=Decimal('3'), loss_model=LossModel.STOP_DISTANCE)
+        fixture = SimpleNamespace(adapter=SimpleNamespace(positions=lambda: [position]),
+            protection=SimpleNamespace(rules={}), contracts={'EURUSD': contract},
+            cfg=SimpleNamespace(contract=contract), _entries={})
+        project = (AccountCoordinatorService._open_positions if producer == 'account'
+                   else DecisionCycle._open_positions)
+&gt;       assert position_risk(project(fixture)[0]) == Decimal('40')
+E       AssertionError: assert Decimal('39.9999999999999999999999999999999999999999999999999999999999999999999999999999996') == Decimal('40')
+E        +  where Decimal('39.9999999999999999999999999999999999999999999999999999999999999999999999999999996') = &lt;function position_risk at 0x7f9d676e8400&gt;(OpenPosition(symbol='EURUSD', direction=&lt;Direction.LONG: 'LONG'&gt;, lots=Decimal('40'), stop_distance=Decimal('3'), valu...ue, loss_model=&lt;LossModel.STOP_DISTANCE: 'STOP_DISTANCE'&gt;, stake=Decimal('0'), liquidity_haircut_per_unit=Decimal('0')))
+E        +  and   Decimal('40') = Decimal('40')
+
+../../van-position-original-terms-baseline-20261027.py:47: AssertionError</failure></testcase><testcase classname="van-position-original-terms-baseline-20261027" name="test_existing_stop_loss_uses_original_tick_ratio[cycle]" time="0.003"><failure message="AssertionError: assert Decimal('39.9999999999999999999999999999999999999999999999999999999999999999999999999999996') == Decimal('40')&#10; +  where Decimal('39.9999999999999999999999999999999999999999999999999999999999999999999999999999996') = &lt;function position_risk at 0x7f9d676e8400&gt;(OpenPosition(symbol='EURUSD', direction=&lt;Direction.LONG: 'LONG'&gt;, lots=Decimal('40'), stop_distance=Decimal('3'), valu...ue, loss_model=&lt;LossModel.STOP_DISTANCE: 'STOP_DISTANCE'&gt;, stake=Decimal('0'), liquidity_haircut_per_unit=Decimal('0')))&#10; +  and   Decimal('40') = Decimal('40')">eurusd = SymbolContract(symbol='EURUSD', venue='mt5', base_currency='EUR', quote_currency='USD', account_currency='USD', contra...=Decimal('0'), max_adv_participation=Decimal('0.10'), liquidity_haircut=Decimal('0'), round_trip_cost_pct=Decimal('0'))
+producer = 'cycle'
+
+    @pytest.mark.parametrize('producer', ['account', 'cycle'])
+    def test_existing_stop_loss_uses_original_tick_ratio(eurusd, producer):
+        from dataclasses import replace
+        from vati.risk.heat import position_risk
+        contract = replace(eurusd, tick_size=Decimal('3'), tick_value=Decimal('1'))
+        position = SimpleNamespace(symbol='EURUSD', position_id='source-fixture-only',
+            direction=Direction.LONG, quantity=Decimal('40'), entry_price=Decimal('6'),
+            stop_price=Decimal('3'), loss_model=LossModel.STOP_DISTANCE)
+        fixture = SimpleNamespace(adapter=SimpleNamespace(positions=lambda: [position]),
+            protection=SimpleNamespace(rules={}), contracts={'EURUSD': contract},
+            cfg=SimpleNamespace(contract=contract), _entries={})
+        project = (AccountCoordinatorService._open_positions if producer == 'account'
+                   else DecisionCycle._open_positions)
+&gt;       assert position_risk(project(fixture)[0]) == Decimal('40')
+E       AssertionError: assert Decimal('39.9999999999999999999999999999999999999999999999999999999999999999999999999999996') == Decimal('40')
+E        +  where Decimal('39.9999999999999999999999999999999999999999999999999999999999999999999999999999996') = &lt;function position_risk at 0x7f9d676e8400&gt;(OpenPosition(symbol='EURUSD', direction=&lt;Direction.LONG: 'LONG'&gt;, lots=Decimal('40'), stop_distance=Decimal('3'), valu...ue, loss_model=&lt;LossModel.STOP_DISTANCE: 'STOP_DISTANCE'&gt;, stake=Decimal('0'), liquidity_haircut_per_unit=Decimal('0')))
+E        +  and   Decimal('40') = Decimal('40')
+
+../../van-position-original-terms-baseline-20261027.py:47: AssertionError</failure></testcase><testcase classname="van-position-original-terms-baseline-20261027" name="test_original_deriv_portfolio_retains_builtin_stake_loss[account]" time="0.005"><failure message="AssertionError: assert &lt;LossModel.STOP_DISTANCE: 'STOP_DISTANCE'&gt; is &lt;LossModel.FULL_STAKE: 'FULL_STAKE'&gt;&#10; +  where &lt;LossModel.STOP_DISTANCE: 'STOP_DISTANCE'&gt; = OpenPosition(symbol='EURUSD', direction=&lt;Direction.LONG: 'LONG'&gt;, lots=Decimal('5'), stop_distance=Decimal('0'), value...se, loss_model=&lt;LossModel.STOP_DISTANCE: 'STOP_DISTANCE'&gt;, stake=Decimal('0'), liquidity_haircut_per_unit=Decimal('0')).loss_model&#10; +  and   &lt;LossModel.FULL_STAKE: 'FULL_STAKE'&gt; = LossModel.FULL_STAKE">eurusd = SymbolContract(symbol='EURUSD', venue='mt5', base_currency='EUR', quote_currency='USD', account_currency='USD', contra...=Decimal('0'), max_adv_participation=Decimal('0.10'), liquidity_haircut=Decimal('0'), round_trip_cost_pct=Decimal('0'))
+producer = 'account'
+
+    @pytest.mark.parametrize('producer', ['account', 'cycle'])
+    def test_original_deriv_portfolio_retains_builtin_stake_loss(eurusd, producer):
+        from dataclasses import replace
+        from vati.execution.deriv import DerivAdapter
+        from vati.risk.heat import position_risk
+        # Actual production portfolio parser over an explicitly isolated reply;
+        # this fixture performs no network, owner admission or financial effect.
+        transport_fixture = SimpleNamespace(_call=lambda _: {'portfolio': {'contracts': [
+            {'contract_id': 'source-fixture-only', 'symbol': 'EURUSD', 'buy_price': '5'}]}})
+        position = DerivAdapter.positions(transport_fixture)[0]
+        assert position.loss_model is LossModel.FULL_STAKE and position.quantity == Decimal('5')
+        contract = replace(eurusd, venue='deriv', loss_model=LossModel.FULL_STAKE)
+        fixture = SimpleNamespace(adapter=SimpleNamespace(positions=lambda: [position]),
+            protection=SimpleNamespace(rules={}), contracts={'EURUSD': contract},
+            cfg=SimpleNamespace(contract=contract), _entries={})
+        project = (AccountCoordinatorService._open_positions if producer == 'account'
+                   else DecisionCycle._open_positions)
+        projected = project(fixture)[0]
+&gt;       assert projected.loss_model is LossModel.FULL_STAKE
+E       AssertionError: assert &lt;LossModel.STOP_DISTANCE: 'STOP_DISTANCE'&gt; is &lt;LossModel.FULL_STAKE: 'FULL_STAKE'&gt;
+E        +  where &lt;LossModel.STOP_DISTANCE: 'STOP_DISTANCE'&gt; = OpenPosition(symbol='EURUSD', direction=&lt;Direction.LONG: 'LONG'&gt;, lots=Decimal('5'), stop_distance=Decimal('0'), value...se, loss_model=&lt;LossModel.STOP_DISTANCE: 'STOP_DISTANCE'&gt;, stake=Decimal('0'), liquidity_haircut_per_unit=Decimal('0')).loss_model
+E        +  and   &lt;LossModel.FULL_STAKE: 'FULL_STAKE'&gt; = LossModel.FULL_STAKE
+
+../../van-position-original-terms-baseline-20261027.py:68: AssertionError</failure></testcase><testcase classname="van-position-original-terms-baseline-20261027" name="test_original_deriv_portfolio_retains_builtin_stake_loss[cycle]" time="0.005"><failure message="AssertionError: assert &lt;LossModel.STOP_DISTANCE: 'STOP_DISTANCE'&gt; is &lt;LossModel.FULL_STAKE: 'FULL_STAKE'&gt;&#10; +  where &lt;LossModel.STOP_DISTANCE: 'STOP_DISTANCE'&gt; = OpenPosition(symbol='EURUSD', direction=&lt;Direction.LONG: 'LONG'&gt;, lots=Decimal('5'), stop_distance=Decimal('0'), value...se, loss_model=&lt;LossModel.STOP_DISTANCE: 'STOP_DISTANCE'&gt;, stake=Decimal('0'), liquidity_haircut_per_unit=Decimal('0')).loss_model&#10; +  and   &lt;LossModel.FULL_STAKE: 'FULL_STAKE'&gt; = LossModel.FULL_STAKE">eurusd = SymbolContract(symbol='EURUSD', venue='mt5', base_currency='EUR', quote_currency='USD', account_currency='USD', contra...=Decimal('0'), max_adv_participation=Decimal('0.10'), liquidity_haircut=Decimal('0'), round_trip_cost_pct=Decimal('0'))
+producer = 'cycle'
+
+    @pytest.mark.parametrize('producer', ['account', 'cycle'])
+    def test_original_deriv_portfolio_retains_builtin_stake_loss(eurusd, producer):
+        from dataclasses import replace
+        from vati.execution.deriv import DerivAdapter
+        from vati.risk.heat import position_risk
+        # Actual production portfolio parser over an explicitly isolated reply;
+        # this fixture performs no network, owner admission or financial effect.
+        transport_fixture = SimpleNamespace(_call=lambda _: {'portfolio': {'contracts': [
+            {'contract_id': 'source-fixture-only', 'symbol': 'EURUSD', 'buy_price': '5'}]}})
+        position = DerivAdapter.positions(transport_fixture)[0]
+        assert position.loss_model is LossModel.FULL_STAKE and position.quantity == Decimal('5')
+        contract = replace(eurusd, venue='deriv', loss_model=LossModel.FULL_STAKE)
+        fixture = SimpleNamespace(adapter=SimpleNamespace(positions=lambda: [position]),
+            protection=SimpleNamespace(rules={}), contracts={'EURUSD': contract},
+            cfg=SimpleNamespace(contract=contract), _entries={})
+        project = (AccountCoordinatorService._open_positions if producer == 'account'
+                   else DecisionCycle._open_positions)
+        projected = project(fixture)[0]
+&gt;       assert projected.loss_model is LossModel.FULL_STAKE
+E       AssertionError: assert &lt;LossModel.STOP_DISTANCE: 'STOP_DISTANCE'&gt; is &lt;LossModel.FULL_STAKE: 'FULL_STAKE'&gt;
+E        +  where &lt;LossModel.STOP_DISTANCE: 'STOP_DISTANCE'&gt; = OpenPosition(symbol='EURUSD', direction=&lt;Direction.LONG: 'LONG'&gt;, lots=Decimal('5'), stop_distance=Decimal('0'), value...se, loss_model=&lt;LossModel.STOP_DISTANCE: 'STOP_DISTANCE'&gt;, stake=Decimal('0'), liquidity_haircut_per_unit=Decimal('0')).loss_model
+E        +  and   &lt;LossModel.FULL_STAKE: 'FULL_STAKE'&gt; = LossModel.FULL_STAKE
+
+../../van-position-original-terms-baseline-20261027.py:68: AssertionError</failure></testcase></testsuite></testsuites>

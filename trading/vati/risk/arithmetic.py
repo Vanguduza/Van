@@ -14,13 +14,15 @@ def fraction(value):
     return Fraction(value)
 
 
-def decimal(value):
+def decimal(value, *, exponent=None):
     """Preserve terminating values exactly; round only nonterminating reports.
 
     A rounded reporting ratio must never supply a permission comparison. Risk
     gates compare the original Fractions; raw-size reports are not quantities.
     """
     value = Fraction(value)
+    if exponent is not None and (type(exponent) is not int or abs(exponent) > MAX_SCALE):
+        raise ValueError('native risk report exponent capacity')
     denominator = value.denominator
     twos = fives = 0
     while denominator % 2 == 0:
@@ -32,9 +34,21 @@ def decimal(value):
         if scale > MAX_SCALE:
             raise ValueError('native risk output scale capacity')
         coefficient = value.numerator * 2**(scale-twos) * 5**(scale-fives)
+        if exponent is not None:
+            shift = -scale - exponent
+            if shift >= 0:
+                coefficient *= 10**shift
+            else:
+                divisor = 10**(-shift)
+                if coefficient % divisor:
+                    raise ValueError('native report exponent would round original value')
+                coefficient //= divisor
+            scale = -exponent
         if abs(coefficient) > MAX_MINOR:
             raise ValueError('native risk output digit capacity')
         return Decimal((int(coefficient < 0), tuple(int(c) for c in str(abs(coefficient))), -scale))
+    if exponent is not None:
+        raise ValueError('native report exponent cannot represent a repeating ratio')
     # Fraction inputs may contain products wider than the output precision.
     # Decimal(int) is exact; only this declared display division is rounded.
     with localcontext(native_decimal_context()):

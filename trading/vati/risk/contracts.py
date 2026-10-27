@@ -114,6 +114,19 @@ class SymbolContract:
 
 
 @dataclass(frozen=True)
+class StopRiskTerms:
+    """Original numeric inputs for a stop-protected position's loss.
+
+    These facts carry no execution authority. The value-per-price report can
+    repeat; it cannot replace the original tick numerator and denominator.
+    """
+    entry: Decimal
+    stop: Decimal
+    tick_size: Decimal
+    tick_value: Decimal
+
+
+@dataclass(frozen=True)
 class OpenPosition:
     symbol: str
     direction: Direction
@@ -127,6 +140,7 @@ class OpenPosition:
     loss_model: LossModel = LossModel.STOP_DISTANCE
     stake: Decimal = Decimal("0")
     liquidity_haircut_per_unit: Decimal = Decimal("0")  # ILLIQUID_EQUITY: price × haircut, per share
+    stop_terms: Optional[StopRiskTerms] = None  # omitted from legacy serialized snapshots
 
 
 @dataclass(frozen=True)

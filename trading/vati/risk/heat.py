@@ -13,7 +13,7 @@ from collections import defaultdict
 from decimal import Decimal
 from typing import Iterable
 
-from vati.risk.contracts import Direction, LossModel, OpenPosition
+from vati.risk.contracts import Direction, LossModel, OpenPosition, StopRiskTerms
 from vati.risk.arithmetic import fraction, decimal
 from fractions import Fraction
 
@@ -35,6 +35,18 @@ def exact_position_risk(position: OpenPosition):
         return fraction(position.lots) * (fraction(position.stop_distance) + fraction(position.liquidity_haircut_per_unit)) * fraction(position.value_per_price_unit_per_lot)
     if not position.has_broker_side_stop:
         return None
+    if position.stop_terms is not None:
+        terms = position.stop_terms
+        if type(terms) is not StopRiskTerms:
+            raise ValueError('original stop-risk terms require the declared typed facts')
+        distance = abs(fraction(terms.entry) - fraction(terms.stop))
+        tick_size, tick_value = fraction(terms.tick_size), fraction(terms.tick_value)
+        if tick_size <= 0 or tick_value <= 0:
+            raise ValueError('original stop-risk tick terms must be positive')
+        if (distance != fraction(position.stop_distance)
+                or decimal(tick_value / tick_size) != position.value_per_price_unit_per_lot):
+            raise ValueError('original stop-risk terms contradict the position reports')
+        return fraction(position.lots) * distance * tick_value / tick_size
     return fraction(position.lots) * fraction(position.stop_distance) * fraction(position.value_per_price_unit_per_lot)
 
 

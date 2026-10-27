@@ -7,7 +7,7 @@ from dataclasses import asdict
 from decimal import Decimal
 from typing import Any
 
-from vati.risk.contracts import Direction, KillSwitchTrigger, LossModel, MarketIntegrityState, OpenPosition, RiskSnapshot, StrategyState, SymbolContract, TradeIntent
+from vati.risk.contracts import Direction, KillSwitchTrigger, LossModel, MarketIntegrityState, OpenPosition, RiskSnapshot, StopRiskTerms, StrategyState, SymbolContract, TradeIntent
 from vati.core.canonical import canonical_hash
 
 RISK_APPROVAL_SCHEMA_VERSION = 2
@@ -33,7 +33,11 @@ def intent_to_dict(i: TradeIntent) -> dict: return _enc(asdict(i))
 def intent_binding_hash(i: TradeIntent) -> str: return canonical_hash(intent_to_dict(i))
 def mandate_binding_hash(mandate) -> str: return canonical_hash(_enc(asdict(mandate)))
 def contract_to_dict(c: SymbolContract) -> dict: return _enc(asdict(c))
-def position_to_dict(p: OpenPosition) -> dict: return _enc(asdict(p))
+def position_to_dict(p: OpenPosition) -> dict:
+    d = _enc(asdict(p))
+    if p.stop_terms is None:
+        d.pop('stop_terms')  # preserve every original legacy position body
+    return d
 
 
 def snapshot_to_dict(s: RiskSnapshot) -> dict:
@@ -68,6 +72,8 @@ def contract_from_dict(d: dict) -> SymbolContract:
 
 def position_from_dict(d: dict) -> OpenPosition:
     kw = dict(d)
+    if kw.get('stop_terms') is not None:
+        kw['stop_terms'] = StopRiskTerms(**{k: _D(v) for k, v in kw['stop_terms'].items()})
     for k in ("lots", "stop_distance", "value_per_price_unit_per_lot", "stake", "liquidity_haircut_per_unit"):
         if k in kw:
             kw[k] = _D(kw[k])

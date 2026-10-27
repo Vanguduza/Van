@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.dial.van.trading.RuntimeRecoveryOperationsTest" tests="8" skipped="0" failures="0" errors="0" timestamp="2026-10-27T06:56:14" hostname="runnervmtai0g" time="0.356">
+  <properties/>
+  <testcase name="aFailedIdentityWritePreventsDispatchAndDoesNotOverwriteThePreviousOperation" classname="com.dial.van.trading.RuntimeRecoveryOperationsTest" time="0.008"/>
+  <testcase name="nativeExpiredNoEffectReceiptFinishesTheOriginalWithoutInventingCurrentRiskState" classname="com.dial.van.trading.RuntimeRecoveryOperationsTest" time="0.005"/>
+  <testcase name="aStaleOrFutureNewIntentCannotReachDurableDispatch" classname="com.dial.van.trading.RuntimeRecoveryOperationsTest" time="0.01"/>
+  <testcase name="anExpiredNewApprovalCannotPersistAnIdentityOrDispatchButItsOriginalRetryStaysOriginal" classname="com.dial.van.trading.RuntimeRecoveryOperationsTest" time="0.004"/>
+  <testcase name="genuineRefusalCanFinishButCorruptHistoryAndSaveFailureKeepTheIdentity" classname="com.dial.van.trading.RuntimeRecoveryOperationsTest" time="0.004"/>
+  <testcase name="uncertaintyAndForeignOrWeakenedNativeReceiptsNeverClearTheOriginal" classname="com.dial.van.trading.RuntimeRecoveryOperationsTest" time="0.01"/>
+  <testcase name="twoClientInstancesCannotLoseAnOriginalIdentityThroughConcurrentPreferenceUpdates" classname="com.dial.van.trading.RuntimeRecoveryOperationsTest" time="0.307"/>
+  <testcase name="coldReadKeepsOnlyTheOriginalPublicIdentityAndAllowsOnlyItsExactRetry" classname="com.dial.van.trading.RuntimeRecoveryOperationsTest" time="0.003"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

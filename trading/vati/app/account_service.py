@@ -591,6 +591,7 @@ class AccountCoordinatorService:
             return None
 
     def _open_positions(self) -> tuple[OpenPosition, ...]:
+        from vati.risk.positions import project_open_position
         assert self.adapter is not None
         out: list[OpenPosition] = []
         for position in self.adapter.positions():
@@ -602,19 +603,9 @@ class AccountCoordinatorService:
                     position.symbol, position.direction, position.quantity, Decimal("0"),
                     Decimal("0"), "", "", has_broker_side_stop=False))
                 continue
-            if position.loss_model is LossModel.ILLIQUID_EQUITY:
-                out.append(OpenPosition(
-                    position.symbol, position.direction, position.quantity,
-                    abs(position.entry_price - (stop or position.entry_price)),
-                    Decimal("1"), contract.base_currency, contract.quote_currency,
-                    "", False, LossModel.ILLIQUID_EQUITY, Decimal("0"),
-                    position.entry_price * contract.liquidity_haircut))
-            else:
-                out.append(OpenPosition(
-                    position.symbol, position.direction, position.quantity,
-                    abs(position.entry_price - stop) if stop is not None else Decimal("0"),
-                    contract.value_per_price_unit_per_lot,
-                    contract.base_currency, contract.quote_currency, "", stop is not None))
+            out.append(project_open_position(symbol=position.symbol, direction=position.direction,
+                quantity=position.quantity, entry=position.entry_price, stop=stop,
+                contract=contract, loss_model=position.loss_model))
         return tuple(out)
 
     def _ledger_positions(self) -> list[LedgerPosition]:

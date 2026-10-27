@@ -203,20 +203,21 @@ class DecisionCycle:
         self.ledger.append(make_event(kind, "vati-cycle", payload, event_time_ms=now_ms, received_time_ms=now_ms, correlation_id=corr or self.cfg.session_id))
 
     def _open_positions(self) -> tuple[OpenPosition, ...]:
+        from vati.risk.positions import project_open_position
         out = []
         c = self.cfg.contract
         # Resting entries reserve their worst-case risk until they fill or expire.
         for row in self._entries.values():
             if row.get("pending") and row.get("stop") is not None:
-                out.append(OpenPosition(row["symbol"], row["direction"], row["pending_quantity"], abs(row["entry"] - row["stop"]),
-                                        c.value_per_price_unit_per_lot, c.base_currency, c.quote_currency, "", True))
+                out.append(project_open_position(symbol=row['symbol'], direction=row['direction'],
+                    quantity=row['pending_quantity'], entry=row['entry'], stop=row['stop'],
+                    contract=c, loss_model=c.loss_model))
         for p in self.adapter.positions():
             stop = p.stop_price if p.stop_price is not None else self.protection.rules.get(p.position_id, None)
             stop_price = stop.stop if hasattr(stop, "stop") else stop
-            if p.loss_model is LossModel.ILLIQUID_EQUITY:
-                out.append(OpenPosition(p.symbol, p.direction, p.quantity, abs(p.entry_price - (stop_price or p.entry_price)), Decimal(1), c.base_currency, c.quote_currency, "", False, LossModel.ILLIQUID_EQUITY, ZERO, p.entry_price * c.liquidity_haircut))
-            else:
-                out.append(OpenPosition(p.symbol, p.direction, p.quantity, abs(p.entry_price - stop_price) if stop_price is not None else ZERO, c.value_per_price_unit_per_lot, c.base_currency, c.quote_currency, "", stop_price is not None))
+            out.append(project_open_position(symbol=p.symbol, direction=p.direction,
+                quantity=p.quantity, entry=p.entry_price, stop=stop_price,
+                contract=c, loss_model=p.loss_model))
         return tuple(out)
 
     def _reconciliation_ok(self, *, account_verified: bool) -> bool:
