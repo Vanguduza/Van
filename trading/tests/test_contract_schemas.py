@@ -10,6 +10,7 @@ import pytest
 
 from vati.contracts import SCHEMA_DIR, SCHEMA_NAMES, load_schema, required_keys
 from vati.risk import RiskDecision, RiskSnapshot, TradeIntent, SymbolContract
+from vati.risk.contracts import NativeAccountRiskContext, OpenPosition, StopRiskTerms
 
 
 @pytest.mark.parametrize("name", SCHEMA_NAMES)
@@ -41,12 +42,34 @@ def test_risk_snapshot_schema_matches_dataclass():
     fields = {f.name for f in dataclasses.fields(RiskSnapshot)}
     schema = load_schema("risk_snapshot")
     assert fields == set(schema["properties"])
-    # New observations bind used margin. Legacy immutable snapshots omit it;
-    # all original required fields remain mandatory.
-    assert fields - {"used_margin"} == required_keys("risk_snapshot")
+    # Optional source observations do not retroactively become mandatory in
+    # immutable legacy bodies. Every original required field stays mandatory.
+    assert fields - {"used_margin", "native_account_context"} == required_keys("risk_snapshot")
     terms = schema["$defs"]["risk_symbol_terms"]
     assert {f.name for f in dataclasses.fields(SymbolContract)} == set(terms["properties"]) == set(terms["required"])
     assert {"synced_at_unix", "spec_hash"} <= required_keys("symbol_contract")
+
+
+def test_native_source_schema_is_closed_and_cannot_issue_authority():
+    schema = load_schema("risk_snapshot")["$defs"]["native_account_context"]
+    fields = {f.name for f in dataclasses.fields(NativeAccountRiskContext)}
+    assert fields == set(schema["properties"]) == set(schema["required"])
+    assert schema["additionalProperties"] is False
+    for flag in ("risk_capital_qualified", "execution_authority"):
+        assert schema["properties"][flag] == {"type": "boolean", "const": False}
+
+
+def test_position_schema_preserves_original_optional_stop_inputs():
+    schema = load_schema("risk_snapshot")
+    position = schema["properties"]["open_positions"]["items"]
+    fields = {f.name for f in dataclasses.fields(OpenPosition)}
+    assert fields <= set(position["properties"])
+    # Keep the inherited optional broker identifier extension intact.
+    assert set(position["properties"]) - fields == {"broker_position_id"}
+    assert "broker_position_id" not in position["required"]
+    terms = schema["$defs"]["original_stop_terms"]
+    assert {f.name for f in dataclasses.fields(StopRiskTerms)} == set(terms["properties"]) == set(terms["required"])
+    assert terms["additionalProperties"] is False
 
 
 def test_trade_intent_dataclass_fields_exist_in_schema():

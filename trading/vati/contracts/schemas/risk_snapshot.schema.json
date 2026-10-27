@@ -127,6 +127,16 @@
           "liquidity_haircut_per_unit": {
             "type": "string",
             "description": "ILLIQUID_EQUITY: price \u00d7 liquidity haircut per share."
+          },
+          "stop_terms": {
+            "anyOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/$defs/original_stop_terms"
+              }
+            ]
           }
         }
       }
@@ -214,6 +224,17 @@
         "null"
       ],
       "description": "Observed committed margin; omitted in immutable legacy snapshot identities when unavailable."
+    },
+    "native_account_context": {
+      "description": "Optional original source identity. Omitted when absent so immutable legacy snapshot bytes/hashes remain unchanged. Never an execution or capital grant.",
+      "anyOf": [
+        {
+          "type": "null"
+        },
+        {
+          "$ref": "#/$defs/native_account_context"
+        }
+      ]
     }
   },
   "$defs": {
@@ -337,6 +358,120 @@
         "round_trip_cost_pct": {
           "type": "string",
           "description": "All-in buy+sell cost as a fraction of notional (vati.zse.costs for ZSE/VFEX; spread+commission+swap model for FX)."
+        }
+      }
+    },
+    "native_account_context": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Original native source identity only. Runtime validates account/time/valuation and durable receipt joins. This object grants no capital qualification or execution authority.",
+      "required": [
+        "provider",
+        "physical_account_key",
+        "monetary_scope_hash",
+        "account_alias",
+        "observation_ref",
+        "source_query_ref",
+        "source_mark_json",
+        "risk_capital_qualified",
+        "execution_authority"
+      ],
+      "properties": {
+        "provider": {
+          "type": "string",
+          "enum": [
+            "MT5",
+            "CTRADER"
+          ]
+        },
+        "physical_account_key": {
+          "type": "string",
+          "pattern": "^native-account:v1:[0-9a-f]{64}$"
+        },
+        "monetary_scope_hash": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "account_alias": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "observation_ref": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "source_query_ref": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "source_mark_json": {
+          "type": "string",
+          "minLength": 2,
+          "maxLength": 16384,
+          "description": "Canonical JSON of the original native mark; semantic source verification remains a runtime requirement."
+        },
+        "risk_capital_qualified": {
+          "type": "boolean",
+          "const": false
+        },
+        "execution_authority": {
+          "type": "boolean",
+          "const": false
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "provider": {
+                "const": "MT5"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "source_query_ref": {
+                "type": "string",
+                "pattern": "^[0-9a-f]{64}$"
+              }
+            }
+          },
+          "else": {
+            "properties": {
+              "source_query_ref": {
+                "type": "null"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "original_stop_terms": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Optional original stop/tick inputs; runtime checks them against the position and loss model. Legacy positions omit absent terms.",
+      "required": [
+        "entry",
+        "stop",
+        "tick_size",
+        "tick_value"
+      ],
+      "properties": {
+        "entry": {
+          "type": "string"
+        },
+        "stop": {
+          "type": "string"
+        },
+        "tick_size": {
+          "type": "string"
+        },
+        "tick_value": {
+          "type": "string"
         }
       }
     }

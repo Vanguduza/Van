@@ -1,0 +1,19 @@
+.............F.......................................................... [ 62%]
+............................................                             [100%]
+=================================== FAILURES ===================================
+_________ test_position_schema_preserves_original_optional_stop_inputs _________
+
+    def test_position_schema_preserves_original_optional_stop_inputs():
+        schema = load_schema("risk_snapshot")
+        position = schema["properties"]["open_positions"]["items"]
+>       assert {f.name for f in dataclasses.fields(OpenPosition)} == set(position["properties"])
+E       AssertionError: assert {'base_curren..., 'lots', ...} == {'base_curren...s_model', ...}
+E         
+E         Extra items in the right set:
+E         'broker_position_id'
+E         Use -v to get more diff
+
+trading/tests/test_contract_schemas.py:65: AssertionError
+=========================== short test summary info ============================
+FAILED trading/tests/test_contract_schemas.py::test_position_schema_preserves_original_optional_stop_inputs
+1 failed, 115 passed in 5.99s
