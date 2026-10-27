@@ -1,6 +1,6 @@
 {
   "schema": "van.rebuild.candidate-source-progress/1",
-  "updated_at_utc": "2026-10-27T01:04:00.742348+00:00",
+  "updated_at_utc": "2026-10-27T01:20:15.016651+00:00",
   "programme": "Rev1.18; original 131 unit IDs and dependencies retained",
   "authority": "auth-20261022-owner-autonomous-candidate-build",
   "meaning": "Candidate source progress is separate from admitted unit acceptance. Independent certificates, owner decisions, live effects and release gates remain unissued. No unit is declared complete by this record.",
@@ -1339,6 +1339,10 @@
           "change": "Complete CSCV observation coverage and strict numerical/alignment producer/evaluator checks",
           "evidence": "backend/BE-013_021_035_VALIDATION_INTEGRITY.md; receipts/VALIDATION_INPUT_INTEGRITY_SOURCE_20261022.json",
           "result": "1663 full trading pass/2skip before two additional passing controls;36 latest integrity tests/88 gateway tests pass; no unit acceptance"
+        },
+        {
+          "description": "The existing backtest metrics owner now accumulates the original equity path with exact rational arithmetic and tracks maximum currency and percentage drawdown independently, converting only the final existing float report fields. An earlier50percent loss is retained after a later100currency/10percent loss; negative equity preserves150percent drawdown; a cent is not erased by large starting equity. The actual strategy-validation source producer retains that original worst percentage. Nine actual regressions/2controls reproduced against unchanged committed source. Eleven new tests include independent prefix-curve/scaling, hostile Decimal contexts and the real source producer.91focused and605final actual SQL/HTTP/accounting/authority/validation cases pass0skip/audit0, all1161 pinned hashes match, owned PostgreSQL fixture independently absent. Two supplemental in-memory faults caught with3positive/3restored controls; active source unchanged. Existing client fields/types, statistical/admission/owner gates and historical reports remain. No unit/native/production/economic/S24 acceptance.",
+          "evidence": "backend/BE-013_035_BACKTEST_DRAWDOWN_PATHS.md;receipts/BACKTEST_DRAWDOWN_SOURCE_20261027.json"
         }
       ]
     },
@@ -1357,6 +1361,10 @@
           "change": "Actual signed capsule promotion refuses malformed/old-version certificate statistics",
           "evidence": "backend/BE-013_021_035_VALIDATION_INTEGRITY.md; receipts/VALIDATION_INPUT_INTEGRITY_SOURCE_20261022.json",
           "result": "1663 full trading pass/2skip before two additional passing controls;36 latest integrity tests/88 gateway tests pass; no unit acceptance"
+        },
+        {
+          "description": "The existing backtest metrics owner now accumulates the original equity path with exact rational arithmetic and tracks maximum currency and percentage drawdown independently, converting only the final existing float report fields. An earlier50percent loss is retained after a later100currency/10percent loss; negative equity preserves150percent drawdown; a cent is not erased by large starting equity. The actual strategy-validation source producer retains that original worst percentage. Nine actual regressions/2controls reproduced against unchanged committed source. Eleven new tests include independent prefix-curve/scaling, hostile Decimal contexts and the real source producer.91focused and605final actual SQL/HTTP/accounting/authority/validation cases pass0skip/audit0, all1161 pinned hashes match, owned PostgreSQL fixture independently absent. Two supplemental in-memory faults caught with3positive/3restored controls; active source unchanged. Existing client fields/types, statistical/admission/owner gates and historical reports remain. No unit/native/production/economic/S24 acceptance.",
+          "evidence": "backend/BE-013_035_BACKTEST_DRAWDOWN_PATHS.md;receipts/BACKTEST_DRAWDOWN_SOURCE_20261027.json"
         }
       ]
     },

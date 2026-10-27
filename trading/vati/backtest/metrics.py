@@ -7,6 +7,7 @@ from __future__ import annotations
 import math
 from dataclasses import dataclass
 from decimal import Decimal
+from fractions import Fraction
 from itertools import combinations
 from typing import Sequence
 
@@ -52,13 +53,17 @@ def compute_metrics(pnls: Sequence[Decimal], r_multiples: Sequence[Decimal], sta
         return Metrics(0, 0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 3.0, 0.0)
     wins = [x for x in p if x > 0]; losses = [-x for x in p if x < 0]
     mean, sd, skew, kurt = _moments(p)
-    eq = float(start_equity); peak = eq; mdd = 0.0; mdd_pct = 0.0
-    for x in p:
-        eq += x; peak = max(peak, eq); dd = peak - eq
-        if dd > mdd:
-            mdd, mdd_pct = dd, dd / peak if peak else 0.0
+    # Keep original account amounts through the equity path. Converting the
+    # starting equity first can erase a real cent before any drawdown exists.
+    # Currency and percentage maxima can occur at different points in time.
+    eq = Fraction(start_equity); peak = eq; mdd = Fraction(0); mdd_pct = Fraction(0)
+    for original in pnls:
+        eq += Fraction(original); peak = max(peak, eq); dd = peak - eq
+        mdd = max(mdd, dd)
+        if peak:
+            mdd_pct = max(mdd_pct, dd / peak)
     pf = (sum(wins) / sum(losses)) if losses else (float("inf") if wins else 0.0)
-    return Metrics(n, len(wins), len(wins) / n, mean, (sum(r) / n) if r else 0.0, pf, mdd, mdd_pct, (mean / sd) if sd else 0.0, skew, kurt, sum(p))
+    return Metrics(n, len(wins), len(wins) / n, mean, (sum(r) / n) if r else 0.0, pf, float(mdd), float(mdd_pct), (mean / sd) if sd else 0.0, skew, kurt, sum(p))
 
 
 def _norm_cdf(x: float) -> float:

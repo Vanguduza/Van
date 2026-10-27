@@ -1,0 +1,61 @@
+{
+  "head": "f00495cf996aaf9adb0a177db61c083640c2965e",
+  "source_sha256": "4e9089078b0caf5ff941b1fc7826a873fb8351cf1d955e9b69f036459044b18f",
+  "source_equals_committed": true,
+  "pure_read_only_probes": [
+    {
+      "case": "earlier_percentage_peak",
+      "start": "100",
+      "pnls": [
+        "-50",
+        "950",
+        "-100"
+      ],
+      "actual_currency_drawdown": 100.0,
+      "actual_percentage_drawdown": 0.1,
+      "independent_exact_currency_drawdown": "100",
+      "independent_exact_percentage_drawdown": "1/2",
+      "matches_oracle": false
+    },
+    {
+      "case": "negative_equity_drawdown",
+      "start": "100",
+      "pnls": [
+        "-150",
+        "1050",
+        "-200"
+      ],
+      "actual_currency_drawdown": 200.0,
+      "actual_percentage_drawdown": 0.2,
+      "independent_exact_currency_drawdown": "200",
+      "independent_exact_percentage_drawdown": "3/2",
+      "matches_oracle": false
+    },
+    {
+      "case": "native_cent_below_float_equity_resolution",
+      "start": "1E+30",
+      "pnls": [
+        "-0.01"
+      ],
+      "actual_currency_drawdown": 0.0,
+      "actual_percentage_drawdown": 0.0,
+      "independent_exact_currency_drawdown": "1/100",
+      "independent_exact_percentage_drawdown": "1/100000000000000000000000000000000",
+      "matches_oracle": false
+    },
+    {
+      "case": "ordinary_control",
+      "start": "100",
+      "pnls": [
+        "100",
+        "-20"
+      ],
+      "actual_currency_drawdown": 20.0,
+      "actual_percentage_drawdown": 0.1,
+      "independent_exact_currency_drawdown": "20",
+      "independent_exact_percentage_drawdown": "1/10",
+      "matches_oracle": true
+    }
+  ],
+  "qualification": "Numerical source evidence only; not real trade, profitability, independent strategy certificate or native admission."
+}

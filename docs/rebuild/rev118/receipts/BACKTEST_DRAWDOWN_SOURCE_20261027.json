@@ -1,0 +1,52 @@
+{
+  "schema": "van.rebuild.backtest-drawdown-source/1",
+  "base_head": "5c584b2af6135660d46ba66216330b1c18704b2b",
+  "updated_at_utc": "2026-10-27T01:20:15.016651+00:00",
+  "units": [
+    "BE-013",
+    "BE-035"
+  ],
+  "status": "SOURCE_TESTED_COMPONENT_NOT_UNIT_ACCEPTANCE",
+  "acceptance": "NOT_ISSUED",
+  "implementation": "The existing backtest metrics owner now accumulates the original equity path with exact rational arithmetic and tracks maximum currency and percentage drawdown independently, converting only the final existing float report fields. An earlier50percent loss is retained after a later100currency/10percent loss; negative equity preserves150percent drawdown; a cent is not erased by large starting equity. The actual strategy-validation source producer retains that original worst percentage. Nine actual regressions/2controls reproduced against unchanged committed source. Eleven new tests include independent prefix-curve/scaling, hostile Decimal contexts and the real source producer.91focused and605final actual SQL/HTTP/accounting/authority/validation cases pass0skip/audit0, all1161 pinned hashes match, owned PostgreSQL fixture independently absent. Two supplemental in-memory faults caught with3positive/3restored controls; active source unchanged. Existing client fields/types, statistical/admission/owner gates and historical reports remain. No unit/native/production/economic/S24 acceptance.",
+  "source_sha256": {
+    "trading/vati/backtest/metrics.py": "02694c5427f868f09379f60a16e70d996c3207a38cf40098a4ce1733b55baccd",
+    "trading/tests/test_backtest_drawdown_paths.py": "c3d1782c8a2597f919f9ee4f7979b79f118295ff86e6cf925e195d053afbc698"
+  },
+  "tests": {
+    "baseline_failed": 9,
+    "baseline_passed_controls": 2,
+    "baseline_errors": 0,
+    "baseline_source_equals_committed": true,
+    "new_cases": 11,
+    "focused": 91,
+    "final_actual_SQLite_Postgres_HTTP_accounting_authority_validation": 605,
+    "final_skips": 0,
+    "final_audit_violations": 0,
+    "pinned_hashes": 1161,
+    "owned_fixture_independently_absent": true,
+    "supplemental_faults_caught": 2,
+    "positive_controls": 3,
+    "restored_controls": 3,
+    "active_source_unchanged_by_faults": true,
+    "counts_overlap": true
+  },
+  "canonical_checks": {
+    "owner_frontend_drift": false,
+    "registry": [
+      483,
+      376
+    ],
+    "original_coverage": [
+      42,
+      105,
+      78
+    ],
+    "mutation_registry_cases": 374,
+    "mutation_registry_edits": 383,
+    "registry_check_execution": "NOT_RUN",
+    "consolidation_findings": []
+  },
+  "qualification": "Exact intermediate drawdown arithmetic with existing approximate float report fields; not a replacement for typed native Money, unitized funding returns, independent economic evidence or the full statistical/trial/admission programme. Other statistical fields retain their existing numerical semantics. Historical reports/certificates are not rewritten or requalified; recalculation lineage/policy/cohort migration remain required before admission. Source fixtures and self-hashed test containers do not issue an owner/independent certificate or guarantee profitability.",
+  "evidence": "ci/backtest_drawdown_20261027"
+}
