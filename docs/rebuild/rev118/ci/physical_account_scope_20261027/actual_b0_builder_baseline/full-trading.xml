@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="4" skipped="0" tests="12" time="8.203" timestamp="2026-10-27T04:15:02.180396+00:00" hostname="2c5a245e39f1"><testcase classname="van-physical-account-builder-baseline-tests-20261027" name="test_actual_builders_preserve_alias_and_native_account_arbitration[native_two-123-REFUSED_HELD_BY_OTHER-single-single]" time="0.839"><failure message="AssertionError: assert &lt;LeaseOutcome.GRANTED: 'GRANTED'&gt; is &lt;LeaseOutcome.REFUSED_HELD_BY_OTHER: 'REFUSED_HELD_BY_OTHER'&gt;&#10; +  where &lt;LeaseOutcome.GRANTED: 'GRANTED'&gt; = LeaseResult(outcome=&lt;LeaseOutcome.GRANTED: 'GRANTED'&gt;, lease=AccountLease(account_alias='native_two', holder_instance_..._ms=1000, expires_at_ms=31000, software_version='vati-single-session/1', git_sha=''), holder_instance_id='', detail='').outcome&#10; +    where LeaseResult(outcome=&lt;LeaseOutcome.GRANTED: 'GRANTED'&gt;, lease=AccountLease(account_alias='native_two', holder_instance_..._ms=1000, expires_at_ms=31000, software_version='vati-single-session/1', git_sha=''), holder_instance_id='', detail='') = acquire(now_ms=1000)&#10; +      where acquire = &lt;vati.app.account_lease.AccountRuntimeLease object at 0x7fea5c5c34d0&gt;.acquire&#10; +        where &lt;vati.app.account_lease.AccountRuntimeLease object at 0x7fea5c5c34d0&gt; = SessionService(cfg=ServiceConfig(account_alias='native_two', symbol='EURUSD', base='EUR', quote='USD', timeframe='H1',...redentialRef(env_var='SOURCE_FIXTURE_NOT_READ', secrets_file=None), demo=True, enabled=True, mandate_ref='', notes='')).lease">tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-645/test_actual_builders_preserve_0')
+eurusd = SymbolContract(symbol='EURUSD', venue='mt5', base_currency='EUR', quote_currency='USD', account_currency='USD', contra...=Decimal('0'), max_adv_participation=Decimal('0.10'), liquidity_haircut=Decimal('0'), round_trip_cost_pct=Decimal('0'))
+pg_dsn = 'user=van_fixture password=van_ephemeral_test_only dbname=van_ledger_fixture_2489e39e490f4c2292e39de6a1dda7a0 host=127.0.0.1 port=32867'
+first_kind = 'single', second_kind = 'single', peer_alias = 'native_two'
+peer_login = '123'
+expected = &lt;LeaseOutcome.REFUSED_HELD_BY_OTHER: 'REFUSED_HELD_BY_OTHER'&gt;
+
+    @pytest.mark.parametrize('first_kind,second_kind', [
+        ('single', 'single'), ('single', 'coordinator'),
+        ('coordinator', 'single'), ('coordinator', 'coordinator')])
+    @pytest.mark.parametrize('peer_alias,peer_login,expected', [
+        ('native_two', '123', LeaseOutcome.REFUSED_HELD_BY_OTHER),
+        ('native_one', '456', LeaseOutcome.REFUSED_HELD_BY_OTHER),
+        ('native_two', '456', LeaseOutcome.GRANTED)])
+    def test_actual_builders_preserve_alias_and_native_account_arbitration(
+            tmp_path, eurusd, pg_dsn, first_kind, second_kind, peer_alias, peer_login, expected):
+        from psycopg.conninfo import conninfo_to_dict
+        database = conninfo_to_dict(pg_dsn)['dbname']
+        uri = urlunsplit(urlsplit(os.environ['VATI_TEST_PG_DSN'])._replace(path='/' + database))
+        services = []
+        try:
+            first = build_fixture(tmp_path / 'first', eurusd, uri, first_kind, 'native_one', '123')
+            services.append(first)
+            second = build_fixture(tmp_path / 'second', eurusd, uri, second_kind, peer_alias, peer_login)
+            services.append(second)
+            assert first.lease.acquire(now_ms=1000).outcome is LeaseOutcome.GRANTED
+            original_epoch = first.lease.epoch
+&gt;           assert second.lease.acquire(now_ms=1000).outcome is expected
+E           AssertionError: assert &lt;LeaseOutcome.GRANTED: 'GRANTED'&gt; is &lt;LeaseOutcome.REFUSED_HELD_BY_OTHER: 'REFUSED_HELD_BY_OTHER'&gt;
+E            +  where &lt;LeaseOutcome.GRANTED: 'GRANTED'&gt; = LeaseResult(outcome=&lt;LeaseOutcome.GRANTED: 'GRANTED'&gt;, lease=AccountLease(account_alias='native_two', holder_instance_..._ms=1000, expires_at_ms=31000, software_version='vati-single-session/1', git_sha=''), holder_instance_id='', detail='').outcome
+E            +    where LeaseResult(outcome=&lt;LeaseOutcome.GRANTED: 'GRANTED'&gt;, lease=AccountLease(account_alias='native_two', holder_instance_..._ms=1000, expires_at_ms=31000, software_version='vati-single-session/1', git_sha=''), holder_instance_id='', detail='') = acquire(now_ms=1000)
+E            +      where acquire = &lt;vati.app.account_lease.AccountRuntimeLease object at 0x7fea5c5c34d0&gt;.acquire
+E            +        where &lt;vati.app.account_lease.AccountRuntimeLease object at 0x7fea5c5c34d0&gt; = SessionService(cfg=ServiceConfig(account_alias='native_two', symbol='EURUSD', base='EUR', quote='USD', timeframe='H1',...redentialRef(env_var='SOURCE_FIXTURE_NOT_READ', secrets_file=None), demo=True, enabled=True, mandate_ref='', notes='')).lease
+
+../../van-physical-account-builder-baseline-tests-20261027.py:63: AssertionError</failure></testcase><testcase classname="van-physical-account-builder-baseline-tests-20261027" name="test_actual_builders_preserve_alias_and_native_account_arbitration[native_two-123-REFUSED_HELD_BY_OTHER-single-coordinator]" time="0.452"><failure message="AssertionError: assert &lt;LeaseOutcome.GRANTED: 'GRANTED'&gt; is &lt;LeaseOutcome.REFUSED_HELD_BY_OTHER: 'REFUSED_HELD_BY_OTHER'&gt;&#10; +  where &lt;LeaseOutcome.GRANTED: 'GRANTED'&gt; = LeaseResult(outcome=&lt;LeaseOutcome.GRANTED: 'GRANTED'&gt;, lease=AccountLease(account_alias='native_two', holder_instance_...000, expires_at_ms=31000, software_version='vati-account-coordinator/1', git_sha=''), holder_instance_id='', detail='').outcome&#10; +    where LeaseResult(outcome=&lt;LeaseOutcome.GRANTED: 'GRANTED'&gt;, lease=AccountLease(account_alias='native_two', holder_instance_...000, expires_at_ms=31000, software_version='vati-account-coordinator/1', git_sha=''), holder_instance_id='', detail='') = acquire(now_ms=1000)&#10; +      where acquire = &lt;vati.app.account_lease.AccountRuntimeLease object at 0x7fea5c12a5a0&gt;.acquire&#10; +        where &lt;vati.app.account_lease.AccountRuntimeLease object at 0x7fea5c12a5a0&gt; = &lt;vati.app.account_service.AccountCoordinatorService object at 0x7fea5c5dd430&gt;.lease">tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-645/test_actual_builders_preserve_1')
+eurusd = SymbolContract(symbol='EURUSD', venue='mt5', base_currency='EUR', quote_currency='USD', account_currency='USD', contra...=Decimal('0'), max_adv_participation=Decimal('0.10'), liquidity_haircut=Decimal('0'), round_trip_cost_pct=Decimal('0'))
+pg_dsn = 'user=van_fixture password=van_ephemeral_test_only dbname=van_ledger_fixture_ab723edab2684a06abc516ee56cba888 host=127.0.0.1 port=32867'
+first_kind = 'single', second_kind = 'coordinator', peer_alias = 'native_two'
+peer_login = '123'
+expected = &lt;LeaseOutcome.REFUSED_HELD_BY_OTHER: 'REFUSED_HELD_BY_OTHER'&gt;
+
+    @pytest.mark.parametrize('first_kind,second_kind', [
+        ('single', 'single'), ('single', 'coordinator'),
+        ('coordinator', 'single'), ('coordinator', 'coordinator')])
+    @pytest.mark.parametrize('peer_alias,peer_login,expected', [
+        ('native_two', '123', LeaseOutcome.REFUSED_HELD_BY_OTHER),
+        ('native_one', '456', LeaseOutcome.REFUSED_HELD_BY_OTHER),
+        ('native_two', '456', LeaseOutcome.GRANTED)])
+    def test_actual_builders_preserve_alias_and_native_account_arbitration(
+            tmp_path, eurusd, pg_dsn, first_kind, second_kind, peer_alias, peer_login, expected):
+        from psycopg.conninfo import conninfo_to_dict
+        database = conninfo_to_dict(pg_dsn)['dbname']
+        uri = urlunsplit(urlsplit(os.environ['VATI_TEST_PG_DSN'])._replace(path='/' + database))
+        services = []
+        try:
+            first = build_fixture(tmp_path / 'first', eurusd, uri, first_kind, 'native_one', '123')
+            services.append(first)
+            second = build_fixture(tmp_path / 'second', eurusd, uri, second_kind, peer_alias, peer_login)
+            services.append(second)
+            assert first.lease.acquire(now_ms=1000).outcome is LeaseOutcome.GRANTED
+            original_epoch = first.lease.epoch
+&gt;           assert second.lease.acquire(now_ms=1000).outcome is expected
+E           AssertionError: assert &lt;LeaseOutcome.GRANTED: 'GRANTED'&gt; is &lt;LeaseOutcome.REFUSED_HELD_BY_OTHER: 'REFUSED_HELD_BY_OTHER'&gt;
+E            +  where &lt;LeaseOutcome.GRANTED: 'GRANTED'&gt; = LeaseResult(outcome=&lt;LeaseOutcome.GRANTED: 'GRANTED'&gt;, lease=AccountLease(account_alias='native_two', holder_instance_...000, expires_at_ms=31000, software_version='vati-account-coordinator/1', git_sha=''), holder_instance_id='', detail='').outcome
+E            +    where LeaseResult(outcome=&lt;LeaseOutcome.GRANTED: 'GRANTED'&gt;, lease=AccountLease(account_alias='native_two', holder_instance_...000, expires_at_ms=31000, software_version='vati-account-coordinator/1', git_sha=''), holder_instance_id='', detail='') = acquire(now_ms=1000)
+E            +      where acquire = &lt;vati.app.account_lease.AccountRuntimeLease object at 0x7fea5c12a5a0&gt;.acquire
+E            +        where &lt;vati.app.account_lease.AccountRuntimeLease object at 0x7fea5c12a5a0&gt; = &lt;vati.app.account_service.AccountCoordinatorService object at 0x7fea5c5dd430&gt;.lease
+
+../../van-physical-account-builder-baseline-tests-20261027.py:63: AssertionError</failure></testcase><testcase classname="van-physical-account-builder-baseline-tests-20261027" name="test_actual_builders_preserve_alias_and_native_account_arbitration[native_two-123-REFUSED_HELD_BY_OTHER-coordinator-single]" time="0.426"><failure message="AssertionError: assert &lt;LeaseOutcome.GRANTED: 'GRANTED'&gt; is &lt;LeaseOutcome.REFUSED_HELD_BY_OTHER: 'REFUSED_HELD_BY_OTHER'&gt;&#10; +  where &lt;LeaseOutcome.GRANTED: 'GRANTED'&gt; = LeaseResult(outcome=&lt;LeaseOutcome.GRANTED: 'GRANTED'&gt;, lease=AccountLease(account_alias='native_two', holder_instance_..._ms=1000, expires_at_ms=31000, software_version='vati-single-session/1', git_sha=''), holder_instance_id='', detail='').outcome&#10; +    where LeaseResult(outcome=&lt;LeaseOutcome.GRANTED: 'GRANTED'&gt;, lease=AccountLease(account_alias='native_two', holder_instance_..._ms=1000, expires_at_ms=31000, software_version='vati-single-session/1', git_sha=''), holder_instance_id='', detail='') = acquire(now_ms=1000)&#10; +      where acquire = &lt;vati.app.account_lease.AccountRuntimeLease object at 0x7fea5c15e210&gt;.acquire&#10; +        where &lt;vati.app.account_lease.AccountRuntimeLease object at 0x7fea5c15e210&gt; = SessionService(cfg=ServiceConfig(account_alias='native_two', symbol='EURUSD', base='EUR', quote='USD', timeframe='H1',...redentialRef(env_var='SOURCE_FIXTURE_NOT_READ', secrets_file=None), demo=True, enabled=True, mandate_ref='', notes='')).lease">tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-645/test_actual_builders_preserve_2')
+eurusd = SymbolContract(symbol='EURUSD', venue='mt5', base_currency='EUR', quote_currency='USD', account_currency='USD', contra...=Decimal('0'), max_adv_participation=Decimal('0.10'), liquidity_haircut=Decimal('0'), round_trip_cost_pct=Decimal('0'))
+pg_dsn = 'user=van_fixture password=van_ephemeral_test_only dbname=van_ledger_fixture_a680e3b7c7a34419b71b91078db26072 host=127.0.0.1 port=32867'
+first_kind = 'coordinator', second_kind = 'single', peer_alias = 'native_two'
+peer_login = '123'
+expected = &lt;LeaseOutcome.REFUSED_HELD_BY_OTHER: 'REFUSED_HELD_BY_OTHER'&gt;
+
+    @pytest.mark.parametrize('first_kind,second_kind', [
+        ('single', 'single'), ('single', 'coordinator'),
+        ('coordinator', 'single'), ('coordinator', 'coordinator')])
+    @pytest.mark.parametrize('peer_alias,peer_login,expected', [
+        ('native_two', '123', LeaseOutcome.REFUSED_HELD_BY_OTHER),
+        ('native_one', '456', LeaseOutcome.REFUSED_HELD_BY_OTHER),
+        ('native_two', '456', LeaseOutcome.GRANTED)])
+    def test_actual_builders_preserve_alias_and_native_account_arbitration(
+            tmp_path, eurusd, pg_dsn, first_kind, second_kind, peer_alias, peer_login, expected):
+        from psycopg.conninfo import conninfo_to_dict
+        database = conninfo_to_dict(pg_dsn)['dbname']
+        uri = urlunsplit(urlsplit(os.environ['VATI_TEST_PG_DSN'])._replace(path='/' + database))
+        services = []
+        try:
+            first = build_fixture(tmp_path / 'first', eurusd, uri, first_kind, 'native_one', '123')
+            services.append(first)
+            second = build_fixture(tmp_path / 'second', eurusd, uri, second_kind, peer_alias, peer_login)
+            services.append(second)
+            assert first.lease.acquire(now_ms=1000).outcome is LeaseOutcome.GRANTED
+            original_epoch = first.lease.epoch
+&gt;           assert second.lease.acquire(now_ms=1000).outcome is expected
+E           AssertionError: assert &lt;LeaseOutcome.GRANTED: 'GRANTED'&gt; is &lt;LeaseOutcome.REFUSED_HELD_BY_OTHER: 'REFUSED_HELD_BY_OTHER'&gt;
+E            +  where &lt;LeaseOutcome.GRANTED: 'GRANTED'&gt; = LeaseResult(outcome=&lt;LeaseOutcome.GRANTED: 'GRANTED'&gt;, lease=AccountLease(account_alias='native_two', holder_instance_..._ms=1000, expires_at_ms=31000, software_version='vati-single-session/1', git_sha=''), holder_instance_id='', detail='').outcome
+E            +    where LeaseResult(outcome=&lt;LeaseOutcome.GRANTED: 'GRANTED'&gt;, lease=AccountLease(account_alias='native_two', holder_instance_..._ms=1000, expires_at_ms=31000, software_version='vati-single-session/1', git_sha=''), holder_instance_id='', detail='') = acquire(now_ms=1000)
+E            +      where acquire = &lt;vati.app.account_lease.AccountRuntimeLease object at 0x7fea5c15e210&gt;.acquire
+E            +        where &lt;vati.app.account_lease.AccountRuntimeLease object at 0x7fea5c15e210&gt; = SessionService(cfg=ServiceConfig(account_alias='native_two', symbol='EURUSD', base='EUR', quote='USD', timeframe='H1',...redentialRef(env_var='SOURCE_FIXTURE_NOT_READ', secrets_file=None), demo=True, enabled=True, mandate_ref='', notes='')).lease
+
+../../van-physical-account-builder-baseline-tests-20261027.py:63: AssertionError</failure></testcase><testcase classname="van-physical-account-builder-baseline-tests-20261027" name="test_actual_builders_preserve_alias_and_native_account_arbitration[native_two-123-REFUSED_HELD_BY_OTHER-coordinator-coordinator]" time="0.420"><failure message="AssertionError: assert &lt;LeaseOutcome.GRANTED: 'GRANTED'&gt; is &lt;LeaseOutcome.REFUSED_HELD_BY_OTHER: 'REFUSED_HELD_BY_OTHER'&gt;&#10; +  where &lt;LeaseOutcome.GRANTED: 'GRANTED'&gt; = LeaseResult(outcome=&lt;LeaseOutcome.GRANTED: 'GRANTED'&gt;, lease=AccountLease(account_alias='native_two', holder_instance_...000, expires_at_ms=31000, software_version='vati-account-coordinator/1', git_sha=''), holder_instance_id='', detail='').outcome&#10; +    where LeaseResult(outcome=&lt;LeaseOutcome.GRANTED: 'GRANTED'&gt;, lease=AccountLease(account_alias='native_two', holder_instance_...000, expires_at_ms=31000, software_version='vati-account-coordinator/1', git_sha=''), holder_instance_id='', detail='') = acquire(now_ms=1000)&#10; +      where acquire = &lt;vati.app.account_lease.AccountRuntimeLease object at 0x7fea5c198c50&gt;.acquire&#10; +        where &lt;vati.app.account_lease.AccountRuntimeLease object at 0x7fea5c198c50&gt; = &lt;vati.app.account_service.AccountCoordinatorService object at 0x7fea5c56fb60&gt;.lease">tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-645/test_actual_builders_preserve_3')
+eurusd = SymbolContract(symbol='EURUSD', venue='mt5', base_currency='EUR', quote_currency='USD', account_currency='USD', contra...=Decimal('0'), max_adv_participation=Decimal('0.10'), liquidity_haircut=Decimal('0'), round_trip_cost_pct=Decimal('0'))
+pg_dsn = 'user=van_fixture password=van_ephemeral_test_only dbname=van_ledger_fixture_814442f83d3241f9b7af9aaf801a95a0 host=127.0.0.1 port=32867'
+first_kind = 'coordinator', second_kind = 'coordinator'
+peer_alias = 'native_two', peer_login = '123'
+expected = &lt;LeaseOutcome.REFUSED_HELD_BY_OTHER: 'REFUSED_HELD_BY_OTHER'&gt;
+
+    @pytest.mark.parametrize('first_kind,second_kind', [
+        ('single', 'single'), ('single', 'coordinator'),
+        ('coordinator', 'single'), ('coordinator', 'coordinator')])
+    @pytest.mark.parametrize('peer_alias,peer_login,expected', [
+        ('native_two', '123', LeaseOutcome.REFUSED_HELD_BY_OTHER),
+        ('native_one', '456', LeaseOutcome.REFUSED_HELD_BY_OTHER),
+        ('native_two', '456', LeaseOutcome.GRANTED)])
+    def test_actual_builders_preserve_alias_and_native_account_arbitration(
+            tmp_path, eurusd, pg_dsn, first_kind, second_kind, peer_alias, peer_login, expected):
+        from psycopg.conninfo import conninfo_to_dict
+        database = conninfo_to_dict(pg_dsn)['dbname']
+        uri = urlunsplit(urlsplit(os.environ['VATI_TEST_PG_DSN'])._replace(path='/' + database))
+        services = []
+        try:
+            first = build_fixture(tmp_path / 'first', eurusd, uri, first_kind, 'native_one', '123')
+            services.append(first)
+            second = build_fixture(tmp_path / 'second', eurusd, uri, second_kind, peer_alias, peer_login)
+            services.append(second)
+            assert first.lease.acquire(now_ms=1000).outcome is LeaseOutcome.GRANTED
+            original_epoch = first.lease.epoch
+&gt;           assert second.lease.acquire(now_ms=1000).outcome is expected
+E           AssertionError: assert &lt;LeaseOutcome.GRANTED: 'GRANTED'&gt; is &lt;LeaseOutcome.REFUSED_HELD_BY_OTHER: 'REFUSED_HELD_BY_OTHER'&gt;
+E            +  where &lt;LeaseOutcome.GRANTED: 'GRANTED'&gt; = LeaseResult(outcome=&lt;LeaseOutcome.GRANTED: 'GRANTED'&gt;, lease=AccountLease(account_alias='native_two', holder_instance_...000, expires_at_ms=31000, software_version='vati-account-coordinator/1', git_sha=''), holder_instance_id='', detail='').outcome
+E            +    where LeaseResult(outcome=&lt;LeaseOutcome.GRANTED: 'GRANTED'&gt;, lease=AccountLease(account_alias='native_two', holder_instance_...000, expires_at_ms=31000, software_version='vati-account-coordinator/1', git_sha=''), holder_instance_id='', detail='') = acquire(now_ms=1000)
+E            +      where acquire = &lt;vati.app.account_lease.AccountRuntimeLease object at 0x7fea5c198c50&gt;.acquire
+E            +        where &lt;vati.app.account_lease.AccountRuntimeLease object at 0x7fea5c198c50&gt; = &lt;vati.app.account_service.AccountCoordinatorService object at 0x7fea5c56fb60&gt;.lease
+
+../../van-physical-account-builder-baseline-tests-20261027.py:63: AssertionError</failure></testcase><testcase classname="van-physical-account-builder-baseline-tests-20261027" name="test_actual_builders_preserve_alias_and_native_account_arbitration[native_one-456-REFUSED_HELD_BY_OTHER-single-single]" time="0.507" /><testcase classname="van-physical-account-builder-baseline-tests-20261027" name="test_actual_builders_preserve_alias_and_native_account_arbitration[native_one-456-REFUSED_HELD_BY_OTHER-single-coordinator]" time="0.636" /><testcase classname="van-physical-account-builder-baseline-tests-20261027" name="test_actual_builders_preserve_alias_and_native_account_arbitration[native_one-456-REFUSED_HELD_BY_OTHER-coordinator-single]" time="0.434" /><testcase classname="van-physical-account-builder-baseline-tests-20261027" name="test_actual_builders_preserve_alias_and_native_account_arbitration[native_one-456-REFUSED_HELD_BY_OTHER-coordinator-coordinator]" time="0.589" /><testcase classname="van-physical-account-builder-baseline-tests-20261027" name="test_actual_builders_preserve_alias_and_native_account_arbitration[native_two-456-GRANTED-single-single]" time="0.780" /><testcase classname="van-physical-account-builder-baseline-tests-20261027" name="test_actual_builders_preserve_alias_and_native_account_arbitration[native_two-456-GRANTED-single-coordinator]" time="1.283" /><testcase classname="van-physical-account-builder-baseline-tests-20261027" name="test_actual_builders_preserve_alias_and_native_account_arbitration[native_two-456-GRANTED-coordinator-single]" time="0.357" /><testcase classname="van-physical-account-builder-baseline-tests-20261027" name="test_actual_builders_preserve_alias_and_native_account_arbitration[native_two-456-GRANTED-coordinator-coordinator]" time="0.423" /></testsuite></testsuites>

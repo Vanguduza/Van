@@ -142,12 +142,13 @@ def build_adapter(account: Account, registry: AccountRegistry, *, equity_hint: D
         return DerivAdapter(venue=account.router_venue, account_alias=account.alias, transport=transport,
                             identity=identity, entry_enabled=account.enabled and account.mode in SENDING_MODES)
     if account.broker == BrokerKind.CTRADER:
-        from vati.execution.ctrader import DEMO_HOST, LIVE_HOST, CtraderAdapter, CtraderTransport
+        from vati.execution.ctrader import CtraderAdapter, CtraderTransport
         secrets = registry.credentials(account.alias)
         for k in ("CTRADER_CLIENT_ID", "CTRADER_CLIENT_SECRET", "CTRADER_ACCESS_TOKEN"):
             if not secrets.get(k):
                 raise RuntimeError(f"{account.alias}: {k} missing from secrets")
-        host = LIVE_HOST if (account.server or "demo").lower() == "live" or not account.demo else DEMO_HOST
+        from vati.accounts.physical_scope import ctrader_host
+        host = ctrader_host(account)
         return bound(CtraderAdapter(CtraderTransport(host=host), client_id=secrets["CTRADER_CLIENT_ID"], client_secret_provider=lambda: registry.credentials(account.alias)["CTRADER_CLIENT_SECRET"],
                               access_token_provider=lambda: registry.credentials(account.alias)["CTRADER_ACCESS_TOKEN"], ctid_trader_account_id=int(account.login), account_alias=account.alias, venue=account.router_venue))
     if account.broker == BrokerKind.MT5_EA:
@@ -211,10 +212,11 @@ class SessionService:
         if isinstance(self.adapter, PaperAdapter):
             self.adapter.bind_contracts({c.symbol: contract})
         self._ledger = open_ledger(c.ledger)
-        from vati.app.account_lease import AccountRuntimeLease, PostgresLeaseStore
+        from vati.app.account_lease import PostgresLeaseStore
+        from vati.app.physical_account_lease import build_runtime_lease
         from vati.app.sqlite_lease import SQLiteLeaseStore
         self._lease_store = PostgresLeaseStore(c.ledger) if shared else SQLiteLeaseStore(c.ledger)
-        self.lease = AccountRuntimeLease(self._lease_store, account_alias=account.alias,
+        self.lease = build_runtime_lease(self._lease_store, account=account, mode=mandate.mode.value,
             instance_id=f"{os.uname().nodename}:{os.getpid()}:{uuid.uuid4().hex}",
             software_version="vati-single-session/1", git_sha=os.environ.get("VAN_GIT_SHA", ""))
         scfg = SessionConfig(symbol=c.symbol, base=c.base, quote=c.quote, venue=account.router_venue, account_alias=account.alias, contract=contract, mandate_dict=c.mandate, timeframe=c.timeframe,

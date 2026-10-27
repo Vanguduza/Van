@@ -1,0 +1,14 @@
+{
+  "observed_at_utc": "2026-10-27T04:57:14.623459+00:00",
+  "measured_run": "focused_r2_78passes",
+  "runtime_sources_still_byte_exact": true,
+  "selected_test_files_changed_after_run": [
+    "trading/tests/test_physical_account_lease_postgres.py"
+  ],
+  "other_test_files_changed_after_run": [
+    "trading/tests/test_physical_account_lease.py",
+    "trading/tests/test_postgres_lease_guard_ownership.py"
+  ],
+  "changes": "Three added pure cases and two optional-driver import moves. Every original functional assertion retained. Earlier78belongs to its earlier test-file snapshot.",
+  "qualification": "The earlier source-scope observation predates the driver-import correction. Current final922r2 is the source-complete revalidation; do not assert current whole-map equality for this78case run."
+}

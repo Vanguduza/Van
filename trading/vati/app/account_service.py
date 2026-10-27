@@ -234,9 +234,10 @@ class AccountCoordinatorService:
             event_time_ms=self.clock(), received_time_ms=self.clock(),
             correlation_id=account.alias,
         ))
-        self.lease = AccountRuntimeLease(
+        from vati.app.physical_account_lease import build_runtime_lease
+        self.lease = build_runtime_lease(
             self._lease_store,
-            account_alias=account.alias,
+            account=account, mode=mandate.mode.value,
             instance_id=f"{os.uname().nodename}:{os.getpid()}:{uuid.uuid4().hex}",
             software_version="vati-account-coordinator/1",
             git_sha=os.environ.get("VAN_GIT_SHA", ""),

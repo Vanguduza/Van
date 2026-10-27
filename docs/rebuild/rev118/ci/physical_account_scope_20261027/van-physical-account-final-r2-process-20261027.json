@@ -1,0 +1,8 @@
+{
+  "pid": 980570,
+  "controller": "/workspace/van-physical-account-final-r2-20261027.py",
+  "expected_cases": 922,
+  "expected_source_hashes": 1167,
+  "timeout_seconds": 1200,
+  "state": "STARTED_NOT_COMPLETE"
+}

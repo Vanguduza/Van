@@ -7,7 +7,6 @@ from contextlib import closing
 import threading
 import time
 
-import psycopg
 import pytest
 
 from test_postgres_ledger_isolation import pg_dsn
@@ -19,6 +18,9 @@ from vati.core.ledger_pg import PostgresLedger
                                              'read_error', 'guard_error', 'guard_entry_error', 'cross_thread_read',
                                              'sql_read_error', 'sql_guard_entry_error'])
 def test_outer_guard_keeps_actual_row_lock_across_nested_operations(pg_dsn, nested_operation, monkeypatch):
+    # The canonical fixture owns optional-driver admission. Non-PG workers must
+    # still collect every case without importing a driver they do not declare.
+    import psycopg
     with closing(PostgresLedger(pg_dsn)):
         pass
     original = PostgresLeaseStore(pg_dsn)

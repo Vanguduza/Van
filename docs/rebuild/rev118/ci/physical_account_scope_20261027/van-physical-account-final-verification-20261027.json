@@ -1,0 +1,12 @@
+{
+  "base_head": "b0a61313e5167bafca4dbeea96f2bfcc5c7c6b90",
+  "passed": 922,
+  "skips": 0,
+  "audit_violations": 0,
+  "all_current_runtime_test_hashes": 1167,
+  "all_hashes_match": true,
+  "owned_fixture_independently_absent": true,
+  "junit_seconds": "967.122",
+  "source_state": "CURRENT_PHYSICAL_AND_LOGICAL_SCOPE_PLUS_CONFIRMED_OPTIONAL_DRIVER_COLLECTION_FIX",
+  "acceptance": "NOT_ISSUED"
+}
