@@ -1,0 +1,76 @@
+FFFF                                                                     [100%]
+=================================== FAILURES ===================================
+____ test_outer_guard_keeps_actual_row_lock_across_nested_operations[none] _____
+
+pg_dsn = 'user=van_fixture password=van_ephemeral_test_only dbname=van_ledger_fixture_a85b58abaa08487fb656536446b46af6 host=127.0.0.1 port=32854'
+nested_operation = 'none'
+
+    @pytest.mark.parametrize('nested_operation', ['none', 'read', 'fence', 'guard'])
+    def test_outer_guard_keeps_actual_row_lock_across_nested_operations(pg_dsn, nested_operation):
+        original = PostgresLeaseStore(pg_dsn)
+        owner = AccountRuntimeLease(original, account_alias='guard_owner', instance_id='original', ttl_ms=1000)
+>       assert owner.acquire(now_ms=0).outcome is LeaseOutcome.GRANTED
+E       AssertionError: assert <LeaseOutcome.STORE_UNREACHABLE: 'STORE_UNREACHABLE'> is <LeaseOutcome.GRANTED: 'GRANTED'>
+E        +  where <LeaseOutcome.STORE_UNREACHABLE: 'STORE_UNREACHABLE'> = LeaseResult(outcome=<LeaseOutcome.STORE_UNREACHABLE: 'STORE_UNREACHABLE'>, lease=None, holder_instance_id='', detail='...s_at_ms, software_version, git_sha FROM vati.accou...\n                                                             ^').outcome
+E        +    where LeaseResult(outcome=<LeaseOutcome.STORE_UNREACHABLE: 'STORE_UNREACHABLE'>, lease=None, holder_instance_id='', detail='...s_at_ms, software_version, git_sha FROM vati.accou...\n                                                             ^') = acquire(now_ms=0)
+E        +      where acquire = <vati.app.account_lease.AccountRuntimeLease object at 0x7f298f7925d0>.acquire
+E        +  and   <LeaseOutcome.GRANTED: 'GRANTED'> = LeaseOutcome.GRANTED
+
+trading/tests/test_postgres_lease_guard_ownership.py:21: AssertionError
+____ test_outer_guard_keeps_actual_row_lock_across_nested_operations[read] _____
+
+pg_dsn = 'user=van_fixture password=van_ephemeral_test_only dbname=van_ledger_fixture_bc35c40480b2432a98349ba3e15db494 host=127.0.0.1 port=32854'
+nested_operation = 'read'
+
+    @pytest.mark.parametrize('nested_operation', ['none', 'read', 'fence', 'guard'])
+    def test_outer_guard_keeps_actual_row_lock_across_nested_operations(pg_dsn, nested_operation):
+        original = PostgresLeaseStore(pg_dsn)
+        owner = AccountRuntimeLease(original, account_alias='guard_owner', instance_id='original', ttl_ms=1000)
+>       assert owner.acquire(now_ms=0).outcome is LeaseOutcome.GRANTED
+E       AssertionError: assert <LeaseOutcome.STORE_UNREACHABLE: 'STORE_UNREACHABLE'> is <LeaseOutcome.GRANTED: 'GRANTED'>
+E        +  where <LeaseOutcome.STORE_UNREACHABLE: 'STORE_UNREACHABLE'> = LeaseResult(outcome=<LeaseOutcome.STORE_UNREACHABLE: 'STORE_UNREACHABLE'>, lease=None, holder_instance_id='', detail='...s_at_ms, software_version, git_sha FROM vati.accou...\n                                                             ^').outcome
+E        +    where LeaseResult(outcome=<LeaseOutcome.STORE_UNREACHABLE: 'STORE_UNREACHABLE'>, lease=None, holder_instance_id='', detail='...s_at_ms, software_version, git_sha FROM vati.accou...\n                                                             ^') = acquire(now_ms=0)
+E        +      where acquire = <vati.app.account_lease.AccountRuntimeLease object at 0x7f298e336780>.acquire
+E        +  and   <LeaseOutcome.GRANTED: 'GRANTED'> = LeaseOutcome.GRANTED
+
+trading/tests/test_postgres_lease_guard_ownership.py:21: AssertionError
+____ test_outer_guard_keeps_actual_row_lock_across_nested_operations[fence] ____
+
+pg_dsn = 'user=van_fixture password=van_ephemeral_test_only dbname=van_ledger_fixture_b40bd09399da4117a173e3d4360e50e3 host=127.0.0.1 port=32854'
+nested_operation = 'fence'
+
+    @pytest.mark.parametrize('nested_operation', ['none', 'read', 'fence', 'guard'])
+    def test_outer_guard_keeps_actual_row_lock_across_nested_operations(pg_dsn, nested_operation):
+        original = PostgresLeaseStore(pg_dsn)
+        owner = AccountRuntimeLease(original, account_alias='guard_owner', instance_id='original', ttl_ms=1000)
+>       assert owner.acquire(now_ms=0).outcome is LeaseOutcome.GRANTED
+E       AssertionError: assert <LeaseOutcome.STORE_UNREACHABLE: 'STORE_UNREACHABLE'> is <LeaseOutcome.GRANTED: 'GRANTED'>
+E        +  where <LeaseOutcome.STORE_UNREACHABLE: 'STORE_UNREACHABLE'> = LeaseResult(outcome=<LeaseOutcome.STORE_UNREACHABLE: 'STORE_UNREACHABLE'>, lease=None, holder_instance_id='', detail='...s_at_ms, software_version, git_sha FROM vati.accou...\n                                                             ^').outcome
+E        +    where LeaseResult(outcome=<LeaseOutcome.STORE_UNREACHABLE: 'STORE_UNREACHABLE'>, lease=None, holder_instance_id='', detail='...s_at_ms, software_version, git_sha FROM vati.accou...\n                                                             ^') = acquire(now_ms=0)
+E        +      where acquire = <vati.app.account_lease.AccountRuntimeLease object at 0x7f298e389340>.acquire
+E        +  and   <LeaseOutcome.GRANTED: 'GRANTED'> = LeaseOutcome.GRANTED
+
+trading/tests/test_postgres_lease_guard_ownership.py:21: AssertionError
+____ test_outer_guard_keeps_actual_row_lock_across_nested_operations[guard] ____
+
+pg_dsn = 'user=van_fixture password=van_ephemeral_test_only dbname=van_ledger_fixture_2ac5688604514266937f24cfd062e7d0 host=127.0.0.1 port=32854'
+nested_operation = 'guard'
+
+    @pytest.mark.parametrize('nested_operation', ['none', 'read', 'fence', 'guard'])
+    def test_outer_guard_keeps_actual_row_lock_across_nested_operations(pg_dsn, nested_operation):
+        original = PostgresLeaseStore(pg_dsn)
+        owner = AccountRuntimeLease(original, account_alias='guard_owner', instance_id='original', ttl_ms=1000)
+>       assert owner.acquire(now_ms=0).outcome is LeaseOutcome.GRANTED
+E       AssertionError: assert <LeaseOutcome.STORE_UNREACHABLE: 'STORE_UNREACHABLE'> is <LeaseOutcome.GRANTED: 'GRANTED'>
+E        +  where <LeaseOutcome.STORE_UNREACHABLE: 'STORE_UNREACHABLE'> = LeaseResult(outcome=<LeaseOutcome.STORE_UNREACHABLE: 'STORE_UNREACHABLE'>, lease=None, holder_instance_id='', detail='...s_at_ms, software_version, git_sha FROM vati.accou...\n                                                             ^').outcome
+E        +    where LeaseResult(outcome=<LeaseOutcome.STORE_UNREACHABLE: 'STORE_UNREACHABLE'>, lease=None, holder_instance_id='', detail='...s_at_ms, software_version, git_sha FROM vati.accou...\n                                                             ^') = acquire(now_ms=0)
+E        +      where acquire = <vati.app.account_lease.AccountRuntimeLease object at 0x7f298e389df0>.acquire
+E        +  and   <LeaseOutcome.GRANTED: 'GRANTED'> = LeaseOutcome.GRANTED
+
+trading/tests/test_postgres_lease_guard_ownership.py:21: AssertionError
+=========================== short test summary info ============================
+FAILED trading/tests/test_postgres_lease_guard_ownership.py::test_outer_guard_keeps_actual_row_lock_across_nested_operations[none]
+FAILED trading/tests/test_postgres_lease_guard_ownership.py::test_outer_guard_keeps_actual_row_lock_across_nested_operations[read]
+FAILED trading/tests/test_postgres_lease_guard_ownership.py::test_outer_guard_keeps_actual_row_lock_across_nested_operations[fence]
+FAILED trading/tests/test_postgres_lease_guard_ownership.py::test_outer_guard_keeps_actual_row_lock_across_nested_operations[guard]
+4 failed in 2.31s

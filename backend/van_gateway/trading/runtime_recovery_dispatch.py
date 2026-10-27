@@ -40,7 +40,8 @@ class RuntimeRecoveryDispatcher:
         intent = RecoveryIntent.from_mapping(context['intent'])
         proof = RecoveryProof.from_mapping(context['proof'])
         if (key != RECEIPT_PREFIX+proof.operation_id or saved.get('operation_id') != proof.operation_id
-            or saved.get('device_id') != intent.device_id or saved.get('intent_digest') != intent.intent_digest
+            or saved.get('device_id') != intent.device_id
+            or saved.get('intent_digest') not in (intent.intent_digest,intent.structured_intent_digest)
             or type(saved.get('expires_at_unix')) is not int or saved['expires_at_unix'] != proof.expires_at_unix):
             raise ValueError('original recovery receipt identity differs')
         owner = await self.auth.require_device(intent.device_id)
@@ -49,7 +50,7 @@ class RuntimeRecoveryDispatcher:
         # Authentication of this immutable receipt is not current authority.
         # Native enqueue checks its own clock and records expired originals as
         # terminal no-effect refusals. It never extends an approval's lifetime.
-        proof.verify_signature(intent, {proof.key_id:owner.public_key_pem})
+        proof.verify_signature(intent, {proof.key_id:owner.public_key_pem},intent_digest=saved['intent_digest'])
         try:
             result = await self._run('runtime_recovery_operation',
                 {'operation_id':proof.operation_id,'device_id':intent.device_id})

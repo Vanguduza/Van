@@ -3,6 +3,7 @@ from __future__ import annotations
 import base64
 import hashlib
 import json
+import re
 import secrets
 import time
 from dataclasses import dataclass
@@ -136,6 +137,16 @@ class OwnerApprovalService:
         )
         return ApprovalChallenge(challenge_id, canonical, expires)
 
+    async def _require_unexpired(self, db, record, challenge_id, now_unix):
+        # One predicate owns both fresh checks. It is read after acquiring the
+        # SQL writer and again after key/proof work; neither wait renews consent.
+        now = int(time.time()) if now_unix is None else now_unix
+        if int(record.get("expires_at_unix", 0)) <= now:
+            await db.execute("DELETE FROM runtime_meta WHERE key = ?", (self.PREFIX + challenge_id,))
+            await db.commit()
+            raise OwnerApprovalError("approval_challenge_expired")
+        return now
+
     async def verify_and_consume(
         self,
         *,
@@ -158,7 +169,6 @@ class OwnerApprovalService:
             await db.execute("BEGIN IMMEDIATE")
             # The SQL writer may have waited behind another transaction. The
             # original owner deadline must not be extended by that queue.
-            now = int(time.time()) if now_unix is None else now_unix
             cur = await db.execute(
                 "SELECT value FROM runtime_meta WHERE key = ?",
                 (self.PREFIX + challenge_id,),
@@ -174,10 +184,7 @@ class OwnerApprovalService:
                 await db.rollback()
                 raise OwnerApprovalError("approval_challenge_corrupt") from exc
 
-            if int(record.get("expires_at_unix", 0)) <= now:
-                await db.execute("DELETE FROM runtime_meta WHERE key = ?", (self.PREFIX + challenge_id,))
-                await db.commit()
-                raise OwnerApprovalError("approval_challenge_expired")
+            now = await self._require_unexpired(db, record, challenge_id, now_unix)
             if (
                 record.get("device_id") != device_id
                 or record.get("action_id") != action_id
@@ -199,7 +206,15 @@ class OwnerApprovalService:
                     or type(record.get("parameters_bound", False)) is not bool):
                 await db.rollback()
                 raise OwnerApprovalError("approval_challenge_binding_corrupt")
-            if schema == "van-a4-intent-v1" and any("|" in value for value in
+            legacy_recovery = (
+                action_id in {"trading.runtime.clear_kill_switch", "trading.runtime.reset_loss_streak",
+                              "trading.runtime.resume_drawdown"}
+                and project_id is None and turn_id is None and parameters is None
+                and record.get("parameters") is None and record.get("parameters_bound", False) is False
+                and record.get("source_command_id") == "runtime:" + action_id.rsplit(".", 1)[-1]
+                and re.fullmatch(r"trading-runtime-control\|[0-9a-f]{64}", text) is not None
+            )
+            if schema == "van-a4-intent-v1" and not legacy_recovery and any("|" in value for value in
                     (device_id, action_id, project_id or "", text)):
                 # Old short-lived challenges keep their original encoding only
                 # when it is unambiguous. Request a fresh proof for other text.
@@ -263,11 +278,7 @@ class OwnerApprovalService:
             # Reading the enrolled device and checking its proof can cross the
             # same deadline too. Consume only within the original half-open
             # window, including when a durable recovery receipt is requested.
-            now = int(time.time()) if now_unix is None else now_unix
-            if int(record.get("expires_at_unix", 0)) <= now:
-                await db.execute("DELETE FROM runtime_meta WHERE key = ?", (self.PREFIX + challenge_id,))
-                await db.commit()
-                raise OwnerApprovalError("approval_challenge_expired")
+            now = await self._require_unexpired(db, record, challenge_id, now_unix)
 
             deleted = await db.execute(
                 "DELETE FROM runtime_meta WHERE key = ?",

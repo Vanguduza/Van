@@ -84,6 +84,14 @@ class RecoveryIntent:
     def intent_digest(self):
         return hashlib.sha256('|'.join(['van-a4-intent-v1',self.device_id,self.action_id,'',self.approval_text]).encode()).hexdigest()
 
+    @property
+    def structured_intent_digest(self):
+        # Same opaque digest as the current gateway. Native recovery fixes the
+        # project and parameters to None; its typed body supplies all target data.
+        body=['van-a4-intent-json-v2',self.device_id,self.action_id,None,
+              ' '.join(self.approval_text.split()),None]
+        return hashlib.sha256(json.dumps(body,sort_keys=True,separators=(',',':'),allow_nan=False).encode()).hexdigest()
+
 
 def approval_statement(intent,operation_id,expires_at_unix):
     if not isinstance(operation_id,str) or not re.fullmatch(r'[A-Za-z0-9_-]{20,128}',operation_id):
@@ -134,7 +142,7 @@ class RecoveryProof:
             raise RuntimeControlError('runtime owner approval expired or exceeds its native lifetime')
         return self.verify_signature(intent, keys)
 
-    def verify_signature(self,intent: RecoveryIntent,keys: Mapping[str,str]):
+    def verify_signature(self,intent: RecoveryIntent,keys: Mapping[str,str],*,intent_digest=None):
         """Authenticate immutable history only; this method grants NO current authority.
 
         Used for an expired first-delivery refusal and archived readback. Effects
@@ -151,7 +159,22 @@ class RecoveryProof:
             if not isinstance(key,ec.EllipticCurvePublicKey) or not isinstance(key.curve,ec.SECP256R1):
                 raise ValueError('owner key must be P256')
             signature=base64.b64decode(self.signature_b64,validate=True)
-            key.verify(signature,statement.encode(),ec.ECDSA(hashes.SHA256()))
+            # Both statements bind this exact typed intent and original expiry.
+            # Keep archived legacy references stable; never select an encoding
+            # from a caller label or merely accept either receipt digest.
+            for candidate_digest in (intent.structured_intent_digest,intent.intent_digest):
+                if intent_digest is not None and candidate_digest!=intent_digest:
+                    continue
+                fields=statement.split('|');fields[6]=candidate_digest
+                candidate='|'.join(fields)
+                try:
+                    key.verify(signature,candidate.encode(),ec.ECDSA(hashes.SHA256()))
+                except InvalidSignature:
+                    continue
+                statement=candidate
+                break
+            else:
+                raise InvalidSignature()
         except (ValueError,TypeError,InvalidSignature) as exc:
             raise RuntimeControlError('runtime owner signature is invalid') from exc
         return 'owner-runtime-control:'+hashlib.sha256(statement.encode()+b'\n'+signature).hexdigest()

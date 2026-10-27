@@ -1,0 +1,13 @@
+{
+  "run": "van-owner-recovery-final-r1-20261027",
+  "test": "test_a4_requires_one_time_biometric_signature_and_rejects_legacy_token",
+  "original_status": "degraded",
+  "original_message": "This action could not be authorised against the sealed command; command not executed",
+  "authority_failure_reasons": [
+    "command_authority_expired"
+  ],
+  "request_claim_to_response_seconds": 23,
+  "signed_command_window_seconds": 5,
+  "interpretation": "The positive-control fixture used live wall clock and crossed its unchanged command lifetime. Runtime refused correctly. No expiry assertion or runtime deadline will be weakened.",
+  "change": "Scoped deterministic fixture clock for this one positive/replay test; dedicated real-SQL expiry tests remain unchanged."
+}

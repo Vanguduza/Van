@@ -127,14 +127,21 @@ async def test_delivery_marker_failure_recovers_native_original_instead_of_resen
 
 
 @pytest.mark.asyncio
-@pytest.mark.parametrize('field', ['device_id','expires_at_unix','intent_digest','operation_id'])
+@pytest.mark.parametrize('field', ['device_id','expires_at_unix','intent_digest','operation_id','other_valid_digest'])
 async def test_corrupt_receipt_metadata_never_dispatches(client, session_control, field):
     ac, app = client; service, transport, _ = session_control
     body = await prepare(ac, service); op = body['approval_proof']['challenge_id']
     transport.fail_before_enqueue = True
     assert (await ac.post(BASE+'/request', json=body)).status_code == 503
     row = await app.state.store.fetchone('SELECT value FROM runtime_meta WHERE key=?',('owner_approval_receipt:'+op,))
-    saved = json.loads(row['value']); saved[field] = saved[field]+1 if field=='expires_at_unix' else 'foreign'
+    saved = json.loads(row['value'])
+    if field=='other_valid_digest':
+        from vati.app.runtime_control_protocol import RecoveryIntent
+        intent=RecoveryIntent.from_mapping(saved['context']['intent'])
+        assert saved['intent_digest']==intent.structured_intent_digest
+        saved['intent_digest']=intent.intent_digest
+    else:
+        saved[field] = saved[field]+1 if field=='expires_at_unix' else 'foreign'
     await app.state.store.execute('UPDATE runtime_meta SET value=? WHERE key=?',(json.dumps(saved),'owner_approval_receipt:'+op))
     assert (await dispatcher(app).reconcile_once())['deferred'] == 1
     assert transport.calls.count('runtime_recovery_request') == 1

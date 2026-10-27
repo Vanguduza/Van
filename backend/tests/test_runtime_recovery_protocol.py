@@ -1,5 +1,7 @@
 """Existing gateway A4 CryptoObject statements bind exact native recovery."""
 import base64
+import hashlib
+import json
 from dataclasses import replace
 
 import pytest
@@ -9,9 +11,68 @@ from cryptography.hazmat.primitives.asymmetric import ec
 
 from van_gateway.approval.service import OwnerApprovalService
 from van_gateway.storage.db import Store
-from vati.app.runtime_control_protocol import RecoveryIntent,RecoveryProof,RuntimeControlError
+from vati.app.runtime_control_protocol import RecoveryIntent,RecoveryProof,RuntimeControlError,approval_statement
 
 NOW=1800000000
+
+
+@pytest.mark.asyncio
+async def test_current_gateway_signature_requires_its_actual_receipt_digest(owner_proof):
+    intent,proof,keys=await owner_proof()
+    reference=proof.verify(intent,keys,now_unix=NOW)
+    assert proof.verify_signature(intent,keys,intent_digest=intent.structured_intent_digest)==reference
+    with pytest.raises(RuntimeControlError,match='signature is invalid'):
+        proof.verify_signature(intent,keys,intent_digest=intent.intent_digest)
+
+
+@pytest.mark.asyncio
+async def test_legacy_native_signature_keeps_original_reference_and_expiry(owner_proof):
+    intent,current,_=await owner_proof()
+    signer=ec.generate_private_key(ec.SECP256R1())
+    public=signer.public_key().public_bytes(serialization.Encoding.PEM,serialization.PublicFormat.SubjectPublicKeyInfo).decode()
+    statement=approval_statement(intent,current.operation_id,current.expires_at_unix)
+    signature=signer.sign(statement.encode(),ec.ECDSA(hashes.SHA256()))
+    proof=replace(current,signature_b64=base64.b64encode(signature).decode())
+    keys={proof.key_id:public}
+    original='owner-runtime-control:'+hashlib.sha256(statement.encode()+b'\n'+signature).hexdigest()
+    assert proof.verify(intent,keys,now_unix=NOW)==original
+    assert proof.verify_signature(intent,keys,intent_digest=intent.intent_digest)==original
+    with pytest.raises(RuntimeControlError,match='signature is invalid'):
+        proof.verify_signature(intent,keys,intent_digest=intent.structured_intent_digest)
+    with pytest.raises(RuntimeControlError,match='expired'):
+        proof.verify(intent,keys,now_unix=proof.expires_at_unix)
+
+
+@pytest.mark.asyncio
+async def test_unconsumed_legacy_native_challenge_keeps_exact_fresh_one_use_authority(tmp_path,owner_proof):
+    intent,_,_=await owner_proof()
+    store=Store(str(tmp_path/'legacy-native-approval.sqlite'));await store.migrate()
+    approvals=OwnerApprovalService(store)
+    signer=ec.generate_private_key(ec.SECP256R1())
+    public=signer.public_key().public_bytes(serialization.Encoding.PEM,serialization.PublicFormat.SubjectPublicKeyInfo).decode()
+    await store.execute('INSERT INTO devices(device_id,public_key_pem,enrolled_at_unix) VALUES(?,?,?)',
+                        (intent.device_id,public,NOW))
+    identity=dict(device_id=intent.device_id,source_command_id='runtime:'+intent.action,turn_id=None,
+                  action_id=intent.action_id,text=intent.approval_text,project_id=None)
+    challenge=await approvals.issue(**identity,now_unix=NOW)
+    row=await store.fetchone('SELECT value FROM runtime_meta WHERE key=?',(approvals.PREFIX+challenge.challenge_id,))
+    record=json.loads(row['value']);record.pop('intent_digest_schema')
+    record['intent_digest']=intent.intent_digest
+    record['canonical']=approval_statement(intent,challenge.challenge_id,challenge.expires_at_unix)
+    await store.execute('UPDATE runtime_meta SET value=? WHERE key=?',
+                        (json.dumps(record),approvals.PREFIX+challenge.challenge_id))
+    signature=base64.b64encode(signer.sign(record['canonical'].encode(),ec.ECDSA(hashes.SHA256()))).decode()
+    proof=RecoveryProof(challenge.challenge_id,challenge.expires_at_unix,'legacy-fixture-key',signature)
+    arguments=dict(**identity,challenge_id=challenge.challenge_id,signature_b64=signature,now_unix=NOW+1)
+    context={'intent':intent.body(),'proof':proof.public_record()}
+    await approvals.verify_and_consume(**arguments,durable_receipt=context)
+    saved=json.loads((await store.fetchone('SELECT value FROM runtime_meta WHERE key=?',
+                     ('owner_approval_receipt:'+challenge.challenge_id,)))['value'])
+    assert saved['intent_digest']==intent.intent_digest
+    assert proof.verify_signature(intent,{proof.key_id:public},intent_digest=saved['intent_digest'])
+    from van_gateway.approval.service import OwnerApprovalError
+    with pytest.raises(OwnerApprovalError,match='unknown_or_consumed'):
+        await approvals.verify_and_consume(**arguments)
 
 
 @pytest_asyncio.fixture
