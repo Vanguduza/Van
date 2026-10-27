@@ -131,6 +131,8 @@ def _canonical_hash(obj: Any) -> str:
             if isinstance(o, RiskSnapshot) and o.used_margin is None:
                 result.pop("used_margin")  # original snapshot identities remain reproducible
             if isinstance(o, RiskSnapshot):
+                if o.native_account_context is None:
+                    result.pop('native_account_context')
                 for position in result['open_positions']:
                     if position['stop_terms'] is None:
                         position.pop('stop_terms')  # original legacy snapshot bytes/hash
@@ -268,6 +270,8 @@ class RiskAuthority:
         # None means the venue did not report it. That is treated as unknown rather than
         # healthy, and unknown is only acceptable where there is genuinely no margin to
         # report: a paper account, or a venue VAN does not place orders on.
+        from vati.risk.account_context import validate_snapshot_context
+        validate_snapshot_context(snapshot)
         native_margin = (snapshot.symbol_contract.loss_model is LossModel.STOP_DISTANCE
                          and intent.venue != "paper")
         amounts = (snapshot.used_margin, snapshot.free_margin, snapshot.margin_level_pct)

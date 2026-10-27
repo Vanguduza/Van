@@ -650,8 +650,11 @@ class AccountCoordinatorService:
         now_ms = max(now_ms, self.clock())
         from vati.funding.risk_fence import funding_risk_fence
         from vati.funding.mt5_runtime import capture_cached_mt5
-        capture_cached_mt5(self._ledger, acct, now_ms=now_ms)
+        native_capture = capture_cached_mt5(self._ledger, acct, now_ms=now_ms)
         funding = funding_risk_fence(self._ledger, self.adapter, acct, now_ms=now_ms)
+        from vati.risk.account_context import context_with_funding_hold
+        native_context, funding = context_with_funding_hold(self._ledger, self.adapter, acct, funding,
+            now_ms=now_ms, mt5_capture=native_capture)
         if funding.available:
             if self.peak_equity == 0:
                 self.peak_equity = self.day_start_equity = self.week_start_equity = acct.equity
@@ -687,6 +690,7 @@ class AccountCoordinatorService:
             risk_store_ok=store_ok, market_integrity=integrity,
             tier1_event_blackout_active=blackout,
             margin_level_pct=acct.margin_level_pct, free_margin=acct.free_margin, used_margin=acct.used_margin,
+            native_account_context=native_context,
             kill_switch_triggers=frozenset(self.kill.active),
             preservation_blocks_new_risk=(
                 not funding.available or (self.lifecycle.preservation_blocks_new_risk

@@ -1,0 +1,25 @@
+{
+  "command": [
+    "env",
+    "PYTHONPATH=trading:trading/tests:backend:backend/tests:.",
+    "/workspace/van-backend-venv-20261025/bin/python",
+    "tools/rebuild/source_storage_audit.py",
+    "--report",
+    "/workspace/van-native-risk-context-fault-fixture-20261027-audit.json",
+    "/workspace/van-native-risk-context-fault-fixture-20261027.py",
+    "-p",
+    "conftest",
+    "--import-mode=importlib",
+    "--junitxml=/workspace/van-native-risk-context-fault-fixture-20261027.xml",
+    "-q"
+  ],
+  "cwd": "/workspace/van-review-2026-10-18/publish",
+  "controller_pid": 1146908,
+  "started_at_utc": "2026-10-27T08:49:32.274497+00:00",
+  "timeout_seconds": 300,
+  "state": "COMPLETED",
+  "command_pid": 1146923,
+  "exit": 0,
+  "adopted_children_reaped": [],
+  "finished_at_utc": "2026-10-27T08:52:30.206353+00:00"
+}

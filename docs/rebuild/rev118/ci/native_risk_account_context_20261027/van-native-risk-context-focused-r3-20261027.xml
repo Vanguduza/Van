@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="2" skipped="0" tests="33" time="2.551" timestamp="2026-10-27T08:41:50.403047+00:00" hostname="2c5a245e39f1"><testcase classname="trading.tests.test_native_risk_account_context" name="test_mt5_context_retains_actual_query_identity_and_does_not_submit_commands" time="1.218" /><testcase classname="trading.tests.test_native_risk_account_context" name="test_aliases_share_physical_identity_but_retain_their_original_source_labels" time="0.018" /><testcase classname="trading.tests.test_native_risk_account_context" name="test_original_mt5_source_query_must_exist_before_context_can_bind_it[None]" time="0.011" /><testcase classname="trading.tests.test_native_risk_account_context" name="test_original_mt5_source_query_must_exist_before_context_can_bind_it[captured1]" time="0.012" /><testcase classname="trading.tests.test_native_risk_account_context" name="test_original_mt5_source_query_must_exist_before_context_can_bind_it[captured2]" time="0.009" /><testcase classname="trading.tests.test_native_risk_account_context" name="test_context_cannot_claim_authority_or_contradict_its_original_source[risk_capital_qualified-True]" time="0.013" /><testcase classname="trading.tests.test_native_risk_account_context" name="test_context_cannot_claim_authority_or_contradict_its_original_source[execution_authority-True]" time="0.010" /><testcase classname="trading.tests.test_native_risk_account_context" name="test_context_cannot_claim_authority_or_contradict_its_original_source[account_alias-other]" time="0.012" /><testcase classname="trading.tests.test_native_risk_account_context" name="test_context_cannot_claim_authority_or_contradict_its_original_source[physical_account_key-native-account:v1:0000000000000000000000000000000000000000000000000000000000000000]" time="0.014" /><testcase classname="trading.tests.test_native_risk_account_context" name="test_context_cannot_claim_authority_or_contradict_its_original_source[monetary_scope_hash-0000000000000000000000000000000000000000000000000000000000000000]" time="0.014" /><testcase classname="trading.tests.test_native_risk_account_context" name="test_context_cannot_claim_authority_or_contradict_its_original_source[observation_ref-0000000000000000000000000000000000000000000000000000000000000000]" time="0.015" /><testcase classname="trading.tests.test_native_risk_account_context" name="test_context_cannot_claim_authority_or_contradict_its_original_source[source_query_ref-None]" time="0.012" /><testcase classname="trading.tests.test_native_risk_account_context" name="test_context_cannot_claim_authority_or_contradict_its_original_source[source_mark_json-{}]" time="0.022" /><testcase classname="trading.tests.test_native_risk_account_context" name="test_mutable_or_noncanonical_mark_spelling_cannot_change_a_frozen_input" time="0.013" /><testcase classname="trading.tests.test_native_risk_account_context" name="test_ctrader_context_preserves_actual_reader_facts_without_additional_provider_io" time="0.210" /><testcase classname="trading.tests.test_native_risk_account_context" name="test_unsupported_or_unverified_accounts_do_not_invent_native_evidence" time="0.008" /><testcase classname="trading.tests.test_native_risk_account_context" name="test_new_context_round_trip_is_hashed_and_old_snapshot_remains_byte_compatible" time="0.014" /><testcase classname="trading.tests.test_native_risk_account_context" name="test_snapshot_cannot_borrow_another_account_or_time_currency_valuation[alias]" time="0.013" /><testcase classname="trading.tests.test_native_risk_account_context" name="test_snapshot_cannot_borrow_another_account_or_time_currency_valuation[balance]" time="0.016" /><testcase classname="trading.tests.test_native_risk_account_context" name="test_snapshot_cannot_borrow_another_account_or_time_currency_valuation[equity]" time="0.018" /><testcase classname="trading.tests.test_native_risk_account_context" name="test_snapshot_cannot_borrow_another_account_or_time_currency_valuation[currency]" time="0.022" /><testcase classname="trading.tests.test_native_risk_account_context" name="test_snapshot_cannot_borrow_another_account_or_time_currency_valuation[venue]" time="0.025" /><testcase classname="trading.tests.test_native_risk_account_context" name="test_snapshot_cannot_borrow_another_account_or_time_currency_valuation[future]" time="0.018" /><testcase classname="trading.tests.test_native_risk_account_context" name="test_actual_snapshot_producers_bind_original_native_sources[MT5-single]" time="0.056"><failure message="ValueError: native account source context does not bind this risk snapshot">tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-684/test_actual_snapshot_producers0')
+eurusd = SymbolContract(symbol='EURUSD', venue='mt5', base_currency='EUR', quote_currency='USD', account_currency='USD', contra...=Decimal('0'), max_adv_participation=Decimal('0.10'), liquidity_haircut=Decimal('0'), round_trip_cost_pct=Decimal('0'))
+producer = 'single', provider = 'MT5'
+
+    @pytest.mark.parametrize('producer', ['single', 'account'])
+    @pytest.mark.parametrize('provider', ['MT5', 'CTRADER'])
+    def test_actual_snapshot_producers_bind_original_native_sources(tmp_path, eurusd, producer, provider):
+        from types import SimpleNamespace as N
+        from vati.execution.base import Health
+        from vati.risk.contracts import MarketIntegrityState
+        from vati.risk.serde import snapshot_to_dict
+        if provider == 'MT5':
+            from test_mt5_funding_runtime import setup
+            ledger, adapter, account = setup(tmp_path)
+        else:
+            from test_funding_risk_fence import book, native, mark
+            ledger, _, _ = book(tmp_path)
+            adapter, account = native(mark(3500, equity='98'))
+        contract = replace(eurusd, venue=adapter.venue, account_currency=account.currency)
+        adapter.sync_account = lambda: account
+        adapter.heartbeat = lambda **_: Health(True, 0, 10000)
+        adapter.positions = lambda: []
+        if producer == 'single':
+            from test_recoverable_lockouts import _cycle
+            service = _cycle(contract, ledger)
+            service.adapter = adapter
+            facts = service.snapshot(now_ms=10000, quote_age_ms=17)
+        else:
+            from vati.app.account_service import AccountCoordinatorService
+            service = AccountCoordinatorService.__new__(AccountCoordinatorService)
+            service.adapter = adapter; service.account = N(); service._ledger = ledger
+            service.clock = lambda: 10000; service.contracts = {'EURUSD': contract}
+            service.peak_equity = account.equity; service.day_start_equity = account.equity
+            service.week_start_equity = account.equity; service._entries = {}
+            service.cfg = N(account_alias=account.account_alias, max_quote_age_ms=5000)
+            service._ledger_positions = lambda: []; service._risk_store_ok = lambda: True
+            service._open_positions = lambda: (); service._drawdown_top_state = lambda: None
+            service.lifecycle = None; service.consecutive_losses = 0; service.kill = N(active=[])
+            service.evaluators = {'EURUSD': N(last_state=N(as_of_ms=10000, quote_age_ms=17,
+                event_window=None, integrity=MarketIntegrityState.NORMAL))}
+            facts = service._snapshot_for(N(symbol='EURUSD', strategy_id=''))
+        context = facts.native_account_context
+        assert type(context) is NativeAccountRiskContext and context.provider == provider
+        assert context.account_alias == facts.account_alias == account.account_alias
+        assert context.monetary_scope_hash == account.funding_mark.scope_hash
+        assert context.risk_capital_qualified is context.execution_authority is False
+&gt;       validate_snapshot_context(facts)
+
+trading/tests/test_native_risk_account_context.py:185: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+snapshot = RiskSnapshot(now_unix=10, account_alias='native', account_verified=True, equity=Decimal('10000'), balance=Decimal('100...sis":"REPORTED_ACCOUNT_EQUITY_MINUS_NATIVE_ACCOUNT_CREDIT"}', risk_capital_qualified=False, execution_authority=False))
+
+    def validate_snapshot_context(snapshot):
+        context = snapshot.native_account_context
+        if context is None:
+            return
+        source = inspect_context(context)
+        if (context.account_alias != snapshot.account_alias
+                or {'MT5': 'mt5', 'CTRADER': 'ctrader'}[context.provider] != snapshot.symbol_contract.venue
+                or source['currency'] != snapshot.symbol_contract.account_currency
+                or fraction(source['balance']) != fraction(snapshot.balance)
+                or fraction(source['equity']) != fraction(snapshot.equity)
+                or source['observed_at_ms'] // 1000 &gt; snapshot.now_unix):
+&gt;           raise ValueError('native account source context does not bind this risk snapshot')
+E           ValueError: native account source context does not bind this risk snapshot
+
+trading/vati/risk/account_context.py:106: ValueError</failure></testcase><testcase classname="trading.tests.test_native_risk_account_context" name="test_actual_snapshot_producers_bind_original_native_sources[MT5-account]" time="0.165" /><testcase classname="trading.tests.test_native_risk_account_context" name="test_actual_snapshot_producers_bind_original_native_sources[CTRADER-single]" time="0.028"><failure message="ValueError: native account source context does not bind this risk snapshot">tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-684/test_actual_snapshot_producers2')
+eurusd = SymbolContract(symbol='EURUSD', venue='mt5', base_currency='EUR', quote_currency='USD', account_currency='USD', contra...=Decimal('0'), max_adv_participation=Decimal('0.10'), liquidity_haircut=Decimal('0'), round_trip_cost_pct=Decimal('0'))
+producer = 'single', provider = 'CTRADER'
+
+    @pytest.mark.parametrize('producer', ['single', 'account'])
+    @pytest.mark.parametrize('provider', ['MT5', 'CTRADER'])
+    def test_actual_snapshot_producers_bind_original_native_sources(tmp_path, eurusd, producer, provider):
+        from types import SimpleNamespace as N
+        from vati.execution.base import Health
+        from vati.risk.contracts import MarketIntegrityState
+        from vati.risk.serde import snapshot_to_dict
+        if provider == 'MT5':
+            from test_mt5_funding_runtime import setup
+            ledger, adapter, account = setup(tmp_path)
+        else:
+            from test_funding_risk_fence import book, native, mark
+            ledger, _, _ = book(tmp_path)
+            adapter, account = native(mark(3500, equity='98'))
+        contract = replace(eurusd, venue=adapter.venue, account_currency=account.currency)
+        adapter.sync_account = lambda: account
+        adapter.heartbeat = lambda **_: Health(True, 0, 10000)
+        adapter.positions = lambda: []
+        if producer == 'single':
+            from test_recoverable_lockouts import _cycle
+            service = _cycle(contract, ledger)
+            service.adapter = adapter
+            facts = service.snapshot(now_ms=10000, quote_age_ms=17)
+        else:
+            from vati.app.account_service import AccountCoordinatorService
+            service = AccountCoordinatorService.__new__(AccountCoordinatorService)
+            service.adapter = adapter; service.account = N(); service._ledger = ledger
+            service.clock = lambda: 10000; service.contracts = {'EURUSD': contract}
+            service.peak_equity = account.equity; service.day_start_equity = account.equity
+            service.week_start_equity = account.equity; service._entries = {}
+            service.cfg = N(account_alias=account.account_alias, max_quote_age_ms=5000)
+            service._ledger_positions = lambda: []; service._risk_store_ok = lambda: True
+            service._open_positions = lambda: (); service._drawdown_top_state = lambda: None
+            service.lifecycle = None; service.consecutive_losses = 0; service.kill = N(active=[])
+            service.evaluators = {'EURUSD': N(last_state=N(as_of_ms=10000, quote_age_ms=17,
+                event_window=None, integrity=MarketIntegrityState.NORMAL))}
+            facts = service._snapshot_for(N(symbol='EURUSD', strategy_id=''))
+        context = facts.native_account_context
+        assert type(context) is NativeAccountRiskContext and context.provider == provider
+        assert context.account_alias == facts.account_alias == account.account_alias
+        assert context.monetary_scope_hash == account.funding_mark.scope_hash
+        assert context.risk_capital_qualified is context.execution_authority is False
+&gt;       validate_snapshot_context(facts)
+
+trading/tests/test_native_risk_account_context.py:185: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+snapshot = RiskSnapshot(now_unix=10, account_alias='ctrader_primary', account_verified=True, equity=Decimal('98'), balance=Decima...NCE_PLUS_NATIVE_NET_UNREALIZED_EXCLUDING_SEPARATE_BONUSES"}', risk_capital_qualified=False, execution_authority=False))
+
+    def validate_snapshot_context(snapshot):
+        context = snapshot.native_account_context
+        if context is None:
+            return
+        source = inspect_context(context)
+        if (context.account_alias != snapshot.account_alias
+                or {'MT5': 'mt5', 'CTRADER': 'ctrader'}[context.provider] != snapshot.symbol_contract.venue
+                or source['currency'] != snapshot.symbol_contract.account_currency
+                or fraction(source['balance']) != fraction(snapshot.balance)
+                or fraction(source['equity']) != fraction(snapshot.equity)
+                or source['observed_at_ms'] // 1000 &gt; snapshot.now_unix):
+&gt;           raise ValueError('native account source context does not bind this risk snapshot')
+E           ValueError: native account source context does not bind this risk snapshot
+
+trading/vati/risk/account_context.py:106: ValueError</failure></testcase><testcase classname="trading.tests.test_native_risk_account_context" name="test_actual_snapshot_producers_bind_original_native_sources[CTRADER-account]" time="0.015" /><testcase classname="trading.tests.test_native_risk_account_context" name="test_real_sealed_decision_and_durable_replay_bind_original_native_source" time="0.033" /><testcase classname="trading.tests.test_native_risk_account_context" name="test_actual_authority_seals_a_refusal_for_invalid_native_context[authority]" time="0.026" /><testcase classname="trading.tests.test_native_risk_account_context" name="test_actual_authority_seals_a_refusal_for_invalid_native_context[source]" time="0.023" /><testcase classname="trading.tests.test_native_risk_account_context" name="test_actual_authority_seals_a_refusal_for_invalid_native_context[physical]" time="0.015" /><testcase classname="trading.tests.test_native_risk_account_context" name="test_actual_authority_seals_a_refusal_for_invalid_native_context[alias]" time="0.015" /><testcase classname="trading.tests.test_native_risk_account_context" name="test_actual_authority_seals_a_refusal_for_invalid_native_context[venue]" time="0.014" /></testsuite></testsuites>

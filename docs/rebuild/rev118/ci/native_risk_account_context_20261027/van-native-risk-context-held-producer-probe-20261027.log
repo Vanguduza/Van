@@ -1,0 +1,118 @@
+FF                                                                       [100%]
+=================================== FAILURES ===================================
+___ test_native_source_failure_keeps_existing_explicit_funding_hold[single] ____
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-689/test_native_source_failure_kee0')
+eurusd = SymbolContract(symbol='EURUSD', venue='mt5', base_currency='EUR', quote_currency='USD', account_currency='USD', contra...=Decimal('0'), max_adv_participation=Decimal('0.10'), liquidity_haircut=Decimal('0'), round_trip_cost_pct=Decimal('0'))
+producer = 'single'
+
+    @pytest.mark.parametrize('producer', ['single','account'])
+    def test_native_source_failure_keeps_existing_explicit_funding_hold(tmp_path, eurusd, producer):
+        from test_funding_risk_fence import book,native,mark
+        from test_recoverable_lockouts import _cycle
+        from vati.risk.contracts import MarketIntegrityState
+        ledger,_,_=book(tmp_path)
+        adapter,account=native(replace(mark(3500,equity='98'),native_account_id=99999))
+        contract=replace(eurusd,venue='ctrader',account_currency=account.currency)
+        if producer=='single':
+            service=_cycle(contract,ledger)
+            service.cfg=replace(service.cfg,contract=contract,venue='ctrader',account_alias=account.account_alias)
+            service.adapter=adapter
+>           facts=service.snapshot(now_ms=10000,quote_age_ms=17)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+../../van-native-risk-context-held-producer-probe-20261027.py:17: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+trading/vati/app/cycle.py:326: in snapshot
+    native_context = context_for_account(self.ledger, self.adapter, acct,
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+ledger = <vati.core.ledger.Ledger object at 0x7f77e8091400>
+adapter = CtraderAdapter(transport=<test_native_cash_history.NativeCash object at 0x7f77e75ccaa0>, client_id='fixture', client_s...der.depth.DepthBook object at 0x7f77e75cc7a0>, _depth_subscriptions={}, _depth_control_states={}, _depth_retired=set())
+account = AccountState(account_alias='ctrader_primary', equity=Decimal('98'), balance=Decimal('100'), currency='EUR', verified=T...sion=1, manager_bonus=None, ib_bonus=None, nonwithdrawable_bonus=None, registered_at_ms=None), native_observation=None)
+now_ms = 10000, mt5_capture = None
+
+    def context_for_account(ledger, adapter, account, *, now_ms, mt5_capture=None):
+        """Preserve actual cached source data; perform no provider or order I/O."""
+        if account.verified is not True:
+            return None
+        from vati.execution.ctrader.adapter import CtraderAdapter
+        from vati.execution.mt5_bridge import Mt5BridgeAdapter
+        from vati.execution.mt5_pull import Mt5PullAdapter
+        mark = getattr(account, 'funding_mark', None)
+        if isinstance(adapter, CtraderAdapter) and type(mark) is NativeAccountMark:
+            source = NativeAccountMark.from_body(mark.body())
+            from vati.execution.ctrader.transport import DEMO_HOST, LIVE_HOST
+            realm = DEMO_HOST if source.environment == 'DEMO' else LIVE_HOST
+            if (adapter.ctid_trader_account_id != source.native_account_id
+                    or adapter.transport.host != realm):
+>               raise ValueError('current cTrader source account identity mismatch')
+E               ValueError: current cTrader source account identity mismatch
+
+trading/vati/risk/account_context.py:123: ValueError
+___ test_native_source_failure_keeps_existing_explicit_funding_hold[account] ___
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-689/test_native_source_failure_kee1')
+eurusd = SymbolContract(symbol='EURUSD', venue='mt5', base_currency='EUR', quote_currency='USD', account_currency='USD', contra...=Decimal('0'), max_adv_participation=Decimal('0.10'), liquidity_haircut=Decimal('0'), round_trip_cost_pct=Decimal('0'))
+producer = 'account'
+
+    @pytest.mark.parametrize('producer', ['single','account'])
+    def test_native_source_failure_keeps_existing_explicit_funding_hold(tmp_path, eurusd, producer):
+        from test_funding_risk_fence import book,native,mark
+        from test_recoverable_lockouts import _cycle
+        from vati.risk.contracts import MarketIntegrityState
+        ledger,_,_=book(tmp_path)
+        adapter,account=native(replace(mark(3500,equity='98'),native_account_id=99999))
+        contract=replace(eurusd,venue='ctrader',account_currency=account.currency)
+        if producer=='single':
+            service=_cycle(contract,ledger)
+            service.cfg=replace(service.cfg,contract=contract,venue='ctrader',account_alias=account.account_alias)
+            service.adapter=adapter
+            facts=service.snapshot(now_ms=10000,quote_age_ms=17)
+        else:
+            from vati.app.account_service import AccountCoordinatorService
+            service=AccountCoordinatorService.__new__(AccountCoordinatorService)
+            service.adapter=adapter;service.account=N();service._ledger=ledger;service.clock=lambda:10000
+            service.contracts={'EURUSD':contract};service.peak_equity=account.equity
+            service.day_start_equity=account.equity;service.week_start_equity=account.equity
+            service._entries={};service.cfg=N(account_alias=account.account_alias,max_quote_age_ms=5000)
+            service._ledger_positions=lambda:[];service._risk_store_ok=lambda:True
+            service._open_positions=lambda:();service._drawdown_top_state=lambda:None
+            service.lifecycle=None;service.consecutive_losses=0;service.kill=N(active=[])
+            service.evaluators={'EURUSD':N(last_state=N(as_of_ms=10000,quote_age_ms=17,event_window=None,integrity=MarketIntegrityState.NORMAL))}
+>           facts=service._snapshot_for(N(symbol='EURUSD',strategy_id=''))
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+../../van-native-risk-context-held-producer-probe-20261027.py:29: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+trading/vati/app/account_service.py:656: in _snapshot_for
+    native_context = context_for_account(self._ledger, self.adapter, acct,
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+ledger = <vati.core.ledger.Ledger object at 0x7f77e734eba0>
+adapter = CtraderAdapter(transport=<test_native_cash_history.NativeCash object at 0x7f77e734ed20>, client_id='fixture', client_s...der.depth.DepthBook object at 0x7f77e734f050>, _depth_subscriptions={}, _depth_control_states={}, _depth_retired=set())
+account = AccountState(account_alias='ctrader_primary', equity=Decimal('98'), balance=Decimal('100'), currency='EUR', verified=T...sion=1, manager_bonus=None, ib_bonus=None, nonwithdrawable_bonus=None, registered_at_ms=None), native_observation=None)
+now_ms = 10000, mt5_capture = None
+
+    def context_for_account(ledger, adapter, account, *, now_ms, mt5_capture=None):
+        """Preserve actual cached source data; perform no provider or order I/O."""
+        if account.verified is not True:
+            return None
+        from vati.execution.ctrader.adapter import CtraderAdapter
+        from vati.execution.mt5_bridge import Mt5BridgeAdapter
+        from vati.execution.mt5_pull import Mt5PullAdapter
+        mark = getattr(account, 'funding_mark', None)
+        if isinstance(adapter, CtraderAdapter) and type(mark) is NativeAccountMark:
+            source = NativeAccountMark.from_body(mark.body())
+            from vati.execution.ctrader.transport import DEMO_HOST, LIVE_HOST
+            realm = DEMO_HOST if source.environment == 'DEMO' else LIVE_HOST
+            if (adapter.ctid_trader_account_id != source.native_account_id
+                    or adapter.transport.host != realm):
+>               raise ValueError('current cTrader source account identity mismatch')
+E               ValueError: current cTrader source account identity mismatch
+
+trading/vati/risk/account_context.py:123: ValueError
+=========================== short test summary info ============================
+FAILED ../../van-native-risk-context-held-producer-probe-20261027.py::test_native_source_failure_keeps_existing_explicit_funding_hold[single]
+FAILED ../../van-native-risk-context-held-producer-probe-20261027.py::test_native_source_failure_keeps_existing_explicit_funding_hold[account]
+2 failed in 3.89s

@@ -174,6 +174,20 @@ class TradeIntent:
 
 
 @dataclass(frozen=True)
+class NativeAccountRiskContext:
+    """Immutable source identity; never collateral qualification or authority."""
+    provider: str
+    physical_account_key: str
+    monetary_scope_hash: str
+    account_alias: str
+    observation_ref: str
+    source_query_ref: Optional[str]
+    source_mark_json: str
+    risk_capital_qualified: bool = False
+    execution_authority: bool = False
+
+
+@dataclass(frozen=True)
 class RiskSnapshot:
     """Everything the authority needs, captured at decision time. Any field the
     caller cannot prove must be supplied as its fail-closed value."""
@@ -216,6 +230,7 @@ class RiskSnapshot:
     loss_streak_lock: str = ""
     loss_streak_multiplier: Decimal = Decimal("1")
     drawdown_top_state: Optional["StrategyState"] = None
+    native_account_context: Optional[NativeAccountRiskContext] = None
 
     @property
     def data_fresh(self) -> bool:

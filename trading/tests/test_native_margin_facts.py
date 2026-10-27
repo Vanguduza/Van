@@ -61,11 +61,18 @@ def test_flat_native_margin_has_a_real_zero_commitment_without_a_fabricated_heal
 
 
 def test_absent_added_margin_field_preserves_legacy_snapshot_hash_and_serialization(eurusd):
-    from dataclasses import asdict
+    import json
+    from pathlib import Path
     from vati.risk.authority import _canonical_hash
     native=snapshot(eurusd,used_margin=None)
-    legacy=asdict(native);legacy.pop('used_margin')
+    # Use bytes produced by the actual original serializer. asdict() of the
+    # current class includes later optional fields and is not an old snapshot.
+    original=json.loads((Path(__file__).parent/'fixtures/legacy_risk_snapshot_no_margin_74b1749a.json').read_text())
+    legacy=original['snapshot']
     assert 'used_margin' not in snapshot_to_dict(native)
+    assert 'native_account_context' not in snapshot_to_dict(native)
+    assert snapshot_to_dict(native)==legacy
+    assert _canonical_hash(native)==original['original_snapshot_hash']
     assert _canonical_hash(native)==_canonical_hash(legacy)
     assert _canonical_hash(snapshot_from_dict(snapshot_to_dict(native)))==_canonical_hash(legacy)
 

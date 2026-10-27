@@ -320,8 +320,11 @@ class DecisionCycle:
             quote_age_ms += now_ms - started_ms
         from vati.funding.risk_fence import funding_risk_fence
         from vati.funding.mt5_runtime import capture_cached_mt5
-        capture_cached_mt5(self.ledger, acct, now_ms=now_ms)
+        native_capture = capture_cached_mt5(self.ledger, acct, now_ms=now_ms)
         funding = funding_risk_fence(self.ledger, self.adapter, acct, now_ms=now_ms)
+        from vati.risk.account_context import context_with_funding_hold
+        native_context, funding = context_with_funding_hold(self.ledger, self.adapter, acct, funding,
+            now_ms=now_ms, mt5_capture=native_capture)
         # A held observation remains visible, but cannot seed or increase the
         # baselines used by later decisions after native evidence recovers.
         if funding.available:
@@ -348,6 +351,7 @@ class DecisionCycle:
                             tier1_event_blackout_active=self._tier1_blackout(now_ms=now_ms),
                             margin_level_pct=acct.margin_level_pct,
                             free_margin=acct.free_margin, used_margin=acct.used_margin,
+                            native_account_context=native_context,
                             preservation_blocks_new_risk=not funding.available,
                             preservation_reason=funding.reason,
                             kill_switch_triggers=frozenset(self.kill.active))
