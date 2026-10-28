@@ -683,7 +683,8 @@ class DecisionCycle:
                   if e.producer=='vati-cycle' and e.hash==canonical_hash(e.body())]
         if original:
             core=tca.as_dict()
-            if any(any(e.payload.get(k)!=v for k,v in core.items()) for e in original):
+            from vati.execution.tca import same_tca_measurement
+            if any(not same_tca_measurement(e.payload,core) for e in original):
                 raise ValueError('original cost measurement conflicts; use native correction/reconciliation')
         else:
             self._log(EventKind.TCA_RECORD, tca_payload, now_ms=now_ms, corr=rec.trade_intent_id)

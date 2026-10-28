@@ -203,8 +203,21 @@ def _payload(evidence_class: EvidenceClass, content: Mapping[str, Any]) -> Mappi
         p = content["payload"]
         if not isinstance(p, Mapping):
             raise EvidenceError("ledger payload is not an object")
-        return p
-    return content
+    else:
+        p = content
+    # Validate exact cost claims before any broker/health/artifact consumer can
+    # cache them. Historical records without that additive claim stay legacy.
+    tca = p if evidence_class is EvidenceClass.TCA_RECORD else None
+    if evidence_class is EvidenceClass.VTIL_ARTIFACT:
+        execution = p.get('execution')
+        tca = execution.get('tca') if isinstance(execution, Mapping) else None
+    if isinstance(tca, Mapping):
+        from vati.execution.tca import validate_tca_arithmetic
+        try:
+            validate_tca_arithmetic(tca)
+        except ValueError as error:
+            raise EvidenceError(str(error)) from None
+    return p
 
 
 def _least_authoritative(fixed: Environment, ceiling: Environment) -> Environment:
