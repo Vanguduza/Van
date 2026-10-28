@@ -133,6 +133,8 @@ def _canonical_hash(obj: Any) -> str:
             if isinstance(o, RiskSnapshot):
                 if o.native_account_context is None:
                     result.pop('native_account_context')
+                if o.native_risk_basis_ref is None:
+                    result.pop('native_risk_basis_ref')
                 for position in result['open_positions']:
                     if position['stop_terms'] is None:
                         position.pop('stop_terms')  # original legacy snapshot bytes/hash

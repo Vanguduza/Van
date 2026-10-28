@@ -86,6 +86,13 @@ def recovery_review(service):
             and e.payload.get('event') in {RESET_EVENT, DRAWDOWN_RESUME_EVENT}],
         'unresolved_entry_ids': sorted(c.unresolved_entry_attempts),
     }
+    if callable(getattr(c.streaks, 'original_contributors', None)):
+        state['loss_scope_contributors'] = {scope:list(c.streaks.original_contributors(scope))
+            for scope in sorted(c.streaks._scopes)}
+        runtime = getattr(getattr(c, 'service', c), '_physical_risk_runtime', None)
+        if runtime is not None:
+            state['baseline_contributors'] = {alias:{'peak_equity':str(value.peak),
+                'original_ref':value.event_ref} for alias,value in sorted(runtime.book.origins.items())}
     return {'state': state, 'state_ref': canonical_hash(state), 'observed_ms': service.clock()}
 
 
@@ -125,6 +132,31 @@ def _same_owner_key(pem,expected):
     except (ValueError,TypeError,AttributeError,UnsupportedAlgorithm):return False
 
 
+def _native_control_metadata(c, account, now_ms):
+    """Capture original native identity before the writer, without venue IO.
+
+    This preserves provenance of this alias's existing control; it does not
+    expand its authority. Missing evidence is recorded explicitly and cannot
+    later be replaced with a profile's current configuration.
+    """
+    from vati.funding.mt5_runtime import capture_cached_mt5
+    from vati.risk.account_context import context_for_account
+    from vati.execution.ctrader.adapter import CtraderAdapter
+    from vati.execution.mt5_bridge import Mt5BridgeAdapter
+    from vati.execution.mt5_pull import Mt5PullAdapter
+    if not isinstance(c.adapter, (CtraderAdapter, Mt5BridgeAdapter, Mt5PullAdapter)):
+        return {}
+    try:
+        capture = capture_cached_mt5(c.ledger, account, now_ms=now_ms)
+        context = context_for_account(c.ledger, c.adapter, account,
+            now_ms=now_ms, mt5_capture=capture)
+        if context is not None:
+            return {'native_account_context': asdict(context)}
+    except Exception:
+        pass
+    return {'native_history_source_state': 'UNAVAILABLE'}
+
+
 def process_recovery_requests(service):
     """Run only on the current actor; original requests never dispatch orders."""
     c = _recovery_cycle(service)
@@ -135,6 +167,26 @@ def process_recovery_requests(service):
         account = c.adapter.sync_account()
         heartbeat = c.adapter.heartbeat(now_ms=service.clock())
         positions = tuple(c.adapter.positions())
+        native_metadata = (_native_control_metadata(c, account, service.clock())
+            if request.intent.action in {'reset_loss_streak','resume_drawdown'} else {})
+        native_review_head = None
+        if native_metadata.get('native_account_context') is not None:
+            try:
+                from vati.risk.contracts import NativeAccountRiskContext
+                from vati.risk.physical_runtime import PhysicalRiskRuntime
+                context = NativeAccountRiskContext(**native_metadata['native_account_context'])
+                owner = getattr(c, 'service', c)
+                runtime = getattr(owner, '_physical_risk_runtime', None)
+                if runtime is None or runtime.policy != c.streaks.policy or runtime.context != context:
+                    runtime = PhysicalRiskRuntime(c.ledger, context, c.streaks.policy, now_ms=service.clock())
+                    owner._physical_risk_runtime = runtime
+                values = runtime.refresh(context, now_ms=service.clock())
+                c.streaks = runtime.streaks
+                if values.peak is not None:
+                    c.peak_equity = values.peak
+                native_review_head = runtime._head
+            except Exception:
+                native_metadata = {'native_history_source_state':'UNAVAILABLE'}
         committed = None
         try:
             with service.lease.submission_guard(service.lease.epoch, now_ms=service.clock()) as valid:
@@ -172,6 +224,10 @@ def process_recovery_requests(service):
                         reason = 'ACTOR_LEASE_LOST'
                     if reason == 'APPLIED' and now // 1000 >= request.proof.expires_at_unix:
                         reason = 'APPROVAL_EXPIRED'
+                    if reason == 'APPLIED' and native_metadata.get('native_history_source_state') == 'UNAVAILABLE':
+                        reason = 'PRECONDITION_UNMET'
+                    if reason == 'APPLIED' and native_review_head is not None and c.ledger.head() != native_review_head:
+                        reason = 'STATE_CHANGED'
                     if reason == 'APPLIED' and not _eligible(c, request, account, heartbeat, positions, now):
                         reason = 'PRECONDITION_UNMET'
                     effects = []
@@ -179,7 +235,7 @@ def process_recovery_requests(service):
                         action = request.intent.action
                         args = dict(request.intent.arguments)
                         payload = {'account_alias': c.cfg.account_alias, 'owner_signature_ref': request.authority_ref,
-                                   'operation_id': request.proof.operation_id}
+                                   'operation_id': request.proof.operation_id, **native_metadata}
                         kind = EventKind.SESSION
                         if action == 'clear_kill_switch':
                             kind = EventKind.KILL_SWITCH
@@ -219,6 +275,20 @@ def process_recovery_requests(service):
                 c.kill.active.discard(KillSwitchTrigger(dict(request.intent.arguments)['trigger']))
                 c.kill.history.append((service.clock(), 'CLEAR:' + request.authority_ref,
                                        KillSwitchTrigger(dict(request.intent.arguments)['trigger'])))
+            elif native_metadata.get('native_account_context') is not None:
+                # Replay actual applied controls through their original native
+                # aliases; an alias rebuild must not discard other contributors.
+                from vati.risk.contracts import NativeAccountRiskContext
+                from vati.risk.physical_runtime import PhysicalRiskRuntime
+                context = NativeAccountRiskContext(**native_metadata['native_account_context'])
+                owner = getattr(c, 'service', c)
+                runtime = PhysicalRiskRuntime(c.ledger, context, c.streaks.policy,
+                    now_ms=service.clock())
+                owner._physical_risk_runtime = runtime
+                c.streaks = runtime.streaks
+                values = runtime.book.projection(service.clock())
+                if values.peak is not None:
+                    c.peak_equity = values.peak
             elif request.intent.action == 'reset_loss_streak':
                 # Fold the complete committed history, including any later loss.
                 c.streaks = LossStreakGovernor.rebuild(c.streaks.policy, c.ledger.iter(), account_alias=c.cfg.account_alias)

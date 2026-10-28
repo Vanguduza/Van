@@ -231,6 +231,8 @@ class RiskSnapshot:
     loss_streak_multiplier: Decimal = Decimal("1")
     drawdown_top_state: Optional["StrategyState"] = None
     native_account_context: Optional[NativeAccountRiskContext] = None
+    # Original own-alias basis; the displayed shared peak must never seed itself.
+    native_risk_basis_ref: Optional[str] = None
 
     @property
     def data_fresh(self) -> bool:

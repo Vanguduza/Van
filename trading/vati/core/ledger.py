@@ -233,6 +233,14 @@ class Ledger:
             return self._conn.execute("SELECT COUNT(*) FROM events").fetchone()[0]
         return self._conn.execute("SELECT COUNT(*) FROM events WHERE kind = ?", (kind.value,)).fetchone()[0]
 
+    def iter_after(self, seq: int):
+        """Ordered original rows after a retained cursor, without an OFFSET scan."""
+        if type(seq) is not int or seq < 0:
+            raise ValueError('ledger cursor must be a nonnegative integer')
+        for row in self._conn.execute(
+                'SELECT seq, kind, producer, correlation_id, event_time_ms, received_time_ms, decision_time_ms, schema_version, payload_json, event_hash FROM events WHERE seq > ? ORDER BY seq', (seq,)):
+            yield row[0], self._row_to_event(row)
+
     def head(self) -> str:
         row = self._conn.execute("SELECT chain_hash FROM events ORDER BY seq DESC LIMIT 1").fetchone()
         return row[0] if row else GENESIS

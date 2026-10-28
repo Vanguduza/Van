@@ -167,6 +167,9 @@ def producer_snapshot(eurusd, ledger, adapter, account, producer):
         service._ledger_positions = lambda: []; service._risk_store_ok = lambda: True
         service._open_positions = lambda: (); service._drawdown_top_state = lambda: None
         service.lifecycle = None; service.consecutive_losses = 0; service.kill = N(active=[])
+        from conftest import mandate_dict
+        from vati.risk import TradingMandate
+        service.mandate = TradingMandate.from_mapping(mandate_dict(account_alias=account.account_alias, venue=adapter.venue))
         service.evaluators = {'EURUSD': N(last_state=N(as_of_ms=10000, quote_age_ms=17,
             event_window=None, integrity=MarketIntegrityState.NORMAL))}
         facts = service._snapshot_for(N(symbol='EURUSD', strategy_id=''))

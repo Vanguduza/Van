@@ -132,13 +132,14 @@ class NativeRiskHistory:
     Unbound records require reconciliation before a financial consumer can
     claim complete history. Original labels and immutable references survive.
     """
-    anchor_event_ref: str
+    anchor_event_ref: str | None
     physical_account_key: str
     monetary_scope_hash: str
     original_inputs: tuple[NativeRiskInput, ...]
     unresolved_refs: tuple[str, ...]
     execution_authority: bool = False
     risk_capital_qualified: bool = False
+    nonfinancial_rejection_refs: tuple[str, ...] = ()
 
 
 def original_native_risk_history(ledger, anchor_event_ref: str, *, available_at_ms: int) -> NativeRiskHistory:
@@ -162,22 +163,90 @@ def original_native_risk_history(ledger, anchor_event_ref: str, *, available_at_
             raise NativeRiskSourceUnavailable('original native risk record is unavailable')
         queries = {}
         anchor = _from_original_event(ledger, anchors[0], available_at_ms=available_at_ms, queries=queries)
-        selected, unresolved = [], []
-        for event in rows:
-            # Later original publications are not facts at an earlier cutoff.
-            if max(event.event_time_ms, event.received_time_ms) > available_at_ms:
-                continue
-            try:
-                value = anchor if event.hash == anchor_event_ref else _from_original_event(
-                    ledger, event, available_at_ms=available_at_ms, queries=queries)
-            except NativeRiskSourceUnavailable:
-                unresolved.append(event.hash)
-                continue
-            if value.context.physical_account_key != anchor.context.physical_account_key:
-                continue
-            if value.context.monetary_scope_hash != anchor.context.monetary_scope_hash:
-                unresolved.append(event.hash)
-                continue
-            selected.append(value)
-        return NativeRiskHistory(anchor_event_ref, anchor.context.physical_account_key,
-            anchor.context.monetary_scope_hash, tuple(selected), tuple(unresolved))
+        return _select_original_inputs(ledger, rows, anchor.context,
+            available_at_ms=available_at_ms, queries=queries, anchor=anchor)
+
+
+def native_risk_history_for_context(ledger, context: NativeAccountRiskContext, *,
+                                    available_at_ms: int) -> NativeRiskHistory:
+    """Read proven history before the current alias's first risk decision.
+
+    The caller obtains current context from the existing native account
+    producer. Its independently retained source receipt is checked here; it
+    cannot supply absent identity to an old record. No synthetic risk decision
+    is written to bootstrap recovery, and this read grants no capital authority.
+    """
+    native_int(available_at_ms, minimum=0)
+    with committed_source_snapshot(ledger):
+        if not ledger.verify_chain()[0]:
+            raise NativeRiskSourceUnavailable('original native risk ledger integrity is unavailable')
+        try:
+            source = inspect_context(context)
+            if source['observed_at_ms'] > available_at_ms:
+                raise NativeRiskSourceUnavailable('native account source was not yet available')
+            queries = {}
+            if context.provider == 'MT5':
+                query = _original_mt5_query(ledger, context, queries)
+                omit_alias = lambda value: {k: v for k, v in value.items() if k != 'account_alias'}
+                if (max(query.event_time_ms, query.received_time_ms) > available_at_ms
+                        or query.payload['source_ref'] != context.observation_ref
+                        or omit_alias(query.payload['mark']) != omit_alias(source['mark'])):
+                    raise NativeRiskSourceUnavailable('original native MT5 query does not bind current history source')
+            rows = tuple(ledger.iter(EventKind.RISK_DECISION))
+            return _select_original_inputs(ledger, rows, context,
+                available_at_ms=available_at_ms, queries=queries)
+        except NativeRiskSourceUnavailable:
+            raise
+        except (ValueError, TypeError, KeyError, ArithmeticError, AttributeError) as exc:
+            raise NativeRiskSourceUnavailable('native history source context is malformed') from exc
+
+
+def _select_original_inputs(ledger, rows, context, *, available_at_ms, queries, anchor=None):
+    selected, unresolved, rejections = [], [], []
+    for event in rows:
+        # Later original publications are not facts at an earlier cutoff.
+        if max(event.event_time_ms, event.received_time_ms) > available_at_ms:
+            continue
+        try:
+            value = anchor if anchor is not None and event.hash == anchor.event_ref else _from_original_event(
+                ledger, event, available_at_ms=available_at_ms, queries=queries)
+        except NativeRiskSourceUnavailable:
+            unresolved.append(event.hash)
+            if _original_nonfinancial_rejection(event):
+                rejections.append(event.hash)
+            continue
+        if value.context.physical_account_key != context.physical_account_key:
+            continue
+        if value.context.monetary_scope_hash != context.monetary_scope_hash:
+            unresolved.append(event.hash)
+            continue
+        selected.append(value)
+    return NativeRiskHistory(None if anchor is None else anchor.event_ref,
+        context.physical_account_key, context.monetary_scope_hash, tuple(selected), tuple(unresolved),
+        nonfinancial_rejection_refs=tuple(rejections))
+
+
+def _original_nonfinancial_rejection(event):
+    """A hash-bound original refusal has no capital/execution ownership.
+
+    Its unknown native identity stays in unresolved_refs. The additional
+    category lets a financial consumer retain that fact without treating an
+    original refusal as financial exposure. A close without its own approving
+    input still remains unresolved.
+    """
+    try:
+        p = event.payload
+        inputs, decision = p['inputs'], p['decision']
+        request = inputs['intent']
+        snapshot = snapshot_from_dict(inputs['snapshot'])
+        trade = request['trade_intent_id']
+        return bool(event.producer in _PRODUCERS and event.hash == canonical_hash(event.body())
+            and isinstance(trade, str) and trade and trade == event.correlation_id
+            and decision['trade_intent_id'] == trade and decision['decision'] == 'REJECTED'
+            and type(decision.get('approval_schema_version')) is int
+            and decision['approval_schema_version'] == 2
+            and canonical_hash(request) == decision['intent_hash']
+            and canonical_hash({k:v for k,v in decision.items() if k != 'decision_hash'}) == decision['decision_hash']
+            and _canonical_hash(snapshot) == decision['risk_snapshot_hash'])
+    except (KeyError, ValueError, TypeError, ArithmeticError, AttributeError):
+        return False

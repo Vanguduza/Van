@@ -327,7 +327,18 @@ class DecisionCycle:
             now_ms=now_ms, mt5_capture=native_capture)
         # A held observation remains visible, but cannot seed or increase the
         # baselines used by later decisions after native evidence recovers.
-        if funding.available:
+        basis_ref = None
+        if funding.available and native_context is not None:
+            from vati.risk.physical_runtime import project_native_risk
+            from vati.funding.risk_fence import FundingRiskFence
+            basis_ref, values, streaks, issue = project_native_risk(self, self.ledger,
+                native_context, self.streaks.policy, now_ms=now_ms, producer='vati-cycle')
+            if issue:
+                funding = FundingRiskFence(False, issue)
+            else:
+                self.peak_equity, self.day_start_equity, self.week_start_equity = values.peak, values.day, values.week
+                self.streaks = streaks
+        elif funding.available:
             if self.peak_equity == ZERO:
                 self.peak_equity = acct.equity
             if self.day_start_equity == ZERO:
@@ -352,6 +363,7 @@ class DecisionCycle:
                             margin_level_pct=acct.margin_level_pct,
                             free_margin=acct.free_margin, used_margin=acct.used_margin,
                             native_account_context=native_context,
+                            native_risk_basis_ref=basis_ref,
                             preservation_blocks_new_risk=not funding.available,
                             preservation_reason=funding.reason,
                             kill_switch_triggers=frozenset(self.kill.active))
@@ -536,12 +548,20 @@ class DecisionCycle:
     # ------------------------------------------------- owner-signed recovery (A4)
     def reset_loss_streak(self, scope: str, *, owner_signature_ref: str, authority, now_ms: int) -> None:
         """Clear a losing-streak suspension. `scope` is a strategy id or ACCOUNT_SCOPE."""
-        authority.verify(owner_signature_ref, act="loss-streak-reset", subject=f"{self.cfg.account_alias}:{scope}", now_unix=now_ms // 1000)
-        self._log(EventKind.SESSION, {**self.streaks.reset(scope), "owner_signature_ref": owner_signature_ref}, now_ms=now_ms)
+        verified = authority.verify(owner_signature_ref, act="loss-streak-reset", subject=f"{self.cfg.account_alias}:{scope}", now_unix=now_ms // 1000)
+        metadata = self._direct_native_control_metadata(owner_signature_ref, verified, now_ms)
+        if metadata:
+            with self._direct_native_control_writer(verified, now_ms) as applied_ms:
+                self._refuse_reused_native_control(owner_signature_ref)
+                self._log(EventKind.SESSION, {"event":"LOSS_STREAK_RESET", "scope":scope,
+                    "owner_signature_ref":owner_signature_ref, **metadata}, now_ms=applied_ms)
+            self._restore_direct_native_control(metadata, applied_ms)
+        else:
+            self._log(EventKind.SESSION, {**self.streaks.reset(scope), "owner_signature_ref": owner_signature_ref}, now_ms=now_ms)
 
     def resume_after_drawdown(self, *, owner_signature_ref: str, authority, now_ms: int) -> None:
         """Owner decision to resume after the suspending drawdown tier: re-baseline the peak."""
-        authority.verify(owner_signature_ref, act="drawdown-resume", subject=self.cfg.account_alias, now_unix=now_ms // 1000)
+        verified = authority.verify(owner_signature_ref, act="drawdown-resume", subject=self.cfg.account_alias, now_unix=now_ms // 1000)
         account = self.adapter.sync_account()
         from vati.funding.mt5_runtime import capture_cached_mt5
         from vati.funding.risk_fence import funding_risk_fence
@@ -549,11 +569,62 @@ class DecisionCycle:
         funding = funding_risk_fence(self.ledger, self.adapter, account, now_ms=now_ms)
         if not funding.available:
             raise ValueError('drawdown baseline unavailable: ' + funding.reason)
+        metadata = self._direct_native_control_metadata(owner_signature_ref, verified, now_ms, account=account)
         equity = account.equity
         old = self.peak_equity
+        if metadata:
+            with self._direct_native_control_writer(verified, now_ms) as applied_ms:
+                self._refuse_reused_native_control(owner_signature_ref)
+                self._log(EventKind.SESSION, {"event":DRAWDOWN_RESUME_EVENT,
+                    "old_peak_equity":str(old),"new_peak_equity":str(equity),
+                    "owner_signature_ref":owner_signature_ref, **metadata}, now_ms=applied_ms)
+            self._restore_direct_native_control(metadata, applied_ms)
+            return
         self.peak_equity = equity
         self._log(EventKind.SESSION, {"event": DRAWDOWN_RESUME_EVENT, "old_peak_equity": str(old), "new_peak_equity": str(equity),
                                       "owner_signature_ref": owner_signature_ref}, now_ms=now_ms)
+
+    def _direct_native_control_metadata(self, token, verified, now_ms, *, account=None):
+        from vati.execution.ctrader.adapter import CtraderAdapter
+        from vati.execution.mt5_bridge import Mt5BridgeAdapter
+        from vati.execution.mt5_pull import Mt5PullAdapter
+        if not isinstance(self.adapter, (CtraderAdapter,Mt5BridgeAdapter,Mt5PullAdapter)):
+            return {}
+        from vati.app.runtime_control_actor import _native_control_metadata
+        from vati.risk.control_archive import archive_verified_control
+        metadata = _native_control_metadata(self, account or self.adapter.sync_account(), now_ms)
+        if 'native_account_context' not in metadata:
+            raise ValueError('native owner control source unavailable; no effect applied')
+        metadata['original_owner_control'] = archive_verified_control(token, verified)
+        return metadata
+
+    def _refuse_reused_native_control(self, token):
+        if any(e.payload.get('owner_signature_ref') == token for e in self.ledger.iter(EventKind.SESSION)
+                if e.payload.get('event') in {'LOSS_STREAK_RESET',DRAWDOWN_RESUME_EVENT}):
+            raise ValueError('original native owner control already applied')
+
+    @contextmanager
+    def _direct_native_control_writer(self, verified, now_ms):
+        from contextlib import nullcontext
+        from vati.core.file_lock import exclusive_state_lock
+        binding = verified._verified_key_binding
+        issuer = exclusive_state_lock(binding.registry_path) if binding.registry_path else nullcontext()
+        with issuer, self.ledger.atomic():
+            applied_ms = max(now_ms, self._lease_clock()) if callable(getattr(self,'_lease_clock',None)) else now_ms
+            if not binding.is_current() or applied_ms//1000 >= verified.expires_at_unix:
+                raise ValueError('native owner control expired or its original issuer changed before apply')
+            yield applied_ms
+
+    def _restore_direct_native_control(self, metadata, now_ms):
+        from vati.risk.contracts import NativeAccountRiskContext
+        from vati.risk.physical_runtime import PhysicalRiskRuntime
+        context = NativeAccountRiskContext(**metadata['native_account_context'])
+        runtime = PhysicalRiskRuntime(self.ledger, context, self.streaks.policy, now_ms=now_ms)
+        self._physical_risk_runtime = runtime
+        self.streaks = runtime.streaks
+        values = runtime.book.projection(now_ms)
+        if values.peak is not None:
+            self.peak_equity = values.peak
 
     # ------------------------------------------------------- marks and exits
     def mark(self, bid: Decimal, ask: Decimal, *, now_ms: int) -> None:

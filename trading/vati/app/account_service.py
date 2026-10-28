@@ -655,7 +655,21 @@ class AccountCoordinatorService:
         from vati.risk.account_context import context_with_funding_hold
         native_context, funding = context_with_funding_hold(self._ledger, self.adapter, acct, funding,
             now_ms=now_ms, mt5_capture=native_capture)
-        if funding.available:
+        basis_ref = None
+        if funding.available and native_context is not None:
+            from vati.risk.physical_runtime import project_native_risk
+            from vati.funding.risk_fence import FundingRiskFence
+            policy = (self.lifecycle.streaks.policy if self.lifecycle is not None
+                else LockoutPolicy(self.mandate.max_consecutive_losses))
+            basis_ref, values, streaks, issue = project_native_risk(self, self._ledger,
+                native_context, policy, now_ms=now_ms, producer='vati-account-service')
+            if issue:
+                funding = FundingRiskFence(False, issue)
+            else:
+                self.peak_equity, self.day_start_equity, self.week_start_equity = values.peak, values.day, values.week
+                if self.lifecycle is not None:
+                    self.lifecycle.streaks = streaks
+        elif funding.available:
             if self.peak_equity == 0:
                 self.peak_equity = self.day_start_equity = self.week_start_equity = acct.equity
             self.peak_equity = max(self.peak_equity, acct.equity)
@@ -691,6 +705,7 @@ class AccountCoordinatorService:
             tier1_event_blackout_active=blackout,
             margin_level_pct=acct.margin_level_pct, free_margin=acct.free_margin, used_margin=acct.used_margin,
             native_account_context=native_context,
+            native_risk_basis_ref=basis_ref,
             kill_switch_triggers=frozenset(self.kill.active),
             preservation_blocks_new_risk=(
                 not funding.available or (self.lifecycle.preservation_blocks_new_risk

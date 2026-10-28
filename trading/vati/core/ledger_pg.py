@@ -182,6 +182,18 @@ class PostgresLedger:
         finally:
             self._finish_read()
 
+    def iter_after(self, seq: int):
+        """The cursor is scoped to this ledger, including shared-database gaps."""
+        if type(seq) is not int or seq < 0:
+            raise ValueError('ledger cursor must be a nonnegative integer')
+        try:
+            with self._conn.cursor() as cur:
+                cur.execute('SELECT seq, kind, producer, correlation_id, event_time_ms, received_time_ms, decision_time_ms, schema_version, payload_json, event_hash FROM vati.events WHERE ledger = %s AND seq > %s ORDER BY seq', (self.name, seq))
+                for row in cur:
+                    yield row[0], self._row_to_event(row)
+        finally:
+            self._finish_read()
+
     def count(self, kind: Optional[EventKind] = None) -> int:
         with self._conn.cursor() as cur:
             if kind is None:

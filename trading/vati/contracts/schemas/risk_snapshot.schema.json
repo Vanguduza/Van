@@ -225,6 +225,11 @@
       ],
       "description": "Observed committed margin; omitted in immutable legacy snapshot identities when unavailable."
     },
+    "native_risk_basis_ref": {
+      "description": "Original own-alias baseline event; shared display values are projections, never new own-alias capital.",
+      "type": ["string", "null"],
+      "pattern": "^[0-9a-f]{64}$"
+    },
     "native_account_context": {
       "description": "Optional original source identity. Omitted when absent so immutable legacy snapshot bytes/hashes remain unchanged. Never an execution or capital grant.",
       "anyOf": [

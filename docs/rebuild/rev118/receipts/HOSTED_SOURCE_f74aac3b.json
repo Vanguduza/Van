@@ -1,0 +1,50 @@
+{
+  "schema": "van.rev118.selected-hosted-source/1",
+  "source_head": "f74aac3bf503478cd6800949b5541b4c17609d9c",
+  "main_run": 40517467959,
+  "main_conclusion": "FAILURE",
+  "public_jobs_success": 17,
+  "mandatory_prerequisite_failures": [
+    "DDS contract read key",
+    "trusted-base Project Truth checker"
+  ],
+  "supporting_workflows": "All4metadataSUCCESS; these selected archive checks do not re-execute them",
+  "selected_original_archive": {
+    "artifact_id": 12741450124,
+    "head_sha": "f74aac3bf503478cd6800949b5541b4c17609d9c",
+    "bytes": 176108,
+    "sha256": "414665e6225dd499d99ed3085be821ac5e1b940bba19da197ea63bdcc1e022d5",
+    "digest_matched": true,
+    "junit": [
+      {
+        "path": "postgres-ledger-report.xml",
+        "cases": 26,
+        "failures": 0,
+        "errors": 0,
+        "skips": 0
+      },
+      {
+        "path": "trading-source-report.xml",
+        "cases": 4496,
+        "failures": 0,
+        "errors": 0,
+        "skips": 1
+      },
+      {
+        "path": "voice-source-report.xml",
+        "cases": 117,
+        "failures": 0,
+        "errors": 0,
+        "skips": 0
+      }
+    ]
+  },
+  "source_counts": {
+    "trading_passed": 4495,
+    "trading_declared_dds_skips": 1,
+    "postgres_passed": 26,
+    "voice_passed": 117
+  },
+  "raw": "ci/physical_risk_20261028/hosted_parent",
+  "limitations": "Parent source only, not current uncommitted packet or native/device acceptance."
+}

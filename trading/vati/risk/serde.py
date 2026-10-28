@@ -46,6 +46,8 @@ def snapshot_to_dict(s: RiskSnapshot) -> dict:
         d.pop("used_margin")  # preserve original legacy snapshot bytes/hash
     if s.native_account_context is None:
         d.pop('native_account_context')
+    if s.native_risk_basis_ref is None:
+        d.pop('native_risk_basis_ref')
     d["symbol_contract"] = contract_to_dict(s.symbol_contract)
     d["open_positions"] = [position_to_dict(p) for p in s.open_positions]
     return d

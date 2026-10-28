@@ -1,0 +1,37 @@
+.....F.................................................................. [ 97%]
+..                                                                       [100%]
+=================================== FAILURES ===================================
+_ test_direct_native_control_rechecks_authority_inside_actual_sql_writer[revocation] _
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-19/test_direct_native_control_rec1')
+eurusd = SymbolContract(symbol='EURUSD', venue='mt5', base_currency='EUR', quote_currency='USD', account_currency='USD', contra...=Decimal('0'), max_adv_participation=Decimal('0.10'), liquidity_haircut=Decimal('0'), round_trip_cost_pct=Decimal('0'))
+change = 'revocation'
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7fd1b6206a50>
+
+    @pytest.mark.parametrize('change',['expiry','revocation'])
+    def test_direct_native_control_rechecks_authority_inside_actual_sql_writer(tmp_path,eurusd,change,monkeypatch):
+        from contextlib import contextmanager
+        ledger,adapter,account,_,a=native_facts(tmp_path,eurusd)
+        c=cycle(ledger,adapter,account,a);owner=OwnerAuthorityHarness()
+        token=owner.token(act='loss-streak-reset',subject=a.account_alias+':'+ACCOUNT_SCOPE,
+            issued_at_unix=NOW,lifetime_seconds=60)
+        clock={'ms':NOW*1000};c._lease_clock=lambda:clock['ms']
+        atomic=ledger.atomic
+        @contextmanager
+        def delayed_writer():
+            with atomic():
+                if change=='expiry':clock['ms']+=61000
+                else:owner.verifier.keys.clear()
+                yield
+        monkeypatch.setattr(ledger,'atomic',delayed_writer)
+        before=ledger.count(EventKind.SESSION)
+>       with pytest.raises(ValueError,match='expired or its original issuer changed'):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AssertionError: Regex pattern did not match.
+E         Expected regex: 'expired or its original issuer changed'
+E         Actual message: 'native control original owner key is unavailable'
+
+trading/tests/test_physical_native_controls.py:113: AssertionError
+=========================== short test summary info ============================
+FAILED trading/tests/test_physical_native_controls.py::test_direct_native_control_rechecks_authority_inside_actual_sql_writer[revocation]
+1 failed, 73 passed in 2.67s

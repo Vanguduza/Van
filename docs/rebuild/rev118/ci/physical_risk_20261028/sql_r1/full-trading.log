@@ -1,0 +1,52 @@
+........................................................................ [ 16%]
+........................................................................ [ 32%]
+........................................................................ [ 49%]
+........................................................................ [ 65%]
+..........................F............................................. [ 82%]
+........................................................................ [ 98%]
+.......                                                                  [100%]
+=================================== FAILURES ===================================
+_ test_direct_native_control_rechecks_authority_inside_actual_sql_writer[revocation] _
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-20/test_direct_native_control_rec1')
+eurusd = SymbolContract(symbol='EURUSD', venue='mt5', base_currency='EUR', quote_currency='USD', account_currency='USD', contra...=Decimal('0'), max_adv_participation=Decimal('0.10'), liquidity_haircut=Decimal('0'), round_trip_cost_pct=Decimal('0'))
+change = 'revocation'
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f61259f8710>
+
+    @pytest.mark.parametrize('change',['expiry','revocation'])
+    def test_direct_native_control_rechecks_authority_inside_actual_sql_writer(tmp_path,eurusd,change,monkeypatch):
+        from contextlib import contextmanager
+        ledger,adapter,account,_,a=native_facts(tmp_path,eurusd)
+        c=cycle(ledger,adapter,account,a);owner=OwnerAuthorityHarness()
+        token=owner.token(act='loss-streak-reset',subject=a.account_alias+':'+ACCOUNT_SCOPE,
+            issued_at_unix=NOW,lifetime_seconds=60)
+        clock={'ms':NOW*1000};c._lease_clock=lambda:clock['ms']
+        atomic=ledger.atomic
+        @contextmanager
+        def delayed_writer():
+            with atomic():
+                if change=='expiry':clock['ms']+=61000
+                else:owner.verifier.keys.clear()
+                yield
+        monkeypatch.setattr(ledger,'atomic',delayed_writer)
+        before=ledger.count(EventKind.SESSION)
+>       with pytest.raises(ValueError,match='expired or its original issuer changed'):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AssertionError: Regex pattern did not match.
+E         Expected regex: 'expired or its original issuer changed'
+E         Actual message: 'native control original owner key is unavailable'
+
+trading/tests/test_physical_native_controls.py:113: AssertionError
+=============================== warnings summary ===============================
+../../van-backend-venv-20261025/lib/python3.12/site-packages/fastapi/testclient.py:1
+  /workspace/van-backend-venv-20261025/lib/python3.12/site-packages/fastapi/testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+    from starlette.testclient import TestClient as TestClient  # noqa
+
+../../van-backend-venv-20261025/lib/python3.12/site-packages/starlette/testclient.py:53
+  /workspace/van-backend-venv-20261025/lib/python3.12/site-packages/starlette/testclient.py:53: DeprecationWarning: The anyio.abc.BlockingPortal alias is deprecated, use anyio.from_thread.BlockingPortal instead.
+    _PortalFactoryType = Callable[[], AbstractContextManager[anyio.abc.BlockingPortal]]
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED trading/tests/test_physical_native_controls.py::test_direct_native_control_rechecks_authority_inside_actual_sql_writer[revocation]
+1 failed, 438 passed, 2 warnings in 63.38s (0:01:03)

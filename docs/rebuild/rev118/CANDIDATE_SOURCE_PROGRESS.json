@@ -1,6 +1,6 @@
 {
   "schema": "van.rebuild.candidate-source-progress/1",
-  "updated_at_utc": "2026-10-27T13:50:49.623582+00:00",
+  "updated_at_utc": "2026-10-28T04:23:21.792540+00:00",
   "programme": "Rev1.18; original 131 unit IDs and dependencies retained",
   "authority": "auth-20261022-owner-autonomous-candidate-build",
   "meaning": "Candidate source progress is separate from admitted unit acceptance. Independent certificates, owner decisions, live effects and release gates remain unissued. No unit is declared complete by this record.",
@@ -22,7 +22,7 @@
       "milestones": []
     },
     "PRE-003": {
-      "title": "Independent DIAL F0–F15 build-ready certification",
+      "title": "Independent DIAL F0\u2013F15 build-ready certification",
       "dependencies": [
         "PRE-002"
       ],
@@ -763,6 +763,10 @@
         {
           "description": "Original native risk input and physical-history provenance readback;147actualSQLcases/0skip/audit0/1179sourcehashesmatch/PGabsent;215rebuild/private topology/0skip. New execution method and full-scope index preserve alloriginalidentities and contracts. Data foundation only: shared risk/control/collateral/reservation integration remains open. No entire-unit acceptance.",
           "evidence": "BUILD_EXECUTION_PLAN.md; SOURCE_WORKMAP.json; receipts/ORIGINAL_NATIVE_HISTORY_SOURCE_20261027.json"
+        },
+        {
+          "description": "Physical-account baseline/streak runtime source now joins both native producers to original same-account history; own-origin basis references prevent aggregate peak feedback after alias-scoped resets. Original native direct/journal controls retain positive behavior, signature/source lineage, replay, issuer and queued-expiry checks without widening scope. Final444 actual SQLite/PostgreSQL/HTTP/namespace/owner/restart cases pass0skip/audit0;444unique call IDs once, all1196Python hashes and both original legacy fixtures match; ownedPG independently absent. 215rebuild/private-topology passes before final chronology refinement overlap; final444 cover it. Retained two actual chronology failures are fixed, and original fixture/schema failures remain recorded. Scope/owner/frontend/consolidation checks pass unchanged; mutationpreflight374/383 is consistency, not corpus execution. Exact publishedf74 main40517467959 remainsFAILED2mandatoryprerequisites/all17publicSUCCESS; original selected archive independently verifies4495trading/1DDSskip,26PG,117voice. Flow adjustment/collateral/all-origin reservations, native finality/reconciliation and all remaining programme requirements stay open. No whole unit/native/production/S24 acceptance.",
+          "evidence": "backend/BE-009_PHYSICAL_RISK_RUNTIME.md;receipts/PHYSICAL_RISK_RUNTIME_SOURCE_20261028.json"
         }
       ]
     },
@@ -1413,7 +1417,7 @@
       ]
     },
     "BE-016": {
-      "title": "Governed news effects D1–D7 and news strategy lifecycle",
+      "title": "Governed news effects D1\u2013D7 and news strategy lifecycle",
       "dependencies": [
         "BE-009",
         "BE-012",
