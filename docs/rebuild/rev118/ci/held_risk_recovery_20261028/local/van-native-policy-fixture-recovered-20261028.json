@@ -1,0 +1,23 @@
+{
+  "command": [
+    "/workspace/van-backend-venv-20261025/bin/python",
+    "tools/rebuild/source_storage_audit.py",
+    "--report",
+    "/workspace/van-native-policy-fixture-recovered-20261028-audit.json",
+    "trading/tests/test_funding_baseline_preservation.py",
+    "trading/tests/test_funding_risk_fence.py",
+    "trading/tests/test_native_risk_account_context.py",
+    "trading/tests/test_physical_snapshot_producers.py",
+    "--junitxml=/workspace/van-native-policy-fixture-recovered-20261028.xml",
+    "-q"
+  ],
+  "cwd": "/workspace/van-review-2026-10-18/publish",
+  "controller_pid": 100820,
+  "started_at_utc": "2026-10-28T04:58:41.221219+00:00",
+  "timeout_seconds": 300,
+  "state": "COMPLETED",
+  "command_pid": 100821,
+  "exit": 0,
+  "adopted_children_reaped": [],
+  "finished_at_utc": "2026-10-28T04:58:43.896407+00:00"
+}

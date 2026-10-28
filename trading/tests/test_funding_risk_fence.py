@@ -216,6 +216,10 @@ def test_risk_capture_uses_post_native_io_clock_and_ages_quotes(tmp_path,eurusd,
         def opened():clock['now']+=500;return ()
         service._open_positions=opened;service._drawdown_top_state=lambda:None
         service.lifecycle=None;service.consecutive_losses=0;service.kill=N(active=[])
+        from conftest import mandate_dict
+        from vati.risk import TradingMandate
+        service.mandate=TradingMandate.from_mapping(mandate_dict(account_alias='ctrader_primary',
+            venue=adapter.venue,signed_at_unix=1,expires_at_unix=3600))
         service.evaluators={'EURUSD':N(last_state=N(as_of_ms=7000,quote_age_ms=quote_age,event_window=None,integrity=MarketIntegrityState.NORMAL))}
         value=service._snapshot_for(N(symbol='EURUSD',strategy_id=''))
     assert clock['now']==10000 and value.now_unix==10

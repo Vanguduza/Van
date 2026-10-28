@@ -9,7 +9,7 @@ from decimal import Decimal
 
 from vati.core import EventKind, make_event
 from vati.risk.account_context import inspect_context
-from vati.risk.lockouts import _funding_baseline_held
+from vati.risk.lockouts import _funding_baseline_held, _physical_baseline_unavailable
 from vati.risk.physical_history import physical_financial_history
 
 
@@ -110,6 +110,12 @@ class PhysicalRiskBasisBook:
         p, alias, now = fact.payload, fact.origin_alias, fact.event_time_ms
         if fact.kind == 'RISK_DECISION':
             snap = p['inputs']['snapshot']
+            if _physical_baseline_unavailable(snap):
+                # The original source reader has independently bound native
+                # equity. Retain that natural observation, not a displayed
+                # aggregate whose original-basis append/readback failed.
+                self.origins[alias] = self._observed(alias, _money(snap['equity']), now, fact.event_ref)
+                return
             if _funding_baseline_held(snap):
                 return
             ref = snap.get('native_risk_basis_ref')

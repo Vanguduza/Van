@@ -1,0 +1,217 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="4" skipped="0" tests="4" time="0.933" timestamp="2026-10-28T05:06:37.572773+00:00" hostname="6e9feff21467"><testcase classname="trading.tests.test_physical_snapshot_producers" name="test_held_shared_snapshot_never_becomes_an_own_peak_during_recovery[read-single]" time="0.375"><failure message="AssertionError: assert Decimal('15000') == Decimal('10000')&#10; +  where Decimal('15000') = RiskSnapshot(now_unix=1800000000, account_alias='second_alias', account_verified=True, equity=Decimal('10000'), balanc..., execution_authority=False), native_risk_basis_ref='a149cae39fd9e2989dbdbcedb80e8d026028888192e35d60540118b0db461a69').peak_equity&#10; +  and   Decimal('10000') = AccountState(account_alias='second_alias', equity=Decimal('10000'), balance=Decimal('10000'), currency='USD', verified...'), reported_equity=Decimal('10200'), credit=Decimal('200'), currency_digits=2, movements=()), native_observation=None).equity">tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-41/test_held_shared_snapshot_neve0')
+eurusd = SymbolContract(symbol='EURUSD', venue='mt5', base_currency='EUR', quote_currency='USD', account_currency='USD', contra...=Decimal('0'), max_adv_participation=Decimal('0.10'), liquidity_haircut=Decimal('0'), round_trip_cost_pct=Decimal('0'))
+kind = 'single', failure = 'read'
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x7fc93dae50a0&gt;
+
+    @pytest.mark.parametrize('kind',['single','account'])
+    @pytest.mark.parametrize('failure',['read','lost_commit_reply'])
+    def test_held_shared_snapshot_never_becomes_an_own_peak_during_recovery(tmp_path,eurusd,kind,failure,monkeypatch):
+        from contextlib import contextmanager
+        from test_physical_control_history import original_control
+        from vati.risk.physical_runtime import PhysicalRiskRuntime
+        ledger,adapter,account,_,a=native_facts(tmp_path,eurusd)
+        legacy(ledger,a,'original-a-peak','15000')
+        b=other_context(ledger,adapter,account,a,alias='second_alias')
+        current=replace(account,account_alias=b.account_alias,
+            funding_mark=replace(account.funding_mark,account_alias=b.account_alias))
+        service=producer(kind,ledger,adapter,current,b)
+        first=capture(service,kind)
+        assert first.peak_equity==D('15000') and first.native_risk_basis_ref
+        record(ledger,first,request=intent(trade_intent_id='b-original-shared',account_alias=b.account_alias))
+        before=ledger.count(EventKind.SESSION)
+        with monkeypatch.context() as patch:
+            if failure=='read':
+                def unavailable(*args,**kwargs):raise OSError('isolated read unavailable')
+                patch.setattr(PhysicalRiskRuntime,'observe',unavailable)
+            else:
+                state=service._physical_risk_runtime;plan=state.book.observation_event;atomic=ledger.atomic
+                writer={'armed':False,'depth':0}
+                def planned(*args,**kwargs):
+                    result=plan(*args,**kwargs);writer['armed']=True;return result
+                @contextmanager
+                def lost_reply():
+                    outer=writer['depth']==0;writer['depth']+=1
+                    try:
+                        with atomic():yield
+                    finally:writer['depth']-=1
+                    if outer and writer['armed']:
+                        writer['armed']=False
+                        raise OSError('isolated basis commit acknowledgement lost')
+                patch.setattr(state.book,'observation_event',planned)
+                patch.setattr(ledger,'atomic',lost_reply)
+            held=capture(service,kind)
+            assert held.preservation_blocks_new_risk and held.native_risk_basis_ref is None
+            assert held.peak_equity==D('15000')
+        assert ledger.count(EventKind.SESSION)==before+(failure=='lost_commit_reply')
+        record(ledger,held,request=intent(trade_intent_id='b-held-shared',account_alias=b.account_alias))
+        original_control(ledger,a.native_account_context,action='resume_drawdown')
+        recovered=capture(service,kind)
+        assert not recovered.preservation_blocks_new_risk,recovered.preservation_reason
+&gt;       assert recovered.peak_equity==current.equity
+E       AssertionError: assert Decimal('15000') == Decimal('10000')
+E        +  where Decimal('15000') = RiskSnapshot(now_unix=1800000000, account_alias='second_alias', account_verified=True, equity=Decimal('10000'), balanc..., execution_authority=False), native_risk_basis_ref='a149cae39fd9e2989dbdbcedb80e8d026028888192e35d60540118b0db461a69').peak_equity
+E        +  and   Decimal('10000') = AccountState(account_alias='second_alias', equity=Decimal('10000'), balance=Decimal('10000'), currency='USD', verified...'), reported_equity=Decimal('10200'), credit=Decimal('200'), currency_digits=2, movements=()), native_observation=None).equity
+
+trading/tests/test_physical_snapshot_producers.py:131: AssertionError</failure></testcase><testcase classname="trading.tests.test_physical_snapshot_producers" name="test_held_shared_snapshot_never_becomes_an_own_peak_during_recovery[read-account]" time="0.101"><failure message="AssertionError: assert Decimal('15000') == Decimal('10000')&#10; +  where Decimal('15000') = RiskSnapshot(now_unix=1800000000, account_alias='second_alias', account_verified=True, equity=Decimal('10000'), balanc..., execution_authority=False), native_risk_basis_ref='6c2f217d042751cbf351524d3c44387290d02dce68f739b1d2692004fa47fb73').peak_equity&#10; +  and   Decimal('10000') = AccountState(account_alias='second_alias', equity=Decimal('10000'), balance=Decimal('10000'), currency='USD', verified...'), reported_equity=Decimal('10200'), credit=Decimal('200'), currency_digits=2, movements=()), native_observation=None).equity">tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-41/test_held_shared_snapshot_neve1')
+eurusd = SymbolContract(symbol='EURUSD', venue='mt5', base_currency='EUR', quote_currency='USD', account_currency='USD', contra...=Decimal('0'), max_adv_participation=Decimal('0.10'), liquidity_haircut=Decimal('0'), round_trip_cost_pct=Decimal('0'))
+kind = 'account', failure = 'read'
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x7fc93cff7fe0&gt;
+
+    @pytest.mark.parametrize('kind',['single','account'])
+    @pytest.mark.parametrize('failure',['read','lost_commit_reply'])
+    def test_held_shared_snapshot_never_becomes_an_own_peak_during_recovery(tmp_path,eurusd,kind,failure,monkeypatch):
+        from contextlib import contextmanager
+        from test_physical_control_history import original_control
+        from vati.risk.physical_runtime import PhysicalRiskRuntime
+        ledger,adapter,account,_,a=native_facts(tmp_path,eurusd)
+        legacy(ledger,a,'original-a-peak','15000')
+        b=other_context(ledger,adapter,account,a,alias='second_alias')
+        current=replace(account,account_alias=b.account_alias,
+            funding_mark=replace(account.funding_mark,account_alias=b.account_alias))
+        service=producer(kind,ledger,adapter,current,b)
+        first=capture(service,kind)
+        assert first.peak_equity==D('15000') and first.native_risk_basis_ref
+        record(ledger,first,request=intent(trade_intent_id='b-original-shared',account_alias=b.account_alias))
+        before=ledger.count(EventKind.SESSION)
+        with monkeypatch.context() as patch:
+            if failure=='read':
+                def unavailable(*args,**kwargs):raise OSError('isolated read unavailable')
+                patch.setattr(PhysicalRiskRuntime,'observe',unavailable)
+            else:
+                state=service._physical_risk_runtime;plan=state.book.observation_event;atomic=ledger.atomic
+                writer={'armed':False,'depth':0}
+                def planned(*args,**kwargs):
+                    result=plan(*args,**kwargs);writer['armed']=True;return result
+                @contextmanager
+                def lost_reply():
+                    outer=writer['depth']==0;writer['depth']+=1
+                    try:
+                        with atomic():yield
+                    finally:writer['depth']-=1
+                    if outer and writer['armed']:
+                        writer['armed']=False
+                        raise OSError('isolated basis commit acknowledgement lost')
+                patch.setattr(state.book,'observation_event',planned)
+                patch.setattr(ledger,'atomic',lost_reply)
+            held=capture(service,kind)
+            assert held.preservation_blocks_new_risk and held.native_risk_basis_ref is None
+            assert held.peak_equity==D('15000')
+        assert ledger.count(EventKind.SESSION)==before+(failure=='lost_commit_reply')
+        record(ledger,held,request=intent(trade_intent_id='b-held-shared',account_alias=b.account_alias))
+        original_control(ledger,a.native_account_context,action='resume_drawdown')
+        recovered=capture(service,kind)
+        assert not recovered.preservation_blocks_new_risk,recovered.preservation_reason
+&gt;       assert recovered.peak_equity==current.equity
+E       AssertionError: assert Decimal('15000') == Decimal('10000')
+E        +  where Decimal('15000') = RiskSnapshot(now_unix=1800000000, account_alias='second_alias', account_verified=True, equity=Decimal('10000'), balanc..., execution_authority=False), native_risk_basis_ref='6c2f217d042751cbf351524d3c44387290d02dce68f739b1d2692004fa47fb73').peak_equity
+E        +  and   Decimal('10000') = AccountState(account_alias='second_alias', equity=Decimal('10000'), balance=Decimal('10000'), currency='USD', verified...'), reported_equity=Decimal('10200'), credit=Decimal('200'), currency_digits=2, movements=()), native_observation=None).equity
+
+trading/tests/test_physical_snapshot_producers.py:131: AssertionError</failure></testcase><testcase classname="trading.tests.test_physical_snapshot_producers" name="test_held_shared_snapshot_never_becomes_an_own_peak_during_recovery[lost_commit_reply-single]" time="0.039"><failure message="AssertionError: assert Decimal('15000') == Decimal('10000')&#10; +  where Decimal('15000') = RiskSnapshot(now_unix=1800000000, account_alias='second_alias', account_verified=True, equity=Decimal('10000'), balanc..., execution_authority=False), native_risk_basis_ref='c13717e71d069507a3d5653e854d1ebc7888ba63878efdc5333c243712443191').peak_equity&#10; +  and   Decimal('10000') = AccountState(account_alias='second_alias', equity=Decimal('10000'), balance=Decimal('10000'), currency='USD', verified...'), reported_equity=Decimal('10200'), credit=Decimal('200'), currency_digits=2, movements=()), native_observation=None).equity">tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-41/test_held_shared_snapshot_neve2')
+eurusd = SymbolContract(symbol='EURUSD', venue='mt5', base_currency='EUR', quote_currency='USD', account_currency='USD', contra...=Decimal('0'), max_adv_participation=Decimal('0.10'), liquidity_haircut=Decimal('0'), round_trip_cost_pct=Decimal('0'))
+kind = 'single', failure = 'lost_commit_reply'
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x7fc93cd3f4a0&gt;
+
+    @pytest.mark.parametrize('kind',['single','account'])
+    @pytest.mark.parametrize('failure',['read','lost_commit_reply'])
+    def test_held_shared_snapshot_never_becomes_an_own_peak_during_recovery(tmp_path,eurusd,kind,failure,monkeypatch):
+        from contextlib import contextmanager
+        from test_physical_control_history import original_control
+        from vati.risk.physical_runtime import PhysicalRiskRuntime
+        ledger,adapter,account,_,a=native_facts(tmp_path,eurusd)
+        legacy(ledger,a,'original-a-peak','15000')
+        b=other_context(ledger,adapter,account,a,alias='second_alias')
+        current=replace(account,account_alias=b.account_alias,
+            funding_mark=replace(account.funding_mark,account_alias=b.account_alias))
+        service=producer(kind,ledger,adapter,current,b)
+        first=capture(service,kind)
+        assert first.peak_equity==D('15000') and first.native_risk_basis_ref
+        record(ledger,first,request=intent(trade_intent_id='b-original-shared',account_alias=b.account_alias))
+        before=ledger.count(EventKind.SESSION)
+        with monkeypatch.context() as patch:
+            if failure=='read':
+                def unavailable(*args,**kwargs):raise OSError('isolated read unavailable')
+                patch.setattr(PhysicalRiskRuntime,'observe',unavailable)
+            else:
+                state=service._physical_risk_runtime;plan=state.book.observation_event;atomic=ledger.atomic
+                writer={'armed':False,'depth':0}
+                def planned(*args,**kwargs):
+                    result=plan(*args,**kwargs);writer['armed']=True;return result
+                @contextmanager
+                def lost_reply():
+                    outer=writer['depth']==0;writer['depth']+=1
+                    try:
+                        with atomic():yield
+                    finally:writer['depth']-=1
+                    if outer and writer['armed']:
+                        writer['armed']=False
+                        raise OSError('isolated basis commit acknowledgement lost')
+                patch.setattr(state.book,'observation_event',planned)
+                patch.setattr(ledger,'atomic',lost_reply)
+            held=capture(service,kind)
+            assert held.preservation_blocks_new_risk and held.native_risk_basis_ref is None
+            assert held.peak_equity==D('15000')
+        assert ledger.count(EventKind.SESSION)==before+(failure=='lost_commit_reply')
+        record(ledger,held,request=intent(trade_intent_id='b-held-shared',account_alias=b.account_alias))
+        original_control(ledger,a.native_account_context,action='resume_drawdown')
+        recovered=capture(service,kind)
+        assert not recovered.preservation_blocks_new_risk,recovered.preservation_reason
+&gt;       assert recovered.peak_equity==current.equity
+E       AssertionError: assert Decimal('15000') == Decimal('10000')
+E        +  where Decimal('15000') = RiskSnapshot(now_unix=1800000000, account_alias='second_alias', account_verified=True, equity=Decimal('10000'), balanc..., execution_authority=False), native_risk_basis_ref='c13717e71d069507a3d5653e854d1ebc7888ba63878efdc5333c243712443191').peak_equity
+E        +  and   Decimal('10000') = AccountState(account_alias='second_alias', equity=Decimal('10000'), balance=Decimal('10000'), currency='USD', verified...'), reported_equity=Decimal('10200'), credit=Decimal('200'), currency_digits=2, movements=()), native_observation=None).equity
+
+trading/tests/test_physical_snapshot_producers.py:131: AssertionError</failure></testcase><testcase classname="trading.tests.test_physical_snapshot_producers" name="test_held_shared_snapshot_never_becomes_an_own_peak_during_recovery[lost_commit_reply-account]" time="0.037"><failure message="AssertionError: assert Decimal('15000') == Decimal('10000')&#10; +  where Decimal('15000') = RiskSnapshot(now_unix=1800000000, account_alias='second_alias', account_verified=True, equity=Decimal('10000'), balanc..., execution_authority=False), native_risk_basis_ref='5b2f3b4cb80d2af88df0e579165630c8d2a8c71a6d64e8dfb7c788f76be63cc8').peak_equity&#10; +  and   Decimal('10000') = AccountState(account_alias='second_alias', equity=Decimal('10000'), balance=Decimal('10000'), currency='USD', verified...'), reported_equity=Decimal('10200'), credit=Decimal('200'), currency_digits=2, movements=()), native_observation=None).equity">tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-41/test_held_shared_snapshot_neve3')
+eurusd = SymbolContract(symbol='EURUSD', venue='mt5', base_currency='EUR', quote_currency='USD', account_currency='USD', contra...=Decimal('0'), max_adv_participation=Decimal('0.10'), liquidity_haircut=Decimal('0'), round_trip_cost_pct=Decimal('0'))
+kind = 'account', failure = 'lost_commit_reply'
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x7fc93cd62e10&gt;
+
+    @pytest.mark.parametrize('kind',['single','account'])
+    @pytest.mark.parametrize('failure',['read','lost_commit_reply'])
+    def test_held_shared_snapshot_never_becomes_an_own_peak_during_recovery(tmp_path,eurusd,kind,failure,monkeypatch):
+        from contextlib import contextmanager
+        from test_physical_control_history import original_control
+        from vati.risk.physical_runtime import PhysicalRiskRuntime
+        ledger,adapter,account,_,a=native_facts(tmp_path,eurusd)
+        legacy(ledger,a,'original-a-peak','15000')
+        b=other_context(ledger,adapter,account,a,alias='second_alias')
+        current=replace(account,account_alias=b.account_alias,
+            funding_mark=replace(account.funding_mark,account_alias=b.account_alias))
+        service=producer(kind,ledger,adapter,current,b)
+        first=capture(service,kind)
+        assert first.peak_equity==D('15000') and first.native_risk_basis_ref
+        record(ledger,first,request=intent(trade_intent_id='b-original-shared',account_alias=b.account_alias))
+        before=ledger.count(EventKind.SESSION)
+        with monkeypatch.context() as patch:
+            if failure=='read':
+                def unavailable(*args,**kwargs):raise OSError('isolated read unavailable')
+                patch.setattr(PhysicalRiskRuntime,'observe',unavailable)
+            else:
+                state=service._physical_risk_runtime;plan=state.book.observation_event;atomic=ledger.atomic
+                writer={'armed':False,'depth':0}
+                def planned(*args,**kwargs):
+                    result=plan(*args,**kwargs);writer['armed']=True;return result
+                @contextmanager
+                def lost_reply():
+                    outer=writer['depth']==0;writer['depth']+=1
+                    try:
+                        with atomic():yield
+                    finally:writer['depth']-=1
+                    if outer and writer['armed']:
+                        writer['armed']=False
+                        raise OSError('isolated basis commit acknowledgement lost')
+                patch.setattr(state.book,'observation_event',planned)
+                patch.setattr(ledger,'atomic',lost_reply)
+            held=capture(service,kind)
+            assert held.preservation_blocks_new_risk and held.native_risk_basis_ref is None
+            assert held.peak_equity==D('15000')
+        assert ledger.count(EventKind.SESSION)==before+(failure=='lost_commit_reply')
+        record(ledger,held,request=intent(trade_intent_id='b-held-shared',account_alias=b.account_alias))
+        original_control(ledger,a.native_account_context,action='resume_drawdown')
+        recovered=capture(service,kind)
+        assert not recovered.preservation_blocks_new_risk,recovered.preservation_reason
+&gt;       assert recovered.peak_equity==current.equity
+E       AssertionError: assert Decimal('15000') == Decimal('10000')
+E        +  where Decimal('15000') = RiskSnapshot(now_unix=1800000000, account_alias='second_alias', account_verified=True, equity=Decimal('10000'), balanc..., execution_authority=False), native_risk_basis_ref='5b2f3b4cb80d2af88df0e579165630c8d2a8c71a6d64e8dfb7c788f76be63cc8').peak_equity
+E        +  and   Decimal('10000') = AccountState(account_alias='second_alias', equity=Decimal('10000'), balance=Decimal('10000'), currency='USD', verified...'), reported_equity=Decimal('10200'), credit=Decimal('200'), currency_digits=2, movements=()), native_observation=None).equity
+
+trading/tests/test_physical_snapshot_producers.py:131: AssertionError</failure></testcase></testsuite></testsuites>

@@ -1,0 +1,14 @@
+{
+  "trading/tests/test_funding_baseline_preservation.py": {
+    "original_assertions": 13,
+    "assertion_AST_unchanged": true,
+    "before_sha256": "43fd780a74b3cd91a298eaf761a32c72aa51c0d7992dde18a4fccc6282b6c80f",
+    "after_sha256": "927274888057dd39311112a918d87bdb8dc47f22d37003e6d9d97aeb432fa005"
+  },
+  "trading/tests/test_funding_risk_fence.py": {
+    "original_assertions": 29,
+    "assertion_AST_unchanged": true,
+    "before_sha256": "f1651c7211bd39c5f90a3b8a3d102c1bf66caf7ec63f3080793d9b31806d4252",
+    "after_sha256": "f5f8ebc7332865739f049a0619f718a0f12a4b8aca161cb2341bcfc90cfebf65"
+  }
+}

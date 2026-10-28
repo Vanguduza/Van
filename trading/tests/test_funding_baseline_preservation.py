@@ -21,6 +21,10 @@ def runtime(producer, adapter, ledger, eurusd, baseline):
         service._ledger_positions = lambda: []; service._open_positions = lambda: ()
         service._risk_store_ok = lambda: True; service._drawdown_top_state = lambda: None
         service.lifecycle = None; service.consecutive_losses = 0; service.kill = N(active=[])
+        from conftest import mandate_dict
+        from vati.risk import TradingMandate
+        service.mandate = TradingMandate.from_mapping(mandate_dict(account_alias='ctrader_primary',
+            venue=adapter.venue, signed_at_unix=1, expires_at_unix=3600))
         service.evaluators = {'EURUSD': N(last_state=N(quote_age_ms=0, as_of_ms=7000,
             event_window=None, integrity=MarketIntegrityState.NORMAL))}
     service.peak_equity = service.day_start_equity = service.week_start_equity = D(baseline)

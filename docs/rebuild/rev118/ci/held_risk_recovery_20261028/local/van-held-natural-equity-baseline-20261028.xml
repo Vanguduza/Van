@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="2" skipped="0" tests="2" time="1.217" timestamp="2026-10-28T05:10:00.934606+00:00" hostname="6e9feff21467"><testcase classname="trading.tests.test_physical_snapshot_producers" name="test_held_projection_keeps_its_verified_native_equity_sample_without_borrowing_the_displayed_peak[single]" time="0.513"><failure message="AssertionError: assert (Decimal('10000') == Decimal('10000') and Decimal('15000') == Decimal('12000'))&#10; +  where Decimal('10000') = RiskSnapshot(now_unix=1800000000, account_alias='second_alias', account_verified=True, equity=Decimal('10000'), balanc..., execution_authority=False), native_risk_basis_ref='6bb93a99568acd1e1b1cfde4f7e6fc870c4b5cd78ea5d6b657928c856e397b9f').equity&#10; +  and   Decimal('10000') = D('10000')&#10; +  and   Decimal('15000') = RiskSnapshot(now_unix=1800000000, account_alias='second_alias', account_verified=True, equity=Decimal('10000'), balanc..., execution_authority=False), native_risk_basis_ref='6bb93a99568acd1e1b1cfde4f7e6fc870c4b5cd78ea5d6b657928c856e397b9f').peak_equity&#10; +  and   Decimal('12000') = D('12000')">tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-42/test_held_projection_keeps_its0')
+eurusd = SymbolContract(symbol='EURUSD', venue='mt5', base_currency='EUR', quote_currency='USD', account_currency='USD', contra...=Decimal('0'), max_adv_participation=Decimal('0.10'), liquidity_haircut=Decimal('0'), round_trip_cost_pct=Decimal('0'))
+kind = 'single'
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x7f5ba4fe21e0&gt;
+
+    @pytest.mark.parametrize('kind',['single','account'])
+    def test_held_projection_keeps_its_verified_native_equity_sample_without_borrowing_the_displayed_peak(tmp_path,eurusd,kind,monkeypatch):
+        from test_physical_control_history import original_control
+        from vati.risk.physical_runtime import PhysicalRiskRuntime
+        ledger,adapter,account,_,a=native_facts(tmp_path,eurusd)
+        legacy(ledger,a,'original-a-high','15000')
+        b=other_context(ledger,adapter,account,a,alias='second_alias')
+        current=replace(account,account_alias=b.account_alias,
+            funding_mark=replace(account.funding_mark,account_alias=b.account_alias))
+        service=producer(kind,ledger,adapter,current,b)
+        first=capture(service,kind)
+        record(ledger,first,request=intent(trade_intent_id='b-first',account_alias=b.account_alias))
+        high=replace(current,equity=D('12000'),funding_mark=replace(current.funding_mark,
+            reported_equity=D('12000')+current.funding_mark.credit,source_nonce='isolated-high-equity'))
+        with monkeypatch.context() as patch:
+            patch.setattr(adapter,'sync_account',lambda:high)
+            def unavailable(*args,**kwargs):raise OSError('isolated projection read unavailable')
+            patch.setattr(PhysicalRiskRuntime,'observe',unavailable)
+            held=capture(service,kind)
+        assert held.equity==D('12000') and held.peak_equity==D('15000')
+        assert held.preservation_blocks_new_risk and held.native_risk_basis_ref is None
+        record(ledger,held,request=intent(trade_intent_id='b-observed-high',account_alias=b.account_alias))
+        original_control(ledger,a.native_account_context,action='resume_drawdown')
+        recovered=capture(service,kind)
+        assert not recovered.preservation_blocks_new_risk,recovered.preservation_reason
+&gt;       assert recovered.equity==D('10000') and recovered.peak_equity==D('12000')
+E       AssertionError: assert (Decimal('10000') == Decimal('10000') and Decimal('15000') == Decimal('12000'))
+E        +  where Decimal('10000') = RiskSnapshot(now_unix=1800000000, account_alias='second_alias', account_verified=True, equity=Decimal('10000'), balanc..., execution_authority=False), native_risk_basis_ref='6bb93a99568acd1e1b1cfde4f7e6fc870c4b5cd78ea5d6b657928c856e397b9f').equity
+E        +  and   Decimal('10000') = D('10000')
+E        +  and   Decimal('15000') = RiskSnapshot(now_unix=1800000000, account_alias='second_alias', account_verified=True, equity=Decimal('10000'), balanc..., execution_authority=False), native_risk_basis_ref='6bb93a99568acd1e1b1cfde4f7e6fc870c4b5cd78ea5d6b657928c856e397b9f').peak_equity
+E        +  and   Decimal('12000') = D('12000')
+
+trading/tests/test_physical_snapshot_producers.py:160: AssertionError</failure></testcase><testcase classname="trading.tests.test_physical_snapshot_producers" name="test_held_projection_keeps_its_verified_native_equity_sample_without_borrowing_the_displayed_peak[account]" time="0.209"><failure message="AssertionError: assert (Decimal('10000') == Decimal('10000') and Decimal('15000') == Decimal('12000'))&#10; +  where Decimal('10000') = RiskSnapshot(now_unix=1800000000, account_alias='second_alias', account_verified=True, equity=Decimal('10000'), balanc..., execution_authority=False), native_risk_basis_ref='9c0f1fb4c7dcf1b01f7bd2237a249de583994e2801bf460adb22ed2628721c84').equity&#10; +  and   Decimal('10000') = D('10000')&#10; +  and   Decimal('15000') = RiskSnapshot(now_unix=1800000000, account_alias='second_alias', account_verified=True, equity=Decimal('10000'), balanc..., execution_authority=False), native_risk_basis_ref='9c0f1fb4c7dcf1b01f7bd2237a249de583994e2801bf460adb22ed2628721c84').peak_equity&#10; +  and   Decimal('12000') = D('12000')">tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-42/test_held_projection_keeps_its1')
+eurusd = SymbolContract(symbol='EURUSD', venue='mt5', base_currency='EUR', quote_currency='USD', account_currency='USD', contra...=Decimal('0'), max_adv_participation=Decimal('0.10'), liquidity_haircut=Decimal('0'), round_trip_cost_pct=Decimal('0'))
+kind = 'account'
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x7f5ba44f7530&gt;
+
+    @pytest.mark.parametrize('kind',['single','account'])
+    def test_held_projection_keeps_its_verified_native_equity_sample_without_borrowing_the_displayed_peak(tmp_path,eurusd,kind,monkeypatch):
+        from test_physical_control_history import original_control
+        from vati.risk.physical_runtime import PhysicalRiskRuntime
+        ledger,adapter,account,_,a=native_facts(tmp_path,eurusd)
+        legacy(ledger,a,'original-a-high','15000')
+        b=other_context(ledger,adapter,account,a,alias='second_alias')
+        current=replace(account,account_alias=b.account_alias,
+            funding_mark=replace(account.funding_mark,account_alias=b.account_alias))
+        service=producer(kind,ledger,adapter,current,b)
+        first=capture(service,kind)
+        record(ledger,first,request=intent(trade_intent_id='b-first',account_alias=b.account_alias))
+        high=replace(current,equity=D('12000'),funding_mark=replace(current.funding_mark,
+            reported_equity=D('12000')+current.funding_mark.credit,source_nonce='isolated-high-equity'))
+        with monkeypatch.context() as patch:
+            patch.setattr(adapter,'sync_account',lambda:high)
+            def unavailable(*args,**kwargs):raise OSError('isolated projection read unavailable')
+            patch.setattr(PhysicalRiskRuntime,'observe',unavailable)
+            held=capture(service,kind)
+        assert held.equity==D('12000') and held.peak_equity==D('15000')
+        assert held.preservation_blocks_new_risk and held.native_risk_basis_ref is None
+        record(ledger,held,request=intent(trade_intent_id='b-observed-high',account_alias=b.account_alias))
+        original_control(ledger,a.native_account_context,action='resume_drawdown')
+        recovered=capture(service,kind)
+        assert not recovered.preservation_blocks_new_risk,recovered.preservation_reason
+&gt;       assert recovered.equity==D('10000') and recovered.peak_equity==D('12000')
+E       AssertionError: assert (Decimal('10000') == Decimal('10000') and Decimal('15000') == Decimal('12000'))
+E        +  where Decimal('10000') = RiskSnapshot(now_unix=1800000000, account_alias='second_alias', account_verified=True, equity=Decimal('10000'), balanc..., execution_authority=False), native_risk_basis_ref='9c0f1fb4c7dcf1b01f7bd2237a249de583994e2801bf460adb22ed2628721c84').equity
+E        +  and   Decimal('10000') = D('10000')
+E        +  and   Decimal('15000') = RiskSnapshot(now_unix=1800000000, account_alias='second_alias', account_verified=True, equity=Decimal('10000'), balanc..., execution_authority=False), native_risk_basis_ref='9c0f1fb4c7dcf1b01f7bd2237a249de583994e2801bf460adb22ed2628721c84').peak_equity
+E        +  and   Decimal('12000') = D('12000')
+
+trading/tests/test_physical_snapshot_producers.py:160: AssertionError</failure></testcase></testsuite></testsuites>

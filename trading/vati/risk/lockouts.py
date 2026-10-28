@@ -180,11 +180,18 @@ class LossStreakGovernor:
         return g
 
 
+def _physical_baseline_unavailable(snapshot):
+    return (snapshot.get('preservation_blocks_new_risk') is True
+            and str(snapshot.get('preservation_reason', '')).startswith('NATIVE_PHYSICAL_RISK_'))
+
+
 def _funding_baseline_held(snapshot):
     # Older producers raised their peak before refusing the same observation.
     # Keep that original decision intact; its held capital is not a risk basis.
+    reason = str(snapshot.get('preservation_reason', ''))
     return (snapshot.get('preservation_blocks_new_risk') is True
-            and 'FUNDING_RISK_' in str(snapshot.get('preservation_reason', '')))
+            and ('FUNDING_RISK_' in reason or reason.startswith(
+                ('NATIVE_PHYSICAL_RISK_', 'NATIVE_RISK_ACCOUNT_SOURCE_UNAVAILABLE:'))))
 
 
 def restore_peak_equity(events: Iterable, *, account_alias: str | None = None) -> Optional[Decimal]:
