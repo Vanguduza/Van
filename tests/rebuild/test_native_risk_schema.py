@@ -50,6 +50,17 @@ def test_optional_pending_originals_preserve_all_legacy_required_fields():
     assert set(json.loads(SCHEMA.read_text())['required'])==ORIGINAL_REQUIRED
 
 
+def test_separate_current_contract_preserves_closed_original_pending_bodies():
+    body=pending_body();p=body['pending_risk_commitments'][0]
+    assert 'valuation_contract' not in p
+    validator().validate(body)
+    p['valuation_contract']=deepcopy(p['contract'])
+    p['valuation_contract']['tick_value']='2'
+    validator().validate(body)
+    p['valuation_contract']['is_synthetic']='false'
+    with pytest.raises(ValidationError):validator().validate(body)
+
+
 @pytest.mark.parametrize('field,value',[
     ('command_ref','x'),('original_input_ref','A'*64),('state','NO_EFFECT'),
     ('direction','BUY'),('new_position_slots',True),('new_position_slots',2),

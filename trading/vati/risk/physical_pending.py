@@ -49,7 +49,7 @@ class PhysicalPendingRisk:
                 raise LedgerError('pending risk ledger integrity unavailable')
         self._now = now_ms
 
-    def refresh(self, positions, *, now_ms):
+    def refresh(self, positions, *, now_ms, contracts=None):
         with committed_source_snapshot(self.ledger):
             if not self.ledger.verify_incremental()[0]:
                 raise LedgerError('pending risk ledger integrity unavailable')
@@ -90,15 +90,20 @@ class PhysicalPendingRisk:
                     continue  # Position stop risk only; not cash or fee settlement.
                 quantity = decimal(max(Fraction(0),fraction(order.quantity)-covered))
                 if quantity==0:continue
+                valuation = None
+                if contracts is not None:
+                    from vati.risk.pending import validate_valuation_contract
+                    valuation=contracts.get(contract.symbol.upper())
+                    validate_valuation_contract(contract,valuation)
                 out.append(PendingRiskCommitment(order.command_ref,order.original_input_ref,order.origin_alias,
                     self.context.physical_account_key,self.context.monetary_scope_hash,order.state,direction,
                     quantity,Decimal(cmd['entry_price']),
                     None if cmd['protective_stop'] is None else Decimal(cmd['protective_stop']),
-                    contract,new_position_slots=0 if matches else 1))
+                    contract,new_position_slots=0 if matches else 1,valuation_contract=valuation))
             return tuple(out)
 
 
-def project_pending_risk(owner, ledger, context, positions, *, now_ms):
+def project_pending_risk(owner, ledger, context, positions, *, now_ms, contracts):
     """Called only after the existing native context and risk-source gates."""
     try:
         runtime = getattr(owner,'_physical_pending_risk',None)
@@ -108,7 +113,7 @@ def project_pending_risk(owner, ledger, context, positions, *, now_ms):
                 or runtime.context.account_alias!=context.account_alias):
             runtime = PhysicalPendingRisk(ledger,context,now_ms=now_ms)
             owner._physical_pending_risk = runtime
-        return runtime.refresh(positions,now_ms=now_ms),''
+        return runtime.refresh(positions,now_ms=now_ms,contracts=contracts),''
     except Exception as exc:
         owner._physical_pending_risk = None
         return (),'NATIVE_PENDING_RISK_UNAVAILABLE:'+type(exc).__name__[:64]

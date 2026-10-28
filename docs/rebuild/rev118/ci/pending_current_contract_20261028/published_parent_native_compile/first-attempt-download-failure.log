@@ -1,0 +1,256 @@
+﻿2026-10-28T08:34:42.2834171Z Current runner version: '2.338.0'
+2026-10-28T08:34:42.2852763Z ##[group]Runner Image Provisioner
+2026-10-28T08:34:42.2853306Z Hosted Compute Agent
+2026-10-28T08:34:42.2853638Z Version: 20261021.618
+2026-10-28T08:34:42.2853982Z Commit: 21505ad2541d5be6135ed84fc33697146cf75b8e
+2026-10-28T08:34:42.2854386Z Build Date: 2026-10-21T00:45:21Z
+2026-10-28T08:34:42.2854797Z Worker ID: {9bf1a5cc-a37c-47ce-bf9d-7f00ffd0fa2a}
+2026-10-28T08:34:42.2855188Z Region: westus3
+2026-10-28T08:34:42.2855493Z Cloud: Azure
+2026-10-28T08:34:42.2855790Z ##[endgroup]
+2026-10-28T08:34:42.2856513Z ##[group]Operating System
+2026-10-28T08:34:42.2856855Z Microsoft Windows Server 2025
+2026-10-28T08:34:42.2857180Z 10.0.26100
+2026-10-28T08:34:42.2857477Z Datacenter
+2026-10-28T08:34:42.2857763Z ##[endgroup]
+2026-10-28T08:34:42.2858052Z ##[group]Runner Image
+2026-10-28T08:34:42.2858405Z Image: windows-2025-vs2026
+2026-10-28T08:34:42.2858725Z Version: 20261021.278.1
+2026-10-28T08:34:42.2859731Z Included Software: https://github.com/actions/runner-images/blob/win25-vs2026/20261021.278/images/windows/Windows2025-VS2026-Readme.md
+2026-10-28T08:34:42.2860669Z Image Release: https://github.com/actions/runner-images/releases/tag/win25-vs2026%2F20261021.278
+2026-10-28T08:34:42.2861204Z ##[endgroup]
+2026-10-28T08:34:42.2861826Z ##[group]GITHUB_TOKEN Permissions
+2026-10-28T08:34:42.2863021Z Contents: read
+2026-10-28T08:34:42.2863323Z Metadata: read
+2026-10-28T08:34:42.2863682Z ##[endgroup]
+2026-10-28T08:34:42.2865070Z Secret source: Actions
+2026-10-28T08:34:42.2865585Z Cache mode: write
+2026-10-28T08:34:42.2865977Z Prepare workflow directory
+2026-10-28T08:34:42.3082433Z Prepare all required actions
+2026-10-28T08:34:42.3115506Z Getting action download info
+2026-10-28T08:34:42.6034100Z Download action repository 'actions/checkout@v4' (SHA:11d5960a326750d5838078e36cf38b85af677262)
+2026-10-28T08:34:42.7535274Z Download action repository 'actions/upload-artifact@v4' (SHA:ea165f8d65b6e75b540449e92b4886f43607fa02)
+2026-10-28T08:34:43.0525230Z Complete job name: native-metaeditor
+2026-10-28T08:34:43.1801888Z ##[group]Run git config --global core.autocrlf false
+2026-10-28T08:34:43.1802475Z [36;1mgit config --global core.autocrlf false[0m
+2026-10-28T08:34:43.1802826Z [36;1mgit config --global core.eol lf[0m
+2026-10-28T08:34:43.1803160Z [36;1mgit config --global core.longpaths true[0m
+2026-10-28T08:34:43.2478665Z shell: C:\Program Files\PowerShell\7\pwsh.EXE -command ". '{0}'"
+2026-10-28T08:34:43.2479246Z ##[endgroup]
+2026-10-28T08:34:44.6771404Z ##[group]Run actions/checkout@v4
+2026-10-28T08:34:44.6771812Z with:
+2026-10-28T08:34:44.6772059Z   persist-credentials: false
+2026-10-28T08:34:44.6772368Z   repository: Vanguduza/Van
+2026-10-28T08:34:44.6774813Z   token: ***
+2026-10-28T08:34:44.6775050Z   ssh-strict: true
+2026-10-28T08:34:44.6775287Z   ssh-user: git
+2026-10-28T08:34:44.6775514Z   clean: true
+2026-10-28T08:34:44.6775764Z   sparse-checkout-cone-mode: true
+2026-10-28T08:34:44.6776055Z   fetch-depth: 1
+2026-10-28T08:34:44.6776315Z   fetch-tags: false
+2026-10-28T08:34:44.6776565Z   show-progress: true
+2026-10-28T08:34:44.6776820Z   lfs: false
+2026-10-28T08:34:44.6777043Z   submodules: false
+2026-10-28T08:34:44.6777297Z   set-safe-directory: true
+2026-10-28T08:34:44.6777597Z   allow-unsafe-pr-checkout: false
+2026-10-28T08:34:44.6777890Z ##[endgroup]
+2026-10-28T08:34:44.7975733Z Syncing repository: Vanguduza/Van
+2026-10-28T08:34:44.7976939Z ##[group]Getting Git version info
+2026-10-28T08:34:44.7977375Z Working directory is 'D:\a\Van\Van'
+2026-10-28T08:34:44.8428953Z [command]"C:\Program Files\Git\bin\git.exe" version
+2026-10-28T08:34:44.8683727Z git version 2.56.0.windows.2
+2026-10-28T08:34:44.8713841Z ##[endgroup]
+2026-10-28T08:34:44.8724035Z Copying 'C:\Users\runneradmin\.gitconfig' to 'D:\a\_temp\fa59091d-2807-4ef9-b0d9-a9204593b414\.gitconfig'
+2026-10-28T08:34:44.8738463Z Temporarily overriding HOME='D:\a\_temp\fa59091d-2807-4ef9-b0d9-a9204593b414' before making global git config changes
+2026-10-28T08:34:44.8741160Z Adding repository directory to the temporary git global config as a safe directory
+2026-10-28T08:34:44.8746583Z [command]"C:\Program Files\Git\bin\git.exe" config --global --add safe.directory D:\a\Van\Van
+2026-10-28T08:34:44.9020699Z Deleting the contents of 'D:\a\Van\Van'
+2026-10-28T08:34:44.9025032Z ##[group]Initializing the repository
+2026-10-28T08:34:44.9031715Z [command]"C:\Program Files\Git\bin\git.exe" init D:\a\Van\Van
+2026-10-28T08:34:45.0154087Z Initialized empty Git repository in D:/a/Van/Van/.git/
+2026-10-28T08:34:45.0195754Z [command]"C:\Program Files\Git\bin\git.exe" remote add origin https://github.com/Vanguduza/Van
+2026-10-28T08:34:45.1399330Z ##[endgroup]
+2026-10-28T08:34:45.1400385Z ##[group]Disabling automatic garbage collection
+2026-10-28T08:34:45.1406672Z [command]"C:\Program Files\Git\bin\git.exe" config --local gc.auto 0
+2026-10-28T08:34:45.1678626Z ##[endgroup]
+2026-10-28T08:34:45.1679565Z ##[group]Setting up auth
+2026-10-28T08:34:45.1688345Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp core\.sshCommand
+2026-10-28T08:34:45.1955131Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "sh -c \"git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :\""
+2026-10-28T08:34:48.4200221Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-10-28T08:34:48.4459040Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "sh -c \"git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :\""
+2026-10-28T08:34:48.8546800Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-10-28T08:34:48.8811921Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "git config --local --show-origin --name-only --get-regexp remote.origin.url"
+2026-10-28T08:34:49.2665329Z [command]"C:\Program Files\Git\bin\git.exe" config --local http.https://github.com/.extraheader "AUTHORIZATION: basic ***"
+2026-10-28T08:34:49.2922901Z ##[endgroup]
+2026-10-28T08:34:49.2923207Z ##[group]Fetching the repository
+2026-10-28T08:34:49.2936950Z [command]"C:\Program Files\Git\bin\git.exe" -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +14e75c055d91d9c86e09987a0f16da352e5a8be5:refs/remotes/pull/105/merge
+2026-10-28T08:35:00.0726901Z From https://github.com/Vanguduza/Van
+2026-10-28T08:35:00.0727428Z  * [new ref]         14e75c055d91d9c86e09987a0f16da352e5a8be5 -> pull/105/merge
+2026-10-28T08:35:00.0760003Z ##[endgroup]
+2026-10-28T08:35:00.0762738Z ##[group]Determining the checkout info
+2026-10-28T08:35:00.0763547Z ##[endgroup]
+2026-10-28T08:35:00.0772612Z [command]"C:\Program Files\Git\bin\git.exe" sparse-checkout disable
+2026-10-28T08:35:00.1203303Z [command]"C:\Program Files\Git\bin\git.exe" config --local --unset-all extensions.worktreeConfig
+2026-10-28T08:35:00.1482169Z ##[group]Checking out the ref
+2026-10-28T08:35:00.1490750Z [command]"C:\Program Files\Git\bin\git.exe" checkout --progress --force refs/remotes/pull/105/merge
+2026-10-28T08:35:01.2710865Z Updating files:  22% (3534/15394)
+2026-10-28T08:35:01.2916468Z Updating files:  23% (3541/15394)
+2026-10-28T08:35:01.3231709Z Updating files:  24% (3695/15394)
+2026-10-28T08:35:01.3545427Z Updating files:  25% (3849/15394)
+2026-10-28T08:35:01.3761948Z Updating files:  26% (4003/15394)
+2026-10-28T08:35:01.4191661Z Updating files:  27% (4157/15394)
+2026-10-28T08:35:01.4478465Z Updating files:  28% (4311/15394)
+2026-10-28T08:35:01.4742027Z Updating files:  29% (4465/15394)
+2026-10-28T08:35:01.5004210Z Updating files:  30% (4619/15394)
+2026-10-28T08:35:01.5245212Z Updating files:  31% (4773/15394)
+2026-10-28T08:35:01.5479917Z Updating files:  32% (4927/15394)
+2026-10-28T08:35:01.5723094Z Updating files:  33% (5081/15394)
+2026-10-28T08:35:01.5972777Z Updating files:  34% (5234/15394)
+2026-10-28T08:35:01.6143424Z Updating files:  35% (5388/15394)
+2026-10-28T08:35:01.6312806Z Updating files:  36% (5542/15394)
+2026-10-28T08:35:01.7136558Z Updating files:  37% (5696/15394)
+2026-10-28T08:35:01.7451233Z Updating files:  38% (5850/15394)
+2026-10-28T08:35:01.7710365Z Updating files:  39% (6004/15394)
+2026-10-28T08:35:01.7975717Z Updating files:  40% (6158/15394)
+2026-10-28T08:35:01.8265136Z Updating files:  41% (6312/15394)
+2026-10-28T08:35:01.8522283Z Updating files:  42% (6466/15394)
+2026-10-28T08:35:01.8756197Z Updating files:  43% (6620/15394)
+2026-10-28T08:35:01.9039504Z Updating files:  44% (6774/15394)
+2026-10-28T08:35:01.9297858Z Updating files:  45% (6928/15394)
+2026-10-28T08:35:01.9569875Z Updating files:  46% (7082/15394)
+2026-10-28T08:35:01.9752883Z Updating files:  47% (7236/15394)
+2026-10-28T08:35:01.9920700Z Updating files:  48% (7390/15394)
+2026-10-28T08:35:02.0131989Z Updating files:  49% (7544/15394)
+2026-10-28T08:35:02.0371923Z Updating files:  50% (7697/15394)
+2026-10-28T08:35:02.0613737Z Updating files:  51% (7851/15394)
+2026-10-28T08:35:02.0849154Z Updating files:  52% (8005/15394)
+2026-10-28T08:35:02.1092691Z Updating files:  53% (8159/15394)
+2026-10-28T08:35:02.1340195Z Updating files:  54% (8313/15394)
+2026-10-28T08:35:02.1599419Z Updating files:  55% (8467/15394)
+2026-10-28T08:35:02.1856731Z Updating files:  56% (8621/15394)
+2026-10-28T08:35:02.2045812Z Updating files:  57% (8775/15394)
+2026-10-28T08:35:02.2217470Z Updating files:  58% (8929/15394)
+2026-10-28T08:35:02.3163624Z Updating files:  59% (9083/15394)
+2026-10-28T08:35:02.3231071Z Updating files:  59% (9214/15394)
+2026-10-28T08:35:02.3485046Z Updating files:  60% (9237/15394)
+2026-10-28T08:35:02.3875865Z Updating files:  61% (9391/15394)
+2026-10-28T08:35:02.4121280Z Updating files:  62% (9545/15394)
+2026-10-28T08:35:02.4301111Z Updating files:  63% (9699/15394)
+2026-10-28T08:35:02.4466282Z Updating files:  64% (9853/15394)
+2026-10-28T08:35:02.4689189Z Updating files:  65% (10007/15394)
+2026-10-28T08:35:02.4916274Z Updating files:  66% (10161/15394)
+2026-10-28T08:35:02.5175136Z Updating files:  67% (10314/15394)
+2026-10-28T08:35:02.5468934Z Updating files:  68% (10468/15394)
+2026-10-28T08:35:02.5730328Z Updating files:  69% (10622/15394)
+2026-10-28T08:35:02.5956472Z Updating files:  70% (10776/15394)
+2026-10-28T08:35:02.6207878Z Updating files:  71% (10930/15394)
+2026-10-28T08:35:02.6413059Z Updating files:  72% (11084/15394)
+2026-10-28T08:35:02.6661016Z Updating files:  73% (11238/15394)
+2026-10-28T08:35:02.6836366Z Updating files:  74% (11392/15394)
+2026-10-28T08:35:02.7074674Z Updating files:  75% (11546/15394)
+2026-10-28T08:35:02.7270755Z Updating files:  76% (11700/15394)
+2026-10-28T08:35:02.7454683Z Updating files:  77% (11854/15394)
+2026-10-28T08:35:02.7662262Z Updating files:  78% (12008/15394)
+2026-10-28T08:35:02.7903117Z Updating files:  79% (12162/15394)
+2026-10-28T08:35:02.8184297Z Updating files:  80% (12316/15394)
+2026-10-28T08:35:02.8452933Z Updating files:  81% (12470/15394)
+2026-10-28T08:35:02.8668836Z Updating files:  82% (12624/15394)
+2026-10-28T08:35:02.8898046Z Updating files:  83% (12778/15394)
+2026-10-28T08:35:02.9246593Z Updating files:  84% (12931/15394)
+2026-10-28T08:35:02.9432482Z Updating files:  85% (13085/15394)
+2026-10-28T08:35:03.0222356Z Updating files:  86% (13239/15394)
+2026-10-28T08:35:03.0514078Z Updating files:  87% (13393/15394)
+2026-10-28T08:35:03.0724136Z Updating files:  88% (13547/15394)
+2026-10-28T08:35:03.0967895Z Updating files:  89% (13701/15394)
+2026-10-28T08:35:03.1492681Z Updating files:  90% (13855/15394)
+2026-10-28T08:35:03.2044288Z Updating files:  91% (14009/15394)
+2026-10-28T08:35:03.2344057Z Updating files:  92% (14163/15394)
+2026-10-28T08:35:03.2668406Z Updating files:  93% (14317/15394)
+2026-10-28T08:35:03.2843353Z Updating files:  94% (14471/15394)
+2026-10-28T08:35:03.2888477Z Updating files:  94% (14593/15394)
+2026-10-28T08:35:03.3092953Z Updating files:  95% (14625/15394)
+2026-10-28T08:35:03.3282829Z Updating files:  96% (14779/15394)
+2026-10-28T08:35:03.3487038Z Updating files:  97% (14933/15394)
+2026-10-28T08:35:03.3724158Z Updating files:  98% (15087/15394)
+2026-10-28T08:35:03.5983584Z Updating files:  99% (15241/15394)
+2026-10-28T08:35:03.5983904Z Updating files: 100% (15394/15394)
+2026-10-28T08:35:03.5984140Z Updating files: 100% (15394/15394), done.
+2026-10-28T08:35:03.6189061Z Note: switching to 'refs/remotes/pull/105/merge'.
+2026-10-28T08:35:03.6189228Z 
+2026-10-28T08:35:03.6189451Z You are in 'detached HEAD' state. You can look around, make experimental
+2026-10-28T08:35:03.6189759Z changes and commit them, and you can discard any commits you make in this
+2026-10-28T08:35:03.6190017Z state without impacting any branches by switching back to a branch.
+2026-10-28T08:35:03.6190191Z 
+2026-10-28T08:35:03.6190339Z If you want to create a new branch to retain commits you create, you may
+2026-10-28T08:35:03.6190714Z do so (now or later) by using -c with the switch command. Example:
+2026-10-28T08:35:03.6190945Z 
+2026-10-28T08:35:03.6191070Z   git switch -c <new-branch-name>
+2026-10-28T08:35:03.6191217Z 
+2026-10-28T08:35:03.6191310Z Or undo this operation with:
+2026-10-28T08:35:03.6191429Z 
+2026-10-28T08:35:03.6191497Z   git switch -
+2026-10-28T08:35:03.6191587Z 
+2026-10-28T08:35:03.6191753Z Turn off this advice by setting config variable advice.detachedHead to false
+2026-10-28T08:35:03.6191992Z 
+2026-10-28T08:35:03.6192278Z HEAD is now at 14e75c0 Merge eac4761f34c2c966ccc57578d7a8865695b40cf7 into 8eb1889822fc8a83f219977c15340172e16acd91
+2026-10-28T08:35:03.6479337Z ##[endgroup]
+2026-10-28T08:35:03.6853258Z [command]"C:\Program Files\Git\bin\git.exe" log -1 --format=%H
+2026-10-28T08:35:03.7089989Z 14e75c055d91d9c86e09987a0f16da352e5a8be5
+2026-10-28T08:35:03.7123520Z ##[group]Removing auth
+2026-10-28T08:35:03.7129719Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp core\.sshCommand
+2026-10-28T08:35:03.7379221Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "sh -c \"git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :\""
+2026-10-28T08:35:04.1601033Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-10-28T08:35:04.1828815Z http.https://github.com/.extraheader
+2026-10-28T08:35:04.1856795Z [command]"C:\Program Files\Git\bin\git.exe" config --local --unset-all http.https://github.com/.extraheader
+2026-10-28T08:35:04.2104677Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "sh -c \"git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :\""
+2026-10-28T08:35:04.6029664Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-10-28T08:35:04.6281794Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "git config --local --show-origin --name-only --get-regexp remote.origin.url"
+2026-10-28T08:35:05.0316748Z ##[endgroup]
+2026-10-28T08:35:05.0572877Z ##[group]Run ./tools/rebuild/native_mql_source.ps1
+2026-10-28T08:35:05.0573139Z [36;1m./tools/rebuild/native_mql_source.ps1[0m
+2026-10-28T08:35:05.0625912Z shell: C:\Program Files\PowerShell\7\pwsh.EXE -command ". '{0}'"
+2026-10-28T08:35:05.0626123Z ##[endgroup]
+2026-10-28T08:35:09.0081195Z [31;1mInvoke-WebRequest: [0mD:\a\Van\Van\tools\rebuild\native_mql_source.ps1:125[0m
+2026-10-28T08:35:09.0081694Z [31;1m[0m[36;1mLine |[0m
+2026-10-28T08:35:09.0082249Z [31;1m[0m[36;1m[36;1m 125 | [0m     [36;1mInvoke-WebRequest -Uri $uri -OutFile $installer -TimeoutSec 90[0m
+2026-10-28T08:35:09.0082823Z [31;1m[0m[36;1m[36;1m[0m[36;1m[0m[36;1m     | [31;1m     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+2026-10-28T08:35:09.0083996Z [31;1m[0m[36;1m[36;1m[0m[36;1m[0m[36;1m[31;1m[31;1m[36;1m     | [31;1mNo connection could be made because the target machine actively refused it.[0m
+2026-10-28T08:35:09.0621337Z ##[error]Process completed with exit code 1.
+2026-10-28T08:35:09.0779564Z ##[group]Run actions/upload-artifact@v4
+2026-10-28T08:35:09.0779770Z with:
+2026-10-28T08:35:09.0779892Z   name: van-mql-native-source-report
+2026-10-28T08:35:09.0780051Z   path: mql-native-source-report/
+2026-10-28T08:35:09.0780195Z   if-no-files-found: error
+2026-10-28T08:35:09.0780331Z   compression-level: 6
+2026-10-28T08:35:09.0780448Z   overwrite: false
+2026-10-28T08:35:09.0780563Z   include-hidden-files: false
+2026-10-28T08:35:09.0780703Z ##[endgroup]
+2026-10-28T08:35:09.2165778Z (node:2752) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-10-28T08:35:09.2166186Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-10-28T08:35:09.2207985Z With the provided path, there will be 1 file uploaded
+2026-10-28T08:35:09.2211117Z Artifact name is valid!
+2026-10-28T08:35:09.2212308Z Root directory input is valid!
+2026-10-28T08:35:09.5824845Z Beginning upload of artifact content to blob storage
+2026-10-28T08:35:09.5953201Z (node:2752) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
+2026-10-28T08:35:09.8021066Z Uploaded bytes 573
+2026-10-28T08:35:09.8600521Z Finished uploading artifact content to blob storage!
+2026-10-28T08:35:09.8601147Z SHA256 digest of uploaded artifact zip is 867023242f67cb3316cf887b19e465bb2773840ed88fb677f7614caefe833ef4
+2026-10-28T08:35:09.8602562Z Finalizing artifact upload
+2026-10-28T08:35:10.3574791Z Artifact van-mql-native-source-report.zip successfully finalized. Artifact ID 12802103955
+2026-10-28T08:35:10.3575679Z Artifact van-mql-native-source-report has been successfully uploaded! Final size is 573 bytes. Artifact ID is 12802103955
+2026-10-28T08:35:10.3584339Z Artifact download URL: https://github.com/Vanguduza/Van/actions/runs/40657788235/artifacts/12802103955
+2026-10-28T08:35:10.3856811Z Post job cleanup.
+2026-10-28T08:35:10.4935476Z [command]"C:\Program Files\Git\bin\git.exe" version
+2026-10-28T08:35:10.5219604Z git version 2.56.0.windows.2
+2026-10-28T08:35:10.5271241Z Copying 'C:\Users\runneradmin\.gitconfig' to 'D:\a\_temp\22f15cf8-44d2-4143-b9f6-e0c961411fd8\.gitconfig'
+2026-10-28T08:35:10.5287414Z Temporarily overriding HOME='D:\a\_temp\22f15cf8-44d2-4143-b9f6-e0c961411fd8' before making global git config changes
+2026-10-28T08:35:10.5288224Z Adding repository directory to the temporary git global config as a safe directory
+2026-10-28T08:35:10.5297041Z [command]"C:\Program Files\Git\bin\git.exe" config --global --add safe.directory D:\a\Van\Van
+2026-10-28T08:35:10.5609451Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp core\.sshCommand
+2026-10-28T08:35:10.5890963Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "sh -c \"git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :\""
+2026-10-28T08:35:11.0081156Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-10-28T08:35:11.0380851Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "sh -c \"git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :\""
+2026-10-28T08:35:11.4654058Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-10-28T08:35:11.4934889Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "git config --local --show-origin --name-only --get-regexp remote.origin.url"
+2026-10-28T08:35:11.9489183Z Cleaning up orphan processes
+2026-10-28T08:35:11.9697377Z ##[warning]Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/checkout@v4, actions/upload-artifact@v4. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/

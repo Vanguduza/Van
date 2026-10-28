@@ -346,7 +346,8 @@ class DecisionCycle:
                 self.peak_equity, self.day_start_equity, self.week_start_equity = values.peak, values.day, values.week
                 self.streaks = streaks
                 from vati.risk.physical_pending import project_pending_risk
-                pending_risk, issue = project_pending_risk(self,self.ledger,native_context,positions,now_ms=now_ms)
+                pending_risk, issue = project_pending_risk(self,self.ledger,native_context,positions,
+                    now_ms=now_ms,contracts={self.cfg.contract.symbol.upper():self.cfg.contract})
                 if issue:
                     funding = FundingRiskFence(False,issue)
         elif funding.available:

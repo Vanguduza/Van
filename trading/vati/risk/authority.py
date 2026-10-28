@@ -72,6 +72,8 @@ def invalid_boolean_fact(intent, snapshot):
                    for index,position in enumerate(snapshot.open_positions))
     records.extend((f'pending_risk_commitments[{index}].contract',pending.contract,SymbolContract)
                    for index,pending in enumerate(snapshot.pending_risk_commitments))
+    records.extend((f'pending_risk_commitments[{index}].valuation_contract',pending.valuation_contract,SymbolContract)
+                   for index,pending in enumerate(snapshot.pending_risk_commitments) if pending.valuation_contract is not None)
     for scope,record,contract in records:
         for name in BOOLEAN_FACT_FIELDS[contract]:
             if type(getattr(record,name)) is not bool:
@@ -140,6 +142,10 @@ def _canonical_hash(obj: Any) -> str:
                     result.pop('native_risk_basis_ref')
                 if not o.pending_risk_commitments:
                     result.pop('pending_risk_commitments')
+                else:
+                    for pending in result['pending_risk_commitments']:
+                        if pending['valuation_contract'] is None:
+                            pending.pop('valuation_contract')
                 for position in result['open_positions']:
                     if position['stop_terms'] is None:
                         position.pop('stop_terms')  # original legacy snapshot bytes/hash
@@ -206,8 +212,11 @@ class RiskAuthority:
     def evaluate(self, intent: TradeIntent, snapshot: RiskSnapshot) -> RiskDecision:
         m = self.mandate
         snap_hash = _canonical_hash(snapshot)
-        from vati.risk.pending import pending_risk_losses
-        pending_losses=pending_risk_losses(snapshot)
+        from vati.risk.pending import pending_risk_losses,PendingValuationUnavailable
+        try:
+            pending_losses=pending_risk_losses(snapshot)
+        except PendingValuationUnavailable as exc:
+            return self._reject(intent,snap_hash,Decimal('1'),'PENDING_VALUATION_UNAVAILABLE',str(exc))
         pending_total=sum((value for _,value in pending_losses),Fraction(0))
         before=exact_open_stop_risk(snapshot.open_positions,snapshot.equity,additional_loss=pending_total)
         heat_before=Decimal('Infinity') if before is None else decimal(before)

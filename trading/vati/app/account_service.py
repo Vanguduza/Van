@@ -671,7 +671,8 @@ class AccountCoordinatorService:
                 if self.lifecycle is not None:
                     self.lifecycle.streaks = streaks
                 from vati.risk.physical_pending import project_pending_risk
-                pending_risk, issue = project_pending_risk(self,self._ledger,native_context,positions,now_ms=now_ms)
+                pending_risk, issue = project_pending_risk(self,self._ledger,native_context,positions,
+                    now_ms=now_ms,contracts=self.contracts)
                 if issue:
                     funding = FundingRiskFence(False,issue)
         elif funding.available:

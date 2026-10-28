@@ -205,6 +205,7 @@ class PendingRiskCommitment:
     new_position_slots: int = 1
     protection_confirmed: bool = False
     execution_authority: bool = False
+    valuation_contract: Optional[SymbolContract] = None  # absent in historical original-only bodies
 
 
 @dataclass(frozen=True)

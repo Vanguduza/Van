@@ -52,6 +52,10 @@ def snapshot_to_dict(s: RiskSnapshot) -> dict:
         d.pop('native_risk_basis_ref')
     if not s.pending_risk_commitments:
         d.pop('pending_risk_commitments')
+    else:
+        for pending in d['pending_risk_commitments']:
+            if pending['valuation_contract'] is None:
+                pending.pop('valuation_contract')
     d["symbol_contract"] = contract_to_dict(s.symbol_contract)
     d["open_positions"] = [position_to_dict(p) for p in s.open_positions]
     return d
@@ -95,6 +99,8 @@ def snapshot_from_dict(d: dict) -> RiskSnapshot:
         values=[]
         for raw in kw['pending_risk_commitments']:
             p=dict(raw);p['direction']=Direction(p['direction']);p['contract']=contract_from_dict(p['contract'])
+            if p.get('valuation_contract') is not None:
+                p['valuation_contract']=contract_from_dict(p['valuation_contract'])
             for key in ('quantity','entry','stop'):
                 if p[key] is not None:p[key]=_D(p[key])
             values.append(PendingRiskCommitment(**p))

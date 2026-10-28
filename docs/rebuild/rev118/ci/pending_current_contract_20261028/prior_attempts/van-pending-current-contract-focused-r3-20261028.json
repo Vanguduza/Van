@@ -1,0 +1,23 @@
+{
+  "command": [
+    "/workspace/van-backend-venv-20261025/bin/python",
+    "tools/rebuild/source_storage_audit.py",
+    "--report",
+    "/workspace/van-pending-current-contract-focused-r3-20261028-audit.json",
+    "trading/tests/test_pending_current_contract.py",
+    "trading/tests/test_physical_pending_risk.py",
+    "trading/tests/test_contract_schemas.py",
+    "tests/rebuild/test_native_risk_schema.py",
+    "--junitxml=/workspace/van-pending-current-contract-focused-r3-20261028.xml",
+    "-q"
+  ],
+  "cwd": "/workspace/van-review-2026-10-18/publish",
+  "controller_pid": 268550,
+  "started_at_utc": "2026-10-28T08:46:25.935559+00:00",
+  "timeout_seconds": 300,
+  "state": "COMPLETED",
+  "command_pid": 268553,
+  "exit": 1,
+  "adopted_children_reaped": [],
+  "finished_at_utc": "2026-10-28T08:46:30.286342+00:00"
+}

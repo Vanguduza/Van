@@ -573,6 +573,17 @@
         "execution_authority": {
           "type": "boolean",
           "const": false
+        },
+        "valuation_contract": {
+          "anyOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "#/$defs/risk_symbol_terms"
+            }
+          ],
+          "description": "Current risk-owner supplied terms, separate from the original contract. Absence is historical data, not sufficient current valuation."
         }
       }
     }

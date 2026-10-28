@@ -21,7 +21,8 @@ from test_physical_financial_history import close
 
 
 def pending(ledger,facts,positions=(),*,now=NOW*1000+100):
-    return PhysicalPendingRisk(ledger,facts.native_account_context,now_ms=now).refresh(positions,now_ms=now)
+    return PhysicalPendingRisk(ledger,facts.native_account_context,now_ms=now).refresh(positions,now_ms=now,
+        contracts={facts.symbol_contract.symbol.upper():facts.symbol_contract})
 
 
 def position(cmd,contract,*,quantity=None,position_id='source-position'):
@@ -117,7 +118,8 @@ def test_uncertain_original_input_holds_entries_without_issuing_authority(tmp_pa
     ledger,_,_,_,facts=native_facts(tmp_path,eurusd);_,cmd=command(ledger,facts,'uncertain')
     if damage=='receipt':
         receipt(ledger,cmd,status='REJECTED',receipt_hash='0'*64)
-        out,issue=project_pending_risk(N(),ledger,facts.native_account_context,(),now_ms=NOW*1000+100)
+        out,issue=project_pending_risk(N(),ledger,facts.native_account_context,(),now_ms=NOW*1000+100,
+            contracts={eurusd.symbol:eurusd})
         assert out==() and issue.startswith('NATIVE_PENDING_RISK_UNAVAILABLE:')
     else:
         p=pending(ledger,facts)[0]

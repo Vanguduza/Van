@@ -47,7 +47,7 @@ def test_actual_owners_reopen_original_pending_risk_and_native_no_effect_release
         assert first.pending_risk_commitments[0].quantity==cmd.quantity
         decision=RiskAuthority(grant).evaluate_safe(intent(account_alias=b.account_alias),first)
         assert decision.reason_code=='PORTFOLIO_HEAT'
-        out,issue=project_pending_risk(N(),foreign,b.native_account_context,(),now_ms=now)
+        out,issue=project_pending_risk(N(),foreign,b.native_account_context,(),now_ms=now,contracts={eurusd.symbol:eurusd})
         assert out==() and issue.startswith('NATIVE_PENDING_RISK_UNAVAILABLE:')
         # A source-bound native no-effect receipt clears stop risk, not cash.
         receipt(ledger,cmd,status='CANCELLED',when=4,native_entry_observation={
@@ -74,6 +74,34 @@ def test_partial_native_coverage_uses_original_receipt_identity_after_pg_reopen(
         out=runtime.refresh((position(cmd,eurusd,quantity=cmd.quantity/2),),now_ms=NOW*1000+100)
         assert len(out)==1 and out[0].quantity==cmd.quantity/2 and out[0].new_position_slots==0
         assert out[0].protection_confirmed is out[0].execution_authority is False
+    finally:
+        if reopened is not None:reopened.close()
+        ledger.close()
+
+
+def test_current_contract_revaluation_preserves_original_pg_lineage_after_reopen(pg_dsn,tmp_path,eurusd):
+    from vati.risk.pending import pending_risk_losses
+    from vati.risk.serde import snapshot_to_dict,snapshot_from_dict
+    unused,adapter,account,_,_=mt5_context(tmp_path);unused.close()
+    ledger=PostgresLedger(pg_dsn,ledger_name='current-pending-risk');reopened=None
+    try:
+        captured=capture_cached_mt5(ledger,account,now_ms=10000)
+        context=context_for_account(ledger,adapter,account,now_ms=10000,mt5_capture=captured)
+        facts=snapshot(eurusd,account_alias=account.account_alias,balance=account.balance,equity=account.equity,
+            native_account_context=context)
+        original,cmd=command(ledger,facts,'pg-revaluation');receipt(ledger,cmd,status='ACCEPTED')
+        reopened=PostgresLedger(pg_dsn,ledger_name='current-pending-risk')
+        runtime=PhysicalPendingRisk(reopened,context,now_ms=NOW*1000+100)
+        first=runtime.refresh((),now_ms=NOW*1000+100,contracts={'EURUSD':eurusd})
+        higher=replace(eurusd,tick_value=eurusd.tick_value*2)
+        current=runtime.refresh((),now_ms=NOW*1000+101,contracts={'EURUSD':higher})
+        initial=pending_risk_losses(replace(facts,pending_risk_commitments=first))[0][1]
+        result=replace(facts,pending_risk_commitments=current)
+        assert pending_risk_losses(result)[0][1]==initial*2
+        assert current[0].command_ref==original.hash and current[0].contract==eurusd
+        assert current[0].valuation_contract==higher
+        assert snapshot_from_dict(snapshot_to_dict(result))==result
+        assert ledger.verify_chain()[0]
     finally:
         if reopened is not None:reopened.close()
         ledger.close()

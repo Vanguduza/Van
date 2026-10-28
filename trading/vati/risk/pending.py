@@ -8,6 +8,23 @@ from vati.risk.contracts import PendingRiskCommitment,SymbolContract,Direction,L
 _REF=re.compile('[a-f0-9]{64}',re.ASCII)
 
 
+class PendingValuationUnavailable(ValueError):
+    pass
+
+
+def validate_valuation_contract(original,current):
+    if type(current) is not SymbolContract:
+        raise PendingValuationUnavailable('pending exposure has no current risk-owner contract')
+    if any(getattr(current,k)!=getattr(original,k) for k in
+           ('symbol','venue','base_currency','quote_currency','account_currency','loss_model','contract_size')):
+        raise PendingValuationUnavailable('pending instrument identity, unit or loss model changed; reconciliation required')
+    if (current.loss_model is LossModel.STOP_DISTANCE and
+            (fraction(current.tick_size)<=0 or fraction(current.tick_value)<=0)):
+        raise PendingValuationUnavailable('pending current tick terms unavailable')
+    if current.loss_model is LossModel.ILLIQUID_EQUITY and fraction(current.liquidity_haircut)<0:
+        raise PendingValuationUnavailable('pending current haircut unavailable')
+
+
 def pending_risk_losses(snapshot):
     values=[];seen=set()
     if type(snapshot.pending_risk_commitments) is not tuple:
@@ -36,7 +53,12 @@ def pending_risk_losses(snapshot):
             raise ValueError('pending risk cannot offset loss with a negative haircut')
         if p.contract.loss_model is not LossModel.FULL_STAKE and (p.stop is None or fraction(p.stop)<=0):
             raise ValueError('pending risk protective level unavailable')
+        validate_valuation_contract(p.contract,p.valuation_contract)
         value=exact_loss_amount(p.quantity,p.contract,entry=p.entry,stop=p.stop)
+        current_value=exact_loss_amount(p.quantity,p.valuation_contract,entry=p.entry,stop=p.stop)
+        # Preserve the original committed floor until a separate qualified
+        # reconciliation releases it. Higher currently supplied loss is held.
+        value=max(value,current_value)
         if value<0:raise ValueError('pending risk cannot supply negative capacity')
         seen.add(p.command_ref);values.append((p,value))
     return tuple(values)
