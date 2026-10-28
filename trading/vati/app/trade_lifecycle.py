@@ -179,7 +179,7 @@ class AccountTradeLifecycle:
             broker_position_id=str(payload.get("broker_position_id") or ""),
             reject_reason=str(payload.get("reject_reason") or ""),
             spread_at_submit=dec("spread_at_submit"),
-            fees=dec("fees"),
+            fees=None if "fees" in payload and payload["fees"] is None else dec("fees"),
             protective_stop_price=(
                 Decimal(str(raw_stop)) if raw_stop is not None else None),
             receipt_hash=str(payload.get("receipt_hash") or ""),
@@ -339,6 +339,7 @@ class AccountTradeLifecycle:
                 "best_price": position.entry_price,
                 "worst_price": position.entry_price,
                 "protective_stop_confirmed": current_stop is not None,
+                "fees": None,
                 "family_id": family_id,
             }
             if self.families.for_intent(iid) is None:
@@ -373,10 +374,17 @@ class AccountTradeLifecycle:
                     family_id, venue_quantity=position.quantity,
                     now_ms=opened_ms, emit=False)
 
-            cost_ratio = tca_cost_ratios.get(iid)
-            if cost_ratio is None and iid in entry_receipts:
+            recovered_receipt = None
+            if iid in entry_receipts:
                 try:
-                    receipt = self._receipt_from_payload(entry_receipts[iid])
+                    recovered_receipt = self._receipt_from_payload(entry_receipts[iid])
+                    self.entries[iid]["fees"] = recovered_receipt.fees
+                except (ValueError, ArithmeticError):
+                    pass  # Preserve protection, without inventing economic truth.
+            cost_ratio = tca_cost_ratios.get(iid)
+            if cost_ratio is None and recovered_receipt is not None:
+                try:
+                    receipt = recovered_receipt
                     if receipt.received_time_unix_ms is None:
                         raise ValueError("native receipt availability remains unmeasured")
                     modelled_cost = self.modelled_costs.get(
@@ -445,6 +453,7 @@ class AccountTradeLifecycle:
             "cost_pct": self.modelled_costs.get(symbol, contract.round_trip_cost_pct),
             "decision_price": Decimal(str(order_payload["entry_price"])),
             "quantity": receipt.filled_qty,
+            "fees": receipt.fees,
             "software_stop": True,
             "broker_position_id": receipt.broker_position_id,
             "open": receipt.filled_qty > ZERO,
@@ -471,6 +480,11 @@ class AccountTradeLifecycle:
 
         modelled_cost = self.modelled_costs.get(
             symbol, contract.round_trip_cost_pct)
+        if receipt.fees is None:
+            self._log(EventKind.SESSION, {"event": "TCA_UNAVAILABLE",
+                "reason": "RECORDED_NATIVE_FEES_UNMEASURED", "source_receipt_hash": receipt.receipt_hash},
+                now_ms=receipt.received_time_unix_ms, corr=receipt.trade_intent_id)
+            return
         tca = compute_tca(
             receipt,
             direction=direction,
@@ -615,6 +629,11 @@ class AccountTradeLifecycle:
             targets=tuple(targets), expected_horizon_ms=expected_horizon_ms,
             entry_price=entry_price)
 
+        if receipt.fees is None:
+            self._log(EventKind.SESSION, {"event": "TCA_UNAVAILABLE",
+                "reason": "RECORDED_NATIVE_FEES_UNMEASURED", "source_receipt_hash": receipt.receipt_hash},
+                now_ms=receipt.received_time_unix_ms, corr=intent.trade_intent_id)
+            return
         contract = self.contracts[intent.symbol.upper()]
         value_per_unit = (
             contract.value_per_price_unit_per_lot

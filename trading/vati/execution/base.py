@@ -77,7 +77,9 @@ class ExecutionReceipt:
     broker_position_id: str = ""
     reject_reason: str = ""
     spread_at_submit: Decimal = Decimal("0")
-    fees: Decimal = Decimal("0")
+    # None preserves a known native effect whose recorded charge is unmeasured.
+    # Keep the legacy default/body unchanged for existing sealed receipts.
+    fees: Optional[Decimal] = Decimal("0")
     protective_stop_price: Optional[Decimal] = None
     receipt_hash: str = ""
 

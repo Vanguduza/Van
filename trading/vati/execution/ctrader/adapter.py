@@ -27,6 +27,23 @@ ZERO = Decimal("0")
 PRICE_SCALE = Decimal("100000")
 
 
+def _recorded_commission(deal: dict) -> Decimal | None:
+    """Decode only a charge with its own native precision, never account fallback.
+
+    This retains the adapter's existing magnitude convention. It is a recorded
+    charge, not a claim of complete fees, sign qualification or settlement.
+    Invalid optional metadata must not erase an independently observed fill.
+    """
+    from vati.funding.native import native_int, native_money
+    try:
+        raw = native_int(deal['commission'])
+        digits = native_int(deal['moneyDigits'], minimum=0, maximum=18)
+        # copy_abs is exact even for the minimum int64 and under caller traps.
+        return native_money(raw, digits).copy_abs()
+    except (KeyError, TypeError, ValueError):
+        return None
+
+
 @dataclass
 class SymbolInfo:
     symbol_id: int
@@ -702,7 +719,7 @@ class CtraderAdapter:
         state='FILLED' if et=='ORDER_FILLED' and native_quantity==volume else 'PARTIAL'
         return ExecutionReceipt(cmd.trade_intent_id, cmd.decision_hash, self.venue, state, filled, px, cmd.entry_price, px, cmd.entry_price, sl is not None,
                                 int(deal.get("executionTimestamp", now_ms)), now_ms, broker_order_id=str(deal.get("orderId", "")), broker_position_id=str(pos.get("positionId") or deal.get("positionId", "")),
-                                protective_stop_price=sl, fees=abs(Decimal(deal.get("commission", 0))) / (Decimal(10) ** int(deal.get("moneyDigits", self._money_digits)))).sealed()
+                                protective_stop_price=sl, fees=_recorded_commission(deal)).sealed()
 
     def modify_stop(self, position_id: str, new_stop: Decimal, *, now_ms: int) -> ExecutionReceipt:
         self._ensure_auth()

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="1" time="0.904" timestamp="2026-10-28T23:16:51.254225+00:00" hostname="6e9feff21467"><testcase classname="test_van_owner_cost_replay_20261028" name="test_original_measured_cost_remains_in_reconstructed_owner_entry" time="0.014"><failure message="AssertionError: assert None == Decimal('-0.05543884220354808590102707750')&#10; +  where None = &lt;built-in method get of dict object at 0x7f9081ecac80&gt;('cost_ratio')&#10; +    where &lt;built-in method get of dict object at 0x7f9081ecac80&gt; = {'symbol': 'DELTA', 'entry': Decimal('24.90'), 'stop': Decimal('22.50'), 'direction': &lt;Direction.LONG: 'LONG'&gt;, ...}.get">tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-231/test_original_measured_cost_re0')
+
+    def test_original_measured_cost_remains_in_reconstructed_owner_entry(tmp_path):
+        ledger = Ledger(tmp_path/'owner-cost.sqlite3')
+        try:
+            life = _lifecycle(ledger, OwnerTicketAdapter(equity=D('1000000'), csd_verified=True))
+            receipt = replace(_owner_receipt(price='24.90'), fees=D('1.25'), receipt_hash='').sealed()
+            _durable_receipt(ledger, receipt)
+            order = {'symbol':'DELTA','direction':'LONG','strategy_id':'ZSE-VALUE-ROTATION-01',
+                'entry_price':'25.00','protective_stop':'22.50','targets':['30.00']}
+            life.adopt_owner_buy_confirmation(receipt, order_payload=order)
+            original = life.entries['intent-1']['cost_ratio']
+            life.adopt_owner_buy_confirmation(receipt, order_payload=order)
+&gt;           assert life.entries['intent-1'].get('cost_ratio') == original
+E           AssertionError: assert None == Decimal('-0.05543884220354808590102707750')
+E            +  where None = &lt;built-in method get of dict object at 0x7f9081ecac80&gt;('cost_ratio')
+E            +    where &lt;built-in method get of dict object at 0x7f9081ecac80&gt; = {'symbol': 'DELTA', 'entry': Decimal('24.90'), 'stop': Decimal('22.50'), 'direction': &lt;Direction.LONG: 'LONG'&gt;, ...}.get
+
+../../test_van_owner_cost_replay_20261028.py:20: AssertionError</failure></testcase></testsuite></testsuites>

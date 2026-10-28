@@ -138,19 +138,24 @@ def closed_trade_pnl(entry, exit_price: Decimal, contract, reported_rows=()) -> 
     """
     from vati.risk.contracts import Direction, LossModel
     try:
-        fees, carry = Decimal(str(entry.get("fees", ZERO))), Decimal(str(entry.get("carry", ZERO)))
-        if not fees.is_finite() or not carry.is_finite():
-            return PnlMeasurement(None, "UNKNOWN_CHARGES")
         reported = _reported_parent_cash([row for row in reported_rows or ()
                                          if row.get("intent") == entry.get("trade_intent_id")])
         if reported is not None:
             amount, basis = reported
             if not amount.is_finite():
                 return PnlMeasurement(None, "UNKNOWN_REPORTED_PNL")
-            if basis == "GROSS_PRICE_MOVEMENT":
-                return PnlMeasurement(amount-fees+carry, "REPORTED_GROSS_NET_RECORDED_CHARGES")
-            return PnlMeasurement(amount, "REPORTED_NET_CONFIRMED" if basis == "NET_CONFIRMED"
-                                  else "REPORTED_NET_OR_LEGACY_UNSPECIFIED_CONVENTION")
+            if basis != "GROSS_PRICE_MOVEMENT":
+                # A reported net cash amount does not require inventing its
+                # unavailable charge decomposition. Its convention stays explicit.
+                return PnlMeasurement(amount, "REPORTED_NET_CONFIRMED" if basis == "NET_CONFIRMED"
+                                      else "REPORTED_NET_OR_LEGACY_UNSPECIFIED_CONVENTION")
+        if entry.get("fees", ZERO) is None or entry.get("carry", ZERO) is None:
+            return PnlMeasurement(None, "UNKNOWN_CHARGES")
+        fees, carry = Decimal(str(entry.get("fees", ZERO))), Decimal(str(entry.get("carry", ZERO)))
+        if not fees.is_finite() or not carry.is_finite():
+            return PnlMeasurement(None, "UNKNOWN_CHARGES")
+        if reported is not None:
+            return PnlMeasurement(amount-fees+carry, "REPORTED_GROSS_NET_RECORDED_CHARGES")
         quantity, opened = Decimal(str(entry.get("quantity", ZERO))), Decimal(str(entry["entry"]))
         if contract is None or contract.loss_model is LossModel.FULL_STAKE:
             return PnlMeasurement(None, "UNKNOWN_REQUIRES_PRODUCT_SETTLEMENT")
