@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="2" skipped="0" tests="12" time="0.594" timestamp="2026-10-28T19:55:39.431864+00:00" hostname="6e9feff21467"><testcase classname="trading.tests.test_native_close_movement" name="test_original_native_balance_delta_does_not_guess_commission_sign_or_future_fees" time="0.079" /><testcase classname="trading.tests.test_native_close_movement" name="test_unbound_balance_baseline_cannot_supply_a_closing_cash_delta[gap]" time="0.004" /><testcase classname="trading.tests.test_native_close_movement" name="test_unbound_balance_baseline_cannot_supply_a_closing_cash_delta[wrong_scope]" time="0.005" /><testcase classname="trading.tests.test_native_close_movement" name="test_unbound_balance_baseline_cannot_supply_a_closing_cash_delta[future_availability]" time="0.004" /><testcase classname="trading.tests.test_native_close_movement" name="test_existing_financial_owner_publishes_and_independently_reads_original_close_observation" time="0.131" /><testcase classname="trading.tests.test_native_close_movement" name="test_cash_or_prior_close_can_anchor_the_next_exact_native_balance_version[cash]" time="0.004" /><testcase classname="trading.tests.test_native_close_movement" name="test_cash_or_prior_close_can_anchor_the_next_exact_native_balance_version[close]" time="0.004" /><testcase classname="trading.tests.test_native_close_movement" name="test_current_native_version_ambiguity_blocks_new_close_postings[two_closes]" time="0.006" /><testcase classname="trading.tests.test_native_close_movement" name="test_current_native_version_ambiguity_blocks_new_close_postings[cash_and_close]" time="0.007" /><testcase classname="trading.tests.test_native_close_movement" name="test_current_native_version_ambiguity_blocks_new_close_postings[contradictory_mark]" time="0.011" /><testcase classname="trading.tests.test_native_close_movement" name="test_automatic_materialization_exposes_original_close_on_the_existing_read_model" time="0.008"><failure message="assert 0 == 1">tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-197/test_automatic_materialization0')
+
+    def test_automatic_materialization_exposes_original_close_on_the_existing_read_model(tmp_path):
+        from vati.funding.movement_journal import FinancialMovementBook
+        ledger=Ledger(tmp_path/'facts.sqlite')
+        try:
+            before,event,scope=originals(ledger);book=FinancialMovementBook(ledger,clock=lambda:7000)
+            result=book.materialize(scope)
+&gt;           assert result['posted_count']==result['original_movement_count']==1
+E           assert 0 == 1
+
+trading/tests/test_native_close_movement.py:124: AssertionError</failure></testcase><testcase classname="trading.tests.test_native_close_movement" name="test_bounded_native_close_catch_up_uses_prior_original_close_without_reposting" time="0.020"><failure message="assert (0 == 1)">tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-197/test_bounded_native_close_catc0')
+
+    def test_bounded_native_close_catch_up_uses_prior_original_close_without_reposting(tmp_path):
+        from vati.funding.movement_journal import FinancialMovementBook
+        ledger=Ledger(tmp_path/'facts.sqlite')
+        try:
+            before=snapshot(ledger,mark(1000))
+            second=replace(closed(balance='115',version=3,at=2500),native_id=2)
+            scope=observe(ledger,deals=(closed(),second));book=FinancialMovementBook(ledger,clock=lambda:7000)
+            first=book.materialize(scope,max_batch=1)
+&gt;           assert first['posted_count']==1 and first['pending_count']==1
+E           assert (0 == 1)
+
+trading/tests/test_native_close_movement.py:141: AssertionError</failure></testcase></testsuite></testsuites>

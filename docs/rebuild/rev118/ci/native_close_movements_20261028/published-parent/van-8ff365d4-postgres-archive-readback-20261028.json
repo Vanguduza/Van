@@ -1,0 +1,63 @@
+{
+  "artifact_id": 12847145332,
+  "run_id": 40755754628,
+  "artifact_bytes": 198272,
+  "artifact_sha256": "063b8e7562b90b9aed539d73e4b06ba6254a769f371772c14d18a760b7a178f5",
+  "metadata_workflow_run": {
+    "id": 40755754628,
+    "repository_id": 1369211561,
+    "head_repository_id": 1369211561,
+    "head_branch": "ccr-9e07e1af-8mgz1p",
+    "head_sha": "8ff365d42bb118620d3b53a0d932edeb085b1350"
+  },
+  "CRC_and_safe_unique_paths_verified": true,
+  "members": {
+    "trading-source-report.xml": {
+      "bytes": 827208,
+      "sha256": "8d4d0753921543b7ded31b82c1afb89a80ebc98f7e026c240743d3babfe9af9b"
+    },
+    "trading-source.log": {
+      "bytes": 697055,
+      "sha256": "ca41e1fa75064abb2e31a2cf4970affe94228deb815abf39a0371eafe6ec11e8"
+    },
+    "postgres-ledger-report.xml": {
+      "bytes": 4452,
+      "sha256": "011189eebd4a01e72004738d5f4725a0ddb5f3f8fabff3212d8581783f4cf23b"
+    },
+    "voice-source-report.xml": {
+      "bytes": 17643,
+      "sha256": "6ad3f5f86d71464af0710d873da86c8ed680d7c914d2585bdfc9502926566976"
+    }
+  },
+  "junit": {
+    "trading-source-report.xml": {
+      "cases": 5163,
+      "passed": 5162,
+      "failure": 0,
+      "error": 0,
+      "skipped": 1,
+      "declared_tests": 5163
+    },
+    "postgres-ledger-report.xml": {
+      "cases": 26,
+      "passed": 26,
+      "failure": 0,
+      "error": 0,
+      "skipped": 0,
+      "declared_tests": 26
+    },
+    "voice-source-report.xml": {
+      "cases": 117,
+      "passed": 117,
+      "failure": 0,
+      "error": 0,
+      "skipped": 0,
+      "declared_tests": 117
+    }
+  },
+  "source_binding_state": "EXACT_RUN_HEAD_ARTIFACT_METADATA_VERIFIED_CHECKOUT_LOG_RETAINED",
+  "native_or_production_acceptance": false,
+  "declared_skips": [
+    "dial-new checkout not available (set DIAL_REPO)"
+  ]
+}

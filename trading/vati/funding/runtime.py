@@ -85,8 +85,8 @@ def capture_funding(ledger,adapter,account,*,now_ms):
     # Journal failures propagate: an observation must never appear saved after a
     # failed commit. Repeating the original window recovers a lost commit ACK.
     receipt=book.record_statement(statement)
-    financial_movements=_financial_projection(ledger,mark.scope_hash,materialize=True)
     deal_observation=_capture_deals(ledger,adapter,mark)
+    financial_movements=_financial_projection(ledger,mark.scope_hash,materialize=True)
     return result|{'state':'CONFLICT' if receipt['state']=='CONFLICT' or prior['state']=='CONFLICT' else 'OBSERVED',
         'statement':receipt,'coverage_from_ms':start,'coverage_to_ms':end,
         'deal_observation':deal_observation,

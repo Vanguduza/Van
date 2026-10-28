@@ -33,3 +33,5 @@ The frozen package and [source workmap](../SOURCE_WORKMAP.json) remain authorita
 The selected host remains Van trading core. Android uses its provisioned production profile without asking the owner for backend addresses. No frontend redesign before BG-001, production deployment, native signing, independent certificate or S24 acceptance is claimed by this work.
 
 [Exact source receipt](../receipts/PROVISIONAL_SHARED_RESOURCES_SOURCE_20261028.json) retains all test partitions, input differences, original failed probes and remaining full-feature obligations.
+
+Original native close observations now have a [same-journal capture/materialization/readback path](BE-006_009_010_NATIVE_CLOSE_OBSERVATIONS.md). This is bounded observation evidence; step5 native/economic settlement, fee allocation, compensation and reservation release remain open.

@@ -1,0 +1,384 @@
+{
+  "artifacts": [
+    {
+      "id": 12848606466,
+      "name": "van-backend-public-source",
+      "size_in_bytes": 157275,
+      "url": "https://api.github.com/repos/Vanguduza/Van/actions/artifacts/12848606466",
+      "archive_download_url": "https://api.github.com/repos/Vanguduza/Van/actions/artifacts/12848606466/zip",
+      "expired": false,
+      "created_at": "2026-10-28T20:20:42Z",
+      "expires_at": "2027-01-26T19:36:06Z",
+      "updated_at": "2026-10-28T20:20:42Z",
+      "digest": "sha256:2c42bb4b8c3c2e7d55891282b0ca13b70f5608086d857e69bb7736568ed00ccb",
+      "workflow_run": {
+        "id": 40755754628,
+        "repository_id": 1369211561,
+        "head_repository_id": 1369211561,
+        "head_branch": "ccr-9e07e1af-8mgz1p",
+        "head_sha": "8ff365d42bb118620d3b53a0d932edeb085b1350"
+      }
+    },
+    {
+      "id": 12848031537,
+      "name": "van-browser-guard-source",
+      "size_in_bytes": 34381,
+      "url": "https://api.github.com/repos/Vanguduza/Van/actions/artifacts/12848031537",
+      "archive_download_url": "https://api.github.com/repos/Vanguduza/Van/actions/artifacts/12848031537/zip",
+      "expired": false,
+      "created_at": "2026-10-28T20:04:35Z",
+      "expires_at": "2027-01-26T19:36:06Z",
+      "updated_at": "2026-10-28T20:04:35Z",
+      "digest": "sha256:83dde9ba04ae06e8a65fbcc0c4edf567360dada3b592f62efa73f12ad2ece045",
+      "workflow_run": {
+        "id": 40755754628,
+        "repository_id": 1369211561,
+        "head_repository_id": 1369211561,
+        "head_branch": "ccr-9e07e1af-8mgz1p",
+        "head_sha": "8ff365d42bb118620d3b53a0d932edeb085b1350"
+      }
+    },
+    {
+      "id": 12847481483,
+      "name": "van-mutation-report-python-0",
+      "size_in_bytes": 2295,
+      "url": "https://api.github.com/repos/Vanguduza/Van/actions/artifacts/12847481483",
+      "archive_download_url": "https://api.github.com/repos/Vanguduza/Van/actions/artifacts/12847481483/zip",
+      "expired": false,
+      "created_at": "2026-10-28T19:57:53Z",
+      "expires_at": "2027-01-26T19:36:06Z",
+      "updated_at": "2026-10-28T19:57:53Z",
+      "digest": "sha256:b0ac84b526281499c8afa245f284a9a66ae997b7e7fa8373499071aaf4c2ea7d",
+      "workflow_run": {
+        "id": 40755754628,
+        "repository_id": 1369211561,
+        "head_repository_id": 1369211561,
+        "head_branch": "ccr-9e07e1af-8mgz1p",
+        "head_sha": "8ff365d42bb118620d3b53a0d932edeb085b1350"
+      }
+    },
+    {
+      "id": 12847305949,
+      "name": "van-voice-runtime",
+      "size_in_bytes": 794,
+      "url": "https://api.github.com/repos/Vanguduza/Van/actions/artifacts/12847305949",
+      "archive_download_url": "https://api.github.com/repos/Vanguduza/Van/actions/artifacts/12847305949/zip",
+      "expired": false,
+      "created_at": "2026-10-28T19:49:16Z",
+      "expires_at": "2027-01-26T19:36:06Z",
+      "updated_at": "2026-10-28T19:49:16Z",
+      "digest": "sha256:ff6dd9e25410932bacfaeea1d2496832122ae96c5dddccad83b61c68e7f63c45",
+      "workflow_run": {
+        "id": 40755754628,
+        "repository_id": 1369211561,
+        "head_repository_id": 1369211561,
+        "head_branch": "ccr-9e07e1af-8mgz1p",
+        "head_sha": "8ff365d42bb118620d3b53a0d932edeb085b1350"
+      }
+    },
+    {
+      "id": 12847275603,
+      "name": "van-mutation-report-kotlin-0",
+      "size_in_bytes": 1527,
+      "url": "https://api.github.com/repos/Vanguduza/Van/actions/artifacts/12847275603",
+      "archive_download_url": "https://api.github.com/repos/Vanguduza/Van/actions/artifacts/12847275603/zip",
+      "expired": false,
+      "created_at": "2026-10-28T19:45:49Z",
+      "expires_at": "2027-01-26T19:36:06Z",
+      "updated_at": "2026-10-28T19:45:49Z",
+      "digest": "sha256:7cdf0f0b4c3e6cbe99cb7df9805aa789f723d96577c199a4a48b5b90f09adf97",
+      "workflow_run": {
+        "id": 40755754628,
+        "repository_id": 1369211561,
+        "head_repository_id": 1369211561,
+        "head_branch": "ccr-9e07e1af-8mgz1p",
+        "head_sha": "8ff365d42bb118620d3b53a0d932edeb085b1350"
+      }
+    },
+    {
+      "id": 12847145332,
+      "name": "van-postgres-ledger-report",
+      "size_in_bytes": 198272,
+      "url": "https://api.github.com/repos/Vanguduza/Van/actions/artifacts/12847145332",
+      "archive_download_url": "https://api.github.com/repos/Vanguduza/Van/actions/artifacts/12847145332/zip",
+      "expired": false,
+      "created_at": "2026-10-28T19:43:03Z",
+      "expires_at": "2027-01-26T19:36:06Z",
+      "updated_at": "2026-10-28T19:43:03Z",
+      "digest": "sha256:063b8e7562b90b9aed539d73e4b06ba6254a769f371772c14d18a760b7a178f5",
+      "workflow_run": {
+        "id": 40755754628,
+        "repository_id": 1369211561,
+        "head_repository_id": 1369211561,
+        "head_branch": "ccr-9e07e1af-8mgz1p",
+        "head_sha": "8ff365d42bb118620d3b53a0d932edeb085b1350"
+      }
+    },
+    {
+      "id": 12846966243,
+      "name": "van-visual-evidence",
+      "size_in_bytes": 16596435,
+      "url": "https://api.github.com/repos/Vanguduza/Van/actions/artifacts/12846966243",
+      "archive_download_url": "https://api.github.com/repos/Vanguduza/Van/actions/artifacts/12846966243/zip",
+      "expired": false,
+      "created_at": "2026-10-28T19:50:34Z",
+      "expires_at": "2027-01-26T19:36:06Z",
+      "updated_at": "2026-10-28T19:50:34Z",
+      "digest": "sha256:537bdcdfa02dc384df78464814fe3916b52e47816b602e303fdbfd224fbf7eaa",
+      "workflow_run": {
+        "id": 40755754628,
+        "repository_id": 1369211561,
+        "head_repository_id": 1369211561,
+        "head_branch": "ccr-9e07e1af-8mgz1p",
+        "head_sha": "8ff365d42bb118620d3b53a0d932edeb085b1350"
+      }
+    },
+    {
+      "id": 12846961383,
+      "name": "van-instrumentation-report",
+      "size_in_bytes": 10647,
+      "url": "https://api.github.com/repos/Vanguduza/Van/actions/artifacts/12846961383",
+      "archive_download_url": "https://api.github.com/repos/Vanguduza/Van/actions/artifacts/12846961383/zip",
+      "expired": false,
+      "created_at": "2026-10-28T19:49:15Z",
+      "expires_at": "2027-01-26T19:36:06Z",
+      "updated_at": "2026-10-28T19:49:15Z",
+      "digest": "sha256:d6d09b6c09f0416e68ccf837f13a53b1ab8b973445ab9a4e77da19993a280e64",
+      "workflow_run": {
+        "id": 40755754628,
+        "repository_id": 1369211561,
+        "head_repository_id": 1369211561,
+        "head_branch": "ccr-9e07e1af-8mgz1p",
+        "head_sha": "8ff365d42bb118620d3b53a0d932edeb085b1350"
+      }
+    },
+    {
+      "id": 12846956325,
+      "name": "van-instrumentation-screenshots",
+      "size_in_bytes": 3293915,
+      "url": "https://api.github.com/repos/Vanguduza/Van/actions/artifacts/12846956325",
+      "archive_download_url": "https://api.github.com/repos/Vanguduza/Van/actions/artifacts/12846956325/zip",
+      "expired": false,
+      "created_at": "2026-10-28T19:49:20Z",
+      "expires_at": "2027-01-26T19:36:06Z",
+      "updated_at": "2026-10-28T19:49:20Z",
+      "digest": "sha256:db902be09123fd7bdc39f20d53894316aa4c8c76843286616bfa17d9928ad329",
+      "workflow_run": {
+        "id": 40755754628,
+        "repository_id": 1369211561,
+        "head_repository_id": 1369211561,
+        "head_branch": "ccr-9e07e1af-8mgz1p",
+        "head_sha": "8ff365d42bb118620d3b53a0d932edeb085b1350"
+      }
+    },
+    {
+      "id": 12846825874,
+      "name": "van-mutation-report-kotlin-1",
+      "size_in_bytes": 1491,
+      "url": "https://api.github.com/repos/Vanguduza/Van/actions/artifacts/12846825874",
+      "archive_download_url": "https://api.github.com/repos/Vanguduza/Van/actions/artifacts/12846825874/zip",
+      "expired": false,
+      "created_at": "2026-10-28T19:46:34Z",
+      "expires_at": "2027-01-26T19:36:06Z",
+      "updated_at": "2026-10-28T19:46:34Z",
+      "digest": "sha256:49f4c13792724096989d0ae6ad71084bdbbb394f79efd49d3671c74835989362",
+      "workflow_run": {
+        "id": 40755754628,
+        "repository_id": 1369211561,
+        "head_repository_id": 1369211561,
+        "head_branch": "ccr-9e07e1af-8mgz1p",
+        "head_sha": "8ff365d42bb118620d3b53a0d932edeb085b1350"
+      }
+    },
+    {
+      "id": 12846681739,
+      "name": "van-mutation-report-python-3",
+      "size_in_bytes": 2351,
+      "url": "https://api.github.com/repos/Vanguduza/Van/actions/artifacts/12846681739",
+      "archive_download_url": "https://api.github.com/repos/Vanguduza/Van/actions/artifacts/12846681739/zip",
+      "expired": false,
+      "created_at": "2026-10-28T19:47:56Z",
+      "expires_at": "2027-01-26T19:36:06Z",
+      "updated_at": "2026-10-28T19:47:56Z",
+      "digest": "sha256:ff3cfe796051322dffa023b8ea398878284c9748f8b44f9bd502bdbe6c032704",
+      "workflow_run": {
+        "id": 40755754628,
+        "repository_id": 1369211561,
+        "head_repository_id": 1369211561,
+        "head_branch": "ccr-9e07e1af-8mgz1p",
+        "head_sha": "8ff365d42bb118620d3b53a0d932edeb085b1350"
+      }
+    },
+    {
+      "id": 12846142042,
+      "name": "van-mutation-report-kotlin-2",
+      "size_in_bytes": 1529,
+      "url": "https://api.github.com/repos/Vanguduza/Van/actions/artifacts/12846142042",
+      "archive_download_url": "https://api.github.com/repos/Vanguduza/Van/actions/artifacts/12846142042/zip",
+      "expired": false,
+      "created_at": "2026-10-28T19:46:34Z",
+      "expires_at": "2027-01-26T19:36:06Z",
+      "updated_at": "2026-10-28T19:46:34Z",
+      "digest": "sha256:9d61ef8838918fe3c932062fce385b49cdb44656711bc2369d2b92bd0e4b701d",
+      "workflow_run": {
+        "id": 40755754628,
+        "repository_id": 1369211561,
+        "head_repository_id": 1369211561,
+        "head_branch": "ccr-9e07e1af-8mgz1p",
+        "head_sha": "8ff365d42bb118620d3b53a0d932edeb085b1350"
+      }
+    },
+    {
+      "id": 12846018858,
+      "name": "van-mutation-report-python-2",
+      "size_in_bytes": 2078,
+      "url": "https://api.github.com/repos/Vanguduza/Van/actions/artifacts/12846018858",
+      "archive_download_url": "https://api.github.com/repos/Vanguduza/Van/actions/artifacts/12846018858/zip",
+      "expired": false,
+      "created_at": "2026-10-28T19:45:07Z",
+      "expires_at": "2027-01-26T19:36:06Z",
+      "updated_at": "2026-10-28T19:45:07Z",
+      "digest": "sha256:bbce76c00d5d20e75354202bda55248aa1c0315267e28ad010d7d66fe903f4da",
+      "workflow_run": {
+        "id": 40755754628,
+        "repository_id": 1369211561,
+        "head_repository_id": 1369211561,
+        "head_branch": "ccr-9e07e1af-8mgz1p",
+        "head_sha": "8ff365d42bb118620d3b53a0d932edeb085b1350"
+      }
+    },
+    {
+      "id": 12846009804,
+      "name": "van-mutation-report-python-1",
+      "size_in_bytes": 2034,
+      "url": "https://api.github.com/repos/Vanguduza/Van/actions/artifacts/12846009804",
+      "archive_download_url": "https://api.github.com/repos/Vanguduza/Van/actions/artifacts/12846009804/zip",
+      "expired": false,
+      "created_at": "2026-10-28T19:57:33Z",
+      "expires_at": "2027-01-26T19:36:06Z",
+      "updated_at": "2026-10-28T19:57:33Z",
+      "digest": "sha256:8c1a23b7b3c30ee41e0bd50a9ff22f2ff1601df9499414ef676851ea7e4f4976",
+      "workflow_run": {
+        "id": 40755754628,
+        "repository_id": 1369211561,
+        "head_repository_id": 1369211561,
+        "head_branch": "ccr-9e07e1af-8mgz1p",
+        "head_sha": "8ff365d42bb118620d3b53a0d932edeb085b1350"
+      }
+    },
+    {
+      "id": 12845714767,
+      "name": "van-debug-apk",
+      "size_in_bytes": 237756419,
+      "url": "https://api.github.com/repos/Vanguduza/Van/actions/artifacts/12845714767",
+      "archive_download_url": "https://api.github.com/repos/Vanguduza/Van/actions/artifacts/12845714767/zip",
+      "expired": false,
+      "created_at": "2026-10-28T19:49:56Z",
+      "expires_at": "2027-01-26T19:36:06Z",
+      "updated_at": "2026-10-28T19:49:56Z",
+      "digest": "sha256:60c7dd19dbdd700b6334f106c9b7677fee0a47b4180883d53471c6e07398e3c5",
+      "workflow_run": {
+        "id": 40755754628,
+        "repository_id": 1369211561,
+        "head_repository_id": 1369211561,
+        "head_branch": "ccr-9e07e1af-8mgz1p",
+        "head_sha": "8ff365d42bb118620d3b53a0d932edeb085b1350"
+      }
+    },
+    {
+      "id": 12845593326,
+      "name": "van-mutation-report-browser-agent",
+      "size_in_bytes": 1362,
+      "url": "https://api.github.com/repos/Vanguduza/Van/actions/artifacts/12845593326",
+      "archive_download_url": "https://api.github.com/repos/Vanguduza/Van/actions/artifacts/12845593326/zip",
+      "expired": false,
+      "created_at": "2026-10-28T19:38:14Z",
+      "expires_at": "2027-01-26T19:36:06Z",
+      "updated_at": "2026-10-28T19:38:14Z",
+      "digest": "sha256:4210a30eed2cf7b61f9017dd5eef73090bef5dc3a14e4aa2694765380efdd6ee",
+      "workflow_run": {
+        "id": 40755754628,
+        "repository_id": 1369211561,
+        "head_repository_id": 1369211561,
+        "head_branch": "ccr-9e07e1af-8mgz1p",
+        "head_sha": "8ff365d42bb118620d3b53a0d932edeb085b1350"
+      }
+    },
+    {
+      "id": 12845414509,
+      "name": "van-actual-release-guards",
+      "size_in_bytes": 442,
+      "url": "https://api.github.com/repos/Vanguduza/Van/actions/artifacts/12845414509",
+      "archive_download_url": "https://api.github.com/repos/Vanguduza/Van/actions/artifacts/12845414509/zip",
+      "expired": false,
+      "created_at": "2026-10-28T19:42:42Z",
+      "expires_at": "2027-01-26T19:36:06Z",
+      "updated_at": "2026-10-28T19:42:42Z",
+      "digest": "sha256:effbfdae837297027848ec5996d1c18166ba34cddd086de8cbf3763f5c805825",
+      "workflow_run": {
+        "id": 40755754628,
+        "repository_id": 1369211561,
+        "head_repository_id": 1369211561,
+        "head_branch": "ccr-9e07e1af-8mgz1p",
+        "head_sha": "8ff365d42bb118620d3b53a0d932edeb085b1350"
+      }
+    },
+    {
+      "id": 12845404141,
+      "name": "van-character-forge-validation-binding",
+      "size_in_bytes": 2101,
+      "url": "https://api.github.com/repos/Vanguduza/Van/actions/artifacts/12845404141",
+      "archive_download_url": "https://api.github.com/repos/Vanguduza/Van/actions/artifacts/12845404141/zip",
+      "expired": false,
+      "created_at": "2026-10-28T19:49:18Z",
+      "expires_at": "2027-01-26T19:36:06Z",
+      "updated_at": "2026-10-28T19:49:18Z",
+      "digest": "sha256:33ed6f067f5fb1cdf0b317618d254c87d38ddd5ff812c8889a98adca030ab06d",
+      "workflow_run": {
+        "id": 40755754628,
+        "repository_id": 1369211561,
+        "head_repository_id": 1369211561,
+        "head_branch": "ccr-9e07e1af-8mgz1p",
+        "head_sha": "8ff365d42bb118620d3b53a0d932edeb085b1350"
+      }
+    },
+    {
+      "id": 12845279214,
+      "name": "van-mutation-report-kotlin-3",
+      "size_in_bytes": 1541,
+      "url": "https://api.github.com/repos/Vanguduza/Van/actions/artifacts/12845279214",
+      "archive_download_url": "https://api.github.com/repos/Vanguduza/Van/actions/artifacts/12845279214/zip",
+      "expired": false,
+      "created_at": "2026-10-28T19:46:43Z",
+      "expires_at": "2027-01-26T19:36:06Z",
+      "updated_at": "2026-10-28T19:46:43Z",
+      "digest": "sha256:0695617ad8a2370d8d17b0f74f1f7ec682769e785d978a150c39c665f36b3971",
+      "workflow_run": {
+        "id": 40755754628,
+        "repository_id": 1369211561,
+        "head_repository_id": 1369211561,
+        "head_branch": "ccr-9e07e1af-8mgz1p",
+        "head_sha": "8ff365d42bb118620d3b53a0d932edeb085b1350"
+      }
+    },
+    {
+      "id": 12845148964,
+      "name": "van-market-monitor-source",
+      "size_in_bytes": 7147,
+      "url": "https://api.github.com/repos/Vanguduza/Van/actions/artifacts/12845148964",
+      "archive_download_url": "https://api.github.com/repos/Vanguduza/Van/actions/artifacts/12845148964/zip",
+      "expired": false,
+      "created_at": "2026-10-28T19:38:04Z",
+      "expires_at": "2027-01-26T19:36:06Z",
+      "updated_at": "2026-10-28T19:38:04Z",
+      "digest": "sha256:527361d808672e5345343ab24810961c1407e5413f2cf09e3f44de739e11163f",
+      "workflow_run": {
+        "id": 40755754628,
+        "repository_id": 1369211561,
+        "head_repository_id": 1369211561,
+        "head_branch": "ccr-9e07e1af-8mgz1p",
+        "head_sha": "8ff365d42bb118620d3b53a0d932edeb085b1350"
+      }
+    }
+  ]
+}

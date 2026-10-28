@@ -1,0 +1,12 @@
+trading/tests/test_native_close_movement.py
+trading/tests/test_native_close_movement_postgres.py
+trading/tests/test_financial_movement_journal.py
+trading/tests/test_financial_movement_projection.py
+trading/tests/test_financial_movement_runtime.py
+trading/tests/test_funding_runtime.py
+trading/tests/test_funding_owner_reports.py
+trading/tests/test_native_balance_reconciliation.py
+trading/tests/test_funding_postgres.py
+trading/tests/test_funding_committed_reads.py
+backend/tests/test_trading_api.py
+backend/tests/test_van_private_core_service.py
