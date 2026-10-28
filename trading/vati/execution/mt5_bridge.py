@@ -19,7 +19,7 @@ from vati.execution.base import AccountState, ExecutionReceipt, Health, OrderCom
 from vati.execution.mt5_identity import Mt5Identity
 from vati.risk.contracts import Direction, LossModel
 
-OPS = ("sync_account", "sync_symbols", "order_check", "order_send", "order_send_expiring", "positions", "orders", "history", "modify_sl_tp", "close")
+OPS = ("sync_account", "sync_symbols", "expected_margin", "order_check", "order_send", "order_send_expiring", "positions", "orders", "history", "modify_sl_tp", "close")
 ZERO = Decimal("0")
 
 
@@ -102,6 +102,11 @@ class Mt5BridgeAdapter:
             if op == 'sync_account':
                 self.identity.validate(response.get('account'))
         return response
+
+    def expected_margin(self,symbol,lots,*,price,direction,context,deadline_ms):
+        from vati.execution.mt5_expected_margin import read_bridge_expected_margin
+        return read_bridge_expected_margin(self,symbol,lots,price=price,direction=direction,
+            context=context,deadline_ms=deadline_ms)
 
     def sync_account(self) -> AccountState:
         r = self._call("sync_account", {"alias": self.account_alias}, now_ms=self.clock())

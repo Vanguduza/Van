@@ -126,7 +126,7 @@ string Utf8Hex(const string value)
 bool NativeIdentityMatches(const string &f[])
 {
    if(ArraySize(f) != 17 && ArraySize(f) != 18) return false;
-   if(ArraySize(f) != (f[1] == "ORDER_SEND_EXPIRING" ? 18 : 17)) return false;
+   if(ArraySize(f) != ((f[1] == "ORDER_SEND_EXPIRING" || f[1] == "MARGIN_QUOTE") ? 18 : 17)) return false;
    long mode = AccountInfoInteger(ACCOUNT_TRADE_MODE);
    if(mode != ACCOUNT_TRADE_MODE_DEMO && mode != ACCOUNT_TRADE_MODE_REAL) return false;
    return f[13] == IntegerToString(AccountInfoInteger(ACCOUNT_LOGIN))
@@ -241,7 +241,7 @@ string SnapshotJson()
    string funding = NativeCashJson();
    long accountMode = AccountInfoInteger(ACCOUNT_TRADE_MODE);
    string accountDemo = accountMode == ACCOUNT_TRADE_MODE_DEMO ? "true" : accountMode == ACCOUNT_TRADE_MODE_REAL ? "false" : "null";
-   string acct = StringFormat("{\"login\":%I64d,\"server\":\"%s\",\"demo\":%s,\"equity\":\"%s\",\"balance\":\"%s\",\"credit\":\"%s\",\"currency_digits\":%I64d,\"currency\":\"%s\",\"trade_allowed\":%s,\"hedging\":%s,\"server_time_ms\":%I64d,\"funding\":%s,%s,\"entry_constraints\":{\"schema\":\"van.mt5.ea-entry-constraints/1\",\"explicit_deadline\":true,\"required_op\":\"ORDER_SEND_EXPIRING\",\"framed_fields\":18}}",
+   string acct = StringFormat("{\"login\":%I64d,\"server\":\"%s\",\"demo\":%s,\"equity\":\"%s\",\"balance\":\"%s\",\"credit\":\"%s\",\"currency_digits\":%I64d,\"currency\":\"%s\",\"trade_allowed\":%s,\"hedging\":%s,\"server_time_ms\":%I64d,\"funding\":%s,%s,\"entry_constraints\":{\"schema\":\"van.mt5.ea-entry-constraints/1\",\"explicit_deadline\":true,\"required_op\":\"ORDER_SEND_EXPIRING\",\"framed_fields\":18},\"expected_margin_constraints\":{\"schema\":\"van.mt5.ea-margin-constraints/1\",\"required_op\":\"MARGIN_QUOTE\",\"framed_fields\":18,\"explicit_deadline\":true}}",
       AccountInfoInteger(ACCOUNT_LOGIN), JsonEscape(AccountInfoString(ACCOUNT_SERVER)), accountDemo,
       DoubleToString(AccountInfoDouble(ACCOUNT_EQUITY),-16), DoubleToString(AccountInfoDouble(ACCOUNT_BALANCE),-16),
       DoubleToString(AccountInfoDouble(ACCOUNT_CREDIT),-16), AccountInfoInteger(ACCOUNT_CURRENCY_DIGITS), JsonEscape(AccountInfoString(ACCOUNT_CURRENCY)),
@@ -278,6 +278,69 @@ string SnapshotJson()
 }
 
 void PushResult(const string json) { int n = ArraySize(pendingResults); ArrayResize(pendingResults, n + 1); pendingResults[n] = json; }
+
+// Read-only native calculation. The core rechecks exact decimal increments;
+// neither this result nor its native double format grants a reservation.
+string MarginReadAccountJson()
+{
+   ResetLastError();
+   long mode = AccountInfoInteger(ACCOUNT_TRADE_MODE);
+   string demo = mode == ACCOUNT_TRADE_MODE_DEMO ? "true" : mode == ACCOUNT_TRADE_MODE_REAL ? "false" : "null";
+   long marginMode = AccountInfoInteger(ACCOUNT_MARGIN_MODE);
+   string value = StringFormat("{\"login\":%I64d,\"server\":\"%s\",\"demo\":%s,\"currency\":\"%s\",\"currency_digits\":%I64d,\"leverage\":%I64d,\"margin_mode\":%I64d,\"hedging\":%s,\"balance\":\"%s\",\"equity\":\"%s\",\"credit\":\"%s\"}",
+      AccountInfoInteger(ACCOUNT_LOGIN),JsonEscape(AccountInfoString(ACCOUNT_SERVER)),demo,
+      JsonEscape(AccountInfoString(ACCOUNT_CURRENCY)),AccountInfoInteger(ACCOUNT_CURRENCY_DIGITS),
+      AccountInfoInteger(ACCOUNT_LEVERAGE),marginMode,marginMode == ACCOUNT_MARGIN_MODE_RETAIL_HEDGING ? "true" : "false",
+      DoubleToString(AccountInfoDouble(ACCOUNT_BALANCE),-16),DoubleToString(AccountInfoDouble(ACCOUNT_EQUITY),-16),DoubleToString(AccountInfoDouble(ACCOUNT_CREDIT),-16));
+   return GetLastError()==0 ? value : "";
+}
+
+string MarginReadAccountScopeJson()
+{
+   return StringFormat("%I64d|%s|%s|%I64d|%I64d|%I64d|%I64d",
+      AccountInfoInteger(ACCOUNT_LOGIN),AccountInfoString(ACCOUNT_SERVER),AccountInfoString(ACCOUNT_CURRENCY),
+      AccountInfoInteger(ACCOUNT_TRADE_MODE),AccountInfoInteger(ACCOUNT_CURRENCY_DIGITS),
+      AccountInfoInteger(ACCOUNT_LEVERAGE),AccountInfoInteger(ACCOUNT_MARGIN_MODE));
+}
+
+string MarginReadContractJson(const string symbol)
+{
+   double minimum=0,step=0,maximum=0,tick=0;
+   if(!SymbolInfoDouble(symbol,SYMBOL_VOLUME_MIN,minimum) || !SymbolInfoDouble(symbol,SYMBOL_VOLUME_STEP,step)
+      || !SymbolInfoDouble(symbol,SYMBOL_VOLUME_MAX,maximum) || !SymbolInfoDouble(symbol,SYMBOL_TRADE_TICK_SIZE,tick)
+      || !MathIsValidNumber(minimum) || !MathIsValidNumber(step) || !MathIsValidNumber(maximum) || !MathIsValidNumber(tick)
+      || minimum<=0 || step<=0 || maximum<minimum || tick<=0) return "";
+   // Retain the original binary64 round-trip text. The receiver reconstructs
+   // the same native double before the shared decimal increment checks.
+   return StringFormat("{\"symbol\":\"%s\",\"volume_min\":\"%s\",\"volume_step\":\"%s\",\"volume_max\":\"%s\",\"trade_tick_size\":\"%s\",\"native_numeric_format\":\"MQL_BINARY64_ROUNDTRIP\"}",
+      JsonEscape(symbol),DoubleToString(minimum,-16),DoubleToString(step,-16),DoubleToString(maximum,-16),DoubleToString(tick,-16));
+}
+
+void ExecMarginQuote(const string id,const string &f[])
+{
+   long expiry = ArraySize(f)==18 ? StringToInteger(f[17]) : 0;
+   if(!NativeIdentityMatches(f) || expiry<=0 || IntegerToString(expiry)!=f[17] || !NativeEntryDeadlineCurrent(expiry))
+   { PushResult(StringFormat("{\"id\":%s,\"error\":\"native margin identity or deadline unavailable\"}",id)); return; }
+   double volume=StringToDouble(f[4]),price=StringToDouble(f[5]);
+   if((f[3]!="BUY" && f[3]!="SELL") || !MathIsValidNumber(volume) || !MathIsValidNumber(price) || volume<=0 || price<=0)
+   { PushResult(StringFormat("{\"id\":%s,\"error\":\"native margin request unavailable\"}",id)); return; }
+   string beforeScope=MarginReadAccountScopeJson(),before=MarginReadAccountJson(),contract=MarginReadContractJson(f[2]);
+   long start=(long)TimeGMT()*1000;
+   double margin=0;
+   ENUM_ORDER_TYPE side = f[3]=="BUY" ? ORDER_TYPE_BUY : ORDER_TYPE_SELL;
+   if(before=="" || contract=="" || start<=0 || !TerminalInfoInteger(TERMINAL_CONNECTED)
+      || !OrderCalcMargin(side,f[2],volume,price,margin) || !MathIsValidNumber(margin) || margin<0)
+   { PushResult(StringFormat("{\"id\":%s,\"error\":\"native isolated margin unavailable\"}",id)); return; }
+   string after=MarginReadAccountJson(),latest=MarginReadContractJson(f[2]);
+   long received=(long)TimeGMT()*1000+999;
+   if(after=="" || beforeScope!=MarginReadAccountScopeJson() || contract!=latest || received<start
+      || !TerminalInfoInteger(TERMINAL_CONNECTED) || !NativeIdentityMatches(f) || !NativeEntryDeadlineCurrent(expiry))
+   { PushResult(StringFormat("{\"id\":%s,\"error\":\"native margin source changed or expired\"}",id)); return; }
+   string request=StringFormat("{\"symbol\":\"%s\",\"type\":\"%s\",\"volume\":\"%s\",\"price\":\"%s\"}",JsonEscape(f[2]),f[3],JsonEscape(f[4]),JsonEscape(f[5]));
+   string observation=StringFormat("{\"schema\":\"van.mt5.expected-margin/1\",\"state\":\"OBSERVED\",\"request\":%s,\"account_before\":%s,\"account_after\":%s,\"contract\":%s,\"raw_margin\":\"%s\",\"currency_digits\":%I64d,\"requested_at_ms\":%I64d,\"received_at_ms\":%I64d,\"deadline_ms\":%I64d,\"native_clock_basis\":\"UTC_SECOND_INTERVAL\",\"valuation_basis\":\"ISOLATED_ORDER_AT_REQUEST_PRICE_EXCLUDES_EXISTING_POSITIONS_AND_PENDING_ORDERS\",\"account_snapshot_atomic\":false,\"reservation_qualified\":false,\"execution_authority\":false}",
+      request,before,after,contract,DoubleToString(margin,-16),AccountInfoInteger(ACCOUNT_CURRENCY_DIGITS),start,received,expiry);
+   PushResult(StringFormat("{\"id\":%s,\"observation\":%s}",id,observation));
+}
 
 //+------------------------------------------------------------------+
 //| execution (SL required, tighten-only, no size decisions)          |
@@ -420,7 +483,8 @@ void OnTimer()
          PushResult(StringFormat("{\"id\":%s,\"status\":\"REJECTED\",\"volume\":\"0\",\"reason\":\"unsupported explicit order type\"}", id));
          continue;
       }
-      if(op == "ORDER_SEND" || op == "ORDER_SEND_EXPIRING") ExecOrderSend(id, f[2], f[3], StringToDouble(f[4]), StringToDouble(f[5]), StringToDouble(f[6]), StringToDouble(f[7]), f[9], StringToInteger(f[10]), (int)StringToInteger(f[11]), f[12], f);
+      if(op == "MARGIN_QUOTE") ExecMarginQuote(id,f);
+      else if(op == "ORDER_SEND" || op == "ORDER_SEND_EXPIRING") ExecOrderSend(id, f[2], f[3], StringToDouble(f[4]), StringToDouble(f[5]), StringToDouble(f[6]), StringToDouble(f[7]), f[9], StringToInteger(f[10]), (int)StringToInteger(f[11]), f[12], f);
       else if(op == "MODIFY_SL")  ExecModifySl(id, (ulong)StringToInteger(f[8]), StringToDouble(f[6]), StringToDouble(f[7]));
       else if(op == "CLOSE")      ExecClose(id, (ulong)StringToInteger(f[8]), StringToDouble(f[4]));
       else PushResult(StringFormat("{\"id\":%s,\"status\":\"REJECTED\",\"reason\":\"op not in contract\"}", id));

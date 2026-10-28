@@ -42,7 +42,7 @@ from vati.risk.contracts import Direction, LossModel
 
 ZERO = Decimal("0")
 ENTRY_OPS = ("ORDER_SEND", "ORDER_SEND_EXPIRING")
-OPS = (*ENTRY_OPS, "MODIFY_SL", "CLOSE")
+OPS = (*ENTRY_OPS, "MARGIN_QUOTE", "MODIFY_SL", "CLOSE")
 SKEW_S = 60
 STATE_FRESH_MS = 30_000
 
@@ -131,7 +131,7 @@ class BridgeQueue:
                 out = []
                 for cid, op, body in rows:
                     payload = json.loads(body)
-                    if ((op=='ORDER_SEND_EXPIRING' and not _deadline_valid(payload.get('expires_at_ms'),now_ms=now_ms))
+                    if ((op in ('ORDER_SEND_EXPIRING','MARGIN_QUOTE') and not _deadline_valid(payload.get('expires_at_ms'),now_ms=now_ms))
                         or (op=='ORDER_SEND' and 'expires_at_ms' in payload)):
                         result={'status':'REJECTED','volume':'0','reason':'native entry deadline invalid or expired before dispatch'}
                         self._conn.execute("UPDATE commands SET status='DONE', result_json=?, done_ms=? WHERE id=?",
@@ -222,7 +222,7 @@ def format_commands(cmds: list[dict]) -> str:
             identity = Mt5Identity(**c['expected_account'])
             f += [str(c.get('order_type','')), identity.login, identity.server.encode().hex(),
                   identity.currency.encode().hex(), 'true' if identity.demo else 'false']
-        if c['op']=='ORDER_SEND_EXPIRING':
+        if c['op'] in ('ORDER_SEND_EXPIRING','MARGIN_QUOTE'):
             if 'expected_account' not in c or not _deadline_valid(c.get('expires_at_ms')):
                 raise VenueUnavailable('bounded native entry frame requires physical identity and an exact deadline')
             f.append(str(c['expires_at_ms']))
@@ -288,6 +288,11 @@ class Mt5PullAdapter:
                 return r
             time.sleep(self.poll_s)
         return None
+
+    def expected_margin(self,symbol,lots,*,price,direction,context,deadline_ms):
+        from vati.execution.mt5_expected_margin import read_pull_expected_margin
+        return read_pull_expected_margin(self,symbol,lots,price=price,direction=direction,
+            context=context,deadline_ms=deadline_ms)
 
     def sync_account(self) -> AccountState:
         st = self._state();a = st["account"]

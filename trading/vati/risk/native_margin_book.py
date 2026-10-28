@@ -11,11 +11,20 @@ from vati.core.canonical import canonical_hash, canonical_json
 from vati.core.ledger import committed_source_snapshot, require_committed_source_read
 from vati.execution.ctrader.feed import native_integer
 from vati.execution.ctrader.margin_quote import ExpectedMarginObservation
+from vati.execution.mt5_expected_margin import Mt5ExpectedMarginObservation
 from vati.risk.native_history import original_native_risk_input
 
 EVENT='ORIGINAL_NATIVE_MARGIN'
 PRODUCER='vati-native-margin-book'
 SCHEMA='vati.original-native-margin-record/1'
+
+
+def _observation(body):
+    factories={'vati.ctrader-expected-margin/1':ExpectedMarginObservation,
+        'vati.mt5-expected-margin/1':Mt5ExpectedMarginObservation}
+    if type(body) is not dict or body.get('schema') not in factories:
+        raise NativeMarginError('NATIVE_MARGIN_OBSERVATION_SCHEMA_UNAVAILABLE')
+    return factories[body['schema']].from_body(body)
 
 
 class NativeMarginError(ValueError):
@@ -57,7 +66,7 @@ class NativeMarginBook:
                     or event.producer!=PRODUCER or event.schema_version!=1 or event.decision_time_ms is not None
                     or event.hash!=canonical_hash(event.body()) or p['original_input_ref'] not in earlier):
                 raise NativeMarginError('NATIVE_MARGIN_RECORD_INVALID')
-            q=ExpectedMarginObservation.from_body(p['observation']).body();key=q['source_ref']
+            q=_observation(p['observation']).body();key=q['source_ref']
             native_integer(event.received_time_ms,minimum=last,maximum=q['valid_until_ms']-1)
             if (type(event.event_time_ms) is not int or event.event_time_ms!=event.received_time_ms
                     or event.received_time_ms<q['received_at_ms'] or key!=event.correlation_id or key in rows):
@@ -92,8 +101,9 @@ class NativeMarginBook:
     def record(self,original_input_ref,observation):
         require_committed_source_read(self.ledger)
         if getattr(self.ledger,'_read_snapshot_depth',0):raise NativeMarginError('NATIVE_MARGIN_REQUIRES_OWN_WRITER')
-        if type(observation) is not ExpectedMarginObservation:raise NativeMarginError('NATIVE_MARGIN_TYPED_OBSERVATION_REQUIRED')
-        q=ExpectedMarginObservation.from_body(observation.body()).body();key=q['source_ref']
+        if type(observation) not in (ExpectedMarginObservation,Mt5ExpectedMarginObservation):
+            raise NativeMarginError('NATIVE_MARGIN_TYPED_OBSERVATION_REQUIRED')
+        q=_observation(observation.body()).body();key=q['source_ref']
         original=original_native_risk_input(self.ledger,original_input_ref,available_at_ms=q['requested_at_ms'])
         if canonical_json(asdict(original.context))!=canonical_json(q['native_account_context']):
             raise NativeMarginError('NATIVE_MARGIN_ORIGINAL_INPUT_BINDING_INVALID')
@@ -130,8 +140,19 @@ class NativeMarginBook:
             if started:raise NativeMarginUnknown(key) from None
             raise
 
-    def capture(self,adapter,original_input_ref,symbol,lots,*,deadline_ms):
+    def capture(self,adapter,original_input_ref,symbol,lots,*,deadline_ms,price=None,direction=None):
         """Actual adapter caller; record only after the native read completes."""
         original=original_native_risk_input(self.ledger,original_input_ref,available_at_ms=self._now())
-        observation=adapter.expected_margin(symbol,lots,context=original.context,deadline_ms=deadline_ms)
+        kwargs={}
+        if original.context.provider=='MT5':
+            from decimal import Decimal
+            from vati.risk.contracts import Direction
+            row=next(e for e in self.ledger.iter(EventKind.RISK_DECISION,correlation_id=original.trade_intent_id)
+                if e.hash==original_input_ref)
+            intent=row.payload['inputs']['intent']
+            kwargs={'price':price if price is not None else Decimal(intent['entry']),
+                'direction':direction if direction is not None else Direction(intent['direction'])}
+        elif price is not None or direction is not None:
+            raise NativeMarginError('NATIVE_MARGIN_PROVIDER_HAS_NO_REQUEST_PRICE_PARAMETER')
+        observation=adapter.expected_margin(symbol,lots,context=original.context,deadline_ms=deadline_ms,**kwargs)
         return self.record(original_input_ref,observation)

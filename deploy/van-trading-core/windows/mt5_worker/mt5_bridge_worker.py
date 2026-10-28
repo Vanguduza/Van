@@ -30,12 +30,14 @@ import ssl
 import sys
 import threading
 import time
+from decimal import Decimal
+from fractions import Fraction
 from datetime import datetime, timezone
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from typing import Any, Callable, Optional
 
-OPS = ("sync_account", "sync_symbols", "order_check", "order_send", "order_send_expiring", "positions", "orders", "history", "modify_sl_tp", "close")
+OPS = ("sync_account", "sync_symbols", "expected_margin", "order_check", "order_send", "order_send_expiring", "positions", "orders", "history", "modify_sl_tp", "close")
 SKEW_MS = 5000
 
 
@@ -147,6 +149,7 @@ class Terminal:
                 "margin_free": str(getattr(a, "margin_free", None)),
                 "margin_level": str(getattr(a, "margin_level", None)), "leverage": a.leverage,
                 "hedging": getattr(a, "margin_mode", 2) == 2,
+                "margin_mode": getattr(a, "margin_mode", None),
                 "trade_allowed": trading_allowed}
 
     def cash_account(self, before: dict, *, query_ms: int, clock) -> dict:
@@ -251,6 +254,67 @@ class Terminal:
         if b.get("tp"):
             req["tp"] = float(b["tp"])
         return req
+
+    def expected_margin(self,b:dict,*,clock) -> dict:
+        """Isolated order estimate; no order_check/send or reservation effect."""
+        def at():
+            value=clock()
+            if type(value) is not int or not 0<=value<2**63:raise ValueError('native margin clock unavailable')
+            return value
+        def exact(value,*,positive=False):
+            if type(value) is not str or not 1<=len(value)<=128:raise ValueError('native margin exact input unavailable')
+            d=Decimal(value)
+            if not d.is_finite() or (d<=0 if positive else d<0) or abs(d.as_tuple().exponent)>64:
+                raise ValueError('native margin exact input unavailable')
+            return d
+        try:
+            started=at();deadline=b['deadline_ms']
+            if type(deadline) is not int or not started<deadline<2**63:raise ValueError('native margin deadline unavailable')
+            symbol=b['symbol'];side=b['type']
+            if type(symbol) is not str or not 1<=len(symbol)<=256 or any(ord(c)<32 for c in symbol) or side not in {'BUY','SELL'}:
+                raise ValueError('native margin product or direction unavailable')
+            volume=exact(b['volume'],positive=True);price=exact(b['price'],positive=True)
+            before=self.account();contract=self.symbol(symbol)
+            identity={'login':str(before['login']),'server':before['server'],'currency':before['currency'],'demo':before['demo']}
+            if b.get('expected_account')!=identity or type(b['expected_account'].get('demo')) is not bool:
+                raise ValueError('native margin original account binding required')
+            digits=before['currency_digits']
+            if type(digits) is not int or not 0<=digits<=16:raise ValueError('native margin currency precision unavailable')
+            if (type(before['margin_mode']) is not int or before['margin_mode'] not in (0,1,2)
+                    or type(before['leverage']) is not int or before['leverage']<=0):
+                raise ValueError('native margin mode or leverage unavailable')
+            minimum=exact(contract['volume_min'],positive=True);step=exact(contract['volume_step'],positive=True)
+            maximum=exact(contract['volume_max'],positive=True);tick=exact(contract['trade_tick_size'],positive=True)
+            if (not minimum<=volume<=maximum or Fraction(volume)%Fraction(step)
+                    or Fraction(price)%Fraction(tick)):
+                raise ValueError('native margin quantity or price is not on the native increment')
+            # Native SDK parameters are doubles. Preserve the original decimal
+            # request and refuse any decimal spelling lost at that boundary.
+            native_volume=float(volume);native_price=float(price)
+            if (not math.isfinite(native_volume) or not math.isfinite(native_price)
+                    or Decimal(str(native_volume))!=volume or Decimal(str(native_price))!=price):
+                raise ValueError('native margin request cannot retain original decimal value')
+            if at()>=deadline:raise ValueError('native margin deadline elapsed before query')
+            action=self.mt5.ORDER_TYPE_BUY if side=='BUY' else self.mt5.ORDER_TYPE_SELL
+            margin=self.mt5.order_calc_margin(action,symbol,native_volume,native_price)
+            if type(margin) not in (int,float) or isinstance(margin,bool):raise ValueError('native margin not observed')
+            raw=str(margin);exact(raw)
+            after=self.account();latest=self.symbol(symbol);received=at()
+            stable=('login','server','demo','currency','currency_digits','leverage','hedging','margin_mode')
+            if (received<started or received>=deadline
+                    or any(type(before[k]) is not type(after[k]) or before[k]!=after[k] for k in stable)
+                    or canonical_json(contract)!=canonical_json(latest)):
+                raise ValueError('native margin account, contract or deadline changed')
+            return {'schema':'van.mt5.expected-margin/1','state':'OBSERVED',
+                'request':{'symbol':symbol,'type':side,'volume':b['volume'],'price':b['price']},
+                'account_before':before,'account_after':after,'contract':contract,
+                'raw_margin':raw,'currency_digits':digits,'requested_at_ms':started,
+                'received_at_ms':received,'deadline_ms':deadline,
+                'valuation_basis':'ISOLATED_ORDER_AT_REQUEST_PRICE_EXCLUDES_EXISTING_POSITIONS_AND_PENDING_ORDERS',
+                'account_snapshot_atomic':False,'reservation_qualified':False,'execution_authority':False}
+        except Exception:
+            # Native exception text may contain terminal/account details.
+            raise ValueError('native expected-margin scope, precision, quantity or deadline unavailable') from None
 
     def order_check(self, b: dict) -> dict:
         if not b.get("sl"):
@@ -485,6 +549,8 @@ class Worker:
                     out = {"symbols": [self.t.symbol(s) for s in b.get("symbols", [])]}
                 elif op == "order_check":
                     out = self.t.order_check(b)
+                elif op == "expected_margin":
+                    out = {'observation':self.t.expected_margin(b,clock=self.clock)}
                 elif op in ("order_send","order_send_expiring"):
                     if abs(self.clock() - int(req["issued_ms"])) > SKEW_MS:
                         out = {"status": "REJECTED", "reason": "signed entry request expired before terminal dispatch"}

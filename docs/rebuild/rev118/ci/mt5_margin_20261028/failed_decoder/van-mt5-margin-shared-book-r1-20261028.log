@@ -1,0 +1,43 @@
+...........F............................................................ [ 64%]
+.......................................                                  [100%]
+=================================== FAILURES ===================================
+_ test_resealed_envelope_cannot_change_original_native_units_request_or_authority[scope] _
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-60/test_resealed_envelope_cannot_2')
+change = 'scope'
+
+    @pytest.mark.parametrize('change',['amount','request','scope','authority','contract','mode','deadline'])
+    def test_resealed_envelope_cannot_change_original_native_units_request_or_authority(tmp_path,change):
+        sdk,worker,adapter,now,_,context=source(tmp_path);body=quote(adapter,now,context).body()
+        if change=='amount':body['estimate_money']['minor_units']='0'
+        elif change=='request':body['request']['volume']='0.11'
+        elif change=='scope':body['observation']['account_after']['currency']='EUR'
+        elif change=='authority':body['execution_authority']=True
+        elif change=='contract':body['observation']['contract']['volume_step']='0.03'
+        elif change=='mode':body['observation']['account_after']['margin_mode']=0
+        elif change=='deadline':body['valid_until_ms']+=1
+        body['source_ref']=canonical_hash({k:v for k,v in body.items() if k!='source_ref'})
+>       with pytest.raises((ValueError,TypeError,KeyError)):Mt5ExpectedMarginObservation.from_body(body)
+                                                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+trading/tests/test_mt5_expected_margin.py:86: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+trading/vati/execution/mt5_expected_margin.py:68: in from_body
+    a,b=raw['account_before'],raw['account_after'];identity.validate(a);identity.validate(b)
+                                                                        ^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = Mt5Identity(login='12345678', server='Broker-Demo', currency='USD', demo=True)
+observed = {'balance': '10000.0', 'credit': '250.5', 'currency': 'EUR', 'currency_digits': 2, ...}
+
+    def validate(self, observed):
+        if (not isinstance(observed, dict) or login_id(observed.get('login')) != self.login
+            or observed.get('server') != self.server or observed.get('currency') != self.currency
+            or type(observed.get('demo')) is not bool or observed['demo'] is not self.demo):
+>           raise VenueUnavailable('MT5 physical account identity differs from the registered binding')
+E           vati.execution.base.VenueUnavailable: MT5 physical account identity differs from the registered binding
+
+trading/vati/execution/mt5_identity.py:40: VenueUnavailable
+=========================== short test summary info ============================
+FAILED trading/tests/test_mt5_expected_margin.py::test_resealed_envelope_cannot_change_original_native_units_request_or_authority[scope]
+1 failed, 110 passed in 2.40s
