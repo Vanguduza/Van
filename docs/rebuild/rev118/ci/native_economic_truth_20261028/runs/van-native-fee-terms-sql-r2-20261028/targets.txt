@@ -1,0 +1,16 @@
+trading/tests/test_native_fee_terms.py
+trading/tests/test_native_fee_terms_postgres.py
+trading/tests/test_native_margin_book.py
+trading/tests/test_native_margin_book_postgres.py
+trading/tests/test_entry_margin_binding.py
+trading/tests/test_entry_resource_projection.py
+trading/tests/test_current_entry_risk_source.py
+trading/tests/test_current_entry_risk_source_postgres.py
+trading/tests/test_provisional_resource_book.py
+trading/tests/test_provisional_resource_book_postgres.py
+trading/tests/test_entry_resource_groups.py
+trading/tests/test_mt5_native_margin_book.py
+trading/tests/test_mt5_native_margin_book_postgres.py
+trading/tests/test_ctrader_expected_margin.py
+backend/tests/test_trading_api.py
+backend/tests/test_van_private_core_service.py

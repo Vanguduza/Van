@@ -1,0 +1,6 @@
+{"duration": 0.010780879005324095, "nodeid": "trading/tests/test_native_entry_risk_recovery.py::test_original_partial_readback_repairs_contradiction_while_retaining_full_possible_entry_risk", "outcome": "passed", "phase": "setup"}
+{"duration": 0.4728641199908452, "nodeid": "trading/tests/test_native_entry_risk_recovery.py::test_original_partial_readback_repairs_contradiction_while_retaining_full_possible_entry_risk", "outcome": "passed", "phase": "call"}
+{"duration": 0.00045775600301567465, "nodeid": "trading/tests/test_native_entry_risk_recovery.py::test_original_partial_readback_repairs_contradiction_while_retaining_full_possible_entry_risk", "outcome": "passed", "phase": "teardown"}
+{"duration": 0.0012607969983946532, "nodeid": "trading/tests/test_native_entry_risk_recovery.py::test_two_original_parents_cannot_claim_the_same_native_order_volume", "outcome": "passed", "phase": "setup"}
+{"duration": 0.04840539299766533, "nodeid": "trading/tests/test_native_entry_risk_recovery.py::test_two_original_parents_cannot_claim_the_same_native_order_volume", "outcome": "passed", "phase": "call"}
+{"duration": 0.0008143330051098019, "nodeid": "trading/tests/test_native_entry_risk_recovery.py::test_two_original_parents_cannot_claim_the_same_native_order_volume", "outcome": "passed", "phase": "teardown"}

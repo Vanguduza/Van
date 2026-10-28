@@ -1,0 +1,25 @@
+{
+  "command": [
+    "env",
+    "PYTHONPATH=/workspace:backend:backend/tests:trading:trading/tests:.",
+    "VAN_TEST_EVENT_LOG=/workspace/van-native-entry-risk-recovery-final-events-20261028.jsonl",
+    "/workspace/van-backend-venv-20261025/bin/python",
+    "tools/rebuild/source_storage_audit.py",
+    "--report",
+    "/workspace/van-native-entry-risk-recovery-final-audit-20261028.json",
+    "trading/tests/test_native_entry_risk_recovery.py",
+    "-p",
+    "van_pytest_live_diagnostics",
+    "--junitxml=/workspace/van-native-entry-risk-recovery-final-20261028.xml",
+    "-q"
+  ],
+  "cwd": "/workspace/van-review-2026-10-18/publish",
+  "controller_pid": 803533,
+  "started_at_utc": "2026-10-28T22:08:34.879340+00:00",
+  "timeout_seconds": 120,
+  "state": "COMPLETED",
+  "command_pid": 803537,
+  "exit": 0,
+  "adopted_children_reaped": [],
+  "finished_at_utc": "2026-10-28T22:08:36.453191+00:00"
+}

@@ -106,6 +106,15 @@ class NativeMarginBook:
             self._original(event)
             return {'receipt':self._receipt(event),'observation':event.payload['observation']}
 
+    def lookup_entry_fee_terms(self,command_hash,source_ref):
+        """Read the original contract vintage; never renew or reserve its fees."""
+        from vati.risk.native_fee_terms import original_entry_commission_terms
+        return original_entry_commission_terms(self,command_hash,source_ref)
+
+    def lookup_entry_volume(self,command_hash,source_ref,*,available_at_ms):
+        from vati.risk.native_entry_volume import read_original_entry_volume
+        return read_original_entry_volume(self,command_hash,source_ref,available_at_ms=available_at_ms).body()
+
     def record(self,original_input_ref,observation):
         require_committed_source_read(self.ledger)
         if getattr(self.ledger,'_read_snapshot_depth',0):raise NativeMarginError('NATIVE_MARGIN_REQUIRES_OWN_WRITER')

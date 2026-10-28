@@ -29,6 +29,9 @@ class PhysicalPendingRisk:
                 raise ValueError('pending exposure original ownership is unresolved')
             rows = tuple(self.ledger.iter_after(0))
             by_ref = {e.hash:e for _,e in rows}
+            native_deals_available = self.context.provider=='CTRADER' and any(
+                e.kind is EventKind.FUNDING_DEAL_STATEMENT
+                and max(e.event_time_ms,e.received_time_ms)<=now_ms for _,e in rows)
             self._originals = {}
             for order in self.exposure.orders:
                 original = by_ref[order.original_input_ref]
@@ -40,6 +43,18 @@ class PhysicalPendingRisk:
                 ids = {by_ref[ref].payload.get('broker_position_id') for ref in order.receipt_refs}
                 ids.discard(None);ids.discard('')
                 self._originals[order.command_ref] = (contract,frozenset(ids))
+                binding_ref=cmd.get('native_entry_margin_ref')
+                has_native_order=any(by_ref[ref].payload.get('broker_order_id') not in (None,'')
+                    for ref in order.receipt_refs)
+                if native_deals_available and binding_ref and has_native_order:
+                    from vati.risk.native_margin_book import NativeMarginBook
+                    bound=by_ref.get(binding_ref)
+                    if bound is None:raise ValueError('original native entry binding unavailable')
+                    volume=NativeMarginBook(self.ledger).lookup_entry_volume(cmd['command_hash'],
+                        bound.payload['source_ref'],available_at_ms=now_ms)
+                    if volume['state'] in {'NATIVE_GROSS_VOLUME_EXCEEDS_ORIGINAL_COMMAND',
+                            'NATIVE_DEALS_CONTRADICT_NO_EFFECT_RECEIPT'}:
+                        raise ValueError('original native deals contradict entry exposure: '+volume['state'])
             self._closed = {by_ref[f.event_ref].correlation_id for f in history.facts if f.kind=='TRADE_REVIEW'}
             self._trades = {o.trade_intent_id for o in self.exposure.orders}
             self._seq = max((s for s,_ in rows),default=0)
@@ -60,7 +75,8 @@ class PhysicalPendingRisk:
                 if available>now_ms:
                     self._future = min(available,self._future) if self._future is not None else available
                     continue
-                if (event.kind in {EventKind.ORDER_COMMAND,EventKind.EXECUTION_RECEIPT,EventKind.TRADE_REVIEW}
+                if (event.kind in {EventKind.ORDER_COMMAND,EventKind.EXECUTION_RECEIPT,EventKind.TRADE_REVIEW,
+                                  EventKind.FUNDING_DEAL_STATEMENT}
                         or event.kind is EventKind.RISK_DECISION and event.correlation_id in self._trades):
                     reload = True
             if reload:
