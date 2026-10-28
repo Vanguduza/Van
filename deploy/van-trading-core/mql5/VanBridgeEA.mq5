@@ -126,7 +126,7 @@ string Utf8Hex(const string value)
 bool NativeIdentityMatches(const string &f[])
 {
    if(ArraySize(f) != 17 && ArraySize(f) != 18) return false;
-   if(ArraySize(f) != ((f[1] == "ORDER_SEND_EXPIRING" || f[1] == "MARGIN_QUOTE") ? 18 : 17)) return false;
+   if(ArraySize(f) != ((f[1] == "ORDER_SEND_EXPIRING" || f[1] == "MARGIN_QUOTE" || f[1] == "SYMBOL_CONTRACT") ? 18 : 17)) return false;
    long mode = AccountInfoInteger(ACCOUNT_TRADE_MODE);
    if(mode != ACCOUNT_TRADE_MODE_DEMO && mode != ACCOUNT_TRADE_MODE_REAL) return false;
    return f[13] == IntegerToString(AccountInfoInteger(ACCOUNT_LOGIN))
@@ -241,7 +241,7 @@ string SnapshotJson()
    string funding = NativeCashJson();
    long accountMode = AccountInfoInteger(ACCOUNT_TRADE_MODE);
    string accountDemo = accountMode == ACCOUNT_TRADE_MODE_DEMO ? "true" : accountMode == ACCOUNT_TRADE_MODE_REAL ? "false" : "null";
-   string acct = StringFormat("{\"login\":%I64d,\"server\":\"%s\",\"demo\":%s,\"equity\":\"%s\",\"balance\":\"%s\",\"credit\":\"%s\",\"currency_digits\":%I64d,\"currency\":\"%s\",\"trade_allowed\":%s,\"hedging\":%s,\"server_time_ms\":%I64d,\"funding\":%s,%s,\"entry_constraints\":{\"schema\":\"van.mt5.ea-entry-constraints/1\",\"explicit_deadline\":true,\"required_op\":\"ORDER_SEND_EXPIRING\",\"framed_fields\":18},\"expected_margin_constraints\":{\"schema\":\"van.mt5.ea-margin-constraints/1\",\"required_op\":\"MARGIN_QUOTE\",\"framed_fields\":18,\"explicit_deadline\":true}}",
+   string acct = StringFormat("{\"login\":%I64d,\"server\":\"%s\",\"demo\":%s,\"equity\":\"%s\",\"balance\":\"%s\",\"credit\":\"%s\",\"currency_digits\":%I64d,\"currency\":\"%s\",\"trade_allowed\":%s,\"hedging\":%s,\"server_time_ms\":%I64d,\"funding\":%s,%s,\"entry_constraints\":{\"schema\":\"van.mt5.ea-entry-constraints/1\",\"explicit_deadline\":true,\"required_op\":\"ORDER_SEND_EXPIRING\",\"framed_fields\":18},\"expected_margin_constraints\":{\"schema\":\"van.mt5.ea-margin-constraints/1\",\"required_op\":\"MARGIN_QUOTE\",\"framed_fields\":18,\"explicit_deadline\":true},\"symbol_contract_constraints\":{\"schema\":\"van.mt5.ea-symbol-constraints/1\",\"required_op\":\"SYMBOL_CONTRACT\",\"framed_fields\":18,\"explicit_deadline\":true}}",
       AccountInfoInteger(ACCOUNT_LOGIN), JsonEscape(AccountInfoString(ACCOUNT_SERVER)), accountDemo,
       DoubleToString(AccountInfoDouble(ACCOUNT_EQUITY),-16), DoubleToString(AccountInfoDouble(ACCOUNT_BALANCE),-16),
       DoubleToString(AccountInfoDouble(ACCOUNT_CREDIT),-16), AccountInfoInteger(ACCOUNT_CURRENCY_DIGITS), JsonEscape(AccountInfoString(ACCOUNT_CURRENCY)),
@@ -314,6 +314,64 @@ string MarginReadContractJson(const string symbol)
    // the same native double before the shared decimal increment checks.
    return StringFormat("{\"symbol\":\"%s\",\"volume_min\":\"%s\",\"volume_step\":\"%s\",\"volume_max\":\"%s\",\"trade_tick_size\":\"%s\",\"native_numeric_format\":\"MQL_BINARY64_ROUNDTRIP\"}",
       JsonEscape(symbol),DoubleToString(minimum,-16),DoubleToString(step,-16),DoubleToString(maximum,-16),DoubleToString(tick,-16));
+}
+
+string NativeSymbolContractJson(const string symbol)
+{
+   ENUM_SYMBOL_INFO_DOUBLE doubles[]={SYMBOL_VOLUME_MIN,SYMBOL_VOLUME_STEP,SYMBOL_VOLUME_MAX,SYMBOL_POINT,
+      SYMBOL_TRADE_CONTRACT_SIZE,SYMBOL_TRADE_TICK_SIZE,SYMBOL_TRADE_TICK_VALUE,
+      SYMBOL_TRADE_TICK_VALUE_PROFIT,SYMBOL_TRADE_TICK_VALUE_LOSS};
+   string names[]={"volume_min","volume_step","volume_max","point","trade_contract_size",
+      "trade_tick_size","trade_tick_value","trade_tick_value_profit","trade_tick_value_loss"};
+   string value=StringFormat("{\"symbol\":\"%s\"",JsonEscape(symbol));
+   double minimum=0,maximum=0;
+   for(int i=0;i<ArraySize(doubles);i++)
+   {
+      double number=0;
+      if(!SymbolInfoDouble(symbol,doubles[i],number) || !MathIsValidNumber(number)
+         || (i<6 ? number<=0 : number<0)) return "";
+      if(i==0) minimum=number;
+      if(i==2) maximum=number;
+      value+=StringFormat(",\"%s\":\"%s\"",names[i],DoubleToString(number,-16));
+   }
+   if(maximum<minimum) return "";
+   ENUM_SYMBOL_INFO_INTEGER integers[]={SYMBOL_DIGITS,SYMBOL_TRADE_STOPS_LEVEL,SYMBOL_TRADE_FREEZE_LEVEL,
+      SYMBOL_TRADE_MODE,SYMBOL_TRADE_CALC_MODE,SYMBOL_SPREAD};
+   string integerNames[]={"digits","trade_stops_level","trade_freeze_level","trade_mode","trade_calc_mode","spread"};
+   for(int i=0;i<ArraySize(integers);i++)
+   {
+      long number=0;
+      if(!SymbolInfoInteger(symbol,integers[i],number) || number<0 || number>2147483647) return "";
+      value+=StringFormat(",\"%s\":%I64d",integerNames[i],number);
+   }
+   ENUM_SYMBOL_INFO_STRING strings[]={SYMBOL_CURRENCY_BASE,SYMBOL_CURRENCY_PROFIT,SYMBOL_CURRENCY_MARGIN};
+   string stringNames[]={"currency_base","currency_profit","currency_margin"};
+   for(int i=0;i<ArraySize(strings);i++)
+   {
+      string text="";
+      if(!SymbolInfoString(symbol,strings[i],text) || StringLen(text)>64) return "";
+      value+=StringFormat(",\"%s\":\"%s\"",stringNames[i],JsonEscape(text));
+   }
+   return value+"}";
+}
+
+void ExecSymbolContract(const string id,const string &f[])
+{
+   long expiry=ArraySize(f)==18 ? StringToInteger(f[17]) : 0;
+   if(!NativeIdentityMatches(f) || expiry<=0 || IntegerToString(expiry)!=f[17] || !NativeEntryDeadlineCurrent(expiry))
+   { PushResult(StringFormat("{\"id\":%s,\"error\":\"native symbol identity or deadline unavailable\"}",id)); return; }
+   long start=(long)TimeGMT()*1000;
+   string scope=MarginReadAccountScopeJson(),before=MarginReadAccountJson();
+   string contract=NativeSymbolContractJson(f[2]),after=MarginReadAccountJson();
+   long received=(long)TimeGMT()*1000+999;
+   if(before=="" || after=="" || contract=="" || start<=0 || received<start
+      || scope!=MarginReadAccountScopeJson() || !TerminalInfoInteger(TERMINAL_CONNECTED)
+      || !NativeIdentityMatches(f) || !NativeEntryDeadlineCurrent(expiry))
+   { PushResult(StringFormat("{\"id\":%s,\"error\":\"native symbol source changed, unavailable or expired\"}",id)); return; }
+   string request=StringFormat("{\"symbol\":\"%s\"}",JsonEscape(f[2]));
+   string observation=StringFormat("{\"schema\":\"van.mt5.symbol-contract/1\",\"request\":%s,\"account_before\":%s,\"account_after\":%s,\"contract\":%s,\"requested_at_ms\":%I64d,\"received_at_ms\":%I64d,\"deadline_ms\":%I64d,\"native_clock_basis\":\"UTC_SECOND_INTERVAL\",\"native_numeric_format\":\"MQL_BINARY64_ROUNDTRIP\",\"tick_value_basis\":\"NATIVE_SYMBOL_ACCOUNT_CURRENCY_VALUES_NO_SEPARATE_FX_TIMESTAMP\",\"account_snapshot_atomic\":false,\"risk_terms_qualified\":false,\"execution_authority\":false}",
+      request,before,after,contract,start,received,expiry);
+   PushResult(StringFormat("{\"id\":%s,\"observation\":%s}",id,observation));
 }
 
 void ExecMarginQuote(const string id,const string &f[])
@@ -483,7 +541,8 @@ void OnTimer()
          PushResult(StringFormat("{\"id\":%s,\"status\":\"REJECTED\",\"volume\":\"0\",\"reason\":\"unsupported explicit order type\"}", id));
          continue;
       }
-      if(op == "MARGIN_QUOTE") ExecMarginQuote(id,f);
+      if(op == "SYMBOL_CONTRACT") ExecSymbolContract(id,f);
+      else if(op == "MARGIN_QUOTE") ExecMarginQuote(id,f);
       else if(op == "ORDER_SEND" || op == "ORDER_SEND_EXPIRING") ExecOrderSend(id, f[2], f[3], StringToDouble(f[4]), StringToDouble(f[5]), StringToDouble(f[6]), StringToDouble(f[7]), f[9], StringToInteger(f[10]), (int)StringToInteger(f[11]), f[12], f);
       else if(op == "MODIFY_SL")  ExecModifySl(id, (ulong)StringToInteger(f[8]), StringToDouble(f[6]), StringToDouble(f[7]));
       else if(op == "CLOSE")      ExecClose(id, (ulong)StringToInteger(f[8]), StringToDouble(f[4]));

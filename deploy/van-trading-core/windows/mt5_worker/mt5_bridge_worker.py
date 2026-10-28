@@ -37,7 +37,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from typing import Any, Callable, Optional
 
-OPS = ("sync_account", "sync_symbols", "expected_margin", "order_check", "order_send", "order_send_expiring", "positions", "orders", "history", "modify_sl_tp", "close")
+OPS = ("sync_account", "sync_symbols", "symbol_contract", "expected_margin", "order_check", "order_send", "order_send_expiring", "positions", "orders", "history", "modify_sl_tp", "close")
 SKEW_MS = 5000
 
 
@@ -223,6 +223,55 @@ class Terminal:
             raise RuntimeError(f"unknown symbol {symbol}")
         return {"symbol": symbol, "volume_min": str(s.volume_min), "volume_step": str(s.volume_step), "volume_max": str(s.volume_max), "trade_stops_level": s.trade_stops_level, "point": str(s.point), "digits": s.digits,
                 "trade_contract_size": str(s.trade_contract_size), "trade_tick_value": str(s.trade_tick_value), "trade_tick_size": str(s.trade_tick_size), "spread": s.spread, "trade_mode": s.trade_mode}
+
+    def symbol_contract(self,b:dict,*,clock) -> dict:
+        """Original native terms, not fresh FX, risk admission or a trade."""
+        def at():
+            value=clock()
+            if type(value) is not int or not 0<=value<2**63:
+                raise ValueError('native symbol clock unavailable')
+            return value
+        def exact(value,*,positive=False):
+            if type(value) not in (float,int):raise ValueError('native symbol number unavailable')
+            text=str(value);number=Decimal(text)
+            if (not number.is_finite() or len(text)>128 or abs(number.as_tuple().exponent)>64
+                    or (number<=0 if positive else number<0)):
+                raise ValueError('native symbol number invalid')
+            return text
+        start=at();deadline=b.get('deadline_ms');symbol=b.get('symbol')
+        if (type(deadline) is not int or not start<deadline<2**63 or type(symbol) is not str
+                or not 1<=len(symbol)<=256 or any(ord(c)<32 or ord(c)==127 or c=='|' for c in symbol)):
+            raise ValueError('native symbol request or deadline unavailable')
+        before=self.account();native=self.mt5.symbol_info(symbol)
+        if native is None or getattr(native,'name',None)!=symbol:
+            raise ValueError('native symbol identity unavailable')
+        contract={'symbol':symbol}
+        for name in ('volume_min','volume_step','volume_max','point','trade_contract_size','trade_tick_size',
+                     'trade_tick_value','trade_tick_value_profit','trade_tick_value_loss'):
+            contract[name]=exact(getattr(native,name,None),positive=name not in
+                {'trade_tick_value','trade_tick_value_profit','trade_tick_value_loss'})
+        for name in ('digits','trade_stops_level','trade_freeze_level','trade_mode','trade_calc_mode','spread'):
+            value=getattr(native,name,None)
+            if type(value) is not int or not 0<=value<2**31:raise ValueError('native symbol integer unavailable')
+            contract[name]=value
+        for name in ('currency_base','currency_profit','currency_margin'):
+            value=getattr(native,name,None)
+            if type(value) is not str or len(value)>64 or any(ord(c)<32 or ord(c)==127 for c in value):
+                raise ValueError('native symbol currency metadata unavailable')
+            contract[name]=value
+        after=self.account();received=at()
+        if (received<start or received>=deadline
+                or any(type(after.get(k)) is not type(before.get(k)) or after[k]!=before[k]
+                       for k in ('login','server','currency','demo','currency_digits'))):
+            raise ValueError('native symbol account identity, units or deadline changed')
+        if type(before.get('currency_digits')) is not int or not 0<=before['currency_digits']<=64:
+            raise ValueError('native account currency precision unavailable')
+        return {'schema':'van.mt5.symbol-contract/1','request':{'symbol':symbol},
+            'account_before':before,'account_after':after,'contract':contract,
+            'requested_at_ms':start,'received_at_ms':received,'deadline_ms':deadline,
+            'native_clock_basis':'UTC_HOST_MS','native_numeric_format':'PYTHON_BINARY64_SHORTEST',
+            'tick_value_basis':'NATIVE_SYMBOL_ACCOUNT_CURRENCY_VALUES_NO_SEPARATE_FX_TIMESTAMP',
+            'account_snapshot_atomic':False,'risk_terms_qualified':False,'execution_authority':False}
 
     def _request(self, b: dict) -> dict:
         m = self.mt5
@@ -549,6 +598,8 @@ class Worker:
                     out = {"symbols": [self.t.symbol(s) for s in b.get("symbols", [])]}
                 elif op == "order_check":
                     out = self.t.order_check(b)
+                elif op == "symbol_contract":
+                    out = {'observation':self.t.symbol_contract(b,clock=self.clock)}
                 elif op == "expected_margin":
                     out = {'observation':self.t.expected_margin(b,clock=self.clock)}
                 elif op in ("order_send","order_send_expiring"):
@@ -587,6 +638,14 @@ class Worker:
                     out = self.t.close(int(b["position"]), b.get("volume"), str(b.get("reason", "")))
                 else:
                     out = {"error": "unreachable"}
+                if op in {'sync_symbols','symbol_contract'} and 'error' not in out:
+                    latest = self.t.account()
+                    if (type(latest.get('login')) is not int or type(latest.get('demo')) is not bool
+                            or physical != {'login':str(latest['login']),'server':latest.get('server'),
+                                            'currency':latest.get('currency'),'demo':latest['demo']}):
+                        raise PermissionError('terminal account identity changed during symbol sync')
+                    if op=='symbol_contract' and self.clock()>=b['deadline_ms']:
+                        raise ValueError('native symbol deadline expired before result binding')
                 if expected is not None and 'error' not in out:
                     out['identity_binding'] = physical
         except Exception as exc:  # noqa: BLE001 — venue faults become data for the client's fail-closed path
