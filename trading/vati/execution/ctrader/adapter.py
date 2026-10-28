@@ -382,6 +382,11 @@ class CtraderAdapter:
             raise VenueUnavailable('cTrader native account identity, money precision or deposit currency unavailable') from None
         return t
 
+    def expected_margin(self, symbol: str, lots: Decimal, *, context, deadline_ms: int):
+        """Read native current-price margin; grants no order or reservation."""
+        from vati.execution.ctrader.margin_quote import read_expected_margin
+        return read_expected_margin(self, symbol, lots, context=context, deadline_ms=deadline_ms)
+
     def sync_account(self) -> AccountState:
         from vati.funding.native import NativeAccountMark,native_int,native_money
         self._ensure_auth()
