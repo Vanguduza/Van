@@ -1,0 +1,9 @@
+{"duration": 0.214950402994873, "nodeid": "trading/tests/test_single_session_unknown_entry.py::test_original_timed_out_native_entry_is_not_reported_as_executed_or_approved", "outcome": "passed", "phase": "setup"}
+{"duration": 5.659114281996153, "nodeid": "trading/tests/test_single_session_unknown_entry.py::test_original_timed_out_native_entry_is_not_reported_as_executed_or_approved", "outcome": "passed", "phase": "call"}
+{"duration": 0.053169507009442896, "nodeid": "trading/tests/test_single_session_unknown_entry.py::test_original_timed_out_native_entry_is_not_reported_as_executed_or_approved", "outcome": "passed", "phase": "teardown"}
+{"duration": 0.04200079699512571, "nodeid": "trading/tests/test_entry_margin_binding_postgres.py::test_original_entry_binding_survives_postgres_reopen_and_other_scope_isolation", "outcome": "passed", "phase": "setup"}
+{"duration": 0.2288325459958287, "nodeid": "trading/tests/test_entry_margin_binding_postgres.py::test_original_entry_binding_survives_postgres_reopen_and_other_scope_isolation", "outcome": "passed", "phase": "call"}
+{"duration": 0.019491218990879133, "nodeid": "trading/tests/test_entry_margin_binding_postgres.py::test_original_entry_binding_survives_postgres_reopen_and_other_scope_isolation", "outcome": "passed", "phase": "teardown"}
+{"duration": 0.03948560501157772, "nodeid": "trading/tests/test_entry_margin_binding_postgres.py::test_independent_postgres_binding_writers_retain_one_original_completion", "outcome": "passed", "phase": "setup"}
+{"duration": 0.21671315300045535, "nodeid": "trading/tests/test_entry_margin_binding_postgres.py::test_independent_postgres_binding_writers_retain_one_original_completion", "outcome": "passed", "phase": "call"}
+{"duration": 0.01599858699773904, "nodeid": "trading/tests/test_entry_margin_binding_postgres.py::test_independent_postgres_binding_writers_retain_one_original_completion", "outcome": "passed", "phase": "teardown"}

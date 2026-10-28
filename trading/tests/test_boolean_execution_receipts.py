@@ -13,14 +13,23 @@ from vati.execution.router import ExecutionRouter,RouterError
 from vati.risk import KillSwitch,KillSwitchTrigger,RiskAuthority,TradingMandate
 
 
-def native_flow(contract,*,check=True,stop=True,modify=True):
+def native_flow(contract,tmp_path,*,check=True,stop=True,modify=True):
+    from test_mt5_expected_margin_worker import MarginSdk
+    from test_mt5_worker_funding import connection
+    from test_mt5_worker import KEY
+    from vati.funding.mt5_runtime import capture_cached_mt5
+    from vati.risk.account_context import context_for_account
+    from test_native_risk_history_inputs import record
+    sdk,worker,adapter,clock=connection(tmp_path,MarginSdk());clock['ms']=NOW*1000
     calls=[]
     def transport(request):
         assert client.verify(BridgeRequest(**request));calls.append(request['op'])
-        data={'nonce':request['nonce'],'worker_time_ms':request['issued_ms']}
+        clock['ms']=request['issued_ms']
+        data={'nonce':request['nonce'],'worker_time_ms':request['issued_ms'],
+              'identity_binding':adapter.identity.as_dict()}
         if request['op']=='sync_account':
-            return {**data,'entry_constraints':{'schema':'van.mt5.entry-constraints/1','explicit_deadline':True,'required_op':'order_send_expiring'},'account':{'equity':'10000','balance':'10000','currency':'USD',
-                'verified':True,'hedging':True,'server_time_ms':request['issued_ms']}}
+            return worker.handle(request)
+        if request['op']=='expected_margin':return worker.handle(request)
         if request['op']=='order_check':return {**data,'ok':check}
         if request['op']=='order_send_expiring':
             assert type(request['body']['expires_at_ms']) is int
@@ -28,35 +37,43 @@ def native_flow(contract,*,check=True,stop=True,modify=True):
                 return {**data,'status':'REJECTED','volume':'0','reason':'fixture original deadline expired'}
         if request['op']=='modify_sl_tp':return {**data,'ok':modify}
         return {**data,'status':'FILLED','volume':'0.18','price':'1.1001','order':'O1','position':'P1','sl_confirmed':stop}
-    client=Mt5BridgeClient(signing_key=b'fixture-native-request-key',transport=transport)
-    adapter=Mt5BridgeAdapter(client,clock=lambda:NOW*1000);mandate=TradingMandate.from_mapping(mandate_dict())
-    trade=intent();native=snapshot(contract);authority=RiskAuthority(mandate);decision=authority.evaluate_safe(trade,native)
+    client=Mt5BridgeClient(signing_key=KEY,transport=transport);adapter.client=client
+    grant=mandate_dict(account_alias=adapter.account_alias)
+    mandate=TradingMandate.from_mapping(grant);trade=intent(account_alias=adapter.account_alias)
+    ledger=Ledger();account=adapter.sync_account()
+    captured=capture_cached_mt5(ledger,account,now_ms=clock['ms'])
+    context=context_for_account(ledger,adapter,account,now_ms=clock['ms'],mt5_capture=captured)
+    native=snapshot(contract,account_alias=adapter.account_alias,native_account_context=context)
+    authority=RiskAuthority(mandate);decision=authority.evaluate_safe(trade,native)
+    original=record(ledger,native,request=trade,grant=grant)
+    assert original.payload['decision']['decision_hash']==decision.decision_hash
+    calls.clear()  # Trace every operation of the subsequent parser scenario.
     from vati.execution.risk_refresh import CurrentRiskFacts
     # These native-parser fixtures state exact current facts; no truthy approval
     # may bypass the real RiskAuthority or the new native dispatch boundary.
-    router=ExecutionRouter(ledger=Ledger(),adapters={'mt5':adapter},kill_switch=KillSwitch(),protection=ProtectionManager(),
+    router=ExecutionRouter(ledger=ledger,adapters={'mt5':adapter},kill_switch=KillSwitch(),protection=ProtectionManager(),
         current_risk_facts_provider=lambda *a,**kw:CurrentRiskFacts(native,NOW*1000),
         current_risk_authority=authority)
     return adapter,router,trade,decision,mandate,calls
 
 
-def test_false_text_from_order_check_cannot_reach_the_actual_send(eurusd):
-    adapter,router,trade,decision,mandate,calls=native_flow(eurusd,check='false')
+def test_false_text_from_order_check_cannot_reach_the_actual_send(eurusd,tmp_path):
+    adapter,router,trade,decision,mandate,calls=native_flow(eurusd,tmp_path,check='false')
     result=router.execute(trade,decision,mandate,now_ms=NOW*1000)
-    assert result.status=='REJECTED' and calls==['sync_account','sync_account','order_check']
+    assert result.status=='REJECTED' and calls==['sync_account','sync_account','expected_margin','sync_account','sync_account','order_check']
 
 
-def test_unconfirmed_native_stop_is_not_reported_protected_and_uses_the_actual_flatten_path(eurusd):
-    adapter,router,trade,decision,mandate,calls=native_flow(eurusd,stop='false')
+def test_unconfirmed_native_stop_is_not_reported_protected_and_uses_the_actual_flatten_path(eurusd,tmp_path):
+    adapter,router,trade,decision,mandate,calls=native_flow(eurusd,tmp_path,stop='false')
     with pytest.raises(RouterError,match='flattened'):
         router.execute(trade,decision,mandate,now_ms=NOW*1000)
-    assert calls==['sync_account','sync_account','order_check','order_send_expiring','close']
+    assert calls==['sync_account','sync_account','expected_margin','sync_account','sync_account','order_check','sync_account','order_send_expiring','sync_account','close']
     assert KillSwitchTrigger.STOP_REJECTED in router.kill.active
 
 
-def test_malformed_reply_after_a_sent_modification_stays_unknown(eurusd):
-    adapter,*_=native_flow(eurusd,modify='false')
-    result=adapter.modify_stop('P1',D('1.095'),now_ms=1000)
+def test_malformed_reply_after_a_sent_modification_stays_unknown(eurusd,tmp_path):
+    adapter,*_=native_flow(eurusd,tmp_path,modify='false')
+    result=adapter.modify_stop('P1',D('1.095'),now_ms=NOW*1000)
     assert result.status=='UNKNOWN' and result.protective_stop_confirmed is False
     assert result.protective_stop_price is None
 

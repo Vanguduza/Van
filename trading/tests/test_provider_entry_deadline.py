@@ -10,10 +10,21 @@ from test_deriv_native_identity import factory,native,command
 class Wire:
     def __init__(self,t,clock,late_reply=False,lost=False):
         self.t=t;self.clock=clock;self.sent=[];self.late_reply=late_reply;self.lost=lost
+        self.margin_reads=None
     def sendall(self,frame):
         name,body,cid=SCHEMA.unwrap(frame[4:])
         if name=='ProtoOAGetAccountListByAccessTokenReq':
             self.t._pending[cid].put(('ProtoOAGetAccountListByAccessTokenRes',{'ctidTraderAccount':[{'ctidTraderAccountId':12345,'isLive':False}]}));return
+        if self.margin_reads is not None and name in ('ProtoOATraderReq','ProtoOAAssetListReq','ProtoOAExpectedMarginReq'):
+            self.margin_reads.append((name,body))
+            if name=='ProtoOATraderReq':
+                response=('ProtoOATraderRes',{'ctidTraderAccountId':12345,'trader':{'ctidTraderAccountId':12345,
+                    'depositAssetId':2,'balance':1000000,'moneyDigits':2,'leverageInCents':10000}})
+            elif name=='ProtoOAAssetListReq':
+                response=('ProtoOAAssetListRes',{'ctidTraderAccountId':12345,'asset':[{'assetId':2,'name':'USD'}]})
+            else:response=('ProtoOAExpectedMarginRes',{'ctidTraderAccountId':12345,'moneyDigits':2,
+                'margin':[{'volume':body['volume'][0],'buyMargin':3325,'sellMargin':3425}]})
+            self.t._pending[cid].put(response);return
         self.sent.append((name,body))
         if self.lost:raise OSError('fixture reply unavailable after native write')
         ev=event('ORDER_FILLED');ev['order'].update(clientOrderId=body['clientOrderId'],closingOrder=False)
@@ -129,15 +140,41 @@ def test_actual_router_binds_ctrader_mandate_and_original_quote_through_wire_dis
     from vati.execution.pretrade import MarketReference
     from vati.risk import RiskAuthority,TradingMandate,KillSwitch,Decision
     a,_,wire,clock=ctrader();clock['ms']=NOW*1000
-    m=TradingMandate.from_mapping(mandate_dict(venue='ctrader',account_alias=a.account_alias,expires_at_unix=NOW+1))
+    a.transport._connection_counter=1
+    a._auth_connection=a._symbol_connection=a.transport.connection_id
+    grant=mandate_dict(venue='ctrader',account_alias=a.account_alias,expires_at_unix=NOW+1)
+    m=TradingMandate.from_mapping(grant)
     trade=intent(venue='ctrader',account_alias=a.account_alias)
-    facts=snapshot(replace(eurusd,venue='ctrader'),account_alias=a.account_alias)
+    from types import SimpleNamespace
+    from vati.execution.ctrader.contracts import NativeSymbolContract
+    from vati.funding.native import NativeAccountMark
+    from vati.risk.account_context import context_for_account
+    from test_native_risk_history_inputs import record
+    ledger=Ledger();wire.margin_reads=[]
+    contract=NativeSymbolContract.capture(account_id=12345,transport_host=a.transport.host,
+        light={'symbolId':1,'symbolName':'EURUSD','enabled':True},detail={'symbolId':1,'digits':5,'pipPosition':4,
+            'lotSize':10000000,'minVolume':1000,'stepVolume':1000,'maxVolume':1000000000},received_at_ms=clock['ms'])
+    a.symbols['EURUSD'].native_contract=contract;a.symbols['EURUSD'].contract_revision=contract.revision
+    a._symbol_snapshot_valid=True
+    mark=NativeAccountMark('CTRADER','DEMO',a.account_alias,12345,2,'USD',clock['ms'],D('10000'),D('10000'),1,None,None,None)
+    account=SimpleNamespace(verified=True,funding_mark=mark,account_alias=a.account_alias,
+        balance=mark.balance,equity=mark.net_equity,currency=mark.currency)
+    context=context_for_account(ledger,a,account,now_ms=clock['ms'])
+    facts=snapshot(replace(eurusd,venue='ctrader'),account_alias=a.account_alias,native_account_context=context)
     authority=RiskAuthority(m);approved=authority.evaluate_safe(trade,facts)
     assert approved.decision in {Decision.APPROVED,Decision.REDUCED}
-    ledger=Ledger();router=ExecutionRouter(ledger=ledger,adapters={'ctrader':a},kill_switch=KillSwitch(),protection=ProtectionManager(),clock=lambda:clock['ms'],current_risk_authority=authority,current_risk_facts_provider=lambda *args,**kwargs:CurrentRiskFacts(facts,clock['ms']))
+    original=record(ledger,facts,request=trade,grant=grant)
+    assert original.payload['decision']['decision_hash']==approved.decision_hash
+    armed={'entry':False}
+    def current(*args,**kwargs):
+        assert any(name=='ProtoOAExpectedMarginReq' for name,_ in wire.margin_reads)
+        armed['entry']=True
+        return CurrentRiskFacts(facts,clock['ms'])
+    router=ExecutionRouter(ledger=ledger,adapters={'ctrader':a},kill_switch=KillSwitch(),protection=ProtectionManager(),clock=lambda:clock['ms'],current_risk_authority=authority,current_risk_facts_provider=current)
     if late:
         class LastWriteLock:
-            def __enter__(self):clock['ms']=NOW*1000+101
+            def __enter__(self):
+                if armed['entry']:clock['ms']=NOW*1000+101
             def __exit__(self,*args):pass
         a.transport._lock=LastWriteLock()
     result=router.execute(trade,approved,m,now_ms=clock['ms'],entry_type='MARKET',market_reference=MarketReference(trade.entry,0,100))

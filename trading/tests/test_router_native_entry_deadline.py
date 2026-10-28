@@ -12,13 +12,22 @@ from vati.risk import RiskAuthority, TradingMandate, KillSwitch, Decision
 def flow(tmp_path, eurusd):
     sdk, worker, adapter, clock = connection(tmp_path)
     clock['ms'] = NOW * 1000
-    mandate = TradingMandate.from_mapping(mandate_dict(venue='mt5', account_alias='native', expires_at_unix=NOW+1))
+    grant=mandate_dict(venue='mt5', account_alias='native', expires_at_unix=NOW+1)
+    mandate = TradingMandate.from_mapping(grant)
     authority = RiskAuthority(mandate)
     trade = intent(venue='mt5', account_alias='native')
-    facts = snapshot(replace(eurusd, venue='mt5'), account_alias='native')
+    ledger = Ledger()
+    from vati.funding.mt5_runtime import capture_cached_mt5
+    from vati.risk.account_context import context_for_account
+    from test_native_risk_history_inputs import record
+    account=adapter.sync_account()
+    cached=capture_cached_mt5(ledger,account,now_ms=clock['ms'])
+    context=context_for_account(ledger,adapter,account,now_ms=clock['ms'],mt5_capture=cached)
+    facts = snapshot(replace(eurusd, venue='mt5'), account_alias='native',native_account_context=context)
+    original=record(ledger,facts,request=trade,grant=grant)
     approved = authority.evaluate_safe(trade, facts)
     assert approved.decision in {Decision.APPROVED, Decision.REDUCED}
-    ledger = Ledger()
+    assert original.payload['decision']['decision_hash']==approved.decision_hash
     router = ExecutionRouter(ledger=ledger, adapters={'mt5':adapter}, kill_switch=KillSwitch(),
         protection=ProtectionManager(), clock=lambda:clock['ms'], current_risk_authority=authority,
         current_risk_facts_provider=lambda *a, **kw:CurrentRiskFacts(facts,clock['ms']))

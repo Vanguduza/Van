@@ -45,6 +45,7 @@ def delayed_native_session(tmp_path,contract,*,lose_enqueue_reply=False,initial_
     bars=synthetic_bars();clock={'ms':bars[100].end_ms};queue=BridgeQueue(tmp_path/'native-ea.sqlite')
     app=create_pull_app(queue,lambda who:key if who==alias else None,clock=lambda:clock['ms'])
     client=TestClient(app);delivered=[];nonces={'n':0};terminal_positions=[]
+    margin_reads=[]
     def poll(*,results=(),positions=None):
         if positions is not None:terminal_positions[:]=positions
         nonces['n']+=1;ts=str(clock['ms']//1000);nonce='owner-ea-'+str(nonces['n'])
@@ -53,7 +54,9 @@ def delayed_native_session(tmp_path,contract,*,lose_enqueue_reply=False,initial_
         from decimal import Decimal
         margin_used=Decimal('1000')*len(terminal_positions)
         account=cash_telemetry({'login':native_login,'server':'fixture-native-ea','demo':True,'equity':'10000','balance':'10000','currency':'USD',
-            'trade_allowed':True,'hedging':True,'server_time_ms':clock['ms'],
+            'trade_allowed':True,'hedging':True,'server_time_ms':clock['ms'],'leverage':30,'margin_mode':2,
+            'expected_margin_constraints':{'schema':'van.mt5.ea-margin-constraints/1','required_op':'MARGIN_QUOTE',
+                                         'framed_fields':18,'explicit_deadline':True},
             'entry_constraints':{'schema':'van.mt5.ea-entry-constraints/1','explicit_deadline':True,
                                  'required_op':'ORDER_SEND_EXPIRING','framed_fields':18},
             'margin_used':str(margin_used),'margin_free':str(Decimal('10000')-margin_used),
@@ -62,7 +65,16 @@ def delayed_native_session(tmp_path,contract,*,lose_enqueue_reply=False,initial_
         response=client.post('/ea/v1/'+alias+'/poll',content=body,headers={'x-van-ts':ts,'x-van-nonce':nonce,
             'x-van-signature':sign_poll(key,ts,nonce,alias,body),'content-type':'application/json'})
         assert response.status_code==200
-        delivered.extend(response.text.splitlines())
+        read_results=[]
+        for line in response.text.splitlines():
+            fields=line.split('|')
+            if fields[1]=='MARGIN_QUOTE':
+                from test_mt5_expected_margin_pull import observation
+                assert len(fields)==18
+                margin_reads.append(line)
+                read_results.append({'id':int(fields[0]),'observation':observation(fields,account,{'now':clock['ms']})})
+            else:delivered.append(line)
+        if read_results:poll(results=read_results)
     adapter=Mt5PullAdapter(BridgeQueue(tmp_path/'native-ea.sqlite'),account_alias=alias,clock=lambda:clock['ms'],timeout_s=.003,poll_s=.001,identity=Mt5Identity(str(native_login),'fixture-native-ea','USD',True))
     if initial_partial_status:
         def partial_reply(cid):
@@ -84,8 +96,20 @@ def delayed_native_session(tmp_path,contract,*,lose_enqueue_reply=False,initial_
         enqueue=adapter.queue.enqueue
         def lost_reply(*args,**kwargs):
             cid=enqueue(*args,**kwargs)
-            raise OSError('fixture queue commit reply lost after original claim')
+            if args[1] in ('ORDER_SEND','ORDER_SEND_EXPIRING'):
+                raise OSError('fixture queue commit reply lost after original claim')
+            return cid
         adapter.queue.enqueue=lost_reply
+    enqueue_read=adapter.queue.enqueue
+    def answer_read(*args,**kwargs):
+        cid=enqueue_read(*args,**kwargs)
+        # The read loop waits on the original durable queue result directly.
+        # Model the signed EA read response before advancing to the next bar;
+        # entry effects retain their original timeout/lost-ACK behavior.
+        if args[1]=='MARGIN_QUOTE':poll()
+        return cid
+    adapter.queue.enqueue=answer_read
+    adapter._source_fixture_margin_reads=margin_reads
     registry=AccountRegistry(tmp_path/'accounts.json')
     registry.add(Account(alias=alias,broker='MT5',mode='DEMO_TRADER',currency='USD',demo=True,
         credential_ref=CredentialRef(env_var='SOURCE_FIXTURE_NOT_READ'),login=str(native_login),server='fixture-native-ea'))
@@ -129,7 +153,7 @@ def delayed_native_session(tmp_path,contract,*,lose_enqueue_reply=False,initial_
                     if not initial_partial_status:assert receipts[-1].payload['filled_qty']=='0'
                 else:
                     assert lose_enqueue_reply
-                    assert queue._conn.execute('SELECT count(*) FROM commands WHERE alias=?',(alias,)).fetchone()[0]==1
+                    assert queue._conn.execute("SELECT count(*) FROM commands WHERE alias=? AND op IN ('ORDER_SEND','ORDER_SEND_EXPIRING')",(alias,)).fetchone()[0]==1
 
                 if not initial_partial_status and not initial_terminal_status:
                     # Preserve the original unknown-effect scenario: the

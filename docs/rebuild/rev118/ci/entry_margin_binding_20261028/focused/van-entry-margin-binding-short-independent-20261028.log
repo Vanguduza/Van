@@ -1,0 +1,24 @@
+EE                                                                       [100%]
+==================================== ERRORS ====================================
+_ ERROR at setup of test_original_short_selects_actual_sell_estimate_and_never_sends[mt5] _
+file /workspace/test_van_short_entry_margin_binding_20261028.py, line 15
+  @pytest.mark.parametrize('provider',['mt5','ctrader'])
+  def test_original_short_selects_actual_sell_estimate_and_never_sends(tmp_path,eurusd,provider):
+E       fixture 'eurusd' not found
+>       available fixtures: _asyncio_loop_factory, _class_scoped_runner, _function_scoped_runner, _module_scoped_runner, _package_scoped_runner, _session_scoped_runner, anyio_backend, anyio_backend_name, anyio_backend_options, cache, capfd, capfdbinary, caplog, capsys, capsysbinary, capteesys, doctest_namespace, event_loop_policy, free_tcp_port, free_tcp_port_factory, free_udp_port, free_udp_port_factory, monkeypatch, pytestconfig, record_property, record_testsuite_property, record_xml_attribute, recwarn, subtests, tmp_path, tmp_path_factory, tmpdir, tmpdir_factory, unused_tcp_port, unused_tcp_port_factory, unused_udp_port, unused_udp_port_factory
+>       use 'pytest --fixtures [testpath]' for help on them.
+
+/workspace/test_van_short_entry_margin_binding_20261028.py:15
+_ ERROR at setup of test_original_short_selects_actual_sell_estimate_and_never_sends[ctrader] _
+file /workspace/test_van_short_entry_margin_binding_20261028.py, line 15
+  @pytest.mark.parametrize('provider',['mt5','ctrader'])
+  def test_original_short_selects_actual_sell_estimate_and_never_sends(tmp_path,eurusd,provider):
+E       fixture 'eurusd' not found
+>       available fixtures: _asyncio_loop_factory, _class_scoped_runner, _function_scoped_runner, _module_scoped_runner, _package_scoped_runner, _session_scoped_runner, anyio_backend, anyio_backend_name, anyio_backend_options, cache, capfd, capfdbinary, caplog, capsys, capsysbinary, capteesys, doctest_namespace, event_loop_policy, free_tcp_port, free_tcp_port_factory, free_udp_port, free_udp_port_factory, monkeypatch, pytestconfig, record_property, record_testsuite_property, record_xml_attribute, recwarn, subtests, tmp_path, tmp_path_factory, tmpdir, tmpdir_factory, unused_tcp_port, unused_tcp_port_factory, unused_udp_port, unused_udp_port_factory
+>       use 'pytest --fixtures [testpath]' for help on them.
+
+/workspace/test_van_short_entry_margin_binding_20261028.py:15
+=========================== short test summary info ============================
+ERROR ../../test_van_short_entry_margin_binding_20261028.py::test_original_short_selects_actual_sell_estimate_and_never_sends[mt5]
+ERROR ../../test_van_short_entry_margin_binding_20261028.py::test_original_short_selects_actual_sell_estimate_and_never_sends[ctrader]
+2 errors in 2.84s

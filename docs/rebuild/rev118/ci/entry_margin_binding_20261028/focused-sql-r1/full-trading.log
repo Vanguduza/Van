@@ -1,0 +1,1307 @@
+....................................FFFFFFFFFF
+=================================== FAILURES ===================================
+_ test_original_timed_out_native_entry_is_not_reported_as_executed_or_approved _
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-136/test_original_timed_out_native0')
+eurusd = SymbolContract(symbol='EURUSD', venue='mt5', base_currency='EUR', quote_currency='USD', account_currency='USD', contra...=Decimal('0'), max_adv_participation=Decimal('0.10'), liquidity_haircut=Decimal('0'), round_trip_cost_pct=Decimal('0'))
+
+    def test_original_timed_out_native_entry_is_not_reported_as_executed_or_approved(tmp_path,eurusd):
+>       with delayed_native_session(tmp_path,eurusd) as (service,bars,index,clock,poll,orders,result,queue,delivered):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+trading/tests/test_single_session_unknown_entry.py:149: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/contextlib.py:137: in __enter__
+    return next(self.gen)
+           ^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-136/test_original_timed_out_native0')
+contract = SymbolContract(symbol='EURUSD', venue='mt5', base_currency='EUR', quote_currency='USD', account_currency='USD', contra...=Decimal('0'), max_adv_participation=Decimal('0.10'), liquidity_haircut=Decimal('0'), round_trip_cost_pct=Decimal('0'))
+lose_enqueue_reply = False, initial_partial_status = None, omit_context = False
+initial_terminal_status = None
+
+    @contextmanager
+    def delayed_native_session(tmp_path,contract,*,lose_enqueue_reply=False,initial_partial_status=None,omit_context=False,initial_terminal_status=None):
+        alias='delayed_mt5_'+uuid.uuid4().hex[:12];native_login=10_000_000+uuid.uuid4().int%(2**53);key=b'local-source-fixture-key-32-bytes!'
+        bars=synthetic_bars();clock={'ms':bars[100].end_ms};queue=BridgeQueue(tmp_path/'native-ea.sqlite')
+        app=create_pull_app(queue,lambda who:key if who==alias else None,clock=lambda:clock['ms'])
+        client=TestClient(app);delivered=[];nonces={'n':0};terminal_positions=[]
+        def poll(*,results=(),positions=None):
+            if positions is not None:terminal_positions[:]=positions
+            nonces['n']+=1;ts=str(clock['ms']//1000);nonce='owner-ea-'+str(nonces['n'])
+            # Explicit simulated native margin: 1,000 deposit units per open position.
+            # An empty account has observed zero usage and an undefined ratio.
+            from decimal import Decimal
+            margin_used=Decimal('1000')*len(terminal_positions)
+            account=cash_telemetry({'login':native_login,'server':'fixture-native-ea','demo':True,'equity':'10000','balance':'10000','currency':'USD',
+                'trade_allowed':True,'hedging':True,'server_time_ms':clock['ms'],
+                'entry_constraints':{'schema':'van.mt5.ea-entry-constraints/1','explicit_deadline':True,
+                                     'required_op':'ORDER_SEND_EXPIRING','framed_fields':18},
+                'margin_used':str(margin_used),'margin_free':str(Decimal('10000')-margin_used),
+                'margin_level':str(Decimal('1000000')/margin_used if margin_used else Decimal('0'))},credit='0',native_clock_ms=clock['ms'],movements=[],currency_digits=2)
+            body=json.dumps({'account':account,'positions':terminal_positions,'results':list(results)}).encode()
+            response=client.post('/ea/v1/'+alias+'/poll',content=body,headers={'x-van-ts':ts,'x-van-nonce':nonce,
+                'x-van-signature':sign_poll(key,ts,nonce,alias,body),'content-type':'application/json'})
+            assert response.status_code==200
+            delivered.extend(response.text.splitlines())
+        adapter=Mt5PullAdapter(BridgeQueue(tmp_path/'native-ea.sqlite'),account_alias=alias,clock=lambda:clock['ms'],timeout_s=.003,poll_s=.001,identity=Mt5Identity(str(native_login),'fixture-native-ea','USD',True))
+        if initial_partial_status:
+            def partial_reply(cid):
+                from decimal import Decimal
+                poll();fields=delivered[-1].split('|')
+                qty=str(Decimal(fields[4])/2)
+                native={'ticket':900,'symbol':fields[2],'type':fields[3],'volume':qty,'price_open':fields[5],
+                    'sl':fields[6],'tp':fields[7] or 0,'comment':fields[9],'magic':int(fields[10]),'profit':0}
+                poll(results=[{'id':cid,'status':initial_partial_status,'volume':qty,'price':fields[5],
+                    'order':'partial-original','position':900,'sl_confirmed':True,'server_time_ms':clock['ms']}],positions=[native])
+                return adapter.queue.result(cid)
+            adapter._await=partial_reply
+        if initial_terminal_status:
+            def terminal_reply(cid):
+                poll();poll(results=[{'id':cid,'status':initial_terminal_status,'volume':'0','reason':'original native no-effect outcome'}])
+                return adapter.queue.result(cid)
+            adapter._await=terminal_reply
+        if lose_enqueue_reply:
+            enqueue=adapter.queue.enqueue
+            def lost_reply(*args,**kwargs):
+                cid=enqueue(*args,**kwargs)
+                raise OSError('fixture queue commit reply lost after original claim')
+            adapter.queue.enqueue=lost_reply
+        registry=AccountRegistry(tmp_path/'accounts.json')
+        registry.add(Account(alias=alias,broker='MT5',mode='DEMO_TRADER',currency='USD',demo=True,
+            credential_ref=CredentialRef(env_var='SOURCE_FIXTURE_NOT_READ'),login=str(native_login),server='fixture-native-ea'))
+        cfg=ServiceConfig(account_alias=alias,symbol='EURUSD',base='EUR',quote='USD',timeframe='H1',
+            contract=contract_to_dict(contract),mandate=historical_mandate_dict(account_alias=alias,venue='mt5',mode='DEMO_TRADER',
+                allowed_strategies=['FX-TREND-PULLBACK-01']),capsules=['FX-TREND-PULLBACK-01'],registry_path=str(registry.path),
+            ledger=os.environ['VATI_TEST_PG_DSN'],heartbeat_path=str(tmp_path/'heartbeat.json'))
+        poll();service=SessionService(cfg,lambda now:[b for b in bars if b.end_ms<=now],clock=lambda:clock['ms'],adapter=adapter).build()
+        if omit_context:
+            publish=service.runner.cycle._log
+            def old_context_producer(kind,payload,**kwargs):
+                if kind is EventKind.SESSION and payload.get('event')=='ENTRY_CONTEXT':return
+                return publish(kind,payload,**kwargs)
+            service.runner.cycle._log=old_context_producer
+        def orders():return [e for e in service._ledger.iter(EventKind.ORDER_COMMAND) if e.payload['account_alias']==alias]
+        try:
+            service.start()
+            if not service.runner.permit_new_orders:
+                from vati.risk.history_scope import risk_history_for_account
+                scope=risk_history_for_account(service._ledger.iter(),alias)
+                rows=[]
+                for e in service._ledger.iter():
+                    if e.hash in scope.unresolved_refs:
+                        p=e.payload;i=(p.get('inputs') or {}).get('intent') or {}
+                        rows.append({'kind':e.kind.value,'producer':e.producer,'hash':e.hash,'corr':e.correlation_id,
+                            'alias':p.get('account_alias'),'intent_alias':i.get('account_alias'),
+                            'intent_id':i.get('trade_intent_id'),'command_id':p.get('trade_intent_id')})
+                Path('/tmp/van-single-unknown-start-issues.json').write_text(json.dumps(rows,indent=2))
+            assert service.runner.permit_new_orders,(service.runner.cycle.kill.active,service.learning.recovery_issue,service.runner.cycle.streaks.recovery_issue,service.runner.startup_report)
+            for index,bar in enumerate(bars[101:],101):
+                clock['ms']=bar.end_ms+1000;poll()
+                try:result=service.step_once()
+                except OSError:
+                    assert lose_enqueue_reply
+                    result='DISPATCH_EXCEPTION'
+    
+                if orders():
+                    receipts=list(service._ledger.iter(EventKind.EXECUTION_RECEIPT,correlation_id=orders()[0].correlation_id))
+                    if receipts:
+                        assert receipts[-1].payload['status']==(initial_terminal_status or ('PARTIAL' if initial_partial_status else 'UNKNOWN'))
+                        if not initial_partial_status:assert receipts[-1].payload['filled_qty']=='0'
+                    else:
+                        assert lose_enqueue_reply
+                        assert queue._conn.execute('SELECT count(*) FROM commands WHERE alias=?',(alias,)).fetchone()[0]==1
+    
+                    if not initial_partial_status and not initial_terminal_status:
+                        # Preserve the original unknown-effect scenario: the
+                        # authentic terminal claims it before its entry deadline,
+                        # then withholds the result while later bars/restarts run.
+                        # Never model an expired unclaimed request as a late fill.
+                        poll()
+    
+                    yield service,bars,index,clock,poll,orders,result,queue,delivered
+                    break
+>           else:raise AssertionError('fixture never queued a genuinely approved native order')
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           AssertionError: fixture never queued a genuinely approved native order
+
+trading/tests/test_single_session_unknown_entry.py:143: AssertionError
+__ test_current_empty_positions_do_not_release_original_unresolved_entry_risk __
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-136/test_current_empty_positions_d0')
+eurusd = SymbolContract(symbol='EURUSD', venue='mt5', base_currency='EUR', quote_currency='USD', account_currency='USD', contra...=Decimal('0'), max_adv_participation=Decimal('0.10'), liquidity_haircut=Decimal('0'), round_trip_cost_pct=Decimal('0'))
+
+    def test_current_empty_positions_do_not_release_original_unresolved_entry_risk(tmp_path,eurusd):
+>       with delayed_native_session(tmp_path,eurusd) as (service,bars,index,clock,poll,orders,result,queue,delivered):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+trading/tests/test_single_session_unknown_entry.py:155: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/contextlib.py:137: in __enter__
+    return next(self.gen)
+           ^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-136/test_current_empty_positions_d0')
+contract = SymbolContract(symbol='EURUSD', venue='mt5', base_currency='EUR', quote_currency='USD', account_currency='USD', contra...=Decimal('0'), max_adv_participation=Decimal('0.10'), liquidity_haircut=Decimal('0'), round_trip_cost_pct=Decimal('0'))
+lose_enqueue_reply = False, initial_partial_status = None, omit_context = False
+initial_terminal_status = None
+
+    @contextmanager
+    def delayed_native_session(tmp_path,contract,*,lose_enqueue_reply=False,initial_partial_status=None,omit_context=False,initial_terminal_status=None):
+        alias='delayed_mt5_'+uuid.uuid4().hex[:12];native_login=10_000_000+uuid.uuid4().int%(2**53);key=b'local-source-fixture-key-32-bytes!'
+        bars=synthetic_bars();clock={'ms':bars[100].end_ms};queue=BridgeQueue(tmp_path/'native-ea.sqlite')
+        app=create_pull_app(queue,lambda who:key if who==alias else None,clock=lambda:clock['ms'])
+        client=TestClient(app);delivered=[];nonces={'n':0};terminal_positions=[]
+        def poll(*,results=(),positions=None):
+            if positions is not None:terminal_positions[:]=positions
+            nonces['n']+=1;ts=str(clock['ms']//1000);nonce='owner-ea-'+str(nonces['n'])
+            # Explicit simulated native margin: 1,000 deposit units per open position.
+            # An empty account has observed zero usage and an undefined ratio.
+            from decimal import Decimal
+            margin_used=Decimal('1000')*len(terminal_positions)
+            account=cash_telemetry({'login':native_login,'server':'fixture-native-ea','demo':True,'equity':'10000','balance':'10000','currency':'USD',
+                'trade_allowed':True,'hedging':True,'server_time_ms':clock['ms'],
+                'entry_constraints':{'schema':'van.mt5.ea-entry-constraints/1','explicit_deadline':True,
+                                     'required_op':'ORDER_SEND_EXPIRING','framed_fields':18},
+                'margin_used':str(margin_used),'margin_free':str(Decimal('10000')-margin_used),
+                'margin_level':str(Decimal('1000000')/margin_used if margin_used else Decimal('0'))},credit='0',native_clock_ms=clock['ms'],movements=[],currency_digits=2)
+            body=json.dumps({'account':account,'positions':terminal_positions,'results':list(results)}).encode()
+            response=client.post('/ea/v1/'+alias+'/poll',content=body,headers={'x-van-ts':ts,'x-van-nonce':nonce,
+                'x-van-signature':sign_poll(key,ts,nonce,alias,body),'content-type':'application/json'})
+            assert response.status_code==200
+            delivered.extend(response.text.splitlines())
+        adapter=Mt5PullAdapter(BridgeQueue(tmp_path/'native-ea.sqlite'),account_alias=alias,clock=lambda:clock['ms'],timeout_s=.003,poll_s=.001,identity=Mt5Identity(str(native_login),'fixture-native-ea','USD',True))
+        if initial_partial_status:
+            def partial_reply(cid):
+                from decimal import Decimal
+                poll();fields=delivered[-1].split('|')
+                qty=str(Decimal(fields[4])/2)
+                native={'ticket':900,'symbol':fields[2],'type':fields[3],'volume':qty,'price_open':fields[5],
+                    'sl':fields[6],'tp':fields[7] or 0,'comment':fields[9],'magic':int(fields[10]),'profit':0}
+                poll(results=[{'id':cid,'status':initial_partial_status,'volume':qty,'price':fields[5],
+                    'order':'partial-original','position':900,'sl_confirmed':True,'server_time_ms':clock['ms']}],positions=[native])
+                return adapter.queue.result(cid)
+            adapter._await=partial_reply
+        if initial_terminal_status:
+            def terminal_reply(cid):
+                poll();poll(results=[{'id':cid,'status':initial_terminal_status,'volume':'0','reason':'original native no-effect outcome'}])
+                return adapter.queue.result(cid)
+            adapter._await=terminal_reply
+        if lose_enqueue_reply:
+            enqueue=adapter.queue.enqueue
+            def lost_reply(*args,**kwargs):
+                cid=enqueue(*args,**kwargs)
+                raise OSError('fixture queue commit reply lost after original claim')
+            adapter.queue.enqueue=lost_reply
+        registry=AccountRegistry(tmp_path/'accounts.json')
+        registry.add(Account(alias=alias,broker='MT5',mode='DEMO_TRADER',currency='USD',demo=True,
+            credential_ref=CredentialRef(env_var='SOURCE_FIXTURE_NOT_READ'),login=str(native_login),server='fixture-native-ea'))
+        cfg=ServiceConfig(account_alias=alias,symbol='EURUSD',base='EUR',quote='USD',timeframe='H1',
+            contract=contract_to_dict(contract),mandate=historical_mandate_dict(account_alias=alias,venue='mt5',mode='DEMO_TRADER',
+                allowed_strategies=['FX-TREND-PULLBACK-01']),capsules=['FX-TREND-PULLBACK-01'],registry_path=str(registry.path),
+            ledger=os.environ['VATI_TEST_PG_DSN'],heartbeat_path=str(tmp_path/'heartbeat.json'))
+        poll();service=SessionService(cfg,lambda now:[b for b in bars if b.end_ms<=now],clock=lambda:clock['ms'],adapter=adapter).build()
+        if omit_context:
+            publish=service.runner.cycle._log
+            def old_context_producer(kind,payload,**kwargs):
+                if kind is EventKind.SESSION and payload.get('event')=='ENTRY_CONTEXT':return
+                return publish(kind,payload,**kwargs)
+            service.runner.cycle._log=old_context_producer
+        def orders():return [e for e in service._ledger.iter(EventKind.ORDER_COMMAND) if e.payload['account_alias']==alias]
+        try:
+            service.start()
+            if not service.runner.permit_new_orders:
+                from vati.risk.history_scope import risk_history_for_account
+                scope=risk_history_for_account(service._ledger.iter(),alias)
+                rows=[]
+                for e in service._ledger.iter():
+                    if e.hash in scope.unresolved_refs:
+                        p=e.payload;i=(p.get('inputs') or {}).get('intent') or {}
+                        rows.append({'kind':e.kind.value,'producer':e.producer,'hash':e.hash,'corr':e.correlation_id,
+                            'alias':p.get('account_alias'),'intent_alias':i.get('account_alias'),
+                            'intent_id':i.get('trade_intent_id'),'command_id':p.get('trade_intent_id')})
+                Path('/tmp/van-single-unknown-start-issues.json').write_text(json.dumps(rows,indent=2))
+            assert service.runner.permit_new_orders,(service.runner.cycle.kill.active,service.learning.recovery_issue,service.runner.cycle.streaks.recovery_issue,service.runner.startup_report)
+            for index,bar in enumerate(bars[101:],101):
+                clock['ms']=bar.end_ms+1000;poll()
+                try:result=service.step_once()
+                except OSError:
+                    assert lose_enqueue_reply
+                    result='DISPATCH_EXCEPTION'
+    
+                if orders():
+                    receipts=list(service._ledger.iter(EventKind.EXECUTION_RECEIPT,correlation_id=orders()[0].correlation_id))
+                    if receipts:
+                        assert receipts[-1].payload['status']==(initial_terminal_status or ('PARTIAL' if initial_partial_status else 'UNKNOWN'))
+                        if not initial_partial_status:assert receipts[-1].payload['filled_qty']=='0'
+                    else:
+                        assert lose_enqueue_reply
+                        assert queue._conn.execute('SELECT count(*) FROM commands WHERE alias=?',(alias,)).fetchone()[0]==1
+    
+                    if not initial_partial_status and not initial_terminal_status:
+                        # Preserve the original unknown-effect scenario: the
+                        # authentic terminal claims it before its entry deadline,
+                        # then withholds the result while later bars/restarts run.
+                        # Never model an expired unclaimed request as a late fill.
+                        poll()
+    
+                    yield service,bars,index,clock,poll,orders,result,queue,delivered
+                    break
+>           else:raise AssertionError('fixture never queued a genuinely approved native order')
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           AssertionError: fixture never queued a genuinely approved native order
+
+trading/tests/test_single_session_unknown_entry.py:143: AssertionError
+_ test_late_original_native_rejection_releases_only_that_attempt_without_replaying_it _
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-136/test_late_original_native_reje0')
+eurusd = SymbolContract(symbol='EURUSD', venue='mt5', base_currency='EUR', quote_currency='USD', account_currency='USD', contra...=Decimal('0'), max_adv_participation=Decimal('0.10'), liquidity_haircut=Decimal('0'), round_trip_cost_pct=Decimal('0'))
+
+    def test_late_original_native_rejection_releases_only_that_attempt_without_replaying_it(tmp_path,eurusd):
+>       with delayed_native_session(tmp_path,eurusd) as (service,bars,index,clock,poll,orders,result,queue,delivered):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+trading/tests/test_single_session_unknown_entry.py:165: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/contextlib.py:137: in __enter__
+    return next(self.gen)
+           ^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-136/test_late_original_native_reje0')
+contract = SymbolContract(symbol='EURUSD', venue='mt5', base_currency='EUR', quote_currency='USD', account_currency='USD', contra...=Decimal('0'), max_adv_participation=Decimal('0.10'), liquidity_haircut=Decimal('0'), round_trip_cost_pct=Decimal('0'))
+lose_enqueue_reply = False, initial_partial_status = None, omit_context = False
+initial_terminal_status = None
+
+    @contextmanager
+    def delayed_native_session(tmp_path,contract,*,lose_enqueue_reply=False,initial_partial_status=None,omit_context=False,initial_terminal_status=None):
+        alias='delayed_mt5_'+uuid.uuid4().hex[:12];native_login=10_000_000+uuid.uuid4().int%(2**53);key=b'local-source-fixture-key-32-bytes!'
+        bars=synthetic_bars();clock={'ms':bars[100].end_ms};queue=BridgeQueue(tmp_path/'native-ea.sqlite')
+        app=create_pull_app(queue,lambda who:key if who==alias else None,clock=lambda:clock['ms'])
+        client=TestClient(app);delivered=[];nonces={'n':0};terminal_positions=[]
+        def poll(*,results=(),positions=None):
+            if positions is not None:terminal_positions[:]=positions
+            nonces['n']+=1;ts=str(clock['ms']//1000);nonce='owner-ea-'+str(nonces['n'])
+            # Explicit simulated native margin: 1,000 deposit units per open position.
+            # An empty account has observed zero usage and an undefined ratio.
+            from decimal import Decimal
+            margin_used=Decimal('1000')*len(terminal_positions)
+            account=cash_telemetry({'login':native_login,'server':'fixture-native-ea','demo':True,'equity':'10000','balance':'10000','currency':'USD',
+                'trade_allowed':True,'hedging':True,'server_time_ms':clock['ms'],
+                'entry_constraints':{'schema':'van.mt5.ea-entry-constraints/1','explicit_deadline':True,
+                                     'required_op':'ORDER_SEND_EXPIRING','framed_fields':18},
+                'margin_used':str(margin_used),'margin_free':str(Decimal('10000')-margin_used),
+                'margin_level':str(Decimal('1000000')/margin_used if margin_used else Decimal('0'))},credit='0',native_clock_ms=clock['ms'],movements=[],currency_digits=2)
+            body=json.dumps({'account':account,'positions':terminal_positions,'results':list(results)}).encode()
+            response=client.post('/ea/v1/'+alias+'/poll',content=body,headers={'x-van-ts':ts,'x-van-nonce':nonce,
+                'x-van-signature':sign_poll(key,ts,nonce,alias,body),'content-type':'application/json'})
+            assert response.status_code==200
+            delivered.extend(response.text.splitlines())
+        adapter=Mt5PullAdapter(BridgeQueue(tmp_path/'native-ea.sqlite'),account_alias=alias,clock=lambda:clock['ms'],timeout_s=.003,poll_s=.001,identity=Mt5Identity(str(native_login),'fixture-native-ea','USD',True))
+        if initial_partial_status:
+            def partial_reply(cid):
+                from decimal import Decimal
+                poll();fields=delivered[-1].split('|')
+                qty=str(Decimal(fields[4])/2)
+                native={'ticket':900,'symbol':fields[2],'type':fields[3],'volume':qty,'price_open':fields[5],
+                    'sl':fields[6],'tp':fields[7] or 0,'comment':fields[9],'magic':int(fields[10]),'profit':0}
+                poll(results=[{'id':cid,'status':initial_partial_status,'volume':qty,'price':fields[5],
+                    'order':'partial-original','position':900,'sl_confirmed':True,'server_time_ms':clock['ms']}],positions=[native])
+                return adapter.queue.result(cid)
+            adapter._await=partial_reply
+        if initial_terminal_status:
+            def terminal_reply(cid):
+                poll();poll(results=[{'id':cid,'status':initial_terminal_status,'volume':'0','reason':'original native no-effect outcome'}])
+                return adapter.queue.result(cid)
+            adapter._await=terminal_reply
+        if lose_enqueue_reply:
+            enqueue=adapter.queue.enqueue
+            def lost_reply(*args,**kwargs):
+                cid=enqueue(*args,**kwargs)
+                raise OSError('fixture queue commit reply lost after original claim')
+            adapter.queue.enqueue=lost_reply
+        registry=AccountRegistry(tmp_path/'accounts.json')
+        registry.add(Account(alias=alias,broker='MT5',mode='DEMO_TRADER',currency='USD',demo=True,
+            credential_ref=CredentialRef(env_var='SOURCE_FIXTURE_NOT_READ'),login=str(native_login),server='fixture-native-ea'))
+        cfg=ServiceConfig(account_alias=alias,symbol='EURUSD',base='EUR',quote='USD',timeframe='H1',
+            contract=contract_to_dict(contract),mandate=historical_mandate_dict(account_alias=alias,venue='mt5',mode='DEMO_TRADER',
+                allowed_strategies=['FX-TREND-PULLBACK-01']),capsules=['FX-TREND-PULLBACK-01'],registry_path=str(registry.path),
+            ledger=os.environ['VATI_TEST_PG_DSN'],heartbeat_path=str(tmp_path/'heartbeat.json'))
+        poll();service=SessionService(cfg,lambda now:[b for b in bars if b.end_ms<=now],clock=lambda:clock['ms'],adapter=adapter).build()
+        if omit_context:
+            publish=service.runner.cycle._log
+            def old_context_producer(kind,payload,**kwargs):
+                if kind is EventKind.SESSION and payload.get('event')=='ENTRY_CONTEXT':return
+                return publish(kind,payload,**kwargs)
+            service.runner.cycle._log=old_context_producer
+        def orders():return [e for e in service._ledger.iter(EventKind.ORDER_COMMAND) if e.payload['account_alias']==alias]
+        try:
+            service.start()
+            if not service.runner.permit_new_orders:
+                from vati.risk.history_scope import risk_history_for_account
+                scope=risk_history_for_account(service._ledger.iter(),alias)
+                rows=[]
+                for e in service._ledger.iter():
+                    if e.hash in scope.unresolved_refs:
+                        p=e.payload;i=(p.get('inputs') or {}).get('intent') or {}
+                        rows.append({'kind':e.kind.value,'producer':e.producer,'hash':e.hash,'corr':e.correlation_id,
+                            'alias':p.get('account_alias'),'intent_alias':i.get('account_alias'),
+                            'intent_id':i.get('trade_intent_id'),'command_id':p.get('trade_intent_id')})
+                Path('/tmp/van-single-unknown-start-issues.json').write_text(json.dumps(rows,indent=2))
+            assert service.runner.permit_new_orders,(service.runner.cycle.kill.active,service.learning.recovery_issue,service.runner.cycle.streaks.recovery_issue,service.runner.startup_report)
+            for index,bar in enumerate(bars[101:],101):
+                clock['ms']=bar.end_ms+1000;poll()
+                try:result=service.step_once()
+                except OSError:
+                    assert lose_enqueue_reply
+                    result='DISPATCH_EXCEPTION'
+    
+                if orders():
+                    receipts=list(service._ledger.iter(EventKind.EXECUTION_RECEIPT,correlation_id=orders()[0].correlation_id))
+                    if receipts:
+                        assert receipts[-1].payload['status']==(initial_terminal_status or ('PARTIAL' if initial_partial_status else 'UNKNOWN'))
+                        if not initial_partial_status:assert receipts[-1].payload['filled_qty']=='0'
+                    else:
+                        assert lose_enqueue_reply
+                        assert queue._conn.execute('SELECT count(*) FROM commands WHERE alias=?',(alias,)).fetchone()[0]==1
+    
+                    if not initial_partial_status and not initial_terminal_status:
+                        # Preserve the original unknown-effect scenario: the
+                        # authentic terminal claims it before its entry deadline,
+                        # then withholds the result while later bars/restarts run.
+                        # Never model an expired unclaimed request as a late fill.
+                        poll()
+    
+                    yield service,bars,index,clock,poll,orders,result,queue,delivered
+                    break
+>           else:raise AssertionError('fixture never queued a genuinely approved native order')
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           AssertionError: fixture never queued a genuinely approved native order
+
+trading/tests/test_single_session_unknown_entry.py:143: AssertionError
+_ test_late_original_native_fill_restores_full_trade_identity_and_protection_without_another_send _
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-136/test_late_original_native_fill0')
+eurusd = SymbolContract(symbol='EURUSD', venue='mt5', base_currency='EUR', quote_currency='USD', account_currency='USD', contra...=Decimal('0'), max_adv_participation=Decimal('0.10'), liquidity_haircut=Decimal('0'), round_trip_cost_pct=Decimal('0'))
+
+    def test_late_original_native_fill_restores_full_trade_identity_and_protection_without_another_send(tmp_path,eurusd):
+>       with delayed_native_session(tmp_path,eurusd) as (service,bars,index,clock,poll,orders,result,queue,delivered):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+trading/tests/test_single_session_unknown_entry.py:176: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/contextlib.py:137: in __enter__
+    return next(self.gen)
+           ^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-136/test_late_original_native_fill0')
+contract = SymbolContract(symbol='EURUSD', venue='mt5', base_currency='EUR', quote_currency='USD', account_currency='USD', contra...=Decimal('0'), max_adv_participation=Decimal('0.10'), liquidity_haircut=Decimal('0'), round_trip_cost_pct=Decimal('0'))
+lose_enqueue_reply = False, initial_partial_status = None, omit_context = False
+initial_terminal_status = None
+
+    @contextmanager
+    def delayed_native_session(tmp_path,contract,*,lose_enqueue_reply=False,initial_partial_status=None,omit_context=False,initial_terminal_status=None):
+        alias='delayed_mt5_'+uuid.uuid4().hex[:12];native_login=10_000_000+uuid.uuid4().int%(2**53);key=b'local-source-fixture-key-32-bytes!'
+        bars=synthetic_bars();clock={'ms':bars[100].end_ms};queue=BridgeQueue(tmp_path/'native-ea.sqlite')
+        app=create_pull_app(queue,lambda who:key if who==alias else None,clock=lambda:clock['ms'])
+        client=TestClient(app);delivered=[];nonces={'n':0};terminal_positions=[]
+        def poll(*,results=(),positions=None):
+            if positions is not None:terminal_positions[:]=positions
+            nonces['n']+=1;ts=str(clock['ms']//1000);nonce='owner-ea-'+str(nonces['n'])
+            # Explicit simulated native margin: 1,000 deposit units per open position.
+            # An empty account has observed zero usage and an undefined ratio.
+            from decimal import Decimal
+            margin_used=Decimal('1000')*len(terminal_positions)
+            account=cash_telemetry({'login':native_login,'server':'fixture-native-ea','demo':True,'equity':'10000','balance':'10000','currency':'USD',
+                'trade_allowed':True,'hedging':True,'server_time_ms':clock['ms'],
+                'entry_constraints':{'schema':'van.mt5.ea-entry-constraints/1','explicit_deadline':True,
+                                     'required_op':'ORDER_SEND_EXPIRING','framed_fields':18},
+                'margin_used':str(margin_used),'margin_free':str(Decimal('10000')-margin_used),
+                'margin_level':str(Decimal('1000000')/margin_used if margin_used else Decimal('0'))},credit='0',native_clock_ms=clock['ms'],movements=[],currency_digits=2)
+            body=json.dumps({'account':account,'positions':terminal_positions,'results':list(results)}).encode()
+            response=client.post('/ea/v1/'+alias+'/poll',content=body,headers={'x-van-ts':ts,'x-van-nonce':nonce,
+                'x-van-signature':sign_poll(key,ts,nonce,alias,body),'content-type':'application/json'})
+            assert response.status_code==200
+            delivered.extend(response.text.splitlines())
+        adapter=Mt5PullAdapter(BridgeQueue(tmp_path/'native-ea.sqlite'),account_alias=alias,clock=lambda:clock['ms'],timeout_s=.003,poll_s=.001,identity=Mt5Identity(str(native_login),'fixture-native-ea','USD',True))
+        if initial_partial_status:
+            def partial_reply(cid):
+                from decimal import Decimal
+                poll();fields=delivered[-1].split('|')
+                qty=str(Decimal(fields[4])/2)
+                native={'ticket':900,'symbol':fields[2],'type':fields[3],'volume':qty,'price_open':fields[5],
+                    'sl':fields[6],'tp':fields[7] or 0,'comment':fields[9],'magic':int(fields[10]),'profit':0}
+                poll(results=[{'id':cid,'status':initial_partial_status,'volume':qty,'price':fields[5],
+                    'order':'partial-original','position':900,'sl_confirmed':True,'server_time_ms':clock['ms']}],positions=[native])
+                return adapter.queue.result(cid)
+            adapter._await=partial_reply
+        if initial_terminal_status:
+            def terminal_reply(cid):
+                poll();poll(results=[{'id':cid,'status':initial_terminal_status,'volume':'0','reason':'original native no-effect outcome'}])
+                return adapter.queue.result(cid)
+            adapter._await=terminal_reply
+        if lose_enqueue_reply:
+            enqueue=adapter.queue.enqueue
+            def lost_reply(*args,**kwargs):
+                cid=enqueue(*args,**kwargs)
+                raise OSError('fixture queue commit reply lost after original claim')
+            adapter.queue.enqueue=lost_reply
+        registry=AccountRegistry(tmp_path/'accounts.json')
+        registry.add(Account(alias=alias,broker='MT5',mode='DEMO_TRADER',currency='USD',demo=True,
+            credential_ref=CredentialRef(env_var='SOURCE_FIXTURE_NOT_READ'),login=str(native_login),server='fixture-native-ea'))
+        cfg=ServiceConfig(account_alias=alias,symbol='EURUSD',base='EUR',quote='USD',timeframe='H1',
+            contract=contract_to_dict(contract),mandate=historical_mandate_dict(account_alias=alias,venue='mt5',mode='DEMO_TRADER',
+                allowed_strategies=['FX-TREND-PULLBACK-01']),capsules=['FX-TREND-PULLBACK-01'],registry_path=str(registry.path),
+            ledger=os.environ['VATI_TEST_PG_DSN'],heartbeat_path=str(tmp_path/'heartbeat.json'))
+        poll();service=SessionService(cfg,lambda now:[b for b in bars if b.end_ms<=now],clock=lambda:clock['ms'],adapter=adapter).build()
+        if omit_context:
+            publish=service.runner.cycle._log
+            def old_context_producer(kind,payload,**kwargs):
+                if kind is EventKind.SESSION and payload.get('event')=='ENTRY_CONTEXT':return
+                return publish(kind,payload,**kwargs)
+            service.runner.cycle._log=old_context_producer
+        def orders():return [e for e in service._ledger.iter(EventKind.ORDER_COMMAND) if e.payload['account_alias']==alias]
+        try:
+            service.start()
+            if not service.runner.permit_new_orders:
+                from vati.risk.history_scope import risk_history_for_account
+                scope=risk_history_for_account(service._ledger.iter(),alias)
+                rows=[]
+                for e in service._ledger.iter():
+                    if e.hash in scope.unresolved_refs:
+                        p=e.payload;i=(p.get('inputs') or {}).get('intent') or {}
+                        rows.append({'kind':e.kind.value,'producer':e.producer,'hash':e.hash,'corr':e.correlation_id,
+                            'alias':p.get('account_alias'),'intent_alias':i.get('account_alias'),
+                            'intent_id':i.get('trade_intent_id'),'command_id':p.get('trade_intent_id')})
+                Path('/tmp/van-single-unknown-start-issues.json').write_text(json.dumps(rows,indent=2))
+            assert service.runner.permit_new_orders,(service.runner.cycle.kill.active,service.learning.recovery_issue,service.runner.cycle.streaks.recovery_issue,service.runner.startup_report)
+            for index,bar in enumerate(bars[101:],101):
+                clock['ms']=bar.end_ms+1000;poll()
+                try:result=service.step_once()
+                except OSError:
+                    assert lose_enqueue_reply
+                    result='DISPATCH_EXCEPTION'
+    
+                if orders():
+                    receipts=list(service._ledger.iter(EventKind.EXECUTION_RECEIPT,correlation_id=orders()[0].correlation_id))
+                    if receipts:
+                        assert receipts[-1].payload['status']==(initial_terminal_status or ('PARTIAL' if initial_partial_status else 'UNKNOWN'))
+                        if not initial_partial_status:assert receipts[-1].payload['filled_qty']=='0'
+                    else:
+                        assert lose_enqueue_reply
+                        assert queue._conn.execute('SELECT count(*) FROM commands WHERE alias=?',(alias,)).fetchone()[0]==1
+    
+                    if not initial_partial_status and not initial_terminal_status:
+                        # Preserve the original unknown-effect scenario: the
+                        # authentic terminal claims it before its entry deadline,
+                        # then withholds the result while later bars/restarts run.
+                        # Never model an expired unclaimed request as a late fill.
+                        poll()
+    
+                    yield service,bars,index,clock,poll,orders,result,queue,delivered
+                    break
+>           else:raise AssertionError('fixture never queued a genuinely approved native order')
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           AssertionError: fixture never queued a genuinely approved native order
+
+trading/tests/test_single_session_unknown_entry.py:143: AssertionError
+_____ test_missing_native_enqueue_reply_holds_the_durable_original_attempt _____
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-136/test_missing_native_enqueue_re0')
+eurusd = SymbolContract(symbol='EURUSD', venue='mt5', base_currency='EUR', quote_currency='USD', account_currency='USD', contra...=Decimal('0'), max_adv_participation=Decimal('0.10'), liquidity_haircut=Decimal('0'), round_trip_cost_pct=Decimal('0'))
+
+    def test_missing_native_enqueue_reply_holds_the_durable_original_attempt(tmp_path,eurusd):
+>       with delayed_native_session(tmp_path,eurusd,lose_enqueue_reply=True) as (service,bars,index,clock,poll,orders,result,queue,delivered):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+trading/tests/test_single_session_unknown_entry.py:196: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/contextlib.py:137: in __enter__
+    return next(self.gen)
+           ^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-136/test_missing_native_enqueue_re0')
+contract = SymbolContract(symbol='EURUSD', venue='mt5', base_currency='EUR', quote_currency='USD', account_currency='USD', contra...=Decimal('0'), max_adv_participation=Decimal('0.10'), liquidity_haircut=Decimal('0'), round_trip_cost_pct=Decimal('0'))
+lose_enqueue_reply = True, initial_partial_status = None, omit_context = False
+initial_terminal_status = None
+
+    @contextmanager
+    def delayed_native_session(tmp_path,contract,*,lose_enqueue_reply=False,initial_partial_status=None,omit_context=False,initial_terminal_status=None):
+        alias='delayed_mt5_'+uuid.uuid4().hex[:12];native_login=10_000_000+uuid.uuid4().int%(2**53);key=b'local-source-fixture-key-32-bytes!'
+        bars=synthetic_bars();clock={'ms':bars[100].end_ms};queue=BridgeQueue(tmp_path/'native-ea.sqlite')
+        app=create_pull_app(queue,lambda who:key if who==alias else None,clock=lambda:clock['ms'])
+        client=TestClient(app);delivered=[];nonces={'n':0};terminal_positions=[]
+        def poll(*,results=(),positions=None):
+            if positions is not None:terminal_positions[:]=positions
+            nonces['n']+=1;ts=str(clock['ms']//1000);nonce='owner-ea-'+str(nonces['n'])
+            # Explicit simulated native margin: 1,000 deposit units per open position.
+            # An empty account has observed zero usage and an undefined ratio.
+            from decimal import Decimal
+            margin_used=Decimal('1000')*len(terminal_positions)
+            account=cash_telemetry({'login':native_login,'server':'fixture-native-ea','demo':True,'equity':'10000','balance':'10000','currency':'USD',
+                'trade_allowed':True,'hedging':True,'server_time_ms':clock['ms'],
+                'entry_constraints':{'schema':'van.mt5.ea-entry-constraints/1','explicit_deadline':True,
+                                     'required_op':'ORDER_SEND_EXPIRING','framed_fields':18},
+                'margin_used':str(margin_used),'margin_free':str(Decimal('10000')-margin_used),
+                'margin_level':str(Decimal('1000000')/margin_used if margin_used else Decimal('0'))},credit='0',native_clock_ms=clock['ms'],movements=[],currency_digits=2)
+            body=json.dumps({'account':account,'positions':terminal_positions,'results':list(results)}).encode()
+            response=client.post('/ea/v1/'+alias+'/poll',content=body,headers={'x-van-ts':ts,'x-van-nonce':nonce,
+                'x-van-signature':sign_poll(key,ts,nonce,alias,body),'content-type':'application/json'})
+            assert response.status_code==200
+            delivered.extend(response.text.splitlines())
+        adapter=Mt5PullAdapter(BridgeQueue(tmp_path/'native-ea.sqlite'),account_alias=alias,clock=lambda:clock['ms'],timeout_s=.003,poll_s=.001,identity=Mt5Identity(str(native_login),'fixture-native-ea','USD',True))
+        if initial_partial_status:
+            def partial_reply(cid):
+                from decimal import Decimal
+                poll();fields=delivered[-1].split('|')
+                qty=str(Decimal(fields[4])/2)
+                native={'ticket':900,'symbol':fields[2],'type':fields[3],'volume':qty,'price_open':fields[5],
+                    'sl':fields[6],'tp':fields[7] or 0,'comment':fields[9],'magic':int(fields[10]),'profit':0}
+                poll(results=[{'id':cid,'status':initial_partial_status,'volume':qty,'price':fields[5],
+                    'order':'partial-original','position':900,'sl_confirmed':True,'server_time_ms':clock['ms']}],positions=[native])
+                return adapter.queue.result(cid)
+            adapter._await=partial_reply
+        if initial_terminal_status:
+            def terminal_reply(cid):
+                poll();poll(results=[{'id':cid,'status':initial_terminal_status,'volume':'0','reason':'original native no-effect outcome'}])
+                return adapter.queue.result(cid)
+            adapter._await=terminal_reply
+        if lose_enqueue_reply:
+            enqueue=adapter.queue.enqueue
+            def lost_reply(*args,**kwargs):
+                cid=enqueue(*args,**kwargs)
+                raise OSError('fixture queue commit reply lost after original claim')
+            adapter.queue.enqueue=lost_reply
+        registry=AccountRegistry(tmp_path/'accounts.json')
+        registry.add(Account(alias=alias,broker='MT5',mode='DEMO_TRADER',currency='USD',demo=True,
+            credential_ref=CredentialRef(env_var='SOURCE_FIXTURE_NOT_READ'),login=str(native_login),server='fixture-native-ea'))
+        cfg=ServiceConfig(account_alias=alias,symbol='EURUSD',base='EUR',quote='USD',timeframe='H1',
+            contract=contract_to_dict(contract),mandate=historical_mandate_dict(account_alias=alias,venue='mt5',mode='DEMO_TRADER',
+                allowed_strategies=['FX-TREND-PULLBACK-01']),capsules=['FX-TREND-PULLBACK-01'],registry_path=str(registry.path),
+            ledger=os.environ['VATI_TEST_PG_DSN'],heartbeat_path=str(tmp_path/'heartbeat.json'))
+        poll();service=SessionService(cfg,lambda now:[b for b in bars if b.end_ms<=now],clock=lambda:clock['ms'],adapter=adapter).build()
+        if omit_context:
+            publish=service.runner.cycle._log
+            def old_context_producer(kind,payload,**kwargs):
+                if kind is EventKind.SESSION and payload.get('event')=='ENTRY_CONTEXT':return
+                return publish(kind,payload,**kwargs)
+            service.runner.cycle._log=old_context_producer
+        def orders():return [e for e in service._ledger.iter(EventKind.ORDER_COMMAND) if e.payload['account_alias']==alias]
+        try:
+            service.start()
+            if not service.runner.permit_new_orders:
+                from vati.risk.history_scope import risk_history_for_account
+                scope=risk_history_for_account(service._ledger.iter(),alias)
+                rows=[]
+                for e in service._ledger.iter():
+                    if e.hash in scope.unresolved_refs:
+                        p=e.payload;i=(p.get('inputs') or {}).get('intent') or {}
+                        rows.append({'kind':e.kind.value,'producer':e.producer,'hash':e.hash,'corr':e.correlation_id,
+                            'alias':p.get('account_alias'),'intent_alias':i.get('account_alias'),
+                            'intent_id':i.get('trade_intent_id'),'command_id':p.get('trade_intent_id')})
+                Path('/tmp/van-single-unknown-start-issues.json').write_text(json.dumps(rows,indent=2))
+            assert service.runner.permit_new_orders,(service.runner.cycle.kill.active,service.learning.recovery_issue,service.runner.cycle.streaks.recovery_issue,service.runner.startup_report)
+            for index,bar in enumerate(bars[101:],101):
+                clock['ms']=bar.end_ms+1000;poll()
+                try:result=service.step_once()
+                except OSError:
+                    assert lose_enqueue_reply
+                    result='DISPATCH_EXCEPTION'
+    
+                if orders():
+                    receipts=list(service._ledger.iter(EventKind.EXECUTION_RECEIPT,correlation_id=orders()[0].correlation_id))
+                    if receipts:
+                        assert receipts[-1].payload['status']==(initial_terminal_status or ('PARTIAL' if initial_partial_status else 'UNKNOWN'))
+                        if not initial_partial_status:assert receipts[-1].payload['filled_qty']=='0'
+                    else:
+                        assert lose_enqueue_reply
+                        assert queue._conn.execute('SELECT count(*) FROM commands WHERE alias=?',(alias,)).fetchone()[0]==1
+    
+                    if not initial_partial_status and not initial_terminal_status:
+                        # Preserve the original unknown-effect scenario: the
+                        # authentic terminal claims it before its entry deadline,
+                        # then withholds the result while later bars/restarts run.
+                        # Never model an expired unclaimed request as a late fill.
+                        poll()
+    
+                    yield service,bars,index,clock,poll,orders,result,queue,delivered
+                    break
+>           else:raise AssertionError('fixture never queued a genuinely approved native order')
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           AssertionError: fixture never queued a genuinely approved native order
+
+trading/tests/test_single_session_unknown_entry.py:143: AssertionError
+_ test_contradictory_or_partial_native_evidence_cannot_release_the_original_hold[wrong-symbol] _
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-136/test_contradictory_or_partial_0')
+eurusd = SymbolContract(symbol='EURUSD', venue='mt5', base_currency='EUR', quote_currency='USD', account_currency='USD', contra...=Decimal('0'), max_adv_participation=Decimal('0.10'), liquidity_haircut=Decimal('0'), round_trip_cost_pct=Decimal('0'))
+damage = 'wrong-symbol'
+
+    @pytest.mark.parametrize('damage',['wrong-symbol','oversized-fill','stop-unconfirmed','rejected-with-fill','malformed-volume'])
+    def test_contradictory_or_partial_native_evidence_cannot_release_the_original_hold(tmp_path,eurusd,damage):
+>       with delayed_native_session(tmp_path,eurusd) as (service,bars,index,clock,poll,orders,result,queue,delivered):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+trading/tests/test_single_session_unknown_entry.py:206: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/contextlib.py:137: in __enter__
+    return next(self.gen)
+           ^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-136/test_contradictory_or_partial_0')
+contract = SymbolContract(symbol='EURUSD', venue='mt5', base_currency='EUR', quote_currency='USD', account_currency='USD', contra...=Decimal('0'), max_adv_participation=Decimal('0.10'), liquidity_haircut=Decimal('0'), round_trip_cost_pct=Decimal('0'))
+lose_enqueue_reply = False, initial_partial_status = None, omit_context = False
+initial_terminal_status = None
+
+    @contextmanager
+    def delayed_native_session(tmp_path,contract,*,lose_enqueue_reply=False,initial_partial_status=None,omit_context=False,initial_terminal_status=None):
+        alias='delayed_mt5_'+uuid.uuid4().hex[:12];native_login=10_000_000+uuid.uuid4().int%(2**53);key=b'local-source-fixture-key-32-bytes!'
+        bars=synthetic_bars();clock={'ms':bars[100].end_ms};queue=BridgeQueue(tmp_path/'native-ea.sqlite')
+        app=create_pull_app(queue,lambda who:key if who==alias else None,clock=lambda:clock['ms'])
+        client=TestClient(app);delivered=[];nonces={'n':0};terminal_positions=[]
+        def poll(*,results=(),positions=None):
+            if positions is not None:terminal_positions[:]=positions
+            nonces['n']+=1;ts=str(clock['ms']//1000);nonce='owner-ea-'+str(nonces['n'])
+            # Explicit simulated native margin: 1,000 deposit units per open position.
+            # An empty account has observed zero usage and an undefined ratio.
+            from decimal import Decimal
+            margin_used=Decimal('1000')*len(terminal_positions)
+            account=cash_telemetry({'login':native_login,'server':'fixture-native-ea','demo':True,'equity':'10000','balance':'10000','currency':'USD',
+                'trade_allowed':True,'hedging':True,'server_time_ms':clock['ms'],
+                'entry_constraints':{'schema':'van.mt5.ea-entry-constraints/1','explicit_deadline':True,
+                                     'required_op':'ORDER_SEND_EXPIRING','framed_fields':18},
+                'margin_used':str(margin_used),'margin_free':str(Decimal('10000')-margin_used),
+                'margin_level':str(Decimal('1000000')/margin_used if margin_used else Decimal('0'))},credit='0',native_clock_ms=clock['ms'],movements=[],currency_digits=2)
+            body=json.dumps({'account':account,'positions':terminal_positions,'results':list(results)}).encode()
+            response=client.post('/ea/v1/'+alias+'/poll',content=body,headers={'x-van-ts':ts,'x-van-nonce':nonce,
+                'x-van-signature':sign_poll(key,ts,nonce,alias,body),'content-type':'application/json'})
+            assert response.status_code==200
+            delivered.extend(response.text.splitlines())
+        adapter=Mt5PullAdapter(BridgeQueue(tmp_path/'native-ea.sqlite'),account_alias=alias,clock=lambda:clock['ms'],timeout_s=.003,poll_s=.001,identity=Mt5Identity(str(native_login),'fixture-native-ea','USD',True))
+        if initial_partial_status:
+            def partial_reply(cid):
+                from decimal import Decimal
+                poll();fields=delivered[-1].split('|')
+                qty=str(Decimal(fields[4])/2)
+                native={'ticket':900,'symbol':fields[2],'type':fields[3],'volume':qty,'price_open':fields[5],
+                    'sl':fields[6],'tp':fields[7] or 0,'comment':fields[9],'magic':int(fields[10]),'profit':0}
+                poll(results=[{'id':cid,'status':initial_partial_status,'volume':qty,'price':fields[5],
+                    'order':'partial-original','position':900,'sl_confirmed':True,'server_time_ms':clock['ms']}],positions=[native])
+                return adapter.queue.result(cid)
+            adapter._await=partial_reply
+        if initial_terminal_status:
+            def terminal_reply(cid):
+                poll();poll(results=[{'id':cid,'status':initial_terminal_status,'volume':'0','reason':'original native no-effect outcome'}])
+                return adapter.queue.result(cid)
+            adapter._await=terminal_reply
+        if lose_enqueue_reply:
+            enqueue=adapter.queue.enqueue
+            def lost_reply(*args,**kwargs):
+                cid=enqueue(*args,**kwargs)
+                raise OSError('fixture queue commit reply lost after original claim')
+            adapter.queue.enqueue=lost_reply
+        registry=AccountRegistry(tmp_path/'accounts.json')
+        registry.add(Account(alias=alias,broker='MT5',mode='DEMO_TRADER',currency='USD',demo=True,
+            credential_ref=CredentialRef(env_var='SOURCE_FIXTURE_NOT_READ'),login=str(native_login),server='fixture-native-ea'))
+        cfg=ServiceConfig(account_alias=alias,symbol='EURUSD',base='EUR',quote='USD',timeframe='H1',
+            contract=contract_to_dict(contract),mandate=historical_mandate_dict(account_alias=alias,venue='mt5',mode='DEMO_TRADER',
+                allowed_strategies=['FX-TREND-PULLBACK-01']),capsules=['FX-TREND-PULLBACK-01'],registry_path=str(registry.path),
+            ledger=os.environ['VATI_TEST_PG_DSN'],heartbeat_path=str(tmp_path/'heartbeat.json'))
+        poll();service=SessionService(cfg,lambda now:[b for b in bars if b.end_ms<=now],clock=lambda:clock['ms'],adapter=adapter).build()
+        if omit_context:
+            publish=service.runner.cycle._log
+            def old_context_producer(kind,payload,**kwargs):
+                if kind is EventKind.SESSION and payload.get('event')=='ENTRY_CONTEXT':return
+                return publish(kind,payload,**kwargs)
+            service.runner.cycle._log=old_context_producer
+        def orders():return [e for e in service._ledger.iter(EventKind.ORDER_COMMAND) if e.payload['account_alias']==alias]
+        try:
+            service.start()
+            if not service.runner.permit_new_orders:
+                from vati.risk.history_scope import risk_history_for_account
+                scope=risk_history_for_account(service._ledger.iter(),alias)
+                rows=[]
+                for e in service._ledger.iter():
+                    if e.hash in scope.unresolved_refs:
+                        p=e.payload;i=(p.get('inputs') or {}).get('intent') or {}
+                        rows.append({'kind':e.kind.value,'producer':e.producer,'hash':e.hash,'corr':e.correlation_id,
+                            'alias':p.get('account_alias'),'intent_alias':i.get('account_alias'),
+                            'intent_id':i.get('trade_intent_id'),'command_id':p.get('trade_intent_id')})
+                Path('/tmp/van-single-unknown-start-issues.json').write_text(json.dumps(rows,indent=2))
+            assert service.runner.permit_new_orders,(service.runner.cycle.kill.active,service.learning.recovery_issue,service.runner.cycle.streaks.recovery_issue,service.runner.startup_report)
+            for index,bar in enumerate(bars[101:],101):
+                clock['ms']=bar.end_ms+1000;poll()
+                try:result=service.step_once()
+                except OSError:
+                    assert lose_enqueue_reply
+                    result='DISPATCH_EXCEPTION'
+    
+                if orders():
+                    receipts=list(service._ledger.iter(EventKind.EXECUTION_RECEIPT,correlation_id=orders()[0].correlation_id))
+                    if receipts:
+                        assert receipts[-1].payload['status']==(initial_terminal_status or ('PARTIAL' if initial_partial_status else 'UNKNOWN'))
+                        if not initial_partial_status:assert receipts[-1].payload['filled_qty']=='0'
+                    else:
+                        assert lose_enqueue_reply
+                        assert queue._conn.execute('SELECT count(*) FROM commands WHERE alias=?',(alias,)).fetchone()[0]==1
+    
+                    if not initial_partial_status and not initial_terminal_status:
+                        # Preserve the original unknown-effect scenario: the
+                        # authentic terminal claims it before its entry deadline,
+                        # then withholds the result while later bars/restarts run.
+                        # Never model an expired unclaimed request as a late fill.
+                        poll()
+    
+                    yield service,bars,index,clock,poll,orders,result,queue,delivered
+                    break
+>           else:raise AssertionError('fixture never queued a genuinely approved native order')
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           AssertionError: fixture never queued a genuinely approved native order
+
+trading/tests/test_single_session_unknown_entry.py:143: AssertionError
+_ test_contradictory_or_partial_native_evidence_cannot_release_the_original_hold[oversized-fill] _
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-136/test_contradictory_or_partial_1')
+eurusd = SymbolContract(symbol='EURUSD', venue='mt5', base_currency='EUR', quote_currency='USD', account_currency='USD', contra...=Decimal('0'), max_adv_participation=Decimal('0.10'), liquidity_haircut=Decimal('0'), round_trip_cost_pct=Decimal('0'))
+damage = 'oversized-fill'
+
+    @pytest.mark.parametrize('damage',['wrong-symbol','oversized-fill','stop-unconfirmed','rejected-with-fill','malformed-volume'])
+    def test_contradictory_or_partial_native_evidence_cannot_release_the_original_hold(tmp_path,eurusd,damage):
+>       with delayed_native_session(tmp_path,eurusd) as (service,bars,index,clock,poll,orders,result,queue,delivered):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+trading/tests/test_single_session_unknown_entry.py:206: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/contextlib.py:137: in __enter__
+    return next(self.gen)
+           ^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-136/test_contradictory_or_partial_1')
+contract = SymbolContract(symbol='EURUSD', venue='mt5', base_currency='EUR', quote_currency='USD', account_currency='USD', contra...=Decimal('0'), max_adv_participation=Decimal('0.10'), liquidity_haircut=Decimal('0'), round_trip_cost_pct=Decimal('0'))
+lose_enqueue_reply = False, initial_partial_status = None, omit_context = False
+initial_terminal_status = None
+
+    @contextmanager
+    def delayed_native_session(tmp_path,contract,*,lose_enqueue_reply=False,initial_partial_status=None,omit_context=False,initial_terminal_status=None):
+        alias='delayed_mt5_'+uuid.uuid4().hex[:12];native_login=10_000_000+uuid.uuid4().int%(2**53);key=b'local-source-fixture-key-32-bytes!'
+        bars=synthetic_bars();clock={'ms':bars[100].end_ms};queue=BridgeQueue(tmp_path/'native-ea.sqlite')
+        app=create_pull_app(queue,lambda who:key if who==alias else None,clock=lambda:clock['ms'])
+        client=TestClient(app);delivered=[];nonces={'n':0};terminal_positions=[]
+        def poll(*,results=(),positions=None):
+            if positions is not None:terminal_positions[:]=positions
+            nonces['n']+=1;ts=str(clock['ms']//1000);nonce='owner-ea-'+str(nonces['n'])
+            # Explicit simulated native margin: 1,000 deposit units per open position.
+            # An empty account has observed zero usage and an undefined ratio.
+            from decimal import Decimal
+            margin_used=Decimal('1000')*len(terminal_positions)
+            account=cash_telemetry({'login':native_login,'server':'fixture-native-ea','demo':True,'equity':'10000','balance':'10000','currency':'USD',
+                'trade_allowed':True,'hedging':True,'server_time_ms':clock['ms'],
+                'entry_constraints':{'schema':'van.mt5.ea-entry-constraints/1','explicit_deadline':True,
+                                     'required_op':'ORDER_SEND_EXPIRING','framed_fields':18},
+                'margin_used':str(margin_used),'margin_free':str(Decimal('10000')-margin_used),
+                'margin_level':str(Decimal('1000000')/margin_used if margin_used else Decimal('0'))},credit='0',native_clock_ms=clock['ms'],movements=[],currency_digits=2)
+            body=json.dumps({'account':account,'positions':terminal_positions,'results':list(results)}).encode()
+            response=client.post('/ea/v1/'+alias+'/poll',content=body,headers={'x-van-ts':ts,'x-van-nonce':nonce,
+                'x-van-signature':sign_poll(key,ts,nonce,alias,body),'content-type':'application/json'})
+            assert response.status_code==200
+            delivered.extend(response.text.splitlines())
+        adapter=Mt5PullAdapter(BridgeQueue(tmp_path/'native-ea.sqlite'),account_alias=alias,clock=lambda:clock['ms'],timeout_s=.003,poll_s=.001,identity=Mt5Identity(str(native_login),'fixture-native-ea','USD',True))
+        if initial_partial_status:
+            def partial_reply(cid):
+                from decimal import Decimal
+                poll();fields=delivered[-1].split('|')
+                qty=str(Decimal(fields[4])/2)
+                native={'ticket':900,'symbol':fields[2],'type':fields[3],'volume':qty,'price_open':fields[5],
+                    'sl':fields[6],'tp':fields[7] or 0,'comment':fields[9],'magic':int(fields[10]),'profit':0}
+                poll(results=[{'id':cid,'status':initial_partial_status,'volume':qty,'price':fields[5],
+                    'order':'partial-original','position':900,'sl_confirmed':True,'server_time_ms':clock['ms']}],positions=[native])
+                return adapter.queue.result(cid)
+            adapter._await=partial_reply
+        if initial_terminal_status:
+            def terminal_reply(cid):
+                poll();poll(results=[{'id':cid,'status':initial_terminal_status,'volume':'0','reason':'original native no-effect outcome'}])
+                return adapter.queue.result(cid)
+            adapter._await=terminal_reply
+        if lose_enqueue_reply:
+            enqueue=adapter.queue.enqueue
+            def lost_reply(*args,**kwargs):
+                cid=enqueue(*args,**kwargs)
+                raise OSError('fixture queue commit reply lost after original claim')
+            adapter.queue.enqueue=lost_reply
+        registry=AccountRegistry(tmp_path/'accounts.json')
+        registry.add(Account(alias=alias,broker='MT5',mode='DEMO_TRADER',currency='USD',demo=True,
+            credential_ref=CredentialRef(env_var='SOURCE_FIXTURE_NOT_READ'),login=str(native_login),server='fixture-native-ea'))
+        cfg=ServiceConfig(account_alias=alias,symbol='EURUSD',base='EUR',quote='USD',timeframe='H1',
+            contract=contract_to_dict(contract),mandate=historical_mandate_dict(account_alias=alias,venue='mt5',mode='DEMO_TRADER',
+                allowed_strategies=['FX-TREND-PULLBACK-01']),capsules=['FX-TREND-PULLBACK-01'],registry_path=str(registry.path),
+            ledger=os.environ['VATI_TEST_PG_DSN'],heartbeat_path=str(tmp_path/'heartbeat.json'))
+        poll();service=SessionService(cfg,lambda now:[b for b in bars if b.end_ms<=now],clock=lambda:clock['ms'],adapter=adapter).build()
+        if omit_context:
+            publish=service.runner.cycle._log
+            def old_context_producer(kind,payload,**kwargs):
+                if kind is EventKind.SESSION and payload.get('event')=='ENTRY_CONTEXT':return
+                return publish(kind,payload,**kwargs)
+            service.runner.cycle._log=old_context_producer
+        def orders():return [e for e in service._ledger.iter(EventKind.ORDER_COMMAND) if e.payload['account_alias']==alias]
+        try:
+            service.start()
+            if not service.runner.permit_new_orders:
+                from vati.risk.history_scope import risk_history_for_account
+                scope=risk_history_for_account(service._ledger.iter(),alias)
+                rows=[]
+                for e in service._ledger.iter():
+                    if e.hash in scope.unresolved_refs:
+                        p=e.payload;i=(p.get('inputs') or {}).get('intent') or {}
+                        rows.append({'kind':e.kind.value,'producer':e.producer,'hash':e.hash,'corr':e.correlation_id,
+                            'alias':p.get('account_alias'),'intent_alias':i.get('account_alias'),
+                            'intent_id':i.get('trade_intent_id'),'command_id':p.get('trade_intent_id')})
+                Path('/tmp/van-single-unknown-start-issues.json').write_text(json.dumps(rows,indent=2))
+            assert service.runner.permit_new_orders,(service.runner.cycle.kill.active,service.learning.recovery_issue,service.runner.cycle.streaks.recovery_issue,service.runner.startup_report)
+            for index,bar in enumerate(bars[101:],101):
+                clock['ms']=bar.end_ms+1000;poll()
+                try:result=service.step_once()
+                except OSError:
+                    assert lose_enqueue_reply
+                    result='DISPATCH_EXCEPTION'
+    
+                if orders():
+                    receipts=list(service._ledger.iter(EventKind.EXECUTION_RECEIPT,correlation_id=orders()[0].correlation_id))
+                    if receipts:
+                        assert receipts[-1].payload['status']==(initial_terminal_status or ('PARTIAL' if initial_partial_status else 'UNKNOWN'))
+                        if not initial_partial_status:assert receipts[-1].payload['filled_qty']=='0'
+                    else:
+                        assert lose_enqueue_reply
+                        assert queue._conn.execute('SELECT count(*) FROM commands WHERE alias=?',(alias,)).fetchone()[0]==1
+    
+                    if not initial_partial_status and not initial_terminal_status:
+                        # Preserve the original unknown-effect scenario: the
+                        # authentic terminal claims it before its entry deadline,
+                        # then withholds the result while later bars/restarts run.
+                        # Never model an expired unclaimed request as a late fill.
+                        poll()
+    
+                    yield service,bars,index,clock,poll,orders,result,queue,delivered
+                    break
+>           else:raise AssertionError('fixture never queued a genuinely approved native order')
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           AssertionError: fixture never queued a genuinely approved native order
+
+trading/tests/test_single_session_unknown_entry.py:143: AssertionError
+_ test_contradictory_or_partial_native_evidence_cannot_release_the_original_hold[stop-unconfirmed] _
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-136/test_contradictory_or_partial_2')
+eurusd = SymbolContract(symbol='EURUSD', venue='mt5', base_currency='EUR', quote_currency='USD', account_currency='USD', contra...=Decimal('0'), max_adv_participation=Decimal('0.10'), liquidity_haircut=Decimal('0'), round_trip_cost_pct=Decimal('0'))
+damage = 'stop-unconfirmed'
+
+    @pytest.mark.parametrize('damage',['wrong-symbol','oversized-fill','stop-unconfirmed','rejected-with-fill','malformed-volume'])
+    def test_contradictory_or_partial_native_evidence_cannot_release_the_original_hold(tmp_path,eurusd,damage):
+>       with delayed_native_session(tmp_path,eurusd) as (service,bars,index,clock,poll,orders,result,queue,delivered):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+trading/tests/test_single_session_unknown_entry.py:206: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/contextlib.py:137: in __enter__
+    return next(self.gen)
+           ^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-136/test_contradictory_or_partial_2')
+contract = SymbolContract(symbol='EURUSD', venue='mt5', base_currency='EUR', quote_currency='USD', account_currency='USD', contra...=Decimal('0'), max_adv_participation=Decimal('0.10'), liquidity_haircut=Decimal('0'), round_trip_cost_pct=Decimal('0'))
+lose_enqueue_reply = False, initial_partial_status = None, omit_context = False
+initial_terminal_status = None
+
+    @contextmanager
+    def delayed_native_session(tmp_path,contract,*,lose_enqueue_reply=False,initial_partial_status=None,omit_context=False,initial_terminal_status=None):
+        alias='delayed_mt5_'+uuid.uuid4().hex[:12];native_login=10_000_000+uuid.uuid4().int%(2**53);key=b'local-source-fixture-key-32-bytes!'
+        bars=synthetic_bars();clock={'ms':bars[100].end_ms};queue=BridgeQueue(tmp_path/'native-ea.sqlite')
+        app=create_pull_app(queue,lambda who:key if who==alias else None,clock=lambda:clock['ms'])
+        client=TestClient(app);delivered=[];nonces={'n':0};terminal_positions=[]
+        def poll(*,results=(),positions=None):
+            if positions is not None:terminal_positions[:]=positions
+            nonces['n']+=1;ts=str(clock['ms']//1000);nonce='owner-ea-'+str(nonces['n'])
+            # Explicit simulated native margin: 1,000 deposit units per open position.
+            # An empty account has observed zero usage and an undefined ratio.
+            from decimal import Decimal
+            margin_used=Decimal('1000')*len(terminal_positions)
+            account=cash_telemetry({'login':native_login,'server':'fixture-native-ea','demo':True,'equity':'10000','balance':'10000','currency':'USD',
+                'trade_allowed':True,'hedging':True,'server_time_ms':clock['ms'],
+                'entry_constraints':{'schema':'van.mt5.ea-entry-constraints/1','explicit_deadline':True,
+                                     'required_op':'ORDER_SEND_EXPIRING','framed_fields':18},
+                'margin_used':str(margin_used),'margin_free':str(Decimal('10000')-margin_used),
+                'margin_level':str(Decimal('1000000')/margin_used if margin_used else Decimal('0'))},credit='0',native_clock_ms=clock['ms'],movements=[],currency_digits=2)
+            body=json.dumps({'account':account,'positions':terminal_positions,'results':list(results)}).encode()
+            response=client.post('/ea/v1/'+alias+'/poll',content=body,headers={'x-van-ts':ts,'x-van-nonce':nonce,
+                'x-van-signature':sign_poll(key,ts,nonce,alias,body),'content-type':'application/json'})
+            assert response.status_code==200
+            delivered.extend(response.text.splitlines())
+        adapter=Mt5PullAdapter(BridgeQueue(tmp_path/'native-ea.sqlite'),account_alias=alias,clock=lambda:clock['ms'],timeout_s=.003,poll_s=.001,identity=Mt5Identity(str(native_login),'fixture-native-ea','USD',True))
+        if initial_partial_status:
+            def partial_reply(cid):
+                from decimal import Decimal
+                poll();fields=delivered[-1].split('|')
+                qty=str(Decimal(fields[4])/2)
+                native={'ticket':900,'symbol':fields[2],'type':fields[3],'volume':qty,'price_open':fields[5],
+                    'sl':fields[6],'tp':fields[7] or 0,'comment':fields[9],'magic':int(fields[10]),'profit':0}
+                poll(results=[{'id':cid,'status':initial_partial_status,'volume':qty,'price':fields[5],
+                    'order':'partial-original','position':900,'sl_confirmed':True,'server_time_ms':clock['ms']}],positions=[native])
+                return adapter.queue.result(cid)
+            adapter._await=partial_reply
+        if initial_terminal_status:
+            def terminal_reply(cid):
+                poll();poll(results=[{'id':cid,'status':initial_terminal_status,'volume':'0','reason':'original native no-effect outcome'}])
+                return adapter.queue.result(cid)
+            adapter._await=terminal_reply
+        if lose_enqueue_reply:
+            enqueue=adapter.queue.enqueue
+            def lost_reply(*args,**kwargs):
+                cid=enqueue(*args,**kwargs)
+                raise OSError('fixture queue commit reply lost after original claim')
+            adapter.queue.enqueue=lost_reply
+        registry=AccountRegistry(tmp_path/'accounts.json')
+        registry.add(Account(alias=alias,broker='MT5',mode='DEMO_TRADER',currency='USD',demo=True,
+            credential_ref=CredentialRef(env_var='SOURCE_FIXTURE_NOT_READ'),login=str(native_login),server='fixture-native-ea'))
+        cfg=ServiceConfig(account_alias=alias,symbol='EURUSD',base='EUR',quote='USD',timeframe='H1',
+            contract=contract_to_dict(contract),mandate=historical_mandate_dict(account_alias=alias,venue='mt5',mode='DEMO_TRADER',
+                allowed_strategies=['FX-TREND-PULLBACK-01']),capsules=['FX-TREND-PULLBACK-01'],registry_path=str(registry.path),
+            ledger=os.environ['VATI_TEST_PG_DSN'],heartbeat_path=str(tmp_path/'heartbeat.json'))
+        poll();service=SessionService(cfg,lambda now:[b for b in bars if b.end_ms<=now],clock=lambda:clock['ms'],adapter=adapter).build()
+        if omit_context:
+            publish=service.runner.cycle._log
+            def old_context_producer(kind,payload,**kwargs):
+                if kind is EventKind.SESSION and payload.get('event')=='ENTRY_CONTEXT':return
+                return publish(kind,payload,**kwargs)
+            service.runner.cycle._log=old_context_producer
+        def orders():return [e for e in service._ledger.iter(EventKind.ORDER_COMMAND) if e.payload['account_alias']==alias]
+        try:
+            service.start()
+            if not service.runner.permit_new_orders:
+                from vati.risk.history_scope import risk_history_for_account
+                scope=risk_history_for_account(service._ledger.iter(),alias)
+                rows=[]
+                for e in service._ledger.iter():
+                    if e.hash in scope.unresolved_refs:
+                        p=e.payload;i=(p.get('inputs') or {}).get('intent') or {}
+                        rows.append({'kind':e.kind.value,'producer':e.producer,'hash':e.hash,'corr':e.correlation_id,
+                            'alias':p.get('account_alias'),'intent_alias':i.get('account_alias'),
+                            'intent_id':i.get('trade_intent_id'),'command_id':p.get('trade_intent_id')})
+                Path('/tmp/van-single-unknown-start-issues.json').write_text(json.dumps(rows,indent=2))
+            assert service.runner.permit_new_orders,(service.runner.cycle.kill.active,service.learning.recovery_issue,service.runner.cycle.streaks.recovery_issue,service.runner.startup_report)
+            for index,bar in enumerate(bars[101:],101):
+                clock['ms']=bar.end_ms+1000;poll()
+                try:result=service.step_once()
+                except OSError:
+                    assert lose_enqueue_reply
+                    result='DISPATCH_EXCEPTION'
+    
+                if orders():
+                    receipts=list(service._ledger.iter(EventKind.EXECUTION_RECEIPT,correlation_id=orders()[0].correlation_id))
+                    if receipts:
+                        assert receipts[-1].payload['status']==(initial_terminal_status or ('PARTIAL' if initial_partial_status else 'UNKNOWN'))
+                        if not initial_partial_status:assert receipts[-1].payload['filled_qty']=='0'
+                    else:
+                        assert lose_enqueue_reply
+                        assert queue._conn.execute('SELECT count(*) FROM commands WHERE alias=?',(alias,)).fetchone()[0]==1
+    
+                    if not initial_partial_status and not initial_terminal_status:
+                        # Preserve the original unknown-effect scenario: the
+                        # authentic terminal claims it before its entry deadline,
+                        # then withholds the result while later bars/restarts run.
+                        # Never model an expired unclaimed request as a late fill.
+                        poll()
+    
+                    yield service,bars,index,clock,poll,orders,result,queue,delivered
+                    break
+>           else:raise AssertionError('fixture never queued a genuinely approved native order')
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           AssertionError: fixture never queued a genuinely approved native order
+
+trading/tests/test_single_session_unknown_entry.py:143: AssertionError
+_ test_contradictory_or_partial_native_evidence_cannot_release_the_original_hold[rejected-with-fill] _
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-136/test_contradictory_or_partial_3')
+eurusd = SymbolContract(symbol='EURUSD', venue='mt5', base_currency='EUR', quote_currency='USD', account_currency='USD', contra...=Decimal('0'), max_adv_participation=Decimal('0.10'), liquidity_haircut=Decimal('0'), round_trip_cost_pct=Decimal('0'))
+damage = 'rejected-with-fill'
+
+    @pytest.mark.parametrize('damage',['wrong-symbol','oversized-fill','stop-unconfirmed','rejected-with-fill','malformed-volume'])
+    def test_contradictory_or_partial_native_evidence_cannot_release_the_original_hold(tmp_path,eurusd,damage):
+>       with delayed_native_session(tmp_path,eurusd) as (service,bars,index,clock,poll,orders,result,queue,delivered):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+trading/tests/test_single_session_unknown_entry.py:206: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/contextlib.py:137: in __enter__
+    return next(self.gen)
+           ^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-136/test_contradictory_or_partial_3')
+contract = SymbolContract(symbol='EURUSD', venue='mt5', base_currency='EUR', quote_currency='USD', account_currency='USD', contra...=Decimal('0'), max_adv_participation=Decimal('0.10'), liquidity_haircut=Decimal('0'), round_trip_cost_pct=Decimal('0'))
+lose_enqueue_reply = False, initial_partial_status = None, omit_context = False
+initial_terminal_status = None
+
+    @contextmanager
+    def delayed_native_session(tmp_path,contract,*,lose_enqueue_reply=False,initial_partial_status=None,omit_context=False,initial_terminal_status=None):
+        alias='delayed_mt5_'+uuid.uuid4().hex[:12];native_login=10_000_000+uuid.uuid4().int%(2**53);key=b'local-source-fixture-key-32-bytes!'
+        bars=synthetic_bars();clock={'ms':bars[100].end_ms};queue=BridgeQueue(tmp_path/'native-ea.sqlite')
+        app=create_pull_app(queue,lambda who:key if who==alias else None,clock=lambda:clock['ms'])
+        client=TestClient(app);delivered=[];nonces={'n':0};terminal_positions=[]
+        def poll(*,results=(),positions=None):
+            if positions is not None:terminal_positions[:]=positions
+            nonces['n']+=1;ts=str(clock['ms']//1000);nonce='owner-ea-'+str(nonces['n'])
+            # Explicit simulated native margin: 1,000 deposit units per open position.
+            # An empty account has observed zero usage and an undefined ratio.
+            from decimal import Decimal
+            margin_used=Decimal('1000')*len(terminal_positions)
+            account=cash_telemetry({'login':native_login,'server':'fixture-native-ea','demo':True,'equity':'10000','balance':'10000','currency':'USD',
+                'trade_allowed':True,'hedging':True,'server_time_ms':clock['ms'],
+                'entry_constraints':{'schema':'van.mt5.ea-entry-constraints/1','explicit_deadline':True,
+                                     'required_op':'ORDER_SEND_EXPIRING','framed_fields':18},
+                'margin_used':str(margin_used),'margin_free':str(Decimal('10000')-margin_used),
+                'margin_level':str(Decimal('1000000')/margin_used if margin_used else Decimal('0'))},credit='0',native_clock_ms=clock['ms'],movements=[],currency_digits=2)
+            body=json.dumps({'account':account,'positions':terminal_positions,'results':list(results)}).encode()
+            response=client.post('/ea/v1/'+alias+'/poll',content=body,headers={'x-van-ts':ts,'x-van-nonce':nonce,
+                'x-van-signature':sign_poll(key,ts,nonce,alias,body),'content-type':'application/json'})
+            assert response.status_code==200
+            delivered.extend(response.text.splitlines())
+        adapter=Mt5PullAdapter(BridgeQueue(tmp_path/'native-ea.sqlite'),account_alias=alias,clock=lambda:clock['ms'],timeout_s=.003,poll_s=.001,identity=Mt5Identity(str(native_login),'fixture-native-ea','USD',True))
+        if initial_partial_status:
+            def partial_reply(cid):
+                from decimal import Decimal
+                poll();fields=delivered[-1].split('|')
+                qty=str(Decimal(fields[4])/2)
+                native={'ticket':900,'symbol':fields[2],'type':fields[3],'volume':qty,'price_open':fields[5],
+                    'sl':fields[6],'tp':fields[7] or 0,'comment':fields[9],'magic':int(fields[10]),'profit':0}
+                poll(results=[{'id':cid,'status':initial_partial_status,'volume':qty,'price':fields[5],
+                    'order':'partial-original','position':900,'sl_confirmed':True,'server_time_ms':clock['ms']}],positions=[native])
+                return adapter.queue.result(cid)
+            adapter._await=partial_reply
+        if initial_terminal_status:
+            def terminal_reply(cid):
+                poll();poll(results=[{'id':cid,'status':initial_terminal_status,'volume':'0','reason':'original native no-effect outcome'}])
+                return adapter.queue.result(cid)
+            adapter._await=terminal_reply
+        if lose_enqueue_reply:
+            enqueue=adapter.queue.enqueue
+            def lost_reply(*args,**kwargs):
+                cid=enqueue(*args,**kwargs)
+                raise OSError('fixture queue commit reply lost after original claim')
+            adapter.queue.enqueue=lost_reply
+        registry=AccountRegistry(tmp_path/'accounts.json')
+        registry.add(Account(alias=alias,broker='MT5',mode='DEMO_TRADER',currency='USD',demo=True,
+            credential_ref=CredentialRef(env_var='SOURCE_FIXTURE_NOT_READ'),login=str(native_login),server='fixture-native-ea'))
+        cfg=ServiceConfig(account_alias=alias,symbol='EURUSD',base='EUR',quote='USD',timeframe='H1',
+            contract=contract_to_dict(contract),mandate=historical_mandate_dict(account_alias=alias,venue='mt5',mode='DEMO_TRADER',
+                allowed_strategies=['FX-TREND-PULLBACK-01']),capsules=['FX-TREND-PULLBACK-01'],registry_path=str(registry.path),
+            ledger=os.environ['VATI_TEST_PG_DSN'],heartbeat_path=str(tmp_path/'heartbeat.json'))
+        poll();service=SessionService(cfg,lambda now:[b for b in bars if b.end_ms<=now],clock=lambda:clock['ms'],adapter=adapter).build()
+        if omit_context:
+            publish=service.runner.cycle._log
+            def old_context_producer(kind,payload,**kwargs):
+                if kind is EventKind.SESSION and payload.get('event')=='ENTRY_CONTEXT':return
+                return publish(kind,payload,**kwargs)
+            service.runner.cycle._log=old_context_producer
+        def orders():return [e for e in service._ledger.iter(EventKind.ORDER_COMMAND) if e.payload['account_alias']==alias]
+        try:
+            service.start()
+            if not service.runner.permit_new_orders:
+                from vati.risk.history_scope import risk_history_for_account
+                scope=risk_history_for_account(service._ledger.iter(),alias)
+                rows=[]
+                for e in service._ledger.iter():
+                    if e.hash in scope.unresolved_refs:
+                        p=e.payload;i=(p.get('inputs') or {}).get('intent') or {}
+                        rows.append({'kind':e.kind.value,'producer':e.producer,'hash':e.hash,'corr':e.correlation_id,
+                            'alias':p.get('account_alias'),'intent_alias':i.get('account_alias'),
+                            'intent_id':i.get('trade_intent_id'),'command_id':p.get('trade_intent_id')})
+                Path('/tmp/van-single-unknown-start-issues.json').write_text(json.dumps(rows,indent=2))
+            assert service.runner.permit_new_orders,(service.runner.cycle.kill.active,service.learning.recovery_issue,service.runner.cycle.streaks.recovery_issue,service.runner.startup_report)
+            for index,bar in enumerate(bars[101:],101):
+                clock['ms']=bar.end_ms+1000;poll()
+                try:result=service.step_once()
+                except OSError:
+                    assert lose_enqueue_reply
+                    result='DISPATCH_EXCEPTION'
+    
+                if orders():
+                    receipts=list(service._ledger.iter(EventKind.EXECUTION_RECEIPT,correlation_id=orders()[0].correlation_id))
+                    if receipts:
+                        assert receipts[-1].payload['status']==(initial_terminal_status or ('PARTIAL' if initial_partial_status else 'UNKNOWN'))
+                        if not initial_partial_status:assert receipts[-1].payload['filled_qty']=='0'
+                    else:
+                        assert lose_enqueue_reply
+                        assert queue._conn.execute('SELECT count(*) FROM commands WHERE alias=?',(alias,)).fetchone()[0]==1
+    
+                    if not initial_partial_status and not initial_terminal_status:
+                        # Preserve the original unknown-effect scenario: the
+                        # authentic terminal claims it before its entry deadline,
+                        # then withholds the result while later bars/restarts run.
+                        # Never model an expired unclaimed request as a late fill.
+                        poll()
+    
+                    yield service,bars,index,clock,poll,orders,result,queue,delivered
+                    break
+>           else:raise AssertionError('fixture never queued a genuinely approved native order')
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           AssertionError: fixture never queued a genuinely approved native order
+
+trading/tests/test_single_session_unknown_entry.py:143: AssertionError
+_ test_contradictory_or_partial_native_evidence_cannot_release_the_original_hold[malformed-volume] _
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-136/test_contradictory_or_partial_4')
+eurusd = SymbolContract(symbol='EURUSD', venue='mt5', base_currency='EUR', quote_currency='USD', account_currency='USD', contra...=Decimal('0'), max_adv_participation=Decimal('0.10'), liquidity_haircut=Decimal('0'), round_trip_cost_pct=Decimal('0'))
+damage = 'malformed-volume'
+
+    @pytest.mark.parametrize('damage',['wrong-symbol','oversized-fill','stop-unconfirmed','rejected-with-fill','malformed-volume'])
+    def test_contradictory_or_partial_native_evidence_cannot_release_the_original_hold(tmp_path,eurusd,damage):
+>       with delayed_native_session(tmp_path,eurusd) as (service,bars,index,clock,poll,orders,result,queue,delivered):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+trading/tests/test_single_session_unknown_entry.py:206: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/contextlib.py:137: in __enter__
+    return next(self.gen)
+           ^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-136/test_contradictory_or_partial_4')
+contract = SymbolContract(symbol='EURUSD', venue='mt5', base_currency='EUR', quote_currency='USD', account_currency='USD', contra...=Decimal('0'), max_adv_participation=Decimal('0.10'), liquidity_haircut=Decimal('0'), round_trip_cost_pct=Decimal('0'))
+lose_enqueue_reply = False, initial_partial_status = None, omit_context = False
+initial_terminal_status = None
+
+    @contextmanager
+    def delayed_native_session(tmp_path,contract,*,lose_enqueue_reply=False,initial_partial_status=None,omit_context=False,initial_terminal_status=None):
+        alias='delayed_mt5_'+uuid.uuid4().hex[:12];native_login=10_000_000+uuid.uuid4().int%(2**53);key=b'local-source-fixture-key-32-bytes!'
+        bars=synthetic_bars();clock={'ms':bars[100].end_ms};queue=BridgeQueue(tmp_path/'native-ea.sqlite')
+        app=create_pull_app(queue,lambda who:key if who==alias else None,clock=lambda:clock['ms'])
+        client=TestClient(app);delivered=[];nonces={'n':0};terminal_positions=[]
+        def poll(*,results=(),positions=None):
+            if positions is not None:terminal_positions[:]=positions
+            nonces['n']+=1;ts=str(clock['ms']//1000);nonce='owner-ea-'+str(nonces['n'])
+            # Explicit simulated native margin: 1,000 deposit units per open position.
+            # An empty account has observed zero usage and an undefined ratio.
+            from decimal import Decimal
+            margin_used=Decimal('1000')*len(terminal_positions)
+            account=cash_telemetry({'login':native_login,'server':'fixture-native-ea','demo':True,'equity':'10000','balance':'10000','currency':'USD',
+                'trade_allowed':True,'hedging':True,'server_time_ms':clock['ms'],
+                'entry_constraints':{'schema':'van.mt5.ea-entry-constraints/1','explicit_deadline':True,
+                                     'required_op':'ORDER_SEND_EXPIRING','framed_fields':18},
+                'margin_used':str(margin_used),'margin_free':str(Decimal('10000')-margin_used),
+                'margin_level':str(Decimal('1000000')/margin_used if margin_used else Decimal('0'))},credit='0',native_clock_ms=clock['ms'],movements=[],currency_digits=2)
+            body=json.dumps({'account':account,'positions':terminal_positions,'results':list(results)}).encode()
+            response=client.post('/ea/v1/'+alias+'/poll',content=body,headers={'x-van-ts':ts,'x-van-nonce':nonce,
+                'x-van-signature':sign_poll(key,ts,nonce,alias,body),'content-type':'application/json'})
+            assert response.status_code==200
+            delivered.extend(response.text.splitlines())
+        adapter=Mt5PullAdapter(BridgeQueue(tmp_path/'native-ea.sqlite'),account_alias=alias,clock=lambda:clock['ms'],timeout_s=.003,poll_s=.001,identity=Mt5Identity(str(native_login),'fixture-native-ea','USD',True))
+        if initial_partial_status:
+            def partial_reply(cid):
+                from decimal import Decimal
+                poll();fields=delivered[-1].split('|')
+                qty=str(Decimal(fields[4])/2)
+                native={'ticket':900,'symbol':fields[2],'type':fields[3],'volume':qty,'price_open':fields[5],
+                    'sl':fields[6],'tp':fields[7] or 0,'comment':fields[9],'magic':int(fields[10]),'profit':0}
+                poll(results=[{'id':cid,'status':initial_partial_status,'volume':qty,'price':fields[5],
+                    'order':'partial-original','position':900,'sl_confirmed':True,'server_time_ms':clock['ms']}],positions=[native])
+                return adapter.queue.result(cid)
+            adapter._await=partial_reply
+        if initial_terminal_status:
+            def terminal_reply(cid):
+                poll();poll(results=[{'id':cid,'status':initial_terminal_status,'volume':'0','reason':'original native no-effect outcome'}])
+                return adapter.queue.result(cid)
+            adapter._await=terminal_reply
+        if lose_enqueue_reply:
+            enqueue=adapter.queue.enqueue
+            def lost_reply(*args,**kwargs):
+                cid=enqueue(*args,**kwargs)
+                raise OSError('fixture queue commit reply lost after original claim')
+            adapter.queue.enqueue=lost_reply
+        registry=AccountRegistry(tmp_path/'accounts.json')
+        registry.add(Account(alias=alias,broker='MT5',mode='DEMO_TRADER',currency='USD',demo=True,
+            credential_ref=CredentialRef(env_var='SOURCE_FIXTURE_NOT_READ'),login=str(native_login),server='fixture-native-ea'))
+        cfg=ServiceConfig(account_alias=alias,symbol='EURUSD',base='EUR',quote='USD',timeframe='H1',
+            contract=contract_to_dict(contract),mandate=historical_mandate_dict(account_alias=alias,venue='mt5',mode='DEMO_TRADER',
+                allowed_strategies=['FX-TREND-PULLBACK-01']),capsules=['FX-TREND-PULLBACK-01'],registry_path=str(registry.path),
+            ledger=os.environ['VATI_TEST_PG_DSN'],heartbeat_path=str(tmp_path/'heartbeat.json'))
+        poll();service=SessionService(cfg,lambda now:[b for b in bars if b.end_ms<=now],clock=lambda:clock['ms'],adapter=adapter).build()
+        if omit_context:
+            publish=service.runner.cycle._log
+            def old_context_producer(kind,payload,**kwargs):
+                if kind is EventKind.SESSION and payload.get('event')=='ENTRY_CONTEXT':return
+                return publish(kind,payload,**kwargs)
+            service.runner.cycle._log=old_context_producer
+        def orders():return [e for e in service._ledger.iter(EventKind.ORDER_COMMAND) if e.payload['account_alias']==alias]
+        try:
+            service.start()
+            if not service.runner.permit_new_orders:
+                from vati.risk.history_scope import risk_history_for_account
+                scope=risk_history_for_account(service._ledger.iter(),alias)
+                rows=[]
+                for e in service._ledger.iter():
+                    if e.hash in scope.unresolved_refs:
+                        p=e.payload;i=(p.get('inputs') or {}).get('intent') or {}
+                        rows.append({'kind':e.kind.value,'producer':e.producer,'hash':e.hash,'corr':e.correlation_id,
+                            'alias':p.get('account_alias'),'intent_alias':i.get('account_alias'),
+                            'intent_id':i.get('trade_intent_id'),'command_id':p.get('trade_intent_id')})
+                Path('/tmp/van-single-unknown-start-issues.json').write_text(json.dumps(rows,indent=2))
+            assert service.runner.permit_new_orders,(service.runner.cycle.kill.active,service.learning.recovery_issue,service.runner.cycle.streaks.recovery_issue,service.runner.startup_report)
+            for index,bar in enumerate(bars[101:],101):
+                clock['ms']=bar.end_ms+1000;poll()
+                try:result=service.step_once()
+                except OSError:
+                    assert lose_enqueue_reply
+                    result='DISPATCH_EXCEPTION'
+    
+                if orders():
+                    receipts=list(service._ledger.iter(EventKind.EXECUTION_RECEIPT,correlation_id=orders()[0].correlation_id))
+                    if receipts:
+                        assert receipts[-1].payload['status']==(initial_terminal_status or ('PARTIAL' if initial_partial_status else 'UNKNOWN'))
+                        if not initial_partial_status:assert receipts[-1].payload['filled_qty']=='0'
+                    else:
+                        assert lose_enqueue_reply
+                        assert queue._conn.execute('SELECT count(*) FROM commands WHERE alias=?',(alias,)).fetchone()[0]==1
+    
+                    if not initial_partial_status and not initial_terminal_status:
+                        # Preserve the original unknown-effect scenario: the
+                        # authentic terminal claims it before its entry deadline,
+                        # then withholds the result while later bars/restarts run.
+                        # Never model an expired unclaimed request as a late fill.
+                        poll()
+    
+                    yield service,bars,index,clock,poll,orders,result,queue,delivered
+                    break
+>           else:raise AssertionError('fixture never queued a genuinely approved native order')
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           AssertionError: fixture never queued a genuinely approved native order
+
+trading/tests/test_single_session_unknown_entry.py:143: AssertionError
+=============================== warnings summary ===============================
+../../van-backend-venv-20261025/lib/python3.12/site-packages/fastapi/testclient.py:1
+  /workspace/van-backend-venv-20261025/lib/python3.12/site-packages/fastapi/testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+    from starlette.testclient import TestClient as TestClient  # noqa
+
+../../van-backend-venv-20261025/lib/python3.12/site-packages/starlette/testclient.py:53
+  /workspace/van-backend-venv-20261025/lib/python3.12/site-packages/starlette/testclient.py:53: DeprecationWarning: The anyio.abc.BlockingPortal alias is deprecated, use anyio.from_thread.BlockingPortal instead.
+    _PortalFactoryType = Callable[[], AbstractContextManager[anyio.abc.BlockingPortal]]
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED trading/tests/test_single_session_unknown_entry.py::test_original_timed_out_native_entry_is_not_reported_as_executed_or_approved
+FAILED trading/tests/test_single_session_unknown_entry.py::test_current_empty_positions_do_not_release_original_unresolved_entry_risk
+FAILED trading/tests/test_single_session_unknown_entry.py::test_late_original_native_rejection_releases_only_that_attempt_without_replaying_it
+FAILED trading/tests/test_single_session_unknown_entry.py::test_late_original_native_fill_restores_full_trade_identity_and_protection_without_another_send
+FAILED trading/tests/test_single_session_unknown_entry.py::test_missing_native_enqueue_reply_holds_the_durable_original_attempt
+FAILED trading/tests/test_single_session_unknown_entry.py::test_contradictory_or_partial_native_evidence_cannot_release_the_original_hold[wrong-symbol]
+FAILED trading/tests/test_single_session_unknown_entry.py::test_contradictory_or_partial_native_evidence_cannot_release_the_original_hold[oversized-fill]
+FAILED trading/tests/test_single_session_unknown_entry.py::test_contradictory_or_partial_native_evidence_cannot_release_the_original_hold[stop-unconfirmed]
+FAILED trading/tests/test_single_session_unknown_entry.py::test_contradictory_or_partial_native_evidence_cannot_release_the_original_hold[rejected-with-fill]
+FAILED trading/tests/test_single_session_unknown_entry.py::test_contradictory_or_partial_native_evidence_cannot_release_the_original_hold[malformed-volume]
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! KeyboardInterrupt !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+/workspace/van-backend-venv-20261025/lib/python3.12/site-packages/psycopg/cursor.py:97: KeyboardInterrupt
+(to show a full traceback on KeyboardInterrupt use --full-trace)
+10 failed, 36 passed, 2 warnings in 641.56s (0:10:41)

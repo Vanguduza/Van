@@ -15,6 +15,7 @@ from vati.execution.mt5_expected_margin import Mt5ExpectedMarginObservation
 from vati.risk.native_history import original_native_risk_input
 
 EVENT='ORIGINAL_NATIVE_MARGIN'
+ENTRY_EVENT='ORIGINAL_ENTRY_MARGIN_BINDING'
 PRODUCER='vati-native-margin-book'
 SCHEMA='vati.original-native-margin-record/1'
 
@@ -58,6 +59,13 @@ class NativeMarginBook:
             if event.kind is not EventKind.SESSION:
                 seen.add(event.hash);continue
             p=event.payload
+            if isinstance(p,dict) and p.get('event')==ENTRY_EVENT:
+                # Quotes and their order bindings share this storage owner.
+                # Neither may publish behind an already committed observation.
+                native_integer(event.received_time_ms,minimum=last)
+                if type(event.event_time_ms) is not int or event.event_time_ms!=event.received_time_ms:
+                    raise NativeMarginError('NATIVE_MARGIN_BINDING_STORAGE_CLOCK_INVALID')
+                last=event.received_time_ms;seen.add(event.hash);continue
             if not isinstance(p,dict) or p.get('event')!=EVENT:
                 seen.add(event.hash);continue
             size+=len(canonical_json(event.body()).encode())
@@ -156,3 +164,24 @@ class NativeMarginBook:
             raise NativeMarginError('NATIVE_MARGIN_PROVIDER_HAS_NO_REQUEST_PRICE_PARAMETER')
         observation=adapter.expected_margin(symbol,lots,context=original.context,deadline_ms=deadline_ms,**kwargs)
         return self.record(original_input_ref,observation)
+
+    def capture_entry(self,adapter,original_input_ref,command,*,deadline_ms):
+        from vati.risk.entry_margin import capture_entry
+        try:return capture_entry(self,adapter,original_input_ref,command,deadline_ms=deadline_ms)
+        except NativeMarginError:raise
+        except (KeyError,TypeError,ValueError,ArithmeticError):
+            raise NativeMarginError('ENTRY_MARGIN_BINDING_INVALID') from None
+
+    def bind_entry(self,original_input_ref,command,source_ref):
+        from vati.risk.entry_margin import bind_entry
+        try:return bind_entry(self,original_input_ref,command,source_ref)
+        except NativeMarginError:raise
+        except (KeyError,TypeError,ValueError,ArithmeticError):
+            raise NativeMarginError('ENTRY_MARGIN_BINDING_INVALID') from None
+
+    def lookup_entry(self,command_hash,source_ref):
+        from vati.risk.entry_margin import lookup_entry
+        try:return lookup_entry(self,command_hash,source_ref)
+        except NativeMarginError:raise
+        except (KeyError,TypeError,ValueError,ArithmeticError):
+            raise NativeMarginError('ENTRY_MARGIN_BINDING_INVALID') from None

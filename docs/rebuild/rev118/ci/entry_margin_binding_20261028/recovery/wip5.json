@@ -1,0 +1,20 @@
+{
+  "path": "/workspace/van-entry-margin-binding-wip5-20261028.zip",
+  "size": 41905,
+  "sha256": "23ee99b5305401b4c481b0560e957eda9a10a0740fb62cf94511539194b3cf10",
+  "manifest": {
+    "base": "0726ee9f4ea6a022442b6e76cfd29392512e7166",
+    "files": {
+      "trading/tests/test_boolean_execution_receipts.py": "da4c90c9f8a4405c7e8f27bef1d16bcaaeb27af7859784e395858b81d2d8e415",
+      "trading/tests/test_provider_entry_deadline.py": "cec3d90637465e7b041d09a46eb8485b7516020ef0910bc8cddac99b8d4a2742",
+      "trading/tests/test_receipt_availability_clock.py": "6c1f30aaad0055ca7c4e9b1d8a494cab048789bdaa9393b1471685eff2ad2eee",
+      "trading/tests/test_router_native_entry_deadline.py": "c96438b3921ccf496265c8cd5390a7dc3e983e2bd7bcbfdf246d68bff73a4c0c",
+      "trading/tests/test_single_session_unknown_entry.py": "2aa2f371a227b83e6157646dce87d114121b4c5369e40b09fbd1e36ee87f379e",
+      "trading/vati/execution/router.py": "fb96f104f22a2155e801edfdd8c7849eb5f51145dc2e108b96fff77054fa8e28",
+      "trading/vati/risk/native_margin_book.py": "ffa877969980c552c19d750d73680e41ad17467bee9d9b8babb09104332df27c",
+      "trading/tests/test_entry_margin_binding.py": "087f7cb25e991e9052fc373155ea4cdc1ce57824639e330d0f9200e2ef140607",
+      "trading/tests/test_entry_margin_binding_postgres.py": "963825bd7198903093b2e5b10ff3200a6a095f12882a959b9e7efa6457cbbe18",
+      "trading/vati/risk/entry_margin.py": "0013a21e8d4d78b185568a78af5f8d051e21b89ba82d85d5db41db49164bc29b"
+    }
+  }
+}

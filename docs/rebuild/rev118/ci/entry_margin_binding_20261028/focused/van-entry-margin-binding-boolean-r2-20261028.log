@@ -1,0 +1,52 @@
+..F...                                                                   [100%]
+=================================== FAILURES ===================================
+_________ test_malformed_reply_after_a_sent_modification_stays_unknown _________
+
+eurusd = SymbolContract(symbol='EURUSD', venue='mt5', base_currency='EUR', quote_currency='USD', account_currency='USD', contra...=Decimal('0'), max_adv_participation=Decimal('0.10'), liquidity_haircut=Decimal('0'), round_trip_cost_pct=Decimal('0'))
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-142/test_malformed_reply_after_a_s0')
+
+    def test_malformed_reply_after_a_sent_modification_stays_unknown(eurusd,tmp_path):
+        adapter,*_=native_flow(eurusd,tmp_path,modify='false')
+>       result=adapter.modify_stop('P1',D('1.095'),now_ms=1000)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+trading/tests/test_boolean_execution_receipts.py:76: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+trading/vati/execution/mt5_bridge.py:204: in modify_stop
+    r = self._call("modify_sl_tp", {"alias": self.account_alias, "position": position_id, "sl": str(new_stop)}, now_ms=now_ms)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/execution/mt5_bridge.py:94: in _call
+    self._call('sync_account', {'alias': self.account_alias}, now_ms=now_ms)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = Mt5BridgeAdapter(client=<vati.execution.mt5_bridge.Mt5BridgeClient object at 0x7f821cd38650>, account_alias='native', ...>.<lambda> at 0x7f821cc14f40>, identity=Mt5Identity(login='12345678', server='Broker-Demo', currency='USD', demo=True))
+op = 'sync_account'
+body = {'alias': 'native', 'expected_account': {'login': '12345678', 'server': 'Broker-Demo', 'currency': 'USD', 'demo': True}}
+now_ms = 1000
+
+    def _call(self, op, body, *, now_ms):
+        if self.identity is not None:
+            # A legacy worker must refuse admission before an effectful call.
+            # Every new worker also verifies this same binding inside its lock.
+            if op != 'sync_account':
+                self._call('sync_account', {'alias': self.account_alias}, now_ms=now_ms)
+            body = {**body, 'expected_account': self.identity.as_dict()}
+        response = self.client.call(op, body, now_ms=now_ms)
+        if not isinstance(response, dict) or 'error' in response:
+>           raise VenueUnavailable('MT5 worker account operation refused or unavailable')
+E           vati.execution.base.VenueUnavailable: MT5 worker account operation refused or unavailable
+
+trading/vati/execution/mt5_bridge.py:98: VenueUnavailable
+=============================== warnings summary ===============================
+../../van-backend-venv-20261025/lib/python3.12/site-packages/fastapi/testclient.py:1
+  /workspace/van-backend-venv-20261025/lib/python3.12/site-packages/fastapi/testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+    from starlette.testclient import TestClient as TestClient  # noqa
+
+../../van-backend-venv-20261025/lib/python3.12/site-packages/starlette/testclient.py:53
+  /workspace/van-backend-venv-20261025/lib/python3.12/site-packages/starlette/testclient.py:53: DeprecationWarning: The anyio.abc.BlockingPortal alias is deprecated, use anyio.from_thread.BlockingPortal instead.
+    _PortalFactoryType = Callable[[], AbstractContextManager[anyio.abc.BlockingPortal]]
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED trading/tests/test_boolean_execution_receipts.py::test_malformed_reply_after_a_sent_modification_stays_unknown
+1 failed, 5 passed, 2 warnings in 1.58s

@@ -196,6 +196,38 @@ class ExecutionRouter:
             raise RouterError('current account risk budget is below the original command; re-evaluation required')
         return ref
 
+    def _native_entry_margin(self, command, adapter, *, now_ms):
+        from vati.execution.mt5_bridge import Mt5BridgeAdapter
+        from vati.execution.mt5_pull import Mt5PullAdapter
+        from vati.execution.ctrader.adapter import CtraderAdapter
+        if not isinstance(adapter,(Mt5BridgeAdapter,Mt5PullAdapter,CtraderAdapter)):
+            return None
+        from vati.risk.native_margin_book import NativeMarginBook
+        from vati.funding.native import native_int
+        rows=[e for e in self.ledger.iter(EventKind.RISK_DECISION,correlation_id=command.trade_intent_id)
+            if isinstance(e.payload,dict) and isinstance(e.payload.get('decision'),dict)
+            and e.payload['decision'].get('decision_hash')==command.decision_hash]
+        if len(rows)!=1:
+            raise RouterError('native entry margin requires one original durable risk input; not dispatched')
+        clock=self.clock if self.clock is not None else lambda:now_ms
+        book=NativeMarginBook(self.ledger,clock=clock)
+        deadline=min(now_ms+4000,command.expires_at_ms) if command.expires_at_ms is not None else now_ms+4000
+        try:
+            receipt=book.capture_entry(adapter,rows[0].hash,command,deadline_ms=deadline)
+            read=book.lookup_entry(command.command_hash,receipt['source_ref'])
+            observed=native_int(clock(),minimum=now_ms)
+            if (read is None or read['receipt']!=receipt
+                    or receipt['original_input_ref']!=rows[0].hash
+                    or receipt['reservation_qualified'] is not False or receipt['execution_authority'] is not False
+                    or not read['observation']['received_at_ms']<=observed<read['observation']['valid_until_ms']
+                    or command.expires_at_ms is not None and observed>=command.expires_at_ms):
+                raise ValueError('original bound margin readback is unavailable or expired')
+            return receipt['record_ref'],read['observation']['valid_until_ms']
+        except Exception as exc:
+            source=getattr(exc,'source_ref','')
+            raise RouterError('native entry margin evidence unavailable: '+type(exc).__name__+
+                (' source_ref='+source if isinstance(source,str) and source else '')+'; not dispatched') from exc
+
     def _current_command_controls(self, intent, decision, command, *, market_reference, decision_time_ms, now_ms):
         if not self.enforce_rev51_controls:
             return
@@ -522,11 +554,14 @@ class ExecutionRouter:
                 raise RouterError(f"account runtime lease fence refused epoch {lease_epoch!r}")
             self._current_command_controls(intent,decision,cmd,market_reference=market_reference,
                 decision_time_ms=decision_time_ms,now_ms=now_ms)
+            native_margin=self._native_entry_margin(cmd,adapter,now_ms=now_ms)
+            native_margin_ref=native_margin[0] if native_margin is not None else None
+            now_ms=self._dispatch_time(mandate,now_ms=now_ms)
             current_risk_ref=self._current_account_risk(intent,decision,mandate,cmd,adapter,now_ms=now_ms,
                 market_reference=market_reference.aged(observed_at_ms=decision_time_ms,now_ms=now_ms) if market_reference is not None else None)
-            if current_risk_ref is not None:
-                # Account reads may block. Preserve refusal facts across that
-                # read as well as across lease and signer acquisition.
+            if current_risk_ref is not None or native_margin_ref is not None:
+                # Account and margin reads may block. Preserve refusal facts
+                # across both reads and across lease/signer acquisition.
                 now_ms=self._dispatch_time(mandate,now_ms=now_ms)
                 lease_current=self.lease_fence(lease_epoch) if self.lease_fence is not None else True
                 now_ms=self._dispatch_time(mandate,now_ms=now_ms)
@@ -536,6 +571,9 @@ class ExecutionRouter:
                     raise RouterError(f"account runtime lease fence refused epoch {lease_epoch!r}")
                 self._current_command_controls(intent,decision,cmd,market_reference=market_reference,
                     decision_time_ms=decision_time_ms,now_ms=now_ms)
+            now_ms=self._dispatch_time(mandate,now_ms=now_ms)
+            if native_margin is not None and now_ms>=native_margin[1]:
+                raise RouterError('original bound native margin expired after current account risk read; not dispatched')
             self._seen.add(intent.idempotency_key)
             if self.enforce_rev51_controls:
                 assert self.pretrade_controls is not None
@@ -547,6 +585,7 @@ class ExecutionRouter:
                 )
             self._log(EventKind.ORDER_COMMAND, {**asdict(cmd), "direction": cmd.direction.value, "stop_mode": cmd.stop_mode.value, "loss_model": cmd.loss_model.value,
                                                 **({'risk_revalidation_ref':current_risk_ref} if current_risk_ref is not None else {}),
+                                                **({'native_entry_margin_ref':native_margin_ref} if native_margin_ref is not None else {}),
                                                 **({"requested_entry_type": requested_entry_type, "entry_type_substituted": True} if substituted else {})},
                       now_ms=now_ms, corr=corr, decision_time=decision_time_ms)
             metrics.inc("vati_orders_sent_total", venue=intent.venue)

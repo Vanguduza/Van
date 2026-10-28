@@ -1,0 +1,20 @@
+{
+  "command": [
+    "/workspace/van-backend-venv-20261025/bin/python",
+    "tools/rebuild/source_storage_audit.py",
+    "--report",
+    "/workspace/van-entry-margin-binding-boolean-r1-20261028-audit.json",
+    "trading/tests/test_boolean_execution_receipts.py",
+    "--junitxml=/workspace/van-entry-margin-binding-boolean-r1-20261028.xml",
+    "-q"
+  ],
+  "cwd": "/workspace/van-review-2026-10-18/publish",
+  "controller_pid": 591739,
+  "started_at_utc": "2026-10-28T16:21:31.816387+00:00",
+  "timeout_seconds": 120,
+  "state": "COMPLETED",
+  "command_pid": 591742,
+  "exit": 1,
+  "adopted_children_reaped": [],
+  "finished_at_utc": "2026-10-28T16:21:33.893852+00:00"
+}

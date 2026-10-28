@@ -1,0 +1,22 @@
+{
+  "command": [
+    "/workspace/van-backend-venv-20261025/bin/python",
+    "tools/rebuild/source_storage_audit.py",
+    "--report",
+    "/workspace/van-entry-margin-binding-r2-20261028-audit.json",
+    "trading/tests/test_entry_margin_binding.py",
+    "trading/tests/test_mt5_native_margin_book.py",
+    "trading/tests/test_native_margin_book.py",
+    "--junitxml=/workspace/van-entry-margin-binding-r2-20261028.xml",
+    "-q"
+  ],
+  "cwd": "/workspace/van-review-2026-10-18/publish",
+  "controller_pid": 580094,
+  "started_at_utc": "2026-10-28T15:21:09.220243+00:00",
+  "timeout_seconds": 180,
+  "state": "COMPLETED",
+  "command_pid": 580097,
+  "exit": 0,
+  "adopted_children_reaped": [],
+  "finished_at_utc": "2026-10-28T15:21:14.368410+00:00"
+}

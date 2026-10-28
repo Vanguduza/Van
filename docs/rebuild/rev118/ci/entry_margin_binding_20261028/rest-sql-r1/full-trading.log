@@ -1,0 +1,369 @@
+........................................................................ [  1%]
+........................................................................ [  2%]
+........................................................................ [  4%]
+........................................................................ [  5%]
+................................................................FF...... [  6%]
+........................................................................ [  8%]
+........................................................................ [  9%]
+........................................................................ [ 10%]
+........................................................................ [ 12%]
+........................................................................ [ 13%]
+........................................................................ [ 14%]
+........................................................................ [ 16%]
+........................................................................ [ 17%]
+........................................................................ [ 18%]
+........................................................................ [ 20%]
+........................................................................ [ 21%]
+........................................................................ [ 23%]
+........................................................................ [ 24%]
+........................................................................ [ 25%]
+........................................................................ [ 27%]
+........................................................................ [ 28%]
+........................................................................ [ 29%]
+........................................................................ [ 31%]
+........................................................................ [ 32%]
+........................................................................ [ 33%]
+........................................................................ [ 35%]
+........................................................................ [ 36%]
+........................................................................ [ 37%]
+........................................................................ [ 39%]
+........................................................................ [ 40%]
+........................................................................ [ 42%]
+........................................................................ [ 43%]
+........................................................................ [ 44%]
+........................................................................ [ 46%]
+........................................................................ [ 47%]
+........................................................................ [ 48%]
+........................................................................ [ 50%]
+........................................................................ [ 51%]
+........................................................................ [ 52%]
+........................................................................ [ 54%]
+........................................................................ [ 55%]
+........................................................................ [ 56%]
+........................................................................ [ 58%]
+........................................................................ [ 59%]
+........................................................................ [ 60%]
+........................................................................ [ 62%]
+........................................................................ [ 63%]
+........................................................................ [ 65%]
+........................................................................ [ 66%]
+........................................................................ [ 67%]
+........................................................................ [ 69%]
+........................................................................ [ 70%]
+........................................................................ [ 71%]
+........................................................................ [ 73%]
+........................................................................ [ 74%]
+........................................................................ [ 75%]
+..................................................FF................FF.. [ 77%]
+........................................................................ [ 78%]
+........................................................................ [ 79%]
+........................................................................ [ 81%]
+........................................................................ [ 82%]
+........................................................................ [ 84%]
+........................................................................ [ 85%]
+........................................................................ [ 86%]
+........................................................................ [ 88%]
+........................................................................ [ 89%]
+........................................................................ [ 90%]
+........................................................................ [ 92%]
+........................................................................ [ 93%]
+........................................................................ [ 94%]
+........................................................................ [ 96%]
+........................................................................ [ 97%]
+........................................................................ [ 98%]
+..........................................................               [100%]
+=================================== FAILURES ===================================
+________ test_false_text_from_order_check_cannot_reach_the_actual_send _________
+
+eurusd = SymbolContract(symbol='EURUSD', venue='mt5', base_currency='EUR', quote_currency='USD', account_currency='USD', contra...=Decimal('0'), max_adv_participation=Decimal('0.10'), liquidity_haircut=Decimal('0'), round_trip_cost_pct=Decimal('0'))
+
+    def test_false_text_from_order_check_cannot_reach_the_actual_send(eurusd):
+        adapter,router,trade,decision,mandate,calls=native_flow(eurusd,check='false')
+>       result=router.execute(trade,decision,mandate,now_ms=NOW*1000)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+trading/tests/test_boolean_execution_receipts.py:45: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+trading/vati/execution/router.py:557: in execute
+    native_margin=self._native_entry_margin(cmd,adapter,now_ms=now_ms)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <vati.execution.router.ExecutionRouter object at 0x7f6cc76b85c0>
+command = OrderCommand(trade_intent_id='ti-1', decision_hash='07a7d26c17be0aeb201072de57f4399e455c8a2080b27232951ec3e9f103a6f8',...egy_version='4.2.1', lease_epoch=None, command_hash='7c48a962a1dddce99fe33137de1441dcfbedecd1c87d1702ceba7319b24ef9fa')
+adapter = Mt5BridgeAdapter(client=<vati.execution.mt5_bridge.Mt5BridgeClient object at 0x7f6cc79a1100>, account_alias='fx_primary', venue='mt5', clock=<function native_flow.<locals>.<lambda> at 0x7f6cc77854e0>, identity=None)
+now_ms = 1800000000000
+
+    def _native_entry_margin(self, command, adapter, *, now_ms):
+        from vati.execution.mt5_bridge import Mt5BridgeAdapter
+        from vati.execution.mt5_pull import Mt5PullAdapter
+        from vati.execution.ctrader.adapter import CtraderAdapter
+        if not isinstance(adapter,(Mt5BridgeAdapter,Mt5PullAdapter,CtraderAdapter)):
+            return None
+        from vati.risk.native_margin_book import NativeMarginBook
+        from vati.funding.native import native_int
+        rows=[e for e in self.ledger.iter(EventKind.RISK_DECISION,correlation_id=command.trade_intent_id)
+            if isinstance(e.payload,dict) and isinstance(e.payload.get('decision'),dict)
+            and e.payload['decision'].get('decision_hash')==command.decision_hash]
+        if len(rows)!=1:
+>           raise RouterError('native entry margin requires one original durable risk input; not dispatched')
+E           vati.execution.router.RouterError: native entry margin requires one original durable risk input; not dispatched
+
+trading/vati/execution/router.py:211: RouterError
+_ test_unconfirmed_native_stop_is_not_reported_protected_and_uses_the_actual_flatten_path _
+
+eurusd = SymbolContract(symbol='EURUSD', venue='mt5', base_currency='EUR', quote_currency='USD', account_currency='USD', contra...=Decimal('0'), max_adv_participation=Decimal('0.10'), liquidity_haircut=Decimal('0'), round_trip_cost_pct=Decimal('0'))
+
+    def test_unconfirmed_native_stop_is_not_reported_protected_and_uses_the_actual_flatten_path(eurusd):
+        adapter,router,trade,decision,mandate,calls=native_flow(eurusd,stop='false')
+>       with pytest.raises(RouterError,match='flattened'):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AssertionError: Regex pattern did not match.
+E         Expected regex: 'flattened'
+E         Actual message: 'native entry margin requires one original durable risk input; not dispatched'
+
+trading/tests/test_boolean_execution_receipts.py:51: AssertionError
+_ test_actual_router_binds_ctrader_mandate_and_original_quote_through_wire_dispatch[False] _
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-140/test_actual_router_binds_ctrad0')
+eurusd = SymbolContract(symbol='EURUSD', venue='mt5', base_currency='EUR', quote_currency='USD', account_currency='USD', contra...=Decimal('0'), max_adv_participation=Decimal('0.10'), liquidity_haircut=Decimal('0'), round_trip_cost_pct=Decimal('0'))
+late = False
+
+    @pytest.mark.parametrize('late',[False,True])
+    def test_actual_router_binds_ctrader_mandate_and_original_quote_through_wire_dispatch(tmp_path,eurusd,late):
+        from conftest import NOW,mandate_dict,snapshot,intent
+        from vati.core import Ledger,EventKind
+        from vati.execution import ExecutionRouter,ProtectionManager
+        from vati.execution.risk_refresh import CurrentRiskFacts
+        from vati.execution.pretrade import MarketReference
+        from vati.risk import RiskAuthority,TradingMandate,KillSwitch,Decision
+        a,_,wire,clock=ctrader();clock['ms']=NOW*1000
+        m=TradingMandate.from_mapping(mandate_dict(venue='ctrader',account_alias=a.account_alias,expires_at_unix=NOW+1))
+        trade=intent(venue='ctrader',account_alias=a.account_alias)
+        facts=snapshot(replace(eurusd,venue='ctrader'),account_alias=a.account_alias)
+        authority=RiskAuthority(m);approved=authority.evaluate_safe(trade,facts)
+        assert approved.decision in {Decision.APPROVED,Decision.REDUCED}
+        ledger=Ledger();router=ExecutionRouter(ledger=ledger,adapters={'ctrader':a},kill_switch=KillSwitch(),protection=ProtectionManager(),clock=lambda:clock['ms'],current_risk_authority=authority,current_risk_facts_provider=lambda *args,**kwargs:CurrentRiskFacts(facts,clock['ms']))
+        if late:
+            class LastWriteLock:
+                def __enter__(self):clock['ms']=NOW*1000+101
+                def __exit__(self,*args):pass
+            a.transport._lock=LastWriteLock()
+>       result=router.execute(trade,approved,m,now_ms=clock['ms'],entry_type='MARKET',market_reference=MarketReference(trade.entry,0,100))
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+trading/tests/test_provider_entry_deadline.py:143: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+trading/vati/execution/router.py:557: in execute
+    native_margin=self._native_entry_margin(cmd,adapter,now_ms=now_ms)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <vati.execution.router.ExecutionRouter object at 0x7f6cc832c800>
+command = OrderCommand(trade_intent_id='ti-1', decision_hash='d5f7412f15c0c4fb43c6ef585c3d029b82f1c0a0a4ca2f3c594a9fe3a26b33d0',...egy_version='4.2.1', lease_epoch=None, command_hash='0117244638823d25c3bf8c0a6fa831781272f4659dbb35c9fa207dba5cf473f8')
+adapter = CtraderAdapter(transport=<vati.execution.ctrader.transport.CtraderTransport object at 0x7f6cc832e1b0>, client_id='fixt...der.depth.DepthBook object at 0x7f6cc832e2a0>, _depth_subscriptions={}, _depth_control_states={}, _depth_retired=set())
+now_ms = 1800000000000
+
+    def _native_entry_margin(self, command, adapter, *, now_ms):
+        from vati.execution.mt5_bridge import Mt5BridgeAdapter
+        from vati.execution.mt5_pull import Mt5PullAdapter
+        from vati.execution.ctrader.adapter import CtraderAdapter
+        if not isinstance(adapter,(Mt5BridgeAdapter,Mt5PullAdapter,CtraderAdapter)):
+            return None
+        from vati.risk.native_margin_book import NativeMarginBook
+        from vati.funding.native import native_int
+        rows=[e for e in self.ledger.iter(EventKind.RISK_DECISION,correlation_id=command.trade_intent_id)
+            if isinstance(e.payload,dict) and isinstance(e.payload.get('decision'),dict)
+            and e.payload['decision'].get('decision_hash')==command.decision_hash]
+        if len(rows)!=1:
+>           raise RouterError('native entry margin requires one original durable risk input; not dispatched')
+E           vati.execution.router.RouterError: native entry margin requires one original durable risk input; not dispatched
+
+trading/vati/execution/router.py:211: RouterError
+_ test_actual_router_binds_ctrader_mandate_and_original_quote_through_wire_dispatch[True] _
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-140/test_actual_router_binds_ctrad1')
+eurusd = SymbolContract(symbol='EURUSD', venue='mt5', base_currency='EUR', quote_currency='USD', account_currency='USD', contra...=Decimal('0'), max_adv_participation=Decimal('0.10'), liquidity_haircut=Decimal('0'), round_trip_cost_pct=Decimal('0'))
+late = True
+
+    @pytest.mark.parametrize('late',[False,True])
+    def test_actual_router_binds_ctrader_mandate_and_original_quote_through_wire_dispatch(tmp_path,eurusd,late):
+        from conftest import NOW,mandate_dict,snapshot,intent
+        from vati.core import Ledger,EventKind
+        from vati.execution import ExecutionRouter,ProtectionManager
+        from vati.execution.risk_refresh import CurrentRiskFacts
+        from vati.execution.pretrade import MarketReference
+        from vati.risk import RiskAuthority,TradingMandate,KillSwitch,Decision
+        a,_,wire,clock=ctrader();clock['ms']=NOW*1000
+        m=TradingMandate.from_mapping(mandate_dict(venue='ctrader',account_alias=a.account_alias,expires_at_unix=NOW+1))
+        trade=intent(venue='ctrader',account_alias=a.account_alias)
+        facts=snapshot(replace(eurusd,venue='ctrader'),account_alias=a.account_alias)
+        authority=RiskAuthority(m);approved=authority.evaluate_safe(trade,facts)
+        assert approved.decision in {Decision.APPROVED,Decision.REDUCED}
+        ledger=Ledger();router=ExecutionRouter(ledger=ledger,adapters={'ctrader':a},kill_switch=KillSwitch(),protection=ProtectionManager(),clock=lambda:clock['ms'],current_risk_authority=authority,current_risk_facts_provider=lambda *args,**kwargs:CurrentRiskFacts(facts,clock['ms']))
+        if late:
+            class LastWriteLock:
+                def __enter__(self):clock['ms']=NOW*1000+101
+                def __exit__(self,*args):pass
+            a.transport._lock=LastWriteLock()
+>       result=router.execute(trade,approved,m,now_ms=clock['ms'],entry_type='MARKET',market_reference=MarketReference(trade.entry,0,100))
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+trading/tests/test_provider_entry_deadline.py:143: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+trading/vati/execution/router.py:557: in execute
+    native_margin=self._native_entry_margin(cmd,adapter,now_ms=now_ms)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <vati.execution.router.ExecutionRouter object at 0x7f6cc6b3bd10>
+command = OrderCommand(trade_intent_id='ti-1', decision_hash='7de0471cfbd49bd5f13a92aa5e92a0583352da3b549d978b46d156301ed65e2d',...egy_version='4.2.1', lease_epoch=None, command_hash='2e6d2b894766a92eb6dab2c227cae3917589a33ebbfe09626363b5b62f4eccbb')
+adapter = CtraderAdapter(transport=<vati.execution.ctrader.transport.CtraderTransport object at 0x7f6cc6b3b5c0>, client_id='fixt...der.depth.DepthBook object at 0x7f6cc6b3b500>, _depth_subscriptions={}, _depth_control_states={}, _depth_retired=set())
+now_ms = 1800000000101
+
+    def _native_entry_margin(self, command, adapter, *, now_ms):
+        from vati.execution.mt5_bridge import Mt5BridgeAdapter
+        from vati.execution.mt5_pull import Mt5PullAdapter
+        from vati.execution.ctrader.adapter import CtraderAdapter
+        if not isinstance(adapter,(Mt5BridgeAdapter,Mt5PullAdapter,CtraderAdapter)):
+            return None
+        from vati.risk.native_margin_book import NativeMarginBook
+        from vati.funding.native import native_int
+        rows=[e for e in self.ledger.iter(EventKind.RISK_DECISION,correlation_id=command.trade_intent_id)
+            if isinstance(e.payload,dict) and isinstance(e.payload.get('decision'),dict)
+            and e.payload['decision'].get('decision_hash')==command.decision_hash]
+        if len(rows)!=1:
+>           raise RouterError('native entry margin requires one original durable risk input; not dispatched')
+E           vati.execution.router.RouterError: native entry margin requires one original durable risk input; not dispatched
+
+trading/vati/execution/router.py:211: RouterError
+_ test_experience_rejects_unmeasured_availability_with_a_real_positive_control[False] _
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-140/test_experience_rejects_unmeas0')
+eurusd = SymbolContract(symbol='EURUSD', venue='mt5', base_currency='EUR', quote_currency='USD', account_currency='USD', contra...=Decimal('0'), max_adv_participation=Decimal('0.10'), liquidity_haircut=Decimal('0'), round_trip_cost_pct=Decimal('0'))
+qualified = False
+
+    @pytest.mark.parametrize('qualified',[False,True])
+    def test_experience_rejects_unmeasured_availability_with_a_real_positive_control(tmp_path,eurusd,qualified):
+        from dataclasses import asdict,replace
+        from conftest import snapshot
+        from vati.core import make_event
+        from vati.risk.serde import intent_to_dict,snapshot_to_dict
+        from vati.learning.episodes import episode_from_ledger,Environment
+        sdk,worker,a,clock,m,trade,approved,ledger,router=flow(tmp_path,eurusd)
+        facts=snapshot(replace(eurusd,venue='mt5'),account_alias='native')
+        ledger.append(make_event(EventKind.RISK_DECISION,'vati-cycle',{'decision':asdict(approved),'inputs':{'intent':intent_to_dict(trade),'snapshot':snapshot_to_dict(facts)}},event_time_ms=clock['ms'],received_time_ms=clock['ms'],correlation_id=trade.trade_intent_id))
+        if not qualified:
+            original=a.client._transport
+            def delayed(request):
+                response=original(request)
+                if request['op']=='order_send_expiring':clock['ms']=None
+                return response
+            a.client._transport=delayed
+>       r=router.execute(trade,approved,m,now_ms=clock['ms'],entry_type='MARKET')
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+trading/tests/test_receipt_availability_clock.py:76: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+trading/vati/execution/router.py:557: in execute
+    native_margin=self._native_entry_margin(cmd,adapter,now_ms=now_ms)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <vati.execution.router.ExecutionRouter object at 0x7f6cc75dc980>
+command = OrderCommand(trade_intent_id='ti-1', decision_hash='00f766c48883f4b05422db76be840cf976c5c3f2234e51ef5d73041d36ba8e5e',...egy_version='4.2.1', lease_epoch=None, command_hash='b3879e4817e97868f24b3d26744e94407f7c2a858b680e7a85553bd2a4494676')
+adapter = Mt5BridgeAdapter(client=<vati.execution.mt5_bridge.Mt5BridgeClient object at 0x7f6cc726d2e0>, account_alias='native', ...>.<lambda> at 0x7f6cc85c7f60>, identity=Mt5Identity(login='12345678', server='Broker-Demo', currency='USD', demo=True))
+now_ms = 1800000000000
+
+    def _native_entry_margin(self, command, adapter, *, now_ms):
+        from vati.execution.mt5_bridge import Mt5BridgeAdapter
+        from vati.execution.mt5_pull import Mt5PullAdapter
+        from vati.execution.ctrader.adapter import CtraderAdapter
+        if not isinstance(adapter,(Mt5BridgeAdapter,Mt5PullAdapter,CtraderAdapter)):
+            return None
+        from vati.risk.native_margin_book import NativeMarginBook
+        from vati.funding.native import native_int
+        rows=[e for e in self.ledger.iter(EventKind.RISK_DECISION,correlation_id=command.trade_intent_id)
+            if isinstance(e.payload,dict) and isinstance(e.payload.get('decision'),dict)
+            and e.payload['decision'].get('decision_hash')==command.decision_hash]
+        if len(rows)!=1:
+>           raise RouterError('native entry margin requires one original durable risk input; not dispatched')
+E           vati.execution.router.RouterError: native entry margin requires one original durable risk input; not dispatched
+
+trading/vati/execution/router.py:211: RouterError
+_ test_experience_rejects_unmeasured_availability_with_a_real_positive_control[True] _
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-140/test_experience_rejects_unmeas1')
+eurusd = SymbolContract(symbol='EURUSD', venue='mt5', base_currency='EUR', quote_currency='USD', account_currency='USD', contra...=Decimal('0'), max_adv_participation=Decimal('0.10'), liquidity_haircut=Decimal('0'), round_trip_cost_pct=Decimal('0'))
+qualified = True
+
+    @pytest.mark.parametrize('qualified',[False,True])
+    def test_experience_rejects_unmeasured_availability_with_a_real_positive_control(tmp_path,eurusd,qualified):
+        from dataclasses import asdict,replace
+        from conftest import snapshot
+        from vati.core import make_event
+        from vati.risk.serde import intent_to_dict,snapshot_to_dict
+        from vati.learning.episodes import episode_from_ledger,Environment
+        sdk,worker,a,clock,m,trade,approved,ledger,router=flow(tmp_path,eurusd)
+        facts=snapshot(replace(eurusd,venue='mt5'),account_alias='native')
+        ledger.append(make_event(EventKind.RISK_DECISION,'vati-cycle',{'decision':asdict(approved),'inputs':{'intent':intent_to_dict(trade),'snapshot':snapshot_to_dict(facts)}},event_time_ms=clock['ms'],received_time_ms=clock['ms'],correlation_id=trade.trade_intent_id))
+        if not qualified:
+            original=a.client._transport
+            def delayed(request):
+                response=original(request)
+                if request['op']=='order_send_expiring':clock['ms']=None
+                return response
+            a.client._transport=delayed
+>       r=router.execute(trade,approved,m,now_ms=clock['ms'],entry_type='MARKET')
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+trading/tests/test_receipt_availability_clock.py:76: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+trading/vati/execution/router.py:557: in execute
+    native_margin=self._native_entry_margin(cmd,adapter,now_ms=now_ms)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <vati.execution.router.ExecutionRouter object at 0x7f6cc7fcec30>
+command = OrderCommand(trade_intent_id='ti-1', decision_hash='398c3ed84b45e8aefa9fb1591ff6509fbd1ddf2412c57be06194240f9d0e025f',...egy_version='4.2.1', lease_epoch=None, command_hash='115b82b472580cff59cd587d30c9dc66e1f80a8106b58b4d0469fc39c451e4f8')
+adapter = Mt5BridgeAdapter(client=<vati.execution.mt5_bridge.Mt5BridgeClient object at 0x7f6cc75dcce0>, account_alias='native', ...>.<lambda> at 0x7f6cc85b9300>, identity=Mt5Identity(login='12345678', server='Broker-Demo', currency='USD', demo=True))
+now_ms = 1800000000000
+
+    def _native_entry_margin(self, command, adapter, *, now_ms):
+        from vati.execution.mt5_bridge import Mt5BridgeAdapter
+        from vati.execution.mt5_pull import Mt5PullAdapter
+        from vati.execution.ctrader.adapter import CtraderAdapter
+        if not isinstance(adapter,(Mt5BridgeAdapter,Mt5PullAdapter,CtraderAdapter)):
+            return None
+        from vati.risk.native_margin_book import NativeMarginBook
+        from vati.funding.native import native_int
+        rows=[e for e in self.ledger.iter(EventKind.RISK_DECISION,correlation_id=command.trade_intent_id)
+            if isinstance(e.payload,dict) and isinstance(e.payload.get('decision'),dict)
+            and e.payload['decision'].get('decision_hash')==command.decision_hash]
+        if len(rows)!=1:
+>           raise RouterError('native entry margin requires one original durable risk input; not dispatched')
+E           vati.execution.router.RouterError: native entry margin requires one original durable risk input; not dispatched
+
+trading/vati/execution/router.py:211: RouterError
+=============================== warnings summary ===============================
+../../van-backend-venv-20261025/lib/python3.12/site-packages/fastapi/testclient.py:1
+  /workspace/van-backend-venv-20261025/lib/python3.12/site-packages/fastapi/testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+    from starlette.testclient import TestClient as TestClient  # noqa
+
+../../van-backend-venv-20261025/lib/python3.12/site-packages/starlette/testclient.py:53
+  /workspace/van-backend-venv-20261025/lib/python3.12/site-packages/starlette/testclient.py:53: DeprecationWarning: The anyio.abc.BlockingPortal alias is deprecated, use anyio.from_thread.BlockingPortal instead.
+    _PortalFactoryType = Callable[[], AbstractContextManager[anyio.abc.BlockingPortal]]
+
+trading/tests/test_infra_live.py::test_deriv_ws_transport_over_a_real_websocket_server
+  /workspace/van-review-2026-10-18/publish/trading/vati/execution/transports/deriv_ws.py:97: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+    self._ws.send(wire)
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED trading/tests/test_boolean_execution_receipts.py::test_false_text_from_order_check_cannot_reach_the_actual_send
+FAILED trading/tests/test_boolean_execution_receipts.py::test_unconfirmed_native_stop_is_not_reported_protected_and_uses_the_actual_flatten_path
+FAILED trading/tests/test_provider_entry_deadline.py::test_actual_router_binds_ctrader_mandate_and_original_quote_through_wire_dispatch[False]
+FAILED trading/tests/test_provider_entry_deadline.py::test_actual_router_binds_ctrader_mandate_and_original_quote_through_wire_dispatch[True]
+FAILED trading/tests/test_receipt_availability_clock.py::test_experience_rejects_unmeasured_availability_with_a_real_positive_control[False]
+FAILED trading/tests/test_receipt_availability_clock.py::test_experience_rejects_unmeasured_availability_with_a_real_positive_control[True]
+6 failed, 5308 passed, 3 warnings in 534.38s (0:08:54)

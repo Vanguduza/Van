@@ -1,0 +1,114 @@
+{
+  "schema": "van.rev118.entry-margin-binding-source/1",
+  "source_parent": "0726ee9f4ea6a022442b6e76cfd29392512e7166",
+  "observed_at_utc": "2026-10-28T16:43:41.293753+00:00",
+  "source_files_sha256": {
+    "trading/tests/test_boolean_execution_receipts.py": "da4c90c9f8a4405c7e8f27bef1d16bcaaeb27af7859784e395858b81d2d8e415",
+    "trading/tests/test_provider_entry_deadline.py": "cec3d90637465e7b041d09a46eb8485b7516020ef0910bc8cddac99b8d4a2742",
+    "trading/tests/test_receipt_availability_clock.py": "6c1f30aaad0055ca7c4e9b1d8a494cab048789bdaa9393b1471685eff2ad2eee",
+    "trading/tests/test_router_native_entry_deadline.py": "c96438b3921ccf496265c8cd5390a7dc3e983e2bd7bcbfdf246d68bff73a4c0c",
+    "trading/tests/test_single_session_unknown_entry.py": "2aa2f371a227b83e6157646dce87d114121b4c5369e40b09fbd1e36ee87f379e",
+    "trading/vati/execution/router.py": "fb96f104f22a2155e801edfdd8c7849eb5f51145dc2e108b96fff77054fa8e28",
+    "trading/vati/risk/native_margin_book.py": "ffa877969980c552c19d750d73680e41ad17467bee9d9b8babb09104332df27c",
+    "trading/tests/test_entry_margin_binding.py": "087f7cb25e991e9052fc373155ea4cdc1ce57824639e330d0f9200e2ef140607",
+    "trading/tests/test_entry_margin_binding_postgres.py": "963825bd7198903093b2e5b10ff3200a6a095f12882a959b9e7efa6457cbbe18",
+    "trading/vati/risk/entry_margin.py": "0013a21e8d4d78b185568a78af5f8d051e21b89ba82d85d5db41db49164bc29b"
+  },
+  "implementation": "The actual MT5 SDK/EA and cTrader runtime entry path now captures an original native margin read for the exact sealed intended order, stores its full command binding through the existing NativeMarginBook and independently reads the original committed receipt before ORDER_COMMAND. Original durable risk input, account/product/side/quantity and full command seal remain linked. MT5 retains original reference-price identity; cTrader explicitly retains provider-current-price-only semantics. Quote/command expiry is checked inside the SQL writer and again after current-risk reads; quotes and bindings share one monotonic committed storage clock; kill, lease, owner and existing execution guards retain authority. Historical replay preserves the first receipt, lost storage ACK remains typed unknown, and competing PostgreSQL writers retain one completion. This is source evidence/data-only, not a shared financial reservation or new order authority. Final clean SQL/HTTP qualification covers all 5348 independently discovered cases exactly once, with0fail/error/skip/storage violations, actual inner/outerexit0 and the owned PostgreSQL fixture independently absent. All 1265 source/fixture pins match; 2961 original trading/rebuild test functions retain identical AST;5 reviewed consumer-test fixture migrations retain behavioral assertions and expand exact native-read traces.0formal/native/production/S24acceptances issued.",
+  "source_result": {
+    "partitions": {
+      "full-sql-r2": {
+        "passed": 5348,
+        "inner_exit": 0,
+        "outer_exit": 0,
+        "audit_violations": 0,
+        "owned_postgres_independently_absent": true
+      }
+    },
+    "unique_passed_cases": 5348,
+    "full_discovered_case_set_matches_executed": true,
+    "source_and_fixture_pins_matched": 1265,
+    "original_test_functions_AST_preserved": 2961,
+    "reviewed_test_functions": [
+      {
+        "file": "trading/tests/test_boolean_execution_receipts.py",
+        "function": "test_malformed_reply_after_a_sent_modification_stays_unknown",
+        "before_AST_sha256": "e4785775dd5961e854a7edc62b0ace48488bab446e470d6cdd0998432e53118d",
+        "after_AST_sha256": "e51943c8fa0a4bbb99579dbe53faa17f6febfb736505e714e6ad56aa011e26cb"
+      },
+      {
+        "file": "trading/tests/test_boolean_execution_receipts.py",
+        "function": "test_false_text_from_order_check_cannot_reach_the_actual_send",
+        "before_AST_sha256": "f6656934641f52b50b9262c72cd83ec091221b858e48c6df34b1d47f5f15f76f",
+        "after_AST_sha256": "652aa45dfb0703c00971b2df5b18c842075163ac3a70626efbe9121480263c62"
+      },
+      {
+        "file": "trading/tests/test_boolean_execution_receipts.py",
+        "function": "test_unconfirmed_native_stop_is_not_reported_protected_and_uses_the_actual_flatten_path",
+        "before_AST_sha256": "ecca4b533264ecb8aa84864495b97d346145a2d349e8cb80530166502a5e29b7",
+        "after_AST_sha256": "7abbbf5ae1af5b378ccd94f0dbb2fcc97dad40665b33a9e89ae4b6f09c29beb7"
+      },
+      {
+        "file": "trading/tests/test_provider_entry_deadline.py",
+        "function": "test_actual_router_binds_ctrader_mandate_and_original_quote_through_wire_dispatch",
+        "before_AST_sha256": "c7d3619fad999ade42282bcd0f2b8c0f8ba5b16e02dc80b0fa3ce3e80db36dbb",
+        "after_AST_sha256": "b805c9f04c51539578828fac3012b0a8be2f612545a8c6dc6e6f582c7e400cde"
+      },
+      {
+        "file": "trading/tests/test_receipt_availability_clock.py",
+        "function": "test_experience_rejects_unmeasured_availability_with_a_real_positive_control",
+        "before_AST_sha256": "44554074dcdcbceaedd2c3235c4dbbee4f2648b8050a18893922c2c5b3077f0d",
+        "after_AST_sha256": "036cdd4638ff754ac2c258631bc91447c21c4391d668e89eae63f55270cf8c9e"
+      }
+    ],
+    "raw": "ci/entry_margin_binding_20261028"
+  },
+  "independent_short_side": {
+    "passed": 2,
+    "actual_exit": 0,
+    "included_in_full_run_count": false,
+    "mt5": "original SELL request retained",
+    "ctrader": "actual sell_margin selected, distinct from buy_margin"
+  },
+  "source_authorizations": [
+    "auth-20261022-owner-autonomous-candidate-build"
+  ],
+  "retained_failures": [
+    "Before:actualexit1,2missing capture_entry failures; no completed behavior inferred.",
+    "Focusedr1:12passed1failed; new cTrader test asked .10lots while the explicit original native fixture quoted .123lots. Corrected new test to the exact original .123; the production quantity-match refusal remains.",
+    "Dispatchr1:42passed4failed30declaredPGskips; original native-deadline fixture omitted durable original risk/native context. Only fixture producer corrected; original test functions/assertions unchanged. Fresh realPG later executes all recovery cases.",
+    "FocusedSQLr1 interrupted after original uncertain-entry producer lacked the new read protocol. Actualexit2/partial, exact owned PID independently verified before interrupt; ownedPG absent.",
+    "FocusedSQLr2:2passed1failed. The simulated signed margin response arrived at the next bar, one hour beyond its four-second deadline. The actual native read waits directly on the durable queue result. Fixture now answers read-only MARGIN_QUOTE immediately after its actual queue enqueue through the original signed poll endpoint; effectful order sends retain timeout/lost-ACK boundaries.",
+    "Independent short-side first attempt had2fixture-discovery errors before any functional assertion. The next attempt had2actual owner-key-registration fixture failures; the external module now explicitly imports both existing owner-registration and cleanup fixtures. Third/fourth attempts correctly refused oversized new SHORT fixture requests; their wider stops independently approved less than the requested quantities. The final fixture mirrors the original22pip stop distance around its actual1.10010entry and asserts requested size is within the independently approved original size before the native read. The production original-approval limit remains unchanged. No production authority check was bypassed; final independent2cases pass.",
+    "FullSQLr1 was deliberately interrupted with actual inner/outerexit2 after identifying a cross-record storage-clock regression boundary; only exact owned audit PID597153 was signalled after parent/controller/cmdline verification. Its ownedPG was independently absent; not a passing run. Clock-before independently reproduced2unsafe chronology acceptances; clock-after100focused cases pass, preserving original quote/binding availability.",
+    "RestSQLr1 is a failed run with6consumer-fixture failures:missing original native inputs in2boolean/2cTrader cases and duplicate incomplete original-risk records in2receipt-timing cases. Original behavior assertions remain in the migrated fixtures; final consumer suite57passed. Booleanr1/r2 and consumersr1/r2 failed during explicit native fixture migration; their raw evidence is retained. Final full run includes all cases again without ignores.",
+    "Owner registry command r1 actualexit2:wrong checker CLI rejected --check without changing files. Correct source-contract checker r2 passed."
+  ],
+  "fixture_preservation": "All but5original test functions retain identical AST. The5reviewed consumer tests migrate fixture parameters, keep real behavioral assertions, expand exact boolean-protocol call traces for newly required native reads and remove a duplicate incomplete risk input now supplied by flow. Native deadline fixture now supplies actual durable original risk/native context. Uncertain-entry fixture advertises its explicit simulated margin protocol, answers only read-only requests through signed HTTP, retains effect-only delivery identity and injects lost enqueue ACK only for original ENTRY_OPS. Its one-effect-claim SQL assertion now counts those exact entry operations rather than an unrelated preceding read. No duplicate-effect assertion removed. Native APIs remain explicit source fixtures, not connected broker evidence.",
+  "published_parent": {
+    "head": "0726ee9f4ea6a022442b6e76cfd29392512e7166",
+    "main_run": 40709514471,
+    "public_jobs_success": 17,
+    "required_prerequisite_jobs_failed": 2,
+    "failure_reasons": [
+      "DDS read deploy key unprovisioned",
+      "trusted-main ledger checker missing"
+    ],
+    "supporting_workflows_success": 4,
+    "original_postgres_job": 122890635282,
+    "trading_passed": 5085,
+    "declared_private_DDS_skips": 1,
+    "postgres_passed": 26,
+    "voice_passed": 117,
+    "original_JUnit_archive_independently_verified": false,
+    "native_compile_job_success_original_artifact_readback": "UNAVAILABLE:artifact download tool returned697byte JSON metadata instead of advertised108683byte ZIP; rejected before extraction. Direct approved archive GET denied. No new independent compiler/binary readback claimed."
+  },
+  "formal_acceptances_issued": 0,
+  "limitations": [
+    "No quote creates spendable collateral, reservation, settlement or execution authority. Current risk/mandate/owner/lease/kill/native protections remain their existing owners.",
+    "Shared all-origin transactional cash/margin/stop-risk reservations, active-policy arbitration, qualified FX/contracts/fees/fill contingencies, actual post-fill margin and full working-order/partial-fill/cancel/funding/payment economic finality remain required.",
+    "MT5 original request price is a quote reference, not an independently approved stop/price. cTrader native quote does not accept that price. Native account snapshots are bracketed, not atomic. No pending-order support or provider/account qualification is inferred.",
+    "Every other original backend, ML/learning/crypto/assistant/operations and Android contract remains. Profitability requires evidence, never a guarantee."
+  ],
+  "next": "Commit through genuine Project Truth hook; verify committed ledger against4fd466de; normal push, independent exact remote readback and exact-source CI. Continue existing-ledger all-origin reservations and remaining canonical backend programme; Android only with original gates and actual provisioned-profile/signing/Artemis-S24 evidence."
+}

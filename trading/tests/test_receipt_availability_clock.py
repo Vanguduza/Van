@@ -58,14 +58,11 @@ def test_unknown_availability_retains_account_exposure_without_emitting_timed_le
 
 @pytest.mark.parametrize('qualified',[False,True])
 def test_experience_rejects_unmeasured_availability_with_a_real_positive_control(tmp_path,eurusd,qualified):
-    from dataclasses import asdict,replace
-    from conftest import snapshot
-    from vati.core import make_event
-    from vati.risk.serde import intent_to_dict,snapshot_to_dict
     from vati.learning.episodes import episode_from_ledger,Environment
     sdk,worker,a,clock,m,trade,approved,ledger,router=flow(tmp_path,eurusd)
-    facts=snapshot(replace(eurusd,venue='mt5'),account_alias='native')
-    ledger.append(make_event(EventKind.RISK_DECISION,'vati-cycle',{'decision':asdict(approved),'inputs':{'intent':intent_to_dict(trade),'snapshot':snapshot_to_dict(facts)}},event_time_ms=clock['ms'],received_time_ms=clock['ms'],correlation_id=trade.trade_intent_id))
+    # flow now publishes the complete original risk input itself. A second
+    # incomplete approval would contradict the unique original binding.
+    assert ledger.count(EventKind.RISK_DECISION)==1
     if not qualified:
         original=a.client._transport
         def delayed(request):
