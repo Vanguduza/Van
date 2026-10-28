@@ -23,9 +23,13 @@ def ea(tmp_path_factory):
     names={'JsonEscape','JsonNumber','NativeRefusal','ResolvePositionTicket',
            'NativeIdentityMatches','NativeEntryDeadline','NativeEntryDeadlineCurrent',
            'NativeBindingJson','CashUnavailable','NativeCashJson','NativeMarginJson',
-           'SnapshotJson','PushResult','ExecOrderSend','ExecModifySl','ExecClose'}
+           'SnapshotJson','PushResult','ExecOrderSend','ExecModifySl','ExecClose',
+           'MarginReadAccountScopeJson','NativeUnitsCanonical','NativeUnitsIncrement',
+           'NativeMoneyUnitsFromText','NativeUnitsCompare','NativeUnitsSubtract',
+           'NativeCashAmount','NativeEntryCashScope','NativeEntryCashBound',
+           'NativeCheckCurrentEntryCash','NativePrepareEntryCash'}
     bodies=[]
-    for match in re.finditer(r'^(?:string|void|bool|ulong) (\w+)\([^\n]*\)\s*\{',source,re.M):
+    for match in re.finditer(r'^(?:string|void|bool|ulong|int) (\w+)\([^{};]*?\)\s*\{',source,re.M):
         if match[1] not in names:
             continue
         # Brace-aware lexer: JSON strings/comments also contain braces.
@@ -47,11 +51,12 @@ def ea(tmp_path_factory):
     folder=tmp_path_factory.mktemp('actual-ea-bodies')
     cpp=folder/'ea.cpp'; binary=folder/'ea'
     fixture=Path(__file__).with_name('mql_terminal_fixture.cpp').read_text()
-    cpp.write_text(fixture.replace('// EXTRACTED_EA_FUNCTIONS','\n'.join(bodies)))
-    compiled=subprocess.run(['g++','-std=c++17','-Wall','-Werror','-Wno-sign-compare',str(cpp),'-o',str(binary)],capture_output=True,text=True)
+    structure=source[source.index('struct EntryCashMarginCheck'):source.index('bool NativeCheckCurrentEntryCash(')]
+    cpp.write_text(fixture.replace('// EXTRACTED_EA_FUNCTIONS',structure+'\n'+'\n'.join(bodies)))
+    compiled=subprocess.run(['g++','-std=c++17','-Wall','-Werror','-Wno-sign-compare',str(cpp),'-o',str(binary)],capture_output=True,text=True,timeout=30)
     assert compiled.returncode==0, compiled.stderr
     def run(case):
-        return json.loads(subprocess.check_output([str(binary),case],text=True),parse_float=Decimal)
+        return json.loads(subprocess.check_output([str(binary),case],text=True,timeout=15),parse_float=Decimal)
     return run
 
 
@@ -146,6 +151,42 @@ def test_actual_ea_bounded_entry_still_executes_once_and_advertises_its_protocol
     assert ea('snapshot')['account']['entry_constraints']=={
         'schema':'van.mt5.ea-entry-constraints/1','explicit_deadline':True,
         'required_op':'ORDER_SEND_EXPIRING','framed_fields':18}
+
+
+@pytest.mark.parametrize('case',['entry-cash-credit','entry-cash-used','entry-cash-fraction-boundary',
+    'entry-cash-after','entry-cash-final','entry-cash-limit-insufficient'])
+def test_actual_ea_cash_gate_rejects_before_either_native_entry_effect(ea,case):
+    value=ea(case);result=value['results'][0]
+    assert value['entry_calls']==0 and value['margin_calls']==1 and result['status']=='REJECTED'
+    assert result['reason_code']=='NATIVE_CASH_MARGIN_INSUFFICIENT'
+    if case=='entry-cash-final':assert value['post_margin_cash_reads']==2
+
+
+@pytest.mark.parametrize('case',['entry-cash-missing','entry-cash-nonfinite','entry-cash-units'])
+def test_actual_ea_unavailable_margin_never_becomes_zero_cash_requirement(ea,case):
+    value=ea(case)
+    assert value['entry_calls']==0 and value['results'][0]['reason_code']=='NATIVE_CASH_MARGIN_UNAVAILABLE'
+
+
+@pytest.mark.parametrize('case',['entry-cash-deadline','entry-cash-permission'])
+def test_actual_ea_margin_calculation_cannot_renew_authority(ea,case):
+    value=ea(case)
+    assert value['margin_calls']==1 and value['entry_calls']==0 and value['results'][0]['status']=='REJECTED'
+
+
+@pytest.mark.parametrize('case',['entry-cash-zero','entry-cash-sell','entry-cash-limit-good'])
+def test_actual_ea_cash_positive_paths_preserve_native_entry_kind(ea,case):
+    value=ea(case)
+    assert value['entry_calls']==1 and value['margin_calls']==1
+    assert value['results'][0]['status']==('ACCEPTED' if case=='entry-cash-limit-good' else 'FILLED')
+    assert value['last_margin_side']==(1 if case=='entry-cash-sell' else 0)
+
+
+def test_actual_ea_protective_controls_still_work_without_entry_cash(ea):
+    closed=ea('cash-protective-close');modified=ea('cash-protective-modify')
+    assert closed['close_calls']==1 and closed['results'][0]['status']=='FILLED'
+    assert modified['modify_calls']==1 and modified['results'][0]['ok'] is True
+    assert closed['margin_calls']==modified['margin_calls']==0
 
 
 @pytest.mark.parametrize('case',['unknown-close','partial-close'])

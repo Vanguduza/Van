@@ -303,6 +303,183 @@ string MarginReadAccountScopeJson()
       AccountInfoInteger(ACCOUNT_LEVERAGE),AccountInfoInteger(ACCOUNT_MARGIN_MODE));
 }
 
+// BEGIN_NATIVE_CASH_UNITS
+// Native API doubles cross to original 17-digit text before money decisions.
+// All subsequent rounding, subtraction and comparisons use integer strings.
+string NativeUnitsCanonical(string value)
+{
+   while(StringLen(value)>1 && StringGetCharacter(value,0)=='0') value=StringSubstr(value,1);
+   return value;
+}
+
+string NativeUnitsIncrement(string value)
+{
+   for(int i=StringLen(value)-1;i>=0;i--)
+   {
+      int digit=(int)StringGetCharacter(value,i)-'0';
+      if(digit<9) { StringSetCharacter(value,i,(ushort)('0'+digit+1)); return value; }
+      StringSetCharacter(value,i,'0');
+   }
+   return "1"+value;
+}
+
+bool NativeMoneyUnitsFromText(string text,int scale,bool roundUp,string &units)
+{
+   units="";
+   if(scale<0 || scale>16 || StringLen(text)<1 || StringLen(text)>64) return false;
+   bool negative=false;
+   if(StringGetCharacter(text,0)=='-') { negative=true; text=StringSubstr(text,1); }
+   string digits="";int fraction=0;bool dot=false;int i=0;
+   for(;i<StringLen(text);i++)
+   {
+      int c=(int)StringGetCharacter(text,i);
+      if(c=='e' || c=='E') break;
+      if(c=='.') { if(dot || StringLen(digits)==0) return false; dot=true; continue; }
+      if(c<'0' || c>'9') return false;
+      digits+=StringSubstr(text,i,1);if(dot) fraction++;
+   }
+   if(StringLen(digits)==0 || (dot && fraction==0)) return false;
+   int exponent=0;
+   if(i<StringLen(text))
+   {
+      i++;bool minus=false;
+      if(i<StringLen(text) && (StringGetCharacter(text,i)=='-' || StringGetCharacter(text,i)=='+'))
+      { minus=StringGetCharacter(text,i)=='-';i++; }
+      if(i>=StringLen(text)) return false;
+      for(;i<StringLen(text);i++)
+      {
+         int c=(int)StringGetCharacter(text,i);if(c<'0' || c>'9') return false;
+         exponent=exponent*10+c-'0';if(exponent>400) return false;
+      }
+      if(minus) exponent=-exponent;
+   }
+   digits=NativeUnitsCanonical(digits);
+   if(negative && digits!="0") return false;
+   int shift=scale+exponent-fraction;
+   if(shift>=0)
+   {
+      if(StringLen(digits)+shift>512) return false;
+      units=digits;if(units!="0") for(int n=0;n<shift;n++) units+="0";
+      return true;
+   }
+   int keep=StringLen(digits)+shift;
+   units=keep>0 ? NativeUnitsCanonical(StringSubstr(digits,0,keep)) : "0";
+   bool remainder=false;
+   for(int n=keep>0 ? keep : 0;n<StringLen(digits);n++)
+      if(StringGetCharacter(digits,n)!='0') { remainder=true;break; }
+   if(roundUp && remainder) units=NativeUnitsIncrement(units);
+   return true;
+}
+
+int NativeUnitsCompare(const string a,const string b)
+{
+   if(StringLen(a)!=StringLen(b)) return StringLen(a)<StringLen(b) ? -1 : 1;
+   return StringCompare(a,b);
+}
+
+bool NativeUnitsSubtract(const string a,const string b,string &result)
+{
+   if(NativeUnitsCompare(a,b)<0) return false;
+   result=a;int borrow=0;int j=StringLen(b)-1;
+   for(int i=StringLen(a)-1;i>=0;i--,j--)
+   {
+      int value=(int)StringGetCharacter(a,i)-'0'-borrow;
+      if(j>=0) value-=(int)StringGetCharacter(b,j)-'0';
+      borrow=value<0 ? 1 : 0;if(borrow) value+=10;
+      StringSetCharacter(result,i,(ushort)('0'+value));
+   }
+   if(borrow!=0) return false;
+   result=NativeUnitsCanonical(result);return true;
+}
+// END_NATIVE_CASH_UNITS
+
+bool NativeCashAmount(ENUM_ACCOUNT_INFO_DOUBLE field,double &value)
+{
+   ResetLastError();value=AccountInfoDouble(field);
+   return GetLastError()==0 && MathIsValidNumber(value);
+}
+
+bool NativeEntryCashScope(string &scope,int &digits)
+{
+   ResetLastError();scope=MarginReadAccountScopeJson();
+   long unit=AccountInfoInteger(ACCOUNT_CURRENCY_DIGITS);
+   long leverage=AccountInfoInteger(ACCOUNT_LEVERAGE),mode=AccountInfoInteger(ACCOUNT_MARGIN_MODE);
+   if(GetLastError()!=0 || unit<0 || unit>16 || leverage<=0 || mode<0 || mode>2) return false;
+   digits=(int)unit;return true;
+}
+
+bool NativeEntryCashBound(const string expectedScope,int digits,string &capacity)
+{
+   string scope;int observedDigits;
+   if(!NativeEntryCashScope(scope,observedDigits) || scope!=expectedScope || observedDigits!=digits) return false;
+   double equity,credit,used,free;
+   if(!NativeCashAmount(ACCOUNT_EQUITY,equity) || !NativeCashAmount(ACCOUNT_CREDIT,credit)
+      || !NativeCashAmount(ACCOUNT_MARGIN,used) || !NativeCashAmount(ACCOUNT_MARGIN_FREE,free)) return false;
+   if(credit<0 || used<0) return false;
+   if(equity<=0 || free<=0)
+   {
+      if(!NativeEntryCashScope(scope,observedDigits) || scope!=expectedScope || observedDigits!=digits) return false;
+      capacity="0";return true;
+   }
+   string e,c,u,f,net;
+   if(!NativeMoneyUnitsFromText(JsonNumber(equity),digits,false,e)
+      || !NativeMoneyUnitsFromText(JsonNumber(credit),digits,true,c)
+      || !NativeMoneyUnitsFromText(JsonNumber(used),digits,true,u)
+      || !NativeMoneyUnitsFromText(JsonNumber(free),digits,false,f)) return false;
+   if(!NativeUnitsSubtract(e,c,net) || !NativeUnitsSubtract(net,u,capacity)) capacity="0";
+   if(!NativeEntryCashScope(scope,observedDigits) || scope!=expectedScope || observedDigits!=digits) return false;
+   if(NativeUnitsCompare(f,capacity)<0) capacity=f;
+   return true;
+}
+
+struct EntryCashMarginCheck
+{
+   string scope;
+   int digits;
+   string required;
+   string originalCapacity;
+   string failureCode;
+};
+
+bool NativeCheckCurrentEntryCash(EntryCashMarginCheck &check)
+{
+   check.failureCode="NATIVE_CASH_MARGIN_UNAVAILABLE";
+   string scope,capacity;int digits;
+   if(!NativeEntryCashScope(scope,digits) || scope!=check.scope || digits!=check.digits
+      || !NativeEntryCashBound(check.scope,digits,capacity)) return false;
+   if(NativeUnitsCompare(check.originalCapacity,capacity)<0) capacity=check.originalCapacity;
+   if(capacity=="0" || NativeUnitsCompare(check.required,capacity)>0)
+   { check.failureCode="NATIVE_CASH_MARGIN_INSUFFICIENT";return false; }
+   check.failureCode="";return true;
+}
+
+bool NativePrepareEntryCash(const string symbol,const string side,double volume,double price,
+   const string orderType,EntryCashMarginCheck &check)
+{
+   check.failureCode="NATIVE_CASH_MARGIN_UNAVAILABLE";
+   string before;int digits;
+   if(!NativeEntryCashScope(check.scope,check.digits) || !NativeEntryCashBound(check.scope,check.digits,before)) return false;
+   if(before=="0") { check.failureCode="NATIVE_CASH_MARGIN_INSUFFICIENT";return false; }
+   if(orderType=="MARKET")
+   {
+      MqlTick tick;if(!SymbolInfoTick(symbol,tick)) return false;
+      price=side=="BUY" ? tick.ask : tick.bid;
+   }
+   if(!MathIsValidNumber(price) || price<=0) return false;
+   double required;
+   ResetLastError();
+   if(!OrderCalcMargin(side=="BUY" ? ORDER_TYPE_BUY : ORDER_TYPE_SELL,symbol,volume,price,required)
+      || GetLastError()!=0 || !MathIsValidNumber(required) || required<0
+      || !NativeMoneyUnitsFromText(JsonNumber(required),check.digits,true,check.required)) return false;
+   string after,scope;
+   if(!NativeEntryCashScope(scope,digits) || scope!=check.scope || digits!=check.digits
+      || !NativeEntryCashBound(check.scope,digits,after)) return false;
+   check.originalCapacity=NativeUnitsCompare(before,after)<0 ? before : after;
+   if(check.originalCapacity=="0" || NativeUnitsCompare(check.required,check.originalCapacity)>0)
+   { check.failureCode="NATIVE_CASH_MARGIN_INSUFFICIENT";return false; }
+   check.failureCode="";return true;
+}
+
 string MarginReadContractJson(const string symbol)
 {
    double minimum=0,step=0,maximum=0,tick=0;
@@ -479,6 +656,9 @@ void ExecOrderSend(const string id, const string symbol, const string side, doub
    }
    trade.SetExpertMagicNumber(magic);
    trade.SetDeviationInPoints(deviation);
+   EntryCashMarginCheck cashCheck;
+   if(!NativePrepareEntryCash(symbol,side,volume,price,orderType,cashCheck) || !NativeCheckCurrentEntryCash(cashCheck))
+   { PushResult(StringFormat("{\"id\":%s,\"status\":\"REJECTED\",\"volume\":\"0\",\"reason_code\":\"%s\",\"reason\":\"%s: native cash-backed margin %s; not dispatched\"}", id, cashCheck.failureCode,cashCheck.failureCode,cashCheck.failureCode=="NATIVE_CASH_MARGIN_INSUFFICIENT" ? "insufficient" : "unavailable")); return; }
    if(!NativeIdentityMatches(binding) || !NativeEntryDeadlineCurrent(deadlineMs) || !TerminalInfoInteger(TERMINAL_CONNECTED) || !TerminalInfoInteger(TERMINAL_TRADE_ALLOWED) || !AccountInfoInteger(ACCOUNT_TRADE_ALLOWED) || !AccountInfoInteger(ACCOUNT_TRADE_EXPERT) || !MQLInfoInteger(MQL_TRADE_ALLOWED))
    { PushResult(StringFormat("{\"id\":%s,\"status\":\"REJECTED\",\"volume\":\"0\",\"reason\":\"native entry authority expired or changed before dispatch\"}", id)); return; }
    bool ok;

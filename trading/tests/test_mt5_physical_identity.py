@@ -60,25 +60,26 @@ def test_the_terminal_login_cache_cannot_transfer_a_login_number_across_servers(
 
 
 def test_parallel_aliases_cannot_switch_the_terminal_between_identity_check_and_send(tmp_path):
-    class Terminal:
+    class Terminal(worker_mod.Terminal):
         def __init__(self):
+            super().__init__(PhysicalMt5())
             self.selected=None;self.sends=[];self.first_sending=threading.Event();self.second_sending=threading.Event()
-        def login(self,login,server,password):self.selected=server;return True
-        def account(self):return {'login':12345678,'server':self.selected,'currency':'USD','demo':True,'trade_allowed':True}
+        def login(self,login,server,password):self.selected=server;self.mt5.server=server;return True
         def order_send(self,body,*,before_dispatch):
             if body['alias']=='account_one':
                 self.first_sending.set();self.second_sending.wait(timeout=0.5)
             else:self.second_sending.set()
-            before_dispatch()
-            self.sends.append((body['alias'],self.selected))
-            return {'status':'FILLED'}
+            result=super().order_send(body,before_dispatch=before_dispatch)
+            if result['status']=='FILLED':self.sends.append((body['alias'],self.selected))
+            return result
     terminal=Terminal();cfg={'nonce_store':str(tmp_path/'worker-nonces.sqlite'),'accounts':{}}
     for alias in ['account_one','account_two']:
         cfg['accounts'][alias]={'login':12345678,'server':alias,'currency':'USD','demo':True}
     worker=worker_mod.Worker(cfg,terminal,KEY,clock=lambda:1000000)
     from vati.execution.mt5_bridge import BridgeRequest
     signer=Mt5BridgeClient(signing_key=KEY)
-    requests=[signer.sign(BridgeRequest('order_send',index+1,1000000,{'alias':alias})).__dict__
+    requests=[signer.sign(BridgeRequest('order_send',index+1,1000000,{'alias':alias,'symbol':'EURUSD',
+        'type':'BUY','volume':'0.1','price':'1.1','sl':'1.09','order_type':'MARKET'})).__dict__
         for index,alias in enumerate(cfg['accounts'])]
     with ThreadPoolExecutor(max_workers=2) as pool:
         first=pool.submit(worker.handle,requests[0])

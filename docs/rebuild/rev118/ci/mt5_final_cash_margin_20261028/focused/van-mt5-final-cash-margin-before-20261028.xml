@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="2" skipped="0" tests="3" time="0.273" timestamp="2026-10-28T11:44:33.048683+00:00" hostname="6e9feff21467"><testcase classname="trading.tests.test_mt5_final_cash_margin" name="test_original_signed_entry_cannot_spend_credit_or_more_than_cash_free_capacity[facts0]" time="0.055"><failure message="AssertionError: actual native order_send was reached despite insufficient cash-backed margin&#10;assert not [{'action': 1, 'symbol': 'EURUSD', 'volume': 0.1, 'sl': 1.098, ...}]&#10; +  where [{'action': 1, 'symbol': 'EURUSD', 'volume': 0.1, 'sl': 1.098, ...}] = &lt;test_mt5_final_cash_margin.EntryCashSdk object at 0x7f16e30b8b30&gt;.sent">tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-102/test_original_signed_entry_can0')
+facts = {'equity': 100.0, 'credit': 95.0, 'used': 0.0, 'reported_free': 100.0}
+
+    @pytest.mark.parametrize('facts',[{'equity':100.,'credit':95.,'used':0.,'reported_free':100.},
+        {'equity':100.,'credit':0.,'used':90.,'reported_free':100.}])
+    def test_original_signed_entry_cannot_spend_credit_or_more_than_cash_free_capacity(tmp_path,facts):
+        sdk,worker,adapter,now=connection(tmp_path,EntryCashSdk(**facts));sdk.margin_value=33.25
+        receipt=adapter.submit(command(adapter.account_alias),now_ms=now['ms'])
+&gt;       assert not sdk.sent,'actual native order_send was reached despite insufficient cash-backed margin'
+E       AssertionError: actual native order_send was reached despite insufficient cash-backed margin
+E       assert not [{'action': 1, 'symbol': 'EURUSD', 'volume': 0.1, 'sl': 1.098, ...}]
+E        +  where [{'action': 1, 'symbol': 'EURUSD', 'volume': 0.1, 'sl': 1.098, ...}] = &lt;test_mt5_final_cash_margin.EntryCashSdk object at 0x7f16e30b8b30&gt;.sent
+
+trading/tests/test_mt5_final_cash_margin.py:31: AssertionError</failure></testcase><testcase classname="trading.tests.test_mt5_final_cash_margin" name="test_original_signed_entry_cannot_spend_credit_or_more_than_cash_free_capacity[facts1]" time="0.005"><failure message="AssertionError: actual native order_send was reached despite insufficient cash-backed margin&#10;assert not [{'action': 1, 'symbol': 'EURUSD', 'volume': 0.1, 'sl': 1.098, ...}]&#10; +  where [{'action': 1, 'symbol': 'EURUSD', 'volume': 0.1, 'sl': 1.098, ...}] = &lt;test_mt5_final_cash_margin.EntryCashSdk object at 0x7f16e311fb60&gt;.sent">tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-102/test_original_signed_entry_can1')
+facts = {'equity': 100.0, 'credit': 0.0, 'used': 90.0, 'reported_free': 100.0}
+
+    @pytest.mark.parametrize('facts',[{'equity':100.,'credit':95.,'used':0.,'reported_free':100.},
+        {'equity':100.,'credit':0.,'used':90.,'reported_free':100.}])
+    def test_original_signed_entry_cannot_spend_credit_or_more_than_cash_free_capacity(tmp_path,facts):
+        sdk,worker,adapter,now=connection(tmp_path,EntryCashSdk(**facts));sdk.margin_value=33.25
+        receipt=adapter.submit(command(adapter.account_alias),now_ms=now['ms'])
+&gt;       assert not sdk.sent,'actual native order_send was reached despite insufficient cash-backed margin'
+E       AssertionError: actual native order_send was reached despite insufficient cash-backed margin
+E       assert not [{'action': 1, 'symbol': 'EURUSD', 'volume': 0.1, 'sl': 1.098, ...}]
+E        +  where [{'action': 1, 'symbol': 'EURUSD', 'volume': 0.1, 'sl': 1.098, ...}] = &lt;test_mt5_final_cash_margin.EntryCashSdk object at 0x7f16e311fb60&gt;.sent
+
+trading/tests/test_mt5_final_cash_margin.py:31: AssertionError</failure></testcase><testcase classname="trading.tests.test_mt5_final_cash_margin" name="test_original_signed_entry_with_sufficient_native_cash_retains_fill_and_protection" time="0.006" /></testsuite></testsuites>

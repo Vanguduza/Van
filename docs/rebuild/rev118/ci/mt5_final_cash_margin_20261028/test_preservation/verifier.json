@@ -1,0 +1,9 @@
+{
+  "original_test_functions_unchanged_AST": 40,
+  "all_original_test_function_names_preserved": true,
+  "reviewed_test_fixture_boundary_changes": {
+    "test_parallel_aliases_cannot_switch_the_terminal_between_identity_check_and_send": "Original assertions identical. Fixture now executes actual Terminal native preparation instead of bypassing it.",
+    "test_final_native_account_read_cannot_extend_the_signed_time_window": "Delay is injected at the actual final_entry_guard account read. REJECTED and no-native-send conditions retained; exactly one final-read injection replaces obsolete third-read numbering."
+  },
+  "actual_EA_function_bodies": "Exact source bodies remain extracted; dependency set/struct/API fixture expanded. No original EA control assertion removed."
+}

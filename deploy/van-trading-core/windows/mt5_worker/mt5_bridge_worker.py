@@ -32,10 +32,16 @@ import threading
 import time
 from decimal import Decimal
 from fractions import Fraction
+from collections import namedtuple
 from datetime import datetime, timezone
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from typing import Any, Callable, Optional
+
+_EntryCashMargin = namedtuple('_EntryCashMargin', 'scope required_units cash_bounds')
+
+class _EntryCashMarginInsufficient(ValueError):
+    pass
 
 OPS = ("sync_account", "sync_symbols", "symbol_contract", "quote_snapshot", "expected_margin", "order_check", "order_send", "order_send_expiring", "positions", "orders", "history", "modify_sl_tp", "close")
 SKEW_MS = 5000
@@ -415,7 +421,67 @@ class Terminal:
         r = self.mt5.order_check(request)
         return {"ok": r is not None and r.retcode == 0, "retcode": getattr(r, "retcode", None), "reason": getattr(r, "comment", ""), "margin": str(getattr(r, "margin", "")), "margin_free": str(getattr(r, "margin_free", ""))}
 
-    def order_send(self, b: dict, *, before_dispatch: Optional[Callable[[], None]] = None) -> dict:
+    @staticmethod
+    def _entry_cash_scope(account):
+        keys=('login','server','demo','currency','currency_digits','leverage','margin_mode')
+        if (type(account.get('login')) is not int or account['login']<=0
+                or any(type(account.get(k)) is not str or not account[k] for k in ('server','currency'))
+                or type(account.get('demo')) is not bool
+                or type(account.get('currency_digits')) is not int or not 0<=account['currency_digits']<=16
+                or type(account.get('leverage')) is not int or account['leverage']<=0
+                or type(account.get('margin_mode')) is not int or account['margin_mode'] not in (0,1,2)):
+            raise ValueError('native entry cash scope unavailable')
+        return tuple(account[k] for k in keys)
+
+    @staticmethod
+    def _entry_cash_amount(value):
+        if type(value) is not str or not 1<=len(value)<=128:
+            raise ValueError('native entry cash amount unavailable')
+        amount=Decimal(value)
+        if not amount.is_finite() or abs(amount.as_tuple().exponent)>64:
+            raise ValueError('native entry cash amount unavailable')
+        return Fraction(amount)
+
+    def _entry_cash_bound(self,account):
+        self._entry_cash_scope(account)
+        equity,credit,used,free=(self._entry_cash_amount(account[k])
+            for k in ('equity','credit','margin_used','margin_free'))
+        if credit<0 or used<0:raise ValueError('native entry cash liabilities unavailable')
+        scale=10**account['currency_digits']
+        ceil=lambda value:-((-value.numerator)//value.denominator)
+        # Monetary comparisons use original exact text and declared account
+        # units. Available amounts round down; commitments round up.
+        return min((equity*scale).__floor__()-ceil(credit*scale)-ceil(used*scale),
+            (free*scale).__floor__())
+
+    def _check_entry_cash_margin(self,observation,account):
+        if type(observation) is not _EntryCashMargin or self._entry_cash_scope(account)!=observation.scope:
+            raise ValueError('native entry cash scope changed')
+        capacity=min(*observation.cash_bounds,self._entry_cash_bound(account))
+        if capacity<=0 or observation.required_units>capacity:
+            raise _EntryCashMarginInsufficient('native entry cash-backed margin insufficient')
+
+    @staticmethod
+    def _entry_cash_refused(insufficient):
+        code='NATIVE_CASH_MARGIN_INSUFFICIENT' if insufficient else 'NATIVE_CASH_MARGIN_UNAVAILABLE'
+        reason='insufficient' if insufficient else 'unavailable'
+        return {'status':'REJECTED','volume':'0','reason_code':code,
+            'reason':code+': native cash-backed margin '+reason+'; not dispatched'}
+
+    def _entry_cash_margin(self,body,request):
+        before=self.account();scope=self._entry_cash_scope(before)
+        side=self.mt5.ORDER_TYPE_BUY if body['type']=='BUY' else self.mt5.ORDER_TYPE_SELL
+        value=self.mt5.order_calc_margin(side,body['symbol'],request['volume'],request['price'])
+        if type(value) not in (int,float) or not math.isfinite(value) or value<0:
+            raise ValueError('native entry margin not observed')
+        required=self._entry_cash_amount(str(value))*10**before['currency_digits']
+        units=-((-required.numerator)//required.denominator)
+        after=self.account()
+        observation=_EntryCashMargin(scope,units,(self._entry_cash_bound(before),self._entry_cash_bound(after)))
+        self._check_entry_cash_margin(observation,after)
+        return observation
+
+    def order_send(self, b: dict, *, before_dispatch: Optional[Callable] = None) -> dict:
         if not b.get("sl"):
             return {"status": "REJECTED", "reason": "protective stop (sl) required in the same request"}
         m = self.mt5
@@ -424,10 +490,17 @@ class Terminal:
             return {'status':'REJECTED','volume':'0','reason':'invalid native entry parameters'}
         if not self._netting_symbol_clear(b['symbol']):
             return {'status':'REJECTED','volume':'0','reason':'netting symbol has existing or unknown exposure; allocation reconciliation required'}
+        try:cash_margin=self._entry_cash_margin(b,request)
+        except _EntryCashMarginInsufficient:
+            return self._entry_cash_refused(True)
+        except Exception:
+            return self._entry_cash_refused(False)
         # Native symbol/tick/exposure reads can block after signed admission.
         # The worker supplies this private guard; it is not a request field.
         if before_dispatch is not None:
-            try:before_dispatch()
+            try:before_dispatch(margin_observation=cash_margin)
+            except _EntryCashMarginInsufficient:
+                return self._entry_cash_refused(True)
             except Exception:
                 return {'status':'REJECTED','volume':'0','reason':'native final entry authorization unavailable; not dispatched'}
         r = m.order_send(request)
@@ -651,13 +724,14 @@ class Worker:
                     elif a.get("trade_allowed") is not True:
                         out = {"status": "REJECTED", "reason": "terminal trade not allowed"}
                     else:
-                        def final_entry_guard():
+                        def final_entry_guard(*,margin_observation=None):
                             current=self.t.account()
                             if (type(current.get('login')) is not int or str(current['login'])!=physical['login']
                                 or current.get('server')!=physical['server'] or current.get('currency')!=physical['currency']
                                 or type(current.get('demo')) is not bool or current['demo'] is not physical['demo']
                                 or current.get('trade_allowed') is not True):
                                 raise PermissionError('native entry identity or permissions changed')
+                            self.t._check_entry_cash_margin(margin_observation,current)
                             # Check after the final native read as well as at
                             # HTTP admission. This does not renew signed time.
                             if abs(self.clock()-int(req['issued_ms']))>SKEW_MS:

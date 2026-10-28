@@ -46,11 +46,12 @@ class FakeMt5:
 
     def initialize(self): return True
     def login(self, login, password=None, server=None): self.login_calls.append((login, server, "pw-redacted")); return login == self._login and password == "s3cret"
-    def account_info(self): return NS(login=self._login, server="Broker-Demo", trade_mode=0, equity=10_250.5, balance=10_000.0, currency="USD", margin_free=9_000.0, leverage=30, margin_mode=2, trade_allowed=self.trade_allowed,trade_expert=self.expert_allowed)
+    def account_info(self): return NS(login=self._login, server="Broker-Demo", trade_mode=0, equity=10_250.5, balance=10_000.0, currency="USD", credit=0.0, currency_digits=2, margin=0.0, margin_level=0.0, margin_free=9_000.0, leverage=30, margin_mode=2, trade_allowed=self.trade_allowed,trade_expert=self.expert_allowed)
     def terminal_info(self): return NS(connected=self.connected,trade_allowed=self.terminal_trade_allowed,tradeapi_disabled=self.tradeapi_disabled)
     def symbol_info(self, s): return NS(volume_min=0.01, volume_step=0.01, volume_max=100.0, trade_stops_level=5, point=0.00001, digits=5, trade_contract_size=100000.0, trade_tick_value=1.0, trade_tick_size=0.00001, spread=8, trade_mode=4)
     def symbol_info_tick(self, s): return NS(bid=1.10000, ask=1.10008)
     def order_check(self, req): return NS(retcode=0, comment="ok", margin=33.0, margin_free=8967.0)
+    def order_calc_margin(self, side, symbol, volume, price): return 33.0
     def order_send(self, req):
         self.sent.append(req)
         if req["action"] == self.TRADE_ACTION_SLTP:

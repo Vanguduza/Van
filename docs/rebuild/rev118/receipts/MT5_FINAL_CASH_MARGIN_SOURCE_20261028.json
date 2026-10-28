@@ -1,0 +1,51 @@
+{
+  "schema": "van.rev118.mt5-final-cash-margin-source/1",
+  "source_parent": "bf41e16b0213431eeaeb33da96676cfb7dc47477",
+  "observed_at_utc": "2026-10-28T12:56:04.296842+00:00",
+  "source_files_sha256": {
+    "deploy/van-trading-core/mql5/VanBridgeEA.mq5": "40d15b43f2cba20a5c8dadec6db245cecc105c17a70e216ac98adb39e166bb1f",
+    "deploy/van-trading-core/windows/mt5_worker/README.md": "d0511cb1f54d5cbc8c447fe88f3f29044c6f40dcacf6758df7ef7cc8c1b52f0f",
+    "deploy/van-trading-core/windows/mt5_worker/mt5_bridge_worker.py": "9a5cc0f179e37faa0eb9099b198305665e1fbfa2123db2eabb2758b17589393c",
+    "tests/rebuild/test_mt5_cash_unit_source.py": "14bd93372f1ba356aa74be32fa5636951577dcd28100b043826e2c110785d4cb",
+    "trading/tests/mql_terminal_fixture.cpp": "86bb8de0fee529c2bdafbc3e9dd43d45e1493dfb498b4345cb3ce55b0f4769f0",
+    "trading/tests/test_mql_native_function_bodies.py": "fe80b9f7a58e343b05686e3700359027a5e4cfcded1ada39abf01c0409871b3b",
+    "trading/tests/test_mt5_final_cash_margin.py": "b9c0bb2180d386100e77d4aa20cde040a502544a6e5829773580138cb5fb9693",
+    "trading/tests/test_mt5_final_native_entry_fence.py": "ac12e3eb84ef802eb5100e7e60ffaee4bb18ef5f1916a13654b38d8ed9373ce7",
+    "trading/tests/test_mt5_physical_identity.py": "84e17af7563c9a47bc6af46b610976128020824d87710d327629513188e8f807",
+    "trading/tests/test_mt5_worker.py": "1403bdcca0cd645a406a723a15b09f9fa39bef9d7f5d555ab19fb51c05fc2735"
+  },
+  "implementation": "Final MT5 SDK and EA entry paths now calculate original native isolated margin and compare against cash-backed capacity before native handoff. Credit cannot fund entry risk; available amounts round down and requirements up at original account precision. SDK uses exact Fraction over original text; EA uses 17-digit original text and integer-string arithmetic. Scope and cash are rechecked around calculation and at the final guard; original identity/permission/deadline checks remain. Known insufficient and unavailable facts remain distinct; explicit zero native requirement works with positive cash. Market/limit/native side and protective tighten/close behavior are preserved. Baseline actual signed SDK fixture reached unsafe native sends in2cases; exact original published EA entry body also reached2unsafe simulated sends. These are explicit source fixtures, not connected brokers. Final full source qualification:5215passed0skip/fail/error/audit,actualinner/outerexit0,everycallonce,all1258inputhashesmatchincludingactualCPPfixture/SDK/EA/README,ownedPostgreSQLindependentlyabsent. Original failed attempts remain retained. Actual new EA MetaEditor compilation PENDING exact-source hosted job. Shared reservations/post-entry margin floors/fee-and-fill contingencies/full valuation and financial qualification remain open.0formal/native/production/S24acceptancesissued.",
+  "source_result": {
+    "actual_inner_exit": 0,
+    "actual_outer_exit": 0,
+    "passed": 5215,
+    "skipped": 0,
+    "failures": 0,
+    "errors": 0,
+    "audit_violations": 0,
+    "unique_calls_once": 5215,
+    "pinned_inputs_matched": 1258,
+    "owned_postgres_independently_absent": true,
+    "raw": "ci/mt5_final_cash_margin_20261028/sql_r2"
+  },
+  "source_authorizations": [
+    "auth-20261022-owner-autonomous-candidate-build",
+    "auth-20261023-owner-native-worker-source"
+  ],
+  "retained_failures": [
+    "Signed SDK baseline actualexit1:2unsafe sends/1healthycontrolpass.",
+    "Original SDK regressionr1:52passed4failed; legacy native fixture lacked explicit cash/calculator facts, and a mutex dummy terminal bypassed actual native preparation. Explicit facts and real Terminal source path restored while original assertions remained.",
+    "First fullSQLr1 actualexit1:5139passed1failed60errors0skip. Existing actual-EA extractor omitted new cash helper dependencies; old final-clock fixture counted the former third read. Extractor now includes exact helper bodies/struct and original API-model facts. Clock delay now targets actual final guard read. All original assertions and financial source code retained.",
+    "Original EA entry-body verifier first completed behavioral assertions but exited1 while serializing Decimal artifact values. Exact Decimal text encoding repaired the artifact path; rerun actualexit0. Original failed process/log retained."
+  ],
+  "source_math_qualification": "Exact EA function bodies executed through the existing controlled C++ terminal model and independent Fraction oracle. This is not MetaTrader runtime; changed EA native compilation remains separately pending.",
+  "native_EA_compilation": "PENDING_EXACT_MODIFIED_SOURCE_HOSTED_JOB",
+  "formal_acceptances_issued": 0,
+  "limitations": [
+    "A final native cash check is not a shared all-origin transactional reservation, post-entry margin floor, fee/fill-price contingency, qualified FX/contract migration or economic finality. All remain required.",
+    "Native doubles enter as original declared-format text. Down/up rounding supplies conservative bounds, not an invented exact broker debit or timestamped conversion. Source bracket checks do not claim atomic native account snapshots.",
+    "Linux SDK/EA responses and C++ API services are explicit fixtures. No connected account/provider/financial/native handset acceptance is claimed. Python storage audit is not an OS sandbox.",
+    "All remaining funding/payment/manual/handover, feeds/forecasts/learning/crypto/assistant/security/operations and Android functionality remains required. Profitability is evaluated with evidence, never guaranteed."
+  ],
+  "next": "Genuine hooks, required committed-baseline verify, normal exact publication, fresh changed-EA native compilation and exact-head source CI. Continue complete shared financial reservations/current policy/reconciliation and the full backend-to-Android programme."
+}

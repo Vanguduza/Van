@@ -33,15 +33,18 @@ def test_current_signed_entry_still_reaches_exactly_one_native_sdk_send(tmp_path
 
 
 def test_final_native_account_read_cannot_extend_the_signed_time_window(tmp_path):
-    worker,signer,native=build(tmp_path);clock={'now':1000000,'reads':0};worker.clock=lambda:clock['now']
+    import sys
+    worker,signer,native=build(tmp_path);clock={'now':1000000,'reads':0,'final_reads':0};worker.clock=lambda:clock['now']
     account=native.account_info
     def delayed_account():
         clock['reads']+=1
         result=account()
-        if clock['reads']==3:clock['now']+=worker_mod.SKEW_MS+1
+        if sys._getframe(2).f_code.co_name=='final_entry_guard':
+            clock['final_reads']+=1
+            clock['now']+=worker_mod.SKEW_MS+1
         return result
     native.account_info=delayed_account
     request=signer.sign(BridgeRequest('order_send',1,1000000,{'alias':'fx_primary','symbol':'EURUSD',
         'type':'BUY','volume':'0.1','price':'1.1','sl':'1.09','order_type':'MARKET'}))
     result=worker.handle(request.__dict__)
-    assert result.get('status')=='REJECTED' and clock['reads']==3 and not native.sent,result
+    assert result.get('status')=='REJECTED' and clock['final_reads']==1 and clock['reads']>=3 and not native.sent,result
