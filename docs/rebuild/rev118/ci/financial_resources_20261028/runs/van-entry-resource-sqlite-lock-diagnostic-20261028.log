@@ -1,0 +1,12 @@
+============================= test session starts ==============================
+platform linux -- Python 3.12.14, pytest-9.1.1, pluggy-1.6.0 -- /workspace/van-backend-venv-20261025/bin/python
+cachedir: .pytest_cache
+rootdir: /workspace/van-review-2026-10-18/publish
+configfile: pytest.ini
+plugins: asyncio-1.4.0, anyio-4.15.1
+asyncio: mode=Mode.AUTO, debug=False, asyncio_default_fixture_loop_scope=function, asyncio_default_test_loop_scope=function
+collecting ... collected 1 item
+
+trading/tests/test_provisional_resource_book.py::test_independent_sqlite_connections_serialize_distinct_entries_and_keep_the_first_hold PASSED [100%]
+
+============================== 1 passed in 1.18s ===============================

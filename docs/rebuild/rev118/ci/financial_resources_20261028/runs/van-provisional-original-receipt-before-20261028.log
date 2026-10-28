@@ -1,0 +1,29 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+_____ test_later_requirement_list_cannot_rewrite_an_original_durable_hold ______
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-185/test_later_requirement_list_ca0')
+eurusd = SymbolContract(symbol='EURUSD', venue='mt5', base_currency='EUR', quote_currency='USD', account_currency='USD', contra...=Decimal('0'), max_adv_participation=Decimal('0.10'), liquidity_haircut=Decimal('0'), round_trip_cost_pct=Decimal('0'))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f58b3510800>
+
+    def test_later_requirement_list_cannot_rewrite_an_original_durable_hold(tmp_path,eurusd,monkeypatch):
+        import vati.risk.provisional_resource_book as module
+        sdk,clock,ledger,command,margin,current,authority,book,router=prepared(tmp_path,eurusd)
+        try:
+            original=book.reserve_entry(command,margin,current,authority);count=ledger.count()
+            assert 'FEES' in original['missing_requirements']
+            monkeypatch.setattr(module,'MISSING',[])
+            replay=book.reserve_entry(command,margin,current,None)
+>           assert replay==original,'historical readback silently removed original unresolved obligations'
+E           AssertionError: historical readback silently removed original unresolved obligations
+E           assert {'record_ref'...CE_HOLD', ...} == {'record_ref'...CE_HOLD', ...}
+E             
+E             Omitting 10 identical items, use -vv to show
+E             Differing items:
+E             {'missing_requirements': []} != {'missing_requirements': ['FEES', 'FILL_CONTINGENCIES', 'NATIVE_CONTRACT_VALUATION', 'PRICE_AND_ORDER_SEMANTICS', 'PORTFOLIO_GROUP_RESOURCES', 'ACTIVE_SHARED_POLICY', ...]}
+E             Use -v to get more diff
+
+../../test_van_provisional_original_receipt_20261028.py:14: AssertionError
+=========================== short test summary info ============================
+FAILED ../../test_van_provisional_original_receipt_20261028.py::test_later_requirement_list_cannot_rewrite_an_original_durable_hold
+1 failed in 1.44s

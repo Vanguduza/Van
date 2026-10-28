@@ -1,0 +1,54 @@
+{
+  "workflow_runs": [
+    {
+      "id": 40729769673,
+      "name": "van-ci",
+      "status": "completed",
+      "conclusion": "failure",
+      "run_number": 1936,
+      "jobs_url": "https://api.github.com/repos/Vanguduza/Van/actions/runs/40729769673/jobs",
+      "logs_url": "https://api.github.com/repos/Vanguduza/Van/actions/runs/40729769673/logs",
+      "workflow_id": 359474996
+    },
+    {
+      "id": 40729767325,
+      "name": "van-mql-native-source",
+      "status": "completed",
+      "conclusion": "success",
+      "run_number": 90,
+      "jobs_url": "https://api.github.com/repos/Vanguduza/Van/actions/runs/40729767325/jobs",
+      "logs_url": "https://api.github.com/repos/Vanguduza/Van/actions/runs/40729767325/logs",
+      "workflow_id": 393800426
+    },
+    {
+      "id": 40729767360,
+      "name": "van-kernel-source",
+      "status": "completed",
+      "conclusion": "success",
+      "run_number": 97,
+      "jobs_url": "https://api.github.com/repos/Vanguduza/Van/actions/runs/40729767360/jobs",
+      "logs_url": "https://api.github.com/repos/Vanguduza/Van/actions/runs/40729767360/logs",
+      "workflow_id": 393628057
+    },
+    {
+      "id": 40729767517,
+      "name": "van-forecast-runtime-source",
+      "status": "completed",
+      "conclusion": "success",
+      "run_number": 40,
+      "jobs_url": "https://api.github.com/repos/Vanguduza/Van/actions/runs/40729767517/jobs",
+      "logs_url": "https://api.github.com/repos/Vanguduza/Van/actions/runs/40729767517/logs",
+      "workflow_id": 396667110
+    },
+    {
+      "id": 40729767413,
+      "name": "cognitive-fabric-r161-van",
+      "status": "completed",
+      "conclusion": "success",
+      "run_number": 329,
+      "jobs_url": "https://api.github.com/repos/Vanguduza/Van/actions/runs/40729767413/jobs",
+      "logs_url": "https://api.github.com/repos/Vanguduza/Van/actions/runs/40729767413/logs",
+      "workflow_id": 376327449
+    }
+  ]
+}

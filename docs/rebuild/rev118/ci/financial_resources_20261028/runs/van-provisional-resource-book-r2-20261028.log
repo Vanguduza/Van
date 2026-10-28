@@ -1,0 +1,32 @@
+...F...................                                                  [100%]
+=================================== FAILURES ===================================
+_ test_distinct_original_entries_share_the_actual_projected_margin_floor_budget _
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-167/test_distinct_original_entries0')
+eurusd = SymbolContract(symbol='EURUSD', venue='mt5', base_currency='EUR', quote_currency='USD', account_currency='USD', contra...=Decimal('0'), max_adv_participation=Decimal('0.10'), liquidity_haircut=Decimal('0'), round_trip_cost_pct=Decimal('0'))
+
+    def test_distinct_original_entries_share_the_actual_projected_margin_floor_budget(tmp_path,eurusd):
+        from test_native_risk_history_inputs import record
+        from test_entry_margin_binding import entry_command
+        from vati.risk.serde import intent_from_dict,snapshot_from_dict
+        sdk,clock,ledger,command,margin_ref,current_ref,authority,book,router=prepared(tmp_path,eurusd,native_margin=D('1600'))
+        try:
+            first=book.reserve_entry(command,margin_ref,current_ref,authority)
+            original=next(e for e in ledger.iter(EventKind.RISK_DECISION) if e.payload['decision']['decision_hash']==command.decision_hash)
+            facts=snapshot_from_dict(original.payload['inputs']['snapshot'])
+            trade=replace(intent_from_dict(original.payload['inputs']['intent']),trade_intent_id='other-entry',idempotency_key='other-entry')
+            event=record(ledger,facts,request=trade,grant=original.payload['inputs']['mandate'])
+            approved=RiskAuthority(authority.mandate).evaluate_safe(trade,facts)
+            other=replace(entry_command(event),expires_at_ms=command.expires_at_ms,command_hash='').sealed()
+            margin,_=router._native_entry_margin(other,router.adapters['mt5'],now_ms=clock['ms'])
+            current=router._current_account_risk(trade,approved,authority.mandate,other,router.adapters['mt5'],
+                now_ms=clock['ms'],market_reference=None)
+            before=ledger.count()
+>           with pytest.raises(ResourceHoldError,match='RESOURCE_CAPACITY_EXCEEDED:margin_floor_equity'):
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           Failed: DID NOT RAISE ResourceHoldError
+
+trading/tests/test_provisional_resource_book.py:78: Failed
+=========================== short test summary info ============================
+FAILED trading/tests/test_provisional_resource_book.py::test_distinct_original_entries_share_the_actual_projected_margin_floor_budget
+1 failed, 22 passed in 2.59s

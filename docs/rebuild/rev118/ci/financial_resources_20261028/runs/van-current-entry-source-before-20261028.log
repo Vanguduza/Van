@@ -1,0 +1,26 @@
+FF                                                                       [100%]
+=================================== FAILURES ===================================
+___ test_original_current_risk_and_native_margin_are_one_exact_entry_source ____
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-156/test_original_current_risk_and0')
+eurusd = SymbolContract(symbol='EURUSD', venue='mt5', base_currency='EUR', quote_currency='USD', account_currency='USD', contra...=Decimal('0'), max_adv_participation=Decimal('0.10'), liquidity_haircut=Decimal('0'), round_trip_cost_pct=Decimal('0'))
+
+    def test_original_current_risk_and_native_margin_are_one_exact_entry_source(tmp_path,eurusd):
+>       from vati.risk.current_entry_source import current_entry_source
+E       ModuleNotFoundError: No module named 'vati.risk.current_entry_source'
+
+trading/tests/test_current_entry_risk_source.py:22: ModuleNotFoundError
+___ test_expired_source_is_original_data_and_never_a_fresh_reservation_grant ___
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-156/test_expired_source_is_origina0')
+eurusd = SymbolContract(symbol='EURUSD', venue='mt5', base_currency='EUR', quote_currency='USD', account_currency='USD', contra...=Decimal('0'), max_adv_participation=Decimal('0.10'), liquidity_haircut=Decimal('0'), round_trip_cost_pct=Decimal('0'))
+
+    def test_expired_source_is_original_data_and_never_a_fresh_reservation_grant(tmp_path,eurusd):
+>       from vati.risk.current_entry_source import current_entry_source
+E       ModuleNotFoundError: No module named 'vati.risk.current_entry_source'
+
+trading/tests/test_current_entry_risk_source.py:41: ModuleNotFoundError
+=========================== short test summary info ============================
+FAILED trading/tests/test_current_entry_risk_source.py::test_original_current_risk_and_native_margin_are_one_exact_entry_source
+FAILED trading/tests/test_current_entry_risk_source.py::test_expired_source_is_original_data_and_never_a_fresh_reservation_grant
+2 failed in 3.00s

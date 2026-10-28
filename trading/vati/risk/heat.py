@@ -69,12 +69,9 @@ def open_stop_risk(positions: Iterable[OpenPosition], equity: Decimal) -> Decima
     return Decimal('Infinity') if value is None else decimal(value)
 
 
-def exact_currency_leg_exposure(positions: Iterable[OpenPosition], equity: Decimal, *,
-                               additional_loss=None, base_currency=None, quote_currency=None, direction=None,
-                               pending_losses=()):
-    """Net stop-risk per currency leg as a fraction of equity (absolute value)."""
-    if equity <= ZERO:
-        return None
+def exact_currency_leg_intervals(positions: Iterable[OpenPosition], *, pending_losses=(),
+                                additional_loss=None, base_currency=None, quote_currency=None, direction=None):
+    """Account-currency bounds; unfilled commitments can fill independently."""
     legs = defaultdict(Fraction)
     for p in positions:
         r = exact_position_risk(p)
@@ -94,8 +91,20 @@ def exact_currency_leg_exposure(positions: Iterable[OpenPosition], equity: Decim
             lower[ccy]+=min(Fraction(0),value);upper[ccy]+=max(Fraction(0),value)
     # Each unfilled commitment can fill independently. An opposing pending
     # order cannot offset a leg before its actual fill is observed.
-    return {ccy:max(abs(legs[ccy]+lower[ccy]),abs(legs[ccy]+upper[ccy]))/fraction(equity)
+    return {ccy:(legs[ccy]+lower[ccy],legs[ccy]+upper[ccy])
         for ccy in set(legs)|set(lower)|set(upper)}
+
+
+def exact_currency_leg_exposure(positions: Iterable[OpenPosition], equity: Decimal, *,
+                               additional_loss=None, base_currency=None, quote_currency=None, direction=None,
+                               pending_losses=()):
+    """Net stop-risk per currency leg as a fraction of equity (absolute value)."""
+    if equity <= ZERO:
+        return None
+    intervals=exact_currency_leg_intervals(positions,pending_losses=pending_losses,
+        additional_loss=additional_loss,base_currency=base_currency,quote_currency=quote_currency,direction=direction)
+    if intervals is None:return None
+    return {ccy:max(abs(low),abs(high))/fraction(equity) for ccy,(low,high) in intervals.items()}
 
 
 def currency_leg_exposure(positions: Iterable[OpenPosition], equity: Decimal) -> dict[str, Decimal]:

@@ -1,0 +1,24 @@
+{
+  "command": [
+    "/workspace/van-backend-venv-20261025/bin/python",
+    "tools/rebuild/source_storage_audit.py",
+    "--report",
+    "/workspace/van-entry-resource-groups-r1-20261028-audit.json",
+    "trading/tests/test_entry_resource_groups.py",
+    "trading/tests/test_provisional_resource_book.py",
+    "trading/tests/test_entry_resource_projection.py",
+    "trading/tests/test_current_entry_risk_source.py",
+    "trading/tests/test_heat_governor.py",
+    "--junitxml=/workspace/van-entry-resource-groups-r1-20261028.xml",
+    "-q"
+  ],
+  "cwd": "/workspace/van-review-2026-10-18/publish",
+  "controller_pid": 648045,
+  "started_at_utc": "2026-10-28T18:49:58.889154+00:00",
+  "timeout_seconds": 180,
+  "state": "COMPLETED",
+  "command_pid": 648049,
+  "exit": 1,
+  "adopted_children_reaped": [],
+  "finished_at_utc": "2026-10-28T18:50:05.600718+00:00"
+}

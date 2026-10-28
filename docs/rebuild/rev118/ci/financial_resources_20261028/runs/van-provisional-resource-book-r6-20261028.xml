@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="28" time="3.403" timestamp="2026-10-28T18:29:21.400571+00:00" hostname="6e9feff21467"><testcase classname="trading.tests.test_provisional_resource_book" name="test_actual_source_and_current_owner_control_publish_one_incomplete_hold_not_an_order" time="0.522" /><testcase classname="trading.tests.test_provisional_resource_book" name="test_original_hold_replay_after_expiry_keeps_first_receipt_and_retains_obligation" time="0.140" /><testcase classname="trading.tests.test_provisional_resource_book" name="test_actual_hold_commit_ack_loss_requires_original_readback_without_another_write" time="0.097" /><testcase classname="trading.tests.test_provisional_resource_book" name="test_distinct_original_entries_share_the_actual_projected_margin_floor_budget" time="0.230" /><testcase classname="trading.tests.test_provisional_resource_book" name="test_source_data_and_boolean_approval_never_replace_the_existing_authority[None]" time="0.063" /><testcase classname="trading.tests.test_provisional_resource_book" name="test_source_data_and_boolean_approval_never_replace_the_existing_authority[True]" time="0.065" /><testcase classname="trading.tests.test_provisional_resource_book" name="test_source_data_and_boolean_approval_never_replace_the_existing_authority[authority_value2]" time="0.065" /><testcase classname="trading.tests.test_provisional_resource_book" name="test_real_test_key_revocation_refuses_new_hold_but_keeps_original_history" time="0.173" /><testcase classname="trading.tests.test_provisional_resource_book" name="test_another_alias_cannot_ignore_existing_holds_on_the_same_native_account" time="0.111"><failure message="vati.risk.mandate.MandateError: max_risk_per_trade cannot exceed max_open_stop_risk">tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-172/test_another_alias_cannot_igno0')
+eurusd = SymbolContract(symbol='EURUSD', venue='mt5', base_currency='EUR', quote_currency='USD', account_currency='USD', contra...=Decimal('0'), max_adv_participation=Decimal('0.10'), liquidity_haircut=Decimal('0'), round_trip_cost_pct=Decimal('0'))
+
+    def test_another_alias_cannot_ignore_existing_holds_on_the_same_native_account(tmp_path,eurusd):
+        from conftest import NOW,mandate_dict
+        from test_native_risk_history_inputs import record
+        from test_entry_margin_binding import entry_command
+        from vati.execution.mt5_bridge import Mt5BridgeAdapter
+        from vati.execution import ExecutionRouter,ProtectionManager
+        from vati.execution.risk_refresh import CurrentRiskFacts
+        from vati.funding.mt5_runtime import capture_cached_mt5
+        from vati.risk.account_context import context_for_account
+        from vati.risk import KillSwitch
+        from vati.risk.serde import intent_from_dict,snapshot_from_dict
+        sdk,clock,ledger,command,margin_ref,current_ref,authority,book,router=prepared(tmp_path,eurusd)
+        try:
+            first=book.reserve_entry(command,margin_ref,current_ref,authority)
+            original=next(e for e in ledger.iter(EventKind.RISK_DECISION) if e.payload['decision']['decision_hash']==command.decision_hash)
+            old_adapter=router.adapters['mt5'];worker=old_adapter.client._transport.__self__
+            alias='same_native_other_label'
+            worker.cfg['accounts'][alias]=dict(worker.cfg['accounts'][command.account_alias])
+            adapter=Mt5BridgeAdapter(old_adapter.client,account_alias=alias,clock=lambda:clock['ms'],identity=old_adapter.identity)
+            account=adapter.sync_account();captured=capture_cached_mt5(ledger,account,now_ms=clock['ms'])
+            context=context_for_account(ledger,adapter,account,now_ms=clock['ms'],mt5_capture=captured)
+            facts=replace(snapshot_from_dict(original.payload['inputs']['snapshot']),account_alias=alias,native_account_context=context)
+            trade=replace(intent_from_dict(original.payload['inputs']['intent']),account_alias=alias,
+                trade_intent_id='other-label-entry',idempotency_key='other-label-entry')
+            grant=mandate_dict(account_alias=alias,max_open_stop_risk=D('.004'),expires_at_unix=NOW+2)
+&gt;           other_authority=RiskAuthority(TradingMandate.from_mapping(grant))
+                                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+trading/tests/test_provisional_resource_book.py:147: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+trading/vati/risk/mandate.py:296: in from_mapping
+    m.validate(ceilings)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = TradingMandate(mandate_id='mandate-fx-primary', version='1.0.0', account_alias='same_native_other_label', venue='mt5',...se)), strategy_risk_budgets={}, trading_temperament=None, strategy_temperaments={}, temperament_owner_signature_ref='')
+ceilings = PlatformCeilings(max_risk_per_trade=Decimal('0.0200'), max_open_stop_risk=Decimal('0.0600'), max_daily_loss=Decimal('0...max_weekly_drawdown=Decimal('0.1000'), max_currency_leg_exposure=Decimal('0.0400'), policy_version='risk-policy/2.0.0')
+
+    def validate(self, ceilings: PlatformCeilings) -&gt; None:
+        _boolean(self.weekend_hold_allowed,'weekend_hold_allowed')
+        for tier in self.drawdown_tiers:
+            _boolean(tier.top_tier_only,'drawdown_tier.top_tier_only')
+        if self.temperament_enabled and not self.temperament_owner_signature_ref.startswith("owner-authority:"):
+            raise MandateError("owner-verified temperament grant reference required")
+        if not self.temperament_enabled and self.temperament_owner_signature_ref:
+            raise MandateError("unexpected temperament owner grant without a profile")
+        if self.trading_temperament is not None and not isinstance(self.trading_temperament, TradingTemperament):
+            raise MandateError("invalid trading_temperament")
+        for sid, profile in self.strategy_temperaments.items():
+            if sid not in self.allowed_strategies:
+                raise MandateError(f"trading temperament for unapproved strategy {sid}")
+            if not isinstance(profile, TradingTemperament):
+                raise MandateError(f"invalid strategy temperament for {sid}")
+        if self.tier1_event_policy not in ("flat", "strategy_specific"):
+            raise MandateError(f"tier1_event_policy must be flat|strategy_specific, got {self.tier1_event_policy!r}")
+        if self.max_consecutive_losses &lt; 1 or self.max_positions_per_instrument &lt; 1 or self.max_total_positions &lt; 1:
+            raise MandateError("count limits must be &gt;= 1")
+        if self.expires_at_unix &lt;= self.signed_at_unix:
+            raise MandateError("mandate expires before it is signed")
+        if self.max_risk_per_trade &gt; self.max_open_stop_risk:
+&gt;           raise MandateError("max_risk_per_trade cannot exceed max_open_stop_risk")
+E           vati.risk.mandate.MandateError: max_risk_per_trade cannot exceed max_open_stop_risk
+
+trading/vati/risk/mandate.py:336: MandateError</failure></testcase><testcase classname="trading.tests.test_entry_resource_projection" name="test_actual_quote_and_signed_policy_produce_exact_resource_burdens_without_a_grant" time="0.145" /><testcase classname="trading.tests.test_entry_resource_projection" name="test_margin_rounds_to_native_money_before_applying_the_existing_floor" time="0.102" /><testcase classname="trading.tests.test_current_entry_risk_source" name="test_original_current_risk_and_native_margin_are_one_exact_entry_source" time="0.089" /><testcase classname="trading.tests.test_current_entry_risk_source" name="test_expired_source_is_original_data_and_never_a_fresh_reservation_grant" time="0.066" /><testcase classname="trading.tests.test_current_entry_risk_source" name="test_foreign_or_unavailable_source_cannot_supply_original_entry_resources[command]" time="0.054" /><testcase classname="trading.tests.test_current_entry_risk_source" name="test_foreign_or_unavailable_source_cannot_supply_original_entry_resources[margin_ref]" time="0.053" /><testcase classname="trading.tests.test_current_entry_risk_source" name="test_foreign_or_unavailable_source_cannot_supply_original_entry_resources[risk_ref]" time="0.061" /><testcase classname="trading.tests.test_current_entry_risk_source" name="test_foreign_or_unavailable_source_cannot_supply_original_entry_resources[availability]" time="0.054" /><testcase classname="trading.tests.test_current_entry_risk_source" name="test_actual_current_risk_refusal_remains_refused_despite_a_positive_margin_quote" time="0.061" /><testcase classname="trading.tests.test_current_entry_risk_source" name="test_resealed_current_record_cannot_change_inner_binding_or_authority[extra_field]" time="0.054" /><testcase classname="trading.tests.test_current_entry_risk_source" name="test_resealed_current_record_cannot_change_inner_binding_or_authority[authority]" time="0.066" /><testcase classname="trading.tests.test_current_entry_risk_source" name="test_resealed_current_record_cannot_change_inner_binding_or_authority[command_hash]" time="0.059" /><testcase classname="trading.tests.test_current_entry_risk_source" name="test_resealed_current_record_cannot_change_inner_binding_or_authority[quantity]" time="0.053" /><testcase classname="trading.tests.test_current_entry_risk_source" name="test_resealed_current_record_cannot_change_inner_binding_or_authority[state]" time="0.056" /><testcase classname="trading.tests.test_current_entry_risk_source" name="test_resealed_current_record_cannot_change_inner_binding_or_authority[decision]" time="0.070" /><testcase classname="trading.tests.test_current_entry_risk_source" name="test_resealed_current_record_cannot_change_inner_binding_or_authority[snapshot]" time="0.070" /><testcase classname="trading.tests.test_current_entry_risk_source" name="test_source_reader_never_promotes_its_callers_open_writer_to_durable_evidence" time="0.046" /><testcase classname="trading.tests.test_current_entry_risk_source" name="test_ctrader_current_price_source_retains_actual_risk_result[False]" time="0.048" /><testcase classname="trading.tests.test_current_entry_risk_source" name="test_ctrader_current_price_source_retains_actual_risk_result[True]" time="0.066" /></testsuite></testsuites>
