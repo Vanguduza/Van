@@ -59,3 +59,12 @@ The EA counterpart is `SYMBOL_CONTRACT`, advertised by `symbol_contract_constrai
 `NativeSymbolBook` binds the observation to the existing independently read MT5 account-query journal before a risk decision exists. It preserves original request/queue identity, committed SQL readback, replay, expiry-at-writer, namespace isolation and recovery after lost storage acknowledgement without repeating the native read. It stores small risk-input observations, not a full market feed/catalog in the financial log.
 
 These are original terms from native APIs. Their receipt does not prove a separately timestamped FX conversion, atomic account snapshot, current financial eligibility or risk/portfolio reservation. All qualification/execution flags remain false. The modified EA still requires exact-source native compiler evidence after publication; actual terminal/provider, deployment, signing and handset acceptance remain separate. No production profile or owner address-entry flow is changed.
+
+
+## Original native quote snapshots
+
+The signed `quote_snapshot` read and EA `QUOTE_SNAPSHOT` retain original bid/ask/last values, native full-tick time, volume fields, subscription/delay facts, account scope and contract terms before/after the read. The EA advertises an exact identity/deadline18-field capability; legacy capabilities and queued expiry refuse before native handoff. Reads do not invoke order checks or sends and remain independent of trading permission.
+
+`Mt5QuoteObservation.snapshot` evaluates the native tick age at the requested current clock. Missing quotes/sides/timestamps, future/inconsistent time, crossed prices, delayed subscriptions, unknown entitlement and stale data retain distinct states. There is no local-time fallback for missing native tick time. A current observed snapshot stays explicitly unqualified. Native full-tick time is not a fabricated individual bid/ask update time; last-trade volume is not lots or genuine market depth.
+
+`NativeQuoteBook` reuses the original-account-query SQL owner with a distinct record kind and unchanged symbol-record compatibility. Historical lookup, independent reopen, expiry and lost-ACK recovery preserve original tick time and cannot freshen data or issue a financial grant. Quote/metadata source tests are separate from native provider, FX/risk eligibility and production qualification. The modified EA requires new exact-source compilation evidence after publication.

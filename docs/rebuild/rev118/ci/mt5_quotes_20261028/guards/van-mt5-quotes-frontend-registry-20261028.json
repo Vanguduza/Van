@@ -1,0 +1,16 @@
+{
+  "command": [
+    "python3",
+    "tools/rebuild/render_frontend_registry.py",
+    "--check"
+  ],
+  "cwd": "/workspace/van-review-2026-10-18/publish",
+  "controller_pid": 343024,
+  "started_at_utc": "2026-10-28T10:48:11.705497+00:00",
+  "timeout_seconds": 300,
+  "state": "COMPLETED",
+  "command_pid": 343044,
+  "exit": 0,
+  "adopted_children_reaped": [],
+  "finished_at_utc": "2026-10-28T10:48:12.077193+00:00"
+}

@@ -37,7 +37,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from typing import Any, Callable, Optional
 
-OPS = ("sync_account", "sync_symbols", "symbol_contract", "expected_margin", "order_check", "order_send", "order_send_expiring", "positions", "orders", "history", "modify_sl_tp", "close")
+OPS = ("sync_account", "sync_symbols", "symbol_contract", "quote_snapshot", "expected_margin", "order_check", "order_send", "order_send_expiring", "positions", "orders", "history", "modify_sl_tp", "close")
 SKEW_MS = 5000
 
 
@@ -271,6 +271,47 @@ class Terminal:
             'requested_at_ms':start,'received_at_ms':received,'deadline_ms':deadline,
             'native_clock_basis':'UTC_HOST_MS','native_numeric_format':'PYTHON_BINARY64_SHORTEST',
             'tick_value_basis':'NATIVE_SYMBOL_ACCOUNT_CURRENCY_VALUES_NO_SEPARATE_FX_TIMESTAMP',
+            'account_snapshot_atomic':False,'risk_terms_qualified':False,'execution_authority':False}
+
+    def quote_snapshot(self,b:dict,*,clock) -> dict:
+        """Original full native tick snapshot; no invented per-side timestamp."""
+        before=self.symbol_contract(b,clock=clock)
+        native=self.mt5.symbol_info_tick(b['symbol'])
+        if native is None:
+            tick=None
+        else:
+            tick={}
+            for key in ('bid','ask','last','volume_real'):
+                value=getattr(native,key,None)
+                if value is None:tick[key]=None;continue
+                if type(value) not in (int,float) or not math.isfinite(value) or value<0:
+                    raise ValueError('native quote value unavailable')
+                tick[key]=str(value)
+            for key in ('time','time_msc','flags','volume'):
+                value=getattr(native,key,None)
+                if value is not None and (type(value) is not int or not 0<=value<2**64):
+                    raise ValueError('native quote integer unavailable')
+                tick[key]=None if value is None else str(value)
+        after=self.symbol_contract(b,clock=clock)
+        fixed=('symbol','currency_base','currency_profit','currency_margin','trade_contract_size',
+               'trade_tick_size','digits','trade_calc_mode')
+        if any(before['contract'][k]!=after['contract'][k] for k in fixed):
+            raise ValueError('native quote instrument identity or units changed')
+        info=self.mt5.symbol_info(b['symbol'])
+        selected=getattr(info,'select',None);delayed=getattr(info,'subscription_delay',None)
+        if selected is not None and type(selected) is not bool or delayed is not None and type(delayed) is not bool:
+            raise ValueError('native quote subscription metadata unavailable')
+        received=clock()
+        if type(received) is not int or not before['requested_at_ms']<=received<b['deadline_ms']:
+            raise ValueError('native quote deadline or clock unavailable')
+        return {'schema':'van.mt5.quote-snapshot/1','request':{'symbol':b['symbol']},
+            'account_before':before['account_before'],'account_after':after['account_after'],
+            'contract_before':before['contract'],'contract_after':after['contract'],'tick':tick,
+            'symbol_selected':selected,'subscription_delayed':delayed,
+            'requested_at_ms':before['requested_at_ms'],'received_at_ms':received,'deadline_ms':b['deadline_ms'],
+            'native_clock_basis':'UTC_HOST_MS','native_numeric_format':'PYTHON_BINARY64_SHORTEST',
+            'tick_time_basis':'BROKER_UTC_LATEST_FULL_TICK_SNAPSHOT_NOT_INDIVIDUAL_SIDE_TIMES',
+            'volume_basis':'NATIVE_LAST_TRADE_VOLUME_NOT_LOTS_OR_GENUINE_DEPTH',
             'account_snapshot_atomic':False,'risk_terms_qualified':False,'execution_authority':False}
 
     def _request(self, b: dict) -> dict:
@@ -600,6 +641,8 @@ class Worker:
                     out = self.t.order_check(b)
                 elif op == "symbol_contract":
                     out = {'observation':self.t.symbol_contract(b,clock=self.clock)}
+                elif op == "quote_snapshot":
+                    out = {'observation':self.t.quote_snapshot(b,clock=self.clock)}
                 elif op == "expected_margin":
                     out = {'observation':self.t.expected_margin(b,clock=self.clock)}
                 elif op in ("order_send","order_send_expiring"):
@@ -638,13 +681,13 @@ class Worker:
                     out = self.t.close(int(b["position"]), b.get("volume"), str(b.get("reason", "")))
                 else:
                     out = {"error": "unreachable"}
-                if op in {'sync_symbols','symbol_contract'} and 'error' not in out:
+                if op in {'sync_symbols','symbol_contract','quote_snapshot'} and 'error' not in out:
                     latest = self.t.account()
                     if (type(latest.get('login')) is not int or type(latest.get('demo')) is not bool
                             or physical != {'login':str(latest['login']),'server':latest.get('server'),
                                             'currency':latest.get('currency'),'demo':latest['demo']}):
                         raise PermissionError('terminal account identity changed during symbol sync')
-                    if op=='symbol_contract' and self.clock()>=b['deadline_ms']:
+                    if op in {'symbol_contract','quote_snapshot'} and self.clock()>=b['deadline_ms']:
                         raise ValueError('native symbol deadline expired before result binding')
                 if expected is not None and 'error' not in out:
                     out['identity_binding'] = physical

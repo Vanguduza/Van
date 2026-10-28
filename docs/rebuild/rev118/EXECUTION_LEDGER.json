@@ -112,7 +112,8 @@
         "receipts/COMMITTED_FUNDING_READS_SOURCE_20261026.json",
         "backend/BE-003_009_COORDINATOR_INSTANCE_ARBITRATION.md",
         "receipts/COORDINATOR_INSTANCE_SOURCE_20261026.json",
-        "receipts/MT5_ORIGINAL_SYMBOL_SOURCE_20261028.json"
+        "receipts/MT5_ORIGINAL_SYMBOL_SOURCE_20261028.json",
+        "receipts/MT5_ORIGINAL_QUOTE_SOURCE_20261028.json"
       ]
     },
     "BE-006": {
@@ -192,7 +193,8 @@
         "backend/BE-008_BAR_AGGREGATION_BOUNDARIES.md",
         "receipts/BAR_AGGREGATION_SOURCE_20261026.json",
         "receipts/PENDING_CURRENT_CONTRACT_SOURCE_20261028.json",
-        "receipts/MT5_ORIGINAL_SYMBOL_SOURCE_20261028.json"
+        "receipts/MT5_ORIGINAL_SYMBOL_SOURCE_20261028.json",
+        "receipts/MT5_ORIGINAL_QUOTE_SOURCE_20261028.json"
       ]
     },
     "BE-014": {
@@ -281,7 +283,8 @@
         "receipts/MT5_ORIGINAL_MARGIN_SOURCE_20261028.json",
         "receipts/PHYSICAL_PENDING_STOP_RISK_SOURCE_20261028.json",
         "receipts/PENDING_CURRENT_CONTRACT_SOURCE_20261028.json",
-        "receipts/MT5_ORIGINAL_SYMBOL_SOURCE_20261028.json"
+        "receipts/MT5_ORIGINAL_SYMBOL_SOURCE_20261028.json",
+        "receipts/MT5_ORIGINAL_QUOTE_SOURCE_20261028.json"
       ]
     },
     "BE-010": {
@@ -480,7 +483,8 @@
     "Both MT5 source transports now implement original price/side/quantity-bound isolated-margin reads. Signed Windows worker validates native increments, representable inputs, original account/model/precision and unchanged deadline before/after SDK read; missing/invalid values never become zero. EA source adds capability-bound identity/18-field expiry framing, original binary64 metadata and UTC-second uncertainty, with no order_check/send effect. Actual signed HTTP/queue plus public-adapter/SQL readback paths execute on explicit SDK/EA source fixtures. Original native request nonce or queue ID is retained. Shared NativeMarginBook independently binds the existing risk-input account context, supports restart/expired historical data and lost storage ACK without native requery, and keeps reservation_amountNone/authorityFalse. Final1050actualsourceSQLitePostgreSQLHTTP/protocol/recovery/protection cases pass0skip/audit0;1050unique calls once/all1218pinnedPython-and-deploy-EA hashes match/ownedPG independently absent. Focused144 overlap. Initial51PASS/1decoder-exception-contractFAIL and110PASS/1sameFAIL remain recorded; invalid scope was already refused and the pure decoder now consistently raises ValueError. Native MetaEditor compilation of the modified EA is PENDING until exact-head hosted source job; actual Windows SDK/terminal/provider qualification and deployment NOT_ISSUED. This isolated estimate excludes existing positions/pending orders and does not replace all-origin reservations, current active-policy arbitration, native finality, settlement or the complete canonical backend/Android programme.0formal/native/production/S24acceptance.",
     "Both actual native snapshot owners now carry original all-alias possible-fill stop-risk commitments into the existing RiskAuthority portfolio heat, position-count and currency-leg limits. Original commands, sealed approving inputs and native receipt position IDs bind the data; missing positions do not imply cancellation. Partial native coverage is counted once; independent opposing pending fills cannot prematurely cancel currency risk. Protection and execution authority remain explicitly false. Original native no-effect or a source-bound fully-filled close with current position absence can release position stop risk, never fee/cash settlement. Cache uses incremental rows between financial changes, retains original availability cutoffs and SQL reopen/namespace semantics. Two actual owner counterexamples failed APPROVED before the fix. Full trading plus original backend HTTP recovery/schema/workmap qualification: 4951 actual passes, 0 declared skips, no failures or storage-audit violations; every call once and all 1223 pinned input hashes match; owned PostgreSQL independently absent. Legacy snapshot bytes and hashes and the 27 original required schema fields remain intact. No formal unit/native/production/S24 acceptance issued.",
     "Both actual native snapshot owners now retain original pending contract terms and separate current risk-owner supplied valuation terms. Exact pending loss uses the larger original/current loss without reducing original commitments. Missing current symbol terms or changed instrument/currency/unit/model hold new risk; independent protection retains its owner. Incremental cached histories revalue on each snapshot without another financial event/full scan. Four actual counterexamples on an independently exported exact eac4761f runtime approved while current heat/currency risk exceeded its signed limit; all four now refuse at their correct original gates. Original parent snapshots/decisions retain exact serialized bodies and hashes, but original-only valuation cannot authorize current risk. Full trading plus selected backend HTTP recovery/schema/scope checks: 4968 passes,0 skips/failures/audit violations,every call once,all1225 pinned inputs match,owned PostgreSQL independently absent.110 focused checks overlap.0formal/native/production/S24 acceptance issued.",
-    "MT5 signed SDK and authenticated EA source transports now expose original symbol terms with native loss/profit tick values, quantity/tick rules and base/profit/margin currencies. Both public adapters preserve original request/nonce or queue identity, exact deadline, account scope and original numeric/clock formats. Explicit zero loss value remains UNPRICED; no missing value becomes zero or LIVE. Two genuine legacy signed symbol reads accepted a switched login/currency while retaining the old label; post-SDK readback now fences login/server/currency/demo changes without changing stable legacy shape or requiring trading permission. EA adds separate SYMBOL_CONTRACT capability and18-field expiry frame outside entry claims. NativeSymbolBook independently binds the existing MT5 account-query journal before a risk decision exists, preserving SQL replay/reopen/namespace isolation, queued/writer expiry and lost-ACK recovery without native retry. Final full trading plus selected backend HTTP/schema/scope qualification:5026pass0skip/fail/audit,every call once,all1234 pinned input hashes match,ownedPostgreSQL independently absent.56focused checks overlap. Modified EA native compilation PENDING exact-source hosted evidence.0formal/native/production/S24acceptance issued."
+    "MT5 signed SDK and authenticated EA source transports now expose original symbol terms with native loss/profit tick values, quantity/tick rules and base/profit/margin currencies. Both public adapters preserve original request/nonce or queue identity, exact deadline, account scope and original numeric/clock formats. Explicit zero loss value remains UNPRICED; no missing value becomes zero or LIVE. Two genuine legacy signed symbol reads accepted a switched login/currency while retaining the old label; post-SDK readback now fences login/server/currency/demo changes without changing stable legacy shape or requiring trading permission. EA adds separate SYMBOL_CONTRACT capability and18-field expiry frame outside entry claims. NativeSymbolBook independently binds the existing MT5 account-query journal before a risk decision exists, preserving SQL replay/reopen/namespace isolation, queued/writer expiry and lost-ACK recovery without native retry. Final full trading plus selected backend HTTP/schema/scope qualification:5026pass0skip/fail/audit,every call once,all1234 pinned input hashes match,ownedPostgreSQL independently absent.56focused checks overlap. Modified EA native compilation PENDING exact-source hosted evidence.0formal/native/production/S24acceptance issued.",
+    "Original MT5 quote snapshots now flow through both signed SDK and authenticated EA/public adapters and the existing original-account-query SQL owner. Both native account and contract observations are retained around tick access. Original bid/ask/last, native full-tick time, subscription/delay facts and exact integer volume remain explicit; last-trade volume is not lots or genuine depth. Causal view distinguishes missing ticks/sides/time, inconsistent/future time, crossed prices, unverified subscription/entitlement, delayed and stale data. It never invents native time from local receipt time or refreshes history on replay. Original symbol receipt shape and data-kind isolation remain compatible through shared SQL ownership. Final full trading plus selected backend HTTP/schema/scope qualification:5069pass0skip/fail/audit,every call once,all1241 pinned input hashes match,ownedPostgreSQL independently absent.57focused source passes overlap. New modified-EA compilation PENDING exact-source hosted evidence; parent symbol EA compilation is retained separately.0formal/native/production/S24acceptance issued."
   ],
   "obligations": "obligations/OBLIGATIONS.json: preserved observations with source implementation evidence and explicit remaining native/unit obligations.",
   "pre002_challenge": "pre002/challenge/: 324 author-prepared dossiers (AUTHOR_CHALLENGED_PENDING_INDEPENDENT_REVIEW)",
@@ -533,8 +537,8 @@
       "evidence": "ci/MUTATION_CORPUS_c2a27848.json"
     }
   ],
-  "current_action": "Genuine hooks, required committed-baseline verify, normal push/exact remote readback, actual hosted source and modified-EA compilation; then native valuation/current-policy/shared transactional reservation workflows and remaining complete backend/Android programme.",
-  "updated_at_utc": "2026-10-28T10:04:22.125613+00:00",
+  "current_action": "Genuine hooks, required committed-baseline verify, normal push/exact remote, exact hosted source and changed-EA native compilation; then full feed/valuation/current-policy/shared transactional reservation workflows and complete remaining backend/Android programme.",
+  "updated_at_utc": "2026-10-28T10:57:02.653735+00:00",
   "execution_method": {
     "path": "BUILD_EXECUTION_PLAN.md",
     "scope_index": "SOURCE_WORKMAP.json",

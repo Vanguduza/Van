@@ -19,7 +19,7 @@ from vati.execution.base import AccountState, ExecutionReceipt, Health, OrderCom
 from vati.execution.mt5_identity import Mt5Identity
 from vati.risk.contracts import Direction, LossModel
 
-OPS = ("sync_account", "sync_symbols", "symbol_contract", "expected_margin", "order_check", "order_send", "order_send_expiring", "positions", "orders", "history", "modify_sl_tp", "close")
+OPS = ("sync_account", "sync_symbols", "symbol_contract", "quote_snapshot", "expected_margin", "order_check", "order_send", "order_send_expiring", "positions", "orders", "history", "modify_sl_tp", "close")
 ZERO = Decimal("0")
 
 
@@ -106,6 +106,10 @@ class Mt5BridgeAdapter:
     def symbol_contract(self,symbol,*,context,deadline_ms):
         from vati.execution.mt5_symbol_contract import read_symbol_contract
         return read_symbol_contract(self,symbol,context=context,deadline_ms=deadline_ms)
+
+    def quote_snapshot(self,symbol,*,context,deadline_ms):
+        from vati.execution.mt5_quotes import read_quote_snapshot
+        return read_quote_snapshot(self,symbol,context=context,deadline_ms=deadline_ms)
 
     def expected_margin(self,symbol,lots,*,price,direction,context,deadline_ms):
         from vati.execution.mt5_expected_margin import read_bridge_expected_margin

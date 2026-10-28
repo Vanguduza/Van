@@ -29,6 +29,13 @@ class NativeSymbolUnknown(OSError):
 
 
 class NativeSymbolBook:
+    observation_type=Mt5SymbolContractObservation
+    event_name=EVENT
+    producer=PRODUCER
+    record_schema=SCHEMA
+    receipt_schema='vati.original-mt5-symbol-receipt/1'
+    stored_state='ORIGINAL_NATIVE_SYMBOL_STORED'
+
     def __init__(self,ledger,*,clock=None,max_records=4096,max_bytes=16*1024**2,max_ledger_events=100000):
         for value,limit in [(max_records,100000),(max_bytes,256*1024**2),(max_ledger_events,1000000)]:
             if type(value) is not int or not 1<=value<=limit:raise NativeSymbolError('NATIVE_SYMBOL_CAPACITY_INVALID')
@@ -57,14 +64,14 @@ class NativeSymbolBook:
         rows={};size=0;last=-1;queries={}
         for event in self.ledger.iter(EventKind.SESSION):
             p=event.payload
-            if type(p) is not dict or p.get('event')!=EVENT:continue
+            if type(p) is not dict or p.get('event')!=self.event_name:continue
             size+=len(canonical_json(event.body()).encode())
             if size>self.max_bytes or len(rows)>=self.max_records:raise NativeSymbolError('NATIVE_SYMBOL_HISTORY_CAPACITY')
-            if (event.producer!=PRODUCER or type(event.schema_version) is not int or event.schema_version!=1
+            if (event.producer!=self.producer or type(event.schema_version) is not int or event.schema_version!=1
                     or event.decision_time_ms is not None or event.hash!=canonical_hash(event.body())
-                    or set(p)!={'event','schema','observation'} or p['schema']!=SCHEMA):
+                    or set(p)!={'event','schema','observation'} or p['schema']!=self.record_schema):
                 raise NativeSymbolError('NATIVE_SYMBOL_RECORD_INVALID')
-            q=Mt5SymbolContractObservation.from_body(p['observation']).body();key=q['source_ref']
+            q=self.observation_type.from_body(p['observation']).body();key=q['source_ref']
             self._bind(q,queries)
             if (key in rows or event.correlation_id!=key or type(event.event_time_ms) is not int
                     or type(event.received_time_ms) is not int or event.event_time_ms!=event.received_time_ms
@@ -73,12 +80,11 @@ class NativeSymbolBook:
             rows[key]=event;last=event.received_time_ms
         return rows,size,last
 
-    @staticmethod
-    def _receipt(event):
+    def _receipt(self,event):
         q=event.payload['observation']
-        return {'schema':'vati.original-mt5-symbol-receipt/1','record_ref':event.hash,
+        return {'schema':self.receipt_schema,'record_ref':event.hash,
             'source_ref':q['source_ref'],'source_query_ref':q['native_account_context']['source_query_ref'],
-            'available_at_ms':event.received_time_ms,'state':'ORIGINAL_NATIVE_SYMBOL_STORED',
+            'available_at_ms':event.received_time_ms,'state':self.stored_state,
             'risk_terms_qualified':False,'execution_authority':False}
 
     def lookup(self,source_ref):
@@ -91,9 +97,9 @@ class NativeSymbolBook:
     def record(self,observation):
         require_committed_source_read(self.ledger)
         if getattr(self.ledger,'_read_snapshot_depth',0):raise NativeSymbolError('NATIVE_SYMBOL_REQUIRES_OWN_WRITER')
-        if type(observation) is not Mt5SymbolContractObservation:
+        if type(observation) is not self.observation_type:
             raise NativeSymbolError('NATIVE_SYMBOL_TYPED_OBSERVATION_REQUIRED')
-        q=Mt5SymbolContractObservation.from_body(observation.body()).body();key=q['source_ref']
+        q=self.observation_type.from_body(observation.body()).body();key=q['source_ref']
         with committed_source_snapshot(self.ledger):self._bind(q,{})
         known=self.lookup(key)
         if known is not None:return known['receipt']
@@ -109,7 +115,7 @@ class NativeSymbolBook:
                         raise NativeSymbolError('NATIVE_SYMBOL_EXPIRED_OR_CLOCK_REGRESSED')
                     if len(rows)>=self.max_records or self.ledger.count()>=self.max_ledger_events:
                         raise NativeSymbolError('NATIVE_SYMBOL_EVENT_CAPACITY')
-                    event=make_event(EventKind.SESSION,PRODUCER,{'event':EVENT,'schema':SCHEMA,'observation':q},
+                    event=make_event(EventKind.SESSION,self.producer,{'event':self.event_name,'schema':self.record_schema,'observation':q},
                         event_time_ms=now,received_time_ms=now,correlation_id=key)
                     if size+len(canonical_json(event.body()).encode())>self.max_bytes:
                         raise NativeSymbolError('NATIVE_SYMBOL_BYTE_CAPACITY')
@@ -130,5 +136,8 @@ class NativeSymbolBook:
         with committed_source_snapshot(self.ledger):
             if not self.ledger.verify_chain()[0]:raise NativeSymbolError('NATIVE_SYMBOL_CHAIN_UNAVAILABLE')
             self._bind(proof,{})
-        observation=adapter.symbol_contract(symbol,context=context,deadline_ms=deadline_ms)
+        observation=self._read(adapter,symbol,context=context,deadline_ms=deadline_ms)
         return self.record(observation)
+
+    def _read(self,adapter,symbol,*,context,deadline_ms):
+        return adapter.symbol_contract(symbol,context=context,deadline_ms=deadline_ms)

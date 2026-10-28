@@ -17,7 +17,7 @@ Wire (server → EA): text/plain, one command per line:
   ORDER_SEND_EXPIRING adds the exact UTC expires_at_ms as field18; an older
   17-field EA refuses the new frame rather than dropping its deadline.
   (legacy unbound component fixtures retain the original 12-column format)
-The EA's operations are ORDER_SEND, ORDER_SEND_EXPIRING, MARGIN_QUOTE, SYMBOL_CONTRACT, MODIFY_SL and CLOSE. The two reads cannot execute an order."""
+The EA's operations are ORDER_SEND, ORDER_SEND_EXPIRING, MARGIN_QUOTE, SYMBOL_CONTRACT, QUOTE_SNAPSHOT, MODIFY_SL and CLOSE. The two reads cannot execute an order."""
 
 from __future__ import annotations
 
@@ -42,7 +42,7 @@ from vati.risk.contracts import Direction, LossModel
 
 ZERO = Decimal("0")
 ENTRY_OPS = ("ORDER_SEND", "ORDER_SEND_EXPIRING")
-OPS = (*ENTRY_OPS, "MARGIN_QUOTE", "SYMBOL_CONTRACT", "MODIFY_SL", "CLOSE")
+OPS = (*ENTRY_OPS, "MARGIN_QUOTE", "SYMBOL_CONTRACT", "QUOTE_SNAPSHOT", "MODIFY_SL", "CLOSE")
 SKEW_S = 60
 STATE_FRESH_MS = 30_000
 
@@ -131,7 +131,7 @@ class BridgeQueue:
                 out = []
                 for cid, op, body in rows:
                     payload = json.loads(body)
-                    if ((op in ('ORDER_SEND_EXPIRING','MARGIN_QUOTE','SYMBOL_CONTRACT') and not _deadline_valid(payload.get('expires_at_ms'),now_ms=now_ms))
+                    if ((op in ('ORDER_SEND_EXPIRING','MARGIN_QUOTE','SYMBOL_CONTRACT','QUOTE_SNAPSHOT') and not _deadline_valid(payload.get('expires_at_ms'),now_ms=now_ms))
                         or (op=='ORDER_SEND' and 'expires_at_ms' in payload)):
                         result={'status':'REJECTED','volume':'0','reason':'native entry deadline invalid or expired before dispatch'}
                         self._conn.execute("UPDATE commands SET status='DONE', result_json=?, done_ms=? WHERE id=?",
@@ -222,7 +222,7 @@ def format_commands(cmds: list[dict]) -> str:
             identity = Mt5Identity(**c['expected_account'])
             f += [str(c.get('order_type','')), identity.login, identity.server.encode().hex(),
                   identity.currency.encode().hex(), 'true' if identity.demo else 'false']
-        if c['op'] in ('ORDER_SEND_EXPIRING','MARGIN_QUOTE','SYMBOL_CONTRACT'):
+        if c['op'] in ('ORDER_SEND_EXPIRING','MARGIN_QUOTE','SYMBOL_CONTRACT','QUOTE_SNAPSHOT'):
             if 'expected_account' not in c or not _deadline_valid(c.get('expires_at_ms')):
                 raise VenueUnavailable('bounded native entry frame requires physical identity and an exact deadline')
             f.append(str(c['expires_at_ms']))
@@ -292,6 +292,10 @@ class Mt5PullAdapter:
     def symbol_contract(self,symbol,*,context,deadline_ms):
         from vati.execution.mt5_symbol_contract import read_symbol_contract
         return read_symbol_contract(self,symbol,context=context,deadline_ms=deadline_ms,pull=True)
+
+    def quote_snapshot(self,symbol,*,context,deadline_ms):
+        from vati.execution.mt5_quotes import read_quote_snapshot
+        return read_quote_snapshot(self,symbol,context=context,deadline_ms=deadline_ms,pull=True)
 
     def expected_margin(self,symbol,lots,*,price,direction,context,deadline_ms):
         from vati.execution.mt5_expected_margin import read_pull_expected_margin

@@ -1,0 +1,13 @@
+# Original MT5 quote snapshots and causal state
+
+Candidate source only; no full-unit or financial/native admission.
+
+Original MT5 quote snapshots now flow through both signed SDK and authenticated EA/public adapters and the existing original-account-query SQL owner. Both native account and contract observations are retained around tick access. Original bid/ask/last, native full-tick time, subscription/delay facts and exact integer volume remain explicit; last-trade volume is not lots or genuine depth. Causal view distinguishes missing ticks/sides/time, inconsistent/future time, crossed prices, unverified subscription/entitlement, delayed and stale data. It never invents native time from local receipt time or refreshes history on replay. Original symbol receipt shape and data-kind isolation remain compatible through shared SQL ownership. Final full trading plus selected backend HTTP/schema/scope qualification:5069pass0skip/fail/audit,every call once,all1241 pinned input hashes match,ownedPostgreSQL independently absent.57focused source passes overlap. New modified-EA compilation PENDING exact-source hosted evidence; parent symbol EA compilation is retained separately.0formal/native/production/S24acceptance issued.
+
+The native SDK/EA read captures original full-tick time and account/instrument observations. Exact capability/18-field expiry framing keeps old peers and expired queued reads away from native handoff. Trading permission is independent of these reads, and no order check/send obtains a quote.
+
+Causal view is evaluated against the requested current clock and age bound. Missing native clock stays missing; historical readback cannot substitute a new local timestamp. Original currency, prices and uint64 volume remain intact. Metadata, quote and source-receipt kinds stay distinct under the same tested SQL owner; existing symbol serialization is preserved. Public SDK and signed HTTP/EA queue routes exercise the actual original query/SQL readback chain over declared native fixtures.
+
+Read the [source receipt](../receipts/MT5_ORIGINAL_QUOTE_SOURCE_20261028.json) and raw source evidence. The changed EA requires its own subsequent exact-source native compilation. Source-state observation is not current tradability, financial authority, fresh FX qualification or production/native/provider/device acceptance.
+
+Complete native stream/bar/gap/depth/entitlement and discovery obligations, qualified valuation/migration, shared transactional all-origin cash/margin/stop-risk reservations, active-policy arbitration and working-order/economic-finality workflows. Preserve every remaining payment/manual/handover, backend/forecast/assistant/operations and prescribed Android function. Profitability is never guaranteed.
