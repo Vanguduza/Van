@@ -1,0 +1,9 @@
+trading/tests/test_instrument_catalog.py
+trading/tests/test_native_catalog_store.py
+trading/tests/test_native_symbol_catalog.py
+backend/tests/test_native_instrument_catalog_http.py
+backend/tests/test_native_depth_history.py
+backend/tests/test_van_private_core_service.py
+backend/tests/test_trading_api.py
+tests/rebuild/test_native_risk_schema.py
+tests/rebuild/test_source_workmap.py

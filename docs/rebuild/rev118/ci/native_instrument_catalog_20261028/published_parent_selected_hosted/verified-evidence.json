@@ -1,0 +1,35 @@
+{
+  "source_commit": "291de61baf55255d8ccd51ae7783df0bec4b8692",
+  "artifact_id": 12810964239,
+  "workflow_run": 40676993320,
+  "bytes": 190911,
+  "sha256": "1ac1fb85e6bf8b5bedd94ee81b054a0554ed3872f31bcc3479508c8bb441bd34",
+  "xml": {
+    "trading-source-report.xml": {
+      "cases": 4932,
+      "passed": 4931,
+      "failures": 0,
+      "errors": 0,
+      "skips": [
+        {
+          "case": "test_dial_resolver_selects_trading_knowledge_from_van_registry",
+          "message": "dial-new checkout not available (set DIAL_REPO)"
+        }
+      ]
+    },
+    "voice-source-report.xml": {
+      "cases": 117,
+      "passed": 117,
+      "failures": 0,
+      "errors": 0,
+      "skips": []
+    },
+    "postgres-ledger-report.xml": {
+      "cases": 26,
+      "passed": 26,
+      "failures": 0,
+      "errors": 0,
+      "skips": []
+    }
+  }
+}

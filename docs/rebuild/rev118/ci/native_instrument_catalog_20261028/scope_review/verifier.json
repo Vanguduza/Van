@@ -1,0 +1,994 @@
+{
+  "owner_features": {
+    "all_original_ids_rows_values_and_order_preserved_except_source_citations": true,
+    "changes": [
+      {
+        "path": "/OF-HOME-001/endpoint_refs/VE-74fac65f350e/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/OF-HOME-001/endpoint_refs/VE-d3271755e9f9/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/OF-HOME-001/endpoint_refs/VE-276a5ba5fcd5/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/OF-HOME-001/endpoint_refs/VE-70d344b53103/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/OF-COMMAND-001/endpoint_refs/VE-46283550c868/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/OF-COMMAND-001/endpoint_refs/VE-e1308a8edf69/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/OF-ATTENTION-001/endpoint_refs/VE-276a5ba5fcd5/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/OF-ATTENTION-001/endpoint_refs/VE-cf82eafbdeb9/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/OF-ATTENTION-001/endpoint_refs/VE-90761687deb9/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/OF-DECISION-001/endpoint_refs/VE-b2aa094f0895/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/OF-DECISION-001/endpoint_refs/VE-1df5172aa202/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/OF-APPROVAL-001/endpoint_refs/VE-46283550c868/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/OF-APPROVAL-001/endpoint_refs/VE-25b6b4f8427b/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/OF-REMINDER-001/endpoint_refs/VE-9ef85a0d6e7a/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/OF-REMINDER-001/endpoint_refs/VE-d7f6562ce04b/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/OF-REMINDER-001/endpoint_refs/VE-85624e3859a7/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/OF-REMINDER-001/endpoint_refs/VE-b6932785a6e1/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/OF-REMINDER-001/endpoint_refs/VE-9765b88983e2/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/OF-REMINDER-001/backend_contract_extensions/VE-85624e3859a7/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/OF-REMINDER-001/backend_contract_extensions/VE-9ef85a0d6e7a/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/OF-REMINDER-001/backend_contract_extensions/VE-d7f6562ce04b/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/OF-REMINDER-001/backend_contract_extensions/VE-9765b88983e2/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/OF-REMINDER-001/backend_contract_extensions/VE-b6932785a6e1/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/OF-MEMORY-001/endpoint_refs/VE-4618336736dd/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/OF-MEMORY-001/endpoint_refs/VE-caa1a831cd8f/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/OF-MEMORY-002/endpoint_refs/VE-d499de7845c7/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/OF-MEMORY-002/endpoint_refs/VE-bf3a9fa9f698/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/OF-MEMORY-002/endpoint_refs/VE-e499aab47970/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/OF-MEMORY-002/endpoint_refs/VE-46283550c868/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/OF-MEMORY-002/endpoint_refs/VE-e1308a8edf69/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/OF-MEMORY-003/endpoint_refs/VE-bdc7ae21680f/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/OF-MEMORY-003/endpoint_refs/VE-4f28e519027f/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/OF-MEMORY-003/endpoint_refs/VE-4618336736dd/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/OF-PROJECT-001/endpoint_refs/VE-e512dd0faab4/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/OF-PROJECT-001/endpoint_refs/VE-1c26e9d71245/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/OF-PROJECT-001/endpoint_refs/VE-276a5ba5fcd5/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/OF-PROJECT-001/endpoint_refs/VE-bf3a9fa9f698/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/OF-AUTHORITY-001/endpoint_refs/VE-46283550c868/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/OF-GOOGLE-001/endpoint_refs/VE-5e6f768ddb6f/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/OF-GOOGLE-001/endpoint_refs/VE-7deffb936a64/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/OF-GOOGLE-001/endpoint_refs/VE-124dc7291c8f/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/OF-GOOGLE-001/endpoint_refs/VE-73060808bad1/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/OF-GOOGLE-001/endpoint_refs/VE-0cb573a7c345/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/OF-GOOGLE-002/endpoint_refs/VE-46283550c868/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/OF-GOOGLE-002/endpoint_refs/VE-c225e5628af2/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/OF-GOOGLE-002/endpoint_refs/VE-a4decae315ba/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/OF-GOOGLE-002/endpoint_refs/VE-4c628c3e5a78/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/OF-GOOGLE-002/endpoint_refs/VE-23aaa05d4d7b/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/OF-GOOGLE-002/endpoint_refs/VE-351f73de9c2b/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/OF-GOOGLE-002/endpoint_refs/VE-a980fcccde77/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/OF-GOOGLE-002/endpoint_refs/VE-79d86c59cb7d/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/OF-GOOGLE-002/endpoint_refs/VE-a760f5ffdf00/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/OF-GOOGLE-002/endpoint_refs/VE-592e2db652f5/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/OF-GOOGLE-002/endpoint_refs/VE-25b6b4f8427b/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/OF-KNOWLEDGE-001/endpoint_refs/VE-46283550c868/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/OF-AUTOMATION-001/endpoint_refs/VE-46283550c868/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/OF-BROWSER-001/endpoint_refs/VE-1df5172aa202/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/OF-BROWSER-001/endpoint_refs/VE-46283550c868/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/OF-BROWSER-003/endpoint_refs/VE-46283550c868/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/OF-BROWSER-004/endpoint_refs/VE-46283550c868/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/OF-VOICE-001/endpoint_refs/VE-46283550c868/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/OF-OVERLAY-001/endpoint_refs/VE-46283550c868/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/OF-OVERLAY-001/endpoint_refs/VE-276a5ba5fcd5/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/OF-OVERLAY-001/endpoint_refs/VE-0e0d11add643/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/OF-NOTIFICATION-001/endpoint_refs/VE-184568bf5191/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/OF-NOTIFICATION-001/endpoint_refs/VE-0075332ffdca/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/OF-NOTIFICATION-001/endpoint_refs/VE-276a5ba5fcd5/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/OF-SHARE-001/endpoint_refs/VE-184568bf5191/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/OF-PROVISION-001/endpoint_refs/VE-782ff5cd38db/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/OF-PROVISION-001/endpoint_refs/VE-b0d2d3d8a692/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/OF-PROVISION-001/endpoint_refs/VE-890375698504/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/OF-PROVISION-001/endpoint_refs/VE-b452420ac05f/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/OF-PROVISION-001/endpoint_refs/VE-a595c39c916b/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/OF-PROVISION-001/endpoint_refs/VE-675e5084631e/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/OF-PROVISION-001/endpoint_refs/VE-7601e79b5b4b/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/OF-PROVISION-001/endpoint_refs/VE-c30376b402c7/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/OF-PROVISION-001/endpoint_refs/VE-4af2782b0c0a/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/OF-SETTINGS-001/endpoint_refs/VE-74fac65f350e/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/OF-SETTINGS-001/endpoint_refs/VE-a28ca11d646f/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/OF-SETTINGS-001/endpoint_refs/VE-a595c39c916b/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/OF-DIAGNOSTICS-001/endpoint_refs/VE-74fac65f350e/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/OF-DIAGNOSTICS-001/endpoint_refs/VE-be1d235e3e07/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/OF-DIAGNOSTICS-001/endpoint_refs/VE-7b962dca04ce/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/OF-DIAGNOSTICS-001/endpoint_refs/VE-b6d0fb44ce1a/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/OF-DIAGNOSTICS-001/endpoint_refs/VE-0e0d11add643/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/OF-TRADING-001/endpoint_refs/VE-7f665d15bcb7/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/OF-TRADING-001/endpoint_refs/VE-70d344b53103/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/OF-TRADING-001/endpoint_refs/VE-df932ad7aa9c/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/OF-TRADING-001/endpoint_refs/VE-17a8bae5d1a9/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/OF-TRADING-001/endpoint_refs/VE-677a08ec2f59/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/OF-TRADING-001/endpoint_refs/VE-2cbdf3eedbfa/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/OF-TRADING-001/endpoint_refs/VE-f8fa1e95ae19/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/OF-TRADING-002/endpoint_refs/VE-ea378bd7e456/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/OF-TRADING-002/endpoint_refs/VE-09993102f92f/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/OF-TRADING-002/endpoint_refs/VE-606f97aabb6e/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/OF-TRADING-002/endpoint_refs/VE-3cd653f61b92/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/OF-TRADING-002/endpoint_refs/VE-8f98fc5082e0/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/OF-TRADING-002/endpoint_refs/VE-1bb8459d8122/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/OF-TRADING-002/backend_contract_extensions/VE-37240eeb4805",
+        "change": "ADDED_CATALOG_EXTENSION"
+      },
+      {
+        "path": "/OF-TRADING-003/endpoint_refs/VE-74f3be9cd819/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/OF-TRADING-003/endpoint_refs/VE-0a22c152320d/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/OF-TRADING-003/endpoint_refs/VE-7110235ee7ad/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/OF-TRADING-003/endpoint_refs/VE-78837b67b4b1/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/OF-TRADING-003/backend_contract_extensions/VE-23d73eb21056/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/OF-TRADING-003/backend_contract_extensions/VE-ab7afddc7f0e/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/OF-TRADING-003/backend_contract_extensions/VE-74f3be9cd819/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/OF-TRADING-003/backend_contract_extensions/VE-df932ad7aa9c/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/OF-TRADING-004/endpoint_refs/VE-4e3c1f240f76/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/OF-TRADING-004/endpoint_refs/VE-b2920c7de8db/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/OF-TRADING-004/endpoint_refs/VE-273a47874923/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/OF-TRADING-005/endpoint_refs/VE-ad4fc9e37cb1/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/OF-TRADING-005/endpoint_refs/VE-6d46328732b6/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/OF-TRADING-005/endpoint_refs/VE-c30a0ba46d55/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/OF-TRADING-005/endpoint_refs/VE-46283550c868/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/OF-TRADING-005/endpoint_refs/VE-7f665d15bcb7/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/OF-ARTEMIS-001/endpoint_refs/VE-d8d924027316/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/OF-EMBODIMENT-001/endpoint_refs/VE-0e0d11add643/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/OF-EMBODIMENT-001/endpoint_refs/VE-6ec4d3b06e96/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/OF-EMBODIMENT-001/endpoint_refs/VE-3392f0bf0347/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      }
+    ]
+  },
+  "owner_screens": {
+    "all_original_ids_rows_values_and_order_preserved_except_source_citations": true,
+    "changes": [
+      {
+        "path": "/van.home/endpoint_refs/VE-74fac65f350e/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/van.home/endpoint_refs/VE-276a5ba5fcd5/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/van.home/endpoint_refs/VE-d3271755e9f9/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/van.home/endpoint_refs/VE-85624e3859a7/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/van.home/endpoint_refs/VE-70d344b53103/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/van.attention/endpoint_refs/VE-276a5ba5fcd5/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/van.attention/endpoint_refs/VE-b2aa094f0895/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/van.attention/endpoint_refs/VE-cf82eafbdeb9/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/van.attention/endpoint_refs/VE-90761687deb9/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/van.attention/endpoint_refs/VE-1df5172aa202/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/van.work/endpoint_refs/VE-46283550c868/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/van.work/endpoint_refs/VE-e1308a8edf69/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/van.work/endpoint_refs/VE-74fac65f350e/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/van.work/endpoint_refs/VE-25b6b4f8427b/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/van.work.activity/endpoint_refs/VE-0e0d11add643/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/van.work.artemis/endpoint_refs/VE-d8d924027316/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/van.work.browser.escalations/endpoint_refs/VE-1df5172aa202/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/van.work.browser.escalations/endpoint_refs/VE-46283550c868/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/van.trading.overview/endpoint_refs/VE-df932ad7aa9c/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/van.trading.overview/endpoint_refs/VE-70d344b53103/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/van.trading.overview/endpoint_refs/VE-17a8bae5d1a9/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/van.trading.overview/endpoint_refs/VE-3cd653f61b92/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/van.trading.overview/endpoint_refs/VE-7f665d15bcb7/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/van.trading.positions/endpoint_refs/VE-17a8bae5d1a9/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/van.trading.positions.detail/endpoint_refs/VE-17a8bae5d1a9/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/van.trading.positions.detail/endpoint_refs/VE-09993102f92f/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/van.trading.positions.detail/endpoint_refs/VE-3cd653f61b92/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/van.trading.positions.detail/endpoint_refs/VE-2cbdf3eedbfa/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/van.trading.positions.detail/backend_contract_extensions/VE-37240eeb4805",
+        "change": "ADDED_CATALOG_EXTENSION"
+      },
+      {
+        "path": "/van.trading.potential/endpoint_refs/VE-8f98fc5082e0/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/van.trading.history/endpoint_refs/VE-1bb8459d8122/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/van.trading.accounts/endpoint_refs/VE-74f3be9cd819/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/van.trading.accounts/backend_contract_extensions/VE-74f3be9cd819/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/van.trading.accounts/backend_contract_extensions/VE-df932ad7aa9c/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/van.trading.cognition/endpoint_refs/VE-f8fa1e95ae19/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/van.trading.accounts.add/endpoint_refs/VE-0a22c152320d/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/van.trading.accounts.add/endpoint_refs/VE-7110235ee7ad/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/van.trading.accounts.add/backend_contract_extensions/VE-23d73eb21056/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/van.trading.accounts.add/backend_contract_extensions/VE-ab7afddc7f0e/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/van.trading.accounts.add/backend_contract_extensions/VE-74f3be9cd819/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/van.trading.accounts.add/backend_contract_extensions/VE-df932ad7aa9c/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/van.trading.strategies/endpoint_refs/VE-4e3c1f240f76/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/van.trading.strategies/endpoint_refs/VE-b2920c7de8db/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/van.trading.strategies/endpoint_refs/VE-273a47874923/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/van.trading.halt/endpoint_refs/VE-46283550c868/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/van.trading.halt/endpoint_refs/VE-e1308a8edf69/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/van.trading.halt/endpoint_refs/VE-7f665d15bcb7/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/van.memory/endpoint_refs/VE-bf3a9fa9f698/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/van.memory/endpoint_refs/VE-4f28e519027f/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/van.memory/endpoint_refs/VE-4618336736dd/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/van.memory/endpoint_refs/VE-caa1a831cd8f/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/van.memory/endpoint_refs/VE-46283550c868/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/van.memory/endpoint_refs/VE-bdc7ae21680f/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/van.projects/endpoint_refs/VE-e512dd0faab4/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/van.projects/endpoint_refs/VE-276a5ba5fcd5/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/van.projects/endpoint_refs/VE-bf3a9fa9f698/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/van.projects/endpoint_refs/VE-1c26e9d71245/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/van.projects.detail/endpoint_refs/VE-1c26e9d71245/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/van.projects.detail/endpoint_refs/VE-276a5ba5fcd5/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/van.projects.detail/endpoint_refs/VE-b2aa094f0895/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/van.projects.detail/endpoint_refs/VE-bf3a9fa9f698/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/van.projects.detail/endpoint_refs/VE-46283550c868/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/van.connected/endpoint_refs/VE-74fac65f350e/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/van.connected/endpoint_refs/VE-7deffb936a64/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/van.connected/endpoint_refs/VE-0cb573a7c345/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/van.connected/endpoint_refs/VE-5e6f768ddb6f/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/van.settings/endpoint_refs/VE-a28ca11d646f/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/van.settings/endpoint_refs/VE-6ec4d3b06e96/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/van.floating/endpoint_refs/VE-46283550c868/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/van.floating/endpoint_refs/VE-ea378bd7e456/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/van.voice.turn/endpoint_refs/VE-46283550c868/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/van.browser.interactive/endpoint_refs/VE-46283550c868/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/van.permissions/endpoint_refs/VE-46283550c868/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/van.autonomy/endpoint_refs/VE-46283550c868/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/van.reminders.manage/endpoint_refs/VE-85624e3859a7/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/van.reminders.manage/endpoint_refs/VE-d7f6562ce04b/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/van.reminders.manage/endpoint_refs/VE-b6932785a6e1/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/van.reminders.manage/endpoint_refs/VE-9765b88983e2/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/van.reminders.manage/backend_contract_extensions/VE-85624e3859a7/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/van.reminders.manage/backend_contract_extensions/VE-9ef85a0d6e7a/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/van.reminders.manage/backend_contract_extensions/VE-d7f6562ce04b/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/van.reminders.manage/backend_contract_extensions/VE-9765b88983e2/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/van.reminders.manage/backend_contract_extensions/VE-b6932785a6e1/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/van.memory.history/endpoint_refs/VE-bdc7ae21680f/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/van.approval.detail/endpoint_refs/VE-46283550c868/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/van.approval.detail/endpoint_refs/VE-25b6b4f8427b/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/van.knowledge.research/endpoint_refs/VE-46283550c868/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/van.automation.library/endpoint_refs/VE-46283550c868/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/van.automation.intent/endpoint_refs/VE-46283550c868/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/van.browser.downloads/endpoint_refs/VE-46283550c868/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/van.devices.provision/endpoint_refs/VE-782ff5cd38db/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/van.devices.provision/endpoint_refs/VE-b0d2d3d8a692/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/van.devices.provision/endpoint_refs/VE-890375698504/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/van.devices.provision/endpoint_refs/VE-b452420ac05f/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/van.devices.provision/endpoint_refs/VE-a595c39c916b/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/van.devices.provision/endpoint_refs/VE-675e5084631e/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/van.devices.provision/endpoint_refs/VE-7601e79b5b4b/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/van.devices.provision/endpoint_refs/VE-c30376b402c7/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/van.devices.provision/endpoint_refs/VE-4af2782b0c0a/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/van.diagnostics/endpoint_refs/VE-74fac65f350e/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/van.diagnostics/endpoint_refs/VE-be1d235e3e07/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/van.diagnostics/endpoint_refs/VE-7b962dca04ce/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/van.diagnostics/endpoint_refs/VE-b6d0fb44ce1a/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/van.diagnostics/endpoint_refs/VE-0e0d11add643/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/van.provisioning/endpoint_refs/VE-782ff5cd38db/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/van.provisioning/endpoint_refs/VE-b0d2d3d8a692/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/van.provisioning/endpoint_refs/VE-890375698504/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/van.provisioning/endpoint_refs/VE-7601e79b5b4b/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/van.provisioning/endpoint_refs/VE-c30376b402c7/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/van.provisioning/endpoint_refs/VE-4af2782b0c0a/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/van.share.intake/endpoint_refs/VE-184568bf5191/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/van.memory.privacy/endpoint_refs/VE-d499de7845c7/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/van.memory.privacy/endpoint_refs/VE-46283550c868/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/van.memory.privacy/endpoint_refs/VE-e1308a8edf69/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/van.memory.privacy/endpoint_refs/VE-bf3a9fa9f698/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/van.knowledge.sources/endpoint_refs/VE-46283550c868/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/van.trading.tickets/endpoint_refs/VE-6d46328732b6/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/van.trading.tickets/endpoint_refs/VE-46283550c868/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/van.approval.trading-ticket/endpoint_refs/VE-6d46328732b6/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/van.approval.trading-ticket/endpoint_refs/VE-46283550c868/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/van.memory.record/endpoint_refs/VE-46283550c868/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/van.permissions.grant/endpoint_refs/VE-46283550c868/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/van.automation.plan/endpoint_refs/VE-46283550c868/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/van.browser.action-plan/endpoint_refs/VE-46283550c868/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      },
+      {
+        "path": "/van.browser.file-provider/endpoint_refs/VE-46283550c868/source_ref",
+        "change": "SOURCE_CITATION_REFRESH"
+      }
+    ]
+  },
+  "frozen_unit_contracts_and_dependencies_preserved": true,
+  "all_identity_sets_and105_source_function_contract_hashes_preserved": true,
+  "changed_source_row_hashes": {
+    "source_features": 32,
+    "source_surfaces": 46
+  }
+}

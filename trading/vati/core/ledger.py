@@ -143,6 +143,23 @@ class IncrementalChainVerifier:
 
 
 class Ledger:
+    @classmethod
+    def open_read_only(cls, path: str | Path):
+        """Open an existing source without creating or migrating its schema."""
+        source = Path(path)
+        if not source.is_absolute() or not source.is_file():
+            raise LedgerError('existing_absolute_source_ledger_required')
+        result = cls.__new__(cls)
+        result.path = str(source)
+        result._conn = sqlite3.connect(source.as_uri() + '?mode=ro', uri=True, isolation_level=None)
+        try:
+            result._conn.execute('PRAGMA query_only=ON')
+            result._conn.execute('SELECT seq, event_hash, chain_hash FROM events LIMIT 0')
+        except BaseException:
+            result._conn.close()
+            raise
+        return result
+
     def __init__(self, path: str | Path = ":memory:") -> None:
         self.path = str(path)
         self._conn = sqlite3.connect(self.path, isolation_level=None)

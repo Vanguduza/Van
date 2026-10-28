@@ -92,7 +92,12 @@ class TradingService:
     #: the correct default for a process that can halt live trading.
     owner_authority: Any = None
     native_source_root: str = ""
+    native_catalog_ledger_path: str = ""
     native_history_max_bytes: int = 64*1024**2
+
+    def instrument_catalog(self,**query):
+        from van_gateway.trading.instrument_catalog import read_catalog
+        return read_catalog(path=self.native_catalog_ledger_path,max_bytes=self.native_history_max_bytes,**query)
 
     def native_depth_history(self,*,environment,native_account_id,native_symbol_id,revision=None,as_of_ms=None):
         from van_gateway.trading.native_depth_history import read_history

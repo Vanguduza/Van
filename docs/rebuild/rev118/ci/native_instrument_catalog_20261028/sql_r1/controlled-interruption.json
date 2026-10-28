@@ -1,0 +1,7 @@
+{
+  "state": "CONTROLLED_INTERRUPTION_NOT_PASS",
+  "reason": "Stale derived frontend inventory and workmap detected by genuine guards after adding endpoint. Stop only the owned test before regenerating consumed data. Retain partial run and await original owned-PostgreSQL cleanup.",
+  "owned_test_pid": 391660,
+  "controller_pid": 391398,
+  "initial_target_discovery": "proc task children capability unavailable; no signal sent; supported ps parentage plus exact proc cmdline then independently verified"
+}

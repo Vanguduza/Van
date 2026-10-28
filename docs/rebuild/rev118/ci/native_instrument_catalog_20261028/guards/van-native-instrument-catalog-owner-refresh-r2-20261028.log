@@ -1,0 +1,7 @@
+Traceback (most recent call last):
+  File "/workspace/van-review-2026-10-18/publish/tools/rebuild/refresh_owner_source_contracts.py", line 445, in <module>
+    raise SystemExit(main())
+                     ^^^^^^
+  File "/workspace/van-review-2026-10-18/publish/tools/rebuild/refresh_owner_source_contracts.py", line 428, in main
+    raise ValueError("Unexpected registry edits require review: "+path)
+ValueError: Unexpected registry edits require review: registries/owner_features.json

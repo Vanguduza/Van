@@ -2005,8 +2005,8 @@
     "trading/vati/contracts/schemas/native_account_observation.schema.json": "af0c32a5ac27d55218474da3c8ea24a049c3c7b1bc59dc9abf465ae4a2b83a9f",
     "android/app/src/main/java/com/dial/van/trading/NativeAccountObservation.kt": "c6da23e70724022d1f813bb779b0e31661142565a8729949ca6a016ddf06927d"
   },
-  "endpoint_count": 483,
-  "schema_count": 376,
+  "endpoint_count": 484,
+  "schema_count": 378,
   "physical_cases_executed": 0,
   "owner_release": false,
   "deployment_accepted": false

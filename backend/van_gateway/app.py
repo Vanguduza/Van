@@ -662,6 +662,7 @@ def create_app() -> FastAPI:
         lake_root=settings.vati_lake_root,
         reporting_currency=settings.vati_reporting_currency,
         native_source_root=settings.vati_native_source_root,
+        native_catalog_ledger_path=settings.vati_native_catalog_ledger_path,
         native_history_max_bytes=settings.vati_native_history_max_bytes,
     )
     visual_acceptance = VisualAcceptanceService(store)
@@ -1261,6 +1262,8 @@ def create_app() -> FastAPI:
     app.include_router(build_chart_router(chart_workspaces))
     from van_gateway.trading.native_depth_history import build_depth_history_router
     app.include_router(build_depth_history_router(trading))
+    from van_gateway.trading.instrument_catalog import build_instrument_catalog_router
+    app.include_router(build_instrument_catalog_router(trading))
     from van_gateway.trading.payment_draft_api import FundingDraftService,build_funding_draft_router
     app.state.funding_drafts=FundingDraftService(trading)
     app.include_router(build_funding_draft_router(app.state.funding_drafts))

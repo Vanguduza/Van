@@ -320,6 +320,20 @@ def build(read=None):
     }
     for row in (chart_feature,chart_screen):
         row.setdefault("backend_contract_extensions",[]).append(copy.deepcopy(depth_extension))
+    catalog_endpoint = next(r for r in endpoint_doc['endpoints'] if r['path']=='/v1/trading/market/instruments')
+    catalog_extension = {
+        'method':catalog_endpoint['method'],'path':catalog_endpoint['path'],'endpoint_id':catalog_endpoint['endpoint_id'],
+        'source_ref':catalog_endpoint['source'],'authentication':catalog_endpoint['authentication'],
+        'device_proof_required_when_bound':catalog_endpoint['device_proof_required_when_bound'],
+        'source_status':'CANDIDATE_ORIGINAL_CATALOG_DISCOVERY_ANDROID_CONSUMER_PENDING',
+        'authority':'ORIGINAL_SOURCE_READ_ONLY_NO_EXECUTION_TRADABILITY_OR_ENTITLEMENT_GRANT',
+        'canonical_units':['BE-008'],
+        'scope':'Exact native realm/account discovery and original-name resolution from the existing dedicated catalog owner. Hidden, archived and omitted-name rows remain visible as source facts. Duplicate aliases are ambiguous even on a one-row page; explicit native IDs disambiguate without changing permissions. Revision/source/selector-bound pagination and causal availability preserve historical identity. Frontend InstrumentRef is supplied only where the original name fits its existing contract; full contract revision remains unresolved. A provisioned read-only source and two retained read slots bound work, including disconnected clients. No request-supplied path, native refresh, renamed ticker, synthetic LIVE or frontend redesign.',
+        'specification':'docs/rebuild/rev118/backend/BE-008_NATIVE_INSTRUMENT_CATALOG_HTTP.md',
+        'new_ui_implemented':False,'live_qualified':False,
+    }
+    for row in (chart_feature,chart_screen):
+        row.setdefault('backend_contract_extensions',[]).append(copy.deepcopy(catalog_extension))
     funding_rows=[accounts,next(r for r in documents['owner_screens']['screens'] if r['id']=='van.trading.accounts')]
     for endpoint in endpoint_doc['endpoints']:
         if not endpoint['path'].startswith('/v1/trading/funding/drafts'):

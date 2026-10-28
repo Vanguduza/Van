@@ -1,0 +1,15 @@
+{
+  "command": [
+    "python3",
+    "/workspace/van-native-instrument-catalog-sql-r1-20261028.py"
+  ],
+  "cwd": "/workspace/van-review-2026-10-18/publish",
+  "controller_pid": 391394,
+  "started_at_utc": "2026-10-28T11:15:48.777268+00:00",
+  "timeout_seconds": 2100,
+  "state": "COMPLETED",
+  "command_pid": 391398,
+  "exit": 2,
+  "adopted_children_reaped": [],
+  "finished_at_utc": "2026-10-28T11:17:16.123746+00:00"
+}

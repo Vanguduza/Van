@@ -7467,6 +7467,211 @@
         ],
         "title": "IndicatorInstance"
       },
+      "InstrumentCatalogErrorResponse": {
+        "properties": {
+          "detail": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "required": [
+          "detail"
+        ],
+        "title": "InstrumentCatalogErrorResponse"
+      },
+      "InstrumentCatalogResponse": {
+        "properties": {
+          "schema": {
+            "type": "string",
+            "const": "vati.native-instrument-catalog-view/1",
+            "title": "Schema"
+          },
+          "state": {
+            "type": "string",
+            "enum": [
+              "NO_CAPTURE",
+              "EMPTY_CATALOG",
+              "CATALOG_OBSERVED_UNQUALIFIED"
+            ],
+            "title": "State"
+          },
+          "scope": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Scope"
+          },
+          "receipt": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Receipt"
+          },
+          "requested_revision": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Requested Revision"
+          },
+          "requested_as_of_ms": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Requested As Of Ms"
+          },
+          "requested_record_ref": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Requested Record Ref"
+          },
+          "alias": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Alias"
+          },
+          "native_symbol_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Native Symbol Id"
+          },
+          "resolution_state": {
+            "type": "string",
+            "enum": [
+              "NOT_REQUESTED",
+              "SOURCE_UNAVAILABLE",
+              "NOT_FOUND",
+              "RESOLVED_NATIVE_IDENTITY",
+              "AMBIGUOUS_NATIVE_ALIAS"
+            ],
+            "title": "Resolution State"
+          },
+          "total_matches": {
+            "type": "integer",
+            "title": "Total Matches"
+          },
+          "members": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "type": "array",
+            "maxItems": 256,
+            "title": "Members"
+          },
+          "next_cursor": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Next Cursor"
+          },
+          "coverage": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "REQUESTED_ARCHIVED_ROWS",
+                  "ARCHIVED_COVERAGE_NOT_REQUESTED"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Coverage"
+          },
+          "alias_matching": {
+            "type": "string",
+            "const": "EXACT_ORIGINAL_NATIVE_NAME_NO_CASE_OR_PUNCTUATION_REWRITE",
+            "title": "Alias Matching"
+          },
+          "current_tradability": {
+            "type": "string",
+            "const": "NOT_EVALUATED_HISTORICAL_LISTING",
+            "title": "Current Tradability"
+          },
+          "provider_qualified": {
+            "type": "boolean",
+            "const": false,
+            "title": "Provider Qualified"
+          },
+          "execution_authority": {
+            "type": "boolean",
+            "const": false,
+            "title": "Execution Authority"
+          },
+          "authority_effect": {
+            "type": "string",
+            "const": "NONE",
+            "title": "Authority Effect"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "schema",
+          "state",
+          "scope",
+          "receipt",
+          "requested_revision",
+          "requested_as_of_ms",
+          "requested_record_ref",
+          "alias",
+          "native_symbol_id",
+          "resolution_state",
+          "total_matches",
+          "members",
+          "next_cursor",
+          "coverage",
+          "alias_matching",
+          "current_tradability",
+          "provider_qualified",
+          "execution_authority",
+          "authority_effect"
+        ],
+        "title": "InstrumentCatalogResponse"
+      },
       "InstrumentRef": {
         "properties": {
           "venue": {

@@ -1,0 +1,16 @@
+{
+  "command": [
+    "/workspace/van-backend-venv-20261025/bin/python",
+    "tools/rebuild/refresh_owner_source_contracts.py",
+    "--apply"
+  ],
+  "cwd": "/workspace/van-review-2026-10-18/publish",
+  "controller_pid": 386122,
+  "started_at_utc": "2026-10-28T11:14:32.777865+00:00",
+  "timeout_seconds": 240,
+  "state": "COMPLETED",
+  "command_pid": 386125,
+  "exit": 1,
+  "adopted_children_reaped": [],
+  "finished_at_utc": "2026-10-28T11:14:54.237564+00:00"
+}

@@ -1,0 +1,9 @@
+Traceback (most recent call last):
+  File "/workspace/van-review-2026-10-18/publish/tools/rebuild/workmap.py", line 149, in <module>
+    raise SystemExit(main())
+                     ^^^^^^
+  File "/workspace/van-review-2026-10-18/publish/tools/rebuild/workmap.py", line 142, in main
+    check_document(json.loads((ROOT / OUTPUT).read_text()), expected)
+  File "/workspace/van-review-2026-10-18/publish/tools/rebuild/workmap.py", line 124, in check_document
+    raise ValueError("workmap differs from original identities, full contract hashes, dependency edges or source index; regenerate and review the actual change")
+ValueError: workmap differs from original identities, full contract hashes, dependency edges or source index; regenerate and review the actual change

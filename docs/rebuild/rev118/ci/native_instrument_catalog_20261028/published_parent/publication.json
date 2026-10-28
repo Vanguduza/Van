@@ -1,0 +1,121 @@
+{
+  "source_head": "291de61baf55255d8ccd51ae7783df0bec4b8692",
+  "remote_exact_head_verified": true,
+  "committed_ledger": "GREEN189",
+  "required_baseline": "4fd466dec3910ed5de614bfbf95887ad619df5ca",
+  "commands": {
+    "genuine-commit": {
+      "command": [
+        "python3",
+        "/workspace/van-run-reaped.py",
+        "git",
+        "commit",
+        "-m",
+        "Preserve original native MT5 quote snapshots through signed transports and durable query readback"
+      ],
+      "cwd": "/workspace/van-review-2026-10-18/publish",
+      "controller_pid": 352565,
+      "started_at_utc": "2026-10-28T10:59:04.999575+00:00",
+      "timeout_seconds": 1200,
+      "state": "COMPLETED",
+      "command_pid": 352568,
+      "exit": 0,
+      "adopted_children_reaped": [],
+      "finished_at_utc": "2026-10-28T10:59:06.838679+00:00"
+    },
+    "committed-verify": {
+      "command": [
+        "/workspace/van-backend-venv-20261025/bin/python",
+        "tools/ci/project_truth_ledger.py",
+        "verify",
+        "--committed",
+        "--baseline",
+        "4fd466dec3910ed5de614bfbf95887ad619df5ca"
+      ],
+      "cwd": "/workspace/van-review-2026-10-18/publish",
+      "controller_pid": 352796,
+      "started_at_utc": "2026-10-28T10:59:16.639288+00:00",
+      "timeout_seconds": 1200,
+      "state": "COMPLETED",
+      "command_pid": 352801,
+      "exit": 0,
+      "adopted_children_reaped": [],
+      "finished_at_utc": "2026-10-28T11:01:45.266950+00:00"
+    },
+    "normal-push": {
+      "command": [
+        "git",
+        "push",
+        "origin",
+        "ccr-9e07e1af-8mgz1p"
+      ],
+      "cwd": "/workspace/van-review-2026-10-18/publish",
+      "controller_pid": 379516,
+      "started_at_utc": "2026-10-28T11:03:26.175203+00:00",
+      "timeout_seconds": 300,
+      "state": "COMPLETED",
+      "command_pid": 379521,
+      "exit": 0,
+      "adopted_children_reaped": [],
+      "finished_at_utc": "2026-10-28T11:03:30.617846+00:00"
+    },
+    "remote-readback": {
+      "command": [
+        "git",
+        "ls-remote",
+        "origin",
+        "refs/heads/ccr-9e07e1af-8mgz1p"
+      ],
+      "cwd": "/workspace/van-review-2026-10-18/publish",
+      "controller_pid": 379536,
+      "started_at_utc": "2026-10-28T11:04:09.286184+00:00",
+      "timeout_seconds": 180,
+      "state": "COMPLETED",
+      "command_pid": 379540,
+      "exit": 0,
+      "adopted_children_reaped": [],
+      "finished_at_utc": "2026-10-28T11:04:10.103937+00:00"
+    }
+  },
+  "formal_acceptances_issued": 0,
+  "current_source_receipt": "docs/rebuild/rev118/receipts/MT5_ORIGINAL_QUOTE_SOURCE_20261028.json",
+  "native_source_compile": {
+    "schema": "van.native-mql-independent-artifact-readback/1",
+    "requested_head": "291de61baf55255d8ccd51ae7783df0bec4b8692",
+    "actual_tested_merge_head": "adb3e2c52f06ab0e0b95e607d101a1f43683a640",
+    "source_sha256": "72865771fbfad856df5613057f88b8a5729bac219697a5ea4aa9271b2563e7f1",
+    "source_blob_oid": "49716fcba0d6a1f6a16f3f565c6f7b399b69749c",
+    "source_bytes_and_blob_match": true,
+    "artifact_id": 12811600078,
+    "workflow_run": 40676993217,
+    "original_archive_bytes": 89792,
+    "original_archive_sha256": "9953d1df260062b360b9b650f2d46666210d12a683711194fef57fc8ea858b9d",
+    "native_phase": "SOURCE_COMPILED",
+    "compile_cases": [
+      {
+        "name": "VanCompilerRejectionProbe",
+        "expected_success": false,
+        "process_exit_code": 0,
+        "errors": 4,
+        "warnings": 0,
+        "fresh_binary": false,
+        "started_at_utc": "2026-10-28T11:04:46.9654486Z",
+        "finished_at_utc": "2026-10-28T11:04:48.0955217Z",
+        "log_sha256": "fd9165f6d0e286c0f3833c2f837333d693b8e94208be15a8bb96311e688faf59"
+      },
+      {
+        "name": "VanBridgeEA",
+        "expected_success": true,
+        "process_exit_code": 1,
+        "errors": 0,
+        "warnings": 0,
+        "fresh_binary": true,
+        "started_at_utc": "2026-10-28T11:04:48.0990106Z",
+        "finished_at_utc": "2026-10-28T11:04:50.8591310Z",
+        "log_sha256": "eb9d24643450bbf13792d3fdb09ec6d99aa0908b8a697674b39ce0fbb35aea08",
+        "binary_sha256": "9ff0e549c2c58221edf183d44ba5f1be5dd82716d07054039585d5e7e7b2461a"
+      }
+    ],
+    "financial_native_device_acceptance": "NOT_ISSUED"
+  }
+}
