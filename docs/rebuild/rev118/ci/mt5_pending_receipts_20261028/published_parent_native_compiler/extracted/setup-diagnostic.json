@@ -1,0 +1,1216 @@
+{
+  "observed_at_utc": "2026-10-28T13:04:02.1884337Z",
+  "candidates": [
+    {
+      "exists": false,
+      "path": "C:\\Program Files\\MetaTrader 5\\metaeditor64.exe"
+    },
+    {
+      "exists": true,
+      "path": "D:\\a\\_temp\\van-mql-2b49b4c9b58a49e0b059c82773b1bbf2\\sdk\\metaeditor64.exe"
+    }
+  ],
+  "processes": [],
+  "sdk_files": [
+    {
+      "relative_path": "MetaEditor64.exe",
+      "Length": 116198368
+    },
+    {
+      "relative_path": "metatester64.exe",
+      "Length": 22370672
+    },
+    {
+      "relative_path": "Terminal.ico",
+      "Length": 410598
+    },
+    {
+      "relative_path": "terminal64.exe",
+      "Length": 121825224
+    },
+    {
+      "relative_path": "uninstall.exe",
+      "Length": 22902352
+    },
+    {
+      "relative_path": "van-offline-sdk.ini",
+      "Length": 79
+    },
+    {
+      "relative_path": "Bases\\alerts.dat",
+      "Length": 428
+    },
+    {
+      "relative_path": "Bases\\objects.dat",
+      "Length": 0
+    },
+    {
+      "relative_path": "Bases\\strategy.dat",
+      "Length": 0
+    },
+    {
+      "relative_path": "Bases\\Default\\History\\EURUSD\\2023.hcc",
+      "Length": 9827739
+    },
+    {
+      "relative_path": "Bases\\Default\\History\\EURUSD\\2024.hcc",
+      "Length": 14518323
+    },
+    {
+      "relative_path": "Bases\\Default\\History\\GBPUSD\\2023.hcc",
+      "Length": 9913566
+    },
+    {
+      "relative_path": "Bases\\Default\\History\\GBPUSD\\2024.hcc",
+      "Length": 16253196
+    },
+    {
+      "relative_path": "Bases\\Default\\History\\USDCHF\\2023.hcc",
+      "Length": 9907746
+    },
+    {
+      "relative_path": "Bases\\Default\\History\\USDCHF\\2024.hcc",
+      "Length": 15232056
+    },
+    {
+      "relative_path": "Bases\\Default\\History\\USDJPY\\2023.hcc",
+      "Length": 9909846
+    },
+    {
+      "relative_path": "Bases\\Default\\History\\USDJPY\\2024.hcc",
+      "Length": 16251036
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\1.welcome.arabic.welcome",
+      "Length": 19942
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\1.welcome.bengali.welcome",
+      "Length": 20130
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\1.welcome.bulgarian.welcome",
+      "Length": 21180
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\1.welcome.chinese (simplified).welcome",
+      "Length": 18886
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\1.welcome.chinese (traditional).welcome",
+      "Length": 17936
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\1.welcome.croatian.welcome",
+      "Length": 19652
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\1.welcome.czech.welcome",
+      "Length": 20704
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\1.welcome.danish.welcome",
+      "Length": 19536
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\1.welcome.default.welcome",
+      "Length": 20864
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\1.welcome.dutch.welcome",
+      "Length": 21054
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\1.welcome.english.welcome",
+      "Length": 20864
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\1.welcome.estonian.welcome",
+      "Length": 19854
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\1.welcome.finnish.welcome",
+      "Length": 19946
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\1.welcome.french.welcome",
+      "Length": 21484
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\1.welcome.georgian.welcome",
+      "Length": 19924
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\1.welcome.german.welcome",
+      "Length": 21256
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\1.welcome.greek.welcome",
+      "Length": 20152
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\1.welcome.hausa.welcome",
+      "Length": 20268
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\1.welcome.hebrew.welcome",
+      "Length": 18890
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\1.welcome.hindi.welcome",
+      "Length": 19470
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\1.welcome.hungarian.welcome",
+      "Length": 21312
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\1.welcome.indonesian.welcome",
+      "Length": 19910
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\1.welcome.italian.welcome",
+      "Length": 21258
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\1.welcome.japanese.welcome",
+      "Length": 19196
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\1.welcome.javanese.welcome",
+      "Length": 19602
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\1.welcome.korean.welcome",
+      "Length": 19988
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\1.welcome.latvian.welcome",
+      "Length": 19626
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\1.welcome.lithuanian.welcome",
+      "Length": 19770
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\1.welcome.malay.welcome",
+      "Length": 19610
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\1.welcome.marathi.welcome",
+      "Length": 19520
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\1.welcome.mongolian.welcome",
+      "Length": 19702
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\1.welcome.persian.welcome",
+      "Length": 19732
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\1.welcome.polish.welcome",
+      "Length": 19768
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\1.welcome.portuguese.welcome",
+      "Length": 21522
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\1.welcome.punjabi (india).welcome",
+      "Length": 19612
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\1.welcome.punjabi (pakistan).welcome",
+      "Length": 19750
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\1.welcome.romanian.welcome",
+      "Length": 20162
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\1.welcome.russian.welcome",
+      "Length": 21460
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\1.welcome.serbian.welcome",
+      "Length": 19680
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\1.welcome.slovak.welcome",
+      "Length": 20432
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\1.welcome.slovenian.welcome",
+      "Length": 19638
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\1.welcome.spanish.welcome",
+      "Length": 21734
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\1.welcome.swahili.welcome",
+      "Length": 19800
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\1.welcome.swedish.welcome",
+      "Length": 19858
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\1.welcome.tajik.welcome",
+      "Length": 21030
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\1.welcome.tamil.welcome",
+      "Length": 20054
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\1.welcome.telugu.welcome",
+      "Length": 20720
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\1.welcome.thai.welcome",
+      "Length": 19120
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\1.welcome.turkish.welcome",
+      "Length": 20808
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\1.welcome.ukrainian.welcome",
+      "Length": 21070
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\1.welcome.urdu.welcome",
+      "Length": 19674
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\1.welcome.uzbek.welcome",
+      "Length": 21100
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\1.welcome.vietnamese.welcome",
+      "Length": 20632
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\10.developers.arabic.welcome",
+      "Length": 19636
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\10.developers.bengali.welcome",
+      "Length": 20226
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\10.developers.bulgarian.welcome",
+      "Length": 20622
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\10.developers.chinese (simplified).welcome",
+      "Length": 17254
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\10.developers.chinese (traditional).welcome",
+      "Length": 17278
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\10.developers.croatian.welcome",
+      "Length": 20066
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\10.developers.czech.welcome",
+      "Length": 21798
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\10.developers.danish.welcome",
+      "Length": 20600
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\10.developers.dutch.welcome",
+      "Length": 20796
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\10.developers.english.welcome",
+      "Length": 20436
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\10.developers.estonian.welcome",
+      "Length": 20488
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\10.developers.finnish.welcome",
+      "Length": 20830
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\10.developers.french.welcome",
+      "Length": 21464
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\10.developers.georgian.welcome",
+      "Length": 20520
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\10.developers.german.welcome",
+      "Length": 21418
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\10.developers.greek.welcome",
+      "Length": 20778
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\10.developers.hausa.welcome",
+      "Length": 20782
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\10.developers.hebrew.welcome",
+      "Length": 19038
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\10.developers.hindi.welcome",
+      "Length": 19976
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\10.developers.hungarian.welcome",
+      "Length": 22552
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\10.developers.indonesian.welcome",
+      "Length": 20750
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\10.developers.italian.welcome",
+      "Length": 20880
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\10.developers.japanese.welcome",
+      "Length": 17960
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\10.developers.javanese.welcome",
+      "Length": 19980
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\10.developers.korean.welcome",
+      "Length": 18124
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\10.developers.latvian.welcome",
+      "Length": 20298
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\10.developers.lithuanian.welcome",
+      "Length": 20154
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\10.developers.malay.welcome",
+      "Length": 20300
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\10.developers.marathi.welcome",
+      "Length": 19738
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\10.developers.mongolian.welcome",
+      "Length": 20396
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\10.developers.persian.welcome",
+      "Length": 20286
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\10.developers.polish.welcome",
+      "Length": 20496
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\10.developers.portuguese.welcome",
+      "Length": 20806
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\10.developers.punjabi (india).welcome",
+      "Length": 20024
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\10.developers.punjabi (pakistan).welcome",
+      "Length": 20582
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\10.developers.romanian.welcome",
+      "Length": 21072
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\10.developers.russian.welcome",
+      "Length": 20506
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\10.developers.serbian.welcome",
+      "Length": 20082
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\10.developers.slovak.welcome",
+      "Length": 21508
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\10.developers.slovenian.welcome",
+      "Length": 20108
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\10.developers.spanish.welcome",
+      "Length": 20992
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\10.developers.swahili.welcome",
+      "Length": 20628
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\10.developers.swedish.welcome",
+      "Length": 20752
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\10.developers.tamil.welcome",
+      "Length": 21002
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\10.developers.telugu.welcome",
+      "Length": 20476
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\10.developers.thai.welcome",
+      "Length": 19248
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\10.developers.turkish.welcome",
+      "Length": 20538
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\10.developers.ukrainian.welcome",
+      "Length": 20212
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\10.developers.urdu.welcome",
+      "Length": 20552
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\10.developers.uzbek.welcome",
+      "Length": 20668
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\10.developers.vietnamese.welcome",
+      "Length": 21610
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\2.signals.arabic.welcome",
+      "Length": 9606
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\2.signals.bengali.welcome",
+      "Length": 9718
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\2.signals.bulgarian.welcome",
+      "Length": 9996
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\2.signals.chinese (simplified).welcome",
+      "Length": 8550
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\2.signals.chinese (traditional).welcome",
+      "Length": 8554
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\2.signals.croatian.welcome",
+      "Length": 9644
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\2.signals.czech.welcome",
+      "Length": 10420
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\2.signals.danish.welcome",
+      "Length": 9762
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\2.signals.default.welcome",
+      "Length": 9912
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\2.signals.dutch.welcome",
+      "Length": 10206
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\2.signals.english.welcome",
+      "Length": 9912
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\2.signals.estonian.welcome",
+      "Length": 9720
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\2.signals.finnish.welcome",
+      "Length": 9986
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\2.signals.french.welcome",
+      "Length": 10278
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\2.signals.georgian.welcome",
+      "Length": 9872
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\2.signals.german.welcome",
+      "Length": 10314
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\2.signals.greek.welcome",
+      "Length": 9852
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\2.signals.hausa.welcome",
+      "Length": 9960
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\2.signals.hebrew.welcome",
+      "Length": 9220
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\2.signals.hindi.welcome",
+      "Length": 9554
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\2.signals.hungarian.welcome",
+      "Length": 10844
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\2.signals.indonesian.welcome",
+      "Length": 9942
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\2.signals.italian.welcome",
+      "Length": 10144
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\2.signals.japanese.welcome",
+      "Length": 8904
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\2.signals.javanese.welcome",
+      "Length": 9726
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\2.signals.korean.welcome",
+      "Length": 8962
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\2.signals.latvian.welcome",
+      "Length": 9736
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\2.signals.lithuanian.welcome",
+      "Length": 9786
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\2.signals.malay.welcome",
+      "Length": 9640
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\2.signals.marathi.welcome",
+      "Length": 9450
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\2.signals.mongolian.welcome",
+      "Length": 9698
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\2.signals.persian.welcome",
+      "Length": 9820
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\2.signals.polish.welcome",
+      "Length": 9758
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\2.signals.portuguese.welcome",
+      "Length": 10210
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\2.signals.punjabi (india).welcome",
+      "Length": 9536
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\2.signals.punjabi (pakistan).welcome",
+      "Length": 9612
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\2.signals.romanian.welcome",
+      "Length": 10048
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\2.signals.russian.welcome",
+      "Length": 10068
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\2.signals.serbian.welcome",
+      "Length": 9674
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\2.signals.slovak.welcome",
+      "Length": 10414
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\2.signals.slovenian.welcome",
+      "Length": 9598
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\2.signals.spanish.welcome",
+      "Length": 10378
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\2.signals.swahili.welcome",
+      "Length": 9772
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\2.signals.swedish.welcome",
+      "Length": 9944
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\2.signals.tajik.welcome",
+      "Length": 10012
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\2.signals.tamil.welcome",
+      "Length": 10082
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\2.signals.telugu.welcome",
+      "Length": 9856
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\2.signals.thai.welcome",
+      "Length": 9434
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\2.signals.turkish.welcome",
+      "Length": 9974
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\2.signals.ukrainian.welcome",
+      "Length": 9840
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\2.signals.urdu.welcome",
+      "Length": 9642
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\2.signals.uzbek.welcome",
+      "Length": 10276
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\2.signals.vietnamese.welcome",
+      "Length": 10674
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\3.market.arabic.welcome",
+      "Length": 9906
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\3.market.bengali.welcome",
+      "Length": 9818
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\3.market.bulgarian.welcome",
+      "Length": 10498
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\3.market.chinese (simplified).welcome",
+      "Length": 8500
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\3.market.chinese (traditional).welcome",
+      "Length": 8502
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\3.market.croatian.welcome",
+      "Length": 9952
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\3.market.czech.welcome",
+      "Length": 10600
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\3.market.danish.welcome",
+      "Length": 10206
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\3.market.default.welcome",
+      "Length": 10154
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\3.market.dutch.welcome",
+      "Length": 10280
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\3.market.english.welcome",
+      "Length": 10154
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\3.market.estonian.welcome",
+      "Length": 10148
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\3.market.finnish.welcome",
+      "Length": 10238
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\3.market.french.welcome",
+      "Length": 10636
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\3.market.georgian.welcome",
+      "Length": 10058
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\3.market.german.welcome",
+      "Length": 10480
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\3.market.greek.welcome",
+      "Length": 10252
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\3.market.hausa.welcome",
+      "Length": 10376
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\3.market.hebrew.welcome",
+      "Length": 9464
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\3.market.hindi.welcome",
+      "Length": 9788
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\3.market.hungarian.welcome",
+      "Length": 11472
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\3.market.indonesian.welcome",
+      "Length": 10200
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\3.market.italian.welcome",
+      "Length": 10356
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\3.market.japanese.welcome",
+      "Length": 8914
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\3.market.javanese.welcome",
+      "Length": 10088
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\3.market.korean.welcome",
+      "Length": 8946
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\3.market.latvian.welcome",
+      "Length": 9946
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\3.market.lithuanian.welcome",
+      "Length": 9998
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\3.market.malay.welcome",
+      "Length": 10024
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\3.market.marathi.welcome",
+      "Length": 9866
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\3.market.mongolian.welcome",
+      "Length": 10104
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\3.market.persian.welcome",
+      "Length": 10158
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\3.market.polish.welcome",
+      "Length": 10022
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\3.market.portuguese.welcome",
+      "Length": 10854
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\3.market.punjabi (india).welcome",
+      "Length": 9828
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\3.market.punjabi (pakistan).welcome",
+      "Length": 9910
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\3.market.romanian.welcome",
+      "Length": 10386
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\3.market.russian.welcome",
+      "Length": 10676
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\3.market.serbian.welcome",
+      "Length": 10020
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\3.market.slovak.welcome",
+      "Length": 10620
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\3.market.slovenian.welcome",
+      "Length": 9950
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\3.market.spanish.welcome",
+      "Length": 11100
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\3.market.swahili.welcome",
+      "Length": 10112
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\3.market.swedish.welcome",
+      "Length": 10242
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\3.market.tajik.welcome",
+      "Length": 10338
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\3.market.tamil.welcome",
+      "Length": 10418
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\3.market.telugu.welcome",
+      "Length": 10128
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\3.market.thai.welcome",
+      "Length": 9614
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\3.market.turkish.welcome",
+      "Length": 10258
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\3.market.ukrainian.welcome",
+      "Length": 10284
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\3.market.urdu.welcome",
+      "Length": 9978
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\3.market.uzbek.welcome",
+      "Length": 10570
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\3.market.vietnamese.welcome",
+      "Length": 10660
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\4.mobile.arabic.welcome",
+      "Length": 17118
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\4.mobile.bengali.welcome",
+      "Length": 17010
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\4.mobile.bulgarian.welcome",
+      "Length": 18372
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\4.mobile.chinese (simplified).welcome",
+      "Length": 17238
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\4.mobile.chinese (traditional).welcome",
+      "Length": 16304
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\4.mobile.croatian.welcome",
+      "Length": 16930
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\4.mobile.czech.welcome",
+      "Length": 17372
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\4.mobile.danish.welcome",
+      "Length": 17064
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\4.mobile.default.welcome",
+      "Length": 18310
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\4.mobile.dutch.welcome",
+      "Length": 18396
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\4.mobile.english.welcome",
+      "Length": 18310
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\4.mobile.estonian.welcome",
+      "Length": 17050
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\4.mobile.finnish.welcome",
+      "Length": 17218
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\4.mobile.french.welcome",
+      "Length": 18726
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\4.mobile.georgian.welcome",
+      "Length": 17138
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\4.mobile.german.welcome",
+      "Length": 18494
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\4.mobile.greek.welcome",
+      "Length": 17258
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\4.mobile.hausa.welcome",
+      "Length": 17290
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\4.mobile.hebrew.welcome",
+      "Length": 16728
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\4.mobile.hindi.welcome",
+      "Length": 16842
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\4.mobile.hungarian.welcome",
+      "Length": 17726
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\4.mobile.indonesian.welcome",
+      "Length": 17286
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\4.mobile.italian.welcome",
+      "Length": 18444
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\4.mobile.japanese.welcome",
+      "Length": 17518
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\4.mobile.javanese.welcome",
+      "Length": 17004
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\4.mobile.korean.welcome",
+      "Length": 17398
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\4.mobile.latvian.welcome",
+      "Length": 17052
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\4.mobile.lithuanian.welcome",
+      "Length": 17274
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\4.mobile.malay.welcome",
+      "Length": 17066
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\4.mobile.marathi.welcome",
+      "Length": 16806
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\4.mobile.mongolian.welcome",
+      "Length": 17136
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\4.mobile.persian.welcome",
+      "Length": 17184
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\4.mobile.polish.welcome",
+      "Length": 17080
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\4.mobile.portuguese.welcome",
+      "Length": 18476
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\4.mobile.punjabi (india).welcome",
+      "Length": 16846
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\4.mobile.punjabi (pakistan).welcome",
+      "Length": 16854
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\4.mobile.romanian.welcome",
+      "Length": 17270
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\4.mobile.russian.welcome",
+      "Length": 18386
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\4.mobile.serbian.welcome",
+      "Length": 16952
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\4.mobile.slovak.welcome",
+      "Length": 17412
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\4.mobile.slovenian.welcome",
+      "Length": 16944
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\4.mobile.spanish.welcome",
+      "Length": 18568
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\4.mobile.swahili.welcome",
+      "Length": 17068
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\4.mobile.swedish.welcome",
+      "Length": 17166
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\4.mobile.tajik.welcome",
+      "Length": 18346
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\4.mobile.tamil.welcome",
+      "Length": 17348
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\4.mobile.telugu.welcome",
+      "Length": 17202
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\4.mobile.thai.welcome",
+      "Length": 16790
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\4.mobile.turkish.welcome",
+      "Length": 18132
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\4.mobile.ukrainian.welcome",
+      "Length": 18270
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\4.mobile.urdu.welcome",
+      "Length": 16850
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\4.mobile.uzbek.welcome",
+      "Length": 18470
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\4.mobile.vietnamese.welcome",
+      "Length": 17474
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\5.freelance.arabic.welcome",
+      "Length": 8818
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\5.freelance.bengali.welcome",
+      "Length": 9070
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\5.freelance.bulgarian.welcome",
+      "Length": 9188
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\5.freelance.chinese (simplified).welcome",
+      "Length": 8102
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\5.freelance.chinese (traditional).welcome",
+      "Length": 8104
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\5.freelance.croatian.welcome",
+      "Length": 9050
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\5.freelance.czech.welcome",
+      "Length": 9446
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\5.freelance.danish.welcome",
+      "Length": 9154
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\5.freelance.default.welcome",
+      "Length": 9082
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\5.freelance.dutch.welcome",
+      "Length": 9194
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\5.freelance.english.welcome",
+      "Length": 9082
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\5.freelance.estonian.welcome",
+      "Length": 9046
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\5.freelance.finnish.welcome",
+      "Length": 8984
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\5.freelance.french.welcome",
+      "Length": 9522
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\5.freelance.georgian.welcome",
+      "Length": 9084
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\5.freelance.german.welcome",
+      "Length": 9542
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\5.freelance.greek.welcome",
+      "Length": 9304
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\5.freelance.hausa.welcome",
+      "Length": 9096
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\5.freelance.hebrew.welcome",
+      "Length": 8600
+    },
+    {
+      "relative_path": "Bases\\Default\\Mail\\5.freelance.hindi.welcome",
+      "Length": 8972
+    }
+  ]
+}

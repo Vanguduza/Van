@@ -28,7 +28,7 @@ import sqlite3
 import threading
 import time
 from contextlib import contextmanager, nullcontext
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from decimal import Decimal
 from pathlib import Path
 from typing import Any, Callable, Optional, ClassVar
@@ -112,13 +112,14 @@ class BridgeQueue:
             cur = self._conn.execute("INSERT INTO commands(alias, op, body_json, created_ms) VALUES (?,?,?,?)", (alias, op, json.dumps(body, sort_keys=True), now_ms))
             return int(cur.lastrowid)
 
-    def native_entries(self, alias: str) -> list[dict]:
+    def native_entries(self, alias: str, *, include_clocks: bool = False) -> list[dict]:
         """Original durable claims/results, scoped to this authenticated EA."""
         with self._lock:
-            rows=self._conn.execute("SELECT id,body_json,status,result_json FROM commands WHERE alias=? AND op IN ('ORDER_SEND','ORDER_SEND_EXPIRING') AND json_type(body_json,'$.native_command_hash')='text' ORDER BY id",(alias,)).fetchall()
+            rows=self._conn.execute("SELECT id,body_json,status,result_json,created_ms,taken_ms,done_ms FROM commands WHERE alias=? AND op IN ('ORDER_SEND','ORDER_SEND_EXPIRING') AND json_type(body_json,'$.native_command_hash')='text' ORDER BY id",(alias,)).fetchall()
             return [{'id':int(cid),'body':json.loads(body),'status':status,
-                     'result':json.loads(result) if result is not None else None}
-                    for cid,body,status,result in rows]
+                     'result':json.loads(result) if result is not None else None,
+                     **({'created_ms':created,'taken_ms':taken,'done_ms':done} if include_clocks else {})}
+                    for cid,body,status,result,created,taken,done in rows]
 
     def take_pending(self, alias: str, *, now_ms: int, limit: int = 10,
                      expected_identity: Mt5Identity | None = None, allow_entry: bool = True) -> list[dict]:
@@ -380,17 +381,44 @@ class Mt5PullAdapter:
                 **({'expected_account':self.identity.as_dict()} if self.identity is not None else {})}
 
     def _entry_receipt(self, cmd: OrderCommand, r, *, now_ms: int) -> ExecutionReceipt:
-        rej = lambda why, status="REJECTED": ExecutionReceipt(cmd.trade_intent_id, cmd.decision_hash, self.venue, status, ZERO, None, cmd.entry_price, cmd.entry_price, cmd.entry_price, False, now_ms, now_ms, reject_reason=why).sealed()  # noqa: E731
+        # Local receipt time is never a substitute for an absent native clock.
+        native_clock = r.get('server_time_ms') if isinstance(r,dict) else None
+        native_clock = native_clock if type(native_clock) is int and 0<native_clock<=now_ms else 0
+        rej = lambda why, status="REJECTED": ExecutionReceipt(cmd.trade_intent_id, cmd.decision_hash, self.venue, status, ZERO, None, cmd.entry_price, cmd.entry_price, cmd.entry_price, False, native_clock, now_ms, reject_reason=why).sealed()  # noqa: E731
         if r is None:
             return rej("EA did not report within timeout; reconcile before retrying", "UNKNOWN")
         if not isinstance(r,dict):return rej('native entry result malformed; reconcile original claim','UNKNOWN')
         status=r.get('status')
+        if not isinstance(status,str):return rej('native entry status malformed; reconcile original claim','UNKNOWN')
         if status in {'REJECTED','CANCELLED','EXPIRED'}:
             try:
                 qty=Decimal(str(r.get('volume','0')))
                 if not qty.is_finite() or qty!=ZERO:return rej('native refusal contradicts reported fill','UNKNOWN')
             except (ValueError,ArithmeticError):return rej('native refusal volume malformed','UNKNOWN')
             return rej(str(r.get('reason') or status),status)
+        if status=='ACCEPTED':
+            try:
+                # The actual EA PLACED response confirms an order, not a fill
+                # or a position. Preserve the full native unsigned ticket.
+                order=r['order']
+                if type(order) is int:
+                    valid=0<order<2**64
+                else:
+                    valid=(type(order) is str and order.isascii() and order.isdecimal()
+                           and not order.startswith('0') and len(order)<=20 and int(order)<2**64)
+                qty=Decimal(str(r.get('volume','0')))
+                if (not valid or not qty.is_finite() or qty!=ZERO
+                    or not (r.get('position') is None or r.get('position')==''
+                            or (type(r.get('position')) is int and r['position']==0))
+                    or ('retcode' in r and (type(r['retcode']) is not int or r['retcode']!=10008))):
+                    raise ValueError('contradictory pending acknowledgment')
+                stop_confirmed=r.get('sl_confirmed') is True
+                return ExecutionReceipt(cmd.trade_intent_id,cmd.decision_hash,self.venue,'ACCEPTED',
+                    ZERO,None,cmd.entry_price,cmd.entry_price,cmd.entry_price,stop_confirmed,
+                    native_clock,now_ms,broker_order_id=str(order),
+                    protective_stop_price=cmd.protective_stop if stop_confirmed else None).sealed()
+            except (KeyError,TypeError,ValueError,ArithmeticError):
+                return rej('native pending acknowledgment malformed; reconcile original claim','UNKNOWN')
         if status not in {'FILLED','PARTIAL'}:return rej('original native entry result unconfirmed','UNKNOWN')
         try:
             qty=Decimal(str(r['volume']));price=Decimal(str(r['price']))
@@ -398,31 +426,46 @@ class Mt5PullAdapter:
             if qty<cmd.quantity:status='PARTIAL'
             stop_confirmed=r.get('sl_confirmed') is True
             return ExecutionReceipt(cmd.trade_intent_id, cmd.decision_hash, self.venue, status, qty, price, cmd.entry_price, Decimal(str(r.get('arrival',r['price']))), cmd.entry_price,
-                stop_confirmed,int(r.get('server_time_ms',now_ms)),now_ms,broker_order_id=str(r.get('order') or ''),broker_position_id=str(r.get('position') or ''),
+                stop_confirmed,native_clock,now_ms,broker_order_id=str(r.get('order') or ''),broker_position_id=str(r.get('position') or ''),
                 protective_stop_price=cmd.protective_stop if stop_confirmed else None).sealed()
         except (KeyError,ValueError,ArithmeticError):return rej('native fill malformed; reconcile original claim','UNKNOWN')
+
+    def _recorded_entry_receipt(self, cmd: OrderCommand, entry: dict, *, now_ms: int) -> ExecutionReceipt:
+        """Decode the first durable result, retaining its original local completion."""
+        done=entry.get('done_ms');created=entry.get('created_ms');taken=entry.get('taken_ms')
+        completed=entry.get('status')=='DONE'
+        preflight=(isinstance(entry.get('result'),dict)
+                   and entry['result'].get('status') in ('REJECTED','CANCELLED','EXPIRED'))
+        valid=(completed and type(created) is int and type(done) is int
+               and 0<=created<=done<=now_ms
+               and ((taken is None and preflight) or (type(taken) is int and created<=taken<=done)))
+        receipt=self._entry_receipt(cmd,entry.get('result') if completed else None,
+            now_ms=done if valid else now_ms)
+        # A missing/corrupt completion clock must not erase a known native
+        # effect, or invent a new completion each time recovery observes it.
+        return replace(receipt,received_time_unix_ms=done if valid else None,receipt_hash='').sealed()
 
     def recover_entry(self, cmd: OrderCommand, *, now_ms: int) -> Optional[ExecutionReceipt]:
         """Read the original claim/result. Never enqueue, emit or retry."""
         body=self._entry_body(cmd)
-        rows=[e for e in self.queue.native_entries(self.account_alias) if e['body'].get('native_command_hash')==cmd.command_hash]
+        rows=[e for e in self.queue.native_entries(self.account_alias,include_clocks=True) if e['body'].get('native_command_hash')==cmd.command_hash]
         if len(rows)!=1 or rows[0]['body']!=body:return None
         # Original result readback is historical, not a current account view.
         # Consumers still need positions()/sync_account() before applying it.
-        return self._entry_receipt(cmd,rows[0]['result'],now_ms=now_ms)
+        return self._recorded_entry_receipt(cmd,rows[0],now_ms=now_ms)
 
     def submit(self, cmd: OrderCommand, *, now_ms: int) -> ExecutionReceipt:
         rej = lambda why: self._entry_receipt(cmd,{'status':'REJECTED','volume':'0','reason':why},now_ms=now_ms)
         if cmd.protective_stop is None:
             return rej("MT5 orders require SL in the same request")
         body=self._entry_body(cmd)
-        previous=[e for e in self.queue.native_entries(self.account_alias) if e['body'].get('native_command_hash')==cmd.command_hash]
+        previous=[e for e in self.queue.native_entries(self.account_alias,include_clocks=True) if e['body'].get('native_command_hash')==cmd.command_hash]
         if previous:
             if len(previous)!=1 or previous[0]['body']!=body:
                 return self._entry_receipt(cmd,None,now_ms=now_ms)
             # Current availability cannot rewrite an existing UNKNOWN claim as
             # a new preflight refusal. Return its original result without send.
-            return self._entry_receipt(cmd,previous[0]['result'],now_ms=now_ms)
+            return self._recorded_entry_receipt(cmd,previous[0],now_ms=now_ms)
         try:
             state=self._state()
         except VenueUnavailable as exc:
@@ -437,8 +480,13 @@ class Mt5PullAdapter:
                 return rej('native EA cannot enforce the explicit entry deadline; not queued')
         body = self._entry_body(cmd)
         cid = self.queue.enqueue(self.account_alias, "ORDER_SEND_EXPIRING" if cmd.expires_at_ms is not None else "ORDER_SEND", body, now_ms=now_ms)
-        r = self._await(cid)
-        return self._entry_receipt(cmd,r,now_ms=now_ms)
+        self._await(cid)
+        # Read back the original SQL claim, rather than trusting a transient
+        # waiter return or renewing the caller's pre-dispatch timestamp.
+        rows=[e for e in self.queue.native_entries(self.account_alias,include_clocks=True) if e['id']==cid]
+        if len(rows)!=1 or rows[0]['body']!=body:
+            return self._entry_receipt(cmd,None,now_ms=self.clock())
+        return self._recorded_entry_receipt(cmd,rows[0],now_ms=self.clock())
 
     def modify_stop(self, position_id: str, new_stop: Decimal, *, now_ms: int) -> ExecutionReceipt:
         try:

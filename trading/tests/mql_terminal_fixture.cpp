@@ -260,6 +260,7 @@ int main(int argc, char** argv) {
   if(c=="entry-cash-permission") disable_margin_read=true;
   if(c=="entry-cash-sell") positions[42].type=1;
   if(c=="entry-cash-limit-good") trade.rc=TRADE_RETCODE_PLACED;
+  if(c=="entry-market-accepted") trade.rc=TRADE_RETCODE_PLACED;
   if(c=="entry-weak-stop") positions[42].sl=1.1;
   if(c=="entry-no-stop") positions[42].sl=0;
   if(c=="entry-unknown-position") trade.deal=0;

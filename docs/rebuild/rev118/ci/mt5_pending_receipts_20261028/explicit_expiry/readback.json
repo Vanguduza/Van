@@ -1,0 +1,75 @@
+{
+  "schema": "van.mt5-original-expired-command-recovery/1",
+  "source_sha256": {
+    "trading/vati/execution/mt5_pull.py": "1ff81c1d17fac2669511ec789c814a16c27262192e38db6810402d499b215d87",
+    "trading/tests/test_mt5_pending_receipts.py": "6d33c20461431ce8cd48374606d0e937f8e7dda19f067c2557fe8cc84ce7b746"
+  },
+  "checks": [
+    {
+      "original_status": "ACCEPTED",
+      "after_expiry_status": "ACCEPTED",
+      "original_received_ms": 120,
+      "receipt_hash": "4d0138fdf5aafe6508fdad63229c7929d823a568026f10bb6a961c1403e44bce",
+      "original_claims": 1,
+      "passed": true
+    },
+    {
+      "original_status": "FILLED",
+      "after_expiry_status": "FILLED",
+      "original_received_ms": 120,
+      "receipt_hash": "8ddd517ea2b04a5938b5c0c660bc7c2551c4d04da00e5fb77d2f6ef398cb0fae",
+      "original_claims": 1,
+      "passed": true
+    },
+    {
+      "original_status": "PARTIAL",
+      "after_expiry_status": "PARTIAL",
+      "original_received_ms": 120,
+      "receipt_hash": "6a8d2eb3b25945b22e1a0cf1c244da0cf18e57a63717e52870ae55f2a62276dc",
+      "original_claims": 1,
+      "passed": true
+    },
+    {
+      "original_status": "REJECTED",
+      "after_expiry_status": "REJECTED",
+      "original_received_ms": 120,
+      "receipt_hash": "1070e82df218c8869d4e3578d689241b54df64e9f3f9b5d614b7f802d628ceac",
+      "original_claims": 1,
+      "passed": true
+    },
+    {
+      "original_status": "CANCELLED",
+      "after_expiry_status": "CANCELLED",
+      "original_received_ms": 120,
+      "receipt_hash": "27673e5288b85441cfd18883ae1fda1164c3160e42cd84e90cd370065ea3c2e5",
+      "original_claims": 1,
+      "passed": true
+    },
+    {
+      "original_status": "EXPIRED",
+      "after_expiry_status": "EXPIRED",
+      "original_received_ms": 120,
+      "receipt_hash": "5ccc5ab03474d086238b25358fe283f00e5162ebadcbf3b73ad4517eae4db06e",
+      "original_claims": 1,
+      "passed": true
+    },
+    {
+      "original_status": "QUEUED",
+      "after_expiry_status": "UNKNOWN",
+      "original_received_ms": null,
+      "receipt_hash": "b6187eaf2d5b2eecc75834ee7909e57821fe5e1da510451c3558264e83858257",
+      "original_claims": 1,
+      "passed": true
+    },
+    {
+      "original_status": "TAKEN",
+      "after_expiry_status": "UNKNOWN",
+      "original_received_ms": null,
+      "receipt_hash": "b6187eaf2d5b2eecc75834ee7909e57821fe5e1da510451c3558264e83858257",
+      "original_claims": 1,
+      "passed": true
+    }
+  ],
+  "native_effects_executed": false,
+  "scope": "Real SQL original bounded command and historical completion recovery; no native terminal execution."
+}

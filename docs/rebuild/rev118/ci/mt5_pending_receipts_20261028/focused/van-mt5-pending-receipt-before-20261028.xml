@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="2" skipped="0" tests="2" time="3.183" timestamp="2026-10-28T13:22:32.650601+00:00" hostname="6e9feff21467"><testcase classname="trading.tests.test_mt5_pending_receipts" name="test_actual_ea_pending_ack_keeps_original_order_and_no_invented_fill" time="2.250"><failure message="AssertionError: assert ('UNKNOWN' == 'ACCEPTED'&#10;  &#10;  - ACCEPTED&#10;  + UNKNOWN)">ea = &lt;function ea.&lt;locals&gt;.run at 0x7f6a4ebf8a40&gt;
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-114/test_actual_ea_pending_ack_kee0')
+
+    def test_actual_ea_pending_ack_keeps_original_order_and_no_invented_fill(ea,tmp_path):
+        native=ea('entry-cash-limit-good')['results'][0]
+        assert native['status']=='ACCEPTED' and native['sl_confirmed'] is True
+        q=BridgeQueue(tmp_path/'receipt.sqlite')
+        try:
+            receipt=Mt5PullAdapter(q)._entry_receipt(command(),native,now_ms=1700000000000)
+&gt;           assert receipt.status=='ACCEPTED' and receipt.broker_order_id=='11'
+E           AssertionError: assert ('UNKNOWN' == 'ACCEPTED'
+E             
+E             - ACCEPTED
+E             + UNKNOWN)
+
+trading/tests/test_mt5_pending_receipts.py:29: AssertionError</failure></testcase><testcase classname="trading.tests.test_mt5_pending_receipts" name="test_real_signed_poll_sql_ack_reopen_and_expired_replay_keep_first_completion" time="0.105"><failure message="AssertionError: assert ('UNKNOWN' == 'ACCEPTED'&#10;  &#10;  - ACCEPTED&#10;  + UNKNOWN)">ea = &lt;function ea.&lt;locals&gt;.run at 0x7f6a4ebf8a40&gt;
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-114/test_real_signed_poll_sql_ack_0')
+
+    def test_real_signed_poll_sql_ack_reopen_and_expired_replay_keep_first_completion(ea,tmp_path):
+        path=tmp_path/'bridge.sqlite';q=BridgeQueue(path);reopened=None
+        now={'ms':1700000000000};native=ea('snapshot')['account'];cmd=command();counter={'n':0}
+        app=create_pull_app(q,lambda alias:KEY if alias=='mt5_ea' else None,clock=lambda:now['ms'])
+        def poll(client,results):
+            counter['n']+=1;nonce='pending-'+str(counter['n']);ts=str(now['ms']//1000)
+            body=json.dumps({'account':native,'positions':[],'orders':[],'results':results}).encode()
+            return client.post('/ea/v1/mt5_ea/poll',content=body,headers={'content-type':'application/json',
+                'x-van-ts':ts,'x-van-nonce':nonce,'x-van-signature':sign_poll(KEY,ts,nonce,'mt5_ea',body)})
+        try:
+            with TestClient(app) as client:
+                assert poll(client,[]).status_code==200
+                adapter=Mt5PullAdapter(q,clock=lambda:now['ms'],timeout_s=3,poll_s=.005,
+                    identity=Mt5Identity('12345678','broker-demo','USD',True))
+                with ThreadPoolExecutor(max_workers=1) as pool:
+                    task=pool.submit(adapter.submit,cmd,now_ms=now['ms'])
+                    deadline=time.monotonic()+2
+                    while not q.native_entries('mt5_ea') and time.monotonic()&lt;deadline:time.sleep(.005)
+                    offered=poll(client,[]);assert offered.status_code==200 and '|MARKET|' in offered.text
+                    cid=int(offered.text.split('|')[0]);now['ms']+=50
+                    response=ea('entry-pending')['results'][0]|{'id':cid}
+                    assert poll(client,[response]).status_code==200
+                    receipt=task.result(timeout=3)
+&gt;               assert receipt.status=='ACCEPTED' and receipt.filled_qty==0
+E               AssertionError: assert ('UNKNOWN' == 'ACCEPTED'
+E                 
+E                 - ACCEPTED
+E                 + UNKNOWN)
+
+trading/tests/test_mt5_pending_receipts.py:59: AssertionError</failure></testcase></testsuite></testsuites>
