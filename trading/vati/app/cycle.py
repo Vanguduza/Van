@@ -403,7 +403,10 @@ class DecisionCycle:
         snap = self.snapshot(now_ms=now_ms, quote_age_ms=state.quote_age_ms, strategy_id=intent.strategy_id)
         now_ms = max(now_ms, getattr(self, "_risk_snapshot_ms", now_ms))
         decision = self.authority.evaluate_safe(intent, snap)
-        self._log(EventKind.RISK_DECISION, {"inputs": {"intent": intent_to_dict(intent), "snapshot": snapshot_to_dict(snap), "mandate": cfg.mandate_dict}, "decision": decision.to_dict()}, now_ms=now_ms, corr=intent.trade_intent_id)
+        from vati.risk.mandate_source import capture_mandate_source
+        original_policy = capture_mandate_source(self.authority.mandate, cfg.mandate_dict, now_ms=now_ms)
+        self._log(EventKind.RISK_DECISION, {"inputs": {"intent": intent_to_dict(intent), "snapshot": snapshot_to_dict(snap),
+            "mandate": cfg.mandate_dict, "original_mandate_source": original_policy}, "decision": decision.to_dict()}, now_ms=now_ms, corr=intent.trade_intent_id)
         metrics.inc("vati_decisions_total", outcome=decision.decision.value)
         if decision.decision is Decision.REJECTED:
             return CycleResult(state.as_of_ms, state.state_hash, f"REJECTED:{decision.reason_code}", decision.reason_detail)

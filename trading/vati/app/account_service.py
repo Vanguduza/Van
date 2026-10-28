@@ -720,10 +720,12 @@ class AccountCoordinatorService:
         assert self.authority is not None
         decision = self.authority.evaluate_safe(intent, snapshot)
         now = self.clock()
+        from vati.risk.mandate_source import capture_mandate_source
+        original_policy = capture_mandate_source(self.authority.mandate, self.cfg.mandate, now_ms=now)
         self._ledger.append(make_event(
             EventKind.RISK_DECISION, "vati-account-coordinator",
             {"inputs": {"intent": intent_to_dict(intent), "snapshot": snapshot_to_dict(snapshot),
-                        "mandate": self.cfg.mandate},
+                        "mandate": self.cfg.mandate, "original_mandate_source": original_policy},
              "decision": decision.to_dict(),
              "execution_cohort": execution_cohort_for(self.adapter, self.mandate.mode).as_dict()},
             event_time_ms=now, received_time_ms=now, decision_time_ms=now,

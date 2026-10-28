@@ -1,0 +1,89 @@
+{
+  "schema": "van.rev118.original-mandate-policy-source/1",
+  "source_parent": "e12ef22329700775e6111eb0bc1354ba84bb88ba",
+  "observed_at_utc": "2026-10-28T06:16:19.925194+00:00",
+  "source_files_sha256": {
+    "trading/vati/risk/mandate_source.py": "1984019b962838fda442011ffb514e75d087f9f272de76920b0a98a7653d84c7",
+    "trading/vati/app/account_service.py": "135a420d9383cd60d7938825325959d3f01a224b8b4a1eb1cbdd18f6bc4bb6f1",
+    "trading/vati/app/cycle.py": "fd7b2c02641029e1fed05e1cb9c964a51d3ec52ad367e5d33ab1c0019a53f628",
+    "trading/tests/test_mandate_source.py": "65869d2a94e73d45f71dba5b4bcbfb021433e7d2bec2c65c62db97df00185fe1",
+    "trading/tests/test_mandate_source_postgres.py": "50845d79d82fca90b1c6ef20184b7fd573a503ee78f602cad9218bd742841612"
+  },
+  "implementation": "Both existing risk producers now archive the actual effective mandate and original standing-signature/public-key evidence used by the real kernel. A separate temperament grant retains its exact signed raw input; normalization cannot substitute a different signature subject. Original readback independently checks policy/decision hashes, scope, lifetime and P256 signatures after SQL reopen or key rotation/removal/revocation, without re-admission. The result is immutable OriginalMandatePolicy data, not a TradingMandate or current grant. Legacy/invalid proof stays UNBOUND without dropping original native losses or history. Positive account approval and both original producer paths execute; no trade effect is issued by these readbacks. Final766actualsourceSQLitePostgreSQLHTTP/recovery/authority cases pass0skip/audit0;766unique callIDs once/all1210pinnedPythonhashes match/ownedPGabsent. The69focused checks overlap. Initial68PASS/1source-temperamentFAIL and764PASS/1PGfault-fixtureFAIL remain recorded, then corrected without weakening original assertions or owner controls. Published e12 original selected artifact independently verifies4708tradingPASS/1declaredDDSskip,26PGPASS,117voicePASS; four supporting workflowsSUCCESS, mainstillrunning with two independently confirmed mandatory admission failures. Full current active-policy arbitration, all-origin reservations, native finality, payment settlement and the entire unchanged programme remain open.0formal/native/production/S24acceptance.",
+  "source_result": {
+    "actual_outer_exit": 0,
+    "actual_inner_exit": 0,
+    "passed": 766,
+    "skipped": 0,
+    "audit_violations": 0,
+    "unique_call_identities_once": 766,
+    "pinned_python_inputs_matched": 1210,
+    "owned_postgres_independently_absent": true,
+    "raw": "ci/original_policy_20261028/sql_final"
+  },
+  "focused_result": {
+    "passed": 69,
+    "overlaps_final": true
+  },
+  "failed_attempts": [
+    {
+      "passed": 68,
+      "failed": 1,
+      "reason": "Original separately signed temperament raw input was absent from the first normalizing reader; source fixed."
+    },
+    {
+      "passed": 764,
+      "failed": 1,
+      "reason": "PG append does not invoke the public atomic hook; fault fixture now enters an actual outer transaction and loses its commit reply."
+    }
+  ],
+  "published_parent": {
+    "artifact_id": 12795254478,
+    "head": "e12ef22329700775e6111eb0bc1354ba84bb88ba",
+    "main_run": 40641060997,
+    "bytes": 183076,
+    "sha256": "13320fc08bee69b3f3a12c818336d1d8281343674fb717b6685400bf092fd3e0",
+    "GitHub_digest_size_CRC_paths_and_extracted_readback_verified": true,
+    "independent_junit_results": [
+      {
+        "file": "postgres-ledger-report.xml",
+        "cases": 26,
+        "passed": 26,
+        "failed_or_error": 0,
+        "skips": []
+      },
+      {
+        "file": "trading-source-report.xml",
+        "cases": 4709,
+        "passed": 4708,
+        "failed_or_error": 0,
+        "skips": [
+          {
+            "name": "test_dial_resolver_selects_trading_knowledge_from_van_registry",
+            "reason": {
+              "type": "pytest.skip",
+              "message": "dial-new checkout not available (set DIAL_REPO)"
+            }
+          }
+        ]
+      },
+      {
+        "file": "voice-source-report.xml",
+        "cases": 117,
+        "passed": 117,
+        "failed_or_error": 0,
+        "skips": []
+      }
+    ]
+  },
+  "limitations": [
+    "Original signature data cannot admit a current mandate or policy",
+    "Unknown historical policy does not erase its native financial contributions",
+    "Source key fixtures are not owner production keys, provider/device evidence or deployment",
+    "Active/revoked policy arbitration and all-origin reservation enforcement remain open",
+    "Metadata size, capacity and complete native deployment require their own qualification",
+    "Python storage audit is not an OS sandbox"
+  ],
+  "formal_acceptances_issued": 0,
+  "next": "Complete native prospective-margin coverage and all-origin reservation state, current active mandate/policy reconciliation and authoritative native finality/release; preserve all canonical backend and Android requirements."
+}

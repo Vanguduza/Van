@@ -1,0 +1,1 @@
+{"workmap": "docs/rebuild/rev118/SOURCE_WORKMAP.json", "counts": {"units": 131, "backend_units": 82, "backend_verification_units": 12, "requirements": 324, "acceptance": 1610, "contexts": 234, "actions": 349, "planned_features": 93, "source_features": 42, "source_functions": 105, "source_surfaces": 78}, "result": "SOURCE_SCOPE_INDEX_CONSISTENT", "acceptance_issued": false}
