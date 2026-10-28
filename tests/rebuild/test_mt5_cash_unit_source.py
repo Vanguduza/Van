@@ -19,7 +19,7 @@ def source_executable(tmp_path_factory):
     text=EA.read_text()
     units=text.split('// BEGIN_NATIVE_CASH_UNITS\n',1)[1].split('// END_NATIVE_CASH_UNITS',1)[0]
     amount=text[text.index('bool NativeCashAmount('):text.index('bool NativeEntryCashScope(')]
-    bound=text[text.index('bool NativeEntryCashBound('):text.index('struct EntryCashMarginCheck')]
+    bound=text[text.index('bool NativeEntryCashBounds('):text.index('struct EntryCashMarginCheck')]
     shim=r'''
 #include <string>
 #include <iostream>
@@ -34,8 +34,8 @@ ushort StringGetCharacter(const string &s,int i){return (unsigned char)s.at(i);}
 string StringSubstr(const string &s,int start,int count=-1){return s.substr(start,count<0?string::npos:count);}
 bool StringSetCharacter(string &s,int i,ushort c){s.at(i)=(char)c;return true;}
 int StringCompare(const string &a,const string &b){return a.compare(b);}
-enum ENUM_ACCOUNT_INFO_DOUBLE{ACCOUNT_EQUITY,ACCOUNT_CREDIT,ACCOUNT_MARGIN,ACCOUNT_MARGIN_FREE};
-double values[4];bool missing[4];int nativeError=0;int currencyScale=2;
+enum ENUM_ACCOUNT_INFO_DOUBLE{ACCOUNT_EQUITY,ACCOUNT_CREDIT,ACCOUNT_MARGIN,ACCOUNT_MARGIN_FREE,ACCOUNT_MARGIN_LEVEL};
+double values[5];bool missing[5];int nativeError=0;int currencyScale=2;
 void ResetLastError(){nativeError=0;}
 int GetLastError(){return nativeError;}
 double AccountInfoDouble(ENUM_ACCOUNT_INFO_DOUBLE f){if(missing[f])nativeError=501;return values[f];}
@@ -51,6 +51,15 @@ int main(){string row;
    std::cout<<(NativeMoneyUnitsFromText(text,scale,up!=0,result)?result:"REFUSED")<<"\n";
   }else if(op=="S"){string a,b;in>>a>>b;
    std::cout<<(NativeUnitsSubtract(a,b,result)?result:"REFUSED")<<"\n";
+  }else if(op=="A"){string a,b;in>>a>>b;
+   std::cout<<NativeUnitsAdd(a,b)<<"\n";
+  }else if(op=="M"){string a;int factor;in>>a>>factor;
+   result=NativeUnitsScaleByInteger(a,factor);std::cout<<(result.empty()?"REFUSED":result)<<"\n";
+  }else if(op=="F"){string capital,used,required;in>>capital>>used>>required;
+   std::cout<<(NativeProjectedMarginFloorAllows(capital,used,required)?"ALLOW":"HOLD")<<"\n";
+  }else if(op=="P"){string a,b;in>>a>>b;std::cout<<NativeUnitsMultiply(a,b)<<"\n";
+  }else if(op=="R"){string capital,used,required;int exponent;in>>capital>>exponent>>used>>required;
+   std::cout<<(NativeReportedMarginFloorAllows(capital,exponent,used,required)?"ALLOW":"HOLD")<<"\n";
   }else if(op=="B"){in>>currencyScale;
    for(int i=0;i<4;i++){string raw;in>>raw;char *end=nullptr;values[i]=std::strtod(raw.c_str(),&end);missing[i]=!end || *end!=0;}
    std::cout<<(NativeEntryCashBound("explicit-source-fixture",currencyScale,result)?result:"REFUSED")<<"\n";
@@ -118,3 +127,23 @@ def test_actual_ea_cash_bound_uses_original_units_and_credit_exclusion(source_ex
             expected.append(str(max(0,capacity)))
         except ValueError:expected.append('REFUSED')
     assert source_executable(rows)==expected
+
+
+def test_actual_ea_projected_margin_arithmetic_matches_independent_integer_oracle(source_executable):
+    rng=random.Random(118200);rows=[];expected=[]
+    pairs=[(0,0),(1,0),(0,1),(10**320-1,1),(10**320-1,10**319+1)]
+    pairs += [(rng.randrange(10**rng.randrange(1,320)),rng.randrange(10**rng.randrange(1,320))) for _ in range(1024)]
+    for a,b in pairs:
+        rows.append(f'A {a} {b}');expected.append(str(a+b))
+        factor=rng.choice([0,1,2,100,200,1000000]);rows.append(f'M {a} {factor}');expected.append(str(a*factor))
+        rows.append(f'P {a} {b}');expected.append(str(a*b))
+        for offset in [-1,0,1]:
+            capital=max(0,2*(a+b)+offset)
+            rows.append(f'F {capital} {a} {b}');expected.append('ALLOW' if 100*capital>200*(a+b) else 'HOLD')
+            reported=max(0,200*(a+b)+offset)
+            rows.append(f'R {reported} 0 {a} {b}');expected.append('ALLOW' if reported>200*(a+b) else 'HOLD')
+            exponent=rng.randrange(-400,401);reported=rng.randrange(10**rng.randrange(1,320))
+            rows.append(f'R {reported} {exponent} {a} {b}')
+            expected.append('ALLOW' if Fraction(reported)*Fraction(10)**exponent>200*(a+b) else 'HOLD')
+    assert source_executable(rows)==expected
+    assert source_executable(['M 100 -1','M 100 1000001'])==['REFUSED','REFUSED']

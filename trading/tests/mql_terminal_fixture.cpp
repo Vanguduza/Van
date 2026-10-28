@@ -95,6 +95,9 @@ int pending_count=0;
 int modify_calls=0, close_calls=0, entry_calls=0;
 double account_credit=200, account_balance=12344.12345678, account_equity=12345.12345678;
 double required_margin=33.25;
+bool floor_drop_during_margin=false, floor_drop_final=false, floor_rise_during_margin=false;
+bool reported_level_available=true, reported_level_drop_final=false, reported_level_rise=false;
+int post_margin_level_reads=0;
 bool margin_calculation_available=true;
 bool cash_drop_during_margin=false, cash_drop_final=false, cash_units_change=false;
 bool expire_margin_read=false, disable_margin_read=false;
@@ -121,16 +124,22 @@ long AccountInfoInteger(int field) {
 double AccountInfoDouble(int field) {
  if(field==ACCOUNT_MARGIN || field==ACCOUNT_MARGIN_FREE || field==ACCOUNT_MARGIN_LEVEL) {
   if(!margin_available) last_error=1;
+  if(field==ACCOUNT_MARGIN_LEVEL && !reported_level_available) last_error=1;
+  if(field==ACCOUNT_MARGIN_LEVEL && margin_calls && reported_level_drop_final && ++post_margin_level_reads>=2) account_margin_level=210;
   return field==ACCOUNT_MARGIN ? account_margin : field==ACCOUNT_MARGIN_FREE ? account_margin_free : account_margin_level;
  }
  if(!funds_available) last_error=1;
  if(field==ACCOUNT_EQUITY && margin_calls && cash_drop_final && ++post_margin_cash_reads>=2) account_equity=20;
+ if(field==ACCOUNT_EQUITY && margin_calls && floor_drop_final && ++post_margin_cash_reads>=2) account_equity=500;
  return field==ACCOUNT_EQUITY ? account_equity : field==ACCOUNT_CREDIT ? account_credit : account_balance;
 }
 bool OrderCalcMargin(int side,const string&,double,double price,double &result) {
  last_margin_side=side;last_margin_price=price;
  margin_calls++;result=required_margin;
  if(cash_drop_during_margin) account_equity=20;
+ if(floor_drop_during_margin) account_equity=500;
+ if(floor_rise_during_margin) account_equity=2000;
+ if(reported_level_rise) account_margin_level=1000;
  if(cash_units_change) currency_digits=3;
  if(expire_margin_read) utc_clock++;
  if(disable_margin_read) connected=false;
@@ -261,6 +270,27 @@ int main(int argc, char** argv) {
   if(c=="entry-cash-sell") positions[42].type=1;
   if(c=="entry-cash-limit-good") trade.rc=TRADE_RETCODE_PLACED;
   if(c=="entry-market-accepted") trade.rc=TRADE_RETCODE_PLACED;
+  if(c.rfind("entry-floor",0)==0) {
+   account_equity=1000;account_credit=0;account_margin=100;account_margin_free=900;required_margin=400;
+   if(c=="entry-floor-low") required_margin=450;
+   if(c=="entry-floor-credit") { account_equity=1100;account_credit=100;account_margin_free=1000; }
+   if(c=="entry-floor-good") required_margin=399.5;
+   if(c=="entry-floor-fraction-held") required_margin=399.99;
+   if(c=="entry-floor-after") { required_margin=200;floor_drop_during_margin=true; }
+   if(c=="entry-floor-final") { required_margin=200;floor_drop_final=true; }
+   if(c=="entry-floor-improved") floor_rise_during_margin=true;
+   if(c=="entry-floor-reported" || c=="entry-floor-reported-improved") { required_margin=10;account_margin_level=210; }
+   if(c=="entry-floor-reported-improved") reported_level_rise=true;
+   if(c=="entry-floor-reported-equal") { required_margin=10;account_margin_level=220; }
+   if(c=="entry-floor-reported-good") { required_margin=10;account_margin_level=250; }
+   if(c=="entry-floor-reported-fraction") { required_margin=10;account_margin_level=220.005; }
+   if(c=="entry-floor-reported-final") { required_margin=10;account_margin_level=1000;reported_level_drop_final=true; }
+   if(c=="entry-floor-level-missing") reported_level_available=false;
+   if(c=="entry-floor-level-invalid") account_margin_level=std::numeric_limits<double>::quiet_NaN();
+   if(c=="entry-floor-level-negative") account_margin_level=-1;
+   if(c=="entry-floor-subminor") { account_margin=.001;account_margin_level=1e8;account_margin_free=999.999;required_margin=1; }
+   if(c=="entry-floor-limit") trade.rc=TRADE_RETCODE_PLACED;
+  }
   if(c=="entry-weak-stop") positions[42].sl=1.1;
   if(c=="entry-no-stop") positions[42].sl=0;
   if(c=="entry-unknown-position") trade.deal=0;
@@ -287,7 +317,7 @@ int main(int argc, char** argv) {
   }
   if(c=="entry-identity-delayed") drift_entry_identity=true;
   if(c=="entry-permission-delayed") disable_entry_read=true;
-  ExecOrderSend("1","EURUSD",c=="entry-invalid-side" ? "INVALID" : c=="entry-cash-sell" ? "SELL" : "BUY",volume,1.123456789012345,sl,1.2,"vati:fixture",123,20,c=="entry-pending" || c=="entry-cash-limit-good" || c=="entry-cash-limit-insufficient" ? "LIMIT" : "MARKET",binding);
+  ExecOrderSend("1","EURUSD",c=="entry-invalid-side" ? "INVALID" : c=="entry-cash-sell" ? "SELL" : "BUY",volume,1.123456789012345,sl,1.2,"vati:fixture",123,20,c=="entry-pending" || c=="entry-cash-limit-good" || c=="entry-cash-limit-insufficient" || c=="entry-floor-limit" ? "LIMIT" : "MARKET",binding);
  }
  std::cout<<"{\"results\":[";
  for(size_t i=0;i<pendingResults.size();i++) { if(i) std::cout<<","; std::cout<<pendingResults[i]; }

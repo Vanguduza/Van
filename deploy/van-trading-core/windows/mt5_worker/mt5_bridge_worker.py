@@ -38,9 +38,15 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from typing import Any, Callable, Optional
 
-_EntryCashMargin = namedtuple('_EntryCashMargin', 'scope required_units cash_bounds')
+# Native refusal fence mirrors RiskAuthority's existing minimum. It never
+# sizes, grants, or relaxes a current signed policy. Source checks bind them.
+NATIVE_ENTRY_MARGIN_FLOOR_LEVEL_PCT = 200
+_EntryCashMargin = namedtuple('_EntryCashMargin', 'scope required_units cash_bounds margin_bounds')
 
 class _EntryCashMarginInsufficient(ValueError):
+    pass
+
+class _EntryCashMarginFloor(ValueError):
     pass
 
 OPS = ("sync_account", "sync_symbols", "symbol_contract", "quote_snapshot", "expected_margin", "order_check", "order_send", "order_send_expiring", "positions", "orders", "history", "modify_sl_tp", "close")
@@ -442,7 +448,7 @@ class Terminal:
             raise ValueError('native entry cash amount unavailable')
         return Fraction(amount)
 
-    def _entry_cash_bound(self,account):
+    def _entry_cash_bound(self,account,*,include_margin=False):
         self._entry_cash_scope(account)
         equity,credit,used,free=(self._entry_cash_amount(account[k])
             for k in ('equity','credit','margin_used','margin_free'))
@@ -451,20 +457,36 @@ class Terminal:
         ceil=lambda value:-((-value.numerator)//value.denominator)
         # Monetary comparisons use original exact text and declared account
         # units. Available amounts round down; commitments round up.
-        return min((equity*scale).__floor__()-ceil(credit*scale)-ceil(used*scale),
-            (free*scale).__floor__())
+        capital=(equity*scale).__floor__()-ceil(credit*scale)
+        committed=ceil(used*scale)
+        capacity=min(capital-committed,(free*scale).__floor__())
+        floor_capital=capital
+        if include_margin and used>0:
+            level=self._entry_cash_amount(account['margin_level'])
+            if level<0:raise ValueError('native entry reported margin level invalid')
+            # Preserve the risk owner's lower reported level. Use original
+            # exact used-margin text in this product, never its rounded-up bound.
+            # This is a percentage constraint, not a spendable cash amount.
+            # Retain its rational product so a strictly above-floor native
+            # observation is not refused by a second money quantization.
+            floor_capital=min(capital,level*used*scale/100)
+        return (capacity,floor_capital,committed) if include_margin else capacity
 
     def _check_entry_cash_margin(self,observation,account):
         if type(observation) is not _EntryCashMargin or self._entry_cash_scope(account)!=observation.scope:
             raise ValueError('native entry cash scope changed')
-        capacity=min(*observation.cash_bounds,self._entry_cash_bound(account))
+        current=self._entry_cash_bound(account,include_margin=True)
+        capacity=min(*observation.cash_bounds,current[0])
         if capacity<=0 or observation.required_units>capacity:
             raise _EntryCashMarginInsufficient('native entry cash-backed margin insufficient')
+        if any(100*capital<=NATIVE_ENTRY_MARGIN_FLOOR_LEVEL_PCT*(used+observation.required_units)
+               for capital,used in (*observation.margin_bounds,current[1:])):
+            raise _EntryCashMarginFloor('projected cash-backed margin at or below the existing risk floor')
 
     @staticmethod
-    def _entry_cash_refused(insufficient):
-        code='NATIVE_CASH_MARGIN_INSUFFICIENT' if insufficient else 'NATIVE_CASH_MARGIN_UNAVAILABLE'
-        reason='insufficient' if insufficient else 'unavailable'
+    def _entry_cash_refused(insufficient,*,floor=False):
+        code='NATIVE_CASH_MARGIN_FLOOR' if floor else 'NATIVE_CASH_MARGIN_INSUFFICIENT' if insufficient else 'NATIVE_CASH_MARGIN_UNAVAILABLE'
+        reason='at or below the existing projected floor' if floor else 'insufficient' if insufficient else 'unavailable'
         return {'status':'REJECTED','volume':'0','reason_code':code,
             'reason':code+': native cash-backed margin '+reason+'; not dispatched'}
 
@@ -477,7 +499,9 @@ class Terminal:
         required=self._entry_cash_amount(str(value))*10**before['currency_digits']
         units=-((-required.numerator)//required.denominator)
         after=self.account()
-        observation=_EntryCashMargin(scope,units,(self._entry_cash_bound(before),self._entry_cash_bound(after)))
+        initial=self._entry_cash_bound(before,include_margin=True)
+        final=self._entry_cash_bound(after,include_margin=True)
+        observation=_EntryCashMargin(scope,units,(initial[0],final[0]),(initial[1:],final[1:]))
         self._check_entry_cash_margin(observation,after)
         return observation
 
@@ -491,6 +515,8 @@ class Terminal:
         if not self._netting_symbol_clear(b['symbol']):
             return {'status':'REJECTED','volume':'0','reason':'netting symbol has existing or unknown exposure; allocation reconciliation required'}
         try:cash_margin=self._entry_cash_margin(b,request)
+        except _EntryCashMarginFloor:
+            return self._entry_cash_refused(False,floor=True)
         except _EntryCashMarginInsufficient:
             return self._entry_cash_refused(True)
         except Exception:
@@ -499,6 +525,8 @@ class Terminal:
         # The worker supplies this private guard; it is not a request field.
         if before_dispatch is not None:
             try:before_dispatch(margin_observation=cash_margin)
+            except _EntryCashMarginFloor:
+                return self._entry_cash_refused(False,floor=True)
             except _EntryCashMarginInsufficient:
                 return self._entry_cash_refused(True)
             except Exception:

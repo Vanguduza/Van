@@ -25,8 +25,10 @@ def ea(tmp_path_factory):
            'NativeBindingJson','CashUnavailable','NativeCashJson','NativeMarginJson',
            'SnapshotJson','PushResult','ExecOrderSend','ExecModifySl','ExecClose',
            'MarginReadAccountScopeJson','NativeUnitsCanonical','NativeUnitsIncrement',
-           'NativeMoneyUnitsFromText','NativeUnitsCompare','NativeUnitsSubtract',
-           'NativeCashAmount','NativeEntryCashScope','NativeEntryCashBound',
+           'NativeExactDecimalParts','NativeMoneyUnitsFromText','NativeUnitsCompare','NativeUnitsSubtract',
+           'NativeUnitsAdd','NativeUnitsScaleByInteger','NativeProjectedMarginFloorAllows',
+           'NativeUnitsMultiply','NativeReportedMarginFloorAllows',
+           'NativeCashAmount','NativeEntryCashScope','NativeEntryCashBound','NativeEntryCashBounds',
            'NativeCheckCurrentEntryCash','NativePrepareEntryCash'}
     bodies=[]
     for match in re.finditer(r'^(?:string|void|bool|ulong|int) (\w+)\([^{};]*?\)\s*\{',source,re.M):
@@ -52,7 +54,9 @@ def ea(tmp_path_factory):
     cpp=folder/'ea.cpp'; binary=folder/'ea'
     fixture=Path(__file__).with_name('mql_terminal_fixture.cpp').read_text()
     structure=source[source.index('struct EntryCashMarginCheck'):source.index('bool NativeCheckCurrentEntryCash(')]
-    cpp.write_text(fixture.replace('// EXTRACTED_EA_FUNCTIONS',structure+'\n'+'\n'.join(bodies)))
+    floor=re.search(r'^const int NATIVE_ENTRY_MARGIN_FLOOR_LEVEL_PCT=\d+;',source,re.M)
+    assert floor is not None
+    cpp.write_text(fixture.replace('// EXTRACTED_EA_FUNCTIONS',floor[0]+'\n'+structure+'\n'+'\n'.join(bodies)))
     compiled=subprocess.run(['g++','-std=c++17','-Wall','-Werror','-Wno-sign-compare',str(cpp),'-o',str(binary)],capture_output=True,text=True,timeout=30)
     assert compiled.returncode==0, compiled.stderr
     def run(case):

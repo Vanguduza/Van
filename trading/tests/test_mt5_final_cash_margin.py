@@ -14,6 +14,7 @@ class EntryCashSdk(MarginSdk):
         self.entry_used=used;self.entry_reported_free=reported_free
     def account_info(self):
         a=super().account_info();a.equity=self.entry_equity;a.margin=self.entry_used
+        a.margin_level=self.entry_equity*100/self.entry_used if self.entry_used>0 else 0.
         a.margin_free=self.entry_reported_free;return a
 
 

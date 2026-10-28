@@ -304,6 +304,8 @@ string MarginReadAccountScopeJson()
 }
 
 // BEGIN_NATIVE_CASH_UNITS
+// Mirrors the existing RiskAuthority minimum; this refusal fence never grants.
+const int NATIVE_ENTRY_MARGIN_FLOOR_LEVEL_PCT=200;
 // Native API doubles cross to original 17-digit text before money decisions.
 // All subsequent rounding, subtraction and comparisons use integer strings.
 string NativeUnitsCanonical(string value)
@@ -323,13 +325,13 @@ string NativeUnitsIncrement(string value)
    return "1"+value;
 }
 
-bool NativeMoneyUnitsFromText(string text,int scale,bool roundUp,string &units)
+bool NativeExactDecimalParts(string text,string &digits,int &decimalExponent)
 {
-   units="";
-   if(scale<0 || scale>16 || StringLen(text)<1 || StringLen(text)>64) return false;
+   digits="";decimalExponent=0;
+   if(StringLen(text)<1 || StringLen(text)>64) return false;
    bool negative=false;
    if(StringGetCharacter(text,0)=='-') { negative=true; text=StringSubstr(text,1); }
-   string digits="";int fraction=0;bool dot=false;int i=0;
+   int fraction=0;bool dot=false;int i=0;
    for(;i<StringLen(text);i++)
    {
       int c=(int)StringGetCharacter(text,i);
@@ -355,7 +357,14 @@ bool NativeMoneyUnitsFromText(string text,int scale,bool roundUp,string &units)
    }
    digits=NativeUnitsCanonical(digits);
    if(negative && digits!="0") return false;
-   int shift=scale+exponent-fraction;
+   decimalExponent=exponent-fraction;return true;
+}
+
+bool NativeMoneyUnitsFromText(string text,int scale,bool roundUp,string &units)
+{
+   units="";string digits;int exponent;
+   if(scale<0 || scale>16 || !NativeExactDecimalParts(text,digits,exponent)) return false;
+   int shift=scale+exponent;
    if(shift>=0)
    {
       if(StringLen(digits)+shift>512) return false;
@@ -391,6 +400,61 @@ bool NativeUnitsSubtract(const string a,const string b,string &result)
    if(borrow!=0) return false;
    result=NativeUnitsCanonical(result);return true;
 }
+
+string NativeUnitsAdd(const string a,const string b)
+{
+   string result="";int i=StringLen(a)-1,j=StringLen(b)-1,carry=0;
+   while(i>=0 || j>=0 || carry>0)
+   {
+      int digit=carry;
+      if(i>=0) digit+=(int)StringGetCharacter(a,i--)-'0';
+      if(j>=0) digit+=(int)StringGetCharacter(b,j--)-'0';
+      result=StringSubstr("0123456789",digit%10,1)+result;carry=digit/10;
+   }
+   return NativeUnitsCanonical(result);
+}
+
+string NativeUnitsScaleByInteger(const string value,int factor)
+{
+   if(factor<0 || factor>1000000) return "";
+   string result="";int carry=0;
+   for(int i=StringLen(value)-1;i>=0;i--)
+   {
+      int digit=((int)StringGetCharacter(value,i)-'0')*factor+carry;
+      result=StringSubstr("0123456789",digit%10,1)+result;carry=digit/10;
+   }
+   while(carry>0) { result=StringSubstr("0123456789",carry%10,1)+result;carry/=10; }
+   return NativeUnitsCanonical(result);
+}
+
+bool NativeProjectedMarginFloorAllows(const string capital,const string used,const string required)
+{
+   string total=NativeUnitsAdd(used,required);
+   return NativeUnitsCompare(NativeUnitsScaleByInteger(capital,100),
+      NativeUnitsScaleByInteger(total,NATIVE_ENTRY_MARGIN_FLOOR_LEVEL_PCT))>0;
+}
+
+string NativeUnitsMultiply(const string a,const string b)
+{
+   string result="0",zeros="";
+   for(int i=StringLen(b)-1;i>=0;i--)
+   {
+      string part=NativeUnitsScaleByInteger(a,(int)StringGetCharacter(b,i)-'0');
+      result=NativeUnitsAdd(result,part+zeros);zeros+="0";
+   }
+   return NativeUnitsCanonical(result);
+}
+
+bool NativeReportedMarginFloorAllows(const string reportedCapital,int exponent,const string used,const string required)
+{
+   // Empty is internal proof of explicit zero used margin, whose ratio is undefined.
+   if(reportedCapital=="") return true;
+   string total=NativeUnitsAdd(used,required),left=reportedCapital;
+   string right=NativeUnitsScaleByInteger(total,NATIVE_ENTRY_MARGIN_FLOOR_LEVEL_PCT);
+   if(exponent>=0) for(int leftZeros=0;leftZeros<exponent;leftZeros++) left+="0";
+   else for(int rightZeros=0;rightZeros<(-exponent);rightZeros++) right+="0";
+   return NativeUnitsCompare(NativeUnitsCanonical(left),NativeUnitsCanonical(right))>0;
+}
 // END_NATIVE_CASH_UNITS
 
 bool NativeCashAmount(ENUM_ACCOUNT_INFO_DOUBLE field,double &value)
@@ -408,8 +472,9 @@ bool NativeEntryCashScope(string &scope,int &digits)
    digits=(int)unit;return true;
 }
 
-bool NativeEntryCashBound(const string expectedScope,int digits,string &capacity)
+bool NativeEntryCashBounds(const string expectedScope,int digits,string &capacity,string &capital,string &committed,string &reportedCapital,int &reportedExponent)
 {
+   capital="0";committed="0";reportedCapital="";reportedExponent=0;
    string scope;int observedDigits;
    if(!NativeEntryCashScope(scope,observedDigits) || scope!=expectedScope || observedDigits!=digits) return false;
    double equity,credit,used,free;
@@ -426,10 +491,29 @@ bool NativeEntryCashBound(const string expectedScope,int digits,string &capacity
       || !NativeMoneyUnitsFromText(JsonNumber(credit),digits,true,c)
       || !NativeMoneyUnitsFromText(JsonNumber(used),digits,true,u)
       || !NativeMoneyUnitsFromText(JsonNumber(free),digits,false,f)) return false;
-   if(!NativeUnitsSubtract(e,c,net) || !NativeUnitsSubtract(net,u,capacity)) capacity="0";
+   if(!NativeUnitsSubtract(e,c,net)) net="0";
+   capital=net;committed=u;
+   if(!NativeUnitsSubtract(net,u,capacity)) capacity="0";
+   if(used>0)
+   {
+      double level;string levelUnits,usedUnits;int levelExponent,usedExponent;
+      // Preserve the complete original text product, including sub-minor-unit
+      // used margin. Rounding used margin down first could erase real capacity.
+      if(!NativeCashAmount(ACCOUNT_MARGIN_LEVEL,level) || level<0
+         || !NativeExactDecimalParts(JsonNumber(level),levelUnits,levelExponent)
+         || !NativeExactDecimalParts(JsonNumber(used),usedUnits,usedExponent)) return false;
+      reportedCapital=NativeUnitsMultiply(levelUnits,usedUnits);
+      reportedExponent=levelExponent+usedExponent+digits;
+   }
    if(!NativeEntryCashScope(scope,observedDigits) || scope!=expectedScope || observedDigits!=digits) return false;
    if(NativeUnitsCompare(f,capacity)<0) capacity=f;
    return true;
+}
+
+bool NativeEntryCashBound(const string expectedScope,int digits,string &capacity)
+{
+   string capital,committed,reportedCapital;int reportedExponent;
+   return NativeEntryCashBounds(expectedScope,digits,capacity,capital,committed,reportedCapital,reportedExponent);
 }
 
 struct EntryCashMarginCheck
@@ -438,18 +522,27 @@ struct EntryCashMarginCheck
    int digits;
    string required;
    string originalCapacity;
+   string originalCapital;
+   string originalCommitted;
+   string originalReportedCapital;
+   int originalReportedExponent;
    string failureCode;
 };
 
 bool NativeCheckCurrentEntryCash(EntryCashMarginCheck &check)
 {
    check.failureCode="NATIVE_CASH_MARGIN_UNAVAILABLE";
-   string scope,capacity;int digits;
+   string scope,capacity,capital,committed,reportedCapital;int digits,reportedExponent;
    if(!NativeEntryCashScope(scope,digits) || scope!=check.scope || digits!=check.digits
-      || !NativeEntryCashBound(check.scope,digits,capacity)) return false;
+      || !NativeEntryCashBounds(check.scope,digits,capacity,capital,committed,reportedCapital,reportedExponent)) return false;
    if(NativeUnitsCompare(check.originalCapacity,capacity)<0) capacity=check.originalCapacity;
    if(capacity=="0" || NativeUnitsCompare(check.required,capacity)>0)
    { check.failureCode="NATIVE_CASH_MARGIN_INSUFFICIENT";return false; }
+   if(!NativeProjectedMarginFloorAllows(check.originalCapital,check.originalCommitted,check.required)
+      || !NativeProjectedMarginFloorAllows(capital,committed,check.required)
+      || !NativeReportedMarginFloorAllows(check.originalReportedCapital,check.originalReportedExponent,check.originalCommitted,check.required)
+      || !NativeReportedMarginFloorAllows(reportedCapital,reportedExponent,committed,check.required))
+   { check.failureCode="NATIVE_CASH_MARGIN_FLOOR";return false; }
    check.failureCode="";return true;
 }
 
@@ -458,7 +551,8 @@ bool NativePrepareEntryCash(const string symbol,const string side,double volume,
 {
    check.failureCode="NATIVE_CASH_MARGIN_UNAVAILABLE";
    string before;int digits;
-   if(!NativeEntryCashScope(check.scope,check.digits) || !NativeEntryCashBound(check.scope,check.digits,before)) return false;
+   if(!NativeEntryCashScope(check.scope,check.digits)
+      || !NativeEntryCashBounds(check.scope,check.digits,before,check.originalCapital,check.originalCommitted,check.originalReportedCapital,check.originalReportedExponent)) return false;
    if(before=="0") { check.failureCode="NATIVE_CASH_MARGIN_INSUFFICIENT";return false; }
    if(orderType=="MARKET")
    {
@@ -471,12 +565,17 @@ bool NativePrepareEntryCash(const string symbol,const string side,double volume,
    if(!OrderCalcMargin(side=="BUY" ? ORDER_TYPE_BUY : ORDER_TYPE_SELL,symbol,volume,price,required)
       || GetLastError()!=0 || !MathIsValidNumber(required) || required<0
       || !NativeMoneyUnitsFromText(JsonNumber(required),check.digits,true,check.required)) return false;
-   string after,scope;
+   string after,scope,capital,committed,reportedCapital;int reportedExponent;
    if(!NativeEntryCashScope(scope,digits) || scope!=check.scope || digits!=check.digits
-      || !NativeEntryCashBound(check.scope,digits,after)) return false;
+      || !NativeEntryCashBounds(check.scope,digits,after,capital,committed,reportedCapital,reportedExponent)) return false;
    check.originalCapacity=NativeUnitsCompare(before,after)<0 ? before : after;
    if(check.originalCapacity=="0" || NativeUnitsCompare(check.required,check.originalCapacity)>0)
    { check.failureCode="NATIVE_CASH_MARGIN_INSUFFICIENT";return false; }
+   if(!NativeProjectedMarginFloorAllows(check.originalCapital,check.originalCommitted,check.required)
+      || !NativeProjectedMarginFloorAllows(capital,committed,check.required)
+      || !NativeReportedMarginFloorAllows(check.originalReportedCapital,check.originalReportedExponent,check.originalCommitted,check.required)
+      || !NativeReportedMarginFloorAllows(reportedCapital,reportedExponent,committed,check.required))
+   { check.failureCode="NATIVE_CASH_MARGIN_FLOOR";return false; }
    check.failureCode="";return true;
 }
 

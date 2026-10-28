@@ -77,3 +77,35 @@ Unknown native requirements, cash facts, precision or scope refuse before dispat
 This final check does not implement shared all-origin reservations, fee/fill-price contingency, post-entry margin floors, full contract/FX migration or economic finality. Those remain required under the core Risk Authority and existing financial owners. Unchanged legacy frame shapes do not qualify an old peer that lacks this source. Actual deployment/admission and native/provider/device qualification remain separate.
 
 Source arithmetic qualification additionally requires **g++ with C++17** (available on the hosted Ubuntu source worker). `tests/rebuild/test_mt5_cash_unit_source.py` compiles the exact EA integer-string functions with an explicit API shim and compares them against an independent Python Fraction oracle. This is source arithmetic execution, not MetaTrader execution. The actual changed EA still requires its own official MetaEditor compilation and subsequent real terminal qualification.
+
+The final entry fence also preserves the existing RiskAuthority 200% cash-backed
+margin minimum after adding the original proposed isolated requirement to native
+committed margin. It compares exact scaled integer bounds: cash equity rounds
+down, credit/committed/proposed margin round up, and equality refuses entry.
+Original-before, after-calculation and final native facts cannot renew a weaker
+original budget. `NATIVE_CASH_MARGIN_FLOOR` is distinct from insufficient free
+cash and unavailable facts. Explicit zero requirement on positive cash remains
+supported; protective tightening and closing retain their existing controls.
+
+This is a refusal fence derived from the existing risk owner, without new sizing
+or financial authority. Source checks bind both native constants to the current
+RiskAuthority minimum. The 200% value remains an inherited starting floor, not a
+measured optimum or profitability claim. Stricter current policy remains with
+RiskAuthority. A changed policy/native source cohort needs independent
+qualification. Isolated proposed margin is not an atomic native portfolio margin
+snapshot or a shared reservation. Fill-price/fee contingencies, transactional
+all-origin reservations, native working-order reconciliation and economic
+finality still require their complete qualification.
+
+When committed native margin is positive, the lower original broker-reported
+margin level remains binding as well. Its absence is unavailable evidence.
+Both native paths retain the original reported-level × used-margin product;
+used margin below one currency minor unit is not rounded to zero before that
+product. The SDK uses exact Fraction; the EA compares original decimal mantissas
+and exponents with integer-string multiplication. This retains the stricter
+reported bound without inventing a new percentage precision or native capital.
+The percentage-derived constraint remains an exact ratio; it is not rounded a
+second time into a spendable cash balance. Both native transports therefore keep
+strictly above-floor reported observations eligible under the unchanged guard,
+while equality and lower observations refuse. Actual cash and monetary margin
+commitments retain their original conservative unit rounding.

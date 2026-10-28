@@ -1,0 +1,113 @@
+FFF.FFFF.                                                                [100%]
+=================================== FAILURES ===================================
+_ test_signed_native_entry_cannot_cross_existing_cash_margin_floor[1000.0-0.0-100.0-450.0] _
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-118/test_signed_native_entry_canno0')
+equity = 1000.0, credit = 0.0, used = 100.0, required = 450.0
+
+    @pytest.mark.parametrize('equity,credit,used,required',[
+        (1000.,0.,100.,450.),(1000.,0.,100.,400.),(1100.,100.,100.,400.),
+    ])
+    def test_signed_native_entry_cannot_cross_existing_cash_margin_floor(tmp_path,equity,credit,used,required):
+        sdk=EntryCashSdk(equity=equity,credit=credit,used=used,reported_free=equity-used)
+        sdk.margin_value=required;sdk,worker,adapter,now=connection(tmp_path,sdk)
+        receipt=adapter.submit(command(adapter.account_alias),now_ms=now['ms'])
+>       assert not sdk.sent,'native order_send reached at or below the existing projected 200% floor'
+E       AssertionError: native order_send reached at or below the existing projected 200% floor
+E       assert not [{'action': 1, 'symbol': 'EURUSD', 'volume': 0.1, 'sl': 1.098, ...}]
+E        +  where [{'action': 1, 'symbol': 'EURUSD', 'volume': 0.1, 'sl': 1.098, ...}] = <test_mt5_final_cash_margin.EntryCashSdk object at 0x7f13bc62e090>.sent
+
+trading/tests/test_mt5_projected_margin_floor.py:16: AssertionError
+_ test_signed_native_entry_cannot_cross_existing_cash_margin_floor[1000.0-0.0-100.0-400.0] _
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-118/test_signed_native_entry_canno1')
+equity = 1000.0, credit = 0.0, used = 100.0, required = 400.0
+
+    @pytest.mark.parametrize('equity,credit,used,required',[
+        (1000.,0.,100.,450.),(1000.,0.,100.,400.),(1100.,100.,100.,400.),
+    ])
+    def test_signed_native_entry_cannot_cross_existing_cash_margin_floor(tmp_path,equity,credit,used,required):
+        sdk=EntryCashSdk(equity=equity,credit=credit,used=used,reported_free=equity-used)
+        sdk.margin_value=required;sdk,worker,adapter,now=connection(tmp_path,sdk)
+        receipt=adapter.submit(command(adapter.account_alias),now_ms=now['ms'])
+>       assert not sdk.sent,'native order_send reached at or below the existing projected 200% floor'
+E       AssertionError: native order_send reached at or below the existing projected 200% floor
+E       assert not [{'action': 1, 'symbol': 'EURUSD', 'volume': 0.1, 'sl': 1.098, ...}]
+E        +  where [{'action': 1, 'symbol': 'EURUSD', 'volume': 0.1, 'sl': 1.098, ...}] = <test_mt5_final_cash_margin.EntryCashSdk object at 0x7f13bb3b0e60>.sent
+
+trading/tests/test_mt5_projected_margin_floor.py:16: AssertionError
+_ test_signed_native_entry_cannot_cross_existing_cash_margin_floor[1100.0-100.0-100.0-400.0] _
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-118/test_signed_native_entry_canno2')
+equity = 1100.0, credit = 100.0, used = 100.0, required = 400.0
+
+    @pytest.mark.parametrize('equity,credit,used,required',[
+        (1000.,0.,100.,450.),(1000.,0.,100.,400.),(1100.,100.,100.,400.),
+    ])
+    def test_signed_native_entry_cannot_cross_existing_cash_margin_floor(tmp_path,equity,credit,used,required):
+        sdk=EntryCashSdk(equity=equity,credit=credit,used=used,reported_free=equity-used)
+        sdk.margin_value=required;sdk,worker,adapter,now=connection(tmp_path,sdk)
+        receipt=adapter.submit(command(adapter.account_alias),now_ms=now['ms'])
+>       assert not sdk.sent,'native order_send reached at or below the existing projected 200% floor'
+E       AssertionError: native order_send reached at or below the existing projected 200% floor
+E       assert not [{'action': 1, 'symbol': 'EURUSD', 'volume': 0.1, 'sl': 1.098, ...}]
+E        +  where [{'action': 1, 'symbol': 'EURUSD', 'volume': 0.1, 'sl': 1.098, ...}] = <test_mt5_final_cash_margin.EntryCashSdk object at 0x7f13bb3b36b0>.sent
+
+trading/tests/test_mt5_projected_margin_floor.py:16: AssertionError
+_____ test_actual_ea_entry_keeps_original_projected_floor[entry-floor-low] _____
+
+ea = <function ea.<locals>.run at 0x7f13bb3e4ae0>, case = 'entry-floor-low'
+
+    @pytest.mark.parametrize('case',['entry-floor-low','entry-floor-equal','entry-floor-credit','entry-floor-limit'])
+    def test_actual_ea_entry_keeps_original_projected_floor(ea,case):
+        native=ea(case)
+>       assert native['entry_calls']==0,'actual EA entry function reached a simulated unsafe native send'
+E       AssertionError: actual EA entry function reached a simulated unsafe native send
+E       assert 1 == 0
+
+trading/tests/test_mt5_projected_margin_floor.py:31: AssertionError
+____ test_actual_ea_entry_keeps_original_projected_floor[entry-floor-equal] ____
+
+ea = <function ea.<locals>.run at 0x7f13bb3e4ae0>, case = 'entry-floor-equal'
+
+    @pytest.mark.parametrize('case',['entry-floor-low','entry-floor-equal','entry-floor-credit','entry-floor-limit'])
+    def test_actual_ea_entry_keeps_original_projected_floor(ea,case):
+        native=ea(case)
+>       assert native['entry_calls']==0,'actual EA entry function reached a simulated unsafe native send'
+E       AssertionError: actual EA entry function reached a simulated unsafe native send
+E       assert 1 == 0
+
+trading/tests/test_mt5_projected_margin_floor.py:31: AssertionError
+___ test_actual_ea_entry_keeps_original_projected_floor[entry-floor-credit] ____
+
+ea = <function ea.<locals>.run at 0x7f13bb3e4ae0>, case = 'entry-floor-credit'
+
+    @pytest.mark.parametrize('case',['entry-floor-low','entry-floor-equal','entry-floor-credit','entry-floor-limit'])
+    def test_actual_ea_entry_keeps_original_projected_floor(ea,case):
+        native=ea(case)
+>       assert native['entry_calls']==0,'actual EA entry function reached a simulated unsafe native send'
+E       AssertionError: actual EA entry function reached a simulated unsafe native send
+E       assert 1 == 0
+
+trading/tests/test_mt5_projected_margin_floor.py:31: AssertionError
+____ test_actual_ea_entry_keeps_original_projected_floor[entry-floor-limit] ____
+
+ea = <function ea.<locals>.run at 0x7f13bb3e4ae0>, case = 'entry-floor-limit'
+
+    @pytest.mark.parametrize('case',['entry-floor-low','entry-floor-equal','entry-floor-credit','entry-floor-limit'])
+    def test_actual_ea_entry_keeps_original_projected_floor(ea,case):
+        native=ea(case)
+>       assert native['entry_calls']==0,'actual EA entry function reached a simulated unsafe native send'
+E       AssertionError: actual EA entry function reached a simulated unsafe native send
+E       assert 1 == 0
+
+trading/tests/test_mt5_projected_margin_floor.py:31: AssertionError
+=========================== short test summary info ============================
+FAILED trading/tests/test_mt5_projected_margin_floor.py::test_signed_native_entry_cannot_cross_existing_cash_margin_floor[1000.0-0.0-100.0-450.0]
+FAILED trading/tests/test_mt5_projected_margin_floor.py::test_signed_native_entry_cannot_cross_existing_cash_margin_floor[1000.0-0.0-100.0-400.0]
+FAILED trading/tests/test_mt5_projected_margin_floor.py::test_signed_native_entry_cannot_cross_existing_cash_margin_floor[1100.0-100.0-100.0-400.0]
+FAILED trading/tests/test_mt5_projected_margin_floor.py::test_actual_ea_entry_keeps_original_projected_floor[entry-floor-low]
+FAILED trading/tests/test_mt5_projected_margin_floor.py::test_actual_ea_entry_keeps_original_projected_floor[entry-floor-equal]
+FAILED trading/tests/test_mt5_projected_margin_floor.py::test_actual_ea_entry_keeps_original_projected_floor[entry-floor-credit]
+FAILED trading/tests/test_mt5_projected_margin_floor.py::test_actual_ea_entry_keeps_original_projected_floor[entry-floor-limit]
+7 failed, 2 passed in 3.11s

@@ -1,0 +1,10 @@
+{
+  "source_parent": "d53eea63539d5829ff0ac4f5aa7b55155a3c7491",
+  "all_original_test_function_names_and_AST_preserved": true,
+  "original_test_functions_AST_preserved": 2951,
+  "fixture_changes": [
+    "EntryCashSdk now provides its explicit original reported margin level consistently with its simulated equity/used facts; no original test assertions changed.",
+    "Actual-EA extractor expands only helper dependencies and exact current struct/constant; pure C++ API shim gains reported-level field and operations for original new helpers.",
+    "C++ native model adds floor/boundary cases without removing existing cases."
+  ]
+}
