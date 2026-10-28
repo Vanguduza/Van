@@ -1,10 +1,8 @@
 """Actual native source/history readback never reattributes a shared peak."""
 from dataclasses import replace
 from decimal import Decimal as D
-import json
 
 import pytest
-from jsonschema import Draft202012Validator
 
 from conftest import NOW, intent
 from test_native_risk_history_inputs import native_facts, record
@@ -119,16 +117,10 @@ def test_funding_held_snapshot_never_seeds_a_baseline(tmp_path,eurusd):
     assert book(ledger,facts).projection(NOW*1000).peak is None
 
 
-def test_optional_reference_preserves_legacy_hash_input_and_current_closed_schema(tmp_path,eurusd):
-    from pathlib import Path
+def test_optional_reference_preserves_legacy_hash_input_and_current_serialization(tmp_path,eurusd):
     ledger,_,_,_,facts=native_facts(tmp_path,eurusd)
     legacy_body=snapshot_to_dict(facts)
     assert 'native_risk_basis_ref' not in legacy_body
     assert snapshot_to_dict(snapshot_from_dict(legacy_body)) == legacy_body
-    schema=json.loads((Path(__file__).parents[1]/'vati/contracts/schemas/risk_snapshot.schema.json').read_text())
-    assert len(schema['required'])==27 and schema['additionalProperties'] is False
     current=snapshot_to_dict(replace(facts,native_risk_basis_ref='a'*64))
-    Draft202012Validator(schema).validate(current)
     assert snapshot_to_dict(snapshot_from_dict(current))==current
-    current['native_risk_basis_ref']='not-a-sealed-ref'
-    assert list(Draft202012Validator(schema).iter_errors(current))

@@ -42,6 +42,22 @@ def test_every_original_required_field_and_root_closure_remain_intact():
 
 
 @pytest.mark.parametrize('provider', ['MT5', 'CTRADER'])
+def test_original_basis_reference_preserves_legacy_serialization_and_closed_schema(provider):
+    # JSON Schema validation uses its existing declared rebuild dependency.
+    # The source trading runtime/suite does not import that documentary tool.
+    legacy_body=current(provider)
+    assert 'native_risk_basis_ref' not in legacy_body
+    schema=json.loads(SCHEMA.read_text())
+    assert len(schema['required'])==27 and schema['additionalProperties'] is False
+    Draft202012Validator(schema).validate(legacy_body)
+    body=deepcopy(legacy_body)
+    body['native_risk_basis_ref']='a'*64
+    Draft202012Validator(schema).validate(body)
+    body['native_risk_basis_ref']='not-a-sealed-ref'
+    assert list(Draft202012Validator(schema).iter_errors(body))
+
+
+@pytest.mark.parametrize('provider', ['MT5', 'CTRADER'])
 def test_actual_original_native_context_serializer_output_validates(provider):
     fixture = json.loads(FIXTURES.read_text())
     assert fixture['source_head'] == 'e9cbdd69c9d98688e14b088c19c65e5df80c6e42'
