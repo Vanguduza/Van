@@ -7,7 +7,7 @@ from dataclasses import asdict
 from decimal import Decimal
 from typing import Any
 
-from vati.risk.contracts import Direction, KillSwitchTrigger, LossModel, MarketIntegrityState, NativeAccountRiskContext, OpenPosition, RiskSnapshot, StopRiskTerms, StrategyState, SymbolContract, TradeIntent
+from vati.risk.contracts import Direction, KillSwitchTrigger, LossModel, MarketIntegrityState, NativeAccountRiskContext, OpenPosition, PendingRiskCommitment, RiskSnapshot, StopRiskTerms, StrategyState, SymbolContract, TradeIntent
 from vati.core.canonical import canonical_hash
 
 RISK_APPROVAL_SCHEMA_VERSION = 2
@@ -37,6 +37,8 @@ def position_to_dict(p: OpenPosition) -> dict:
     d = _enc(asdict(p))
     if p.stop_terms is None:
         d.pop('stop_terms')  # preserve every original legacy position body
+    if p.broker_position_id is None:
+        d.pop('broker_position_id')
     return d
 
 
@@ -48,6 +50,8 @@ def snapshot_to_dict(s: RiskSnapshot) -> dict:
         d.pop('native_account_context')
     if s.native_risk_basis_ref is None:
         d.pop('native_risk_basis_ref')
+    if not s.pending_risk_commitments:
+        d.pop('pending_risk_commitments')
     d["symbol_contract"] = contract_to_dict(s.symbol_contract)
     d["open_positions"] = [position_to_dict(p) for p in s.open_positions]
     return d
@@ -87,6 +91,14 @@ def position_from_dict(d: dict) -> OpenPosition:
 
 def snapshot_from_dict(d: dict) -> RiskSnapshot:
     kw = dict(d)
+    if 'pending_risk_commitments' in kw:
+        values=[]
+        for raw in kw['pending_risk_commitments']:
+            p=dict(raw);p['direction']=Direction(p['direction']);p['contract']=contract_from_dict(p['contract'])
+            for key in ('quantity','entry','stop'):
+                if p[key] is not None:p[key]=_D(p[key])
+            values.append(PendingRiskCommitment(**p))
+        kw['pending_risk_commitments']=tuple(values)
     if kw.get('native_account_context') is not None:
         kw['native_account_context'] = NativeAccountRiskContext(**kw['native_account_context'])
     for k in ("equity", "balance", "peak_equity", "day_start_equity", "week_start_equity", "free_margin", "margin_level_pct", "used_margin"):

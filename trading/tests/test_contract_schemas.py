@@ -44,7 +44,7 @@ def test_risk_snapshot_schema_matches_dataclass():
     assert fields == set(schema["properties"])
     # Optional source observations do not retroactively become mandatory in
     # immutable legacy bodies. Every original required field stays mandatory.
-    assert fields - {"used_margin", "native_account_context", "native_risk_basis_ref"} == required_keys("risk_snapshot")
+    assert fields - {"used_margin", "native_account_context", "native_risk_basis_ref", "pending_risk_commitments"} == required_keys("risk_snapshot")
     terms = schema["$defs"]["risk_symbol_terms"]
     assert {f.name for f in dataclasses.fields(SymbolContract)} == set(terms["properties"]) == set(terms["required"])
     assert {"synced_at_unix", "spec_hash"} <= required_keys("symbol_contract")
@@ -65,7 +65,7 @@ def test_position_schema_preserves_original_optional_stop_inputs():
     fields = {f.name for f in dataclasses.fields(OpenPosition)}
     assert fields <= set(position["properties"])
     # Keep the inherited optional broker identifier extension intact.
-    assert set(position["properties"]) - fields == {"broker_position_id"}
+    assert set(position["properties"]) == fields
     assert "broker_position_id" not in position["required"]
     terms = schema["$defs"]["original_stop_terms"]
     assert {f.name for f in dataclasses.fields(StopRiskTerms)} == set(terms["properties"]) == set(terms["required"])

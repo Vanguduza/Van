@@ -227,7 +227,10 @@
     },
     "native_risk_basis_ref": {
       "description": "Original own-alias baseline event; shared display values are projections, never new own-alias capital.",
-      "type": ["string", "null"],
+      "type": [
+        "string",
+        "null"
+      ],
       "pattern": "^[0-9a-f]{64}$"
     },
     "native_account_context": {
@@ -240,6 +243,12 @@
           "$ref": "#/$defs/native_account_context"
         }
       ]
+    },
+    "pending_risk_commitments": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/pending_risk_commitment"
+      }
     }
   },
   "$defs": {
@@ -477,6 +486,93 @@
         },
         "tick_value": {
           "type": "string"
+        }
+      }
+    },
+    "pending_risk_commitment": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "command_ref",
+        "original_input_ref",
+        "monetary_scope_hash",
+        "origin_alias",
+        "physical_account_key",
+        "state",
+        "direction",
+        "quantity",
+        "entry",
+        "stop",
+        "contract",
+        "new_position_slots",
+        "protection_confirmed",
+        "execution_authority"
+      ],
+      "properties": {
+        "command_ref": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "original_input_ref": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "monetary_scope_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "origin_alias": {
+          "type": "string",
+          "minLength": 1
+        },
+        "physical_account_key": {
+          "type": "string",
+          "pattern": "^native-account:v1:[a-f0-9]{64}$"
+        },
+        "state": {
+          "enum": [
+            "UNCONFIRMED",
+            "PENDING",
+            "PARTIAL",
+            "OPEN",
+            "UNCERTAIN"
+          ]
+        },
+        "direction": {
+          "enum": [
+            "LONG",
+            "SHORT"
+          ]
+        },
+        "quantity": {
+          "type": "string"
+        },
+        "entry": {
+          "type": "string"
+        },
+        "stop": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "contract": {
+          "$ref": "#/$defs/risk_symbol_terms"
+        },
+        "new_position_slots": {
+          "type": "integer",
+          "enum": [
+            0,
+            1
+          ]
+        },
+        "protection_confirmed": {
+          "type": "boolean",
+          "const": false
+        },
+        "execution_authority": {
+          "type": "boolean",
+          "const": false
         }
       }
     }

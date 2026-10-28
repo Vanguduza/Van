@@ -141,6 +141,7 @@ class OpenPosition:
     stake: Decimal = Decimal("0")
     liquidity_haircut_per_unit: Decimal = Decimal("0")  # ILLIQUID_EQUITY: price × haircut, per share
     stop_terms: Optional[StopRiskTerms] = None  # omitted from legacy serialized snapshots
+    broker_position_id: Optional[str] = None  # original native identity, omitted from legacy bodies
 
 
 @dataclass(frozen=True)
@@ -184,6 +185,25 @@ class NativeAccountRiskContext:
     source_query_ref: Optional[str]
     source_mark_json: str
     risk_capital_qualified: bool = False
+    execution_authority: bool = False
+
+
+@dataclass(frozen=True)
+class PendingRiskCommitment:
+    """A possible future fill, never a confirmed protected position or grant."""
+    command_ref: str
+    original_input_ref: str
+    origin_alias: str
+    physical_account_key: str
+    monetary_scope_hash: str
+    state: str
+    direction: Direction
+    quantity: Decimal
+    entry: Decimal
+    stop: Optional[Decimal]
+    contract: SymbolContract
+    new_position_slots: int = 1
+    protection_confirmed: bool = False
     execution_authority: bool = False
 
 
@@ -233,6 +253,7 @@ class RiskSnapshot:
     native_account_context: Optional[NativeAccountRiskContext] = None
     # Original own-alias basis; the displayed shared peak must never seed itself.
     native_risk_basis_ref: Optional[str] = None
+    pending_risk_commitments: tuple[PendingRiskCommitment, ...] = ()
 
     @property
     def data_fresh(self) -> bool:

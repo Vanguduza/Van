@@ -12,6 +12,7 @@ import json
 from dataclasses import asdict, dataclass, field, fields
 from decimal import Decimal
 from enum import Enum
+from fractions import Fraction
 from typing import Any, Optional
 
 from vati.risk.contracts import (
@@ -69,6 +70,8 @@ def invalid_boolean_fact(intent, snapshot):
              ('contract',snapshot.symbol_contract,SymbolContract)]
     records.extend((f'open_positions[{index}]',position,OpenPosition)
                    for index,position in enumerate(snapshot.open_positions))
+    records.extend((f'pending_risk_commitments[{index}].contract',pending.contract,SymbolContract)
+                   for index,pending in enumerate(snapshot.pending_risk_commitments))
     for scope,record,contract in records:
         for name in BOOLEAN_FACT_FIELDS[contract]:
             if type(getattr(record,name)) is not bool:
@@ -135,9 +138,13 @@ def _canonical_hash(obj: Any) -> str:
                     result.pop('native_account_context')
                 if o.native_risk_basis_ref is None:
                     result.pop('native_risk_basis_ref')
+                if not o.pending_risk_commitments:
+                    result.pop('pending_risk_commitments')
                 for position in result['open_positions']:
                     if position['stop_terms'] is None:
                         position.pop('stop_terms')  # original legacy snapshot bytes/hash
+                    if position['broker_position_id'] is None:
+                        position.pop('broker_position_id')
             return result
         raise TypeError(f"unhashable: {type(o)}")
 
@@ -199,7 +206,11 @@ class RiskAuthority:
     def evaluate(self, intent: TradeIntent, snapshot: RiskSnapshot) -> RiskDecision:
         m = self.mandate
         snap_hash = _canonical_hash(snapshot)
-        heat_before = open_stop_risk(snapshot.open_positions, snapshot.equity)
+        from vati.risk.pending import pending_risk_losses
+        pending_losses=pending_risk_losses(snapshot)
+        pending_total=sum((value for _,value in pending_losses),Fraction(0))
+        before=exact_open_stop_risk(snapshot.open_positions,snapshot.equity,additional_loss=pending_total)
+        heat_before=Decimal('Infinity') if before is None else decimal(before)
         heat_before_out = heat_before if heat_before.is_finite() else Decimal("1")
         rej = lambda code, detail: self._reject(intent, snap_hash, heat_before_out, code, detail)  # noqa: E731
 
@@ -348,10 +359,12 @@ class RiskAuthority:
 
         # 9. Position count limits
         same_symbol = sum(1 for p in snapshot.open_positions if p.symbol.upper() == symbol)
+        same_symbol += sum(p.new_position_slots for p,_ in pending_losses if p.contract.symbol.upper()==symbol)
         if same_symbol >= m.max_positions_per_instrument:
             return rej("MAX_POSITIONS_PER_INSTRUMENT", f"{same_symbol}")
-        if len(snapshot.open_positions) >= m.max_total_positions:
-            return rej("MAX_TOTAL_POSITIONS", f"{len(snapshot.open_positions)}")
+        total_positions=len(snapshot.open_positions)+sum(p.new_position_slots for p,_ in pending_losses)
+        if total_positions >= m.max_total_positions:
+            return rej("MAX_TOTAL_POSITIONS", f"{total_positions}")
 
         # 10. Allowed risk: min(requested, mandate) — never above either
         constraints: list[str] = []
@@ -435,12 +448,12 @@ class RiskAuthority:
         new_loss = exact_loss_amount(sized.size, contract, entry=intent.entry, stop=intent.stop)
         # Reporting ratios may repeat. Compare unrounded source arithmetic to
         # the signed ceiling; even a tiny positive excess must still refuse.
-        heat_after = exact_open_stop_risk(snapshot.open_positions, snapshot.equity, additional_loss=new_loss)
+        heat_after = exact_open_stop_risk(snapshot.open_positions, snapshot.equity, additional_loss=new_loss+pending_total)
         if heat_after > m.max_open_stop_risk:
             return rej("PORTFOLIO_HEAT", f"entry would exceed portfolio risk limit {m.max_open_stop_risk}; reported heat {decimal(heat_after)}")
         legs = exact_currency_leg_exposure(snapshot.open_positions, snapshot.equity,
             additional_loss=new_loss, base_currency=contract.base_currency,
-            quote_currency=contract.quote_currency, direction=intent.direction)
+            quote_currency=contract.quote_currency, direction=intent.direction,pending_losses=pending_losses)
         hot = {c: v for c, v in legs.items() if v > m.max_currency_leg_exposure}
         if hot:
             return rej("CURRENCY_LEG_EXPOSURE", ",".join(f"{c}={decimal(v)}" for c, v in sorted(hot.items())))

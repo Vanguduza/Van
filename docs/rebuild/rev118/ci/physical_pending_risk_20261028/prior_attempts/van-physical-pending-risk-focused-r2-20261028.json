@@ -1,0 +1,22 @@
+{
+  "command": [
+    "/workspace/van-backend-venv-20261025/bin/python",
+    "tools/rebuild/source_storage_audit.py",
+    "--report",
+    "/workspace/van-physical-pending-risk-focused-r2-20261028-audit.json",
+    "trading/tests/test_physical_pending_risk.py",
+    "trading/tests/test_position_risk_original_terms.py",
+    "trading/tests/test_risk_boolean_facts.py",
+    "--junitxml=/workspace/van-physical-pending-risk-focused-r2-20261028.xml",
+    "-q"
+  ],
+  "cwd": "/workspace/van-review-2026-10-18/publish",
+  "controller_pid": 232112,
+  "started_at_utc": "2026-10-28T08:17:34.063570+00:00",
+  "timeout_seconds": 300,
+  "state": "COMPLETED",
+  "command_pid": 232122,
+  "exit": 1,
+  "adopted_children_reaped": [],
+  "finished_at_utc": "2026-10-28T08:17:36.835565+00:00"
+}

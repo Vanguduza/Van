@@ -601,11 +601,11 @@ class AccountCoordinatorService:
             if contract is None:
                 out.append(OpenPosition(
                     position.symbol, position.direction, position.quantity, Decimal("0"),
-                    Decimal("0"), "", "", has_broker_side_stop=False))
+                    Decimal("0"), "", "", has_broker_side_stop=False,broker_position_id=position.position_id))
                 continue
             out.append(project_open_position(symbol=position.symbol, direction=position.direction,
                 quantity=position.quantity, entry=position.entry_price, stop=stop,
-                contract=contract, loss_model=position.loss_model))
+                contract=contract, loss_model=position.loss_model,broker_position_id=position.position_id))
         return tuple(out)
 
     def _ledger_positions(self) -> list[LedgerPosition]:
@@ -656,6 +656,7 @@ class AccountCoordinatorService:
         native_context, funding = context_with_funding_hold(self._ledger, self.adapter, acct, funding,
             now_ms=now_ms, mt5_capture=native_capture)
         basis_ref = None
+        pending_risk = ()
         if funding.available and native_context is not None:
             from vati.risk.physical_runtime import project_native_risk
             from vati.funding.risk_fence import FundingRiskFence
@@ -669,6 +670,10 @@ class AccountCoordinatorService:
                 self.peak_equity, self.day_start_equity, self.week_start_equity = values.peak, values.day, values.week
                 if self.lifecycle is not None:
                     self.lifecycle.streaks = streaks
+                from vati.risk.physical_pending import project_pending_risk
+                pending_risk, issue = project_pending_risk(self,self._ledger,native_context,positions,now_ms=now_ms)
+                if issue:
+                    funding = FundingRiskFence(False,issue)
         elif funding.available:
             if self.peak_equity == 0:
                 self.peak_equity = self.day_start_equity = self.week_start_equity = acct.equity
@@ -706,6 +711,7 @@ class AccountCoordinatorService:
             margin_level_pct=acct.margin_level_pct, free_margin=acct.free_margin, used_margin=acct.used_margin,
             native_account_context=native_context,
             native_risk_basis_ref=basis_ref,
+            pending_risk_commitments=pending_risk,
             kill_switch_triggers=frozenset(self.kill.active),
             preservation_blocks_new_risk=(
                 not funding.available or (self.lifecycle.preservation_blocks_new_risk

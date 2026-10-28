@@ -70,7 +70,8 @@ def open_stop_risk(positions: Iterable[OpenPosition], equity: Decimal) -> Decima
 
 
 def exact_currency_leg_exposure(positions: Iterable[OpenPosition], equity: Decimal, *,
-                               additional_loss=None, base_currency=None, quote_currency=None, direction=None):
+                               additional_loss=None, base_currency=None, quote_currency=None, direction=None,
+                               pending_losses=()):
     """Net stop-risk per currency leg as a fraction of equity (absolute value)."""
     if equity <= ZERO:
         return None
@@ -86,7 +87,15 @@ def exact_currency_leg_exposure(positions: Iterable[OpenPosition], equity: Decim
         sign = 1 if direction is Direction.LONG else -1
         legs[base_currency] += sign * Fraction(additional_loss)
         legs[quote_currency] -= sign * Fraction(additional_loss)
-    return {ccy: abs(v) / fraction(equity) for ccy, v in legs.items()}
+    lower=defaultdict(Fraction);upper=defaultdict(Fraction)
+    for p,r in pending_losses:
+        sign=1 if p.direction is Direction.LONG else -1
+        for ccy,value in ((p.contract.base_currency,sign*r),(p.contract.quote_currency,-sign*r)):
+            lower[ccy]+=min(Fraction(0),value);upper[ccy]+=max(Fraction(0),value)
+    # Each unfilled commitment can fill independently. An opposing pending
+    # order cannot offset a leg before its actual fill is observed.
+    return {ccy:max(abs(legs[ccy]+lower[ccy]),abs(legs[ccy]+upper[ccy]))/fraction(equity)
+        for ccy in set(legs)|set(lower)|set(upper)}
 
 
 def currency_leg_exposure(positions: Iterable[OpenPosition], equity: Decimal) -> dict[str, Decimal]:

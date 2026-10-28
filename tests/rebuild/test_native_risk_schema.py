@@ -34,6 +34,34 @@ def current(provider='MT5'):
     return deepcopy(json.loads(FIXTURES.read_text())['snapshots'][provider])
 
 
+def pending_body():
+    body=current();context=body['native_account_context']
+    body['pending_risk_commitments']=[{
+        'command_ref':'a'*64,'original_input_ref':'b'*64,'origin_alias':'original_alias',
+        'physical_account_key':context['physical_account_key'],'monetary_scope_hash':context['monetary_scope_hash'],
+        'state':'PENDING','direction':'LONG','quantity':'0.10','entry':'1.10','stop':'1.09',
+        'contract':body['symbol_contract'],'new_position_slots':1,
+        'protection_confirmed':False,'execution_authority':False}]
+    return body
+
+
+def test_optional_pending_originals_preserve_all_legacy_required_fields():
+    validator().validate(pending_body())
+    assert set(json.loads(SCHEMA.read_text())['required'])==ORIGINAL_REQUIRED
+
+
+@pytest.mark.parametrize('field,value',[
+    ('command_ref','x'),('original_input_ref','A'*64),('state','NO_EFFECT'),
+    ('direction','BUY'),('new_position_slots',True),('new_position_slots',2),
+    ('protection_confirmed',True),('protection_confirmed',0),
+    ('execution_authority',True),('execution_authority','false'),
+    ('unearned_owner_grant',True),('quantity',0.1),('physical_account_key','alias'),
+])
+def test_pending_metadata_is_typed_closed_and_cannot_claim_execution_or_protection(field,value):
+    body=pending_body();body['pending_risk_commitments'][0][field]=value
+    with pytest.raises(ValidationError):validator().validate(body)
+
+
 def test_every_original_required_field_and_root_closure_remain_intact():
     schema = json.loads(SCHEMA.read_text())
     assert set(schema['required']) == ORIGINAL_REQUIRED

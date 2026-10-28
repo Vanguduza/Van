@@ -202,22 +202,28 @@ class DecisionCycle:
                        "learning_environment": self.learning.environment.value}
         self.ledger.append(make_event(kind, "vati-cycle", payload, event_time_ms=now_ms, received_time_ms=now_ms, correlation_id=corr or self.cfg.session_id))
 
-    def _open_positions(self) -> tuple[OpenPosition, ...]:
+    def _open_positions(self, *, include_pending=True) -> tuple[OpenPosition, ...]:
         from vati.risk.positions import project_open_position
-        out = []
+        out = list(DecisionCycle._legacy_pending_positions(self)) if include_pending else []
         c = self.cfg.contract
+        for p in self.adapter.positions():
+            stop = p.stop_price if p.stop_price is not None else self.protection.rules.get(p.position_id, None)
+            stop_price = stop.stop if hasattr(stop, "stop") else stop
+            out.append(project_open_position(symbol=p.symbol, direction=p.direction,
+                quantity=p.quantity, entry=p.entry_price, stop=stop_price,
+                contract=c, loss_model=p.loss_model,broker_position_id=p.position_id))
+        return tuple(out)
+
+    def _legacy_pending_positions(self):
+        from vati.risk.positions import project_open_position
+        out=[]
+        c=self.cfg.contract
         # Resting entries reserve their worst-case risk until they fill or expire.
         for row in self._entries.values():
             if row.get("pending") and row.get("stop") is not None:
                 out.append(project_open_position(symbol=row['symbol'], direction=row['direction'],
                     quantity=row['pending_quantity'], entry=row['entry'], stop=row['stop'],
                     contract=c, loss_model=c.loss_model))
-        for p in self.adapter.positions():
-            stop = p.stop_price if p.stop_price is not None else self.protection.rules.get(p.position_id, None)
-            stop_price = stop.stop if hasattr(stop, "stop") else stop
-            out.append(project_open_position(symbol=p.symbol, direction=p.direction,
-                quantity=p.quantity, entry=p.entry_price, stop=stop_price,
-                contract=c, loss_model=p.loss_model))
         return tuple(out)
 
     def _reconciliation_ok(self, *, account_verified: bool) -> bool:
@@ -310,7 +316,7 @@ class DecisionCycle:
         self.restore_risk_baselines(now_ms)
         acct = self.adapter.sync_account()
         hb = self.adapter.heartbeat(now_ms=now_ms)
-        positions = self._open_positions()
+        positions = self._open_positions(include_pending=False)
         reconciled = self._reconciliation_ok(account_verified=acct.verified)
         store_ok = self._risk_store_ok()
         if callable(getattr(self, "_lease_clock", None)):
@@ -328,6 +334,7 @@ class DecisionCycle:
         # A held observation remains visible, but cannot seed or increase the
         # baselines used by later decisions after native evidence recovers.
         basis_ref = None
+        pending_risk = ()
         if funding.available and native_context is not None:
             from vati.risk.physical_runtime import project_native_risk
             from vati.funding.risk_fence import FundingRiskFence
@@ -338,6 +345,10 @@ class DecisionCycle:
             else:
                 self.peak_equity, self.day_start_equity, self.week_start_equity = values.peak, values.day, values.week
                 self.streaks = streaks
+                from vati.risk.physical_pending import project_pending_risk
+                pending_risk, issue = project_pending_risk(self,self.ledger,native_context,positions,now_ms=now_ms)
+                if issue:
+                    funding = FundingRiskFence(False,issue)
         elif funding.available:
             if self.peak_equity == ZERO:
                 self.peak_equity = acct.equity
@@ -347,6 +358,8 @@ class DecisionCycle:
                 self.week_start_equity = acct.equity
             self.peak_equity = max(self.peak_equity, acct.equity)
         streak = self.streaks.verdict(strategy_id, now_ms) if strategy_id or self.streaks.recovery_issue else None
+        if native_context is None:
+            positions += self._legacy_pending_positions()
         return RiskSnapshot(now_unix=now_ms // 1000, account_alias=acct.account_alias, account_verified=acct.verified, equity=acct.equity, balance=acct.balance,
                             peak_equity=self.peak_equity, day_start_equity=self.day_start_equity, week_start_equity=self.week_start_equity,
                             consecutive_losses=streak.losses if streak else 0,
@@ -364,6 +377,7 @@ class DecisionCycle:
                             free_margin=acct.free_margin, used_margin=acct.used_margin,
                             native_account_context=native_context,
                             native_risk_basis_ref=basis_ref,
+                            pending_risk_commitments=pending_risk,
                             preservation_blocks_new_risk=not funding.available,
                             preservation_reason=funding.reason,
                             kill_switch_triggers=frozenset(self.kill.active))
