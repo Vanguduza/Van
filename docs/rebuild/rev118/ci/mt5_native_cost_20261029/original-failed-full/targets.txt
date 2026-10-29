@@ -1,0 +1,4 @@
+trading/tests
+backend/tests/test_trading_api.py
+backend/tests/test_van_private_core_service.py
+tests/rebuild/test_mt5_cash_unit_source.py

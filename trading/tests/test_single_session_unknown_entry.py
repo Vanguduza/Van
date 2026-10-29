@@ -40,7 +40,7 @@ def isolated_native_history(pg_dsn,monkeypatch):
 
 
 @contextmanager
-def delayed_native_session(tmp_path,contract,*,lose_enqueue_reply=False,initial_partial_status=None,omit_context=False,initial_terminal_status=None):
+def delayed_native_session(tmp_path,contract,*,lose_enqueue_reply=False,initial_partial_status=None,omit_context=False,initial_terminal_status=None,recorded_costs=True):
     alias='delayed_mt5_'+uuid.uuid4().hex[:12];native_login=10_000_000+uuid.uuid4().int%(2**53);key=b'local-source-fixture-key-32-bytes!'
     bars=synthetic_bars();clock={'ms':bars[100].end_ms};queue=BridgeQueue(tmp_path/'native-ea.sqlite')
     app=create_pull_app(queue,lambda who:key if who==alias else None,clock=lambda:clock['ms'])
@@ -61,7 +61,32 @@ def delayed_native_session(tmp_path,contract,*,lose_enqueue_reply=False,initial_
                                  'required_op':'ORDER_SEND_EXPIRING','framed_fields':18},
             'margin_used':str(margin_used),'margin_free':str(Decimal('10000')-margin_used),
             'margin_level':str(Decimal('1000000')/margin_used if margin_used else Decimal('0'))},credit='0',native_clock_ms=clock['ms'],movements=[],currency_digits=2)
-        body=json.dumps({'account':account,'positions':terminal_positions,'results':list(results)}).encode()
+        # Explicit simulated native history observations preserve the original
+        # positive-cost/crash-recovery cases. Production never infers this zero.
+        # Unavailable-cost cases opt out and retain missing native charges.
+        native_results=[]
+        for raw in results:
+            row=dict(raw) if isinstance(raw,dict) else raw
+            if recorded_costs and isinstance(row,dict) and row.get('status') in ('FILLED','PARTIAL'):
+                try:
+                    volume=Decimal(str(row['volume']))
+                    order=int(row['order']);position=int(row['position']);cid=int(row['id'])
+                    original=next(line.split('|') for line in delivered if int(line.split('|')[0])==cid)
+                    if not volume.is_finite() or volume<=0 or not 0<order<2**64 or not 0<position<2**64:
+                        raise ValueError('unavailable simulated native charge join')
+                    row['deal']=500000+cid
+                    row['recorded_entry_charges']={
+                        'schema':'van.mt5.recorded-entry-charges/1',
+                        'identity':{'login':str(native_login),'server':'fixture-native-ea','currency':'USD','demo':True},
+                        'deal_id':str(row['deal']),'order_id':str(order),'position_identifier':str(position),
+                        'position_ticket':str(position),'symbol':original[2],'side':original[3],
+                        'volume':row['volume'],'commission_delta':'0','fee_delta':'0','native_time_ms':clock['ms'],
+                        'entry_type':'IN','cash_convention':'MT5_SIGNED_DEAL_CASH_COMPONENTS',
+                        'complete_future_charges':False,'settlement_final':False}
+                except (KeyError,ValueError,TypeError,ArithmeticError,StopIteration):
+                    pass  # Missing or malformed native data remains unavailable.
+            native_results.append(row)
+        body=json.dumps({'account':account,'positions':terminal_positions,'results':native_results}).encode()
         response=client.post('/ea/v1/'+alias+'/poll',content=body,headers={'x-van-ts':ts,'x-van-nonce':nonce,
             'x-van-signature':sign_poll(key,ts,nonce,alias,body),'content-type':'application/json'})
         assert response.status_code==200
@@ -231,7 +256,7 @@ def test_contradictory_or_partial_native_evidence_cannot_release_the_original_ho
         original=orders()[0].correlation_id;poll();fields=delivered[0].split('|');cid=int(fields[0])
         native={'ticket':900,'symbol':fields[2],'type':fields[3],'volume':fields[4],'price_open':fields[5],
             'sl':fields[6],'tp':fields[7] or 0,'comment':fields[9],'magic':int(fields[10]),'profit':0}
-        ack={'id':cid,'status':'FILLED','order':'original-order','position':900,'volume':fields[4],
+        ack={'id':cid,'status':'FILLED','order':'90001','position':900,'volume':fields[4],
             'price':fields[5],'sl_confirmed':True,'server_time_ms':clock['ms']}
         if damage=='wrong-symbol':native['symbol']='GBPUSD'
         elif damage=='oversized-fill':ack['volume']=native['volume']='99'
@@ -267,7 +292,7 @@ def test_original_late_fill_recovery_retries_a_local_publication_failure_without
         original=orders()[0].correlation_id;poll();fields=delivered[0].split('|');cid=int(fields[0]);cycle=service.runner.cycle
         native={'ticket':900,'symbol':fields[2],'type':fields[3],'volume':fields[4],'price_open':fields[5],
             'sl':fields[6],'tp':fields[7] or 0,'comment':fields[9],'magic':int(fields[10]),'profit':0}
-        ack={'id':cid,'status':'FILLED','order':'original-order','position':900,'volume':fields[4],
+        ack={'id':cid,'status':'FILLED','order':'90001','position':900,'volume':fields[4],
             'price':fields[5],'sl_confirmed':True,'server_time_ms':clock['ms']}
         write=cycle._record_tca
         def interrupted(*args,**kwargs):
@@ -289,7 +314,7 @@ def test_native_thesis_write_failure_recovers_from_real_persistence_not_a_memory
         original=orders()[0].correlation_id;poll();fields=delivered[0].split('|');cid=int(fields[0]);cycle=service.runner.cycle
         native={'ticket':900,'symbol':fields[2],'type':fields[3],'volume':fields[4],'price_open':fields[5],
             'sl':fields[6],'tp':fields[7] or 0,'comment':fields[9],'magic':int(fields[10]),'profit':0}
-        ack={'id':cid,'status':'FILLED','order':'original-order','position':900,'volume':fields[4],
+        ack={'id':cid,'status':'FILLED','order':'90001','position':900,'volume':fields[4],
             'price':fields[5],'sl_confirmed':True,'server_time_ms':clock['ms']}
         append=service._ledger.append
         def interrupted(event):
@@ -314,7 +339,7 @@ def test_already_resolved_original_result_replays_consistently_after_real_servic
         original=orders()[0].correlation_id;poll();fields=delivered[0].split('|');cid=int(fields[0])
         ack={'id':cid,'status':outcome,'volume':'0','reason':'genuine original native refusal'};positions=[]
         if outcome=='FILLED':
-            ack.update(order='original-order',position=900,volume=fields[4],price=fields[5],sl_confirmed=True,server_time_ms=clock['ms'])
+            ack.update(order='90001',position=900,volume=fields[4],price=fields[5],sl_confirmed=True,server_time_ms=clock['ms'])
             positions=[{'ticket':900,'symbol':fields[2],'type':fields[3],'volume':fields[4],'price_open':fields[5],
                 'sl':fields[6],'tp':fields[7] or 0,'comment':fields[9],'magic':int(fields[10]),'profit':0}]
         poll(results=[ack],positions=positions);service.step_once()
@@ -385,7 +410,7 @@ def test_process_restart_before_original_native_result_can_reconcile_without_res
             assert not restarted.runner.permit_new_orders
             ack={'id':cid,'status':outcome,'volume':'0','reason':'original native refusal'};positions=[]
             if outcome=='FILLED':
-                ack.update(order='original-order',position=900,volume=fields[4],price=fields[5],sl_confirmed=True,server_time_ms=clock['ms'])
+                ack.update(order='90001',position=900,volume=fields[4],price=fields[5],sl_confirmed=True,server_time_ms=clock['ms'])
                 positions=[{'ticket':900,'symbol':fields[2],'type':fields[3],'volume':fields[4],'price_open':fields[5],
                     'sl':fields[6],'tp':fields[7] or 0,'comment':fields[9],'magic':int(fields[10]),'profit':0}]
             poll(results=[ack],positions=positions);restarted.step_once()
@@ -414,7 +439,7 @@ def test_late_original_fill_uses_approved_capsule_not_a_current_replacement(tmp_
         poll();fields=delivered[0].split('|');cid=int(fields[0])
         native={'ticket':900,'symbol':fields[2],'type':fields[3],'volume':fields[4],'price_open':fields[5],
             'sl':fields[6],'tp':fields[7] or 0,'comment':fields[9],'magic':int(fields[10]),'profit':0}
-        poll(results=[{'id':cid,'status':'FILLED','volume':fields[4],'price':fields[5],'order':'original-order',
+        poll(results=[{'id':cid,'status':'FILLED','volume':fields[4],'price':fields[5],'order':'90001',
             'position':900,'sl_confirmed':True,'server_time_ms':clock['ms']}],positions=[native])
         service.step_once()
         thesis=cycle.thesis.thesis_for(original)
@@ -446,7 +471,7 @@ def test_late_native_fill_keeps_original_setup_and_derives_target_r_from_actual_
         fill=D(fields[5])+D('0.00001')
         native={'ticket':900,'symbol':fields[2],'type':fields[3],'volume':fields[4],'price_open':str(fill),
             'sl':fields[6],'tp':fields[7] or 0,'comment':fields[9],'magic':int(fields[10]),'profit':0}
-        poll(results=[{'id':cid,'status':'FILLED','volume':fields[4],'price':str(fill),'order':'original-order',
+        poll(results=[{'id':cid,'status':'FILLED','volume':fields[4],'price':str(fill),'order':'90001',
             'position':900,'sl_confirmed':True,'server_time_ms':clock['ms']}],positions=[native])
         service.step_once();thesis=service.runner.cycle.thesis.thesis_for(original)
         assert thesis is not None and thesis.entry==fill

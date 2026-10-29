@@ -69,7 +69,8 @@ enum {
  DEAL_POSITION_ID, ORDER_SL, ORDER_SYMBOL, ORDER_TYPE, ORDER_VOLUME_CURRENT, ORDER_PRICE_OPEN,
  ORDER_TP, ORDER_COMMENT, ORDER_MAGIC, ACCOUNT_CREDIT, ACCOUNT_CURRENCY_DIGITS,
  DEAL_TYPE, DEAL_TIME_MSC, DEAL_PROFIT, DEAL_COMMISSION, DEAL_SWAP, DEAL_FEE,
- ACCOUNT_MARGIN, ACCOUNT_MARGIN_FREE, ACCOUNT_MARGIN_LEVEL, ACCOUNT_LEVERAGE
+ ACCOUNT_MARGIN, ACCOUNT_MARGIN_FREE, ACCOUNT_MARGIN_LEVEL, ACCOUNT_LEVERAGE,
+ DEAL_ORDER, DEAL_ENTRY, DEAL_SYMBOL, DEAL_VOLUME
 };
 const long ACCOUNT_TRADE_MODE_DEMO=20, ACCOUNT_TRADE_MODE_REAL=21;
 const long ACCOUNT_MARGIN_MODE_RETAIL_HEDGING=2, POSITION_TYPE_BUY=0, ORDER_TIME_GTC=0;
@@ -109,6 +110,11 @@ bool funds_available=true, history_available=true, native_deal_available=true;
 bool cash_amount_available=true, change_funds_during_query=false, change_identity_during_query=false;
 bool expire_cash_query=false;
 bool expire_entry_read=false, drift_entry_identity=false, disable_entry_read=false;
+bool entry_charge_available=false;
+bool entry_charge_read_available=true;
+int entry_charge_reads=0;
+double entry_commission=-.25, entry_fee=-.01;
+const int DEAL_ENTRY_IN=0;
 long native_login=12345678;
 struct CashDeal { ulong ticket=9007199254740993UL; long type=DEAL_TYPE_BALANCE, at=1699999999000L;
  double profit=12344.12345678, commission=0, swap=0, fee=-.00000013; };
@@ -180,13 +186,31 @@ ulong HistoryDealGetTicket(int index) {
  if(!native_deal_available) { last_error=1; return 0; }
  return native_deals.at(index).ticket;
 }
+string HistoryDealGetString(ulong ticket,int field) {
+ if(entry_charge_available && ticket==77 && field==DEAL_SYMBOL) return "EURUSD";
+ last_error=1; return "";
+}
 long HistoryDealGetInteger(ulong ticket,int field) {
+ if(entry_charge_available && ticket==77) {
+  if(field==DEAL_ORDER) return 11;
+  if(field==DEAL_ENTRY) return DEAL_ENTRY_IN;
+  if(field==DEAL_TYPE) return DEAL_TYPE_BUY;
+  if(field==DEAL_TIME_MSC) return 1700000000000L;
+ }
  if(field==DEAL_POSITION_ID) return 900;
  for(auto& row:native_deals) if(row.ticket==ticket) return field==DEAL_TYPE ? row.type : row.at;
  last_error=1; return 0;
 }
 double HistoryDealGetDouble(ulong ticket,int field) {
  if(!cash_amount_available) { last_error=1; return 0; }
+ if(entry_charge_available && ticket==77) {
+  if(field==DEAL_COMMISSION || field==DEAL_FEE) entry_charge_reads++;
+  if(!entry_charge_read_available) { last_error=1;return 0; }
+  if(field==DEAL_VOLUME) return .00123456;
+  if(field==DEAL_COMMISSION) return entry_commission;
+  if(field==DEAL_FEE) return entry_fee;
+  last_error=1; return 0;
+ }
  for(auto& row:native_deals) if(row.ticket==ticket) {
   return field==DEAL_PROFIT ? row.profit : field==DEAL_COMMISSION ? row.commission : field==DEAL_SWAP ? row.swap : row.fee;
  }
@@ -270,6 +294,11 @@ int main(int argc, char** argv) {
   if(c=="entry-cash-sell") positions[42].type=1;
   if(c=="entry-cash-limit-good") trade.rc=TRADE_RETCODE_PLACED;
   if(c=="entry-market-accepted") trade.rc=TRADE_RETCODE_PLACED;
+  if(c=="entry-charge-zero" || c=="entry-charge-debit" || c=="entry-charge-rebate" || c=="entry-charge-unavailable") entry_charge_available=true;
+  if(c=="entry-charge-zero") { entry_commission=0;entry_fee=0; }
+  if(c=="entry-charge-rebate") { entry_commission=.25;entry_fee=0; }
+  if(c=="entry-charge-unavailable") entry_charge_read_available=false;
+  if(c=="entry-charge-weak-stop") { entry_charge_available=true;positions[42].sl=1.1; }
   if(c.rfind("entry-floor",0)==0) {
    account_equity=1000;account_credit=0;account_margin=100;account_margin_free=900;required_margin=400;
    if(c=="entry-floor-low") required_margin=450;
@@ -321,5 +350,5 @@ int main(int argc, char** argv) {
  }
  std::cout<<"{\"results\":[";
  for(size_t i=0;i<pendingResults.size();i++) { if(i) std::cout<<","; std::cout<<pendingResults[i]; }
- std::cout<<"],\"modify_calls\":"<<modify_calls<<",\"close_calls\":"<<close_calls<<",\"entry_calls\":"<<entry_calls<<",\"margin_calls\":"<<margin_calls<<",\"last_margin_side\":"<<last_margin_side<<",\"post_margin_cash_reads\":"<<post_margin_cash_reads<<"}";
+ std::cout<<"],\"modify_calls\":"<<modify_calls<<",\"close_calls\":"<<close_calls<<",\"entry_calls\":"<<entry_calls<<",\"margin_calls\":"<<margin_calls<<",\"last_margin_side\":"<<last_margin_side<<",\"post_margin_cash_reads\":"<<post_margin_cash_reads<<",\"entry_charge_reads\":"<<entry_charge_reads<<"}";
 }

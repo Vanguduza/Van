@@ -17,6 +17,7 @@ from typing import Any, Callable, Optional, ClassVar
 from vati.core.canonical import canonical_json
 from vati.execution.base import AccountState, ExecutionReceipt, Health, OrderCommand, VenuePosition, VenueUnavailable
 from vati.execution.mt5_identity import Mt5Identity
+from vati.execution.mt5_charges import recorded_entry_fees
 from vati.risk.contracts import Direction, LossModel
 
 OPS = ("sync_account", "sync_symbols", "symbol_contract", "quote_snapshot", "expected_margin", "order_check", "order_send", "order_send_expiring", "positions", "orders", "history", "modify_sl_tp", "close")
@@ -198,13 +199,14 @@ class Mt5BridgeAdapter:
         return ExecutionReceipt(cmd.trade_intent_id, cmd.decision_hash, self.venue, r.get("status", "UNKNOWN"), filled, Decimal(str(r["price"])) if r.get("price") else None,
                                 cmd.entry_price, Decimal(str(r.get("arrival") or cmd.entry_price)), cmd.entry_price, stop_confirmed, int(r.get("server_time_ms", now_ms)), now_ms,
                                 broker_order_id=str(r.get("order") or ''), broker_position_id=str(r.get("position") or ''), protective_stop_price=cmd.protective_stop if stop_confirmed else None,
+                                fees=recorded_entry_fees(cmd, r, self.identity),
                                 reject_reason=str(r.get("reason") or r.get("error") or "") if r.get("status", "UNKNOWN") in ("REJECTED", "UNKNOWN") else "").sealed()
 
     def modify_stop(self, position_id: str, new_stop: Decimal, *, now_ms: int) -> ExecutionReceipt:
         r = self._call("modify_sl_tp", {"alias": self.account_alias, "position": position_id, "sl": str(new_stop)}, now_ms=now_ms)
         ok=r.get('ok');status='ACCEPTED' if ok is True else 'REJECTED' if ok is False else 'UNKNOWN'
-        return ExecutionReceipt("", "", self.venue, status, ZERO, None, ZERO, ZERO, ZERO, ok is True, now_ms, now_ms, broker_position_id=position_id, protective_stop_price=new_stop if ok is True else None).sealed()
+        return ExecutionReceipt("", "", self.venue, status, ZERO, None, ZERO, ZERO, ZERO, ok is True, now_ms, now_ms, broker_position_id=position_id, protective_stop_price=new_stop if ok is True else None, fees=None).sealed()
 
     def close(self, position_id: str, quantity: Optional[Decimal], *, now_ms: int, reason: str) -> ExecutionReceipt:
         r = self._call("close", {"alias": self.account_alias, "position": position_id, "volume": str(quantity) if quantity else None, "reason": reason}, now_ms=now_ms)
-        return ExecutionReceipt("", "", self.venue, r.get("status", "UNKNOWN"), Decimal(str(r.get("volume", "0"))), Decimal(str(r["price"])) if r.get("price") else None, ZERO, ZERO, ZERO, r.get('sl_confirmed') is True, now_ms, now_ms, broker_position_id=position_id, reject_reason=reason).sealed()
+        return ExecutionReceipt("", "", self.venue, r.get("status", "UNKNOWN"), Decimal(str(r.get("volume", "0"))), Decimal(str(r["price"])) if r.get("price") else None, ZERO, ZERO, ZERO, r.get('sl_confirmed') is True, now_ms, now_ms, broker_position_id=position_id, reject_reason=reason, fees=None).sealed()

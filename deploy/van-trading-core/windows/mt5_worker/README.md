@@ -109,3 +109,25 @@ second time into a spendable cash balance. Both native transports therefore keep
 strictly above-floor reported observations eligible under the unchanged guard,
 while equality and lower observations refuse. Actual cash and monetary margin
 commitments retain their original conservative unit rounding.
+
+## Recorded entry charges and cost availability
+
+The candidate worker can attach `recorded_entry_charges` with schema
+`van.mt5.recorded-entry-charges/1` to a protected filled/partial result. It reads
+the exact returned deal through the Python SDK's **order-ticket** history
+filter, checks its order, stable position identifier, native position ticket,
+symbol, side, entry type and filled volume, and retains native commission/fee
+cash components with the observed account identity. The core requires its
+registered identity and the matching original result before deriving a recorded
+cost. Explicit zero is measured data; absent or mismatched fields remain null.
+
+This is an immediate entry-deal observation, not complete fees, a fee schedule,
+native sign qualification, settlement or financial authority. Deferred
+daily/monthly commission, financing, later fills/charges and closing costs need
+their original reconciliation owners. Optional cost reads are skipped when the
+native stop is unconfirmed so they cannot delay protective recovery. A known
+fill with unavailable costs stays a known fill, with a durable receipt-bound
+unavailable-cost fact and no numeric TCA. Old sealed receipts are not rewritten.
+
+Native/provider qualification, deployment and terminal acceptance remain
+required. This source packet does not install a worker or qualify an account.

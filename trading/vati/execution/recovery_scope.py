@@ -12,6 +12,7 @@ class PositionRecoveryError(ValueError):
 
 
 RELATED_PRODUCERS = {
+    EventKind.SESSION: frozenset({'vati-cycle','vati-account-lifecycle'}),
     EventKind.EXECUTION_RECEIPT: frozenset({'vati-execution-router','vati-cycle','vati-account-service','vati-account-lifecycle'}),
     EventKind.TCA_RECORD: frozenset({'vati-cycle','vati-account-lifecycle'}),
     EventKind.OWNER_TICKET: frozenset({'vati-execution-router','vati-account-service','vati-account-lifecycle','van-gateway'}),

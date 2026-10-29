@@ -118,6 +118,21 @@ def _recover_session(cycle,positions):
     for event in history.events(EventKind.TCA_RECORD):
         try:tca[event.correlation_id]=number(event.payload['cost_ratio'])
         except (KeyError,ValueError,ArithmeticError):pass
+    cost_unavailable=set()
+    for event in history.events(EventKind.SESSION):
+        p=event.payload
+        if (event.producer!='vati-cycle' or p.get('event')!='TCA_UNAVAILABLE'
+            or p.get('reason')!='RECORDED_NATIVE_FEES_UNMEASURED'
+            or p.get('schema') not in (None,'vati.execution-cost-availability/1')):
+            continue
+        for fact in receipts[event.correlation_id]:
+            if (fact.get('receipt_hash')==p.get('source_receipt_hash')
+                and 'fees' in fact and fact['fees'] is None
+                and fact.get('status') in ('FILLED','PARTIAL')):
+                try:
+                    if number(fact['filled_qty'],positive=True)>0 and number(fact['average_fill'],positive=True)>0:
+                        cost_unavailable.add(event.correlation_id)
+                except (KeyError,ValueError,ArithmeticError):pass
     theses=defaultdict(dict)
     for event in history.events(EventKind.TRADE_THESIS):
         try:
@@ -148,8 +163,15 @@ def _recover_session(cycle,positions):
             context=original_context(history,iid)
             thesis=next(iter(theses[iid].values())) if len(theses[iid])==1 else None
             risk=initial_risk_from_ledger(cycle.ledger,iid,available_cutoff_ms=opened)
+            entry_fee=None
+            for fact in receipts[iid]:
+                if fact.get('status') not in ('FILLED','PARTIAL'):continue
+                try:
+                    if number(fact['filled_qty'],positive=True)>0 and number(fact['average_fill'],positive=True)>0:
+                        entry_fee=fact.get('fees')
+                except (KeyError,ValueError,ArithmeticError):pass
             complete=(context is not None and thesis is not None and thesis.entry==position.entry_price
-                      and risk is not None and iid in tca and iid not in closed)
+                      and risk is not None and (iid in tca or iid in cost_unavailable) and iid not in closed)
             row={'symbol':position.symbol,'entry':position.entry_price,'stop':current,'direction':position.direction,
                 'strategy_id':command.get('strategy_id',''),'decision_price':number(command['entry_price']),
                 'quantity':position.quantity,'broker_position_id':position.position_id,'opened_ms':opened,
@@ -157,6 +179,7 @@ def _recover_session(cycle,positions):
                 'open':True,'pending':False,'protective_stop_confirmed':current is not None,
                 'best_price':position.entry_price,'worst_price':position.entry_price,
                 'recovered':True,'recovery_context_complete':complete,'cost_ratio':tca.get(iid),
+                'fees':entry_fee,
                 'cost_pct':None,'original_approved_risk_pct':None}
             if context is not None:row.update(context)
             if thesis is not None and complete:

@@ -1,0 +1,26 @@
+{
+  "path": "/workspace/van-mt5-owner-cost-wip5-20261029.zip",
+  "bytes": 115692,
+  "sha256": "d152e5a5deca43b8698893128aa05da4f48fa5a3597c849ab2ae979ae7656f01",
+  "manifest": {
+    "source_parent": "457205e3ac3c73f115a7bf7134b33c98bd905f12",
+    "files": {
+      "trading/tests/test_mt5_cost_availability_recovery.py": "9f8cc629b2d00af7335c0be0d3edaf961fdaf08cb2acdb7fda7cda4f4a529d46",
+      "trading/tests/test_mt5_owner_cost_knowledge.py": "20abf1b1ffc1ee370a6395ce556e7bb99654aacf92e5f6a8a49f8a0d96ecdc3e",
+      "trading/tests/test_mt5_owner_cost_knowledge_postgres.py": "b779ea011e38752ef13991bb638a6767cb93d6c13a2410643e5e7f63b15223a7",
+      "trading/tests/test_mt5_recorded_entry_charges.py": "3ac48aeb9139c67d8fe88e86f7de6591c3808fed2795011945a56af1b82b60a9",
+      "trading/vati/execution/mt5_charges.py": "b6fb732a7d5dd78c2ab6478d009310ff76e799d533b7964416acfb70c572c276",
+      "deploy/van-trading-core/mql5/VanBridgeEA.mq5": "659d2dd7a784b3dee524ba203bba7abfbf8cf6d1a94006d29235f251db5db30f",
+      "deploy/van-trading-core/windows/mt5_worker/mt5_bridge_worker.py": "ad2a971130f13b4e041c46d722d56228122d982e0e14c3638f8f491c43e0b2cd",
+      "trading/tests/mql_terminal_fixture.cpp": "d9711a86578fcfd5976581a299656246bbaa577b13eca0540871b292e1026b93",
+      "trading/tests/test_mql_native_function_bodies.py": "83326169a4badde63c6e7863120be0c981661715966ecad77b84faa278742e04",
+      "trading/tests/test_single_session_unknown_entry.py": "8084faabb7ec7d2f8a3cf9c5211fe76be07ecd4b25bef337f4e3d2c61214dd7b",
+      "trading/vati/app/cycle.py": "94d8bcb8da38763af4a95c3fce2d85cb874896721328b347f2a7c1c71faa0885",
+      "trading/vati/app/session_recovery.py": "026598a8935c8b48273f15b03ceb44ec0e9afe29ac5d6d16ab7108aacd4ff5ca",
+      "trading/vati/app/trade_lifecycle.py": "1fd94f81c655258e53c9cb4c5b873825461362616b7a0f09046c0bbd7113548d",
+      "trading/vati/execution/mt5_bridge.py": "3d054edcdbd8e9876cfd17b3ccaaad37891ec9f5b753ff88fca8d2ac8d7d6512",
+      "trading/vati/execution/mt5_pull.py": "55125edba3e4c6edb206ab2fae94c2c539f5cd6cebc3619e5593cfe96d3bed57",
+      "trading/vati/execution/recovery_scope.py": "86485e26ce300d453c94dfe78041a472e3efb0d11c927a7c8fa755d29e780b97"
+    }
+  }
+}

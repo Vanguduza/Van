@@ -1,0 +1,21 @@
+{
+  "command": [
+    "/workspace/van-backend-venv-20261025/bin/python",
+    "-m",
+    "pytest",
+    "/workspace/test_van_mt5_recorded_fee_absence_20261028.py",
+    "-q",
+    "-o",
+    "pythonpath=trading trading/tests /workspace",
+    "--junitxml=/workspace/van-mt5-recorded-fee-absence-before-20261028.xml"
+  ],
+  "cwd": "/workspace/van-review-2026-10-18/publish",
+  "controller_pid": 843717,
+  "started_at_utc": "2026-10-28T23:11:44.610018+00:00",
+  "timeout_seconds": 120,
+  "state": "COMPLETED",
+  "command_pid": 843720,
+  "exit": 1,
+  "adopted_children_reaped": [],
+  "finished_at_utc": "2026-10-28T23:11:53.955717+00:00"
+}

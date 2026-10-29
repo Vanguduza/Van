@@ -38,6 +38,7 @@ from fastapi.responses import PlainTextResponse
 
 from vati.execution.base import AccountState, ExecutionReceipt, Health, OrderCommand, VenuePosition, VenueUnavailable
 from vati.execution.mt5_identity import Mt5Identity
+from vati.execution.mt5_charges import recorded_entry_fees
 from vati.risk.contracts import Direction, LossModel
 
 ZERO = Decimal("0")
@@ -415,7 +416,7 @@ class Mt5PullAdapter:
                 stop_confirmed=r.get('sl_confirmed') is True
                 return ExecutionReceipt(cmd.trade_intent_id,cmd.decision_hash,self.venue,'ACCEPTED',
                     ZERO,None,cmd.entry_price,cmd.entry_price,cmd.entry_price,stop_confirmed,
-                    native_clock,now_ms,broker_order_id=str(order),
+                    native_clock,now_ms,broker_order_id=str(order),fees=None,
                     protective_stop_price=cmd.protective_stop if stop_confirmed else None).sealed()
             except (KeyError,TypeError,ValueError,ArithmeticError):
                 return rej('native pending acknowledgment malformed; reconcile original claim','UNKNOWN')
@@ -427,6 +428,7 @@ class Mt5PullAdapter:
             stop_confirmed=r.get('sl_confirmed') is True
             return ExecutionReceipt(cmd.trade_intent_id, cmd.decision_hash, self.venue, status, qty, price, cmd.entry_price, Decimal(str(r.get('arrival',r['price']))), cmd.entry_price,
                 stop_confirmed,native_clock,now_ms,broker_order_id=str(r.get('order') or ''),broker_position_id=str(r.get('position') or ''),
+                fees=recorded_entry_fees(cmd,r,self.identity),
                 protective_stop_price=cmd.protective_stop if stop_confirmed else None).sealed()
         except (KeyError,ValueError,ArithmeticError):return rej('native fill malformed; reconcile original claim','UNKNOWN')
 
@@ -503,7 +505,7 @@ class Mt5PullAdapter:
         r = self._await(cid)
         ok=r.get('ok') if r is not None else None
         status='ACCEPTED' if ok is True else 'REJECTED' if ok is False else 'UNKNOWN'
-        return ExecutionReceipt("", "", self.venue, status, ZERO, None, ZERO, ZERO, ZERO, ok is True, now_ms, now_ms, broker_position_id=position_id, protective_stop_price=new_stop if ok is True else None, reject_reason="" if ok is True else str((r or {}).get("reason", "EA result unconfirmed; reconcile original request"))).sealed()
+        return ExecutionReceipt("", "", self.venue, status, ZERO, None, ZERO, ZERO, ZERO, ok is True, now_ms, now_ms, broker_position_id=position_id, protective_stop_price=new_stop if ok is True else None, reject_reason="" if ok is True else str((r or {}).get("reason", "EA result unconfirmed; reconcile original request")), fees=None).sealed()
 
     def close(self, position_id: str, quantity: Optional[Decimal], *, now_ms: int, reason: str) -> ExecutionReceipt:
         if self.identity is not None:
@@ -512,8 +514,8 @@ class Mt5PullAdapter:
             **({'expected_account':self.identity.as_dict()} if self.identity is not None else {})}, now_ms=now_ms)
         r = self._await(cid)
         if r is None:
-            return ExecutionReceipt("", "", self.venue, "UNKNOWN", ZERO, None, ZERO, ZERO, ZERO, False, now_ms, now_ms, broker_position_id=position_id, reject_reason=f"{reason}; EA timeout").sealed()
-        return ExecutionReceipt("", "", self.venue, r.get("status", "UNKNOWN"), Decimal(str(r.get("volume", "0"))), Decimal(str(r["price"])) if r.get("price") else None, ZERO, ZERO, ZERO, r.get('sl_confirmed') is True, now_ms, now_ms, broker_position_id=position_id, reject_reason=reason).sealed()
+            return ExecutionReceipt("", "", self.venue, "UNKNOWN", ZERO, None, ZERO, ZERO, ZERO, False, now_ms, now_ms, broker_position_id=position_id, reject_reason=f"{reason}; EA timeout", fees=None).sealed()
+        return ExecutionReceipt("", "", self.venue, r.get("status", "UNKNOWN"), Decimal(str(r.get("volume", "0"))), Decimal(str(r["price"])) if r.get("price") else None, ZERO, ZERO, ZERO, r.get('sl_confirmed') is True, now_ms, now_ms, broker_position_id=position_id, reject_reason=reason, fees=None).sealed()
 
 
 # ------------------------------------------------------------------ pull server (EA side)

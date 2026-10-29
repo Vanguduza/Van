@@ -29,7 +29,7 @@ def ea(tmp_path_factory):
            'NativeUnitsAdd','NativeUnitsScaleByInteger','NativeProjectedMarginFloorAllows',
            'NativeUnitsMultiply','NativeReportedMarginFloorAllows',
            'NativeCashAmount','NativeEntryCashScope','NativeEntryCashBound','NativeEntryCashBounds',
-           'NativeCheckCurrentEntryCash','NativePrepareEntryCash'}
+           'NativeCheckCurrentEntryCash','NativePrepareEntryCash','NativeRecordedEntryCharges'}
     bodies=[]
     for match in re.finditer(r'^(?:string|void|bool|ulong|int) (\w+)\([^{};]*?\)\s*\{',source,re.M):
         if match[1] not in names:

@@ -32,6 +32,24 @@ flattens an entry whose stop the server did not confirm.
 
 Production factory connections require the registered numeric login, exact server, account currency and demo/live identity. The EA reports these on every signed poll. The registered poll provider rechecks identity, key and entry permission under the same locks as account writers before claiming queued commands. An undelivered command with a changed identity or disabled entry profile is refused with zero effect; a previously taken command retains its uncertainty.
 
-Bound commands have 17 pipe-separated fields: the original 12 fields, explicit order type, numeric login, UTF-8 hex server name, UTF-8 hex currency and a boolean demo label. The EA checks the current native account against these fields before every operation. The order type comes from its explicit field. Server names containing Unicode or pipe characters remain unambiguous. Historical original-result reads do not supply a fresh account or position snapshot.
+Identity-bound legacy fixtures have 17 pipe-separated fields: the original 12 fields, explicit order type, numeric login, UTF-8 hex server name, UTF-8 hex currency and a boolean demo label. Modern native entry/margin requests carry an eighteenth field for the explicit original deadline; the old frame cannot silently drop that deadline. The EA checks the current native account against the binding before every operation. The order type comes from its explicit field. Server names containing Unicode or pipe characters remain unambiguous. Historical original-result reads do not supply a fresh account or position snapshot.
 
 Update core and EA together; an older EA without native identity fields cannot satisfy production admission. Native MetaEditor compilation and terminal acceptance are still required for this source change. Native monetary finality, precision, full deadline/epoch enforcement and the other original execution requirements remain separate obligations.
+
+## Recorded entry charges
+
+Protected immediate fills can publish `recorded_entry_charges` under
+`van.mt5.recorded-entry-charges/1`. The EA reads the actual returned entry deal,
+checks its original order, stable position identifier, symbol, side, entry type
+and native volume, and emits explicit commission/fee cash components plus the
+current native account identity and original result IDs. Missing, invalid or
+unmatched properties produce null, preserving the real fill and protection.
+The core validates the registered identity and the complete observation before
+using a recorded cost. Neither this data nor a zero component establishes
+complete future fees, economic finality or order authority.
+
+Emergency protection takes priority over optional charge reads. An unprotected
+fill retains its separate native close/recovery result and unknown costs; it
+does not wait for charge history. Source function-body fixtures are distinct
+from actual MetaEditor compilation, broker qualification and terminal/device
+acceptance. Changing this EA requires fresh exact-source compilation evidence.

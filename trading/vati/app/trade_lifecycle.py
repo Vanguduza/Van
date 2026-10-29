@@ -474,7 +474,6 @@ class AccountTradeLifecycle:
         if (
             receipt.filled_qty <= ZERO
             or receipt.average_fill is None
-            or self._has_event(EventKind.TCA_RECORD, receipt.trade_intent_id)
         ):
             return
 
@@ -485,13 +484,32 @@ class AccountTradeLifecycle:
                 "reason": "RECORDED_NATIVE_FEES_UNMEASURED", "source_receipt_hash": receipt.receipt_hash},
                 now_ms=receipt.received_time_unix_ms, corr=receipt.trade_intent_id)
             return
-        tca = compute_tca(
-            receipt,
-            direction=direction,
-            qty=receipt.filled_qty,
-            value_per_unit=Decimal("1"),
-            modelled_cost_pct=modelled_cost,
-        )
+        def measure_cost(cost):
+            return compute_tca(receipt, direction=direction, qty=receipt.filled_qty,
+                value_per_unit=Decimal("1"), modelled_cost_pct=cost)
+        original_costs = list(self.ledger.iter(EventKind.TCA_RECORD,
+            correlation_id=receipt.trade_intent_id))
+        if original_costs:
+            from vati.execution.tca import same_tca_measurement, validate_tca_arithmetic
+            try:
+                # Replay uses the original measurement's model, not today's
+                # configuration. A configuration change cannot rewrite history.
+                tca = measure_cost(Decimal(str(original_costs[0].payload['modelled_cost_pct'])))
+                for original in original_costs:
+                    if (original.producer not in {'vati-account-lifecycle', 'vati-cycle'}
+                        or original.hash != canonical_hash(original.body())):
+                        raise ValueError('original cost provenance unavailable')
+                    validate_tca_arithmetic(original.payload)
+                    if not same_tca_measurement(original.payload, tca.as_dict()):
+                        raise ValueError('original cost differs from receipt; native correction required')
+            except (KeyError, ValueError, TypeError, ArithmeticError):
+                self._log(EventKind.SESSION, {'event': 'TCA_REPLAY_UNRECONCILED',
+                    'reason': 'ORIGINAL_COST_CONFLICT_OR_UNAVAILABLE', 'source_receipt_hash': receipt.receipt_hash},
+                    now_ms=receipt.received_time_unix_ms, corr=receipt.trade_intent_id)
+                return
+            self.entries[receipt.trade_intent_id]['cost_ratio'] = tca.cost_ratio
+            return  # Restore the measured state without another TCA/learning sample.
+        tca = measure_cost(modelled_cost)
         owner_tca_payload = tca.as_dict()
         if self.learning is not None:
             owner_tca_payload |= {

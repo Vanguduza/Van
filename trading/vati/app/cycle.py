@@ -669,9 +669,21 @@ class DecisionCycle:
         if rec.average_fill is None or rec.filled_qty <= ZERO:
             return
         if rec.fees is None:
-            self._log(EventKind.SESSION, {"event": "TCA_UNAVAILABLE",
-                "reason": "RECORDED_NATIVE_FEES_UNMEASURED", "source_receipt_hash": rec.receipt_hash},
-                now_ms=now_ms, corr=rec.trade_intent_id)
+            # Cost unavailability is a durable result, not an unknown order.
+            # Retry of a lost local ACK cannot append another cost-status fact.
+            with self.ledger.atomic():
+                original = [e for e in self.ledger.iter(EventKind.SESSION, correlation_id=rec.trade_intent_id)
+                    if e.producer == 'vati-cycle' and e.hash == canonical_hash(e.body())
+                    and e.payload.get('account_alias') == cfg.account_alias
+                    and e.payload.get('event') == 'TCA_UNAVAILABLE'
+                    and e.payload.get('reason') == 'RECORDED_NATIVE_FEES_UNMEASURED'
+                    and e.payload.get('schema') in (None, 'vati.execution-cost-availability/1')
+                    and e.payload.get('source_receipt_hash') == rec.receipt_hash]
+                if not original:
+                    self._log(EventKind.SESSION, {"schema": "vati.execution-cost-availability/1",
+                        "event": "TCA_UNAVAILABLE", "reason": "RECORDED_NATIVE_FEES_UNMEASURED",
+                        "source_receipt_hash": rec.receipt_hash},
+                        now_ms=now_ms, corr=rec.trade_intent_id)
             return
         tca = compute_tca(rec, direction=direction, qty=rec.filled_qty, value_per_unit=cfg.contract.value_per_price_unit_per_lot if cfg.contract.loss_model is LossModel.STOP_DISTANCE else Decimal(1), modelled_cost_pct=cost)
         tca_payload = tca.as_dict()

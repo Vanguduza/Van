@@ -537,6 +537,7 @@ class Terminal:
         status = "FILLED" if r.retcode == m.TRADE_RETCODE_DONE else ("PARTIAL" if r.retcode == m.TRADE_RETCODE_DONE_PARTIAL else ("ACCEPTED" if r.retcode == m.TRADE_RETCODE_PLACED else "REJECTED" if self._native_refusal(r.retcode) else "UNKNOWN"))
         sl_confirmed = False
         position = None
+        pos = None
         if status in {'FILLED','PARTIAL'}:
             pos = self._position_for_result(r,b)
             if pos is not None:
@@ -551,7 +552,45 @@ class Terminal:
                 # A read fault after a native effect cannot erase that effect.
                 sl_confirmed=False
         return {"status": status, "retcode": r.retcode, "reason": getattr(r, "comment", ""), "order": getattr(r, "order", 0), "deal":getattr(r,'deal',None), "position": position, "volume": str(getattr(r, "volume", 0)), "price": str(getattr(r, "price", 0)) if getattr(r, "price", 0) else None,
-                "arrival": str(getattr(r, "price", 0)) if getattr(r, "price", 0) else None, "sl_confirmed": sl_confirmed, "server_time_ms": int(time.time() * 1000)}
+                "arrival": str(getattr(r, "price", 0)) if getattr(r, "price", 0) else None, "sl_confirmed": sl_confirmed, "server_time_ms": int(time.time() * 1000),
+                "recorded_entry_charges": self._recorded_entry_charges(r,b,pos) if status in {'FILLED','PARTIAL'} and sl_confirmed else None}
+
+    def _recorded_entry_charges(self,result,body,position):
+        """Observed entry-deal components only; failure cannot erase an effect."""
+        try:
+            if position is None:return None
+            def ticket(value):
+                if type(value) is not int or not 0<value<2**64:raise ValueError('native ticket unavailable')
+                return str(value)
+            def amount(value):
+                if type(value) not in (int,float) or not math.isfinite(value):raise ValueError('native amount unavailable')
+                return str(value)
+            order=ticket(result.order);deal=ticket(result.deal)
+            # The Python API filters by ORDER ticket, not deal ticket.
+            rows=self._observed_rows(self.mt5.history_deals_get(ticket=int(order)),'entry charges')
+            if len(rows)>512:return None
+            matches=[d for d in rows if d.ticket==result.deal and d.order==result.order]
+            if len(matches)!=1:return None
+            native=matches[0]
+            side=self.mt5.ORDER_TYPE_BUY if body['type']=='BUY' else self.mt5.ORDER_TYPE_SELL
+            if (native.entry!=0 or native.type!=side or native.symbol!=body['symbol']
+                or native.position_id!=position.identifier or native.volume!=result.volume
+                or native.volume<=0):return None
+            clock=native.time_msc
+            if type(clock) is not int or not 0<clock<2**63:return None
+            account=self.account()
+            identity={k:account[k] for k in ('server','currency','demo')}
+            identity['login']=str(account['login'])
+            return {'schema':'van.mt5.recorded-entry-charges/1','identity':identity,
+                'deal_id':deal,'order_id':order,'position_identifier':ticket(native.position_id),
+                'position_ticket':ticket(position.ticket),'symbol':native.symbol,'side':body['type'],
+                'volume':amount(native.volume),'commission_delta':amount(native.commission),'fee_delta':amount(native.fee),
+                'native_time_ms':clock,'entry_type':'IN','cash_convention':'MT5_SIGNED_DEAL_CASH_COMPONENTS',
+                'complete_future_charges':False,'settlement_final':False}
+        except Exception:
+            # Missing fields/history, ambiguity or read failure is unknown,
+            # never commission/fee zero and never a synthetic rejected fill.
+            return None
 
     @staticmethod
     def _native_refusal(retcode):

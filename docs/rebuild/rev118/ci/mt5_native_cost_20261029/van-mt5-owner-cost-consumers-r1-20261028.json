@@ -1,0 +1,19 @@
+{
+  "command": [
+    "/workspace/van-backend-venv-20261025/bin/python",
+    "-m",
+    "pytest",
+    "trading/tests/test_mt5_owner_cost_knowledge.py",
+    "-q",
+    "--junitxml=/workspace/van-mt5-owner-cost-consumers-r1-20261028.xml"
+  ],
+  "cwd": "/workspace/van-review-2026-10-18/publish",
+  "controller_pid": 877590,
+  "started_at_utc": "2026-10-28T23:28:42.088579+00:00",
+  "timeout_seconds": 120,
+  "state": "COMPLETED",
+  "command_pid": 877593,
+  "exit": 1,
+  "adopted_children_reaped": [],
+  "finished_at_utc": "2026-10-28T23:28:45.720175+00:00"
+}

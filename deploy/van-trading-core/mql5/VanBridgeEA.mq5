@@ -726,6 +726,37 @@ void ExecMarginQuote(const string id,const string &f[])
 //+------------------------------------------------------------------+
 //| execution (SL required, tighten-only, no size decisions)          |
 //+------------------------------------------------------------------+
+string NativeRecordedEntryCharges(ulong deal, ulong order, ulong ticket, const string symbol, const string side, double filled)
+{
+   if(deal == 0 || order == 0 || ticket == 0 || !MathIsValidNumber(filled) || filled <= 0) return "null";
+   ResetLastError();
+   if(!HistoryDealSelect(deal) || GetLastError() != 0) return "null";
+   ResetLastError();
+   ulong actualOrder = (ulong)HistoryDealGetInteger(deal, DEAL_ORDER);
+   ulong identifier = (ulong)HistoryDealGetInteger(deal, DEAL_POSITION_ID);
+   long entry = HistoryDealGetInteger(deal, DEAL_ENTRY);
+   long kind = HistoryDealGetInteger(deal, DEAL_TYPE);
+   long at = HistoryDealGetInteger(deal, DEAL_TIME_MSC);
+   if(GetLastError() != 0 || actualOrder != order || identifier == 0 || entry != DEAL_ENTRY_IN || at <= 0) return "null";
+   if((side == "BUY" && kind != DEAL_TYPE_BUY) || (side == "SELL" && kind != DEAL_TYPE_SELL)) return "null";
+   ResetLastError();
+   string actualSymbol = HistoryDealGetString(deal, DEAL_SYMBOL);
+   double volume = HistoryDealGetDouble(deal, DEAL_VOLUME);
+   double commission = HistoryDealGetDouble(deal, DEAL_COMMISSION);
+   double fee = HistoryDealGetDouble(deal, DEAL_FEE);
+   if(GetLastError() != 0 || actualSymbol != symbol || !MathIsValidNumber(volume) || volume != filled
+      || !MathIsValidNumber(commission) || !MathIsValidNumber(fee)) return "null";
+   ResetLastError();
+   long login = AccountInfoInteger(ACCOUNT_LOGIN);
+   long mode = AccountInfoInteger(ACCOUNT_TRADE_MODE);
+   string server = AccountInfoString(ACCOUNT_SERVER), currency = AccountInfoString(ACCOUNT_CURRENCY);
+   if(GetLastError() != 0 || login <= 0 || server == "" || currency == ""
+      || (mode != ACCOUNT_TRADE_MODE_DEMO && mode != ACCOUNT_TRADE_MODE_REAL)) return "null";
+   return StringFormat("{\"schema\":\"van.mt5.recorded-entry-charges/1\",\"identity\":{\"login\":\"%I64d\",\"server\":\"%s\",\"currency\":\"%s\",\"demo\":%s},\"deal_id\":\"%I64u\",\"order_id\":\"%I64u\",\"position_identifier\":\"%I64u\",\"position_ticket\":\"%I64u\",\"symbol\":\"%s\",\"side\":\"%s\",\"volume\":%s,\"commission_delta\":\"%s\",\"fee_delta\":\"%s\",\"native_time_ms\":%I64d,\"entry_type\":\"IN\",\"cash_convention\":\"MT5_SIGNED_DEAL_CASH_COMPONENTS\",\"complete_future_charges\":false,\"settlement_final\":false}",
+      login, JsonEscape(server), JsonEscape(currency), mode == ACCOUNT_TRADE_MODE_DEMO ? "true" : "false", deal, order, identifier, ticket,
+      JsonEscape(symbol), side, JsonNumber(volume), DoubleToString(commission,-16), DoubleToString(fee,-16), at);
+}
+
 void ExecOrderSend(const string id, const string symbol, const string side, double volume, double price, double sl, double tp, const string comment, long magic, int deviation, const string orderType, const string &binding[])
 {
    long deadlineMs = 0;
@@ -778,6 +809,7 @@ void ExecOrderSend(const string id, const string symbol, const string side, doub
          slConfirmed = actualSl > 0 && ((side == "BUY" && actualSl >= sl) || (side == "SELL" && actualSl <= sl));
       }
       string recovery = "null";
+      string charges = "null";
       // Preserve the original fill, and record the separate emergency close.
       // An unavailable ticket must never target an unrelated order/position.
       if(!slConfirmed && ticket != 0)
@@ -787,8 +819,11 @@ void ExecOrderSend(const string id, const string symbol, const string side, doub
          string closeStatus = closed && closeRc == TRADE_RETCODE_DONE ? "FILLED" : closed && closeRc == TRADE_RETCODE_DONE_PARTIAL ? "PARTIAL" : NativeRefusal(closeRc) ? "REJECTED" : "UNKNOWN";
          recovery = StringFormat("{\"status\":\"%s\",\"position\":%I64u,\"volume\":%s,\"retcode\":%u}", closeStatus, ticket, JsonNumber(trade.ResultVolume()), closeRc);
       }
-      PushResult(StringFormat("{\"id\":%s,\"status\":\"%s\",\"order\":%I64u,\"deal\":%I64u,\"position\":%s,\"volume\":%s,\"price\":%s,\"sl_confirmed\":%s,\"protection_recovery\":%s,\"server_time_ms\":%I64d,\"retcode\":%u}",
-         id, rc == TRADE_RETCODE_DONE ? "FILLED" : "PARTIAL", order, deal, ticket != 0 ? StringFormat("%I64u", ticket) : "null", JsonNumber(filled), JsonNumber(fillPrice), slConfirmed ? "true" : "false", recovery, (long)TimeGMT() * 1000, rc));
+      // Optional cost reads must not delay emergency protection or core repair.
+      // Original IDs/quantity above survive any CTrade close result overwrite.
+      if(slConfirmed) charges = NativeRecordedEntryCharges(deal, order, ticket, symbol, side, filled);
+      PushResult(StringFormat("{\"id\":%s,\"status\":\"%s\",\"order\":%I64u,\"deal\":%I64u,\"position\":%s,\"volume\":%s,\"price\":%s,\"sl_confirmed\":%s,\"protection_recovery\":%s,\"server_time_ms\":%I64d,\"retcode\":%u,\"recorded_entry_charges\":%s}",
+         id, rc == TRADE_RETCODE_DONE ? "FILLED" : "PARTIAL", order, deal, ticket != 0 ? StringFormat("%I64u", ticket) : "null", JsonNumber(filled), JsonNumber(fillPrice), slConfirmed ? "true" : "false", recovery, (long)TimeGMT() * 1000, rc, charges));
    }
    else if(ok && rc == TRADE_RETCODE_PLACED)
    {
