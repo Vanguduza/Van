@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="1" time="0.659" timestamp="2026-10-29T01:26:06.020926+00:00" hostname="6e9feff21467"><testcase classname="trading.tests.test_entry_dispatch_commit_fence" name="test_preexisting_independent_routers_cannot_dispatch_the_same_original_twice" time="0.491"><failure message="AssertionError: assert 2 == 1&#10; +  where 2 = count(&lt;EventKind.ORDER_COMMAND: 'ORDER_COMMAND'&gt;)&#10; +    where count = &lt;vati.core.ledger.Ledger object at 0x7f3589738620&gt;.count&#10; +    and   &lt;EventKind.ORDER_COMMAND: 'ORDER_COMMAND'&gt; = EventKind.ORDER_COMMAND">tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-248/test_preexisting_independent_r0')
+eurusd = SymbolContract(symbol='EURUSD', venue='mt5', base_currency='EUR', quote_currency='USD', account_currency='USD', contra...=Decimal('0'), max_adv_participation=Decimal('0.10'), liquidity_haircut=Decimal('0'), round_trip_cost_pct=Decimal('0'))
+
+    def test_preexisting_independent_routers_cannot_dispatch_the_same_original_twice(tmp_path, eurusd):
+        mandate, trade, decision = approved_entry(eurusd)
+        path = tmp_path/'entry.sqlite'
+        first, second = Ledger(path), Ledger(path)
+        left, right = PaperAdapter(), PaperAdapter()
+        try:
+            a, b = sender(first, left), sender(second, right)
+            a.execute(trade, decision, mandate, now_ms=NOW*1000)
+            try:
+                b.execute(trade, decision, mandate, now_ms=NOW*1000+1)
+            except RouterError:
+                pass
+&gt;           assert first.count(EventKind.ORDER_COMMAND) == 1
+E           AssertionError: assert 2 == 1
+E            +  where 2 = count(&lt;EventKind.ORDER_COMMAND: 'ORDER_COMMAND'&gt;)
+E            +    where count = &lt;vati.core.ledger.Ledger object at 0x7f3589738620&gt;.count
+E            +    and   &lt;EventKind.ORDER_COMMAND: 'ORDER_COMMAND'&gt; = EventKind.ORDER_COMMAND
+
+trading/tests/test_entry_dispatch_commit_fence.py:35: AssertionError</failure></testcase></testsuite></testsuites>

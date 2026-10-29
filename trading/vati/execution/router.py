@@ -15,7 +15,7 @@ from typing import Callable, Optional
 
 from vati.core.canonical import canonical_hash
 from vati.core.events import EventKind, make_event
-from vati.core.ledger import Ledger
+from vati.core.ledger import Ledger, LedgerError, committed_source_snapshot, require_committed_source_read
 from vati.execution.base import ExecutionReceipt, OrderCommand, StopMode, VenueAdapter
 from vati.execution.exit_journal import ExitJournal, ExitPending
 from vati.execution.protection import ProtectionManager
@@ -41,6 +41,14 @@ class RouterError(RuntimeError):
 
 class ExitInFlight(RouterError):
     pass
+
+
+class EntryDispatchUnknown(RouterError):
+    """The original command's durable publication must be reconciled, never resent."""
+    def __init__(self, command):
+        self.command_hash = command.command_hash
+        self.idempotency_key = command.idempotency_key
+        super().__init__('entry command commit/readback unavailable; reconcile original idempotency key before retry')
 
 
 def recompute_decision_hash(d: RiskDecision) -> str:
@@ -117,6 +125,55 @@ class ExecutionRouter:
         event = make_event(kind, self.producer, payload, event_time_ms=now_ms, received_time_ms=now_ms, decision_time_ms=decision_time, correlation_id=corr)
         self.ledger.append(event)
         return event.hash
+
+    def _commit_entry_command(self, command, payload, *, now_ms, decision_time_ms,
+                              recheck):
+        """Serialize the final duplicate check and commit before any transport.
+
+        The in-memory set is an early refusal cache only. A second, already
+        constructed router must observe the original durable command under the
+        same SQL writer. A caller transaction cannot publish an uncommitted
+        command then roll it back after an irreversible native submission.
+        This entry fence is not a financial reservation or parent budget.
+        """
+        require_committed_source_read(self.ledger)
+        if getattr(self.ledger, '_read_snapshot_depth', 0):
+            raise RouterError('entry dispatch requires its own committed writer')
+        started = False
+        try:
+            with self.ledger.atomic():
+                if not self.ledger.verify_incremental()[0]:
+                    raise RouterError('entry command journal invalid; reconciliation required')
+                if any(e.payload.get('idempotency_key') == command.idempotency_key
+                       for e in self.ledger.iter(EventKind.ORDER_COMMAND)):
+                    self._seen.add(command.idempotency_key)
+                    raise RouterError('duplicate idempotency key in committed entry journal')
+                # Writer acquisition may block. Recheck the original grant,
+                # lease, kill state, command controls and deadlines after it.
+                now_ms = recheck(now_ms)
+                event = make_event(EventKind.ORDER_COMMAND, self.producer, payload,
+                    event_time_ms=now_ms, received_time_ms=now_ms,
+                    decision_time_ms=decision_time_ms, correlation_id=command.trade_intent_id)
+                started = True
+                ref = self._log(EventKind.ORDER_COMMAND, payload, now_ms=now_ms,
+                    corr=command.trade_intent_id, decision_time=decision_time_ms)
+                if ref != event.hash:
+                    raise RouterError('entry command publication identity changed')
+            # This is a new, read-only transaction after the writer committed.
+            # A lost commit ACK or failed readback cannot authorize transport.
+            with committed_source_snapshot(self.ledger):
+                rows = [e for e in self.ledger.iter(EventKind.ORDER_COMMAND)
+                        if e.payload.get('idempotency_key') == command.idempotency_key]
+                if (len(rows) != 1 or rows[0].hash != event.hash
+                    or rows[0].hash != canonical_hash(rows[0].body())):
+                    raise RouterError('original committed entry command readback differs')
+            self._seen.add(command.idempotency_key)
+            return now_ms, event.hash
+        except Exception:
+            if started:
+                self._seen.add(command.idempotency_key)
+                raise EntryDispatchUnknown(command) from None
+            raise
 
     def _dispatch_time(self, mandate: TradingMandate, *, now_ms: int) -> int:
         # Native service builders supply their current clock. Isolated replay
@@ -350,6 +407,12 @@ class ExecutionRouter:
                 liquidity: Optional[LiquidityView] = None,
                 urgency: Urgency = Urgency.NORMAL,
                 setup_valid_until_ms: Optional[int] = None) -> ExecutionReceipt:
+        try:
+            require_committed_source_read(self.ledger)
+            if getattr(self.ledger, '_read_snapshot_depth', 0):
+                raise LedgerError('read-only caller snapshot cannot own entry publication')
+        except LedgerError:
+            raise RouterError('entry dispatch requires its own committed writer; caller transaction active') from None
         corr = intent.trade_intent_id
         for pending in self.exit_journal.unresolved():
             if pending.payload.get("state", "UNKNOWN") != "ACCEPTED":
@@ -574,7 +637,60 @@ class ExecutionRouter:
             now_ms=self._dispatch_time(mandate,now_ms=now_ms)
             if native_margin is not None and now_ms>=native_margin[1]:
                 raise RouterError('original bound native margin expired after current account risk read; not dispatched')
-            self._seen.add(intent.idempotency_key)
+            def recheck_after_writer(lower_bound):
+                observed = self._dispatch_time(mandate, now_ms=lower_bound)
+                lease_current = self.lease_fence(lease_epoch) if self.lease_fence is not None else True
+                observed = self._dispatch_time(mandate, now_ms=observed)
+                if self.kill.halted:
+                    raise RouterError(f"kill switch active: {sorted(t.value for t in self.kill.active)}")
+                if not lease_current:
+                    raise RouterError(f"account runtime lease fence refused epoch {lease_epoch!r}")
+                self._current_command_controls(intent, decision, cmd, market_reference=market_reference,
+                    decision_time_ms=decision_time_ms, now_ms=observed)
+                if native_margin is not None and observed >= native_margin[1]:
+                    raise RouterError('original bound native margin expired while waiting for entry writer; not dispatched')
+                if cmd.expires_at_ms is not None and observed >= cmd.expires_at_ms:
+                    raise RouterError('original entry deadline expired while waiting for entry writer; not dispatched')
+                return observed
+            now_ms, command_ref = self._commit_entry_command(cmd, {
+                **asdict(cmd), 'direction': cmd.direction.value, 'stop_mode': cmd.stop_mode.value,
+                'loss_model': cmd.loss_model.value,
+                **({'risk_revalidation_ref': current_risk_ref} if current_risk_ref is not None else {}),
+                **({'native_entry_margin_ref': native_margin_ref} if native_margin_ref is not None else {}),
+                **({'requested_entry_type': requested_entry_type, 'entry_type_substituted': True} if substituted else {}),
+            }, now_ms=now_ms, decision_time_ms=decision_time_ms, recheck=recheck_after_writer)
+            try:
+                # Independent readback can itself block. It cannot extend a
+                # grant, quote or lease past the actual transport boundary.
+                now_ms = recheck_after_writer(now_ms)
+            except RouterError as refusal:
+                arrived = now_ms
+                if self.clock is not None:
+                    try:
+                        arrived = self.clock()
+                    except Exception:
+                        arrived = None
+                    if type(arrived) is not int or arrived < now_ms:
+                        arrived = None
+                envelope_time = arrived if arrived is not None else now_ms
+                receipt = ExecutionReceipt(cmd.trade_intent_id, cmd.decision_hash, cmd.venue,
+                    'REJECTED', ZERO, None, cmd.entry_price, cmd.entry_price, cmd.entry_price,
+                    False, 0, arrived, reject_reason=str(refusal)).sealed()
+                payload = {**asdict(receipt), 'entry_command_ref': command_ref,
+                    'native_dispatch_attempted': False, 'dispatch_state': 'NOT_DISPATCHED'}
+                if arrived is None:
+                    payload['receipt_availability'] = {'state': 'UNAVAILABLE',
+                        'received_at_ms': None, 'dispatch_lower_bound_ms': now_ms}
+                try:
+                    ref = self._log(EventKind.EXECUTION_RECEIPT, payload, now_ms=envelope_time, corr=corr)
+                    with committed_source_snapshot(self.ledger):
+                        rows = [e for e in self.ledger.iter(EventKind.EXECUTION_RECEIPT, correlation_id=corr)
+                                if e.hash == ref]
+                        if len(rows) != 1 or rows[0].hash != canonical_hash(rows[0].body()):
+                            raise RouterError('entry refusal readback unavailable')
+                except Exception:
+                    raise EntryDispatchUnknown(cmd) from None
+                return receipt
             if self.enforce_rev51_controls:
                 assert self.pretrade_controls is not None
                 self.pretrade_controls.note_sent(
@@ -583,11 +699,6 @@ class ExecutionRouter:
                     quantity=cmd.quantity,
                     now_ms=now_ms,
                 )
-            self._log(EventKind.ORDER_COMMAND, {**asdict(cmd), "direction": cmd.direction.value, "stop_mode": cmd.stop_mode.value, "loss_model": cmd.loss_model.value,
-                                                **({'risk_revalidation_ref':current_risk_ref} if current_risk_ref is not None else {}),
-                                                **({'native_entry_margin_ref':native_margin_ref} if native_margin_ref is not None else {}),
-                                                **({"requested_entry_type": requested_entry_type, "entry_type_substituted": True} if substituted else {})},
-                      now_ms=now_ms, corr=corr, decision_time=decision_time_ms)
             metrics.inc("vati_orders_sent_total", venue=intent.venue)
             receipt = adapter.submit(cmd, now_ms=now_ms)
             # An admitted write may return after the grant expires. Retain the

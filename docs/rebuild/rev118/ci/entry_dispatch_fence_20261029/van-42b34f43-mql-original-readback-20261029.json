@@ -1,0 +1,63 @@
+{
+  "candidate_head": "42b34f43657dcc64503e951d946f4231c4f3022d",
+  "actual_tested_merge": "9e20f69ce3c339536ba9243d9f294db840d3912e",
+  "artifact_id": 12865860854,
+  "run_id": 40800029960,
+  "job_id": 123205644128,
+  "archive_bytes": 111087,
+  "archive_sha256": "05751fcf32c0937f75d9678b9cde311ae3806e441da7a07bfece6590b630213e",
+  "zip_crc_verified": true,
+  "source_sha256": "659d2dd7a784b3dee524ba203bba7abfbf8cf6d1a94006d29235f251db5db30f",
+  "source_blob_oid": "fa98951fa557e091cd65d0f5f57c14b11ce9339e",
+  "original_compile_cases": [
+    {
+      "name": "VanCompilerRejectionProbe",
+      "expected_success": false,
+      "process_exit_code": 0,
+      "errors": 4,
+      "warnings": 0,
+      "fresh_binary": false,
+      "started_at_utc": "2026-10-29T01:23:32.7130814Z",
+      "finished_at_utc": "2026-10-29T01:23:33.7780089Z",
+      "log_sha256": "3cadda77288d8d42732ebbd2f85e79e17bc68d6d0b425eb50beaf9a00cddd4bf"
+    },
+    {
+      "name": "VanBridgeEA",
+      "expected_success": true,
+      "process_exit_code": 1,
+      "errors": 0,
+      "warnings": 0,
+      "fresh_binary": true,
+      "started_at_utc": "2026-10-29T01:23:33.7817209Z",
+      "finished_at_utc": "2026-10-29T01:23:36.7707671Z",
+      "log_sha256": "49678865b7340b1fa3c319be02662c91f2886cf545a4e8026e88ff81431cc1a5",
+      "binary_sha256": "81e13e75e7a4afde2a614ef4f033e90d5eb377cceeb3009cb64e422490b0154b"
+    }
+  ],
+  "original_installer_signature": {
+    "status": "Valid",
+    "subject": "CN=MetaQuotes Ltd., O=MetaQuotes Ltd., S=Lemesos, C=CY",
+    "thumbprint": "5A64A7AED24C33DED342D01D01FA5286F06DA6DC"
+  },
+  "original_editor_signature": {
+    "status": "Valid",
+    "subject": "CN=MetaQuotes Ltd., O=MetaQuotes Ltd., S=Lemesos, C=CY",
+    "thumbprint": "5A64A7AED24C33DED342D01D01FA5286F06DA6DC"
+  },
+  "all_entry_hashes": {
+    "receipt.json": "a828fda4148c51af24e4fc7bb6c54aeb2fe686023ddd38821c0d264bf32309c1",
+    "setup-diagnostic.json": "1657f8e6ef860ed764bd6233e23f985e478148c5ab4071bb98775b6bfffa97b3",
+    "VanBridgeEA.ex5": "81e13e75e7a4afde2a614ef4f033e90d5eb377cceeb3009cb64e422490b0154b",
+    "VanBridgeEA.log": "49678865b7340b1fa3c319be02662c91f2886cf545a4e8026e88ff81431cc1a5",
+    "VanCompilerRejectionProbe.log": "3cadda77288d8d42732ebbd2f85e79e17bc68d6d0b425eb50beaf9a00cddd4bf"
+  },
+  "qualification": "SOURCE_COMPILED_ONLY_NO_NATIVE_ACCOUNT_DEPLOYMENT_FINANCIAL_OR_DEVICE_ACCEPTANCE",
+  "original_compiler_signature": {
+    "status": "Valid",
+    "subject": "CN=MetaQuotes Ltd., O=MetaQuotes Ltd., S=Lemesos, C=CY",
+    "thumbprint": "5A64A7AED24C33DED342D01D01FA5286F06DA6DC"
+  },
+  "compiler_sha256": "0f39a71f538760ec9bceb39d6b52abdf169707d12cc54f201c6ba7477fbe3782",
+  "compiler_file_version": "5.0.0.6292",
+  "standard_library_trade_sha256": "96e6781624534377fe7971cba52cca3d62d1b030bc10d5e4ebf3ed8c541399ed"
+}
