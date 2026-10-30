@@ -5,7 +5,6 @@ from dataclasses import replace
 import threading
 import time
 
-import psycopg
 import pytest
 
 from conftest import NOW, intent, mandate_dict, snapshot
@@ -69,6 +68,7 @@ def test_concurrent_postgres_routers_publish_and_send_the_original_once(pg_dsn, 
 
 
 def test_grant_expiry_during_actual_postgres_writer_wait_cannot_send(pg_dsn, eurusd):
+    import psycopg
     mandate, trade, decision = approved_entry(eurusd)
     blocker = PostgresLedger(pg_dsn, ledger_name='entry-wait')
     clock = {'now': NOW*1000}

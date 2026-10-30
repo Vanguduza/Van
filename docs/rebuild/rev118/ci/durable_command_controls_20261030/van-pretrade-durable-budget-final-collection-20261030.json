@@ -1,0 +1,22 @@
+{
+  "command": [
+    "/workspace/van-backend-venv-20261025/bin/python",
+    "-m",
+    "pytest",
+    "trading/tests",
+    "backend/tests/test_trading_api.py",
+    "backend/tests/test_van_private_core_service.py",
+    "tests/rebuild/test_mt5_cash_unit_source.py",
+    "--collect-only",
+    "-q"
+  ],
+  "cwd": "/workspace/van-review-2026-10-18/publish",
+  "controller_pid": 637,
+  "started_at_utc": "2026-10-30T09:12:37.074071+00:00",
+  "timeout_seconds": 180,
+  "state": "COMPLETED",
+  "command_pid": 656,
+  "exit": 0,
+  "adopted_children_reaped": [],
+  "finished_at_utc": "2026-10-30T09:12:46.838985+00:00"
+}

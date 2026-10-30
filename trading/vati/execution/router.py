@@ -20,7 +20,7 @@ from vati.execution.base import ExecutionReceipt, OrderCommand, StopMode, VenueA
 from vati.execution.exit_journal import ExitJournal, ExitPending
 from vati.execution.protection import ProtectionManager
 from vati.execution.policy_templates import DO_NOT_EXECUTE, LIMIT_AT_TOUCH, entry_compatible, slippage_bound_in_price, template as execution_template
-from vati.execution.pretrade import MarketReference, PreTradeControls
+from vati.execution.pretrade import MarketReference, PreTradeControls, PreTradeConfigError
 from vati.execution.route_registry import RouteRegistry
 from vati.execution.style_selector import (
     ExecutionStyleSelector, LiquidityView, StyleRefused, Urgency,
@@ -285,11 +285,17 @@ class ExecutionRouter:
             raise RouterError('native entry margin evidence unavailable: '+type(exc).__name__+
                 (' source_ref='+source if isinstance(source,str) and source else '')+'; not dispatched') from exc
 
-    def _current_command_controls(self, intent, decision, command, *, market_reference, decision_time_ms, now_ms):
+    def _current_command_controls(self, intent, decision, command, *, market_reference, decision_time_ms, now_ms,
+                                  active_command_ref=None):
         if not self.enforce_rev51_controls:
             return
         current_mark=market_reference.aged(observed_at_ms=decision_time_ms,now_ms=now_ms) if market_reference is not None else None
-        result=self.pretrade_controls.check(intent=intent,decision=decision,mark=current_mark,now_ms=now_ms)
+        active = None if active_command_ref is None else {
+            'ref': active_command_ref, 'command_hash': command.command_hash,
+            'decision_hash': command.decision_hash, 'trade_intent_id': command.trade_intent_id,
+            'key': command.idempotency_key, 'producer': self.producer}
+        result=self.pretrade_controls.check(intent=intent,decision=decision,mark=current_mark,now_ms=now_ms,
+            active_command=active)
         if not result.passed or result.quantised is None:
             raise RouterError(f"pre-trade refused {result.reason_code}: {result.reason_detail}")
         current=result.quantised
@@ -473,6 +479,10 @@ class ExecutionRouter:
             assert self.route_registry is not None
             assert self.pretrade_controls is not None
             assert self.style_selector is not None
+            try:
+                self.pretrade_controls.bind_ledger(self.ledger, producer=self.producer)
+            except PreTradeConfigError:
+                raise RouterError('pre-trade COMMAND_HISTORY_UNAVAILABLE: original ledger/producer binding requires reconciliation') from None
             pretrade = self.pretrade_controls.check(
                 intent=intent, decision=decision, mark=market_reference, now_ms=now_ms)
             if not pretrade.passed or pretrade.quantised is None:
@@ -637,6 +647,7 @@ class ExecutionRouter:
             now_ms=self._dispatch_time(mandate,now_ms=now_ms)
             if native_margin is not None and now_ms>=native_margin[1]:
                 raise RouterError('original bound native margin expired after current account risk read; not dispatched')
+            active_command_ref = None
             def recheck_after_writer(lower_bound):
                 observed = self._dispatch_time(mandate, now_ms=lower_bound)
                 lease_current = self.lease_fence(lease_epoch) if self.lease_fence is not None else True
@@ -646,7 +657,7 @@ class ExecutionRouter:
                 if not lease_current:
                     raise RouterError(f"account runtime lease fence refused epoch {lease_epoch!r}")
                 self._current_command_controls(intent, decision, cmd, market_reference=market_reference,
-                    decision_time_ms=decision_time_ms, now_ms=observed)
+                    decision_time_ms=decision_time_ms, now_ms=observed, active_command_ref=active_command_ref)
                 if native_margin is not None and observed >= native_margin[1]:
                     raise RouterError('original bound native margin expired while waiting for entry writer; not dispatched')
                 if cmd.expires_at_ms is not None and observed >= cmd.expires_at_ms:
@@ -659,6 +670,7 @@ class ExecutionRouter:
                 **({'native_entry_margin_ref': native_margin_ref} if native_margin_ref is not None else {}),
                 **({'requested_entry_type': requested_entry_type, 'entry_type_substituted': True} if substituted else {}),
             }, now_ms=now_ms, decision_time_ms=decision_time_ms, recheck=recheck_after_writer)
+            active_command_ref = command_ref
             try:
                 # Independent readback can itself block. It cannot extend a
                 # grant, quote or lease past the actual transport boundary.

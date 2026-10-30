@@ -1,0 +1,11 @@
+{
+  "head": "524e1ca2aadc076642b5e237e0b9765065610927",
+  "source_sha256": {
+    "trading/vati/execution/pretrade.py": "ea81974f4cea44519e80bfc28c7ce36e80d7401e8d6f6d62ffb18ac230e444f2",
+    "trading/vati/execution/router.py": "df5863d0d2b55f432cb1cae2dc113af1b6fbde3ae86800279e64c7ee8977af1c",
+    "trading/tests/test_pretrade_durable_command_budget.py": "8f1f20fad8ba1fdb7501674616180b4fb3f01adde84d4b818b36c96af57aa94a"
+  },
+  "new_probe": "test_pretrade_durable_command_budget.py",
+  "initial_actual": "1FAILED/1PASSED",
+  "runtime_implementation_changed": false
+}

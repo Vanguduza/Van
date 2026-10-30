@@ -1,0 +1,193 @@
+﻿2026-10-29T01:51:27.8003891Z Current runner version: '2.338.0'
+2026-10-29T01:51:27.8038742Z ##[group]Runner Image Provisioner
+2026-10-29T01:51:27.8040240Z Hosted Compute Agent
+2026-10-29T01:51:27.8041303Z Version: 20261021.618
+2026-10-29T01:51:27.8042559Z Commit: 21505ad2541d5be6135ed84fc33697146cf75b8e
+2026-10-29T01:51:27.8043859Z Build Date: 2026-10-21T00:45:21Z
+2026-10-29T01:51:27.8044995Z Worker ID: {dd6018ba-f45f-4e62-b1d5-7edec1c52227}
+2026-10-29T01:51:27.8046394Z Region: eastus2
+2026-10-29T01:51:27.8047312Z Cloud: Azure
+2026-10-29T01:51:27.8048663Z ##[endgroup]
+2026-10-29T01:51:27.8051024Z ##[group]Operating System
+2026-10-29T01:51:27.8052248Z Ubuntu
+2026-10-29T01:51:27.8053298Z 24.04.5
+2026-10-29T01:51:27.8054180Z LTS
+2026-10-29T01:51:27.8055132Z ##[endgroup]
+2026-10-29T01:51:27.8056049Z ##[group]Runner Image
+2026-10-29T01:51:27.8057127Z Image: ubuntu-24.04
+2026-10-29T01:51:27.8058432Z Version: 20261025.353.1
+2026-10-29T01:51:27.8060727Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20261025.353/images/ubuntu/Ubuntu2404-Readme.md
+2026-10-29T01:51:27.8063569Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20261025.353
+2026-10-29T01:51:27.8065500Z ##[endgroup]
+2026-10-29T01:51:27.8067709Z ##[group]GITHUB_TOKEN Permissions
+2026-10-29T01:51:27.8070677Z Contents: read
+2026-10-29T01:51:27.8071709Z Metadata: read
+2026-10-29T01:51:27.8072775Z Packages: read
+2026-10-29T01:51:27.8073733Z ##[endgroup]
+2026-10-29T01:51:27.8076806Z Secret source: Actions
+2026-10-29T01:51:27.8078753Z Cache mode: write
+2026-10-29T01:51:27.8080059Z Prepare workflow directory
+2026-10-29T01:51:27.8570064Z Prepare all required actions
+2026-10-29T01:51:27.8642042Z Getting action download info
+2026-10-29T01:51:28.7541788Z Download action repository 'actions/checkout@v4' (SHA:11d5960a326750d5838078e36cf38b85af677262)
+2026-10-29T01:51:28.8570840Z Download action repository 'actions/setup-python@v5' (SHA:a26af69be951a213d495a4c3e4e4022e16d87065)
+2026-10-29T01:51:28.9374967Z Download action repository 'actions/setup-node@v4' (SHA:49933ea5288caeca8642d1e84afbd3f7d6820020)
+2026-10-29T01:51:29.0255523Z Download action repository 'actions/upload-artifact@v4' (SHA:ea165f8d65b6e75b540449e92b4886f43607fa02)
+2026-10-29T01:51:29.2862425Z Complete job name: backend
+2026-10-29T01:51:29.4271747Z ##[group]Run actions/checkout@v4
+2026-10-29T01:51:29.4273189Z with:
+2026-10-29T01:51:29.4274055Z   repository: Vanguduza/Van
+2026-10-29T01:51:29.4283147Z   token: ***
+2026-10-29T01:51:29.4284002Z   ssh-strict: true
+2026-10-29T01:51:29.4284870Z   ssh-user: git
+2026-10-29T01:51:29.4285753Z   persist-credentials: true
+2026-10-29T01:51:29.4286722Z   clean: true
+2026-10-29T01:51:29.4287613Z   sparse-checkout-cone-mode: true
+2026-10-29T01:51:29.4288836Z   fetch-depth: 1
+2026-10-29T01:51:29.4289705Z   fetch-tags: false
+2026-10-29T01:51:29.4290590Z   show-progress: true
+2026-10-29T01:51:29.4291470Z   lfs: false
+2026-10-29T01:51:29.4292302Z   submodules: false
+2026-10-29T01:51:29.4293206Z   set-safe-directory: true
+2026-10-29T01:51:29.4294237Z   allow-unsafe-pr-checkout: false
+2026-10-29T01:51:29.4295600Z ##[endgroup]
+2026-10-29T01:51:29.7413801Z Syncing repository: Vanguduza/Van
+2026-10-29T01:51:29.7415316Z ##[group]Getting Git version info
+2026-10-29T01:51:29.7415900Z Working directory is '/home/runner/work/Van/Van'
+2026-10-29T01:51:29.7416797Z [command]/usr/bin/git version
+2026-10-29T01:51:29.7538906Z git version 2.56.0
+2026-10-29T01:51:29.7574682Z ##[endgroup]
+2026-10-29T01:51:29.7588840Z Temporarily overriding HOME='/home/runner/work/_temp/446e5c99-627c-4c1a-9bb2-0113c5853efb' before making global git config changes
+2026-10-29T01:51:29.7619478Z Adding repository directory to the temporary git global config as a safe directory
+2026-10-29T01:51:29.7628693Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/Van/Van
+2026-10-29T01:51:29.7669953Z Deleting the contents of '/home/runner/work/Van/Van'
+2026-10-29T01:51:29.7675562Z ##[group]Initializing the repository
+2026-10-29T01:51:29.7680578Z [command]/usr/bin/git init /home/runner/work/Van/Van
+2026-10-29T01:51:29.7812844Z hint: Using 'master' as the name for the initial branch. This default branch name
+2026-10-29T01:51:29.7814667Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+2026-10-29T01:51:29.7816056Z hint: to use in all of your new repositories, which will suppress this warning,
+2026-10-29T01:51:29.7816956Z hint: call:
+2026-10-29T01:51:29.7817430Z hint:
+2026-10-29T01:51:29.7818317Z hint: 	git config --global init.defaultBranch <name>
+2026-10-29T01:51:29.7819034Z hint:
+2026-10-29T01:51:29.7819726Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+2026-10-29T01:51:29.7820649Z hint: 'development'. The just-created branch can be renamed via this command:
+2026-10-29T01:51:29.7821410Z hint:
+2026-10-29T01:51:29.7821866Z hint: 	git branch -m <name>
+2026-10-29T01:51:29.7822400Z hint:
+2026-10-29T01:51:29.7823145Z hint: Disable this message with "git config set advice.defaultBranchName false"
+2026-10-29T01:51:29.7828407Z Initialized empty Git repository in /home/runner/work/Van/Van/.git/
+2026-10-29T01:51:29.7863351Z [command]/usr/bin/git remote add origin https://github.com/Vanguduza/Van
+2026-10-29T01:51:29.7935584Z ##[endgroup]
+2026-10-29T01:51:29.7936826Z ##[group]Disabling automatic garbage collection
+2026-10-29T01:51:29.7942081Z [command]/usr/bin/git config --local gc.auto 0
+2026-10-29T01:51:29.8010653Z ##[endgroup]
+2026-10-29T01:51:29.8011634Z ##[group]Setting up auth
+2026-10-29T01:51:29.8029390Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-10-29T01:51:29.8086850Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-10-29T01:51:29.8534063Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-10-29T01:51:29.8592245Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-10-29T01:51:29.8846127Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-10-29T01:51:29.8896626Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-10-29T01:51:29.9152260Z [command]/usr/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+2026-10-29T01:51:29.9207434Z ##[endgroup]
+2026-10-29T01:51:29.9208757Z ##[group]Fetching the repository
+2026-10-29T01:51:29.9221769Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +f78a71beb093cb3392a6aa5a8a86dff523d8023f:refs/remotes/pull/105/merge
+2026-10-29T01:51:33.3021188Z From https://github.com/Vanguduza/Van
+2026-10-29T01:51:33.3022648Z  * [new ref]         f78a71beb093cb3392a6aa5a8a86dff523d8023f -> pull/105/merge
+2026-10-29T01:51:33.3025852Z ##[endgroup]
+2026-10-29T01:51:33.3026960Z ##[group]Determining the checkout info
+2026-10-29T01:51:33.3029724Z ##[endgroup]
+2026-10-29T01:51:33.3035846Z [command]/usr/bin/git sparse-checkout disable
+2026-10-29T01:51:33.3104913Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+2026-10-29T01:51:33.3141875Z ##[group]Checking out the ref
+2026-10-29T01:51:33.3145346Z [command]/usr/bin/git checkout --progress --force refs/remotes/pull/105/merge
+2026-10-29T01:51:34.3368829Z Updating files:  61% (10406/16895)
+2026-10-29T01:51:34.3428925Z Updating files:  62% (10475/16895)
+2026-10-29T01:51:34.3574898Z Updating files:  63% (10644/16895)
+2026-10-29T01:51:34.3721380Z Updating files:  64% (10813/16895)
+2026-10-29T01:51:34.4002166Z Updating files:  65% (10982/16895)
+2026-10-29T01:51:34.4132670Z Updating files:  66% (11151/16895)
+2026-10-29T01:51:34.4372886Z Updating files:  67% (11320/16895)
+2026-10-29T01:51:34.4642051Z Updating files:  68% (11489/16895)
+2026-10-29T01:51:34.4920584Z Updating files:  69% (11658/16895)
+2026-10-29T01:51:34.5210294Z Updating files:  70% (11827/16895)
+2026-10-29T01:51:34.5345108Z Updating files:  71% (11996/16895)
+2026-10-29T01:51:34.5527752Z Updating files:  72% (12165/16895)
+2026-10-29T01:51:34.5686555Z Updating files:  73% (12334/16895)
+2026-10-29T01:51:34.5946924Z Updating files:  74% (12503/16895)
+2026-10-29T01:51:34.6093129Z Updating files:  75% (12672/16895)
+2026-10-29T01:51:34.6282981Z Updating files:  76% (12841/16895)
+2026-10-29T01:51:34.6385993Z Updating files:  77% (13010/16895)
+2026-10-29T01:51:34.6476030Z Updating files:  78% (13179/16895)
+2026-10-29T01:51:34.6596614Z Updating files:  79% (13348/16895)
+2026-10-29T01:51:34.6743756Z Updating files:  80% (13516/16895)
+2026-10-29T01:51:34.7090148Z Updating files:  81% (13685/16895)
+2026-10-29T01:51:34.7296736Z Updating files:  82% (13854/16895)
+2026-10-29T01:51:34.7418580Z Updating files:  83% (14023/16895)
+2026-10-29T01:51:34.7559586Z Updating files:  84% (14192/16895)
+2026-10-29T01:51:34.7851461Z Updating files:  85% (14361/16895)
+2026-10-29T01:51:34.7966785Z Updating files:  86% (14530/16895)
+2026-10-29T01:51:34.8851067Z Updating files:  87% (14699/16895)
+2026-10-29T01:51:34.9033386Z Updating files:  88% (14868/16895)
+2026-10-29T01:51:34.9164935Z Updating files:  89% (15037/16895)
+2026-10-29T01:51:34.9283917Z Updating files:  90% (15206/16895)
+2026-10-29T01:51:34.9843272Z Updating files:  91% (15375/16895)
+2026-10-29T01:51:35.0213647Z Updating files:  92% (15544/16895)
+2026-10-29T01:51:35.0469822Z Updating files:  93% (15713/16895)
+2026-10-29T01:51:35.0601188Z Updating files:  94% (15882/16895)
+2026-10-29T01:51:35.0718037Z Updating files:  95% (16051/16895)
+2026-10-29T01:51:35.0832660Z Updating files:  96% (16220/16895)
+2026-10-29T01:51:35.0949323Z Updating files:  97% (16389/16895)
+2026-10-29T01:51:35.1054361Z Updating files:  98% (16558/16895)
+2026-10-29T01:51:35.2937590Z Updating files:  99% (16727/16895)
+2026-10-29T01:51:35.2938587Z Updating files: 100% (16895/16895)
+2026-10-29T01:51:35.2948359Z Updating files: 100% (16895/16895), done.
+2026-10-29T01:51:35.3134973Z Note: switching to 'refs/remotes/pull/105/merge'.
+2026-10-29T01:51:35.3135403Z 
+2026-10-29T01:51:35.3136042Z You are in 'detached HEAD' state. You can look around, make experimental
+2026-10-29T01:51:35.3136951Z changes and commit them, and you can discard any commits you make in this
+2026-10-29T01:51:35.3137890Z state without impacting any branches by switching back to a branch.
+2026-10-29T01:51:35.3138710Z 
+2026-10-29T01:51:35.3139065Z If you want to create a new branch to retain commits you create, you may
+2026-10-29T01:51:35.3139864Z do so (now or later) by using -c with the switch command. Example:
+2026-10-29T01:51:35.3140333Z 
+2026-10-29T01:51:35.3140535Z   git switch -c <new-branch-name>
+2026-10-29T01:51:35.3140845Z 
+2026-10-29T01:51:35.3141029Z Or undo this operation with:
+2026-10-29T01:51:35.3141320Z 
+2026-10-29T01:51:35.3141477Z   git switch -
+2026-10-29T01:51:35.3141702Z 
+2026-10-29T01:51:35.3142075Z Turn off this advice by setting config variable advice.detachedHead to false
+2026-10-29T01:51:35.3142726Z 
+2026-10-29T01:51:35.3143304Z HEAD is now at f78a71b Merge 524e1ca2aadc076642b5e237e0b9765065610927 into 8eb1889822fc8a83f219977c15340172e16acd91
+2026-10-29T01:51:35.3272202Z ##[endgroup]
+2026-10-29T01:51:35.3330846Z [command]/usr/bin/git log -1 --format=%H
+2026-10-29T01:51:35.3364572Z f78a71beb093cb3392a6aa5a8a86dff523d8023f
+2026-10-29T01:51:35.3618873Z ##[group]Run test -n "$DDS_KEY" || {
+2026-10-29T01:51:35.3619271Z [36;1mtest -n "$DDS_KEY" || {[0m
+2026-10-29T01:51:35.3620134Z [36;1m  echo "::error::secret DDS_CONTRACT_READ_DEPLOY_KEY is not provisioned: add a read-only deploy key on Vanguduza/dial-development-system and store its private half in this repository's Actions secrets"[0m
+2026-10-29T01:51:35.3620978Z [36;1m  exit 1[0m
+2026-10-29T01:51:35.3621184Z [36;1m}[0m
+2026-10-29T01:51:35.3644261Z shell: /usr/bin/bash -e {0}
+2026-10-29T01:51:35.3644521Z env:
+2026-10-29T01:51:35.3644709Z   DDS_KEY: 
+2026-10-29T01:51:35.3645102Z ##[endgroup]
+2026-10-29T01:51:35.3723078Z ##[error]secret DDS_CONTRACT_READ_DEPLOY_KEY is not provisioned: add a read-only deploy key on Vanguduza/dial-development-system and store its private half in this repository's Actions secrets
+2026-10-29T01:51:35.3734919Z ##[error]Process completed with exit code 1.
+2026-10-29T01:51:35.4026279Z Post job cleanup.
+2026-10-29T01:51:35.4915514Z [command]/usr/bin/git version
+2026-10-29T01:51:35.4992449Z git version 2.56.0
+2026-10-29T01:51:35.5032254Z Temporarily overriding HOME='/home/runner/work/_temp/50ee1341-bc0b-45a6-aa4c-cbe6faa209ca' before making global git config changes
+2026-10-29T01:51:35.5033560Z Adding repository directory to the temporary git global config as a safe directory
+2026-10-29T01:51:35.5038426Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/Van/Van
+2026-10-29T01:51:35.5083737Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-10-29T01:51:35.5123196Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-10-29T01:51:35.5418328Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-10-29T01:51:35.5454280Z http.https://github.com/.extraheader
+2026-10-29T01:51:35.5467752Z [command]/usr/bin/git config --local --unset-all http.https://github.com/.extraheader
+2026-10-29T01:51:35.5522772Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-10-29T01:51:35.5817067Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-10-29T01:51:35.5861326Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-10-29T01:51:35.6267327Z Cleaning up orphan processes
+2026-10-29T01:51:35.6657634Z ##[warning]Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/checkout@v4. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/

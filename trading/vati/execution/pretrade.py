@@ -82,6 +82,8 @@ PRETRADE_REASONS: dict[str, str] = {
     "DECISION_INTENT_UNBOUND": "the approval lacks an exact trade binding and requires re-evaluation",
     "DECISION_SEAL_INVALID": "the decision hash does not recompute",
     "APPROVED_SIZE_EMPTY": "the approved size is zero or negative",
+    "CONTROL_CONFIG_INVALID": "command-control limits are unavailable or invalid",
+    "COMMAND_HISTORY_UNAVAILABLE": "original account command history requires reconciliation",
     "IDEMPOTENCY_REPLAY": "this idempotency key has already been sent",
     "ROUTE_UNRESOLVED": "no usable venue route for this account and symbol",
     "DIRECTION_NOT_PERMITTED": "the venue trade mode forbids this direction",
@@ -168,22 +170,68 @@ class PreTradeControls:
                  max_orders_per_window: int = MAX_ORDERS_PER_WINDOW,
                  order_window_ms: int = ORDER_WINDOW_MS,
                  ledger=None, producer: str = PRODUCER) -> None:
-        if max_orders_per_window <= 0:
-            raise PreTradeConfigError("an order limit of zero is a halt, not a limit")
         self.routes = routes
         self.max_notional = max_notional
         self.max_orders_per_window = max_orders_per_window
         self.order_window_ms = order_window_ms
+        self._validate_config()
+        self._config_hash = canonical_hash(self._config_body())
         self._ledger = ledger
         self._producer = producer
         self._sent_keys: set[str] = set()
         self._order_times: dict[str, list[int]] = {}
         self._recent_sizes: dict[str, list[Decimal]] = {}
+        self._active_original = None
+        self._command_producer = 'vati-execution-router'
+        self._bound_producer = None
+
+    def _config_body(self):
+        return {'max_notional': self.max_notional, 'max_orders_per_window': self.max_orders_per_window,
+                'order_window_ms': self.order_window_ms}
+
+    def _validate_config(self):
+        if type(self.max_orders_per_window) is not int or self.max_orders_per_window <= 0:
+            raise PreTradeConfigError('order limit must be a positive integer; zero is a halt, not a limit')
+        if type(self.order_window_ms) is not int or self.order_window_ms <= 0:
+            raise PreTradeConfigError('command window must be a positive integer number of milliseconds')
+        if self.max_notional is not None and (type(self.max_notional) is not Decimal
+            or not self.max_notional.is_finite() or self.max_notional < ZERO):
+            raise PreTradeConfigError('notional cap must be a finite nonnegative Decimal or absent')
+        if hasattr(self, '_config_hash') and canonical_hash(self._config_body()) != self._config_hash:
+            raise PreTradeConfigError('original joint control configuration changed; current admission required')
+
+    def bind_ledger(self, ledger, *, producer='vati-execution-router'):
+        """The actual router and controls must use the same durable owner."""
+        if self._ledger is not None and self._ledger is not ledger:
+            raise PreTradeConfigError('pre-trade controls and router must share the same ledger owner')
+        if self._ledger is None and (self._sent_keys or self._order_times or self._recent_sizes):
+            raise PreTradeConfigError('legacy command notes require original durable history before owner binding')
+        if self._bound_producer is not None and self._bound_producer != producer:
+            raise PreTradeConfigError('original command producer binding changed; reconciliation required')
+        self._ledger = ledger
+        self._command_producer = producer
+        self._bound_producer = producer
+
+    def _restore_history(self, account_alias, now_ms, active):
+        from vati.execution.command_history import account_command_history
+        rows, selected = account_command_history(self._ledger, account_alias, now_ms=now_ms, active=active,
+            producer=self._command_producer)
+        self._sent_keys = {r['key'] for r in rows}
+        self._order_times = {account_alias: [r['at_ms'] for r in rows]}
+        self._recent_sizes = {account_alias: [r['quantity'] for r in rows[-500:]]}
+        self._active_original = selected
 
     # ---------------------------------------------------------------- history
     def note_sent(self, *, account_alias: str, idempotency_key: str,
                   quantity: Decimal, now_ms: int) -> None:
         """Called by the order path once a command has actually been built."""
+        if self._ledger is not None:
+            original = self._active_original
+            if (original is None or original['key'] != idempotency_key
+                or original['payload']['account_alias'] != account_alias
+                or original['quantity'] != quantity or original['at_ms'] > now_ms):
+                raise PreTradeConfigError('note_sent requires the independently committed original command')
+            self._active_original = None
         self._sent_keys.add(idempotency_key)
         self._order_times.setdefault(account_alias, []).append(now_ms)
         sizes = self._recent_sizes.setdefault(account_alias, [])
@@ -206,7 +254,7 @@ class PreTradeControls:
 
     # ------------------------------------------------------------------ check
     def check(self, *, intent: TradeIntent, decision, mark: Optional[MarketReference],
-              now_ms: int) -> PreTradeResult:
+              now_ms: int, active_command=None) -> PreTradeResult:
         """Run every control in order. The first failure names the reason."""
         ran: list[str] = []
 
@@ -238,6 +286,21 @@ class PreTradeControls:
         ran.append("APPROVED_SIZE_EMPTY")
         if approved <= ZERO:
             return fail("APPROVED_SIZE_EMPTY", f"approved size is {approved}")
+
+        ran.append('CONTROL_CONFIG_INVALID')
+        try:
+            self._validate_config()
+        except PreTradeConfigError:
+            self._active_original = None
+            return fail('CONTROL_CONFIG_INVALID', 'command-control limits require repair')
+
+        if self._ledger is not None:
+            ran.append('COMMAND_HISTORY_UNAVAILABLE')
+            try:
+                self._restore_history(intent.account_alias, now_ms, active_command)
+            except Exception:
+                self._active_original = None
+                return fail('COMMAND_HISTORY_UNAVAILABLE', 'original account commands require reconciliation')
 
         ran.append("IDEMPOTENCY_REPLAY")
         if intent.idempotency_key in self._sent_keys:
