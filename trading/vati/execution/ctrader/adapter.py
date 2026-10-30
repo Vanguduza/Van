@@ -601,6 +601,10 @@ class CtraderAdapter:
         from vati.execution.ctrader.orders import read_order_details
         return read_order_details(self, order_id, context=context, deadline_ms=deadline_ms)
 
+    def cancel_order(self, observation, *, deadline_ms: int, recheck):
+        from vati.execution.ctrader.cancel import cancel_original_order
+        return cancel_original_order(self, observation, deadline_ms=deadline_ms, recheck=recheck)
+
     def positions(self) -> list[VenuePosition]:
         self._ensure_auth()
         out = []

@@ -202,11 +202,15 @@ class NativeOrderBook:
             events = [e for e in self._rows()[0].values()
                       if e.payload['request']['command_hash'] == command_hash
                       and e.received_time_ms <= available_at_ms]
-            deals = {}; reported_by_order = {}; issues = set(); refs = []
+            deals = {}; reported_by_order = {}; issues = set(); refs = []; possible_entry_orders = set()
             for event in events:
                 p = event.payload; q = p['observation']; facts = q['facts']
                 _, volume = self._binding(p['request'], available_at_ms=q['requested_at_ms'], observation=q)
                 refs.append(event.hash)
+                if facts['native_order_status'] in {'ORDER_STATUS_ACCEPTED','ORDER_STATUS_FILLED'}:
+                    # A live unfilled order can still execute. A reported fill
+                    # also remains possible exposure when its deals are absent.
+                    possible_entry_orders.add(q['native_order_id'])
                 if facts['observation_state'] != 'NATIVE_ORDER_OBSERVED' or facts['closing_order'] is not False:
                     issues.add('NATIVE_ORDER_FACTS_UNRECONCILED')
                 reported = facts['reported_executed_volume']
@@ -227,6 +231,7 @@ class NativeOrderBook:
             if events and gross > volume['original_command_volume_cents']:
                 issues.add('NATIVE_ORDER_EXECUTION_EXCEEDS_ORIGINAL_COMMAND')
             return {'original_record_refs': refs, 'recorded_gross_deal_volume': gross,
+                    'native_orders_requiring_original_exposure':sorted(possible_entry_orders),
                     'maximum_reported_executed_volume': sum(reported_by_order.values()), 'issues': sorted(issues),
                     'remaining_entry_allowance': None, 'position_flat': None,
                     'execution_authority': False, 'settlement_qualified': False}

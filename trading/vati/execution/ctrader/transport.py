@@ -30,6 +30,20 @@ class CtraderError(VenueUnavailable):
     pass
 
 
+class CancellationNotSent(VenueUnavailable):
+    """The bounded cancellation was refused before its native frame."""
+
+
+def _cancel_gate(expires_at_ms, clock, recheck):
+    try:
+        require_entry_deadline(expires_at_ms, clock)
+        if not callable(recheck) or recheck() is not True:
+            raise ValueError('current cancellation fence unavailable')
+        require_entry_deadline(expires_at_ms, clock)
+    except Exception:
+        raise CancellationNotSent('original cancellation expired or current authority/fence unavailable; not sent') from None
+
+
 class CtraderApiError(RuntimeError):
     """A ProtoOAErrorRes / ProtoErrorRes: data, not a transport fault."""
     def __init__(self, code: str, description: str) -> None:
@@ -169,16 +183,18 @@ class CtraderTransport:
     def _send_guard(self):
         return self._lock
 
-    def _send_frame(self, payload: bytes, *, expires_at_ms=None, clock=None, expected_socket=None) -> None:
+    def _send_frame(self, payload: bytes, *, expires_at_ms=None, clock=None, expected_socket=None, cancellation_recheck=None) -> None:
         frame=struct.pack(">I", len(payload)) + payload
         with self._send_guard():
-            if expires_at_ms is not None:
+            if expires_at_ms is not None and cancellation_recheck is None:
                 require_entry_deadline(expires_at_ms, clock)
             with self._state_lock:
                 sock = self._sock
                 if sock is None or not self._alive or (expected_socket is not None and sock is not expected_socket):
                     raise CtraderError("cTrader connection changed before send")
             self._prepare_io(sock)
+            if cancellation_recheck is not None:
+                _cancel_gate(expires_at_ms, clock, cancellation_recheck)
             sock.sendall(frame)
             self.sent += 1
 
@@ -237,7 +253,17 @@ class CtraderTransport:
         require_entry_deadline(expires_at_ms,clock)
         return self._request(message,values,timeout_s=timeout_s,expires_at_ms=expires_at_ms,clock=clock)
 
-    def _request(self, message, values, *, timeout_s=None, expires_at_ms=None, clock=None):
+    def call_cancel(self, message, values, *, expires_at_ms, clock, recheck, timeout_s=None):
+        """Only the original pending order; caller owns authority and journal."""
+        if (message != 'ProtoOACancelOrderReq' or type(values) is not dict
+                or set(values) != {'ctidTraderAccountId', 'orderId'}
+                or any(type(v) is not int or not 0 < v < 2**63 for v in values.values())):
+            raise CancellationNotSent('exact native cancellation account and order required; not sent')
+        _cancel_gate(expires_at_ms, clock, recheck)
+        return self._request(message, values, timeout_s=timeout_s, expires_at_ms=expires_at_ms,
+                             clock=clock, cancellation_recheck=recheck)
+
+    def _request(self, message, values, *, timeout_s=None, expires_at_ms=None, clock=None, cancellation_recheck=None):
         self.connect()
         cid = uuid.uuid4().hex[:16]
         q: queue.Queue = queue.Queue()
@@ -249,7 +275,10 @@ class CtraderTransport:
             self._pending_sockets[cid] = sock
         try:
             payload=SCHEMA.wrap(message, values, cid)
-            if expires_at_ms is None:
+            if cancellation_recheck is not None:
+                self._send_frame(payload, expires_at_ms=expires_at_ms, clock=clock,
+                                 expected_socket=sock, cancellation_recheck=cancellation_recheck)
+            elif expires_at_ms is None:
                 self._send_frame(payload, expected_socket=sock)
             else:
                 self._send_frame(payload,expires_at_ms=expires_at_ms,clock=clock,expected_socket=sock)
@@ -501,6 +530,9 @@ class CtraderReadTransport(CtraderTransport):
 
     def call_entry(self, *args, **kwargs):
         raise EntryNotSent("read-only native source cannot submit an order; not sent")
+
+    def call_cancel(self, *args, **kwargs):
+        raise CancellationNotSent('market-only native source cannot cancel an order; not sent')
 
     def wait_event(self,predicate,*,timeout_s):
         if type(timeout_s) not in (int,float) or not math.isfinite(timeout_s) or timeout_s<=0:

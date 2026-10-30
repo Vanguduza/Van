@@ -1,0 +1,61 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+________ test_control_journal_reserves_a_result_slot_before_native_send ________
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-20/test_control_journal_reserves_0')
+eurusd = SymbolContract(symbol='EURUSD', venue='mt5', base_currency='EUR', quote_currency='USD', account_currency='USD', contra...=Decimal('0'), max_adv_participation=Decimal('0.10'), liquidity_haircut=Decimal('0'), round_trip_cost_pct=Decimal('0'))
+
+    def test_control_journal_reserves_a_result_slot_before_native_send(tmp_path,eurusd):
+        ledger,adapter,router,owner,authority,clock,intent,token=setup_cancel(tmp_path,eurusd)
+        limited=NativeCancelOwner(router,authority=authority.verifier,max_records=1)
+        try:
+>           with pytest.raises(NativeCancelError,match='CAPACITY'):limited.execute(intent,token)
+                                                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+trading/tests/test_native_cancel_owner.py:291: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+trading/vati/execution/native_cancel.py:364: in execute
+    return self._finish(current, state='WIRE_OBSERVED', response={'message':name,'body':response})
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <vati.execution.native_cancel.NativeCancelOwner object at 0x7f2646128e90>
+current = {'request_id': 'cancel-1', 'intent': {'account_alias': 'ctrader_primary', 'command_hash': '02195d005c0aeededf9efae8157...d3dfdac7613bdb66c48ecf2b126a860', 'state_ref': 'c56ae36f8b029433eb5987d9beff93714d3dfdac7613bdb66c48ecf2b126a860', ...}
+state = 'WIRE_OBSERVED'
+response = {'message': 'ProtoOAExecutionEvent', 'body': {'ctidTraderAccountId': 12345, 'executionType': 'ORDER_CANCELLED', 'order...derStatus': 'ORDER_STATUS_CANCELLED', ...}, 'deal': {'dealId': 91, 'orderId': 2, 'positionId': 3, 'symbolId': 7, ...}}}
+order_query_receipt = None
+
+    def _finish(self, current, *, state, response=None, order_query_receipt=None):
+        started = False
+        try:
+            require_committed_source_read(self.ledger)
+            with self.ledger.atomic():
+                history, _, _, last, _ = self._history()
+                selected = history[current['request_id']]
+                if selected['latest'].hash != current['state_ref']:
+                    raise NativeCancelError('NATIVE_CANCEL_CONCURRENT_STATE_RECONCILE_ORIGINAL')
+                try:
+                    now = self._now()
+                    native_int(now, minimum=max(last,selected['latest'].received_time_ms))
+                    availability = {'state':'AVAILABLE','received_at_ms':now}
+                except Exception:
+                    now = self._history()[3]
+                    availability = {'state':'UNAVAILABLE','received_at_ms':None}
+                event = make_event(EventKind.SESSION, PRODUCER, {'event':EVENT, 'schema':SCHEMA,
+                    'state':state, 'request_ref':current['original_request_ref'], 'previous_ref':current['state_ref'],
+                    'response':response, 'order_query_receipt':order_query_receipt, 'availability':availability},
+                    event_time_ms=now, received_time_ms=now, correlation_id=current['request_id'])
+                started = True; self._append(event)
+            result = self.lookup(current['request_id'])
+            if result is None or result['state_ref'] != event.hash:
+                raise NativeCancelUnknown(current['request_id'])
+            return result
+        except Exception:
+            if started:
+>               raise NativeCancelUnknown(current['request_id']) from None
+E               vati.execution.native_cancel.NativeCancelUnknown: NATIVE_CANCEL_STORAGE_OUTCOME_UNKNOWN_READ_ORIGINAL_REQUEST_NEVER_RESEND
+
+trading/vati/execution/native_cancel.py:278: NativeCancelUnknown
+=========================== short test summary info ============================
+FAILED trading/tests/test_native_cancel_owner.py::test_control_journal_reserves_a_result_slot_before_native_send
+1 failed in 1.13s

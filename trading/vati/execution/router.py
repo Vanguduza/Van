@@ -137,6 +137,21 @@ class ExecutionRouter:
         return book.capture(self.adapters.get('ctrader'), request_id, command_hash,
                             margin_source_ref, native_order_id, deadline_ms=deadline_ms)
 
+    def prepare_native_cancel(self, request_id, command_hash, margin_source_ref, native_order_id,
+                              *, deadline_ms, lease_epoch=None, authority=None):
+        from vati.execution.native_cancel import NativeCancelOwner
+        return NativeCancelOwner(self,authority=authority).prepare(request_id,command_hash,
+            margin_source_ref,native_order_id,deadline_ms=deadline_ms,lease_epoch=lease_epoch)
+
+    def cancel_native_order(self, intent, owner_token, *, authority=None):
+        """One signed original-order attempt; replay never sends it again."""
+        from vati.execution.native_cancel import NativeCancelOwner
+        return NativeCancelOwner(self,authority=authority).execute(intent,owner_token)
+
+    def reconcile_native_cancel(self, request_id, query_id, *, deadline_ms, authority=None):
+        from vati.execution.native_cancel import NativeCancelOwner
+        return NativeCancelOwner(self,authority=authority).reconcile(request_id,query_id,deadline_ms=deadline_ms)
+
     def _commit_entry_command(self, command, payload, *, now_ms, decision_time_ms,
                               recheck):
         """Serialize the final duplicate check and commit before any transport.

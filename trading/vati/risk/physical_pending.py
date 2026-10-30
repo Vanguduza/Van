@@ -51,6 +51,8 @@ class PhysicalPendingRisk:
                 if native_orders_available:
                     observed = NativeOrderBook(self.ledger).for_command(cmd['command_hash'],available_at_ms=now_ms)
                     if (observed['issues'] or order.state=='NO_EFFECT' and (
+                            observed['native_orders_requiring_original_exposure']
+                            or
                             observed['recorded_gross_deal_volume']>0
                             or observed['maximum_reported_executed_volume']>0)):
                         raise ValueError('original native order facts contradict or cannot reconcile pending exposure')
