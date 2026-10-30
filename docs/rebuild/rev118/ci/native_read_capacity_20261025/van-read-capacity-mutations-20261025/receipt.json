@@ -1,0 +1,23 @@
+{
+  "schema": "van.supplemental-source-faults/1",
+  "control_sha256": "52352be2366a0d425032802e2ab6a54e51475a6b10651e14d63627ae8b4046a9",
+  "source_restored": true,
+  "cases": [
+    {
+      "case": "omit-frame-header-accounting",
+      "exit": 1,
+      "mutated_sha256": "081a1b06fc6c0a5d907ad3f838b733694980d0a80e270da2fae22ffba3e91aee"
+    },
+    {
+      "case": "omit-encoded-byte-limit",
+      "exit": 1,
+      "mutated_sha256": "4d61cc4c41cf805c5065d85b01e8233368c0e609aea18f66a874249626edb583"
+    },
+    {
+      "case": "refund-on-reconnect",
+      "exit": 1,
+      "mutated_sha256": "68bfe43cca4c9b1fb40d5ee562e2b2d3b6233a6d7c2e868c82aa867fa767e3ca"
+    }
+  ],
+  "not_canonical_corpus": true
+}

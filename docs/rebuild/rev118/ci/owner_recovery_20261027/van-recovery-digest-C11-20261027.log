@@ -1,0 +1,8 @@
+
+### ['tests/test_recovery_matrix.py']
+CAUGHT             C11 an expired approval challenge can still be signed
+
+1/1 caught
+
+================ SURVIVORS ================
+none

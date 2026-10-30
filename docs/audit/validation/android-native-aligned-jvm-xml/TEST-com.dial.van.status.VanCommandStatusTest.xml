@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.dial.van.status.VanCommandStatusTest" tests="6" skipped="0" failures="0" errors="0" timestamp="2026-10-07T22:11:48" hostname="052fefa249ff" time="0.001">
+  <properties/>
+  <testcase name="everyOwnerStatusMapsToAMessageStatus()" classname="com.dial.van.status.VanCommandStatusTest" time="0.0"/>
+  <testcase name="onlyAVerifiedOutcomeShowsAsSucceeded()" classname="com.dial.van.status.VanCommandStatusTest" time="0.0"/>
+  <testcase name="anUnknownGatewayStatusShowsAsUnknown()" classname="com.dial.van.status.VanCommandStatusTest" time="0.001"/>
+  <testcase name="aRefusalDoesNotShowAsAFailure()" classname="com.dial.van.status.VanCommandStatusTest" time="0.0"/>
+  <testcase name="acceptedShowsAsAcceptedNotSucceeded()" classname="com.dial.van.status.VanCommandStatusTest" time="0.0"/>
+  <testcase name="theThreePostExecutionOutcomesShowAsThreeDifferentThings()" classname="com.dial.van.status.VanCommandStatusTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

@@ -14,6 +14,7 @@ from __future__ import annotations
 
 import json
 import os
+import uuid
 import signal
 import time
 from dataclasses import asdict, dataclass
@@ -30,6 +31,7 @@ from vati.arbiter import OpportunityEngine
 from vati.arbiter.candidate import CandidateOpportunity
 from vati.arbiter.opportunity import CANDIDATE_TTL_MS, DEFAULT_CANDIDATE_TTL_MS
 from vati.arbiter.portfolio_allocator import OpportunityPortfolioAllocator
+from vati.arbiter.temperament import TemperamentPolicy, TemperedOpportunityAllocator
 from vati.core.canonical import canonical_hash
 from vati.core.events import EventKind, make_event
 from vati.cognition.invokers import CognitionConfig, build_invoker, build_research_invoker
@@ -56,10 +58,13 @@ from vati.observability import metrics
 from vati.observability.rejection_analytics import RejectionAnalyticsEngine
 from vati.learning.hooks import LearningHooks
 from vati.learning.replay import restore_learning_runtime
+from vati.learning.runtime_cohort import execution_cohort_for
 from vati.observability.enhancement_metrics import (
     CORRELATION_MULTIPLIER, EXECUTION_FILL_PROBABILITY, EXECUTION_POLICY_SELECTED,
     PORTFOLIO_INCREMENTAL_ES,
 )
+from vati.risk.lockouts import LockoutPolicy, LossStreakGovernor, relative_top_state, restore_equity_baselines
+from vati.risk.history_scope import RiskHistoryScopeError
 from vati.risk import KillSwitch, MarketIntegrityState, OpenPosition, RiskAuthority, RiskSnapshot, TradingMandate
 from vati.risk.contracts import Direction, KillSwitchTrigger, LossModel
 from vati.risk.dependency import PortfolioDependencyEngine
@@ -125,6 +130,10 @@ class AccountCoordinatorService:
         # GAP-F-004. Present from construction so the read model and the
         # heartbeat can always state the invoker's actual state, including
         # on a service that has not finished building.
+        self.tri_analyst = None
+        self._packet_worker_stop = None
+        self._packet_worker = None
+        self._packet_worker_state = 'DISABLED'
         self.cognition_config = CognitionConfig()
         self.event_research: Optional[EventResearchRuntime] = None
         self.news = None
@@ -143,6 +152,8 @@ class AccountCoordinatorService:
         self.day_start_equity = Decimal("0")
         self.week_start_equity = Decimal("0")
         self.consecutive_losses = 0
+        self._recovery_unresolved = ()
+        self._lease_outcome = 'NOT_ACQUIRED'
 
     def _load_specs(self) -> None:
         primary = LiveInstrumentSpec.from_mapping({}, defaults=self.cfg)
@@ -166,8 +177,8 @@ class AccountCoordinatorService:
         mandate = TradingMandate.from_mapping(c.mandate)
         if mandate.account_alias != account.alias:
             raise RuntimeError(f"mandate is for {mandate.account_alias!r}, account is {account.alias!r}")
-        if mandate.mode.value in ("LIMITED_LIVE", "AUTONOMOUS_LIVE") and account.demo:
-            raise RuntimeError("live mandate cannot run against a demo account identity")
+        from vati.accounts.access import validate_mode
+        validate_mode(account, mandate.mode.value)
         if not str(c.ledger).startswith(("postgres://", "postgresql://")):
             raise RuntimeError(
                 "multi-instrument account coordination requires the shared PostgreSQL "
@@ -176,8 +187,19 @@ class AccountCoordinatorService:
         self.account = account
         self.mandate = mandate
         self.authority = RiskAuthority(mandate)
-        self.adapter = self.adapter or build_adapter(account, registry)
+        self.contracts = {spec.symbol: contract_from_dict({**spec.contract, "venue": account.router_venue})
+                          for spec in self.specs.values()}
+        self.adapter = self.adapter or build_adapter(account, registry, symbol_contracts=self.contracts)
+        from vati.execution.paper import PaperAdapter
+        if isinstance(self.adapter, PaperAdapter):
+            self.adapter.bind_contracts(self.contracts)
         self._ledger = open_ledger(c.ledger)
+        from vati.cognition.fabric import TriAnalystPlane
+        self.tri_analyst = TriAnalystPlane(self._ledger, account_alias=c.account_alias,
+            qualified_providers=getattr(c, 'cognitive_fabric', {}).get('qualified_providers', {}))
+        self._ledger.append(make_event(EventKind.COGNITIVE_FABRIC, 'vati-account-service',
+            {'record_type': 'ProviderQualification', 'account_alias': c.account_alias,
+             'providers': self.tri_analyst.qualified}, event_time_ms=self.clock(), received_time_ms=self.clock()))
         self._lease_store = PostgresLeaseStore(c.ledger)
         # GAP-F-004 closed here. Persistent first-pass cognition is still
         # shadow-only and still wakes *after* RiskAuthority has decided; what
@@ -212,10 +234,11 @@ class AccountCoordinatorService:
             event_time_ms=self.clock(), received_time_ms=self.clock(),
             correlation_id=account.alias,
         ))
-        self.lease = AccountRuntimeLease(
+        from vati.app.physical_account_lease import build_runtime_lease
+        self.lease = build_runtime_lease(
             self._lease_store,
-            account_alias=account.alias,
-            instance_id=f"{os.uname().nodename}:{os.getpid()}",
+            account=account, mode=mandate.mode.value,
+            instance_id=f"{os.uname().nodename}:{os.getpid()}:{uuid.uuid4().hex}",
             software_version="vati-account-coordinator/1",
             git_sha=os.environ.get("VAN_GIT_SHA", ""),
         )
@@ -235,6 +258,9 @@ class AccountCoordinatorService:
             pretrade_controls=self.pretrade,
             style_selector=self.style_selector,
             enforce_rev51_controls=True,
+            clock=self.clock,
+            current_risk_facts_provider=self._current_risk_facts,
+            current_risk_authority=self.authority,
         )
 
         capsule_root = c.capsule_dir or ROOT / "strategies" / "registry"
@@ -244,7 +270,6 @@ class AccountCoordinatorService:
 
         evaluators: list[InstrumentEvaluator] = []
         for spec in self.specs.values():
-            self.contracts[spec.symbol] = contract_from_dict({**spec.contract, "venue": account.router_venue})
             chosen_capsules = [all_capsules.get(sid) for sid in spec.capsules]
             capsule_registry = CapsuleRegistry(chosen_capsules)
             implementations = {
@@ -338,7 +363,8 @@ class AccountCoordinatorService:
         self.rejection_analytics = RejectionAnalyticsEngine(ledger=self._ledger)
 
         self.learning = LearningHooks(
-            environment=ENVIRONMENT_FOR_MODE[mandate.mode],
+            environment=execution_cohort_for(self.adapter, mandate.mode).environment,
+            account_alias=account.alias,
             broker=str(getattr(account.broker, "value", account.broker)).lower(),
         )
         self.learning_replay = restore_learning_runtime(
@@ -349,6 +375,8 @@ class AccountCoordinatorService:
                 for symbol, evaluator in self.evaluators.items()
             },
         )
+        if self.learning.recovery_issue:
+            self.kill.trip(KillSwitchTrigger.RECONCILIATION_FAILURE, self.clock())
         self.news = self._build_news(events)
         self.lifecycle = AccountTradeLifecycle(
             ledger=self._ledger,
@@ -364,6 +392,7 @@ class AccountCoordinatorService:
             },
             learning=self.learning,
             cognition=self.cognition,
+            streaks=LossStreakGovernor.rebuild(LockoutPolicy(mandate.max_consecutive_losses), self._ledger.iter(), account_alias=c.account_alias),
             # GAP-F-003. The adaptive-management path is given the same gate
             # the opening path uses: the account's RiskAuthority, its mandate,
             # and the same snapshot builder. A size-changing adjustment is a
@@ -388,17 +417,36 @@ class AccountCoordinatorService:
         # One account-scoped lifecycle owns entry truth for reconciliation,
         # TCA, protection, trade review and reduce-only learning.
         self._entries = self.lifecycle.entries
+        if self.lifecycle.streaks.recovery_issue or self.learning.recovery_issue:
+            self.kill.trip(KillSwitchTrigger.RECONCILIATION_FAILURE, self.clock())
 
+        profile = TemperamentPolicy(mandate) if mandate.temperament_enabled else None
+        base_allocator = OpportunityPortfolioAllocator()
+        allocator = (TemperedOpportunityAllocator(base_allocator, profile)
+                     if profile is not None else base_allocator)
+        if profile is not None:
+            self._ledger.append(make_event(
+                EventKind.SESSION, "vati-account-coordinator",
+                {"event": "SIGNED_TEMPERAMENT_ACTIVATED",
+                 "mandate_id": mandate.mandate_id, "mandate_version": mandate.version,
+                 "default": (mandate.trading_temperament.value
+                             if mandate.trading_temperament else "LEGACY"),
+                 "per_strategy": {s: v.value for s, v in sorted(
+                     mandate.strategy_temperaments.items())}},
+                event_time_ms=self.clock(), received_time_ms=self.clock(),
+                correlation_id=account.alias))
         self.coordinator = AccountDecisionCoordinator(
             CoordinatorConfig(account_alias=account.alias, max_new_intents_per_pass=1),
             evaluators=evaluators,
-            allocator=OpportunityPortfolioAllocator(),
+            allocator=allocator,
             lease=self.lease,
             snapshot_fn=self._snapshot_for,
             risk_fn=self._risk,
             execute_fn=self._execute,
             dependency_fn=self._dependency_for,
             mandate=mandate,
+            candidate_intent_fn=self.tri_analyst.bind_intent,
+            temperament_policy=profile,
         )
         return self
 
@@ -412,44 +460,21 @@ class AccountCoordinatorService:
         (`calendar/recorder.py` -> `tier1_event_blackout_active`) remains the
         blackout authority and is untouched.
         """
-        cfg = dict(getattr(self.cfg, "news", None) or {})
-        if not cfg:
-            return None
-        from vati.events.news_ingress import (
-            NewsIngress, rows_from_file, sources_from_config,
-        )
+        from vati.events.news_runtime import build_news_file
         registry = (
             self.event_research.registry
             if self.event_research is not None else None)
-        ingress = NewsIngress(
-            registry=registry,
-            ledger=self._ledger,
-            sources=sources_from_config(cfg),
-            relevance_window_ms=int(
-                cfg.get("relevance_window_ms", 6 * 3_600_000)),
-        )
-        path = cfg.get("path")
-        if path and Path(path).is_file():
-            ingress.ingest_rows(rows_from_file(path), now_ms=self.clock())
-        return ingress
+        return build_news_file(getattr(self.cfg,'news',None) or {},ledger=self._ledger,
+            registry=registry,scope=f'account:{self.cfg.account_alias}',now_ms=self.clock())
 
     def refresh_news(self, now_ms: int) -> dict:
         """Re-read the headline file. Called from the VERIFY DATA stage."""
-        cfg = dict(getattr(self.cfg, "news", None) or {})
-        path = cfg.get("path")
-        if self.news is None or not path or not Path(path).is_file():
+        if self.news is None:
             return {"accepted": 0, "duplicates": 0, "skipped": 0}
-        from vati.events.news_ingress import rows_from_file
-
-        try:
-            return self.news.ingest_rows(rows_from_file(path), now_ms=now_ms)
-        except Exception as exc:  # noqa: BLE001 — a bad news file never stops a cycle
-            self._ledger.append(make_event(
-                EventKind.MARKET_DATA_HEALTH, "vati-account-service",
-                {"source": "news", "state": "UNREADABLE", "error": str(exc)[:200]},
-                event_time_ms=now_ms, received_time_ms=now_ms,
-                correlation_id=self.cfg.account_alias))
-            return {"accepted": 0, "duplicates": 0, "skipped": 1}
+        from vati.events.news_runtime import refresh_news_file
+        registry=self.event_research.registry if self.event_research is not None else None
+        return refresh_news_file(self.news,getattr(self.cfg,'news',None) or {},ledger=self._ledger,
+            registry=registry,scope=f'account:{self.cfg.account_alias}',now_ms=now_ms)
 
     def _apply_news_event_risk(self, now_ms: int) -> dict:
         """Push recorded headlines into every evaluator's meta-labeller.
@@ -471,7 +496,8 @@ class AccountCoordinatorService:
             try:
                 multiplier, materiality, refs = self.news.candidate_risk(
                     symbol, now_ms=now_ms)
-            except Exception:  # noqa: BLE001 — a news fault never stops a cycle
+            except Exception as exc:  # noqa: BLE001 — preserve protection and the previous reduction
+                applied[symbol.upper()]={'state':'UNAVAILABLE','error_code':type(exc).__name__}
                 continue
             evaluator.engine.m.news_event_risk[symbol.upper()] = multiplier
             if multiplier < Decimal("1"):
@@ -509,6 +535,11 @@ class AccountCoordinatorService:
         except Exception:  # noqa: BLE001 — no snapshot means no adjustment
             return None
 
+    def _current_risk_facts(self, intent, *, now_ms, market_reference):
+        from vati.execution.risk_refresh import CurrentRiskFacts
+        snapshot=self._snapshot_for(intent)
+        return CurrentRiskFacts(snapshot,self._risk_snapshot_ms)
+
     def _execute_delta(self, intent, decision):
         """Submit an authority-approved delta intent through ExecutionRouter.
 
@@ -534,9 +565,10 @@ class AccountCoordinatorService:
             account_alias=self.account.alias,
             adapter_id=str(getattr(self.account.broker, "value", self.account.broker)).lower(),
             contracts=self.contracts, now_ms=self.clock(), source="delta_intent_refresh")
+        dispatch_ms=self.clock()
         try:
             return self.router.execute(
-                intent, decision, self.mandate, now_ms=self.clock(),
+                intent, decision, self.mandate, now_ms=dispatch_ms,
                 stop_mode=StopMode.SOFTWARE if software else StopMode.VENUE,
                 targets=(), time_in_force=self.specs[symbol].time_in_force,
                 lease_epoch=self.lease.epoch if self.lease is not None else None,
@@ -545,7 +577,7 @@ class AccountCoordinatorService:
                     last_price=state.features.close,
                     mark_age_ms=state.quote_age_ms,
                     max_mark_age_ms=self.cfg.max_quote_age_ms,
-                ),
+                ).aged(observed_at_ms=state.as_of_ms,now_ms=dispatch_ms),
                 liquidity=LiquidityView(),
             )
         except RouterError as exc:
@@ -559,6 +591,7 @@ class AccountCoordinatorService:
             return None
 
     def _open_positions(self) -> tuple[OpenPosition, ...]:
+        from vati.risk.positions import project_open_position
         assert self.adapter is not None
         out: list[OpenPosition] = []
         for position in self.adapter.positions():
@@ -568,21 +601,11 @@ class AccountCoordinatorService:
             if contract is None:
                 out.append(OpenPosition(
                     position.symbol, position.direction, position.quantity, Decimal("0"),
-                    Decimal("0"), "", "", has_broker_side_stop=False))
+                    Decimal("0"), "", "", has_broker_side_stop=False,broker_position_id=position.position_id))
                 continue
-            if position.loss_model is LossModel.ILLIQUID_EQUITY:
-                out.append(OpenPosition(
-                    position.symbol, position.direction, position.quantity,
-                    abs(position.entry_price - (stop or position.entry_price)),
-                    Decimal("1"), contract.base_currency, contract.quote_currency,
-                    "", False, LossModel.ILLIQUID_EQUITY, Decimal("0"),
-                    position.entry_price * contract.liquidity_haircut))
-            else:
-                out.append(OpenPosition(
-                    position.symbol, position.direction, position.quantity,
-                    abs(position.entry_price - stop) if stop is not None else Decimal("0"),
-                    contract.value_per_price_unit_per_lot,
-                    contract.base_currency, contract.quote_currency, "", stop is not None))
+            out.append(project_open_position(symbol=position.symbol, direction=position.direction,
+                quantity=position.quantity, entry=position.entry_price, stop=stop,
+                contract=contract, loss_model=position.loss_model,broker_position_id=position.position_id))
         return tuple(out)
 
     def _ledger_positions(self) -> list[LedgerPosition]:
@@ -595,60 +618,123 @@ class AccountCoordinatorService:
 
     def _risk_store_ok(self) -> bool:
         try:
-            return bool(self._ledger.verify_chain()[0])
+            return bool(self._ledger.verify_incremental()[0])
         except Exception:
             return False
+
+    def _drawdown_top_state(self):
+        if self.mandate is None:
+            return None
+        states = []
+        for ev in self.evaluators.values():
+            reg = getattr(getattr(ev, "engine", None), "registry", None)
+            for sid in self.mandate.allowed_strategies:
+                try:
+                    states.append(reg.get(sid).state)
+                except Exception:  # noqa: BLE001
+                    continue
+        return relative_top_state(states)
 
     def _snapshot_for(self, candidate: CandidateOpportunity) -> RiskSnapshot:
         assert self.adapter is not None and self.account is not None
         contract = self.contracts[candidate.symbol.upper()]
+        started_ms = self.clock()
         acct = self.adapter.sync_account()
-        now_ms = self.clock()
-        if self.peak_equity == 0:
-            self.peak_equity = self.day_start_equity = self.week_start_equity = acct.equity
-        self.peak_equity = max(self.peak_equity, acct.equity)
+        now_ms = max(started_ms,self.clock())
         hb = self.adapter.heartbeat(now_ms=now_ms)
         report = reconcile(self._ledger_positions(), self.adapter.positions(), account_verified=acct.verified)
+        from vati.app.account_recovery import unresolved_account_entries
+        originals_unresolved=bool(unresolved_account_entries(self))
+        positions = self._open_positions()
+        store_ok = self._risk_store_ok()
+        now_ms = max(now_ms, self.clock())
+        from vati.funding.risk_fence import funding_risk_fence
+        from vati.funding.mt5_runtime import capture_cached_mt5
+        native_capture = capture_cached_mt5(self._ledger, acct, now_ms=now_ms)
+        funding = funding_risk_fence(self._ledger, self.adapter, acct, now_ms=now_ms)
+        from vati.risk.account_context import context_with_funding_hold
+        native_context, funding = context_with_funding_hold(self._ledger, self.adapter, acct, funding,
+            now_ms=now_ms, mt5_capture=native_capture)
+        basis_ref = None
+        pending_risk = ()
+        if funding.available and native_context is not None:
+            from vati.risk.physical_runtime import project_native_risk
+            from vati.funding.risk_fence import FundingRiskFence
+            policy = (self.lifecycle.streaks.policy if self.lifecycle is not None
+                else LockoutPolicy(self.mandate.max_consecutive_losses))
+            basis_ref, values, streaks, issue = project_native_risk(self, self._ledger,
+                native_context, policy, now_ms=now_ms, producer='vati-account-service')
+            if issue:
+                funding = FundingRiskFence(False, issue)
+            else:
+                self.peak_equity, self.day_start_equity, self.week_start_equity = values.peak, values.day, values.week
+                if self.lifecycle is not None:
+                    self.lifecycle.streaks = streaks
+                from vati.risk.physical_pending import project_pending_risk
+                pending_risk, issue = project_pending_risk(self,self._ledger,native_context,positions,
+                    now_ms=now_ms,contracts=self.contracts)
+                if issue:
+                    funding = FundingRiskFence(False,issue)
+        elif funding.available:
+            if self.peak_equity == 0:
+                self.peak_equity = self.day_start_equity = self.week_start_equity = acct.equity
+            self.peak_equity = max(self.peak_equity, acct.equity)
         state = self.evaluators[candidate.symbol.upper()].last_state
-        quote_age = state.quote_age_ms if state is not None else self.cfg.max_quote_age_ms + 1
+        from vati.execution.pretrade import quote_age_at
+        quote_age = quote_age_at(age_ms=state.quote_age_ms,observed_at_ms=getattr(state,'as_of_ms',None),now_ms=now_ms) if state is not None else -1
         blackout = bool(
             state is not None and
             state.event_window in (EventWindowState.PRE_BLACKOUT, EventWindowState.POST_BLACKOUT))
         integrity = state.integrity if state is not None else MarketIntegrityState.HALTED
+        streaks = getattr(self.lifecycle, "streaks", None) if self.lifecycle is not None else None
+        sid = getattr(candidate, "strategy_id", "")
+        streak = streaks.verdict(sid, now_ms) if (streaks is not None and (sid or streaks.recovery_issue)) else None
+        self._risk_snapshot_ms=now_ms
         return RiskSnapshot(
             now_unix=now_ms // 1000, account_alias=acct.account_alias,
             account_verified=acct.verified, equity=acct.equity, balance=acct.balance,
             peak_equity=self.peak_equity, day_start_equity=self.day_start_equity,
             week_start_equity=self.week_start_equity,
             consecutive_losses=(
-                self.lifecycle.consecutive_losses
-                if self.lifecycle is not None else self.consecutive_losses
+                streak.losses if streak is not None
+                else self.lifecycle.consecutive_losses if self.lifecycle is not None
+                else self.consecutive_losses
             ),
-            open_positions=self._open_positions(), symbol_contract=contract,
+            loss_streak_lock=(self.learning.recovery_issue if getattr(self, "learning", None) else "") or (streak.lock if streak is not None else ""),
+            loss_streak_multiplier=streak.risk_multiplier if streak is not None else Decimal("1"),
+            drawdown_top_state=self._drawdown_top_state(),
+            open_positions=positions, symbol_contract=contract,
             quote_age_ms=quote_age, max_quote_age_ms=self.cfg.max_quote_age_ms,
-            broker_connected=hb.connected, reconciliation_ok=report.permit_new_orders,
+            broker_connected=hb.connected, reconciliation_ok=report.permit_new_orders and not originals_unresolved,
             clock_sync_ok=abs(hb.server_offset_ms) < 2000,
-            risk_store_ok=self._risk_store_ok(), market_integrity=integrity,
+            risk_store_ok=store_ok, market_integrity=integrity,
             tier1_event_blackout_active=blackout,
-            margin_level_pct=acct.margin_level_pct, free_margin=acct.free_margin,
+            margin_level_pct=acct.margin_level_pct, free_margin=acct.free_margin, used_margin=acct.used_margin,
+            native_account_context=native_context,
+            native_risk_basis_ref=basis_ref,
+            pending_risk_commitments=pending_risk,
             kill_switch_triggers=frozenset(self.kill.active),
             preservation_blocks_new_risk=(
-                self.lifecycle.preservation_blocks_new_risk
-                if self.lifecycle is not None else False),
+                not funding.available or (self.lifecycle.preservation_blocks_new_risk
+                if self.lifecycle is not None else False)),
             preservation_reason=(
-                self.lifecycle.preservation_reason
-                if self.lifecycle is not None else ""),
+                (self.lifecycle.preservation_reason if self.lifecycle is not None else "")
+                + ((";" if self.lifecycle is not None and self.lifecycle.preservation_reason else "")
+                   + funding.reason if funding.reason else "")),
         )
 
     def _risk(self, intent, snapshot: RiskSnapshot):
         assert self.authority is not None
         decision = self.authority.evaluate_safe(intent, snapshot)
         now = self.clock()
+        from vati.risk.mandate_source import capture_mandate_source
+        original_policy = capture_mandate_source(self.authority.mandate, self.cfg.mandate, now_ms=now)
         self._ledger.append(make_event(
             EventKind.RISK_DECISION, "vati-account-coordinator",
             {"inputs": {"intent": intent_to_dict(intent), "snapshot": snapshot_to_dict(snapshot),
-                        "mandate": self.cfg.mandate},
-             "decision": decision.to_dict()},
+                        "mandate": self.cfg.mandate, "original_mandate_source": original_policy},
+             "decision": decision.to_dict(),
+             "execution_cohort": execution_cohort_for(self.adapter, self.mandate.mode).as_dict()},
             event_time_ms=now, received_time_ms=now, decision_time_ms=now,
             correlation_id=intent.trade_intent_id))
         metrics.inc("vati_decisions_total", outcome=decision.decision.value)
@@ -674,6 +760,9 @@ class AccountCoordinatorService:
 
     def _dependency_for(self, candidate: CandidateOpportunity, snapshot: RiskSnapshot):
         risk_pct = self.coordinator.risk_pct_fn(candidate) if self.coordinator else Decimal("0")
+        if self.coordinator and self.coordinator.temperament_policy is not None:
+            profile = self.coordinator.temperament_policy.verdict(candidate, now_ms=self.clock())
+            risk_pct *= profile.risk_fraction if profile.eligible else Decimal("0")
         dep = self.dependency.assess(
             candidate_id=candidate.candidate_id, symbol=candidate.symbol,
             candidate_risk=snapshot.equity * risk_pct,
@@ -696,6 +785,14 @@ class AccountCoordinatorService:
 
     def _execute(self, candidate, intent, decision, targets, lease_epoch):
         assert self.router is not None and self.account is not None and self.mandate is not None
+        selection_ms = self.clock()
+        setup_from_ms = getattr(candidate, 'valid_from_ms', None)
+        setup_until_ms = getattr(candidate, 'valid_until_ms', None)
+        if (type(selection_ms) is not int or type(setup_from_ms) is not int
+            or type(setup_until_ms) is not int
+            or not 0 <= setup_from_ms < setup_until_ms < 2**63
+            or not setup_from_ms <= selection_ms < setup_until_ms):
+            raise RouterError('original selected setup window invalid or not current; not dispatched')
         state = self.evaluators[candidate.symbol.upper()].last_state
         if state is None:
             raise RouterError("candidate has no current market state")
@@ -706,7 +803,7 @@ class AccountCoordinatorService:
             event_proximity=state.event_window.value, direction=candidate.direction.value)
         policy_decision = self.policy.select(
             candidate_id=candidate.candidate_id, bucket=bucket,
-            event_state=state.event_window.value)
+            event_state=state.event_window.value, entry_type=candidate.entry_type)
         metrics.inc(
             EXECUTION_POLICY_SELECTED,
             account_alias=self.account.alias, symbol=candidate.symbol,
@@ -725,16 +822,19 @@ class AccountCoordinatorService:
             now_ms=self.clock(),
             source="pre_order_refresh",
         )
+        dispatch_ms=self.clock()
         receipt = self.router.execute(
-            intent, decision, self.mandate, now_ms=self.clock(),
+            intent, decision, self.mandate, now_ms=dispatch_ms,
             stop_mode=StopMode.SOFTWARE if software else StopMode.VENUE,
             targets=targets, time_in_force=self.specs[candidate.symbol.upper()].time_in_force,
+            entry_type=candidate.entry_type,
+            setup_valid_until_ms=setup_until_ms,
             lease_epoch=lease_epoch, execution_policy_decision=policy_decision,
             market_reference=MarketReference(
                 last_price=state.features.close,
                 mark_age_ms=state.quote_age_ms,
                 max_mark_age_ms=self.cfg.max_quote_age_ms,
-            ),
+            ).aged(observed_at_ms=state.as_of_ms,now_ms=dispatch_ms),
             # No venue depth is exposed by the current adapter contract. Passing
             # an explicit unknown view makes the selector choose one bounded order
             # rather than pretending depth exists.
@@ -755,12 +855,9 @@ class AccountCoordinatorService:
         return receipt
 
     def _observe_owner_halt(self, now_ms: int) -> None:
-        latest = None
-        for event in self._ledger.iter(EventKind.KILL_SWITCH):
-            if event.payload.get("trigger") != "OWNER_HALT":
-                continue
-            latest = None if event.payload.get("cleared") else event
-        if latest is not None:
+        from vati.app.runtime_control_actor import outstanding_owner_halts
+        if (KillSwitchTrigger.OWNER_HALT not in self.kill.active
+            and outstanding_owner_halts(self._ledger,self.cfg.account_alias)):
             self.kill.trip(KillSwitchTrigger.OWNER_HALT, now_ms)
 
     def _owner_ticket_projection(self):
@@ -939,9 +1036,22 @@ class AccountCoordinatorService:
         return tuple(sorted(unresolved))
 
     def _account_snapshot(self, now_ms: int) -> None:
+        if getattr(self, "learning", None) is not None and getattr(self, "_ledger", None) is not None:
+            self.learning.update_projection(self._ledger)
         assert self.adapter is not None
         acct = self.adapter.sync_account()
+        observed_clock=self.clock()
+        account_observed_ms=observed_clock if type(observed_clock) is int and observed_clock>=now_ms else None
+        from vati.execution.native_margin import account_margin_body
+        margin=account_margin_body(self.adapter,acct,observed_at_ms=account_observed_ms)
         hb = self.adapter.heartbeat(now_ms=now_ms)
+        positions=self.adapter.positions()
+        from vati.funding.worker import snapshot_funding
+        funding = snapshot_funding(self,self._ledger,self.adapter,acct,now_ms=now_ms)
+        from vati.funding.native import account_mark_body
+        mark=account_mark_body(acct)
+        from vati.execution.mt5_observation import account_observation_body
+        received_ms=max(now_ms,acct.server_time_unix_ms,self.clock())
         self._ledger.append(make_event(
             EventKind.ACCOUNT_SNAPSHOT, "vati-account-service",
             {
@@ -950,16 +1060,34 @@ class AccountCoordinatorService:
                 "balance": str(acct.balance),
                 "currency": acct.currency,
                 "verified": acct.verified,
+                "funding_observation": funding,
+                "margin": margin,
+                "native_account_mark": mark,
+                "native_account_observation": account_observation_body(acct),
                 "connected": hb.connected,
                 "server_offset_ms": hb.server_offset_ms,
-                "open_positions": len(self.adapter.positions()),
+                "open_positions": len(positions),
                 "peak_equity": str(self.peak_equity),
                 "day_start_equity": str(self.day_start_equity),
                 "week_start_equity": str(self.week_start_equity),
                 "kill_switch": sorted(t.value for t in self.kill.active),
+                "risk_history_issue": getattr(getattr(self.lifecycle, "streaks", None), "recovery_issue", ""),
+            "learning_history_issue": self.learning.recovery_issue if getattr(self, "learning", None) else "",
+                "restated_learning": self.learning.projection_summary if getattr(self, "learning", None) else {"status":"NOT_CONSTRUCTED"},
+                "owner_policy_current": bool(self.mandate and self.mandate.owner_keys_current()),
                 "mode": self.mandate.mode.value if self.mandate else "UNKNOWN",
+                "temperament": (self.mandate.trading_temperament.value
+                                if self.mandate and self.mandate.trading_temperament
+                                else "LEGACY"),
+                "strategy_temperaments": ({s: p.value for s, p in sorted(
+                    self.mandate.strategy_temperaments.items())}
+                    if self.mandate else {}),
+                "aggressive_edge_authority": (
+                    "UNBOUND" if self.coordinator and self.coordinator.temperament_policy
+                    and self.coordinator.temperament_policy.admitted_edge_fn is None
+                    else "NOT_APPLICABLE_OR_BOUND"),
             },
-            event_time_ms=now_ms, received_time_ms=now_ms,
+            event_time_ms=now_ms, received_time_ms=received_ms,
             correlation_id=self.cfg.account_alias,
         ))
 
@@ -997,11 +1125,20 @@ class AccountCoordinatorService:
                 decision_time_ms=now_ms, correlation_id=outcome.candidate_id,
             ))
     def _heartbeat(self, status: str, extra: Optional[dict] = None) -> None:
+        from vati.events.news_runtime import news_heartbeat
+        if getattr(self, "learning", None) is not None and getattr(self, "_ledger", None) is not None:
+            self.learning.update_projection(self._ledger)
         payload = {
+            "owner_policy_current": bool(self.mandate and self.mandate.owner_keys_current()),
             "account_alias": self.cfg.account_alias, "symbols": sorted(self.specs),
             "status": status, "cycles": self.cycles,
+            "cognitive_packet_worker": {"state":self._packet_worker_state, "authority":"ADVISORY_CANDIDATE", "live_qualification_claimed":False},
             "lease_epoch": self.lease.epoch if self.lease else None,
+            "lease_outcome": self._lease_outcome,
             "kill_switch": sorted(t.value for t in self.kill.active),
+            "risk_history_issue": getattr(getattr(self.lifecycle, "streaks", None), "recovery_issue", ""),
+            "learning_history_issue": self.learning.recovery_issue if getattr(self, "learning", None) else "",
+            "restated_learning": self.learning.projection_summary if getattr(self, "learning", None) else {"status":"NOT_CONSTRUCTED"},
             "mtf_shadow": {
                 symbol: {
                     "complete": mtf.complete,
@@ -1010,7 +1147,12 @@ class AccountCoordinatorService:
                 }
                 for symbol, mtf in sorted(self.mtf_shadow.items())
             },
+            "news":news_heartbeat(self.news),
             "updated_ms": self.clock(), "pid": os.getpid(), **(extra or {})}
+        from vati.app.runtime_control_actor import recovery_review
+        if self.lease is not None and self.mandate is not None and self.lifecycle is not None:
+            payload['runtime_recovery']=recovery_review(self)
+            payload['session_id']=payload['runtime_recovery']['state']['session_id']
         Path(self.cfg.heartbeat_path).write_text(json.dumps(payload))
 
     def start(self) -> None:
@@ -1018,6 +1160,7 @@ class AccountCoordinatorService:
         assert self.lifecycle is not None
         now = self.clock()
         result = self.lease.acquire(now_ms=now)
+        self._lease_outcome=result.outcome.value
         if not result.permits_orders:
             raise RuntimeError(f"account runtime lease refused: {result.outcome.value}")
 
@@ -1036,13 +1179,31 @@ class AccountCoordinatorService:
             + unresolved_buy_tickets
             + unresolved_sell_tickets
         )))
+        self._recovery_unresolved = unresolved
         report = reconcile(
             self._ledger_positions(), self.adapter.positions(),
             account_verified=acct.verified,
         )
         if unresolved or not report.permit_new_orders:
             self.kill.trip(KillSwitchTrigger.RECONCILIATION_FAILURE, now)
-        self.peak_equity = self.day_start_equity = self.week_start_equity = acct.equity
+        # P1-TRADE-RISK-005: a restart resumes the recorded high-water mark and, within the
+        # same day/week, the recorded loss baselines; it no longer re-baselines them.
+        try:
+            peak, day, week = restore_equity_baselines(self._ledger.iter(), now, account_alias=self.cfg.account_alias)
+            risk_history_issue = ""
+        except RiskHistoryScopeError as exc:
+            peak = day = week = None
+            risk_history_issue = str(exc)
+            self.kill.trip(KillSwitchTrigger.RECONCILIATION_FAILURE, now)
+        from vati.funding.mt5_runtime import capture_cached_mt5
+        from vati.funding.risk_fence import funding_risk_fence
+        risk_observed_ms=max(now,self.clock())
+        capture_cached_mt5(self._ledger,acct,now_ms=risk_observed_ms)
+        funding=funding_risk_fence(self._ledger,self.adapter,acct,now_ms=risk_observed_ms)
+        self.peak_equity = max(peak, acct.equity) if funding.available and peak is not None else (
+            acct.equity if funding.available else peak if peak is not None else Decimal('0'))
+        self.day_start_equity = day if day is not None else acct.equity if funding.available else Decimal('0')
+        self.week_start_equity = week if week is not None else acct.equity if funding.available else Decimal('0')
         self._observe_owner_halt(now)
 
         self._ledger.append(make_event(
@@ -1054,6 +1215,7 @@ class AccountCoordinatorService:
                 "connected": hb.connected,
                 "restored_intents": list(restored),
                 "unresolved_positions": list(unresolved),
+                "risk_history_issue": risk_history_issue,
                 "kill": sorted(t.value for t in self.kill.active),
             },
             event_time_ms=now, received_time_ms=now,
@@ -1063,7 +1225,9 @@ class AccountCoordinatorService:
             EventKind.SESSION, "vati-account-service",
             {
                 "event": "STARTED",
-                "permit_new_orders": report.permit_new_orders and not self.kill.halted,
+                "permit_new_orders": bool(report.permit_new_orders and not self.kill.halted
+                    and self.mandate and self.mandate.owner_keys_current()),
+                "owner_policy_current": bool(self.mandate and self.mandate.owner_keys_current()),
                 "mode": self.mandate.mode.value if self.mandate else "UNKNOWN",
                 "lease_epoch": self.lease.epoch,
             },
@@ -1080,7 +1244,13 @@ class AccountCoordinatorService:
     def step_once(self):
         assert self.coordinator is not None and self.lifecycle is not None
         now = self.clock()
+        if self.lease is not None:
+            renewal=self.lease.renew(now_ms=now)
+            self._lease_outcome=renewal.outcome.value
         self._observe_owner_halt(now)
+        from vati.app.runtime_control_actor import process_recovery_requests
+        if self.lease is not None and self.mandate is not None:
+            process_recovery_requests(self)
         owner_ticket_unresolved = tuple(sorted(set(
             self._sync_owner_ticket_buys(now)
             + self._sync_owner_ticket_sells(now)
@@ -1133,9 +1303,22 @@ class AccountCoordinatorService:
                 advanced_bars[symbol] = bars
 
         if not observed_bars:
+            if self.tri_analyst is not None:
+                self.tri_analyst.join_outcomes(now_ms=now)
             self._heartbeat("NO_DATA")
             return None
-        if not advanced_bars:
+        cognitive_results = []
+        if self.tri_analyst is not None:
+            try:
+                cognitive_results = self.tri_analyst.evaluate_pending(
+                    evaluators=self.evaluators, bars_by_symbol=observed_bars, now_ms=now,
+                    candidate_sink=self.coordinator.pool.admit)
+            except (ValueError, KeyError) as exc:
+                self._heartbeat("COGNITIVE_ADMISSION_REFUSED", {"reason": str(exc)[:200]})
+        cognitive_candidates = any(r.get('vati_candidate_ids') for r in cognitive_results)
+        if not advanced_bars and not cognitive_candidates:
+            if self.tri_analyst is not None:
+                self.tri_analyst.join_outcomes(now_ms=now)
             self._heartbeat("WAITING_FOR_BAR")
             return None
 
@@ -1169,6 +1352,34 @@ class AccountCoordinatorService:
             if evaluator.last_mtf_state is not None
         }
         self._log_allocation_pass(result, now)
+        if self.tri_analyst is not None:
+            self.tri_analyst.join_outcomes(now_ms=now)
+        if self.tri_analyst is not None:
+            from vati.core.canonical import canonical_hash
+            self.tri_analyst.universe(instruments=[{
+                'symbol': symbol, 'broker_symbol': spec.contract.get('broker_symbol', symbol),
+                'asset_class': 'CONFIGURED_CONTRACT',
+                'contract_hash': canonical_hash(spec.contract),
+                'market_data_available': symbol in observed_bars,
+                'discovery_allowed': True, 'execution_supported': symbol in self.evaluators,
+                'execution_eligibility_state': 'VATI_STRATEGY_AND_RISK_GATES_REQUIRED'}
+                for symbol, spec in sorted(self.specs.items())],
+                broker=str(getattr(self.account.broker, 'value', self.account.broker)),
+                venue=self.account.router_venue, now_ms=now)
+            for symbol, evaluator in self.evaluators.items():
+                if evaluator.last_state is None or symbol not in advanced_bars:
+                    continue
+                state = evaluator.last_state
+                self.tri_analyst.evidence(symbol=symbol, state={
+                    'market_data_hash': canonical_hash([b.as_dict() if hasattr(b, 'as_dict') else str(b) for b in advanced_bars[symbol]]),
+                    'state_hash': state.state_hash,
+                    'contract_hash': canonical_hash(self.specs[symbol].contract),
+                    'multi_timeframe_state_hash': evaluator.last_mtf_state.mtf_state_hash if evaluator.last_mtf_state else state.state_hash,
+                    'strategy_context_hash': canonical_hash(self.specs[symbol].capsules),
+                    'portfolio_context_hash': self._ledger.head(),
+                    'VTIL_activation_ref': self.cfg.activation_id},
+                    source_refs=[state.state_hash, self._ledger.head()], now_ms=now,
+                    deadline_ms=now + self.cfg.max_quote_age_ms)
         for symbol, bars in advanced_bars.items():
             self.last_bar_end_ms[symbol] = max(
                 self.last_bar_end_ms.get(symbol, 0), bars[-1].end_ms)
@@ -1184,13 +1395,56 @@ class AccountCoordinatorService:
             "cognition_invoker": self.cognition_config.invoker,
         })
         return result
+    def _start_packet_worker(self):
+        sources = getattr(self.cfg, 'cognitive_fabric', {}).get('packet_sources', [])
+        if not sources or not any(s.get('enabled') is True for s in sources):
+            return
+        import threading
+        from vati.cognition.packet_producer import PacketProducer
+        from vati.cognition.fabric import TriAnalystPlane
+        # Validate configuration without performing network calls or changing qualification.
+        PacketProducer(self.tri_analyst, sources=sources, clock=self.clock)
+        stop = threading.Event()
+        self._packet_worker_stop = stop
+        def produce():
+            ledger = None
+            try:
+                ledger = open_ledger(self.cfg.ledger)
+                self._packet_worker_state = 'RUNNING_ADVISORY'
+                plane = TriAnalystPlane(ledger, account_alias=self.cfg.account_alias)
+                producer = PacketProducer(plane, sources=sources, clock=self.clock,
+                    secrets_dir=getattr(self.cfg, 'secrets_dir', ''), should_stop=stop.is_set)
+                while not stop.is_set():
+                    try:
+                        producer.poll()
+                        self._packet_worker_state = 'RUNNING_ADVISORY'
+                    except Exception:
+                        self._packet_worker_state = 'DEGRADED'
+                        # Isolated advisory lane faults never trip/widen account risk state.
+                        ledger.append(make_event(EventKind.COGNITIVE_FABRIC, 'vati-packet-worker',
+                            {'record_type':'PacketWorkerFault', 'account_alias':self.cfg.account_alias,
+                             'state':'DEGRADED', 'reason':'PACKET_WORKER_FAULT'},
+                            event_time_ms=self.clock(), received_time_ms=self.clock()))
+                    stop.wait(max(0.1, self.cfg.poll_seconds))
+            except Exception:
+                self._packet_worker_state = 'DEGRADED'
+            finally:
+                if ledger is not None:
+                    ledger.close()
+                if stop.is_set():
+                    self._packet_worker_state = 'STOPPED'
+        self._packet_worker_state = 'CONFIGURED_NOT_STARTED'
+        self._packet_worker = threading.Thread(target=produce, name='vati-advisory-packets', daemon=True)
+        self._packet_worker.start()
+
     def run_forever(self) -> int:
         def stop(*_args):
             self.stop_requested = True
         signal.signal(signal.SIGTERM, stop)
         signal.signal(signal.SIGINT, stop)
-        self.start()
         try:
+            self.start()
+            self._start_packet_worker()
             while not self.stop_requested:
                 try:
                     self.step_once()
@@ -1206,6 +1460,12 @@ class AccountCoordinatorService:
                     self._heartbeat("FAULT", {"error": str(exc)[:200]})
                 time.sleep(self.cfg.poll_seconds)
         finally:
+            from vati.funding.worker import stop_funding
+            stop_funding(self)
+            if self._packet_worker_stop is not None:
+                self._packet_worker_stop.set()
+            if self._packet_worker is not None:
+                self._packet_worker.join(timeout=16)
             if self.lease is not None:
                 self.lease.release(now_ms=self.clock())
             if self._lease_store is not None:

@@ -14,9 +14,23 @@ def test_android_never_contains_private_artemis_console_credential_or_private_en
 
 
 def test_console_session_is_hardware_device_proofed_and_proxy_is_hermes_governed():
+    from inspect import getclosurevars
+
+    from van_gateway.app import app as gateway
+
     app = Path("backend/van_gateway/app.py").read_text(encoding="utf-8")
     console = Path("backend/van_gateway/artemis/console.py").read_text(encoding="utf-8")
-    assert 'or path == "/v1/artemis/console/session"' in app
+    ingress = next(
+        middleware.kwargs["dispatch"] for middleware in gateway.user_middleware
+        if getattr(middleware.kwargs.get("dispatch"), "__name__", "") == "require_ingress_auth"
+    )
+    requires_proof = getclosurevars(ingress).nonlocals["requires_device_proof"]
+    assert requires_proof("POST", "/v1/artemis/console/session")
+    # Exercise the actual ingress closure: new owner mutation paths inherit the gate,
+    # while polling reads and separately authorized bootstrap remain distinct.
+    assert requires_proof("POST", "/v1/new-owner-surface/action")
+    assert not requires_proof("GET", "/v1/artemis/console/session")
+    assert not requires_proof("POST", "/v1/devices/bootstrap/attest")
     assert 'request.method not in {"GET", "HEAD", "OPTIONS", "POST"}' in console
     assert "artemis_console_origin_refused" in console
     assert 'headers["Authorization"] = f"Bearer {token}"' in console

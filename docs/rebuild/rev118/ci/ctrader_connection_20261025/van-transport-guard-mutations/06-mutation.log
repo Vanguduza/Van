@@ -1,0 +1,44 @@
+.............FF.....                                                     [100%]
+=================================== FAILURES ===================================
+_ test_wrong_native_authentication_response_never_authenticates_or_admits_cached_contracts[other_account] _
+
+invalid = 'other_account'
+
+    @pytest.mark.parametrize('invalid', ['application_type', 'account_type', 'other_account', 'bool_account'])
+    def test_wrong_native_authentication_response_never_authenticates_or_admits_cached_contracts(invalid):
+        adapter, transport, responses, calls = fixture()
+        adapter._load_symbols()
+        if invalid == 'application_type':
+            responses['ProtoOAApplicationAuthReq'][0] = 'ProtoHeartbeatEvent'
+        elif invalid == 'account_type':
+            responses['ProtoOAAccountAuthReq'][0] = 'ProtoOATraderRes'
+        else:
+            responses['ProtoOAAccountAuthReq'][1]['ctidTraderAccountId'] = True if invalid == 'bool_account' else 999
+>       with pytest.raises(VenueUnavailable):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE VenueUnavailable
+
+trading/tests/test_ctrader_connection_auth.py:53: Failed
+_ test_wrong_native_authentication_response_never_authenticates_or_admits_cached_contracts[bool_account] _
+
+invalid = 'bool_account'
+
+    @pytest.mark.parametrize('invalid', ['application_type', 'account_type', 'other_account', 'bool_account'])
+    def test_wrong_native_authentication_response_never_authenticates_or_admits_cached_contracts(invalid):
+        adapter, transport, responses, calls = fixture()
+        adapter._load_symbols()
+        if invalid == 'application_type':
+            responses['ProtoOAApplicationAuthReq'][0] = 'ProtoHeartbeatEvent'
+        elif invalid == 'account_type':
+            responses['ProtoOAAccountAuthReq'][0] = 'ProtoOATraderRes'
+        else:
+            responses['ProtoOAAccountAuthReq'][1]['ctidTraderAccountId'] = True if invalid == 'bool_account' else 999
+>       with pytest.raises(VenueUnavailable):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE VenueUnavailable
+
+trading/tests/test_ctrader_connection_auth.py:53: Failed
+=========================== short test summary info ============================
+FAILED trading/tests/test_ctrader_connection_auth.py::test_wrong_native_authentication_response_never_authenticates_or_admits_cached_contracts[other_account]
+FAILED trading/tests/test_ctrader_connection_auth.py::test_wrong_native_authentication_response_never_authenticates_or_admits_cached_contracts[bool_account]
+2 failed, 18 passed in 0.82s

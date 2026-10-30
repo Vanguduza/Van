@@ -1,0 +1,92 @@
+{
+  "schema": "van.ml004.fixed-fixture-inference/1",
+  "status": "SOURCE_FIXTURE_INFERENCE_PASS",
+  "data_environment": "FIXTURE",
+  "economic_evidence": false,
+  "execution_authority": false,
+  "worker_boundary": {
+    "role": "INFERENCE_FIXTURE_SMOKE",
+    "environment_keys": [
+      "ALL_PROXY",
+      "ARROW_NUM_THREADS",
+      "CUDA_VISIBLE_DEVICES",
+      "DO_NOT_TRACK",
+      "FEAST_USAGE",
+      "GPG_KEY",
+      "HF_HUB_OFFLINE",
+      "HOME",
+      "HOSTNAME",
+      "HTTPS_PROXY",
+      "HTTP_PROXY",
+      "LANG",
+      "MKL_NUM_THREADS",
+      "MLFLOW_DISABLE_TELEMETRY",
+      "MPLCONFIGDIR",
+      "NO_PROXY",
+      "NUMEXPR_NUM_THREADS",
+      "OMP_NUM_THREADS",
+      "OPENBLAS_NUM_THREADS",
+      "PATH",
+      "PYTHONDONTWRITEBYTECODE",
+      "PYTHONHASHSEED",
+      "PYTHONPATH",
+      "PYTHON_SHA256",
+      "PYTHON_VERSION",
+      "RAY_USAGE_STATS_ENABLED",
+      "VAN_MODEL_WORKER_ROLE",
+      "all_proxy",
+      "http_proxy",
+      "https_proxy",
+      "no_proxy"
+    ],
+    "broker_credentials_forwarded": false,
+    "execution_authority": false,
+    "data_environment": "FIXTURE",
+    "budget": {
+      "cpu_millis": 2000,
+      "memory_bytes": 6442450944,
+      "pids": 256,
+      "runtime_seconds": 300,
+      "log_bytes": 4194304,
+      "artifact_bytes": 67108864,
+      "execution_authority": false,
+      "economic_admission": false
+    },
+    "observed_cgroup": {
+      "cpu.max": "200000 100000",
+      "memory.max": "6442450944",
+      "pids.max": "256"
+    },
+    "root_read_only": true,
+    "no_new_privileges": true,
+    "effective_capabilities": 0
+  },
+  "locked_environment": {
+    "interpreter": "3.12.15",
+    "architecture": "x86_64",
+    "locked_distribution_count": 232,
+    "required_versions": {
+      "pyqlib": "0.9.7",
+      "lightgbm": "4.7.0",
+      "neuralforecast": "3.3.0",
+      "optuna": "5.0.0",
+      "feast": "0.67.0",
+      "mlflow": "3.17.2",
+      "xgboost-cpu": "3.4.1",
+      "torch": "2.14.1+cpu"
+    }
+  },
+  "model_rows": {
+    "qlib_lightgbm": 10,
+    "xgboost": 10,
+    "neuralforecast": 2
+  },
+  "max_abs_reload_errors": {
+    "qlib_lightgbm": 0.0,
+    "xgboost": 0.0,
+    "neuralforecast": 0.0
+  },
+  "training_executed": false,
+  "allow_pickle": false,
+  "trust_remote": false
+}

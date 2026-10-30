@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="3" skipped="0" tests="3" time="0.369" timestamp="2026-10-26T22:50:31.903379+00:00" hostname="2c5a245e39f1"><testcase classname="trading.tests.test_bar_aggregation_boundaries" name="test_resuming_after_finish_cannot_reopen_an_already_emitted_interval[60001]" time="0.169"><failure message="Failed: DID NOT RAISE ValueError">timestamp = 60001
+
+    @pytest.mark.parametrize('timestamp',[60001,60002,119999])
+    def test_resuming_after_finish_cannot_reopen_an_already_emitted_interval(timestamp):
+        agg=BarAggregator('EURUSD',60000);agg.push(Tick(60001,Decimal('1'),Decimal('2')))
+        original=agg.finish();assert original.start_ms==60000
+&gt;       with pytest.raises(ValueError,match='order'):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+trading/tests/test_bar_aggregation_boundaries.py:102: Failed</failure></testcase><testcase classname="trading.tests.test_bar_aggregation_boundaries" name="test_resuming_after_finish_cannot_reopen_an_already_emitted_interval[60002]" time="0.001"><failure message="Failed: DID NOT RAISE ValueError">timestamp = 60002
+
+    @pytest.mark.parametrize('timestamp',[60001,60002,119999])
+    def test_resuming_after_finish_cannot_reopen_an_already_emitted_interval(timestamp):
+        agg=BarAggregator('EURUSD',60000);agg.push(Tick(60001,Decimal('1'),Decimal('2')))
+        original=agg.finish();assert original.start_ms==60000
+&gt;       with pytest.raises(ValueError,match='order'):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+trading/tests/test_bar_aggregation_boundaries.py:102: Failed</failure></testcase><testcase classname="trading.tests.test_bar_aggregation_boundaries" name="test_resuming_after_finish_cannot_reopen_an_already_emitted_interval[119999]" time="0.001"><failure message="Failed: DID NOT RAISE ValueError">timestamp = 119999
+
+    @pytest.mark.parametrize('timestamp',[60001,60002,119999])
+    def test_resuming_after_finish_cannot_reopen_an_already_emitted_interval(timestamp):
+        agg=BarAggregator('EURUSD',60000);agg.push(Tick(60001,Decimal('1'),Decimal('2')))
+        original=agg.finish();assert original.start_ms==60000
+&gt;       with pytest.raises(ValueError,match='order'):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+trading/tests/test_bar_aggregation_boundaries.py:102: Failed</failure></testcase></testsuite></testsuites>

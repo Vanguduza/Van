@@ -1,0 +1,42 @@
+........................................................................ [  9%]
+........................................................................ [ 18%]
+........................................................................ [ 28%]
+........................................................................ [ 37%]
+........................................................................ [ 47%]
+........................................................................ [ 56%]
+........................................................................ [ 66%]
+....................F................................................... [ 75%]
+........................................................................ [ 85%]
+........................................................................ [ 94%]
+.......................................                                  [100%]
+=================================== FAILURES ===================================
+_ test_absent_added_margin_field_preserves_legacy_snapshot_hash_and_serialization _
+
+eurusd = SymbolContract(symbol='EURUSD', venue='mt5', base_currency='EUR', quote_currency='USD', account_currency='USD', contra...=Decimal('0'), max_adv_participation=Decimal('0.10'), liquidity_haircut=Decimal('0'), round_trip_cost_pct=Decimal('0'))
+
+    def test_absent_added_margin_field_preserves_legacy_snapshot_hash_and_serialization(eurusd):
+        from dataclasses import asdict
+        from vati.risk.authority import _canonical_hash
+        native=snapshot(eurusd,used_margin=None)
+        legacy=asdict(native);legacy.pop('used_margin')
+        assert 'used_margin' not in snapshot_to_dict(native)
+>       assert _canonical_hash(native)==_canonical_hash(legacy)
+E       AssertionError: assert 'b046ce938b01...e5f7f334f4c4f' == 'd1c017b7cf37...be0b0c254e7dc'
+E         
+E         - d1c017b7cf378d9443a4d075d98e3a84e5cb1acc1a2516a96b3be0b0c254e7dc
+E         + b046ce938b014c35fea53299f62d6d9067fa1221863528391f4e5f7f334f4c4f
+
+trading/tests/test_native_margin_facts.py:69: AssertionError
+=============================== warnings summary ===============================
+../../van-backend-venv-20261025/lib/python3.12/site-packages/fastapi/testclient.py:1
+  /workspace/van-backend-venv-20261025/lib/python3.12/site-packages/fastapi/testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+    from starlette.testclient import TestClient as TestClient  # noqa
+
+../../van-backend-venv-20261025/lib/python3.12/site-packages/starlette/testclient.py:53
+  /workspace/van-backend-venv-20261025/lib/python3.12/site-packages/starlette/testclient.py:53: DeprecationWarning: The anyio.abc.BlockingPortal alias is deprecated, use anyio.from_thread.BlockingPortal instead.
+    _PortalFactoryType = Callable[[], AbstractContextManager[anyio.abc.BlockingPortal]]
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED trading/tests/test_native_margin_facts.py::test_absent_added_margin_field_preserves_legacy_snapshot_hash_and_serialization
+1 failed, 758 passed, 2 warnings in 880.68s (0:14:40)

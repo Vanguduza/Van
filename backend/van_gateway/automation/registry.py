@@ -26,6 +26,7 @@ from van_gateway.automation.models import (
     WorkflowCapability,
     WorkflowEngine,
     WorkflowLifecycle,
+    WorkflowIR,
 )
 from van_gateway.models import ActionClass
 from van_gateway.storage.db import Store
@@ -63,6 +64,11 @@ class AutomationRegistry:
               runtime_workflow_ref=excluded.runtime_workflow_ref,
               action_class=excluded.action_class,
               mutates_state=excluded.mutates_state,
+              input_schema_json=excluded.input_schema_json,
+              output_schema_json=excluded.output_schema_json,
+              required_context_json=excluded.required_context_json,
+              required_credentials_json=excluded.required_credentials_json,
+              verifier_type=excluded.verifier_type,
               lifecycle_state=excluded.lifecycle_state,
               workflow_ir_digest=excluded.workflow_ir_digest,
               updated_at_ms=excluded.updated_at_ms
@@ -155,10 +161,13 @@ class AutomationRegistry:
         validation_report_digest: str | None = None,
         n8n_workflow_id: str | None = None,
         now_ms: int | None = None,
+        runtime_ir: WorkflowIR | None = None,
     ) -> AutomationWorkflowArtifact:
         """§§154-155 — one transaction, guarded by the expected current state."""
         if target not in LIFECYCLE_TRANSITIONS[expected]:
             raise RegistryError(f"illegal_transition:{expected.value}->{target.value}")
+        if runtime_ir is not None and target is not WorkflowLifecycle.ADMITTED:
+            raise RegistryError("runtime_metadata_requires_admission")
         now = int(time.time() * 1000) if now_ms is None else now_ms
 
         sets = ["lifecycle_state = ?"]
@@ -178,6 +187,14 @@ class AutomationRegistry:
         params.extend([artifact_id, expected.value])
 
         async with self.store.connection() as db:
+            await db.execute("BEGIN IMMEDIATE")
+            if runtime_ir is not None:
+                row = await (await db.execute("SELECT capability_id FROM automation_artifacts WHERE artifact_id=?", (artifact_id,))).fetchone()
+                if row is None:
+                    raise RegistryError("transition_precondition_failed")
+                running = await (await db.execute("SELECT run_id FROM automation_runs WHERE capability_id=? AND status IN ('PENDING','DISPATCHED','SUBMITTED') LIMIT 1", (row["capability_id"],))).fetchone()
+                if running:
+                    raise RegistryError("WORKFLOW_REPLACEMENT_HAS_ACTIVE_RUNS")
             cur = await db.execute(
                 f"UPDATE automation_artifacts SET {', '.join(sets)} "
                 "WHERE artifact_id = ? AND lifecycle_state = ?",
@@ -194,6 +211,26 @@ class AutomationRegistry:
                     "WHERE artifact_id = ?)",
                     (target.value, now, artifact_id),
                 )
+            if runtime_ir is not None:
+                capability_id = row["capability_id"]
+                await db.execute("""UPDATE automation_capabilities SET action_class=?,mutates_state=?,
+                    input_schema_json=?,output_schema_json=?,required_credentials_json=?,verifier_type=?,
+                    workflow_ir_digest=?,runtime_workflow_ref=? WHERE capability_id=?""",
+                    (runtime_ir.action_class.value, int(any(step.mutates for step in runtime_ir.steps)),
+                     Store.dumps(runtime_ir.inputs_schema), Store.dumps(runtime_ir.outputs_schema),
+                     Store.dumps(runtime_ir.credential_requirements), str(runtime_ir.verifier.get("kind", "NONE")),
+                     digest(runtime_ir.semantic_payload()), n8n_workflow_id, capability_id))
+                await db.execute("""INSERT INTO action_definitions(action_id,action_class,mutates_state,
+                    allowed_principals_json,verifier_type,no_stale_replay,max_age_seconds,parameter_schema_json,
+                    enabled,updated_at_unix_ms) VALUES (?,?,?,?,'READ_BACK',0,300,?,1,?)
+                    ON CONFLICT(action_id) DO UPDATE SET action_class=excluded.action_class,
+                    mutates_state=excluded.mutates_state,allowed_principals_json=excluded.allowed_principals_json,
+                    verifier_type=excluded.verifier_type,max_age_seconds=excluded.max_age_seconds,
+                    parameter_schema_json=excluded.parameter_schema_json,enabled=excluded.enabled,
+                    updated_at_unix_ms=excluded.updated_at_unix_ms""",
+                    (f"automation.workflow.{capability_id}", runtime_ir.action_class.value,
+                     int(any(step.mutates for step in runtime_ir.steps)), Store.dumps(["AUTOMATION", "OWNER_DEVICE"]),
+                     Store.dumps(runtime_ir.inputs_schema), now))
             await db.commit()
 
         artifact = await self.get_artifact(artifact_id)

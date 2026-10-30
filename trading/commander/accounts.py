@@ -15,11 +15,16 @@ import os
 import re
 import secrets as pysecrets
 import time
-from dataclasses import dataclass, field
+import tempfile
+from dataclasses import dataclass, field, replace
+from functools import wraps
 from pathlib import Path
 from typing import Any, Callable, Optional
 
 from fastapi import HTTPException
+from commander.account_config import resolve_account_config,validate_deriv_endpoint
+from commander.account_effects import (AccountEffectError, AccountEffectJournal, AccountOperationUnconfirmed,
+    AccountOperationBlocked, JOURNALED_COMMANDS, invoke_account_effect, mark_account_effect, operation_intent, readback)
 
 ALIAS_RE = re.compile(r"^[a-z0-9_]{3,32}$")
 BROKER_SECRET_KEYS = {
@@ -29,11 +34,16 @@ BROKER_SECRET_KEYS = {
     "MT5": {"BRIDGE_SIGNING_KEY", "BRIDGE_CA_FILE", "BRIDGE_CLIENT_CERT", "BRIDGE_CLIENT_KEY"},
     "PAPER": set(), "ZSE_OWNER_TICKET": set(),
 }
-ACCOUNT_COMMANDS = ("account_upsert", "account_credentials", "account_remove", "account_verify", "deriv_verify_email", "deriv_create_demo", "deriv_oauth_link", "ctrader_discover", "ctrader_oauth_exchange", "ctrader_link", "mt5_ea_issue_key")
+ACCOUNT_MUTATIONS = frozenset({"account_upsert", "account_credentials", "account_remove",
+    "deriv_create_demo", "deriv_oauth_link", "ctrader_link", "mt5_ea_issue_key"})
+ACCOUNT_COMMANDS = ("account_upsert", "account_credentials", "account_remove", "account_verify", "account_revision", "account_review", "account_operation", "deriv_verify_email", "deriv_create_demo", "deriv_oauth_link", "ctrader_discover", "ctrader_oauth_exchange", "ctrader_link", "mt5_ea_issue_key")
 ACCOUNT_TOOL_SCHEMAS = {
-    "account_upsert": {"description": "Create or replace a non-secret account record (alias, broker, mode, currency, identifiers). Credentials go through account_credentials.", "properties": {"alias": {"type": "string"}, "broker": {"type": "string"}, "mode": {"type": "string"}, "currency": {"type": "string"}, "label": {"type": "string"}, "server": {"type": "string"}, "login": {"type": "string"}, "bridge_url": {"type": "string"}, "demo": {"type": "boolean"}}, "required": ["alias", "broker"]},
+    "account_review": {"description": "Resolve exact public before/after settings or local-unlink safety facts without broker effects. Native readonly checks may use host credentials; credential values and locators are never exported.", "properties": {"action": {"type": "string"}, "args": {"type": "object"}}, "required": ["action", "args"]},
+    "account_operation": {"description": "Read the original native account-operation outcome for its gateway-authenticated owner device. No effect or credential export.", "properties": {"operation_id": {"type": "string"}, "device_id": {"type": "string"}}, "required": ["operation_id", "device_id"]},
+    "account_revision": {"description": "Read the native non-secret account configuration version for exact owner-intent binding.", "properties": {"alias": {"type": "string"}}, "required": ["alias"]},
+    "account_upsert": {"description": "Register a new account or edit specified public settings. Existing omitted settings and credentials are preserved. New accounts require broker; native identity changes require verified migration.", "properties": {"alias": {"type": "string"}, "broker": {"type": "string"}, "mode": {"type": "string"}, "currency": {"type": "string"}, "label": {"type": "string"}, "server": {"type": "string"}, "login": {"type": "string"}, "bridge_url": {"type": "string"}, "demo": {"type": "boolean"}, "enabled": {"type": "boolean"}, "notes": {"type": "string"}, "venue": {"type": "string"}, "mandate_ref": {"type": "string"}}, "required": ["alias"]},
     "account_credentials": {"description": "Store credential values for an alias in its 0600 secrets file (allowlisted keys per broker). Values are never echoed.", "properties": {"alias": {"type": "string"}, "secrets": {"type": "object"}}, "required": ["alias", "secrets"]},
-    "account_remove": {"description": "Remove an account record and shred its secrets file.", "properties": {"alias": {"type": "string"}}, "required": ["alias"]},
+    "account_remove": {"description": "Unlink the VAN-local account only after exact owner review, inactive runtime and fresh known funds, positions, pending orders and original outcomes. Keeps history and remote account/funds; no broker closure or money movement.", "properties": {"alias": {"type": "string"}}, "required": ["alias"]},
     "account_verify": {"description": "Connect to the venue with the stored credentials and report equity/currency/connectivity. No order is placed.", "properties": {"alias": {"type": "string"}}, "required": ["alias"]},
     "deriv_verify_email": {"description": "Start Deriv account opening: send the verification email.", "properties": {"email": {"type": "string"}, "app_id": {"type": "string"}}, "required": ["email"]},
     "deriv_create_demo": {"description": "Create a Deriv virtual (demo) account from the emailed code and register it under an alias.", "properties": {"alias": {"type": "string"}, "email": {"type": "string"}, "verification_code": {"type": "string"}, "client_password": {"type": "string"}, "residence": {"type": "string"}, "app_id": {"type": "string"}}, "required": ["alias", "verification_code", "client_password", "residence"]},
@@ -53,6 +63,7 @@ class AccountControlSettings:
     ctrader_transport_factory: Optional[Callable[[bool], Any]] = None               # is_live → CtraderTransport
     ctrader_http: Optional[Callable[[str, dict], dict]] = None
     verify_timeout_s: float = 20.0
+    operation_ledger: str = ""  # Actual constructors bind the existing native VATI ledger.
 
 
 def _secrets_path(st: AccountControlSettings, alias: str) -> Path:
@@ -60,26 +71,46 @@ def _secrets_path(st: AccountControlSettings, alias: str) -> Path:
 
 
 def _write_secrets(path: Path, values: dict[str, str], *, merge: bool = True) -> None:
+    from vati.core.file_lock import exclusive_state_lock
+    from vati.accounts.registry import load_secret_file
+
     path.parent.mkdir(parents=True, exist_ok=True, mode=0o700)
-    existing: dict[str, str] = {}
-    if merge and path.is_file():
-        for line in path.read_text(encoding="utf-8").splitlines():
-            if "=" in line and not line.startswith("#"):
-                k, v = line.split("=", 1); existing[k.strip()] = v.strip()
-    existing.update({k: str(v) for k, v in values.items()})
-    fd = os.open(path, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
-    with os.fdopen(fd, "w", encoding="utf-8") as f:
-        for k, v in existing.items():
-            f.write(f"{k}={v}\n")
-    os.chmod(path, 0o600)
+    if any(not isinstance(k, str) or not re.fullmatch(r"[A-Z][A-Z0-9_]*", k)
+           or not isinstance(v, str) or "\n" in v or "\r" in v for k, v in values.items()):
+        raise ValueError("credential file requires valid keys and single-line text values")
+    with exclusive_state_lock(path):
+        if path.is_symlink():
+            raise ValueError("credential destination must not be a symbolic link")
+        # Validate old ownership/permissions even when replacing, before reading or changing it.
+        old = load_secret_file(str(path)) if path.exists() else {}
+        existing = old if merge else {}
+        existing.update(values)
+        fd, temporary = tempfile.mkstemp(prefix=f".{path.name}.", suffix=".tmp", dir=str(path.parent))
+        try:
+            with os.fdopen(fd, "w", encoding="utf-8") as stream:
+                for key, value in existing.items():
+                    stream.write(f"{key}={value}\n")
+                stream.flush()
+                os.fsync(stream.fileno())
+            os.chmod(temporary, 0o600)
+            os.replace(temporary, path)
+        finally:
+            if os.path.exists(temporary):
+                os.unlink(temporary)
 
 
 def _shred(path: Path) -> None:
-    if path.is_file():
-        size = path.stat().st_size
-        with open(path, "r+b") as f:
-            f.write(os.urandom(size)); f.flush(); os.fsync(f.fileno())
-        path.unlink()
+    from vati.core.file_lock import exclusive_state_lock
+    with exclusive_state_lock(path):
+        if path.is_symlink():
+            raise ValueError("credential destination must not be a symbolic link")
+        if path.is_file():
+            size = path.stat().st_size
+            with open(path, "r+b") as stream:
+                stream.write(os.urandom(size))
+                stream.flush()
+                os.fsync(stream.fileno())
+            path.unlink()
 
 
 def _alias(a: dict) -> str:
@@ -87,6 +118,33 @@ def _alias(a: dict) -> str:
     if not ALIAS_RE.match(alias):
         raise HTTPException(422, "alias must match [a-z0-9_]{3,32}")
     return alias
+
+
+def require_resource_version(command: str, args: dict) -> None:
+    """Required on actual gateway/Commander ingress; direct handlers are native code."""
+    if command not in ACCOUNT_MUTATIONS:
+        return
+    _alias(args)
+    expected = args.get("_expected_resource_version")
+    if not isinstance(expected, str) or not re.fullmatch(r"[0-9a-f]{64}", expected):
+        raise HTTPException(409, "native account resource version is required before mutation")
+    if command in JOURNALED_COMMANDS:
+        try:
+            operation_intent(command, args)
+        except AccountEffectError as exc:
+            raise HTTPException(409, str(exc)) from None
+    if command in {'account_upsert','account_remove'}:
+        review=args.get("_expected_review_digest")
+        authority=args.get("_native_operation",{}).get("authority_ref","")
+        if not isinstance(review,str) or not re.fullmatch(r"[0-9a-f]{64}",review) or not authority.endswith("::review:"+review):
+            raise HTTPException(409,"Resolved native owner review is required before an account edit")
+
+
+def _boolean(args: dict, name: str, default: bool) -> bool:
+    value = args.get(name, default)
+    if type(value) is not bool:
+        raise HTTPException(422, f"{name} must be a JSON boolean")
+    return value
 
 
 def build_account_handlers(st: AccountControlSettings) -> dict[str, Callable[[dict], dict]]:
@@ -97,61 +155,211 @@ def build_account_handlers(st: AccountControlSettings) -> dict[str, Callable[[di
 
     def upsert_record(alias: str, broker: str, *, mode: str = "DEMO_TRADER", currency: str = "USD", label: str = "", server: str = "", login: str = "", bridge_url: str = "", demo: bool = True, mandate_ref: str = "") -> dict:
         r = reg()
-        if alias in r.accounts:
-            r.remove(alias)
         sec = _secrets_path(st, alias)
         if broker in ("DERIV", "CTRADER", "MT5_EA", "MT5"):
             if not sec.is_file():
+                mark_account_effect()
                 _write_secrets(sec, {})
             cref = CredentialRef(secrets_file=str(sec))
         else:
             cref = CredentialRef()
         try:
-            acc = r.add(Account(alias=alias, broker=broker, mode=mode, currency=currency, label=label or alias, server=server, login=login, bridge_url=bridge_url, credential_ref=cref, demo=demo, mandate_ref=mandate_ref))
+            candidate = Account(alias=alias, broker=broker, mode=mode, currency=currency, label=label or alias, server=server, login=login, bridge_url=bridge_url, credential_ref=cref, demo=demo, mandate_ref=mandate_ref)
+            candidate.validate()
+            mark_account_effect()
+            acc = r.replace(candidate) if alias in r.accounts else r.add(candidate)
         except AccountRegistryError as exc:
             raise HTTPException(422, str(exc))
         return acc.public()
 
-    def store_secrets(alias: str, broker: str, values: dict[str, Any]) -> list[str]:
+    def clean_secrets(broker: str, values: dict[str, Any]) -> dict[str, str]:
         allowed = BROKER_SECRET_KEYS.get(broker, set())
         bad = [k for k in values if k not in allowed]
         if bad:
             raise HTTPException(422, f"keys not allowed for {broker}: {sorted(bad)}")
         clean = {k: str(v).strip() for k, v in values.items() if str(v).strip()}
-        if any("\n" in v for v in clean.values()):
+        if any("\n" in v or "\r" in v for v in clean.values()):
             raise HTTPException(422, "secret values must be single-line")
+        return clean
+
+    def store_secrets(alias: str, broker: str, values: dict[str, Any]) -> list[str]:
+        clean = clean_secrets(broker, values)
+        mark_account_effect()
+        reg().touch(alias)
         _write_secrets(_secrets_path(st, alias), clean)
         return sorted(clean)
 
+    def verify_deriv_material(*, app_id: str, token: str, login: str, currency: str,
+                              demo: bool | None, require_trade: bool, endpoint: str = "") -> dict:
+        validate_deriv_endpoint(endpoint)
+        from vati.execution.deriv_identity import DerivIdentity, DerivIdentityError
+        from vati.execution.transports.deriv_ws import DerivWebSocketTransport
+        transport = DerivWebSocketTransport(app_id=app_id, token_provider=lambda: token,
+            endpoint=endpoint or "wss://ws.derivws.com/websockets/v3",
+            timeout_s=st.verify_timeout_s, connector=st.deriv_connector)
+        try:
+            response = transport({"authorize": "<token-from-vault-never-in-prompt>"})
+            profile = response.get("authorize", {})
+            virtual = profile.get("is_virtual")
+            if type(virtual) is not int or virtual not in (0, 1):
+                raise DerivIdentityError("Deriv native demo/live identity is unavailable")
+            identity = DerivIdentity(login or profile.get("loginid", ""), currency,
+                                     bool(virtual) if demo is None else demo, require_trade)
+            identity.validate(profile)
+            return profile
+        except Exception:
+            # An authorization read has no money effect. Do not include a raw
+            # broker exception or echo_req: either can contain credential data.
+            raise HTTPException(409, "Deriv credential or native account identity could not be verified; previous connection retained") from None
+        finally:
+            transport.close()
+
+    def require_new_alias(alias: str) -> None:
+        if alias in reg().accounts:
+            raise HTTPException(409, "account alias already exists; use the approved account update flow")
+
     # ------------------------------------------------------------ generic
+    def cmd_account_revision(a: dict) -> dict:
+        from vati.accounts.resource_version import resource_snapshot
+        return resource_snapshot(reg(), _alias(a))
+
+    def retirement_review(values,*,inside_removal=False,native_ledger=None):
+        from commander.account_retirement import inspect_retirement,require_idle_runtime,authority_path
+        from vati.core.ledger_pg import open_ledger
+        from vati.core.canonical import canonical_hash
+        alias=_alias(values)
+        # Never wait for the runtime lease while holding the alias lock: the
+        # router holds its lease before entering the account submission fence.
+        if not inside_removal:require_idle_runtime(st,alias)
+        # Initialize authority storage before alias/lease locks. Reopening a PG
+        # ledger under its lease guard could wait on DDL held by this same call.
+        ledger=native_ledger if native_ledger is not None else open_ledger(authority_path(st))
+        try:
+            with reg().operation_lock(alias):
+                registry=reg()
+                try:current=registry.get(alias)
+                except Exception:raise HTTPException(404,'Unknown native account alias') from None
+                facts=inspect_retirement(st,registry,current,inside_removal=True,native_ledger=ledger,
+                    operation_id=(values.get('_native_operation') or {}).get('operation_id'))
+                body={'schema':'vati.account-review/1','action':'account_remove','alias':alias,
+                    'request_digest':canonical_hash({k:v for k,v in values.items() if not k.startswith('_')}),
+                    'resource_version':cmd_account_revision({'alias':alias})['resource_version'],
+                    'before':current.public(),'after':None,'changed_fields':['local_link'],'retirement':facts}
+                return {**body,'review_digest':canonical_hash(body)}
+        finally:
+            if native_ledger is None:ledger.close()
+
+    def cmd_account_review(a: dict) -> dict:
+        from vati.core.canonical import canonical_hash
+        if a.get('action')=='account_remove' and isinstance(a.get('args'),dict):
+            return retirement_review(a['args'])
+        if a.get('action')!='account_upsert' or not isinstance(a.get('args'),dict):
+            raise HTTPException(422,'Unsupported native account review action')
+        values=a['args']; alias=_alias(values)
+        with reg().operation_lock(alias):
+            registry=reg(); current=registry.accounts.get(alias)
+            candidate=resolve_account_config(values,alias=alias,current=current,secret_path=_secrets_path(st,alias))
+            before=current.public() if current else None; after=candidate.public()
+            public_args={key:value for key,value in values.items() if not key.startswith('_')}
+            body={'schema':'vati.account-review/1','action':'account_upsert','alias':alias,
+                'request_digest':canonical_hash(public_args),
+                'resource_version':cmd_account_revision({'alias':alias})['resource_version'],
+                'before':before,'after':after,
+                'changed_fields':sorted(key for key,value in after.items() if before is None or before.get(key)!=value)}
+            return {**body,'review_digest':canonical_hash(body)}
+
+    def open_operation_ledger():
+        from vati.core.ledger_pg import open_ledger
+        if not st.operation_ledger:
+            raise HTTPException(503, "native VATI operation ledger is not configured; no effect dispatched")
+        return open_ledger(st.operation_ledger)
+
+    def cmd_account_operation(a: dict) -> dict:
+        led = open_operation_ledger()
+        try:
+            state = AccountEffectJournal(led).status(a.get("operation_id"), a.get("device_id"))
+            if state is None:
+                # Absence does not prove a lost request can never arrive.
+                raise AccountOperationUnconfirmed(a.get("operation_id"))
+            return readback(state)
+        except AccountEffectError:
+            raise HTTPException(409, "native operation cannot be read for this owner device") from None
+        finally:
+            led.close()
+
     def cmd_account_upsert(a: dict) -> dict:
+        if '_expected_review_digest' in a:
+            review=cmd_account_review({'action':'account_upsert','args':a})
+            if review['review_digest']!=a['_expected_review_digest']:
+                raise HTTPException(409,'Resolved account settings changed since owner review; current connection retained')
         alias = _alias(a)
-        broker = str(a.get("broker", "")).upper()
-        if broker not in BROKER_SECRET_KEYS:
-            raise HTTPException(422, f"broker must be one of {sorted(BROKER_SECRET_KEYS)}")
-        pub = upsert_record(alias, broker, mode=str(a.get("mode", "DEMO_TRADER")), currency=str(a.get("currency", "USD")).upper(), label=str(a.get("label", "")), server=str(a.get("server", "")), login=str(a.get("login", "")),
-                            bridge_url=str(a.get("bridge_url", "")), demo=bool(a.get("demo", True)), mandate_ref=str(a.get("mandate_ref", "")))
-        return {"account": pub, "secrets_file": str(_secrets_path(st, alias)) if broker in ("DERIV", "CTRADER", "MT5_EA", "MT5") else None}
+        registry=reg(); current=registry.accounts.get(alias)
+        candidate=resolve_account_config(a,alias=alias,current=current,secret_path=_secrets_path(st,alias))
+        if current is None and candidate.credential_ref.secrets_file:
+            mark_account_effect()
+            _write_secrets(Path(candidate.credential_ref.secrets_file),{})
+        mark_account_effect()
+        account=registry.replace(candidate) if current else registry.add(candidate)
+        return {"account":account.public(),"secrets_file":candidate.credential_ref.secrets_file}
 
     def cmd_account_credentials(a: dict) -> dict:
         alias = _alias(a)
+        registry = reg()
         try:
-            acc = reg().get(alias)
+            acc = registry.get(alias)
         except AccountRegistryError as exc:
             raise HTTPException(404, str(exc))
         values = a.get("secrets")
         if not isinstance(values, dict) or not values:
             raise HTTPException(422, "secrets must be a non-empty object")
+        if acc.broker == "DERIV":
+            from vati.accounts.access import SENDING_MODES
+            clean = clean_secrets(acc.broker, values)
+            expected_path = _secrets_path(st, alias).resolve()
+            if not acc.credential_ref.secrets_file or Path(acc.credential_ref.secrets_file).resolve() != expected_path:
+                raise HTTPException(409, "credential rotation must use the registered credential reference")
+            candidate = {**registry.credentials(alias), **clean}
+            app_id = acc.server or "1089"
+            if candidate.get("DERIV_APP_ID", app_id) != app_id:
+                raise HTTPException(409, "credential app ID differs from the registered connection")
+            profile = verify_deriv_material(app_id=app_id, token=candidate.get("DERIV_API_TOKEN", ""),
+                login=acc.login, currency=acc.currency, demo=acc.demo,
+                require_trade=acc.mode in SENDING_MODES, endpoint=acc.bridge_url)
+            # Pin an initially unbound account only after native readback. This
+            # happens under the account-operation lock, before an entry can run.
+            # A failed subsequent file swap leaves an identity whose old token
+            # must still pass native verification; it cannot switch principals.
+            if not acc.login:
+                mark_account_effect()
+                registry.replace(replace(acc, login=profile["loginid"]))
         keys = store_secrets(alias, acc.broker, values)
         return {"alias": alias, "stored_keys": keys}
 
-    def cmd_account_remove(a: dict) -> dict:
+    def cmd_account_remove(a: dict,*,native_ledger=None) -> dict:
+        from commander.account_retirement import credential_cleanup
+        from contextlib import nullcontext
+        from vati.core.file_lock import exclusive_state_lock
         alias = _alias(a)
         r = reg()
         if alias not in r.accounts:
             raise HTTPException(404, f"unknown alias {alias}")
-        r.remove(alias); _shred(_secrets_path(st, alias))
-        return {"alias": alias, "removed": True}
+        review=retirement_review(a,inside_removal=True,native_ledger=native_ledger)
+        if ('_native_operation' in a or '_expected_review_digest' in a) and a.get('_expected_review_digest')!=review['review_digest']:
+            raise HTTPException(409,'Native unlink facts changed or owner review missing; local connection retained')
+        # Freeze all credential-reference writers through the final plan check
+        # and deletion. An alias added during venue IO must retain its access.
+        with r._mutation_lock():
+            current=reg();account=current.get(alias);cleanup,target=credential_cleanup(st,current,account)
+            if cleanup!=review['retirement']['credential_cleanup']:
+                raise HTTPException(409,'Credential reference ownership changed; review local unlink again')
+            with exclusive_state_lock(target) if target is not None else nullcontext():
+                if cmd_account_revision({'alias':alias})['resource_version']!=review['resource_version']:
+                    raise HTTPException(409,'Native credential generation changed; local connection retained')
+                mark_account_effect()
+                current.remove(alias)
+                if target is not None:_shred(target)
+        return {"alias": alias, "removed": True,**{k:review['retirement'][k] for k in (
+            'remote_account_closed','historical_data_retained','retained_remote_funds','credential_cleanup')}}
 
     def cmd_account_verify(a: dict) -> dict:
         alias = _alias(a)
@@ -167,10 +375,7 @@ def build_account_handlers(st: AccountControlSettings) -> dict[str, Callable[[di
             return {"alias": alias, "ok": hb.connected, "detail": "EA is polling" if hb.connected else "EA has not polled in the last 30 s; check BridgeUrl/Alias/SigningKey in the terminal", "safety_identity": acc.safety_identity}
         try:
             from vati.app.service import build_adapter
-            adapter = build_adapter(acc, r)
-            if st.deriv_connector and acc.broker == "DERIV":
-                from vati.execution.transports.deriv_ws import DerivWebSocketTransport
-                adapter.transport = DerivWebSocketTransport(app_id=acc.server or "1089", token_provider=lambda: r.credentials(alias).get("DERIV_API_TOKEN", ""), connector=st.deriv_connector)
+            adapter = build_adapter(acc, r, deriv_connector=st.deriv_connector)
             if st.ctrader_transport_factory and acc.broker == "CTRADER":
                 adapter.transport = st.ctrader_transport_factory(not acc.demo)
             state = adapter.sync_account()
@@ -196,6 +401,7 @@ def build_account_handlers(st: AccountControlSettings) -> dict[str, Callable[[di
 
     def cmd_deriv_create_demo(a: dict) -> dict:
         alias = _alias(a)
+        require_new_alias(alias)
         app_id = str(a.get("app_id") or "1089")
         t = deriv_transport(app_id)
         r = t({"new_account_virtual": 1, "verification_code": str(a["verification_code"]).strip(), "client_password": str(a["client_password"]), "residence": str(a["residence"]).lower(), "type": "trading"})
@@ -205,18 +411,26 @@ def build_account_handlers(st: AccountControlSettings) -> dict[str, Callable[[di
         token = nav.get("oauth_token")
         if not token:
             raise HTTPException(502, "Deriv did not return an account token")
+        verify_deriv_material(app_id=app_id, token=token, login=str(nav.get("client_id", "")),
+            currency=str(nav.get("currency", "USD")), demo=True, require_trade=True)
         pub = upsert_record(alias, "DERIV", currency=str(nav.get("currency", "USD")), label=str(a.get("label") or f"Deriv demo {nav.get('client_id', '')}"), server=app_id, login=str(nav.get("client_id", "")), demo=True)
         store_secrets(alias, "DERIV", {"DERIV_API_TOKEN": token, "DERIV_APP_ID": app_id})
         return {"account": pub, "client_id": nav.get("client_id"), "currency": nav.get("currency"), "note": "virtual account created; token stored on van-trading-core"}
 
     def cmd_deriv_oauth_link(a: dict) -> dict:
         alias = _alias(a)
+        require_new_alias(alias)
         loginid = str(a.get("loginid", "")).strip().upper()
         token = str(a.get("token", "")).strip()
         if not loginid or not token:
             raise HTTPException(422, "loginid and token required")
-        demo = loginid.startswith("VR")
-        pub = upsert_record(alias, "DERIV", currency=str(a.get("currency") or "USD").upper(), label=str(a.get("label") or f"Deriv {loginid}"), server=str(a.get("app_id") or "1089"), login=loginid, demo=demo, mode="DEMO_TRADER" if demo else "OBSERVE")
+        currency = str(a.get("currency") or "USD").upper()
+        app_id = str(a.get("app_id") or "1089")
+        profile = verify_deriv_material(app_id=app_id, token=token, login=loginid,
+            currency=currency, demo=None, require_trade=False)
+        demo = bool(profile["is_virtual"])
+        mode = "DEMO_TRADER" if demo and "trade" in profile["scopes"] else "OBSERVE"
+        pub = upsert_record(alias, "DERIV", currency=currency, label=str(a.get("label") or f"Deriv {loginid}"), server=app_id, login=loginid, demo=demo, mode=mode)
         store_secrets(alias, "DERIV", {"DERIV_API_TOKEN": token, "DERIV_APP_ID": str(a.get("app_id") or "1089")})
         return {"account": pub}
 
@@ -260,8 +474,9 @@ def build_account_handlers(st: AccountControlSettings) -> dict[str, Callable[[di
 
     def cmd_ctrader_link(a: dict) -> dict:
         alias = _alias(a)
+        require_new_alias(alias)
         ctid = int(a["ctid_trader_account_id"])
-        is_live = bool(a.get("is_live", False))
+        is_live = _boolean(a, "is_live", False)
         pub = upsert_record(alias, "CTRADER", currency=str(a.get("currency") or "USD").upper(), label=str(a.get("label") or f"cTrader {ctid}"), server="live" if is_live else "demo", login=str(ctid), demo=not is_live, mode="DEMO_TRADER" if not is_live else "OBSERVE")
         store_secrets(alias, "CTRADER", {"CTRADER_CLIENT_ID": a["client_id"], "CTRADER_CLIENT_SECRET": a["client_secret"], "CTRADER_ACCESS_TOKEN": a["access_token"], **({"CTRADER_REFRESH_TOKEN": a["refresh_token"]} if a.get("refresh_token") else {})})
         return {"account": pub}
@@ -270,13 +485,85 @@ def build_account_handlers(st: AccountControlSettings) -> dict[str, Callable[[di
     def cmd_mt5_ea_issue_key(a: dict) -> dict:
         alias = _alias(a)
         key = pysecrets.token_hex(32)
-        pub = upsert_record(alias, "MT5_EA", currency=str(a.get("currency") or "USD").upper(), label=str(a.get("label") or f"MT5 {a.get('login')}"), server=str(a.get("server", "")), login=str(a.get("login", "")), demo=bool(a.get("demo", True)))
+        pub = upsert_record(alias, "MT5_EA", currency=str(a.get("currency") or "USD").upper(), label=str(a.get("label") or f"MT5 {a.get('login')}"), server=str(a.get("server", "")), login=str(a.get("login", "")), demo=_boolean(a, "demo", True))
         store_secrets(alias, "MT5_EA", {"BRIDGE_SIGNING_KEY": key})
         return {"account": pub, "signing_key": key, "ea_inputs": {"Alias": alias, "SigningKey": key, "BridgeUrl": os.environ.get("VAN_PUBLIC_HOST", "") and f"https://{os.environ['VAN_PUBLIC_HOST']}"}, "note": "shown once; paste into VanBridgeEA inputs"}
 
-    return {"account_upsert": cmd_account_upsert, "account_credentials": cmd_account_credentials, "account_remove": cmd_account_remove, "account_verify": cmd_account_verify,
+    handlers = {"account_upsert": cmd_account_upsert, "account_credentials": cmd_account_credentials, "account_remove": cmd_account_remove, "account_verify": cmd_account_verify, "account_revision": cmd_account_revision, "account_review":cmd_account_review, "account_operation": cmd_account_operation,
             "deriv_verify_email": cmd_deriv_verify_email, "deriv_create_demo": cmd_deriv_create_demo, "deriv_oauth_link": cmd_deriv_oauth_link, "ctrader_discover": cmd_ctrader_discover,
             "ctrader_oauth_exchange": cmd_ctrader_oauth_exchange, "ctrader_link": cmd_ctrader_link, "mt5_ea_issue_key": cmd_mt5_ea_issue_key}
+
+    def serialize_account_mutation(command, handler):
+        @wraps(handler)
+        def invoke(args):
+            from vati.core.file_lock import exclusive_state_lock
+            alias = _alias(args)
+            path = Path(st.registry_path).resolve()
+            with exclusive_state_lock(path.with_name(path.name + ".operation." + alias)):
+                def check_version():
+                    if "_expected_resource_version" in args:
+                        expected = args["_expected_resource_version"]
+                        actual = cmd_account_revision({"alias": alias})["resource_version"]
+                        if not isinstance(expected, str) or expected != actual:
+                            raise HTTPException(409, "account changed since owner approval; review the current account and approve again")
+                if command not in JOURNALED_COMMANDS or "_native_operation" not in args:
+                    # Internal native handler seams; real Local/HTTP ingress
+                    # separately requires the verified operation context.
+                    if st.operation_ledger:
+                        led = open_operation_ledger()
+                        try:
+                            AccountEffectJournal(led).require_clear_targets(("account:"+alias,))
+                        except AccountEffectError:
+                            raise AccountOperationBlocked() from None
+                        finally:
+                            led.close()
+                    check_version()
+                    return handler(args)
+                intent = operation_intent(command, args)
+                led = open_operation_ledger()
+                try:
+                    journal = AccountEffectJournal(led)
+                    # Known-result reads retain the ORIGINAL version. Never
+                    # rebase a completed request onto today's registry record.
+                    existing = journal.status(intent.operation_id, intent.device_id)
+                    if existing is None:
+                        check_version()
+                    return invoke_account_effect(journal, intent, lambda: handler(args))
+                except AccountEffectError:
+                    raise AccountOperationUnconfirmed(intent.operation_id) from None
+                finally:
+                    led.close()
+        return invoke
+
+    def serialize_retirement(handler):
+        @wraps(handler)
+        def invoke(args):
+            from commander.account_retirement import retirement_scope
+            alias=_alias(args)
+            ledger=open_operation_ledger()
+            def retire():
+                # The unique original journal claim is durable before taking
+                # lease -> alias locks. No ledger transaction spans venue IO.
+                with retirement_scope(st,alias),reg().operation_lock(alias):
+                    if '_expected_resource_version' in args:
+                        if args['_expected_resource_version']!=cmd_account_revision({'alias':alias})['resource_version']:
+                            raise HTTPException(409,'Account changed since owner approval; local connection retained')
+                    return handler(args,native_ledger=ledger)
+            try:
+                if '_native_operation' not in args:return retire()
+                intent=operation_intent('account_remove',args)
+                return invoke_account_effect(AccountEffectJournal(ledger),intent,retire)
+            except AccountEffectError:
+                raise AccountOperationUnconfirmed(args.get('_native_operation',{}).get('operation_id')) from None
+            finally:ledger.close()
+        return invoke
+
+    # Serialize before the registry lookup as well as the file swap. Otherwise
+    # a rotation can read an alias, wait for unlink, then recreate orphan secrets.
+    for command in ACCOUNT_MUTATIONS:
+        handlers[command] = (serialize_retirement(handlers[command]) if command=='account_remove'
+                             else serialize_account_mutation(command, handlers[command]))
+    return handlers
 
 
 SECRET_ARG_KEYS = {"secrets", "client_password", "token", "access_token", "refresh_token", "client_secret", "verification_code", "code"}

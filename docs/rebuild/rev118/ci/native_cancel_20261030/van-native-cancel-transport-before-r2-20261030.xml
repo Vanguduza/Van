@@ -1,0 +1,332 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="14" skipped="0" tests="14" time="0.397" timestamp="2026-10-30T10:38:31.815063+00:00" hostname="c80195087e61"><testcase classname="trading.tests.test_ctrader_cancel_transport" name="test_actual_framed_cancel_keeps_original_order_and_partial_execution" time="0.005"><failure message="AttributeError: 'CtraderTransport' object has no attribute 'call_cancel'">def test_actual_framed_cancel_keeps_original_order_and_partial_execution():
+        peer = CancelPeer(); transport = CtraderTransport(host=DEMO_HOST, connector=peer.connector, timeout_s=.5)
+        checks = []
+        try:
+&gt;           name, body = send(transport, recheck=lambda: checks.append('checked') or True)
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+trading/tests/test_ctrader_cancel_transport.py:32: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+transport = &lt;vati.execution.ctrader.transport.CtraderTransport object at 0x7fee3bf2b200&gt;
+deadline = 2000, clock = &lt;function &lt;lambda&gt; at 0x7fee3c2dd440&gt;
+recheck = &lt;function test_actual_framed_cancel_keeps_original_order_and_partial_execution.&lt;locals&gt;.&lt;lambda&gt; at 0x7fee3bf52160&gt;
+message = 'ProtoOACancelOrderReq'
+
+    def send(transport, *, deadline=2000, clock=lambda: 1000, recheck=lambda: True, message='ProtoOACancelOrderReq'):
+&gt;       return transport.call_cancel(message, {'ctidTraderAccountId': 12345, 'orderId': 71},
+               ^^^^^^^^^^^^^^^^^^^^^
+                                     expires_at_ms=deadline, clock=clock, recheck=recheck)
+E       AttributeError: 'CtraderTransport' object has no attribute 'call_cancel'
+
+trading/tests/test_ctrader_cancel_transport.py:24: AttributeError</failure></testcase><testcase classname="trading.tests.test_ctrader_cancel_transport" name="test_invalid_or_expired_cancel_deadline_cannot_connect_or_send[0]" time="0.004"><failure message="AttributeError: 'CtraderTransport' object has no attribute 'call_cancel'">deadline = 0
+
+    @pytest.mark.parametrize('deadline', [0, -1, True, None, '2000', 1000, 2**63])
+    def test_invalid_or_expired_cancel_deadline_cannot_connect_or_send(deadline):
+        calls = []
+        transport = CtraderTransport(connector=lambda *args: calls.append(args))
+        try:
+&gt;           with pytest.raises(VenueUnavailable): send(transport, deadline=deadline)
+                                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+trading/tests/test_ctrader_cancel_transport.py:46: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+transport = &lt;vati.execution.ctrader.transport.CtraderTransport object at 0x7fee3bf63890&gt;
+deadline = 0, clock = &lt;function &lt;lambda&gt; at 0x7fee3c2dd440&gt;
+recheck = &lt;function &lt;lambda&gt; at 0x7fee3bf50ae0&gt;
+message = 'ProtoOACancelOrderReq'
+
+    def send(transport, *, deadline=2000, clock=lambda: 1000, recheck=lambda: True, message='ProtoOACancelOrderReq'):
+&gt;       return transport.call_cancel(message, {'ctidTraderAccountId': 12345, 'orderId': 71},
+               ^^^^^^^^^^^^^^^^^^^^^
+                                     expires_at_ms=deadline, clock=clock, recheck=recheck)
+E       AttributeError: 'CtraderTransport' object has no attribute 'call_cancel'
+
+trading/tests/test_ctrader_cancel_transport.py:24: AttributeError</failure></testcase><testcase classname="trading.tests.test_ctrader_cancel_transport" name="test_invalid_or_expired_cancel_deadline_cannot_connect_or_send[-1]" time="0.001"><failure message="AttributeError: 'CtraderTransport' object has no attribute 'call_cancel'">deadline = -1
+
+    @pytest.mark.parametrize('deadline', [0, -1, True, None, '2000', 1000, 2**63])
+    def test_invalid_or_expired_cancel_deadline_cannot_connect_or_send(deadline):
+        calls = []
+        transport = CtraderTransport(connector=lambda *args: calls.append(args))
+        try:
+&gt;           with pytest.raises(VenueUnavailable): send(transport, deadline=deadline)
+                                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+trading/tests/test_ctrader_cancel_transport.py:46: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+transport = &lt;vati.execution.ctrader.transport.CtraderTransport object at 0x7fee3bf62c60&gt;
+deadline = -1, clock = &lt;function &lt;lambda&gt; at 0x7fee3c2dd440&gt;
+recheck = &lt;function &lt;lambda&gt; at 0x7fee3bf50ae0&gt;
+message = 'ProtoOACancelOrderReq'
+
+    def send(transport, *, deadline=2000, clock=lambda: 1000, recheck=lambda: True, message='ProtoOACancelOrderReq'):
+&gt;       return transport.call_cancel(message, {'ctidTraderAccountId': 12345, 'orderId': 71},
+               ^^^^^^^^^^^^^^^^^^^^^
+                                     expires_at_ms=deadline, clock=clock, recheck=recheck)
+E       AttributeError: 'CtraderTransport' object has no attribute 'call_cancel'
+
+trading/tests/test_ctrader_cancel_transport.py:24: AttributeError</failure></testcase><testcase classname="trading.tests.test_ctrader_cancel_transport" name="test_invalid_or_expired_cancel_deadline_cannot_connect_or_send[True]" time="0.001"><failure message="AttributeError: 'CtraderTransport' object has no attribute 'call_cancel'">deadline = True
+
+    @pytest.mark.parametrize('deadline', [0, -1, True, None, '2000', 1000, 2**63])
+    def test_invalid_or_expired_cancel_deadline_cannot_connect_or_send(deadline):
+        calls = []
+        transport = CtraderTransport(connector=lambda *args: calls.append(args))
+        try:
+&gt;           with pytest.raises(VenueUnavailable): send(transport, deadline=deadline)
+                                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+trading/tests/test_ctrader_cancel_transport.py:46: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+transport = &lt;vati.execution.ctrader.transport.CtraderTransport object at 0x7fee3bf62bd0&gt;
+deadline = True, clock = &lt;function &lt;lambda&gt; at 0x7fee3c2dd440&gt;
+recheck = &lt;function &lt;lambda&gt; at 0x7fee3bf50ae0&gt;
+message = 'ProtoOACancelOrderReq'
+
+    def send(transport, *, deadline=2000, clock=lambda: 1000, recheck=lambda: True, message='ProtoOACancelOrderReq'):
+&gt;       return transport.call_cancel(message, {'ctidTraderAccountId': 12345, 'orderId': 71},
+               ^^^^^^^^^^^^^^^^^^^^^
+                                     expires_at_ms=deadline, clock=clock, recheck=recheck)
+E       AttributeError: 'CtraderTransport' object has no attribute 'call_cancel'
+
+trading/tests/test_ctrader_cancel_transport.py:24: AttributeError</failure></testcase><testcase classname="trading.tests.test_ctrader_cancel_transport" name="test_invalid_or_expired_cancel_deadline_cannot_connect_or_send[None]" time="0.001"><failure message="AttributeError: 'CtraderTransport' object has no attribute 'call_cancel'">deadline = None
+
+    @pytest.mark.parametrize('deadline', [0, -1, True, None, '2000', 1000, 2**63])
+    def test_invalid_or_expired_cancel_deadline_cannot_connect_or_send(deadline):
+        calls = []
+        transport = CtraderTransport(connector=lambda *args: calls.append(args))
+        try:
+&gt;           with pytest.raises(VenueUnavailable): send(transport, deadline=deadline)
+                                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+trading/tests/test_ctrader_cancel_transport.py:46: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+transport = &lt;vati.execution.ctrader.transport.CtraderTransport object at 0x7fee3bf94ef0&gt;
+deadline = None, clock = &lt;function &lt;lambda&gt; at 0x7fee3c2dd440&gt;
+recheck = &lt;function &lt;lambda&gt; at 0x7fee3bf50ae0&gt;
+message = 'ProtoOACancelOrderReq'
+
+    def send(transport, *, deadline=2000, clock=lambda: 1000, recheck=lambda: True, message='ProtoOACancelOrderReq'):
+&gt;       return transport.call_cancel(message, {'ctidTraderAccountId': 12345, 'orderId': 71},
+               ^^^^^^^^^^^^^^^^^^^^^
+                                     expires_at_ms=deadline, clock=clock, recheck=recheck)
+E       AttributeError: 'CtraderTransport' object has no attribute 'call_cancel'
+
+trading/tests/test_ctrader_cancel_transport.py:24: AttributeError</failure></testcase><testcase classname="trading.tests.test_ctrader_cancel_transport" name="test_invalid_or_expired_cancel_deadline_cannot_connect_or_send[2000]" time="0.001"><failure message="AttributeError: 'CtraderTransport' object has no attribute 'call_cancel'">deadline = '2000'
+
+    @pytest.mark.parametrize('deadline', [0, -1, True, None, '2000', 1000, 2**63])
+    def test_invalid_or_expired_cancel_deadline_cannot_connect_or_send(deadline):
+        calls = []
+        transport = CtraderTransport(connector=lambda *args: calls.append(args))
+        try:
+&gt;           with pytest.raises(VenueUnavailable): send(transport, deadline=deadline)
+                                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+trading/tests/test_ctrader_cancel_transport.py:46: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+transport = &lt;vati.execution.ctrader.transport.CtraderTransport object at 0x7fee3bf95dc0&gt;
+deadline = '2000', clock = &lt;function &lt;lambda&gt; at 0x7fee3c2dd440&gt;
+recheck = &lt;function &lt;lambda&gt; at 0x7fee3bf50ae0&gt;
+message = 'ProtoOACancelOrderReq'
+
+    def send(transport, *, deadline=2000, clock=lambda: 1000, recheck=lambda: True, message='ProtoOACancelOrderReq'):
+&gt;       return transport.call_cancel(message, {'ctidTraderAccountId': 12345, 'orderId': 71},
+               ^^^^^^^^^^^^^^^^^^^^^
+                                     expires_at_ms=deadline, clock=clock, recheck=recheck)
+E       AttributeError: 'CtraderTransport' object has no attribute 'call_cancel'
+
+trading/tests/test_ctrader_cancel_transport.py:24: AttributeError</failure></testcase><testcase classname="trading.tests.test_ctrader_cancel_transport" name="test_invalid_or_expired_cancel_deadline_cannot_connect_or_send[1000]" time="0.001"><failure message="AttributeError: 'CtraderTransport' object has no attribute 'call_cancel'">deadline = 1000
+
+    @pytest.mark.parametrize('deadline', [0, -1, True, None, '2000', 1000, 2**63])
+    def test_invalid_or_expired_cancel_deadline_cannot_connect_or_send(deadline):
+        calls = []
+        transport = CtraderTransport(connector=lambda *args: calls.append(args))
+        try:
+&gt;           with pytest.raises(VenueUnavailable): send(transport, deadline=deadline)
+                                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+trading/tests/test_ctrader_cancel_transport.py:46: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+transport = &lt;vati.execution.ctrader.transport.CtraderTransport object at 0x7fee3bf968a0&gt;
+deadline = 1000, clock = &lt;function &lt;lambda&gt; at 0x7fee3c2dd440&gt;
+recheck = &lt;function &lt;lambda&gt; at 0x7fee3bf50ae0&gt;
+message = 'ProtoOACancelOrderReq'
+
+    def send(transport, *, deadline=2000, clock=lambda: 1000, recheck=lambda: True, message='ProtoOACancelOrderReq'):
+&gt;       return transport.call_cancel(message, {'ctidTraderAccountId': 12345, 'orderId': 71},
+               ^^^^^^^^^^^^^^^^^^^^^
+                                     expires_at_ms=deadline, clock=clock, recheck=recheck)
+E       AttributeError: 'CtraderTransport' object has no attribute 'call_cancel'
+
+trading/tests/test_ctrader_cancel_transport.py:24: AttributeError</failure></testcase><testcase classname="trading.tests.test_ctrader_cancel_transport" name="test_invalid_or_expired_cancel_deadline_cannot_connect_or_send[9223372036854775808]" time="0.001"><failure message="AttributeError: 'CtraderTransport' object has no attribute 'call_cancel'">deadline = 9223372036854775808
+
+    @pytest.mark.parametrize('deadline', [0, -1, True, None, '2000', 1000, 2**63])
+    def test_invalid_or_expired_cancel_deadline_cannot_connect_or_send(deadline):
+        calls = []
+        transport = CtraderTransport(connector=lambda *args: calls.append(args))
+        try:
+&gt;           with pytest.raises(VenueUnavailable): send(transport, deadline=deadline)
+                                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+trading/tests/test_ctrader_cancel_transport.py:46: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+transport = &lt;vati.execution.ctrader.transport.CtraderTransport object at 0x7fee3bf97860&gt;
+deadline = 9223372036854775808, clock = &lt;function &lt;lambda&gt; at 0x7fee3c2dd440&gt;
+recheck = &lt;function &lt;lambda&gt; at 0x7fee3bf50ae0&gt;
+message = 'ProtoOACancelOrderReq'
+
+    def send(transport, *, deadline=2000, clock=lambda: 1000, recheck=lambda: True, message='ProtoOACancelOrderReq'):
+&gt;       return transport.call_cancel(message, {'ctidTraderAccountId': 12345, 'orderId': 71},
+               ^^^^^^^^^^^^^^^^^^^^^
+                                     expires_at_ms=deadline, clock=clock, recheck=recheck)
+E       AttributeError: 'CtraderTransport' object has no attribute 'call_cancel'
+
+trading/tests/test_ctrader_cancel_transport.py:24: AttributeError</failure></testcase><testcase classname="trading.tests.test_ctrader_cancel_transport" name="test_cancel_clock_and_authority_are_rechecked_after_send_lock" time="0.001"><failure message="AttributeError: 'CtraderTransport' object has no attribute 'call_cancel'">def test_cancel_clock_and_authority_are_rechecked_after_send_lock():
+        peer = CancelPeer(); transport = CtraderTransport(host=DEMO_HOST, connector=peer.connector, timeout_s=.5)
+        clock = {'ms': 1000}; original = transport._send_guard
+        @contextmanager
+        def delayed():
+            with original():
+                clock['ms'] = 2000
+                yield
+        transport._send_guard = delayed
+        try:
+&gt;           with pytest.raises(VenueUnavailable): send(transport, clock=lambda: clock['ms'])
+                                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+trading/tests/test_ctrader_cancel_transport.py:61: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+transport = &lt;vati.execution.ctrader.transport.CtraderTransport object at 0x7fee3bf97260&gt;
+deadline = 2000
+clock = &lt;function test_cancel_clock_and_authority_are_rechecked_after_send_lock.&lt;locals&gt;.&lt;lambda&gt; at 0x7fee3bf76b60&gt;
+recheck = &lt;function &lt;lambda&gt; at 0x7fee3bf50ae0&gt;
+message = 'ProtoOACancelOrderReq'
+
+    def send(transport, *, deadline=2000, clock=lambda: 1000, recheck=lambda: True, message='ProtoOACancelOrderReq'):
+&gt;       return transport.call_cancel(message, {'ctidTraderAccountId': 12345, 'orderId': 71},
+               ^^^^^^^^^^^^^^^^^^^^^
+                                     expires_at_ms=deadline, clock=clock, recheck=recheck)
+E       AttributeError: 'CtraderTransport' object has no attribute 'call_cancel'
+
+trading/tests/test_ctrader_cancel_transport.py:24: AttributeError</failure></testcase><testcase classname="trading.tests.test_ctrader_cancel_transport" name="test_cancel_authority_change_at_send_prevents_the_native_frame" time="0.001"><failure message="AttributeError: 'CtraderTransport' object has no attribute 'call_cancel'">def test_cancel_authority_change_at_send_prevents_the_native_frame():
+        peer = CancelPeer(); transport = CtraderTransport(host=DEMO_HOST, connector=peer.connector, timeout_s=.5)
+        checks = []
+        def recheck():
+            checks.append(1)
+            return len(checks) == 1
+        try:
+&gt;           with pytest.raises(VenueUnavailable): send(transport, recheck=recheck)
+                                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+trading/tests/test_ctrader_cancel_transport.py:73: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+transport = &lt;vati.execution.ctrader.transport.CtraderTransport object at 0x7fee3bf8c560&gt;
+deadline = 2000, clock = &lt;function &lt;lambda&gt; at 0x7fee3c2dd440&gt;
+recheck = &lt;function test_cancel_authority_change_at_send_prevents_the_native_frame.&lt;locals&gt;.recheck at 0x7fee3bf76980&gt;
+message = 'ProtoOACancelOrderReq'
+
+    def send(transport, *, deadline=2000, clock=lambda: 1000, recheck=lambda: True, message='ProtoOACancelOrderReq'):
+&gt;       return transport.call_cancel(message, {'ctidTraderAccountId': 12345, 'orderId': 71},
+               ^^^^^^^^^^^^^^^^^^^^^
+                                     expires_at_ms=deadline, clock=clock, recheck=recheck)
+E       AttributeError: 'CtraderTransport' object has no attribute 'call_cancel'
+
+trading/tests/test_ctrader_cancel_transport.py:24: AttributeError</failure></testcase><testcase classname="trading.tests.test_ctrader_cancel_transport" name="test_cancel_transport_cannot_be_repurposed_for_another_financial_operation[ProtoOANewOrderReq]" time="0.001"><failure message="AttributeError: 'CtraderTransport' object has no attribute 'call_cancel'">message = 'ProtoOANewOrderReq'
+
+    @pytest.mark.parametrize('message', ['ProtoOANewOrderReq','ProtoOAAmendOrderReq','ProtoOAClosePositionReq'])
+    def test_cancel_transport_cannot_be_repurposed_for_another_financial_operation(message):
+        calls = []; transport = CtraderTransport(connector=lambda *args: calls.append(args))
+        try:
+&gt;           with pytest.raises(VenueUnavailable): send(transport, message=message)
+                                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+trading/tests/test_ctrader_cancel_transport.py:82: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+transport = &lt;vati.execution.ctrader.transport.CtraderTransport object at 0x7fee3bf97410&gt;
+deadline = 2000, clock = &lt;function &lt;lambda&gt; at 0x7fee3c2dd440&gt;
+recheck = &lt;function &lt;lambda&gt; at 0x7fee3bf50ae0&gt;, message = 'ProtoOANewOrderReq'
+
+    def send(transport, *, deadline=2000, clock=lambda: 1000, recheck=lambda: True, message='ProtoOACancelOrderReq'):
+&gt;       return transport.call_cancel(message, {'ctidTraderAccountId': 12345, 'orderId': 71},
+               ^^^^^^^^^^^^^^^^^^^^^
+                                     expires_at_ms=deadline, clock=clock, recheck=recheck)
+E       AttributeError: 'CtraderTransport' object has no attribute 'call_cancel'
+
+trading/tests/test_ctrader_cancel_transport.py:24: AttributeError</failure></testcase><testcase classname="trading.tests.test_ctrader_cancel_transport" name="test_cancel_transport_cannot_be_repurposed_for_another_financial_operation[ProtoOAAmendOrderReq]" time="0.005"><failure message="AttributeError: 'CtraderTransport' object has no attribute 'call_cancel'">message = 'ProtoOAAmendOrderReq'
+
+    @pytest.mark.parametrize('message', ['ProtoOANewOrderReq','ProtoOAAmendOrderReq','ProtoOAClosePositionReq'])
+    def test_cancel_transport_cannot_be_repurposed_for_another_financial_operation(message):
+        calls = []; transport = CtraderTransport(connector=lambda *args: calls.append(args))
+        try:
+&gt;           with pytest.raises(VenueUnavailable): send(transport, message=message)
+                                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+trading/tests/test_ctrader_cancel_transport.py:82: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+transport = &lt;vati.execution.ctrader.transport.CtraderTransport object at 0x7fee3c251df0&gt;
+deadline = 2000, clock = &lt;function &lt;lambda&gt; at 0x7fee3c2dd440&gt;
+recheck = &lt;function &lt;lambda&gt; at 0x7fee3bf50ae0&gt;
+message = 'ProtoOAAmendOrderReq'
+
+    def send(transport, *, deadline=2000, clock=lambda: 1000, recheck=lambda: True, message='ProtoOACancelOrderReq'):
+&gt;       return transport.call_cancel(message, {'ctidTraderAccountId': 12345, 'orderId': 71},
+               ^^^^^^^^^^^^^^^^^^^^^
+                                     expires_at_ms=deadline, clock=clock, recheck=recheck)
+E       AttributeError: 'CtraderTransport' object has no attribute 'call_cancel'
+
+trading/tests/test_ctrader_cancel_transport.py:24: AttributeError</failure></testcase><testcase classname="trading.tests.test_ctrader_cancel_transport" name="test_cancel_transport_cannot_be_repurposed_for_another_financial_operation[ProtoOAClosePositionReq]" time="0.001"><failure message="AttributeError: 'CtraderTransport' object has no attribute 'call_cancel'">message = 'ProtoOAClosePositionReq'
+
+    @pytest.mark.parametrize('message', ['ProtoOANewOrderReq','ProtoOAAmendOrderReq','ProtoOAClosePositionReq'])
+    def test_cancel_transport_cannot_be_repurposed_for_another_financial_operation(message):
+        calls = []; transport = CtraderTransport(connector=lambda *args: calls.append(args))
+        try:
+&gt;           with pytest.raises(VenueUnavailable): send(transport, message=message)
+                                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+trading/tests/test_ctrader_cancel_transport.py:82: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+transport = &lt;vati.execution.ctrader.transport.CtraderTransport object at 0x7fee3c276b40&gt;
+deadline = 2000, clock = &lt;function &lt;lambda&gt; at 0x7fee3c2dd440&gt;
+recheck = &lt;function &lt;lambda&gt; at 0x7fee3bf50ae0&gt;
+message = 'ProtoOAClosePositionReq'
+
+    def send(transport, *, deadline=2000, clock=lambda: 1000, recheck=lambda: True, message='ProtoOACancelOrderReq'):
+&gt;       return transport.call_cancel(message, {'ctidTraderAccountId': 12345, 'orderId': 71},
+               ^^^^^^^^^^^^^^^^^^^^^
+                                     expires_at_ms=deadline, clock=clock, recheck=recheck)
+E       AttributeError: 'CtraderTransport' object has no attribute 'call_cancel'
+
+trading/tests/test_ctrader_cancel_transport.py:24: AttributeError</failure></testcase><testcase classname="trading.tests.test_ctrader_cancel_transport" name="test_market_only_read_transport_cannot_inherit_cancel_capability" time="0.001"><failure message="AttributeError: 'CtraderReadTransport' object has no attribute 'call_cancel'">def test_market_only_read_transport_cannot_inherit_cancel_capability():
+        calls = []
+        transport = CtraderReadTransport(host=DEMO_HOST, connector=lambda *args: calls.append(args),
+                                         operation_timeout_s=1)
+        try:
+&gt;           with pytest.raises(VenueUnavailable): send(transport)
+                                                  ^^^^^^^^^^^^^^^
+
+trading/tests/test_ctrader_cancel_transport.py:92: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+transport = &lt;vati.execution.ctrader.transport.CtraderReadTransport object at 0x7fee3c276f60&gt;
+deadline = 2000, clock = &lt;function &lt;lambda&gt; at 0x7fee3c2dd440&gt;
+recheck = &lt;function &lt;lambda&gt; at 0x7fee3bf50ae0&gt;
+message = 'ProtoOACancelOrderReq'
+
+    def send(transport, *, deadline=2000, clock=lambda: 1000, recheck=lambda: True, message='ProtoOACancelOrderReq'):
+&gt;       return transport.call_cancel(message, {'ctidTraderAccountId': 12345, 'orderId': 71},
+               ^^^^^^^^^^^^^^^^^^^^^
+                                     expires_at_ms=deadline, clock=clock, recheck=recheck)
+E       AttributeError: 'CtraderReadTransport' object has no attribute 'call_cancel'
+
+trading/tests/test_ctrader_cancel_transport.py:24: AttributeError</failure></testcase></testsuite></testsuites>

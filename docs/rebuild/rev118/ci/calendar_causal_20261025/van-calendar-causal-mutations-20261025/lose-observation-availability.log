@@ -1,0 +1,80 @@
+.......F..............F....F.......                                      [100%]
+=================================== FAILURES ===================================
+_______ test_ledger_availability_is_the_actual_declared_observation_time _______
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-142/test_ledger_availability_is_th0')
+
+    def test_ledger_availability_is_the_actual_declared_observation_time(tmp_path):
+        ledger=Ledger(tmp_path/'calendar.sqlite')
+        try:
+            recorder=CalendarRecorder(ledger=ledger);scheduled=_sched(recorder)
+            observed=recorder.observe(_obs(scheduled.event_key,'a','1',SCHED_MS+3000))
+            event=next(ledger.iter(EventKind.CALENDAR_RELEASE))
+>           assert event.received_time_ms==observed.observed_ms
+E           AssertionError: assert 1700000000000 == 1700000003000
+E            +  where 1700000000000 = Event(kind=<EventKind.CALENDAR_RELEASE: 'CALENDAR_RELEASE'>, producer='vati-calendar-recorder', event_time_ms=17000000...e_ms=None, correlation_id='NFP:1700000000000', hash='06c548f44828ca0de99eef9db2e2cfa28a7a28524ab0ff6b15be331294d41310').received_time_ms
+E            +  and   1700000003000 = ReleaseObservation(event_key='NFP:1700000000000', source='a', actual=Decimal('1'), observed_ms=1700000003000, released_ms=1700000000000, forecast=None, previous=None, revision_of='').observed_ms
+
+trading/tests/test_calendar_causal_boundaries.py:68: AssertionError
+_ test_cold_recovery_reads_original_sealed_records_without_another_publication _
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-142/test_cold_recovery_reads_origi0')
+
+    def test_cold_recovery_reads_original_sealed_records_without_another_publication(tmp_path):
+        path=tmp_path/'calendar.sqlite';ledger=Ledger(path)
+        recorder=CalendarRecorder(ledger=ledger);scheduled=_sched(recorder)
+        for source in ('a','b'):recorder.observe(_obs(scheduled.event_key,source,'1',SCHED_MS+500))
+        before=ledger.head();ledger.close();cold=Ledger(path)
+        try:
+            recovered=CalendarRecorder.from_ledger(cold)
+            assert recovered.record(scheduled.event_key,now_ms=SCHED_MS+100).agreed_actual is None
+            result=recovered.record(scheduled.event_key,now_ms=SCHED_MS+500)
+            assert result.status is ReleaseStatus.VERIFIED and result.agreed_actual==Decimal('1')
+            assert recovered.report()['recovered_from_ledger'] is True
+>           assert recovered.report()['legacy_envelope_availability_unqualified']==[]
+E           AssertionError: assert ['e6ee6bee9b5...996cda1c9256'] == []
+E             
+E             Left contains 2 more items, first extra item: 'e6ee6bee9b52f3cd07812063319d8ea2'
+E             Use -v to get more diff
+
+trading/tests/test_calendar_causal_boundaries.py:197: AssertionError
+_ test_actual_calendar_commit_reply_loss_is_recovered_from_original_backend[sqlite] _
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-142/test_actual_calendar_commit_re0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7ff9bd2ecc50>
+backend = 'sqlite'
+
+    @pytest.mark.parametrize('backend',['sqlite','postgres'])
+    def test_actual_calendar_commit_reply_loss_is_recovered_from_original_backend(tmp_path,monkeypatch,backend):
+        factory=ledger_factory(tmp_path,backend);ledger=factory()
+        try:
+            recorder=CalendarRecorder(ledger=ledger);scheduled=_sched(recorder)
+            observed=_obs(scheduled.event_key,'original-publisher','1',SCHED_MS+100)
+            atomic=ledger.atomic
+            @contextmanager
+            def commit_then_lose_reply():
+                outer=ledger._atomic_depth==0 if backend=='postgres' else not ledger._conn.in_transaction
+                with atomic():yield ledger
+                if outer:raise OSError('fixture lost original committed calendar reply')
+            with monkeypatch.context() as patch:
+                patch.setattr(ledger,'atomic',commit_then_lose_reply)
+                with pytest.raises(OSError,match='committed calendar reply'):recorder.observe(observed)
+            head=ledger.head();recorder.observe(observed)
+            assert ledger.count(EventKind.CALENDAR_RELEASE)==1 and ledger.head()==head
+        finally:ledger.close()
+        cold=factory()
+        try:
+            recovered=CalendarRecorder.from_ledger(cold)
+            assert recovered.records()[0].agreed_actual==Decimal('1')
+            event=next(cold.iter(EventKind.CALENDAR_RELEASE))
+>           assert event.received_time_ms==observed.observed_ms and cold.verify_chain()[0]
+E           AssertionError: assert (1700000000000 == 1700000000100)
+E            +  where 1700000000000 = Event(kind=<EventKind.CALENDAR_RELEASE: 'CALENDAR_RELEASE'>, producer='vati-calendar-recorder', event_time_ms=17000000...e_ms=None, correlation_id='NFP:1700000000000', hash='28e4dcd1f9da621bad90b4d38d53347afee820a3491ad0c7f839bd326ff94b43').received_time_ms
+E            +  and   1700000000100 = ReleaseObservation(event_key='NFP:1700000000000', source='original-publisher', actual=Decimal('1'), observed_ms=1700000000100, released_ms=1700000000000, forecast=None, previous=None, revision_of='').observed_ms
+
+trading/tests/test_calendar_causal_boundaries.py:294: AssertionError
+=========================== short test summary info ============================
+FAILED trading/tests/test_calendar_causal_boundaries.py::test_ledger_availability_is_the_actual_declared_observation_time
+FAILED trading/tests/test_calendar_causal_boundaries.py::test_cold_recovery_reads_original_sealed_records_without_another_publication
+FAILED trading/tests/test_calendar_causal_boundaries.py::test_actual_calendar_commit_reply_loss_is_recovered_from_original_backend[sqlite]
+3 failed, 32 passed, 2 deselected in 0.53s

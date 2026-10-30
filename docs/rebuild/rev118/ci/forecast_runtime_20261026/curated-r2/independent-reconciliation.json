@@ -1,0 +1,18 @@
+{
+  "status": "INDEPENDENT_SOURCE_READBACK_PASS_NOT_ADMISSION",
+  "original_receipt_sha256": "81a8c3ad8a7b79e0d531b22d54fd0759c1fc4deaf14524ae4ea5e273f63a9240",
+  "cleanup": [
+    {
+      "role": "research",
+      "original_name": "van-ml004-4f8a695927404c4cbba637419ff88f07",
+      "absent": true
+    },
+    {
+      "role": "inference",
+      "original_name": "van-ml004-07294a4d49874f059579884f5576959e",
+      "absent": true
+    }
+  ],
+  "source_matches_recorded_snapshot": true,
+  "controller_changed_after_run": "Cleanup confirmation/source-tamper failure handling added; separately covered by simulated fault controls and pending exact hosted execution."
+}

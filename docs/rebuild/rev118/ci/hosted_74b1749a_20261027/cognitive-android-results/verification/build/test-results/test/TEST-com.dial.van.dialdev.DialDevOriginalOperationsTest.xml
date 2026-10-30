@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.dial.van.dialdev.DialDevOriginalOperationsTest" tests="14" skipped="0" failures="0" errors="0" timestamp="2026-10-27T08:07:58" hostname="runnervmtai0g" time="0.228">
+  <properties/>
+  <testcase name="same task name in another project has a different scope()" classname="com.dial.van.dialdev.DialDevOriginalOperationsTest" time="0.004"/>
+  <testcase name="failed or corrupt persistence refuses new dispatch()" classname="com.dial.van.dialdev.DialDevOriginalOperationsTest" time="0.001"/>
+  <testcase name="an applied label without its native acknowledgement cannot settle an original()" classname="com.dial.van.dialdev.DialDevOriginalOperationsTest" time="0.004"/>
+  <testcase name="caller mutable parameters cannot change a prepared request()" classname="com.dial.van.dialdev.DialDevOriginalOperationsTest" time="0.0"/>
+  <testcase name="cold retry keeps exact original revision parameters and key()" classname="com.dial.van.dialdev.DialDevOriginalOperationsTest" time="0.001"/>
+  <testcase name="changed parameters cannot replace an unknown original()" classname="com.dial.van.dialdev.DialDevOriginalOperationsTest" time="0.001"/>
+  <testcase name="two client instances cannot mint separate original operations()" classname="com.dial.van.dialdev.DialDevOriginalOperationsTest" time="0.203"/>
+  <testcase name="unknown native timeout reason does not become proven refusal()" classname="com.dial.van.dialdev.DialDevOriginalOperationsTest" time="0.001"/>
+  <testcase name="an old terminal observer cannot erase a newer operation()" classname="com.dial.van.dialdev.DialDevOriginalOperationsTest" time="0.002"/>
+  <testcase name="a separately authorized protective pause stays available without replacing the original()" classname="com.dial.van.dialdev.DialDevOriginalOperationsTest" time="0.003"/>
+  <testcase name="different native decisions keep different original requests()" classname="com.dial.van.dialdev.DialDevOriginalOperationsTest" time="0.001"/>
+  <testcase name="distinct typed controls preserve independent originals and native authorization()" classname="com.dial.van.dialdev.DialDevOriginalOperationsTest" time="0.0"/>
+  <testcase name="malformed native freshness cannot retire an original control()" classname="com.dial.van.dialdev.DialDevOriginalOperationsTest" time="0.0"/>
+  <testcase name="accepted identity survives restart and foreign readbacks never clear it()" classname="com.dial.van.dialdev.DialDevOriginalOperationsTest" time="0.002"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

@@ -1,0 +1,19 @@
+..................................F......                                [100%]
+=================================== FAILURES ===================================
+_ test_changed_file_capacity_policy_gets_a_new_health_receipt_without_rewriting_history _
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-250/test_changed_file_capacity_pol0')
+ledger = <vati.core.ledger.Ledger object at 0x7f602c0b1730>
+
+    def test_changed_file_capacity_policy_gets_a_new_health_receipt_without_rewriting_history(tmp_path,ledger):
+        path=tmp_path/'news.json';path.write_text(json.dumps([row()]));value=service('account',ledger,configured(path)|{'max_rows':100})
+        news=build(value,'account');original=health_records(ledger)[0];first=news.source_health['source_ref']
+        value.cfg.news['max_rows']=101
+        result=value.refresh_news(NOW+1)
+>       assert result['source_health']['source_ref']!=first
+E       AssertionError: assert 'c3f7ef428c2112b3924d3f56e74bbfd34ffcac9b5c92db01f31bdb57d4bc4703' != 'c3f7ef428c2112b3924d3f56e74bbfd34ffcac9b5c92db01f31bdb57d4bc4703'
+
+trading/tests/test_news_runtime_health.py:261: AssertionError
+=========================== short test summary info ============================
+FAILED trading/tests/test_news_runtime_health.py::test_changed_file_capacity_policy_gets_a_new_health_receipt_without_rewriting_history
+1 failed, 40 passed, 2 deselected in 1.15s

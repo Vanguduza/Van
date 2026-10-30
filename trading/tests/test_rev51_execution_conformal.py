@@ -105,21 +105,20 @@ def test_size_within_the_participation_cap_is_worked_in_one():
 
 
 def test_size_beyond_the_cap_is_sliced_and_the_total_is_preserved():
-    s = _select(quantity=D("1.00"), liquidity=LiquidityView(displayed_size=D("0.5")))
+    s = _select(quantity=D("0.96"), liquidity=LiquidityView(displayed_size=D("0.5")))
     assert s.slices > 1
-    assert s.total_quantity == D("1.00")
+    assert s.total_quantity == D("0.96")
 
 
 def test_slicing_is_bounded_because_more_slices_start_signalling():
-    s = _select(quantity=D("90"), liquidity=LiquidityView(displayed_size=D("0.04")))
-    assert s.slices <= MAX_SLICES
+    with pytest.raises(StyleRefused, match="participation"):
+        _select(quantity=D("90"), liquidity=LiquidityView(displayed_size=D("0.04")))
 
 
-def test_the_slice_count_comes_down_until_the_lot_step_can_express_it():
-    s = _select(quantity=D("0.03"), liquidity=LiquidityView(displayed_size=D("0.01")),
+def test_a_lot_larger_than_the_participation_cap_is_refused():
+    with pytest.raises(StyleRefused, match="participation"):
+        _select(quantity=D("0.03"), liquidity=LiquidityView(displayed_size=D("0.01")),
                 route=_route(_contract(volume_step=D("0.01"), volume_min=D("0.01"))))
-    assert s.slice_quantity >= D("0.01")
-    assert s.total_quantity == D("0.03")
 
 
 def test_a_size_the_venue_cannot_express_at_all_is_refused():

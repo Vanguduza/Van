@@ -1,0 +1,48 @@
+...................................FF....................                [100%]
+=================================== FAILURES ===================================
+___________ test_resting_cycle_entry_keeps_original_stop_risk[False] ___________
+
+eurusd = SymbolContract(symbol='EURUSD', venue='mt5', base_currency='EUR', quote_currency='USD', account_currency='USD', contra...=Decimal('0'), max_adv_participation=Decimal('0.10'), liquidity_haircut=Decimal('0'), round_trip_cost_pct=Decimal('0'))
+hostile = False
+
+    @pytest.mark.parametrize('hostile', [False, True])
+    def test_resting_cycle_entry_keeps_original_stop_risk(eurusd, hostile):
+        from vati.risk.heat import position_risk
+        row = {'symbol': 'EURUSD', 'direction': Direction.LONG, 'pending': True,
+               'pending_quantity': Decimal('1'), 'entry': Decimal('1.10010'), 'stop': Decimal('1.09790')}
+        fixture = projection_fixture(eurusd, None, pending={'original-entry': row})
+        with localcontext() as caller:
+            if hostile:
+                caller.prec = 1
+                caller.rounding = ROUND_DOWN
+            projected = DecisionCycle._open_positions(fixture)
+>           assert len(projected) == 1 and projected[0].stop_terms is not None
+E           assert (0 == 1)
+E            +  where 0 = len(())
+
+trading/tests/test_position_risk_original_terms.py:181: AssertionError
+___________ test_resting_cycle_entry_keeps_original_stop_risk[True] ____________
+
+eurusd = SymbolContract(symbol='EURUSD', venue='mt5', base_currency='EUR', quote_currency='USD', account_currency='USD', contra...=Decimal('0'), max_adv_participation=Decimal('0.10'), liquidity_haircut=Decimal('0'), round_trip_cost_pct=Decimal('0'))
+hostile = True
+
+    @pytest.mark.parametrize('hostile', [False, True])
+    def test_resting_cycle_entry_keeps_original_stop_risk(eurusd, hostile):
+        from vati.risk.heat import position_risk
+        row = {'symbol': 'EURUSD', 'direction': Direction.LONG, 'pending': True,
+               'pending_quantity': Decimal('1'), 'entry': Decimal('1.10010'), 'stop': Decimal('1.09790')}
+        fixture = projection_fixture(eurusd, None, pending={'original-entry': row})
+        with localcontext() as caller:
+            if hostile:
+                caller.prec = 1
+                caller.rounding = ROUND_DOWN
+            projected = DecisionCycle._open_positions(fixture)
+>           assert len(projected) == 1 and projected[0].stop_terms is not None
+E           assert (0 == 1)
+E            +  where 0 = len(())
+
+trading/tests/test_position_risk_original_terms.py:181: AssertionError
+=========================== short test summary info ============================
+FAILED trading/tests/test_position_risk_original_terms.py::test_resting_cycle_entry_keeps_original_stop_risk[False]
+FAILED trading/tests/test_position_risk_original_terms.py::test_resting_cycle_entry_keeps_original_stop_risk[True]
+2 failed, 55 passed in 1.94s

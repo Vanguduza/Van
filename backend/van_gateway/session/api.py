@@ -14,24 +14,31 @@ purpose; sharing the envelope and the router is the point.
 from __future__ import annotations
 
 import asyncio
+import base64
+import binascii
 import json
 import time
 from typing import Any
 
+import anyio
 from fastapi import APIRouter, HTTPException, Request, WebSocket, WebSocketDisconnect
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, Field
 
-from van_gateway.mtls.transport import mtls_device_id
+from van_gateway.auth.device_binding import DeviceBindingError
+from van_gateway.command.nonce import CommandNonceService, NonceReplay
+
+from van_gateway.mtls.transport import mtls_certificate_serial, mtls_device_id
 from van_gateway.observability import instruments
 from van_gateway.session.models import (
     Direction,
     PROTOCOL_VERSION,
     PathClass,
     SessionEnvelope,
+    SessionState,
     TransportPathDescriptor,
 )
-from van_gateway.session.router import SessionRouter
+from van_gateway.session.router import REJECT_RESULT_PENDING, SessionRouter
 from van_gateway.session.service import SessionError, VanHermesSessionService
 
 SESSION_PREFIX = "/v1/session"
@@ -53,6 +60,7 @@ def is_session_owner_route(path: str) -> bool:
 
 
 class OpenSessionBody(BaseModel):
+    open_request_id: str | None = Field(default=None, min_length=16, max_length=128, pattern=r"^[A-Za-z0-9_-]+$")
     path_id: str = "primary"
     route_id: str = "default"
     protocol: str = "WSS"
@@ -98,6 +106,8 @@ def build_session_router(
     router: SessionRouter,
     events: Any,
     resume_snapshot: Any | None = None,
+    require_device_binding: bool = False,
+    audit: Any | None = None,
 ) -> APIRouter:
     api = APIRouter(prefix=SESSION_PREFIX, tags=["session"])
 
@@ -130,16 +140,20 @@ def build_session_router(
     @api.post("/open")
     async def open_session(request: Request, body: OpenSessionBody):
         device_id = _device(request)
-        session, path_epoch = await sessions.open(
-            device_id=device_id,
-            path=TransportPathDescriptor(
-                path_id=body.path_id, path_class=body.path_class, protocol=body.protocol,
-                endpoint=f"{SESSION_PREFIX}/ws", route_id=body.route_id,
-                supports_full_duplex=body.path_class is PathClass.A_REALTIME,
-            ),
-        )
+        try:
+            session, path_epoch = await sessions.open(
+                device_id=device_id, open_request_id=body.open_request_id,
+                path=TransportPathDescriptor(
+                    path_id=body.path_id, path_class=body.path_class, protocol=body.protocol,
+                    endpoint=f"{SESSION_PREFIX}/ws", route_id=body.route_id,
+                    supports_full_duplex=body.path_class is PathClass.A_REALTIME,
+                ),
+            )
+        except SessionError as exc:
+            raise HTTPException(status_code=409, detail=exc.reason) from exc
         state, reason = await sessions.continuity(session.van_session_id)
         return {
+            "open_request_id": body.open_request_id,
             "van_session_id": session.van_session_id,
             "session_epoch": session.session_epoch,
             "path_epoch": path_epoch,
@@ -248,7 +262,8 @@ def build_session_router(
         device_id = _device(request)
         routed = await router.route(_envelope(body, device_id))
         if not routed.accepted:
-            status = 409 if routed.refusal in {"session_idempotency_conflict"} else 400
+            status = (503 if routed.refusal == REJECT_RESULT_PENDING else
+                      409 if routed.refusal == "session_idempotency_conflict" else 400)
             raise HTTPException(status_code=status, detail=routed.refusal)
         return {
             "accepted": True,
@@ -320,23 +335,129 @@ def build_session_router(
         if session is None or session.device_id != device.device_id:
             await websocket.close(code=4404)
             return
+        if session.state is SessionState.CLOSED:
+            await websocket.close(code=4404, reason="session_closed")
+            return
+
+        async def binding_identity(*, verify_proof: bool) -> str | None:
+            service = getattr(app.state, "owner_device_bindings", None)
+            if service is None:
+                if require_device_binding:
+                    raise DeviceBindingError("owner_device_binding_unconfigured")
+                return None
+            binding = await service.active()
+            if binding is None:
+                if await service.for_device(device.device_id) is not None:
+                    raise DeviceBindingError("device_binding_revoked")
+                if require_device_binding:
+                    raise DeviceBindingError("device_not_bound")
+                return None
+            if binding.device_id != device.device_id:
+                raise DeviceBindingError("device_not_owner_device")
+            if require_device_binding and not binding.attestation_chain_verified:
+                raise DeviceBindingError("device_attestation_recertification_required")
+            # Only the server's verified certificate scope may substitute for a request
+            # proof. A caller header cannot create it, and strict binding still applies.
+            if not verify_proof or certified == device.device_id:
+                return binding.binding_id
+            signature_b64 = websocket.headers.get("X-Van-Device-Proof", "")
+            issued_at_raw = websocket.headers.get("X-Van-Device-Proof-Issued-At", "")
+            if not signature_b64 or not issued_at_raw:
+                raise DeviceBindingError("device_proof_required")
+            try:
+                signature = base64.b64decode(signature_b64, validate=True)
+                issued_at_ms = int(issued_at_raw)
+            except (ValueError, binascii.Error) as exc:
+                raise DeviceBindingError("device_proof_malformed") from exc
+            await service.require_proof(
+                device_id=device.device_id, signature=signature, method="GET",
+                path=SESSION_PREFIX + "/ws", issued_at_ms=issued_at_ms, body=b"",
+            )
+            try:
+                # The signed timestamp identifies one handshake, regardless of ECDSA
+                # signature encoding. An intercepted proof cannot open a second socket.
+                await CommandNonceService(service.store).consume(
+                    device_id=device.device_id, nonce=f"ws-proof:{issued_at_ms}",
+                    command_id=van_session_id,
+                )
+            except NonceReplay as exc:
+                raise DeviceBindingError("device_proof_replayed") from exc
+            return binding.binding_id
+
+        authority_closed = False
+        authority_close: asyncio.Task | None = None
+
+        async def close_authority(code: int, reason: str) -> None:
+            nonlocal authority_closed, authority_close
+            if authority_close is None:
+                authority_closed = True
+                authority_close = asyncio.create_task(websocket.close(code=code, reason=reason))
+            # Revocation can be observed by both loops. Canceling the event pump during
+            # receiver shutdown must not cancel the close frame before it is delivered.
+            await asyncio.shield(authority_close)
+
+        async def refuse_binding(exc: DeviceBindingError) -> None:
+            code = 1011 if exc.reason == "owner_device_binding_unconfigured" else (
+                4401 if exc.reason.startswith("device_proof_") else 4403
+            )
+            await close_authority(code, exc.reason)
+
+        try:
+            admitted_binding_id = await binding_identity(verify_proof=True)
+        except DeviceBindingError as exc:
+            await refuse_binding(exc)
+            return
+
+        async def continuing_authority() -> bool:
+            if authority_closed:
+                return False
+            try:
+                await auth.require_access_token(device_token)
+            except Exception:
+                await close_authority(4401, "device_access_revoked")
+                return False
+            try:
+                if await binding_identity(verify_proof=False) != admitted_binding_id:
+                    raise DeviceBindingError("device_binding_changed")
+            except DeviceBindingError as exc:
+                await refuse_binding(exc)
+                return False
+            return not authority_closed
 
         await websocket.accept()
+        if audit is not None:
+            await audit.record(
+                result="accepted", device_id=device.device_id, capability="session.transport.admitted",
+                after={
+                    "van_session_id": van_session_id,
+                    "binding_id": admitted_binding_id,
+                    "transport": "WEBSOCKET",
+                    "certified_matching": certified == device.device_id,
+                    "certificate_serial": mtls_certificate_serial(websocket.scope),
+                    "proof_verified": admitted_binding_id is not None and certified != device.device_id,
+                },
+            )
         cursor = session.last_client_event_seq
 
         async def pump_downstream():
             nonlocal cursor
             while True:
+                if not await continuing_authority():
+                    return
                 page = await events.replay(device.device_id, cursor)
                 for event in page["events"]:
+                    if authority_closed:
+                        return
                     await websocket.send_json({"direction": "DOWNSTREAM", "event": event})
                 cursor = page["next_cursor"]
                 await asyncio.sleep(DOWNSTREAM_POLL_MS / 1000)
 
         pump = asyncio.create_task(pump_downstream())
         try:
-            while True:
+            while not authority_closed:
                 raw = await websocket.receive_json()
+                if not await continuing_authority():
+                    return
                 try:
                     body = EnvelopeBody(**raw)
                 except Exception:
@@ -354,6 +475,16 @@ def build_session_router(
         except WebSocketDisconnect:
             pass
         finally:
-            pump.cancel()
+            # A peer can disconnect immediately after receiving the revocation
+            # close. ASGI cancellation must not cancel the task join itself and
+            # recancel a pump that is already releasing its database resources.
+            # asyncio.shield above protects the close sender from sibling task
+            # cancellation; this scope also protects their final joins from the
+            # enclosing ASGI/AnyIO connection cancellation.
+            with anyio.CancelScope(shield=True):
+                pump.cancel()
+                await asyncio.gather(pump, return_exceptions=True)
+                if authority_close is not None:
+                    await asyncio.gather(authority_close, return_exceptions=True)
 
     return api

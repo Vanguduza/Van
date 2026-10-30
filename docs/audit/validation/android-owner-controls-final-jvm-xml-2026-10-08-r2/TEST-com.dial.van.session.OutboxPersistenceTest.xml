@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.dial.van.session.OutboxPersistenceTest" tests="10" skipped="0" failures="0" errors="0" timestamp="2026-10-08T04:57:38" hostname="052fefa249ff" time="0.002">
+  <properties/>
+  <testcase name="an unrecognised storability is refused rather than defaulted()" classname="com.dial.van.session.OutboxPersistenceTest" time="0.0"/>
+  <testcase name="a record from another part of the app is not read as session work()" classname="com.dial.van.session.OutboxPersistenceTest" time="0.0"/>
+  <testcase name="a record with no storability is refused rather than reconstructed()" classname="com.dial.van.session.OutboxPersistenceTest" time="0.0"/>
+  <testcase name="the expiry that survives is the entrys own and not the queues default()" classname="com.dial.van.session.OutboxPersistenceTest" time="0.0"/>
+  <testcase name="an A4 never reaches the record at all()" classname="com.dial.van.session.OutboxPersistenceTest" time="0.0"/>
+  <testcase name="an entry survives a round trip through the queue record unchanged()" classname="com.dial.van.session.OutboxPersistenceTest" time="0.0"/>
+  <testcase name="the two vocabularies on the record cannot disagree()" classname="com.dial.van.session.OutboxPersistenceTest" time="0.0"/>
+  <testcase name="anything needing the owner present is stored as NO_STALE_REPLAY()" classname="com.dial.van.session.OutboxPersistenceTest" time="0.001"/>
+  <testcase name="a reconfirmation survives the process dying()" classname="com.dial.van.session.OutboxPersistenceTest" time="0.0"/>
+  <testcase name="an attempt count survives so three failures on one path are not three on three()" classname="com.dial.van.session.OutboxPersistenceTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

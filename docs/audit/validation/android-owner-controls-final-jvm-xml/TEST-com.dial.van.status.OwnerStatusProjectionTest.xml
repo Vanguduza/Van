@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.dial.van.status.OwnerStatusProjectionTest" tests="10" skipped="0" failures="0" errors="0" timestamp="2026-10-07T22:57:33" hostname="052fefa249ff" time="0.002">
+  <properties/>
+  <testcase name="unknownReachesTheOwnerAndIsNotTreatedAsFinished()" classname="com.dial.van.status.OwnerStatusProjectionTest" time="0.0"/>
+  <testcase name="acceptedIsNotSuccess()" classname="com.dial.van.status.OwnerStatusProjectionTest" time="0.0"/>
+  <testcase name="nothingIsBothWorkingAndFinished()" classname="com.dial.van.status.OwnerStatusProjectionTest" time="0.001"/>
+  <testcase name="everyProjectedValueIsAStatusWithASentence()" classname="com.dial.van.status.OwnerStatusProjectionTest" time="0.0"/>
+  <testcase name="caseAndWhitespaceFromTheWireDoNotProduceUnknown()" classname="com.dial.van.status.OwnerStatusProjectionTest" time="0.0"/>
+  <testcase name="anUnknownGatewayStatusIsUnknownNotWorking()" classname="com.dial.van.status.OwnerStatusProjectionTest" time="0.0"/>
+  <testcase name="theThreePostExecutionOutcomesStayThreeDifferentAnswers()" classname="com.dial.van.status.OwnerStatusProjectionTest" time="0.001"/>
+  <testcase name="everyStatusHasADistinctSentence()" classname="com.dial.van.status.OwnerStatusProjectionTest" time="0.0"/>
+  <testcase name="onlyAVerifiedMissionReadsAsDone()" classname="com.dial.van.status.OwnerStatusProjectionTest" time="0.0"/>
+  <testcase name="aRefusalIsNotAFailure()" classname="com.dial.van.status.OwnerStatusProjectionTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

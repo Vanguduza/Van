@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="4" skipped="0" tests="4" time="1.275" timestamp="2026-10-26T10:30:11.843464+00:00" hostname="2c5a245e39f1"><testcase classname="trading.tests.test_native_read_identity" name="test_visible_hidden_nameless_and_archived_entries_have_read_only_identity[1]" time="0.017"><failure message="assert True is False">native_id = 1
+
+    @pytest.mark.parametrize('native_id',[1,2,3,4])
+    def test_visible_hidden_nameless_and_archived_entries_have_read_only_identity(native_id):
+        value=identity(native_id)
+        assert value.native_scope==SCOPE|{'native_symbol_id':native_id}
+        assert not isinstance(value,NativeSymbolContract)
+&gt;       assert value.body()['qualified_for_execution'] is value.body()['qualified_for_research'] is False
+E       assert True is False
+
+trading/tests/test_native_read_identity.py:35: AssertionError</failure></testcase><testcase classname="trading.tests.test_native_read_identity" name="test_visible_hidden_nameless_and_archived_entries_have_read_only_identity[2]" time="0.002"><failure message="assert True is False">native_id = 2
+
+    @pytest.mark.parametrize('native_id',[1,2,3,4])
+    def test_visible_hidden_nameless_and_archived_entries_have_read_only_identity(native_id):
+        value=identity(native_id)
+        assert value.native_scope==SCOPE|{'native_symbol_id':native_id}
+        assert not isinstance(value,NativeSymbolContract)
+&gt;       assert value.body()['qualified_for_execution'] is value.body()['qualified_for_research'] is False
+E       assert True is False
+
+trading/tests/test_native_read_identity.py:35: AssertionError</failure></testcase><testcase classname="trading.tests.test_native_read_identity" name="test_visible_hidden_nameless_and_archived_entries_have_read_only_identity[3]" time="0.002"><failure message="assert True is False">native_id = 3
+
+    @pytest.mark.parametrize('native_id',[1,2,3,4])
+    def test_visible_hidden_nameless_and_archived_entries_have_read_only_identity(native_id):
+        value=identity(native_id)
+        assert value.native_scope==SCOPE|{'native_symbol_id':native_id}
+        assert not isinstance(value,NativeSymbolContract)
+&gt;       assert value.body()['qualified_for_execution'] is value.body()['qualified_for_research'] is False
+E       assert True is False
+
+trading/tests/test_native_read_identity.py:35: AssertionError</failure></testcase><testcase classname="trading.tests.test_native_read_identity" name="test_visible_hidden_nameless_and_archived_entries_have_read_only_identity[4]" time="0.005"><failure message="assert True is False">native_id = 4
+
+    @pytest.mark.parametrize('native_id',[1,2,3,4])
+    def test_visible_hidden_nameless_and_archived_entries_have_read_only_identity(native_id):
+        value=identity(native_id)
+        assert value.native_scope==SCOPE|{'native_symbol_id':native_id}
+        assert not isinstance(value,NativeSymbolContract)
+&gt;       assert value.body()['qualified_for_execution'] is value.body()['qualified_for_research'] is False
+E       assert True is False
+
+trading/tests/test_native_read_identity.py:35: AssertionError</failure></testcase></testsuite></testsuites>

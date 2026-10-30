@@ -1,0 +1,28 @@
+{
+  "candidate_head": "42b34f43657dcc64503e951d946f4231c4f3022d",
+  "artifact_id": 12866191678,
+  "archive_bytes": 10653,
+  "archive_sha256": "c5c0a8726334bb5a42bb6b8113dd1d2a07b061b9736b600f723e541dd09fb760",
+  "crc_verified": true,
+  "entries": {
+    "debug/com.dial.van.instrumentation.CommandCentreLaunchTest.html": "2d83579a97c4ca4022afb2e2cbcf03f20f9506534bb0e30d5af9dd670260ff32",
+    "debug/com.dial.van.instrumentation.NetworkSecurityRuntimeTest.html": "aef00e492cb80c7953873e4417f72f4420e30404939ecc6c19c4f0db94f23c7e",
+    "debug/com.dial.van.instrumentation.FloatingOverlayServiceTest.html": "869cda245aebeed20276c3f375fbe62da5eeedf6b9de47b83b1299ae1ef5f7c8",
+    "debug/com.dial.van.instrumentation.RiveContractTest.html": "cc2c3fa9f448862e0062923e8c4ca3a6654486cf781fb27567d17a2c1d572633",
+    "debug/com.dial.van.instrumentation.TemplateRuntimeTest.html": "2e88536365a4ec236ca8e069f885b023c9130967a7f2fe057f182cb265431e19",
+    "debug/com.dial.van.instrumentation.VoicePlaybackRuntimeTest.html": "545efbcbc497d162650c0c8c6888fff1f8d875ba67795a62e3bc6119205b421b",
+    "debug/com.dial.van.instrumentation.html": "9fc46e52ef8a08507e03a0d8f88066db74b22f79853573996dddc54aedc77f86",
+    "debug/css/base-style.css": "2851d0b2f14f4ff1b75f0d01438887911eb474e235be93e561709227cefb18db",
+    "debug/css/style.css": "f1b366319836f8726d0939654d0eeddfc5b20f67d9e5954b9a1632c60f2f31bf",
+    "debug/index.html": "6aeb81cfcfa1f23cf0ee449e1f48390b74923038139fa96f1f178fea46ca8dac",
+    "debug/js/report.js": "0aa306f94805890682c639b2d5c06108801d64b859a171a3c6eea66c8bab4c6a"
+  },
+  "original_HTML_counts": {
+    "tests": 22,
+    "failures": 0,
+    "skipped": 4
+  },
+  "passed": 18,
+  "S24_acceptance": false,
+  "qualification": "HOSTED_EMULATOR_SOURCE_ONLY"
+}

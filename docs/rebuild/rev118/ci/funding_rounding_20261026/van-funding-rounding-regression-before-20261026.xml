@@ -1,0 +1,328 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="9" skipped="0" tests="24" time="0.756" timestamp="2026-10-26T12:19:56.835320+00:00" hostname="2c5a245e39f1"><testcase classname="trading.tests.test_funding_unitization" name="test_deposit_is_not_profit_and_withdrawal_is_not_a_loss" time="0.179" /><testcase classname="trading.tests.test_funding_unitization" name="test_deposit_cannot_erase_the_prior_trading_loss_or_drawdown" time="0.001" /><testcase classname="trading.tests.test_funding_unitization" name="test_withdrawal_after_a_gain_retains_the_gain" time="0.002" /><testcase classname="trading.tests.test_funding_unitization" name="test_new_capital_does_not_reweight_old_time_weighted_losses" time="0.005" /><testcase classname="trading.tests.test_funding_unitization" name="test_internal_fees_are_account_losses_and_normalized_credit_is_not_capital" time="0.002" /><testcase classname="trading.tests.test_funding_unitization" name="test_full_redemption_preserves_history_without_inventing_a_loss_or_reset" time="0.001" /><testcase classname="trading.tests.test_funding_unitization" name="test_missing_or_impossible_evidence_is_unmeasured_not_zero[movement0-NATIVE_NET_FLOW_VALUATION_UNAVAILABLE]" time="0.002" /><testcase classname="trading.tests.test_funding_unitization" name="test_missing_or_impossible_evidence_is_unmeasured_not_zero[movement1-UNCLASSIFIED_NATIVE_MOVEMENT]" time="0.001" /><testcase classname="trading.tests.test_funding_unitization" name="test_missing_or_impossible_evidence_is_unmeasured_not_zero[movement2-NONPOSITIVE_NAV_AT_EXTERNAL_FLOW]" time="0.002" /><testcase classname="trading.tests.test_funding_unitization" name="test_missing_or_impossible_evidence_is_unmeasured_not_zero[movement3-OUTFLOW_EXCEEDS_NET_CAPITAL]" time="0.001" /><testcase classname="trading.tests.test_funding_unitization" name="test_same_timestamp_needs_native_order_instead_of_sorting_by_id" time="0.002" /><testcase classname="trading.tests.test_funding_unitization" name="test_native_scope_and_original_identity_cannot_be_rebound" time="0.001" /><testcase classname="trading.tests.test_funding_unitization" name="test_many_native_capital_movements_cannot_manufacture_any_account_return" time="0.004" /><testcase classname="trading.tests.test_funding_unitization" name="test_native_order_is_required_at_equal_time_valuation_boundaries" time="0.002" /><testcase classname="trading.tests.test_funding_unitization" name="test_unmeasured_results_do_not_publish_zero_drawdown_as_if_it_were_a_complete_measurement" time="0.001" /><testcase classname="trading.tests.test_funding_unitization" name="test_reporting_does_not_inherit_ambient_rounding_or_inexact_traps[ROUND_CEILING]" time="0.001"><failure message="decimal.Inexact: [&lt;class 'decimal.Inexact'&gt;, &lt;class 'decimal.Rounded'&gt;]">rounding = 'ROUND_CEILING'
+
+    @pytest.mark.parametrize('rounding',[
+        'ROUND_CEILING','ROUND_DOWN','ROUND_FLOOR','ROUND_HALF_DOWN',
+        'ROUND_HALF_EVEN','ROUND_HALF_UP','ROUND_UP','ROUND_05UP'])
+    def test_reporting_does_not_inherit_ambient_rounding_or_inexact_traps(rounding):
+        from decimal import Context,Inexact,Rounded,localcontext
+        with localcontext(Context()):
+            expected=unitize(valuation(1,'3','start'),valuation(3,'4','end'))
+        assert expected['flow_neutral_return']=='0.'+'3'*80
+        with localcontext() as ambient:
+            ambient.prec=5;ambient.rounding=rounding
+            ambient.traps[Inexact]=ambient.traps[Rounded]=True
+            before=ambient.copy()
+&gt;           actual=unitize(valuation(1,'3','start'),valuation(3,'4','end'))
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+trading/tests/test_funding_unitization.py:101: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+trading/vati/funding/unitization.py:123: in unitize
+    return report('MEASURED' if units&gt;0 else 'NO_ACTIVE_CAPITAL')
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/funding/unitization.py:85: in report
+    'nav_per_unit':_render(nav) if status!='UNMEASURED' else None,
+                   ^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+value = Fraction(4, 3)
+
+    def _render(value):
+        if value is None:return None
+        with localcontext() as context:
+            context.prec=80
+&gt;           return str(Decimal(value.numerator)/Decimal(value.denominator))
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           decimal.Inexact: [&lt;class 'decimal.Inexact'&gt;, &lt;class 'decimal.Rounded'&gt;]
+
+trading/vati/funding/unitization.py:51: Inexact</failure></testcase><testcase classname="trading.tests.test_funding_unitization" name="test_reporting_does_not_inherit_ambient_rounding_or_inexact_traps[ROUND_DOWN]" time="0.003"><failure message="decimal.Inexact: [&lt;class 'decimal.Inexact'&gt;, &lt;class 'decimal.Rounded'&gt;]">rounding = 'ROUND_DOWN'
+
+    @pytest.mark.parametrize('rounding',[
+        'ROUND_CEILING','ROUND_DOWN','ROUND_FLOOR','ROUND_HALF_DOWN',
+        'ROUND_HALF_EVEN','ROUND_HALF_UP','ROUND_UP','ROUND_05UP'])
+    def test_reporting_does_not_inherit_ambient_rounding_or_inexact_traps(rounding):
+        from decimal import Context,Inexact,Rounded,localcontext
+        with localcontext(Context()):
+            expected=unitize(valuation(1,'3','start'),valuation(3,'4','end'))
+        assert expected['flow_neutral_return']=='0.'+'3'*80
+        with localcontext() as ambient:
+            ambient.prec=5;ambient.rounding=rounding
+            ambient.traps[Inexact]=ambient.traps[Rounded]=True
+            before=ambient.copy()
+&gt;           actual=unitize(valuation(1,'3','start'),valuation(3,'4','end'))
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+trading/tests/test_funding_unitization.py:101: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+trading/vati/funding/unitization.py:123: in unitize
+    return report('MEASURED' if units&gt;0 else 'NO_ACTIVE_CAPITAL')
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/funding/unitization.py:85: in report
+    'nav_per_unit':_render(nav) if status!='UNMEASURED' else None,
+                   ^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+value = Fraction(4, 3)
+
+    def _render(value):
+        if value is None:return None
+        with localcontext() as context:
+            context.prec=80
+&gt;           return str(Decimal(value.numerator)/Decimal(value.denominator))
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           decimal.Inexact: [&lt;class 'decimal.Inexact'&gt;, &lt;class 'decimal.Rounded'&gt;]
+
+trading/vati/funding/unitization.py:51: Inexact</failure></testcase><testcase classname="trading.tests.test_funding_unitization" name="test_reporting_does_not_inherit_ambient_rounding_or_inexact_traps[ROUND_FLOOR]" time="0.001"><failure message="decimal.Inexact: [&lt;class 'decimal.Inexact'&gt;, &lt;class 'decimal.Rounded'&gt;]">rounding = 'ROUND_FLOOR'
+
+    @pytest.mark.parametrize('rounding',[
+        'ROUND_CEILING','ROUND_DOWN','ROUND_FLOOR','ROUND_HALF_DOWN',
+        'ROUND_HALF_EVEN','ROUND_HALF_UP','ROUND_UP','ROUND_05UP'])
+    def test_reporting_does_not_inherit_ambient_rounding_or_inexact_traps(rounding):
+        from decimal import Context,Inexact,Rounded,localcontext
+        with localcontext(Context()):
+            expected=unitize(valuation(1,'3','start'),valuation(3,'4','end'))
+        assert expected['flow_neutral_return']=='0.'+'3'*80
+        with localcontext() as ambient:
+            ambient.prec=5;ambient.rounding=rounding
+            ambient.traps[Inexact]=ambient.traps[Rounded]=True
+            before=ambient.copy()
+&gt;           actual=unitize(valuation(1,'3','start'),valuation(3,'4','end'))
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+trading/tests/test_funding_unitization.py:101: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+trading/vati/funding/unitization.py:123: in unitize
+    return report('MEASURED' if units&gt;0 else 'NO_ACTIVE_CAPITAL')
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/funding/unitization.py:85: in report
+    'nav_per_unit':_render(nav) if status!='UNMEASURED' else None,
+                   ^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+value = Fraction(4, 3)
+
+    def _render(value):
+        if value is None:return None
+        with localcontext() as context:
+            context.prec=80
+&gt;           return str(Decimal(value.numerator)/Decimal(value.denominator))
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           decimal.Inexact: [&lt;class 'decimal.Inexact'&gt;, &lt;class 'decimal.Rounded'&gt;]
+
+trading/vati/funding/unitization.py:51: Inexact</failure></testcase><testcase classname="trading.tests.test_funding_unitization" name="test_reporting_does_not_inherit_ambient_rounding_or_inexact_traps[ROUND_HALF_DOWN]" time="0.003"><failure message="decimal.Inexact: [&lt;class 'decimal.Inexact'&gt;, &lt;class 'decimal.Rounded'&gt;]">rounding = 'ROUND_HALF_DOWN'
+
+    @pytest.mark.parametrize('rounding',[
+        'ROUND_CEILING','ROUND_DOWN','ROUND_FLOOR','ROUND_HALF_DOWN',
+        'ROUND_HALF_EVEN','ROUND_HALF_UP','ROUND_UP','ROUND_05UP'])
+    def test_reporting_does_not_inherit_ambient_rounding_or_inexact_traps(rounding):
+        from decimal import Context,Inexact,Rounded,localcontext
+        with localcontext(Context()):
+            expected=unitize(valuation(1,'3','start'),valuation(3,'4','end'))
+        assert expected['flow_neutral_return']=='0.'+'3'*80
+        with localcontext() as ambient:
+            ambient.prec=5;ambient.rounding=rounding
+            ambient.traps[Inexact]=ambient.traps[Rounded]=True
+            before=ambient.copy()
+&gt;           actual=unitize(valuation(1,'3','start'),valuation(3,'4','end'))
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+trading/tests/test_funding_unitization.py:101: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+trading/vati/funding/unitization.py:123: in unitize
+    return report('MEASURED' if units&gt;0 else 'NO_ACTIVE_CAPITAL')
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/funding/unitization.py:85: in report
+    'nav_per_unit':_render(nav) if status!='UNMEASURED' else None,
+                   ^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+value = Fraction(4, 3)
+
+    def _render(value):
+        if value is None:return None
+        with localcontext() as context:
+            context.prec=80
+&gt;           return str(Decimal(value.numerator)/Decimal(value.denominator))
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           decimal.Inexact: [&lt;class 'decimal.Inexact'&gt;, &lt;class 'decimal.Rounded'&gt;]
+
+trading/vati/funding/unitization.py:51: Inexact</failure></testcase><testcase classname="trading.tests.test_funding_unitization" name="test_reporting_does_not_inherit_ambient_rounding_or_inexact_traps[ROUND_HALF_EVEN]" time="0.002"><failure message="decimal.Inexact: [&lt;class 'decimal.Inexact'&gt;, &lt;class 'decimal.Rounded'&gt;]">rounding = 'ROUND_HALF_EVEN'
+
+    @pytest.mark.parametrize('rounding',[
+        'ROUND_CEILING','ROUND_DOWN','ROUND_FLOOR','ROUND_HALF_DOWN',
+        'ROUND_HALF_EVEN','ROUND_HALF_UP','ROUND_UP','ROUND_05UP'])
+    def test_reporting_does_not_inherit_ambient_rounding_or_inexact_traps(rounding):
+        from decimal import Context,Inexact,Rounded,localcontext
+        with localcontext(Context()):
+            expected=unitize(valuation(1,'3','start'),valuation(3,'4','end'))
+        assert expected['flow_neutral_return']=='0.'+'3'*80
+        with localcontext() as ambient:
+            ambient.prec=5;ambient.rounding=rounding
+            ambient.traps[Inexact]=ambient.traps[Rounded]=True
+            before=ambient.copy()
+&gt;           actual=unitize(valuation(1,'3','start'),valuation(3,'4','end'))
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+trading/tests/test_funding_unitization.py:101: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+trading/vati/funding/unitization.py:123: in unitize
+    return report('MEASURED' if units&gt;0 else 'NO_ACTIVE_CAPITAL')
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/funding/unitization.py:85: in report
+    'nav_per_unit':_render(nav) if status!='UNMEASURED' else None,
+                   ^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+value = Fraction(4, 3)
+
+    def _render(value):
+        if value is None:return None
+        with localcontext() as context:
+            context.prec=80
+&gt;           return str(Decimal(value.numerator)/Decimal(value.denominator))
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           decimal.Inexact: [&lt;class 'decimal.Inexact'&gt;, &lt;class 'decimal.Rounded'&gt;]
+
+trading/vati/funding/unitization.py:51: Inexact</failure></testcase><testcase classname="trading.tests.test_funding_unitization" name="test_reporting_does_not_inherit_ambient_rounding_or_inexact_traps[ROUND_HALF_UP]" time="0.002"><failure message="decimal.Inexact: [&lt;class 'decimal.Inexact'&gt;, &lt;class 'decimal.Rounded'&gt;]">rounding = 'ROUND_HALF_UP'
+
+    @pytest.mark.parametrize('rounding',[
+        'ROUND_CEILING','ROUND_DOWN','ROUND_FLOOR','ROUND_HALF_DOWN',
+        'ROUND_HALF_EVEN','ROUND_HALF_UP','ROUND_UP','ROUND_05UP'])
+    def test_reporting_does_not_inherit_ambient_rounding_or_inexact_traps(rounding):
+        from decimal import Context,Inexact,Rounded,localcontext
+        with localcontext(Context()):
+            expected=unitize(valuation(1,'3','start'),valuation(3,'4','end'))
+        assert expected['flow_neutral_return']=='0.'+'3'*80
+        with localcontext() as ambient:
+            ambient.prec=5;ambient.rounding=rounding
+            ambient.traps[Inexact]=ambient.traps[Rounded]=True
+            before=ambient.copy()
+&gt;           actual=unitize(valuation(1,'3','start'),valuation(3,'4','end'))
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+trading/tests/test_funding_unitization.py:101: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+trading/vati/funding/unitization.py:123: in unitize
+    return report('MEASURED' if units&gt;0 else 'NO_ACTIVE_CAPITAL')
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/funding/unitization.py:85: in report
+    'nav_per_unit':_render(nav) if status!='UNMEASURED' else None,
+                   ^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+value = Fraction(4, 3)
+
+    def _render(value):
+        if value is None:return None
+        with localcontext() as context:
+            context.prec=80
+&gt;           return str(Decimal(value.numerator)/Decimal(value.denominator))
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           decimal.Inexact: [&lt;class 'decimal.Inexact'&gt;, &lt;class 'decimal.Rounded'&gt;]
+
+trading/vati/funding/unitization.py:51: Inexact</failure></testcase><testcase classname="trading.tests.test_funding_unitization" name="test_reporting_does_not_inherit_ambient_rounding_or_inexact_traps[ROUND_UP]" time="0.002"><failure message="decimal.Inexact: [&lt;class 'decimal.Inexact'&gt;, &lt;class 'decimal.Rounded'&gt;]">rounding = 'ROUND_UP'
+
+    @pytest.mark.parametrize('rounding',[
+        'ROUND_CEILING','ROUND_DOWN','ROUND_FLOOR','ROUND_HALF_DOWN',
+        'ROUND_HALF_EVEN','ROUND_HALF_UP','ROUND_UP','ROUND_05UP'])
+    def test_reporting_does_not_inherit_ambient_rounding_or_inexact_traps(rounding):
+        from decimal import Context,Inexact,Rounded,localcontext
+        with localcontext(Context()):
+            expected=unitize(valuation(1,'3','start'),valuation(3,'4','end'))
+        assert expected['flow_neutral_return']=='0.'+'3'*80
+        with localcontext() as ambient:
+            ambient.prec=5;ambient.rounding=rounding
+            ambient.traps[Inexact]=ambient.traps[Rounded]=True
+            before=ambient.copy()
+&gt;           actual=unitize(valuation(1,'3','start'),valuation(3,'4','end'))
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+trading/tests/test_funding_unitization.py:101: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+trading/vati/funding/unitization.py:123: in unitize
+    return report('MEASURED' if units&gt;0 else 'NO_ACTIVE_CAPITAL')
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/funding/unitization.py:85: in report
+    'nav_per_unit':_render(nav) if status!='UNMEASURED' else None,
+                   ^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+value = Fraction(4, 3)
+
+    def _render(value):
+        if value is None:return None
+        with localcontext() as context:
+            context.prec=80
+&gt;           return str(Decimal(value.numerator)/Decimal(value.denominator))
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           decimal.Inexact: [&lt;class 'decimal.Inexact'&gt;, &lt;class 'decimal.Rounded'&gt;]
+
+trading/vati/funding/unitization.py:51: Inexact</failure></testcase><testcase classname="trading.tests.test_funding_unitization" name="test_reporting_does_not_inherit_ambient_rounding_or_inexact_traps[ROUND_05UP]" time="0.002"><failure message="decimal.Inexact: [&lt;class 'decimal.Inexact'&gt;, &lt;class 'decimal.Rounded'&gt;]">rounding = 'ROUND_05UP'
+
+    @pytest.mark.parametrize('rounding',[
+        'ROUND_CEILING','ROUND_DOWN','ROUND_FLOOR','ROUND_HALF_DOWN',
+        'ROUND_HALF_EVEN','ROUND_HALF_UP','ROUND_UP','ROUND_05UP'])
+    def test_reporting_does_not_inherit_ambient_rounding_or_inexact_traps(rounding):
+        from decimal import Context,Inexact,Rounded,localcontext
+        with localcontext(Context()):
+            expected=unitize(valuation(1,'3','start'),valuation(3,'4','end'))
+        assert expected['flow_neutral_return']=='0.'+'3'*80
+        with localcontext() as ambient:
+            ambient.prec=5;ambient.rounding=rounding
+            ambient.traps[Inexact]=ambient.traps[Rounded]=True
+            before=ambient.copy()
+&gt;           actual=unitize(valuation(1,'3','start'),valuation(3,'4','end'))
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+trading/tests/test_funding_unitization.py:101: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+trading/vati/funding/unitization.py:123: in unitize
+    return report('MEASURED' if units&gt;0 else 'NO_ACTIVE_CAPITAL')
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/funding/unitization.py:85: in report
+    'nav_per_unit':_render(nav) if status!='UNMEASURED' else None,
+                   ^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+value = Fraction(4, 3)
+
+    def _render(value):
+        if value is None:return None
+        with localcontext() as context:
+            context.prec=80
+&gt;           return str(Decimal(value.numerator)/Decimal(value.denominator))
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           decimal.Inexact: [&lt;class 'decimal.Inexact'&gt;, &lt;class 'decimal.Rounded'&gt;]
+
+trading/vati/funding/unitization.py:51: Inexact</failure></testcase><testcase classname="trading.tests.test_funding_unitization" name="test_valid_source_money_is_not_overflowed_by_an_unrelated_decimal_context" time="0.001"><failure message="decimal.Overflow: [&lt;class 'decimal.Overflow'&gt;]">def test_valid_source_money_is_not_overflowed_by_an_unrelated_decimal_context():
+        from decimal import Context,localcontext
+        with localcontext(Context()):
+            expected=unitize(valuation(1,'3E12','start'),valuation(3,'4E12','end'))
+        assert D(expected['net_account_pnl'])==D('1E12')
+        with localcontext() as ambient:
+            ambient.Emax=9;ambient.Emin=-9;ambient.prec=3
+            before=ambient.copy()
+&gt;           actual=unitize(valuation(1,'3E12','start'),valuation(3,'4E12','end'))
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+trading/tests/test_funding_unitization.py:115: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+trading/vati/funding/unitization.py:123: in unitize
+    return report('MEASURED' if units&gt;0 else 'NO_ACTIVE_CAPITAL')
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/funding/unitization.py:83: in report
+    'from_ms':baseline.at_ms,'to_ms':closing.at_ms,'units':_render(units) if status!='UNMEASURED' else None,
+                                                           ^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+value = Fraction(3000000000000, 1)
+
+    def _render(value):
+        if value is None:return None
+        with localcontext() as context:
+            context.prec=80
+&gt;           return str(Decimal(value.numerator)/Decimal(value.denominator))
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           decimal.Overflow: [&lt;class 'decimal.Overflow'&gt;]
+
+trading/vati/funding/unitization.py:51: Overflow</failure></testcase></testsuite></testsuites>

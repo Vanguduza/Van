@@ -1,0 +1,65 @@
+{
+  "schema_version": 1,
+  "authorization_id": "auth-20260930-owner-van-ledger-enforcement",
+  "project": "van",
+  "authority": "OWNER_EXPLICIT",
+  "owner_instruction_sha256": "1fb51f92482bc51e4c6d7fc1ef508b3070a56c0d024dd773927367162ce72dfb",
+  "owner_instruction_digest_input": "UTF-8 bytes of the verbatim owner answer \"Yes to owner derived treatment and  enforce van's ledger\" (double space preserved) with no quotes and no trailing newline",
+  "owner_instruction_record": "docs/decisions/OWNER-DECISION-20260930-OWNER-DERIVED-AND-LEDGER-ENFORCEMENT.md",
+  "owner_instruction_excerpt": "Yes to owner derived treatment and  enforce van's ledger",
+  "authority_basis": "The owner was asked whether VAN's LOCAL_CHANGE_LEDGER.jsonl should be enforced by a checker and whether the 69 remaining Programme B files should get OWNER_DERIVED treatment, and answered yes to both in one message recorded verbatim with its sha256. That is a bounded owner-ordered change, so the enforcement tooling and the records carrying out the answer are OWNER_EXPLICIT. The design (modes, row format, supersession rule, baselines, hooks, CI job) is the integrator's (unit G7) and was not separately approved by the owner.",
+  "source": {
+    "kind": "owner_session_instruction",
+    "channel": "claude_code",
+    "request_id": "claude-code-session_01ELKqm4GCPmPvF3ggKkgB1J-20260930",
+    "owner_attested": true,
+    "device_signature_claimed": false,
+    "cryptographic_signature_claimed": false,
+    "signed_ingress_claimed": false
+  },
+  "signature_note": "The owner answered in a Claude Code session. No device, biometric or cryptographic signature is claimed. This record is not signed-ingress evidence.",
+  "limits": [
+    "No signature of any kind is claimed.",
+    "Covers only the listed files: the ledger checker, its hooks, install script, baseline registry, CI step, tests and README section, the git exemption for the checker in tests/contracts/test_ledger_reconcile.py, the decision record for the 2026-09-30 answer, and the authorization records that carry it out.",
+    "It does not authorize any product, browser, trading, Jev, Android, Hermes, deploy or storage change, and it does not open any production activation gate (it does not name any gate's decision record).",
+    "The Programme A and Programme B OWNER_DERIVED records it lists as paths take their authority from their own contents; listing their files here authorizes adding the files, not widening what those records claim.",
+    "Not reusable: exact paths, no globs."
+  ],
+  "issued_at_utc": "2026-09-30T00:00:00Z",
+  "base_sha": "12feb9033dfc1dd68d7b4d41ac477f0d9dbbc4af",
+  "branch_scope": "gpt/jev-openmuse-convergence-r1-van-20260929 (unit-g7) and gpt/memory-fabric-rev1-2-van-20260929 (unit-g7-a); byte-identical on both",
+  "authorized_paths": [
+    ".githooks/pre-commit",
+    ".githooks/pre-merge-commit",
+    ".github/workflows/van-ci.yml",
+    "docs/decisions/OWNER-DECISION-20260930-OWNER-DERIVED-AND-LEDGER-ENFORCEMENT.md",
+    "docs/project-state/authorizations/auth-20260930-owner-derived-programme-a-memory-fabric.json",
+    "docs/project-state/authorizations/auth-20260930-owner-derived-programme-b-remaining.json",
+    "docs/project-state/authorizations/auth-20260930-owner-van-ledger-enforcement.json",
+    "registries/project_truth_ledger_baselines.json",
+    "tests/contracts/test_ledger_reconcile.py",
+    "tests/contracts/test_project_truth_ledger.py",
+    "tools/ci/README.md",
+    "tools/ci/github-actions-ci.yml",
+    "tools/ci/install_project_truth_hooks.sh",
+    "tools/ci/project_truth_ledger.py"
+  ],
+  "decision_sections_in_scope": [
+    "2026-09-30 answer, questions 1 and 2"
+  ],
+  "change_classes": [
+    "project_truth_enforcement",
+    "verification",
+    "project_truth_reconciliation"
+  ],
+  "material_scope_expansion": false,
+  "feature_removal": false,
+  "business_model_change": false,
+  "security_authority_change": false,
+  "owner_control_boundary_change": false,
+  "legal_position_change": false,
+  "money_or_custody_model_change": false,
+  "locked_provider_change": false,
+  "reusable": false,
+  "revoked": false
+}

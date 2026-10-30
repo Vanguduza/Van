@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="1" time="0.910" timestamp="2026-10-26T18:31:01.801552+00:00" hostname="2c5a245e39f1"><testcase classname="trading.tests.test_native_valuation" name="test_incomplete_independent_source_readback_cannot_claim_a_complete_original[sqlite]" time="0.387"><failure message="Failed: DID NOT RAISE UnitError">original = (&lt;vati.core.ledger.Ledger object at 0x7f29a038f050&gt;, Event(kind=&lt;EventKind.ACCOUNT_SNAPSHOT: 'ACCOUNT_SNAPSHOT'&gt;, prod...ce_version=1, manager_bonus=Decimal('3.01'), ib_bonus=None, nonwithdrawable_bonus=Decimal('5'), registered_at_ms=None))
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x7f29a0453b00&gt;
+
+    def test_incomplete_independent_source_readback_cannot_claim_a_complete_original(original,monkeypatch):
+        ledger,event,point=original
+        snapshot(ledger,replace(point,observed_at_ms=3000),received=4000)
+        iterator=ledger.iter
+        def missing(kind=None,**kwargs):
+            for row in iterator(kind,**kwargs):
+                if kind is EventKind.ACCOUNT_SNAPSHOT and row.hash!=event.hash:continue
+                yield row
+        monkeypatch.setattr(ledger,'iter',missing)
+        assert ledger.verify_chain()[0]
+&gt;       with pytest.raises(UnitError,match='READBACK_COUNT_INVALID'):read(original)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE UnitError
+
+trading/tests/test_native_valuation.py:109: Failed</failure></testcase></testsuite></testsuites>

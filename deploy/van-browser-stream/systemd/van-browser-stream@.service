@@ -1,0 +1,32 @@
+[Unit]
+Description=VAN HTTPS/WebRTC stream for isolated profile %i
+After=van-browser-chromium@%i.service van-browser-transfer-stage@%i.service
+BindsTo=van-browser-chromium@%i.service
+Requires=van-browser-transfer-stage@%i.service
+
+[Service]
+Type=simple
+User=van-stream-%i
+Group=van-transfer-%i
+EnvironmentFile=/etc/van-browser-stream/profiles/%i/stream.env
+ExecStart=/opt/van-browser-stream/venv/bin/python -m services.browser_stream_host.server
+WorkingDirectory=/opt/van-browser-stream/src
+Restart=on-failure
+RestartPreventExitStatus=2
+RestartSec=5
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+ProtectProc=invisible
+ProcSubset=pid
+RestrictSUIDSGID=true
+InaccessiblePaths=-/var/lib/van-browser-profiles -/etc/van-browser-stream/profiles/%i/control-pki -/run/docker.sock
+ReadWritePaths=/var/lib/van-browser-transfers/%i /var/log/van-browser-stream/%i/stream
+UMask=0007
+
+[Install]
+WantedBy=multi-user.target

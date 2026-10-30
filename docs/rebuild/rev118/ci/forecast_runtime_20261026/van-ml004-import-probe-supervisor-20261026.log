@@ -1,0 +1,17 @@
+Traceback (most recent call last):
+  File "/workspace/van-ml004-bootstrap-20261026/run_import_probe.py", line 14, in <module>
+    call(['create','--name',name,'--label','van.task='+label,'--network','none','--read-only',
+  File "/workspace/van-ml004-bootstrap-20261026/run_import_probe.py", line 11, in call
+    def call(args):return subprocess.run(docker+args,env=env,text=True,capture_output=True,check=True,timeout=30)
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/subprocess.py", line 550, in run
+    stdout, stderr = process.communicate(input, timeout=timeout)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/subprocess.py", line 1209, in communicate
+    stdout, stderr = self._communicate(input, endtime, timeout)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/subprocess.py", line 2116, in _communicate
+    self._check_timeout(endtime, orig_timeout, stdout, stderr)
+  File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/subprocess.py", line 1253, in _check_timeout
+    raise TimeoutExpired(
+subprocess.TimeoutExpired: Command '['docker', '--host=unix:///var/run/docker.sock', 'create', '--name', 'van-ml004-import-probe-20261026', '--label', 'van.task=ml004-import-probe-20261026', '--network', 'none', '--read-only', '--cap-drop', 'ALL', '--security-opt', 'no-new-privileges', '--user', '1000:1000', '--pids-limit', '256', '--cpus', '2', '--memory', '6g', '--tmpfs', '/tmp:rw,nosuid,nodev,size=512m,mode=1777', '--mount', 'type=bind,source=/workspace/van-ml004-bootstrap-20261026/import_probe.py,target=/probe.py,readonly', '--env', 'HOME=/tmp/van-ml004', '--env', 'MPLCONFIGDIR=/tmp/matplotlib', '--env', 'HF_HUB_OFFLINE=1', '--env', 'CUDA_VISIBLE_DEVICES=', 'sha256:d329d19854d7c1f414def27e5d681f050562cd32a506e56e274171b65d9124e1', 'python', '/probe.py']' timed out after 30 seconds

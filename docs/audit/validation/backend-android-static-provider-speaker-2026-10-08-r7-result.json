@@ -1,0 +1,34 @@
+{
+  "schema_version": 1,
+  "suite": "backend-static-android-source",
+  "selection": [
+    "backend/tests/test_account_approval_contract.py",
+    "backend/tests/test_owner_status_kotlin_contract.py"
+  ],
+  "command": [
+    "/workspace/.onboarding/van-venv/bin/python",
+    "-m",
+    "pytest",
+    "-q",
+    "backend/tests/test_account_approval_contract.py",
+    "backend/tests/test_owner_status_kotlin_contract.py",
+    "--junitxml=/workspace/van-audit/backend-android-static-provider-speaker-2026-10-08-r7.xml"
+  ],
+  "started_at_utc": "2026-10-08T06:56:15.101324+00:00",
+  "finished_at_utc": "2026-10-08T06:56:16.573165+00:00",
+  "exit_code": 0,
+  "counts": {
+    "tests": 16,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "passed": 16
+  },
+  "source_unchanged_during_test": true,
+  "changed_inputs": [],
+  "input_files": 1600,
+  "production_manifest_sha256": "d2269cc6013b42138740d21efa5055e86f44d02de965be209308230d823c5947",
+  "physical_tests_executed": 0,
+  "production_deployed": false,
+  "overlay_count_is_non_additive_to_full_backend": true
+}

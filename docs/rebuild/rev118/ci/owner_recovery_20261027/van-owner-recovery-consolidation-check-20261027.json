@@ -1,0 +1,7 @@
+{
+  "scope": "SOURCE_CONSOLIDATION_ONLY",
+  "branches_evaluated": 70,
+  "blueprint_archive_sha256": "6c7c7c1cb4fbd4748c0d63ceb2add9bd460778b66fb3b2302e16de09ac3a57a8",
+  "findings": [],
+  "runtime_qualification_issued": false
+}

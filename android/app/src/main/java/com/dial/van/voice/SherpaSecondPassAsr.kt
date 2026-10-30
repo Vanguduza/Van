@@ -63,9 +63,13 @@ class SherpaLocalSecondPassAsr private constructor(
         private val SHA256 = Regex("^[0-9a-fA-F]{64}$")
 
         fun fromFiles(context: Context): SherpaLocalSecondPassAsr? {
-            val root = File(context.applicationContext.filesDir, "voice").canonicalFile
-            val manifest = File(context.applicationContext.filesDir, MANIFEST_PATH)
+            val installed = VoiceAssetInstaller.installedOrNull() ?: return null
+            val root = installed.root.canonicalFile
+            val manifest = File(root, "asr_second_pass.json")
             if (!manifest.isFile || manifest.length() !in 1..MAX_MANIFEST_BYTES) return null
+            val expectedManifest = installed.bundle.entries.firstOrNull { it.path == "asr_second_pass.json" }
+                ?.sha256 ?: return null
+            if (sha256(manifest) != expectedManifest) return null
 
             val json = runCatching { JSONObject(manifest.readText(Charsets.UTF_8)) }.getOrNull()
                 ?: return null
@@ -120,10 +124,17 @@ class SherpaLocalSecondPassAsr private constructor(
                 maxActivePaths = maxActivePaths,
             )
             return runCatching {
-                SherpaLocalSecondPassAsr(
-                    recognizer = OfflineRecognizer(config = config),
-                    sampleRateHz = sampleRate,
-                )
+                val recognizer = OfflineRecognizer(config = config)
+                val runtime = SherpaLocalSecondPassAsr(recognizer, sampleRate)
+                try {
+                    // Exercise decode, not just model construction. This result is never
+                    // treated as an owner transcript or confidence evidence.
+                    runtime.transcribe(ByteArray(sampleRate * 2), emptyList())
+                    runtime
+                } catch (failure: Throwable) {
+                    recognizer.release()
+                    throw failure
+                }
             }.getOrNull()
         }
 

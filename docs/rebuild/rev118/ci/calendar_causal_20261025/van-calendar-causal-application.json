@@ -1,0 +1,13 @@
+{
+  "schema": "van.isolated-candidate-application/1",
+  "base_head": "047dacc6b006e16b382e6f510725af364dc2b0bb",
+  "isolated_base": "ad1d3941d6a0257ee9966fd66f02eddb76af04de",
+  "source": "/workspace/van-calendar-source-20261025",
+  "destination": "/workspace/van-review-2026-10-18/publish",
+  "preexisting_file_bytes_verified_against_base": true,
+  "files": {
+    "trading/vati/calendar/recorder.py": "417c3e8f29af02bbed542ecc45e58d40b7ebfc305fe0fff37a3749095ade1bb1",
+    "trading/tests/test_calendar_causal_boundaries.py": "c4db9ff53f151121e387a46e4ff9f9121d561350d83ac890525cfb66369ec5c0"
+  },
+  "scope": "Source candidate only, isolated worktree retained, normal hooks and qualification pending"
+}

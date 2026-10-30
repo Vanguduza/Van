@@ -1,0 +1,97 @@
+{
+  "source_head": "733b7ac93e403048f2807df80f56b7038a4f5d48",
+  "tested_merge": "96cd9f894123a5aab80b49ec6affac47ada89633",
+  "tree_comparison": "GitHub ahead1/behind0/files[]",
+  "run_id": 40394743701,
+  "status": "TERMINAL_FAILURE_MANDATORY_PREREQUISITES_UNWAIVED",
+  "public_jobs_success": 17,
+  "mandatory_unwaived_failures": [
+    "missing private DDS deploy key",
+    "absent trusted-main checker"
+  ],
+  "postgres_job": "SUCCESS;actual4017trading/1privateDDSskip,26Postgres,117voice;allreportcasesreconciled",
+  "junit": {
+    "van-market-monitor-source/report.xml": {
+      "passed": 258,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "van-browser-guard-source/uid-report.xml": {
+      "passed": 1,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "van-browser-guard-source/full-report.xml": {
+      "passed": 1547,
+      "skips": 1,
+      "failures": 0,
+      "errors": 0
+    },
+    "van-browser-guard-source/report.xml": {
+      "passed": 11,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "van-browser-guard-source/firewall-report.xml": {
+      "passed": 10,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "van-postgres-ledger-report/trading-source-report.xml": {
+      "passed": 4017,
+      "skips": 1,
+      "failures": 0,
+      "errors": 0
+    },
+    "van-postgres-ledger-report/voice-source-report.xml": {
+      "passed": 117,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "van-postgres-ledger-report/postgres-ledger-report.xml": {
+      "passed": 26,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "van-backend-public-source/media-report.xml": {
+      "passed": 198,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "van-backend-public-source/gateway-report.xml": {
+      "passed": 5775,
+      "skips": 7,
+      "failures": 0,
+      "errors": 0
+    },
+    "van-native-source-parquet-report/report.xml": {
+      "passed": 114,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    }
+  },
+  "android_emulator": {
+    "tests": 22,
+    "failures": 0,
+    "skipped": 4,
+    "passed": 18
+  },
+  "canonical_mutations": {
+    "actual_reports": 9,
+    "caught_exactly_once": 374,
+    "edits": 383,
+    "survivors": 0,
+    "unexecuted": 0
+  },
+  "actual_verified_archives": 16,
+  "native_or_unit_acceptance": false,
+  "qualification": "Published733b source only;not later arithmetic or rawdepth candidates"
+}

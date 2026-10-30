@@ -1,0 +1,81 @@
+{
+  "schema": "van.rebuild.registry-entry-fence-source/1",
+  "source_parent": "79a4a56f05831e6f5a8e3a4bcd1d950d70b39388",
+  "source_sha256": {
+    "trading/vati/accounts/access.py": "102f8f85a066d3a487ed08732466eed8605cf5989db7d96aa0dd878fe1b4cc20",
+    "trading/vati/app/service.py": "8b4515937aaec4ce609eb5ee13a125c68960d7a87eaa1fa9bd32eb30e3c5c736",
+    "trading/tests/test_registry_entry_fence.py": "c1367d7884a9f0c33cdc9ea8183c79019229f1315b4dc53bd552fa80c2edd04d"
+  },
+  "initial_counterexamples": {
+    "failed": 10,
+    "positive_control_passed": 1
+  },
+  "full_trading_real_postgresql": {
+    "tests": 1909,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "sha256": "98bdf517349ae40e69493dcd19333048825f206c8b8473e1b12ea1ff8d21b85b"
+  },
+  "focused_registry_deriv_credential_mode": {
+    "tests": 84,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "sha256": "328fbc3cd5572166e8051fc514f85d2c24ba54134ff476cd60e11832493ee77a"
+  },
+  "custom_mutants": {
+    "detected": 3,
+    "survived": 0,
+    "source_restored": true,
+    "rows": [
+      {
+        "kind": "baseline",
+        "mutation": null,
+        "exit_code": 0,
+        "log": "/tmp/van-registry-fence-mutant-0.txt",
+        "sha256": "1c9cf1ec4f30326810009991ec795fa44d71c5f66ddf57e632a722f5f20b92a2"
+      },
+      {
+        "kind": "mutation",
+        "mutation": "let a cached sender ignore the current registry",
+        "exit_code": 1,
+        "log": "/tmp/van-registry-fence-mutant-1.txt",
+        "sha256": "f779b1ff08b3860478f15f713305e7a4ed4f8256cd32eaa93b228a305fc441a3"
+      },
+      {
+        "kind": "mutation",
+        "mutation": "ignore a replacement owner mandate reference",
+        "exit_code": 1,
+        "log": "/tmp/van-registry-fence-mutant-2.txt",
+        "sha256": "35a170638545a6ea2d414d71a693e2d7d2e93335f699ad1222ebd39ab07ad49f"
+      },
+      {
+        "kind": "mutation",
+        "mutation": "turn a failure after delegated effect into a false refusal",
+        "exit_code": 1,
+        "log": "/tmp/van-registry-fence-mutant-3.txt",
+        "sha256": "490bfa8c1d14d5aea2b5e4cafbc16ae711676c65ac6dc8323056c24c31b339cf"
+      }
+    ]
+  },
+  "private_fixture_cleanup": {
+    "stopped": true,
+    "removed": true
+  },
+  "legacy_mutations": {
+    "identities": 374,
+    "edits": 383,
+    "preserved": true,
+    "current_anchor_preflight": "PASS; execution separate"
+  },
+  "whole_unit_acceptance": "NOT_ISSUED",
+  "safe_exposure_unlink_qualified": false,
+  "cross_host_revocation_qualified": false,
+  "remaining": [
+    "native owner resource-version and durable generic operation recovery",
+    "cross-host lease and exposure/funds-safe unlink",
+    "native readback and product/provider qualification",
+    "original whole-product scope and independent/production/handset gates"
+  ]
+}

@@ -1,0 +1,19 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+_ test_period_cannot_consume_a_closing_source_from_its_callers_writer[sqlite] __
+
+source = (<vati.core.ledger.Ledger object at 0x7f783c5382f0>, '9416990f89cc231045967018d529f8f2a4f42488499c86fb9f71bedc2f9c7f3b')
+
+    def test_period_cannot_consume_a_closing_source_from_its_callers_writer(source):
+        ledger,scope=source;before=ledger.head(),ledger.count()
+        with pytest.raises(RollbackFixture):
+            with ledger.atomic():
+                closing=closing_snapshot(ledger)
+>               with pytest.raises(LedgerError,match='committed_source'):
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E               Failed: DID NOT RAISE LedgerError
+
+trading/tests/test_funding_committed_reads.py:51: Failed
+=========================== short test summary info ============================
+FAILED trading/tests/test_funding_committed_reads.py::test_period_cannot_consume_a_closing_source_from_its_callers_writer[sqlite]
+1 failed, 1 deselected in 1.62s

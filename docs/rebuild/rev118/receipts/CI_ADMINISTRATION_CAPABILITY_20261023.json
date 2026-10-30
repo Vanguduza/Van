@@ -1,0 +1,32 @@
+{
+  "schema": "van.rebuild.ci-administration-capability/1",
+  "observed_at_utc": "2026-10-23T03:08:30.314536+00:00",
+  "repository_permissions_metadata": {
+    "Van": {
+      "private": false,
+      "admin": true
+    },
+    "dial-development-system": {
+      "private": true,
+      "admin": true
+    }
+  },
+  "api_results": [
+    {
+      "method": "GET",
+      "path": "repos/Vanguduza/Van/actions/secrets/DDS_CONTRACT_READ_DEPLOY_KEY",
+      "status": 403
+    },
+    {
+      "method": "GET",
+      "path": "repos/Vanguduza/Van/actions/secrets/public-key",
+      "status": 403
+    },
+    {
+      "method": "GET",
+      "path": "repos/Vanguduza/dial-development-system/keys",
+      "status": 403
+    }
+  ],
+  "meaning": "Repository account permission metadata does not grant the current connection access to secret/deploy-key administration. These are actual HTTP refusals, not automatic approval review rejections. No credentials or keys changed. Actions rerun is separately permitted: the specific Kotlin2dependency failure rerun returned201."
+}

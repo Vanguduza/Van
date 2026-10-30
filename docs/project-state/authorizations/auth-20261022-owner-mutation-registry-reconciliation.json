@@ -1,0 +1,29 @@
+{
+  "schema_version": 1,
+  "authorization_id": "auth-20261022-owner-mutation-registry-reconciliation",
+  "project": "van",
+  "authority": "OWNER_DERIVED",
+  "owner_instruction_sha256": "90d7fde72bcbd5524bfa567a69533bbbb99b8aea62cd5c30a9a3c4dc42e8083b",
+  "owner_instruction_excerpt": "opus is nolonger available finish building from the current state to completion",
+  "derivation": "Continuation of the owner-directed build, expressly resumed by the owner with proceed. The verified mutation preflight identifies 32 cases targeting retired source or incorrect roots. This bounded derivative permits retargeting the existing mutation registry and lexer helper to current implementations, preserving all 374 mutation identities, original invariants and valid unmutated controls. Any newly uncovered behavior defect remains subject to the existing build authorization and admission boundaries.",
+  "source": {
+    "kind": "owner_session_instruction",
+    "channel": "codex",
+    "owner_attested": true,
+    "device_signature_claimed": false,
+    "cryptographic_signature_claimed": false,
+    "signed_ingress_claimed": false
+  },
+  "issued_at_utc": "2026-10-22T03:48:37.844702+00:00",
+  "branch_scope": "ccr-9e07e1af-8mgz1p",
+  "authorized_paths": [
+    "tools/audit/mutation_suite.py",
+    "tools/audit/kotlin_reachability.py"
+  ],
+  "reusable": true,
+  "revoked": false,
+  "limitations": [
+    "Preserve all existing mutation identities and safety invariants; no silent deletion, inflated score, weakening of controls, or syntax failures represented as semantic proof.",
+    "No native authority, owner signature, independent certification, release admission, live financial activation or frozen blueprint modification."
+  ]
+}

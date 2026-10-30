@@ -19,7 +19,11 @@ from van_gateway.reasoning.calibration import (
     Verbosity,
 )
 from van_gateway.reasoning.kernel import ChallengeMode
-from van_gateway.understanding.owner_model import OwnerCognitiveModel, OwnerModelField
+from van_gateway.understanding.owner_model import (
+    ObservationOrigin,
+    OwnerCognitiveModel,
+    OwnerModelField,
+)
 
 
 async def seed_episodes(store, *names: str) -> dict[str, str]:
@@ -51,7 +55,8 @@ async def _engine_with(tmp_path, field=None, value=None):
         model = OwnerCognitiveModel(store)
         episodes = await seed_episodes(store, "m1")
         assertion = await model.observe(
-            owner_principal_id="owner", field=field, value=value, episode_ref=episodes["m1"]
+            owner_principal_id="owner", field=field, value=value, episode_ref=episodes["m1"],
+            origin=ObservationOrigin.SYSTEM_OBSERVED
         )
         await model.confirm(assertion.assertion_id)
     return RelationshipCalibrationEngine(store)
@@ -116,6 +121,7 @@ async def test_only_confirmed_preferences_change_behaviour(tmp_path):
         await model.observe(
             owner_principal_id="owner", field=OwnerModelField.COMMUNICATION_PREFERENCE,
             value="terse", episode_ref=episodes[name],
+            origin=ObservationOrigin.SYSTEM_OBSERVED,
         )
     engine = RelationshipCalibrationEngine(store)
     calibration = await engine.calibrate(owner_principal_id="owner")
@@ -126,6 +132,7 @@ async def test_only_confirmed_preferences_change_behaviour(tmp_path):
     await model.observe(
         owner_principal_id="owner", field=OwnerModelField.COMMUNICATION_PREFERENCE,
         value="terse", episode_ref=episodes["m3"],
+            origin=ObservationOrigin.SYSTEM_OBSERVED,
     )
     evidenced = await engine.calibrate(owner_principal_id="owner")
     assert evidenced.verbosity is Verbosity.TERSE
@@ -225,10 +232,12 @@ async def test_two_corrections_through_the_router_push_the_calibration_to_critic
     first = await api.owner_model.observe(
         owner_principal_id="owner", field=OwnerModelField.COMMUNICATION_PREFERENCE,
         value="verbose", episode_ref=episodes["m1"],
+            origin=ObservationOrigin.SYSTEM_OBSERVED,
     )
     second = await api.owner_model.observe(
         owner_principal_id="owner", field=OwnerModelField.REASONING_PREFERENCE,
         value="brief", episode_ref=episodes["m2"],
+            origin=ObservationOrigin.SYSTEM_OBSERVED,
     )
     async with client:
         before = await client.get("/v1/understanding")
@@ -262,10 +271,12 @@ async def test_confirm_and_reject_also_return_a_calibration_snapshot(tmp_path):
     confirmable = await api.owner_model.observe(
         owner_principal_id="owner", field=OwnerModelField.COMMUNICATION_PREFERENCE,
         value="terse", episode_ref=episodes["m1"],
+            origin=ObservationOrigin.SYSTEM_OBSERVED,
     )
     rejectable = await api.owner_model.observe(
         owner_principal_id="owner", field=OwnerModelField.REASONING_PREFERENCE,
         value="thorough", episode_ref=episodes["m2"],
+            origin=ObservationOrigin.SYSTEM_OBSERVED,
     )
     async with client:
         confirmed = await client.post(

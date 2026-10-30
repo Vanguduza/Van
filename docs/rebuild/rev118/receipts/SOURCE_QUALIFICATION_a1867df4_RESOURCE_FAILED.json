@@ -1,0 +1,140 @@
+{
+  "schema": "van.rebuild.source-qualification-resource-failure/1",
+  "source_head": "a1867df4312bd4d35299ec56b8368b2ba1280f05",
+  "observed_at_utc": "2026-10-24T09:07:56.037942+00:00",
+  "state": "STOPPED_AT_MAXFAIL_WITH_THREAD_EXHAUSTION_EVIDENCE",
+  "backend": {
+    "tests": 1015,
+    "failures": 4,
+    "errors": 1,
+    "skipped": 1,
+    "passed": 1009,
+    "seconds": 557.632,
+    "xml_sha256": "26e24b25183b3497dae71b50a6aea68ccecfc7ea6f942a10d4a1bff5c00ac200",
+    "findings": [
+      {
+        "case": "backend.tests.test_browser_guard_lost_regression::test_a_busy_renderer_cannot_make_the_lease_guard_forget_the_click[busy-20s-mutating]",
+        "kind": "failure",
+        "message": "AssertionError: the page's handler never ran: the case measured nothing\nassert False"
+      },
+      {
+        "case": "backend.tests.test_browser_guard_lost_regression::test_a_navigation_started_outside_the_page_between_calls_keeps_its_guard",
+        "kind": "failure",
+        "message": "AssertionError: assert (<van_harness_egress.GuardLease object at 0x7f1da033c8c0> is <van_harness_egress.GuardLease object at 0x7f1da033c8c0> and 'NETWORK_GUARD_UNAVAILABLE' is None)\n +  where 'NETWORK_GUARD_UNAVAILABLE' = <van_harness_egress.GuardLease object at 0x7f1da033c8c0>.pending"
+      },
+      {
+        "case": "backend.tests.test_browser_guard_lost_regression::test_a_freeze_that_did_not_land_is_retried",
+        "kind": "failure",
+        "message": "van_gateway.browser.adapters.BrowserAdapterError: BROWSER_HARNESS_UNAVAILABLE: Server disconnected without sending a response."
+      },
+      {
+        "case": "backend.tests.test_browser_guard_lost_regression::test_a_page_that_navigates_itself_between_calls_keeps_its_guard",
+        "kind": "error",
+        "message": "failed on setup with \"RuntimeError: can't start new thread\""
+      },
+      {
+        "case": "backend.tests.test_browser_guard_lost_regression::test_a_lease_the_guard_thread_gave_up_on_is_reported_at_release_and_resumed_not_replaced",
+        "kind": "failure",
+        "message": "RuntimeError: can't start new thread"
+      }
+    ]
+  },
+  "storage_audit": {
+    "schema": "van.source-storage-audit/1",
+    "forbidden_events": [],
+    "source_sha256": "d4e270150fb0da6e8d79b449dd0de68fd1f97b3ccea3d282f31d91297edbd495",
+    "root": "/workspace/van-autonomous-qualification-20261022/Van",
+    "scope": "SQLite opens, path-based writable opens and directory/link/rename/delete events under data and backend/data",
+    "limits": "Python audit events only; existing fd writes, native-library raw I/O and external processes are not an OS sandbox. Git state is checked separately."
+  },
+  "private_pg_cleanup": {
+    "stopped": true,
+    "removed": true
+  },
+  "browser_reproduction_first": {
+    "tests": 5,
+    "failures": 1,
+    "errors": 4,
+    "skipped": 0,
+    "passed": 0,
+    "seconds": 1.397,
+    "xml_sha256": "01db775099f11f68889d254233fbfcb2eeed4eac45b50e566d6cea3c53931a7b",
+    "findings": [
+      {
+        "case": "tests.test_browser_guard_lost_regression::test_a_busy_renderer_cannot_make_the_lease_guard_forget_the_click[busy-20s-mutating]",
+        "kind": "error",
+        "message": "failed on setup with \"websockets.exceptions.InvalidProxyStatus: proxy rejected connection: HTTP 403\""
+      },
+      {
+        "case": "tests.test_browser_guard_lost_regression::test_a_navigation_started_outside_the_page_between_calls_keeps_its_guard",
+        "kind": "error",
+        "message": "failed on setup with \"van_harness_egress.WorkerError: CHROMIUM_START_FAILED\""
+      },
+      {
+        "case": "tests.test_browser_guard_lost_regression::test_a_freeze_that_did_not_land_is_retried",
+        "kind": "error",
+        "message": "failed on setup with \"RuntimeError: can't start new thread\""
+      },
+      {
+        "case": "tests.test_browser_guard_lost_regression::test_a_page_that_navigates_itself_between_calls_keeps_its_guard",
+        "kind": "error",
+        "message": "failed on setup with \"RuntimeError: can't start new thread\""
+      },
+      {
+        "case": "tests.test_browser_guard_lost_regression::test_a_lease_the_guard_thread_gave_up_on_is_reported_at_release_and_resumed_not_replaced",
+        "kind": "failure",
+        "message": "RuntimeError: can't start new thread"
+      }
+    ]
+  },
+  "browser_reproduction_loopback_corrected": {
+    "tests": 5,
+    "failures": 1,
+    "errors": 4,
+    "skipped": 0,
+    "passed": 0,
+    "seconds": 16.236,
+    "xml_sha256": "c4ca9e93107c370e3683635a53ebbaa5e8fae35e7bff66b96caca6fed6084c37",
+    "findings": [
+      {
+        "case": "tests.test_browser_guard_lost_regression::test_a_busy_renderer_cannot_make_the_lease_guard_forget_the_click[busy-20s-mutating]",
+        "kind": "error",
+        "message": "failed on setup with \"TimeoutError: Page.enable\""
+      },
+      {
+        "case": "tests.test_browser_guard_lost_regression::test_a_navigation_started_outside_the_page_between_calls_keeps_its_guard",
+        "kind": "error",
+        "message": "failed on setup with \"RuntimeError: can't start new thread\""
+      },
+      {
+        "case": "tests.test_browser_guard_lost_regression::test_a_freeze_that_did_not_land_is_retried",
+        "kind": "error",
+        "message": "failed on setup with \"RuntimeError: can't start new thread\""
+      },
+      {
+        "case": "tests.test_browser_guard_lost_regression::test_a_page_that_navigates_itself_between_calls_keeps_its_guard",
+        "kind": "error",
+        "message": "failed on setup with \"RuntimeError: can't start new thread\""
+      },
+      {
+        "case": "tests.test_browser_guard_lost_regression::test_a_lease_the_guard_thread_gave_up_on_is_reported_at_release_and_resumed_not_replaced",
+        "kind": "failure",
+        "message": "RuntimeError: can't start new thread"
+      }
+    ]
+  },
+  "notes": [
+    "The full run contains three behavioral/browser failures plus explicit thread-creation errors. They are not recorded as passing or all attributed conclusively to infrastructure.",
+    "PID1 is a platform-owned tail process, not a child reaper; process inspection found26468zombies. No PID1 manipulation, privilege change or platform guard bypass was attempted.",
+    "The first isolated reproduction incorrectly sent loopback websocket connections to the inherited HTTP proxy. Its403results are retained, not treated as source findings. The corrected run preserves external proxies, adds loopback-only exclusions and reproduces Page.enable timeout plus thread failures.",
+    "A scoped subreaper now owns and reaps only one test command and its orphaned descendants. It cannot reap old PID1 zombies. A subsequent native-deal/control suite passed75/75 on unchanged candidate code when Chromium was inactive.",
+    "A fresh source run or clean hosted worker must resolve the browser findings; no full-backend qualification is issued. Trading was not run by the failed sequential driver."
+  ],
+  "subreaper_helper_sha256": "d3e76fe87241d3d0f0b18d5596f0b08980f8dac8770144382a34b3fde81f7d5a",
+  "log_sha256": {
+    "van-a1867df4-full-backend.txt": "e346522d7099b2383b7ccf7466851784285311976d849581d6cab3edbae575ec",
+    "van-a1867df4-browser-repro.txt": "bba75cc05b403f220669ff4cf3f1d3735a6c97c5ee77954eef6f43f05a3c5501",
+    "van-a1867df4-browser-repro-r1.txt": "ff2d7e05d5988cd99a1ad4d036f53d366ef5f4e4f58298f0cd91d271b57df87e",
+    "van-a1867df4-qualification-driver.txt": "92a2b2a927bb6c016f082637816b664cf4cd5cbd8cac4680ffb8b96081961050"
+  }
+}

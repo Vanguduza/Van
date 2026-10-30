@@ -49,36 +49,54 @@ class EventBus:
         supplies its own gets idempotency: publishing the same event twice after an ambiguous
         failure writes one row, because the unique index refuses the second.
         """
-        now_ms = int(time.time() * 1000) if occurred_at_ms is None else int(occurred_at_ms)
-        generated = event_id or f"evt_{uuid.uuid4().hex}"
         async with self.store.connection() as db:
-            cur = await db.execute(
-                """
-                INSERT INTO events(
-                  event_type, payload_json, created_at_unix,
-                  event_id, target_device_id, occurred_at_ms, mission_id, command_id, correlation_id
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-                -- The unique index on event_id is partial (`WHERE event_id IS NOT NULL`),
-                -- and SQLite matches a conflict target to a partial index only when the
-                -- predicate is repeated here. Without it this raises
-                -- "ON CONFLICT clause does not match any PRIMARY KEY or UNIQUE constraint"
-                -- at runtime, which is what three existing tests said the first time.
-                ON CONFLICT(event_id) WHERE event_id IS NOT NULL DO NOTHING
-                """,
-                (
-                    event_type, Store.dumps(payload), now_ms // 1000,
-                    generated, target_device_id, now_ms, mission_id, command_id, correlation_id,
-                ),
+            seq = await self.publish_in_transaction(
+                db, event_type, payload, target_device_id=target_device_id,
+                event_id=event_id, mission_id=mission_id, command_id=command_id,
+                correlation_id=correlation_id, occurred_at_ms=occurred_at_ms,
             )
             await db.commit()
-            if cur.rowcount == 0:
-                existing = await db.execute(
-                    "SELECT seq FROM events WHERE event_id = ?", (generated,)
-                )
-                row = await existing.fetchone()
-                if row is not None:
-                    return int(row["seq"])
-            return int(cur.lastrowid)
+            return seq
+
+    async def publish_in_transaction(
+        self, db, event_type: str, payload: dict[str, Any], *,
+        target_device_id: str | None = None, event_id: str | None = None,
+        mission_id: str | None = None, command_id: str | None = None,
+        correlation_id: str | None = None, occurred_at_ms: int | None = None,
+    ) -> int:
+        """Use the canonical envelope inside the caller's transaction; never commit it.
+
+        The caller owns rollback and commit. This lets a domain state transition,
+        event and existing-stream projection witness have one SQLite outcome.
+        """
+        now_ms = int(time.time() * 1000) if occurred_at_ms is None else int(occurred_at_ms)
+        generated = event_id or f"evt_{uuid.uuid4().hex}"
+        cur = await db.execute(
+            """
+            INSERT INTO events(
+              event_type, payload_json, created_at_unix,
+              event_id, target_device_id, occurred_at_ms, mission_id, command_id, correlation_id
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+            -- The unique index on event_id is partial (`WHERE event_id IS NOT NULL`),
+            -- and SQLite matches a conflict target to a partial index only when the
+            -- predicate is repeated here. Without it this raises
+            -- "ON CONFLICT clause does not match any PRIMARY KEY or UNIQUE constraint"
+            -- at runtime, which is what three existing tests said the first time.
+            ON CONFLICT(event_id) WHERE event_id IS NOT NULL DO NOTHING
+            """,
+            (
+                event_type, Store.dumps(payload), now_ms // 1000,
+                generated, target_device_id, now_ms, mission_id, command_id, correlation_id,
+            ),
+        )
+        if cur.rowcount == 0:
+            existing = await db.execute(
+                "SELECT seq FROM events WHERE event_id = ?", (generated,)
+            )
+            row = await existing.fetchone()
+            if row is not None:
+                return int(row["seq"])
+        return int(cur.lastrowid)
 
     async def replay(self, device_id: str, after_seq: int) -> dict[str, Any]:
         # P3-OBS-002 — event-bus lag is Gate 11's name for the thing an owner

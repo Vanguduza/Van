@@ -1,0 +1,146 @@
+{
+  "baseline_commit": "6574671a381d48199593fb054f69e30ee7632c70",
+  "certification_scope": "repository implementation closure only; runtime/shadow/live require independent external evidence",
+  "external_evidence": {
+    "runtime_evidence_present": false,
+    "runtime_qualification": "artifacts/trading/rev51/runtime_qualification.json",
+    "shadow_evidence_present": false,
+    "shadow_qualification": "artifacts/trading/rev51/shadow_qualification.json"
+  },
+  "gates": {
+    "authority_singletons": {
+      "detail": {
+        "adapter_submit_paths": [
+          "trading/vati/execution/router.py"
+        ],
+        "risk_authority_classes": [
+          "trading/vati/risk/authority.py"
+        ]
+      },
+      "ok": true
+    },
+    "cognition_qualification_hooks": {
+      "detail": {
+        "blind_review": true,
+        "decision_exam": true
+      },
+      "ok": true
+    },
+    "cognition_runtime_hooks": {
+      "detail": {
+        "context_compile": true,
+        "handoff": true,
+        "performance_after_outcome": true,
+        "persistent_runtime": true,
+        "post_risk_wake": true,
+        "result_normalise": true,
+        "shadow_book": true,
+        "shadow_translate": true,
+        "world_projection": true
+      },
+      "ok": true
+    },
+    "conformal_authority_hook": {
+      "detail": {
+        "before_sizing": true,
+        "gate_dependency": true
+      },
+      "ok": true
+    },
+    "declared_files_exist": {
+      "detail": {
+        "missing_modules": [],
+        "missing_tests": []
+      },
+      "ok": true
+    },
+    "event_runtime_hooks": {
+      "detail": {
+        "calendar_consumer": true,
+        "episode_close": true,
+        "horizon_callback": true,
+        "normalise": true,
+        "service_feed": true,
+        "surprise": true
+      },
+      "ok": true
+    },
+    "first_pass_live_safety": {
+      "detail": {
+        "expansion_mode": "Mode.SHADOW",
+        "g11_live_promotion_guard": true,
+        "live_advisory_enabled_literal": "False",
+        "registry": {
+          "cognition_mode": "OFFLINE_EVOLUTION+SHADOW_LIVE",
+          "live_advisory": "DISABLED",
+          "live_status": "NOT_CLAIMED"
+        }
+      },
+      "ok": true
+    },
+    "invariant_registry": {
+      "detail": {
+        "missing": []
+      },
+      "ok": true
+    },
+    "non_bypassable_execution": {
+      "detail": {
+        "account_runtime_enforced": true,
+        "legacy_runtime_enforced": true,
+        "router_pretrade": true,
+        "router_route_resolution": true,
+        "router_style_selection": true
+      },
+      "ok": true
+    },
+    "offline_evolution_hooks": {
+      "detail": {
+        "admission": true,
+        "archive": true,
+        "growth": true,
+        "mission_orchestration": true,
+        "proposal": true,
+        "synthesis": true,
+        "yield": true
+      },
+      "ok": true
+    },
+    "owner_surface_hooks": {
+      "detail": [],
+      "ok": true
+    },
+    "post_entry_runtime_hooks": {
+      "detail": {
+        "attribution": true,
+        "envelope": true,
+        "family": true,
+        "health": true,
+        "preservation": true,
+        "risk_block": true,
+        "router_preservation": true,
+        "shadow_expansion": true
+      },
+      "ok": true
+    },
+    "registry_complete": {
+      "detail": {
+        "expected": 44,
+        "extra": [],
+        "missing": [],
+        "observed": 44
+      },
+      "ok": true
+    }
+  },
+  "live_status": "NOT_CLAIMED",
+  "report_version": "rev51-certification/1.0.0",
+  "revision": "5.1",
+  "states": {
+    "IMPLEMENTATION_CLOSED": true,
+    "LIVE_ELIGIBLE": false,
+    "RUNTIME_QUALIFIED": false,
+    "SHADOW_QUALIFIED": false,
+    "SPEC_CLOSED": true
+  }
+}

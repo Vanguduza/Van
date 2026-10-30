@@ -1,0 +1,29 @@
+{
+  "source_commit": "42d8b386e61f2ea26730d4232cab494b3173320e",
+  "artifact_id": 12799871385,
+  "bytes": 185452,
+  "sha256": "68ee64567319bc62be74fd7ed39c23de1b820e5f787aa7027a366a2818c30d78",
+  "xml": {
+    "extracted/trading-source-report.xml": {
+      "cases": 4790,
+      "passed": 4789,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 1
+    },
+    "extracted/voice-source-report.xml": {
+      "cases": 117,
+      "passed": 117,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "extracted/postgres-ledger-report.xml": {
+      "cases": 26,
+      "passed": 26,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0
+    }
+  }
+}

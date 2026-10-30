@@ -1,0 +1,374 @@
+{
+  "cases": [
+    {
+      "detected": true,
+      "examples": [
+        "INVALID_TRUTH_REQUIREMENTS:VAN-PT-01",
+        "PARENT_REQUIREMENTS_REMOVED:VAN-NX-001",
+        "PREPARED_OBJECT_LOCK_MISMATCH:requirements"
+      ],
+      "finding_count": 3,
+      "id": "DELETE_PARENT_REQUIREMENT"
+    },
+    {
+      "detected": true,
+      "examples": [
+        "PARENT_REQUIREMENTS_CHANGED:VAN-NX-001",
+        "PREPARED_OBJECT_LOCK_MISMATCH:requirements"
+      ],
+      "finding_count": 2,
+      "id": "ALTER_PARENT_REQUIREMENT"
+    },
+    {
+      "detected": true,
+      "examples": [
+        "INVALID_TRUTH_REQUIREMENTS:VAN-PT-SO-01",
+        "INVALID_TRUTH_REQUIREMENTS:VAN-PT-SO-02",
+        "MANDATORY_SCOPE_LOSS:VAN-SO-"
+      ],
+      "finding_count": 5,
+      "id": "DELETE_SELF_OPTIMIZATION_OBJECTIVE"
+    },
+    {
+      "detected": true,
+      "examples": [
+        "INVALID_TRUTH_REQUIREMENTS:VAN-PT-CRYPTO-01",
+        "MANDATORY_SCOPE_LOSS:VAN-CRYPTO-",
+        "NEW_REQUIREMENT_MISSING_OR_CHANGED:VAN-CRYPTO-001"
+      ],
+      "finding_count": 4,
+      "id": "DELETE_CRYPTO_EXECUTION"
+    },
+    {
+      "detected": true,
+      "examples": [
+        "DUPLICATE_REQUIREMENT:VAN-NX-001"
+      ],
+      "finding_count": 1,
+      "id": "DUPLICATE_REQUIREMENT"
+    },
+    {
+      "detected": true,
+      "examples": [
+        "PARENT_ACTIONS_REMOVED:LAC-349",
+        "PREPARED_OBJECT_LOCK_MISMATCH:actions"
+      ],
+      "finding_count": 2,
+      "id": "DELETE_LEGACY_ACTION"
+    },
+    {
+      "detected": true,
+      "examples": [
+        "PARENT_CONTEXT_IDS_CHANGED",
+        "PREPARED_OBJECT_LOCK_MISMATCH:surfaces"
+      ],
+      "finding_count": 2,
+      "id": "DELETE_CONTEXT"
+    },
+    {
+      "detected": true,
+      "examples": [
+        "PARENT_TESTS_REMOVED:T-BE-001-POS",
+        "PREPARED_OBJECT_LOCK_MISMATCH:tests"
+      ],
+      "finding_count": 2,
+      "id": "DELETE_PARENT_ACCEPTANCE_TEST"
+    },
+    {
+      "detected": true,
+      "examples": [
+        "PREPARED_OBJECT_LOCK_MISMATCH:tests",
+        "REQUIREMENT_WITHOUT_TEST:VAN-EL-007"
+      ],
+      "finding_count": 2,
+      "id": "DELETE_NEW_LOOP_ACCEPTANCE"
+    },
+    {
+      "detected": true,
+      "examples": [
+        "FABRICATED_APPLICATION_RESULT:T-BE-001-POS",
+        "PARENT_TESTS_CHANGED:T-BE-001-POS",
+        "PREPARED_OBJECT_LOCK_MISMATCH:tests"
+      ],
+      "finding_count": 3,
+      "id": "MARK_APPLICATION_TEST_PASSED"
+    },
+    {
+      "detected": true,
+      "examples": [
+        "BACKEND_DENOMINATOR_MISMATCH",
+        "INVALID_REQUIREMENT_OWNER:VAN-CX-006",
+        "INVALID_REQUIREMENT_OWNER:VAN-CX-008"
+      ],
+      "finding_count": 94,
+      "id": "DELETE_UNIT"
+    },
+    {
+      "detected": true,
+      "examples": [
+        "DUPLICATE_UNIT:PRE-001"
+      ],
+      "finding_count": 1,
+      "id": "DUPLICATE_UNIT"
+    },
+    {
+      "detected": true,
+      "examples": [
+        "CYCLE:PRE-001",
+        "DEPENDENCY_ORDER_OR_CYCLE:PRE-001",
+        "PREPARED_OBJECT_LOCK_MISMATCH:units"
+      ],
+      "finding_count": 3,
+      "id": "CYCLE"
+    },
+    {
+      "detected": true,
+      "examples": [
+        "FRONTEND_BEFORE_BG:UX-001",
+        "PREPARED_OBJECT_LOCK_MISMATCH:units"
+      ],
+      "finding_count": 2,
+      "id": "FRONTEND_BEFORE_BG"
+    },
+    {
+      "detected": true,
+      "examples": [
+        "BACKEND_DENOMINATOR_MISMATCH"
+      ],
+      "finding_count": 1,
+      "id": "BG_BACKEND_DENOMINATOR_REMOVAL"
+    },
+    {
+      "detected": true,
+      "examples": [
+        "LEARNING_BEFORE_EXECUTION_OR_EVALUATOR",
+        "PREPARED_OBJECT_LOCK_MISMATCH:units"
+      ],
+      "finding_count": 2,
+      "id": "LEARNING_BEFORE_EVALUATOR"
+    },
+    {
+      "detected": true,
+      "examples": [
+        "FALSE_UNIT_COMPLETION:BE-001",
+        "PREPARED_OBJECT_LOCK_MISMATCH:units"
+      ],
+      "finding_count": 2,
+      "id": "FALSE_UNIT_COMPLETION"
+    },
+    {
+      "detected": true,
+      "examples": [
+        "UNJUSTIFIED_NEW_DAEMON_REQUIREMENT"
+      ],
+      "finding_count": 1,
+      "id": "ADD_DAEMON_REQUIREMENT"
+    },
+    {
+      "detected": true,
+      "examples": [
+        "FABRICATED_CERTIFICATE:f15"
+      ],
+      "finding_count": 1,
+      "id": "FORGE_F15"
+    },
+    {
+      "detected": true,
+      "examples": [
+        "FABRICATED_CERTIFICATE:bg"
+      ],
+      "finding_count": 1,
+      "id": "FORGE_BG"
+    },
+    {
+      "detected": true,
+      "examples": [
+        "UNAUTHORIZED_LIVE_EXPLORATION"
+      ],
+      "finding_count": 1,
+      "id": "DEFAULT_LIVE_EXPLORATION"
+    },
+    {
+      "detected": true,
+      "examples": [
+        "OPTIMIZER_FINANCIAL_AUTHORITY_LEAK:WITHDRAW_FUNDS"
+      ],
+      "finding_count": 1,
+      "id": "OPTIMIZER_WITHDRAWAL_RIGHT"
+    },
+    {
+      "detected": true,
+      "examples": [
+        "UNAUTHORIZED_PROMOTION"
+      ],
+      "finding_count": 1,
+      "id": "UNQUALIFIED_PROMOTION"
+    },
+    {
+      "detected": true,
+      "examples": [
+        "UNMAPPED_PRODUCT_TRUTH:VAN-PT-LEAN-01"
+      ],
+      "finding_count": 1,
+      "id": "REMOVE_PRODUCT_TRUTH_MAP"
+    },
+    {
+      "detected": true,
+      "examples": [
+        "MISSING_LATE_FACT_RECONCILIATION:RECONCILED"
+      ],
+      "finding_count": 1,
+      "id": "DROP_LATE_FILL_RECONCILIATION"
+    },
+    {
+      "detected": true,
+      "examples": [
+        "DUPLICATE_MACHINE:SO-PARENT"
+      ],
+      "finding_count": 1,
+      "id": "DUPLICATE_MACHINE"
+    },
+    {
+      "detected": true,
+      "examples": [
+        "DUPLICATE_STATE:SO-PARENT"
+      ],
+      "finding_count": 1,
+      "id": "DUPLICATE_STATE"
+    },
+    {
+      "detected": true,
+      "examples": [
+        "DUPLICATE_TRANSITION:SO-PARENT-T001"
+      ],
+      "finding_count": 1,
+      "id": "DUPLICATE_TRANSITION"
+    },
+    {
+      "detected": true,
+      "examples": [
+        "UNKNOWN_TRANSITION_STATE:SO-PARENT",
+        "UNREACHABLE_STATE:SO-PARENT:CANCEL_REQUESTED,PLANNED,RESERVED,WORKING"
+      ],
+      "finding_count": 2,
+      "id": "UNKNOWN_TRANSITION_STATE"
+    },
+    {
+      "detected": true,
+      "examples": [
+        "MISSING_INDEPENDENT_INVARIANT"
+      ],
+      "finding_count": 1,
+      "id": "REMOVED_INDEPENDENT_AUTHORITY_INVARIANT"
+    },
+    {
+      "detected": true,
+      "examples": [
+        "INVALID_PROOF_SET:SO-CHILD-T001",
+        "INVALID_PROOF_SET:SO-PARENT-T001",
+        "INVALID_PROOF_SET:SO-PARENT-T013"
+      ],
+      "finding_count": 3,
+      "id": "REMOVE_TYPED_PROOF"
+    },
+    {
+      "detected": true,
+      "examples": [
+        "FALSE_LOCK_AUTHORITY"
+      ],
+      "finding_count": 1,
+      "id": "PREPARED_LOCK_RELABELLED_SIGNED"
+    },
+    {
+      "detected": true,
+      "examples": [
+        "SOURCE_COVERAGE_INCOMPLETE"
+      ],
+      "finding_count": 1,
+      "id": "SOURCE_GAP_DROPPED"
+    },
+    {
+      "detected": true,
+      "examples": [
+        "CRITICAL_EDGE_PROOF_MISSING:SO-CHILD-T002:COMMAND_DURABLE,FEASIBLE_ACTION,FENCE_CURRENT,GRANT_CURRENT,POLICY_QUALIFIED,RESERVATION_CURRENT"
+      ],
+      "finding_count": 1,
+      "id": "SHORTCUT_SO-CHILD_SUBMITTING"
+    },
+    {
+      "detected": true,
+      "examples": [
+        "CRITICAL_EDGE_PROOF_MISSING:SO-CHILD-T004:VENUE_FILL"
+      ],
+      "finding_count": 1,
+      "id": "SHORTCUT_SO-CHILD_FILLED"
+    },
+    {
+      "detected": true,
+      "examples": [
+        "CRITICAL_EDGE_PROOF_MISSING:SO-PARENT-T010:CASH_RECONCILED,EXPOSURE_RECONCILED,PROTECTION_RESOLVED"
+      ],
+      "finding_count": 1,
+      "id": "SHORTCUT_SO-PARENT_ECONOMICALLY_RECONCILED"
+    },
+    {
+      "detected": true,
+      "examples": [
+        "CRITICAL_EDGE_PROOF_MISSING:SO-EVIDENCE-T003:COHORT_COMPATIBLE,MATURE_OBSERVATION,NOT_APPLIED,UPDATE_RULE_QUALIFIED"
+      ],
+      "finding_count": 1,
+      "id": "SHORTCUT_SO-EVIDENCE_APPLIED"
+    },
+    {
+      "detected": true,
+      "examples": [
+        "CRITICAL_EDGE_PROOF_MISSING:SO-CANDIDATE-T009:INDEPENDENT_QUALIFICATION,PROMOTION_AUTHORIZED"
+      ],
+      "finding_count": 1,
+      "id": "SHORTCUT_SO-CANDIDATE_AUTHORIZED"
+    },
+    {
+      "detected": true,
+      "examples": [
+        "CRITICAL_EDGE_PROOF_MISSING:SO-BINDING-T002:ACTIVATION_READBACK,POLICY_QUALIFIED,PROMOTION_AUTHORIZED"
+      ],
+      "finding_count": 1,
+      "id": "SHORTCUT_SO-BINDING_ACTIVE"
+    },
+    {
+      "detected": true,
+      "id": "DUPLICATE_JSON_KEY"
+    },
+    {
+      "detected": true,
+      "id": "CRYPTO_WITHDRAWAL_ENABLED"
+    },
+    {
+      "detected": true,
+      "id": "CRYPTO_SPOT_SCOPE_REMOVED"
+    },
+    {
+      "detected": true,
+      "id": "UNKNOWN_SCHEMA_FIELD"
+    },
+    {
+      "detected": true,
+      "id": "NEGATIVE_QUANTITY"
+    },
+    {
+      "detected": true,
+      "id": "NONFINITE_MONEY"
+    },
+    {
+      "detected": true,
+      "id": "MISSING_NONFILL_IS_NOT_ZERO"
+    },
+    {
+      "detected": true,
+      "id": "CONFLICTING_DUPLICATE_OUTCOME"
+    }
+  ],
+  "detected": 47,
+  "scope": "ADVERSARIAL_DOCUMENT_AND_SYNTHETIC_FIXTURE_CHECKS_ONLY",
+  "total": 47
+}

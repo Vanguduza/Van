@@ -138,6 +138,84 @@ async def test_a_plain_text_webhook_response_is_still_a_run():
     assert await client.run_workflow("wf-1", {}) == {"body": "OK"}
 
 
+@pytest.mark.parametrize("exception,code", [
+    (httpx.ReadTimeout("internal detail"), "N8N_TIMEOUT"),
+    (httpx.ConnectError("internal detail"), "N8N_UNREACHABLE"),
+])
+async def test_webhook_transport_failure_is_typed_and_never_retried(exception, code):
+    posts = []
+
+    def handler(request):
+        if request.method == "GET":
+            return httpx.Response(200, json={"nodes": [
+                {"type": "n8n-nodes-base.webhook", "parameters": {"path": WEBHOOK_PATH}}
+            ]})
+        posts.append(request)
+        raise exception
+
+    with pytest.raises(N8nClientError) as raised:
+        await _client(httpx.MockTransport(handler)).run_workflow("wf-1", {"capability_grant": "single-use"})
+    assert raised.value.code == code
+    assert str(raised.value) == code
+    assert len(posts) == 1
+
+
+@pytest.mark.parametrize("redirect_at", ["management", "webhook"])
+async def test_redirect_is_not_a_successful_management_or_webhook_operation(redirect_at):
+    seen = []
+
+    def handler(request):
+        seen.append(request)
+        if redirect_at == "management" or request.method == "POST":
+            return httpx.Response(302, headers={"Location": "http://8.8.8.8/stolen"})
+        return httpx.Response(200, json={"nodes": [
+            {"type": "n8n-nodes-base.webhook", "parameters": {"path": WEBHOOK_PATH}}
+        ]})
+
+    with pytest.raises(N8nClientError) as raised:
+        await _client(httpx.MockTransport(handler)).run_workflow("wf-1", {})
+    assert raised.value.code == "AUTOMATION_UPSTREAM_REDIRECT"
+    assert all(request.url.host == "127.0.0.1" for request in seen)
+
+
+async def test_configured_webhook_cannot_send_run_grants_to_public_host():
+    seen = []
+
+    def handler(request):
+        seen.append(request)
+        return httpx.Response(200, json={"nodes": [
+            {"type": "n8n-nodes-base.webhook", "parameters": {"path": WEBHOOK_PATH}}
+        ]})
+
+    client = _client(httpx.MockTransport(handler))
+    client.webhook_base_url = "https://8.8.8.8"
+    with pytest.raises(N8nClientError) as raised:
+        await client.run_workflow("wf-1", {"capability_grant": "single-use"})
+    assert raised.value.code == "AUTOMATION_MANAGEMENT_HOST_NOT_PRIVATE"
+    assert len(seen) == 1
+    assert seen[0].method == "GET"
+
+
+async def test_runtime_version_reads_real_n8n_frontend_settings_endpoint():
+    requests = []
+
+    def handler(request):
+        requests.append(request)
+        if request.url.path != "/rest/settings":
+            return httpx.Response(404)
+        return httpx.Response(200, json={"data": {"versionCli": "2.39.7"}})
+
+    assert await _client(httpx.MockTransport(handler)).runtime_version() == "2.39.7"
+    assert len(requests) == 1
+
+
+@pytest.mark.parametrize("payload", [[], {"data": []}, {"data": {"versionCli": 42}}, {"data": {}}])
+async def test_runtime_version_malformed_response_is_a_typed_failure(payload):
+    with pytest.raises(N8nClientError) as raised:
+        await _client(httpx.MockTransport(lambda request: httpx.Response(200, json=payload))).runtime_version()
+    assert raised.value.code == "AUTOMATION_RESPONSE_MALFORMED"
+
+
 # ---------------------------------------------------------------- P3-OPS-006
 
 @pytest.mark.asyncio

@@ -1,0 +1,59 @@
+{
+  "artifact_id": 12853456941,
+  "metadata_workflow_run": {
+    "id": 40772084829,
+    "repository_id": 1369211561,
+    "head_repository_id": 1369211561,
+    "head_branch": "ccr-9e07e1af-8mgz1p",
+    "head_sha": "3bec9a18e7b51f73a19c872c13e642138d27d41e"
+  },
+  "archive_bytes": 200278,
+  "archive_sha256": "da63ef5c03c97eba9d50176a8867ac0c7e5b949833f5667cfa47468b038a25d5",
+  "bytes_digest_CRC_and_safe_unique_paths_verified": true,
+  "members": {
+    "postgres-ledger-report.xml": {
+      "bytes": 4452,
+      "sha256": "4ab6af9fc63aa89d52c1e9b65a62ee3edac36875c9cd598b8e1298517a38914c"
+    },
+    "trading-source-report.xml": {
+      "bytes": 836683,
+      "sha256": "058d02f65172921d4dc9a294e1feabb763afd3b3b301fee9c044de07a2112f85"
+    },
+    "trading-source.log": {
+      "bytes": 705160,
+      "sha256": "11ae4b380af8fa42b8ee2c31275d970a76e5317fe3ba24a91e5fda168717120b"
+    },
+    "voice-source-report.xml": {
+      "bytes": 17643,
+      "sha256": "136a12215b954d0c9962d2a92c63f8cf7366a63ad4b5f27e54ef9da8cedba790"
+    }
+  },
+  "junit": {
+    "postgres-ledger-report.xml": {
+      "cases": 26,
+      "passed": 26,
+      "failure": 0,
+      "error": 0,
+      "skipped": 0
+    },
+    "trading-source-report.xml": {
+      "cases": 5220,
+      "passed": 5219,
+      "failure": 0,
+      "error": 0,
+      "skipped": 1
+    },
+    "voice-source-report.xml": {
+      "cases": 117,
+      "passed": 117,
+      "failure": 0,
+      "error": 0,
+      "skipped": 0
+    }
+  },
+  "declared_skips": [
+    "dial-new checkout not available (set DIAL_REPO)"
+  ],
+  "source_binding": "ORIGINAL_WORKFLOW_HEAD_METADATA_VERIFIED_CHECKOUT_LOG_PENDING",
+  "native_or_production_qualification": false
+}

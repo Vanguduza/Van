@@ -1,0 +1,42 @@
+{
+  "at_utc": "2026-10-30T12:36:17.502381+00:00",
+  "source_parent": "0aa3bfc19cd7d0aa285d8b897ec1aa61ef157fd7",
+  "source_working_tree_packet": "native-close-cost-provenance; family source unchanged",
+  "members": [
+    {
+      "member_id": "root",
+      "role": "ROOT",
+      "quantity": "10",
+      "price": "100",
+      "occurred_ms": 1000,
+      "trade_intent_id": "",
+      "stop": null
+    },
+    {
+      "member_id": "first-exit",
+      "role": "PARTIAL_EXIT",
+      "quantity": "5",
+      "price": "110",
+      "occurred_ms": 2000,
+      "trade_intent_id": "",
+      "stop": null
+    },
+    {
+      "member_id": "scale",
+      "role": "SCALE_IN",
+      "quantity": "5",
+      "price": "120",
+      "occurred_ms": 3000,
+      "trade_intent_id": "",
+      "stop": null
+    }
+  ],
+  "actual_average_entry": "106.6666666666666666666666667",
+  "expected_remaining_average_entry": "110",
+  "actual_unrealised_at_130": "233.3333333333333333333333330",
+  "expected_unrealised_at_130": "200",
+  "actual_realised_money": "50",
+  "expected_realised_money": "50",
+  "financial_effect": false,
+  "next_source_candidate_only": true
+}

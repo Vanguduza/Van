@@ -1,0 +1,25 @@
+{
+  "command": [
+    "env",
+    "PYTHONPATH=backend:backend/tests:trading:trading/tests:.",
+    "/workspace/van-backend-venv-20261025/bin/python",
+    "tools/rebuild/source_storage_audit.py",
+    "--report",
+    "/workspace/van-native-entry-pending-r1-20261028-audit.json",
+    "trading/tests/test_native_entry_volume.py",
+    "trading/tests/test_native_fee_terms.py",
+    "trading/tests/test_physical_pending_risk.py",
+    "trading/tests/test_physical_order_exposure.py",
+    "--junitxml=/workspace/van-native-entry-pending-r1-20261028.xml",
+    "-q"
+  ],
+  "cwd": "/workspace/van-review-2026-10-18/publish",
+  "controller_pid": 795077,
+  "started_at_utc": "2026-10-28T21:53:10.400681+00:00",
+  "timeout_seconds": 180,
+  "state": "COMPLETED",
+  "command_pid": 795080,
+  "exit": 0,
+  "adopted_children_reaped": [],
+  "finished_at_utc": "2026-10-28T21:53:14.159615+00:00"
+}

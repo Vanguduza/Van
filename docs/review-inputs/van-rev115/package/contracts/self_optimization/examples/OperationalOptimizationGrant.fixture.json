@@ -1,0 +1,46 @@
+{
+  "allowed_methods": [
+    {
+      "algorithm_id": "FIXTURE_ALGORITHM_ID",
+      "algorithm_version": "FIXTURE_ALGORITHM_VERSION",
+      "artifact_sha256": "1111111111111111111111111111111111111111111111111111111111111111",
+      "joint_parameter_profile": "FIXTURE_JOINT_PARAMETER_PROFILE",
+      "qualification_ref": "FIXTURE_QUALIFICATION_REF"
+    }
+  ],
+  "allowed_operations": [
+    "SELECT_QUALIFIED_METHOD",
+    "ADJUST_QUALIFIED_PROFILE",
+    "QUALIFIED_FALLBACK"
+  ],
+  "authorization_ref": "FIXTURE_AUTHORIZATION_REF",
+  "environment": "FIXTURE",
+  "estimator_rule_ref": "FIXTURE_ESTIMATOR_RULE_REF",
+  "evidence_use_policy_ref": "FIXTURE_EVIDENCE_USE_POLICY_REF",
+  "expires_at_ms": 2000,
+  "fallback_order": [
+    "FIXTURE_METHOD"
+  ],
+  "financial_authority_source": "EXISTING_OWNER_ACCOUNT_RISK_MANDATE",
+  "mandatory_risk_ref": "FIXTURE_MANDATORY_RISK_REF",
+  "max_switches_per_parent": 1,
+  "no_new_policy_promotion": true,
+  "no_withdrawal_authority": true,
+  "policy_artifact_sha256": "1111111111111111111111111111111111111111111111111111111111111111",
+  "qualification_ref": "FIXTURE_QUALIFICATION_REF",
+  "qualified_at_ms": 1000,
+  "record_id": "FIXTURE_OperationalOptimizationGrant",
+  "record_type": "OperationalOptimizationGrant",
+  "revocation_epoch": 0,
+  "schema_version": 2,
+  "scope": {
+    "account_id": "FIXTURE_ACCOUNT",
+    "market_type": "CRYPTO_SPOT",
+    "ownership": "OWNER_MANUAL",
+    "product_id": "FIXTURE_PRODUCT_ID",
+    "scope_hash": "1111111111111111111111111111111111111111111111111111111111111111",
+    "strategy_id": "FIXTURE_STRATEGY_ID",
+    "venue_id": "FIXTURE_VENUE"
+  },
+  "valid_from_ms": 1000
+}

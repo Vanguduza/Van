@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.dial.van.voice.AcousticDeliveryTest" tests="6" skipped="0" failures="0" errors="0" timestamp="2026-10-27T05:23:24" hostname="runnervmtai0g" time="0.033">
+  <properties/>
+  <testcase name="smallRealKeywordIsAdmittedButSmallModelIsRefused()" classname="com.dial.van.voice.AcousticDeliveryTest" time="0.011"/>
+  <testcase name="failedCopyPublishesNothingAndRetryInstallsExactBytes()" classname="com.dial.van.voice.AcousticDeliveryTest" time="0.018"/>
+  <testcase name="manifestPinAndBoundedReadRefuseBeforeInstalling()" classname="com.dial.van.voice.AcousticDeliveryTest" time="0.001"/>
+  <testcase name="traversalAndDuplicatePathsRefuseManifest()" classname="com.dial.van.voice.AcousticDeliveryTest" time="0.002"/>
+  <testcase name="genericSpeakerAssetDoesNotClaimOwnerEnrollment()" classname="com.dial.van.voice.AcousticDeliveryTest" time="0.0"/>
+  <testcase name="byteCountAndDigestMustBothMatch()" classname="com.dial.van.voice.AcousticDeliveryTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

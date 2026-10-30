@@ -1,0 +1,71 @@
+{
+  "schema_version": 1,
+  "status": "CURRENT_SUPPORTED_SOURCE_REGISTRY_LOCAL_VALIDATION_PASS",
+  "production_freeze": {
+    "path": "docs/audit/validation/van-production-source-freeze-2026-10-07.json",
+    "sha256": "29c055fe86b0d3057b4975dc3a5a8fda1db74d8973de6f670096eedc16e86384"
+  },
+  "android_receipt": {
+    "path": "docs/audit/validation/android-owner-controls-final-receipt-2026-10-07.json",
+    "sha256": "443c57f152df18656c228c0cca5cd38737ab1aa6588d56ae49a7ebcc37175d28"
+  },
+  "source_bound_registry_counts": {
+    "features": 42,
+    "functions": 77,
+    "screens_and_hosted_surfaces": 70,
+    "endpoints": 307,
+    "schema_components": 165,
+    "prepared_acceptance_cases": 726
+  },
+  "functional_feature_status_counts": {
+    "SOURCE_WIRED_REQUIRES_ACCEPTANCE": 30,
+    "EXTERNAL_CONTRACT_OR_ASSET_REQUIRED": 4,
+    "SOURCE_WIRING_INCOMPLETE": 8
+  },
+  "local_contract_checks": {
+    "tests": 98,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "passed": 98,
+    "xml": "docs/audit/validation/owner-registry-artemis-final-contracts-2026-10-07.xml",
+    "xml_sha256": "83c66287363a656191688b4e2e767ee80d3bfe487a76272084b1c11ab54644b1",
+    "count_scope": "Focused subset overlaps full contracts and is excluded from disjoint aggregate."
+  },
+  "artifact_hashes": {
+    "registries/owner_features.json": "8941ab59ee5628f2eed022cdcf98d2eb90c1cdbf4b21ce1d376728afbfbd7ef9",
+    "registries/owner_screens.json": "b7d30bfbc95985ea53870916b6fd10f2bdb0d1757cd5b5b2632811e94f11dd75",
+    "registries/owner_endpoints.json": "5f9c8a897a54590b7ec1b2faa62a5f150d86dc381e6e5bc93364db6eacb8ec31",
+    "registries/owner_endpoint_schemas.json": "efe5c8bbaf061598f7528041f0335b049ba8e5c78dbeef8baf3a4147785a426d",
+    "docs/audit/OWNER_FRONTEND_CONTRACT.html": "7e70e8e18a27dd64e6c83744f4eab8ff53efdf9cefcb2bc0e9bb45bde30be088",
+    "docs/audit/VAN_ARTEMIS_ACCEPTANCE_PLAN_2026-10-07.json": "beb0ca1e4bf7813c21a6e8dc4df9fa7b4cf9448f96ab6eb7dffb2a72da03b30b",
+    "docs/audit/VAN_ARTEMIS_LIVE_READINESS_2026-10-07.json": "33e9f348a3b9ceb1da4ffb84e7de6e3c4b867b022f83043dd82904e19ed0e5f6",
+    "tests/contracts/test_owner_redesign_registry.py": "bb24753469962450515bfae16121871fe0ee785350ddb34045169be5512611f5",
+    "tests/contracts/test_owner_endpoint_registry.py": "38bed91c7f3df85519bf3aa2cf321b09ea0af276cd19e9f67b93c6246c4ebce1",
+    "tests/contracts/test_stored_command_is_deliverable.py": "bf7174339a0316557d73008684b515cd6c344289509e54a3cf187f8f1d207f3d",
+    "tests/contracts/test_artemis_acceptance_plan.py": "3ea2f8c73898a8f04dcecee223f94277cd04be4b1481310be3a390152a17e9e7",
+    "tests/contracts/test_artemis_usb_acceptance.py": "e2687ec756a176bae44db75febb03c30173e78542ba306f6a5713a1d2eede6ad"
+  },
+  "historical_registry_snapshots": {
+    "owner_features.json": "2ecc45df95683c23366710b2ac4d80d3842b616720604b2eeb6c98a36d642d70",
+    "owner_screens.json": "6d96433451a08ad8ff6d322e5f957a7c805fe1b4d3e0a1edca459852ff421941"
+  },
+  "owner_selected_execution_route": "NATIVE_ARTEMIS_VIA_DIAL_COMMANDER",
+  "legacy_adapter": "LEGACY_DDS_HERMES_ANDROID_TESTING_PLANE",
+  "baseline_fields_unchanged": true,
+  "unresolved_current_citations": 0,
+  "physical_cases_executed": 0,
+  "deployment_accepted": false,
+  "owner_release": false,
+  "scope": "Current supported source contracts and local checks only. Explicit source limitations, upstream gaps, external assets, visual redesign and live qualification remain separately recorded.",
+  "overall_local_validation": {
+    "path": "docs/audit/VAN_WIRING_CLOSURE_VALIDATION_2026-10-07.json",
+    "sha256": "d8d28eb52b237addaf65c7f57e3de0331e9efe4bfc7d12cb0c5bd6a2d0900df1",
+    "disjoint_runner_executions": {
+      "passed": 6574,
+      "skipped": 10,
+      "failed": 0,
+      "errors": 0
+    }
+  }
+}

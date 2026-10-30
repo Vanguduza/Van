@@ -1,0 +1,64 @@
+..FFF.                                                                   [100%]
+=================================== FAILURES ===================================
+____________ test_changed_source_snapshot_refuses_success[changed] _____________
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-310/test_changed_source_snapshot_r0')
+damage = 'changed'
+
+    @pytest.mark.parametrize('damage',['changed','missing','symlink'])
+    def test_changed_source_snapshot_refuses_success(tmp_path,damage):
+        original=tmp_path/'source.py';original.write_bytes(b'original')
+        hashes={'source.py':hashlib.sha256(b'original').hexdigest()}
+        controller.require_unchanged_snapshot(tmp_path,hashes)
+        if damage=='changed':original.write_bytes(b'changed')
+        elif damage=='missing':original.unlink()
+        else:
+            original.unlink();target=tmp_path/'target.py';target.write_bytes(b'original');original.symlink_to(target)
+>       with pytest.raises(RuntimeError,match='SOURCE_SNAPSHOT_CHANGED'):controller.require_unchanged_snapshot(tmp_path,hashes)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE RuntimeError
+
+trading/tests/test_forecast_runtime_supervisor.py:64: Failed
+____________ test_changed_source_snapshot_refuses_success[missing] _____________
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-310/test_changed_source_snapshot_r1')
+damage = 'missing'
+
+    @pytest.mark.parametrize('damage',['changed','missing','symlink'])
+    def test_changed_source_snapshot_refuses_success(tmp_path,damage):
+        original=tmp_path/'source.py';original.write_bytes(b'original')
+        hashes={'source.py':hashlib.sha256(b'original').hexdigest()}
+        controller.require_unchanged_snapshot(tmp_path,hashes)
+        if damage=='changed':original.write_bytes(b'changed')
+        elif damage=='missing':original.unlink()
+        else:
+            original.unlink();target=tmp_path/'target.py';target.write_bytes(b'original');original.symlink_to(target)
+>       with pytest.raises(RuntimeError,match='SOURCE_SNAPSHOT_CHANGED'):controller.require_unchanged_snapshot(tmp_path,hashes)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE RuntimeError
+
+trading/tests/test_forecast_runtime_supervisor.py:64: Failed
+____________ test_changed_source_snapshot_refuses_success[symlink] _____________
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-310/test_changed_source_snapshot_r2')
+damage = 'symlink'
+
+    @pytest.mark.parametrize('damage',['changed','missing','symlink'])
+    def test_changed_source_snapshot_refuses_success(tmp_path,damage):
+        original=tmp_path/'source.py';original.write_bytes(b'original')
+        hashes={'source.py':hashlib.sha256(b'original').hexdigest()}
+        controller.require_unchanged_snapshot(tmp_path,hashes)
+        if damage=='changed':original.write_bytes(b'changed')
+        elif damage=='missing':original.unlink()
+        else:
+            original.unlink();target=tmp_path/'target.py';target.write_bytes(b'original');original.symlink_to(target)
+>       with pytest.raises(RuntimeError,match='SOURCE_SNAPSHOT_CHANGED'):controller.require_unchanged_snapshot(tmp_path,hashes)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE RuntimeError
+
+trading/tests/test_forecast_runtime_supervisor.py:64: Failed
+=========================== short test summary info ============================
+FAILED trading/tests/test_forecast_runtime_supervisor.py::test_changed_source_snapshot_refuses_success[changed]
+FAILED trading/tests/test_forecast_runtime_supervisor.py::test_changed_source_snapshot_refuses_success[missing]
+FAILED trading/tests/test_forecast_runtime_supervisor.py::test_changed_source_snapshot_refuses_success[symlink]
+3 failed, 3 passed in 0.29s

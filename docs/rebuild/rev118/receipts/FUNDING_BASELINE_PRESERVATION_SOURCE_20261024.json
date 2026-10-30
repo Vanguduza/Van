@@ -1,0 +1,368 @@
+{
+  "schema": "van.rebuild.funding-baseline-preservation-source/1",
+  "source_preimage": "be61c629ffdfaf3db71b084e9cae1acb9d6ea31c",
+  "paths": {
+    "trading/vati/app/account_service.py": {
+      "preimage_sha256": "c30dbd387229075f0078af23a1e18b6ca279474526a90c8a2fb408f2d81b4c35",
+      "source_sha256": "57e9ea99098fe18d356c75e99b30b42bcf245816a984f276c0bc727a4a5f270b"
+    },
+    "trading/vati/app/cycle.py": {
+      "preimage_sha256": "8ecdb1358dc4a6ddafbd4e6d20b1ffaa901033a8aa8599d9147ba3e43c857a34",
+      "source_sha256": "d46b43e9c31aec81bd9edcd0f466f1e6465f710208c85ed95487b23eecdf3387"
+    },
+    "trading/vati/app/runtime_control_actor.py": {
+      "preimage_sha256": "b72faaad9d673226c21f674710c7228404ee6fb6965176ba5433044fabe00681",
+      "source_sha256": "2f0b013f25849cd394d0ce64c6ab4f346a9089c59bf9ecf423856c059bf79f70"
+    },
+    "trading/vati/risk/lockouts.py": {
+      "preimage_sha256": "ab1009af104641c6ad3febd51092c5a9b69c8633439aac241dbe7364935732ae",
+      "source_sha256": "a355810a73b0f85d207fe99a786cff668fadea4bdfe0b18e7ef8272959bdaa63"
+    },
+    "trading/tests/test_funding_baseline_preservation.py": {
+      "preimage_sha256": null,
+      "source_sha256": "43fd780a74b3cd91a298eaf761a32c72aa51c0d7992dde18a4fccc6282b6c80f"
+    },
+    "trading/tests/test_funding_baseline_preservation_postgres.py": {
+      "preimage_sha256": null,
+      "source_sha256": "dca4b25e8d74c885071a73879df12b09f6b30761c4985c00e5c9214df015b38e"
+    }
+  },
+  "confirmed_original_failures": {
+    "both_snapshot_producers_seeded_or_raised_held_native_capital": 6,
+    "restart_restored_old_held_capital_baseline": 2
+  },
+  "behavior": "Only available native funding evidence can seed or raise current loss baselines. Unavailable native credit/history still allows account and position protection reads. Account startup preserves original restored values or the existing uninitialized sentinel. Historical held-funding decisions remain immutable but their known invalid baselines are excluded from risk-state restoration. Both owner drawdown recovery entrypoints require current usable funding before rebasing; no order authority is granted.",
+  "source_checks": {
+    "van-funding-baseline-before": {
+      "sha256": "eded3cc6be66b5624a8fe3ddf54e90c8c144fff8e26deb5a1224fb15db7539eb",
+      "tests": 8,
+      "passed": 2,
+      "failures": [
+        {
+          "id": "trading.tests.test_funding_baseline_preservation::test_held_native_deposit_does_not_seed_or_raise_any_loss_baseline[0-single]",
+          "message": "AssertionError: assert (Decimal('200...ecimal('200')) == (Decimal('0')... Decimal('0'))\n  \n  At index 0 diff: Decimal('200') != Decimal('0')\n  Use -v to get more diff"
+        },
+        {
+          "id": "trading.tests.test_funding_baseline_preservation::test_held_native_deposit_does_not_seed_or_raise_any_loss_baseline[0-account]",
+          "message": "AssertionError: assert (Decimal('200...ecimal('200')) == (Decimal('0')... Decimal('0'))\n  \n  At index 0 diff: Decimal('200') != Decimal('0')\n  Use -v to get more diff"
+        },
+        {
+          "id": "trading.tests.test_funding_baseline_preservation::test_held_native_deposit_does_not_seed_or_raise_any_loss_baseline[100-single]",
+          "message": "AssertionError: assert (Decimal('200...ecimal('100')) == (Decimal('100...ecimal('100'))\n  \n  At index 0 diff: Decimal('200') != Decimal('100')\n  Use -v to get more diff"
+        },
+        {
+          "id": "trading.tests.test_funding_baseline_preservation::test_held_native_deposit_does_not_seed_or_raise_any_loss_baseline[100-account]",
+          "message": "AssertionError: assert (Decimal('200...ecimal('100')) == (Decimal('100...ecimal('100'))\n  \n  At index 0 diff: Decimal('200') != Decimal('100')\n  Use -v to get more diff"
+        },
+        {
+          "id": "trading.tests.test_funding_baseline_preservation::test_missing_credit_and_history_preserve_protective_account_reads_without_seeding_risk[single]",
+          "message": "AssertionError: assert (Decimal('102...al('10250.5')) == (0, 0, 0)\n  \n  At index 0 diff: Decimal('10250.5') != 0\n  Use -v to get more diff"
+        },
+        {
+          "id": "trading.tests.test_funding_baseline_preservation::test_missing_credit_and_history_preserve_protective_account_reads_without_seeding_risk[account]",
+          "message": "AssertionError: assert (Decimal('102...al('10250.5')) == (0, 0, 0)\n  \n  At index 0 diff: Decimal('10250.5') != 0\n  Use -v to get more diff"
+        }
+      ],
+      "errors": 0,
+      "skipped": 0
+    },
+    "van-funding-baseline-restore-before": {
+      "sha256": "9ad8e9095ae6db7b4ae2c2078c84672286724c081238cb8dbfbb89f52a4d59dd",
+      "tests": 2,
+      "passed": 0,
+      "failures": [
+        {
+          "id": "trading.tests.test_funding_baseline_preservation::test_restart_does_not_restore_the_known_old_held_funding_baseline_defect[False]",
+          "message": "AssertionError: assert (Decimal('100...imal('10000')) == (None, None, None)\n  \n  At index 0 diff: Decimal('10000') != None\n  Use -v to get more diff"
+        },
+        {
+          "id": "trading.tests.test_funding_baseline_preservation::test_restart_does_not_restore_the_known_old_held_funding_baseline_defect[True]",
+          "message": "AssertionError: assert (Decimal('100...imal('10000')) == (Decimal('100...ecimal('100'))\n  \n  At index 0 diff: Decimal('10000') != Decimal('100')\n  Use -v to get more diff"
+        }
+      ],
+      "errors": 0,
+      "skipped": 0
+    },
+    "van-funding-baseline-r4": {
+      "sha256": "a37f575e2f5b1fb4618c761e00afa77054947149e95065e2b89a0a5994698cca",
+      "tests": 125,
+      "passed": 125,
+      "failures": [],
+      "errors": 0,
+      "skipped": 0
+    },
+    "van-funding-baseline-start": {
+      "sha256": "d3066b3d5a32a174b8f165a7deb3bdcc8884cf320c76fc0ed1723d8c54023841",
+      "tests": 14,
+      "passed": 13,
+      "failures": [
+        {
+          "id": "trading.tests.test_funding_baseline_preservation::test_account_start_does_not_seed_unknown_credit_before_the_first_decision",
+          "message": "vati.risk.mandate.MandateError: mandate is not owner-signed: mandate-admit: owner authority is for 'mandate-v2:1a01f05c5eae650c00e39275d4f25d21dbbeae486ad8c0c8102f026fc7c49d11', not 'mandate-v2:517e986b64e278f16d28317993bf0680648b19be51d79ed7fb38fa881c820693'"
+        }
+      ],
+      "errors": 0,
+      "skipped": 0
+    },
+    "van-funding-baseline-start-r2": {
+      "sha256": "1dd1712e9cc6f58132a96ef91fc5da3d0a9e16e5b106689d02f92396f9edb1d6",
+      "tests": 14,
+      "passed": 13,
+      "failures": [
+        {
+          "id": "trading.tests.test_funding_baseline_preservation::test_account_start_does_not_seed_unknown_credit_before_the_first_decision",
+          "message": "RuntimeError: multi-instrument account coordination requires the shared PostgreSQL VATI authority store; a process-local lease is not a cross-host fence"
+        }
+      ],
+      "errors": 0,
+      "skipped": 0
+    },
+    "van-funding-baseline-pg": {
+      "sha256": "f07ff8197cbd06fdf7bd0833df86ed6dc32fa3d882a8d3eb5d61a699336de49a",
+      "tests": 225,
+      "passed": 224,
+      "failures": [
+        {
+          "id": "trading.tests.test_funding_baseline_preservation::test_account_start_does_not_seed_unknown_credit_before_the_first_decision",
+          "message": "RuntimeError: multi-instrument account coordination requires the shared PostgreSQL VATI authority store; a process-local lease is not a cross-host fence"
+        }
+      ],
+      "errors": 0,
+      "skipped": 0
+    },
+    "van-funding-baseline-pg-final-r2": {
+      "sha256": "bf8d8cb1119ebecc1a0928f1876e4637927438e3fc441d3b28585caa6d3c0ced",
+      "tests": 225,
+      "passed": 222,
+      "failures": [
+        {
+          "id": "trading.tests.test_funding_baseline_preservation_postgres::test_account_start_does_not_seed_unknown_credit_before_the_first_decision",
+          "message": "AttributeError: 'AccountCoordinatorService' object has no attribute 'close'. Did you mean: 'clock'?"
+        },
+        {
+          "id": "trading.tests.test_single_session_lease::test_actual_single_symbol_processes_arbitrate_before_startup_reconciliation[postgres]",
+          "message": "_queue.Empty"
+        },
+        {
+          "id": "trading.tests.test_single_session_lease::test_simultaneous_first_postgres_insert_reports_healthy_arbitration_not_outage",
+          "message": "_queue.Empty"
+        }
+      ],
+      "errors": 0,
+      "skipped": 0
+    },
+    "van-funding-baseline-pg-final-r3": {
+      "sha256": "e812881d1cf9eed6830c31972bfc7dd0e6718ccc9d096dab5e71b3b78becefb6",
+      "tests": 225,
+      "passed": 223,
+      "failures": [
+        {
+          "id": "trading.tests.test_single_session_lease::test_actual_single_symbol_processes_arbitrate_before_startup_reconciliation[postgres]",
+          "message": "AssertionError: [('STARTED', 1, 61577), ('ERROR', \"RuntimeError('fixture-release-unavailable')\", 61577)]\nassert ['ERROR', 'STARTED'] == ['REFUSED', 'STARTED']\n  \n  At index 0 diff: 'ERROR' != 'REFUSED'\n  Use -v to get more diff"
+        },
+        {
+          "id": "trading.tests.test_single_session_lease::test_simultaneous_first_postgres_insert_reports_healthy_arbitration_not_outage",
+          "message": "_queue.Empty"
+        }
+      ],
+      "errors": 0,
+      "skipped": 0
+    },
+    "van-funding-baseline-root-final": {
+      "sha256": "fb6c83d7e61f0dc014f175b7e40962988e6c7da5cfd2d73cc3843e987222402c",
+      "tests": 75,
+      "passed": 75,
+      "failures": [],
+      "errors": 0,
+      "skipped": 0
+    },
+    "van-funding-startup-before": {
+      "sha256": "0daa7750d2c5e6bdfc43a7b7930a1a60a49f2051bc9d4b7fe55d97477260cffc",
+      "tests": 1,
+      "passed": 0,
+      "failures": [],
+      "errors": 1,
+      "skipped": 0
+    }
+  },
+  "cleanup": {
+    "van-funding-baseline-pg": {
+      "stopped": true,
+      "removed": true
+    },
+    "van-funding-baseline-pg-final-r2": {
+      "stopped": true,
+      "removed": true
+    },
+    "van-funding-baseline-pg-final-r3": {
+      "stopped": true,
+      "removed": true
+    },
+    "van-funding-startup-before": {
+      "stopped": true,
+      "removed": true
+    }
+  },
+  "semantic_fault_pairs": {
+    "baseline": {
+      "exit_code": 0,
+      "failures": [],
+      "errors": 0,
+      "skipped": 0,
+      "tests": 13,
+      "log_sha256": "a0584ab9a9bf51d0dc9910e73f866b592027fd98b58d4fa09a10f6372b51b252",
+      "xml_sha256": "3f618feb6a9c5231dbc22ecef7d0597a7c84b733aea938632bbad53657338232"
+    },
+    "cases": [
+      {
+        "case": "single-baseline-funding-bypass",
+        "path": "trading/vati/app/cycle.py",
+        "expected_failure": "test_held_native_deposit",
+        "source_sha256": "d46b43e9c31aec81bd9edcd0f466f1e6465f710208c85ed95487b23eecdf3387",
+        "fault": {
+          "exit_code": 1,
+          "failures": [
+            "test_held_native_deposit_does_not_seed_or_raise_any_loss_baseline[0-single]",
+            "test_held_native_deposit_does_not_seed_or_raise_any_loss_baseline[100-single]",
+            "test_missing_credit_and_history_preserve_protective_account_reads_without_seeding_risk[single]"
+          ],
+          "errors": 0,
+          "skipped": 0,
+          "tests": 13,
+          "log_sha256": "16e9ba3d949de33feb551a04c4f121d8fbabf0293d657b55122d169714309cbc",
+          "xml_sha256": "5f5272bce015e63788996030f229d3530c7468f09d70f81fbe1442015d83c45d"
+        },
+        "restored": {
+          "exit_code": 0,
+          "failures": [],
+          "errors": 0,
+          "skipped": 0,
+          "tests": 13,
+          "log_sha256": "71797afb08cd62dfbefc56ad7a9745c9ca34640204b111cf263942e54f73d48a",
+          "xml_sha256": "fca433f1030c283db8c43b9e612200e740df7a124f1fa500aef89a99ad977906"
+        },
+        "caught_by_expected_assertion": true
+      },
+      {
+        "case": "account-baseline-funding-bypass",
+        "path": "trading/vati/app/account_service.py",
+        "expected_failure": "test_held_native_deposit",
+        "source_sha256": "57e9ea99098fe18d356c75e99b30b42bcf245816a984f276c0bc727a4a5f270b",
+        "fault": {
+          "exit_code": 1,
+          "failures": [
+            "test_held_native_deposit_does_not_seed_or_raise_any_loss_baseline[0-account]",
+            "test_held_native_deposit_does_not_seed_or_raise_any_loss_baseline[100-account]",
+            "test_missing_credit_and_history_preserve_protective_account_reads_without_seeding_risk[account]"
+          ],
+          "errors": 0,
+          "skipped": 0,
+          "tests": 13,
+          "log_sha256": "06f90aca7adb10e4fe7ef6174155cfcf89f1b0904f9ff838e7213eae3b1386c7",
+          "xml_sha256": "695ac8a9509f6e865df9cbb3dd271fa370d9f8ef00457dbfae75916ad5c339bd"
+        },
+        "restored": {
+          "exit_code": 0,
+          "failures": [],
+          "errors": 0,
+          "skipped": 0,
+          "tests": 13,
+          "log_sha256": "4aa7f21539f88e904b1068c15628b8d8ecd18df618fd34c67b3953d3bd2431b3",
+          "xml_sha256": "b617b72c7681f7bc9fed85b3bc05a51fae7bd1256a48aca2f57a471a664f6e52"
+        },
+        "caught_by_expected_assertion": true
+      },
+      {
+        "case": "owner-resume-funding-bypass",
+        "path": "trading/vati/app/cycle.py",
+        "expected_failure": "test_owner_resume",
+        "source_sha256": "d46b43e9c31aec81bd9edcd0f466f1e6465f710208c85ed95487b23eecdf3387",
+        "fault": {
+          "exit_code": 1,
+          "failures": [
+            "test_owner_resume_cannot_turn_unqualified_native_capital_into_a_new_peak"
+          ],
+          "errors": 0,
+          "skipped": 0,
+          "tests": 13,
+          "log_sha256": "ada646f072cfbcde26ed69881d33c273d5569364ee93860addf61a9a30f0ed43",
+          "xml_sha256": "dbab4ae2051f67866f37d280cfb131cc95307ca28cb071378e7b0d0f5d3ee8d6"
+        },
+        "restored": {
+          "exit_code": 0,
+          "failures": [],
+          "errors": 0,
+          "skipped": 0,
+          "tests": 13,
+          "log_sha256": "7689adda663427991212831d92a603f8312a5b1a33b065e5f9b7b8e3b00dd9ef",
+          "xml_sha256": "fc2c90b604150b2d013db33f06c65fc7018e84800c6502c1e215e59f297e4eed"
+        },
+        "caught_by_expected_assertion": true
+      },
+      {
+        "case": "actor-resume-funding-bypass",
+        "path": "trading/vati/app/runtime_control_actor.py",
+        "expected_failure": "test_existing_recovery_actor",
+        "source_sha256": "2f0b013f25849cd394d0ce64c6ab4f346a9089c59bf9ecf423856c059bf79f70",
+        "fault": {
+          "exit_code": 1,
+          "failures": [
+            "test_existing_recovery_actor_requires_current_funding_for_drawdown_rebaseline[True]"
+          ],
+          "errors": 0,
+          "skipped": 0,
+          "tests": 13,
+          "log_sha256": "84e9d857765dc82c7b12e001ff5c4b27cb0c66effd50adbea9a9fcadb183c320",
+          "xml_sha256": "aa7f28a3f87e91c967b33c5b167e03b728f8f02203ec25950ba55c457f1bcbe7"
+        },
+        "restored": {
+          "exit_code": 0,
+          "failures": [],
+          "errors": 0,
+          "skipped": 0,
+          "tests": 13,
+          "log_sha256": "e30719f71bd90590ca894bbf93995c80fabe52a2d1e286146e90325c335195cd",
+          "xml_sha256": "0fc1fdfcf9590c9b14e1344ec4d446dd73f64f56580e345ad22ca03590d4655a"
+        },
+        "caught_by_expected_assertion": true
+      },
+      {
+        "case": "historical-held-baseline-replayed",
+        "path": "trading/vati/risk/lockouts.py",
+        "expected_failure": "test_restart_does_not_restore",
+        "source_sha256": "a355810a73b0f85d207fe99a786cff668fadea4bdfe0b18e7ef8272959bdaa63",
+        "fault": {
+          "exit_code": 1,
+          "failures": [
+            "test_restart_does_not_restore_the_known_old_held_funding_baseline_defect[False]",
+            "test_restart_does_not_restore_the_known_old_held_funding_baseline_defect[True]"
+          ],
+          "errors": 0,
+          "skipped": 0,
+          "tests": 13,
+          "log_sha256": "d9a4980d38b1573f74aa1d28151c6918ef4e5b65a345d191fcca00f64cc27854",
+          "xml_sha256": "780b8a0089ecb6ad6f7acdbf52dd1b1be14e1699b9cab505c94de8e3be79894b"
+        },
+        "restored": {
+          "exit_code": 0,
+          "failures": [],
+          "errors": 0,
+          "skipped": 0,
+          "tests": 13,
+          "log_sha256": "bf043fb7fb4254afc2734e63badea35f506916098af9a4cc9ae0443fa44dcd4b",
+          "xml_sha256": "dbf3ce49019cf2e40a8f2aa15b5df4712276990d0b2e005daa4f4b319b7f7a8e"
+        },
+        "caught_by_expected_assertion": true
+      }
+    ],
+    "scope": "Actual cycle/account/recovery/ledger baseline code; native effects remain explicit fixtures."
+  },
+  "startup_fault_attempt": {
+    "state": "NOT_EXECUTED_INVALID_CONTROL",
+    "control_error": "PostgreSQL could not fork a connection process: resource temporarily unavailable. No mutant ran and no detection is claimed.",
+    "report": "van-funding-startup-before",
+    "current_startup_positive_case": "PASSED in final-r3 PostgreSQL batch; its full225-case run has223passes and2process-thread failures."
+  },
+  "retained_failures": "Initial startup fixture changed a signed mandate without issuing a matching fixture signature; corrected with the existing fixture issuer. Next startup fixture tried a local coordinator store and was correctly refused; moved to actual disposable PostgreSQL. Initial cleanup called nonexistent coordinator.close; corrected to supported lease/store/ledger cleanup. Two original process-arbitration scenarios subsequently failed with explicit native thread/fork exhaustion, not application assertions; failed runs retained without a full-suite pass.",
+  "qualification": "Source candidate only. Five semantic fault/restored pairs, no setup errors counted as caught. No independent/unit/BG001/provider/host/phone/production/profitability certificate. Fresh full hosted execution of this new source remains pending."
+}

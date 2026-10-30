@@ -1,11 +1,13 @@
 from __future__ import annotations
 
 import time
+import json
 import uuid
 from typing import Any
 
 from van_gateway.attention.scoring import AttentionCandidate, AttentionScorer, Disposition
 from van_gateway.models import AttentionItem, AttentionSeverity, AttentionState
+from van_gateway.jev.advisor import JevVanAdvisor, score01
 from van_gateway.storage.db import Store
 
 #: How a severity maps onto the scorer's dimensions when a caller has not supplied its own
@@ -40,10 +42,12 @@ class AttentionEngine:
         budget_per_hour: int = 12,
         *,
         scorer: AttentionScorer | None = None,
+        jev_advisor: JevVanAdvisor | None = None,
     ) -> None:
         self.store = store
         self.budget_per_hour = budget_per_hour
         self.scorer = scorer or AttentionScorer(store)
+        self.jev_advisor = jev_advisor
 
     async def upsert(
         self,
@@ -57,14 +61,59 @@ class AttentionEngine:
         state: AttentionState = AttentionState.OPEN,
         candidate: AttentionCandidate | None = None,
         quiet_hours: bool = False,
+        source_revision: int | None = None,
     ) -> AttentionItem:
+        if source_revision is not None and (type(source_revision) is not int or source_revision < 1):
+            raise ValueError("attention_source_revision_invalid")
+        # This reserved field is supplied by the durable source, never its payload.
+        payload = {k: v for k, v in (payload or {}).items() if k != "_source_revision"}
+        if source_revision is not None:
+            payload["_source_revision"] = source_revision
         now = int(time.time())
-        scored = await self.scorer.score(
-            candidate or self.candidate_for(
-                title=title, severity=severity, source=source, dedupe_key=dedupe_key
-            ),
-            quiet_hours=quiet_hours,
+        base_candidate = candidate or self.candidate_for(
+            title=title, severity=severity, source=source, dedupe_key=dedupe_key
         )
+        jev_evidence: dict[str, Any] | None = None
+        if self.jev_advisor is not None and self.jev_advisor.configured:
+            try:
+                annotation = await self.jev_advisor.attention_fields(
+                    {
+                        "source": base_candidate.source,
+                        "summary": base_candidate.summary,
+                        "importance": base_candidate.importance,
+                        "urgency": base_candidate.urgency,
+                        "actionability": base_candidate.actionability,
+                        "novelty": base_candidate.novelty,
+                        "owner_relevance": base_candidate.owner_relevance,
+                        "interruption_cost": base_candidate.interruption_cost,
+                    }
+                )
+                if annotation is not None:
+                    jev_evidence = {
+                        "module_id": annotation.module_id,
+                        "provider": annotation.provider,
+                        "apply_effect": annotation.apply_effect,
+                        "result_fingerprint": annotation.result_fingerprint,
+                        "fallback_reason": annotation.fallback_reason,
+                    }
+                    if annotation.apply_effect:
+                        updates = {
+                            field: value
+                            for field in ("urgency", "owner_relevance", "novelty")
+                            if (value := score01(annotation.answers.get(field))) is not None
+                        }
+                        if updates:
+                            base_candidate = base_candidate.model_copy(update=updates)
+            except Exception:
+                # Optional provider failure must never make attention unavailable.
+                jev_evidence = {
+                    "module_id": "van.attention.fields.v1",
+                    "provider": "fallback",
+                    "apply_effect": False,
+                    "fallback_reason": "JEV_UNAVAILABLE",
+                }
+
+        scored = await self.scorer.score(base_candidate, quiet_hours=quiet_hours)
         payload = {
             **(payload or {}),
             # The decision travels with the item, so "why did VAN interrupt me" and "why
@@ -73,61 +122,80 @@ class AttentionEngine:
             "attention_score": scored.score,
             "attention_reason": scored.reason,
             "attention_candidate_id": scored.candidate_id,
+            **({"jev_attention": jev_evidence} if jev_evidence is not None else {}),
         }
-        existing = await self.store.fetchone(
-            "SELECT id, title, severity, state, source, project_id, created_at_unix, updated_at_unix, dedupe_key, snooze_until_unix, payload_json FROM attention WHERE dedupe_key = ?",
-            (dedupe_key,),
-        )
-        if existing:
-            # P3-OPS-005: this used to write `state` unconditionally, so a source that
-            # re-reported the same condition — which is what a source does after a
-            # restart — silently moved an item the owner had already acknowledged,
-            # snoozed or handled back to OPEN. Only a *re-report* is overridden: a
-            # caller that explicitly resolves the item still resolves it, because
-            # "VAN finished the thing" must be able to close an acknowledged item.
-            previous = AttentionState(existing["state"])
-            effective_state = (
-                previous if state is AttentionState.OPEN and previous is not AttentionState.OPEN
-                else state
+        async with self.store.connection() as db:
+            await db.execute("BEGIN IMMEDIATE")
+            existing = await (await db.execute(
+                "SELECT id, title, severity, state, source, project_id, created_at_unix, updated_at_unix, dedupe_key, snooze_until_unix, payload_json FROM attention WHERE dedupe_key = ?",
+                (dedupe_key,),
+            )).fetchone()
+            if existing:
+                old_payload = json.loads(existing["payload_json"] or "{}")
+                old_revision = old_payload.get("_source_revision")
+                if source_revision is not None:
+                    if existing["source"] != source or (existing["project_id"] or None) != (project_id or None):
+                        raise ValueError("attention_source_scope_conflict")
+                    if type(old_revision) is int and old_revision >= source_revision:
+                        # A delayed publisher must never downgrade a newer failure
+                        # or overwrite an owner's acknowledgement on replay.
+                        return AttentionItem(
+                            id=existing["id"], title=existing["title"], severity=AttentionSeverity(existing["severity"]),
+                            state=AttentionState(existing["state"]), source=existing["source"], project_id=existing["project_id"],
+                            created_at_unix=existing["created_at_unix"], updated_at_unix=existing["updated_at_unix"],
+                            dedupe_key=existing["dedupe_key"], snooze_until_unix=existing["snooze_until_unix"], payload=old_payload,
+                        )
+                # P3-OPS-005: this used to write `state` unconditionally, so a source that
+                # re-reported the same condition — which is what a source does after a
+                # restart — silently moved an item the owner had already acknowledged,
+                # snoozed or handled back to OPEN. Only a *re-report* is overridden: a
+                # caller that explicitly resolves the item still resolves it, because
+                # "VAN finished the thing" must be able to close an acknowledged item.
+                previous = AttentionState(existing["state"])
+                effective_state = (
+                    previous if state is AttentionState.OPEN and previous is not AttentionState.OPEN
+                    else state
+                )
+                await db.execute(
+                    "UPDATE attention SET title = ?, severity = ?, state = ?, updated_at_unix = ?, payload_json = ?, source = ?, project_id = ? WHERE dedupe_key = ?",
+                    (title, severity.value, effective_state.value, now, Store.dumps(payload or {}), source, project_id or existing["project_id"], dedupe_key),
+                )
+                await db.commit()
+                return AttentionItem(
+                    id=existing["id"],
+                    title=title,
+                    severity=severity,
+                    state=effective_state,
+                    source=source,
+                    project_id=project_id or existing["project_id"],
+                    created_at_unix=int(existing["created_at_unix"]),
+                    updated_at_unix=now,
+                    dedupe_key=dedupe_key,
+                    snooze_until_unix=existing["snooze_until_unix"],
+                    payload=payload or {},
+                )
+            item_id = str(uuid.uuid4())
+            await db.execute(
+                """
+                INSERT INTO attention(id, title, severity, state, source, project_id, created_at_unix, updated_at_unix, dedupe_key, snooze_until_unix, payload_json)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NULL, ?)
+                """,
+                (item_id, title, severity.value, state.value, source, project_id, now, now, dedupe_key, Store.dumps(payload or {})),
             )
-            await self.store.execute(
-                "UPDATE attention SET title = ?, severity = ?, state = ?, updated_at_unix = ?, payload_json = ? WHERE dedupe_key = ?",
-                (title, severity.value, effective_state.value, now, Store.dumps(payload or {}), dedupe_key),
-            )
+            await db.commit()
             return AttentionItem(
-                id=existing["id"],
+                id=item_id,
                 title=title,
                 severity=severity,
-                state=effective_state,
+                state=state,
                 source=source,
-                project_id=project_id or existing["project_id"],
-                created_at_unix=int(existing["created_at_unix"]),
+                project_id=project_id,
+                created_at_unix=now,
                 updated_at_unix=now,
                 dedupe_key=dedupe_key,
-                snooze_until_unix=existing["snooze_until_unix"],
+                snooze_until_unix=None,
                 payload=payload or {},
             )
-        item_id = str(uuid.uuid4())
-        await self.store.execute(
-            """
-            INSERT INTO attention(id, title, severity, state, source, project_id, created_at_unix, updated_at_unix, dedupe_key, snooze_until_unix, payload_json)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NULL, ?)
-            """,
-            (item_id, title, severity.value, state.value, source, project_id, now, now, dedupe_key, Store.dumps(payload or {})),
-        )
-        return AttentionItem(
-            id=item_id,
-            title=title,
-            severity=severity,
-            state=state,
-            source=source,
-            project_id=project_id,
-            created_at_unix=now,
-            updated_at_unix=now,
-            dedupe_key=dedupe_key,
-            snooze_until_unix=None,
-            payload=payload or {},
-        )
 
     @staticmethod
     def candidate_for(

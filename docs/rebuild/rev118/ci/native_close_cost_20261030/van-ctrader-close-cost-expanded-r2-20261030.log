@@ -1,0 +1,97 @@
+.....................FF................................................. [ 86%]
+...........                                                              [100%]
+=================================== FAILURES ===================================
+_ test_actual_partial_then_full_native_closes_use_every_price_and_charge_once[False] _
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-31/test_actual_partial_then_full_0')
+missing_last = False
+
+    @pytest.mark.parametrize('missing_last',[False,True])
+    def test_actual_partial_then_full_native_closes_use_every_price_and_charge_once(tmp_path,missing_last):
+        from vati.lifecycle.family import FamilyMember,MemberRole
+        ledger=Ledger(tmp_path/'partial-native-costs.sqlite')
+        try:
+            with native_fill(commission=-100) as (adapter,command,entry):
+                life=entry_lifecycle(ledger,adapter,command,entry)
+                peer=adapter.transport._connector.__self__;original=peer.handle;closed=[]
+                def handle(name,body,cid):
+                    if name!='ProtoOAClosePositionReq':return original(name,body,cid)
+                    pid=body['positionId'];before=deepcopy(peer.positions[pid]);volume=body['volume']
+                    remaining=before['tradeData']['volume']-volume;index=len(closed)
+                    assert remaining>=0
+                    if remaining:
+                        peer.positions[pid]['tradeData']['volume']=remaining
+                        position=deepcopy(peer.positions[pid])
+                    else:
+                        peer.positions.pop(pid);position={**before,'positionStatus':'POSITION_STATUS_CLOSED'}
+                    order_id=1001+index;price=(1.102,1.105)[index]
+                    deal={'dealId':2001+index,'orderId':order_id,'positionId':pid,'symbolId':7,
+                        'volume':volume,'filledVolume':volume,'tradeSide':'SELL','dealStatus':'FILLED',
+                        'createTimestamp':1700000000000,'executionTimestamp':1700000001000+index,
+                        'executionPrice':price,'commission':(-125,-200)[index],'moneyDigits':2}
+                    if missing_last and index==1:deal.pop('commission')
+                    closed.append(deepcopy(deal))
+                    return FakeCtrader.send(peer,'ProtoOAExecutionEvent',{'ctidTraderAccountId':12345,
+                        'executionType':'ORDER_FILLED','position':position,
+                        'order':{'orderId':order_id,'tradeData':{**before['tradeData'],'volume':volume,'tradeSide':'SELL'},
+                            'orderType':'MARKET','orderStatus':'ORDER_STATUS_FILLED','closingOrder':True},'deal':deal},cid)
+                peer.handle=handle
+                first=life.router.apply_preservation('ctrader',position_id=entry.broker_position_id,
+                    trade_intent_id=command.trade_intent_id,action='PARTIAL_CLOSE',quantity=D('.04'),
+                    now_ms=1700000001000,reason='PARTIAL')
+>               assert first.status=='FILLED' and first.filled_qty==D('.04') and first.fees==D('1.25')
+E               AssertionError: assert ('UNKNOWN' == 'FILLED'
+E                 
+E                 - FILLED
+E                 + UNKNOWN)
+
+trading/tests/test_recorded_close_cost_scope.py:93: AssertionError
+_ test_actual_partial_then_full_native_closes_use_every_price_and_charge_once[True] _
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-31/test_actual_partial_then_full_1')
+missing_last = True
+
+    @pytest.mark.parametrize('missing_last',[False,True])
+    def test_actual_partial_then_full_native_closes_use_every_price_and_charge_once(tmp_path,missing_last):
+        from vati.lifecycle.family import FamilyMember,MemberRole
+        ledger=Ledger(tmp_path/'partial-native-costs.sqlite')
+        try:
+            with native_fill(commission=-100) as (adapter,command,entry):
+                life=entry_lifecycle(ledger,adapter,command,entry)
+                peer=adapter.transport._connector.__self__;original=peer.handle;closed=[]
+                def handle(name,body,cid):
+                    if name!='ProtoOAClosePositionReq':return original(name,body,cid)
+                    pid=body['positionId'];before=deepcopy(peer.positions[pid]);volume=body['volume']
+                    remaining=before['tradeData']['volume']-volume;index=len(closed)
+                    assert remaining>=0
+                    if remaining:
+                        peer.positions[pid]['tradeData']['volume']=remaining
+                        position=deepcopy(peer.positions[pid])
+                    else:
+                        peer.positions.pop(pid);position={**before,'positionStatus':'POSITION_STATUS_CLOSED'}
+                    order_id=1001+index;price=(1.102,1.105)[index]
+                    deal={'dealId':2001+index,'orderId':order_id,'positionId':pid,'symbolId':7,
+                        'volume':volume,'filledVolume':volume,'tradeSide':'SELL','dealStatus':'FILLED',
+                        'createTimestamp':1700000000000,'executionTimestamp':1700000001000+index,
+                        'executionPrice':price,'commission':(-125,-200)[index],'moneyDigits':2}
+                    if missing_last and index==1:deal.pop('commission')
+                    closed.append(deepcopy(deal))
+                    return FakeCtrader.send(peer,'ProtoOAExecutionEvent',{'ctidTraderAccountId':12345,
+                        'executionType':'ORDER_FILLED','position':position,
+                        'order':{'orderId':order_id,'tradeData':{**before['tradeData'],'volume':volume,'tradeSide':'SELL'},
+                            'orderType':'MARKET','orderStatus':'ORDER_STATUS_FILLED','closingOrder':True},'deal':deal},cid)
+                peer.handle=handle
+                first=life.router.apply_preservation('ctrader',position_id=entry.broker_position_id,
+                    trade_intent_id=command.trade_intent_id,action='PARTIAL_CLOSE',quantity=D('.04'),
+                    now_ms=1700000001000,reason='PARTIAL')
+>               assert first.status=='FILLED' and first.filled_qty==D('.04') and first.fees==D('1.25')
+E               AssertionError: assert ('UNKNOWN' == 'FILLED'
+E                 
+E                 - FILLED
+E                 + UNKNOWN)
+
+trading/tests/test_recorded_close_cost_scope.py:93: AssertionError
+=========================== short test summary info ============================
+FAILED trading/tests/test_recorded_close_cost_scope.py::test_actual_partial_then_full_native_closes_use_every_price_and_charge_once[False]
+FAILED trading/tests/test_recorded_close_cost_scope.py::test_actual_partial_then_full_native_closes_use_every_price_and_charge_once[True]
+2 failed, 81 passed in 1.87s

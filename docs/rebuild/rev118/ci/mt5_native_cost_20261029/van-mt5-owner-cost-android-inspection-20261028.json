@@ -1,0 +1,13 @@
+{
+  "observed_at_utc": "2026-10-28T23:39:22.158842+00:00",
+  "source_parent": "457205e3ac3c73f115a7bf7134b33c98bd905f12",
+  "files_unchanged": {
+    "android/app/src/main/java/com/dial/van/trading/TradingModels.kt": "aa7bfa98e6b0a8c7cecd49aa9b57b34189393d0d52a694e57a6784d5ef87d962",
+    "android/app/src/main/java/com/dial/van/trading/TradingRepository.kt": "6c1a9a9f5cd7cea10f84a99a9c94fe7d4cb4502be270f4f86e8039e770b89368",
+    "android/app/src/main/java/com/dial/van/trading/TradingReadModels.kt": "3aba6b5043ef250a0f11ed768f0bd919a93668df042e8cfb76fb4e72611e1380",
+    "android/app/src/main/java/com/dial/van/trading/TradeBook.kt": "f00726b356062348cab0071ee1e81a26c522fd41b4662718c38ab0a0bc951afd"
+  },
+  "inspection": "Trading JsonObject.str explicitly preserves JsonNull as absent; numeric helpers are nullable. No typed fees/ExecutionReceipt Kotlin field found by source search. This is a source compatibility inspection, not an executed Android/native/provider/device test.",
+  "android_changed": false,
+  "native_or_S24_acceptance": false
+}

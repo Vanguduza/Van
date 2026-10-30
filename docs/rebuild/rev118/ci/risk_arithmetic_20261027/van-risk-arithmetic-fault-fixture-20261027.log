@@ -1,0 +1,30 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+______ test_existing_gate_probes_have_valid_controls_and_no_crash_credit _______
+
+capsys = <_pytest.capture.CaptureFixture object at 0x7f3c370b1d30>
+
+    def test_existing_gate_probes_have_valid_controls_and_no_crash_credit(capsys):
+        path = Path('/workspace/van-review-2026-10-18/publish/trading/tools/induce_gate_failures.py')
+        spec = importlib.util.spec_from_file_location('van_risk_fault_probes', path)
+        module = importlib.util.module_from_spec(spec)
+        sys.modules[spec.name] = module
+        spec.loader.exec_module(module)
+        code = module.main()
+        output = capsys.readouterr().out
+        Path('/workspace/van-risk-arithmetic-invariant-faults-valid-owner-20261027.txt').write_text(output)
+>       assert 'fuzz CRASHED' not in output, 'a probe exception is not semantic mutation evidence'
+E       AssertionError: a probe exception is not semantic mutation evidence
+E       assert 'fuzz CRASHED' not in 'OK   contro...s expected\n'
+E         
+E         'fuzz CRASHED' is contained here:
+E                     fuzz CRASHED (KeyError: fail-closed by exception)
+E         ?           ++++++++++++
+E           OK   break: stop-required check                                 fuzz CRASHED (TypeError: fail-closed by exception)
+E           
+E           13/13 probes behaved as expected
+
+../../van-risk-arithmetic-fault-fixture-20261027.py:16: AssertionError
+=========================== short test summary info ============================
+FAILED ../../van-risk-arithmetic-fault-fixture-20261027.py::test_existing_gate_probes_have_valid_controls_and_no_crash_credit
+1 failed in 80.47s (0:01:20)

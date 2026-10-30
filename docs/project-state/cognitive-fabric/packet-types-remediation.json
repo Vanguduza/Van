@@ -1,0 +1,30 @@
+{
+  "finding": "Independent P2: object directional_thesis accepted as live packet then poisoned consolidation with unhashable dict.",
+  "owner_gate": "auth-20261006-owner-derived-cognitive-fabric-complete-closure",
+  "repair": "TriAnalystPlane.packet bounds and validates all identity/text/list/time/bool fields before lookup, comparisons, hashing or persistence; optional assessment fields are strings; evidence arrays contain bounded strings only.",
+  "transport_effect": "Fixed FabricError produces sealed REFUSED metadata; no accepted packet/admission; same-epoch poll stays healthy and later valid native evidence consolidates.",
+  "tests": "18 native structural negatives plus7 real-loopback malformed response regressions; focused74passed1warning before commit.",
+  "trading_authority": "unchanged; candidate evidence only, no provider qualification/deployment/order activation",
+  "files": [
+    {
+      "path": "trading/vati/cognition/fabric.py",
+      "sha256": "7bc63341a270e52261cc7a6d68ef63e4615651530d170d14aeba6fecf493eb07"
+    },
+    {
+      "path": "trading/tests/test_cognitive_packet_producer.py",
+      "sha256": "704f91f6bf71695514948d98bf42fd034ddcdda1e982df8fdb19912f2ee08c42"
+    },
+    {
+      "path": "trading/tests/test_vati_cognitive_fabric.py",
+      "sha256": "f408126f7771cb92a452211574fc409e9857ae9986e40cb240a4aadc527ba272"
+    }
+  ],
+  "source_commit": "3dcb5cd5e43dc7aefedac48cf50ef9a2a618bc31",
+  "postcommit_verification": {
+    "focused": "74 passed,1warning9.55s",
+    "broad": "1400 passed,5skipped,2warnings57.12s",
+    "broad_command": "PYTHONPATH=backend:trading .venv/bin/python -m pytest -q trading/tests backend/tests/test_cognitive_fabric.py backend/tests/test_cognitive_twin.py backend/tests/test_context_admission_api.py backend/tests/test_context_lifecycle_governance.py backend/tests/test_trading_api.py",
+    "independent_reproduction": "Reviewer closure_review reported exact poison case REFUSED PACKET_TEXT_TYPES,zero packets/admissions,next poll empty,no exception.",
+    "source_frozen_after_verification": true
+  }
+}

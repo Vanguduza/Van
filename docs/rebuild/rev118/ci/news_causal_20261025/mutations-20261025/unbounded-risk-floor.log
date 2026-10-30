@@ -1,0 +1,28 @@
+.......FF................                                                [100%]
+=================================== FAILURES ===================================
+_ test_an_invalid_floor_cannot_make_the_reduce_only_multiplier_exceed_its_contract[floor0] _
+
+floor = Decimal('-0.1')
+
+    @pytest.mark.parametrize('floor',[Decimal('-0.1'),Decimal('2'),Decimal('NaN')])
+    def test_an_invalid_floor_cannot_make_the_reduce_only_multiplier_exceed_its_contract(floor):
+>       with pytest.raises(NewsIngressError):event_risk_multiplier_for(Decimal('1'),floor=floor)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE NewsIngressError
+
+trading/tests/test_news_causal_boundaries.py:60: Failed
+_ test_an_invalid_floor_cannot_make_the_reduce_only_multiplier_exceed_its_contract[floor1] _
+
+floor = Decimal('2')
+
+    @pytest.mark.parametrize('floor',[Decimal('-0.1'),Decimal('2'),Decimal('NaN')])
+    def test_an_invalid_floor_cannot_make_the_reduce_only_multiplier_exceed_its_contract(floor):
+>       with pytest.raises(NewsIngressError):event_risk_multiplier_for(Decimal('1'),floor=floor)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE NewsIngressError
+
+trading/tests/test_news_causal_boundaries.py:60: Failed
+=========================== short test summary info ============================
+FAILED trading/tests/test_news_causal_boundaries.py::test_an_invalid_floor_cannot_make_the_reduce_only_multiplier_exceed_its_contract[floor0]
+FAILED trading/tests/test_news_causal_boundaries.py::test_an_invalid_floor_cannot_make_the_reduce_only_multiplier_exceed_its_contract[floor1]
+2 failed, 23 passed in 0.36s

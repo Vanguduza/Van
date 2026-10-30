@@ -28,6 +28,7 @@ def test_unsigned_mandate_rejected():
 def test_a_mandate_signature_does_not_admit_a_later_version():
     """The version is in the subject, so widening the limits needs a new signature."""
     from conftest import owner_authority
+    from vati.risk.mandate import mandate_subject
 
     base = mandate_dict()
     tampered = {**base, "version": "1.0.1", "max_risk_per_trade": "0.5000"}
@@ -37,7 +38,7 @@ def test_a_mandate_signature_does_not_admit_a_later_version():
     # ...and the owner can of course sign the new version.
     tampered["owner_signature_ref"] = owner_authority().token(
         act="mandate-admit",
-        subject=f"{tampered['mandate_id']}:{tampered['version']}",
+        subject=mandate_subject(tampered),
         issued_at_unix=int(tampered["signed_at_unix"]),
         lifetime_seconds=int(tampered["expires_at_unix"]) - int(tampered["signed_at_unix"]),
     )

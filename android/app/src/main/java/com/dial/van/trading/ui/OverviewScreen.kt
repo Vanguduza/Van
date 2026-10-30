@@ -42,13 +42,15 @@ import com.dial.van.trading.PositionsReadModel
 import com.dial.van.trading.TradingFormat
 import com.dial.van.trading.TradingReadModels
 import com.dial.van.trading.TradingRepository
+import com.dial.van.trading.TradingRuntimeReadModel
+import com.dial.van.command.owner.ownerTime
 
 /**
  * DNA §4 Trading overview: accounts strip, equity + risk headroom + portfolio heat + open
  * exposure, active positions with thesis state, significant events, VAN's own read of the
  * book, and the urgent-risks rail. `LiveBadge` staleness is read from the newest timestamp
- * actually present across the fetched read models — there is no dedicated `/v1/trading/
- * status` client method in this worker's scope (see this worker's final report).
+ * actually present in `/v1/trading/status`; missing or failed integrity/freshness
+ * observations are explicitly unknown, never live.
  *
  * @DataSource("GET /v1/trading/portfolio")
  * @DataSource("GET /v1/trading/risk")
@@ -60,25 +62,25 @@ import com.dial.van.trading.TradingRepository
 fun OverviewScreen(repo: TradingRepository, nav: TradingNav, nowMs: () -> Long) {
     val tokens = LocalVanTokens.current
     var tick by remember { mutableIntStateOf(0) }
+    var runtime: Loaded<TradingRuntimeReadModel> by remember { mutableStateOf(Loaded.Loading) }
+    var refreshing by remember { mutableStateOf(false) }
+    var observedAt by remember { mutableStateOf(0L) }
     var portfolio: Loaded<PortfolioSummary> by remember { mutableStateOf(Loaded.Loading) }
     var assessment: Loaded<AssessmentReadModel> by remember { mutableStateOf(Loaded.Loading) }
     var positions: Loaded<PositionsReadModel> by remember { mutableStateOf(Loaded.Loading) }
     var events: Loaded<EventsReadModel> by remember { mutableStateOf(Loaded.Loading) }
 
     LaunchedEffect(tick) {
-        portfolio = repo.portfolio()
-        assessment = repo.assessment()
-        positions = repo.positions()
-        events = repo.events(30)
+        refreshing = true
+        try {
+            runtime = repo.status()
+            portfolio = repo.portfolio()
+            assessment = repo.assessment()
+            positions = repo.positions()
+            events = repo.events(30)
+            observedAt = nowMs()
+        } finally { refreshing = false }
     }
-
-    val newestMs = latestOf(
-        (positions as? Loaded.Ready)?.value?.positions?.maxOfOrNull { p -> latestOf(p.latestAssessment?.assessedMs, p.health?.assessedMs, p.openedMs) ?: 0L },
-        (events as? Loaded.Ready)?.value?.events?.firstOrNull()?.publishedMs,
-        (events as? Loaded.Ready)?.value?.impacts?.firstOrNull()?.atMs,
-    )
-    val ledgerAvailable = (assessment as? Loaded.Ready)?.value?.ledgerAvailable
-        ?: (portfolio as? Loaded.Ready)?.value?.ledgerAvailable
 
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
@@ -88,11 +90,36 @@ fun OverviewScreen(repo: TradingRepository, nav: TradingNav, nowMs: () -> Long) 
         item {
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                 Text("Overview", style = tokens.type.title, color = tokens.color.textPrimary)
-                OverviewLiveBadge(ledgerAvailable, newestMs, nowMs)
+                Column {
+                    OverviewLiveBadge(runtime, nowMs())
+                    if (!refreshing) TradingRefreshAction { tick++ }
+                }
             }
         }
 
+        item {
+            if (refreshing) Text("Refreshing trading information…", style = tokens.type.label, color = tokens.color.textSecondary)
+            if (observedAt > 0L) Text("Last read ${ownerTime(observedAt)}", style = tokens.type.label, color = tokens.color.textTertiary)
+            for ((name, value) in listOf("Runtime and control" to runtime, "Portfolio" to portfolio, "Assessment" to assessment, "Positions" to positions, "Events" to events)) {
+                if (value is Loaded.Unavailable) Text("$name could not be read. ${TradingFormat.unavailableState(value.reason)}", style = tokens.type.body, color = tokens.color.textSecondary)
+            }
+            (runtime as? Loaded.Ready)?.value?.let { status ->
+                VanPanel { Column(verticalArrangement = Arrangement.spacedBy(tokens.space.space1)) {
+                    SectionHeader("Trading authority & controls")
+                    Text(when (status.killSwitchActive) { true -> "Kill switch recorded active: ${status.killSwitchTriggers.joinToString().ifBlank { "trigger not supplied" }}"; false -> "The latest ledger read records no active kill switch."; null -> "Current kill switch state could not be confirmed." }, style = tokens.type.body, color = tokens.color.textSecondary)
+                    Text(when (status.ownerHaltRecorded) { true -> "An owner halt is recorded in the ledger. This alone does not certify the trading worker or broker observed it."; false -> "The current ledger read does not record an active owner halt."; null -> "Owner halt state is unknown." }, style = tokens.type.label, color = tokens.color.textSecondary)
+                    Text(when (status.chainOk) { true -> "Ledger chain verified."; false -> "Ledger chain verification failed; treat its results as untrusted."; null -> "Ledger chain integrity could not be confirmed." }, style = tokens.type.label, color = tokens.color.textTertiary)
+                    status.staleReason?.let { Text(it, style = tokens.type.label, color = tokens.color.textSecondary) }
+                    status.head?.let { Text("Ledger receipt: $it", style = tokens.type.label, color = tokens.color.textTertiary) }
+                } }
+            }
+        }
         item { AccountsStrip(portfolio, nav) }
+        item {
+            TextButton(onClick = nav.openTickets) {
+                Text("Owner broker tickets", style = tokens.type.label, color = tokens.color.accentCyan)
+            }
+        }
 
         item { EquityAndRiskPanel(portfolio, assessment) }
 
@@ -124,16 +151,19 @@ fun OverviewScreen(repo: TradingRepository, nav: TradingNav, nowMs: () -> Long) 
 }
 
 @Composable
-private fun OverviewLiveBadge(ledgerAvailable: Boolean?, newestMs: Long?, nowMs: () -> Long) {
-    val state = when {
-        ledgerAvailable == false -> LiveBadgeState.Offline
-        newestMs == null -> LiveBadgeState.Live
-        else -> {
-            val age = (nowMs() - newestMs).coerceAtLeast(0L)
-            if (age >= TradingReadModels.LEDGER_STALENESS_MS) LiveBadgeState.Stale(age) else LiveBadgeState.Live
+private fun OverviewLiveBadge(runtime: Loaded<TradingRuntimeReadModel>, nowMs: Long) {
+    val state = (runtime as? Loaded.Ready)?.value
+    val freshness = state?.freshness(nowMs) ?: TradingRuntimeReadModel.Freshness.UNKNOWN
+    when (freshness) {
+        TradingRuntimeReadModel.Freshness.UNKNOWN -> StatusChip(label = "FRESHNESS UNKNOWN", role = StatusSemantics.ROLE_DISABLED)
+        TradingRuntimeReadModel.Freshness.OFFLINE -> LiveBadge(LiveBadgeState.Offline)
+        TradingRuntimeReadModel.Freshness.STALE -> {
+            val time = state?.lastEventMs?.takeIf { it > 0 }
+            if (time == null) StatusChip(label = "STALE · TIME UNKNOWN", role = StatusSemantics.ROLE_EVENT_RISK)
+            else LiveBadge(LiveBadgeState.Stale((nowMs - time).coerceAtLeast(0L)))
         }
+        TradingRuntimeReadModel.Freshness.LIVE -> LiveBadge(LiveBadgeState.Live)
     }
-    LiveBadge(state = state)
 }
 
 @Composable

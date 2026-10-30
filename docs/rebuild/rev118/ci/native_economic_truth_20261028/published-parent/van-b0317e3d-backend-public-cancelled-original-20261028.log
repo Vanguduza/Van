@@ -1,0 +1,1080 @@
+﻿2026-10-28T20:49:03.3799180Z Current runner version: '2.338.0'
+2026-10-28T20:49:03.3838824Z ##[group]Runner Image Provisioner
+2026-10-28T20:49:03.3840231Z Hosted Compute Agent
+2026-10-28T20:49:03.3841185Z Version: 20261021.618
+2026-10-28T20:49:03.3842593Z Commit: 21505ad2541d5be6135ed84fc33697146cf75b8e
+2026-10-28T20:49:03.3843870Z Build Date: 2026-10-21T00:45:21Z
+2026-10-28T20:49:03.3845056Z Worker ID: {3f3df337-a4dd-4475-bea2-88981d4ce370}
+2026-10-28T20:49:03.3846346Z Region: southcentralus
+2026-10-28T20:49:03.3847285Z Cloud: Azure
+2026-10-28T20:49:03.3848252Z ##[endgroup]
+2026-10-28T20:49:03.3850503Z ##[group]Operating System
+2026-10-28T20:49:03.3851524Z Ubuntu
+2026-10-28T20:49:03.3852806Z 24.04.5
+2026-10-28T20:49:03.3853707Z LTS
+2026-10-28T20:49:03.3854746Z ##[endgroup]
+2026-10-28T20:49:03.3855906Z ##[group]Runner Image
+2026-10-28T20:49:03.3857112Z Image: ubuntu-24.04
+2026-10-28T20:49:03.3858367Z Version: 20261025.353.1
+2026-10-28T20:49:03.3860695Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20261025.353/images/ubuntu/Ubuntu2404-Readme.md
+2026-10-28T20:49:03.3863790Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20261025.353
+2026-10-28T20:49:03.3865507Z ##[endgroup]
+2026-10-28T20:49:03.3867926Z ##[group]GITHUB_TOKEN Permissions
+2026-10-28T20:49:03.3871049Z Contents: read
+2026-10-28T20:49:03.3872511Z Metadata: read
+2026-10-28T20:49:03.3873646Z Packages: read
+2026-10-28T20:49:03.3874799Z ##[endgroup]
+2026-10-28T20:49:03.3878712Z Secret source: Actions
+2026-10-28T20:49:03.3880438Z Cache mode: write
+2026-10-28T20:49:03.3881665Z Prepare workflow directory
+2026-10-28T20:49:03.4422366Z Prepare all required actions
+2026-10-28T20:49:03.4493854Z Getting action download info
+2026-10-28T20:49:03.7272620Z Download action repository 'actions/checkout@v4' (SHA:11d5960a326750d5838078e36cf38b85af677262)
+2026-10-28T20:49:03.8674948Z Download action repository 'actions/setup-node@v4' (SHA:49933ea5288caeca8642d1e84afbd3f7d6820020)
+2026-10-28T20:49:03.9638072Z Download action repository 'actions/setup-python@v5' (SHA:a26af69be951a213d495a4c3e4e4022e16d87065)
+2026-10-28T20:49:04.0451516Z Download action repository 'actions/upload-artifact@v4' (SHA:ea165f8d65b6e75b540449e92b4886f43607fa02)
+2026-10-28T20:49:04.2644708Z Complete job name: backend-public-source
+2026-10-28T20:49:04.3325328Z ##[group]Checking docker version
+2026-10-28T20:49:04.3338779Z ##[command]/usr/bin/docker version --format '{{.Server.APIVersion}}'
+2026-10-28T20:49:04.4484325Z '1.48'
+2026-10-28T20:49:04.4507216Z Docker daemon API version: '1.48'
+2026-10-28T20:49:04.4507986Z ##[command]/usr/bin/docker version --format '{{.Client.APIVersion}}'
+2026-10-28T20:49:04.4736868Z '1.48'
+2026-10-28T20:49:04.4757285Z Docker client API version: '1.48'
+2026-10-28T20:49:04.4764050Z ##[endgroup]
+2026-10-28T20:49:04.4768263Z ##[group]Clean up resources from previous jobs
+2026-10-28T20:49:04.4774002Z ##[command]/usr/bin/docker ps --all --quiet --no-trunc --filter "label=2067ab"
+2026-10-28T20:49:04.4945342Z ##[command]/usr/bin/docker network prune --force --filter "label=2067ab"
+2026-10-28T20:49:04.5106061Z ##[endgroup]
+2026-10-28T20:49:04.5106582Z ##[group]Create local container network
+2026-10-28T20:49:04.5116610Z ##[command]/usr/bin/docker network create --label 2067ab github_network_7f0d51a131c04723ad09cc22d3aff034
+2026-10-28T20:49:04.5686030Z 2d60fe1643d5185c8c2583add763f62aa72cf5c828861ba48046a5de254c5b44
+2026-10-28T20:49:04.5723288Z ##[endgroup]
+2026-10-28T20:49:04.5748422Z ##[group]Starting postgres service container
+2026-10-28T20:49:04.5771051Z ##[command]/usr/bin/docker pull postgres:17.11-bookworm@sha256:858bb5e98eed02eb8cafbcdc007f9a65d1b613972028944a8ec2133ccaf80d27
+2026-10-28T20:49:05.0258255Z docker.io/library/postgres@sha256:858bb5e98eed02eb8cafbcdc007f9a65d1b613972028944a8ec2133ccaf80d27: Pulling from library/postgres
+2026-10-28T20:49:05.1925718Z 11422d7ca1a4: Pulling fs layer
+2026-10-28T20:49:05.1927454Z a03cba1ee28f: Pulling fs layer
+2026-10-28T20:49:05.1928887Z 32ac211a4068: Pulling fs layer
+2026-10-28T20:49:05.1930332Z 80015fd97697: Pulling fs layer
+2026-10-28T20:49:05.1932258Z 3d633189a257: Pulling fs layer
+2026-10-28T20:49:05.1933280Z abc91d04c190: Pulling fs layer
+2026-10-28T20:49:05.1934283Z b69f574b66a3: Pulling fs layer
+2026-10-28T20:49:05.1935256Z ebb1e532806b: Pulling fs layer
+2026-10-28T20:49:05.1936256Z c5f39862cce6: Pulling fs layer
+2026-10-28T20:49:05.1937232Z 1dc57ea82d8b: Pulling fs layer
+2026-10-28T20:49:05.1938183Z 2433825d376d: Pulling fs layer
+2026-10-28T20:49:05.1939113Z 66361375bc70: Pulling fs layer
+2026-10-28T20:49:05.1940142Z 34c01ab7a545: Pulling fs layer
+2026-10-28T20:49:05.1941199Z eb2a6aab6a8e: Pulling fs layer
+2026-10-28T20:49:05.1942478Z 80015fd97697: Waiting
+2026-10-28T20:49:05.1943447Z 3d633189a257: Waiting
+2026-10-28T20:49:05.1944367Z abc91d04c190: Waiting
+2026-10-28T20:49:05.1945306Z b69f574b66a3: Waiting
+2026-10-28T20:49:05.1946244Z 2433825d376d: Waiting
+2026-10-28T20:49:05.1947169Z 66361375bc70: Waiting
+2026-10-28T20:49:05.1948106Z ebb1e532806b: Waiting
+2026-10-28T20:49:05.1949198Z 34c01ab7a545: Waiting
+2026-10-28T20:49:05.1950355Z c5f39862cce6: Waiting
+2026-10-28T20:49:05.1951497Z eb2a6aab6a8e: Waiting
+2026-10-28T20:49:05.1953012Z 1dc57ea82d8b: Waiting
+2026-10-28T20:49:05.3461823Z a03cba1ee28f: Verifying Checksum
+2026-10-28T20:49:05.3464082Z a03cba1ee28f: Download complete
+2026-10-28T20:49:05.4103015Z 32ac211a4068: Verifying Checksum
+2026-10-28T20:49:05.4103876Z 32ac211a4068: Download complete
+2026-10-28T20:49:05.4659193Z 11422d7ca1a4: Verifying Checksum
+2026-10-28T20:49:05.4660513Z 11422d7ca1a4: Download complete
+2026-10-28T20:49:05.5646973Z 80015fd97697: Download complete
+2026-10-28T20:49:05.6658255Z abc91d04c190: Verifying Checksum
+2026-10-28T20:49:05.6659671Z abc91d04c190: Download complete
+2026-10-28T20:49:05.6759101Z 3d633189a257: Verifying Checksum
+2026-10-28T20:49:05.6760170Z 3d633189a257: Download complete
+2026-10-28T20:49:05.7310597Z b69f574b66a3: Verifying Checksum
+2026-10-28T20:49:05.7311114Z b69f574b66a3: Download complete
+2026-10-28T20:49:05.8170312Z ebb1e532806b: Verifying Checksum
+2026-10-28T20:49:05.8175604Z ebb1e532806b: Download complete
+2026-10-28T20:49:05.8815324Z 1dc57ea82d8b: Download complete
+2026-10-28T20:49:05.9779046Z 2433825d376d: Download complete
+2026-10-28T20:49:06.0430486Z 66361375bc70: Download complete
+2026-10-28T20:49:06.1390036Z 34c01ab7a545: Verifying Checksum
+2026-10-28T20:49:06.1391125Z 34c01ab7a545: Download complete
+2026-10-28T20:49:06.1904150Z eb2a6aab6a8e: Verifying Checksum
+2026-10-28T20:49:06.1924647Z eb2a6aab6a8e: Download complete
+2026-10-28T20:49:06.2762682Z c5f39862cce6: Verifying Checksum
+2026-10-28T20:49:06.2763815Z c5f39862cce6: Download complete
+2026-10-28T20:49:06.6883391Z 11422d7ca1a4: Pull complete
+2026-10-28T20:49:07.3143952Z a03cba1ee28f: Pull complete
+2026-10-28T20:49:07.4467078Z 32ac211a4068: Pull complete
+2026-10-28T20:49:07.4785447Z 80015fd97697: Pull complete
+2026-10-28T20:49:07.7757689Z 3d633189a257: Pull complete
+2026-10-28T20:49:07.8412261Z abc91d04c190: Pull complete
+2026-10-28T20:49:07.8512702Z b69f574b66a3: Pull complete
+2026-10-28T20:49:07.8598888Z ebb1e532806b: Pull complete
+2026-10-28T20:49:10.7727332Z c5f39862cce6: Pull complete
+2026-10-28T20:49:10.7851374Z 1dc57ea82d8b: Pull complete
+2026-10-28T20:49:10.7989916Z 2433825d376d: Pull complete
+2026-10-28T20:49:10.8074817Z 66361375bc70: Pull complete
+2026-10-28T20:49:10.8161832Z 34c01ab7a545: Pull complete
+2026-10-28T20:49:10.8250499Z eb2a6aab6a8e: Pull complete
+2026-10-28T20:49:10.8289209Z Digest: sha256:858bb5e98eed02eb8cafbcdc007f9a65d1b613972028944a8ec2133ccaf80d27
+2026-10-28T20:49:10.8296682Z Status: Downloaded newer image for postgres@sha256:858bb5e98eed02eb8cafbcdc007f9a65d1b613972028944a8ec2133ccaf80d27
+2026-10-28T20:49:10.8323857Z docker.io/library/postgres:17.11-bookworm@sha256:858bb5e98eed02eb8cafbcdc007f9a65d1b613972028944a8ec2133ccaf80d27
+2026-10-28T20:49:10.8390238Z ##[command]/usr/bin/docker create --name 73b939b59c88488f9ad19b91aa681e63_postgres1711bookwormsha256858bb5e98eed02eb8cafbcdc007f9a65d1b613972028944a8ec2133ccaf80d27_f5fa52 --label 2067ab --network github_network_7f0d51a131c04723ad09cc22d3aff034 --network-alias postgres -p 5432:5432 --health-cmd "pg_isready -U van_fixture -d postgres" --health-interval 5s --health-timeout 5s --health-retries 12 -e "POSTGRES_USER=van_fixture" -e "POSTGRES_PASSWORD=van_ephemeral_test_only" -e "POSTGRES_DB=postgres" -e GITHUB_ACTIONS=true -e CI=true postgres:17.11-bookworm@sha256:858bb5e98eed02eb8cafbcdc007f9a65d1b613972028944a8ec2133ccaf80d27
+2026-10-28T20:49:10.8705268Z 2af364ecca1637bfd14e494f728b6e54d2a42ebeed840e2ca824c87dec056bcf
+2026-10-28T20:49:10.8734711Z ##[command]/usr/bin/docker start 2af364ecca1637bfd14e494f728b6e54d2a42ebeed840e2ca824c87dec056bcf
+2026-10-28T20:49:11.1206850Z 2af364ecca1637bfd14e494f728b6e54d2a42ebeed840e2ca824c87dec056bcf
+2026-10-28T20:49:11.1238215Z ##[command]/usr/bin/docker ps --all --filter id=2af364ecca1637bfd14e494f728b6e54d2a42ebeed840e2ca824c87dec056bcf --filter status=running --no-trunc --format "{{.ID}} {{.Status}}"
+2026-10-28T20:49:11.1406277Z 2af364ecca1637bfd14e494f728b6e54d2a42ebeed840e2ca824c87dec056bcf Up Less than a second (health: starting)
+2026-10-28T20:49:11.1431406Z ##[command]/usr/bin/docker port 2af364ecca1637bfd14e494f728b6e54d2a42ebeed840e2ca824c87dec056bcf
+2026-10-28T20:49:11.1596690Z 5432/tcp -> 0.0.0.0:5432
+2026-10-28T20:49:11.1597477Z 5432/tcp -> [::]:5432
+2026-10-28T20:49:11.1660512Z ##[endgroup]
+2026-10-28T20:49:11.1672735Z ##[group]Waiting for all services to be ready
+2026-10-28T20:49:11.1691051Z ##[command]/usr/bin/docker inspect --format="{{if .Config.Healthcheck}}{{print .State.Health.Status}}{{end}}" 2af364ecca1637bfd14e494f728b6e54d2a42ebeed840e2ca824c87dec056bcf
+2026-10-28T20:49:11.1874842Z starting
+2026-10-28T20:49:11.1911842Z postgres service is starting, waiting 2 seconds before checking again.
+2026-10-28T20:49:13.1917035Z ##[command]/usr/bin/docker inspect --format="{{if .Config.Healthcheck}}{{print .State.Health.Status}}{{end}}" 2af364ecca1637bfd14e494f728b6e54d2a42ebeed840e2ca824c87dec056bcf
+2026-10-28T20:49:13.2068670Z starting
+2026-10-28T20:49:13.2084927Z postgres service is starting, waiting 3 seconds before checking again.
+2026-10-28T20:49:16.9614470Z ##[command]/usr/bin/docker inspect --format="{{if .Config.Healthcheck}}{{print .State.Health.Status}}{{end}}" 2af364ecca1637bfd14e494f728b6e54d2a42ebeed840e2ca824c87dec056bcf
+2026-10-28T20:49:16.9774342Z healthy
+2026-10-28T20:49:16.9793870Z postgres service is healthy.
+2026-10-28T20:49:16.9794601Z ##[endgroup]
+2026-10-28T20:49:17.0112760Z ##[group]Run actions/checkout@v4
+2026-10-28T20:49:17.0113367Z with:
+2026-10-28T20:49:17.0113611Z   ref: b0317e3dd3f01748abe6cf92504c6d965e0956bb
+2026-10-28T20:49:17.0113909Z   fetch-depth: 0
+2026-10-28T20:49:17.0114115Z   repository: Vanguduza/Van
+2026-10-28T20:49:17.0116448Z   token: ***
+2026-10-28T20:49:17.0116656Z   ssh-strict: true
+2026-10-28T20:49:17.0116860Z   ssh-user: git
+2026-10-28T20:49:17.0117063Z   persist-credentials: true
+2026-10-28T20:49:17.0117292Z   clean: true
+2026-10-28T20:49:17.0117495Z   sparse-checkout-cone-mode: true
+2026-10-28T20:49:17.0117739Z   fetch-tags: false
+2026-10-28T20:49:17.0117959Z   show-progress: true
+2026-10-28T20:49:17.0118154Z   lfs: false
+2026-10-28T20:49:17.0118331Z   submodules: false
+2026-10-28T20:49:17.0118533Z   set-safe-directory: true
+2026-10-28T20:49:17.0118768Z   allow-unsafe-pr-checkout: false
+2026-10-28T20:49:17.0119183Z env:
+2026-10-28T20:49:17.0119440Z   PYTHONPATH: backend:backend/tests:trading:trading/tests:.
+2026-10-28T20:49:17.0120087Z   VATI_TEST_PG_DSN: ***127.0.0.1:5432/postgres
+2026-10-28T20:49:17.0120372Z   VATI_TEST_PG_ISOLATED_FIXTURE: 1
+2026-10-28T20:49:17.0120612Z ##[endgroup]
+2026-10-28T20:49:17.3331023Z Syncing repository: Vanguduza/Van
+2026-10-28T20:49:17.3332813Z ##[group]Getting Git version info
+2026-10-28T20:49:17.3333194Z Working directory is '/home/runner/work/Van/Van'
+2026-10-28T20:49:17.3333750Z [command]/usr/bin/git version
+2026-10-28T20:49:17.3445199Z git version 2.56.0
+2026-10-28T20:49:17.3468152Z ##[endgroup]
+2026-10-28T20:49:17.3485913Z Temporarily overriding HOME='/home/runner/work/_temp/15a47449-ae4b-46ba-a7f5-17d806940adc' before making global git config changes
+2026-10-28T20:49:17.3487815Z Adding repository directory to the temporary git global config as a safe directory
+2026-10-28T20:49:17.3492429Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/Van/Van
+2026-10-28T20:49:17.3557785Z Deleting the contents of '/home/runner/work/Van/Van'
+2026-10-28T20:49:17.3562976Z ##[group]Initializing the repository
+2026-10-28T20:49:17.3568023Z [command]/usr/bin/git init /home/runner/work/Van/Van
+2026-10-28T20:49:17.3714924Z hint: Using 'master' as the name for the initial branch. This default branch name
+2026-10-28T20:49:17.3715750Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+2026-10-28T20:49:17.3716314Z hint: to use in all of your new repositories, which will suppress this warning,
+2026-10-28T20:49:17.3716712Z hint: call:
+2026-10-28T20:49:17.3716899Z hint:
+2026-10-28T20:49:17.3717225Z hint: 	git config --global init.defaultBranch <name>
+2026-10-28T20:49:17.3717562Z hint:
+2026-10-28T20:49:17.3717894Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+2026-10-28T20:49:17.3718405Z hint: 'development'. The just-created branch can be renamed via this command:
+2026-10-28T20:49:17.3718852Z hint:
+2026-10-28T20:49:17.3719200Z hint: 	git branch -m <name>
+2026-10-28T20:49:17.3719609Z hint:
+2026-10-28T20:49:17.3720203Z hint: Disable this message with "git config set advice.defaultBranchName false"
+2026-10-28T20:49:17.3737575Z Initialized empty Git repository in /home/runner/work/Van/Van/.git/
+2026-10-28T20:49:17.3751891Z [command]/usr/bin/git remote add origin https://github.com/Vanguduza/Van
+2026-10-28T20:49:17.3807798Z ##[endgroup]
+2026-10-28T20:49:17.3808444Z ##[group]Disabling automatic garbage collection
+2026-10-28T20:49:17.3813204Z [command]/usr/bin/git config --local gc.auto 0
+2026-10-28T20:49:17.3847687Z ##[endgroup]
+2026-10-28T20:49:17.3870241Z ##[group]Setting up auth
+2026-10-28T20:49:17.3870916Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-10-28T20:49:17.3910964Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-10-28T20:49:17.4387949Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-10-28T20:49:17.4432571Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-10-28T20:49:17.4677140Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-10-28T20:49:17.4721735Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-10-28T20:49:17.4964817Z [command]/usr/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+2026-10-28T20:49:17.5014957Z ##[endgroup]
+2026-10-28T20:49:17.5015420Z ##[group]Fetching the repository
+2026-10-28T20:49:17.5030475Z [command]/usr/bin/git -c protocol.version=2 fetch --prune --no-recurse-submodules origin +refs/heads/*:refs/remotes/origin/* +refs/tags/*:refs/tags/*
+2026-10-28T20:49:38.3248913Z From https://github.com/Vanguduza/Van
+2026-10-28T20:49:38.3250339Z  * [new branch]        ccr-71397b02-lm6fid       -> origin/ccr-71397b02-lm6fid
+2026-10-28T20:49:38.3251294Z  * [new branch]        ccr-8f1201e9-w1xm0r       -> origin/ccr-8f1201e9-w1xm0r
+2026-10-28T20:49:38.3252387Z  * [new branch]        ccr-9e07e1af-8mgz1p       -> origin/ccr-9e07e1af-8mgz1p
+2026-10-28T20:49:38.3253498Z  * [new branch]        chatgpt/allow-sandboxed-playwright-userns-20261008 -> origin/chatgpt/allow-sandboxed-playwright-userns-20261008
+2026-10-28T20:49:38.3254473Z  * [new branch]        chatgpt/better-remote-commander-oci-20261021 -> origin/chatgpt/better-remote-commander-oci-20261021
+2026-10-28T20:49:38.3255354Z  * [new branch]        chatgpt/fix-browser-harness-pillow-pin-20261008 -> origin/chatgpt/fix-browser-harness-pillow-pin-20261008
+2026-10-28T20:49:38.3256565Z  * [new branch]        chatgpt/fix-browser-runtime-ancestor-acl-20261008 -> origin/chatgpt/fix-browser-runtime-ancestor-acl-20261008
+2026-10-28T20:49:38.3257708Z  * [new branch]        chatgpt/fix-browser-runtime-path-access-20261008 -> origin/chatgpt/fix-browser-runtime-path-access-20261008
+2026-10-28T20:49:38.3258628Z  * [new branch]        chatgpt/fix-browser-runtime-path-perms-20261008 -> origin/chatgpt/fix-browser-runtime-path-perms-20261008
+2026-10-28T20:49:38.3259465Z  * [new branch]        chatgpt/fix-browser-systemd-retry-20261008 -> origin/chatgpt/fix-browser-systemd-retry-20261008
+2026-10-28T20:49:38.3260276Z  * [new branch]        chatgpt/fix-browser-systemd-retry2-20261008 -> origin/chatgpt/fix-browser-systemd-retry2-20261008
+2026-10-28T20:49:38.3261123Z  * [new branch]        chatgpt/fix-browser-systemd-startlimit-20261008 -> origin/chatgpt/fix-browser-systemd-startlimit-20261008
+2026-10-28T20:49:38.3262368Z  * [new branch]        chatgpt/fix-gateway-browser-runtime-staging-20261008 -> origin/chatgpt/fix-gateway-browser-runtime-staging-20261008
+2026-10-28T20:49:38.3263305Z  * [new branch]        chatgpt/fix-stagehand-listen-syntax-20261008 -> origin/chatgpt/fix-stagehand-listen-syntax-20261008
+2026-10-28T20:49:38.3264168Z  * [new branch]        chatgpt/fix-stagehand-listen-syntax-v2-20261008 -> origin/chatgpt/fix-stagehand-listen-syntax-v2-20261008
+2026-10-28T20:49:38.3265050Z  * [new branch]        chatgpt/fix-stagehand-readiness-window-20261008 -> origin/chatgpt/fix-stagehand-readiness-window-20261008
+2026-10-28T20:49:38.3266232Z  * [new branch]        chatgpt/harden-playwright-chromium-ownership-20261008 -> origin/chatgpt/harden-playwright-chromium-ownership-20261008
+2026-10-28T20:49:38.3267276Z  * [new branch]        chatgpt/stage-browser-governance-certification-20261008 -> origin/chatgpt/stage-browser-governance-certification-20261008
+2026-10-28T20:49:38.3268229Z  * [new branch]        chatgpt/van-browser-assignment-proof-20261008 -> origin/chatgpt/van-browser-assignment-proof-20261008
+2026-10-28T20:49:38.3269051Z  * [new branch]        chatgpt/van-browser-sandbox-launch-20261008 -> origin/chatgpt/van-browser-sandbox-launch-20261008
+2026-10-28T20:49:38.3270535Z  * [new branch]        chatgpt/van-browser-task-read-auth-20261008 -> origin/chatgpt/van-browser-task-read-auth-20261008
+2026-10-28T20:49:38.3271485Z  * [new branch]        chatgpt/van-browser-tested-source-20261008 -> origin/chatgpt/van-browser-tested-source-20261008
+2026-10-28T20:49:38.3272742Z  * [new branch]        chatgpt/van-overlay-firewall-persistence-20261007 -> origin/chatgpt/van-overlay-firewall-persistence-20261007
+2026-10-28T20:49:38.3273607Z  * [new branch]        chatgpt/van-web-acquisition-fabric-20261004 -> origin/chatgpt/van-web-acquisition-fabric-20261004
+2026-10-28T20:49:38.3274364Z  * [new branch]        chatgpt/vati-opportunity-modes-20261008 -> origin/chatgpt/vati-opportunity-modes-20261008
+2026-10-28T20:49:38.3275006Z  * [new branch]        claude/busy-bardeen-sbfo2u -> origin/claude/busy-bardeen-sbfo2u
+2026-10-28T20:49:38.3275637Z  * [new branch]        claude/van-fable-forensic-audit-ds8g0o -> origin/claude/van-fable-forensic-audit-ds8g0o
+2026-10-28T20:49:38.3276369Z  * [new branch]        claude/van-forge-audit-11n4wh -> origin/claude/van-forge-audit-11n4wh
+2026-10-28T20:49:38.3277065Z  * [new branch]        codex/cognitive-fabric-r161-20261006 -> origin/codex/cognitive-fabric-r161-20261006
+2026-10-28T20:49:38.3277848Z  * [new branch]        codex/van-canon-ci-import-path-2026-10-08 -> origin/codex/van-canon-ci-import-path-2026-10-08
+2026-10-28T20:49:38.3278595Z  * [new branch]        codex/van-canon-consolidation-2026-10-08 -> origin/codex/van-canon-consolidation-2026-10-08
+2026-10-28T20:49:38.3279343Z  * [new branch]        codex/van-canon-runtime-closure-2026-10-09 -> origin/codex/van-canon-runtime-closure-2026-10-09
+2026-10-28T20:49:38.3280116Z  * [new branch]        codex/van-canon-runtime-evidence-2026-10-09 -> origin/codex/van-canon-runtime-evidence-2026-10-09
+2026-10-28T20:49:38.3281134Z  * [new branch]        codex/van-dfc1557a-direct-acceptance-2026-10-09 -> origin/codex/van-dfc1557a-direct-acceptance-2026-10-09
+2026-10-28T20:49:38.3281886Z  * [new branch]        codex/van-direct-artemis-2026-10-08 -> origin/codex/van-direct-artemis-2026-10-08
+2026-10-28T20:49:38.3282835Z  * [new branch]        codex/van-owner-core-only-2026-10-08 -> origin/codex/van-owner-core-only-2026-10-08
+2026-10-28T20:49:38.3283478Z  * [new branch]        codex/van-owner-wiring-2026-10-08 -> origin/codex/van-owner-wiring-2026-10-08
+2026-10-28T20:49:38.3284248Z  * [new branch]        codex/van-project-truth-bootstrap-review-2026-10-09 -> origin/codex/van-project-truth-bootstrap-review-2026-10-09
+2026-10-28T20:49:38.3285078Z  * [new branch]        consolidation/opus-clean-rev118-20261021 -> origin/consolidation/opus-clean-rev118-20261021
+2026-10-28T20:49:38.3285916Z  * [new branch]        feat/supabase-one-install-multiproject-20261020 -> origin/feat/supabase-one-install-multiproject-20261020
+2026-10-28T20:49:38.3287517Z  * [new branch]        feature/muse-dual-surface-control-20261012 -> origin/feature/muse-dual-surface-control-20261012
+2026-10-28T20:49:38.3288882Z  * [new branch]        feature/rea-trading-accounts-tactile-20261015 -> origin/feature/rea-trading-accounts-tactile-20261015
+2026-10-28T20:49:38.3289997Z  * [new branch]        fix/muse-zram-host-resilience-20261012 -> origin/fix/muse-zram-host-resilience-20261012
+2026-10-28T20:49:38.3291189Z  * [new branch]        forge/candidate-b-rive-mechanics-20260925 -> origin/forge/candidate-b-rive-mechanics-20260925
+2026-10-28T20:49:38.3292740Z  * [new branch]        gpt/character-forge-netcup-env-hotfix-20260923 -> origin/gpt/character-forge-netcup-env-hotfix-20260923
+2026-10-28T20:49:38.3294336Z  * [new branch]        gpt/character-forge-netcup-qualification-fix-20260923 -> origin/gpt/character-forge-netcup-qualification-fix-20260923
+2026-10-28T20:49:38.3295936Z  * [new branch]        gpt/character-forge-production-closure-20260924 -> origin/gpt/character-forge-production-closure-20260924
+2026-10-28T20:49:38.3297190Z  * [new branch]        gpt/jev-control-centre-20260925 -> origin/gpt/jev-control-centre-20260925
+2026-10-28T20:49:38.3298654Z  * [new branch]        gpt/jev-openmuse-convergence-r1-van-20260929 -> origin/gpt/jev-openmuse-convergence-r1-van-20260929
+2026-10-28T20:49:38.3300352Z  * [new branch]        gpt/jev-openmuse-convergence-r1-van-20260929-parent-ccr-integration -> origin/gpt/jev-openmuse-convergence-r1-van-20260929-parent-ccr-integration
+2026-10-28T20:49:38.3301873Z  * [new branch]        gpt/memory-fabric-rev1-2-van-20260929 -> origin/gpt/memory-fabric-rev1-2-van-20260929
+2026-10-28T20:49:38.3303298Z  * [new branch]        gpt/meta-muse-access-live-green-20261002 -> origin/gpt/meta-muse-access-live-green-20261002
+2026-10-28T20:49:38.3304608Z  * [new branch]        gpt/meta-muse-secure-access-20261002 -> origin/gpt/meta-muse-secure-access-20261002
+2026-10-28T20:49:38.3305829Z  * [new branch]        gpt/muse-egress-hardening-20260930 -> origin/gpt/muse-egress-hardening-20260930
+2026-10-28T20:49:38.3307053Z  * [new branch]        gpt/openmuse-van-convergence-r1 -> origin/gpt/openmuse-van-convergence-r1
+2026-10-28T20:49:38.3308098Z  * [new branch]        gpt/van-artemis-console-20260923 -> origin/gpt/van-artemis-console-20260923
+2026-10-28T20:49:38.3309411Z  * [new branch]        gpt/van-character-forge-authority-closure-20260924 -> origin/gpt/van-character-forge-authority-closure-20260924
+2026-10-28T20:49:38.3310875Z  * [new branch]        gpt/van-character-forge-engineering-20260922 -> origin/gpt/van-character-forge-engineering-20260922
+2026-10-28T20:49:38.3312555Z  * [new branch]        gpt/van-character-forge-production-v3-20260924 -> origin/gpt/van-character-forge-production-v3-20260924
+2026-10-28T20:49:38.3314067Z  * [new branch]        gpt/van-post-fable-product-closure-20260922 -> origin/gpt/van-post-fable-product-closure-20260922
+2026-10-28T20:49:38.3315648Z  * [new branch]        gpt/van-rive-build-input-pack-20260924 -> origin/gpt/van-rive-build-input-pack-20260924
+2026-10-28T20:49:38.3316594Z  * [new branch]        main                      -> origin/main
+2026-10-28T20:49:38.3317574Z  * [new branch]        muse/vati-opportunity-modes-20261008 -> origin/muse/vati-opportunity-modes-20261008
+2026-10-28T20:49:38.3318732Z  * [new branch]        ops/dial-control-recovery-20260930 -> origin/ops/dial-control-recovery-20260930
+2026-10-28T20:49:38.3320032Z  * [new branch]        owner/dial-universe-whatsapp-browser-20261008 -> origin/owner/dial-universe-whatsapp-browser-20261008
+2026-10-28T20:49:38.3321414Z  * [new branch]        platform/rev3-cinematic-studio-20261016 -> origin/platform/rev3-cinematic-studio-20261016
+2026-10-28T20:49:38.3323133Z  * [new branch]        platform/rev3-interaction-pr93-contribution-20261014 -> origin/platform/rev3-interaction-pr93-contribution-20261014
+2026-10-28T20:49:38.3324395Z  * [new branch]        platform/rev3-owner-controls-20261015 -> origin/platform/rev3-owner-controls-20261015
+2026-10-28T20:49:38.3325121Z  * [new branch]        review/muse-vati-rev114-inputs-20261018 -> origin/review/muse-vati-rev114-inputs-20261018
+2026-10-28T20:49:38.3326000Z  * [new branch]        review/van-next-universal-coverage-b4-closure-20261016 -> origin/review/van-next-universal-coverage-b4-closure-20261016
+2026-10-28T20:49:38.3326762Z  * [new branch]        review/van-rev115-20261018 -> origin/review/van-rev115-20261018
+2026-10-28T20:49:38.3327379Z  * [new branch]        spike/van-next-chart-engine-20261015 -> origin/spike/van-next-chart-engine-20261015
+2026-10-28T20:49:38.3328241Z  * [new tag]           archive/van-20261021/ccr-71397b02-lm6fid -> archive/van-20261021/ccr-71397b02-lm6fid
+2026-10-28T20:49:38.3328890Z  * [new tag]           archive/van-20261021/ccr-8f1201e9-w1xm0r -> archive/van-20261021/ccr-8f1201e9-w1xm0r
+2026-10-28T20:49:38.3329914Z  * [new tag]           archive/van-20261021/chatgpt/allow-sandboxed-playwright-userns-20261008 -> archive/van-20261021/chatgpt/allow-sandboxed-playwright-userns-20261008
+2026-10-28T20:49:38.3331016Z  * [new tag]           archive/van-20261021/chatgpt/better-remote-commander-oci-20261021 -> archive/van-20261021/chatgpt/better-remote-commander-oci-20261021
+2026-10-28T20:49:38.3332833Z  * [new tag]           archive/van-20261021/chatgpt/fix-browser-harness-pillow-pin-20261008 -> archive/van-20261021/chatgpt/fix-browser-harness-pillow-pin-20261008
+2026-10-28T20:49:38.3333956Z  * [new tag]           archive/van-20261021/chatgpt/fix-browser-runtime-ancestor-acl-20261008 -> archive/van-20261021/chatgpt/fix-browser-runtime-ancestor-acl-20261008
+2026-10-28T20:49:38.3335664Z  * [new tag]           archive/van-20261021/chatgpt/fix-browser-runtime-path-access-20261008 -> archive/van-20261021/chatgpt/fix-browser-runtime-path-access-20261008
+2026-10-28T20:49:38.3337004Z  * [new tag]           archive/van-20261021/chatgpt/fix-browser-runtime-path-perms-20261008 -> archive/van-20261021/chatgpt/fix-browser-runtime-path-perms-20261008
+2026-10-28T20:49:38.3338048Z  * [new tag]           archive/van-20261021/chatgpt/fix-browser-systemd-retry-20261008 -> archive/van-20261021/chatgpt/fix-browser-systemd-retry-20261008
+2026-10-28T20:49:38.3339039Z  * [new tag]           archive/van-20261021/chatgpt/fix-browser-systemd-retry2-20261008 -> archive/van-20261021/chatgpt/fix-browser-systemd-retry2-20261008
+2026-10-28T20:49:38.3340071Z  * [new tag]           archive/van-20261021/chatgpt/fix-browser-systemd-startlimit-20261008 -> archive/van-20261021/chatgpt/fix-browser-systemd-startlimit-20261008
+2026-10-28T20:49:38.3341188Z  * [new tag]           archive/van-20261021/chatgpt/fix-gateway-browser-runtime-staging-20261008 -> archive/van-20261021/chatgpt/fix-gateway-browser-runtime-staging-20261008
+2026-10-28T20:49:38.3342629Z  * [new tag]           archive/van-20261021/chatgpt/fix-stagehand-listen-syntax-20261008 -> archive/van-20261021/chatgpt/fix-stagehand-listen-syntax-20261008
+2026-10-28T20:49:38.3343673Z  * [new tag]           archive/van-20261021/chatgpt/fix-stagehand-listen-syntax-v2-20261008 -> archive/van-20261021/chatgpt/fix-stagehand-listen-syntax-v2-20261008
+2026-10-28T20:49:38.3344934Z  * [new tag]           archive/van-20261021/chatgpt/fix-stagehand-readiness-window-20261008 -> archive/van-20261021/chatgpt/fix-stagehand-readiness-window-20261008
+2026-10-28T20:49:38.3346070Z  * [new tag]           archive/van-20261021/chatgpt/harden-playwright-chromium-ownership-20261008 -> archive/van-20261021/chatgpt/harden-playwright-chromium-ownership-20261008
+2026-10-28T20:49:38.3347285Z  * [new tag]           archive/van-20261021/chatgpt/stage-browser-governance-certification-20261008 -> archive/van-20261021/chatgpt/stage-browser-governance-certification-20261008
+2026-10-28T20:49:38.3348414Z  * [new tag]           archive/van-20261021/chatgpt/van-browser-assignment-proof-20261008 -> archive/van-20261021/chatgpt/van-browser-assignment-proof-20261008
+2026-10-28T20:49:38.3349443Z  * [new tag]           archive/van-20261021/chatgpt/van-browser-sandbox-launch-20261008 -> archive/van-20261021/chatgpt/van-browser-sandbox-launch-20261008
+2026-10-28T20:49:38.3350441Z  * [new tag]           archive/van-20261021/chatgpt/van-browser-task-read-auth-20261008 -> archive/van-20261021/chatgpt/van-browser-task-read-auth-20261008
+2026-10-28T20:49:38.3352337Z  * [new tag]           archive/van-20261021/chatgpt/van-browser-tested-source-20261008 -> archive/van-20261021/chatgpt/van-browser-tested-source-20261008
+2026-10-28T20:49:38.3354092Z  * [new tag]           archive/van-20261021/chatgpt/van-overlay-firewall-persistence-20261007 -> archive/van-20261021/chatgpt/van-overlay-firewall-persistence-20261007
+2026-10-28T20:49:38.3355830Z  * [new tag]           archive/van-20261021/chatgpt/van-web-acquisition-fabric-20261004 -> archive/van-20261021/chatgpt/van-web-acquisition-fabric-20261004
+2026-10-28T20:49:38.3357508Z  * [new tag]           archive/van-20261021/chatgpt/vati-opportunity-modes-20261008 -> archive/van-20261021/chatgpt/vati-opportunity-modes-20261008
+2026-10-28T20:49:38.3358979Z  * [new tag]           archive/van-20261021/claude/busy-bardeen-sbfo2u -> archive/van-20261021/claude/busy-bardeen-sbfo2u
+2026-10-28T20:49:38.3360418Z  * [new tag]           archive/van-20261021/claude/van-fable-forensic-audit-ds8g0o -> archive/van-20261021/claude/van-fable-forensic-audit-ds8g0o
+2026-10-28T20:49:38.3362297Z  * [new tag]           archive/van-20261021/claude/van-forge-audit-11n4wh -> archive/van-20261021/claude/van-forge-audit-11n4wh
+2026-10-28T20:49:38.3363776Z  * [new tag]           archive/van-20261021/codex/cognitive-fabric-r161-20261006 -> archive/van-20261021/codex/cognitive-fabric-r161-20261006
+2026-10-28T20:49:38.3365309Z  * [new tag]           archive/van-20261021/codex/van-canon-ci-import-path-2026-10-08 -> archive/van-20261021/codex/van-canon-ci-import-path-2026-10-08
+2026-10-28T20:49:38.3367157Z  * [new tag]           archive/van-20261021/codex/van-canon-consolidation-2026-10-08 -> archive/van-20261021/codex/van-canon-consolidation-2026-10-08
+2026-10-28T20:49:38.3368917Z  * [new tag]           archive/van-20261021/codex/van-canon-runtime-closure-2026-10-09 -> archive/van-20261021/codex/van-canon-runtime-closure-2026-10-09
+2026-10-28T20:49:38.3370642Z  * [new tag]           archive/van-20261021/codex/van-canon-runtime-evidence-2026-10-09 -> archive/van-20261021/codex/van-canon-runtime-evidence-2026-10-09
+2026-10-28T20:49:38.3372617Z  * [new tag]           archive/van-20261021/codex/van-dfc1557a-direct-acceptance-2026-10-09 -> archive/van-20261021/codex/van-dfc1557a-direct-acceptance-2026-10-09
+2026-10-28T20:49:38.3374305Z  * [new tag]           archive/van-20261021/codex/van-direct-artemis-2026-10-08 -> archive/van-20261021/codex/van-direct-artemis-2026-10-08
+2026-10-28T20:49:38.3375833Z  * [new tag]           archive/van-20261021/codex/van-owner-core-only-2026-10-08 -> archive/van-20261021/codex/van-owner-core-only-2026-10-08
+2026-10-28T20:49:38.3377310Z  * [new tag]           archive/van-20261021/codex/van-owner-wiring-2026-10-08 -> archive/van-20261021/codex/van-owner-wiring-2026-10-08
+2026-10-28T20:49:38.3379301Z  * [new tag]           archive/van-20261021/codex/van-project-truth-bootstrap-review-2026-10-09 -> archive/van-20261021/codex/van-project-truth-bootstrap-review-2026-10-09
+2026-10-28T20:49:38.3380713Z  * [new tag]           archive/van-20261021/feat/supabase-one-install-multiproject-20261020 -> archive/van-20261021/feat/supabase-one-install-multiproject-20261020
+2026-10-28T20:49:38.3381754Z  * [new tag]           archive/van-20261021/feature/muse-dual-surface-control-20261012 -> archive/van-20261021/feature/muse-dual-surface-control-20261012
+2026-10-28T20:49:38.3383086Z  * [new tag]           archive/van-20261021/feature/rea-trading-accounts-tactile-20261015 -> archive/van-20261021/feature/rea-trading-accounts-tactile-20261015
+2026-10-28T20:49:38.3384169Z  * [new tag]           archive/van-20261021/fix/muse-zram-host-resilience-20261012 -> archive/van-20261021/fix/muse-zram-host-resilience-20261012
+2026-10-28T20:49:38.3385480Z  * [new tag]           archive/van-20261021/forge/candidate-b-rive-mechanics-20260925 -> archive/van-20261021/forge/candidate-b-rive-mechanics-20260925
+2026-10-28T20:49:38.3386511Z  * [new tag]           archive/van-20261021/gpt/character-forge-netcup-env-hotfix-20260923 -> archive/van-20261021/gpt/character-forge-netcup-env-hotfix-20260923
+2026-10-28T20:49:38.3387648Z  * [new tag]           archive/van-20261021/gpt/character-forge-netcup-qualification-fix-20260923 -> archive/van-20261021/gpt/character-forge-netcup-qualification-fix-20260923
+2026-10-28T20:49:38.3389054Z  * [new tag]           archive/van-20261021/gpt/character-forge-production-closure-20260924 -> archive/van-20261021/gpt/character-forge-production-closure-20260924
+2026-10-28T20:49:38.3390013Z  * [new tag]           archive/van-20261021/gpt/jev-control-centre-20260925 -> archive/van-20261021/gpt/jev-control-centre-20260925
+2026-10-28T20:49:38.3390940Z  * [new tag]           archive/van-20261021/gpt/jev-openmuse-convergence-r1-van-20260929 -> archive/van-20261021/gpt/jev-openmuse-convergence-r1-van-20260929
+2026-10-28T20:49:38.3393407Z  * [new tag]           archive/van-20261021/gpt/jev-openmuse-convergence-r1-van-20260929-parent-ccr-integration -> archive/van-20261021/gpt/jev-openmuse-convergence-r1-van-20260929-parent-ccr-integration
+2026-10-28T20:49:38.3395011Z  * [new tag]           archive/van-20261021/gpt/memory-fabric-rev1-2-van-20260929 -> archive/van-20261021/gpt/memory-fabric-rev1-2-van-20260929
+2026-10-28T20:49:38.3395968Z  * [new tag]           archive/van-20261021/gpt/meta-muse-access-live-green-20261002 -> archive/van-20261021/gpt/meta-muse-access-live-green-20261002
+2026-10-28T20:49:38.3396894Z  * [new tag]           archive/van-20261021/gpt/meta-muse-secure-access-20261002 -> archive/van-20261021/gpt/meta-muse-secure-access-20261002
+2026-10-28T20:49:38.3398228Z  * [new tag]           archive/van-20261021/gpt/muse-egress-hardening-20260930 -> archive/van-20261021/gpt/muse-egress-hardening-20260930
+2026-10-28T20:49:38.3399748Z  * [new tag]           archive/van-20261021/gpt/openmuse-van-convergence-r1 -> archive/van-20261021/gpt/openmuse-van-convergence-r1
+2026-10-28T20:49:38.3401242Z  * [new tag]           archive/van-20261021/gpt/van-artemis-console-20260923 -> archive/van-20261021/gpt/van-artemis-console-20260923
+2026-10-28T20:49:38.3403276Z  * [new tag]           archive/van-20261021/gpt/van-character-forge-authority-closure-20260924 -> archive/van-20261021/gpt/van-character-forge-authority-closure-20260924
+2026-10-28T20:49:38.3405166Z  * [new tag]           archive/van-20261021/gpt/van-character-forge-engineering-20260922 -> archive/van-20261021/gpt/van-character-forge-engineering-20260922
+2026-10-28T20:49:38.3407022Z  * [new tag]           archive/van-20261021/gpt/van-character-forge-production-v3-20260924 -> archive/van-20261021/gpt/van-character-forge-production-v3-20260924
+2026-10-28T20:49:38.3408579Z  * [new tag]           archive/van-20261021/gpt/van-post-fable-product-closure-20260922 -> archive/van-20261021/gpt/van-post-fable-product-closure-20260922
+2026-10-28T20:49:38.3409742Z  * [new tag]           archive/van-20261021/gpt/van-rive-build-input-pack-20260924 -> archive/van-20261021/gpt/van-rive-build-input-pack-20260924
+2026-10-28T20:49:38.3410645Z  * [new tag]           archive/van-20261021/main -> archive/van-20261021/main
+2026-10-28T20:49:38.3411481Z  * [new tag]           archive/van-20261021/muse/vati-opportunity-modes-20261008 -> archive/van-20261021/muse/vati-opportunity-modes-20261008
+2026-10-28T20:49:38.3412607Z  * [new tag]           archive/van-20261021/ops/dial-control-recovery-20260930 -> archive/van-20261021/ops/dial-control-recovery-20260930
+2026-10-28T20:49:38.3413563Z  * [new tag]           archive/van-20261021/owner/dial-universe-whatsapp-browser-20261008 -> archive/van-20261021/owner/dial-universe-whatsapp-browser-20261008
+2026-10-28T20:49:38.3414546Z  * [new tag]           archive/van-20261021/platform/rev3-cinematic-studio-20261016 -> archive/van-20261021/platform/rev3-cinematic-studio-20261016
+2026-10-28T20:49:38.3415840Z  * [new tag]           archive/van-20261021/platform/rev3-interaction-pr93-contribution-20261014 -> archive/van-20261021/platform/rev3-interaction-pr93-contribution-20261014
+2026-10-28T20:49:38.3416950Z  * [new tag]           archive/van-20261021/platform/rev3-owner-controls-20261015 -> archive/van-20261021/platform/rev3-owner-controls-20261015
+2026-10-28T20:49:38.3417873Z  * [new tag]           archive/van-20261021/review/muse-vati-rev114-inputs-20261018 -> archive/van-20261021/review/muse-vati-rev114-inputs-20261018
+2026-10-28T20:49:38.3418929Z  * [new tag]           archive/van-20261021/review/van-next-universal-coverage-b4-closure-20261016 -> archive/van-20261021/review/van-next-universal-coverage-b4-closure-20261016
+2026-10-28T20:49:38.3419887Z  * [new tag]           archive/van-20261021/review/van-rev115-20261018 -> archive/van-20261021/review/van-rev115-20261018
+2026-10-28T20:49:38.3420682Z  * [new tag]           archive/van-20261021/spike/van-next-chart-engine-20261015 -> archive/van-20261021/spike/van-next-chart-engine-20261015
+2026-10-28T20:49:38.3421307Z  * [new tag]           v0.5.0-dev                -> v0.5.0-dev
+2026-10-28T20:49:38.3422611Z [command]/usr/bin/git rev-parse --verify --quiet b0317e3dd3f01748abe6cf92504c6d965e0956bb^{object}
+2026-10-28T20:49:38.3423165Z b0317e3dd3f01748abe6cf92504c6d965e0956bb
+2026-10-28T20:49:38.3423861Z ##[endgroup]
+2026-10-28T20:49:38.3424476Z ##[group]Determining the checkout info
+2026-10-28T20:49:38.3424893Z ##[endgroup]
+2026-10-28T20:49:38.3425115Z [command]/usr/bin/git sparse-checkout disable
+2026-10-28T20:49:38.3425777Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+2026-10-28T20:49:38.3459109Z ##[group]Checking out the ref
+2026-10-28T20:49:38.3464236Z [command]/usr/bin/git checkout --progress --force b0317e3dd3f01748abe6cf92504c6d965e0956bb
+2026-10-28T20:49:39.3809212Z Updating files:  58% (9609/16493)
+2026-10-28T20:49:39.3964482Z Updating files:  59% (9731/16493)
+2026-10-28T20:49:39.4095506Z Updating files:  60% (9896/16493)
+2026-10-28T20:49:39.4192444Z Updating files:  61% (10061/16493)
+2026-10-28T20:49:39.4260814Z Updating files:  62% (10226/16493)
+2026-10-28T20:49:39.4338148Z Updating files:  63% (10391/16493)
+2026-10-28T20:49:39.4475693Z Updating files:  64% (10556/16493)
+2026-10-28T20:49:39.4628336Z Updating files:  65% (10721/16493)
+2026-10-28T20:49:39.4903789Z Updating files:  66% (10886/16493)
+2026-10-28T20:49:39.5037964Z Updating files:  67% (11051/16493)
+2026-10-28T20:49:39.5305678Z Updating files:  68% (11216/16493)
+2026-10-28T20:49:39.5752924Z Updating files:  69% (11381/16493)
+2026-10-28T20:49:39.5997395Z Updating files:  70% (11546/16493)
+2026-10-28T20:49:39.6135994Z Updating files:  71% (11711/16493)
+2026-10-28T20:49:39.6285835Z Updating files:  72% (11875/16493)
+2026-10-28T20:49:39.6460469Z Updating files:  73% (12040/16493)
+2026-10-28T20:49:39.6730461Z Updating files:  74% (12205/16493)
+2026-10-28T20:49:39.6822046Z Updating files:  75% (12370/16493)
+2026-10-28T20:49:39.6943270Z Updating files:  76% (12535/16493)
+2026-10-28T20:49:39.7041870Z Updating files:  77% (12700/16493)
+2026-10-28T20:49:39.7147968Z Updating files:  78% (12865/16493)
+2026-10-28T20:49:39.7251777Z Updating files:  79% (13030/16493)
+2026-10-28T20:49:39.7531652Z Updating files:  80% (13195/16493)
+2026-10-28T20:49:39.7835978Z Updating files:  81% (13360/16493)
+2026-10-28T20:49:39.8006180Z Updating files:  82% (13525/16493)
+2026-10-28T20:49:39.8119768Z Updating files:  83% (13690/16493)
+2026-10-28T20:49:39.8360793Z Updating files:  84% (13855/16493)
+2026-10-28T20:49:39.8570177Z Updating files:  85% (14020/16493)
+2026-10-28T20:49:39.8701261Z Updating files:  86% (14184/16493)
+2026-10-28T20:49:39.9731226Z Updating files:  87% (14349/16493)
+2026-10-28T20:49:39.9903572Z Updating files:  88% (14514/16493)
+2026-10-28T20:49:40.0053905Z Updating files:  89% (14679/16493)
+2026-10-28T20:49:40.0179974Z Updating files:  90% (14844/16493)
+2026-10-28T20:49:40.0767038Z Updating files:  91% (15009/16493)
+2026-10-28T20:49:40.1229915Z Updating files:  92% (15174/16493)
+2026-10-28T20:49:40.1501597Z Updating files:  93% (15339/16493)
+2026-10-28T20:49:40.1642574Z Updating files:  94% (15504/16493)
+2026-10-28T20:49:40.1763684Z Updating files:  95% (15669/16493)
+2026-10-28T20:49:40.1878663Z Updating files:  96% (15834/16493)
+2026-10-28T20:49:40.2010549Z Updating files:  97% (15999/16493)
+2026-10-28T20:49:40.2121990Z Updating files:  98% (16164/16493)
+2026-10-28T20:49:40.3920591Z Updating files:  99% (16329/16493)
+2026-10-28T20:49:40.4066385Z Updating files:  99% (16482/16493)
+2026-10-28T20:49:40.4067165Z Updating files: 100% (16493/16493)
+2026-10-28T20:49:40.4068018Z Updating files: 100% (16493/16493), done.
+2026-10-28T20:49:40.4268730Z Note: switching to 'b0317e3dd3f01748abe6cf92504c6d965e0956bb'.
+2026-10-28T20:49:40.4269219Z 
+2026-10-28T20:49:40.4269549Z You are in 'detached HEAD' state. You can look around, make experimental
+2026-10-28T20:49:40.4270343Z changes and commit them, and you can discard any commits you make in this
+2026-10-28T20:49:40.4271130Z state without impacting any branches by switching back to a branch.
+2026-10-28T20:49:40.4271626Z 
+2026-10-28T20:49:40.4272156Z If you want to create a new branch to retain commits you create, you may
+2026-10-28T20:49:40.4272904Z do so (now or later) by using -c with the switch command. Example:
+2026-10-28T20:49:40.4273321Z 
+2026-10-28T20:49:40.4273489Z   git switch -c <new-branch-name>
+2026-10-28T20:49:40.4274071Z 
+2026-10-28T20:49:40.4274241Z Or undo this operation with:
+2026-10-28T20:49:40.4274506Z 
+2026-10-28T20:49:40.4274636Z   git switch -
+2026-10-28T20:49:40.4274829Z 
+2026-10-28T20:49:40.4275173Z Turn off this advice by setting config variable advice.detachedHead to false
+2026-10-28T20:49:40.4275685Z 
+2026-10-28T20:49:40.4276145Z HEAD is now at b0317e3d Publish original native close observations through the financial journal
+2026-10-28T20:49:40.4513027Z ##[endgroup]
+2026-10-28T20:49:40.4517773Z [command]/usr/bin/git log -1 --format=%H
+2026-10-28T20:49:40.4555607Z b0317e3dd3f01748abe6cf92504c6d965e0956bb
+2026-10-28T20:49:40.4869713Z ##[group]Run actions/setup-node@v4
+2026-10-28T20:49:40.4870009Z with:
+2026-10-28T20:49:40.4870214Z   node-version: 24.19.0
+2026-10-28T20:49:40.4870432Z   always-auth: false
+2026-10-28T20:49:40.4870637Z   check-latest: false
+2026-10-28T20:49:40.4873178Z   token: ***
+2026-10-28T20:49:40.4873378Z env:
+2026-10-28T20:49:40.4873636Z   PYTHONPATH: backend:backend/tests:trading:trading/tests:.
+2026-10-28T20:49:40.4874232Z   VATI_TEST_PG_DSN: ***127.0.0.1:5432/postgres
+2026-10-28T20:49:40.4874529Z   VATI_TEST_PG_ISOLATED_FIXTURE: 1
+2026-10-28T20:49:40.4874771Z ##[endgroup]
+2026-10-28T20:49:40.6338375Z Attempting to download 24.19.0...
+2026-10-28T20:49:40.6503517Z (node:2829) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-10-28T20:49:40.6504808Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-10-28T20:49:41.4491651Z Acquiring 24.19.0 - x64 from https://github.com/actions/node-versions/releases/download/24.19.0-30872449280/node-24.19.0-linux-x64.tar.gz
+2026-10-28T20:49:41.9538959Z Extracting ...
+2026-10-28T20:49:41.9690006Z [command]/usr/bin/tar xz --strip 1 --warning=no-unknown-keyword --overwrite -C /home/runner/work/_temp/a7d2d1e2-2fec-4487-8a8f-2f76d0d0604a -f /home/runner/work/_temp/640f9686-a09c-4bd4-91c5-b49472d5b2ba
+2026-10-28T20:49:43.2442758Z Adding to the cache ...
+2026-10-28T20:49:44.9204185Z ##[group]Environment details
+2026-10-28T20:49:45.1712614Z node: v24.19.0
+2026-10-28T20:49:45.1712973Z npm: 11.17.0
+2026-10-28T20:49:45.1713361Z yarn: 1.22.22
+2026-10-28T20:49:45.1713996Z ##[endgroup]
+2026-10-28T20:49:45.1943873Z ##[group]Run actions/setup-python@v5
+2026-10-28T20:49:45.1944168Z with:
+2026-10-28T20:49:45.1944358Z   python-version: 3.12
+2026-10-28T20:49:45.1944577Z   check-latest: false
+2026-10-28T20:49:45.1946806Z   token: ***
+2026-10-28T20:49:45.1947021Z   update-environment: true
+2026-10-28T20:49:45.1947272Z   allow-prereleases: false
+2026-10-28T20:49:45.1947498Z   freethreaded: false
+2026-10-28T20:49:45.1947718Z env:
+2026-10-28T20:49:45.1947966Z   PYTHONPATH: backend:backend/tests:trading:trading/tests:.
+2026-10-28T20:49:45.1948500Z   VATI_TEST_PG_DSN: ***127.0.0.1:5432/postgres
+2026-10-28T20:49:45.1948787Z   VATI_TEST_PG_ISOLATED_FIXTURE: 1
+2026-10-28T20:49:45.1949026Z ##[endgroup]
+2026-10-28T20:49:45.3349589Z ##[group]Installed versions
+2026-10-28T20:49:45.3475391Z (node:2885) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-10-28T20:49:45.3476360Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-10-28T20:49:45.3476924Z Successfully set up CPython (3.12.15)
+2026-10-28T20:49:45.3477372Z ##[endgroup]
+2026-10-28T20:49:45.3641698Z ##[group]Run python -m pip install -r backend/requirements.lock
+2026-10-28T20:49:45.3642753Z [36;1mpython -m pip install -r backend/requirements.lock[0m
+2026-10-28T20:49:45.3643521Z [36;1mpython -m pip install --no-deps psycopg==3.2.9 psycopg-binary==3.2.9[0m
+2026-10-28T20:49:45.3644321Z [36;1mpython -m pip install pytest==9.1.1 pytest-asyncio==1.4.0[0m
+2026-10-28T20:49:45.3644967Z [36;1mpython -m pip install --no-deps Pillow==12.3.0[0m
+2026-10-28T20:49:45.3645535Z [36;1mpython -m playwright install chromium[0m
+2026-10-28T20:49:45.4007384Z shell: /usr/bin/bash -e {0}
+2026-10-28T20:49:45.4007710Z env:
+2026-10-28T20:49:45.4008018Z   PYTHONPATH: backend:backend/tests:trading:trading/tests:.
+2026-10-28T20:49:45.4008849Z   VATI_TEST_PG_DSN: ***127.0.0.1:5432/postgres
+2026-10-28T20:49:45.4009181Z   VATI_TEST_PG_ISOLATED_FIXTURE: 1
+2026-10-28T20:49:45.4009538Z   pythonLocation: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-28T20:49:45.4010107Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.15/x64/lib/pkgconfig
+2026-10-28T20:49:45.4010591Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-28T20:49:45.4011009Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-28T20:49:45.4011433Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-28T20:49:45.4012092Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.15/x64/lib
+2026-10-28T20:49:45.4012453Z ##[endgroup]
+2026-10-28T20:49:49.4420504Z Collecting aiosqlite==0.22.1 (from -r backend/requirements.lock (line 16))
+2026-10-28T20:49:49.5194654Z   Downloading aiosqlite-0.22.1-py3-none-any.whl.metadata (4.3 kB)
+2026-10-28T20:49:49.5380701Z Collecting annotated-doc==0.0.5 (from -r backend/requirements.lock (line 17))
+2026-10-28T20:49:49.5512128Z   Downloading annotated_doc-0.0.5-py3-none-any.whl.metadata (6.5 kB)
+2026-10-28T20:49:49.5683254Z Collecting annotated-types==0.8.0 (from -r backend/requirements.lock (line 18))
+2026-10-28T20:49:49.5812277Z   Downloading annotated_types-0.8.0-py3-none-any.whl.metadata (15 kB)
+2026-10-28T20:49:49.6116829Z Collecting anyio==4.15.1 (from -r backend/requirements.lock (line 19))
+2026-10-28T20:49:49.6247504Z   Downloading anyio-4.15.1-py3-none-any.whl.metadata (4.7 kB)
+2026-10-28T20:49:49.6491215Z Collecting certifi==2026.7.22 (from -r backend/requirements.lock (line 20))
+2026-10-28T20:49:49.6621594Z   Downloading certifi-2026.7.22-py3-none-any.whl.metadata (2.5 kB)
+2026-10-28T20:49:49.7983823Z Collecting cffi==2.1.1 (from -r backend/requirements.lock (line 21))
+2026-10-28T20:49:49.8114524Z   Downloading cffi-2.1.1-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.whl.metadata (2.5 kB)
+2026-10-28T20:49:49.8334765Z Collecting click==8.5.0 (from -r backend/requirements.lock (line 22))
+2026-10-28T20:49:49.8461713Z   Downloading click-8.5.0-py3-none-any.whl.metadata (2.6 kB)
+2026-10-28T20:49:50.0302830Z Collecting cryptography==50.0.1 (from -r backend/requirements.lock (line 23))
+2026-10-28T20:49:50.0434323Z   Downloading cryptography-50.0.1-cp311-abi3-manylinux_2_34_x86_64.whl.metadata (4.3 kB)
+2026-10-28T20:49:50.0911743Z Collecting fastapi==0.141.1 (from -r backend/requirements.lock (line 24))
+2026-10-28T20:49:50.1041035Z   Downloading fastapi-0.141.1-py3-none-any.whl.metadata (27 kB)
+2026-10-28T20:49:50.2609915Z Collecting greenlet==3.5.6 (from -r backend/requirements.lock (line 25))
+2026-10-28T20:49:50.2743528Z   Downloading greenlet-3.5.6-cp312-cp312-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl.metadata (3.8 kB)
+2026-10-28T20:49:50.2923075Z Collecting h11==0.16.0 (from -r backend/requirements.lock (line 26))
+2026-10-28T20:49:50.3062461Z   Downloading h11-0.16.0-py3-none-any.whl.metadata (8.3 kB)
+2026-10-28T20:49:50.3299179Z Collecting httpcore==1.0.9 (from -r backend/requirements.lock (line 27))
+2026-10-28T20:49:50.3426086Z   Downloading httpcore-1.0.9-py3-none-any.whl.metadata (21 kB)
+2026-10-28T20:49:50.3865008Z Collecting httptools==0.8.0 (from -r backend/requirements.lock (line 28))
+2026-10-28T20:49:50.3997685Z   Downloading httptools-0.8.0-cp312-cp312-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl.metadata (3.5 kB)
+2026-10-28T20:49:50.4239976Z Collecting httpx==0.28.1 (from -r backend/requirements.lock (line 29))
+2026-10-28T20:49:50.4370205Z   Downloading httpx-0.28.1-py3-none-any.whl.metadata (7.1 kB)
+2026-10-28T20:49:50.4584855Z Collecting idna==3.20 (from -r backend/requirements.lock (line 30))
+2026-10-28T20:49:50.4715900Z   Downloading idna-3.20-py3-none-any.whl.metadata (7.2 kB)
+2026-10-28T20:49:50.4897418Z Collecting iniconfig==2.3.0 (from -r backend/requirements.lock (line 31))
+2026-10-28T20:49:50.5027947Z   Downloading iniconfig-2.3.0-py3-none-any.whl.metadata (2.5 kB)
+2026-10-28T20:49:50.5235971Z Collecting packaging==26.3 (from -r backend/requirements.lock (line 32))
+2026-10-28T20:49:50.5361779Z   Downloading packaging-26.3-py3-none-any.whl.metadata (3.5 kB)
+2026-10-28T20:49:50.5788317Z Collecting playwright==1.63.0 (from -r backend/requirements.lock (line 33))
+2026-10-28T20:49:50.5919473Z   Downloading playwright-1.63.0-py3-none-manylinux1_x86_64.whl.metadata (3.3 kB)
+2026-10-28T20:49:50.6100325Z Collecting pluggy==1.6.0 (from -r backend/requirements.lock (line 34))
+2026-10-28T20:49:50.6232377Z   Downloading pluggy-1.6.0-py3-none-any.whl.metadata (4.8 kB)
+2026-10-28T20:49:50.6413155Z Collecting pycparser==3.0 (from -r backend/requirements.lock (line 35))
+2026-10-28T20:49:50.6545441Z   Downloading pycparser-3.0-py3-none-any.whl.metadata (8.2 kB)
+2026-10-28T20:49:50.7607854Z Collecting pydantic==2.13.5 (from -r backend/requirements.lock (line 36))
+2026-10-28T20:49:50.7740769Z   Downloading pydantic-2.13.5-py3-none-any.whl.metadata (110 kB)
+2026-10-28T20:49:50.8131796Z Collecting pydantic-settings==2.15.0 (from -r backend/requirements.lock (line 37))
+2026-10-28T20:49:50.8263227Z   Downloading pydantic_settings-2.15.0-py3-none-any.whl.metadata (3.9 kB)
+2026-10-28T20:49:51.5092921Z Collecting pydantic_core==2.46.5 (from -r backend/requirements.lock (line 38))
+2026-10-28T20:49:51.5222536Z   Downloading pydantic_core-2.46.5-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (6.6 kB)
+2026-10-28T20:49:51.5490926Z Collecting pypdf==6.19.0 (from -r backend/requirements.lock (line 39))
+2026-10-28T20:49:51.5616500Z   Downloading pypdf-6.19.0-py3-none-any.whl.metadata (7.5 kB)
+2026-10-28T20:49:51.5833630Z Collecting pyee==13.0.1 (from -r backend/requirements.lock (line 40))
+2026-10-28T20:49:51.5956880Z   Downloading pyee-13.0.1-py3-none-any.whl.metadata (3.0 kB)
+2026-10-28T20:49:51.6197616Z Collecting Pygments==2.21.0 (from -r backend/requirements.lock (line 41))
+2026-10-28T20:49:51.6323256Z   Downloading pygments-2.21.0-py3-none-any.whl.metadata (2.5 kB)
+2026-10-28T20:49:51.6894822Z Collecting pytest==9.1.1 (from -r backend/requirements.lock (line 42))
+2026-10-28T20:49:51.7021170Z   Downloading pytest-9.1.1-py3-none-any.whl.metadata (7.6 kB)
+2026-10-28T20:49:51.7265132Z Collecting pytest-asyncio==1.4.0 (from -r backend/requirements.lock (line 43))
+2026-10-28T20:49:51.7392597Z   Downloading pytest_asyncio-1.4.0-py3-none-any.whl.metadata (4.1 kB)
+2026-10-28T20:49:51.7609485Z Collecting python-dotenv==1.2.3 (from -r backend/requirements.lock (line 44))
+2026-10-28T20:49:51.7744339Z   Downloading python_dotenv-1.2.3-py3-none-any.whl.metadata (29 kB)
+2026-10-28T20:49:51.8024891Z Collecting python-multipart==0.0.32 (from -r backend/requirements.lock (line 45))
+2026-10-28T20:49:51.8151028Z   Downloading python_multipart-0.0.32-py3-none-any.whl.metadata (2.1 kB)
+2026-10-28T20:49:51.8571329Z Collecting PyYAML==6.0.3 (from -r backend/requirements.lock (line 46))
+2026-10-28T20:49:51.8700948Z   Downloading pyyaml-6.0.3-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (2.4 kB)
+2026-10-28T20:49:51.8981793Z Collecting starlette==1.6.0 (from -r backend/requirements.lock (line 47))
+2026-10-28T20:49:51.9114824Z   Downloading starlette-1.6.0-py3-none-any.whl.metadata (6.4 kB)
+2026-10-28T20:49:51.9299176Z Collecting typing-inspection==0.4.4 (from -r backend/requirements.lock (line 48))
+2026-10-28T20:49:51.9425385Z   Downloading typing_inspection-0.4.4-py3-none-any.whl.metadata (2.6 kB)
+2026-10-28T20:49:51.9636734Z Collecting typing_extensions==4.16.0 (from -r backend/requirements.lock (line 49))
+2026-10-28T20:49:51.9764050Z   Downloading typing_extensions-4.16.0-py3-none-any.whl.metadata (3.3 kB)
+2026-10-28T20:49:52.0051127Z Collecting uvicorn==0.53.0 (from -r backend/requirements.lock (line 50))
+2026-10-28T20:49:52.0179814Z   Downloading uvicorn-0.53.0-py3-none-any.whl.metadata (6.6 kB)
+2026-10-28T20:49:52.0626386Z Collecting uvloop==0.22.1 (from -r backend/requirements.lock (line 51))
+2026-10-28T20:49:52.0755111Z   Downloading uvloop-0.22.1-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (4.9 kB)
+2026-10-28T20:49:52.1559381Z Collecting watchfiles==1.3.0 (from -r backend/requirements.lock (line 52))
+2026-10-28T20:49:52.1687029Z   Downloading watchfiles-1.3.0-cp310-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (4.9 kB)
+2026-10-28T20:49:52.2939618Z Collecting websockets==17.1 (from -r backend/requirements.lock (line 53))
+2026-10-28T20:49:52.3075796Z   Downloading websockets-17.1-cp312-cp312-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl.metadata (6.3 kB)
+2026-10-28T20:49:52.3646280Z Downloading aiosqlite-0.22.1-py3-none-any.whl (17 kB)
+2026-10-28T20:49:52.3794134Z Downloading annotated_doc-0.0.5-py3-none-any.whl (5.3 kB)
+2026-10-28T20:49:52.3939703Z Downloading annotated_types-0.8.0-py3-none-any.whl (13 kB)
+2026-10-28T20:49:52.4085514Z Downloading anyio-4.15.1-py3-none-any.whl (132 kB)
+2026-10-28T20:49:52.4262173Z Downloading certifi-2026.7.22-py3-none-any.whl (136 kB)
+2026-10-28T20:49:52.4420887Z Downloading cffi-2.1.1-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.whl (221 kB)
+2026-10-28T20:49:52.4606474Z Downloading click-8.5.0-py3-none-any.whl (125 kB)
+2026-10-28T20:49:52.4755303Z Downloading cryptography-50.0.1-cp311-abi3-manylinux_2_34_x86_64.whl (4.7 MB)
+2026-10-28T20:49:52.5185549Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 4.7/4.7 MB 115.2 MB/s  0:00:00
+2026-10-28T20:49:52.5313089Z Downloading fastapi-0.141.1-py3-none-any.whl (131 kB)
+2026-10-28T20:49:52.5470129Z Downloading greenlet-3.5.6-cp312-cp312-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl (621 kB)
+2026-10-28T20:49:52.5518491Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 621.4/621.4 kB 133.9 MB/s  0:00:00
+2026-10-28T20:49:52.5647502Z Downloading h11-0.16.0-py3-none-any.whl (37 kB)
+2026-10-28T20:49:52.5799989Z Downloading httpcore-1.0.9-py3-none-any.whl (78 kB)
+2026-10-28T20:49:52.5957581Z Downloading httptools-0.8.0-cp312-cp312-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl (523 kB)
+2026-10-28T20:49:52.6119853Z Downloading httpx-0.28.1-py3-none-any.whl (73 kB)
+2026-10-28T20:49:52.6273196Z Downloading idna-3.20-py3-none-any.whl (69 kB)
+2026-10-28T20:49:52.6428770Z Downloading iniconfig-2.3.0-py3-none-any.whl (7.5 kB)
+2026-10-28T20:49:52.6581733Z Downloading packaging-26.3-py3-none-any.whl (129 kB)
+2026-10-28T20:49:52.6735965Z Downloading playwright-1.63.0-py3-none-manylinux1_x86_64.whl (48.2 MB)
+2026-10-28T20:49:52.8339463Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 48.2/48.2 MB 306.3 MB/s  0:00:00
+2026-10-28T20:49:52.8472356Z Downloading pyee-13.0.1-py3-none-any.whl (15 kB)
+2026-10-28T20:49:52.8618238Z Downloading pluggy-1.6.0-py3-none-any.whl (20 kB)
+2026-10-28T20:49:52.8772362Z Downloading pycparser-3.0-py3-none-any.whl (48 kB)
+2026-10-28T20:49:52.8936202Z Downloading pydantic-2.13.5-py3-none-any.whl (472 kB)
+2026-10-28T20:49:52.9095690Z Downloading pydantic_settings-2.15.0-py3-none-any.whl (69 kB)
+2026-10-28T20:49:52.9250407Z Downloading pydantic_core-2.46.5-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (2.1 MB)
+2026-10-28T20:49:52.9340347Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 2.1/2.1 MB 270.5 MB/s  0:00:00
+2026-10-28T20:49:52.9470724Z Downloading pypdf-6.19.0-py3-none-any.whl (395 kB)
+2026-10-28T20:49:52.9628258Z Downloading pygments-2.21.0-py3-none-any.whl (1.3 MB)
+2026-10-28T20:49:52.9695035Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 1.3/1.3 MB 237.2 MB/s  0:00:00
+2026-10-28T20:49:52.9821266Z Downloading pytest-9.1.1-py3-none-any.whl (386 kB)
+2026-10-28T20:49:52.9976855Z Downloading pytest_asyncio-1.4.0-py3-none-any.whl (16 kB)
+2026-10-28T20:49:53.0120612Z Downloading python_dotenv-1.2.3-py3-none-any.whl (22 kB)
+2026-10-28T20:49:53.0266622Z Downloading python_multipart-0.0.32-py3-none-any.whl (30 kB)
+2026-10-28T20:49:53.0414118Z Downloading pyyaml-6.0.3-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (807 kB)
+2026-10-28T20:49:53.0472920Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 807.9/807.9 kB 157.7 MB/s  0:00:00
+2026-10-28T20:49:53.0599723Z Downloading starlette-1.6.0-py3-none-any.whl (75 kB)
+2026-10-28T20:49:53.0756319Z Downloading typing_inspection-0.4.4-py3-none-any.whl (14 kB)
+2026-10-28T20:49:53.0903100Z Downloading typing_extensions-4.16.0-py3-none-any.whl (45 kB)
+2026-10-28T20:49:53.1049159Z Downloading uvicorn-0.53.0-py3-none-any.whl (87 kB)
+2026-10-28T20:49:53.1199585Z Downloading uvloop-0.22.1-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (4.4 MB)
+2026-10-28T20:49:53.1344237Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 4.4/4.4 MB 347.6 MB/s  0:00:00
+2026-10-28T20:49:53.1475583Z Downloading watchfiles-1.3.0-cp310-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (458 kB)
+2026-10-28T20:49:53.1634254Z Downloading websockets-17.1-cp312-cp312-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl (224 kB)
+2026-10-28T20:49:53.6139020Z Installing collected packages: websockets, uvloop, typing_extensions, PyYAML, python-multipart, python-dotenv, pypdf, Pygments, pycparser, pluggy, packaging, iniconfig, idna, httptools, h11, greenlet, click, certifi, annotated-types, annotated-doc, aiosqlite, uvicorn, typing-inspection, pytest, pyee, pydantic_core, httpcore, cffi, anyio, watchfiles, starlette, pytest-asyncio, pydantic, playwright, httpx, cryptography, pydantic-settings, fastapi
+2026-10-28T20:49:57.7819536Z 
+2026-10-28T20:49:57.7858403Z Successfully installed PyYAML-6.0.3 Pygments-2.21.0 aiosqlite-0.22.1 annotated-doc-0.0.5 annotated-types-0.8.0 anyio-4.15.1 certifi-2026.7.22 cffi-2.1.1 click-8.5.0 cryptography-50.0.1 fastapi-0.141.1 greenlet-3.5.6 h11-0.16.0 httpcore-1.0.9 httptools-0.8.0 httpx-0.28.1 idna-3.20 iniconfig-2.3.0 packaging-26.3 playwright-1.63.0 pluggy-1.6.0 pycparser-3.0 pydantic-2.13.5 pydantic-settings-2.15.0 pydantic_core-2.46.5 pyee-13.0.1 pypdf-6.19.0 pytest-9.1.1 pytest-asyncio-1.4.0 python-dotenv-1.2.3 python-multipart-0.0.32 starlette-1.6.0 typing-inspection-0.4.4 typing_extensions-4.16.0 uvicorn-0.53.0 uvloop-0.22.1 watchfiles-1.3.0 websockets-17.1
+2026-10-28T20:49:58.3547807Z Collecting psycopg==3.2.9
+2026-10-28T20:49:58.4365306Z   Downloading psycopg-3.2.9-py3-none-any.whl.metadata (4.5 kB)
+2026-10-28T20:49:58.6486766Z Collecting psycopg-binary==3.2.9
+2026-10-28T20:49:58.6649998Z   Downloading psycopg_binary-3.2.9-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (2.9 kB)
+2026-10-28T20:49:58.6857455Z Downloading psycopg-3.2.9-py3-none-any.whl (202 kB)
+2026-10-28T20:49:58.7396382Z Downloading psycopg_binary-3.2.9-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (4.4 MB)
+2026-10-28T20:49:58.7999433Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 4.4/4.4 MB 90.0 MB/s  0:00:00
+2026-10-28T20:49:58.8249305Z Installing collected packages: psycopg-binary, psycopg
+2026-10-28T20:49:59.0493108Z 
+2026-10-28T20:49:59.0527961Z Successfully installed psycopg-3.2.9 psycopg-binary-3.2.9
+2026-10-28T20:49:59.4448921Z Requirement already satisfied: pytest==9.1.1 in /opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages (9.1.1)
+2026-10-28T20:49:59.4453565Z Requirement already satisfied: pytest-asyncio==1.4.0 in /opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages (1.4.0)
+2026-10-28T20:49:59.4466849Z Requirement already satisfied: iniconfig>=1.0.1 in /opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages (from pytest==9.1.1) (2.3.0)
+2026-10-28T20:49:59.4472270Z Requirement already satisfied: packaging>=22 in /opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages (from pytest==9.1.1) (26.3)
+2026-10-28T20:49:59.4477979Z Requirement already satisfied: pluggy<2,>=1.5 in /opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages (from pytest==9.1.1) (1.6.0)
+2026-10-28T20:49:59.4483093Z Requirement already satisfied: pygments>=2.7.2 in /opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages (from pytest==9.1.1) (2.21.0)
+2026-10-28T20:49:59.4503375Z Requirement already satisfied: typing-extensions>=4.12 in /opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages (from pytest-asyncio==1.4.0) (4.16.0)
+2026-10-28T20:50:00.1971674Z Collecting Pillow==12.3.0
+2026-10-28T20:50:00.2743083Z   Downloading pillow-12.3.0-cp312-cp312-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl.metadata (9.1 kB)
+2026-10-28T20:50:00.2936494Z Downloading pillow-12.3.0-cp312-cp312-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl (6.9 MB)
+2026-10-28T20:50:00.3913471Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 6.9/6.9 MB 107.1 MB/s  0:00:00
+2026-10-28T20:50:00.4157372Z Installing collected packages: Pillow
+2026-10-28T20:50:00.7487932Z Successfully installed Pillow-12.3.0
+2026-10-28T20:50:01.1658126Z Downloading Chrome for Testing 153.0.8010.12 (playwright chromium v1243) from https://cdn.playwright.dev/builds/cft/153.0.8010.12/linux64/chrome-linux64.zip
+2026-10-28T20:50:01.5867394Z |                                                                                |   0% of 186.8 MiB
+2026-10-28T20:50:01.8042526Z |■■■■■■■■                                                                        |  10% of 186.8 MiB
+2026-10-28T20:50:01.8988067Z |■■■■■■■■■■■■■■■■                                                                |  20% of 186.8 MiB
+2026-10-28T20:50:02.0076583Z |■■■■■■■■■■■■■■■■■■■■■■■■                                                        |  30% of 186.8 MiB
+2026-10-28T20:50:02.0973563Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                                                |  40% of 186.8 MiB
+2026-10-28T20:50:02.1749277Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                                        |  50% of 186.8 MiB
+2026-10-28T20:50:02.2634463Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                                |  60% of 186.8 MiB
+2026-10-28T20:50:02.3287669Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                        |  70% of 186.8 MiB
+2026-10-28T20:50:02.4364909Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                |  80% of 186.8 MiB
+2026-10-28T20:50:02.5200851Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■        |  90% of 186.8 MiB
+2026-10-28T20:50:02.5843825Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■| 100% of 186.8 MiB
+2026-10-28T20:50:05.6460519Z Chrome for Testing 153.0.8010.12 (playwright chromium v1243) downloaded to /home/runner/.cache/ms-playwright/chromium-1243
+2026-10-28T20:50:05.6466370Z Downloading FFmpeg (playwright ffmpeg v1011) from https://cdn.playwright.dev/dbazure/download/playwright/builds/ffmpeg/1011/ffmpeg-linux.zip
+2026-10-28T20:50:06.0601331Z |                                                                                |   0% of 2.3 MiB
+2026-10-28T20:50:06.0832167Z |■■■■■■■■                                                                        |  10% of 2.3 MiB
+2026-10-28T20:50:06.0997069Z |■■■■■■■■■■■■■■■■                                                                |  20% of 2.3 MiB
+2026-10-28T20:50:06.1185352Z |■■■■■■■■■■■■■■■■■■■■■■■■                                                        |  30% of 2.3 MiB
+2026-10-28T20:50:06.1327838Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                                                |  40% of 2.3 MiB
+2026-10-28T20:50:06.1396072Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                                        |  50% of 2.3 MiB
+2026-10-28T20:50:06.1450021Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                                |  60% of 2.3 MiB
+2026-10-28T20:50:06.1492158Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                        |  70% of 2.3 MiB
+2026-10-28T20:50:06.1538107Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                |  80% of 2.3 MiB
+2026-10-28T20:50:06.1569724Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■        |  90% of 2.3 MiB
+2026-10-28T20:50:06.1598709Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■| 100% of 2.3 MiB
+2026-10-28T20:50:06.2188757Z FFmpeg (playwright ffmpeg v1011) downloaded to /home/runner/.cache/ms-playwright/ffmpeg-1011
+2026-10-28T20:50:06.2192663Z Downloading Chrome Headless Shell 153.0.8010.12 (playwright chromium-headless-shell v1243) from https://cdn.playwright.dev/builds/cft/153.0.8010.12/linux64/chrome-headless-shell-linux64.zip
+2026-10-28T20:50:06.6373746Z |                                                                                |   0% of 114.3 MiB
+2026-10-28T20:50:06.7739052Z |■■■■■■■■                                                                        |  10% of 114.3 MiB
+2026-10-28T20:50:06.8424958Z |■■■■■■■■■■■■■■■■                                                                |  20% of 114.3 MiB
+2026-10-28T20:50:06.9040250Z |■■■■■■■■■■■■■■■■■■■■■■■■                                                        |  30% of 114.3 MiB
+2026-10-28T20:50:06.9816233Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                                                |  40% of 114.3 MiB
+2026-10-28T20:50:07.0310246Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                                        |  50% of 114.3 MiB
+2026-10-28T20:50:07.0701661Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                                |  60% of 114.3 MiB
+2026-10-28T20:50:07.1315979Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                        |  70% of 114.3 MiB
+2026-10-28T20:50:07.1683230Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                |  80% of 114.3 MiB
+2026-10-28T20:50:07.2066367Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■        |  90% of 114.3 MiB
+2026-10-28T20:50:07.2639497Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■| 100% of 114.3 MiB
+2026-10-28T20:50:09.5055504Z Chrome Headless Shell 153.0.8010.12 (playwright chromium-headless-shell v1243) downloaded to /home/runner/.cache/ms-playwright/chromium_headless_shell-1243
+2026-10-28T20:50:09.5357914Z ##[group]Run python - <<'PYCODE'
+2026-10-28T20:50:09.5358275Z [36;1mpython - <<'PYCODE'[0m
+2026-10-28T20:50:09.5358519Z [36;1mimport os[0m
+2026-10-28T20:50:09.5358745Z [36;1mfrom pathlib import Path[0m
+2026-10-28T20:50:09.5359004Z [36;1mimport psycopg[0m
+2026-10-28T20:50:09.5359293Z [36;1mfrom playwright.sync_api import sync_playwright[0m
+2026-10-28T20:50:09.5359637Z [36;1mwith sync_playwright() as p:[0m
+2026-10-28T20:50:09.5359959Z [36;1m    executable = Path(p.chromium.executable_path)[0m
+2026-10-28T20:50:09.5360405Z [36;1massert executable.is_file() and os.access(executable, os.X_OK)[0m
+2026-10-28T20:50:09.5360835Z [36;1mwith open(os.environ["GITHUB_ENV"], "a") as env:[0m
+2026-10-28T20:50:09.5361204Z [36;1m    env.write(f"VAN_TEST_CHROMIUM={executable}\n")[0m
+2026-10-28T20:50:09.5361546Z [36;1m    for key in ("NO_PROXY", "no_proxy"):[0m
+2026-10-28T20:50:09.5362249Z [36;1m        env.write(key+"="+",".join(["127.0.0.1", "localhost", "::1", os.environ.get(key, "")])+"\n")[0m
+2026-10-28T20:50:09.5362999Z [36;1mwith psycopg.connect(os.environ["VATI_TEST_PG_DSN"]) as conn:[0m
+2026-10-28T20:50:09.5363393Z [36;1m    conn.execute("CREATE SCHEMA vati")[0m
+2026-10-28T20:50:09.5363679Z [36;1mPYCODE[0m
+2026-10-28T20:50:09.5386509Z shell: /usr/bin/bash -e {0}
+2026-10-28T20:50:09.5386866Z env:
+2026-10-28T20:50:09.5387264Z   PYTHONPATH: backend:backend/tests:trading:trading/tests:.
+2026-10-28T20:50:09.5388159Z   VATI_TEST_PG_DSN: ***127.0.0.1:5432/postgres
+2026-10-28T20:50:09.5388616Z   VATI_TEST_PG_ISOLATED_FIXTURE: 1
+2026-10-28T20:50:09.5389140Z   pythonLocation: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-28T20:50:09.5389844Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.15/x64/lib/pkgconfig
+2026-10-28T20:50:09.5390559Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-28T20:50:09.5390989Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-28T20:50:09.5391386Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-28T20:50:09.5391807Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.15/x64/lib
+2026-10-28T20:50:09.5392501Z ##[endgroup]
+2026-10-28T20:50:10.7483489Z ##[group]Run python tools/rebuild/backend_public_source.py plan --output artifacts/backend-public-source
+2026-10-28T20:50:10.7484884Z [36;1mpython tools/rebuild/backend_public_source.py plan --output artifacts/backend-public-source[0m
+2026-10-28T20:50:10.7486028Z [36;1mgit rev-parse HEAD > artifacts/backend-public-source/tested-commit.txt[0m
+2026-10-28T20:50:10.7518836Z shell: /usr/bin/bash -e {0}
+2026-10-28T20:50:10.7519261Z env:
+2026-10-28T20:50:10.7519724Z   PYTHONPATH: backend:backend/tests:trading:trading/tests:.
+2026-10-28T20:50:10.7520837Z   VATI_TEST_PG_DSN: ***127.0.0.1:5432/postgres
+2026-10-28T20:50:10.7521370Z   VATI_TEST_PG_ISOLATED_FIXTURE: 1
+2026-10-28T20:50:10.7522224Z   pythonLocation: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-28T20:50:10.7522997Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.15/x64/lib/pkgconfig
+2026-10-28T20:50:10.7523777Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-28T20:50:10.7524518Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-28T20:50:10.7525214Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-28T20:50:10.7525912Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.15/x64/lib
+2026-10-28T20:50:10.7526801Z   VAN_TEST_CHROMIUM: /home/runner/.cache/ms-playwright/chromium-1243/chrome-linux64/chrome
+2026-10-28T20:50:10.7527601Z   NO_PROXY: 127.0.0.1,localhost,::1,
+2026-10-28T20:50:10.7528071Z   no_proxy: 127.0.0.1,localhost,::1,
+2026-10-28T20:50:10.7528500Z ##[endgroup]
+2026-10-28T20:50:10.9968765Z {'selected': 385, 'separate': 54}
+2026-10-28T20:50:11.0118706Z ##[group]Run python tools/rebuild/backend_public_source.py run --output artifacts/backend-public-source --runtime gateway --basetemp="/home/runner/work/_temp/van-backend-public-source"
+2026-10-28T20:50:11.0120050Z [36;1mpython tools/rebuild/backend_public_source.py run --output artifacts/backend-public-source --runtime gateway --basetemp="/home/runner/work/_temp/van-backend-public-source"[0m
+2026-10-28T20:50:11.0142270Z shell: /usr/bin/bash -e {0}
+2026-10-28T20:50:11.0142521Z env:
+2026-10-28T20:50:11.0142789Z   PYTHONPATH: backend:backend/tests:trading:trading/tests:.
+2026-10-28T20:50:11.0143576Z   VATI_TEST_PG_DSN: ***127.0.0.1:5432/postgres
+2026-10-28T20:50:11.0143887Z   VATI_TEST_PG_ISOLATED_FIXTURE: 1
+2026-10-28T20:50:11.0144206Z   pythonLocation: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-28T20:50:11.0144622Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.15/x64/lib/pkgconfig
+2026-10-28T20:50:11.0145039Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-28T20:50:11.0145453Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-28T20:50:11.0145831Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-28T20:50:11.0146207Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.15/x64/lib
+2026-10-28T20:50:11.0146881Z   VAN_TEST_CHROMIUM: /home/runner/.cache/ms-playwright/chromium-1243/chrome-linux64/chrome
+2026-10-28T20:50:11.0147328Z   NO_PROXY: 127.0.0.1,localhost,::1,
+2026-10-28T20:50:11.0147583Z   no_proxy: 127.0.0.1,localhost,::1,
+2026-10-28T20:50:11.0147820Z ##[endgroup]
+2026-10-28T20:51:51.6748594Z ........................................................................ [  1%]
+2026-10-28T20:52:02.8324478Z ........................................................................ [  2%]
+2026-10-28T20:52:26.9173396Z ........................................................................ [  3%]
+2026-10-28T20:52:36.7012410Z ........................................................................ [  4%]
+2026-10-28T20:53:02.1942184Z ........................................................................ [  6%]
+2026-10-28T20:53:29.0386468Z ........................................................................ [  7%]
+2026-10-28T20:53:29.1518482Z ........................................................................ [  8%]
+2026-10-28T20:53:36.5574634Z ........................................................................ [  9%]
+2026-10-28T20:53:36.6623480Z ........................................................................ [ 11%]
+2026-10-28T20:54:30.0992701Z ........................................................................ [ 12%]
+2026-10-28T20:55:20.0865852Z ........................................................................ [ 13%]
+2026-10-28T20:55:31.8208182Z ........................................................................ [ 14%]
+2026-10-28T20:56:07.0964621Z ........................................................................ [ 15%]
+2026-10-28T20:56:55.1002441Z ........................................................................ [ 17%]
+2026-10-28T20:57:06.0920424Z ........................................................................ [ 18%]
+2026-10-28T20:57:23.5872449Z ........................................................................ [ 19%]
+2026-10-28T20:57:35.9311617Z ........................................................................ [ 20%]
+2026-10-28T20:58:01.4456706Z ........................................................................ [ 22%]
+2026-10-28T20:59:05.4880520Z ........................................................................ [ 23%]
+2026-10-28T21:00:29.6136148Z ........................................................................ [ 24%]
+2026-10-28T21:00:56.2507237Z ........................................................................ [ 25%]
+2026-10-28T21:01:43.9241450Z ........................................................................ [ 26%]
+2026-10-28T21:02:00.9215531Z ........................................................................ [ 28%]
+2026-10-28T21:02:30.7149170Z ........................................................................ [ 29%]
+2026-10-28T21:02:41.0734570Z ........................................................................ [ 30%]
+2026-10-28T21:03:45.8218411Z ........................................................................ [ 31%]
+2026-10-28T21:04:35.1275326Z ........................................................................ [ 33%]
+2026-10-28T21:04:58.3632857Z ........................................................................ [ 34%]
+2026-10-28T21:04:58.4713253Z ............................................s........................... [ 35%]
+2026-10-28T21:04:58.5329914Z ........................................................................ [ 36%]
+2026-10-28T21:04:58.5690966Z ...............................
+2026-10-28T21:04:58.5691730Z B2 FIXTURE corpus stats (not a live measurement)
+2026-10-28T21:04:58.5694611Z   dds57: {"eligibility_rate": 0.2105, "eligible": 12, "measurement_kind": "FIXTURE_CORPUS_NOT_LIVE", "per_class": {"CREDENTIAL": 9, "OWNER_PRIVATE": 19, "POLICY_DENIED": 10, "PUBLIC_ELIGIBLE": 8, "SANITIZABLE_ELIGIBLE": 4, "TRADING_PROTECTED": 7}, "policy_rejection_rate": 0.1754, "privacy_rejection_rate": 0.614, "total": 57}
+2026-10-28T21:04:58.5699158Z   adversarial: {"eligibility_rate": 0.2, "eligible": 9, "measurement_kind": "FIXTURE_CORPUS_NOT_LIVE", "per_class": {"CREDENTIAL": 2, "OWNER_PRIVATE": 26, "POLICY_DENIED": 8, "PUBLIC_ELIGIBLE": 1, "SANITIZABLE_ELIGIBLE": 8}, "policy_rejection_rate": 0.1778, "privacy_rejection_rate": 0.6222, "total": 45}
+2026-10-28T21:04:58.5703496Z   combined: {"eligibility_rate": 0.2059, "eligible": 21, "measurement_kind": "FIXTURE_CORPUS_NOT_LIVE", "per_class": {"CREDENTIAL": 11, "OWNER_PRIVATE": 45, "POLICY_DENIED": 18, "PUBLIC_ELIGIBLE": 9, "SANITIZABLE_ELIGIBLE": 12, "TRADING_PROTECTED": 7}, "policy_rejection_rate": 0.1765, "privacy_rejection_rate": 0.6176, "total": 102}
+2026-10-28T21:04:59.1090840Z .....................................s... [ 37%]
+2026-10-28T21:05:02.4078118Z .............ss......................................................... [ 39%]
+2026-10-28T21:05:48.8777984Z ........................................................................ [ 40%]
+2026-10-28T21:06:19.1928173Z ........................................................................ [ 41%]
+2026-10-28T21:06:52.2250541Z ........................................................................ [ 42%]
+2026-10-28T21:07:02.9829581Z ........................................................................ [ 44%]
+2026-10-28T21:07:36.6269831Z ........................................................................ [ 45%]
+2026-10-28T21:08:33.2377868Z ........................................................................ [ 46%]
+2026-10-28T21:09:33.0587753Z ........................................................................ [ 47%]
+2026-10-28T21:09:57.9818037Z ........................................................................ [ 48%]
+2026-10-28T21:10:17.6822774Z ........................................................................ [ 50%]
+2026-10-28T21:11:31.7029544Z ........................................................................ [ 51%]
+2026-10-28T21:12:20.0954668Z ........................................................................ [ 52%]
+2026-10-28T21:12:50.7869593Z ........................................................................ [ 53%]
+2026-10-28T21:13:25.2462817Z ........................................................................ [ 55%]
+2026-10-28T21:14:09.5573288Z ........................................................................ [ 56%]
+2026-10-28T21:15:00.9616455Z ........................................................................ [ 57%]
+2026-10-28T21:15:24.6613527Z ........................................................................ [ 58%]
+2026-10-28T21:15:35.2008202Z ........................................................................ [ 60%]
+2026-10-28T21:15:41.3056665Z ........................................................................ [ 61%]
+2026-10-28T21:15:54.0942952Z ........................................................................ [ 62%]
+2026-10-28T21:16:23.0286727Z ........................................................................ [ 63%]
+2026-10-28T21:17:13.9588398Z ........................................................................ [ 64%]
+2026-10-28T21:17:39.7362140Z ........................................................................ [ 66%]
+2026-10-28T21:18:42.4411045Z ........................................................................ [ 67%]
+2026-10-28T21:18:44.6314339Z ........................................................................ [ 68%]
+2026-10-28T21:19:36.5099275Z ........................................................................ [ 69%]
+2026-10-28T21:20:00.9958652Z ........................................................................ [ 71%]
+2026-10-28T21:20:44.2437849Z ........................................................................ [ 72%]
+2026-10-28T21:20:53.5748139Z ........................................................................ [ 73%]
+2026-10-28T21:20:59.4400276Z ........................................................................ [ 74%]
+2026-10-28T21:21:05.1477611Z ........................................................................ [ 75%]
+2026-10-28T21:21:14.7707372Z .........s............................................................s. [ 77%]
+2026-10-28T21:21:19.0540388Z ........................................................................ [ 78%]
+2026-10-28T21:21:19.9325411Z ........................................................................ [ 79%]
+2026-10-28T21:21:20.8944651Z ........................................................................ [ 80%]
+2026-10-28T21:21:21.9058569Z ........................................................................ [ 82%]
+2026-10-28T21:21:23.9542819Z .....................................................s.................. [ 83%]
+2026-10-28T21:21:28.8662538Z ........................................................................ [ 84%]
+2026-10-28T21:22:43.7640208Z ........................................................................ [ 85%]
+2026-10-28T21:22:55.0877384Z ........................................................................ [ 86%]
+2026-10-28T21:22:59.6506754Z ........................................................................ [ 88%]
+2026-10-28T21:23:02.2364225Z ........................................................................ [ 89%]
+2026-10-28T21:23:07.1401179Z ........................................................................ [ 90%]
+2026-10-28T21:23:08.2699427Z ........................................................................ [ 91%]
+2026-10-28T21:23:17.1637092Z ........................................................................ [ 93%]
+2026-10-28T21:27:37.8933928Z ##[error]The operation was canceled.
+2026-10-28T21:27:37.8984695Z ##[group]Run python -m venv "$RUNNER_TEMP/public-media-venv"
+2026-10-28T21:27:37.8985169Z [36;1mpython -m venv "$RUNNER_TEMP/public-media-venv"[0m
+2026-10-28T21:27:37.8985818Z [36;1m"$RUNNER_TEMP/public-media-venv/bin/python" -m pip install --require-hashes -r deploy/van-browser-stream/requirements.lock[0m
+2026-10-28T21:27:37.8986604Z [36;1m"$RUNNER_TEMP/public-media-venv/bin/python" -m pip install pytest==9.1.1 pytest-asyncio==1.4.0[0m
+2026-10-28T21:27:37.8987311Z [36;1m"$RUNNER_TEMP/public-media-venv/bin/python" tools/rebuild/backend_public_source.py run \[0m
+2026-10-28T21:27:37.8987878Z [36;1m  --output artifacts/backend-public-source --runtime media \[0m
+2026-10-28T21:27:37.8988312Z [36;1m  --basetemp="$RUNNER_TEMP/van-public-media-source"[0m
+2026-10-28T21:27:37.9008610Z shell: /usr/bin/bash -e {0}
+2026-10-28T21:27:37.9008862Z env:
+2026-10-28T21:27:37.9009128Z   PYTHONPATH: backend:backend/tests:trading:trading/tests:.
+2026-10-28T21:27:37.9009810Z   VATI_TEST_PG_DSN: ***127.0.0.1:5432/postgres
+2026-10-28T21:27:37.9010119Z   VATI_TEST_PG_ISOLATED_FIXTURE: 1
+2026-10-28T21:27:37.9010446Z   pythonLocation: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-28T21:27:37.9010869Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.15/x64/lib/pkgconfig
+2026-10-28T21:27:37.9011294Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-28T21:27:37.9011672Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-28T21:27:37.9012427Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-28T21:27:37.9012821Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.15/x64/lib
+2026-10-28T21:27:37.9013303Z   VAN_TEST_CHROMIUM: /home/runner/.cache/ms-playwright/chromium-1243/chrome-linux64/chrome
+2026-10-28T21:27:37.9013739Z   NO_PROXY: 127.0.0.1,localhost,::1,
+2026-10-28T21:27:37.9013992Z   no_proxy: 127.0.0.1,localhost,::1,
+2026-10-28T21:27:37.9014226Z ##[endgroup]
+2026-10-28T21:27:41.3025906Z Collecting aiohappyeyeballs==2.7.1 (from -r deploy/van-browser-stream/requirements.lock (line 2))
+2026-10-28T21:27:41.3850775Z   Downloading aiohappyeyeballs-2.7.1-py3-none-any.whl (15 kB)
+2026-10-28T21:27:41.8976389Z Collecting aiohttp==3.13.5 (from -r deploy/van-browser-stream/requirements.lock (line 3))
+2026-10-28T21:27:41.9122707Z   Downloading aiohttp-3.13.5-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (1.8 MB)
+2026-10-28T21:27:41.9828980Z      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 1.8/1.8 MB 44.6 MB/s eta 0:00:00
+2026-10-28T21:27:42.0206527Z Collecting aioice==0.10.2 (from -r deploy/van-browser-stream/requirements.lock (line 4))
+2026-10-28T21:27:42.0354967Z   Downloading aioice-0.10.2-py3-none-any.whl (24 kB)
+2026-10-28T21:27:42.0820717Z Collecting aiortc==1.14.0 (from -r deploy/van-browser-stream/requirements.lock (line 5))
+2026-10-28T21:27:42.0966948Z   Downloading aiortc-1.14.0-py3-none-any.whl (93 kB)
+2026-10-28T21:27:42.1213602Z Collecting aiosignal==1.4.0 (from -r deploy/van-browser-stream/requirements.lock (line 6))
+2026-10-28T21:27:42.1377796Z   Downloading aiosignal-1.4.0-py3-none-any.whl (7.5 kB)
+2026-10-28T21:27:42.1624320Z Collecting aiosqlite==0.22.1 (from -r deploy/van-browser-stream/requirements.lock (line 7))
+2026-10-28T21:27:42.1636225Z   Using cached aiosqlite-0.22.1-py3-none-any.whl (17 kB)
+2026-10-28T21:27:42.1906428Z Collecting attrs==26.1.0 (from -r deploy/van-browser-stream/requirements.lock (line 8))
+2026-10-28T21:27:42.2053047Z   Downloading attrs-26.1.0-py3-none-any.whl (67 kB)
+2026-10-28T21:27:42.2627554Z Collecting av==16.1.0 (from -r deploy/van-browser-stream/requirements.lock (line 9))
+2026-10-28T21:27:42.2776628Z   Downloading av-16.1.0-cp312-cp312-manylinux_2_28_x86_64.whl (41.2 MB)
+2026-10-28T21:27:42.5386710Z      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 41.2/41.2 MB 159.0 MB/s eta 0:00:00
+2026-10-28T21:27:42.6700306Z Collecting cffi==2.1.1 (from -r deploy/van-browser-stream/requirements.lock (line 10))
+2026-10-28T21:27:42.6714314Z   Using cached cffi-2.1.1-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.whl (221 kB)
+2026-10-28T21:27:42.8649543Z Collecting cryptography==50.0.0 (from -r deploy/van-browser-stream/requirements.lock (line 11))
+2026-10-28T21:27:42.8792512Z   Downloading cryptography-50.0.0-cp311-abi3-manylinux_2_34_x86_64.whl (4.7 MB)
+2026-10-28T21:27:42.8993658Z      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 4.7/4.7 MB 265.0 MB/s eta 0:00:00
+2026-10-28T21:27:42.9331184Z Collecting dnspython==2.8.0 (from -r deploy/van-browser-stream/requirements.lock (line 12))
+2026-10-28T21:27:42.9480232Z   Downloading dnspython-2.8.0-py3-none-any.whl (331 kB)
+2026-10-28T21:27:43.0275970Z Collecting frozenlist==1.8.0 (from -r deploy/van-browser-stream/requirements.lock (line 13))
+2026-10-28T21:27:43.0420089Z   Downloading frozenlist-1.8.0-cp312-cp312-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl (242 kB)
+2026-10-28T21:27:43.1007995Z Collecting google-crc32c==1.9.0 (from -r deploy/van-browser-stream/requirements.lock (line 14))
+2026-10-28T21:27:43.1152845Z   Downloading google_crc32c-1.9.0-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.whl (36 kB)
+2026-10-28T21:27:43.1418954Z Collecting idna==3.20 (from -r deploy/van-browser-stream/requirements.lock (line 15))
+2026-10-28T21:27:43.1430879Z   Using cached idna-3.20-py3-none-any.whl (69 kB)
+2026-10-28T21:27:43.1637382Z Collecting ifaddr==0.2.0 (from -r deploy/van-browser-stream/requirements.lock (line 16))
+2026-10-28T21:27:43.1777814Z   Downloading ifaddr-0.2.0-py3-none-any.whl (12 kB)
+2026-10-28T21:27:43.4263564Z Collecting multidict==6.9.1 (from -r deploy/van-browser-stream/requirements.lock (line 17))
+2026-10-28T21:27:43.4409986Z   Downloading multidict-6.9.1-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (336 kB)
+2026-10-28T21:27:43.6032296Z Collecting pillow==12.3.0 (from -r deploy/van-browser-stream/requirements.lock (line 18))
+2026-10-28T21:27:43.6046210Z   Using cached pillow-12.3.0-cp312-cp312-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl (6.9 MB)
+2026-10-28T21:27:43.7131879Z Collecting propcache==0.5.4 (from -r deploy/van-browser-stream/requirements.lock (line 19))
+2026-10-28T21:27:43.7277422Z   Downloading propcache-0.5.4-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (250 kB)
+2026-10-28T21:27:43.7527119Z Collecting pycparser==3.0 (from -r deploy/van-browser-stream/requirements.lock (line 20))
+2026-10-28T21:27:43.7538411Z   Using cached pycparser-3.0-py3-none-any.whl (48 kB)
+2026-10-28T21:27:43.7807473Z Collecting pyee==14.0.0 (from -r deploy/van-browser-stream/requirements.lock (line 21))
+2026-10-28T21:27:43.7953004Z   Downloading pyee-14.0.0-py3-none-any.whl (15 kB)
+2026-10-28T21:27:43.8343832Z Collecting pylibsrtp==1.0.0 (from -r deploy/van-browser-stream/requirements.lock (line 22))
+2026-10-28T21:27:43.8485565Z   Downloading pylibsrtp-1.0.0-cp310-abi3-manylinux_2_26_x86_64.manylinux_2_28_x86_64.whl (2.4 MB)
+2026-10-28T21:27:43.8600308Z      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 2.4/2.4 MB 244.3 MB/s eta 0:00:00
+2026-10-28T21:27:43.8886130Z Collecting pyOpenSSL==26.4.0 (from -r deploy/van-browser-stream/requirements.lock (line 23))
+2026-10-28T21:27:43.9042094Z   Downloading pyopenssl-26.4.0-py3-none-any.whl (56 kB)
+2026-10-28T21:27:43.9349142Z Collecting typing_extensions==4.16.0 (from -r deploy/van-browser-stream/requirements.lock (line 24))
+2026-10-28T21:27:43.9362262Z   Using cached typing_extensions-4.16.0-py3-none-any.whl (45 kB)
+2026-10-28T21:27:44.1697721Z Collecting yarl==1.25.1 (from -r deploy/van-browser-stream/requirements.lock (line 25))
+2026-10-28T21:27:44.1841673Z   Downloading yarl-1.25.1-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (117 kB)
+2026-10-28T21:27:44.3495566Z Installing collected packages: ifaddr, typing_extensions, pycparser, propcache, pillow, multidict, idna, google-crc32c, frozenlist, dnspython, av, attrs, aiosqlite, aiohappyeyeballs, yarl, pyee, cffi, aiosignal, aioice, pylibsrtp, cryptography, aiohttp, pyOpenSSL, aiortc
+2026-10-28T21:27:46.3448490Z Successfully installed aiohappyeyeballs-2.7.1 aiohttp-3.13.5 aioice-0.10.2 aiortc-1.14.0 aiosignal-1.4.0 aiosqlite-0.22.1 attrs-26.1.0 av-16.1.0 cffi-2.1.1 cryptography-50.0.0 dnspython-2.8.0 frozenlist-1.8.0 google-crc32c-1.9.0 idna-3.20 ifaddr-0.2.0 multidict-6.9.1 pillow-12.3.0 propcache-0.5.4 pyOpenSSL-26.4.0 pycparser-3.0 pyee-14.0.0 pylibsrtp-1.0.0 typing_extensions-4.16.0 yarl-1.25.1
+2026-10-28T21:27:46.4567892Z 
+2026-10-28T21:27:46.4568801Z [notice] A new release of pip is available: 25.0.1 -> 26.2.2
+2026-10-28T21:27:46.4569807Z [notice] To update, run: python -m pip install --upgrade pip
+2026-10-28T21:27:47.1105997Z Collecting pytest==9.1.1
+2026-10-28T21:27:47.1121636Z   Using cached pytest-9.1.1-py3-none-any.whl.metadata (7.6 kB)
+2026-10-28T21:27:47.1437202Z Collecting pytest-asyncio==1.4.0
+2026-10-28T21:27:47.1452199Z   Using cached pytest_asyncio-1.4.0-py3-none-any.whl.metadata (4.1 kB)
+2026-10-28T21:27:47.1657194Z Collecting iniconfig>=1.0.1 (from pytest==9.1.1)
+2026-10-28T21:27:47.2247202Z   Downloading iniconfig-2.3.1-py3-none-any.whl.metadata (2.8 kB)
+2026-10-28T21:27:47.2584672Z Collecting packaging>=22 (from pytest==9.1.1)
+2026-10-28T21:27:47.2597258Z   Using cached packaging-26.3-py3-none-any.whl.metadata (3.5 kB)
+2026-10-28T21:27:47.2845297Z Collecting pluggy<2,>=1.5 (from pytest==9.1.1)
+2026-10-28T21:27:47.2986173Z   Downloading pluggy-1.7.0-py3-none-any.whl.metadata (5.0 kB)
+2026-10-28T21:27:47.3351128Z Collecting pygments>=2.7.2 (from pytest==9.1.1)
+2026-10-28T21:27:47.3363613Z   Using cached pygments-2.21.0-py3-none-any.whl.metadata (2.5 kB)
+2026-10-28T21:27:47.3532392Z Requirement already satisfied: typing-extensions>=4.12 in /home/runner/work/_temp/public-media-venv/lib/python3.12/site-packages (from pytest-asyncio==1.4.0) (4.16.0)
+2026-10-28T21:27:47.3568127Z Using cached pytest-9.1.1-py3-none-any.whl (386 kB)
+2026-10-28T21:27:47.3582483Z Using cached pytest_asyncio-1.4.0-py3-none-any.whl (16 kB)
+2026-10-28T21:27:47.3722577Z Downloading iniconfig-2.3.1-py3-none-any.whl (7.6 kB)
+2026-10-28T21:27:47.3761049Z Using cached packaging-26.3-py3-none-any.whl (129 kB)
+2026-10-28T21:27:47.3903021Z Downloading pluggy-1.7.0-py3-none-any.whl (27 kB)
+2026-10-28T21:27:47.3989522Z Using cached pygments-2.21.0-py3-none-any.whl (1.3 MB)
+2026-10-28T21:27:47.4653631Z Installing collected packages: pygments, pluggy, packaging, iniconfig, pytest, pytest-asyncio
+2026-10-28T21:27:48.6420073Z Successfully installed iniconfig-2.3.1 packaging-26.3 pluggy-1.7.0 pygments-2.21.0 pytest-9.1.1 pytest-asyncio-1.4.0
+2026-10-28T21:27:48.6774925Z 
+2026-10-28T21:27:48.6775952Z [notice] A new release of pip is available: 25.0.1 -> 26.2.2
+2026-10-28T21:27:48.6777269Z [notice] To update, run: python -m pip install --upgrade pip
+2026-10-28T21:27:50.0819850Z ........................................................................ [ 36%]
+2026-10-28T21:27:51.2346453Z ........................................................................ [ 72%]
+2026-10-28T21:27:52.4019105Z ......................................................                   [100%]
+2026-10-28T21:27:52.4020075Z 198 passed in 3.28s
+2026-10-28T21:27:52.5213246Z ##[group]Run python tools/rebuild/backend_public_source.py verify --output artifacts/backend-public-source
+2026-10-28T21:27:52.5214652Z [36;1mpython tools/rebuild/backend_public_source.py verify --output artifacts/backend-public-source[0m
+2026-10-28T21:27:52.5244719Z shell: /usr/bin/bash -e {0}
+2026-10-28T21:27:52.5245139Z env:
+2026-10-28T21:27:52.5245579Z   PYTHONPATH: backend:backend/tests:trading:trading/tests:.
+2026-10-28T21:27:52.5246774Z   VATI_TEST_PG_DSN: ***127.0.0.1:5432/postgres
+2026-10-28T21:27:52.5247336Z   VATI_TEST_PG_ISOLATED_FIXTURE: 1
+2026-10-28T21:27:52.5247903Z   pythonLocation: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-28T21:27:52.5248625Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.15/x64/lib/pkgconfig
+2026-10-28T21:27:52.5249365Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-28T21:27:52.5250048Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-28T21:27:52.5250792Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-28T21:27:52.5251508Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.15/x64/lib
+2026-10-28T21:27:52.5252675Z   VAN_TEST_CHROMIUM: /home/runner/.cache/ms-playwright/chromium-1243/chrome-linux64/chrome
+2026-10-28T21:27:52.5253490Z   NO_PROXY: 127.0.0.1,localhost,::1,
+2026-10-28T21:27:52.5253991Z   no_proxy: 127.0.0.1,localhost,::1,
+2026-10-28T21:27:52.5254462Z ##[endgroup]
+2026-10-28T21:27:52.6689905Z Traceback (most recent call last):
+2026-10-28T21:27:52.6691320Z   File "/home/runner/work/Van/Van/tools/rebuild/backend_public_source.py", line 111, in <module>
+2026-10-28T21:27:52.6692874Z     if __name__=="__main__":raise SystemExit(main())
+2026-10-28T21:27:52.6693530Z                                              ^^^^^^
+2026-10-28T21:27:52.6694501Z   File "/home/runner/work/Van/Van/tools/rebuild/backend_public_source.py", line 109, in main
+2026-10-28T21:27:52.6696169Z     result=verify(d,report,audit);(args.output/"summary.json").write_text(json.dumps(result,indent=2)+"\n");print(json.dumps(result,indent=2));return 0
+2026-10-28T21:27:52.6697341Z            ^^^^^^^^^^^^^^^^^^^^^^
+2026-10-28T21:27:52.6698268Z   File "/home/runner/work/Van/Van/tools/rebuild/backend_public_source.py", line 62, in verify
+2026-10-28T21:27:52.6699943Z     group_cases=list(ET.parse(group_report).getroot().iter("testcase"))
+2026-10-28T21:27:52.6700950Z                      ^^^^^^^^^^^^^^^^^^^^^^
+2026-10-28T21:27:52.6702260Z   File "/opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/xml/etree/ElementTree.py", line 1204, in parse
+2026-10-28T21:27:52.6703283Z     tree.parse(source, parser)
+2026-10-28T21:27:52.6704292Z   File "/opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/xml/etree/ElementTree.py", line 558, in parse
+2026-10-28T21:27:52.6705251Z     source = open(source, "rb")
+2026-10-28T21:27:52.6705732Z              ^^^^^^^^^^^^^^^^^^
+2026-10-28T21:27:52.6706826Z FileNotFoundError: [Errno 2] No such file or directory: 'artifacts/backend-public-source/gateway-report.xml'
+2026-10-28T21:27:52.6779728Z ##[error]Process completed with exit code 1.
+2026-10-28T21:27:52.6833440Z ##[group]Run actions/upload-artifact@v4
+2026-10-28T21:27:52.6833749Z with:
+2026-10-28T21:27:52.6833957Z   name: van-backend-public-source
+2026-10-28T21:27:52.6834237Z   path: artifacts/backend-public-source/
+2026-10-28T21:27:52.6834522Z   if-no-files-found: error
+2026-10-28T21:27:52.6834751Z   compression-level: 6
+2026-10-28T21:27:52.6835167Z   overwrite: false
+2026-10-28T21:27:52.6835374Z   include-hidden-files: false
+2026-10-28T21:27:52.6835598Z env:
+2026-10-28T21:27:52.6835840Z   PYTHONPATH: backend:backend/tests:trading:trading/tests:.
+2026-10-28T21:27:52.6836469Z   VATI_TEST_PG_DSN: ***127.0.0.1:5432/postgres
+2026-10-28T21:27:52.6836765Z   VATI_TEST_PG_ISOLATED_FIXTURE: 1
+2026-10-28T21:27:52.6837082Z   pythonLocation: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-28T21:27:52.6837498Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.15/x64/lib/pkgconfig
+2026-10-28T21:27:52.6837915Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-28T21:27:52.6838336Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-28T21:27:52.6838711Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-28T21:27:52.6839087Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.15/x64/lib
+2026-10-28T21:27:52.6839565Z   VAN_TEST_CHROMIUM: /home/runner/.cache/ms-playwright/chromium-1243/chrome-linux64/chrome
+2026-10-28T21:27:52.6840005Z   NO_PROXY: 127.0.0.1,localhost,::1,
+2026-10-28T21:27:52.6840260Z   no_proxy: 127.0.0.1,localhost,::1,
+2026-10-28T21:27:52.6840495Z ##[endgroup]
+2026-10-28T21:27:52.8674046Z (node:175466) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-10-28T21:27:52.8675526Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-10-28T21:27:52.8765134Z With the provided path, there will be 4 files uploaded
+2026-10-28T21:27:52.8767588Z Artifact name is valid!
+2026-10-28T21:27:52.8768344Z Root directory input is valid!
+2026-10-28T21:27:53.2158129Z Beginning upload of artifact content to blob storage
+2026-10-28T21:27:53.2534610Z (node:175466) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
+2026-10-28T21:27:53.4159515Z Uploaded bytes 27909
+2026-10-28T21:27:53.4584335Z Finished uploading artifact content to blob storage!
+2026-10-28T21:27:53.4586122Z SHA256 digest of uploaded artifact zip is 38421e8a436a16101245bd35e7ad01a2d06d3de8046c2128787c381f361c1853
+2026-10-28T21:27:53.4587575Z Finalizing artifact upload
+2026-10-28T21:27:53.8993552Z Artifact van-backend-public-source.zip successfully finalized. Artifact ID 12853016392
+2026-10-28T21:27:53.8994747Z Artifact van-backend-public-source has been successfully uploaded! Final size is 27909 bytes. Artifact ID is 12853016392
+2026-10-28T21:27:53.8995680Z Artifact download URL: https://github.com/Vanguduza/Van/actions/runs/40766386824/artifacts/12853016392
+2026-10-28T21:27:53.9235344Z Post job cleanup.
+2026-10-28T21:27:54.0270488Z [command]/usr/bin/git version
+2026-10-28T21:27:54.0322906Z git version 2.56.0
+2026-10-28T21:27:54.0403387Z Temporarily overriding HOME='/home/runner/work/_temp/c8458af6-c7ae-4ce5-bbd8-f8039fe35be7' before making global git config changes
+2026-10-28T21:27:54.0407432Z Adding repository directory to the temporary git global config as a safe directory
+2026-10-28T21:27:54.0411070Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/Van/Van
+2026-10-28T21:27:54.0473076Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-10-28T21:27:54.0526080Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-10-28T21:27:54.0885206Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-10-28T21:27:54.0934766Z http.https://github.com/.extraheader
+2026-10-28T21:27:54.0954541Z [command]/usr/bin/git config --local --unset-all http.https://github.com/.extraheader
+2026-10-28T21:27:54.1010887Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-10-28T21:27:54.1467941Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-10-28T21:27:54.1553574Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-10-28T21:27:54.2024853Z Print service container logs: 73b939b59c88488f9ad19b91aa681e63_postgres1711bookwormsha256858bb5e98eed02eb8cafbcdc007f9a65d1b613972028944a8ec2133ccaf80d27_f5fa52
+2026-10-28T21:27:54.2030418Z ##[command]/usr/bin/docker logs --details 2af364ecca1637bfd14e494f728b6e54d2a42ebeed840e2ca824c87dec056bcf
+2026-10-28T21:27:54.2219061Z  initdb: warning: enabling "trust" authentication for local connections
+2026-10-28T21:27:54.2220062Z  The files belonging to this database system will be owned by user "postgres".
+2026-10-28T21:27:54.2221424Z  initdb: hint: You can change this by editing pg_hba.conf or using the option -A, or --auth-local and --auth-host, the next time you run initdb.
+2026-10-28T21:27:54.2223600Z  2026-10-28 20:49:12.008 UTC [1] LOG:  starting PostgreSQL 17.11 (Debian 17.11-1.pgdg12+2) on x86_64-pc-linux-gnu, compiled by gcc (Debian 12.2.0-14+deb12u1) 12.2.0, 64-bit
+2026-10-28T21:27:54.2225084Z  2026-10-28 20:49:12.008 UTC [1] LOG:  listening on IPv4 address "0.0.0.0", port 5432
+2026-10-28T21:27:54.2225948Z  2026-10-28 20:49:12.008 UTC [1] LOG:  listening on IPv6 address "::", port 5432
+2026-10-28T21:27:54.2226884Z  2026-10-28 20:49:12.009 UTC [1] LOG:  listening on Unix socket "/var/run/postgresql/.s.PGSQL.5432"
+2026-10-28T21:27:54.2227896Z  2026-10-28 20:49:12.012 UTC [62] LOG:  database system was shut down at 2026-10-28 20:49:11 UTC
+2026-10-28T21:27:54.2228808Z  2026-10-28 20:49:12.018 UTC [1] LOG:  database system is ready to accept connections
+2026-10-28T21:27:54.2229806Z  2026-10-28 20:51:13.682 UTC [60] LOG:  checkpoint starting: immediate force wait
+2026-10-28T21:27:54.2232330Z  2026-10-28 20:51:13.685 UTC [60] LOG:  checkpoint complete: wrote 53 buffers (0.3%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.002 s, sync=0.001 s, total=0.004 s; sync files=18, longest=0.001 s, average=0.001 s; distance=4660 kB, estimate=4660 kB; lsn=0/19741F8, redo lsn=0/19741A0
+2026-10-28T21:27:54.2234657Z  2026-10-28 20:56:13.730 UTC [60] LOG:  checkpoint starting: time
+2026-10-28T21:27:54.2236852Z  2026-10-28 20:56:13.832 UTC [60] LOG:  checkpoint complete: wrote 2 buffers (0.0%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.101 s, sync=0.001 s, total=0.103 s; sync files=2, longest=0.001 s, average=0.001 s; distance=0 kB, estimate=4194 kB; lsn=0/1974390, redo lsn=0/1974338
+2026-10-28T21:27:54.2239001Z  2026-10-28 21:21:14.153 UTC [60] LOG:  checkpoint starting: time
+2026-10-28T21:27:54.2264950Z  2026-10-28 21:21:21.572 UTC [60] LOG:  checkpoint complete: wrote 75 buffers (0.5%); 0 WAL file(s) added, 0 removed, 0 recycled; write=7.416 s, sync=0.002 s, total=7.420 s; sync files=55, longest=0.002 s, average=0.001 s; distance=317 kB, estimate=3806 kB; lsn=0/19C38D8, redo lsn=0/19C3848
+2026-10-28T21:27:54.2266893Z  This user must also own the server process.
+2026-10-28T21:27:54.2267394Z  
+2026-10-28T21:27:54.2267880Z  The database cluster will be initialized with locale "en_US.utf8".
+2026-10-28T21:27:54.2268679Z  The default database encoding has accordingly been set to "UTF8".
+2026-10-28T21:27:54.2269458Z  The default text search configuration will be set to "english".
+2026-10-28T21:27:54.2270219Z  
+2026-10-28T21:27:54.2270567Z  Data page checksums are disabled.
+2026-10-28T21:27:54.2270998Z  
+2026-10-28T21:27:54.2271517Z  fixing permissions on existing directory /var/lib/postgresql/data ... ok
+2026-10-28T21:27:54.2272487Z  creating subdirectories ... ok
+2026-10-28T21:27:54.2273066Z  selecting dynamic shared memory implementation ... posix
+2026-10-28T21:27:54.2273696Z  selecting default "max_connections" ... 100
+2026-10-28T21:27:54.2274236Z  selecting default "shared_buffers" ... 128MB
+2026-10-28T21:27:54.2274768Z  selecting default time zone ... Etc/UTC
+2026-10-28T21:27:54.2275648Z  creating configuration files ... ok
+2026-10-28T21:27:54.2276135Z  running bootstrap script ... ok
+2026-10-28T21:27:54.2276666Z  performing post-bootstrap initialization ... ok
+2026-10-28T21:27:54.2277214Z  syncing data to disk ... ok
+2026-10-28T21:27:54.2277616Z  
+2026-10-28T21:27:54.2277906Z  
+2026-10-28T21:27:54.2278743Z  Success. You can now start the database server using:
+2026-10-28T21:27:54.2279288Z  
+2026-10-28T21:27:54.2279712Z      pg_ctl -D /var/lib/postgresql/data -l logfile start
+2026-10-28T21:27:54.2280254Z  
+2026-10-28T21:27:54.2281433Z  waiting for server to start....2026-10-28 20:49:11.768 UTC [48] LOG:  starting PostgreSQL 17.11 (Debian 17.11-1.pgdg12+2) on x86_64-pc-linux-gnu, compiled by gcc (Debian 12.2.0-14+deb12u1) 12.2.0, 64-bit
+2026-10-28T21:27:54.2283339Z  2026-10-28 20:49:11.768 UTC [48] LOG:  listening on Unix socket "/var/run/postgresql/.s.PGSQL.5432"
+2026-10-28T21:27:54.2284374Z  2026-10-28 20:49:11.771 UTC [51] LOG:  database system was shut down at 2026-10-28 20:49:11 UTC
+2026-10-28T21:27:54.2285311Z  2026-10-28 20:49:11.775 UTC [48] LOG:  database system is ready to accept connections
+2026-10-28T21:27:54.2285968Z   done
+2026-10-28T21:27:54.2286289Z  server started
+2026-10-28T21:27:54.2286623Z  
+2026-10-28T21:27:54.2287190Z  /usr/local/bin/docker-entrypoint.sh: ignoring /docker-entrypoint-initdb.d/*
+2026-10-28T21:27:54.2287890Z  
+2026-10-28T21:27:54.2288339Z  2026-10-28 20:49:11.884 UTC [48] LOG:  received fast shutdown request
+2026-10-28T21:27:54.2289279Z  waiting for server to shut down....2026-10-28 20:49:11.885 UTC [48] LOG:  aborting any active transactions
+2026-10-28T21:27:54.2290497Z  2026-10-28 20:49:11.887 UTC [48] LOG:  background worker "logical replication launcher" (PID 54) exited with exit code 1
+2026-10-28T21:27:54.2291442Z  2026-10-28 20:49:11.888 UTC [49] LOG:  shutting down
+2026-10-28T21:27:54.2292343Z  2026-10-28 20:49:11.888 UTC [49] LOG:  checkpoint starting: shutdown immediate
+2026-10-28T21:27:54.2294204Z  2026-10-28 20:49:11.890 UTC [49] LOG:  checkpoint complete: wrote 3 buffers (0.0%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.001 s, sync=0.001 s, total=0.003 s; sync files=2, longest=0.001 s, average=0.001 s; distance=0 kB, estimate=0 kB; lsn=0/14E6FE8, redo lsn=0/14E6FE8
+2026-10-28T21:27:54.2296052Z  2026-10-28 20:49:11.895 UTC [48] LOG:  database system is shut down
+2026-10-28T21:27:54.2296624Z   done
+2026-10-28T21:27:54.2296947Z  server stopped
+2026-10-28T21:27:54.2297280Z  
+2026-10-28T21:27:54.2297693Z  PostgreSQL init process complete; ready for start up.
+2026-10-28T21:27:54.2298215Z  
+2026-10-28T21:27:54.2309839Z Stop and remove container: 73b939b59c88488f9ad19b91aa681e63_postgres1711bookwormsha256858bb5e98eed02eb8cafbcdc007f9a65d1b613972028944a8ec2133ccaf80d27_f5fa52
+2026-10-28T21:27:54.2318414Z ##[command]/usr/bin/docker rm --force 2af364ecca1637bfd14e494f728b6e54d2a42ebeed840e2ca824c87dec056bcf
+2026-10-28T21:27:54.6706406Z 2af364ecca1637bfd14e494f728b6e54d2a42ebeed840e2ca824c87dec056bcf
+2026-10-28T21:27:54.6742909Z Remove container network: github_network_7f0d51a131c04723ad09cc22d3aff034
+2026-10-28T21:27:54.6747753Z ##[command]/usr/bin/docker network rm github_network_7f0d51a131c04723ad09cc22d3aff034
+2026-10-28T21:27:54.7575258Z github_network_7f0d51a131c04723ad09cc22d3aff034
+2026-10-28T21:27:54.7663435Z Cleaning up orphan processes
+2026-10-28T21:27:54.7863417Z Terminate orphan process: pid (3170) (python)
+2026-10-28T21:27:54.7886361Z Terminate orphan process: pid (3171) (python)
+2026-10-28T21:27:54.8057343Z ##[warning]Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/checkout@v4, actions/setup-node@v4, actions/setup-python@v5, actions/upload-artifact@v4. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
+

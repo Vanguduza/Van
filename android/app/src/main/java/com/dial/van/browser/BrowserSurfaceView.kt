@@ -37,6 +37,12 @@ class BrowserSurfaceView @JvmOverloads constructor(
 
     /** Set once the controller exists. Null means nothing is connected yet. */
     var controller: BrowserSessionController? = null
+    var onSurfaceSize: ((Int, Int) -> Unit)? = null
+
+    override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
+        super.onSizeChanged(w, h, oldw, oldh)
+        if (w > 0 && h > 0) onSurfaceSize?.invoke(w, h)
+    }
 
     /**
      * §8.4 — composing text is not committed text.
@@ -81,7 +87,7 @@ class BrowserSurfaceView @JvmOverloads constructor(
         // navigation working: a browser that swallowed Back would trap the owner in it.
         if (keyCode == KeyEvent.KEYCODE_BACK) return super.onKeyDown(keyCode, event)
         if (!active.mayActuate()) return true
-        active.onKey(keyCode, event.unicodeChar, down = true)
+        active.onKey(keyCode, event.unicodeChar, down = true, metaState = event.metaState)
         return true
     }
 
@@ -89,7 +95,7 @@ class BrowserSurfaceView @JvmOverloads constructor(
         val active = controller ?: return false
         if (keyCode == KeyEvent.KEYCODE_BACK) return super.onKeyUp(keyCode, event)
         if (!active.mayActuate()) return true
-        active.onKey(keyCode, event.unicodeChar, down = false)
+        active.onKey(keyCode, event.unicodeChar, down = false, metaState = event.metaState)
         return true
     }
 
@@ -97,6 +103,13 @@ class BrowserSurfaceView @JvmOverloads constructor(
         BaseInputConnection(this@BrowserSurfaceView, true) {
 
         override fun getEditable(): Editable = composing
+
+        override fun performEditorAction(actionCode: Int): Boolean {
+            val active = controller?.takeIf { it.mayActuate() } ?: return false
+            active.onKey(KeyEvent.KEYCODE_ENTER, '\n'.code, down = true)
+            active.onKey(KeyEvent.KEYCODE_ENTER, '\n'.code, down = false)
+            return true
+        }
 
         override fun setComposingText(text: CharSequence, newCursorPosition: Int): Boolean {
             controller?.takeIf { it.mayActuate() }?.onComposition(text.toString())
@@ -124,8 +137,8 @@ class BrowserSurfaceView @JvmOverloads constructor(
         override fun sendKeyEvent(event: KeyEvent): Boolean {
             val active = controller?.takeIf { it.mayActuate() }
             when (event.action) {
-                KeyEvent.ACTION_DOWN -> active?.onKey(event.keyCode, event.unicodeChar, true)
-                KeyEvent.ACTION_UP -> active?.onKey(event.keyCode, event.unicodeChar, false)
+                KeyEvent.ACTION_DOWN -> active?.onKey(event.keyCode, event.unicodeChar, true, event.metaState)
+                KeyEvent.ACTION_UP -> active?.onKey(event.keyCode, event.unicodeChar, false, event.metaState)
             }
             return super.sendKeyEvent(event)
         }

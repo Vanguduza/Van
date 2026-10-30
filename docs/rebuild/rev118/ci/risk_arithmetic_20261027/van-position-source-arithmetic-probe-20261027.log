@@ -1,0 +1,64 @@
+..FF                                                                     [100%]
+=================================== FAILURES ===================================
+_ test_original_position_projection_keeps_original_stop_distance[True-account] _
+
+eurusd = SymbolContract(symbol='EURUSD', venue='mt5', base_currency='EUR', quote_currency='USD', account_currency='USD', contra...=Decimal('0'), max_adv_participation=Decimal('0.10'), liquidity_haircut=Decimal('0'), round_trip_cost_pct=Decimal('0'))
+producer = 'account', hostile = True
+
+    @pytest.mark.parametrize('producer', ['account', 'cycle'])
+    @pytest.mark.parametrize('hostile', [False, True])
+    def test_original_position_projection_keeps_original_stop_distance(eurusd, producer, hostile):
+        position = SimpleNamespace(symbol='EURUSD', position_id='source-fixture-only',
+            direction=Direction.LONG, quantity=Decimal('1'), entry_price=Decimal('1.10010'),
+            stop_price=Decimal('1.09790'), loss_model=LossModel.STOP_DISTANCE)
+        fixture = SimpleNamespace(adapter=SimpleNamespace(positions=lambda: [position]),
+            protection=SimpleNamespace(rules={}), contracts={'EURUSD': eurusd},
+            cfg=SimpleNamespace(contract=eurusd), _entries={})
+        project = (AccountCoordinatorService._open_positions if producer == 'account'
+                   else DecisionCycle._open_positions)
+        original_distance = abs(Fraction(position.entry_price) - Fraction(position.stop_price))
+        with localcontext() as caller:
+            if hostile:
+                caller.prec = 1
+                caller.rounding = ROUND_DOWN
+            projected = project(fixture)
+            assert len(projected) == 1
+>           assert Fraction(projected[0].stop_distance) == original_distance
+E           AssertionError: assert Fraction(1, 500) == Fraction(11, 5000)
+E            +  where Fraction(1, 500) = Fraction(Decimal('0.002'))
+E            +    where Decimal('0.002') = OpenPosition(symbol='EURUSD', direction=<Direction.LONG: 'LONG'>, lots=Decimal('1'), stop_distance=Decimal('0.002'), v...ue, loss_model=<LossModel.STOP_DISTANCE: 'STOP_DISTANCE'>, stake=Decimal('0'), liquidity_haircut_per_unit=Decimal('0')).stop_distance
+
+../../van-position-source-arithmetic-probe-20261027.py:31: AssertionError
+__ test_original_position_projection_keeps_original_stop_distance[True-cycle] __
+
+eurusd = SymbolContract(symbol='EURUSD', venue='mt5', base_currency='EUR', quote_currency='USD', account_currency='USD', contra...=Decimal('0'), max_adv_participation=Decimal('0.10'), liquidity_haircut=Decimal('0'), round_trip_cost_pct=Decimal('0'))
+producer = 'cycle', hostile = True
+
+    @pytest.mark.parametrize('producer', ['account', 'cycle'])
+    @pytest.mark.parametrize('hostile', [False, True])
+    def test_original_position_projection_keeps_original_stop_distance(eurusd, producer, hostile):
+        position = SimpleNamespace(symbol='EURUSD', position_id='source-fixture-only',
+            direction=Direction.LONG, quantity=Decimal('1'), entry_price=Decimal('1.10010'),
+            stop_price=Decimal('1.09790'), loss_model=LossModel.STOP_DISTANCE)
+        fixture = SimpleNamespace(adapter=SimpleNamespace(positions=lambda: [position]),
+            protection=SimpleNamespace(rules={}), contracts={'EURUSD': eurusd},
+            cfg=SimpleNamespace(contract=eurusd), _entries={})
+        project = (AccountCoordinatorService._open_positions if producer == 'account'
+                   else DecisionCycle._open_positions)
+        original_distance = abs(Fraction(position.entry_price) - Fraction(position.stop_price))
+        with localcontext() as caller:
+            if hostile:
+                caller.prec = 1
+                caller.rounding = ROUND_DOWN
+            projected = project(fixture)
+            assert len(projected) == 1
+>           assert Fraction(projected[0].stop_distance) == original_distance
+E           AssertionError: assert Fraction(1, 500) == Fraction(11, 5000)
+E            +  where Fraction(1, 500) = Fraction(Decimal('0.002'))
+E            +    where Decimal('0.002') = OpenPosition(symbol='EURUSD', direction=<Direction.LONG: 'LONG'>, lots=Decimal('1'), stop_distance=Decimal('0.002'), v...ue, loss_model=<LossModel.STOP_DISTANCE: 'STOP_DISTANCE'>, stake=Decimal('0'), liquidity_haircut_per_unit=Decimal('0')).stop_distance
+
+../../van-position-source-arithmetic-probe-20261027.py:31: AssertionError
+=========================== short test summary info ============================
+FAILED ../../van-position-source-arithmetic-probe-20261027.py::test_original_position_projection_keeps_original_stop_distance[True-account]
+FAILED ../../van-position-source-arithmetic-probe-20261027.py::test_original_position_projection_keeps_original_stop_distance[True-cycle]
+2 failed, 2 passed in 1.97s

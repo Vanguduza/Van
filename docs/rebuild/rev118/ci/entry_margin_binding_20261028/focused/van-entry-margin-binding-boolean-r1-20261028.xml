@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="3" skipped="0" tests="6" time="1.096" timestamp="2026-10-28T16:21:32.570182+00:00" hostname="6e9feff21467"><testcase classname="trading.tests.test_boolean_execution_receipts" name="test_false_text_from_order_check_cannot_reach_the_actual_send" time="0.193"><failure message="vati.execution.base.VenueUnavailable: MT5 worker did not acknowledge the registered physical account binding">eurusd = SymbolContract(symbol='EURUSD', venue='mt5', base_currency='EUR', quote_currency='USD', account_currency='USD', contra...=Decimal('0'), max_adv_participation=Decimal('0.10'), liquidity_haircut=Decimal('0'), round_trip_cost_pct=Decimal('0'))
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-141/test_false_text_from_order_che0')
+
+    def test_false_text_from_order_check_cannot_reach_the_actual_send(eurusd,tmp_path):
+        adapter,router,trade,decision,mandate,calls=native_flow(eurusd,tmp_path,check='false')
+&gt;       result=router.execute(trade,decision,mandate,now_ms=NOW*1000)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+trading/tests/test_boolean_execution_receipts.py:60: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+trading/vati/execution/router.py:592: in execute
+    receipt = adapter.submit(cmd, now_ms=now_ms)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/execution/mt5_bridge.py:188: in submit
+    chk = self._call("order_check", body, now_ms=now_ms)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = Mt5BridgeAdapter(client=&lt;vati.execution.mt5_bridge.Mt5BridgeClient object at 0x7fa4edb26960&gt;, account_alias='native', ...&gt;.&lt;lambda&gt; at 0x7fa4ed9b16c0&gt;, identity=Mt5Identity(login='12345678', server='Broker-Demo', currency='USD', demo=True))
+op = 'order_check'
+body = {'alias': 'native', 'symbol': 'EURUSD', 'type': 'BUY', 'volume': '0.18', ...}
+now_ms = 1800000000000
+
+    def _call(self, op, body, *, now_ms):
+        if self.identity is not None:
+            # A legacy worker must refuse admission before an effectful call.
+            # Every new worker also verifies this same binding inside its lock.
+            if op != 'sync_account':
+                self._call('sync_account', {'alias': self.account_alias}, now_ms=now_ms)
+            body = {**body, 'expected_account': self.identity.as_dict()}
+        response = self.client.call(op, body, now_ms=now_ms)
+        if not isinstance(response, dict) or 'error' in response:
+            raise VenueUnavailable('MT5 worker account operation refused or unavailable')
+        if self.identity is not None:
+            if response.get('identity_binding') != self.identity.as_dict():
+&gt;               raise VenueUnavailable('MT5 worker did not acknowledge the registered physical account binding')
+E               vati.execution.base.VenueUnavailable: MT5 worker did not acknowledge the registered physical account binding
+
+trading/vati/execution/mt5_bridge.py:101: VenueUnavailable</failure></testcase><testcase classname="trading.tests.test_boolean_execution_receipts" name="test_unconfirmed_native_stop_is_not_reported_protected_and_uses_the_actual_flatten_path" time="0.057"><failure message="vati.execution.base.VenueUnavailable: MT5 worker did not acknowledge the registered physical account binding">eurusd = SymbolContract(symbol='EURUSD', venue='mt5', base_currency='EUR', quote_currency='USD', account_currency='USD', contra...=Decimal('0'), max_adv_participation=Decimal('0.10'), liquidity_haircut=Decimal('0'), round_trip_cost_pct=Decimal('0'))
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-141/test_unconfirmed_native_stop_i0')
+
+    def test_unconfirmed_native_stop_is_not_reported_protected_and_uses_the_actual_flatten_path(eurusd,tmp_path):
+        adapter,router,trade,decision,mandate,calls=native_flow(eurusd,tmp_path,stop='false')
+        with pytest.raises(RouterError,match='flattened'):
+&gt;           router.execute(trade,decision,mandate,now_ms=NOW*1000)
+
+trading/tests/test_boolean_execution_receipts.py:67: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+trading/vati/execution/router.py:592: in execute
+    receipt = adapter.submit(cmd, now_ms=now_ms)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/execution/mt5_bridge.py:188: in submit
+    chk = self._call("order_check", body, now_ms=now_ms)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = Mt5BridgeAdapter(client=&lt;vati.execution.mt5_bridge.Mt5BridgeClient object at 0x7fa4edb4dd60&gt;, account_alias='native', ...&gt;.&lt;lambda&gt; at 0x7fa4eda8a480&gt;, identity=Mt5Identity(login='12345678', server='Broker-Demo', currency='USD', demo=True))
+op = 'order_check'
+body = {'alias': 'native', 'symbol': 'EURUSD', 'type': 'BUY', 'volume': '0.18', ...}
+now_ms = 1800000000000
+
+    def _call(self, op, body, *, now_ms):
+        if self.identity is not None:
+            # A legacy worker must refuse admission before an effectful call.
+            # Every new worker also verifies this same binding inside its lock.
+            if op != 'sync_account':
+                self._call('sync_account', {'alias': self.account_alias}, now_ms=now_ms)
+            body = {**body, 'expected_account': self.identity.as_dict()}
+        response = self.client.call(op, body, now_ms=now_ms)
+        if not isinstance(response, dict) or 'error' in response:
+            raise VenueUnavailable('MT5 worker account operation refused or unavailable')
+        if self.identity is not None:
+            if response.get('identity_binding') != self.identity.as_dict():
+&gt;               raise VenueUnavailable('MT5 worker did not acknowledge the registered physical account binding')
+E               vati.execution.base.VenueUnavailable: MT5 worker did not acknowledge the registered physical account binding
+
+trading/vati/execution/mt5_bridge.py:101: VenueUnavailable</failure></testcase><testcase classname="trading.tests.test_boolean_execution_receipts" name="test_malformed_reply_after_a_sent_modification_stays_unknown" time="0.012"><failure message="vati.execution.base.VenueUnavailable: bridge clock skew beyond limit">eurusd = SymbolContract(symbol='EURUSD', venue='mt5', base_currency='EUR', quote_currency='USD', account_currency='USD', contra...=Decimal('0'), max_adv_participation=Decimal('0.10'), liquidity_haircut=Decimal('0'), round_trip_cost_pct=Decimal('0'))
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-141/test_malformed_reply_after_a_s0')
+
+    def test_malformed_reply_after_a_sent_modification_stays_unknown(eurusd,tmp_path):
+        adapter,*_=native_flow(eurusd,tmp_path,modify='false')
+&gt;       result=adapter.modify_stop('P1',D('1.095'),now_ms=1000)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+trading/tests/test_boolean_execution_receipts.py:74: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+trading/vati/execution/mt5_bridge.py:204: in modify_stop
+    r = self._call("modify_sl_tp", {"alias": self.account_alias, "position": position_id, "sl": str(new_stop)}, now_ms=now_ms)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/execution/mt5_bridge.py:94: in _call
+    self._call('sync_account', {'alias': self.account_alias}, now_ms=now_ms)
+trading/vati/execution/mt5_bridge.py:96: in _call
+    response = self.client.call(op, body, now_ms=now_ms)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;vati.execution.mt5_bridge.Mt5BridgeClient object at 0x7fa4ed9996d0&gt;
+op = 'sync_account'
+body = {'alias': 'native', 'expected_account': {'login': '12345678', 'server': 'Broker-Demo', 'currency': 'USD', 'demo': True}}
+now_ms = 1000
+
+    def call(self, op: str, body: dict[str, Any], *, now_ms: int) -&gt; dict[str, Any]:
+        if op not in OPS:
+            raise ValueError(f"op not in bridge contract: {op}")
+        if self._transport is None:
+            raise VenueUnavailable("MT5 bridge transport not configured; fail closed")
+        with self._nonce_lock:
+            if self._nonce &amp; 0xffffffff==0xffffffff:
+                self._nonce=secrets.randbits(96)&lt;&lt;32
+            self._nonce += 1
+            nonce = self._nonce
+        req = self.sign(BridgeRequest(op, nonce, now_ms, body))
+        self.sent.append(req)
+        resp = self._transport(req.__dict__)
+        if resp.get("nonce") != req.nonce:
+            raise VenueUnavailable("bridge response nonce mismatch (replay?)")
+        if abs(int(resp.get("worker_time_ms", now_ms)) - now_ms) &gt; self.max_skew_ms:
+&gt;           raise VenueUnavailable("bridge clock skew beyond limit")
+E           vati.execution.base.VenueUnavailable: bridge clock skew beyond limit
+
+trading/vati/execution/mt5_bridge.py:74: VenueUnavailable</failure></testcase><testcase classname="trading.tests.test_boolean_execution_receipts" name="test_actual_authenticated_ea_snapshot_cannot_coerce_false_text[trade_allowed]" time="0.051" /><testcase classname="trading.tests.test_boolean_execution_receipts" name="test_actual_authenticated_ea_snapshot_cannot_coerce_false_text[hedging]" time="0.009" /><testcase classname="trading.tests.test_boolean_execution_receipts" name="test_delayed_pull_modification_is_unknown_and_can_still_apply_after_the_wait" time="0.033" /></testsuite></testsuites>

@@ -1,0 +1,25 @@
+{
+  "command": [
+    "env",
+    "PYTHONPATH=trading:trading/tests:backend:backend/tests:.",
+    "/workspace/van-backend-venv-20261025/bin/python",
+    "tools/rebuild/source_storage_audit.py",
+    "--report",
+    "/workspace/van-risk-arithmetic-fault-fixture-final-audit-20261027.json",
+    "/workspace/van-risk-arithmetic-fault-fixture-20261027.py",
+    "-p",
+    "conftest",
+    "--import-mode=importlib",
+    "--junitxml=/workspace/van-risk-arithmetic-fault-fixture-final-20261027.xml",
+    "-q"
+  ],
+  "cwd": "/workspace/van-review-2026-10-18/publish",
+  "controller_pid": 1039275,
+  "started_at_utc": "2026-10-27T06:07:34.217291+00:00",
+  "timeout_seconds": 240,
+  "state": "COMPLETED",
+  "command_pid": 1039276,
+  "exit": 0,
+  "adopted_children_reaped": [],
+  "finished_at_utc": "2026-10-27T06:10:06.623991+00:00"
+}

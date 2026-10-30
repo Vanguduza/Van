@@ -1,0 +1,17 @@
+{
+  "head": "068267e2901d0e1d62c29d101e83860916461bec",
+  "causal_application_sources_equal_committed": true,
+  "source_sha256": {
+    "trading/vati/risk/heat.py": "1d0c35c2b9f8d23df74d5247198eff6342b2fa79d888a56ada22763e7dba1fa4",
+    "trading/vati/risk/sizing.py": "115a6b12ff5ff15588f3da30aef7d372f960ac6d07b99a66564283c92edace86",
+    "trading/vati/risk/authority.py": "c65b46d035d919da44a108cc5fd84774a83fbea0c7af5432150f2773c7073dcb",
+    "trading/vati/risk/contracts.py": "83173c1beac35afc5f9ba61e7b6be9bc142c57ed44c4cbfbdefb1aa3e8e723fb",
+    "trading/vati/risk/margin.py": "24110828d20ec5fb1e2f8601c72dfe4c68d3a226e3ca82e51b79263aa6da1470",
+    "trading/vati/risk/governor.py": "8c01a1eb733374a4f94d55c30838e51880e0dfe0d9387a3ce77f1270672fd24e"
+  },
+  "failed": 7,
+  "errors": 0,
+  "passed_controls": 1,
+  "skips": 0,
+  "qualification": "Source arithmetic and actual RiskAuthority gate; no native financial effect or live account claim."
+}

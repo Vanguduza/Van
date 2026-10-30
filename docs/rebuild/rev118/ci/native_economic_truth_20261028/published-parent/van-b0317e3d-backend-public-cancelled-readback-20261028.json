@@ -1,0 +1,51 @@
+{
+  "artifact_id": 12853016392,
+  "metadata": {
+    "id": 12853016392,
+    "name": "van-backend-public-source",
+    "size_in_bytes": 27909,
+    "url": "https://api.github.com/repos/Vanguduza/Van/actions/artifacts/12853016392",
+    "archive_download_url": "https://api.github.com/repos/Vanguduza/Van/actions/artifacts/12853016392/zip",
+    "expired": false,
+    "created_at": "2026-10-28T21:27:53Z",
+    "expires_at": "2027-01-26T20:47:25Z",
+    "updated_at": "2026-10-28T21:27:53Z",
+    "digest": "sha256:38421e8a436a16101245bd35e7ad01a2d06d3de8046c2128787c381f361c1853",
+    "workflow_run": {
+      "id": 40766386824,
+      "repository_id": 1369211561,
+      "head_repository_id": 1369211561,
+      "head_branch": "ccr-9e07e1af-8mgz1p",
+      "head_sha": "b0317e3dd3f01748abe6cf92504c6d965e0956bb"
+    }
+  },
+  "digest_and_bytes_and_CRC_safe_unique_paths_verified": true,
+  "members": {
+    "media-report.xml": {
+      "bytes": 35977,
+      "sha256": "3f04c0909cb1aaf22065c293bfed263998db4e72dd3fafb03b3fb26a256109de"
+    },
+    "media-storage-audit.json": {
+      "bytes": 545,
+      "sha256": "128b04a8c8f58c8d4d335db930e1fabd533499ca88e5c1c3afb2e49eb25caea1"
+    },
+    "selection.json": {
+      "bytes": 73514,
+      "sha256": "22c0ab0f6702d3e4505bb52fccd8ecfa326c952b33950a897b4f6ff037444347"
+    },
+    "tested-commit.txt": {
+      "bytes": 41,
+      "sha256": "a3a34cf6c5c5b83b4f02192a4c92d7cc8794e93f79a53b9a012c8bdccc0e41f6"
+    }
+  },
+  "junit": {
+    "media-report.xml": {
+      "cases": 198,
+      "passed": 198,
+      "failure": 0,
+      "error": 0,
+      "skipped": 0
+    }
+  },
+  "qualification": "CANCELLED_GATEWAY_JOB_NOT_FULL_PASS"
+}

@@ -1,0 +1,40 @@
+{
+  "schema": "van.rebuild.native-valuation-source/1",
+  "base_head": "6c7142f126b206ba7f6aeefccb922cc51545c27c",
+  "updated_at_utc": "2026-10-26T18:37:01.533855+00:00",
+  "status": "SOURCE_TESTED_COMPONENT_NOT_NATIVE_RISK_SETTLEMENT_OR_UNIT_ACCEPTANCE",
+  "units": [
+    "BE-006"
+  ],
+  "unit_status": "IN_PROGRESS",
+  "acceptance": "NOT_ISSUED",
+  "source_sha256": {
+    "trading/vati/funding/valuation.py": "77473cdf30e2634f79da44a739aa8918614cf31fbc8b0203951d9be00b19c7d8",
+    "trading/vati/funding/reconciliation.py": "d089ac092daf0aaa6424cf492f90e6c3f7313431c7d6cde3061abf28ed5d3f04",
+    "trading/tests/test_native_valuation.py": "277821c5b655719b598fb9fc2908b94705c2d9eec13a3488ff14a28127b01e70"
+  },
+  "wiring": "Original account snapshot validation and baseline/closing typed values consumed by existing period_report;read_valuation independently resolves actual committed SQL source;no append or newstore",
+  "actual_tests": {
+    "initial_models_SQLite": "18passed18PGdeselected/audit0;before extra source-clock/resource guards",
+    "initial_integration_SQLite": "113passed20PGdeselected/audit0;before2additionalSQLlineage/readbackcases",
+    "confirmed_before": "1actual period-report assertion failure:sampled drawdown3->2 differed under ambient ROUND_UP/ROUND_DOWN;retained before correction",
+    "final_pg": "376passed0skips/audit0/51.14seconds/all485runtime-testhashesmatch/ownedactualPGfixtureindependentlyabsent",
+    "new_valuation_cases": 45,
+    "supplemental_faults_assertion_caught": 7,
+    "positive_and_restored_SQLite_controls": 20,
+    "supplemental_PG_parameters": "Explicitlydeselectedonlyin fault exercise;allactualPGparameters executedin final selection",
+    "rebuild_workflow_T0_boundary": 122,
+    "counts_overlap": true
+  },
+  "canonical_checks": {
+    "owner_frontend_drift": false,
+    "registry_cases": 374,
+    "registry_edits": 383,
+    "registry_findings": [],
+    "current_candidate_registry_execution": "NOT_RUN;parent source runs separately evidenced",
+    "consolidation_findings": []
+  },
+  "qualification": "Exact native account value/lineage/source fixtures only;no risk-capital,settlement,holdings-completeness,grant,native/provider/unit/owner/production/Android/S24acceptance",
+  "remaining": "Full multi-asset valuation/FlowAdjustedRisk/historical normalized flow evidence/reversals/compensating facts/sharedreservations/BE007 native rails;full canonical backend/ML/assistant and Android/device programme",
+  "evidence": "ci/native_valuation_20261026"
+}

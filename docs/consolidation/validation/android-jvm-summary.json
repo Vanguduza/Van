@@ -1,0 +1,13 @@
+{
+  "scope": "ANDROID_PURE_JVM_ONLY",
+  "xml_files": 157,
+  "tests": 1273,
+  "failures": 0,
+  "errors": 0,
+  "skipped": 0,
+  "sorted_xml_digest_sha256": "f57ad40e1da999aa4ba4260aa8d976aeb3974d37ee0908b1951ece3df5fd03f2",
+  "native_build_or_handset_qualification": false,
+  "tested_source_commit": "f6aacd10f68df5ce7500000d8d95fa0a17ab00c0",
+  "java_source_tree": "f06c67e39f49e8e82d93f1995fe5bd58537eba77",
+  "jvm_harness_tree": "2cc495957eaa1ad73b63f185905f040118deab8e"
+}

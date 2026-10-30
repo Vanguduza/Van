@@ -1,0 +1,9 @@
+# OAuth collision preflight and original outcome recovery
+
+The broad frozen-source audit at `9ea88ce2` exposed a regression in account alias collision preflight: five OAuth recovery cases stopped at an ordinary alias-exists refusal before the durable effect journal could report an original unconfirmed result. The audit stopped after five failures; its remaining collection was not executed. `receipts/SOURCE_QUALIFICATION_9ea88ce2.json` retains that actual failure separately from hosted emulator and mutation passes.
+
+The preflight now recognizes an existing device-owned link operation even while its pending material still exists. This routes only to the existing original-effect reader; its exact request, owner, broker, encrypted receipt and finality checks remain in `OAuthEffects.begin`. It does not allocate another native effect or rebase the original result onto current account configuration. An original unconfirmed result remains readable when current native inventory is unavailable.
+
+A new OAuth state addressing an unresolved alias target reaches the existing atomic target fence and receives its reconciliation state. It cannot use an ordinary alias collision to conceal that unresolved history or bypass the native effect. A genuinely new link to an already registered alias still fails collision preflight, and native alias guards remain in force. No completed, expired, absent or unknown state is converted into permission to repeat a link.
+
+See `receipts/OAUTH_COLLISION_RECOVERY_SOURCE_20261022.json` for actual gateway, fault, registry and rebuild checks. All original unknown-effect, lost-reply, mismatched-receipt and new-state bypass assertions remain. This is a candidate BE-002/003/005 repair; source tests and hosted Android evidence do not issue whole-unit, provider, production, independent or handset acceptance. The next broad source audit must run against the exact corrected commit.

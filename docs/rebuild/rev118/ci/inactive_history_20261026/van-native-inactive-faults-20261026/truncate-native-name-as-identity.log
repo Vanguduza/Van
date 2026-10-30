@@ -1,0 +1,58 @@
+FFF                                                                      [100%]
+=================================== FAILURES ===================================
+_ test_unknown_or_unusable_display_label_retains_native_identity_without_truncating_data[] _
+
+name = ''
+
+    @pytest.mark.parametrize('name',['','/','x'*300])
+    def test_unknown_or_unusable_display_label_retains_native_identity_without_truncating_data(name):
+        body=response();body['symbol'][1]['symbolName']=name
+        value=NativeReadIdentity.capture(captured(response=body),2)
+>       assert value.display_name==name and value.series_label=='CTRADER_NATIVE_2'
+E       assert ('' == '' and 'UNKNOWN' == 'CTRADER_NATIVE_2'
+E        +  where '' = NativeReadIdentity(metadata_json='{"catalog_metadata":{"include_archived_symbols":true,"protocol_schema_sha256":"3f452...":"demo.ctraderapi.com"}},"native_symbol_id":2,"schema":"vati.ctrader-read-identity/1"}', received_at_ms=1800000000000).display_name
+E         
+E         - CTRADER_NATIVE_2
+E         + UNKNOWN)
+
+trading/tests/test_native_read_identity.py:50: AssertionError
+_ test_unknown_or_unusable_display_label_retains_native_identity_without_truncating_data[/] _
+
+name = '/'
+
+    @pytest.mark.parametrize('name',['','/','x'*300])
+    def test_unknown_or_unusable_display_label_retains_native_identity_without_truncating_data(name):
+        body=response();body['symbol'][1]['symbolName']=name
+        value=NativeReadIdentity.capture(captured(response=body),2)
+>       assert value.display_name==name and value.series_label=='CTRADER_NATIVE_2'
+E       AssertionError: assert ('/' == '/'
+E         
+E           / and '/' == 'CTRADER_NATIVE_2'
+E         
+E         - CTRADER_NATIVE_2
+E         + /)
+
+trading/tests/test_native_read_identity.py:50: AssertionError
+_ test_unknown_or_unusable_display_label_retains_native_identity_without_truncating_data[xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx] _
+
+name = 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx...xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'
+
+    @pytest.mark.parametrize('name',['','/','x'*300])
+    def test_unknown_or_unusable_display_label_retains_native_identity_without_truncating_data(name):
+        body=response();body['symbol'][1]['symbolName']=name
+        value=NativeReadIdentity.capture(captured(response=body),2)
+>       assert value.display_name==name and value.series_label=='CTRADER_NATIVE_2'
+E       AssertionError: assert ('xxxxxxxxxxxx...xxxxxxxxxxxxx' == 'xxxxxxxxxxxx...xxxxxxxxxxxxx'
+E         
+E         Skipping 289 identical leading characters in diff, use -v to show
+E           xxxxxxxxxxx and 'xxxxxxxxxxxx...xxxxxxxxxxxxx' == 'CTRADER_NATIVE_2'
+E         
+E         - CTRADER_NATIVE_2
+E         + xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx)
+
+trading/tests/test_native_read_identity.py:50: AssertionError
+=========================== short test summary info ============================
+FAILED trading/tests/test_native_read_identity.py::test_unknown_or_unusable_display_label_retains_native_identity_without_truncating_data[]
+FAILED trading/tests/test_native_read_identity.py::test_unknown_or_unusable_display_label_retains_native_identity_without_truncating_data[/]
+FAILED trading/tests/test_native_read_identity.py::test_unknown_or_unusable_display_label_retains_native_identity_without_truncating_data[xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx]
+3 failed in 0.63s

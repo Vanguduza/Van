@@ -1,0 +1,23 @@
+....................F...........                                         [100%]
+=================================== FAILURES ===================================
+____ test_report_cannot_mutate_last_known_raw_snapshot_or_captured_profile _____
+
+setup = (<vati.core.ledger.Ledger object at 0x7f4218a8d100>, PosixPath('/tmp/pytest-of-agent/pytest-289/test_report_cannot_mut...t_report_cannot_mutate_last0/feed.xml', 'input_format': 'rss2', 'source_id': 'transport', 'publisher_id': 'publisher'})
+
+    def test_report_cannot_mutate_last_known_raw_snapshot_or_captured_profile(setup):
+        ledger,path,config=setup;news=build(ledger,config)
+        report=news.report(now_ms=NOW)
+        report['source_health']['last_known_source_snapshot']['receipt_hash']='forged'
+        report['source_health']['source_profile']['adapter']['publisher_id']='forged'
+        original,=snapshots(ledger)
+        current=news.report(now_ms=NOW)['source_health']
+>       assert current['last_known_source_snapshot']['receipt_hash']==original.hash
+E       AssertionError: assert 'forged' == 'bb0a2efec683...c03036a5b3404'
+E         
+E         - bb0a2efec6833995851aa639591bedb57e13e163ba5d0c13e63c03036a5b3404
+E         + forged
+
+trading/tests/test_news_rss_feed.py:219: AssertionError
+=========================== short test summary info ============================
+FAILED trading/tests/test_news_rss_feed.py::test_report_cannot_mutate_last_known_raw_snapshot_or_captured_profile
+1 failed, 31 passed, 2 deselected in 0.96s

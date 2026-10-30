@@ -1,0 +1,9 @@
+{
+  "created_at": "2026-10-28T19:14:12.299422+00:00",
+  "base": "b876fc27f35765244fb169dbde1030f2b79b836e",
+  "state": "OPEN_PROVIDER_SEMANTICS_FINDING_NOT_CONFIRMED_PRODUCTION_DEFECT",
+  "evidence": "/workspace/van-ctrader-signed-commission-before-20261028.json",
+  "actual_result": "1 failed; framed simulation supplies+350commission/moneyDigits2; current adapter abs maps to+3.5fee",
+  "limitation": "External test assumes positive native commission is a credit. Retained ProtoOADeal comments only say amount of commission and do not establish this sign convention. No connected provider proof or final settlement; do not apply sign mapping without corroboration. Existing native deal journals retain signed raw facts.",
+  "next_action": "Resolve actual authoritative commission/rebate/close-fee semantics and complete fee coverage; preserve unknown and raw signed observations; no adapter changes made."
+}

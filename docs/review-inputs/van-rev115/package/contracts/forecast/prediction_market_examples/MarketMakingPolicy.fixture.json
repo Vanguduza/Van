@@ -1,0 +1,25 @@
+{
+  "schema_version": "1.0",
+  "record_id": "fixture:MarketMakingPolicy",
+  "environment": "FIXTURE",
+  "authority_effect": "NONE",
+  "evidence_refs": [
+    "fixture:synthetic-only-not-real-evidence"
+  ],
+  "source_digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "policy_id": "fixture:inventory-skew",
+  "canonical_event_family": "fixture:CPI",
+  "inventory_limit_contracts": "50",
+  "max_open_quote_count": 4,
+  "max_gross_outlay": "40.00",
+  "currency": "USD",
+  "quote_model_ref": "fixture:bounded-event-jump-aware-policy",
+  "fill_conditional_value_required": true,
+  "gap_behavior": "WITHDRAW_NEW_QUOTES_KEEP_PENDING_EXPOSURE",
+  "pending_cancel_reservations_retained": true,
+  "official_release_policy_ref": "fixture:withdraw-before-known-release",
+  "queue_assumption_ref": "fixture:conservative-queue-range",
+  "special_venue_privileges_assumed": false,
+  "market_manipulation_allowed": false,
+  "live_order_submission": false
+}

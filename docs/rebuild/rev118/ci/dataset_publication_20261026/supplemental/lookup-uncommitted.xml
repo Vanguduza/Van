@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="1" time="1.106" timestamp="2026-10-26T11:15:22.189398+00:00" hostname="2c5a245e39f1"><testcase classname="trading.worker_tests.test_dataset_candidate_archive" name="test_lookup_cannot_report_an_uncommitted_candidate_as_published[sqlite]" time="0.155"><failure message="Failed: DID NOT RAISE DatasetContractError">publication = (&lt;vati.core.ledger.Ledger object at 0x7f6273153860&gt;, &lt;vati.research.dataset_archive.DatasetCandidateArchive object at ...tive_account_id":123,"schema":"vati.ctrader-symbol/1","transport_host":"demo.ctraderapi.com"}', received_at_ms=100000))
+
+    def test_lookup_cannot_report_an_uncommitted_candidate_as_published(publication):
+        ledger,archive,record,c=publication
+        archive.publish('committed',parse(record),expected_scope=c.native_scope)
+        with ledger.atomic():
+&gt;           with pytest.raises(DatasetContractError,match='OWN_TRANSACTION'):archive.lookup('committed')
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           Failed: DID NOT RAISE DatasetContractError
+
+trading/worker_tests/test_dataset_candidate_archive.py:108: Failed</failure></testcase></testsuite></testsuites>

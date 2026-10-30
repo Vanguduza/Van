@@ -1,0 +1,95 @@
+
+### ['../tests/contracts/test_encrypted_queue_writes_are_off_the_main_thread.py']
+CAUGHT             C39 the outbox says saved before the bytes are down
+CAUGHT             C39 a burst of notifications writes to an encrypted disk on the thread that draws
+CAUGHT             C39 discarding the queue is one synchronous write per command, from a button
+
+3/3 caught
+
+### ['../tests/contracts/test_stored_command_is_deliverable.py']
+CAUGHT             C38 the body stored offline is unsigned, and is refused on the flush
+CAUGHT             C38 the stored command has no id for the Gateway to admit it by
+CAUGHT             C38 the offline path assembles its own payload again
+
+3/3 caught
+
+### ['tests/test_session_transport_api.py', 'tests/test_van_hermes_session.py']
+CAUGHT             C36 the owner cancels a mission over the session and nothing happens
+CAUGHT             C36 a refused message keeps its idempotency key and the corrected resend is refused
+CAUGHT             C36 an envelope nobody can carry out is written into the admission table first
+CAUGHT             C36 the Gateway holds the message and tells the phone to send it again
+CAUGHT             C36 a new session is told it already holds the abandoned one's work
+CAUGHT             C36 a malformed command reads as a server fault and is retried forever
+
+6/6 caught
+
+### ['tests/test_owner_memory_has_a_producer.py']
+CAUGHT             C8 stop observing the goal
+CAUGHT             C8 ordinary use recorded as a decision
+CAUGHT             C8 infer a reason the owner never gave
+CAUGHT             C8 never record the decision outcome
+CAUGHT             C8 sweep the goals just mentioned
+CAUGHT             C8 drop the stale-intent sweep
+
+6/6 caught
+
+### ['tests/test_irreversible_work_waits_on_assumptions.py', 'tests/test_authority_descriptor.py']
+Traceback (most recent call last):
+  File "/home/runner/work/Van/Van/backend/../tools/audit/mutation_suite.py", line 1803, in <module>
+    raise SystemExit(main(args.selector, args.family, shard))
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/work/Van/Van/backend/../tools/audit/mutation_suite.py", line 1769, in main
+    survivors += run(mutations, tests, **options)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/work/Van/Van/tools/audit/mutation.py", line 93, in run
+    raise RuntimeError(
+RuntimeError: BASELINE_TESTS_FAILED (exit 1); no mutations executed
+......................................F..................                [100%]
+=================================== FAILURES ===================================
+_ TestEveryRegisteredActionHasOneDescriptor.test_a_mutating_action_has_a_decided_reversibility _
+
+self = <test_authority_descriptor.TestEveryRegisteredActionHasOneDescriptor object at 0x7fb3ea83ba40>
+
+    def test_a_mutating_action_has_a_decided_reversibility(self):
+        """UNDECLARED is the honest answer for something nobody has decided, and it must
+        not be where a mutating action quietly lands.
+    
+        The alternative — inferring reversibility from the action class — would be wrong in
+        both directions: an A3 note create is reversible and an A4 delete is not, and both
+        would be guessed the same way.
+        """
+        undecided = [
+            d.action_id for d in BUILTIN_ACTIONS
+            if d.mutates_state
+            and describe_action(d).reversibility is Reversibility.UNDECLARED
+        ]
+>       assert undecided == [], f"reversibility undecided for {undecided}"
+E       AssertionError: reversibility undecided for ['trading.alert.pause', 'trading.alert.restart', 'trading.alert.delete']
+E       assert ['trading.ale...alert.delete'] == []
+E         
+E         Left contains 3 more items, first extra item: 'trading.alert.pause'
+E         
+E         Full diff:
+E         - []
+E         + [
+E         +     'trading.alert.pause',
+E         +     'trading.alert.restart',
+E         +     'trading.alert.delete',
+E         + ]
+
+tests/test_authority_descriptor.py:151: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_authority_descriptor.py::TestEveryRegisteredActionHasOneDescriptor::test_a_mutating_action_has_a_decided_reversibility - AssertionError: reversibility undecided for ['trading.alert.pause', 'trading.alert.restart', 'trading.alert.delete']
+assert ['trading.ale...alert.delete'] == []
+  
+  Left contains 3 more items, first extra item: 'trading.alert.pause'
+  
+  Full diff:
+  - []
+  + [
+  +     'trading.alert.pause',
+  +     'trading.alert.restart',
+  +     'trading.alert.delete',
+  + ]
+1 failed, 56 passed in 16.17s
+

@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="3" skipped="0" tests="25" time="0.408" timestamp="2026-10-25T23:33:05.357439+00:00" hostname="2c5a245e39f1"><testcase classname="trading.tests.test_news_causal_boundaries" name="test_future_publication_or_observation_cannot_affect_an_earlier_subject[changes0]" time="0.125" /><testcase classname="trading.tests.test_news_causal_boundaries" name="test_future_publication_or_observation_cannot_affect_an_earlier_subject[changes1]" time="0.001" /><testcase classname="trading.tests.test_news_causal_boundaries" name="test_a_future_relay_cannot_enter_an_earlier_impact_evidence_set" time="0.002" /><testcase classname="trading.tests.test_news_causal_boundaries" name="test_a_feed_row_cannot_promote_its_own_source_trust[None-T1_PRIMARY-UNTRUSTED]" time="0.002" /><testcase classname="trading.tests.test_news_causal_boundaries" name="test_a_feed_row_cannot_promote_its_own_source_trust[T2_SECONDARY-T1_PRIMARY-T2_SECONDARY]" time="0.001" /><testcase classname="trading.tests.test_news_causal_boundaries" name="test_a_feed_row_cannot_promote_its_own_source_trust[T1_PRIMARY-UNTRUSTED-UNTRUSTED]" time="0.001" /><testcase classname="trading.tests.test_news_causal_boundaries" name="test_explicit_zero_milliseconds_is_not_replaced_by_another_time" time="0.001" /><testcase classname="trading.tests.test_news_causal_boundaries" name="test_an_invalid_floor_cannot_make_the_reduce_only_multiplier_exceed_its_contract[floor0]" time="0.001" /><testcase classname="trading.tests.test_news_causal_boundaries" name="test_an_invalid_floor_cannot_make_the_reduce_only_multiplier_exceed_its_contract[floor1]" time="0.001" /><testcase classname="trading.tests.test_news_causal_boundaries" name="test_an_invalid_floor_cannot_make_the_reduce_only_multiplier_exceed_its_contract[floor2]" time="0.001"><failure message="decimal.InvalidOperation: [&lt;class 'decimal.InvalidOperation'&gt;]">floor = Decimal('NaN')
+
+    @pytest.mark.parametrize('floor',[Decimal('-0.1'),Decimal('2'),Decimal('NaN')])
+    def test_an_invalid_floor_cannot_make_the_reduce_only_multiplier_exceed_its_contract(floor):
+&gt;       with pytest.raises(NewsIngressError):event_risk_multiplier_for(Decimal('1'),floor=floor)
+                                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+trading/tests/test_news_causal_boundaries.py:60: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+materiality = Decimal('1'), floor = Decimal('NaN')
+
+    def event_risk_multiplier_for(materiality: Decimal, *,
+                                  floor: Decimal = EVENT_MULTIPLIER_FLOOR) -&gt; Decimal:
+        """Materiality -&gt; a multiplier in [floor, 1]. Never above 1, by construction.
+    
+        This is the single function through which news reaches sizing, and it is
+        written as `1 - reduction` rather than as a lookup so that "news cannot
+        raise risk" is a property of the arithmetic rather than of a table somebody
+        might extend.
+        """
+        floor=_finite_decimal(floor,'event multiplier floor')
+&gt;       if not ZERO&lt;=floor&lt;=ONE:
+               ^^^^^^^^^^^^^^^^
+E       decimal.InvalidOperation: [&lt;class 'decimal.InvalidOperation'&gt;]
+
+trading/vati/events/news_ingress.py:300: InvalidOperation</failure></testcase><testcase classname="trading.tests.test_news_causal_boundaries" name="test_nonfinite_news_materiality_has_a_controlled_domain_error[value0]" time="0.001"><failure message="decimal.InvalidOperation: [&lt;class 'decimal.InvalidOperation'&gt;]">value = Decimal('NaN')
+
+    @pytest.mark.parametrize('value',[Decimal('NaN'),Decimal('Infinity')])
+    def test_nonfinite_news_materiality_has_a_controlled_domain_error(value):
+&gt;       with pytest.raises(NewsIngressError):event_risk_multiplier_for(value)
+                                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+trading/tests/test_news_causal_boundaries.py:65: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+materiality = Decimal('NaN'), floor = Decimal('0.25')
+
+    def event_risk_multiplier_for(materiality: Decimal, *,
+                                  floor: Decimal = EVENT_MULTIPLIER_FLOOR) -&gt; Decimal:
+        """Materiality -&gt; a multiplier in [floor, 1]. Never above 1, by construction.
+    
+        This is the single function through which news reaches sizing, and it is
+        written as `1 - reduction` rather than as a lookup so that "news cannot
+        raise risk" is a property of the arithmetic rather than of a table somebody
+        might extend.
+        """
+        floor=_finite_decimal(floor,'event multiplier floor')
+        if not ZERO&lt;=floor&lt;=ONE:
+            raise NewsIngressError('event multiplier floor is outside [0, 1]')
+&gt;       m = max(ZERO, min(ONE, _finite_decimal(materiality,'materiality')))
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       decimal.InvalidOperation: [&lt;class 'decimal.InvalidOperation'&gt;]
+
+trading/vati/events/news_ingress.py:302: InvalidOperation</failure></testcase><testcase classname="trading.tests.test_news_causal_boundaries" name="test_nonfinite_news_materiality_has_a_controlled_domain_error[value1]" time="0.002"><failure message="Failed: DID NOT RAISE NewsIngressError">value = Decimal('Infinity')
+
+    @pytest.mark.parametrize('value',[Decimal('NaN'),Decimal('Infinity')])
+    def test_nonfinite_news_materiality_has_a_controlled_domain_error(value):
+&gt;       with pytest.raises(NewsIngressError):event_risk_multiplier_for(value)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE NewsIngressError
+
+trading/tests/test_news_causal_boundaries.py:65: Failed</failure></testcase><testcase classname="trading.tests.test_news_causal_boundaries" name="test_same_subject_identifier_in_different_subject_kinds_keeps_distinct_impacts" time="0.001" /><testcase classname="trading.tests.test_news_causal_boundaries" name="test_available_original_story_keeps_reduce_only_sizing_and_its_reference" time="0.002" /><testcase classname="trading.tests.test_news_causal_boundaries" name="test_supplied_ingress_clock_prevents_a_backdated_claim_from_entering_earlier_decisions" time="0.001" /><testcase classname="trading.tests.test_news_causal_boundaries" name="test_a_backdated_relay_stays_out_of_evidence_before_its_supplied_ingress_clock" time="0.001" /><testcase classname="trading.tests.test_news_causal_boundaries" name="test_replaying_the_same_observation_cannot_move_its_original_ingress_clock_backwards" time="0.001" /><testcase classname="trading.tests.test_news_causal_boundaries" name="test_report_cutoff_does_not_count_unavailable_headlines_or_impacts" time="0.001" /><testcase classname="trading.tests.test_news_causal_boundaries" name="test_first_available_claim_keeps_its_terms_when_an_equal_time_relay_arrives" time="0.001" /><testcase classname="trading.tests.test_news_causal_boundaries" name="test_an_earlier_observation_is_available_even_if_the_future_original_was_loaded_first" time="0.001" /><testcase classname="trading.tests.test_news_causal_boundaries" name="test_news_rows_share_the_exact_explicit_calendar_time_boundary[2026-10-14T12:30:00]" time="0.001" /><testcase classname="trading.tests.test_news_causal_boundaries" name="test_news_rows_share_the_exact_explicit_calendar_time_boundary[2026-10-14T12:30:00.0000001Z]" time="0.001" /><testcase classname="trading.tests.test_news_causal_boundaries" name="test_typed_headlines_require_exact_signed_millisecond_clocks[True]" time="0.001" /><testcase classname="trading.tests.test_news_causal_boundaries" name="test_typed_headlines_require_exact_signed_millisecond_clocks[1.5]" time="0.001" /><testcase classname="trading.tests.test_news_causal_boundaries" name="test_typed_headlines_require_exact_signed_millisecond_clocks[-9223372036854775809]" time="0.001" /></testsuite></testsuites>

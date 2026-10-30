@@ -1,0 +1,64 @@
+............FFFF.......                                                  [100%]
+=================================== FAILURES ===================================
+_ test_worker_cannot_claim_isolation_from_configuration_strings_alone[change2] _
+
+change = {'memory.max': 'max'}
+
+    @pytest.mark.parametrize('change',[{'cpu.max':'max 100000'},{'cpu.max':'300000 100000'},
+        {'memory.max':'max'},{'memory.max':str(7*1024**3)},{'pids.max':'max'},{'pids.max':'257'},
+        {'cpu.max':'0 100000'},{'cpu.max':'200000 0'}])
+    def test_worker_cannot_claim_isolation_from_configuration_strings_alone(change):
+        observed={'cpu.max':'200000 100000','memory.max':str(6*1024**3),'pids.max':'256'} | change
+>       with pytest.raises(WorkerBoundaryError):require_kernel_limits(WorkerBudget(),observed)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE WorkerBoundaryError
+
+trading/tests/test_forecast_worker_policy.py:45: Failed
+_ test_worker_cannot_claim_isolation_from_configuration_strings_alone[change3] _
+
+change = {'memory.max': '7516192768'}
+
+    @pytest.mark.parametrize('change',[{'cpu.max':'max 100000'},{'cpu.max':'300000 100000'},
+        {'memory.max':'max'},{'memory.max':str(7*1024**3)},{'pids.max':'max'},{'pids.max':'257'},
+        {'cpu.max':'0 100000'},{'cpu.max':'200000 0'}])
+    def test_worker_cannot_claim_isolation_from_configuration_strings_alone(change):
+        observed={'cpu.max':'200000 100000','memory.max':str(6*1024**3),'pids.max':'256'} | change
+>       with pytest.raises(WorkerBoundaryError):require_kernel_limits(WorkerBudget(),observed)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE WorkerBoundaryError
+
+trading/tests/test_forecast_worker_policy.py:45: Failed
+_ test_worker_cannot_claim_isolation_from_configuration_strings_alone[change4] _
+
+change = {'pids.max': 'max'}
+
+    @pytest.mark.parametrize('change',[{'cpu.max':'max 100000'},{'cpu.max':'300000 100000'},
+        {'memory.max':'max'},{'memory.max':str(7*1024**3)},{'pids.max':'max'},{'pids.max':'257'},
+        {'cpu.max':'0 100000'},{'cpu.max':'200000 0'}])
+    def test_worker_cannot_claim_isolation_from_configuration_strings_alone(change):
+        observed={'cpu.max':'200000 100000','memory.max':str(6*1024**3),'pids.max':'256'} | change
+>       with pytest.raises(WorkerBoundaryError):require_kernel_limits(WorkerBudget(),observed)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE WorkerBoundaryError
+
+trading/tests/test_forecast_worker_policy.py:45: Failed
+_ test_worker_cannot_claim_isolation_from_configuration_strings_alone[change5] _
+
+change = {'pids.max': '257'}
+
+    @pytest.mark.parametrize('change',[{'cpu.max':'max 100000'},{'cpu.max':'300000 100000'},
+        {'memory.max':'max'},{'memory.max':str(7*1024**3)},{'pids.max':'max'},{'pids.max':'257'},
+        {'cpu.max':'0 100000'},{'cpu.max':'200000 0'}])
+    def test_worker_cannot_claim_isolation_from_configuration_strings_alone(change):
+        observed={'cpu.max':'200000 100000','memory.max':str(6*1024**3),'pids.max':'256'} | change
+>       with pytest.raises(WorkerBoundaryError):require_kernel_limits(WorkerBudget(),observed)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE WorkerBoundaryError
+
+trading/tests/test_forecast_worker_policy.py:45: Failed
+=========================== short test summary info ============================
+FAILED trading/tests/test_forecast_worker_policy.py::test_worker_cannot_claim_isolation_from_configuration_strings_alone[change2]
+FAILED trading/tests/test_forecast_worker_policy.py::test_worker_cannot_claim_isolation_from_configuration_strings_alone[change3]
+FAILED trading/tests/test_forecast_worker_policy.py::test_worker_cannot_claim_isolation_from_configuration_strings_alone[change4]
+FAILED trading/tests/test_forecast_worker_policy.py::test_worker_cannot_claim_isolation_from_configuration_strings_alone[change5]
+4 failed, 19 passed in 0.38s

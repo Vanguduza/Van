@@ -1,0 +1,16 @@
+{
+  "base_head": "4ef8fcf2e8dc6ccb4592c69a91a49b51676f5733",
+  "source_state": "UNCOMMITTED_NATIVE_FEED_CANDIDATE",
+  "container": "van-native-feed-pg-20261025",
+  "image": "postgres:17.11-bookworm@sha256:858bb5e98eed02eb8cafbcdc007f9a65d1b613972028944a8ec2133ccaf80d27",
+  "completed": true,
+  "cleaned": true,
+  "source_sha256": {
+    "trading/vati/execution/ctrader/feed.py": "435416c631599e05c55b9162633c8bad43e47547a8ad446963031c261a9410ee",
+    "trading/vati/execution/ctrader/adapter.py": "0d04755e8b657bfa6aa30f4b2c8d42f445b6a81c9dec690bf1b642fbc4246169",
+    "trading/tests/test_ctrader.py": "2b8ad6ff95187b78e59666029c68c5f82e40945d5fe200695c0605927aeade19",
+    "trading/tests/test_ctrader_feed_contract.py": "3613df8b1b4a978cdc5ba942b3c0289931a73cd32e9866148cc5afcdc8f1cfff"
+  },
+  "container_id": "e70fa055a193dcbc6d0270dc27a09b009390f27ad7d5f3fe1b7e979ddae9c17d",
+  "exit": 1
+}

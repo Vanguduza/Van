@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.dial.van.browser.BrowserControlMutationTest" tests="16" skipped="0" failures="0" errors="0" timestamp="2026-10-08T04:57:37" hostname="052fefa249ff" time="0.057">
+  <properties/>
+  <testcase name="take control changes authority only after matching receipt and readback()" classname="com.dial.van.browser.BrowserControlMutationTest" time="0.019"/>
+  <testcase name="refused take control retains latest confirmed state without readback or retry()" classname="com.dial.van.browser.BrowserControlMutationTest" time="0.004"/>
+  <testcase name="cancelled request retains confirmed authority with unknown outcome and input held()" classname="com.dial.van.browser.BrowserControlMutationTest" time="0.001"/>
+  <testcase name="repeated concurrent taps admit one unkeyed control mutation and old completion cannot clear a new one()" classname="com.dial.van.browser.BrowserControlMutationTest" time="0.003"/>
+  <testcase name="rendered viewport acknowledgment requires exact peer frame proof and independent usable state()" classname="com.dial.van.browser.BrowserControlMutationTest" time="0.004"/>
+  <testcase name="cancellation propagates through controls and shared result capture()" classname="com.dial.van.browser.BrowserControlMutationTest" time="0.003"/>
+  <testcase name="lost handoff readback is unknown and mutation is not retried()" classname="com.dial.van.browser.BrowserControlMutationTest" time="0.002"/>
+  <testcase name="control receipt cannot certify another holder session lease or old generation()" classname="com.dial.van.browser.BrowserControlMutationTest" time="0.002"/>
+  <testcase name="viewport acknowledgement opens the input gate only for exact session revision receipt()" classname="com.dial.van.browser.BrowserControlMutationTest" time="0.003"/>
+  <testcase name="delegation requires confirmed owner session with existing linked mission()" classname="com.dial.van.browser.BrowserControlMutationTest" time="0.002"/>
+  <testcase name="control requests require current agent state and hold while pending or uncertain()" classname="com.dial.van.browser.BrowserControlMutationTest" time="0.0"/>
+  <testcase name="delegation confirms exact agent lease mission and generation before replacing authority()" classname="com.dial.van.browser.BrowserControlMutationTest" time="0.001"/>
+  <testcase name="resume requires renewed owner lease generation and independent readback()" classname="com.dial.van.browser.BrowserControlMutationTest" time="0.002"/>
+  <testcase name="pause and close require the same session and their observed states()" classname="com.dial.van.browser.BrowserControlMutationTest" time="0.002"/>
+  <testcase name="late heartbeat cannot replace newer confirmed control or viewport identity()" classname="com.dial.van.browser.BrowserControlMutationTest" time="0.001"/>
+  <testcase name="lost mutation reply and lost confirmation read stay unknown with one mutation attempt()" classname="com.dial.van.browser.BrowserControlMutationTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

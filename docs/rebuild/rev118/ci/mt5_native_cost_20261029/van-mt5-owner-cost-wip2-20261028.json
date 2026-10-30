@@ -1,0 +1,15 @@
+{
+  "path": "/workspace/van-mt5-owner-cost-wip2-20261028.zip",
+  "bytes": 38936,
+  "sha256": "d28e1e44195c6d6996aecb124f8c423e58b237473315392223093e182e751de0",
+  "manifest": {
+    "source_parent": "457205e3ac3c73f115a7bf7134b33c98bd905f12",
+    "files": {
+      "trading/tests/test_mt5_owner_cost_knowledge.py": "20abf1b1ffc1ee370a6395ce556e7bb99654aacf92e5f6a8a49f8a0d96ecdc3e",
+      "trading/tests/test_mt5_owner_cost_knowledge_postgres.py": "b779ea011e38752ef13991bb638a6767cb93d6c13a2410643e5e7f63b15223a7",
+      "trading/vati/app/trade_lifecycle.py": "1fd94f81c655258e53c9cb4c5b873825461362616b7a0f09046c0bbd7113548d",
+      "trading/vati/execution/mt5_bridge.py": "559b863a0de68cf31502dcf518d4d4bdad89a36671558e015081078e32a63c1d",
+      "trading/vati/execution/mt5_pull.py": "cdf9bb022391b52dbc1bc6b436542a0dab5a3126ba9e7463241ce26832f1c097"
+    }
+  }
+}

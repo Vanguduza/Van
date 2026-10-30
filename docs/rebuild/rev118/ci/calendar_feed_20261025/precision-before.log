@@ -1,0 +1,76 @@
+..FFFF                                                                   [100%]
+=================================== FAILURES ===================================
+_ test_sub_millisecond_time_is_not_silently_made_available_earlier[2026-10-14T12:30:00.0000001Z-_parse_ms0] _
+
+parser = <function _parse_ms at 0x7f2a4d662e80>
+timestamp = '2026-10-14T12:30:00.0000001Z'
+
+    @pytest.mark.parametrize('parser',[_parse_ms,recorder._parse_ms])
+    @pytest.mark.parametrize('timestamp',[
+        '2026-10-14T12:30:00.123001Z',
+        '2026-10-14T12:30:00.0000001Z',
+        '2026-10-14T12:30:00.1230000000000001Z',
+    ])
+    def test_sub_millisecond_time_is_not_silently_made_available_earlier(parser,timestamp):
+>       with pytest.raises(ValueError):parser(timestamp)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+trading/tests/test_calendar_feed_boundaries.py:34: Failed
+_ test_sub_millisecond_time_is_not_silently_made_available_earlier[2026-10-14T12:30:00.0000001Z-_parse_ms1] _
+
+parser = <function _parse_ms at 0x7f2a4d59d4e0>
+timestamp = '2026-10-14T12:30:00.0000001Z'
+
+    @pytest.mark.parametrize('parser',[_parse_ms,recorder._parse_ms])
+    @pytest.mark.parametrize('timestamp',[
+        '2026-10-14T12:30:00.123001Z',
+        '2026-10-14T12:30:00.0000001Z',
+        '2026-10-14T12:30:00.1230000000000001Z',
+    ])
+    def test_sub_millisecond_time_is_not_silently_made_available_earlier(parser,timestamp):
+>       with pytest.raises(ValueError):parser(timestamp)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+trading/tests/test_calendar_feed_boundaries.py:34: Failed
+_ test_sub_millisecond_time_is_not_silently_made_available_earlier[2026-10-14T12:30:00.1230000000000001Z-_parse_ms0] _
+
+parser = <function _parse_ms at 0x7f2a4d662e80>
+timestamp = '2026-10-14T12:30:00.1230000000000001Z'
+
+    @pytest.mark.parametrize('parser',[_parse_ms,recorder._parse_ms])
+    @pytest.mark.parametrize('timestamp',[
+        '2026-10-14T12:30:00.123001Z',
+        '2026-10-14T12:30:00.0000001Z',
+        '2026-10-14T12:30:00.1230000000000001Z',
+    ])
+    def test_sub_millisecond_time_is_not_silently_made_available_earlier(parser,timestamp):
+>       with pytest.raises(ValueError):parser(timestamp)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+trading/tests/test_calendar_feed_boundaries.py:34: Failed
+_ test_sub_millisecond_time_is_not_silently_made_available_earlier[2026-10-14T12:30:00.1230000000000001Z-_parse_ms1] _
+
+parser = <function _parse_ms at 0x7f2a4d59d4e0>
+timestamp = '2026-10-14T12:30:00.1230000000000001Z'
+
+    @pytest.mark.parametrize('parser',[_parse_ms,recorder._parse_ms])
+    @pytest.mark.parametrize('timestamp',[
+        '2026-10-14T12:30:00.123001Z',
+        '2026-10-14T12:30:00.0000001Z',
+        '2026-10-14T12:30:00.1230000000000001Z',
+    ])
+    def test_sub_millisecond_time_is_not_silently_made_available_earlier(parser,timestamp):
+>       with pytest.raises(ValueError):parser(timestamp)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+trading/tests/test_calendar_feed_boundaries.py:34: Failed
+=========================== short test summary info ============================
+FAILED trading/tests/test_calendar_feed_boundaries.py::test_sub_millisecond_time_is_not_silently_made_available_earlier[2026-10-14T12:30:00.0000001Z-_parse_ms0]
+FAILED trading/tests/test_calendar_feed_boundaries.py::test_sub_millisecond_time_is_not_silently_made_available_earlier[2026-10-14T12:30:00.0000001Z-_parse_ms1]
+FAILED trading/tests/test_calendar_feed_boundaries.py::test_sub_millisecond_time_is_not_silently_made_available_earlier[2026-10-14T12:30:00.1230000000000001Z-_parse_ms0]
+FAILED trading/tests/test_calendar_feed_boundaries.py::test_sub_millisecond_time_is_not_silently_made_available_earlier[2026-10-14T12:30:00.1230000000000001Z-_parse_ms1]
+4 failed, 2 passed, 18 deselected in 0.31s

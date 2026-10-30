@@ -9,8 +9,9 @@ import pytest
 from fastapi.testclient import TestClient
 
 from conftest_owner_authority import OwnerAuthorityHarness
-from commander.accounts import ACCOUNT_COMMANDS
+from commander.accounts import ACCOUNT_COMMANDS, ACCOUNT_MUTATIONS
 from commander.strategies import PROMOTION_COMMANDS
+from commander.runtime_controls import RUNTIME_COMMANDS
 from commander.app import AGENT_HIDDEN_COMMANDS, COMMANDS, CommanderSettings, create_app, redact
 from commander.auth import HDR_NONCE, HDR_SIG, HDR_TS, NonceCache, sign_headers, verify_request
 from vati.core import EventKind, Ledger, make_event
@@ -58,7 +59,31 @@ def env(tmp_path):
 def post(client, name, args=None, token=TOKEN, headers=None):
     # P1-HER-005 — `requested_by` is no longer the caller's to declare, so it is omitted;
     # the commander fills it from whichever token signed the request.
-    body = json.dumps({"args": args or {}}).encode()
+    args = dict(args or {})
+    # Follow the real producer's native version read; this is a CAS precondition,
+    # not owner approval. Authentication/forged-body tests keep their own bytes.
+    if name in ACCOUNT_MUTATIONS and headers is None:
+        observed = post(client, "account_revision", {"alias": args.get("alias")}, token=token)
+        if observed.status_code == 200:
+            args["_expected_resource_version"] = observed.json()["result"]["resource_version"]
+            from commander.account_effects import JOURNALED_COMMANDS
+            from vati.core.canonical import canonical_hash
+            import secrets
+            if name in JOURNALED_COMMANDS and "_native_operation" not in args:
+                # This harness IS the signed gateway principal. Real paired
+                # device/biometric proof production is checked in gateway tests.
+                args["_native_operation"] = {"operation_id": secrets.token_urlsafe(24),
+                    "device_id": "source-test-owner", "authority_ref": "source-test-consumed-approval",
+                    "request_digest": canonical_hash({k:v for k,v in args.items() if not k.startswith('_')}),
+                    "expires_at_unix": int(time.time()) + 60}
+            if name in {'account_upsert', 'account_remove'}:
+                review = post(client,'account_review',{'action':name,'args':{k:v for k,v in args.items() if not k.startswith('_')}},token=token)
+                if review.status_code != 200:
+                    return review
+                digest=review.json()['result']['review_digest']
+                args['_expected_review_digest']=digest
+                args['_native_operation']['authority_ref']+='::review:'+digest
+    body = json.dumps({"args": args}).encode()
     h = headers or sign_headers(token, "POST", f"/v1/cmd/{name}", body)
     return client.post(f"/v1/cmd/{name}", content=body, headers={**h, "content-type": "application/json"})
 
@@ -179,7 +204,25 @@ def two_principal_env(tmp_path):
 
 
 def _call(client, name, token, args=None, requested_by=None):
-    payload = {"args": args or {}}
+    args = dict(args or {})
+    if name in ACCOUNT_MUTATIONS and token == GATEWAY_TOKEN:
+        snapshot = _call(client, "account_revision", token, {"alias": args.get("alias")})
+        assert snapshot.status_code == 200, snapshot.text
+        args["_expected_resource_version"] = snapshot.json()["result"]["resource_version"]
+        from commander.account_effects import JOURNALED_COMMANDS
+        from vati.core.canonical import canonical_hash
+        import secrets
+        if name in JOURNALED_COMMANDS:
+            args["_native_operation"] = {"operation_id":secrets.token_urlsafe(24),"device_id":"source-test-owner",
+                "authority_ref":"source-test-consumed-approval","expires_at_unix":int(time.time())+60,
+                "request_digest":canonical_hash({k:v for k,v in args.items() if not k.startswith('_')})}
+        if name in {'account_upsert', 'account_remove'}:
+            review=_call(client,'account_review',token,{'action':name,'args':{k:v for k,v in args.items() if not k.startswith('_')}})
+            assert review.status_code==200,review.text
+            digest=review.json()['result']['review_digest']
+            args['_expected_review_digest']=digest
+            args['_native_operation']['authority_ref']+='::review:'+digest
+    payload = {"args": args}
     if requested_by is not None:
         payload["requested_by"] = requested_by
     body = json.dumps(payload).encode()
@@ -195,8 +238,8 @@ def test_credential_commands_are_hidden_from_agents_but_open_to_the_gateway(env)
     r = client.get("/v1/tools", headers=sign_headers(TOKEN, "GET", "/v1/tools", b""))
     assert r.status_code == 200
     listed = {t["name"] for t in r.json()["tools"]}
-    assert listed.isdisjoint(ACCOUNT_COMMANDS + PROMOTION_COMMANDS) and "status" in listed and "accounts" in listed
-    assert AGENT_HIDDEN_COMMANDS == set(ACCOUNT_COMMANDS + PROMOTION_COMMANDS)
+    assert listed.isdisjoint(ACCOUNT_COMMANDS + PROMOTION_COMMANDS + RUNTIME_COMMANDS) and "status" in listed and "accounts" in listed
+    assert AGENT_HIDDEN_COMMANDS == set(ACCOUNT_COMMANDS + PROMOTION_COMMANDS + RUNTIME_COMMANDS)
 
 
 def test_requested_by_is_not_the_callers_to_declare(two_principal_env):
@@ -307,3 +350,14 @@ def test_the_observation_commands_are_described_for_the_tool_surface(env):
         schema = TOOL_SCHEMAS[name]
         assert "Read-only" in schema["description"]
         assert "properties" in schema
+
+
+@pytest.mark.parametrize('expected',[None,'not-a-native-version'])
+def test_native_http_account_writer_requires_an_exact_resource_version(two_principal_env,expected):
+    client=two_principal_env
+    args={'alias':'paper_lab','broker':'PAPER'}
+    if expected is not None:args['_expected_resource_version']=expected
+    body=json.dumps({'args':args}).encode()
+    response=client.post('/v1/cmd/account_upsert',content=body,
+        headers={**sign_headers(GATEWAY_TOKEN,'POST','/v1/cmd/account_upsert',body),'content-type':'application/json'})
+    assert response.status_code==409,response.text

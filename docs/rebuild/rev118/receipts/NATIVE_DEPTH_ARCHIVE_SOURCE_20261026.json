@@ -1,0 +1,38 @@
+{
+  "schema": "van.rebuild.native-depth-archive/1",
+  "base_head": "0c1344f5f0b3c6cfb5cf437f80234d36812fd94e",
+  "updated_at_utc": "2026-10-26T21:26:10.061482+00:00",
+  "unit": "BE-008",
+  "status": "SOURCE_TESTED_COMPONENT_NOT_UNIT_NATIVE_OR_PRODUCTION_ACCEPTANCE",
+  "acceptance": "NOT_ISSUED",
+  "source_sha256": {
+    "trading/vati/market_data/native_depth.py": "0ee15738cfb7ff8705ee5feee1f0b08e9808d0ed0f6b7df06f4337805a447409",
+    "trading/tests/test_native_depth_archive.py": "b4b4ac48ddfc69e2bc9b311643aad5791e797d6850e0d0a0cd7afdfe80738b1e"
+  },
+  "implementation": "Existing NativeMarketArchive owner/DEPTH partition, bounded canonical capture validation, exact original native integers and cent amounts, policy/contract-bound original request replay, immutable revision/as-of reads, original-record/index-ack recovery, isolated reader closure before capacity/readback/publication and corruption refusal without recapture. No alternate archive commit protocol or grant owner.",
+  "actual_tests": {
+    "initial": 42,
+    "focused_depth_quote_archive_collectors": 175,
+    "new_cases": 48,
+    "final_actual_SQLite_Postgres": 786,
+    "skips": 0,
+    "audit_violations": 0,
+    "runtime_test_hashes_verified": 494,
+    "owned_fixture_independently_absent": true,
+    "supplemental_assertion_faults_caught": 6,
+    "positive_and_restored_controls": 48,
+    "supplemental_source_exactly_restored": true,
+    "rebuild_workflow_T0_boundary": 122,
+    "counts_overlap": true,
+    "actual_recovery": "Child process commits original record then exits before index publication; cold owner independently reads/reconciles original without native recapture. Separate lost-head-ACK and parallel original-collection tests retain one original revision/read."
+  },
+  "canonical_checks": {
+    "owner_frontend_drift": false,
+    "registry_cases": 374,
+    "registry_edits": 383,
+    "registry_validation_is_execution": false
+  },
+  "qualification": "Historical partial-depth source only. Validation is format/consistency, not broker-origin/entitlement, price-scale, native time/sequence/completeness, liquidity, authority or native/unit/production/economic/S24 acceptance. No endpoint or frontend activation.",
+  "remaining": "Verified depth price semantics, provider continuity/health/rights, service/existing-screen consumption and all remaining BE008/backend/ML/assistant/financial and Android obligations.",
+  "evidence": "ci/native_depth_archive_20261026"
+}

@@ -1,0 +1,79 @@
+............................F.......                                     [100%]
+=================================== FAILURES ===================================
+_ test_exact_cost_claim_cannot_be_laundered_through_an_artifact[TRADE_EXPERIENCE_ARTIFACT] _
+
+kind = 'TRADE_EXPERIENCE_ARTIFACT'
+
+    @pytest.mark.parametrize('kind',['TCA_RECORD','TRADE_EXPERIENCE_ARTIFACT'])
+    def test_exact_cost_claim_cannot_be_laundered_through_an_artifact(kind):
+        from vati.core import EventKind,make_event
+        from vati.learning.evidence import EvidenceRecord,EvidenceClass,EvidenceError
+        from vati.learning import Environment
+        r=original();body=compute_tca(r,direction=Direction.LONG,qty=r.filled_qty,value_per_unit=D('100000'),modelled_cost_pct=D('0.01')).as_dict()
+        body['implementation_shortfall']='999'
+        if kind=='TRADE_EXPERIENCE_ARTIFACT':
+            body={'execution':{'tca':body},'environment':'DEMO'}
+        else:body['learning_environment']='DEMO'
+        event=make_event(EventKind(kind),'vati-account-lifecycle',body,event_time_ms=1001,received_time_ms=1001,correlation_id=r.trade_intent_id)
+        with pytest.raises(EvidenceError,match='exact arithmetic'):
+>           EvidenceRecord.from_content(EvidenceClass(kind),event.body(),session_environment=Environment.DEMO)
+                                        ^^^^^^^^^^^^^^^^^^^
+
+trading/tests/test_tca_exact_arithmetic.py:134: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/enum.py:751: in __call__
+    return cls.__new__(cls, value)
+           ^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+cls = <enum 'EvidenceClass'>, value = 'TRADE_EXPERIENCE_ARTIFACT'
+
+    def __new__(cls, value):
+        # all enum instances are actually created during class construction
+        # without calling this method; this method is called by the metaclass'
+        # __call__ (i.e. Color(3) ), and by pickle
+        if type(value) is cls:
+            # For lookups like Color(Color.RED)
+            return value
+        # by-value search for a matching enum member
+        # see if it's in the reverse mapping (for hashable values)
+        try:
+            return cls._value2member_map_[value]
+        except KeyError:
+            # Not found, no need to do long O(n) search
+            pass
+        except TypeError:
+            # not there, now do long search -- O(n) behavior
+            for member in cls._member_map_.values():
+                if member._value_ == value:
+                    return member
+        # still not found -- verify that members exist, in-case somebody got here mistakenly
+        # (such as via super when trying to override __new__)
+        if not cls._member_map_:
+            raise TypeError("%r has no members defined" % cls)
+        #
+        # still not found -- try _missing_ hook
+        try:
+            exc = None
+            result = cls._missing_(value)
+        except Exception as e:
+            exc = e
+            result = None
+        try:
+            if isinstance(result, cls):
+                return result
+            elif (
+                    Flag is not None and issubclass(cls, Flag)
+                    and cls._boundary_ is EJECT and isinstance(result, int)
+                ):
+                return result
+            else:
+                ve_exc = ValueError("%r is not a valid %s" % (value, cls.__qualname__))
+                if result is None and exc is None:
+>                   raise ve_exc
+E                   ValueError: 'TRADE_EXPERIENCE_ARTIFACT' is not a valid EvidenceClass
+
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/enum.py:1170: ValueError
+=========================== short test summary info ============================
+FAILED trading/tests/test_tca_exact_arithmetic.py::test_exact_cost_claim_cannot_be_laundered_through_an_artifact[TRADE_EXPERIENCE_ARTIFACT]
+1 failed, 35 passed in 0.88s

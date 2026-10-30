@@ -1,0 +1,15 @@
+{
+  "head": "3732798104c476680cac8e22f833f2ed764d77e2",
+  "workflow_run": 40692934675,
+  "job": 122832127397,
+  "observed_at": "2026-10-28T13:41:18.119982+00:00",
+  "log_sha256": "4bff22118a4876765d1dbe6e399039328af65cc7b18f55bdfa7d7da089d3098d",
+  "log_reported": {
+    "trading_passed": 4987,
+    "private_DDS_declared_skips": 1,
+    "postgres_passed": 26,
+    "voice_passed": 117
+  },
+  "original_JUnit_archive_verified": false,
+  "archive_failure": "Supported ZIP download returned695-byte JSON metadata rather than192716-byte GitHub artifact; rejected. Repeated supported request same. Direct approved archive endpoint403. No ZIP integrity or JUnit readback claimed."
+}

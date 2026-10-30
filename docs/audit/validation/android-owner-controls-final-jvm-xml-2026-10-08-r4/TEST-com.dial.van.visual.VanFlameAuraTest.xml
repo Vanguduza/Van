@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.dial.van.visual.VanFlameAuraTest" tests="16" skipped="0" failures="0" errors="0" timestamp="2026-10-08T06:59:33" hostname="052fefa249ff" time="0.062">
+  <properties/>
+  <testcase name="flame fragments break off and rise above the envelope()" classname="com.dial.van.visual.VanFlameAuraTest" time="0.002"/>
+  <testcase name="the silhouette is Candidate B's compact build()" classname="com.dial.van.visual.VanFlameAuraTest" time="0.0"/>
+  <testcase name="embers rise off a busy aura and a static budget draws none()" classname="com.dial.van.visual.VanFlameAuraTest" time="0.002"/>
+  <testcase name="the outer flame carries the state colour and the core runs white-hot()" classname="com.dial.van.visual.VanFlameAuraTest" time="0.001"/>
+  <testcase name="no tongue escapes the aura envelope reach()" classname="com.dial.van.visual.VanFlameAuraTest" time="0.02"/>
+  <testcase name="the envelope wraps the silhouette without covering it()" classname="com.dial.van.visual.VanFlameAuraTest" time="0.003"/>
+  <testcase name="a working VAN flares and a sleeping one smoulders()" classname="com.dial.van.visual.VanFlameAuraTest" time="0.006"/>
+  <testcase name="the flame plan is deterministic()" classname="com.dial.van.visual.VanFlameAuraTest" time="0.001"/>
+  <testcase name="flames rise above the head()" classname="com.dial.van.visual.VanFlameAuraTest" time="0.002"/>
+  <testcase name="every state that has an aura has a flame envelope()" classname="com.dial.van.visual.VanFlameAuraTest" time="0.009"/>
+  <testcase name="a pulse expands and whitens the fire()" classname="com.dial.van.visual.VanFlameAuraTest" time="0.001"/>
+  <testcase name="the slow clock changes the fire while the fast loop stays seamless()" classname="com.dial.van.visual.VanFlameAuraTest" time="0.003"/>
+  <testcase name="the rim lights VAN's edge and never bridges a gap across the background()" classname="com.dial.van.visual.VanFlameAuraTest" time="0.001"/>
+  <testcase name="the fire moves with the phase and loops without a jump()" classname="com.dial.van.visual.VanFlameAuraTest" time="0.003"/>
+  <testcase name="a live alpha mask drives the flames()" classname="com.dial.van.visual.VanFlameAuraTest" time="0.004"/>
+  <testcase name="front wisps cross the lower body only, never the face, and stay translucent()" classname="com.dial.van.visual.VanFlameAuraTest" time="0.003"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

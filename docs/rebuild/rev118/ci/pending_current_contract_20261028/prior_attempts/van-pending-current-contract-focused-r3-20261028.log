@@ -1,0 +1,167 @@
+..FF.................................................................... [ 73%]
+..........................                                               [100%]
+=================================== FAILURES ===================================
+_ test_actual_native_owner_revalues_pending_loss_with_higher_current_contract[limits1-PORTFOLIO_HEAT-single] _
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-73/test_actual_native_owner_reval2')
+eurusd = SymbolContract(symbol='EURUSD', venue='mt5', base_currency='EUR', quote_currency='USD', account_currency='USD', contra...=Decimal('0'), max_adv_participation=Decimal('0.10'), liquidity_haircut=Decimal('0'), round_trip_cost_pct=Decimal('0'))
+kind = 'single'
+limits = {'max_open_stop_risk': '0.010', 'max_currency_leg_exposure': '0.5'}
+expected = 'PORTFOLIO_HEAT'
+
+    @pytest.mark.parametrize('kind',['single','account'])
+    @pytest.mark.parametrize('limits,expected',[
+        ({'max_open_stop_risk':'0.012'},'CURRENCY_LEG_EXPOSURE'),
+        ({'max_open_stop_risk':'0.010','max_currency_leg_exposure':'0.5'},'PORTFOLIO_HEAT'),
+    ])
+    def test_actual_native_owner_revalues_pending_loss_with_higher_current_contract(tmp_path,eurusd,kind,limits,expected):
+        ledger,adapter,account,_,original=native_facts(tmp_path,eurusd)
+        _,first=command(ledger,original,'before-contract-change');receipt(ledger,first,status='ACCEPTED')
+        b=other_context(ledger,adapter,account,original,alias='second_alias')
+        current=replace(account,account_alias=b.account_alias,
+            funding_mark=replace(account.funding_mark,account_alias=b.account_alias),
+            used_margin=D(0),free_margin=account.equity,margin_level_pct=None)
+        # Existing risk owner receives a changed current contract for this symbol;
+        # no broker, native conversion or external account qualification is claimed.
+        terms=replace(eurusd,tick_value=eurusd.tick_value*2)
+        b=replace(b,symbol_contract=terms)
+        owner=producer(kind,ledger,adapter,current,b);now=NOW*1000+100
+        if kind=='single':facts=owner.snapshot(now_ms=now,quote_age_ms=0,strategy_id=intent().strategy_id)
+        else:
+            owner.clock=lambda:now
+            facts=owner._snapshot_for(N(symbol='EURUSD',strategy_id=intent().strategy_id))
+        assert facts.symbol_contract.tick_value==terms.tick_value
+        assert facts.reconciliation_ok and not facts.preservation_blocks_new_risk and not facts.open_positions
+>       grant=TradingMandate.from_mapping(mandate_dict(account_alias=b.account_alias,
+            max_positions_per_instrument=10,max_total_positions=20,**limits))
+
+trading/tests/test_pending_current_contract.py:38: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+trading/vati/risk/mandate.py:296: in from_mapping
+    m.validate(ceilings)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = TradingMandate(mandate_id='mandate-fx-primary', version='1.0.0', account_alias='second_alias', venue='mt5', mode=<Auth...se)), strategy_risk_budgets={}, trading_temperament=None, strategy_temperaments={}, temperament_owner_signature_ref='')
+ceilings = PlatformCeilings(max_risk_per_trade=Decimal('0.0200'), max_open_stop_risk=Decimal('0.0600'), max_daily_loss=Decimal('0...max_weekly_drawdown=Decimal('0.1000'), max_currency_leg_exposure=Decimal('0.0400'), policy_version='risk-policy/2.0.0')
+
+    def validate(self, ceilings: PlatformCeilings) -> None:
+        _boolean(self.weekend_hold_allowed,'weekend_hold_allowed')
+        for tier in self.drawdown_tiers:
+            _boolean(tier.top_tier_only,'drawdown_tier.top_tier_only')
+        if self.temperament_enabled and not self.temperament_owner_signature_ref.startswith("owner-authority:"):
+            raise MandateError("owner-verified temperament grant reference required")
+        if not self.temperament_enabled and self.temperament_owner_signature_ref:
+            raise MandateError("unexpected temperament owner grant without a profile")
+        if self.trading_temperament is not None and not isinstance(self.trading_temperament, TradingTemperament):
+            raise MandateError("invalid trading_temperament")
+        for sid, profile in self.strategy_temperaments.items():
+            if sid not in self.allowed_strategies:
+                raise MandateError(f"trading temperament for unapproved strategy {sid}")
+            if not isinstance(profile, TradingTemperament):
+                raise MandateError(f"invalid strategy temperament for {sid}")
+        if self.tier1_event_policy not in ("flat", "strategy_specific"):
+            raise MandateError(f"tier1_event_policy must be flat|strategy_specific, got {self.tier1_event_policy!r}")
+        if self.max_consecutive_losses < 1 or self.max_positions_per_instrument < 1 or self.max_total_positions < 1:
+            raise MandateError("count limits must be >= 1")
+        if self.expires_at_unix <= self.signed_at_unix:
+            raise MandateError("mandate expires before it is signed")
+        if self.max_risk_per_trade > self.max_open_stop_risk:
+            raise MandateError("max_risk_per_trade cannot exceed max_open_stop_risk")
+        checks = (
+            ("max_risk_per_trade", self.max_risk_per_trade, ceilings.max_risk_per_trade),
+            ("max_open_stop_risk", self.max_open_stop_risk, ceilings.max_open_stop_risk),
+            ("max_daily_loss", self.max_daily_loss, ceilings.max_daily_loss),
+            ("max_weekly_drawdown", self.max_weekly_drawdown, ceilings.max_weekly_drawdown),
+            ("max_currency_leg_exposure", self.max_currency_leg_exposure, ceilings.max_currency_leg_exposure),
+        )
+        self._validate_budgets(ceilings)
+        for name, value, ceiling in checks:
+            if value > ceiling:
+>               raise MandateError(f"{name}={value} exceeds platform ceiling {ceiling} ({ceilings.policy_version})")
+E               vati.risk.mandate.MandateError: max_currency_leg_exposure=0.5 exceeds platform ceiling 0.0400 (risk-policy/2.0.0)
+
+trading/vati/risk/mandate.py:347: MandateError
+_ test_actual_native_owner_revalues_pending_loss_with_higher_current_contract[limits1-PORTFOLIO_HEAT-account] _
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-73/test_actual_native_owner_reval3')
+eurusd = SymbolContract(symbol='EURUSD', venue='mt5', base_currency='EUR', quote_currency='USD', account_currency='USD', contra...=Decimal('0'), max_adv_participation=Decimal('0.10'), liquidity_haircut=Decimal('0'), round_trip_cost_pct=Decimal('0'))
+kind = 'account'
+limits = {'max_open_stop_risk': '0.010', 'max_currency_leg_exposure': '0.5'}
+expected = 'PORTFOLIO_HEAT'
+
+    @pytest.mark.parametrize('kind',['single','account'])
+    @pytest.mark.parametrize('limits,expected',[
+        ({'max_open_stop_risk':'0.012'},'CURRENCY_LEG_EXPOSURE'),
+        ({'max_open_stop_risk':'0.010','max_currency_leg_exposure':'0.5'},'PORTFOLIO_HEAT'),
+    ])
+    def test_actual_native_owner_revalues_pending_loss_with_higher_current_contract(tmp_path,eurusd,kind,limits,expected):
+        ledger,adapter,account,_,original=native_facts(tmp_path,eurusd)
+        _,first=command(ledger,original,'before-contract-change');receipt(ledger,first,status='ACCEPTED')
+        b=other_context(ledger,adapter,account,original,alias='second_alias')
+        current=replace(account,account_alias=b.account_alias,
+            funding_mark=replace(account.funding_mark,account_alias=b.account_alias),
+            used_margin=D(0),free_margin=account.equity,margin_level_pct=None)
+        # Existing risk owner receives a changed current contract for this symbol;
+        # no broker, native conversion or external account qualification is claimed.
+        terms=replace(eurusd,tick_value=eurusd.tick_value*2)
+        b=replace(b,symbol_contract=terms)
+        owner=producer(kind,ledger,adapter,current,b);now=NOW*1000+100
+        if kind=='single':facts=owner.snapshot(now_ms=now,quote_age_ms=0,strategy_id=intent().strategy_id)
+        else:
+            owner.clock=lambda:now
+            facts=owner._snapshot_for(N(symbol='EURUSD',strategy_id=intent().strategy_id))
+        assert facts.symbol_contract.tick_value==terms.tick_value
+        assert facts.reconciliation_ok and not facts.preservation_blocks_new_risk and not facts.open_positions
+>       grant=TradingMandate.from_mapping(mandate_dict(account_alias=b.account_alias,
+            max_positions_per_instrument=10,max_total_positions=20,**limits))
+
+trading/tests/test_pending_current_contract.py:38: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+trading/vati/risk/mandate.py:296: in from_mapping
+    m.validate(ceilings)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = TradingMandate(mandate_id='mandate-fx-primary', version='1.0.0', account_alias='second_alias', venue='mt5', mode=<Auth...se)), strategy_risk_budgets={}, trading_temperament=None, strategy_temperaments={}, temperament_owner_signature_ref='')
+ceilings = PlatformCeilings(max_risk_per_trade=Decimal('0.0200'), max_open_stop_risk=Decimal('0.0600'), max_daily_loss=Decimal('0...max_weekly_drawdown=Decimal('0.1000'), max_currency_leg_exposure=Decimal('0.0400'), policy_version='risk-policy/2.0.0')
+
+    def validate(self, ceilings: PlatformCeilings) -> None:
+        _boolean(self.weekend_hold_allowed,'weekend_hold_allowed')
+        for tier in self.drawdown_tiers:
+            _boolean(tier.top_tier_only,'drawdown_tier.top_tier_only')
+        if self.temperament_enabled and not self.temperament_owner_signature_ref.startswith("owner-authority:"):
+            raise MandateError("owner-verified temperament grant reference required")
+        if not self.temperament_enabled and self.temperament_owner_signature_ref:
+            raise MandateError("unexpected temperament owner grant without a profile")
+        if self.trading_temperament is not None and not isinstance(self.trading_temperament, TradingTemperament):
+            raise MandateError("invalid trading_temperament")
+        for sid, profile in self.strategy_temperaments.items():
+            if sid not in self.allowed_strategies:
+                raise MandateError(f"trading temperament for unapproved strategy {sid}")
+            if not isinstance(profile, TradingTemperament):
+                raise MandateError(f"invalid strategy temperament for {sid}")
+        if self.tier1_event_policy not in ("flat", "strategy_specific"):
+            raise MandateError(f"tier1_event_policy must be flat|strategy_specific, got {self.tier1_event_policy!r}")
+        if self.max_consecutive_losses < 1 or self.max_positions_per_instrument < 1 or self.max_total_positions < 1:
+            raise MandateError("count limits must be >= 1")
+        if self.expires_at_unix <= self.signed_at_unix:
+            raise MandateError("mandate expires before it is signed")
+        if self.max_risk_per_trade > self.max_open_stop_risk:
+            raise MandateError("max_risk_per_trade cannot exceed max_open_stop_risk")
+        checks = (
+            ("max_risk_per_trade", self.max_risk_per_trade, ceilings.max_risk_per_trade),
+            ("max_open_stop_risk", self.max_open_stop_risk, ceilings.max_open_stop_risk),
+            ("max_daily_loss", self.max_daily_loss, ceilings.max_daily_loss),
+            ("max_weekly_drawdown", self.max_weekly_drawdown, ceilings.max_weekly_drawdown),
+            ("max_currency_leg_exposure", self.max_currency_leg_exposure, ceilings.max_currency_leg_exposure),
+        )
+        self._validate_budgets(ceilings)
+        for name, value, ceiling in checks:
+            if value > ceiling:
+>               raise MandateError(f"{name}={value} exceeds platform ceiling {ceiling} ({ceilings.policy_version})")
+E               vati.risk.mandate.MandateError: max_currency_leg_exposure=0.5 exceeds platform ceiling 0.0400 (risk-policy/2.0.0)
+
+trading/vati/risk/mandate.py:347: MandateError
+=========================== short test summary info ============================
+FAILED trading/tests/test_pending_current_contract.py::test_actual_native_owner_revalues_pending_loss_with_higher_current_contract[limits1-PORTFOLIO_HEAT-single]
+FAILED trading/tests/test_pending_current_contract.py::test_actual_native_owner_revalues_pending_loss_with_higher_current_contract[limits1-PORTFOLIO_HEAT-account]
+2 failed, 96 passed in 3.57s

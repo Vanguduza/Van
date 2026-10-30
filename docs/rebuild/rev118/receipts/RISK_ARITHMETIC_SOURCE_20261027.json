@@ -1,0 +1,48 @@
+{
+  "schema": "van.rebuild.exact-risk-arithmetic-source/1",
+  "created_at_utc": "2026-10-27T06:33:34.040698+00:00",
+  "base_head": "068267e2901d0e1d62c29d101e83860916461bec",
+  "state": "SOURCE_TESTED_UNCOMMITTED_AT_GENERATION",
+  "units": [
+    "BE-009"
+  ],
+  "implementation": "Risk sizing, portfolio heat, currency legs, loss/drawdown and cost gates now use original bounded Decimal facts as exact Fractions for permission comparisons. Venue quantities round down exactly; new-position loss uses original quantity, price and tick terms. Repeating Decimal values are reports only. Fresh complete arithmetic contexts ignore caller/default precision, traps, exponent range and clamp without mutating them. All original signed mandate/intent bindings, refusal codes, public Decimal fields and owner ceilings remain. Original0682 causal sources reproduced7failures/1control; intermediate report-ratio, original-tick and cost boundaries each reproduced1failure with9/10/23controls. Final190focused cases and1396combined actualSQL/HTTP/accounting/authority/execution cases pass0skip/audit0; all1169source-test hashes match, ownedPGfixture independently absent. 165rebuild/private-topology cases pass. Existing13safetyprobes produce3passing controls and10semantic assertion detections with0crashcredit. The initial missing-owner probe run and intermediate runtime-exception outcomes remain invalid semantic evidence and are retained. Canonical registry preflight374cases/383edits has0findings, but that corpus has not executed on this uncommitted risk packet. Exact published0682 independently records4351trading/1DDSskip,26PG,117voice, 5854gateway/7skips,198media and374canonical cases caught once; main40454839376 remainsFAILED2mandatory prerequisites/all17publicSUCCESS. Forecast40454839421 independently verifies114native cases,6synthetic fixtures,3cold models/parity0/232versions/kernel/cleanup/hashes. Cognitive40454839472SUCCESS has79focused, 4143broad with245declaredPG/DDSskips and1568Androidsource cases. Parent evidence does not qualify later risk source. No unit/native/production/economic/S24 acceptance is issued.",
+  "source_tests": {
+    "passed": 1396,
+    "failed": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "focused_tests": {
+    "passed": 190,
+    "failed": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "new_regression_cases": 24,
+  "rebuild_private_topology": {
+    "passed": 165,
+    "failed": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "verified_source_test_hashes": 1169,
+  "owned_fixture_independently_absent": true,
+  "semantic_probes": {
+    "controls": 3,
+    "assertion_detections": 10,
+    "runtime_crash_credit": 0
+  },
+  "canonical_registry_preflight": {
+    "schema": "van.rebuild.mutation-registry-preflight/1",
+    "registry_sha256": "35d10c7b0f2b8319b7f7305828262c972b2a6451139d75b9e83c7d0062282955",
+    "mutation_count": 374,
+    "edit_count": 383,
+    "findings": [],
+    "execution_state": "NOT_RUN",
+    "status": "ANCHORS_VALID_BASELINES_AND_MUTATIONS_NOT_EXECUTED"
+  },
+  "evidence_directory": "ci/risk_arithmetic_20261027",
+  "acceptance": "NOT_ISSUED",
+  "next_action": "Finish real manifest, verified staged backup, genuine candidate-build hook and required-baseline committed verification; normalpush/readback and inspect exact hosted CI. Continue canonical shared physical-account financial history, collateral and all-origin reservations, full payment/provider/manual reconciliation and remaining backend programme. No new frontend before BG-001. Van trading core remains the chosen host; Android uses a provisioned production profile without owner-entered backend addresses. Independent admission, provisioning, signing, deployment and actual Artemis/S24 acceptance remain open."
+}

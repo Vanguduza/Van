@@ -1,0 +1,15 @@
+{
+  "schema": "van.native-mql-checkout-source-recovery/1",
+  "failed_head": "5fa1913631c0ee033be6c18113dfad7cf8f09f9e",
+  "failed_run": 40241410215,
+  "failed_job": 121313801954,
+  "actual_failure": "Windows Git checkout: Filename too long on269-character tracked quote-archive compatibility record; compiler step SKIPPED; artifact absent because checkout failed",
+  "raw_log_sha256": "74a65cbada2489a10f3b47bcea67813e7418747f55f8c3c4faeb403c10e24de5",
+  "source_change": "Enable gitcore.longpaths before checkout; originalCRLF/LFsettings, triggers, permissions, nativeSDKsignature/compiler and requiredartifact gates unchanged",
+  "verification": {
+    "local": "PyYAMLparse success; baseline structural comparison proves onlyoneadded gitcore.longpaths command; original job/triggers/permissions/signature/compiler/artifact steps preserved",
+    "native_windows": "PENDING_NEW_COMMIT_SOURCE_WORKFLOW; original5fa runfailedcheckout and compilerSKIPPED"
+  },
+  "qualification": "NOT_NATIVE_COMPILATION_OR_UNIT_ACCEPTANCE",
+  "updated_at_utc": "2026-10-25T22:48:24.733752+00:00"
+}

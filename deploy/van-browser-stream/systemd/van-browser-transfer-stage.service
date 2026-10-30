@@ -1,0 +1,15 @@
+[Unit]
+Description=Bind only encrypted VAN transfer staging outside the private browser profile
+After=van-browser-profiles.mount
+Requires=van-browser-profiles.mount
+Before=van-browser-chromium.service van-browser-stream.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=true
+ExecStart=/usr/bin/mount --bind /var/lib/van-browser-profiles/.transfers /var/lib/van-browser-transfers
+ExecStart=/usr/bin/mount -o remount,bind,nodev,nosuid,noexec /var/lib/van-browser-transfers
+ExecStop=/usr/bin/umount /var/lib/van-browser-transfers
+
+[Install]
+WantedBy=multi-user.target

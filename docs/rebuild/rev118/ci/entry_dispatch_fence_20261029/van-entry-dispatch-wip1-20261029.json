@@ -1,0 +1,14 @@
+{
+  "path": "/workspace/van-entry-dispatch-wip1-20261029.zip",
+  "bytes": 19786,
+  "sha256": "5161ac6383e466ca7f78ff572c30035c9161287bfe9dd3c0e218d84e31a94600",
+  "manifest": {
+    "source_parent": "42b34f43657dcc64503e951d946f4231c4f3022d",
+    "state": "SOURCE_FOCUSED90PASS_NOT_FINAL_FULL_OR_ACCEPTANCE",
+    "files": {
+      "trading/vati/execution/router.py": "df5863d0d2b55f432cb1cae2dc113af1b6fbde3ae86800279e64c7ee8977af1c",
+      "trading/tests/test_entry_dispatch_commit_fence.py": "5cf3374fa6e41ede1e2d2342def4d52fef10703aa976c3d1a61c2d4682d1fb5e",
+      "trading/tests/test_entry_dispatch_commit_fence_postgres.py": "851a81725f947b8e125955b7d53458f119ab5835f348a20edc2eb39c32fc0ee1"
+    }
+  }
+}

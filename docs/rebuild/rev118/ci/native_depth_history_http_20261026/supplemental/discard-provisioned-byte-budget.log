@@ -1,0 +1,32 @@
+F
+=================================== FAILURES ===================================
+_ test_storage_integrity_and_read_capacity_refuse_without_changing_history[budget] _
+
+client = (<httpx.AsyncClient object at 0x7f0fee5ada30>, <fastapi.applications.FastAPI object at 0x7f0fee0aeb70>)
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-576/test_storage_integrity_and_rea0')
+bad = 'budget'
+
+    @pytest.mark.asyncio
+    @pytest.mark.parametrize('bad',['corrupt','budget'])
+    async def test_storage_integrity_and_read_capacity_refuse_without_changing_history(client,tmp_path,bad):
+        ac,app=client;root,c,first=seed(tmp_path);app.state.trading.native_source_root=str(root)
+        if bad=='corrupt':
+            record=next(root.rglob('00000000000000000001-*.json'));record.write_bytes(record.read_bytes()+b' ')
+        else:app.state.trading.native_history_max_bytes=1
+        before=files(root);result=await ac.get(PATH,params=QUERY)
+>       assert result.status_code==503 and result.json()['detail']['code']=='NATIVE_DEPTH_HISTORY_UNAVAILABLE'
+E       assert (200 == 503)
+E        +  where 200 = <Response [200 OK]>.status_code
+
+backend/tests/test_native_depth_history.py:103: AssertionError
+---------------------------- Captured stdout setup -----------------------------
+{"action_class": null, "command_id": null, "correlation_id": null, "degraded_code": null, "detail": {"duration_ms": 3142.91, "method": "POST", "route": "/v1/devices/pairing-ticket"}, "device_id": null, "error_class": null, "level": "INFO", "logger": "van.request", "message": "request", "mission_id": null, "principal": null, "result": "200", "service": "van-gateway", "ts": "2026-10-26T22:27:55.744Z"}
+{"action_class": null, "command_id": null, "correlation_id": null, "degraded_code": null, "detail": {"duration_ms": 105.9, "method": "POST", "route": "/v1/devices/pair"}, "device_id": null, "error_class": null, "level": "INFO", "logger": "van.request", "message": "request", "mission_id": null, "principal": null, "result": "200", "service": "van-gateway", "ts": "2026-10-26T22:27:55.869Z"}
+----------------------------- Captured stdout call -----------------------------
+{"action_class": null, "command_id": null, "correlation_id": null, "degraded_code": null, "detail": {"duration_ms": 19.99, "method": "GET", "route": "/v1/trading/market/depth-history"}, "device_id": null, "error_class": null, "level": "INFO", "logger": "van.request", "message": "request", "mission_id": null, "principal": null, "result": "200", "service": "van-gateway", "ts": "2026-10-26T22:27:55.942Z"}
+------------------------------ Captured log call -------------------------------
+INFO     van.request:logging.py:112 request
+=========================== short test summary info ============================
+FAILED backend/tests/test_native_depth_history.py::test_storage_integrity_and_read_capacity_refuse_without_changing_history[budget]
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed in 10.33s

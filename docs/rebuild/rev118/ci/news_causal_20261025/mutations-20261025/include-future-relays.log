@@ -1,0 +1,43 @@
+..F............FF........                                                [100%]
+=================================== FAILURES ===================================
+_______ test_a_future_relay_cannot_enter_an_earlier_impact_evidence_set ________
+
+    def test_a_future_relay_cannot_enter_an_earlier_impact_evidence_set():
+        news=NewsIngress();h=story();news.ingest(h)
+        news.ingest(story(source_id='future-relay',observed_ms=NOW+1000))
+        before=news.assess(h,subject_kind='POSITION',subject_id='p',symbol='EURUSD',now_ms=NOW)
+        after=news.assess(h,subject_kind='POSITION',subject_id='p',symbol='EURUSD',now_ms=NOW+1000)
+>       assert 'publisher' in before.evidence_refs and 'future-relay' not in before.evidence_refs
+E       AssertionError: assert ('publisher' in ('138bd873f2a6c652858d8f2f466ac369cd194fb68ff43f2a00a3d50a892ec36f', 'publisher', 'future-relay') and 'future-relay' not in ('138bd873f2a6c652858d8f2f466ac369cd194fb68ff43f2a00a3d50a892ec36f', 'publisher', 'future-relay'))
+E        +  where ('138bd873f2a6c652858d8f2f466ac369cd194fb68ff43f2a00a3d50a892ec36f', 'publisher', 'future-relay') = EventImpactAssessment(impact_id='c509c4d168802183e0cd9e38', headline_id='138bd873f2a6c652858d8f2f466ac369', subject_ki...ff43f2a00a3d50a892ec36f', 'publisher', 'future-relay'), assessed_ms=1800000000000, impact_version='event-impact/5.1.1').evidence_refs
+E        +  and   ('138bd873f2a6c652858d8f2f466ac369cd194fb68ff43f2a00a3d50a892ec36f', 'publisher', 'future-relay') = EventImpactAssessment(impact_id='c509c4d168802183e0cd9e38', headline_id='138bd873f2a6c652858d8f2f466ac369', subject_ki...ff43f2a00a3d50a892ec36f', 'publisher', 'future-relay'), assessed_ms=1800000000000, impact_version='event-impact/5.1.1').evidence_refs
+
+trading/tests/test_news_causal_boundaries.py:35: AssertionError
+_ test_a_backdated_relay_stays_out_of_evidence_before_its_supplied_ingress_clock _
+
+    def test_a_backdated_relay_stays_out_of_evidence_before_its_supplied_ingress_clock():
+        news=NewsIngress();h=story();news.ingest(h,now_ms=NOW)
+        news.ingest(story(source_id='backdated-relay'),now_ms=NOW+1000)
+        impact=news.assess(h,subject_kind='POSITION',subject_id='p',symbol='EURUSD',now_ms=NOW)
+>       assert 'backdated-relay' not in impact.evidence_refs
+E       AssertionError: assert 'backdated-relay' not in ('138bd873f2a6c652858d8f2f466ac369cd194fb68ff43f2a00a3d50a892ec36f', 'publisher', 'backdated-relay')
+E        +  where ('138bd873f2a6c652858d8f2f466ac369cd194fb68ff43f2a00a3d50a892ec36f', 'publisher', 'backdated-relay') = EventImpactAssessment(impact_id='c509c4d168802183e0cd9e38', headline_id='138bd873f2a6c652858d8f2f466ac369', subject_ki...3f2a00a3d50a892ec36f', 'publisher', 'backdated-relay'), assessed_ms=1800000000000, impact_version='event-impact/5.1.1').evidence_refs
+
+trading/tests/test_news_causal_boundaries.py:93: AssertionError
+_ test_replaying_the_same_observation_cannot_move_its_original_ingress_clock_backwards _
+
+    def test_replaying_the_same_observation_cannot_move_its_original_ingress_clock_backwards():
+        news=NewsIngress();h=story();news.ingest(h,now_ms=NOW+1000)
+        news.ingest(h,now_ms=NOW)
+>       assert news.relayed_by(h.headline_id,as_of_ms=NOW)==()
+E       AssertionError: assert ('publisher',) == ()
+E         
+E         Left contains one more item: 'publisher'
+E         Use -v to get more diff
+
+trading/tests/test_news_causal_boundaries.py:99: AssertionError
+=========================== short test summary info ============================
+FAILED trading/tests/test_news_causal_boundaries.py::test_a_future_relay_cannot_enter_an_earlier_impact_evidence_set
+FAILED trading/tests/test_news_causal_boundaries.py::test_a_backdated_relay_stays_out_of_evidence_before_its_supplied_ingress_clock
+FAILED trading/tests/test_news_causal_boundaries.py::test_replaying_the_same_observation_cannot_move_its_original_ingress_clock_backwards
+3 failed, 22 passed in 0.43s

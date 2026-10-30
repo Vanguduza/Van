@@ -1,0 +1,18 @@
+[
+  {
+    "artifact_id": 12703215555,
+    "name": "van-native-source-parquet-report",
+    "bytes": 3196,
+    "sha256": "3498c1e66370ce969746f5be048e725ad7a666dd01897b4ebfe5c4c166844358",
+    "github_digest": "sha256:3498c1e66370ce969746f5be048e725ad7a666dd01897b4ebfe5c4c166844358",
+    "crc_path_symlink_verified": true
+  },
+  {
+    "artifact_id": 12702851947,
+    "name": "van-forecast-runtime-source-report",
+    "bytes": 148637,
+    "sha256": "bfe23774e16cf9f2ee34bb1ac506dda3f9ebd620e7c3ca061819ab8329c302d2",
+    "github_digest": "sha256:bfe23774e16cf9f2ee34bb1ac506dda3f9ebd620e7c3ca061819ab8329c302d2",
+    "crc_path_symlink_verified": true
+  }
+]

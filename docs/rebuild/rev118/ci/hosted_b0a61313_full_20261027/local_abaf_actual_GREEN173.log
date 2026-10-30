@@ -1,0 +1,4 @@
+project-truth-ledger verify: GREEN — 173 commit(s) in 4fd466dec391..abafcf9094be
+  baseline: 4fd466dec3910ed5de614bfbf95887ad619df5ca
+  ledger_source: abafcf9094be:docs/project-state/LOCAL_CHANGE_LEDGER.jsonl
+  trusted_records: abafcf9094be

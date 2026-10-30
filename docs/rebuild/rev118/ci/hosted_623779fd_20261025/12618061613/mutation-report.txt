@@ -1,0 +1,93 @@
+
+### ['tests/test_permissions_computeruse_verifiers.py', 'tests/test_automation_health_api.py']
+CAUGHT             C6 pretend every surface has a worker
+CAUGHT             C6 drop the no-worker refusal
+CAUGHT             C6 health route falls through to device auth
+
+3/3 caught
+
+### ['tests/test_learning_records_and_bounds.py', 'tests/test_ops_backup.py']
+CAUGHT             C7 offer every strategy regardless of envelope
+CAUGHT             C7 never raise the recorded ceiling
+CAUGHT             C7 an unverified mission counts as a strategy success
+CAUGHT             C7 strategy for a mission that ran nothing
+CAUGHT             C7 drop the auto-demote job
+CAUGHT             C7 leave the scratch restore on disk
+CAUGHT             C7 raise the earned-autonomy cap to the top
+CAUGHT             C7 a learning module writes an authority table
+
+8/8 caught
+
+### ['tests/test_command_success_contract.py', 'tests/test_learning_records_and_bounds.py', 'tests/test_owner_memory_has_a_producer.py']
+CAUGHT             RC1 a source mutation falls back to the notebook contract
+CAUGHT             RC1 a delete stops asserting the sources are gone
+CAUGHT             RC1 an add stops asserting the sources are there
+CAUGHT             RC1 an unreachable provider reads as a removed source
+CAUGHT             RC1 the source verifier falls back to the weaker notebook observation
+CAUGHT             RC2 an owner cancellation punishes the strategy
+CAUGHT             RC2 'VAN does not know' punishes the strategy
+CAUGHT             RC2 a policy refusal punishes the strategy
+CAUGHT             RC2 inconclusive falls through to failure_count
+CAUGHT             RC2 a real failure stops counting
+CAUGHT             RC4 one request becomes a standing goal again
+CAUGHT             RC4 a brand-new goal starts standing
+CAUGHT             RC4 the owner saying so stops counting
+
+13/13 caught
+
+### ['tests/test_external_reality_and_benchmarks.py']
+CAUGHT             C9 stop recording what sources claim
+CAUGHT             C9 decide the owner is wrong from a headline
+CAUGHT             C9 untrusted source looks credible
+CAUGHT             C9 claim every suite has a corpus
+CAUGHT             C9 admit a technology with no benchmark
+
+5/5 caught
+
+### ['tests/test_owner_device_binding.py']
+CAUGHT             C27 an attestation for an older challenge is accepted
+CAUGHT             C27 a software-only key is accepted as hardware-backed
+CAUGHT             C27 a device that failed verified boot is accepted
+CAUGHT             C27 another app on the same phone can bind the owner slot
+CAUGHT             C27 a rebuilt app with a different signing key binds
+CAUGHT             C27 an old signature stays a valid credential
+CAUGHT             C27 a proof no longer binds the route or the body
+CAUGHT             C27 an old manifest can be replayed at a device that moved on
+CAUGHT             C27 an unknown signing key is tried rather than refused
+CAUGHT             C27 a manifest may carry a pairing token
+CAUGHT             C27 the gateway republishes an older manifest version
+
+11/11 caught
+
+### ['tests/contracts/test_debug_signing_identity.py']
+CAUGHT             C22 a keystore Android cannot open is accepted and the build signs with the runner's
+CAUGHT             C22 the no-key run stops naming the consequence
+CAUGHT             C22 a run with no key falls through into the restore path
+CAUGHT             C22 an apksigner that prints no certificate publishes an empty identity
+CAUGHT             C22 a build that produced no APK still reports a signature
+CAUGHT             C22 the identity stays on the runner
+
+6/6 caught
+
+### ['tests/contracts/test_maturity_gate.py']
+CAUGHT             C21 a deleted class comes back and the removal claim stands
+CAUGHT             C21 the gate stops recognising a deleted class
+CAUGHT             C21 the gate stops recognising a deleted Kotlin function
+CAUGHT             C21 the gate stops recognising a deleted Python function
+
+4/4 caught
+
+### ['tests/contracts/test_kotlin_reachability.py']
+CAUGHT             C15 the manifest sweep treats permissions as components again
+CAUGHT             C15 a symbol named in a line comment counts as a call site
+CAUGHT             C15 a symbol named in a KDoc counts as a call site
+CAUGHT             C15 a symbol named in a string counts as a call site
+CAUGHT             C15 strip everything, so all code looks dead
+CAUGHT             C15 miss enum and annotation declarations
+CAUGHT             C15 stop reporting files nothing references
+CAUGHT             C15 stop reporting test-only symbols
+
+8/8 caught
+
+================ SURVIVORS ================
+none

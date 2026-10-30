@@ -80,6 +80,28 @@ def invalid_response(reason: str, error: str = "dial_dev_request_invalid") -> JS
     return JSONResponse(status_code=422, content={"error": error, "reason": reason}, headers=_NO_STORE)
 
 
+class DialDevNativeAction(BaseModel):
+    """Native control lifecycle, distinct from task success or proven no effect."""
+    model_config = ConfigDict(extra="allow")
+    action_id: str
+    action: str
+    target: dict[str, Any]
+    state: str = Field(description="Native ACCEPTED/APPLIED/REJECTED/SUPERSEDED. A control error does not establish no effect; task success has its own source.")
+    reason: str | None = None
+    typed_control: dict[str, Any] | None = None
+    control_result: dict[str, Any] | None = None
+
+
+class DialDevNativeActionEnvelope(BaseModel):
+    model_config = ConfigDict(extra="allow")
+    projection_revision: str
+    observed_at: str
+    sources: dict[str, Any]
+    freshness_ms: int
+    degraded: list[Any]
+    data: DialDevNativeAction
+
+
 class DialDevActionBody(BaseModel):
     """§3.3, as the device sends it. Closed: an unknown field is a refusal."""
 
@@ -234,6 +256,13 @@ def build_dial_dev_router(
             return invalid_response("task_id")
         return await _read(f"{UPSTREAM_PREFIX}/tasks/{seg}")
 
+    @router.get("/actions/{action_id}", responses={200: {"model": DialDevNativeActionEnvelope}})
+    async def original_action(action_id: str):
+        seg = _seg(action_id)
+        if seg is None:
+            return invalid_response("action_id")
+        return await _read(f"{UPSTREAM_PREFIX}/actions/{seg}")
+
     @router.get("/agents")
     async def agents():
         return await _read(f"{UPSTREAM_PREFIX}/agents")
@@ -322,17 +351,34 @@ def build_dial_dev_router(
             return _mark_down(DialDevUnavailable("upstream_error"))
         dial_degraded.mark_unavailable(degraded, False)
 
+        async def close_stream():
+            try:
+                await stream.close()
+            except DialDevUnavailable as exc:
+                _mark_down(exc)
+
         async def frames():
-            async for line in stream.lines():
-                if stream.discloses_credential(line):
-                    continue
-                yield line + "\n"
+            try:
+                async for line in stream.lines():
+                    if stream.discloses_credential(line):
+                        continue
+                    yield line + "\n"
+            except DialDevUnavailable as exc:
+                _mark_down(exc)
+                # Headers have already been sent: report the same safe unavailable
+                # vocabulary in a terminal SSE frame, then end this read stream.
+                # Separate an unfinished upstream event before our terminal frame.
+                yield "\nevent: error\ndata: " + json.dumps({
+                    "error": "dial_dev_unavailable", "reason": exc.reason,
+                }, separators=(",", ":")) + "\n\n"
+            finally:
+                await close_stream()
 
         return StreamingResponse(
             frames(),
             media_type="text/event-stream",
             headers={**_NO_STORE, "X-Accel-Buffering": "no"},
-            background=BackgroundTask(stream.close),
+            background=BackgroundTask(close_stream),
         )
 
     # -------------------------------------------------------------- actions (§3.3)

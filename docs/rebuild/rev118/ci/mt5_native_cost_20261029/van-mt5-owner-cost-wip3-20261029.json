@@ -1,0 +1,25 @@
+{
+  "path": "/workspace/van-mt5-owner-cost-wip3-20261029.zip",
+  "bytes": 105377,
+  "sha256": "ca4f704845173eea175522a88b6a90bf362103e407a9342f02a5a5d318b45993",
+  "manifest": {
+    "source_parent": "457205e3ac3c73f115a7bf7134b33c98bd905f12",
+    "state": "PARTIAL_SOURCE_NATIVE_PRODUCERS_IN_PROGRESS_NOT_FULL_TESTED",
+    "files": {
+      "trading/tests/test_mt5_owner_cost_knowledge.py": "20abf1b1ffc1ee370a6395ce556e7bb99654aacf92e5f6a8a49f8a0d96ecdc3e",
+      "trading/tests/test_mt5_owner_cost_knowledge_postgres.py": "b779ea011e38752ef13991bb638a6767cb93d6c13a2410643e5e7f63b15223a7",
+      "trading/tests/test_mt5_recorded_entry_charges.py": "506bb5df5fc30e015be9d48663e65fcb31728424f2266354b82a3994af0d61f6",
+      "trading/vati/execution/mt5_charges.py": "17c00626f2ec2c31f3b8858d741e8276162d3a0f2fb893e26b6a60cd6475427d",
+      "deploy/van-trading-core/mql5/VanBridgeEA.mq5": "08e139d95e48c730cca29a82c157c0b974123b6657dcdda39b9a19e8a85972cb",
+      "deploy/van-trading-core/windows/mt5_worker/mt5_bridge_worker.py": "70d4c7c8f87775cfe7d14c74875cab49d720a1a66a842c5bd99ea1f1be77cdd7",
+      "trading/tests/mql_terminal_fixture.cpp": "731f74cafbda3d3cc532f7a8c289392346b7d2d579d70ac5d6967d74e85ae02b",
+      "trading/tests/test_mql_native_function_bodies.py": "83326169a4badde63c6e7863120be0c981661715966ecad77b84faa278742e04",
+      "trading/vati/app/cycle.py": "94d8bcb8da38763af4a95c3fce2d85cb874896721328b347f2a7c1c71faa0885",
+      "trading/vati/app/session_recovery.py": "026598a8935c8b48273f15b03ceb44ec0e9afe29ac5d6d16ab7108aacd4ff5ca",
+      "trading/vati/app/trade_lifecycle.py": "1fd94f81c655258e53c9cb4c5b873825461362616b7a0f09046c0bbd7113548d",
+      "trading/vati/execution/mt5_bridge.py": "3d054edcdbd8e9876cfd17b3ccaaad37891ec9f5b753ff88fca8d2ac8d7d6512",
+      "trading/vati/execution/mt5_pull.py": "55125edba3e4c6edb206ab2fae94c2c539f5cd6cebc3619e5593cfe96d3bed57",
+      "trading/vati/execution/recovery_scope.py": "86485e26ce300d453c94dfe78041a472e3efb0d11c927a7c8fa755d29e780b97"
+    }
+  }
+}

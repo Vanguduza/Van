@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="2" failures="0" skipped="0" tests="2" time="7.406" timestamp="2026-10-27T04:38:35.262498+00:00" hostname="2c5a245e39f1"><testcase classname="" name="trading.tests.test_physical_account_lease_postgres" time="0.000"><error message="collection failure">ImportError while importing test module '/workspace/van-review-2026-10-18/publish/trading/tests/test_physical_account_lease_postgres.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/importlib/__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+trading/tests/test_physical_account_lease_postgres.py:7: in &lt;module&gt;
+    import psycopg
+../../van-cognitive-no-driver-20261027/sitecustomize.py:9: in find_spec
+    raise ModuleNotFoundError("No module named 'psycopg' (controlled absent-driver fixture)", name=fullname)
+E   ModuleNotFoundError: No module named 'psycopg' (controlled absent-driver fixture)</error></testcase><testcase classname="" name="trading.tests.test_postgres_lease_guard_ownership" time="0.000"><error message="collection failure">ImportError while importing test module '/workspace/van-review-2026-10-18/publish/trading/tests/test_postgres_lease_guard_ownership.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/importlib/__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+trading/tests/test_postgres_lease_guard_ownership.py:10: in &lt;module&gt;
+    import psycopg
+../../van-cognitive-no-driver-20261027/sitecustomize.py:9: in find_spec
+    raise ModuleNotFoundError("No module named 'psycopg' (controlled absent-driver fixture)", name=fullname)
+E   ModuleNotFoundError: No module named 'psycopg' (controlled absent-driver fixture)</error></testcase></testsuite></testsuites>

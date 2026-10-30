@@ -1,0 +1,20 @@
+F.......................                                                 [100%]
+=================================== FAILURES ===================================
+_____ test_bare_json_array_keeps_the_same_records_as_the_documented_object _____
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-165/test_bare_json_array_keeps_the0')
+
+    def test_bare_json_array_keeps_the_same_records_as_the_documented_object(tmp_path):
+        p=tmp_path/'calendar.json';p.write_text(json.dumps([row()]))
+        bare=load_calendar(p)
+        p.write_text(json.dumps({'events':[row()]}))
+>       assert bare==load_calendar(p) and len(bare)==1
+E       AssertionError: assert ([] == [Tier1Event(e...ed_sources=1)]
+E         
+E         Right contains one more item: Tier1Event(event_id='CPI:1791981000000', name='CPI', release_ms=1791981000000, currencies=frozenset({'USD'}), blackout_before_ms=300000, blackout_after_ms=900000, quiet_until_ms=2700000, drift_until_ms=14400000, verified_sources=1)
+E         Use -v to get more diff)
+
+trading/tests/test_calendar_feed_boundaries.py:19: AssertionError
+=========================== short test summary info ============================
+FAILED trading/tests/test_calendar_feed_boundaries.py::test_bare_json_array_keeps_the_same_records_as_the_documented_object
+1 failed, 23 passed in 0.43s

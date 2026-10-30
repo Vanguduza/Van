@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.dial.van.session.FailoverTransactionTest" tests="9" skipped="0" failures="0" errors="0" timestamp="2026-10-08T04:57:38" hostname="052fefa249ff" time="0.002">
+  <properties/>
+  <testcase name="the old path stops being authoritative in the same call()" classname="com.dial.van.session.FailoverTransactionTest" time="0.0"/>
+  <testcase name="an unreadable battery does not authorise a spare socket()" classname="com.dial.van.session.FailoverTransactionTest" time="0.001"/>
+  <testcase name="an epoch that does not advance is not a promotion()" classname="com.dial.van.session.FailoverTransactionTest" time="0.0"/>
+  <testcase name="promotion requires the transaction to have run()" classname="com.dial.van.session.FailoverTransactionTest" time="0.0"/>
+  <testcase name="a late envelope from the old path is rejected()" classname="com.dial.van.session.FailoverTransactionTest" time="0.0"/>
+  <testcase name="an abandoned failover leaves the old path in place()" classname="com.dial.van.session.FailoverTransactionTest" time="0.001"/>
+  <testcase name="the unknown sentinel is the one the runtime reading actually uses()" classname="com.dial.van.session.FailoverTransactionTest" time="0.0"/>
+  <testcase name="rejection is by epoch, so a reused path does not inherit its old messages()" classname="com.dial.van.session.FailoverTransactionTest" time="0.0"/>
+  <testcase name="charging does not buy a spare socket the battery could not be read for()" classname="com.dial.van.session.FailoverTransactionTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

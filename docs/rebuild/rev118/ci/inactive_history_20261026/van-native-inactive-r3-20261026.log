@@ -1,0 +1,81 @@
+.................................F...................................... [ 30%]
+........................................................................ [ 61%]
+........................................................................ [ 91%]
+...................                                                      [100%]
+=================================== FAILURES ===================================
+____ test_native_unavailable_history_does_not_become_empty_archive_success _____
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-408/test_native_unavailable_histor0')
+
+    def test_native_unavailable_history_does_not_become_empty_archive_success(tmp_path):
+        expected=identity(wire=True);peer=UnavailableHistoryPeer();parent=make_adapter(peer);parent.clock=lambda:NOW
+        book=NativeMarketArchive(tmp_path/'native',clock=lambda:NOW+1000)
+        try:
+            with pytest.raises(CtraderError,match='history unavailable'):
+>               NativeMarketCollector(book,parent.market_reader).collect('unavailable',expected,
+                    timeframe='M1',from_ms=120000,to_ms=300000)
+
+trading/tests/test_native_read_identity.py:190: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+trading/vati/market_data/native_collector.py:39: in collect
+    contract,observation=reader.read_window(expected_contract,timeframe=timeframe,from_ms=from_ms,to_ms=to_ms)
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/execution/ctrader/adapter.py:261: in read_window
+    return self.read_identity_window(expected_contract,timeframe=timeframe,from_ms=from_ms,to_ms=to_ms)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/execution/ctrader/adapter.py:302: in read_identity_window
+    observed=read_trendbars(source,original.series_label,timeframe,from_ms=from_ms,to_ms=to_ms,count=2001)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/execution/ctrader/feed.py:78: in read_trendbars
+    name, response = adapter.transport.call("ProtoOAGetTrendbarsReq", {
+trading/vati/execution/ctrader/transport.py:494: in call
+    result = super().call(message, values, timeout_s=timeout_s)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/execution/ctrader/transport.py:231: in call
+    return self._request(message,values,timeout_s=timeout_s)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <vati.execution.ctrader.transport.CtraderReadTransport object at 0x7f31cde80f80>
+message = 'ProtoOAGetTrendbarsReq'
+values = {'ctidTraderAccountId': 12345, 'fromTimestamp': 120000, 'toTimestamp': 300000, 'period': 'M1', ...}
+timeout_s = None, expires_at_ms = None, clock = None
+
+    def _request(self, message, values, *, timeout_s=None, expires_at_ms=None, clock=None):
+        self.connect()
+        cid = uuid.uuid4().hex[:16]
+        q: queue.Queue = queue.Queue()
+        with self._state_lock:
+            sock = self._sock
+            if sock is None or not self._alive:
+                raise CtraderError("cTrader disconnected before request registration")
+            self._pending[cid] = q
+            self._pending_sockets[cid] = sock
+        try:
+            payload=SCHEMA.wrap(message, values, cid)
+            if expires_at_ms is None:
+                self._send_frame(payload, expected_socket=sock)
+            else:
+                self._send_frame(payload,expires_at_ms=expires_at_ms,clock=clock,expected_socket=sock)
+            try:
+                name, body = q.get(timeout=self._response_timeout(timeout_s))
+            except queue.Empty:
+                raise CtraderError(f"cTrader timeout waiting for {message} response")
+        except OSError as exc:
+            self._retire(sock, str(exc))
+            raise CtraderError(f"cTrader socket failure: {exc}") from exc
+        finally:
+            with self._state_lock:
+                if self._pending.get(cid) is q:
+                    self._pending.pop(cid, None)
+                    self._pending_sockets.pop(cid, None)
+        if name == "__disconnect__":
+            raise CtraderError(f"cTrader disconnected: {body.get('error')}")
+        if name in ("ProtoOAErrorRes", "ProtoErrorRes"):
+>           raise CtraderApiError(str(body.get("errorCode")), str(body.get("description", "")))
+E           vati.execution.ctrader.transport.CtraderApiError: SYMBOL_NOT_FOUND: history unavailable
+
+trading/vati/execution/ctrader/transport.py:271: CtraderApiError
+=========================== short test summary info ============================
+FAILED trading/tests/test_native_read_identity.py::test_native_unavailable_history_does_not_become_empty_archive_success
+1 failed, 234 passed in 14.45s

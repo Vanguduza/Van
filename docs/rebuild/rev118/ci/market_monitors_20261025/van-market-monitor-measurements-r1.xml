@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="3" skipped="0" tests="29" time="0.250" timestamp="2026-10-25T02:03:41.770480+00:00" hostname="56ae90b2c83c"><testcase classname="tests.test_market_monitor_measurements" name="test_first_sample_establishes_crossing_then_only_new_contiguous_sample_can_fire" time="0.002" /><testcase classname="tests.test_market_monitor_measurements" name="test_full_scope_and_actual_availability_refusals[change0-SOURCE_SCOPE_MISMATCH]" time="0.001" /><testcase classname="tests.test_market_monitor_measurements" name="test_full_scope_and_actual_availability_refusals[change1-SOURCE_SCOPE_MISMATCH]" time="0.001" /><testcase classname="tests.test_market_monitor_measurements" name="test_full_scope_and_actual_availability_refusals[change2-SOURCE_SCOPE_MISMATCH]" time="0.001" /><testcase classname="tests.test_market_monitor_measurements" name="test_full_scope_and_actual_availability_refusals[change3-SOURCE_FROM_FUTURE]" time="0.001" /><testcase classname="tests.test_market_monitor_measurements" name="test_stale_data_missing_binding_and_short_indicator_history_are_not_zeroes" time="0.043" /><testcase classname="tests.test_market_monitor_measurements" name="test_correction_gap_source_revision_and_out_of_order_data_cannot_manufacture_crossing" time="0.001" /><testcase classname="tests.test_market_monitor_measurements" name="test_measurements_match_independent_hand_calculated_series[SMA-VALUE-spec0-closes0-3]" time="0.000" /><testcase classname="tests.test_market_monitor_measurements" name="test_measurements_match_independent_hand_calculated_series[EMA-VALUE-spec1-closes1-3]" time="0.000" /><testcase classname="tests.test_market_monitor_measurements" name="test_measurements_match_independent_hand_calculated_series[RSI-VALUE-spec2-closes2-100]" time="0.000" /><testcase classname="tests.test_market_monitor_measurements" name="test_measurements_match_independent_hand_calculated_series[ATR-VALUE-spec3-closes3-2]" time="0.000" /><testcase classname="tests.test_market_monitor_measurements" name="test_measurements_match_independent_hand_calculated_series[MACD-MACD-spec4-closes4-0.5]" time="0.001"><failure message="AssertionError: assert Decimal('0.5000000000000000000000000000000000000000000000000000000000000000000000000000001') == Decimal('0.5')&#10; +  where Decimal('0.5000000000000000000000000000000000000000000000000000000000000000000000000000001') = measurement(MarketSnapshot(instrument=InstrumentRef(venue='fixture-venue', environment='DEMO', api_family='spot', product_id='nati...lose='4', volume='1'), MonitorBar(start_ms=900000, end_ms=960000, open='5', high='6', low='4', close='5', volume='1')]), IndicatorCondition(kind='INDICATOR', indicator=MacdIndicator(kind='MACD', fast=2, slow=3, signal=2), component='MACD', comparator='AT_OR_ABOVE', threshold='0'))&#10; +  and   Decimal('0.5') = Decimal('0.5')">kind = 'MACD', component = 'MACD', spec = {'fast': 2, 'slow': 3, 'signal': 2}
+closes = [1, 2, 3, 4, 5], expected = '0.5'
+
+    @pytest.mark.parametrize('kind,component,spec,closes,expected', [
+        ('SMA', 'VALUE', {'period': 3}, [1,2,3,4], '3'),
+        ('EMA', 'VALUE', {'period': 3}, [1,2,3,4], '3'),
+        ('RSI', 'VALUE', {'period': 2}, [1,2,3,4], '100'),
+        ('ATR', 'VALUE', {'period': 2}, [1,2,3,4], '2'),
+        ('MACD', 'MACD', {'fast': 2,'slow': 3,'signal': 2}, [1,2,3,4,5], '0.5'),
+        ('MACD', 'SIGNAL', {'fast': 2,'slow': 3,'signal': 2}, [1,2,3,4,5], '0.5'),
+        ('MACD', 'HISTOGRAM', {'fast': 2,'slow': 3,'signal': 2}, [1,2,3,4,5], '0'),
+        ('BOLLINGER', 'UPPER', {'period': 3,'deviations': '2'}, [1,1,1], '1'),
+        ('BOLLINGER', 'LOWER', {'period': 3,'deviations': '2'}, [1,1,1], '1'),
+        ('VWAP', 'VALUE', {'anchor_ms': 780000}, [2,4,6], '4'),
+    ])
+    def test_measurements_match_independent_hand_calculated_series(kind, component, spec, closes, expected):
+        condition = IndicatorCondition.model_validate({'kind':'INDICATOR','indicator':{'kind':kind,**spec},
+            'component':component,'comparator':'AT_OR_ABOVE','threshold':'0'})
+        data = snapshot(closes)
+&gt;       assert measurement(data, condition) == Decimal(expected)
+E       AssertionError: assert Decimal('0.5000000000000000000000000000000000000000000000000000000000000000000000000000001') == Decimal('0.5')
+E        +  where Decimal('0.5000000000000000000000000000000000000000000000000000000000000000000000000000001') = measurement(MarketSnapshot(instrument=InstrumentRef(venue='fixture-venue', environment='DEMO', api_family='spot', product_id='nati...lose='4', volume='1'), MonitorBar(start_ms=900000, end_ms=960000, open='5', high='6', low='4', close='5', volume='1')]), IndicatorCondition(kind='INDICATOR', indicator=MacdIndicator(kind='MACD', fast=2, slow=3, signal=2), component='MACD', comparator='AT_OR_ABOVE', threshold='0'))
+E        +  and   Decimal('0.5') = Decimal('0.5')
+
+backend/tests/test_market_monitor_measurements.py:100: AssertionError</failure></testcase><testcase classname="tests.test_market_monitor_measurements" name="test_measurements_match_independent_hand_calculated_series[MACD-SIGNAL-spec5-closes5-0.5]" time="0.001"><failure message="AssertionError: assert Decimal('0.50000000000000000000000000000000000000000000000000000000000000000000000000000006') == Decimal('0.5')&#10; +  where Decimal('0.50000000000000000000000000000000000000000000000000000000000000000000000000000006') = measurement(MarketSnapshot(instrument=InstrumentRef(venue='fixture-venue', environment='DEMO', api_family='spot', product_id='nati...lose='4', volume='1'), MonitorBar(start_ms=900000, end_ms=960000, open='5', high='6', low='4', close='5', volume='1')]), IndicatorCondition(kind='INDICATOR', indicator=MacdIndicator(kind='MACD', fast=2, slow=3, signal=2), component='SIGNAL', comparator='AT_OR_ABOVE', threshold='0'))&#10; +  and   Decimal('0.5') = Decimal('0.5')">kind = 'MACD', component = 'SIGNAL', spec = {'fast': 2, 'slow': 3, 'signal': 2}
+closes = [1, 2, 3, 4, 5], expected = '0.5'
+
+    @pytest.mark.parametrize('kind,component,spec,closes,expected', [
+        ('SMA', 'VALUE', {'period': 3}, [1,2,3,4], '3'),
+        ('EMA', 'VALUE', {'period': 3}, [1,2,3,4], '3'),
+        ('RSI', 'VALUE', {'period': 2}, [1,2,3,4], '100'),
+        ('ATR', 'VALUE', {'period': 2}, [1,2,3,4], '2'),
+        ('MACD', 'MACD', {'fast': 2,'slow': 3,'signal': 2}, [1,2,3,4,5], '0.5'),
+        ('MACD', 'SIGNAL', {'fast': 2,'slow': 3,'signal': 2}, [1,2,3,4,5], '0.5'),
+        ('MACD', 'HISTOGRAM', {'fast': 2,'slow': 3,'signal': 2}, [1,2,3,4,5], '0'),
+        ('BOLLINGER', 'UPPER', {'period': 3,'deviations': '2'}, [1,1,1], '1'),
+        ('BOLLINGER', 'LOWER', {'period': 3,'deviations': '2'}, [1,1,1], '1'),
+        ('VWAP', 'VALUE', {'anchor_ms': 780000}, [2,4,6], '4'),
+    ])
+    def test_measurements_match_independent_hand_calculated_series(kind, component, spec, closes, expected):
+        condition = IndicatorCondition.model_validate({'kind':'INDICATOR','indicator':{'kind':kind,**spec},
+            'component':component,'comparator':'AT_OR_ABOVE','threshold':'0'})
+        data = snapshot(closes)
+&gt;       assert measurement(data, condition) == Decimal(expected)
+E       AssertionError: assert Decimal('0.50000000000000000000000000000000000000000000000000000000000000000000000000000006') == Decimal('0.5')
+E        +  where Decimal('0.50000000000000000000000000000000000000000000000000000000000000000000000000000006') = measurement(MarketSnapshot(instrument=InstrumentRef(venue='fixture-venue', environment='DEMO', api_family='spot', product_id='nati...lose='4', volume='1'), MonitorBar(start_ms=900000, end_ms=960000, open='5', high='6', low='4', close='5', volume='1')]), IndicatorCondition(kind='INDICATOR', indicator=MacdIndicator(kind='MACD', fast=2, slow=3, signal=2), component='SIGNAL', comparator='AT_OR_ABOVE', threshold='0'))
+E        +  and   Decimal('0.5') = Decimal('0.5')
+
+backend/tests/test_market_monitor_measurements.py:100: AssertionError</failure></testcase><testcase classname="tests.test_market_monitor_measurements" name="test_measurements_match_independent_hand_calculated_series[MACD-HISTOGRAM-spec6-closes6-0]" time="0.001"><failure message="AssertionError: assert Decimal('4E-80') == Decimal('0')&#10; +  where Decimal('4E-80') = measurement(MarketSnapshot(instrument=InstrumentRef(venue='fixture-venue', environment='DEMO', api_family='spot', product_id='nati...lose='4', volume='1'), MonitorBar(start_ms=900000, end_ms=960000, open='5', high='6', low='4', close='5', volume='1')]), IndicatorCondition(kind='INDICATOR', indicator=MacdIndicator(kind='MACD', fast=2, slow=3, signal=2), component='HISTOGRAM', comparator='AT_OR_ABOVE', threshold='0'))&#10; +  and   Decimal('0') = Decimal('0')">kind = 'MACD', component = 'HISTOGRAM'
+spec = {'fast': 2, 'slow': 3, 'signal': 2}, closes = [1, 2, 3, 4, 5]
+expected = '0'
+
+    @pytest.mark.parametrize('kind,component,spec,closes,expected', [
+        ('SMA', 'VALUE', {'period': 3}, [1,2,3,4], '3'),
+        ('EMA', 'VALUE', {'period': 3}, [1,2,3,4], '3'),
+        ('RSI', 'VALUE', {'period': 2}, [1,2,3,4], '100'),
+        ('ATR', 'VALUE', {'period': 2}, [1,2,3,4], '2'),
+        ('MACD', 'MACD', {'fast': 2,'slow': 3,'signal': 2}, [1,2,3,4,5], '0.5'),
+        ('MACD', 'SIGNAL', {'fast': 2,'slow': 3,'signal': 2}, [1,2,3,4,5], '0.5'),
+        ('MACD', 'HISTOGRAM', {'fast': 2,'slow': 3,'signal': 2}, [1,2,3,4,5], '0'),
+        ('BOLLINGER', 'UPPER', {'period': 3,'deviations': '2'}, [1,1,1], '1'),
+        ('BOLLINGER', 'LOWER', {'period': 3,'deviations': '2'}, [1,1,1], '1'),
+        ('VWAP', 'VALUE', {'anchor_ms': 780000}, [2,4,6], '4'),
+    ])
+    def test_measurements_match_independent_hand_calculated_series(kind, component, spec, closes, expected):
+        condition = IndicatorCondition.model_validate({'kind':'INDICATOR','indicator':{'kind':kind,**spec},
+            'component':component,'comparator':'AT_OR_ABOVE','threshold':'0'})
+        data = snapshot(closes)
+&gt;       assert measurement(data, condition) == Decimal(expected)
+E       AssertionError: assert Decimal('4E-80') == Decimal('0')
+E        +  where Decimal('4E-80') = measurement(MarketSnapshot(instrument=InstrumentRef(venue='fixture-venue', environment='DEMO', api_family='spot', product_id='nati...lose='4', volume='1'), MonitorBar(start_ms=900000, end_ms=960000, open='5', high='6', low='4', close='5', volume='1')]), IndicatorCondition(kind='INDICATOR', indicator=MacdIndicator(kind='MACD', fast=2, slow=3, signal=2), component='HISTOGRAM', comparator='AT_OR_ABOVE', threshold='0'))
+E        +  and   Decimal('0') = Decimal('0')
+
+backend/tests/test_market_monitor_measurements.py:100: AssertionError</failure></testcase><testcase classname="tests.test_market_monitor_measurements" name="test_measurements_match_independent_hand_calculated_series[BOLLINGER-UPPER-spec7-closes7-1]" time="0.000" /><testcase classname="tests.test_market_monitor_measurements" name="test_measurements_match_independent_hand_calculated_series[BOLLINGER-LOWER-spec8-closes8-1]" time="0.000" /><testcase classname="tests.test_market_monitor_measurements" name="test_measurements_match_independent_hand_calculated_series[VWAP-VALUE-spec9-closes9-4]" time="0.000" /><testcase classname="tests.test_market_monitor_measurements" name="test_vwap_does_not_silently_move_an_uncaptured_or_partial_bar_anchor" time="0.000" /><testcase classname="tests.test_market_monitor_measurements" name="test_moving_pinned_trend_uses_price_minus_line_at_each_observation_time" time="0.001" /><testcase classname="tests.test_market_monitor_measurements" name="test_literal_news_keyword_matching_preserves_trust_freshness_time_and_declared_relevance" time="0.001" /><testcase classname="tests.test_market_monitor_measurements" name="test_invalid_or_authority_bearing_alerts_cannot_be_saved[data0]" time="0.000" /><testcase classname="tests.test_market_monitor_measurements" name="test_invalid_or_authority_bearing_alerts_cannot_be_saved[data1]" time="0.000" /><testcase classname="tests.test_market_monitor_measurements" name="test_invalid_or_authority_bearing_alerts_cannot_be_saved[data2]" time="0.000" /><testcase classname="tests.test_market_monitor_measurements" name="test_invalid_or_authority_bearing_alerts_cannot_be_saved[data3]" time="0.000" /><testcase classname="tests.test_market_monitor_measurements" name="test_invalid_or_authority_bearing_alerts_cannot_be_saved[data4]" time="0.000" /><testcase classname="tests.test_market_monitor_measurements" name="test_invalid_or_authority_bearing_alerts_cannot_be_saved[data5]" time="0.000" /><testcase classname="tests.test_market_monitor_measurements" name="test_invalid_or_authority_bearing_alerts_cannot_be_saved[data6]" time="0.000" /><testcase classname="tests.test_market_monitor_measurements" name="test_duplicate_native_identity_is_refused_but_same_symbol_on_distinct_venues_is_preserved" time="0.000" /><testcase classname="tests.test_market_monitor_measurements" name="test_scan_has_closed_level_predicates_and_bounded_distinct_universe" time="0.000" /></testsuite></testsuites>

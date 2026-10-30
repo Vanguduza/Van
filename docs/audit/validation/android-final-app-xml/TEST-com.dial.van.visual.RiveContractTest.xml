@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.dial.van.visual.RiveContractTest" tests="6" skipped="0" failures="0" errors="0" timestamp="2026-10-07T22:16:26" hostname="052fefa249ff" time="0.007">
+  <properties/>
+  <testcase name="durableStatesMatchCanonicalContract" classname="com.dial.van.visual.RiveContractTest" time="0.004"/>
+  <testcase name="triggersMatchCanonicalContract" classname="com.dial.van.visual.RiveContractTest" time="0.001"/>
+  <testcase name="finiteActionsMatchCanonicalContract" classname="com.dial.van.visual.RiveContractTest" time="0.0"/>
+  <testcase name="repoCanonicalContractMatchesTestFixture" classname="com.dial.van.visual.RiveContractTest" time="0.0"/>
+  <testcase name="inputsMatchCanonicalContract" classname="com.dial.van.visual.RiveContractTest" time="0.001"/>
+  <testcase name="bindingConstantsMatchArtboardAndStateMachine" classname="com.dial.van.visual.RiveContractTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

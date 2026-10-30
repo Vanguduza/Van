@@ -1,0 +1,63 @@
+{
+  "artifact_id": 12858410637,
+  "metadata_workflow_run": {
+    "id": 40781906990,
+    "repository_id": 1369211561,
+    "head_repository_id": 1369211561,
+    "head_branch": "ccr-9e07e1af-8mgz1p",
+    "head_sha": "ab91a8ebf2a7e94e9ab7d742108eba81b88d93cd"
+  },
+  "archive_bytes": 202739,
+  "archive_sha256": "5b20190ba3e6f2be604253064a3511028c6d6b400906ac559d099e2859cfc695",
+  "bytes_digest_CRC_and_safe_unique_paths_verified": true,
+  "members": {
+    "postgres-ledger-report.xml": {
+      "bytes": 4452,
+      "sha256": "e99fe98367ea1d08badc15fab853691df22934484b771d644afb47c0821420e5"
+    },
+    "trading-source.log": {
+      "bytes": 711474,
+      "sha256": "b47a16852ccdf4c50dfa8795598d776233cd19411ee4f15bf91a8e49523aff99"
+    },
+    "trading-source-report.xml": {
+      "bytes": 844206,
+      "sha256": "339f64e12508283f43846f37a8e052ad382b57e49690cf07fdb7d2da4df6ff08"
+    },
+    "voice-source-report.xml": {
+      "bytes": 17643,
+      "sha256": "91e31b919e317a0e1d386fe3e37c709e80443a97f0254ab56a142714d46615e6"
+    }
+  },
+  "junit": {
+    "postgres-ledger-report.xml": {
+      "cases": 26,
+      "passed": 26,
+      "failure": 0,
+      "error": 0,
+      "skipped": 0
+    },
+    "trading-source-report.xml": {
+      "cases": 5264,
+      "passed": 5263,
+      "failure": 0,
+      "error": 0,
+      "skipped": 1
+    },
+    "voice-source-report.xml": {
+      "cases": 117,
+      "passed": 117,
+      "failure": 0,
+      "error": 0,
+      "skipped": 0
+    }
+  },
+  "declared_skips": [
+    "dial-new checkout not available (set DIAL_REPO)"
+  ],
+  "source_binding": "ORIGINAL_WORKFLOW_HEAD_METADATA_AND_ACTUAL_CHECKOUT_MERGE_PARENTS_VERIFIED",
+  "native_or_production_qualification": false,
+  "checkout_log": "/workspace/van-ab91-original-job-123145423660-20261028.log",
+  "checkout_parent_line": [
+    "2026-10-28T22:42:08.8781039Z HEAD is now at 8c93786 Merge ab91a8ebf2a7e94e9ab7d742108eba81b88d93cd into 8eb1889822fc8a83f219977c15340172e16acd91"
+  ]
+}

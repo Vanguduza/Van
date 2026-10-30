@@ -1,0 +1,49 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+______ test_old_pause_verifies_its_receipt_after_later_restart_and_delete ______
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-20/test_old_pause_verifies_its_re0')
+
+    @pytest.mark.asyncio
+    async def test_old_pause_verifies_its_receipt_after_later_restart_and_delete(tmp_path):
+        s = await service(tmp_path); alert = await create_alert(s)
+        ctx = await command(s,alert.object_id)
+        original = await AlertControlExecutor().execute(ctx)
+        await s.write('owner','ALERT','RESTART',MonitorControl(request_id='later-restart',expected_revision=2),alert.object_id)
+        assert (await s.get('owner','ALERT',alert.object_id)).lifecycle=='ACTIVE'
+        await s.write('owner','ALERT','DELETE',MonitorControl(request_id='later-delete',expected_revision=3),alert.object_id)
+>       assert await control_readback(s.store,ctx.command_id)==original.observed_postcondition
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+backend/tests/test_market_monitor_commands.py:132: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+store = <van_gateway.storage.db.Store object at 0x7ff97eed4fb0>
+command_id = 'original-owner-command'
+
+    async def control_readback(store, command_id):
+        record, pinned, body = await sealed_control(store, command_id)
+        operation = ACTIONS[record.typed_action_id]
+        row = await store.fetchone(
+            "SELECT request_sha256,result_json FROM market_monitor_operations WHERE owner_id=? AND request_id=?",
+            ("owner", body.request_id))
+        expected_hash = digest({"kind": "ALERT", "operation": operation,
+                                "object_id": pinned["alert_id"], "body": body.model_dump(mode="json")})
+        if row is None or row["request_sha256"] != expected_hash:
+            raise ValueError("alert_control_receipt_missing_or_conflicting")
+        receipt = MonitorWrite.model_validate_json(row["result_json"], strict=True)
+        state_hash_valid = (receipt.state_sha256 is None if operation == "DELETE" else
+            isinstance(receipt.state_sha256, str) and re.fullmatch(r"[0-9a-f]{64}", receipt.state_sha256) is not None)
+        if (receipt.request_id != body.request_id or receipt.object_id != pinned["alert_id"]
+                or receipt.kind != "ALERT" or type(receipt.revision) is not int
+                or receipt.revision != pinned["expected_revision"]+1
+                or receipt.status != STATUSES[operation] or not state_hash_valid):
+            raise ValueError("alert_control_receipt_integrity_failed")
+        if not await store.fetchone("SELECT object_id FROM market_monitor_objects WHERE owner_id=? AND object_id=?", ("owner", pinned["alert_id"])):
+>           raise ValueError("mutant requires deleted current alert")
+E           ValueError: mutant requires deleted current alert
+
+backend/van_gateway/trading/monitor_commands.py:73: ValueError
+=========================== short test summary info ============================
+FAILED backend/tests/test_market_monitor_commands.py::test_old_pause_verifies_its_receipt_after_later_restart_and_delete
+1 failed in 2.40s

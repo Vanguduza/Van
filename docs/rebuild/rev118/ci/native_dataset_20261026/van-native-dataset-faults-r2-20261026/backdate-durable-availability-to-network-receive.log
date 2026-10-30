@@ -1,0 +1,69 @@
+FF........FF...........                                                  [100%]
+=================================== FAILURES ===================================
+__ test_real_catalog_original_replay_and_cold_readback_do_not_append[sqlite] ___
+
+source = (<vati.core.ledger.Ledger object at 0x7fe24833d220>, <vati.market_data.catalog_store.NativeCatalogStore object at 0x7fe24833d460>)
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-349/test_real_catalog_original_rep0')
+
+    def test_real_catalog_original_replay_and_cold_readback_do_not_append(source,tmp_path):
+        ledger,store=source;value=captured();first=store.record('original',value);head=ledger.head()
+        store.clock=lambda:(_ for _ in ()).throw(AssertionError('replay renewed capture clock'))
+        assert store.record('original',value)==first and ledger.head()==head
+        assert NativeCatalogStore(ledger).lookup(SCOPE,'original')==first
+        frozen=store.snapshot(SCOPE,revision=1,record_ref=first['record_ref'])
+        assert len(frozen['members'])==4 and frozen['qualified_for_research'] is False
+>       assert first['received_at_ms']==NOW and first['available_at_ms']==NOW+100
+E       assert (1800000000000 == 1800000000000 and 1800000000000 == (1800000000000 + 100))
+
+trading/tests/test_native_catalog_store.py:36: AssertionError
+_ test_delisting_source_update_does_not_backdate_or_rewrite_prior_universe_vintage[sqlite] _
+
+source = (<vati.core.ledger.Ledger object at 0x7fe248319820>, <vati.market_data.catalog_store.NativeCatalogStore object at 0x7fe24833d250>)
+
+    def test_delisting_source_update_does_not_backdate_or_rewrite_prior_universe_vintage(source):
+        ledger,store=source;first=store.record('before',captured());past=store.snapshot(SCOPE,revision=1)
+        rows=response();rows['symbol']=[r for r in rows['symbol'] if r['symbolId']!=1]
+        rows['archivedSymbol'].append({'symbolId':1,'name':'EUR/USD','utcLastUpdateTimestamp':NOW-10000})
+        update=captured(response=rows,received_at_ms=NOW+200);store.clock=lambda:NOW+300
+        second=store.record('archived-later',update)
+        old=store.snapshot(SCOPE,as_of_ms=NOW+250)
+>       assert old==past and old['members'][0]['visible'] is True
+E       AssertionError: assert ({'receipt': {...ED_ROWS', ...} == {'receipt': {...ED_ROWS', ...}
+E         
+E         Omitting 5 identical items, use -vv to show
+E         Differing items:
+E         {'receipt': {'record_ref': '5000205182c2baaed42f16d277b00d330d75b7d0b3ebe9a6b49fe0d0ef016807', 'revision': 2, 'request...nvironment': 'DEMO', 'native_account_id': 12345, 'provider': 'CTRADER', 'transport_host': 'demo.ctraderapi.com'}, ...}} != {'receipt': {'record_ref': 'aca9843c904aa1254e065c1dd758a3f23974c8a6bcaa275df7125105ae301174', 'revision': 1, 'request...nvironment': 'DEMO', 'native_account_id': 12345, 'provider': 'CTRADER', 'transport_host': 'demo.ctraderapi.com'}, ...}}
+E         {'members': [{'native_symbol_id':...
+E         
+E         ...Full output truncated (3 lines hidden), use '-vv' to show)
+
+trading/tests/test_native_catalog_store.py:46: AssertionError
+_ test_known_past_catalog_before_first_availability_is_missing_not_an_empty_universe[sqlite] _
+
+source = (<vati.core.ledger.Ledger object at 0x7fe24833e210>, <vati.market_data.catalog_store.NativeCatalogStore object at 0x7fe24833fdd0>)
+
+    def test_known_past_catalog_before_first_availability_is_missing_not_an_empty_universe(source):
+        ledger,store=source;store.record('original',captured())
+>       assert store.snapshot(SCOPE,as_of_ms=NOW+99) is None
+E       AssertionError: assert {'receipt': {'record_ref': '35625c330ef6b37be2ba15c05d759755416b4275f1ed2c86bd00870d6ff39dfc', 'revision': 1, 'request...'utcLastUpdateTimestamp': 1799999900000}, 'source_kind': 'ARCHIVED', ...}], 'coverage': 'REQUESTED_ARCHIVED_ROWS', ...} is None
+E        +  where {'receipt': {'record_ref': '35625c330ef6b37be2ba15c05d759755416b4275f1ed2c86bd00870d6ff39dfc', 'revision': 1, 'request...'utcLastUpdateTimestamp': 1799999900000}, 'source_kind': 'ARCHIVED', ...}], 'coverage': 'REQUESTED_ARCHIVED_ROWS', ...} = snapshot({'provider': 'CTRADER', 'environment': 'DEMO', 'transport_host': 'demo.ctraderapi.com', 'native_account_id': 12345}, as_of_ms=(1800000000000 + 99))
+E        +    where snapshot = <vati.market_data.catalog_store.NativeCatalogStore object at 0x7fe24833fdd0>.snapshot
+
+trading/tests/test_native_catalog_store.py:131: AssertionError
+_ test_publication_clock_cannot_move_backwards_or_precede_source_capture[sqlite] _
+
+source = (<vati.core.ledger.Ledger object at 0x7fe24833fbc0>, <vati.market_data.catalog_store.NativeCatalogStore object at 0x7fe2483d8050>)
+
+    def test_publication_clock_cannot_move_backwards_or_precede_source_capture(source):
+        ledger,store=source;store.record('original',captured());head=ledger.head();store.clock=lambda:NOW+50
+>       with pytest.raises(CatalogArchiveError,match='clock moved backwards'):store.record('late',captured())
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE CatalogArchiveError
+
+trading/tests/test_native_catalog_store.py:137: Failed
+=========================== short test summary info ============================
+FAILED trading/tests/test_native_catalog_store.py::test_real_catalog_original_replay_and_cold_readback_do_not_append[sqlite]
+FAILED trading/tests/test_native_catalog_store.py::test_delisting_source_update_does_not_backdate_or_rewrite_prior_universe_vintage[sqlite]
+FAILED trading/tests/test_native_catalog_store.py::test_known_past_catalog_before_first_availability_is_missing_not_an_empty_universe[sqlite]
+FAILED trading/tests/test_native_catalog_store.py::test_publication_clock_cannot_move_backwards_or_precede_source_capture[sqlite]
+4 failed, 19 passed, 21 deselected in 2.46s

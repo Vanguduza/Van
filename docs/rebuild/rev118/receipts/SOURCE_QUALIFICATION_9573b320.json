@@ -1,0 +1,690 @@
+{
+  "schema": "van.rebuild.frozen-source-qualification/1",
+  "source_head": "9573b3204ad2a5087e935269d3e5522c85b6ab2d",
+  "selection": [
+    "backend/tests",
+    "tests/contracts"
+  ],
+  "passed": 6557,
+  "skipped": 166,
+  "failures": 0,
+  "errors": 0,
+  "warnings": 7,
+  "elapsed_seconds": 1784.71,
+  "storage_audit": {
+    "forbidden_events": [],
+    "scope": "backend/tests plus tests/contracts; repo-root invocation; writes and SQLite opens under root/data or backend/data refused"
+  },
+  "skip_inventory": [
+    {
+      "case": "backend.tests.test_browser_canary_origin::test_the_armed_canary_lease_loads_its_page_from_the_overlay_address_through_the_proxy",
+      "reason": "needs the pinned Chromium, openssl and a local non-loopback address"
+    },
+    {
+      "case": "backend.tests.test_browser_canary_origin::test_the_canary_exception_refuses_a_websocket_upgrade_and_ends_with_the_lease",
+      "reason": "needs the pinned Chromium, openssl and a local non-loopback address"
+    },
+    {
+      "case": "backend.tests.test_browser_canary_origin::test_a_normal_task_cannot_reach_the_canary_origin",
+      "reason": "needs the pinned Chromium, openssl and a local non-loopback address"
+    },
+    {
+      "case": "backend.tests.test_browser_canary_origin::test_loopback_and_every_other_non_global_upstream_stay_refused_while_the_canary_is_armed",
+      "reason": "needs the pinned Chromium, openssl and a local non-loopback address"
+    },
+    {
+      "case": "backend.tests.test_browser_canary_origin::test_the_canary_upstream_is_verified_against_its_pinned_certificate_only",
+      "reason": "needs the pinned Chromium, openssl and a local non-loopback address"
+    },
+    {
+      "case": "backend.tests.test_browser_canary_origin::test_guard_canary_passes_end_to_end_through_the_proxy_and_the_harness_handler",
+      "reason": "needs the pinned Chromium, openssl and a local non-loopback address"
+    },
+    {
+      "case": "backend.tests.test_browser_egress_proxy::test_chromium_is_launched_through_the_proxy_with_quic_disabled",
+      "reason": "needs the pinned Chromium and openssl"
+    },
+    {
+      "case": "backend.tests.test_browser_egress_proxy::test_in_scope_get_passes_through_the_interception",
+      "reason": "needs the pinned Chromium and openssl"
+    },
+    {
+      "case": "backend.tests.test_browser_egress_proxy::test_ws_handshake_to_ws_pay_is_refused_and_never_reaches_the_server",
+      "reason": "needs the pinned Chromium and openssl"
+    },
+    {
+      "case": "backend.tests.test_browser_egress_proxy::test_wss_handshake_to_ws_pay_is_refused_inside_tls_and_never_reaches_the_server",
+      "reason": "needs the pinned Chromium and openssl"
+    },
+    {
+      "case": "backend.tests.test_browser_egress_proxy::test_a_mutating_task_may_open_a_websocket_inside_its_scope",
+      "reason": "needs the pinned Chromium and openssl"
+    },
+    {
+      "case": "backend.tests.test_browser_egress_proxy::test_out_of_scope_wss_host_and_out_of_scope_get_are_refused_at_connect",
+      "reason": "needs the pinned Chromium and openssl"
+    },
+    {
+      "case": "backend.tests.test_browser_egress_proxy::test_writes_after_the_guard_window_are_refused_for_a_read_only_task",
+      "reason": "needs the pinned Chromium and openssl"
+    },
+    {
+      "case": "backend.tests.test_browser_egress_proxy::test_a_mutating_task_may_write_inside_its_scope_only",
+      "reason": "needs the pinned Chromium and openssl"
+    },
+    {
+      "case": "backend.tests.test_browser_egress_proxy::test_no_policy_means_every_request_is_refused",
+      "reason": "needs the pinned Chromium and openssl"
+    },
+    {
+      "case": "backend.tests.test_browser_egress_proxy::test_loopback_goes_through_the_proxy_and_is_refused",
+      "reason": "needs the pinned Chromium and openssl"
+    },
+    {
+      "case": "backend.tests.test_browser_egress_proxy::test_a_policy_without_a_valid_effect_mac_is_refused_and_leaves_the_old_one",
+      "reason": "needs the pinned Chromium and openssl"
+    },
+    {
+      "case": "backend.tests.test_browser_egress_proxy::test_interception_is_trusted_only_through_the_pinned_leaf_key",
+      "reason": "needs the pinned Chromium and openssl"
+    },
+    {
+      "case": "backend.tests.test_browser_egress_proxy::test_a_trust_zone_worker_refuses_to_start_chromium_without_the_proxy",
+      "reason": "needs the pinned Chromium and openssl"
+    },
+    {
+      "case": "backend.tests.test_browser_egress_proxy::test_a_lease_start_revokes_the_older_lease_policy",
+      "reason": "needs the pinned Chromium and openssl"
+    },
+    {
+      "case": "backend.tests.test_browser_egress_proxy::test_the_lease_end_revokes_finally_and_the_policy_cannot_come_back",
+      "reason": "needs the pinned Chromium and openssl"
+    },
+    {
+      "case": "backend.tests.test_browser_egress_proxy::test_a_guard_freeze_revokes_the_lease_policy",
+      "reason": "needs the pinned Chromium and openssl"
+    },
+    {
+      "case": "backend.tests.test_browser_egress_proxy::test_the_lease_end_revokes_even_when_the_page_cannot_be_frozen",
+      "reason": "needs the pinned Chromium and openssl"
+    },
+    {
+      "case": "backend.tests.test_browser_egress_proxy::test_an_older_lease_release_leaves_the_newer_lease_policy",
+      "reason": "needs the pinned Chromium and openssl"
+    },
+    {
+      "case": "backend.tests.test_browser_egress_proxy::test_a_revocation_without_a_valid_mac_is_refused",
+      "reason": "needs the pinned Chromium and openssl"
+    },
+    {
+      "case": "backend.tests.test_browser_egress_proxy::test_through_the_worker_handler_the_proxy_policy_follows_the_page_lease",
+      "reason": "needs the pinned Chromium and openssl"
+    },
+    {
+      "case": "backend.tests.test_browser_egress_proxy::test_through_the_worker_handler_a_lease_start_removes_an_older_lease_policy",
+      "reason": "needs the pinned Chromium and openssl"
+    },
+    {
+      "case": "backend.tests.test_browser_egress_proxy_i8::test_only_the_configured_client_uid_may_use_a_listener",
+      "reason": "needs root and setpriv"
+    },
+    {
+      "case": "backend.tests.test_browser_guard_lost_regression::test_a_busy_renderer_cannot_make_the_lease_guard_forget_the_click[control-3s-read-only]",
+      "reason": "needs the pinned Chromium and openssl"
+    },
+    {
+      "case": "backend.tests.test_browser_guard_lost_regression::test_a_busy_renderer_cannot_make_the_lease_guard_forget_the_click[busy-20s-read-only]",
+      "reason": "needs the pinned Chromium and openssl"
+    },
+    {
+      "case": "backend.tests.test_browser_guard_lost_regression::test_a_busy_renderer_cannot_make_the_lease_guard_forget_the_click[busy-20s-mutating]",
+      "reason": "needs the pinned Chromium and openssl"
+    },
+    {
+      "case": "backend.tests.test_browser_guard_lost_regression::test_a_navigation_started_outside_the_page_between_calls_keeps_its_guard",
+      "reason": "needs the pinned Chromium and openssl"
+    },
+    {
+      "case": "backend.tests.test_browser_guard_lost_regression::test_a_freeze_that_did_not_land_is_retried",
+      "reason": "needs the pinned Chromium and openssl"
+    },
+    {
+      "case": "backend.tests.test_browser_guard_lost_regression::test_a_page_that_navigates_itself_between_calls_keeps_its_guard",
+      "reason": "needs the pinned Chromium and openssl"
+    },
+    {
+      "case": "backend.tests.test_browser_i5_integration_g8::test_real_chromium_redacts_text_media_and_form_and_routes_them_to_a4",
+      "reason": "no Chromium/Playwright available"
+    },
+    {
+      "case": "backend.tests.test_browser_i5_integration_g8::test_the_bound_operations_carry_the_fence_mac_and_a_keyed_harness_requires_it",
+      "reason": "no Chromium/Playwright available"
+    },
+    {
+      "case": "backend.tests.test_browser_i5_integration_g8::test_the_profile_lock_covers_the_bound_click",
+      "reason": "no Chromium/Playwright available"
+    },
+    {
+      "case": "backend.tests.test_browser_late_block_callers::test_the_watch_runner_real_harness[/docs/analytics-expected0]",
+      "reason": "needs the pinned Chromium and openssl"
+    },
+    {
+      "case": "backend.tests.test_browser_late_block_callers::test_the_watch_runner_real_harness[/docs/post_after_load-expected1]",
+      "reason": "needs the pinned Chromium and openssl"
+    },
+    {
+      "case": "backend.tests.test_browser_late_block_callers::test_the_watch_runner_real_harness[/docs/ws_after_load-expected2]",
+      "reason": "needs the pinned Chromium and openssl"
+    },
+    {
+      "case": "backend.tests.test_browser_late_block_callers::test_assignments_real_harness_late_write_goes_to_the_owner",
+      "reason": "needs the pinned Chromium and openssl"
+    },
+    {
+      "case": "backend.tests.test_browser_network_effect_guard::test_handler_payment_behind_a_benign_label_is_blocked_in_every_lane[#w5-deterministic]",
+      "reason": "no Chromium for the network-effect guard"
+    },
+    {
+      "case": "backend.tests.test_browser_network_effect_guard::test_handler_payment_behind_a_benign_label_is_blocked_in_every_lane[#w5-stagehand]",
+      "reason": "no Chromium for the network-effect guard"
+    },
+    {
+      "case": "backend.tests.test_browser_network_effect_guard::test_handler_payment_behind_a_benign_label_is_blocked_in_every_lane[#w5-jev]",
+      "reason": "no Chromium for the network-effect guard"
+    },
+    {
+      "case": "backend.tests.test_browser_network_effect_guard::test_handler_payment_behind_a_benign_label_is_blocked_in_every_lane[#w8-deterministic]",
+      "reason": "no Chromium for the network-effect guard"
+    },
+    {
+      "case": "backend.tests.test_browser_network_effect_guard::test_handler_payment_behind_a_benign_label_is_blocked_in_every_lane[#w8-stagehand]",
+      "reason": "no Chromium for the network-effect guard"
+    },
+    {
+      "case": "backend.tests.test_browser_network_effect_guard::test_handler_payment_behind_a_benign_label_is_blocked_in_every_lane[#w8-jev]",
+      "reason": "no Chromium for the network-effect guard"
+    },
+    {
+      "case": "backend.tests.test_browser_network_effect_guard::test_every_write_channel_is_blocked_and_goes_to_the_owner[/docs/n_fetch-POST]",
+      "reason": "no Chromium for the network-effect guard"
+    },
+    {
+      "case": "backend.tests.test_browser_network_effect_guard::test_every_write_channel_is_blocked_and_goes_to_the_owner[/docs/beacon-BEACON]",
+      "reason": "no Chromium for the network-effect guard"
+    },
+    {
+      "case": "backend.tests.test_browser_network_effect_guard::test_every_write_channel_is_blocked_and_goes_to_the_owner[/docs/keepalive-POST]",
+      "reason": "no Chromium for the network-effect guard"
+    },
+    {
+      "case": "backend.tests.test_browser_network_effect_guard::test_every_write_channel_is_blocked_and_goes_to_the_owner[/docs/request_submit-FORM_SUBMIT]",
+      "reason": "no Chromium for the network-effect guard"
+    },
+    {
+      "case": "backend.tests.test_browser_network_effect_guard::test_every_write_channel_is_blocked_and_goes_to_the_owner[/docs/form_get-FORM_SUBMIT]",
+      "reason": "no Chromium for the network-effect guard"
+    },
+    {
+      "case": "backend.tests.test_browser_network_effect_guard::test_every_write_channel_is_blocked_and_goes_to_the_owner[/docs/timeout-POST]",
+      "reason": "no Chromium for the network-effect guard"
+    },
+    {
+      "case": "backend.tests.test_browser_network_effect_guard::test_every_write_channel_is_blocked_and_goes_to_the_owner[/docs/capture-POST]",
+      "reason": "no Chromium for the network-effect guard"
+    },
+    {
+      "case": "backend.tests.test_browser_network_effect_guard::test_every_write_channel_is_blocked_and_goes_to_the_owner[/docs/sync_xhr-POST]",
+      "reason": "no Chromium for the network-effect guard"
+    },
+    {
+      "case": "backend.tests.test_browser_network_effect_guard::test_every_write_channel_is_blocked_and_goes_to_the_owner[/docs/xframe-CROSS_ORIGIN_FRAME]",
+      "reason": "no Chromium for the network-effect guard"
+    },
+    {
+      "case": "backend.tests.test_browser_network_effect_guard::test_every_write_channel_is_blocked_and_goes_to_the_owner[/docs/popup-POPUP]",
+      "reason": "no Chromium for the network-effect guard"
+    },
+    {
+      "case": "backend.tests.test_browser_network_effect_guard::test_every_write_channel_is_blocked_and_goes_to_the_owner[/docs/eventsource-EVENTSOURCE]",
+      "reason": "no Chromium for the network-effect guard"
+    },
+    {
+      "case": "backend.tests.test_browser_network_effect_guard::test_a_request_submit_the_event_guard_sees_is_cancelled_before_the_network",
+      "reason": "no Chromium for the network-effect guard"
+    },
+    {
+      "case": "backend.tests.test_browser_network_effect_guard::test_a_service_worker_write_does_not_escape",
+      "reason": "no Chromium for the network-effect guard"
+    },
+    {
+      "case": "backend.tests.test_browser_network_effect_guard::test_a_beacon_from_a_service_worker_controlled_page_does_not_escape",
+      "reason": "no Chromium for the network-effect guard"
+    },
+    {
+      "case": "backend.tests.test_browser_network_effect_guard::test_a_shared_worker_cannot_be_started_to_write",
+      "reason": "no Chromium for the network-effect guard"
+    },
+    {
+      "case": "backend.tests.test_browser_network_effect_guard::test_frames_created_after_the_guard_are_not_left_paused",
+      "reason": "no Chromium for the network-effect guard"
+    },
+    {
+      "case": "backend.tests.test_browser_network_effect_guard::test_the_guard_covers_the_landing_check_after_the_action",
+      "reason": "no Chromium for the network-effect guard"
+    },
+    {
+      "case": "backend.tests.test_browser_network_effect_guard::test_a_custom_method_is_reported_in_the_closed_vocabulary_only",
+      "reason": "no Chromium for the network-effect guard"
+    },
+    {
+      "case": "backend.tests.test_browser_network_effect_guard::test_a_websocket_open_is_detected_and_goes_to_the_owner",
+      "reason": "no Chromium for the network-effect guard"
+    },
+    {
+      "case": "backend.tests.test_browser_network_effect_guard::test_a_get_only_benign_click_still_runs",
+      "reason": "no Chromium for the network-effect guard"
+    },
+    {
+      "case": "backend.tests.test_browser_network_effect_guard::test_an_in_scope_link_still_navigates",
+      "reason": "no Chromium for the network-effect guard"
+    },
+    {
+      "case": "backend.tests.test_browser_network_effect_guard::test_a_mutating_task_may_submit_a_form_inside_its_scope",
+      "reason": "no Chromium for the network-effect guard"
+    },
+    {
+      "case": "backend.tests.test_browser_network_effect_guard::test_a_mutating_task_is_blocked_writing_outside_its_scope",
+      "reason": "no Chromium for the network-effect guard"
+    },
+    {
+      "case": "backend.tests.test_browser_network_effect_guard::test_a_mutating_task_is_blocked_writing_to_its_own_origin_outside_the_path_scope",
+      "reason": "no Chromium for the network-effect guard"
+    },
+    {
+      "case": "backend.tests.test_browser_network_effect_guard::test_a_mutating_flag_without_the_fence_key_is_not_trusted",
+      "reason": "no Chromium for the network-effect guard"
+    },
+    {
+      "case": "backend.tests.test_browser_network_effect_guard::test_a_keyed_harness_refuses_a_forged_mutating_flag_or_widened_scope",
+      "reason": "no Chromium for the network-effect guard"
+    },
+    {
+      "case": "backend.tests.test_browser_network_effect_guard::test_interception_that_cannot_be_enabled_refuses_the_action[Fetch.enable]",
+      "reason": "no Chromium for the network-effect guard"
+    },
+    {
+      "case": "backend.tests.test_browser_network_effect_guard::test_interception_that_cannot_be_enabled_refuses_the_action[Target.autoAttachRelated]",
+      "reason": "no Chromium for the network-effect guard"
+    },
+    {
+      "case": "backend.tests.test_browser_network_effect_guard::test_interception_that_cannot_be_enabled_refuses_the_action[Target.attachToBrowserTarget]",
+      "reason": "no Chromium for the network-effect guard"
+    },
+    {
+      "case": "backend.tests.test_browser_network_effect_guard::test_a_script_without_the_event_stream_refuses_the_action",
+      "reason": "no Chromium for the network-effect guard"
+    },
+    {
+      "case": "backend.tests.test_browser_network_effect_guard::test_navigate_is_guarded_too",
+      "reason": "no Chromium for the network-effect guard"
+    },
+    {
+      "case": "backend.tests.test_browser_network_effect_guard::test_assignments_hand_a_blocked_write_to_the_owner",
+      "reason": "no Chromium for the network-effect guard"
+    },
+    {
+      "case": "backend.tests.test_browser_network_effect_guard::test_interaction_step_hands_a_blocked_write_to_the_owner_with_a_closed_code",
+      "reason": "no Chromium for the network-effect guard"
+    },
+    {
+      "case": "backend.tests.test_browser_network_effect_guard::test_the_mutating_flag_is_task_truth_and_defaults_to_non_mutating",
+      "reason": "no Chromium for the network-effect guard"
+    },
+    {
+      "case": "backend.tests.test_browser_network_effect_guard::test_the_gateway_and_harness_macs_agree",
+      "reason": "no Chromium for the network-effect guard"
+    },
+    {
+      "case": "backend.tests.test_browser_network_guard_lease::test_a_write_after_the_action_window_never_reaches_the_server[/docs/delay2500]",
+      "reason": "no Chromium for the network-effect guard"
+    },
+    {
+      "case": "backend.tests.test_browser_network_guard_lease::test_a_write_after_the_action_window_never_reaches_the_server[/docs/delay6000]",
+      "reason": "no Chromium for the network-effect guard"
+    },
+    {
+      "case": "backend.tests.test_browser_network_guard_lease::test_a_write_after_the_action_window_never_reaches_the_server[/docs/retry]",
+      "reason": "no Chromium for the network-effect guard"
+    },
+    {
+      "case": "backend.tests.test_browser_network_guard_lease::test_a_write_after_the_action_window_never_reaches_the_server[/docs/sw_delay]",
+      "reason": "no Chromium for the network-effect guard"
+    },
+    {
+      "case": "backend.tests.test_browser_network_guard_lease::test_a_write_after_the_action_window_never_reaches_the_server[/docs/dworker]",
+      "reason": "no Chromium for the network-effect guard"
+    },
+    {
+      "case": "backend.tests.test_browser_network_guard_lease::test_a_write_after_the_action_window_never_reaches_the_server[/docs/open_blank_delay]",
+      "reason": "no Chromium for the network-effect guard"
+    },
+    {
+      "case": "backend.tests.test_browser_network_guard_lease::test_the_retry_after_a_block_is_stopped_by_the_freeze",
+      "reason": "no Chromium for the network-effect guard"
+    },
+    {
+      "case": "backend.tests.test_browser_network_guard_lease::test_releasing_the_lease_freezes_the_page_before_a_late_write",
+      "reason": "no Chromium for the network-effect guard"
+    },
+    {
+      "case": "backend.tests.test_browser_network_guard_lease::test_a_newer_lease_ends_the_older_leases_guard_first",
+      "reason": "no Chromium for the network-effect guard"
+    },
+    {
+      "case": "backend.tests.test_browser_network_guard_lease::test_reads_between_actions_still_flow_under_the_guard",
+      "reason": "no Chromium for the network-effect guard"
+    },
+    {
+      "case": "backend.tests.test_browser_network_guard_lease::test_a_load_time_beacon_on_a_read_only_watch_is_dropped_and_the_task_continues",
+      "reason": "no Chromium for the network-effect guard"
+    },
+    {
+      "case": "backend.tests.test_browser_network_guard_lease::test_a_delayed_write_after_a_click_on_a_read_only_task_still_goes_to_the_owner",
+      "reason": "no Chromium for the network-effect guard"
+    },
+    {
+      "case": "backend.tests.test_browser_network_guard_lease::test_a_background_write_after_the_first_click_is_not_background",
+      "reason": "no Chromium for the network-effect guard"
+    },
+    {
+      "case": "backend.tests.test_browser_network_guard_lease::test_a_websocket_open_is_detected_named_so_and_the_page_is_closed",
+      "reason": "no Chromium for the network-effect guard"
+    },
+    {
+      "case": "backend.tests.test_browser_network_guard_lease::test_the_settle_window_alone_catches_a_write_between_the_action_and_the_landing",
+      "reason": "no Chromium for the network-effect guard"
+    },
+    {
+      "case": "backend.tests.test_browser_network_guard_lease::test_a_document_replacestated_into_the_scope_is_judged_by_its_real_url[frame-navigated]",
+      "reason": "no Chromium for the network-effect guard"
+    },
+    {
+      "case": "backend.tests.test_browser_network_guard_lease::test_a_document_replacestated_into_the_scope_is_judged_by_its_real_url[navigation-timing]",
+      "reason": "no Chromium for the network-effect guard"
+    },
+    {
+      "case": "backend.tests.test_browser_network_guard_lease::test_interaction_step_gives_the_lease_back_through_the_harness",
+      "reason": "no Chromium for the network-effect guard"
+    },
+    {
+      "case": "backend.tests.test_browser_network_guard_lease::test_a_write_blocked_between_steps_of_a_held_lease_goes_to_the_owner_at_the_next_step",
+      "reason": "no Chromium for the network-effect guard"
+    },
+    {
+      "case": "backend.tests.test_browser_network_guard_lease::test_release_is_fenced",
+      "reason": "no Chromium for the network-effect guard"
+    },
+    {
+      "case": "backend.tests.test_browser_network_guard_lease::test_the_mutating_flag_is_not_granted_by_a_read",
+      "reason": "no Chromium for the network-effect guard"
+    },
+    {
+      "case": "backend.tests.test_browser_review_i5_task_scope::test_real_chromium_no_scope_fails_closed_and_path_scope_holds",
+      "reason": "no Chromium/Playwright available"
+    },
+    {
+      "case": "backend.tests.test_browser_review_i5_task_scope::test_real_chromium_link_destination_must_be_in_scope",
+      "reason": "no Chromium/Playwright available"
+    },
+    {
+      "case": "backend.tests.test_browser_review_i5_task_scope::test_real_chromium_harness_rechecks_scope_and_binding_at_the_click",
+      "reason": "no Chromium/Playwright available"
+    },
+    {
+      "case": "backend.tests.test_browser_review_i5_task_scope::test_major1_visible_text_is_reported_and_classified",
+      "reason": "no Chromium/Playwright available"
+    },
+    {
+      "case": "backend.tests.test_browser_review_i5_task_scope::test_major2_unresolved_structures_are_a4",
+      "reason": "no Chromium/Playwright available"
+    },
+    {
+      "case": "backend.tests.test_browser_review_i5_task_scope::test_major2_hit_test_refuses_an_overlay_the_describe_did_not_see",
+      "reason": "no Chromium/Playwright available"
+    },
+    {
+      "case": "backend.tests.test_browser_review_i5_task_scope::test_major2_swap_during_the_click_is_cancelled",
+      "reason": "no Chromium/Playwright available"
+    },
+    {
+      "case": "backend.tests.test_browser_review_i5_task_scope::test_major2_binding_survives_a_selector_swap_and_refuses_a_replaced_node",
+      "reason": "no Chromium/Playwright available"
+    },
+    {
+      "case": "backend.tests.test_browser_review_i5_task_scope::test_major2_a_label_changed_after_classification_is_refused",
+      "reason": "no Chromium/Playwright available"
+    },
+    {
+      "case": "backend.tests.test_browser_review_i5_task_scope::test_major3_press_key_is_classified_against_the_focused_element",
+      "reason": "no Chromium/Playwright available"
+    },
+    {
+      "case": "backend.tests.test_browser_review_i5_task_scope::test_major3_unknown_focus_and_moved_focus",
+      "reason": "no Chromium/Playwright available"
+    },
+    {
+      "case": "backend.tests.test_browser_review_i5_task_scope::test_major4_form_context_is_reported_and_judged",
+      "reason": "no Chromium/Playwright available"
+    },
+    {
+      "case": "backend.tests.test_browser_review_i5_task_scope::test_major4_fill_in_a_form_goes_to_the_bound_field",
+      "reason": "no Chromium/Playwright available"
+    },
+    {
+      "case": "backend.tests.test_browser_review_i5_task_scope::test_major5_image_and_css_names_are_text_and_empty_names_are_a4",
+      "reason": "no Chromium/Playwright available"
+    },
+    {
+      "case": "backend.tests.test_browser_review_i6_scope::test_m3_vectors_match_real_chromiums_whatwg_parser",
+      "reason": "no Chromium/Playwright available"
+    },
+    {
+      "case": "backend.tests.test_browser_review_i6_scope::test_m3_harness_refuses_navigate_traversal_on_its_own[https://docs.example.com/docs/../checkout/pay]",
+      "reason": "no Chromium/Playwright available"
+    },
+    {
+      "case": "backend.tests.test_browser_review_i6_scope::test_m3_harness_refuses_navigate_traversal_on_its_own[https://docs.example.com/docs/%2e%2e/checkout/pay]",
+      "reason": "no Chromium/Playwright available"
+    },
+    {
+      "case": "backend.tests.test_browser_review_i6_scope::test_m3_harness_refuses_navigate_traversal_on_its_own[https://docs.example.com/docs/..\\\\checkout/pay]",
+      "reason": "no Chromium/Playwright available"
+    },
+    {
+      "case": "backend.tests.test_browser_review_i6_scope::test_m3_navigate_in_scope_still_lands",
+      "reason": "no Chromium/Playwright available"
+    },
+    {
+      "case": "backend.tests.test_browser_review_i6_scope::test_m3_runtime_destination_out_of_scope_is_lane_4_and_closed[/docs/onclick_out-#b]",
+      "reason": "no Chromium/Playwright available"
+    },
+    {
+      "case": "backend.tests.test_browser_review_i6_scope::test_m3_runtime_destination_out_of_scope_is_lane_4_and_closed[/docs/href_swap-#a]",
+      "reason": "no Chromium/Playwright available"
+    },
+    {
+      "case": "backend.tests.test_browser_review_i6_scope::test_m3_control_runtime_destination_in_scope_succeeds",
+      "reason": "no Chromium/Playwright available"
+    },
+    {
+      "case": "backend.tests.test_browser_review_i6_scope::test_m3_describe_runs_in_an_isolated_world[/docs/url_poison]",
+      "reason": "no Chromium/Playwright available"
+    },
+    {
+      "case": "backend.tests.test_browser_review_i6_scope::test_m3_describe_runs_in_an_isolated_world[/docs/getattr_poison]",
+      "reason": "no Chromium/Playwright available"
+    },
+    {
+      "case": "backend.tests.test_browser_review_i6_scope::test_m2_harness_refuses_mutating_paths_without_a_scope",
+      "reason": "no Chromium/Playwright available"
+    },
+    {
+      "case": "backend.tests.test_browser_review_i6_scope::test_m3_token_in_link_text_is_masked_and_never_reaches_jev",
+      "reason": "no Chromium/Playwright available"
+    },
+    {
+      "case": "backend.tests.test_browser_review_i6_scope::test_m4_page_role_never_reaches_the_step_ledger",
+      "reason": "no Chromium/Playwright available"
+    },
+    {
+      "case": "backend.tests.test_browser_review_i6_scope::test_m3_harness_itself_refuses_an_out_of_scope_landing",
+      "reason": "no Chromium/Playwright available"
+    },
+    {
+      "case": "backend.tests.test_browser_review_i6_scope::test_m3_the_page_script_itself_masks_the_name",
+      "reason": "no Chromium/Playwright available"
+    },
+    {
+      "case": "backend.tests.test_harness_elements::test_real_chromium_reports_roles_names_attributes_and_redacts",
+      "reason": "no Chromium/Playwright available for the real-browser element test"
+    },
+    {
+      "case": "backend.tests.test_harness_elements::test_real_chromium_benign_public_page_is_classifiable",
+      "reason": "no Chromium/Playwright available for the real-browser element test"
+    },
+    {
+      "case": "backend.tests.test_harness_elements::test_real_chromium_in_page_snapshot_is_already_redacted",
+      "reason": "no Chromium/Playwright available for the real-browser element test"
+    },
+    {
+      "case": "backend.tests.test_harness_elements::test_real_page_benign_click_resolves_and_executes_pay_goes_to_takeover",
+      "reason": "no Chromium/Playwright available for the real-browser element test"
+    },
+    {
+      "case": "backend.tests.test_harness_i5_redaction::test_real_chromium_redacts_mirrored_values_and_url_tokens",
+      "reason": "no Chromium/Playwright available for the real-browser element test"
+    },
+    {
+      "case": "backend.tests.test_harness_i5_redaction::test_real_chromium_login_state_is_unknown_with_any_site_state",
+      "reason": "no Chromium/Playwright available for the real-browser element test"
+    },
+    {
+      "case": "backend.tests.test_harness_pseudo_hit_ownership::test_direct_pseudo_owner_describes_and_activates_bound_button_once[before]",
+      "reason": "no Chromium/Playwright available"
+    },
+    {
+      "case": "backend.tests.test_harness_pseudo_hit_ownership::test_direct_pseudo_owner_describes_and_activates_bound_button_once[after]",
+      "reason": "no Chromium/Playwright available"
+    },
+    {
+      "case": "backend.tests.test_harness_pseudo_hit_ownership::test_foreign_overlay_is_occluded_and_never_activated[regular-overlay]",
+      "reason": "no Chromium/Playwright available"
+    },
+    {
+      "case": "backend.tests.test_harness_pseudo_hit_ownership::test_foreign_overlay_is_occluded_and_never_activated[pseudo-overlay]",
+      "reason": "no Chromium/Playwright available"
+    },
+    {
+      "case": "backend.tests.test_harness_pseudo_hit_ownership::test_nested_interactive_control_cannot_be_normalized_to_wrapper[nested-control]",
+      "reason": "no Chromium/Playwright available"
+    },
+    {
+      "case": "backend.tests.test_harness_pseudo_hit_ownership::test_nested_interactive_control_cannot_be_normalized_to_wrapper[nested-control-pseudo]",
+      "reason": "no Chromium/Playwright available"
+    },
+    {
+      "case": "backend.tests.test_harness_pseudo_hit_ownership::test_ownership_and_hit_are_fresh_after_successful_description[late-regular-overlay]",
+      "reason": "no Chromium/Playwright available"
+    },
+    {
+      "case": "backend.tests.test_harness_pseudo_hit_ownership::test_ownership_and_hit_are_fresh_after_successful_description[late-pseudo-overlay]",
+      "reason": "no Chromium/Playwright available"
+    },
+    {
+      "case": "backend.tests.test_harness_pseudo_hit_ownership::test_cdp_ownership_faults_fail_closed_on_real_pseudo_hit[descriptor-error]",
+      "reason": "no Chromium/Playwright available"
+    },
+    {
+      "case": "backend.tests.test_harness_pseudo_hit_ownership::test_cdp_ownership_faults_fail_closed_on_real_pseudo_hit[missing-node]",
+      "reason": "no Chromium/Playwright available"
+    },
+    {
+      "case": "backend.tests.test_harness_pseudo_hit_ownership::test_cdp_ownership_faults_fail_closed_on_real_pseudo_hit[missing-pseudos]",
+      "reason": "no Chromium/Playwright available"
+    },
+    {
+      "case": "backend.tests.test_harness_pseudo_hit_ownership::test_cdp_ownership_faults_fail_closed_on_real_pseudo_hit[noninteger-pseudo-id]",
+      "reason": "no Chromium/Playwright available"
+    },
+    {
+      "case": "backend.tests.test_harness_pseudo_hit_ownership::test_cdp_ownership_faults_fail_closed_on_real_pseudo_hit[unknown-pseudo-type]",
+      "reason": "no Chromium/Playwright available"
+    },
+    {
+      "case": "backend.tests.test_harness_pseudo_hit_ownership::test_cdp_ownership_faults_fail_closed_on_real_pseudo_hit[boolean-hit-id]",
+      "reason": "no Chromium/Playwright available"
+    },
+    {
+      "case": "backend.tests.test_harness_pseudo_hit_ownership::test_cdp_ownership_faults_fail_closed_on_real_pseudo_hit[floating-hit-id]",
+      "reason": "no Chromium/Playwright available"
+    },
+    {
+      "case": "backend.tests.test_harness_pseudo_hit_ownership::test_cdp_ownership_faults_fail_closed_on_real_pseudo_hit[string-hit-id]",
+      "reason": "no Chromium/Playwright available"
+    },
+    {
+      "case": "backend.tests.test_harness_pseudo_hit_ownership::test_cdp_ownership_faults_fail_closed_on_real_pseudo_hit[zero-hit-id]",
+      "reason": "no Chromium/Playwright available"
+    },
+    {
+      "case": "backend.tests.test_jev_browser_eligibility::test_vendored_dds_files_are_the_audited_blobs",
+      "reason": "DDS checkout not present; blob hashes pinned above"
+    },
+    {
+      "case": "backend.tests.test_jev_no_generic_executor::test_no_fabric_or_generic_operation_survives_the_b1_validator[click]",
+      "reason": "member of the B1 closed set by definition"
+    },
+    {
+      "case": "backend.tests.test_jev_no_generic_executor::test_no_fabric_or_generic_operation_survives_the_b1_validator[scroll]",
+      "reason": "member of the B1 closed set by definition"
+    },
+    {
+      "case": "backend.tests.test_jev_no_generic_executor::test_no_fabric_or_generic_operation_survives_the_b1_validator[select]",
+      "reason": "member of the B1 closed set by definition"
+    },
+    {
+      "case": "tests.contracts.test_android_instrumentation_abi::test_actual_agp_direct_package_release_refuses_missing_core_deployment_profile",
+      "reason": "opt-in actual AGP release guard check"
+    },
+    {
+      "case": "tests.contracts.test_android_production_target::test_actual_agp_valid_target_still_refuses_missing_production_signing",
+      "reason": "opt-in actual AGP signing guard check"
+    },
+    {
+      "case": "tests.contracts.test_van_browser_core_firewall::test_live_ruleset_drops_browser_udp_and_direct_tcp",
+      "reason": "needs root, unshare -n, nft and setpriv"
+    },
+    {
+      "case": "tests.contracts.test_van_browser_core_firewall::test_live_dns_to_an_off_host_resolver_is_udp_only",
+      "reason": "needs root, unshare -n, nft and setpriv"
+    },
+    {
+      "case": "tests.contracts.test_van_browser_core_firewall::test_live_qualify_reports_the_firewall_and_the_proxy_green",
+      "reason": "needs root, unshare -n, nft and setpriv"
+    },
+    {
+      "case": "tests.contracts.test_van_browser_core_firewall::test_live_qualify_fails_without_the_ruleset",
+      "reason": "needs root, unshare -n, nft and setpriv"
+    },
+    {
+      "case": "tests.contracts.test_van_browser_core_firewall::test_live_qualify_does_not_take_a_kernel_reset_for_the_ruleset",
+      "reason": "needs root, unshare -n, nft and setpriv"
+    }
+  ],
+  "logs_sha256": {
+    "/tmp/van-9573-backend.xml": "8ef3078db67a4bdb5946b4b9c41873654c2a1e3a07086e12a92ceb2f41836a81",
+    "/tmp/van-9573-full-backend.txt": "aba507b9b5bdb784e0dff3ac816572f7085e4cbab11a9618648205343a41ee99",
+    "/tmp/van-9573-storage-audit.json": "1b56ec3befec4b9a93f4edf7df778c2b426d7820087e51a143a9ca6967174f1c"
+  },
+  "scope": "Frozen source tests only. Not newer working source, deployment, provider, independent gate or handset acceptance."
+}

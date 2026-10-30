@@ -1,0 +1,19 @@
+{
+  "command": [
+    "/workspace/van-backend-venv-20261025/bin/python",
+    "-m",
+    "pytest",
+    "trading/tests/test_mt5_recorded_entry_charges.py",
+    "-q",
+    "--junitxml=/workspace/van-mt5-recorded-charge-producers-r2-20261029.xml"
+  ],
+  "cwd": "/workspace/van-review-2026-10-18/publish",
+  "controller_pid": 887070,
+  "started_at_utc": "2026-10-29T00:07:02.080862+00:00",
+  "timeout_seconds": 120,
+  "state": "COMPLETED",
+  "command_pid": 887073,
+  "exit": 1,
+  "adopted_children_reaped": [],
+  "finished_at_utc": "2026-10-29T00:07:05.856453+00:00"
+}

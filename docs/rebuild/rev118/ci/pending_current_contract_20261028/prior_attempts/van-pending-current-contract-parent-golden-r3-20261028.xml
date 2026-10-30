@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="4" skipped="0" tests="4" time="0.930" timestamp="2026-10-28T08:49:34.574906+00:00" hostname="6e9feff21467"><testcase classname="trading.tests.test_pending_current_contract" name="test_actual_native_owner_revalues_pending_loss_with_higher_current_contract[limits0-CURRENCY_LEG_EXPOSURE-single]" time="0.389"><failure message="AssertionError: RiskDecision(trade_intent_id='ti-1', decision=&lt;Decision.APPROVED: 'APPROVED'&gt;, reason_code='OK', reason_detail='', app...2c3606bf0', mandate_hash='e615d4627fd457843003d7fa78cf624ac5237ce4e56d22090f696a32d26d65ea', approval_schema_version=2)&#10;assert ('OK' == 'CURRENCY_LEG_EXPOSURE'&#10;  &#10;  - CURRENCY_LEG_EXPOSURE&#10;  + OK)">tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-76/test_actual_native_owner_reval0')
+eurusd = SymbolContract(symbol='EURUSD', venue='mt5', base_currency='EUR', quote_currency='USD', account_currency='USD', contra...=Decimal('0'), max_adv_participation=Decimal('0.10'), liquidity_haircut=Decimal('0'), round_trip_cost_pct=Decimal('0'))
+kind = 'single', limits = {'max_open_stop_risk': '0.012'}
+expected = 'CURRENCY_LEG_EXPOSURE'
+
+    @pytest.mark.parametrize('kind',['single','account'])
+    @pytest.mark.parametrize('limits,expected',[
+        ({'max_open_stop_risk':'0.012'},'CURRENCY_LEG_EXPOSURE'),
+        ({'max_open_stop_risk':'0.010','max_currency_leg_exposure':'0.0400'},'PORTFOLIO_HEAT'),
+    ])
+    def test_actual_native_owner_revalues_pending_loss_with_higher_current_contract(tmp_path,eurusd,kind,limits,expected):
+        ledger,adapter,account,_,original=native_facts(tmp_path,eurusd)
+        _,first=command(ledger,original,'before-contract-change');receipt(ledger,first,status='ACCEPTED')
+        b=other_context(ledger,adapter,account,original,alias='second_alias')
+        current=replace(account,account_alias=b.account_alias,
+            funding_mark=replace(account.funding_mark,account_alias=b.account_alias),
+            used_margin=D(0),free_margin=account.equity,margin_level_pct=None)
+        # Existing risk owner receives a changed current contract for this symbol;
+        # no broker, native conversion or external account qualification is claimed.
+        terms=replace(eurusd,tick_value=eurusd.tick_value*2)
+        b=replace(b,symbol_contract=terms)
+        owner=producer(kind,ledger,adapter,current,b);now=NOW*1000+100
+        if kind=='single':facts=owner.snapshot(now_ms=now,quote_age_ms=0,strategy_id=intent().strategy_id)
+        else:
+            owner.clock=lambda:now
+            facts=owner._snapshot_for(N(symbol='EURUSD',strategy_id=intent().strategy_id))
+        assert facts.symbol_contract.tick_value==terms.tick_value
+        assert facts.reconciliation_ok and not facts.preservation_blocks_new_risk and not facts.open_positions
+        grant=TradingMandate.from_mapping(mandate_dict(account_alias=b.account_alias,
+            max_positions_per_instrument=10,max_total_positions=20,**limits))
+        result=RiskAuthority(grant).evaluate_safe(intent(account_alias=b.account_alias),facts)
+&gt;       assert result.reason_code==expected and result.decision.value=='REJECTED',result
+E       AssertionError: RiskDecision(trade_intent_id='ti-1', decision=&lt;Decision.APPROVED: 'APPROVED'&gt;, reason_code='OK', reason_detail='', app...2c3606bf0', mandate_hash='e615d4627fd457843003d7fa78cf624ac5237ce4e56d22090f696a32d26d65ea', approval_schema_version=2)
+E       assert ('OK' == 'CURRENCY_LEG_EXPOSURE'
+E         
+E         - CURRENCY_LEG_EXPOSURE
+E         + OK)
+
+trading/tests/test_pending_current_contract.py:41: AssertionError</failure></testcase><testcase classname="trading.tests.test_pending_current_contract" name="test_actual_native_owner_revalues_pending_loss_with_higher_current_contract[limits0-CURRENCY_LEG_EXPOSURE-account]" time="0.100"><failure message="AssertionError: RiskDecision(trade_intent_id='ti-1', decision=&lt;Decision.APPROVED: 'APPROVED'&gt;, reason_code='OK', reason_detail='', app...2c3606bf0', mandate_hash='78fef546b39304dc1d6130db7b9014b1224ea0fa3b18f6b6e8c5c65d56057ca1', approval_schema_version=2)&#10;assert ('OK' == 'CURRENCY_LEG_EXPOSURE'&#10;  &#10;  - CURRENCY_LEG_EXPOSURE&#10;  + OK)">tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-76/test_actual_native_owner_reval1')
+eurusd = SymbolContract(symbol='EURUSD', venue='mt5', base_currency='EUR', quote_currency='USD', account_currency='USD', contra...=Decimal('0'), max_adv_participation=Decimal('0.10'), liquidity_haircut=Decimal('0'), round_trip_cost_pct=Decimal('0'))
+kind = 'account', limits = {'max_open_stop_risk': '0.012'}
+expected = 'CURRENCY_LEG_EXPOSURE'
+
+    @pytest.mark.parametrize('kind',['single','account'])
+    @pytest.mark.parametrize('limits,expected',[
+        ({'max_open_stop_risk':'0.012'},'CURRENCY_LEG_EXPOSURE'),
+        ({'max_open_stop_risk':'0.010','max_currency_leg_exposure':'0.0400'},'PORTFOLIO_HEAT'),
+    ])
+    def test_actual_native_owner_revalues_pending_loss_with_higher_current_contract(tmp_path,eurusd,kind,limits,expected):
+        ledger,adapter,account,_,original=native_facts(tmp_path,eurusd)
+        _,first=command(ledger,original,'before-contract-change');receipt(ledger,first,status='ACCEPTED')
+        b=other_context(ledger,adapter,account,original,alias='second_alias')
+        current=replace(account,account_alias=b.account_alias,
+            funding_mark=replace(account.funding_mark,account_alias=b.account_alias),
+            used_margin=D(0),free_margin=account.equity,margin_level_pct=None)
+        # Existing risk owner receives a changed current contract for this symbol;
+        # no broker, native conversion or external account qualification is claimed.
+        terms=replace(eurusd,tick_value=eurusd.tick_value*2)
+        b=replace(b,symbol_contract=terms)
+        owner=producer(kind,ledger,adapter,current,b);now=NOW*1000+100
+        if kind=='single':facts=owner.snapshot(now_ms=now,quote_age_ms=0,strategy_id=intent().strategy_id)
+        else:
+            owner.clock=lambda:now
+            facts=owner._snapshot_for(N(symbol='EURUSD',strategy_id=intent().strategy_id))
+        assert facts.symbol_contract.tick_value==terms.tick_value
+        assert facts.reconciliation_ok and not facts.preservation_blocks_new_risk and not facts.open_positions
+        grant=TradingMandate.from_mapping(mandate_dict(account_alias=b.account_alias,
+            max_positions_per_instrument=10,max_total_positions=20,**limits))
+        result=RiskAuthority(grant).evaluate_safe(intent(account_alias=b.account_alias),facts)
+&gt;       assert result.reason_code==expected and result.decision.value=='REJECTED',result
+E       AssertionError: RiskDecision(trade_intent_id='ti-1', decision=&lt;Decision.APPROVED: 'APPROVED'&gt;, reason_code='OK', reason_detail='', app...2c3606bf0', mandate_hash='78fef546b39304dc1d6130db7b9014b1224ea0fa3b18f6b6e8c5c65d56057ca1', approval_schema_version=2)
+E       assert ('OK' == 'CURRENCY_LEG_EXPOSURE'
+E         
+E         - CURRENCY_LEG_EXPOSURE
+E         + OK)
+
+trading/tests/test_pending_current_contract.py:41: AssertionError</failure></testcase><testcase classname="trading.tests.test_pending_current_contract" name="test_actual_native_owner_revalues_pending_loss_with_higher_current_contract[limits1-PORTFOLIO_HEAT-single]" time="0.035"><failure message="AssertionError: RiskDecision(trade_intent_id='ti-1', decision=&lt;Decision.APPROVED: 'APPROVED'&gt;, reason_code='OK', reason_detail='', app...2c3606bf0', mandate_hash='70f9a160cf6f7d458b79a9641bb1ee8dcd79b2a5e3e4ed18e45ee6819e258638', approval_schema_version=2)&#10;assert ('OK' == 'PORTFOLIO_HEAT'&#10;  &#10;  - PORTFOLIO_HEAT&#10;  + OK)">tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-76/test_actual_native_owner_reval2')
+eurusd = SymbolContract(symbol='EURUSD', venue='mt5', base_currency='EUR', quote_currency='USD', account_currency='USD', contra...=Decimal('0'), max_adv_participation=Decimal('0.10'), liquidity_haircut=Decimal('0'), round_trip_cost_pct=Decimal('0'))
+kind = 'single'
+limits = {'max_open_stop_risk': '0.010', 'max_currency_leg_exposure': '0.0400'}
+expected = 'PORTFOLIO_HEAT'
+
+    @pytest.mark.parametrize('kind',['single','account'])
+    @pytest.mark.parametrize('limits,expected',[
+        ({'max_open_stop_risk':'0.012'},'CURRENCY_LEG_EXPOSURE'),
+        ({'max_open_stop_risk':'0.010','max_currency_leg_exposure':'0.0400'},'PORTFOLIO_HEAT'),
+    ])
+    def test_actual_native_owner_revalues_pending_loss_with_higher_current_contract(tmp_path,eurusd,kind,limits,expected):
+        ledger,adapter,account,_,original=native_facts(tmp_path,eurusd)
+        _,first=command(ledger,original,'before-contract-change');receipt(ledger,first,status='ACCEPTED')
+        b=other_context(ledger,adapter,account,original,alias='second_alias')
+        current=replace(account,account_alias=b.account_alias,
+            funding_mark=replace(account.funding_mark,account_alias=b.account_alias),
+            used_margin=D(0),free_margin=account.equity,margin_level_pct=None)
+        # Existing risk owner receives a changed current contract for this symbol;
+        # no broker, native conversion or external account qualification is claimed.
+        terms=replace(eurusd,tick_value=eurusd.tick_value*2)
+        b=replace(b,symbol_contract=terms)
+        owner=producer(kind,ledger,adapter,current,b);now=NOW*1000+100
+        if kind=='single':facts=owner.snapshot(now_ms=now,quote_age_ms=0,strategy_id=intent().strategy_id)
+        else:
+            owner.clock=lambda:now
+            facts=owner._snapshot_for(N(symbol='EURUSD',strategy_id=intent().strategy_id))
+        assert facts.symbol_contract.tick_value==terms.tick_value
+        assert facts.reconciliation_ok and not facts.preservation_blocks_new_risk and not facts.open_positions
+        grant=TradingMandate.from_mapping(mandate_dict(account_alias=b.account_alias,
+            max_positions_per_instrument=10,max_total_positions=20,**limits))
+        result=RiskAuthority(grant).evaluate_safe(intent(account_alias=b.account_alias),facts)
+&gt;       assert result.reason_code==expected and result.decision.value=='REJECTED',result
+E       AssertionError: RiskDecision(trade_intent_id='ti-1', decision=&lt;Decision.APPROVED: 'APPROVED'&gt;, reason_code='OK', reason_detail='', app...2c3606bf0', mandate_hash='70f9a160cf6f7d458b79a9641bb1ee8dcd79b2a5e3e4ed18e45ee6819e258638', approval_schema_version=2)
+E       assert ('OK' == 'PORTFOLIO_HEAT'
+E         
+E         - PORTFOLIO_HEAT
+E         + OK)
+
+trading/tests/test_pending_current_contract.py:41: AssertionError</failure></testcase><testcase classname="trading.tests.test_pending_current_contract" name="test_actual_native_owner_revalues_pending_loss_with_higher_current_contract[limits1-PORTFOLIO_HEAT-account]" time="0.024"><failure message="AssertionError: RiskDecision(trade_intent_id='ti-1', decision=&lt;Decision.APPROVED: 'APPROVED'&gt;, reason_code='OK', reason_detail='', app...2c3606bf0', mandate_hash='a8125f602800b36ab0bb86dea4c53a1aaf4bde124e5b024dc50f58c42f3f25dc', approval_schema_version=2)&#10;assert ('OK' == 'PORTFOLIO_HEAT'&#10;  &#10;  - PORTFOLIO_HEAT&#10;  + OK)">tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-76/test_actual_native_owner_reval3')
+eurusd = SymbolContract(symbol='EURUSD', venue='mt5', base_currency='EUR', quote_currency='USD', account_currency='USD', contra...=Decimal('0'), max_adv_participation=Decimal('0.10'), liquidity_haircut=Decimal('0'), round_trip_cost_pct=Decimal('0'))
+kind = 'account'
+limits = {'max_open_stop_risk': '0.010', 'max_currency_leg_exposure': '0.0400'}
+expected = 'PORTFOLIO_HEAT'
+
+    @pytest.mark.parametrize('kind',['single','account'])
+    @pytest.mark.parametrize('limits,expected',[
+        ({'max_open_stop_risk':'0.012'},'CURRENCY_LEG_EXPOSURE'),
+        ({'max_open_stop_risk':'0.010','max_currency_leg_exposure':'0.0400'},'PORTFOLIO_HEAT'),
+    ])
+    def test_actual_native_owner_revalues_pending_loss_with_higher_current_contract(tmp_path,eurusd,kind,limits,expected):
+        ledger,adapter,account,_,original=native_facts(tmp_path,eurusd)
+        _,first=command(ledger,original,'before-contract-change');receipt(ledger,first,status='ACCEPTED')
+        b=other_context(ledger,adapter,account,original,alias='second_alias')
+        current=replace(account,account_alias=b.account_alias,
+            funding_mark=replace(account.funding_mark,account_alias=b.account_alias),
+            used_margin=D(0),free_margin=account.equity,margin_level_pct=None)
+        # Existing risk owner receives a changed current contract for this symbol;
+        # no broker, native conversion or external account qualification is claimed.
+        terms=replace(eurusd,tick_value=eurusd.tick_value*2)
+        b=replace(b,symbol_contract=terms)
+        owner=producer(kind,ledger,adapter,current,b);now=NOW*1000+100
+        if kind=='single':facts=owner.snapshot(now_ms=now,quote_age_ms=0,strategy_id=intent().strategy_id)
+        else:
+            owner.clock=lambda:now
+            facts=owner._snapshot_for(N(symbol='EURUSD',strategy_id=intent().strategy_id))
+        assert facts.symbol_contract.tick_value==terms.tick_value
+        assert facts.reconciliation_ok and not facts.preservation_blocks_new_risk and not facts.open_positions
+        grant=TradingMandate.from_mapping(mandate_dict(account_alias=b.account_alias,
+            max_positions_per_instrument=10,max_total_positions=20,**limits))
+        result=RiskAuthority(grant).evaluate_safe(intent(account_alias=b.account_alias),facts)
+&gt;       assert result.reason_code==expected and result.decision.value=='REJECTED',result
+E       AssertionError: RiskDecision(trade_intent_id='ti-1', decision=&lt;Decision.APPROVED: 'APPROVED'&gt;, reason_code='OK', reason_detail='', app...2c3606bf0', mandate_hash='a8125f602800b36ab0bb86dea4c53a1aaf4bde124e5b024dc50f58c42f3f25dc', approval_schema_version=2)
+E       assert ('OK' == 'PORTFOLIO_HEAT'
+E         
+E         - PORTFOLIO_HEAT
+E         + OK)
+
+trading/tests/test_pending_current_contract.py:41: AssertionError</failure></testcase></testsuite></testsuites>

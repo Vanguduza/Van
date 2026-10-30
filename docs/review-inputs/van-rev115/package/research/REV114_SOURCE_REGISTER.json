@@ -1,0 +1,135 @@
+{
+  "date": "2026-10-18",
+  "fresh_all_branch_audit": false,
+  "fresh_application_tests": false,
+  "records": [
+    {
+      "evidence_scope": "Owner compilation, not new implementation evidence",
+      "id": "SRC-CONSOLIDATED",
+      "identity": "d3d1f8fe9e9c39e23d291115ac3a8b55c46bca8bdca48336dfd29736080ae7cf",
+      "observed_date": "2026-10-18",
+      "title": "Owner consolidated recommendations",
+      "url": "attachment:VAN_VATI_CONSOLIDATED_RECOMMENDATIONS_AND_IMPROVEMENTS_REV1_20261018-1.md"
+    },
+    {
+      "evidence_scope": "237 requirement objects; 1328 test objects; 131 units; 234 contexts. Not the different D4 count quoted in the compilation.",
+      "id": "SRC-PARENT",
+      "identity": "da9125a0c918cd197d15671c6152288df641f0eeacff148f6af01c35c4280112",
+      "observed_date": "2026-10-18",
+      "title": "Unified Rev 1.13 exact delivered archive",
+      "url": "attachment:VAN_NEXT_UNIFIED_REBUILD_BLUEPRINT_PACK_REV1_13_20261018.zip"
+    },
+    {
+      "additional_source_reads": [
+        {
+          "blob": "571c06fe8af19c7a2549ad2dabfd11f7f0e7efed",
+          "scope": "Full source read, estimator and in-memory evidence behavior.",
+          "url": "https://github.com/Vanguduza/Van/blob/8eb1889822fc8a83f219977c15340172e16acd91/trading/vati/execution/policy.py"
+        }
+      ],
+      "evidence_scope": "PR101 select lines 190–290 refreshed; full main version also read. New static issues, not runtime reproductions.",
+      "id": "SRC-POLICY",
+      "identity": "blob:199609008d7fdc8c957baa5206649bbbc664dba6",
+      "observed_date": "2026-10-18",
+      "title": "ExecutionPolicyEngine immutable source reads",
+      "url": "https://github.com/Vanguduza/Van/blob/a39f241b0135cf92cc5a6b9a28af226aa294603d/trading/vati/execution/policy.py"
+    },
+    {
+      "evidence_scope": "Forbidden EXECUTION_POLICY and production-alias targets; retain and add narrow qualified selection boundary.",
+      "id": "SRC-BOUNDARY",
+      "identity": "blob:6db46ca03cec2f914c9b685ca2ff28029e44f3b7",
+      "observed_date": "2026-10-18",
+      "title": "LearningBoundary immutable source",
+      "url": "https://github.com/Vanguduza/Van/blob/8eb1889822fc8a83f219977c15340172e16acd91/trading/vati/learning/boundary.py"
+    },
+    {
+      "evidence_scope": "Observed open/unmerged at a39f241b; metadata not proof of current deployment.",
+      "id": "SRC-PR101",
+      "identity": null,
+      "observed_date": "2026-10-18",
+      "title": "Live PR metadata",
+      "url": "https://github.com/Vanguduza/Van/pull/101"
+    },
+    {
+      "evidence_scope": "F15 before normal implementation; F12 complete loop; F13 external matrix; schema checks not runtime proof.",
+      "id": "SRC-DIAL",
+      "identity": "blob:1e9b5587c07eadd24a2bed94891bbdc044ba5b5d",
+      "observed_date": "2026-10-18",
+      "title": "PRD-DDP-R2 Fable predevelopment standard",
+      "url": "https://github.com/Vanguduza/dial-development-system/blob/master/docs/dial/final-audit/06_DEVELOPMENT_SYSTEM/PRD_TO_DETERMINISTIC_DEVELOPMENT_PACK_PROJECT_PREPARATION_GUIDE_REV_2.md"
+    },
+    {
+      "evidence_scope": "Finite lifecycle executors and controllers are reference patterns, not a second VAN trading owner.",
+      "id": "EXT-HUMMINGBOT",
+      "identity": null,
+      "observed_date": "2026-10-18",
+      "title": "Hummingbot V2 architecture",
+      "url": "https://hummingbot.org/strategies/v2-strategies/"
+    },
+    {
+      "evidence_scope": "Venue/reconciliation, queue and persistence limits. Exact version must be qualified; no automatic durable-before-send guarantee.",
+      "id": "EXT-NAUTILUS",
+      "identity": null,
+      "observed_date": "2026-10-18",
+      "title": "NautilusTrader live trading",
+      "url": "https://nautilustrader.io/docs/latest/concepts/live/"
+    },
+    {
+      "evidence_scope": "Static mocked responses cannot qualify realistic execution, matching or latency.",
+      "id": "EXT-COINBASE",
+      "identity": null,
+      "observed_date": "2026-10-18",
+      "title": "Coinbase Advanced sandbox",
+      "url": "https://docs.cdp.coinbase.com/coinbase-app/advanced-trade-apis/sandbox"
+    },
+    {
+      "evidence_scope": "Example current venue parameters and conditional order capabilities; not owner eligibility or authorization.",
+      "id": "EXT-KRAKEN-ORDER",
+      "identity": null,
+      "observed_date": "2026-10-18",
+      "title": "Kraken Spot WebSocket v2 Add Order",
+      "url": "https://docs.kraken.com/exchange/api-reference/spot-websocket-v2/add_order"
+    },
+    {
+      "evidence_scope": "All-account cancellation can conflict with protective orders; scope must be qualified.",
+      "id": "EXT-KRAKEN-DMS",
+      "identity": null,
+      "observed_date": "2026-10-18",
+      "title": "Kraken Cancel on Disconnect",
+      "url": "https://docs.kraken.com/exchange/api-reference/spot-websocket-v2/cancel_after"
+    },
+    {
+      "evidence_scope": "Off-policy evaluation methodology subject to assumptions; no cure for unsupported actions.",
+      "id": "EXT-DR",
+      "identity": null,
+      "observed_date": "2026-10-18",
+      "title": "Doubly Robust Policy Evaluation and Learning, Dudík et al.",
+      "url": "https://arxiv.org/abs/1103.4601"
+    },
+    {
+      "evidence_scope": "Repeated monitoring methods only under verified assumptions; not a universal trading guarantee.",
+      "id": "EXT-CS",
+      "identity": null,
+      "observed_date": "2026-10-18",
+      "title": "Time-uniform, nonparametric, nonasymptotic confidence sequences, Howard et al.",
+      "url": "https://arxiv.org/abs/1810.08240"
+    },
+    {
+      "evidence_scope": "Selection/non-normal-return adjustment; not a universal probability of skill.",
+      "id": "EXT-DSR",
+      "identity": null,
+      "observed_date": "2026-10-18",
+      "title": "The Deflated Sharpe Ratio, Bailey and López de Prado",
+      "url": "https://www.davidhbailey.com/dhbpapers/deflated-sharpe.pdf"
+    },
+    {
+      "evidence_scope": "Pinned select() lines190–290: entry compatibility, fallback ordering, urgent-filter widenback. Static source only.",
+      "id": "SRC-POLICY-PR101",
+      "identity": "blob:199609008d7fdc8c957baa5206649bbbc664dba6",
+      "observed_date": "2026-10-18",
+      "title": "PR101 selection function",
+      "url": "https://github.com/Vanguduza/Van/blob/a39f241b0135cf92cc5a6b9a28af226aa294603d/trading/vati/execution/policy.py"
+    }
+  ],
+  "schema": "van.rev114.sources/1.0"
+}

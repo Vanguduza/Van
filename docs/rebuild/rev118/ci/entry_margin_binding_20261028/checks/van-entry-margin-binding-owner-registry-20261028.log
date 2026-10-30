@@ -1,0 +1,4 @@
+usage: refresh_owner_registry.py [-h]
+                                 [--final-source-manifest FINAL_SOURCE_MANIFEST]
+                                 [--android-receipt ANDROID_RECEIPT]
+refresh_owner_registry.py: error: unrecognized arguments: --check

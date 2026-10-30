@@ -1,0 +1,48 @@
+{
+  "schema": "van.rebuild.sampled-flow-risk-source/1",
+  "base_head": "9bf1acc4ed0239540d1ffffcc8cf9cf7eec16f82",
+  "updated_at_utc": "2026-10-26T19:16:21.414143+00:00",
+  "status": "SOURCE_TESTED_COMPONENT_NOT_NATIVE_RISK_SETTLEMENT_OR_UNIT_ACCEPTANCE",
+  "units": [
+    "BE-006"
+  ],
+  "unit_status": "IN_PROGRESS",
+  "acceptance": "NOT_ISSUED",
+  "source_sha256": {
+    "trading/vati/funding/flow_risk.py": "97b212ec4a09bf05d05e8ffb00eb36bab6770ae9a010940979c9fadeffc2fa16",
+    "trading/vati/funding/reconciliation.py": "f9caa80a9e42cbee06ea936a6664f95d2914af3a269fc6931f595157202835ce",
+    "trading/tests/test_flow_adjusted_risk.py": "8c9d42c2dd85b2e7bf7fb9d47cf72452b464226ad777220b74e88b567521d72f",
+    "trading/tests/test_native_valuation.py": "5b05aba3e7c6387143b496fab9dedb36fa3b4ee8ec7a9c8e217b1d155c06785c"
+  },
+  "wiring": "Existing exactunitization plus intermediatetypednormalizedsamples;immutableFlowAdjustedRisk consumedbyactualnativeperiod_report fromoriginalvaluations;legacyperformance/sourcecoveragerefsretained",
+  "actual_tests": {
+    "initial_model": "38passed(kernel+legacyunitization)/audit0;before2additionalsampleguardcases",
+    "initial_integration_SQLite": "122passed22PGdeselected/audit0;beforeextraSQLintermediatedrawdowncase",
+    "actual_pg_r1": "394passed0skip/audit0;productbytesidentical,earliertestcapacitycaseusedduplicates",
+    "final_pg": "394passed0skip/audit0/42.25seconds/all487runtime-testhashesmatch/ownedactualPGfixtureindependentlyabsent",
+    "stronger_capacity_control": "Uses4097otherwisevalidunique-sourcepointsandassertsexactcapacityreason;cannotpassviareused-referenceguard;no productassertionweakened",
+    "new_cases": 18,
+    "supplemental_faults_assertion_caught": 7,
+    "positive_and_restored_SQLite_controls": 10,
+    "supplemental_PG_parameters": "Explicitlydeselectedonlyinfault exercise;actualPGvariants executedin final selection",
+    "rebuild_workflow_T0_boundary": 122,
+    "counts_overlap": true
+  },
+  "independent_economic_oracles": [
+    "Intermediate50/225NAV gives7/9sampleddrawdown;flowboundariesalonegive0.2;deposit/withdraw unitissuance preserved",
+    "Fullredemptionandreplacementcapitalpreserveprior20percentloss",
+    "Unknownflowvalues/classification retainknownprefixwithoutzero fullmeasurement",
+    "Internalfees/alreadyexcludedcreditdonotissueexternalunits"
+  ],
+  "canonical_checks": {
+    "owner_frontend_drift": false,
+    "registry_cases": 374,
+    "registry_edits": 383,
+    "registry_findings": [],
+    "current_candidate_registry_execution": "NOT_RUN;exactpublished6c71canonical374executionseparatelyverified",
+    "consolidation_findings": []
+  },
+  "qualification": "Calculationrequiresalready-normalizedsourceinputs;cannotcertifythemorgrantnative/riskcapital/settlement/execution/unit/owner/production/Android/S24authority",
+  "remaining": "Nativehistoricalflowclock/normalizationqualification,multiassetaccounting,sharedreservations,reversals/compensatingfacts,BE007nativerails;fullcanonicalbackend/ML/assistantandAndroid/nativeacceptance",
+  "evidence": "ci/sampled_flow_risk_20261026"
+}

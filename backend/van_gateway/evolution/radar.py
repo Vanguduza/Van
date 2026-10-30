@@ -462,8 +462,23 @@ class StrategyLearning:
     PREFERRED_MIN_RUNS = 10
     PREFERRED_MIN_RATE = 0.9
 
-    def __init__(self, store: Store) -> None:
+    def __init__(self, store: Store, *, _db: Any = None) -> None:
         self.store = store
+        self._db = _db
+
+    async def _execute(self, sql: str, parameters: tuple = ()):
+        if self._db is None:
+            return await self.store.execute(sql, parameters)
+        if not self._db.in_transaction:
+            raise ValueError("strategy_projection_requires_transaction")
+        return await self._db.execute(sql, parameters)
+
+    async def _fetchone(self, sql: str, parameters: tuple = ()):
+        if self._db is None:
+            return await self.store.fetchone(sql, parameters)
+        if not self._db.in_transaction:
+            raise ValueError("strategy_projection_requires_transaction")
+        return await (await self._db.execute(sql, parameters)).fetchone()
 
     async def register(
         self,
@@ -476,7 +491,7 @@ class StrategyLearning:
     ) -> str:
         now = int(time.time() * 1000) if now_ms is None else now_ms
         strategy_id = f"strat_{uuid.uuid4().hex}"
-        await self.store.execute(
+        await self._execute(
             """
             INSERT INTO execution_strategies(
               strategy_id, mission_class, capability_sequence_json, conditions_json,
@@ -508,7 +523,7 @@ class StrategyLearning:
         through a fuzzy comparison that would merge two different plans.
         """
         encoded = Store.dumps(capability_sequence)
-        row = await self.store.fetchone(
+        row = await self._fetchone(
             "SELECT strategy_id, max_action_class FROM execution_strategies "
             "WHERE mission_class = ? AND capability_sequence_json = ?",
             (mission_class, encoded),
@@ -523,7 +538,7 @@ class StrategyLearning:
         # to meet a real run and never beyond one. It is not a grant: `permitted_for`
         # compares it with the asking mission's envelope and refuses the wider strategy.
         if CLASS_RANK[ActionClass(str(row["max_action_class"]))] < CLASS_RANK[max_action_class]:
-            await self.store.execute(
+            await self._execute(
                 "UPDATE execution_strategies SET max_action_class = ? WHERE strategy_id = ?",
                 (max_action_class.value, strategy_id),
             )
@@ -557,14 +572,14 @@ class StrategyLearning:
         if outcome is StrategyOutcome.INCONCLUSIVE:
             # Touched, not counted. The timestamp moves so a strategy that is being
             # exercised does not look abandoned, and neither counter changes.
-            await self.store.execute(
+            await self._execute(
                 "UPDATE execution_strategies SET inconclusive_count = inconclusive_count + 1, "
                 "updated_at_ms = ? WHERE strategy_id = ?",
                 (now, strategy_id),
             )
             return
         column = "success_count" if outcome is StrategyOutcome.SUCCESS else "failure_count"
-        await self.store.execute(
+        await self._execute(
             f"UPDATE execution_strategies SET {column} = {column} + 1, updated_at_ms = ? "
             "WHERE strategy_id = ?",
             (now, strategy_id),

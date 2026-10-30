@@ -141,6 +141,24 @@ async def client():
 
 @pytest.mark.asyncio
 class TestTheGatewayEnforcesIt:
+    async def test_legacy_internal_token_cannot_reach_n8n_worker_callbacks(self, client):
+        ac, _ = client
+        response = await ac.post("/v1/automation/worker/step", json={},
+                                 headers={"X-Van-Internal-Token": INTERNAL})
+        assert response.status_code == 403
+        assert response.json()["required_scope"] == "automation_worker"
+
+    async def test_owner_device_cannot_fall_through_to_n8n_worker_callbacks(self, client):
+        ac, app = client
+        ticket = await app.state.auth.create_pairing_ticket("worker-scope-device")
+        enrolled = await app.state.auth.pair_device(
+            ticket.token, "worker-scope-device", "s" * 32, "PEM", "worker-scope-device",
+        )
+        response = await ac.post("/v1/automation/worker/step", json={},
+                                 headers={"X-Van-Device-Token": enrolled.access_token})
+        assert response.status_code == 403
+        assert response.json()["required_scope"] == "automation_worker"
+
     async def test_the_internal_token_can_no_longer_mint_a_pairing_ticket(self, client):
         """The audit's first step: one string, and then owner-device authority."""
         ac, _ = client

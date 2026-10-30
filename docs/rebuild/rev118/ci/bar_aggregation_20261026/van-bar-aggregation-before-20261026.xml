@@ -1,0 +1,316 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="17" skipped="0" tests="21" time="0.472" timestamp="2026-10-26T22:42:11.114899+00:00" hostname="2c5a245e39f1"><testcase classname="trading.tests.test_bar_aggregation_boundaries" name="test_original_tick_aggregation_is_independent_of_caller_context[precision]" time="0.126"><failure message="AssertionError: assert [Bar(symbol='...('0.000002'))] == [Bar(symbol='...('0.000002'))]&#10;  &#10;  At index 0 diff: Bar(symbol='EURUSD', start_ms=0, end_ms=60000, open=Decimal('1.12'), high=Decimal('1.24'), low=Decimal('1.12'), close=Decimal('1.24'), volume=Decimal('0.358'), ticks=2, avg_spread=Decimal('0.000002')) != Bar(symbol='EURUSD', start_ms=0, end_ms=60000, open=Decimal('1.123457'), high=Decimal('1.234568'), low=Decimal('1.123457'), close=Decimal('1.234568'), volume=Decimal('0.358023'), ticks=2, avg_spread=Decimal('0.000002'))&#10;  Use -v to get more diff">setting = 'precision'
+
+    @pytest.mark.parametrize('setting',['precision','rounding','exponents','traps','mutable-default'])
+    def test_original_tick_aggregation_is_independent_of_caller_context(setting):
+        expected=list(BarAggregator('EURUSD',60000).run(ticks()))
+        default=DefaultContext.copy()
+        try:
+            with localcontext() as context:
+                if setting=='precision':context.prec=3
+                elif setting=='rounding':context.prec=6;context.rounding=ROUND_DOWN
+                elif setting=='exponents':context.Emax=0;context.Emin=0
+                elif setting=='traps':context.prec=3;context.traps[Inexact]=True
+                else:DefaultContext.prec=3;DefaultContext.rounding=ROUND_DOWN;DefaultContext.Emax=0
+                before=context.copy()
+                actual=list(BarAggregator('EURUSD',60000).run(ticks()))
+&gt;               assert actual==expected
+E               AssertionError: assert [Bar(symbol='...('0.000002'))] == [Bar(symbol='...('0.000002'))]
+E                 
+E                 At index 0 diff: Bar(symbol='EURUSD', start_ms=0, end_ms=60000, open=Decimal('1.12'), high=Decimal('1.24'), low=Decimal('1.12'), close=Decimal('1.24'), volume=Decimal('0.358'), ticks=2, avg_spread=Decimal('0.000002')) != Bar(symbol='EURUSD', start_ms=0, end_ms=60000, open=Decimal('1.123457'), high=Decimal('1.234568'), low=Decimal('1.123457'), close=Decimal('1.234568'), volume=Decimal('0.358023'), ticks=2, avg_spread=Decimal('0.000002'))
+E                 Use -v to get more diff
+
+trading/tests/test_bar_aggregation_boundaries.py:27: AssertionError</failure></testcase><testcase classname="trading.tests.test_bar_aggregation_boundaries" name="test_original_tick_aggregation_is_independent_of_caller_context[rounding]" time="0.001"><failure message="AssertionError: assert [Bar(symbol='...('0.000002'))] == [Bar(symbol='...('0.000002'))]&#10;  &#10;  At index 0 diff: Bar(symbol='EURUSD', start_ms=0, end_ms=60000, open=Decimal('1.12345'), high=Decimal('1.23456'), low=Decimal('1.12345'), close=Decimal('1.23456'), volume=Decimal('0.358023'), ticks=2, avg_spread=Decimal('0.000002')) != Bar(symbol='EURUSD', start_ms=0, end_ms=60000, open=Decimal('1.123457'), high=Decimal('1.234568'), low=Decimal('1.123457'), close=Decimal('1.234568'), volume=Decimal('0.358023'), ticks=2, avg_spread=Decimal('0.000002'))&#10;  Use -v to get more diff">setting = 'rounding'
+
+    @pytest.mark.parametrize('setting',['precision','rounding','exponents','traps','mutable-default'])
+    def test_original_tick_aggregation_is_independent_of_caller_context(setting):
+        expected=list(BarAggregator('EURUSD',60000).run(ticks()))
+        default=DefaultContext.copy()
+        try:
+            with localcontext() as context:
+                if setting=='precision':context.prec=3
+                elif setting=='rounding':context.prec=6;context.rounding=ROUND_DOWN
+                elif setting=='exponents':context.Emax=0;context.Emin=0
+                elif setting=='traps':context.prec=3;context.traps[Inexact]=True
+                else:DefaultContext.prec=3;DefaultContext.rounding=ROUND_DOWN;DefaultContext.Emax=0
+                before=context.copy()
+                actual=list(BarAggregator('EURUSD',60000).run(ticks()))
+&gt;               assert actual==expected
+E               AssertionError: assert [Bar(symbol='...('0.000002'))] == [Bar(symbol='...('0.000002'))]
+E                 
+E                 At index 0 diff: Bar(symbol='EURUSD', start_ms=0, end_ms=60000, open=Decimal('1.12345'), high=Decimal('1.23456'), low=Decimal('1.12345'), close=Decimal('1.23456'), volume=Decimal('0.358023'), ticks=2, avg_spread=Decimal('0.000002')) != Bar(symbol='EURUSD', start_ms=0, end_ms=60000, open=Decimal('1.123457'), high=Decimal('1.234568'), low=Decimal('1.123457'), close=Decimal('1.234568'), volume=Decimal('0.358023'), ticks=2, avg_spread=Decimal('0.000002'))
+E                 Use -v to get more diff
+
+trading/tests/test_bar_aggregation_boundaries.py:27: AssertionError</failure></testcase><testcase classname="trading.tests.test_bar_aggregation_boundaries" name="test_original_tick_aggregation_is_independent_of_caller_context[exponents]" time="0.001"><failure message="AssertionError: assert ({&lt;class 'deci...amped'&gt;:False} == {&lt;class 'deci...amped'&gt;:False}&#10;  &#10;  Omitting 8 identical items, use -vv to show&#10;  Differing items:&#10;  {&lt;class 'decimal.Subnormal'&gt;: True} != {&lt;class 'decimal.Subnormal'&gt;: False}&#10;  Use -v to get more diff)">setting = 'exponents'
+
+    @pytest.mark.parametrize('setting',['precision','rounding','exponents','traps','mutable-default'])
+    def test_original_tick_aggregation_is_independent_of_caller_context(setting):
+        expected=list(BarAggregator('EURUSD',60000).run(ticks()))
+        default=DefaultContext.copy()
+        try:
+            with localcontext() as context:
+                if setting=='precision':context.prec=3
+                elif setting=='rounding':context.prec=6;context.rounding=ROUND_DOWN
+                elif setting=='exponents':context.Emax=0;context.Emin=0
+                elif setting=='traps':context.prec=3;context.traps[Inexact]=True
+                else:DefaultContext.prec=3;DefaultContext.rounding=ROUND_DOWN;DefaultContext.Emax=0
+                before=context.copy()
+                actual=list(BarAggregator('EURUSD',60000).run(ticks()))
+                assert actual==expected
+&gt;               assert context.flags==before.flags and context.traps==before.traps
+E               AssertionError: assert ({&lt;class 'deci...amped'&gt;:False} == {&lt;class 'deci...amped'&gt;:False}
+E                 
+E                 Omitting 8 identical items, use -vv to show
+E                 Differing items:
+E                 {&lt;class 'decimal.Subnormal'&gt;: True} != {&lt;class 'decimal.Subnormal'&gt;: False}
+E                 Use -v to get more diff)
+
+trading/tests/test_bar_aggregation_boundaries.py:28: AssertionError</failure></testcase><testcase classname="trading.tests.test_bar_aggregation_boundaries" name="test_original_tick_aggregation_is_independent_of_caller_context[traps]" time="0.002"><failure message="decimal.Inexact: [&lt;class 'decimal.Inexact'&gt;]">setting = 'traps'
+
+    @pytest.mark.parametrize('setting',['precision','rounding','exponents','traps','mutable-default'])
+    def test_original_tick_aggregation_is_independent_of_caller_context(setting):
+        expected=list(BarAggregator('EURUSD',60000).run(ticks()))
+        default=DefaultContext.copy()
+        try:
+            with localcontext() as context:
+                if setting=='precision':context.prec=3
+                elif setting=='rounding':context.prec=6;context.rounding=ROUND_DOWN
+                elif setting=='exponents':context.Emax=0;context.Emin=0
+                elif setting=='traps':context.prec=3;context.traps[Inexact]=True
+                else:DefaultContext.prec=3;DefaultContext.rounding=ROUND_DOWN;DefaultContext.Emax=0
+                before=context.copy()
+&gt;               actual=list(BarAggregator('EURUSD',60000).run(ticks()))
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+trading/tests/test_bar_aggregation_boundaries.py:26: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+trading/vati/market_data/bars.py:71: in run
+    b = self.push(t)
+        ^^^^^^^^^^^^
+trading/vati/market_data/bars.py:60: in push
+    self._cur = {"start": start, "o": t.mid, "h": t.mid, "l": t.mid, "c": t.mid, "v": Decimal("0"), "n": 0, "spread": Decimal("0")}
+                                      ^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = Tick(ts_ms=1, bid=Decimal('1.123456'), ask=Decimal('1.123458'), volume=Decimal('0.123456'))
+
+    @property
+    def mid(self) -&gt; Decimal:
+&gt;       return (self.bid + self.ask) / Decimal("2")
+                ^^^^^^^^^^^^^^^^^^^
+E       decimal.Inexact: [&lt;class 'decimal.Inexact'&gt;]
+
+trading/vati/market_data/bars.py:19: Inexact</failure></testcase><testcase classname="trading.tests.test_bar_aggregation_boundaries" name="test_original_tick_aggregation_is_independent_of_caller_context[mutable-default]" time="0.001" /><testcase classname="trading.tests.test_bar_aggregation_boundaries" name="test_out_of_order_tick_refuses_before_publishing_or_changing_a_bar[1]" time="0.001"><failure message="Failed: DID NOT RAISE ValueError">late = 1
+
+    @pytest.mark.parametrize('late',[1,60000])
+    def test_out_of_order_tick_refuses_before_publishing_or_changing_a_bar(late):
+        agg=BarAggregator('EURUSD',60000);agg.push(Tick(60001,Decimal('1'),Decimal('2')))
+&gt;       with pytest.raises(ValueError,match='order'):agg.push(Tick(late,Decimal('3'),Decimal('4')))
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+trading/tests/test_bar_aggregation_boundaries.py:38: Failed</failure></testcase><testcase classname="trading.tests.test_bar_aggregation_boundaries" name="test_out_of_order_tick_refuses_before_publishing_or_changing_a_bar[60000]" time="0.001"><failure message="Failed: DID NOT RAISE ValueError">late = 60000
+
+    @pytest.mark.parametrize('late',[1,60000])
+    def test_out_of_order_tick_refuses_before_publishing_or_changing_a_bar(late):
+        agg=BarAggregator('EURUSD',60000);agg.push(Tick(60001,Decimal('1'),Decimal('2')))
+&gt;       with pytest.raises(ValueError,match='order'):agg.push(Tick(late,Decimal('3'),Decimal('4')))
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+trading/tests/test_bar_aggregation_boundaries.py:38: Failed</failure></testcase><testcase classname="trading.tests.test_bar_aggregation_boundaries" name="test_interval_requires_a_positive_integer[True]" time="0.001"><failure message="Failed: DID NOT RAISE ValueError">bad = True
+
+    @pytest.mark.parametrize('bad',[True,1.5,0,-1])
+    def test_interval_requires_a_positive_integer(bad):
+&gt;       with pytest.raises(ValueError):BarAggregator('EURUSD',bad)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+trading/tests/test_bar_aggregation_boundaries.py:47: Failed</failure></testcase><testcase classname="trading.tests.test_bar_aggregation_boundaries" name="test_interval_requires_a_positive_integer[1.5]" time="0.002"><failure message="Failed: DID NOT RAISE ValueError">bad = 1.5
+
+    @pytest.mark.parametrize('bad',[True,1.5,0,-1])
+    def test_interval_requires_a_positive_integer(bad):
+&gt;       with pytest.raises(ValueError):BarAggregator('EURUSD',bad)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+trading/tests/test_bar_aggregation_boundaries.py:47: Failed</failure></testcase><testcase classname="trading.tests.test_bar_aggregation_boundaries" name="test_interval_requires_a_positive_integer[0]" time="0.001" /><testcase classname="trading.tests.test_bar_aggregation_boundaries" name="test_interval_requires_a_positive_integer[-1]" time="0.001" /><testcase classname="trading.tests.test_bar_aggregation_boundaries" name="test_invalid_new_interval_cannot_flush_the_current_original[ts_ms-True]" time="0.001"><failure message="Failed: DID NOT RAISE ValueError">field = 'ts_ms', value = True
+
+    @pytest.mark.parametrize('field,value',[
+        ('ts_ms',True),('ts_ms',1.5),('bid',1.0),('ask',Decimal('NaN')),
+        ('bid',Decimal('Infinity')),('volume',Decimal('-1')),('volume',Decimal('sNaN')),
+        ('bid',Decimal('4')),
+    ])
+    def test_invalid_new_interval_cannot_flush_the_current_original(field,value):
+        agg=BarAggregator('EURUSD',60000);agg.push(Tick(1,Decimal('1'),Decimal('2')))
+        row={'ts_ms':60001,'bid':Decimal('2'),'ask':Decimal('3'),'volume':Decimal('0')};row[field]=value
+&gt;       with pytest.raises(ValueError):agg.push(Tick(**row))
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+trading/tests/test_bar_aggregation_boundaries.py:58: Failed</failure></testcase><testcase classname="trading.tests.test_bar_aggregation_boundaries" name="test_invalid_new_interval_cannot_flush_the_current_original[ts_ms-1.5]" time="0.002"><failure message="Failed: DID NOT RAISE ValueError">field = 'ts_ms', value = 1.5
+
+    @pytest.mark.parametrize('field,value',[
+        ('ts_ms',True),('ts_ms',1.5),('bid',1.0),('ask',Decimal('NaN')),
+        ('bid',Decimal('Infinity')),('volume',Decimal('-1')),('volume',Decimal('sNaN')),
+        ('bid',Decimal('4')),
+    ])
+    def test_invalid_new_interval_cannot_flush_the_current_original(field,value):
+        agg=BarAggregator('EURUSD',60000);agg.push(Tick(1,Decimal('1'),Decimal('2')))
+        row={'ts_ms':60001,'bid':Decimal('2'),'ask':Decimal('3'),'volume':Decimal('0')};row[field]=value
+&gt;       with pytest.raises(ValueError):agg.push(Tick(**row))
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+trading/tests/test_bar_aggregation_boundaries.py:58: Failed</failure></testcase><testcase classname="trading.tests.test_bar_aggregation_boundaries" name="test_invalid_new_interval_cannot_flush_the_current_original[bid-1.0]" time="0.001"><failure message="TypeError: unsupported operand type(s) for +: 'float' and 'decimal.Decimal'">field = 'bid', value = 1.0
+
+    @pytest.mark.parametrize('field,value',[
+        ('ts_ms',True),('ts_ms',1.5),('bid',1.0),('ask',Decimal('NaN')),
+        ('bid',Decimal('Infinity')),('volume',Decimal('-1')),('volume',Decimal('sNaN')),
+        ('bid',Decimal('4')),
+    ])
+    def test_invalid_new_interval_cannot_flush_the_current_original(field,value):
+        agg=BarAggregator('EURUSD',60000);agg.push(Tick(1,Decimal('1'),Decimal('2')))
+        row={'ts_ms':60001,'bid':Decimal('2'),'ask':Decimal('3'),'volume':Decimal('0')};row[field]=value
+&gt;       with pytest.raises(ValueError):agg.push(Tick(**row))
+                                       ^^^^^^^^^^^^^^^^^^^^^
+
+trading/tests/test_bar_aggregation_boundaries.py:58: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+trading/vati/market_data/bars.py:60: in push
+    self._cur = {"start": start, "o": t.mid, "h": t.mid, "l": t.mid, "c": t.mid, "v": Decimal("0"), "n": 0, "spread": Decimal("0")}
+                                      ^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = Tick(ts_ms=60001, bid=1.0, ask=Decimal('3'), volume=Decimal('0'))
+
+    @property
+    def mid(self) -&gt; Decimal:
+&gt;       return (self.bid + self.ask) / Decimal("2")
+                ^^^^^^^^^^^^^^^^^^^
+E       TypeError: unsupported operand type(s) for +: 'float' and 'decimal.Decimal'
+
+trading/vati/market_data/bars.py:19: TypeError</failure></testcase><testcase classname="trading.tests.test_bar_aggregation_boundaries" name="test_invalid_new_interval_cannot_flush_the_current_original[ask-value3]" time="0.001"><failure message="decimal.InvalidOperation: [&lt;class 'decimal.InvalidOperation'&gt;]">field = 'ask', value = Decimal('NaN')
+
+    @pytest.mark.parametrize('field,value',[
+        ('ts_ms',True),('ts_ms',1.5),('bid',1.0),('ask',Decimal('NaN')),
+        ('bid',Decimal('Infinity')),('volume',Decimal('-1')),('volume',Decimal('sNaN')),
+        ('bid',Decimal('4')),
+    ])
+    def test_invalid_new_interval_cannot_flush_the_current_original(field,value):
+        agg=BarAggregator('EURUSD',60000);agg.push(Tick(1,Decimal('1'),Decimal('2')))
+        row={'ts_ms':60001,'bid':Decimal('2'),'ask':Decimal('3'),'volume':Decimal('0')};row[field]=value
+&gt;       with pytest.raises(ValueError):agg.push(Tick(**row))
+                                       ^^^^^^^^^^^^^^^^^^^^^
+
+trading/tests/test_bar_aggregation_boundaries.py:58: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;vati.market_data.bars.BarAggregator object at 0x7f29863fd0d0&gt;
+t = Tick(ts_ms=60001, bid=Decimal('2'), ask=Decimal('NaN'), volume=Decimal('0'))
+
+    def push(self, t: Tick) -&gt; Optional[Bar]:
+        start = t.ts_ms - (t.ts_ms % self.interval_ms)
+        out = None
+        if self._cur is not None and start != self._cur["start"]:
+            out = self._flush()
+        if self._cur is None:
+            self._cur = {"start": start, "o": t.mid, "h": t.mid, "l": t.mid, "c": t.mid, "v": Decimal("0"), "n": 0, "spread": Decimal("0")}
+        c = self._cur
+&gt;       c["h"] = max(c["h"], t.mid); c["l"] = min(c["l"], t.mid); c["c"] = t.mid
+                 ^^^^^^^^^^^^^^^^^^
+E       decimal.InvalidOperation: [&lt;class 'decimal.InvalidOperation'&gt;]
+
+trading/vati/market_data/bars.py:62: InvalidOperation</failure></testcase><testcase classname="trading.tests.test_bar_aggregation_boundaries" name="test_invalid_new_interval_cannot_flush_the_current_original[bid-value4]" time="0.001"><failure message="Failed: DID NOT RAISE ValueError">field = 'bid', value = Decimal('Infinity')
+
+    @pytest.mark.parametrize('field,value',[
+        ('ts_ms',True),('ts_ms',1.5),('bid',1.0),('ask',Decimal('NaN')),
+        ('bid',Decimal('Infinity')),('volume',Decimal('-1')),('volume',Decimal('sNaN')),
+        ('bid',Decimal('4')),
+    ])
+    def test_invalid_new_interval_cannot_flush_the_current_original(field,value):
+        agg=BarAggregator('EURUSD',60000);agg.push(Tick(1,Decimal('1'),Decimal('2')))
+        row={'ts_ms':60001,'bid':Decimal('2'),'ask':Decimal('3'),'volume':Decimal('0')};row[field]=value
+&gt;       with pytest.raises(ValueError):agg.push(Tick(**row))
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+trading/tests/test_bar_aggregation_boundaries.py:58: Failed</failure></testcase><testcase classname="trading.tests.test_bar_aggregation_boundaries" name="test_invalid_new_interval_cannot_flush_the_current_original[volume-value5]" time="0.001"><failure message="Failed: DID NOT RAISE ValueError">field = 'volume', value = Decimal('-1')
+
+    @pytest.mark.parametrize('field,value',[
+        ('ts_ms',True),('ts_ms',1.5),('bid',1.0),('ask',Decimal('NaN')),
+        ('bid',Decimal('Infinity')),('volume',Decimal('-1')),('volume',Decimal('sNaN')),
+        ('bid',Decimal('4')),
+    ])
+    def test_invalid_new_interval_cannot_flush_the_current_original(field,value):
+        agg=BarAggregator('EURUSD',60000);agg.push(Tick(1,Decimal('1'),Decimal('2')))
+        row={'ts_ms':60001,'bid':Decimal('2'),'ask':Decimal('3'),'volume':Decimal('0')};row[field]=value
+&gt;       with pytest.raises(ValueError):agg.push(Tick(**row))
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+trading/tests/test_bar_aggregation_boundaries.py:58: Failed</failure></testcase><testcase classname="trading.tests.test_bar_aggregation_boundaries" name="test_invalid_new_interval_cannot_flush_the_current_original[volume-value6]" time="0.001"><failure message="decimal.InvalidOperation: [&lt;class 'decimal.InvalidOperation'&gt;]">field = 'volume', value = Decimal('sNaN')
+
+    @pytest.mark.parametrize('field,value',[
+        ('ts_ms',True),('ts_ms',1.5),('bid',1.0),('ask',Decimal('NaN')),
+        ('bid',Decimal('Infinity')),('volume',Decimal('-1')),('volume',Decimal('sNaN')),
+        ('bid',Decimal('4')),
+    ])
+    def test_invalid_new_interval_cannot_flush_the_current_original(field,value):
+        agg=BarAggregator('EURUSD',60000);agg.push(Tick(1,Decimal('1'),Decimal('2')))
+        row={'ts_ms':60001,'bid':Decimal('2'),'ask':Decimal('3'),'volume':Decimal('0')};row[field]=value
+&gt;       with pytest.raises(ValueError):agg.push(Tick(**row))
+                                       ^^^^^^^^^^^^^^^^^^^^^
+
+trading/tests/test_bar_aggregation_boundaries.py:58: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;vati.market_data.bars.BarAggregator object at 0x7f2986729490&gt;
+t = Tick(ts_ms=60001, bid=Decimal('2'), ask=Decimal('3'), volume=Decimal('sNaN'))
+
+    def push(self, t: Tick) -&gt; Optional[Bar]:
+        start = t.ts_ms - (t.ts_ms % self.interval_ms)
+        out = None
+        if self._cur is not None and start != self._cur["start"]:
+            out = self._flush()
+        if self._cur is None:
+            self._cur = {"start": start, "o": t.mid, "h": t.mid, "l": t.mid, "c": t.mid, "v": Decimal("0"), "n": 0, "spread": Decimal("0")}
+        c = self._cur
+        c["h"] = max(c["h"], t.mid); c["l"] = min(c["l"], t.mid); c["c"] = t.mid
+&gt;       c["v"] += t.volume; c["n"] += 1; c["spread"] += (t.ask - t.bid)
+        ^^^^^^^^^^^^^^^^^^
+E       decimal.InvalidOperation: [&lt;class 'decimal.InvalidOperation'&gt;]
+
+trading/vati/market_data/bars.py:63: InvalidOperation</failure></testcase><testcase classname="trading.tests.test_bar_aggregation_boundaries" name="test_invalid_new_interval_cannot_flush_the_current_original[bid-value7]" time="0.002"><failure message="Failed: DID NOT RAISE ValueError">field = 'bid', value = Decimal('4')
+
+    @pytest.mark.parametrize('field,value',[
+        ('ts_ms',True),('ts_ms',1.5),('bid',1.0),('ask',Decimal('NaN')),
+        ('bid',Decimal('Infinity')),('volume',Decimal('-1')),('volume',Decimal('sNaN')),
+        ('bid',Decimal('4')),
+    ])
+    def test_invalid_new_interval_cannot_flush_the_current_original(field,value):
+        agg=BarAggregator('EURUSD',60000);agg.push(Tick(1,Decimal('1'),Decimal('2')))
+        row={'ts_ms':60001,'bid':Decimal('2'),'ask':Decimal('3'),'volume':Decimal('0')};row[field]=value
+&gt;       with pytest.raises(ValueError):agg.push(Tick(**row))
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+trading/tests/test_bar_aggregation_boundaries.py:58: Failed</failure></testcase><testcase classname="trading.tests.test_bar_aggregation_boundaries" name="test_equal_clock_order_is_preserved_without_inventing_sequence_or_gap_bars" time="0.001" /><testcase classname="trading.tests.test_bar_aggregation_boundaries" name="test_negative_instrument_prices_remain_valid_and_mid_and_range_are_context_stable" time="0.001"><failure message="decimal.Inexact: [&lt;class 'decimal.Inexact'&gt;]">def test_negative_instrument_prices_remain_valid_and_mid_and_range_are_context_stable():
+        tick=Tick(1,Decimal('-40.123456'),Decimal('-40.123454'))
+        bar=list(BarAggregator('WTI',60000).run([tick,Tick(2,Decimal('-39.123456'),Decimal('-39.123454'))]))[0]
+        with localcontext() as context:
+            context.prec=3;context.traps[Inexact]=True
+&gt;           assert tick.mid==Decimal('-40.123455') and bar.range==Decimal('1')
+                   ^^^^^^^^
+
+trading/tests/test_bar_aggregation_boundaries.py:77: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = Tick(ts_ms=1, bid=Decimal('-40.123456'), ask=Decimal('-40.123454'), volume=Decimal('0'))
+
+    @property
+    def mid(self) -&gt; Decimal:
+&gt;       return (self.bid + self.ask) / Decimal("2")
+                ^^^^^^^^^^^^^^^^^^^
+E       decimal.Inexact: [&lt;class 'decimal.Inexact'&gt;]
+
+trading/vati/market_data/bars.py:19: Inexact</failure></testcase></testsuite></testsuites>

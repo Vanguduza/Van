@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="11" time="0.730" timestamp="2026-10-26T21:48:09.988274+00:00" hostname="2c5a245e39f1"><testcase classname="trading.tests.test_native_archive_read_budget" name="test_growing_native_record_is_read_with_a_real_bound_even_after_a_small_stat" time="0.012" /><testcase classname="trading.tests.test_native_archive_read_budget" name="test_request_budget_refuses_valid_history_without_modifying_or_recapturing_it" time="0.036" /><testcase classname="trading.tests.test_native_archive_read_budget" name="test_exact_record_and_index_byte_budget_admits_the_original_snapshot" time="0.020" /><testcase classname="trading.tests.test_native_archive_read_budget" name="test_configured_publication_capacity_refuses_before_a_new_record_commits" time="0.016" /><testcase classname="trading.tests.test_native_archive_read_budget" name="test_native_history_budget_is_a_bounded_integer_or_explicit_legacy_mode[True]" time="0.003" /><testcase classname="trading.tests.test_native_archive_read_budget" name="test_native_history_budget_is_a_bounded_integer_or_explicit_legacy_mode[0]" time="0.005" /><testcase classname="trading.tests.test_native_archive_read_budget" name="test_native_history_budget_is_a_bounded_integer_or_explicit_legacy_mode[-1]" time="0.001" /><testcase classname="trading.tests.test_native_archive_read_budget" name="test_native_history_budget_is_a_bounded_integer_or_explicit_legacy_mode[1.0]" time="0.002" /><testcase classname="trading.tests.test_native_archive_read_budget" name="test_native_history_budget_is_a_bounded_integer_or_explicit_legacy_mode[268435457]" time="0.004" /><testcase classname="trading.tests.test_native_archive_read_budget" name="test_cumulative_budget_cannot_be_reset_for_each_individually_small_record" time="0.026" /><testcase classname="trading.tests.test_native_archive_read_budget" name="test_index_recovery_cannot_grow_its_head_past_the_original_budget" time="0.221"><failure message="assert b'{&quot;record_ha...ame&quot;:&quot;DEPTH&quot;}' == b'{&quot;record_ha...ame&quot;:&quot;DEPTH&quot;}'&#10;  &#10;  At index 16 diff: b'8' != b'f'&#10;  Use -v to get more diff">tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-565/test_index_recovery_cannot_gro0')
+
+    def test_index_recovery_cannot_grow_its_head_past_the_original_budget(tmp_path):
+        c=contract();root=tmp_path/'depth';writer=NativeDepthArchive(root,clock=lambda:400000)
+        for n in range(9):writer.record('request-'+str(n),c,sample(c))
+        part=writer._partition(c.native_scope,'DEPTH');old_head=(part/'head.json').read_bytes()
+        tenth=writer.record('request-9',c,sample(c));new_head=(part/'head.json').read_bytes()
+        assert len(new_head)==len(old_head)+1  # The original owner advances revision9 -&gt;10.
+        (part/'head.json').write_bytes(old_head)
+        budget=sum(p.stat().st_size for p in part.glob('*.json'))
+        bounded=NativeDepthArchive(root,max_history_bytes=budget)
+        def never():raise AssertionError('index capacity refusal recaptured original depth')
+        with pytest.raises(NativeArchiveError):NativeDepthCollector(bounded,never).collect('request-9',c)
+&gt;       assert (part/'head.json').read_bytes()==old_head
+E       assert b'{"record_ha...ame":"DEPTH"}' == b'{"record_ha...ame":"DEPTH"}'
+E         
+E         At index 16 diff: b'8' != b'f'
+E         Use -v to get more diff
+
+trading/tests/test_native_archive_read_budget.py:89: AssertionError</failure></testcase></testsuite></testsuites>

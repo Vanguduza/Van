@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="8" time="4.294" timestamp="2026-10-25T16:33:30.795663+00:00" hostname="2c5a245e39f1"><testcase classname="tests.test_market_monitor_commands" name="test_original_receipt_fields_are_exact_not_a_related_success[change0]" time="0.357"><failure message="Failed: DID NOT RAISE ValueError">tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-18/test_original_receipt_fields_a0')
+change = {'revision': 3}
+
+    @pytest.mark.asyncio
+    @pytest.mark.parametrize('change', [
+        {'revision':3}, {'revision':True}, {'request_id':'different'}, {'object_id':ALERT},
+        {'kind':'WATCHLIST'}, {'status':'RESTARTED'}, {'state_sha256':None}, {'authority_effect':'ORDER'},
+    ])
+    async def test_original_receipt_fields_are_exact_not_a_related_success(tmp_path,change):
+        s=await service(tmp_path); alert=await create_alert(s); ctx=await command(s,alert.object_id)
+        await AlertControlExecutor().execute(ctx)
+        row=await s.store.fetchone('SELECT result_json FROM market_monitor_operations WHERE request_id=?',(request_id(ctx.command_id),))
+        altered=json.loads(row['result_json']) | change
+        await s.store.execute('UPDATE market_monitor_operations SET result_json=? WHERE request_id=?',
+            (json.dumps(altered),request_id(ctx.command_id)))
+&gt;       with pytest.raises(ValueError):await control_readback(s.store,ctx.command_id)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+backend/tests/test_market_monitor_commands.py:168: Failed</failure></testcase><testcase classname="tests.test_market_monitor_commands" name="test_original_receipt_fields_are_exact_not_a_related_success[change1]" time="0.212" /><testcase classname="tests.test_market_monitor_commands" name="test_original_receipt_fields_are_exact_not_a_related_success[change2]" time="0.342" /><testcase classname="tests.test_market_monitor_commands" name="test_original_receipt_fields_are_exact_not_a_related_success[change3]" time="0.340" /><testcase classname="tests.test_market_monitor_commands" name="test_original_receipt_fields_are_exact_not_a_related_success[change4]" time="0.317" /><testcase classname="tests.test_market_monitor_commands" name="test_original_receipt_fields_are_exact_not_a_related_success[change5]" time="0.308" /><testcase classname="tests.test_market_monitor_commands" name="test_original_receipt_fields_are_exact_not_a_related_success[change6]" time="0.203" /><testcase classname="tests.test_market_monitor_commands" name="test_original_receipt_fields_are_exact_not_a_related_success[change7]" time="0.204" /></testsuite></testsuites>

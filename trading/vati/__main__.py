@@ -156,11 +156,36 @@ def cmd_research(a: argparse.Namespace) -> int:
     """Run one non-authoritative trading research operation from JSON."""
     from vati.core.ledger_pg import open_ledger
     from vati.research.workflow import TradingResearchWorkflow
-    spec = json.loads(Path(a.spec).read_text())
+    def pairs(items):
+        result = {}
+        for key, value in items:
+            if key in result:
+                raise ValueError('RESEARCH_DUPLICATE_JSON_KEY')
+            result[key] = value
+        return result
+    spec = json.loads(Path(a.spec).read_text(), object_pairs_hook=pairs)
     ledger = open_ledger(a.ledger) if a.ledger else None
-    result = TradingResearchWorkflow(ledger=ledger).run_spec(spec)
-    print(json.dumps(result, indent=2, default=str))
-    return 0
+    try:
+        partitions = None
+        archive_path = getattr(a, 'native_archive', None)
+        partition_path = getattr(a, 'source_partitions', None)
+        if archive_path or partition_path:
+            from vati_forecast_worker.source_partitions import SourcePartitionError
+            if (spec.get('operation') not in {'native_bar_source_partition', 'dataset_source_inspect',
+                    'dataset_candidate_publish','dataset_candidate_inspect'} or not archive_path
+                    or not partition_path or not Path(archive_path).is_dir()
+                    or (spec.get('operation') != 'native_bar_source_partition' and not Path(partition_path).is_dir())):
+                raise SourcePartitionError('PARTITION_EXPLICIT_EXISTING_SOURCE_AND_OUTPUT_REQUIRED')
+            from vati.market_data.native_archive import NativeMarketArchive
+            from vati.market_data.native_windows import NativeBarWindowReader
+            from vati.research.bar_partitions import NativeBarPartitionService
+            partitions = NativeBarPartitionService(NativeBarWindowReader(NativeMarketArchive(archive_path)), partition_path)
+        result = TradingResearchWorkflow(ledger=ledger, native_bar_partitions=partitions).run_spec(spec)
+        print(json.dumps(result, indent=2, default=str))
+        return 0
+    finally:
+        if ledger is not None:
+            ledger.close()
 
 
 def cmd_calendar_record(a: argparse.Namespace) -> int:
@@ -203,29 +228,53 @@ def cmd_news_ingest(a: argparse.Namespace) -> int:
     from vati.events.news_ingress import NewsIngress, rows_from_file, sources_from_config
 
     config = json.loads(Path(a.config).read_text(encoding="utf-8"))
-    ledger = Ledger(a.ledger) if a.ledger else None
-    ingress = NewsIngress(
-        ledger=ledger,
-        sources=sources_from_config(config),
-        relevance_window_ms=int(config.get("relevance_window_ms", 6 * 3_600_000)),
-    )
-    now_ms = int(a.now) if a.now else int(_t.time() * 1000)
     path = a.file or config.get("path")
     if not path:
         print(json.dumps({"error": "no headline file given by --file or config `path`"}))
         return 2
-    counts = ingress.ingest_rows(rows_from_file(path), now_ms=now_ms)
-    report = ingress.report(now_ms=now_ms) | {"counts": counts}
-    report["headlines_recorded"] = [
-        h.body() for h in ingress.headlines(limit=int(a.limit))
-    ]
-    print(json.dumps(report, indent=2))
-    if a.out:
-        Path(a.out).write_text(json.dumps(report, indent=2))
-    return 1 if ingress.skipped else 0
+    input_format=config.get('input_format','json')
+    if input_format=='rss2' and not a.ledger:
+        print(json.dumps({'error':'RSS_DURABLE_LEDGER_REQUIRED'}))
+        return 2
+    ledger = Ledger(a.ledger) if a.ledger else None
+    try:
+        now_ms = int(a.now) if a.now else int(_t.time() * 1000)
+        if input_format=='json':
+            ingress = NewsIngress(
+                ledger=ledger,
+                sources=sources_from_config(config),
+                relevance_window_ms=int(config.get("relevance_window_ms", 6 * 3_600_000)),
+            )
+            counts = ingress.ingest_rows(rows_from_file(path), now_ms=now_ms)
+            result={}
+            exit_code=1 if ingress.skipped else 0
+        else:
+            from vati.events.news_runtime import ingest_news_file
+            ingress,result=ingest_news_file(config|{'path':path},ledger=ledger,
+                scope='news-ingest-cli',now_ms=now_ms)
+            counts={name:result[name] for name in ('accepted','duplicates','skipped')}
+            state=result['source_health']['state']
+            exit_code=0 if state in {'READY_DECLARED','EMPTY_DECLARED'} else 1 if state=='PARTIAL' else 2
+        report = ingress.report(now_ms=now_ms) | {"counts": counts}
+        if result.get('reconcile_required'):report['reconcile_required']=True
+        report["headlines_recorded"] = [
+            h.body() for h in ingress.headlines(limit=int(a.limit))
+        ]
+        print(json.dumps(report, indent=2))
+        if a.out:
+            Path(a.out).write_text(json.dumps(report, indent=2))
+        return exit_code
+    finally:
+        if ledger is not None:ledger.close()
 
 
 def cmd_serve(a: argparse.Namespace) -> int:
+    from vati.core.model_boundary import install_t0_model_guard,T0ModelImportError
+    try:
+        install_t0_model_guard()
+    except T0ModelImportError as exc:
+        print(json.dumps({'error':'T0_MODEL_BOUNDARY_UNAVAILABLE','detail':str(exc)}))
+        return 2
     from vati.app.process_lock import SessionAlreadyRunning, SessionLock
     from vati.app.service import ServiceConfig, SessionService, lake_bar_source
     from vati.market_data.feeds import BarLake
@@ -273,7 +322,8 @@ def main(argv=None) -> int:
     cal = sub.add_parser("calendar"); cal.add_argument("--file", required=True); cal.set_defaults(fn=cmd_calendar)
     cr = sub.add_parser("calendar-record"); cr.add_argument("--schedule", required=True); cr.add_argument("--releases"); cr.add_argument("--ledger")
     cr.add_argument("--out"); cr.add_argument("--now"); cr.set_defaults(fn=cmd_calendar_record)
-    rs = sub.add_parser("research"); rs.add_argument("--spec", required=True); rs.add_argument("--ledger"); rs.set_defaults(fn=cmd_research)
+    rs = sub.add_parser("research"); rs.add_argument("--spec", required=True); rs.add_argument("--ledger")
+    rs.add_argument("--native-archive"); rs.add_argument("--source-partitions"); rs.set_defaults(fn=cmd_research)
     ni = sub.add_parser("news-ingest"); ni.add_argument("--config", required=True); ni.add_argument("--file"); ni.add_argument("--ledger")
     ni.add_argument("--out"); ni.add_argument("--now"); ni.add_argument("--limit", default="20"); ni.set_defaults(fn=cmd_news_ingest)
     sv = sub.add_parser("serve"); sv.add_argument("--config", required=True); sv.add_argument("--once", action="store_true"); sv.set_defaults(fn=cmd_serve)

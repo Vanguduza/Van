@@ -1,0 +1,400 @@
+FF..EF.E.F.F..........                                                   [100%]
+==================================== ERRORS ====================================
+_ ERROR at teardown of test_concurrent_connects_create_one_socket_and_one_reader _
+
+    @pytest.fixture
+    def harness():
+        owned = Harness()
+        try:
+            yield owned
+        finally:
+>           owned.cleanup()
+
+trading/tests/test_ctrader_transport_lifecycle.py:69: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+trading/tests/test_ctrader_transport_lifecycle.py:57: in cleanup
+    transport.close()
+trading/vati/execution/ctrader/transport.py:86: in close
+    self._retire(sock, "connection closed")
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <vati.execution.ctrader.transport.CtraderTransport object at 0x7ff10adf8800>
+sock = <socket.socket [closed] fd=-1, family=1, type=1, proto=0>
+error = 'connection closed'
+
+    def _retire(self, sock, error: str) -> None:
+        """Retire only this socket; old failures cannot close a replacement.
+    
+        Disconnect is an unknown response/effect, never evidence that an order
+        was refused or safe to replay. Callers retain the existing reconciliation
+        contract. Wake pending calls before joining the original reader.
+        """
+        with self._state_lock:
+            if self._sock is not sock:
+                return
+            self._sock, self._alive = None, False
+            reader, self._reader = self._reader, None
+            for cid, pending in self._pending.items():
+                if self._pending_sockets.get(cid) is sock:
+                    pending.put(("__disconnect__", {"error": error}))
+        try:
+            shutdown = getattr(sock, "shutdown", None)
+            if shutdown is not None:
+                shutdown(socket.SHUT_RDWR)
+        except OSError:
+            pass  # Already disconnected; close and reader reconciliation remain.
+        finally:
+            try:
+                sock.close()
+            except OSError:
+                pass
+            finally:
+                if reader is not None and reader is not threading.current_thread():
+                    pass  # deliberately omit owned reader join
+                    if reader.is_alive():
+>                       raise CtraderError("cTrader reader did not terminate after socket shutdown")
+E                       vati.execution.ctrader.transport.CtraderError: cTrader reader did not terminate after socket shutdown
+
+trading/vati/execution/ctrader/transport.py:118: CtraderError
+_ ERROR at teardown of test_old_request_failure_cannot_close_a_replacement_socket _
+
+    @pytest.fixture
+    def harness():
+        owned = Harness()
+        try:
+            yield owned
+        finally:
+>           owned.cleanup()
+
+trading/tests/test_ctrader_transport_lifecycle.py:69: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+trading/tests/test_ctrader_transport_lifecycle.py:57: in cleanup
+    transport.close()
+trading/vati/execution/ctrader/transport.py:86: in close
+    self._retire(sock, "connection closed")
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <vati.execution.ctrader.transport.CtraderTransport object at 0x7ff10ad14da0>
+sock = <socket.socket [closed] fd=-1, family=1, type=1, proto=0>
+error = 'connection closed'
+
+    def _retire(self, sock, error: str) -> None:
+        """Retire only this socket; old failures cannot close a replacement.
+    
+        Disconnect is an unknown response/effect, never evidence that an order
+        was refused or safe to replay. Callers retain the existing reconciliation
+        contract. Wake pending calls before joining the original reader.
+        """
+        with self._state_lock:
+            if self._sock is not sock:
+                return
+            self._sock, self._alive = None, False
+            reader, self._reader = self._reader, None
+            for cid, pending in self._pending.items():
+                if self._pending_sockets.get(cid) is sock:
+                    pending.put(("__disconnect__", {"error": error}))
+        try:
+            shutdown = getattr(sock, "shutdown", None)
+            if shutdown is not None:
+                shutdown(socket.SHUT_RDWR)
+        except OSError:
+            pass  # Already disconnected; close and reader reconciliation remain.
+        finally:
+            try:
+                sock.close()
+            except OSError:
+                pass
+            finally:
+                if reader is not None and reader is not threading.current_thread():
+                    pass  # deliberately omit owned reader join
+                    if reader.is_alive():
+>                       raise CtraderError("cTrader reader did not terminate after socket shutdown")
+E                       vati.execution.ctrader.transport.CtraderError: cTrader reader did not terminate after socket shutdown
+
+trading/vati/execution/ctrader/transport.py:118: CtraderError
+=================================== FAILURES ===================================
+_______________ test_close_shuts_down_and_joins_a_blocked_reader _______________
+
+harness = <test_ctrader_transport_lifecycle.Harness object at 0x7ff10adf1970>
+
+    def test_close_shuts_down_and_joins_a_blocked_reader(harness):
+        client, _ = harness.pair()
+        transport = harness.transport(lambda *_: client)
+        transport.connect()
+        reader = transport._reader
+>       transport.close()
+
+trading/tests/test_ctrader_transport_lifecycle.py:90: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+trading/vati/execution/ctrader/transport.py:86: in close
+    self._retire(sock, "connection closed")
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <vati.execution.ctrader.transport.CtraderTransport object at 0x7ff10b026870>
+sock = <socket.socket [closed] fd=-1, family=1, type=1, proto=0>
+error = 'connection closed'
+
+    def _retire(self, sock, error: str) -> None:
+        """Retire only this socket; old failures cannot close a replacement.
+    
+        Disconnect is an unknown response/effect, never evidence that an order
+        was refused or safe to replay. Callers retain the existing reconciliation
+        contract. Wake pending calls before joining the original reader.
+        """
+        with self._state_lock:
+            if self._sock is not sock:
+                return
+            self._sock, self._alive = None, False
+            reader, self._reader = self._reader, None
+            for cid, pending in self._pending.items():
+                if self._pending_sockets.get(cid) is sock:
+                    pending.put(("__disconnect__", {"error": error}))
+        try:
+            shutdown = getattr(sock, "shutdown", None)
+            if shutdown is not None:
+                shutdown(socket.SHUT_RDWR)
+        except OSError:
+            pass  # Already disconnected; close and reader reconciliation remain.
+        finally:
+            try:
+                sock.close()
+            except OSError:
+                pass
+            finally:
+                if reader is not None and reader is not threading.current_thread():
+                    pass  # deliberately omit owned reader join
+                    if reader.is_alive():
+>                       raise CtraderError("cTrader reader did not terminate after socket shutdown")
+E                       vati.execution.ctrader.transport.CtraderError: cTrader reader did not terminate after socket shutdown
+
+trading/vati/execution/ctrader/transport.py:118: CtraderError
+___ test_close_wakes_an_original_pending_request_without_waiting_for_timeout ___
+
+harness = <test_ctrader_transport_lifecycle.Harness object at 0x7ff10adf1a60>
+
+    def test_close_wakes_an_original_pending_request_without_waiting_for_timeout(harness):
+        client, server = harness.pair()
+        transport = harness.transport(lambda *_: client)
+        worker, result = harness.worker(lambda: transport.call("ProtoOATraderReq", {"ctidTraderAccountId": 12345}))
+        assert receive_frame(server)[0] == "ProtoOATraderReq"
+>       transport.close()
+
+trading/tests/test_ctrader_transport_lifecycle.py:101: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+trading/vati/execution/ctrader/transport.py:86: in close
+    self._retire(sock, "connection closed")
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <vati.execution.ctrader.transport.CtraderTransport object at 0x7ff10adf0d70>
+sock = <socket.socket [closed] fd=-1, family=1, type=1, proto=0>
+error = 'connection closed'
+
+    def _retire(self, sock, error: str) -> None:
+        """Retire only this socket; old failures cannot close a replacement.
+    
+        Disconnect is an unknown response/effect, never evidence that an order
+        was refused or safe to replay. Callers retain the existing reconciliation
+        contract. Wake pending calls before joining the original reader.
+        """
+        with self._state_lock:
+            if self._sock is not sock:
+                return
+            self._sock, self._alive = None, False
+            reader, self._reader = self._reader, None
+            for cid, pending in self._pending.items():
+                if self._pending_sockets.get(cid) is sock:
+                    pending.put(("__disconnect__", {"error": error}))
+        try:
+            shutdown = getattr(sock, "shutdown", None)
+            if shutdown is not None:
+                shutdown(socket.SHUT_RDWR)
+        except OSError:
+            pass  # Already disconnected; close and reader reconciliation remain.
+        finally:
+            try:
+                sock.close()
+            except OSError:
+                pass
+            finally:
+                if reader is not None and reader is not threading.current_thread():
+                    pass  # deliberately omit owned reader join
+                    if reader.is_alive():
+>                       raise CtraderError("cTrader reader did not terminate after socket shutdown")
+E                       vati.execution.ctrader.transport.CtraderError: cTrader reader did not terminate after socket shutdown
+
+trading/vati/execution/ctrader/transport.py:118: CtraderError
+______ test_old_reader_failure_cannot_disconnect_a_replacement_connection ______
+
+harness = <test_ctrader_transport_lifecycle.Harness object at 0x7ff10ad16540>
+
+    def test_old_reader_failure_cannot_disconnect_a_replacement_connection(harness):
+        original = DelayedSocket(harness.pair()[0], read=True)
+        replacement = harness.pair()[0]
+        harness.release.append(original.release)
+        sockets = iter([original, replacement])
+        transport = harness.transport(lambda *_: next(sockets))
+        transport.connect()
+        reader = transport._reader
+        assert original.entered.wait(1)
+        closer, close_result = harness.worker(transport.close)
+        assert original.closed.wait(1)
+        closer.join(.1)
+>       assert closer.is_alive(), "close returned before its original reader terminated"
+E       AssertionError: close returned before its original reader terminated
+E       assert False
+E        +  where False = is_alive()
+E        +    where is_alive = <Thread(Thread-9 (run), stopped 140673232856768)>.is_alive
+
+trading/tests/test_ctrader_transport_lifecycle.py:183: AssertionError
+_______ test_response_correlation_and_unsolicited_events_survive_cleanup _______
+
+harness = <test_ctrader_transport_lifecycle.Harness object at 0x7ff10ad1fec0>
+
+    def test_response_correlation_and_unsolicited_events_survive_cleanup(harness):
+        client, server = harness.pair()
+        transport = harness.transport(lambda *_: client)
+        caller, result = harness.worker(lambda: transport.call("ProtoOATraderReq", {"ctidTraderAccountId": 12345}))
+        _, _, cid = receive_frame(server)
+        for name, values, request_id in [
+            ("ProtoHeartbeatEvent", {}, None),
+            ("ProtoOASpotEvent", {"ctidTraderAccountId": 12345, "symbolId": 1, "bid": 110000}, None),
+            ("ProtoOATraderRes", {"ctidTraderAccountId": 12345, "trader": {"ctidTraderAccountId": 12345, "balance": 100, "depositAssetId": 1}}, cid),
+        ]:
+            payload = SCHEMA.wrap(name, values, request_id)
+            server.sendall(struct.pack(">I", len(payload)) + payload)
+        caller.join(1)
+        response = result.get_nowait()
+        assert response[0] == "ProtoOATraderRes" and response[1]["ctidTraderAccountId"] == 12345
+        assert [name for name, _ in transport.drain_events()] == ["ProtoOASpotEvent"]
+>       transport.close()
+
+trading/tests/test_ctrader_transport_lifecycle.py:238: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+trading/vati/execution/ctrader/transport.py:86: in close
+    self._retire(sock, "connection closed")
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <vati.execution.ctrader.transport.CtraderTransport object at 0x7ff10ad1c560>
+sock = <socket.socket [closed] fd=-1, family=1, type=1, proto=0>
+error = 'connection closed'
+
+    def _retire(self, sock, error: str) -> None:
+        """Retire only this socket; old failures cannot close a replacement.
+    
+        Disconnect is an unknown response/effect, never evidence that an order
+        was refused or safe to replay. Callers retain the existing reconciliation
+        contract. Wake pending calls before joining the original reader.
+        """
+        with self._state_lock:
+            if self._sock is not sock:
+                return
+            self._sock, self._alive = None, False
+            reader, self._reader = self._reader, None
+            for cid, pending in self._pending.items():
+                if self._pending_sockets.get(cid) is sock:
+                    pending.put(("__disconnect__", {"error": error}))
+        try:
+            shutdown = getattr(sock, "shutdown", None)
+            if shutdown is not None:
+                shutdown(socket.SHUT_RDWR)
+        except OSError:
+            pass  # Already disconnected; close and reader reconciliation remain.
+        finally:
+            try:
+                sock.close()
+            except OSError:
+                pass
+            finally:
+                if reader is not None and reader is not threading.current_thread():
+                    pass  # deliberately omit owned reader join
+                    if reader.is_alive():
+>                       raise CtraderError("cTrader reader did not terminate after socket shutdown")
+E                       vati.execution.ctrader.transport.CtraderError: cTrader reader did not terminate after socket shutdown
+
+trading/vati/execution/ctrader/transport.py:118: CtraderError
+___ test_reconnect_discards_old_quotes_and_keeps_original_execution_evidence ___
+
+harness = <test_ctrader_transport_lifecycle.Harness object at 0x7ff10ad149b0>
+
+    def test_reconnect_discards_old_quotes_and_keeps_original_execution_evidence(harness):
+        client, server = harness.pair()
+        replacement, _ = harness.pair()
+        sockets = iter([client, replacement])
+        transport = harness.transport(lambda *_: next(sockets))
+        transport.connect()
+        first_id = transport.connection_id
+        for name, values in [
+            ('ProtoOASpotEvent', {'ctidTraderAccountId': 12345, 'symbolId': 1, 'bid': 110000}),
+            ('ProtoOAExecutionEvent', {'ctidTraderAccountId': 12345, 'executionType': 'ORDER_ACCEPTED'}),
+        ]:
+            payload = SCHEMA.wrap(name, values)
+            server.sendall(struct.pack('>I', len(payload)) + payload)
+        # Consume the original execution through the public matcher, which stashes
+        # the preceding quote. Its original connection identity must survive stashing.
+        result = transport.wait_event(lambda name, _: name == 'ProtoOAExecutionEvent', timeout_s=1)
+        assert result[1]['executionType'] == 'ORDER_ACCEPTED'
+        # A second execution remains queued across reconnect for reconciliation.
+        payload = SCHEMA.wrap('ProtoOAExecutionEvent', {'ctidTraderAccountId': 12345, 'executionType': 'ORDER_FILLED'})
+        server.sendall(struct.pack('>I', len(payload)) + payload)
+        # A correlated response is the barrier proving the preceding event arrived.
+        caller, response = harness.worker(lambda: transport.call('ProtoHeartbeatEvent', {}))
+        _, _, cid = receive_frame(server)
+        payload = SCHEMA.wrap('ProtoHeartbeatEvent', {}, cid)
+        server.sendall(struct.pack('>I', len(payload)) + payload)
+        caller.join(1)
+        assert response.get_nowait()[0] == 'ProtoHeartbeatEvent'
+>       transport.close()
+
+trading/tests/test_ctrader_transport_lifecycle.py:281: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+trading/vati/execution/ctrader/transport.py:86: in close
+    self._retire(sock, "connection closed")
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <vati.execution.ctrader.transport.CtraderTransport object at 0x7ff10ad14fb0>
+sock = <socket.socket [closed] fd=-1, family=1, type=1, proto=0>
+error = 'connection closed'
+
+    def _retire(self, sock, error: str) -> None:
+        """Retire only this socket; old failures cannot close a replacement.
+    
+        Disconnect is an unknown response/effect, never evidence that an order
+        was refused or safe to replay. Callers retain the existing reconciliation
+        contract. Wake pending calls before joining the original reader.
+        """
+        with self._state_lock:
+            if self._sock is not sock:
+                return
+            self._sock, self._alive = None, False
+            reader, self._reader = self._reader, None
+            for cid, pending in self._pending.items():
+                if self._pending_sockets.get(cid) is sock:
+                    pending.put(("__disconnect__", {"error": error}))
+        try:
+            shutdown = getattr(sock, "shutdown", None)
+            if shutdown is not None:
+                shutdown(socket.SHUT_RDWR)
+        except OSError:
+            pass  # Already disconnected; close and reader reconciliation remain.
+        finally:
+            try:
+                sock.close()
+            except OSError:
+                pass
+            finally:
+                if reader is not None and reader is not threading.current_thread():
+                    pass  # deliberately omit owned reader join
+                    if reader.is_alive():
+>                       raise CtraderError("cTrader reader did not terminate after socket shutdown")
+E                       vati.execution.ctrader.transport.CtraderError: cTrader reader did not terminate after socket shutdown
+
+trading/vati/execution/ctrader/transport.py:118: CtraderError
+=========================== short test summary info ============================
+FAILED trading/tests/test_ctrader_transport_lifecycle.py::test_close_shuts_down_and_joins_a_blocked_reader
+FAILED trading/tests/test_ctrader_transport_lifecycle.py::test_close_wakes_an_original_pending_request_without_waiting_for_timeout
+FAILED trading/tests/test_ctrader_transport_lifecycle.py::test_old_reader_failure_cannot_disconnect_a_replacement_connection
+FAILED trading/tests/test_ctrader_transport_lifecycle.py::test_response_correlation_and_unsolicited_events_survive_cleanup
+FAILED trading/tests/test_ctrader_transport_lifecycle.py::test_reconnect_discards_old_quotes_and_keeps_original_execution_evidence
+ERROR trading/tests/test_ctrader_transport_lifecycle.py::test_concurrent_connects_create_one_socket_and_one_reader
+ERROR trading/tests/test_ctrader_transport_lifecycle.py::test_old_request_failure_cannot_close_a_replacement_socket
+5 failed, 15 passed, 2 errors in 0.83s

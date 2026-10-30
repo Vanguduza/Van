@@ -1,0 +1,142 @@
+{
+  "schema_version": 1,
+  "status": "SEVEN_ENVIRONMENTAL_SKIPS_VERIFIED_WITH_ACTUAL_LOCAL_TOOLS",
+  "main_validation": "docs/audit/VAN_WIRING_CLOSURE_VALIDATION_2026-10-07.json",
+  "main_validation_sha256": "d8d28eb52b237addaf65c7f57e3de0331e9efe4bfc7d12cb0c5bd6a2d0900df1",
+  "production_manifest": "docs/audit/validation/van-production-source-freeze-2026-10-07.json",
+  "production_manifest_sha256": "29c055fe86b0d3057b4975dc3a5a8fda1db74d8973de6f670096eedc16e86384",
+  "production_source_unchanged": true,
+  "checks": [
+    {
+      "scope": "actual_release_refusal",
+      "cases": [
+        {
+          "case": "tests.contracts.test_android_instrumentation_abi::test_actual_agp_direct_package_release_refuses_missing_core_deployment_profile",
+          "original_skip_reason": "opt-in actual AGP release guard check",
+          "outcome": "PASSED"
+        },
+        {
+          "case": "tests.contracts.test_android_production_target::test_actual_agp_valid_target_still_refuses_missing_production_signing",
+          "original_skip_reason": "opt-in actual AGP signing guard check",
+          "outcome": "PASSED"
+        }
+      ],
+      "passed": 2,
+      "skipped": 0,
+      "failed": 0,
+      "junit": "docs/audit/validation/android-actual-release-guards-final-2026-10-07.xml",
+      "junit_sha256": "9c93029c440d7d3bde0454b0ceab0ca1fd741481137cbb7a21fcfa762065e2b5"
+    },
+    {
+      "scope": "character_reference_integrity",
+      "cases": [
+        {
+          "case": "tests.contracts.test_character_forge_reference_pack::test_crops_regenerate_byte_identically_from_the_board",
+          "original_skip_reason": "could not import 'PIL.Image': No module named 'PIL'",
+          "outcome": "PASSED"
+        },
+        {
+          "case": "tests.contracts.test_character_forge_reference_pack::test_interim_art_is_the_bundled_asset_and_regenerates_from_candidate_b",
+          "original_skip_reason": "could not import 'PIL.Image': No module named 'PIL'",
+          "outcome": "PASSED"
+        }
+      ],
+      "passed": 2,
+      "skipped": 0,
+      "failed": 0,
+      "junit": "docs/audit/validation/character-reference-integrity-final-2026-10-07.xml",
+      "junit_sha256": "08f3737ced807655f1fd871c935d38ece74dbbe516f159eceb6eb9beaec151f5"
+    },
+    {
+      "scope": "hermes_runtime_preservation",
+      "cases": [
+        {
+          "case": "tests.hermes.test_profile_layout::test_install_profile_preserves_runtime_state_and_secrets",
+          "original_skip_reason": "install_van_profile.sh requires rsync; runtime-state preservation is NOT VERIFIED here",
+          "outcome": "PASSED"
+        }
+      ],
+      "passed": 1,
+      "skipped": 0,
+      "failed": 0,
+      "junit": "docs/audit/validation/hermes-profile-runtime-preservation-rsync-2026-10-07.xml",
+      "junit_sha256": "c7189bb0cdffc0e9be57ea972d4a3475cde08ba28f08c67050550c4f9462618f",
+      "receipt": "docs/audit/validation/hermes-profile-runtime-preservation-rsync-2026-10-07.json",
+      "receipt_sha256": "d3035b97e06f2243d3e3d621254e69d506afc4c4a42b683adab1d0901dd3b8f8"
+    },
+    {
+      "scope": "dial_registry_resolver",
+      "cases": [
+        {
+          "case": "trading.tests.test_vtil_borrow::test_dial_resolver_selects_trading_knowledge_from_van_registry",
+          "original_skip_reason": "dial-new checkout not available (set DIAL_REPO)",
+          "outcome": "PASSED"
+        }
+      ],
+      "passed": 1,
+      "skipped": 0,
+      "failed": 0,
+      "junit": "docs/audit/validation/vtil-dial-resolver-2026-10-07/test-result.xml",
+      "junit_sha256": "d0c56947bbd2706eab4c9bc612be50d7be66cc64488e1068cfe3241d1134fa2c",
+      "receipt": "docs/audit/validation/vtil-dial-resolver-2026-10-07/result.json",
+      "receipt_sha256": "4c1455fc61b2b41203489d42079cc01cab24152bd87e100df97c7333dbd23036"
+    },
+    {
+      "scope": "real_postgres_ledger",
+      "cases": [
+        {
+          "case": "trading.tests.test_infra_live::test_postgres_ledger_matches_sqlite_chain_and_detects_tampering",
+          "original_skip_reason": "local PostgreSQL not reachable",
+          "outcome": "PASSED"
+        }
+      ],
+      "passed": 1,
+      "skipped": 0,
+      "failed": 0,
+      "junit": "docs/audit/validation/postgres-ledger-real-fixture-2026-10-07.xml",
+      "junit_sha256": "9214dcfb4da91fa0334835a62ff6870b23b9d2efa0eae049c701daccbb23bc24",
+      "receipt": "docs/audit/validation/postgres-ledger-real-fixture-2026-10-07.json",
+      "receipt_sha256": "424ca1bad49fdff2644ee7d21f8d0bf1292056c3b64b45c75d6037241a8ab463"
+    }
+  ],
+  "actual_release_guard_logs": {
+    "docs/audit/validation/android-actual-release-deployment-refusal-2026-10-07.log": "343899be81acacfcccb022dfa58d7226bd59476bb9f9c6ee9cbb61ec50bf0116",
+    "docs/audit/validation/android-actual-release-signing-refusal-2026-10-07.log": "6fb535af91aebca994b03d080710c320cf2564a5e242fe9a0a8d50186c076b8f"
+  },
+  "additional_test_inputs_sha256": {
+    "tests/contracts/test_android_instrumentation_abi.py": "d74f2f4258e3014c6f83b754a0da3830769b5b7c4f12ddcaf845ac9931e71857",
+    "tests/contracts/test_android_production_target.py": "d9a56219089b9aa91634c83d09283d25bb7d38394ee002079a30615b8b035f2e",
+    "tests/contracts/test_character_forge_reference_pack.py": "a51d58ae45da8625d7d517d948c1f125310d54e6151120f645bd5134c93245f7",
+    "tools/character_forge/build_reference_pack.py": "f79f4cca3c8c7b8949378c7f4d886b530d77ec8b02d9bc1ebef42fedaa67f531",
+    "android/app/build.gradle.kts": "2047e411d1356517f6bafe1f0c70f3e7f8046623602170f9bc552c99bc17f514",
+    "android/buildSrc/src/main/java/com/dial/van/buildconfig/VanProductionTarget.java": "3b3c9e2e641b81dfff28ce6c553c8acf5fbf4c7817325fd2152094610758608c"
+  },
+  "pillow_version": "11.3.0",
+  "additional_passed_cases": 7,
+  "main_suite_results_preserved": {
+    "passed": 6574,
+    "skipped": 10,
+    "failed": 0,
+    "errors": 0
+  },
+  "verified_main_plus_previously_skipped_executions": 6581,
+  "unresolved_skipped_cases": [
+    {
+      "case": "trading.tests.test_oci_trading_topology_bootstrap::test_firewall_verify_accepts_a_single_vcn_admin_source",
+      "reason": "the helper refuses to run unless it is root"
+    },
+    {
+      "case": "trading.tests.test_oci_trading_topology_bootstrap::test_firewall_verify_rejects_overlay_and_empty_admin_lists",
+      "reason": "the helper refuses to run unless it is root"
+    },
+    {
+      "case": "trading.tests.test_oci_trading_topology_bootstrap::test_firewall_verify_rejects_a_blank_admin_entry",
+      "reason": "the helper refuses to run unless it is root"
+    }
+  ],
+  "count_scope": "Seven unique cases skipped in the main suites passed in separate targeted runs; no previously passing case is counted again. Original suite logs/receipts and registry hashes are unchanged.",
+  "limits": "Three privileged OCI firewall helper tests remain skipped; no privilege bypass or host firewall qualification. These local fixtures do not establish production, provider, owner-release or physical Android acceptance.",
+  "physical_tests_executed": 0,
+  "production_deployed": false,
+  "owner_release_built": false
+}

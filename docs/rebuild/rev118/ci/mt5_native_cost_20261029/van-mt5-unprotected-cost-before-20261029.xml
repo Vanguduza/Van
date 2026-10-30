@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="1" time="0.673" timestamp="2026-10-29T00:18:37.154999+00:00" hostname="6e9feff21467"><testcase classname="trading.tests.test_mt5_recorded_entry_charges" name="test_optional_charge_read_cannot_delay_recovery_of_an_unprotected_native_fill" time="0.055"><failure message="AssertionError: assert (Decimal('1.375') is None)&#10; +  where Decimal('1.375') = ExecutionReceipt(trade_intent_id='deadline-original', decision_hash='aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa...('1.375'), protective_stop_price=None, receipt_hash='042597fc05d0d13d223cd371b03c180e3be0f427ec9398f06cdee0e47ff8f25f').fees">tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-242/test_optional_charge_read_cann0')
+
+    def test_optional_charge_read_cannot_delay_recovery_of_an_unprotected_native_fill(tmp_path):
+        queries = []
+        _, result, _, receipt = observed_worker(tmp_path, unprotected=True, history_queries=queries)
+&gt;       assert receipt.fees is None and result['recorded_entry_charges'] is None
+E       AssertionError: assert (Decimal('1.375') is None)
+E        +  where Decimal('1.375') = ExecutionReceipt(trade_intent_id='deadline-original', decision_hash='aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa...('1.375'), protective_stop_price=None, receipt_hash='042597fc05d0d13d223cd371b03c180e3be0f427ec9398f06cdee0e47ff8f25f').fees
+
+trading/tests/test_mt5_recorded_entry_charges.py:60: AssertionError</failure></testcase></testsuite></testsuites>

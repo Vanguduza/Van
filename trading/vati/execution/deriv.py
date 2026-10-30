@@ -4,11 +4,14 @@ indices are refused unless the capsule is synthetic_only (Rev 3 A.8: OBSERVE).""
 
 from __future__ import annotations
 
+import time
 from dataclasses import dataclass, field
 from decimal import Decimal
 from typing import Any, Callable, Optional
 
 from vati.execution.base import AccountState, ExecutionReceipt, Health, OrderCommand, VenuePosition, VenueUnavailable
+from vati.execution.deriv_identity import DerivIdentity, DerivIdentityError
+from vati.execution.entry_deadline import EntryNotSent, require_entry_deadline
 from vati.risk.contracts import Direction, LossModel
 
 ZERO = Decimal("0")
@@ -45,6 +48,9 @@ class DerivAdapter:
     transport: Optional[Callable[[dict], dict]] = None
     allow_synthetics: bool = False
     sent: list[dict] = field(default_factory=list)
+    identity: Optional[DerivIdentity] = None
+    entry_enabled: bool = True
+    clock: Callable[[], int] = field(default=lambda:int(time.time()*1000))
 
     def _call(self, msg: dict) -> dict:
         if self.transport is None:
@@ -55,10 +61,29 @@ class DerivAdapter:
     def sync_account(self) -> AccountState:
         r = self._call({"authorize": "<token-from-vault-never-in-prompt>"})
         a = r.get("authorize", {})
-        return AccountState(self.account_alias, Decimal(str(a.get("balance", "0"))), Decimal(str(a.get("balance", "0"))), a.get("currency", "USD"), bool(a.get("loginid")))
+        if self.identity is not None:
+            try:
+                self.identity.validate(a)
+            except DerivIdentityError:
+                return AccountState(self.account_alias, ZERO, ZERO, self.identity.currency, False)
+        try:
+            balance=Decimal(str(a['balance']));currency=a['currency']
+            if not balance.is_finite() or not isinstance(currency,str) or not currency.strip():raise ValueError()
+        except (KeyError,TypeError,ValueError,ArithmeticError):
+            raise VenueUnavailable('Deriv native funds or currency observation unavailable') from None
+        return AccountState(self.account_alias,balance,balance,currency,bool(a.get('loginid')))
+
+    def orders(self) -> list[dict]:
+        # This immediate digital-contract route has no resting entry order.
+        # A proposal is only a quote; accepted financial contracts are exposed
+        # by the native portfolio, and in-flight buys remain in the journal.
+        self.positions()
+        return []
 
     def positions(self) -> list[VenuePosition]:
         r = self._call({"portfolio": 1})
+        if r.get("error") or not isinstance(r.get("portfolio"), dict) or not isinstance(r["portfolio"].get("contracts"), list):
+            raise VenueUnavailable("Deriv native portfolio is unavailable; exposure must be reconciled")
         out = []
         for c in r.get("portfolio", {}).get("contracts", []):
             out.append(VenuePosition(str(c["contract_id"]), c["symbol"], Direction.LONG, Decimal(str(c.get("buy_price", "0"))), Decimal(str(c.get("buy_price", "0"))), None, str(c.get("passthrough", {}).get("trade_intent_id", "")), LossModel.FULL_STAKE))
@@ -75,17 +100,36 @@ class DerivAdapter:
         loss_model, _ = map_deriv_contract(family)
         if loss_model is not cmd.loss_model:
             raise ValueError(f"contract family {family} implies {loss_model.value}, command carries {cmd.loss_model.value}")
-        return {"proposal": 1, "amount": str(cmd.quantity), "basis": "stake", "contract_type": "CALL" if cmd.direction is Direction.LONG else "PUT", "currency": "USD",
+        return {"proposal": 1, "amount": str(cmd.quantity), "basis": "stake", "contract_type": "CALL" if cmd.direction is Direction.LONG else "PUT", "currency": self.identity.currency if self.identity else "USD",
                 "duration": duration, "duration_unit": duration_unit, "symbol": cmd.symbol, "passthrough": {"trade_intent_id": cmd.trade_intent_id, "decision_hash": cmd.decision_hash}}
 
     def submit(self, cmd: OrderCommand, *, now_ms: int, family: str = "MULTIPLIERS", duration: int = 60) -> ExecutionReceipt:
+        if self.entry_enabled is not True or cmd.account_alias != self.account_alias or cmd.venue != self.venue:
+            return ExecutionReceipt(cmd.trade_intent_id, cmd.decision_hash, self.venue, "REJECTED", ZERO, None, cmd.entry_price, cmd.entry_price, cmd.entry_price, False, now_ms, now_ms, reject_reason="Deriv command or configured mode does not match the bound account").sealed()
         if is_synthetic(cmd.symbol) and not self.allow_synthetics:
             return ExecutionReceipt(cmd.trade_intent_id, cmd.decision_hash, self.venue, "REJECTED", ZERO, None, cmd.entry_price, cmd.entry_price, cmd.entry_price, False, now_ms, now_ms, reject_reason="synthetic index: OBSERVE only (Rev 3 A.8)").sealed()
-        prop = self._call(self.build_proposal(cmd, family=family, duration=duration))
+        rej=lambda why,status="REJECTED":ExecutionReceipt(cmd.trade_intent_id,cmd.decision_hash,self.venue,status,ZERO,None,cmd.entry_price,cmd.entry_price,cmd.entry_price,False,now_ms,now_ms,reject_reason=why).sealed()
+        def entry(msg):
+            if cmd.expires_at_ms is None:
+                return self._call(msg)
+            require_entry_deadline(cmd.expires_at_ms,self.clock)
+            bounded=getattr(self.transport,'call_entry',None)
+            if not callable(bounded):
+                raise EntryNotSent('native transport cannot enforce the explicit entry deadline; not sent')
+            self.sent.append(msg)
+            return bounded(msg,expires_at_ms=cmd.expires_at_ms,clock=self.clock)
+        try:
+            prop = entry(self.build_proposal(cmd, family=family, duration=duration))
+        except EntryNotSent as exc:
+            return rej(str(exc))
         pid = prop.get("proposal", {}).get("id")
         if not pid:
             return ExecutionReceipt(cmd.trade_intent_id, cmd.decision_hash, self.venue, "REJECTED", ZERO, None, cmd.entry_price, cmd.entry_price, cmd.entry_price, False, now_ms, now_ms, reject_reason=str(prop.get("error", "no proposal"))).sealed()
-        buy = self._call({"buy": pid, "price": str(cmd.quantity), "passthrough": {"trade_intent_id": cmd.trade_intent_id, "decision_hash": cmd.decision_hash}})
+        try:
+            buy = entry({"buy": pid, "price": str(cmd.quantity), "passthrough": {"trade_intent_id": cmd.trade_intent_id, "decision_hash": cmd.decision_hash}})
+        except EntryNotSent as exc:
+            return rej(str(exc))
+
         b = buy.get("buy")
         if not b:
             return ExecutionReceipt(cmd.trade_intent_id, cmd.decision_hash, self.venue, "REJECTED", ZERO, None, cmd.entry_price, cmd.entry_price, cmd.entry_price, False, now_ms, now_ms, reject_reason=str(buy.get("error", "buy failed"))).sealed()

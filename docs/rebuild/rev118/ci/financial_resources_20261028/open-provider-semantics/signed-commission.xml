@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="1" time="0.638" timestamp="2026-10-28T19:12:13.556060+00:00" hostname="6e9feff21467"><testcase classname="test_van_ctrader_signed_commission_20261028" name="test_native_positive_commission_credit_is_a_negative_cost_not_a_charge" time="0.023"><failure message="AssertionError: the adapter converted a native signed credit into a positive fee&#10;assert Decimal('3.5') == Decimal('-3.50')&#10; +  where Decimal('3.5') = ExecutionReceipt(trade_intent_id='fee-credit', decision_hash='dddddddddddddddddddddddddddddddddddddddddddddddddddddddd...tective_stop_price=Decimal('1.09808'), receipt_hash='8f305aebd662650d16d39624addad019b47b5e068b1b4ed31855f313aa81fe57').fees&#10; +  and   Decimal('-3.50') = D('-3.50')">def test_native_positive_commission_credit_is_a_negative_cost_not_a_charge():
+        fake=FakeCtrader();send=fake.send
+        def credited(name,body,cid=None):
+            if name=='ProtoOAExecutionEvent' and body.get('deal',{}).get('filledVolume'):
+                body['deal']['commission']=350
+                body['deal']['moneyDigits']=2
+            return send(name,body,cid)
+        fake.send=credited;adapter=make_adapter(fake)
+        try:
+            adapter.sync_account()
+            command=OrderCommand('fee-credit','d'*64,'fee-credit','ct_demo','ctrader','EURUSD',
+                Direction.LONG,'MARKET',D('.1'),D('1.10008'),D('1.09808'),StopMode.VENUE,
+                LossModel.STOP_DISTANCE).sealed()
+            receipt=adapter.submit(command,now_ms=5)
+            assert receipt.status=='FILLED' and receipt.filled_qty==D('.1')
+&gt;           assert receipt.fees==D('-3.50'),'the adapter converted a native signed credit into a positive fee'
+E           AssertionError: the adapter converted a native signed credit into a positive fee
+E           assert Decimal('3.5') == Decimal('-3.50')
+E            +  where Decimal('3.5') = ExecutionReceipt(trade_intent_id='fee-credit', decision_hash='dddddddddddddddddddddddddddddddddddddddddddddddddddddddd...tective_stop_price=Decimal('1.09808'), receipt_hash='8f305aebd662650d16d39624addad019b47b5e068b1b4ed31855f313aa81fe57').fees
+E            +  and   Decimal('-3.50') = D('-3.50')
+
+../../test_van_ctrader_signed_commission_20261028.py:24: AssertionError</failure></testcase></testsuite></testsuites>

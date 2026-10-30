@@ -1,0 +1,18 @@
+...........F.......................                                      [100%]
+=================================== FAILURES ===================================
+_____ test_clock_defect_claims_remain_visible_but_cannot_verify_an_actual ______
+
+    def test_clock_defect_claims_remain_visible_but_cannot_verify_an_actual():
+        recorder=CalendarRecorder();scheduled=_sched(recorder)
+        for source in ('a','b'):recorder.observe(_obs(scheduled.event_key,source,'1',SCHED_MS-1))
+        result=recorder.record(scheduled.event_key)
+        assert len(result.observations)==2 and result.latency_ms==-1
+>       assert result.status is not ReleaseStatus.VERIFIED and result.agreed_actual is None
+E       AssertionError: assert (<ReleaseStatus.VERIFIED: 'VERIFIED'> is not <ReleaseStatus.VERIFIED: 'VERIFIED'>)
+E        +  where <ReleaseStatus.VERIFIED: 'VERIFIED'> = ReleaseRecord(scheduled=ScheduledRelease(event_key='NFP:1700000000000', name='NFP', scheduled_ms=1700000000000, curren...: 'VERIFIED'>, agreed_actual=Decimal('1'), agreeing_sources=('a', 'b'), dissenting=(), first_observed_ms=1699999999999).status
+E        +  and   <ReleaseStatus.VERIFIED: 'VERIFIED'> = ReleaseStatus.VERIFIED
+
+trading/tests/test_calendar_causal_boundaries.py:108: AssertionError
+=========================== short test summary info ============================
+FAILED trading/tests/test_calendar_causal_boundaries.py::test_clock_defect_claims_remain_visible_but_cannot_verify_an_actual
+1 failed, 34 passed, 2 deselected in 0.36s

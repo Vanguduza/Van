@@ -1,0 +1,90 @@
+........................................................................ [ 31%]
+........................................................................ [ 62%]
+................................................FFF..................... [ 93%]
+.....F..........                                                         [100%]
+=================================== FAILURES ===================================
+_________ test_ctrader_current_bounded_entry_still_fills_exactly_once __________
+
+    def test_ctrader_current_bounded_entry_still_fills_exactly_once():
+        a,c,w,_=ctrader();r=a.submit(c,now_ms=1000)
+>       assert r.status=='FILLED' and len(w.sent)==1 and r.filled_qty==D('.1')
+E       AssertionError: assert ('REJECTED' == 'FILLED'
+E         
+E         - FILLED
+E         + REJECTED)
+
+trading/tests/test_provider_entry_deadline.py:45: AssertionError
+_____ test_ctrader_expiry_after_native_write_cannot_rewrite_a_genuine_fill _____
+
+    def test_ctrader_expiry_after_native_write_cannot_rewrite_a_genuine_fill():
+        a,c,w,_=ctrader(late_reply=True);r=a.submit(c,now_ms=1000)
+>       assert r.status=='FILLED' and len(w.sent)==1
+E       AssertionError: assert ('REJECTED' == 'FILLED'
+E         
+E         - FILLED
+E         + REJECTED)
+
+trading/tests/test_provider_entry_deadline.py:49: AssertionError
+__ test_ctrader_lost_response_after_native_write_is_unknown_not_a_new_refusal __
+
+    def test_ctrader_lost_response_after_native_write_is_unknown_not_a_new_refusal():
+        a,c,w,_=ctrader(lost=True);r=a.submit(c,now_ms=1000)
+>       assert r.status=='UNKNOWN' and len(w.sent)==1
+E       AssertionError: assert ('REJECTED' == 'UNKNOWN'
+E         
+E         - UNKNOWN
+E         + REJECTED)
+
+trading/tests/test_provider_entry_deadline.py:53: AssertionError
+_ test_actual_router_binds_ctrader_mandate_and_original_quote_through_wire_dispatch[False] _
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-53/test_actual_router_binds_ctrad0')
+eurusd = SymbolContract(symbol='EURUSD', venue='mt5', base_currency='EUR', quote_currency='USD', account_currency='USD', contra...=Decimal('0'), max_adv_participation=Decimal('0.10'), liquidity_haircut=Decimal('0'), round_trip_cost_pct=Decimal('0'))
+late = False
+
+    @pytest.mark.parametrize('late',[False,True])
+    def test_actual_router_binds_ctrader_mandate_and_original_quote_through_wire_dispatch(tmp_path,eurusd,late):
+        from conftest import NOW,mandate_dict,snapshot,intent
+        from vati.core import Ledger,EventKind
+        from vati.execution import ExecutionRouter,ProtectionManager
+        from vati.execution.risk_refresh import CurrentRiskFacts
+        from vati.execution.pretrade import MarketReference
+        from vati.risk import RiskAuthority,TradingMandate,KillSwitch,Decision
+        a,_,wire,clock=ctrader();clock['ms']=NOW*1000
+        m=TradingMandate.from_mapping(mandate_dict(venue='ctrader',account_alias=a.account_alias,expires_at_unix=NOW+1))
+        trade=intent(venue='ctrader',account_alias=a.account_alias)
+        facts=snapshot(replace(eurusd,venue='ctrader'),account_alias=a.account_alias)
+        authority=RiskAuthority(m);approved=authority.evaluate_safe(trade,facts)
+        assert approved.decision in {Decision.APPROVED,Decision.REDUCED}
+        ledger=Ledger();router=ExecutionRouter(ledger=ledger,adapters={'ctrader':a},kill_switch=KillSwitch(),protection=ProtectionManager(),clock=lambda:clock['ms'],current_risk_authority=authority,current_risk_facts_provider=lambda *args,**kwargs:CurrentRiskFacts(facts,clock['ms']))
+        if late:
+            class LastWriteLock:
+                def __enter__(self):clock['ms']=NOW*1000+101
+                def __exit__(self,*args):pass
+            a.transport._lock=LastWriteLock()
+        result=router.execute(trade,approved,m,now_ms=clock['ms'],entry_type='MARKET',market_reference=MarketReference(trade.entry,0,100))
+        command_event=next(ledger.iter(EventKind.ORDER_COMMAND))
+        assert command_event.payload['expires_at_ms']==NOW*1000+101
+>       assert result.status==('REJECTED' if late else 'FILLED') and len(wire.sent)==(0 if late else 1)
+E       AssertionError: assert ('REJECTED' == 'FILLED'
+E         
+E         - FILLED
+E         + REJECTED)
+
+trading/tests/test_provider_entry_deadline.py:146: AssertionError
+=============================== warnings summary ===============================
+../../van-backend-venv-20261025/lib/python3.12/site-packages/fastapi/testclient.py:1
+  /workspace/van-backend-venv-20261025/lib/python3.12/site-packages/fastapi/testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+    from starlette.testclient import TestClient as TestClient  # noqa
+
+../../van-backend-venv-20261025/lib/python3.12/site-packages/starlette/testclient.py:53
+  /workspace/van-backend-venv-20261025/lib/python3.12/site-packages/starlette/testclient.py:53: DeprecationWarning: The anyio.abc.BlockingPortal alias is deprecated, use anyio.from_thread.BlockingPortal instead.
+    _PortalFactoryType = Callable[[], AbstractContextManager[anyio.abc.BlockingPortal]]
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED trading/tests/test_provider_entry_deadline.py::test_ctrader_current_bounded_entry_still_fills_exactly_once
+FAILED trading/tests/test_provider_entry_deadline.py::test_ctrader_expiry_after_native_write_cannot_rewrite_a_genuine_fill
+FAILED trading/tests/test_provider_entry_deadline.py::test_ctrader_lost_response_after_native_write_is_unknown_not_a_new_refusal
+FAILED trading/tests/test_provider_entry_deadline.py::test_actual_router_binds_ctrader_mandate_and_original_quote_through_wire_dispatch[False]
+4 failed, 228 passed, 2 warnings in 2.87s

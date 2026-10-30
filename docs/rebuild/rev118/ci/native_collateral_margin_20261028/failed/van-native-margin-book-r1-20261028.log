@@ -1,0 +1,26 @@
+...................................F.......                              [100%]
+=================================== FAILURES ===================================
+_ test_storage_commit_ack_loss_reconciles_original_without_recapture_or_duplicate _
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-47/test_storage_commit_ack_loss_r0')
+eurusd = SymbolContract(symbol='EURUSD', venue='mt5', base_currency='EUR', quote_currency='USD', account_currency='USD', contra...=Decimal('0'), max_adv_participation=Decimal('0.10'), liquidity_haircut=Decimal('0'), round_trip_cost_pct=Decimal('0'))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f6018c1e9c0>
+
+    def test_storage_commit_ack_loss_reconciles_original_without_recapture_or_duplicate(tmp_path,eurusd,monkeypatch):
+        ledger,adapter,event,book,now,_=setup_book(tmp_path,eurusd)
+        original=ledger.atomic
+        @contextmanager
+        def lost_ack():
+            with original():yield ledger
+            raise OSError('fixture actual commit ACK loss')
+        monkeypatch.setattr(ledger,'atomic',lost_ack)
+        with pytest.raises(NativeMarginUnknown) as error:capture(adapter,event,book)
+        calls=len(adapter.transport.calls);count=ledger.count()
+        observed=book.lookup(error.value.source_ref)
+>       assert observed is not None
+E       assert None is not None
+
+trading/tests/test_native_margin_book.py:66: AssertionError
+=========================== short test summary info ============================
+FAILED trading/tests/test_native_margin_book.py::test_storage_commit_ack_loss_reconciles_original_without_recapture_or_duplicate
+1 failed, 42 passed in 1.62s

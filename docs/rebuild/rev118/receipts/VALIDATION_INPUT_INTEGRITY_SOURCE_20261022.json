@@ -1,0 +1,50 @@
+{
+  "schema": "van.rebuild.candidate-source-receipt/1",
+  "source_parent": "da3087d65c5b58ab4375baca6d7a4f6230b59de0",
+  "scope": "PARTIAL_BE013_BE021_BE035_NOT_UNIT_ACCEPTANCE",
+  "source_sha256": {
+    "trading/vati/backtest/metrics.py": "4e9089078b0caf5ff941b1fc7826a873fb8351cf1d955e9b69f036459044b18f",
+    "trading/vati/validation/builder.py": "244e39db764a3aa3dfdb5097332f5e2f8ea327ca53a423ffa1138f737fdb4721",
+    "trading/vati/validation/certificates.py": "e90e5483316c5fbe9a9e008a5a007457dc237492a4f36c7e3756a4640118b1a3",
+    "trading/vati/validation/policy.py": "e5e994a057c3f4ad26622cd69d6edc68a3b179316b74dd1e3891b491b8d9b983",
+    "trading/tests/test_validation_input_integrity.py": "6d15f7422657bb965b02478d7974d8e51acf068842b1901c5dffb15f1ee9b3a8"
+  },
+  "before": {
+    "failed": 22,
+    "passed": 1
+  },
+  "validation": {
+    "full_trading_before_two_additional_test_only_controls": {
+      "passed": 1663,
+      "skipped": 2,
+      "warnings": 3,
+      "seconds": 44.37
+    },
+    "latest_integrity_tests": {
+      "passed": 36,
+      "seconds": 0.2
+    },
+    "related_certificate_policy_tests": {
+      "passed": 71
+    },
+    "gateway_trading_readback_activation_tests": {
+      "passed": 88,
+      "warnings": 2,
+      "seconds": 15.5
+    }
+  },
+  "logs_sha256": {
+    "/tmp/van-validation-integrity-before.txt": "1c8e9ba621fef81fa624057826419097304fc70018e31c3416de0acf2a59c601",
+    "/tmp/van-validation-integrity-second.txt": "ce1aad03eae1a3f79f12cf7da8da3d4d3edc9fb901e1d44ed85abc63fc5bcf66",
+    "/tmp/van-validation-integrity-full.txt": "eb73381cb8e37c4b0e3f5a4cc40663d35f6af8f27a24db512d34a42dcca1e5dc",
+    "/tmp/van-validation-integrity-control.txt": "fd28cc0ade2aec754277aa76b9ba505d1f80f1fe4eeda3c75bc94c1d5302f49b",
+    "/tmp/van-validation-integrity-gateway.txt": "431292237d8420ffd1de970da58cd5c287de19d8107ccd47eb8519210aa53352"
+  },
+  "policy_version": "validation-policy/1.1.0",
+  "policy_change": "Numerical validity and complete CSCV partition semantics changed; existing DSR/PBO thresholds retained. Old certificate policy versions require reevaluation; no new owner policy signature issued.",
+  "remaining": [
+    "Complete chronological dataset/fold provenance, dependent/multiple-trial inference and untouched/prospective qualification",
+    "Bounded positive learned-policy-to-selector implementation and native independent qualification",
+    "No real provider, trading permission, live profit or unit acceptance asserted"
+  ]
+}

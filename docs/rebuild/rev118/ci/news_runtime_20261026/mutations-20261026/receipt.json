@@ -1,0 +1,72 @@
+{
+  "schema": "van.supplemental-source-faults/1",
+  "control_sha256": {
+    "trading/vati/events/news_runtime.py": "e3fac385aa891c8ab91d24017f5b306d9ca5a7b95959045de3f18abd12605128",
+    "trading/vati/events/news_ingress.py": "a51674b0e3ab93c01354980af8490146254ad52094d1184a674f9463a8cb5cc7",
+    "trading/vati/app/account_service.py": "f726e9a161affcde31cc457bd5a0827969308c948aa30e83b61d301c9a382235"
+  },
+  "source_restored": true,
+  "cases": [
+    {
+      "case": "discard-cold-history",
+      "path": "trading/vati/events/news_runtime.py",
+      "exit": 1,
+      "mutated_sha256": "d47b1d55122429de42e1008af3ffc1f54aaeea21c83379196464511c8a7e81f6"
+    },
+    {
+      "case": "abort-jsonl-neighbors",
+      "path": "trading/vati/events/news_ingress.py",
+      "exit": 1,
+      "mutated_sha256": "54ce14c7091d3da1571bda78d9422c0501942ecbf33b5edd41a4e4feb1e56eb4"
+    },
+    {
+      "case": "claim-missing-ready",
+      "path": "trading/vati/events/news_runtime.py",
+      "exit": 1,
+      "mutated_sha256": "6c5bc06f51d4b20ee55e398a0b0579d784a3af05fa3d7af88f1a96629df8afeb"
+    },
+    {
+      "case": "qualify-file-labels",
+      "path": "trading/vati/events/news_runtime.py",
+      "exit": 1,
+      "mutated_sha256": "90ec79645e509365504652beee196923aa201f9eadc79e0b6680bd2ea9f71773"
+    },
+    {
+      "case": "skip-health-readback",
+      "path": "trading/vati/events/news_runtime.py",
+      "exit": 1,
+      "mutated_sha256": "fafa87f57404233ab47ad1163406d125c21501bac95a4c9934edb8a4efc45a5c"
+    },
+    {
+      "case": "duplicate-health-replay",
+      "path": "trading/vati/events/news_runtime.py",
+      "exit": 1,
+      "mutated_sha256": "9a7e01ea088ed8d1c577e654d1e46106a9781e5fc1342b79def0b2ebe9983212"
+    },
+    {
+      "case": "ignore-row-capacity",
+      "path": "trading/vati/events/news_runtime.py",
+      "exit": 1,
+      "mutated_sha256": "c847a3ba677db61ae1e23f5c7918852d9aabab5b484260d5940eb2ae00865da8"
+    },
+    {
+      "case": "discard-profile-identity",
+      "path": "trading/vati/events/news_runtime.py",
+      "exit": 1,
+      "mutated_sha256": "231d65d2216b5bde7c7eea8bd587be8350a0e67ba592103ef7925dddc99291f3"
+    },
+    {
+      "case": "count-future-headlines",
+      "path": "trading/vati/events/news_runtime.py",
+      "exit": 1,
+      "mutated_sha256": "7f64b540924567190af546b27f312ddca662b00052f70396dd571f09e16cefdc"
+    },
+    {
+      "case": "hide-account-assessment-failure",
+      "path": "trading/vati/app/account_service.py",
+      "exit": 1,
+      "mutated_sha256": "a9529114238f58572e28e4a9b6dc098804d73850f344b18471daa10b7c691459"
+    }
+  ],
+  "not_canonical_corpus": true
+}

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="1" time="1.942" timestamp="2026-10-26T08:46:20.763173+00:00" hostname="2c5a245e39f1"><testcase classname="trading.worker_tests.test_native_source_parquet" name="test_actual_parquet_readback_is_typed_exact_and_deterministic" time="1.162"><failure message="assert (True is False)">source = (&lt;vati.market_data.native_archive.NativeMarketArchive object at 0x7fbae0d7dc10&gt;, NativeSymbolContract(metadata_json='{...transport_host': 'demo.ctraderapi.com', 'native_account_id': 123, ...}, 'timeframe': 'M1', 'through_revision': 1, ...})
+arrow = &lt;module 'pyarrow' from '/workspace/van-parquet-source-venv-20261026/lib/python3.12/site-packages/pyarrow/__init__.py'&gt;
+
+    def test_actual_parquet_readback_is_typed_exact_and_deterministic(source, arrow):
+        window = source[3]
+        data = encode_native_bar_partition(window)
+        assert data.startswith(b'PAR1') and data.endswith(b'PAR1')
+        assert data == encode_native_bar_partition(window)
+        result = verify_native_bar_partition(data, window)
+        assert result['sha256'] == hashlib.sha256(data).hexdigest() and result['row_count'] == 3
+&gt;       assert result['qualified_for_research'] is False and result['authority_effect'] == 'NONE'
+E       assert (True is False)
+
+trading/worker_tests/test_native_source_parquet.py:41: AssertionError</failure></testcase></testsuite></testsuites>

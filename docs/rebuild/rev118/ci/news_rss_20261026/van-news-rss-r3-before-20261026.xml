@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="3" skipped="0" tests="22" time="3.390" timestamp="2026-10-26T02:17:35.547763+00:00" hostname="2c5a245e39f1"><testcase classname="trading.tests.test_news_rss_feed" name="test_real_file_builder_ingests_rss_with_declared_guid_and_original_publication_clock" time="0.975" /><testcase classname="trading.tests.test_news_rss_feed" name="test_repeated_same_rss_bytes_reuse_first_capture_and_observation_after_cold_recovery" time="0.064" /><testcase classname="trading.tests.test_news_rss_feed" name="test_missing_publication_or_original_key_is_partial_without_a_guessed_clock[&lt;item&gt;&lt;title&gt;Missing publication&lt;/title&gt;&lt;guid&gt;x&lt;/guid&gt;&lt;/item&gt;]" time="0.018" /><testcase classname="trading.tests.test_news_rss_feed" name="test_missing_publication_or_original_key_is_partial_without_a_guessed_clock[&lt;item&gt;&lt;title&gt;Unzoned&lt;/title&gt;&lt;guid&gt;x&lt;/guid&gt;&lt;pubDate&gt;16 Oct 2026 15:00:00&lt;/pubDate&gt;&lt;/item&gt;]" time="0.014" /><testcase classname="trading.tests.test_news_rss_feed" name="test_missing_publication_or_original_key_is_partial_without_a_guessed_clock[&lt;item&gt;&lt;title&gt;No original key&lt;/title&gt;&lt;pubDate&gt;16 Oct 2026 15:00:00 GMT&lt;/pubDate&gt;&lt;/item&gt;]" time="0.012" /><testcase classname="trading.tests.test_news_rss_feed" name="test_bad_rss_item_preserves_its_valid_neighbors" time="0.026" /><testcase classname="trading.tests.test_news_rss_feed" name="test_raw_snapshot_bytes_survive_malformed_feed_without_fabricated_coverage" time="0.022" /><testcase classname="trading.tests.test_news_rss_feed" name="test_bad_adapter_profile_is_configuration_error_before_capture[change0]" time="0.011" /><testcase classname="trading.tests.test_news_rss_feed" name="test_bad_adapter_profile_is_configuration_error_before_capture[change1]" time="0.006" /><testcase classname="trading.tests.test_news_rss_feed" name="test_bad_adapter_profile_is_configuration_error_before_capture[change2]" time="0.011" /><testcase classname="trading.tests.test_news_rss_feed" name="test_lost_snapshot_commit_reply_publishes_no_headline_then_reuses_original_capture" time="0.020" /><testcase classname="trading.tests.test_news_rss_feed" name="test_rss_dtd_is_never_resolved_or_treated_as_feed_coverage[&lt;!DOCTYPE rss [&lt;!ENTITY x &quot;replacement&quot;&gt;]&gt;]" time="0.024" /><testcase classname="trading.tests.test_news_rss_feed" name="test_rss_dtd_is_never_resolved_or_treated_as_feed_coverage[&lt;!DOCTYPE rss SYSTEM &quot;file:///etc/passwd&quot;&gt;]" time="0.022" /><testcase classname="trading.tests.test_news_rss_feed" name="test_declared_rss_relevance_is_used_without_inferring_currency_from_publisher" time="0.030"><failure message="AssertionError: assert Decimal('1') &lt; 1">setup = (&lt;vati.core.ledger.Ledger object at 0x7f2a657403e0&gt;, PosixPath('/tmp/pytest-of-agent/pytest-278/test_declared_rss_rele...lared_rss_relevance_is0/feed.xml', 'input_format': 'rss2', 'source_id': 'transport', 'publisher_id': 'publisher', ...})
+
+    def test_declared_rss_relevance_is_used_without_inferring_currency_from_publisher(setup):
+        ledger, path, config = setup
+        config |= {'relevance':{'currencies':['USD'],'symbols':['EURUSD']},
+                   'sources':[{'source_id':'transport','trust':'T1_PRIMARY'}]}
+        news = build(ledger, config); h, = news.headlines(since_ms=-(2**63),as_of_ms=NOW)
+        assert h.currencies == ('USD',) and h.symbols == ('EURUSD',)
+&gt;       assert news.candidate_risk('EURUSD',now_ms=NOW,persist=False)[0] &lt; 1
+E       AssertionError: assert Decimal('1') &lt; 1
+
+trading/tests/test_news_rss_feed.py:136: AssertionError</failure></testcase><testcase classname="trading.tests.test_news_rss_feed" name="test_rss_row_capacity_is_explicit_and_never_admits_a_partial_prefix_as_complete" time="0.018" /><testcase classname="trading.tests.test_news_rss_feed" name="test_snapshot_publication_requires_independent_original_readback" time="0.013" /><testcase classname="trading.tests.test_news_rss_feed" name="test_snapshot_corruption_cannot_be_recovered_or_extended_with_health_success" time="0.012" /><testcase classname="trading.tests.test_news_rss_feed" name="test_missing_warm_snapshot_refuses_recreation_without_publishing_health_into_corruption" time="0.028" /><testcase classname="trading.tests.test_news_rss_feed" name="test_cold_recovery_refuses_hidden_original_snapshot_instead_of_appending_another" time="0.041"><failure message="AssertionError: assert 'PUBLICATION_UNKNOWN' == 'RECOVERY_UNAVAILABLE'&#10;  &#10;  - RECOVERY_UNAVAILABLE&#10;  + PUBLICATION_UNKNOWN">setup = (&lt;vati.core.ledger.Ledger object at 0x7f2a65742540&gt;, PosixPath('/tmp/pytest-of-agent/pytest-278/test_cold_recovery_ref...t_cold_recovery_refuses_hid0/feed.xml', 'input_format': 'rss2', 'source_id': 'transport', 'publisher_id': 'publisher'})
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x7f2a65742d20&gt;
+
+    def test_cold_recovery_refuses_hidden_original_snapshot_instead_of_appending_another(setup,monkeypatch):
+        ledger,path,config=setup;build(ledger,config);iterate=ledger.iter;head=ledger.head()
+        def hidden(kind=None,**kwargs):
+            if kind is not None and kind.value=='NEWS_SOURCE_SNAPSHOT':return iter(())
+            return iterate(kind,**kwargs)
+        with monkeypatch.context() as patch:
+            patch.setattr(ledger,'iter',hidden);news=build(ledger,config,NOW+1)
+&gt;       assert news.source_health['state']=='RECOVERY_UNAVAILABLE'
+E       AssertionError: assert 'PUBLICATION_UNKNOWN' == 'RECOVERY_UNAVAILABLE'
+E         
+E         - RECOVERY_UNAVAILABLE
+E         + PUBLICATION_UNKNOWN
+
+trading/tests/test_news_rss_feed.py:194: AssertionError</failure></testcase><testcase classname="trading.tests.test_news_rss_feed" name="test_report_cannot_mutate_last_known_raw_snapshot_or_captured_profile" time="0.023"><failure message="AssertionError: assert 'forged' == 'cae503791c80...fb9366833de7d'&#10;  &#10;  - cae503791c80e26bf27f3eeb9787a465160f237d5e9bb3c1b8afb9366833de7d&#10;  + forged">setup = (&lt;vati.core.ledger.Ledger object at 0x7f2a65741e20&gt;, PosixPath('/tmp/pytest-of-agent/pytest-278/test_report_cannot_mut...t_report_cannot_mutate_last0/feed.xml', 'input_format': 'rss2', 'source_id': 'transport', 'publisher_id': 'publisher'})
+
+    def test_report_cannot_mutate_last_known_raw_snapshot_or_captured_profile(setup):
+        ledger,path,config=setup;news=build(ledger,config)
+        report=news.report(now_ms=NOW)
+        report['source_health']['last_known_source_snapshot']['receipt_hash']='forged'
+        report['source_health']['source_profile']['adapter']['publisher_id']='forged'
+        original,=snapshots(ledger)
+        current=news.report(now_ms=NOW)['source_health']
+&gt;       assert current['last_known_source_snapshot']['receipt_hash']==original.hash
+E       AssertionError: assert 'forged' == 'cae503791c80...fb9366833de7d'
+E         
+E         - cae503791c80e26bf27f3eeb9787a465160f237d5e9bb3c1b8afb9366833de7d
+E         + forged
+
+trading/tests/test_news_rss_feed.py:205: AssertionError</failure></testcase><testcase classname="trading.tests.test_news_rss_feed" name="test_actual_service_news_builder_wires_rss_ingestion_and_refresh[session]" time="0.890" /><testcase classname="trading.tests.test_news_rss_feed" name="test_actual_service_news_builder_wires_rss_ingestion_and_refresh[account]" time="0.024" /></testsuite></testsuites>

@@ -1,0 +1,9 @@
+{
+  "head": "ca981d19615f614a1c41f78618e04ea1582d620e",
+  "source_sha256": "1f2df28d9cde198c51bc3b13febc484291bd7637cffb390f2b5c2021af95e2fc",
+  "source_equals_committed": true,
+  "baseline_failed": 4,
+  "baseline_passed": 0,
+  "baseline_errors": 0,
+  "source_scope": "Actual PostgreSQL submission-row lock retention; no native financial effect"
+}

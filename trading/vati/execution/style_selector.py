@@ -16,9 +16,9 @@ template already permits (INV-EXEC-001).
 Slicing exists because size relative to displayed liquidity is a real cost and
 the template engine cannot see it. The participation cap is the same idea the
 ILLIQUID_EQUITY loss model already applies to sizing, applied to working the
-order. Where the venue's lot step cannot express a slice, the slice count
-comes down until it can — never the other way, and if a single slice is still
-not expressible the selector refuses rather than rounding something up.
+order. Participation, count and venue lot constraints must all hold together;
+an infeasible plan is refused rather than increasing participation. A plan is
+not evidence of replenished liquidity or authority to submit its children.
 
 Urgency comes from deterministic state only — the trade health engine, the
 event window, the protection path — never from a model. A style chosen partly
@@ -43,7 +43,7 @@ from vati.execution.policy_templates import (
 from vati.execution.route_registry import QuantisationRefused, Route, quantise_volume
 
 PRODUCER = "vati-execution-style"
-STYLE_VERSION = "execution-style/5.1.0"
+STYLE_VERSION = "execution-style/5.1.1"
 
 ZERO, ONE = Decimal("0"), Decimal("1")
 
@@ -152,7 +152,7 @@ class ExecutionStyleSelector:
 
     def __init__(self, *, participation_cap: Decimal = DEFAULT_PARTICIPATION_CAP,
                  ledger=None, producer: str = PRODUCER) -> None:
-        if not (ZERO < participation_cap <= ONE):
+        if not isinstance(participation_cap, Decimal) or not participation_cap.is_finite() or not (ZERO < participation_cap <= ONE):
             raise StyleRefused(f"participation cap {participation_cap} is outside (0, 1]")
         self.participation_cap = participation_cap
         self._ledger = ledger
@@ -162,6 +162,8 @@ class ExecutionStyleSelector:
                quantity: Decimal, liquidity: LiquidityView,
                urgency: Urgency = Urgency.NORMAL, now_ms: int) -> ExecutionStyle:
         template_id = getattr(policy_decision, "template_id", "")
+        if not isinstance(urgency, Urgency):
+            raise StyleRefused("execution urgency must be a registered deterministic state")
         if template_id == DO_NOT_EXECUTE or not template_id:
             raise StyleRefused(f"execution policy refused this order: {template_id or 'none'}")
         t = resolve_template(template_id)
@@ -240,6 +242,11 @@ class ExecutionStyleSelector:
     def _slice(self, route: Route, quantity: Decimal, liquidity: LiquidityView,
                urgency: Urgency) -> tuple[int, Decimal, Decimal, str]:
         """How many pieces, and how big, with the lot step the binding fact."""
+        if (any(not isinstance(v, Decimal) or not v.is_finite() or v < ZERO for v in
+                (quantity, liquidity.displayed_size, liquidity.spread, liquidity.typical_spread))
+            or not route.contract.volume_step.is_finite() or route.contract.volume_step <= ZERO
+            or not route.contract.volume_min.is_finite() or route.contract.volume_min <= ZERO):
+            raise StyleRefused("finite positive quantity/lot constraints and nonnegative liquidity required")
         try:
             total, _shortfall = quantise_volume(route.contract, quantity)
         except QuantisationRefused as exc:
@@ -251,27 +258,24 @@ class ExecutionStyleSelector:
             return 1, total, total, ("urgent exit, worked in one" if urgency is Urgency.IMMEDIATE
                                      else "no displayed depth; single order")
 
-        per_slice_cap = liquidity.displayed_size * self.participation_cap
-        if per_slice_cap <= ZERO or total <= per_slice_cap:
+        per_slice_cap = _floor(liquidity.displayed_size * self.participation_cap, route.contract.volume_step)
+        if total <= per_slice_cap:
             return 1, total, total, "size within the participation cap"
-
+        if per_slice_cap < route.contract.volume_min:
+            raise StyleRefused("participation cap is below the venue minimum lot")
         wanted = int((total / per_slice_cap).to_integral_value(rounding="ROUND_CEILING"))
-        slices = max(1, min(wanted, MAX_SLICES))
-
-        # Walk the count down until every slice is expressible at the venue.
-        while slices > 1:
-            candidate = _floor(total / Decimal(slices), route.contract.volume_step)
-            if candidate >= route.contract.volume_min:
-                break
-            slices -= 1
-        if slices == 1:
-            return 1, total, total, "lot step cannot express a smaller slice"
-
-        slice_qty = _floor(total / Decimal(slices), route.contract.volume_step)
-        final = total - slice_qty * (slices - 1)
-        return slices, slice_qty, final, (
-            f"size is {total} against {liquidity.displayed_size} displayed; "
-            f"worked in {slices} at a {self.participation_cap} cap")
+        if wanted > MAX_SLICES:
+            raise StyleRefused(f"participation requires at least {wanted} slices; maximum is {MAX_SLICES}")
+        for slices in range(max(2, wanted), MAX_SLICES + 1):
+            lower = _floor(total / Decimal(slices), route.contract.volume_step)
+            for slice_qty in (lower, lower + route.contract.volume_step):
+                final = total - slice_qty * (slices - 1)
+                if (route.contract.volume_min <= slice_qty <= per_slice_cap
+                    and route.contract.volume_min <= final <= per_slice_cap):
+                    return slices, slice_qty, final, (
+                        f"size {total}; {slices} planned slices at participation {self.participation_cap}; "
+                        "each child requires fresh eligible liquidity; plan is not submission authority")
+        raise StyleRefused("participation, maximum slices and venue lot constraints are jointly infeasible")
 
 
 def _floor(value: Decimal, step: Decimal) -> Decimal:

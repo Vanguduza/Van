@@ -1,0 +1,5 @@
+Traceback (most recent call last):
+  File "/workspace/van-native-risk-schema-fixtures-20261027.py", line 16, in <module>
+    position=OpenPosition(symbol='EURUSD',direction=Direction.LONG,lots=D('.1'),stop_distance=D('.001'),
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: OpenPosition.__init__() got an unexpected keyword argument 'broker_position_id'

@@ -124,6 +124,9 @@ def decode_call(message: str | bytes) -> tuple[str, Call]:
     # looked up from `task_id`.
     if "scope" in payload or "step_budget" in payload or "grant" in payload:
         raise WireError("wire_authority_is_not_a_wire_field")
+    allowed = {'protocol', 'request_id', 'operation', 'session_id', 'target_id', 'lease_id', 'lease_generation', 'task_id', 'params'}
+    if set(payload) - allowed:
+        raise WireError('wire_unknown_field')
 
     try:
         operation = Operation(payload.get("operation"))

@@ -1,0 +1,21 @@
+# Native command targets and risk-value contracts
+
+Candidate implementation for existing execution/account features. BE-006 remains in progress; no unit acceptance is issued.
+
+Eleven original counterexamples demonstrated foreign-account/venue dispatch, a legacy Deriv entry-disable bypass without an identity object, and an incorrectly mapped native router reaching provider I/O. MT5 and cTrader now reject the wrong command target before native calls. Deriv requires an actual boolean enabled flag and a matching target regardless of its identity helper. The router checks native/owner-ticket targets before heartbeat, idempotency consumption or command creation. Existing isolated PaperAdapter simulation retains its namespace behavior. The signed-worker positive control still fills the valid command exactly once after a foreign command is refused.
+
+Hosted31a726ca completed public trading with2,898 passes, one schema failure and one declared private-DDS skip. The added used_margin observation was missing from the published RiskSnapshot schema. It is now an optional nullable decimal string, preserving every original required field and immutable legacy snapshots that omit it. An actual serialized snapshot also exposed a pre-existing nested mismatch: value-only risk terms referenced the richer native synchronization record. RiskSnapshot now defines its exact closed calculation-value shape. The full native contract still requires synced_at_unix and spec_hash; calculation data cannot attest broker freshness or authorize execution.
+
+## Executed source evidence
+
+NATIVE_COMMAND_SCOPE_AND_SCHEMA_SOURCE_20261024.json records227 actual disposable-PostgreSQL checks with no skips and confirmed cleanup,121 native-adapter/worker checks,83 schema/margin/target checks, and seven deliberately broken source variants rejected by their expected assertions with passing restored controls. The independent JSON Schema oracle accepts current and legacy serialized snapshots and rejects31 malformed or missing-required variants. Original cTrader outcome test functions are AST-identical; only their adapter factory's previously mismatched account alias was made explicit.
+
+The supplemental public source job inventories370 modules:359 gateway/contracts/Hermes modules and11 media-service modules. Both runtime reports and source-storage audits are required. Fifty browser modules, two private-DDS modules and the namespace firewall module are explicitly assigned to separate checks. The media lock stays isolated from backend pins. All198 media tests pass in that isolated runtime with zero forbidden source-storage events. The local pinned-DDS source batch passes274 cases. Fourteen instrument regressions include12 induced false/missing-evidence failures; their synthetic cases are not application executions. The first complete hosted run of the new public gateway selection remains pending publication.
+
+The original required backend job still requires its private-DDS key and exact pinned blobs. The trusted-main ledger gate remains unchanged. No private DDS code is exported or copied into Van. The new source job provides coverage while those prerequisites remain unresolved; it does not replace them.
+
+## Hosted evidence and remaining work
+
+The actual margin EA now compiles under MetaEditor5.0.0.6283 with zero errors/warnings and a fresh EX5. Deliberately invalid source produces four errors and no EX5. All374 retained mutations are caught. The complete50-file browser source job passes, including separately reexecuted root-UID and all ten firewall cases. Emulator instrumentation passes18 cases with four declared artwork/production-mode skips; both actual offline voice-playback methods pass. The overall workflow fails: the trading schema failure prevents voice-source execution, and the original private-DDS/trusted-main prerequisites remain missing. Separate receipts preserve those distinctions.
+
+Prospective-order margin, broker call/stop-out rules, physical-account binding versus cash-history coverage, native symbol freshness, joint reservations, flow-adjusted economics and remaining product implementation still need work. No independent admission, BG-001, deployed host/provider test, production signing/provisioning, handset acceptance or profitability qualification is claimed. No new frontend is introduced.

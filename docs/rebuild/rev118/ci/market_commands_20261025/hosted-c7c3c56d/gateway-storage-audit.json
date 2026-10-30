@@ -1,0 +1,8 @@
+{
+  "schema": "van.source-storage-audit/1",
+  "forbidden_events": [],
+  "source_sha256": "d4e270150fb0da6e8d79b449dd0de68fd1f97b3ccea3d282f31d91297edbd495",
+  "root": "/home/runner/work/Van/Van",
+  "scope": "SQLite opens, path-based writable opens and directory/link/rename/delete events under data and backend/data",
+  "limits": "Python audit events only; existing fd writes, native-library raw I/O and external processes are not an OS sandbox. Git state is checked separately."
+}

@@ -1,0 +1,73 @@
+{
+  "schema": "van.ctrader-connection-guard-mutations/1",
+  "scope": "nine supplemental component mutants, separate from canonical374",
+  "observed": [
+    {
+      "kind": "baseline",
+      "reason": null,
+      "exit": 0,
+      "log": "00-baseline.log"
+    },
+    {
+      "kind": "mutation",
+      "reason": "retired socket may retire replacement",
+      "exit": 1,
+      "log": "01-mutation.log"
+    },
+    {
+      "kind": "mutation",
+      "reason": "close returns before owned reader finishes",
+      "exit": 1,
+      "log": "02-mutation.log"
+    },
+    {
+      "kind": "mutation",
+      "reason": "pending original is not woken on close",
+      "exit": 1,
+      "log": "03-mutation.log"
+    },
+    {
+      "kind": "mutation",
+      "reason": "TLS refusal leaks raw socket",
+      "exit": 1,
+      "log": "04-mutation.log"
+    },
+    {
+      "kind": "mutation",
+      "reason": "cached authentication ignores replacement connection",
+      "exit": 1,
+      "log": "05-mutation.log"
+    },
+    {
+      "kind": "mutation",
+      "reason": "native account authentication accepts another account",
+      "exit": 1,
+      "log": "06-mutation.log"
+    },
+    {
+      "kind": "mutation",
+      "reason": "mixed-connection contract snapshot is published",
+      "exit": 1,
+      "log": "07-mutation.log"
+    },
+    {
+      "kind": "mutation",
+      "reason": "reconnect reuses original quote cache",
+      "exit": 1,
+      "log": "08-mutation.log"
+    },
+    {
+      "kind": "mutation",
+      "reason": "retired subscription quote is delivered after reconnect",
+      "exit": 1,
+      "log": "09-mutation.log"
+    }
+  ],
+  "survived": [],
+  "source_sha256": {
+    "trading/vati/execution/ctrader/transport.py": "94762a4b4db11f74d7f7e6ee33ec5378ff97fc868a3df825ea46abc5dbb4ae53",
+    "trading/vati/execution/ctrader/adapter.py": "fdbde5bcdcbcbe2d47e3be9a11db8f45425540f33b4273c6f156706e7db5ce28"
+  },
+  "restored": true,
+  "journal_absent": true
+}

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="4" time="2.209" timestamp="2026-10-26T21:48:04.564750+00:00" hostname="2c5a245e39f1"><testcase classname="trading.tests.test_native_archive_read_budget" name="test_growing_native_record_is_read_with_a_real_bound_even_after_a_small_stat" time="0.017" /><testcase classname="trading.tests.test_native_archive_read_budget" name="test_request_budget_refuses_valid_history_without_modifying_or_recapturing_it" time="0.023" /><testcase classname="trading.tests.test_native_archive_read_budget" name="test_exact_record_and_index_byte_budget_admits_the_original_snapshot" time="0.019" /><testcase classname="trading.tests.test_native_archive_read_budget" name="test_configured_publication_capacity_refuses_before_a_new_record_commits" time="0.024"><failure message="assert {'00000000000...me&quot;:&quot;DEPTH&quot;}'} == {'head.json':...me&quot;:&quot;DEPTH&quot;}'}&#10;  &#10;  Omitting 2 identical items, use -vv to show&#10;  Left contains 1 more item:&#10;  {'00000000000000000002-079ad8caa5b1d28d414fd725a32d2afd9a577bad99914e7cf4ca288e472bf205.json': b'{&quot;co'&#10;                                                                                                 b'ntra'&#10;                                                                                                 b'ct&quot;:'&#10;                                                                                                 b'{&quot;au'...&#10;  &#10;  ...Full output truncated (807 lines hidden), use '-vv' to show">tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-564/test_configured_publication_ca0')
+
+    def test_configured_publication_capacity_refuses_before_a_new_record_commits(tmp_path):
+        c=contract();root=tmp_path/'depth';writer=NativeDepthArchive(root,clock=lambda:250000)
+        writer.record('original',c,sample(c));part=writer._partition(c.native_scope,'DEPTH')
+        files={p.name:p.read_bytes() for p in part.glob('*.json')};size=sum(map(len,files.values()))
+        bounded=NativeDepthArchive(root,clock=lambda:400000,max_history_bytes=size)
+        with pytest.raises(NativeArchiveError,match='capacity'):bounded.record('second',c,sample(c,now=300000))
+&gt;       assert {p.name:p.read_bytes() for p in part.glob('*.json')}==files
+E       assert {'00000000000...me":"DEPTH"}'} == {'head.json':...me":"DEPTH"}'}
+E         
+E         Omitting 2 identical items, use -vv to show
+E         Left contains 1 more item:
+E         {'00000000000000000002-079ad8caa5b1d28d414fd725a32d2afd9a577bad99914e7cf4ca288e472bf205.json': b'{"co'
+E                                                                                                        b'ntra'
+E                                                                                                        b'ct":'
+E                                                                                                        b'{"au'...
+E         
+E         ...Full output truncated (807 lines hidden), use '-vv' to show
+
+trading/tests/test_native_archive_read_budget.py:60: AssertionError</failure></testcase></testsuite></testsuites>

@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Button
 import androidx.compose.material3.OutlinedButton
@@ -22,37 +23,25 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.fragment.app.FragmentActivity
 import com.dial.van.VanApplication
-import com.dial.van.command.modules.ActivityModule
+import com.dial.van.command.owner.ownerTime
 import com.dial.van.control.VanCommandSource
-import com.dial.van.control.VanConversationMessage
-import com.dial.van.control.VanMessageRole
 import com.dial.van.design.LocalVanTokens
 import com.dial.van.design.StatusSemantics
 import com.dial.van.design.components.SectionHeader
 import com.dial.van.design.components.StatusChip
-import com.dial.van.design.components.TimelineEvent
-import com.dial.van.design.components.TimelineRail
 import com.dial.van.design.components.VanPanel
-import com.dial.van.design.components.VanPressable
 import com.dial.van.mission.MissionRepository
+import com.dial.van.mission.MissionParsing
+import com.dial.van.mission.MissionSelection
 import com.dial.van.mission.MissionSummary
-import com.dial.van.session.OwnerReconfirmationRequest
-import com.dial.van.status.VanCommandStatus
-import com.dial.van.visual.VanGlassTokens
-import com.dial.van.visual.VanPresence
-import com.dial.van.visual.rememberVanEffectBudget
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
+import org.json.JSONObject
 
 /**
  * DNA §4 destination 3: the Command Centre — "command bar (text + voice), missions (running /
@@ -71,27 +60,98 @@ fun WorkRoute(
     onOpenBrowser: () -> Unit,
     onOpenArtemis: () -> Unit,
     onOpenActivity: () -> Unit,
+    onOpenConvergence: () -> Unit,
     onOpenDevelopment: () -> Unit = {},
+    requestedMissionId: String? = null,
+    onOpenKnowledge: () -> Unit = {},
+    onOpenResearch: () -> Unit = {},
+    onOpenAutomation: () -> Unit = {},
+    onOpenCognitiveTwin: () -> Unit = {},
 ) {
     val tokens = LocalVanTokens.current
     val scope = rememberCoroutineScope()
     val activity = LocalContext.current as? FragmentActivity
     val conversation by app.commandController.state.collectAsState()
+    val approval = conversation.pendingA4Approval
+    val isGmailSend = approval?.resolvedActionId == "google.gmail.send"
+    var gmailPreview by remember(approval?.challengeId) { mutableStateOf<GmailApprovalPreview?>(null) }
+    var gmailPreviewError by remember(approval?.challengeId) { mutableStateOf<String?>(null) }
+    var gmailPreviewAttempt by remember(approval?.challengeId) { mutableStateOf(0) }
+    LaunchedEffect(approval?.challengeId, gmailPreviewAttempt) {
+        if (!isGmailSend || approval == null) return@LaunchedEffect
+        gmailPreview = null
+        gmailPreviewError = null
+        try {
+            val parameters = JSONObject(approval.resolvedParametersJson ?: error("Missing sealed parameters"))
+            val observed = app.gatewayClient.googleGmailDraftPreview(parameters.getString("draft_id"))
+            gmailPreview = GmailApprovalPreview.parse(parameters, observed)
+            if (gmailPreview == null) gmailPreviewError = "This draft could not be matched to the exact approval. Request a new approval if its contents changed."
+        } catch (cancelled: CancellationException) {
+            throw cancelled
+        } catch (_: Exception) {
+            gmailPreviewError = "The draft could not be read for review. Retry the preview before approving."
+        }
+    }
+    val voice by app.voiceUi.state.collectAsState()
+    val voiceTurnActive by app.voiceSession.ownerTurnActive.collectAsState()
     var draft by rememberSaveable { mutableStateOf("") }
 
     val repository = remember(app) { MissionRepository(app.gatewayClient) }
     var active by remember { mutableStateOf<List<MissionSummary>>(emptyList()) }
     var waiting by remember { mutableStateOf<List<MissionSummary>>(emptyList()) }
+    var completed by remember { mutableStateOf<List<MissionSummary>>(emptyList()) }
+    var missionsLoading by remember { mutableStateOf(true) }
     var missionsError by remember { mutableStateOf<String?>(null) }
+    var missionNotice by remember { mutableStateOf<String?>(null) }
+    var requestedMission by remember(requestedMissionId) { mutableStateOf<MissionSummary?>(null) }
+    var requestedMissionError by remember(requestedMissionId) { mutableStateOf<String?>(null) }
 
     fun refreshMissions() {
         scope.launch {
-            runCatching { repository.home() }
-                .onSuccess { active = it.activeMissions; waiting = it.waitingMissions; missionsError = null }
-                .onFailure { missionsError = it.message ?: "Unable to reach VAN" }
+            missionsLoading = true
+            runCatching { repository.missions() }
+                .onSuccess {
+                    active = it.filter { mission -> mission.isActive }
+                    waiting = it.filter { mission -> !mission.isTerminal && mission.state == "WAITING_FOR_OWNER" }
+                    completed = it.filter { mission -> mission.isTerminal }
+                    requestedMission = it.firstOrNull { mission -> mission.missionId == requestedMissionId }
+                    missionsError = null
+                }
+                .onFailure {
+                    if (it is CancellationException) throw it
+                    missionsError = it.message ?: "Unable to reach VAN"
+                }
+            missionsLoading = false
+            if (!requestedMissionId.isNullOrBlank()) {
+                if (requestedMission?.missionId != requestedMissionId) {
+                    runCatching {
+                        MissionParsing.missionSummary(repository.mission(requestedMissionId)).also {
+                            check(it.missionId == requestedMissionId) { "VAN returned a different mission." }
+                        }
+                    }
+                        .onSuccess { requestedMission = it; requestedMissionError = null }
+                        .onFailure {
+                            if (it is CancellationException) throw it
+                            requestedMissionError = it.message ?: "VAN could not open this mission."
+                        }
+                } else {
+                    requestedMissionError = null
+                }
+            }
         }
     }
-    LaunchedEffect(Unit) { refreshMissions() }
+    LaunchedEffect(requestedMissionId) { refreshMissions() }
+    val missions = MissionSelection.present(requestedMissionId, active, waiting, requestedMission)
+    fun missionChanged(updated: MissionSummary?, notice: String) {
+        missionNotice = notice
+        if (updated != null) {
+            active = active.filterNot { it.missionId == updated.missionId }
+            waiting = waiting.filterNot { it.missionId == updated.missionId }
+            completed = listOf(updated) + completed.filterNot { it.missionId == updated.missionId }
+            if (requestedMissionId == updated.missionId) requestedMission = updated
+        }
+        refreshMissions()
+    }
 
     // GAP-F-011 — while any VAN message is unfinished, ask the gateway again every 4s.
     LaunchedEffect(Unit) {
@@ -107,6 +167,24 @@ fun WorkRoute(
         contentPadding = PaddingValues(vertical = tokens.space.space3),
     ) {
         item { SectionHeader("Work", detail = "Command Centre") }
+        missionNotice?.let { item { Text(it, style = tokens.type.label, color = tokens.color.textSecondary) } }
+        if (!requestedMissionId.isNullOrBlank()) {
+            item { SectionHeader("Requested mission") }
+            missions.requested?.let { mission ->
+                item(key = "requested-${mission.missionId}") {
+                    MissionRow(app, mission, StatusSemantics.ROLE_COGNITION, "SELECTED", initiallyExpanded = true, onChanged = ::missionChanged, onRefresh = ::refreshMissions)
+                }
+            } ?: item {
+                Text(
+                    requestedMissionError ?: "Opening mission…",
+                    style = tokens.type.body,
+                    color = tokens.color.textSecondary,
+                )
+                if (requestedMissionError != null) {
+                    OutlinedButton(onClick = ::refreshMissions) { Text("Retry") }
+                }
+            }
+        }
 
         item {
             Column(verticalArrangement = Arrangement.spacedBy(tokens.space.space2)) {
@@ -137,7 +215,19 @@ fun WorkRoute(
                                 draft = ""
                             }
                         }) { Text("Send") }
-                        Button(onClick = { app.voiceSession.beginOwnerTurn() }) { Text("Voice") }
+                        Button(enabled = !voiceTurnActive, onClick = { app.voiceSession.beginOwnerTurn() }) { Text("Voice") }
+                    }
+                    if (voice.listening) {
+                        Text(voice.partialTranscript.ifBlank { "Listening…" }, style = tokens.type.body, color = tokens.color.textSecondary)
+                        OutlinedButton(onClick = { app.voiceSession.endOwnerTurn() }) { Text("Finish speaking") }
+                    }
+                    if (voiceTurnActive) {
+                        if (!voice.listening) Text("Finishing voice recognition…", style = tokens.type.label, color = tokens.color.textSecondary)
+                        OutlinedButton(onClick = { app.voiceSession.cancelOwnerTurn() }) { Text("Cancel speaking") }
+                    }
+                    voice.finalTranscript?.let { Text("Heard: $it", style = tokens.type.label, color = tokens.color.textSecondary) }
+                    voice.errorCode?.let {
+                        Text("VAN could not complete voice recognition (code $it). You can try voice again or type your request.", style = tokens.type.label, color = tokens.color.textSecondary)
                     }
                     if (conversation.submitting) {
                         Text("Sending…", style = tokens.type.label, color = tokens.color.accentCyan)
@@ -155,15 +245,47 @@ fun WorkRoute(
                             StatusChip(label = "PENDING", role = StatusSemantics.ROLE_EVENT_RISK)
                         }
                         Text(pending.resolvedActionId, style = tokens.type.body, color = tokens.color.textSecondary)
+                        Text(pending.command.text, style = tokens.type.body, color = tokens.color.textPrimary)
+                        pending.resolvedParametersJson?.let {
+                            Text("Exact resolved parameters", style = tokens.type.label, color = tokens.color.textSecondary)
+                            Text(it, style = tokens.type.body, color = tokens.color.textPrimary)
+                        }
+                        if (isGmailSend) {
+                            val preview = gmailPreview
+                            if (preview != null) {
+                                Text("From: ${preview.sender}")
+                                Text("To: ${preview.to.joinToString()}")
+                                if (preview.cc.isNotEmpty()) Text("Cc: ${preview.cc.joinToString()}")
+                                if (preview.bcc.isNotEmpty()) Text("Bcc: ${preview.bcc.joinToString()}")
+                                Text("Subject: ${preview.subject}")
+                                Text(preview.body, style = tokens.type.body, color = tokens.color.textPrimary)
+                                Text("This sends the reviewed content as an immutable message. The source draft is retained; its later state is not verified.", style = tokens.type.label, color = tokens.color.textSecondary)
+                            } else {
+                                Text(gmailPreviewError ?: "Reading the draft for your review…", style = tokens.type.body)
+                                if (gmailPreviewError != null) OutlinedButton(onClick = { gmailPreviewAttempt++ }) { Text("Retry preview") }
+                            }
+                        }
+                        Text("Approval expires ${ownerTime(pending.expiresAtUnix * 1_000L)}. Only this exact action is being approved.", style = tokens.type.label, color = tokens.color.textSecondary)
                         Button(
-                            enabled = activity != null && !conversation.submitting,
-                            onClick = { activity?.let { app.commandController.approvePendingA4(it) } },
+                            enabled = activity != null && !conversation.submitting && pending.expiresAtUnix > System.currentTimeMillis() / 1_000L && (!isGmailSend || gmailPreview != null),
+                            onClick = { activity?.let { app.commandController.approvePendingA4(it, reviewedGmailDraftDigest = gmailPreview?.contentDigest) } },
                         ) { Text("Approve") }
+                        OutlinedButton(
+                            enabled = !conversation.submitting,
+                            onClick = { app.commandController.discardPendingA4(pending.challengeId) },
+                        ) { Text("Decline") }
                     }
                 }
             }
         }
 
+        item {
+            LazyRow(horizontalArrangement = Arrangement.spacedBy(tokens.space.space1)) {
+                item { OutlinedButton(onClick = onOpenKnowledge) { Text("Knowledge") } }
+                item { OutlinedButton(onClick = onOpenResearch) { Text("Research") } }
+                item { OutlinedButton(onClick = onOpenAutomation) { Text("Automation") } }
+            }
+        }
         item {
             OutlinedButton(onClick = onOpenBrowser) {
                 Text("Browser & Automation")
@@ -174,6 +296,16 @@ fun WorkRoute(
             OutlinedButton(onClick = onOpenArtemis) {
                 Text("ARTEMIS Android Lab")
             }
+        }
+
+        item {
+            OutlinedButton(onClick = onOpenConvergence) {
+                Text("Documents, goals & results")
+            }
+        }
+
+        item {
+            OutlinedButton(onClick = onOpenCognitiveTwin) { Text("Cognitive Twin — current DIAL facts and evidence") }
         }
 
         // VAN-DEVCC-R1 §2.1 — the Development hub lives under Work (`work/dev`), not as a
@@ -191,16 +323,26 @@ fun WorkRoute(
         item { ReconfirmationPanel(app) }
 
         item { SectionHeader("Missions", detail = "Running, waiting, and what happened") }
-        missionsError?.let { item { Text(it, style = tokens.type.body, color = tokens.color.forStatusRole(StatusSemantics.ROLE_EVENT_RISK)) } }
-        if (waiting.isNotEmpty()) {
+        missionsError?.let { item {
+            Text("VAN could not refresh missions. Last known records remain available. $it", style = tokens.type.body, color = tokens.color.forStatusRole(StatusSemantics.ROLE_EVENT_RISK))
+            OutlinedButton(onClick = ::refreshMissions, enabled = !missionsLoading) { Text("Retry") }
+        } }
+        item { OutlinedButton(onClick = ::refreshMissions, enabled = !missionsLoading) { Text(if (missionsLoading) "Refreshing missions…" else "Refresh missions") } }
+        if (missions.waiting.isNotEmpty()) {
             item { SectionHeader("Waiting on you", detail = "Not progressing") }
-            items(waiting, key = { "wait-${it.missionId}" }) { mission -> MissionRow(app, mission, StatusSemantics.ROLE_HYPOTHESIS, "WAITING") }
+            items(missions.waiting, key = { "wait-${it.missionId}" }) { mission -> MissionRow(app, mission, StatusSemantics.ROLE_HYPOTHESIS, "WAITING", onChanged = ::missionChanged, onRefresh = ::refreshMissions) }
         }
         item { SectionHeader("Running") }
-        if (active.isEmpty()) {
+        if (active.isEmpty() && !missionsLoading && missionsError == null) {
             item { Text("Nothing is running.", style = tokens.type.body, color = tokens.color.textSecondary) }
         }
-        items(active, key = { "run-${it.missionId}" }) { mission -> MissionRow(app, mission, StatusSemantics.ROLE_ENGAGED, "RUNNING") }
+        items(missions.running, key = { "run-${it.missionId}" }) { mission -> MissionRow(app, mission, StatusSemantics.ROLE_ENGAGED, "RUNNING", onChanged = ::missionChanged, onRefresh = ::refreshMissions) }
+        if (completed.any { it.missionId != requestedMissionId }) {
+            item { SectionHeader("Finished", detail = "Verified, partial, failed and cancelled outcomes") }
+            items(completed.filterNot { it.missionId == requestedMissionId }.take(30), key = { "done-${it.missionId}" }) { mission ->
+                MissionRow(app, mission, StatusSemantics.ROLE_MONITOR, mission.state.replace('_', ' '), onChanged = ::missionChanged, onRefresh = ::refreshMissions)
+            }
+        }
 
         item {
             OutlinedButton(onClick = onOpenActivity) {
@@ -209,188 +351,3 @@ fun WorkRoute(
         }
     }
 }
-
-/**
- * `work/activity` — the delegated agents/activity feed DNA §4 lists alongside missions.
- * `ActivityModule` is itself a `LazyColumn { fillMaxSize() }` (P3-AND-002's event stream),
- * so — same reason as Settings' voice/notifications children — it gets its own destination
- * rather than being nested as an item inside Work's own list.
- */
-@Composable
-fun WorkActivityRoute(app: VanApplication, onBack: () -> Unit) {
-    val tokens = LocalVanTokens.current
-    val degraded by app.degradedModeStore.state.collectAsState()
-    val cue = VanPresence.cue(degraded)
-    val budget = rememberVanEffectBudget()
-    val glass = VanGlassTokens.forState(state = cue.durableState, panel = true, liveBlurAvailable = false, budget = budget)
-    Column(modifier = Modifier.fillMaxSize()) {
-        Row(
-            modifier = Modifier.fillMaxWidth().padding(horizontal = tokens.space.pageGutter, vertical = tokens.space.space2),
-            horizontalArrangement = Arrangement.spacedBy(tokens.space.space2),
-        ) {
-            Button(onClick = onBack) { Text("← Work", style = tokens.type.label) }
-        }
-        ActivityModule(app, glass)
-    }
-}
-
-/**
- * §20.15 — work the outbox will not send until the owner says so again. Held over from the
- * old Tasks module: a queue-depth change (arrived, expired, flushed, cancelled) is the
- * signal to re-read `pendingOwnerReconfirmations()`; reconfirmation itself leaves the depth
- * unchanged, so the button handlers below refresh explicitly after the durable write.
- */
-@Composable
-private fun ReconfirmationPanel(app: VanApplication) {
-    val tokens = LocalVanTokens.current
-    val scope = rememberCoroutineScope()
-    val sessionState by app.vanSession.state.collectAsState()
-    var confirmations by remember { mutableStateOf<List<OwnerReconfirmationRequest>>(emptyList()) }
-    var notice by remember { mutableStateOf<String?>(null) }
-
-    fun refresh() {
-        confirmations = app.vanSession.pendingOwnerReconfirmations()
-    }
-    LaunchedEffect(sessionState.outboxDepth) { refresh() }
-
-    if (confirmations.isEmpty()) return
-
-    Column(verticalArrangement = Arrangement.spacedBy(tokens.space.space2)) {
-        SectionHeader("Waiting for you", detail = "Held during an outage; will not run until you confirm them")
-        confirmations.forEach { request ->
-            VanPanel {
-                Column(verticalArrangement = Arrangement.spacedBy(tokens.space.space2)) {
-                    Text(request.commandText, style = tokens.type.headline, color = tokens.color.textPrimary)
-                    Text(request.ownerReadableState, style = tokens.type.label, color = tokens.color.forStatusRole(StatusSemantics.ROLE_EVENT_RISK))
-                    Text(
-                        "Action ${request.actionClass} • ${request.commandId.takeLast(8)}",
-                        style = tokens.type.label,
-                        color = tokens.color.textTertiary,
-                    )
-                    Row(horizontalArrangement = Arrangement.spacedBy(tokens.space.space2)) {
-                        Button(onClick = {
-                            scope.launch {
-                                val accepted = withContext(Dispatchers.IO) { app.vanSession.reconfirmAndFlush(request.messageId) }
-                                notice = if (accepted) {
-                                    "Confirmed. VAN will send it on the current path, or the next one that becomes available."
-                                } else {
-                                    "That queued command is no longer waiting for confirmation."
-                                }
-                                refresh()
-                            }
-                        }) { Text("Confirm") }
-                        OutlinedButton(onClick = {
-                            scope.launch {
-                                val cancelled = withContext(Dispatchers.IO) { app.vanSession.cancelReconfirmation(request.messageId) }
-                                notice = if (cancelled) {
-                                    "Cancelled. VAN will not send that queued command."
-                                } else {
-                                    "That queued command is no longer waiting for confirmation."
-                                }
-                                refresh()
-                            }
-                        }) { Text("Cancel") }
-                    }
-                }
-            }
-        }
-        notice?.let { Text(it, style = tokens.type.label, color = tokens.color.textSecondary) }
-    }
-}
-
-@Composable
-private fun ConversationBubble(message: VanConversationMessage) {
-    val tokens = LocalVanTokens.current
-    val role = when (message.role) {
-        VanMessageRole.OWNER -> "You"
-        VanMessageRole.VAN -> "VAN"
-        VanMessageRole.SYSTEM -> "System"
-    }
-    VanPanel(dense = true) {
-        Column(verticalArrangement = Arrangement.spacedBy(tokens.space.space1)) {
-            Row(horizontalArrangement = Arrangement.spacedBy(tokens.space.space2), verticalAlignment = Alignment.CenterVertically) {
-                Text(role, style = tokens.type.label, color = tokens.color.accentCyan)
-                message.status?.let { status ->
-                    StatusChip(label = status.name.replace('_', ' '), role = statusRole(status))
-                }
-            }
-            Text(message.text, style = tokens.type.body, color = tokens.color.textPrimary)
-            message.contextGapsSentence?.let {
-                Text(it, style = tokens.type.label, color = tokens.color.textTertiary)
-            }
-        }
-    }
-}
-
-/** Exhaustive, mirroring `com.dial.van.command.statusColor` (P0-EXEC-003's own rule). */
-private fun statusRole(status: VanCommandStatus): String = when (status) {
-    VanCommandStatus.SUCCEEDED -> StatusSemantics.ROLE_FAVOURABLE
-    VanCommandStatus.FAILED, VanCommandStatus.CANCELLED, VanCommandStatus.EXPIRED, VanCommandStatus.REFUSED ->
-        StatusSemantics.ROLE_CRITICAL
-    VanCommandStatus.PARTIALLY_SUCCEEDED, VanCommandStatus.COULD_NOT_VERIFY, VanCommandStatus.APPROVAL_REQUIRED, VanCommandStatus.UNKNOWN ->
-        StatusSemantics.ROLE_EVENT_RISK
-    VanCommandStatus.LOCAL_DRAFT, VanCommandStatus.SUBMITTING, VanCommandStatus.ACCEPTED, VanCommandStatus.IN_FLIGHT, VanCommandStatus.QUEUED ->
-        StatusSemantics.ROLE_MONITOR
-}
-
-@Composable
-private fun MissionRow(app: VanApplication, mission: MissionSummary, role: String, label: String) {
-    val tokens = LocalVanTokens.current
-    var expanded by rememberSaveable(mission.missionId) { mutableStateOf(false) }
-    var timeline by remember(mission.missionId) { mutableStateOf<List<TimelineEvent>>(emptyList()) }
-    val scope = rememberCoroutineScope()
-
-    VanPressable(onClick = {
-        expanded = !expanded
-        if (expanded && timeline.isEmpty()) {
-            scope.launch {
-                runCatching { app.gatewayClient.missionActivity(mission.missionId) }
-                    .onSuccess { body ->
-                        val events = body.optJSONArray("events")
-                        timeline = buildList {
-                            if (events != null) {
-                                for (i in 0 until events.length()) {
-                                    val e = events.optJSONObject(i) ?: continue
-                                    add(
-                                        TimelineEvent(
-                                            id = e.optString("event_id", i.toString()),
-                                            title = e.optString("summary", e.optString("event_type", "Event")),
-                                            actor = e.optString("actor", "van"),
-                                            timeLabel = formatTime(e.optLong("occurred_at_ms", 0L)),
-                                            severityRole = severityRole(e.optString("severity", "INFO")),
-                                        ),
-                                    )
-                                }
-                            }
-                        }
-                    }
-            }
-        }
-    }, modifier = Modifier.fillMaxWidth()) {
-        VanPanel(modifier = Modifier.fillMaxWidth()) {
-            Column(verticalArrangement = Arrangement.spacedBy(tokens.space.space2)) {
-                Row(horizontalArrangement = Arrangement.spacedBy(tokens.space.space2), verticalAlignment = Alignment.CenterVertically) {
-                    StatusChip(label = label, role = role)
-                    Text(mission.title, style = tokens.type.body, color = tokens.color.textPrimary)
-                }
-                Text(mission.ownerReadableStatus, style = tokens.type.label, color = tokens.color.textSecondary)
-                if (expanded) {
-                    if (timeline.isEmpty()) {
-                        Text("Loading timeline…", style = tokens.type.label, color = tokens.color.textTertiary)
-                    } else {
-                        TimelineRail(events = timeline)
-                    }
-                }
-            }
-        }
-    }
-}
-
-private fun severityRole(severity: String): String = when (severity.uppercase()) {
-    "CRITICAL", "ERROR" -> StatusSemantics.ROLE_CRITICAL
-    "WARNING", "BLOCKER" -> StatusSemantics.ROLE_EVENT_RISK
-    else -> StatusSemantics.ROLE_MONITOR
-}
-
-private fun formatTime(epochMs: Long): String =
-    if (epochMs <= 0L) "" else SimpleDateFormat("HH:mm", Locale.getDefault()).format(Date(epochMs))

@@ -1,0 +1,1729 @@
+{
+  "status": "SPECIFIED_NOT_IMPLEMENTED",
+  "requirements": [
+    {
+      "id": "VAN-ML-REQ-001",
+      "title": "Preserve inherited scope and branch improvements",
+      "obligation": "Retain every mapped parent action and source-backed capability; no competing trading stack.",
+      "packet_id": "VAN-ML-PKT-001",
+      "parent_units": [
+        "PRE-001",
+        "PRE-002"
+      ],
+      "test_ids": [
+        "VAN-ML-AT-001-P",
+        "VAN-ML-AT-001-N"
+      ],
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "scope": "MANDATORY_ENGINEERING",
+      "economic_admission": "SEPARATE_PER_CANDIDATE"
+    },
+    {
+      "id": "VAN-ML-REQ-002",
+      "title": "Admit complete targets and market scope",
+      "obligation": "Resolve target units, cohorts, providers, required plugins, consumers and budget before implementation.",
+      "packet_id": "VAN-ML-PKT-002",
+      "parent_units": [
+        "PRE-002"
+      ],
+      "test_ids": [
+        "VAN-ML-AT-002-P",
+        "VAN-ML-AT-002-N"
+      ],
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "scope": "MANDATORY_ENGINEERING",
+      "economic_admission": "SEPARATE_PER_CANDIDATE"
+    },
+    {
+      "id": "VAN-ML-REQ-003",
+      "title": "Respect independent F15 and backend-first authority",
+      "obligation": "No code-bearing child may start before current parent F15 and source admission; frontend also requires global BG.",
+      "packet_id": "VAN-ML-PKT-003",
+      "parent_units": [
+        "PRE-003"
+      ],
+      "test_ids": [
+        "VAN-ML-AT-003-P",
+        "VAN-ML-AT-003-N"
+      ],
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "scope": "MANDATORY_ENGINEERING",
+      "economic_admission": "SEPARATE_PER_CANDIDATE"
+    },
+    {
+      "id": "VAN-ML-REQ-004",
+      "title": "Lock tested libraries and isolate computation",
+      "obligation": "Produce reproducible environment manifests and actual VM compatibility evidence without loading training stacks in T0.",
+      "packet_id": "VAN-ML-PKT-004",
+      "parent_units": [
+        "BE-001",
+        "BE-033",
+        "BE-034"
+      ],
+      "test_ids": [
+        "VAN-ML-AT-004-P",
+        "VAN-ML-AT-004-N"
+      ],
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "scope": "MANDATORY_ENGINEERING",
+      "economic_admission": "SEPARATE_PER_CANDIDATE"
+    },
+    {
+      "id": "VAN-ML-REQ-005",
+      "title": "Point-in-time source availability",
+      "obligation": "Every feature source has event and availability timestamps, revision identity and provenance quality.",
+      "packet_id": "VAN-ML-PKT-005",
+      "parent_units": [
+        "BE-008",
+        "BE-014",
+        "BE-015"
+      ],
+      "test_ids": [
+        "VAN-ML-AT-005-P",
+        "VAN-ML-AT-005-N"
+      ],
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "scope": "MANDATORY_ENGINEERING",
+      "economic_admission": "SEPARATE_PER_CANDIDATE"
+    },
+    {
+      "id": "VAN-ML-REQ-006",
+      "title": "Survivorship and instrument identity",
+      "obligation": "Universe and contract membership are as-of; canonical identity includes venue and contract, not ticker alone.",
+      "packet_id": "VAN-ML-PKT-005",
+      "parent_units": [
+        "BE-008",
+        "BE-014",
+        "BE-015"
+      ],
+      "test_ids": [
+        "VAN-ML-AT-006-P",
+        "VAN-ML-AT-006-N"
+      ],
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "scope": "MANDATORY_ENGINEERING",
+      "economic_admission": "SEPARATE_PER_CANDIDATE"
+    },
+    {
+      "id": "VAN-ML-REQ-007",
+      "title": "Calendar and bar completeness",
+      "obligation": "Use closed observed bars and per-market session/business-time horizons with gap policy.",
+      "packet_id": "VAN-ML-PKT-005",
+      "parent_units": [
+        "BE-008",
+        "BE-014",
+        "BE-015"
+      ],
+      "test_ids": [
+        "VAN-ML-AT-007-P",
+        "VAN-ML-AT-007-N"
+      ],
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "scope": "MANDATORY_ENGINEERING",
+      "economic_admission": "SEPARATE_PER_CANDIDATE"
+    },
+    {
+      "id": "VAN-ML-REQ-008",
+      "title": "Single feature definition and offline-online parity",
+      "obligation": "Reuse the VAN feature owner, version transformations and materialize Feast views without alternate T0 authority.",
+      "packet_id": "VAN-ML-PKT-006",
+      "parent_units": [
+        "BE-008",
+        "BE-018"
+      ],
+      "test_ids": [
+        "VAN-ML-AT-008-P",
+        "VAN-ML-AT-008-N"
+      ],
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "scope": "MANDATORY_ENGINEERING",
+      "economic_admission": "SEPARATE_PER_CANDIDATE"
+    },
+    {
+      "id": "VAN-ML-REQ-009",
+      "title": "Train-only transforms and aligned row masks",
+      "obligation": "Fit scalers, PCA, feature selection and outlier transforms only inside training boundaries; preserve X/y/weight alignment.",
+      "packet_id": "VAN-ML-PKT-006",
+      "parent_units": [
+        "BE-008",
+        "BE-018"
+      ],
+      "test_ids": [
+        "VAN-ML-AT-009-P",
+        "VAN-ML-AT-009-N"
+      ],
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "scope": "MANDATORY_ENGINEERING",
+      "economic_admission": "SEPARATE_PER_CANDIDATE"
+    },
+    {
+      "id": "VAN-ML-REQ-010",
+      "title": "Controlled feature expansion",
+      "obligation": "Lag, timeframe, peer and calendar features use an admitted DAG and measured feature budget.",
+      "packet_id": "VAN-ML-PKT-006",
+      "parent_units": [
+        "BE-008",
+        "BE-018"
+      ],
+      "test_ids": [
+        "VAN-ML-AT-010-P",
+        "VAN-ML-AT-010-N"
+      ],
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "scope": "MANDATORY_ENGINEERING",
+      "economic_admission": "SEPARATE_PER_CANDIDATE"
+    },
+    {
+      "id": "VAN-ML-REQ-011",
+      "title": "Target maturity and event semantics",
+      "obligation": "Every label records interval, available_at, cost treatment, censoring and target version.",
+      "packet_id": "VAN-ML-PKT-007",
+      "parent_units": [
+        "BE-013",
+        "BE-022"
+      ],
+      "test_ids": [
+        "VAN-ML-AT-011-P",
+        "VAN-ML-AT-011-N"
+      ],
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "scope": "MANDATORY_ENGINEERING",
+      "economic_admission": "SEPARATE_PER_CANDIDATE"
+    },
+    {
+      "id": "VAN-ML-REQ-012",
+      "title": "Separate facts, practice and counterfactuals",
+      "obligation": "Do not mix actual fills, paper/practice, inferred outcomes and synthetic fixtures in promotion statistics.",
+      "packet_id": "VAN-ML-PKT-007",
+      "parent_units": [
+        "BE-013",
+        "BE-022"
+      ],
+      "test_ids": [
+        "VAN-ML-AT-012-P",
+        "VAN-ML-AT-012-N"
+      ],
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "scope": "MANDATORY_ENGINEERING",
+      "economic_admission": "SEPARATE_PER_CANDIDATE"
+    },
+    {
+      "id": "VAN-ML-REQ-013",
+      "title": "Return, ranking, volatility and cost targets",
+      "obligation": "Provide all requested target families with correct domain and units; no binary-option payoff guessed as linear return.",
+      "packet_id": "VAN-ML-PKT-007",
+      "parent_units": [
+        "BE-013",
+        "BE-022"
+      ],
+      "test_ids": [
+        "VAN-ML-AT-013-P",
+        "VAN-ML-AT-013-N"
+      ],
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "scope": "MANDATORY_ENGINEERING",
+      "economic_admission": "SEPARATE_PER_CANDIDATE"
+    },
+    {
+      "id": "VAN-ML-REQ-014",
+      "title": "Purged chronological validation",
+      "obligation": "Purge overlapping label intervals across training/validation/calibration/test; synchronize cohort cutoffs.",
+      "packet_id": "VAN-ML-PKT-008",
+      "parent_units": [
+        "BE-013",
+        "BE-019",
+        "BE-022"
+      ],
+      "test_ids": [
+        "VAN-ML-AT-014-P",
+        "VAN-ML-AT-014-N"
+      ],
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "scope": "MANDATORY_ENGINEERING",
+      "economic_admission": "SEPARATE_PER_CANDIDATE"
+    },
+    {
+      "id": "VAN-ML-REQ-015",
+      "title": "Bias and warmup diagnostics",
+      "obligation": "Build native lookahead/prefix and indicator-recursion checks; poison tests must demonstrate sensitivity.",
+      "packet_id": "VAN-ML-PKT-008",
+      "parent_units": [
+        "BE-013",
+        "BE-019",
+        "BE-022"
+      ],
+      "test_ids": [
+        "VAN-ML-AT-015-P",
+        "VAN-ML-AT-015-N"
+      ],
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "scope": "MANDATORY_ENGINEERING",
+      "economic_admission": "SEPARATE_PER_CANDIDATE"
+    },
+    {
+      "id": "VAN-ML-REQ-016",
+      "title": "Immutable final holdout and trial census",
+      "obligation": "Pre-register holdout access and count architectures/features/horizons/calibrators tried, including failures.",
+      "packet_id": "VAN-ML-PKT-008",
+      "parent_units": [
+        "BE-013",
+        "BE-019",
+        "BE-022"
+      ],
+      "test_ids": [
+        "VAN-ML-AT-016-P",
+        "VAN-ML-AT-016-N"
+      ],
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "scope": "MANDATORY_ENGINEERING",
+      "economic_admission": "SEPARATE_PER_CANDIDATE"
+    },
+    {
+      "id": "VAN-ML-REQ-017",
+      "title": "Direction-neutral intrabar uncertainty",
+      "obligation": "Use observed subbars/ticks or declared feasible market scenarios; never claim a long-only path is conservative for all sides.",
+      "packet_id": "VAN-ML-PKT-009",
+      "parent_units": [
+        "BE-006",
+        "BE-010",
+        "BE-012",
+        "BE-019"
+      ],
+      "test_ids": [
+        "VAN-ML-AT-017-P",
+        "VAN-ML-AT-017-N"
+      ],
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "scope": "MANDATORY_ENGINEERING",
+      "economic_admission": "SEPARATE_PER_CANDIDATE"
+    },
+    {
+      "id": "VAN-ML-REQ-018",
+      "title": "Economic cost and valuation accounting",
+      "obligation": "Debit monetary costs once and use realizable prices, latency, partial fills and post-liquidation equity.",
+      "packet_id": "VAN-ML-PKT-009",
+      "parent_units": [
+        "BE-006",
+        "BE-010",
+        "BE-012",
+        "BE-019"
+      ],
+      "test_ids": [
+        "VAN-ML-AT-018-P",
+        "VAN-ML-AT-018-N"
+      ],
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "scope": "MANDATORY_ENGINEERING",
+      "economic_admission": "SEPARATE_PER_CANDIDATE"
+    },
+    {
+      "id": "VAN-ML-REQ-019",
+      "title": "Flow-adjusted and open-position risk metrics",
+      "obligation": "Preserve cash-flow-neutral performance and current collateral/MTM drawdown as separate measurements.",
+      "packet_id": "VAN-ML-PKT-009",
+      "parent_units": [
+        "BE-006",
+        "BE-010",
+        "BE-012",
+        "BE-019"
+      ],
+      "test_ids": [
+        "VAN-ML-AT-019-P",
+        "VAN-ML-AT-019-N"
+      ],
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "scope": "MANDATORY_ENGINEERING",
+      "economic_admission": "SEPARATE_PER_CANDIDATE"
+    },
+    {
+      "id": "VAN-ML-REQ-020",
+      "title": "Account-wide research-live parity",
+      "obligation": "Use the real account coordinator and policy interfaces with isolated execution and reservation state.",
+      "packet_id": "VAN-ML-PKT-010",
+      "parent_units": [
+        "BE-009",
+        "BE-010",
+        "BE-012",
+        "BE-019"
+      ],
+      "test_ids": [
+        "VAN-ML-AT-020-P",
+        "VAN-ML-AT-020-N"
+      ],
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "scope": "MANDATORY_ENGINEERING",
+      "economic_admission": "SEPARATE_PER_CANDIDATE"
+    },
+    {
+      "id": "VAN-ML-REQ-021",
+      "title": "Nonvacuous deterministic evidence",
+      "obligation": "Determinism concerns specified events/decisions, not just final trade count or zero-checked replay.",
+      "packet_id": "VAN-ML-PKT-010",
+      "parent_units": [
+        "BE-009",
+        "BE-010",
+        "BE-012",
+        "BE-019"
+      ],
+      "test_ids": [
+        "VAN-ML-AT-021-P",
+        "VAN-ML-AT-021-N"
+      ],
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "scope": "MANDATORY_ENGINEERING",
+      "economic_admission": "SEPARATE_PER_CANDIDATE"
+    },
+    {
+      "id": "VAN-ML-REQ-022",
+      "title": "Qlib model boundary and processor configuration",
+      "obligation": "Use custom VAN data handlers; configure processor fitting, DK_L/DK_I and Recorder explicitly; no Qlib execution runtime.",
+      "packet_id": "VAN-ML-PKT-011",
+      "parent_units": [
+        "BE-013",
+        "BE-022"
+      ],
+      "test_ids": [
+        "VAN-ML-AT-022-P",
+        "VAN-ML-AT-022-N"
+      ],
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "scope": "MANDATORY_ENGINEERING",
+      "economic_admission": "SEPARATE_PER_CANDIDATE"
+    },
+    {
+      "id": "VAN-ML-REQ-023",
+      "title": "LightGBM regression production adapter",
+      "obligation": "Implement per-target/horizon expected-return/net-edge models and native export with exact transform manifest.",
+      "packet_id": "VAN-ML-PKT-012",
+      "parent_units": [
+        "BE-013"
+      ],
+      "test_ids": [
+        "VAN-ML-AT-023-P",
+        "VAN-ML-AT-023-N"
+      ],
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "scope": "MANDATORY_ENGINEERING",
+      "economic_admission": "SEPARATE_PER_CANDIDATE"
+    },
+    {
+      "id": "VAN-ML-REQ-024",
+      "title": "Calibratable setup classification",
+      "obligation": "Implement binary target models with defined population and raw-probability semantics before separate calibration.",
+      "packet_id": "VAN-ML-PKT-013",
+      "parent_units": [
+        "BE-013"
+      ],
+      "test_ids": [
+        "VAN-ML-AT-024-P",
+        "VAN-ML-AT-024-N"
+      ],
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "scope": "MANDATORY_ENGINEERING",
+      "economic_admission": "SEPARATE_PER_CANDIDATE"
+    },
+    {
+      "id": "VAN-ML-REQ-025",
+      "title": "Quantile adapter completeness",
+      "obligation": "Implement separate quantile/horizon objectives outside unsupported stock Qlib loss API.",
+      "packet_id": "VAN-ML-PKT-014",
+      "parent_units": [
+        "BE-013"
+      ],
+      "test_ids": [
+        "VAN-ML-AT-025-P",
+        "VAN-ML-AT-025-N"
+      ],
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "scope": "MANDATORY_ENGINEERING",
+      "economic_admission": "SEPARATE_PER_CANDIDATE"
+    },
+    {
+      "id": "VAN-ML-REQ-026",
+      "title": "Grouped ranking correctness",
+      "obligation": "Train ranking with cutoff/universe query groups and appropriate nonnegative relevance coding; report ordinal scores.",
+      "packet_id": "VAN-ML-PKT-014",
+      "parent_units": [
+        "BE-013"
+      ],
+      "test_ids": [
+        "VAN-ML-AT-026-P",
+        "VAN-ML-AT-026-N"
+      ],
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "scope": "MANDATORY_ENGINEERING",
+      "economic_admission": "SEPARATE_PER_CANDIDATE"
+    },
+    {
+      "id": "VAN-ML-REQ-027",
+      "title": "Meaningful baseline and challenger comparisons",
+      "obligation": "Implement XGBoost and simple/statistical incumbents against identical targets and calendars.",
+      "packet_id": "VAN-ML-PKT-015",
+      "parent_units": [
+        "BE-013",
+        "BE-022"
+      ],
+      "test_ids": [
+        "VAN-ML-AT-027-P",
+        "VAN-ML-AT-027-N"
+      ],
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "scope": "MANDATORY_ENGINEERING",
+      "economic_admission": "SEPARATE_PER_CANDIDATE"
+    },
+    {
+      "id": "VAN-ML-REQ-028",
+      "title": "NeuralForecast shared data contract",
+      "obligation": "Map unique_id/ds/y and exogenous inputs with immutable cutoffs and fold-scoped scalers.",
+      "packet_id": "VAN-ML-PKT-016",
+      "parent_units": [
+        "BE-013",
+        "BE-022"
+      ],
+      "test_ids": [
+        "VAN-ML-AT-028-P",
+        "VAN-ML-AT-028-N"
+      ],
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "scope": "MANDATORY_ENGINEERING",
+      "economic_admission": "SEPARATE_PER_CANDIDATE"
+    },
+    {
+      "id": "VAN-ML-REQ-029",
+      "title": "N-HiTS complete research integration",
+      "obligation": "Implement real NHITS training, multi-horizon inference, model persistence and shared provenance.",
+      "packet_id": "VAN-ML-PKT-016",
+      "parent_units": [
+        "BE-013",
+        "BE-022"
+      ],
+      "test_ids": [
+        "VAN-ML-AT-029-P",
+        "VAN-ML-AT-029-N"
+      ],
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "scope": "MANDATORY_ENGINEERING",
+      "economic_admission": "SEPARATE_PER_CANDIDATE"
+    },
+    {
+      "id": "VAN-ML-REQ-030",
+      "title": "N-BEATSx contextual and interpretability integration",
+      "obligation": "Implement supported exogenous inputs and optional native decomposition with noncausal explanations.",
+      "packet_id": "VAN-ML-PKT-017",
+      "parent_units": [
+        "BE-013",
+        "BE-021"
+      ],
+      "test_ids": [
+        "VAN-ML-AT-030-P",
+        "VAN-ML-AT-030-N"
+      ],
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "scope": "MANDATORY_ENGINEERING",
+      "economic_admission": "SEPARATE_PER_CANDIDATE"
+    },
+    {
+      "id": "VAN-ML-REQ-031",
+      "title": "DeepAR distribution and path integration",
+      "obligation": "Implement domain-valid distributions and retained individual temporal samples with seeds.",
+      "packet_id": "VAN-ML-PKT-018",
+      "parent_units": [
+        "BE-013",
+        "BE-019"
+      ],
+      "test_ids": [
+        "VAN-ML-AT-031-P",
+        "VAN-ML-AT-031-N"
+      ],
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "scope": "MANDATORY_ENGINEERING",
+      "economic_admission": "SEPARATE_PER_CANDIDATE"
+    },
+    {
+      "id": "VAN-ML-REQ-032",
+      "title": "Complete challenger plugin interfaces",
+      "obligation": "Implement TFT, PatchTST and iTransformer research plugins, gated by verified per-model capability matrix.",
+      "packet_id": "VAN-ML-PKT-019",
+      "parent_units": [
+        "BE-013",
+        "BE-021",
+        "BE-022"
+      ],
+      "test_ids": [
+        "VAN-ML-AT-032-P",
+        "VAN-ML-AT-032-N"
+      ],
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "scope": "MANDATORY_ENGINEERING",
+      "economic_admission": "SEPARATE_PER_CANDIDATE"
+    },
+    {
+      "id": "VAN-ML-REQ-033",
+      "title": "Reuse existing conformal ownership",
+      "obligation": "Extend existing vati.risk.conformal and source-bound calibration producer; no independent sizing permission.",
+      "packet_id": "VAN-ML-PKT-020",
+      "parent_units": [
+        "BE-009",
+        "BE-013",
+        "BE-021"
+      ],
+      "test_ids": [
+        "VAN-ML-AT-033-P",
+        "VAN-ML-AT-033-N"
+      ],
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "scope": "MANDATORY_ENGINEERING",
+      "economic_admission": "SEPARATE_PER_CANDIDATE"
+    },
+    {
+      "id": "VAN-ML-REQ-034",
+      "title": "Honest probability and interval calibration",
+      "obligation": "Validate disjoint calibration, empirical coverage and adequacy; label marginal/conditional limitations.",
+      "packet_id": "VAN-ML-PKT-020",
+      "parent_units": [
+        "BE-009",
+        "BE-013",
+        "BE-021"
+      ],
+      "test_ids": [
+        "VAN-ML-AT-034-P",
+        "VAN-ML-AT-034-N"
+      ],
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "scope": "MANDATORY_ENGINEERING",
+      "economic_admission": "SEPARATE_PER_CANDIDATE"
+    },
+    {
+      "id": "VAN-ML-REQ-035",
+      "title": "Calibration lineage and tail semantics",
+      "obligation": "Bind calibration to exact model/transform/target; avoid unsupported joint-tail, stop-touch and transformed-mean claims.",
+      "packet_id": "VAN-ML-PKT-020",
+      "parent_units": [
+        "BE-009",
+        "BE-013",
+        "BE-021"
+      ],
+      "test_ids": [
+        "VAN-ML-AT-035-P",
+        "VAN-ML-AT-035-N"
+      ],
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "scope": "MANDATORY_ENGINEERING",
+      "economic_admission": "SEPARATE_PER_CANDIDATE"
+    },
+    {
+      "id": "VAN-ML-REQ-036",
+      "title": "One bounded optimization control",
+      "obligation": "Use one Optuna/trial budget across Qlib/NF; all optimization only creates candidates.",
+      "packet_id": "VAN-ML-PKT-021",
+      "parent_units": [
+        "BE-013",
+        "BE-022",
+        "BE-028"
+      ],
+      "test_ids": [
+        "VAN-ML-AT-036-P",
+        "VAN-ML-AT-036-N"
+      ],
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "scope": "MANDATORY_ENGINEERING",
+      "economic_admission": "SEPARATE_PER_CANDIDATE"
+    },
+    {
+      "id": "VAN-ML-REQ-037",
+      "title": "Safe artifact and supply-chain boundary",
+      "obligation": "Use native LightGBM and vetted safe neural formats; allowlisted loaders verify immutable bytes.",
+      "packet_id": "VAN-ML-PKT-022",
+      "parent_units": [
+        "BE-013",
+        "BE-031",
+        "BE-033"
+      ],
+      "test_ids": [
+        "VAN-ML-AT-037-P",
+        "VAN-ML-AT-037-N"
+      ],
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "scope": "MANDATORY_ENGINEERING",
+      "economic_admission": "SEPARATE_PER_CANDIDATE"
+    },
+    {
+      "id": "VAN-ML-REQ-038",
+      "title": "Registry is not authority",
+      "obligation": "MLflow aliases and experiment status never grant forecast influence or strategy promotion.",
+      "packet_id": "VAN-ML-PKT-022",
+      "parent_units": [
+        "BE-013",
+        "BE-031",
+        "BE-033"
+      ],
+      "test_ids": [
+        "VAN-ML-AT-038-P",
+        "VAN-ML-AT-038-N"
+      ],
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "scope": "MANDATORY_ENGINEERING",
+      "economic_admission": "SEPARATE_PER_CANDIDATE"
+    },
+    {
+      "id": "VAN-ML-REQ-039",
+      "title": "Durable adaptive retraining",
+      "obligation": "Implement per-scope jobs, cadence/drift triggers, leases, retries, checkpoints and safe cancellation.",
+      "packet_id": "VAN-ML-PKT-023",
+      "parent_units": [
+        "BE-013",
+        "BE-028",
+        "BE-033"
+      ],
+      "test_ids": [
+        "VAN-ML-AT-039-P",
+        "VAN-ML-AT-039-N"
+      ],
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "scope": "MANDATORY_ENGINEERING",
+      "economic_admission": "SEPARATE_PER_CANDIDATE"
+    },
+    {
+      "id": "VAN-ML-REQ-040",
+      "title": "Prevent schedule and resource starvation",
+      "obligation": "Coalesce obsolete retrains with explicit receipts, bound queue/threads and protect serving/T0 capacity.",
+      "packet_id": "VAN-ML-PKT-023",
+      "parent_units": [
+        "BE-013",
+        "BE-028",
+        "BE-033"
+      ],
+      "test_ids": [
+        "VAN-ML-AT-040-P",
+        "VAN-ML-AT-040-N"
+      ],
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "scope": "MANDATORY_ENGINEERING",
+      "economic_admission": "SEPARATE_PER_CANDIDATE"
+    },
+    {
+      "id": "VAN-ML-REQ-041",
+      "title": "Typed forecast service and complete provenance",
+      "obligation": "Emit ForecastPacket or abstention with scope, cutoffs, target, model, transformation and source evidence.",
+      "packet_id": "VAN-ML-PKT-024",
+      "parent_units": [
+        "BE-008",
+        "BE-013",
+        "BE-031",
+        "BE-033"
+      ],
+      "test_ids": [
+        "VAN-ML-AT-041-P",
+        "VAN-ML-AT-041-N"
+      ],
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "scope": "MANDATORY_ENGINEERING",
+      "economic_admission": "SEPARATE_PER_CANDIDATE"
+    },
+    {
+      "id": "VAN-ML-REQ-042",
+      "title": "Independent freshness and OOD checks",
+      "obligation": "Validate model age, data age, calibration age and novelty as separate dimensions.",
+      "packet_id": "VAN-ML-PKT-024",
+      "parent_units": [
+        "BE-008",
+        "BE-013",
+        "BE-031",
+        "BE-033"
+      ],
+      "test_ids": [
+        "VAN-ML-AT-042-P",
+        "VAN-ML-AT-042-N"
+      ],
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "scope": "MANDATORY_ENGINEERING",
+      "economic_admission": "SEPARATE_PER_CANDIDATE"
+    },
+    {
+      "id": "VAN-ML-REQ-043",
+      "title": "Nonblocking inference and immutable cache",
+      "obligation": "Preload admitted artifacts and cache by all material identities; T0 never awaits training/registry/network.",
+      "packet_id": "VAN-ML-PKT-024",
+      "parent_units": [
+        "BE-008",
+        "BE-013",
+        "BE-031",
+        "BE-033"
+      ],
+      "test_ids": [
+        "VAN-ML-AT-043-P",
+        "VAN-ML-AT-043-N"
+      ],
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "scope": "MANDATORY_ENGINEERING",
+      "economic_admission": "SEPARATE_PER_CANDIDATE"
+    },
+    {
+      "id": "VAN-ML-REQ-044",
+      "title": "OOF-only forecast fusion and redundancy control",
+      "obligation": "Learn combination only from out-of-fold predictions and track shared information across models.",
+      "packet_id": "VAN-ML-PKT-025",
+      "parent_units": [
+        "BE-009",
+        "BE-013",
+        "BE-016",
+        "BE-021"
+      ],
+      "test_ids": [
+        "VAN-ML-AT-044-P",
+        "VAN-ML-AT-044-N"
+      ],
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "scope": "MANDATORY_ENGINEERING",
+      "economic_admission": "SEPARATE_PER_CANDIDATE"
+    },
+    {
+      "id": "VAN-ML-REQ-045",
+      "title": "Preserve trading and financial authority",
+      "obligation": "Models propose evidence only; only existing RiskAuthority sizes and ExecutionRouter sends orders.",
+      "packet_id": "VAN-ML-PKT-025",
+      "parent_units": [
+        "BE-009",
+        "BE-013",
+        "BE-016",
+        "BE-021"
+      ],
+      "test_ids": [
+        "VAN-ML-AT-045-P",
+        "VAN-ML-AT-045-N"
+      ],
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "scope": "MANDATORY_ENGINEERING",
+      "economic_admission": "SEPARATE_PER_CANDIDATE"
+    },
+    {
+      "id": "VAN-ML-REQ-046",
+      "title": "Independent edge evidence and mode integration",
+      "obligation": "Supply real economic-evidence producer and signed scope binding for Normal/Risky/Aggressive policy use.",
+      "packet_id": "VAN-ML-PKT-025",
+      "parent_units": [
+        "BE-009",
+        "BE-013",
+        "BE-016",
+        "BE-021"
+      ],
+      "test_ids": [
+        "VAN-ML-AT-046-P",
+        "VAN-ML-AT-046-N"
+      ],
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "scope": "MANDATORY_ENGINEERING",
+      "economic_admission": "SEPARATE_PER_CANDIDATE"
+    },
+    {
+      "id": "VAN-ML-REQ-047",
+      "title": "Complementary suppression without duplicate risk governor",
+      "obligation": "Implement per-instrument/strategy cooldown and loss/profit protections through existing risk controls.",
+      "packet_id": "VAN-ML-PKT-026",
+      "parent_units": [
+        "BE-009",
+        "BE-012",
+        "BE-013"
+      ],
+      "test_ids": [
+        "VAN-ML-AT-047-P",
+        "VAN-ML-AT-047-N"
+      ],
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "scope": "MANDATORY_ENGINEERING",
+      "economic_admission": "SEPARATE_PER_CANDIDATE"
+    },
+    {
+      "id": "VAN-ML-REQ-048",
+      "title": "Outcome attribution and scientific data moat",
+      "obligation": "Join all eligible candidates and model outputs to observed decisions/outcomes and label unobserved counterfactuals.",
+      "packet_id": "VAN-ML-PKT-027",
+      "parent_units": [
+        "BE-012",
+        "BE-013",
+        "BE-022",
+        "BE-027"
+      ],
+      "test_ids": [
+        "VAN-ML-AT-048-P",
+        "VAN-ML-AT-048-N"
+      ],
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "scope": "MANDATORY_ENGINEERING",
+      "economic_admission": "SEPARATE_PER_CANDIDATE"
+    },
+    {
+      "id": "VAN-ML-REQ-049",
+      "title": "Privacy and correction propagation",
+      "obligation": "Respect entitlements/consent; invalidate downstream datasets/models when affected source is corrected/revoked.",
+      "packet_id": "VAN-ML-PKT-027",
+      "parent_units": [
+        "BE-012",
+        "BE-013",
+        "BE-022",
+        "BE-027"
+      ],
+      "test_ids": [
+        "VAN-ML-AT-049-P",
+        "VAN-ML-AT-049-N"
+      ],
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "scope": "MANDATORY_ENGINEERING",
+      "economic_admission": "SEPARATE_PER_CANDIDATE"
+    },
+    {
+      "id": "VAN-ML-REQ-050",
+      "title": "Every capability has a genuine caller and readback",
+      "obligation": "Publish complete catalog/actions/error states and actual gateway operations without new frontend implementation.",
+      "packet_id": "VAN-ML-PKT-028",
+      "parent_units": [
+        "BE-020",
+        "BE-021",
+        "BE-022",
+        "BE-030",
+        "BE-031",
+        "BE-032"
+      ],
+      "test_ids": [
+        "VAN-ML-AT-050-P",
+        "VAN-ML-AT-050-N"
+      ],
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "scope": "MANDATORY_ENGINEERING",
+      "economic_admission": "SEPARATE_PER_CANDIDATE"
+    },
+    {
+      "id": "VAN-ML-REQ-051",
+      "title": "Truthful confidence and explanation surfaces",
+      "obligation": "Keep raw rank/rule score, calibrated event probability, intervals and economic evidence distinct.",
+      "packet_id": "VAN-ML-PKT-028",
+      "parent_units": [
+        "BE-020",
+        "BE-021",
+        "BE-022",
+        "BE-030",
+        "BE-031",
+        "BE-032"
+      ],
+      "test_ids": [
+        "VAN-ML-AT-051-P",
+        "VAN-ML-AT-051-N"
+      ],
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "scope": "MANDATORY_ENGINEERING",
+      "economic_admission": "SEPARATE_PER_CANDIDATE"
+    },
+    {
+      "id": "VAN-ML-REQ-052",
+      "title": "Authorized VM deployment and recovery",
+      "obligation": "Use qualified Global DIAL/Zuul execution routes, exact source, resource admission and tested isolation.",
+      "packet_id": "VAN-ML-PKT-029",
+      "parent_units": [
+        "BE-033",
+        "BE-034"
+      ],
+      "test_ids": [
+        "VAN-ML-AT-052-P",
+        "VAN-ML-AT-052-N"
+      ],
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "scope": "MANDATORY_ENGINEERING",
+      "economic_admission": "SEPARATE_PER_CANDIDATE"
+    },
+    {
+      "id": "VAN-ML-REQ-053",
+      "title": "Bounded capacity and observability",
+      "obligation": "Measure real CPU/memory/latency/disk and keep risk/protection independent of research load.",
+      "packet_id": "VAN-ML-PKT-029",
+      "parent_units": [
+        "BE-033",
+        "BE-034"
+      ],
+      "test_ids": [
+        "VAN-ML-AT-053-P",
+        "VAN-ML-AT-053-N"
+      ],
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "scope": "MANDATORY_ENGINEERING",
+      "economic_admission": "SEPARATE_PER_CANDIDATE"
+    },
+    {
+      "id": "VAN-ML-REQ-054",
+      "title": "Actual statistical and economic evaluation",
+      "obligation": "Use matched OOS forecasts, costs, intervals, DSR/PBO where applicable and pre-registered uncertainty analysis.",
+      "packet_id": "VAN-ML-PKT-030",
+      "parent_units": [
+        "BQ-001",
+        "BQ-002",
+        "BQ-003"
+      ],
+      "test_ids": [
+        "VAN-ML-AT-054-P",
+        "VAN-ML-AT-054-N"
+      ],
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "scope": "MANDATORY_ENGINEERING",
+      "economic_admission": "SEPARATE_PER_CANDIDATE"
+    },
+    {
+      "id": "VAN-ML-REQ-055",
+      "title": "Real shadow pipeline and full rejection path",
+      "obligation": "Exercise the real pipeline in shadow/sandbox and preserve prospective timestamped outcomes.",
+      "packet_id": "VAN-ML-PKT-031",
+      "parent_units": [
+        "BQ-001",
+        "BQ-002",
+        "BQ-003",
+        "BQ-005"
+      ],
+      "test_ids": [
+        "VAN-ML-AT-055-P",
+        "VAN-ML-AT-055-N"
+      ],
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "scope": "MANDATORY_ENGINEERING",
+      "economic_admission": "SEPARATE_PER_CANDIDATE"
+    },
+    {
+      "id": "VAN-ML-REQ-056",
+      "title": "Independent complete additive backend closure",
+      "obligation": "All mandatory backend engineering must have real source/service/caller/failure evidence.",
+      "packet_id": "VAN-ML-PKT-032",
+      "parent_units": [
+        "BQ-006"
+      ],
+      "test_ids": [
+        "VAN-ML-AT-056-P",
+        "VAN-ML-AT-056-N"
+      ],
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "scope": "MANDATORY_ENGINEERING",
+      "economic_admission": "SEPARATE_PER_CANDIDATE"
+    },
+    {
+      "id": "VAN-ML-REQ-057",
+      "title": "Global backend barrier and contract renewal",
+      "obligation": "Integrate with all parent backend/BQ obligations; renew BG before any new UX/frontend.",
+      "packet_id": "VAN-ML-PKT-033",
+      "parent_units": [
+        "BE-032",
+        "BQ-006",
+        "BG-001"
+      ],
+      "test_ids": [
+        "VAN-ML-AT-057-P",
+        "VAN-ML-AT-057-N"
+      ],
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "scope": "MANDATORY_ENGINEERING",
+      "economic_admission": "SEPARATE_PER_CANDIDATE"
+    },
+    {
+      "id": "VAN-ML-REQ-058",
+      "title": "Complete post-backend UI integration",
+      "obligation": "Apply every forecast capability/state/action in appropriate existing native screen families after BG.",
+      "packet_id": "VAN-ML-PKT-034",
+      "parent_units": [
+        "UX-001",
+        "UX-002",
+        "UX-003",
+        "FE-006",
+        "FE-007",
+        "FE-008",
+        "FE-009",
+        "FE-011",
+        "FE-012",
+        "FE-014",
+        "FE-015",
+        "FE-018",
+        "FE-019",
+        "FE-020",
+        "FE-022"
+      ],
+      "test_ids": [
+        "VAN-ML-AT-058-P",
+        "VAN-ML-AT-058-N"
+      ],
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "scope": "MANDATORY_ENGINEERING",
+      "economic_admission": "SEPARATE_PER_CANDIDATE"
+    },
+    {
+      "id": "VAN-ML-REQ-059",
+      "title": "Physical and whole-product final acceptance",
+      "obligation": "Actual S24 and signed app use the qualified backend and preserve all inherited actions.",
+      "packet_id": "VAN-ML-PKT-035",
+      "parent_units": [
+        "QA-001",
+        "QA-002",
+        "QA-003",
+        "QA-004",
+        "QA-005"
+      ],
+      "test_ids": [
+        "VAN-ML-AT-059-P",
+        "VAN-ML-AT-059-N"
+      ],
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "scope": "MANDATORY_ENGINEERING",
+      "economic_admission": "SEPARATE_PER_CANDIDATE"
+    },
+    {
+      "id": "VAN-ML-REQ-060",
+      "title": "Separate software release from live-model promotion",
+      "obligation": "Release software by parent policy; live influence requires independent model/strategy/account admission and owner authority.",
+      "packet_id": "VAN-ML-PKT-036",
+      "parent_units": [
+        "REL-001",
+        "REL-002"
+      ],
+      "test_ids": [
+        "VAN-ML-AT-060-P",
+        "VAN-ML-AT-060-N"
+      ],
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "scope": "MANDATORY_ENGINEERING",
+      "economic_admission": "SEPARATE_PER_CANDIDATE"
+    },
+    {
+      "id": "VAN-ML-REQ-061",
+      "title": "Separate deployment, source access and procurement",
+      "obligation": "Record Netcup/Oracle execution profiles; no licence procurement or external spending in this phase; no inference that VM location establishes operator eligibility.",
+      "packet_id": "VAN-ML-PKT-037",
+      "parent_units": [
+        "BE-003",
+        "BE-008",
+        "BE-014",
+        "BE-015",
+        "BE-033"
+      ],
+      "test_ids": [
+        "VAN-ML-AT-061-P",
+        "VAN-ML-AT-061-N"
+      ],
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "scope": "MANDATORY_ENGINEERING",
+      "economic_admission": "SEPARATE_PER_CANDIDATE",
+      "introduced_in": "1.1"
+    },
+    {
+      "id": "VAN-ML-REQ-062",
+      "title": "Non-blocking no-procurement development path",
+      "obligation": "Provide implemented fixture/replay and provider-adapter paths; source-use status is scoped; absent purchased licence cannot block ordinary specification, coding or fixture validation.",
+      "packet_id": "VAN-ML-PKT-037",
+      "parent_units": [
+        "BE-003",
+        "BE-008",
+        "BE-014",
+        "BE-015",
+        "BE-033"
+      ],
+      "test_ids": [
+        "VAN-ML-AT-062-P",
+        "VAN-ML-AT-062-N"
+      ],
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "scope": "MANDATORY_ENGINEERING",
+      "economic_admission": "SEPARATE_PER_CANDIDATE",
+      "introduced_in": "1.1"
+    },
+    {
+      "id": "VAN-ML-REQ-063",
+      "title": "Versioned bounded read-only adapters",
+      "obligation": "Implement allowlisted market-data REST and optional read-only streaming with pinned contract revisions, timeouts, rate budgets and cursor handling; no order/account mutations.",
+      "packet_id": "VAN-ML-PKT-038",
+      "parent_units": [
+        "BE-003",
+        "BE-008",
+        "BE-014",
+        "BE-015"
+      ],
+      "test_ids": [
+        "VAN-ML-AT-063-P",
+        "VAN-ML-AT-063-N"
+      ],
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "scope": "MANDATORY_ENGINEERING",
+      "economic_admission": "SEPARATE_PER_CANDIDATE",
+      "introduced_in": "1.1"
+    },
+    {
+      "id": "VAN-ML-REQ-064",
+      "title": "Point-in-time archive and live completeness",
+      "obligation": "Store publication/receive/availability clocks and per-record historical cutoffs; dedupe and reconcile archive handoffs without inventing past receipt times.",
+      "packet_id": "VAN-ML-PKT-038",
+      "parent_units": [
+        "BE-003",
+        "BE-008",
+        "BE-014",
+        "BE-015"
+      ],
+      "test_ids": [
+        "VAN-ML-AT-064-P",
+        "VAN-ML-AT-064-N"
+      ],
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "scope": "MANDATORY_ENGINEERING",
+      "economic_admission": "SEPARATE_PER_CANDIDATE",
+      "introduced_in": "1.1"
+    },
+    {
+      "id": "VAN-ML-REQ-065",
+      "title": "Exact bid and ask conversion",
+      "obligation": "Parse fixed-point price/quantity strings and derive YES asks from NO bids and vice versa; retain source book and executable depth.",
+      "packet_id": "VAN-ML-PKT-038",
+      "parent_units": [
+        "BE-003",
+        "BE-008",
+        "BE-014",
+        "BE-015"
+      ],
+      "test_ids": [
+        "VAN-ML-AT-065-P",
+        "VAN-ML-AT-065-N"
+      ],
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "scope": "MANDATORY_ENGINEERING",
+      "economic_admission": "SEPARATE_PER_CANDIDATE",
+      "introduced_in": "1.1"
+    },
+    {
+      "id": "VAN-ML-REQ-066",
+      "title": "Stream gap and sequence recovery",
+      "obligation": "Apply sequence-aware deltas idempotently; gaps, negative resulting depth or duplicate mismatches force INVALID until full resynchronization.",
+      "packet_id": "VAN-ML-PKT-038",
+      "parent_units": [
+        "BE-003",
+        "BE-008",
+        "BE-014",
+        "BE-015"
+      ],
+      "test_ids": [
+        "VAN-ML-AT-066-P",
+        "VAN-ML-AT-066-N"
+      ],
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "scope": "MANDATORY_ENGINEERING",
+      "economic_admission": "SEPARATE_PER_CANDIDATE",
+      "introduced_in": "1.1"
+    },
+    {
+      "id": "VAN-ML-REQ-067",
+      "title": "Canonical event and proposition identity",
+      "obligation": "Bind thresholds/comparators, units, timezones, official source/vintage and rules digest; distinguish exact, complement, overlapping and non-equivalent contracts.",
+      "packet_id": "VAN-ML-PKT-039",
+      "parent_units": [
+        "BE-008",
+        "BE-014",
+        "BE-015",
+        "BE-016"
+      ],
+      "test_ids": [
+        "VAN-ML-AT-067-P",
+        "VAN-ML-AT-067-N"
+      ],
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "scope": "MANDATORY_ENGINEERING",
+      "economic_admission": "SEPARATE_PER_CANDIDATE",
+      "introduced_in": "1.1"
+    },
+    {
+      "id": "VAN-ML-REQ-068",
+      "title": "Resolution and cash settlement are separate",
+      "obligation": "Track occurrence, release, close, provisional outcome, dispute/cancel and final settlement separately; corrections create versions.",
+      "packet_id": "VAN-ML-PKT-039",
+      "parent_units": [
+        "BE-008",
+        "BE-014",
+        "BE-015",
+        "BE-016"
+      ],
+      "test_ids": [
+        "VAN-ML-AT-068-P",
+        "VAN-ML-AT-068-N"
+      ],
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "scope": "MANDATORY_ENGINEERING",
+      "economic_admission": "SEPARATE_PER_CANDIDATE",
+      "introduced_in": "1.1"
+    },
+    {
+      "id": "VAN-ML-REQ-069",
+      "title": "Maturity-aware contract continuity",
+      "obligation": "Key probability changes by event/proposition/horizon and explicit roll rule; missing successor contracts produce missing features.",
+      "packet_id": "VAN-ML-PKT-040",
+      "parent_units": [
+        "BE-014",
+        "BE-015",
+        "BE-016",
+        "BE-018"
+      ],
+      "test_ids": [
+        "VAN-ML-AT-069-P",
+        "VAN-ML-AT-069-N"
+      ],
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "scope": "MANDATORY_ENGINEERING",
+      "economic_admission": "SEPARATE_PER_CANDIDATE",
+      "introduced_in": "1.1"
+    },
+    {
+      "id": "VAN-ML-REQ-070",
+      "title": "Coherent distributions without fabricated tails",
+      "obligation": "Differentiate mutually exclusive bins from overlapping thresholds; monotonicity, mass, open-tail and adjustment policies are explicit.",
+      "packet_id": "VAN-ML-PKT-040",
+      "parent_units": [
+        "BE-014",
+        "BE-015",
+        "BE-016",
+        "BE-018"
+      ],
+      "test_ids": [
+        "VAN-ML-AT-070-P",
+        "VAN-ML-AT-070-N"
+      ],
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "scope": "MANDATORY_ENGINEERING",
+      "economic_admission": "SEPARATE_PER_CANDIDATE",
+      "introduced_in": "1.1"
+    },
+    {
+      "id": "VAN-ML-REQ-071",
+      "title": "Quality-aware market-implied estimates",
+      "obligation": "Track estimator type, depth, spread, age, activity and rule coherence separately from calibration; empty books produce missing observations.",
+      "packet_id": "VAN-ML-PKT-040",
+      "parent_units": [
+        "BE-014",
+        "BE-015",
+        "BE-016",
+        "BE-018"
+      ],
+      "test_ids": [
+        "VAN-ML-AT-071-P",
+        "VAN-ML-AT-071-N"
+      ],
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "scope": "MANDATORY_ENGINEERING",
+      "economic_admission": "SEPARATE_PER_CANDIDATE",
+      "introduced_in": "1.1"
+    },
+    {
+      "id": "VAN-ML-REQ-072",
+      "title": "Freeze expectations before official information",
+      "obligation": "Link each surprise to the last genuinely available pre-release snapshot and official release vintage; no future availability.",
+      "packet_id": "VAN-ML-PKT-041",
+      "parent_units": [
+        "BE-015",
+        "BE-016",
+        "BE-021",
+        "BE-022"
+      ],
+      "test_ids": [
+        "VAN-ML-AT-072-P",
+        "VAN-ML-AT-072-N"
+      ],
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "scope": "MANDATORY_ENGINEERING",
+      "economic_admission": "SEPARATE_PER_CANDIDATE",
+      "introduced_in": "1.1"
+    },
+    {
+      "id": "VAN-ML-REQ-073",
+      "title": "Two-source agreement is not independence",
+      "obligation": "Preserve parent Kalshi/Polymarket liquidity/agreement rules for armed expectations; matching horizons and semantic relation required; no independent-evidence multiplication.",
+      "packet_id": "VAN-ML-PKT-040",
+      "parent_units": [
+        "BE-014",
+        "BE-015",
+        "BE-016",
+        "BE-018"
+      ],
+      "test_ids": [
+        "VAN-ML-AT-073-P",
+        "VAN-ML-AT-073-N"
+      ],
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "scope": "MANDATORY_ENGINEERING",
+      "economic_admission": "SEPARATE_PER_CANDIDATE",
+      "introduced_in": "1.1"
+    },
+    {
+      "id": "VAN-ML-REQ-074",
+      "title": "Event-grouped calibration and adequate evidence",
+      "obligation": "Calibrate by declared event family/horizon/cohort with matured labels; group dependent snapshots/contracts and report effective event counts and uncertainty.",
+      "packet_id": "VAN-ML-PKT-041",
+      "parent_units": [
+        "BE-015",
+        "BE-016",
+        "BE-021",
+        "BE-022"
+      ],
+      "test_ids": [
+        "VAN-ML-AT-074-P",
+        "VAN-ML-AT-074-N"
+      ],
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "scope": "MANDATORY_ENGINEERING",
+      "economic_admission": "SEPARATE_PER_CANDIDATE",
+      "introduced_in": "1.1"
+    },
+    {
+      "id": "VAN-ML-REQ-075",
+      "title": "Preserve probability meaning",
+      "obligation": "Market-implied estimate, calibrated physical-event probability, asset outcome probability and rank score are distinct types and fields.",
+      "packet_id": "VAN-ML-PKT-041",
+      "parent_units": [
+        "BE-015",
+        "BE-016",
+        "BE-021",
+        "BE-022"
+      ],
+      "test_ids": [
+        "VAN-ML-AT-075-P",
+        "VAN-ML-AT-075-N"
+      ],
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "scope": "MANDATORY_ENGINEERING",
+      "economic_admission": "SEPARATE_PER_CANDIDATE",
+      "introduced_in": "1.1"
+    },
+    {
+      "id": "VAN-ML-REQ-076",
+      "title": "Correct Qlib and neural event-feature adapters",
+      "obligation": "Feed as-of event features to existing Qlib/LightGBM tasks and supported NeuralForecast historical covariates; future calendar use is versioned and not future probabilities.",
+      "packet_id": "VAN-ML-PKT-042",
+      "parent_units": [
+        "BE-013",
+        "BE-015",
+        "BE-016",
+        "BE-021",
+        "BE-022"
+      ],
+      "test_ids": [
+        "VAN-ML-AT-076-P",
+        "VAN-ML-AT-076-N"
+      ],
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "scope": "MANDATORY_ENGINEERING",
+      "economic_admission": "SEPARATE_PER_CANDIDATE",
+      "introduced_in": "1.1"
+    },
+    {
+      "id": "VAN-ML-REQ-077",
+      "title": "Conditional asset response and incremental information",
+      "obligation": "Estimate event-to-instrument outcomes under context, timing and horizon; compare against conventional market/news/calendar features and use OOF fusion.",
+      "packet_id": "VAN-ML-PKT-042",
+      "parent_units": [
+        "BE-013",
+        "BE-015",
+        "BE-016",
+        "BE-021",
+        "BE-022"
+      ],
+      "test_ids": [
+        "VAN-ML-AT-077-P",
+        "VAN-ML-AT-077-N"
+      ],
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "scope": "MANDATORY_ENGINEERING",
+      "economic_admission": "SEPARATE_PER_CANDIDATE",
+      "introduced_in": "1.1"
+    },
+    {
+      "id": "VAN-ML-REQ-078",
+      "title": "Preserve D1–D7 and manual ownership",
+      "obligation": "External information affects entries/ranking/lifecycle only through inherited rules; D7 is required for news-generated added risk; existing risk authority sizes.",
+      "packet_id": "VAN-ML-PKT-043",
+      "parent_units": [
+        "BE-009",
+        "BE-011",
+        "BE-013",
+        "BE-015",
+        "BE-016",
+        "BE-017"
+      ],
+      "test_ids": [
+        "VAN-ML-AT-078-P",
+        "VAN-ML-AT-078-N"
+      ],
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "scope": "MANDATORY_ENGINEERING",
+      "economic_admission": "SEPARATE_PER_CANDIDATE",
+      "introduced_in": "1.1"
+    },
+    {
+      "id": "VAN-ML-REQ-079",
+      "title": "Net executable binary-contract value",
+      "obligation": "For held-to-settlement use expected payout minus actual entry costs/fees/lockup; for early exit use executable exit distribution; market price is not independent edge.",
+      "packet_id": "VAN-ML-PKT-043",
+      "parent_units": [
+        "BE-009",
+        "BE-011",
+        "BE-013",
+        "BE-015",
+        "BE-016",
+        "BE-017"
+      ],
+      "test_ids": [
+        "VAN-ML-AT-079-P",
+        "VAN-ML-AT-079-N"
+      ],
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "scope": "MANDATORY_ENGINEERING",
+      "economic_admission": "SEPARATE_PER_CANDIDATE",
+      "introduced_in": "1.1"
+    },
+    {
+      "id": "VAN-ML-REQ-080",
+      "title": "Full event-loss and portfolio stress",
+      "obligation": "Model maximum binary outlay, related event exposures and uncertain probabilities; Kelly-style analysis remains a bounded sandbox proposal, never sizing authority.",
+      "packet_id": "VAN-ML-PKT-043",
+      "parent_units": [
+        "BE-009",
+        "BE-011",
+        "BE-013",
+        "BE-015",
+        "BE-016",
+        "BE-017"
+      ],
+      "test_ids": [
+        "VAN-ML-AT-080-P",
+        "VAN-ML-AT-080-N"
+      ],
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "scope": "MANDATORY_ENGINEERING",
+      "economic_admission": "SEPARATE_PER_CANDIDATE",
+      "introduced_in": "1.1"
+    },
+    {
+      "id": "VAN-ML-REQ-081",
+      "title": "Exact fees and complete settlement accounting",
+      "obligation": "Use revision/series/account-specific fee rules, per-fill precision/accumulator, cash reservations and all relevant settlement/conversion costs.",
+      "packet_id": "VAN-ML-PKT-044",
+      "parent_units": [
+        "BE-006",
+        "BE-009",
+        "BE-010",
+        "BE-011",
+        "BE-012",
+        "BE-019"
+      ],
+      "test_ids": [
+        "VAN-ML-AT-081-P",
+        "VAN-ML-AT-081-N"
+      ],
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "scope": "MANDATORY_ENGINEERING",
+      "economic_admission": "SEPARATE_PER_CANDIDATE",
+      "introduced_in": "1.1"
+    },
+    {
+      "id": "VAN-ML-REQ-082",
+      "title": "Queue-aware feasible event execution",
+      "obligation": "Model real observation/decision/order latency, depth, partial fills, queue uncertainty and cancel races; sparse data cannot prove maker profitability.",
+      "packet_id": "VAN-ML-PKT-044",
+      "parent_units": [
+        "BE-006",
+        "BE-009",
+        "BE-010",
+        "BE-011",
+        "BE-012",
+        "BE-019"
+      ],
+      "test_ids": [
+        "VAN-ML-AT-082-P",
+        "VAN-ML-AT-082-N"
+      ],
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "scope": "MANDATORY_ENGINEERING",
+      "economic_admission": "SEPARATE_PER_CANDIDATE",
+      "introduced_in": "1.1"
+    },
+    {
+      "id": "VAN-ML-REQ-083",
+      "title": "Payoff-proven contract consistency",
+      "obligation": "Enumerate permissible resolution/void/dispute states and quantities; exact/complement matching precedes worst-case net-payoff assessment.",
+      "packet_id": "VAN-ML-PKT-045",
+      "parent_units": [
+        "BE-009",
+        "BE-012",
+        "BE-019",
+        "BE-021",
+        "BE-022"
+      ],
+      "test_ids": [
+        "VAN-ML-AT-083-P",
+        "VAN-ML-AT-083-N"
+      ],
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "scope": "MANDATORY_ENGINEERING",
+      "economic_admission": "SEPARATE_PER_CANDIDATE",
+      "introduced_in": "1.1"
+    },
+    {
+      "id": "VAN-ML-REQ-084",
+      "title": "Non-atomic multi-venue risk and capital",
+      "obligation": "Keep venue-specific balances, collateral/currency conversion and hedge-failure unwind costs; no instant cross-venue capital or fill assumption.",
+      "packet_id": "VAN-ML-PKT-045",
+      "parent_units": [
+        "BE-009",
+        "BE-012",
+        "BE-019",
+        "BE-021",
+        "BE-022"
+      ],
+      "test_ids": [
+        "VAN-ML-AT-084-P",
+        "VAN-ML-AT-084-N"
+      ],
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "scope": "MANDATORY_ENGINEERING",
+      "economic_admission": "SEPARATE_PER_CANDIDATE",
+      "introduced_in": "1.1"
+    },
+    {
+      "id": "VAN-ML-REQ-085",
+      "title": "Inventory-aware event quoting laboratory",
+      "obligation": "Implement bounded quoting policies with event-family inventory, jump risk, adverse selection and value conditional on fills; no direct live execution.",
+      "packet_id": "VAN-ML-PKT-046",
+      "parent_units": [
+        "BE-009",
+        "BE-010",
+        "BE-012",
+        "BE-019",
+        "BE-021",
+        "BE-022"
+      ],
+      "test_ids": [
+        "VAN-ML-AT-085-P",
+        "VAN-ML-AT-085-N"
+      ],
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "scope": "MANDATORY_ENGINEERING",
+      "economic_admission": "SEPARATE_PER_CANDIDATE",
+      "introduced_in": "1.1"
+    },
+    {
+      "id": "VAN-ML-REQ-086",
+      "title": "Maker quote lifecycle and protective withdrawal",
+      "obligation": "Simulate pending/new/partial/cancel/unknown quote states, stale-feed reduction and scheduled-event withdrawal without manipulating markets.",
+      "packet_id": "VAN-ML-PKT-046",
+      "parent_units": [
+        "BE-009",
+        "BE-010",
+        "BE-012",
+        "BE-019",
+        "BE-021",
+        "BE-022"
+      ],
+      "test_ids": [
+        "VAN-ML-AT-086-P",
+        "VAN-ML-AT-086-N"
+      ],
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "scope": "MANDATORY_ENGINEERING",
+      "economic_admission": "SEPARATE_PER_CANDIDATE",
+      "introduced_in": "1.1"
+    },
+    {
+      "id": "VAN-ML-REQ-087",
+      "title": "Four preregistered incremental-value studies",
+      "obligation": "Implement risk-filter, surprise, volatility and ranking studies with identical opportunity sets, incumbent/calendar/exposure-matched controls and frozen utility.",
+      "packet_id": "VAN-ML-PKT-047",
+      "parent_units": [
+        "BE-016",
+        "BE-021",
+        "BE-022",
+        "BQ-001",
+        "BQ-002",
+        "BQ-003"
+      ],
+      "test_ids": [
+        "VAN-ML-AT-087-P",
+        "VAN-ML-AT-087-N"
+      ],
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "scope": "MANDATORY_ENGINEERING",
+      "economic_admission": "SEPARATE_PER_CANDIDATE",
+      "introduced_in": "1.1"
+    },
+    {
+      "id": "VAN-ML-REQ-088",
+      "title": "Prospective sealing and dependent uncertainty",
+      "obligation": "Seal issued forecasts before outcomes, use event/time-block inference and full trial census; compare realistic lags and negative controls.",
+      "packet_id": "VAN-ML-PKT-047",
+      "parent_units": [
+        "BE-016",
+        "BE-021",
+        "BE-022",
+        "BQ-001",
+        "BQ-002",
+        "BQ-003"
+      ],
+      "test_ids": [
+        "VAN-ML-AT-088-P",
+        "VAN-ML-AT-088-N"
+      ],
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "scope": "MANDATORY_ENGINEERING",
+      "economic_admission": "SEPARATE_PER_CANDIDATE",
+      "introduced_in": "1.1"
+    },
+    {
+      "id": "VAN-ML-REQ-089",
+      "title": "Complete owner projections and operator controls",
+      "obligation": "Extend existing event/research/work/evidence/settings and later native surfaces with source state, expectation lineage, study/lab controls, calibration and per-use outcomes.",
+      "packet_id": "VAN-ML-PKT-048",
+      "parent_units": [
+        "BE-003",
+        "BE-015",
+        "BE-016",
+        "BE-017",
+        "BE-030",
+        "BE-031",
+        "BE-032",
+        "BE-033",
+        "BE-034",
+        "BQ-001",
+        "BQ-005",
+        "BQ-006"
+      ],
+      "test_ids": [
+        "VAN-ML-AT-089-P",
+        "VAN-ML-AT-089-N"
+      ],
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "scope": "MANDATORY_ENGINEERING",
+      "economic_admission": "SEPARATE_PER_CANDIDATE",
+      "introduced_in": "1.1"
+    },
+    {
+      "id": "VAN-ML-REQ-090",
+      "title": "Failure isolation and truthful full-backend closure",
+      "obligation": "Isolate event workers from T0 and finance; complete recovery, revocation and rollback; all new backend obligations feed existing gates without purchasing licences or fabricating access.",
+      "packet_id": "VAN-ML-PKT-048",
+      "parent_units": [
+        "BE-003",
+        "BE-015",
+        "BE-016",
+        "BE-017",
+        "BE-030",
+        "BE-031",
+        "BE-032",
+        "BE-033",
+        "BE-034",
+        "BQ-001",
+        "BQ-005",
+        "BQ-006"
+      ],
+      "test_ids": [
+        "VAN-ML-AT-090-P",
+        "VAN-ML-AT-090-N"
+      ],
+      "status": "SPECIFIED_NOT_IMPLEMENTED",
+      "scope": "MANDATORY_ENGINEERING",
+      "economic_admission": "SEPARATE_PER_CANDIDATE",
+      "introduced_in": "1.1"
+    }
+  ]
+}

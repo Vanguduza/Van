@@ -1,0 +1,99 @@
+{
+  "scope": "SUPPLEMENTAL_SOURCE_ASSERTION_FAULTS_NOT_CANONICAL374",
+  "positive": {
+    "exit": 0,
+    "tests": 20,
+    "failures": 0,
+    "errors": 0,
+    "skips": 0,
+    "audit": []
+  },
+  "faults": [
+    {
+      "exit": 1,
+      "tests": 1,
+      "failures": 1,
+      "errors": 0,
+      "skips": 0,
+      "audit": [],
+      "name": "equity-is-not-cash",
+      "path": "trading/vati/funding/valuation.py",
+      "original_sha256": "77473cdf30e2634f79da44a739aa8918614cf31fbc8b0203951d9be00b19c7d8"
+    },
+    {
+      "exit": 1,
+      "tests": 1,
+      "failures": 1,
+      "errors": 0,
+      "skips": 0,
+      "audit": [],
+      "name": "native-scope",
+      "path": "trading/vati/funding/valuation.py",
+      "original_sha256": "77473cdf30e2634f79da44a739aa8918614cf31fbc8b0203951d9be00b19c7d8"
+    },
+    {
+      "exit": 1,
+      "tests": 1,
+      "failures": 1,
+      "errors": 0,
+      "skips": 0,
+      "audit": [],
+      "name": "caller-transaction",
+      "path": "trading/vati/funding/valuation.py",
+      "original_sha256": "77473cdf30e2634f79da44a739aa8918614cf31fbc8b0203951d9be00b19c7d8"
+    },
+    {
+      "exit": 1,
+      "tests": 16,
+      "failures": 1,
+      "errors": 0,
+      "skips": 0,
+      "audit": [],
+      "name": "source-clock",
+      "path": "trading/vati/funding/valuation.py",
+      "original_sha256": "77473cdf30e2634f79da44a739aa8918614cf31fbc8b0203951d9be00b19c7d8"
+    },
+    {
+      "exit": 1,
+      "tests": 16,
+      "failures": 1,
+      "errors": 0,
+      "skips": 0,
+      "audit": [],
+      "name": "verified-boolean",
+      "path": "trading/vati/funding/valuation.py",
+      "original_sha256": "77473cdf30e2634f79da44a739aa8918614cf31fbc8b0203951d9be00b19c7d8"
+    },
+    {
+      "exit": 1,
+      "tests": 1,
+      "failures": 1,
+      "errors": 0,
+      "skips": 0,
+      "audit": [],
+      "name": "complete-readback",
+      "path": "trading/vati/funding/valuation.py",
+      "original_sha256": "77473cdf30e2634f79da44a739aa8918614cf31fbc8b0203951d9be00b19c7d8"
+    },
+    {
+      "exit": 1,
+      "tests": 1,
+      "failures": 1,
+      "errors": 0,
+      "skips": 0,
+      "audit": [],
+      "name": "period-render-context",
+      "path": "trading/vati/funding/reconciliation.py",
+      "original_sha256": "d089ac092daf0aaa6424cf492f90e6c3f7313431c7d6cde3061abf28ed5d3f04"
+    }
+  ],
+  "restored": {
+    "exit": 0,
+    "tests": 20,
+    "failures": 0,
+    "errors": 0,
+    "skips": 0,
+    "audit": []
+  },
+  "all_restored": true
+}

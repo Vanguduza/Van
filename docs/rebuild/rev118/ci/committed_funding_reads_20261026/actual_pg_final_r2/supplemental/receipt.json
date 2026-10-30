@@ -1,0 +1,94 @@
+{
+  "scope": "SUPPLEMENTAL_ACTUAL_SQLITE_AND_POSTGRES_SOURCE_FAULTS_NOT_CANONICAL374",
+  "positive": {
+    "exit": 0,
+    "tests": 14,
+    "failures": 0,
+    "errors": 0,
+    "skips": 0,
+    "audit": []
+  },
+  "faults": [
+    {
+      "exit": 1,
+      "tests": 1,
+      "failures": 1,
+      "errors": 0,
+      "skips": 0,
+      "audit": [],
+      "name": "period-writer",
+      "path": "trading/vati/funding/reconciliation.py",
+      "selection": "sqlite",
+      "original_sha256": "d325b0931443a4b8721ab740c4cf86d95dbc07461b5a336f0116ab241678b382"
+    },
+    {
+      "exit": 1,
+      "tests": 2,
+      "failures": 1,
+      "errors": 0,
+      "skips": 0,
+      "audit": [],
+      "name": "owner-mt5-writer",
+      "path": "trading/vati/funding/runtime.py",
+      "selection": "sqlite",
+      "original_sha256": "61c08aae62d191b2eace6072942e2ce9351a9b423f2a57b9c8cdd1f9cbdd16ce"
+    },
+    {
+      "exit": 1,
+      "tests": 2,
+      "failures": 1,
+      "errors": 0,
+      "skips": 0,
+      "audit": [],
+      "name": "risk-mt5-writer",
+      "path": "trading/vati/funding/risk_fence.py",
+      "selection": "sqlite",
+      "original_sha256": "8aa5eef7feccb1a299207bca8440e568294df3acd7976b24570c7b68b14f14e0"
+    },
+    {
+      "exit": 1,
+      "tests": 1,
+      "failures": 1,
+      "errors": 0,
+      "skips": 0,
+      "audit": [],
+      "name": "sqlite-rollback-cache",
+      "path": "trading/vati/core/ledger.py",
+      "selection": "sqlite",
+      "original_sha256": "1d706f4004afeafdb7f8350b4f11ffddf32e2b34ab6efa31378d6aa4c2955d4d"
+    },
+    {
+      "exit": 1,
+      "tests": 1,
+      "failures": 1,
+      "errors": 0,
+      "skips": 0,
+      "audit": [],
+      "name": "postgres-rollback-cache",
+      "path": "trading/vati/core/ledger_pg.py",
+      "selection": "postgres",
+      "original_sha256": "bb4d4db88fce57eda298842bcf4992017200da4868c7e7bf74da98f47ee1829f"
+    },
+    {
+      "exit": 1,
+      "tests": 1,
+      "failures": 1,
+      "errors": 0,
+      "skips": 0,
+      "audit": [],
+      "name": "committed-source-guard",
+      "path": "trading/vati/core/ledger.py",
+      "selection": "postgres",
+      "original_sha256": "1d706f4004afeafdb7f8350b4f11ffddf32e2b34ab6efa31378d6aa4c2955d4d"
+    }
+  ],
+  "restored": {
+    "exit": 0,
+    "tests": 14,
+    "failures": 0,
+    "errors": 0,
+    "skips": 0,
+    "audit": []
+  },
+  "all_restored": true
+}

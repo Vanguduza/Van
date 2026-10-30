@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.dial.van.status.OwnerOverviewTest" tests="10" skipped="0" failures="0" errors="0" timestamp="2026-10-08T06:47:29" hostname="052fefa249ff" time="0.004">
+  <properties/>
+  <testcase name="blockers sort above information and the order is stable()" classname="com.dial.van.status.OwnerOverviewTest" time="0.002"/>
+  <testcase name="a briefing with nothing to say contributes no line()" classname="com.dial.van.status.OwnerOverviewTest" time="0.0"/>
+  <testcase name="an empty queue and an unreachable gateway never say the same thing()" classname="com.dial.van.status.OwnerOverviewTest" time="0.0"/>
+  <testcase name="a malformed row does not take the whole queue down()" classname="com.dial.van.status.OwnerOverviewTest" time="0.001"/>
+  <testcase name="informational items alone do not read as something waiting()" classname="com.dial.van.status.OwnerOverviewTest" time="0.0"/>
+  <testcase name="blockers are counted and informational items are not()" classname="com.dial.van.status.OwnerOverviewTest" time="0.0"/>
+  <testcase name="an item with no title is labelled rather than shown blank()" classname="com.dial.van.status.OwnerOverviewTest" time="0.0"/>
+  <testcase name="one waiting item reads as one, not as a number()" classname="com.dial.van.status.OwnerOverviewTest" time="0.0"/>
+  <testcase name="the briefing falls back to its summary when it has no headline()" classname="com.dial.van.status.OwnerOverviewTest" time="0.0"/>
+  <testcase name="a failure carries its reason to the owner()" classname="com.dial.van.status.OwnerOverviewTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

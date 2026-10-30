@@ -1,0 +1,464 @@
+{
+  "mappings": [
+    {
+      "id": "VAN-PT-01",
+      "van_requirements": [
+        "VAN-NX-001",
+        "VAN-NX-002",
+        "VAN-NX-003",
+        "VAN-NX-029",
+        "VAN-NX-030"
+      ]
+    },
+    {
+      "id": "VAN-PT-02",
+      "van_requirements": [
+        "VAN-NX-004"
+      ]
+    },
+    {
+      "id": "VAN-PT-03",
+      "van_requirements": [
+        "VAN-NX-005",
+        "VAN-NX-063"
+      ]
+    },
+    {
+      "id": "VAN-PT-04",
+      "van_requirements": [
+        "VAN-NX-006"
+      ]
+    },
+    {
+      "id": "VAN-PT-05",
+      "van_requirements": [
+        "VAN-NX-008",
+        "VAN-NX-048"
+      ]
+    },
+    {
+      "id": "VAN-PT-06",
+      "van_requirements": [
+        "VAN-NX-009",
+        "VAN-NX-040",
+        "VAN-NX-041",
+        "VAN-NX-042",
+        "VAN-NX-043",
+        "VAN-NX-044",
+        "VAN-NX-045",
+        "VAN-NX-046",
+        "VAN-NX-047"
+      ]
+    },
+    {
+      "id": "VAN-PT-07",
+      "van_requirements": [
+        "VAN-NX-010",
+        "VAN-NX-011",
+        "VAN-NX-012",
+        "VAN-NX-027",
+        "VAN-NX-031",
+        "VAN-NX-052",
+        "VAN-NX-058",
+        "VAN-NX-061",
+        "VAN-NX-062"
+      ]
+    },
+    {
+      "id": "VAN-PT-08",
+      "van_requirements": [
+        "VAN-NX-013",
+        "VAN-NX-032",
+        "VAN-NX-033",
+        "VAN-NX-036",
+        "VAN-NX-037",
+        "VAN-NX-038"
+      ]
+    },
+    {
+      "id": "VAN-PT-09",
+      "van_requirements": [
+        "VAN-NX-046",
+        "VAN-NX-065"
+      ]
+    },
+    {
+      "id": "VAN-PT-10",
+      "van_requirements": [
+        "VAN-NX-048",
+        "VAN-NX-049",
+        "VAN-NX-050",
+        "VAN-NX-051",
+        "VAN-NX-052",
+        "VAN-NX-055",
+        "VAN-NX-056",
+        "VAN-NX-057",
+        "VAN-NX-064"
+      ]
+    },
+    {
+      "id": "VAN-PT-11",
+      "van_requirements": [
+        "VAN-NX-014",
+        "VAN-NX-015",
+        "VAN-NX-016"
+      ]
+    },
+    {
+      "id": "VAN-PT-12",
+      "van_requirements": [
+        "VAN-NX-017",
+        "VAN-NX-019",
+        "VAN-NX-020",
+        "VAN-NX-069"
+      ]
+    },
+    {
+      "id": "VAN-PT-13",
+      "van_requirements": [
+        "VAN-NX-007",
+        "VAN-NX-021",
+        "VAN-NX-027",
+        "VAN-NX-055",
+        "VAN-NX-056"
+      ]
+    },
+    {
+      "id": "VAN-PT-14",
+      "van_requirements": [
+        "VAN-NX-023",
+        "VAN-NX-028",
+        "VAN-NX-053",
+        "VAN-NX-071"
+      ]
+    },
+    {
+      "id": "VAN-PT-15",
+      "van_requirements": [
+        "VAN-NX-021",
+        "VAN-NX-040",
+        "VAN-NX-056"
+      ]
+    },
+    {
+      "id": "VAN-PT-16",
+      "van_requirements": [
+        "VAN-NX-022",
+        "VAN-NX-025",
+        "VAN-NX-060"
+      ]
+    },
+    {
+      "id": "VAN-PT-17",
+      "van_requirements": [
+        "VAN-NX-058"
+      ]
+    },
+    {
+      "id": "VAN-PT-18",
+      "van_requirements": [
+        "VAN-NX-024",
+        "VAN-NX-026",
+        "VAN-NX-028",
+        "VAN-NX-053",
+        "VAN-NX-054",
+        "VAN-NX-070",
+        "VAN-NX-071"
+      ]
+    },
+    {
+      "id": "VAN-PT-SO-01",
+      "van_requirements": [
+        "VAN-SO-001",
+        "VAN-SO-002",
+        "VAN-SO-003",
+        "VAN-SO-004",
+        "VAN-SO-005",
+        "VAN-SO-006",
+        "VAN-SO-007",
+        "VAN-SO-008",
+        "VAN-SO-009",
+        "VAN-SO-010",
+        "VAN-SO-011",
+        "VAN-SO-012",
+        "VAN-SO-013",
+        "VAN-SO-014",
+        "VAN-SO-015",
+        "VAN-SO-016",
+        "VAN-SO-017",
+        "VAN-SO-018",
+        "VAN-SO-019",
+        "VAN-SO-020",
+        "VAN-SO-021",
+        "VAN-SO-022",
+        "VAN-SO-023",
+        "VAN-SO-024",
+        "VAN-SO-025",
+        "VAN-SO-026",
+        "VAN-SO-027",
+        "VAN-SO-028",
+        "VAN-SO-029",
+        "VAN-SO-030",
+        "VAN-SO-031",
+        "VAN-SO-032",
+        "VAN-SO-033",
+        "VAN-SO-034",
+        "VAN-SO-035",
+        "VAN-SO-036",
+        "VAN-SO-037",
+        "VAN-SO-038",
+        "VAN-SO-039",
+        "VAN-SO-040",
+        "VAN-SO-041",
+        "VAN-SO-042",
+        "VAN-SO-043",
+        "VAN-SO-044",
+        "VAN-RV-001",
+        "VAN-RV-002",
+        "VAN-RV-003",
+        "VAN-RV-004",
+        "VAN-RV-005",
+        "VAN-RV-006",
+        "VAN-RV-007"
+      ]
+    },
+    {
+      "id": "VAN-PT-SO-02",
+      "van_requirements": [
+        "VAN-SO-001",
+        "VAN-SO-002",
+        "VAN-SO-003",
+        "VAN-SO-004",
+        "VAN-SO-005",
+        "VAN-SO-006",
+        "VAN-SO-007",
+        "VAN-SO-008",
+        "VAN-SO-009",
+        "VAN-SO-010",
+        "VAN-SO-011",
+        "VAN-SO-012",
+        "VAN-SO-013",
+        "VAN-SO-014",
+        "VAN-SO-015",
+        "VAN-SO-016",
+        "VAN-SO-017",
+        "VAN-SO-018",
+        "VAN-SO-019",
+        "VAN-SO-020",
+        "VAN-SO-021",
+        "VAN-SO-022",
+        "VAN-SO-023",
+        "VAN-SO-024",
+        "VAN-SO-025",
+        "VAN-SO-026",
+        "VAN-SO-027",
+        "VAN-SO-028",
+        "VAN-SO-029",
+        "VAN-SO-030",
+        "VAN-SO-031",
+        "VAN-SO-032",
+        "VAN-SO-033",
+        "VAN-SO-034",
+        "VAN-SO-035",
+        "VAN-SO-036",
+        "VAN-SO-037",
+        "VAN-SO-038",
+        "VAN-SO-039",
+        "VAN-SO-040",
+        "VAN-SO-041",
+        "VAN-SO-042",
+        "VAN-SO-043",
+        "VAN-SO-044",
+        "VAN-RV-008"
+      ]
+    },
+    {
+      "id": "VAN-PT-CRYPTO-01",
+      "van_requirements": [
+        "VAN-CRYPTO-001",
+        "VAN-CRYPTO-002",
+        "VAN-CRYPTO-003",
+        "VAN-CRYPTO-004",
+        "VAN-CRYPTO-005",
+        "VAN-CRYPTO-006",
+        "VAN-CRYPTO-007",
+        "VAN-CRYPTO-008",
+        "VAN-CRYPTO-009",
+        "VAN-CRYPTO-010",
+        "VAN-CRYPTO-011",
+        "VAN-CRYPTO-012",
+        "VAN-CRYPTO-013",
+        "VAN-CRYPTO-014"
+      ]
+    },
+    {
+      "id": "VAN-PT-LEAN-01",
+      "van_requirements": [
+        "VAN-LEAN-001",
+        "VAN-LEAN-002",
+        "VAN-LEAN-003",
+        "VAN-LEAN-004",
+        "VAN-LEAN-005",
+        "VAN-LEAN-006"
+      ]
+    }
+  ],
+  "revision": "1.15",
+  "status": "PENDING_OWNER_SIGNATURE_AND_INDEPENDENT_REVIEW",
+  "truth_atoms": [
+    {
+      "acceptance": "Owner review + trace to feature/surface/action/test + product acceptance",
+      "id": "VAN-PT-01",
+      "provenance": "OWNER_CONVERSATION_EXPANDED_CANONICAL_CANDIDATE",
+      "state": "PENDING_OWNER_FREEZE",
+      "text": "New coherent Tactile Spatial visual identity across the entire Android app, with matched light/dark parity, real depth and restrained contrast. No generic stock dashboard or flattened reskin."
+    },
+    {
+      "acceptance": "Owner review + trace to feature/surface/action/test + product acceptance",
+      "id": "VAN-PT-02",
+      "provenance": "OWNER_CONVERSATION_EXPANDED_CANONICAL_CANDIDATE",
+      "state": "PENDING_OWNER_FREEZE",
+      "text": "The central metallic VAN orb is visually sculpted, animated, state-aware, accessible and power-bounded. Home has no event-colour key or legend."
+    },
+    {
+      "acceptance": "Owner review + trace to feature/surface/action/test + product acceptance",
+      "id": "VAN-PT-03",
+      "provenance": "OWNER_CONVERSATION_EXPANDED_CANONICAL_CANDIDATE",
+      "state": "PENDING_OWNER_FREEZE",
+      "text": "Tapping the Home orb opens a **short** attention/quick-action sheet: urgent event, compact position performance, relevant task/progress snapshot and a few deep-link actions. No dense miniature dashboard."
+    },
+    {
+      "acceptance": "Owner review + trace to feature/surface/action/test + product acceptance",
+      "id": "VAN-PT-04",
+      "provenance": "OWNER_CONVERSATION_EXPANDED_CANONICAL_CANDIDATE",
+      "state": "PENDING_OWNER_FREEZE",
+      "text": "Floating VAN remains a persistent autonomous mobile assistant control surface. Reuse verified gestures, lifecycle, voice/chat, dock/minimise/expand/restore, Android policy and owner control behaviour while rebuilding its look."
+    },
+    {
+      "acceptance": "Owner review + trace to feature/surface/action/test + product acceptance",
+      "id": "VAN-PT-05",
+      "provenance": "OWNER_CONVERSATION_EXPANDED_CANONICAL_CANDIDATE",
+      "state": "PENDING_OWNER_FREEZE",
+      "text": "Trading Home retains portfolio/risk snapshot, Markets, Watchlist, Opportunities **plus Charts and Intelligence** direct controls, with Accounts & Funds accessible, not buried."
+    },
+    {
+      "acceptance": "Owner review + trace to feature/surface/action/test + product acceptance",
+      "id": "VAN-PT-06",
+      "provenance": "OWNER_CONVERSATION_EXPANDED_CANONICAL_CANDIDATE",
+      "state": "PENDING_OWNER_FREEZE",
+      "text": "Full chart workstation supports professional instrument/timeframe search, indicators, drawing/editing, chart types, replay, multichart, watchlist, depth where supported, position/order overlays, advanced precision/zoom and comprehensive accessible interactions."
+    },
+    {
+      "acceptance": "Owner review + trace to feature/surface/action/test + product acceptance",
+      "id": "VAN-PT-07",
+      "provenance": "OWNER_CONVERSATION_EXPANDED_CANONICAL_CANDIDATE",
+      "state": "PENDING_OWNER_FREEZE",
+      "text": "Full Trading scope: markets, positions, pending orders, history, strategies, risk, execution/TCA, opportunities, analyst, alerts, account/funds and broker/device status. Never confuse presentation with execution."
+    },
+    {
+      "acceptance": "Owner review + trace to feature/surface/action/test + product acceptance",
+      "id": "VAN-PT-08",
+      "provenance": "OWNER_CONVERSATION_EXPANDED_CANONICAL_CANDIDATE",
+      "state": "PENDING_OWNER_FREEZE",
+      "text": "Intelligence includes **News**, full causal/market-impact analysis, calendar, affected instruments/positions/strategies, source citations, contradiction, uncertainty, correction/revision, scenario and invalidation views."
+    },
+    {
+      "acceptance": "Owner review + trace to feature/surface/action/test + product acceptance",
+      "id": "VAN-PT-09",
+      "provenance": "OWNER_CONVERSATION_EXPANDED_CANONICAL_CANDIDATE",
+      "state": "PENDING_OWNER_FREEZE",
+      "text": "Chart observations, user drawings, analyst notes and verified news can assist backend intelligence via typed provenance-aware, bounded read-only intake; never bypass VATI admission, Risk Authority or broker authorization."
+    },
+    {
+      "acceptance": "Owner review + trace to feature/surface/action/test + product acceptance",
+      "id": "VAN-PT-10",
+      "provenance": "OWNER_CONVERSATION_EXPANDED_CANONICAL_CANDIDATE",
+      "state": "PENDING_OWNER_FREEZE",
+      "text": "Account management **within the app** across discovery, creation or connection, verification, editing, metadata, credential rotation, restrictions, safe unlink, remote closure when supported, deposit, withdrawal, transfer, methods, history, KYC and receipts, with qualified provider dependencies and clear honest fallbacks."
+    },
+    {
+      "acceptance": "Owner review + trace to feature/surface/action/test + product acceptance",
+      "id": "VAN-PT-11",
+      "provenance": "OWNER_CONVERSATION_EXPANDED_CANONICAL_CANDIDATE",
+      "state": "PENDING_OWNER_FREEZE",
+      "text": "Work/Projects/Tasks include live diagrammatic DAG/workflow/agent views; node/edge truth, stage ownership, handoff, blockers, evidence, timestamps and deterministic progress. List alternative and meaningful mobile controls always exist."
+    },
+    {
+      "acceptance": "Owner review + trace to feature/surface/action/test + product acceptance",
+      "id": "VAN-PT-12",
+      "provenance": "OWNER_CONVERSATION_EXPANDED_CANONICAL_CANDIDATE",
+      "state": "PENDING_OWNER_FREEZE",
+      "text": "VAN can interact with Muse, Hermes, ARTEMIS, DIAL Work Tracker, JEV and connected systems with native-feeling controls; browser/VNC fallback is not the primary mobile experience."
+    },
+    {
+      "acceptance": "Owner review + trace to feature/surface/action/test + product acceptance",
+      "id": "VAN-PT-13",
+      "provenance": "OWNER_CONVERSATION_EXPANDED_CANONICAL_CANDIDATE",
+      "state": "PENDING_OWNER_FREEZE",
+      "text": "Account, trading, owner commands, resource grants and system administration require correct owner/device/authority boundaries and independent effect receipts."
+    },
+    {
+      "acceptance": "Owner review + trace to feature/surface/action/test + product acceptance",
+      "id": "VAN-PT-14",
+      "provenance": "OWNER_CONVERSATION_EXPANDED_CANONICAL_CANDIDATE",
+      "state": "PENDING_OWNER_FREEZE",
+      "text": "Original functional capability is not lost merely because a presentation route is replaced; every legacy item receives ADOPT/ADAPT/REBUILD/REJECT plus proof."
+    },
+    {
+      "acceptance": "Owner review + trace to feature/surface/action/test + product acceptance",
+      "id": "VAN-PT-15",
+      "provenance": "OWNER_CONVERSATION_EXPANDED_CANONICAL_CANDIDATE",
+      "state": "PENDING_OWNER_FREEZE",
+      "text": "No false chart prices, fake success, unverified broker balances, simulated progress as live, or synthetic personal details in production."
+    },
+    {
+      "acceptance": "Owner review + trace to feature/surface/action/test + product acceptance",
+      "id": "VAN-PT-16",
+      "provenance": "OWNER_CONVERSATION_EXPANDED_CANONICAL_CANDIDATE",
+      "state": "PENDING_OWNER_FREEZE",
+      "text": "Physical Samsung S24 Ultra validation, accessibility, reduced motion, Android-native system bars, battery/thermal budgets, split-screen, dynamic type, landscape, tablet and process-death restoration."
+    },
+    {
+      "acceptance": "Owner review + trace to feature/surface/action/test + product acceptance",
+      "id": "VAN-PT-17",
+      "provenance": "OWNER_CONVERSATION_EXPANDED_CANONICAL_CANDIDATE",
+      "state": "PENDING_OWNER_FREEZE",
+      "text": "Multiple trading modes Normal, Risky, Aggressive must be **intelligently quality-aware**, not blanket maximum leverage/risk. Selection is orthogonal to broker mandate and owner authorization."
+    },
+    {
+      "acceptance": "Owner review + trace to feature/surface/action/test + product acceptance",
+      "id": "VAN-PT-18",
+      "provenance": "OWNER_CONVERSATION_EXPANDED_CANONICAL_CANDIDATE",
+      "state": "PENDING_OWNER_FREEZE",
+      "text": "A deterministic engineering programme: requirements \u2192 Product Truth \u2192 DUs \u2192 dependency DAG \u2192 source/authority \u2192 tests/receipts \u2192 Zuul independent qualification \u2192 owner approval, without accidental thinning or premature merge."
+    },
+    {
+      "acceptance": "Full source/requirement/lifecycle evidence and independent qualification; no profit guarantee or financial authority from document.",
+      "id": "VAN-PT-SO-01",
+      "provenance": "LATEST_OWNER_INSTRUCTION_20261018",
+      "state": "RECORDED_INTENT_PENDING_FORMAL_SCOPE_SIGNATURE",
+      "text": "VATI self-optimization is a core engineering outcome with automatic choices among qualified methods and separately governed policy evolution."
+    },
+    {
+      "acceptance": "Full source/requirement/lifecycle evidence and independent qualification; no profit guarantee or financial authority from document.",
+      "id": "VAN-PT-SO-02",
+      "provenance": "LATEST_OWNER_INSTRUCTION_20261018",
+      "state": "RECORDED_INTENT_PENDING_FORMAL_SCOPE_SIGNATURE",
+      "text": "Execution learning must demonstrably join genuine outcomes to durable state and later eligible decisions with faithful replay, without expanding financial authority."
+    },
+    {
+      "acceptance": "Full source/requirement/lifecycle evidence and independent qualification; no profit guarantee or financial authority from document.",
+      "id": "VAN-PT-CRYPTO-01",
+      "provenance": "LATEST_OWNER_INSTRUCTION_20261018",
+      "state": "RECORDED_INTENT_PENDING_FORMAL_SCOPE_SIGNATURE",
+      "text": "VAN supports admitted centralized-exchange spot crypto trading alongside current markets through its existing account/risk/router lifecycle; crypto research remains separately read-only."
+    },
+    {
+      "acceptance": "Full source/requirement/lifecycle evidence and independent qualification; no profit guarantee or financial authority from document.",
+      "id": "VAN-PT-LEAN-01",
+      "provenance": "LATEST_OWNER_INSTRUCTION_20261018",
+      "state": "RECORDED_INTENT_PENDING_FORMAL_SCOPE_SIGNATURE",
+      "text": "All required capabilities are built, but the active runtime remains the simplest qualified coherent stack; complexity earns operational or economic value and never duplicates financial truth."
+    }
+  ]
+}

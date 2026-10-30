@@ -1,0 +1,837 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="10" skipped="0" tests="10" time="24.965" timestamp="2026-10-25T19:53:45.386003+00:00" hostname="2c5a245e39f1"><testcase classname="trading.tests.test_ctrader_spot_contract" name="test_foreign_native_account_cannot_replace_the_original_product_quote" time="3.021"><failure message="vati.execution.ctrader.transport.CtraderError: cTrader timeout waiting for ProtoHeartbeatEvent response">self = &lt;vati.execution.ctrader.transport.CtraderTransport object at 0x7f1a22f4f2f0&gt;
+message = 'ProtoHeartbeatEvent', values = {}, timeout_s = None
+expires_at_ms = None, clock = None
+
+    def _request(self, message, values, *, timeout_s=None, expires_at_ms=None, clock=None):
+        self.connect()
+        cid = uuid.uuid4().hex[:16]
+        q: queue.Queue = queue.Queue()
+        with self._state_lock:
+            sock = self._sock
+            if sock is None or not self._alive:
+                raise CtraderError("cTrader disconnected before request registration")
+            self._pending[cid] = q
+            self._pending_sockets[cid] = sock
+        try:
+            payload=SCHEMA.wrap(message, values, cid)
+            if expires_at_ms is None:
+                self._send_frame(payload, expected_socket=sock)
+            else:
+                self._send_frame(payload,expires_at_ms=expires_at_ms,clock=clock,expected_socket=sock)
+            try:
+&gt;               name, body = q.get(timeout=self._response_timeout(timeout_s))
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+trading/vati/execution/ctrader/transport.py:250: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;queue.Queue object at 0x7f1a22f27d40&gt;, block = True, timeout = 3
+
+    def get(self, block=True, timeout=None):
+        '''Remove and return an item from the queue.
+    
+        If optional args 'block' is true and 'timeout' is None (the default),
+        block if necessary until an item is available. If 'timeout' is
+        a non-negative number, it blocks at most 'timeout' seconds and raises
+        the Empty exception if no item was available within that time.
+        Otherwise ('block' is false), return an item if one is immediately
+        available, else raise the Empty exception ('timeout' is ignored
+        in that case).
+        '''
+        with self.not_empty:
+            if not block:
+                if not self._qsize():
+                    raise Empty
+            elif timeout is None:
+                while not self._qsize():
+                    self.not_empty.wait()
+            elif timeout &lt; 0:
+                raise ValueError("'timeout' must be a non-negative number")
+            else:
+                endtime = time() + timeout
+                while not self._qsize():
+                    remaining = endtime - time()
+                    if remaining &lt;= 0.0:
+&gt;                       raise Empty
+E                       _queue.Empty
+
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/queue.py:179: Empty
+
+During handling of the above exception, another exception occurred:
+
+    def test_foreign_native_account_cannot_replace_the_original_product_quote():
+&gt;       adapter,native=ready();publish(adapter,native,ctidTraderAccountId=999,bid=99000,ask=99008)
+                       ^^^^^^^
+
+trading/tests/test_ctrader_spot_contract.py:26: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+trading/tests/test_ctrader_spot_contract.py:13: in ready
+    adapter.transport.call('ProtoHeartbeatEvent',{})  # Barrier after queued initial snapshot.
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/execution/ctrader/transport.py:224: in call
+    return self._request(message,values,timeout_s=timeout_s)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;vati.execution.ctrader.transport.CtraderTransport object at 0x7f1a22f4f2f0&gt;
+message = 'ProtoHeartbeatEvent', values = {}, timeout_s = None
+expires_at_ms = None, clock = None
+
+    def _request(self, message, values, *, timeout_s=None, expires_at_ms=None, clock=None):
+        self.connect()
+        cid = uuid.uuid4().hex[:16]
+        q: queue.Queue = queue.Queue()
+        with self._state_lock:
+            sock = self._sock
+            if sock is None or not self._alive:
+                raise CtraderError("cTrader disconnected before request registration")
+            self._pending[cid] = q
+            self._pending_sockets[cid] = sock
+        try:
+            payload=SCHEMA.wrap(message, values, cid)
+            if expires_at_ms is None:
+                self._send_frame(payload, expected_socket=sock)
+            else:
+                self._send_frame(payload,expires_at_ms=expires_at_ms,clock=clock,expected_socket=sock)
+            try:
+                name, body = q.get(timeout=self._response_timeout(timeout_s))
+            except queue.Empty:
+&gt;               raise CtraderError(f"cTrader timeout waiting for {message} response")
+E               vati.execution.ctrader.transport.CtraderError: cTrader timeout waiting for ProtoHeartbeatEvent response
+
+trading/vati/execution/ctrader/transport.py:252: CtraderError</failure></testcase><testcase classname="trading.tests.test_ctrader_spot_contract" name="test_native_one_sided_update_preserves_the_other_side_without_ignoring_the_update" time="3.008"><failure message="vati.execution.ctrader.transport.CtraderError: cTrader timeout waiting for ProtoHeartbeatEvent response">self = &lt;vati.execution.ctrader.transport.CtraderTransport object at 0x7f1a22f4fe00&gt;
+message = 'ProtoHeartbeatEvent', values = {}, timeout_s = None
+expires_at_ms = None, clock = None
+
+    def _request(self, message, values, *, timeout_s=None, expires_at_ms=None, clock=None):
+        self.connect()
+        cid = uuid.uuid4().hex[:16]
+        q: queue.Queue = queue.Queue()
+        with self._state_lock:
+            sock = self._sock
+            if sock is None or not self._alive:
+                raise CtraderError("cTrader disconnected before request registration")
+            self._pending[cid] = q
+            self._pending_sockets[cid] = sock
+        try:
+            payload=SCHEMA.wrap(message, values, cid)
+            if expires_at_ms is None:
+                self._send_frame(payload, expected_socket=sock)
+            else:
+                self._send_frame(payload,expires_at_ms=expires_at_ms,clock=clock,expected_socket=sock)
+            try:
+&gt;               name, body = q.get(timeout=self._response_timeout(timeout_s))
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+trading/vati/execution/ctrader/transport.py:250: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;queue.Queue object at 0x7f1a21dfc3b0&gt;, block = True, timeout = 3
+
+    def get(self, block=True, timeout=None):
+        '''Remove and return an item from the queue.
+    
+        If optional args 'block' is true and 'timeout' is None (the default),
+        block if necessary until an item is available. If 'timeout' is
+        a non-negative number, it blocks at most 'timeout' seconds and raises
+        the Empty exception if no item was available within that time.
+        Otherwise ('block' is false), return an item if one is immediately
+        available, else raise the Empty exception ('timeout' is ignored
+        in that case).
+        '''
+        with self.not_empty:
+            if not block:
+                if not self._qsize():
+                    raise Empty
+            elif timeout is None:
+                while not self._qsize():
+                    self.not_empty.wait()
+            elif timeout &lt; 0:
+                raise ValueError("'timeout' must be a non-negative number")
+            else:
+                endtime = time() + timeout
+                while not self._qsize():
+                    remaining = endtime - time()
+                    if remaining &lt;= 0.0:
+&gt;                       raise Empty
+E                       _queue.Empty
+
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/queue.py:179: Empty
+
+During handling of the above exception, another exception occurred:
+
+    def test_native_one_sided_update_preserves_the_other_side_without_ignoring_the_update():
+&gt;       adapter,native=ready();now=adapter.clock()+1;adapter.clock=lambda:now
+                       ^^^^^^^
+
+trading/tests/test_ctrader_spot_contract.py:31: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+trading/tests/test_ctrader_spot_contract.py:13: in ready
+    adapter.transport.call('ProtoHeartbeatEvent',{})  # Barrier after queued initial snapshot.
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/execution/ctrader/transport.py:224: in call
+    return self._request(message,values,timeout_s=timeout_s)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;vati.execution.ctrader.transport.CtraderTransport object at 0x7f1a22f4fe00&gt;
+message = 'ProtoHeartbeatEvent', values = {}, timeout_s = None
+expires_at_ms = None, clock = None
+
+    def _request(self, message, values, *, timeout_s=None, expires_at_ms=None, clock=None):
+        self.connect()
+        cid = uuid.uuid4().hex[:16]
+        q: queue.Queue = queue.Queue()
+        with self._state_lock:
+            sock = self._sock
+            if sock is None or not self._alive:
+                raise CtraderError("cTrader disconnected before request registration")
+            self._pending[cid] = q
+            self._pending_sockets[cid] = sock
+        try:
+            payload=SCHEMA.wrap(message, values, cid)
+            if expires_at_ms is None:
+                self._send_frame(payload, expected_socket=sock)
+            else:
+                self._send_frame(payload,expires_at_ms=expires_at_ms,clock=clock,expected_socket=sock)
+            try:
+                name, body = q.get(timeout=self._response_timeout(timeout_s))
+            except queue.Empty:
+&gt;               raise CtraderError(f"cTrader timeout waiting for {message} response")
+E               vati.execution.ctrader.transport.CtraderError: cTrader timeout waiting for ProtoHeartbeatEvent response
+
+trading/vati/execution/ctrader/transport.py:252: CtraderError</failure></testcase><testcase classname="trading.tests.test_ctrader_spot_contract" name="test_spot_read_does_not_consume_an_original_financial_execution_event" time="3.007"><failure message="vati.execution.ctrader.transport.CtraderError: cTrader timeout waiting for ProtoHeartbeatEvent response">self = &lt;vati.execution.ctrader.transport.CtraderTransport object at 0x7f1a22f4c680&gt;
+message = 'ProtoHeartbeatEvent', values = {}, timeout_s = None
+expires_at_ms = None, clock = None
+
+    def _request(self, message, values, *, timeout_s=None, expires_at_ms=None, clock=None):
+        self.connect()
+        cid = uuid.uuid4().hex[:16]
+        q: queue.Queue = queue.Queue()
+        with self._state_lock:
+            sock = self._sock
+            if sock is None or not self._alive:
+                raise CtraderError("cTrader disconnected before request registration")
+            self._pending[cid] = q
+            self._pending_sockets[cid] = sock
+        try:
+            payload=SCHEMA.wrap(message, values, cid)
+            if expires_at_ms is None:
+                self._send_frame(payload, expected_socket=sock)
+            else:
+                self._send_frame(payload,expires_at_ms=expires_at_ms,clock=clock,expected_socket=sock)
+            try:
+&gt;               name, body = q.get(timeout=self._response_timeout(timeout_s))
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+trading/vati/execution/ctrader/transport.py:250: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;queue.Queue object at 0x7f1a22ff0d10&gt;, block = True, timeout = 3
+
+    def get(self, block=True, timeout=None):
+        '''Remove and return an item from the queue.
+    
+        If optional args 'block' is true and 'timeout' is None (the default),
+        block if necessary until an item is available. If 'timeout' is
+        a non-negative number, it blocks at most 'timeout' seconds and raises
+        the Empty exception if no item was available within that time.
+        Otherwise ('block' is false), return an item if one is immediately
+        available, else raise the Empty exception ('timeout' is ignored
+        in that case).
+        '''
+        with self.not_empty:
+            if not block:
+                if not self._qsize():
+                    raise Empty
+            elif timeout is None:
+                while not self._qsize():
+                    self.not_empty.wait()
+            elif timeout &lt; 0:
+                raise ValueError("'timeout' must be a non-negative number")
+            else:
+                endtime = time() + timeout
+                while not self._qsize():
+                    remaining = endtime - time()
+                    if remaining &lt;= 0.0:
+&gt;                       raise Empty
+E                       _queue.Empty
+
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/queue.py:179: Empty
+
+During handling of the above exception, another exception occurred:
+
+    def test_spot_read_does_not_consume_an_original_financial_execution_event():
+&gt;       adapter,native=ready()
+                       ^^^^^^^
+
+trading/tests/test_ctrader_spot_contract.py:38: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+trading/tests/test_ctrader_spot_contract.py:13: in ready
+    adapter.transport.call('ProtoHeartbeatEvent',{})  # Barrier after queued initial snapshot.
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/execution/ctrader/transport.py:224: in call
+    return self._request(message,values,timeout_s=timeout_s)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;vati.execution.ctrader.transport.CtraderTransport object at 0x7f1a22f4c680&gt;
+message = 'ProtoHeartbeatEvent', values = {}, timeout_s = None
+expires_at_ms = None, clock = None
+
+    def _request(self, message, values, *, timeout_s=None, expires_at_ms=None, clock=None):
+        self.connect()
+        cid = uuid.uuid4().hex[:16]
+        q: queue.Queue = queue.Queue()
+        with self._state_lock:
+            sock = self._sock
+            if sock is None or not self._alive:
+                raise CtraderError("cTrader disconnected before request registration")
+            self._pending[cid] = q
+            self._pending_sockets[cid] = sock
+        try:
+            payload=SCHEMA.wrap(message, values, cid)
+            if expires_at_ms is None:
+                self._send_frame(payload, expected_socket=sock)
+            else:
+                self._send_frame(payload,expires_at_ms=expires_at_ms,clock=clock,expected_socket=sock)
+            try:
+                name, body = q.get(timeout=self._response_timeout(timeout_s))
+            except queue.Empty:
+&gt;               raise CtraderError(f"cTrader timeout waiting for {message} response")
+E               vati.execution.ctrader.transport.CtraderError: cTrader timeout waiting for ProtoHeartbeatEvent response
+
+trading/vati/execution/ctrader/transport.py:252: CtraderError</failure></testcase><testcase classname="trading.tests.test_ctrader_spot_contract" name="test_crossed_native_snapshot_is_unavailable_instead_of_a_negative_spread" time="3.012"><failure message="vati.execution.ctrader.transport.CtraderError: cTrader timeout waiting for ProtoHeartbeatEvent response">self = &lt;vati.execution.ctrader.transport.CtraderTransport object at 0x7f1a21dfd340&gt;
+message = 'ProtoHeartbeatEvent', values = {}, timeout_s = None
+expires_at_ms = None, clock = None
+
+    def _request(self, message, values, *, timeout_s=None, expires_at_ms=None, clock=None):
+        self.connect()
+        cid = uuid.uuid4().hex[:16]
+        q: queue.Queue = queue.Queue()
+        with self._state_lock:
+            sock = self._sock
+            if sock is None or not self._alive:
+                raise CtraderError("cTrader disconnected before request registration")
+            self._pending[cid] = q
+            self._pending_sockets[cid] = sock
+        try:
+            payload=SCHEMA.wrap(message, values, cid)
+            if expires_at_ms is None:
+                self._send_frame(payload, expected_socket=sock)
+            else:
+                self._send_frame(payload,expires_at_ms=expires_at_ms,clock=clock,expected_socket=sock)
+            try:
+&gt;               name, body = q.get(timeout=self._response_timeout(timeout_s))
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+trading/vati/execution/ctrader/transport.py:250: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;queue.Queue object at 0x7f1a21dfdbe0&gt;, block = True, timeout = 3
+
+    def get(self, block=True, timeout=None):
+        '''Remove and return an item from the queue.
+    
+        If optional args 'block' is true and 'timeout' is None (the default),
+        block if necessary until an item is available. If 'timeout' is
+        a non-negative number, it blocks at most 'timeout' seconds and raises
+        the Empty exception if no item was available within that time.
+        Otherwise ('block' is false), return an item if one is immediately
+        available, else raise the Empty exception ('timeout' is ignored
+        in that case).
+        '''
+        with self.not_empty:
+            if not block:
+                if not self._qsize():
+                    raise Empty
+            elif timeout is None:
+                while not self._qsize():
+                    self.not_empty.wait()
+            elif timeout &lt; 0:
+                raise ValueError("'timeout' must be a non-negative number")
+            else:
+                endtime = time() + timeout
+                while not self._qsize():
+                    remaining = endtime - time()
+                    if remaining &lt;= 0.0:
+&gt;                       raise Empty
+E                       _queue.Empty
+
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/queue.py:179: Empty
+
+During handling of the above exception, another exception occurred:
+
+    def test_crossed_native_snapshot_is_unavailable_instead_of_a_negative_spread():
+&gt;       adapter,native=ready();publish(adapter,native,bid=110110,ask=110108)
+                       ^^^^^^^
+
+trading/tests/test_ctrader_spot_contract.py:47: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+trading/tests/test_ctrader_spot_contract.py:13: in ready
+    adapter.transport.call('ProtoHeartbeatEvent',{})  # Barrier after queued initial snapshot.
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/execution/ctrader/transport.py:224: in call
+    return self._request(message,values,timeout_s=timeout_s)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;vati.execution.ctrader.transport.CtraderTransport object at 0x7f1a21dfd340&gt;
+message = 'ProtoHeartbeatEvent', values = {}, timeout_s = None
+expires_at_ms = None, clock = None
+
+    def _request(self, message, values, *, timeout_s=None, expires_at_ms=None, clock=None):
+        self.connect()
+        cid = uuid.uuid4().hex[:16]
+        q: queue.Queue = queue.Queue()
+        with self._state_lock:
+            sock = self._sock
+            if sock is None or not self._alive:
+                raise CtraderError("cTrader disconnected before request registration")
+            self._pending[cid] = q
+            self._pending_sockets[cid] = sock
+        try:
+            payload=SCHEMA.wrap(message, values, cid)
+            if expires_at_ms is None:
+                self._send_frame(payload, expected_socket=sock)
+            else:
+                self._send_frame(payload,expires_at_ms=expires_at_ms,clock=clock,expected_socket=sock)
+            try:
+                name, body = q.get(timeout=self._response_timeout(timeout_s))
+            except queue.Empty:
+&gt;               raise CtraderError(f"cTrader timeout waiting for {message} response")
+E               vati.execution.ctrader.transport.CtraderError: cTrader timeout waiting for ProtoHeartbeatEvent response
+
+trading/vati/execution/ctrader/transport.py:252: CtraderError</failure></testcase><testcase classname="trading.tests.test_ctrader_spot_contract" name="test_native_price_conversion_is_exact_under_low_ambient_decimal_precision" time="3.009"><failure message="vati.execution.ctrader.transport.CtraderError: cTrader timeout waiting for ProtoHeartbeatEvent response">self = &lt;vati.execution.ctrader.transport.CtraderTransport object at 0x7f1a21dfed80&gt;
+message = 'ProtoHeartbeatEvent', values = {}, timeout_s = None
+expires_at_ms = None, clock = None
+
+    def _request(self, message, values, *, timeout_s=None, expires_at_ms=None, clock=None):
+        self.connect()
+        cid = uuid.uuid4().hex[:16]
+        q: queue.Queue = queue.Queue()
+        with self._state_lock:
+            sock = self._sock
+            if sock is None or not self._alive:
+                raise CtraderError("cTrader disconnected before request registration")
+            self._pending[cid] = q
+            self._pending_sockets[cid] = sock
+        try:
+            payload=SCHEMA.wrap(message, values, cid)
+            if expires_at_ms is None:
+                self._send_frame(payload, expected_socket=sock)
+            else:
+                self._send_frame(payload,expires_at_ms=expires_at_ms,clock=clock,expected_socket=sock)
+            try:
+&gt;               name, body = q.get(timeout=self._response_timeout(timeout_s))
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+trading/vati/execution/ctrader/transport.py:250: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;queue.Queue object at 0x7f1a21dff770&gt;, block = True, timeout = 3
+
+    def get(self, block=True, timeout=None):
+        '''Remove and return an item from the queue.
+    
+        If optional args 'block' is true and 'timeout' is None (the default),
+        block if necessary until an item is available. If 'timeout' is
+        a non-negative number, it blocks at most 'timeout' seconds and raises
+        the Empty exception if no item was available within that time.
+        Otherwise ('block' is false), return an item if one is immediately
+        available, else raise the Empty exception ('timeout' is ignored
+        in that case).
+        '''
+        with self.not_empty:
+            if not block:
+                if not self._qsize():
+                    raise Empty
+            elif timeout is None:
+                while not self._qsize():
+                    self.not_empty.wait()
+            elif timeout &lt; 0:
+                raise ValueError("'timeout' must be a non-negative number")
+            else:
+                endtime = time() + timeout
+                while not self._qsize():
+                    remaining = endtime - time()
+                    if remaining &lt;= 0.0:
+&gt;                       raise Empty
+E                       _queue.Empty
+
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/queue.py:179: Empty
+
+During handling of the above exception, another exception occurred:
+
+    def test_native_price_conversion_is_exact_under_low_ambient_decimal_precision():
+&gt;       adapter,native=ready();publish(adapter,native,bid=123456789012345,ask=123456789012353)
+                       ^^^^^^^
+
+trading/tests/test_ctrader_spot_contract.py:52: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+trading/tests/test_ctrader_spot_contract.py:13: in ready
+    adapter.transport.call('ProtoHeartbeatEvent',{})  # Barrier after queued initial snapshot.
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/execution/ctrader/transport.py:224: in call
+    return self._request(message,values,timeout_s=timeout_s)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;vati.execution.ctrader.transport.CtraderTransport object at 0x7f1a21dfed80&gt;
+message = 'ProtoHeartbeatEvent', values = {}, timeout_s = None
+expires_at_ms = None, clock = None
+
+    def _request(self, message, values, *, timeout_s=None, expires_at_ms=None, clock=None):
+        self.connect()
+        cid = uuid.uuid4().hex[:16]
+        q: queue.Queue = queue.Queue()
+        with self._state_lock:
+            sock = self._sock
+            if sock is None or not self._alive:
+                raise CtraderError("cTrader disconnected before request registration")
+            self._pending[cid] = q
+            self._pending_sockets[cid] = sock
+        try:
+            payload=SCHEMA.wrap(message, values, cid)
+            if expires_at_ms is None:
+                self._send_frame(payload, expected_socket=sock)
+            else:
+                self._send_frame(payload,expires_at_ms=expires_at_ms,clock=clock,expected_socket=sock)
+            try:
+                name, body = q.get(timeout=self._response_timeout(timeout_s))
+            except queue.Empty:
+&gt;               raise CtraderError(f"cTrader timeout waiting for {message} response")
+E               vati.execution.ctrader.transport.CtraderError: cTrader timeout waiting for ProtoHeartbeatEvent response
+
+trading/vati/execution/ctrader/transport.py:252: CtraderError</failure></testcase><testcase classname="trading.tests.test_ctrader_spot_contract" name="test_native_quote_age_does_not_refresh_when_the_cached_quote_is_read_again" time="3.010"><failure message="vati.execution.ctrader.transport.CtraderError: cTrader timeout waiting for ProtoHeartbeatEvent response">self = &lt;vati.execution.ctrader.transport.CtraderTransport object at 0x7f1a21dcb7d0&gt;
+message = 'ProtoHeartbeatEvent', values = {}, timeout_s = None
+expires_at_ms = None, clock = None
+
+    def _request(self, message, values, *, timeout_s=None, expires_at_ms=None, clock=None):
+        self.connect()
+        cid = uuid.uuid4().hex[:16]
+        q: queue.Queue = queue.Queue()
+        with self._state_lock:
+            sock = self._sock
+            if sock is None or not self._alive:
+                raise CtraderError("cTrader disconnected before request registration")
+            self._pending[cid] = q
+            self._pending_sockets[cid] = sock
+        try:
+            payload=SCHEMA.wrap(message, values, cid)
+            if expires_at_ms is None:
+                self._send_frame(payload, expected_socket=sock)
+            else:
+                self._send_frame(payload,expires_at_ms=expires_at_ms,clock=clock,expected_socket=sock)
+            try:
+&gt;               name, body = q.get(timeout=self._response_timeout(timeout_s))
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+trading/vati/execution/ctrader/transport.py:250: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;queue.Queue object at 0x7f1a21dc8e90&gt;, block = True, timeout = 3
+
+    def get(self, block=True, timeout=None):
+        '''Remove and return an item from the queue.
+    
+        If optional args 'block' is true and 'timeout' is None (the default),
+        block if necessary until an item is available. If 'timeout' is
+        a non-negative number, it blocks at most 'timeout' seconds and raises
+        the Empty exception if no item was available within that time.
+        Otherwise ('block' is false), return an item if one is immediately
+        available, else raise the Empty exception ('timeout' is ignored
+        in that case).
+        '''
+        with self.not_empty:
+            if not block:
+                if not self._qsize():
+                    raise Empty
+            elif timeout is None:
+                while not self._qsize():
+                    self.not_empty.wait()
+            elif timeout &lt; 0:
+                raise ValueError("'timeout' must be a non-negative number")
+            else:
+                endtime = time() + timeout
+                while not self._qsize():
+                    remaining = endtime - time()
+                    if remaining &lt;= 0.0:
+&gt;                       raise Empty
+E                       _queue.Empty
+
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/queue.py:179: Empty
+
+During handling of the above exception, another exception occurred:
+
+    def test_native_quote_age_does_not_refresh_when_the_cached_quote_is_read_again():
+&gt;       adapter,native=ready();now=adapter.clock()+5001;adapter.clock=lambda:now
+                       ^^^^^^^
+
+trading/tests/test_ctrader_spot_contract.py:59: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+trading/tests/test_ctrader_spot_contract.py:13: in ready
+    adapter.transport.call('ProtoHeartbeatEvent',{})  # Barrier after queued initial snapshot.
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/execution/ctrader/transport.py:224: in call
+    return self._request(message,values,timeout_s=timeout_s)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;vati.execution.ctrader.transport.CtraderTransport object at 0x7f1a21dcb7d0&gt;
+message = 'ProtoHeartbeatEvent', values = {}, timeout_s = None
+expires_at_ms = None, clock = None
+
+    def _request(self, message, values, *, timeout_s=None, expires_at_ms=None, clock=None):
+        self.connect()
+        cid = uuid.uuid4().hex[:16]
+        q: queue.Queue = queue.Queue()
+        with self._state_lock:
+            sock = self._sock
+            if sock is None or not self._alive:
+                raise CtraderError("cTrader disconnected before request registration")
+            self._pending[cid] = q
+            self._pending_sockets[cid] = sock
+        try:
+            payload=SCHEMA.wrap(message, values, cid)
+            if expires_at_ms is None:
+                self._send_frame(payload, expected_socket=sock)
+            else:
+                self._send_frame(payload,expires_at_ms=expires_at_ms,clock=clock,expected_socket=sock)
+            try:
+                name, body = q.get(timeout=self._response_timeout(timeout_s))
+            except queue.Empty:
+&gt;               raise CtraderError(f"cTrader timeout waiting for {message} response")
+E               vati.execution.ctrader.transport.CtraderError: cTrader timeout waiting for ProtoHeartbeatEvent response
+
+trading/vati/execution/ctrader/transport.py:252: CtraderError</failure></testcase><testcase classname="trading.tests.test_ctrader_spot_contract" name="test_native_update_without_requested_time_does_not_become_a_fresh_quote" time="3.008"><failure message="vati.execution.ctrader.transport.CtraderError: cTrader timeout waiting for ProtoHeartbeatEvent response">self = &lt;vati.execution.ctrader.transport.CtraderTransport object at 0x7f1a22f64860&gt;
+message = 'ProtoHeartbeatEvent', values = {}, timeout_s = None
+expires_at_ms = None, clock = None
+
+    def _request(self, message, values, *, timeout_s=None, expires_at_ms=None, clock=None):
+        self.connect()
+        cid = uuid.uuid4().hex[:16]
+        q: queue.Queue = queue.Queue()
+        with self._state_lock:
+            sock = self._sock
+            if sock is None or not self._alive:
+                raise CtraderError("cTrader disconnected before request registration")
+            self._pending[cid] = q
+            self._pending_sockets[cid] = sock
+        try:
+            payload=SCHEMA.wrap(message, values, cid)
+            if expires_at_ms is None:
+                self._send_frame(payload, expected_socket=sock)
+            else:
+                self._send_frame(payload,expires_at_ms=expires_at_ms,clock=clock,expected_socket=sock)
+            try:
+&gt;               name, body = q.get(timeout=self._response_timeout(timeout_s))
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+trading/vati/execution/ctrader/transport.py:250: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;queue.Queue object at 0x7f1a230dfe60&gt;, block = True, timeout = 3
+
+    def get(self, block=True, timeout=None):
+        '''Remove and return an item from the queue.
+    
+        If optional args 'block' is true and 'timeout' is None (the default),
+        block if necessary until an item is available. If 'timeout' is
+        a non-negative number, it blocks at most 'timeout' seconds and raises
+        the Empty exception if no item was available within that time.
+        Otherwise ('block' is false), return an item if one is immediately
+        available, else raise the Empty exception ('timeout' is ignored
+        in that case).
+        '''
+        with self.not_empty:
+            if not block:
+                if not self._qsize():
+                    raise Empty
+            elif timeout is None:
+                while not self._qsize():
+                    self.not_empty.wait()
+            elif timeout &lt; 0:
+                raise ValueError("'timeout' must be a non-negative number")
+            else:
+                endtime = time() + timeout
+                while not self._qsize():
+                    remaining = endtime - time()
+                    if remaining &lt;= 0.0:
+&gt;                       raise Empty
+E                       _queue.Empty
+
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/queue.py:179: Empty
+
+During handling of the above exception, another exception occurred:
+
+    def test_native_update_without_requested_time_does_not_become_a_fresh_quote():
+&gt;       adapter,native=ready()
+                       ^^^^^^^
+
+trading/tests/test_ctrader_spot_contract.py:64: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+trading/tests/test_ctrader_spot_contract.py:13: in ready
+    adapter.transport.call('ProtoHeartbeatEvent',{})  # Barrier after queued initial snapshot.
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/execution/ctrader/transport.py:224: in call
+    return self._request(message,values,timeout_s=timeout_s)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;vati.execution.ctrader.transport.CtraderTransport object at 0x7f1a22f64860&gt;
+message = 'ProtoHeartbeatEvent', values = {}, timeout_s = None
+expires_at_ms = None, clock = None
+
+    def _request(self, message, values, *, timeout_s=None, expires_at_ms=None, clock=None):
+        self.connect()
+        cid = uuid.uuid4().hex[:16]
+        q: queue.Queue = queue.Queue()
+        with self._state_lock:
+            sock = self._sock
+            if sock is None or not self._alive:
+                raise CtraderError("cTrader disconnected before request registration")
+            self._pending[cid] = q
+            self._pending_sockets[cid] = sock
+        try:
+            payload=SCHEMA.wrap(message, values, cid)
+            if expires_at_ms is None:
+                self._send_frame(payload, expected_socket=sock)
+            else:
+                self._send_frame(payload,expires_at_ms=expires_at_ms,clock=clock,expected_socket=sock)
+            try:
+                name, body = q.get(timeout=self._response_timeout(timeout_s))
+            except queue.Empty:
+&gt;               raise CtraderError(f"cTrader timeout waiting for {message} response")
+E               vati.execution.ctrader.transport.CtraderError: cTrader timeout waiting for ProtoHeartbeatEvent response
+
+trading/vati/execution/ctrader/transport.py:252: CtraderError</failure></testcase><testcase classname="trading.tests.test_ctrader_spot_contract" name="test_subscription_ack_must_match_the_native_account_and_response_type[account]" time="0.008"><failure message="Failed: DID NOT RAISE VenueUnavailable">wrong = 'account'
+
+    @pytest.mark.parametrize('wrong',['account','type'])
+    def test_subscription_ack_must_match_the_native_account_and_response_type(wrong):
+        class WrongAck(FakeCtrader):
+            def handle(self,name,body,cid):
+                if name=='ProtoOASubscribeSpotsReq':
+                    return self.send('ProtoOASubscribeSpotsRes',{'ctidTraderAccountId':999},cid) if wrong=='account' else self.send('ProtoHeartbeatEvent',{},cid)
+                return super().handle(name,body,cid)
+        native=WrongAck();adapter=make_adapter(native)
+&gt;       with pytest.raises(VenueUnavailable):adapter.subscribe_spots('EURUSD')
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE VenueUnavailable
+
+trading/tests/test_ctrader_spot_contract.py:78: Failed</failure></testcase><testcase classname="trading.tests.test_ctrader_spot_contract" name="test_subscription_ack_must_match_the_native_account_and_response_type[type]" time="0.011"><failure message="Failed: DID NOT RAISE VenueUnavailable">wrong = 'type'
+
+    @pytest.mark.parametrize('wrong',['account','type'])
+    def test_subscription_ack_must_match_the_native_account_and_response_type(wrong):
+        class WrongAck(FakeCtrader):
+            def handle(self,name,body,cid):
+                if name=='ProtoOASubscribeSpotsReq':
+                    return self.send('ProtoOASubscribeSpotsRes',{'ctidTraderAccountId':999},cid) if wrong=='account' else self.send('ProtoHeartbeatEvent',{},cid)
+                return super().handle(name,body,cid)
+        native=WrongAck();adapter=make_adapter(native)
+&gt;       with pytest.raises(VenueUnavailable):adapter.subscribe_spots('EURUSD')
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE VenueUnavailable
+
+trading/tests/test_ctrader_spot_contract.py:78: Failed</failure></testcase><testcase classname="trading.tests.test_ctrader_spot_contract" name="test_native_subscription_is_requested_once_with_timestamp_delivery" time="3.009"><failure message="vati.execution.ctrader.transport.CtraderError: cTrader timeout waiting for ProtoHeartbeatEvent response">self = &lt;vati.execution.ctrader.transport.CtraderTransport object at 0x7f1a22ee35f0&gt;
+message = 'ProtoHeartbeatEvent', values = {}, timeout_s = None
+expires_at_ms = None, clock = None
+
+    def _request(self, message, values, *, timeout_s=None, expires_at_ms=None, clock=None):
+        self.connect()
+        cid = uuid.uuid4().hex[:16]
+        q: queue.Queue = queue.Queue()
+        with self._state_lock:
+            sock = self._sock
+            if sock is None or not self._alive:
+                raise CtraderError("cTrader disconnected before request registration")
+            self._pending[cid] = q
+            self._pending_sockets[cid] = sock
+        try:
+            payload=SCHEMA.wrap(message, values, cid)
+            if expires_at_ms is None:
+                self._send_frame(payload, expected_socket=sock)
+            else:
+                self._send_frame(payload,expires_at_ms=expires_at_ms,clock=clock,expected_socket=sock)
+            try:
+&gt;               name, body = q.get(timeout=self._response_timeout(timeout_s))
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+trading/vati/execution/ctrader/transport.py:250: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;queue.Queue object at 0x7f1a21dfd0d0&gt;, block = True, timeout = 3
+
+    def get(self, block=True, timeout=None):
+        '''Remove and return an item from the queue.
+    
+        If optional args 'block' is true and 'timeout' is None (the default),
+        block if necessary until an item is available. If 'timeout' is
+        a non-negative number, it blocks at most 'timeout' seconds and raises
+        the Empty exception if no item was available within that time.
+        Otherwise ('block' is false), return an item if one is immediately
+        available, else raise the Empty exception ('timeout' is ignored
+        in that case).
+        '''
+        with self.not_empty:
+            if not block:
+                if not self._qsize():
+                    raise Empty
+            elif timeout is None:
+                while not self._qsize():
+                    self.not_empty.wait()
+            elif timeout &lt; 0:
+                raise ValueError("'timeout' must be a non-negative number")
+            else:
+                endtime = time() + timeout
+                while not self._qsize():
+                    remaining = endtime - time()
+                    if remaining &lt;= 0.0:
+&gt;                       raise Empty
+E                       _queue.Empty
+
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/queue.py:179: Empty
+
+During handling of the above exception, another exception occurred:
+
+    def test_native_subscription_is_requested_once_with_timestamp_delivery():
+&gt;       adapter,native=ready();adapter.subscribe_spots('EURUSD')
+                       ^^^^^^^
+
+trading/tests/test_ctrader_spot_contract.py:82: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+trading/tests/test_ctrader_spot_contract.py:13: in ready
+    adapter.transport.call('ProtoHeartbeatEvent',{})  # Barrier after queued initial snapshot.
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/execution/ctrader/transport.py:224: in call
+    return self._request(message,values,timeout_s=timeout_s)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;vati.execution.ctrader.transport.CtraderTransport object at 0x7f1a22ee35f0&gt;
+message = 'ProtoHeartbeatEvent', values = {}, timeout_s = None
+expires_at_ms = None, clock = None
+
+    def _request(self, message, values, *, timeout_s=None, expires_at_ms=None, clock=None):
+        self.connect()
+        cid = uuid.uuid4().hex[:16]
+        q: queue.Queue = queue.Queue()
+        with self._state_lock:
+            sock = self._sock
+            if sock is None or not self._alive:
+                raise CtraderError("cTrader disconnected before request registration")
+            self._pending[cid] = q
+            self._pending_sockets[cid] = sock
+        try:
+            payload=SCHEMA.wrap(message, values, cid)
+            if expires_at_ms is None:
+                self._send_frame(payload, expected_socket=sock)
+            else:
+                self._send_frame(payload,expires_at_ms=expires_at_ms,clock=clock,expected_socket=sock)
+            try:
+                name, body = q.get(timeout=self._response_timeout(timeout_s))
+            except queue.Empty:
+&gt;               raise CtraderError(f"cTrader timeout waiting for {message} response")
+E               vati.execution.ctrader.transport.CtraderError: cTrader timeout waiting for ProtoHeartbeatEvent response
+
+trading/vati/execution/ctrader/transport.py:252: CtraderError</failure></testcase></testsuite></testsuites>

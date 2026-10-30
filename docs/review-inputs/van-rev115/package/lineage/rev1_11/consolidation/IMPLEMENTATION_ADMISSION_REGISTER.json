@@ -1,0 +1,395 @@
+{
+  "items": [
+    {
+      "canonical_units": [
+        "PRE-001",
+        "PRE-002"
+      ],
+      "capability": "Opus product/authority decisions, visual design and original feature set",
+      "correction_ids": [
+        "VAN-CX-001",
+        "VAN-CX-002"
+      ],
+      "disposition": "ADOPT_REQUIREMENTS",
+      "evidence_grade": "SOURCE_REVIEW_AND_BOUNDED_TESTS_WHERE_RECORDED",
+      "id": "ADP-01",
+      "implementation_acceptance": "NOT_GRANTED_BY_DOCUMENT",
+      "source_paths_or_refs": [
+        "VAN_NEXT_OWNER_DECISIONS_REV1.md",
+        "VAN_TACTILE_SPATIAL_REDESIGN_BLUEPRINT_REV1_9B_20261016.md"
+      ]
+    },
+    {
+      "canonical_units": [
+        "PRE-002"
+      ],
+      "capability": "Deterministic generation, duplicate and missing-producer checks",
+      "correction_ids": [
+        "VAN-CX-001",
+        "VAN-CX-019"
+      ],
+      "disposition": "ADAPT_GENERATOR_KEEP_VALIDATION_PATTERNS",
+      "evidence_grade": "SOURCE_REVIEW_AND_BOUNDED_TESTS_WHERE_RECORDED",
+      "id": "ADP-02",
+      "implementation_acceptance": "NOT_GRANTED_BY_DOCUMENT",
+      "source_paths_or_refs": [
+        "plan/generate_plan.py",
+        "plan/REQUIREMENT_LOCK_REV1_9B.json"
+      ]
+    },
+    {
+      "canonical_units": [
+        "PRE-002",
+        "BE-002",
+        "BE-017"
+      ],
+      "capability": "Typed transition allowlist, 159 approved edges and 35 proof types",
+      "correction_ids": [
+        "VAN-CX-015"
+      ],
+      "disposition": "ADAPT_READINESS_KEEP_EXACT_GUARDS",
+      "evidence_grade": "SOURCE_REVIEW_AND_BOUNDED_TESTS_WHERE_RECORDED",
+      "id": "ADP-03",
+      "implementation_acceptance": "NOT_GRANTED_BY_DOCUMENT",
+      "source_paths_or_refs": [
+        "contracts/check_state_machines.py",
+        "contracts/VAN_TRANSITION_GUARDS_REV1_9B.json",
+        "contracts/VAN_STATE_MACHINES_REV1_9.json"
+      ]
+    },
+    {
+      "canonical_units": [
+        "PRE-002",
+        "PRE-003"
+      ],
+      "capability": "Immutable evidence builder and clean-input refusal",
+      "correction_ids": [
+        "VAN-CX-019"
+      ],
+      "disposition": "ADOPT_AFTER_EXACT_SOURCE_REVIEW",
+      "evidence_grade": "SOURCE_REVIEW_AND_BOUNDED_TESTS_WHERE_RECORDED",
+      "id": "ADP-04",
+      "implementation_acceptance": "NOT_GRANTED_BY_DOCUMENT",
+      "source_paths_or_refs": [
+        "evidence/build_evidence_pack.py",
+        "evidence/EVIDENCE_MANIFEST.json"
+      ]
+    },
+    {
+      "canonical_units": [
+        "BE-003"
+      ],
+      "capability": "Incremental ledger verification",
+      "correction_ids": [
+        "VAN-CX-008"
+      ],
+      "disposition": "ADAPT_WITH_INTEGRITY_QUALIFICATION",
+      "evidence_grade": "SOURCE_REVIEW_AND_BOUNDED_TESTS_WHERE_RECORDED",
+      "id": "ADP-05",
+      "implementation_acceptance": "NOT_GRANTED_BY_DOCUMENT",
+      "source_paths_or_refs": [
+        "trading/vati/core/ledger.py",
+        "trading/tests/test_ledger_incremental_verify.py"
+      ]
+    },
+    {
+      "canonical_units": [
+        "BE-008",
+        "BE-009",
+        "BE-010"
+      ],
+      "capability": "Relative slippage and instrument-aware bounds",
+      "correction_ids": [
+        "VAN-CX-007"
+      ],
+      "disposition": "ADAPT_METADATA_AND_POLICY_BINDING",
+      "evidence_grade": "SOURCE_REVIEW_AND_BOUNDED_TESTS_WHERE_RECORDED",
+      "id": "ADP-06",
+      "implementation_acceptance": "NOT_GRANTED_BY_DOCUMENT",
+      "source_paths_or_refs": [
+        "trading/vati/execution/policy_templates.py",
+        "trading/vati/execution/mt5_pull.py",
+        "trading/vati/execution/router.py"
+      ]
+    },
+    {
+      "canonical_units": [
+        "BE-008",
+        "BE-009",
+        "BE-010"
+      ],
+      "capability": "No-widening tick quantisation",
+      "correction_ids": [
+        "VAN-CX-007"
+      ],
+      "disposition": "ADAPT_PRE_APPROVAL_NUMERIC_CONTRACT",
+      "evidence_grade": "SOURCE_REVIEW_AND_BOUNDED_TESTS_WHERE_RECORDED",
+      "id": "ADP-07",
+      "implementation_acceptance": "NOT_GRANTED_BY_DOCUMENT",
+      "source_paths_or_refs": [
+        "trading/vati/execution/route_registry.py",
+        "trading/tests/test_execution_scale_and_rounding.py"
+      ]
+    },
+    {
+      "canonical_units": [
+        "BE-010"
+      ],
+      "capability": "Strategy entry type through allocator/policy/router and venue refusal",
+      "correction_ids": [
+        "VAN-CX-004",
+        "VAN-CX-005"
+      ],
+      "disposition": "ADAPT_REMOVE_UNAUTHORIZED_COERCION",
+      "evidence_grade": "SOURCE_REVIEW_AND_BOUNDED_TESTS_WHERE_RECORDED",
+      "id": "ADP-08",
+      "implementation_acceptance": "NOT_GRANTED_BY_DOCUMENT",
+      "source_paths_or_refs": [
+        "trading/vati/app/account_coordinator.py",
+        "trading/vati/app/account_service.py",
+        "trading/vati/execution/router.py"
+      ]
+    },
+    {
+      "canonical_units": [
+        "BE-010",
+        "BE-012",
+        "BE-019"
+      ],
+      "capability": "Pending order model, reservation, thesis and TCA integration",
+      "correction_ids": [
+        "VAN-CX-003",
+        "VAN-CX-004",
+        "VAN-CX-005",
+        "VAN-CX-006"
+      ],
+      "disposition": "KEEP_MODEL_CORRECT_CRITICAL_RESIDUALS",
+      "evidence_grade": "SOURCE_REVIEW_AND_BOUNDED_TESTS_WHERE_RECORDED",
+      "id": "ADP-09",
+      "implementation_acceptance": "NOT_GRANTED_BY_DOCUMENT",
+      "source_paths_or_refs": [
+        "trading/vati/execution/paper.py",
+        "trading/vati/app/cycle.py",
+        "trading/vati/app/tradebook.py"
+      ]
+    },
+    {
+      "canonical_units": [
+        "BE-002",
+        "BE-009",
+        "BE-013"
+      ],
+      "capability": "Persistent cooldown, probation and signed reset infrastructure",
+      "correction_ids": [
+        "VAN-CX-009"
+      ],
+      "disposition": "KEEP_ACCEPTED_VALUES_ADAPT_RUNTIME_BINDING",
+      "evidence_grade": "SOURCE_REVIEW_AND_BOUNDED_TESTS_WHERE_RECORDED",
+      "id": "ADP-10",
+      "implementation_acceptance": "NOT_GRANTED_BY_DOCUMENT",
+      "source_paths_or_refs": [
+        "trading/vati/risk/lockouts.py",
+        "trading/vati/risk/authority.py",
+        "trading/vati/app/account_service.py",
+        "trading/tests/test_recoverable_lockouts.py"
+      ]
+    },
+    {
+      "canonical_units": [
+        "BE-009",
+        "BQ-007"
+      ],
+      "capability": "Test-time clock fix",
+      "correction_ids": [
+        "VAN-CX-019"
+      ],
+      "disposition": "ADOPT_TEST_RELIABILITY_FIX",
+      "evidence_grade": "SOURCE_REVIEW_AND_BOUNDED_TESTS_WHERE_RECORDED",
+      "id": "ADP-11",
+      "implementation_acceptance": "NOT_GRANTED_BY_DOCUMENT",
+      "source_paths_or_refs": [
+        "trading/tests/test_recoverable_lockouts.py"
+      ]
+    },
+    {
+      "canonical_units": [
+        "BE-035",
+        "BE-036"
+      ],
+      "capability": "Historical strategy experiment harness and per-trade data",
+      "correction_ids": [
+        "VAN-CX-010",
+        "VAN-CX-011",
+        "VAN-CX-012",
+        "VAN-CX-013"
+      ],
+      "disposition": "PRESERVE_RESEARCH_NOT_PROMOTION_PROOF",
+      "evidence_grade": "SOURCE_REVIEW_AND_BOUNDED_TESTS_WHERE_RECORDED",
+      "id": "ADP-12",
+      "implementation_acceptance": "NOT_GRANTED_BY_DOCUMENT",
+      "source_paths_or_refs": [
+        "research/strategy_backtest_20261017/harness.py",
+        "research/strategy_backtest_20261017/analyze.py",
+        "research/strategy_backtest_20261017/VAN_STRATEGY_BACKTEST_RESEARCH_20261017.md"
+      ]
+    },
+    {
+      "canonical_units": [
+        "BE-036"
+      ],
+      "capability": "Continuous strategy development OD37",
+      "correction_ids": [
+        "VAN-CX-014"
+      ],
+      "disposition": "ADOPT_AND_COMPLETE_ON_EXISTING_VATI",
+      "evidence_grade": "SOURCE_REVIEW_AND_BOUNDED_TESTS_WHERE_RECORDED",
+      "id": "ADP-13",
+      "implementation_acceptance": "NOT_GRANTED_BY_DOCUMENT",
+      "source_paths_or_refs": [
+        "VAN_TACTILE_SPATIAL_REDESIGN_BLUEPRINT_REV1_9B_20261016.md#7.4.14"
+      ]
+    },
+    {
+      "canonical_units": [
+        "FE-007",
+        "FE-008"
+      ],
+      "capability": "Native chart spike",
+      "correction_ids": [
+        "VAN-CX-020"
+      ],
+      "disposition": "QUARANTINE_UNTIL_POST_BG_FRONTEND_CONTRACT",
+      "evidence_grade": "SOURCE_REVIEW_AND_BOUNDED_TESTS_WHERE_RECORDED",
+      "id": "ADP-14",
+      "implementation_acceptance": "NOT_GRANTED_BY_DOCUMENT",
+      "source_paths_or_refs": [
+        "spike/van-next-chart-engine-20261015@30bc2d0"
+      ]
+    },
+    {
+      "canonical_units": [
+        "BE-004",
+        "BE-005"
+      ],
+      "capability": "Earlier atomic account registry fix",
+      "correction_ids": [
+        "VAN-CX-016"
+      ],
+      "disposition": "REFERENCE_CANDIDATE_NOT_PROVIDER_ACCOUNT_SERVICE",
+      "evidence_grade": "SOURCE_REVIEW_AND_BOUNDED_TESTS_WHERE_RECORDED",
+      "id": "ADP-15",
+      "implementation_acceptance": "NOT_GRANTED_BY_DOCUMENT",
+      "source_paths_or_refs": [
+        "feature/rea-trading-accounts-tactile-20261015@3b2c9e04"
+      ]
+    },
+    {
+      "canonical_units": [
+        "PRE-001",
+        "BE-001"
+      ],
+      "capability": "PR93 owner-core, legacy behaviour and complete source atlas",
+      "correction_ids": [
+        "VAN-CX-002"
+      ],
+      "disposition": "PRESERVE_BY_FUNCTION_NOT_BLANKET_MERGE",
+      "evidence_grade": "SOURCE_REVIEW_AND_BOUNDED_TESTS_WHERE_RECORDED",
+      "id": "ADP-16",
+      "implementation_acceptance": "NOT_GRANTED_BY_DOCUMENT",
+      "source_paths_or_refs": [
+        "PR93@dfc1557ab99ad8d41cf84714e1bb671e89b045e6"
+      ]
+    },
+    {
+      "canonical_units": [
+        "PRE-001",
+        "BE-024",
+        "BE-025",
+        "BE-026",
+        "BE-034"
+      ],
+      "capability": "Muse/receipts/JEV/cognitive/Android/site/studio branch candidates",
+      "correction_ids": [
+        "VAN-CX-002",
+        "VAN-CX-017"
+      ],
+      "disposition": "PRESERVE_CANDIDATES_REQUIRE_LIVE_REVALIDATION",
+      "evidence_grade": "SOURCE_REVIEW_AND_BOUNDED_TESTS_WHERE_RECORDED",
+      "id": "ADP-17",
+      "implementation_acceptance": "NOT_GRANTED_BY_DOCUMENT",
+      "source_paths_or_refs": [
+        "PR70",
+        "PR72",
+        "PR77",
+        "PR92",
+        "PR95",
+        "PR97",
+        "PR98",
+        "PR99"
+      ]
+    },
+    {
+      "canonical_units": [
+        "BE-035",
+        "BE-036",
+        "BE-032",
+        "BG-001"
+      ],
+      "capability": "Forecast, research lifecycle and prediction-market addendum",
+      "correction_ids": [
+        "VAN-CX-018"
+      ],
+      "disposition": "INTEGRATE_INTO_SINGLE_CANONICAL_GRAPH",
+      "evidence_grade": "SOURCE_REVIEW_AND_BOUNDED_TESTS_WHERE_RECORDED",
+      "id": "ADP-18",
+      "implementation_acceptance": "NOT_GRANTED_BY_DOCUMENT",
+      "source_paths_or_refs": [
+        "VAN_FORECAST_ADOPTION_BLUEPRINT_REV1_1_20261017.md"
+      ]
+    },
+    {
+      "canonical_units": [
+        "PRE-002",
+        "BG-001",
+        "UX-003"
+      ],
+      "capability": "Whole-product backend-first parent and per-screen design",
+      "correction_ids": [
+        "VAN-CX-001",
+        "VAN-CX-017",
+        "VAN-CX-020"
+      ],
+      "disposition": "ADOPT_WITH_NEW_SOURCE_AND_REQUIREMENT_RECONCILIATION",
+      "evidence_grade": "SOURCE_REVIEW_AND_BOUNDED_TESTS_WHERE_RECORDED",
+      "id": "ADP-19",
+      "implementation_acceptance": "NOT_GRANTED_BY_DOCUMENT",
+      "source_paths_or_refs": [
+        "VAN_NEXT_MASTER_BLUEPRINT_REV1_10_20261017.md"
+      ]
+    },
+    {
+      "canonical_units": [
+        "PRE-002",
+        "PRE-003",
+        "BG-001"
+      ],
+      "capability": "B1 total scope and B4 evidence closure rather than waiver",
+      "correction_ids": [
+        "VAN-CX-001",
+        "VAN-CX-019"
+      ],
+      "disposition": "ADOPT_GATED_CLOSURE_POLICY",
+      "evidence_grade": "SOURCE_REVIEW_AND_BOUNDED_TESTS_WHERE_RECORDED",
+      "id": "ADP-20",
+      "implementation_acceptance": "NOT_GRANTED_BY_DOCUMENT",
+      "source_paths_or_refs": [
+        "PR100@0a694a998cfed119e116c68d3248de1cb84f120f"
+      ]
+    }
+  ],
+  "main_head": "8eb1889822fc8a83f219977c15340172e16acd91",
+  "merge_policy": "No blanket merge; retain source and tests, repair then admit through PRE/F15/BE-001 contracts",
+  "schema": "van.source.admission/1.0",
+  "source_head": "a39f241b0135cf92cc5a6b9a28af226aa294603d",
+  "source_status": "43 focused tests plus Opus plan/state checks reproduced; no application repair performed in this consolidation"
+}

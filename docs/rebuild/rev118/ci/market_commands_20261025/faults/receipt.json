@@ -1,0 +1,125 @@
+{
+  "cases": [
+    {
+      "case": "owner-source",
+      "file": "backend/van_gateway/trading/monitor_commands.py",
+      "target": "backend/tests/test_market_monitor_commands.py::test_non_owner_or_different_sealed_authority_cannot_write",
+      "control": {
+        "exit": 0,
+        "tests": 7,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "mutant": {
+        "exit": 1,
+        "tests": 7,
+        "failures": 1,
+        "errors": 0,
+        "skipped": 0
+      },
+      "caught": true
+    },
+    {
+      "case": "original-authority-key",
+      "file": "backend/van_gateway/trading/monitor_commands.py",
+      "target": "backend/tests/test_market_monitor_commands.py::test_corrupt_authority_key_or_changed_submitted_parameters_cannot_write",
+      "control": {
+        "exit": 0,
+        "tests": 1,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "mutant": {
+        "exit": 1,
+        "tests": 1,
+        "failures": 1,
+        "errors": 0,
+        "skipped": 0
+      },
+      "caught": true
+    },
+    {
+      "case": "writer-expiry",
+      "file": "backend/van_gateway/trading/monitor_service.py",
+      "target": "backend/tests/test_market_monitor_commands.py::test_queue_wait_rechecks_expiry_under_actual_sql_writer_lock",
+      "control": {
+        "exit": 0,
+        "tests": 1,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "mutant": {
+        "exit": 1,
+        "tests": 1,
+        "failures": 1,
+        "errors": 0,
+        "skipped": 0
+      },
+      "caught": true
+    },
+    {
+      "case": "receipt-scope",
+      "file": "backend/van_gateway/trading/monitor_commands.py",
+      "target": "backend/tests/test_market_monitor_commands.py::test_corrupt_receipt_never_verifies",
+      "control": {
+        "exit": 0,
+        "tests": 3,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "mutant": {
+        "exit": 1,
+        "tests": 3,
+        "failures": 1,
+        "errors": 0,
+        "skipped": 0
+      },
+      "caught": true
+    },
+    {
+      "case": "exact-control-revision",
+      "file": "backend/van_gateway/trading/monitor_commands.py",
+      "target": "backend/tests/test_market_monitor_commands.py::test_original_receipt_fields_are_exact_not_a_related_success",
+      "control": {
+        "exit": 0,
+        "tests": 8,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "mutant": {
+        "exit": 1,
+        "tests": 8,
+        "failures": 1,
+        "errors": 0,
+        "skipped": 0
+      },
+      "caught": true
+    },
+    {
+      "case": "historical-completion",
+      "file": "backend/van_gateway/trading/monitor_commands.py",
+      "target": "backend/tests/test_market_monitor_commands.py::test_old_pause_verifies_its_receipt_after_later_restart_and_delete",
+      "control": {
+        "exit": 0,
+        "tests": 1,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "mutant": {
+        "exit": 1,
+        "tests": 1,
+        "failures": 1,
+        "errors": 0,
+        "skipped": 0
+      },
+      "caught": true
+    }
+  ],
+  "restored": true
+}

@@ -1,0 +1,94 @@
+{
+  "source_head": "4637de1bb67e311a4ba2cf75600d50dd77c62955",
+  "tested_merge": "db63554b2294038e8f72ce4109411383eee722c3",
+  "run_id": 40296406059,
+  "status": "TERMINAL_FAILURE",
+  "public_jobs_success": 17,
+  "mandatory_unwaived_failures": [
+    "missing private DDS deploy key",
+    "absent trusted-main checker"
+  ],
+  "junit": {
+    "van-market-monitor-source/report.xml": {
+      "passed": 258,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "van-browser-guard-source/uid-report.xml": {
+      "passed": 1,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "van-browser-guard-source/full-report.xml": {
+      "passed": 1547,
+      "skips": 1,
+      "failures": 0,
+      "errors": 0
+    },
+    "van-browser-guard-source/report.xml": {
+      "passed": 11,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "van-browser-guard-source/firewall-report.xml": {
+      "passed": 10,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "van-postgres-ledger-report/trading-source-report.xml": {
+      "passed": 3744,
+      "skips": 1,
+      "failures": 0,
+      "errors": 0
+    },
+    "van-postgres-ledger-report/voice-source-report.xml": {
+      "passed": 117,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "van-postgres-ledger-report/postgres-ledger-report.xml": {
+      "passed": 26,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "van-actual-release-guards/report.xml": {
+      "passed": 2,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "van-backend-public-source/media-report.xml": {
+      "passed": 198,
+      "skips": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "van-backend-public-source/gateway-report.xml": {
+      "passed": 5775,
+      "skips": 7,
+      "failures": 0,
+      "errors": 0
+    }
+  },
+  "android_emulator": {
+    "tests": 22,
+    "failures": 0,
+    "skipped": 4,
+    "passed": 18
+  },
+  "canonical_mutations": {
+    "unique_caught_once": 374,
+    "edits": 383,
+    "survivors": 0,
+    "unexecuted": 0,
+    "counter_matches_actual_registry": true
+  },
+  "actual_verified_archives": 15,
+  "native_or_unit_acceptance": false
+}

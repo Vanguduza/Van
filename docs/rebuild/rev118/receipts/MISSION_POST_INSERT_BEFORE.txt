@@ -1,0 +1,26 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+_ test_a_post_insert_integrity_failure_is_not_reported_as_successful_duplicate_recovery _
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-70/test_a_post_insert_integrity_f0')
+
+    @pytest.mark.asyncio
+    async def test_a_post_insert_integrity_failure_is_not_reported_as_successful_duplicate_recovery(tmp_path):
+        store = Store(str(tmp_path / "post-insert.sqlite3"))
+        await store.migrate()
+    
+        class BrokenLearning:
+            async def record_mission_opened(self, mission, *, now_ms):
+                # A real, unrelated database constraint after the mission insert. The
+                # presence of that mission must not turn this failed creation into success.
+                await store.execute("INSERT INTO missions(mission_id) VALUES (?)", ("incomplete-row",))
+    
+        link = CommandMissionLink(MissionService(store, learning=BrokenLearning()))
+>       with pytest.raises(sqlite3.IntegrityError, match="NOT NULL constraint failed"):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE IntegrityError
+
+backend/tests/test_command_mission_creation_race.py:90: Failed
+=========================== short test summary info ============================
+FAILED backend/tests/test_command_mission_creation_race.py::test_a_post_insert_integrity_failure_is_not_reported_as_successful_duplicate_recovery
+1 failed in 0.38s

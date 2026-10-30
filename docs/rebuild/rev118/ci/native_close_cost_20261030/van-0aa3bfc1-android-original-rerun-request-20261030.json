@@ -1,0 +1,19 @@
+{
+  "source_head": "0aa3bfc19cd7d0aa285d8b897ec1aa61ef157fd7",
+  "run_id": 41048787494,
+  "original_job_id": 124039398463,
+  "original_failed_unchanged": true,
+  "reason": "Original report shows Compose test-clock recomposition from a coroutine worker without Android looper; activity delivery is on main. Replay unchanged original job once before choosing source repair. All assertions retained.",
+  "response": {
+    "content": [
+      {
+        "type": "text",
+        "text": "Action completed."
+      }
+    ],
+    "structuredContent": {
+      "success": true
+    },
+    "isError": false
+  }
+}

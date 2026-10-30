@@ -1,0 +1,126 @@
+{
+  "schema": "van.supplemental-source-faults/1",
+  "not_canonical_374": true,
+  "positive_control": {
+    "exit": 0,
+    "cases": 37,
+    "failures": 0,
+    "assertions": 0,
+    "errors": 0,
+    "skips": 0,
+    "storage_audit_violations": 0
+  },
+  "restored_control": {
+    "exit": 0,
+    "cases": 37,
+    "failures": 0,
+    "assertions": 0,
+    "errors": 0,
+    "skips": 0,
+    "storage_audit_violations": 0
+  },
+  "cases": [
+    {
+      "case": "self-grant-read-execution",
+      "path": "trading/vati/execution/ctrader/read_identity.py",
+      "mutant_sha256": "d46ac29d91b80c1c4d530ca7fa8d94140e23e9b041523d6102943ffed7f964e8",
+      "exit": 1,
+      "cases": 4,
+      "failures": 4,
+      "assertions": 4,
+      "errors": 0,
+      "skips": 0,
+      "storage_audit_violations": 0
+    },
+    {
+      "case": "renew-identity-on-capture-clock",
+      "path": "trading/vati/execution/ctrader/read_identity.py",
+      "mutant_sha256": "c0bba93930cfb233fa915a3ee96361bfb64b8a053f7aaeb09d6dd6bfdcb94972",
+      "exit": 1,
+      "cases": 1,
+      "failures": 1,
+      "assertions": 1,
+      "errors": 0,
+      "skips": 0,
+      "storage_audit_violations": 0
+    },
+    {
+      "case": "accept-corrupt-qualification-zero",
+      "path": "trading/vati/execution/ctrader/read_identity.py",
+      "mutant_sha256": "79a22bf1cb079393378d0a00e6c3fa972bfd0958afe7970426535200b1d3d902",
+      "exit": 1,
+      "cases": 12,
+      "failures": 3,
+      "assertions": 3,
+      "errors": 0,
+      "skips": 0,
+      "storage_audit_violations": 0
+    },
+    {
+      "case": "truncate-native-name-as-identity",
+      "path": "trading/vati/execution/ctrader/read_identity.py",
+      "mutant_sha256": "41199f2de60162d85ce1ddc72109ec9f931aa8ada4efc41c472fdfcc33cee809",
+      "exit": 1,
+      "cases": 3,
+      "failures": 3,
+      "assertions": 3,
+      "errors": 0,
+      "skips": 0,
+      "storage_audit_violations": 0
+    },
+    {
+      "case": "ignore-original-catalog-revision",
+      "path": "trading/vati/execution/ctrader/adapter.py",
+      "mutant_sha256": "4fb2e78da64e8d8b3669f84b885e1a2872fb8495395a1953d8bd6ff3f3df9b7c",
+      "exit": 1,
+      "cases": 1,
+      "failures": 1,
+      "assertions": 1,
+      "errors": 0,
+      "skips": 0,
+      "storage_audit_violations": 0
+    },
+    {
+      "case": "ignore-retired-read-session",
+      "path": "trading/vati/execution/ctrader/adapter.py",
+      "mutant_sha256": "f02b33b87a1f9ae051180a4cb3d7a80fe88cfbba3a6568f5fedc511818d280c7",
+      "exit": 1,
+      "cases": 1,
+      "failures": 1,
+      "assertions": 1,
+      "errors": 0,
+      "skips": 0,
+      "storage_audit_violations": 0
+    },
+    {
+      "case": "ignore-final-history-parse-budget",
+      "path": "trading/vati/execution/ctrader/adapter.py",
+      "mutant_sha256": "de41c989d0910c798350c75617b37a45927194ea9f0806197544a347d905cfbb",
+      "exit": 1,
+      "cases": 1,
+      "failures": 1,
+      "assertions": 1,
+      "errors": 0,
+      "skips": 0,
+      "storage_audit_violations": 0
+    },
+    {
+      "case": "allow-disabled-execution-contract",
+      "path": "trading/vati/execution/ctrader/contracts.py",
+      "mutant_sha256": "2a9e705a907a4d46cdb7b04f94ec1147ce74d8e5048e06384c3fbef8a284e1bd",
+      "exit": 1,
+      "cases": 1,
+      "failures": 1,
+      "assertions": 1,
+      "errors": 0,
+      "skips": 0,
+      "storage_audit_violations": 0
+    }
+  ],
+  "restored": true,
+  "source_sha256": {
+    "trading/vati/execution/ctrader/read_identity.py": "5d96b88c7c2cd5e1176ef3d6ba21a804a9a5b09dc972027fc30cd218d0cf0e11",
+    "trading/vati/execution/ctrader/adapter.py": "01e1a0f2d6c69dfb79b8cfbdeed3dd4e6547811ba55019a85ddf55960db2c815",
+    "trading/vati/execution/ctrader/contracts.py": "fc719fecbc9fc032836ffddbd9900421e720fd9277ba6cb229f572f5c8d445d5"
+  }
+}

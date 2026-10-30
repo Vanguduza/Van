@@ -1,0 +1,166 @@
+FFFFFFFFF                                                                [100%]
+=================================== FAILURES ===================================
+__ test_invalid_command_control_parameters_cannot_disable_a_budget[options0] ___
+
+options = {'max_orders_per_window': True}
+
+    @pytest.mark.parametrize('options', [
+        {'max_orders_per_window': True}, {'max_orders_per_window': 1.5},
+        {'max_orders_per_window': float('nan')},
+        {'order_window_ms': 0}, {'order_window_ms': -1}, {'order_window_ms': True},
+        {'order_window_ms': float('nan')}, {'max_notional': D('NaN')},
+        {'max_notional': float('inf')},
+    ])
+    def test_invalid_command_control_parameters_cannot_disable_a_budget(options):
+>       with pytest.raises(PreTradeConfigError):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE PreTradeConfigError
+
+trading/tests/test_pretrade_durable_command_budget.py:77: Failed
+__ test_invalid_command_control_parameters_cannot_disable_a_budget[options1] ___
+
+options = {'max_orders_per_window': 1.5}
+
+    @pytest.mark.parametrize('options', [
+        {'max_orders_per_window': True}, {'max_orders_per_window': 1.5},
+        {'max_orders_per_window': float('nan')},
+        {'order_window_ms': 0}, {'order_window_ms': -1}, {'order_window_ms': True},
+        {'order_window_ms': float('nan')}, {'max_notional': D('NaN')},
+        {'max_notional': float('inf')},
+    ])
+    def test_invalid_command_control_parameters_cannot_disable_a_budget(options):
+>       with pytest.raises(PreTradeConfigError):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE PreTradeConfigError
+
+trading/tests/test_pretrade_durable_command_budget.py:77: Failed
+__ test_invalid_command_control_parameters_cannot_disable_a_budget[options2] ___
+
+options = {'max_orders_per_window': nan}
+
+    @pytest.mark.parametrize('options', [
+        {'max_orders_per_window': True}, {'max_orders_per_window': 1.5},
+        {'max_orders_per_window': float('nan')},
+        {'order_window_ms': 0}, {'order_window_ms': -1}, {'order_window_ms': True},
+        {'order_window_ms': float('nan')}, {'max_notional': D('NaN')},
+        {'max_notional': float('inf')},
+    ])
+    def test_invalid_command_control_parameters_cannot_disable_a_budget(options):
+>       with pytest.raises(PreTradeConfigError):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE PreTradeConfigError
+
+trading/tests/test_pretrade_durable_command_budget.py:77: Failed
+__ test_invalid_command_control_parameters_cannot_disable_a_budget[options3] ___
+
+options = {'order_window_ms': 0}
+
+    @pytest.mark.parametrize('options', [
+        {'max_orders_per_window': True}, {'max_orders_per_window': 1.5},
+        {'max_orders_per_window': float('nan')},
+        {'order_window_ms': 0}, {'order_window_ms': -1}, {'order_window_ms': True},
+        {'order_window_ms': float('nan')}, {'max_notional': D('NaN')},
+        {'max_notional': float('inf')},
+    ])
+    def test_invalid_command_control_parameters_cannot_disable_a_budget(options):
+>       with pytest.raises(PreTradeConfigError):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE PreTradeConfigError
+
+trading/tests/test_pretrade_durable_command_budget.py:77: Failed
+__ test_invalid_command_control_parameters_cannot_disable_a_budget[options4] ___
+
+options = {'order_window_ms': -1}
+
+    @pytest.mark.parametrize('options', [
+        {'max_orders_per_window': True}, {'max_orders_per_window': 1.5},
+        {'max_orders_per_window': float('nan')},
+        {'order_window_ms': 0}, {'order_window_ms': -1}, {'order_window_ms': True},
+        {'order_window_ms': float('nan')}, {'max_notional': D('NaN')},
+        {'max_notional': float('inf')},
+    ])
+    def test_invalid_command_control_parameters_cannot_disable_a_budget(options):
+>       with pytest.raises(PreTradeConfigError):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE PreTradeConfigError
+
+trading/tests/test_pretrade_durable_command_budget.py:77: Failed
+__ test_invalid_command_control_parameters_cannot_disable_a_budget[options5] ___
+
+options = {'order_window_ms': True}
+
+    @pytest.mark.parametrize('options', [
+        {'max_orders_per_window': True}, {'max_orders_per_window': 1.5},
+        {'max_orders_per_window': float('nan')},
+        {'order_window_ms': 0}, {'order_window_ms': -1}, {'order_window_ms': True},
+        {'order_window_ms': float('nan')}, {'max_notional': D('NaN')},
+        {'max_notional': float('inf')},
+    ])
+    def test_invalid_command_control_parameters_cannot_disable_a_budget(options):
+>       with pytest.raises(PreTradeConfigError):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE PreTradeConfigError
+
+trading/tests/test_pretrade_durable_command_budget.py:77: Failed
+__ test_invalid_command_control_parameters_cannot_disable_a_budget[options6] ___
+
+options = {'order_window_ms': nan}
+
+    @pytest.mark.parametrize('options', [
+        {'max_orders_per_window': True}, {'max_orders_per_window': 1.5},
+        {'max_orders_per_window': float('nan')},
+        {'order_window_ms': 0}, {'order_window_ms': -1}, {'order_window_ms': True},
+        {'order_window_ms': float('nan')}, {'max_notional': D('NaN')},
+        {'max_notional': float('inf')},
+    ])
+    def test_invalid_command_control_parameters_cannot_disable_a_budget(options):
+>       with pytest.raises(PreTradeConfigError):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE PreTradeConfigError
+
+trading/tests/test_pretrade_durable_command_budget.py:77: Failed
+__ test_invalid_command_control_parameters_cannot_disable_a_budget[options7] ___
+
+options = {'max_notional': Decimal('NaN')}
+
+    @pytest.mark.parametrize('options', [
+        {'max_orders_per_window': True}, {'max_orders_per_window': 1.5},
+        {'max_orders_per_window': float('nan')},
+        {'order_window_ms': 0}, {'order_window_ms': -1}, {'order_window_ms': True},
+        {'order_window_ms': float('nan')}, {'max_notional': D('NaN')},
+        {'max_notional': float('inf')},
+    ])
+    def test_invalid_command_control_parameters_cannot_disable_a_budget(options):
+>       with pytest.raises(PreTradeConfigError):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE PreTradeConfigError
+
+trading/tests/test_pretrade_durable_command_budget.py:77: Failed
+__ test_invalid_command_control_parameters_cannot_disable_a_budget[options8] ___
+
+options = {'max_notional': inf}
+
+    @pytest.mark.parametrize('options', [
+        {'max_orders_per_window': True}, {'max_orders_per_window': 1.5},
+        {'max_orders_per_window': float('nan')},
+        {'order_window_ms': 0}, {'order_window_ms': -1}, {'order_window_ms': True},
+        {'order_window_ms': float('nan')}, {'max_notional': D('NaN')},
+        {'max_notional': float('inf')},
+    ])
+    def test_invalid_command_control_parameters_cannot_disable_a_budget(options):
+>       with pytest.raises(PreTradeConfigError):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE PreTradeConfigError
+
+trading/tests/test_pretrade_durable_command_budget.py:77: Failed
+=========================== short test summary info ============================
+FAILED trading/tests/test_pretrade_durable_command_budget.py::test_invalid_command_control_parameters_cannot_disable_a_budget[options0]
+FAILED trading/tests/test_pretrade_durable_command_budget.py::test_invalid_command_control_parameters_cannot_disable_a_budget[options1]
+FAILED trading/tests/test_pretrade_durable_command_budget.py::test_invalid_command_control_parameters_cannot_disable_a_budget[options2]
+FAILED trading/tests/test_pretrade_durable_command_budget.py::test_invalid_command_control_parameters_cannot_disable_a_budget[options3]
+FAILED trading/tests/test_pretrade_durable_command_budget.py::test_invalid_command_control_parameters_cannot_disable_a_budget[options4]
+FAILED trading/tests/test_pretrade_durable_command_budget.py::test_invalid_command_control_parameters_cannot_disable_a_budget[options5]
+FAILED trading/tests/test_pretrade_durable_command_budget.py::test_invalid_command_control_parameters_cannot_disable_a_budget[options6]
+FAILED trading/tests/test_pretrade_durable_command_budget.py::test_invalid_command_control_parameters_cannot_disable_a_budget[options7]
+FAILED trading/tests/test_pretrade_durable_command_budget.py::test_invalid_command_control_parameters_cannot_disable_a_budget[options8]
+9 failed in 0.45s

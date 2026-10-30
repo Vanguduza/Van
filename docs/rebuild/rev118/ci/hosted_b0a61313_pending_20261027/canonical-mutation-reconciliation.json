@@ -1,0 +1,10 @@
+{
+  "source_head": "b0a61313e5167bafca4dbeea96f2bfcc5c7c6b90",
+  "run_id": 40448997885,
+  "reports": 9,
+  "canonical_cases_caught_exactly_once": 374,
+  "edits": 383,
+  "survivors": 0,
+  "unexecuted": 0,
+  "qualification": "Published b0 only, not later uncommitted physical-scope/import-boundary repair."
+}

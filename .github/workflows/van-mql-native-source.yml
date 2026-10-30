@@ -1,0 +1,40 @@
+name: van-mql-native-source
+
+on:
+  pull_request:
+    paths:
+      - 'deploy/van-trading-core/mql5/**'
+      - 'tools/rebuild/native_mql_source.ps1'
+      - '.github/workflows/van-mql-native-source.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: van-mql-native-source-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  native-metaeditor:
+    runs-on: windows-2025
+    timeout-minutes: 20
+    steps:
+      - name: Preserve exact Git source bytes on Windows
+        shell: pwsh
+        run: |
+          git config --global core.autocrlf false
+          git config --global core.eol lf
+          git config --global core.longpaths true
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Compile VAN source with the official signed native SDK
+        shell: pwsh
+        run: ./tools/rebuild/native_mql_source.ps1
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: van-mql-native-source-report
+          path: mql-native-source-report/
+          if-no-files-found: error

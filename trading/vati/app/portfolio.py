@@ -19,7 +19,8 @@ ZERO = Decimal("0")
 
 def _d(v) -> Optional[Decimal]:
     try:
-        return None if v is None else Decimal(str(v))
+        value=None if v is None else Decimal(str(v))
+        return value if value is not None and value.is_finite() else None
     except Exception:
         return None
 
@@ -39,6 +40,9 @@ def _latest_by(ledger: Ledger, kind: EventKind, key) -> dict[str, Event]:
 
 # ------------------------------------------------------------------ accounts
 def account_states(ledger: Ledger, registry_public: list[dict]) -> list[dict[str, Any]]:
+    with ledger.read_snapshot():return _account_states(ledger,registry_public)
+
+def _account_states(ledger: Ledger, registry_public: list[dict]) -> list[dict[str, Any]]:
     snaps = _latest_by(ledger, EventKind.ACCOUNT_SNAPSHOT, lambda e: e.payload.get("account_alias"))
     sessions = _latest_by(ledger, EventKind.SESSION, lambda e: e.correlation_id.split(":")[0] if ":" in e.correlation_id else None)
     open_by_alias: dict[str, int] = defaultdict(int)
@@ -60,14 +64,60 @@ def account_states(ledger: Ledger, registry_public: list[dict]) -> list[dict[str
                "connected": p.get("connected"), "verified": p.get("verified"), "open_positions": open_by_alias.get(a["alias"], p.get("open_positions", 0)), "kill_switch": p.get("kill_switch", []),
                "last_sync_ms": s.event_time_ms if s else None, "connection_state": ("LIVE" if p.get("connected") else "OFFLINE") if s else "NEVER_SYNCED", "session_event": sessions.get(a["alias"]).payload.get("event") if sessions.get(a["alias"]) else None}
         out.append(row)
+        row["risk_history_issue"] = p.get("risk_history_issue") or None
+        row["learning_history_issue"] = p.get("learning_history_issue") or None
+        from vati.readmodels.learning import reported_restated_learning
+        row["restated_learning"] = reported_restated_learning(s, a["alias"])
+        from vati.funding.runtime import reported_funding
+        row['funding']=reported_funding(ledger,s,a)
+        from vati.execution.native_margin import reported_account_margin
+        row["margin"]=reported_account_margin(s,a["alias"])
+        from vati.execution.mt5_observation import reported_account_observation
+        row['native_account_observation']=reported_account_observation(s,a)
+        native_scope=(row['native_account_observation'].get('scope_hash')
+            if row['native_account_observation']['state']=='OBSERVED' else None)
+        native_unbound=a.get("broker") in {"MT5","CTRADER"} and not (row["funding"].get("scope_hash") or native_scope)
+        if native_unbound:
+            row["margin"]={"state":"UNAVAILABLE","reason":"NATIVE_SCOPE_UNBOUND","execution_authority":False}
+        if (a.get('broker')=='MT5' and row['funding']['state'] not in {'OBSERVED','CONFLICT'}
+            and not (native_scope and row['native_account_observation']['valuation_state']=='CREDIT_EXCLUDED')):
+            # Legacy MT5 equity can include broker credit. Without the bound
+            # credit-excluded account mark its difference is not floating PnL.
+            row['floating_pnl']=None
+        if (row['native_account_observation']['state']=='OBSERVED'
+            and row['native_account_observation']['valuation_state']!='CREDIT_EXCLUDED'):
+            row['equity']=None
+        row['raw_equity_change']={'day':row['day_pnl'],'week':row['week_pnl'],
+            'drawdown_from_raw_peak':row['drawdown_pct'],'basis':'UNADJUSTED_EQUITY_INCLUDES_CAPITAL_FLOWS'}
+        if row['equity'] is None:
+            row['raw_equity_change']={**row['raw_equity_change'],'day':None,'week':None,'drawdown_from_raw_peak':None}
+        if a.get('broker')!='PAPER':
+            # Native deposits, withdrawals and restricted credit can change all
+            # three old metrics without any trade. Never label those changes PnL.
+            row['day_pnl']=row['week_pnl']=row['drawdown_pct']=None
+        row['performance_state']='SIMULATED_PAPER_EQUITY' if a.get('broker')=='PAPER' else 'UNMEASURED'
+        if (row['funding']['reason']=='CURRENT_PROFILE_NATIVE_SCOPE_MISMATCH'
+            or row['native_account_observation']['state']=='UNAVAILABLE' or native_unbound):
+            unavailable_reason=(row['native_account_observation'].get('reason')
+                if row['native_account_observation']['state']=='UNAVAILABLE' else
+                'CURRENT_PROFILE_NATIVE_SCOPE_MISMATCH' if row['funding']['reason']=='CURRENT_PROFILE_NATIVE_SCOPE_MISMATCH' else 'NATIVE_SCOPE_UNBOUND')
+            row.update(equity=None,balance=None,floating_pnl=None,connected=False,verified=False,connection_state='STALE',currency=a.get('currency'))
+            row["margin"]={"state":"UNAVAILABLE","reason":unavailable_reason,"execution_authority":False}
+            row['raw_equity_change']={**row['raw_equity_change'],'day':None,'week':None,'drawdown_from_raw_peak':None}
     return out
 
 
 def portfolio(ledger: Ledger, registry_public: list[dict], *, reporting_currency: str = "USD") -> dict[str, Any]:
+    with ledger.read_snapshot():return _portfolio(ledger,registry_public,reporting_currency=reporting_currency)
+
+def _portfolio(ledger: Ledger, registry_public: list[dict], *, reporting_currency: str = "USD") -> dict[str, Any]:
     accounts = account_states(ledger, registry_public)
     same = [a for a in accounts if a["currency"] == reporting_currency and a["equity"] is not None]
     other = [a["alias"] for a in accounts if a["equity"] is not None and a["currency"] != reporting_currency]
-    tot = lambda k: str(sum((Decimal(a[k]) for a in same if a.get(k) is not None), ZERO))  # noqa: E731
+    def tot(key):
+        if any(a.get(key) is None for a in same):return None
+        if not same and key in {'day_pnl','week_pnl'}:return None
+        return str(sum((Decimal(a[key]) for a in same),ZERO))
     chains, assessments = _collect(ledger)
     cur, past = current_trades(chains.values()), past_trades(chains.values())
     latest_dec = None
@@ -157,7 +207,7 @@ def risk(ledger: Ledger, mandate: Optional[dict] = None) -> dict[str, Any]:
 
 
 # ------------------------------------------------------------------ trade detail
-TIMELINE = {EventKind.RISK_DECISION: "RISK_DECISION", EventKind.ORDER_COMMAND: "ORDER_SENT", EventKind.EXECUTION_RECEIPT: "EXECUTION", EventKind.TCA_RECORD: "TCA", EventKind.TRADE_REVIEW: "REVIEW",
+TIMELINE = {EventKind.RISK_REVALIDATION: "RISK_RECHECK", EventKind.RISK_DECISION: "RISK_DECISION", EventKind.ORDER_COMMAND: "ORDER_SENT", EventKind.EXECUTION_RECEIPT: "EXECUTION", EventKind.TCA_RECORD: "TCA", EventKind.TRADE_REVIEW: "REVIEW",
             EventKind.TRADE_EXPERIENCE_ARTIFACT: "EXPERIENCE_ARTIFACT", EventKind.OWNER_TICKET: "OWNER_TICKET", EventKind.CAPSULE_STATE: "CAPSULE_STATE", EventKind.KILL_SWITCH: "KILL_SWITCH", EventKind.SESSION: "SESSION"}
 
 
@@ -166,6 +216,8 @@ def _timeline_entry(ev: Event) -> dict:
     label = TIMELINE.get(ev.kind, ev.kind.value)
     if ev.kind is EventKind.RISK_DECISION:
         d = p.get("decision", {}); text = f"Risk Authority {d.get('decision')} · size {d.get('approved_size')} · risk {d.get('approved_risk_pct')} · heat {d.get('portfolio_heat_before')}→{d.get('portfolio_heat_after')}" + (f" · {d.get('reason_code')}" if d.get("reason_code") else "")
+    elif ev.kind is EventKind.RISK_REVALIDATION:
+        text = f"current risk {p.get('state')} · {p.get('reason_code')} · size limit {p.get('decision', {}).get('approved_size')} · observation only"
     elif ev.kind is EventKind.ORDER_COMMAND:
         text = f"{p.get('entry_type')} {p.get('direction')} {p.get('quantity')} @ {p.get('entry_price')} · stop {p.get('protective_stop')} ({p.get('stop_mode')})"
     elif ev.kind is EventKind.EXECUTION_RECEIPT:

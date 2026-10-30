@@ -1,0 +1,306 @@
+{
+  "schema": "van.rebuild.current-profile-authority-source/1",
+  "observed_at_utc": "2026-10-23T01:28:28.088273+00:00",
+  "source_parent": "90868b6f0f5dfb6052d645b62f89417990da6474",
+  "source_sha256": {
+    "trading/vati/accounts/access.py": "0f0de9b5112da1c24d214235dd5beef7fb597921ae328f9c545b34c31ba5393b",
+    "trading/vati/app/service.py": "b9e6af2325e2dd06428b755e6ff62fb7ff831273f7bfca7ee48d5eae55caa83d",
+    "trading/vati/app/cycle.py": "fd53f8c14b67d2e48aaf4ab55d38a56b4c62f9dec9594c559b5e6a6149d0980e",
+    "trading/tests/test_single_session_profile_authority.py": "c9487f0899b0760dc9c8e1bd75da47c2dec90d9f9019fbda145c4658089121d0",
+    "trading/tests/test_single_session_unknown_entry.py": "3f461df04a0d3dcb2334d4e53f802e907cbba30fe5f11575dddf42fee488f531"
+  },
+  "initial_partial_counterexamples": {
+    "tests": 5,
+    "failures": 5,
+    "errors": 0,
+    "skipped": 0,
+    "sha256": "eaa936ee16ddc7b3274cdd6e1a719a291e726b1c9465db6ba7726718c76eae9d"
+  },
+  "complete_counterexamples": {
+    "tests": 10,
+    "failures": 9,
+    "errors": 0,
+    "skipped": 0,
+    "sha256": "a57d22a1fd1610e2fd75056c87dd74fd0835785fdbf82cdee6c23f99f983164e"
+  },
+  "initial_focused_fixture_clock_error": {
+    "tests": 10,
+    "failures": 1,
+    "errors": 0,
+    "skipped": 0,
+    "sha256": "7742f6f58e4aad217be4c8d32691c91fef9e148912f52b5a0bb3115d3066a8d7"
+  },
+  "intermediate_full_before_sending_mode_error_fix": {
+    "tests": 2144,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "sha256": "bee7685e783374c4aac154bb72ab3223369b8c0387493a23643c252a14517a6c"
+  },
+  "sending_mode_counterexamples": {
+    "tests": 2,
+    "failures": 2,
+    "errors": 0,
+    "skipped": 0,
+    "sha256": "15f685040df7e2adb03ed3c5ad750141b2e3435b292182023f4b69cf883acf24"
+  },
+  "profile_controls_after_mode_fix": {
+    "tests": 9,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "sha256": "f1acf070cb308444ef1c2a542cf955b0cd83a6a4a02cd6ae571ee7c7c3a1a152"
+  },
+  "full_trading_real_private_postgresql": {
+    "tests": 2146,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "sha256": "ff86b3a9d67db30306baeb06d62fd23df21a2ba63aed5ee6277fb1f0c085aad7"
+  },
+  "rebuild": {
+    "tests": 78,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "sha256": "4a0cd21937e8f7e644ca2203be33ffad6f75747a2e710a34aeb7ecd463feeab2"
+  },
+  "source_faults": {
+    "definitions": [
+      [
+        [
+          "trading/vati/app/service.py",
+          "return bool(profile_permitted and self._lease_allows_entry",
+          "return bool(self._lease_allows_entry",
+          "ignore the current profile result in session permission"
+        ],
+        [
+          "trading/tests/test_single_session_profile_authority.py::test_current_native_profile_refuses_stale_session_permission_without_losing_protection[disabled]"
+        ]
+      ],
+      [
+        [
+          "trading/vati/accounts/access.py",
+          "if native_binding(current) != native_binding(bound):",
+          "if False:",
+          "admit the old runtime against a changed native account binding"
+        ],
+        [
+          "trading/tests/test_single_session_profile_authority.py::test_current_native_profile_refuses_stale_session_permission_without_losing_protection[binding]"
+        ]
+      ],
+      [
+        [
+          "trading/vati/accounts/access.py",
+          "if not current.enabled or current.mode not in SENDING_MODES or bound.mode not in SENDING_MODES:",
+          "if current.mode not in SENDING_MODES or bound.mode not in SENDING_MODES:",
+          "ignore a current disabled account"
+        ],
+        [
+          "trading/tests/test_single_session_profile_authority.py::test_current_native_profile_refuses_stale_session_permission_without_losing_protection[disabled]"
+        ]
+      ],
+      [
+        [
+          "trading/vati/accounts/access.py",
+          "except (AccountRegistryError, AccountModeAuthorityError, StateFileLockError, OSError):",
+          "except (AccountRegistryError, StateFileLockError, OSError):",
+          "turn a bound native mode refusal into a caller exception"
+        ],
+        [
+          "trading/tests/test_single_session_profile_authority.py::test_bound_sender_reports_mode_reduction_as_native_zero_effect"
+        ]
+      ],
+      [
+        [
+          "trading/vati/app/service.py",
+          "except (ValueError,AccountModeAuthorityError,OSError,StateFileLockError):",
+          "except (ValueError,OSError,StateFileLockError):",
+          "lose owner readback when a valid sending mode is reduced"
+        ],
+        [
+          "trading/tests/test_single_session_profile_authority.py::test_current_sending_mode_reduction_is_a_readable_refusal"
+        ]
+      ],
+      [
+        [
+          "trading/vati/app/cycle.py",
+          "state.state_hash,rec.status,rec.reject_reason",
+          "state.state_hash,decision.decision.value,rec.reject_reason",
+          "misreport confirmed native zero effect as prior risk approval"
+        ],
+        [
+          "trading/tests/test_single_session_unknown_entry.py::test_initial_confirmed_native_no_effect_is_not_reported_as_a_risk_approval"
+        ]
+      ],
+      [
+        [
+          "trading/vati/accounts/access.py",
+          "account.bridge_url, account.credential_ref, account.mandate_ref)",
+          "account.bridge_url, account.credential_ref, account.mandate_ref,account.label,account.notes)",
+          "disable a working connection for harmless owner display metadata"
+        ],
+        [
+          "trading/tests/test_single_session_profile_authority.py::test_non_authority_account_labels_do_not_disable_a_live_session"
+        ]
+      ],
+      [
+        [
+          [
+            [
+              "trading/vati/app/service.py",
+              " and self.runner.permit_new_orders\n",
+              "\n"
+            ],
+            [
+              "trading/vati/app/service.py",
+              " and not self.runner.cycle.kill.halted)",
+              " and True)"
+            ]
+          ],
+          "discard owner halt from the surfaced permission when the profile is reenabled"
+        ],
+        [
+          "trading/tests/test_single_session_profile_authority.py::test_profile_reenable_does_not_clear_an_actual_signed_owner_halt"
+        ]
+      ]
+    ],
+    "records": [
+      {
+        "phase": "baseline",
+        "why": null,
+        "returncode": 0,
+        "log_sha256": "212504876166ec78d6893ba7cb632e14878599d119e4df02390a6a5464c97ea0"
+      },
+      {
+        "phase": "mutation",
+        "why": "ignore the current profile result in session permission",
+        "returncode": 1,
+        "log_sha256": "0971bbfdfb0d9dd5d37497f3855cc7abaa379e145ed2e10e350c1170eeb4a2b3"
+      },
+      {
+        "phase": "baseline",
+        "why": null,
+        "returncode": 0,
+        "log_sha256": "01311baa852db076753814271165a33a7a35b7e0b63de979423ac3269388316e"
+      },
+      {
+        "phase": "mutation",
+        "why": "admit the old runtime against a changed native account binding",
+        "returncode": 1,
+        "log_sha256": "43c8ecdc21e4c8e9dafca3aab8d0fb0c6229261831873bc862522de82c99be21"
+      },
+      {
+        "phase": "baseline",
+        "why": null,
+        "returncode": 0,
+        "log_sha256": "6262dd4ae1e1610248aa7a1d90c86e6b7861110a1a434aeede186690d3652770"
+      },
+      {
+        "phase": "mutation",
+        "why": "ignore a current disabled account",
+        "returncode": 1,
+        "log_sha256": "25395116af818757eebf1f0ffbf5b9f2322961c57cf258f8980d79c4746b227f"
+      },
+      {
+        "phase": "baseline",
+        "why": null,
+        "returncode": 0,
+        "log_sha256": "4037d59412aa458fb4ac8fd789f8a0b6b2e75828f90c85285cccbe51fac875be"
+      },
+      {
+        "phase": "mutation",
+        "why": "turn a bound native mode refusal into a caller exception",
+        "returncode": 1,
+        "log_sha256": "81782f700e5d41df41ad0103c13a3654aed3f14505add81d8ffcb7ffbc6a82db"
+      },
+      {
+        "phase": "baseline",
+        "why": null,
+        "returncode": 0,
+        "log_sha256": "ac03dc55bdc1ce87ab5a711fdf5a7d72d345e62c471c4cb4e9de283e03475f14"
+      },
+      {
+        "phase": "mutation",
+        "why": "lose owner readback when a valid sending mode is reduced",
+        "returncode": 1,
+        "log_sha256": "7980a038660ccc2fa3909ad45933c59c14e589f4dbb1f30f7ca94843dc5cab50"
+      },
+      {
+        "phase": "baseline",
+        "why": null,
+        "returncode": 0,
+        "log_sha256": "df9498366aa01f0127cb2f4cd9ab78145847d20e7d02b1dc123e911dbe35fbb9"
+      },
+      {
+        "phase": "mutation",
+        "why": "misreport confirmed native zero effect as prior risk approval",
+        "returncode": 1,
+        "log_sha256": "24590c49da220921a81c56f8eb0ee8042ea29200bb93f91bac3f8022d7f50802"
+      },
+      {
+        "phase": "baseline",
+        "why": null,
+        "returncode": 0,
+        "log_sha256": "f9c9506451c8c246d741ba6f531e0c5616255ea5048df68bdc58562afc09939b"
+      },
+      {
+        "phase": "mutation",
+        "why": "disable a working connection for harmless owner display metadata",
+        "returncode": 1,
+        "log_sha256": "cca232f868418757fa1ac18ebe1e1f56d8d4eaba13012451128cf8eea7019b9d"
+      },
+      {
+        "phase": "baseline",
+        "why": null,
+        "returncode": 0,
+        "log_sha256": "057a4f811934a7c8e0413d700e4be6b0e9bcd24fc5edea4612ed45c4e19a021e"
+      },
+      {
+        "phase": "mutation",
+        "why": "discard owner halt from the surfaced permission when the profile is reenabled",
+        "returncode": 1,
+        "log_sha256": "b5f431e89e849dd1402f42899cd1d395b79813d1852a16a3b5808dd08f329c38"
+      }
+    ],
+    "source_before_sha256": {
+      "trading/vati/accounts/access.py": "0f0de9b5112da1c24d214235dd5beef7fb597921ae328f9c545b34c31ba5393b",
+      "trading/vati/app/cycle.py": "fd53f8c14b67d2e48aaf4ab55d38a56b4c62f9dec9594c559b5e6a6149d0980e",
+      "trading/vati/app/service.py": "b9e6af2325e2dd06428b755e6ff62fb7ff831273f7bfca7ee48d5eae55caa83d"
+    },
+    "source_after_sha256": {
+      "trading/vati/accounts/access.py": "0f0de9b5112da1c24d214235dd5beef7fb597921ae328f9c545b34c31ba5393b",
+      "trading/vati/app/cycle.py": "fd53f8c14b67d2e48aaf4ab55d38a56b4c62f9dec9594c559b5e6a6149d0980e",
+      "trading/vati/app/service.py": "b9e6af2325e2dd06428b755e6ff62fb7ff831273f7bfca7ee48d5eae55caa83d"
+    },
+    "source_restored": true,
+    "journal_present": false
+  },
+  "full_fixture_cleanup": {
+    "stopped": true,
+    "removed": true
+  },
+  "mutation_fixture_cleanup": {
+    "stopped": true,
+    "removed": true
+  },
+  "owner_contract_check": {
+    "changed": [],
+    "applied": false,
+    "scope": "SOURCE_CONTRACTS_ONLY"
+  },
+  "legacy_anchor_preflight": {
+    "schema": "van.rebuild.mutation-registry-preflight/1",
+    "registry_sha256": "35d10c7b0f2b8319b7f7305828262c972b2a6451139d75b9e83c7d0062282955",
+    "mutation_count": 374,
+    "edit_count": 383,
+    "findings": [],
+    "execution_state": "NOT_RUN",
+    "status": "ANCHORS_VALID_BASELINES_AND_MUTATIONS_NOT_EXECUTED"
+  },
+  "fixture_corrections": [
+    "Owner halt uses a genuinely signed test token issued at the controlled native session clock. Initial wall-clock token caused an unrelated not-valid-yet failure; restored the existing verifier contract, without weakening production authentication.",
+    "Configured sending-mode reduction tests use paper transport and no bars/orders or live broker/funds. They verify authority denial, not live identity or profitability."
+  ],
+  "qualification": "Candidate source only. Current registry controls agree with session/owner permission and preserve protection. No independent/native/provider/whole-unit, financial activation, profitability, production or S24 acceptance."
+}

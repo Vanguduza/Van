@@ -15,7 +15,8 @@ class WakeModelLoader(
     context: Context,
     private val expectedSha256: String? = null,
 ) {
-    private val voiceRoot = File(context.applicationContext.filesDir, VOICE_ROOT)
+    private val installed = VoiceAssetInstaller.installedOrNull()
+    private val voiceRoot = installed?.root ?: File(context.applicationContext.filesDir, "voice/unavailable")
     private val manifestFile = File(voiceRoot, MANIFEST_NAME)
 
     @Volatile
@@ -80,7 +81,9 @@ class WakeModelLoader(
         WakeSherpaBundle.load(
             voiceRoot = voiceRoot,
             manifestFile = manifestFile,
-            expectedManifestSha256 = expectedSha256,
+            expectedManifestSha256 = expectedSha256
+                ?: installed?.bundle?.entries?.firstOrNull { it.path == MANIFEST_NAME }?.sha256
+                ?: error("wake_manifest_pin_unbound"),
         )
 
     companion object {

@@ -1,0 +1,776 @@
+{
+  "schema": "van.rebuild.intent-memory-integrity/1",
+  "observed_at_utc": "2026-10-23T17:27:36.207671+00:00",
+  "source_parent": "00260ad28a60e20ab0173888c9fe03e8acb31b08",
+  "source_sha256": {
+    "backend/van_gateway/understanding/memory.py": "636094f359e53212873c40470ab1dc752a3c003c8f36227e89ff4846b549af0b",
+    "backend/van_gateway/learning/feed.py": "3c7ba486518d774cfa47d51924f9a65bf71084c3cb3315e40f88abd20aa83479",
+    "backend/tests/test_intent_memory_integrity.py": "c8da0b24d35d3b3e90bbe18d9a16521dc9d187bfdfd37756e43f83e5038b69ab"
+  },
+  "executions": {
+    "initial_before": {
+      "tests": 6,
+      "failures": 6,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 1.122,
+      "xml_sha256": "972373389e16c994c1ecbf773168edf1552c7f88e26f6ad2148e420192fcb432"
+    },
+    "legacy_link_before": {
+      "tests": 1,
+      "failures": 1,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 0.431,
+      "xml_sha256": "eb7c30263c4b70e71fcb1be840ce783a96951b036a68aaf232dcfee9b434a2f2"
+    },
+    "isolated_final": {
+      "tests": 62,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 6.417,
+      "xml_sha256": "4a5503d9955393a415c8030444042d42c04bcd4b98e6ffa9b8c46c48042da6b9"
+    },
+    "integrated_audited": {
+      "tests": 241,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 77.415,
+      "xml_sha256": "75c2c5575b67e31e51c287339d4d92c854e011793b7f6ca627962b10eff32069"
+    },
+    "owner_contracts": {
+      "tests": 29,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 3.871,
+      "xml_sha256": "96f585c7226d15df1b525887373e30cc31070ee9616e7e7b93f91650a21b90ad"
+    },
+    "rebuild": {
+      "tests": 79,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 32.937,
+      "xml_sha256": "6127e2c7f0b2000fee5b575ca68c24acc5f67e156bd5b8b266ef4385522e568c"
+    }
+  },
+  "fault_campaign": {
+    "definitions": [
+      [
+        "defer owner-intent lock beyond source read",
+        [
+          [
+            "backend/van_gateway/understanding/memory.py",
+            "await db.execute(\"BEGIN IMMEDIATE\")\n            if mission_id is not None:",
+            "await db.execute(\"BEGIN\")\n            if mission_id is not None:",
+            1
+          ]
+        ],
+        "backend/tests/test_intent_memory_integrity.py::test_independent_writer_cannot_be_lost_between_observation_read_and_update"
+      ],
+      [
+        "discard an observed repetition",
+        [
+          [
+            "backend/van_gateway/understanding/memory.py",
+            "seen = int(row[\"observation_count\"]) + 1",
+            "seen = int(row[\"observation_count\"])",
+            1
+          ]
+        ],
+        "backend/tests/test_intent_memory_integrity.py::test_concurrent_existing_observations_do_not_drop_counts_or_project_context"
+      ],
+      [
+        "discard prior owner constraints",
+        [
+          [
+            "backend/van_gateway/understanding/memory.py",
+            "list(dict.fromkeys(json.loads(row[\"constraints_json\"])+list(constraints or [])))",
+            "list(constraints or [])",
+            1
+          ]
+        ],
+        "backend/tests/test_intent_memory_integrity.py::test_repeated_owner_goals_keep_later_constraints_without_dropping_earlier_ones"
+      ],
+      [
+        "move latest evidence backwards",
+        [
+          [
+            "backend/van_gateway/understanding/memory.py",
+            "latest_observed_ms=MAX(latest_observed_ms,?)",
+            "latest_observed_ms=MIN(latest_observed_ms,?)",
+            1
+          ]
+        ],
+        "backend/tests/test_intent_memory_integrity.py::test_old_observation_does_not_move_latest_owner_evidence_backwards"
+      ],
+      [
+        "discard earliest actual observation",
+        [
+          [
+            "backend/van_gateway/understanding/memory.py",
+            "first_observed_ms=MIN(first_observed_ms,?)",
+            "first_observed_ms=MAX(first_observed_ms,?)",
+            1
+          ]
+        ],
+        "backend/tests/test_intent_memory_integrity.py::test_old_observation_does_not_move_latest_owner_evidence_backwards"
+      ],
+      [
+        "count replayed producer calls as new instructions",
+        [
+          [
+            "backend/van_gateway/learning/feed.py",
+            "mission_id=mission.mission_id,\n        )\n\n        decision_id = None",
+            "mission_id=None,\n        )\n\n        decision_id = None",
+            1
+          ]
+        ],
+        "backend/tests/test_intent_memory_integrity.py::test_replaying_same_real_mission_does_not_manufacture_repetition_evidence"
+      ],
+      [
+        "commit goal before its source can be linked",
+        [
+          [
+            "backend/van_gateway/understanding/memory.py",
+            "if mission_id is not None:\n                await db.execute(\"INSERT INTO intent_missions",
+            "if mission_id is not None:\n                await db.commit()\n                await db.execute(\"INSERT INTO intent_missions",
+            1
+          ]
+        ],
+        "backend/tests/test_intent_memory_integrity.py::test_mission_link_failure_rolls_back_the_observation_it_would_claim"
+      ],
+      [
+        "commit superseding edge before status update",
+        [
+          [
+            "backend/van_gateway/understanding/memory.py",
+            "if edge_type is IntentEdgeType.SUPERSEDES:\n                await db.execute(\"UPDATE intent_nodes",
+            "if edge_type is IntentEdgeType.SUPERSEDES:\n                await db.commit()\n                await db.execute(\"UPDATE intent_nodes",
+            1
+          ]
+        ],
+        "backend/tests/test_intent_memory_integrity.py::test_failed_superseding_update_does_not_leave_a_committed_relationship"
+      ],
+      [
+        "accept empty owner goal",
+        [
+          [
+            "backend/van_gateway/understanding/memory.py",
+            "if not normalized:\n            raise ValueError(\"INTENT_GOAL_REQUIRED\")",
+            "if False:\n            raise ValueError(\"INTENT_GOAL_REQUIRED\")",
+            1
+          ]
+        ],
+        "backend/tests/test_intent_memory_integrity.py::test_whitespace_is_not_an_owner_objective"
+      ],
+      [
+        "allow cyclic supersession",
+        [
+          [
+            "backend/van_gateway/understanding/memory.py",
+            "if cycle is not None:\n                    raise ValueError(\"INTENT_SUPERSESSION_CYCLE\")",
+            "if False:\n                    raise ValueError(\"INTENT_SUPERSESSION_CYCLE\")",
+            1
+          ]
+        ],
+        "backend/tests/test_intent_memory_integrity.py::test_self_or_cyclic_supersession_cannot_retire_all_owner_goals"
+      ]
+    ],
+    "records": [
+      {
+        "case": 0,
+        "phase": "control",
+        "reason": "defer owner-intent lock beyond source read",
+        "exit_code": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 0,
+        "xml_sha256": "54a3e91bf635bbf7a6410556c8c8e1a50103c833637ee3892d351f0ddb642180"
+      },
+      {
+        "case": 0,
+        "phase": "fault",
+        "reason": "defer owner-intent lock beyond source read",
+        "exit_code": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 1,
+        "xml_sha256": "8d35753faa0f605f19cde7c5dd216a9def132f302af8737326607b83f61e2216"
+      },
+      {
+        "case": 1,
+        "phase": "control",
+        "reason": "discard an observed repetition",
+        "exit_code": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 0,
+        "xml_sha256": "5487a48091629dc1925f6ad6a349b0e0a958316431c1bf240073a55ffbb29ecf"
+      },
+      {
+        "case": 1,
+        "phase": "fault",
+        "reason": "discard an observed repetition",
+        "exit_code": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 1,
+        "xml_sha256": "57a8a6ab9bfca515f1c214dec9861d2bfa976d64c858d7fa18f164ca0fbb248b"
+      },
+      {
+        "case": 2,
+        "phase": "control",
+        "reason": "discard prior owner constraints",
+        "exit_code": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 0,
+        "xml_sha256": "a70dc9c99611589a39dea47184bd4ca434aada0a5db93adff68d51b584730acb"
+      },
+      {
+        "case": 2,
+        "phase": "fault",
+        "reason": "discard prior owner constraints",
+        "exit_code": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 1,
+        "xml_sha256": "e48e257e75fcad218bd27b0b26dc1de8e081279991b5c71160d73b68b1ad9851"
+      },
+      {
+        "case": 3,
+        "phase": "control",
+        "reason": "move latest evidence backwards",
+        "exit_code": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 0,
+        "xml_sha256": "03e7f98fb66225780e3e2b0a2582e3c7c66fca76426e94d17404361fe83f20de"
+      },
+      {
+        "case": 3,
+        "phase": "fault",
+        "reason": "move latest evidence backwards",
+        "exit_code": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 1,
+        "xml_sha256": "b966856588bcf0c00d0189d160e193fd88ff097df201837c7d05fd7cb9395d7c"
+      },
+      {
+        "case": 4,
+        "phase": "control",
+        "reason": "discard earliest actual observation",
+        "exit_code": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 0,
+        "xml_sha256": "b47c186a04e4c9dea69474abf2502611aaf353a15fe4ab2373abd1a6ce671f12"
+      },
+      {
+        "case": 4,
+        "phase": "fault",
+        "reason": "discard earliest actual observation",
+        "exit_code": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 1,
+        "xml_sha256": "8eb655a323a64ca06b1f4dc45682ee643c50ab183ecb8f15ee9eecf7f8dd930d"
+      },
+      {
+        "case": 5,
+        "phase": "control",
+        "reason": "count replayed producer calls as new instructions",
+        "exit_code": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 0,
+        "xml_sha256": "0f6977d2b777c0090da5df4eb6bd6bb3f6742515e1b7154345bfa7c7e8085e52"
+      },
+      {
+        "case": 5,
+        "phase": "fault",
+        "reason": "count replayed producer calls as new instructions",
+        "exit_code": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 1,
+        "xml_sha256": "6658b570b8a15a3f07e704c36fe55facd33ba9f44c7c6711948ebf93d215a608"
+      },
+      {
+        "case": 6,
+        "phase": "control",
+        "reason": "commit goal before its source can be linked",
+        "exit_code": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 0,
+        "xml_sha256": "5f1ca7102c06c5516f188115daf2525194131b900fc641bf51327cac6d7576be"
+      },
+      {
+        "case": 6,
+        "phase": "fault",
+        "reason": "commit goal before its source can be linked",
+        "exit_code": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 1,
+        "xml_sha256": "dfc7a962dabf29275640206a6c4a417f8546bcf1919e9a79565c60116861a3de"
+      },
+      {
+        "case": 7,
+        "phase": "control",
+        "reason": "commit superseding edge before status update",
+        "exit_code": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 0,
+        "xml_sha256": "c07495d5c28b22491f1aec5c4360bcc1ecabc858e7bcd8908a223bcb65ae8b1d"
+      },
+      {
+        "case": 7,
+        "phase": "fault",
+        "reason": "commit superseding edge before status update",
+        "exit_code": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 1,
+        "xml_sha256": "2e968789d30e610460af05ac49d2ae32a7d9fab8e3a7e71ead32056dbf5aa992"
+      },
+      {
+        "case": 8,
+        "phase": "control",
+        "reason": "accept empty owner goal",
+        "exit_code": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 0,
+        "xml_sha256": "fa9acd134ff4085b85b8cdce059487e254e755d20855bfe0d95704681c43847b"
+      },
+      {
+        "case": 8,
+        "phase": "fault",
+        "reason": "accept empty owner goal",
+        "exit_code": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 1,
+        "xml_sha256": "0d6a1d74e0c5db540b3f814265db8bf3600f4ab74727e9e519a6451e8a527823"
+      },
+      {
+        "case": 9,
+        "phase": "control",
+        "reason": "allow cyclic supersession",
+        "exit_code": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 0,
+        "xml_sha256": "05a7f07c714ddaa8cbea7b9246bccfca68714234b6722bcf0b12a9d99bfb95c8"
+      },
+      {
+        "case": 9,
+        "phase": "fault",
+        "reason": "allow cyclic supersession",
+        "exit_code": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 1,
+        "xml_sha256": "f544e53e60ece303f2c52f2944d8d43ba39715c96fa628a76ce309a902a47cc3"
+      }
+    ],
+    "before": {
+      "backend/van_gateway/understanding/memory.py": "636094f359e53212873c40470ab1dc752a3c003c8f36227e89ff4846b549af0b",
+      "backend/van_gateway/learning/feed.py": "3c7ba486518d774cfa47d51924f9a65bf71084c3cb3315e40f88abd20aa83479"
+    },
+    "after": {
+      "backend/van_gateway/understanding/memory.py": "636094f359e53212873c40470ab1dc752a3c003c8f36227e89ff4846b549af0b",
+      "backend/van_gateway/learning/feed.py": "3c7ba486518d774cfa47d51924f9a65bf71084c3cb3315e40f88abd20aa83479"
+    },
+    "source_restored": true
+  },
+  "initial_fault_survivor": {
+    "definitions": [
+      [
+        "defer owner-intent lock beyond source read",
+        [
+          [
+            "backend/van_gateway/understanding/memory.py",
+            "await db.execute(\"BEGIN IMMEDIATE\")\n            if mission_id is not None:",
+            "await db.execute(\"BEGIN\")\n            if mission_id is not None:",
+            1
+          ]
+        ],
+        "backend/tests/test_intent_memory_integrity.py::test_independent_writer_cannot_be_lost_between_observation_read_and_update"
+      ],
+      [
+        "discard an observed repetition",
+        [
+          [
+            "backend/van_gateway/understanding/memory.py",
+            "seen = int(row[\"observation_count\"]) + 1",
+            "seen = int(row[\"observation_count\"])",
+            1
+          ]
+        ],
+        "backend/tests/test_intent_memory_integrity.py::test_concurrent_existing_observations_do_not_drop_counts_or_project_context"
+      ],
+      [
+        "discard prior owner constraints",
+        [
+          [
+            "backend/van_gateway/understanding/memory.py",
+            "list(dict.fromkeys(json.loads(row[\"constraints_json\"])+list(constraints or [])))",
+            "list(constraints or [])",
+            1
+          ]
+        ],
+        "backend/tests/test_intent_memory_integrity.py::test_repeated_owner_goals_keep_later_constraints_without_dropping_earlier_ones"
+      ],
+      [
+        "move latest evidence backwards",
+        [
+          [
+            "backend/van_gateway/understanding/memory.py",
+            "latest_observed_ms=MAX(latest_observed_ms,?)",
+            "latest_observed_ms=MIN(latest_observed_ms,?)",
+            1
+          ]
+        ],
+        "backend/tests/test_intent_memory_integrity.py::test_old_observation_does_not_move_latest_owner_evidence_backwards"
+      ],
+      [
+        "discard earliest actual observation",
+        [
+          [
+            "backend/van_gateway/understanding/memory.py",
+            "first_observed_ms=MIN(first_observed_ms,?)",
+            "first_observed_ms=MAX(first_observed_ms,?)",
+            1
+          ]
+        ],
+        "backend/tests/test_intent_memory_integrity.py::test_old_observation_does_not_move_latest_owner_evidence_backwards"
+      ],
+      [
+        "count replayed producer calls as new instructions",
+        [
+          [
+            "backend/van_gateway/learning/feed.py",
+            "mission_id=mission.mission_id,\n        )\n\n        decision_id = None",
+            "mission_id=None,\n        )\n\n        decision_id = None",
+            1
+          ]
+        ],
+        "backend/tests/test_intent_memory_integrity.py::test_replaying_same_real_mission_does_not_manufacture_repetition_evidence"
+      ],
+      [
+        "commit goal before its source can be linked",
+        [
+          [
+            "backend/van_gateway/understanding/memory.py",
+            "if mission_id is not None:\n                await db.execute(\"INSERT INTO intent_missions",
+            "if mission_id is not None:\n                await db.commit()\n                await db.execute(\"INSERT INTO intent_missions",
+            1
+          ]
+        ],
+        "backend/tests/test_intent_memory_integrity.py::test_mission_link_failure_rolls_back_the_observation_it_would_claim"
+      ],
+      [
+        "commit superseding edge before status update",
+        [
+          [
+            "backend/van_gateway/understanding/memory.py",
+            "if edge_type is IntentEdgeType.SUPERSEDES:\n                await db.execute(\"UPDATE intent_nodes",
+            "if edge_type is IntentEdgeType.SUPERSEDES:\n                await db.commit()\n                await db.execute(\"UPDATE intent_nodes",
+            1
+          ]
+        ],
+        "backend/tests/test_intent_memory_integrity.py::test_failed_superseding_update_does_not_leave_a_committed_relationship"
+      ],
+      [
+        "accept empty owner goal",
+        [
+          [
+            "backend/van_gateway/understanding/memory.py",
+            "if not normalized:\n            raise ValueError(\"INTENT_GOAL_REQUIRED\")",
+            "if False:\n            raise ValueError(\"INTENT_GOAL_REQUIRED\")",
+            1
+          ]
+        ],
+        "backend/tests/test_intent_memory_integrity.py::test_whitespace_is_not_an_owner_objective"
+      ],
+      [
+        "allow cyclic supersession",
+        [
+          [
+            "backend/van_gateway/understanding/memory.py",
+            "if cycle is not None:\n                    raise ValueError(\"INTENT_SUPERSESSION_CYCLE\")",
+            "if False:\n                    raise ValueError(\"INTENT_SUPERSESSION_CYCLE\")",
+            1
+          ]
+        ],
+        "backend/tests/test_intent_memory_integrity.py::test_self_or_cyclic_supersession_cannot_retire_all_owner_goals"
+      ]
+    ],
+    "records": [
+      {
+        "case": 0,
+        "phase": "control",
+        "reason": "defer owner-intent lock beyond source read",
+        "exit_code": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 0,
+        "xml_sha256": "a7eb16f4ea442443c522f5709dbd899003fbeee121574e0c8e492f29cf3e2f32"
+      },
+      {
+        "case": 0,
+        "phase": "fault",
+        "reason": "defer owner-intent lock beyond source read",
+        "exit_code": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 1,
+        "xml_sha256": "773689c183c6b5ee0193f796c91002ef6008583e882ffc42b27ceb1b1988ec71"
+      },
+      {
+        "case": 1,
+        "phase": "control",
+        "reason": "discard an observed repetition",
+        "exit_code": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 0,
+        "xml_sha256": "62a74af1e99b35992b3d008659ae5916d8a457e375a16c8511cfd29d7bdbfb8b"
+      },
+      {
+        "case": 1,
+        "phase": "fault",
+        "reason": "discard an observed repetition",
+        "exit_code": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 1,
+        "xml_sha256": "e4bcf4a8d52ce2097598b21dd995343c4cd7325ac1a071e0cd8b999743dcc326"
+      },
+      {
+        "case": 2,
+        "phase": "control",
+        "reason": "discard prior owner constraints",
+        "exit_code": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 0,
+        "xml_sha256": "c2259f7c68a5967be0f2b24df8e485adeb5af9d77782846564050a6070e21ef2"
+      },
+      {
+        "case": 2,
+        "phase": "fault",
+        "reason": "discard prior owner constraints",
+        "exit_code": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 1,
+        "xml_sha256": "e33445fd94c257173ca7cee0882340287e4f088a15dd64bf8cab2d5c62d398c9"
+      },
+      {
+        "case": 3,
+        "phase": "control",
+        "reason": "move latest evidence backwards",
+        "exit_code": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 0,
+        "xml_sha256": "f0cdb3f9b2ef4f17f6b02e0a532203b018902d5ca801ead1d4150bdbf92336b6"
+      },
+      {
+        "case": 3,
+        "phase": "fault",
+        "reason": "move latest evidence backwards",
+        "exit_code": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 1,
+        "xml_sha256": "b31be5e3bf4891307b56eadbdfd6e079c6c249492f93155ec75a0d23ac976936"
+      },
+      {
+        "case": 4,
+        "phase": "control",
+        "reason": "discard earliest actual observation",
+        "exit_code": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 0,
+        "xml_sha256": "8df9f40df5de4c7749bbd403c4b579fb61731eb5aba29248fc64f338644b8e07"
+      },
+      {
+        "case": 4,
+        "phase": "fault",
+        "reason": "discard earliest actual observation",
+        "exit_code": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 0,
+        "xml_sha256": "b7d37414735ae358db2bbc94a999398b7156c03ceda7a5e99f8122f57c43c9df"
+      }
+    ],
+    "before": {
+      "backend/van_gateway/understanding/memory.py": "636094f359e53212873c40470ab1dc752a3c003c8f36227e89ff4846b549af0b",
+      "backend/van_gateway/learning/feed.py": "3c7ba486518d774cfa47d51924f9a65bf71084c3cb3315e40f88abd20aa83479"
+    },
+    "after": {
+      "backend/van_gateway/understanding/memory.py": "636094f359e53212873c40470ab1dc752a3c003c8f36227e89ff4846b549af0b",
+      "backend/van_gateway/learning/feed.py": "3c7ba486518d774cfa47d51924f9a65bf71084c3cb3315e40f88abd20aa83479"
+    },
+    "source_restored": true
+  },
+  "fault_instrument": "Final campaign removes only the two mutated modules compiled caches in the owned temporary checkout before each independent Python -B process. This prevents same-size/same-second MIN/MAX edits from reusing timestamp-based Python bytecode. Passing controls and failing behavioural assertions recorded for all10 faults.",
+  "storage_audit": {
+    "schema": "van.source-storage-audit/1",
+    "forbidden_events": [],
+    "source_sha256": "d4e270150fb0da6e8d79b449dd0de68fd1f97b3ccea3d282f31d91297edbd495",
+    "root": "/workspace/van-review-2026-10-18/publish",
+    "scope": "SQLite opens, path-based writable opens and directory/link/rename/delete events under data and backend/data",
+    "limits": "Python audit events only; existing fd writes, native-library raw I/O and external processes are not an OS sandbox. Git state is checked separately."
+  },
+  "legacy_mutation_preflight": {
+    "schema": "van.rebuild.mutation-registry-preflight/1",
+    "registry_sha256": "35d10c7b0f2b8319b7f7305828262c972b2a6451139d75b9e83c7d0062282955",
+    "mutation_count": 374,
+    "edit_count": 383,
+    "findings": [
+      {
+        "kind": "SOURCE_ANCHOR_MISSING",
+        "path": "van_gateway/understanding/memory.py",
+        "mutation": "RC4 a brand-new goal starts standing",
+        "anchor": "            current=IntentHorizon.EPHEMERAL,\n            observations=1,"
+      }
+    ],
+    "execution_state": "NOT_RUN",
+    "status": "INVALID_REGISTRY"
+  },
+  "qualification": "Candidate memory source only. Existing repetition thresholds/horizon semantics retained; no execution authority or scientific/market evidence is granted. Pre-existing duplicate legacy goal nodes are not destructively merged. Entire LearningFeed, original approval-fingerprint authority, first HTTP response recovery, whole-unit, live service, privacy completeness and S24 remain unqualified."
+}

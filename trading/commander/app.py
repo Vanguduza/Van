@@ -1,6 +1,11 @@
 from __future__ import annotations
 
 import fnmatch
+import asyncio
+from concurrent.futures import ThreadPoolExecutor
+from contextlib import asynccontextmanager
+import threading
+import weakref
 import json
 import os
 import platform
@@ -10,7 +15,7 @@ import stat
 import subprocess
 import sys
 import time
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from pathlib import Path
 from typing import Any, Callable, Optional
 from urllib.request import Request, urlopen
@@ -19,7 +24,7 @@ from fastapi import FastAPI, HTTPException, Request as FastRequest
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field
 
-from commander.accounts import ACCOUNT_COMMANDS, ACCOUNT_TOOL_SCHEMAS, AccountControlSettings, build_account_handlers, redact_args
+from commander.accounts import ACCOUNT_COMMANDS, ACCOUNT_TOOL_SCHEMAS, AccountControlSettings, build_account_handlers, redact_args, require_resource_version
 from commander.strategies import (
     PROMOTION_COMMANDS,
     PROMOTION_TOOL_SCHEMAS,
@@ -27,6 +32,7 @@ from commander.strategies import (
     build_strategy_handlers,
 )
 from commander.auth import DEFAULT_PRINCIPAL, NonceCache, verify_request_principal
+from commander.runtime_controls import RUNTIME_COMMANDS, RUNTIME_TOOL_SCHEMAS, build_runtime_control_handlers
 
 REDACT = re.compile(r"(?i)(password|passwd|token|api[_-]?key|secret|bearer|signing[_-]?key)(\s*[:=]\s*)\S+")
 UNIT_RE = re.compile(r"^[A-Za-z0-9@._-]+$")
@@ -38,15 +44,22 @@ COMMANDS = ("status", "ledger_status", "services", "restart_service", "tail_log"
             # projections of the VATI ledger; neither can create, size, modify
             # or cancel anything, and neither is in GATEWAY_ONLY_COMMANDS
             # because observation is not a mutation.
-            "positions", "assessment") + ACCOUNT_COMMANDS + PROMOTION_COMMANDS
+            "positions", "assessment") + ACCOUNT_COMMANDS + PROMOTION_COMMANDS + RUNTIME_COMMANDS
 # Credential-bearing and strategy-promotion commands are gateway-only. This is a
 # positive allow-list: the authenticated principal must be exactly van-gateway.
 # A legacy/shared credential or a future/renamed agent cannot acquire mutation
 # authority merely by avoiding a deny-list.
 GATEWAY_PRINCIPAL = "van-gateway"
-GATEWAY_ONLY_COMMANDS = frozenset(ACCOUNT_COMMANDS + PROMOTION_COMMANDS)
+GATEWAY_ONLY_COMMANDS = frozenset(ACCOUNT_COMMANDS + PROMOTION_COMMANDS + RUNTIME_COMMANDS)
 # Compatibility name used by the MCP/tool-list contract.
 AGENT_HIDDEN_COMMANDS = GATEWAY_ONLY_COMMANDS
+# Reads do not wait behind native writes or a long backtest. Halt remains an
+# independently authorized, atomic reduce-only path. Unknown/new commands use
+# the serialized executor by default.
+PARALLEL_COMMANDS = frozenset({"status", "ledger_status", "services", "tail_log",
+    "doctor", "accounts", "positions", "assessment", "account_revision", "account_review",
+    "account_verify", "account_operation", "ctrader_discover", "halt", "runtime_recovery_review", "runtime_recovery_operation"})
+MAX_NATIVE_PENDING_COMMANDS = 16
 Runner = Callable[[list[str], int], tuple[int, str, str]]
 
 
@@ -137,7 +150,7 @@ class CommanderSettings:
 
         if self._owner_authority is None:
             self._owner_authority = OwnerAuthorityVerifier(
-                load_owner_keys(self.owner_authority_keys)
+                load_owner_keys(self.owner_authority_keys), registry_path=self.owner_authority_keys
             )
         return self._owner_authority
 
@@ -189,12 +202,26 @@ TOOL_SCHEMAS = {
     "assessment": {"description": "VAN's reading of the book: urgent risks, portfolio heat, available risk headroom, active theses by state, kill-switch state and the cognition invoker actually configured. Read-only; a reading, never a permission.", "properties": {}},
     **ACCOUNT_TOOL_SCHEMAS,
     **PROMOTION_TOOL_SCHEMAS,
+    **RUNTIME_TOOL_SCHEMAS,
 }
 
 
 def create_app(settings: Optional[CommanderSettings] = None) -> FastAPI:
     st = settings or CommanderSettings()
-    app = FastAPI(title="Van Trading Commander", version="1.0.0")
+    native_writes = ThreadPoolExecutor(max_workers=1, thread_name_prefix="van-native-command")
+    native_slots = threading.BoundedSemaphore(MAX_NATIVE_PENDING_COMMANDS)
+
+    @asynccontextmanager
+    async def native_lifespan(_app):
+        try:
+            yield
+        finally:
+            # Stop work that has not started and let actual native work finish.
+            # Lifecycle teardown must not create a second executor over it.
+            await asyncio.to_thread(native_writes.shutdown, wait=True, cancel_futures=True)
+
+    app = FastAPI(title="Van Trading Commander", version="1.0.0", lifespan=native_lifespan)
+    weakref.finalize(app, native_writes.shutdown, wait=False, cancel_futures=True)
     # Exposed so a deployment or a test can install the owner authority verifier
     # this host should trust, the same way the gateway exposes its services.
     app.state.commander_settings = st
@@ -397,7 +424,9 @@ def create_app(settings: Optional[CommanderSettings] = None) -> FastAPI:
     handlers = {"status": cmd_status, "ledger_status": cmd_ledger_status, "services": cmd_services, "restart_service": cmd_restart, "tail_log": cmd_tail, "run_backtest": cmd_backtest,
                 "vekl_resolve": cmd_vekl, "halt": cmd_halt, "doctor": cmd_doctor, "accounts": cmd_accounts,
                 "positions": cmd_positions, "assessment": cmd_assessment,
-                **build_account_handlers(st.account_control or AccountControlSettings(registry_path=st.accounts_registry, secrets_dir=st.secrets_dir)),
+                **build_account_handlers(replace(st.account_control, operation_ledger=st.ledger) if st.account_control else
+                    AccountControlSettings(registry_path=st.accounts_registry, secrets_dir=st.secrets_dir, operation_ledger=st.ledger)),
+                **build_runtime_control_handlers(st),
                 **build_strategy_handlers(StrategyPromotionSettings(
                     capsule_dir=capsule_dir,
                     ledger=st.ledger,
@@ -453,9 +482,40 @@ def create_app(settings: Optional[CommanderSettings] = None) -> FastAPI:
                 "credential and strategy mutations require the authenticated van-gateway principal",
             )
         try:
-            result = handlers[name](parsed.args)
+            require_resource_version(name, parsed.args)
+            def invoke():
+                # Admission already consumed the one-use nonce on the event
+                # loop. Recheck the signed envelope against CURRENT keys/time
+                # at actual dispatch without trying to consume that nonce again.
+                current, reason, current_principal = verify_request_principal(
+                    st.load_tokens(), request.headers, "POST", f"/v1/cmd/{name}",
+                    body, nonces=NonceCache())
+                if not current or current_principal != principal:
+                    raise HTTPException(401, "command authorization expired or changed before execution: " + reason)
+                return handlers[name](parsed.args)
+
+            if name in PARALLEL_COMMANDS:
+                result = await asyncio.to_thread(invoke)
+            else:
+                if not native_slots.acquire(blocking=False):
+                    raise HTTPException(503, "native command queue is full; no command dispatched")
+                try:
+                    native_future = native_writes.submit(invoke)
+                except RuntimeError:
+                    native_slots.release()
+                    raise HTTPException(503, "native command executor is shutting down; no command dispatched") from None
+                # A cancelled HTTP waiter must not release a running native
+                # slot or allow the next write to overtake its actual effect.
+                native_future.add_done_callback(lambda _future: native_slots.release())
+                waiter = asyncio.wrap_future(native_future)
+                waiter.add_done_callback(lambda done: done.exception() if not done.cancelled() else None)
+                # Losing an HTTP waiter is not cancellation of an admitted
+                # operation. Keep queued work and its capacity until the native
+                # executor resolves it; recheck authorization when it starts.
+                result = await asyncio.shield(waiter)
         except HTTPException as exc:
-            audit(name, parsed.requested_by, parsed.args, f"refused:{exc.detail}")
+            audit(name, parsed.requested_by, parsed.args,
+                ("unknown:" if getattr(exc, "effect_state", None) == "UNKNOWN" else "refused:") + str(exc.detail))
             raise
         audit(name, parsed.requested_by, parsed.args, "ok")
         return JSONResponse({"command": name, "result": result})

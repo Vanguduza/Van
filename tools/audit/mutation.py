@@ -61,7 +61,7 @@ def recover() -> list[str]:
     return restored
 
 
-def run(mutations, tests, root=".", cwd=None, command=None):
+def run(mutations, tests, root=".", cwd=None, command=None, observe=None):
     """`root` is what the mutation paths are relative to; `cwd` is where the suite runs.
 
     They differ for mutations outside backend/ — a workflow file, a Gradle script, Kotlin
@@ -79,6 +79,21 @@ def run(mutations, tests, root=".", cwd=None, command=None):
     stale = recover()
     if stale:
         print(f"recovered {len(stale)} file(s) a previous run left mutated: {stale}")
+    # A failing control cannot establish that a mutation was detected. In particular,
+    # missing imports, test collection failures and an unprepared Gradle environment
+    # must never inflate the caught count.
+    _purge_bytecode(root)
+    baseline = subprocess.run(
+        command or [sys.executable, "-m", "pytest", *tests, "-q"],
+        capture_output=True, text=True, cwd=cwd,
+    )
+    if observe is not None:
+        observe("baseline", None, baseline)
+    if baseline.returncode != 0:
+        raise RuntimeError(
+            f"BASELINE_TESTS_FAILED (exit {baseline.returncode}); no mutations executed\n"
+            + baseline.stdout + baseline.stderr
+        )
     verdicts = []
     for mutation in mutations:
         if len(mutation) == 2:
@@ -123,6 +138,19 @@ def run(mutations, tests, root=".", cwd=None, command=None):
             for number, handler in previous.items():
                 signal.signal(number, handler)
             _purge_bytecode(root)
+        if observe is not None:
+            observe("mutation", why, result)
+        if command is None and result.returncode not in (0, 1):
+            raise RuntimeError(
+                f"MUTATION_EXECUTION_INVALID (pytest exit {result.returncode}): {why}\n"
+                + result.stdout + result.stderr
+            )
+        if command and pathlib.Path(command[0]).name in {"gradle", "gradlew"} and result.returncode:
+            import re
+            output = result.stdout + result.stderr
+            if (re.search(r"(?:compile\w*Kotlin FAILED|Compilation error|Unresolved reference)", output)
+                or not re.search(r"\d+ tests? completed, \d+ failed", output)):
+                raise RuntimeError(f"MUTATION_EXECUTION_INVALID (Gradle): {why}\n" + output)
         caught = result.returncode != 0
         verdicts.append((caught, why))
         print(f"{'CAUGHT' if caught else '*** SURVIVED ***':18} {why}")

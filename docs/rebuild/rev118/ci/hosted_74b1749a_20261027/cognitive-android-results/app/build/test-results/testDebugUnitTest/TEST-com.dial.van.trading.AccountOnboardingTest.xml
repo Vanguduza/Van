@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.dial.van.trading.AccountOnboardingTest" tests="4" skipped="0" failures="0" errors="0" timestamp="2026-10-27T08:13:24" hostname="runnervmtai0g" time="0.067">
+  <properties/>
+  <testcase name="escapesLikePythonJsonDumps" classname="com.dial.van.trading.AccountOnboardingTest" time="0.013"/>
+  <testcase name="formsValidateAndOutcomesParse" classname="com.dial.van.trading.AccountOnboardingTest" time="0.022"/>
+  <testcase name="canonicalJsonAndSignatureMatchTheGatewayVector" classname="com.dial.van.trading.AccountOnboardingTest" time="0.03"/>
+  <testcase name="nativeReviewShowsEffectiveTargetAndChangesWithoutPrivateLocators" classname="com.dial.van.trading.AccountOnboardingTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

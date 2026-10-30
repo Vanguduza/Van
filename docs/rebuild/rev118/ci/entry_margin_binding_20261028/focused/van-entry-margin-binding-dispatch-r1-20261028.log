@@ -1,0 +1,192 @@
+..........................................FFFFssssssssssssssssssssssssss [ 94%]
+ssss                                                                     [100%]
+=================================== FAILURES ===================================
+_ test_original_router_mandate_deadline_is_in_the_actual_signed_native_request _
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-132/test_original_router_mandate_d0')
+eurusd = SymbolContract(symbol='EURUSD', venue='mt5', base_currency='EUR', quote_currency='USD', account_currency='USD', contra...=Decimal('0'), max_adv_participation=Decimal('0.10'), liquidity_haircut=Decimal('0'), round_trip_cost_pct=Decimal('0'))
+
+    def test_original_router_mandate_deadline_is_in_the_actual_signed_native_request(tmp_path, eurusd):
+        sdk, worker, adapter, clock, mandate, trade, approved, ledger, router = flow(tmp_path, eurusd)
+>       result = router.execute(trade, approved, mandate, now_ms=clock['ms'], entry_type='MARKET')
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+trading/tests/test_router_native_entry_deadline.py:30: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+trading/vati/execution/router.py:558: in execute
+    native_margin_ref=self._native_entry_margin(cmd,adapter,now_ms=now_ms)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <vati.execution.router.ExecutionRouter object at 0x7f9385958c50>
+command = OrderCommand(trade_intent_id='ti-1', decision_hash='368ffd3f1cc1165fa1e539d01df7f201d15e00098e7cb77cfdcc1b27378e68d4',...egy_version='4.2.1', lease_epoch=None, command_hash='d9aabc756391e4ca145fce3500b46eff5588a585d97baaa7298732e4d8276dbb')
+adapter = Mt5BridgeAdapter(client=<vati.execution.mt5_bridge.Mt5BridgeClient object at 0x7f938595a960>, account_alias='native', ...>.<lambda> at 0x7f938599aac0>, identity=Mt5Identity(login='12345678', server='Broker-Demo', currency='USD', demo=True))
+now_ms = 1800000000000
+
+    def _native_entry_margin(self, command, adapter, *, now_ms):
+        from vati.execution.mt5_bridge import Mt5BridgeAdapter
+        from vati.execution.mt5_pull import Mt5PullAdapter
+        from vati.execution.ctrader.adapter import CtraderAdapter
+        if not isinstance(adapter,(Mt5BridgeAdapter,Mt5PullAdapter,CtraderAdapter)):
+            return None
+        from vati.risk.native_margin_book import NativeMarginBook
+        from vati.funding.native import native_int
+        rows=[e for e in self.ledger.iter(EventKind.RISK_DECISION,correlation_id=command.trade_intent_id)
+            if e.payload.get('decision',{}).get('decision_hash')==command.decision_hash]
+        if len(rows)!=1:
+>           raise RouterError('native entry margin requires one original durable risk input; not dispatched')
+E           vati.execution.router.RouterError: native entry margin requires one original durable risk input; not dispatched
+
+trading/vati/execution/router.py:210: RouterError
+_ test_native_quote_after_router_preflight_cannot_outlive_the_original_mandate _
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-132/test_native_quote_after_router0')
+eurusd = SymbolContract(symbol='EURUSD', venue='mt5', base_currency='EUR', quote_currency='USD', account_currency='USD', contra...=Decimal('0'), max_adv_participation=Decimal('0.10'), liquidity_haircut=Decimal('0'), round_trip_cost_pct=Decimal('0'))
+
+    def test_native_quote_after_router_preflight_cannot_outlive_the_original_mandate(tmp_path, eurusd):
+        sdk, worker, adapter, clock, mandate, trade, approved, ledger, router = flow(tmp_path, eurusd)
+        native_quote = sdk.symbol_info_tick
+        calls=[]
+        def delayed(symbol):
+            value=native_quote(symbol);calls.append(symbol)
+            if len(calls)==2:clock['ms']=mandate.expires_at_unix*1000
+            return value
+        sdk.symbol_info_tick=delayed
+>       result=router.execute(trade,approved,mandate,now_ms=clock['ms'],entry_type='MARKET')
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+trading/tests/test_router_native_entry_deadline.py:48: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+trading/vati/execution/router.py:558: in execute
+    native_margin_ref=self._native_entry_margin(cmd,adapter,now_ms=now_ms)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <vati.execution.router.ExecutionRouter object at 0x7f9385974260>
+command = OrderCommand(trade_intent_id='ti-1', decision_hash='ed3d3a39639c664a671e90bede0cb5df3c1c58f47325eee05ecf8d8291072631',...egy_version='4.2.1', lease_epoch=None, command_hash='63e8a287f0d3dda34fbe9c52b3aefbfddde1506e1fd94840cbf555be716913e8')
+adapter = Mt5BridgeAdapter(client=<vati.execution.mt5_bridge.Mt5BridgeClient object at 0x7f93859779e0>, account_alias='native', ...>.<lambda> at 0x7f93859cb7e0>, identity=Mt5Identity(login='12345678', server='Broker-Demo', currency='USD', demo=True))
+now_ms = 1800000000000
+
+    def _native_entry_margin(self, command, adapter, *, now_ms):
+        from vati.execution.mt5_bridge import Mt5BridgeAdapter
+        from vati.execution.mt5_pull import Mt5PullAdapter
+        from vati.execution.ctrader.adapter import CtraderAdapter
+        if not isinstance(adapter,(Mt5BridgeAdapter,Mt5PullAdapter,CtraderAdapter)):
+            return None
+        from vati.risk.native_margin_book import NativeMarginBook
+        from vati.funding.native import native_int
+        rows=[e for e in self.ledger.iter(EventKind.RISK_DECISION,correlation_id=command.trade_intent_id)
+            if e.payload.get('decision',{}).get('decision_hash')==command.decision_hash]
+        if len(rows)!=1:
+>           raise RouterError('native entry margin requires one original durable risk input; not dispatched')
+E           vati.execution.router.RouterError: native entry margin requires one original durable risk input; not dispatched
+
+trading/vati/execution/router.py:210: RouterError
+_ test_original_quote_lifetime_is_not_renewed_inside_native_adapter_io[False] __
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-132/test_original_quote_lifetime_i0')
+eurusd = SymbolContract(symbol='EURUSD', venue='mt5', base_currency='EUR', quote_currency='USD', account_currency='USD', contra...=Decimal('0'), max_adv_participation=Decimal('0.10'), liquidity_haircut=Decimal('0'), round_trip_cost_pct=Decimal('0'))
+late = False
+
+    @pytest.mark.parametrize('late', [False, True])
+    def test_original_quote_lifetime_is_not_renewed_inside_native_adapter_io(tmp_path, eurusd, late):
+        from vati.execution.pretrade import MarketReference
+        sdk, worker, adapter, clock, mandate, trade, approved, ledger, router = flow(tmp_path, eurusd)
+        started=clock['ms']; original=sdk.symbol_info_tick; calls=[]
+        def quote(symbol):
+            value=original(symbol);calls.append(symbol)
+            if late and len(calls)==2:clock['ms']=started+101
+            return value
+        sdk.symbol_info_tick=quote
+>       result=router.execute(trade,approved,mandate,now_ms=started,entry_type='MARKET',
+            market_reference=MarketReference(trade.entry,0,100))
+
+trading/tests/test_router_native_entry_deadline.py:64: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+trading/vati/execution/router.py:558: in execute
+    native_margin_ref=self._native_entry_margin(cmd,adapter,now_ms=now_ms)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <vati.execution.router.ExecutionRouter object at 0x7f93855ebda0>
+command = OrderCommand(trade_intent_id='ti-1', decision_hash='0ad902fb8479b0b9ec0eba9766a02cb4f043bd5fc4c7dd0ea8c157c506eaa592',...egy_version='4.2.1', lease_epoch=None, command_hash='aa4db2d17d84f5a117fcbe2f2da1179f98c19870d05e9dca851390f011ffb642')
+adapter = Mt5BridgeAdapter(client=<vati.execution.mt5_bridge.Mt5BridgeClient object at 0x7f938595bcb0>, account_alias='native', ...>.<lambda> at 0x7f938599aac0>, identity=Mt5Identity(login='12345678', server='Broker-Demo', currency='USD', demo=True))
+now_ms = 1800000000000
+
+    def _native_entry_margin(self, command, adapter, *, now_ms):
+        from vati.execution.mt5_bridge import Mt5BridgeAdapter
+        from vati.execution.mt5_pull import Mt5PullAdapter
+        from vati.execution.ctrader.adapter import CtraderAdapter
+        if not isinstance(adapter,(Mt5BridgeAdapter,Mt5PullAdapter,CtraderAdapter)):
+            return None
+        from vati.risk.native_margin_book import NativeMarginBook
+        from vati.funding.native import native_int
+        rows=[e for e in self.ledger.iter(EventKind.RISK_DECISION,correlation_id=command.trade_intent_id)
+            if e.payload.get('decision',{}).get('decision_hash')==command.decision_hash]
+        if len(rows)!=1:
+>           raise RouterError('native entry margin requires one original durable risk input; not dispatched')
+E           vati.execution.router.RouterError: native entry margin requires one original durable risk input; not dispatched
+
+trading/vati/execution/router.py:210: RouterError
+__ test_original_quote_lifetime_is_not_renewed_inside_native_adapter_io[True] __
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-132/test_original_quote_lifetime_i1')
+eurusd = SymbolContract(symbol='EURUSD', venue='mt5', base_currency='EUR', quote_currency='USD', account_currency='USD', contra...=Decimal('0'), max_adv_participation=Decimal('0.10'), liquidity_haircut=Decimal('0'), round_trip_cost_pct=Decimal('0'))
+late = True
+
+    @pytest.mark.parametrize('late', [False, True])
+    def test_original_quote_lifetime_is_not_renewed_inside_native_adapter_io(tmp_path, eurusd, late):
+        from vati.execution.pretrade import MarketReference
+        sdk, worker, adapter, clock, mandate, trade, approved, ledger, router = flow(tmp_path, eurusd)
+        started=clock['ms']; original=sdk.symbol_info_tick; calls=[]
+        def quote(symbol):
+            value=original(symbol);calls.append(symbol)
+            if late and len(calls)==2:clock['ms']=started+101
+            return value
+        sdk.symbol_info_tick=quote
+>       result=router.execute(trade,approved,mandate,now_ms=started,entry_type='MARKET',
+            market_reference=MarketReference(trade.entry,0,100))
+
+trading/tests/test_router_native_entry_deadline.py:64: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+trading/vati/execution/router.py:558: in execute
+    native_margin_ref=self._native_entry_margin(cmd,adapter,now_ms=now_ms)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <vati.execution.router.ExecutionRouter object at 0x7f9385976900>
+command = OrderCommand(trade_intent_id='ti-1', decision_hash='176a216f6011ec62474f2ed9a674ccd9f05ffe060b29418fe34421bf58bd3efb',...egy_version='4.2.1', lease_epoch=None, command_hash='d97e14d36897b12d4b2708484375878af44997b3ef556b03a5c465384a3198cb')
+adapter = Mt5BridgeAdapter(client=<vati.execution.mt5_bridge.Mt5BridgeClient object at 0x7f9385975a30>, account_alias='native', ...>.<lambda> at 0x7f93859bd6c0>, identity=Mt5Identity(login='12345678', server='Broker-Demo', currency='USD', demo=True))
+now_ms = 1800000000000
+
+    def _native_entry_margin(self, command, adapter, *, now_ms):
+        from vati.execution.mt5_bridge import Mt5BridgeAdapter
+        from vati.execution.mt5_pull import Mt5PullAdapter
+        from vati.execution.ctrader.adapter import CtraderAdapter
+        if not isinstance(adapter,(Mt5BridgeAdapter,Mt5PullAdapter,CtraderAdapter)):
+            return None
+        from vati.risk.native_margin_book import NativeMarginBook
+        from vati.funding.native import native_int
+        rows=[e for e in self.ledger.iter(EventKind.RISK_DECISION,correlation_id=command.trade_intent_id)
+            if e.payload.get('decision',{}).get('decision_hash')==command.decision_hash]
+        if len(rows)!=1:
+>           raise RouterError('native entry margin requires one original durable risk input; not dispatched')
+E           vati.execution.router.RouterError: native entry margin requires one original durable risk input; not dispatched
+
+trading/vati/execution/router.py:210: RouterError
+=============================== warnings summary ===============================
+../../van-backend-venv-20261025/lib/python3.12/site-packages/fastapi/testclient.py:1
+  /workspace/van-backend-venv-20261025/lib/python3.12/site-packages/fastapi/testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+    from starlette.testclient import TestClient as TestClient  # noqa
+
+../../van-backend-venv-20261025/lib/python3.12/site-packages/starlette/testclient.py:53
+  /workspace/van-backend-venv-20261025/lib/python3.12/site-packages/starlette/testclient.py:53: DeprecationWarning: The anyio.abc.BlockingPortal alias is deprecated, use anyio.from_thread.BlockingPortal instead.
+    _PortalFactoryType = Callable[[], AbstractContextManager[anyio.abc.BlockingPortal]]
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED trading/tests/test_router_native_entry_deadline.py::test_original_router_mandate_deadline_is_in_the_actual_signed_native_request
+FAILED trading/tests/test_router_native_entry_deadline.py::test_native_quote_after_router_preflight_cannot_outlive_the_original_mandate
+FAILED trading/tests/test_router_native_entry_deadline.py::test_original_quote_lifetime_is_not_renewed_inside_native_adapter_io[False]
+FAILED trading/tests/test_router_native_entry_deadline.py::test_original_quote_lifetime_is_not_renewed_inside_native_adapter_io[True]
+4 failed, 42 passed, 30 skipped, 2 warnings in 4.95s

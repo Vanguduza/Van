@@ -1,0 +1,25 @@
+{
+  "schema": "van.rebuild.hosted-postgres/1",
+  "run_id": 39745717242,
+  "job_id": 119713644375,
+  "source_head": "9e345e680a1dade94a8747f5e32ac0b0069fd8b7",
+  "tested_merge": "6455b194d17e64e3bc0dc98f729b5c0baf9569c6",
+  "identical_source_tree": "513e72cc7412dc4365a9f0d0e104b612d9d9b1fd",
+  "conclusion": "success",
+  "cases": {
+    "tests": 26,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "report_sha256": "f2af9990fdbb36e045192164f3634bb3456adec003adf7ae7ba93eee5dc19bfe",
+  "other_job_failure": {
+    "job": 119713644600,
+    "stage": "APT dependency acquisition; emulator/tests never started",
+    "cause": "Unrelated packages.microsoft.com feed returned403 during apt-get update",
+    "log_sha256": "61a36b9eadf03d6cbf66a3b92051851cc9266dceef090839fcc23aef7a2dac61",
+    "candidate_fix": "tools/rebuild/ci_ubuntu_libraries.py",
+    "fix_hosted_validation": "PENDING_NEW_SOURCE_RUN"
+  },
+  "qualification": "Hosted ephemeral source tests; no production/native database migration or handset qualification"
+}

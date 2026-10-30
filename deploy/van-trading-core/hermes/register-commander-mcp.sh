@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-# Registers the Van trading commander as a Hermes subordinate MCP on dial-hermes-control.
+# Registers the Van trading commander as a Hermes subordinate MCP on the Hermes host dial-control
+# (fabric alias dial-hermes-control).
 # Splices exactly one block (mcp_servers.van_trading_commander) into the live ~/.hermes/config.yaml,
 # preserving every other byte (comments, anchors), verifying the result before writing and
 # taking a 0600 backup. Ported from DIAL's install-hermes-local-mcp-plane.sh. Idempotent; --dry-run.

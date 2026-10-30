@@ -12,6 +12,7 @@ from vati.risk.mandate import (
     MandateError,
     PlatformCeilings,
     TradingMandate,
+    TradingTemperament,
 )
 from vati.risk.contracts import (
     Direction,
@@ -61,6 +62,7 @@ __all__ = [
     "SymbolContract",
     "TradeIntent",
     "TradingMandate",
+    "TradingTemperament",
     "clamp_multiplier",
     "currency_leg_exposure",
     "drawdown_verdict",

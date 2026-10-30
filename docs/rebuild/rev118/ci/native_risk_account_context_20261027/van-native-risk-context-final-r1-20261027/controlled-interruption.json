@@ -1,0 +1,12 @@
+{
+  "at_utc": "2026-10-27T08:53:38.568125+00:00",
+  "state": "CONTROLLED_INTERRUPTION_NOT_PASS",
+  "reason": "Confirmed2actualnativeproducer failures in separate originalWIPprobe: identityinvalid raisedinstead ofpreserving explicitfundinghold; source correctionrequiresnewqualification",
+  "owned_pytest_pid": 1138541,
+  "ownership_argv_verified": true,
+  "source_hashes_still_original": 1175,
+  "call_outcomes_before_interrupt": {
+    "passed": 703
+  },
+  "signal": "SIGINT_EXACT_OWNED_PYTEST_ONLY"
+}

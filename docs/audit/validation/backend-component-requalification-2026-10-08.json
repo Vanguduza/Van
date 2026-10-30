@@ -1,0 +1,39 @@
+{
+  "schema_version": 1,
+  "status": "CURRENT_BACKEND_COMPONENT_AND_ANDROID_SOURCE_CONTRACT_PASS",
+  "full_suite_counts": {
+    "tests": 3145,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "passed": 3145
+  },
+  "full_junit_sha256": "c923bdd9d4f7584c254da9f0d7aa89eb36f4162edbc64c39e597d89056745a5a",
+  "original_full_runner_receipt": "backend-expansion-frozen-final-2026-10-08-r2-result.json",
+  "original_whole_input_stability": false,
+  "original_production_manifest_sha256": "0250ebbb27305d083f8f0b1c2aa7b7c78d211b42b5ef31f8512a0fc5228ccb8c",
+  "final_production_manifest_sha256": "7c10fa544d0344d1b73899b4cb3fd7341c0d32caaba9b4c54df7eb6ffadc50af",
+  "changed_global_inputs": [
+    "android/app/src/main/java/com/dial/van/browser/BrowserPhoneActions.kt"
+  ],
+  "backend_runtime_and_remaining_full_test_inputs_changed": [],
+  "unchanged_full_inputs_verified": 1534,
+  "affected_static_source_contract_selection": [
+    "backend/tests/test_account_approval_contract.py",
+    "backend/tests/test_owner_status_kotlin_contract.py"
+  ],
+  "static_contract_rerun_counts": {
+    "tests": 16,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "passed": 16
+  },
+  "static_contract_junit": "docs/audit/validation/backend-android-static-requalified-2026-10-08.xml",
+  "static_contract_junit_sha256": "fd0a0ec98ed5ab450cad3fa8caddd7c5b25c723ea1708eddcef19e2079b32d9f",
+  "static_contract_log": "docs/audit/validation/backend-android-static-requalified-2026-10-08.log",
+  "static_contract_log_sha256": "95398fd5d5ef558f590099c913bb337f00e415509239232f46fcce1ece1befa0",
+  "scope": "Full backend runtime/tests retained exact bytes. The sole concurrent change was Android browser recovery encryption. Both backend test modules that read Android source were rerun against the final frozen Android source (16 passing overlapping cases); these are not added to the full-suite total. The original broad runner correctly retains whole-input stability false.",
+  "physical_tests_executed": 0,
+  "production_deployed": false
+}

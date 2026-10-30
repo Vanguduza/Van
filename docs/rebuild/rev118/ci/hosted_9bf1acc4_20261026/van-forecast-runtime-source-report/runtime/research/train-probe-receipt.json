@@ -1,0 +1,202 @@
+{
+  "schema": "van.ml004.synthetic-stack-probe/1",
+  "status": "SOURCE_FIXTURE_SMOKE_PASS_NOT_UNIT_QUALIFICATION",
+  "data_environment": "FIXTURE",
+  "economic_evidence": false,
+  "execution_authority": false,
+  "worker_boundary": {
+    "role": "RESEARCH_FIXTURE_SMOKE",
+    "environment_keys": [
+      "ALL_PROXY",
+      "ARROW_NUM_THREADS",
+      "CUDA_VISIBLE_DEVICES",
+      "DO_NOT_TRACK",
+      "FEAST_USAGE",
+      "GPG_KEY",
+      "HF_HUB_OFFLINE",
+      "HOME",
+      "HOSTNAME",
+      "HTTPS_PROXY",
+      "HTTP_PROXY",
+      "LANG",
+      "MKL_NUM_THREADS",
+      "MLFLOW_DISABLE_TELEMETRY",
+      "MPLCONFIGDIR",
+      "NO_PROXY",
+      "NUMEXPR_NUM_THREADS",
+      "OMP_NUM_THREADS",
+      "OPENBLAS_NUM_THREADS",
+      "PATH",
+      "PYTHONDONTWRITEBYTECODE",
+      "PYTHONHASHSEED",
+      "PYTHONPATH",
+      "PYTHON_SHA256",
+      "PYTHON_VERSION",
+      "RAY_USAGE_STATS_ENABLED",
+      "VAN_MODEL_WORKER_ROLE",
+      "all_proxy",
+      "http_proxy",
+      "https_proxy",
+      "no_proxy"
+    ],
+    "broker_credentials_forwarded": false,
+    "execution_authority": false,
+    "data_environment": "FIXTURE",
+    "budget": {
+      "cpu_millis": 2000,
+      "memory_bytes": 6442450944,
+      "pids": 256,
+      "runtime_seconds": 300,
+      "log_bytes": 4194304,
+      "artifact_bytes": 67108864,
+      "execution_authority": false,
+      "economic_admission": false
+    },
+    "observed_cgroup": {
+      "cpu.max": "200000 100000",
+      "memory.max": "6442450944",
+      "pids.max": "256"
+    },
+    "root_read_only": true,
+    "no_new_privileges": true,
+    "effective_capabilities": 0
+  },
+  "locked_environment": {
+    "interpreter": "3.12.15",
+    "architecture": "x86_64",
+    "locked_distribution_count": 232,
+    "required_versions": {
+      "pyqlib": "0.9.7",
+      "lightgbm": "4.7.0",
+      "neuralforecast": "3.3.0",
+      "optuna": "5.0.0",
+      "feast": "0.67.0",
+      "mlflow": "3.17.2",
+      "xgboost-cpu": "3.4.1",
+      "torch": "2.14.1+cpu"
+    }
+  },
+  "cases": [
+    {
+      "case": "qlib_lightgbm",
+      "status": "PASS",
+      "detail": {
+        "rows": 10,
+        "native_format": "LIGHTGBM_TEXT",
+        "max_abs_reload_error": 0.0,
+        "artifact_sha256": "58ab9809acac5cd3e345b7a46c86f42bab563323023ea44eb25a86a0c0558e24",
+        "expected_predictions": [
+          -0.5133726175998647,
+          -0.5133726175998647,
+          -0.5133726175998647,
+          -0.5133726175998647,
+          -0.5133726175998647,
+          -0.5133726175998647,
+          -0.5133726175998647,
+          -0.5133726175998647,
+          -0.5133726175998647,
+          -0.5133726175998647
+        ],
+        "actual_qlib_model_fit": true,
+        "data_provider_used": false
+      },
+      "elapsed_seconds": 2.179813853000013
+    },
+    {
+      "case": "xgboost",
+      "status": "PASS",
+      "detail": {
+        "rows": 10,
+        "native_format": "XGBOOST_JSON",
+        "max_abs_reload_error": 0.0,
+        "artifact_sha256": "e63bf713e2fd45ae9d0a24790fef9dee6b872a4fe49ca543097cc402dd1e0bec",
+        "expected_predictions": [
+          -0.1655731499195099,
+          -0.1655731499195099,
+          -0.1655731499195099,
+          -0.1655731499195099,
+          -0.1655731499195099,
+          -0.1655731499195099,
+          -0.1655731499195099,
+          -0.1655731499195099,
+          -0.1655731499195099,
+          -0.1655731499195099
+        ]
+      },
+      "elapsed_seconds": 0.0025519090000045708
+    },
+    {
+      "case": "neuralforecast",
+      "status": "PASS",
+      "detail": {
+        "rows": 2,
+        "native_format": "NEURALFORECAST_V2_JSON_SAFETENSORS",
+        "max_abs_reload_error": 0.0,
+        "allow_pickle": false,
+        "trust_remote": false,
+        "expected_predictions": [
+          2.1280131340026855,
+          1.719799280166626
+        ],
+        "artifacts": {
+          "NHITS_0.safetensors": "28da50dec94822b572cd4526335e5a73433ccc99215c3b587fc078530591b603",
+          "configuration.json": "7bab4328fe11f4f261fd45e68db45954788dcea15d01eda160843ab19c5cab25"
+        }
+      },
+      "elapsed_seconds": 3.647928486000012
+    },
+    {
+      "case": "optuna",
+      "status": "PASS",
+      "detail": {
+        "trial_count": 2,
+        "states": [
+          "COMPLETE",
+          "COMPLETE"
+        ],
+        "objective_is_fixture_math": true
+      },
+      "elapsed_seconds": 0.17132048299998814
+    },
+    {
+      "case": "feast",
+      "status": "PASS",
+      "detail": {
+        "registry_exists": true,
+        "sqlite_online_value": [
+          2.5
+        ],
+        "offline_source": "LOCAL_FIXTURE_PARQUET",
+        "network_provider_used": false
+      },
+      "elapsed_seconds": 1.5471020230000079
+    },
+    {
+      "case": "mlflow",
+      "status": "PASS",
+      "detail": {
+        "run_id": "f98e03d7855e4af38bb4b02549987580",
+        "readback_status": "FINISHED",
+        "local_sqlite_metrics": true,
+        "artifact_sha256": "b5f2ef99bf3fbed751213e0e5d04cae3f7202c9a28aec496c31375380c0da39c"
+      },
+      "elapsed_seconds": 1.1067840620000027
+    }
+  ],
+  "unexecuted": [],
+  "bundled_openmp": {
+    "libgomp.so.1": "dcb9bd5cc517b0a23cf5923864abeee11ee00ba11abe9b3089388f50f7ba4628"
+  },
+  "observed_cgroup": {
+    "cpu.max": "200000 100000",
+    "memory.max": "6442450944",
+    "pids.max": "256"
+  },
+  "model_bundle": {
+    "bundle_manifest_sha256": "b7a6247f166f7d52acd7197ce127b6be5869e454e120af31f60cba039d6ec7ce",
+    "data_environment": "FIXTURE",
+    "execution_authority": false,
+    "economic_admission": false
+  },
+  "observed_memory_current": "609984512"
+}

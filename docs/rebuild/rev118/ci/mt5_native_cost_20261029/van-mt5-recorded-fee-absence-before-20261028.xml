@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="2" skipped="0" tests="2" time="6.895" timestamp="2026-10-28T23:11:46.713350+00:00" hostname="6e9feff21467"><testcase classname="test_van_mt5_recorded_fee_absence_20261028" name="test_real_signed_worker_result_without_charge_fields_is_not_fee_zero" time="0.013"><failure message="AssertionError: the signed worker returns no measured charge fields&#10;assert Decimal('0') is None&#10; +  where Decimal('0') = ExecutionReceipt(trade_intent_id='deadline-original', decision_hash='aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa...protective_stop_price=Decimal('1.09'), receipt_hash='ae328ee6398093d19c4f95f1b9eb1985cf13bf2ae7d78935b9f5e98723969829').fees">tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-230/test_real_signed_worker_result0')
+
+    def test_real_signed_worker_result_without_charge_fields_is_not_fee_zero(tmp_path):
+        worker, client, native = build(tmp_path)
+        adapter = Mt5BridgeAdapter(client, clock=lambda:1000000)
+        receipt = adapter.submit(command(1001000), now_ms=1000000)
+        assert receipt.status == 'FILLED' and receipt.filled_qty == D('.1')
+        assert receipt.protective_stop_confirmed and len(adapter.positions()) == 1
+&gt;       assert receipt.fees is None, 'the signed worker returns no measured charge fields'
+E       AssertionError: the signed worker returns no measured charge fields
+E       assert Decimal('0') is None
+E        +  where Decimal('0') = ExecutionReceipt(trade_intent_id='deadline-original', decision_hash='aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa...protective_stop_price=Decimal('1.09'), receipt_hash='ae328ee6398093d19c4f95f1b9eb1985cf13bf2ae7d78935b9f5e98723969829').fees
+
+../../test_van_mt5_recorded_fee_absence_20261028.py:17: AssertionError</failure></testcase><testcase classname="test_van_mt5_recorded_fee_absence_20261028" name="test_actual_ea_function_fill_without_charge_fields_is_not_fee_zero" time="2.529"><failure message="AssertionError: the original EA reply does not measure commission or fees&#10;assert Decimal('0') is None&#10; +  where Decimal('0') = ExecutionReceipt(trade_intent_id='fixture', decision_hash='0000007b000000000000000000000000000000000000000000000000000...protective_stop_price=Decimal('1.12'), receipt_hash='d97dd73d8667943efdcb4c7174fc1442de6ab97ad553b133e7050b5e575c6811').fees">ea = &lt;function ea.&lt;locals&gt;.run at 0x7ff6804c91c0&gt;
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-230/test_actual_ea_function_fill_w0')
+
+    def test_actual_ea_function_fill_without_charge_fields_is_not_fee_zero(ea, tmp_path):
+        queue = BridgeQueue(tmp_path/'native-result.sqlite3')
+        try:
+            native = ea('entry-market')['results'][0]
+            receipt = Mt5PullAdapter(queue)._entry_receipt(pull_command(), native, now_ms=1700000000000)
+            assert receipt.status in ('FILLED','PARTIAL') and receipt.filled_qty &gt; 0
+            assert receipt.protective_stop_confirmed
+&gt;           assert receipt.fees is None, 'the original EA reply does not measure commission or fees'
+E           AssertionError: the original EA reply does not measure commission or fees
+E           assert Decimal('0') is None
+E            +  where Decimal('0') = ExecutionReceipt(trade_intent_id='fixture', decision_hash='0000007b000000000000000000000000000000000000000000000000000...protective_stop_price=Decimal('1.12'), receipt_hash='d97dd73d8667943efdcb4c7174fc1442de6ab97ad553b133e7050b5e575c6811').fees
+
+../../test_van_mt5_recorded_fee_absence_20261028.py:27: AssertionError</failure></testcase></testsuite></testsuites>

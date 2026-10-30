@@ -70,6 +70,8 @@ class OwnerDeviceBinding:
     last_proof_at_ms: int | None = None
     revoked_at_ms: int | None = None
     revoke_reason: str | None = None
+    attestation_chain_verified: bool = False
+    attestation_challenge: str | None = None
 
 
 class OwnerDeviceBindingService:
@@ -82,6 +84,7 @@ class OwnerDeviceBindingService:
     async def create_bootstrap_token(
         self, *, note: str | None = None, now_ms: int | None = None,
         owner_principal_id: str = OWNER_PRINCIPAL,
+        ttl_ms: int = BOOTSTRAP_TTL_MS,
     ) -> tuple[str, str]:
         """ADR-RB-026 — the installer's one-time credential.
 
@@ -90,6 +93,8 @@ class OwnerDeviceBindingService:
         a new device, sitting in the file a backup copies.
         """
         now = int(time.time() * 1000) if now_ms is None else now_ms
+        if not 60_000 <= ttl_ms <= BOOTSTRAP_TTL_MS:
+            raise DeviceBindingError("bootstrap_ttl_invalid")
         token = secrets.token_urlsafe(32)
         challenge = secrets.token_urlsafe(24)
         await self.store.execute(
@@ -101,7 +106,7 @@ class OwnerDeviceBindingService:
             """,
             (
                 f"boot_{uuid.uuid4().hex}", _sha256(token), owner_principal_id, challenge,
-                now, now + BOOTSTRAP_TTL_MS, note,
+                now, now + ttl_ms, note,
             ),
         )
         return token, challenge
@@ -126,6 +131,94 @@ class OwnerDeviceBindingService:
 
     # ------------------------------------------------------------------ enrolment
 
+    async def recover_bootstrap(
+        self, *, token: str, device_id: str, signature: bytes,
+        issued_at_ms: int, body: bytes, now_ms: int | None = None,
+    ) -> OwnerDeviceBinding:
+        """Read back one consumed enrollment using its exact active hardware key."""
+        from van_gateway.command.nonce import CommandNonceService, NonceReplay
+        now = int(time.time() * 1000) if now_ms is None else now_ms
+        row = await self.store.fetchone(
+            "SELECT * FROM owner_device_bootstrap_tokens WHERE token_sha256 = ?",
+            (_sha256(token),),
+        )
+        if row is None:
+            raise DeviceBindingError("bootstrap_token_unknown")
+        if row["revoked_at_ms"] is not None:
+            raise DeviceBindingError("bootstrap_token_revoked")
+        if int(row["expires_at_ms"]) <= now:
+            raise DeviceBindingError("bootstrap_token_expired")
+        if row["consumed_at_ms"] is None:
+            if await self.active(str(row["owner_principal_id"])) is not None:
+                raise DeviceBindingError("owner_device_already_bound")
+            raise DeviceBindingError("bootstrap_not_consumed")
+        if row["consumed_by_device_id"] != device_id:
+            raise DeviceBindingError("bootstrap_device_mismatch")
+        binding = await self.active(str(row["owner_principal_id"]))
+        if binding is None or binding.device_id != device_id:
+            raise DeviceBindingError("device_binding_revoked")
+        if not binding.attestation_chain_verified:
+            raise DeviceBindingError("device_attestation_recertification_required")
+        binding = await self.require_proof(
+            device_id=device_id, signature=signature, method="POST",
+            path="/v1/devices/bootstrap/recover", issued_at_ms=issued_at_ms,
+            body=body, now_ms=now,
+        )
+        try:
+            await CommandNonceService(self.store).consume(
+                device_id=device_id, nonce=f"bootstrap-recover:{issued_at_ms}",
+                command_id=str(row["token_id"]), now=now // 1000,
+            )
+        except NonceReplay as exc:
+            raise DeviceBindingError("device_proof_replayed") from exc
+        return binding
+
+    async def certify_existing(
+        self, *, device_id: str, certificates_der: list[bytes],
+        now_ms: int | None = None,
+    ) -> OwnerDeviceBinding:
+        """Certify the already bound key, without replacing or enrolling any device."""
+        from van_gateway.auth.device_proof import verify_attestation_chain
+        binding = await self.for_device(device_id)
+        if binding is None or binding.status is not BindingStatus.ACTIVE:
+            raise DeviceBindingError("device_not_bound")
+        challenge = binding.attestation_challenge
+        if challenge is None:
+            event = await self.store.fetchone(
+                "SELECT challenge FROM device_attestation_events WHERE device_id = ? "
+                "AND outcome = 'ACCEPTED' AND occurred_at_ms = ? ORDER BY event_id LIMIT 1",
+                (device_id, binding.bound_at_ms),
+            )
+            challenge = str(event["challenge"]) if event else None
+        if challenge is None:
+            raise DeviceBindingError("attestation_original_challenge_absent")
+        try:
+            extension, root = verify_attestation_chain(
+                certificates_der=certificates_der, public_key_pem=binding.public_key_pem,
+                policy=self.policy, now_ms=now_ms,
+            )
+        except DeviceProofError as exc:
+            raise DeviceBindingError(exc.reason) from exc
+        verdict = verify_attestation(
+            extension=extension, challenge=challenge.encode(),
+            policy=self.policy, root_fingerprint=root,
+        )
+        if not verdict.accepted:
+            raise DeviceBindingError(verdict.refusal or "attestation_refused")
+        async with self.store.connection() as db:
+            cursor = await db.execute(
+                "UPDATE owner_device_bindings SET attestation_chain_verified = 1, "
+                "attestation_root_fingerprint = ? WHERE binding_id = ? AND status = 'ACTIVE'",
+                (root, binding.binding_id),
+            )
+            if cursor.rowcount != 1:
+                await db.rollback()
+                raise DeviceBindingError("device_binding_revoked")
+            await db.commit()
+        result = await self.for_device(device_id)
+        assert result is not None
+        return result
+
     async def bind(
         self,
         *,
@@ -138,6 +231,7 @@ class OwnerDeviceBindingService:
         os_patch_level: str | None = None,
         owner_principal_id: str = OWNER_PRINCIPAL,
         now_ms: int | None = None,
+        attestation_chain_verified: bool = False,
     ) -> OwnerDeviceBinding:
         """Enrol the owner's device, or refuse and say why.
 
@@ -165,13 +259,17 @@ class OwnerDeviceBindingService:
         fingerprint = key_fingerprint(public_key_pem)
         binding_id = f"bind_{uuid.uuid4().hex}"
         async with self.store.connection() as db:
+            # Recheck expiry at the atomic consumption, after cryptographic validation.
+            consumed_now = int(time.time() * 1000) if now_ms is None else now
             cur = await db.execute(
                 """
                 UPDATE owner_device_bootstrap_tokens
                    SET consumed_at_ms = ?, consumed_by_device_id = ?
                  WHERE token_sha256 = ? AND consumed_at_ms IS NULL
+                   AND revoked_at_ms IS NULL AND expires_at_ms > ?
+                   AND owner_principal_id = ?
                 """,
-                (now, device_id, _sha256(token)),
+                (consumed_now, device_id, _sha256(token), consumed_now, owner_principal_id),
             )
             if cur.rowcount != 1:
                 await db.rollback()
@@ -183,8 +281,9 @@ class OwnerDeviceBindingService:
                       binding_id, owner_principal_id, device_id, device_key_fingerprint,
                       public_key_pem, key_security_level, app_package_name,
                       app_signing_cert_sha256, attestation_root_fingerprint,
-                      verified_boot_state, os_version, os_patch_level, status, bound_at_ms
-                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                      verified_boot_state, os_version, os_patch_level, status, bound_at_ms,
+                      attestation_chain_verified, attestation_challenge
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                     """,
                     (
                         binding_id, owner_principal_id, device_id, fingerprint,
@@ -194,6 +293,7 @@ class OwnerDeviceBindingService:
                         verdict.facts.verified_boot_state.value
                         if verdict.facts.verified_boot_state else None,
                         os_version, os_patch_level, BindingStatus.ACTIVE.value, now,
+                        int(attestation_chain_verified), challenge,
                     ),
                 )
             except Exception as exc:
@@ -340,6 +440,8 @@ def _row_to_binding(row) -> OwnerDeviceBinding:
         last_proof_at_ms=int(row["last_proof_at_ms"]) if row["last_proof_at_ms"] else None,
         revoked_at_ms=int(row["revoked_at_ms"]) if row["revoked_at_ms"] else None,
         revoke_reason=row["revoke_reason"],
+        attestation_chain_verified=bool(row["attestation_chain_verified"]),
+        attestation_challenge=row["attestation_challenge"],
     )
 
 

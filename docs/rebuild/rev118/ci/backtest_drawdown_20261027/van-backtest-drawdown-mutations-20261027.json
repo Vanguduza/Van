@@ -1,0 +1,128 @@
+{
+  "schema": "van.rebuild.backtest-drawdown-supplemental-faults/1",
+  "source_sha256": "02694c5427f868f09379f60a16e70d996c3207a38cf40098a4ce1733b55baccd",
+  "positive_controls": [
+    {
+      "case": "earlier_percentage_peak",
+      "passed": true,
+      "actual": [
+        100.0,
+        0.5
+      ]
+    },
+    {
+      "case": "negative_equity_drawdown",
+      "passed": true,
+      "actual": [
+        200.0,
+        1.5
+      ]
+    },
+    {
+      "case": "native_cent",
+      "passed": true,
+      "actual": [
+        0.01,
+        1e-32
+      ]
+    }
+  ],
+  "faults": [
+    {
+      "mutation": "coupled_percentage_maximum",
+      "mutated_source_sha256": "1595d17b2e38d74f149d0c5f58a5cb958fff99a6b022d12cd4d0474048124cc9",
+      "caught_by": [
+        "earlier_percentage_peak",
+        "negative_equity_drawdown"
+      ],
+      "probes": [
+        {
+          "case": "earlier_percentage_peak",
+          "passed": false,
+          "actual": [
+            100.0,
+            0.1
+          ]
+        },
+        {
+          "case": "negative_equity_drawdown",
+          "passed": false,
+          "actual": [
+            200.0,
+            0.2
+          ]
+        },
+        {
+          "case": "native_cent",
+          "passed": true,
+          "actual": [
+            0.01,
+            1e-32
+          ]
+        }
+      ]
+    },
+    {
+      "mutation": "float_equity_path",
+      "mutated_source_sha256": "4b569af6f34399250ae52ce15f54bc671ed0ae9e6b19b6c15c7295eaeb4c861b",
+      "caught_by": [
+        "native_cent"
+      ],
+      "probes": [
+        {
+          "case": "earlier_percentage_peak",
+          "passed": true,
+          "actual": [
+            100.0,
+            0.5
+          ]
+        },
+        {
+          "case": "negative_equity_drawdown",
+          "passed": true,
+          "actual": [
+            200.0,
+            1.5
+          ]
+        },
+        {
+          "case": "native_cent",
+          "passed": false,
+          "actual": [
+            0.0,
+            0.0
+          ]
+        }
+      ]
+    }
+  ],
+  "restored_controls": [
+    {
+      "case": "earlier_percentage_peak",
+      "passed": true,
+      "actual": [
+        100.0,
+        0.5
+      ]
+    },
+    {
+      "case": "negative_equity_drawdown",
+      "passed": true,
+      "actual": [
+        200.0,
+        1.5
+      ]
+    },
+    {
+      "case": "native_cent",
+      "passed": true,
+      "actual": [
+        0.01,
+        1e-32
+      ]
+    }
+  ],
+  "source_unchanged": true,
+  "canonical_registry_cases_executed": false,
+  "qualification": "Two supplemental in-memory source faults; no active source mutation, live trade, admission or profitability evidence."
+}

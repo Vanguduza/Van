@@ -1,0 +1,79 @@
+{
+  "schema": "van.rebuild.native-metaeditor-hosted-attempt/1",
+  "observed_at_utc": "2026-10-23T09:20:30.478286+00:00",
+  "source_head": "81522214b76af9d0e708c51b70b17c248ab0d902",
+  "tested_merge": "54eb71c14b4aecd0a95ef710121eb6469bee9a58",
+  "identical_source_tree": "ac42ff0012a8d9cd6f5c22034894852201ba0c31",
+  "run_id": 39930454950,
+  "conclusion": "SUCCESS",
+  "native_receipt": {
+    "schema": "van.mql-native-source/1",
+    "source_head": "54eb71c14b4aecd0a95ef710121eb6469bee9a58",
+    "source_sha256": "4bdea422e163db651671a5c8e1e2aa09702fb01ca4178185d06fe59915737dbf",
+    "phase": "SOURCE_COMPILED",
+    "qualification": "Source compilation only; no terminal account, broker order, deployed EA, financial or handset acceptance.",
+    "compile_cases": [
+      {
+        "name": "VanCompilerRejectionProbe",
+        "expected_success": false,
+        "process_exit_code": 0,
+        "errors": 4,
+        "warnings": 0,
+        "fresh_binary": false,
+        "started_at_utc": "2026-10-23T09:15:39.5186118Z",
+        "finished_at_utc": "2026-10-23T09:15:40.4067634Z",
+        "log_sha256": "f32e031d3d4dd09bcd43112d76ead02e727bb7599871e15f33d7f875aaec28ab"
+      },
+      {
+        "name": "VanBridgeEA",
+        "expected_success": true,
+        "process_exit_code": 1,
+        "errors": 0,
+        "warnings": 0,
+        "fresh_binary": true,
+        "started_at_utc": "2026-10-23T09:15:40.4106633Z",
+        "finished_at_utc": "2026-10-23T09:15:42.3365633Z",
+        "log_sha256": "29e5829611f33e4d222907f385beefab75f08b78084afe8691c28f413f1f8b1b",
+        "binary_sha256": "f771b4a0a1dd1be61d7954751f9bf3475ef604ed0cbaeec6b1f02dad93acffd1"
+      }
+    ],
+    "source_blob_oid": "436e3571b7ae43a7de2abfdaa4741dbb99184cef",
+    "checkout_blob_oid": "436e3571b7ae43a7de2abfdaa4741dbb99184cef",
+    "installer_url": "https://download.terminal.free/cdn/web/metaquotes.ltd/mt5/mt5setup.exe?utm_source=www.metatrader5.com&utm_campaign=download",
+    "installer_sha256": "c8c0a73f86c58974df62fb48f8256a099d6698518cf2defc2b3f169773729e22",
+    "installer_bytes": 22902352,
+    "installer_signature": {
+      "status": "Valid",
+      "subject": "CN=MetaQuotes Ltd., O=MetaQuotes Ltd., S=Lemesos, C=CY",
+      "thumbprint": "5A64A7AED24C33DED342D01D01FA5286F06DA6DC"
+    },
+    "data_initialization": {
+      "editor_signature": {
+        "status": "Valid",
+        "subject": "CN=MetaQuotes Ltd., O=MetaQuotes Ltd., S=Lemesos, C=CY",
+        "thumbprint": "5A64A7AED24C33DED342D01D01FA5286F06DA6DC"
+      },
+      "terminal_started": true,
+      "terminal_signature": {
+        "status": "Valid",
+        "subject": "CN=MetaQuotes Ltd., O=MetaQuotes Ltd., S=Lemesos, C=CY",
+        "thumbprint": "5A64A7AED24C33DED342D01D01FA5286F06DA6DC"
+      },
+      "network_blocked_program": "D:\\a\\_temp\\van-mql-b00279f00ad44cde868ce22b8841045a\\sdk\\terminal64.exe",
+      "firewall_profiles_enabled": true
+    },
+    "compiler_signature": {
+      "status": "Valid",
+      "subject": "CN=MetaQuotes Ltd., O=MetaQuotes Ltd., S=Lemesos, C=CY",
+      "thumbprint": "5A64A7AED24C33DED342D01D01FA5286F06DA6DC"
+    },
+    "compiler_sha256": "66fef88fe6a5d6071163a31ea46b3382ab482e19239b048f5fd578e8a13bd03a",
+    "compiler_file_version": "5.0.0.6281",
+    "standard_library_trade_sha256": "96e6781624534377fe7971cba52cca3d62d1b030bc10d5e4ebf3ed8c541399ed",
+    "finished_at_utc": "2026-10-23T09:15:42.3394947Z"
+  },
+  "raw_receipt_sha256": "8cc7db96578e09887ae0db0fc0c493ba87d68474da4ec29310a079673f8d03b6",
+  "artifact_zip_sha256": "c2677bb2362d3c2fac59604b19532672fb21d0f09c6336ff0d56bcf660d65e81",
+  "job_log_sha256": "a1157a326df778eccc0de85252d3cfe39ac8f04b2a2055e0a2a192a6d662fd3b",
+  "interpretation": "Actual signed MetaEditor 5.0.0.6281 compiled exact Git source with zero errors/zero warnings and a fresh EX5; deliberately invalid source produced four errors and no EX5. SDK data initialized in a network-blocked experts-disabled disposable terminal before EA compilation. Source compilation only, no native order execution, provider/production/handset/whole-unit acceptance."
+}

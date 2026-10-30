@@ -1,0 +1,48 @@
+{
+  "schema": "van.rebuild.dataset-candidate-publication/1",
+  "base_head": "16414d3f4d413a75736a65ddeaaee2f04dcfa7ab",
+  "updated_at_utc": "2026-10-26T11:20:54.403950+00:00",
+  "status": "SOURCE_TESTED_COMPONENT_NOT_DATA_USE_OR_UNIT_ACCEPTANCE",
+  "units": [
+    "VAN-ML-PKT-005"
+  ],
+  "unit_status": "IN_PROGRESS",
+  "acceptance": "NOT_ISSUED",
+  "source_sha256": {
+    ".github/workflows/van-forecast-runtime-source.yml": "c007112ef0785ed8e5994d47ffe9c06ba6cc658373e3ed6625cc04ee5eeeb408",
+    "trading/vati/__main__.py": "52a7c8e10710d7da771e5e01e9ee47b3580daae982209fa37a3adc37c502b79f",
+    "trading/vati/core/events.py": "264e9db3fc4c265df4f875aae04e018001a7c31c9e7cfe1284aa77f50657b5bc",
+    "trading/vati/research/workflow.py": "1e883923cd4cc4480e249cb1582a1ec800343e15d50e460e96dbfd219153ef18",
+    "trading/vati/research/dataset_archive.py": "d1691ba7185d7e706d754ec3866859820580a720e340fb03db481a30eb918af7",
+    "trading/worker_tests/test_dataset_candidate_archive.py": "60300face6dbb165ac26b265665dff791db5c8e2363cf4f8b8ec281e4fd9bf8e"
+  },
+  "tests": {
+    "R1": "8 passed/1 fixture failure: nonexistent EventKind.DECISION; corrected to existing SESSION; retained",
+    "R2": "58 passed/0 skips/audit0; actual PostgreSQL fixture independently absent",
+    "R3": "20 passed/1 actual failure: specific readback unknown incorrectly wrapped; corrected without weakening assertion; retained",
+    "R4": "67 passed/0 skips/audit0; owned fixture independently absent",
+    "R5": "83 passed/0 skips/audit0; owned fixture independently absent; corrupt-record tests subsequently made independently discriminating",
+    "first_broad": "559 passed/0 skips/audit0; owned fixture independently absent",
+    "final_broad": "563 passed/0 skips/audit0; final source/test hashes match; owned isolated PostgreSQL fixture independently absent",
+    "new_publication_cases": 45,
+    "supplemental": "8 assertion-caught faults/23 positive plus23 restored SQLite controls/0 errors,skips,audit violations/exact restoration;PostgreSQL parameterizations explicitly deselected in supplemental selection only;not canonical374",
+    "rebuild": 108,
+    "counts_overlap": true
+  },
+  "canonical_checks": {
+    "owner_frontend_drift": false,
+    "registry_cases": 374,
+    "registry_edits": 383,
+    "registry_findings": [],
+    "canonical_mutations_for_this_uncommitted_source": "NOT_RUN",
+    "consolidation_findings": []
+  },
+  "hosted_job_change": "Dedicated native-source-parquet now provisions isolated pinned PostgreSQL; changed job NOT_RUN until commit/push",
+  "qualification": "Candidate publication and original-source checks only; no actual scope/rights/current policy/provider/native/unit/owner/production/economic/S24 qualification",
+  "evidence": "ci/dataset_publication_20261026",
+  "remaining": [
+    "Full DatasetManifest admission with actual scope/origin,universe/calendar/feature/target owners",
+    "Current provider entitlement and owner consent;licensed joins",
+    "Effective lifecycle,gap policy,reconstructed/corrected-research paths and governed producer/consumer/runtime integration"
+  ]
+}

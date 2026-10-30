@@ -1,0 +1,52 @@
+{
+  "schema_version": 1,
+  "authorization_id": "auth-20260930-scope-binding-programme-b-review-i6-remediation",
+  "project": "van",
+  "record_kind": "commit_scope_binding",
+  "authority": "OWNER_DERIVED",
+  "owner_instruction_sha256": "1fb51f92482bc51e4c6d7fc1ef508b3070a56c0d024dd773927367162ce72dfb",
+  "owner_instruction_digest_input": "UTF-8 bytes of the verbatim owner answer \"Yes to owner derived treatment and  enforce van's ledger\" (double space preserved) with no quotes and no trailing newline",
+  "owner_instruction_record": "docs/decisions/OWNER-DECISION-20260930-OWNER-DERIVED-AND-LEDGER-ENFORCEMENT.md",
+  "owner_instruction_excerpt": "Yes to owner derived treatment and  enforce van's ledger",
+  "source": {
+    "kind": "owner_session_instruction",
+    "channel": "claude_code",
+    "request_id": "claude-code-session_01ELKqm4GCPmPvF3ggKkgB1J-20260930",
+    "owner_attested": true,
+    "device_signature_claimed": false,
+    "cryptographic_signature_claimed": false,
+    "signed_ingress_claimed": false
+  },
+  "signature_note": "The owner answered in a Claude Code session. No device, biometric or cryptographic signature is claimed. This record is not signed-ingress evidence. The owner ordered the ledger enforced; binding each existing non-reusable record to the commits it declares is a necessary consequence of enforcing its 'not reusable' limit. The owner did not review these commit lists.",
+  "purpose": "Bind unit G9b's record, written without a machine-readable commit_scope, to the commits its own text declares.",
+  "binds": {
+    "auth-20260930-owner-derived-programme-b-review-i6-remediation": {
+      "commits": [
+        "24235d98c9ed455d32a5bb94e364189f5a8c5879",
+        "909cc5187ae9fc385eafa3f44d1def7b3aa5f38d",
+        "92ab93b1e48ed4b4e0cccb590cddc57f2ce79eaa"
+      ],
+      "derivation": "git rev-list 72e721205118ce5339fd6104daa27079fee613c1..92ab93b1e48ed4b4e0cccb590cddc57f2ce79eaa",
+      "note": "commit_range '72e72120..(unit-g9b head)'; unit-g9b is 92ab93b1 (git branch: unit-g9b 92ab93b1), the Programme B head the integrator pushed. 92ab93b1 itself is ledger-only."
+    }
+  },
+  "limits": [
+    "No signature of any kind is claimed.",
+    "A scope binding authorizes no file. It only states, for records written before tools/ci/project_truth_ledger.py read commit scopes, which commits each record covers, as the record's own text declares them (see each 'basis').",
+    "It can only narrow: without it these non-reusable records cover nothing under the checker; with it they cover the listed commits and no later commit.",
+    "It may not bind a record that declares its own commit_scope or is reusable, and a second binding of the same record makes that record cover nothing (the checker refuses to choose).",
+    "The records it binds keep their own limits; this record widens none of their paths or authority."
+  ],
+  "issued_at_utc": "2026-09-30T00:00:00Z",
+  "recorded_by": "unit G9a (review I6 M1 remediation)",
+  "material_scope_expansion": false,
+  "feature_removal": false,
+  "business_model_change": false,
+  "security_authority_change": false,
+  "owner_control_boundary_change": false,
+  "legal_position_change": false,
+  "money_or_custody_model_change": false,
+  "locked_provider_change": false,
+  "reusable": false,
+  "revoked": false
+}

@@ -1,0 +1,44 @@
+...FF....................                                                [100%]
+=================================== FAILURES ===================================
+_ test_a_feed_row_cannot_promote_its_own_source_trust[None-T1_PRIMARY-UNTRUSTED] _
+
+registered = None, requested = 'T1_PRIMARY'
+expected = <SourceTrust.UNTRUSTED: 'UNTRUSTED'>
+
+    @pytest.mark.parametrize('registered,requested,expected',[
+        (None,'T1_PRIMARY',SourceTrust.UNTRUSTED),
+        (SourceTrust.T2_SECONDARY,'T1_PRIMARY',SourceTrust.T2_SECONDARY),
+        (SourceTrust.T1_PRIMARY,'UNTRUSTED',SourceTrust.UNTRUSTED),
+    ])
+    def test_a_feed_row_cannot_promote_its_own_source_trust(registered,requested,expected):
+        news=NewsIngress(sources=[] if registered is None else [NewsSource('publisher',registered)])
+        parsed=news.headline_from_row(dict(source='publisher',trust=requested,title='Policy decision',
+            published_ms=NOW,observed_ms=NOW))
+>       assert parsed.trust is expected
+E       AssertionError: assert <SourceTrust.T1_PRIMARY: 'T1_PRIMARY'> is <SourceTrust.UNTRUSTED: 'UNTRUSTED'>
+E        +  where <SourceTrust.T1_PRIMARY: 'T1_PRIMARY'> = Headline(source_id='publisher', trust=<SourceTrust.T1_PRIMARY: 'T1_PRIMARY'>, published_ms=1800000000000, observed_ms=...t_classes=(), symbols=(), event_class='', severity=None, concern=<Concern.UNCLEAR: 'UNCLEAR'>, url='', body_excerpt='').trust
+
+trading/tests/test_news_causal_boundaries.py:49: AssertionError
+_ test_a_feed_row_cannot_promote_its_own_source_trust[T2_SECONDARY-T1_PRIMARY-T2_SECONDARY] _
+
+registered = <SourceTrust.T2_SECONDARY: 'T2_SECONDARY'>
+requested = 'T1_PRIMARY', expected = <SourceTrust.T2_SECONDARY: 'T2_SECONDARY'>
+
+    @pytest.mark.parametrize('registered,requested,expected',[
+        (None,'T1_PRIMARY',SourceTrust.UNTRUSTED),
+        (SourceTrust.T2_SECONDARY,'T1_PRIMARY',SourceTrust.T2_SECONDARY),
+        (SourceTrust.T1_PRIMARY,'UNTRUSTED',SourceTrust.UNTRUSTED),
+    ])
+    def test_a_feed_row_cannot_promote_its_own_source_trust(registered,requested,expected):
+        news=NewsIngress(sources=[] if registered is None else [NewsSource('publisher',registered)])
+        parsed=news.headline_from_row(dict(source='publisher',trust=requested,title='Policy decision',
+            published_ms=NOW,observed_ms=NOW))
+>       assert parsed.trust is expected
+E       AssertionError: assert <SourceTrust.T1_PRIMARY: 'T1_PRIMARY'> is <SourceTrust.T2_SECONDARY: 'T2_SECONDARY'>
+E        +  where <SourceTrust.T1_PRIMARY: 'T1_PRIMARY'> = Headline(source_id='publisher', trust=<SourceTrust.T1_PRIMARY: 'T1_PRIMARY'>, published_ms=1800000000000, observed_ms=...t_classes=(), symbols=(), event_class='', severity=None, concern=<Concern.UNCLEAR: 'UNCLEAR'>, url='', body_excerpt='').trust
+
+trading/tests/test_news_causal_boundaries.py:49: AssertionError
+=========================== short test summary info ============================
+FAILED trading/tests/test_news_causal_boundaries.py::test_a_feed_row_cannot_promote_its_own_source_trust[None-T1_PRIMARY-UNTRUSTED]
+FAILED trading/tests/test_news_causal_boundaries.py::test_a_feed_row_cannot_promote_its_own_source_trust[T2_SECONDARY-T1_PRIMARY-T2_SECONDARY]
+2 failed, 23 passed in 0.37s

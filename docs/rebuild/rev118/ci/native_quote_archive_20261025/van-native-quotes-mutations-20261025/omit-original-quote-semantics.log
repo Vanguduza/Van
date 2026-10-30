@@ -1,0 +1,164 @@
+...........FFFF......................                                    [100%]
+=================================== FAILURES ===================================
+_ test_rehashed_invalid_or_overclaiming_quote_cannot_be_persisted[subscription] _
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-125/test_rehashed_invalid_or_overc10')
+bad = 'subscription'
+
+    @pytest.mark.parametrize('bad',['authority','scope','precision','crossed','stale','native_time','processing',
+        'clock_order','age','contract','subscription','control','session','quote_hash','capture_hash',
+        'capacity_exhausted','capacity_bool','capacity_empty','capacity_bytes','capacity_totals','policy_bool'])
+    def test_rehashed_invalid_or_overclaiming_quote_cannot_be_persisted(tmp_path,bad):
+        c=contract();capture=sample(c);body=capture.body();q=body['quote'];cap=body['read_capacity']
+        if bad=='authority':q['provider_qualified']=True
+        elif bad=='scope':q['scope']['native_account_id']=999
+        elif bad=='precision':q['bid']='1.101001'
+        elif bad=='crossed':q['bid']='2'
+        elif bad=='stale':q['evaluated_at_ms']=206000;q['age_ms']=6000
+        elif bad=='native_time':q['bid_native_time_ms']=200001
+        elif bad=='processing':q['processed_at_ms']=99999
+        elif bad=='clock_order':q['evaluated_at_ms']=199999
+        elif bad=='age':q['age_ms']=True
+        elif bad=='contract':q['contract_revision']='0'*64
+        elif bad=='subscription':q['subscription_state']='NOT_ACKNOWLEDGED'
+        elif bad=='control':q['control_state']='UNSUBSCRIBE_REQUESTED_UNCONFIRMED'
+        elif bad=='session':q['market_session_state']='LIVE'
+        elif bad=='capacity_exhausted':cap['state']='EXHAUSTED';cap['refused_frame_length']=100
+        elif bad=='capacity_bool':cap['admitted_frame_headers']=True
+        elif bad=='capacity_empty':cap['admitted_frame_headers']=0
+        elif bad=='capacity_bytes':cap['reserved_encoded_bytes']=16777217
+        elif bad=='capacity_totals':cap['reserved_encoded_bytes']=1
+        elif bad=='policy_bool':body['max_age_ms']=True
+        q['observation_sha256']=canonical_hash({k:v for k,v in q.items() if k!='observation_sha256'})
+        if bad=='quote_hash':q['observation_sha256']='0'*64
+        body['capture_sha256']=canonical_hash({k:v for k,v in body.items() if k!='capture_sha256'})
+        if bad=='capture_hash':body['capture_sha256']='0'*64
+        object.__setattr__(capture,'body',lambda:body)
+>       with pytest.raises(NativeArchiveError):archive(tmp_path).record('refused',c,capture)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE NativeArchiveError
+
+trading/tests/test_native_quote_archive.py:80: Failed
+___ test_rehashed_invalid_or_overclaiming_quote_cannot_be_persisted[control] ___
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-125/test_rehashed_invalid_or_overc11')
+bad = 'control'
+
+    @pytest.mark.parametrize('bad',['authority','scope','precision','crossed','stale','native_time','processing',
+        'clock_order','age','contract','subscription','control','session','quote_hash','capture_hash',
+        'capacity_exhausted','capacity_bool','capacity_empty','capacity_bytes','capacity_totals','policy_bool'])
+    def test_rehashed_invalid_or_overclaiming_quote_cannot_be_persisted(tmp_path,bad):
+        c=contract();capture=sample(c);body=capture.body();q=body['quote'];cap=body['read_capacity']
+        if bad=='authority':q['provider_qualified']=True
+        elif bad=='scope':q['scope']['native_account_id']=999
+        elif bad=='precision':q['bid']='1.101001'
+        elif bad=='crossed':q['bid']='2'
+        elif bad=='stale':q['evaluated_at_ms']=206000;q['age_ms']=6000
+        elif bad=='native_time':q['bid_native_time_ms']=200001
+        elif bad=='processing':q['processed_at_ms']=99999
+        elif bad=='clock_order':q['evaluated_at_ms']=199999
+        elif bad=='age':q['age_ms']=True
+        elif bad=='contract':q['contract_revision']='0'*64
+        elif bad=='subscription':q['subscription_state']='NOT_ACKNOWLEDGED'
+        elif bad=='control':q['control_state']='UNSUBSCRIBE_REQUESTED_UNCONFIRMED'
+        elif bad=='session':q['market_session_state']='LIVE'
+        elif bad=='capacity_exhausted':cap['state']='EXHAUSTED';cap['refused_frame_length']=100
+        elif bad=='capacity_bool':cap['admitted_frame_headers']=True
+        elif bad=='capacity_empty':cap['admitted_frame_headers']=0
+        elif bad=='capacity_bytes':cap['reserved_encoded_bytes']=16777217
+        elif bad=='capacity_totals':cap['reserved_encoded_bytes']=1
+        elif bad=='policy_bool':body['max_age_ms']=True
+        q['observation_sha256']=canonical_hash({k:v for k,v in q.items() if k!='observation_sha256'})
+        if bad=='quote_hash':q['observation_sha256']='0'*64
+        body['capture_sha256']=canonical_hash({k:v for k,v in body.items() if k!='capture_sha256'})
+        if bad=='capture_hash':body['capture_sha256']='0'*64
+        object.__setattr__(capture,'body',lambda:body)
+>       with pytest.raises(NativeArchiveError):archive(tmp_path).record('refused',c,capture)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE NativeArchiveError
+
+trading/tests/test_native_quote_archive.py:80: Failed
+___ test_rehashed_invalid_or_overclaiming_quote_cannot_be_persisted[session] ___
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-125/test_rehashed_invalid_or_overc12')
+bad = 'session'
+
+    @pytest.mark.parametrize('bad',['authority','scope','precision','crossed','stale','native_time','processing',
+        'clock_order','age','contract','subscription','control','session','quote_hash','capture_hash',
+        'capacity_exhausted','capacity_bool','capacity_empty','capacity_bytes','capacity_totals','policy_bool'])
+    def test_rehashed_invalid_or_overclaiming_quote_cannot_be_persisted(tmp_path,bad):
+        c=contract();capture=sample(c);body=capture.body();q=body['quote'];cap=body['read_capacity']
+        if bad=='authority':q['provider_qualified']=True
+        elif bad=='scope':q['scope']['native_account_id']=999
+        elif bad=='precision':q['bid']='1.101001'
+        elif bad=='crossed':q['bid']='2'
+        elif bad=='stale':q['evaluated_at_ms']=206000;q['age_ms']=6000
+        elif bad=='native_time':q['bid_native_time_ms']=200001
+        elif bad=='processing':q['processed_at_ms']=99999
+        elif bad=='clock_order':q['evaluated_at_ms']=199999
+        elif bad=='age':q['age_ms']=True
+        elif bad=='contract':q['contract_revision']='0'*64
+        elif bad=='subscription':q['subscription_state']='NOT_ACKNOWLEDGED'
+        elif bad=='control':q['control_state']='UNSUBSCRIBE_REQUESTED_UNCONFIRMED'
+        elif bad=='session':q['market_session_state']='LIVE'
+        elif bad=='capacity_exhausted':cap['state']='EXHAUSTED';cap['refused_frame_length']=100
+        elif bad=='capacity_bool':cap['admitted_frame_headers']=True
+        elif bad=='capacity_empty':cap['admitted_frame_headers']=0
+        elif bad=='capacity_bytes':cap['reserved_encoded_bytes']=16777217
+        elif bad=='capacity_totals':cap['reserved_encoded_bytes']=1
+        elif bad=='policy_bool':body['max_age_ms']=True
+        q['observation_sha256']=canonical_hash({k:v for k,v in q.items() if k!='observation_sha256'})
+        if bad=='quote_hash':q['observation_sha256']='0'*64
+        body['capture_sha256']=canonical_hash({k:v for k,v in body.items() if k!='capture_sha256'})
+        if bad=='capture_hash':body['capture_sha256']='0'*64
+        object.__setattr__(capture,'body',lambda:body)
+>       with pytest.raises(NativeArchiveError):archive(tmp_path).record('refused',c,capture)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE NativeArchiveError
+
+trading/tests/test_native_quote_archive.py:80: Failed
+_ test_rehashed_invalid_or_overclaiming_quote_cannot_be_persisted[quote_hash] __
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-125/test_rehashed_invalid_or_overc13')
+bad = 'quote_hash'
+
+    @pytest.mark.parametrize('bad',['authority','scope','precision','crossed','stale','native_time','processing',
+        'clock_order','age','contract','subscription','control','session','quote_hash','capture_hash',
+        'capacity_exhausted','capacity_bool','capacity_empty','capacity_bytes','capacity_totals','policy_bool'])
+    def test_rehashed_invalid_or_overclaiming_quote_cannot_be_persisted(tmp_path,bad):
+        c=contract();capture=sample(c);body=capture.body();q=body['quote'];cap=body['read_capacity']
+        if bad=='authority':q['provider_qualified']=True
+        elif bad=='scope':q['scope']['native_account_id']=999
+        elif bad=='precision':q['bid']='1.101001'
+        elif bad=='crossed':q['bid']='2'
+        elif bad=='stale':q['evaluated_at_ms']=206000;q['age_ms']=6000
+        elif bad=='native_time':q['bid_native_time_ms']=200001
+        elif bad=='processing':q['processed_at_ms']=99999
+        elif bad=='clock_order':q['evaluated_at_ms']=199999
+        elif bad=='age':q['age_ms']=True
+        elif bad=='contract':q['contract_revision']='0'*64
+        elif bad=='subscription':q['subscription_state']='NOT_ACKNOWLEDGED'
+        elif bad=='control':q['control_state']='UNSUBSCRIBE_REQUESTED_UNCONFIRMED'
+        elif bad=='session':q['market_session_state']='LIVE'
+        elif bad=='capacity_exhausted':cap['state']='EXHAUSTED';cap['refused_frame_length']=100
+        elif bad=='capacity_bool':cap['admitted_frame_headers']=True
+        elif bad=='capacity_empty':cap['admitted_frame_headers']=0
+        elif bad=='capacity_bytes':cap['reserved_encoded_bytes']=16777217
+        elif bad=='capacity_totals':cap['reserved_encoded_bytes']=1
+        elif bad=='policy_bool':body['max_age_ms']=True
+        q['observation_sha256']=canonical_hash({k:v for k,v in q.items() if k!='observation_sha256'})
+        if bad=='quote_hash':q['observation_sha256']='0'*64
+        body['capture_sha256']=canonical_hash({k:v for k,v in body.items() if k!='capture_sha256'})
+        if bad=='capture_hash':body['capture_sha256']='0'*64
+        object.__setattr__(capture,'body',lambda:body)
+>       with pytest.raises(NativeArchiveError):archive(tmp_path).record('refused',c,capture)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE NativeArchiveError
+
+trading/tests/test_native_quote_archive.py:80: Failed
+=========================== short test summary info ============================
+FAILED trading/tests/test_native_quote_archive.py::test_rehashed_invalid_or_overclaiming_quote_cannot_be_persisted[subscription]
+FAILED trading/tests/test_native_quote_archive.py::test_rehashed_invalid_or_overclaiming_quote_cannot_be_persisted[control]
+FAILED trading/tests/test_native_quote_archive.py::test_rehashed_invalid_or_overclaiming_quote_cannot_be_persisted[session]
+FAILED trading/tests/test_native_quote_archive.py::test_rehashed_invalid_or_overclaiming_quote_cannot_be_persisted[quote_hash]
+4 failed, 33 passed in 1.81s

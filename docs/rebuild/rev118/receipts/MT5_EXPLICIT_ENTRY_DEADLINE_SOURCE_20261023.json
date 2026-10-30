@@ -1,0 +1,502 @@
+{
+  "schema": "van.rebuild.mt5-explicit-entry-deadline-source/1",
+  "observed_at_utc": "2026-10-23T14:25:27.938373+00:00",
+  "source_parent": "1c06852cbc6c30416c18a276e633ce8dee16ca19",
+  "source_sha256": {
+    "deploy/van-trading-core/windows/mt5_worker/mt5_bridge_worker.py": "1f69134e6884951e4d000164fe8d9ad0c667e3f116623d0654df9a6eda735565",
+    "trading/vati/execution/mt5_bridge.py": "84b4e25f90de947aeb27cb11ca14780d6dea99cde571716a626e472ddbdeee82",
+    "trading/tests/test_mt5_worker.py": "282e4cc9542c513ee317513041ec58852c062f99cd095038f2899e0874f8e5e9",
+    "trading/tests/test_mt5_explicit_entry_deadline.py": "2da03abb9ea3f1b54d8df42c9b9f978c1261700ced4342c34e38bb12b9dca538",
+    "tools/rebuild/source_storage_audit.py": "d4e270150fb0da6e8d79b449dd0de68fd1f97b3ccea3d282f31d91297edbd495",
+    "tests/rebuild/test_source_storage_audit.py": "80863a129145bfbafdbcf118cda2a7ef43b8e6203b86b56a0ca5ba323d1e7366",
+    "deploy/van-trading-core/windows/mt5_worker/README.md": "472895ebd2513286479bca589856de461cd90b6318dc0132188d8b77dbf3e94b"
+  },
+  "executions": {
+    "initial_before": {
+      "tests": 8,
+      "failures": 8,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 0.211,
+      "sha256": "2286dcd5f2226e0f27e431b7adf2903f0d82e66cbe15c395c61e12dcb62cc30b"
+    },
+    "valid_eight_before": {
+      "tests": 8,
+      "failures": 8,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 0.182,
+      "sha256": "c5d466d678777be90a654c98e62f014cc081dfc849e636a95e2e69f4af74ffb2"
+    },
+    "intermediate_focused": {
+      "tests": 66,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 1.964,
+      "sha256": "f381ad4667d016b34a59300cc51cec87cdbca1ebd3235591120cc4f52bbd3574"
+    },
+    "pre_typed_operation_focused": {
+      "tests": 71,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 1.887,
+      "sha256": "3afeb36ee524bc1eefb74085739dd50ee41e3c87821219ac872e4535586cd391"
+    },
+    "typed_intermediate": {
+      "tests": 73,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 1.899,
+      "sha256": "a8679b140a4a463bf604ee0f447587f427cc374f0a8c48fe2f02c0066a6fa2cb"
+    },
+    "integrated_before": {
+      "tests": 16,
+      "failures": 15,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 0.249,
+      "sha256": "b251e54d997209fef76f011d40d22b0f54cb6bc4238cfd07fcdbed61305a3b2f"
+    },
+    "integrated_current": {
+      "tests": 74,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 1.876,
+      "sha256": "1c1509b9f8acbd45899d649b39f549e775e5bfccb0326f71efd14021638916e3"
+    },
+    "full_trading_actual_pg": {
+      "tests": 2500,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 509.306,
+      "sha256": "cc1d3450eec21bb2f34e9035e4e49f4f5ebbc988410850f86a9bf85519648a64"
+    },
+    "rebuild": {
+      "tests": 79,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 35.826,
+      "sha256": "30d383357fde19017ac13ee1bc4b1ed4232eeb0e5a6b905bf78076a0e660902d"
+    },
+    "storage_guard_dial_control": {
+      "tests": 20,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 6.345,
+      "sha256": "10871622de1b7284fa4bd273c5b4726fe3743141e79b629303a01536a1a3490c"
+    }
+  },
+  "fault_campaign": {
+    "definitions": [
+      [
+        "skip local expired-command refusal",
+        "trading/vati/execution/mt5_bridge.py",
+        "if type(expiry) is not int or not 0<expiry<2**63 or expiry<=max(now_ms,self.clock()):",
+        "if False:"
+      ],
+      [
+        "drop deadline from signed native body",
+        "trading/vati/execution/mt5_bridge.py",
+        "if expiry is not None:body['expires_at_ms']=expiry",
+        "if False:pass"
+      ],
+      [
+        "ignore final native deadline",
+        "deploy/van-trading-core/windows/mt5_worker/mt5_bridge_worker.py",
+        "or self.clock()>=expiry:",
+        "or False:"
+      ],
+      [
+        "silently allow legacy worker",
+        "trading/vati/execution/mt5_bridge.py",
+        "if support!={'schema':'van.mt5.entry-constraints/1','explicit_deadline':True,'required_op':'order_send_expiring'} or type(support.get('explicit_deadline')) is not bool:",
+        "if False:"
+      ],
+      [
+        "coerce signed deadline string",
+        "deploy/van-trading-core/windows/mt5_worker/mt5_bridge_worker.py",
+        "expiry=b['expires_at_ms']",
+        "expiry=int(b['expires_at_ms'])"
+      ],
+      [
+        "renew expiry across readonly precheck",
+        "trading/vati/execution/mt5_bridge.py",
+        "if expiry is not None and expiry<=self.clock():",
+        "if False:"
+      ],
+      [
+        "fallback to legacy unbounded operation",
+        "trading/vati/execution/mt5_bridge.py",
+        "\"order_send_expiring\" if expiry is not None else \"order_send\"",
+        "\"order_send\""
+      ]
+    ],
+    "records": [
+      {
+        "case": 0,
+        "phase": "control",
+        "reason": "skip local expired-command refusal",
+        "exit_code": 0,
+        "counts": {
+          "tests": 16,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "assertion_failures": 0,
+        "xml_sha256": "8fdbe4d4943d7a25791175d9d47232b8097981c9b648706f6104a7e2f959679e"
+      },
+      {
+        "case": 0,
+        "phase": "fault",
+        "reason": "skip local expired-command refusal",
+        "exit_code": 1,
+        "counts": {
+          "tests": 16,
+          "failures": 5,
+          "errors": 0,
+          "skipped": 0
+        },
+        "assertion_failures": 4,
+        "xml_sha256": "42a385f20051b23e7f242dd8d15acfd93e5ad8f0b715451ff705a0f8aa2b7aa5"
+      },
+      {
+        "case": 1,
+        "phase": "control",
+        "reason": "drop deadline from signed native body",
+        "exit_code": 0,
+        "counts": {
+          "tests": 16,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "assertion_failures": 0,
+        "xml_sha256": "2908df907b378f1f15cfee6a3b5e2c8c24eeeeaf9a2be457aa1b4755f8939729"
+      },
+      {
+        "case": 1,
+        "phase": "fault",
+        "reason": "drop deadline from signed native body",
+        "exit_code": 1,
+        "counts": {
+          "tests": 16,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "assertion_failures": 1,
+        "xml_sha256": "a160f15008374a1255ddbb5de7ce1fcd24aa11c8091a99d11f96a848f8780326"
+      },
+      {
+        "case": 2,
+        "phase": "control",
+        "reason": "ignore final native deadline",
+        "exit_code": 0,
+        "counts": {
+          "tests": 16,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "assertion_failures": 0,
+        "xml_sha256": "fe842eb2804ca1b0fac04b8aabcaff15b50e02f790d99fb46564acaf1e18e5d3"
+      },
+      {
+        "case": 2,
+        "phase": "fault",
+        "reason": "ignore final native deadline",
+        "exit_code": 1,
+        "counts": {
+          "tests": 16,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "assertion_failures": 1,
+        "xml_sha256": "e2d0126baa72d13378c8d9f45d2d2d37adf3433d81ea060ca0b6154b6690e3a9"
+      },
+      {
+        "case": 3,
+        "phase": "control",
+        "reason": "silently allow legacy worker",
+        "exit_code": 0,
+        "counts": {
+          "tests": 16,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "assertion_failures": 0,
+        "xml_sha256": "efb42d47d4d68acf93e77df94c4e3a7ffd587b02d6a1e0dcbe6a95341ff6ebaf"
+      },
+      {
+        "case": 3,
+        "phase": "fault",
+        "reason": "silently allow legacy worker",
+        "exit_code": 1,
+        "counts": {
+          "tests": 16,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "assertion_failures": 1,
+        "xml_sha256": "6f8a512266addd7cb005ad342f77ac15fcf1343b0d35a12abeab5102c57f67fb"
+      },
+      {
+        "case": 4,
+        "phase": "control",
+        "reason": "coerce signed deadline string",
+        "exit_code": 0,
+        "counts": {
+          "tests": 16,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "assertion_failures": 0,
+        "xml_sha256": "37619c7b13edd92b503491db08ebae2e893f307b46faf7869df434a9aca6cfe9"
+      },
+      {
+        "case": 4,
+        "phase": "fault",
+        "reason": "coerce signed deadline string",
+        "exit_code": 1,
+        "counts": {
+          "tests": 16,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "assertion_failures": 1,
+        "xml_sha256": "c74ba133718ec8976fcdf9c7cef99fb4822969c72e087fe77b6c16db89dca353"
+      },
+      {
+        "case": 5,
+        "phase": "control",
+        "reason": "renew expiry across readonly precheck",
+        "exit_code": 0,
+        "counts": {
+          "tests": 16,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "assertion_failures": 0,
+        "xml_sha256": "57f0a5afb03ae8922f601315a0684964247656cc115d9bfbd52115042e7a5813"
+      },
+      {
+        "case": 5,
+        "phase": "fault",
+        "reason": "renew expiry across readonly precheck",
+        "exit_code": 1,
+        "counts": {
+          "tests": 16,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "assertion_failures": 1,
+        "xml_sha256": "6f88872a5d9b86e3e831d33900505101903ef862a8144cc790b64920853b8569"
+      },
+      {
+        "case": 6,
+        "phase": "control",
+        "reason": "fallback to legacy unbounded operation",
+        "exit_code": 0,
+        "counts": {
+          "tests": 16,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "assertion_failures": 0,
+        "xml_sha256": "e8f16b86adbc82d4492784c9c10475cc40d67a964cfb9717b5da515358ddb1f0"
+      },
+      {
+        "case": 6,
+        "phase": "fault",
+        "reason": "fallback to legacy unbounded operation",
+        "exit_code": 1,
+        "counts": {
+          "tests": 16,
+          "failures": 2,
+          "errors": 0,
+          "skipped": 0
+        },
+        "assertion_failures": 1,
+        "xml_sha256": "284bce8aab018a7c340b9c7387a0f8735416bdf5195f62838d4e86f4e0c3f995"
+      }
+    ],
+    "before": {
+      "trading/vati/execution/mt5_bridge.py": "84b4e25f90de947aeb27cb11ca14780d6dea99cde571716a626e472ddbdeee82",
+      "deploy/van-trading-core/windows/mt5_worker/mt5_bridge_worker.py": "1f69134e6884951e4d000164fe8d9ad0c667e3f116623d0654df9a6eda735565"
+    },
+    "after": {
+      "trading/vati/execution/mt5_bridge.py": "84b4e25f90de947aeb27cb11ca14780d6dea99cde571716a626e472ddbdeee82",
+      "deploy/van-trading-core/windows/mt5_worker/mt5_bridge_worker.py": "1f69134e6884951e4d000164fe8d9ad0c667e3f116623d0654df9a6eda735565"
+    },
+    "source_restored": true
+  },
+  "initial_native_fault_survivor": {
+    "definitions": [
+      [
+        "skip local expired-command refusal",
+        "trading/vati/execution/mt5_bridge.py",
+        "if type(expiry) is not int or not 0<expiry<2**63 or expiry<=max(now_ms,self.clock()):",
+        "if False:"
+      ],
+      [
+        "drop deadline from signed native body",
+        "trading/vati/execution/mt5_bridge.py",
+        "if expiry is not None:body['expires_at_ms']=expiry",
+        "if False:pass"
+      ],
+      [
+        "ignore final native deadline",
+        "deploy/van-trading-core/windows/mt5_worker/mt5_bridge_worker.py",
+        "or self.clock()>=expiry:",
+        "or False:"
+      ],
+      [
+        "silently allow legacy worker",
+        "trading/vati/execution/mt5_bridge.py",
+        "if support!={'schema':'van.mt5.entry-constraints/1','explicit_deadline':True} or type(support.get('explicit_deadline')) is not bool:",
+        "if False:"
+      ],
+      [
+        "coerce signed deadline string",
+        "deploy/van-trading-core/windows/mt5_worker/mt5_bridge_worker.py",
+        "expiry=b['expires_at_ms']",
+        "expiry=int(b['expires_at_ms'])"
+      ],
+      [
+        "renew expiry across readonly precheck",
+        "trading/vati/execution/mt5_bridge.py",
+        "if expiry is not None and expiry<=self.clock():",
+        "if False:"
+      ]
+    ],
+    "records": [
+      {
+        "case": 0,
+        "phase": "control",
+        "reason": "skip local expired-command refusal",
+        "exit_code": 0,
+        "counts": {
+          "tests": 13,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "assertion_failures": 0,
+        "xml_sha256": "e8f4ee198ee4a132fb9c932e7f8fd9db9b87c1d7b9e5e6722a9e8c2f33beafe9"
+      },
+      {
+        "case": 0,
+        "phase": "fault",
+        "reason": "skip local expired-command refusal",
+        "exit_code": 1,
+        "counts": {
+          "tests": 13,
+          "failures": 5,
+          "errors": 0,
+          "skipped": 0
+        },
+        "assertion_failures": 4,
+        "xml_sha256": "c058c1bfb2df5a9aae18276f978162303ee08518f0d2e3f143c7acc404169b46"
+      },
+      {
+        "case": 1,
+        "phase": "control",
+        "reason": "drop deadline from signed native body",
+        "exit_code": 0,
+        "counts": {
+          "tests": 13,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "assertion_failures": 0,
+        "xml_sha256": "a953035862eb15f1e4b72c569ba9a6462b58b3b150685f9d4db7199f330d5581"
+      },
+      {
+        "case": 1,
+        "phase": "fault",
+        "reason": "drop deadline from signed native body",
+        "exit_code": 1,
+        "counts": {
+          "tests": 13,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "assertion_failures": 1,
+        "xml_sha256": "877adad7a4fad8f82e1eb851e7df39cdef7f82110ab7952a1478923dc3a7d6da"
+      },
+      {
+        "case": 2,
+        "phase": "control",
+        "reason": "ignore final native deadline",
+        "exit_code": 0,
+        "counts": {
+          "tests": 13,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "assertion_failures": 0,
+        "xml_sha256": "f94914c8cf55de521cd66e4fbfde94e072b8b2e4c588cd80ad923bb295aa8796"
+      },
+      {
+        "case": 2,
+        "phase": "fault",
+        "reason": "ignore final native deadline",
+        "exit_code": 0,
+        "counts": {
+          "tests": 13,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "assertion_failures": 0,
+        "xml_sha256": "30cabe78f1e38723e353e451df0e35f709aac5cf8740b64f89e0567b0760daea"
+      }
+    ],
+    "before": {
+      "trading/vati/execution/mt5_bridge.py": "8d1774942530853bad0da8fbbc0f774c0f4f9ec8dac6faf43b77b99201845dee",
+      "deploy/van-trading-core/windows/mt5_worker/mt5_bridge_worker.py": "5133bcce26b8016918b8344257ea66331d02ee7dd02d836d8004ef9fd76ca023"
+    },
+    "after": {
+      "trading/vati/execution/mt5_bridge.py": "8d1774942530853bad0da8fbbc0f774c0f4f9ec8dac6faf43b77b99201845dee",
+      "deploy/van-trading-core/windows/mt5_worker/mt5_bridge_worker.py": "5133bcce26b8016918b8344257ea66331d02ee7dd02d836d8004ef9fd76ca023"
+    },
+    "source_restored": true
+  },
+  "oracle_correction": "First delay happened at the readonly precheck. Corrected test delays second/send-time quote after the client final check. Native expiry mutant now causes the intended assertion; complete final seven-case campaign rerun.",
+  "storage_audit_selftest": {
+    "rejected": 14,
+    "allowed_read_and_external_write": true
+  },
+  "storage_audit_control": {
+    "schema": "van.source-storage-audit/1",
+    "forbidden_events": [],
+    "source_sha256": "d4e270150fb0da6e8d79b449dd0de68fd1f97b3ccea3d282f31d91297edbd495",
+    "root": "/workspace/van-review-2026-10-18/publish",
+    "scope": "SQLite opens, path-based writable opens and directory/link/rename/delete events under data and backend/data",
+    "limits": "Python audit events only; existing fd writes, native-library raw I/O and external processes are not an OS sandbox. Git state is checked separately."
+  },
+  "private_pg_cleanup": {
+    "stopped": true,
+    "removed": true
+  },
+  "qualification": "Candidate source only. Explicit deadline is signed and enforced on the native clock through a typed operation; transport time is not renewed, legacy None-deadline behavior retained. No native clock synchronization, financial risk-budget/lease-epoch, real broker/Windows terminal, whole-unit, production or handset acceptance."
+}

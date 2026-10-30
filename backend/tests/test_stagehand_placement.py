@@ -1,0 +1,349 @@
+"""Owner decisions 2026-09-29 §§1, 4, 5 — Stagehand production placement/model gate."""
+
+from __future__ import annotations
+
+import pytest
+
+from van_gateway.automation.placement import (
+    FORBIDDEN_STAGEHAND_ZONES,
+    STAGEHAND_PLACEMENT_SATISFIED,
+    stagehand_production_enabled,
+    stagehand_production_state,
+)
+from van_gateway.config import Settings
+
+
+def _pki(tmp_path):
+    paths = {}
+    for name in ("browser_core_ca_file", "browser_core_client_cert_file", "browser_core_client_key_file"):
+        p = tmp_path / f"{name}.pem"
+        p.write_text("placeholder-not-a-key\n", encoding="utf-8")
+        paths[name] = str(p)
+    return paths
+
+
+def _ready_settings(tmp_path, **overrides) -> Settings:
+    values = dict(
+        browser_enabled=True,
+        browser_stagehand_zone="van-browser-core",
+        browser_stagehand_base_url="https://10.77.0.6:9443/stagehand",
+        **_pki(tmp_path),
+    )
+    values.update(overrides)
+    return Settings(**values)
+
+
+def _healthy(**overrides) -> dict:
+    body = {
+        "ok": True,
+        "trust_zone": "van-browser-core",
+        "runtime_version": "4.1.0",
+        "runtime_version_source": "installed-package-metadata",
+        "act_endpoint_enabled": False,
+        "model_name": "anthropic/claude-sonnet-5",
+        "model_key_present": True,
+        "provider_key_in_browser_memory": False,
+        "direct_agent_loop": False,
+        "model_self_selection": False,
+    }
+    body.update(overrides)
+    return body
+
+
+def test_default_model_is_the_owner_decided_pair_not_empty():
+    s = Settings()
+    assert (s.browser_stagehand_model_provider, s.browser_stagehand_model_name) == (
+        "anthropic",
+        "claude-sonnet-5",
+    )
+    # The immutable snapshot id is not established from this repository.
+    assert s.browser_stagehand_model_revision == ""
+    assert stagehand_production_state(s)["model_revision_status"] == "UNVERIFIED_IMMUTABLE_SNAPSHOT"
+
+
+def test_default_settings_are_production_disabled():
+    enabled, reason = stagehand_production_enabled(Settings())
+    assert enabled is False
+    assert reason == "BROWSER_FABRIC_DISABLED"
+    enabled, reason = stagehand_production_enabled(Settings(browser_enabled=True))
+    assert (enabled, reason) == (False, "STAGEHAND_ZONE_UNDECLARED")
+
+
+@pytest.mark.parametrize("zone", sorted(FORBIDDEN_STAGEHAND_ZONES))
+def test_forbidden_zones_are_refused_by_name(tmp_path, zone):
+    s = _ready_settings(tmp_path, browser_stagehand_zone=zone)
+    enabled, reason = stagehand_production_enabled(s, worker_health=_healthy(trust_zone=zone))
+    assert enabled is False
+    assert reason == f"STAGEHAND_PLACEMENT_FORBIDDEN:{zone}"
+
+
+def test_unknown_zone_is_refused(tmp_path):
+    s = _ready_settings(tmp_path, browser_stagehand_zone="some-other-host")
+    assert stagehand_production_enabled(s, worker_health=_healthy())[1].startswith(
+        "STAGEHAND_ZONE_NOT_VAN_BROWSER_CORE"
+    )
+
+
+@pytest.mark.parametrize(
+    "url",
+    ["http://127.0.0.1:9140", "https://127.0.0.1:9140", "http://10.77.0.6:9140", ""],
+)
+def test_loopback_or_unauthenticated_endpoint_is_not_cross_zone(tmp_path, url):
+    s = _ready_settings(tmp_path, browser_stagehand_base_url=url)
+    assert stagehand_production_enabled(s, worker_health=_healthy()) == (
+        False,
+        "STAGEHAND_ENDPOINT_NOT_CROSS_ZONE_MTLS",
+    )
+
+
+@pytest.mark.parametrize(
+    "url",
+    [
+        # review I minor 4: a literal set let these through.
+        "https://127.0.0.2:9443",
+        "https://localhost.:9443",
+        "https://LOCALHOST:9443",
+        "https://127.255.255.254:9443",
+        "https://127.1:9443",
+        "https://2130706433:9443",
+        "https://0x7f.1:9443",
+        "https://[::1]:9443",
+        "https://[0:0:0:0:0:0:0:1]:9443",
+        "https://[::ffff:127.0.0.1]:9443",
+        "https://[::]:9443",
+        "https://0.0.0.0:9443",
+        "https://0:9443",
+        "https://169.254.169.254:9443",
+        "https://[fe80::1]:9443",
+        "https://browser.localhost:9443",
+        "https://browser.localhost.:9443",
+        "https://localhost.localdomain:9443",
+    ],
+)
+def test_every_loopback_link_local_or_unspecified_host_is_refused(tmp_path, url):
+    s = _ready_settings(tmp_path, browser_stagehand_base_url=url)
+    assert stagehand_production_enabled(s, worker_health=_healthy()) == (
+        False,
+        "STAGEHAND_ENDPOINT_NOT_CROSS_ZONE_MTLS",
+    )
+
+
+@pytest.mark.parametrize(
+    "url", ["https://10.77.0.6:9443/stagehand", "https://browser-core.van.internal:9443", "https://[fd00::6]:9443"]
+)
+def test_cross_zone_hosts_still_pass_the_endpoint_check(tmp_path, url):
+    s = _ready_settings(tmp_path, browser_stagehand_base_url=url)
+    # The named host resolves (injected, no network) to an overlay address.
+    resolver = _Resolver({"browser-core.van.internal": ["10.77.0.6"]})
+    assert stagehand_production_enabled(s, worker_health=_healthy(), resolver=resolver) == (
+        True, STAGEHAND_PLACEMENT_SATISFIED)
+
+
+# ------------------------------------------------ review I2 carried minor: DNS to loopback
+
+
+class _Resolver:
+    """Injected resolver: a fixed answer table, and a record of what was asked."""
+
+    def __init__(self, table: dict[str, object]) -> None:
+        self.table = table
+        self.asked: list[str] = []
+
+    def __call__(self, host: str):
+        self.asked.append(host)
+        answer = self.table.get(host, OSError("NXDOMAIN"))
+        if isinstance(answer, BaseException):
+            raise answer
+        return answer
+
+
+@pytest.mark.parametrize("answers", [
+    ["127.0.0.1"],                    # probe placement2.py: localtest.me
+    ["10.77.0.6", "127.0.0.1"],       # one loopback answer among overlay ones
+    ["::1"],
+    ["::ffff:127.0.0.1"],
+    ["169.254.169.254"],
+    ["fe80::1%eth0"],
+    ["0.0.0.0"],
+    ["::"],
+    ["224.0.0.1"],
+    ["192.0.2.10"],                   # private (documentation), not overlay
+    ["198.18.0.1"],                   # private (benchmarking), not overlay
+    ["240.0.0.1"],                    # reserved
+])
+def test_a_name_resolving_to_a_refused_address_is_not_cross_zone(tmp_path, answers):
+    s = _ready_settings(tmp_path, browser_stagehand_base_url="https://localtest.me:9443")
+    resolver = _Resolver({"localtest.me": answers})
+    assert stagehand_production_enabled(s, worker_health=_healthy(), resolver=resolver) == (
+        False, "STAGEHAND_ENDPOINT_NOT_CROSS_ZONE_MTLS")
+    assert resolver.asked == ["localtest.me"]
+
+
+@pytest.mark.parametrize("answer", [
+    OSError("NXDOMAIN"), TimeoutError("slow"), [], ["not-an-address"],
+])
+def test_an_unresolvable_name_fails_closed(tmp_path, answer):
+    s = _ready_settings(tmp_path, browser_stagehand_base_url="https://browser-core.van.internal:9443")
+    resolver = _Resolver({"browser-core.van.internal": answer})
+    assert stagehand_production_enabled(s, worker_health=_healthy(), resolver=resolver) == (
+        False, "STAGEHAND_ENDPOINT_UNRESOLVABLE")
+
+
+@pytest.mark.parametrize("answers", [
+    ["10.77.0.6"], ["172.16.4.2"], ["192.168.1.9"], ["100.64.1.2"], ["fd00::6"], ["10.0.0.5", "fd00::5"],
+])
+def test_a_name_resolving_only_to_overlay_addresses_passes(tmp_path, answers):
+    s = _ready_settings(tmp_path, browser_stagehand_base_url="https://browser-core.van.internal.:9443")
+    resolver = _Resolver({"browser-core.van.internal": answers})
+    assert stagehand_production_enabled(s, worker_health=_healthy(), resolver=resolver) == (
+        True, STAGEHAND_PLACEMENT_SATISFIED)
+
+
+@pytest.mark.parametrize("url", ["https://192.0.2.10:9443", "https://198.18.0.1:9443", "https://240.0.0.1:9443"])
+def test_a_literal_private_non_overlay_address_is_refused(tmp_path, url):
+    s = _ready_settings(tmp_path, browser_stagehand_base_url=url)
+    resolver = _Resolver({})
+    assert stagehand_production_enabled(s, worker_health=_healthy(), resolver=resolver) == (
+        False, "STAGEHAND_ENDPOINT_NOT_CROSS_ZONE_MTLS")
+    assert resolver.asked == []  # a literal address never touches the resolver
+
+
+def test_the_default_resolver_is_getaddrinfo_and_its_answers_are_classified(tmp_path, monkeypatch):
+    """The production path (no injected resolver), with getaddrinfo faked: no network."""
+    import socket
+
+    from van_gateway.automation import placement
+
+    asked = []
+
+    def fake_getaddrinfo(host, port, *args, **kwargs):
+        asked.append(host)
+        return [(socket.AF_INET, socket.SOCK_STREAM, 6, "", ("127.0.0.1", 0))]
+
+    monkeypatch.setattr(placement.socket, "getaddrinfo", fake_getaddrinfo)
+    s = _ready_settings(tmp_path, browser_stagehand_base_url="https://localtest.me:9443")
+    assert stagehand_production_enabled(s, worker_health=_healthy()) == (
+        False, "STAGEHAND_ENDPOINT_NOT_CROSS_ZONE_MTLS")
+    assert asked == ["localtest.me"]
+
+
+def test_the_default_resolver_times_out_closed(tmp_path, monkeypatch):
+    import threading
+
+    from van_gateway.automation import placement
+
+    release = threading.Event()
+
+    def hung_getaddrinfo(*args, **kwargs):
+        release.wait(5)
+        return [(2, 1, 6, "", ("10.77.0.6", 0))]
+
+    monkeypatch.setattr(placement.socket, "getaddrinfo", hung_getaddrinfo)
+    monkeypatch.setattr(placement, "DNS_RESOLVE_TIMEOUT_S", 0.05)
+    s = _ready_settings(tmp_path, browser_stagehand_base_url="https://browser-core.van.internal:9443")
+    try:
+        assert stagehand_production_enabled(s, worker_health=_healthy()) == (
+            False, "STAGEHAND_ENDPOINT_UNRESOLVABLE")
+    finally:
+        release.set()
+
+
+def test_missing_mtls_client_identity_disables(tmp_path):
+    s = _ready_settings(tmp_path, browser_core_client_key_file=str(tmp_path / "absent.key"))
+    enabled, reason = stagehand_production_enabled(s, worker_health=_healthy())
+    assert enabled is False
+    assert reason == "STAGEHAND_MTLS_CLIENT_IDENTITY_MISSING:browser_core_client_key_file"
+
+
+@pytest.mark.parametrize(
+    ("provider", "model"),
+    [("anthropic", "claude-sonnet-4-5"), ("anthropic", "claude-sonnet-4-6"), ("openai", "gpt-5.5")],
+)
+def test_no_silent_downgrade_or_substitution(tmp_path, provider, model):
+    s = _ready_settings(
+        tmp_path, browser_stagehand_model_provider=provider, browser_stagehand_model_name=model
+    )
+    enabled, reason = stagehand_production_enabled(s, worker_health=_healthy(model_name=f"{provider}/{model}"))
+    assert enabled is False
+    assert reason == f"STAGEHAND_MODEL_NOT_OWNER_DECIDED:{provider}/{model}"
+
+
+def test_unavailable_zone_is_production_disabled(tmp_path):
+    s = _ready_settings(tmp_path)
+    assert stagehand_production_enabled(s) == (False, "VAN_BROWSER_CORE_UNAVAILABLE:health_unverified")
+    assert stagehand_production_enabled(s, worker_health=_healthy(ok=False))[0] is False
+
+
+def test_running_zone_must_be_proved_by_the_worker(tmp_path):
+    s = _ready_settings(tmp_path)
+    enabled, reason = stagehand_production_enabled(
+        s, worker_health=_healthy(trust_zone="van-trading-core")
+    )
+    assert (enabled, reason) == (False, "STAGEHAND_RUNNING_ZONE_MISMATCH:van-trading-core")
+    enabled, reason = stagehand_production_enabled(s, worker_health=_healthy(trust_zone=None))
+    assert (enabled, reason) == (False, "STAGEHAND_RUNNING_ZONE_MISMATCH:unreported")
+
+
+def test_runtime_version_and_model_must_match(tmp_path):
+    s = _ready_settings(tmp_path)
+    assert stagehand_production_enabled(s, worker_health=_healthy(runtime_version="4.2.0-alpha"))[1] == (
+        "STAGEHAND_RUNTIME_VERSION_MISMATCH"
+    )
+    assert stagehand_production_enabled(
+        s, worker_health=_healthy(model_name="anthropic/claude-sonnet-4-6")
+    )[1] == "STAGEHAND_RUNTIME_MODEL_MISMATCH"
+
+
+def test_runtime_version_must_come_from_installed_package_metadata(tmp_path):
+    """Review I minor 5: a constant runtime_version could never fail the check."""
+    s = _ready_settings(tmp_path)
+    for source in (None, "constant", "INSTALLED-PACKAGE-METADATA"):
+        health = _healthy(runtime_version_source=source)
+        if source is None:
+            health.pop("runtime_version_source")
+        assert stagehand_production_enabled(s, worker_health=health) == (
+            False, "STAGEHAND_RUNTIME_VERSION_UNPROVEN",
+        )
+    # An unreadable installed version (null) is a mismatch, not a pass.
+    assert stagehand_production_enabled(s, worker_health=_healthy(runtime_version=None))[1] == (
+        "STAGEHAND_RUNTIME_VERSION_MISMATCH"
+    )
+
+
+@pytest.mark.parametrize("value", [True, None, "false", 0])
+def test_worker_serving_act_is_production_disabled(tmp_path, value):
+    s = _ready_settings(tmp_path)
+    health = _healthy(act_endpoint_enabled=value)
+    if value is None:
+        health.pop("act_endpoint_enabled")
+    assert stagehand_production_enabled(s, worker_health=health) == (
+        False, "STAGEHAND_WORKER_ACTUATION_EXPOSED",
+    )
+
+
+def test_provider_key_in_browser_memory_disables(tmp_path):
+    """Stagehand 4.1.0's default model path hands the key to its in-Chromium worker."""
+    s = _ready_settings(tmp_path)
+    for value in (True, None):
+        enabled, reason = stagehand_production_enabled(
+            s, worker_health=_healthy(provider_key_in_browser_memory=value)
+        )
+        assert (enabled, reason) == (False, "STAGEHAND_PROVIDER_KEY_ENTERS_BROWSER_MEMORY")
+
+
+def test_all_placement_conditions_met(tmp_path):
+    s = _ready_settings(tmp_path)
+    assert stagehand_production_enabled(s, worker_health=_healthy()) == (
+        True,
+        STAGEHAND_PLACEMENT_SATISFIED,
+    )
+    state = stagehand_production_state(s, worker_health=_healthy())
+    assert state["state"] == "PLACEMENT_SATISFIED"
+    assert state["stagehand_release_commit"] == "cd7b230778cf92269e4cb90e80d97f5113781c51"
+
+
+def test_settings_carry_no_credential_value_for_the_model():
+    """§4 — the model name is configured; no provider key is a Settings field."""
+    fields = set(Settings.model_fields)
+    stagehand_fields = {f for f in fields if "stagehand" in f}
+    assert not {f for f in stagehand_fields if "key" in f or "token" in f or "secret" in f}

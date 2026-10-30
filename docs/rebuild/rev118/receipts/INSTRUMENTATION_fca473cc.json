@@ -1,0 +1,53 @@
+{
+  "schema": "van.rebuild.android-instrumentation/1",
+  "run_id": 39723196572,
+  "job_id": 119641334042,
+  "source_head": "fca473cc9b3dfee52642696fcd1c36aeec703bba",
+  "tested_merge": "b1516dc308a7eddbb62a515a7315da8fb033b09e",
+  "tree": "15f3160c0c860dd38d98ee280a3f53ce6cd4e609",
+  "status": "FAILED_LEGACY_DEEP_LINK_TIMING_ASSERTION",
+  "tests": 20,
+  "passed": 15,
+  "failed": 1,
+  "skipped": 4,
+  "classes": [
+    {
+      "class": "com.dial.van.instrumentation.CommandCentreLaunchTest",
+      "tests": 4,
+      "failures": 1,
+      "skipped": 0
+    },
+    {
+      "class": "com.dial.van.instrumentation.FloatingOverlayServiceTest",
+      "tests": 1,
+      "failures": 0,
+      "skipped": 0
+    },
+    {
+      "class": "com.dial.van.instrumentation.NetworkSecurityRuntimeTest",
+      "tests": 2,
+      "failures": 0,
+      "skipped": 0
+    },
+    {
+      "class": "com.dial.van.instrumentation.RiveContractTest",
+      "tests": 11,
+      "failures": 0,
+      "skipped": 4
+    },
+    {
+      "class": "com.dial.van.instrumentation.TemplateRuntimeTest",
+      "tests": 2,
+      "failures": 0,
+      "skipped": 0
+    }
+  ],
+  "network_policy_runtime_tests": "2 passed: real loopback HTTP, non-loopback HTTP refusal, exact domain policy and debug activity permission",
+  "character_forge_core_gate": "PASS",
+  "full_or_production_rig_qualified": false,
+  "s24_tested": false,
+  "failure": "CommandCentreLaunchTest.kt:115: Attention tab selected=false after startActivity; idle Compose does not await ActivityManager onNewIntent delivery.",
+  "correction": "Bounded wait for the exact selected tab, preserving same resident Activity and delivered Intent assertions. Runtime rerun remains required.",
+  "report_artifact": 12402670602,
+  "report_sha256": "f18167cefa364a27f00acea851ea239308360d74015f27abd390c0a7f938c70f"
+}

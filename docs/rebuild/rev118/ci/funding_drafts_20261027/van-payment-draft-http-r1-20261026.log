@@ -1,0 +1,36 @@
+.F..................................................................     [100%]
+=================================== FAILURES ===================================
+___ test_changed_request_and_foreign_owner_refuse_with_original_draft_intact ___
+
+client = (<httpx.AsyncClient object at 0x7f0b1d4d8e60>, <fastapi.applications.FastAPI object at 0x7f0b16e49be0>)
+
+    @pytest.mark.asyncio
+    async def test_changed_request_and_foreign_owner_refuse_with_original_draft_intact(client):
+        ac,app=client;provision(app);payload=body();first=await ac.post(PATH,json=payload);assert first.status_code==200
+        payload['intent']['operation']='TRANSFER'
+        conflict=await ac.post(PATH,json=payload);assert conflict.status_code==409
+        assert conflict.json()['detail']['code']=='FUNDING_DRAFT_ORIGINAL_REQUEST_CONFLICT'
+        payload=body();payload['intent']['quote']['beneficiary']['owner_ref']='owner:foreign'
+>       foreign=await ac.post(PATH,json=payload);assert foreign.status_code==403
+                                                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       assert 422 == 403
+E        +  where 422 = <Response [422 Unprocessable Entity]>.status_code
+
+backend/tests/test_payment_draft_gateway.py:59: AssertionError
+---------------------------- Captured stdout setup -----------------------------
+{"action_class": null, "command_id": null, "correlation_id": null, "degraded_code": null, "detail": {"duration_ms": 714.76, "method": "POST", "route": "/v1/devices/pairing-ticket"}, "device_id": null, "error_class": null, "level": "INFO", "logger": "van.request", "message": "request", "mission_id": null, "principal": null, "result": "200", "service": "van-gateway", "ts": "2026-10-26T23:46:24.448Z"}
+{"action_class": null, "command_id": null, "correlation_id": null, "degraded_code": null, "detail": {"duration_ms": 33.33, "method": "POST", "route": "/v1/devices/pair"}, "device_id": null, "error_class": null, "level": "INFO", "logger": "van.request", "message": "request", "mission_id": null, "principal": null, "result": "200", "service": "van-gateway", "ts": "2026-10-26T23:46:24.487Z"}
+------------------------------ Captured log setup ------------------------------
+INFO     van.request:logging.py:112 request
+INFO     van.request:logging.py:112 request
+----------------------------- Captured stdout call -----------------------------
+{"action_class": null, "command_id": null, "correlation_id": null, "degraded_code": null, "detail": {"duration_ms": 14.81, "method": "POST", "route": "/v1/trading/funding/drafts"}, "device_id": null, "error_class": null, "level": "INFO", "logger": "van.request", "message": "request", "mission_id": null, "principal": null, "result": "200", "service": "van-gateway", "ts": "2026-10-26T23:46:24.528Z"}
+{"action_class": null, "command_id": null, "correlation_id": null, "degraded_code": null, "detail": {"duration_ms": 11.16, "method": "POST", "route": "/v1/trading/funding/drafts"}, "device_id": null, "error_class": null, "level": "INFO", "logger": "van.request", "message": "request", "mission_id": null, "principal": null, "result": "409", "service": "van-gateway", "ts": "2026-10-26T23:46:24.552Z"}
+{"action_class": null, "command_id": null, "correlation_id": null, "degraded_code": null, "detail": {"duration_ms": 4.16, "method": "POST", "route": "/v1/trading/funding/drafts"}, "device_id": null, "error_class": null, "level": "INFO", "logger": "van.request", "message": "request", "mission_id": null, "principal": null, "result": "422", "service": "van-gateway", "ts": "2026-10-26T23:46:24.576Z"}
+------------------------------ Captured log call -------------------------------
+INFO     van.request:logging.py:112 request
+INFO     van.request:logging.py:112 request
+INFO     van.request:logging.py:112 request
+=========================== short test summary info ============================
+FAILED backend/tests/test_payment_draft_gateway.py::test_changed_request_and_foreign_owner_refuse_with_original_draft_intact
+1 failed, 67 passed in 61.64s (0:01:01)

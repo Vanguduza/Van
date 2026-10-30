@@ -1,0 +1,42 @@
+.................F....F.                                                 [100%]
+=================================== FAILURES ===================================
+__ test_draining_native_events_does_not_refund_the_original_operation_budget ___
+
+harness = <test_ctrader_transport_lifecycle.Harness object at 0x7fc3a6118b90>
+
+    def test_draining_native_events_does_not_refund_the_original_operation_budget(harness):
+        transport,server=source(harness,max_read_frames=1)
+        transport.connect();worker=transport._reader
+        send(server,'ProtoOAExecutionEvent',{'ctidTraderAccountId':12345,'executionType':'ORDER_FILLED'})
+        assert transport.wait_event(lambda *_:True,timeout_s=.2) is not None
+        server.sendall(struct.pack('>I',2))
+        worker.join(.5);assert not worker.is_alive()
+        with pytest.raises(CtraderError,match='capacity'):transport.connect()
+>       assert transport.read_capacity_snapshot()['admitted_frame_headers']==1
+E       assert 0 == 1
+
+trading/tests/test_ctrader_read_capacity.py:78: AssertionError
+____ test_close_and_reconnect_do_not_reset_admitted_frames_or_encoded_bytes ____
+
+harness = <test_ctrader_transport_lifecycle.Harness object at 0x7fc3a6118bc0>
+
+    def test_close_and_reconnect_do_not_reset_admitted_frames_or_encoded_bytes(harness):
+        transport,server=source(harness,max_read_frames=1)
+        transport.connect()
+        size=send(server,'ProtoOAExecutionEvent',{'ctidTraderAccountId':12345,'executionType':'ORDER_FILLED'})
+        assert transport.wait_event(lambda *_:True,timeout_s=.2) is not None
+        transport.close()
+        replacement,peer=harness.pair();transport._connector=lambda *_:replacement
+        transport.connect();worker=transport._reader
+        peer.sendall(struct.pack('>I',size))
+>       worker.join(.5);assert not worker.is_alive()
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       assert not True
+E        +  where True = is_alive()
+E        +    where is_alive = <Thread(Thread-11 (_read_loop), started daemon 140478272882368)>.is_alive
+
+trading/tests/test_ctrader_read_capacity.py:129: AssertionError
+=========================== short test summary info ============================
+FAILED trading/tests/test_ctrader_read_capacity.py::test_draining_native_events_does_not_refund_the_original_operation_budget
+FAILED trading/tests/test_ctrader_read_capacity.py::test_close_and_reconnect_do_not_reset_admitted_frames_or_encoded_bytes
+2 failed, 22 passed in 1.11s

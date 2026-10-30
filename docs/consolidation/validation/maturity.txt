@@ -1,0 +1,8 @@
+findings:   154 registered, 154 closed
+              7 DELIBERATELY_REMOVED_CANON_CORRECTED
+             72 EXTERNALLY_BLOCKED_REPOSITORY_COMPLETE
+             75 INTEGRATED_AND_EVIDENCED
+residuals:  37 DELIBERATE_SCOPE, 36 ENVIRONMENT_UNVERIFIED, 4 EXTERNAL_ARTEFACT, 21 EXTERNAL_RUNTIME, 11 OWNER_DEPLOYMENT_DECISION
+components: 209 inventoried, 209 at a terminal state
+
+MATURITY GATE PASSED — every claim in the ledgers is backed.

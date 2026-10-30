@@ -9,9 +9,10 @@ from __future__ import annotations
 
 import hashlib
 import json
-from dataclasses import asdict, dataclass, field
+from dataclasses import asdict, dataclass, field, fields
 from decimal import Decimal
 from enum import Enum
+from fractions import Fraction
 from typing import Any, Optional
 
 from vati.risk.contracts import (
@@ -22,13 +23,18 @@ from vati.risk.contracts import (
     OpenPosition,
     RiskSnapshot,
     StrategyState,
+    SymbolContract,
     TradeIntent,
 )
 from vati.risk.conformal import ConformalAdmissionGate, ConformalAdmissionRefused
 from vati.risk.governor import drawdown_verdict
-from vati.risk.heat import currency_leg_exposure, open_stop_risk
+from vati.risk.lockouts import at_or_above
+from vati.risk.heat import currency_leg_exposure, open_stop_risk, exact_open_stop_risk, exact_currency_leg_exposure
+from vati.risk.arithmetic import fraction, decimal, exact_loss_amount
+from vati.risk.serde import intent_binding_hash, mandate_binding_hash, RISK_APPROVAL_SCHEMA_VERSION
 from vati.risk.mandate import AuthorizationMode, PlatformCeilings, TradingMandate
 from vati.risk.sizing import Multipliers, SizingRejected, size_illiquid_equity, size_stake_contract, size_stop_contract
+from vati.core.decimal_context import native_financial_arithmetic
 
 ZERO = Decimal("0")
 
@@ -49,6 +55,30 @@ STRATEGY_STATES_FOR_MODE = {
     AuthorizationMode.LIMITED_LIVE: frozenset({StrategyState.LIMITED_LIVE, StrategyState.CERTIFIED_LIVE}),
     AuthorizationMode.AUTONOMOUS_LIVE: frozenset({StrategyState.CERTIFIED_LIVE}),
 }
+
+# Native producers must publish an explicit boolean, never a truthy string,
+# integer, missing value or generic container. Derive the field lists from
+# the declared contracts so a new boolean fact cannot silently skip this gate.
+BOOLEAN_FACT_FIELDS = {
+    cls: tuple(f.name for f in fields(cls) if f.type in (bool, 'bool'))
+    for cls in (RiskSnapshot,TradeIntent,SymbolContract,OpenPosition)
+}
+
+
+def invalid_boolean_fact(intent, snapshot):
+    records=[('snapshot',snapshot,RiskSnapshot),('intent',intent,TradeIntent),
+             ('contract',snapshot.symbol_contract,SymbolContract)]
+    records.extend((f'open_positions[{index}]',position,OpenPosition)
+                   for index,position in enumerate(snapshot.open_positions))
+    records.extend((f'pending_risk_commitments[{index}].contract',pending.contract,SymbolContract)
+                   for index,pending in enumerate(snapshot.pending_risk_commitments))
+    records.extend((f'pending_risk_commitments[{index}].valuation_contract',pending.valuation_contract,SymbolContract)
+                   for index,pending in enumerate(snapshot.pending_risk_commitments) if pending.valuation_contract is not None)
+    for scope,record,contract in records:
+        for name in BOOLEAN_FACT_FIELDS[contract]:
+            if type(getattr(record,name)) is not bool:
+                return f'{scope}.{name} requires an explicit boolean source fact'
+    return None
 
 
 class Decision(str, Enum):
@@ -74,9 +104,17 @@ class RiskDecision:
     mandate_version: str
     risk_snapshot_hash: str
     decision_hash: str = ""
+    intent_hash: Optional[str] = None
+    mandate_hash: Optional[str] = None
+    approval_schema_version: Optional[int] = None
 
     def to_dict(self) -> dict[str, Any]:
         d = asdict(self)
+        # Historical v1 bodies remain byte-equivalent when decoded. They are
+        # readable evidence, but cannot authorize a new broker submission.
+        for key in ("intent_hash", "mandate_hash", "approval_schema_version"):
+            if d[key] is None:
+                d.pop(key)
         for k, v in list(d.items()):
             if isinstance(v, Decimal):
                 d[k] = str(v)
@@ -94,7 +132,26 @@ def _canonical_hash(obj: Any) -> str:
         if isinstance(o, (set, frozenset)):
             return sorted(str(x) for x in o)
         if hasattr(o, "__dataclass_fields__"):
-            return asdict(o)
+            result = asdict(o)
+            if isinstance(o, RiskSnapshot) and o.used_margin is None:
+                result.pop("used_margin")  # original snapshot identities remain reproducible
+            if isinstance(o, RiskSnapshot):
+                if o.native_account_context is None:
+                    result.pop('native_account_context')
+                if o.native_risk_basis_ref is None:
+                    result.pop('native_risk_basis_ref')
+                if not o.pending_risk_commitments:
+                    result.pop('pending_risk_commitments')
+                else:
+                    for pending in result['pending_risk_commitments']:
+                        if pending['valuation_contract'] is None:
+                            pending.pop('valuation_contract')
+                for position in result['open_positions']:
+                    if position['stop_terms'] is None:
+                        position.pop('stop_terms')  # original legacy snapshot bytes/hash
+                    if position['broker_position_id'] is None:
+                        position.pop('broker_position_id')
+            return result
         raise TypeError(f"unhashable: {type(o)}")
 
     payload = json.dumps(obj, sort_keys=True, separators=(",", ":"), default=default)
@@ -128,6 +185,9 @@ class RiskAuthority:
             mandate_id=self.mandate.mandate_id,
             mandate_version=self.mandate.version,
             risk_snapshot_hash=snap_hash,
+            intent_hash=intent_binding_hash(intent),
+            mandate_hash=mandate_binding_hash(self.mandate),
+            approval_schema_version=RISK_APPROVAL_SCHEMA_VERSION,
         )
         return self._seal(d)
 
@@ -148,16 +208,34 @@ class RiskAuthority:
             return self._reject(intent, "0" * 64, Decimal("1"), "AUTHORITY_FAULT", f"{type(exc).__name__}: {exc}"[:200])
 
     # ---------------------------------------------------------------- evaluate
+    @native_financial_arithmetic
     def evaluate(self, intent: TradeIntent, snapshot: RiskSnapshot) -> RiskDecision:
         m = self.mandate
         snap_hash = _canonical_hash(snapshot)
-        heat_before = open_stop_risk(snapshot.open_positions, snapshot.equity)
+        from vati.risk.pending import pending_risk_losses,PendingValuationUnavailable
+        try:
+            pending_losses=pending_risk_losses(snapshot)
+        except PendingValuationUnavailable as exc:
+            return self._reject(intent,snap_hash,Decimal('1'),'PENDING_VALUATION_UNAVAILABLE',str(exc))
+        pending_total=sum((value for _,value in pending_losses),Fraction(0))
+        before=exact_open_stop_risk(snapshot.open_positions,snapshot.equity,additional_loss=pending_total)
+        heat_before=Decimal('Infinity') if before is None else decimal(before)
         heat_before_out = heat_before if heat_before.is_finite() else Decimal("1")
         rej = lambda code, detail: self._reject(intent, snap_hash, heat_before_out, code, detail)  # noqa: E731
 
         # 1. Kill switch
         if snapshot.kill_switch_triggers:
             return rej("KILL_SWITCH", ",".join(sorted(t.value for t in snapshot.kill_switch_triggers)))
+
+        invalid_fact=invalid_boolean_fact(intent,snapshot)
+        if invalid_fact:
+            return rej('INVALID_BOOLEAN_FACT',invalid_fact)
+
+        if not m.authority_matches_policy():
+            return rej('MANDATE_AUTHORITY_MISMATCH','current effective policy lacks its original owner grant; re-admission required')
+
+        if not m.owner_keys_current():
+            return rej('MANDATE_SIGNER_UNAVAILABLE','current owner signer is not registered or changed; re-admission required')
 
         # 1b. Post-entry preservation has precedence over new risk. The
         # lifecycle may describe why, but only RiskAuthority turns that fact
@@ -177,6 +255,8 @@ class RiskAuthority:
             return rej("VENUE_MISMATCH", f"mandate venue {m.venue}")
 
         # 3. Mandate validity & mode
+        if snapshot.now_unix < m.signed_at_unix:
+            return rej('MANDATE_NOT_YET_VALID',f'valid from {m.signed_at_unix}')
         if m.is_expired(snapshot.now_unix):
             return rej("MANDATE_EXPIRED", f"expired at {m.expires_at_unix}")
         if not m.sends_orders():
@@ -212,21 +292,32 @@ class RiskAuthority:
         # None means the venue did not report it. That is treated as unknown rather than
         # healthy, and unknown is only acceptable where there is genuinely no margin to
         # report: a paper account, or a venue VAN does not place orders on.
-        if snapshot.margin_level_pct is not None:
-            if snapshot.margin_level_pct <= MARGIN_CALL_LEVEL_PCT:
-                return rej(
-                    "MARGIN_CALL",
-                    f"margin level {snapshot.margin_level_pct}% at or below "
-                    f"{MARGIN_CALL_LEVEL_PCT}%; the venue is closing positions",
-                )
-            if snapshot.margin_level_pct <= MARGIN_FLOOR_LEVEL_PCT:
-                return rej(
-                    "MARGIN_FLOOR",
-                    f"margin level {snapshot.margin_level_pct}% at or below the "
-                    f"{MARGIN_FLOOR_LEVEL_PCT}% floor; no new risk until it recovers",
-                )
-        if snapshot.free_margin is not None and snapshot.free_margin <= ZERO:
-            return rej("NO_FREE_MARGIN", "the account has no free margin for a new position")
+        from vati.risk.account_context import validate_snapshot_context
+        validate_snapshot_context(snapshot)
+        native_margin = (snapshot.symbol_contract.loss_model is LossModel.STOP_DISTANCE
+                         and intent.venue != "paper")
+        amounts = (snapshot.used_margin, snapshot.free_margin, snapshot.margin_level_pct)
+        if any(value is not None and (type(value) is not Decimal or not value.is_finite()) for value in amounts):
+            return rej("MARGIN_INVALID", "margin facts require original finite decimal amounts")
+        if snapshot.used_margin is not None and snapshot.used_margin < ZERO:
+            return rej("MARGIN_INVALID", "native committed margin cannot be negative")
+        if native_margin and (snapshot.used_margin is None or snapshot.free_margin is None
+                              or snapshot.used_margin > ZERO and snapshot.margin_level_pct is None):
+            return rej("MARGIN_UNKNOWN", "native committed/free margin or applicable margin level unavailable")
+        # Credit/bonuses excluded from risk equity cannot restore margin capacity.
+        # These are conservative risk bounds, never newly reported broker money.
+        from vati.risk.margin import cash_margin_bounds, exact_cash_margin_bounds
+        free,level=cash_margin_bounds(snapshot.equity,snapshot.used_margin,snapshot.free_margin,snapshot.margin_level_pct)
+        exact_free,exact_level=exact_cash_margin_bounds(snapshot.equity,snapshot.used_margin,snapshot.free_margin,snapshot.margin_level_pct)
+        if snapshot.used_margin == ZERO and snapshot.margin_level_pct is not None:
+            return rej("MARGIN_INVALID", "zero committed margin has no defined equity/margin ratio")
+        if exact_level is not None:
+            if exact_level <= MARGIN_CALL_LEVEL_PCT:
+                return rej("MARGIN_CALL", f"risk margin level {level}% at or below {MARGIN_CALL_LEVEL_PCT}%")
+            if exact_level <= MARGIN_FLOOR_LEVEL_PCT:
+                return rej("MARGIN_FLOOR", f"risk margin level {level}% at or below {MARGIN_FLOOR_LEVEL_PCT}%")
+        if exact_free is not None and exact_free <= ZERO:
+            return rej("NO_FREE_MARGIN", "the account has no cash-backed free margin for a new position")
 
         # 6. Instrument / strategy eligibility
         contract = snapshot.symbol_contract
@@ -250,30 +341,39 @@ class RiskAuthority:
         # 8. Loss limits and drawdown governor
         if snapshot.consecutive_losses >= m.max_consecutive_losses:
             return rej("CONSECUTIVE_LOSSES", f"{snapshot.consecutive_losses} >= {m.max_consecutive_losses}")
+        if snapshot.loss_streak_lock:
+            # P1-TRADE-RISK-005: a cooldown or an owner-reset suspension, not a permanent lock.
+            return rej("CONSECUTIVE_LOSSES", snapshot.loss_streak_lock)
         if snapshot.day_start_equity > ZERO:
-            day_loss = (snapshot.day_start_equity - snapshot.equity) / snapshot.day_start_equity
+            day_loss = (fraction(snapshot.day_start_equity) - fraction(snapshot.equity)) / fraction(snapshot.day_start_equity)
             if day_loss >= m.max_daily_loss:
-                return rej("MAX_DAILY_LOSS", f"{day_loss}")
+                return rej("MAX_DAILY_LOSS", f"{decimal(day_loss)}")
         else:
             return rej("EQUITY_BASELINE_MISSING", "day_start_equity unknown")
         if snapshot.week_start_equity > ZERO:
-            week_dd = (snapshot.week_start_equity - snapshot.equity) / snapshot.week_start_equity
+            week_dd = (fraction(snapshot.week_start_equity) - fraction(snapshot.equity)) / fraction(snapshot.week_start_equity)
             if week_dd >= m.max_weekly_drawdown:
-                return rej("MAX_WEEKLY_DRAWDOWN", f"{week_dd}")
+                return rej("MAX_WEEKLY_DRAWDOWN", f"{decimal(week_dd)}")
         else:
             return rej("EQUITY_BASELINE_MISSING", "week_start_equity unknown")
         dd = drawdown_verdict(snapshot.peak_equity, snapshot.equity, m.drawdown_tiers)
         if dd.suspended:
             return rej("DRAWDOWN_SUSPENDED", f"drawdown {dd.drawdown}")
-        if dd.top_tier_only and intent.strategy_state is not StrategyState.CERTIFIED_LIVE:
-            return rej("DRAWDOWN_TOP_TIER_ONLY", f"drawdown {dd.drawdown}")
+        # P1-TRADE-RISK-005: "top tier" is the highest promotion state the mandate's
+        # strategies actually hold, so a restricted account keeps trading its best-proven
+        # strategies at the tier's reduced size and can recover. Legacy floor when unset.
+        top_floor = snapshot.drawdown_top_state or StrategyState.CERTIFIED_LIVE
+        if dd.top_tier_only and not at_or_above(intent.strategy_state, top_floor):
+            return rej("DRAWDOWN_TOP_TIER_ONLY", f"drawdown {dd.drawdown}; trading limited to {top_floor.value}")
 
         # 9. Position count limits
         same_symbol = sum(1 for p in snapshot.open_positions if p.symbol.upper() == symbol)
+        same_symbol += sum(p.new_position_slots for p,_ in pending_losses if p.contract.symbol.upper()==symbol)
         if same_symbol >= m.max_positions_per_instrument:
             return rej("MAX_POSITIONS_PER_INSTRUMENT", f"{same_symbol}")
-        if len(snapshot.open_positions) >= m.max_total_positions:
-            return rej("MAX_TOTAL_POSITIONS", f"{len(snapshot.open_positions)}")
+        total_positions=len(snapshot.open_positions)+sum(p.new_position_slots for p,_ in pending_losses)
+        if total_positions >= m.max_total_positions:
+            return rej("MAX_TOTAL_POSITIONS", f"{total_positions}")
 
         # 10. Allowed risk: min(requested, mandate) — never above either
         constraints: list[str] = []
@@ -294,14 +394,16 @@ class RiskAuthority:
             liquidity=liquidity,
             event_risk=intent.event_risk_multiplier,
             correlation=intent.correlation_multiplier,
-            drawdown=dd.multiplier,
+            drawdown=decimal(fraction(dd.multiplier) * fraction(min(ONE, max(ZERO, snapshot.loss_streak_multiplier)))),
         )
         if dd.tier_index >= 0:
             constraints.append(f"DRAWDOWN_TIER_{dd.tier_index}")
+        if snapshot.loss_streak_multiplier < ONE:
+            constraints.append("LOSS_STREAK_PROBATION")
 
         # 10b. Edge must clear round-trip cost (Rev 3: cost is the first edge)
         if intent.expected_gross_move_pct is not None and contract.round_trip_cost_pct > ZERO:
-            if intent.expected_gross_move_pct < contract.round_trip_cost_pct * Decimal("2"):
+            if fraction(intent.expected_gross_move_pct) < fraction(contract.round_trip_cost_pct) * 2:
                 return rej("EDGE_BELOW_COST", f"expected move {intent.expected_gross_move_pct} < 2 × round-trip cost {contract.round_trip_cost_pct}")
 
         # 10c. Optional conformal admission. Only strategies explicitly registered
@@ -352,28 +454,22 @@ class RiskAuthority:
             return rej(exc.code, exc.detail)
 
         # 12. Portfolio heat and currency legs *after* the trade
-        if contract.loss_model is LossModel.FULL_STAKE:
-            new_pos = OpenPosition(symbol, intent.direction, ZERO, ZERO, ZERO, contract.base_currency,
-                                   contract.quote_currency, intent.strategy_id, True, LossModel.FULL_STAKE, sized.size)
-        elif contract.loss_model is LossModel.ILLIQUID_EQUITY:
-            new_pos = OpenPosition(symbol, intent.direction, sized.size, intent.entry - intent.stop,  # type: ignore[operator]
-                                   Decimal("1"), contract.base_currency, contract.quote_currency, intent.strategy_id,
-                                   False, LossModel.ILLIQUID_EQUITY, ZERO, intent.entry * contract.liquidity_haircut)
-        else:
-            new_pos = OpenPosition(symbol, intent.direction, sized.size, abs(intent.entry - intent.stop),  # type: ignore[arg-type]
-                                   contract.value_per_price_unit_per_lot, contract.base_currency,
-                                   contract.quote_currency, intent.strategy_id, True)
-        after = snapshot.open_positions + (new_pos,)
-        heat_after = open_stop_risk(after, snapshot.equity)
+        new_loss = exact_loss_amount(sized.size, contract, entry=intent.entry, stop=intent.stop)
+        # Reporting ratios may repeat. Compare unrounded source arithmetic to
+        # the signed ceiling; even a tiny positive excess must still refuse.
+        heat_after = exact_open_stop_risk(snapshot.open_positions, snapshot.equity, additional_loss=new_loss+pending_total)
         if heat_after > m.max_open_stop_risk:
-            return rej("PORTFOLIO_HEAT", f"heat after {heat_after} > {m.max_open_stop_risk}")
-        legs = currency_leg_exposure(after, snapshot.equity)
+            return rej("PORTFOLIO_HEAT", f"entry would exceed portfolio risk limit {m.max_open_stop_risk}; reported heat {decimal(heat_after)}")
+        legs = exact_currency_leg_exposure(snapshot.open_positions, snapshot.equity,
+            additional_loss=new_loss, base_currency=contract.base_currency,
+            quote_currency=contract.quote_currency, direction=intent.direction,pending_losses=pending_losses)
         hot = {c: v for c, v in legs.items() if v > m.max_currency_leg_exposure}
         if hot:
-            return rej("CURRENCY_LEG_EXPOSURE", ",".join(f"{c}={v}" for c, v in sorted(hot.items())))
+            return rej("CURRENCY_LEG_EXPOSURE", ",".join(f"{c}={decimal(v)}" for c, v in sorted(hot.items())))
 
         # 13. Final invariant re-check (the contract, restated)
-        if sized.risk_pct > m.max_risk_per_trade or sized.risk_pct > intent.requested_risk_pct:
+        exact_risk_pct = new_loss / fraction(snapshot.equity)
+        if exact_risk_pct > m.max_risk_per_trade or exact_risk_pct > intent.requested_risk_pct:
             return rej("RISK_INVARIANT", f"{sized.risk_pct}")
 
         decision = Decision.APPROVED
@@ -389,11 +485,14 @@ class RiskAuthority:
             approved_risk_pct=sized.risk_pct,
             requested_risk_pct=intent.requested_risk_pct,
             portfolio_heat_before=heat_before_out,
-            portfolio_heat_after=heat_after,
+            portfolio_heat_after=decimal(heat_after),
             constraints=tuple(constraints),
             risk_policy_version=self.ceilings.policy_version,
             mandate_id=m.mandate_id,
             mandate_version=m.version,
             risk_snapshot_hash=snap_hash,
+            intent_hash=intent_binding_hash(intent),
+            mandate_hash=mandate_binding_hash(m),
+            approval_schema_version=RISK_APPROVAL_SCHEMA_VERSION,
         )
         return self._seal(d)

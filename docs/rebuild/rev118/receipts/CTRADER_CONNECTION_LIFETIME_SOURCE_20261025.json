@@ -1,0 +1,42 @@
+{
+  "schema": "van.rebuild.ctrader-connection-source/1",
+  "status": "SOURCE_TESTED_COMPONENT_NOT_UNIT_ACCEPTANCE",
+  "base_head": "ac60c4d3ba57ff488a39fa1962920ce4711c0ffc",
+  "updated_at_utc": "2026-10-25T18:23:48.719827+00:00",
+  "source_sha256": {
+    "trading/vati/execution/ctrader/transport.py": "94762a4b4db11f74d7f7e6ee33ec5378ff97fc868a3df825ea46abc5dbb4ae53",
+    "trading/vati/execution/ctrader/adapter.py": "fdbde5bcdcbcbe2d47e3be9a11db8f45425540f33b4273c6f156706e7db5ce28",
+    "trading/vati/funding/deals.py": "6d036085410710fa88583cbecf6a30487c79ba270f28d5ca8340b23fe1034f19",
+    "trading/tests/conftest.py": "7aac5662097f07f77f200dc4a13781f8db0c020298c6ff3760a5a99fe718f535",
+    "trading/tests/test_ctrader.py": "edfe74722a1e0c23e2d8c060e660e57960454e302514ee1b4c9bd48e5eeb74d8",
+    "trading/tests/test_provider_entry_deadline.py": "7617b3e811e391df027ee52d06c90f530ee79e44216219b14dc6321339080f1a",
+    "trading/tests/test_ctrader_transport_lifecycle.py": "c74f3378dee489c91c5b7c198a96bfacdbd28d1eb4a5e2bda2e3016503874937",
+    "trading/tests/test_ctrader_connection_auth.py": "ff646f8e5a01e71df661127ffccd369cf2ec653706056dff3ca48c70f1fafa1f"
+  },
+  "executed": {
+    "transport_before": "7failed/1passed before repair; retained original failures",
+    "auth_before": "8failed before adapter repair",
+    "first_combined": "212pass/18fail: explicitly authenticated synthetic socket omitted its new authentication lifetime binding",
+    "second_combined": "228pass/4fail: same fixture omitted contract lifetime binding; all original behavioural assertions retained",
+    "focused": "234pass/0skip under source storage audit, zero forbidden events",
+    "extended_initial": "767pass/2child-import failures/26declared PostgreSQL skips; missing inherited PYTHONPATH and PostgreSQL fixture, not a pass",
+    "extended_postgres": "810pass/0skip/0forbidden storage events. Actual pinned disposable PostgreSQL, canonical schema and explicit isolated-fixture guard. Owned container removed and child reaping reconciled.",
+    "supplemental_mutants": "Passing20case control and9/9deliberate guard removals caught, no survivors, exact source hashes restored, journal absent. Additional component cases, not part of the canonical374.",
+    "rebuild": "108pass/0skip",
+    "consolidation": "70branches preserved,0findings"
+  },
+  "qualification": {
+    "provider": false,
+    "native": false,
+    "economic": false,
+    "unit_acceptance": "NOT_ISSUED",
+    "android": "NOT_RUN",
+    "s24": "NOT_RUN"
+  },
+  "evidence": "ci/ctrader_connection_20261025",
+  "remaining": [
+    "Scoped native contract/market persistence and independent bounded producer",
+    "Entitlements, source gaps/corrections/health, broker calendars and monitor consumers",
+    "Complete BE-008, other backend/ML/assistant units and original Android/native gates"
+  ]
+}

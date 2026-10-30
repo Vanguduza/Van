@@ -1,0 +1,40 @@
+[
+  {
+    "id": 12638541935,
+    "name": "van-forecast-runtime-source-report",
+    "size_in_bytes": 148638,
+    "url": "https://api.github.com/repos/Vanguduza/Van/actions/artifacts/12638541935",
+    "archive_download_url": "https://api.github.com/repos/Vanguduza/Van/actions/artifacts/12638541935/zip",
+    "expired": false,
+    "created_at": "2026-10-26T09:04:02Z",
+    "expires_at": "2027-01-24T09:01:27Z",
+    "updated_at": "2026-10-26T09:04:02Z",
+    "digest": "sha256:488fdfdb2197ea01928d71748ce22b2c7a12692dda0b762cbcfc579dbcc9156b",
+    "workflow_run": {
+      "id": 40296406014,
+      "repository_id": 1369211561,
+      "head_repository_id": 1369211561,
+      "head_branch": "ccr-9e07e1af-8mgz1p",
+      "head_sha": "4637de1bb67e311a4ba2cf75600d50dd77c62955"
+    }
+  },
+  {
+    "id": 12637564955,
+    "name": "van-native-source-parquet-report",
+    "size_in_bytes": 2068,
+    "url": "https://api.github.com/repos/Vanguduza/Van/actions/artifacts/12637564955",
+    "archive_download_url": "https://api.github.com/repos/Vanguduza/Van/actions/artifacts/12637564955/zip",
+    "expired": false,
+    "created_at": "2026-10-26T09:02:03Z",
+    "expires_at": "2027-01-24T09:01:27Z",
+    "updated_at": "2026-10-26T09:02:03Z",
+    "digest": "sha256:3cc9072ef15de47f2c1de4e344cd25571ac896206fd3aa03ea4c26146c024462",
+    "workflow_run": {
+      "id": 40296406014,
+      "repository_id": 1369211561,
+      "head_repository_id": 1369211561,
+      "head_branch": "ccr-9e07e1af-8mgz1p",
+      "head_sha": "4637de1bb67e311a4ba2cf75600d50dd77c62955"
+    }
+  }
+]

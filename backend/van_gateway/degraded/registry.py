@@ -324,6 +324,13 @@ CATALOG: dict[DegradedCode, DegradedCapability] = {
         will_not_do="Have owner development actions applied until DIAL Hermes recovers",
         restore_action="Recover DIAL Hermes on dial-control; VAN's Hermes is unaffected",
     ),
+    DegradedCode.JEV_UNAVAILABLE: DegradedCapability(
+        code=DegradedCode.JEV_UNAVAILABLE,
+        broken="DIAL Jev judgment service unavailable, bypassed, or not qualified",
+        still_works="VAN, DIAL Development System and DIAL Business continue on their registered non-Jev paths",
+        will_not_do="Jev-backed System-1 judgments, contribution views, or Jev-assisted supervision until restored",
+        restore_action="Restore/qualify the private DIAL Jev service or keep Jev bypassed; no core capability depends on it",
+    ),
 }
 
 

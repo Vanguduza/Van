@@ -1,0 +1,12 @@
+{
+  "head": "ca981d19615f614a1c41f78618e04ea1582d620e",
+  "source_sha256": "1f2df28d9cde198c51bc3b13febc484291bd7637cffb390f2b5c2021af95e2fc",
+  "source_equals_committed": true,
+  "functional_failures": 3,
+  "positive_controls": 1,
+  "errors": 0,
+  "skips": 0,
+  "audit_violations": 0,
+  "owned_fixture_independently_absent": true,
+  "qualification": "Actual PostgreSQL locks/peer takeover inside source submission guards; no native financial effect"
+}

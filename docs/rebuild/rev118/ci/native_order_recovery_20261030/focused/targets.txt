@@ -1,0 +1,12 @@
+trading/tests/test_native_order_book.py
+trading/tests/test_native_order_book_postgres.py
+trading/tests/test_ctrader_order_details.py
+trading/tests/test_ctrader_expected_margin.py
+trading/tests/test_ctrader_original_outcomes.py
+trading/tests/test_native_entry_volume.py
+trading/tests/test_native_entry_volume_postgres.py
+trading/tests/test_physical_pending_risk.py
+trading/tests/test_physical_pending_risk_postgres.py
+trading/tests/test_router_native_entry_deadline.py
+trading/tests/test_entry_dispatch_commit_fence.py
+trading/tests/test_entry_dispatch_commit_fence_postgres.py

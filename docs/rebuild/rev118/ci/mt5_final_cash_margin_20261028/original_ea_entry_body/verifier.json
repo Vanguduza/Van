@@ -1,0 +1,81 @@
+{
+  "schema": "van.original-ea-entry-body-cash-counterexample/1",
+  "original_source_commit": "bf41e16b0213431eeaeb33da96676cfb7dc47477",
+  "original_entry_body_sha256": "ac13b14ee9a9c732f8c89cfd3617183003f98ca1d7ea6e3cbc7d72f7e238628f",
+  "fixture_sha256": "86bb8de0fee529c2bdafbc3e9dd43d45e1493dfb498b4345cb3ce55b0f4769f0",
+  "method": "Exact original published ExecOrderSend body; current supplemental helper declarations unused by that body; controlled C++ terminal API fixture. Not MetaTrader runtime or connected broker evidence.",
+  "numeric_values_encoding": "Parsed Decimal values preserved as exact text in this source artifact only",
+  "results": {
+    "entry-cash-credit": {
+      "results": [
+        {
+          "id": 1,
+          "status": "FILLED",
+          "order": 11,
+          "deal": 77,
+          "position": 42,
+          "volume": "0.00123456",
+          "price": "1.123456789012345",
+          "sl_confirmed": true,
+          "protection_recovery": null,
+          "server_time_ms": 1700000000000,
+          "retcode": 10009
+        }
+      ],
+      "modify_calls": 0,
+      "close_calls": 0,
+      "entry_calls": 1,
+      "margin_calls": 0,
+      "last_margin_side": -1,
+      "post_margin_cash_reads": 0
+    },
+    "entry-cash-used": {
+      "results": [
+        {
+          "id": 1,
+          "status": "FILLED",
+          "order": 11,
+          "deal": 77,
+          "position": 42,
+          "volume": "0.00123456",
+          "price": "1.123456789012345",
+          "sl_confirmed": true,
+          "protection_recovery": null,
+          "server_time_ms": 1700000000000,
+          "retcode": 10009
+        }
+      ],
+      "modify_calls": 0,
+      "close_calls": 0,
+      "entry_calls": 1,
+      "margin_calls": 0,
+      "last_margin_side": -1,
+      "post_margin_cash_reads": 0
+    },
+    "entry-good": {
+      "results": [
+        {
+          "id": 1,
+          "status": "FILLED",
+          "order": 11,
+          "deal": 77,
+          "position": 42,
+          "volume": "0.00123456",
+          "price": "1.123456789012345",
+          "sl_confirmed": true,
+          "protection_recovery": null,
+          "server_time_ms": 1700000000000,
+          "retcode": 10009
+        }
+      ],
+      "modify_calls": 0,
+      "close_calls": 0,
+      "entry_calls": 1,
+      "margin_calls": 0,
+      "last_margin_side": -1,
+      "post_margin_cash_reads": 0
+    }
+  },
+  "actual_verifier_exit": 0,
+  "formal_native_financial_acceptance": "NOT_ISSUED"
+}

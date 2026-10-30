@@ -1,0 +1,15 @@
+{
+  "command": [
+    "python3",
+    "tools/consolidation/verify.py"
+  ],
+  "cwd": "/workspace/van-review-2026-10-18/publish",
+  "controller_pid": 391694,
+  "started_at_utc": "2026-10-28T11:16:09.470992+00:00",
+  "timeout_seconds": 300,
+  "state": "COMPLETED",
+  "command_pid": 391710,
+  "exit": 0,
+  "adopted_children_reaped": [],
+  "finished_at_utc": "2026-10-28T11:16:10.298025+00:00"
+}

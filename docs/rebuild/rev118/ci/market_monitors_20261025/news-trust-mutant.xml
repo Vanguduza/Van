@@ -1,0 +1,3 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="1" time="0.187" timestamp="2026-10-25T02:24:06.382306+00:00" hostname="56ae90b2c83c"><testcase classname="tests.test_market_monitor_measurements" name="test_literal_news_keyword_matching_preserves_trust_freshness_time_and_declared_relevance" time="0.002"><failure message="assert (not True)">backend/tests/test_market_monitor_measurements.py:138: in test_literal_news_keyword_matching_preserves_trust_freshness_time_and_declared_relevance
+    assert not fire and current.state=='NO_MATCH'
+E   assert (not True)</failure></testcase></testsuite></testsuites>

@@ -1,0 +1,209 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="2" skipped="0" tests="12" time="3.185" timestamp="2026-10-27T02:07:50.751673+00:00" hostname="2c5a245e39f1"><testcase classname="trading.tests.test_postgres_lease_guard_ownership" name="test_outer_guard_keeps_actual_row_lock_across_nested_operations[none]" time="0.506" /><testcase classname="trading.tests.test_postgres_lease_guard_ownership" name="test_outer_guard_keeps_actual_row_lock_across_nested_operations[read]" time="0.171" /><testcase classname="trading.tests.test_postgres_lease_guard_ownership" name="test_outer_guard_keeps_actual_row_lock_across_nested_operations[fence]" time="0.169" /><testcase classname="trading.tests.test_postgres_lease_guard_ownership" name="test_outer_guard_keeps_actual_row_lock_across_nested_operations[guard]" time="0.184" /><testcase classname="trading.tests.test_postgres_lease_guard_ownership" name="test_outer_guard_keeps_actual_row_lock_across_nested_operations[write]" time="0.167" /><testcase classname="trading.tests.test_postgres_lease_guard_ownership" name="test_outer_guard_keeps_actual_row_lock_across_nested_operations[close]" time="0.155" /><testcase classname="trading.tests.test_postgres_lease_guard_ownership" name="test_outer_guard_keeps_actual_row_lock_across_nested_operations[read_error]" time="0.163" /><testcase classname="trading.tests.test_postgres_lease_guard_ownership" name="test_outer_guard_keeps_actual_row_lock_across_nested_operations[guard_error]" time="0.152" /><testcase classname="trading.tests.test_postgres_lease_guard_ownership" name="test_outer_guard_keeps_actual_row_lock_across_nested_operations[guard_entry_error]" time="0.155" /><testcase classname="trading.tests.test_postgres_lease_guard_ownership" name="test_outer_guard_keeps_actual_row_lock_across_nested_operations[cross_thread_read]" time="0.171" /><testcase classname="trading.tests.test_postgres_lease_guard_ownership" name="test_outer_guard_keeps_actual_row_lock_across_nested_operations[sql_read_error]" time="0.155"><failure message="AssertionError: peer did not remain blocked by the original submission row lock&#10;assert False">pg_dsn = 'user=van_fixture password=van_ephemeral_test_only dbname=van_ledger_fixture_641aabe31adf4ae9bdb6c9ba3ff38c6f host=127.0.0.1 port=32859'
+nested_operation = 'sql_read_error'
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x7ff99637ab70&gt;
+
+    @pytest.mark.parametrize('nested_operation', ['none', 'read', 'fence', 'guard', 'write', 'close',
+                                                 'read_error', 'guard_error', 'guard_entry_error', 'cross_thread_read',
+                                                 'sql_read_error', 'sql_guard_entry_error'])
+    def test_outer_guard_keeps_actual_row_lock_across_nested_operations(pg_dsn, nested_operation, monkeypatch):
+        with closing(PostgresLedger(pg_dsn)):
+            pass
+        original = PostgresLeaseStore(pg_dsn)
+        owner = AccountRuntimeLease(original, account_alias='guard_owner', instance_id='original', ttl_ms=1000)
+        requested = threading.Event()
+        peer_pid = []
+    
+        def peer_takeover():
+            class ObservedStore(PostgresLeaseStore):
+                def write_if(self, expected, new):
+                    requested.set()
+                    return super().write_if(expected, new)
+            store = ObservedStore(pg_dsn)
+            try:
+                peer_pid.append(store._conn.info.backend_pid)
+                peer = AccountRuntimeLease(store, account_alias='guard_owner', instance_id='peer', ttl_ms=1000)
+                return peer.acquire(now_ms=1001)
+            finally:
+                store.close()
+    
+        try:
+            assert owner.acquire(now_ms=0).outcome is LeaseOutcome.GRANTED
+            epoch = owner.epoch
+            with psycopg.connect(pg_dsn, autocommit=True) as observer, ThreadPoolExecutor(max_workers=2) as executor:
+                borrowed_read = None
+                with owner.submission_guard(epoch, now_ms=1) as allowed:
+                    assert allowed is True
+                    if nested_operation == 'read':
+                        assert original.read('guard_owner').lease_epoch == epoch
+                    elif nested_operation == 'fence':
+                        assert owner.fence(epoch, now_ms=2, min_validity_ms=0) is True
+                    elif nested_operation == 'guard':
+                        with owner.submission_guard(epoch, now_ms=2) as inner:
+                            assert inner is True
+                    elif nested_operation == 'write':
+                        with pytest.raises(LeaseStoreUnavailable, match='inside a submission guard'):
+                            original.write_if(owner.held, owner.held)
+                    elif nested_operation == 'close':
+                        with pytest.raises(LeaseStoreUnavailable, match='inside a submission guard'):
+                            original.close()
+                        assert original.read('guard_owner').lease_epoch == epoch
+                    elif nested_operation == 'read_error':
+                        def invalid_row(_):
+                            raise ValueError('injected decode failure')
+                        with monkeypatch.context() as patch:
+                            patch.setattr(original, '_from_row', invalid_row)
+                            with pytest.raises(LeaseStoreUnavailable, match='decode failure'):
+                                original.read('guard_owner')
+                    elif nested_operation == 'guard_error':
+                        with pytest.raises(RuntimeError, match='original guarded failure'):
+                            with owner.submission_guard(epoch, now_ms=2) as inner:
+                                assert inner is True
+                                raise RuntimeError('original guarded failure')
+                    elif nested_operation == 'guard_entry_error':
+                        def invalid_guard_row(_):
+                            raise ValueError('injected guard decode failure')
+                        with monkeypatch.context() as patch:
+                            patch.setattr(original, '_from_row', invalid_guard_row)
+                            with owner.submission_guard(epoch, now_ms=2) as inner:
+                                assert inner is False
+                    elif nested_operation in {'sql_read_error', 'sql_guard_entry_error'}:
+                        def server_query_error(_):
+                            # An actual PostgreSQL error, not a Python decoder error.
+                            original._conn.execute('SELECT 1 / 0')
+                        with monkeypatch.context() as patch:
+                            patch.setattr(original, '_from_row', server_query_error)
+                            if nested_operation == 'sql_read_error':
+                                with pytest.raises(LeaseStoreUnavailable):
+                                    original.read('guard_owner')
+                            else:
+                                with owner.submission_guard(epoch, now_ms=2) as inner:
+                                    assert inner is False
+                    elif nested_operation == 'cross_thread_read':
+                        read_requested = threading.Event()
+                        def read_from_peer_thread():
+                            read_requested.set()
+                            return original.read('guard_owner')
+                        borrowed_read = executor.submit(read_from_peer_thread)
+                        assert read_requested.wait(timeout=5)
+                        assert not borrowed_read.done()
+                    future = executor.submit(peer_takeover)
+                    assert requested.wait(timeout=5)
+                    waiting_on_actual_lock = False
+                    for _ in range(100):
+                        if future.done():
+                            break
+                        row = observer.execute('SELECT wait_event_type FROM pg_stat_activity WHERE pid=%s',
+                                               (peer_pid[0],)).fetchone()
+                        if row is not None and row[0] == 'Lock':
+                            waiting_on_actual_lock = True
+                            break
+                        time.sleep(.01)
+&gt;                   assert waiting_on_actual_lock, 'peer did not remain blocked by the original submission row lock'
+E                   AssertionError: peer did not remain blocked by the original submission row lock
+E                   assert False
+
+trading/tests/test_postgres_lease_guard_ownership.py:114: AssertionError</failure></testcase><testcase classname="trading.tests.test_postgres_lease_guard_ownership" name="test_outer_guard_keeps_actual_row_lock_across_nested_operations[sql_guard_entry_error]" time="0.154"><failure message="AssertionError: peer did not remain blocked by the original submission row lock&#10;assert False">pg_dsn = 'user=van_fixture password=van_ephemeral_test_only dbname=van_ledger_fixture_f34f809442874b18bfc34f5dd93db1b3 host=127.0.0.1 port=32859'
+nested_operation = 'sql_guard_entry_error'
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x7ff996396f60&gt;
+
+    @pytest.mark.parametrize('nested_operation', ['none', 'read', 'fence', 'guard', 'write', 'close',
+                                                 'read_error', 'guard_error', 'guard_entry_error', 'cross_thread_read',
+                                                 'sql_read_error', 'sql_guard_entry_error'])
+    def test_outer_guard_keeps_actual_row_lock_across_nested_operations(pg_dsn, nested_operation, monkeypatch):
+        with closing(PostgresLedger(pg_dsn)):
+            pass
+        original = PostgresLeaseStore(pg_dsn)
+        owner = AccountRuntimeLease(original, account_alias='guard_owner', instance_id='original', ttl_ms=1000)
+        requested = threading.Event()
+        peer_pid = []
+    
+        def peer_takeover():
+            class ObservedStore(PostgresLeaseStore):
+                def write_if(self, expected, new):
+                    requested.set()
+                    return super().write_if(expected, new)
+            store = ObservedStore(pg_dsn)
+            try:
+                peer_pid.append(store._conn.info.backend_pid)
+                peer = AccountRuntimeLease(store, account_alias='guard_owner', instance_id='peer', ttl_ms=1000)
+                return peer.acquire(now_ms=1001)
+            finally:
+                store.close()
+    
+        try:
+            assert owner.acquire(now_ms=0).outcome is LeaseOutcome.GRANTED
+            epoch = owner.epoch
+            with psycopg.connect(pg_dsn, autocommit=True) as observer, ThreadPoolExecutor(max_workers=2) as executor:
+                borrowed_read = None
+                with owner.submission_guard(epoch, now_ms=1) as allowed:
+                    assert allowed is True
+                    if nested_operation == 'read':
+                        assert original.read('guard_owner').lease_epoch == epoch
+                    elif nested_operation == 'fence':
+                        assert owner.fence(epoch, now_ms=2, min_validity_ms=0) is True
+                    elif nested_operation == 'guard':
+                        with owner.submission_guard(epoch, now_ms=2) as inner:
+                            assert inner is True
+                    elif nested_operation == 'write':
+                        with pytest.raises(LeaseStoreUnavailable, match='inside a submission guard'):
+                            original.write_if(owner.held, owner.held)
+                    elif nested_operation == 'close':
+                        with pytest.raises(LeaseStoreUnavailable, match='inside a submission guard'):
+                            original.close()
+                        assert original.read('guard_owner').lease_epoch == epoch
+                    elif nested_operation == 'read_error':
+                        def invalid_row(_):
+                            raise ValueError('injected decode failure')
+                        with monkeypatch.context() as patch:
+                            patch.setattr(original, '_from_row', invalid_row)
+                            with pytest.raises(LeaseStoreUnavailable, match='decode failure'):
+                                original.read('guard_owner')
+                    elif nested_operation == 'guard_error':
+                        with pytest.raises(RuntimeError, match='original guarded failure'):
+                            with owner.submission_guard(epoch, now_ms=2) as inner:
+                                assert inner is True
+                                raise RuntimeError('original guarded failure')
+                    elif nested_operation == 'guard_entry_error':
+                        def invalid_guard_row(_):
+                            raise ValueError('injected guard decode failure')
+                        with monkeypatch.context() as patch:
+                            patch.setattr(original, '_from_row', invalid_guard_row)
+                            with owner.submission_guard(epoch, now_ms=2) as inner:
+                                assert inner is False
+                    elif nested_operation in {'sql_read_error', 'sql_guard_entry_error'}:
+                        def server_query_error(_):
+                            # An actual PostgreSQL error, not a Python decoder error.
+                            original._conn.execute('SELECT 1 / 0')
+                        with monkeypatch.context() as patch:
+                            patch.setattr(original, '_from_row', server_query_error)
+                            if nested_operation == 'sql_read_error':
+                                with pytest.raises(LeaseStoreUnavailable):
+                                    original.read('guard_owner')
+                            else:
+                                with owner.submission_guard(epoch, now_ms=2) as inner:
+                                    assert inner is False
+                    elif nested_operation == 'cross_thread_read':
+                        read_requested = threading.Event()
+                        def read_from_peer_thread():
+                            read_requested.set()
+                            return original.read('guard_owner')
+                        borrowed_read = executor.submit(read_from_peer_thread)
+                        assert read_requested.wait(timeout=5)
+                        assert not borrowed_read.done()
+                    future = executor.submit(peer_takeover)
+                    assert requested.wait(timeout=5)
+                    waiting_on_actual_lock = False
+                    for _ in range(100):
+                        if future.done():
+                            break
+                        row = observer.execute('SELECT wait_event_type FROM pg_stat_activity WHERE pid=%s',
+                                               (peer_pid[0],)).fetchone()
+                        if row is not None and row[0] == 'Lock':
+                            waiting_on_actual_lock = True
+                            break
+                        time.sleep(.01)
+&gt;                   assert waiting_on_actual_lock, 'peer did not remain blocked by the original submission row lock'
+E                   AssertionError: peer did not remain blocked by the original submission row lock
+E                   assert False
+
+trading/tests/test_postgres_lease_guard_ownership.py:114: AssertionError</failure></testcase></testsuite></testsuites>

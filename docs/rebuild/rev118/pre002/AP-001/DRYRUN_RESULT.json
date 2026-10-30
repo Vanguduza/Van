@@ -1,0 +1,92 @@
+{
+ "generators": [
+  0,
+  0
+ ],
+ "generator_output": [
+  "Compiled 1624 acceptance identities with 349 action-oracle refinements, explicit ownership additions and 72 domain scenarios; all NOT_RUN.",
+  "Rendered VAN_NEXT_DETERMINISTIC_PLAN_REV1_18.md, 5430 lines; digest 6eba84a1f2d3bbba9e717773afac85a5912e81c48ad5137f213afeb0facd8226"
+ ],
+ "verifiers": [
+  {
+   "cmd": "plan/compile_rev118.py --check",
+   "exit": 0,
+   "failed_cases": [],
+   "tail": "Effective acceptance registry matches"
+  },
+  {
+   "cmd": "plan/render_plan.py --check",
+   "exit": 0,
+   "failed_cases": [],
+   "tail": "0 findings: rendered plan and input provenance match"
+  },
+  {
+   "cmd": "verification/verify_whole_product.py",
+   "exit": 0,
+   "failed_cases": [],
+   "tail": "}"
+  },
+  {
+   "cmd": "verification/verify_rev117.py --json",
+   "exit": 0,
+   "failed_cases": [],
+   "tail": "}"
+  },
+  {
+   "cmd": "verification/verify_rev117.py --selftest --json",
+   "exit": 0,
+   "failed_cases": [],
+   "tail": "}"
+  },
+  {
+   "cmd": "verification/verify_review_contracts.py",
+   "exit": 0,
+   "failed_cases": [],
+   "tail": "}"
+  },
+  {
+   "cmd": "verification/verify_experience_learning.py",
+   "exit": 0,
+   "failed_cases": [],
+   "tail": "}"
+  },
+  {
+   "cmd": "verification/verify_model_hardening.py",
+   "exit": 0,
+   "failed_cases": [],
+   "tail": "}"
+  },
+  {
+   "cmd": "verification/verify_theme_readability.py",
+   "exit": 0,
+   "failed_cases": [],
+   "tail": "}"
+  },
+  {
+   "cmd": "verification/verify_rev117.py --check-package --json",
+   "exit": 0,
+   "failed_cases": [],
+   "tail": "}"
+  }
+ ],
+ "changed_files": [
+  "CANONICAL_AUTHORITY.json",
+  "MANIFEST.json",
+  "VAN_NEXT_UNIFIED_REBUILD_BLUEPRINT_REV1_18_20261021.md",
+  "VATI_SELF_OPTIMIZING_EXECUTION_AND_CRYPTO_BLUEPRINT_REV5_20261018.md",
+  "amendments/AP-001.json",
+  "consolidation/GENERATED_SCOPE_COUNTS.json",
+  "contracts/whole_product/ACCEPTANCE_REFINEMENTS.json",
+  "plan/DEVELOPMENT_PLAN.json",
+  "plan/PLAN_INPUT_PROVENANCE.json",
+  "plan/PROPOSED_SCOPE_LOCK.json",
+  "plan/VAN_NEXT_DETERMINISTIC_PLAN_REV1_18.md",
+  "plan/compile_rev118.py",
+  "verification/EFFECTIVE_TEST_CONTRACTS_REV118.json",
+  "verification/TEST_CONTRACTS.json",
+  "verification/verify_experience_learning.py",
+  "verification/verify_model_hardening.py",
+  "verification/verify_review_contracts.py",
+  "verification/verify_whole_product.py"
+ ]
+}

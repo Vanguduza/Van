@@ -1,0 +1,328 @@
+{
+  "active_plan": "plan/DEVELOPMENT_PLAN.json",
+  "adoptions": [
+    {
+      "adoption_id": "VAN-A01",
+      "disposition": "EXTEND_EXISTING_OWNER_AND_RETAIN_FULL_SCOPE",
+      "requirement_ids": [
+        "VAN-HVA-001",
+        "VAN-HVA-005",
+        "VAN-HVA-017",
+        "VAN-HVA-018"
+      ],
+      "test_contract_ids": [
+        "T-HVA-001-POS",
+        "T-HVA-001-NEG",
+        "T-HVA-001-REC",
+        "T-HVA-005-POS",
+        "T-HVA-005-NEG",
+        "T-HVA-005-REC",
+        "T-HVA-017-POS",
+        "T-HVA-017-NEG",
+        "T-HVA-017-REC",
+        "T-HVA-018-POS",
+        "T-HVA-018-NEG",
+        "T-HVA-018-REC"
+      ],
+      "units": [
+        "BE-041",
+        "BQ-006",
+        "BQ-008",
+        "BQ-009",
+        "PRE-002",
+        "VAN-ML-PKT-007",
+        "VAN-ML-PKT-009",
+        "VAN-ML-PKT-019",
+        "VAN-ML-PKT-044",
+        "VAN-ML-PKT-048"
+      ]
+    },
+    {
+      "adoption_id": "VAN-A02",
+      "disposition": "EXTEND_EXISTING_OWNER_AND_RETAIN_FULL_SCOPE",
+      "requirement_ids": [
+        "VAN-HVA-001",
+        "VAN-HVA-007",
+        "VAN-HVA-029",
+        "VAN-HVA-030"
+      ],
+      "test_contract_ids": [
+        "T-HVA-001-POS",
+        "T-HVA-001-NEG",
+        "T-HVA-001-REC",
+        "T-HVA-007-POS",
+        "T-HVA-007-NEG",
+        "T-HVA-007-REC",
+        "T-HVA-029-POS",
+        "T-HVA-029-NEG",
+        "T-HVA-029-REC",
+        "T-HVA-030-POS",
+        "T-HVA-030-NEG",
+        "T-HVA-030-REC"
+      ],
+      "units": [
+        "BE-013",
+        "BE-043",
+        "BQ-006",
+        "BQ-009",
+        "PRE-002",
+        "VAN-ML-PKT-007",
+        "VAN-ML-PKT-019",
+        "VAN-ML-PKT-020",
+        "VAN-ML-PKT-024",
+        "VAN-ML-PKT-025",
+        "VAN-ML-PKT-048"
+      ]
+    },
+    {
+      "adoption_id": "VAN-A03",
+      "disposition": "EXTEND_EXISTING_OWNER_AND_RETAIN_FULL_SCOPE",
+      "requirement_ids": [
+        "VAN-HVA-006",
+        "VAN-HVA-012",
+        "VAN-HVA-023",
+        "VAN-HVA-024",
+        "VAN-HVA-025",
+        "VAN-HVA-026"
+      ],
+      "test_contract_ids": [
+        "T-HVA-006-POS",
+        "T-HVA-006-NEG",
+        "T-HVA-006-REC",
+        "T-HVA-012-POS",
+        "T-HVA-012-NEG",
+        "T-HVA-012-REC",
+        "T-HVA-023-POS",
+        "T-HVA-023-NEG",
+        "T-HVA-023-REC",
+        "T-HVA-024-POS",
+        "T-HVA-024-NEG",
+        "T-HVA-024-REC",
+        "T-HVA-025-POS",
+        "T-HVA-025-NEG",
+        "T-HVA-025-REC",
+        "T-HVA-026-POS",
+        "T-HVA-026-NEG",
+        "T-HVA-026-REC"
+      ],
+      "units": [
+        "BE-035",
+        "BE-038",
+        "BE-042",
+        "BQ-008",
+        "BQ-009",
+        "FE-023",
+        "VAN-ML-PKT-005",
+        "VAN-ML-PKT-007",
+        "VAN-ML-PKT-010",
+        "VAN-ML-PKT-021",
+        "VAN-ML-PKT-027",
+        "VAN-ML-PKT-030"
+      ]
+    },
+    {
+      "adoption_id": "VAN-A04",
+      "disposition": "ADD_READ_ONLY_DOMAIN_CAPABILITY",
+      "requirement_ids": [
+        "VAN-HVA-008",
+        "VAN-HVA-009",
+        "VAN-HVA-010",
+        "VAN-HVA-011",
+        "VAN-HVA-012",
+        "VAN-HVA-013",
+        "VAN-HVA-014"
+      ],
+      "test_contract_ids": [
+        "T-HVA-008-POS",
+        "T-HVA-008-NEG",
+        "T-HVA-008-REC",
+        "T-HVA-009-POS",
+        "T-HVA-009-NEG",
+        "T-HVA-009-REC",
+        "T-HVA-010-POS",
+        "T-HVA-010-NEG",
+        "T-HVA-010-REC",
+        "T-HVA-011-POS",
+        "T-HVA-011-NEG",
+        "T-HVA-011-REC",
+        "T-HVA-012-POS",
+        "T-HVA-012-NEG",
+        "T-HVA-012-REC",
+        "T-HVA-013-POS",
+        "T-HVA-013-NEG",
+        "T-HVA-013-REC",
+        "T-HVA-014-POS",
+        "T-HVA-014-NEG",
+        "T-HVA-014-REC"
+      ],
+      "units": [
+        "BE-037",
+        "BE-038",
+        "BE-043",
+        "BE-044",
+        "BQ-008",
+        "BQ-009",
+        "VAN-ML-PKT-005",
+        "VAN-ML-PKT-037"
+      ]
+    },
+    {
+      "adoption_id": "VAN-A05",
+      "disposition": "ADD_READ_ONLY_DOMAIN_CAPABILITY",
+      "requirement_ids": [
+        "VAN-HVA-015",
+        "VAN-HVA-016",
+        "VAN-HVA-017",
+        "VAN-HVA-019",
+        "VAN-HVA-020",
+        "VAN-HVA-021",
+        "VAN-HVA-022"
+      ],
+      "test_contract_ids": [
+        "T-HVA-015-POS",
+        "T-HVA-015-NEG",
+        "T-HVA-015-REC",
+        "T-HVA-016-POS",
+        "T-HVA-016-NEG",
+        "T-HVA-016-REC",
+        "T-HVA-017-POS",
+        "T-HVA-017-NEG",
+        "T-HVA-017-REC",
+        "T-HVA-019-POS",
+        "T-HVA-019-NEG",
+        "T-HVA-019-REC",
+        "T-HVA-020-POS",
+        "T-HVA-020-NEG",
+        "T-HVA-020-REC",
+        "T-HVA-021-POS",
+        "T-HVA-021-NEG",
+        "T-HVA-021-REC",
+        "T-HVA-022-POS",
+        "T-HVA-022-NEG",
+        "T-HVA-022-REC"
+      ],
+      "units": [
+        "BE-039",
+        "BE-040",
+        "BE-041",
+        "BE-042",
+        "BE-043",
+        "BQ-008",
+        "BQ-009"
+      ]
+    },
+    {
+      "adoption_id": "VAN-A06",
+      "disposition": "EXTEND_EXISTING_OWNER_AND_RETAIN_FULL_SCOPE",
+      "requirement_ids": [
+        "VAN-HVA-003",
+        "VAN-HVA-027",
+        "VAN-HVA-028",
+        "VAN-HVA-030"
+      ],
+      "test_contract_ids": [
+        "T-HVA-003-POS",
+        "T-HVA-003-NEG",
+        "T-HVA-003-REC",
+        "T-HVA-027-POS",
+        "T-HVA-027-NEG",
+        "T-HVA-027-REC",
+        "T-HVA-028-POS",
+        "T-HVA-028-NEG",
+        "T-HVA-028-REC",
+        "T-HVA-030-POS",
+        "T-HVA-030-NEG",
+        "T-HVA-030-REC"
+      ],
+      "units": [
+        "BE-003",
+        "BE-021",
+        "BE-024",
+        "BE-043",
+        "BQ-009",
+        "PRE-002",
+        "VAN-ML-PKT-020",
+        "VAN-ML-PKT-024",
+        "VAN-ML-PKT-025"
+      ]
+    },
+    {
+      "adoption_id": "VAN-A07",
+      "disposition": "EXTEND_EXISTING_OWNER_AND_RETAIN_FULL_SCOPE",
+      "requirement_ids": [
+        "VAN-HVA-001",
+        "VAN-HVA-007",
+        "VAN-HVA-010",
+        "VAN-HVA-026"
+      ],
+      "test_contract_ids": [
+        "T-HVA-001-POS",
+        "T-HVA-001-NEG",
+        "T-HVA-001-REC",
+        "T-HVA-007-POS",
+        "T-HVA-007-NEG",
+        "T-HVA-007-REC",
+        "T-HVA-010-POS",
+        "T-HVA-010-NEG",
+        "T-HVA-010-REC",
+        "T-HVA-026-POS",
+        "T-HVA-026-NEG",
+        "T-HVA-026-REC"
+      ],
+      "units": [
+        "BE-037",
+        "BQ-006",
+        "BQ-008",
+        "BQ-009",
+        "PRE-002",
+        "VAN-ML-PKT-007",
+        "VAN-ML-PKT-019",
+        "VAN-ML-PKT-020",
+        "VAN-ML-PKT-021",
+        "VAN-ML-PKT-030",
+        "VAN-ML-PKT-037",
+        "VAN-ML-PKT-048"
+      ]
+    },
+    {
+      "adoption_id": "VAN-A08",
+      "disposition": "EXTEND_EXISTING_OWNER_AND_RETAIN_FULL_SCOPE",
+      "requirement_ids": [
+        "VAN-HVA-002",
+        "VAN-HVA-004",
+        "VAN-HVA-031",
+        "VAN-HVA-032"
+      ],
+      "test_contract_ids": [
+        "T-HVA-002-POS",
+        "T-HVA-002-NEG",
+        "T-HVA-002-REC",
+        "T-HVA-004-POS",
+        "T-HVA-004-NEG",
+        "T-HVA-004-REC",
+        "T-HVA-031-POS",
+        "T-HVA-031-NEG",
+        "T-HVA-031-REC",
+        "T-HVA-032-POS",
+        "T-HVA-032-NEG",
+        "T-HVA-032-REC"
+      ],
+      "units": [
+        "BE-001",
+        "BE-032",
+        "BE-033",
+        "BE-037",
+        "BE-044",
+        "BG-001",
+        "BQ-006",
+        "BQ-008",
+        "BQ-009",
+        "FE-023",
+        "PRE-001",
+        "PRE-002",
+        "PRE-003"
+      ]
+    }
+  ],
+  "schema": "van.hva.crosswalk/1.0"
+}

@@ -1,0 +1,20 @@
+{
+  "command": [
+    "/workspace/van-backend-venv-20261025/bin/python",
+    "tools/rebuild/source_storage_audit.py",
+    "--report",
+    "/workspace/van-mt5-projected-margin-floor-reported-fraction-before-20261028-audit.json",
+    "/workspace/test_van_mt5_reported_fraction_20261028.py",
+    "--junitxml=/workspace/van-mt5-projected-margin-floor-reported-fraction-before-20261028.xml",
+    "-q"
+  ],
+  "cwd": "/workspace/van-review-2026-10-18/publish",
+  "controller_pid": 536327,
+  "started_at_utc": "2026-10-28T14:19:21.022300+00:00",
+  "timeout_seconds": 90,
+  "state": "COMPLETED",
+  "command_pid": 536330,
+  "exit": 1,
+  "adopted_children_reaped": [],
+  "finished_at_utc": "2026-10-28T14:19:25.823302+00:00"
+}

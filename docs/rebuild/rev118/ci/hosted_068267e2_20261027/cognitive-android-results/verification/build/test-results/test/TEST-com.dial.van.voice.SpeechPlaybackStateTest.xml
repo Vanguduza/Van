@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.dial.van.voice.SpeechPlaybackStateTest" tests="9" skipped="0" failures="0" errors="0" timestamp="2026-10-27T05:23:25" hostname="runnervmtai0g" time="0.005">
+  <properties/>
+  <testcase name="barge in during buffer drain never completes unheard trailing audio()" classname="com.dial.van.voice.SpeechPlaybackStateTest" time="0.0"/>
+  <testcase name="a queued request is not proof the owner heard audio()" classname="com.dial.van.voice.SpeechPlaybackStateTest" time="0.0"/>
+  <testcase name="buffer admission is not completion until the playback head drains()" classname="com.dial.van.voice.SpeechPlaybackStateTest" time="0.001"/>
+  <testcase name="a reset playback head is not accepted as a completed stream()" classname="com.dial.van.voice.SpeechPlaybackStateTest" time="0.002"/>
+  <testcase name="barge in invalidates a pending synthesis before native playback starts()" classname="com.dial.van.voice.SpeechPlaybackStateTest" time="0.0"/>
+  <testcase name="another engine cannot acknowledge or start the current utterance()" classname="com.dial.van.voice.SpeechPlaybackStateTest" time="0.0"/>
+  <testcase name="reusing a logical segment id does not reuse native callback authority()" classname="com.dial.van.voice.SpeechPlaybackStateTest" time="0.0"/>
+  <testcase name="a stalled playback head times out instead of acknowledging delivery()" classname="com.dial.van.voice.SpeechPlaybackStateTest" time="0.001"/>
+  <testcase name="a late callback from the same engine cannot complete newer playback()" classname="com.dial.van.voice.SpeechPlaybackStateTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

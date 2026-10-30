@@ -1,0 +1,36 @@
+{
+  "schema": "van.ml004.dependency-resolution/1",
+  "status": "RESOLVED_NOT_INSTALLED_OR_TESTED",
+  "image_id": "sha256:31313965b30fb5a79fccfee4f53acb1f70873c9dc3368f7f553cd11b364207b2",
+  "image_bytes": 805557345,
+  "distributions": 232,
+  "source_distributions": [
+    {
+      "name": "gym",
+      "version": "0.26.2"
+    }
+  ],
+  "environment": {
+    "implementation_name": "cpython",
+    "implementation_version": "3.12.15",
+    "os_name": "posix",
+    "platform_machine": "x86_64",
+    "platform_release": "6.18.55",
+    "platform_system": "Linux",
+    "platform_version": "#1 SMP Wed Oct 14 19:45:18 UTC 2026",
+    "python_full_version": "3.12.15",
+    "platform_python_implementation": "CPython",
+    "python_version": "3.12",
+    "sys_platform": "linux"
+  },
+  "files_sha256": {
+    "research-source.lock": "16e8f762d29ddac81b4b7024f9e5c675a988815c45b62fbbc97032bccd1db0c5",
+    "research.in": "94302933db0db7dcc807d9f90016a2e6379ec289a15fc299ac83b913f7305713",
+    "hash_lock.py": "35912279ddb73affb783aab120af9b265d25629beb42abb20cff311a19237d87",
+    "research-report.json": "4de9d1c646d0fb86072597839c222239d74be14541b3a2da8f6fe4593072b2e9",
+    "bootstrap-state.json": "8839a4c00cbdd0a0d8cc67cb42e7c2fe3900a9c3b7a3fed4099bf86783e8dbae",
+    "build-tools-report.json": "3949d916b60447315ba47a8bd0a091c29fb6b347d24c9c9e192353ce630d0db4",
+    "Dockerfile": "c9ed17ebff64a60cd35555534ab5104cecaf28fe850956f41952a058aef77623",
+    "build-tools.lock": "0496f2e6a919f0b7391a91009453b77d9a641b5b8045593d7fa22762e6765a52"
+  }
+}

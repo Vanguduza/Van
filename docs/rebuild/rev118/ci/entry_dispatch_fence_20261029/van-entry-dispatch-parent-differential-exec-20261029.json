@@ -1,0 +1,22 @@
+{
+  "command": [
+    "/workspace/van-backend-venv-20261025/bin/python",
+    "-m",
+    "pytest",
+    "-c",
+    "/workspace/van-entry-dispatch-parent-runtime-42-20261029/pytest.ini",
+    "--rootdir=/workspace/van-entry-dispatch-parent-runtime-42-20261029",
+    "-q",
+    "/workspace/van-entry-dispatch-parent-runtime-42-20261029/trading/tests/test_entry_dispatch_parent_differential.py",
+    "--junitxml=/workspace/van-entry-dispatch-parent-differential-20261029.xml"
+  ],
+  "cwd": "/workspace/van-review-2026-10-18/publish",
+  "controller_pid": 932120,
+  "started_at_utc": "2026-10-29T01:36:35.781174+00:00",
+  "timeout_seconds": 120,
+  "state": "COMPLETED",
+  "command_pid": 932126,
+  "exit": 1,
+  "adopted_children_reaped": [],
+  "finished_at_utc": "2026-10-29T01:36:37.351265+00:00"
+}

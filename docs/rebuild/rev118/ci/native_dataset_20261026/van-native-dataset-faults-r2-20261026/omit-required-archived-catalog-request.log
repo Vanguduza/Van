@@ -1,0 +1,19 @@
+..................F.......                                               [100%]
+=================================== FAILURES ===================================
+_ test_actual_independent_native_reader_requests_archived_rows_and_no_order_messages _
+
+    def test_actual_independent_native_reader_requests_archived_rows_and_no_order_messages():
+        peer=CatalogPeer();parent=make_adapter(peer);parent.clock=lambda:NOW;reader=parent.market_reader()
+        try:
+            value=reader.read_catalog(SCOPE)
+>           assert [r['native_symbol_id'] for r in value.members()]==[1,2,3,4]
+E           assert [1, 41] == [1, 2, 3, 4]
+E             
+E             At index 1 diff: 41 != 2
+E             Right contains 2 more items, first extra item: 3
+E             Use -v to get more diff
+
+trading/tests/test_native_symbol_catalog.py:96: AssertionError
+=========================== short test summary info ============================
+FAILED trading/tests/test_native_symbol_catalog.py::test_actual_independent_native_reader_requests_archived_rows_and_no_order_messages
+1 failed, 25 passed in 0.50s

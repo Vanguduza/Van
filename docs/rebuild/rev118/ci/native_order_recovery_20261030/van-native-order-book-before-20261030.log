@@ -1,0 +1,42 @@
+.F..........F                                                            [100%]
+=================================== FAILURES ===================================
+______ test_confirmed_fills_contradict_no_effect_in_actual_pending_owner _______
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-5/test_confirmed_fills_contradic0')
+eurusd = SymbolContract(symbol='EURUSD', venue='mt5', base_currency='EUR', quote_currency='USD', account_currency='USD', contra...=Decimal('0'), max_adv_participation=Decimal('0.10'), liquidity_haircut=Decimal('0'), round_trip_cost_pct=Decimal('0'))
+
+    def test_confirmed_fills_contradict_no_effect_in_actual_pending_owner(tmp_path, eurusd):
+        parts = setup_order(tmp_path, eurusd, receipt_changes={'status': 'REJECTED', 'filled_qty': D(0), 'average_fill': None})
+        ledger, adapter, book, clock, command, _, context = parts
+        try:
+            runtime = PhysicalPendingRisk(ledger, context, now_ms=clock['ms'])
+            assert runtime.refresh((), now_ms=clock['ms']) == ()
+            capture(parts)
+>           with pytest.raises(ValueError, match='native order'):
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           Failed: DID NOT RAISE ValueError
+
+trading/tests/test_native_order_book.py:76: Failed
+____ test_later_conflicting_deal_is_retained_and_blocks_current_pending_use ____
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-5/test_later_conflicting_deal_is0')
+eurusd = SymbolContract(symbol='EURUSD', venue='mt5', base_currency='EUR', quote_currency='USD', account_currency='USD', contra...=Decimal('0'), max_adv_participation=Decimal('0.10'), liquidity_haircut=Decimal('0'), round_trip_cost_pct=Decimal('0'))
+
+    def test_later_conflicting_deal_is_retained_and_blocks_current_pending_use(tmp_path, eurusd):
+        parts = setup_order(tmp_path, eurusd); ledger, adapter, book, clock, command, _, context = parts
+        try:
+            capture(parts); clock['ms'] += 1
+            adapter.transport.order_reply['deal'][0]['filledVolume'] = 0
+            capture(parts, 'query-2')
+            facts = book.for_command(command.command_hash, available_at_ms=clock['ms'])
+            assert 'NATIVE_ORDER_DEAL_CORRECTION_UNRECONCILED' in facts['issues']
+            assert facts['recorded_gross_deal_volume'] == 500000
+>           with pytest.raises(ValueError, match='native order'):
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           Failed: DID NOT RAISE ValueError
+
+trading/tests/test_native_order_book.py:184: Failed
+=========================== short test summary info ============================
+FAILED trading/tests/test_native_order_book.py::test_confirmed_fills_contradict_no_effect_in_actual_pending_owner
+FAILED trading/tests/test_native_order_book.py::test_later_conflicting_deal_is_retained_and_blocks_current_pending_use
+2 failed, 11 passed in 2.70s

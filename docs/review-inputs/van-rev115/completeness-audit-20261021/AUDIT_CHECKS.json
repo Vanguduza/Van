@@ -1,0 +1,59 @@
+{
+  "scope": "DOCUMENTARY_AUDIT_AND_PINNED_PACKAGE_CHECKS",
+  "audited_commit": "172d2143d3e6d2ec4b401376f5ef5a4cf94c7429",
+  "passed": true,
+  "application_tests_executed": 0,
+  "checks": [
+    {
+      "working_directory": "audit",
+      "command": [
+        "python3",
+        "-B",
+        "build_inventory.py"
+      ],
+      "exit_code": 0,
+      "entrypoint_sha256": "6ad0a30c917af2573cbe24b45ab3319f5a292edcc35bdbcfc9030eb17016ff20",
+      "stdout": "{\n  \"counts\": {\n    \"features\": 93,\n    \"requirements\": 324,\n    \"contexts\": 234,\n    \"actions\": 349,\n    \"services\": 82,\n    \"tests\": 1610,\n    \"units\": 131,\n    \"source_atoms\": 171,\n    \"product_truth\": 22,\n    \"external_qualification\": 82\n  },\n  \"unresolved_references\": 0,\n  \"primary_test_owner_mismatches\": 22,\n  \"application_tests_executed\": 0\n}\n",
+      "stderr": ""
+    },
+    {
+      "working_directory": "audit",
+      "command": [
+        "python3",
+        "-B",
+        "verify_audit.py"
+      ],
+      "exit_code": 0,
+      "entrypoint_sha256": "101e55f66d87b37ad0920bfe8252f80dffcbb33b26f24b9725887aa0dd63de43",
+      "stdout": "{\n  \"scope\": \"AUDIT_STRUCTURE_AND_INPUT_HASH_CHECKS_ONLY\",\n  \"passed\": true,\n  \"findings\": [],\n  \"negative_controls\": [\n    {\n      \"name\": \"omitted context rejected\",\n      \"passed\": true\n    },\n    {\n      \"name\": \"omitted Studio service rejected\",\n      \"passed\": true\n    },\n    {\n      \"name\": \"invented closure owner rejected\",\n      \"passed\": true\n    },\n    {\n      \"name\": \"unsupported handset claim rejected\",\n      \"passed\": true\n    }\n  ],\n  \"backend_units_covered\": 82,\n  \"review_families\": 24,\n  \"source_input_hashes_verified\": 15,\n  \"application_tests_executed\": 0,\n  \"semantic_judgments_independently_certified\": false\n}\n",
+      "stderr": ""
+    },
+    {
+      "working_directory": "package",
+      "command": [
+        "python3",
+        "-B",
+        "verification/verify_rev117.py",
+        "--json"
+      ],
+      "exit_code": 0,
+      "entrypoint_sha256": "4b9d6da3c516897927bc211d286296a9f07e838429f2a6c22bb6d4ce4eec6c1d",
+      "stdout": "{\n  \"BG\": \"NOT_ISSUED\",\n  \"F15\": \"NOT_ISSUED\",\n  \"application_tests_executed\": 0,\n  \"findings\": [],\n  \"planned_application_contracts\": 1610,\n  \"requirements\": 324,\n  \"schema_examples\": 12,\n  \"scope\": \"DOCUMENT_SCHEMA_GRAPH_AND_SYNTHETIC_MODEL_ONLY\",\n  \"synthetic_loop\": {\n    \"cold_replay_equal\": true,\n    \"mature_distinct_parents\": 4,\n    \"mean_benchmark_cost\": {\n      \"A\": \"1.20\",\n      \"B\": \"0.65\"\n    },\n    \"not_actual_VATI_execution\": true,\n    \"selections\": {\n      \"1\": \"A\",\n      \"2\": \"A\",\n      \"3\": \"A\",\n      \"4\": \"A\",\n      \"5\": \"B\",\n      \"6\": \"B\"\n    }\n  },\n  \"units\": 131\n}\n",
+      "stderr": ""
+    },
+    {
+      "working_directory": "package",
+      "command": [
+        "python3",
+        "-B",
+        "verification/verify_rev117.py",
+        "--check-package",
+        "--json"
+      ],
+      "exit_code": 0,
+      "entrypoint_sha256": "4b9d6da3c516897927bc211d286296a9f07e838429f2a6c22bb6d4ce4eec6c1d",
+      "stdout": "{\n  \"files_checked\": 863,\n  \"findings\": [],\n  \"scope\": \"ARCHIVE_MEMBER_IDENTITY_ONLY\"\n}\n",
+      "stderr": ""
+    }
+  ]
+}

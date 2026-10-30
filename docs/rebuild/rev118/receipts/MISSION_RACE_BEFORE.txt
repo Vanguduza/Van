@@ -1,0 +1,45 @@
+F.                                                                       [100%]
+=================================== FAILURES ===================================
+___ test_racing_links_return_one_durable_mission_without_a_constraint_error ____
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-62/test_racing_links_return_one_d0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7fa4b2baf9b0>
+
+    @pytest.mark.asyncio
+    async def test_racing_links_return_one_durable_mission_without_a_constraint_error(tmp_path, monkeypatch):
+        database = str(tmp_path / "racing.sqlite3")
+        store = Store(database)
+        await store.migrate()
+        links = [CommandMissionLink(MissionService(Store(database))) for _ in range(2)]
+        both_read = asyncio.Event()
+        initial_reads = 0
+    
+        def delay_initial_read(original):
+            async def lookup(command_id):
+                nonlocal initial_reads
+                result = await original(command_id)
+                initial_reads += 1
+                ordinal = initial_reads
+                if ordinal == 2:
+                    both_read.set()
+                if ordinal <= 2:
+                    assert result is None
+                    await asyncio.wait_for(both_read.wait(), timeout=5)
+                return result
+            return lookup
+    
+        for link in links:
+            monkeypatch.setattr(link, "existing_for_command", delay_initial_read(link.existing_for_command))
+        results = await asyncio.wait_for(asyncio.gather(*[
+            link.open(request(), effective_action_class=ActionClass.A1, owner_approved=False)
+            for link in links
+        ], return_exceptions=True), timeout=10)
+>       assert not any(isinstance(result, BaseException) for result in results), results
+E       AssertionError: [IntegrityError("UNIQUE constraint failed: index 'idx_missions_source_command'"), Mission(mission_id='msn_df0c83f206ae...sion_id=None, final_outcome=None, verification_state=<VerificationStatus.PENDING: 'PENDING'>, learning_record_id=None)]
+E       assert not True
+E        +  where True = any(<generator object test_racing_links_return_one_durable_mission_without_a_constraint_error.<locals>.<genexpr> at 0x7fa4b2b74d60>)
+
+backend/tests/test_command_mission_creation_race.py:51: AssertionError
+=========================== short test summary info ============================
+FAILED backend/tests/test_command_mission_creation_race.py::test_racing_links_return_one_durable_mission_without_a_constraint_error
+1 failed, 1 passed in 0.44s

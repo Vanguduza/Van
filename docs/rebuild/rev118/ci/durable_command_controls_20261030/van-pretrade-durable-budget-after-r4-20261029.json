@@ -1,0 +1,22 @@
+{
+  "command": [
+    "/workspace/van-backend-venv-20261025/bin/python",
+    "-m",
+    "pytest",
+    "-q",
+    "trading/tests/test_pretrade_durable_command_budget.py",
+    "trading/tests/test_rev51_route_pretrade.py",
+    "trading/tests/test_dispatch_current_controls.py",
+    "trading/tests/test_entry_dispatch_commit_fence.py",
+    "--junitxml=/workspace/van-pretrade-durable-budget-after-r4-20261029.xml"
+  ],
+  "cwd": "/workspace/van-review-2026-10-18/publish",
+  "controller_pid": 971460,
+  "started_at_utc": "2026-10-29T02:07:32.071947+00:00",
+  "timeout_seconds": 180,
+  "state": "COMPLETED",
+  "command_pid": 971463,
+  "exit": 0,
+  "adopted_children_reaped": [],
+  "finished_at_utc": "2026-10-29T02:07:35.499592+00:00"
+}

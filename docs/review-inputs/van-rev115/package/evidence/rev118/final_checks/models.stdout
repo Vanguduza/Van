@@ -1,0 +1,151 @@
+{
+  "scope": "DOCUMENT_INTEGRATION_SCHEMA_MUTATIONS_AND_COST_ARITHMETIC_ONLY",
+  "passed": 35,
+  "total": 35,
+  "findings": [],
+  "model_invocations": 0,
+  "application_tests_executed": 0,
+  "economic_experiments_executed": 0,
+  "cases": [
+    {
+      "id": "INTEGRATION",
+      "passed": true
+    },
+    {
+      "id": "DROP_no_model_rpc_on_financial_path",
+      "passed": true
+    },
+    {
+      "id": "DROP_all_attempts_reserved_before_transport",
+      "passed": true
+    },
+    {
+      "id": "DROP_unknown_cost_retains_liability",
+      "passed": true
+    },
+    {
+      "id": "DROP_model_weight_leakage_assessed",
+      "passed": true
+    },
+    {
+      "id": "DROP_probability_target_requires_calibration",
+      "passed": true
+    },
+    {
+      "id": "DROP_reviewer_and_holdout_separated",
+      "passed": true
+    },
+    {
+      "id": "DROP_economic_health_separate_from_procedural_health",
+      "passed": true
+    },
+    {
+      "id": "REMOVE_REQUIREMENT",
+      "passed": true
+    },
+    {
+      "id": "REMOVE_TEST",
+      "passed": true
+    },
+    {
+      "id": "FORGE_MODEL_WIN",
+      "passed": true
+    },
+    {
+      "id": "RELABEL_ARGON",
+      "passed": true
+    },
+    {
+      "id": "NO_CONFIRMATION",
+      "passed": true
+    },
+    {
+      "id": "HIDE_UNKNOWN_COST",
+      "passed": true
+    },
+    {
+      "id": "VALID_ModelUseRecord",
+      "passed": true
+    },
+    {
+      "id": "VALID_ResearchBudgetReservation",
+      "passed": true
+    },
+    {
+      "id": "VALID_ModelQualificationEvidence",
+      "passed": true
+    },
+    {
+      "id": "REJECT_ModelUseRecord_resolved_model",
+      "passed": true
+    },
+    {
+      "id": "REJECT_ModelUseRecord_evidence_epoch",
+      "passed": true
+    },
+    {
+      "id": "REJECT_ModelUseRecord_calibration_ref",
+      "passed": true
+    },
+    {
+      "id": "REJECT_ModelUseRecord_financial_authority",
+      "passed": true
+    },
+    {
+      "id": "REJECT_ResearchBudgetReservation_liability_retained",
+      "passed": true
+    },
+    {
+      "id": "REJECT_ModelQualificationEvidence_protected_confirmation_ref",
+      "passed": true
+    },
+    {
+      "id": "REJECT_ModelQualificationEvidence_cost_and_risk_comparison_ref",
+      "passed": true
+    },
+    {
+      "id": "REJECT_ModelQualificationEvidence_independent_review_ref",
+      "passed": true
+    },
+    {
+      "id": "PRESERVE_INCONCLUSIVE",
+      "passed": true
+    },
+    {
+      "id": "FULL_NORMATIVE_SECTION",
+      "passed": true
+    },
+    {
+      "id": "NEW_TESTS_RENDERED",
+      "passed": true
+    },
+    {
+      "id": "ACTIVE_COUNTS",
+      "passed": true
+    },
+    {
+      "id": "TOKEN_COST_ARITHMETIC_ARGON",
+      "passed": true
+    },
+    {
+      "id": "TOKEN_COST_ARITHMETIC_ARGON_DEC",
+      "passed": true
+    },
+    {
+      "id": "TOKEN_COST_ARITHMETIC_DS_PRO_PEAK",
+      "passed": true
+    },
+    {
+      "id": "TOKEN_COST_ARITHMETIC_DS_PRO_OFFPEAK",
+      "passed": true
+    },
+    {
+      "id": "TOKEN_COST_ARITHMETIC_DS_FLASH_PEAK",
+      "passed": true
+    },
+    {
+      "id": "TOKEN_COST_ARITHMETIC_DS_FLASH_OFFPEAK",
+      "passed": true
+    }
+  ]
+}

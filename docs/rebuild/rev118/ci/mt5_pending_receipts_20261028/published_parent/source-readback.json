@@ -1,0 +1,2762 @@
+{
+  "job_backend": "﻿2026-10-28T13:03:05.6000435Z Current runner version: '2.338.0'\n2026-10-28T13:03:05.6048711Z ##[group]Runner Image Provisioner\n2026-10-28T13:03:05.6049559Z Hosted Compute Agent\n2026-10-28T13:03:05.6050215Z Version: 20261021.618\n2026-10-28T13:03:05.6050874Z Commit: 21505ad2541d5be6135ed84fc33697146cf75b8e\n2026-10-28T13:03:05.6051640Z Build Date: 2026-10-21T00:45:21Z\n2026-10-28T13:03:05.6052416Z Worker ID: {a0e0ca17-bec1-4659-bc71-d0d331f9e3f9}\n2026-10-28T13:03:05.6053410Z Region: westcentralus\n2026-10-28T13:03:05.6054054Z Cloud: Azure\n2026-10-28T13:03:05.6054624Z ##[endgroup]\n2026-10-28T13:03:05.6056160Z ##[group]Operating System\n2026-10-28T13:03:05.6056894Z Ubuntu\n2026-10-28T13:03:05.6057429Z 24.04.5\n2026-10-28T13:03:05.6057922Z LTS\n2026-10-28T13:03:05.6058496Z ##[endgroup]\n2026-10-28T13:03:05.6059108Z ##[group]Runner Image\n2026-10-28T13:03:05.6059794Z Image: ubuntu-24.04\n2026-10-28T13:03:05.6060375Z Version: 20261012.334.1\n2026-10-28T13:03:05.6061647Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20261012.334/images/ubuntu/Ubuntu2404-Readme.md\n2026-10-28T13:03:05.6063469Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20261012.334\n2026-10-28T13:03:05.6064506Z ##[endgroup]\n2026-10-28T13:03:05.6065664Z ##[group]GITHUB_TOKEN Permissions\n2026-10-28T13:03:05.6067618Z Contents: read\n2026-10-28T13:03:05.6068274Z Metadata: read\n2026-10-28T13:03:05.6068828Z Packages: read\n2026-10-28T13:03:05.6069531Z ##[endgroup]\n2026-10-28T13:03:05.6071589Z Secret source: Actions\n2026-10-28T13:03:05.6072627Z Cache mode: write\n2026-10-28T13:03:05.6073630Z Prepare workflow directory\n2026-10-28T13:03:05.6413623Z Prepare all required actions\n2026-10-28T13:03:05.6460502Z Getting action download info\n2026-10-28T13:03:06.0006968Z Download action repository 'actions/checkout@v4' (SHA:11d5960a326750d5838078e36cf38b85af677262)\n2026-10-28T13:03:06.1056441Z Download action repository 'actions/setup-python@v5' (SHA:a26af69be951a213d495a4c3e4e4022e16d87065)\n2026-10-28T13:03:06.1831573Z Download action repository 'actions/setup-node@v4' (SHA:49933ea5288caeca8642d1e84afbd3f7d6820020)\n2026-10-28T13:03:06.2685792Z Download action repository 'actions/upload-artifact@v4' (SHA:ea165f8d65b6e75b540449e92b4886f43607fa02)\n2026-10-28T13:03:06.4936472Z Complete job name: backend\n2026-10-28T13:03:06.6108495Z ##[group]Run actions/checkout@v4\n2026-10-28T13:03:06.6109372Z with:\n2026-10-28T13:03:06.6109815Z   repository: Vanguduza/Van\n2026-10-28T13:03:06.6113950Z   token: ***\n2026-10-28T13:03:06.6114381Z   ssh-strict: true\n2026-10-28T13:03:06.6114810Z   ssh-user: git\n2026-10-28T13:03:06.6115250Z   persist-credentials: true\n2026-10-28T13:03:06.6115722Z   clean: true\n2026-10-28T13:03:06.6116160Z   sparse-checkout-cone-mode: true\n2026-10-28T13:03:06.6116672Z   fetch-depth: 1\n2026-10-28T13:03:06.6117103Z   fetch-tags: false\n2026-10-28T13:03:06.6117532Z   show-progress: true\n2026-10-28T13:03:06.6117966Z   lfs: false\n2026-10-28T13:03:06.6118365Z   submodules: false\n2026-10-28T13:03:06.6118797Z   set-safe-directory: true\n2026-10-28T13:03:06.6119316Z   allow-unsafe-pr-checkout: false\n2026-10-28T13:03:06.6120073Z ##[endgroup]\n2026-10-28T13:03:06.9235662Z Syncing repository: Vanguduza/Van\n2026-10-28T13:03:06.9237804Z ##[group]Getting Git version info\n2026-10-28T13:03:06.9239174Z Working directory is '/home/runner/work/Van/Van'\n2026-10-28T13:03:06.9240739Z [command]/usr/bin/git version\n2026-10-28T13:03:06.9358894Z git version 2.55.0\n2026-10-28T13:03:06.9382983Z ##[endgroup]\n2026-10-28T13:03:06.9399176Z Temporarily overriding HOME='/home/runner/work/_temp/b466f464-bb1e-4899-8587-23bb00608dff' before making global git config changes\n2026-10-28T13:03:06.9401585Z Adding repository directory to the temporary git global config as a safe directory\n2026-10-28T13:03:06.9405062Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/Van/Van\n2026-10-28T13:03:06.9470226Z Deleting the contents of '/home/runner/work/Van/Van'\n2026-10-28T13:03:06.9481435Z ##[group]Initializing the repository\n2026-10-28T13:03:06.9492022Z [command]/usr/bin/git init /home/runner/work/Van/Van\n2026-10-28T13:03:06.9604078Z hint: Using 'master' as the name for the initial branch. This default branch name\n2026-10-28T13:03:06.9605807Z hint: will change to \"main\" in Git 3.0. To configure the initial branch name\n2026-10-28T13:03:06.9607703Z hint: to use in all of your new repositories, which will suppress this warning,\n2026-10-28T13:03:06.9608942Z hint: call:\n2026-10-28T13:03:06.9609630Z hint:\n2026-10-28T13:03:06.9610479Z hint: \tgit config --global init.defaultBranch <name>\n2026-10-28T13:03:06.9611453Z hint:\n2026-10-28T13:03:06.9612357Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and\n2026-10-28T13:03:06.9614214Z hint: 'development'. The just-created branch can be renamed via this command:\n2026-10-28T13:03:06.9615418Z hint:\n2026-10-28T13:03:06.9616058Z hint: \tgit branch -m <name>\n2026-10-28T13:03:06.9616818Z hint:\n2026-10-28T13:03:06.9617890Z hint: Disable this message with \"git config set advice.defaultBranchName false\"\n2026-10-28T13:03:06.9619472Z Initialized empty Git repository in /home/runner/work/Van/Van/.git/\n2026-10-28T13:03:06.9622079Z [command]/usr/bin/git remote add origin https://github.com/Vanguduza/Van\n2026-10-28T13:03:06.9681227Z ##[endgroup]\n2026-10-28T13:03:06.9682522Z ##[group]Disabling automatic garbage collection\n2026-10-28T13:03:06.9685896Z [command]/usr/bin/git config --local gc.auto 0\n2026-10-28T13:03:06.9721685Z ##[endgroup]\n2026-10-28T13:03:06.9722899Z ##[group]Setting up auth\n2026-10-28T13:03:06.9729883Z [command]/usr/bin/git config --local --name-only --get-regexp core\\.sshCommand\n2026-10-28T13:03:06.9773705Z [command]/usr/bin/git submodule foreach --recursive sh -c \"git config --local --name-only --get-regexp 'core\\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :\"\n2026-10-28T13:03:07.0171115Z [command]/usr/bin/git config --local --name-only --get-regexp http\\.https\\:\\/\\/github\\.com\\/\\.extraheader\n2026-10-28T13:03:07.0206312Z [command]/usr/bin/git submodule foreach --recursive sh -c \"git config --local --name-only --get-regexp 'http\\.https\\:\\/\\/github\\.com\\/\\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :\"\n2026-10-28T13:03:07.0466414Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\\.gitdir:\n2026-10-28T13:03:07.0506385Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url\n2026-10-28T13:03:07.0735464Z [command]/usr/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***\n2026-10-28T13:03:07.0780194Z ##[endgroup]\n2026-10-28T13:03:07.0792480Z ##[group]Fetching the repository\n2026-10-28T13:03:07.0794813Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +ca1f8fab8e120b2ec380ec8406998d35d58f1735:refs/remotes/pull/105/merge\n2026-10-28T13:03:16.5986029Z From https://github.com/Vanguduza/Van\n2026-10-28T13:03:16.5987538Z  * [new ref]         ca1f8fab8e120b2ec380ec8406998d35d58f1735 -> pull/105/merge\n2026-10-28T13:03:16.5991967Z ##[endgroup]\n2026-10-28T13:03:16.5993562Z ##[group]Determining the checkout info\n2026-10-28T13:03:16.5995923Z ##[endgroup]\n2026-10-28T13:03:16.6003684Z [command]/usr/bin/git sparse-checkout disable\n2026-10-28T13:03:16.6060878Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig\n2026-10-28T13:03:16.6102026Z ##[group]Checking out the ref\n2026-10-28T13:03:16.6106106Z [command]/usr/bin/git checkout --progress --force refs/remotes/pull/105/merge\n2026-10-28T13:03:17.6300049Z Updating files:  67% (10750/15823)\n2026-10-28T13:03:17.6407524Z Updating files:  68% (10760/15823)\n2026-10-28T13:03:17.6759876Z Updating files:  69% (10918/15823)\n2026-10-28T13:03:17.7101065Z Updating files:  70% (11077/15823)\n2026-10-28T13:03:17.7240252Z Updating files:  71% (11235/15823)\n2026-10-28T13:03:17.7395754Z Updating files:  72% (11393/15823)\n2026-10-28T13:03:17.7654553Z Updating files:  73% (11551/15823)\n2026-10-28T13:03:17.7726884Z Updating files:  74% (11710/15823)\n2026-10-28T13:03:17.7862212Z Updating files:  75% (11868/15823)\n2026-10-28T13:03:17.7956563Z Updating files:  76% (12026/15823)\n2026-10-28T13:03:17.8044540Z Updating files:  77% (12184/15823)\n2026-10-28T13:03:17.8160240Z Updating files:  78% (12342/15823)\n2026-10-28T13:03:17.8282020Z Updating files:  79% (12501/15823)\n2026-10-28T13:03:17.8616797Z Updating files:  80% (12659/15823)\n2026-10-28T13:03:17.8779134Z Updating files:  81% (12817/15823)\n2026-10-28T13:03:17.8914557Z Updating files:  82% (12975/15823)\n2026-10-28T13:03:17.9039075Z Updating files:  83% (13134/15823)\n2026-10-28T13:03:17.9300920Z Updating files:  84% (13292/15823)\n2026-10-28T13:03:17.9412552Z Updating files:  85% (13450/15823)\n2026-10-28T13:03:18.0008295Z Updating files:  86% (13608/15823)\n2026-10-28T13:03:18.0277372Z Updating files:  87% (13767/15823)\n2026-10-28T13:03:18.0377467Z Updating files:  88% (13925/15823)\n2026-10-28T13:03:18.0520206Z Updating files:  89% (14083/15823)\n2026-10-28T13:03:18.0714241Z Updating files:  90% (14241/15823)\n2026-10-28T13:03:18.1200089Z Updating files:  91% (14399/15823)\n2026-10-28T13:03:18.1534403Z Updating files:  92% (14558/15823)\n2026-10-28T13:03:18.1764638Z Updating files:  93% (14716/15823)\n2026-10-28T13:03:18.1891233Z Updating files:  94% (14874/15823)\n2026-10-28T13:03:18.2003080Z Updating files:  95% (15032/15823)\n2026-10-28T13:03:18.2111093Z Updating files:  96% (15191/15823)\n2026-10-28T13:03:18.2217738Z Updating files:  97% (15349/15823)\n2026-10-28T13:03:18.2318090Z Updating files:  98% (15507/15823)\n2026-10-28T13:03:18.4194557Z Updating files:  99% (15665/15823)\n2026-10-28T13:03:18.4195318Z Updating files: 100% (15823/15823)\n2026-10-28T13:03:18.4195879Z Updating files: 100% (15823/15823), done.\n2026-10-28T13:03:18.4384765Z Note: switching to 'refs/remotes/pull/105/merge'.\n2026-10-28T13:03:18.4385471Z \n2026-10-28T13:03:18.4385829Z You are in 'detached HEAD' state. You can look around, make experimental\n2026-10-28T13:03:18.4386466Z changes and commit them, and you can discard any commits you make in this\n2026-10-28T13:03:18.4387097Z state without impacting any branches by switching back to a branch.\n2026-10-28T13:03:18.4387406Z \n2026-10-28T13:03:18.4387623Z If you want to create a new branch to retain commits you create, you may\n2026-10-28T13:03:18.4388383Z do so (now or later) by using -c with the switch command. Example:\n2026-10-28T13:03:18.4388671Z \n2026-10-28T13:03:18.4388832Z   git switch -c <new-branch-name>\n2026-10-28T13:03:18.4389024Z \n2026-10-28T13:03:18.4389132Z Or undo this operation with:\n2026-10-28T13:03:18.4389304Z \n2026-10-28T13:03:18.4389397Z   git switch -\n2026-10-28T13:03:18.4389543Z \n2026-10-28T13:03:18.4389798Z Turn off this advice by setting config variable advice.detachedHead to false\n2026-10-28T13:03:18.4390135Z \n2026-10-28T13:03:18.4390495Z HEAD is now at ca1f8fa Merge 3732798104c476680cac8e22f833f2ed764d77e2 into 8eb1889822fc8a83f219977c15340172e16acd91\n2026-10-28T13:03:18.4493613Z ##[endgroup]\n2026-10-28T13:03:18.4549874Z [command]/usr/bin/git log -1 --format=%H\n2026-10-28T13:03:18.4580778Z ca1f8fab8e120b2ec380ec8406998d35d58f1735\n2026-10-28T13:03:18.4837365Z ##[group]Run test -n \"$DDS_KEY\" || {\n2026-10-28T13:03:18.4837779Z \u001b[36;1mtest -n \"$DDS_KEY\" || {\u001b[0m\n2026-10-28T13:03:18.4838667Z \u001b[36;1m  echo \"::error::secret DDS_CONTRACT_READ_DEPLOY_KEY is not provisioned: add a read-only deploy key on Vanguduza/dial-development-system and store its private half in this repository's Actions secrets\"\u001b[0m\n2026-10-28T13:03:18.4839540Z \u001b[36;1m  exit 1\u001b[0m\n2026-10-28T13:03:18.4839756Z \u001b[36;1m}\u001b[0m\n2026-10-28T13:03:18.5110719Z shell: /usr/bin/bash -e {0}\n2026-10-28T13:03:18.5111065Z env:\n2026-10-28T13:03:18.5111313Z   DDS_KEY: \n2026-10-28T13:03:18.5111563Z ##[endgroup]\n2026-10-28T13:03:18.5231967Z ##[error]secret DDS_CONTRACT_READ_DEPLOY_KEY is not provisioned: add a read-only deploy key on Vanguduza/dial-development-system and store its private half in this repository's Actions secrets\n2026-10-28T13:03:18.5242941Z ##[error]Process completed with exit code 1.\n2026-10-28T13:03:18.5551919Z Post job cleanup.\n2026-10-28T13:03:18.6414113Z [command]/usr/bin/git version\n2026-10-28T13:03:18.6453303Z git version 2.55.0\n2026-10-28T13:03:18.6501161Z Temporarily overriding HOME='/home/runner/work/_temp/358578b0-d98b-4fae-a460-aa832db9468e' before making global git config changes\n2026-10-28T13:03:18.6502778Z Adding repository directory to the temporary git global config as a safe directory\n2026-10-28T13:03:18.6508175Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/Van/Van\n2026-10-28T13:03:18.6550660Z [command]/usr/bin/git config --local --name-only --get-regexp core\\.sshCommand\n2026-10-28T13:03:18.6658821Z [command]/usr/bin/git submodule foreach --recursive sh -c \"git config --local --name-only --get-regexp 'core\\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :\"\n2026-10-28T13:03:18.6916102Z [command]/usr/bin/git config --local --name-only --get-regexp http\\.https\\:\\/\\/github\\.com\\/\\.extraheader\n2026-10-28T13:03:18.6953757Z http.https://github.com/.extraheader\n2026-10-28T13:03:18.6968420Z [command]/usr/bin/git config --local --unset-all http.https://github.com/.extraheader\n2026-10-28T13:03:18.7000357Z [command]/usr/bin/git submodule foreach --recursive sh -c \"git config --local --name-only --get-regexp 'http\\.https\\:\\/\\/github\\.com\\/\\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :\"\n2026-10-28T13:03:18.7277185Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\\.gitdir:\n2026-10-28T13:03:18.7319199Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url\n2026-10-28T13:03:18.7712553Z Cleaning up orphan processes\n2026-10-28T13:03:18.8100636Z ##[warning]Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/checkout@v4. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/\n",
+  "job_ledger": "﻿2026-10-28T13:03:23.2990894Z Current runner version: '2.338.0'\n2026-10-28T13:03:23.3032472Z ##[group]Runner Image Provisioner\n2026-10-28T13:03:23.3033262Z Hosted Compute Agent\n2026-10-28T13:03:23.3033742Z Version: 20261021.618\n2026-10-28T13:03:23.3034314Z Commit: 21505ad2541d5be6135ed84fc33697146cf75b8e\n2026-10-28T13:03:23.3034932Z Build Date: 2026-10-21T00:45:21Z\n2026-10-28T13:03:23.3035505Z Worker ID: {b79db097-ec43-419d-a679-498071b974ff}\n2026-10-28T13:03:23.3036115Z Region: eastus\n2026-10-28T13:03:23.3036567Z Cloud: Azure\n2026-10-28T13:03:23.3037020Z ##[endgroup]\n2026-10-28T13:03:23.3038123Z ##[group]Operating System\n2026-10-28T13:03:23.3038869Z Ubuntu\n2026-10-28T13:03:23.3039587Z 24.04.5\n2026-10-28T13:03:23.3040009Z LTS\n2026-10-28T13:03:23.3040446Z ##[endgroup]\n2026-10-28T13:03:23.3040952Z ##[group]Runner Image\n2026-10-28T13:03:23.3041454Z Image: ubuntu-24.04\n2026-10-28T13:03:23.3041951Z Version: 20261012.334.1\n2026-10-28T13:03:23.3043018Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20261012.334/images/ubuntu/Ubuntu2404-Readme.md\n2026-10-28T13:03:23.3044323Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20261012.334\n2026-10-28T13:03:23.3045101Z ##[endgroup]\n2026-10-28T13:03:23.3046120Z ##[group]GITHUB_TOKEN Permissions\n2026-10-28T13:03:23.3047726Z Contents: read\n2026-10-28T13:03:23.3048610Z Metadata: read\n2026-10-28T13:03:23.3049277Z Packages: read\n2026-10-28T13:03:23.3049907Z ##[endgroup]\n2026-10-28T13:03:23.3052289Z Secret source: Actions\n2026-10-28T13:03:23.3053165Z Cache mode: write\n2026-10-28T13:03:23.3053810Z Prepare workflow directory\n2026-10-28T13:03:23.3480589Z Prepare all required actions\n2026-10-28T13:03:23.3517997Z Getting action download info\n2026-10-28T13:03:23.5427064Z Download action repository 'actions/checkout@v4' (SHA:11d5960a326750d5838078e36cf38b85af677262)\n2026-10-28T13:03:23.7385342Z Download action repository 'actions/setup-python@v5' (SHA:a26af69be951a213d495a4c3e4e4022e16d87065)\n2026-10-28T13:03:24.2595929Z Complete job name: project-truth-ledger\n2026-10-28T13:03:24.3315805Z ##[group]Run actions/checkout@v4\n2026-10-28T13:03:24.3316571Z with:\n2026-10-28T13:03:24.3317013Z   ref: 3732798104c476680cac8e22f833f2ed764d77e2\n2026-10-28T13:03:24.3317512Z   path: head\n2026-10-28T13:03:24.3317876Z   fetch-depth: 0\n2026-10-28T13:03:24.3318284Z   repository: Vanguduza/Van\n2026-10-28T13:03:24.3321977Z   token: ***\n2026-10-28T13:03:24.3322371Z   ssh-strict: true\n2026-10-28T13:03:24.3322765Z   ssh-user: git\n2026-10-28T13:03:24.3323148Z   persist-credentials: true\n2026-10-28T13:03:24.3323569Z   clean: true\n2026-10-28T13:03:24.3323948Z   sparse-checkout-cone-mode: true\n2026-10-28T13:03:24.3324393Z   fetch-tags: false\n2026-10-28T13:03:24.3324793Z   show-progress: true\n2026-10-28T13:03:24.3325180Z   lfs: false\n2026-10-28T13:03:24.3325536Z   submodules: false\n2026-10-28T13:03:24.3325922Z   set-safe-directory: true\n2026-10-28T13:03:24.3326352Z   allow-unsafe-pr-checkout: false\n2026-10-28T13:03:24.3326968Z env:\n2026-10-28T13:03:24.3327432Z   HEAD_SHA: 3732798104c476680cac8e22f833f2ed764d77e2\n2026-10-28T13:03:24.3328005Z   PR_BASE_SHA: 8eb1889822fc8a83f219977c15340172e16acd91\n2026-10-28T13:03:24.3328653Z   PUSHED_REF: 105/merge\n2026-10-28T13:03:24.3329115Z   PUSHED_BEFORE: bf41e16b0213431eeaeb33da96676cfb7dc47477\n2026-10-28T13:03:24.3329648Z   DEFAULT_BRANCH: main\n2026-10-28T13:03:24.3330030Z ##[endgroup]\n2026-10-28T13:03:24.6561646Z Syncing repository: Vanguduza/Van\n2026-10-28T13:03:24.6564646Z ##[group]Getting Git version info\n2026-10-28T13:03:24.6565835Z Working directory is '/home/runner/work/Van/Van/head'\n2026-10-28T13:03:24.6567631Z [command]/usr/bin/git version\n2026-10-28T13:03:24.6644034Z git version 2.55.0\n2026-10-28T13:03:24.6682492Z ##[endgroup]\n2026-10-28T13:03:24.6690470Z Temporarily overriding HOME='/home/runner/work/_temp/2163eaa2-0e05-40f6-9c92-4f9c9866c611' before making global git config changes\n2026-10-28T13:03:24.6693181Z Adding repository directory to the temporary git global config as a safe directory\n2026-10-28T13:03:24.6695463Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/Van/Van/head\n2026-10-28T13:03:24.6725255Z ##[group]Initializing the repository\n2026-10-28T13:03:24.6728150Z [command]/usr/bin/git init /home/runner/work/Van/Van/head\n2026-10-28T13:03:24.6800740Z hint: Using 'master' as the name for the initial branch. This default branch name\n2026-10-28T13:03:24.6803024Z hint: will change to \"main\" in Git 3.0. To configure the initial branch name\n2026-10-28T13:03:24.6805366Z hint: to use in all of your new repositories, which will suppress this warning,\n2026-10-28T13:03:24.6807329Z hint: call:\n2026-10-28T13:03:24.6808585Z hint:\n2026-10-28T13:03:24.6809967Z hint: \tgit config --global init.defaultBranch <name>\n2026-10-28T13:03:24.6811602Z hint:\n2026-10-28T13:03:24.6813176Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and\n2026-10-28T13:03:24.6815549Z hint: 'development'. The just-created branch can be renamed via this command:\n2026-10-28T13:03:24.6817569Z hint:\n2026-10-28T13:03:24.6819097Z hint: \tgit branch -m <name>\n2026-10-28T13:03:24.6820457Z hint:\n2026-10-28T13:03:24.6822253Z hint: Disable this message with \"git config set advice.defaultBranchName false\"\n2026-10-28T13:03:24.6825000Z Initialized empty Git repository in /home/runner/work/Van/Van/head/.git/\n2026-10-28T13:03:24.6829797Z [command]/usr/bin/git remote add origin https://github.com/Vanguduza/Van\n2026-10-28T13:03:24.6853561Z ##[endgroup]\n2026-10-28T13:03:24.6855737Z ##[group]Disabling automatic garbage collection\n2026-10-28T13:03:24.6857525Z [command]/usr/bin/git config --local gc.auto 0\n2026-10-28T13:03:24.6884272Z ##[endgroup]\n2026-10-28T13:03:24.6886093Z ##[group]Setting up auth\n2026-10-28T13:03:24.6888332Z [command]/usr/bin/git config --local --name-only --get-regexp core\\.sshCommand\n2026-10-28T13:03:24.6918841Z [command]/usr/bin/git submodule foreach --recursive sh -c \"git config --local --name-only --get-regexp 'core\\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :\"\n2026-10-28T13:03:24.7226184Z [command]/usr/bin/git config --local --name-only --get-regexp http\\.https\\:\\/\\/github\\.com\\/\\.extraheader\n2026-10-28T13:03:24.7257036Z [command]/usr/bin/git submodule foreach --recursive sh -c \"git config --local --name-only --get-regexp 'http\\.https\\:\\/\\/github\\.com\\/\\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :\"\n2026-10-28T13:03:24.7478549Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\\.gitdir:\n2026-10-28T13:03:24.7510798Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url\n2026-10-28T13:03:24.7700235Z [command]/usr/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***\n2026-10-28T13:03:24.7736269Z ##[endgroup]\n2026-10-28T13:03:24.7746464Z ##[group]Fetching the repository\n2026-10-28T13:03:24.7749827Z [command]/usr/bin/git -c protocol.version=2 fetch --prune --no-recurse-submodules origin +refs/heads/*:refs/remotes/origin/* +refs/tags/*:refs/tags/*\n2026-10-28T13:03:35.0595761Z From https://github.com/Vanguduza/Van\n2026-10-28T13:03:35.0596540Z  * [new branch]        ccr-71397b02-lm6fid       -> origin/ccr-71397b02-lm6fid\n2026-10-28T13:03:35.0597188Z  * [new branch]        ccr-8f1201e9-w1xm0r       -> origin/ccr-8f1201e9-w1xm0r\n2026-10-28T13:03:35.0597826Z  * [new branch]        ccr-9e07e1af-8mgz1p       -> origin/ccr-9e07e1af-8mgz1p\n2026-10-28T13:03:35.0598897Z  * [new branch]        chatgpt/allow-sandboxed-playwright-userns-20261008 -> origin/chatgpt/allow-sandboxed-playwright-userns-20261008\n2026-10-28T13:03:35.0600084Z  * [new branch]        chatgpt/better-remote-commander-oci-20261021 -> origin/chatgpt/better-remote-commander-oci-20261021\n2026-10-28T13:03:35.0600843Z  * [new branch]        chatgpt/fix-browser-harness-pillow-pin-20261008 -> origin/chatgpt/fix-browser-harness-pillow-pin-20261008\n2026-10-28T13:03:35.0601570Z  * [new branch]        chatgpt/fix-browser-runtime-ancestor-acl-20261008 -> origin/chatgpt/fix-browser-runtime-ancestor-acl-20261008\n2026-10-28T13:03:35.0602635Z  * [new branch]        chatgpt/fix-browser-runtime-path-access-20261008 -> origin/chatgpt/fix-browser-runtime-path-access-20261008\n2026-10-28T13:03:35.0603365Z  * [new branch]        chatgpt/fix-browser-runtime-path-perms-20261008 -> origin/chatgpt/fix-browser-runtime-path-perms-20261008\n2026-10-28T13:03:35.0604157Z  * [new branch]        chatgpt/fix-browser-systemd-retry-20261008 -> origin/chatgpt/fix-browser-systemd-retry-20261008\n2026-10-28T13:03:35.0606276Z  * [new branch]        chatgpt/fix-browser-systemd-retry2-20261008 -> origin/chatgpt/fix-browser-systemd-retry2-20261008\n2026-10-28T13:03:35.0607470Z  * [new branch]        chatgpt/fix-browser-systemd-startlimit-20261008 -> origin/chatgpt/fix-browser-systemd-startlimit-20261008\n2026-10-28T13:03:35.0608966Z  * [new branch]        chatgpt/fix-gateway-browser-runtime-staging-20261008 -> origin/chatgpt/fix-gateway-browser-runtime-staging-20261008\n2026-10-28T13:03:35.0609855Z  * [new branch]        chatgpt/fix-stagehand-listen-syntax-20261008 -> origin/chatgpt/fix-stagehand-listen-syntax-20261008\n2026-10-28T13:03:35.0610539Z  * [new branch]        chatgpt/fix-stagehand-listen-syntax-v2-20261008 -> origin/chatgpt/fix-stagehand-listen-syntax-v2-20261008\n2026-10-28T13:03:35.0611513Z  * [new branch]        chatgpt/fix-stagehand-readiness-window-20261008 -> origin/chatgpt/fix-stagehand-readiness-window-20261008\n2026-10-28T13:03:35.0612669Z  * [new branch]        chatgpt/harden-playwright-chromium-ownership-20261008 -> origin/chatgpt/harden-playwright-chromium-ownership-20261008\n2026-10-28T13:03:35.0613533Z  * [new branch]        chatgpt/stage-browser-governance-certification-20261008 -> origin/chatgpt/stage-browser-governance-certification-20261008\n2026-10-28T13:03:35.0614264Z  * [new branch]        chatgpt/van-browser-assignment-proof-20261008 -> origin/chatgpt/van-browser-assignment-proof-20261008\n2026-10-28T13:03:35.0615103Z  * [new branch]        chatgpt/van-browser-sandbox-launch-20261008 -> origin/chatgpt/van-browser-sandbox-launch-20261008\n2026-10-28T13:03:35.0615822Z  * [new branch]        chatgpt/van-browser-task-read-auth-20261008 -> origin/chatgpt/van-browser-task-read-auth-20261008\n2026-10-28T13:03:35.0616455Z  * [new branch]        chatgpt/van-browser-tested-source-20261008 -> origin/chatgpt/van-browser-tested-source-20261008\n2026-10-28T13:03:35.0617137Z  * [new branch]        chatgpt/van-overlay-firewall-persistence-20261007 -> origin/chatgpt/van-overlay-firewall-persistence-20261007\n2026-10-28T13:03:35.0617863Z  * [new branch]        chatgpt/van-web-acquisition-fabric-20261004 -> origin/chatgpt/van-web-acquisition-fabric-20261004\n2026-10-28T13:03:35.0618803Z  * [new branch]        chatgpt/vati-opportunity-modes-20261008 -> origin/chatgpt/vati-opportunity-modes-20261008\n2026-10-28T13:03:35.0619421Z  * [new branch]        claude/busy-bardeen-sbfo2u -> origin/claude/busy-bardeen-sbfo2u\n2026-10-28T13:03:35.0619953Z  * [new branch]        claude/van-fable-forensic-audit-ds8g0o -> origin/claude/van-fable-forensic-audit-ds8g0o\n2026-10-28T13:03:35.0620522Z  * [new branch]        claude/van-forge-audit-11n4wh -> origin/claude/van-forge-audit-11n4wh\n2026-10-28T13:03:35.0621132Z  * [new branch]        codex/cognitive-fabric-r161-20261006 -> origin/codex/cognitive-fabric-r161-20261006\n2026-10-28T13:03:35.0621805Z  * [new branch]        codex/van-canon-ci-import-path-2026-10-08 -> origin/codex/van-canon-ci-import-path-2026-10-08\n2026-10-28T13:03:35.0622418Z  * [new branch]        codex/van-canon-consolidation-2026-10-08 -> origin/codex/van-canon-consolidation-2026-10-08\n2026-10-28T13:03:35.0623020Z  * [new branch]        codex/van-canon-runtime-closure-2026-10-09 -> origin/codex/van-canon-runtime-closure-2026-10-09\n2026-10-28T13:03:35.0623634Z  * [new branch]        codex/van-canon-runtime-evidence-2026-10-09 -> origin/codex/van-canon-runtime-evidence-2026-10-09\n2026-10-28T13:03:35.0624282Z  * [new branch]        codex/van-dfc1557a-direct-acceptance-2026-10-09 -> origin/codex/van-dfc1557a-direct-acceptance-2026-10-09\n2026-10-28T13:03:35.0624883Z  * [new branch]        codex/van-direct-artemis-2026-10-08 -> origin/codex/van-direct-artemis-2026-10-08\n2026-10-28T13:03:35.0625549Z  * [new branch]        codex/van-owner-core-only-2026-10-08 -> origin/codex/van-owner-core-only-2026-10-08\n2026-10-28T13:03:35.0626072Z  * [new branch]        codex/van-owner-wiring-2026-10-08 -> origin/codex/van-owner-wiring-2026-10-08\n2026-10-28T13:03:35.0626690Z  * [new branch]        codex/van-project-truth-bootstrap-review-2026-10-09 -> origin/codex/van-project-truth-bootstrap-review-2026-10-09\n2026-10-28T13:03:35.0627364Z  * [new branch]        consolidation/opus-clean-rev118-20261021 -> origin/consolidation/opus-clean-rev118-20261021\n2026-10-28T13:03:35.0628042Z  * [new branch]        feat/supabase-one-install-multiproject-20261020 -> origin/feat/supabase-one-install-multiproject-20261020\n2026-10-28T13:03:35.0628904Z  * [new branch]        feature/muse-dual-surface-control-20261012 -> origin/feature/muse-dual-surface-control-20261012\n2026-10-28T13:03:35.0629571Z  * [new branch]        feature/rea-trading-accounts-tactile-20261015 -> origin/feature/rea-trading-accounts-tactile-20261015\n2026-10-28T13:03:35.0692913Z  * [new branch]        fix/muse-zram-host-resilience-20261012 -> origin/fix/muse-zram-host-resilience-20261012\n2026-10-28T13:03:35.0693705Z  * [new branch]        forge/candidate-b-rive-mechanics-20260925 -> origin/forge/candidate-b-rive-mechanics-20260925\n2026-10-28T13:03:35.0694493Z  * [new branch]        gpt/character-forge-netcup-env-hotfix-20260923 -> origin/gpt/character-forge-netcup-env-hotfix-20260923\n2026-10-28T13:03:35.0695341Z  * [new branch]        gpt/character-forge-netcup-qualification-fix-20260923 -> origin/gpt/character-forge-netcup-qualification-fix-20260923\n2026-10-28T13:03:35.0696114Z  * [new branch]        gpt/character-forge-production-closure-20260924 -> origin/gpt/character-forge-production-closure-20260924\n2026-10-28T13:03:35.0696716Z  * [new branch]        gpt/jev-control-centre-20260925 -> origin/gpt/jev-control-centre-20260925\n2026-10-28T13:03:35.0697535Z  * [new branch]        gpt/jev-openmuse-convergence-r1-van-20260929 -> origin/gpt/jev-openmuse-convergence-r1-van-20260929\n2026-10-28T13:03:35.0698467Z  * [new branch]        gpt/jev-openmuse-convergence-r1-van-20260929-parent-ccr-integration -> origin/gpt/jev-openmuse-convergence-r1-van-20260929-parent-ccr-integration\n2026-10-28T13:03:35.0699232Z  * [new branch]        gpt/memory-fabric-rev1-2-van-20260929 -> origin/gpt/memory-fabric-rev1-2-van-20260929\n2026-10-28T13:03:35.0699824Z  * [new branch]        gpt/meta-muse-access-live-green-20261002 -> origin/gpt/meta-muse-access-live-green-20261002\n2026-10-28T13:03:35.0700423Z  * [new branch]        gpt/meta-muse-secure-access-20261002 -> origin/gpt/meta-muse-secure-access-20261002\n2026-10-28T13:03:35.0700965Z  * [new branch]        gpt/muse-egress-hardening-20260930 -> origin/gpt/muse-egress-hardening-20260930\n2026-10-28T13:03:35.0701490Z  * [new branch]        gpt/openmuse-van-convergence-r1 -> origin/gpt/openmuse-van-convergence-r1\n2026-10-28T13:03:35.0702014Z  * [new branch]        gpt/van-artemis-console-20260923 -> origin/gpt/van-artemis-console-20260923\n2026-10-28T13:03:35.0702639Z  * [new branch]        gpt/van-character-forge-authority-closure-20260924 -> origin/gpt/van-character-forge-authority-closure-20260924\n2026-10-28T13:03:35.0703333Z  * [new branch]        gpt/van-character-forge-engineering-20260922 -> origin/gpt/van-character-forge-engineering-20260922\n2026-10-28T13:03:35.0704008Z  * [new branch]        gpt/van-character-forge-production-v3-20260924 -> origin/gpt/van-character-forge-production-v3-20260924\n2026-10-28T13:03:35.0704708Z  * [new branch]        gpt/van-post-fable-product-closure-20260922 -> origin/gpt/van-post-fable-product-closure-20260922\n2026-10-28T13:03:35.0705377Z  * [new branch]        gpt/van-rive-build-input-pack-20260924 -> origin/gpt/van-rive-build-input-pack-20260924\n2026-10-28T13:03:35.0705860Z  * [new branch]        main                      -> origin/main\n2026-10-28T13:03:35.0706320Z  * [new branch]        muse/vati-opportunity-modes-20261008 -> origin/muse/vati-opportunity-modes-20261008\n2026-10-28T13:03:35.0707011Z  * [new branch]        ops/dial-control-recovery-20260930 -> origin/ops/dial-control-recovery-20260930\n2026-10-28T13:03:35.0707657Z  * [new branch]        owner/dial-universe-whatsapp-browser-20261008 -> origin/owner/dial-universe-whatsapp-browser-20261008\n2026-10-28T13:03:35.0708511Z  * [new branch]        platform/rev3-cinematic-studio-20261016 -> origin/platform/rev3-cinematic-studio-20261016\n2026-10-28T13:03:35.0709243Z  * [new branch]        platform/rev3-interaction-pr93-contribution-20261014 -> origin/platform/rev3-interaction-pr93-contribution-20261014\n2026-10-28T13:03:35.0709894Z  * [new branch]        platform/rev3-owner-controls-20261015 -> origin/platform/rev3-owner-controls-20261015\n2026-10-28T13:03:35.0710473Z  * [new branch]        review/muse-vati-rev114-inputs-20261018 -> origin/review/muse-vati-rev114-inputs-20261018\n2026-10-28T13:03:35.0711173Z  * [new branch]        review/van-next-universal-coverage-b4-closure-20261016 -> origin/review/van-next-universal-coverage-b4-closure-20261016\n2026-10-28T13:03:35.0711785Z  * [new branch]        review/van-rev115-20261018 -> origin/review/van-rev115-20261018\n2026-10-28T13:03:35.0712278Z  * [new branch]        spike/van-next-chart-engine-20261015 -> origin/spike/van-next-chart-engine-20261015\n2026-10-28T13:03:35.0712816Z  * [new tag]           archive/van-20261021/ccr-71397b02-lm6fid -> archive/van-20261021/ccr-71397b02-lm6fid\n2026-10-28T13:03:35.0713323Z  * [new tag]           archive/van-20261021/ccr-8f1201e9-w1xm0r -> archive/van-20261021/ccr-8f1201e9-w1xm0r\n2026-10-28T13:03:35.0714026Z  * [new tag]           archive/van-20261021/chatgpt/allow-sandboxed-playwright-userns-20261008 -> archive/van-20261021/chatgpt/allow-sandboxed-playwright-userns-20261008\n2026-10-28T13:03:35.0714882Z  * [new tag]           archive/van-20261021/chatgpt/better-remote-commander-oci-20261021 -> archive/van-20261021/chatgpt/better-remote-commander-oci-20261021\n2026-10-28T13:03:35.0715986Z  * [new tag]           archive/van-20261021/chatgpt/fix-browser-harness-pillow-pin-20261008 -> archive/van-20261021/chatgpt/fix-browser-harness-pillow-pin-20261008\n2026-10-28T13:03:35.0716862Z  * [new tag]           archive/van-20261021/chatgpt/fix-browser-runtime-ancestor-acl-20261008 -> archive/van-20261021/chatgpt/fix-browser-runtime-ancestor-acl-20261008\n2026-10-28T13:03:35.0717713Z  * [new tag]           archive/van-20261021/chatgpt/fix-browser-runtime-path-access-20261008 -> archive/van-20261021/chatgpt/fix-browser-runtime-path-access-20261008\n2026-10-28T13:03:35.0718685Z  * [new tag]           archive/van-20261021/chatgpt/fix-browser-runtime-path-perms-20261008 -> archive/van-20261021/chatgpt/fix-browser-runtime-path-perms-20261008\n2026-10-28T13:03:35.0719581Z  * [new tag]           archive/van-20261021/chatgpt/fix-browser-systemd-retry-20261008 -> archive/van-20261021/chatgpt/fix-browser-systemd-retry-20261008\n2026-10-28T13:03:35.0720381Z  * [new tag]           archive/van-20261021/chatgpt/fix-browser-systemd-retry2-20261008 -> archive/van-20261021/chatgpt/fix-browser-systemd-retry2-20261008\n2026-10-28T13:03:35.0721199Z  * [new tag]           archive/van-20261021/chatgpt/fix-browser-systemd-startlimit-20261008 -> archive/van-20261021/chatgpt/fix-browser-systemd-startlimit-20261008\n2026-10-28T13:03:35.0722070Z  * [new tag]           archive/van-20261021/chatgpt/fix-gateway-browser-runtime-staging-20261008 -> archive/van-20261021/chatgpt/fix-gateway-browser-runtime-staging-20261008\n2026-10-28T13:03:35.0722921Z  * [new tag]           archive/van-20261021/chatgpt/fix-stagehand-listen-syntax-20261008 -> archive/van-20261021/chatgpt/fix-stagehand-listen-syntax-20261008\n2026-10-28T13:03:35.0723733Z  * [new tag]           archive/van-20261021/chatgpt/fix-stagehand-listen-syntax-v2-20261008 -> archive/van-20261021/chatgpt/fix-stagehand-listen-syntax-v2-20261008\n2026-10-28T13:03:35.0724570Z  * [new tag]           archive/van-20261021/chatgpt/fix-stagehand-readiness-window-20261008 -> archive/van-20261021/chatgpt/fix-stagehand-readiness-window-20261008\n2026-10-28T13:03:35.0725567Z  * [new tag]           archive/van-20261021/chatgpt/harden-playwright-chromium-ownership-20261008 -> archive/van-20261021/chatgpt/harden-playwright-chromium-ownership-20261008\n2026-10-28T13:03:35.0726505Z  * [new tag]           archive/van-20261021/chatgpt/stage-browser-governance-certification-20261008 -> archive/van-20261021/chatgpt/stage-browser-governance-certification-20261008\n2026-10-28T13:03:35.0727381Z  * [new tag]           archive/van-20261021/chatgpt/van-browser-assignment-proof-20261008 -> archive/van-20261021/chatgpt/van-browser-assignment-proof-20261008\n2026-10-28T13:03:35.0728177Z  * [new tag]           archive/van-20261021/chatgpt/van-browser-sandbox-launch-20261008 -> archive/van-20261021/chatgpt/van-browser-sandbox-launch-20261008\n2026-10-28T13:03:35.0729597Z  * [new tag]           archive/van-20261021/chatgpt/van-browser-task-read-auth-20261008 -> archive/van-20261021/chatgpt/van-browser-task-read-auth-20261008\n2026-10-28T13:03:35.0730405Z  * [new tag]           archive/van-20261021/chatgpt/van-browser-tested-source-20261008 -> archive/van-20261021/chatgpt/van-browser-tested-source-20261008\n2026-10-28T13:03:35.0731233Z  * [new tag]           archive/van-20261021/chatgpt/van-overlay-firewall-persistence-20261007 -> archive/van-20261021/chatgpt/van-overlay-firewall-persistence-20261007\n2026-10-28T13:03:35.0732059Z  * [new tag]           archive/van-20261021/chatgpt/van-web-acquisition-fabric-20261004 -> archive/van-20261021/chatgpt/van-web-acquisition-fabric-20261004\n2026-10-28T13:03:35.0732816Z  * [new tag]           archive/van-20261021/chatgpt/vati-opportunity-modes-20261008 -> archive/van-20261021/chatgpt/vati-opportunity-modes-20261008\n2026-10-28T13:03:35.0733503Z  * [new tag]           archive/van-20261021/claude/busy-bardeen-sbfo2u -> archive/van-20261021/claude/busy-bardeen-sbfo2u\n2026-10-28T13:03:35.0734310Z  * [new tag]           archive/van-20261021/claude/van-fable-forensic-audit-ds8g0o -> archive/van-20261021/claude/van-fable-forensic-audit-ds8g0o\n2026-10-28T13:03:35.0735002Z  * [new tag]           archive/van-20261021/claude/van-forge-audit-11n4wh -> archive/van-20261021/claude/van-forge-audit-11n4wh\n2026-10-28T13:03:35.0735667Z  * [new tag]           archive/van-20261021/codex/cognitive-fabric-r161-20261006 -> archive/van-20261021/codex/cognitive-fabric-r161-20261006\n2026-10-28T13:03:35.0736400Z  * [new tag]           archive/van-20261021/codex/van-canon-ci-import-path-2026-10-08 -> archive/van-20261021/codex/van-canon-ci-import-path-2026-10-08\n2026-10-28T13:03:35.0737146Z  * [new tag]           archive/van-20261021/codex/van-canon-consolidation-2026-10-08 -> archive/van-20261021/codex/van-canon-consolidation-2026-10-08\n2026-10-28T13:03:35.0737914Z  * [new tag]           archive/van-20261021/codex/van-canon-runtime-closure-2026-10-09 -> archive/van-20261021/codex/van-canon-runtime-closure-2026-10-09\n2026-10-28T13:03:35.0738875Z  * [new tag]           archive/van-20261021/codex/van-canon-runtime-evidence-2026-10-09 -> archive/van-20261021/codex/van-canon-runtime-evidence-2026-10-09\n2026-10-28T13:03:35.0739693Z  * [new tag]           archive/van-20261021/codex/van-dfc1557a-direct-acceptance-2026-10-09 -> archive/van-20261021/codex/van-dfc1557a-direct-acceptance-2026-10-09\n2026-10-28T13:03:35.0740445Z  * [new tag]           archive/van-20261021/codex/van-direct-artemis-2026-10-08 -> archive/van-20261021/codex/van-direct-artemis-2026-10-08\n2026-10-28T13:03:35.0741133Z  * [new tag]           archive/van-20261021/codex/van-owner-core-only-2026-10-08 -> archive/van-20261021/codex/van-owner-core-only-2026-10-08\n2026-10-28T13:03:35.0741803Z  * [new tag]           archive/van-20261021/codex/van-owner-wiring-2026-10-08 -> archive/van-20261021/codex/van-owner-wiring-2026-10-08\n2026-10-28T13:03:35.0742581Z  * [new tag]           archive/van-20261021/codex/van-project-truth-bootstrap-review-2026-10-09 -> archive/van-20261021/codex/van-project-truth-bootstrap-review-2026-10-09\n2026-10-28T13:03:35.0743460Z  * [new tag]           archive/van-20261021/feat/supabase-one-install-multiproject-20261020 -> archive/van-20261021/feat/supabase-one-install-multiproject-20261020\n2026-10-28T13:03:35.0744389Z  * [new tag]           archive/van-20261021/feature/muse-dual-surface-control-20261012 -> archive/van-20261021/feature/muse-dual-surface-control-20261012\n2026-10-28T13:03:35.0745179Z  * [new tag]           archive/van-20261021/feature/rea-trading-accounts-tactile-20261015 -> archive/van-20261021/feature/rea-trading-accounts-tactile-20261015\n2026-10-28T13:03:35.0745943Z  * [new tag]           archive/van-20261021/fix/muse-zram-host-resilience-20261012 -> archive/van-20261021/fix/muse-zram-host-resilience-20261012\n2026-10-28T13:03:35.0746693Z  * [new tag]           archive/van-20261021/forge/candidate-b-rive-mechanics-20260925 -> archive/van-20261021/forge/candidate-b-rive-mechanics-20260925\n2026-10-28T13:03:35.0747496Z  * [new tag]           archive/van-20261021/gpt/character-forge-netcup-env-hotfix-20260923 -> archive/van-20261021/gpt/character-forge-netcup-env-hotfix-20260923\n2026-10-28T13:03:35.0748523Z  * [new tag]           archive/van-20261021/gpt/character-forge-netcup-qualification-fix-20260923 -> archive/van-20261021/gpt/character-forge-netcup-qualification-fix-20260923\n2026-10-28T13:03:35.0749474Z  * [new tag]           archive/van-20261021/gpt/character-forge-production-closure-20260924 -> archive/van-20261021/gpt/character-forge-production-closure-20260924\n2026-10-28T13:03:35.0750251Z  * [new tag]           archive/van-20261021/gpt/jev-control-centre-20260925 -> archive/van-20261021/gpt/jev-control-centre-20260925\n2026-10-28T13:03:35.0750985Z  * [new tag]           archive/van-20261021/gpt/jev-openmuse-convergence-r1-van-20260929 -> archive/van-20261021/gpt/jev-openmuse-convergence-r1-van-20260929\n2026-10-28T13:03:35.0752056Z  * [new tag]           archive/van-20261021/gpt/jev-openmuse-convergence-r1-van-20260929-parent-ccr-integration -> archive/van-20261021/gpt/jev-openmuse-convergence-r1-van-20260929-parent-ccr-integration\n2026-10-28T13:03:35.0752982Z  * [new tag]           archive/van-20261021/gpt/memory-fabric-rev1-2-van-20260929 -> archive/van-20261021/gpt/memory-fabric-rev1-2-van-20260929\n2026-10-28T13:03:35.0753716Z  * [new tag]           archive/van-20261021/gpt/meta-muse-access-live-green-20261002 -> archive/van-20261021/gpt/meta-muse-access-live-green-20261002\n2026-10-28T13:03:35.0754438Z  * [new tag]           archive/van-20261021/gpt/meta-muse-secure-access-20261002 -> archive/van-20261021/gpt/meta-muse-secure-access-20261002\n2026-10-28T13:03:35.0755129Z  * [new tag]           archive/van-20261021/gpt/muse-egress-hardening-20260930 -> archive/van-20261021/gpt/muse-egress-hardening-20260930\n2026-10-28T13:03:35.0755810Z  * [new tag]           archive/van-20261021/gpt/openmuse-van-convergence-r1 -> archive/van-20261021/gpt/openmuse-van-convergence-r1\n2026-10-28T13:03:35.0756469Z  * [new tag]           archive/van-20261021/gpt/van-artemis-console-20260923 -> archive/van-20261021/gpt/van-artemis-console-20260923\n2026-10-28T13:03:35.0757269Z  * [new tag]           archive/van-20261021/gpt/van-character-forge-authority-closure-20260924 -> archive/van-20261021/gpt/van-character-forge-authority-closure-20260924\n2026-10-28T13:03:35.0758113Z  * [new tag]           archive/van-20261021/gpt/van-character-forge-engineering-20260922 -> archive/van-20261021/gpt/van-character-forge-engineering-20260922\n2026-10-28T13:03:35.0759066Z  * [new tag]           archive/van-20261021/gpt/van-character-forge-production-v3-20260924 -> archive/van-20261021/gpt/van-character-forge-production-v3-20260924\n2026-10-28T13:03:35.0759900Z  * [new tag]           archive/van-20261021/gpt/van-post-fable-product-closure-20260922 -> archive/van-20261021/gpt/van-post-fable-product-closure-20260922\n2026-10-28T13:03:35.0760667Z  * [new tag]           archive/van-20261021/gpt/van-rive-build-input-pack-20260924 -> archive/van-20261021/gpt/van-rive-build-input-pack-20260924\n2026-10-28T13:03:35.0761235Z  * [new tag]           archive/van-20261021/main -> archive/van-20261021/main\n2026-10-28T13:03:35.0761895Z  * [new tag]           archive/van-20261021/muse/vati-opportunity-modes-20261008 -> archive/van-20261021/muse/vati-opportunity-modes-20261008\n2026-10-28T13:03:35.0762595Z  * [new tag]           archive/van-20261021/ops/dial-control-recovery-20260930 -> archive/van-20261021/ops/dial-control-recovery-20260930\n2026-10-28T13:03:35.0763350Z  * [new tag]           archive/van-20261021/owner/dial-universe-whatsapp-browser-20261008 -> archive/van-20261021/owner/dial-universe-whatsapp-browser-20261008\n2026-10-28T13:03:35.0764141Z  * [new tag]           archive/van-20261021/platform/rev3-cinematic-studio-20261016 -> archive/van-20261021/platform/rev3-cinematic-studio-20261016\n2026-10-28T13:03:35.0764969Z  * [new tag]           archive/van-20261021/platform/rev3-interaction-pr93-contribution-20261014 -> archive/van-20261021/platform/rev3-interaction-pr93-contribution-20261014\n2026-10-28T13:03:35.0765782Z  * [new tag]           archive/van-20261021/platform/rev3-owner-controls-20261015 -> archive/van-20261021/platform/rev3-owner-controls-20261015\n2026-10-28T13:03:35.0766511Z  * [new tag]           archive/van-20261021/review/muse-vati-rev114-inputs-20261018 -> archive/van-20261021/review/muse-vati-rev114-inputs-20261018\n2026-10-28T13:03:35.0767341Z  * [new tag]           archive/van-20261021/review/van-next-universal-coverage-b4-closure-20261016 -> archive/van-20261021/review/van-next-universal-coverage-b4-closure-20261016\n2026-10-28T13:03:35.0768105Z  * [new tag]           archive/van-20261021/review/van-rev115-20261018 -> archive/van-20261021/review/van-rev115-20261018\n2026-10-28T13:03:35.0769067Z  * [new tag]           archive/van-20261021/spike/van-next-chart-engine-20261015 -> archive/van-20261021/spike/van-next-chart-engine-20261015\n2026-10-28T13:03:35.0769582Z  * [new tag]           v0.5.0-dev                -> v0.5.0-dev\n2026-10-28T13:03:35.0770572Z [command]/usr/bin/git rev-parse --verify --quiet 3732798104c476680cac8e22f833f2ed764d77e2^{object}\n2026-10-28T13:03:35.0771171Z 3732798104c476680cac8e22f833f2ed764d77e2\n2026-10-28T13:03:35.0771881Z ##[endgroup]\n2026-10-28T13:03:35.0772246Z ##[group]Determining the checkout info\n2026-10-28T13:03:35.0772623Z ##[endgroup]\n2026-10-28T13:03:35.0772860Z [command]/usr/bin/git sparse-checkout disable\n2026-10-28T13:03:35.0979686Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig\n2026-10-28T13:03:35.1010572Z ##[group]Checking out the ref\n2026-10-28T13:03:35.1013622Z [command]/usr/bin/git checkout --progress --force 3732798104c476680cac8e22f833f2ed764d77e2\n2026-10-28T13:03:36.1285590Z Updating files:  80% (12737/15823)\n2026-10-28T13:03:36.1417158Z Updating files:  81% (12817/15823)\n2026-10-28T13:03:36.1525533Z Updating files:  82% (12975/15823)\n2026-10-28T13:03:36.1625676Z Updating files:  83% (13134/15823)\n2026-10-28T13:03:36.1853355Z Updating files:  84% (13292/15823)\n2026-10-28T13:03:36.1955701Z Updating files:  85% (13450/15823)\n2026-10-28T13:03:36.2499952Z Updating files:  86% (13608/15823)\n2026-10-28T13:03:36.2717825Z Updating files:  87% (13767/15823)\n2026-10-28T13:03:36.2790596Z Updating files:  88% (13925/15823)\n2026-10-28T13:03:36.2919155Z Updating files:  89% (14083/15823)\n2026-10-28T13:03:36.3090384Z Updating files:  90% (14241/15823)\n2026-10-28T13:03:36.3477261Z Updating files:  91% (14399/15823)\n2026-10-28T13:03:36.3771579Z Updating files:  92% (14558/15823)\n2026-10-28T13:03:36.3989689Z Updating files:  93% (14716/15823)\n2026-10-28T13:03:36.4098244Z Updating files:  94% (14874/15823)\n2026-10-28T13:03:36.4191028Z Updating files:  95% (15032/15823)\n2026-10-28T13:03:36.4278595Z Updating files:  96% (15191/15823)\n2026-10-28T13:03:36.4377616Z Updating files:  97% (15349/15823)\n2026-10-28T13:03:36.4461434Z Updating files:  98% (15507/15823)\n2026-10-28T13:03:36.6077842Z Updating files:  99% (15665/15823)\n2026-10-28T13:03:36.6092014Z Updating files: 100% (15823/15823)\n2026-10-28T13:03:36.6092268Z Updating files: 100% (15823/15823), done.\n2026-10-28T13:03:36.6246233Z Note: switching to '3732798104c476680cac8e22f833f2ed764d77e2'.\n2026-10-28T13:03:36.6246789Z \n2026-10-28T13:03:36.6247107Z You are in 'detached HEAD' state. You can look around, make experimental\n2026-10-28T13:03:36.6247732Z changes and commit them, and you can discard any commits you make in this\n2026-10-28T13:03:36.6248520Z state without impacting any branches by switching back to a branch.\n2026-10-28T13:03:36.6248886Z \n2026-10-28T13:03:36.6249119Z If you want to create a new branch to retain commits you create, you may\n2026-10-28T13:03:36.6249782Z do so (now or later) by using -c with the switch command. Example:\n2026-10-28T13:03:36.6250138Z \n2026-10-28T13:03:36.6259223Z   git switch -c <new-branch-name>\n2026-10-28T13:03:36.6259482Z \n2026-10-28T13:03:36.6259632Z Or undo this operation with:\n2026-10-28T13:03:36.6259841Z \n2026-10-28T13:03:36.6259965Z   git switch -\n2026-10-28T13:03:36.6260126Z \n2026-10-28T13:03:36.6260415Z Turn off this advice by setting config variable advice.detachedHead to false\n2026-10-28T13:03:36.6260822Z \n2026-10-28T13:03:36.6261204Z HEAD is now at 37327981 Fence native MT5 entry margin against original cash capacity at final dispatch\n2026-10-28T13:03:36.8716702Z ##[endgroup]\n2026-10-28T13:03:36.8760589Z [command]/usr/bin/git log -1 --format=%H\n2026-10-28T13:03:36.8786370Z 3732798104c476680cac8e22f833f2ed764d77e2\n2026-10-28T13:03:36.8984165Z ##[group]Run set -euo pipefail\n2026-10-28T13:03:36.8984489Z \u001b[36;1mset -euo pipefail\u001b[0m\n2026-10-28T13:03:36.8984762Z \u001b[36;1mif [[ \"$GITHUB_EVENT_NAME\" == pull_request ]]; then\u001b[0m\n2026-10-28T13:03:36.8985038Z \u001b[36;1m  trusted=\"$PR_BASE_SHA\"\u001b[0m\n2026-10-28T13:03:36.8985242Z \u001b[36;1melse\u001b[0m\n2026-10-28T13:03:36.8985584Z \u001b[36;1m  git fetch --no-tags --quiet origin \"+refs/heads/$DEFAULT_BRANCH:refs/protected/$DEFAULT_BRANCH\" \\\u001b[0m\n2026-10-28T13:03:36.8986020Z \u001b[36;1m    '+refs/heads/gpt/*:refs/protected/gpt/*'\u001b[0m\n2026-10-28T13:03:36.8986269Z \u001b[36;1m  case \"$PUSHED_REF\" in\u001b[0m\n2026-10-28T13:03:36.8986485Z \u001b[36;1m    \"$DEFAULT_BRANCH\"|gpt/*)\u001b[0m\n2026-10-28T13:03:36.8986817Z \u001b[36;1m      # A protected branch moves only by a reviewed merge: its previous head is its\u001b[0m\n2026-10-28T13:03:36.8987287Z \u001b[36;1m      # protected upstream. A force-push (previous head not an ancestor) is refused.\u001b[0m\n2026-10-28T13:03:36.8987623Z \u001b[36;1m      trusted=\"$PUSHED_BEFORE\"\u001b[0m\n2026-10-28T13:03:36.8987969Z \u001b[36;1m      if [[ \"$trusted\" =~ ^0+$ ]] || ! git merge-base --is-ancestor \"$trusted\" HEAD; then\u001b[0m\n2026-10-28T13:03:36.8988589Z \u001b[36;1m        echo \"push to protected $PUSHED_REF: previous head missing or rewritten; refusing\" >&2\u001b[0m\n2026-10-28T13:03:36.8988936Z \u001b[36;1m        exit 1\u001b[0m\n2026-10-28T13:03:36.8989114Z \u001b[36;1m      fi\u001b[0m\n2026-10-28T13:03:36.8989272Z \u001b[36;1m      ;;\u001b[0m\n2026-10-28T13:03:36.8989423Z \u001b[36;1m    *)\u001b[0m\n2026-10-28T13:03:36.8989697Z \u001b[36;1m      # Unprotected: the newest commit this history shares with a protected branch.\u001b[0m\n2026-10-28T13:03:36.8990021Z \u001b[36;1m      trusted=\"\"\u001b[0m\n2026-10-28T13:03:36.8990303Z \u001b[36;1m      for ref in $(git for-each-ref --format='%(refname)' refs/protected/); do\u001b[0m\n2026-10-28T13:03:36.8990641Z \u001b[36;1m        base=\"$(git merge-base HEAD \"$ref\" || true)\"\u001b[0m\n2026-10-28T13:03:36.8990893Z \u001b[36;1m        [[ -n \"$base\" ]] || continue\u001b[0m\n2026-10-28T13:03:36.8991210Z \u001b[36;1m        if [[ -z \"$trusted\" ]] || git merge-base --is-ancestor \"$trusted\" \"$base\"; then\u001b[0m\n2026-10-28T13:03:36.8991528Z \u001b[36;1m          trusted=\"$base\"\u001b[0m\n2026-10-28T13:03:36.8991722Z \u001b[36;1m        fi\u001b[0m\n2026-10-28T13:03:36.8991891Z \u001b[36;1m      done\u001b[0m\n2026-10-28T13:03:36.8992083Z \u001b[36;1m      if [[ -z \"$trusted\" ]]; then\u001b[0m\n2026-10-28T13:03:36.8992430Z \u001b[36;1m        echo \"no protected branch shares history with $PUSHED_REF; open a pull request\" >&2\u001b[0m\n2026-10-28T13:03:36.8992767Z \u001b[36;1m        exit 1\u001b[0m\n2026-10-28T13:03:36.8992943Z \u001b[36;1m      fi\u001b[0m\n2026-10-28T13:03:36.8993106Z \u001b[36;1m      ;;\u001b[0m\n2026-10-28T13:03:36.8993265Z \u001b[36;1m  esac\u001b[0m\n2026-10-28T13:03:36.8993418Z \u001b[36;1mfi\u001b[0m\n2026-10-28T13:03:36.8993584Z \u001b[36;1mecho \"trusted ref: $trusted\"\u001b[0m\n2026-10-28T13:03:36.8993828Z \u001b[36;1mecho \"TRUSTED_SHA=$trusted\" >> \"$GITHUB_ENV\"\u001b[0m\n2026-10-28T13:03:36.9187361Z shell: /usr/bin/bash -e {0}\n2026-10-28T13:03:36.9187589Z env:\n2026-10-28T13:03:36.9187802Z   HEAD_SHA: 3732798104c476680cac8e22f833f2ed764d77e2\n2026-10-28T13:03:36.9188112Z   PR_BASE_SHA: 8eb1889822fc8a83f219977c15340172e16acd91\n2026-10-28T13:03:36.9188580Z   PUSHED_REF: 105/merge\n2026-10-28T13:03:36.9188849Z   PUSHED_BEFORE: bf41e16b0213431eeaeb33da96676cfb7dc47477\n2026-10-28T13:03:36.9189101Z   DEFAULT_BRANCH: main\n2026-10-28T13:03:36.9189279Z ##[endgroup]\n2026-10-28T13:03:36.9280126Z trusted ref: 8eb1889822fc8a83f219977c15340172e16acd91\n2026-10-28T13:03:36.9363116Z ##[group]Run actions/checkout@v4\n2026-10-28T13:03:36.9363325Z with:\n2026-10-28T13:03:36.9363515Z   ref: 8eb1889822fc8a83f219977c15340172e16acd91\n2026-10-28T13:03:36.9363743Z   path: trusted\n2026-10-28T13:03:36.9363908Z   fetch-depth: 1\n2026-10-28T13:03:36.9364084Z   repository: Vanguduza/Van\n2026-10-28T13:03:36.9366153Z   token: ***\n2026-10-28T13:03:36.9366327Z   ssh-strict: true\n2026-10-28T13:03:36.9366510Z   ssh-user: git\n2026-10-28T13:03:36.9366687Z   persist-credentials: true\n2026-10-28T13:03:36.9366878Z   clean: true\n2026-10-28T13:03:36.9367060Z   sparse-checkout-cone-mode: true\n2026-10-28T13:03:36.9367273Z   fetch-tags: false\n2026-10-28T13:03:36.9367448Z   show-progress: true\n2026-10-28T13:03:36.9367620Z   lfs: false\n2026-10-28T13:03:36.9367780Z   submodules: false\n2026-10-28T13:03:36.9367951Z   set-safe-directory: true\n2026-10-28T13:03:36.9368158Z   allow-unsafe-pr-checkout: false\n2026-10-28T13:03:36.9368502Z env:\n2026-10-28T13:03:36.9368736Z   HEAD_SHA: 3732798104c476680cac8e22f833f2ed764d77e2\n2026-10-28T13:03:36.9369011Z   PR_BASE_SHA: 8eb1889822fc8a83f219977c15340172e16acd91\n2026-10-28T13:03:36.9369253Z   PUSHED_REF: 105/merge\n2026-10-28T13:03:36.9369474Z   PUSHED_BEFORE: bf41e16b0213431eeaeb33da96676cfb7dc47477\n2026-10-28T13:03:36.9369728Z   DEFAULT_BRANCH: main\n2026-10-28T13:03:36.9369936Z   TRUSTED_SHA: 8eb1889822fc8a83f219977c15340172e16acd91\n2026-10-28T13:03:36.9370181Z ##[endgroup]\n2026-10-28T13:03:37.0064848Z Syncing repository: Vanguduza/Van\n2026-10-28T13:03:37.0065799Z ##[group]Getting Git version info\n2026-10-28T13:03:37.0066389Z Working directory is '/home/runner/work/Van/Van/trusted'\n2026-10-28T13:03:37.0086923Z [command]/usr/bin/git version\n2026-10-28T13:03:37.0122680Z git version 2.55.0\n2026-10-28T13:03:37.0140123Z ##[endgroup]\n2026-10-28T13:03:37.0151469Z Temporarily overriding HOME='/home/runner/work/_temp/37278e95-4007-4f54-9c7e-f49f41c977e5' before making global git config changes\n2026-10-28T13:03:37.0152564Z Adding repository directory to the temporary git global config as a safe directory\n2026-10-28T13:03:37.0169109Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/Van/Van/trusted\n2026-10-28T13:03:37.0189122Z ##[group]Initializing the repository\n2026-10-28T13:03:37.0189557Z [command]/usr/bin/git init /home/runner/work/Van/Van/trusted\n2026-10-28T13:03:37.0225910Z hint: Using 'master' as the name for the initial branch. This default branch name\n2026-10-28T13:03:37.0226553Z hint: will change to \"main\" in Git 3.0. To configure the initial branch name\n2026-10-28T13:03:37.0227142Z hint: to use in all of your new repositories, which will suppress this warning,\n2026-10-28T13:03:37.0227599Z hint: call:\n2026-10-28T13:03:37.0227828Z hint:\n2026-10-28T13:03:37.0228129Z hint: \tgit config --global init.defaultBranch <name>\n2026-10-28T13:03:37.0228651Z hint:\n2026-10-28T13:03:37.0228982Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and\n2026-10-28T13:03:37.0229665Z hint: 'development'. The just-created branch can be renamed via this command:\n2026-10-28T13:03:37.0230121Z hint:\n2026-10-28T13:03:37.0230355Z hint: \tgit branch -m <name>\n2026-10-28T13:03:37.0230625Z hint:\n2026-10-28T13:03:37.0231010Z hint: Disable this message with \"git config set advice.defaultBranchName false\"\n2026-10-28T13:03:37.0231643Z Initialized empty Git repository in /home/runner/work/Van/Van/trusted/.git/\n2026-10-28T13:03:37.0235026Z [command]/usr/bin/git remote add origin https://github.com/Vanguduza/Van\n2026-10-28T13:03:37.0267180Z ##[endgroup]\n2026-10-28T13:03:37.0267612Z ##[group]Disabling automatic garbage collection\n2026-10-28T13:03:37.0270777Z [command]/usr/bin/git config --local gc.auto 0\n2026-10-28T13:03:37.0297272Z ##[endgroup]\n2026-10-28T13:03:37.0297573Z ##[group]Setting up auth\n2026-10-28T13:03:37.0304242Z [command]/usr/bin/git config --local --name-only --get-regexp core\\.sshCommand\n2026-10-28T13:03:37.0332061Z [command]/usr/bin/git submodule foreach --recursive sh -c \"git config --local --name-only --get-regexp 'core\\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :\"\n2026-10-28T13:03:37.0582599Z [command]/usr/bin/git config --local --name-only --get-regexp http\\.https\\:\\/\\/github\\.com\\/\\.extraheader\n2026-10-28T13:03:37.0618696Z [command]/usr/bin/git submodule foreach --recursive sh -c \"git config --local --name-only --get-regexp 'http\\.https\\:\\/\\/github\\.com\\/\\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :\"\n2026-10-28T13:03:37.0824818Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\\.gitdir:\n2026-10-28T13:03:37.0856537Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url\n2026-10-28T13:03:37.1046777Z [command]/usr/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***\n2026-10-28T13:03:37.1082330Z ##[endgroup]\n2026-10-28T13:03:37.1090389Z ##[group]Fetching the repository\n2026-10-28T13:03:37.1091429Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin 8eb1889822fc8a83f219977c15340172e16acd91\n2026-10-28T13:03:38.7614430Z From https://github.com/Vanguduza/Van\n2026-10-28T13:03:38.7615179Z  * branch            8eb1889822fc8a83f219977c15340172e16acd91 -> FETCH_HEAD\n2026-10-28T13:03:38.7618660Z ##[endgroup]\n2026-10-28T13:03:38.7619146Z ##[group]Determining the checkout info\n2026-10-28T13:03:38.7621331Z ##[endgroup]\n2026-10-28T13:03:38.7627336Z [command]/usr/bin/git sparse-checkout disable\n2026-10-28T13:03:38.7666282Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig\n2026-10-28T13:03:38.7692860Z ##[group]Checking out the ref\n2026-10-28T13:03:38.7695806Z [command]/usr/bin/git checkout --progress --force 8eb1889822fc8a83f219977c15340172e16acd91\n2026-10-28T13:03:39.0785630Z Note: switching to '8eb1889822fc8a83f219977c15340172e16acd91'.\n2026-10-28T13:03:39.0786111Z \n2026-10-28T13:03:39.0786581Z You are in 'detached HEAD' state. You can look around, make experimental\n2026-10-28T13:03:39.0787379Z changes and commit them, and you can discard any commits you make in this\n2026-10-28T13:03:39.0787977Z state without impacting any branches by switching back to a branch.\n2026-10-28T13:03:39.0788308Z \n2026-10-28T13:03:39.0788683Z If you want to create a new branch to retain commits you create, you may\n2026-10-28T13:03:39.0789183Z do so (now or later) by using -c with the switch command. Example:\n2026-10-28T13:03:39.0789495Z \n2026-10-28T13:03:39.0789618Z   git switch -c <new-branch-name>\n2026-10-28T13:03:39.0789828Z \n2026-10-28T13:03:39.0789942Z Or undo this operation with:\n2026-10-28T13:03:39.0790138Z \n2026-10-28T13:03:39.0790240Z   git switch -\n2026-10-28T13:03:39.0790376Z \n2026-10-28T13:03:39.0790630Z Turn off this advice by setting config variable advice.detachedHead to false\n2026-10-28T13:03:39.0790997Z \n2026-10-28T13:03:39.0791377Z HEAD is now at 8eb1889 Merge pull request #91 from Vanguduza/owner/dial-universe-whatsapp-browser-20261008\n2026-10-28T13:03:39.0805946Z ##[endgroup]\n2026-10-28T13:03:39.0843820Z [command]/usr/bin/git log -1 --format=%H\n2026-10-28T13:03:39.0866254Z 8eb1889822fc8a83f219977c15340172e16acd91\n2026-10-28T13:03:39.1030550Z ##[group]Run actions/setup-python@v5\n2026-10-28T13:03:39.1030784Z with:\n2026-10-28T13:03:39.1030958Z   python-version: 3.12\n2026-10-28T13:03:39.1031153Z   check-latest: false\n2026-10-28T13:03:39.1033189Z   token: ***\n2026-10-28T13:03:39.1033372Z   update-environment: true\n2026-10-28T13:03:39.1033723Z   allow-prereleases: false\n2026-10-28T13:03:39.1033904Z   freethreaded: false\n2026-10-28T13:03:39.1034073Z env:\n2026-10-28T13:03:39.1034256Z   HEAD_SHA: 3732798104c476680cac8e22f833f2ed764d77e2\n2026-10-28T13:03:39.1034537Z   PR_BASE_SHA: 8eb1889822fc8a83f219977c15340172e16acd91\n2026-10-28T13:03:39.1034779Z   PUSHED_REF: 105/merge\n2026-10-28T13:03:39.1035004Z   PUSHED_BEFORE: bf41e16b0213431eeaeb33da96676cfb7dc47477\n2026-10-28T13:03:39.1035253Z   DEFAULT_BRANCH: main\n2026-10-28T13:03:39.1035461Z   TRUSTED_SHA: 8eb1889822fc8a83f219977c15340172e16acd91\n2026-10-28T13:03:39.1035690Z ##[endgroup]\n2026-10-28T13:03:39.2092977Z ##[group]Installed versions\n2026-10-28T13:03:39.2197815Z (node:2192) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.\n2026-10-28T13:03:39.2198527Z (Use `node --trace-deprecation ...` to show where the warning was created)\n2026-10-28T13:03:39.2199118Z Successfully set up CPython (3.12.15)\n2026-10-28T13:03:39.2199657Z ##[endgroup]\n2026-10-28T13:03:39.2345943Z ##[group]Run python trusted/tools/ci/project_truth_ledger.py --repo head verify-pr --base \"$TRUSTED_SHA\" --head \"$HEAD_SHA\"\n2026-10-28T13:03:39.2346613Z \u001b[36;1mpython trusted/tools/ci/project_truth_ledger.py --repo head verify-pr --base \"$TRUSTED_SHA\" --head \"$HEAD_SHA\"\u001b[0m\n2026-10-28T13:03:39.2429449Z shell: /usr/bin/bash -e {0}\n2026-10-28T13:03:39.2429694Z env:\n2026-10-28T13:03:39.2429905Z   HEAD_SHA: 3732798104c476680cac8e22f833f2ed764d77e2\n2026-10-28T13:03:39.2430205Z   PR_BASE_SHA: 8eb1889822fc8a83f219977c15340172e16acd91\n2026-10-28T13:03:39.2430445Z   PUSHED_REF: 105/merge\n2026-10-28T13:03:39.2430678Z   PUSHED_BEFORE: bf41e16b0213431eeaeb33da96676cfb7dc47477\n2026-10-28T13:03:39.2430938Z   DEFAULT_BRANCH: main\n2026-10-28T13:03:39.2431155Z   TRUSTED_SHA: 8eb1889822fc8a83f219977c15340172e16acd91\n2026-10-28T13:03:39.2431446Z   pythonLocation: /opt/hostedtoolcache/Python/3.12.15/x64\n2026-10-28T13:03:39.2431892Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.15/x64/lib/pkgconfig\n2026-10-28T13:03:39.2432242Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64\n2026-10-28T13:03:39.2432538Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64\n2026-10-28T13:03:39.2432834Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64\n2026-10-28T13:03:39.2433139Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.15/x64/lib\n2026-10-28T13:03:39.2433398Z ##[endgroup]\n2026-10-28T13:03:39.2749527Z python: can't open file '/home/runner/work/Van/Van/trusted/tools/ci/project_truth_ledger.py': [Errno 2] No such file or directory\n2026-10-28T13:03:39.2781416Z ##[error]Process completed with exit code 2.\n2026-10-28T13:03:39.2897224Z Post job cleanup.\n2026-10-28T13:03:39.3576023Z [command]/usr/bin/git version\n2026-10-28T13:03:39.3642745Z git version 2.55.0\n2026-10-28T13:03:39.3672828Z Temporarily overriding HOME='/home/runner/work/_temp/9bafc1f5-2f60-4d57-9968-69bd4075645c' before making global git config changes\n2026-10-28T13:03:39.3674003Z Adding repository directory to the temporary git global config as a safe directory\n2026-10-28T13:03:39.3677367Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/Van/Van/trusted\n2026-10-28T13:03:39.3712433Z [command]/usr/bin/git config --local --name-only --get-regexp core\\.sshCommand\n2026-10-28T13:03:39.3742404Z [command]/usr/bin/git submodule foreach --recursive sh -c \"git config --local --name-only --get-regexp 'core\\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :\"\n2026-10-28T13:03:39.3961038Z [command]/usr/bin/git config --local --name-only --get-regexp http\\.https\\:\\/\\/github\\.com\\/\\.extraheader\n2026-10-28T13:03:39.3992901Z http.https://github.com/.extraheader\n2026-10-28T13:03:39.4002459Z [command]/usr/bin/git config --local --unset-all http.https://github.com/.extraheader\n2026-10-28T13:03:39.4034004Z [command]/usr/bin/git submodule foreach --recursive sh -c \"git config --local --name-only --get-regexp 'http\\.https\\:\\/\\/github\\.com\\/\\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :\"\n2026-10-28T13:03:39.4253916Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\\.gitdir:\n2026-10-28T13:03:39.4284800Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url\n2026-10-28T13:03:39.4628583Z Post job cleanup.\n2026-10-28T13:03:39.5305784Z [command]/usr/bin/git version\n2026-10-28T13:03:39.5339799Z git version 2.55.0\n2026-10-28T13:03:39.5401256Z Temporarily overriding HOME='/home/runner/work/_temp/3909db62-87a9-4dc0-a70b-6a854a8e93a1' before making global git config changes\n2026-10-28T13:03:39.5402354Z Adding repository directory to the temporary git global config as a safe directory\n2026-10-28T13:03:39.5405002Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/Van/Van/head\n2026-10-28T13:03:39.5438239Z [command]/usr/bin/git config --local --name-only --get-regexp core\\.sshCommand\n2026-10-28T13:03:39.5468717Z [command]/usr/bin/git submodule foreach --recursive sh -c \"git config --local --name-only --get-regexp 'core\\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :\"\n2026-10-28T13:03:39.5699418Z [command]/usr/bin/git config --local --name-only --get-regexp http\\.https\\:\\/\\/github\\.com\\/\\.extraheader\n2026-10-28T13:03:39.5719663Z http.https://github.com/.extraheader\n2026-10-28T13:03:39.5739225Z [command]/usr/bin/git config --local --unset-all http.https://github.com/.extraheader\n2026-10-28T13:03:39.5763493Z [command]/usr/bin/git submodule foreach --recursive sh -c \"git config --local --name-only --get-regexp 'http\\.https\\:\\/\\/github\\.com\\/\\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :\"\n2026-10-28T13:03:39.6016462Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\\.gitdir:\n2026-10-28T13:03:39.6035034Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url\n2026-10-28T13:03:39.6507353Z Cleaning up orphan processes\n2026-10-28T13:03:39.6862024Z ##[warning]Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/checkout@v4, actions/setup-python@v5. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/\n",
+  "jobs": {
+    "jobs": [
+      {
+        "id": 122832126941,
+        "name": "rebuild-documentary",
+        "status": "completed",
+        "conclusion": "success",
+        "run_id": 40692934675,
+        "logs_url": null,
+        "steps": [
+          {
+            "name": "Set up job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 1
+          },
+          {
+            "name": "Run actions/checkout@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 2
+          },
+          {
+            "name": "Run actions/setup-python@v5",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 3
+          },
+          {
+            "name": "Install isolated rebuild verification dependencies",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 4
+          },
+          {
+            "name": "Rebuild documentary and induced-failure regressions",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 5
+          },
+          {
+            "name": "Post Run actions/setup-python@v5",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 9
+          },
+          {
+            "name": "Post Run actions/checkout@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 10
+          },
+          {
+            "name": "Complete job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 11
+          }
+        ]
+      },
+      {
+        "id": 122832127251,
+        "name": "market-monitor-source",
+        "status": "completed",
+        "conclusion": "success",
+        "run_id": 40692934675,
+        "logs_url": null,
+        "steps": [
+          {
+            "name": "Set up job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 1
+          },
+          {
+            "name": "Run actions/checkout@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 2
+          },
+          {
+            "name": "Run actions/setup-node@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 3
+          },
+          {
+            "name": "Run actions/setup-python@v5",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 4
+          },
+          {
+            "name": "Install original locked source and documentary dependencies",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 5
+          },
+          {
+            "name": "Execute original monitor, command, migration and recovery source cases",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 6
+          },
+          {
+            "name": "Require actual execution without failures, skips or checkout storage",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 7
+          },
+          {
+            "name": "Run actions/upload-artifact@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 8
+          },
+          {
+            "name": "Post Run actions/setup-python@v5",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 14
+          },
+          {
+            "name": "Post Run actions/setup-node@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 15
+          },
+          {
+            "name": "Post Run actions/checkout@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 16
+          },
+          {
+            "name": "Complete job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 17
+          }
+        ]
+      },
+      {
+        "id": 122832127342,
+        "name": "backend-public-source",
+        "status": "in_progress",
+        "conclusion": null,
+        "run_id": 40692934675,
+        "logs_url": null,
+        "steps": [
+          {
+            "name": "Set up job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 1
+          },
+          {
+            "name": "Initialize containers",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 2
+          },
+          {
+            "name": "Run actions/checkout@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 3
+          },
+          {
+            "name": "Run actions/setup-node@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 4
+          },
+          {
+            "name": "Run actions/setup-python@v5",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 5
+          },
+          {
+            "name": "Install original locked public source dependencies",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 6
+          },
+          {
+            "name": "Resolve actual Chromium and initialize the disposable schema",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 7
+          },
+          {
+            "name": "Inventory every public source module and explicit separate dependencies",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 8
+          },
+          {
+            "name": "Execute remaining backend, contract and Hermes source cases",
+            "status": "in_progress",
+            "conclusion": null,
+            "number": 9
+          },
+          {
+            "name": "Execute media service cases with their separate hashed runtime",
+            "status": "pending",
+            "conclusion": null,
+            "number": 10
+          },
+          {
+            "name": "Require complete selected coverage and exact declared prerequisite skips",
+            "status": "pending",
+            "conclusion": null,
+            "number": 11
+          },
+          {
+            "name": "Run actions/upload-artifact@v4",
+            "status": "pending",
+            "conclusion": null,
+            "number": 12
+          },
+          {
+            "name": "Post Run actions/setup-python@v5",
+            "status": "pending",
+            "conclusion": null,
+            "number": 21
+          },
+          {
+            "name": "Post Run actions/setup-node@v4",
+            "status": "pending",
+            "conclusion": null,
+            "number": 22
+          },
+          {
+            "name": "Post Run actions/checkout@v4",
+            "status": "pending",
+            "conclusion": null,
+            "number": 23
+          },
+          {
+            "name": "Stop containers",
+            "status": "pending",
+            "conclusion": null,
+            "number": 24
+          }
+        ]
+      },
+      {
+        "id": 122832127349,
+        "name": "browser-guard-source",
+        "status": "completed",
+        "conclusion": "success",
+        "run_id": 40692934675,
+        "logs_url": null,
+        "steps": [
+          {
+            "name": "Set up job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 1
+          },
+          {
+            "name": "Run actions/checkout@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 2
+          },
+          {
+            "name": "Run actions/setup-node@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 3
+          },
+          {
+            "name": "Run actions/setup-python@v5",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 4
+          },
+          {
+            "name": "Install the original locked browser source dependencies",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 5
+          },
+          {
+            "name": "Resolve the lock-selected actual Chromium",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 6
+          },
+          {
+            "name": "Execute all original lease-guard regressions against Chromium",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 7
+          },
+          {
+            "name": "Require actual execution with no skip or failure",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 8
+          },
+          {
+            "name": "Execute the complete public browser and harness source suites",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 9
+          },
+          {
+            "name": "Execute the source listener UID boundary in an isolated root fixture",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 10
+          },
+          {
+            "name": "Install the namespace firewall test prerequisite from signed Ubuntu sources",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 11
+          },
+          {
+            "name": "Execute original firewall controls in disposable network namespaces",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 12
+          },
+          {
+            "name": "Require complete browser coverage and the actual listener UID result",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 13
+          },
+          {
+            "name": "Run actions/upload-artifact@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 14
+          },
+          {
+            "name": "Post Run actions/setup-python@v5",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 26
+          },
+          {
+            "name": "Post Run actions/setup-node@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 27
+          },
+          {
+            "name": "Post Run actions/checkout@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 28
+          },
+          {
+            "name": "Complete job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 29
+          }
+        ]
+      },
+      {
+        "id": 122832127397,
+        "name": "postgres-ledger",
+        "status": "completed",
+        "conclusion": "success",
+        "run_id": 40692934675,
+        "logs_url": null,
+        "steps": [
+          {
+            "name": "Set up job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 1
+          },
+          {
+            "name": "Initialize containers",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 2
+          },
+          {
+            "name": "Run actions/checkout@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 3
+          },
+          {
+            "name": "Run actions/setup-node@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 4
+          },
+          {
+            "name": "Run actions/setup-python@v5",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 5
+          },
+          {
+            "name": "Install pinned PostgreSQL verification dependencies",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 6
+          },
+          {
+            "name": "Initialize the disposable test schema",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 7
+          },
+          {
+            "name": "Real PostgreSQL isolation, migration, writer and recovery checks",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 8
+          },
+          {
+            "name": "Require executed PostgreSQL cases without skips",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 9
+          },
+          {
+            "name": "Public trading source regressions",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 10
+          },
+          {
+            "name": "Record the only private-source test unavailable to this public job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 11
+          },
+          {
+            "name": "Public voice, speaker-authority and speech-continuity checks",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 12
+          },
+          {
+            "name": "Require executed voice cases without skips",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 13
+          },
+          {
+            "name": "Run actions/upload-artifact@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 14
+          },
+          {
+            "name": "Post Run actions/setup-python@v5",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 25
+          },
+          {
+            "name": "Post Run actions/setup-node@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 26
+          },
+          {
+            "name": "Post Run actions/checkout@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 27
+          },
+          {
+            "name": "Stop containers",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 28
+          },
+          {
+            "name": "Complete job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 29
+          }
+        ]
+      },
+      {
+        "id": 122832127441,
+        "name": "backend",
+        "status": "completed",
+        "conclusion": "failure",
+        "run_id": 40692934675,
+        "logs_url": null,
+        "steps": [
+          {
+            "name": "Set up job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 1
+          },
+          {
+            "name": "Run actions/checkout@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 2
+          },
+          {
+            "name": "Require the DDS contract read key",
+            "status": "completed",
+            "conclusion": "failure",
+            "number": 3
+          },
+          {
+            "name": "Check out pinned DDS source contracts (sibling)",
+            "status": "completed",
+            "conclusion": "skipped",
+            "number": 4
+          },
+          {
+            "name": "Verify pinned DDS contract blobs and place the sibling",
+            "status": "completed",
+            "conclusion": "skipped",
+            "number": 5
+          },
+          {
+            "name": "Run actions/setup-python@v5",
+            "status": "completed",
+            "conclusion": "skipped",
+            "number": 6
+          },
+          {
+            "name": "Run actions/setup-node@v4",
+            "status": "completed",
+            "conclusion": "skipped",
+            "number": 7
+          },
+          {
+            "name": "Install backend dependencies",
+            "status": "completed",
+            "conclusion": "skipped",
+            "number": 8
+          },
+          {
+            "name": "Maturity gate (truth and policy)",
+            "status": "completed",
+            "conclusion": "skipped",
+            "number": 9
+          },
+          {
+            "name": "Authority map (which document owns which invariant)",
+            "status": "completed",
+            "conclusion": "skipped",
+            "number": 10
+          },
+          {
+            "name": "Character Forge pinned Rive CLI authoring smoke",
+            "status": "completed",
+            "conclusion": "skipped",
+            "number": 11
+          },
+          {
+            "name": "Backend tests",
+            "status": "completed",
+            "conclusion": "skipped",
+            "number": 12
+          },
+          {
+            "name": "Contract tests",
+            "status": "completed",
+            "conclusion": "skipped",
+            "number": 13
+          },
+          {
+            "name": "OpenMuse → VAN convergence repository certification",
+            "status": "completed",
+            "conclusion": "skipped",
+            "number": 14
+          },
+          {
+            "name": "Upload OpenMuse → VAN convergence evidence",
+            "status": "completed",
+            "conclusion": "skipped",
+            "number": 15
+          },
+          {
+            "name": "Browser Control Agent and stream-host logic",
+            "status": "completed",
+            "conclusion": "skipped",
+            "number": 16
+          },
+          {
+            "name": "Kotlin reachability (what nothing in the app reaches)",
+            "status": "completed",
+            "conclusion": "skipped",
+            "number": 17
+          },
+          {
+            "name": "Ledger reconciliation (does the source still agree?)",
+            "status": "completed",
+            "conclusion": "skipped",
+            "number": 18
+          },
+          {
+            "name": "Red-team register (§38)",
+            "status": "completed",
+            "conclusion": "skipped",
+            "number": 19
+          },
+          {
+            "name": "Red-team register self-test",
+            "status": "completed",
+            "conclusion": "skipped",
+            "number": 20
+          },
+          {
+            "name": "Production acceptance (§43)",
+            "status": "completed",
+            "conclusion": "skipped",
+            "number": 21
+          },
+          {
+            "name": "Production acceptance self-test",
+            "status": "completed",
+            "conclusion": "skipped",
+            "number": 22
+          },
+          {
+            "name": "Maturity gate self-test",
+            "status": "completed",
+            "conclusion": "skipped",
+            "number": 23
+          },
+          {
+            "name": "Authority map self-test",
+            "status": "completed",
+            "conclusion": "skipped",
+            "number": 24
+          },
+          {
+            "name": "Hermes policy tests",
+            "status": "completed",
+            "conclusion": "skipped",
+            "number": 25
+          },
+          {
+            "name": "Hermes profile layout tests",
+            "status": "completed",
+            "conclusion": "skipped",
+            "number": 26
+          },
+          {
+            "name": "Trading stack-lock and adoption-proposal tests",
+            "status": "completed",
+            "conclusion": "skipped",
+            "number": 27
+          },
+          {
+            "name": "Trading enhancement architecture guardrails",
+            "status": "completed",
+            "conclusion": "skipped",
+            "number": 28
+          },
+          {
+            "name": "Capsule timeframe migration is settled",
+            "status": "completed",
+            "conclusion": "skipped",
+            "number": 29
+          },
+          {
+            "name": "Trading enhancement tests",
+            "status": "completed",
+            "conclusion": "skipped",
+            "number": 30
+          },
+          {
+            "name": "Trading Rev 5.1 certification harness",
+            "status": "completed",
+            "conclusion": "skipped",
+            "number": 31
+          },
+          {
+            "name": "Automation and browser fabric tests",
+            "status": "completed",
+            "conclusion": "skipped",
+            "number": 32
+          },
+          {
+            "name": "Automation fail-closed proof",
+            "status": "completed",
+            "conclusion": "skipped",
+            "number": 33
+          },
+          {
+            "name": "Context retrieval latency evidence",
+            "status": "completed",
+            "conclusion": "skipped",
+            "number": 34
+          },
+          {
+            "name": "Upload context latency evidence",
+            "status": "completed",
+            "conclusion": "skipped",
+            "number": 35
+          },
+          {
+            "name": "Post Run actions/checkout@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 70
+          },
+          {
+            "name": "Complete job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 71
+          }
+        ]
+      },
+      {
+        "id": 122832127467,
+        "name": "project-truth-ledger",
+        "status": "completed",
+        "conclusion": "failure",
+        "run_id": 40692934675,
+        "logs_url": null,
+        "steps": [
+          {
+            "name": "Set up job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 1
+          },
+          {
+            "name": "Run actions/checkout@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 2
+          },
+          {
+            "name": "Trusted ref (the PR base, or a protected branch; never the pushed history)",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 3
+          },
+          {
+            "name": "Run actions/checkout@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 4
+          },
+          {
+            "name": "Run actions/setup-python@v5",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 5
+          },
+          {
+            "name": "Project Truth ledger (trusted checker, every new commit has an authorized row)",
+            "status": "completed",
+            "conclusion": "failure",
+            "number": 6
+          },
+          {
+            "name": "Project Truth ledger self-test (the head's own tests; informative, not the gate)",
+            "status": "completed",
+            "conclusion": "skipped",
+            "number": 7
+          },
+          {
+            "name": "Post Run actions/setup-python@v5",
+            "status": "completed",
+            "conclusion": "skipped",
+            "number": 12
+          },
+          {
+            "name": "Post Run actions/checkout@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 13
+          },
+          {
+            "name": "Post Run actions/checkout@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 14
+          },
+          {
+            "name": "Complete job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 15
+          }
+        ]
+      },
+      {
+        "id": 122832127480,
+        "name": "android-and-visual-evidence",
+        "status": "completed",
+        "conclusion": "success",
+        "run_id": 40692934675,
+        "logs_url": null,
+        "steps": [
+          {
+            "name": "Set up job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 1
+          },
+          {
+            "name": "Run actions/checkout@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 2
+          },
+          {
+            "name": "Run actions/setup-java@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 3
+          },
+          {
+            "name": "Run actions/setup-python@v5",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 4
+          },
+          {
+            "name": "Pure Kotlin logic (owner status projection, mission read models)",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 5
+          },
+          {
+            "name": "Actual AGP release-profile and signing refusal controls",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 6
+          },
+          {
+            "name": "Run actions/upload-artifact@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 7
+          },
+          {
+            "name": "Debug signing key, when the owner has supplied one",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 8
+          },
+          {
+            "name": "Prepare exact pinned generic offline voice assets",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 9
+          },
+          {
+            "name": "Build Candidate B mechanics prototype",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 10
+          },
+          {
+            "name": "Stage Candidate B Character Rig Lab asset",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 11
+          },
+          {
+            "name": "Android unit tests, build and lint",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 12
+          },
+          {
+            "name": "Debug APK signing identity",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 13
+          },
+          {
+            "name": "Upload debug APK",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 14
+          },
+          {
+            "name": "Shared visual geometry tests",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 15
+          },
+          {
+            "name": "Render owner visual evidence from shipping geometry",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 16
+          },
+          {
+            "name": "Upload visual evidence",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 17
+          },
+          {
+            "name": "Post Run actions/setup-python@v5",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 32
+          },
+          {
+            "name": "Post Run actions/setup-java@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 33
+          },
+          {
+            "name": "Post Run actions/checkout@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 34
+          },
+          {
+            "name": "Complete job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 35
+          }
+        ]
+      },
+      {
+        "id": 122832127486,
+        "name": "android-instrumentation",
+        "status": "completed",
+        "conclusion": "success",
+        "run_id": 40692934675,
+        "logs_url": null,
+        "steps": [
+          {
+            "name": "Set up job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 1
+          },
+          {
+            "name": "Run actions/checkout@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 2
+          },
+          {
+            "name": "Run actions/setup-java@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 3
+          },
+          {
+            "name": "Run actions/setup-python@v5",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 4
+          },
+          {
+            "name": "Enable KVM for the emulator",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 5
+          },
+          {
+            "name": "Build Candidate B mechanics prototype",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 6
+          },
+          {
+            "name": "Bind Candidate B mechanics prototype for CI only",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 7
+          },
+          {
+            "name": "Bind Character Forge validation input",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 8
+          },
+          {
+            "name": "Prepare exact pinned generic offline voice assets",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 9
+          },
+          {
+            "name": "Instrumentation tests (owner surface, Floating VAN)",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 10
+          },
+          {
+            "name": "Summarise Character Forge validation outcome",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 11
+          },
+          {
+            "name": "Upload instrumentation report",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 12
+          },
+          {
+            "name": "Upload native voice readiness diagnostics",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 13
+          },
+          {
+            "name": "Upload Character Forge validation binding",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 14
+          },
+          {
+            "name": "Upload instrumentation screenshots",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 15
+          },
+          {
+            "name": "Post Run actions/setup-python@v5",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 28
+          },
+          {
+            "name": "Post Run actions/setup-java@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 29
+          },
+          {
+            "name": "Post Run actions/checkout@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 30
+          },
+          {
+            "name": "Complete job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 31
+          }
+        ]
+      },
+      {
+        "id": 122832127502,
+        "name": "mutation (kotlin-2, kotlin, 2/4)",
+        "status": "completed",
+        "conclusion": "success",
+        "run_id": 40692934675,
+        "logs_url": null,
+        "steps": [
+          {
+            "name": "Set up job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 1
+          },
+          {
+            "name": "Run actions/checkout@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 2
+          },
+          {
+            "name": "Run actions/setup-python@v5",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 3
+          },
+          {
+            "name": "Run actions/setup-java@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 4
+          },
+          {
+            "name": "Install backend dependencies",
+            "status": "completed",
+            "conclusion": "skipped",
+            "number": 5
+          },
+          {
+            "name": "Install browser mutation dependencies",
+            "status": "completed",
+            "conclusion": "skipped",
+            "number": 6
+          },
+          {
+            "name": "Install mutation Gradle",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 7
+          },
+          {
+            "name": "Resolve and prove the Kotlin control before offline mutations",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 8
+          },
+          {
+            "name": "Mutation testing (non-blocking)",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 9
+          },
+          {
+            "name": "Upload mutation report",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 10
+          },
+          {
+            "name": "Post Install mutation Gradle",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 17
+          },
+          {
+            "name": "Post Run actions/setup-java@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 18
+          },
+          {
+            "name": "Post Run actions/setup-python@v5",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 19
+          },
+          {
+            "name": "Post Run actions/checkout@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 20
+          },
+          {
+            "name": "Complete job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 21
+          }
+        ]
+      },
+      {
+        "id": 122832127611,
+        "name": "mutation (browser-agent, browser-agent, 0/1)",
+        "status": "completed",
+        "conclusion": "success",
+        "run_id": 40692934675,
+        "logs_url": null,
+        "steps": [
+          {
+            "name": "Set up job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 1
+          },
+          {
+            "name": "Run actions/checkout@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 2
+          },
+          {
+            "name": "Run actions/setup-python@v5",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 3
+          },
+          {
+            "name": "Run actions/setup-java@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 4
+          },
+          {
+            "name": "Install backend dependencies",
+            "status": "completed",
+            "conclusion": "skipped",
+            "number": 5
+          },
+          {
+            "name": "Install browser mutation dependencies",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 6
+          },
+          {
+            "name": "Install mutation Gradle",
+            "status": "completed",
+            "conclusion": "skipped",
+            "number": 7
+          },
+          {
+            "name": "Resolve and prove the Kotlin control before offline mutations",
+            "status": "completed",
+            "conclusion": "skipped",
+            "number": 8
+          },
+          {
+            "name": "Mutation testing (non-blocking)",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 9
+          },
+          {
+            "name": "Upload mutation report",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 10
+          },
+          {
+            "name": "Post Run actions/setup-java@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 18
+          },
+          {
+            "name": "Post Run actions/setup-python@v5",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 19
+          },
+          {
+            "name": "Post Run actions/checkout@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 20
+          },
+          {
+            "name": "Complete job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 21
+          }
+        ]
+      },
+      {
+        "id": 122832127647,
+        "name": "mutation (kotlin-0, kotlin, 0/4)",
+        "status": "completed",
+        "conclusion": "success",
+        "run_id": 40692934675,
+        "logs_url": null,
+        "steps": [
+          {
+            "name": "Set up job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 1
+          },
+          {
+            "name": "Run actions/checkout@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 2
+          },
+          {
+            "name": "Run actions/setup-python@v5",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 3
+          },
+          {
+            "name": "Run actions/setup-java@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 4
+          },
+          {
+            "name": "Install backend dependencies",
+            "status": "completed",
+            "conclusion": "skipped",
+            "number": 5
+          },
+          {
+            "name": "Install browser mutation dependencies",
+            "status": "completed",
+            "conclusion": "skipped",
+            "number": 6
+          },
+          {
+            "name": "Install mutation Gradle",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 7
+          },
+          {
+            "name": "Resolve and prove the Kotlin control before offline mutations",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 8
+          },
+          {
+            "name": "Mutation testing (non-blocking)",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 9
+          },
+          {
+            "name": "Upload mutation report",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 10
+          },
+          {
+            "name": "Post Install mutation Gradle",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 17
+          },
+          {
+            "name": "Post Run actions/setup-java@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 18
+          },
+          {
+            "name": "Post Run actions/setup-python@v5",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 19
+          },
+          {
+            "name": "Post Run actions/checkout@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 20
+          },
+          {
+            "name": "Complete job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 21
+          }
+        ]
+      },
+      {
+        "id": 122832127659,
+        "name": "mutation (python-3, python, 3/4)",
+        "status": "completed",
+        "conclusion": "success",
+        "run_id": 40692934675,
+        "logs_url": null,
+        "steps": [
+          {
+            "name": "Set up job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 1
+          },
+          {
+            "name": "Run actions/checkout@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 2
+          },
+          {
+            "name": "Run actions/setup-python@v5",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 3
+          },
+          {
+            "name": "Run actions/setup-java@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 4
+          },
+          {
+            "name": "Install backend dependencies",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 5
+          },
+          {
+            "name": "Install browser mutation dependencies",
+            "status": "completed",
+            "conclusion": "skipped",
+            "number": 6
+          },
+          {
+            "name": "Install mutation Gradle",
+            "status": "completed",
+            "conclusion": "skipped",
+            "number": 7
+          },
+          {
+            "name": "Resolve and prove the Kotlin control before offline mutations",
+            "status": "completed",
+            "conclusion": "skipped",
+            "number": 8
+          },
+          {
+            "name": "Mutation testing (non-blocking)",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 9
+          },
+          {
+            "name": "Upload mutation report",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 10
+          },
+          {
+            "name": "Post Run actions/setup-java@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 18
+          },
+          {
+            "name": "Post Run actions/setup-python@v5",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 19
+          },
+          {
+            "name": "Post Run actions/checkout@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 20
+          },
+          {
+            "name": "Complete job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 21
+          }
+        ]
+      },
+      {
+        "id": 122832127666,
+        "name": "mutation (python-2, python, 2/4)",
+        "status": "completed",
+        "conclusion": "success",
+        "run_id": 40692934675,
+        "logs_url": null,
+        "steps": [
+          {
+            "name": "Set up job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 1
+          },
+          {
+            "name": "Run actions/checkout@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 2
+          },
+          {
+            "name": "Run actions/setup-python@v5",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 3
+          },
+          {
+            "name": "Run actions/setup-java@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 4
+          },
+          {
+            "name": "Install backend dependencies",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 5
+          },
+          {
+            "name": "Install browser mutation dependencies",
+            "status": "completed",
+            "conclusion": "skipped",
+            "number": 6
+          },
+          {
+            "name": "Install mutation Gradle",
+            "status": "completed",
+            "conclusion": "skipped",
+            "number": 7
+          },
+          {
+            "name": "Resolve and prove the Kotlin control before offline mutations",
+            "status": "completed",
+            "conclusion": "skipped",
+            "number": 8
+          },
+          {
+            "name": "Mutation testing (non-blocking)",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 9
+          },
+          {
+            "name": "Upload mutation report",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 10
+          },
+          {
+            "name": "Post Run actions/setup-java@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 18
+          },
+          {
+            "name": "Post Run actions/setup-python@v5",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 19
+          },
+          {
+            "name": "Post Run actions/checkout@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 20
+          },
+          {
+            "name": "Complete job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 21
+          }
+        ]
+      },
+      {
+        "id": 122832127748,
+        "name": "mutation (kotlin-3, kotlin, 3/4)",
+        "status": "completed",
+        "conclusion": "success",
+        "run_id": 40692934675,
+        "logs_url": null,
+        "steps": [
+          {
+            "name": "Set up job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 1
+          },
+          {
+            "name": "Run actions/checkout@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 2
+          },
+          {
+            "name": "Run actions/setup-python@v5",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 3
+          },
+          {
+            "name": "Run actions/setup-java@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 4
+          },
+          {
+            "name": "Install backend dependencies",
+            "status": "completed",
+            "conclusion": "skipped",
+            "number": 5
+          },
+          {
+            "name": "Install browser mutation dependencies",
+            "status": "completed",
+            "conclusion": "skipped",
+            "number": 6
+          },
+          {
+            "name": "Install mutation Gradle",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 7
+          },
+          {
+            "name": "Resolve and prove the Kotlin control before offline mutations",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 8
+          },
+          {
+            "name": "Mutation testing (non-blocking)",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 9
+          },
+          {
+            "name": "Upload mutation report",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 10
+          },
+          {
+            "name": "Post Install mutation Gradle",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 17
+          },
+          {
+            "name": "Post Run actions/setup-java@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 18
+          },
+          {
+            "name": "Post Run actions/setup-python@v5",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 19
+          },
+          {
+            "name": "Post Run actions/checkout@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 20
+          },
+          {
+            "name": "Complete job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 21
+          }
+        ]
+      },
+      {
+        "id": 122832127760,
+        "name": "mutation (kotlin-1, kotlin, 1/4)",
+        "status": "completed",
+        "conclusion": "success",
+        "run_id": 40692934675,
+        "logs_url": null,
+        "steps": [
+          {
+            "name": "Set up job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 1
+          },
+          {
+            "name": "Run actions/checkout@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 2
+          },
+          {
+            "name": "Run actions/setup-python@v5",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 3
+          },
+          {
+            "name": "Run actions/setup-java@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 4
+          },
+          {
+            "name": "Install backend dependencies",
+            "status": "completed",
+            "conclusion": "skipped",
+            "number": 5
+          },
+          {
+            "name": "Install browser mutation dependencies",
+            "status": "completed",
+            "conclusion": "skipped",
+            "number": 6
+          },
+          {
+            "name": "Install mutation Gradle",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 7
+          },
+          {
+            "name": "Resolve and prove the Kotlin control before offline mutations",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 8
+          },
+          {
+            "name": "Mutation testing (non-blocking)",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 9
+          },
+          {
+            "name": "Upload mutation report",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 10
+          },
+          {
+            "name": "Post Install mutation Gradle",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 17
+          },
+          {
+            "name": "Post Run actions/setup-java@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 18
+          },
+          {
+            "name": "Post Run actions/setup-python@v5",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 19
+          },
+          {
+            "name": "Post Run actions/checkout@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 20
+          },
+          {
+            "name": "Complete job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 21
+          }
+        ]
+      },
+      {
+        "id": 122832127767,
+        "name": "mutation (python-0, python, 0/4)",
+        "status": "completed",
+        "conclusion": "success",
+        "run_id": 40692934675,
+        "logs_url": null,
+        "steps": [
+          {
+            "name": "Set up job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 1
+          },
+          {
+            "name": "Run actions/checkout@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 2
+          },
+          {
+            "name": "Run actions/setup-python@v5",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 3
+          },
+          {
+            "name": "Run actions/setup-java@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 4
+          },
+          {
+            "name": "Install backend dependencies",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 5
+          },
+          {
+            "name": "Install browser mutation dependencies",
+            "status": "completed",
+            "conclusion": "skipped",
+            "number": 6
+          },
+          {
+            "name": "Install mutation Gradle",
+            "status": "completed",
+            "conclusion": "skipped",
+            "number": 7
+          },
+          {
+            "name": "Resolve and prove the Kotlin control before offline mutations",
+            "status": "completed",
+            "conclusion": "skipped",
+            "number": 8
+          },
+          {
+            "name": "Mutation testing (non-blocking)",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 9
+          },
+          {
+            "name": "Upload mutation report",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 10
+          },
+          {
+            "name": "Post Run actions/setup-java@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 18
+          },
+          {
+            "name": "Post Run actions/setup-python@v5",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 19
+          },
+          {
+            "name": "Post Run actions/checkout@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 20
+          },
+          {
+            "name": "Complete job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 21
+          }
+        ]
+      },
+      {
+        "id": 122832127774,
+        "name": "mutation (python-1, python, 1/4)",
+        "status": "completed",
+        "conclusion": "success",
+        "run_id": 40692934675,
+        "logs_url": null,
+        "steps": [
+          {
+            "name": "Set up job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 1
+          },
+          {
+            "name": "Run actions/checkout@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 2
+          },
+          {
+            "name": "Run actions/setup-python@v5",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 3
+          },
+          {
+            "name": "Run actions/setup-java@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 4
+          },
+          {
+            "name": "Install backend dependencies",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 5
+          },
+          {
+            "name": "Install browser mutation dependencies",
+            "status": "completed",
+            "conclusion": "skipped",
+            "number": 6
+          },
+          {
+            "name": "Install mutation Gradle",
+            "status": "completed",
+            "conclusion": "skipped",
+            "number": 7
+          },
+          {
+            "name": "Resolve and prove the Kotlin control before offline mutations",
+            "status": "completed",
+            "conclusion": "skipped",
+            "number": 8
+          },
+          {
+            "name": "Mutation testing (non-blocking)",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 9
+          },
+          {
+            "name": "Upload mutation report",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 10
+          },
+          {
+            "name": "Post Run actions/setup-java@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 18
+          },
+          {
+            "name": "Post Run actions/setup-python@v5",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 19
+          },
+          {
+            "name": "Post Run actions/checkout@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 20
+          },
+          {
+            "name": "Complete job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 21
+          }
+        ]
+      },
+      {
+        "id": 122839040426,
+        "name": "character-forge-gate",
+        "status": "completed",
+        "conclusion": "success",
+        "run_id": 40692934675,
+        "logs_url": null,
+        "steps": [
+          {
+            "name": "Set up job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 1
+          },
+          {
+            "name": "Run actions/checkout@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 2
+          },
+          {
+            "name": "Download Character Forge validation binding",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 3
+          },
+          {
+            "name": "Rive asset present means RiveContractTest must have passed",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 4
+          },
+          {
+            "name": "Post Run actions/checkout@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 8
+          },
+          {
+            "name": "Complete job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 9
+          }
+        ]
+      }
+    ]
+  },
+  "runs": {
+    "workflow_runs": [
+      {
+        "id": 40692934889,
+        "name": "van-mql-native-source",
+        "status": "completed",
+        "conclusion": "success",
+        "run_number": 87,
+        "jobs_url": "https://api.github.com/repos/Vanguduza/Van/actions/runs/40692934889/jobs",
+        "logs_url": "https://api.github.com/repos/Vanguduza/Van/actions/runs/40692934889/logs",
+        "workflow_id": 393800426
+      },
+      {
+        "id": 40692934687,
+        "name": "van-kernel-source",
+        "status": "completed",
+        "conclusion": "success",
+        "run_number": 94,
+        "jobs_url": "https://api.github.com/repos/Vanguduza/Van/actions/runs/40692934687/jobs",
+        "logs_url": "https://api.github.com/repos/Vanguduza/Van/actions/runs/40692934687/logs",
+        "workflow_id": 393628057
+      },
+      {
+        "id": 40692934744,
+        "name": "van-forecast-runtime-source",
+        "status": "completed",
+        "conclusion": "success",
+        "run_number": 37,
+        "jobs_url": "https://api.github.com/repos/Vanguduza/Van/actions/runs/40692934744/jobs",
+        "logs_url": "https://api.github.com/repos/Vanguduza/Van/actions/runs/40692934744/logs",
+        "workflow_id": 396667110
+      },
+      {
+        "id": 40692934658,
+        "name": "cognitive-fabric-r161-van",
+        "status": "completed",
+        "conclusion": "success",
+        "run_number": 323,
+        "jobs_url": "https://api.github.com/repos/Vanguduza/Van/actions/runs/40692934658/jobs",
+        "logs_url": "https://api.github.com/repos/Vanguduza/Van/actions/runs/40692934658/logs",
+        "workflow_id": 376327449
+      },
+      {
+        "id": 40692934675,
+        "name": "van-ci",
+        "status": "in_progress",
+        "conclusion": null,
+        "run_number": 1933,
+        "jobs_url": "https://api.github.com/repos/Vanguduza/Van/actions/runs/40692934675/jobs",
+        "logs_url": "https://api.github.com/repos/Vanguduza/Van/actions/runs/40692934675/logs",
+        "workflow_id": 359474996
+      }
+    ]
+  },
+  "artifacts": {
+    "artifacts": [
+      {
+        "id": 12819672607,
+        "name": "van-browser-guard-source",
+        "size_in_bytes": 34488,
+        "url": "https://api.github.com/repos/Vanguduza/Van/actions/artifacts/12819672607",
+        "archive_download_url": "https://api.github.com/repos/Vanguduza/Van/actions/artifacts/12819672607/zip",
+        "expired": false,
+        "created_at": "2026-10-28T13:30:37Z",
+        "expires_at": "2027-01-26T13:03:02Z",
+        "updated_at": "2026-10-28T13:30:37Z",
+        "digest": "sha256:1b8b126ebab9042bda52626d2908a1090a5a32b674f8b0cf520319c93f216574",
+        "workflow_run": {
+          "id": 40692934675,
+          "repository_id": 1369211561,
+          "head_repository_id": 1369211561,
+          "head_branch": "ccr-9e07e1af-8mgz1p",
+          "head_sha": "3732798104c476680cac8e22f833f2ed764d77e2"
+        }
+      },
+      {
+        "id": 12819505250,
+        "name": "van-mutation-report-kotlin-2",
+        "size_in_bytes": 1529,
+        "url": "https://api.github.com/repos/Vanguduza/Van/actions/artifacts/12819505250",
+        "archive_download_url": "https://api.github.com/repos/Vanguduza/Van/actions/artifacts/12819505250/zip",
+        "expired": false,
+        "created_at": "2026-10-28T13:14:47Z",
+        "expires_at": "2027-01-26T13:03:02Z",
+        "updated_at": "2026-10-28T13:14:47Z",
+        "digest": "sha256:cc427ed66b693ed573ad9f411aca252408c17a6f08da48947b333ac712d224d7",
+        "workflow_run": {
+          "id": 40692934675,
+          "repository_id": 1369211561,
+          "head_repository_id": 1369211561,
+          "head_branch": "ccr-9e07e1af-8mgz1p",
+          "head_sha": "3732798104c476680cac8e22f833f2ed764d77e2"
+        }
+      },
+      {
+        "id": 12819487028,
+        "name": "van-mutation-report-python-1",
+        "size_in_bytes": 2034,
+        "url": "https://api.github.com/repos/Vanguduza/Van/actions/artifacts/12819487028",
+        "archive_download_url": "https://api.github.com/repos/Vanguduza/Van/actions/artifacts/12819487028/zip",
+        "expired": false,
+        "created_at": "2026-10-28T13:25:34Z",
+        "expires_at": "2027-01-26T13:03:02Z",
+        "updated_at": "2026-10-28T13:25:34Z",
+        "digest": "sha256:815099ed26d77ed69365361f8771adab49fe1233695704506b291dd6fc608c39",
+        "workflow_run": {
+          "id": 40692934675,
+          "repository_id": 1369211561,
+          "head_repository_id": 1369211561,
+          "head_branch": "ccr-9e07e1af-8mgz1p",
+          "head_sha": "3732798104c476680cac8e22f833f2ed764d77e2"
+        }
+      },
+      {
+        "id": 12819475555,
+        "name": "van-instrumentation-screenshots",
+        "size_in_bytes": 3292793,
+        "url": "https://api.github.com/repos/Vanguduza/Van/actions/artifacts/12819475555",
+        "archive_download_url": "https://api.github.com/repos/Vanguduza/Van/actions/artifacts/12819475555/zip",
+        "expired": false,
+        "created_at": "2026-10-28T13:16:23Z",
+        "expires_at": "2027-01-26T13:03:02Z",
+        "updated_at": "2026-10-28T13:16:23Z",
+        "digest": "sha256:7ae43dacab4a442d39f742ed214bc2e8a4764c20cb0c15fea9ee0572e4ca2fe2",
+        "workflow_run": {
+          "id": 40692934675,
+          "repository_id": 1369211561,
+          "head_repository_id": 1369211561,
+          "head_branch": "ccr-9e07e1af-8mgz1p",
+          "head_sha": "3732798104c476680cac8e22f833f2ed764d77e2"
+        }
+      },
+      {
+        "id": 12819460526,
+        "name": "van-instrumentation-report",
+        "size_in_bytes": 10637,
+        "url": "https://api.github.com/repos/Vanguduza/Van/actions/artifacts/12819460526",
+        "archive_download_url": "https://api.github.com/repos/Vanguduza/Van/actions/artifacts/12819460526/zip",
+        "expired": false,
+        "created_at": "2026-10-28T13:16:18Z",
+        "expires_at": "2027-01-26T13:03:02Z",
+        "updated_at": "2026-10-28T13:16:18Z",
+        "digest": "sha256:0cd89eb4423d3853cb58d64833ccee836fc07675b640a8cc92627979acdbeff9",
+        "workflow_run": {
+          "id": 40692934675,
+          "repository_id": 1369211561,
+          "head_repository_id": 1369211561,
+          "head_branch": "ccr-9e07e1af-8mgz1p",
+          "head_sha": "3732798104c476680cac8e22f833f2ed764d77e2"
+        }
+      },
+      {
+        "id": 12819241615,
+        "name": "van-mutation-report-python-3",
+        "size_in_bytes": 2351,
+        "url": "https://api.github.com/repos/Vanguduza/Van/actions/artifacts/12819241615",
+        "archive_download_url": "https://api.github.com/repos/Vanguduza/Van/actions/artifacts/12819241615/zip",
+        "expired": false,
+        "created_at": "2026-10-28T13:18:36Z",
+        "expires_at": "2027-01-26T13:03:02Z",
+        "updated_at": "2026-10-28T13:18:36Z",
+        "digest": "sha256:0cd9e1e989dff396ba4567d69b7bae42d730a2882b15454210c5eb43042a41c1",
+        "workflow_run": {
+          "id": 40692934675,
+          "repository_id": 1369211561,
+          "head_repository_id": 1369211561,
+          "head_branch": "ccr-9e07e1af-8mgz1p",
+          "head_sha": "3732798104c476680cac8e22f833f2ed764d77e2"
+        }
+      },
+      {
+        "id": 12819216289,
+        "name": "van-character-forge-validation-binding",
+        "size_in_bytes": 2095,
+        "url": "https://api.github.com/repos/Vanguduza/Van/actions/artifacts/12819216289",
+        "archive_download_url": "https://api.github.com/repos/Vanguduza/Van/actions/artifacts/12819216289/zip",
+        "expired": false,
+        "created_at": "2026-10-28T13:16:21Z",
+        "expires_at": "2027-01-26T13:03:02Z",
+        "updated_at": "2026-10-28T13:16:21Z",
+        "digest": "sha256:244424da51ef6e360638105450606566fb7beddefb44e0530c28c270c6f7d759",
+        "workflow_run": {
+          "id": 40692934675,
+          "repository_id": 1369211561,
+          "head_repository_id": 1369211561,
+          "head_branch": "ccr-9e07e1af-8mgz1p",
+          "head_sha": "3732798104c476680cac8e22f833f2ed764d77e2"
+        }
+      },
+      {
+        "id": 12819049489,
+        "name": "van-mutation-report-python-0",
+        "size_in_bytes": 2295,
+        "url": "https://api.github.com/repos/Vanguduza/Van/actions/artifacts/12819049489",
+        "archive_download_url": "https://api.github.com/repos/Vanguduza/Van/actions/artifacts/12819049489/zip",
+        "expired": false,
+        "created_at": "2026-10-28T13:25:55Z",
+        "expires_at": "2027-01-26T13:03:02Z",
+        "updated_at": "2026-10-28T13:25:55Z",
+        "digest": "sha256:9f63d54dcc94412c7b06af9c5741da44a07119f312aa946582e33820f3ee9c85",
+        "workflow_run": {
+          "id": 40692934675,
+          "repository_id": 1369211561,
+          "head_repository_id": 1369211561,
+          "head_branch": "ccr-9e07e1af-8mgz1p",
+          "head_sha": "3732798104c476680cac8e22f833f2ed764d77e2"
+        }
+      },
+      {
+        "id": 12818970544,
+        "name": "van-postgres-ledger-report",
+        "size_in_bytes": 192716,
+        "url": "https://api.github.com/repos/Vanguduza/Van/actions/artifacts/12818970544",
+        "archive_download_url": "https://api.github.com/repos/Vanguduza/Van/actions/artifacts/12818970544/zip",
+        "expired": false,
+        "created_at": "2026-10-28T13:11:05Z",
+        "expires_at": "2027-01-26T13:03:02Z",
+        "updated_at": "2026-10-28T13:11:05Z",
+        "digest": "sha256:ef92635aa7b47680a1182b8c5a7152396a29ed876ced684fafa1913456fb16b3",
+        "workflow_run": {
+          "id": 40692934675,
+          "repository_id": 1369211561,
+          "head_repository_id": 1369211561,
+          "head_branch": "ccr-9e07e1af-8mgz1p",
+          "head_sha": "3732798104c476680cac8e22f833f2ed764d77e2"
+        }
+      },
+      {
+        "id": 12818756605,
+        "name": "van-mutation-report-python-2",
+        "size_in_bytes": 2078,
+        "url": "https://api.github.com/repos/Vanguduza/Van/actions/artifacts/12818756605",
+        "archive_download_url": "https://api.github.com/repos/Vanguduza/Van/actions/artifacts/12818756605/zip",
+        "expired": false,
+        "created_at": "2026-10-28T13:13:48Z",
+        "expires_at": "2027-01-26T13:03:02Z",
+        "updated_at": "2026-10-28T13:13:48Z",
+        "digest": "sha256:72cdc71a7de3a36927641813f8a55955bf7d2f816beb6c87d791db27882362b1",
+        "workflow_run": {
+          "id": 40692934675,
+          "repository_id": 1369211561,
+          "head_repository_id": 1369211561,
+          "head_branch": "ccr-9e07e1af-8mgz1p",
+          "head_sha": "3732798104c476680cac8e22f833f2ed764d77e2"
+        }
+      },
+      {
+        "id": 12818755486,
+        "name": "van-actual-release-guards",
+        "size_in_bytes": 443,
+        "url": "https://api.github.com/repos/Vanguduza/Van/actions/artifacts/12818755486",
+        "archive_download_url": "https://api.github.com/repos/Vanguduza/Van/actions/artifacts/12818755486/zip",
+        "expired": false,
+        "created_at": "2026-10-28T13:07:23Z",
+        "expires_at": "2027-01-26T13:03:02Z",
+        "updated_at": "2026-10-28T13:07:23Z",
+        "digest": "sha256:e220e89e741df87775eb640df10b08bc16c4a590143d106dfe00a0c3bc04de34",
+        "workflow_run": {
+          "id": 40692934675,
+          "repository_id": 1369211561,
+          "head_repository_id": 1369211561,
+          "head_branch": "ccr-9e07e1af-8mgz1p",
+          "head_sha": "3732798104c476680cac8e22f833f2ed764d77e2"
+        }
+      },
+      {
+        "id": 12818615482,
+        "name": "van-mutation-report-browser-agent",
+        "size_in_bytes": 1362,
+        "url": "https://api.github.com/repos/Vanguduza/Van/actions/artifacts/12818615482",
+        "archive_download_url": "https://api.github.com/repos/Vanguduza/Van/actions/artifacts/12818615482/zip",
+        "expired": false,
+        "created_at": "2026-10-28T13:05:58Z",
+        "expires_at": "2027-01-26T13:03:02Z",
+        "updated_at": "2026-10-28T13:05:58Z",
+        "digest": "sha256:3e3582dcd6d9c19455eea5515a4b8c868c68bb2ed307393597df3e9c9f0b72d1",
+        "workflow_run": {
+          "id": 40692934675,
+          "repository_id": 1369211561,
+          "head_repository_id": 1369211561,
+          "head_branch": "ccr-9e07e1af-8mgz1p",
+          "head_sha": "3732798104c476680cac8e22f833f2ed764d77e2"
+        }
+      },
+      {
+        "id": 12818457424,
+        "name": "van-visual-evidence",
+        "size_in_bytes": 16596435,
+        "url": "https://api.github.com/repos/Vanguduza/Van/actions/artifacts/12818457424",
+        "archive_download_url": "https://api.github.com/repos/Vanguduza/Van/actions/artifacts/12818457424/zip",
+        "expired": false,
+        "created_at": "2026-10-28T13:15:38Z",
+        "expires_at": "2027-01-26T13:03:02Z",
+        "updated_at": "2026-10-28T13:15:38Z",
+        "digest": "sha256:68de8752904d41ac17c43d7e1933726210e82931f42b4e71af4c9db19ffa6a20",
+        "workflow_run": {
+          "id": 40692934675,
+          "repository_id": 1369211561,
+          "head_repository_id": 1369211561,
+          "head_branch": "ccr-9e07e1af-8mgz1p",
+          "head_sha": "3732798104c476680cac8e22f833f2ed764d77e2"
+        }
+      },
+      {
+        "id": 12818337999,
+        "name": "van-debug-apk",
+        "size_in_bytes": 237756477,
+        "url": "https://api.github.com/repos/Vanguduza/Van/actions/artifacts/12818337999",
+        "archive_download_url": "https://api.github.com/repos/Vanguduza/Van/actions/artifacts/12818337999/zip",
+        "expired": false,
+        "created_at": "2026-10-28T13:14:58Z",
+        "expires_at": "2027-01-26T13:03:02Z",
+        "updated_at": "2026-10-28T13:14:58Z",
+        "digest": "sha256:f8a00aafff250ef5132239f31dd6b76ed9cc2a49a39799815482c87846d12e0d",
+        "workflow_run": {
+          "id": 40692934675,
+          "repository_id": 1369211561,
+          "head_repository_id": 1369211561,
+          "head_branch": "ccr-9e07e1af-8mgz1p",
+          "head_sha": "3732798104c476680cac8e22f833f2ed764d77e2"
+        }
+      },
+      {
+        "id": 12818198766,
+        "name": "van-voice-runtime",
+        "size_in_bytes": 793,
+        "url": "https://api.github.com/repos/Vanguduza/Van/actions/artifacts/12818198766",
+        "archive_download_url": "https://api.github.com/repos/Vanguduza/Van/actions/artifacts/12818198766/zip",
+        "expired": false,
+        "created_at": "2026-10-28T13:16:20Z",
+        "expires_at": "2027-01-26T13:03:02Z",
+        "updated_at": "2026-10-28T13:16:20Z",
+        "digest": "sha256:4513e749d9fb5cc68500fe47da40d49444d3d8ae8700a95d18a48b338067f4bc",
+        "workflow_run": {
+          "id": 40692934675,
+          "repository_id": 1369211561,
+          "head_repository_id": 1369211561,
+          "head_branch": "ccr-9e07e1af-8mgz1p",
+          "head_sha": "3732798104c476680cac8e22f833f2ed764d77e2"
+        }
+      },
+      {
+        "id": 12818182513,
+        "name": "van-mutation-report-kotlin-0",
+        "size_in_bytes": 1527,
+        "url": "https://api.github.com/repos/Vanguduza/Van/actions/artifacts/12818182513",
+        "archive_download_url": "https://api.github.com/repos/Vanguduza/Van/actions/artifacts/12818182513/zip",
+        "expired": false,
+        "created_at": "2026-10-28T13:11:26Z",
+        "expires_at": "2027-01-26T13:03:02Z",
+        "updated_at": "2026-10-28T13:11:26Z",
+        "digest": "sha256:73fee0e3cc1c522937e49100a1c1b8675289ae25de647d91c97a53cab127d4a9",
+        "workflow_run": {
+          "id": 40692934675,
+          "repository_id": 1369211561,
+          "head_repository_id": 1369211561,
+          "head_branch": "ccr-9e07e1af-8mgz1p",
+          "head_sha": "3732798104c476680cac8e22f833f2ed764d77e2"
+        }
+      },
+      {
+        "id": 12818138310,
+        "name": "van-mutation-report-kotlin-1",
+        "size_in_bytes": 1491,
+        "url": "https://api.github.com/repos/Vanguduza/Van/actions/artifacts/12818138310",
+        "archive_download_url": "https://api.github.com/repos/Vanguduza/Van/actions/artifacts/12818138310/zip",
+        "expired": false,
+        "created_at": "2026-10-28T13:14:51Z",
+        "expires_at": "2027-01-26T13:03:02Z",
+        "updated_at": "2026-10-28T13:14:51Z",
+        "digest": "sha256:1e84604ba700247966bbd29fbc3b076b07fa28221e1ab7e1d7c22cb84afb126b",
+        "workflow_run": {
+          "id": 40692934675,
+          "repository_id": 1369211561,
+          "head_repository_id": 1369211561,
+          "head_branch": "ccr-9e07e1af-8mgz1p",
+          "head_sha": "3732798104c476680cac8e22f833f2ed764d77e2"
+        }
+      },
+      {
+        "id": 12817888604,
+        "name": "van-mutation-report-kotlin-3",
+        "size_in_bytes": 1541,
+        "url": "https://api.github.com/repos/Vanguduza/Van/actions/artifacts/12817888604",
+        "archive_download_url": "https://api.github.com/repos/Vanguduza/Van/actions/artifacts/12817888604/zip",
+        "expired": false,
+        "created_at": "2026-10-28T13:11:57Z",
+        "expires_at": "2027-01-26T13:03:02Z",
+        "updated_at": "2026-10-28T13:11:57Z",
+        "digest": "sha256:a671c0411bff2dae627a536e024749dcfb17681db6bce09543736f46231f61a1",
+        "workflow_run": {
+          "id": 40692934675,
+          "repository_id": 1369211561,
+          "head_repository_id": 1369211561,
+          "head_branch": "ccr-9e07e1af-8mgz1p",
+          "head_sha": "3732798104c476680cac8e22f833f2ed764d77e2"
+        }
+      },
+      {
+        "id": 12816759442,
+        "name": "van-market-monitor-source",
+        "size_in_bytes": 7212,
+        "url": "https://api.github.com/repos/Vanguduza/Van/actions/artifacts/12816759442",
+        "archive_download_url": "https://api.github.com/repos/Vanguduza/Van/actions/artifacts/12816759442/zip",
+        "expired": false,
+        "created_at": "2026-10-28T13:04:45Z",
+        "expires_at": "2027-01-26T13:03:02Z",
+        "updated_at": "2026-10-28T13:04:45Z",
+        "digest": "sha256:2bdb9d292be3ac94c44fb7e0b25f910cd08b0d5fb48239cb9b2d369d309bb45f",
+        "workflow_run": {
+          "id": 40692934675,
+          "repository_id": 1369211561,
+          "head_repository_id": 1369211561,
+          "head_branch": "ccr-9e07e1af-8mgz1p",
+          "head_sha": "3732798104c476680cac8e22f833f2ed764d77e2"
+        }
+      }
+    ]
+  },
+  "pr_readback": {
+    "url": "https://api.github.com/repos/Vanguduza/Van/pulls/105",
+    "id": 4960891781,
+    "node_id": "PR_kwDOUZyCqc8AAAABJ7EzhQ",
+    "html_url": "https://github.com/Vanguduza/Van/pull/105",
+    "diff_url": "https://github.com/Vanguduza/Van/pull/105.diff",
+    "patch_url": "https://github.com/Vanguduza/Van/pull/105.patch",
+    "issue_url": "https://api.github.com/repos/Vanguduza/Van/issues/105",
+    "commits_url": "https://api.github.com/repos/Vanguduza/Van/pulls/105/commits",
+    "review_comments_url": "https://api.github.com/repos/Vanguduza/Van/pulls/105/comments",
+    "review_comment_url": "https://api.github.com/repos/Vanguduza/Van/pulls/comments{/number}",
+    "comments_url": "https://api.github.com/repos/Vanguduza/Van/issues/105/comments",
+    "statuses_url": "https://api.github.com/repos/Vanguduza/Van/statuses/3732798104c476680cac8e22f833f2ed764d77e2",
+    "number": 105,
+    "state": "open",
+    "locked": false,
+    "title": "Build Rev1.18 candidate source and harden Android, trading, accounts and recovery",
+    "user": {
+      "login": "Vanguduza",
+      "id": 215922244,
+      "node_id": "U_kgDODN62RA",
+      "avatar_url": "https://avatars.githubusercontent.com/u/215922244?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/Vanguduza",
+      "html_url": "https://github.com/Vanguduza",
+      "followers_url": "https://api.github.com/users/Vanguduza/followers",
+      "following_url": "https://api.github.com/users/Vanguduza/following{/other_user}",
+      "gists_url": "https://api.github.com/users/Vanguduza/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/Vanguduza/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/Vanguduza/subscriptions",
+      "organizations_url": "https://api.github.com/users/Vanguduza/orgs",
+      "repos_url": "https://api.github.com/users/Vanguduza/repos",
+      "events_url": "https://api.github.com/users/Vanguduza/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/Vanguduza/received_events",
+      "type": "User",
+      "user_view_type": "public",
+      "site_admin": false
+    },
+    "body": "This draft continues the complete Rev1.18 candidate rebuild from existing source and the frozen plan. Formal unit, full-backend and production/device acceptance remain open.\n\nCurrent published source: `3732798104c476680cac8e22f833f2ed764d77e2`.\n\n### Latest behavior\n\nBoth native MT5 entry paths now calculate the proposed order's isolated native margin and compare it with cash-backed capacity before native handoff. Credit cannot fund entry risk. Available amounts round down and commitments round up at the original account precision. Python uses exact Fraction over native text; the EA uses original 17-digit text and integer-string arithmetic.\n\nScope and cash are checked around calculation and at the final guard. Original identity, permission, nonce and deadline controls remain; a native read cannot renew authority. Known insufficient and unavailable facts have distinct native reply/rejection codes. Explicit zero native requirements work with positive cash, and market/limit/native-side behavior and protective tighten/close remain supported.\n\nThe signed SDK fixture and exact original EA entry body both previously reached simulated native entry in two insufficient-cash cases. The new checks stop those sends. SDK fixtures and the C++ terminal API model are explicit source evidence, without connected broker or MetaTrader runtime acceptance.\n\n### Verification\n\n- **5,215 passed, zero failures/errors/skips**, across full trading and selected original gateway SQL/HTTP/private-core/schema/scope checks. Actual SQLite/PostgreSQL executed; zero Python storage-audit violations. Every call ran once; all **1,258 pinned inputs** independently match committed Git objects, including SDK, EA, README and the actual C++ fixture. Owned PostgreSQL independently confirmed removed.\n- Exact EA entry/helper bodies execute through the existing controlled C++ terminal model and an independent Fraction arithmetic oracle. Original test functions are preserved: 40 retain identical AST; two reviewed fixture updates preserve concurrency assertions and target the actual final native read boundary. Initial failed runs remain failed in retained evidence.\n- Genuine hook, required-baseline committed verification (**GREEN191**, actual exit0), normal push and independent exact remote readback: succeeded.\n- Canonical manifest: **10,301 files, zero mismatches**. Owner/frontend inventories and all frozen scope identities remain intact. Mutation registry consistency retains 374 identities/383 edits; it is not local mutation execution.\n- Fresh [official MetaEditor job40692934889](https://github.com/Vanguduza/Van/actions/runs/40692934889) succeeded. Original artifact12817329530 independently verified: GitHub size/digest, ZIP integrity, exact changed EA source/blob, valid MetaQuotes signatures, log/binary hashes and fresh binary. Native output: **zero errors/warnings**; invalid probe: four errors/no binary. Actual process codes remain positive1/rejection0. Source SHA256 `40d15b43f2cba20a5c8dadec6db245cecc105c17a70e216ac98adb39e166bb1f`. This is SOURCE_COMPILED, without connected-account/financial/device qualification. [Exact-head main40692934675](https://github.com/Vanguduza/Van/actions/runs/40692934675) is still running.\n- Parent catalog main40683291239 finished **FAILURE**: all 17 public jobs successful; two mandatory prerequisites failed (trusted-main checker absent, DDS read key unprovisioned). Its four supporting workflows succeeded. Independently verified parent artifact: 4,950 trading passes/one declared private-DDS skip, 26 PostgreSQL passes and 117 voice passes. These remain parent evidence.\n\n### Full scope and continuation\n\n[Execution method](docs/rebuild/rev118/BUILD_EXECUTION_PLAN.md) and [full workmap](docs/rebuild/rev118/SOURCE_WORKMAP.json) retain all 131 units, 324 requirements, 1,610 acceptance identities, 234 contexts, 349 actions and 93 features. Original frontend coverage remains 42 groups/105 functions/78 surfaces. [Cash-margin source receipt](docs/rebuild/rev118/receipts/MT5_FINAL_CASH_MARGIN_SOURCE_20261028.json) retains exact checks and failed attempts.\n\nComplete shared all-origin transactional cash/margin/stop-risk reservations, post-entry margin floors, fee/fill-price contingencies, qualified FX/contract migration, active-policy arbitration, working-order/partial-fill reconciliation and native economic finality. The final native check does not complete those requirements. All payment/manual/handover, discovery/feeds/depth/entitlements, forecasts/learning/crypto, assistant, security/operations and Android functions remain required. Profitability is evaluated with evidence, never guaranteed.\n\nAndroid uses its provisioned production profile on Van trading core without owner-entered backend addresses. Frontend redesign remains behind BG-001. Independent admission, signing, deployment and actual Artemis/Samsung S24 Ultra acceptance remain open. Frozen package bytes, original authority records and ledger integrity are preserved.\n",
+    "labels": [],
+    "milestone": null,
+    "active_lock_reason": null,
+    "created_at": "2026-10-22T01:52:15Z",
+    "updated_at": "2026-10-28T13:07:22Z",
+    "closed_at": null,
+    "merged_at": null,
+    "merge_commit_sha": "ca1f8fab8e120b2ec380ec8406998d35d58f1735",
+    "assignee": null,
+    "assignees": [],
+    "requested_reviewers": [],
+    "requested_teams": [],
+    "head": {
+      "label": "Vanguduza:ccr-9e07e1af-8mgz1p",
+      "ref": "ccr-9e07e1af-8mgz1p",
+      "repo": {
+        "id": 1369211561,
+        "node_id": "R_kgDOUZyCqQ",
+        "name": "Van",
+        "full_name": "Vanguduza/Van",
+        "owner": {
+          "login": "Vanguduza",
+          "id": 215922244,
+          "node_id": "U_kgDODN62RA",
+          "avatar_url": "https://avatars.githubusercontent.com/u/215922244?v=4",
+          "gravatar_id": "",
+          "url": "https://api.github.com/users/Vanguduza",
+          "html_url": "https://github.com/Vanguduza",
+          "followers_url": "https://api.github.com/users/Vanguduza/followers",
+          "following_url": "https://api.github.com/users/Vanguduza/following{/other_user}",
+          "gists_url": "https://api.github.com/users/Vanguduza/gists{/gist_id}",
+          "starred_url": "https://api.github.com/users/Vanguduza/starred{/owner}{/repo}",
+          "subscriptions_url": "https://api.github.com/users/Vanguduza/subscriptions",
+          "organizations_url": "https://api.github.com/users/Vanguduza/orgs",
+          "repos_url": "https://api.github.com/users/Vanguduza/repos",
+          "events_url": "https://api.github.com/users/Vanguduza/events{/privacy}",
+          "received_events_url": "https://api.github.com/users/Vanguduza/received_events",
+          "type": "User",
+          "user_view_type": "public",
+          "site_admin": false
+        },
+        "private": false,
+        "fork": false,
+        "archived": false,
+        "disabled": false,
+        "description": "Personal Assistant ",
+        "homepage": null,
+        "language": "Python",
+        "visibility": "public",
+        "is_template": false,
+        "topics": [],
+        "forks_count": 0,
+        "forks": 0,
+        "stargazers_count": 0,
+        "watchers_count": 0,
+        "watchers": 0,
+        "open_issues_count": 26,
+        "open_issues": 26,
+        "size": 261459,
+        "default_branch": "main",
+        "has_issues": true,
+        "has_projects": true,
+        "has_wiki": true,
+        "has_pages": false,
+        "has_downloads": false,
+        "has_discussions": false,
+        "has_pull_requests": true,
+        "pushed_at": "2026-10-28T13:02:52Z",
+        "created_at": "2026-09-14T03:22:23Z",
+        "updated_at": "2026-10-08T19:04:40Z",
+        "allow_forking": true,
+        "web_commit_signoff_required": false,
+        "pull_request_creation_policy": "all",
+        "license": {
+          "key": "mit",
+          "name": "MIT License",
+          "url": "https://api.github.com/licenses/mit",
+          "spdx_id": "MIT",
+          "node_id": "MDc6TGljZW5zZTEz"
+        },
+        "url": "https://api.github.com/repos/Vanguduza/Van",
+        "html_url": "https://github.com/Vanguduza/Van",
+        "archive_url": "https://api.github.com/repos/Vanguduza/Van/{archive_format}{/ref}",
+        "assignees_url": "https://api.github.com/repos/Vanguduza/Van/assignees{/user}",
+        "blobs_url": "https://api.github.com/repos/Vanguduza/Van/git/blobs{/sha}",
+        "branches_url": "https://api.github.com/repos/Vanguduza/Van/branches{/branch}",
+        "collaborators_url": "https://api.github.com/repos/Vanguduza/Van/collaborators{/collaborator}",
+        "comments_url": "https://api.github.com/repos/Vanguduza/Van/comments{/number}",
+        "commits_url": "https://api.github.com/repos/Vanguduza/Van/commits{/sha}",
+        "compare_url": "https://api.github.com/repos/Vanguduza/Van/compare/{base}...{head}",
+        "contents_url": "https://api.github.com/repos/Vanguduza/Van/contents/{+path}",
+        "contributors_url": "https://api.github.com/repos/Vanguduza/Van/contributors",
+        "deployments_url": "https://api.github.com/repos/Vanguduza/Van/deployments",
+        "downloads_url": "https://api.github.com/repos/Vanguduza/Van/downloads",
+        "events_url": "https://api.github.com/repos/Vanguduza/Van/events",
+        "forks_url": "https://api.github.com/repos/Vanguduza/Van/forks",
+        "git_commits_url": "https://api.github.com/repos/Vanguduza/Van/git/commits{/sha}",
+        "git_refs_url": "https://api.github.com/repos/Vanguduza/Van/git/refs{/sha}",
+        "git_tags_url": "https://api.github.com/repos/Vanguduza/Van/git/tags{/sha}",
+        "git_url": "git://github.com/Vanguduza/Van.git",
+        "issue_comment_url": "https://api.github.com/repos/Vanguduza/Van/issues/comments{/number}",
+        "issue_events_url": "https://api.github.com/repos/Vanguduza/Van/issues/events{/number}",
+        "issues_url": "https://api.github.com/repos/Vanguduza/Van/issues{/number}",
+        "keys_url": "https://api.github.com/repos/Vanguduza/Van/keys{/key_id}",
+        "labels_url": "https://api.github.com/repos/Vanguduza/Van/labels{/name}",
+        "languages_url": "https://api.github.com/repos/Vanguduza/Van/languages",
+        "merges_url": "https://api.github.com/repos/Vanguduza/Van/merges",
+        "milestones_url": "https://api.github.com/repos/Vanguduza/Van/milestones{/number}",
+        "notifications_url": "https://api.github.com/repos/Vanguduza/Van/notifications{?since,all,participating}",
+        "pulls_url": "https://api.github.com/repos/Vanguduza/Van/pulls{/number}",
+        "releases_url": "https://api.github.com/repos/Vanguduza/Van/releases{/id}",
+        "ssh_url": "git@github.com:Vanguduza/Van.git",
+        "stargazers_url": "https://api.github.com/repos/Vanguduza/Van/stargazers",
+        "statuses_url": "https://api.github.com/repos/Vanguduza/Van/statuses/{sha}",
+        "subscribers_url": "https://api.github.com/repos/Vanguduza/Van/subscribers",
+        "subscription_url": "https://api.github.com/repos/Vanguduza/Van/subscription",
+        "tags_url": "https://api.github.com/repos/Vanguduza/Van/tags",
+        "teams_url": "https://api.github.com/repos/Vanguduza/Van/teams",
+        "trees_url": "https://api.github.com/repos/Vanguduza/Van/git/trees{/sha}",
+        "clone_url": "https://github.com/Vanguduza/Van.git",
+        "mirror_url": null,
+        "hooks_url": "https://api.github.com/repos/Vanguduza/Van/hooks",
+        "svn_url": "https://github.com/Vanguduza/Van"
+      },
+      "sha": "3732798104c476680cac8e22f833f2ed764d77e2",
+      "user": {
+        "login": "Vanguduza",
+        "id": 215922244,
+        "node_id": "U_kgDODN62RA",
+        "avatar_url": "https://avatars.githubusercontent.com/u/215922244?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/Vanguduza",
+        "html_url": "https://github.com/Vanguduza",
+        "followers_url": "https://api.github.com/users/Vanguduza/followers",
+        "following_url": "https://api.github.com/users/Vanguduza/following{/other_user}",
+        "gists_url": "https://api.github.com/users/Vanguduza/gists{/gist_id}",
+        "starred_url": "https://api.github.com/users/Vanguduza/starred{/owner}{/repo}",
+        "subscriptions_url": "https://api.github.com/users/Vanguduza/subscriptions",
+        "organizations_url": "https://api.github.com/users/Vanguduza/orgs",
+        "repos_url": "https://api.github.com/users/Vanguduza/repos",
+        "events_url": "https://api.github.com/users/Vanguduza/events{/privacy}",
+        "received_events_url": "https://api.github.com/users/Vanguduza/received_events",
+        "type": "User",
+        "user_view_type": "public",
+        "site_admin": false
+      }
+    },
+    "base": {
+      "label": "Vanguduza:main",
+      "ref": "main",
+      "repo": {
+        "id": 1369211561,
+        "node_id": "R_kgDOUZyCqQ",
+        "name": "Van",
+        "full_name": "Vanguduza/Van",
+        "owner": {
+          "login": "Vanguduza",
+          "id": 215922244,
+          "node_id": "U_kgDODN62RA",
+          "avatar_url": "https://avatars.githubusercontent.com/u/215922244?v=4",
+          "gravatar_id": "",
+          "url": "https://api.github.com/users/Vanguduza",
+          "html_url": "https://github.com/Vanguduza",
+          "followers_url": "https://api.github.com/users/Vanguduza/followers",
+          "following_url": "https://api.github.com/users/Vanguduza/following{/other_user}",
+          "gists_url": "https://api.github.com/users/Vanguduza/gists{/gist_id}",
+          "starred_url": "https://api.github.com/users/Vanguduza/starred{/owner}{/repo}",
+          "subscriptions_url": "https://api.github.com/users/Vanguduza/subscriptions",
+          "organizations_url": "https://api.github.com/users/Vanguduza/orgs",
+          "repos_url": "https://api.github.com/users/Vanguduza/repos",
+          "events_url": "https://api.github.com/users/Vanguduza/events{/privacy}",
+          "received_events_url": "https://api.github.com/users/Vanguduza/received_events",
+          "type": "User",
+          "user_view_type": "public",
+          "site_admin": false
+        },
+        "private": false,
+        "fork": false,
+        "archived": false,
+        "disabled": false,
+        "description": "Personal Assistant ",
+        "homepage": null,
+        "language": "Python",
+        "visibility": "public",
+        "is_template": false,
+        "topics": [],
+        "forks_count": 0,
+        "forks": 0,
+        "stargazers_count": 0,
+        "watchers_count": 0,
+        "watchers": 0,
+        "open_issues_count": 26,
+        "open_issues": 26,
+        "size": 261459,
+        "default_branch": "main",
+        "has_issues": true,
+        "has_projects": true,
+        "has_wiki": true,
+        "has_pages": false,
+        "has_downloads": false,
+        "has_discussions": false,
+        "has_pull_requests": true,
+        "pushed_at": "2026-10-28T13:02:52Z",
+        "created_at": "2026-09-14T03:22:23Z",
+        "updated_at": "2026-10-08T19:04:40Z",
+        "allow_forking": true,
+        "web_commit_signoff_required": false,
+        "pull_request_creation_policy": "all",
+        "license": {
+          "key": "mit",
+          "name": "MIT License",
+          "url": "https://api.github.com/licenses/mit",
+          "spdx_id": "MIT",
+          "node_id": "MDc6TGljZW5zZTEz"
+        },
+        "url": "https://api.github.com/repos/Vanguduza/Van",
+        "html_url": "https://github.com/Vanguduza/Van",
+        "archive_url": "https://api.github.com/repos/Vanguduza/Van/{archive_format}{/ref}",
+        "assignees_url": "https://api.github.com/repos/Vanguduza/Van/assignees{/user}",
+        "blobs_url": "https://api.github.com/repos/Vanguduza/Van/git/blobs{/sha}",
+        "branches_url": "https://api.github.com/repos/Vanguduza/Van/branches{/branch}",
+        "collaborators_url": "https://api.github.com/repos/Vanguduza/Van/collaborators{/collaborator}",
+        "comments_url": "https://api.github.com/repos/Vanguduza/Van/comments{/number}",
+        "commits_url": "https://api.github.com/repos/Vanguduza/Van/commits{/sha}",
+        "compare_url": "https://api.github.com/repos/Vanguduza/Van/compare/{base}...{head}",
+        "contents_url": "https://api.github.com/repos/Vanguduza/Van/contents/{+path}",
+        "contributors_url": "https://api.github.com/repos/Vanguduza/Van/contributors",
+        "deployments_url": "https://api.github.com/repos/Vanguduza/Van/deployments",
+        "downloads_url": "https://api.github.com/repos/Vanguduza/Van/downloads",
+        "events_url": "https://api.github.com/repos/Vanguduza/Van/events",
+        "forks_url": "https://api.github.com/repos/Vanguduza/Van/forks",
+        "git_commits_url": "https://api.github.com/repos/Vanguduza/Van/git/commits{/sha}",
+        "git_refs_url": "https://api.github.com/repos/Vanguduza/Van/git/refs{/sha}",
+        "git_tags_url": "https://api.github.com/repos/Vanguduza/Van/git/tags{/sha}",
+        "git_url": "git://github.com/Vanguduza/Van.git",
+        "issue_comment_url": "https://api.github.com/repos/Vanguduza/Van/issues/comments{/number}",
+        "issue_events_url": "https://api.github.com/repos/Vanguduza/Van/issues/events{/number}",
+        "issues_url": "https://api.github.com/repos/Vanguduza/Van/issues{/number}",
+        "keys_url": "https://api.github.com/repos/Vanguduza/Van/keys{/key_id}",
+        "labels_url": "https://api.github.com/repos/Vanguduza/Van/labels{/name}",
+        "languages_url": "https://api.github.com/repos/Vanguduza/Van/languages",
+        "merges_url": "https://api.github.com/repos/Vanguduza/Van/merges",
+        "milestones_url": "https://api.github.com/repos/Vanguduza/Van/milestones{/number}",
+        "notifications_url": "https://api.github.com/repos/Vanguduza/Van/notifications{?since,all,participating}",
+        "pulls_url": "https://api.github.com/repos/Vanguduza/Van/pulls{/number}",
+        "releases_url": "https://api.github.com/repos/Vanguduza/Van/releases{/id}",
+        "ssh_url": "git@github.com:Vanguduza/Van.git",
+        "stargazers_url": "https://api.github.com/repos/Vanguduza/Van/stargazers",
+        "statuses_url": "https://api.github.com/repos/Vanguduza/Van/statuses/{sha}",
+        "subscribers_url": "https://api.github.com/repos/Vanguduza/Van/subscribers",
+        "subscription_url": "https://api.github.com/repos/Vanguduza/Van/subscription",
+        "tags_url": "https://api.github.com/repos/Vanguduza/Van/tags",
+        "teams_url": "https://api.github.com/repos/Vanguduza/Van/teams",
+        "trees_url": "https://api.github.com/repos/Vanguduza/Van/git/trees{/sha}",
+        "clone_url": "https://github.com/Vanguduza/Van.git",
+        "mirror_url": null,
+        "hooks_url": "https://api.github.com/repos/Vanguduza/Van/hooks",
+        "svn_url": "https://github.com/Vanguduza/Van"
+      },
+      "sha": "8eb1889822fc8a83f219977c15340172e16acd91",
+      "user": {
+        "login": "Vanguduza",
+        "id": 215922244,
+        "node_id": "U_kgDODN62RA",
+        "avatar_url": "https://avatars.githubusercontent.com/u/215922244?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/Vanguduza",
+        "html_url": "https://github.com/Vanguduza",
+        "followers_url": "https://api.github.com/users/Vanguduza/followers",
+        "following_url": "https://api.github.com/users/Vanguduza/following{/other_user}",
+        "gists_url": "https://api.github.com/users/Vanguduza/gists{/gist_id}",
+        "starred_url": "https://api.github.com/users/Vanguduza/starred{/owner}{/repo}",
+        "subscriptions_url": "https://api.github.com/users/Vanguduza/subscriptions",
+        "organizations_url": "https://api.github.com/users/Vanguduza/orgs",
+        "repos_url": "https://api.github.com/users/Vanguduza/repos",
+        "events_url": "https://api.github.com/users/Vanguduza/events{/privacy}",
+        "received_events_url": "https://api.github.com/users/Vanguduza/received_events",
+        "type": "User",
+        "user_view_type": "public",
+        "site_admin": false
+      }
+    },
+    "_links": {
+      "comments": {
+        "href": "https://api.github.com/repos/Vanguduza/Van/issues/105/comments"
+      },
+      "commits": {
+        "href": "https://api.github.com/repos/Vanguduza/Van/pulls/105/commits"
+      },
+      "statuses": {
+        "href": "https://api.github.com/repos/Vanguduza/Van/statuses/3732798104c476680cac8e22f833f2ed764d77e2"
+      },
+      "html": {
+        "href": "https://github.com/Vanguduza/Van/pull/105"
+      },
+      "issue": {
+        "href": "https://api.github.com/repos/Vanguduza/Van/issues/105"
+      },
+      "review_comments": {
+        "href": "https://api.github.com/repos/Vanguduza/Van/pulls/105/comments"
+      },
+      "review_comment": {
+        "href": "https://api.github.com/repos/Vanguduza/Van/pulls/comments{/number}"
+      },
+      "self": {
+        "href": "https://api.github.com/repos/Vanguduza/Van/pulls/105"
+      }
+    },
+    "author_association": "OWNER",
+    "auto_merge": null,
+    "draft": true,
+    "merged": false,
+    "mergeable": true,
+    "rebaseable": false,
+    "mergeable_state": "unstable",
+    "merged_by": null,
+    "comments": 0,
+    "review_comments": 0,
+    "maintainer_can_modify": false,
+    "commits": 890,
+    "additions": 3642562,
+    "deletions": 8397,
+    "changed_files": 14594
+  }
+}

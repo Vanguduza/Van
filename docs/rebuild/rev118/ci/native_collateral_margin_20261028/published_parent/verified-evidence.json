@@ -1,0 +1,40 @@
+{
+  "artifact_id": 12794822760,
+  "source_head": "d156d943df32329c14c1abf147edebe7d6425820",
+  "main_run": 40638560229,
+  "bytes": 179927,
+  "sha256": "734d84dfbf6a6866e9d48f03f85e7b9ac6ca052bc87f5226a82e4dc5133acc08",
+  "GitHub_digest_and_size_match": true,
+  "zip_CRC_paths_and_extracted_readback_verified": true,
+  "independent_junit_results": [
+    {
+      "file": "postgres-ledger-report.xml",
+      "cases": 26,
+      "passed": 26,
+      "failed_or_error": 0,
+      "skips": []
+    },
+    {
+      "file": "trading-source-report.xml",
+      "cases": 4616,
+      "passed": 4615,
+      "failed_or_error": 0,
+      "skips": [
+        {
+          "name": "test_dial_resolver_selects_trading_knowledge_from_van_registry",
+          "reason": {
+            "type": "pytest.skip",
+            "message": "dial-new checkout not available (set DIAL_REPO)"
+          }
+        }
+      ]
+    },
+    {
+      "file": "voice-source-report.xml",
+      "cases": 117,
+      "passed": 117,
+      "failed_or_error": 0,
+      "skips": []
+    }
+  ]
+}

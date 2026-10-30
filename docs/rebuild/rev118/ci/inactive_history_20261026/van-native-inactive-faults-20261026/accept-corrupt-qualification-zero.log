@@ -1,0 +1,46 @@
+...FFF......                                                             [100%]
+=================================== FAILURES ===================================
+_ test_read_identity_cannot_self_grant_or_corrupt_qualification_types[0-qualified_for_execution] _
+
+field = 'qualified_for_execution', value = 0
+
+    @pytest.mark.parametrize('field',['qualified_for_execution','qualified_for_research','provider_qualified'])
+    @pytest.mark.parametrize('value',[True,0,None,'false'])
+    def test_read_identity_cannot_self_grant_or_corrupt_qualification_types(field,value):
+        body=identity().body();body[field]=value
+>       with pytest.raises(ValueError):NativeReadIdentity.from_body(body)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+trading/tests/test_native_read_identity.py:66: Failed
+_ test_read_identity_cannot_self_grant_or_corrupt_qualification_types[0-qualified_for_research] _
+
+field = 'qualified_for_research', value = 0
+
+    @pytest.mark.parametrize('field',['qualified_for_execution','qualified_for_research','provider_qualified'])
+    @pytest.mark.parametrize('value',[True,0,None,'false'])
+    def test_read_identity_cannot_self_grant_or_corrupt_qualification_types(field,value):
+        body=identity().body();body[field]=value
+>       with pytest.raises(ValueError):NativeReadIdentity.from_body(body)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+trading/tests/test_native_read_identity.py:66: Failed
+_ test_read_identity_cannot_self_grant_or_corrupt_qualification_types[0-provider_qualified] _
+
+field = 'provider_qualified', value = 0
+
+    @pytest.mark.parametrize('field',['qualified_for_execution','qualified_for_research','provider_qualified'])
+    @pytest.mark.parametrize('value',[True,0,None,'false'])
+    def test_read_identity_cannot_self_grant_or_corrupt_qualification_types(field,value):
+        body=identity().body();body[field]=value
+>       with pytest.raises(ValueError):NativeReadIdentity.from_body(body)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+trading/tests/test_native_read_identity.py:66: Failed
+=========================== short test summary info ============================
+FAILED trading/tests/test_native_read_identity.py::test_read_identity_cannot_self_grant_or_corrupt_qualification_types[0-qualified_for_execution]
+FAILED trading/tests/test_native_read_identity.py::test_read_identity_cannot_self_grant_or_corrupt_qualification_types[0-qualified_for_research]
+FAILED trading/tests/test_native_read_identity.py::test_read_identity_cannot_self_grant_or_corrupt_qualification_types[0-provider_qualified]
+3 failed, 9 passed in 1.14s

@@ -1,0 +1,64 @@
+......s.s.s.s.s..ss.s.....sssss...sssFs.s.s.s...sss..................... [ 94%]
+....                                                                     [100%]
+=================================== FAILURES ===================================
+___ test_independent_sql_connections_publish_the_same_original_once[sqlite] ____
+
+book = (<vati.core.ledger.Ledger object at 0x7f3e6b7840e0>, <vati.funding.movement_journal.FinancialMovementBook object at 0x...version=9, occurred_at_ms=1500, money_digits=8),)), 'becc530bc24b7acd785ad72793add5a1d0c2418a4b5148c93c3e97d5ab89c68b')
+
+    def test_independent_sql_connections_publish_the_same_original_once(book):
+        ledger,journal,native,ref=book;barrier=threading.Barrier(2)
+        def writer():
+            if isinstance(ledger,Ledger):owned=Ledger(ledger.path)
+            else:
+                from vati.core.ledger_pg import PostgresLedger
+                owned=PostgresLedger(ledger.path,ledger_name=ledger.name)
+            with closing(owned):
+                other=FinancialMovementBook(owned,clock=lambda:6000);history=other._history;first=True
+                def synchronized():
+                    nonlocal first
+                    result=history()
+                    if first:first=False;barrier.wait(timeout=10)
+                    return result
+                other._history=synchronized
+                return other.publish('concurrent',scope_hash=native.scope_hash,native_id=native.movements[0].native_id,statement_ref=ref)
+        with ThreadPoolExecutor(max_workers=2) as pool:
+>           jobs=[pool.submit(writer) for _ in range(2)];results=[job.result(timeout=30) for job in jobs]
+                                                                  ^^^^^^^^^^^^^^^^^^^^^^
+
+trading/tests/test_financial_movement_journal.py:184: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/concurrent/futures/_base.py:456: in result
+    return self.__get_result()
+           ^^^^^^^^^^^^^^^^^^^
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/concurrent/futures/_base.py:401: in __get_result
+    raise self._exception
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/concurrent/futures/thread.py:59: in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+trading/tests/test_financial_movement_journal.py:182: in writer
+    return other.publish('concurrent',scope_hash=native.scope_hash,native_id=native.movements[0].native_id,statement_ref=ref)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/funding/movement_journal.py:213: in publish
+    return self._publish(request_id,_source_request(scope_hash,native_id,statement_ref))
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <vati.funding.movement_journal.FinancialMovementBook object at 0x7f3e6b74b950>
+request_id = 'concurrent'
+requested = {'scope_hash': '9416990f89cc231045967018d529f8f2a4f42488499c86fb9f71bedc2f9c7f3b', 'native_id': '7', 'statement_ref': 'becc530bc24b7acd785ad72793add5a1d0c2418a4b5148c93c3e97d5ab89c68b'}
+
+    def _publish(self,request_id,requested):
+        if not isinstance(request_id,str) or REQUEST.fullmatch(request_id) is None:
+            raise UnitError('FINANCIAL_REQUEST_ID_INVALID')
+        fingerprint=canonical_hash(requested)
+        anchors=(requested['balance_anchor_ref'],) if 'balance_anchor_ref' in requested else ()
+        started=False; confirmation_needed=False
+        try:
+>           self._transaction(publication=True); rows,_,_=self._history(anchor_refs=anchors)
+                                                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           TypeError: test_independent_sql_connections_publish_the_same_original_once.<locals>.writer.<locals>.synchronized() got an unexpected keyword argument 'anchor_refs'
+
+trading/vati/funding/movement_journal.py:225: TypeError
+=========================== short test summary info ============================
+FAILED trading/tests/test_financial_movement_journal.py::test_independent_sql_connections_publish_the_same_original_once[sqlite]
+1 failed, 52 passed, 23 skipped in 1.75s

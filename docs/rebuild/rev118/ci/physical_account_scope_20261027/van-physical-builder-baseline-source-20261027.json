@@ -1,0 +1,12 @@
+{
+  "base_head": "b0a61313e5167bafca4dbeea96f2bfcc5c7c6b90",
+  "actual_runtime_builder_paths": 4,
+  "actual_SQL_failed_duplicate_physical_alias_cases": 4,
+  "passed_existing_alias_and_distinct_account_controls": 8,
+  "skips": 0,
+  "audit_violations": 0,
+  "pinned_source_hashes": 1162,
+  "all_current_hashes_match": true,
+  "owned_fixture_independently_absent": true,
+  "qualification": "Actual service-construction and shared PostgreSQL lease scope, injected paper adapter/source fixtures. No native connection, biometric, financial effect or economic bypass demonstrated."
+}

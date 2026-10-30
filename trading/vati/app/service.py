@@ -14,6 +14,7 @@ import json
 import os
 import signal
 import time
+import uuid
 from dataclasses import dataclass, field
 from decimal import Decimal
 from pathlib import Path
@@ -34,6 +35,7 @@ from vati.market_data.feeds.lake import TIMEFRAMES_MS, BarLake
 from vati.learning.episodes import Environment
 from vati.learning.hooks import LearningHooks
 from vati.learning.replay import restore_learning_runtime
+from vati.learning.runtime_cohort import execution_cohort_for
 from vati.risk import AuthorizationMode, TradingMandate
 from vati.risk.serde import contract_from_dict
 from vati.strategies import STRATEGY_IMPLEMENTATIONS, CapsuleRegistry
@@ -77,6 +79,8 @@ class ServiceConfig:
     #: did: an explicit MODEL_UNAVAILABLE abstention and an untouched
     #: deterministic decision.
     cognition: dict = field(default_factory=dict)
+    # Operator-admitted provider/model qualifications; packets cannot set these.
+    cognitive_fabric: dict = field(default_factory=dict)
     #: Where `secretref://` credential handles resolve. Mirrors the gateway's
     #: `vati_secrets_dir`; the credential value itself is never configuration.
     secrets_dir: str = ""
@@ -89,6 +93,8 @@ class ServiceConfig:
     #: News is reduce-only wherever it lands; the economic calendar remains the
     #: blackout authority.
     news: dict = field(default_factory=dict)
+    #: Native public owner keys, shared with Commander; no private signing key.
+    owner_authority_keys: str = ""
 
     @classmethod
     def load(cls, path: str | Path) -> "ServiceConfig":
@@ -99,22 +105,19 @@ class ServiceConfig:
 #: P1-TRADE-008 — which learning environment a session's experience belongs to. Taken from
 #: the mandate's authorization mode rather than assumed, so a demo session's episodes are
 #: never pooled with a live one's; the two are not comparable evidence.
-ENVIRONMENT_FOR_MODE: dict[AuthorizationMode, Environment] = {
-    AuthorizationMode.OBSERVE: Environment.SHADOW,
-    AuthorizationMode.ADVISOR: Environment.SHADOW,
-    AuthorizationMode.DEMO_TRADER: Environment.DEMO,
-    AuthorizationMode.SHADOW_TRADER: Environment.SHADOW,
-    AuthorizationMode.LIMITED_LIVE: Environment.LIMITED_LIVE,
-    AuthorizationMode.AUTONOMOUS_LIVE: Environment.LIVE,
-    AuthorizationMode.HALTED: Environment.SHADOW,
-}
+from vati.learning.scope import ENVIRONMENT_FOR_MODE
 
 
-def build_adapter(account: Account, registry: AccountRegistry, *, equity_hint: Decimal = Decimal("10000")) -> VenueAdapter:
+def build_adapter(account: Account, registry: AccountRegistry, *, equity_hint: Decimal = Decimal("10000"), deriv_connector=None, symbol_contracts=None) -> VenueAdapter:
     """Adapter from the account record. Credentials are resolved inside the transport and never returned."""
+    from vati.accounts.access import bind_entry_authority
+    def bound(adapter):
+        return bind_entry_authority(adapter, registry, account)
     if account.broker == BrokerKind.PAPER:
-        return PaperAdapter(venue=account.router_venue, account_alias=account.alias, equity=equity_hint)
+        return bound(PaperAdapter(venue=account.router_venue, account_alias=account.alias, currency=account.currency, equity=equity_hint, symbol_contracts=symbol_contracts))
     if account.broker == BrokerKind.MT5:
+        from vati.execution.mt5_identity import Mt5Identity
+        identity = Mt5Identity.from_account(account)
         from vati.execution.mt5_bridge import Mt5BridgeAdapter, Mt5BridgeClient
         from vati.execution.transports.mt5_http import Mt5HttpTransport
         secrets = registry.credentials(account.alias)
@@ -122,31 +125,45 @@ def build_adapter(account: Account, registry: AccountRegistry, *, equity_hint: D
         if not key:
             raise RuntimeError(f"{account.alias}: BRIDGE_SIGNING_KEY missing from secrets")
         transport = Mt5HttpTransport(account.bridge_url, ca_file=secrets["BRIDGE_CA_FILE"], client_cert=secrets.get("BRIDGE_CLIENT_CERT"), client_key=secrets.get("BRIDGE_CLIENT_KEY"))
-        return Mt5BridgeAdapter(Mt5BridgeClient(signing_key=key.encode(), transport=transport), account_alias=account.alias, venue=account.router_venue)
+        return bound(Mt5BridgeAdapter(Mt5BridgeClient(signing_key=key.encode(), transport=transport), account_alias=account.alias, venue=account.router_venue,
+            identity=identity))
     if account.broker == BrokerKind.DERIV:
+        from vati.execution.deriv_identity import validate_deriv_endpoint
+        validate_deriv_endpoint(account.bridge_url)
         from vati.execution.deriv import DerivAdapter
+        from vati.execution.deriv_identity import DerivIdentity
+        from vati.accounts.access import SENDING_MODES, entry_fence
         from vati.execution.transports.deriv_ws import DerivWebSocketTransport
+        identity = DerivIdentity(account.login, account.currency, account.demo, account.mode in SENDING_MODES)
         transport = DerivWebSocketTransport(app_id=account.server or "1089", token_provider=lambda: registry.credentials(account.alias).get("DERIV_API_TOKEN") or registry.credentials(account.alias).get("TOKEN", ""),
-                                            endpoint=account.bridge_url or "wss://ws.derivws.com/websockets/v3")
-        return DerivAdapter(venue=account.router_venue, account_alias=account.alias, transport=transport)
+                                            endpoint=account.bridge_url or "wss://ws.derivws.com/websockets/v3",
+                                            identity=identity, entry_scope=lambda: entry_fence(registry, account),
+                                            **({"connector": deriv_connector} if deriv_connector is not None else {}))
+        return DerivAdapter(venue=account.router_venue, account_alias=account.alias, transport=transport,
+                            identity=identity, entry_enabled=account.enabled and account.mode in SENDING_MODES)
     if account.broker == BrokerKind.CTRADER:
-        from vati.execution.ctrader import DEMO_HOST, LIVE_HOST, CtraderAdapter, CtraderTransport
+        from vati.execution.ctrader import CtraderAdapter, CtraderTransport
         secrets = registry.credentials(account.alias)
         for k in ("CTRADER_CLIENT_ID", "CTRADER_CLIENT_SECRET", "CTRADER_ACCESS_TOKEN"):
             if not secrets.get(k):
                 raise RuntimeError(f"{account.alias}: {k} missing from secrets")
-        host = LIVE_HOST if (account.server or "demo").lower() == "live" or not account.demo else DEMO_HOST
-        return CtraderAdapter(CtraderTransport(host=host), client_id=secrets["CTRADER_CLIENT_ID"], client_secret_provider=lambda: registry.credentials(account.alias)["CTRADER_CLIENT_SECRET"],
-                              access_token_provider=lambda: registry.credentials(account.alias)["CTRADER_ACCESS_TOKEN"], ctid_trader_account_id=int(account.login), account_alias=account.alias, venue=account.router_venue)
+        from vati.accounts.physical_scope import ctrader_host
+        host = ctrader_host(account)
+        return bound(CtraderAdapter(CtraderTransport(host=host), client_id=secrets["CTRADER_CLIENT_ID"], client_secret_provider=lambda: registry.credentials(account.alias)["CTRADER_CLIENT_SECRET"],
+                              access_token_provider=lambda: registry.credentials(account.alias)["CTRADER_ACCESS_TOKEN"], ctid_trader_account_id=int(account.login), account_alias=account.alias, venue=account.router_venue))
     if account.broker == BrokerKind.MT5_EA:
+        from vati.execution.mt5_identity import Mt5Identity
+        identity = Mt5Identity.from_account(account)
         from vati.execution.mt5_pull import Mt5PullAdapter, open_bridge_queue
         secrets = registry.credentials(account.alias)
         if not secrets.get("BRIDGE_SIGNING_KEY"):
             raise RuntimeError(f"{account.alias}: BRIDGE_SIGNING_KEY missing from secrets")
-        return Mt5PullAdapter(open_bridge_queue(secrets.get("BRIDGE_QUEUE", "")), account_alias=account.alias, venue=account.router_venue)
+        return bound(Mt5PullAdapter(open_bridge_queue(secrets.get("BRIDGE_QUEUE", "")), account_alias=account.alias, venue=account.router_venue,
+            identity=identity))
     if account.broker == BrokerKind.ZSE_OWNER_TICKET:
         from vati.execution.zse_ticket import OwnerTicketAdapter
-        return OwnerTicketAdapter(equity=equity_hint, csd_verified=False)
+        return bound(OwnerTicketAdapter(venue=account.router_venue, account_alias=account.alias,
+            currency=account.currency, equity=equity_hint, csd_verified=False))
     raise RuntimeError(f"no adapter for broker {account.broker}")
 
 
@@ -164,21 +181,44 @@ class SessionService:
     news: object = None
     _ledger: object = None
     _started_ms: int = 0
+    lease: object = None
+    _lease_store: object = None
+    _lease_allows_entry: bool = False
+    _lease_outcome: str = "NOT_ACQUIRED"
+    _entry_registry: object = None
+    _entry_account: object = None
 
     def build(self) -> "SessionService":
         c = self.cfg
         registry = AccountRegistry(c.registry_path)
         account = registry.get(c.account_alias)
+        self._entry_registry,self._entry_account=registry,account
         if not account.enabled:
             raise RuntimeError(f"account {account.alias} is disabled")
         mandate = TradingMandate.from_mapping(c.mandate)
-        if mandate.mode.value in ("LIMITED_LIVE", "AUTONOMOUS_LIVE") and account.demo:
-            raise RuntimeError("mandate is live but the account record is demo: refuse to start with mismatched safety identity")
+        if mandate.temperament_enabled:
+            raise RuntimeError("trading temperaments require AccountCoordinatorService; "
+                               "single-symbol session refuses unsupported signed posture")
+        from vati.accounts.access import validate_mode
+        validate_mode(account, mandate.mode.value)
         if mandate.account_alias != account.alias:
             raise RuntimeError(f"mandate is signed for account {mandate.account_alias!r} but the session is for {account.alias!r}: refuse to start (every intent would be ACCOUNT_MISMATCH)")
-        self.adapter = self.adapter or build_adapter(account, registry)
+        from vati.accounts.access import SENDING_MODES
+        shared = str(c.ledger).startswith(("postgres://", "postgresql://"))
+        if not shared and account.broker != BrokerKind.PAPER and mandate.mode.value in SENDING_MODES:
+            raise RuntimeError("native venue entry requires the shared PostgreSQL VATI authority store; a local lease is not a cross-host fence")
+        contract = contract_from_dict({**c.contract, "venue": account.router_venue})
+        self.adapter = self.adapter or build_adapter(account, registry, symbol_contracts={c.symbol: contract})
+        if isinstance(self.adapter, PaperAdapter):
+            self.adapter.bind_contracts({c.symbol: contract})
         self._ledger = open_ledger(c.ledger)
-        contract = contract_from_dict({**c.contract, "venue": account.router_venue})   # the account decides the venue; a contract copied from another venue must not silently mismatch
+        from vati.app.account_lease import PostgresLeaseStore
+        from vati.app.physical_account_lease import build_runtime_lease
+        from vati.app.sqlite_lease import SQLiteLeaseStore
+        self._lease_store = PostgresLeaseStore(c.ledger) if shared else SQLiteLeaseStore(c.ledger)
+        self.lease = build_runtime_lease(self._lease_store, account=account, mode=mandate.mode.value,
+            instance_id=f"{os.uname().nodename}:{os.getpid()}:{uuid.uuid4().hex}",
+            software_version="vati-single-session/1", git_sha=os.environ.get("VAN_GIT_SHA", ""))
         scfg = SessionConfig(symbol=c.symbol, base=c.base, quote=c.quote, venue=account.router_venue, account_alias=account.alias, contract=contract, mandate_dict=c.mandate, timeframe=c.timeframe,
                              warmup_bars=c.warmup_bars, max_quote_age_ms=c.max_quote_age_ms, session_id=f"{account.alias}:{c.symbol}:{int(self.clock())}", activation_id=c.activation_id,
                              software_stops=account.broker == BrokerKind.ZSE_OWNER_TICKET)
@@ -188,20 +228,22 @@ class SessionService:
         cost = Decimal(c.round_trip_cost_pct)
         # P1-TRADE-008 — `learning` was never passed here, so capsule-health demotion,
         # broker-liquidity learning and experience artefacts existed only in backtests.
-        # The environment is taken from the mandate's mode rather than assumed, because a
-        # DEMO session's experience must not be pooled with a LIVE one's.
+        # Bind actual adapter provenance as well as the policy ceiling: a Paper
+        # account configured with a live policy still supplies simulated facts.
         #
         # This is safe to wire because the effects it can have are already bounded: the
         # LearningBoundary permits reduce-only adjustments, and a demotion moves a capsule
         # towards SHADOW or DEGRADED, never towards more authority. That boundary is what
         # made this a wiring job rather than a design one.
         learning = LearningHooks(
-            environment=ENVIRONMENT_FOR_MODE[mandate.mode],
+            environment=execution_cohort_for(self.adapter, mandate.mode).environment,
+            account_alias=account.alias,
             broker=str(getattr(account.broker, "value", account.broker)).lower(),
         )
         self.learning_replay = restore_learning_runtime(
             self._ledger, learning, {c.symbol.upper(): engine})
-        cycle = DecisionCycle(cfg=scfg, adapter=self.adapter, ledger=self._ledger, engine=engine, cost_fn=lambda st: cost, calendar=FX_CALENDAR, events=build_matrix(c.calendar_path), learning=learning)
+        cycle = DecisionCycle(cfg=scfg, adapter=self.adapter, ledger=self._ledger, engine=engine, cost_fn=lambda st: cost, calendar=FX_CALENDAR, events=build_matrix(c.calendar_path), learning=learning,
+            runtime_lease=self.lease, lease_clock=self.clock, lease_permission=self._entry_permitted)
         # GAP-F-003. The single-symbol runtime gets the same headline ingress the
         # account runtime has, so backtest-to-live parity covers the thesis and
         # event path rather than only the order path. No `news` block in the
@@ -214,21 +256,9 @@ class SessionService:
 
     def _build_news(self):
         """Headline ingress from `cfg.news`, or None. Reduce-only everywhere."""
-        cfg = dict(getattr(self.cfg, "news", None) or {})
-        if not cfg:
-            return None
-        from vati.events.news_ingress import (
-            NewsIngress, rows_from_file, sources_from_config,
-        )
-        ingress = NewsIngress(
-            ledger=self._ledger,
-            sources=sources_from_config(cfg),
-            relevance_window_ms=int(cfg.get("relevance_window_ms", 6 * 3_600_000)),
-        )
-        path = cfg.get("path")
-        if path and Path(path).is_file():
-            ingress.ingest_rows(rows_from_file(path), now_ms=self.clock())
-        return ingress
+        from vati.events.news_runtime import build_news_file
+        return build_news_file(getattr(self.cfg,'news',None) or {},ledger=self._ledger,
+            scope=f'account:{self.cfg.account_alias}:symbol:{self.cfg.symbol.upper()}',now_ms=self.clock())
 
     def refresh_news(self, now_ms: int) -> dict:
         """Re-read the headline file and push candidate event risk into sizing.
@@ -240,51 +270,88 @@ class SessionService:
         news = getattr(self, "news", None)
         if news is None:
             return {}
-        cfg = dict(getattr(self.cfg, "news", None) or {})
-        path = cfg.get("path")
-        counts: dict = {}
-        if path and Path(path).is_file():
-            from vati.events.news_ingress import rows_from_file
-            try:
-                counts = news.ingest_rows(rows_from_file(path), now_ms=now_ms)
-            except Exception as exc:  # noqa: BLE001 — a bad news file never stops a cycle
-                self.runner.cycle.ledger.append(make_event(
-                    EventKind.MARKET_DATA_HEALTH, "vati-service",
-                    {"source": "news", "state": "UNREADABLE", "error": str(exc)[:200]},
-                    event_time_ms=now_ms, received_time_ms=now_ms,
-                    correlation_id=self.cfg.symbol))
-                return {"skipped": 1}
+        from vati.events.news_runtime import refresh_news_file
+        counts=refresh_news_file(news,getattr(self.cfg,'news',None) or {},ledger=self._ledger,
+            scope=f'account:{self.cfg.account_alias}:symbol:{self.cfg.symbol.upper()}',now_ms=now_ms)
         try:
             multiplier, _materiality, _refs = news.candidate_risk(
                 self.cfg.symbol, now_ms=now_ms)
             self.runner.cycle.engine.m.news_event_risk[
                 self.cfg.symbol.upper()] = multiplier
             counts = dict(counts) | {"event_risk_multiplier": str(multiplier)}
-        except Exception:  # noqa: BLE001
-            pass
+        except Exception as exc:  # noqa: BLE001 — optional news cannot stop protective work
+            counts=dict(counts)|{'risk_state':'UNAVAILABLE','risk_error_code':type(exc).__name__}
         return counts
 
     # ------------------------------------------------------------------ loop
     def _heartbeat(self, status: str, extra: Optional[dict] = None) -> None:
-        hb = {"account_alias": self.cfg.account_alias, "symbol": self.cfg.symbol, "status": status, "cycles": self.cycles, "last_bar_end_ms": self.last_bar_end_ms,
-              "permit_new_orders": bool(self.runner and self.runner.permit_new_orders), "kill_switch": sorted(t.value for t in self.runner.cycle.kill.active) if self.runner else [],
+        from vati.events.news_runtime import news_heartbeat
+        if getattr(self, "learning", None) is not None and getattr(self, "_ledger", None) is not None:
+            self.learning.update_projection(self._ledger)
+        hb = {"account_alias": self.cfg.account_alias, "symbol": self.cfg.symbol, "session_id": self.runner.cycle.cfg.session_id if self.runner else None, "status": status, "cycles": self.cycles, "last_bar_end_ms": self.last_bar_end_ms,
+              "owner_policy_current": bool(self.runner and self.runner.cycle.mandate.owner_keys_current()),
+              "permit_new_orders": bool(self._entry_permitted()
+                  and self.lease and self.lease.fence(self.lease.epoch, now_ms=self.clock())), "kill_switch": sorted(t.value for t in self.runner.cycle.kill.active) if self.runner else [],
+              "lease_outcome": self._lease_outcome, "lease_epoch": self.lease.epoch if self.lease else None,
+              "risk_history_issue": self.runner.cycle.streaks.recovery_issue if self.runner else "",
+              "unresolved_entry_count": len(self.runner.cycle.unresolved_entry_attempts) if self.runner else 0,
+              "unresolved_entry_ids": sorted(self.runner.cycle.unresolved_entry_attempts) if self.runner else [],
+              "learning_history_issue": self.learning.recovery_issue if getattr(self, "learning", None) else "",
+              "restated_learning": self.learning.projection_summary if getattr(self, "learning", None) else {"status":"NOT_CONSTRUCTED"},
+              "news":news_heartbeat(self.news),
               "updated_ms": self.clock(), "pid": os.getpid(), **(extra or {})}
+        if self.runner and self.lease:
+            from vati.app.runtime_control_actor import recovery_review
+            hb['runtime_recovery'] = recovery_review(self)
         Path(self.cfg.heartbeat_path).write_text(json.dumps(hb))
 
     def _account_snapshot(self, now_ms: int) -> None:
+        if getattr(self, "learning", None) is not None and getattr(self, "_ledger", None) is not None:
+            self.learning.update_projection(self._ledger)
         r = self.runner
         assert r is not None
         acct = r.cycle.adapter.sync_account()
+        observed_clock=self.clock()
+        account_observed_ms=observed_clock if type(observed_clock) is int and observed_clock>=now_ms else None
+        from vati.execution.native_margin import account_margin_body
+        margin=account_margin_body(r.cycle.adapter,acct,observed_at_ms=account_observed_ms)
         hb = r.cycle.adapter.heartbeat(now_ms=now_ms)
         positions = r.cycle.adapter.positions()
+        from vati.funding.worker import snapshot_funding
+        funding = snapshot_funding(self,r.cycle.ledger,r.cycle.adapter,acct,now_ms=now_ms)
+        from vati.funding.native import account_mark_body
+        mark=account_mark_body(acct)
+        from vati.execution.mt5_observation import account_observation_body
+        received_ms=max(now_ms,acct.server_time_unix_ms,self.clock())
         r.cycle.ledger.append(make_event(EventKind.ACCOUNT_SNAPSHOT, "vati-service", {
             "account_alias": acct.account_alias, "equity": str(acct.equity), "balance": str(acct.balance), "currency": acct.currency, "verified": acct.verified,
+            "funding_observation": funding,
+            "margin": margin,
+            "native_account_mark": mark,
+            "native_account_observation": account_observation_body(acct),
             "connected": hb.connected, "server_offset_ms": hb.server_offset_ms, "open_positions": len(positions), "peak_equity": str(r.cycle.peak_equity), "day_start_equity": str(r.cycle.day_start_equity),
             "week_start_equity": str(r.cycle.week_start_equity), "kill_switch": sorted(t.value for t in r.cycle.kill.active), "mode": r.cycle.mandate.mode.value,
-        }, event_time_ms=now_ms, received_time_ms=now_ms, correlation_id=r.cycle.cfg.session_id))
+            "risk_history_issue": r.cycle.streaks.recovery_issue,
+            "learning_history_issue": self.learning.recovery_issue if getattr(self, "learning", None) else "",
+            "restated_learning": self.learning.projection_summary if getattr(self, "learning", None) else {"status":"NOT_CONSTRUCTED"},
+        }, event_time_ms=now_ms, received_time_ms=received_ms, correlation_id=r.cycle.cfg.session_id))
 
     def start(self) -> None:
         assert self.runner is not None, "build() first"
+        if self.runner.started:
+            raise RuntimeError("single-symbol runtime is already started")
+        result = self.lease.acquire(now_ms=self.clock())
+        self._lease_outcome = result.outcome.value
+        self._lease_allows_entry = result.permits_orders
+        if not result.permits_orders:
+            raise RuntimeError(f"account runtime lease refused: {result.outcome.value}")
+        try:
+            self._start_reconciled()
+        except BaseException:
+            self.close()
+            raise
+
+    def _start_reconciled(self) -> None:
         now = self.clock()
         self._started_ms = now
         rep = self.runner.startup(now_ms=now)
@@ -294,6 +361,17 @@ class SessionService:
         self._observe_owner_halt(now)
         self._account_snapshot(now)
         self._heartbeat("STARTED", {"reconciliation": rep.counts()})
+
+    def close(self) -> None:
+        from vati.funding.worker import stop_funding
+        stop_funding(self)
+        self._lease_allows_entry = False
+        try:
+            if self.lease is not None:
+                self.lease.release(now_ms=self.clock())
+        finally:
+            if self._lease_store is not None:
+                self._lease_store.close()
 
     def _observe_owner_halt(self, now_ms: int) -> None:
         """An OWNER_HALT written by the gateway or the commander (A4) stops new orders.
@@ -312,18 +390,11 @@ class SessionService:
         from vati.risk.contracts import KillSwitchTrigger
         if KillSwitchTrigger.OWNER_HALT in self.runner.cycle.kill.active:
             return
-        latest_halt = None
-        for ev in self.runner.cycle.ledger.iter(EventKind.KILL_SWITCH):
-            if ev.producer == "vati-runner":
-                continue
-            if ev.payload.get("trigger") != "OWNER_HALT":
-                continue
-            if ev.payload.get("cleared"):
-                latest_halt = None
-                continue
-            latest_halt = ev
-        if latest_halt is None:
+        from vati.app.runtime_control_actor import outstanding_owner_halts
+        halts = outstanding_owner_halts(self.runner.cycle.ledger, self.cfg.account_alias)
+        if not halts:
             return
+        latest_halt = halts[-1]
         self.runner.cycle.kill.trip(KillSwitchTrigger.OWNER_HALT, now_ms)
         self.runner.permit_new_orders = False
         self.runner.cycle.ledger.append(make_event(
@@ -335,11 +406,38 @@ class SessionService:
             correlation_id=self.runner.cycle.cfg.session_id,
         ))
 
+    def _entry_permitted(self) -> bool:
+        if self.stop_requested or self.runner is None:
+            return False
+        self._observe_owner_halt(self.clock())
+        from vati.accounts.access import entry_fence,AccountModeAuthorityError
+        from vati.core.file_lock import StateFileLockError
+        try:
+            # The adapter remains the final submission fence. This fresh check
+            # keeps the session gate and owner readback consistent with it.
+            with entry_fence(self._entry_registry,self._entry_account):
+                profile_permitted=True
+        except (ValueError,AccountModeAuthorityError,OSError,StateFileLockError):
+            profile_permitted=False
+        return bool(profile_permitted and self._lease_allows_entry and self.runner.permit_new_orders
+            and not self.runner.cycle.unresolved_entry_attempts
+            and self.runner.cycle.mandate.sends_orders() and self.runner.cycle.mandate.owner_keys_current()
+            and not self.runner.cycle.kill.halted)
+
     def step_once(self) -> Optional[str]:
         """One loop iteration; returns the cycle decision when a new bar closed, else None."""
         assert self.runner is not None
+        if not self.runner.started:
+            raise RuntimeError("start() first")
         now = self.clock()
+        result = self.lease.renew(now_ms=now)
+        self._lease_outcome = result.outcome.value
+        self._lease_allows_entry = result.permits_orders
         self._observe_owner_halt(now)
+        from vati.app.entry_recovery import reconcile_inflight_entries
+        reconcile_inflight_entries(self.runner.cycle,now_ms=now)
+        from vati.app.runtime_control_actor import process_recovery_requests
+        process_recovery_requests(self)
         bars = self.bar_source(now)
         if not bars:
             self.runner.cycle.ledger.append(make_event(EventKind.MARKET_DATA_HEALTH, "vati-service", {"symbol": self.cfg.symbol, "state": "NO_DATA"}, event_time_ms=now, received_time_ms=now, correlation_id=self.cfg.symbol))
@@ -365,6 +463,12 @@ class SessionService:
             self.stop_requested = True
         signal.signal(signal.SIGTERM, _stop)
         signal.signal(signal.SIGINT, _stop)
+        try:
+            return self._run_started_loop()
+        finally:
+            self.close()
+
+    def _run_started_loop(self) -> int:
         self.start()
         while not self.stop_requested:
             try:
@@ -375,6 +479,7 @@ class SessionService:
                 self._heartbeat("FAULT", {"error": str(exc)[:200]})
             time.sleep(self.cfg.poll_seconds)
         now = self.clock()
+        self._lease_allows_entry = False
         self.runner.cycle.ledger.append(make_event(EventKind.SESSION, "vati-service", {"event": "STOPPED", "open_positions": len(self.runner.cycle.adapter.positions())}, event_time_ms=now, received_time_ms=now, correlation_id=self.runner.cycle.cfg.session_id))
         self._heartbeat("STOPPED")
         return 0

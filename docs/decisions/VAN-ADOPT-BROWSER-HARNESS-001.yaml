@@ -62,3 +62,33 @@ owner_decision_record:
     - production self-modification quarantine (§381) is retained in full
     - production remains a non-self-modifying actuator with a read-only admitted helper set
     - payments are never performed through the deterministic actuator
+
+# APPENDED 2026-10-09 — signature scope clarification; historical text is frozen.
+# This append qualifies existing recorded intent; it does not sign or approve anything.
+# All historical bytes, owner words, status values and evidence pointers are preserved.
+owner_signature_semantics:
+  basis: PROJECT_TRUTH_OWNER_INSTRUCTION
+  authority_tier: Project Truth recorded intent, not device-signed ingress
+  device_signed: false
+  evidence_scope: EXISTING_RECORDED_SESSION_INTENT_ONLY
+signed_ingress:
+  status: ABSENT
+  evidence_ref: null
+  scope: REPOSITORY_RECORD
+  note: >-
+    No device-signed ingress evidence for this decision is present in this repository.
+    The historical SIGNED label records the existing owner session instruction and
+    must not be read as a cryptographic device signature or current deployment grant.
+reconciliation_record:
+  reconciled_on: 2026-10-09
+  decision_id: VAN-ADOPT-BROWSER-HARNESS-001
+  header_status: HISTORICAL_HEADER_SUPERSEDED_BY_SIGNATURE_SCOPE_CLARIFICATION
+  preserved_prefix_sha256: e5b2eb0fce7c43a87a12479bad9c1c4171fae6d74257debd876d90ec2bbd8c3b
+  signature_claimed: none
+  authority_granted: none
+  creates_new_approval: false
+  production_gate_changed: false
+  note: >-
+    This clarification preserves the recorded owner words and opaque session evidence
+    pointer. It does not authenticate that pointer, create trusted authorization intake,
+    provide signed-ingress evidence, waive a production gate or widen any scope.

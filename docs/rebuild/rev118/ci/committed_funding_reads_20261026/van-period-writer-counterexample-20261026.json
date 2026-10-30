@@ -1,0 +1,17 @@
+{
+  "schema": "van.readonly-period-counterexample/1",
+  "context": "ACTUAL_SQLITE_CALLER_OWNED_WRITER_ROLLED_BACK",
+  "before_commit_report_state": "MEASURED",
+  "claimed_return": "0.1",
+  "funding_prerequisite_before_commit_available": true,
+  "funding_prerequisite_reason": "NATIVE_FUNDING_NO_CAPITAL_CHANGE:646a33cabbad87fa41765c32ecd05c43a8a920eff72f39f3bc9a9318bd8e73f1:63eb611d34b617177fc0f869e6ad76baf064224b38d4b3d82b8812dc05a06ebd",
+  "original_closing_ref": "63eb611d34b617177fc0f869e6ad76baf064224b38d4b3d82b8812dc05a06ebd",
+  "reference_present_after_rollback": false,
+  "same_connection_after_rollback": {
+    "exception": "LedgerError",
+    "reason": "native_period_journal_invalid"
+  },
+  "fresh_connection_after_rollback_state": "UNMEASURED",
+  "fresh_connection_after_rollback_reason": "NO_COVERED_LATER_MARK",
+  "independent_chain_valid_after_rollback": true
+}

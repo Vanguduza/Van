@@ -1,0 +1,20 @@
+{
+  "observed_at_utc": "2026-10-26T04:32:54.542431+00:00",
+  "original_name": "van-ml004-3cbef2112a4e45f0954466bcc00e02cc",
+  "inspect_exit": 0,
+  "container_id": "45f6cb54a1e1f9fa20ef5a18081d38411268dc37e21d91dde0502152d0dcabdd",
+  "state": {
+    "Status": "created",
+    "Running": false,
+    "Paused": false,
+    "Restarting": false,
+    "OOMKilled": false,
+    "Dead": false,
+    "Pid": 0,
+    "ExitCode": 0,
+    "Error": "",
+    "StartedAt": "0001-01-01T00:00:00Z",
+    "FinishedAt": "0001-01-01T00:00:00Z"
+  },
+  "created": "2026-10-26T04:26:57.125884766Z"
+}

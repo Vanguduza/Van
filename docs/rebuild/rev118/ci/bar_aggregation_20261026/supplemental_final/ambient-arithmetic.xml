@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="1" time="0.391" timestamp="2026-10-26T22:50:54.480104+00:00" hostname="2c5a245e39f1"><testcase classname="trading.tests.test_bar_aggregation_boundaries" name="test_original_tick_aggregation_is_independent_of_caller_context[precision]" time="0.157"><failure message="AssertionError: assert [Bar(symbol='...('0.000002'))] == [Bar(symbol='...('0.000002'))]&#10;  &#10;  At index 0 diff: Bar(symbol='EURUSD', start_ms=0, end_ms=60000, open=Decimal('1.12'), high=Decimal('1.24'), low=Decimal('1.12'), close=Decimal('1.24'), volume=Decimal('0.358'), ticks=2, avg_spread=Decimal('0.000002')) != Bar(symbol='EURUSD', start_ms=0, end_ms=60000, open=Decimal('1.123457'), high=Decimal('1.234568'), low=Decimal('1.123457'), close=Decimal('1.234568'), volume=Decimal('0.358023'), ticks=2, avg_spread=Decimal('0.000002'))&#10;  Use -v to get more diff">setting = 'precision'
+
+    @pytest.mark.parametrize('setting',['precision','rounding','exponents','traps','mutable-default'])
+    def test_original_tick_aggregation_is_independent_of_caller_context(setting):
+        expected=list(BarAggregator('EURUSD',60000).run(ticks()))
+        default=DefaultContext.copy()
+        try:
+            with localcontext() as context:
+                if setting=='precision':context.prec=3
+                elif setting=='rounding':context.prec=6;context.rounding=ROUND_DOWN
+                elif setting=='exponents':context.Emax=0;context.Emin=0
+                elif setting=='traps':context.prec=3;context.traps[Inexact]=True
+                else:DefaultContext.prec=3;DefaultContext.rounding=ROUND_DOWN;DefaultContext.Emax=0
+                before=context.copy()
+                actual=list(BarAggregator('EURUSD',60000).run(ticks()))
+&gt;               assert actual==expected
+E               AssertionError: assert [Bar(symbol='...('0.000002'))] == [Bar(symbol='...('0.000002'))]
+E                 
+E                 At index 0 diff: Bar(symbol='EURUSD', start_ms=0, end_ms=60000, open=Decimal('1.12'), high=Decimal('1.24'), low=Decimal('1.12'), close=Decimal('1.24'), volume=Decimal('0.358'), ticks=2, avg_spread=Decimal('0.000002')) != Bar(symbol='EURUSD', start_ms=0, end_ms=60000, open=Decimal('1.123457'), high=Decimal('1.234568'), low=Decimal('1.123457'), close=Decimal('1.234568'), volume=Decimal('0.358023'), ticks=2, avg_spread=Decimal('0.000002'))
+E                 Use -v to get more diff
+
+trading/tests/test_bar_aggregation_boundaries.py:27: AssertionError</failure></testcase></testsuite></testsuites>

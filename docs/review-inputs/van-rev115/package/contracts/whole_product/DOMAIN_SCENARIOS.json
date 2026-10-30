@@ -1,0 +1,1281 @@
+{
+  "revision": "1.18",
+  "scenarios": [
+    {
+      "evidence": "Actual stimulus, independent before/after readback, errors, timestamps and original-operation reconciliation; no fixture-only native acceptance.",
+      "family": "HOME",
+      "id": "WP-SC-HOME-POS",
+      "inputs": "Exact owner, domain subject, source/config/provider version, artifact/operation identities and admitted test environment.",
+      "kind": "POS",
+      "oracle": "A genuine protection or task event creates one scoped Attention item, updates the orb, opens the right subject and records acknowledgement.",
+      "owners": [
+        "BE-030",
+        "FE-004"
+      ],
+      "state": "NOT_RUN",
+      "test_id": "T-BE-030-POS"
+    },
+    {
+      "evidence": "Actual stimulus, independent before/after readback, errors, timestamps and original-operation reconciliation; no fixture-only native acceptance.",
+      "family": "HOME",
+      "id": "WP-SC-HOME-NEG",
+      "inputs": "Exact owner, domain subject, source/config/provider version, artifact/operation identities and admitted test environment.",
+      "kind": "NEG",
+      "oracle": "Stale task stream with healthy market stream stays distinguishable; denied notification permission, quiet hours and dismissed previews retain critical in-app incident state; replay does not notify twice.",
+      "owners": [
+        "BE-030",
+        "FE-004"
+      ],
+      "state": "NOT_RUN",
+      "test_id": "T-BE-030-NEG"
+    },
+    {
+      "evidence": "Actual stimulus, independent before/after readback, errors, timestamps and original-operation reconciliation; no fixture-only native acceptance.",
+      "family": "HOME",
+      "id": "WP-SC-HOME-REC",
+      "inputs": "Exact owner, domain subject, source/config/provider version, artifact/operation identities and admitted test environment.",
+      "kind": "REC",
+      "oracle": "Stale task stream with healthy market stream stays distinguishable; denied notification permission, quiet hours and dismissed previews retain critical in-app incident state; replay does not notify twice. Restart and recover original identities; require authoritative postconditions and no duplicate effects.",
+      "owners": [
+        "BE-030",
+        "FE-004"
+      ],
+      "state": "NOT_RUN",
+      "test_id": "T-BE-030-REC"
+    },
+    {
+      "evidence": "Actual stimulus, independent before/after readback, errors, timestamps and original-operation reconciliation; no fixture-only native acceptance.",
+      "family": "BOOTSTRAP",
+      "id": "WP-SC-BOOTSTRAP-POS",
+      "inputs": "Exact owner, domain subject, source/config/provider version, artifact/operation identities and admitted test environment.",
+      "kind": "POS",
+      "oracle": "Fresh signed install receives/verifies provisioning, enrolls owner/device, connects to the admitted gateway, reads service capabilities and restores an authorized deep link without typing backend configuration.",
+      "owners": [
+        "BE-002",
+        "BE-003",
+        "BE-031",
+        "FE-001",
+        "FE-003",
+        "FE-022"
+      ],
+      "state": "NOT_RUN",
+      "test_id": "T-BE-002-POS"
+    },
+    {
+      "evidence": "Actual stimulus, independent before/after readback, errors, timestamps and original-operation reconciliation; no fixture-only native acceptance.",
+      "family": "BOOTSTRAP",
+      "id": "WP-SC-BOOTSTRAP-NEG",
+      "inputs": "Exact owner, domain subject, source/config/provider version, artifact/operation identities and admitted test environment.",
+      "kind": "NEG",
+      "oracle": "Expired provisioning, rotated service certificate/endpoint, lost/replaced/revoked handset, clock skew, unavailable backend and app restore have distinct repair paths; an old device cannot regain authority.",
+      "owners": [
+        "BE-002",
+        "BE-003",
+        "BE-031",
+        "FE-001",
+        "FE-003",
+        "FE-022"
+      ],
+      "state": "NOT_RUN",
+      "test_id": "T-BE-002-NEG"
+    },
+    {
+      "evidence": "Actual stimulus, independent before/after readback, errors, timestamps and original-operation reconciliation; no fixture-only native acceptance.",
+      "family": "BOOTSTRAP",
+      "id": "WP-SC-BOOTSTRAP-REC",
+      "inputs": "Exact owner, domain subject, source/config/provider version, artifact/operation identities and admitted test environment.",
+      "kind": "REC",
+      "oracle": "Expired provisioning, rotated service certificate/endpoint, lost/replaced/revoked handset, clock skew, unavailable backend and app restore have distinct repair paths; an old device cannot regain authority. Restart and recover original identities; require authoritative postconditions and no duplicate effects.",
+      "owners": [
+        "BE-002",
+        "BE-003",
+        "BE-031",
+        "FE-001",
+        "FE-003",
+        "FE-022"
+      ],
+      "state": "NOT_RUN",
+      "test_id": "T-BE-002-REC"
+    },
+    {
+      "evidence": "Actual stimulus, independent before/after readback, errors, timestamps and original-operation reconciliation; no fixture-only native acceptance.",
+      "family": "MARKETS",
+      "id": "WP-SC-MARKETS-POS",
+      "inputs": "Exact owner, domain subject, source/config/provider version, artifact/operation identities and admitted test environment.",
+      "kind": "POS",
+      "oracle": "Find an instrument, persist a watchlist/screen rule, receive a server-evaluated alert and open the exact venue/instrument with source time.",
+      "owners": [
+        "BE-008",
+        "BE-020",
+        "FE-006",
+        "FE-011"
+      ],
+      "state": "NOT_RUN",
+      "test_id": "T-BE-008-POS"
+    },
+    {
+      "evidence": "Actual stimulus, independent before/after readback, errors, timestamps and original-operation reconciliation; no fixture-only native acceptance.",
+      "family": "MARKETS",
+      "id": "WP-SC-MARKETS-NEG",
+      "inputs": "Exact owner, domain subject, source/config/provider version, artifact/operation identities and admitted test environment.",
+      "kind": "NEG",
+      "oracle": "Feed gap, delisting, alias collision, market closure, entitlement denial, process death and duplicate alert delivery preserve accurate data and one alert identity.",
+      "owners": [
+        "BE-008",
+        "BE-020",
+        "FE-006",
+        "FE-011"
+      ],
+      "state": "NOT_RUN",
+      "test_id": "T-BE-008-NEG"
+    },
+    {
+      "evidence": "Actual stimulus, independent before/after readback, errors, timestamps and original-operation reconciliation; no fixture-only native acceptance.",
+      "family": "MARKETS",
+      "id": "WP-SC-MARKETS-REC",
+      "inputs": "Exact owner, domain subject, source/config/provider version, artifact/operation identities and admitted test environment.",
+      "kind": "REC",
+      "oracle": "Feed gap, delisting, alias collision, market closure, entitlement denial, process death and duplicate alert delivery preserve accurate data and one alert identity. Restart and recover original identities; require authoritative postconditions and no duplicate effects.",
+      "owners": [
+        "BE-008",
+        "BE-020",
+        "FE-006",
+        "FE-011"
+      ],
+      "state": "NOT_RUN",
+      "test_id": "T-BE-008-REC"
+    },
+    {
+      "evidence": "Actual stimulus, independent before/after readback, errors, timestamps and original-operation reconciliation; no fixture-only native acceptance.",
+      "family": "CHART",
+      "id": "WP-SC-CHART-POS",
+      "inputs": "Exact owner, domain subject, source/config/provider version, artifact/operation identities and admitted test environment.",
+      "kind": "POS",
+      "oracle": "Save drawings and indicator settings, restore a multi-chart workspace, inspect real order overlays, run isolated replay and submit a typed observation to research.",
+      "owners": [
+        "BE-018",
+        "BE-019",
+        "FE-007",
+        "FE-008"
+      ],
+      "state": "NOT_RUN",
+      "test_id": "T-BE-018-POS"
+    },
+    {
+      "evidence": "Actual stimulus, independent before/after readback, errors, timestamps and original-operation reconciliation; no fixture-only native acceptance.",
+      "family": "CHART",
+      "id": "WP-SC-CHART-NEG",
+      "inputs": "Exact owner, domain subject, source/config/provider version, artifact/operation identities and admitted test environment.",
+      "kind": "NEG",
+      "oracle": "Unsupported depth/order types are explicit; reconnect gaps, WebView/native renderer failure, malformed bridge inputs and workspace conflicts preserve instrument precision and never execute from a chart.",
+      "owners": [
+        "BE-018",
+        "BE-019",
+        "FE-007",
+        "FE-008"
+      ],
+      "state": "NOT_RUN",
+      "test_id": "T-BE-018-NEG"
+    },
+    {
+      "evidence": "Actual stimulus, independent before/after readback, errors, timestamps and original-operation reconciliation; no fixture-only native acceptance.",
+      "family": "CHART",
+      "id": "WP-SC-CHART-REC",
+      "inputs": "Exact owner, domain subject, source/config/provider version, artifact/operation identities and admitted test environment.",
+      "kind": "REC",
+      "oracle": "Unsupported depth/order types are explicit; reconnect gaps, WebView/native renderer failure, malformed bridge inputs and workspace conflicts preserve instrument precision and never execute from a chart. Restart and recover original identities; require authoritative postconditions and no duplicate effects.",
+      "owners": [
+        "BE-018",
+        "BE-019",
+        "FE-007",
+        "FE-008"
+      ],
+      "state": "NOT_RUN",
+      "test_id": "T-BE-018-REC"
+    },
+    {
+      "evidence": "Actual stimulus, independent before/after readback, errors, timestamps and original-operation reconciliation; no fixture-only native acceptance.",
+      "family": "ORDERS",
+      "id": "WP-SC-ORDERS-POS",
+      "inputs": "Exact owner, domain subject, source/config/provider version, artifact/operation identities and admitted test environment.",
+      "kind": "POS",
+      "oracle": "Preview a scoped order, confirm within mandate, receive partial/final fills with protection, hand control between owner and VAN, then reconcile cash and TCA.",
+      "owners": [
+        "BE-009",
+        "BE-010",
+        "BE-011",
+        "BE-012",
+        "FE-009",
+        "FE-011"
+      ],
+      "state": "NOT_RUN",
+      "test_id": "T-BE-009-POS"
+    },
+    {
+      "evidence": "Actual stimulus, independent before/after readback, errors, timestamps and original-operation reconciliation; no fixture-only native acceptance.",
+      "family": "ORDERS",
+      "id": "WP-SC-ORDERS-NEG",
+      "inputs": "Exact owner, domain subject, source/config/provider version, artifact/operation identities and admitted test environment.",
+      "kind": "NEG",
+      "oracle": "Concurrent spend, partial fill, cancel race, exchange outage, unknown submission, late correction and restart preserve exposure, protection, unique intents and readback.",
+      "owners": [
+        "BE-009",
+        "BE-010",
+        "BE-011",
+        "BE-012",
+        "FE-009",
+        "FE-011"
+      ],
+      "state": "NOT_RUN",
+      "test_id": "T-BE-009-NEG"
+    },
+    {
+      "evidence": "Actual stimulus, independent before/after readback, errors, timestamps and original-operation reconciliation; no fixture-only native acceptance.",
+      "family": "ORDERS",
+      "id": "WP-SC-ORDERS-REC",
+      "inputs": "Exact owner, domain subject, source/config/provider version, artifact/operation identities and admitted test environment.",
+      "kind": "REC",
+      "oracle": "Concurrent spend, partial fill, cancel race, exchange outage, unknown submission, late correction and restart preserve exposure, protection, unique intents and readback. Restart and recover original identities; require authoritative postconditions and no duplicate effects.",
+      "owners": [
+        "BE-009",
+        "BE-010",
+        "BE-011",
+        "BE-012",
+        "FE-009",
+        "FE-011"
+      ],
+      "state": "NOT_RUN",
+      "test_id": "T-BE-009-REC"
+    },
+    {
+      "evidence": "Actual stimulus, independent before/after readback, errors, timestamps and original-operation reconciliation; no fixture-only native acceptance.",
+      "family": "ACCOUNTS",
+      "id": "WP-SC-ACCOUNTS-POS",
+      "inputs": "Exact owner, domain subject, source/config/provider version, artifact/operation identities and admitted test environment.",
+      "kind": "POS",
+      "oracle": "Link or create an admitted account, validate access, rotate credentials, deposit/withdraw/transfer through the supported flow and reconcile settlement/statement.",
+      "owners": [
+        "BE-004",
+        "BE-005",
+        "BE-006",
+        "BE-007",
+        "FE-010",
+        "FE-011"
+      ],
+      "state": "NOT_RUN",
+      "test_id": "T-BE-004-POS"
+    },
+    {
+      "evidence": "Actual stimulus, independent before/after readback, errors, timestamps and original-operation reconciliation; no fixture-only native acceptance.",
+      "family": "ACCOUNTS",
+      "id": "WP-SC-ACCOUNTS-NEG",
+      "inputs": "Exact owner, domain subject, source/config/provider version, artifact/operation identities and admitted test environment.",
+      "kind": "NEG",
+      "oracle": "Observe-only access, KYC restriction, expired hosted callback, duplicate transfer, disputed/returned payment and open exposure prevent false success or unsafe closure.",
+      "owners": [
+        "BE-004",
+        "BE-005",
+        "BE-006",
+        "BE-007",
+        "FE-010",
+        "FE-011"
+      ],
+      "state": "NOT_RUN",
+      "test_id": "T-BE-004-NEG"
+    },
+    {
+      "evidence": "Actual stimulus, independent before/after readback, errors, timestamps and original-operation reconciliation; no fixture-only native acceptance.",
+      "family": "ACCOUNTS",
+      "id": "WP-SC-ACCOUNTS-REC",
+      "inputs": "Exact owner, domain subject, source/config/provider version, artifact/operation identities and admitted test environment.",
+      "kind": "REC",
+      "oracle": "Observe-only access, KYC restriction, expired hosted callback, duplicate transfer, disputed/returned payment and open exposure prevent false success or unsafe closure. Restart and recover original identities; require authoritative postconditions and no duplicate effects.",
+      "owners": [
+        "BE-004",
+        "BE-005",
+        "BE-006",
+        "BE-007",
+        "FE-010",
+        "FE-011"
+      ],
+      "state": "NOT_RUN",
+      "test_id": "T-BE-004-REC"
+    },
+    {
+      "evidence": "Actual stimulus, independent before/after readback, errors, timestamps and original-operation reconciliation; no fixture-only native acceptance.",
+      "family": "STRATEGIES",
+      "id": "WP-SC-STRATEGIES-POS",
+      "inputs": "Exact owner, domain subject, source/config/provider version, artifact/operation identities and admitted test environment.",
+      "kind": "POS",
+      "oracle": "Inspect strategy evidence, select an admitted mode, authorize an exact policy change and verify active consumer/version and current risk bounds.",
+      "owners": [
+        "BE-013",
+        "BE-036",
+        "FE-012"
+      ],
+      "state": "NOT_RUN",
+      "test_id": "T-BE-013-POS"
+    },
+    {
+      "evidence": "Actual stimulus, independent before/after readback, errors, timestamps and original-operation reconciliation; no fixture-only native acceptance.",
+      "family": "STRATEGIES",
+      "id": "WP-SC-STRATEGIES-NEG",
+      "inputs": "Exact owner, domain subject, source/config/provider version, artifact/operation identities and admitted test environment.",
+      "kind": "NEG",
+      "oracle": "Inconclusive edge, revoked mandate, changed candidate, active old-version parent, drift and rollback preserve existing protections and qualified fallback.",
+      "owners": [
+        "BE-013",
+        "BE-036",
+        "FE-012"
+      ],
+      "state": "NOT_RUN",
+      "test_id": "T-BE-013-NEG"
+    },
+    {
+      "evidence": "Actual stimulus, independent before/after readback, errors, timestamps and original-operation reconciliation; no fixture-only native acceptance.",
+      "family": "STRATEGIES",
+      "id": "WP-SC-STRATEGIES-REC",
+      "inputs": "Exact owner, domain subject, source/config/provider version, artifact/operation identities and admitted test environment.",
+      "kind": "REC",
+      "oracle": "Inconclusive edge, revoked mandate, changed candidate, active old-version parent, drift and rollback preserve existing protections and qualified fallback. Restart and recover original identities; require authoritative postconditions and no duplicate effects.",
+      "owners": [
+        "BE-013",
+        "BE-036",
+        "FE-012"
+      ],
+      "state": "NOT_RUN",
+      "test_id": "T-BE-013-REC"
+    },
+    {
+      "evidence": "Actual stimulus, independent before/after readback, errors, timestamps and original-operation reconciliation; no fixture-only native acceptance.",
+      "family": "LEARNING",
+      "id": "WP-SC-LEARNING-POS",
+      "inputs": "Exact owner, domain subject, source/config/provider version, artifact/operation identities and admitted test environment.",
+      "kind": "POS",
+      "oracle": "Seal a full opportunity cohort, diagnose outcomes with uncertainty, evaluate a candidate after full costs, qualify it, observe a changed later decision and reproduce that decision from retained evidence.",
+      "owners": [
+        "BE-035",
+        "BE-036",
+        "VAN-ML-PKT-004",
+        "VAN-ML-PKT-005",
+        "VAN-ML-PKT-006",
+        "VAN-ML-PKT-007",
+        "VAN-ML-PKT-008",
+        "VAN-ML-PKT-009",
+        "VAN-ML-PKT-010",
+        "VAN-ML-PKT-011",
+        "VAN-ML-PKT-012",
+        "VAN-ML-PKT-013",
+        "VAN-ML-PKT-014",
+        "VAN-ML-PKT-015",
+        "VAN-ML-PKT-016",
+        "VAN-ML-PKT-017",
+        "VAN-ML-PKT-018",
+        "VAN-ML-PKT-019",
+        "VAN-ML-PKT-020",
+        "VAN-ML-PKT-021",
+        "VAN-ML-PKT-022",
+        "VAN-ML-PKT-023",
+        "VAN-ML-PKT-024",
+        "VAN-ML-PKT-025",
+        "VAN-ML-PKT-026",
+        "VAN-ML-PKT-027",
+        "VAN-ML-PKT-028",
+        "VAN-ML-PKT-029",
+        "FE-012",
+        "FE-014",
+        "FE-023"
+      ],
+      "state": "NOT_RUN",
+      "test_id": "T-VAN-CX-011-POS"
+    },
+    {
+      "evidence": "Actual stimulus, independent before/after readback, errors, timestamps and original-operation reconciliation; no fixture-only native acceptance.",
+      "family": "LEARNING",
+      "id": "WP-SC-LEARNING-NEG",
+      "inputs": "Exact owner, domain subject, source/config/provider version, artifact/operation identities and admitted test environment.",
+      "kind": "NEG",
+      "oracle": "Contamination, future-data leakage, sparse cohorts, model alias change, interrupted budget settlement, corrected labels and drift yield explicit ineligible/inconclusive states and qualified fallback.",
+      "owners": [
+        "BE-035",
+        "BE-036",
+        "VAN-ML-PKT-004",
+        "VAN-ML-PKT-005",
+        "VAN-ML-PKT-006",
+        "VAN-ML-PKT-007",
+        "VAN-ML-PKT-008",
+        "VAN-ML-PKT-009",
+        "VAN-ML-PKT-010",
+        "VAN-ML-PKT-011",
+        "VAN-ML-PKT-012",
+        "VAN-ML-PKT-013",
+        "VAN-ML-PKT-014",
+        "VAN-ML-PKT-015",
+        "VAN-ML-PKT-016",
+        "VAN-ML-PKT-017",
+        "VAN-ML-PKT-018",
+        "VAN-ML-PKT-019",
+        "VAN-ML-PKT-020",
+        "VAN-ML-PKT-021",
+        "VAN-ML-PKT-022",
+        "VAN-ML-PKT-023",
+        "VAN-ML-PKT-024",
+        "VAN-ML-PKT-025",
+        "VAN-ML-PKT-026",
+        "VAN-ML-PKT-027",
+        "VAN-ML-PKT-028",
+        "VAN-ML-PKT-029",
+        "FE-012",
+        "FE-014",
+        "FE-023"
+      ],
+      "state": "NOT_RUN",
+      "test_id": "T-VAN-CX-011-NEG"
+    },
+    {
+      "evidence": "Actual stimulus, independent before/after readback, errors, timestamps and original-operation reconciliation; no fixture-only native acceptance.",
+      "family": "LEARNING",
+      "id": "WP-SC-LEARNING-REC",
+      "inputs": "Exact owner, domain subject, source/config/provider version, artifact/operation identities and admitted test environment.",
+      "kind": "REC",
+      "oracle": "Contamination, future-data leakage, sparse cohorts, model alias change, interrupted budget settlement, corrected labels and drift yield explicit ineligible/inconclusive states and qualified fallback. Restart and recover original identities; require authoritative postconditions and no duplicate effects.",
+      "owners": [
+        "BE-035",
+        "BE-036",
+        "VAN-ML-PKT-004",
+        "VAN-ML-PKT-005",
+        "VAN-ML-PKT-006",
+        "VAN-ML-PKT-007",
+        "VAN-ML-PKT-008",
+        "VAN-ML-PKT-009",
+        "VAN-ML-PKT-010",
+        "VAN-ML-PKT-011",
+        "VAN-ML-PKT-012",
+        "VAN-ML-PKT-013",
+        "VAN-ML-PKT-014",
+        "VAN-ML-PKT-015",
+        "VAN-ML-PKT-016",
+        "VAN-ML-PKT-017",
+        "VAN-ML-PKT-018",
+        "VAN-ML-PKT-019",
+        "VAN-ML-PKT-020",
+        "VAN-ML-PKT-021",
+        "VAN-ML-PKT-022",
+        "VAN-ML-PKT-023",
+        "VAN-ML-PKT-024",
+        "VAN-ML-PKT-025",
+        "VAN-ML-PKT-026",
+        "VAN-ML-PKT-027",
+        "VAN-ML-PKT-028",
+        "VAN-ML-PKT-029",
+        "FE-012",
+        "FE-014",
+        "FE-023"
+      ],
+      "state": "NOT_RUN",
+      "test_id": "T-VAN-CX-011-REC"
+    },
+    {
+      "evidence": "Actual stimulus, independent before/after readback, errors, timestamps and original-operation reconciliation; no fixture-only native acceptance.",
+      "family": "NEWS",
+      "id": "WP-SC-NEWS-POS",
+      "inputs": "Exact owner, domain subject, source/config/provider version, artifact/operation identities and admitted test environment.",
+      "kind": "POS",
+      "oracle": "Read a sourced event analysis, inspect affected holdings, obtain a grounded analyst answer, and arm an eligible exact news ticket whose actual outcome is reconciled.",
+      "owners": [
+        "BE-014",
+        "BE-015",
+        "BE-016",
+        "BE-017",
+        "BE-021",
+        "BE-022",
+        "FE-013",
+        "FE-014"
+      ],
+      "state": "NOT_RUN",
+      "test_id": "T-BE-014-POS"
+    },
+    {
+      "evidence": "Actual stimulus, independent before/after readback, errors, timestamps and original-operation reconciliation; no fixture-only native acceptance.",
+      "family": "NEWS",
+      "id": "WP-SC-NEWS-NEG",
+      "inputs": "Exact owner, domain subject, source/config/provider version, artifact/operation identities and admitted test environment.",
+      "kind": "NEG",
+      "oracle": "Duplicate/revised stories, bad timestamps, unavailable source, contradictory facts, late release and expired single-use ticket cannot create fabricated certainty or repeated trading.",
+      "owners": [
+        "BE-014",
+        "BE-015",
+        "BE-016",
+        "BE-017",
+        "BE-021",
+        "BE-022",
+        "FE-013",
+        "FE-014"
+      ],
+      "state": "NOT_RUN",
+      "test_id": "T-BE-014-NEG"
+    },
+    {
+      "evidence": "Actual stimulus, independent before/after readback, errors, timestamps and original-operation reconciliation; no fixture-only native acceptance.",
+      "family": "NEWS",
+      "id": "WP-SC-NEWS-REC",
+      "inputs": "Exact owner, domain subject, source/config/provider version, artifact/operation identities and admitted test environment.",
+      "kind": "REC",
+      "oracle": "Duplicate/revised stories, bad timestamps, unavailable source, contradictory facts, late release and expired single-use ticket cannot create fabricated certainty or repeated trading. Restart and recover original identities; require authoritative postconditions and no duplicate effects.",
+      "owners": [
+        "BE-014",
+        "BE-015",
+        "BE-016",
+        "BE-017",
+        "BE-021",
+        "BE-022",
+        "FE-013",
+        "FE-014"
+      ],
+      "state": "NOT_RUN",
+      "test_id": "T-BE-014-REC"
+    },
+    {
+      "evidence": "Actual stimulus, independent before/after readback, errors, timestamps and original-operation reconciliation; no fixture-only native acceptance.",
+      "family": "PREDICTION",
+      "id": "WP-SC-PREDICTION-POS",
+      "inputs": "Exact owner, domain subject, source/config/provider version, artifact/operation identities and admitted test environment.",
+      "kind": "POS",
+      "oracle": "Capture a time-qualified event distribution and evaluate its incremental asset/research value, preserving settlement and fee assumptions in the report.",
+      "owners": [
+        "VAN-ML-PKT-037",
+        "VAN-ML-PKT-038",
+        "VAN-ML-PKT-039",
+        "VAN-ML-PKT-040",
+        "VAN-ML-PKT-041",
+        "VAN-ML-PKT-042",
+        "VAN-ML-PKT-043",
+        "VAN-ML-PKT-044",
+        "VAN-ML-PKT-045",
+        "VAN-ML-PKT-046",
+        "VAN-ML-PKT-047",
+        "VAN-ML-PKT-048",
+        "FE-023"
+      ],
+      "state": "NOT_RUN",
+      "test_id": "VAN-ML-AT-061-P"
+    },
+    {
+      "evidence": "Actual stimulus, independent before/after readback, errors, timestamps and original-operation reconciliation; no fixture-only native acceptance.",
+      "family": "PREDICTION",
+      "id": "WP-SC-PREDICTION-NEG",
+      "inputs": "Exact owner, domain subject, source/config/provider version, artifact/operation identities and admitted test environment.",
+      "kind": "NEG",
+      "oracle": "Void/disputed resolution, source disagreement, absent liquidity, stale quotes and non-atomic fills fail the appropriate research claim; no lab creates live order authority.",
+      "owners": [
+        "VAN-ML-PKT-037",
+        "VAN-ML-PKT-038",
+        "VAN-ML-PKT-039",
+        "VAN-ML-PKT-040",
+        "VAN-ML-PKT-041",
+        "VAN-ML-PKT-042",
+        "VAN-ML-PKT-043",
+        "VAN-ML-PKT-044",
+        "VAN-ML-PKT-045",
+        "VAN-ML-PKT-046",
+        "VAN-ML-PKT-047",
+        "VAN-ML-PKT-048",
+        "FE-023"
+      ],
+      "state": "NOT_RUN",
+      "test_id": "VAN-ML-AT-061-P"
+    },
+    {
+      "evidence": "Actual stimulus, independent before/after readback, errors, timestamps and original-operation reconciliation; no fixture-only native acceptance.",
+      "family": "PREDICTION",
+      "id": "WP-SC-PREDICTION-REC",
+      "inputs": "Exact owner, domain subject, source/config/provider version, artifact/operation identities and admitted test environment.",
+      "kind": "REC",
+      "oracle": "Void/disputed resolution, source disagreement, absent liquidity, stale quotes and non-atomic fills fail the appropriate research claim; no lab creates live order authority. Restart and recover original identities; require authoritative postconditions and no duplicate effects.",
+      "owners": [
+        "VAN-ML-PKT-037",
+        "VAN-ML-PKT-038",
+        "VAN-ML-PKT-039",
+        "VAN-ML-PKT-040",
+        "VAN-ML-PKT-041",
+        "VAN-ML-PKT-042",
+        "VAN-ML-PKT-043",
+        "VAN-ML-PKT-044",
+        "VAN-ML-PKT-045",
+        "VAN-ML-PKT-046",
+        "VAN-ML-PKT-047",
+        "VAN-ML-PKT-048",
+        "FE-023"
+      ],
+      "state": "NOT_RUN",
+      "test_id": "VAN-ML-AT-061-P"
+    },
+    {
+      "evidence": "Actual stimulus, independent before/after readback, errors, timestamps and original-operation reconciliation; no fixture-only native acceptance.",
+      "family": "CRYPTO_TRADE",
+      "id": "WP-SC-CRYPTO_TRADE-POS",
+      "inputs": "Exact owner, domain subject, source/config/provider version, artifact/operation identities and admitted test environment.",
+      "kind": "POS",
+      "oracle": "Use the admitted venue/account/instrument, satisfy size/precision filters, trade spot and reconcile asset inventory, protection and fees in their true currencies.",
+      "owners": [
+        "BE-004",
+        "BE-005",
+        "BE-008",
+        "BE-009",
+        "BE-010",
+        "BE-012",
+        "FE-009",
+        "FE-010",
+        "FE-011"
+      ],
+      "state": "NOT_RUN",
+      "test_id": "T-BE-004-POS"
+    },
+    {
+      "evidence": "Actual stimulus, independent before/after readback, errors, timestamps and original-operation reconciliation; no fixture-only native acceptance.",
+      "family": "CRYPTO_TRADE",
+      "id": "WP-SC-CRYPTO_TRADE-NEG",
+      "inputs": "Exact owner, domain subject, source/config/provider version, artifact/operation identities and admitted test environment.",
+      "kind": "NEG",
+      "oracle": "Book gap, rate limit, nonce/clock issue, stop support mismatch, fee asset shortage and dead-man cancellation preserve truthful exposure and recovery priority.",
+      "owners": [
+        "BE-004",
+        "BE-005",
+        "BE-008",
+        "BE-009",
+        "BE-010",
+        "BE-012",
+        "FE-009",
+        "FE-010",
+        "FE-011"
+      ],
+      "state": "NOT_RUN",
+      "test_id": "T-BE-004-NEG"
+    },
+    {
+      "evidence": "Actual stimulus, independent before/after readback, errors, timestamps and original-operation reconciliation; no fixture-only native acceptance.",
+      "family": "CRYPTO_TRADE",
+      "id": "WP-SC-CRYPTO_TRADE-REC",
+      "inputs": "Exact owner, domain subject, source/config/provider version, artifact/operation identities and admitted test environment.",
+      "kind": "REC",
+      "oracle": "Book gap, rate limit, nonce/clock issue, stop support mismatch, fee asset shortage and dead-man cancellation preserve truthful exposure and recovery priority. Restart and recover original identities; require authoritative postconditions and no duplicate effects.",
+      "owners": [
+        "BE-004",
+        "BE-005",
+        "BE-008",
+        "BE-009",
+        "BE-010",
+        "BE-012",
+        "FE-009",
+        "FE-010",
+        "FE-011"
+      ],
+      "state": "NOT_RUN",
+      "test_id": "T-BE-004-REC"
+    },
+    {
+      "evidence": "Actual stimulus, independent before/after readback, errors, timestamps and original-operation reconciliation; no fixture-only native acceptance.",
+      "family": "CHAIN",
+      "id": "WP-SC-CHAIN-POS",
+      "inputs": "Exact owner, domain subject, source/config/provider version, artifact/operation identities and admitted test environment.",
+      "kind": "POS",
+      "oracle": "Inspect a discovered asset, state-bound security analysis, independent buy/sell quotes, wallet attribution and matched-cohort economics with citations.",
+      "owners": [
+        "BE-037",
+        "BE-038",
+        "BE-039",
+        "BE-040",
+        "BE-041",
+        "BE-042",
+        "BE-043",
+        "BE-044",
+        "FE-014",
+        "FE-023"
+      ],
+      "state": "NOT_RUN",
+      "test_id": "T-HVA-004-POS"
+    },
+    {
+      "evidence": "Actual stimulus, independent before/after readback, errors, timestamps and original-operation reconciliation; no fixture-only native acceptance.",
+      "family": "CHAIN",
+      "id": "WP-SC-CHAIN-NEG",
+      "inputs": "Exact owner, domain subject, source/config/provider version, artifact/operation identities and admitted test environment.",
+      "kind": "NEG",
+      "oracle": "Reorganization, unsupported extension/proxy, unavailable sell path, incomplete holdings and censored exit remain explicit unknowns and invalidate dependent evidence.",
+      "owners": [
+        "BE-037",
+        "BE-038",
+        "BE-039",
+        "BE-040",
+        "BE-041",
+        "BE-042",
+        "BE-043",
+        "BE-044",
+        "FE-014",
+        "FE-023"
+      ],
+      "state": "NOT_RUN",
+      "test_id": "T-HVA-004-NEG"
+    },
+    {
+      "evidence": "Actual stimulus, independent before/after readback, errors, timestamps and original-operation reconciliation; no fixture-only native acceptance.",
+      "family": "CHAIN",
+      "id": "WP-SC-CHAIN-REC",
+      "inputs": "Exact owner, domain subject, source/config/provider version, artifact/operation identities and admitted test environment.",
+      "kind": "REC",
+      "oracle": "Reorganization, unsupported extension/proxy, unavailable sell path, incomplete holdings and censored exit remain explicit unknowns and invalidate dependent evidence. Restart and recover original identities; require authoritative postconditions and no duplicate effects.",
+      "owners": [
+        "BE-037",
+        "BE-038",
+        "BE-039",
+        "BE-040",
+        "BE-041",
+        "BE-042",
+        "BE-043",
+        "BE-044",
+        "FE-014",
+        "FE-023"
+      ],
+      "state": "NOT_RUN",
+      "test_id": "T-HVA-004-REC"
+    },
+    {
+      "evidence": "Actual stimulus, independent before/after readback, errors, timestamps and original-operation reconciliation; no fixture-only native acceptance.",
+      "family": "WORK",
+      "id": "WP-SC-WORK-POS",
+      "inputs": "Exact owner, domain subject, source/config/provider version, artifact/operation identities and admitted test environment.",
+      "kind": "POS",
+      "oracle": "Create or update a permitted task, inspect its dependency graph, resolve a blocker, review evidence and observe authoritative verified completion.",
+      "owners": [
+        "BE-023",
+        "FE-015"
+      ],
+      "state": "NOT_RUN",
+      "test_id": "T-BE-023-POS"
+    },
+    {
+      "evidence": "Actual stimulus, independent before/after readback, errors, timestamps and original-operation reconciliation; no fixture-only native acceptance.",
+      "family": "WORK",
+      "id": "WP-SC-WORK-NEG",
+      "inputs": "Exact owner, domain subject, source/config/provider version, artifact/operation identities and admitted test environment.",
+      "kind": "NEG",
+      "oracle": "Cycle, stale revision, concurrent edit, failed review, missing handoff and lost cancellation response never fabricate progress or dispatch twice; reconcile original task/job.",
+      "owners": [
+        "BE-023",
+        "FE-015"
+      ],
+      "state": "NOT_RUN",
+      "test_id": "T-BE-023-NEG"
+    },
+    {
+      "evidence": "Actual stimulus, independent before/after readback, errors, timestamps and original-operation reconciliation; no fixture-only native acceptance.",
+      "family": "WORK",
+      "id": "WP-SC-WORK-REC",
+      "inputs": "Exact owner, domain subject, source/config/provider version, artifact/operation identities and admitted test environment.",
+      "kind": "REC",
+      "oracle": "Cycle, stale revision, concurrent edit, failed review, missing handoff and lost cancellation response never fabricate progress or dispatch twice; reconcile original task/job. Restart and recover original identities; require authoritative postconditions and no duplicate effects.",
+      "owners": [
+        "BE-023",
+        "FE-015"
+      ],
+      "state": "NOT_RUN",
+      "test_id": "T-BE-023-REC"
+    },
+    {
+      "evidence": "Actual stimulus, independent before/after readback, errors, timestamps and original-operation reconciliation; no fixture-only native acceptance.",
+      "family": "AGENTS",
+      "id": "WP-SC-AGENTS-POS",
+      "inputs": "Exact owner, domain subject, source/config/provider version, artifact/operation identities and admitted test environment.",
+      "kind": "POS",
+      "oracle": "Observe a real assignment, steer the exact permitted job, answer its bound approval and inspect its native outcome/artifact.",
+      "owners": [
+        "BE-024",
+        "FE-016"
+      ],
+      "state": "NOT_RUN",
+      "test_id": "T-BE-024-POS"
+    },
+    {
+      "evidence": "Actual stimulus, independent before/after readback, errors, timestamps and original-operation reconciliation; no fixture-only native acceptance.",
+      "family": "AGENTS",
+      "id": "WP-SC-AGENTS-NEG",
+      "inputs": "Exact owner, domain subject, source/config/provider version, artifact/operation identities and admitted test environment.",
+      "kind": "NEG",
+      "oracle": "Expired lease, late callback, worker replacement, provider outage and revoked capability retain native identities and enforce current scopes.",
+      "owners": [
+        "BE-024",
+        "FE-016"
+      ],
+      "state": "NOT_RUN",
+      "test_id": "T-BE-024-NEG"
+    },
+    {
+      "evidence": "Actual stimulus, independent before/after readback, errors, timestamps and original-operation reconciliation; no fixture-only native acceptance.",
+      "family": "AGENTS",
+      "id": "WP-SC-AGENTS-REC",
+      "inputs": "Exact owner, domain subject, source/config/provider version, artifact/operation identities and admitted test environment.",
+      "kind": "REC",
+      "oracle": "Expired lease, late callback, worker replacement, provider outage and revoked capability retain native identities and enforce current scopes. Restart and recover original identities; require authoritative postconditions and no duplicate effects.",
+      "owners": [
+        "BE-024",
+        "FE-016"
+      ],
+      "state": "NOT_RUN",
+      "test_id": "T-BE-024-REC"
+    },
+    {
+      "evidence": "Actual stimulus, independent before/after readback, errors, timestamps and original-operation reconciliation; no fixture-only native acceptance.",
+      "family": "STUDIO",
+      "id": "WP-SC-STUDIO-POS",
+      "inputs": "Exact owner, domain subject, source/config/provider version, artifact/operation identities and admitted test environment.",
+      "kind": "POS",
+      "oracle": "Open a real source/workspace artifact, inspect CI/security/design evidence, request an authorized native action and verify its exact build/source outcome.",
+      "owners": [
+        "BE-034",
+        "FE-018"
+      ],
+      "state": "NOT_RUN",
+      "test_id": "T-BE-034-POS"
+    },
+    {
+      "evidence": "Actual stimulus, independent before/after readback, errors, timestamps and original-operation reconciliation; no fixture-only native acceptance.",
+      "family": "STUDIO",
+      "id": "WP-SC-STUDIO-NEG",
+      "inputs": "Exact owner, domain subject, source/config/provider version, artifact/operation identities and admitted test environment.",
+      "kind": "NEG",
+      "oracle": "Wrong branch/artifact, stale review, unavailable plugin and failed build remain distinct; a workspace control cannot imply deployment or mint authority.",
+      "owners": [
+        "BE-034",
+        "FE-018"
+      ],
+      "state": "NOT_RUN",
+      "test_id": "T-BE-034-NEG"
+    },
+    {
+      "evidence": "Actual stimulus, independent before/after readback, errors, timestamps and original-operation reconciliation; no fixture-only native acceptance.",
+      "family": "STUDIO",
+      "id": "WP-SC-STUDIO-REC",
+      "inputs": "Exact owner, domain subject, source/config/provider version, artifact/operation identities and admitted test environment.",
+      "kind": "REC",
+      "oracle": "Wrong branch/artifact, stale review, unavailable plugin and failed build remain distinct; a workspace control cannot imply deployment or mint authority. Restart and recover original identities; require authoritative postconditions and no duplicate effects.",
+      "owners": [
+        "BE-034",
+        "FE-018"
+      ],
+      "state": "NOT_RUN",
+      "test_id": "T-BE-034-REC"
+    },
+    {
+      "evidence": "Actual stimulus, independent before/after readback, errors, timestamps and original-operation reconciliation; no fixture-only native acceptance.",
+      "family": "VOICE",
+      "id": "WP-SC-VOICE-POS",
+      "inputs": "Exact owner, domain subject, source/config/provider version, artifact/operation identities and admitted test environment.",
+      "kind": "POS",
+      "oracle": "Speak a scoped request, inspect corrected interpretation, receive an intelligible spoken answer, follow up, interrupt playback and obtain a verified spoken effect result when applicable.",
+      "owners": [
+        "BE-029",
+        "FE-021"
+      ],
+      "state": "NOT_RUN",
+      "test_id": "T-BE-029-POS"
+    },
+    {
+      "evidence": "Actual stimulus, independent before/after readback, errors, timestamps and original-operation reconciliation; no fixture-only native acceptance.",
+      "family": "VOICE",
+      "id": "WP-SC-VOICE-NEG",
+      "inputs": "Exact owner, domain subject, source/config/provider version, artifact/operation identities and admitted test environment.",
+      "kind": "NEG",
+      "oracle": "Ambiguous account/amount, ASR correction, TTS failure, Bluetooth/audio-focus change, phone call, interruption, timeout, reconnection and revoked mic consent preserve one turn/command and a usable text path.",
+      "owners": [
+        "BE-029",
+        "FE-021"
+      ],
+      "state": "NOT_RUN",
+      "test_id": "T-BE-029-NEG"
+    },
+    {
+      "evidence": "Actual stimulus, independent before/after readback, errors, timestamps and original-operation reconciliation; no fixture-only native acceptance.",
+      "family": "VOICE",
+      "id": "WP-SC-VOICE-REC",
+      "inputs": "Exact owner, domain subject, source/config/provider version, artifact/operation identities and admitted test environment.",
+      "kind": "REC",
+      "oracle": "Ambiguous account/amount, ASR correction, TTS failure, Bluetooth/audio-focus change, phone call, interruption, timeout, reconnection and revoked mic consent preserve one turn/command and a usable text path. Restart and recover original identities; require authoritative postconditions and no duplicate effects.",
+      "owners": [
+        "BE-029",
+        "FE-021"
+      ],
+      "state": "NOT_RUN",
+      "test_id": "T-BE-029-REC"
+    },
+    {
+      "evidence": "Actual stimulus, independent before/after readback, errors, timestamps and original-operation reconciliation; no fixture-only native acceptance.",
+      "family": "FLOATING",
+      "id": "WP-SC-FLOATING-POS",
+      "inputs": "Exact owner, domain subject, source/config/provider version, artifact/operation identities and admitted test environment.",
+      "kind": "POS",
+      "oracle": "Open and move the assistant without obstructing another app, switch to conversation/work/trades and restore the correct state after process recreation.",
+      "owners": [
+        "BE-029",
+        "BE-030",
+        "BE-031",
+        "FE-005"
+      ],
+      "state": "NOT_RUN",
+      "test_id": "T-BE-029-POS"
+    },
+    {
+      "evidence": "Actual stimulus, independent before/after readback, errors, timestamps and original-operation reconciliation; no fixture-only native acceptance.",
+      "family": "FLOATING",
+      "id": "WP-SC-FLOATING-NEG",
+      "inputs": "Exact owner, domain subject, source/config/provider version, artifact/operation identities and admitted test environment.",
+      "kind": "NEG",
+      "oracle": "Overlay denial, locked screen, service restart restriction, keyboard collision, occlusion, battery saver and dismissed state use documented OS-compatible recovery without hidden mic capture.",
+      "owners": [
+        "BE-029",
+        "BE-030",
+        "BE-031",
+        "FE-005"
+      ],
+      "state": "NOT_RUN",
+      "test_id": "T-BE-029-NEG"
+    },
+    {
+      "evidence": "Actual stimulus, independent before/after readback, errors, timestamps and original-operation reconciliation; no fixture-only native acceptance.",
+      "family": "FLOATING",
+      "id": "WP-SC-FLOATING-REC",
+      "inputs": "Exact owner, domain subject, source/config/provider version, artifact/operation identities and admitted test environment.",
+      "kind": "REC",
+      "oracle": "Overlay denial, locked screen, service restart restriction, keyboard collision, occlusion, battery saver and dismissed state use documented OS-compatible recovery without hidden mic capture. Restart and recover original identities; require authoritative postconditions and no duplicate effects.",
+      "owners": [
+        "BE-029",
+        "BE-030",
+        "BE-031",
+        "FE-005"
+      ],
+      "state": "NOT_RUN",
+      "test_id": "T-BE-029-REC"
+    },
+    {
+      "evidence": "Actual stimulus, independent before/after readback, errors, timestamps and original-operation reconciliation; no fixture-only native acceptance.",
+      "family": "MEMORY",
+      "id": "WP-SC-MEMORY-POS",
+      "inputs": "Exact owner, domain subject, source/config/provider version, artifact/operation identities and admitted test environment.",
+      "kind": "POS",
+      "oracle": "Retrieve a cited fact, correct it, change a goal, review or roll back an adaptation and erase the specified retained scope with verified readback.",
+      "owners": [
+        "BE-027",
+        "FE-019"
+      ],
+      "state": "NOT_RUN",
+      "test_id": "T-BE-027-POS"
+    },
+    {
+      "evidence": "Actual stimulus, independent before/after readback, errors, timestamps and original-operation reconciliation; no fixture-only native acceptance.",
+      "family": "MEMORY",
+      "id": "WP-SC-MEMORY-NEG",
+      "inputs": "Exact owner, domain subject, source/config/provider version, artifact/operation identities and admitted test environment.",
+      "kind": "NEG",
+      "oracle": "Conflicting facts, stale index, cross-project query, revoked source, derived cache and retained backup cannot silently revive erased material or equate deletion with model unlearning.",
+      "owners": [
+        "BE-027",
+        "FE-019"
+      ],
+      "state": "NOT_RUN",
+      "test_id": "T-BE-027-NEG"
+    },
+    {
+      "evidence": "Actual stimulus, independent before/after readback, errors, timestamps and original-operation reconciliation; no fixture-only native acceptance.",
+      "family": "MEMORY",
+      "id": "WP-SC-MEMORY-REC",
+      "inputs": "Exact owner, domain subject, source/config/provider version, artifact/operation identities and admitted test environment.",
+      "kind": "REC",
+      "oracle": "Conflicting facts, stale index, cross-project query, revoked source, derived cache and retained backup cannot silently revive erased material or equate deletion with model unlearning. Restart and recover original identities; require authoritative postconditions and no duplicate effects.",
+      "owners": [
+        "BE-027",
+        "FE-019"
+      ],
+      "state": "NOT_RUN",
+      "test_id": "T-BE-027-REC"
+    },
+    {
+      "evidence": "Actual stimulus, independent before/after readback, errors, timestamps and original-operation reconciliation; no fixture-only native acceptance.",
+      "family": "AUTOMATION",
+      "id": "WP-SC-AUTOMATION-POS",
+      "inputs": "Exact owner, domain subject, source/config/provider version, artifact/operation identities and admitted test environment.",
+      "kind": "POS",
+      "oracle": "Admit a scoped workflow, set a schedule/reminder, observe next/last run, pause or revoke it and inspect per-step durable outcomes.",
+      "owners": [
+        "BE-028",
+        "FE-020"
+      ],
+      "state": "NOT_RUN",
+      "test_id": "T-BE-028-POS"
+    },
+    {
+      "evidence": "Actual stimulus, independent before/after readback, errors, timestamps and original-operation reconciliation; no fixture-only native acceptance.",
+      "family": "AUTOMATION",
+      "id": "WP-SC-AUTOMATION-NEG",
+      "inputs": "Exact owner, domain subject, source/config/provider version, artifact/operation identities and admitted test environment.",
+      "kind": "NEG",
+      "oracle": "DST transition, clock jump, overlapping run, missed schedule, consent expiry and timeout after effect use explicit policies and reconcile before retry.",
+      "owners": [
+        "BE-028",
+        "FE-020"
+      ],
+      "state": "NOT_RUN",
+      "test_id": "T-BE-028-NEG"
+    },
+    {
+      "evidence": "Actual stimulus, independent before/after readback, errors, timestamps and original-operation reconciliation; no fixture-only native acceptance.",
+      "family": "AUTOMATION",
+      "id": "WP-SC-AUTOMATION-REC",
+      "inputs": "Exact owner, domain subject, source/config/provider version, artifact/operation identities and admitted test environment.",
+      "kind": "REC",
+      "oracle": "DST transition, clock jump, overlapping run, missed schedule, consent expiry and timeout after effect use explicit policies and reconcile before retry. Restart and recover original identities; require authoritative postconditions and no duplicate effects.",
+      "owners": [
+        "BE-028",
+        "FE-020"
+      ],
+      "state": "NOT_RUN",
+      "test_id": "T-BE-028-REC"
+    },
+    {
+      "evidence": "Actual stimulus, independent before/after readback, errors, timestamps and original-operation reconciliation; no fixture-only native acceptance.",
+      "family": "REMOTE",
+      "id": "WP-SC-REMOTE-POS",
+      "inputs": "Exact owner, domain subject, source/config/provider version, artifact/operation identities and admitted test environment.",
+      "kind": "POS",
+      "oracle": "Open an admitted session, observe the target, execute an exact permitted interaction, import/export an allowed artifact and verify destination/outcome.",
+      "owners": [
+        "BE-025",
+        "FE-017"
+      ],
+      "state": "NOT_RUN",
+      "test_id": "T-BE-025-POS"
+    },
+    {
+      "evidence": "Actual stimulus, independent before/after readback, errors, timestamps and original-operation reconciliation; no fixture-only native acceptance.",
+      "family": "REMOTE",
+      "id": "WP-SC-REMOTE-NEG",
+      "inputs": "Exact owner, domain subject, source/config/provider version, artifact/operation identities and admitted test environment.",
+      "kind": "NEG",
+      "oracle": "Navigation changes target, stale viewport, interrupted upload, malicious content, oversized file, revoked lease and unknown click outcome require bounded recovery and original-operation lookup.",
+      "owners": [
+        "BE-025",
+        "FE-017"
+      ],
+      "state": "NOT_RUN",
+      "test_id": "T-BE-025-NEG"
+    },
+    {
+      "evidence": "Actual stimulus, independent before/after readback, errors, timestamps and original-operation reconciliation; no fixture-only native acceptance.",
+      "family": "REMOTE",
+      "id": "WP-SC-REMOTE-REC",
+      "inputs": "Exact owner, domain subject, source/config/provider version, artifact/operation identities and admitted test environment.",
+      "kind": "REC",
+      "oracle": "Navigation changes target, stale viewport, interrupted upload, malicious content, oversized file, revoked lease and unknown click outcome require bounded recovery and original-operation lookup. Restart and recover original identities; require authoritative postconditions and no duplicate effects.",
+      "owners": [
+        "BE-025",
+        "FE-017"
+      ],
+      "state": "NOT_RUN",
+      "test_id": "T-BE-025-REC"
+    },
+    {
+      "evidence": "Actual stimulus, independent before/after readback, errors, timestamps and original-operation reconciliation; no fixture-only native acceptance.",
+      "family": "ARTEMIS",
+      "id": "WP-SC-ARTEMIS-POS",
+      "inputs": "Exact owner, domain subject, source/config/provider version, artifact/operation identities and admitted test environment.",
+      "kind": "POS",
+      "oracle": "Choose an admitted device and exact APK, run/cancel a plan, inspect captures and independently resolve the test attempt outcome.",
+      "owners": [
+        "BE-026",
+        "FE-018"
+      ],
+      "state": "NOT_RUN",
+      "test_id": "T-BE-026-POS"
+    },
+    {
+      "evidence": "Actual stimulus, independent before/after readback, errors, timestamps and original-operation reconciliation; no fixture-only native acceptance.",
+      "family": "ARTEMIS",
+      "id": "WP-SC-ARTEMIS-NEG",
+      "inputs": "Exact owner, domain subject, source/config/provider version, artifact/operation identities and admitted test environment.",
+      "kind": "NEG",
+      "oracle": "Device disconnect, missing capture, wrong APK, attempt restart and stale result remain unknown/failed rather than physical-device acceptance.",
+      "owners": [
+        "BE-026",
+        "FE-018"
+      ],
+      "state": "NOT_RUN",
+      "test_id": "T-BE-026-NEG"
+    },
+    {
+      "evidence": "Actual stimulus, independent before/after readback, errors, timestamps and original-operation reconciliation; no fixture-only native acceptance.",
+      "family": "ARTEMIS",
+      "id": "WP-SC-ARTEMIS-REC",
+      "inputs": "Exact owner, domain subject, source/config/provider version, artifact/operation identities and admitted test environment.",
+      "kind": "REC",
+      "oracle": "Device disconnect, missing capture, wrong APK, attempt restart and stale result remain unknown/failed rather than physical-device acceptance. Restart and recover original identities; require authoritative postconditions and no duplicate effects.",
+      "owners": [
+        "BE-026",
+        "FE-018"
+      ],
+      "state": "NOT_RUN",
+      "test_id": "T-BE-026-REC"
+    },
+    {
+      "evidence": "Actual stimulus, independent before/after readback, errors, timestamps and original-operation reconciliation; no fixture-only native acceptance.",
+      "family": "SETTINGS",
+      "id": "WP-SC-SETTINGS-POS",
+      "inputs": "Exact owner, domain subject, source/config/provider version, artifact/operation identities and admitted test environment.",
+      "kind": "POS",
+      "oracle": "Inspect per-service readiness/scopes, change permitted preferences, revoke a device/consent and export scoped redacted diagnostics.",
+      "owners": [
+        "BE-002",
+        "BE-031",
+        "FE-022"
+      ],
+      "state": "NOT_RUN",
+      "test_id": "T-BE-002-POS"
+    },
+    {
+      "evidence": "Actual stimulus, independent before/after readback, errors, timestamps and original-operation reconciliation; no fixture-only native acceptance.",
+      "family": "SETTINGS",
+      "id": "WP-SC-SETTINGS-NEG",
+      "inputs": "Exact owner, domain subject, source/config/provider version, artifact/operation identities and admitted test environment.",
+      "kind": "NEG",
+      "oracle": "Healthy transport with unavailable action, pending Android permission, stale setting revision and expired enrollment remain distinct; recovery preserves privacy choices.",
+      "owners": [
+        "BE-002",
+        "BE-031",
+        "FE-022"
+      ],
+      "state": "NOT_RUN",
+      "test_id": "T-BE-002-NEG"
+    },
+    {
+      "evidence": "Actual stimulus, independent before/after readback, errors, timestamps and original-operation reconciliation; no fixture-only native acceptance.",
+      "family": "SETTINGS",
+      "id": "WP-SC-SETTINGS-REC",
+      "inputs": "Exact owner, domain subject, source/config/provider version, artifact/operation identities and admitted test environment.",
+      "kind": "REC",
+      "oracle": "Healthy transport with unavailable action, pending Android permission, stale setting revision and expired enrollment remain distinct; recovery preserves privacy choices. Restart and recover original identities; require authoritative postconditions and no duplicate effects.",
+      "owners": [
+        "BE-002",
+        "BE-031",
+        "FE-022"
+      ],
+      "state": "NOT_RUN",
+      "test_id": "T-BE-002-REC"
+    },
+    {
+      "evidence": "Actual stimulus, independent before/after readback, errors, timestamps and original-operation reconciliation; no fixture-only native acceptance.",
+      "family": "MOBILE",
+      "id": "WP-SC-MOBILE-POS",
+      "inputs": "Exact owner, domain subject, source/config/provider version, artifact/operation identities and admitted test environment.",
+      "kind": "POS",
+      "oracle": "Navigate every accepted context/action in both themes with large text/TalkBack, recover back-stack and pending references after process death, and keep critical controls readable.",
+      "owners": [
+        "BE-030",
+        "BE-032",
+        "FE-001",
+        "FE-002",
+        "FE-003"
+      ],
+      "state": "NOT_RUN",
+      "test_id": "T-BE-030-POS"
+    },
+    {
+      "evidence": "Actual stimulus, independent before/after readback, errors, timestamps and original-operation reconciliation; no fixture-only native acceptance.",
+      "family": "MOBILE",
+      "id": "WP-SC-MOBILE-NEG",
+      "inputs": "Exact owner, domain subject, source/config/provider version, artifact/operation identities and admitted test environment.",
+      "kind": "NEG",
+      "oracle": "Malformed/expired deep link, low memory, no network, slow render, theme switch and visual effect degradation preserve state and access to required controls.",
+      "owners": [
+        "BE-030",
+        "BE-032",
+        "FE-001",
+        "FE-002",
+        "FE-003"
+      ],
+      "state": "NOT_RUN",
+      "test_id": "T-BE-030-NEG"
+    },
+    {
+      "evidence": "Actual stimulus, independent before/after readback, errors, timestamps and original-operation reconciliation; no fixture-only native acceptance.",
+      "family": "MOBILE",
+      "id": "WP-SC-MOBILE-REC",
+      "inputs": "Exact owner, domain subject, source/config/provider version, artifact/operation identities and admitted test environment.",
+      "kind": "REC",
+      "oracle": "Malformed/expired deep link, low memory, no network, slow render, theme switch and visual effect degradation preserve state and access to required controls. Restart and recover original identities; require authoritative postconditions and no duplicate effects.",
+      "owners": [
+        "BE-030",
+        "BE-032",
+        "FE-001",
+        "FE-002",
+        "FE-003"
+      ],
+      "state": "NOT_RUN",
+      "test_id": "T-BE-030-REC"
+    },
+    {
+      "evidence": "Actual stimulus, independent before/after readback, errors, timestamps and original-operation reconciliation; no fixture-only native acceptance.",
+      "family": "OPERATIONS",
+      "id": "WP-SC-OPERATIONS-POS",
+      "inputs": "Exact owner, domain subject, source/config/provider version, artifact/operation identities and admitted test environment.",
+      "kind": "POS",
+      "oracle": "Deploy a pinned release, migrate and restore state, connect the signed app, observe domain health, rotate credentials and verify a compatible rollback.",
+      "owners": [
+        "BE-001",
+        "BE-002",
+        "BE-003",
+        "BE-032",
+        "BE-033",
+        "FE-001",
+        "FE-022"
+      ],
+      "state": "NOT_RUN",
+      "test_id": "T-BE-001-POS"
+    },
+    {
+      "evidence": "Actual stimulus, independent before/after readback, errors, timestamps and original-operation reconciliation; no fixture-only native acceptance.",
+      "family": "OPERATIONS",
+      "id": "WP-SC-OPERATIONS-NEG",
+      "inputs": "Exact owner, domain subject, source/config/provider version, artifact/operation identities and admitted test environment.",
+      "kind": "NEG",
+      "oracle": "Crash after dispatch, backup/ledger inconsistency, revoked signing authority, schema incompatibility, resource exhaustion and restore of old consent must preserve financial truth and current revocations.",
+      "owners": [
+        "BE-001",
+        "BE-002",
+        "BE-003",
+        "BE-032",
+        "BE-033",
+        "FE-001",
+        "FE-022"
+      ],
+      "state": "NOT_RUN",
+      "test_id": "T-BE-001-NEG"
+    },
+    {
+      "evidence": "Actual stimulus, independent before/after readback, errors, timestamps and original-operation reconciliation; no fixture-only native acceptance.",
+      "family": "OPERATIONS",
+      "id": "WP-SC-OPERATIONS-REC",
+      "inputs": "Exact owner, domain subject, source/config/provider version, artifact/operation identities and admitted test environment.",
+      "kind": "REC",
+      "oracle": "Crash after dispatch, backup/ledger inconsistency, revoked signing authority, schema incompatibility, resource exhaustion and restore of old consent must preserve financial truth and current revocations. Restart and recover original identities; require authoritative postconditions and no duplicate effects.",
+      "owners": [
+        "BE-001",
+        "BE-002",
+        "BE-003",
+        "BE-032",
+        "BE-033",
+        "FE-001",
+        "FE-022"
+      ],
+      "state": "NOT_RUN",
+      "test_id": "T-BE-001-REC"
+    }
+  ],
+  "scope": "72 mandatory scenario refinements under existing acceptance identities, not 72 executed tests"
+}

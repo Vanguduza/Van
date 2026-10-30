@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "kind": "LOCAL_ARTEMIS_ACCEPTANCE_PREPARATION_TESTS",
+  "outcome": "PASS_LOCAL_ONLY",
+  "passed": 38,
+  "failed": 0,
+  "duration_seconds": 5.18,
+  "physical_device_cases": 0,
+  "live_qualified": false,
+  "log_sha256": "7f640644db8048765f829629c602c167da8f91a599e8a0bf050d5957d8d2af78",
+  "source_sha256": {
+    "tools/certification/artemis_acceptance.py": "44fd874e90af7028155dfb825ec1ab331846b5f0d09fa41c501637964c287d0b",
+    "tools/certification/artemis_scenarios.py": "4448c1d3e4612a6ba76e944915ccae1daf85f063450376e69ac8b51e59c1b027",
+    "tools/certification/ARTEMIS_ANDROID_ACCEPTANCE.md": "1e5dcc4c8175847a21fd022b59c7b1a12fa931e5750e94d38592e21de66b9c03",
+    "tests/contracts/test_artemis_acceptance_plan.py": "1b2003ef3af64eec2f27b73ceb72ee0ae77bee2045b90b5dff914fef49bf4c7a"
+  }
+}

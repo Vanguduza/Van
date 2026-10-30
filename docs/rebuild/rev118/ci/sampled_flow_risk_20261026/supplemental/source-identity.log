@@ -1,0 +1,24 @@
+.F.....                                                                  [100%]
+=================================== FAILURES ===================================
+_ test_wrong_scope_identity_dimensions_and_capacity_cannot_be_computed[reused-ref] _
+
+damage = 'reused-ref'
+
+    @pytest.mark.parametrize('damage',['scope','reused-ref','float-time','bool-order','wrong-dimension','bad-ref','capacity'])
+    def test_wrong_scope_identity_dimensions_and_capacity_cannot_be_computed(damage):
+        first=value(1,'100','start');last=value(3,'110','end');samples=[value(2,'90','sample')]
+        if damage=='scope':samples=[replace(samples[0],scope_hash='f'*64)]
+        elif damage=='reused-ref':samples=[replace(samples[0],source_ref=first.source_ref)]
+        elif damage=='float-time':samples=[replace(samples[0],at_ms=2.0)]
+        elif damage=='bool-order':samples=[replace(samples[0],native_order=True)]
+        elif damage=='wrong-dimension':samples=[flow(2,'0','90','flow-not-valuation')]
+        elif damage=='bad-ref':samples=[replace(samples[0],source_ref='alias-only')]
+        else:samples=[value(2,'90','unique-capacity-sample-'+str(i),i) for i in range(MAX_POINTS+1)]
+>       with pytest.raises(UnitError,match='POINT_CAPACITY' if damage=='capacity' else None):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE UnitError
+
+trading/tests/test_flow_adjusted_risk.py:81: Failed
+=========================== short test summary info ============================
+FAILED trading/tests/test_flow_adjusted_risk.py::test_wrong_scope_identity_dimensions_and_capacity_cannot_be_computed[reused-ref]
+1 failed, 6 passed in 1.21s

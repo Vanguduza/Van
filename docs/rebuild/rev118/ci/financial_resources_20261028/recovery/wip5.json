@@ -1,0 +1,33 @@
+{
+  "base": "b876fc27f35765244fb169dbde1030f2b79b836e",
+  "created_at": "2026-10-28T19:00:57.215121+00:00",
+  "state": "IN_PROGRESS_NOT_EXECUTION_ELIGIBLE",
+  "files": {
+    "trading/tests/test_current_entry_risk_source.py": "5de51acd0b5fd8bb6716ca6d0c4954c7bfa8288b1639939958af09d5920b3f6a",
+    "trading/tests/test_current_entry_risk_source_postgres.py": "080562d069c4f4fcc754f6661c39dc502ff81ed5b2c607817252692dce5e009f",
+    "trading/tests/test_entry_resource_groups.py": "fe7659334c0f05e2cb9ac8c880951216da6b275fe1cc5f89f9a4667e6145706c",
+    "trading/tests/test_entry_resource_projection.py": "b0ac71af42fced8d9bb53522ed6dddb40e1a97d568652988963b4a25afadfdd2",
+    "trading/tests/test_provisional_resource_book.py": "72f5af49454333e819051ccadfd9e19e409a55c8b896a4b30093bc7c59a6c908",
+    "trading/tests/test_provisional_resource_book_postgres.py": "6ad933547f78f67cf59b22a01214589c368444d5c32b033a04e4ecfd8f35ddec",
+    "trading/vati/risk/current_entry_source.py": "778852d3f5099fa323ebd909f5cd19789e3096d736d897d6955be034a35ca59b",
+    "trading/vati/risk/entry_resource_projection.py": "9352429da5e1c426e19961bfb81610bc2aa1562f2797fe49e9aaf985bb5b8336",
+    "trading/vati/risk/heat.py": "220d2193a9d9f6f77fb01329316966c7c63d868b1d37227f4cce8aea276d926c",
+    "trading/vati/risk/provisional_resource_book.py": "682f4cea74668a47c3761f8bad32eb0cf6acd8f0930e51b91e6b7796e54b7119"
+  },
+  "evidence": {
+    "sql_r3": "119 passed,0fail/skip/error,ownedPGindependentlyabsent (before2newdistinct-competitor tests)",
+    "focused_r5": "42passed0 actualexit0",
+    "sqlite_diagnostic": "1passed0 actualexit0;no deadlock reproduced",
+    "unexecuted": "New PostgreSQL distinct-entry race; full broad current-source run"
+  },
+  "remaining": [
+    "complete fees/fill/price semantics",
+    "family/correlation/parent limits",
+    "active shared policy and qualified runtime cohort",
+    "legacy obligations and native economic reconciliation",
+    "real effect consumers and independent acceptance"
+  ],
+  "archive": "/workspace/van-financial-resource-owner-wip5-20261028.zip",
+  "size": 25210,
+  "sha256": "a16d29a04ebeb05dc62e2e4fcdebb454cb111d5f52fa65738ed7f77616eef069"
+}

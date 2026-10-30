@@ -1,0 +1,41 @@
+{
+  "schema_version": 1,
+  "authorization_id": "auth-20261022-owner-autonomous-candidate-build",
+  "project": "van",
+  "authority": "OWNER_EXPLICIT",
+  "owner_instruction_sha256": "b9853d8dea01c04101e6035d73d64faad6a3ecc6590b7def69465af23cf0a648",
+  "owner_instruction_excerpt": "Why did you stop? This is an autonomous build task",
+  "derivation": "The owner reiterates the existing instruction to finish the build autonomously after the agent stopped at native admission prerequisites. This continuation permits candidate source implementation and source verification while independent admission/activation gates remain unissued. It supersedes the earlier continuation receipt only insofar as its dependency wording was interpreted to prohibit candidate source construction. Canonical unit acceptance dependencies remain unchanged.",
+  "source": {
+    "kind": "owner_session_instruction",
+    "channel": "codex",
+    "owner_attested": true,
+    "device_signature_claimed": false,
+    "cryptographic_signature_claimed": false,
+    "signed_ingress_claimed": false
+  },
+  "issued_at_utc": "2026-10-22T06:02:40.124537+00:00",
+  "branch_scope": "ccr-9e07e1af-8mgz1p and owner build continuation branches",
+  "authorized_paths": [
+    "android/**",
+    "backend/**",
+    "trading/**",
+    "services/**",
+    "hermes/**",
+    "tools/rebuild/**",
+    "tests/**",
+    "docs/rebuild/**",
+    ".github/workflows/**",
+    "tools/template_scaffold/**",
+    "README.md",
+    "CLAUDE.md"
+  ],
+  "reusable": true,
+  "revoked": false,
+  "limitations": [
+    "Candidate source development and source testing only; no bypass of hooks, protected-main admission, security, financial protection, signing, native certification or release gates.",
+    "No independent certificate, scope-lock signature, amendment admission, native host effect, purchase, financial effect or production release is authorized by this record.",
+    "Frozen blueprint bytes, existing authorization records and ledger rows remain immutable. No new frontend design before BG-001; inherited-source repairs remain permitted.",
+    "Work performed before formal PRE-003 admission must remain labeled candidate evidence, with dependencies and unissued acceptances visible."
+  ]
+}

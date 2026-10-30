@@ -1,0 +1,36 @@
+
+### android/verification (Gradle)
+CAUGHT             C40 the cursor and the record disagree, so the stream skips or repeats
+CAUGHT             C37 a command the Gateway refused is stored and replayed hours later
+CAUGHT             C37 a rebind edits the stored record, so a failed send corrupts what is on disk
+CAUGHT             C36 a restart finds an empty outbox and the owner's queued work is gone
+CAUGHT             C35 a restarted command loses the identity the Gateway matches it by, and goes twice
+CAUGHT             C35 the owner is asked the same question again after a restart
+CAUGHT             C35 the unknown sentinel drifts from the one the runtime actually reports
+CAUGHT             C34 every build treats loopback http as acceptable, not only a debug one
+CAUGHT             C34 a truncated build argument becomes a trust anchor nobody can verify against
+CAUGHT             C33 a negative duration drags the failover percentile down
+CAUGHT             C33 the warm path sends the owner's command too, doubling it
+CAUGHT             C33 a command the owner has forgotten issuing is sent without asking
+CAUGHT             C32 a transition sends Chromium a negative viewport
+CAUGHT             C32 a frame swaps a revision the server never acknowledged
+CAUGHT             C32 javascript: typed in the address bar is navigated to
+CAUGHT             C32 closing an inactive tab moves the owner somewhere else
+CAUGHT             C32 a revoked shortcut still navigates
+CAUGHT             C32 a link from another app opens in the owner's logged-in browser
+CAUGHT             C32 every plain file input on the web stops working
+CAUGHT             C32 WebRTC is negotiated against a grant for a session that is gone
+CAUGHT             C31 a decoder counter that went backwards erases drops that really happened
+CAUGHT             C31 a new stream inherits the previous decoder's drop baseline
+CAUGHT             C14 being on a charger excuses the heat
+CAUGHT             C14 the envelope raises the embodiment's budget
+CAUGHT             C14 SURVIVAL keeps polling
+CAUGHT             C30 an answer counts as finished because its last segment arrived
+CAUGHT             C30 approval-bearing work is queued and performed an hour later
+CAUGHT             C30 VAN speaks under a video voiceover and is unintelligible
+CAUGHT             C30 VAN starts talking because the owner happens to be holding the phone
+
+29/29 caught
+
+================ SURVIVORS ================
+none

@@ -1,0 +1,30 @@
+..............................FF...........                              [100%]
+=================================== FAILURES ===================================
+_ test_missing_or_invalid_anchor_cannot_claim_complete_history[0000000000000000000000000000000000000000000000000000000000000000] _
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-704/test_missing_or_invalid_anchor0')
+anchor = '0000000000000000000000000000000000000000000000000000000000000000'
+
+    @pytest.mark.parametrize('anchor', ['0'*64, 'not-a-digest'])
+    def test_missing_or_invalid_anchor_cannot_claim_complete_history(tmp_path, anchor):
+>       with Ledger(tmp_path/'empty.sqlite') as ledger:
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       TypeError: 'Ledger' object does not support the context manager protocol
+
+trading/tests/test_native_risk_history_index.py:147: TypeError
+__ test_missing_or_invalid_anchor_cannot_claim_complete_history[not-a-digest] __
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-704/test_missing_or_invalid_anchor1')
+anchor = 'not-a-digest'
+
+    @pytest.mark.parametrize('anchor', ['0'*64, 'not-a-digest'])
+    def test_missing_or_invalid_anchor_cannot_claim_complete_history(tmp_path, anchor):
+>       with Ledger(tmp_path/'empty.sqlite') as ledger:
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       TypeError: 'Ledger' object does not support the context manager protocol
+
+trading/tests/test_native_risk_history_index.py:147: TypeError
+=========================== short test summary info ============================
+FAILED trading/tests/test_native_risk_history_index.py::test_missing_or_invalid_anchor_cannot_claim_complete_history[0000000000000000000000000000000000000000000000000000000000000000]
+FAILED trading/tests/test_native_risk_history_index.py::test_missing_or_invalid_anchor_cannot_claim_complete_history[not-a-digest]
+2 failed, 41 passed in 19.84s

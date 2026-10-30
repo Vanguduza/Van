@@ -17,25 +17,16 @@ an injection refusal or an A4/A5 request is POLICY_FORBIDDEN and never becomes
 an owner prompt, because a prompt the target surface can provoke is a way to
 obtain authority rather than a way to supervise it.
 
-P2-CU-001 — what this module did *not* have was an executor. No worker exists for
-any of the four surfaces, so `begin` recorded an operation nobody would perform
-and the fabric read as a built capability in every matrix that listed it. The
-audit's own disposition was "delete or fold"; the closure blueprint's owner
-decision 6 said delete, on the description "a stub".
+P2-CU-001 established the boundary before an executor existed. OMV-002 now adds
+an optional subordinate worker implementation without weakening that boundary:
+`SURFACE_WORKERS` remains empty by default, and a deployment registers only
+workers it has explicitly configured and qualified. A missing worker still
+refuses before a PENDING row is written.
 
-That description was wrong, and reading the code is what corrects it. This is not
-a stub: the refusals are real, ordered and tested, and the ledger is durable. What
-it lacks is a worker. Deleting a hardened boundary because the thing it bounds has
-not been built yet gets the order backwards — the boundary is the part you want
-written first, and re-deriving it later under delivery pressure is how a
-`RUN_ARBITRARY` appears.
-
-So the module stays and the missing executor becomes an enforced runtime state
-instead of a claim in a document. `SURFACE_WORKERS` is empty, `begin` refuses
-`OPERATION_NO_WORKER_FOR_SURFACE` before it writes anything, and
-`/v1/computer-use/health` says so to the owner. The day a worker lands, it
-registers and the refusal stops firing; until then nothing can call this and
-believe work will happen.
+Worker execution is fenced by a durable lease generation. A stale process may
+finish computing after a restart or preemption, but it cannot publish completion
+after its generation has been superseded. There is still no RUN_ARBITRARY,
+EXECUTE, EVAL or host-shell primitive.
 """
 
 from __future__ import annotations
@@ -52,6 +43,7 @@ from van_gateway.browser.models import BrowserBoundaryType
 from van_gateway.capability.models import CLASS_RANK
 from van_gateway.models import ActionClass
 from van_gateway.storage.db import Store
+from van_gateway.computer_use.lease import ComputerWorkerLeaseService, ComputerWorkerLeaseError
 
 
 class Surface(str, Enum):
@@ -83,13 +75,23 @@ class OperationType(str, Enum):
     UPLOAD_FROM_REFERENCE = "UPLOAD_FROM_REFERENCE"
     DOWNLOAD_TO_EVIDENCE = "DOWNLOAD_TO_EVIDENCE"
     WAIT_FOR_CONDITION = "WAIT_FOR_CONDITION"
+    LIST_FILES = "LIST_FILES"
+    READ_TEXT = "READ_TEXT"
+    WRITE_TEXT = "WRITE_TEXT"
+    RUN_PYTHON_FILE = "RUN_PYTHON_FILE"
+    RUN_NODE_FILE = "RUN_NODE_FILE"
+    GIT_STATUS = "GIT_STATUS"
+    GIT_DIFF = "GIT_DIFF"
+    GIT_APPLY_PATCH = "GIT_APPLY_PATCH"
 
     @property
     def mutates(self) -> bool:
         return self in (
             OperationType.CLICK, OperationType.TYPE_TEXT,
             OperationType.FILL_FROM_REFERENCE, OperationType.SELECT,
-            OperationType.UPLOAD_FROM_REFERENCE,
+            OperationType.UPLOAD_FROM_REFERENCE, OperationType.WRITE_TEXT,
+            OperationType.RUN_PYTHON_FILE, OperationType.RUN_NODE_FILE,
+            OperationType.GIT_APPLY_PATCH,
         )
 
     @property
@@ -111,6 +113,7 @@ class OperationState(str, Enum):
     FAILED = "FAILED"
     BLOCKED_POLICY = "BLOCKED_POLICY"
     BLOCKED_UNSAFE = "BLOCKED_UNSAFE"
+    OUTCOME_UNKNOWN = "OUTCOME_UNKNOWN"
 
 
 class ComputerUseError(ValueError):
@@ -145,9 +148,18 @@ SURFACE_WORKERS: frozenset[Surface] = frozenset()
 class ComputerInteractionFabric:
     """Typed operations against any surface, bound to a mission and evidenced."""
 
-    def __init__(self, store: Store, *, workers: frozenset[Surface] | None = None) -> None:
+    def __init__(
+        self,
+        store: Store,
+        *,
+        workers: frozenset[Surface] | None = None,
+        worker_impls: dict[Surface, Any] | None = None,
+    ) -> None:
         self.store = store
-        self.workers = SURFACE_WORKERS if workers is None else workers
+        self.worker_impls = dict(worker_impls or {})
+        declared = frozenset(self.worker_impls)
+        self.workers = (SURFACE_WORKERS if workers is None else workers) | declared
+        self.worker_leases = ComputerWorkerLeaseService(store)
 
     def surfaces(self) -> dict[str, bool]:
         """Which surfaces can be acted on, for the health payload and for tests."""
@@ -211,6 +223,92 @@ class ComputerInteractionFabric:
             ),
         )
         return operation_id
+
+    async def execute_operation(
+        self, request: OperationRequest, *, now_ms: int | None = None
+    ) -> dict[str, Any]:
+        """Execute one admitted typed operation through a registered subordinate worker.
+
+        Admission happens before lease acquisition. Completion is accepted only while the
+        exact lease generation that started this operation is still active.
+        """
+        worker = self.worker_impls.get(request.surface)
+        if worker is None:
+            # Refuse before writing PENDING work nobody can perform.
+            raise ComputerUseError("OPERATION_WORKER_UNBOUND", request.surface.value)
+        status_fn = getattr(worker, "status", None)
+        if status_fn is not None:
+            status = await status_fn()
+            if not bool(status.get("ready")):
+                raise ComputerUseError(
+                    "OPERATION_WORKER_NOT_READY",
+                    str(status.get("reason") or status.get("state") or request.surface.value),
+                )
+        operation_id = await self.begin(request, now_ms=now_ms)
+
+        lease = None
+        try:
+            lease = await self.worker_leases.acquire(
+                request.surface.value, operation_id, now_ms=now_ms
+            )
+            await self.store.execute(
+                "UPDATE computer_operations SET state = 'RUNNING' WHERE operation_id = ?",
+                (operation_id,),
+            )
+            result = await worker.execute(operation_id, request, lease)
+            await self.worker_leases.assert_active(lease)
+            receipt_id = f"cwr_{uuid.uuid4().hex}"
+            evidence_ref = f"computer-receipt://{receipt_id}"
+            await self.store.execute(
+                """
+                INSERT INTO computer_worker_receipts(
+                  receipt_id, operation_id, surface, lease_id, generation,
+                  output_sha256, exit_code, truncated, created_at_ms
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """,
+                (
+                    receipt_id, operation_id, request.surface.value, lease.lease_id,
+                    lease.generation, result.output_sha256, result.exit_code,
+                    1 if result.truncated else 0,
+                    int(time.time() * 1000) if now_ms is None else now_ms,
+                ),
+            )
+            await self.complete(
+                operation_id, state=OperationState.COMPLETED,
+                evidence_ref=evidence_ref, now_ms=now_ms,
+            )
+            return {
+                "operation_id": operation_id,
+                "state": OperationState.COMPLETED.value,
+                "evidence_ref": evidence_ref,
+                "result": result.result,
+            }
+        except ComputerWorkerLeaseError as exc:
+            await self.complete(
+                operation_id, state=OperationState.FAILED,
+                error_code=exc.code, now_ms=now_ms,
+            )
+            raise ComputerUseError(exc.code) from exc
+        except Exception as exc:
+            # Import lazily so the boundary module does not depend on one concrete worker.
+            from van_gateway.computer_use.worker import (
+                ComputerWorkerError, ComputerWorkerOutcomeUnknown,
+            )
+            if isinstance(exc, ComputerWorkerOutcomeUnknown):
+                await self.complete(
+                    operation_id, state=OperationState.OUTCOME_UNKNOWN,
+                    error_code=exc.code, now_ms=now_ms,
+                )
+                raise ComputerUseError("OPERATION_OUTCOME_UNKNOWN") from exc
+            code = exc.code if isinstance(exc, ComputerWorkerError) else "OPERATION_WORKER_FAILED"
+            await self.complete(
+                operation_id, state=OperationState.FAILED,
+                error_code=code, now_ms=now_ms,
+            )
+            raise ComputerUseError(code) from exc
+        finally:
+            if lease is not None:
+                await self.worker_leases.release(lease)
 
     async def checkpoint(
         self, operation_id: str, *, checkpoint_ref: str, now_ms: int | None = None

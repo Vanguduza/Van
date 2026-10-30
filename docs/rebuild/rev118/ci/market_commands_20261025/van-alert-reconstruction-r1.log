@@ -1,0 +1,69 @@
+.................................FF..................................... [ 57%]
+.....................................................                    [100%]
+=================================== FAILURES ===================================
+_ test_signed_gateway_controls_verify_missions_without_order_or_hermes_dispatch _
+
+client = (<httpx.AsyncClient object at 0x7f08eaf819a0>, <fastapi.applications.FastAPI object at 0x7f08e9c05160>, {'create_run': 0})
+
+    @pytest.mark.asyncio
+    async def test_signed_gateway_controls_verify_missions_without_order_or_hermes_dispatch(client):
+        ac,app,hermes=client
+        await _pair_for_test(ac,app,'dev-alert-command','fixture-owner-alert-secret')
+        from test_market_monitor_persistence import alert
+        response=await ac.post('/v1/trading/monitors/alerts',json={'request_id':'owner-alert-create','state':alert().model_dump(mode='json')})
+        assert response.status_code==200,response.text
+        identity=response.json()['object_id']
+        for revision,operation in enumerate(['pause','restart','delete'],1):
+            body=_v1_command(app,device_id='dev-alert-command',text=f'{operation} trading alert id {identity} revision {revision}',
+                action_class='A2',idempotency_key='alert-'+operation)
+            reply=await ac.post('/v1/commands',json=body)
+            assert reply.status_code==200,reply.text
+            result=reply.json()
+>           assert result['status']=='accepted',result
+E           AssertionError: {'status': 'denied', 'command_id': '973d1002-2f1f-4c5c-b4c8-4daa4967e876', 'idempotency_key': 'alert-pause', 'message': 'NO_STALE_REPLAY requires an explicit expiry within 30 seconds', ...}
+E           assert 'denied' == 'accepted'
+E             
+E             - accepted
+E             + denied
+
+backend/tests/test_market_monitor_commands.py:175: AssertionError
+----------------------------- Captured stdout call -----------------------------
+{"action_class": null, "command_id": null, "correlation_id": null, "degraded_code": null, "detail": {"duration_ms": 479.14, "method": "POST", "route": "/v1/trading/monitors/alerts"}, "device_id": null, "error_class": null, "level": "INFO", "logger": "van.request", "message": "request", "mission_id": null, "principal": null, "result": "200", "service": "van-gateway", "ts": "2026-10-25T16:22:51.947Z"}
+{"action_class": "A2", "command_id": "973d1002-2f1f-4c5c-b4c8-4daa4967e876", "correlation_id": "corr_c0045f21a9ec", "degraded_code": null, "detail": {"hermes_run_id": null, "origin_channel": "UI", "requires_approval": false, "resolved_action_id": "trading.alert.pause"}, "device_id": "dev-alert-command", "error_class": null, "level": "WARNING", "logger": "van.command", "message": "command outcome", "mission_id": null, "principal": "OWNER_DEVICE", "result": "denied", "service": "van-gateway", "ts": "2026-10-25T16:22:52.879Z"}
+{"action_class": null, "command_id": null, "correlation_id": null, "degraded_code": null, "detail": {"duration_ms": 923.6, "method": "POST", "route": "/v1/commands"}, "device_id": null, "error_class": null, "level": "INFO", "logger": "van.request", "message": "request", "mission_id": null, "principal": null, "result": "200", "service": "van-gateway", "ts": "2026-10-25T16:22:52.881Z"}
+------------------------------ Captured log call -------------------------------
+INFO     van.request:logging.py:112 request
+WARNING  van.command:logging.py:112 command outcome
+INFO     van.request:logging.py:112 request
+______ test_signed_stale_revision_and_missing_service_are_named_failures _______
+
+client = (<httpx.AsyncClient object at 0x7f08e9612420>, <fastapi.applications.FastAPI object at 0x7f08e92dae10>, {'create_run': 0})
+
+    @pytest.mark.asyncio
+    async def test_signed_stale_revision_and_missing_service_are_named_failures(client):
+        ac,app,_=client;await _pair_for_test(ac,app,'dev-alert-refusal','fixture-alert-refusal-secret')
+        from test_market_monitor_persistence import alert
+        r=await ac.post('/v1/trading/monitors/alerts',json={'request_id':'create','state':alert().model_dump(mode='json')})
+        identity=r.json()['object_id']
+        body=_v1_command(app,device_id='dev-alert-refusal',text=f'pause trading alert id {identity} revision 3',action_class='A2',idempotency_key='stale')
+        response=await ac.post('/v1/commands',json=body)
+        assert response.status_code==200,response.text
+>       assert response.json()['status']=='denied' and 'MONITOR_REVISION_CONFLICT' in response.text
+E       assert ('denied' == 'denied'
+E         
+E           denied and 'MONITOR_REVISION_CONFLICT' in '{"status":"denied","command_id":"ff4cf514-1da0-4fff-bfda-c37e4bc8f4ba","idempotency_key":"stale","message":"NO_STALE_...ext_snapshot_id":null,"mission_id":null,"correlation_id":"corr_55fbc1103b09","local_execution":null,"context_gaps":[]}')
+E        +  where '{"status":"denied","command_id":"ff4cf514-1da0-4fff-bfda-c37e4bc8f4ba","idempotency_key":"stale","message":"NO_STALE_...ext_snapshot_id":null,"mission_id":null,"correlation_id":"corr_55fbc1103b09","local_execution":null,"context_gaps":[]}' = <Response [200 OK]>.text
+
+backend/tests/test_market_monitor_commands.py:195: AssertionError
+----------------------------- Captured stdout call -----------------------------
+{"action_class": null, "command_id": null, "correlation_id": null, "degraded_code": null, "detail": {"duration_ms": 443.94, "method": "POST", "route": "/v1/trading/monitors/alerts"}, "device_id": null, "error_class": null, "level": "INFO", "logger": "van.request", "message": "request", "mission_id": null, "principal": null, "result": "200", "service": "van-gateway", "ts": "2026-10-25T16:22:55.226Z"}
+{"action_class": "A2", "command_id": "ff4cf514-1da0-4fff-bfda-c37e4bc8f4ba", "correlation_id": "corr_55fbc1103b09", "degraded_code": null, "detail": {"hermes_run_id": null, "origin_channel": "UI", "requires_approval": false, "resolved_action_id": "trading.alert.pause"}, "device_id": "dev-alert-refusal", "error_class": null, "level": "WARNING", "logger": "van.command", "message": "command outcome", "mission_id": null, "principal": "OWNER_DEVICE", "result": "denied", "service": "van-gateway", "ts": "2026-10-25T16:22:55.606Z"}
+{"action_class": null, "command_id": null, "correlation_id": null, "degraded_code": null, "detail": {"duration_ms": 370.2, "method": "POST", "route": "/v1/commands"}, "device_id": null, "error_class": null, "level": "INFO", "logger": "van.request", "message": "request", "mission_id": null, "principal": null, "result": "200", "service": "van-gateway", "ts": "2026-10-25T16:22:55.608Z"}
+------------------------------ Captured log call -------------------------------
+INFO     van.request:logging.py:112 request
+WARNING  van.command:logging.py:112 command outcome
+INFO     van.request:logging.py:112 request
+=========================== short test summary info ============================
+FAILED backend/tests/test_market_monitor_commands.py::test_signed_gateway_controls_verify_missions_without_order_or_hermes_dispatch
+FAILED backend/tests/test_market_monitor_commands.py::test_signed_stale_revision_and_missing_service_are_named_failures
+2 failed, 123 passed in 89.25s (0:01:29)

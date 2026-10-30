@@ -1,0 +1,63 @@
+{
+  "artifact": {
+    "id": 12710000291,
+    "name": "cognitive-python-results",
+    "size_in_bytes": 2939,
+    "url": "https://api.github.com/repos/Vanguduza/Van/actions/artifacts/12710000291",
+    "archive_download_url": "https://api.github.com/repos/Vanguduza/Van/actions/artifacts/12710000291/zip",
+    "expired": false,
+    "created_at": "2026-10-27T04:19:07Z",
+    "expires_at": "2027-01-25T04:18:21Z",
+    "updated_at": "2026-10-27T04:19:07Z",
+    "digest": "sha256:9f936e60a89bad3ee9dc80f5643b5635df55691ba917d655b13d8ac3114fac29",
+    "workflow_run": {
+      "id": 40448997882,
+      "repository_id": 1369211561,
+      "head_repository_id": 1369211561,
+      "head_branch": "ccr-9e07e1af-8mgz1p",
+      "head_sha": "b0a61313e5167bafca4dbeea96f2bfcc5c7c6b90"
+    }
+  },
+  "run_id": 40448997882,
+  "job_id": 122006997544,
+  "reported_source_head": "b0a61313e5167bafca4dbeea96f2bfcc5c7c6b90",
+  "qualification": "Actual hosted failure; no pass or native acceptance.",
+  "download_verified": {
+    "size": 2939,
+    "sha256": "9f936e60a89bad3ee9dc80f5643b5635df55691ba917d655b13d8ac3114fac29",
+    "github_digest_matches": true,
+    "zip_crc_and_paths_verified": true
+  },
+  "junit": {
+    "cognitive-broad.xml": [
+      {
+        "name": "pytest",
+        "errors": "1",
+        "failures": "0",
+        "skipped": "0",
+        "tests": "1",
+        "time": "6.982",
+        "timestamp": "2026-10-27T04:18:59.123169+00:00",
+        "hostname": "runnervmtai0g"
+      }
+    ],
+    "cognitive-focused.xml": [
+      {
+        "name": "pytest",
+        "errors": "0",
+        "failures": "0",
+        "skipped": "0",
+        "tests": "79",
+        "time": "6.733",
+        "timestamp": "2026-10-27T04:18:51.691100+00:00",
+        "hostname": "runnervmtai0g"
+      }
+    ]
+  },
+  "file_sha256": {
+    "cognitive-python-results.zip": "9f936e60a89bad3ee9dc80f5643b5635df55691ba917d655b13d8ac3114fac29",
+    "cognitive-broad.xml": "ac113e74b5e699952cef8e097d44ac43f0a310f2f8cee16c00eebc582946d0ff",
+    "cognitive-focused.xml": "09a6bae648e45ee15b4c1d511cda43510d54e0e3992be03e496b57dc0679c092",
+    "hosted-job.log": "d9e650d4dca01af0361d076b7ce7b41eac98a9b48356dfadaf7eb9ef2d45c933"
+  }
+}

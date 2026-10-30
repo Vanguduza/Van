@@ -1,0 +1,96 @@
+{
+  "scope": "SOURCE_CONSOLIDATION_VALIDATION_ARTIFACTS",
+  "files": [
+    {
+      "path": "android-jvm-summary.json",
+      "size": 474,
+      "sha256": "14daf4073ce2d5eae5691e941531ac71f8665f2e62b45b08b79a34deacb3ac1e"
+    },
+    {
+      "path": "authority-map.txt",
+      "size": 471,
+      "sha256": "8d697c9b63b8bea75c4f95854f36034d2438161fbc798351c08501569f441641"
+    },
+    {
+      "path": "backend-crash-retest.txt",
+      "size": 113,
+      "sha256": "ae40b54d3b3010f7c2bb756784c9fcac55d8f2e13fb02d7f52fce9f32ffe2ae4"
+    },
+    {
+      "path": "backend-tests.txt",
+      "size": 15668,
+      "sha256": "5a3f61809c59abaf3d0ab6d2e6a8aabba9806d836f89312b6ab268f99ae6ad0b"
+    },
+    {
+      "path": "consolidation-check.json",
+      "size": 228,
+      "sha256": "d87b8fe5f7b2b4ca7312b9ba93c4e1aa24ae2301f775aa6f915d81572aec7870"
+    },
+    {
+      "path": "contract-ledger-retest.txt",
+      "size": 110,
+      "sha256": "79b5940458853932c139b74ec677bb9074ca6a803fdff74f677dea644ab70390"
+    },
+    {
+      "path": "contracts-configured.txt",
+      "size": 10519,
+      "sha256": "8e3b2083e6170c5c9f54c43f14450a4138e156c452f268f0f55ba9d2fdab6311"
+    },
+    {
+      "path": "focused-tests.txt",
+      "size": 99,
+      "sha256": "535c55f4cb8d0973243f289218ae936d118acccb56f9ada7aae8989d5023ce8e"
+    },
+    {
+      "path": "integration-regressions.txt",
+      "size": 180,
+      "sha256": "4458152618257acf39e656c4e2776c3bb96b289ff248c54af3f0910bd19e443e"
+    },
+    {
+      "path": "ledger-baseline.txt",
+      "size": 294,
+      "sha256": "3aac7fe3f82ad89dbdd16a9ea7f07b871bfd837c39ea426fa6c0c5ed80616560"
+    },
+    {
+      "path": "ledger-consolidation.txt",
+      "size": 242,
+      "sha256": "180b9aa5b5793f971af769a35674d55665346450cf25f1266437f7ba30ccc712"
+    },
+    {
+      "path": "maturity.txt",
+      "size": 436,
+      "sha256": "8bc6070b0072ebe0efdd896d2fc7098a0654f0025d7b38037e76423f08599423"
+    },
+    {
+      "path": "original-checkout-final-check.json",
+      "size": 91,
+      "sha256": "c41d173ad52b9f6809338379ae992988dd9ac6a4625be02169a37f7741189c11"
+    },
+    {
+      "path": "release-workflow-tests.txt",
+      "size": 99,
+      "sha256": "8a21c81dbe43ac7bcd0159a8337c1624a73e4114369c4cbda2f923c9e476b7ee"
+    },
+    {
+      "path": "rev51-harness.txt",
+      "size": 3696,
+      "sha256": "82f1485502897f1d9f47c3309e722a974a0bf8786ecfad103ab7bb422c093d21"
+    },
+    {
+      "path": "services-tests.txt",
+      "size": 260,
+      "sha256": "442d92e8e49fe3b4ff3a1a60743a1cd1f1f6834941c378ed230e645990216dbc"
+    },
+    {
+      "path": "trading-tests.txt",
+      "size": 3163,
+      "sha256": "db93fbcd72f20eea0176688b1e7481d111c1a2f4102a6dbf863e11ab2a65b809"
+    },
+    {
+      "path": "voice-requalification.txt",
+      "size": 558,
+      "sha256": "b55d76688ecb5d6cc1893a1903ab02105a02f5a008452a93720bac410205980e"
+    }
+  ],
+  "application_or_owner_acceptance_issued": false
+}

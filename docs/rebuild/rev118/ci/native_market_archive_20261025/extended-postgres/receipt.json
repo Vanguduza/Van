@@ -1,0 +1,28 @@
+{
+  "base_head": "46474a6cf054bbecf4ab32ed6d3d394611f633b0",
+  "source_state": "UNCOMMITTED_NATIVE_MARKET_ARCHIVE_CANDIDATE",
+  "container": "van-native-archive-extended-pg-20261025",
+  "image": "postgres:17.11-bookworm@sha256:858bb5e98eed02eb8cafbcdc007f9a65d1b613972028944a8ec2133ccaf80d27",
+  "completed": true,
+  "cleaned": true,
+  "source_sha256": {
+    "trading/vati/execution/ctrader/transport.py": "94762a4b4db11f74d7f7e6ee33ec5378ff97fc868a3df825ea46abc5dbb4ae53",
+    "trading/vati/execution/ctrader/adapter.py": "6931e6da4b896e8650ae592abc1abba68af299796a1261301280965e8a3082b1",
+    "trading/vati/funding/deals.py": "6d036085410710fa88583cbecf6a30487c79ba270f28d5ca8340b23fe1034f19",
+    "trading/tests/conftest.py": "7aac5662097f07f77f200dc4a13781f8db0c020298c6ff3760a5a99fe718f535",
+    "trading/tests/test_ctrader.py": "edfe74722a1e0c23e2d8c060e660e57960454e302514ee1b4c9bd48e5eeb74d8",
+    "trading/tests/test_provider_entry_deadline.py": "7617b3e811e391df027ee52d06c90f530ee79e44216219b14dc6321339080f1a",
+    "trading/tests/test_ctrader_transport_lifecycle.py": "c74f3378dee489c91c5b7c198a96bfacdbd28d1eb4a5e2bda2e3016503874937",
+    "trading/tests/test_ctrader_connection_auth.py": "ff646f8e5a01e71df661127ffccd369cf2ec653706056dff3ca48c70f1fafa1f",
+    "trading/vati/execution/ctrader/contracts.py": "fc719fecbc9fc032836ffddbd9900421e720fd9277ba6cb229f572f5c8d445d5",
+    "trading/vati/market_data/native_archive.py": "9c51628356a1f1731cd0503d4cfd2653b5d1f28cfff0f338b365387c4cbe9e9e",
+    "trading/vati/market_data/native_collector.py": "4a8f4f74bd9c82bb662fbe2771b11414a502c8405f9b832281c067b244e412bf",
+    "trading/tests/test_native_market_archive.py": "f0cf0768ddbd07e90d3109cffee239ed159143fe49210eeed5a69026cdafae80",
+    "trading/tests/test_native_market_collector.py": "7ca6c28528c803877faec837e3454ce4033bb38b4f04fb5f620d6efd3ab98b0b",
+    "trading/tests/test_ctrader_feed_contract.py": "6f240e5f5ac3c345f498abf8a4aa9bdfd71bf9af74b7e7d123709325c8da9cb6"
+  },
+  "container_id": "f4c56fa7277768eb581be1a9e3d90073eae8f091e5b97021d1f75f10e248ad1a",
+  "canonical_fixture_schema_initialized": true,
+  "exit": 0,
+  "adopted_children_reaped": []
+}

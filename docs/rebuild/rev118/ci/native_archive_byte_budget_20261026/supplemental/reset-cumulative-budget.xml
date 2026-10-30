@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="2" time="0.671" timestamp="2026-10-26T21:48:02.479895+00:00" hostname="2c5a245e39f1"><testcase classname="trading.tests.test_native_archive_read_budget" name="test_growing_native_record_is_read_with_a_real_bound_even_after_a_small_stat" time="0.021" /><testcase classname="trading.tests.test_native_archive_read_budget" name="test_request_budget_refuses_valid_history_without_modifying_or_recapturing_it" time="0.027"><failure message="Failed: DID NOT RAISE NativeArchiveError">tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-563/test_request_budget_refuses_va0')
+
+    def test_request_budget_refuses_valid_history_without_modifying_or_recapturing_it(tmp_path):
+        c=contract();root=tmp_path/'depth';writer=NativeDepthArchive(root,clock=lambda:250000)
+        first=writer.record('original',c,sample(c));part=writer._partition(c.native_scope,'DEPTH')
+        files={p.name:p.read_bytes() for p in part.glob('*.json')};size=sum(map(len,files.values()))
+        bounded=NativeDepthArchive(root,clock=lambda:500000,max_history_bytes=size-1)
+        def never():raise AssertionError('read-budget refusal performed a replacement native read')
+&gt;       with pytest.raises(NativeArchiveError,match='capacity|resource bound'):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE NativeArchiveError
+
+trading/tests/test_native_archive_read_budget.py:40: Failed</failure></testcase></testsuite></testsuites>

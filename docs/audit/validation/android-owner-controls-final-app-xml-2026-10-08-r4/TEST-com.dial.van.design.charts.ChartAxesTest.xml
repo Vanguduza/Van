@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.dial.van.design.charts.ChartAxesTest" tests="4" skipped="0" failures="0" errors="0" timestamp="2026-10-08T06:57:30" hostname="052fefa249ff" time="0.012">
+  <properties/>
+  <testcase name="timeTicks of an instant returns the single instant" classname="com.dial.van.design.charts.ChartAxesTest" time="0.009"/>
+  <testcase name="ticks of a flat series is the single value" classname="com.dial.van.design.charts.ChartAxesTest" time="0.0"/>
+  <testcase name="timeLabel granularity depends on the overall span" classname="com.dial.van.design.charts.ChartAxesTest" time="0.002"/>
+  <testcase name="ticks span the requested range" classname="com.dial.van.design.charts.ChartAxesTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

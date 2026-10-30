@@ -1,0 +1,91 @@
+{
+  "schema": "van.rebuild.hosted-source-checks/1",
+  "run_id": 39725953372,
+  "source_head": "c2a278488f00bacaf912853ed6e711a5b1de986a",
+  "tested_merge": "9ae436abda2c26a3ea59dffb75c9f6d79b2ebcd0",
+  "overall_conclusion": "failure",
+  "jobs": [
+    {
+      "id": 119649763676,
+      "name": "project-truth-ledger",
+      "conclusion": "failure"
+    },
+    {
+      "id": 119649763750,
+      "name": "backend",
+      "conclusion": "failure"
+    },
+    {
+      "id": 119649763770,
+      "name": "mutation (python-0, python, 0/4)",
+      "conclusion": "success"
+    },
+    {
+      "id": 119649763845,
+      "name": "android-instrumentation",
+      "conclusion": "success"
+    },
+    {
+      "id": 119649763877,
+      "name": "rebuild-documentary",
+      "conclusion": "success"
+    },
+    {
+      "id": 119649763884,
+      "name": "mutation (python-3, python, 3/4)",
+      "conclusion": "success"
+    },
+    {
+      "id": 119649763893,
+      "name": "mutation (kotlin-0, kotlin, 0/4)",
+      "conclusion": "success"
+    },
+    {
+      "id": 119649763900,
+      "name": "android-and-visual-evidence",
+      "conclusion": "success"
+    },
+    {
+      "id": 119649763902,
+      "name": "mutation (browser-agent, browser-agent, 0/1)",
+      "conclusion": "success"
+    },
+    {
+      "id": 119649763927,
+      "name": "mutation (python-2, python, 2/4)",
+      "conclusion": "success"
+    },
+    {
+      "id": 119649763936,
+      "name": "mutation (kotlin-1, kotlin, 1/4)",
+      "conclusion": "success"
+    },
+    {
+      "id": 119649763986,
+      "name": "mutation (kotlin-3, kotlin, 3/4)",
+      "conclusion": "success"
+    },
+    {
+      "id": 119649764055,
+      "name": "mutation (python-1, python, 1/4)",
+      "conclusion": "success"
+    },
+    {
+      "id": 119649764156,
+      "name": "mutation (kotlin-2, kotlin, 2/4)",
+      "conclusion": "success"
+    },
+    {
+      "id": 119652743443,
+      "name": "character-forge-gate",
+      "conclusion": "success"
+    }
+  ],
+  "external_failures": {
+    "backend": "DDS_CONTRACT_READ_DEPLOY_KEY is not provisioned",
+    "project-truth-ledger": "Trusted main lacks tools/ci/project_truth_ledger.py; job fails before judging this branch"
+  },
+  "bypassed": false,
+  "new_rev118_units_accepted": 0,
+  "handset_tested": false
+}

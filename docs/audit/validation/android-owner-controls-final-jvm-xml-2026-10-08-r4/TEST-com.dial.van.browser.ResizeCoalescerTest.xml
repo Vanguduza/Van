@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.dial.van.browser.ResizeCoalescerTest" tests="10" skipped="0" failures="0" errors="0" timestamp="2026-10-08T06:59:30" hostname="052fefa249ff" time="0.009">
+  <properties/>
+  <testcase name="the first candidate of a session is sent even without a baseline()" classname="com.dial.van.browser.ResizeCoalescerTest" time="0.001"/>
+  <testcase name="a drag that ends inside the debounce still converges, inside the settle window()" classname="com.dial.van.browser.ResizeCoalescerTest" time="0.0"/>
+  <testcase name="a rotation is material even at the same size()" classname="com.dial.van.browser.ResizeCoalescerTest" time="0.001"/>
+  <testcase name="releasing the window sends the last bounds immediately()" classname="com.dial.van.browser.ResizeCoalescerTest" time="0.0"/>
+  <testcase name="a drag with pauses is capped at ten a second()" classname="com.dial.van.browser.ResizeCoalescerTest" time="0.002"/>
+  <testcase name="a one pixel inset rounding is not a resize()" classname="com.dial.van.browser.ResizeCoalescerTest" time="0.003"/>
+  <testcase name="a font scale change is material()" classname="com.dial.van.browser.ResizeCoalescerTest" time="0.0"/>
+  <testcase name="a window dragged back to where it started sends nothing()" classname="com.dial.van.browser.ResizeCoalescerTest" time="0.0"/>
+  <testcase name="a smooth drag sends nothing remote while the finger is down()" classname="com.dial.van.browser.ResizeCoalescerTest" time="0.0"/>
+  <testcase name="a change is held until the bounds have been still()" classname="com.dial.van.browser.ResizeCoalescerTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

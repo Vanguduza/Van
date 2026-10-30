@@ -22,6 +22,31 @@ from vati.risk import (
 
 NOW = 1_800_000_000
 
+
+@pytest.fixture(autouse=True)
+def _reap_ctrader_fixture_sockets(monkeypatch):
+    """Close every native peer created by this test, including imported helpers."""
+    import threading
+    from test_ctrader import FakeCtrader
+
+    original = FakeCtrader.__init__
+    owned = []
+    def initialize(peer, *args, **kwargs):
+        original(peer, *args, **kwargs)
+        owned.append(peer)
+    monkeypatch.setattr(FakeCtrader, "__init__", initialize)
+    yield
+    sockets = [peer.a for peer in owned]
+    # Reader threads carry their exact owned socket, including connections
+    # constructed by funding readers through a connector closure.
+    readers = [thread for thread in threading.enumerate()
+               if any(arg is sock for arg in getattr(thread, "_args", ()) for sock in sockets)]
+    for peer in owned:
+        peer.close()
+    for reader in readers:
+        reader.join(3)
+        assert not reader.is_alive(), "owned cTrader transport reader did not terminate"
+
 #: P0-TRADE-001. Every suite used to hand the mandate the literal string
 #: "sig:owner-device:abc123" and it was admitted. A mandate is now admitted only against a
 #: registered owner key, so the fixtures hold one and sign for real — the tests exercise
@@ -84,18 +109,36 @@ def mandate_dict(**overrides):
         "expires_at_unix": NOW + 30 * 86400,
     }
     base.update(overrides)
-    # Signed last, over the identity the caller ended up with: a mandate signed for
-    # version 1.0.0 must not admit an override that bumped the version.
+    # Sign the actual effective policy after the caller selects its scope and bounds.
+    from vati.risk.mandate import mandate_subject
+    try:
+        subject=mandate_subject(base)
+    except (ValueError,TypeError,KeyError):
+        # Negative parser fixtures must reach the real loader. This token
+        # cannot admit any effective policy if parsing is accidentally bypassed.
+        subject='invalid-test-policy'
     base.setdefault(
         "owner_signature_ref",
         owner_authority().token(
             act="mandate-admit",
-            subject=f"{base['mandate_id']}:{base['version']}",
+            subject=subject,
             issued_at_unix=int(base["signed_at_unix"]),
             lifetime_seconds=int(base["expires_at_unix"]) - int(base["signed_at_unix"]),
         ),
     )
     return base
+
+
+def historical_mandate_dict(**overrides):
+    """Owner-signed test grant covering the unchanged historical bar fixtures.
+
+    Historical simulation is evaluated at its event clock, not a later grant's
+    start date. Keep the original prices/calendar and every behavioural oracle.
+    """
+    start=1_757_980_800-3600
+    values={'signed_at_unix':start,'expires_at_unix':start+90*86400}
+    values.update(overrides)
+    return mandate_dict(**values)
 
 
 @pytest.fixture
@@ -130,6 +173,9 @@ def snapshot(contract: SymbolContract, **overrides) -> RiskSnapshot:
         now_unix=NOW,
         account_alias="fx_primary",
         account_verified=True,
+        used_margin=Decimal("1000"),
+        free_margin=Decimal("9000"),
+        margin_level_pct=Decimal("1000"),
         equity=Decimal("10000"),
         balance=Decimal("10000"),
         peak_equity=Decimal("10000"),

@@ -1,0 +1,45 @@
+{
+  "schema": "van.rebuild.source-qualification/1",
+  "source_head": "39807eff3c76841eed92f0a477751635b998f4d8",
+  "result": "FAILED_WITH_FOLLOWUP_CONTRACT_CORRECTION",
+  "backend_contracts": {
+    "tests": 6978,
+    "failures": 2,
+    "errors": 0,
+    "skipped": 9,
+    "passed": 6967,
+    "seconds": 2833.242,
+    "xml_sha256": "96a914259c7bbe95b8075a2ba5e3db0021770de018b96cdc3146fe7f19a1b724"
+  },
+  "trading": "NOT_RUN: driver stops after backend failure; later current source trading runs are separate receipts.",
+  "storage_audit": {
+    "forbidden_events": [],
+    "scope": "backend/tests plus tests/contracts; repo-root invocation; writes and SQLite opens under root/data or backend/data refused"
+  },
+  "audit_enforced_events": [
+    "sqlite3.connect",
+    "os.mkdir"
+  ],
+  "audit_scope_clarification": "The retained raw audit scope string is broad. This run enforced SQLite-open and mkdir events only; it did not instrument every raw file-write operation. Clean Git state was checked separately.",
+  "private_pg_cleanup": {
+    "stopped": true,
+    "removed": true
+  },
+  "worktree_clean": true,
+  "failures": [
+    "tests/contracts/test_dial_dev_boundary.py::test_the_gateway_serves_exactly_the_contract_routes",
+    "tests/contracts/test_dial_dev_boundary.py::test_every_dial_dev_path_the_phone_builds_is_one_the_gateway_serves"
+  ],
+  "cause": "The expected route set predated GET /v1/dial-dev/actions/{action_id}, already served and consumed by source39807eff and provided by pinned native DDS. Added exactly this read route; retained exact route equality, GET-only read methods, the sole proved POST action, Android leak scans and renamed-route negative controls. Production code unchanged.",
+  "followup_source_parent": "81e5576d6cd724b9aaaad15f57412c408604e7fc",
+  "followup": {
+    "tests": 20,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "passed": 20,
+    "seconds": 6.743,
+    "xml_sha256": "e42bdac09aecec404aa20f6fc7f561a0f8e752e5568da331c691689ad3731237"
+  },
+  "qualification": "Original failed full execution retained. Twenty passing corrected boundary/native-read cases do not convert that full run to PASS. No live/unit/native/production/handset acceptance."
+}

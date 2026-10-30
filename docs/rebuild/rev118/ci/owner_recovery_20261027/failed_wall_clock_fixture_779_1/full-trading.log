@@ -1,0 +1,164 @@
+........................................................................ [  9%]
+........................................................................ [ 18%]
+.........................................F.............................. [ 27%]
+........................................................................ [ 36%]
+........................................................................ [ 46%]
+........................................................................ [ 55%]
+........................................................................ [ 64%]
+........................................................................ [ 73%]
+........................................................................ [ 83%]
+........................................................................ [ 92%]
+............................................................             [100%]
+=================================== FAILURES ===================================
+____ test_a4_requires_one_time_biometric_signature_and_rejects_legacy_token ____
+
+client_and_app = (<httpx.AsyncClient object at 0x7f05e2386420>, <fastapi.applications.FastAPI object at 0x7f05e93da6f0>)
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-640/test_a4_requires_one_time_biom0')
+
+    @pytest.mark.asyncio
+    async def test_a4_requires_one_time_biometric_signature_and_rejects_legacy_token(client_and_app, tmp_path):
+        client, app = client_and_app
+        _seed_fresh_ledger(tmp_path / "vati.sqlite")
+        harness = OwnerAuthorityHarness()
+        app.state.trading.owner_authority = harness.verifier
+    
+        private_key = ec.generate_private_key(ec.SECP256R1())
+        device_id = "device-a4"
+        secret = "device-a4-secret"
+        device_token = await _pair(
+            client,
+            device_id=device_id,
+            secret=secret,
+            public_key_pem=_public_pem(private_key),
+        )
+        headers = {"X-Van-Device-Token": device_token}
+        text = "halt autonomous trading"
+    
+        issued = int(time.time())
+        first = await client.post(
+            "/v1/commands",
+            json=_signed_command(
+                app,
+                device_id=device_id,
+                text=text,
+                idempotency_key="a4-initial",
+                issued_at=issued,
+            ),
+            headers=headers,
+        )
+        assert first.status_code == 200
+        challenge = first.json()
+        assert challenge["status"] == "approval_required"
+        assert challenge["effective_action_class"] == "A4"
+        assert challenge["resolved_action_id"] == "trading.halt"
+        assert challenge["no_stale_replay"] is True
+        assert challenge["max_age_seconds"] == 5
+        assert challenge["approval_challenge"]
+    
+        fake = await client.post(
+            "/v1/commands",
+            json=_signed_command(
+                app,
+                device_id=device_id,
+                text=text,
+                idempotency_key="a4-fake-token",
+                issued_at=int(time.time()),
+                approval_token="owner-approved",
+            ),
+            headers=headers,
+        )
+        assert fake.status_code == 200
+        assert fake.json()["status"] == "approval_required"
+    
+        signature = private_key.sign(
+            challenge["approval_challenge"].encode("utf-8"),
+            ec.ECDSA(hashes.SHA256()),
+        )
+        proof = {
+            "challenge_id": challenge["approval_challenge_id"],
+            "signature_b64": base64.b64encode(signature).decode("ascii"),
+            "algorithm": "ECDSA_P256_SHA256",
+        }
+    
+        approved_at = int(time.time())
+        halt_token = harness.token(act="owner-halt", subject="van-trading-core")
+        approved = await client.post(
+            "/v1/commands",
+            json=_signed_command(
+                app,
+                device_id=device_id,
+                text=text,
+                idempotency_key="a4-approved",
+                issued_at=approved_at,
+                expires_at=approved_at + 5,
+                no_stale_replay=True,
+                approval_proof=proof,
+                client_context={"owner_halt_authority_ref": halt_token},
+            ),
+            headers=headers,
+        )
+        assert approved.status_code == 200
+        approved_body = approved.json()
+        # GAP-F-005 — the biometric approval this test proves is only half the A4 story now
+        # that trading.halt executes on the gateway: with a real owner-halt authority alongside
+        # it, the command reaches genuine VERIFIED_SUCCESS, not just "approval accepted".
+>       assert approved_body["status"] == "accepted"
+E       AssertionError: assert 'degraded' == 'accepted'
+E         
+E         - accepted
+E         + degraded
+
+backend/tests/test_a4_owner_approval.py:266: AssertionError
+----------------------------- Captured stdout call -----------------------------
+{"action_class": null, "command_id": null, "correlation_id": null, "degraded_code": null, "detail": {"duration_ms": 7190.08, "method": "POST", "route": "/v1/devices/pairing-ticket"}, "device_id": null, "error_class": null, "level": "INFO", "logger": "van.request", "message": "request", "mission_id": null, "principal": null, "result": "200", "service": "van-gateway", "ts": "2026-10-27T02:59:04.822Z"}
+{"action_class": null, "command_id": null, "correlation_id": null, "degraded_code": null, "detail": {"duration_ms": 41.09, "method": "POST", "route": "/v1/devices/pair"}, "device_id": null, "error_class": null, "level": "INFO", "logger": "van.request", "message": "request", "mission_id": null, "principal": null, "result": "200", "service": "van-gateway", "ts": "2026-10-27T02:59:05.013Z"}
+{"action_class": null, "command_id": null, "correlation_id": null, "degraded_code": null, "detail": {"duration_ms": 31, "fired": 0, "job": "reminders.fire_due", "published": 0}, "device_id": null, "error_class": null, "level": "INFO", "logger": "van.scheduler", "message": "scheduled job completed", "mission_id": null, "principal": null, "result": "OK", "service": "van-gateway", "ts": "2026-10-27T02:59:05.140Z"}
+{"action_class": "A4", "command_id": "f3c8c6c4-ca74-4132-a078-be94e617e77d", "correlation_id": "corr_b00b4b685d6f", "degraded_code": null, "detail": {"hermes_run_id": null, "origin_channel": "VOICE", "requires_approval": true, "resolved_action_id": "trading.halt"}, "device_id": "device-a4", "error_class": null, "level": "WARNING", "logger": "van.command", "message": "command outcome", "mission_id": null, "principal": "OWNER_DEVICE", "result": "approval_required", "service": "van-gateway", "ts": "2026-10-27T02:59:05.162Z"}
+{"action_class": null, "command_id": null, "correlation_id": null, "degraded_code": null, "detail": {"duration_ms": 138.75, "method": "POST", "route": "/v1/commands"}, "device_id": null, "error_class": null, "level": "INFO", "logger": "van.request", "message": "request", "mission_id": null, "principal": null, "result": "200", "service": "van-gateway", "ts": "2026-10-27T02:59:05.163Z"}
+{"action_class": null, "command_id": null, "correlation_id": null, "degraded_code": null, "detail": {"duration_ms": 14, "expired": 0, "job": "missions.expire_overdue"}, "device_id": null, "error_class": null, "level": "INFO", "logger": "van.scheduler", "message": "scheduled job completed", "mission_id": null, "principal": null, "result": "OK", "service": "van-gateway", "ts": "2026-10-27T02:59:05.167Z"}
+{"action_class": null, "command_id": null, "correlation_id": null, "degraded_code": null, "detail": {"duration_ms": 11, "job": "missions.publish_terminal", "published": 0}, "device_id": null, "error_class": null, "level": "INFO", "logger": "van.scheduler", "message": "scheduled job completed", "mission_id": null, "principal": null, "result": "OK", "service": "van-gateway", "ts": "2026-10-27T02:59:05.187Z"}
+{"action_class": null, "command_id": null, "correlation_id": null, "degraded_code": null, "detail": {"duration_ms": 19, "job": "learning.repair_missions", "pending": 0, "repaired": 0, "retry_pending": 0}, "device_id": null, "error_class": null, "level": "INFO", "logger": "van.scheduler", "message": "scheduled job completed", "mission_id": null, "principal": null, "result": "OK", "service": "van-gateway", "ts": "2026-10-27T02:59:05.227Z"}
+{"action_class": "A4", "command_id": "ab421b69-349d-4d4e-84ea-2744845842f9", "correlation_id": "corr_10f67e97c76e", "degraded_code": null, "detail": {"hermes_run_id": null, "origin_channel": "VOICE", "requires_approval": true, "resolved_action_id": "trading.halt"}, "device_id": "device-a4", "error_class": null, "level": "WARNING", "logger": "van.command", "message": "command outcome", "mission_id": null, "principal": "OWNER_DEVICE", "result": "approval_required", "service": "van-gateway", "ts": "2026-10-27T02:59:05.308Z"}
+{"action_class": null, "command_id": null, "correlation_id": null, "degraded_code": null, "detail": {"duration_ms": 135.51, "method": "POST", "route": "/v1/commands"}, "device_id": null, "error_class": null, "level": "INFO", "logger": "van.request", "message": "request", "mission_id": null, "principal": null, "result": "200", "service": "van-gateway", "ts": "2026-10-27T02:59:05.309Z"}
+{"action_class": null, "command_id": null, "correlation_id": null, "degraded_code": null, "detail": {"audit_pruned": 0, "automation_transient_retired": 0, "deleted": 0, "duration_ms": 92, "job": "ops.retention", "tables": 79}, "device_id": null, "error_class": null, "level": "INFO", "logger": "van.scheduler", "message": "scheduled job completed", "mission_id": null, "principal": null, "result": "OK", "service": "van-gateway", "ts": "2026-10-27T02:59:05.335Z"}
+{"action_class": null, "command_id": null, "correlation_id": null, "degraded_code": null, "detail": {"duration_ms": 2966, "job": "proactive.follow_ups", "produced": {"decisions_open": 0, "intents_stale": 0, "missions_expired": 0, "missions_waiting": 0}, "total": 0}, "device_id": null, "error_class": null, "level": "INFO", "logger": "van.scheduler", "message": "scheduled job completed", "mission_id": null, "principal": null, "result": "OK", "service": "van-gateway", "ts": "2026-10-27T02:59:08.619Z"}
+{"action_class": null, "command_id": null, "correlation_id": null, "degraded_code": null, "detail": {"checked": 0, "due": 0, "duration_ms": 2602, "failed": 0, "job": "owner.watches", "published": 0, "triggered": 0}, "device_id": null, "error_class": null, "level": "INFO", "logger": "van.scheduler", "message": "scheduled job completed", "mission_id": null, "principal": null, "result": "OK", "service": "van-gateway", "ts": "2026-10-27T02:59:11.349Z"}
+{"action_class": null, "command_id": null, "correlation_id": null, "degraded_code": null, "detail": {"duration_ms": 293, "job": "trading.publish_closed", "ledger_available": true, "published": 0}, "device_id": null, "error_class": null, "level": "INFO", "logger": "van.scheduler", "message": "scheduled job completed", "mission_id": null, "principal": null, "result": "OK", "service": "van-gateway", "ts": "2026-10-27T02:59:11.662Z"}
+{"action_class": null, "command_id": null, "correlation_id": null, "degraded_code": null, "detail": {"attention_projected": 0, "duration_ms": 1958, "evaluated": 0, "job": "trading.market_monitors", "triggered": 0}, "device_id": null, "error_class": null, "level": "INFO", "logger": "van.scheduler", "message": "scheduled job completed", "mission_id": null, "principal": null, "result": "OK", "service": "van-gateway", "ts": "2026-10-27T02:59:14.554Z"}
+{"action_class": null, "command_id": null, "correlation_id": null, "degraded_code": null, "detail": {"demoted": 0, "duration_ms": 2388, "job": "learning.auto_demote"}, "device_id": null, "error_class": null, "level": "INFO", "logger": "van.scheduler", "message": "scheduled job completed", "mission_id": null, "principal": null, "result": "OK", "service": "van-gateway", "ts": "2026-10-27T02:59:19.529Z"}
+{"action_class": null, "command_id": null, "correlation_id": null, "degraded_code": null, "detail": {"duration_ms": 225, "job": "understanding.mark_stale_intents", "marked_stale": 0}, "device_id": null, "error_class": null, "level": "INFO", "logger": "van.scheduler", "message": "scheduled job completed", "mission_id": null, "principal": null, "result": "OK", "service": "van-gateway", "ts": "2026-10-27T02:59:22.109Z"}
+{"action_class": "A4", "command_id": "359ae83b-d918-407b-9272-672339213341", "correlation_id": "corr_9e903ece94d8", "degraded_code": "LOCAL_ACTION_AUTHORITY_MISMATCH", "detail": {"hermes_run_id": null, "origin_channel": "VOICE", "requires_approval": false, "resolved_action_id": "trading.halt"}, "device_id": "device-a4", "error_class": null, "level": "WARNING", "logger": "van.command", "message": "command outcome", "mission_id": "msn_e69733a631444d8d96580e8a0eb1c480", "principal": "OWNER_DEVICE", "result": "degraded", "service": "van-gateway", "ts": "2026-10-27T02:59:28.839Z"}
+{"action_class": null, "command_id": null, "correlation_id": null, "degraded_code": null, "detail": {"duration_ms": 23625.35, "method": "POST", "route": "/v1/commands"}, "device_id": null, "error_class": null, "level": "INFO", "logger": "van.request", "message": "request", "mission_id": null, "principal": null, "result": "200", "service": "van-gateway", "ts": "2026-10-27T02:59:28.951Z"}
+------------------------------ Captured log call -------------------------------
+INFO     van.request:logging.py:112 request
+INFO     van.request:logging.py:112 request
+INFO     van.scheduler:logging.py:112 scheduled job completed
+WARNING  van.command:logging.py:112 command outcome
+INFO     van.request:logging.py:112 request
+INFO     van.scheduler:logging.py:112 scheduled job completed
+INFO     van.scheduler:logging.py:112 scheduled job completed
+INFO     van.scheduler:logging.py:112 scheduled job completed
+WARNING  van.command:logging.py:112 command outcome
+INFO     van.request:logging.py:112 request
+INFO     van.scheduler:logging.py:112 scheduled job completed
+INFO     van.scheduler:logging.py:112 scheduled job completed
+INFO     van.scheduler:logging.py:112 scheduled job completed
+INFO     van.scheduler:logging.py:112 scheduled job completed
+INFO     van.scheduler:logging.py:112 scheduled job completed
+INFO     van.scheduler:logging.py:112 scheduled job completed
+INFO     van.scheduler:logging.py:112 scheduled job completed
+WARNING  van.command:logging.py:112 command outcome
+INFO     van.request:logging.py:112 request
+=============================== warnings summary ===============================
+../../van-backend-venv-20261025/lib/python3.12/site-packages/fastapi/testclient.py:1
+  /workspace/van-backend-venv-20261025/lib/python3.12/site-packages/fastapi/testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+    from starlette.testclient import TestClient as TestClient  # noqa
+
+../../van-backend-venv-20261025/lib/python3.12/site-packages/starlette/testclient.py:53
+  /workspace/van-backend-venv-20261025/lib/python3.12/site-packages/starlette/testclient.py:53: DeprecationWarning: The anyio.abc.BlockingPortal alias is deprecated, use anyio.from_thread.BlockingPortal instead.
+    _PortalFactoryType = Callable[[], AbstractContextManager[anyio.abc.BlockingPortal]]
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED backend/tests/test_a4_owner_approval.py::test_a4_requires_one_time_biometric_signature_and_rejects_legacy_token
+1 failed, 779 passed, 2 warnings in 573.72s (0:09:33)

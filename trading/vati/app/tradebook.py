@@ -28,6 +28,7 @@ class _Chain:
     review: Optional[Event] = None
     tickets: list[Event] = field(default_factory=list)
     router_refusal: Optional[str] = None
+    current_risk: Optional[Event] = None
 
 
 def _collect(ledger: Ledger) -> tuple[dict[str, _Chain], list[Event]]:
@@ -37,13 +38,15 @@ def _collect(ledger: Ledger) -> tuple[dict[str, _Chain], list[Event]]:
         if ev.kind is EventKind.OPPORTUNITY_ASSESSMENT:
             assessments.append(ev)
             continue
-        if ev.kind not in (EventKind.RISK_DECISION, EventKind.EXECUTION_RECEIPT, EventKind.TCA_RECORD, EventKind.TRADE_REVIEW, EventKind.OWNER_TICKET, EventKind.SESSION):
+        if ev.kind not in (EventKind.RISK_DECISION, EventKind.RISK_REVALIDATION, EventKind.EXECUTION_RECEIPT, EventKind.TCA_RECORD, EventKind.TRADE_REVIEW, EventKind.OWNER_TICKET, EventKind.SESSION):
             continue
         if ev.kind is EventKind.SESSION and "router_refused" not in ev.payload:
             continue
         c = chains.setdefault(ev.correlation_id, _Chain(ev.correlation_id))
         if ev.kind is EventKind.RISK_DECISION:
             c.decision = ev
+        elif ev.kind is EventKind.RISK_REVALIDATION:
+            c.current_risk = ev
         elif ev.kind is EventKind.EXECUTION_RECEIPT:
             c.receipts.append(ev)
         elif ev.kind is EventKind.TCA_RECORD:
@@ -66,17 +69,24 @@ def _base_row(c: _Chain) -> Optional[dict[str, Any]]:
         return None
     intent = c.decision.payload["inputs"]["intent"]
     d = c.decision.payload["decision"]
+    from vati.execution.risk_refresh import reported_current_risk
     return {
         "trade_intent_id": c.intent_id, "symbol": intent["symbol"], "venue": intent["venue"], "direction": intent["direction"], "strategy_id": intent["strategy_id"],
         "strategy_version": intent.get("strategy_version"), "horizon": intent.get("horizon"), "entry": intent.get("entry"), "stop": intent.get("stop"),
         "expected_gross_move_pct": intent.get("expected_gross_move_pct"), "requested_risk_pct": d.get("requested_risk_pct"), "approved_risk_pct": d.get("approved_risk_pct"),
         "approved_size": d.get("approved_size"), "risk_decision": d.get("decision"), "reason_code": d.get("reason_code"), "decision_hash": d.get("decision_hash"),
         "decided_ms": c.decision.event_time_ms, "confidence": _intent_conf(intent),
+        'current_risk':reported_current_risk(c.current_risk,c.decision),
     }
 
 
 def _entry_receipt(c: _Chain) -> Optional[Event]:
-    return next((r for r in c.receipts if r.payload.get("status") in ENTRY_STATUSES and not r.payload.get("exit_action")), None)
+    first = next((r for r in c.receipts if r.payload.get("status") in ENTRY_STATUSES and not r.payload.get("exit_action")), None)
+    if first is not None and first.payload.get("reject_reason") == "PENDING":
+        # A resting entry (P1-TRADE-EXEC-004): its fill arrives later as PENDING_FILLED.
+        filled = next((r for r in c.receipts if r.payload.get("reject_reason") == "PENDING_FILLED"), None)
+        return filled or first
+    return first
 
 
 def past_trades(chains: Iterable[_Chain]) -> list[dict]:
@@ -150,6 +160,10 @@ def potential_trades(chains: dict[str, _Chain], assessments: list[Event], *, lim
             continue   # stale refusals are history, not potential
         if row["risk_decision"] == "REJECTED":
             row.update({"kind": "RISK_REJECTED", "label": f"REJECTED:{row['reason_code']}", "reasons": [c.decision.payload["decision"].get("reason_detail", "")], "assessed_ms": row["decided_ms"]})
+            out.append(row)
+        elif row['current_risk']['state']=='REFUSED' and _entry_receipt(c) is None and c.review is None:
+            row.update({'kind':'RISK_RECHECK_REFUSED','label':'RISK_RECHECK_REFUSED',
+                'reasons':[row['current_risk']['reason_detail']],'assessed_ms':row['current_risk']['received_at_ms']})
             out.append(row)
         elif c.router_refusal and _entry_receipt(c) is None and c.review is None:
             row.update({"kind": "ROUTER_REFUSED", "label": "ROUTER_REFUSED", "reasons": [c.router_refusal], "assessed_ms": row["decided_ms"]})

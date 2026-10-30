@@ -1,0 +1,152 @@
+{
+  "actual_VATI_application_tests_executed": 0,
+  "certificate_issued": false,
+  "commands": [
+    {
+      "application_acceptance_test": false,
+      "command": [
+        "python",
+        "verification/verify_rev114.py",
+        "--json"
+      ],
+      "exit_code": 0,
+      "id": "core_document_check",
+      "project_runtime_test": false,
+      "scope": "LOCAL_DOCUMENT_PROCESSING_AND_SYNTHETIC_CONTRACT_CHECK_ONLY",
+      "stderr": "verification/receipts_rev114/core_document_check.stderr",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout": "verification/receipts_rev114/core_document_check.stdout",
+      "stdout_sha256": "4435dad2d9006c3b8741b6e7beefb46fd4707e48be7fef49970f3dbdd993a832"
+    },
+    {
+      "application_acceptance_test": false,
+      "command": [
+        "python",
+        "verification/verify_rev114.py",
+        "--selftest",
+        "--json"
+      ],
+      "exit_code": 0,
+      "id": "core_adversarial_check",
+      "project_runtime_test": false,
+      "scope": "LOCAL_DOCUMENT_PROCESSING_AND_SYNTHETIC_CONTRACT_CHECK_ONLY",
+      "stderr": "verification/receipts_rev114/core_adversarial_check.stderr",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout": "verification/receipts_rev114/core_adversarial_check.stdout",
+      "stdout_sha256": "b2bc0a57bb2524c2edb1db948101dee4c27a07c0d9c0807f3765e33e697e72d3"
+    },
+    {
+      "application_acceptance_test": false,
+      "command": [
+        "python",
+        "plan/render_plan.py",
+        "--check"
+      ],
+      "exit_code": 0,
+      "id": "rendered_plan_check",
+      "project_runtime_test": false,
+      "scope": "LOCAL_DOCUMENT_PROCESSING_AND_SYNTHETIC_CONTRACT_CHECK_ONLY",
+      "stderr": "verification/receipts_rev114/rendered_plan_check.stderr",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout": "verification/receipts_rev114/rendered_plan_check.stdout",
+      "stdout_sha256": "0ec4f6bf704d3e7909f93ce436b19036a7174eae77a85b4a9d5bb9f39b10e92b"
+    },
+    {
+      "application_acceptance_test": false,
+      "command": [
+        "python",
+        "verification/verify_news_readiness.py"
+      ],
+      "exit_code": 0,
+      "id": "news_contract_check",
+      "project_runtime_test": false,
+      "scope": "LOCAL_DOCUMENT_PROCESSING_AND_SYNTHETIC_CONTRACT_CHECK_ONLY",
+      "stderr": "verification/receipts_rev114/news_contract_check.stderr",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout": "verification/receipts_rev114/news_contract_check.stdout",
+      "stdout_sha256": "8e4fca4ac8ad63edd5e6b8abbfe2bfbfcc942beb24db5b99852201699a743976"
+    },
+    {
+      "application_acceptance_test": false,
+      "command": [
+        "python",
+        "verification/verify_news_readiness.py",
+        "--selftest"
+      ],
+      "exit_code": 0,
+      "id": "news_contract_negative",
+      "project_runtime_test": false,
+      "scope": "LOCAL_DOCUMENT_PROCESSING_AND_SYNTHETIC_CONTRACT_CHECK_ONLY",
+      "stderr": "verification/receipts_rev114/news_contract_negative.stderr",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout": "verification/receipts_rev114/news_contract_negative.stdout",
+      "stdout_sha256": "6703ac7be53a613d04b1447769a006b08d1c133ae5b79cca35a539078a08266a"
+    },
+    {
+      "application_acceptance_test": false,
+      "command": [
+        "python",
+        "verification/verify_forecast_contracts.py"
+      ],
+      "exit_code": 0,
+      "id": "forecast_contract_check",
+      "project_runtime_test": false,
+      "scope": "LOCAL_DOCUMENT_PROCESSING_AND_SYNTHETIC_CONTRACT_CHECK_ONLY",
+      "stderr": "verification/receipts_rev114/forecast_contract_check.stderr",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout": "verification/receipts_rev114/forecast_contract_check.stdout",
+      "stdout_sha256": "14ddb9bd28ff7c3f2ac814251765d791c1431c7d3a23100e02fb2af11eb62e76"
+    },
+    {
+      "application_acceptance_test": false,
+      "command": [
+        "python",
+        "verification/verify_forecast_contracts.py",
+        "--selftest"
+      ],
+      "exit_code": 0,
+      "id": "forecast_contract_negative",
+      "project_runtime_test": false,
+      "scope": "LOCAL_DOCUMENT_PROCESSING_AND_SYNTHETIC_CONTRACT_CHECK_ONLY",
+      "stderr": "verification/receipts_rev114/forecast_contract_negative.stderr",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout": "verification/receipts_rev114/forecast_contract_negative.stdout",
+      "stdout_sha256": "e8873fc9604715833c7671d1385c99b764d848c0c4939acb868868f5fe48cf99"
+    },
+    {
+      "application_acceptance_test": false,
+      "command": [
+        "python",
+        "verification/verify_hva_contracts.py"
+      ],
+      "exit_code": 0,
+      "id": "hva_contract_check",
+      "project_runtime_test": false,
+      "scope": "LOCAL_DOCUMENT_PROCESSING_AND_SYNTHETIC_CONTRACT_CHECK_ONLY",
+      "stderr": "verification/receipts_rev114/hva_contract_check.stderr",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout": "verification/receipts_rev114/hva_contract_check.stdout",
+      "stdout_sha256": "e6f1bfb424f82919a1bbc9ad5f248c860739a5559c13d5e70e832980d8b3fe5c"
+    },
+    {
+      "application_acceptance_test": false,
+      "command": [
+        "python",
+        "verification/verify_hva_contracts.py",
+        "--selftest"
+      ],
+      "exit_code": 0,
+      "id": "hva_contract_negative",
+      "project_runtime_test": false,
+      "scope": "LOCAL_DOCUMENT_PROCESSING_AND_SYNTHETIC_CONTRACT_CHECK_ONLY",
+      "stderr": "verification/receipts_rev114/hva_contract_negative.stderr",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout": "verification/receipts_rev114/hva_contract_negative.stdout",
+      "stdout_sha256": "750d9a11dd3e6e21f94ca7b2a9521547baf65defa9595e68c73f2ea3ac106794"
+    }
+  ],
+  "date": "2026-10-18",
+  "economic_validation_performed": false,
+  "live_provider_calls": 0,
+  "schema": "van.document.receipts/1.0"
+}

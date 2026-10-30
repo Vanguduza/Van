@@ -1,0 +1,66 @@
+{
+  "schema": "van.rev118.basis-schema-dependency-boundary-source/1",
+  "source_parent": "25a0c3f89e387b83927632c8df1bdcd6ef4997e2",
+  "observed_at_utc": "2026-10-28T04:38:56.649449+00:00",
+  "source_files_sha256": {
+    "trading/tests/test_physical_baselines.py": "e30de9be0b14a6f706971c8ddf30e853c9df13b2d1114f3148c934da941748e4",
+    "tests/rebuild/test_native_risk_schema.py": "16e647e43589b764c226dca1555702c101cb4db0a79c505955bd9b91164075be"
+  },
+  "issue": "Published25a hosted trading collection imports documentary-only jsonschema from trading/tests/test_physical_baselines.py; five importing modules fail before trading cases execute.",
+  "correction": "Keep actual native SQL/serializer roundtrip checks in trading without documentary dependency. Validate both original native source fixture bodies plus positive/malformed optional basis references in the existing isolated JSON Schema suite. Original27requiredfields/rootclosure and all serialization/schema assertions remain covered. No runtime lock, workflow, runtime application code or source authority changed.",
+  "hosted_parent": {
+    "main_run": 40632571398,
+    "job": 122632125023,
+    "postgres_passed": 26,
+    "trading_collection_errors": 5,
+    "trading_passes_not_claimed": true,
+    "voice_pass_evidence": "NOT_EXECUTED_AFTER_COLLECTION_FAILURE",
+    "original_archive": {
+      "head": "25a0c3f89e387b83927632c8df1bdcd6ef4997e2",
+      "run": 40632571398,
+      "artifact_id": 12792560386,
+      "bytes": 3527,
+      "sha256": "18496f38fdc40da904baf3264b89b33e48cf42ff1b43cfebea4fb8506f0a4965",
+      "github_digest_size_crc_paths_verified": true,
+      "junit": [
+        {
+          "path": "postgres-ledger-report.xml",
+          "cases": 26,
+          "failed": 0,
+          "errors": 0,
+          "skips": 0
+        },
+        {
+          "path": "trading-source-report.xml",
+          "cases": 5,
+          "failed": 0,
+          "errors": 5,
+          "skips": 0
+        }
+      ]
+    }
+  },
+  "local": {
+    "actual_trading_passed_with_jsonschema_import_denied": 35,
+    "schema_passed_with_declared_rebuild_dependency": 41,
+    "skipped": 0,
+    "audit_violations": 0,
+    "entire_trading_collection_with_jsonschema_import_denied": {
+      "collected": 4610,
+      "exit": 0,
+      "meaning": "COLLECTION_ONLY_NOT_FUNCTIONAL_EXECUTION",
+      "excluded_uncommitted_future_packet": "trading/tests/test_original_native_collateral.py"
+    }
+  },
+  "unchanged_parent_evidence": {
+    "runtime_application_python_matches_published_parent": true,
+    "changed_original1196_python_inputs": [
+      "trading/tests/test_physical_baselines.py"
+    ],
+    "original444SQL_result": "Parent25a evidence retained, not rerun or relabelled as current tests",
+    "original215rebuild_result": "Parent25a evidence retained;41affected schema checks rerun"
+  },
+  "remaining": "Fix/publication/exactCI; continue original collateral/reservations/backend programme. Two untracked collateral read-component files remain separately backed-up WIP with12sourcechecks, not in this repair.",
+  "formal_acceptances_issued": 0,
+  "native_or_production_qualification_issued": false
+}

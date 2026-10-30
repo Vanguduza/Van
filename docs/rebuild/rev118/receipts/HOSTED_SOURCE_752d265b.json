@@ -1,0 +1,159 @@
+{
+  "schema": "van.hosted-exact-source/1",
+  "source_head": "752d265b11ba643ed309481b110248f8b7fe323b",
+  "tested_merge": "ff833a8dbfcfc5a7c86a15fe1543aadabacdd9de",
+  "merge_comparison": {
+    "repository_full_name": "Vanguduza/Van",
+    "base": "752d265b11ba643ed309481b110248f8b7fe323b",
+    "head": "ff833a8dbfcfc5a7c86a15fe1543aadabacdd9de",
+    "status": "ahead",
+    "ahead_by": 1,
+    "behind_by": 0,
+    "total_commits": 1,
+    "too_large": null,
+    "base_commit": {
+      "sha": "752d265b11ba643ed309481b110248f8b7fe323b",
+      "url": "https://api.github.com/repos/Vanguduza/Van/commits/752d265b11ba643ed309481b110248f8b7fe323b",
+      "html_url": "https://github.com/Vanguduza/Van/commit/752d265b11ba643ed309481b110248f8b7fe323b"
+    },
+    "merge_base_commit": {
+      "sha": "752d265b11ba643ed309481b110248f8b7fe323b",
+      "url": "https://api.github.com/repos/Vanguduza/Van/commits/752d265b11ba643ed309481b110248f8b7fe323b",
+      "html_url": "https://github.com/Vanguduza/Van/commit/752d265b11ba643ed309481b110248f8b7fe323b"
+    },
+    "files": []
+  },
+  "run": 40255331558,
+  "status": "TERMINAL_FAILURE",
+  "public_source_jobs_passed": 17,
+  "mandatory_failures": [
+    {
+      "id": 121355848368,
+      "name": "project-truth-ledger",
+      "status": "completed",
+      "conclusion": "failure",
+      "failed_steps": [
+        "Project Truth ledger (trusted checker, every new commit has an authorized row)"
+      ]
+    },
+    {
+      "id": 121355848379,
+      "name": "backend",
+      "status": "completed",
+      "conclusion": "failure",
+      "failed_steps": [
+        "Require the DDS contract read key"
+      ]
+    }
+  ],
+  "junit": [
+    {
+      "file": "van-market-monitor-source/report.xml",
+      "total": 258,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "passed": 258
+    },
+    {
+      "file": "van-browser-guard-source/uid-report.xml",
+      "total": 1,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "passed": 1
+    },
+    {
+      "file": "van-browser-guard-source/full-report.xml",
+      "total": 1548,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 1,
+      "passed": 1547
+    },
+    {
+      "file": "van-browser-guard-source/report.xml",
+      "total": 11,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "passed": 11
+    },
+    {
+      "file": "van-browser-guard-source/firewall-report.xml",
+      "total": 10,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "passed": 10
+    },
+    {
+      "file": "van-postgres-ledger-report/trading-source-report.xml",
+      "total": 3496,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 1,
+      "passed": 3495
+    },
+    {
+      "file": "van-postgres-ledger-report/voice-source-report.xml",
+      "total": 117,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "passed": 117
+    },
+    {
+      "file": "van-postgres-ledger-report/postgres-ledger-report.xml",
+      "total": 26,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "passed": 26
+    },
+    {
+      "file": "van-actual-release-guards/report.xml",
+      "total": 2,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "passed": 2
+    },
+    {
+      "file": "van-backend-public-source/media-report.xml",
+      "total": 198,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "passed": 198
+    },
+    {
+      "file": "van-backend-public-source/gateway-report.xml",
+      "total": 5782,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 7,
+      "passed": 5775
+    }
+  ],
+  "android_emulator": {
+    "tests": 22,
+    "passed": 18,
+    "failed": 0,
+    "declared_skips": 4,
+    "s24_acceptance": false
+  },
+  "canonical_mutations": {
+    "cases": 374,
+    "edits": 383,
+    "caught": 374,
+    "survived": 0,
+    "duplicates": 0,
+    "unexecuted": 0,
+    "identity_counter_match": true
+  },
+  "artifact_digest_matches": 15,
+  "evidence": "ci/hosted_752d265b_20261026",
+  "later_source_qualified": false,
+  "native_or_unit_acceptance": false
+}

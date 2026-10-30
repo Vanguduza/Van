@@ -1,0 +1,25 @@
+[Unit]
+Description=VAN fixed-route HTTPS browser media ingress
+After=network-online.target van-browser-stream@public.service van-browser-stream@owner.service van-browser-ingress-stage.service
+Requires=van-browser-ingress-stage.service
+
+[Service]
+Type=simple
+User=van-browser-ingress
+Group=van-browser-ingress
+RuntimeDirectory=van-browser-ingress
+RuntimeDirectoryMode=0700
+ExecStart=@NGINX_EXECUTABLE@ -c /etc/van-browser-stream/media-ingress.conf -g "daemon off;"
+Restart=on-failure
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ProtectProc=invisible
+ProcSubset=pid
+ReadWritePaths=/run/van-browser-ingress /var/lib/van-browser-transfers/.ingress
+InaccessiblePaths=-/var/lib/van-browser-profiles -/etc/van-browser-stream/profiles -/run/docker.sock
+UMask=0077
+
+[Install]
+WantedBy=multi-user.target

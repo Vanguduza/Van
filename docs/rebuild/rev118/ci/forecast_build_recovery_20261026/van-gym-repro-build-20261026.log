@@ -1,0 +1,93 @@
+#0 building with "default" instance using docker driver
+
+#1 [internal] load build definition from Dockerfile
+#1 transferring dockerfile: 926B 0.0s done
+#1 DONE 0.0s
+
+#2 [internal] load metadata for docker.io/library/python@sha256:6a0e06f5ba0b373d051aabd3fffb9b873f27f9a2a3a14bcbe37dee6f0e3bbc70
+#2 DONE 0.0s
+
+#3 [internal] load .dockerignore
+#3 transferring context: 2B done
+#3 DONE 0.0s
+
+#4 [builder 1/5] FROM docker.io/library/python@sha256:6a0e06f5ba0b373d051aabd3fffb9b873f27f9a2a3a14bcbe37dee6f0e3bbc70
+#4 CACHED
+
+#5 [internal] load build context
+#5 transferring context: 453B done
+#5 DONE 0.0s
+
+#6 [builder 2/5] WORKDIR /build
+#6 DONE 6.5s
+
+#7 [builder 3/5] COPY build.lock gym.lock ./
+#7 DONE 2.9s
+
+#8 [builder 4/5] RUN --mount=type=secret,id=system_ca,required=true PIP_CERT=/run/secrets/system_ca python -m pip install --no-deps --require-hashes -r build.lock
+#8 5.646 Collecting packaging==26.3 (from -r build.lock (line 1))
+#8 6.303   Downloading packaging-26.3-py3-none-any.whl (129 kB)
+#8 6.799 Collecting setuptools==84.2.1 (from -r build.lock (line 2))
+#8 6.955   Downloading setuptools-84.2.1-py3-none-any.whl (876 kB)
+#8 7.423      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 876.3/876.3 kB 1.5 MB/s eta 0:00:00
+#8 7.799 Collecting wheel==0.48.0 (from -r build.lock (line 3))
+#8 8.088   Downloading wheel-0.48.0-py3-none-any.whl (33 kB)
+#8 8.112 Installing collected packages: wheel, setuptools, packaging
+#8 10.29 Successfully installed packaging-26.3 setuptools-84.2.1 wheel-0.48.0
+#8 10.29 WARNING: Running pip as the 'root' user can result in broken permissions and conflicting behaviour with the system package manager, possibly rendering your system unusable. It is recommended to use a virtual environment instead: https://pip.pypa.io/warnings/venv. Use the --root-user-action option if you know what you are doing and want to suppress this warning.
+#8 10.96 
+#8 10.96 [notice] A new release of pip is available: 25.0.1 -> 26.2.2
+#8 10.96 [notice] To update, run: pip install --upgrade pip
+#8 DONE 11.4s
+
+#9 [builder 5/5] RUN --mount=type=secret,id=system_ca,required=true export SOURCE_DATE_EPOCH=315532800 PIP_CERT=/run/secrets/system_ca &&     PYTHONHASHSEED=0 python -m pip wheel --no-cache-dir --no-deps --no-build-isolation --require-hashes -r gym.lock --wheel-dir /out/seed0a &&     PYTHONHASHSEED=0 python -m pip wheel --no-cache-dir --no-deps --no-build-isolation --require-hashes -r gym.lock --wheel-dir /out/seed0b &&     PYTHONHASHSEED=1 python -m pip wheel --no-cache-dir --no-deps --no-build-isolation --require-hashes -r gym.lock --wheel-dir /out/seed1
+#9 3.071 Collecting gym==0.26.2 (from -r gym.lock (line 1))
+#9 3.441   Downloading gym-0.26.2.tar.gz (721 kB)
+#9 3.513      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 721.7/721.7 kB 17.9 MB/s eta 0:00:00
+#9 3.637   Preparing metadata (pyproject.toml): started
+#9 4.135   Preparing metadata (pyproject.toml): finished with status 'done'
+#9 4.156 Building wheels for collected packages: gym
+#9 4.157   Building wheel for gym (pyproject.toml): started
+#9 4.735   Building wheel for gym (pyproject.toml): finished with status 'done'
+#9 4.739   Created wheel for gym: filename=gym-0.26.2-py3-none-any.whl size=827728 sha256=62ee4cd5b252e1bd45211a7ab59823446575e91062db8503faf9c2744de1e3e1
+#9 4.739   Stored in directory: /tmp/pip-ephem-wheel-cache-vtmfhaei/wheels/95/51/6c/9bb05ebbe7c5cb8171dfaa3611f32622ca4658d53f31c79077
+#9 4.745 Successfully built gym
+#9 5.384 
+#9 5.384 [notice] A new release of pip is available: 25.0.1 -> 26.2.2
+#9 5.384 [notice] To update, run: pip install --upgrade pip
+#9 6.582 Collecting gym==0.26.2 (from -r gym.lock (line 1))
+#9 6.931   Downloading gym-0.26.2.tar.gz (721 kB)
+#9 7.273      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 721.7/721.7 kB 6.4 MB/s eta 0:00:00
+#9 7.402   Preparing metadata (pyproject.toml): started
+#9 7.776   Preparing metadata (pyproject.toml): finished with status 'done'
+#9 7.791 Building wheels for collected packages: gym
+#9 7.793   Building wheel for gym (pyproject.toml): started
+#9 9.173   Building wheel for gym (pyproject.toml): finished with status 'done'
+#9 9.177   Created wheel for gym: filename=gym-0.26.2-py3-none-any.whl size=827728 sha256=62ee4cd5b252e1bd45211a7ab59823446575e91062db8503faf9c2744de1e3e1
+#9 9.177   Stored in directory: /tmp/pip-ephem-wheel-cache-ss7wd6la/wheels/95/51/6c/9bb05ebbe7c5cb8171dfaa3611f32622ca4658d53f31c79077
+#9 9.182 Successfully built gym
+#9 9.823 
+#9 9.823 [notice] A new release of pip is available: 25.0.1 -> 26.2.2
+#9 9.823 [notice] To update, run: pip install --upgrade pip
+#9 11.68 Collecting gym==0.26.2 (from -r gym.lock (line 1))
+#9 12.14   Downloading gym-0.26.2.tar.gz (721 kB)
+#9 12.32      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 721.7/721.7 kB 6.4 MB/s eta 0:00:00
+#9 12.62   Preparing metadata (pyproject.toml): started
+#9 13.30   Preparing metadata (pyproject.toml): finished with status 'done'
+#9 13.32 Building wheels for collected packages: gym
+#9 13.32   Building wheel for gym (pyproject.toml): started
+#9 13.98   Building wheel for gym (pyproject.toml): finished with status 'done'
+#9 13.98   Created wheel for gym: filename=gym-0.26.2-py3-none-any.whl size=827726 sha256=2294b62dd24726e4d3255c94570f5f334974d54f8d1888c79bfa0bc421409da8
+#9 13.98   Stored in directory: /tmp/pip-ephem-wheel-cache-3hb6hz11/wheels/95/51/6c/9bb05ebbe7c5cb8171dfaa3611f32622ca4658d53f31c79077
+#9 13.99 Successfully built gym
+#9 14.33 
+#9 14.33 [notice] A new release of pip is available: 25.0.1 -> 26.2.2
+#9 14.33 [notice] To update, run: pip install --upgrade pip
+#9 DONE 14.6s
+
+#10 [export 1/1] COPY --from=builder /out/ /
+#10 DONE 0.0s
+
+#11 exporting to client directory
+#11 copying files 2.48MB 0.0s done
+#11 DONE 0.0s

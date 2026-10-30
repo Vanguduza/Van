@@ -177,7 +177,7 @@ def _signed_command(
 
 
 @pytest.mark.asyncio
-async def test_a4_requires_one_time_biometric_signature_and_rejects_legacy_token(client_and_app, tmp_path):
+async def test_a4_requires_one_time_biometric_signature_and_rejects_legacy_token(client_and_app, tmp_path, monkeypatch):
     client, app = client_and_app
     _seed_fresh_ledger(tmp_path / "vati.sqlite")
     harness = OwnerAuthorityHarness()
@@ -195,6 +195,10 @@ async def test_a4_requires_one_time_biometric_signature_and_rejects_legacy_token
     headers = {"X-Van-Device-Token": device_token}
     text = "halt autonomous trading"
 
+    # Positive proof/replay control, not a host-speed benchmark. Retain the
+    # signed five-second window; expiry across real SQL waits is tested separately.
+    fixture_now = int(time.time())
+    monkeypatch.setattr(time, "time", lambda: fixture_now)
     issued = int(time.time())
     first = await client.post(
         "/v1/commands",

@@ -1,0 +1,33 @@
+Traceback (most recent call last):
+  File "/workspace/van-review-2026-10-18/publish/tools/rebuild/run_forecast_runtime_smoke.py", line 90, in execute
+    try:self.call(args,timeout=180)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/van-review-2026-10-18/publish/tools/rebuild/run_forecast_runtime_smoke.py", line 54, in call
+    return subprocess.run(self.docker+args,env=self.env,text=True,capture_output=True,timeout=timeout,check=check)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/subprocess.py", line 550, in run
+    stdout, stderr = process.communicate(input, timeout=timeout)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/subprocess.py", line 1209, in communicate
+    stdout, stderr = self._communicate(input, endtime, timeout)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/subprocess.py", line 2116, in _communicate
+    self._check_timeout(endtime, orig_timeout, stdout, stderr)
+  File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/subprocess.py", line 1253, in _check_timeout
+    raise TimeoutExpired(
+subprocess.TimeoutExpired: Command '['docker', '--host=unix:///var/run/docker.sock', 'create', '--name', 'van-ml004-3cbef2112a4e45f0954466bcc00e02cc', '--label', 'van.ml004.run=van-ml004-3cbef2112a4e45f0954466bcc00e02cc', '--network', 'none', '--init', '--read-only', '--cap-drop', 'ALL', '--security-opt', 'no-new-privileges', '--user', '1000:1000', '--pids-limit', '256', '--cpus', '2.0', '--memory', '6442450944', '--tmpfs', '/tmp:rw,nosuid,nodev,size=512m,mode=1777', '--workdir', '/work', '--mount', 'type=bind,source=/workspace/van-ml004-active-source-r1-20261026/source/vati_forecast_worker,target=/opt/van/vati_forecast_worker,readonly', '--mount', 'type=bind,source=/workspace/van-ml004-active-source-r1-20261026/inference,target=/work', '--mount', 'type=bind,source=/workspace/van-ml004-active-source-r1-20261026/research/model-bundle,target=/artifacts,readonly', '--env', 'HTTP_PROXY=', '--env', 'HTTPS_PROXY=', '--env', 'ALL_PROXY=', '--env', 'NO_PROXY=', '--env', 'http_proxy=', '--env', 'https_proxy=', '--env', 'all_proxy=', '--env', 'no_proxy=', '--env', 'OMP_NUM_THREADS=1', '--env', 'OPENBLAS_NUM_THREADS=1', '--env', 'MKL_NUM_THREADS=1', '--env', 'NUMEXPR_NUM_THREADS=1', '--env', 'ARROW_NUM_THREADS=1', '--env', 'VAN_MODEL_WORKER_ROLE=INFERENCE_FIXTURE_SMOKE', '--env', 'HOME=/tmp/van-model-worker', '--env', 'MPLCONFIGDIR=/tmp/matplotlib', '--env', 'PYTHONPATH=/opt/van', '--env', 'PYTHONDONTWRITEBYTECODE=1', '--env', 'PYTHONHASHSEED=0', '--env', 'CUDA_VISIBLE_DEVICES=', '--env', 'GPG_KEY=', '--env', 'HF_HUB_OFFLINE=1', '--env', 'DO_NOT_TRACK=1', '--env', 'MLFLOW_DISABLE_TELEMETRY=true', '--env', 'FEAST_USAGE=False', '--env', 'RAY_USAGE_STATS_ENABLED=0', 'sha256:07722805aed602c59b8250b8b08d6da005211ac72385964b9d78813329cab5da', 'python', '-m', 'vati_forecast_worker.inference_smoke']' timed out after 180 seconds
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/workspace/van-review-2026-10-18/publish/tools/rebuild/run_forecast_runtime_smoke.py", line 197, in <module>
+    if __name__=='__main__':raise SystemExit(main())
+                                             ^^^^^^
+  File "/workspace/van-review-2026-10-18/publish/tools/rebuild/run_forecast_runtime_smoke.py", line 194, in main
+    return run(args.image,args.output)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/van-review-2026-10-18/publish/tools/rebuild/run_forecast_runtime_smoke.py", line 162, in run
+    inference.execute(input_artifacts=output/'research/model-bundle')
+  File "/workspace/van-review-2026-10-18/publish/tools/rebuild/run_forecast_runtime_smoke.py", line 97, in execute
+    raise RuntimeError('CONTAINER_CREATE_UNKNOWN')
+RuntimeError: CONTAINER_CREATE_UNKNOWN

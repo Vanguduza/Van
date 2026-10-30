@@ -1,0 +1,33 @@
+......F                                                                  [100%]
+=================================== FAILURES ===================================
+_ test_actual_pending_owner_cannot_release_on_rejection_contradicted_by_original_native_fill _
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-220/test_actual_pending_owner_cann0')
+eurusd = SymbolContract(symbol='EURUSD', venue='mt5', base_currency='EUR', quote_currency='USD', account_currency='USD', contra...=Decimal('0'), max_adv_participation=Decimal('0.10'), liquidity_haircut=Decimal('0'), round_trip_cost_pct=Decimal('0'))
+
+    def test_actual_pending_owner_cannot_release_on_rejection_contradicted_by_original_native_fill(tmp_path,eurusd):
+        from vati.risk.physical_pending import project_pending_risk
+        from vati.risk.contracts import NativeAccountRiskContext
+        ledger,adapter,book,clock,command,binding=dispatched(tmp_path,eurusd,
+            receipt_changes={'status':'REJECTED','filled_qty':D('0'),'average_fill':None})
+        try:
+            q=book.lookup_entry(command.command_hash,binding['source_ref'])['observation']
+            context=NativeAccountRiskContext(**q['native_account_context']);owner=SimpleNamespace()
+            pending,issue=project_pending_risk(owner,ledger,context,(),now_ms=clock['ms'],contracts={})
+            assert pending==() and issue==''
+            observe(ledger,clock,[(1,2,7,200000,None)])
+            result=book.lookup_entry_volume(command.command_hash,binding['source_ref'],available_at_ms=clock['ms'])
+            assert result['state']=='NATIVE_DEALS_CONTRADICT_NO_EFFECT_RECEIPT'
+            pending,issue=project_pending_risk(owner,ledger,context,(),now_ms=clock['ms'],contracts={})
+>           assert pending==() and issue.startswith('NATIVE_PENDING_RISK_UNAVAILABLE:'), 'actual native fill must invalidate a no-effect release'
+E           AssertionError: actual native fill must invalidate a no-effect release
+E           assert (() == ()
+E             
+E             Use -v to get more diff and False)
+E            +  where False = <built-in method startswith of str object at 0x154dcc0>('NATIVE_PENDING_RISK_UNAVAILABLE:')
+E            +    where <built-in method startswith of str object at 0x154dcc0> = ''.startswith
+
+trading/tests/test_native_entry_volume.py:138: AssertionError
+=========================== short test summary info ============================
+FAILED trading/tests/test_native_entry_volume.py::test_actual_pending_owner_cannot_release_on_rejection_contradicted_by_original_native_fill
+1 failed, 6 passed in 1.97s

@@ -1,0 +1,52 @@
+.F...................................................................... [ 67%]
+..................................                                       [100%]
+=================================== FAILURES ===================================
+_ test_real_signed_poll_sql_ack_reopen_and_expired_replay_keep_first_completion _
+
+ea = <function ea.<locals>.run at 0x7fecaa60b1a0>
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-115/test_real_signed_poll_sql_ack_0')
+
+    def test_real_signed_poll_sql_ack_reopen_and_expired_replay_keep_first_completion(ea,tmp_path):
+        path=tmp_path/'bridge.sqlite';q=BridgeQueue(path);reopened=None
+        now={'ms':1700000000000};native=ea('snapshot')['account'];cmd=command();counter={'n':0}
+        app=create_pull_app(q,lambda alias:KEY if alias=='mt5_ea' else None,clock=lambda:now['ms'])
+        def poll(client,results):
+            counter['n']+=1;nonce='pending-'+str(counter['n']);ts=str(now['ms']//1000)
+            body=json.dumps({'account':native,'positions':[],'orders':[],'results':results}).encode()
+            return client.post('/ea/v1/mt5_ea/poll',content=body,headers={'content-type':'application/json',
+                'x-van-ts':ts,'x-van-nonce':nonce,'x-van-signature':sign_poll(KEY,ts,nonce,'mt5_ea',body)})
+        try:
+            with TestClient(app) as client:
+                assert poll(client,[]).status_code==200
+                adapter=Mt5PullAdapter(q,clock=lambda:now['ms'],timeout_s=3,poll_s=.005,
+                    identity=Mt5Identity('12345678','broker-demo','USD',True))
+                with ThreadPoolExecutor(max_workers=1) as pool:
+                    task=pool.submit(adapter.submit,cmd,now_ms=now['ms'])
+                    deadline=time.monotonic()+2
+                    while not q.native_entries('mt5_ea') and time.monotonic()<deadline:time.sleep(.005)
+                    offered=poll(client,[]);assert offered.status_code==200 and '|MARKET|' in offered.text
+                    cid=int(offered.text.split('|')[0]);now['ms']+=50
+                    response=ea('entry-market-accepted')['results'][0]|{'id':cid}
+                    assert poll(client,[response]).status_code==200
+                    receipt=task.result(timeout=3)
+                assert receipt.status=='ACCEPTED' and receipt.filled_qty==0
+                assert receipt.received_time_unix_ms==now['ms'] and receipt.broker_time_unix_ms==0
+                now['ms']+=60000;reopened=BridgeQueue(path)
+                recovered=Mt5PullAdapter(reopened,clock=lambda:now['ms']).recover_entry(cmd,now_ms=now['ms'])
+>               assert recovered==receipt and len(reopened.native_entries('mt5_ea'))==1
+E               AssertionError: assert (None == ExecutionReceipt(trade_intent_id='fixture', decision_hash='0000007b000000000000000000000000000000000000000000000000000...protective_stop_price=Decimal('1.12'), receipt_hash='45a87e213aafdbef2b9d95fd37bd101dfcaf35a25d1d499142f4e8113bef4c8f'))
+
+trading/tests/test_mt5_pending_receipts.py:63: AssertionError
+=============================== warnings summary ===============================
+../../van-backend-venv-20261025/lib/python3.12/site-packages/fastapi/testclient.py:1
+  /workspace/van-backend-venv-20261025/lib/python3.12/site-packages/fastapi/testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+    from starlette.testclient import TestClient as TestClient  # noqa
+
+../../van-backend-venv-20261025/lib/python3.12/site-packages/starlette/testclient.py:53
+  /workspace/van-backend-venv-20261025/lib/python3.12/site-packages/starlette/testclient.py:53: DeprecationWarning: The anyio.abc.BlockingPortal alias is deprecated, use anyio.from_thread.BlockingPortal instead.
+    _PortalFactoryType = Callable[[], AbstractContextManager[anyio.abc.BlockingPortal]]
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED trading/tests/test_mt5_pending_receipts.py::test_real_signed_poll_sql_ack_reopen_and_expired_replay_keep_first_completion
+1 failed, 105 passed, 2 warnings in 7.06s

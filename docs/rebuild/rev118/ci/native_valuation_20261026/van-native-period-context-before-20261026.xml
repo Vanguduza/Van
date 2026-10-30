@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="1" time="0.669" timestamp="2026-10-26T18:22:16.988940+00:00" hostname="2c5a245e39f1"><testcase classname="trading.tests.test_native_valuation" name="test_actual_period_drawdown_does_not_inherit_unrelated_decimal_rounding_or_traps" time="0.182"><failure message="AssertionError: assert ('MEASURED' == 'MEASURED'&#10;  &#10;    MEASURED and {'policy_vers...n': None, ...} == {'policy_vers...n': None, ...}&#10;  &#10;  Omitting 28 identical items, use -vv to show&#10;  Differing items:&#10;  {'performance': {'policy_version': 'funding-unitization/1.0.0', 'status': 'MEASURED', 'reason': None, 'scope_hash': '9416990f89cc231045967018d529f8f2a4f42488499c86fb9f71bedc2f9c7f3b', ...}} != {'performance': {'policy_version': 'funding-unitization/1.0.0', 'status': 'MEASURED', 'reason': None, 'scope_hash': '9416990f89cc231045967018d529f8f2a4f42488499c86fb9f71bedc2f9c7f3b', ...}}&#10;  Use -v to get more diff)">tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-486/test_actual_period_drawdown_do0')
+
+    def test_actual_period_drawdown_does_not_inherit_unrelated_decimal_rounding_or_traps(tmp_path):
+        from test_native_balance_reconciliation import observe
+        from vati.funding.reconciliation import period_report
+        with closing(Ledger(tmp_path/'period.sqlite')) as ledger:
+            snapshot(ledger,mark(1000,balance='3',equity='3'))
+            snapshot(ledger,mark(3000,balance='3',equity='2'))
+            scope=observe(ledger)
+            reports=[]
+            for rounding in (ROUND_UP,ROUND_DOWN):
+                with localcontext() as context:
+                    context.rounding=rounding
+                    reports.append(period_report(ledger,scope))
+&gt;           assert reports[0]['state']=='MEASURED' and reports[0]==reports[1]
+E           AssertionError: assert ('MEASURED' == 'MEASURED'
+E             
+E               MEASURED and {'policy_vers...n': None, ...} == {'policy_vers...n': None, ...}
+E             
+E             Omitting 28 identical items, use -vv to show
+E             Differing items:
+E             {'performance': {'policy_version': 'funding-unitization/1.0.0', 'status': 'MEASURED', 'reason': None, 'scope_hash': '9416990f89cc231045967018d529f8f2a4f42488499c86fb9f71bedc2f9c7f3b', ...}} != {'performance': {'policy_version': 'funding-unitization/1.0.0', 'status': 'MEASURED', 'reason': None, 'scope_hash': '9416990f89cc231045967018d529f8f2a4f42488499c86fb9f71bedc2f9c7f3b', ...}}
+E             Use -v to get more diff)
+
+trading/tests/test_native_valuation.py:118: AssertionError</failure></testcase></testsuite></testsuites>

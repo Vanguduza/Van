@@ -1,0 +1,3 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="1" time="0.184" timestamp="2026-10-25T02:24:07.237542+00:00" hostname="56ae90b2c83c"><testcase classname="tests.test_market_monitor_measurements" name="test_same_time_price_correction_cannot_become_a_new_level_trigger" time="0.002"><failure message="assert (not True)">backend/tests/test_market_monitor_measurements.py:185: in test_same_time_price_correction_cannot_become_a_new_level_trigger
+    assert not fire and corrected.reason == 'CORRECTED_OBSERVATION_BASELINE'
+E   assert (not True)</failure></testcase></testsuite></testsuites>

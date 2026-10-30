@@ -1,0 +1,35 @@
+{
+  "schema": "van.rebuild.news-durable-source/1",
+  "status": "SOURCE_TESTED_COMPONENT_NOT_UNIT_ACCEPTANCE",
+  "base_head": "ea272bf834445bf9f2369dbc4377f3aea548892c",
+  "updated_at_utc": "2026-10-26T00:10:29.219681+00:00",
+  "source_sha256": {
+    "trading/vati/core/events.py": "c45e18708bb9bc7c3f3857ce547b905acd6b764819dfc9a84e98822abd158249",
+    "trading/vati/events/news_ingress.py": "ee7a7546bfc463c8ab1de8c0bd68690dc7fc6d39119422825ba83ba9d73f6825",
+    "trading/tests/test_news_durable_publication.py": "0d758778c56be200b1c8090288004c1bb1353387a45377efdf264c0bd4ae99a1"
+  },
+  "executed": {
+    "initial_before": "8 actual SQL functional assertions fail, no setup errors",
+    "relay_before": "4 additional existing-API relay durability assertions fail,8 deselected",
+    "recovery_before": "6 new recovery contracts fail because from_ledger was absent; not counted as the existing-API functional regressions",
+    "impact_before": "1 same-time changed-evidence evaluation refused by colliding impact identity",
+    "initial_controls": "59 original publication controls,63 relay controls,69 recovery controls",
+    "expanded": "76 passed/2 PostgreSQL skips on local no-DSN selection",
+    "first_postgres": "24 passed/1 failed/maxfail1: misplaced native cold-recovery test block caused NameError in readback test; fixture cleaned; raw failure retained",
+    "corrected_postgres": "643 passed/0skip/audit0; final additional chain-corruption case then added",
+    "final_postgres": "646 passed/0skip/audit0/exact final source and test hashes in R3, actual pinned isolated PostgreSQL, owned fixture removed and owned test children waited",
+    "final_controls": "78 passed/0skip,2 PostgreSQL cases explicitly deselected locally and executed in final PostgreSQL selection",
+    "supplemental_faults": "8 final assertion-caught/0setup errors/0skips/audit0/exact restoration after the cold-missing guards; prior8 on older bytes retained",
+    "contracts": "Final owner/frontend no drift, canonical mutation registry preflight0findings, consolidation0findings",
+    "rebuild": "108 final documentary regressions passed after final source/continuation updates",
+    "cold_missing_before": "2 further actual SQL assertions fail: cold retry recreated a missing headline/first-observation receipt",
+    "intermediate_postgres": "644 passed/0skip/audit0 on prior source, before the cold-missing guards"
+  },
+  "evidence": "ci/news_durable_20261025",
+  "limits": [
+    "Historical declared-source evidence only, no native publisher/clock/provider/entitlement qualification",
+    "Full-chain recovery not an interruptible host-time sandbox or production capacity qualification",
+    "Runtime builders still need cold recovery and source-health/failure wiring; malformed stream handling remains",
+    "Whole BE014 IN_PROGRESS; no unit/native/owner/F15/BG001/provider/economic/production/S24 acceptance"
+  ]
+}

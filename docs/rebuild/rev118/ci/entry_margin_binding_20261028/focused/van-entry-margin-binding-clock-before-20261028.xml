@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="2" skipped="0" tests="2" time="0.759" timestamp="2026-10-28T16:30:15.288993+00:00" hostname="6e9feff21467"><testcase classname="trading.tests.test_entry_margin_binding" name="test_quote_and_binding_share_one_monotonic_original_storage_clock[quote]" time="0.376"><failure message="Failed: DID NOT RAISE NativeMarginError">tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-148/test_quote_and_binding_share_o0')
+eurusd = SymbolContract(symbol='EURUSD', venue='mt5', base_currency='EUR', quote_currency='USD', account_currency='USD', contra...=Decimal('0'), max_adv_participation=Decimal('0.10'), liquidity_haircut=Decimal('0'), round_trip_cost_pct=Decimal('0'))
+later = 'quote'
+
+    @pytest.mark.parametrize('later',['quote','binding'])
+    def test_quote_and_binding_share_one_monotonic_original_storage_clock(tmp_path,eurusd,later):
+        sdk,adapter,now,ledger,event,book=mt5_entry(tmp_path,eurusd)
+        try:
+            cmd=entry_command(event)
+            raw=book.capture(adapter,event.hash,cmd.symbol,cmd.quantity,price=cmd.entry_price,
+                direction=cmd.direction,deadline_ms=NOW*1000+2000)
+            now['ms']+=1
+            if later=='quote':
+                book.capture(adapter,event.hash,cmd.symbol,cmd.quantity,price=cmd.entry_price,
+                    direction=cmd.direction,deadline_ms=NOW*1000+2000)
+            else:book.bind_entry(event.hash,cmd,raw['source_ref'])
+            before=ledger.count();now['ms']-=1
+&gt;           with pytest.raises(NativeMarginError,match='CLOCK_REGRESSED'):
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           Failed: DID NOT RAISE NativeMarginError
+
+trading/tests/test_entry_margin_binding.py:253: Failed</failure></testcase><testcase classname="trading.tests.test_entry_margin_binding" name="test_quote_and_binding_share_one_monotonic_original_storage_clock[binding]" time="0.039"><failure message="Failed: DID NOT RAISE NativeMarginError">tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-148/test_quote_and_binding_share_o1')
+eurusd = SymbolContract(symbol='EURUSD', venue='mt5', base_currency='EUR', quote_currency='USD', account_currency='USD', contra...=Decimal('0'), max_adv_participation=Decimal('0.10'), liquidity_haircut=Decimal('0'), round_trip_cost_pct=Decimal('0'))
+later = 'binding'
+
+    @pytest.mark.parametrize('later',['quote','binding'])
+    def test_quote_and_binding_share_one_monotonic_original_storage_clock(tmp_path,eurusd,later):
+        sdk,adapter,now,ledger,event,book=mt5_entry(tmp_path,eurusd)
+        try:
+            cmd=entry_command(event)
+            raw=book.capture(adapter,event.hash,cmd.symbol,cmd.quantity,price=cmd.entry_price,
+                direction=cmd.direction,deadline_ms=NOW*1000+2000)
+            now['ms']+=1
+            if later=='quote':
+                book.capture(adapter,event.hash,cmd.symbol,cmd.quantity,price=cmd.entry_price,
+                    direction=cmd.direction,deadline_ms=NOW*1000+2000)
+            else:book.bind_entry(event.hash,cmd,raw['source_ref'])
+            before=ledger.count();now['ms']-=1
+&gt;           with pytest.raises(NativeMarginError,match='CLOCK_REGRESSED'):
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           Failed: DID NOT RAISE NativeMarginError
+
+trading/tests/test_entry_margin_binding.py:253: Failed</failure></testcase></testsuite></testsuites>

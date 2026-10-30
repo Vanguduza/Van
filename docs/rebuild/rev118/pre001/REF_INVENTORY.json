@@ -1,0 +1,1930 @@
+{
+ "branch_count": 72,
+ "pr_state": "PR_STATE_20261021.json",
+ "pull_count": 104,
+ "refs_snapshot": "REMOTE_REFS_20261021T171448Z.txt",
+ "refs_snapshot_sha256": "fbc379e4965d1d434934ee7e77153aee41de539e2ca23984c336dc4dda294ae8",
+ "rows": [
+  {
+   "archive_tag": "archive/van-20261021/ccr-71397b02-lm6fid",
+   "evaluated_sha": "bdd63a40174d36ccdd0ceb8f3fb258c612df8bbe",
+   "evaluation_disposition": "INTEGRATED",
+   "id": "ccr-71397b02-lm6fid",
+   "kind": "branch",
+   "live_sha": "bdd63a40174d36ccdd0ceb8f3fb258c612df8bbe",
+   "needs_disposition": false,
+   "state": "UNCHANGED_SINCE_EVALUATION"
+  },
+  {
+   "archive_tag": "archive/van-20261021/ccr-8f1201e9-w1xm0r",
+   "evaluated_sha": "a39f241b0135cf92cc5a6b9a28af226aa294603d",
+   "evaluation_disposition": "INTEGRATED",
+   "id": "ccr-8f1201e9-w1xm0r",
+   "kind": "branch",
+   "live_sha": "a39f241b0135cf92cc5a6b9a28af226aa294603d",
+   "needs_disposition": false,
+   "state": "UNCHANGED_SINCE_EVALUATION"
+  },
+  {
+   "archive_tag": null,
+   "evaluated_sha": null,
+   "evaluation_disposition": null,
+   "id": "ccr-9e07e1af-8mgz1p",
+   "kind": "branch",
+   "live_sha": "33c6e818d9611fd3b1b68a3341a51e61a92ead90",
+   "needs_disposition": true,
+   "state": "NEW_SINCE_EVALUATION"
+  },
+  {
+   "archive_tag": "archive/van-20261021/chatgpt/allow-sandboxed-playwright-userns-20261008",
+   "evaluated_sha": "504a3f6759ffff9d13fe3528037be041a6536088",
+   "evaluation_disposition": "ALREADY_IN_MAIN",
+   "id": "chatgpt/allow-sandboxed-playwright-userns-20261008",
+   "kind": "branch",
+   "live_sha": "504a3f6759ffff9d13fe3528037be041a6536088",
+   "needs_disposition": false,
+   "state": "UNCHANGED_SINCE_EVALUATION"
+  },
+  {
+   "archive_tag": "archive/van-20261021/chatgpt/better-remote-commander-oci-20261021",
+   "evaluated_sha": "739e5904d4fb747c08e8d89a92ac4e242adf5db4",
+   "evaluation_disposition": "PRESERVED_CANDIDATE",
+   "id": "chatgpt/better-remote-commander-oci-20261021",
+   "kind": "branch",
+   "live_sha": "739e5904d4fb747c08e8d89a92ac4e242adf5db4",
+   "needs_disposition": false,
+   "state": "UNCHANGED_SINCE_EVALUATION"
+  },
+  {
+   "archive_tag": "archive/van-20261021/chatgpt/fix-browser-harness-pillow-pin-20261008",
+   "evaluated_sha": "1e9e18a710d77cdc0ab046ad09f78d903cb7f3ec",
+   "evaluation_disposition": "ALREADY_IN_MAIN",
+   "id": "chatgpt/fix-browser-harness-pillow-pin-20261008",
+   "kind": "branch",
+   "live_sha": "1e9e18a710d77cdc0ab046ad09f78d903cb7f3ec",
+   "needs_disposition": false,
+   "state": "UNCHANGED_SINCE_EVALUATION"
+  },
+  {
+   "archive_tag": "archive/van-20261021/chatgpt/fix-browser-runtime-ancestor-acl-20261008",
+   "evaluated_sha": "5dcf149693598dc6ad0998a7ed63ecfd45d4e8a5",
+   "evaluation_disposition": "RECONCILED_IN_SOURCE",
+   "id": "chatgpt/fix-browser-runtime-ancestor-acl-20261008",
+   "kind": "branch",
+   "live_sha": "5dcf149693598dc6ad0998a7ed63ecfd45d4e8a5",
+   "needs_disposition": false,
+   "state": "UNCHANGED_SINCE_EVALUATION"
+  },
+  {
+   "archive_tag": "archive/van-20261021/chatgpt/fix-browser-runtime-path-access-20261008",
+   "evaluated_sha": "b8af36e4ed354ba7f55582dbdd8e2a36b15ae9a1",
+   "evaluation_disposition": "ALREADY_IN_MAIN",
+   "id": "chatgpt/fix-browser-runtime-path-access-20261008",
+   "kind": "branch",
+   "live_sha": "b8af36e4ed354ba7f55582dbdd8e2a36b15ae9a1",
+   "needs_disposition": false,
+   "state": "UNCHANGED_SINCE_EVALUATION"
+  },
+  {
+   "archive_tag": "archive/van-20261021/chatgpt/fix-browser-runtime-path-perms-20261008",
+   "evaluated_sha": "1698430078d8cd2e1309b7bfa24a0043349ea811",
+   "evaluation_disposition": "ALREADY_IN_MAIN",
+   "id": "chatgpt/fix-browser-runtime-path-perms-20261008",
+   "kind": "branch",
+   "live_sha": "1698430078d8cd2e1309b7bfa24a0043349ea811",
+   "needs_disposition": false,
+   "state": "UNCHANGED_SINCE_EVALUATION"
+  },
+  {
+   "archive_tag": "archive/van-20261021/chatgpt/fix-browser-systemd-retry-20261008",
+   "evaluated_sha": "36690fd7c65660aea667e953eab8455e707271a1",
+   "evaluation_disposition": "RECONCILED_IN_SOURCE",
+   "id": "chatgpt/fix-browser-systemd-retry-20261008",
+   "kind": "branch",
+   "live_sha": "36690fd7c65660aea667e953eab8455e707271a1",
+   "needs_disposition": false,
+   "state": "UNCHANGED_SINCE_EVALUATION"
+  },
+  {
+   "archive_tag": "archive/van-20261021/chatgpt/fix-browser-systemd-retry2-20261008",
+   "evaluated_sha": "71a01e7a5450b38e42068fe2b7a580e7230f2aa3",
+   "evaluation_disposition": "ALREADY_IN_MAIN",
+   "id": "chatgpt/fix-browser-systemd-retry2-20261008",
+   "kind": "branch",
+   "live_sha": "71a01e7a5450b38e42068fe2b7a580e7230f2aa3",
+   "needs_disposition": false,
+   "state": "UNCHANGED_SINCE_EVALUATION"
+  },
+  {
+   "archive_tag": "archive/van-20261021/chatgpt/fix-browser-systemd-startlimit-20261008",
+   "evaluated_sha": "71a01e7a5450b38e42068fe2b7a580e7230f2aa3",
+   "evaluation_disposition": "ALREADY_IN_MAIN",
+   "id": "chatgpt/fix-browser-systemd-startlimit-20261008",
+   "kind": "branch",
+   "live_sha": "71a01e7a5450b38e42068fe2b7a580e7230f2aa3",
+   "needs_disposition": false,
+   "state": "UNCHANGED_SINCE_EVALUATION"
+  },
+  {
+   "archive_tag": "archive/van-20261021/chatgpt/fix-gateway-browser-runtime-staging-20261008",
+   "evaluated_sha": "5402cabb1c854518839b7544e591eb7ea6f901a3",
+   "evaluation_disposition": "RECONCILED_IN_SOURCE",
+   "id": "chatgpt/fix-gateway-browser-runtime-staging-20261008",
+   "kind": "branch",
+   "live_sha": "5402cabb1c854518839b7544e591eb7ea6f901a3",
+   "needs_disposition": false,
+   "state": "UNCHANGED_SINCE_EVALUATION"
+  },
+  {
+   "archive_tag": "archive/van-20261021/chatgpt/fix-stagehand-listen-syntax-20261008",
+   "evaluated_sha": "6ade5eed60b7574d5296c9d3eb6770fd8de6368f",
+   "evaluation_disposition": "PATCH_EQUIVALENT_SUPERSEDED",
+   "id": "chatgpt/fix-stagehand-listen-syntax-20261008",
+   "kind": "branch",
+   "live_sha": "6ade5eed60b7574d5296c9d3eb6770fd8de6368f",
+   "needs_disposition": false,
+   "state": "UNCHANGED_SINCE_EVALUATION"
+  },
+  {
+   "archive_tag": "archive/van-20261021/chatgpt/fix-stagehand-listen-syntax-v2-20261008",
+   "evaluated_sha": "96bc3590a0cd48a6083441d7a27e4b8f8bf46683",
+   "evaluation_disposition": "ALREADY_IN_MAIN",
+   "id": "chatgpt/fix-stagehand-listen-syntax-v2-20261008",
+   "kind": "branch",
+   "live_sha": "96bc3590a0cd48a6083441d7a27e4b8f8bf46683",
+   "needs_disposition": false,
+   "state": "UNCHANGED_SINCE_EVALUATION"
+  },
+  {
+   "archive_tag": "archive/van-20261021/chatgpt/fix-stagehand-readiness-window-20261008",
+   "evaluated_sha": "7043d0aadd42322c16393e3fabb3a35113986de1",
+   "evaluation_disposition": "ALREADY_IN_MAIN",
+   "id": "chatgpt/fix-stagehand-readiness-window-20261008",
+   "kind": "branch",
+   "live_sha": "7043d0aadd42322c16393e3fabb3a35113986de1",
+   "needs_disposition": false,
+   "state": "UNCHANGED_SINCE_EVALUATION"
+  },
+  {
+   "archive_tag": "archive/van-20261021/chatgpt/harden-playwright-chromium-ownership-20261008",
+   "evaluated_sha": "306834775ab3e0e33c54bc72828a04f04cd7f135",
+   "evaluation_disposition": "ALREADY_IN_MAIN",
+   "id": "chatgpt/harden-playwright-chromium-ownership-20261008",
+   "kind": "branch",
+   "live_sha": "306834775ab3e0e33c54bc72828a04f04cd7f135",
+   "needs_disposition": false,
+   "state": "UNCHANGED_SINCE_EVALUATION"
+  },
+  {
+   "archive_tag": "archive/van-20261021/chatgpt/stage-browser-governance-certification-20261008",
+   "evaluated_sha": "7231caf101cf89f33316c133a2ac99e87eb3e9b4",
+   "evaluation_disposition": "ALREADY_IN_MAIN",
+   "id": "chatgpt/stage-browser-governance-certification-20261008",
+   "kind": "branch",
+   "live_sha": "7231caf101cf89f33316c133a2ac99e87eb3e9b4",
+   "needs_disposition": false,
+   "state": "UNCHANGED_SINCE_EVALUATION"
+  },
+  {
+   "archive_tag": "archive/van-20261021/chatgpt/van-browser-assignment-proof-20261008",
+   "evaluated_sha": "1b3c6d014f68a61e3360fde57d2c269d351ea239",
+   "evaluation_disposition": "ALREADY_IN_MAIN",
+   "id": "chatgpt/van-browser-assignment-proof-20261008",
+   "kind": "branch",
+   "live_sha": "1b3c6d014f68a61e3360fde57d2c269d351ea239",
+   "needs_disposition": false,
+   "state": "UNCHANGED_SINCE_EVALUATION"
+  },
+  {
+   "archive_tag": "archive/van-20261021/chatgpt/van-browser-sandbox-launch-20261008",
+   "evaluated_sha": "5ffa59ef2bf0003b5248749c5692fdb1a4eceed4",
+   "evaluation_disposition": "ALREADY_IN_MAIN",
+   "id": "chatgpt/van-browser-sandbox-launch-20261008",
+   "kind": "branch",
+   "live_sha": "5ffa59ef2bf0003b5248749c5692fdb1a4eceed4",
+   "needs_disposition": false,
+   "state": "UNCHANGED_SINCE_EVALUATION"
+  },
+  {
+   "archive_tag": "archive/van-20261021/chatgpt/van-browser-task-read-auth-20261008",
+   "evaluated_sha": "9cab59773476713b9ffa23f4d2277820bb6005df",
+   "evaluation_disposition": "ALREADY_IN_MAIN",
+   "id": "chatgpt/van-browser-task-read-auth-20261008",
+   "kind": "branch",
+   "live_sha": "9cab59773476713b9ffa23f4d2277820bb6005df",
+   "needs_disposition": false,
+   "state": "UNCHANGED_SINCE_EVALUATION"
+  },
+  {
+   "archive_tag": "archive/van-20261021/chatgpt/van-browser-tested-source-20261008",
+   "evaluated_sha": "e22080c496dbc2862bb9cbdd47007116e99008af",
+   "evaluation_disposition": "ALREADY_IN_MAIN",
+   "id": "chatgpt/van-browser-tested-source-20261008",
+   "kind": "branch",
+   "live_sha": "e22080c496dbc2862bb9cbdd47007116e99008af",
+   "needs_disposition": false,
+   "state": "UNCHANGED_SINCE_EVALUATION"
+  },
+  {
+   "archive_tag": "archive/van-20261021/chatgpt/van-overlay-firewall-persistence-20261007",
+   "evaluated_sha": "cc60ea8edacde5d545ada67b7af08e1e3623655c",
+   "evaluation_disposition": "INTEGRATED_ANCESTOR",
+   "id": "chatgpt/van-overlay-firewall-persistence-20261007",
+   "kind": "branch",
+   "live_sha": "cc60ea8edacde5d545ada67b7af08e1e3623655c",
+   "needs_disposition": false,
+   "state": "UNCHANGED_SINCE_EVALUATION"
+  },
+  {
+   "archive_tag": "archive/van-20261021/chatgpt/van-web-acquisition-fabric-20261004",
+   "evaluated_sha": "01e7d84a1edd6e902619b284fac1a1e560a2d38d",
+   "evaluation_disposition": "INTEGRATED_ANCESTOR",
+   "id": "chatgpt/van-web-acquisition-fabric-20261004",
+   "kind": "branch",
+   "live_sha": "01e7d84a1edd6e902619b284fac1a1e560a2d38d",
+   "needs_disposition": false,
+   "state": "UNCHANGED_SINCE_EVALUATION"
+  },
+  {
+   "archive_tag": "archive/van-20261021/chatgpt/vati-opportunity-modes-20261008",
+   "evaluated_sha": "923ecf9bbb81a2b3b485a3730071279851596b06",
+   "evaluation_disposition": "INTEGRATED_ANCESTOR",
+   "id": "chatgpt/vati-opportunity-modes-20261008",
+   "kind": "branch",
+   "live_sha": "923ecf9bbb81a2b3b485a3730071279851596b06",
+   "needs_disposition": false,
+   "state": "UNCHANGED_SINCE_EVALUATION"
+  },
+  {
+   "archive_tag": "archive/van-20261021/claude/busy-bardeen-sbfo2u",
+   "evaluated_sha": "4554ee22e438ec0362bd7048321b29320aef073d",
+   "evaluation_disposition": "ALREADY_IN_MAIN",
+   "id": "claude/busy-bardeen-sbfo2u",
+   "kind": "branch",
+   "live_sha": "4554ee22e438ec0362bd7048321b29320aef073d",
+   "needs_disposition": false,
+   "state": "UNCHANGED_SINCE_EVALUATION"
+  },
+  {
+   "archive_tag": "archive/van-20261021/claude/van-fable-forensic-audit-ds8g0o",
+   "evaluated_sha": "620cba868ab94439c2158043c5f8bc5f661ee024",
+   "evaluation_disposition": "HISTORICAL_EVIDENCE",
+   "id": "claude/van-fable-forensic-audit-ds8g0o",
+   "kind": "branch",
+   "live_sha": "620cba868ab94439c2158043c5f8bc5f661ee024",
+   "needs_disposition": false,
+   "state": "UNCHANGED_SINCE_EVALUATION"
+  },
+  {
+   "archive_tag": "archive/van-20261021/claude/van-forge-audit-11n4wh",
+   "evaluated_sha": "2ff009646e4b4933d0313550e6cbfd5238c7199f",
+   "evaluation_disposition": "PRESERVED_CANDIDATE",
+   "id": "claude/van-forge-audit-11n4wh",
+   "kind": "branch",
+   "live_sha": "2ff009646e4b4933d0313550e6cbfd5238c7199f",
+   "needs_disposition": false,
+   "state": "UNCHANGED_SINCE_EVALUATION"
+  },
+  {
+   "archive_tag": "archive/van-20261021/codex/cognitive-fabric-r161-20261006",
+   "evaluated_sha": "c091d22ce21728de33b5c8318385a147809dc207",
+   "evaluation_disposition": "INTEGRATED_ANCESTOR",
+   "id": "codex/cognitive-fabric-r161-20261006",
+   "kind": "branch",
+   "live_sha": "c091d22ce21728de33b5c8318385a147809dc207",
+   "needs_disposition": false,
+   "state": "UNCHANGED_SINCE_EVALUATION"
+  },
+  {
+   "archive_tag": "archive/van-20261021/codex/van-canon-ci-import-path-2026-10-08",
+   "evaluated_sha": "4ad31883d57ab518ba9af414aa849db6e240eb71",
+   "evaluation_disposition": "INTEGRATED_ANCESTOR",
+   "id": "codex/van-canon-ci-import-path-2026-10-08",
+   "kind": "branch",
+   "live_sha": "4ad31883d57ab518ba9af414aa849db6e240eb71",
+   "needs_disposition": false,
+   "state": "UNCHANGED_SINCE_EVALUATION"
+  },
+  {
+   "archive_tag": "archive/van-20261021/codex/van-canon-consolidation-2026-10-08",
+   "evaluated_sha": "dfc1557ab99ad8d41cf84714e1bb671e89b045e6",
+   "evaluation_disposition": "INTEGRATED_ANCESTOR",
+   "id": "codex/van-canon-consolidation-2026-10-08",
+   "kind": "branch",
+   "live_sha": "dfc1557ab99ad8d41cf84714e1bb671e89b045e6",
+   "needs_disposition": false,
+   "state": "UNCHANGED_SINCE_EVALUATION"
+  },
+  {
+   "archive_tag": "archive/van-20261021/codex/van-canon-runtime-closure-2026-10-09",
+   "evaluated_sha": "dfc1557ab99ad8d41cf84714e1bb671e89b045e6",
+   "evaluation_disposition": "INTEGRATED_ANCESTOR",
+   "id": "codex/van-canon-runtime-closure-2026-10-09",
+   "kind": "branch",
+   "live_sha": "dfc1557ab99ad8d41cf84714e1bb671e89b045e6",
+   "needs_disposition": false,
+   "state": "UNCHANGED_SINCE_EVALUATION"
+  },
+  {
+   "archive_tag": "archive/van-20261021/codex/van-canon-runtime-evidence-2026-10-09",
+   "evaluated_sha": "c502cf7ab5c29b262719c4ed7eebf55ac3fe4647",
+   "evaluation_disposition": "HISTORICAL_EVIDENCE",
+   "id": "codex/van-canon-runtime-evidence-2026-10-09",
+   "kind": "branch",
+   "live_sha": "c502cf7ab5c29b262719c4ed7eebf55ac3fe4647",
+   "needs_disposition": false,
+   "state": "UNCHANGED_SINCE_EVALUATION"
+  },
+  {
+   "archive_tag": "archive/van-20261021/codex/van-dfc1557a-direct-acceptance-2026-10-09",
+   "evaluated_sha": "ab59c8cd0498a3bf64cd6e7fca22f4dfddb2bfce",
+   "evaluation_disposition": "HISTORICAL_EVIDENCE",
+   "id": "codex/van-dfc1557a-direct-acceptance-2026-10-09",
+   "kind": "branch",
+   "live_sha": "ab59c8cd0498a3bf64cd6e7fca22f4dfddb2bfce",
+   "needs_disposition": false,
+   "state": "UNCHANGED_SINCE_EVALUATION"
+  },
+  {
+   "archive_tag": "archive/van-20261021/codex/van-direct-artemis-2026-10-08",
+   "evaluated_sha": "f3cab5cb75d73f0255c60a6639a2df43dbb08d90",
+   "evaluation_disposition": "INTEGRATED_ANCESTOR",
+   "id": "codex/van-direct-artemis-2026-10-08",
+   "kind": "branch",
+   "live_sha": "f3cab5cb75d73f0255c60a6639a2df43dbb08d90",
+   "needs_disposition": false,
+   "state": "UNCHANGED_SINCE_EVALUATION"
+  },
+  {
+   "archive_tag": "archive/van-20261021/codex/van-owner-core-only-2026-10-08",
+   "evaluated_sha": "75e2e95b734b29f8e6aa54eadde53a0348c9c499",
+   "evaluation_disposition": "INTEGRATED_ANCESTOR",
+   "id": "codex/van-owner-core-only-2026-10-08",
+   "kind": "branch",
+   "live_sha": "75e2e95b734b29f8e6aa54eadde53a0348c9c499",
+   "needs_disposition": false,
+   "state": "UNCHANGED_SINCE_EVALUATION"
+  },
+  {
+   "archive_tag": "archive/van-20261021/codex/van-owner-wiring-2026-10-08",
+   "evaluated_sha": "652ef3f38717c808f57fcbc97f92d1030f9ab4a8",
+   "evaluation_disposition": "INTEGRATED_ANCESTOR",
+   "id": "codex/van-owner-wiring-2026-10-08",
+   "kind": "branch",
+   "live_sha": "652ef3f38717c808f57fcbc97f92d1030f9ab4a8",
+   "needs_disposition": false,
+   "state": "UNCHANGED_SINCE_EVALUATION"
+  },
+  {
+   "archive_tag": "archive/van-20261021/codex/van-project-truth-bootstrap-review-2026-10-09",
+   "evaluated_sha": "296d647d8755b6036ddb6bc66a5526b78db07029",
+   "evaluation_disposition": "RECONCILED_IN_SOURCE",
+   "id": "codex/van-project-truth-bootstrap-review-2026-10-09",
+   "kind": "branch",
+   "live_sha": "296d647d8755b6036ddb6bc66a5526b78db07029",
+   "needs_disposition": false,
+   "state": "UNCHANGED_SINCE_EVALUATION"
+  },
+  {
+   "archive_tag": null,
+   "evaluated_sha": null,
+   "evaluation_disposition": null,
+   "id": "consolidation/opus-clean-rev118-20261021",
+   "kind": "branch",
+   "live_sha": "b02075f327ea8180ab6d269eba358cf8c5479878",
+   "needs_disposition": true,
+   "state": "NEW_SINCE_EVALUATION"
+  },
+  {
+   "archive_tag": "archive/van-20261021/feat/supabase-one-install-multiproject-20261020",
+   "evaluated_sha": "16af4b93ebbc1971b25626d8ba40d14ac3f80bdf",
+   "evaluation_disposition": "PRESERVED_CANDIDATE",
+   "id": "feat/supabase-one-install-multiproject-20261020",
+   "kind": "branch",
+   "live_sha": "16af4b93ebbc1971b25626d8ba40d14ac3f80bdf",
+   "needs_disposition": false,
+   "state": "UNCHANGED_SINCE_EVALUATION"
+  },
+  {
+   "archive_tag": "archive/van-20261021/feature/muse-dual-surface-control-20261012",
+   "evaluated_sha": "0e825b44f559f44815cc9925f5dcbcaec5d7eb53",
+   "evaluation_disposition": "PRESERVED_CANDIDATE",
+   "id": "feature/muse-dual-surface-control-20261012",
+   "kind": "branch",
+   "live_sha": "0e825b44f559f44815cc9925f5dcbcaec5d7eb53",
+   "needs_disposition": false,
+   "state": "UNCHANGED_SINCE_EVALUATION"
+  },
+  {
+   "archive_tag": "archive/van-20261021/feature/rea-trading-accounts-tactile-20261015",
+   "evaluated_sha": "3b2c9e04df8736f0fbbccd16fcd3905cf1dbe240",
+   "evaluation_disposition": "INTEGRATED",
+   "id": "feature/rea-trading-accounts-tactile-20261015",
+   "kind": "branch",
+   "live_sha": "3b2c9e04df8736f0fbbccd16fcd3905cf1dbe240",
+   "needs_disposition": false,
+   "state": "UNCHANGED_SINCE_EVALUATION"
+  },
+  {
+   "archive_tag": "archive/van-20261021/fix/muse-zram-host-resilience-20261012",
+   "evaluated_sha": "72fe7fd07f2c3f9296a4b6eb1af0bf4d327aa964",
+   "evaluation_disposition": "PRESERVED_CANDIDATE",
+   "id": "fix/muse-zram-host-resilience-20261012",
+   "kind": "branch",
+   "live_sha": "72fe7fd07f2c3f9296a4b6eb1af0bf4d327aa964",
+   "needs_disposition": false,
+   "state": "UNCHANGED_SINCE_EVALUATION"
+  },
+  {
+   "archive_tag": "archive/van-20261021/forge/candidate-b-rive-mechanics-20260925",
+   "evaluated_sha": "80f3f0f304cf41945101dc502777fd8f02a4eab2",
+   "evaluation_disposition": "INTEGRATED_ANCESTOR",
+   "id": "forge/candidate-b-rive-mechanics-20260925",
+   "kind": "branch",
+   "live_sha": "80f3f0f304cf41945101dc502777fd8f02a4eab2",
+   "needs_disposition": false,
+   "state": "UNCHANGED_SINCE_EVALUATION"
+  },
+  {
+   "archive_tag": "archive/van-20261021/gpt/character-forge-netcup-env-hotfix-20260923",
+   "evaluated_sha": "9d20ce68b9b17fe246c8d77e7193b9aa89801c05",
+   "evaluation_disposition": "RECONCILED_IN_SOURCE",
+   "id": "gpt/character-forge-netcup-env-hotfix-20260923",
+   "kind": "branch",
+   "live_sha": "9d20ce68b9b17fe246c8d77e7193b9aa89801c05",
+   "needs_disposition": false,
+   "state": "UNCHANGED_SINCE_EVALUATION"
+  },
+  {
+   "archive_tag": "archive/van-20261021/gpt/character-forge-netcup-qualification-fix-20260923",
+   "evaluated_sha": "359ec7d12f7da26fd066ffb3159ef7f41bd32431",
+   "evaluation_disposition": "RECONCILED_IN_SOURCE",
+   "id": "gpt/character-forge-netcup-qualification-fix-20260923",
+   "kind": "branch",
+   "live_sha": "359ec7d12f7da26fd066ffb3159ef7f41bd32431",
+   "needs_disposition": false,
+   "state": "UNCHANGED_SINCE_EVALUATION"
+  },
+  {
+   "archive_tag": "archive/van-20261021/gpt/character-forge-production-closure-20260924",
+   "evaluated_sha": "4a858df1d355efd5da3efde940846b95e48e501a",
+   "evaluation_disposition": "ALREADY_IN_MAIN",
+   "id": "gpt/character-forge-production-closure-20260924",
+   "kind": "branch",
+   "live_sha": "4a858df1d355efd5da3efde940846b95e48e501a",
+   "needs_disposition": false,
+   "state": "UNCHANGED_SINCE_EVALUATION"
+  },
+  {
+   "archive_tag": "archive/van-20261021/gpt/jev-control-centre-20260925",
+   "evaluated_sha": "f3df7a10e12fc76d25f958e9f19cb0b25c798168",
+   "evaluation_disposition": "RECONCILED_IN_SOURCE",
+   "id": "gpt/jev-control-centre-20260925",
+   "kind": "branch",
+   "live_sha": "f3df7a10e12fc76d25f958e9f19cb0b25c798168",
+   "needs_disposition": false,
+   "state": "UNCHANGED_SINCE_EVALUATION"
+  },
+  {
+   "archive_tag": "archive/van-20261021/gpt/jev-openmuse-convergence-r1-van-20260929",
+   "evaluated_sha": "5138ae9a5e647e3e1700d64fc84bc9a21ca2cbb4",
+   "evaluation_disposition": "INTEGRATED_ANCESTOR",
+   "id": "gpt/jev-openmuse-convergence-r1-van-20260929",
+   "kind": "branch",
+   "live_sha": "5138ae9a5e647e3e1700d64fc84bc9a21ca2cbb4",
+   "needs_disposition": false,
+   "state": "UNCHANGED_SINCE_EVALUATION"
+  },
+  {
+   "archive_tag": "archive/van-20261021/gpt/jev-openmuse-convergence-r1-van-20260929-parent-ccr-integration",
+   "evaluated_sha": "78ca1baeccd859d57ade2f5f87c5723473544421",
+   "evaluation_disposition": "INTEGRATED_ANCESTOR",
+   "id": "gpt/jev-openmuse-convergence-r1-van-20260929-parent-ccr-integration",
+   "kind": "branch",
+   "live_sha": "78ca1baeccd859d57ade2f5f87c5723473544421",
+   "needs_disposition": false,
+   "state": "UNCHANGED_SINCE_EVALUATION"
+  },
+  {
+   "archive_tag": "archive/van-20261021/gpt/memory-fabric-rev1-2-van-20260929",
+   "evaluated_sha": "8c67f53ee52298f31b0d6f0d68548a3e279515bd",
+   "evaluation_disposition": "INTEGRATED_ANCESTOR",
+   "id": "gpt/memory-fabric-rev1-2-van-20260929",
+   "kind": "branch",
+   "live_sha": "8c67f53ee52298f31b0d6f0d68548a3e279515bd",
+   "needs_disposition": false,
+   "state": "UNCHANGED_SINCE_EVALUATION"
+  },
+  {
+   "archive_tag": "archive/van-20261021/gpt/meta-muse-access-live-green-20261002",
+   "evaluated_sha": "f11a8949ba140be850f1135c46b5dd8b3d836cd5",
+   "evaluation_disposition": "HISTORICAL_EVIDENCE",
+   "id": "gpt/meta-muse-access-live-green-20261002",
+   "kind": "branch",
+   "live_sha": "f11a8949ba140be850f1135c46b5dd8b3d836cd5",
+   "needs_disposition": false,
+   "state": "UNCHANGED_SINCE_EVALUATION"
+  },
+  {
+   "archive_tag": "archive/van-20261021/gpt/meta-muse-secure-access-20261002",
+   "evaluated_sha": "51f84a38a7ae3ad45de9a64ef804fb35f9884a11",
+   "evaluation_disposition": "HISTORICAL_EVIDENCE",
+   "id": "gpt/meta-muse-secure-access-20261002",
+   "kind": "branch",
+   "live_sha": "51f84a38a7ae3ad45de9a64ef804fb35f9884a11",
+   "needs_disposition": false,
+   "state": "UNCHANGED_SINCE_EVALUATION"
+  },
+  {
+   "archive_tag": "archive/van-20261021/gpt/muse-egress-hardening-20260930",
+   "evaluated_sha": "4cac338e6d2069b9eb61014d39541ea1387acbb5",
+   "evaluation_disposition": "RECONCILED_IN_SOURCE",
+   "id": "gpt/muse-egress-hardening-20260930",
+   "kind": "branch",
+   "live_sha": "4cac338e6d2069b9eb61014d39541ea1387acbb5",
+   "needs_disposition": false,
+   "state": "UNCHANGED_SINCE_EVALUATION"
+  },
+  {
+   "archive_tag": "archive/van-20261021/gpt/openmuse-van-convergence-r1",
+   "evaluated_sha": "a8d3f1930ad9f6d479717ab1a5e161cfd2f87144",
+   "evaluation_disposition": "INTEGRATED_ANCESTOR",
+   "id": "gpt/openmuse-van-convergence-r1",
+   "kind": "branch",
+   "live_sha": "a8d3f1930ad9f6d479717ab1a5e161cfd2f87144",
+   "needs_disposition": false,
+   "state": "UNCHANGED_SINCE_EVALUATION"
+  },
+  {
+   "archive_tag": "archive/van-20261021/gpt/van-artemis-console-20260923",
+   "evaluated_sha": "ed7dd6179ca5e4a1c2ce1187dd02421df392dc4c",
+   "evaluation_disposition": "ALREADY_IN_MAIN",
+   "id": "gpt/van-artemis-console-20260923",
+   "kind": "branch",
+   "live_sha": "ed7dd6179ca5e4a1c2ce1187dd02421df392dc4c",
+   "needs_disposition": false,
+   "state": "UNCHANGED_SINCE_EVALUATION"
+  },
+  {
+   "archive_tag": "archive/van-20261021/gpt/van-character-forge-authority-closure-20260924",
+   "evaluated_sha": "49d8d4cf8ba613b2222fec48fb932f77d595c77b",
+   "evaluation_disposition": "ALREADY_IN_MAIN",
+   "id": "gpt/van-character-forge-authority-closure-20260924",
+   "kind": "branch",
+   "live_sha": "49d8d4cf8ba613b2222fec48fb932f77d595c77b",
+   "needs_disposition": false,
+   "state": "UNCHANGED_SINCE_EVALUATION"
+  },
+  {
+   "archive_tag": "archive/van-20261021/gpt/van-character-forge-engineering-20260922",
+   "evaluated_sha": "b8bc8a0795d1b22b880802c50494499bcafa25a0",
+   "evaluation_disposition": "ALREADY_IN_MAIN",
+   "id": "gpt/van-character-forge-engineering-20260922",
+   "kind": "branch",
+   "live_sha": "b8bc8a0795d1b22b880802c50494499bcafa25a0",
+   "needs_disposition": false,
+   "state": "UNCHANGED_SINCE_EVALUATION"
+  },
+  {
+   "archive_tag": "archive/van-20261021/gpt/van-character-forge-production-v3-20260924",
+   "evaluated_sha": "85610c9a2949abf22e9ad289624dcb8bd30cd5af",
+   "evaluation_disposition": "ALREADY_IN_MAIN",
+   "id": "gpt/van-character-forge-production-v3-20260924",
+   "kind": "branch",
+   "live_sha": "85610c9a2949abf22e9ad289624dcb8bd30cd5af",
+   "needs_disposition": false,
+   "state": "UNCHANGED_SINCE_EVALUATION"
+  },
+  {
+   "archive_tag": "archive/van-20261021/gpt/van-post-fable-product-closure-20260922",
+   "evaluated_sha": "67eee3f924d666f8622070e0732468bb49f444e6",
+   "evaluation_disposition": "ALREADY_IN_MAIN",
+   "id": "gpt/van-post-fable-product-closure-20260922",
+   "kind": "branch",
+   "live_sha": "67eee3f924d666f8622070e0732468bb49f444e6",
+   "needs_disposition": false,
+   "state": "UNCHANGED_SINCE_EVALUATION"
+  },
+  {
+   "archive_tag": "archive/van-20261021/gpt/van-rive-build-input-pack-20260924",
+   "evaluated_sha": "ae764c510de8d8ba99f8aa6e26e674b5a8fc6d79",
+   "evaluation_disposition": "RECONCILED_IN_SOURCE",
+   "id": "gpt/van-rive-build-input-pack-20260924",
+   "kind": "branch",
+   "live_sha": "ae764c510de8d8ba99f8aa6e26e674b5a8fc6d79",
+   "needs_disposition": false,
+   "state": "UNCHANGED_SINCE_EVALUATION"
+  },
+  {
+   "archive_tag": "archive/van-20261021/main",
+   "evaluated_sha": "8eb1889822fc8a83f219977c15340172e16acd91",
+   "evaluation_disposition": "ALREADY_IN_MAIN",
+   "id": "main",
+   "kind": "branch",
+   "live_sha": "8eb1889822fc8a83f219977c15340172e16acd91",
+   "needs_disposition": false,
+   "state": "UNCHANGED_SINCE_EVALUATION"
+  },
+  {
+   "archive_tag": "archive/van-20261021/muse/vati-opportunity-modes-20261008",
+   "evaluated_sha": "8eb1889822fc8a83f219977c15340172e16acd91",
+   "evaluation_disposition": "ALREADY_IN_MAIN",
+   "id": "muse/vati-opportunity-modes-20261008",
+   "kind": "branch",
+   "live_sha": "8eb1889822fc8a83f219977c15340172e16acd91",
+   "needs_disposition": false,
+   "state": "UNCHANGED_SINCE_EVALUATION"
+  },
+  {
+   "archive_tag": "archive/van-20261021/ops/dial-control-recovery-20260930",
+   "evaluated_sha": "72635c8832befcbb45ffe3d902707c61ef3ff1ec",
+   "evaluation_disposition": "PRESERVED_CANDIDATE",
+   "id": "ops/dial-control-recovery-20260930",
+   "kind": "branch",
+   "live_sha": "72635c8832befcbb45ffe3d902707c61ef3ff1ec",
+   "needs_disposition": false,
+   "state": "UNCHANGED_SINCE_EVALUATION"
+  },
+  {
+   "archive_tag": "archive/van-20261021/owner/dial-universe-whatsapp-browser-20261008",
+   "evaluated_sha": "c0c2984e1eadfb47351aa7449e2129049cede55e",
+   "evaluation_disposition": "ALREADY_IN_MAIN",
+   "id": "owner/dial-universe-whatsapp-browser-20261008",
+   "kind": "branch",
+   "live_sha": "c0c2984e1eadfb47351aa7449e2129049cede55e",
+   "needs_disposition": false,
+   "state": "UNCHANGED_SINCE_EVALUATION"
+  },
+  {
+   "archive_tag": "archive/van-20261021/platform/rev3-cinematic-studio-20261016",
+   "evaluated_sha": "4ad12183d9f65a23a2b4de51ed8ba6d1b6ca48c2",
+   "evaluation_disposition": "PRESERVED_CANDIDATE",
+   "id": "platform/rev3-cinematic-studio-20261016",
+   "kind": "branch",
+   "live_sha": "4ad12183d9f65a23a2b4de51ed8ba6d1b6ca48c2",
+   "needs_disposition": false,
+   "state": "UNCHANGED_SINCE_EVALUATION"
+  },
+  {
+   "archive_tag": "archive/van-20261021/platform/rev3-interaction-pr93-contribution-20261014",
+   "evaluated_sha": "081a547117ea7d585e2cb6089e2c88c76acc2355",
+   "evaluation_disposition": "PRESERVED_CANDIDATE",
+   "id": "platform/rev3-interaction-pr93-contribution-20261014",
+   "kind": "branch",
+   "live_sha": "081a547117ea7d585e2cb6089e2c88c76acc2355",
+   "needs_disposition": false,
+   "state": "UNCHANGED_SINCE_EVALUATION"
+  },
+  {
+   "archive_tag": "archive/van-20261021/platform/rev3-owner-controls-20261015",
+   "evaluated_sha": "68394af3c6e53ed764062b19cb4f2c0ab3b3b608",
+   "evaluation_disposition": "PRESERVED_CANDIDATE",
+   "id": "platform/rev3-owner-controls-20261015",
+   "kind": "branch",
+   "live_sha": "68394af3c6e53ed764062b19cb4f2c0ab3b3b608",
+   "needs_disposition": false,
+   "state": "UNCHANGED_SINCE_EVALUATION"
+  },
+  {
+   "archive_tag": "archive/van-20261021/review/muse-vati-rev114-inputs-20261018",
+   "evaluated_sha": "cbd059cfb1ddfb80766bdebc2c74d3b25302a992",
+   "evaluation_disposition": "SUPERSEDED_SPECIFICATION",
+   "id": "review/muse-vati-rev114-inputs-20261018",
+   "kind": "branch",
+   "live_sha": "cbd059cfb1ddfb80766bdebc2c74d3b25302a992",
+   "needs_disposition": false,
+   "state": "UNCHANGED_SINCE_EVALUATION"
+  },
+  {
+   "archive_tag": "archive/van-20261021/review/van-next-universal-coverage-b4-closure-20261016",
+   "evaluated_sha": "0a694a998cfed119e116c68d3248de1cb84f120f",
+   "evaluation_disposition": "SUPERSEDED_SPECIFICATION",
+   "id": "review/van-next-universal-coverage-b4-closure-20261016",
+   "kind": "branch",
+   "live_sha": "0a694a998cfed119e116c68d3248de1cb84f120f",
+   "needs_disposition": false,
+   "state": "UNCHANGED_SINCE_EVALUATION"
+  },
+  {
+   "archive_tag": "archive/van-20261021/review/van-rev115-20261018",
+   "evaluated_sha": "3c3379bd791f7bda7ab66c21bba550d6077ba853",
+   "evaluation_disposition": "INTEGRATED",
+   "id": "review/van-rev115-20261018",
+   "kind": "branch",
+   "live_sha": "3c3379bd791f7bda7ab66c21bba550d6077ba853",
+   "needs_disposition": false,
+   "state": "UNCHANGED_SINCE_EVALUATION"
+  },
+  {
+   "archive_tag": "archive/van-20261021/spike/van-next-chart-engine-20261015",
+   "evaluated_sha": "30bc2d03d018b2592d2209aa674b6db0a69938c2",
+   "evaluation_disposition": "PRESERVED_CANDIDATE",
+   "id": "spike/van-next-chart-engine-20261015",
+   "kind": "branch",
+   "live_sha": "30bc2d03d018b2592d2209aa674b6db0a69938c2",
+   "needs_disposition": false,
+   "state": "UNCHANGED_SINCE_EVALUATION"
+  },
+  {
+   "changed_blobs": 32,
+   "diff_base": "d339dbcc629d1edb1dda977309c44fd0ac87f88f",
+   "head_contained_in_evaluated_tip": false,
+   "id": "PR-1",
+   "kind": "pull",
+   "live_sha": "d21fb2218e5340ac51092eef3b310ee44899f6a8",
+   "missing_blob_paths": [],
+   "missing_paths_absent_at_consolidation_head": [],
+   "needs_disposition": false,
+   "pr_state": "MERGED",
+   "state": "PR_ONLY_HEAD_CONTENT_PRESERVED"
+  },
+  {
+   "changed_blobs": 4,
+   "diff_base": "5b111e8af39776423beb0a8246dcebc7eb4c1e1f",
+   "head_contained_in_evaluated_tip": false,
+   "id": "PR-2",
+   "kind": "pull",
+   "live_sha": "ac489122071afe4bc578d12f6e8671c1a44aaa85",
+   "missing_blob_paths": [],
+   "missing_paths_absent_at_consolidation_head": [],
+   "needs_disposition": false,
+   "pr_state": "MERGED",
+   "state": "PR_ONLY_HEAD_CONTENT_PRESERVED"
+  },
+  {
+   "head_contained_in_evaluated_tip": true,
+   "id": "PR-3",
+   "kind": "pull",
+   "live_sha": "1a0c85fcfed589424984680d337e012bf830b801",
+   "needs_disposition": false,
+   "pr_state": "MERGED",
+   "state": "COVERED_BY_BRANCH_EVALUATION"
+  },
+  {
+   "changed_blobs": 27,
+   "diff_base": "96279f710ea47277b15ef28764eda6aec0fea744",
+   "head_contained_in_evaluated_tip": false,
+   "id": "PR-4",
+   "kind": "pull",
+   "live_sha": "b470595e970aef0bcb75f75c15c6da2e02e7e1c0",
+   "missing_blob_paths": [
+    "docs/project-state/LOCAL_CHANGE_LEDGER.jsonl"
+   ],
+   "missing_paths_absent_at_consolidation_head": [],
+   "needs_disposition": true,
+   "pr_state": "CLOSED_UNMERGED",
+   "state": "PR_ONLY_HEAD_CONTENT_NOT_PRESERVED"
+  },
+  {
+   "changed_blobs": 31,
+   "diff_base": "db0e9880346e02bfb66524e86fd6dd1d4ad05515",
+   "head_contained_in_evaluated_tip": false,
+   "id": "PR-5",
+   "kind": "pull",
+   "live_sha": "f357a0c8e2c7fd70c8f602f4f0485398d3d82741",
+   "missing_blob_paths": [],
+   "missing_paths_absent_at_consolidation_head": [],
+   "needs_disposition": false,
+   "pr_state": "MERGED",
+   "state": "PR_ONLY_HEAD_CONTENT_PRESERVED"
+  },
+  {
+   "head_contained_in_evaluated_tip": true,
+   "id": "PR-6",
+   "kind": "pull",
+   "live_sha": "a7bc148d65605800ff542582c1534e70d7f4c7f3",
+   "needs_disposition": false,
+   "pr_state": "MERGED",
+   "state": "COVERED_BY_BRANCH_EVALUATION"
+  },
+  {
+   "head_contained_in_evaluated_tip": true,
+   "id": "PR-7",
+   "kind": "pull",
+   "live_sha": "db82670a9fae2f182d5f66b1f731fe31a32de8fa",
+   "needs_disposition": false,
+   "pr_state": "MERGED",
+   "state": "COVERED_BY_BRANCH_EVALUATION"
+  },
+  {
+   "head_contained_in_evaluated_tip": true,
+   "id": "PR-8",
+   "kind": "pull",
+   "live_sha": "52a12b153d8f76e86dab39ee7ebb55ce902abc6b",
+   "needs_disposition": false,
+   "pr_state": "MERGED",
+   "state": "COVERED_BY_BRANCH_EVALUATION"
+  },
+  {
+   "head_contained_in_evaluated_tip": true,
+   "id": "PR-9",
+   "kind": "pull",
+   "live_sha": "b585195fe6cfab3d02c626c007d623631539f2de",
+   "needs_disposition": false,
+   "pr_state": "MERGED",
+   "state": "COVERED_BY_BRANCH_EVALUATION"
+  },
+  {
+   "head_contained_in_evaluated_tip": true,
+   "id": "PR-10",
+   "kind": "pull",
+   "live_sha": "db0e9880346e02bfb66524e86fd6dd1d4ad05515",
+   "needs_disposition": false,
+   "pr_state": "MERGED",
+   "state": "COVERED_BY_BRANCH_EVALUATION"
+  },
+  {
+   "changed_blobs": 17,
+   "diff_base": "db0e9880346e02bfb66524e86fd6dd1d4ad05515",
+   "head_contained_in_evaluated_tip": false,
+   "id": "PR-11",
+   "kind": "pull",
+   "live_sha": "b075817401fc02ae7ffbaea311f8d9b560c9dea0",
+   "missing_blob_paths": [
+    "backend/tests/test_google_mesh.py",
+    "docs/EXTERNAL_GATES.md",
+    "docs/IMPLEMENTATION_LEDGER.md",
+    "docs/project-state/LOCAL_CHANGE_LEDGER.jsonl"
+   ],
+   "missing_paths_absent_at_consolidation_head": [],
+   "needs_disposition": true,
+   "pr_state": "MERGED",
+   "state": "PR_ONLY_HEAD_CONTENT_NOT_PRESERVED"
+  },
+  {
+   "changed_blobs": 19,
+   "diff_base": "db0e9880346e02bfb66524e86fd6dd1d4ad05515",
+   "head_contained_in_evaluated_tip": false,
+   "id": "PR-12",
+   "kind": "pull",
+   "live_sha": "e96777a92d9fde6393486aaddff49c990f8e01d7",
+   "missing_blob_paths": [
+    "backend/tests/test_google_mesh.py",
+    "docs/EXTERNAL_GATES.md",
+    "docs/IMPLEMENTATION_LEDGER.md",
+    "docs/PRODUCTION_ACCEPTANCE_LEDGER.md",
+    "docs/project-state/LOCAL_CHANGE_LEDGER.jsonl"
+   ],
+   "missing_paths_absent_at_consolidation_head": [],
+   "needs_disposition": true,
+   "pr_state": "MERGED",
+   "state": "PR_ONLY_HEAD_CONTENT_NOT_PRESERVED"
+  },
+  {
+   "changed_blobs": 21,
+   "diff_base": "db0e9880346e02bfb66524e86fd6dd1d4ad05515",
+   "head_contained_in_evaluated_tip": false,
+   "id": "PR-13",
+   "kind": "pull",
+   "live_sha": "d0662392f67caf7e3ab3fbecc252ed4646296694",
+   "missing_blob_paths": [
+    "artifacts/google/stitch_live_attestation.json",
+    "backend/tests/test_google_mesh.py",
+    "docs/EXTERNAL_GATES.md",
+    "docs/GOOGLE_INTELLIGENCE_MESH.md",
+    "docs/IMPLEMENTATION_LEDGER.md",
+    "docs/PRODUCTION_ACCEPTANCE_LEDGER.md",
+    "docs/project-state/LOCAL_CHANGE_LEDGER.jsonl"
+   ],
+   "missing_paths_absent_at_consolidation_head": [],
+   "needs_disposition": true,
+   "pr_state": "MERGED",
+   "state": "PR_ONLY_HEAD_CONTENT_NOT_PRESERVED"
+  },
+  {
+   "changed_blobs": 22,
+   "diff_base": "db0e9880346e02bfb66524e86fd6dd1d4ad05515",
+   "head_contained_in_evaluated_tip": false,
+   "id": "PR-14",
+   "kind": "pull",
+   "live_sha": "c4bbbf4815415f7013d436446cc7d32712de26e5",
+   "missing_blob_paths": [
+    "artifacts/google/stitch_live_attestation.json",
+    "docs/EXTERNAL_GATES.md",
+    "docs/IMPLEMENTATION_LEDGER.md",
+    "docs/PRODUCTION_ACCEPTANCE_LEDGER.md",
+    "docs/project-state/LOCAL_CHANGE_LEDGER.jsonl"
+   ],
+   "missing_paths_absent_at_consolidation_head": [],
+   "needs_disposition": true,
+   "pr_state": "MERGED",
+   "state": "PR_ONLY_HEAD_CONTENT_NOT_PRESERVED"
+  },
+  {
+   "changed_blobs": 26,
+   "diff_base": "db0e9880346e02bfb66524e86fd6dd1d4ad05515",
+   "head_contained_in_evaluated_tip": false,
+   "id": "PR-15",
+   "kind": "pull",
+   "live_sha": "30067f1f0f5d6b99a39159d8e4e5d7ddf452a117",
+   "missing_blob_paths": [
+    "docs/EXTERNAL_GATES.md",
+    "docs/IMPLEMENTATION_LEDGER.md",
+    "docs/OWNER_SUPPLY_FOR_V1.md",
+    "docs/PRODUCTION_ACCEPTANCE_LEDGER.md",
+    "docs/project-state/LOCAL_CHANGE_LEDGER.jsonl"
+   ],
+   "missing_paths_absent_at_consolidation_head": [],
+   "needs_disposition": true,
+   "pr_state": "MERGED",
+   "state": "PR_ONLY_HEAD_CONTENT_NOT_PRESERVED"
+  },
+  {
+   "changed_blobs": 28,
+   "diff_base": "db0e9880346e02bfb66524e86fd6dd1d4ad05515",
+   "head_contained_in_evaluated_tip": false,
+   "id": "PR-16",
+   "kind": "pull",
+   "live_sha": "3bba8291ed0398137dfe9e64ed0862c646aa8dc7",
+   "missing_blob_paths": [
+    "docs/EXTERNAL_GATES.md",
+    "docs/IMPLEMENTATION_LEDGER.md",
+    "docs/OWNER_SUPPLY_FOR_V1.md",
+    "docs/PRODUCTION_ACCEPTANCE_LEDGER.md",
+    "docs/project-state/LOCAL_CHANGE_LEDGER.jsonl",
+    "tests/hermes/test_profile_layout.py",
+    "tools/hermes/install_van_profile.sh"
+   ],
+   "missing_paths_absent_at_consolidation_head": [],
+   "needs_disposition": true,
+   "pr_state": "MERGED",
+   "state": "PR_ONLY_HEAD_CONTENT_NOT_PRESERVED"
+  },
+  {
+   "changed_blobs": 29,
+   "diff_base": "db0e9880346e02bfb66524e86fd6dd1d4ad05515",
+   "head_contained_in_evaluated_tip": false,
+   "id": "PR-17",
+   "kind": "pull",
+   "live_sha": "270da5d3a8756a19458307968a9c30e2fe138f1a",
+   "missing_blob_paths": [
+    "docs/EXTERNAL_GATES.md",
+    "docs/IMPLEMENTATION_LEDGER.md",
+    "docs/OWNER_SUPPLY_FOR_V1.md",
+    "docs/PRODUCTION_ACCEPTANCE_LEDGER.md",
+    "docs/project-state/LOCAL_CHANGE_LEDGER.jsonl"
+   ],
+   "missing_paths_absent_at_consolidation_head": [],
+   "needs_disposition": true,
+   "pr_state": "MERGED",
+   "state": "PR_ONLY_HEAD_CONTENT_NOT_PRESERVED"
+  },
+  {
+   "changed_blobs": 30,
+   "diff_base": "db0e9880346e02bfb66524e86fd6dd1d4ad05515",
+   "head_contained_in_evaluated_tip": false,
+   "id": "PR-18",
+   "kind": "pull",
+   "live_sha": "ee8b094ff6d21a4c6015effe60a672cb349a8147",
+   "missing_blob_paths": [
+    "docs/EXTERNAL_GATES.md",
+    "docs/IMPLEMENTATION_LEDGER.md",
+    "docs/OWNER_SUPPLY_FOR_V1.md",
+    "docs/PRODUCTION_ACCEPTANCE_LEDGER.md",
+    "docs/project-state/LOCAL_CHANGE_LEDGER.jsonl"
+   ],
+   "missing_paths_absent_at_consolidation_head": [],
+   "needs_disposition": true,
+   "pr_state": "MERGED",
+   "state": "PR_ONLY_HEAD_CONTENT_NOT_PRESERVED"
+  },
+  {
+   "changed_blobs": 31,
+   "diff_base": "db0e9880346e02bfb66524e86fd6dd1d4ad05515",
+   "head_contained_in_evaluated_tip": false,
+   "id": "PR-19",
+   "kind": "pull",
+   "live_sha": "f357a0c8e2c7fd70c8f602f4f0485398d3d82741",
+   "missing_blob_paths": [],
+   "missing_paths_absent_at_consolidation_head": [],
+   "needs_disposition": false,
+   "pr_state": "MERGED",
+   "state": "PR_ONLY_HEAD_CONTENT_PRESERVED"
+  },
+  {
+   "changed_blobs": 1,
+   "diff_base": "a6756dfd4116473971a01b91d6a7af7769c81304",
+   "head_contained_in_evaluated_tip": false,
+   "id": "PR-20",
+   "kind": "pull",
+   "live_sha": "09dffb62b7c1fc25556fc805b749ceb2462c5f40",
+   "missing_blob_paths": [],
+   "missing_paths_absent_at_consolidation_head": [],
+   "needs_disposition": false,
+   "pr_state": "MERGED",
+   "state": "PR_ONLY_HEAD_CONTENT_PRESERVED"
+  },
+  {
+   "head_contained_in_evaluated_tip": true,
+   "id": "PR-21",
+   "kind": "pull",
+   "live_sha": "e6a50f292bb6ad374c7ce3856b9b3c48a282b786",
+   "needs_disposition": false,
+   "pr_state": "MERGED",
+   "state": "COVERED_BY_BRANCH_EVALUATION"
+  },
+  {
+   "changed_blobs": 240,
+   "diff_base": "1d7b921b04b503de412f43199c5dcf97259b8bbe",
+   "head_contained_in_evaluated_tip": false,
+   "id": "PR-22",
+   "kind": "pull",
+   "live_sha": "4d687b1c2fb8e9a8372bef7076184bd6274ead7f",
+   "missing_blob_paths": [
+    "android/app/src/main/java/com/dial/van/overlay/FloatingOverlayService.kt",
+    "android/app/src/main/java/com/dial/van/trading/TradingCommandCentreActivity.kt",
+    "docs/VAN_ADAPTIVE_TRADING_INTELLIGENCE_TECHNICAL_BLUEPRINT_REV2.md",
+    "docs/VAN_ADAPTIVE_TRADING_INTELLIGENCE_TECHNICAL_BLUEPRINT_REV3.md",
+    "docs/archive/VAN_ADAPTIVE_TRADING_INTELLIGENCE_TECHNICAL_BLUEPRINT_REV1.md",
+    "docs/project-state/LOCAL_CHANGE_LEDGER.jsonl"
+   ],
+   "missing_paths_absent_at_consolidation_head": [],
+   "needs_disposition": true,
+   "pr_state": "CLOSED_UNMERGED",
+   "state": "PR_ONLY_HEAD_CONTENT_NOT_PRESERVED"
+  },
+  {
+   "changed_blobs": 240,
+   "diff_base": "f8c6ab56386843221cf08611e70f194a6bc439e2",
+   "head_contained_in_evaluated_tip": false,
+   "id": "PR-23",
+   "kind": "pull",
+   "live_sha": "48e47fe9242716a300e0fdb79f90b6d7557e1591",
+   "missing_blob_paths": [],
+   "missing_paths_absent_at_consolidation_head": [],
+   "needs_disposition": false,
+   "pr_state": "MERGED",
+   "state": "PR_ONLY_HEAD_CONTENT_PRESERVED"
+  },
+  {
+   "head_contained_in_evaluated_tip": true,
+   "id": "PR-24",
+   "kind": "pull",
+   "live_sha": "8a6a3a033c5ee61d33043e0ca449fe662f213b19",
+   "needs_disposition": false,
+   "pr_state": "MERGED",
+   "state": "COVERED_BY_BRANCH_EVALUATION"
+  },
+  {
+   "changed_blobs": 3,
+   "diff_base": "c4a94d79b4fd15d6a718a0941de19714f725faf8",
+   "head_contained_in_evaluated_tip": false,
+   "id": "PR-25",
+   "kind": "pull",
+   "live_sha": "e4b1b04c9872a16f801e5fb023449e38c1753ea5",
+   "missing_blob_paths": [],
+   "missing_paths_absent_at_consolidation_head": [],
+   "needs_disposition": false,
+   "pr_state": "MERGED",
+   "state": "PR_ONLY_HEAD_CONTENT_PRESERVED"
+  },
+  {
+   "changed_blobs": 3,
+   "diff_base": "1b13d306756bd69d0ac0d840e4141ddb4461e1f1",
+   "head_contained_in_evaluated_tip": false,
+   "id": "PR-26",
+   "kind": "pull",
+   "live_sha": "ac4b167e353402cab446e3bb087e763067a5038e",
+   "missing_blob_paths": [],
+   "missing_paths_absent_at_consolidation_head": [],
+   "needs_disposition": false,
+   "pr_state": "MERGED",
+   "state": "PR_ONLY_HEAD_CONTENT_PRESERVED"
+  },
+  {
+   "changed_blobs": 2,
+   "diff_base": "d853518b3ce4581bc9ed4d4f472fa960e4ad25ac",
+   "head_contained_in_evaluated_tip": false,
+   "id": "PR-27",
+   "kind": "pull",
+   "live_sha": "7049bf5cc4202f2c508a5d7c1106200e86ff2d13",
+   "missing_blob_paths": [],
+   "missing_paths_absent_at_consolidation_head": [],
+   "needs_disposition": false,
+   "pr_state": "MERGED",
+   "state": "PR_ONLY_HEAD_CONTENT_PRESERVED"
+  },
+  {
+   "head_contained_in_evaluated_tip": true,
+   "id": "PR-28",
+   "kind": "pull",
+   "live_sha": "7d3316ec2cfd3b8929dbd4c5559720daa5e66707",
+   "needs_disposition": false,
+   "pr_state": "MERGED",
+   "state": "COVERED_BY_BRANCH_EVALUATION"
+  },
+  {
+   "head_contained_in_evaluated_tip": true,
+   "id": "PR-29",
+   "kind": "pull",
+   "live_sha": "5d0138552ca7991cad5d88b7b53243a85c78d3fc",
+   "needs_disposition": false,
+   "pr_state": "MERGED",
+   "state": "COVERED_BY_BRANCH_EVALUATION"
+  },
+  {
+   "head_contained_in_evaluated_tip": true,
+   "id": "PR-30",
+   "kind": "pull",
+   "live_sha": "7d3316ec2cfd3b8929dbd4c5559720daa5e66707",
+   "needs_disposition": false,
+   "pr_state": "MERGED",
+   "state": "COVERED_BY_BRANCH_EVALUATION"
+  },
+  {
+   "head_contained_in_evaluated_tip": true,
+   "id": "PR-31",
+   "kind": "pull",
+   "live_sha": "6b975f68d5242a349fc85f4a66f86b8819961682",
+   "needs_disposition": false,
+   "pr_state": "MERGED",
+   "state": "COVERED_BY_BRANCH_EVALUATION"
+  },
+  {
+   "head_contained_in_evaluated_tip": true,
+   "id": "PR-32",
+   "kind": "pull",
+   "live_sha": "9237c88bf04127e556f3dd8f1a7faba52b0b53d4",
+   "needs_disposition": false,
+   "pr_state": "MERGED",
+   "state": "COVERED_BY_BRANCH_EVALUATION"
+  },
+  {
+   "head_contained_in_evaluated_tip": true,
+   "id": "PR-33",
+   "kind": "pull",
+   "live_sha": "b6cd685ef44ad04a9de18a5e4f1a289e1fa926c0",
+   "needs_disposition": false,
+   "pr_state": "CLOSED_UNMERGED",
+   "state": "COVERED_BY_BRANCH_EVALUATION"
+  },
+  {
+   "head_contained_in_evaluated_tip": true,
+   "id": "PR-34",
+   "kind": "pull",
+   "live_sha": "af51fa5f0f53bab5dead468a9d040667455d3ed7",
+   "needs_disposition": false,
+   "pr_state": "MERGED",
+   "state": "COVERED_BY_BRANCH_EVALUATION"
+  },
+  {
+   "changed_blobs": 2,
+   "diff_base": "47f213590598c81f83ae8a97f7eff8d93dbf1bfd",
+   "head_contained_in_evaluated_tip": false,
+   "id": "PR-35",
+   "kind": "pull",
+   "live_sha": "8576cdc094a6ff6737dd64f369ae1bde4a287e5e",
+   "missing_blob_paths": [
+    "trading/tests/test_oci_trading_topology_bootstrap.py"
+   ],
+   "missing_paths_absent_at_consolidation_head": [],
+   "needs_disposition": true,
+   "pr_state": "CLOSED_UNMERGED",
+   "state": "PR_ONLY_HEAD_CONTENT_NOT_PRESERVED"
+  },
+  {
+   "head_contained_in_evaluated_tip": true,
+   "id": "PR-36",
+   "kind": "pull",
+   "live_sha": "efffdabbe266ec34130df0164c747663a426b148",
+   "needs_disposition": false,
+   "pr_state": "MERGED",
+   "state": "COVERED_BY_BRANCH_EVALUATION"
+  },
+  {
+   "head_contained_in_evaluated_tip": true,
+   "id": "PR-37",
+   "kind": "pull",
+   "live_sha": "52083c6cf2ea6c04bd42027b6aba5fc2298acd3c",
+   "needs_disposition": false,
+   "pr_state": "MERGED",
+   "state": "COVERED_BY_BRANCH_EVALUATION"
+  },
+  {
+   "changed_blobs": 1,
+   "diff_base": "f8c3fcc9b4d346c7b59ed128cfdbe63bceab3dc0",
+   "head_contained_in_evaluated_tip": false,
+   "id": "PR-38",
+   "kind": "pull",
+   "live_sha": "e09765d70d6a6a3172141a3dc9710362d2554d26",
+   "missing_blob_paths": [
+    "docs/VAN_UNIFIED_PERSONAL_INTELLIGENCE_IMPROVEMENT_BLUEPRINT_REV_1.md"
+   ],
+   "missing_paths_absent_at_consolidation_head": [
+    "docs/VAN_UNIFIED_PERSONAL_INTELLIGENCE_IMPROVEMENT_BLUEPRINT_REV_1.md"
+   ],
+   "needs_disposition": true,
+   "pr_state": "CLOSED_UNMERGED",
+   "state": "PR_ONLY_HEAD_CONTENT_NOT_PRESERVED"
+  },
+  {
+   "head_contained_in_evaluated_tip": true,
+   "id": "PR-39",
+   "kind": "pull",
+   "live_sha": "5ec35e96137a7af318b265fe71d2f01821a7f7b1",
+   "needs_disposition": false,
+   "pr_state": "MERGED",
+   "state": "COVERED_BY_BRANCH_EVALUATION"
+  },
+  {
+   "changed_blobs": 1,
+   "diff_base": "dff38a030367e640c6621ea80dab794b2c5c55b7",
+   "head_contained_in_evaluated_tip": false,
+   "id": "PR-40",
+   "kind": "pull",
+   "live_sha": "a6e5e33e3fa8b35858d78fa025e8fb5dfc3f32db",
+   "missing_blob_paths": [
+    ".github/workflows/van-ci.yml"
+   ],
+   "missing_paths_absent_at_consolidation_head": [],
+   "needs_disposition": true,
+   "pr_state": "CLOSED_UNMERGED",
+   "state": "PR_ONLY_HEAD_CONTENT_NOT_PRESERVED"
+  },
+  {
+   "changed_blobs": 4,
+   "diff_base": "dff38a030367e640c6621ea80dab794b2c5c55b7",
+   "head_contained_in_evaluated_tip": false,
+   "id": "PR-41",
+   "kind": "pull",
+   "live_sha": "f79c862cdd8ac0d0f9714142d8f4048f41e2207a",
+   "missing_blob_paths": [
+    ".github/workflows/van-ci.yml",
+    "android/app/build.gradle.kts"
+   ],
+   "missing_paths_absent_at_consolidation_head": [],
+   "needs_disposition": true,
+   "pr_state": "CLOSED_UNMERGED",
+   "state": "PR_ONLY_HEAD_CONTENT_NOT_PRESERVED"
+  },
+  {
+   "changed_blobs": 2,
+   "diff_base": "dff38a030367e640c6621ea80dab794b2c5c55b7",
+   "head_contained_in_evaluated_tip": false,
+   "id": "PR-42",
+   "kind": "pull",
+   "live_sha": "32d48ff389decc970739172985a490289bd2baca",
+   "missing_blob_paths": [],
+   "missing_paths_absent_at_consolidation_head": [],
+   "needs_disposition": false,
+   "pr_state": "MERGED",
+   "state": "PR_ONLY_HEAD_CONTENT_PRESERVED"
+  },
+  {
+   "changed_blobs": 1,
+   "diff_base": "0b0efad0e63600a2f55597e448cd37b359d475a1",
+   "head_contained_in_evaluated_tip": false,
+   "id": "PR-43",
+   "kind": "pull",
+   "live_sha": "f2e084bab05f2ee8daaccdc5bf7a2c5f573ef5c9",
+   "missing_blob_paths": [
+    ".github/workflows/van-ci.yml"
+   ],
+   "missing_paths_absent_at_consolidation_head": [],
+   "needs_disposition": true,
+   "pr_state": "CLOSED_UNMERGED",
+   "state": "PR_ONLY_HEAD_CONTENT_NOT_PRESERVED"
+  },
+  {
+   "changed_blobs": 1,
+   "diff_base": "0b0efad0e63600a2f55597e448cd37b359d475a1",
+   "head_contained_in_evaluated_tip": false,
+   "id": "PR-44",
+   "kind": "pull",
+   "live_sha": "7705f8db72ee4b0bc84afa658e0aa3eb6d68ab9d",
+   "missing_blob_paths": [
+    ".github/workflows/van-ci.yml"
+   ],
+   "missing_paths_absent_at_consolidation_head": [],
+   "needs_disposition": true,
+   "pr_state": "CLOSED_UNMERGED",
+   "state": "PR_ONLY_HEAD_CONTENT_NOT_PRESERVED"
+  },
+  {
+   "changed_blobs": 1,
+   "diff_base": "0b0efad0e63600a2f55597e448cd37b359d475a1",
+   "head_contained_in_evaluated_tip": false,
+   "id": "PR-45",
+   "kind": "pull",
+   "live_sha": "a4448dda594943fcdd68c03fb0c8bf3bcbab4eb0",
+   "missing_blob_paths": [
+    "android/app/src/debug/AndroidManifest.xml"
+   ],
+   "missing_paths_absent_at_consolidation_head": [],
+   "needs_disposition": true,
+   "pr_state": "CLOSED_UNMERGED",
+   "state": "PR_ONLY_HEAD_CONTENT_NOT_PRESERVED"
+  },
+  {
+   "changed_blobs": 4,
+   "diff_base": "9504436274bd2b1478f85c284b812210024fcce8",
+   "head_contained_in_evaluated_tip": false,
+   "id": "PR-46",
+   "kind": "pull",
+   "live_sha": "f50e521092939208fda2ff8d265b7a076a5c8807",
+   "missing_blob_paths": [
+    "android/app/build.gradle.kts",
+    "android/app/src/debug/AndroidManifest.xml",
+    "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt",
+    "android/app/src/main/java/com/dial/van/onboarding/OnboardingActivity.kt"
+   ],
+   "missing_paths_absent_at_consolidation_head": [],
+   "needs_disposition": true,
+   "pr_state": "CLOSED_UNMERGED",
+   "state": "PR_ONLY_HEAD_CONTENT_NOT_PRESERVED"
+  },
+  {
+   "changed_blobs": 4,
+   "diff_base": "9504436274bd2b1478f85c284b812210024fcce8",
+   "head_contained_in_evaluated_tip": false,
+   "id": "PR-47",
+   "kind": "pull",
+   "live_sha": "813fad4ed2b789e32cfdd071b6f2a3b39741851d",
+   "missing_blob_paths": [
+    ".github/workflows/owner-s24-direct-apk.yml",
+    "android/app/build.gradle.kts",
+    "android/app/src/main/java/com/dial/van/onboarding/OnboardingActivity.kt",
+    "android/app/src/main/java/com/dial/van/onboarding/OnboardingPlan.kt"
+   ],
+   "missing_paths_absent_at_consolidation_head": [
+    ".github/workflows/owner-s24-direct-apk.yml"
+   ],
+   "needs_disposition": true,
+   "pr_state": "CLOSED_UNMERGED",
+   "state": "PR_ONLY_HEAD_CONTENT_NOT_PRESERVED"
+  },
+  {
+   "head_contained_in_evaluated_tip": true,
+   "id": "PR-48",
+   "kind": "pull",
+   "live_sha": "22145c2cf0c13d9ea29f25bbe58defe7741ad294",
+   "needs_disposition": false,
+   "pr_state": "MERGED",
+   "state": "COVERED_BY_BRANCH_EVALUATION"
+  },
+  {
+   "head_contained_in_evaluated_tip": true,
+   "id": "PR-49",
+   "kind": "pull",
+   "live_sha": "864978e8efda97806bf52e2a1a94f2e1d02260af",
+   "needs_disposition": false,
+   "pr_state": "MERGED",
+   "state": "COVERED_BY_BRANCH_EVALUATION"
+  },
+  {
+   "head_contained_in_evaluated_tip": true,
+   "id": "PR-50",
+   "kind": "pull",
+   "live_sha": "108cc022e490235cb439ef3528c967135ec8130c",
+   "needs_disposition": false,
+   "pr_state": "MERGED",
+   "state": "COVERED_BY_BRANCH_EVALUATION"
+  },
+  {
+   "head_contained_in_evaluated_tip": true,
+   "id": "PR-51",
+   "kind": "pull",
+   "live_sha": "5781c76a9bb4730f7f08a9b30fdb8ac24c42fd1c",
+   "needs_disposition": false,
+   "pr_state": "MERGED",
+   "state": "COVERED_BY_BRANCH_EVALUATION"
+  },
+  {
+   "head_contained_in_evaluated_tip": true,
+   "id": "PR-52",
+   "kind": "pull",
+   "live_sha": "db48a60545cb14cf139f3ae03a4641d757e8d77a",
+   "needs_disposition": false,
+   "pr_state": "MERGED",
+   "state": "COVERED_BY_BRANCH_EVALUATION"
+  },
+  {
+   "head_contained_in_evaluated_tip": true,
+   "id": "PR-53",
+   "kind": "pull",
+   "live_sha": "eba8b78ba03ed4e15fc15c9aad4db684128f4054",
+   "needs_disposition": false,
+   "pr_state": "MERGED",
+   "state": "COVERED_BY_BRANCH_EVALUATION"
+  },
+  {
+   "changed_blobs": 6,
+   "diff_base": "40fab650f137eec61021715ea97aaceafb998147",
+   "head_contained_in_evaluated_tip": false,
+   "id": "PR-54",
+   "kind": "pull",
+   "live_sha": "017a90515b387aad08e9812cef9dc4aca327e6a6",
+   "missing_blob_paths": [],
+   "missing_paths_absent_at_consolidation_head": [],
+   "needs_disposition": false,
+   "pr_state": "MERGED",
+   "state": "PR_ONLY_HEAD_CONTENT_PRESERVED"
+  },
+  {
+   "head_contained_in_evaluated_tip": true,
+   "id": "PR-55",
+   "kind": "pull",
+   "live_sha": "90756a06e5f6a26be2ad11a9a25afa8dcdf76271",
+   "needs_disposition": false,
+   "pr_state": "MERGED",
+   "state": "COVERED_BY_BRANCH_EVALUATION"
+  },
+  {
+   "head_contained_in_evaluated_tip": true,
+   "id": "PR-56",
+   "kind": "pull",
+   "live_sha": "6dd698b8345e19d9784fc8860b9dcbd66c09e8c6",
+   "needs_disposition": false,
+   "pr_state": "MERGED",
+   "state": "COVERED_BY_BRANCH_EVALUATION"
+  },
+  {
+   "head_contained_in_evaluated_tip": true,
+   "id": "PR-57",
+   "kind": "pull",
+   "live_sha": "8363ede3d585f4cdb82e9f30c470ffe2ed9425fc",
+   "needs_disposition": false,
+   "pr_state": "MERGED",
+   "state": "COVERED_BY_BRANCH_EVALUATION"
+  },
+  {
+   "head_contained_in_evaluated_tip": true,
+   "id": "PR-58",
+   "kind": "pull",
+   "live_sha": "1e0c2b0053060e7da2d695f6281cbf1441fa7464",
+   "needs_disposition": false,
+   "pr_state": "MERGED",
+   "state": "COVERED_BY_BRANCH_EVALUATION"
+  },
+  {
+   "head_contained_in_evaluated_tip": true,
+   "id": "PR-59",
+   "kind": "pull",
+   "live_sha": "67eee3f924d666f8622070e0732468bb49f444e6",
+   "needs_disposition": false,
+   "pr_state": "MERGED",
+   "state": "COVERED_BY_BRANCH_EVALUATION"
+  },
+  {
+   "head_contained_in_evaluated_tip": true,
+   "id": "PR-60",
+   "kind": "pull",
+   "live_sha": "b8bc8a0795d1b22b880802c50494499bcafa25a0",
+   "needs_disposition": false,
+   "pr_state": "MERGED",
+   "state": "COVERED_BY_BRANCH_EVALUATION"
+  },
+  {
+   "head_contained_in_evaluated_tip": true,
+   "id": "PR-61",
+   "kind": "pull",
+   "live_sha": "9d20ce68b9b17fe246c8d77e7193b9aa89801c05",
+   "needs_disposition": false,
+   "pr_state": "OPEN",
+   "state": "COVERED_BY_BRANCH_EVALUATION"
+  },
+  {
+   "head_contained_in_evaluated_tip": true,
+   "id": "PR-62",
+   "kind": "pull",
+   "live_sha": "359ec7d12f7da26fd066ffb3159ef7f41bd32431",
+   "needs_disposition": false,
+   "pr_state": "OPEN",
+   "state": "COVERED_BY_BRANCH_EVALUATION"
+  },
+  {
+   "head_contained_in_evaluated_tip": true,
+   "id": "PR-63",
+   "kind": "pull",
+   "live_sha": "ed7dd6179ca5e4a1c2ce1187dd02421df392dc4c",
+   "needs_disposition": false,
+   "pr_state": "MERGED",
+   "state": "COVERED_BY_BRANCH_EVALUATION"
+  },
+  {
+   "head_contained_in_evaluated_tip": true,
+   "id": "PR-64",
+   "kind": "pull",
+   "live_sha": "ae764c510de8d8ba99f8aa6e26e674b5a8fc6d79",
+   "needs_disposition": false,
+   "pr_state": "OPEN",
+   "state": "COVERED_BY_BRANCH_EVALUATION"
+  },
+  {
+   "head_contained_in_evaluated_tip": true,
+   "id": "PR-65",
+   "kind": "pull",
+   "live_sha": "4941ef67ab972ee8fc0d9f09184c0ffe9c891c14",
+   "needs_disposition": false,
+   "pr_state": "MERGED",
+   "state": "COVERED_BY_BRANCH_EVALUATION"
+  },
+  {
+   "head_contained_in_evaluated_tip": true,
+   "id": "PR-66",
+   "kind": "pull",
+   "live_sha": "4a858df1d355efd5da3efde940846b95e48e501a",
+   "needs_disposition": false,
+   "pr_state": "MERGED",
+   "state": "COVERED_BY_BRANCH_EVALUATION"
+  },
+  {
+   "head_contained_in_evaluated_tip": true,
+   "id": "PR-67",
+   "kind": "pull",
+   "live_sha": "49d8d4cf8ba613b2222fec48fb932f77d595c77b",
+   "needs_disposition": false,
+   "pr_state": "MERGED",
+   "state": "COVERED_BY_BRANCH_EVALUATION"
+  },
+  {
+   "head_contained_in_evaluated_tip": true,
+   "id": "PR-68",
+   "kind": "pull",
+   "live_sha": "85610c9a2949abf22e9ad289624dcb8bd30cd5af",
+   "needs_disposition": false,
+   "pr_state": "MERGED",
+   "state": "COVERED_BY_BRANCH_EVALUATION"
+  },
+  {
+   "head_contained_in_evaluated_tip": true,
+   "id": "PR-69",
+   "kind": "pull",
+   "live_sha": "2ff009646e4b4933d0313550e6cbfd5238c7199f",
+   "needs_disposition": false,
+   "pr_state": "OPEN",
+   "state": "COVERED_BY_BRANCH_EVALUATION"
+  },
+  {
+   "head_contained_in_evaluated_tip": true,
+   "id": "PR-70",
+   "kind": "pull",
+   "live_sha": "f3df7a10e12fc76d25f958e9f19cb0b25c798168",
+   "needs_disposition": false,
+   "pr_state": "OPEN",
+   "state": "COVERED_BY_BRANCH_EVALUATION"
+  },
+  {
+   "head_contained_in_evaluated_tip": true,
+   "id": "PR-71",
+   "kind": "pull",
+   "live_sha": "4554ee22e438ec0362bd7048321b29320aef073d",
+   "needs_disposition": false,
+   "pr_state": "MERGED",
+   "state": "COVERED_BY_BRANCH_EVALUATION"
+  },
+  {
+   "head_contained_in_evaluated_tip": true,
+   "id": "PR-72",
+   "kind": "pull",
+   "live_sha": "80f3f0f304cf41945101dc502777fd8f02a4eab2",
+   "needs_disposition": false,
+   "pr_state": "OPEN",
+   "state": "COVERED_BY_BRANCH_EVALUATION"
+  },
+  {
+   "head_contained_in_evaluated_tip": true,
+   "id": "PR-73",
+   "kind": "pull",
+   "live_sha": "a8d3f1930ad9f6d479717ab1a5e161cfd2f87144",
+   "needs_disposition": false,
+   "pr_state": "OPEN",
+   "state": "COVERED_BY_BRANCH_EVALUATION"
+  },
+  {
+   "head_contained_in_evaluated_tip": true,
+   "id": "PR-74",
+   "kind": "pull",
+   "live_sha": "4cac338e6d2069b9eb61014d39541ea1387acbb5",
+   "needs_disposition": false,
+   "pr_state": "OPEN",
+   "state": "COVERED_BY_BRANCH_EVALUATION"
+  },
+  {
+   "head_contained_in_evaluated_tip": true,
+   "id": "PR-75",
+   "kind": "pull",
+   "live_sha": "f11a8949ba140be850f1135c46b5dd8b3d836cd5",
+   "needs_disposition": false,
+   "pr_state": "OPEN",
+   "state": "COVERED_BY_BRANCH_EVALUATION"
+  },
+  {
+   "head_contained_in_evaluated_tip": true,
+   "id": "PR-76",
+   "kind": "pull",
+   "live_sha": "01e7d84a1edd6e902619b284fac1a1e560a2d38d",
+   "needs_disposition": false,
+   "pr_state": "OPEN",
+   "state": "COVERED_BY_BRANCH_EVALUATION"
+  },
+  {
+   "head_contained_in_evaluated_tip": true,
+   "id": "PR-77",
+   "kind": "pull",
+   "live_sha": "c091d22ce21728de33b5c8318385a147809dc207",
+   "needs_disposition": false,
+   "pr_state": "OPEN",
+   "state": "COVERED_BY_BRANCH_EVALUATION"
+  },
+  {
+   "head_contained_in_evaluated_tip": true,
+   "id": "PR-78",
+   "kind": "pull",
+   "live_sha": "b8af36e4ed354ba7f55582dbdd8e2a36b15ae9a1",
+   "needs_disposition": false,
+   "pr_state": "MERGED",
+   "state": "COVERED_BY_BRANCH_EVALUATION"
+  },
+  {
+   "head_contained_in_evaluated_tip": true,
+   "id": "PR-79",
+   "kind": "pull",
+   "live_sha": "6ade5eed60b7574d5296c9d3eb6770fd8de6368f",
+   "needs_disposition": false,
+   "pr_state": "CLOSED_UNMERGED",
+   "state": "COVERED_BY_BRANCH_EVALUATION"
+  },
+  {
+   "head_contained_in_evaluated_tip": true,
+   "id": "PR-80",
+   "kind": "pull",
+   "live_sha": "36690fd7c65660aea667e953eab8455e707271a1",
+   "needs_disposition": false,
+   "pr_state": "OPEN",
+   "state": "COVERED_BY_BRANCH_EVALUATION"
+  },
+  {
+   "head_contained_in_evaluated_tip": true,
+   "id": "PR-81",
+   "kind": "pull",
+   "live_sha": "96bc3590a0cd48a6083441d7a27e4b8f8bf46683",
+   "needs_disposition": false,
+   "pr_state": "MERGED",
+   "state": "COVERED_BY_BRANCH_EVALUATION"
+  },
+  {
+   "head_contained_in_evaluated_tip": true,
+   "id": "PR-82",
+   "kind": "pull",
+   "live_sha": "7231caf101cf89f33316c133a2ac99e87eb3e9b4",
+   "needs_disposition": false,
+   "pr_state": "MERGED",
+   "state": "COVERED_BY_BRANCH_EVALUATION"
+  },
+  {
+   "head_contained_in_evaluated_tip": true,
+   "id": "PR-83",
+   "kind": "pull",
+   "live_sha": "5402cabb1c854518839b7544e591eb7ea6f901a3",
+   "needs_disposition": false,
+   "pr_state": "CLOSED_UNMERGED",
+   "state": "COVERED_BY_BRANCH_EVALUATION"
+  },
+  {
+   "head_contained_in_evaluated_tip": true,
+   "id": "PR-84",
+   "kind": "pull",
+   "live_sha": "7043d0aadd42322c16393e3fabb3a35113986de1",
+   "needs_disposition": false,
+   "pr_state": "MERGED",
+   "state": "COVERED_BY_BRANCH_EVALUATION"
+  },
+  {
+   "head_contained_in_evaluated_tip": true,
+   "id": "PR-85",
+   "kind": "pull",
+   "live_sha": "504a3f6759ffff9d13fe3528037be041a6536088",
+   "needs_disposition": false,
+   "pr_state": "MERGED",
+   "state": "COVERED_BY_BRANCH_EVALUATION"
+  },
+  {
+   "head_contained_in_evaluated_tip": true,
+   "id": "PR-86",
+   "kind": "pull",
+   "live_sha": "306834775ab3e0e33c54bc72828a04f04cd7f135",
+   "needs_disposition": false,
+   "pr_state": "MERGED",
+   "state": "COVERED_BY_BRANCH_EVALUATION"
+  },
+  {
+   "head_contained_in_evaluated_tip": true,
+   "id": "PR-87",
+   "kind": "pull",
+   "live_sha": "5ffa59ef2bf0003b5248749c5692fdb1a4eceed4",
+   "needs_disposition": false,
+   "pr_state": "MERGED",
+   "state": "COVERED_BY_BRANCH_EVALUATION"
+  },
+  {
+   "head_contained_in_evaluated_tip": true,
+   "id": "PR-88",
+   "kind": "pull",
+   "live_sha": "1b3c6d014f68a61e3360fde57d2c269d351ea239",
+   "needs_disposition": false,
+   "pr_state": "MERGED",
+   "state": "COVERED_BY_BRANCH_EVALUATION"
+  },
+  {
+   "head_contained_in_evaluated_tip": true,
+   "id": "PR-89",
+   "kind": "pull",
+   "live_sha": "e22080c496dbc2862bb9cbdd47007116e99008af",
+   "needs_disposition": false,
+   "pr_state": "MERGED",
+   "state": "COVERED_BY_BRANCH_EVALUATION"
+  },
+  {
+   "head_contained_in_evaluated_tip": true,
+   "id": "PR-90",
+   "kind": "pull",
+   "live_sha": "9cab59773476713b9ffa23f4d2277820bb6005df",
+   "needs_disposition": false,
+   "pr_state": "MERGED",
+   "state": "COVERED_BY_BRANCH_EVALUATION"
+  },
+  {
+   "head_contained_in_evaluated_tip": true,
+   "id": "PR-91",
+   "kind": "pull",
+   "live_sha": "c0c2984e1eadfb47351aa7449e2129049cede55e",
+   "needs_disposition": false,
+   "pr_state": "MERGED",
+   "state": "COVERED_BY_BRANCH_EVALUATION"
+  },
+  {
+   "head_contained_in_evaluated_tip": true,
+   "id": "PR-92",
+   "kind": "pull",
+   "live_sha": "923ecf9bbb81a2b3b485a3730071279851596b06",
+   "needs_disposition": false,
+   "pr_state": "OPEN",
+   "state": "COVERED_BY_BRANCH_EVALUATION"
+  },
+  {
+   "head_contained_in_evaluated_tip": true,
+   "id": "PR-93",
+   "kind": "pull",
+   "live_sha": "dfc1557ab99ad8d41cf84714e1bb671e89b045e6",
+   "needs_disposition": false,
+   "pr_state": "OPEN",
+   "state": "COVERED_BY_BRANCH_EVALUATION"
+  },
+  {
+   "head_contained_in_evaluated_tip": true,
+   "id": "PR-94",
+   "kind": "pull",
+   "live_sha": "296d647d8755b6036ddb6bc66a5526b78db07029",
+   "needs_disposition": false,
+   "pr_state": "OPEN",
+   "state": "COVERED_BY_BRANCH_EVALUATION"
+  },
+  {
+   "head_contained_in_evaluated_tip": true,
+   "id": "PR-95",
+   "kind": "pull",
+   "live_sha": "0e825b44f559f44815cc9925f5dcbcaec5d7eb53",
+   "needs_disposition": false,
+   "pr_state": "OPEN",
+   "state": "COVERED_BY_BRANCH_EVALUATION"
+  },
+  {
+   "head_contained_in_evaluated_tip": true,
+   "id": "PR-96",
+   "kind": "pull",
+   "live_sha": "72fe7fd07f2c3f9296a4b6eb1af0bf4d327aa964",
+   "needs_disposition": false,
+   "pr_state": "OPEN",
+   "state": "COVERED_BY_BRANCH_EVALUATION"
+  },
+  {
+   "head_contained_in_evaluated_tip": true,
+   "id": "PR-97",
+   "kind": "pull",
+   "live_sha": "081a547117ea7d585e2cb6089e2c88c76acc2355",
+   "needs_disposition": false,
+   "pr_state": "OPEN",
+   "state": "COVERED_BY_BRANCH_EVALUATION"
+  },
+  {
+   "head_contained_in_evaluated_tip": true,
+   "id": "PR-98",
+   "kind": "pull",
+   "live_sha": "68394af3c6e53ed764062b19cb4f2c0ab3b3b608",
+   "needs_disposition": false,
+   "pr_state": "OPEN",
+   "state": "COVERED_BY_BRANCH_EVALUATION"
+  },
+  {
+   "head_contained_in_evaluated_tip": true,
+   "id": "PR-99",
+   "kind": "pull",
+   "live_sha": "4ad12183d9f65a23a2b4de51ed8ba6d1b6ca48c2",
+   "needs_disposition": false,
+   "pr_state": "OPEN",
+   "state": "COVERED_BY_BRANCH_EVALUATION"
+  },
+  {
+   "head_contained_in_evaluated_tip": true,
+   "id": "PR-100",
+   "kind": "pull",
+   "live_sha": "0a694a998cfed119e116c68d3248de1cb84f120f",
+   "needs_disposition": false,
+   "pr_state": "OPEN",
+   "state": "COVERED_BY_BRANCH_EVALUATION"
+  },
+  {
+   "head_contained_in_evaluated_tip": true,
+   "id": "PR-101",
+   "kind": "pull",
+   "live_sha": "a39f241b0135cf92cc5a6b9a28af226aa294603d",
+   "needs_disposition": false,
+   "pr_state": "OPEN",
+   "state": "COVERED_BY_BRANCH_EVALUATION"
+  },
+  {
+   "head_contained_in_evaluated_tip": true,
+   "id": "PR-102",
+   "kind": "pull",
+   "live_sha": "16af4b93ebbc1971b25626d8ba40d14ac3f80bdf",
+   "needs_disposition": false,
+   "pr_state": "OPEN",
+   "state": "COVERED_BY_BRANCH_EVALUATION"
+  },
+  {
+   "head_contained_in_evaluated_tip": true,
+   "id": "PR-103",
+   "kind": "pull",
+   "live_sha": "739e5904d4fb747c08e8d89a92ac4e242adf5db4",
+   "needs_disposition": false,
+   "pr_state": "OPEN",
+   "state": "COVERED_BY_BRANCH_EVALUATION"
+  },
+  {
+   "changed_blobs": 3725,
+   "diff_base": "8eb1889822fc8a83f219977c15340172e16acd91",
+   "head_contained_in_evaluated_tip": false,
+   "id": "PR-104",
+   "kind": "pull",
+   "live_sha": "b02075f327ea8180ab6d269eba358cf8c5479878",
+   "missing_blob_paths": [
+    ".github/workflows/cognitive-fabric-r161-van.yml",
+    ".github/workflows/van-owner-release.yml",
+    "CLAUDE.md",
+    "CONSOLIDATION_STATE.json",
+    "README.md",
+    "android/voice/acquisition-lock.json",
+    "docs/consolidation/ASR_ARCHIVE_REQUALIFICATION.json",
+    "docs/consolidation/BRANCH_EVALUATION.json",
+    "docs/consolidation/BRANCH_EVALUATION.md",
+    "docs/consolidation/LOCAL_BRANCH_EVALUATION.json",
+    "docs/consolidation/MAIN_ADMISSION.md",
+    "docs/consolidation/MAIN_AUTHORIZATION_INTAKE.json",
+    "docs/consolidation/OPUS_BUILD_PROMPT.md",
+    "docs/consolidation/START_HERE.md",
+    "docs/consolidation/VALIDATION.md",
+    "docs/consolidation/validation/MANIFEST.json",
+    "docs/consolidation/validation/android-jvm-summary.json",
+    "docs/consolidation/validation/authority-map.txt",
+    "docs/consolidation/validation/backend-crash-retest.txt",
+    "docs/consolidation/validation/backend-tests.txt",
+    "docs/consolidation/validation/consolidation-check.json",
+    "docs/consolidation/validation/contract-ledger-retest.txt",
+    "docs/consolidation/validation/contracts-configured.txt",
+    "docs/consolidation/validation/focused-tests.txt",
+    "docs/consolidation/validation/integration-regressions.txt",
+    "docs/consolidation/validation/ledger-baseline.txt",
+    "docs/consolidation/validation/ledger-consolidation.txt",
+    "docs/consolidation/validation/maturity.txt",
+    "docs/consolidation/validation/original-checkout-final-check.json",
+    "docs/consolidation/validation/release-workflow-tests.txt",
+    "docs/consolidation/validation/rev51-harness.txt",
+    "docs/consolidation/validation/services-tests.txt",
+    "docs/consolidation/validation/trading-tests.txt",
+    "docs/consolidation/validation/voice-requalification.txt",
+    "docs/design/van-next/README.md",
+    "docs/project-state/LOCAL_CHANGE_LEDGER.jsonl",
+    "docs/project-state/authorizations/auth-20261021-owner-consolidation-asr-requalification.json",
+    "docs/project-state/authorizations/auth-20261021-owner-consolidation-cognitive-ci.json",
+    "docs/project-state/authorizations/auth-20261021-owner-consolidation-release-workflow.json",
+    "docs/project-state/authorizations/auth-20261021-owner-consolidation-test-discovery.json",
+    "docs/project-state/authorizations/auth-20261021-owner-repository-consolidation.json",
+    "pytest.ini",
+    "tools/consolidation/verify.py",
+    "trading/tests/test_consolidated_ledger_transactions.py",
+    "trading/vati/app/account_coordinator.py",
+    "trading/vati/app/account_service.py",
+    "trading/vati/app/cycle.py",
+    "trading/vati/app/trade_lifecycle.py",
+    "trading/vati/core/ledger.py",
+    "trading/vati/core/ledger_pg.py"
+   ],
+   "missing_paths_absent_at_consolidation_head": [],
+   "needs_disposition": true,
+   "pr_state": "OPEN",
+   "state": "PR_ONLY_HEAD_CONTENT_NOT_PRESERVED"
+  }
+ ],
+ "schema": "van.rebuild.pre001.refs/1"
+}

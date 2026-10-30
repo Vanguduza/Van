@@ -1,0 +1,13 @@
+{
+  "schema": "van.rebuild.source-qualification-interrupted/1",
+  "source_head": "90e644522e96e554f0e18f3745af69fb16d7edcb",
+  "state": "INTERRUPTED_NO_OBSERVED_TEST_PROCESS",
+  "observed_at_utc": "2026-10-24T06:07:40.811113+00:00",
+  "logs_sha256": {
+    "qualification-driver.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "full-backend.txt": "e97394a24a70c33994e21e875900051ce9fff946eaf7fa18323c5598b5cc1562"
+  },
+  "evidence": "Driver and pytest are zombies; source log last modified before this resumed session. No final XML, source counts, clean storage audit or PASS is claimed.",
+  "private_fixture_stop_verified": true,
+  "retry": "Same frozen source; a new isolated fixture and separate logs will be used."
+}

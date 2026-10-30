@@ -1,0 +1,15 @@
+{
+  "command": [
+    "python3",
+    "/workspace/van-mt5-projected-margin-floor-sql-r2-20261028.py"
+  ],
+  "cwd": "/workspace/van-review-2026-10-18/publish",
+  "controller_pid": 540156,
+  "started_at_utc": "2026-10-28T14:22:23.466234+00:00",
+  "timeout_seconds": 1900,
+  "state": "COMPLETED",
+  "command_pid": 540183,
+  "exit": 0,
+  "adopted_children_reaped": [],
+  "finished_at_utc": "2026-10-28T14:36:40.815982+00:00"
+}

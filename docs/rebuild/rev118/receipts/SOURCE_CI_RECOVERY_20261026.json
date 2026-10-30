@@ -1,0 +1,37 @@
+{
+  "schema": "van.rebuild.source-ci-recovery/1",
+  "base_head": "e690d5300c2cc2cdba82beb2f71eabe6eaf30846",
+  "updated_at_utc": "2026-10-26T11:51:50.085348+00:00",
+  "status": "LOCAL_SOURCE_JOB_AND_NATIVE_HISTORY_TESTED_HOSTED_REPAIR_NOT_RUN",
+  "source_sha256": {
+    ".github/workflows/van-ci.yml": "ba8457a092286cf915317297036437a470e6fe31906121ec91de2fe699fc3cf1",
+    ".github/workflows/van-forecast-runtime-source.yml": "fdb5b9b103ace5e7e900773419f185b57d2370dde2fb69ecb2280094adbe6b20",
+    "tools/ci/github-actions-ci.yml": "ba8457a092286cf915317297036437a470e6fe31906121ec91de2fe699fc3cf1",
+    "trading/tests/test_single_session_unknown_entry.py": "c2f8ea777ebac10f339d361d0889f9ac26f2db4eaa1e74f2cedbaf8328125cbf"
+  },
+  "actual_failures": {
+    "parent164_main": "40310150170 FAILED;16 successful public jobs,2 mandatory failures,1 PostgreSQL/trading job cancelled at35-minute job maximum;annotation verified;14 raw archives;full trading not completed/voice not executed/no PostgreSQL report",
+    "e690_forecast": "40315532577 FAILED;native Parquet initializer ModuleNotFoundError psycopg before0tests;CPU job independently verifiedSUCCESS",
+    "incomplete_local_dependency_probe": "Failed typing_extensions import because standalone probe omitted existing backend/rebuild dependencies;not an equivalent job and not a product failure",
+    "profile_crash": "source process exit-11 after120-second timed stack dump under cProfile;cause not established;no completed test;owned fixture absent",
+    "e690_main": "40315532625 terminalFAILED;16publicSUCCESS/2unwaivedmandatoryfailures/PostgreSQL-tradingcancelled35-minute maximum;14rawarchives and374exactcanonicalcases383editsverified;fulltradingincomplete/voicenotexecuted"
+  },
+  "repair": "Explicit psycopg3.2.9/psycopg-binary3.2.9 as already declared in original PostgreSQL CI;full trading pytest selection retained behind28-minute SIGINT/30-second forced cleanup before unchanged35-minute job limit;pipefail preserves failures;durable stdout log uploaded;workflow/template exact mirrors;no checks/gates skipped or waived",
+  "actual_verification": {
+    "fresh_equivalent_source_job": "Final114passed/0skips/audit0/36.84seconds/all final runtime/test hashes match including new isolated native-history fixture/owned actual isolated PostgreSQL fixture independently absent;fresh exact backend/rebuild/Arrow/driver dependencies and real driver CREATE SCHEMA",
+    "shell_controls": "positiveexit0/failureexit1/timeoutexit124;fixture terminated and reaped own child",
+    "workflow_contracts": "4passed",
+    "plain_native_session_control": "1passed/2declared deprecation warnings/82.41seconds/owned fixture independently absent",
+    "second_profile": "1passed178.67seconds/2deprecationwarnings/ownedfixtureabsent;31.45M calls;662full-chain checks/380148checked rows;no timed stack dump",
+    "rebuild_and_workflow_contracts": "112 passed:108 rebuild plus4 workflow contracts;selections overlap prior4",
+    "fresh_dependency_integrity": "pip check:No broken requirements found",
+    "native_history_module": "46passed/0skips/audit0/2dependency deprecation warnings/537.25seconds/all final runtime/test hashes match/owned isolated PostgreSQL fixture independently absent",
+    "native_history_case_counts": {
+      "trading.tests.test_single_session_unknown_entry": 30,
+      "trading.tests.test_postgres_ledger_isolation": 16
+    }
+  },
+  "preserved": "Frozen package/authorization/ledger/hooks/source feature and frontend contracts intact;0formalacceptance",
+  "evidence": "ci/source_ci_recovery_20261026",
+  "test_isolation_repair": "Existing actual per-test disposable PostgreSQL database fixture isolates unrelated native recovery scenarios. All original assertions, source checks and within-test restart history retained. Entire original affected module plusPGisolationcases 46cases passed with0skips/audit0;all final runtime/test hashes match and owned fixture independently absent."
+}

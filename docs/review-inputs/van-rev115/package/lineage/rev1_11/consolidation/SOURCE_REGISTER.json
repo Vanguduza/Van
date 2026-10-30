@@ -1,0 +1,65 @@
+{
+  "outside_primary_references": [
+    {
+      "id": "MT5_ORDER_TYPES",
+      "supports": "Limit/stop/market distinctions; no limit-price worsening treated as ordinary limit semantics.",
+      "url": "https://www.metatrader5.com/en/terminal/help/trading/performing_deals"
+    },
+    {
+      "id": "QC_FILL_MODELS",
+      "supports": "Reference fill timing and bid/ask distinctions; not adopted implementation.",
+      "url": "https://www.quantconnect.com/docs/v2/writing-algorithms/reality-modeling/trade-fills/supported-models/immediate-model"
+    },
+    {
+      "id": "DSR_PAPER",
+      "supports": "Multiple-testing/selection/non-normality context; not a generic probability of personal skill.",
+      "url": "https://www.davidhbailey.com/dhbpapers/deflated-sharpe.pdf"
+    }
+  ],
+  "schema": "van.consolidation.sources/1.0",
+  "sources": [
+    {
+      "base": "8eb1889822fc8a83f219977c15340172e16acd91",
+      "changed_files": 105,
+      "commits_ahead": 30,
+      "evidence": "Source read on VM plus connected GitHub metadata; exact focused/source-check commands rerun.",
+      "id": "OPUS_HEAD",
+      "master_sha256": "855e2aca3ab6ffdc965c823c147ef7d3143453c7f49708404f052aee7348f7fc",
+      "pr": 101,
+      "ref": "a39f241b0135cf92cc5a6b9a28af226aa294603d",
+      "repository": "Vanguduza/Van",
+      "state": "OPEN_UNMERGED_WHEN_CHECKED",
+      "working_branch": "ccr-8f1201e9-w1xm0r"
+    },
+    {
+      "artifact": "VAN_NEXT_BACKEND_FIRST_BLUEPRINT_PACK_REV1_10_20261017.zip",
+      "evidence": "Supplied complete artifact; preserved immutable source in lineage.",
+      "id": "PARENT110",
+      "master_sha256": "dba347b9f02831d1a3a2d9570b4434f6a8b4b98f6f47862c830ff6784cb56f51"
+    },
+    {
+      "artifact": "VAN_FORECAST_ADOPTION_BLUEPRINT_PACK_REV1_1_20261017.zip",
+      "evidence": "Existing owner Library additive; parent integration explicitly required; now represented in the one graph.",
+      "id": "FORECAST11",
+      "master_sha256": "544e77a2bc46317ff319c86da646b1c7c937b9c88ee7328b9cafef2f72cff750",
+      "sha256": "dbacf6b24f0e2df572a5e1208748921a59bab60780694570bf84aaadb0a8c849"
+    },
+    {
+      "evidence": "Historical full materialization/line hash receipt, not semantic completeness.",
+      "id": "PR93_ATLAS",
+      "path": "/home/ubuntu/work/van-ui-audit-rev3-20261015/.audit-output/full-pr93-20261016",
+      "receipt_sha256": "d0100e9d8cca5c38002013d939dbdaad5e853abd6d4da17be428663e4dc927b1",
+      "ref": "dfc1557ab99ad8d41cf84714e1bb671e89b045e6"
+    },
+    {
+      "id": "DARK",
+      "path": "design/VAN_LOCKED_DARK.png",
+      "sha256": "e3bca85b2c523bbb171048ec7947b40227f38766eec100e216c1d0643b456a17"
+    },
+    {
+      "id": "LIGHT",
+      "path": "design/VAN_LOCKED_LIGHT.png",
+      "sha256": "76662dca3ba69bc47e1f04d227e4d86aa90b9872adcf2f0e25aa907583c0a2b7"
+    }
+  ]
+}

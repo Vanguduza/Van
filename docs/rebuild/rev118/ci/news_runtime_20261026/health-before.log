@@ -1,0 +1,38 @@
+........................FF                                               [100%]
+=================================== FAILURES ===================================
+_ test_invalid_builder_clock_cannot_be_written_as_a_valid_health_clock[session] _
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-232/test_invalid_builder_clock_can0')
+ledger = <vati.core.ledger.Ledger object at 0x7f95aa704560>, kind = 'session'
+
+    @pytest.mark.parametrize('kind',['session','account'])
+    def test_invalid_builder_clock_cannot_be_written_as_a_valid_health_clock(tmp_path,ledger,kind):
+        value=service(kind,ledger,configured(tmp_path/'news.json')|{'max_rows':0});value.clock=lambda:True
+        news=build(value,kind)
+>       assert news.source_health['state']=='CLOCK_UNAVAILABLE' and news.source_health['checked_ms'] is None
+E       AssertionError: assert ('PERSISTENCE_UNAVAILABLE' == 'CLOCK_UNAVAILABLE'
+E         
+E         - CLOCK_UNAVAILABLE
+E         + PERSISTENCE_UNAVAILABLE)
+
+trading/tests/test_news_runtime_health.py:194: AssertionError
+_ test_invalid_builder_clock_cannot_be_written_as_a_valid_health_clock[account] _
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-232/test_invalid_builder_clock_can1')
+ledger = <vati.core.ledger.Ledger object at 0x7f95aa704530>, kind = 'account'
+
+    @pytest.mark.parametrize('kind',['session','account'])
+    def test_invalid_builder_clock_cannot_be_written_as_a_valid_health_clock(tmp_path,ledger,kind):
+        value=service(kind,ledger,configured(tmp_path/'news.json')|{'max_rows':0});value.clock=lambda:True
+        news=build(value,kind)
+>       assert news.source_health['state']=='CLOCK_UNAVAILABLE' and news.source_health['checked_ms'] is None
+E       AssertionError: assert ('PERSISTENCE_UNAVAILABLE' == 'CLOCK_UNAVAILABLE'
+E         
+E         - CLOCK_UNAVAILABLE
+E         + PERSISTENCE_UNAVAILABLE)
+
+trading/tests/test_news_runtime_health.py:194: AssertionError
+=========================== short test summary info ============================
+FAILED trading/tests/test_news_runtime_health.py::test_invalid_builder_clock_cannot_be_written_as_a_valid_health_clock[session]
+FAILED trading/tests/test_news_runtime_health.py::test_invalid_builder_clock_cannot_be_written_as_a_valid_health_clock[account]
+2 failed, 24 passed in 2.02s

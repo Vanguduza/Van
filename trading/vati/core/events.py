@@ -11,6 +11,7 @@ from vati.core.canonical import canonical_hash
 
 
 class EventKind(str, Enum):
+    COGNITIVE_FABRIC = "COGNITIVE_FABRIC"  # domain-local advisory/learning evidence
     MARKET_TICK = "MARKET_TICK"
     MARKET_BAR = "MARKET_BAR"
     MARKET_STATE = "MARKET_STATE"
@@ -19,6 +20,7 @@ class EventKind(str, Enum):
     OPPORTUNITY_ASSESSMENT = "OPPORTUNITY_ASSESSMENT"
     TRADE_INTENT = "TRADE_INTENT"
     RISK_DECISION = "RISK_DECISION"
+    RISK_REVALIDATION = "RISK_REVALIDATION"  # current facts bounded by the original exact approval
     EXECUTION_POLICY_DECISION = "EXECUTION_POLICY_DECISION"
     CANDIDATE_OPPORTUNITY = "CANDIDATE_OPPORTUNITY"
     CANDIDATE_EXPIRED = "CANDIDATE_EXPIRED"
@@ -38,10 +40,12 @@ class EventKind(str, Enum):
     MARKET_DATA_DISAGREEMENT = "MARKET_DATA_DISAGREEMENT"
     ORDER_COMMAND = "ORDER_COMMAND"
     EXECUTION_RECEIPT = "EXECUTION_RECEIPT"
+    EXIT_ATTEMPT = "EXIT_ATTEMPT"                    # durable protective transport attempt, not new entry authority
     POSITION_CHANGE = "POSITION_CHANGE"
     RECONCILIATION_RESULT = "RECONCILIATION_RESULT"
     TCA_RECORD = "TCA_RECORD"
     TRADE_REVIEW = "TRADE_REVIEW"
+    TRADE_REVIEW_REVISION = "TRADE_REVIEW_REVISION"  # restated evidence only; never replays an original financial close
     TRADE_EXPERIENCE_ARTIFACT = "TRADE_EXPERIENCE_ARTIFACT"
     ACTIVATION_MANIFEST = "ACTIVATION_MANIFEST"
     KILL_SWITCH = "KILL_SWITCH"
@@ -49,8 +53,17 @@ class EventKind(str, Enum):
     CAPSULE_STATE = "CAPSULE_STATE"
     OWNER_TICKET = "OWNER_TICKET"
     SESSION = "SESSION"
+    FUNDING_STATEMENT = "FUNDING_STATEMENT"  # immutable native cash observations; never payment authority
+    FUNDING_DEAL_STATEMENT = "FUNDING_DEAL_STATEMENT"
+    FUNDING_MT5_STATEMENT = "FUNDING_MT5_STATEMENT"
+    FUNDING_MT5_QUERY = "FUNDING_MT5_QUERY"
     ACCOUNT_SNAPSHOT = "ACCOUNT_SNAPSHOT"   # equity/balance/margin as the venue reported them (portfolio truth for the owner surface)
+    ACCOUNT_OPERATION = "ACCOUNT_OPERATION"  # native account-control effects; never trade/outcome evidence
     MARKET_DATA_HEALTH = "MARKET_DATA_HEALTH"
+    NATIVE_SYMBOL_CATALOG = "NATIVE_SYMBOL_CATALOG"  # original catalog vintages; no dataset or execution admission
+    DATASET_MANIFEST_CANDIDATE = "DATASET_MANIFEST_CANDIDATE"
+    FINANCIAL_MOVEMENT = "FINANCIAL_MOVEMENT"  # source-bound balanced postings; no spend/settlement authority
+    PAYMENT_DRAFT = "PAYMENT_DRAFT"  # immutable unapproved funding input; no reservation, send or settlement
 
     # ---- Rev 5.1 (TRD-REV51-090..133). Every kind below is produced by the
     # offline-evolution or shadow-live path. None of them is an order.
@@ -95,6 +108,9 @@ class EventKind(str, Enum):
     THESIS_ASSESSMENT = "THESIS_ASSESSMENT"          # per-cycle thesis state change
     POSITION_ADJUSTMENT = "POSITION_ADJUSTMENT"      # adaptive management proposal
     NEWS_HEADLINE = "NEWS_HEADLINE"                  # T1/T2 headline ingress record
+    NEWS_OBSERVATION = "NEWS_OBSERVATION"            # immutable relay claim and original availability; no order authority
+    NEWS_LINEAGE = "NEWS_LINEAGE"                    # declared publisher/story linkage, not independent-source admission
+    NEWS_SOURCE_SNAPSHOT = "NEWS_SOURCE_SNAPSHOT"    # original raw feed bytes and declared capture clock; no feed admission
     EVENT_IMPACT = "EVENT_IMPACT"                    # headline -> position/candidate impact
     DECISION_QUADRANT = "DECISION_QUADRANT"          # decision quality x outcome
     TRADE_LESSON = "TRADE_LESSON"                    # retrievable lesson record

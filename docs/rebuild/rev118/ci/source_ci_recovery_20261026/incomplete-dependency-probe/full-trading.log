@@ -1,0 +1,12 @@
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+  File "/workspace/van-forecast-pg-dependency-venv-20261026/lib/python3.12/site-packages/psycopg/__init__.py", line 9, in <module>
+    from . import pq  # noqa: F401 import early to stabilize side effects
+    ^^^^^^^^^^^^^^^^
+  File "/workspace/van-forecast-pg-dependency-venv-20261026/lib/python3.12/site-packages/psycopg/pq/__init__.py", line 18, in <module>
+    from . import abc
+  File "/workspace/van-forecast-pg-dependency-venv-20261026/lib/python3.12/site-packages/psycopg/pq/abc.py", line 13, in <module>
+    from .._compat import Self, TypeAlias
+  File "/workspace/van-forecast-pg-dependency-venv-20261026/lib/python3.12/site-packages/psycopg/_compat.py", line 48, in <module>
+    from typing_extensions import TypeVar
+ModuleNotFoundError: No module named 'typing_extensions'

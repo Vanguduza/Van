@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="2" skipped="0" tests="2" time="1.328" timestamp="2026-10-26T11:15:34.661757+00:00" hostname="2c5a245e39f1"><testcase classname="trading.worker_tests.test_dataset_candidate_archive" name="test_new_publication_requires_current_original_bytes_before_any_sql_append[sqlite-missing]" time="0.175"><failure message="Failed: DID NOT RAISE ValueError">publication = (&lt;vati.core.ledger.Ledger object at 0x7f452a14f920&gt;, &lt;vati.research.dataset_archive.DatasetCandidateArchive object at ...tive_account_id":123,"schema":"vati.ctrader-symbol/1","transport_host":"demo.ctraderapi.com"}', received_at_ms=100000))
+damage = 'missing'
+
+    @pytest.mark.parametrize('damage',['missing','changed'])
+    def test_new_publication_requires_current_original_bytes_before_any_sql_append(publication,damage):
+        ledger,archive,record,c=publication
+        path=archive.inspector.partitions.root/(record['partitions'][0]['artifact_id']+'.parquet')
+        if damage=='missing':path.unlink()
+        else:path.write_bytes(b'PAR1not-the-original-sourcePAR1')
+        before=state(ledger)
+&gt;       with pytest.raises(ValueError):archive.publish('invalid-source',parse(record),expected_scope=c.native_scope)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+trading/worker_tests/test_dataset_candidate_archive.py:89: Failed</failure></testcase><testcase classname="trading.worker_tests.test_dataset_candidate_archive" name="test_new_publication_requires_current_original_bytes_before_any_sql_append[sqlite-changed]" time="0.054"><failure message="Failed: DID NOT RAISE ValueError">publication = (&lt;vati.core.ledger.Ledger object at 0x7f452a14f6b0&gt;, &lt;vati.research.dataset_archive.DatasetCandidateArchive object at ...tive_account_id":123,"schema":"vati.ctrader-symbol/1","transport_host":"demo.ctraderapi.com"}', received_at_ms=100000))
+damage = 'changed'
+
+    @pytest.mark.parametrize('damage',['missing','changed'])
+    def test_new_publication_requires_current_original_bytes_before_any_sql_append(publication,damage):
+        ledger,archive,record,c=publication
+        path=archive.inspector.partitions.root/(record['partitions'][0]['artifact_id']+'.parquet')
+        if damage=='missing':path.unlink()
+        else:path.write_bytes(b'PAR1not-the-original-sourcePAR1')
+        before=state(ledger)
+&gt;       with pytest.raises(ValueError):archive.publish('invalid-source',parse(record),expected_scope=c.native_scope)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+trading/worker_tests/test_dataset_candidate_archive.py:89: Failed</failure></testcase></testsuite></testsuites>

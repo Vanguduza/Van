@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="1" time="2.474" timestamp="2026-10-26T18:01:12.862196+00:00" hostname="2c5a245e39f1"><testcase classname="trading.tests.test_financial_movement_runtime" name="test_actual_projection_commit_lost_ack_is_unknown_then_original_recovers" time="0.139"><failure message="vati.core.units.UnitError: FINANCIAL_REQUEST_ID_INVALID">tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-468/test_actual_projection_commit_0')
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x7fbac3b47920&gt;
+
+    def test_actual_projection_commit_lost_ack_is_unknown_then_original_recovers(tmp_path,monkeypatch):
+        ledger,transport,adapter=setup(tmp_path)
+        with closing(ledger):
+            atomic=ledger.atomic;failed=False
+            @contextmanager
+            def lost():
+                nonlocal failed
+                outer=not ledger._conn.in_transaction
+                with atomic() as writer:yield writer
+                if outer and not failed and ledger.count(EventKind.FINANCIAL_MOVEMENT):
+                    failed=True;raise OSError('fixture-private-lost-ACK')
+            with monkeypatch.context() as patch:
+                patch.setattr(ledger,'atomic',lost)
+                result=capture_funding(ledger,adapter,adapter.sync_account(),now_ms=3000)
+            assert failed and result['state']=='OBSERVED'
+            projection=result['financial_movements'];assert projection['state']=='UNKNOWN'
+&gt;           request=projection['original_request_id'];original=FinancialMovementBook(ledger).lookup(request)
+                                                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+trading/tests/test_financial_movement_runtime.py:92: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;vati.funding.movement_journal.FinancialMovementBook object at 0x7fbac19cfce0&gt;
+request_id = None
+
+    def lookup(self, request_id):
+        if not isinstance(request_id,str) or REQUEST.fullmatch(request_id) is None:
+&gt;           raise UnitError('FINANCIAL_REQUEST_ID_INVALID')
+E           vati.core.units.UnitError: FINANCIAL_REQUEST_ID_INVALID
+
+trading/vati/funding/movement_journal.py:147: UnitError</failure></testcase></testsuite></testsuites>

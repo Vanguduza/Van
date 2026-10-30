@@ -19,6 +19,7 @@ from vati.execution.paper import PaperAdapter
 from vati.intelligence.events import EventMatrix
 from vati.intelligence.market_state import MarketState
 from vati.learning.hooks import LearningHooks
+from vati.learning.episodes import Environment
 from vati.market_data.bars import Bar
 from vati.market_data.calendars import MarketCalendar
 from vati.strategies.base import StrategyContext
@@ -49,14 +50,23 @@ class BacktestEngine:
                  ctx_fn: Optional[Callable[[MarketState, Decimal], StrategyContext]] = None, ledger_path: str = ":memory:", learning: Optional[LearningHooks] = None) -> None:
         self.cfg, self.engine, self.cost_fn, self.calendar, self.events, self.ctx_fn = cfg, engine, cost_fn, calendar, events, ctx_fn
         self.learning = learning
+        self._check_learning_cohort()
         self.start_equity, self.spread, self.slippage, self.ledger_path = start_equity, spread, slippage, ledger_path
 
+    def _check_learning_cohort(self):
+        if self.learning is not None and self.learning.environment is not Environment.BACKTEST:
+            raise ValueError('BacktestEngine requires BACKTEST learning hooks')
+
     def run(self, bars: Sequence[Bar], *, peek: bool = False) -> BacktestResult:
+        self._check_learning_cohort()
         cfg = self.cfg
-        paper = PaperAdapter(venue=cfg.venue, account_alias=cfg.account_alias, equity=self.start_equity, spread=self.spread, slippage=self.slippage,
-                             value_per_price_unit_per_lot=cfg.contract.value_per_price_unit_per_lot)
+        paper = PaperAdapter(venue=cfg.venue, account_alias=cfg.account_alias, currency=cfg.contract.account_currency,
+                             equity=self.start_equity, spread=self.spread, slippage=self.slippage,
+                             value_per_price_unit_per_lot=cfg.contract.value_per_price_unit_per_lot,
+                             symbol_contracts={cfg.symbol: cfg.contract})
         ledger = Ledger(self.ledger_path)
-        cycle = DecisionCycle(cfg=cfg, adapter=paper, ledger=ledger, engine=self.engine, cost_fn=self.cost_fn, calendar=self.calendar, events=self.events, ctx_fn=self.ctx_fn, learning=self.learning)
+        cycle = DecisionCycle(cfg=cfg, adapter=paper, ledger=ledger, engine=self.engine, cost_fn=self.cost_fn, calendar=self.calendar, events=self.events, ctx_fn=self.ctx_fn, learning=self.learning,
+            research_environment=Environment.BACKTEST)
         curve: list[tuple[int, Decimal]] = []
         cycles: list[CycleResult] = []
         rejections: dict[str, int] = {}

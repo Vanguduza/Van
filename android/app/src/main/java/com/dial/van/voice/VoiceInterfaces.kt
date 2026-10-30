@@ -47,6 +47,7 @@ interface VoiceInputCallback {
      * fix.
      */
     fun onUnavailable(reason: String?) = Unit
+    fun onCancelled(turnId: String) = Unit
     fun onListeningChanged(listening: Boolean)
 }
 
@@ -54,6 +55,9 @@ interface TtsOutputCallback {
     fun onSpeakingChanged(speaking: Boolean)
     fun onSpeechFrame(frame: SpeechSyncFrame)
     fun onUtteranceDone(utteranceId: String)
+    fun onUtteranceStarted(utteranceId: String) = Unit
+    fun onUtteranceFailed(utteranceId: String) = Unit
+    fun onUtteranceInterrupted(utteranceId: String) = Unit
 }
 
 interface BargeInHook {
@@ -70,9 +74,9 @@ class VoiceInputManager(
     private val callback: VoiceInputCallback,
     val audioArbiter: VoiceAudioArbiter = VoiceAudioArbiter(context.applicationContext),
     private val biasingStringsProvider: () -> List<String> = { emptyList() },
-    private val secondPassCoordinator: VoiceSecondPassCoordinator? = null,
+    private var secondPassCoordinator: VoiceSecondPassCoordinator? = null,
     private val personalConfusionProvider: (String) -> Boolean = { false },
-    private val speakerSimilarityScorer: SpeakerSimilarityScorer? = null,
+    private var speakerSimilarityScorer: SpeakerSimilarityScorer? = null,
 ) {
     private val appContext = context.applicationContext
     private val mainHandler = Handler(Looper.getMainLooper())
@@ -80,30 +84,36 @@ class VoiceInputManager(
         Thread(runnable, "van-voice-evidence").apply { isDaemon = true }
     }
     private val listening = AtomicBoolean(false)
+    private val speakerEvidenceRevision = SpeakerEvidenceRevision()
+    @Volatile private var speakerEnrollmentCapture = false
     private val onDeviceAvailable =
         Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && SpeechRecognizer.isOnDeviceRecognitionAvailable(appContext)
-    val capability: VoiceRecognitionCapabilityDecision =
-        VoiceRecognitionPolicy.decide(Build.VERSION.SDK_INT, onDeviceAvailable)
+    val capability: VoiceRecognitionCapabilityDecision
+        get() = VoiceRecognitionPolicy.decide(
+            Build.VERSION.SDK_INT, onDeviceAvailable && recognizer != null,
+            secondPassCoordinator?.isReady() == true,
+        )
 
-    private val recognizer: SpeechRecognizer? = when (capability.backend) {
-        VoiceRecognitionBackend.ANDROID_ON_DEVICE_CALLER_AUDIO,
-        VoiceRecognitionBackend.ANDROID_ON_DEVICE_DIRECT_MIC ->
+    private val recognizer: SpeechRecognizer? = runCatching {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && onDeviceAvailable) {
                 SpeechRecognizer.createOnDeviceSpeechRecognizer(appContext)
             } else null
-        VoiceRecognitionBackend.SHERPA_PRIMARY,
-        VoiceRecognitionBackend.FUSED_ANDROID_SHERPA,
-        VoiceRecognitionBackend.SHERPA_PRIMARY_REQUIRED,
-        VoiceRecognitionBackend.UNAVAILABLE -> null
-    }
+        }.getOrNull()
 
     private var pipeSession: VoiceAudioPipeSession? = null
     private var turnAudioCapture: VoiceTurnAudioCapture? = null
-    private var activeTurnId: String? = null
+    private val turnLifecycle = VoiceTurnLifecycle()
+    private val _ownerTurnActive = MutableStateFlow(false)
+    val ownerTurnActive: StateFlow<Boolean> = _ownerTurnActive.asStateFlow()
     private var activeTurnStartedAtMs: Long = 0L
+    private var offlineToken: VoiceTurnLifecycle.Token? = null
+    private var offlineSink: ((ByteArray) -> Unit)? = null
+    private var offlineTimeout: Runnable? = null
+    private var offlineEndpoint: OfflineVoiceTurn? = null
 
-    private val listener = object : RecognitionListener {
+    private fun recognitionListener(token: VoiceTurnLifecycle.Token) = object : RecognitionListener {
         override fun onReadyForSpeech(params: Bundle?) {
+            if (!turnLifecycle.acceptsRecognition(token)) return
             listening.set(true)
             callback.onListeningChanged(true)
         }
@@ -113,6 +123,7 @@ class VoiceInputManager(
         override fun onBufferReceived(buffer: ByteArray?) = Unit
 
         override fun onEndOfSpeech() {
+            if (!turnLifecycle.acceptsRecognition(token)) return
             // Closing caller audio signals EOS to the recognizer but deliberately leaves the
             // arbiter capture session alive so wake can resume without reopening AudioRecord.
             closePipeOnly()
@@ -121,6 +132,7 @@ class VoiceInputManager(
         }
 
         override fun onError(error: Int) {
+            if (!turnLifecycle.acceptsRecognition(token)) return
             cleanupTurn(preserveCapture = true)
             listening.set(false)
             callback.onListeningChanged(false)
@@ -128,6 +140,7 @@ class VoiceInputManager(
         }
 
         override fun onResults(results: Bundle?) {
+            if (!turnLifecycle.claimFinal(token)) return
             val hypotheses = results
                 ?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
                 ?.filter { it.isNotBlank() }
@@ -162,9 +175,8 @@ class VoiceInputManager(
                 }
             } else emptyList()
 
-            val turnId = activeTurnId ?: UUID.randomUUID().toString()
             val androidResult = VoiceRecognitionResult(
-                turnId = turnId,
+                turnId = token.turnId,
                 text = hypotheses.firstOrNull().orEmpty(),
                 hypotheses = hypotheses,
                 hypothesisConfidence = confidence,
@@ -182,9 +194,11 @@ class VoiceInputManager(
             val hasCapturedEvidence = capturedPcm.isNotEmpty()
             val needsSecondPass =
                 secondPassCoordinator != null && secondPassDecision?.run == true && hasCapturedEvidence
-            val needsSpeakerEvidence = speakerSimilarityScorer != null && hasCapturedEvidence
+            val speakerForTurn = speakerSimilarityScorer
+            val speakerRevision = speakerEvidenceRevision.snapshot()
+            val needsSpeakerEvidence = speakerForTurn != null && hasCapturedEvidence
 
-            cleanupTurn(preserveCapture = true)
+            cleanupTurn(preserveCapture = true, discardResult = false)
 
             if (needsSecondPass || needsSpeakerEvidence) {
                 evidenceExecutor.execute {
@@ -201,7 +215,7 @@ class VoiceInputManager(
                         androidResult
                     }
                     val speakerScore = if (needsSpeakerEvidence) {
-                        runCatching { speakerSimilarityScorer!!.similarity(capturedPcm) }
+                        runCatching { speakerForTurn!!.similarity(capturedPcm) }
                             .getOrNull()
                             ?.takeIf { it.isFinite() }
                             ?.coerceIn(0f, 1f)
@@ -209,15 +223,17 @@ class VoiceInputManager(
                         null
                     }
                     mainHandler.post {
-                        finishRecognition(resolved.copy(speakerSimilarity = speakerScore))
+                        finishRecognition(token, resolved.copy(speakerSimilarity = speakerEvidenceRevision.admit(speakerRevision, speakerScore)))
+                        capturedPcm.fill(0)
                     }
                 }
             } else {
-                finishRecognition(androidResult)
+                finishRecognition(token, androidResult)
             }
         }
 
         override fun onPartialResults(partialResults: Bundle?) {
+            if (!turnLifecycle.acceptsRecognition(token)) return
             val text = partialResults
                 ?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
                 ?.firstOrNull()
@@ -228,22 +244,30 @@ class VoiceInputManager(
         override fun onEvent(eventType: Int, params: Bundle?) = Unit
     }
 
-    init {
-        recognizer?.setRecognitionListener(listener)
-    }
-
     fun startListening(turnId: String = UUID.randomUUID().toString()): String {
         mainHandler.post { startListeningOnMain(turnId) }
         return turnId
     }
 
     private fun startListeningOnMain(turnId: String) {
+        if (speakerEnrollmentCapture) {
+            callback.onUnavailable("Local speaker enrollment owns the microphone; finish or cancel it before speaking a command.")
+            callback.onCancelled(turnId)
+            return
+        }
         prepareRecognizerForNewTurn()
-        activeTurnId = turnId
+        val token = turnLifecycle.begin(turnId)
+        _ownerTurnActive.value = true
         activeTurnStartedAtMs = System.currentTimeMillis()
+
+        if (capability.backend == VoiceRecognitionBackend.SHERPA_PRIMARY) {
+            startOfflineTurn(token)
+            return
+        }
 
         val localRecognizer = recognizer
         if (localRecognizer == null) {
+            cleanupTurn(preserveCapture = true)
             callback.onListeningChanged(false)
             // P1-VOICE-003 — the reason travels with the code. An owner told only
             // "-10002" learns nothing, and the two situations behind these codes need
@@ -276,7 +300,10 @@ class VoiceInputManager(
         }
 
         val intent = buildRecognitionIntent(callerAudio)
-        runCatching { localRecognizer.startListening(intent) }
+        runCatching {
+            localRecognizer.setRecognitionListener(recognitionListener(token))
+            localRecognizer.startListening(intent)
+        }
             .onFailure {
                 cleanupTurn(preserveCapture = true)
                 callback.onError(ERROR_LOCAL_ASR_START_FAILED)
@@ -285,14 +312,18 @@ class VoiceInputManager(
 
     /** Reset only recognizer-owned turn resources. Never tears down caller-audio capture. */
     private fun prepareRecognizerForNewTurn() {
+        closeOfflineTurn()
         closePipeOnly()
         closeTurnAudioCapture()
-        if (listening.get()) runCatching { recognizer?.cancel() }
+        turnLifecycle.cancel()
+        if (_ownerTurnActive.value) runCatching { recognizer?.cancel() }
         listening.set(false)
-        activeTurnId = null
+        _ownerTurnActive.value = false
     }
 
-    private fun finishRecognition(result: VoiceRecognitionResult) {
+    private fun finishRecognition(token: VoiceTurnLifecycle.Token, result: VoiceRecognitionResult) {
+        if (!turnLifecycle.finish(token)) return
+        _ownerTurnActive.value = false
         listening.set(false)
         callback.onListeningChanged(false)
         callback.onFinalResult(result)
@@ -339,15 +370,30 @@ class VoiceInputManager(
     }
 
     private fun stopListeningOnMain(notify: Boolean, preserveCapture: Boolean) {
+        offlineToken?.let { token ->
+            finishOfflineTurn(token, preserveCapture)
+            return
+        }
         closePipeOnly()
-        closeTurnAudioCapture()
         runCatching { recognizer?.stopListening() }
         if (capability.callerAudioSupported && !preserveCapture) {
             audioArbiter.stopCapture(clearPreRoll = false)
         }
         listening.set(false)
-        activeTurnId = null
         if (notify) callback.onListeningChanged(false)
+    }
+
+    /** Discard this turn, including a final already queued for local evidence processing. */
+    fun cancelListening(preserveCapture: Boolean = false) {
+        mainHandler.post {
+            val cancelled = turnLifecycle.cancel()
+            _ownerTurnActive.value = false
+            runCatching { recognizer?.cancel() }
+            cleanupTurn(preserveCapture)
+            listening.set(false)
+            callback.onListeningChanged(false)
+            cancelled?.let { callback.onCancelled(it.turnId) }
+        }
     }
 
     private fun closePipeOnly() {
@@ -360,18 +406,26 @@ class VoiceInputManager(
         turnAudioCapture = null
     }
 
-    private fun cleanupTurn(preserveCapture: Boolean) {
+    private fun cleanupTurn(preserveCapture: Boolean, discardResult: Boolean = true) {
+        closeOfflineTurn()
         closePipeOnly()
         closeTurnAudioCapture()
         if (capability.callerAudioSupported && !preserveCapture) {
             audioArbiter.stopCapture(clearPreRoll = false)
         }
-        activeTurnId = null
+        if (discardResult) {
+            turnLifecycle.cancel()
+            _ownerTurnActive.value = false
+        }
     }
 
     fun destroy() {
         mainHandler.post {
+            turnLifecycle.cancel()
+            _ownerTurnActive.value = false
+            closeOfflineTurn()
             stopListeningOnMain(notify = false, preserveCapture = false)
+            closeTurnAudioCapture()
             recognizer?.destroy()
             audioArbiter.close()
             evidenceExecutor.shutdownNow()
@@ -389,7 +443,7 @@ class VoiceInputManager(
      * unavailable reads it here rather than mapping an error code back to a guess.
      */
     fun unavailableReason(): String? =
-        if (recognizer == null) {
+        if (recognizer == null && capability.backend != VoiceRecognitionBackend.SHERPA_PRIMARY) {
             capability.unavailableReason
                 ?: when (capability.backend) {
                     VoiceRecognitionBackend.SHERPA_PRIMARY_REQUIRED ->
@@ -398,11 +452,146 @@ class VoiceInputManager(
                 }
         } else null
 
+    /** Evidence is the actual local RMS endpointing path or the on-device recognizer. */
+    fun localVadReady(): Boolean = recognizer != null || capability.backend == VoiceRecognitionBackend.SHERPA_PRIMARY
+
+    /** Main-thread publication after background asset/native initialization; never changes an active turn. */
+    fun bindLocalModels(
+        coordinator: VoiceSecondPassCoordinator?,
+        speaker: SpeakerSimilarityScorer?,
+    ): Boolean {
+        check(Looper.myLooper() == Looper.getMainLooper()) { "voice_models_bind_requires_main_thread" }
+        if (_ownerTurnActive.value) return false
+        secondPassCoordinator = coordinator
+        updateSpeakerEvidence(speaker)
+        return true
+    }
+
+    /** Reserve the shared capture before enrollment; manual and wake turns then fail closed. */
+    fun isSpeakerEnrollmentCaptureActive(): Boolean = speakerEnrollmentCapture
+
+    fun beginSpeakerEnrollmentCapture(): Boolean {
+        check(Looper.myLooper() == Looper.getMainLooper())
+        if (_ownerTurnActive.value || speakerEnrollmentCapture) return false
+        speakerEnrollmentCapture = true
+        return true
+    }
+
+    fun endSpeakerEnrollmentCapture() {
+        check(Looper.myLooper() == Looper.getMainLooper())
+        speakerEnrollmentCapture = false
+    }
+
+    /** May clear evidence during a turn; late workers cannot republish the old profile score. */
+    fun updateSpeakerEvidence(speaker: SpeakerSimilarityScorer?) {
+        check(Looper.myLooper() == Looper.getMainLooper()) { "voice_models_require_main_thread" }
+        speakerEvidenceRevision.changed()
+        speakerSimilarityScorer = speaker
+    }
+
+    private fun startOfflineTurn(token: VoiceTurnLifecycle.Token) {
+        if (!audioArbiter.start()) {
+            cleanupTurn(preserveCapture = true)
+            callback.onError(ERROR_AUDIO_ARBITER_UNAVAILABLE)
+            return
+        }
+        val endpoint = OfflineVoiceTurn(sampleRateHz = audioArbiter.sampleRateHz)
+        val vad = EnergyVadGate()
+        turnAudioCapture = VoiceTurnAudioCapture(audioArbiter, maxDurationMs = 32_000)
+        offlineToken = token
+        offlineEndpoint = endpoint
+        val sink: (ByteArray) -> Unit = { frame ->
+            when (endpoint.accept(frame.size, vad.isSpeech(frame))) {
+                OfflineVoiceTurn.State.CAPTURING -> Unit
+                OfflineVoiceTurn.State.FINALIZE -> mainHandler.post {
+                    finishOfflineTurn(token, preserveCapture = true)
+                }
+                OfflineVoiceTurn.State.NO_SPEECH -> mainHandler.post {
+                    finishOfflineTurn(token, preserveCapture = true, rejection = SpeechRecognizer.ERROR_SPEECH_TIMEOUT)
+                }
+                OfflineVoiceTurn.State.TOO_LONG -> mainHandler.post {
+                    finishOfflineTurn(token, preserveCapture = true, rejection = ERROR_OFFLINE_TURN_TOO_LONG)
+                }
+            }
+        }
+        offlineSink = sink
+        audioArbiter.registerSink(sink)
+        val timeout = Runnable {
+            finishOfflineTurn(token, preserveCapture = true, rejection = ERROR_OFFLINE_TURN_TOO_LONG)
+        }
+        offlineTimeout = timeout
+        mainHandler.postDelayed(timeout, 30_000)
+        listening.set(true)
+        callback.onListeningChanged(true)
+    }
+
+    private fun finishOfflineTurn(
+        token: VoiceTurnLifecycle.Token,
+        preserveCapture: Boolean,
+        rejection: Int? = null,
+    ) {
+        if (!turnLifecycle.claimFinal(token)) return
+        val refused = rejection ?: if (offlineEndpoint?.heardSpeech() != true) SpeechRecognizer.ERROR_NO_MATCH else null
+        val pcm = turnAudioCapture?.snapshot() ?: ByteArray(0)
+        val startedAt = activeTurnStartedAtMs
+        val bias = biasingStringsProvider()
+        cleanupTurn(preserveCapture, discardResult = false)
+        listening.set(false)
+        callback.onListeningChanged(false)
+        if (refused != null) {
+            if (turnLifecycle.finish(token)) {
+                _ownerTurnActive.value = false
+                callback.onError(refused)
+            }
+            return
+        }
+        val speakerForTurn = speakerSimilarityScorer
+        val speakerRevision = speakerEvidenceRevision.snapshot()
+        evidenceExecutor.execute {
+            val local = runCatching { secondPassCoordinator!!.transcribePrimary(pcm, bias) }.getOrNull()
+            val text = local?.text?.trim().orEmpty()
+            val score = runCatching { speakerForTurn?.similarity(pcm) }.getOrNull()
+                ?.takeIf { it.isFinite() }?.coerceIn(0f, 1f)
+            mainHandler.post {
+                if (text.isBlank()) {
+                    if (turnLifecycle.finish(token)) {
+                        _ownerTurnActive.value = false
+                        callback.onError(SpeechRecognizer.ERROR_NO_MATCH)
+                    }
+                } else {
+                    finishRecognition(token, VoiceRecognitionResult(
+                        turnId = token.turnId,
+                        text = text,
+                        hypotheses = listOf(text),
+                        // OfflineRecognizer exposes no calibrated confidence; do not invent one.
+                        hypothesisConfidence = emptyList(),
+                        words = emptyList(), alternatives = emptyList(),
+                        backend = VoiceRecognitionBackend.SHERPA_PRIMARY,
+                        callerAudioInjected = false,
+                        startedAtMs = startedAt, finalizedAtMs = System.currentTimeMillis(),
+                        speakerSimilarity = speakerEvidenceRevision.admit(speakerRevision, score),
+                    ))
+                }
+                pcm.fill(0)
+            }
+        }
+    }
+
+    private fun closeOfflineTurn() {
+        offlineSink?.let(audioArbiter::unregisterSink)
+        offlineSink = null
+        offlineTimeout?.let(mainHandler::removeCallbacks)
+        offlineTimeout = null
+        offlineToken = null
+        offlineEndpoint = null
+    }
+
     companion object {
         const val ERROR_SHERPA_PRIMARY_REQUIRED = -10_001
         const val ERROR_LOCAL_ASR_UNAVAILABLE = -10_002
         const val ERROR_AUDIO_ARBITER_UNAVAILABLE = -10_003
         const val ERROR_LOCAL_ASR_START_FAILED = -10_004
+        const val ERROR_OFFLINE_TURN_TOO_LONG = -10_005
         private const val MAX_HYPOTHESES = 5
         private const val MAX_BIAS_STRINGS = 40
         private const val MAX_BIAS_STRING_LENGTH = 64
@@ -424,10 +613,15 @@ class TtsOutputManager(
     private val callback: TtsOutputCallback,
 ) : BargeInHook, TextToSpeech.OnInitListener {
 
-    private var tts: TextToSpeech? = TextToSpeech(context.applicationContext, this)
+    private val androidLock = Any()
+    private var tts: TextToSpeech? = null
+    private var pendingAndroidInitStatus: Int? = null
+    private var androidInitSucceeded = false
+    private var androidShutDown = false
     private val sherpa = SherpaLocalTtsRuntime(context.applicationContext)
     private val speaking = AtomicBoolean(false)
-    private var androidReady = false
+    private val playbackLock = Any()
+    private val playback = SpeechPlaybackState()
     @Volatile private var activeEngine: TtsEngineKind? = null
     private val main by lazy(LazyThreadSafetyMode.SYNCHRONIZED) { Handler(Looper.getMainLooper()) }
 
@@ -439,45 +633,126 @@ class TtsOutputManager(
 
     private val _visualState = MutableStateFlow(VanVisualState())
     val visualState: StateFlow<VanVisualState> = _visualState.asStateFlow()
+    private val _androidOfflineReadiness = MutableStateFlow(
+        AndroidOfflineTtsReadiness(AndroidOfflineTtsStatus.INITIALIZING),
+    )
+    val androidOfflineState: StateFlow<AndroidOfflineTtsReadiness> = _androidOfflineReadiness.asStateFlow()
+
+    init {
+        // Some engines report initialization before their constructor returns. All
+        // readiness/listener fields exist first, and that callback is replayed after
+        // the engine reference has been assigned.
+        synchronized(androidLock) {
+            try {
+                tts = TextToSpeech(context.applicationContext, this)
+                pendingAndroidInitStatus?.let { configureAndroid(it) }
+                pendingAndroidInitStatus = null
+            } catch (_: Exception) {
+                _androidOfflineReadiness.value = AndroidOfflineTtsReadiness(
+                    AndroidOfflineTtsStatus.INITIALIZATION_FAILED,
+                )
+            }
+        }
+    }
 
     /** Load and self-test VAN's checksum-pinned sherpa OfflineTts model. */
     fun prepareSherpa(): Boolean = sherpa.prepare()
 
     fun sherpaReady(): Boolean = sherpa.ready
+    fun sherpaCanSpeak(text: String): Boolean = sherpa.canSpeak(text)
 
     fun sherpaPreparationError(): String? = sherpa.lastPreparationError
 
-    override fun onInit(status: Int) {
-        androidReady = status == TextToSpeech.SUCCESS
-        tts?.language = Locale.getDefault()
-        tts?.setOnUtteranceProgressListener(object : UtteranceProgressListener() {
+    override fun onInit(status: Int) = synchronized(androidLock) {
+        if (androidShutDown) return@synchronized
+        if (tts == null) {
+            pendingAndroidInitStatus = status
+        } else {
+            configureAndroid(status)
+        }
+    }
+
+    private fun configureAndroid(status: Int) {
+        androidInitSucceeded = status == TextToSpeech.SUCCESS
+        val engine = tts ?: return
+        _androidOfflineReadiness.value = AndroidOfflineTtsProbe.initialize(
+            androidInitSucceeded, platform(engine), Locale.getDefault(),
+        )
+        if (!androidInitSucceeded) {
+            return
+        }
+        val listenerInstalled = try {
+            engine.setOnUtteranceProgressListener(object : UtteranceProgressListener() {
             override fun onStart(utteranceId: String?) {
-                markStarted(TtsEngineKind.ANDROID_OFFLINE, pendingCueTiming)
+                main.post { markStarted(TtsEngineKind.ANDROID_OFFLINE, utteranceId.orEmpty(), pendingCueTiming) }
             }
 
             override fun onDone(utteranceId: String?) {
-                markDone(TtsEngineKind.ANDROID_OFFLINE, utteranceId.orEmpty())
+                main.post { markDone(TtsEngineKind.ANDROID_OFFLINE, utteranceId.orEmpty()) }
             }
 
             @Deprecated("Deprecated in API")
             override fun onError(utteranceId: String?) {
-                markError(TtsEngineKind.ANDROID_OFFLINE)
+                main.post { markError(TtsEngineKind.ANDROID_OFFLINE, utteranceId.orEmpty()) }
+            }
+
+            override fun onStop(utteranceId: String?, interrupted: Boolean) {
+                main.post { markError(TtsEngineKind.ANDROID_OFFLINE, utteranceId.orEmpty(), interrupted = true) }
             }
 
             override fun onRangeStart(utteranceId: String?, start: Int, end: Int, frame: Int) {
-                if (activeEngine != TtsEngineKind.ANDROID_OFFLINE || activeCueTiming != null) return
-                val open = ((frame % 10) / 10f).coerceIn(0f, 1f)
-                val viseme = frame % 15
-                val sync = SpeechSyncFrame(
-                    System.currentTimeMillis(),
-                    rmsDb = open,
-                    mouthOpen = open,
-                    viseme = viseme,
-                )
-                callback.onSpeechFrame(sync)
-                _visualState.value = _visualState.value.copy(mouthOpen = open, viseme = viseme)
+                main.post {
+                    synchronized(playbackLock) {
+                        if (playback.current(TtsEngineKind.ANDROID_OFFLINE, utteranceId.orEmpty()) == null ||
+                            !speaking.get() || activeCueTiming != null) return@synchronized
+                        val open = ((frame % 10) / 10f).coerceIn(0f, 1f)
+                        val viseme = frame % 15
+                        val sync = SpeechSyncFrame(
+                            System.currentTimeMillis(), rmsDb = open, mouthOpen = open, viseme = viseme,
+                        )
+                        _visualState.value = _visualState.value.copy(mouthOpen = open, viseme = viseme)
+                        callback.onSpeechFrame(sync)
+                    }
+                }
             }
-        })
+            }) == TextToSpeech.SUCCESS
+        } catch (_: Exception) {
+            false
+        }
+        if (!listenerInstalled) {
+            androidInitSucceeded = false
+            _androidOfflineReadiness.value = AndroidOfflineTtsReadiness(
+                AndroidOfflineTtsStatus.PROBE_FAILED, initialized = true,
+            )
+        }
+    }
+
+    /** Current platform voice metadata; physical audio still requires device acceptance. */
+    fun androidOfflineReadiness(): AndroidOfflineTtsReadiness = synchronized(androidLock) {
+        val engine = tts
+        if (androidInitSucceeded && !androidShutDown && engine != null) {
+            _androidOfflineReadiness.value = AndroidOfflineTtsProbe.read(platform(engine), Locale.getDefault())
+        }
+        _androidOfflineReadiness.value
+    }
+
+    private fun platform(engine: TextToSpeech) = object : AndroidTtsVoicePlatform {
+        private fun evidence(voice: android.speech.tts.Voice) = AndroidTtsVoiceEvidence(
+            name = voice.name,
+            locale = voice.locale,
+            networkRequired = voice.isNetworkConnectionRequired,
+            dataInstalled = voice.features?.contains(TextToSpeech.Engine.KEY_FEATURE_NOT_INSTALLED) != true,
+            quality = voice.quality,
+            latency = voice.latency,
+        )
+
+        override fun setLanguage(locale: Locale): Boolean = engine.setLanguage(locale) >= 0
+        override fun selectedVoice(): AndroidTtsVoiceEvidence? = engine.voice?.let(::evidence)
+        override fun voices(): List<AndroidTtsVoiceEvidence> = engine.voices.orEmpty().map(::evidence)
+        override fun selectVoice(name: String): Boolean {
+            val voice = engine.voices.orEmpty().firstOrNull { it.name == name } ?: return false
+            return engine.setVoice(voice) == TextToSpeech.SUCCESS
+        }
     }
 
     /**
@@ -496,38 +771,48 @@ class TtsOutputManager(
             if (!sherpa.ready) {
                 false
             } else {
-                activeEngine = TtsEngineKind.SHERPA_ONNX
+                val token = beginPlayback(TtsEngineKind.SHERPA_ONNX, utteranceId, SegmentCueTiming.EMPTY)
                 activeCueTiming = null
-                sherpa.speak(
+                val accepted = sherpa.speak(
                     text = text,
-                    utteranceId = utteranceId,
+                    utteranceId = token.nativeId,
                     onStart = {
                         // PCM frames from SherpaLocalTtsRuntime own mouth-open while this
                         // engine speaks; estimated text cues are intentionally not started.
-                        markStarted(TtsEngineKind.SHERPA_ONNX, SegmentCueTiming.EMPTY)
+                        markStarted(TtsEngineKind.SHERPA_ONNX, token.nativeId, SegmentCueTiming.EMPTY)
                     },
                     onFrame = { frame ->
-                        if (activeEngine == TtsEngineKind.SHERPA_ONNX && speaking.get()) {
-                            callback.onSpeechFrame(frame)
-                            _visualState.value = _visualState.value.copy(
-                                mouthOpen = frame.mouthOpen,
-                                viseme = frame.viseme,
-                            )
+                        synchronized(playbackLock) {
+                            if (playback.current(TtsEngineKind.SHERPA_ONNX, token.nativeId) != null && speaking.get()) {
+                                _visualState.value = _visualState.value.copy(
+                                    mouthOpen = frame.mouthOpen, viseme = frame.viseme,
+                                )
+                                callback.onSpeechFrame(frame)
+                            }
                         }
                     },
                     onDone = { id -> markDone(TtsEngineKind.SHERPA_ONNX, id) },
-                    onError = { markError(TtsEngineKind.SHERPA_ONNX) },
+                    onError = { markError(TtsEngineKind.SHERPA_ONNX, token.nativeId) },
                 )
+                if (!accepted) markError(TtsEngineKind.SHERPA_ONNX, token.nativeId)
+                accepted
             }
         }
 
         TtsEngineKind.ANDROID_OFFLINE -> {
-            if (!androidReady) {
-                false
-            } else {
-                activeEngine = TtsEngineKind.ANDROID_OFFLINE
-                pendingCueTiming = cueTiming
-                tts?.speak(text, TextToSpeech.QUEUE_FLUSH, null, utteranceId) == TextToSpeech.SUCCESS
+            synchronized(androidLock) {
+                if (!androidOfflineReadiness().usableOffline) {
+                    false
+                } else {
+                    val token = beginPlayback(TtsEngineKind.ANDROID_OFFLINE, utteranceId, cueTiming)
+                    val started = try {
+                        tts?.speak(text, TextToSpeech.QUEUE_FLUSH, null, token.nativeId) == TextToSpeech.SUCCESS
+                    } catch (_: Exception) {
+                        false
+                    }
+                    if (!started) markError(TtsEngineKind.ANDROID_OFFLINE, token.nativeId)
+                    started
+                }
             }
         }
 
@@ -535,10 +820,18 @@ class TtsOutputManager(
         TtsEngineKind.CRITICAL_PHRASE_BANK -> false
     }
 
-    private fun markStarted(engine: TtsEngineKind, cueTiming: SegmentCueTiming) {
-        if (activeEngine != engine) return
+    private fun beginPlayback(engine: TtsEngineKind, utteranceId: String, cueTiming: SegmentCueTiming): SpeechPlaybackState.Token {
+        onBargeInRequested()
+        return synchronized(playbackLock) {
+            activeEngine = engine
+            pendingCueTiming = cueTiming
+            playback.begin(engine, utteranceId)
+        }
+    }
+
+    private fun markStarted(engine: TtsEngineKind, nativeId: String, cueTiming: SegmentCueTiming) = synchronized(playbackLock) {
+        val token = playback.start(engine, nativeId) ?: return@synchronized
         speaking.set(true)
-        callback.onSpeakingChanged(true)
         _visualState.value = _visualState.value.copy(
             durableState = VanDurableState.SPEAKING,
             speaking = true,
@@ -550,14 +843,14 @@ class TtsOutputManager(
             cueGeneration += 1L
             tickCues(cueGeneration, timing)
         }
+        callback.onSpeakingChanged(true)
+        callback.onUtteranceStarted(token.utteranceId)
     }
 
-    private fun markDone(engine: TtsEngineKind, utteranceId: String) {
-        if (activeEngine != engine) return
+    private fun markDone(engine: TtsEngineKind, nativeId: String) = synchronized(playbackLock) {
+        val token = playback.complete(engine, nativeId) ?: return@synchronized
         speaking.set(false)
         activeEngine = null
-        callback.onSpeakingChanged(false)
-        callback.onUtteranceDone(utteranceId)
         activeCueTiming = null
         cueGeneration += 1L
         _visualState.value = _visualState.value.copy(
@@ -565,13 +858,14 @@ class TtsOutputManager(
             speaking = false,
             mouthOpen = 0f,
         )
+        callback.onSpeakingChanged(false)
+        callback.onUtteranceDone(token.utteranceId)
     }
 
-    private fun markError(engine: TtsEngineKind) {
-        if (activeEngine != engine) return
+    private fun markError(engine: TtsEngineKind, nativeId: String, interrupted: Boolean = false) = synchronized(playbackLock) {
+        val token = playback.fail(engine, nativeId) ?: return@synchronized
         speaking.set(false)
         activeEngine = null
-        callback.onSpeakingChanged(false)
         activeCueTiming = null
         cueGeneration += 1L
         _visualState.value = _visualState.value.copy(
@@ -579,6 +873,9 @@ class TtsOutputManager(
             speaking = false,
             mouthOpen = 0f,
         )
+        callback.onSpeakingChanged(false)
+        if (interrupted) callback.onUtteranceInterrupted(token.utteranceId)
+        else callback.onUtteranceFailed(token.utteranceId)
     }
 
     /**
@@ -608,28 +905,38 @@ class TtsOutputManager(
     }
 
     override fun onBargeInRequested() {
-        if (speaking.get()) {
-            sherpa.stop()
-            tts?.stop()
+        // Native generation may be queued even before onStart sets speaking.
+        synchronized(playbackLock) {
+            val pending = playback.cancel()
+            val wasSpeaking = speaking.getAndSet(false)
+            runCatching { sherpa.stop() }
+            runCatching { tts?.stop() }
             speaking.set(false)
             activeEngine = null
             activeCueTiming = null
             cueGeneration += 1L
-            callback.onSpeakingChanged(false)
-            _visualState.value = _visualState.value.copy(
-                speaking = false,
-                mouthOpen = 0f,
-                durableState = VanDurableState.LISTENING,
-            )
+            if (pending != null || wasSpeaking) {
+                _visualState.value = _visualState.value.copy(
+                    speaking = false, mouthOpen = 0f, durableState = VanDurableState.LISTENING,
+                )
+                callback.onSpeakingChanged(false)
+            }
+            if (pending != null) callback.onUtteranceInterrupted(pending.utteranceId)
         }
     }
 
     override fun isSpeaking(): Boolean = speaking.get()
 
     fun shutdown() {
+        onBargeInRequested()
         sherpa.release()
-        tts?.shutdown()
-        tts = null
+        synchronized(androidLock) {
+            androidShutDown = true
+            androidInitSucceeded = false
+            _androidOfflineReadiness.value = AndroidOfflineTtsReadiness(AndroidOfflineTtsStatus.SHUT_DOWN)
+            tts?.shutdown()
+            tts = null
+        }
     }
 
     private companion object {
@@ -646,12 +953,17 @@ class VoiceSessionCoordinator(
     private val input: VoiceInputManager,
     private val output: TtsOutputManager,
 ) {
+    val ownerTurnActive: StateFlow<Boolean> = input.ownerTurnActive
     fun beginOwnerTurn(turnId: String = UUID.randomUUID().toString()): String {
-        if (output.isSpeaking()) output.onBargeInRequested()
+        output.onBargeInRequested()  // pending synthesis is also interruptible work
         return input.startListening(turnId)
     }
 
     fun endOwnerTurn(preserveCapture: Boolean = false) {
         input.stopListening(preserveCapture = preserveCapture)
+    }
+
+    fun cancelOwnerTurn(preserveCapture: Boolean = false) {
+        input.cancelListening(preserveCapture = preserveCapture)
     }
 }

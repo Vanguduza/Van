@@ -1,0 +1,12 @@
+{
+  "command": [
+    "/workspace/van-backend-venv-20261025/bin/python",
+    "/workspace/van-native-close-evidence-20261028.py"
+  ],
+  "cwd": "/workspace/van-review-2026-10-18/publish",
+  "controller_pid": 724481,
+  "started_at_utc": "2026-10-28T20:33:34.969460+00:00",
+  "timeout_seconds": 180,
+  "state": "RUNNING_NOT_COMPLETE",
+  "command_pid": 724484
+}

@@ -209,8 +209,8 @@ object VanAuraPlanner {
 
         // CF-D-06 (owner): the aura is the flame envelope and its embers, nothing else. The
         // wind strands, electrical branches, scattered ion specks and the orb link line all
-        // read as noise on a phone screen, so the plan no longer draws them. The field
-        // geometry engine stays in the codebase; the aura simply stops asking it for lines.
+        // read as noise on a phone screen, so the plan no longer draws them, and the strand
+        // engine that produced them has been removed.
         return ops
     }
 

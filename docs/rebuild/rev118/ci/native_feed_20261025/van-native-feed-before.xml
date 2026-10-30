@@ -1,0 +1,573 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="42" skipped="0" tests="42" time="1.799" timestamp="2026-10-25T16:43:54.514838+00:00" hostname="2c5a245e39f1"><testcase classname="trading.tests.test_ctrader_feed_contract" name="test_wrong_response_scope_or_missing_series_is_an_explicit_native_refusal[changes0]" time="0.026"><failure message="Failed: DID NOT RAISE VenueUnavailable">changes = {'ctidTraderAccountId': 999}
+
+    @pytest.mark.parametrize('changes', [
+        {'ctidTraderAccountId':999}, {'ctidTraderAccountId':True}, {'symbolId':999},
+        {'symbolId':True}, {'period':'H1'}, {'trendbar':None},
+    ])
+    def test_wrong_response_scope_or_missing_series_is_an_explicit_native_refusal(changes):
+        body=response();body.update(changes);adapter,_=fixture(body)
+&gt;       with pytest.raises(VenueUnavailable):trendbars(adapter,'EURUSD','M1',from_ms=120000,to_ms=300000)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE VenueUnavailable
+
+trading/tests/test_ctrader_feed_contract.py:40: Failed</failure></testcase><testcase classname="trading.tests.test_ctrader_feed_contract" name="test_wrong_response_scope_or_missing_series_is_an_explicit_native_refusal[changes1]" time="0.001"><failure message="Failed: DID NOT RAISE VenueUnavailable">changes = {'ctidTraderAccountId': True}
+
+    @pytest.mark.parametrize('changes', [
+        {'ctidTraderAccountId':999}, {'ctidTraderAccountId':True}, {'symbolId':999},
+        {'symbolId':True}, {'period':'H1'}, {'trendbar':None},
+    ])
+    def test_wrong_response_scope_or_missing_series_is_an_explicit_native_refusal(changes):
+        body=response();body.update(changes);adapter,_=fixture(body)
+&gt;       with pytest.raises(VenueUnavailable):trendbars(adapter,'EURUSD','M1',from_ms=120000,to_ms=300000)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE VenueUnavailable
+
+trading/tests/test_ctrader_feed_contract.py:40: Failed</failure></testcase><testcase classname="trading.tests.test_ctrader_feed_contract" name="test_wrong_response_scope_or_missing_series_is_an_explicit_native_refusal[changes2]" time="0.001"><failure message="Failed: DID NOT RAISE VenueUnavailable">changes = {'symbolId': 999}
+
+    @pytest.mark.parametrize('changes', [
+        {'ctidTraderAccountId':999}, {'ctidTraderAccountId':True}, {'symbolId':999},
+        {'symbolId':True}, {'period':'H1'}, {'trendbar':None},
+    ])
+    def test_wrong_response_scope_or_missing_series_is_an_explicit_native_refusal(changes):
+        body=response();body.update(changes);adapter,_=fixture(body)
+&gt;       with pytest.raises(VenueUnavailable):trendbars(adapter,'EURUSD','M1',from_ms=120000,to_ms=300000)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE VenueUnavailable
+
+trading/tests/test_ctrader_feed_contract.py:40: Failed</failure></testcase><testcase classname="trading.tests.test_ctrader_feed_contract" name="test_wrong_response_scope_or_missing_series_is_an_explicit_native_refusal[changes3]" time="0.002"><failure message="Failed: DID NOT RAISE VenueUnavailable">changes = {'symbolId': True}
+
+    @pytest.mark.parametrize('changes', [
+        {'ctidTraderAccountId':999}, {'ctidTraderAccountId':True}, {'symbolId':999},
+        {'symbolId':True}, {'period':'H1'}, {'trendbar':None},
+    ])
+    def test_wrong_response_scope_or_missing_series_is_an_explicit_native_refusal(changes):
+        body=response();body.update(changes);adapter,_=fixture(body)
+&gt;       with pytest.raises(VenueUnavailable):trendbars(adapter,'EURUSD','M1',from_ms=120000,to_ms=300000)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE VenueUnavailable
+
+trading/tests/test_ctrader_feed_contract.py:40: Failed</failure></testcase><testcase classname="trading.tests.test_ctrader_feed_contract" name="test_wrong_response_scope_or_missing_series_is_an_explicit_native_refusal[changes4]" time="0.003"><failure message="Failed: DID NOT RAISE VenueUnavailable">changes = {'period': 'H1'}
+
+    @pytest.mark.parametrize('changes', [
+        {'ctidTraderAccountId':999}, {'ctidTraderAccountId':True}, {'symbolId':999},
+        {'symbolId':True}, {'period':'H1'}, {'trendbar':None},
+    ])
+    def test_wrong_response_scope_or_missing_series_is_an_explicit_native_refusal(changes):
+        body=response();body.update(changes);adapter,_=fixture(body)
+&gt;       with pytest.raises(VenueUnavailable):trendbars(adapter,'EURUSD','M1',from_ms=120000,to_ms=300000)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE VenueUnavailable
+
+trading/tests/test_ctrader_feed_contract.py:40: Failed</failure></testcase><testcase classname="trading.tests.test_ctrader_feed_contract" name="test_wrong_response_scope_or_missing_series_is_an_explicit_native_refusal[changes5]" time="0.002"><failure message="TypeError: 'NoneType' object is not iterable">changes = {'trendbar': None}
+
+    @pytest.mark.parametrize('changes', [
+        {'ctidTraderAccountId':999}, {'ctidTraderAccountId':True}, {'symbolId':999},
+        {'symbolId':True}, {'period':'H1'}, {'trendbar':None},
+    ])
+    def test_wrong_response_scope_or_missing_series_is_an_explicit_native_refusal(changes):
+        body=response();body.update(changes);adapter,_=fixture(body)
+&gt;       with pytest.raises(VenueUnavailable):trendbars(adapter,'EURUSD','M1',from_ms=120000,to_ms=300000)
+                                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+trading/tests/test_ctrader_feed_contract.py:40: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+adapter = namespace(_ensure_auth=&lt;function fixture.&lt;locals&gt;.&lt;lambda&gt; at 0x7f99d722c360&gt;, ctid_trader_account_id=123, symbol=&lt;fun...ls&gt;.call at 0x7f99d722c2c0&gt;, host='demo.ctraderapi.com'), clock=&lt;function fixture.&lt;locals&gt;.&lt;lambda&gt; at 0x7f99d722c5e0&gt;)
+symbol = 'EURUSD', timeframe = 'M1', from_ms = 120000, to_ms = 300000
+count = 500
+
+    def trendbars(adapter, symbol: str, timeframe: str, *, from_ms: int, to_ms: int, count: int = 500) -&gt; list[Bar]:
+        period, step = PERIOD[timeframe]
+        adapter._ensure_auth()
+        sym = adapter.symbol(symbol)
+        _, r = adapter.transport.call("ProtoOAGetTrendbarsReq", {"ctidTraderAccountId": adapter.ctid_trader_account_id, "fromTimestamp": from_ms, "toTimestamp": to_ms, "period": period, "symbolId": sym.symbol_id, "count": count})
+        out = []
+&gt;       for tb in r.get("trendbar", []):
+                  ^^^^^^^^^^^^^^^^^^^^^
+E       TypeError: 'NoneType' object is not iterable
+
+trading/vati/execution/ctrader/feed.py:19: TypeError</failure></testcase><testcase classname="trading.tests.test_ctrader_feed_contract" name="test_wrong_native_response_type_is_refused" time="0.002"><failure message="Failed: DID NOT RAISE VenueUnavailable">def test_wrong_native_response_type_is_refused():
+        adapter,_=fixture(response(),name='ProtoOASpotEvent')
+&gt;       with pytest.raises(VenueUnavailable):trendbars(adapter,'EURUSD','M1',from_ms=120000,to_ms=300000)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE VenueUnavailable
+
+trading/tests/test_ctrader_feed_contract.py:45: Failed</failure></testcase><testcase classname="trading.tests.test_ctrader_feed_contract" name="test_absent_native_fields_never_become_zero_market_facts[volume]" time="0.001"><failure message="Failed: DID NOT RAISE VenueUnavailable">field = 'volume'
+
+    @pytest.mark.parametrize('field', ['volume','low','deltaOpen','deltaHigh','deltaClose','utcTimestampInMinutes'])
+    def test_absent_native_fields_never_become_zero_market_facts(field):
+        body=response();del body['trendbar'][0][field];adapter,_=fixture(body)
+&gt;       with pytest.raises(VenueUnavailable):trendbars(adapter,'EURUSD','M1',from_ms=120000,to_ms=300000)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE VenueUnavailable
+
+trading/tests/test_ctrader_feed_contract.py:51: Failed</failure></testcase><testcase classname="trading.tests.test_ctrader_feed_contract" name="test_absent_native_fields_never_become_zero_market_facts[low]" time="0.001"><failure message="Failed: DID NOT RAISE VenueUnavailable">field = 'low'
+
+    @pytest.mark.parametrize('field', ['volume','low','deltaOpen','deltaHigh','deltaClose','utcTimestampInMinutes'])
+    def test_absent_native_fields_never_become_zero_market_facts(field):
+        body=response();del body['trendbar'][0][field];adapter,_=fixture(body)
+&gt;       with pytest.raises(VenueUnavailable):trendbars(adapter,'EURUSD','M1',from_ms=120000,to_ms=300000)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE VenueUnavailable
+
+trading/tests/test_ctrader_feed_contract.py:51: Failed</failure></testcase><testcase classname="trading.tests.test_ctrader_feed_contract" name="test_absent_native_fields_never_become_zero_market_facts[deltaOpen]" time="0.002"><failure message="Failed: DID NOT RAISE VenueUnavailable">field = 'deltaOpen'
+
+    @pytest.mark.parametrize('field', ['volume','low','deltaOpen','deltaHigh','deltaClose','utcTimestampInMinutes'])
+    def test_absent_native_fields_never_become_zero_market_facts(field):
+        body=response();del body['trendbar'][0][field];adapter,_=fixture(body)
+&gt;       with pytest.raises(VenueUnavailable):trendbars(adapter,'EURUSD','M1',from_ms=120000,to_ms=300000)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE VenueUnavailable
+
+trading/tests/test_ctrader_feed_contract.py:51: Failed</failure></testcase><testcase classname="trading.tests.test_ctrader_feed_contract" name="test_absent_native_fields_never_become_zero_market_facts[deltaHigh]" time="0.002"><failure message="Failed: DID NOT RAISE VenueUnavailable">field = 'deltaHigh'
+
+    @pytest.mark.parametrize('field', ['volume','low','deltaOpen','deltaHigh','deltaClose','utcTimestampInMinutes'])
+    def test_absent_native_fields_never_become_zero_market_facts(field):
+        body=response();del body['trendbar'][0][field];adapter,_=fixture(body)
+&gt;       with pytest.raises(VenueUnavailable):trendbars(adapter,'EURUSD','M1',from_ms=120000,to_ms=300000)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE VenueUnavailable
+
+trading/tests/test_ctrader_feed_contract.py:51: Failed</failure></testcase><testcase classname="trading.tests.test_ctrader_feed_contract" name="test_absent_native_fields_never_become_zero_market_facts[deltaClose]" time="0.048"><failure message="Failed: DID NOT RAISE VenueUnavailable">field = 'deltaClose'
+
+    @pytest.mark.parametrize('field', ['volume','low','deltaOpen','deltaHigh','deltaClose','utcTimestampInMinutes'])
+    def test_absent_native_fields_never_become_zero_market_facts(field):
+        body=response();del body['trendbar'][0][field];adapter,_=fixture(body)
+&gt;       with pytest.raises(VenueUnavailable):trendbars(adapter,'EURUSD','M1',from_ms=120000,to_ms=300000)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE VenueUnavailable
+
+trading/tests/test_ctrader_feed_contract.py:51: Failed</failure></testcase><testcase classname="trading.tests.test_ctrader_feed_contract" name="test_absent_native_fields_never_become_zero_market_facts[utcTimestampInMinutes]" time="0.009"><failure message="Failed: DID NOT RAISE VenueUnavailable">field = 'utcTimestampInMinutes'
+
+    @pytest.mark.parametrize('field', ['volume','low','deltaOpen','deltaHigh','deltaClose','utcTimestampInMinutes'])
+    def test_absent_native_fields_never_become_zero_market_facts(field):
+        body=response();del body['trendbar'][0][field];adapter,_=fixture(body)
+&gt;       with pytest.raises(VenueUnavailable):trendbars(adapter,'EURUSD','M1',from_ms=120000,to_ms=300000)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE VenueUnavailable
+
+trading/tests/test_ctrader_feed_contract.py:51: Failed</failure></testcase><testcase classname="trading.tests.test_ctrader_feed_contract" name="test_malformed_native_integers_and_incoherent_prices_are_refused[volume--1]" time="0.001"><failure message="Failed: DID NOT RAISE VenueUnavailable">field = 'volume', value = -1
+
+    @pytest.mark.parametrize('field,value', [
+        ('volume',-1),('volume',True),('low',1.2),('deltaOpen',-1),
+        ('deltaHigh',4),('deltaClose',21),('utcTimestampInMinutes',True),
+        ('deltaOpen',2**64),('low',2**63),
+    ])
+    def test_malformed_native_integers_and_incoherent_prices_are_refused(field,value):
+        body=response();body['trendbar'][0][field]=value;adapter,_=fixture(body)
+&gt;       with pytest.raises(VenueUnavailable):trendbars(adapter,'EURUSD','M1',from_ms=120000,to_ms=300000)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE VenueUnavailable
+
+trading/tests/test_ctrader_feed_contract.py:61: Failed</failure></testcase><testcase classname="trading.tests.test_ctrader_feed_contract" name="test_malformed_native_integers_and_incoherent_prices_are_refused[volume-True]" time="0.001"><failure message="Failed: DID NOT RAISE VenueUnavailable">field = 'volume', value = True
+
+    @pytest.mark.parametrize('field,value', [
+        ('volume',-1),('volume',True),('low',1.2),('deltaOpen',-1),
+        ('deltaHigh',4),('deltaClose',21),('utcTimestampInMinutes',True),
+        ('deltaOpen',2**64),('low',2**63),
+    ])
+    def test_malformed_native_integers_and_incoherent_prices_are_refused(field,value):
+        body=response();body['trendbar'][0][field]=value;adapter,_=fixture(body)
+&gt;       with pytest.raises(VenueUnavailable):trendbars(adapter,'EURUSD','M1',from_ms=120000,to_ms=300000)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE VenueUnavailable
+
+trading/tests/test_ctrader_feed_contract.py:61: Failed</failure></testcase><testcase classname="trading.tests.test_ctrader_feed_contract" name="test_malformed_native_integers_and_incoherent_prices_are_refused[low-1.2]" time="0.001"><failure message="Failed: DID NOT RAISE VenueUnavailable">field = 'low', value = 1.2
+
+    @pytest.mark.parametrize('field,value', [
+        ('volume',-1),('volume',True),('low',1.2),('deltaOpen',-1),
+        ('deltaHigh',4),('deltaClose',21),('utcTimestampInMinutes',True),
+        ('deltaOpen',2**64),('low',2**63),
+    ])
+    def test_malformed_native_integers_and_incoherent_prices_are_refused(field,value):
+        body=response();body['trendbar'][0][field]=value;adapter,_=fixture(body)
+&gt;       with pytest.raises(VenueUnavailable):trendbars(adapter,'EURUSD','M1',from_ms=120000,to_ms=300000)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE VenueUnavailable
+
+trading/tests/test_ctrader_feed_contract.py:61: Failed</failure></testcase><testcase classname="trading.tests.test_ctrader_feed_contract" name="test_malformed_native_integers_and_incoherent_prices_are_refused[deltaOpen--1]" time="0.003"><failure message="Failed: DID NOT RAISE VenueUnavailable">field = 'deltaOpen', value = -1
+
+    @pytest.mark.parametrize('field,value', [
+        ('volume',-1),('volume',True),('low',1.2),('deltaOpen',-1),
+        ('deltaHigh',4),('deltaClose',21),('utcTimestampInMinutes',True),
+        ('deltaOpen',2**64),('low',2**63),
+    ])
+    def test_malformed_native_integers_and_incoherent_prices_are_refused(field,value):
+        body=response();body['trendbar'][0][field]=value;adapter,_=fixture(body)
+&gt;       with pytest.raises(VenueUnavailable):trendbars(adapter,'EURUSD','M1',from_ms=120000,to_ms=300000)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE VenueUnavailable
+
+trading/tests/test_ctrader_feed_contract.py:61: Failed</failure></testcase><testcase classname="trading.tests.test_ctrader_feed_contract" name="test_malformed_native_integers_and_incoherent_prices_are_refused[deltaHigh-4]" time="0.003"><failure message="Failed: DID NOT RAISE VenueUnavailable">field = 'deltaHigh', value = 4
+
+    @pytest.mark.parametrize('field,value', [
+        ('volume',-1),('volume',True),('low',1.2),('deltaOpen',-1),
+        ('deltaHigh',4),('deltaClose',21),('utcTimestampInMinutes',True),
+        ('deltaOpen',2**64),('low',2**63),
+    ])
+    def test_malformed_native_integers_and_incoherent_prices_are_refused(field,value):
+        body=response();body['trendbar'][0][field]=value;adapter,_=fixture(body)
+&gt;       with pytest.raises(VenueUnavailable):trendbars(adapter,'EURUSD','M1',from_ms=120000,to_ms=300000)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE VenueUnavailable
+
+trading/tests/test_ctrader_feed_contract.py:61: Failed</failure></testcase><testcase classname="trading.tests.test_ctrader_feed_contract" name="test_malformed_native_integers_and_incoherent_prices_are_refused[deltaClose-21]" time="0.001"><failure message="Failed: DID NOT RAISE VenueUnavailable">field = 'deltaClose', value = 21
+
+    @pytest.mark.parametrize('field,value', [
+        ('volume',-1),('volume',True),('low',1.2),('deltaOpen',-1),
+        ('deltaHigh',4),('deltaClose',21),('utcTimestampInMinutes',True),
+        ('deltaOpen',2**64),('low',2**63),
+    ])
+    def test_malformed_native_integers_and_incoherent_prices_are_refused(field,value):
+        body=response();body['trendbar'][0][field]=value;adapter,_=fixture(body)
+&gt;       with pytest.raises(VenueUnavailable):trendbars(adapter,'EURUSD','M1',from_ms=120000,to_ms=300000)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE VenueUnavailable
+
+trading/tests/test_ctrader_feed_contract.py:61: Failed</failure></testcase><testcase classname="trading.tests.test_ctrader_feed_contract" name="test_malformed_native_integers_and_incoherent_prices_are_refused[utcTimestampInMinutes-True]" time="0.002"><failure message="Failed: DID NOT RAISE VenueUnavailable">field = 'utcTimestampInMinutes', value = True
+
+    @pytest.mark.parametrize('field,value', [
+        ('volume',-1),('volume',True),('low',1.2),('deltaOpen',-1),
+        ('deltaHigh',4),('deltaClose',21),('utcTimestampInMinutes',True),
+        ('deltaOpen',2**64),('low',2**63),
+    ])
+    def test_malformed_native_integers_and_incoherent_prices_are_refused(field,value):
+        body=response();body['trendbar'][0][field]=value;adapter,_=fixture(body)
+&gt;       with pytest.raises(VenueUnavailable):trendbars(adapter,'EURUSD','M1',from_ms=120000,to_ms=300000)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE VenueUnavailable
+
+trading/tests/test_ctrader_feed_contract.py:61: Failed</failure></testcase><testcase classname="trading.tests.test_ctrader_feed_contract" name="test_malformed_native_integers_and_incoherent_prices_are_refused[deltaOpen-18446744073709551616]" time="0.001"><failure message="Failed: DID NOT RAISE VenueUnavailable">field = 'deltaOpen', value = 18446744073709551616
+
+    @pytest.mark.parametrize('field,value', [
+        ('volume',-1),('volume',True),('low',1.2),('deltaOpen',-1),
+        ('deltaHigh',4),('deltaClose',21),('utcTimestampInMinutes',True),
+        ('deltaOpen',2**64),('low',2**63),
+    ])
+    def test_malformed_native_integers_and_incoherent_prices_are_refused(field,value):
+        body=response();body['trendbar'][0][field]=value;adapter,_=fixture(body)
+&gt;       with pytest.raises(VenueUnavailable):trendbars(adapter,'EURUSD','M1',from_ms=120000,to_ms=300000)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE VenueUnavailable
+
+trading/tests/test_ctrader_feed_contract.py:61: Failed</failure></testcase><testcase classname="trading.tests.test_ctrader_feed_contract" name="test_malformed_native_integers_and_incoherent_prices_are_refused[low-9223372036854775808]" time="0.001"><failure message="Failed: DID NOT RAISE VenueUnavailable">field = 'low', value = 9223372036854775808
+
+    @pytest.mark.parametrize('field,value', [
+        ('volume',-1),('volume',True),('low',1.2),('deltaOpen',-1),
+        ('deltaHigh',4),('deltaClose',21),('utcTimestampInMinutes',True),
+        ('deltaOpen',2**64),('low',2**63),
+    ])
+    def test_malformed_native_integers_and_incoherent_prices_are_refused(field,value):
+        body=response();body['trendbar'][0][field]=value;adapter,_=fixture(body)
+&gt;       with pytest.raises(VenueUnavailable):trendbars(adapter,'EURUSD','M1',from_ms=120000,to_ms=300000)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE VenueUnavailable
+
+trading/tests/test_ctrader_feed_contract.py:61: Failed</failure></testcase><testcase classname="trading.tests.test_ctrader_feed_contract" name="test_duplicate_and_outside_request_bars_do_not_enter_the_series[minutes0]" time="0.003"><failure message="Failed: DID NOT RAISE VenueUnavailable">minutes = [2, 2, 4]
+
+    @pytest.mark.parametrize('minutes', [[2,2,4],[1,2,3],[2,3,6]])
+    def test_duplicate_and_outside_request_bars_do_not_enter_the_series(minutes):
+        adapter,_=fixture(response()|{'trendbar':[bar(m) for m in minutes]})
+&gt;       with pytest.raises(VenueUnavailable):trendbars(adapter,'EURUSD','M1',from_ms=120000,to_ms=300000)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE VenueUnavailable
+
+trading/tests/test_ctrader_feed_contract.py:67: Failed</failure></testcase><testcase classname="trading.tests.test_ctrader_feed_contract" name="test_duplicate_and_outside_request_bars_do_not_enter_the_series[minutes1]" time="0.001"><failure message="Failed: DID NOT RAISE VenueUnavailable">minutes = [1, 2, 3]
+
+    @pytest.mark.parametrize('minutes', [[2,2,4],[1,2,3],[2,3,6]])
+    def test_duplicate_and_outside_request_bars_do_not_enter_the_series(minutes):
+        adapter,_=fixture(response()|{'trendbar':[bar(m) for m in minutes]})
+&gt;       with pytest.raises(VenueUnavailable):trendbars(adapter,'EURUSD','M1',from_ms=120000,to_ms=300000)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE VenueUnavailable
+
+trading/tests/test_ctrader_feed_contract.py:67: Failed</failure></testcase><testcase classname="trading.tests.test_ctrader_feed_contract" name="test_duplicate_and_outside_request_bars_do_not_enter_the_series[minutes2]" time="0.003"><failure message="Failed: DID NOT RAISE VenueUnavailable">minutes = [2, 3, 6]
+
+    @pytest.mark.parametrize('minutes', [[2,2,4],[1,2,3],[2,3,6]])
+    def test_duplicate_and_outside_request_bars_do_not_enter_the_series(minutes):
+        adapter,_=fixture(response()|{'trendbar':[bar(m) for m in minutes]})
+&gt;       with pytest.raises(VenueUnavailable):trendbars(adapter,'EURUSD','M1',from_ms=120000,to_ms=300000)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE VenueUnavailable
+
+trading/tests/test_ctrader_feed_contract.py:67: Failed</failure></testcase><testcase classname="trading.tests.test_ctrader_feed_contract" name="test_only_closed_bars_are_returned_and_native_tick_volume_is_not_one" time="0.001"><failure message="assert [120000, 180000, 240000] == [120000, 180000]&#10;  &#10;  Left contains one more item: 240000&#10;  Use -v to get more diff">def test_only_closed_bars_are_returned_and_native_tick_volume_is_not_one():
+        adapter,_=fixture(response())
+        result=trendbars(adapter,'EURUSD','M1',from_ms=120000,to_ms=270000)
+&gt;       assert [b.start_ms for b in result]==[120000,180000]
+E       assert [120000, 180000, 240000] == [120000, 180000]
+E         
+E         Left contains one more item: 240000
+E         Use -v to get more diff
+
+trading/tests/test_ctrader_feed_contract.py:73: AssertionError</failure></testcase><testcase classname="trading.tests.test_ctrader_feed_contract" name="test_exact_native_price_conversion_does_not_depend_on_ambient_decimal_precision" time="0.002"><failure message="AssertionError: assert (Decimal('1.23E+9') == Decimal('1234567890.12345'))&#10; +  where Decimal('1.23E+9') = Bar(symbol='EURUSD', start_ms=120000, end_ms=180000, open=Decimal('1.23E+9'), high=Decimal('1.23E+9'), low=Decimal('1.23E+9'), close=Decimal('1.23E+9'), volume=Decimal('12'), ticks=1, avg_spread=Decimal('0')).low&#10; +  and   Decimal('1234567890.12345') = Decimal('1234567890.12345')">def test_exact_native_price_conversion_does_not_depend_on_ambient_decimal_precision():
+        body=response();body['trendbar'][0]['low']=123456789012345
+        adapter,_=fixture(body)
+        with localcontext() as context:
+            context.prec=3
+            actual=trendbars(adapter,'EURUSD','M1',from_ms=120000,to_ms=300000)[0]
+&gt;       assert actual.low==Decimal('1234567890.12345') and actual.open==Decimal('1234567890.12350')
+E       AssertionError: assert (Decimal('1.23E+9') == Decimal('1234567890.12345'))
+E        +  where Decimal('1.23E+9') = Bar(symbol='EURUSD', start_ms=120000, end_ms=180000, open=Decimal('1.23E+9'), high=Decimal('1.23E+9'), low=Decimal('1.23E+9'), close=Decimal('1.23E+9'), volume=Decimal('12'), ticks=1, avg_spread=Decimal('0')).low
+E        +  and   Decimal('1234567890.12345') = Decimal('1234567890.12345')
+
+trading/tests/test_ctrader_feed_contract.py:83: AssertionError</failure></testcase><testcase classname="trading.tests.test_ctrader_feed_contract" name="test_invalid_request_refuses_before_native_io[kwargs0]" time="0.001"><failure message="Failed: DID NOT RAISE ValueError">kwargs = {'from_ms': True, 'to_ms': 300000}
+
+    @pytest.mark.parametrize('kwargs', [
+        {'from_ms':True,'to_ms':300000}, {'from_ms':300000,'to_ms':120000},
+        {'from_ms':120000,'to_ms':300000,'count':0}, {'from_ms':120000,'to_ms':300000,'count':True},
+    ])
+    def test_invalid_request_refuses_before_native_io(kwargs):
+        adapter,calls=fixture()
+&gt;       with pytest.raises(ValueError):trendbars(adapter,'EURUSD','M1',**kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+trading/tests/test_ctrader_feed_contract.py:92: Failed</failure></testcase><testcase classname="trading.tests.test_ctrader_feed_contract" name="test_invalid_request_refuses_before_native_io[kwargs1]" time="0.001"><failure message="Failed: DID NOT RAISE ValueError">kwargs = {'from_ms': 300000, 'to_ms': 120000}
+
+    @pytest.mark.parametrize('kwargs', [
+        {'from_ms':True,'to_ms':300000}, {'from_ms':300000,'to_ms':120000},
+        {'from_ms':120000,'to_ms':300000,'count':0}, {'from_ms':120000,'to_ms':300000,'count':True},
+    ])
+    def test_invalid_request_refuses_before_native_io(kwargs):
+        adapter,calls=fixture()
+&gt;       with pytest.raises(ValueError):trendbars(adapter,'EURUSD','M1',**kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+trading/tests/test_ctrader_feed_contract.py:92: Failed</failure></testcase><testcase classname="trading.tests.test_ctrader_feed_contract" name="test_invalid_request_refuses_before_native_io[kwargs2]" time="0.001"><failure message="Failed: DID NOT RAISE ValueError">kwargs = {'from_ms': 120000, 'to_ms': 300000, 'count': 0}
+
+    @pytest.mark.parametrize('kwargs', [
+        {'from_ms':True,'to_ms':300000}, {'from_ms':300000,'to_ms':120000},
+        {'from_ms':120000,'to_ms':300000,'count':0}, {'from_ms':120000,'to_ms':300000,'count':True},
+    ])
+    def test_invalid_request_refuses_before_native_io(kwargs):
+        adapter,calls=fixture()
+&gt;       with pytest.raises(ValueError):trendbars(adapter,'EURUSD','M1',**kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+trading/tests/test_ctrader_feed_contract.py:92: Failed</failure></testcase><testcase classname="trading.tests.test_ctrader_feed_contract" name="test_invalid_request_refuses_before_native_io[kwargs3]" time="0.001"><failure message="Failed: DID NOT RAISE ValueError">kwargs = {'from_ms': 120000, 'to_ms': 300000, 'count': True}
+
+    @pytest.mark.parametrize('kwargs', [
+        {'from_ms':True,'to_ms':300000}, {'from_ms':300000,'to_ms':120000},
+        {'from_ms':120000,'to_ms':300000,'count':0}, {'from_ms':120000,'to_ms':300000,'count':True},
+    ])
+    def test_invalid_request_refuses_before_native_io(kwargs):
+        adapter,calls=fixture()
+&gt;       with pytest.raises(ValueError):trendbars(adapter,'EURUSD','M1',**kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+trading/tests/test_ctrader_feed_contract.py:92: Failed</failure></testcase><testcase classname="trading.tests.test_ctrader_feed_contract" name="test_native_symbol_registry_never_publishes_wrong_scope_partial_or_default_contracts[list_account]" time="0.002"><failure message="Failed: DID NOT RAISE VenueUnavailable">kind = 'list_account'
+
+    @pytest.mark.parametrize('kind', ['list_account','full_account','wrong_type','duplicate_id','alias_collision','missing_detail','unsolicited_detail','missing_lot','zero_step','bool_precision'])
+    def test_native_symbol_registry_never_publishes_wrong_scope_partial_or_default_contracts(kind):
+        adapter,responses=registry_fixture();light=responses['ProtoOASymbolsListReq'][1]['symbol'];full=responses['ProtoOASymbolByIdReq'][1]['symbol']
+        if kind=='list_account':responses['ProtoOASymbolsListReq'][1]['ctidTraderAccountId']=999
+        elif kind=='full_account':responses['ProtoOASymbolByIdReq'][1]['ctidTraderAccountId']=999
+        elif kind=='wrong_type':responses['ProtoOASymbolByIdReq'][0]='ProtoOASpotEvent'
+        elif kind=='duplicate_id':light.append(dict(light[0]))
+        elif kind=='alias_collision':light.append(dict(light[0],symbolId=13,symbolName='EURUSD'));full.append(dict(full[0],symbolId=13))
+        elif kind=='missing_detail':full.clear()
+        elif kind=='unsolicited_detail':full.append(dict(full[0],symbolId=13))
+        elif kind=='missing_lot':del full[0]['lotSize']
+        elif kind=='zero_step':full[0]['stepVolume']=0
+        elif kind=='bool_precision':full[0]['digits']=True
+&gt;       with pytest.raises(VenueUnavailable):adapter._load_symbols()
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE VenueUnavailable
+
+trading/tests/test_ctrader_feed_contract.py:120: Failed</failure></testcase><testcase classname="trading.tests.test_ctrader_feed_contract" name="test_native_symbol_registry_never_publishes_wrong_scope_partial_or_default_contracts[full_account]" time="0.001"><failure message="Failed: DID NOT RAISE VenueUnavailable">kind = 'full_account'
+
+    @pytest.mark.parametrize('kind', ['list_account','full_account','wrong_type','duplicate_id','alias_collision','missing_detail','unsolicited_detail','missing_lot','zero_step','bool_precision'])
+    def test_native_symbol_registry_never_publishes_wrong_scope_partial_or_default_contracts(kind):
+        adapter,responses=registry_fixture();light=responses['ProtoOASymbolsListReq'][1]['symbol'];full=responses['ProtoOASymbolByIdReq'][1]['symbol']
+        if kind=='list_account':responses['ProtoOASymbolsListReq'][1]['ctidTraderAccountId']=999
+        elif kind=='full_account':responses['ProtoOASymbolByIdReq'][1]['ctidTraderAccountId']=999
+        elif kind=='wrong_type':responses['ProtoOASymbolByIdReq'][0]='ProtoOASpotEvent'
+        elif kind=='duplicate_id':light.append(dict(light[0]))
+        elif kind=='alias_collision':light.append(dict(light[0],symbolId=13,symbolName='EURUSD'));full.append(dict(full[0],symbolId=13))
+        elif kind=='missing_detail':full.clear()
+        elif kind=='unsolicited_detail':full.append(dict(full[0],symbolId=13))
+        elif kind=='missing_lot':del full[0]['lotSize']
+        elif kind=='zero_step':full[0]['stepVolume']=0
+        elif kind=='bool_precision':full[0]['digits']=True
+&gt;       with pytest.raises(VenueUnavailable):adapter._load_symbols()
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE VenueUnavailable
+
+trading/tests/test_ctrader_feed_contract.py:120: Failed</failure></testcase><testcase classname="trading.tests.test_ctrader_feed_contract" name="test_native_symbol_registry_never_publishes_wrong_scope_partial_or_default_contracts[wrong_type]" time="0.001"><failure message="Failed: DID NOT RAISE VenueUnavailable">kind = 'wrong_type'
+
+    @pytest.mark.parametrize('kind', ['list_account','full_account','wrong_type','duplicate_id','alias_collision','missing_detail','unsolicited_detail','missing_lot','zero_step','bool_precision'])
+    def test_native_symbol_registry_never_publishes_wrong_scope_partial_or_default_contracts(kind):
+        adapter,responses=registry_fixture();light=responses['ProtoOASymbolsListReq'][1]['symbol'];full=responses['ProtoOASymbolByIdReq'][1]['symbol']
+        if kind=='list_account':responses['ProtoOASymbolsListReq'][1]['ctidTraderAccountId']=999
+        elif kind=='full_account':responses['ProtoOASymbolByIdReq'][1]['ctidTraderAccountId']=999
+        elif kind=='wrong_type':responses['ProtoOASymbolByIdReq'][0]='ProtoOASpotEvent'
+        elif kind=='duplicate_id':light.append(dict(light[0]))
+        elif kind=='alias_collision':light.append(dict(light[0],symbolId=13,symbolName='EURUSD'));full.append(dict(full[0],symbolId=13))
+        elif kind=='missing_detail':full.clear()
+        elif kind=='unsolicited_detail':full.append(dict(full[0],symbolId=13))
+        elif kind=='missing_lot':del full[0]['lotSize']
+        elif kind=='zero_step':full[0]['stepVolume']=0
+        elif kind=='bool_precision':full[0]['digits']=True
+&gt;       with pytest.raises(VenueUnavailable):adapter._load_symbols()
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE VenueUnavailable
+
+trading/tests/test_ctrader_feed_contract.py:120: Failed</failure></testcase><testcase classname="trading.tests.test_ctrader_feed_contract" name="test_native_symbol_registry_never_publishes_wrong_scope_partial_or_default_contracts[duplicate_id]" time="0.002"><failure message="Failed: DID NOT RAISE VenueUnavailable">kind = 'duplicate_id'
+
+    @pytest.mark.parametrize('kind', ['list_account','full_account','wrong_type','duplicate_id','alias_collision','missing_detail','unsolicited_detail','missing_lot','zero_step','bool_precision'])
+    def test_native_symbol_registry_never_publishes_wrong_scope_partial_or_default_contracts(kind):
+        adapter,responses=registry_fixture();light=responses['ProtoOASymbolsListReq'][1]['symbol'];full=responses['ProtoOASymbolByIdReq'][1]['symbol']
+        if kind=='list_account':responses['ProtoOASymbolsListReq'][1]['ctidTraderAccountId']=999
+        elif kind=='full_account':responses['ProtoOASymbolByIdReq'][1]['ctidTraderAccountId']=999
+        elif kind=='wrong_type':responses['ProtoOASymbolByIdReq'][0]='ProtoOASpotEvent'
+        elif kind=='duplicate_id':light.append(dict(light[0]))
+        elif kind=='alias_collision':light.append(dict(light[0],symbolId=13,symbolName='EURUSD'));full.append(dict(full[0],symbolId=13))
+        elif kind=='missing_detail':full.clear()
+        elif kind=='unsolicited_detail':full.append(dict(full[0],symbolId=13))
+        elif kind=='missing_lot':del full[0]['lotSize']
+        elif kind=='zero_step':full[0]['stepVolume']=0
+        elif kind=='bool_precision':full[0]['digits']=True
+&gt;       with pytest.raises(VenueUnavailable):adapter._load_symbols()
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE VenueUnavailable
+
+trading/tests/test_ctrader_feed_contract.py:120: Failed</failure></testcase><testcase classname="trading.tests.test_ctrader_feed_contract" name="test_native_symbol_registry_never_publishes_wrong_scope_partial_or_default_contracts[alias_collision]" time="0.001"><failure message="Failed: DID NOT RAISE VenueUnavailable">kind = 'alias_collision'
+
+    @pytest.mark.parametrize('kind', ['list_account','full_account','wrong_type','duplicate_id','alias_collision','missing_detail','unsolicited_detail','missing_lot','zero_step','bool_precision'])
+    def test_native_symbol_registry_never_publishes_wrong_scope_partial_or_default_contracts(kind):
+        adapter,responses=registry_fixture();light=responses['ProtoOASymbolsListReq'][1]['symbol'];full=responses['ProtoOASymbolByIdReq'][1]['symbol']
+        if kind=='list_account':responses['ProtoOASymbolsListReq'][1]['ctidTraderAccountId']=999
+        elif kind=='full_account':responses['ProtoOASymbolByIdReq'][1]['ctidTraderAccountId']=999
+        elif kind=='wrong_type':responses['ProtoOASymbolByIdReq'][0]='ProtoOASpotEvent'
+        elif kind=='duplicate_id':light.append(dict(light[0]))
+        elif kind=='alias_collision':light.append(dict(light[0],symbolId=13,symbolName='EURUSD'));full.append(dict(full[0],symbolId=13))
+        elif kind=='missing_detail':full.clear()
+        elif kind=='unsolicited_detail':full.append(dict(full[0],symbolId=13))
+        elif kind=='missing_lot':del full[0]['lotSize']
+        elif kind=='zero_step':full[0]['stepVolume']=0
+        elif kind=='bool_precision':full[0]['digits']=True
+&gt;       with pytest.raises(VenueUnavailable):adapter._load_symbols()
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE VenueUnavailable
+
+trading/tests/test_ctrader_feed_contract.py:120: Failed</failure></testcase><testcase classname="trading.tests.test_ctrader_feed_contract" name="test_native_symbol_registry_never_publishes_wrong_scope_partial_or_default_contracts[missing_detail]" time="0.001"><failure message="Failed: DID NOT RAISE VenueUnavailable">kind = 'missing_detail'
+
+    @pytest.mark.parametrize('kind', ['list_account','full_account','wrong_type','duplicate_id','alias_collision','missing_detail','unsolicited_detail','missing_lot','zero_step','bool_precision'])
+    def test_native_symbol_registry_never_publishes_wrong_scope_partial_or_default_contracts(kind):
+        adapter,responses=registry_fixture();light=responses['ProtoOASymbolsListReq'][1]['symbol'];full=responses['ProtoOASymbolByIdReq'][1]['symbol']
+        if kind=='list_account':responses['ProtoOASymbolsListReq'][1]['ctidTraderAccountId']=999
+        elif kind=='full_account':responses['ProtoOASymbolByIdReq'][1]['ctidTraderAccountId']=999
+        elif kind=='wrong_type':responses['ProtoOASymbolByIdReq'][0]='ProtoOASpotEvent'
+        elif kind=='duplicate_id':light.append(dict(light[0]))
+        elif kind=='alias_collision':light.append(dict(light[0],symbolId=13,symbolName='EURUSD'));full.append(dict(full[0],symbolId=13))
+        elif kind=='missing_detail':full.clear()
+        elif kind=='unsolicited_detail':full.append(dict(full[0],symbolId=13))
+        elif kind=='missing_lot':del full[0]['lotSize']
+        elif kind=='zero_step':full[0]['stepVolume']=0
+        elif kind=='bool_precision':full[0]['digits']=True
+&gt;       with pytest.raises(VenueUnavailable):adapter._load_symbols()
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE VenueUnavailable
+
+trading/tests/test_ctrader_feed_contract.py:120: Failed</failure></testcase><testcase classname="trading.tests.test_ctrader_feed_contract" name="test_native_symbol_registry_never_publishes_wrong_scope_partial_or_default_contracts[unsolicited_detail]" time="0.001"><failure message="KeyError: 13">kind = 'unsolicited_detail'
+
+    @pytest.mark.parametrize('kind', ['list_account','full_account','wrong_type','duplicate_id','alias_collision','missing_detail','unsolicited_detail','missing_lot','zero_step','bool_precision'])
+    def test_native_symbol_registry_never_publishes_wrong_scope_partial_or_default_contracts(kind):
+        adapter,responses=registry_fixture();light=responses['ProtoOASymbolsListReq'][1]['symbol'];full=responses['ProtoOASymbolByIdReq'][1]['symbol']
+        if kind=='list_account':responses['ProtoOASymbolsListReq'][1]['ctidTraderAccountId']=999
+        elif kind=='full_account':responses['ProtoOASymbolByIdReq'][1]['ctidTraderAccountId']=999
+        elif kind=='wrong_type':responses['ProtoOASymbolByIdReq'][0]='ProtoOASpotEvent'
+        elif kind=='duplicate_id':light.append(dict(light[0]))
+        elif kind=='alias_collision':light.append(dict(light[0],symbolId=13,symbolName='EURUSD'));full.append(dict(full[0],symbolId=13))
+        elif kind=='missing_detail':full.clear()
+        elif kind=='unsolicited_detail':full.append(dict(full[0],symbolId=13))
+        elif kind=='missing_lot':del full[0]['lotSize']
+        elif kind=='zero_step':full[0]['stepVolume']=0
+        elif kind=='bool_precision':full[0]['digits']=True
+&gt;       with pytest.raises(VenueUnavailable):adapter._load_symbols()
+                                             ^^^^^^^^^^^^^^^^^^^^^^^
+
+trading/tests/test_ctrader_feed_contract.py:120: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = CtraderAdapter(transport=namespace(call=&lt;function registry_fixture.&lt;locals&gt;.&lt;lambda&gt; at 0x7f99d722c180&gt;), client_id='f...volume=1000, step_volume=1000, max_volume=1000000000)}, _authed=False, _money_digits=2, _currency='USD', _last_spot={})
+
+    def _load_symbols(self) -&gt; None:
+        _, lst = self.transport.call("ProtoOASymbolsListReq", {"ctidTraderAccountId": self.ctid_trader_account_id})
+        light = {s["symbolId"]: s for s in lst.get("symbol", []) if s.get("enabled", True)}
+        ids = list(light)
+        for i in range(0, len(ids), 50):
+            _, full = self.transport.call("ProtoOASymbolByIdReq", {"ctidTraderAccountId": self.ctid_trader_account_id, "symbolId": ids[i:i + 50]})
+            for s in full.get("symbol", []):
+&gt;               name = light[s["symbolId"]].get("symbolName", str(s["symbolId"]))
+                       ^^^^^^^^^^^^^^^^^^^^
+E               KeyError: 13
+
+trading/vati/execution/ctrader/adapter.py:85: KeyError</failure></testcase><testcase classname="trading.tests.test_ctrader_feed_contract" name="test_native_symbol_registry_never_publishes_wrong_scope_partial_or_default_contracts[missing_lot]" time="0.004"><failure message="Failed: DID NOT RAISE VenueUnavailable">kind = 'missing_lot'
+
+    @pytest.mark.parametrize('kind', ['list_account','full_account','wrong_type','duplicate_id','alias_collision','missing_detail','unsolicited_detail','missing_lot','zero_step','bool_precision'])
+    def test_native_symbol_registry_never_publishes_wrong_scope_partial_or_default_contracts(kind):
+        adapter,responses=registry_fixture();light=responses['ProtoOASymbolsListReq'][1]['symbol'];full=responses['ProtoOASymbolByIdReq'][1]['symbol']
+        if kind=='list_account':responses['ProtoOASymbolsListReq'][1]['ctidTraderAccountId']=999
+        elif kind=='full_account':responses['ProtoOASymbolByIdReq'][1]['ctidTraderAccountId']=999
+        elif kind=='wrong_type':responses['ProtoOASymbolByIdReq'][0]='ProtoOASpotEvent'
+        elif kind=='duplicate_id':light.append(dict(light[0]))
+        elif kind=='alias_collision':light.append(dict(light[0],symbolId=13,symbolName='EURUSD'));full.append(dict(full[0],symbolId=13))
+        elif kind=='missing_detail':full.clear()
+        elif kind=='unsolicited_detail':full.append(dict(full[0],symbolId=13))
+        elif kind=='missing_lot':del full[0]['lotSize']
+        elif kind=='zero_step':full[0]['stepVolume']=0
+        elif kind=='bool_precision':full[0]['digits']=True
+&gt;       with pytest.raises(VenueUnavailable):adapter._load_symbols()
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE VenueUnavailable
+
+trading/tests/test_ctrader_feed_contract.py:120: Failed</failure></testcase><testcase classname="trading.tests.test_ctrader_feed_contract" name="test_native_symbol_registry_never_publishes_wrong_scope_partial_or_default_contracts[zero_step]" time="0.004"><failure message="Failed: DID NOT RAISE VenueUnavailable">kind = 'zero_step'
+
+    @pytest.mark.parametrize('kind', ['list_account','full_account','wrong_type','duplicate_id','alias_collision','missing_detail','unsolicited_detail','missing_lot','zero_step','bool_precision'])
+    def test_native_symbol_registry_never_publishes_wrong_scope_partial_or_default_contracts(kind):
+        adapter,responses=registry_fixture();light=responses['ProtoOASymbolsListReq'][1]['symbol'];full=responses['ProtoOASymbolByIdReq'][1]['symbol']
+        if kind=='list_account':responses['ProtoOASymbolsListReq'][1]['ctidTraderAccountId']=999
+        elif kind=='full_account':responses['ProtoOASymbolByIdReq'][1]['ctidTraderAccountId']=999
+        elif kind=='wrong_type':responses['ProtoOASymbolByIdReq'][0]='ProtoOASpotEvent'
+        elif kind=='duplicate_id':light.append(dict(light[0]))
+        elif kind=='alias_collision':light.append(dict(light[0],symbolId=13,symbolName='EURUSD'));full.append(dict(full[0],symbolId=13))
+        elif kind=='missing_detail':full.clear()
+        elif kind=='unsolicited_detail':full.append(dict(full[0],symbolId=13))
+        elif kind=='missing_lot':del full[0]['lotSize']
+        elif kind=='zero_step':full[0]['stepVolume']=0
+        elif kind=='bool_precision':full[0]['digits']=True
+&gt;       with pytest.raises(VenueUnavailable):adapter._load_symbols()
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE VenueUnavailable
+
+trading/tests/test_ctrader_feed_contract.py:120: Failed</failure></testcase><testcase classname="trading.tests.test_ctrader_feed_contract" name="test_native_symbol_registry_never_publishes_wrong_scope_partial_or_default_contracts[bool_precision]" time="0.001"><failure message="Failed: DID NOT RAISE VenueUnavailable">kind = 'bool_precision'
+
+    @pytest.mark.parametrize('kind', ['list_account','full_account','wrong_type','duplicate_id','alias_collision','missing_detail','unsolicited_detail','missing_lot','zero_step','bool_precision'])
+    def test_native_symbol_registry_never_publishes_wrong_scope_partial_or_default_contracts(kind):
+        adapter,responses=registry_fixture();light=responses['ProtoOASymbolsListReq'][1]['symbol'];full=responses['ProtoOASymbolByIdReq'][1]['symbol']
+        if kind=='list_account':responses['ProtoOASymbolsListReq'][1]['ctidTraderAccountId']=999
+        elif kind=='full_account':responses['ProtoOASymbolByIdReq'][1]['ctidTraderAccountId']=999
+        elif kind=='wrong_type':responses['ProtoOASymbolByIdReq'][0]='ProtoOASpotEvent'
+        elif kind=='duplicate_id':light.append(dict(light[0]))
+        elif kind=='alias_collision':light.append(dict(light[0],symbolId=13,symbolName='EURUSD'));full.append(dict(full[0],symbolId=13))
+        elif kind=='missing_detail':full.clear()
+        elif kind=='unsolicited_detail':full.append(dict(full[0],symbolId=13))
+        elif kind=='missing_lot':del full[0]['lotSize']
+        elif kind=='zero_step':full[0]['stepVolume']=0
+        elif kind=='bool_precision':full[0]['digits']=True
+&gt;       with pytest.raises(VenueUnavailable):adapter._load_symbols()
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE VenueUnavailable
+
+trading/tests/test_ctrader_feed_contract.py:120: Failed</failure></testcase><testcase classname="trading.tests.test_ctrader_feed_contract" name="test_symbol_refresh_failure_preserves_original_cache_but_refuses_its_use_until_recovery" time="0.001"><failure message="Failed: DID NOT RAISE VenueUnavailable">def test_symbol_refresh_failure_preserves_original_cache_but_refuses_its_use_until_recovery():
+        adapter,responses=registry_fixture();adapter._load_symbols();old=deepcopy(adapter.symbols)
+        responses['ProtoOASymbolByIdReq'][1]['symbol'][0]['minVolume']=0
+&gt;       with pytest.raises(VenueUnavailable):adapter._load_symbols()
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE VenueUnavailable
+
+trading/tests/test_ctrader_feed_contract.py:126: Failed</failure></testcase></testsuite></testsuites>

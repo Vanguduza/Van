@@ -1,0 +1,298 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="4" skipped="0" tests="4" time="0.835" timestamp="2026-10-28T21:45:46.481388+00:00" hostname="6e9feff21467"><testcase classname="trading.tests.test_native_entry_volume" name="test_actual_original_entry_receipts_and_native_deals_retain_exact_gross_volume" time="0.438"><failure message="AttributeError: 'NativeAccountRiskContext' object has no attribute 'environment'">tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-217/test_actual_original_entry_rec0')
+eurusd = SymbolContract(symbol='EURUSD', venue='mt5', base_currency='EUR', quote_currency='USD', account_currency='USD', contra...=Decimal('0'), max_adv_participation=Decimal('0.10'), liquidity_haircut=Decimal('0'), round_trip_cost_pct=Decimal('0'))
+
+    def test_actual_original_entry_receipts_and_native_deals_retain_exact_gross_volume(tmp_path,eurusd):
+        ledger,adapter,book,clock,command,binding=dispatched(tmp_path,eurusd)
+        try:
+            observe(ledger,clock,[(1,2,7,200000,D('-.01')),(2,2,7,300000,None)])
+            count=ledger.count();calls=len(adapter.transport.calls)
+            with localcontext() as context:
+                context.prec=2;context.traps[Inexact]=True;context.traps[Rounded]=True
+&gt;               result=book.lookup_entry_volume(command.command_hash,binding['source_ref'],available_at_ms=clock['ms'])
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+trading/tests/test_native_entry_volume.py:47: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+trading/vati/risk/native_margin_book.py:116: in lookup_entry_volume
+    return read_original_entry_volume(self,command_hash,source_ref,available_at_ms=available_at_ms).body()
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+book = &lt;vati.risk.native_margin_book.NativeMarginBook object at 0x7f2200eb1880&gt;
+command_hash = '57c7889f050c4fb3ef0f16ddf0d3a18122d6aa31192542a57e90278b67be618a'
+source_ref = '426a36e6abf0f2f9cfefffa7cb3b7c532d43837b2a1c0936a805e39f834eef07'
+available_at_ms = 1800000001003, max_events = 100000, max_bytes = 33554432
+
+    def read_original_entry_volume(book,command_hash,source_ref,*,available_at_ms,max_events=100000,max_bytes=32*1024**2):
+        """Join the existing command, original receipts and deduplicated deal owner."""
+        try:
+            native_int(available_at_ms,minimum=0)
+            native_int(max_events,minimum=1,maximum=1000000);native_int(max_bytes,minimum=1,maximum=256*1024**2)
+            with committed_source_snapshot(book.ledger):
+                if book.ledger.count()&gt;max_events:raise NativeEntryVolumeError('NATIVE_ENTRY_HISTORY_CAPACITY')
+                original=book.lookup_entry(command_hash,source_ref)
+                if original is None:raise NativeEntryVolumeError('ORIGINAL_ENTRY_MARGIN_UNAVAILABLE')
+                q=original['observation'];binding=original['receipt']
+                native_int(binding['available_at_ms'],minimum=0,maximum=available_at_ms)
+                if q['schema']!='vati.ctrader-expected-margin/1':
+                    raise NativeEntryVolumeError('PROVIDER_ENTRY_DEAL_VOLUME_UNAVAILABLE')
+                context=NativeAccountRiskContext(**q['native_account_context'])
+                exposure=physical_order_exposure(book.ledger,context,available_at_ms=available_at_ms)
+                if exposure.unresolved_refs:raise NativeEntryVolumeError('NATIVE_ENTRY_ORIGINAL_OWNERSHIP_UNRESOLVED')
+                selected=[o for o in exposure.orders if o.command['command_hash']==command_hash]
+                if len(selected)!=1:raise NativeEntryVolumeError('ORIGINAL_DISPATCHED_ENTRY_UNAVAILABLE_OR_AMBIGUOUS')
+                order=selected[0]
+                dispatched=order.command
+                if (any(dispatched.get(k)!=v for k,v in original['command'].items())
+                        or dispatched.get('native_entry_margin_ref')!=binding['record_ref']
+                        or order.original_input_ref!=binding['original_input_ref']):
+                    raise NativeEntryVolumeError('ORIGINAL_ENTRY_COMMAND_BINDING_DIFFERS')
+                events={};size=0
+                for event in book.ledger.iter():
+                    size+=len(canonical_json(event.body()).encode())
+                    if size&gt;max_bytes:raise NativeEntryVolumeError('NATIVE_ENTRY_HISTORY_BYTE_CAPACITY')
+                    if max(event.event_time_ms,event.received_time_ms)&lt;=available_at_ms:events[event.hash]=event
+                owners={};receipt_refs=[]
+                for candidate in exposure.orders:
+                    for ref in candidate.receipt_refs:
+                        event=events[ref];p=event.payload
+                        if p.get('exit_action') is not None:continue
+                        raw=p.get('broker_order_id')
+                        if raw in ('',None):continue
+                        # A provider-owned identifier must not be interpreted from
+                        # a comment, alias, position ID or another parent's symbol.
+                        native=_native_order_id(raw)
+                        owners.setdefault(native,set()).add(candidate.command_ref)
+                        if candidate.command_ref==order.command_ref:receipt_refs.append(ref)
+                native_ids={n for n,refs in owners.items() if order.command_ref in refs}
+                if not native_ids:raise NativeEntryVolumeError('ORIGINAL_NATIVE_ORDER_ID_UNAVAILABLE')
+                if any(owners[n]!={order.command_ref} for n in native_ids):
+                    raise NativeEntryVolumeError('NATIVE_ORDER_CLAIMED_BY_MULTIPLE_COMMANDS')
+                scope={k:q[k] for k in ('native_account_id','deposit_asset_id','currency')}
+&gt;               scope.update(provider='CTRADER',environment=context.environment)
+                                                            ^^^^^^^^^^^^^^^^^^^
+E               AttributeError: 'NativeAccountRiskContext' object has no attribute 'environment'
+
+trading/vati/risk/native_entry_volume.py:84: AttributeError</failure></testcase><testcase classname="trading.tests.test_native_entry_volume" name="test_duplicate_native_statements_and_other_orders_never_reduce_or_repeat_gross_entries" time="0.041"><failure message="AttributeError: 'NativeAccountRiskContext' object has no attribute 'environment'">tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-217/test_duplicate_native_statemen0')
+eurusd = SymbolContract(symbol='EURUSD', venue='mt5', base_currency='EUR', quote_currency='USD', account_currency='USD', contra...=Decimal('0'), max_adv_participation=Decimal('0.10'), liquidity_haircut=Decimal('0'), round_trip_cost_pct=Decimal('0'))
+
+    def test_duplicate_native_statements_and_other_orders_never_reduce_or_repeat_gross_entries(tmp_path,eurusd):
+        ledger,adapter,book,clock,command,binding=dispatched(tmp_path,eurusd)
+        try:
+            rows=[(1,2,7,200000,D('-.01')),(2,2,7,300000,None)]
+            observe(ledger,clock,rows)
+            clock['ms']+=1
+            # Preserve original economic row times when repeating a vintage.
+            statement=list(ledger.iter(EventKind.FUNDING_DEAL_STATEMENT))[0].payload['statement']
+            repeated=NativeDealStatement.from_body(statement)
+            DealBook(ledger,clock=lambda:clock['ms']).record_statement(replace(repeated,observed_at_ms=clock['ms'],to_ms=clock['ms']))
+            observe(ledger,clock,[(3,99,7,500000,D('99'))])
+&gt;           result=book.lookup_entry_volume(command.command_hash,binding['source_ref'],available_at_ms=clock['ms'])
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+trading/tests/test_native_entry_volume.py:71: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+trading/vati/risk/native_margin_book.py:116: in lookup_entry_volume
+    return read_original_entry_volume(self,command_hash,source_ref,available_at_ms=available_at_ms).body()
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+book = &lt;vati.risk.native_margin_book.NativeMarginBook object at 0x7f2200f212e0&gt;
+command_hash = '969affe6581acc1f2a3ff7f157deacc8e0a99d3190abc90dff2ef9fc4d2276d0'
+source_ref = '426a36e6abf0f2f9cfefffa7cb3b7c532d43837b2a1c0936a805e39f834eef07'
+available_at_ms = 1800000001004, max_events = 100000, max_bytes = 33554432
+
+    def read_original_entry_volume(book,command_hash,source_ref,*,available_at_ms,max_events=100000,max_bytes=32*1024**2):
+        """Join the existing command, original receipts and deduplicated deal owner."""
+        try:
+            native_int(available_at_ms,minimum=0)
+            native_int(max_events,minimum=1,maximum=1000000);native_int(max_bytes,minimum=1,maximum=256*1024**2)
+            with committed_source_snapshot(book.ledger):
+                if book.ledger.count()&gt;max_events:raise NativeEntryVolumeError('NATIVE_ENTRY_HISTORY_CAPACITY')
+                original=book.lookup_entry(command_hash,source_ref)
+                if original is None:raise NativeEntryVolumeError('ORIGINAL_ENTRY_MARGIN_UNAVAILABLE')
+                q=original['observation'];binding=original['receipt']
+                native_int(binding['available_at_ms'],minimum=0,maximum=available_at_ms)
+                if q['schema']!='vati.ctrader-expected-margin/1':
+                    raise NativeEntryVolumeError('PROVIDER_ENTRY_DEAL_VOLUME_UNAVAILABLE')
+                context=NativeAccountRiskContext(**q['native_account_context'])
+                exposure=physical_order_exposure(book.ledger,context,available_at_ms=available_at_ms)
+                if exposure.unresolved_refs:raise NativeEntryVolumeError('NATIVE_ENTRY_ORIGINAL_OWNERSHIP_UNRESOLVED')
+                selected=[o for o in exposure.orders if o.command['command_hash']==command_hash]
+                if len(selected)!=1:raise NativeEntryVolumeError('ORIGINAL_DISPATCHED_ENTRY_UNAVAILABLE_OR_AMBIGUOUS')
+                order=selected[0]
+                dispatched=order.command
+                if (any(dispatched.get(k)!=v for k,v in original['command'].items())
+                        or dispatched.get('native_entry_margin_ref')!=binding['record_ref']
+                        or order.original_input_ref!=binding['original_input_ref']):
+                    raise NativeEntryVolumeError('ORIGINAL_ENTRY_COMMAND_BINDING_DIFFERS')
+                events={};size=0
+                for event in book.ledger.iter():
+                    size+=len(canonical_json(event.body()).encode())
+                    if size&gt;max_bytes:raise NativeEntryVolumeError('NATIVE_ENTRY_HISTORY_BYTE_CAPACITY')
+                    if max(event.event_time_ms,event.received_time_ms)&lt;=available_at_ms:events[event.hash]=event
+                owners={};receipt_refs=[]
+                for candidate in exposure.orders:
+                    for ref in candidate.receipt_refs:
+                        event=events[ref];p=event.payload
+                        if p.get('exit_action') is not None:continue
+                        raw=p.get('broker_order_id')
+                        if raw in ('',None):continue
+                        # A provider-owned identifier must not be interpreted from
+                        # a comment, alias, position ID or another parent's symbol.
+                        native=_native_order_id(raw)
+                        owners.setdefault(native,set()).add(candidate.command_ref)
+                        if candidate.command_ref==order.command_ref:receipt_refs.append(ref)
+                native_ids={n for n,refs in owners.items() if order.command_ref in refs}
+                if not native_ids:raise NativeEntryVolumeError('ORIGINAL_NATIVE_ORDER_ID_UNAVAILABLE')
+                if any(owners[n]!={order.command_ref} for n in native_ids):
+                    raise NativeEntryVolumeError('NATIVE_ORDER_CLAIMED_BY_MULTIPLE_COMMANDS')
+                scope={k:q[k] for k in ('native_account_id','deposit_asset_id','currency')}
+&gt;               scope.update(provider='CTRADER',environment=context.environment)
+                                                            ^^^^^^^^^^^^^^^^^^^
+E               AttributeError: 'NativeAccountRiskContext' object has no attribute 'environment'
+
+trading/vati/risk/native_entry_volume.py:84: AttributeError</failure></testcase><testcase classname="trading.tests.test_native_entry_volume" name="test_missing_deals_are_not_zero_outstanding_and_late_conflicts_refuse_current_use" time="0.042"><failure message="AttributeError: 'NativeAccountRiskContext' object has no attribute 'environment'">tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-217/test_missing_deals_are_not_zer0')
+eurusd = SymbolContract(symbol='EURUSD', venue='mt5', base_currency='EUR', quote_currency='USD', account_currency='USD', contra...=Decimal('0'), max_adv_participation=Decimal('0.10'), liquidity_haircut=Decimal('0'), round_trip_cost_pct=Decimal('0'))
+
+    def test_missing_deals_are_not_zero_outstanding_and_late_conflicts_refuse_current_use(tmp_path,eurusd):
+        ledger,adapter,book,clock,command,binding=dispatched(tmp_path,eurusd)
+        try:
+&gt;           empty=book.lookup_entry_volume(command.command_hash,binding['source_ref'],available_at_ms=clock['ms'])
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+trading/tests/test_native_entry_volume.py:80: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+trading/vati/risk/native_margin_book.py:116: in lookup_entry_volume
+    return read_original_entry_volume(self,command_hash,source_ref,available_at_ms=available_at_ms).body()
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+book = &lt;vati.risk.native_margin_book.NativeMarginBook object at 0x7f2200f46e40&gt;
+command_hash = '22de2e6b43c5163199dbabdf232cdd8adc949ec4f9eeeab46e7ed38ba38efe77'
+source_ref = '426a36e6abf0f2f9cfefffa7cb3b7c532d43837b2a1c0936a805e39f834eef07'
+available_at_ms = 1800000001003, max_events = 100000, max_bytes = 33554432
+
+    def read_original_entry_volume(book,command_hash,source_ref,*,available_at_ms,max_events=100000,max_bytes=32*1024**2):
+        """Join the existing command, original receipts and deduplicated deal owner."""
+        try:
+            native_int(available_at_ms,minimum=0)
+            native_int(max_events,minimum=1,maximum=1000000);native_int(max_bytes,minimum=1,maximum=256*1024**2)
+            with committed_source_snapshot(book.ledger):
+                if book.ledger.count()&gt;max_events:raise NativeEntryVolumeError('NATIVE_ENTRY_HISTORY_CAPACITY')
+                original=book.lookup_entry(command_hash,source_ref)
+                if original is None:raise NativeEntryVolumeError('ORIGINAL_ENTRY_MARGIN_UNAVAILABLE')
+                q=original['observation'];binding=original['receipt']
+                native_int(binding['available_at_ms'],minimum=0,maximum=available_at_ms)
+                if q['schema']!='vati.ctrader-expected-margin/1':
+                    raise NativeEntryVolumeError('PROVIDER_ENTRY_DEAL_VOLUME_UNAVAILABLE')
+                context=NativeAccountRiskContext(**q['native_account_context'])
+                exposure=physical_order_exposure(book.ledger,context,available_at_ms=available_at_ms)
+                if exposure.unresolved_refs:raise NativeEntryVolumeError('NATIVE_ENTRY_ORIGINAL_OWNERSHIP_UNRESOLVED')
+                selected=[o for o in exposure.orders if o.command['command_hash']==command_hash]
+                if len(selected)!=1:raise NativeEntryVolumeError('ORIGINAL_DISPATCHED_ENTRY_UNAVAILABLE_OR_AMBIGUOUS')
+                order=selected[0]
+                dispatched=order.command
+                if (any(dispatched.get(k)!=v for k,v in original['command'].items())
+                        or dispatched.get('native_entry_margin_ref')!=binding['record_ref']
+                        or order.original_input_ref!=binding['original_input_ref']):
+                    raise NativeEntryVolumeError('ORIGINAL_ENTRY_COMMAND_BINDING_DIFFERS')
+                events={};size=0
+                for event in book.ledger.iter():
+                    size+=len(canonical_json(event.body()).encode())
+                    if size&gt;max_bytes:raise NativeEntryVolumeError('NATIVE_ENTRY_HISTORY_BYTE_CAPACITY')
+                    if max(event.event_time_ms,event.received_time_ms)&lt;=available_at_ms:events[event.hash]=event
+                owners={};receipt_refs=[]
+                for candidate in exposure.orders:
+                    for ref in candidate.receipt_refs:
+                        event=events[ref];p=event.payload
+                        if p.get('exit_action') is not None:continue
+                        raw=p.get('broker_order_id')
+                        if raw in ('',None):continue
+                        # A provider-owned identifier must not be interpreted from
+                        # a comment, alias, position ID or another parent's symbol.
+                        native=_native_order_id(raw)
+                        owners.setdefault(native,set()).add(candidate.command_ref)
+                        if candidate.command_ref==order.command_ref:receipt_refs.append(ref)
+                native_ids={n for n,refs in owners.items() if order.command_ref in refs}
+                if not native_ids:raise NativeEntryVolumeError('ORIGINAL_NATIVE_ORDER_ID_UNAVAILABLE')
+                if any(owners[n]!={order.command_ref} for n in native_ids):
+                    raise NativeEntryVolumeError('NATIVE_ORDER_CLAIMED_BY_MULTIPLE_COMMANDS')
+                scope={k:q[k] for k in ('native_account_id','deposit_asset_id','currency')}
+&gt;               scope.update(provider='CTRADER',environment=context.environment)
+                                                            ^^^^^^^^^^^^^^^^^^^
+E               AttributeError: 'NativeAccountRiskContext' object has no attribute 'environment'
+
+trading/vati/risk/native_entry_volume.py:84: AttributeError</failure></testcase><testcase classname="trading.tests.test_native_entry_volume" name="test_symbol_conflict_cannot_attribute_a_native_order_to_another_instrument" time="0.034"><failure message="AttributeError: 'NativeAccountRiskContext' object has no attribute 'environment'">tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-217/test_symbol_conflict_cannot_at0')
+eurusd = SymbolContract(symbol='EURUSD', venue='mt5', base_currency='EUR', quote_currency='USD', account_currency='USD', contra...=Decimal('0'), max_adv_participation=Decimal('0.10'), liquidity_haircut=Decimal('0'), round_trip_cost_pct=Decimal('0'))
+
+    def test_symbol_conflict_cannot_attribute_a_native_order_to_another_instrument(tmp_path,eurusd):
+        ledger,adapter,book,clock,command,binding=dispatched(tmp_path,eurusd)
+        try:
+            observe(ledger,clock,[(1,2,99,200000,None)])
+            with pytest.raises(NativeEntryVolumeError,match='SYMBOL_CONFLICT'):
+&gt;               book.lookup_entry_volume(command.command_hash,binding['source_ref'],available_at_ms=clock['ms'])
+
+trading/tests/test_native_entry_volume.py:95: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+trading/vati/risk/native_margin_book.py:116: in lookup_entry_volume
+    return read_original_entry_volume(self,command_hash,source_ref,available_at_ms=available_at_ms).body()
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+book = &lt;vati.risk.native_margin_book.NativeMarginBook object at 0x7f2200df3aa0&gt;
+command_hash = 'c50011b74076d6511c6c687b51512f1c9a079e799434f61d5e32463da1325b39'
+source_ref = '426a36e6abf0f2f9cfefffa7cb3b7c532d43837b2a1c0936a805e39f834eef07'
+available_at_ms = 1800000001003, max_events = 100000, max_bytes = 33554432
+
+    def read_original_entry_volume(book,command_hash,source_ref,*,available_at_ms,max_events=100000,max_bytes=32*1024**2):
+        """Join the existing command, original receipts and deduplicated deal owner."""
+        try:
+            native_int(available_at_ms,minimum=0)
+            native_int(max_events,minimum=1,maximum=1000000);native_int(max_bytes,minimum=1,maximum=256*1024**2)
+            with committed_source_snapshot(book.ledger):
+                if book.ledger.count()&gt;max_events:raise NativeEntryVolumeError('NATIVE_ENTRY_HISTORY_CAPACITY')
+                original=book.lookup_entry(command_hash,source_ref)
+                if original is None:raise NativeEntryVolumeError('ORIGINAL_ENTRY_MARGIN_UNAVAILABLE')
+                q=original['observation'];binding=original['receipt']
+                native_int(binding['available_at_ms'],minimum=0,maximum=available_at_ms)
+                if q['schema']!='vati.ctrader-expected-margin/1':
+                    raise NativeEntryVolumeError('PROVIDER_ENTRY_DEAL_VOLUME_UNAVAILABLE')
+                context=NativeAccountRiskContext(**q['native_account_context'])
+                exposure=physical_order_exposure(book.ledger,context,available_at_ms=available_at_ms)
+                if exposure.unresolved_refs:raise NativeEntryVolumeError('NATIVE_ENTRY_ORIGINAL_OWNERSHIP_UNRESOLVED')
+                selected=[o for o in exposure.orders if o.command['command_hash']==command_hash]
+                if len(selected)!=1:raise NativeEntryVolumeError('ORIGINAL_DISPATCHED_ENTRY_UNAVAILABLE_OR_AMBIGUOUS')
+                order=selected[0]
+                dispatched=order.command
+                if (any(dispatched.get(k)!=v for k,v in original['command'].items())
+                        or dispatched.get('native_entry_margin_ref')!=binding['record_ref']
+                        or order.original_input_ref!=binding['original_input_ref']):
+                    raise NativeEntryVolumeError('ORIGINAL_ENTRY_COMMAND_BINDING_DIFFERS')
+                events={};size=0
+                for event in book.ledger.iter():
+                    size+=len(canonical_json(event.body()).encode())
+                    if size&gt;max_bytes:raise NativeEntryVolumeError('NATIVE_ENTRY_HISTORY_BYTE_CAPACITY')
+                    if max(event.event_time_ms,event.received_time_ms)&lt;=available_at_ms:events[event.hash]=event
+                owners={};receipt_refs=[]
+                for candidate in exposure.orders:
+                    for ref in candidate.receipt_refs:
+                        event=events[ref];p=event.payload
+                        if p.get('exit_action') is not None:continue
+                        raw=p.get('broker_order_id')
+                        if raw in ('',None):continue
+                        # A provider-owned identifier must not be interpreted from
+                        # a comment, alias, position ID or another parent's symbol.
+                        native=_native_order_id(raw)
+                        owners.setdefault(native,set()).add(candidate.command_ref)
+                        if candidate.command_ref==order.command_ref:receipt_refs.append(ref)
+                native_ids={n for n,refs in owners.items() if order.command_ref in refs}
+                if not native_ids:raise NativeEntryVolumeError('ORIGINAL_NATIVE_ORDER_ID_UNAVAILABLE')
+                if any(owners[n]!={order.command_ref} for n in native_ids):
+                    raise NativeEntryVolumeError('NATIVE_ORDER_CLAIMED_BY_MULTIPLE_COMMANDS')
+                scope={k:q[k] for k in ('native_account_id','deposit_asset_id','currency')}
+&gt;               scope.update(provider='CTRADER',environment=context.environment)
+                                                            ^^^^^^^^^^^^^^^^^^^
+E               AttributeError: 'NativeAccountRiskContext' object has no attribute 'environment'
+
+trading/vati/risk/native_entry_volume.py:84: AttributeError</failure></testcase></testsuite></testsuites>

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="2" time="3.453" timestamp="2026-10-28T14:19:21.730019+00:00" hostname="6e9feff21467"><testcase classname="test_van_mt5_reported_fraction_20261028" name="test_actual_ea_helper_retains_strictly_above_reported_fraction" time="2.559" /><testcase classname="test_van_mt5_reported_fraction_20261028" name="test_signed_sdk_retains_the_same_strictly_above_reported_fraction" time="0.020"><failure message="AssertionError: assert ('REJECTED' == 'FILLED'&#10;  &#10;  - FILLED&#10;  + REJECTED)">tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-125/test_signed_sdk_retains_the_sa0')
+
+    def test_signed_sdk_retains_the_same_strictly_above_reported_fraction(tmp_path):
+        sdk=EntryCashSdk(equity=1000.,credit=0.,used=100.,reported_free=900.);original=sdk.account_info
+        def account():
+            a=original();a.margin_level=220.005;return a
+        sdk.account_info=account;sdk.margin_value=10.
+        sdk,worker,adapter,now=connection(tmp_path,sdk)
+        receipt=adapter.submit(command(adapter.account_alias),now_ms=now['ms'])
+&gt;       assert receipt.status=='FILLED' and len(sdk.sent)==1
+E       AssertionError: assert ('REJECTED' == 'FILLED'
+E         
+E         - FILLED
+E         + REJECTED)
+
+../../test_van_mt5_reported_fraction_20261028.py:19: AssertionError</failure></testcase></testsuite></testsuites>

@@ -22,6 +22,7 @@ from conftest_automation import (
     seed_standing_intent,
 )
 from van_gateway.action.service import ActionPolicyError
+from van_gateway.action.models import ActionDefinition, VerifierType
 from van_gateway.command.authority import (
     AuthoritySource,
     CommandAuthorityError,
@@ -74,6 +75,7 @@ async def test_event_derives_ordinary_command_authority(tmp_path):
         workflow_version=1, parameters={"broker_alias": "primary_mt5", "document_type": "statement"},
         run_snapshot_id="ctx-run-1", run_context_digest="sha256:runctx",
         operation_action_class=ActionClass.A2,
+        typed_action_id="automation.workflow.wfcap_statements",
     )
 
     assert derived.authority.principal_type is PrincipalType.AUTOMATION
@@ -92,13 +94,26 @@ async def test_event_derives_ordinary_command_authority(tmp_path):
 
     # And the derived record really does satisfy the ordinary authority check.
     actions = await make_action_runtime(store)
-    definition = await actions.get_definition("research.web.search")
+    definition = await actions.register(ActionDefinition(
+        action_id="automation.workflow.wfcap_statements", action_class=ActionClass.A2,
+        mutates_state=False, allowed_principals={PrincipalType.AUTOMATION}, verifier_type=VerifierType.RECEIPT))
     resolved, _age = await authority.authorize_action(
         command_id=derived.command_id, action=definition,
         principal_type=PrincipalType.AUTOMATION, requested_by=derived.authority.requested_by,
         snapshot_id="ctx-run-1", turn_id=None,
+        parameters={"broker_alias": "primary_mt5", "document_type": "statement"},
     )
     assert resolved.command_id == derived.command_id
+    with pytest.raises(CommandAuthorityError, match="typed_parameter_mismatch"):
+        await authority.authorize_action(command_id=derived.command_id, action=definition,
+            principal_type=PrincipalType.AUTOMATION, requested_by=derived.authority.requested_by,
+            snapshot_id="ctx-run-1", turn_id=None,
+            parameters={"broker_alias": "other", "document_type": "statement"})
+    with pytest.raises(CommandAuthorityError, match="typed_action_mismatch"):
+        await authority.authorize_action(command_id=derived.command_id,
+            action=await actions.get_definition("research.web.search"), principal_type=PrincipalType.AUTOMATION,
+            requested_by=derived.authority.requested_by, snapshot_id="ctx-run-1", turn_id=None,
+            parameters={"broker_alias": "primary_mt5", "document_type": "statement"})
 
 
 async def test_reusing_source_snapshot_is_refused(tmp_path):

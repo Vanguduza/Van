@@ -1,0 +1,702 @@
+{
+  "schema": "van.rebuild.mt5-native-result-source/1",
+  "observed_at_utc": "2026-10-23T09:58:32.772723+00:00",
+  "source_parent": "6255c6c40608e529553d69c905567e35cbc37ff4",
+  "source_sha256": {
+    "deploy/van-trading-core/windows/mt5_worker/mt5_bridge_worker.py": "cebf386ef14862480abb9b193246426ff4783e912cb87ed69c9591edeb4bbb97",
+    "deploy/van-trading-core/mql5/VanBridgeEA.mq5": "24f234cb510d2cce8555a6792612e073fedefd3daf9b69667b078292ce12e2f8",
+    "trading/vati/execution/mt5_bridge.py": "84a1cc3acd6b5eec1982093e6a47cf4b90354944d5fa70cd5f38e8279a1ce8c9",
+    "trading/tests/test_mt5_native_result_identity.py": "466ada6f8b1c9c149abfe012104ed11fadd4a9cccb4d8c4bc3095367f078e0e6",
+    "trading/tests/test_mt5_worker.py": "d71389a4a3da775e06ffe299c5bf24274bace6397b5a0cc01b12ad5fed9c784a",
+    "trading/tests/mql_terminal_fixture.cpp": "3afc869c93cace5e7d3d726b9fd5b4aa15cd5b5ef2cd2287ff521ec41a869d03",
+    "trading/tests/test_mql_native_function_bodies.py": "94540e50c6269b87006f91f8ec70b32996e8d80940a83d14e2ae027aec869cc9"
+  },
+  "executions": {
+    "valid-before": {
+      "tests": 12,
+      "failures": 12,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 0.327,
+      "sha256": "b36100f4cc30629131b7b53a49cb32f934e31e97495bf5d333a0f3b486979a72"
+    },
+    "netting-before": {
+      "tests": 7,
+      "failures": 5,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 1.247,
+      "sha256": "59b31e01017eba11e8fa956a0152914f56998a8e4b0bcc76bc4902f17027ef73"
+    },
+    "parameters-before": {
+      "tests": 6,
+      "failures": 6,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 0.377,
+      "sha256": "cb286b76b2aa86b1b566fc04da6fce62413635a734a0a182fe32daa84106a1fb"
+    },
+    "first": {
+      "tests": 68,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 3.326,
+      "sha256": "2c1527dcc91484d4741f71746d44949f44d99e974baf08d00240b582e6e2f5d9"
+    },
+    "final-focused": {
+      "tests": 81,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 3.393,
+      "sha256": "dd9e39a0b1f4180739f0a0f690ba923cf2541eb00e9a4c248347bd43505e7aaf"
+    },
+    "rebuild": {
+      "tests": 78,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 31.793,
+      "sha256": "257395e51023b0151fe4cf75237aa1db025ab55dab62476b220b2786a50f9b89"
+    }
+  },
+  "full_private_postgresql": {
+    "tests": 2635,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "seconds": 584.483,
+    "sha256": "d938e5deefaf4e080475b12a9ce38c194355b0c09588fb8ed59e3955f68bae64"
+  },
+  "fixture_cleanup": {
+    "stopped": true,
+    "removed": true
+  },
+  "faults": {
+    "definitions": [
+      [
+        [
+          "deploy/van-trading-core/windows/mt5_worker/mt5_bridge_worker.py",
+          "position = pos.ticket",
+          "position = getattr(r,'order',0)",
+          "use an order ID as position ticket"
+        ],
+        "trading/tests/test_mt5_native_result_identity.py::test_worker_maps_the_exact_deal_identifier_to_the_actual_position_ticket"
+      ],
+      [
+        [
+          "deploy/van-trading-core/windows/mt5_worker/mt5_bridge_worker.py",
+          "10006,10013,10014",
+          "10012,10006,10013,10014",
+          "declare native timeout a proven refusal"
+        ],
+        "trading/tests/test_mt5_native_result_identity.py::test_native_timeout_retcode_after_effect_is_unknown[entry]"
+      ],
+      [
+        [
+          "deploy/van-trading-core/windows/mt5_worker/mt5_bridge_worker.py",
+          "actual>=requested if is_buy else actual<=requested",
+          "True",
+          "confirm a weaker native stop"
+        ],
+        "trading/tests/test_mt5_native_result_identity.py::test_worker_rejects_a_weaker_native_stop_as_confirmation"
+      ],
+      [
+        [
+          "deploy/van-trading-core/windows/mt5_worker/mt5_bridge_worker.py",
+          "True if confirmed else False if self._native_refusal",
+          "True if r.retcode==m.TRADE_RETCODE_DONE else False if self._native_refusal",
+          "confirm an acknowledged stop change without observed effect"
+        ],
+        "trading/tests/test_mt5_native_result_identity.py::test_worker_does_not_confirm_a_stop_change_without_observed_effect"
+      ],
+      [
+        [
+          "deploy/van-trading-core/windows/mt5_worker/mt5_bridge_worker.py",
+          "if not math.isfinite(new_sl) or new_sl<=0:",
+          "if False:",
+          "remove sell protection with a zero stop"
+        ],
+        "trading/tests/test_mt5_native_result_identity.py::test_worker_cannot_remove_a_sell_stop_with_zero"
+      ],
+      [
+        [
+          "deploy/van-trading-core/windows/mt5_worker/mt5_bridge_worker.py",
+          "sl_confirmed=False\n        return {\"status\": status",
+          "sl_confirmed=True\n        return {\"status\": status",
+          "invent pending-order protection after failed native read"
+        ],
+        "trading/tests/test_mt5_native_result_identity.py::test_native_pending_order_requires_observed_stop"
+      ],
+      [
+        [
+          "trading/vati/execution/mt5_bridge.py",
+          "r.get(\"arrival\") or cmd.entry_price",
+          "r.get(\"arrival\", cmd.entry_price)",
+          "crash on pending native arrival null"
+        ],
+        "trading/tests/test_mt5_native_result_identity.py::test_native_pending_order_requires_observed_stop"
+      ],
+      [
+        [
+          "deploy/van-trading-core/windows/mt5_worker/mt5_bridge_worker.py",
+          "if mode==2:return True",
+          "if mode in (0,2):return True",
+          "permit a netting order to change existing exposure"
+        ],
+        "trading/tests/test_mt5_native_result_identity.py::test_worker_netting_entry_refuses_existing_or_unknown_exposure[position]"
+      ],
+      [
+        [
+          "deploy/van-trading-core/mql5/VanBridgeEA.mq5",
+          "if(AccountInfoInteger(ACCOUNT_MARGIN_MODE) != ACCOUNT_MARGIN_MODE_RETAIL_HEDGING)",
+          "if(false)",
+          "permit native EA netting entry over pending exposure"
+        ],
+        "trading/tests/test_mql_native_function_bodies.py::test_native_netting_entry_cannot_change_existing_exposure_or_protection[entry-netting-pending]"
+      ],
+      [
+        [
+          "deploy/van-trading-core/windows/mt5_worker/mt5_bridge_worker.py",
+          "b.get('type') not in {'BUY','SELL'}",
+          "False",
+          "silently reinterpret an invalid side as SELL"
+        ],
+        "trading/tests/test_mt5_native_result_identity.py::test_worker_checks_native_entry_parameters_before_any_sdk_effect[type-INVALID]"
+      ],
+      [
+        [
+          "deploy/van-trading-core/windows/mt5_worker/mt5_bridge_worker.py",
+          "if not math.isfinite(value) or (value<=0 if positive else value<0):",
+          "if False:",
+          "submit a negative native quantity"
+        ],
+        "trading/tests/test_mt5_native_result_identity.py::test_worker_checks_native_entry_parameters_before_any_sdk_effect[volume--.1]"
+      ]
+    ],
+    "records": [
+      {
+        "phase": "baseline",
+        "why": null,
+        "returncode": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "xml_sha256": "4fc5643c63fd3ea233ea1274fdd8f8f0cc1a4bab9e88a8ca23bc6f0a1b346c59",
+        "log_sha256": "0234d51de03c8da96792f0ed8d0043697c9f1b2888dbf66e9cf6b5620819903b"
+      },
+      {
+        "phase": "mutation",
+        "why": "use an order ID as position ticket",
+        "returncode": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "xml_sha256": "ae63881856d8dc6647663ae64684d6abdc0dfc6fb8521e95b5ae213d87f1b3ba",
+        "log_sha256": "617d0fdec8b1c8b0f08a4ab1a6dbdf33aa70f08d13c0af0b8775ff8e3b17a215"
+      },
+      {
+        "phase": "baseline",
+        "why": null,
+        "returncode": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "xml_sha256": "5e0e24c192f0387afaf3e35f1cbf91f807b3125978d60fa5d8d44123c6754345",
+        "log_sha256": "bc4c2ff1a05d78db864338a871f51116604f720d25667467a47cb7c30039c666"
+      },
+      {
+        "phase": "mutation",
+        "why": "declare native timeout a proven refusal",
+        "returncode": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "xml_sha256": "b39a5ebcd7fac628ee90c277daa25b8b46198c7ac94326f55dca128836ddb135",
+        "log_sha256": "0f4fde24c2d09215bb47486921a55aa19581f1300e8e51d287626a73a48967e1"
+      },
+      {
+        "phase": "baseline",
+        "why": null,
+        "returncode": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "xml_sha256": "ac97fc07732e35073b1c46cb00e5b8cf326e79f40afd146ae044ab52b04a9f7f",
+        "log_sha256": "41c3b06b1f0237013bf2a2d9555cfc394501d11435eed1ea4fe0a018aef42c2e"
+      },
+      {
+        "phase": "mutation",
+        "why": "confirm a weaker native stop",
+        "returncode": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "xml_sha256": "0104648ccffb040ff1914d59017c829d7bded3e339f268bf990105b991d585b1",
+        "log_sha256": "4cb1acff1505a27725cc52499f0f66bf17187d31f4dc4e04c7c97afd0385b088"
+      },
+      {
+        "phase": "baseline",
+        "why": null,
+        "returncode": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "xml_sha256": "4b71a1297738f56c8ee31b356134ec7c6a0a4acf5c18ae761241c0e3b0ba0f3b",
+        "log_sha256": "63203b4ec2b29e7ab8c45616e4d500960794bb60488784fb13fb7fe05b0386bf"
+      },
+      {
+        "phase": "mutation",
+        "why": "confirm an acknowledged stop change without observed effect",
+        "returncode": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "xml_sha256": "f87318462676b7c0f1cd307aced6ca35558fcafaddeb5c014ee6a9bba48efa5e",
+        "log_sha256": "a3cccbfe1aae7ef0aac8dac55647e8d2ccfe80d785182ef1e72fba378d9fb685"
+      },
+      {
+        "phase": "baseline",
+        "why": null,
+        "returncode": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "xml_sha256": "451ac18cb0fa37c8056b7c3b5bf492e96382e52f10d66031c046d3f612dc94b8",
+        "log_sha256": "06254aecdf245cc6f8784e134e36703bcc595ac0578b8c5f7f3591bcb399781b"
+      },
+      {
+        "phase": "mutation",
+        "why": "remove sell protection with a zero stop",
+        "returncode": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "xml_sha256": "7205f351012eb8b584de086be6d605b0b95abe89fe730ff8a633f3c2026c24c8",
+        "log_sha256": "b67ed3b22a3b407d95df374a13a9a7a2710a3458b1179da73b79dc763c4b8562"
+      },
+      {
+        "phase": "baseline",
+        "why": null,
+        "returncode": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "xml_sha256": "9b606ede4a86f9554d160b39758e5437152edb8994df7fcc08f35ab919fbcc23",
+        "log_sha256": "82c201bb904df7561785e93b567cf9f67336470fb20ba42c9846547bf1029aea"
+      },
+      {
+        "phase": "mutation",
+        "why": "invent pending-order protection after failed native read",
+        "returncode": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "xml_sha256": "7e5627f17fd28ff2414c526875e23a2aa5ce99cdc1ced62b7b2ca604d9a88d45",
+        "log_sha256": "c19dce2528e2f5971d9c1035cfb84cb9694991a3f94385fa7e5c8ee2bf9e95c6"
+      },
+      {
+        "phase": "baseline",
+        "why": null,
+        "returncode": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "xml_sha256": "3e133c96013a403c16c46af0fce96d80e210230e22b30581370fd6cbb27ce6fc",
+        "log_sha256": "0c33791aa03cbc8826ba04efd1b062adb3baa875c47625e4de7090bd753d7635"
+      },
+      {
+        "phase": "mutation",
+        "why": "crash on pending native arrival null",
+        "returncode": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "xml_sha256": "adbe4e16c2eed46d2ae228a971225d9c086c660a622b4c10773c111bb0411eac",
+        "log_sha256": "80dea9019170d3a5b0e2fc5e749dd531ddf2bd8f9d18ac03357a038e5b070112"
+      },
+      {
+        "phase": "baseline",
+        "why": null,
+        "returncode": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "xml_sha256": "5783aa4e1d9f8072b108b62117eacfcb2a46ce601d9168c76f70886e55b8525f",
+        "log_sha256": "7f20721722339faad833bedbd918bbce72ec5ee8917b82cf8b1a09bf4e47f2f3"
+      },
+      {
+        "phase": "mutation",
+        "why": "permit a netting order to change existing exposure",
+        "returncode": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "xml_sha256": "9e5d972cb8bc301c507c1c8c03aae3ac3b8766a13b81495f679b0ff5d1756ba9",
+        "log_sha256": "9fa8ecae021c0b59353acefc151d8dccfe8942c322fd1ff65eec0fc809b3b892"
+      },
+      {
+        "phase": "baseline",
+        "why": null,
+        "returncode": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "xml_sha256": "58cb289c36b52f36074d50a153f36dd32455570421ab79d4f91f0c62fce7d44a",
+        "log_sha256": "01311baa852db076753814271165a33a7a35b7e0b63de979423ac3269388316e"
+      },
+      {
+        "phase": "mutation",
+        "why": "permit native EA netting entry over pending exposure",
+        "returncode": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "xml_sha256": "c4102ad9177c366f29c9a175f15fb7c01d97412c9e84f84d182e42805a2ed764",
+        "log_sha256": "88633dd5352429512666b0bec6e297e318cf7e7ad0edaeeac07d4e6656102bd4"
+      },
+      {
+        "phase": "baseline",
+        "why": null,
+        "returncode": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "xml_sha256": "291a4fd3b42f7cefc57906a47f06401d7430991a971abff1c7a9638cb80430d4",
+        "log_sha256": "7f20721722339faad833bedbd918bbce72ec5ee8917b82cf8b1a09bf4e47f2f3"
+      },
+      {
+        "phase": "mutation",
+        "why": "silently reinterpret an invalid side as SELL",
+        "returncode": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "xml_sha256": "a08d0a29c11d8e7a4e5037c0be1ed6a15f10247173cd375c9cdf9dc8955648fb",
+        "log_sha256": "1418376b7e08223e0e67f9fbc681a5207bb59c39255329747157c7aef5e8d949"
+      },
+      {
+        "phase": "baseline",
+        "why": null,
+        "returncode": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "xml_sha256": "b95049307dc98ab97fc435e78e5fc19bce6e35e2f9797b5bc30f2c867de8e690",
+        "log_sha256": "06254aecdf245cc6f8784e134e36703bcc595ac0578b8c5f7f3591bcb399781b"
+      },
+      {
+        "phase": "mutation",
+        "why": "submit a negative native quantity",
+        "returncode": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "xml_sha256": "76574ebc7816626b40b23984291d5ccb160050aaee2e16906a3f46621d8a399e",
+        "log_sha256": "25ca74f4e481f852cec085c81c53a632755bcefa420f42104ddfcc5a30f86ea0"
+      }
+    ],
+    "source_before_sha256": {
+      "deploy/van-trading-core/windows/mt5_worker/mt5_bridge_worker.py": "cebf386ef14862480abb9b193246426ff4783e912cb87ed69c9591edeb4bbb97",
+      "trading/vati/execution/mt5_bridge.py": "84a1cc3acd6b5eec1982093e6a47cf4b90354944d5fa70cd5f38e8279a1ce8c9",
+      "deploy/van-trading-core/mql5/VanBridgeEA.mq5": "24f234cb510d2cce8555a6792612e073fedefd3daf9b69667b078292ce12e2f8"
+    },
+    "source_after_sha256": {
+      "deploy/van-trading-core/windows/mt5_worker/mt5_bridge_worker.py": "cebf386ef14862480abb9b193246426ff4783e912cb87ed69c9591edeb4bbb97",
+      "trading/vati/execution/mt5_bridge.py": "84a1cc3acd6b5eec1982093e6a47cf4b90354944d5fa70cd5f38e8279a1ce8c9",
+      "deploy/van-trading-core/mql5/VanBridgeEA.mq5": "24f234cb510d2cce8555a6792612e073fedefd3daf9b69667b078292ce12e2f8"
+    },
+    "source_restored": true,
+    "journal_present": false
+  },
+  "initial_fault_attempt": {
+    "definitions": [
+      [
+        [
+          "deploy/van-trading-core/windows/mt5_worker/mt5_bridge_worker.py",
+          "position = pos.ticket",
+          "position = getattr(r,'order',0)",
+          "use an order ID as position ticket"
+        ],
+        "trading/tests/test_mt5_native_result_identity.py::test_worker_maps_the_exact_deal_identifier_to_the_actual_position_ticket"
+      ],
+      [
+        [
+          "deploy/van-trading-core/windows/mt5_worker/mt5_bridge_worker.py",
+          "10006,10013,10014",
+          "10012,10006,10013,10014",
+          "declare native timeout a proven refusal"
+        ],
+        "trading/tests/test_mt5_native_result_identity.py::test_native_timeout_retcode_after_effect_is_unknown[entry]"
+      ],
+      [
+        [
+          "deploy/van-trading-core/windows/mt5_worker/mt5_bridge_worker.py",
+          "actual>=requested if is_buy else actual<=requested",
+          "True",
+          "confirm a weaker native stop"
+        ],
+        "trading/tests/test_mt5_native_result_identity.py::test_worker_rejects_a_weaker_native_stop_as_confirmation"
+      ],
+      [
+        [
+          "deploy/van-trading-core/windows/mt5_worker/mt5_bridge_worker.py",
+          "confirmed=False\n        if r.retcode==m.TRADE_RETCODE_DONE:",
+          "confirmed=True\n        if r.retcode==m.TRADE_RETCODE_DONE:",
+          "confirm an acknowledged stop change without observed effect"
+        ],
+        "trading/tests/test_mt5_native_result_identity.py::test_worker_does_not_confirm_a_stop_change_without_observed_effect"
+      ],
+      [
+        [
+          "deploy/van-trading-core/windows/mt5_worker/mt5_bridge_worker.py",
+          "if not math.isfinite(new_sl) or new_sl<=0:",
+          "if False:",
+          "remove sell protection with a zero stop"
+        ],
+        "trading/tests/test_mt5_native_result_identity.py::test_worker_cannot_remove_a_sell_stop_with_zero"
+      ],
+      [
+        [
+          "deploy/van-trading-core/windows/mt5_worker/mt5_bridge_worker.py",
+          "sl_confirmed=False\n        return {\"status\": status",
+          "sl_confirmed=True\n        return {\"status\": status",
+          "invent pending-order protection after failed native read"
+        ],
+        "trading/tests/test_mt5_native_result_identity.py::test_native_pending_order_requires_observed_stop"
+      ],
+      [
+        [
+          "trading/vati/execution/mt5_bridge.py",
+          "r.get(\"arrival\") or cmd.entry_price",
+          "r.get(\"arrival\", cmd.entry_price)",
+          "crash on pending native arrival null"
+        ],
+        "trading/tests/test_mt5_native_result_identity.py::test_native_pending_order_requires_observed_stop"
+      ],
+      [
+        [
+          "deploy/van-trading-core/windows/mt5_worker/mt5_bridge_worker.py",
+          "if mode==2:return True",
+          "if mode in (0,2):return True",
+          "permit a netting order to change existing exposure"
+        ],
+        "trading/tests/test_mt5_native_result_identity.py::test_worker_netting_entry_refuses_existing_or_unknown_exposure[position]"
+      ],
+      [
+        [
+          "deploy/van-trading-core/mql5/VanBridgeEA.mq5",
+          "if(AccountInfoInteger(ACCOUNT_MARGIN_MODE) != ACCOUNT_MARGIN_MODE_RETAIL_HEDGING)",
+          "if(false)",
+          "permit native EA netting entry over pending exposure"
+        ],
+        "trading/tests/test_mql_native_function_bodies.py::test_native_netting_entry_cannot_change_existing_exposure_or_protection[entry-netting-pending]"
+      ],
+      [
+        [
+          "deploy/van-trading-core/windows/mt5_worker/mt5_bridge_worker.py",
+          "b.get('type') not in {'BUY','SELL'}",
+          "False",
+          "silently reinterpret an invalid side as SELL"
+        ],
+        "trading/tests/test_mt5_native_result_identity.py::test_worker_checks_native_entry_parameters_before_any_sdk_effect[type-INVALID]"
+      ],
+      [
+        [
+          "deploy/van-trading-core/windows/mt5_worker/mt5_bridge_worker.py",
+          "if not math.isfinite(value) or (value<=0 if positive else value<0):",
+          "if False:",
+          "submit a negative native quantity"
+        ],
+        "trading/tests/test_mt5_native_result_identity.py::test_worker_checks_native_entry_parameters_before_any_sdk_effect[volume--.1]"
+      ]
+    ],
+    "records": [
+      {
+        "phase": "baseline",
+        "why": null,
+        "returncode": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "xml_sha256": "2fd50c9845591972f943a08e8e7b04c0ca823026fe3a8bbd0f5d5b2ef628e0f0",
+        "log_sha256": "0d70d5e3025d41820ee8d7865e5ffaa062debd9f4fd30ca4b26f7820dfb180f9"
+      },
+      {
+        "phase": "mutation",
+        "why": "use an order ID as position ticket",
+        "returncode": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "xml_sha256": "4a60e792d326d78fda118b02505d686c6f0e5090c353fd29d0b832446d02a11c",
+        "log_sha256": "277acd3bca5d65139c6c1863d7d834df29847bc52ccf30abc5700acc2cff7a9a"
+      },
+      {
+        "phase": "baseline",
+        "why": null,
+        "returncode": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "xml_sha256": "a4bc930320425e876cfc6b9538c6f6e1dbb8b64022c55ad51e08f63eb65f1b8e",
+        "log_sha256": "b263d69c44b612282137de0281bd9556f3ac416582ffd664301063cbd8c10652"
+      },
+      {
+        "phase": "mutation",
+        "why": "declare native timeout a proven refusal",
+        "returncode": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "xml_sha256": "ca5903429bc466af3b9198000a2df2bc7c92379c8cafb28655e9326a51d5c075",
+        "log_sha256": "df8dbc5cc1431f01faf8e45c5ed25ae0bc2132eca61561c2860cf61690b6732f"
+      },
+      {
+        "phase": "baseline",
+        "why": null,
+        "returncode": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "xml_sha256": "5248390a209c5fd7ce2852b577d53c9cfad8223d2250cbdd0747fa3a9eb8253f",
+        "log_sha256": "fedceb118a93f8e9bed4f5b262246c28f6bfdace0d13713f5045fa2fb6554486"
+      },
+      {
+        "phase": "mutation",
+        "why": "confirm a weaker native stop",
+        "returncode": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "xml_sha256": "4fdbc86ef6fc6a9f8de8e36bf2582da0e9f0fdf5ee3ad4cbaad5d4abd57082d9",
+        "log_sha256": "587bdbf6685c2dc0a5de10f74bfe9c92ccbb5b1d97c2aadf25353ae8035bb79a"
+      },
+      {
+        "phase": "baseline",
+        "why": null,
+        "returncode": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "xml_sha256": "cd6a5bcf3a9ac88765ce6fb7fa159dff194df18d1bc2884e4fd8a7d58eae819b",
+        "log_sha256": "0d70d5e3025d41820ee8d7865e5ffaa062debd9f4fd30ca4b26f7820dfb180f9"
+      },
+      {
+        "phase": "mutation",
+        "why": "confirm an acknowledged stop change without observed effect",
+        "returncode": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "xml_sha256": "bc54c38cadc6c7f8d915f94eef6538cdea2d742dcc8e7ab5058db25c63278024",
+        "log_sha256": "63203b4ec2b29e7ab8c45616e4d500960794bb60488784fb13fb7fe05b0386bf"
+      }
+    ],
+    "source_before_sha256": {
+      "deploy/van-trading-core/windows/mt5_worker/mt5_bridge_worker.py": "cebf386ef14862480abb9b193246426ff4783e912cb87ed69c9591edeb4bbb97",
+      "trading/vati/execution/mt5_bridge.py": "84a1cc3acd6b5eec1982093e6a47cf4b90354944d5fa70cd5f38e8279a1ce8c9",
+      "deploy/van-trading-core/mql5/VanBridgeEA.mq5": "24f234cb510d2cce8555a6792612e073fedefd3daf9b69667b078292ce12e2f8"
+    },
+    "source_after_sha256": {
+      "deploy/van-trading-core/windows/mt5_worker/mt5_bridge_worker.py": "cebf386ef14862480abb9b193246426ff4783e912cb87ed69c9591edeb4bbb97",
+      "trading/vati/execution/mt5_bridge.py": "84a1cc3acd6b5eec1982093e6a47cf4b90354944d5fa70cd5f38e8279a1ce8c9",
+      "deploy/van-trading-core/mql5/VanBridgeEA.mq5": "24f234cb510d2cce8555a6792612e073fedefd3daf9b69667b078292ce12e2f8"
+    },
+    "source_restored": true,
+    "journal_present": false
+  },
+  "instrument_correction": "Initializer-only confirmed=True mutation was neutral because current readback recomputed confirmation. Retained the observed survivor, replaced it with an actual acknowledgement-only bypass, which the existing test caught; no source or assertion weakened.",
+  "qualification": "Real signed worker/adapter with isolated SDK fixture IO; actual EA function bodies in controlled C++ terminal model. No actual Python MetaTrader SDK execution, broker, deployment, financial, unit, profit or S24 acceptance. Previous EA exact native625 compile succeeded; new netting guard native compile pending its own run."
+}

@@ -1,0 +1,555 @@
+{
+  "schema": "van.rebuild.runtime-recovery-outbox-source/1",
+  "observed_at_utc": "2026-10-23T06:00:23.028041+00:00",
+  "source_parent": "882e99e42ab44b0814563573bf0197fa75265f5d",
+  "source_provenance": "Uncommitted candidate source over source_parent, bound by file hashes. No claim of an unmodified committed full run.",
+  "source_sha256": {
+    "backend/van_gateway/app.py": "d46615b16ea4fe69bbd0fc0af775d2cb892fa4ec5de935033cbb9f7f72d1c868",
+    "backend/van_gateway/trading/runtime_controls.py": "3e20987ed04f8941702ffa08768bd4169f14fc5bc6b73847b411c8469f24fe6a",
+    "backend/van_gateway/trading/runtime_recovery_dispatch.py": "e98a05ee200f5eb75ac444a536962603063cf6ebdbc1a8cbe6c68fb4e7a79eb9",
+    "trading/vati/app/runtime_control_journal.py": "76ad2a29c0c6c507bbfbcb86bafc9826f3b713e6e3be0cf6a7d06b5b64ab8060",
+    "trading/vati/app/runtime_control_protocol.py": "dc8e9f179e70c47da1b26f8aa67613c74fa843e8f245e60eb648d55ba388a6b0",
+    "backend/tests/test_runtime_recovery_outbox.py": "030a53960372ed0a1c3e92c2a1a876c5e61233d1bd616b2e8c2aa3d687e8f34a",
+    "backend/tests/test_runtime_recovery_expired_dispatch.py": "51c15eb4faee2f0708010074b2502e51c21365fcac34c87fc381cfd1b0a4f7fa",
+    "android/app/src/test/java/com/dial/van/trading/RuntimeRecoveryOperationsTest.kt": "637eaa493a0e1c3a1c16b17f97307f8204ee27f4736dc694cf8ddf5c126e55d6",
+    "tools/rebuild/render_frontend_registry.py": "4d130bb394a6723b689f0fff430f1016dcece0db82ca458b4f31a2d36c2c92fa"
+  },
+  "full_trading_and_recovery_private_postgres": {
+    "tests": 2371,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "seconds": 504.917,
+    "sha256": "474862939ef39b60849a190f79680d4d6288e27312c7d06b244485deaf4136c0"
+  },
+  "private_fixture_cleanup": {
+    "stopped": true,
+    "removed": true
+  },
+  "full_driver": {
+    "path": "/tmp/van-runtime-recovery-outbox-final-pg-runner.txt",
+    "sha256": "b92ee97af9a786baae2bdf7e23f1ea4c38e5f3b66bce02edb0bf875c736f5c2f",
+    "tail": "trading_exit_code 0\nprivate_fixture_stopped_and_removed True\n"
+  },
+  "full_log": {
+    "path": "/tmp/van-runtime-recovery-outbox-final-full-pg.txt",
+    "sha256": "bb598134a0207e6f7a66d360a919db66ea9eca238b6e617de9d57c697691a075",
+    "tail": "................................................................... [ 81%]\n........................................................................ [ 85%]\n........................................................................ [ 88%]\n........................................................................ [ 91%]\n........................................................................ [ 94%]\n........................................................................ [ 97%]\n...................................................................      [100%]\n2371 passed, 3 warnings in 504.95s (0:08:24)\n"
+  },
+  "executions": {
+    "before": {
+      "tests": 10,
+      "failures": 10,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 4.61,
+      "sha256": "5e02f7646a4d92d7ad140ca072f6b9ef7982ab5fa183a06c8959d3e53a20b685"
+    },
+    "before-valid": {
+      "tests": 10,
+      "failures": 5,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 5.28,
+      "sha256": "7e206a238ce82749e6d716420c1ca8f4c083fc4f64f4355e2513f580c1921043"
+    },
+    "first": {
+      "tests": 48,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 15.334,
+      "sha256": "f451eb4947ecfeb6e6a341b2b1377f3ee4ab26beea4ca2d52ab19a8417239f7b"
+    },
+    "expanded": {
+      "tests": 33,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 19.504,
+      "sha256": "67c49cbcd872a791a4b9cb2ea6cd701be7cb21cdb2c67f20739af72a27f80112"
+    },
+    "focus-full-pg": {
+      "tests": 97,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 23.274,
+      "sha256": "82b0b041ca4a3e390500b594e84ba593a30cddb859541d9078df2ffa4c71682a"
+    },
+    "key-controls": {
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 2.505,
+      "sha256": "1c93b7888b68bb3b596a133b26dd70c1562db600a0a4376a3d68165d44b3b3eb"
+    }
+  },
+  "initial_failure_correction": "Initial before run included six test-fixture errors from using Ledger as a context manager. Corrected to contextlib.closing; valid before run has five actual source counterexample failures and five passing controls. Both runs retained.",
+  "induced_regressions": {
+    "caught": 11,
+    "baseline_passes": 11,
+    "invalid_runs": 0,
+    "evidence": {
+      "definitions": [
+        [
+          [
+            "backend/van_gateway/app.py",
+            "asyncio.create_task(runtime_recovery_dispatcher.run())",
+            "asyncio.create_task(asyncio.sleep(3600))",
+            "omit recovery dispatch from actual gateway startup"
+          ],
+          "backend/tests/test_runtime_recovery_outbox.py::test_recovery_dispatch_background_worker_is_started_and_awaited_on_shutdown"
+        ],
+        [
+          [
+            "backend/van_gateway/trading/runtime_recovery_dispatch.py",
+            "after = cursor['value'] if cursor else ''",
+            "after = ''",
+            "starve later originals behind an unreadable receipt"
+          ],
+          "backend/tests/test_runtime_recovery_outbox.py::test_one_corrupt_old_receipt_cannot_starve_original_dispatch"
+        ],
+        [
+          [
+            "backend/van_gateway/trading/runtime_recovery_dispatch.py",
+            "saved.get('intent_digest') != intent.intent_digest",
+            "False",
+            "dispatch corrupted receipt metadata"
+          ],
+          "backend/tests/test_runtime_recovery_outbox.py::test_corrupt_receipt_metadata_never_dispatches[intent_digest]"
+        ],
+        [
+          [
+            "backend/van_gateway/trading/runtime_recovery_dispatch.py",
+            "proof.verify_signature(intent, {proof.key_id:owner.public_key_pem})",
+            "None",
+            "forward an unauthenticated archived signature to native"
+          ],
+          "backend/tests/test_runtime_recovery_outbox.py::test_invalid_archived_signature_is_not_forwarded_to_native"
+        ],
+        [
+          [
+            "backend/van_gateway/trading/runtime_recovery_dispatch.py",
+            "current.public_key_pem != owner.public_key_pem",
+            "False",
+            "dispatch after a paired owner key changes during enrollment"
+          ],
+          "backend/tests/test_runtime_recovery_outbox.py::test_owner_key_change_during_enrollment_prevents_dispatch"
+        ],
+        [
+          [
+            "trading/vati/app/runtime_control_journal.py",
+            "if old is not None:",
+            "if False:",
+            "replace an already accepted original with an expired no-effect claim"
+          ],
+          "backend/tests/test_runtime_recovery_expired_dispatch.py::test_pending_original_wins_over_expiry_without_being_reclassified_no_effect[sqlite]"
+        ],
+        [
+          [
+            "trading/vati/app/runtime_control_journal.py",
+            "type(now) is not int or now<proof.expires_at_unix",
+            "type(now) is not int",
+            "misclassify a not-yet-valid approval as expired"
+          ],
+          "backend/tests/test_runtime_recovery_expired_dispatch.py::test_nonexpired_but_not_yet_valid_original_cannot_be_reclassified_as_expired[sqlite]"
+        ],
+        [
+          [
+            "trading/vati/app/runtime_control_journal.py",
+            "ref=proof.verify_signature(intent,keys)",
+            "ref='fabricated-signature-reference'",
+            "persist an expired original without authenticating the signature"
+          ],
+          "backend/tests/test_runtime_recovery_expired_dispatch.py::test_expired_invalid_proof_cannot_create_a_native_refusal_record[sqlite-signature]"
+        ],
+        [
+          [
+            "trading/vati/app/runtime_control_journal.py",
+            "                    validate_result(p['result'],'REFUSED',expired_without_dispatch=True)",
+            "                    pass",
+            "trust invented current state in archived no-dispatch refusal"
+          ],
+          "backend/tests/test_runtime_recovery_expired_dispatch.py::test_expired_refusal_history_rejects_invented_effects_or_current_state[claims_state]"
+        ],
+        [
+          [
+            "trading/vati/app/runtime_control_journal.py",
+            "or p['accepted_at_unix']<proof.expires_at_unix",
+            "or False",
+            "accept an expired-refusal record before actual signed expiry"
+          ],
+          "backend/tests/test_runtime_recovery_expired_dispatch.py::test_expired_refusal_history_rejects_invented_effects_or_current_state[accepted_before_expiry]"
+        ],
+        [
+          [
+            "trading/vati/app/runtime_control_journal.py",
+            "result['entry_authority_granted'] is not False",
+            "False",
+            "allow a native no-effect receipt to claim entry authority"
+          ],
+          "backend/tests/test_runtime_recovery_expired_dispatch.py::test_expired_refusal_history_rejects_invented_effects_or_current_state[claims_entry]"
+        ]
+      ],
+      "records": [
+        {
+          "phase": "baseline",
+          "why": null,
+          "returncode": 0,
+          "counts": {
+            "tests": 1,
+            "failures": 0,
+            "errors": 0,
+            "skipped": 0
+          },
+          "log_sha256": "774ad1d328d878245217b74fde00c4faacec92fdde37d6823f334c185f287129",
+          "xml_sha256": "2ae5b0589d14acb5b679c02953719f768f5cff77b4fed38e64f1e7257d7e49d8"
+        },
+        {
+          "phase": "mutation",
+          "why": "omit recovery dispatch from actual gateway startup",
+          "returncode": 1,
+          "counts": {
+            "tests": 1,
+            "failures": 1,
+            "errors": 0,
+            "skipped": 0
+          },
+          "log_sha256": "79cdea07a44e25795b74c7d737b11cc93124b7d1a8cbd11224054ef3f0390004",
+          "xml_sha256": "65ddbd20ec098f0a5426a1403c3870327bd600e674937e559d90a29df60ffa67"
+        },
+        {
+          "phase": "baseline",
+          "why": null,
+          "returncode": 0,
+          "counts": {
+            "tests": 1,
+            "failures": 0,
+            "errors": 0,
+            "skipped": 0
+          },
+          "log_sha256": "05da5f4f10b1da62d8d4dc61c964f77f3013df9f4353374a424ee500864556a1",
+          "xml_sha256": "1e21ef4c3dba42e4a145746191ce7bb47b53713b99aba72f6fbf1fe5bfecf5b0"
+        },
+        {
+          "phase": "mutation",
+          "why": "starve later originals behind an unreadable receipt",
+          "returncode": 1,
+          "counts": {
+            "tests": 1,
+            "failures": 1,
+            "errors": 0,
+            "skipped": 0
+          },
+          "log_sha256": "2c02b945111dcde412f7f41a1608dd7e2640179d349f200921223df467393fd4",
+          "xml_sha256": "cb1a2dfcc927aab77c7afd01d00951563e988b923bcd8571e588e966d1a0fb98"
+        },
+        {
+          "phase": "baseline",
+          "why": null,
+          "returncode": 0,
+          "counts": {
+            "tests": 1,
+            "failures": 0,
+            "errors": 0,
+            "skipped": 0
+          },
+          "log_sha256": "cedbea6ac8dafd4901c3061567c7f6a90a953633e80d003e347339fff87c6fc3",
+          "xml_sha256": "0a37806e7c88bf48b3639ad03b1d60ef8a07617f35a85a2bf30d9b4da6911150"
+        },
+        {
+          "phase": "mutation",
+          "why": "dispatch corrupted receipt metadata",
+          "returncode": 1,
+          "counts": {
+            "tests": 1,
+            "failures": 1,
+            "errors": 0,
+            "skipped": 0
+          },
+          "log_sha256": "aafdc9d7b067022b3b51d646b9ca44b55d0038a42c4fc42a6e1aa0dd9f03a774",
+          "xml_sha256": "55a8b2db4aa5375764e264dcc1cdc024dad84bddfd8ba02abc43d205f81ac306"
+        },
+        {
+          "phase": "baseline",
+          "why": null,
+          "returncode": 0,
+          "counts": {
+            "tests": 1,
+            "failures": 0,
+            "errors": 0,
+            "skipped": 0
+          },
+          "log_sha256": "328ab57f7fe832f785d29a6e8ee8521d1e8530a63cd9dcfbefaa1f9534ca8f9a",
+          "xml_sha256": "98e1cc8f8b3590b56da7358b8828c5e2280b60d1fa3c5e4428f242644578bfd3"
+        },
+        {
+          "phase": "mutation",
+          "why": "forward an unauthenticated archived signature to native",
+          "returncode": 1,
+          "counts": {
+            "tests": 1,
+            "failures": 1,
+            "errors": 0,
+            "skipped": 0
+          },
+          "log_sha256": "25d66353aea22d216a0165c7da272278ad3623d1d89163355241cd4e4532786a",
+          "xml_sha256": "eaa21774e5889481e0f70b7ccae30a69e6a0c90142f141439f2ed9658d51ea86"
+        },
+        {
+          "phase": "baseline",
+          "why": null,
+          "returncode": 0,
+          "counts": {
+            "tests": 1,
+            "failures": 0,
+            "errors": 0,
+            "skipped": 0
+          },
+          "log_sha256": "d3261dbe4878d840d99df441a7807a3a75d2628e139429f1345d8f727f2fbb6f",
+          "xml_sha256": "4eec0df511c5136dfc6a8ff8d02df260ca32e5622ea9bd35405681241bb6fd0d"
+        },
+        {
+          "phase": "mutation",
+          "why": "dispatch after a paired owner key changes during enrollment",
+          "returncode": 1,
+          "counts": {
+            "tests": 1,
+            "failures": 1,
+            "errors": 0,
+            "skipped": 0
+          },
+          "log_sha256": "2dea9b6e5ce0539e09f0c9d92c9cc268b9418f6ecce634e7b083ee9d99dc4cb2",
+          "xml_sha256": "d437f16b53ef833e3072346c99c63c47a9b41cc5a436142db5a312cdcab4a13e"
+        },
+        {
+          "phase": "baseline",
+          "why": null,
+          "returncode": 0,
+          "counts": {
+            "tests": 1,
+            "failures": 0,
+            "errors": 0,
+            "skipped": 0
+          },
+          "log_sha256": "0c33791aa03cbc8826ba04efd1b062adb3baa875c47625e4de7090bd753d7635",
+          "xml_sha256": "2e1e12de2f39dc17b3c518fca9e2b3b9adb067cdc198e91726bedf79f5776baf"
+        },
+        {
+          "phase": "mutation",
+          "why": "replace an already accepted original with an expired no-effect claim",
+          "returncode": 1,
+          "counts": {
+            "tests": 1,
+            "failures": 1,
+            "errors": 0,
+            "skipped": 0
+          },
+          "log_sha256": "f0fa737c056082c88d8ae203c1eef2a736da02e52fdcfa01cad6653064cce5b8",
+          "xml_sha256": "93aaba81aba595c29d04b107af67909139d61ac5da25a5d23217cd5d855a0b95"
+        },
+        {
+          "phase": "baseline",
+          "why": null,
+          "returncode": 0,
+          "counts": {
+            "tests": 1,
+            "failures": 0,
+            "errors": 0,
+            "skipped": 0
+          },
+          "log_sha256": "0c33791aa03cbc8826ba04efd1b062adb3baa875c47625e4de7090bd753d7635",
+          "xml_sha256": "2123967101614eebe995d4f63d7e8945541a9ac1ebb9ae0da3741c36a5a967f6"
+        },
+        {
+          "phase": "mutation",
+          "why": "misclassify a not-yet-valid approval as expired",
+          "returncode": 1,
+          "counts": {
+            "tests": 1,
+            "failures": 1,
+            "errors": 0,
+            "skipped": 0
+          },
+          "log_sha256": "df78b145fa488ce107f3991be13a6d6c9a1339b21ac993639fd42d01cede83a7",
+          "xml_sha256": "62141140816b56a6c4193d711c3b04e938c41fe65aa94f3951c59997f916cc13"
+        },
+        {
+          "phase": "baseline",
+          "why": null,
+          "returncode": 0,
+          "counts": {
+            "tests": 1,
+            "failures": 0,
+            "errors": 0,
+            "skipped": 0
+          },
+          "log_sha256": "63203b4ec2b29e7ab8c45616e4d500960794bb60488784fb13fb7fe05b0386bf",
+          "xml_sha256": "2eafba27a673b96031897e176f8800be37ec58a095ca920998b76b85176cf4a8"
+        },
+        {
+          "phase": "mutation",
+          "why": "persist an expired original without authenticating the signature",
+          "returncode": 1,
+          "counts": {
+            "tests": 1,
+            "failures": 1,
+            "errors": 0,
+            "skipped": 0
+          },
+          "log_sha256": "bf487ea7642c16a6164c5a80e9ee8977288f48a922b3ceb13ed35d72fe9a11a6",
+          "xml_sha256": "1bcdb08a8188269f2a272f69dc670b07fb21db08a7208f6576550ca87a1cf96e"
+        },
+        {
+          "phase": "baseline",
+          "why": null,
+          "returncode": 0,
+          "counts": {
+            "tests": 1,
+            "failures": 0,
+            "errors": 0,
+            "skipped": 0
+          },
+          "log_sha256": "0c33791aa03cbc8826ba04efd1b062adb3baa875c47625e4de7090bd753d7635",
+          "xml_sha256": "79a9ea7d70be043d15d2055dd0e573cacbd6665b955446efbb988a7b8b9751de"
+        },
+        {
+          "phase": "mutation",
+          "why": "trust invented current state in archived no-dispatch refusal",
+          "returncode": 1,
+          "counts": {
+            "tests": 1,
+            "failures": 1,
+            "errors": 0,
+            "skipped": 0
+          },
+          "log_sha256": "c876d12ea23e8fab49ad4900ca20be8a69ccd1e82ae62f7956e1c4e020e4ce1b",
+          "xml_sha256": "075d12162fc6367c48eacde35fecffcb1177410e411498edc7300f68ad8b5265"
+        },
+        {
+          "phase": "baseline",
+          "why": null,
+          "returncode": 0,
+          "counts": {
+            "tests": 1,
+            "failures": 0,
+            "errors": 0,
+            "skipped": 0
+          },
+          "log_sha256": "866432d567eb30f716ad0380ad29e9453b6fd80645780de4fbe94565dc3eab20",
+          "xml_sha256": "1fe72b971f51ff81a0005975f2f2fe0a146e5e9944c9b10871c2012d8985e168"
+        },
+        {
+          "phase": "mutation",
+          "why": "accept an expired-refusal record before actual signed expiry",
+          "returncode": 1,
+          "counts": {
+            "tests": 1,
+            "failures": 1,
+            "errors": 0,
+            "skipped": 0
+          },
+          "log_sha256": "0b05c080d466542e7353ea31525cbb17a47bf5605fce1456fc55b9136d4cdb59",
+          "xml_sha256": "354a6f63acdb7df1fd09da0050a15dc8b4e65ea3e8c27eb7a3768fa6e18bbade"
+        },
+        {
+          "phase": "baseline",
+          "why": null,
+          "returncode": 0,
+          "counts": {
+            "tests": 1,
+            "failures": 0,
+            "errors": 0,
+            "skipped": 0
+          },
+          "log_sha256": "0c33791aa03cbc8826ba04efd1b062adb3baa875c47625e4de7090bd753d7635",
+          "xml_sha256": "84c87c1fa911d6afec4b2750461794259502e95a9bf2fc24716114a3640da033"
+        },
+        {
+          "phase": "mutation",
+          "why": "allow a native no-effect receipt to claim entry authority",
+          "returncode": 1,
+          "counts": {
+            "tests": 1,
+            "failures": 1,
+            "errors": 0,
+            "skipped": 0
+          },
+          "log_sha256": "bccb9fd5e7b14d02f9704a52e7ba6e425b07c3501179f693e9e26d72ef4d135a",
+          "xml_sha256": "b7b6115eca813f09bb9d4a98d097b30b66e4f41cf7275a6b1f1f5c83a87ded3c"
+        }
+      ],
+      "source_before_sha256": {
+        "backend/van_gateway/trading/runtime_recovery_dispatch.py": "6ad68b3488657aef2b232ff06efcc896e1c4cce9dc8beb2a0b3d93e2386d25fa",
+        "trading/vati/app/runtime_control_journal.py": "76ad2a29c0c6c507bbfbcb86bafc9826f3b713e6e3be0cf6a7d06b5b64ab8060",
+        "backend/van_gateway/app.py": "d46615b16ea4fe69bbd0fc0af775d2cb892fa4ec5de935033cbb9f7f72d1c868"
+      },
+      "source_after_sha256": {
+        "backend/van_gateway/trading/runtime_recovery_dispatch.py": "6ad68b3488657aef2b232ff06efcc896e1c4cce9dc8beb2a0b3d93e2386d25fa",
+        "trading/vati/app/runtime_control_journal.py": "76ad2a29c0c6c507bbfbcb86bafc9826f3b713e6e3be0cf6a7d06b5b64ab8060",
+        "backend/van_gateway/app.py": "d46615b16ea4fe69bbd0fc0af775d2cb892fa4ec5de935033cbb9f7f72d1c868"
+      },
+      "source_restored": true,
+      "journal_present": false
+    },
+    "final_change_after_matrix": "Only SQL receipt-prefix matching changed from LIKE to literal-underscore GLOB; final full suite covers the same fairness/recovery cases."
+  },
+  "android_compatibility": {
+    "tests": 8,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "xml_sha256": "1c0a70b8ef6bc1223a1dc7cb0bd906c4cb03880562a0e63c7f0be14705954da3",
+    "log": {
+      "path": "/tmp/van-runtime-recovery-outbox-android.txt",
+      "sha256": "c77ca40587b8db2638dffc5b5f2c38eda6db8aedf65abd839150a473a75a270a",
+      "tail": "\n> Task :app:generateVanBuildProvenance\n> Task :app:mergeDebugAssets\n> Task :app:packageDebugUnitTestForUnitTest\n> Task :app:generateDebugUnitTestConfig\n> Task :app:compileDebugKotlin\n> Task :app:compileDebugJavaWithJavac\n> Task :app:bundleDebugClassesToRuntimeJar\n> Task :app:bundleDebugClassesToCompileJar\n> Task :app:processDebugJavaRes UP-TO-DATE\n> Task :app:compileDebugUnitTestKotlin\n> Task :app:compileDebugUnitTestJavaWithJavac NO-SOURCE\n> Task :app:processDebugUnitTestJavaRes UP-TO-DATE\n> Task :app:testDebugUnitTest\n\nBUILD SUCCESSFUL in 26s\n34 actionable tasks: 13 executed, 21 up-to-date\n"
+    },
+    "scope": "Existing original-operation tracker plus new expired-native-refusal/null-current-state compatibility test; production Android source unchanged from 882e99e4."
+  },
+  "other_checks": {
+    "rebuild": {
+      "path": "/tmp/van-runtime-recovery-outbox-rebuild.txt",
+      "sha256": "8454e16036aa135da12b43c61a1d6e3802bb730c09d5c06e803bfc06c7dcaac9",
+      "tail": "........................................................................ [ 92%]\n......                                                                   [100%]\n78 passed in 33.96s\n"
+    },
+    "owner-contracts": {
+      "path": "/tmp/van-runtime-recovery-outbox-owner-contracts.txt",
+      "sha256": "1aaa92f488b0637a9f55a3ccf94107d4f8d1013862e568ad74054f8fa86b8d05",
+      "tail": "...................                                                      [100%]\n19 passed in 3.77s\n"
+    },
+    "consolidation": {
+      "path": "/tmp/van-runtime-recovery-outbox-consolidation.txt",
+      "sha256": "d87b8fe5f7b2b4ca7312b9ba93c4e1aa24ae2301f775aa6f915d81572aec7870",
+      "tail": "{\n  \"scope\": \"SOURCE_CONSOLIDATION_ONLY\",\n  \"branches_evaluated\": 70,\n  \"blueprint_archive_sha256\": \"6c7c7c1cb4fbd4748c0d63ceb2add9bd460778b66fb3b2302e16de09ac3a57a8\",\n  \"findings\": [],\n  \"runtime_qualification_issued\": false\n}\n"
+    }
+  },
+  "legacy_preflight": {
+    "schema": "van.rebuild.mutation-registry-preflight/1",
+    "registry_sha256": "35d10c7b0f2b8319b7f7305828262c972b2a6451139d75b9e83c7d0062282955",
+    "mutation_count": 374,
+    "edit_count": 383,
+    "findings": [],
+    "execution_state": "NOT_RUN",
+    "status": "ANCHORS_VALID_BASELINES_AND_MUTATIONS_NOT_EXECUTED"
+  },
+  "markdown_registry": {
+    "path": "backend/OWNER_FRONTEND_SCREEN_REGISTRY.md",
+    "sha256": "6ff8dcf375c055c70be14b1f33b638151ce6100cab6576475c4c05eff66ad878",
+    "features": 42,
+    "screens": 78,
+    "endpoints": 444,
+    "schemas": 276,
+    "scope": "All current source rows/actions/states/gaps and endpoint/client extensions rendered; separate from the complete frozen 93-feature planned programme. No frontend design or implementation."
+  },
+  "remaining_original_obligations": [
+    "Current native device-key revocation propagation",
+    "Coordinator recovery controls",
+    "Safe account retirement",
+    "Native worker deadline/lease/precision/fill integrity and provider financial finality",
+    "All remaining original assistant/trading and canonical programme requirements"
+  ],
+  "qualification": "Candidate source only; no whole-unit/native host/provider/production/biometric/S24 or owner admission acceptance. Frozen Rev1.18 package preserved."
+}

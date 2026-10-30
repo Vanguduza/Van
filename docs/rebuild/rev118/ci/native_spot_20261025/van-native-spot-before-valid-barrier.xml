@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="10" skipped="0" tests="10" time="0.584" timestamp="2026-10-25T19:55:40.818965+00:00" hostname="2c5a245e39f1"><testcase classname="trading.tests.test_ctrader_spot_contract" name="test_foreign_native_account_cannot_replace_the_original_product_quote" time="0.026"><failure message="AssertionError: foreign-account quote replaced the original account source&#10;assert (Decimal('0.99'), Decimal('0.99008')) is None&#10; +  where (Decimal('0.99'), Decimal('0.99008')) = spot('EURUSD')&#10; +    where spot = CtraderAdapter(transport=&lt;vati.execution.ctrader.transport.CtraderTransport object at 0x7fd538693500&gt;, client_id='app-..._selected_native_symbols=None, _money_digits=2, _currency='USD', _last_spot={1: (Decimal('0.99'), Decimal('0.99008'))}).spot">def test_foreign_native_account_cannot_replace_the_original_product_quote():
+        adapter,native=ready();publish(adapter,native,ctidTraderAccountId=999,bid=99000,ask=99008)
+&gt;       assert adapter.spot('EURUSD') is None,'foreign-account quote replaced the original account source'
+E       AssertionError: foreign-account quote replaced the original account source
+E       assert (Decimal('0.99'), Decimal('0.99008')) is None
+E        +  where (Decimal('0.99'), Decimal('0.99008')) = spot('EURUSD')
+E        +    where spot = CtraderAdapter(transport=&lt;vati.execution.ctrader.transport.CtraderTransport object at 0x7fd538693500&gt;, client_id='app-..._selected_native_symbols=None, _money_digits=2, _currency='USD', _last_spot={1: (Decimal('0.99'), Decimal('0.99008'))}).spot
+
+trading/tests/test_ctrader_spot_contract.py:31: AssertionError</failure></testcase><testcase classname="trading.tests.test_ctrader_spot_contract" name="test_native_one_sided_update_preserves_the_other_side_without_ignoring_the_update" time="0.007"><failure message="AssertionError: assert (Decimal('1.1...al('1.10108')) == (Decimal('1.1...al('1.10108'))&#10;  &#10;  At index 0 diff: Decimal('1.101') != Decimal('1.10102')&#10;  Use -v to get more diff">def test_native_one_sided_update_preserves_the_other_side_without_ignoring_the_update():
+        adapter,native=ready();now=adapter.clock()+1;adapter.clock=lambda:now
+        native.send('ProtoOASpotEvent',{'ctidTraderAccountId':12345,'symbolId':1,'bid':110102,'timestamp':now})
+        barrier(adapter)
+&gt;       assert adapter.spot('EURUSD')==(Decimal('1.10102'),Decimal('1.10108'))
+E       AssertionError: assert (Decimal('1.1...al('1.10108')) == (Decimal('1.1...al('1.10108'))
+E         
+E         At index 0 diff: Decimal('1.101') != Decimal('1.10102')
+E         Use -v to get more diff
+
+trading/tests/test_ctrader_spot_contract.py:38: AssertionError</failure></testcase><testcase classname="trading.tests.test_ctrader_spot_contract" name="test_spot_read_does_not_consume_an_original_financial_execution_event" time="0.059"><failure message="assert (None is not None)">def test_spot_read_does_not_consume_an_original_financial_execution_event():
+        adapter,native=ready()
+        native.send('ProtoOAExecutionEvent',{'ctidTraderAccountId':12345,'executionType':'ORDER_FILLED'})
+        barrier(adapter)
+        assert adapter.spot('EURUSD')==(Decimal('1.101'),Decimal('1.10108'))
+        original=adapter.transport.wait_event(lambda name,body:name=='ProtoOAExecutionEvent',timeout_s=.05)
+&gt;       assert original is not None and original[1]['executionType']=='ORDER_FILLED'
+E       assert (None is not None)
+
+trading/tests/test_ctrader_spot_contract.py:47: AssertionError</failure></testcase><testcase classname="trading.tests.test_ctrader_spot_contract" name="test_crossed_native_snapshot_is_unavailable_instead_of_a_negative_spread" time="0.006"><failure message="AssertionError: assert (Decimal('1.1011'), Decimal('1.10108')) is None&#10; +  where (Decimal('1.1011'), Decimal('1.10108')) = spot('EURUSD')&#10; +    where spot = CtraderAdapter(transport=&lt;vati.execution.ctrader.transport.CtraderTransport object at 0x7fd538735670&gt;, client_id='app-...elected_native_symbols=None, _money_digits=2, _currency='USD', _last_spot={1: (Decimal('1.1011'), Decimal('1.10108'))}).spot">def test_crossed_native_snapshot_is_unavailable_instead_of_a_negative_spread():
+        adapter,native=ready();publish(adapter,native,bid=110110,ask=110108)
+&gt;       assert adapter.spot('EURUSD') is None
+E       AssertionError: assert (Decimal('1.1011'), Decimal('1.10108')) is None
+E        +  where (Decimal('1.1011'), Decimal('1.10108')) = spot('EURUSD')
+E        +    where spot = CtraderAdapter(transport=&lt;vati.execution.ctrader.transport.CtraderTransport object at 0x7fd538735670&gt;, client_id='app-...elected_native_symbols=None, _money_digits=2, _currency='USD', _last_spot={1: (Decimal('1.1011'), Decimal('1.10108'))}).spot
+
+trading/tests/test_ctrader_spot_contract.py:52: AssertionError</failure></testcase><testcase classname="trading.tests.test_ctrader_spot_contract" name="test_native_price_conversion_is_exact_under_low_ambient_decimal_precision" time="0.008"><failure message="AssertionError: assert (Decimal('1.2...mal('1.2E+9')) == (Decimal('123...67890.12353'))&#10;  &#10;  At index 0 diff: Decimal('1.2E+9') != Decimal('1234567890.12345')&#10;  Use -v to get more diff">def test_native_price_conversion_is_exact_under_low_ambient_decimal_precision():
+        adapter,native=ready();publish(adapter,native,bid=123456789012345,ask=123456789012353)
+        with localcontext() as context:
+            context.prec=2
+&gt;           assert adapter.spot('EURUSD')==(Decimal('1234567890.12345'),Decimal('1234567890.12353'))
+E           AssertionError: assert (Decimal('1.2...mal('1.2E+9')) == (Decimal('123...67890.12353'))
+E             
+E             At index 0 diff: Decimal('1.2E+9') != Decimal('1234567890.12345')
+E             Use -v to get more diff
+
+trading/tests/test_ctrader_spot_contract.py:59: AssertionError</failure></testcase><testcase classname="trading.tests.test_ctrader_spot_contract" name="test_native_quote_age_does_not_refresh_when_the_cached_quote_is_read_again" time="0.005"><failure message="AssertionError: reading the cache concealed an expired native quote&#10;assert (Decimal('1.101'), Decimal('1.10108')) is None&#10; +  where (Decimal('1.101'), Decimal('1.10108')) = spot('EURUSD')&#10; +    where spot = CtraderAdapter(transport=&lt;vati.execution.ctrader.transport.CtraderTransport object at 0x7fd538a3d280&gt;, client_id='app-...selected_native_symbols=None, _money_digits=2, _currency='USD', _last_spot={1: (Decimal('1.101'), Decimal('1.10108'))}).spot">def test_native_quote_age_does_not_refresh_when_the_cached_quote_is_read_again():
+        adapter,native=ready();now=adapter.clock()+5001;adapter.clock=lambda:now
+&gt;       assert adapter.spot('EURUSD') is None,'reading the cache concealed an expired native quote'
+E       AssertionError: reading the cache concealed an expired native quote
+E       assert (Decimal('1.101'), Decimal('1.10108')) is None
+E        +  where (Decimal('1.101'), Decimal('1.10108')) = spot('EURUSD')
+E        +    where spot = CtraderAdapter(transport=&lt;vati.execution.ctrader.transport.CtraderTransport object at 0x7fd538a3d280&gt;, client_id='app-...selected_native_symbols=None, _money_digits=2, _currency='USD', _last_spot={1: (Decimal('1.101'), Decimal('1.10108'))}).spot
+
+trading/tests/test_ctrader_spot_contract.py:64: AssertionError</failure></testcase><testcase classname="trading.tests.test_ctrader_spot_contract" name="test_native_update_without_requested_time_does_not_become_a_fresh_quote" time="0.006"><failure message="AssertionError: assert (Decimal('1.10101'), Decimal('1.10109')) is None&#10; +  where (Decimal('1.10101'), Decimal('1.10109')) = spot('EURUSD')&#10; +    where spot = CtraderAdapter(transport=&lt;vati.execution.ctrader.transport.CtraderTransport object at 0x7fd5374cc410&gt;, client_id='app-...lected_native_symbols=None, _money_digits=2, _currency='USD', _last_spot={1: (Decimal('1.10101'), Decimal('1.10109'))}).spot">def test_native_update_without_requested_time_does_not_become_a_fresh_quote():
+        adapter,native=ready()
+        native.send('ProtoOASpotEvent',{'ctidTraderAccountId':12345,'symbolId':1,'bid':110101,'ask':110109})
+        barrier(adapter)
+&gt;       assert adapter.spot('EURUSD') is None
+E       AssertionError: assert (Decimal('1.10101'), Decimal('1.10109')) is None
+E        +  where (Decimal('1.10101'), Decimal('1.10109')) = spot('EURUSD')
+E        +    where spot = CtraderAdapter(transport=&lt;vati.execution.ctrader.transport.CtraderTransport object at 0x7fd5374cc410&gt;, client_id='app-...lected_native_symbols=None, _money_digits=2, _currency='USD', _last_spot={1: (Decimal('1.10101'), Decimal('1.10109'))}).spot
+
+trading/tests/test_ctrader_spot_contract.py:71: AssertionError</failure></testcase><testcase classname="trading.tests.test_ctrader_spot_contract" name="test_subscription_ack_must_match_the_native_account_and_response_type[account]" time="0.005"><failure message="Failed: DID NOT RAISE VenueUnavailable">wrong = 'account'
+
+    @pytest.mark.parametrize('wrong',['account','type'])
+    def test_subscription_ack_must_match_the_native_account_and_response_type(wrong):
+        class WrongAck(FakeCtrader):
+            def handle(self,name,body,cid):
+                if name=='ProtoOASubscribeSpotsReq':
+                    return self.send('ProtoOASubscribeSpotsRes',{'ctidTraderAccountId':999},cid) if wrong=='account' else self.send('ProtoHeartbeatEvent',{},cid)
+                return super().handle(name,body,cid)
+        native=WrongAck();adapter=make_adapter(native)
+&gt;       with pytest.raises(VenueUnavailable):adapter.subscribe_spots('EURUSD')
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE VenueUnavailable
+
+trading/tests/test_ctrader_spot_contract.py:82: Failed</failure></testcase><testcase classname="trading.tests.test_ctrader_spot_contract" name="test_subscription_ack_must_match_the_native_account_and_response_type[type]" time="0.005"><failure message="Failed: DID NOT RAISE VenueUnavailable">wrong = 'type'
+
+    @pytest.mark.parametrize('wrong',['account','type'])
+    def test_subscription_ack_must_match_the_native_account_and_response_type(wrong):
+        class WrongAck(FakeCtrader):
+            def handle(self,name,body,cid):
+                if name=='ProtoOASubscribeSpotsReq':
+                    return self.send('ProtoOASubscribeSpotsRes',{'ctidTraderAccountId':999},cid) if wrong=='account' else self.send('ProtoHeartbeatEvent',{},cid)
+                return super().handle(name,body,cid)
+        native=WrongAck();adapter=make_adapter(native)
+&gt;       with pytest.raises(VenueUnavailable):adapter.subscribe_spots('EURUSD')
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE VenueUnavailable
+
+trading/tests/test_ctrader_spot_contract.py:82: Failed</failure></testcase><testcase classname="trading.tests.test_ctrader_spot_contract" name="test_native_subscription_is_requested_once_with_timestamp_delivery" time="0.006"><failure message="AssertionError: assert (2 == 1)&#10; +  where 2 = len([{'payloadType': 'PROTO_OA_SUBSCRIBE_SPOTS_REQ', 'ctidTraderAccountId': 12345, 'symbolId': [1]}, {'payloadType': 'PROTO_OA_SUBSCRIBE_SPOTS_REQ', 'ctidTraderAccountId': 12345, 'symbolId': [1]}])">def test_native_subscription_is_requested_once_with_timestamp_delivery():
+        adapter,native=ready();adapter.subscribe_spots('EURUSD')
+        requests=[body for name,body in native.requests if name=='ProtoOASubscribeSpotsReq']
+&gt;       assert len(requests)==1 and requests[0]['subscribeToSpotTimestamp'] is True
+E       AssertionError: assert (2 == 1)
+E        +  where 2 = len([{'payloadType': 'PROTO_OA_SUBSCRIBE_SPOTS_REQ', 'ctidTraderAccountId': 12345, 'symbolId': [1]}, {'payloadType': 'PROTO_OA_SUBSCRIBE_SPOTS_REQ', 'ctidTraderAccountId': 12345, 'symbolId': [1]}])
+
+trading/tests/test_ctrader_spot_contract.py:88: AssertionError</failure></testcase></testsuite></testsuites>

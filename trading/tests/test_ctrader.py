@@ -50,7 +50,18 @@ class FakeCtrader:
         self.positions: dict[int, dict] = {}
         self.next_pos = 100
         self.reject_next_order = False
-        threading.Thread(target=self.serve, daemon=True).start()
+        self.worker = threading.Thread(target=self.serve, daemon=True)
+        self.worker.start()
+
+    def close(self):
+        for sock in (self.a, self.b):
+            try:
+                sock.shutdown(socket.SHUT_RDWR)
+            except OSError:
+                pass
+            sock.close()
+        self.worker.join(3)
+        assert not self.worker.is_alive(), "owned fake cTrader peer did not terminate"
 
     def connector(self, host, port):
         self.host = host; return self.a
@@ -94,8 +105,14 @@ class FakeCtrader:
             return self.send("ProtoOASymbolByIdRes", {"ctidTraderAccountId": acct, "symbol": [s for s in syms if s["symbolId"] in body["symbolId"]]}, cid)
         if name == "ProtoOATraderReq":
             return self.send("ProtoOATraderRes", {"ctidTraderAccountId": acct, "trader": {"ctidTraderAccountId": acct, "balance": 1005309, "depositAssetId": 1, "moneyDigits": 2, "traderLogin": 5551234}}, cid)
+        if name == 'ProtoOAAssetListReq':
+            return self.send('ProtoOAAssetListRes',{'ctidTraderAccountId':acct,'asset':[{'assetId':1,'name':'USD'}]},cid)
         if name == "ProtoOAReconcileReq":
             return self.send("ProtoOAReconcileRes", {"ctidTraderAccountId": acct, "position": list(self.positions.values())}, cid)
+        if name == 'ProtoOAGetPositionUnrealizedPnLReq':
+            return self.send('ProtoOAGetPositionUnrealizedPnLRes',{'ctidTraderAccountId':acct,'moneyDigits':2,
+                'positionUnrealizedPnL':[{'positionId':pid,'grossUnrealizedPnL':0,'netUnrealizedPnL':0}
+                    for pid in self.positions]},cid)
         if name == "ProtoOANewOrderReq":
             if self.reject_next_order:
                 self.reject_next_order = False
@@ -123,7 +140,10 @@ class FakeCtrader:
             return self.send("ProtoOAGetTrendbarsRes", {"ctidTraderAccountId": acct, "period": body["period"], "timestamp": body["toTimestamp"], "trendbar": bars, "symbolId": body["symbolId"]}, cid)
         if name == "ProtoOASubscribeSpotsReq":
             self.send("ProtoOASubscribeSpotsRes", {"ctidTraderAccountId": acct}, cid)
-            return self.send("ProtoOASpotEvent", {"ctidTraderAccountId": acct, "symbolId": body["symbolId"][0], "bid": 110100, "ask": 110108})
+            extra={'timestamp':1700000000000} if body.get('subscribeToSpotTimestamp') else {}
+            return self.send("ProtoOASpotEvent", {"ctidTraderAccountId": acct, "symbolId": body["symbolId"][0], "bid": 110100, "ask": 110108,**extra})
+        if name == 'ProtoOAUnsubscribeSpotsReq':
+            return self.send('ProtoOAUnsubscribeSpotsRes',{'ctidTraderAccountId':acct},cid)
         self.send("ProtoOAErrorRes", {"errorCode": "UNSUPPORTED", "description": name}, cid)
 
 
@@ -164,7 +184,9 @@ def test_adapter_authenticates_reads_and_trades_with_stop_in_the_same_request():
     # spots + trendbars
     ad.subscribe_spots("EURUSD"); time.sleep(0.05)
     assert ad.spot("EURUSD") == (D("1.101"), D("1.10108"))
-    bars = trendbars(ad, "EURUSD", "H1", from_ms=0, to_ms=10)
+    # The fixture returns three 2023 bars: request that actual closed window.
+    ad.clock = lambda: (28_333_333+3*60)*60_000
+    bars = trendbars(ad, "EURUSD", "H1", from_ms=28_333_333*60_000, to_ms=(28_333_333+3*60)*60_000)
     assert len(bars) == 3 and bars[0].low == D("1.1") and bars[0].open == D("1.10005") and bars[0].close == D("1.10012") and bars[0].high == D("1.1002") and bars[1].start_ms - bars[0].start_ms == 3_600_000
     time.sleep(0.12); ad.heartbeat(now_ms=2)
     assert any(n == "ProtoHeartbeatEvent" for n, _ in fake.requests)

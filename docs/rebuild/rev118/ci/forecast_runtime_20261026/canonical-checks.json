@@ -1,0 +1,34 @@
+{
+  "schema": "van.source-documentary-checks/1",
+  "commands": [
+    {
+      "argv": "python tools/rebuild/refresh_owner_source_contracts.py --check",
+      "exit": 0,
+      "changed": []
+    },
+    {
+      "argv": "python tools/rebuild/render_frontend_registry.py --check",
+      "exit": 0,
+      "changed": false
+    },
+    {
+      "argv": "python tools/rebuild/mutation_registry.py --check",
+      "exit": 0,
+      "cases": 374,
+      "edits": 383,
+      "findings": [],
+      "execution": "NOT_RUN"
+    },
+    {
+      "argv": "python tools/consolidation/verify.py",
+      "exit": 0,
+      "findings": []
+    },
+    {
+      "argv": "python -m pytest tests/rebuild -q",
+      "exit": 0,
+      "passed": 108
+    }
+  ],
+  "qualification": "Document/source consistency only;not independent acceptance"
+}

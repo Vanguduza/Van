@@ -1,0 +1,26 @@
+{
+  "head": "89661bf72bfda9207000d3b9b346595ac41904ff",
+  "run": 40633983444,
+  "artifact_id": 12792737873,
+  "bytes": 180150,
+  "sha256": "91efbbba41197596fd5586e4950c7bd7a7e3212d27d9215580f30bf5ed3b6f16",
+  "github_size_digest_crc_paths_verified": true,
+  "junit": [
+    {
+      "path": "postgres-ledger-report.xml",
+      "cases": 26,
+      "passed": 26,
+      "failed": 0,
+      "errors": 0,
+      "skips": 0
+    },
+    {
+      "path": "trading-source-report.xml",
+      "cases": 4610,
+      "passed": 4607,
+      "failed": 2,
+      "errors": 0,
+      "skips": 1
+    }
+  ]
+}

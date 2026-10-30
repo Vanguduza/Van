@@ -1,0 +1,7 @@
+{
+  "adb_binary_installed": true,
+  "default_adb_key_present": false,
+  "usb_bus_present": false,
+  "remote_adb_route_configured": false,
+  "local_adb_server_reachable": false
+}

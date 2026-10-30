@@ -1,0 +1,22 @@
+{
+  "command": [
+    "/workspace/van-backend-venv-20261025/bin/python",
+    "tools/rebuild/source_storage_audit.py",
+    "--report",
+    "/workspace/van-mt5-symbol-contract-adapter-r1-20261028-audit.json",
+    "trading/tests/test_mt5_symbol_contract.py",
+    "trading/tests/test_mt5_symbol_contract_worker.py",
+    "trading/tests/test_mt5_symbol_read_identity.py",
+    "--junitxml=/workspace/van-mt5-symbol-contract-adapter-r1-20261028.xml",
+    "-q"
+  ],
+  "cwd": "/workspace/van-review-2026-10-18/publish",
+  "controller_pid": 305532,
+  "started_at_utc": "2026-10-28T09:28:45.940858+00:00",
+  "timeout_seconds": 300,
+  "state": "COMPLETED",
+  "command_pid": 305535,
+  "exit": 0,
+  "adopted_children_reaped": [],
+  "finished_at_utc": "2026-10-28T09:28:47.514438+00:00"
+}

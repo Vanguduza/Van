@@ -1,0 +1,44 @@
+{
+  "schema_version": 1,
+  "suite": "contracts",
+  "selection": [
+    "tests/contracts"
+  ],
+  "command": [
+    "/workspace/.onboarding/van-venv/bin/python",
+    "-m",
+    "pytest",
+    "tests/contracts",
+    "-q",
+    "--junitxml=/workspace/Van/docs/audit/validation/contracts-provider-speaker-frozen-final-2026-10-08-r8.xml"
+  ],
+  "started_at_utc": "2026-10-08T07:23:39.423921+00:00",
+  "finished_at_utc": "2026-10-08T07:25:14.087851+00:00",
+  "exit_code": 0,
+  "counts": {
+    "tests": 996,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 2
+  },
+  "passed": 994,
+  "qualification": "LOCAL_FROZEN_CONTRACTS_PASS",
+  "source_unchanged_during_test": true,
+  "changed_inputs": [],
+  "external_changed": false,
+  "input_files": 2060,
+  "external_input_files": 2,
+  "production_manifest_sha256": "c55031c4be0cc6da94b86d103066b4b683d71be3c6d779a56bc3520fffb7b61e",
+  "android_receipt_sha256": "144402dd7b1776b8bcd6e155c2d1cf11069ced29eb0266b04eda4e40a1392887",
+  "before_snapshot": "docs/audit/validation/contracts-provider-speaker-frozen-final-2026-10-08-r8-before.json",
+  "before_snapshot_sha256": "3a5ec9e2dd54752d3fc1b909438e8f236554a0959590eddf0372fd98d86cbf92",
+  "after_snapshot": "docs/audit/validation/contracts-provider-speaker-frozen-final-2026-10-08-r8-after.json",
+  "after_snapshot_sha256": "a1d330bfc40719fe760389e79ef8b0da10b125a8d8ac77872f4cf66ea7f62366",
+  "log": "docs/audit/validation/contracts-provider-speaker-frozen-final-2026-10-08-r8.log",
+  "log_sha256": "6f965193d0dcff11352d07a1d5390781c72eb0ee28be1cf28f84904cd829599b",
+  "junit": "docs/audit/validation/contracts-provider-speaker-frozen-final-2026-10-08-r8.xml",
+  "junit_sha256": "3feec7a1fbf8b0ea944294868a3bb4032af878e4f50c6dfc48f72da28c970c7c",
+  "physical_android_cases_executed": 0,
+  "deployment_accepted": false,
+  "provider_live_effects_accepted": false
+}

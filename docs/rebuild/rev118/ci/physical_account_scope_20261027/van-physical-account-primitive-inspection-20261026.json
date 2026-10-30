@@ -1,0 +1,14 @@
+{
+  "recorded_at_utc": "2026-10-26T22:56:00.001016+00:00",
+  "head": "4cc7b3a841054b326958edc30bc3a6cd42196105",
+  "source_sha256": {
+    "trading/vati/accounts/registry.py": "081300e109e82049d5fc7a068df22dce4f854b8e4cae873afb1dc6e66553ca39",
+    "trading/vati/accounts/access.py": "0f0de9b5112da1c24d214235dd5beef7fb597921ae328f9c545b34c31ba5393b",
+    "trading/vati/app/account_lease.py": "1f2df28d9cde198c51bc3b13febc484291bd7637cffb390f2b5c2021af95e2fc",
+    "trading/vati/app/service.py": "c7cd4532d8de147b02936f4985928cd1d1367c2b43fecffcfd1e9a6342477d23",
+    "trading/vati/app/account_service.py": "f726e9a161affcde31cc457bd5a0827969308c948aa30e83b61d301c9a382235"
+  },
+  "actual_probe": "Actual persisted AccountRegistry accepted native_one/native_two for CTRADER/DEMO/nativeID123. One shared InMemoryLeaseStore and two distinct lease instances both acquired GRANTED. Temporary registry removed; leases released. No credentials read, native transport or order effect exercised.",
+  "qualification": "Confirmed alias-scoped primitive behavior only;NOT an end-to-end financial exposure bypass. Do not reject valid observer profiles or change signed mandate aliases. Inspect existing runtime/all-origin-risk/account-protection boundaries before any fix.",
+  "next": "Test actual runtime construction with controlled declared source fixtures and actual shared PostgreSQL; determine physical-account arbitration requirements and existing-cohort migration before implementation. No source change to account/lease owners."
+}

@@ -1,0 +1,51 @@
+{
+  "schema": "van.rebuild.native-dataset-source/1",
+  "status": "SOURCE_TESTED_COMPONENT_NOT_DATASET_OR_UNIT_ACCEPTANCE",
+  "base_head": "a66096fdabc8eef1ecbcf7140dc071d8f65f1d16",
+  "updated_at_utc": "2026-10-26T08:17:35.840402+00:00",
+  "units": [
+    "VAN-ML-PKT-005",
+    "BE-008"
+  ],
+  "unit_status": "IN_PROGRESS",
+  "acceptance": "NOT_ISSUED",
+  "source_sha256": {
+    "trading/vati/core/events.py": "bee30ab695eec11e7657e9f08d550673f44faba0377ed965ca7c090d088429eb",
+    "trading/vati/execution/ctrader/adapter.py": "4787f8aeca733d4abe4b422389f8a1e9d4b0fe7db783d94d01d3ff90249f2b30",
+    "trading/vati/execution/ctrader/catalog.py": "34d7b3687640d1eeef39d0bd88503969db8efff88ee47ac389cde24534628b49",
+    "trading/vati/market_data/catalog_store.py": "a6fb2e4b080ffffa80a5a2067628cd614a6ac20681d408f2b7b0d0811277d1a9",
+    "trading/vati/market_data/native_windows.py": "a0b380c0c6fa488c5d05e75062db85e222a0ff053400a928ee36e0b3c0fd5485",
+    "trading/tests/test_native_bar_windows.py": "bccc02c8c4d85f0a9a576e7917c5f199949303f9d9ca1efbc065c607a2c5a042",
+    "trading/tests/test_native_symbol_catalog.py": "45db8c5065fe989e0943fbf269ddff6492c75dcbce414ef458971c7df6e2387f",
+    "trading/tests/test_native_catalog_store.py": "c93bd97706a719e4244a8cdc1d2b175bbe221e1e53e0e4f86b30d583877c7f9e"
+  },
+  "tests": {
+    "initial_window": "70pass/1invalidfixture:executionNativeSymbolContractcorrectlyrejectsdisabledinstruments;metadatafixturefixedanddisable-execution refusaladded;realarchivedcatalogcoverageadded separately",
+    "native_catalog": "2actualpayloadenum failures/90pass;named/intenumparsingfixed;fixtureadapterclockpinned;95pass/audit0",
+    "initial_store": "61pass/1actualcross-accountglobalbytebudgetpostpublicationregression;globalusagefixedbeforeappend;109pass/audit0",
+    "command_harness": "R3incorrecttest_native_read_budgets.py filename;no tests executed;actualtest paths corrected usingrg",
+    "local": "190pass/18declaredPGskips/audit0;allPGcasesexecuteinfinalisolatedfixture",
+    "broad_postgres": "1042pass/0skips/audit0;ownedfixture removed;exact then-current source/test hashes;threadedforkwarning retained",
+    "final_postgres": "212pass/0skips/audit0;pytestexit0;all finalsource/test hashesmatch;spawnedprocesscleanup;ownedfixture independentlyabsent",
+    "final_spawn": "1actualseparate-process casePASS afterfork->spawn harnessrepair",
+    "supplemental": "8assertion/expected-exception assertion faults caught;0errors/skips/auditviolations;exactrestoration;positive/restoredcontrols passed;notcanonical374",
+    "fault_harness": "Initialreader didnotrecognizepytestDIDNOTRAISE assertion format;originalreportsretained;reader corrected,noapplicationassertionsweakened"
+  },
+  "evidence": "ci/native_dataset_20261026",
+  "remaining": [
+    "FullDatasetManifest publication/actualParquetmaterialization fromresolveddata owners",
+    "PITuniverse/calendar/roweligibility andlicensednews/expectationjoins",
+    "Realentitlement/consent/source/feature/targetresolution;observedvsreconstructedandcorrectionpolicy",
+    "Native/independent/owner/production/economic/S24qualification"
+  ],
+  "runtime_reference": "ci/forecast_hosted_a66096fd_20261026:exacta660cleanimage232wheel/pipcheck/6research+3coldmodelparityPASS;doesnotqualifythislateruncommittedsource",
+  "canonical_checks": {
+    "rebuild_passed": 108,
+    "owner_frontend_contract_drift": false,
+    "mutation_registry_cases": 374,
+    "mutation_registry_edits": 383,
+    "mutation_registry_findings": [],
+    "mutation_execution": "NOT_RUN",
+    "consolidation_findings": []
+  }
+}

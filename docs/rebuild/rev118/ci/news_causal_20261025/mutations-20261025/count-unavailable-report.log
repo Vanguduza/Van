@@ -1,0 +1,15 @@
+.................F.......                                                [100%]
+=================================== FAILURES ===================================
+______ test_report_cutoff_does_not_count_unavailable_headlines_or_impacts ______
+
+    def test_report_cutoff_does_not_count_unavailable_headlines_or_impacts():
+        news=NewsIngress();h=story();news.ingest(h,now_ms=NOW+1000)
+        news.assess(h,subject_kind='POSITION',subject_id='p',symbol='EURUSD',now_ms=NOW+1000)
+        before=news.report(now_ms=NOW)
+>       assert before['headlines']==0 and before['by_trust']=={} and before['impacts']==0
+E       assert (1 == 0)
+
+trading/tests/test_news_causal_boundaries.py:107: AssertionError
+=========================== short test summary info ============================
+FAILED trading/tests/test_news_causal_boundaries.py::test_report_cutoff_does_not_count_unavailable_headlines_or_impacts
+1 failed, 24 passed in 0.35s

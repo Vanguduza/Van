@@ -1,0 +1,35 @@
+{
+  "schema": "van.rebuild.coordinator-instance-source/1",
+  "base_head": "a7485a9a1ca6b3b11c96436b04fa2e1c05397029",
+  "updated_at_utc": "2026-10-26T23:13:55.642450+00:00",
+  "units": [
+    "BE-003",
+    "BE-009"
+  ],
+  "status": "SOURCE_TESTED_COMPONENT_NOT_UNIT_NATIVE_OR_PRODUCTION_ACCEPTANCE",
+  "acceptance": "NOT_ISSUED",
+  "implementation": "Two actual coordinator builders in one process previously shared hostname/PID lease identity. Real PostgreSQL reproduced a peer acquiring the live owner lease and peer shutdown releasing its authority: two failures and one expiry control. Each coordinator now gets a UUID instance suffix, matching the single-session runtime; logical account aliases, signed mandates, store CAS, epochs and submission guards are unchanged. Three focused cases and 1213 final SQL/HTTP/runtime/authority/recovery cases pass, with no skips or storage-audit violations. All 1,150 pinned backend/trading runtime and test hashes match; the owned PostgreSQL fixture is independently absent. This is a source component, not whole-unit, provider, native, production or owner acceptance. Physical-account aliases and shared financial reservations remain separate open work.",
+  "source_sha256": {
+    "trading/vati/app/account_service.py": "1e281b8dba9efc81707e6eaaf8c42f43219fbbccc89f29e477922f82efd1f107",
+    "trading/tests/test_coordinator_instance_arbitration.py": "a91c5e777866716f8cc3c7e83a13ef72f503eacb0deda24f4687f1d5403760f3"
+  },
+  "actual_tests": {
+    "before_failed": 2,
+    "before_positive_expiry_control": 1,
+    "focused_passed": 3,
+    "final_passed": 1213,
+    "final_skips": 0,
+    "audit_violations": 0,
+    "pinned_runtime_test_hashes": 1150,
+    "owned_fixture_independently_absent": true,
+    "counts_overlap": true
+  },
+  "canonical_checks": {
+    "owner_frontend_drift": false,
+    "mutation_registry_cases": 374,
+    "mutation_registry_edits": 383,
+    "registry_check_is_execution": false
+  },
+  "qualification": "Actual runtime construction, PostgreSQL arbitration and Paper source fixtures. No native broker send or new owner authority exercised. This does not close physical-account alias fencing, shared order/funding reservations, account-wide risk, native activation, unit admission, economic or S24 acceptance.",
+  "evidence": "ci/coordinator_instance_20261026"
+}

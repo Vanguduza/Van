@@ -1,0 +1,2972 @@
+{
+  "runs": [
+    {
+      "id": 40377219001,
+      "name": "cognitive-fabric-r161-van",
+      "status": "completed",
+      "conclusion": "success",
+      "run_number": 269,
+      "jobs_url": "https://api.github.com/repos/Vanguduza/Van/actions/runs/40377219001/jobs",
+      "logs_url": "https://api.github.com/repos/Vanguduza/Van/actions/runs/40377219001/logs",
+      "workflow_id": 376327449
+    },
+    {
+      "id": 40377220064,
+      "name": "van-forecast-runtime-source",
+      "status": "completed",
+      "conclusion": "success",
+      "run_number": 10,
+      "jobs_url": "https://api.github.com/repos/Vanguduza/Van/actions/runs/40377220064/jobs",
+      "logs_url": "https://api.github.com/repos/Vanguduza/Van/actions/runs/40377220064/logs",
+      "workflow_id": 396667110
+    },
+    {
+      "id": 40377219037,
+      "name": "van-mql-native-source",
+      "status": "completed",
+      "conclusion": "success",
+      "run_number": 60,
+      "jobs_url": "https://api.github.com/repos/Vanguduza/Van/actions/runs/40377219037/jobs",
+      "logs_url": "https://api.github.com/repos/Vanguduza/Van/actions/runs/40377219037/logs",
+      "workflow_id": 393800426
+    },
+    {
+      "id": 40377219035,
+      "name": "van-kernel-source",
+      "status": "completed",
+      "conclusion": "success",
+      "run_number": 67,
+      "jobs_url": "https://api.github.com/repos/Vanguduza/Van/actions/runs/40377219035/jobs",
+      "logs_url": "https://api.github.com/repos/Vanguduza/Van/actions/runs/40377219035/logs",
+      "workflow_id": 393628057
+    },
+    {
+      "id": 40377218997,
+      "name": "van-ci",
+      "status": "completed",
+      "conclusion": "failure",
+      "run_number": 1906,
+      "jobs_url": "https://api.github.com/repos/Vanguduza/Van/actions/runs/40377218997/jobs",
+      "logs_url": "https://api.github.com/repos/Vanguduza/Van/actions/runs/40377218997/logs",
+      "workflow_id": 359474996
+    }
+  ],
+  "jobs": [
+    {
+      "id": 121763454905,
+      "run_id": 40377218997,
+      "workflow_name": "van-ci",
+      "head_branch": "ccr-9e07e1af-8mgz1p",
+      "run_url": "https://api.github.com/repos/Vanguduza/Van/actions/runs/40377218997",
+      "run_attempt": 1,
+      "node_id": "CR_kwDOUZyCqc8AAAAcWarfuQ",
+      "head_sha": "6c7142f126b206ba7f6aeefccb922cc51545c27c",
+      "url": "https://api.github.com/repos/Vanguduza/Van/actions/jobs/121763454905",
+      "html_url": "https://github.com/Vanguduza/Van/actions/runs/40377218997/job/121763454905",
+      "status": "completed",
+      "conclusion": "success",
+      "created_at": "2026-10-26T18:22:55Z",
+      "started_at": "2026-10-26T18:22:57Z",
+      "completed_at": "2026-10-26T18:24:43Z",
+      "name": "market-monitor-source",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-10-26T18:22:58Z",
+          "completed_at": "2026-10-26T18:22:59Z"
+        },
+        {
+          "name": "Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-10-26T18:22:59Z",
+          "completed_at": "2026-10-26T18:23:17Z"
+        },
+        {
+          "name": "Run actions/setup-node@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-10-26T18:23:17Z",
+          "completed_at": "2026-10-26T18:23:25Z"
+        },
+        {
+          "name": "Run actions/setup-python@v5",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4,
+          "started_at": "2026-10-26T18:23:25Z",
+          "completed_at": "2026-10-26T18:23:25Z"
+        },
+        {
+          "name": "Install original locked source and documentary dependencies",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5,
+          "started_at": "2026-10-26T18:23:25Z",
+          "completed_at": "2026-10-26T18:23:37Z"
+        },
+        {
+          "name": "Execute original monitor, command, migration and recovery source cases",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 6,
+          "started_at": "2026-10-26T18:23:37Z",
+          "completed_at": "2026-10-26T18:24:38Z"
+        },
+        {
+          "name": "Require actual execution without failures, skips or checkout storage",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 7,
+          "started_at": "2026-10-26T18:24:38Z",
+          "completed_at": "2026-10-26T18:24:38Z"
+        },
+        {
+          "name": "Run actions/upload-artifact@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 8,
+          "started_at": "2026-10-26T18:24:38Z",
+          "completed_at": "2026-10-26T18:24:40Z"
+        },
+        {
+          "name": "Post Run actions/setup-python@v5",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 14,
+          "started_at": "2026-10-26T18:24:40Z",
+          "completed_at": "2026-10-26T18:24:40Z"
+        },
+        {
+          "name": "Post Run actions/setup-node@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 15,
+          "started_at": "2026-10-26T18:24:40Z",
+          "completed_at": "2026-10-26T18:24:40Z"
+        },
+        {
+          "name": "Post Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 16,
+          "started_at": "2026-10-26T18:24:40Z",
+          "completed_at": "2026-10-26T18:24:40Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 17,
+          "started_at": "2026-10-26T18:24:40Z",
+          "completed_at": "2026-10-26T18:24:40Z"
+        }
+      ],
+      "check_run_url": "https://api.github.com/repos/Vanguduza/Van/check-runs/121763454905",
+      "labels": [
+        "ubuntu-24.04"
+      ],
+      "runner_id": 1000025139,
+      "runner_name": "GitHub Actions 1000025139",
+      "runner_group_id": 0,
+      "runner_group_name": "GitHub Actions"
+    },
+    {
+      "id": 121763455291,
+      "run_id": 40377218997,
+      "workflow_name": "van-ci",
+      "head_branch": "ccr-9e07e1af-8mgz1p",
+      "run_url": "https://api.github.com/repos/Vanguduza/Van/actions/runs/40377218997",
+      "run_attempt": 1,
+      "node_id": "CR_kwDOUZyCqc8AAAAcWarhOw",
+      "head_sha": "6c7142f126b206ba7f6aeefccb922cc51545c27c",
+      "url": "https://api.github.com/repos/Vanguduza/Van/actions/jobs/121763455291",
+      "html_url": "https://github.com/Vanguduza/Van/actions/runs/40377218997/job/121763455291",
+      "status": "completed",
+      "conclusion": "success",
+      "created_at": "2026-10-26T18:22:55Z",
+      "started_at": "2026-10-26T18:22:57Z",
+      "completed_at": "2026-10-26T18:49:51Z",
+      "name": "browser-guard-source",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-10-26T18:22:58Z",
+          "completed_at": "2026-10-26T18:22:59Z"
+        },
+        {
+          "name": "Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-10-26T18:22:59Z",
+          "completed_at": "2026-10-26T18:23:08Z"
+        },
+        {
+          "name": "Run actions/setup-node@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-10-26T18:23:08Z",
+          "completed_at": "2026-10-26T18:23:13Z"
+        },
+        {
+          "name": "Run actions/setup-python@v5",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4,
+          "started_at": "2026-10-26T18:23:13Z",
+          "completed_at": "2026-10-26T18:23:13Z"
+        },
+        {
+          "name": "Install the original locked browser source dependencies",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5,
+          "started_at": "2026-10-26T18:23:13Z",
+          "completed_at": "2026-10-26T18:23:31Z"
+        },
+        {
+          "name": "Resolve the lock-selected actual Chromium",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 6,
+          "started_at": "2026-10-26T18:23:31Z",
+          "completed_at": "2026-10-26T18:23:32Z"
+        },
+        {
+          "name": "Execute all original lease-guard regressions against Chromium",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 7,
+          "started_at": "2026-10-26T18:23:32Z",
+          "completed_at": "2026-10-26T18:27:00Z"
+        },
+        {
+          "name": "Require actual execution with no skip or failure",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 8,
+          "started_at": "2026-10-26T18:27:00Z",
+          "completed_at": "2026-10-26T18:27:00Z"
+        },
+        {
+          "name": "Execute the complete public browser and harness source suites",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 9,
+          "started_at": "2026-10-26T18:27:00Z",
+          "completed_at": "2026-10-26T18:49:05Z"
+        },
+        {
+          "name": "Execute the source listener UID boundary in an isolated root fixture",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 10,
+          "started_at": "2026-10-26T18:49:05Z",
+          "completed_at": "2026-10-26T18:49:07Z"
+        },
+        {
+          "name": "Install the namespace firewall test prerequisite from signed Ubuntu sources",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 11,
+          "started_at": "2026-10-26T18:49:07Z",
+          "completed_at": "2026-10-26T18:49:13Z"
+        },
+        {
+          "name": "Execute original firewall controls in disposable network namespaces",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 12,
+          "started_at": "2026-10-26T18:49:13Z",
+          "completed_at": "2026-10-26T18:49:47Z"
+        },
+        {
+          "name": "Require complete browser coverage and the actual listener UID result",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 13,
+          "started_at": "2026-10-26T18:49:47Z",
+          "completed_at": "2026-10-26T18:49:48Z"
+        },
+        {
+          "name": "Run actions/upload-artifact@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 14,
+          "started_at": "2026-10-26T18:49:48Z",
+          "completed_at": "2026-10-26T18:49:49Z"
+        },
+        {
+          "name": "Post Run actions/setup-python@v5",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 26,
+          "started_at": "2026-10-26T18:49:49Z",
+          "completed_at": "2026-10-26T18:49:49Z"
+        },
+        {
+          "name": "Post Run actions/setup-node@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 27,
+          "started_at": "2026-10-26T18:49:49Z",
+          "completed_at": "2026-10-26T18:49:49Z"
+        },
+        {
+          "name": "Post Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 28,
+          "started_at": "2026-10-26T18:49:49Z",
+          "completed_at": "2026-10-26T18:49:49Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 29,
+          "started_at": "2026-10-26T18:49:49Z",
+          "completed_at": "2026-10-26T18:49:49Z"
+        }
+      ],
+      "check_run_url": "https://api.github.com/repos/Vanguduza/Van/check-runs/121763455291",
+      "labels": [
+        "ubuntu-24.04"
+      ],
+      "runner_id": 1000025150,
+      "runner_name": "GitHub Actions 1000025150",
+      "runner_group_id": 0,
+      "runner_group_name": "GitHub Actions"
+    },
+    {
+      "id": 121763455337,
+      "run_id": 40377218997,
+      "workflow_name": "van-ci",
+      "head_branch": "ccr-9e07e1af-8mgz1p",
+      "run_url": "https://api.github.com/repos/Vanguduza/Van/actions/runs/40377218997",
+      "run_attempt": 1,
+      "node_id": "CR_kwDOUZyCqc8AAAAcWarhaQ",
+      "head_sha": "6c7142f126b206ba7f6aeefccb922cc51545c27c",
+      "url": "https://api.github.com/repos/Vanguduza/Van/actions/jobs/121763455337",
+      "html_url": "https://github.com/Vanguduza/Van/actions/runs/40377218997/job/121763455337",
+      "status": "completed",
+      "conclusion": "failure",
+      "created_at": "2026-10-26T18:22:55Z",
+      "started_at": "2026-10-26T18:22:57Z",
+      "completed_at": "2026-10-26T18:23:13Z",
+      "name": "project-truth-ledger",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-10-26T18:22:57Z",
+          "completed_at": "2026-10-26T18:22:58Z"
+        },
+        {
+          "name": "Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-10-26T18:22:58Z",
+          "completed_at": "2026-10-26T18:23:09Z"
+        },
+        {
+          "name": "Trusted ref (the PR base, or a protected branch; never the pushed history)",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-10-26T18:23:09Z",
+          "completed_at": "2026-10-26T18:23:09Z"
+        },
+        {
+          "name": "Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4,
+          "started_at": "2026-10-26T18:23:09Z",
+          "completed_at": "2026-10-26T18:23:11Z"
+        },
+        {
+          "name": "Run actions/setup-python@v5",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5,
+          "started_at": "2026-10-26T18:23:11Z",
+          "completed_at": "2026-10-26T18:23:11Z"
+        },
+        {
+          "name": "Project Truth ledger (trusted checker, every new commit has an authorized row)",
+          "status": "completed",
+          "conclusion": "failure",
+          "number": 6,
+          "started_at": "2026-10-26T18:23:11Z",
+          "completed_at": "2026-10-26T18:23:11Z"
+        },
+        {
+          "name": "Project Truth ledger self-test (the head's own tests; informative, not the gate)",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 7,
+          "started_at": "2026-10-26T18:23:11Z",
+          "completed_at": "2026-10-26T18:23:11Z"
+        },
+        {
+          "name": "Post Run actions/setup-python@v5",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 12,
+          "started_at": "2026-10-26T18:23:11Z",
+          "completed_at": "2026-10-26T18:23:11Z"
+        },
+        {
+          "name": "Post Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 13,
+          "started_at": "2026-10-26T18:23:11Z",
+          "completed_at": "2026-10-26T18:23:11Z"
+        },
+        {
+          "name": "Post Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 14,
+          "started_at": "2026-10-26T18:23:11Z",
+          "completed_at": "2026-10-26T18:23:11Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 15,
+          "started_at": "2026-10-26T18:23:11Z",
+          "completed_at": "2026-10-26T18:23:11Z"
+        }
+      ],
+      "check_run_url": "https://api.github.com/repos/Vanguduza/Van/check-runs/121763455337",
+      "labels": [
+        "ubuntu-latest"
+      ],
+      "runner_id": 1000025142,
+      "runner_name": "GitHub Actions 1000025142",
+      "runner_group_id": 0,
+      "runner_group_name": "GitHub Actions"
+    },
+    {
+      "id": 121763455384,
+      "run_id": 40377218997,
+      "workflow_name": "van-ci",
+      "head_branch": "ccr-9e07e1af-8mgz1p",
+      "run_url": "https://api.github.com/repos/Vanguduza/Van/actions/runs/40377218997",
+      "run_attempt": 1,
+      "node_id": "CR_kwDOUZyCqc8AAAAcWarhmA",
+      "head_sha": "6c7142f126b206ba7f6aeefccb922cc51545c27c",
+      "url": "https://api.github.com/repos/Vanguduza/Van/actions/jobs/121763455384",
+      "html_url": "https://github.com/Vanguduza/Van/actions/runs/40377218997/job/121763455384",
+      "status": "completed",
+      "conclusion": "success",
+      "created_at": "2026-10-26T18:22:55Z",
+      "started_at": "2026-10-26T18:22:57Z",
+      "completed_at": "2026-10-26T19:03:01Z",
+      "name": "backend-public-source",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-10-26T18:22:58Z",
+          "completed_at": "2026-10-26T18:22:59Z"
+        },
+        {
+          "name": "Initialize containers",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-10-26T18:22:59Z",
+          "completed_at": "2026-10-26T18:23:20Z"
+        },
+        {
+          "name": "Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-10-26T18:23:20Z",
+          "completed_at": "2026-10-26T18:23:33Z"
+        },
+        {
+          "name": "Run actions/setup-node@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4,
+          "started_at": "2026-10-26T18:23:33Z",
+          "completed_at": "2026-10-26T18:23:38Z"
+        },
+        {
+          "name": "Run actions/setup-python@v5",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5,
+          "started_at": "2026-10-26T18:23:38Z",
+          "completed_at": "2026-10-26T18:23:38Z"
+        },
+        {
+          "name": "Install original locked public source dependencies",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 6,
+          "started_at": "2026-10-26T18:23:38Z",
+          "completed_at": "2026-10-26T18:23:56Z"
+        },
+        {
+          "name": "Resolve actual Chromium and initialize the disposable schema",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 7,
+          "started_at": "2026-10-26T18:23:56Z",
+          "completed_at": "2026-10-26T18:23:58Z"
+        },
+        {
+          "name": "Inventory every public source module and explicit separate dependencies",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 8,
+          "started_at": "2026-10-26T18:23:58Z",
+          "completed_at": "2026-10-26T18:23:58Z"
+        },
+        {
+          "name": "Execute remaining backend, contract and Hermes source cases",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 9,
+          "started_at": "2026-10-26T18:23:58Z",
+          "completed_at": "2026-10-26T19:02:38Z"
+        },
+        {
+          "name": "Execute media service cases with their separate hashed runtime",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 10,
+          "started_at": "2026-10-26T19:02:38Z",
+          "completed_at": "2026-10-26T19:02:51Z"
+        },
+        {
+          "name": "Require complete selected coverage and exact declared prerequisite skips",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 11,
+          "started_at": "2026-10-26T19:02:51Z",
+          "completed_at": "2026-10-26T19:02:53Z"
+        },
+        {
+          "name": "Run actions/upload-artifact@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 12,
+          "started_at": "2026-10-26T19:02:53Z",
+          "completed_at": "2026-10-26T19:02:54Z"
+        },
+        {
+          "name": "Post Run actions/setup-python@v5",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 21,
+          "started_at": "2026-10-26T19:02:54Z",
+          "completed_at": "2026-10-26T19:02:54Z"
+        },
+        {
+          "name": "Post Run actions/setup-node@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 22,
+          "started_at": "2026-10-26T19:02:54Z",
+          "completed_at": "2026-10-26T19:02:55Z"
+        },
+        {
+          "name": "Post Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 23,
+          "started_at": "2026-10-26T19:02:55Z",
+          "completed_at": "2026-10-26T19:02:55Z"
+        },
+        {
+          "name": "Stop containers",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 24,
+          "started_at": "2026-10-26T19:02:55Z",
+          "completed_at": "2026-10-26T19:02:56Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 25,
+          "started_at": "2026-10-26T19:02:56Z",
+          "completed_at": "2026-10-26T19:02:56Z"
+        }
+      ],
+      "check_run_url": "https://api.github.com/repos/Vanguduza/Van/check-runs/121763455384",
+      "labels": [
+        "ubuntu-24.04"
+      ],
+      "runner_id": 1000025151,
+      "runner_name": "GitHub Actions 1000025151",
+      "runner_group_id": 0,
+      "runner_group_name": "GitHub Actions"
+    },
+    {
+      "id": 121763455436,
+      "run_id": 40377218997,
+      "workflow_name": "van-ci",
+      "head_branch": "ccr-9e07e1af-8mgz1p",
+      "run_url": "https://api.github.com/repos/Vanguduza/Van/actions/runs/40377218997",
+      "run_attempt": 1,
+      "node_id": "CR_kwDOUZyCqc8AAAAcWarhzA",
+      "head_sha": "6c7142f126b206ba7f6aeefccb922cc51545c27c",
+      "url": "https://api.github.com/repos/Vanguduza/Van/actions/jobs/121763455436",
+      "html_url": "https://github.com/Vanguduza/Van/actions/runs/40377218997/job/121763455436",
+      "status": "completed",
+      "conclusion": "success",
+      "created_at": "2026-10-26T18:22:55Z",
+      "started_at": "2026-10-26T18:22:57Z",
+      "completed_at": "2026-10-26T18:30:19Z",
+      "name": "postgres-ledger",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-10-26T18:22:57Z",
+          "completed_at": "2026-10-26T18:22:58Z"
+        },
+        {
+          "name": "Initialize containers",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-10-26T18:22:58Z",
+          "completed_at": "2026-10-26T18:23:13Z"
+        },
+        {
+          "name": "Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-10-26T18:23:13Z",
+          "completed_at": "2026-10-26T18:23:17Z"
+        },
+        {
+          "name": "Run actions/setup-node@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4,
+          "started_at": "2026-10-26T18:23:17Z",
+          "completed_at": "2026-10-26T18:23:22Z"
+        },
+        {
+          "name": "Run actions/setup-python@v5",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5,
+          "started_at": "2026-10-26T18:23:22Z",
+          "completed_at": "2026-10-26T18:23:22Z"
+        },
+        {
+          "name": "Install pinned PostgreSQL verification dependencies",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 6,
+          "started_at": "2026-10-26T18:23:22Z",
+          "completed_at": "2026-10-26T18:23:33Z"
+        },
+        {
+          "name": "Initialize the disposable test schema",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 7,
+          "started_at": "2026-10-26T18:23:33Z",
+          "completed_at": "2026-10-26T18:23:34Z"
+        },
+        {
+          "name": "Real PostgreSQL isolation, migration, writer and recovery checks",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 8,
+          "started_at": "2026-10-26T18:23:34Z",
+          "completed_at": "2026-10-26T18:23:38Z"
+        },
+        {
+          "name": "Require executed PostgreSQL cases without skips",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 9,
+          "started_at": "2026-10-26T18:23:38Z",
+          "completed_at": "2026-10-26T18:23:38Z"
+        },
+        {
+          "name": "Public trading source regressions",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 10,
+          "started_at": "2026-10-26T18:23:38Z",
+          "completed_at": "2026-10-26T18:29:20Z"
+        },
+        {
+          "name": "Record the only private-source test unavailable to this public job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 11,
+          "started_at": "2026-10-26T18:29:20Z",
+          "completed_at": "2026-10-26T18:29:20Z"
+        },
+        {
+          "name": "Public voice, speaker-authority and speech-continuity checks",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 12,
+          "started_at": "2026-10-26T18:29:20Z",
+          "completed_at": "2026-10-26T18:30:15Z"
+        },
+        {
+          "name": "Require executed voice cases without skips",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 13,
+          "started_at": "2026-10-26T18:30:15Z",
+          "completed_at": "2026-10-26T18:30:15Z"
+        },
+        {
+          "name": "Run actions/upload-artifact@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 14,
+          "started_at": "2026-10-26T18:30:15Z",
+          "completed_at": "2026-10-26T18:30:16Z"
+        },
+        {
+          "name": "Post Run actions/setup-python@v5",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 25,
+          "started_at": "2026-10-26T18:30:16Z",
+          "completed_at": "2026-10-26T18:30:16Z"
+        },
+        {
+          "name": "Post Run actions/setup-node@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 26,
+          "started_at": "2026-10-26T18:30:16Z",
+          "completed_at": "2026-10-26T18:30:16Z"
+        },
+        {
+          "name": "Post Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 27,
+          "started_at": "2026-10-26T18:30:16Z",
+          "completed_at": "2026-10-26T18:30:16Z"
+        },
+        {
+          "name": "Stop containers",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 28,
+          "started_at": "2026-10-26T18:30:16Z",
+          "completed_at": "2026-10-26T18:30:17Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 29,
+          "started_at": "2026-10-26T18:30:17Z",
+          "completed_at": "2026-10-26T18:30:17Z"
+        }
+      ],
+      "check_run_url": "https://api.github.com/repos/Vanguduza/Van/check-runs/121763455436",
+      "labels": [
+        "ubuntu-latest"
+      ],
+      "runner_id": 1000025143,
+      "runner_name": "GitHub Actions 1000025143",
+      "runner_group_id": 0,
+      "runner_group_name": "GitHub Actions"
+    },
+    {
+      "id": 121763455488,
+      "run_id": 40377218997,
+      "workflow_name": "van-ci",
+      "head_branch": "ccr-9e07e1af-8mgz1p",
+      "run_url": "https://api.github.com/repos/Vanguduza/Van/actions/runs/40377218997",
+      "run_attempt": 1,
+      "node_id": "CR_kwDOUZyCqc8AAAAcWariAA",
+      "head_sha": "6c7142f126b206ba7f6aeefccb922cc51545c27c",
+      "url": "https://api.github.com/repos/Vanguduza/Van/actions/jobs/121763455488",
+      "html_url": "https://github.com/Vanguduza/Van/actions/runs/40377218997/job/121763455488",
+      "status": "completed",
+      "conclusion": "success",
+      "created_at": "2026-10-26T18:22:55Z",
+      "started_at": "2026-10-26T18:22:57Z",
+      "completed_at": "2026-10-26T18:23:44Z",
+      "name": "rebuild-documentary",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-10-26T18:22:57Z",
+          "completed_at": "2026-10-26T18:22:58Z"
+        },
+        {
+          "name": "Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-10-26T18:22:58Z",
+          "completed_at": "2026-10-26T18:23:09Z"
+        },
+        {
+          "name": "Run actions/setup-python@v5",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-10-26T18:23:09Z",
+          "completed_at": "2026-10-26T18:23:09Z"
+        },
+        {
+          "name": "Install isolated rebuild verification dependencies",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4,
+          "started_at": "2026-10-26T18:23:09Z",
+          "completed_at": "2026-10-26T18:23:12Z"
+        },
+        {
+          "name": "Rebuild documentary and induced-failure regressions",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5,
+          "started_at": "2026-10-26T18:23:12Z",
+          "completed_at": "2026-10-26T18:23:41Z"
+        },
+        {
+          "name": "Post Run actions/setup-python@v5",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 9,
+          "started_at": "2026-10-26T18:23:41Z",
+          "completed_at": "2026-10-26T18:23:41Z"
+        },
+        {
+          "name": "Post Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 10,
+          "started_at": "2026-10-26T18:23:41Z",
+          "completed_at": "2026-10-26T18:23:41Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 11,
+          "started_at": "2026-10-26T18:23:41Z",
+          "completed_at": "2026-10-26T18:23:42Z"
+        }
+      ],
+      "check_run_url": "https://api.github.com/repos/Vanguduza/Van/check-runs/121763455488",
+      "labels": [
+        "ubuntu-latest"
+      ],
+      "runner_id": 1000025144,
+      "runner_name": "GitHub Actions 1000025144",
+      "runner_group_id": 0,
+      "runner_group_name": "GitHub Actions"
+    },
+    {
+      "id": 121763455624,
+      "run_id": 40377218997,
+      "workflow_name": "van-ci",
+      "head_branch": "ccr-9e07e1af-8mgz1p",
+      "run_url": "https://api.github.com/repos/Vanguduza/Van/actions/runs/40377218997",
+      "run_attempt": 1,
+      "node_id": "CR_kwDOUZyCqc8AAAAcWariiA",
+      "head_sha": "6c7142f126b206ba7f6aeefccb922cc51545c27c",
+      "url": "https://api.github.com/repos/Vanguduza/Van/actions/jobs/121763455624",
+      "html_url": "https://github.com/Vanguduza/Van/actions/runs/40377218997/job/121763455624",
+      "status": "completed",
+      "conclusion": "success",
+      "created_at": "2026-10-26T18:22:55Z",
+      "started_at": "2026-10-26T18:22:57Z",
+      "completed_at": "2026-10-26T18:33:39Z",
+      "name": "mutation (kotlin-2, kotlin, 2/4)",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-10-26T18:22:57Z",
+          "completed_at": "2026-10-26T18:23:00Z"
+        },
+        {
+          "name": "Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-10-26T18:23:00Z",
+          "completed_at": "2026-10-26T18:23:12Z"
+        },
+        {
+          "name": "Run actions/setup-python@v5",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-10-26T18:23:12Z",
+          "completed_at": "2026-10-26T18:23:12Z"
+        },
+        {
+          "name": "Run actions/setup-java@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4,
+          "started_at": "2026-10-26T18:23:12Z",
+          "completed_at": "2026-10-26T18:23:12Z"
+        },
+        {
+          "name": "Install backend dependencies",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 5,
+          "started_at": "2026-10-26T18:23:12Z",
+          "completed_at": "2026-10-26T18:23:12Z"
+        },
+        {
+          "name": "Install browser mutation dependencies",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 6,
+          "started_at": "2026-10-26T18:23:12Z",
+          "completed_at": "2026-10-26T18:23:12Z"
+        },
+        {
+          "name": "Install mutation Gradle",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 7,
+          "started_at": "2026-10-26T18:23:12Z",
+          "completed_at": "2026-10-26T18:23:18Z"
+        },
+        {
+          "name": "Resolve and prove the Kotlin control before offline mutations",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 8,
+          "started_at": "2026-10-26T18:23:18Z",
+          "completed_at": "2026-10-26T18:24:57Z"
+        },
+        {
+          "name": "Mutation testing (non-blocking)",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 9,
+          "started_at": "2026-10-26T18:24:57Z",
+          "completed_at": "2026-10-26T18:33:35Z"
+        },
+        {
+          "name": "Upload mutation report",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 10,
+          "started_at": "2026-10-26T18:33:35Z",
+          "completed_at": "2026-10-26T18:33:36Z"
+        },
+        {
+          "name": "Post Install mutation Gradle",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 17,
+          "started_at": "2026-10-26T18:33:36Z",
+          "completed_at": "2026-10-26T18:33:36Z"
+        },
+        {
+          "name": "Post Run actions/setup-java@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 18,
+          "started_at": "2026-10-26T18:33:36Z",
+          "completed_at": "2026-10-26T18:33:36Z"
+        },
+        {
+          "name": "Post Run actions/setup-python@v5",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 19,
+          "started_at": "2026-10-26T18:33:36Z",
+          "completed_at": "2026-10-26T18:33:36Z"
+        },
+        {
+          "name": "Post Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 20,
+          "started_at": "2026-10-26T18:33:36Z",
+          "completed_at": "2026-10-26T18:33:37Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 21,
+          "started_at": "2026-10-26T18:33:37Z",
+          "completed_at": "2026-10-26T18:33:37Z"
+        }
+      ],
+      "check_run_url": "https://api.github.com/repos/Vanguduza/Van/check-runs/121763455624",
+      "labels": [
+        "ubuntu-latest"
+      ],
+      "runner_id": 1000025145,
+      "runner_name": "GitHub Actions 1000025145",
+      "runner_group_id": 0,
+      "runner_group_name": "GitHub Actions"
+    },
+    {
+      "id": 121763455773,
+      "run_id": 40377218997,
+      "workflow_name": "van-ci",
+      "head_branch": "ccr-9e07e1af-8mgz1p",
+      "run_url": "https://api.github.com/repos/Vanguduza/Van/actions/runs/40377218997",
+      "run_attempt": 1,
+      "node_id": "CR_kwDOUZyCqc8AAAAcWarjHQ",
+      "head_sha": "6c7142f126b206ba7f6aeefccb922cc51545c27c",
+      "url": "https://api.github.com/repos/Vanguduza/Van/actions/jobs/121763455773",
+      "html_url": "https://github.com/Vanguduza/Van/actions/runs/40377218997/job/121763455773",
+      "status": "completed",
+      "conclusion": "success",
+      "created_at": "2026-10-26T18:22:55Z",
+      "started_at": "2026-10-26T18:22:57Z",
+      "completed_at": "2026-10-26T18:35:04Z",
+      "name": "android-and-visual-evidence",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-10-26T18:22:58Z",
+          "completed_at": "2026-10-26T18:23:00Z"
+        },
+        {
+          "name": "Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-10-26T18:23:00Z",
+          "completed_at": "2026-10-26T18:23:08Z"
+        },
+        {
+          "name": "Run actions/setup-java@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-10-26T18:23:08Z",
+          "completed_at": "2026-10-26T18:23:08Z"
+        },
+        {
+          "name": "Run actions/setup-python@v5",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4,
+          "started_at": "2026-10-26T18:23:08Z",
+          "completed_at": "2026-10-26T18:23:08Z"
+        },
+        {
+          "name": "Pure Kotlin logic (owner status projection, mission read models)",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5,
+          "started_at": "2026-10-26T18:23:08Z",
+          "completed_at": "2026-10-26T18:25:16Z"
+        },
+        {
+          "name": "Actual AGP release-profile and signing refusal controls",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 6,
+          "started_at": "2026-10-26T18:25:16Z",
+          "completed_at": "2026-10-26T18:27:04Z"
+        },
+        {
+          "name": "Run actions/upload-artifact@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 7,
+          "started_at": "2026-10-26T18:27:04Z",
+          "completed_at": "2026-10-26T18:27:05Z"
+        },
+        {
+          "name": "Debug signing key, when the owner has supplied one",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 8,
+          "started_at": "2026-10-26T18:27:05Z",
+          "completed_at": "2026-10-26T18:27:05Z"
+        },
+        {
+          "name": "Prepare exact pinned generic offline voice assets",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 9,
+          "started_at": "2026-10-26T18:27:05Z",
+          "completed_at": "2026-10-26T18:27:19Z"
+        },
+        {
+          "name": "Build Candidate B mechanics prototype",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 10,
+          "started_at": "2026-10-26T18:27:19Z",
+          "completed_at": "2026-10-26T18:27:42Z"
+        },
+        {
+          "name": "Stage Candidate B Character Rig Lab asset",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 11,
+          "started_at": "2026-10-26T18:27:42Z",
+          "completed_at": "2026-10-26T18:27:42Z"
+        },
+        {
+          "name": "Android unit tests, build and lint",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 12,
+          "started_at": "2026-10-26T18:27:42Z",
+          "completed_at": "2026-10-26T18:34:14Z"
+        },
+        {
+          "name": "Debug APK signing identity",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 13,
+          "started_at": "2026-10-26T18:34:14Z",
+          "completed_at": "2026-10-26T18:34:15Z"
+        },
+        {
+          "name": "Upload debug APK",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 14,
+          "started_at": "2026-10-26T18:34:15Z",
+          "completed_at": "2026-10-26T18:34:25Z"
+        },
+        {
+          "name": "Shared visual geometry tests",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 15,
+          "started_at": "2026-10-26T18:34:25Z",
+          "completed_at": "2026-10-26T18:34:43Z"
+        },
+        {
+          "name": "Render owner visual evidence from shipping geometry",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 16,
+          "started_at": "2026-10-26T18:34:43Z",
+          "completed_at": "2026-10-26T18:34:58Z"
+        },
+        {
+          "name": "Upload visual evidence",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 17,
+          "started_at": "2026-10-26T18:34:58Z",
+          "completed_at": "2026-10-26T18:35:01Z"
+        },
+        {
+          "name": "Post Run actions/setup-python@v5",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 32,
+          "started_at": "2026-10-26T18:35:01Z",
+          "completed_at": "2026-10-26T18:35:01Z"
+        },
+        {
+          "name": "Post Run actions/setup-java@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 33,
+          "started_at": "2026-10-26T18:35:01Z",
+          "completed_at": "2026-10-26T18:35:01Z"
+        },
+        {
+          "name": "Post Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 34,
+          "started_at": "2026-10-26T18:35:01Z",
+          "completed_at": "2026-10-26T18:35:02Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 35,
+          "started_at": "2026-10-26T18:35:02Z",
+          "completed_at": "2026-10-26T18:35:02Z"
+        }
+      ],
+      "check_run_url": "https://api.github.com/repos/Vanguduza/Van/check-runs/121763455773",
+      "labels": [
+        "ubuntu-latest"
+      ],
+      "runner_id": 1000025146,
+      "runner_name": "GitHub Actions 1000025146",
+      "runner_group_id": 0,
+      "runner_group_name": "GitHub Actions"
+    },
+    {
+      "id": 121763455802,
+      "run_id": 40377218997,
+      "workflow_name": "van-ci",
+      "head_branch": "ccr-9e07e1af-8mgz1p",
+      "run_url": "https://api.github.com/repos/Vanguduza/Van/actions/runs/40377218997",
+      "run_attempt": 1,
+      "node_id": "CR_kwDOUZyCqc8AAAAcWarjOg",
+      "head_sha": "6c7142f126b206ba7f6aeefccb922cc51545c27c",
+      "url": "https://api.github.com/repos/Vanguduza/Van/actions/jobs/121763455802",
+      "html_url": "https://github.com/Vanguduza/Van/actions/runs/40377218997/job/121763455802",
+      "status": "completed",
+      "conclusion": "success",
+      "created_at": "2026-10-26T18:22:55Z",
+      "started_at": "2026-10-26T18:22:57Z",
+      "completed_at": "2026-10-26T18:36:15Z",
+      "name": "android-instrumentation",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-10-26T18:22:57Z",
+          "completed_at": "2026-10-26T18:22:58Z"
+        },
+        {
+          "name": "Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-10-26T18:22:58Z",
+          "completed_at": "2026-10-26T18:23:08Z"
+        },
+        {
+          "name": "Run actions/setup-java@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-10-26T18:23:08Z",
+          "completed_at": "2026-10-26T18:23:08Z"
+        },
+        {
+          "name": "Run actions/setup-python@v5",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4,
+          "started_at": "2026-10-26T18:23:08Z",
+          "completed_at": "2026-10-26T18:23:08Z"
+        },
+        {
+          "name": "Enable KVM for the emulator",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5,
+          "started_at": "2026-10-26T18:23:08Z",
+          "completed_at": "2026-10-26T18:23:08Z"
+        },
+        {
+          "name": "Build Candidate B mechanics prototype",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 6,
+          "started_at": "2026-10-26T18:23:08Z",
+          "completed_at": "2026-10-26T18:23:27Z"
+        },
+        {
+          "name": "Bind Candidate B mechanics prototype for CI only",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 7,
+          "started_at": "2026-10-26T18:23:27Z",
+          "completed_at": "2026-10-26T18:23:27Z"
+        },
+        {
+          "name": "Bind Character Forge validation input",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 8,
+          "started_at": "2026-10-26T18:23:27Z",
+          "completed_at": "2026-10-26T18:23:27Z"
+        },
+        {
+          "name": "Prepare exact pinned generic offline voice assets",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 9,
+          "started_at": "2026-10-26T18:23:27Z",
+          "completed_at": "2026-10-26T18:23:39Z"
+        },
+        {
+          "name": "Instrumentation tests (owner surface, Floating VAN)",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 10,
+          "started_at": "2026-10-26T18:23:39Z",
+          "completed_at": "2026-10-26T18:36:08Z"
+        },
+        {
+          "name": "Summarise Character Forge validation outcome",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 11,
+          "started_at": "2026-10-26T18:36:08Z",
+          "completed_at": "2026-10-26T18:36:09Z"
+        },
+        {
+          "name": "Upload instrumentation report",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 12,
+          "started_at": "2026-10-26T18:36:09Z",
+          "completed_at": "2026-10-26T18:36:09Z"
+        },
+        {
+          "name": "Upload native voice readiness diagnostics",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 13,
+          "started_at": "2026-10-26T18:36:09Z",
+          "completed_at": "2026-10-26T18:36:10Z"
+        },
+        {
+          "name": "Upload Character Forge validation binding",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 14,
+          "started_at": "2026-10-26T18:36:10Z",
+          "completed_at": "2026-10-26T18:36:11Z"
+        },
+        {
+          "name": "Upload instrumentation screenshots",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 15,
+          "started_at": "2026-10-26T18:36:11Z",
+          "completed_at": "2026-10-26T18:36:13Z"
+        },
+        {
+          "name": "Post Run actions/setup-python@v5",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 28,
+          "started_at": "2026-10-26T18:36:13Z",
+          "completed_at": "2026-10-26T18:36:13Z"
+        },
+        {
+          "name": "Post Run actions/setup-java@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 29,
+          "started_at": "2026-10-26T18:36:13Z",
+          "completed_at": "2026-10-26T18:36:13Z"
+        },
+        {
+          "name": "Post Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 30,
+          "started_at": "2026-10-26T18:36:13Z",
+          "completed_at": "2026-10-26T18:36:13Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 31,
+          "started_at": "2026-10-26T18:36:13Z",
+          "completed_at": "2026-10-26T18:36:13Z"
+        }
+      ],
+      "check_run_url": "https://api.github.com/repos/Vanguduza/Van/check-runs/121763455802",
+      "labels": [
+        "ubuntu-latest"
+      ],
+      "runner_id": 1000025149,
+      "runner_name": "GitHub Actions 1000025149",
+      "runner_group_id": 0,
+      "runner_group_name": "GitHub Actions"
+    },
+    {
+      "id": 121763456034,
+      "run_id": 40377218997,
+      "workflow_name": "van-ci",
+      "head_branch": "ccr-9e07e1af-8mgz1p",
+      "run_url": "https://api.github.com/repos/Vanguduza/Van/actions/runs/40377218997",
+      "run_attempt": 1,
+      "node_id": "CR_kwDOUZyCqc8AAAAcWarkIg",
+      "head_sha": "6c7142f126b206ba7f6aeefccb922cc51545c27c",
+      "url": "https://api.github.com/repos/Vanguduza/Van/actions/jobs/121763456034",
+      "html_url": "https://github.com/Vanguduza/Van/actions/runs/40377218997/job/121763456034",
+      "status": "completed",
+      "conclusion": "success",
+      "created_at": "2026-10-26T18:22:55Z",
+      "started_at": "2026-10-26T18:22:57Z",
+      "completed_at": "2026-10-26T18:35:46Z",
+      "name": "mutation (kotlin-3, kotlin, 3/4)",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-10-26T18:22:58Z",
+          "completed_at": "2026-10-26T18:23:01Z"
+        },
+        {
+          "name": "Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-10-26T18:23:01Z",
+          "completed_at": "2026-10-26T18:23:10Z"
+        },
+        {
+          "name": "Run actions/setup-python@v5",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-10-26T18:23:10Z",
+          "completed_at": "2026-10-26T18:23:10Z"
+        },
+        {
+          "name": "Run actions/setup-java@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4,
+          "started_at": "2026-10-26T18:23:10Z",
+          "completed_at": "2026-10-26T18:23:11Z"
+        },
+        {
+          "name": "Install backend dependencies",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 5,
+          "started_at": "2026-10-26T18:23:11Z",
+          "completed_at": "2026-10-26T18:23:11Z"
+        },
+        {
+          "name": "Install browser mutation dependencies",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 6,
+          "started_at": "2026-10-26T18:23:11Z",
+          "completed_at": "2026-10-26T18:23:11Z"
+        },
+        {
+          "name": "Install mutation Gradle",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 7,
+          "started_at": "2026-10-26T18:23:11Z",
+          "completed_at": "2026-10-26T18:23:18Z"
+        },
+        {
+          "name": "Resolve and prove the Kotlin control before offline mutations",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 8,
+          "started_at": "2026-10-26T18:23:18Z",
+          "completed_at": "2026-10-26T18:25:12Z"
+        },
+        {
+          "name": "Mutation testing (non-blocking)",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 9,
+          "started_at": "2026-10-26T18:25:12Z",
+          "completed_at": "2026-10-26T18:35:40Z"
+        },
+        {
+          "name": "Upload mutation report",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 10,
+          "started_at": "2026-10-26T18:35:40Z",
+          "completed_at": "2026-10-26T18:35:42Z"
+        },
+        {
+          "name": "Post Install mutation Gradle",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 17,
+          "started_at": "2026-10-26T18:35:42Z",
+          "completed_at": "2026-10-26T18:35:42Z"
+        },
+        {
+          "name": "Post Run actions/setup-java@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 18,
+          "started_at": "2026-10-26T18:35:42Z",
+          "completed_at": "2026-10-26T18:35:42Z"
+        },
+        {
+          "name": "Post Run actions/setup-python@v5",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 19,
+          "started_at": "2026-10-26T18:35:42Z",
+          "completed_at": "2026-10-26T18:35:43Z"
+        },
+        {
+          "name": "Post Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 20,
+          "started_at": "2026-10-26T18:35:43Z",
+          "completed_at": "2026-10-26T18:35:43Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 21,
+          "started_at": "2026-10-26T18:35:43Z",
+          "completed_at": "2026-10-26T18:35:43Z"
+        }
+      ],
+      "check_run_url": "https://api.github.com/repos/Vanguduza/Van/check-runs/121763456034",
+      "labels": [
+        "ubuntu-latest"
+      ],
+      "runner_id": 1000025153,
+      "runner_name": "GitHub Actions 1000025153",
+      "runner_group_id": 0,
+      "runner_group_name": "GitHub Actions"
+    },
+    {
+      "id": 121763456112,
+      "run_id": 40377218997,
+      "workflow_name": "van-ci",
+      "head_branch": "ccr-9e07e1af-8mgz1p",
+      "run_url": "https://api.github.com/repos/Vanguduza/Van/actions/runs/40377218997",
+      "run_attempt": 1,
+      "node_id": "CR_kwDOUZyCqc8AAAAcWarkcA",
+      "head_sha": "6c7142f126b206ba7f6aeefccb922cc51545c27c",
+      "url": "https://api.github.com/repos/Vanguduza/Van/actions/jobs/121763456112",
+      "html_url": "https://github.com/Vanguduza/Van/actions/runs/40377218997/job/121763456112",
+      "status": "completed",
+      "conclusion": "success",
+      "created_at": "2026-10-26T18:22:55Z",
+      "started_at": "2026-10-26T18:22:57Z",
+      "completed_at": "2026-10-26T18:24:59Z",
+      "name": "mutation (browser-agent, browser-agent, 0/1)",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-10-26T18:22:58Z",
+          "completed_at": "2026-10-26T18:23:00Z"
+        },
+        {
+          "name": "Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-10-26T18:23:00Z",
+          "completed_at": "2026-10-26T18:23:10Z"
+        },
+        {
+          "name": "Run actions/setup-python@v5",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-10-26T18:23:10Z",
+          "completed_at": "2026-10-26T18:23:10Z"
+        },
+        {
+          "name": "Run actions/setup-java@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4,
+          "started_at": "2026-10-26T18:23:10Z",
+          "completed_at": "2026-10-26T18:23:11Z"
+        },
+        {
+          "name": "Install backend dependencies",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 5,
+          "started_at": "2026-10-26T18:23:11Z",
+          "completed_at": "2026-10-26T18:23:11Z"
+        },
+        {
+          "name": "Install browser mutation dependencies",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 6,
+          "started_at": "2026-10-26T18:23:11Z",
+          "completed_at": "2026-10-26T18:23:19Z"
+        },
+        {
+          "name": "Install mutation Gradle",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 7,
+          "started_at": "2026-10-26T18:23:19Z",
+          "completed_at": "2026-10-26T18:23:19Z"
+        },
+        {
+          "name": "Resolve and prove the Kotlin control before offline mutations",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 8,
+          "started_at": "2026-10-26T18:23:19Z",
+          "completed_at": "2026-10-26T18:23:19Z"
+        },
+        {
+          "name": "Mutation testing (non-blocking)",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 9,
+          "started_at": "2026-10-26T18:23:19Z",
+          "completed_at": "2026-10-26T18:24:54Z"
+        },
+        {
+          "name": "Upload mutation report",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 10,
+          "started_at": "2026-10-26T18:24:54Z",
+          "completed_at": "2026-10-26T18:24:55Z"
+        },
+        {
+          "name": "Post Run actions/setup-java@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 18,
+          "started_at": "2026-10-26T18:24:55Z",
+          "completed_at": "2026-10-26T18:24:56Z"
+        },
+        {
+          "name": "Post Run actions/setup-python@v5",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 19,
+          "started_at": "2026-10-26T18:24:56Z",
+          "completed_at": "2026-10-26T18:24:56Z"
+        },
+        {
+          "name": "Post Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 20,
+          "started_at": "2026-10-26T18:24:56Z",
+          "completed_at": "2026-10-26T18:24:56Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 21,
+          "started_at": "2026-10-26T18:24:56Z",
+          "completed_at": "2026-10-26T18:24:56Z"
+        }
+      ],
+      "check_run_url": "https://api.github.com/repos/Vanguduza/Van/check-runs/121763456112",
+      "labels": [
+        "ubuntu-latest"
+      ],
+      "runner_id": 1000025148,
+      "runner_name": "GitHub Actions 1000025148",
+      "runner_group_id": 0,
+      "runner_group_name": "GitHub Actions"
+    },
+    {
+      "id": 121763456127,
+      "run_id": 40377218997,
+      "workflow_name": "van-ci",
+      "head_branch": "ccr-9e07e1af-8mgz1p",
+      "run_url": "https://api.github.com/repos/Vanguduza/Van/actions/runs/40377218997",
+      "run_attempt": 1,
+      "node_id": "CR_kwDOUZyCqc8AAAAcWarkfw",
+      "head_sha": "6c7142f126b206ba7f6aeefccb922cc51545c27c",
+      "url": "https://api.github.com/repos/Vanguduza/Van/actions/jobs/121763456127",
+      "html_url": "https://github.com/Vanguduza/Van/actions/runs/40377218997/job/121763456127",
+      "status": "completed",
+      "conclusion": "success",
+      "created_at": "2026-10-26T18:22:55Z",
+      "started_at": "2026-10-26T18:23:09Z",
+      "completed_at": "2026-10-26T18:34:08Z",
+      "name": "mutation (kotlin-0, kotlin, 0/4)",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-10-26T18:23:10Z",
+          "completed_at": "2026-10-26T18:23:11Z"
+        },
+        {
+          "name": "Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-10-26T18:23:11Z",
+          "completed_at": "2026-10-26T18:23:18Z"
+        },
+        {
+          "name": "Run actions/setup-python@v5",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-10-26T18:23:18Z",
+          "completed_at": "2026-10-26T18:23:18Z"
+        },
+        {
+          "name": "Run actions/setup-java@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4,
+          "started_at": "2026-10-26T18:23:18Z",
+          "completed_at": "2026-10-26T18:23:18Z"
+        },
+        {
+          "name": "Install backend dependencies",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 5,
+          "started_at": "2026-10-26T18:23:18Z",
+          "completed_at": "2026-10-26T18:23:18Z"
+        },
+        {
+          "name": "Install browser mutation dependencies",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 6,
+          "started_at": "2026-10-26T18:23:18Z",
+          "completed_at": "2026-10-26T18:23:18Z"
+        },
+        {
+          "name": "Install mutation Gradle",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 7,
+          "started_at": "2026-10-26T18:23:18Z",
+          "completed_at": "2026-10-26T18:23:27Z"
+        },
+        {
+          "name": "Resolve and prove the Kotlin control before offline mutations",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 8,
+          "started_at": "2026-10-26T18:23:27Z",
+          "completed_at": "2026-10-26T18:25:10Z"
+        },
+        {
+          "name": "Mutation testing (non-blocking)",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 9,
+          "started_at": "2026-10-26T18:25:10Z",
+          "completed_at": "2026-10-26T18:34:05Z"
+        },
+        {
+          "name": "Upload mutation report",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 10,
+          "started_at": "2026-10-26T18:34:05Z",
+          "completed_at": "2026-10-26T18:34:06Z"
+        },
+        {
+          "name": "Post Install mutation Gradle",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 17,
+          "started_at": "2026-10-26T18:34:06Z",
+          "completed_at": "2026-10-26T18:34:06Z"
+        },
+        {
+          "name": "Post Run actions/setup-java@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 18,
+          "started_at": "2026-10-26T18:34:06Z",
+          "completed_at": "2026-10-26T18:34:06Z"
+        },
+        {
+          "name": "Post Run actions/setup-python@v5",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 19,
+          "started_at": "2026-10-26T18:34:06Z",
+          "completed_at": "2026-10-26T18:34:07Z"
+        },
+        {
+          "name": "Post Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 20,
+          "started_at": "2026-10-26T18:34:07Z",
+          "completed_at": "2026-10-26T18:34:07Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 21,
+          "started_at": "2026-10-26T18:34:07Z",
+          "completed_at": "2026-10-26T18:34:07Z"
+        }
+      ],
+      "check_run_url": "https://api.github.com/repos/Vanguduza/Van/check-runs/121763456127",
+      "labels": [
+        "ubuntu-latest"
+      ],
+      "runner_id": 1000025154,
+      "runner_name": "GitHub Actions 1000025154",
+      "runner_group_id": 0,
+      "runner_group_name": "GitHub Actions"
+    },
+    {
+      "id": 121763456148,
+      "run_id": 40377218997,
+      "workflow_name": "van-ci",
+      "head_branch": "ccr-9e07e1af-8mgz1p",
+      "run_url": "https://api.github.com/repos/Vanguduza/Van/actions/runs/40377218997",
+      "run_attempt": 1,
+      "node_id": "CR_kwDOUZyCqc8AAAAcWarklA",
+      "head_sha": "6c7142f126b206ba7f6aeefccb922cc51545c27c",
+      "url": "https://api.github.com/repos/Vanguduza/Van/actions/jobs/121763456148",
+      "html_url": "https://github.com/Vanguduza/Van/actions/runs/40377218997/job/121763456148",
+      "status": "completed",
+      "conclusion": "success",
+      "created_at": "2026-10-26T18:22:55Z",
+      "started_at": "2026-10-26T18:22:57Z",
+      "completed_at": "2026-10-26T18:37:42Z",
+      "name": "mutation (python-3, python, 3/4)",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-10-26T18:22:57Z",
+          "completed_at": "2026-10-26T18:22:59Z"
+        },
+        {
+          "name": "Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-10-26T18:22:59Z",
+          "completed_at": "2026-10-26T18:23:08Z"
+        },
+        {
+          "name": "Run actions/setup-python@v5",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-10-26T18:23:08Z",
+          "completed_at": "2026-10-26T18:23:08Z"
+        },
+        {
+          "name": "Run actions/setup-java@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4,
+          "started_at": "2026-10-26T18:23:08Z",
+          "completed_at": "2026-10-26T18:23:08Z"
+        },
+        {
+          "name": "Install backend dependencies",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5,
+          "started_at": "2026-10-26T18:23:08Z",
+          "completed_at": "2026-10-26T18:23:17Z"
+        },
+        {
+          "name": "Install browser mutation dependencies",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 6,
+          "started_at": "2026-10-26T18:23:17Z",
+          "completed_at": "2026-10-26T18:23:17Z"
+        },
+        {
+          "name": "Install mutation Gradle",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 7,
+          "started_at": "2026-10-26T18:23:17Z",
+          "completed_at": "2026-10-26T18:23:17Z"
+        },
+        {
+          "name": "Resolve and prove the Kotlin control before offline mutations",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 8,
+          "started_at": "2026-10-26T18:23:17Z",
+          "completed_at": "2026-10-26T18:23:17Z"
+        },
+        {
+          "name": "Mutation testing (non-blocking)",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 9,
+          "started_at": "2026-10-26T18:23:17Z",
+          "completed_at": "2026-10-26T18:37:40Z"
+        },
+        {
+          "name": "Upload mutation report",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 10,
+          "started_at": "2026-10-26T18:37:40Z",
+          "completed_at": "2026-10-26T18:37:41Z"
+        },
+        {
+          "name": "Post Run actions/setup-java@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 18,
+          "started_at": "2026-10-26T18:37:41Z",
+          "completed_at": "2026-10-26T18:37:41Z"
+        },
+        {
+          "name": "Post Run actions/setup-python@v5",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 19,
+          "started_at": "2026-10-26T18:37:41Z",
+          "completed_at": "2026-10-26T18:37:41Z"
+        },
+        {
+          "name": "Post Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 20,
+          "started_at": "2026-10-26T18:37:41Z",
+          "completed_at": "2026-10-26T18:37:41Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 21,
+          "started_at": "2026-10-26T18:37:41Z",
+          "completed_at": "2026-10-26T18:37:41Z"
+        }
+      ],
+      "check_run_url": "https://api.github.com/repos/Vanguduza/Van/check-runs/121763456148",
+      "labels": [
+        "ubuntu-latest"
+      ],
+      "runner_id": 1000025147,
+      "runner_name": "GitHub Actions 1000025147",
+      "runner_group_id": 0,
+      "runner_group_name": "GitHub Actions"
+    },
+    {
+      "id": 121763456167,
+      "run_id": 40377218997,
+      "workflow_name": "van-ci",
+      "head_branch": "ccr-9e07e1af-8mgz1p",
+      "run_url": "https://api.github.com/repos/Vanguduza/Van/actions/runs/40377218997",
+      "run_attempt": 1,
+      "node_id": "CR_kwDOUZyCqc8AAAAcWarkpw",
+      "head_sha": "6c7142f126b206ba7f6aeefccb922cc51545c27c",
+      "url": "https://api.github.com/repos/Vanguduza/Van/actions/jobs/121763456167",
+      "html_url": "https://github.com/Vanguduza/Van/actions/runs/40377218997/job/121763456167",
+      "status": "completed",
+      "conclusion": "success",
+      "created_at": "2026-10-26T18:22:55Z",
+      "started_at": "2026-10-26T18:23:15Z",
+      "completed_at": "2026-10-26T18:44:33Z",
+      "name": "mutation (python-1, python, 1/4)",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-10-26T18:23:16Z",
+          "completed_at": "2026-10-26T18:23:18Z"
+        },
+        {
+          "name": "Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-10-26T18:23:18Z",
+          "completed_at": "2026-10-26T18:23:22Z"
+        },
+        {
+          "name": "Run actions/setup-python@v5",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-10-26T18:23:22Z",
+          "completed_at": "2026-10-26T18:23:23Z"
+        },
+        {
+          "name": "Run actions/setup-java@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4,
+          "started_at": "2026-10-26T18:23:23Z",
+          "completed_at": "2026-10-26T18:23:23Z"
+        },
+        {
+          "name": "Install backend dependencies",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5,
+          "started_at": "2026-10-26T18:23:23Z",
+          "completed_at": "2026-10-26T18:23:34Z"
+        },
+        {
+          "name": "Install browser mutation dependencies",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 6,
+          "started_at": "2026-10-26T18:23:34Z",
+          "completed_at": "2026-10-26T18:23:34Z"
+        },
+        {
+          "name": "Install mutation Gradle",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 7,
+          "started_at": "2026-10-26T18:23:34Z",
+          "completed_at": "2026-10-26T18:23:34Z"
+        },
+        {
+          "name": "Resolve and prove the Kotlin control before offline mutations",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 8,
+          "started_at": "2026-10-26T18:23:34Z",
+          "completed_at": "2026-10-26T18:23:34Z"
+        },
+        {
+          "name": "Mutation testing (non-blocking)",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 9,
+          "started_at": "2026-10-26T18:23:34Z",
+          "completed_at": "2026-10-26T18:44:30Z"
+        },
+        {
+          "name": "Upload mutation report",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 10,
+          "started_at": "2026-10-26T18:44:30Z",
+          "completed_at": "2026-10-26T18:44:31Z"
+        },
+        {
+          "name": "Post Run actions/setup-java@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 18,
+          "started_at": "2026-10-26T18:44:31Z",
+          "completed_at": "2026-10-26T18:44:31Z"
+        },
+        {
+          "name": "Post Run actions/setup-python@v5",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 19,
+          "started_at": "2026-10-26T18:44:31Z",
+          "completed_at": "2026-10-26T18:44:31Z"
+        },
+        {
+          "name": "Post Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 20,
+          "started_at": "2026-10-26T18:44:31Z",
+          "completed_at": "2026-10-26T18:44:32Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 21,
+          "started_at": "2026-10-26T18:44:32Z",
+          "completed_at": "2026-10-26T18:44:32Z"
+        }
+      ],
+      "check_run_url": "https://api.github.com/repos/Vanguduza/Van/check-runs/121763456167",
+      "labels": [
+        "ubuntu-latest"
+      ],
+      "runner_id": 1000025155,
+      "runner_name": "GitHub Actions 1000025155",
+      "runner_group_id": 0,
+      "runner_group_name": "GitHub Actions"
+    },
+    {
+      "id": 121763456171,
+      "run_id": 40377218997,
+      "workflow_name": "van-ci",
+      "head_branch": "ccr-9e07e1af-8mgz1p",
+      "run_url": "https://api.github.com/repos/Vanguduza/Van/actions/runs/40377218997",
+      "run_attempt": 1,
+      "node_id": "CR_kwDOUZyCqc8AAAAcWarkqw",
+      "head_sha": "6c7142f126b206ba7f6aeefccb922cc51545c27c",
+      "url": "https://api.github.com/repos/Vanguduza/Van/actions/jobs/121763456171",
+      "html_url": "https://github.com/Vanguduza/Van/actions/runs/40377218997/job/121763456171",
+      "status": "completed",
+      "conclusion": "failure",
+      "created_at": "2026-10-26T18:22:55Z",
+      "started_at": "2026-10-26T18:24:45Z",
+      "completed_at": "2026-10-26T18:24:58Z",
+      "name": "backend",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-10-26T18:24:46Z",
+          "completed_at": "2026-10-26T18:24:48Z"
+        },
+        {
+          "name": "Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-10-26T18:24:48Z",
+          "completed_at": "2026-10-26T18:24:57Z"
+        },
+        {
+          "name": "Require the DDS contract read key",
+          "status": "completed",
+          "conclusion": "failure",
+          "number": 3,
+          "started_at": "2026-10-26T18:24:57Z",
+          "completed_at": "2026-10-26T18:24:57Z"
+        },
+        {
+          "name": "Check out pinned DDS source contracts (sibling)",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 4,
+          "started_at": "2026-10-26T18:24:57Z",
+          "completed_at": "2026-10-26T18:24:57Z"
+        },
+        {
+          "name": "Verify pinned DDS contract blobs and place the sibling",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 5,
+          "started_at": "2026-10-26T18:24:57Z",
+          "completed_at": "2026-10-26T18:24:57Z"
+        },
+        {
+          "name": "Run actions/setup-python@v5",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 6,
+          "started_at": "2026-10-26T18:24:57Z",
+          "completed_at": "2026-10-26T18:24:57Z"
+        },
+        {
+          "name": "Run actions/setup-node@v4",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 7,
+          "started_at": "2026-10-26T18:24:57Z",
+          "completed_at": "2026-10-26T18:24:57Z"
+        },
+        {
+          "name": "Install backend dependencies",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 8,
+          "started_at": "2026-10-26T18:24:57Z",
+          "completed_at": "2026-10-26T18:24:57Z"
+        },
+        {
+          "name": "Maturity gate (truth and policy)",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 9,
+          "started_at": "2026-10-26T18:24:57Z",
+          "completed_at": "2026-10-26T18:24:57Z"
+        },
+        {
+          "name": "Authority map (which document owns which invariant)",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 10,
+          "started_at": "2026-10-26T18:24:57Z",
+          "completed_at": "2026-10-26T18:24:57Z"
+        },
+        {
+          "name": "Character Forge pinned Rive CLI authoring smoke",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 11,
+          "started_at": "2026-10-26T18:24:57Z",
+          "completed_at": "2026-10-26T18:24:57Z"
+        },
+        {
+          "name": "Backend tests",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 12,
+          "started_at": "2026-10-26T18:24:57Z",
+          "completed_at": "2026-10-26T18:24:57Z"
+        },
+        {
+          "name": "Contract tests",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 13,
+          "started_at": "2026-10-26T18:24:57Z",
+          "completed_at": "2026-10-26T18:24:57Z"
+        },
+        {
+          "name": "OpenMuse → VAN convergence repository certification",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 14,
+          "started_at": "2026-10-26T18:24:57Z",
+          "completed_at": "2026-10-26T18:24:57Z"
+        },
+        {
+          "name": "Upload OpenMuse → VAN convergence evidence",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 15,
+          "started_at": "2026-10-26T18:24:57Z",
+          "completed_at": "2026-10-26T18:24:57Z"
+        },
+        {
+          "name": "Browser Control Agent and stream-host logic",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 16,
+          "started_at": "2026-10-26T18:24:57Z",
+          "completed_at": "2026-10-26T18:24:57Z"
+        },
+        {
+          "name": "Kotlin reachability (what nothing in the app reaches)",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 17,
+          "started_at": "2026-10-26T18:24:57Z",
+          "completed_at": "2026-10-26T18:24:57Z"
+        },
+        {
+          "name": "Ledger reconciliation (does the source still agree?)",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 18,
+          "started_at": "2026-10-26T18:24:57Z",
+          "completed_at": "2026-10-26T18:24:57Z"
+        },
+        {
+          "name": "Red-team register (§38)",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 19,
+          "started_at": "2026-10-26T18:24:57Z",
+          "completed_at": "2026-10-26T18:24:57Z"
+        },
+        {
+          "name": "Red-team register self-test",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 20,
+          "started_at": "2026-10-26T18:24:57Z",
+          "completed_at": "2026-10-26T18:24:57Z"
+        },
+        {
+          "name": "Production acceptance (§43)",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 21,
+          "started_at": "2026-10-26T18:24:57Z",
+          "completed_at": "2026-10-26T18:24:57Z"
+        },
+        {
+          "name": "Production acceptance self-test",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 22,
+          "started_at": "2026-10-26T18:24:57Z",
+          "completed_at": "2026-10-26T18:24:57Z"
+        },
+        {
+          "name": "Maturity gate self-test",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 23,
+          "started_at": "2026-10-26T18:24:57Z",
+          "completed_at": "2026-10-26T18:24:57Z"
+        },
+        {
+          "name": "Authority map self-test",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 24,
+          "started_at": "2026-10-26T18:24:57Z",
+          "completed_at": "2026-10-26T18:24:57Z"
+        },
+        {
+          "name": "Hermes policy tests",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 25,
+          "started_at": "2026-10-26T18:24:57Z",
+          "completed_at": "2026-10-26T18:24:57Z"
+        },
+        {
+          "name": "Hermes profile layout tests",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 26,
+          "started_at": "2026-10-26T18:24:57Z",
+          "completed_at": "2026-10-26T18:24:57Z"
+        },
+        {
+          "name": "Trading stack-lock and adoption-proposal tests",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 27,
+          "started_at": "2026-10-26T18:24:57Z",
+          "completed_at": "2026-10-26T18:24:57Z"
+        },
+        {
+          "name": "Trading enhancement architecture guardrails",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 28,
+          "started_at": "2026-10-26T18:24:57Z",
+          "completed_at": "2026-10-26T18:24:57Z"
+        },
+        {
+          "name": "Capsule timeframe migration is settled",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 29,
+          "started_at": "2026-10-26T18:24:57Z",
+          "completed_at": "2026-10-26T18:24:57Z"
+        },
+        {
+          "name": "Trading enhancement tests",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 30,
+          "started_at": "2026-10-26T18:24:57Z",
+          "completed_at": "2026-10-26T18:24:57Z"
+        },
+        {
+          "name": "Trading Rev 5.1 certification harness",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 31,
+          "started_at": "2026-10-26T18:24:57Z",
+          "completed_at": "2026-10-26T18:24:57Z"
+        },
+        {
+          "name": "Automation and browser fabric tests",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 32,
+          "started_at": "2026-10-26T18:24:57Z",
+          "completed_at": "2026-10-26T18:24:57Z"
+        },
+        {
+          "name": "Automation fail-closed proof",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 33,
+          "started_at": "2026-10-26T18:24:57Z",
+          "completed_at": "2026-10-26T18:24:57Z"
+        },
+        {
+          "name": "Context retrieval latency evidence",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 34,
+          "started_at": "2026-10-26T18:24:57Z",
+          "completed_at": "2026-10-26T18:24:57Z"
+        },
+        {
+          "name": "Upload context latency evidence",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 35,
+          "started_at": "2026-10-26T18:24:57Z",
+          "completed_at": "2026-10-26T18:24:57Z"
+        },
+        {
+          "name": "Post Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 70,
+          "started_at": "2026-10-26T18:24:57Z",
+          "completed_at": "2026-10-26T18:24:57Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 71,
+          "started_at": "2026-10-26T18:24:57Z",
+          "completed_at": "2026-10-26T18:24:57Z"
+        }
+      ],
+      "check_run_url": "https://api.github.com/repos/Vanguduza/Van/check-runs/121763456171",
+      "labels": [
+        "ubuntu-latest"
+      ],
+      "runner_id": 1000025159,
+      "runner_name": "GitHub Actions 1000025159",
+      "runner_group_id": 0,
+      "runner_group_name": "GitHub Actions"
+    },
+    {
+      "id": 121763456178,
+      "run_id": 40377218997,
+      "workflow_name": "van-ci",
+      "head_branch": "ccr-9e07e1af-8mgz1p",
+      "run_url": "https://api.github.com/repos/Vanguduza/Van/actions/runs/40377218997",
+      "run_attempt": 1,
+      "node_id": "CR_kwDOUZyCqc8AAAAcWarksg",
+      "head_sha": "6c7142f126b206ba7f6aeefccb922cc51545c27c",
+      "url": "https://api.github.com/repos/Vanguduza/Van/actions/jobs/121763456178",
+      "html_url": "https://github.com/Vanguduza/Van/actions/runs/40377218997/job/121763456178",
+      "status": "completed",
+      "conclusion": "success",
+      "created_at": "2026-10-26T18:22:55Z",
+      "started_at": "2026-10-26T18:22:57Z",
+      "completed_at": "2026-10-26T18:34:36Z",
+      "name": "mutation (kotlin-1, kotlin, 1/4)",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-10-26T18:22:57Z",
+          "completed_at": "2026-10-26T18:22:59Z"
+        },
+        {
+          "name": "Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-10-26T18:22:59Z",
+          "completed_at": "2026-10-26T18:23:08Z"
+        },
+        {
+          "name": "Run actions/setup-python@v5",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-10-26T18:23:08Z",
+          "completed_at": "2026-10-26T18:23:08Z"
+        },
+        {
+          "name": "Run actions/setup-java@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4,
+          "started_at": "2026-10-26T18:23:08Z",
+          "completed_at": "2026-10-26T18:23:08Z"
+        },
+        {
+          "name": "Install backend dependencies",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 5,
+          "started_at": "2026-10-26T18:23:08Z",
+          "completed_at": "2026-10-26T18:23:08Z"
+        },
+        {
+          "name": "Install browser mutation dependencies",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 6,
+          "started_at": "2026-10-26T18:23:08Z",
+          "completed_at": "2026-10-26T18:23:08Z"
+        },
+        {
+          "name": "Install mutation Gradle",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 7,
+          "started_at": "2026-10-26T18:23:08Z",
+          "completed_at": "2026-10-26T18:23:15Z"
+        },
+        {
+          "name": "Resolve and prove the Kotlin control before offline mutations",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 8,
+          "started_at": "2026-10-26T18:23:15Z",
+          "completed_at": "2026-10-26T18:25:04Z"
+        },
+        {
+          "name": "Mutation testing (non-blocking)",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 9,
+          "started_at": "2026-10-26T18:25:04Z",
+          "completed_at": "2026-10-26T18:34:32Z"
+        },
+        {
+          "name": "Upload mutation report",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 10,
+          "started_at": "2026-10-26T18:34:32Z",
+          "completed_at": "2026-10-26T18:34:33Z"
+        },
+        {
+          "name": "Post Install mutation Gradle",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 17,
+          "started_at": "2026-10-26T18:34:33Z",
+          "completed_at": "2026-10-26T18:34:33Z"
+        },
+        {
+          "name": "Post Run actions/setup-java@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 18,
+          "started_at": "2026-10-26T18:34:33Z",
+          "completed_at": "2026-10-26T18:34:34Z"
+        },
+        {
+          "name": "Post Run actions/setup-python@v5",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 19,
+          "started_at": "2026-10-26T18:34:34Z",
+          "completed_at": "2026-10-26T18:34:34Z"
+        },
+        {
+          "name": "Post Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 20,
+          "started_at": "2026-10-26T18:34:34Z",
+          "completed_at": "2026-10-26T18:34:34Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 21,
+          "started_at": "2026-10-26T18:34:34Z",
+          "completed_at": "2026-10-26T18:34:34Z"
+        }
+      ],
+      "check_run_url": "https://api.github.com/repos/Vanguduza/Van/check-runs/121763456178",
+      "labels": [
+        "ubuntu-latest"
+      ],
+      "runner_id": 1000025152,
+      "runner_name": "GitHub Actions 1000025152",
+      "runner_group_id": 0,
+      "runner_group_name": "GitHub Actions"
+    },
+    {
+      "id": 121763456194,
+      "run_id": 40377218997,
+      "workflow_name": "van-ci",
+      "head_branch": "ccr-9e07e1af-8mgz1p",
+      "run_url": "https://api.github.com/repos/Vanguduza/Van/actions/runs/40377218997",
+      "run_attempt": 1,
+      "node_id": "CR_kwDOUZyCqc8AAAAcWarkwg",
+      "head_sha": "6c7142f126b206ba7f6aeefccb922cc51545c27c",
+      "url": "https://api.github.com/repos/Vanguduza/Van/actions/jobs/121763456194",
+      "html_url": "https://github.com/Vanguduza/Van/actions/runs/40377218997/job/121763456194",
+      "status": "completed",
+      "conclusion": "success",
+      "created_at": "2026-10-26T18:22:55Z",
+      "started_at": "2026-10-26T18:23:46Z",
+      "completed_at": "2026-10-26T18:30:27Z",
+      "name": "mutation (python-2, python, 2/4)",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-10-26T18:23:46Z",
+          "completed_at": "2026-10-26T18:23:49Z"
+        },
+        {
+          "name": "Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-10-26T18:23:49Z",
+          "completed_at": "2026-10-26T18:24:01Z"
+        },
+        {
+          "name": "Run actions/setup-python@v5",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-10-26T18:24:01Z",
+          "completed_at": "2026-10-26T18:24:01Z"
+        },
+        {
+          "name": "Run actions/setup-java@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4,
+          "started_at": "2026-10-26T18:24:01Z",
+          "completed_at": "2026-10-26T18:24:01Z"
+        },
+        {
+          "name": "Install backend dependencies",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5,
+          "started_at": "2026-10-26T18:24:01Z",
+          "completed_at": "2026-10-26T18:24:08Z"
+        },
+        {
+          "name": "Install browser mutation dependencies",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 6,
+          "started_at": "2026-10-26T18:24:08Z",
+          "completed_at": "2026-10-26T18:24:08Z"
+        },
+        {
+          "name": "Install mutation Gradle",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 7,
+          "started_at": "2026-10-26T18:24:08Z",
+          "completed_at": "2026-10-26T18:24:08Z"
+        },
+        {
+          "name": "Resolve and prove the Kotlin control before offline mutations",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 8,
+          "started_at": "2026-10-26T18:24:08Z",
+          "completed_at": "2026-10-26T18:24:08Z"
+        },
+        {
+          "name": "Mutation testing (non-blocking)",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 9,
+          "started_at": "2026-10-26T18:24:08Z",
+          "completed_at": "2026-10-26T18:30:22Z"
+        },
+        {
+          "name": "Upload mutation report",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 10,
+          "started_at": "2026-10-26T18:30:22Z",
+          "completed_at": "2026-10-26T18:30:24Z"
+        },
+        {
+          "name": "Post Run actions/setup-java@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 18,
+          "started_at": "2026-10-26T18:30:24Z",
+          "completed_at": "2026-10-26T18:30:24Z"
+        },
+        {
+          "name": "Post Run actions/setup-python@v5",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 19,
+          "started_at": "2026-10-26T18:30:24Z",
+          "completed_at": "2026-10-26T18:30:24Z"
+        },
+        {
+          "name": "Post Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 20,
+          "started_at": "2026-10-26T18:30:24Z",
+          "completed_at": "2026-10-26T18:30:24Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 21,
+          "started_at": "2026-10-26T18:30:24Z",
+          "completed_at": "2026-10-26T18:30:24Z"
+        }
+      ],
+      "check_run_url": "https://api.github.com/repos/Vanguduza/Van/check-runs/121763456194",
+      "labels": [
+        "ubuntu-latest"
+      ],
+      "runner_id": 1000025156,
+      "runner_name": "GitHub Actions 1000025156",
+      "runner_group_id": 0,
+      "runner_group_name": "GitHub Actions"
+    },
+    {
+      "id": 121763456330,
+      "run_id": 40377218997,
+      "workflow_name": "van-ci",
+      "head_branch": "ccr-9e07e1af-8mgz1p",
+      "run_url": "https://api.github.com/repos/Vanguduza/Van/actions/runs/40377218997",
+      "run_attempt": 1,
+      "node_id": "CR_kwDOUZyCqc8AAAAcWarlSg",
+      "head_sha": "6c7142f126b206ba7f6aeefccb922cc51545c27c",
+      "url": "https://api.github.com/repos/Vanguduza/Van/actions/jobs/121763456330",
+      "html_url": "https://github.com/Vanguduza/Van/actions/runs/40377218997/job/121763456330",
+      "status": "completed",
+      "conclusion": "success",
+      "created_at": "2026-10-26T18:22:55Z",
+      "started_at": "2026-10-26T18:23:59Z",
+      "completed_at": "2026-10-26T18:43:52Z",
+      "name": "mutation (python-0, python, 0/4)",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-10-26T18:24:00Z",
+          "completed_at": "2026-10-26T18:24:04Z"
+        },
+        {
+          "name": "Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-10-26T18:24:04Z",
+          "completed_at": "2026-10-26T18:24:11Z"
+        },
+        {
+          "name": "Run actions/setup-python@v5",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-10-26T18:24:11Z",
+          "completed_at": "2026-10-26T18:24:11Z"
+        },
+        {
+          "name": "Run actions/setup-java@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4,
+          "started_at": "2026-10-26T18:24:11Z",
+          "completed_at": "2026-10-26T18:24:11Z"
+        },
+        {
+          "name": "Install backend dependencies",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5,
+          "started_at": "2026-10-26T18:24:11Z",
+          "completed_at": "2026-10-26T18:24:28Z"
+        },
+        {
+          "name": "Install browser mutation dependencies",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 6,
+          "started_at": "2026-10-26T18:24:28Z",
+          "completed_at": "2026-10-26T18:24:28Z"
+        },
+        {
+          "name": "Install mutation Gradle",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 7,
+          "started_at": "2026-10-26T18:24:28Z",
+          "completed_at": "2026-10-26T18:24:28Z"
+        },
+        {
+          "name": "Resolve and prove the Kotlin control before offline mutations",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 8,
+          "started_at": "2026-10-26T18:24:28Z",
+          "completed_at": "2026-10-26T18:24:28Z"
+        },
+        {
+          "name": "Mutation testing (non-blocking)",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 9,
+          "started_at": "2026-10-26T18:24:28Z",
+          "completed_at": "2026-10-26T18:43:48Z"
+        },
+        {
+          "name": "Upload mutation report",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 10,
+          "started_at": "2026-10-26T18:43:48Z",
+          "completed_at": "2026-10-26T18:43:49Z"
+        },
+        {
+          "name": "Post Run actions/setup-java@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 18,
+          "started_at": "2026-10-26T18:43:49Z",
+          "completed_at": "2026-10-26T18:43:49Z"
+        },
+        {
+          "name": "Post Run actions/setup-python@v5",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 19,
+          "started_at": "2026-10-26T18:43:49Z",
+          "completed_at": "2026-10-26T18:43:50Z"
+        },
+        {
+          "name": "Post Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 20,
+          "started_at": "2026-10-26T18:43:50Z",
+          "completed_at": "2026-10-26T18:43:50Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 21,
+          "started_at": "2026-10-26T18:43:50Z",
+          "completed_at": "2026-10-26T18:43:50Z"
+        }
+      ],
+      "check_run_url": "https://api.github.com/repos/Vanguduza/Van/check-runs/121763456330",
+      "labels": [
+        "ubuntu-latest"
+      ],
+      "runner_id": 1000025157,
+      "runner_name": "GitHub Actions 1000025157",
+      "runner_group_id": 0,
+      "runner_group_name": "GitHub Actions"
+    },
+    {
+      "id": 121770469220,
+      "run_id": 40377218997,
+      "workflow_name": "van-ci",
+      "head_branch": "ccr-9e07e1af-8mgz1p",
+      "run_url": "https://api.github.com/repos/Vanguduza/Van/actions/runs/40377218997",
+      "run_attempt": 1,
+      "node_id": "CR_kwDOUZyCqc8AAAAcWhXnZA",
+      "head_sha": "6c7142f126b206ba7f6aeefccb922cc51545c27c",
+      "url": "https://api.github.com/repos/Vanguduza/Van/actions/jobs/121770469220",
+      "html_url": "https://github.com/Vanguduza/Van/actions/runs/40377218997/job/121770469220",
+      "status": "completed",
+      "conclusion": "success",
+      "created_at": "2026-10-26T18:36:15Z",
+      "started_at": "2026-10-26T18:36:18Z",
+      "completed_at": "2026-10-26T18:36:35Z",
+      "name": "character-forge-gate",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-10-26T18:36:19Z",
+          "completed_at": "2026-10-26T18:36:21Z"
+        },
+        {
+          "name": "Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-10-26T18:36:21Z",
+          "completed_at": "2026-10-26T18:36:31Z"
+        },
+        {
+          "name": "Download Character Forge validation binding",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-10-26T18:36:31Z",
+          "completed_at": "2026-10-26T18:36:32Z"
+        },
+        {
+          "name": "Rive asset present means RiveContractTest must have passed",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4,
+          "started_at": "2026-10-26T18:36:32Z",
+          "completed_at": "2026-10-26T18:36:32Z"
+        },
+        {
+          "name": "Post Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 8,
+          "started_at": "2026-10-26T18:36:32Z",
+          "completed_at": "2026-10-26T18:36:33Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 9,
+          "started_at": "2026-10-26T18:36:33Z",
+          "completed_at": "2026-10-26T18:36:33Z"
+        }
+      ],
+      "check_run_url": "https://api.github.com/repos/Vanguduza/Van/check-runs/121770469220",
+      "labels": [
+        "ubuntu-latest"
+      ],
+      "runner_id": 1000025161,
+      "runner_name": "GitHub Actions 1000025161",
+      "runner_group_id": 0,
+      "runner_group_name": "GitHub Actions"
+    }
+  ]
+}

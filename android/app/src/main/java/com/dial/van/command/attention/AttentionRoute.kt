@@ -1,6 +1,7 @@
 package com.dial.van.command.attention
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -12,6 +13,7 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -26,6 +28,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.fragment.app.FragmentActivity
 import com.dial.van.VanApplication
 import com.dial.van.command.objectList
+import com.dial.van.command.nav.VanRoute
+import com.dial.van.command.owner.ownerTime
 import com.dial.van.design.AttentionSeverity
 import com.dial.van.design.LocalVanTokens
 import com.dial.van.design.ScreenState
@@ -37,6 +41,7 @@ import com.dial.van.design.components.StatusChip
 import com.dial.van.design.components.VanPanel
 import com.dial.van.design.components.VanPressable
 import com.dial.van.design.components.VanScreen
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
 import org.json.JSONObject
 
@@ -66,23 +71,51 @@ fun AttentionRoute(app: VanApplication, onOpenRoute: (String) -> Unit = {}) {
     var data by remember { mutableStateOf<AttentionData?>(null) }
     var loading by remember { mutableStateOf(true) }
     var error by remember { mutableStateOf<String?>(null) }
+    var mutationError by remember { mutableStateOf<String?>(null) }
+    var mutationNotice by remember { mutableStateOf<String?>(null) }
+    var pendingMutations by remember { mutableStateOf<Set<String>>(emptySet()) }
     var filter by remember { mutableStateOf<AttentionSeverity?>(null) }
     val commandState by app.commandController.state.collectAsState()
     val activity = LocalContext.current as? FragmentActivity
 
-    fun load() {
-        scope.launch {
-            loading = true
-            runCatching {
-                AttentionData(
-                    items = app.gatewayClient.attention().objectList(),
-                    decisions = app.gatewayClient.decisions().objectList(),
-                )
-            }.onSuccess { data = it; error = null; loading = false }
-                .onFailure { error = it.message ?: "VAN could not load what is waiting on you."; loading = false }
+    suspend fun refresh() {
+        loading = true
+        try {
+            data = AttentionData(
+                items = app.gatewayClient.attention().objectList(),
+                decisions = app.gatewayClient.decisions().objectList(),
+            )
+            error = null
+        } catch (cancel: CancellationException) {
+            throw cancel
+        } catch (failure: Exception) {
+            error = failure.message ?: "VAN could not load what is waiting on you."
+        } finally {
+            loading = false
         }
     }
+    fun load() { scope.launch { refresh() } }
     LaunchedEffect(Unit) { load() }
+
+    fun mutate(key: String, success: String, action: suspend () -> JSONObject) {
+        if (key in pendingMutations) return
+        pendingMutations = pendingMutations + key
+        mutationError = null
+        mutationNotice = null
+        scope.launch {
+            try {
+                action()
+                mutationNotice = success
+                refresh()
+            } catch (cancel: CancellationException) {
+                throw cancel
+            } catch (failure: Exception) {
+                mutationError = "Could not save that change: ${failure.message ?: "VAN could not reach its gateway."} Try again."
+            } finally {
+                pendingMutations = pendingMutations - key
+            }
+        }
+    }
 
     val quietHours = app.notificationPolicyStore.quietHours()
     val state: ScreenState<AttentionData> = ScreenStateMerge.merge(
@@ -92,122 +125,125 @@ fun AttentionRoute(app: VanApplication, onOpenRoute: (String) -> Unit = {}) {
         emptySentence = "Nothing needs you right now.",
     )
 
-    VanScreen(state = state, onRetry = ::load) { attention ->
-        val visible = attention.items.filter { item ->
-            filter == null || item.optString("severity") == filter?.name
-        }
-        LazyColumn(
-            modifier = Modifier.fillMaxSize().padding(horizontal = tokens.space.pageGutter),
-            verticalArrangement = Arrangement.spacedBy(tokens.space.space3),
-            contentPadding = PaddingValues(vertical = tokens.space.space3),
-        ) {
-            item { SectionHeader("Attention") }
-
-            if (quietHours.enabled) {
-                item {
-                    VanPanel(dense = true) {
-                        Row(horizontalArrangement = Arrangement.spacedBy(tokens.space.space2)) {
-                            StatusChip(label = "QUIET HOURS", role = StatusSemantics.ROLE_MONITOR)
-                            Text(
-                                "VAN is only surfacing priority apps until ${quietHours.endHour}:00.",
-                                style = tokens.type.label,
-                                color = tokens.color.textSecondary,
-                            )
+    Column(modifier = Modifier.fillMaxSize()) {
+        OutlinedButton(modifier = Modifier.padding(horizontal = tokens.space.pageGutter), onClick = { onOpenRoute(VanRoute.REMINDERS) }) { Text("Manage reminders") }
+        Box(modifier = Modifier.weight(1f)) {
+            VanScreen(state = state, onRetry = ::load) { attention ->
+                val visible = attention.items.filter { item ->
+                    filter == null || item.optString("severity") == filter?.name
+                }
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize().padding(horizontal = tokens.space.pageGutter),
+                    verticalArrangement = Arrangement.spacedBy(tokens.space.space3),
+                    contentPadding = PaddingValues(vertical = tokens.space.space3),
+                ) {
+                    item { SectionHeader("Attention") }
+                    mutationError?.let { message ->
+                        item {
+                            Text(message, style = tokens.type.body, color = tokens.color.forStatusRole(StatusSemantics.ROLE_EVENT_RISK))
                         }
                     }
-                }
-            }
+                    mutationNotice?.let { message ->
+                        item { Text(message, style = tokens.type.label, color = tokens.color.textSecondary) }
+                    }
+                    if (error != null) {
+                        item {
+                            Text(error!!, style = tokens.type.body, color = tokens.color.forStatusRole(StatusSemantics.ROLE_EVENT_RISK))
+                            Button(onClick = ::load) { Text("Retry refresh") }
+                        }
+                    }
 
-            commandState.pendingA4Approval?.let { pending ->
-                item {
-                    VanPanel {
-                        Column(verticalArrangement = Arrangement.spacedBy(tokens.space.space2)) {
-                            Row(horizontalArrangement = Arrangement.spacedBy(tokens.space.space2)) {
-                                Text("Owner approval required", style = tokens.type.headline, color = tokens.color.textPrimary)
-                                StatusChip(label = "PENDING", role = StatusSemantics.ROLE_EVENT_RISK)
+                    if (quietHours.enabled) {
+                        item {
+                            VanPanel(dense = true) {
+                                Row(horizontalArrangement = Arrangement.spacedBy(tokens.space.space2)) {
+                                    StatusChip(label = "QUIET HOURS", role = StatusSemantics.ROLE_MONITOR)
+                                    Text(
+                                        "VAN is only surfacing priority apps until ${quietHours.endHour}:00.",
+                                        style = tokens.type.label,
+                                        color = tokens.color.textSecondary,
+                                    )
+                                }
                             }
-                            Text(pending.resolvedActionId, style = tokens.type.body, color = tokens.color.textSecondary)
-                            Text(
-                                "VAN needs your fingerprint or face before doing this, because you cannot easily undo it.",
-                                style = tokens.type.label,
-                                color = tokens.color.textTertiary,
-                            )
-                            Button(
-                                enabled = activity != null && !commandState.submitting,
-                                onClick = { activity?.let { app.commandController.approvePendingA4(it) } },
-                            ) { Text("Approve") }
                         }
                     }
-                }
-            }
 
-            item {
-                LazyRow(horizontalArrangement = Arrangement.spacedBy(tokens.space.space2)) {
-                    item {
-                        FilterChip("ALL", filter == null) { filter = null }
-                    }
-                    items(AttentionSeverity.entries.toList()) { severity ->
-                        FilterChip(severity.name.replace('_', ' '), filter == severity) { filter = severity }
-                    }
-                }
-            }
-
-            if (visible.isEmpty()) {
-                item { Text("Nothing matches this filter.", style = tokens.type.body, color = tokens.color.textSecondary) }
-            }
-            items(visible, key = { it.optString("id") }) { record ->
-                val severity = runCatching { AttentionSeverity.valueOf(record.optString("severity")) }
-                    .getOrDefault(AttentionSeverity.INFO)
-                val devRoute = dialDevRouteFor(record)
-                AttentionItem(
-                    title = record.optString("title", "Attention item"),
-                    severity = severity,
-                    detail = record.optString("source").takeIf { it.isNotBlank() },
-                    onOpen = devRoute?.let { route -> { onOpenRoute(route) } },
-                    onAck = {
-                        scope.launch {
-                            runCatching { app.gatewayClient.attentionAck(record.optString("id")) }
-                                .onSuccess { load() }
-                        }
-                    },
-                    onSnooze = {
-                        scope.launch {
-                            // The swipe gesture is deliberately one-hour. Longer/shorter
-                            // durations belong in the detail surface; the gesture itself
-                            // must remain a single deterministic action.
-                            val until = (System.currentTimeMillis() / 1000L) + 60L * 60L
-                            runCatching {
-                                app.gatewayClient.attentionSnooze(record.optString("id"), until)
-                            }.onSuccess { load() }
-                        }
-                    },
-                )
-            }
-
-            if (attention.decisions.isNotEmpty()) {
-                item { SectionHeader("Decisions", detail = "Owner escalations") }
-                items(attention.decisions, key = { it.optString("id") }) { decision ->
-                    VanPanel {
-                        Column(verticalArrangement = Arrangement.spacedBy(tokens.space.space2)) {
-                            Text(decision.optString("title", "Decision"), style = tokens.type.headline, color = tokens.color.textPrimary)
-                            Text(decision.optString("body"), style = tokens.type.body, color = tokens.color.textSecondary)
-                            Row(horizontalArrangement = Arrangement.spacedBy(tokens.space.space2)) {
-                                Button(onClick = {
-                                    scope.launch {
-                                        runCatching { app.gatewayClient.resolveDecision(decision.getString("id"), true) }
-                                            .onSuccess { load() }
+                    commandState.pendingA4Approval?.let { pending ->
+                        item {
+                            VanPanel {
+                                Column(verticalArrangement = Arrangement.spacedBy(tokens.space.space2)) {
+                                    Row(horizontalArrangement = Arrangement.spacedBy(tokens.space.space2)) {
+                                        Text("Owner approval required", style = tokens.type.headline, color = tokens.color.textPrimary)
+                                        StatusChip(label = "PENDING", role = StatusSemantics.ROLE_EVENT_RISK)
                                     }
-                                }) { Text("Approve") }
-                                Button(
-                                    onClick = {
-                                        scope.launch {
-                                            runCatching { app.gatewayClient.resolveDecision(decision.getString("id"), false) }
-                                                .onSuccess { load() }
-                                        }
-                                    },
-                                    colors = ButtonDefaults.buttonColors(containerColor = tokens.color.forStatusRole(StatusSemantics.ROLE_CRITICAL)),
-                                ) { Text("Refuse") }
+                                    Text(pending.resolvedActionId, style = tokens.type.body, color = tokens.color.textSecondary)
+                                    Text(pending.command.text, style = tokens.type.body, color = tokens.color.textPrimary)
+                                    Text(
+                                        "Approve this exact action with device biometrics. Approval expires ${ownerTime(pending.expiresAtUnix * 1_000L)}.",
+                                        style = tokens.type.label,
+                                        color = tokens.color.textTertiary,
+                                    )
+                                    Button(
+                                        enabled = !commandState.submitting && System.currentTimeMillis() / 1_000L < pending.expiresAtUnix && (pending.resolvedActionId == "google.gmail.send" || activity != null),
+                                        onClick = {
+                                            if (pending.resolvedActionId == "google.gmail.send") onOpenRoute(VanRoute.WORK)
+                                            else activity?.let { app.commandController.approvePendingA4(it) }
+                                        },
+                                    ) { Text(if (pending.resolvedActionId == "google.gmail.send") "Review draft in Work" else "Approve") }
+                                }
                             }
+                        }
+                    }
+
+                    item {
+                        LazyRow(horizontalArrangement = Arrangement.spacedBy(tokens.space.space2)) {
+                            item {
+                                FilterChip("ALL", filter == null) { filter = null }
+                            }
+                            items(AttentionSeverity.entries.toList()) { severity ->
+                                FilterChip(severity.name.replace('_', ' '), filter == severity) { filter = severity }
+                            }
+                        }
+                    }
+
+                    if (visible.isEmpty()) {
+                        item { Text("Nothing matches this filter.", style = tokens.type.body, color = tokens.color.textSecondary) }
+                    }
+                    items(visible, key = { it.optString("id") }) { record ->
+                        val severity = runCatching { AttentionSeverity.valueOf(record.optString("severity")) }
+                            .getOrDefault(AttentionSeverity.INFO)
+                        val devRoute = dialDevRouteFor(record)
+                        val itemId = record.optString("id")
+                        val mutationKey = "attention:$itemId"
+                        val pending = mutationKey in pendingMutations
+                        AttentionItem(
+                            title = record.optString("title", "Attention item"),
+                            severity = severity,
+                            detail = if (pending) "Saving…" else record.optString("source").takeIf { it.isNotBlank() },
+                            onOpen = devRoute?.let { route -> { onOpenRoute(route) } },
+                            onAck = if (pending) null else {
+                                {
+                                    mutate(mutationKey, "Acknowledged.") { app.gatewayClient.attentionAck(itemId) }
+                                }
+                            },
+                            onSnooze = if (pending) null else {
+                                {
+                                    // The swipe gesture is deliberately one-hour. Longer/shorter
+                                    // durations belong in the detail surface; the gesture itself
+                                    // must remain a single deterministic action.
+                                    val until = (System.currentTimeMillis() / 1000L) + 60L * 60L
+                                    mutate(mutationKey, "Snoozed for one hour.") {
+                                        app.gatewayClient.attentionSnooze(itemId, until)
+                                    }
+                                }
+                            },
+                        )
+                    }
+
+                    if (attention.decisions.isNotEmpty()) {
+                        item { SectionHeader("Decisions", detail = "Owner escalations") }
+                        items(attention.decisions, key = { it.optString("id") }) { decision ->
+                            OwnerDecisionCard(app, decision, onOpenRoute)
                         }
                     }
                 }

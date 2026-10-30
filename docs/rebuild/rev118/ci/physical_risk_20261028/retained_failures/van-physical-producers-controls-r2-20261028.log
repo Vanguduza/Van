@@ -1,0 +1,54 @@
+........FF.......................                                        [100%]
+=================================== FAILURES ===================================
+_ test_actual_native_producer_reads_other_alias_peak_and_loss_before_its_first_decision[single] _
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-18/test_actual_native_producer_re0')
+eurusd = SymbolContract(symbol='EURUSD', venue='mt5', base_currency='EUR', quote_currency='USD', account_currency='USD', contra...=Decimal('0'), max_adv_participation=Decimal('0.10'), liquidity_haircut=Decimal('0'), round_trip_cost_pct=Decimal('0'))
+kind = 'single'
+
+    @pytest.mark.parametrize('kind',['single','account'])
+    def test_actual_native_producer_reads_other_alias_peak_and_loss_before_its_first_decision(tmp_path,eurusd,kind):
+        ledger,adapter,account,_,a=native_facts(tmp_path,eurusd)
+        first=approval(ledger,a,'original-loss');close(ledger,first,alias=a.account_alias)
+        legacy(ledger,a,'old-peak','15000')
+        b=other_context(ledger,adapter,account,a,alias='second_alias')
+        current=replace(account,account_alias=b.account_alias,
+            funding_mark=replace(account.funding_mark,account_alias=b.account_alias))
+        service=producer(kind,ledger,adapter,current,b)
+        result=capture(service,kind)
+        assert not result.preservation_blocks_new_risk, result.preservation_reason
+>       assert result.peak_equity==D('15000') and result.consecutive_losses==1
+E       AssertionError: assert (Decimal('15000') == Decimal('15000') and 0 == 1)
+E        +  where Decimal('15000') = RiskSnapshot(now_unix=1800000000, account_alias='second_alias', account_verified=True, equity=Decimal('10000'), balanc..., execution_authority=False), native_risk_basis_ref='326c4f9d2876138aaf6cf846116378bdb6fe3956305ce5fa8c928b53f403360e').peak_equity
+E        +  and   Decimal('15000') = D('15000')
+E        +  and   0 = RiskSnapshot(now_unix=1800000000, account_alias='second_alias', account_verified=True, equity=Decimal('10000'), balanc..., execution_authority=False), native_risk_basis_ref='326c4f9d2876138aaf6cf846116378bdb6fe3956305ce5fa8c928b53f403360e').consecutive_losses
+
+trading/tests/test_physical_snapshot_producers.py:60: AssertionError
+_ test_actual_native_producer_reads_other_alias_peak_and_loss_before_its_first_decision[account] _
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-18/test_actual_native_producer_re1')
+eurusd = SymbolContract(symbol='EURUSD', venue='mt5', base_currency='EUR', quote_currency='USD', account_currency='USD', contra...=Decimal('0'), max_adv_participation=Decimal('0.10'), liquidity_haircut=Decimal('0'), round_trip_cost_pct=Decimal('0'))
+kind = 'account'
+
+    @pytest.mark.parametrize('kind',['single','account'])
+    def test_actual_native_producer_reads_other_alias_peak_and_loss_before_its_first_decision(tmp_path,eurusd,kind):
+        ledger,adapter,account,_,a=native_facts(tmp_path,eurusd)
+        first=approval(ledger,a,'original-loss');close(ledger,first,alias=a.account_alias)
+        legacy(ledger,a,'old-peak','15000')
+        b=other_context(ledger,adapter,account,a,alias='second_alias')
+        current=replace(account,account_alias=b.account_alias,
+            funding_mark=replace(account.funding_mark,account_alias=b.account_alias))
+        service=producer(kind,ledger,adapter,current,b)
+        result=capture(service,kind)
+        assert not result.preservation_blocks_new_risk, result.preservation_reason
+>       assert result.peak_equity==D('15000') and result.consecutive_losses==1
+E       AssertionError: assert (Decimal('15000') == Decimal('15000') and 0 == 1)
+E        +  where Decimal('15000') = RiskSnapshot(now_unix=1800000000, account_alias='second_alias', account_verified=True, equity=Decimal('10000'), balanc..., execution_authority=False), native_risk_basis_ref='4aab96bdae3f159d7a7dd261ff904077bfce7690a2b743c8ede9634f46dcb005').peak_equity
+E        +  and   Decimal('15000') = D('15000')
+E        +  and   0 = RiskSnapshot(now_unix=1800000000, account_alias='second_alias', account_verified=True, equity=Decimal('10000'), balanc..., execution_authority=False), native_risk_basis_ref='4aab96bdae3f159d7a7dd261ff904077bfce7690a2b743c8ede9634f46dcb005').consecutive_losses
+
+trading/tests/test_physical_snapshot_producers.py:60: AssertionError
+=========================== short test summary info ============================
+FAILED trading/tests/test_physical_snapshot_producers.py::test_actual_native_producer_reads_other_alias_peak_and_loss_before_its_first_decision[single]
+FAILED trading/tests/test_physical_snapshot_producers.py::test_actual_native_producer_reads_other_alias_peak_and_loss_before_its_first_decision[account]
+2 failed, 31 passed in 1.65s

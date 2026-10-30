@@ -1,0 +1,132 @@
+{
+  "schema": "van.rebuild.hosted-source/1",
+  "run_id": 39778638488,
+  "source_head": "b1ab08bddd1ca9a101e51eb07f74d28d3eb70767",
+  "tested_merge": "abdaa58f2bc73a1b2f52fbda203050ca31c1397d",
+  "identical_source_tree": "1c137f5712a3682f3fff80be94b1892766177a09",
+  "jobs": [
+    {
+      "id": 119823924706,
+      "name": "project-truth-ledger",
+      "conclusion": "failure"
+    },
+    {
+      "id": 119823924831,
+      "name": "mutation (python-1, python, 1/4)",
+      "conclusion": "success"
+    },
+    {
+      "id": 119823924879,
+      "name": "mutation (python-2, python, 2/4)",
+      "conclusion": "success"
+    },
+    {
+      "id": 119823924980,
+      "name": "android-instrumentation",
+      "conclusion": "success"
+    },
+    {
+      "id": 119823925049,
+      "name": "mutation (kotlin-2, kotlin, 2/4)",
+      "conclusion": "success"
+    },
+    {
+      "id": 119823925058,
+      "name": "mutation (python-3, python, 3/4)",
+      "conclusion": "success"
+    },
+    {
+      "id": 119823925060,
+      "name": "android-and-visual-evidence",
+      "conclusion": "success"
+    },
+    {
+      "id": 119823925069,
+      "name": "mutation (python-0, python, 0/4)",
+      "conclusion": "success"
+    },
+    {
+      "id": 119823925108,
+      "name": "mutation (kotlin-3, kotlin, 3/4)",
+      "conclusion": "success"
+    },
+    {
+      "id": 119823925125,
+      "name": "mutation (browser-agent, browser-agent, 0/1)",
+      "conclusion": "success"
+    },
+    {
+      "id": 119823925132,
+      "name": "postgres-ledger",
+      "conclusion": "success"
+    },
+    {
+      "id": 119823925138,
+      "name": "backend",
+      "conclusion": "failure"
+    },
+    {
+      "id": 119823925142,
+      "name": "mutation (kotlin-0, kotlin, 0/4)",
+      "conclusion": "success"
+    },
+    {
+      "id": 119823925195,
+      "name": "rebuild-documentary",
+      "conclusion": "success"
+    },
+    {
+      "id": 119823925463,
+      "name": "mutation (kotlin-1, kotlin, 1/4)",
+      "conclusion": "success"
+    },
+    {
+      "id": 119829951164,
+      "name": "character-forge-gate",
+      "conclusion": "success"
+    }
+  ],
+  "public_source": {
+    "voice-source-report.xml": {
+      "tests": 117,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "sha256": "e03fc2719135dd5da41bfe0c5f60e13fb1cef3c49433e9a93d7a730744f9360d"
+    },
+    "postgres-ledger-report.xml": {
+      "tests": 26,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "sha256": "349b7a42364a880ada4b03f739b7393697f711fdf500b3c8febee1038bf55b48"
+    },
+    "trading-source-report.xml": {
+      "tests": 1797,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 1,
+      "sha256": "1a09b84990240dcd61cbd96f633c3e1f7d2f8b2b3c7db2ffd194a69c99ce4f36"
+    }
+  },
+  "legacy_mutations": {
+    "caught": 374,
+    "survived": 0,
+    "receipt": "ci/MUTATION_CORPUS_b1ab08bd.json"
+  },
+  "instrumentation": {
+    "collected": 22,
+    "passed": 18,
+    "failed": 0,
+    "skipped": 4,
+    "skips": "existing core artwork mode",
+    "voice_methods": {
+      "cancellationBeforeNativeStartCannotCompleteOrDamageTheReplacementAnswer": "PASS 2.457s",
+      "realOfflineAnswerReachesTheApplicationQueueAsSpoken": "PASS 2.530s"
+    },
+    "index_sha256": "f66b099bd33d7b02a2651ca0b48b381dd5e7d7ddea630191d60fe5ff05904abf",
+    "voice_report_sha256": "b68f7deb9076f0121a09fd582cd64333f6f805a94bfa38351cd8a15c1268b583",
+    "diagnostics_sha256": "6489df2ea32a0cbfda53436326f33dfa437d451df0a2852423047dd235f8c913"
+  },
+  "qualification": "Actual hosted source/emulator evidence at this exact commit only. No physical S24/Artemis/acoustic/provider/production/unit/release qualification. Overall van-ci retains missing private DDS CI key and missing trusted-main bootstrap checker; neither is bypassed."
+}

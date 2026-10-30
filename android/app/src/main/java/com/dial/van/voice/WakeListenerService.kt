@@ -106,9 +106,12 @@ class WakeListenerService : Service() {
          * wake model or the microphone grant, and never re-arms a listener that is already
          * armed. Returns whether a start was requested.
          */
+        fun isRunning(): Boolean = running
+
         fun startIfReady(context: Context): Boolean {
             if (running) return false
             val app = context.applicationContext as? VanApplication ?: return false
+            if (app.voiceInput.isSpeakerEnrollmentCaptureActive()) return false
             if (!app.wakeModel.status().ready) return false
             if (context.checkSelfPermission(Manifest.permission.RECORD_AUDIO) !=
                 PackageManager.PERMISSION_GRANTED

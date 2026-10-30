@@ -1,0 +1,31 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+_ test_actual_parquet_tampering_refuses_even_when_file_hash_is_recomputed[compression] _
+
+source = (<vati.market_data.native_archive.NativeMarketArchive object at 0x7fa88ba05d60>, NativeSymbolContract(metadata_json='{...transport_host': 'demo.ctraderapi.com', 'native_account_id': 123, ...}, 'timeframe': 'M1', 'through_revision': 1, ...})
+arrow = <module 'pyarrow' from '/workspace/van-parquet-source-venv-20261026/lib/python3.12/site-packages/pyarrow/__init__.py'>
+damage = 'compression'
+
+    @pytest.mark.parametrize('damage', ['rows', 'schema', 'compression', 'metadata', 'bytes'])
+    def test_actual_parquet_tampering_refuses_even_when_file_hash_is_recomputed(source, arrow, damage):
+        from pyarrow import parquet as pq
+        window = source[3]; data = encode_native_bar_partition(window)
+        table = pq.read_table(arrow.BufferReader(data))
+        if damage == 'rows':
+            rows = table.to_pylist(); rows[0]['close'] = '999'
+            table = arrow.Table.from_pylist(rows, schema=table.schema)
+        if damage == 'schema': table = table.drop(['scope_sha256'])
+        if damage == 'metadata': table = table.replace_schema_metadata({})
+        if damage == 'bytes': data = b'not parquet'
+        else:
+            out = arrow.BufferOutputStream()
+            pq.write_table(table, out, compression='snappy' if damage == 'compression' else 'NONE', use_dictionary=False)
+            data = out.getvalue().to_pybytes()
+>       with pytest.raises(SourcePartitionError): verify_native_bar_partition(data, window)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE SourcePartitionError
+
+trading/worker_tests/test_native_source_parquet.py:64: Failed
+=========================== short test summary info ============================
+FAILED trading/worker_tests/test_native_source_parquet.py::test_actual_parquet_tampering_refuses_even_when_file_hash_is_recomputed[compression]
+1 failed in 1.97s

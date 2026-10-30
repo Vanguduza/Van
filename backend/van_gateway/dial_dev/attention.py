@@ -216,7 +216,13 @@ class DialDevAttentionIngest:
             except (DialDevUnavailable, httpx.HTTPError) as exc:
                 log.warning("dial_dev event stream dropped: %s", type(exc).__name__)
             finally:
-                await stream.close()
+                try:
+                    await stream.close()
+                except DialDevUnavailable as exc:
+                    # A failed transport cleanup must not stop the read-only
+                    # reconnect loop. Its next connection rehydrates current truth.
+                    log.warning("dial_dev event stream close failed: %s", exc.reason)
+                    self._stream_down(True)
             if self._stopping.is_set():
                 break
             self._stream_down(True)

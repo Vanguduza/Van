@@ -1,0 +1,136 @@
+{
+  "schema": "van.rev118.pending-current-owner-contract-source/1",
+  "source_parent": "eac4761f34c2c966ccc57578d7a8865695b40cf7",
+  "observed_at_utc": "2026-10-28T09:04:46.885471+00:00",
+  "source_files_sha256": {
+    "tests/rebuild/test_native_risk_schema.py": "ba93c79240d1a30364dba0d1eca0036f7648569ad15fa95218f6a72d7fab0399",
+    "trading/tests/fixtures/pending_risk_snapshots_eac4761f.json": "ba4bae9dd490df41d0749f95b3d5a2a8d9a7296ae1c77600c7276d4a7d728228",
+    "trading/tests/test_pending_current_contract.py": "4224a612e0ca02dbce1a75c2fcb785fee8a44685af19fc6c66a567e80f44e899",
+    "trading/tests/test_physical_pending_risk.py": "a9845e877e59e86d144f5d6f2e5c97568ec347c9170d88f11769bd7132805038",
+    "trading/tests/test_physical_pending_risk_postgres.py": "82a3039607d75194e50aba4af45e71c7bb9c02523b0a902a0231006431a7a0ba",
+    "trading/vati/app/account_service.py": "dcfca2de92139f2a5cf43a82b813e971ae51d0e768fae920b9219146cf95fec7",
+    "trading/vati/app/cycle.py": "00cb8e213514d95b1bfe005289a42dc225ce355dc5d2f6e0bae46a527da03d86",
+    "trading/vati/contracts/schemas/risk_snapshot.schema.json": "f4128e0386a26e74e45b221be1686769ce79c1304a11b196b3b741ffd9ee23eb",
+    "trading/vati/risk/authority.py": "f45238ac548f423daa87a5d0b82ec865ed96ddf93817aa7041ebb229473b76dc",
+    "trading/vati/risk/contracts.py": "8154be0b2e96db9ee07a70799a060b3a3035490a3b8821f7bddd562ffc5b3903",
+    "trading/vati/risk/pending.py": "f324e5022e6b2c7b94e9742c1f54824807c545da44a361b4c9ba3086c5480e27",
+    "trading/vati/risk/physical_pending.py": "c5bdb23b6f27b39848572110526415e62c175951f4f9d975353047c26783b189",
+    "trading/vati/risk/serde.py": "81f9d835278435ce4699a1207b23f42c60cd15c75916395f159492fc9c1eabb4"
+  },
+  "implementation": "Both actual native snapshot owners now retain original pending contract terms and separate current risk-owner supplied valuation terms. Exact pending loss uses the larger original/current loss without reducing original commitments. Missing current symbol terms or changed instrument/currency/unit/model hold new risk; independent protection retains its owner. Incremental cached histories revalue on each snapshot without another financial event/full scan. Four actual counterexamples on an independently exported exact eac4761f runtime approved while current heat/currency risk exceeded its signed limit; all four now refuse at their correct original gates. Original parent snapshots/decisions retain exact serialized bodies and hashes, but original-only valuation cannot authorize current risk. Full trading plus selected backend HTTP recovery/schema/scope checks: 4968 passes,0 skips/failures/audit violations,every call once,all1225 pinned inputs match,owned PostgreSQL independently absent.110 focused checks overlap.0formal/native/production/S24 acceptance issued.",
+  "source_result": {
+    "actual_outer_exit": 0,
+    "actual_inner_exit": 0,
+    "passed": 4968,
+    "skipped": 0,
+    "audit_violations": 0,
+    "unique_call_identities_once": 4968,
+    "pinned_source_inputs_matched": 1225,
+    "owned_postgres_independently_absent": true,
+    "raw": "ci/pending_current_contract_20261028/sql_final"
+  },
+  "original_counterexamples": {
+    "original_commit": "eac4761f34c2c966ccc57578d7a8865695b40cf7",
+    "source_export_manifest": "ci/pending_current_contract_20261028/exact_parent_runtime/source-manifest.json",
+    "actual_original_approvals": 4,
+    "actual_original_assertion_failures": 4,
+    "original_snapshot_bodies_and_hashes": 4,
+    "original_module_hashes_independently_matched": true
+  },
+  "retained_failed_attempts": [
+    "Initial two actual approvals retained; initial expected PORTFOLIO_HEAT tag was corrected to the actual signed currency-limit violation and separate valid heat-limit cases were added.",
+    "Focused r1:94 passes/2 incorrect expected gate tags. Focused r2/r3:96 passes/2 new fixture failures from invalid fraction1 and then platform ceiling0.5; fixtures corrected to the existing signed ceiling0.0400.",
+    "Focused r5 and full SQL r1 failed collection because new test imported recompute_decision_hash from the wrong module; import corrected to existing execution router. No functional assertion ran in those collection failures. Original owned PG cleanup independently verified.",
+    "Exact parent baseline r2 and golden capture r3 each retain4 genuine incorrect original approvals; these are expected failed counterexamples, not passing implementation tests."
+  ],
+  "native_parent": {
+    "schema": "van.native-mql-independent-artifact-readback/1",
+    "requested_head": "eac4761f34c2c966ccc57578d7a8865695b40cf7",
+    "actual_tested_merge_head": "14e75c055d91d9c86e09987a0f16da352e5a8be5",
+    "source_sha256": "9a8ab7349deba1c1fd492b056457f808c0876bbd69ff7a0aaa5f783ddc64bc50",
+    "source_blob_oid": "7be8290af4f28792039680fe1eaf16cd937bdd5b",
+    "source_bytes_and_blob_match": true,
+    "artifact_id": 12803446337,
+    "workflow_run": 40657788235,
+    "original_archive_bytes": 77151,
+    "original_archive_sha256": "3d45fe92fa6ef18fb7db6eb380045c77609d6e57c567a6936a4d5487d26fa677",
+    "native_phase": "SOURCE_COMPILED",
+    "compile_cases": [
+      {
+        "name": "VanCompilerRejectionProbe",
+        "expected_success": false,
+        "process_exit_code": 0,
+        "errors": 4,
+        "warnings": 0,
+        "fresh_binary": false,
+        "started_at_utc": "2026-10-28T08:47:30.1859620Z",
+        "finished_at_utc": "2026-10-28T08:47:31.7059497Z",
+        "log_sha256": "54577b5af86b512c9ec09760bd2d5b524e093dd6129883214ffcee71d7d2b905"
+      },
+      {
+        "name": "VanBridgeEA",
+        "expected_success": true,
+        "process_exit_code": 1,
+        "errors": 0,
+        "warnings": 0,
+        "fresh_binary": true,
+        "started_at_utc": "2026-10-28T08:47:31.7096176Z",
+        "finished_at_utc": "2026-10-28T08:47:34.1233232Z",
+        "log_sha256": "98db1b0deacb78bf3e4e47c9670d002350e1ca3274d54ea02c9f5c3edae2c1f7",
+        "binary_sha256": "220c37742a3c6851430e502a8d12461101869de3271934e71ca68bb9e0bf6323"
+      }
+    ],
+    "first_attempt": "FAILED_OFFICIAL_INSTALLER_CONNECTION_REFUSED_BEFORE_COMPILE",
+    "retry": "ACTUAL_SOURCE_COMPILED_ORIGINAL_ARTIFACT_INDEPENDENTLY_VERIFIED",
+    "financial_native_device_acceptance": "NOT_ISSUED"
+  },
+  "selected_hosted_parent": {
+    "source_commit": "eac4761f34c2c966ccc57578d7a8865695b40cf7",
+    "artifact_id": 12803031094,
+    "bytes": 186693,
+    "sha256": "a7e15725ed601d91667cdb675995636beb2e0159d5d31603e5ccb2fabdc8cdd8",
+    "xml": {
+      "extracted/trading-source-report.xml": {
+        "cases": 4815,
+        "passed": 4814,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 1,
+        "skip_reasons": [
+          {
+            "type": "pytest.skip",
+            "message": "dial-new checkout not available (set DIAL_REPO)"
+          }
+        ]
+      },
+      "extracted/voice-source-report.xml": {
+        "cases": 117,
+        "passed": 117,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0,
+        "skip_reasons": []
+      },
+      "extracted/postgres-ledger-report.xml": {
+        "cases": 26,
+        "passed": 26,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0,
+        "skip_reasons": []
+      }
+    }
+  },
+  "formal_acceptances_issued": 0,
+  "source_authorizations": [
+    "auth-20261022-owner-autonomous-candidate-build"
+  ],
+  "limitations": [
+    "These are the existing risk-owner supplied current terms; actual native refresh, timestamped FX conversion, authoritative contract migration and venue qualification remain separate BE-008 obligations.",
+    "The original floor is not automatically released on a lower supplied valuation; release needs its separately qualified reconciliation owner.",
+    "This is stop-risk valuation, not shared transactional cash/margin reservation, native fee/economic finality or financial authority.",
+    "Active signed policy arbitration, all-origin payment/manual commitments and complete working-order workflows remain open.",
+    "Source tests use explicit provider fixtures. Python storage audit is not an OS sandbox."
+  ],
+  "next": "Genuine hooks, committed required-baseline verify, normal push, exact remote and hosted readback; continue actual native valuation/reservation/current-policy prerequisites under the complete frozen programme."
+}

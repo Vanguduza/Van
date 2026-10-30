@@ -1,0 +1,63 @@
+{
+  "source_head": "e690d5300c2cc2cdba82beb2f71eabe6eaf30846",
+  "input": "same native-scoped3->4 exact sample,no external flows",
+  "read_only_observation": true,
+  "results": {
+    "ROUND_UP": {
+      "policy_version": "funding-unitization/1.0.0",
+      "status": "MEASURED",
+      "reason": null,
+      "scope_hash": "source-scope",
+      "valuation_basis": "NORMALIZED_NATIVE_NET_EQUITY",
+      "return_basis": "MARKED_ACCOUNT_RETURN_NOT_SETTLED_TRADE_ALPHA",
+      "from_ms": 0,
+      "to_ms": 1,
+      "units": "3",
+      "known_prefix_units": "3",
+      "nav_per_unit": "1.3333333333333333333333333333333333333333333333333333333333333333333333333333334",
+      "flow_neutral_return": "0.33333333333333333333333333333333333333333333333333333333333333333333333333333334",
+      "worst_observed_drawdown": "0",
+      "known_prefix_drawdown": "0",
+      "external_net_flow": "0",
+      "known_prefix_external_net_flow": "0",
+      "net_account_pnl": "1",
+      "input_refs": [
+        "original-baseline",
+        "original-closing"
+      ],
+      "evidence_refs": [
+        "original-baseline",
+        "original-closing"
+      ],
+      "execution_authority": false
+    },
+    "ROUND_DOWN": {
+      "policy_version": "funding-unitization/1.0.0",
+      "status": "MEASURED",
+      "reason": null,
+      "scope_hash": "source-scope",
+      "valuation_basis": "NORMALIZED_NATIVE_NET_EQUITY",
+      "return_basis": "MARKED_ACCOUNT_RETURN_NOT_SETTLED_TRADE_ALPHA",
+      "from_ms": 0,
+      "to_ms": 1,
+      "units": "3",
+      "known_prefix_units": "3",
+      "nav_per_unit": "1.3333333333333333333333333333333333333333333333333333333333333333333333333333333",
+      "flow_neutral_return": "0.33333333333333333333333333333333333333333333333333333333333333333333333333333333",
+      "worst_observed_drawdown": "0",
+      "known_prefix_drawdown": "0",
+      "external_net_flow": "0",
+      "known_prefix_external_net_flow": "0",
+      "net_account_pnl": "1",
+      "input_refs": [
+        "original-baseline",
+        "original-closing"
+      ],
+      "evidence_refs": [
+        "original-baseline",
+        "original-closing"
+      ],
+      "execution_authority": false
+    }
+  }
+}

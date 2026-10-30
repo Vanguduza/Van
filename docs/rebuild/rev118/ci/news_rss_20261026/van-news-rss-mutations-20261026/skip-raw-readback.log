@@ -1,0 +1,30 @@
+................F...............                                         [100%]
+=================================== FAILURES ===================================
+_______ test_snapshot_publication_requires_independent_original_readback _______
+
+setup = (<vati.core.ledger.Ledger object at 0x7f93ba54da30>, PosixPath('/tmp/pytest-of-agent/pytest-283/test_snapshot_publicat...t_snapshot_publication_requ0/feed.xml', 'input_format': 'rss2', 'source_id': 'transport', 'publisher_id': 'publisher'})
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f93ba54e030>
+
+    def test_snapshot_publication_requires_independent_original_readback(setup,monkeypatch):
+        ledger, path, config = setup; iterate=ledger.iter; atomic=ledger.atomic; committed=False
+        @contextmanager
+        def note_commit():
+            nonlocal committed
+            with atomic():yield ledger
+            committed=True
+        def hidden(kind=None,**kwargs):
+            if committed and kind is not None and kind.value=='NEWS_SOURCE_SNAPSHOT':return iter(())
+            return iterate(kind,**kwargs)
+        with monkeypatch.context() as patch:
+            patch.setattr(ledger,'atomic',note_commit);patch.setattr(ledger,'iter',hidden)
+            news=build(ledger,config)
+>       assert news.source_health['state']=='PUBLICATION_UNKNOWN' and news.headlines()==[]
+E       AssertionError: assert ('READY_DECLARED' == 'PUBLICATION_UNKNOWN'
+E         
+E         - PUBLICATION_UNKNOWN
+E         + READY_DECLARED)
+
+trading/tests/test_news_rss_feed.py:175: AssertionError
+=========================== short test summary info ============================
+FAILED trading/tests/test_news_rss_feed.py::test_snapshot_publication_requires_independent_original_readback
+1 failed, 31 passed, 2 deselected in 1.27s

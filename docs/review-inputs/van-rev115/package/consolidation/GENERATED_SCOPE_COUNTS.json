@@ -1,0 +1,28 @@
+{
+  "BG_packet": "VAN-PKT-098",
+  "all_context_material_bindings": 234,
+  "application_tests_executed": 0,
+  "counts": {
+    "actions": 349,
+    "backend": 82,
+    "backend_verification": 12,
+    "nodes": 131,
+    "requirements": 324,
+    "surfaces": 234,
+    "tests": 1610,
+    "truth": 22
+  },
+  "domain_scenario_refinements": 72,
+  "effective_acceptance_identities": 1610,
+  "first_UX_packet": "VAN-PKT-099",
+  "historical_counts": "Earlier blueprints and receipts retain their historical scope; CANONICAL_AUTHORITY selects the active revision.",
+  "legacy_action_oracle_refinements": 349,
+  "new_application_contracts": 0,
+  "new_requirements": 0,
+  "original_requirement_objects_preserved": 324,
+  "original_test_objects_preserved": 1610,
+  "original_unit_ids_preserved": 131,
+  "revision": "1.18",
+  "theme_variants": 2,
+  "whole_product_issues_addressed_at_design_level": 16
+}

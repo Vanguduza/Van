@@ -1,0 +1,20 @@
+{
+  "command": [
+    "/workspace/van-backend-ci-lite-20261029/bin/python",
+    "-m",
+    "pytest",
+    "-q",
+    "trading/tests/test_entry_dispatch_commit_fence_postgres.py",
+    "trading/tests/test_pretrade_durable_command_budget_postgres.py",
+    "--junitxml=/workspace/van-pretrade-ci-lite-optional-pg-20261030.xml"
+  ],
+  "cwd": "/workspace/van-review-2026-10-18/publish",
+  "controller_pid": 575,
+  "started_at_utc": "2026-10-30T09:10:36.928968+00:00",
+  "timeout_seconds": 180,
+  "state": "COMPLETED",
+  "command_pid": 578,
+  "exit": 0,
+  "adopted_children_reaped": [],
+  "finished_at_utc": "2026-10-30T09:10:37.896375+00:00"
+}

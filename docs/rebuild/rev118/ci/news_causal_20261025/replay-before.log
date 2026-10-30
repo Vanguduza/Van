@@ -1,0 +1,17 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+_ test_replaying_the_same_observation_cannot_move_its_original_ingress_clock_backwards _
+
+    def test_replaying_the_same_observation_cannot_move_its_original_ingress_clock_backwards():
+        news=NewsIngress();h=story();news.ingest(h,now_ms=NOW+1000)
+        news.ingest(h,now_ms=NOW)
+>       assert news.relayed_by(h.headline_id,as_of_ms=NOW)==()
+E       AssertionError: assert ('publisher',) == ()
+E         
+E         Left contains one more item: 'publisher'
+E         Use -v to get more diff
+
+trading/tests/test_news_causal_boundaries.py:99: AssertionError
+=========================== short test summary info ============================
+FAILED trading/tests/test_news_causal_boundaries.py::test_replaying_the_same_observation_cannot_move_its_original_ingress_clock_backwards
+1 failed, 24 deselected in 0.44s

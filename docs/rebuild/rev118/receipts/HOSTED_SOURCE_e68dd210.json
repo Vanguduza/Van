@@ -1,0 +1,127 @@
+{
+  "schema": "van.rebuild.hosted-source/1",
+  "run_id": 39748651706,
+  "source_head": "e68dd21003057250a72ac59c61684451f02d1ee7",
+  "tested_merge": "f40ddd921373598c857e08651b79c889aef13506",
+  "identical_source_tree": "01f77040cd1fe955edee7f56653facb72be00a6d",
+  "jobs": [
+    {
+      "id": 119723352800,
+      "name": "android-instrumentation",
+      "conclusion": "success"
+    },
+    {
+      "id": 119723353007,
+      "name": "rebuild-documentary",
+      "conclusion": "success"
+    },
+    {
+      "id": 119723353010,
+      "name": "project-truth-ledger",
+      "conclusion": "failure"
+    },
+    {
+      "id": 119723353080,
+      "name": "postgres-ledger",
+      "conclusion": "success"
+    },
+    {
+      "id": 119723353240,
+      "name": "android-and-visual-evidence",
+      "conclusion": "success"
+    },
+    {
+      "id": 119723353245,
+      "name": "mutation (python-1, python, 1/4)",
+      "conclusion": "success"
+    },
+    {
+      "id": 119723353290,
+      "name": "mutation (browser-agent, browser-agent, 0/1)",
+      "conclusion": "success"
+    },
+    {
+      "id": 119723353394,
+      "name": "mutation (kotlin-1, kotlin, 1/4)",
+      "conclusion": "success"
+    },
+    {
+      "id": 119723353396,
+      "name": "backend",
+      "conclusion": "failure"
+    },
+    {
+      "id": 119723353408,
+      "name": "mutation (python-2, python, 2/4)",
+      "conclusion": "success"
+    },
+    {
+      "id": 119723353415,
+      "name": "mutation (python-3, python, 3/4)",
+      "conclusion": "success"
+    },
+    {
+      "id": 119723353417,
+      "name": "mutation (python-0, python, 0/4)",
+      "conclusion": "success"
+    },
+    {
+      "id": 119723353504,
+      "name": "mutation (kotlin-0, kotlin, 0/4)",
+      "conclusion": "success"
+    },
+    {
+      "id": 119723353514,
+      "name": "mutation (kotlin-3, kotlin, 3/4)",
+      "conclusion": "success"
+    },
+    {
+      "id": 119723353624,
+      "name": "mutation (kotlin-2, kotlin, 2/4)",
+      "conclusion": "success"
+    },
+    {
+      "id": 119727524737,
+      "name": "character-forge-gate",
+      "conclusion": "success"
+    }
+  ],
+  "postgres_ledger": {
+    "tests": 26,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "passed": 26,
+    "report_sha256": "3f5f259380d454faec83e090b70d44f1f25b1fdf8b478ab9559e1833862e3a66"
+  },
+  "public_trading": {
+    "tests": 1691,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 1,
+    "passed": 1690,
+    "report_sha256": "d5a1e10544b493e76a29c2d3d540b06cfd53430ecff2e8a12e43a0db380ebb32"
+  },
+  "explicit_private_source_skip": [
+    {
+      "classname": "trading.tests.test_vtil_borrow",
+      "name": "test_dial_resolver_selects_trading_knowledge_from_van_registry",
+      "reason": "dial-new checkout not available (set DIAL_REPO)"
+    }
+  ],
+  "android_instrumentation": {
+    "tests": 20,
+    "passed": 16,
+    "failed": 0,
+    "skipped": 4,
+    "core_mode": true,
+    "summary_html_sha256": "884a47599f4c1a22c7c69bcb45061c99f132a5285f837b2edb1c9607877fc6ac"
+  },
+  "mutations": "ci/MUTATION_CORPUS_e68dd210.json",
+  "ubuntu_helper": "EXECUTED_PASS_ON_HOSTED_ANDROID_AND_CHARACTER_FORGE",
+  "remaining_failures": [
+    "DDS_CONTRACT_READ_DEPLOY_KEY absent",
+    "Trusted-main Project Truth bootstrap absent"
+  ],
+  "qualification": "Exact source tests, not production/provider/native/S24 acceptance."
+}

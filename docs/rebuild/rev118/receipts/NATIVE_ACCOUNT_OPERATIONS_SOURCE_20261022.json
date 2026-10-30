@@ -1,0 +1,448 @@
+{
+  "schema": "van.rebuild.native-account-operations-source/1",
+  "source_parent": "886f2aea7e2ffa0a31a5a09377df48ed8d238a8e",
+  "source_sha256": {
+    "trading/commander/account_effects.py": "cff64f76a0b873dafa825a062ede5c290da1395ec7f892667cbd1646080ca7c0",
+    "trading/commander/accounts.py": "ff73d2a6099630eea34a8eee1852d45839429fe8b8dca475c26f75f6289fe11c",
+    "trading/commander/app.py": "17bdb545b183cf85a862344c164e5813bd84afff6b49d233714d68a64d610ac0",
+    "trading/vati/core/events.py": "4c9cf66e2431c2a97eb63d2158d197109c872a98a084d5f70ec6a316f7d4de0c",
+    "trading/tests/test_native_account_effects.py": "8085951f83c6f9cc8f681c1a428949cc9786cf8a0f50e11ee21d8ad90a7e3421",
+    "backend/van_gateway/trading/accounts.py": "77e84a18ac60f26fc5ce53c98839c079bdc0d77f3eedd5c4e9f65af4e28e19d5",
+    "backend/van_gateway/app.py": "f09be0e5f4372de9fe60daa56e238157b0d85567227e69c462c5606c9016c0c7",
+    "backend/van_gateway/approval/service.py": "d0d22b9fd56628439bd317db4187aa4ef283db99507485fcff345b38fb7800c6",
+    "backend/tests/test_account_operation_recovery.py": "1f181162a28d3a3e3f4a3578f00804e03ded12c847fa474d13e355f98aeabe09",
+    "backend/tests/test_account_approval_contract.py": "bee2039e3d776f77a703a7a34f9eae9cd299681348d2cf9ac2368c8322c60330",
+    "android/app/src/main/java/com/dial/van/trading/AccountOperationRecovery.kt": "3454ec6d27e2016a92a0b90b8c498ca458c3f403c9833252651bec2a7a4522a6",
+    "android/app/src/main/java/com/dial/van/trading/AccountOnboarding.kt": "822e36c8722f7caaf72a7bf5927f401e1e35bff64cb414d182391bd4055a8d55",
+    "android/app/src/main/java/com/dial/van/trading/ui/AccountOnboardingScreen.kt": "c464f4110602f5d3632cf14b0e3be73dc69c3aafc4a50d0bdc75974e63245840",
+    "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt": "cb469e85fcfbae3026848e6639ad8c8df87907ef46715d43a261e48206d08f24",
+    "android/app/src/test/java/com/dial/van/trading/AccountOperationRecoveryTest.kt": "cf0f3490c810b07cf97fc6ceaa50a9808b196fc39ad8715212d00f4483909ef6"
+  },
+  "commands": [
+    "account_upsert",
+    "account_credentials",
+    "account_remove",
+    "mt5_ea_issue_key"
+  ],
+  "full_trading_real_postgresql": {
+    "tests": 1956,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "sha256": "7cd50d2c337ec92bd2b12496ad9054436cb561ed1a73d988edb40d5b31ecbe32"
+  },
+  "gateway_native_focused": {
+    "tests": 115,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 1,
+    "sha256": "90130c682cbec5e74e2eed981dcd6527adda0707694e09e9a95990b84b36ae21"
+  },
+  "wire_agreement": {
+    "tests": 9,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "sha256": "78ed07f0ff970b639deaa61432f8d9b92e9e4afac57150aa64b41d383090a6a3"
+  },
+  "owner_artemis_plan_contracts": {
+    "tests": 192,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "sha256": "8cc19e82c08153f06637f2a23f653def981350006e72ed679da100def631604d"
+  },
+  "rebuild": {
+    "tests": 78,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "sha256": "c65b06ee43b6a0442ba8e0ec3405b71b67c1de728e2c1e52c1b14b99174f9b53"
+  },
+  "source_faults": {
+    "records": [
+      {
+        "phase": "baseline",
+        "why": null,
+        "returncode": 0,
+        "log_sha256": "50184a0d60f70ab29be8d55b3ebd1f7322be3cbfe7e61397196e9b0c32b70238",
+        "log": "/tmp/van-native-effects-mutant-0.txt"
+      },
+      {
+        "phase": "mutation",
+        "why": "native account effect without durable original claim",
+        "returncode": 1,
+        "log_sha256": "c75d6760c23256f68996f38728572b28421de2d64674ea293b33c2ff8c7a5388",
+        "log": "/tmp/van-native-effects-mutant-1.txt"
+      },
+      {
+        "phase": "mutation",
+        "why": "reopen an unconfirmed original after process restart",
+        "returncode": 1,
+        "log_sha256": "e9d87bb3a59989f37d69caded1dea560e2caff75daf17344a44c879e17d4dfc5",
+        "log": "/tmp/van-native-effects-mutant-2.txt"
+      },
+      {
+        "phase": "mutation",
+        "why": "adopt original operation with another approved authority",
+        "returncode": 1,
+        "log_sha256": "49bb94e2d4c67a4288077fb9ddb048d1fab9866b6c83886dd27d519287d97ac7",
+        "log": "/tmp/van-native-effects-mutant-3.txt"
+      },
+      {
+        "phase": "mutation",
+        "why": "execute an expired original authority",
+        "returncode": 1,
+        "log_sha256": "4fe2ab2864ae08c91e99ebc772cbc65c8a2cd0cbf23f150ee950564d65748b6c",
+        "log": "/tmp/van-native-effects-mutant-4.txt"
+      },
+      {
+        "phase": "mutation",
+        "why": "change signed native request under its original identity",
+        "returncode": 1,
+        "log_sha256": "d0f025a8c22257008719e55e0c8ba97eb04d88087b6362210afafdaf171b82c4",
+        "log": "/tmp/van-native-effects-mutant-5.txt"
+      },
+      {
+        "phase": "mutation",
+        "why": "use an OAuth/provider link to bypass an unconfirmed alias",
+        "returncode": 1,
+        "log_sha256": "ed8c380ea894ddb5d4fc68831be49ca31684e5c396749aa336cd1dfe77221a2c",
+        "log": "/tmp/van-native-effects-mutant-6.txt"
+      },
+      {
+        "phase": "mutation",
+        "why": "retain a raw credential export in native operation history",
+        "returncode": 1,
+        "log_sha256": "c99b0719f74249583195672048eed260b21f0f2fdb58f9b70cca61fa030d45a2",
+        "log": "/tmp/van-native-effects-mutant-7.txt"
+      },
+      {
+        "phase": "mutation",
+        "why": "refresh the owner-approved timestamp after biometric approval",
+        "returncode": 1,
+        "log_sha256": "681eed8d9d2fb7bb8f167665ef6adccd26ced7b3858f7027404413a65414d861",
+        "log": "/tmp/van-native-effects-mutant-8.txt"
+      },
+      {
+        "phase": "mutation",
+        "why": "substitute caller query identity for authenticated readback owner",
+        "returncode": 1,
+        "log_sha256": "9ddbe6807519c3b0e981d5976d2a53ffe7ad47e3a8b42ee260185a7f65979991",
+        "log": "/tmp/van-native-effects-mutant-9.txt"
+      }
+    ],
+    "source_restored": true,
+    "mutation_journal_present": false,
+    "scope": "Nine source faults before final response-binding and concurrency follow-ups; final source rechecked in the focused/full trading suites"
+  },
+  "android_faults": {
+    "records": [
+      {
+        "phase": "baseline",
+        "why": null,
+        "returncode": 0,
+        "log_sha256": "3da5c4de236e738220e87d6a60260796ecba08fe3bcd12335d9247f583a49a6f"
+      },
+      {
+        "phase": "mutation",
+        "why": "dispatch without saving the original Android operation identity",
+        "returncode": 1,
+        "log_sha256": "46b10d6367b5c9b73c5d0179ac484cc760c43704341f75c9a4fcbe1a2f20d670"
+      },
+      {
+        "phase": "mutation",
+        "why": "clear Android pending operation on unknown or misbound native response",
+        "returncode": 1,
+        "log_sha256": "0f7950262a34628c6009364ca8ae3322ad42576fa410545129fd120eb2767211"
+      }
+    ],
+    "original_sha256": "3454ec6d27e2016a92a0b90b8c498ca458c3f403c9833252651bec2a7a4522a6",
+    "restored_sha256": "3454ec6d27e2016a92a0b90b8c498ca458c3f403c9833252651bec2a7a4522a6",
+    "source_restored": true,
+    "journal_present": false
+  },
+  "android": {
+    "tests": 202,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "xml": {
+      "TEST-com.dial.van.design.ScreenStateTest.xml": {
+        "tests": 7,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "sha256": "88c13b1c988d3ce9d4baf2afbe0c4b2a3cc1bcdfda6636edd5c5f8afab8cb60e"
+      },
+      "TEST-com.dial.van.trading.TradeBookTest.xml": {
+        "tests": 6,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "sha256": "2b4cf5ae4046064baed94f9bc63b44e86fbe0872f8ca5853d10a20c2d846d8e0"
+      },
+      "TEST-com.dial.van.projects.ProjectModelsTest.xml": {
+        "tests": 18,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "sha256": "2c7c7c44679068c39ba1847b6a8e1c85b3be25d22ef4b667d193f3dea10a036f"
+      },
+      "TEST-com.dial.van.trading.StrategyPromotionVerificationTest.xml": {
+        "tests": 3,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "sha256": "ee711630ca24a7b82b26fc4dd96757b96d6b3df4ed3c6f2a8a5cf7b23c31194e"
+      },
+      "TEST-com.dial.van.visual.VanEffectPolicyTest.xml": {
+        "tests": 3,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "sha256": "2a2c2826324985027204557475ebae5da9c33c039839611a23c1a602f1dceafa"
+      },
+      "TEST-com.dial.van.visual.VanWindFieldMotionTest.xml": {
+        "tests": 4,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "sha256": "03b6c30c9941b77e2978b90b700acc4949be10d453e49db02d0791f9ab0ba4f7"
+      },
+      "TEST-com.dial.van.mission.MissionSurfaceTest.xml": {
+        "tests": 11,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "sha256": "9aec9114efb495fe455e3d3f5bc59ee0faab9d17a96f2ad1c8d8274eaa4554f1"
+      },
+      "TEST-com.dial.van.design.DensityTierTest.xml": {
+        "tests": 2,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "sha256": "ca588491dd88bb4801360838ae5060d7f2ba9ed2b8e22ae78702bd342ef74b82"
+      },
+      "TEST-com.dial.van.queue.EncryptedCommandQueueLogicTest.xml": {
+        "tests": 5,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "sha256": "d5a3e196b61f18dd85e47479106d9249e930b767e2b62f003477e41622549f24"
+      },
+      "TEST-com.dial.van.memory.MemoryModelsTest.xml": {
+        "tests": 12,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "sha256": "28fb318bd18854ff4c84767261d6caab707b09f9f1f4f1fd226f73ac7a1ee47b"
+      },
+      "TEST-com.dial.van.visual.VanVisualRuntimeTest.xml": {
+        "tests": 8,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "sha256": "160f6547c24bfc17c5049700a96b91bdd6d3cd4a21e07db836d0983435ecae01"
+      },
+      "TEST-com.dial.van.visual.VanAuraEnvelopeTest.xml": {
+        "tests": 5,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "sha256": "cfe55522a7cb390334c642c2f129a0fcfa0735a75edbb0f014ecc161d7c59901"
+      },
+      "TEST-com.dial.van.design.StatusSemanticsTest.xml": {
+        "tests": 4,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "sha256": "f77565dbc1495948d49a32321df1595b456566a05360ab9cf11365e8c359b3a1"
+      },
+      "TEST-com.dial.van.trading.AccountOnboardingTest.xml": {
+        "tests": 3,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "sha256": "0e9d5239603f0e23d29e9c3161437868e5517a775bd39900b9a6ecac746d138a"
+      },
+      "TEST-com.dial.van.overlay.VanOverlayChromeTest.xml": {
+        "tests": 4,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "sha256": "7ea2b577090092c071371fffbb4f385f385c935a967593a58f3a16f1b0675129"
+      },
+      "TEST-com.dial.van.visual.VanCharacterOpacityTest.xml": {
+        "tests": 1,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "sha256": "21f7475d51e1eb371272c2480b57aa537f65d89cd7c6c6151f06922485e6ee1f"
+      },
+      "TEST-com.dial.van.trading.AccountOperationRecoveryTest.xml": {
+        "tests": 7,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "sha256": "aaaa85f53a3f77b74208ceb69677c977f52136a09af7b5bf4914fca9f89739cb"
+      },
+      "TEST-com.dial.van.gateway.ReplayDispatchPolicyTest.xml": {
+        "tests": 7,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "sha256": "b3d4abe634f36ee82a5562be98365c130ca0fccf78f44309808634928d9e6ef3"
+      },
+      "TEST-com.dial.van.trading.TradingModelsTest.xml": {
+        "tests": 3,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "sha256": "c40532f3791931cb2d66ca8c73fcb085990a670543ef3084cd01fb1908c20562"
+      },
+      "TEST-com.dial.van.degraded.DegradedModeStoreTest.xml": {
+        "tests": 3,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "sha256": "69ad9f07ff3392aa288dded2a138efe3be22c7d99d5db414d13a4418db6aade9"
+      },
+      "TEST-com.dial.van.visual.VanPresenceTest.xml": {
+        "tests": 10,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "sha256": "c7c784905b89c9a4ac154c66efef714fe01a23f6bd9b9b2ff7078aa58414dfed"
+      },
+      "TEST-com.dial.van.design.MotionSpecTest.xml": {
+        "tests": 3,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "sha256": "0c0c2d0b3b3a1dc83c4694e996d12c3515b1b332995e67bd1fbfdc7b7157138e"
+      },
+      "TEST-com.dial.van.visual.VanPresenceFrameTest.xml": {
+        "tests": 9,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "sha256": "93f44e08792114cbfbf3a697d71d89f758312ca32f611e861bff185547e3c3c0"
+      },
+      "TEST-com.dial.van.visual.VanSceneIdentityTest.xml": {
+        "tests": 13,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "sha256": "8ec118583cb82d457ba84e0bbab2d3075422546065440e77d73630c1995b372c"
+      },
+      "TEST-com.dial.van.design.charts.ChartAxesTest.xml": {
+        "tests": 4,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "sha256": "ae22f8ef16aa2514b3bd8519c8a83f06192b7adcd8b42a3ebfb2eb96441dc3ed"
+      },
+      "TEST-com.dial.van.visual.RiveContractTest.xml": {
+        "tests": 6,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "sha256": "827413b1ee17a3891f581101b2e91e6f885ad4c6d7804fa7be0b66b83eb07b56"
+      },
+      "TEST-com.dial.van.voice.WakeRuntimeTest.xml": {
+        "tests": 7,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "sha256": "823b0220c01fc780a22d3faf8261bc3f586ae544bd361b26ec5c7b11976ad06b"
+      },
+      "TEST-com.dial.van.security.OwnerAuthorityTokenTest.xml": {
+        "tests": 3,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "sha256": "a163b6465a7f94f595645941cde34eee00f898837d7ed51926475e1382823f28"
+      },
+      "TEST-com.dial.van.voice.VoiceRecognitionPolicyTest.xml": {
+        "tests": 7,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "sha256": "9131d200f42945264ebc2de81a0714c0e107ab5682ace3e0c60ed27e2ecf5175"
+      },
+      "TEST-com.dial.van.voice.VoiceSecondPassTest.xml": {
+        "tests": 6,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "sha256": "8d4763a9ea2fa5710cc0583f1abf9637e31079a0db2f2afb522c01599236ea54"
+      },
+      "TEST-com.dial.van.trading.ChartGeometryTest.xml": {
+        "tests": 4,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "sha256": "af12df2cdf1a250a0ae7129f54d4fe063f8b4a3ba23cbbfb0d43d059c8260de2"
+      },
+      "TEST-com.dial.van.trading.CognitionSurfacesTest.xml": {
+        "tests": 2,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "sha256": "b5cc24b71dd4609049f554841d58e2d68f5302e6a66ac0e2e6b64d98d991039a"
+      },
+      "TEST-com.dial.van.visual.VanCharacterMotionTest.xml": {
+        "tests": 4,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "sha256": "a2367274b3ad5a07977933859dad35b37a3a4eefb02d1cf332f2625c0d331257"
+      },
+      "TEST-com.dial.van.design.LiveBadgeFormatTest.xml": {
+        "tests": 3,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "sha256": "d3f59083d5176df1bacf32dfc232babafa0c092308417d44821767ff9895b3d2"
+      },
+      "TEST-com.dial.van.overlay.VanOverlayInteractionTest.xml": {
+        "tests": 5,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "sha256": "a10cfbad497e7704cd044779387a987d37893b879b4092463263478666e4d2fc"
+      }
+    },
+    "lint": {
+      "Warning": 90,
+      "Hint": 22
+    },
+    "restored_build_log_sha256": "82bf905d734bc40e53cb08991860c2e3b298ee638bbda535a9aa4dd2af6824af",
+    "tasks": [
+      ":app:testDebugUnitTest",
+      ":app:assembleDebug",
+      ":app:assembleDebugAndroidTest",
+      ":app:lintDebug"
+    ],
+    "apk_sha256": "e94379227353ddc3831a2ef344b3ab9b8002efa3aad25ede91a35d7096f5c1ba",
+    "instrumentation_apk_sha256": "759741b5f36d08804db31d43d99ccfba1fd9c810c59bb7355cf92bb2b7851419"
+  },
+  "private_fixture_cleanup": {
+    "stopped": true,
+    "removed": true
+  },
+  "registry_refresh": "Validated all four previous working generated registry digests and source-receipt digest before final citation refresh; original IDs/status/history retained",
+  "native_host_actions_executed": 0,
+  "physical_s24_cases_executed": 0,
+  "unit_acceptance": "NOT_ISSUED",
+  "release_qualified": false,
+  "remaining": [
+    "native provider effect journals and adjudication",
+    "native current device/epoch and full resolved owner review",
+    "physical account identity and shared single-symbol runtime lease",
+    "exposure/orders/funds/retention-safe retirement",
+    "history-scale latency and contention qualification",
+    "original independent, provider, production, signing and handset gates"
+  ]
+}

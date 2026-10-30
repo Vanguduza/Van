@@ -1,0 +1,230 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>VAN comparative blueprint review — 17 October 2026</title><style>html{color-scheme:light dark}body{margin:0;font:16px/1.65 system-ui,-apple-system,Segoe UI,sans-serif;background:#f4f6f9;color:#182230}main{max-width:1020px;margin:auto;padding:42px 28px 80px;background:white}h1{font-size:2.2rem;line-height:1.2;margin-top:0}h2{margin-top:2.4rem;border-top:1px solid #d8dfe8;padding-top:1.1rem}h3{margin-top:1.7rem}a{color:#165ea8}table{width:100%;border-collapse:collapse;font-size:.94rem;display:block;overflow:auto;margin:20px 0}th,td{padding:11px 13px;border:1px solid #dae1e9;vertical-align:top;text-align:left}th{background:#edf2f8}code{background:#edf1f6;padding:2px 4px;overflow-wrap:anywhere}pre{overflow:auto;padding:18px;background:#edf1f6}p,li{overflow-wrap:anywhere}strong{font-weight:650}.tag{font-size:12px;text-transform:uppercase;letter-spacing:.1em;color:#607087;margin-bottom:18px}@media(prefers-color-scheme:dark){body{background:#111720;color:#dce5ef}main{background:#17202b}th,pre,code{background:#222f3f}th,td,h2{border-color:#39495c}a{color:#8cc3ff}}@media(max-width:600px){main{padding:26px 17px 55px}h1{font-size:1.8rem}body{font-size:15px}th,td{padding:9px}}@media print{main{max-width:none;padding:0}body,main{background:white;color:black}h2,h3{break-after:avoid}table{display:table}a{color:inherit}}</style></head><body><main><div class="tag">Source-grounded review · Not an adoption decision</div><h1>VAN High-Value Trading Adoptions — Comparative Review</h1>
+<p><strong>Date:</strong> 17 October 2026<br />
+<strong>Review state:</strong> <code>REVIEW_COMPLETE / INTEGRATION_CHANGES_RECOMMENDED / NOT_ADOPTED</code><br />
+<strong>Basis:</strong> Uploaded High-Value Trading Adoptions Rev1.0; Forecast Adoption Rev1.1 and its implementation pack; current VAN Next Unified Rebuild Rev1.11 candidate; all currently advertised VAN branch heads; selected source-level review and focused VM paper-adapter probes.</p>
+<h2>Executive decision</h2>
+<p>The uploaded blueprint is a useful complementary domain-adoption proposal, not a replacement for the current forecast specification and not an implementation-ready alternative roadmap. Preserve Forecast Rev1.1's full engineering obligations inside the newer Rev1.11 unified candidate. Integrate the uploaded document's genuinely new chain-security, sellability, temporal-wallet and complete-discovery-cohort requirements through explicit deltas. Correct the scope, gate, evidence-grade and source-baseline conflicts before adopting it.</p>
+<p>The strongest genuinely new contribution is <strong>read-only crypto safety and executable-exit intelligence</strong>, not another Qlib, LightGBM or Jev stack. Several supposedly new general capabilities already have concrete source on unmerged branches. Conversely, the forecasting libraries are still represented by plans/declarations rather than a demonstrated working integration in the scanned tracked source.</p>
+<p>The uploaded document explicitly says NOT ADOPTED / NOT DEPLOYED and limits its own original repository evidence to selected default-branch reads. This review respects that boundary and supplies a broader branch comparison; it does not convert the proposal into owner authorization. [S1 §§0,15]</p>
+<h2>1. What was inspected and what was not</h2>
+<p>The Global DIAL audit ran on the actual Oracle <code>van-trading-core</code> VM in an isolated scratch repository under ubuntu uid1001. No desktop was used. The branch-head snapshot covered <strong>66 branches, 63 distinct head commits and 4,634 distinct file paths across their trees</strong>, with no ref drift during the inventory pass. Every head tree was read and compared with the pinned main SHA.</p>
+<p>The content pass examined 3,798 distinct path/blob pairs in selected text formats, requesting 3,706 unique blobs and scanning 3,680 UTF-8 blobs. Twenty-six candidate blobs were excluded for size/encoding/binary reasons. Other file extensions were outside the lexical pass. The audit performed mechanical text/import analysis across those variants and selective semantic review of the relevant owners, adapters and changed code. This is <strong>not</strong> a claim of full semantic correctness, test coverage or deployment qualification for every file.</p>
+<p>“All branches” means the repository's currently advertised <code>refs/heads</code>: it does not include deleted historical heads, unfetched forks, uncommitted work or separately deployed untracked services. No full trading suite or model training ran this pass. Four focused synthetic PaperAdapter observations did run on the exact PR101 source. [E1–E3]</p>
+<h3>A newer integration baseline exists</h3>
+<p>The Library's <strong>VAN Next Unified Backend-First Rebuild Rev1.11</strong> already incorporates Forecast Adoption Rev1.1, Rev1.10 and the Opus PR101 source. It defines a single 121-packet plan and 205 active requirements, including all 90 forecast requirements. Its status remains an independently unadmitted consolidation candidate—not F15, not Backend Complete, not deployed. Its historical documents and gate IDs are lineage/aliases, not alternative executable plans. [S3 opening, §§0,27–29]</p>
+<p>The correct next integration point is therefore a reviewed delta to that consolidated candidate. Do not accidentally restore Rev1.10's separate scheduling or replace the complete forecasting scope with this uploaded document's smaller M0–M9 programme.</p>
+<h2>2. Source findings that change the comparison</h2>
+<h3>2.1 There is no single “most complete branch” that can be selected blindly</h3>
+<p>The pinned merged baseline is <code>8eb1889822fc8a83f219977c15340172e16acd91</code>. PR101 is <code>a39f241b0135cf92cc5a6b9a28af226aa294603d</code>; the PR93 canon family includes <code>dfc1557ab99ad8d41cf84714e1bb671e89b045e6</code>. Account coordinator and account service each have <strong>five distinct source versions</strong> across the heads.</p>
+<p>PR101 carries newer execution/ledger/lockout corrections. The canon family carries Jev consumers, cognitive evidence resolution and trading temperament integration not present in the same form in PR101. Merge or transplant by reviewed function/contract with regression evidence, not by choosing the branch with the most commits. This review does not authorize merging any branch. [E1; S4–S9]</p>
+<table>
+<thead>
+<tr>
+<th>Branch or family</th>
+<th>What must be preserved or distinguished</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>main</code></td>
+<td>Actual merged source, not the complete intended product</td>
+</tr>
+<tr>
+<td>PR101 / <code>ccr-8f1201e9-w1xm0r</code></td>
+<td>Resting-order support, entry semantics, slippage-unit and rounding changes, incremental ledger checks, recoverable lockouts; remaining defects below</td>
+</tr>
+<tr>
+<td>PR93 and canon-derived branches</td>
+<td>Shared Jev gateway/advisor/native surfaces; cognitive and typed evidence integration; temperament contributions</td>
+</tr>
+<tr>
+<td>PR92 / <code>chatgpt/vati-opportunity-modes-20261008</code></td>
+<td>Signed NORMAL/RISKY/AGGRESSIVE selection proposal machinery; economic evidence admission is separate</td>
+</tr>
+<tr>
+<td><code>muse/vati-opportunity-modes-20261008</code></td>
+<td>Head equals main in this snapshot; the branch name is not proof of a separate published implementation</td>
+</tr>
+<tr>
+<td>PR77 cognitive fabric</td>
+<td>Advisory producer/consumer work that must not be overwritten with a parallel model-evidence mechanism</td>
+</tr>
+<tr>
+<td>Jev control/convergence branches</td>
+<td>Existing service clients, registered judgments, owner controls and source-level consumers</td>
+</tr>
+<tr>
+<td>PR76 / web acquisition</td>
+<td>Reusable bounded acquisition infrastructure; it does not itself implement token security or wallet attribution</td>
+</tr>
+</tbody>
+</table>
+<p>The focused branch JSON in this pack contains exact hashes for selected relevant heads. The complete 66-head inventory is retained on the VM and identified by path and SHA-256 in the evidence summary. It was not replaced by a list inferred from branch names.</p>
+<h3>2.2 The research integrations are not demonstrated in scanned source</h3>
+<p>No direct production Python imports of Qlib, LightGBM, NeuralForecast, XGBoost, scikit-learn or Freqtrade/FreqAI were found in the scanned supported source. Forecast-library text matches were documents and stack/lock declarations. Prediction-market matches were documentation rather than an implementing Kalshi/Polymarket adapter. Chain-security matches were false positives in third-party licence text, not concrete token analyzers. [E2]</p>
+<p>This supports “planned integration remains to be built in the inspected source,” not an absolute assertion that no external service, alias or uncommitted implementation exists anywhere. The current blueprint must preserve actual train/export/load and provider/consumer acceptance, not count package names in the stack lock as implementation.</p>
+<h3>2.3 AllocatorV1 already exists—and still excludes confidence</h3>
+<p><code>portfolio_allocator.py</code> has the same blob on all 66 heads. It implements both deterministic V0 and an <code>AllocatorV1</code> adding edge-floor, capital-efficiency, execution-quality and stability terms. Its V1 explicitly continues to exclude uncalibrated confidence. [S5]</p>
+<p>The uploaded phrase “the calibrated allocator upgrade / V1 gate” needs an exact policy/version mapping. Merely selecting the existing <code>AllocatorV1</code> does not enable calibrated model-weighted ranking. Introduce or extend an explicitly reviewed policy version and input contract; do not create another allocator or relax confidence restrictions indirectly through rank order.</p>
+<p>Capital reservations remain with the account-coordination path after the proper risk decision. “Allocator never reserves” must not be misread as “the whole account replay has no capital reservation.”</p>
+<h3>2.4 Jev is not greenfield</h3>
+<p>The canon branch has <code>backend/van_gateway/jev/advisor.py</code>, <code>client.py</code>, <code>api.py</code>, production callers and native Jev controls. <code>JevVanAdvisor</code> is explicitly a consumer of the one shared <code>dial-jev</code> service, using a consumer credential and returning annotations—not a new authority or trade sender. [S6]</p>
+<p>A06 should extend registered domain questions, context provenance, output validation and contribution studies through these owners. Existing attention/critic/browser judgments do not prove that a token-vetting question set exists or has financial predictive skill. Reuse the plumbing; validate the new domain behavior.</p>
+<p>The canon's <code>trading/vati/learning/evidence.py</code> also enforces exact ledger-resolved evidence classes and allowlisted kind/producer pairs. Research or counterfactual records must not be relabeled as authoritative execution facts simply because they have hashes. [S7]</p>
+<h3>2.5 The backtester still needs correction across the branch set</h3>
+<p><code>backtest/engine.py</code> is identical across all 66 heads. It still walks open → low → high → close, records its equity-curve point before terminal forced liquidation, and instantiates a single-instrument DecisionCycle. That is not evidence of full account-coordinator parity or complete execution-realistic accounting. [S8]</p>
+<p>Both inspected PaperAdapter variants calculate realized P&amp;L from price difference, size and value-per-price-unit; explicit commission and financing debit integration is not shown in that formula. A separate cost estimate used to screen candidates is not equivalent to charging those costs to simulated cash. These corrections must remain under the existing BE-010/BE-035 and forecast 009/010 obligations. [S9; S2 §6]</p>
+<p>PR101 is progress, but not complete closure. The new review <strong>reproduced previously documented Rev1.11 counterexamples</strong>, rather than claiming them as discoveries for the first time:</p>
+<table>
+<thead>
+<tr>
+<th>Focused VM probe on <code>a39f241b…</code></th>
+<th>Observed result</th>
+<th>Interpretation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Buy limit 1.10000</td>
+<td>FILLED at 1.10007</td>
+<td>Limit-price invariant fails</td>
+</tr>
+<tr>
+<td>Sell limit 1.10000</td>
+<td>FILLED at 1.09993</td>
+<td>Limit-price invariant fails</td>
+</tr>
+<tr>
+<td>Distant buy limit</td>
+<td>ACCEPTED; one pending order</td>
+<td>Positive control confirms resting support exists</td>
+</tr>
+<tr>
+<td>Resting stop with no explicit expiry</td>
+<td>86,400,000 ms lifetime</td>
+<td>Adapter fallback is 24 hours; its STOP_ENTRY policy specifies four hours</td>
+</tr>
+</tbody>
+</table>
+<p>The direct adapter expiry probe did not exercise full policy-to-router propagation. The unified candidate already assigns the combined expiry issue to corrective contracts. These synthetic observations are not broker orders, live qualification or a full-suite pass. [E3; S3 opening; S9]</p>
+<h2>3. Adoption crosswalk</h2>
+<p>The complete machine-readable crosswalk accompanies this report. Forecast packet suffixes below refer to existing <code>VAN-ML-PKT-*</code> identifiers; in the unified plan, existing gate aliases remain aliases rather than second gates.</p>
+<table>
+<thead>
+<tr>
+<th>Uploaded adoption</th>
+<th>Review disposition</th>
+<th>Existing home / net-new part</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>A01 executable economics</td>
+<td>Extend, do not duplicate</td>
+<td>Forecast 007/009/010/044 plus BE-010/035; new DEX-specific exitability and route economics</td>
+</tr>
+<tr>
+<td>A02 Qlib/LightGBM/NF</td>
+<td>Largely already specified</td>
+<td>Forecast 011–025; preserve all model, registry, lifecycle and calibration obligations</td>
+</tr>
+<tr>
+<td>A03 incremental evaluator</td>
+<td>Valuable clarification to an existing obligation</td>
+<td>Forecast 005/007/008/010/027/030/031/047; add full discovery cohorts and changed-trade-path evaluation</td>
+</tr>
+<tr>
+<td>A04 crypto discovery</td>
+<td>Genuine new domain scope</td>
+<td>Chain/token/pool identity, discovery retention, staged filters and reason-specific rechecks</td>
+</tr>
+<tr>
+<td>A05 chain/wallet intelligence</td>
+<td>Genuine new domain scope</td>
+<td>Chain-specific security facts, temporal attribution, sellability, pool migration and finality/reorg behavior</td>
+</tr>
+<tr>
+<td>A06 typed Jev</td>
+<td>Reuse existing branch implementation</td>
+<td>Shared Jev/cognition owners; new registered questions and domain evaluation only</td>
+</tr>
+<tr>
+<td>A07 prediction-market context</td>
+<td>Narrow subset of existing mandatory scope</td>
+<td>Retain all forecast 037–048, including non-order-sending laboratories</td>
+</tr>
+<tr>
+<td>A08 agent/UI mapping</td>
+<td>Reuse owners; extend projections</td>
+<td>Existing Hermes and risk/router ownership; post-BG candidate funnel, not early frontend</td>
+</tr>
+</tbody>
+</table>
+<h2>4. Integration-blocking specification conflicts</h2>
+<h3>R01 — Use the actual current umbrella and preserve authority lineage</h3>
+<p>The uploaded proposal names Rev4/5 and derived profitability documents but does not map to Forecast Rev1.1 or the newer Unified Rev1.11. Amend its authority/reference section, execution cards and delivery milestones with exact document hashes, source heads and current canonical selector. The unified candidate itself still needs independent semantic admission. Do not turn its name into proof of approval. [S1 §0; S3 opening]</p>
+<h3>R02 — Do not thin mandatory forecasting or prediction-market scope</h3>
+<p>The upload makes NeuralForecast and Kalshi/Jev later conditional experiments. That is acceptable for <strong>economic influence</strong>, but incompatible if used to omit current mandatory implementation: usable NHITS/NBEATSx/DeepAR, the specified challenger plugins, retained paths, model lifecycle and the event-contract valuation/arbitrage/market-making research laboratories. [S1 §§1,12,15; S2 §§1,22]</p>
+<p>A functioning model integration can truthfully conclude NO_QUALIFIED_MODEL or reject a trained candidate. That negative economic result does not excuse leaving required software absent. A07 must not reduce the complete existing prediction-market programme to one probability-change feature. Keeping live event-contract execution disabled remains compatible with both plans.</p>
+<h3>R03 — M8 is scheduled too early</h3>
+<p>The uploaded M8 permits UI after M2 and at least one qualified feed. The current unified programme requires all mandatory backend work and independent global BG-001 first. Replace M8's readiness condition with the actual BG-001 dependency. Headless API/projection contracts can be implemented earlier; new UI cannot. G0–G6 and M0–M9 should map to existing canonical units, not become independent approval or release routes. [S1 §12; S3 opening]</p>
+<h3>R04 — Evidence-grade names collide dangerously</h3>
+<p>The upload uses E1–E5 as publication/source-quality categories. Unified Rev1.11 uses E0–E6 as implementation/acceptance evidence levels. In one scheme E3 means vendor capability and E5 means unverified creator claims; in the other E3 is a test receipt and E5 is device certification. [S1 §0.1; S3 §0.4]</p>
+<p>Never store both in one unnamespaced <code>evidence_grade</code>. Preserve separate fields such as <code>research_source_class</code> and <code>implementation_evidence_level</code>, with an explicit mapping that does not promote one into the other. A vendor capability or creator screenshot is not a passed software test or a certified phone.</p>
+<h3>R05 — Preserve compatible branch work before extending it</h3>
+<p>A new Jev service, duplicate model registry, parallel calibration package or newly reinvented lockout governor would be avoidable duplication. The uploaded “only if absent” directory proviso is useful, but it must now point to the actual branch matrix and the forecast runtime/research split. Preserve PR101 execution fixes while reconciling canon learning evidence and signed temperament work at shared account-runtime seams. [S1 §§0.3,3,7; E1–E2; S4–S7]</p>
+<h3>R06 — Separate software closure, source access, effect admission and live authority</h3>
+<p>The upload's staged language is compatible only when these are separate dimensions. A defensive veto can be useful without positive alpha; a read-only research component must not require a funded venue account just to finish its offline code. Conversely, an externally blocked source must not be marked provider-E2E complete or used to waive global backend acceptance. Preserve the no-new-procurement scope and report unresolved provider capabilities explicitly. [S1 §§11–13; S2 §22.2]</p>
+<h2>5. Technical refinements worth integrating</h2>
+<h3>R07 — Split observed executable facts from modeled economics</h3>
+<p>The proposed <code>ExecutableCostEvidence</code> mixes quote facts with projected exit proceeds and <code>p_fill_estimate</code>. Its prose correctly requires units and avoids double-counting, but the illustrative object does not itself provide sufficient target/calibration lineage for those predictions. [S1 §2]</p>
+<p>Use linked records under the existing owners: an observed quote/route snapshot; an execution-cost/fill forecast; and a resulting net-edge assessment. Each needs side, quantity/units, currency, price convention, venue/route, as-of/available-at/expiry, fee-inclusion flags and immutable references. Predictions additionally need target/horizon, model/transform/calibration revision and domain validity. DEX simulations need a block/slot and relevant contract/router state binding. Do not name every modeled outcome an observed “fact.”</p>
+<h3>R08 — Preserve size-only attribution and add whole-policy replay</h3>
+<p>The upload correctly identifies <code>ShadowEntry.shadow_r</code> as size-only. Current source multiplies actual R by a shadow multiplier. That can describe contribution in common baseline risk units under proportional assumptions; it is not a new trade's independently remeasured own-risk R, nor a replay of altered timing, nonlinear fees, liquidity, capital usage or selection. [S1 §4; S10]</p>
+<p>Add matched-opportunity records to the existing experiment and account-replay services. Seal the discovered universe, both policy decisions, rejects, expiries, unavailable observations and versioned fill assumptions before outcomes mature. Replay each account independently; a skipped position changes later cash and opportunity availability. Preserve the old shadow view as a specifically labeled attribution view.</p>
+<h3>R09 — Improve causal/statistical wording without manufacturing a new gate</h3>
+<p>Call the normal result “incremental policy performance under specified replay assumptions,” not identified causal contribution merely because two arms were simulated. Use event/time/asset-cluster-aware resampling where observations are dependent, not an unspecified independent per-row paired bootstrap. Measure false rejection of legitimate winners as well as dangerous candidates avoided. [S1 §§4,11; S2 §§16,22.14]</p>
+<p>The proposed lower 95% confidence-bound requirement is a proposed research policy, not existing authority. Bind materiality, effect size, sample adequacy, multiple trials and stopping rules to the one versioned validation policy. Do not silently replace canonical DSR/PBO or create a contradictory second threshold service. Distinguish a terminal return quantile from path-dependent adverse excursion and stop-touch probability; define and validate each target separately.</p>
+<h3>R10 — Expand crypto safety as a domain capability, not a trading desk</h3>
+<p>A04/A05 are the clearest new value. Retain chain-specific asset and pool identities; source-backed role attribution; technical-pool/burn exclusions without discarding raw concentration; time-indexed flows; contract-capability checks; independent sell-side simulation; and typed UNKNOWN states. A single holder snapshot cannot support a claim of holder growth or accumulation. [S1 §§5–6]</p>
+<p>Refine identity normalization per chain rather than applying a universal string transform. Bind security findings and route simulation to the actual state observed, invalidate affected descendants on state revision/reorganization, and track pool migrations without changing the token identity. A successful read-only simulation is evidence at that state, not a promise that a later sell will succeed.</p>
+<p>Separate factual restrictions, uncertain wallet attribution, manipulation-risk predictions and economic forecasts. <code>NO_HARD_BLOCK</code> must remain distinct from SAFE_TO_BUY. A safety veto cannot prevent mandatory risk-reducing exits or acquire wallet/signing authority. No new funded crypto venue is authorized by adopting the research code.</p>
+<h3>R11 — Keep one bounded serving and cognition hierarchy</h3>
+<p>The upload puts bounded inference broadly in T2. The forecast blueprint provides a bounded local ForecastService in the designated forecasting lane, with T0 consuming prepared results rather than synchronously calling model training, registry or remote LLM services. Classify slow Jev/chain/public-source work separately from inexpensive precomputed model inference; do not move every inference call into remote T2 or drag heavy research dependencies into core trading imports. [S1 §§0.2,12; S2 §§3,12]</p>
+<p>Existing typed evidence resolution and snapshot/TTL checks must remain the admission path. A model ID, artifact hash, registry alias or source quality score must not confer authority by itself. Malformed, non-finite, incompatible or expired outputs must have explicit behavior and an exercised positive valid path as well as rejection tests.</p>
+<h3>R12 — Replay determinism is not universal retraining identity</h3>
+<p>Uploaded INV-12 promises the same candidate/model state/decision hash for frozen inputs and versions. Scope exact equality to canonical recorded decisions and a defined reproducible inference environment. Distinguish deterministic replay of persisted outputs, fixed-seed same-environment inference, cross-device numerical tolerances and independently repeated stochastic training. Do not claim every neural/GPU training run is byte-identical because the dataset is frozen. [S1 §11.2; S2 §8.4]</p>
+<h2>6. What the existing forecast specification should also change</h2>
+<p>This is not a one-sided review. Forecast Rev1.1 was explicit that it had not re-audited every branch. Its source reconciliation and consumer maps now need the new 66-head evidence, the PR101 code baseline, the canon evidence/Jev/mode overlaps and the Rev1.11 single-plan integration. Do not continue describing resting orders and recoverable lockouts as absent everywhere. [S2 §2; E1–E3]</p>
+<p>Its broad point-in-time and policy-replay duties should explicitly absorb full token-discovery cohorts, technical-holder classification, state-bound sellability and rejected/migrated/disappearing pools. The crypto subdomain requires additional schemas, producer contracts and adversarial cases; merely attaching the new PDF/Markdown as reading material is insufficient.</p>
+<p>The combined programme must regenerate its requirement→packet→producer→consumer→test→evidence→UI traceability and DAG after scope admission. Preserve all 90 forecasting requirements and current parent corrective contracts. Add new IDs only through the programme's actual generator; this review invents no new packet count or acceptance certificate.</p>
+<h2>7. Recommended reconciliation sequence</h2>
+<ol>
+<li>Freeze the exact document/source identities and reconcile the existing single-plan selector. Preserve the supplied High-Value document as provenance rather than allowing two active roadmaps.</li>
+<li>Perform function/contract-level source consolidation under BE-001. Carry forward the compatible PR101 execution work, canon Jev/cognitive evidence, signed mode contributions and existing owner controls.</li>
+<li>Close the already specified simulator and evaluator defects before using financial backtests to admit new forecast effects. Retain positive controls and deliberately failing counterexamples.</li>
+<li>Implement the existing full forecasting programme and admit A04/A05's additional read-only domain scope through real producer, storage, consumer, model/evaluation and runtime contracts. Reuse the shared pipeline rather than creating a crypto-only parallel forecasting engine.</li>
+<li>Complete backend APIs, failure/recovery behavior and independent backend qualification. Only BG-001 permits new native funnel and analytics UI; model influence and live trading require their separate scoped evidence/owner decisions.</li>
+</ol>
+<p>This sequence is a recommendation for the existing canonical plan, not authorization to start a new implementation or merge campaign.</p>
+<h2>8. Review outcome and delivery boundary</h2>
+<p><strong>Recommended outcome:</strong> retain and extend the current forecasting/unified specification; adopt the uploaded document as a corrected domain-specific annex and requirements delta. Its wallet/chain/sellability material is valuable. Its general forecasting and Jev sections should chiefly link to and strengthen existing owners. Its optional-model, reduced prediction-market and early-UI scheduling must not replace current mandatory obligations.</p>
+<p>No application source or input blueprint was changed, no branch was merged, no source was economically admitted, no model was trained, no broker/chain transaction occurred and no F15/BG/production certificate was issued. The four local-in-VM paper observations are deliberately narrow. Raw branch/content/probe evidence remains in the named audit workspace. Downloadable JSON here is explicitly a compiled summary and crosswalk, not a replacement for those raw source/receipt artifacts.</p>
+<h2>Source and evidence register</h2>
+<ul>
+<li><strong>S1</strong> — User upload: <code>VAN_HIGH_VALUE_TRADING_ADOPTIONS_BLUEPRINT_REV1_2026-10-17.md</code>, 466 parsed lines. Referenced by its original section numbers. Its donor audit was located in Library and states that private FOMO/desk execution and the creator's private production deployment were not available. Those performance claims were not used to qualify VAN.</li>
+<li><strong>S2</strong> — <code>VAN_FORECAST_ADOPTION_BLUEPRINT_REV1_1_20261017.md</code> and its 59-member implementation pack. The review read the complete master and inspected the machine plan/crosswalk identities. Checks from its original delivery remain historical document checks, not new application proof.</li>
+<li><strong>S3</strong> — Library <code>VAN_NEXT_UNIFIED_REBUILD_BLUEPRINT_REV1_11_20261017.md</code>, file ID <code>file_00000000fbe48208b29a976c444e8e44</code>. Reviewed opening authority, current source/corrective findings and targeted plan/requirement sections; not a new full semantic audit of all 3,427 lines.</li>
+<li><strong>S4</strong> — <a href="https://github.com/Vanguduza/Van/pull/101">PR101 metadata and scope</a>, pinned head <code>a39f241b0135cf92cc5a6b9a28af226aa294603d</code>. PR-reported full-suite results remain reported rather than rerun here.</li>
+<li><strong>S5</strong> — <a href="https://github.com/Vanguduza/Van/blob/8eb1889822fc8a83f219977c15340172e16acd91/trading/vati/arbiter/portfolio_allocator.py">Portfolio allocator</a>, blob <code>d3a824b500618918d177b4d7eff37ab585a08614</code>.</li>
+<li><strong>S6</strong> — <a href="https://github.com/Vanguduza/Van/blob/dfc1557ab99ad8d41cf84714e1bb671e89b045e6/backend/van_gateway/jev/advisor.py">Shared Jev consumer</a>, blob <code>8e9f78030613325dcd9e53b14d927ad4d5013245</code>.</li>
+<li><strong>S7</strong> — <a href="https://github.com/Vanguduza/Van/blob/dfc1557ab99ad8d41cf84714e1bb671e89b045e6/trading/vati/learning/evidence.py">Learning evidence resolver</a>, blob <code>b9a2cc0e0eb4701534ae918373406d6fca495605</code>.</li>
+<li><strong>S8</strong> — <a href="https://github.com/Vanguduza/Van/blob/a39f241b0135cf92cc5a6b9a28af226aa294603d/trading/vati/backtest/engine.py">Backtest engine</a>, blob <code>0e43a0c75269f608b74e0c9b12c1e4d731da377c</code>.</li>
+<li><strong>S9</strong> — <a href="https://github.com/Vanguduza/Van/blob/a39f241b0135cf92cc5a6b9a28af226aa294603d/trading/vati/execution/paper.py">PR101 PaperAdapter</a>, blob <code>f9be04e3fbbb174726ccd86834b3b77ac81b36a2</code>; <a href="https://github.com/Vanguduza/Van/blob/a39f241b0135cf92cc5a6b9a28af226aa294603d/trading/vati/execution/base.py">OrderCommand contract</a>.</li>
+<li><strong>S10</strong> — <a href="https://github.com/Vanguduza/Van/blob/8eb1889822fc8a83f219977c15340172e16acd91/trading/vati/cognition/shadow_book.py">Size-only shadow book</a>, blob <code>4e6068e78b43ad005413962dd42543d026d81371</code>.</li>
+<li><strong>E1</strong> — Actual typed inventory run <code>van-hva-allbranches-run-20261017-01</code>; complete VM <code>BRANCH_REVIEW_INVENTORY.json</code> SHA-256 <code>3dc2d3bbe93eab38f510573b696e150e2b5e2a0ec8df2e8a76606fa2da86cc5c</code>.</li>
+<li><strong>E2</strong> — Actual typed text/import scan <code>van-hva-content-run-20261017-02</code>; VM <code>ALL_BRANCH_CONTENT_SCAN.json</code> SHA-256 <code>051d75ca3bda4ab2d8330dc877048e00aa4808eebe3807afe8848457e72f527c</code>.</li>
+<li><strong>E3</strong> — Actual focused adapter probe <code>van-hva-probes-run-20261017-03</code>; source <code>a39f241b…</code>; raw <code>PAPER_PROBE_RECEIPT.json</code> and export retained on VM. The E1/E2/E3 labels in this report are <strong>local bibliography identifiers only</strong>, not either blueprint's evidence-grade enums.</li>
+</ul>
+<p><strong>Raw VM audit directory:</strong> <code>/home/ubuntu/work/van-high-value-review-20261017-005_3oh7/</code>. This is a forensic evidence location, not a public download link. Input SHA-256 values and typed request identities are included in <code>REVIEW_EVIDENCE_SUMMARY.json</code>.</p>
+</main></body></html>

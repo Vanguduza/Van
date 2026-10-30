@@ -9,6 +9,30 @@ import kotlin.test.assertFalse
 class VanNavModelTest {
 
     @Test
+    fun `plain activity reentry carries no steering request`() {
+        assertNull(VanNavModel.intentDestination(null, null))
+        assertNull(VanNavModel.intentDestination(null, "  "))
+    }
+
+    @Test
+    fun `resident activity uses the same validated deep link destination as a fresh launch`() {
+        assertEquals("projects/acme-42", VanNavModel.intentDestination("van://projects/acme-42", null))
+        assertEquals(VanRoute.SETTINGS, VanNavModel.intentDestination("van://settings", "chat"))
+    }
+
+    @Test
+    fun `resident activity accepts the existing legacy module delivery`() {
+        assertEquals(VanRoute.WORK, VanNavModel.intentDestination(null, "chat"))
+        assertEquals(VanRoute.WORK_BROWSER, VanNavModel.intentDestination(null, "browser_automation"))
+    }
+
+    @Test
+    fun `foreign or unregistered link cannot redirect through a module extra`() {
+        assertNull(VanNavModel.intentDestination("https://home", "chat"))
+        assertNull(VanNavModel.intentDestination("van://not-a-real-route", "chat"))
+    }
+
+    @Test
     fun `restore falls back to home for null, blank or unknown routes`() {
         assertEquals(VanRoute.HOME, VanNavModel.restore(null))
         assertEquals(VanRoute.HOME, VanNavModel.restore(""))

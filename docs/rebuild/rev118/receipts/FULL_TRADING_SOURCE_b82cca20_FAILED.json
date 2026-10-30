@@ -1,0 +1,49 @@
+{
+  "schema": "van.rebuild.full-trading-source/1",
+  "source_head": "b82cca202239b4d68c33583b2efba339ca977496",
+  "status": "FAILED",
+  "execution": "Stopped at original maxfail5",
+  "counts": {
+    "tests": 1000,
+    "passed": 995,
+    "failures": 5,
+    "errors": 0,
+    "skipped": 0
+  },
+  "report_sha256": "20330c5afda5cc630bcce389dc3c41a6a93c1767813df3b0862be35520d59c6f",
+  "log_sha256": "5d23f8a5c67300916dbc24657355ee71bc60ffd12086f0c74072d32cd6df1593",
+  "storage_audit": {
+    "schema": "van.source-storage-audit/1",
+    "forbidden_events": [],
+    "source_sha256": "d4e270150fb0da6e8d79b449dd0de68fd1f97b3ccea3d282f31d91297edbd495",
+    "root": "/tmp/van-current-risk-full-qualification-20261024",
+    "scope": "SQLite opens, path-based writable opens and directory/link/rename/delete events under data and backend/data",
+    "limits": "Python audit events only; existing fd writes, native-library raw I/O and external processes are not an OS sandbox. Git state is checked separately."
+  },
+  "private_postgres_cleanup": {
+    "stopped": true,
+    "removed": true
+  },
+  "findings": {
+    "native_boolean_execution_fixtures": "Two standalone native router fixtures lack the newly required current RiskAuthority/facts callback. Wiring exact fixture observations preserves original calls/order-send/flatten assertions. Actual application factories already wire both callbacks.",
+    "resource_failures": [
+      "loopback CLI subprocess fork EAGAIN",
+      "PostgreSQL child fork EAGAIN",
+      "MT5 HTTP fixture subprocess fork EAGAIN"
+    ]
+  },
+  "limits": "A partial failed run; no whole trading or backend pass. Exact cases require successful rerun on corrected source and a capable worker.",
+  "fixture_correction": {
+    "source_sha256": "df101a58ccef42918fa8b22a81e6bf18a5e3f453179bb1f6b1a600587cd45548",
+    "all_original_test_functions_ast_unchanged": true,
+    "original_test_count": 5,
+    "combined_current_risk_and_native_receipts": {
+      "passed": 46,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "junit_sha256": "1bed1690457e02de02aef81928d4885e86a65d77b452939f1f20d911e7de85b2"
+    },
+    "change": "Only native_flow supplies exact fixture CurrentRiskFacts and the real original RiskAuthority. All test functions and exact native calls/send/flatten assertions are unchanged."
+  }
+}

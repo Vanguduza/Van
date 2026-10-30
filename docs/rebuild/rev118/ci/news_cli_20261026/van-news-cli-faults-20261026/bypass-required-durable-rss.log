@@ -1,0 +1,18 @@
+......F........                                                          [100%]
+=================================== FAILURES ===================================
+_______ test_rss_cli_requires_original_durable_sink_before_reading_feed ________
+
+files = (PosixPath('/tmp/pytest-of-agent/pytest-317/test_rss_cli_requires_original0/news.json'), PosixPath('/tmp/pytest-of-age...uires_original0/feed.xml'), PosixPath('/tmp/pytest-of-agent/pytest-317/test_rss_cli_requires_original0/ledger.sqlite'))
+capsys = <_pytest.capture.CaptureFixture object at 0x7f71fddf7110>
+
+    def test_rss_cli_requires_original_durable_sink_before_reading_feed(files,capsys):
+        code,report=invoke(files,capsys,ledger=False)
+>       assert code==2 and report.get('error')=='RSS_DURABLE_LEDGER_REQUIRED'
+E       AssertionError: assert (2 == 2 and None == 'RSS_DURABLE_LEDGER_REQUIRED')
+E        +  where None = <built-in method get of dict object at 0x7f71fde1c8c0>('error')
+E        +    where <built-in method get of dict object at 0x7f71fde1c8c0> = {'ingress_version': 'news-ingress/5.1.2', 'headlines': 0, 'by_trust': {}, 'sources': [], ...}.get
+
+trading/tests/test_news_cli_source.py:81: AssertionError
+=========================== short test summary info ============================
+FAILED trading/tests/test_news_cli_source.py::test_rss_cli_requires_original_durable_sink_before_reading_feed
+1 failed, 14 passed in 1.22s

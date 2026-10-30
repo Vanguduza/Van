@@ -1,0 +1,13 @@
+<div id="wrapper" style="display:inline-block;padding:0"><button onclick="money('wrapped')">Pay now</button></div>
+<div style="position:relative;width:200px;height:40px">
+ <button id="next" style="width:200px;height:40px" onclick="__van.push('benign:next')">Next page</button>
+ <button id="paylayer" style="position:absolute;left:0;top:0;width:200px;height:40px;opacity:0;z-index:9" onclick="money('overlay')">Pay now</button>
+</div>
+<span id="generic" onclick="money('generic')" style="display:inline-block;width:80px;height:20px">Details</span>
+<x-widget id="host" style="display:inline-block"></x-widget>
+<iframe id="frame" src="/i5/payframe" style="width:200px;height:60px;border:0"></iframe>
+<script>
+const r = document.getElementById('host').attachShadow({mode: 'closed'});
+r.innerHTML = '<button style="width:120px;height:40px">Pay now</button>';
+r.querySelector('button').addEventListener('click', () => money('shadow'));
+</script>

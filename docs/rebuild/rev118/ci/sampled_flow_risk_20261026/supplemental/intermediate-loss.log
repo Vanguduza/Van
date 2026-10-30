@@ -1,0 +1,28 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+_ test_intermediate_loss_between_external_flows_cannot_disappear_from_drawdown _
+
+    def test_intermediate_loss_between_external_flows_cannot_disappear_from_drawdown():
+        first=value(1000,'100','baseline');last=value(4000,'150','closing')
+        flows=[flow(2000,'100','180','deposit'),flow(3000,'-90','180','withdrawal')]
+        samples=[value(1500,'80','first-loss'),value(2250,'50','deep-loss'),value(2500,'270','recovery')]
+        # Shares:100 ->225 afterdeposit ->150 afterwithdrawal. The intermediate
+        # 50/225 NAV is2/9, so drawdown from NAV1 is7/9; closing NAV returns to1.
+        original=unitize(first,last,flows)
+        assert D(original['worst_observed_drawdown'])==D('.2')
+        result=FlowAdjustedRisk(first,last,flows,samples=samples).body();calculation=result['calculation']
+        assert result['state']=='MEASURED' and D(calculation['units'])==150
+        assert D(calculation['flow_neutral_return'])==0 and D(calculation['external_net_flow'])==10
+        assert D(calculation['net_account_pnl'])==40
+>       assert abs(Fraction(D(calculation['worst_observed_drawdown']))-Fraction(7,9))<Fraction(1,10**79)
+E       AssertionError: assert Fraction(26, 45) < Fraction(1, 10000000000000000000000000000000000000000000000000000000000000000000000000000000)
+E        +  where Fraction(26, 45) = abs((Fraction(1, 5) - Fraction(7, 9)))
+E        +    where Fraction(1, 5) = Fraction(Decimal('0.2'))
+E        +      where Decimal('0.2') = D('0.2')
+E        +    and   Fraction(7, 9) = Fraction(7, 9)
+E        +  and   Fraction(1, 10000000000000000000000000000000000000000000000000000000000000000000000000000000) = Fraction(1, (10 ** 79))
+
+trading/tests/test_flow_adjusted_risk.py:30: AssertionError
+=========================== short test summary info ============================
+FAILED trading/tests/test_flow_adjusted_risk.py::test_intermediate_loss_between_external_flows_cannot_disappear_from_drawdown
+1 failed in 1.23s

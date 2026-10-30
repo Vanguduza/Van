@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.dial.van.voice.OfflineSpeechCoverageTest" tests="3" skipped="0" failures="0" errors="0" timestamp="2026-10-08T06:47:30" hostname="052fefa249ff" time="0.003">
+  <properties/>
+  <testcase name="cancellationCannotBeUndoneByAnotherQueuedSpeechSegment()" classname="com.dial.van.voice.OfflineSpeechCoverageTest" time="0.0"/>
+  <testcase name="unsupportedUnicodeNumbersAndPunctuationDoNotClaimCoverage()" classname="com.dial.van.voice.OfflineSpeechCoverageTest" time="0.003"/>
+  <testcase name="wholeUtteranceFallsBackWhenAnyWordWouldBeDropped()" classname="com.dial.van.voice.OfflineSpeechCoverageTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

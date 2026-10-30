@@ -1,0 +1,35 @@
+FF                                                                       [100%]
+=================================== FAILURES ===================================
+_ test_actual_signed_sdk_to_sql_binding_retains_original_order_and_read_only_estimate _
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-129/test_actual_signed_sdk_to_sql_0')
+eurusd = SymbolContract(symbol='EURUSD', venue='mt5', base_currency='EUR', quote_currency='USD', account_currency='USD', contra...=Decimal('0'), max_adv_participation=Decimal('0.10'), liquidity_haircut=Decimal('0'), round_trip_cost_pct=Decimal('0'))
+
+    def test_actual_signed_sdk_to_sql_binding_retains_original_order_and_read_only_estimate(tmp_path,eurusd):
+        sdk,adapter,now,ledger,event,book=mt5_entry(tmp_path,eurusd)
+        try:
+            cmd=entry_command(event)
+>           receipt=book.capture_entry(adapter,event.hash,cmd,deadline_ms=NOW*1000+2000)
+                    ^^^^^^^^^^^^^^^^^^
+E           AttributeError: 'NativeMarginBook' object has no attribute 'capture_entry'
+
+trading/tests/test_entry_margin_binding.py:37: AttributeError
+_ test_actual_ctrader_current_price_quote_binds_exact_order_without_inventing_price_valuation _
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-129/test_actual_ctrader_current_pr0')
+eurusd = SymbolContract(symbol='EURUSD', venue='mt5', base_currency='EUR', quote_currency='USD', account_currency='USD', contra...=Decimal('0'), max_adv_participation=Decimal('0.10'), liquidity_haircut=Decimal('0'), round_trip_cost_pct=Decimal('0'))
+
+    def test_actual_ctrader_current_price_quote_binds_exact_order_without_inventing_price_valuation(tmp_path,eurusd):
+        ledger,adapter,old,book,now,facts=setup_book(tmp_path,eurusd)
+        try:
+            event=record(ledger,replace(facts,used_margin=D('0'),free_margin=D('10000'),margin_level_pct=None))
+            cmd=entry_command(event)
+>           receipt=book.capture_entry(adapter,event.hash,cmd,deadline_ms=NOW*1000+2000)
+                    ^^^^^^^^^^^^^^^^^^
+E           AttributeError: 'NativeMarginBook' object has no attribute 'capture_entry'
+
+trading/tests/test_entry_margin_binding.py:54: AttributeError
+=========================== short test summary info ============================
+FAILED trading/tests/test_entry_margin_binding.py::test_actual_signed_sdk_to_sql_binding_retains_original_order_and_read_only_estimate
+FAILED trading/tests/test_entry_margin_binding.py::test_actual_ctrader_current_price_quote_binds_exact_order_without_inventing_price_valuation
+2 failed in 0.77s

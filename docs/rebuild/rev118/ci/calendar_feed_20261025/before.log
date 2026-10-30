@@ -1,0 +1,132 @@
+FFFFFFFFFF..                                                             [100%]
+=================================== FAILURES ===================================
+_____ test_bare_json_array_keeps_the_same_records_as_the_documented_object _____
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-146/test_bare_json_array_keeps_the0')
+
+    def test_bare_json_array_keeps_the_same_records_as_the_documented_object(tmp_path):
+        p=tmp_path/'calendar.json';p.write_text(json.dumps([row()]))
+>       bare=load_calendar(p)
+             ^^^^^^^^^^^^^^^^
+
+trading/tests/test_calendar_feed_boundaries.py:18: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+path = PosixPath('/tmp/pytest-of-agent/pytest-146/test_bare_json_array_keeps_the0/calendar.json')
+
+    def load_calendar(path: str | Path) -> list[Tier1Event]:
+        """JSON: {"events":[{name, release, currencies:"USD|EUR", source}]}  or CSV with the same columns.
+        Two rows for the same event from different sources → verified_sources = 2."""
+        p = Path(path)
+        if p.suffix.lower() == ".json":
+            data = json.loads(p.read_text(encoding="utf-8"))
+>           return events_from_records(data.get("events", data if isinstance(data, list) else []))
+                                       ^^^^^^^^
+E           AttributeError: 'list' object has no attribute 'get'
+
+trading/vati/intelligence/calendar_feed.py:51: AttributeError
+_ test_naive_release_time_is_rejected_instead_of_using_the_worker_timezone[_parse_ms0] _
+
+parser = <function _parse_ms at 0x7ff3d69d6a20>
+
+    @pytest.mark.parametrize('parser',[_parse_ms,recorder._parse_ms])
+    def test_naive_release_time_is_rejected_instead_of_using_the_worker_timezone(parser):
+>       with pytest.raises(ValueError):parser('2026-10-14T12:30:00')
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+trading/tests/test_calendar_feed_boundaries.py:25: Failed
+_ test_naive_release_time_is_rejected_instead_of_using_the_worker_timezone[_parse_ms1] _
+
+parser = <function _parse_ms at 0x7ff3d6958ea0>
+
+    @pytest.mark.parametrize('parser',[_parse_ms,recorder._parse_ms])
+    def test_naive_release_time_is_rejected_instead_of_using_the_worker_timezone(parser):
+>       with pytest.raises(ValueError):parser('2026-10-14T12:30:00')
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+trading/tests/test_calendar_feed_boundaries.py:25: Failed
+_ test_sub_millisecond_time_is_not_silently_made_available_earlier[_parse_ms0] _
+
+parser = <function _parse_ms at 0x7ff3d69d6a20>
+
+    @pytest.mark.parametrize('parser',[_parse_ms,recorder._parse_ms])
+    def test_sub_millisecond_time_is_not_silently_made_available_earlier(parser):
+>       with pytest.raises(ValueError):parser('2026-10-14T12:30:00.123001Z')
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+trading/tests/test_calendar_feed_boundaries.py:30: Failed
+_ test_sub_millisecond_time_is_not_silently_made_available_earlier[_parse_ms1] _
+
+parser = <function _parse_ms at 0x7ff3d6958ea0>
+
+    @pytest.mark.parametrize('parser',[_parse_ms,recorder._parse_ms])
+    def test_sub_millisecond_time_is_not_silently_made_available_earlier(parser):
+>       with pytest.raises(ValueError):parser('2026-10-14T12:30:00.123001Z')
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+trading/tests/test_calendar_feed_boundaries.py:30: Failed
+___ test_different_currency_scopes_cannot_silently_share_a_legacy_event_key ____
+
+    def test_different_currency_scopes_cannot_silently_share_a_legacy_event_key():
+>       with pytest.raises(ValueError):events_from_records([row(currencies='USD'),row(currencies='CAD')])
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+trading/tests/test_calendar_feed_boundaries.py:34: Failed
+_______ test_explicit_native_keys_preserve_two_same_name_and_time_series _______
+
+    def test_explicit_native_keys_preserve_two_same_name_and_time_series():
+        result=events_from_records([row(event_key='provider:US:CPI:2026-10',currencies='USD'),
+            row(event_key='provider:CA:CPI:2026-10',currencies='CAD')])
+>       assert len(result)==2
+E       AssertionError: assert 1 == 2
+E        +  where 1 = len([Tier1Event(event_id='CPI:1791981000000', name='CPI', release_ms=1791981000000, currencies=frozenset({'USD'}), blackout_before_ms=300000, blackout_after_ms=900000, quiet_until_ms=2700000, drift_until_ms=14400000, verified_sources=1)])
+
+trading/tests/test_calendar_feed_boundaries.py:40: AssertionError
+_ test_schedule_and_observation_rows_keep_the_same_original_explicit_event_key _
+
+    def test_schedule_and_observation_rows_keep_the_same_original_explicit_event_key():
+        original=row(event_key='provider:US:CPI:2026-10')
+        scheduled=scheduled_from_row(original)
+        observed=observation_from_row(original|{'actual':'3.1'})
+>       assert scheduled.event_key==observed.event_key=='provider:US:CPI:2026-10'
+E       AssertionError: assert 'CPI:1791981000000' == 'provider:US:CPI:2026-10'
+E         
+E         - provider:US:CPI:2026-10
+E         + CPI:1791981000000
+
+trading/tests/test_calendar_feed_boundaries.py:49: AssertionError
+__ test_one_explicit_key_cannot_silently_change_its_original_release_or_scope __
+
+    def test_one_explicit_key_cannot_silently_change_its_original_release_or_scope():
+>       with pytest.raises(ValueError):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+trading/tests/test_calendar_feed_boundaries.py:53: Failed
+___ test_two_transport_labels_cannot_make_an_unqualified_file_live_eligible ____
+
+    def test_two_transport_labels_cannot_make_an_unqualified_file_live_eligible():
+        events=events_from_records([row(source='transport-a'),row(source='transport-b')])
+        report=calendar_report(events,now_ms=events[0].release_ms-1000)
+        assert events[0].verified_sources==2  # Preserve the legacy declared count.
+>       assert report['live_eligible']==0 and report['declared_agreement']==1
+E       assert (1 == 0)
+
+trading/tests/test_calendar_feed_boundaries.py:62: AssertionError
+=========================== short test summary info ============================
+FAILED trading/tests/test_calendar_feed_boundaries.py::test_bare_json_array_keeps_the_same_records_as_the_documented_object
+FAILED trading/tests/test_calendar_feed_boundaries.py::test_naive_release_time_is_rejected_instead_of_using_the_worker_timezone[_parse_ms0]
+FAILED trading/tests/test_calendar_feed_boundaries.py::test_naive_release_time_is_rejected_instead_of_using_the_worker_timezone[_parse_ms1]
+FAILED trading/tests/test_calendar_feed_boundaries.py::test_sub_millisecond_time_is_not_silently_made_available_earlier[_parse_ms0]
+FAILED trading/tests/test_calendar_feed_boundaries.py::test_sub_millisecond_time_is_not_silently_made_available_earlier[_parse_ms1]
+FAILED trading/tests/test_calendar_feed_boundaries.py::test_different_currency_scopes_cannot_silently_share_a_legacy_event_key
+FAILED trading/tests/test_calendar_feed_boundaries.py::test_explicit_native_keys_preserve_two_same_name_and_time_series
+FAILED trading/tests/test_calendar_feed_boundaries.py::test_schedule_and_observation_rows_keep_the_same_original_explicit_event_key
+FAILED trading/tests/test_calendar_feed_boundaries.py::test_one_explicit_key_cannot_silently_change_its_original_release_or_scope
+FAILED trading/tests/test_calendar_feed_boundaries.py::test_two_transport_labels_cannot_make_an_unqualified_file_live_eligible
+10 failed, 2 passed in 0.30s

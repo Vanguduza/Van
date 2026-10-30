@@ -98,7 +98,10 @@ class SymbolContract:
 
     @property
     def value_per_price_unit_per_lot(self) -> Decimal:
-        return self.tick_value / self.tick_size
+        from decimal import localcontext
+        from vati.core.decimal_context import native_decimal_context
+        with localcontext(native_decimal_context()):
+            return self.tick_value / self.tick_size
 
     def allows(self, direction: Direction) -> bool:
         if self.trade_mode == "FULL":
@@ -108,6 +111,19 @@ class SymbolContract:
         if self.trade_mode == "SHORT_ONLY":
             return direction is Direction.SHORT
         return False
+
+
+@dataclass(frozen=True)
+class StopRiskTerms:
+    """Original numeric inputs for a stop-protected position's loss.
+
+    These facts carry no execution authority. The value-per-price report can
+    repeat; it cannot replace the original tick numerator and denominator.
+    """
+    entry: Decimal
+    stop: Decimal
+    tick_size: Decimal
+    tick_value: Decimal
 
 
 @dataclass(frozen=True)
@@ -124,6 +140,8 @@ class OpenPosition:
     loss_model: LossModel = LossModel.STOP_DISTANCE
     stake: Decimal = Decimal("0")
     liquidity_haircut_per_unit: Decimal = Decimal("0")  # ILLIQUID_EQUITY: price × haircut, per share
+    stop_terms: Optional[StopRiskTerms] = None  # omitted from legacy serialized snapshots
+    broker_position_id: Optional[str] = None  # original native identity, omitted from legacy bodies
 
 
 @dataclass(frozen=True)
@@ -157,6 +175,40 @@ class TradeIntent:
 
 
 @dataclass(frozen=True)
+class NativeAccountRiskContext:
+    """Immutable source identity; never collateral qualification or authority."""
+    provider: str
+    physical_account_key: str
+    monetary_scope_hash: str
+    account_alias: str
+    observation_ref: str
+    source_query_ref: Optional[str]
+    source_mark_json: str
+    risk_capital_qualified: bool = False
+    execution_authority: bool = False
+
+
+@dataclass(frozen=True)
+class PendingRiskCommitment:
+    """A possible future fill, never a confirmed protected position or grant."""
+    command_ref: str
+    original_input_ref: str
+    origin_alias: str
+    physical_account_key: str
+    monetary_scope_hash: str
+    state: str
+    direction: Direction
+    quantity: Decimal
+    entry: Decimal
+    stop: Optional[Decimal]
+    contract: SymbolContract
+    new_position_slots: int = 1
+    protection_confirmed: bool = False
+    execution_authority: bool = False
+    valuation_contract: Optional[SymbolContract] = None  # absent in historical original-only bodies
+
+
+@dataclass(frozen=True)
 class RiskSnapshot:
     """Everything the authority needs, captured at decision time. Any field the
     caller cannot prove must be supplied as its fail-closed value."""
@@ -186,10 +238,23 @@ class RiskSnapshot:
     #: healthy; a paper or owner-ticket venue has no margin and legitimately reports None.
     margin_level_pct: Optional[Decimal] = None
     free_margin: Optional[Decimal] = None
+    #: Native committed margin. None remains absent in legacy snapshot identities.
+    used_margin: Optional[Decimal] = None
     #: Rev 5.1 preservation is evaluated before new risk. The flag is supplied
     #: by the deterministic lifecycle supervisor and consumed only by RiskAuthority.
     preservation_blocks_new_risk: bool = False
     preservation_reason: str = ""
+    #: P1-TRADE-RISK-005 — recoverable lockouts (vati.risk.lockouts). A non-empty lock
+    #: refuses new risk for this strategy or the account; the multiplier (≤ 1) is the
+    #: probation size after a cooldown; the top state is the highest promotion state
+    #: among the mandate's strategies (None keeps the legacy CERTIFIED_LIVE floor).
+    loss_streak_lock: str = ""
+    loss_streak_multiplier: Decimal = Decimal("1")
+    drawdown_top_state: Optional["StrategyState"] = None
+    native_account_context: Optional[NativeAccountRiskContext] = None
+    # Original own-alias basis; the displayed shared peak must never seed itself.
+    native_risk_basis_ref: Optional[str] = None
+    pending_risk_commitments: tuple[PendingRiskCommitment, ...] = ()
 
     @property
     def data_fresh(self) -> bool:

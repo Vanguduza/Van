@@ -1,0 +1,67 @@
+{
+  "schema": "van.rebuild.candidate-source-receipt/1",
+  "source_parent": "ae433a07a69b9d8edf433103722b2dbfff28e697",
+  "scope": "PARTIAL_BE003_BE009_BE012_NOT_UNIT_ACCEPTANCE",
+  "source_sha256": {
+    "trading/vati/risk/history_scope.py": "9a5135534993e08c355c06b8ebaa23cf33c8adbbfac36e52f8f0a49db6cc1f02",
+    "trading/vati/risk/lockouts.py": "96fe22022c825d62df5137509b6cc061c7c4103e64ddbdfe175298863d19601f",
+    "trading/vati/execution/review.py": "530d216c1b8fdbb9ae4402cde494d8641d99b221f0589d225b3e7f964ef0fd97",
+    "trading/vati/app/cycle.py": "71dbb241d26ce37efd05e9bd068d4336c1202376c4b6183bf7612bdcb31cd56c",
+    "trading/vati/app/runner.py": "341a69c20465172309b6f94ba1cce6acbcdb45842f10531c6b213cecbb5b4e14",
+    "trading/vati/app/service.py": "47efdb7ab69b6e59bb64b9f435e8c8bbbb41d97b83237af441bbe35fef9a9009",
+    "trading/vati/app/account_service.py": "bbf345f741a04e18a6d999cd08dc30add5cd5536964e36963391d04faf18ba14",
+    "trading/vati/app/trade_lifecycle.py": "3267754353287c662b943585bae9b2773b8eef720fc58a11b1f313ef87d6234e",
+    "trading/vati/app/portfolio.py": "f6c39027d4de6683f2c860d388f2df7a26f404fc7cd4f999314dfe9f099d0653",
+    "trading/tests/test_recoverable_lockouts.py": "de2f5b90a40f1f181c6f597a76ee843e480b1a10f479f8b9fa06767e9571ad5e",
+    "trading/tests/test_account_risk_recovery_scope.py": "4d7d22890b3f286b978b35725fab43b5fa3031d6dc5387ef2ffe72fb185699c7"
+  },
+  "full_trading": {
+    "tests": 1741,
+    "passed": 1741,
+    "skipped": 0,
+    "failures": 0,
+    "errors": 0,
+    "warnings": 3,
+    "seconds": 47.49
+  },
+  "focused": {
+    "passed": 74,
+    "skipped": 1,
+    "skip_covered_in_full": true,
+    "new_source_cases": 28,
+    "gateway_trading_tickets": 41,
+    "owner_registries_and_Artemis_plans": 154
+  },
+  "counterexamples": {
+    "real_constructor_cross_account_contamination": 3
+  },
+  "retained_failed_instrument": {
+    "probe_fixture_missing_configured_evaluator": "1740 pass/one fixture failure; fixture corrected to configured symbol, then1741 pass"
+  },
+  "logs_sha256": {
+    "/tmp/van-account-risk-scope-before.txt": "e9bad03d1512b23519a7b798fab86a62bfd14017abca2c509240765687ad8c30",
+    "/tmp/van-account-risk-scope-first.txt": "f74e226e27a5a5f42e94db91572c9f765ed66585fd25022decb4c0de3715535a",
+    "/tmp/van-account-risk-scope-focused-verified.txt": "c9a4ca11f5a29fb8bf43ef343ae6c038e1110e8cbe5bf038768a30a7ec57987d",
+    "/tmp/van-account-risk-scope-owner-contracts.txt": "42daa38674d5a74646f0caa4e2306be47d7d99f112cdc82743ca10c730de3132",
+    "/tmp/van-account-risk-scope-gateway.txt": "27ddf782bcb10f08842a91ce21b0be3f5fff52d757b9cead5d96baf1a28484ca",
+    "/tmp/van-account-risk-scope-preflight-verified.txt": "b1e8359648f88d5623789a3a98a4bb5e863bf64a12b7634789e76ca64f359f11",
+    "/tmp/van-account-risk-scope-architecture-verified.txt": "f1deb5246f8a3b0b90848a916de3a857d39373acf45c5e343c3c13b92cfc52ac",
+    "/tmp/van-account-risk-scope-rev51-latest.txt": "82f1485502897f1d9f47c3309e722a974a0bf8786ecfad103ab7bb422c093d21",
+    "/tmp/van-account-risk-verified-full-pg.txt": "e41c9fc0621de6692cca502f607788d4d7c400572d1c6b91ef1c91539f63f028",
+    "/tmp/van-account-risk-acceptance-full-pg.txt": "3203f284dadd9b01f20be15be15322c9c2b1294f778ce888b4545b130e425f50",
+    "/tmp/van-account-risk-acceptance-full-pg.xml": "17e9e8c996ee1d065169b1448ae8e86646112ce4338e372abaf8bc3208fb2e6c",
+    "/tmp/van-account-risk-acceptance-pg-cleanup.json": "b7f9e505b2dad306208e6e8b0a7c090a27d7c39402c0073fbf835afd740a10aa"
+  },
+  "fixture_cleanup": {
+    "stopped": true,
+    "removed": true
+  },
+  "history_rewritten": false,
+  "financial_policy_values_changed": false,
+  "native_or_release_gate_issued": false,
+  "remaining": [
+    "Full learning/capsule/tradebook account/environment/revision binding",
+    "Explicit native ambiguity resolution",
+    "Full unit exit criteria"
+  ]
+}

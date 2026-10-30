@@ -1,0 +1,985 @@
+{
+  "schema": "van.rebuild.learning-recovery-source/1",
+  "observed_at_utc": "2026-10-24T07:10:25.646464+00:00",
+  "source_parent": "815405e9676407a38f43df0b2b9a8bd7bd87f74d",
+  "source_sha256": {
+    "backend/van_gateway/app.py": "8dfbdaee83f3dd6d06dffa0e5cd50b9520d76ad1feded876792b5768fbd19fde",
+    "backend/van_gateway/command/mission_link.py": "c9cef2c1d7fa08caf75c2decb08ff4f384cf7ef7796edc2bab724f3d9b563454",
+    "backend/van_gateway/context/forget.py": "f7db0ce723037e5bd1c282010779fd0d776edf0b45635f809a3109723a3223d5",
+    "backend/van_gateway/evolution/radar.py": "7f92053ca43f1fb20d9d1d11d0172ee4190275241925e56dd8a672f05574e71d",
+    "backend/van_gateway/learning/feed.py": "748231fd6cf6d998dd6e020b00457b0b59c4cebf0bd35e130804dc50915dd993",
+    "backend/van_gateway/mission/service.py": "155b110f344c600b90fa19de3925e901d5003691f886e818910a0a7493066168",
+    "backend/van_gateway/ops/retention.py": "6d6d80914ffb8dc350b699b74279a4935a5ca7ab1a463b018840f70badebb98d",
+    "backend/van_gateway/storage/db.py": "7e16e4c1057cb5539f8664fe8e0cdbf058b636cccaad67f2df1526d7fb7bb829",
+    "backend/van_gateway/learning/schema.py": "87868bae4e8aed89a2005b59e391607a1947fc63f4c8e0f4248b2bdc7b12415a",
+    "backend/tests/test_learning_recovery.py": "f36a23b304df2468ccea38c3284fa76387641c7c06632e80c902165db0f804ae",
+    "backend/tests/test_chart_workspace_persistence.py": "6823115a148477b62933e692ba7c84d2e25f0fedbbf9eabbce856340259f2378"
+  },
+  "executions": {
+    "original_before": {
+      "tests": 4,
+      "failures": 4,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 0.889,
+      "xml_sha256": "24d03b1d69d4efdc342c766e17362dd4deba84436fd31e79e0bfe5937f2f82b4"
+    },
+    "first_atomic": {
+      "tests": 39,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 16.575,
+      "xml_sha256": "0e64fd1cb8e4851ba1d4d0a0b645de47f7464c9e5554c773963ba2bb009d73aa"
+    },
+    "restart": {
+      "tests": 49,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 18.395,
+      "xml_sha256": "ca526ca616b4faf98749f28db8f0d332fe404b76217ce4d572e3f9cdee7e8adb"
+    },
+    "retention_gap": {
+      "tests": 125,
+      "failures": 1,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 41.129,
+      "xml_sha256": "b6ca2923a01178fc401407fce8627cd8d114dab80cb525178eaded14ba8ee919"
+    },
+    "first_privacy_fixture": {
+      "tests": 18,
+      "failures": 1,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 6.053,
+      "xml_sha256": "ace9de775247ae0b73d75ee84de561d3014657c103eb417e48a9e9cfab4db35f"
+    },
+    "focused": {
+      "tests": 137,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 41.674,
+      "xml_sha256": "8393eb3f136341fab9b83e9fe4a9684f7bdaaa47c0d43b66942cfb6ce7617dc0"
+    },
+    "native_process_death": {
+      "tests": 27,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 8.221,
+      "xml_sha256": "4c8b879944790a1785d489209cd17946dcad8ed811fcb1255a11ba2aa63f52e8"
+    },
+    "migration_before": {
+      "tests": 2,
+      "failures": 2,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 1.685,
+      "xml_sha256": "0e2cd0986a1a45f84a127e13a63b8c444cd13c3ef9c11617193f4c337afd94f0"
+    },
+    "migration_focused": {
+      "tests": 147,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 46.158,
+      "xml_sha256": "98305d5a0394d23148c2eff075b9176af93ca5ad5dd8a45f8f6d6e254b2ad70a"
+    },
+    "generation_race_before": {
+      "tests": 1,
+      "failures": 1,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 1.135,
+      "xml_sha256": "fd98e797846f3f912673694cd102cfdbc2421657bbbadfb890f7b546f1edf570"
+    },
+    "generation_after": {
+      "tests": 30,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 9.295,
+      "xml_sha256": "25b61205d950e0b215bef29916ee71598272356821644ed87b884966125d1157"
+    },
+    "final_oracle": {
+      "tests": 31,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 9.184,
+      "xml_sha256": "c083a61e483f403587a6e78dfed4471aa66c3b8dde9558c27f429684994ee700"
+    },
+    "first_root_integration": {
+      "tests": 373,
+      "failures": 1,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 128.644,
+      "xml_sha256": "d944a8af0bf16887e205e0b1157f88a127aceabc420566893ccd73f41d55fea1"
+    },
+    "final_root_audited": {
+      "tests": 373,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 121.52,
+      "xml_sha256": "a9cbfa0f6a00bfc62fd21e3bdfc894c42cf14871852770ee6cb4bbb0d30258d4"
+    },
+    "registry": {
+      "tests": 26,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 3.647,
+      "xml_sha256": "96375852397ccc39ee100883f90c43f50c6e2076410c6141e77541f56ce5fa4e"
+    },
+    "rebuild": {
+      "tests": 80,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 31.853,
+      "xml_sha256": "2477f6bdffd322c4a73af437e485d2e3e6ce96346393b0610564cc7680e4097b"
+    }
+  },
+  "final_fault_campaign": {
+    "definitions": [
+      [
+        "accept a claimed success over native failure",
+        [
+          [
+            "backend/van_gateway/learning/feed.py",
+            "if row is None or row[\"state\"] != state.value:",
+            "if row is None:",
+            1
+          ]
+        ],
+        "backend/tests/test_learning_recovery.py::test_a_claimed_success_cannot_replace_the_native_failed_outcome"
+      ],
+      [
+        "accept the caller replacement strategy class and ceiling",
+        [
+          [
+            "backend/van_gateway/learning/feed.py",
+            "        mission = MissionService._row_to_mission(row)",
+            "        pass # use the caller instead of native source",
+            1
+          ]
+        ],
+        "backend/tests/test_learning_recovery.py::test_a_caller_cannot_replace_the_original_native_strategy_class_or_ceiling"
+      ],
+      [
+        "count repeated original strategy delivery as another failed experience",
+        [
+          [
+            "backend/van_gateway/learning/feed.py",
+            "            return previous[\"strategy_id\"]",
+            "            await db.execute(\"UPDATE execution_strategies SET failure_count=failure_count+1 WHERE strategy_id=?\",(previous[\"strategy_id\"],))\n            await db.commit()\n            return previous[\"strategy_id\"]",
+            1
+          ]
+        ],
+        "backend/tests/test_learning_recovery.py::test_replayed_original_strategy_outcome_is_one_sample"
+      ],
+      [
+        "commit the counter before its original projection receipt",
+        [
+          [
+            "backend/van_gateway/learning/feed.py",
+            "        await db.execute(\"INSERT INTO mission_strategy_observations",
+            "        await db.commit()\n        await db.execute(\"INSERT INTO mission_strategy_observations",
+            1
+          ]
+        ],
+        "backend/tests/test_learning_recovery.py::test_receipt_failure_rolls_back_the_strategy_identity_and_counter"
+      ],
+      [
+        "publish native capture before persisting its learning delivery",
+        [
+          [
+            "backend/van_gateway/mission/service.py",
+            "            capture_generation = await self._enqueue_learning(db, mission.mission_id, \"OPENED\", now)",
+            "            await db.commit()\n            capture_generation = await self._enqueue_learning(db, mission.mission_id, \"OPENED\", now)",
+            1
+          ]
+        ],
+        "backend/tests/test_learning_recovery.py::test_capture_and_original_learning_delivery_commit_atomically"
+      ],
+      [
+        "publish native terminal state before its learning deliveries",
+        [
+          [
+            "backend/van_gateway/mission/service.py",
+            "                for stage in (\"MISSION_OUTCOME\", \"STRATEGY_OUTCOME\", \"DECISION_OUTCOME\"):",
+            "                await db.commit()\n                for stage in (\"MISSION_OUTCOME\", \"STRATEGY_OUTCOME\", \"DECISION_OUTCOME\"):",
+            1
+          ]
+        ],
+        "backend/tests/test_learning_recovery.py::test_terminal_state_and_original_learning_deliveries_commit_atomically"
+      ],
+      [
+        "drop a failed original delivery instead of retaining it",
+        [
+          [
+            "backend/van_gateway/mission/service.py",
+            "                self.report_learning_unavailable(row[\"mission_id\"], row[\"stage\"], exc)",
+            "                self.report_learning_unavailable(row[\"mission_id\"], row[\"stage\"], exc)\n                await self.store.execute(\"DELETE FROM mission_learning_outbox WHERE mission_id=? AND stage=?\",(row[\"mission_id\"],row[\"stage\"]))",
+            1
+          ]
+        ],
+        "backend/tests/test_learning_recovery.py::test_a_lost_strategy_delivery_ack_retries_the_original_sample_once"
+      ],
+      [
+        "let a broken original source starve later deliveries",
+        [
+          [
+            "backend/van_gateway/mission/service.py",
+            "queue_order=(SELECT COALESCE(MAX(queue_order),0)+1 FROM mission_learning_outbox)",
+            "queue_order=queue_order",
+            1
+          ]
+        ],
+        "backend/tests/test_learning_recovery.py::test_a_failed_original_source_cannot_starve_other_learning_work"
+      ],
+      [
+        "count legacy pre-receipt history as new experience",
+        [
+          [
+            "backend/van_gateway/learning/schema.py",
+            "FROM missions WHERE state IN",
+            "FROM missions WHERE 0 AND state IN",
+            1
+          ]
+        ],
+        "backend/tests/test_learning_recovery.py::test_upgrade_does_not_guess_that_legacy_terminal_missions_are_new_samples"
+      ],
+      [
+        "omit the terminal outcome for a late owner-source publication",
+        [
+          [
+            "backend/van_gateway/mission/service.py",
+            "            if mission.is_terminal:\n                # The decision stage",
+            "            if False:\n                # The decision stage",
+            1
+          ]
+        ],
+        "backend/tests/test_learning_recovery.py::test_late_opened_delivery_also_restores_the_original_terminal_decision_outcome"
+      ],
+      [
+        "overwrite the owner reassessment on a repeated native outcome",
+        [
+          [
+            "backend/van_gateway/learning/feed.py",
+            "UPDATE decision_fingerprints SET outcome=?,updated_at_ms=?",
+            "UPDATE decision_fingerprints SET outcome=?,reassessment=NULL,updated_at_ms=?",
+            1
+          ],
+          [
+            "backend/van_gateway/learning/feed.py",
+            "WHERE mission_id=? AND outcome IS NOT ?",
+            "WHERE mission_id=? AND ? IS NOT NULL",
+            1
+          ]
+        ],
+        "backend/tests/test_learning_recovery.py::test_replayed_native_outcome_preserves_a_later_owner_reassessment"
+      ],
+      [
+        "omit startup recovery of durable native feedback",
+        [
+          [
+            "backend/van_gateway/app.py",
+            "        await missions.reconcile_learning_projections(limit=8)",
+            "        pass # omit learning repair at startup",
+            1
+          ]
+        ],
+        "backend/tests/test_learning_recovery.py::test_gateway_startup_and_real_scheduler_are_wired_to_original_learning_delivery"
+      ],
+      [
+        "omit periodic recovery of durable native feedback",
+        [
+          [
+            "backend/van_gateway/app.py",
+            "            ScheduledJob(\"learning.repair_missions\", settings.reminder_sweep_seconds,\n                         _repair_mission_learning),",
+            "",
+            1
+          ]
+        ],
+        "backend/tests/test_learning_recovery.py::test_gateway_startup_and_real_scheduler_are_wired_to_original_learning_delivery"
+      ],
+      [
+        "relearn an old original owner source after native erasure",
+        [
+          [
+            "backend/van_gateway/context/memory_erasure.py",
+            "if (original.get('record_id') is None or unknown_identity) and source_kernel_revision<original['context_revision_after']:return True",
+            "if False:return True",
+            1
+          ]
+        ],
+        "backend/tests/test_learning_recovery.py::test_repair_of_original_owner_sources_cannot_undo_native_erasure"
+      ],
+      [
+        "discard the actual native verification receipt during recovery",
+        [
+          [
+            "backend/van_gateway/mission/service.py",
+            "            verification = await self.verification_record(mission.mission_id)",
+            "            verification = None",
+            1
+          ]
+        ],
+        "backend/tests/test_learning_recovery.py::test_recovery_reads_the_exact_original_native_verification_receipt"
+      ],
+      [
+        "publish migration tables without their original version marker",
+        [
+          [
+            "backend/van_gateway/learning/schema.py",
+            "BEGIN IMMEDIATE;\n",
+            "",
+            1
+          ]
+        ],
+        "backend/tests/test_learning_recovery.py::test_failed_schema_version_marker_rolls_back_new_learning_tables_and_can_retry"
+      ],
+      [
+        "let an old acknowledgement erase a newly authorized delivery",
+        [
+          [
+            "backend/van_gateway/mission/service.py",
+            "DELETE FROM mission_learning_outbox WHERE mission_id=? AND stage=? AND generation=?",
+            "DELETE FROM mission_learning_outbox WHERE mission_id=? AND stage=?",
+            1
+          ],
+          [
+            "backend/van_gateway/mission/service.py",
+            "(mission_id,stage,expected_generation))",
+            "(mission_id,stage))",
+            1
+          ]
+        ],
+        "backend/tests/test_learning_recovery.py::test_an_old_delivery_ack_cannot_erase_newly_authorized_owner_feedback"
+      ],
+      [
+        "let an old failure overwrite a newly authorized delivery",
+        [
+          [
+            "backend/van_gateway/mission/service.py",
+            "\"WHERE mission_id=? AND stage=? AND generation=?\", (type(exc).__name__,row[\"mission_id\"],row[\"stage\"],row[\"generation\"]))",
+            "\"WHERE mission_id=? AND stage=?\", (type(exc).__name__,row[\"mission_id\"],row[\"stage\"]))",
+            1
+          ]
+        ],
+        "backend/tests/test_learning_recovery.py::test_an_old_delivery_ack_cannot_erase_newly_authorized_owner_feedback"
+      ],
+      [
+        "reuse the old delivery generation after new native authorization",
+        [
+          [
+            "backend/van_gateway/mission/service.py",
+            "generation=generation+1",
+            "generation=generation",
+            1
+          ]
+        ],
+        "backend/tests/test_learning_recovery.py::test_an_old_delivery_ack_cannot_erase_newly_authorized_owner_feedback"
+      ]
+    ],
+    "records": [
+      {
+        "case": 0,
+        "phase": "control",
+        "reason": "accept a claimed success over native failure",
+        "exit_code": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 0,
+        "xml_sha256": "673c6ecbcb34df80455e5bd27328090a192c1ed6a456ada756523ee3dc07ce16"
+      },
+      {
+        "case": 0,
+        "phase": "fault",
+        "reason": "accept a claimed success over native failure",
+        "exit_code": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 1,
+        "xml_sha256": "c2a7369baa3529d99a62029a0c6f3a7fd7da87d5bba4dba715c083e62e60af9d"
+      },
+      {
+        "case": 1,
+        "phase": "control",
+        "reason": "accept the caller replacement strategy class and ceiling",
+        "exit_code": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 0,
+        "xml_sha256": "2c432e97d9eeffcea17e4bd0e8d7e5343827be63d82bbc7051b110d6b271c007"
+      },
+      {
+        "case": 1,
+        "phase": "fault",
+        "reason": "accept the caller replacement strategy class and ceiling",
+        "exit_code": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 1,
+        "xml_sha256": "00157f9bc303479e84bdad00a3d35c69713fea19f44b5312cd75978a4f351c58"
+      },
+      {
+        "case": 2,
+        "phase": "control",
+        "reason": "count repeated original strategy delivery as another failed experience",
+        "exit_code": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 0,
+        "xml_sha256": "a77e09920521ab8c8091dede4ff21d357289ef87bf8a1680aac49d6754fe49a9"
+      },
+      {
+        "case": 2,
+        "phase": "fault",
+        "reason": "count repeated original strategy delivery as another failed experience",
+        "exit_code": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 1,
+        "xml_sha256": "ed7dd5a0971690239a5c5dfbceab51b4c7bac97f65ec85468895f1bfb78748a6"
+      },
+      {
+        "case": 3,
+        "phase": "control",
+        "reason": "commit the counter before its original projection receipt",
+        "exit_code": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 0,
+        "xml_sha256": "3de6b12ce1f4a5c7690b1b8fdee34adc65ab5b5b45e1fc228f8a5d024a409d0f"
+      },
+      {
+        "case": 3,
+        "phase": "fault",
+        "reason": "commit the counter before its original projection receipt",
+        "exit_code": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 1,
+        "xml_sha256": "015691703f70d0cfac77b13f712d006b4a26bd17a6d62027419d3682feaa26b9"
+      },
+      {
+        "case": 4,
+        "phase": "control",
+        "reason": "publish native capture before persisting its learning delivery",
+        "exit_code": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 0,
+        "xml_sha256": "1e796515ade52d172c9f31cfb32027fa02d84d3719343fb0116a646f238c300d"
+      },
+      {
+        "case": 4,
+        "phase": "fault",
+        "reason": "publish native capture before persisting its learning delivery",
+        "exit_code": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 1,
+        "xml_sha256": "02bcef42143b7c53deaa98c60c73c768e85d772da5c8dee0a3264b9b6854f9a1"
+      },
+      {
+        "case": 5,
+        "phase": "control",
+        "reason": "publish native terminal state before its learning deliveries",
+        "exit_code": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 0,
+        "xml_sha256": "e8751dec42eaf66e3f684ab3e5a88fef320d22c0b66cc78a02b095c6409e16e8"
+      },
+      {
+        "case": 5,
+        "phase": "fault",
+        "reason": "publish native terminal state before its learning deliveries",
+        "exit_code": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 1,
+        "xml_sha256": "565d0d32f9bb33be0ed47b8bffbad1e6f45d400eb2c10ecc5e9565ce83763f44"
+      },
+      {
+        "case": 6,
+        "phase": "control",
+        "reason": "drop a failed original delivery instead of retaining it",
+        "exit_code": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 0,
+        "xml_sha256": "7d98dbfe668a43e00957b60861d6af0745a6156b720709de8a8ccb11fa60fadd"
+      },
+      {
+        "case": 6,
+        "phase": "fault",
+        "reason": "drop a failed original delivery instead of retaining it",
+        "exit_code": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 1,
+        "xml_sha256": "92617c055fe4886bdb778274fb255b0755d325bae6ab4f2b580ae1ceb5b03c05"
+      },
+      {
+        "case": 7,
+        "phase": "control",
+        "reason": "let a broken original source starve later deliveries",
+        "exit_code": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 0,
+        "xml_sha256": "c53b31e36fd30adbc6464b5e272191a70f576bfd97b3e1e81c129ce136e7c9bf"
+      },
+      {
+        "case": 7,
+        "phase": "fault",
+        "reason": "let a broken original source starve later deliveries",
+        "exit_code": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 1,
+        "xml_sha256": "f548a08e5a1ac90df04dbe480971a4414afbec2ca4fa124dfb1112bc36ec39ff"
+      },
+      {
+        "case": 8,
+        "phase": "control",
+        "reason": "count legacy pre-receipt history as new experience",
+        "exit_code": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 0,
+        "xml_sha256": "f6a81e3bfecc1a3fe8d24c45c4eacac153203c538d3c4abc64acdf937e93badb"
+      },
+      {
+        "case": 8,
+        "phase": "fault",
+        "reason": "count legacy pre-receipt history as new experience",
+        "exit_code": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 1,
+        "xml_sha256": "470070fd8e5f864c573f5cde810306f508cc7c3969ef2aae8ef323e2e36ec5b4"
+      },
+      {
+        "case": 9,
+        "phase": "control",
+        "reason": "omit the terminal outcome for a late owner-source publication",
+        "exit_code": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 0,
+        "xml_sha256": "40772cb25099892c161e09b925ba6aa615ce8e7c6f28d1ca4db0cd8cb3071504"
+      },
+      {
+        "case": 9,
+        "phase": "fault",
+        "reason": "omit the terminal outcome for a late owner-source publication",
+        "exit_code": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 1,
+        "xml_sha256": "23875b9beec39273510a67630fda6ae4dce72f5dd2116203edd2c514d5db661a"
+      },
+      {
+        "case": 10,
+        "phase": "control",
+        "reason": "overwrite the owner reassessment on a repeated native outcome",
+        "exit_code": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 0,
+        "xml_sha256": "facd3e8df1d79692dbf2bb997190033e4cda6555713ae39e0cc06907958970f5"
+      },
+      {
+        "case": 10,
+        "phase": "fault",
+        "reason": "overwrite the owner reassessment on a repeated native outcome",
+        "exit_code": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 1,
+        "xml_sha256": "bdfe8e963e7d14e44d9a966f7a0366c9c435c22cd3dcf39bee66689eba7361aa"
+      },
+      {
+        "case": 11,
+        "phase": "control",
+        "reason": "omit startup recovery of durable native feedback",
+        "exit_code": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 0,
+        "xml_sha256": "476a2811a31c6d4a0ed23cd2c334de1ab5f39227fbdd8cc01f556ab906ecb25a"
+      },
+      {
+        "case": 11,
+        "phase": "fault",
+        "reason": "omit startup recovery of durable native feedback",
+        "exit_code": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 1,
+        "xml_sha256": "6085ea7d7bd198da3270cdff4a1d4287038d0dc2bf0fdce6ccb075e4df1d5319"
+      },
+      {
+        "case": 12,
+        "phase": "control",
+        "reason": "omit periodic recovery of durable native feedback",
+        "exit_code": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 0,
+        "xml_sha256": "040c3659e3a80dc1fe63d6e9bd7672c9859a386f9db66ebbb6b8aafa7e81a6ae"
+      },
+      {
+        "case": 12,
+        "phase": "fault",
+        "reason": "omit periodic recovery of durable native feedback",
+        "exit_code": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 1,
+        "xml_sha256": "8395038164428c6b5db92c6836611dd5f527b3fc22c90f62a03d2a699098dad3"
+      },
+      {
+        "case": 13,
+        "phase": "control",
+        "reason": "relearn an old original owner source after native erasure",
+        "exit_code": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 0,
+        "xml_sha256": "4113d3b3828deb6159aa15853e960f573ec98f4f0f4165f6519b89877d5e70b0"
+      },
+      {
+        "case": 13,
+        "phase": "fault",
+        "reason": "relearn an old original owner source after native erasure",
+        "exit_code": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 1,
+        "xml_sha256": "dfe289bd73af192eba9d439379bef658cc330a55ef69f4b8ab06a9d822740f44"
+      },
+      {
+        "case": 14,
+        "phase": "control",
+        "reason": "discard the actual native verification receipt during recovery",
+        "exit_code": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 0,
+        "xml_sha256": "f435505335a10274a5862aeae0fe5da48b7251ad462cd1577d1fec0cb6a18a1e"
+      },
+      {
+        "case": 14,
+        "phase": "fault",
+        "reason": "discard the actual native verification receipt during recovery",
+        "exit_code": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 1,
+        "xml_sha256": "067fcf548fc7fe8472d13c8a9045442b8cb3b07032b46267f8c44989e3347682"
+      },
+      {
+        "case": 15,
+        "phase": "control",
+        "reason": "publish migration tables without their original version marker",
+        "exit_code": 0,
+        "counts": {
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 0,
+        "xml_sha256": "be8dba84e0488969946432d6e52c9d0ef1bafb6f7548e04f174f0e1dc07a08eb"
+      },
+      {
+        "case": 15,
+        "phase": "fault",
+        "reason": "publish migration tables without their original version marker",
+        "exit_code": 1,
+        "counts": {
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 1,
+        "xml_sha256": "77b9a1c4cb981192b1b9e2abc6def66196e8ffa9271194293320497d0a90e7e6"
+      },
+      {
+        "case": 16,
+        "phase": "control",
+        "reason": "let an old acknowledgement erase a newly authorized delivery",
+        "exit_code": 0,
+        "counts": {
+          "tests": 2,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 0,
+        "xml_sha256": "3301cb92b34500d958102d79b10be3595c77faaf8e96461f56c8ea2121c73916"
+      },
+      {
+        "case": 16,
+        "phase": "fault",
+        "reason": "let an old acknowledgement erase a newly authorized delivery",
+        "exit_code": 1,
+        "counts": {
+          "tests": 2,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 1,
+        "xml_sha256": "d3d4148430b34e8ec08227f53d6619b21503eaaa8ff2f502425c3d2d68f8d7ed"
+      },
+      {
+        "case": 17,
+        "phase": "control",
+        "reason": "let an old failure overwrite a newly authorized delivery",
+        "exit_code": 0,
+        "counts": {
+          "tests": 2,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 0,
+        "xml_sha256": "4fff5b87f3ffbed3d237fa1cd22220f9d5746834cbe423248172d5e7e8d2b5cd"
+      },
+      {
+        "case": 17,
+        "phase": "fault",
+        "reason": "let an old failure overwrite a newly authorized delivery",
+        "exit_code": 1,
+        "counts": {
+          "tests": 2,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 1,
+        "xml_sha256": "0e31afe1f041d17a24fb133a886c3478e4a6b577dbf82b95226b25324889f4b0"
+      },
+      {
+        "case": 18,
+        "phase": "control",
+        "reason": "reuse the old delivery generation after new native authorization",
+        "exit_code": 0,
+        "counts": {
+          "tests": 2,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 0,
+        "xml_sha256": "77df042d892e60b8fd2636bf014a20c3af7ac2f9962ab64daf025806e5d8a92c"
+      },
+      {
+        "case": 18,
+        "phase": "fault",
+        "reason": "reuse the old delivery generation after new native authorization",
+        "exit_code": 1,
+        "counts": {
+          "tests": 2,
+          "failures": 2,
+          "errors": 0,
+          "skipped": 0
+        },
+        "behavioural_assertion_failures": 2,
+        "xml_sha256": "8eb3bbf58e5449c855bbc82b98c92943eb391b4df84295e31c67f9ab95632a75"
+      }
+    ],
+    "before": {
+      "backend/van_gateway/learning/feed.py": "748231fd6cf6d998dd6e020b00457b0b59c4cebf0bd35e130804dc50915dd993",
+      "backend/van_gateway/mission/service.py": "155b110f344c600b90fa19de3925e901d5003691f886e818910a0a7493066168",
+      "backend/van_gateway/app.py": "8dfbdaee83f3dd6d06dffa0e5cd50b9520d76ad1feded876792b5768fbd19fde",
+      "backend/van_gateway/learning/schema.py": "87868bae4e8aed89a2005b59e391607a1947fc63f4c8e0f4248b2bdc7b12415a",
+      "backend/van_gateway/context/memory_erasure.py": "2471c607991848d10047ad5f6fa44772c96cd631ada75907caa2dd2a3f5ba1fa",
+      "backend/van_gateway/evolution/radar.py": "7f92053ca43f1fb20d9d1d11d0172ee4190275241925e56dd8a672f05574e71d",
+      "backend/van_gateway/command/mission_link.py": "c9cef2c1d7fa08caf75c2decb08ff4f384cf7ef7796edc2bab724f3d9b563454",
+      "backend/van_gateway/context/forget.py": "f7db0ce723037e5bd1c282010779fd0d776edf0b45635f809a3109723a3223d5",
+      "backend/van_gateway/ops/retention.py": "6d6d80914ffb8dc350b699b74279a4935a5ca7ab1a463b018840f70badebb98d",
+      "backend/van_gateway/storage/db.py": "7e16e4c1057cb5539f8664fe8e0cdbf058b636cccaad67f2df1526d7fb7bb829"
+    },
+    "after": {
+      "backend/van_gateway/learning/feed.py": "748231fd6cf6d998dd6e020b00457b0b59c4cebf0bd35e130804dc50915dd993",
+      "backend/van_gateway/mission/service.py": "155b110f344c600b90fa19de3925e901d5003691f886e818910a0a7493066168",
+      "backend/van_gateway/app.py": "8dfbdaee83f3dd6d06dffa0e5cd50b9520d76ad1feded876792b5768fbd19fde",
+      "backend/van_gateway/learning/schema.py": "87868bae4e8aed89a2005b59e391607a1947fc63f4c8e0f4248b2bdc7b12415a",
+      "backend/van_gateway/context/memory_erasure.py": "2471c607991848d10047ad5f6fa44772c96cd631ada75907caa2dd2a3f5ba1fa",
+      "backend/van_gateway/evolution/radar.py": "7f92053ca43f1fb20d9d1d11d0172ee4190275241925e56dd8a672f05574e71d",
+      "backend/van_gateway/command/mission_link.py": "c9cef2c1d7fa08caf75c2decb08ff4f384cf7ef7796edc2bab724f3d9b563454",
+      "backend/van_gateway/context/forget.py": "f7db0ce723037e5bd1c282010779fd0d776edf0b45635f809a3109723a3223d5",
+      "backend/van_gateway/ops/retention.py": "6d6d80914ffb8dc350b699b74279a4935a5ca7ab1a463b018840f70badebb98d",
+      "backend/van_gateway/storage/db.py": "7e16e4c1057cb5539f8664fe8e0cdbf058b636cccaad67f2df1526d7fb7bb829"
+    },
+    "source_restored": true
+  },
+  "source_storage_audit": {
+    "schema": "van.source-storage-audit/1",
+    "forbidden_events": [],
+    "source_sha256": "d4e270150fb0da6e8d79b449dd0de68fd1f97b3ccea3d282f31d91297edbd495",
+    "root": "/workspace/van-review-2026-10-18/publish",
+    "scope": "SQLite opens, path-based writable opens and directory/link/rename/delete events under data and backend/data",
+    "limits": "Python audit events only; existing fd writes, native-library raw I/O and external processes are not an OS sandbox. Git state is checked separately."
+  },
+  "legacy_registry_preflight": {
+    "schema": "van.rebuild.mutation-registry-preflight/1",
+    "registry_sha256": "35d10c7b0f2b8319b7f7305828262c972b2a6451139d75b9e83c7d0062282955",
+    "mutation_count": 374,
+    "edit_count": 383,
+    "findings": [],
+    "execution_state": "NOT_RUN",
+    "status": "ANCHORS_VALID_BASELINES_AND_MUTATIONS_NOT_EXECUTED"
+  },
+  "retained_source_subset_before_migration_generation_finalization": {
+    "c7": {
+      "caught": 8,
+      "log_sha256": "391ebfee999aa5b4d213d612ec2c9c8190301551f499acc77da974cf17c1dd4e"
+    },
+    "rc2": {
+      "caught": 5,
+      "log_sha256": "9e264ee16293aa908c5a395659000c75e3fe2d0a63d3f07d8ef97787abbdbe8d"
+    }
+  },
+  "retained_subset_scope": "These13 retained cases ran earlier within the candidate. Current complete374-case execution requires the next exact-source hosted run; source anchors/identities/edits remain unchanged.",
+  "retained_failure_explanations": {
+    "retention_gap": "Three existing chart tables had no retention policies; corrected and age-sweep tested.",
+    "first_privacy_fixture": "An all-intents-empty assertion incorrectly rejected fresh consent after intent erasure; corrected to require the old source absent while the later owner instruction remains learnable.",
+    "first_root_integration": "The chart migration fixture assumed56 was latest and removed an old version marker beneath a later completed migration. It now constructs a genuine55-to-partial56 upgrade and verifies latest migration plus owner data preservation."
+  },
+  "qualification": "Durable local native mission projections source component only. No causal/profitability, complete feedback/all-memory, whole-unit, F15/BG, deployed service/provider, Hermes/DIAL or physical handset acceptance. Legacy samples remain explicitly unreconciled. Separately reproduced mission-created-event atomicity is the next packet."
+}

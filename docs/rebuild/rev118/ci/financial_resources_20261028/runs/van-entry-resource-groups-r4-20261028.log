@@ -1,0 +1,28 @@
+.......F.................................                                [100%]
+=================================== FAILURES ===================================
+_ test_opposing_unfilled_hold_cannot_cancel_the_next_same_direction_currency_burden _
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-179/test_opposing_unfilled_hold_ca0')
+eurusd = SymbolContract(symbol='EURUSD', venue='mt5', base_currency='EUR', quote_currency='USD', account_currency='USD', contra...=Decimal('0'), max_adv_participation=Decimal('0.10'), liquidity_haircut=Decimal('0'), round_trip_cost_pct=Decimal('0'))
+
+    def test_opposing_unfilled_hold_cannot_cancel_the_next_same_direction_currency_burden(tmp_path,eurusd):
+        sdk,clock,ledger,command,margin,current,authority,book,router=prepared(tmp_path,eurusd,
+            mandate_changes={'max_positions_per_instrument':3,'max_currency_leg_exposure':'0.003',
+                'max_risk_per_trade':'0.0025'})
+        try:
+            book.reserve_entry(command,margin,current,authority)
+            short,m,c=another_entry(ledger,command,authority,router,clock,direction=Direction.SHORT)
+            second=book.reserve_entry(short,m,c,authority)
+            assert second['eligible_for_native_dispatch'] is False
+            third,m,c=another_entry(ledger,command,authority,router,clock,key='third-entry')
+            before=ledger.count()
+>           with pytest.raises(ResourceHoldError,match='RESOURCE_CAPACITY_EXCEEDED:currency_leg_up:EUR'):
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           AssertionError: Regex pattern did not match.
+E             Expected regex: 'RESOURCE_CAPACITY_EXCEEDED:currency_leg_up:EUR'
+E             Actual message: 'RESOURCE_CAPACITY_EXCEEDED:currency_leg_down:USD'
+
+trading/tests/test_entry_resource_groups.py:146: AssertionError
+=========================== short test summary info ============================
+FAILED trading/tests/test_entry_resource_groups.py::test_opposing_unfilled_hold_cannot_cancel_the_next_same_direction_currency_burden
+1 failed, 40 passed in 5.26s

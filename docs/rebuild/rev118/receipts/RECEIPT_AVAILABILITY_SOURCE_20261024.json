@@ -1,0 +1,398 @@
+{
+  "schema": "van.rebuild.receipt-availability-source/1",
+  "source_preimage": "dfb0abdc09b93c15d5bafb7fa92c1b6932438f31",
+  "paths": {
+    "trading/vati/execution/base.py": {
+      "preimage_sha256": "f74af1ca8eb853cffcdd95861d4d814a45303e33e759beeabcbe9d7595f6d3c2",
+      "source_sha256": "676865f3737ebd52d55146fe6468ceb4d0f88217d67977f349ead98a4c7da2b9"
+    },
+    "trading/vati/execution/router.py": {
+      "preimage_sha256": "a891d9034fe3da7dc0c09092f9f8d28672c4934696a9d8bdaa0c58ea014c7925",
+      "source_sha256": "efad7f1eb836192c86cb424f877b20b0b067989e73a1908d8b36570adbfac44d"
+    },
+    "trading/vati/app/trade_lifecycle.py": {
+      "preimage_sha256": "a8c9005cd6ee48a2779d85811f8d1322b2c860364fda45de9ea3ea9cd5bd2de5",
+      "source_sha256": "352f57dc018b5964571bec6465c6116b2a11b4536b6ac45068d3355fe3b0c5ed"
+    },
+    "trading/vati/learning/episodes.py": {
+      "preimage_sha256": "c92811760e7db6803df4da4bc9b70c1a2638fb616f7a04e6f4e44aa3567f9f3b",
+      "source_sha256": "d1136dca507ec05d7b99c8c2aa9d9142055628e000562193e53cb78cdb24d5b1"
+    },
+    "trading/vati/contracts/schemas/execution_receipt.schema.json": {
+      "preimage_sha256": "977875d78666baed1e077d817728deb27a954dc94867ad740e4c13cfea4fd094",
+      "source_sha256": "4b23a0a356dd9ed595965d167b39a4e85a361a831a6de8dda707ef9941bd732e"
+    },
+    "trading/tests/test_receipt_availability_clock.py": {
+      "preimage_sha256": null,
+      "source_sha256": "ed0c6c6b74e6ab466487216695b88ae0e6ab59adbb364ff70bca7d4b6129b102"
+    },
+    "trading/tests/test_boolean_execution_receipts.py": {
+      "preimage_sha256": "df101a58ccef42918fa8b22a81e6bf18a5e3f453179bb1f6b1a600587cd45548",
+      "source_sha256": "ec84dcaf4cbc0366d5d5df37fa268d0ccd8d4cb5cbd1ee7a577d509f4f8c6a70",
+      "change": "Declared deterministic bounded worker fixture; exact extra capability-read and typed send expectations. Original protective truth predicates retained."
+    }
+  },
+  "reproduced_before": {
+    "path": "/tmp/van-receipt-availability-before-r3.xml",
+    "sha256": "8247cc6ab7689686b3a98fc969aa2efe2843547eb037c8822d25ddf14a4aaa13",
+    "tests": 1,
+    "passed": 0,
+    "failures": [
+      {
+        "name": "test_genuine_fill_received_after_mandate_expiry_retains_effect_and_actual_availability",
+        "message": "AssertionError: actual native result availability was backdated to dispatch\nassert (1800000000000 == 1800000003000)\n +  where 1800000000000 = ExecutionReceipt(trade_intent_id='ti-1', decision_hash='37024ed42c2d6a73d7582564788e5f784b6902bd8f1b76b7fc3874f2b24a43...tective_stop_price=Decimal('1.09790'), receipt_hash='9df39cfd001f603ef6626778d75a332a762a62ec4e26da13b02cd14362fd1520').received_time_unix_ms"
+      }
+    ],
+    "errors": 0,
+    "skipped": []
+  },
+  "reviewed_focused": {
+    "path": "/tmp/van-receipt-availability-r4.xml",
+    "sha256": "f5fed01fc17e030b3d5cd8bc9f6c8a7ed94f598410ad0e6f1f496cdfaee303f0",
+    "tests": 47,
+    "passed": 46,
+    "failures": [],
+    "errors": 0,
+    "skipped": [
+      {
+        "name": "test_actual_book_factory_rechecks_its_own_clock_before_the_native_sender",
+        "reason": "requires isolated PostgreSQL fixture"
+      }
+    ]
+  },
+  "broader_final": {
+    "path": "/tmp/van-receipt-availability-r6.xml",
+    "sha256": "1455738394617652c66a73f00e5c07794280c5439c7a42b4e4f2904caf1d2b6e",
+    "tests": 241,
+    "passed": 238,
+    "failures": [],
+    "errors": 0,
+    "skipped": [
+      {
+        "name": "test_postgres_native_learning_scope_uses_the_same_account_boundary",
+        "reason": "explicit isolated PostgreSQL learning fixture not available"
+      },
+      {
+        "name": "test_actual_book_builder_keeps_a_paper_live_policy_in_the_demo_cohort",
+        "reason": "requires real isolated PostgreSQL fixture"
+      },
+      {
+        "name": "test_actual_book_factory_rechecks_its_own_clock_before_the_native_sender",
+        "reason": "requires isolated PostgreSQL fixture"
+      }
+    ]
+  },
+  "semantic_faults": [
+    {
+      "name": "receipt-backdated-to-dispatch",
+      "path": "trading/vati/execution/router.py",
+      "before": "receipt = replace(receipt, received_time_unix_ms=received_ms, receipt_hash=\"\").sealed()",
+      "after": "receipt = replace(receipt, received_time_unix_ms=now_ms, receipt_hash=\"\").sealed()",
+      "expected": "test_genuine_fill_received_after_mandate_expiry",
+      "source_sha256": "efad7f1eb836192c86cb424f877b20b0b067989e73a1908d8b36570adbfac44d",
+      "fault": {
+        "tests": 10,
+        "failures": [
+          {
+            "name": "test_genuine_fill_received_after_mandate_expiry_retains_effect_and_actual_availability",
+            "message": "AssertionError: actual native result availability was backdated to dispatch\nassert (1800000000000 == 1800000003000)\n +  where 1800000000000 = ExecutionReceipt(trade_intent_id='ti-1', decision_hash='05c968d499b37c08a7057f4f0a745fd9a535178e45c4c680a9f0d0c8e933bc...tective_stop_price=Decimal('1.09790'), receipt_hash='c6eeae5ff452a862c78b25f516fe53119b15aed9f31bb23eebc8a42d3f42bc9b').received_time_unix_ms"
+          },
+          {
+            "name": "test_clock_failure_after_a_real_fill_keeps_effect_and_protection_but_withholds_learning_time[True]",
+            "message": "AssertionError: assert (1800000000000 is None)\n +  where 1800000000000 = ExecutionReceipt(trade_intent_id='ti-1', decision_hash='0ea152801e09d43fbd116a837352e92c3dd6e3cdb384e6684def9281a36f06...tective_stop_price=Decimal('1.09790'), receipt_hash='84d2cae970016aa63424c9adb6d3d7ef1f53c91a791981eda5be769bdd4356e0').received_time_unix_ms"
+          },
+          {
+            "name": "test_clock_failure_after_a_real_fill_keeps_effect_and_protection_but_withholds_learning_time[None]",
+            "message": "AssertionError: assert (1800000000000 is None)\n +  where 1800000000000 = ExecutionReceipt(trade_intent_id='ti-1', decision_hash='88d511f30fb5b95ffb9aa96927eb6f540142077bd711ffe003392f2af29cc2...tective_stop_price=Decimal('1.09790'), receipt_hash='364df10c16645bffe3c4d8d33874a657ee676810170c9a8f4a86fcdfb84bb4b3').received_time_unix_ms"
+          },
+          {
+            "name": "test_clock_failure_after_a_real_fill_keeps_effect_and_protection_but_withholds_learning_time[unavailable]",
+            "message": "AssertionError: assert (1800000000000 is None)\n +  where 1800000000000 = ExecutionReceipt(trade_intent_id='ti-1', decision_hash='e288480ce12fdf1422ff293760e1dfad9f60293b447fb3125b847e5f95eaa9...tective_stop_price=Decimal('1.09790'), receipt_hash='bcbd9fbf2b23ea9ee20f58a4e48a8d105e60ae9c6c4a01113da331ba1f1064da').received_time_unix_ms"
+          },
+          {
+            "name": "test_clock_failure_after_a_real_fill_keeps_effect_and_protection_but_withholds_learning_time[-1]",
+            "message": "AssertionError: assert (1800000000000 is None)\n +  where 1800000000000 = ExecutionReceipt(trade_intent_id='ti-1', decision_hash='c8de8ef6627d4bc3159b5518f35ea42f631d66edb586569871d219a72a3553...tective_stop_price=Decimal('1.09790'), receipt_hash='0e425aebb6d8fe95f53ab4003fa9e5cc94b29c8d4bd36614ae2da8dc7ee3d818').received_time_unix_ms"
+          },
+          {
+            "name": "test_clock_failure_after_a_real_fill_keeps_effect_and_protection_but_withholds_learning_time[throws]",
+            "message": "AssertionError: assert (1800000000000 is None)\n +  where 1800000000000 = ExecutionReceipt(trade_intent_id='ti-1', decision_hash='7a63619bd0e5fc50ab8a8ffe9d42972d01ffe19461a5fdbb742973bf5d1d53...tective_stop_price=Decimal('1.09790'), receipt_hash='639d0d262fee18c2a759dfd88613c633158502cf9951fe36aa40e5eafcd2c2f7').received_time_unix_ms"
+          },
+          {
+            "name": "test_experience_rejects_unmeasured_availability_with_a_real_positive_control[False]",
+            "message": "AssertionError: assert (ExperienceEpisode(episode_id='ti-1', environment=<Environment.DEMO: 'DEMO'>, instrument='EURUSD', venue='mt5', account...'PROPOSED', artifact_hash='42767e5445696a71f2d269fe7275bd86e9061ad0f02e6d97ee50b27a7a5f6640', learning_cutoff_ref=None) is not None) == False"
+          },
+          {
+            "name": "test_restart_restores_real_position_but_never_backfills_an_unknown_receipt_time",
+            "message": "AssertionError: assert ('FILLED' == 'FILLED'\n  \n    FILLED and 1800000000000 is None)\n +  where 1800000000000 = ExecutionReceipt(trade_intent_id='ti-1', decision_hash='188c984710b3274cc0a9d9566bf0312e4e02575f0a60cd21675f02e64eb90e...tective_stop_price=Decimal('1.09790'), receipt_hash='86e9c7e953db7a63d8412ab6ec187501681a5a5ceaea0ae6ff80a6ca6ea7da26').received_time_unix_ms"
+          }
+        ],
+        "errors": 0,
+        "skipped": 0,
+        "sha256": "d0bae6f69554969bf3e4d81e5e6065464627f4f89f4a007f7f1246d7c31149d3"
+      },
+      "restored": {
+        "tests": 10,
+        "failures": [],
+        "errors": 0,
+        "skipped": 0,
+        "sha256": "c3ec44da9577f51be58630d03323a1670774290044a86f0aebc9a17c601c4e2d"
+      },
+      "caught": true,
+      "restored_pass": true
+    },
+    {
+      "name": "receipt-event-backdated-to-dispatch",
+      "path": "trading/vati/execution/router.py",
+      "before": "now_ms=received_ms if received_ms is not None else now_ms, corr=corr)",
+      "after": "now_ms=now_ms, corr=corr)",
+      "expected": "test_genuine_fill_received_after_mandate_expiry",
+      "source_sha256": "efad7f1eb836192c86cb424f877b20b0b067989e73a1908d8b36570adbfac44d",
+      "fault": {
+        "tests": 10,
+        "failures": [
+          {
+            "name": "test_genuine_fill_received_after_mandate_expiry_retains_effect_and_actual_availability",
+            "message": "AssertionError: actual native result availability was backdated to dispatch\nassert (1800000003000 == 1800000003000 and 1800000000000 == 1800000003000)\n +  where 1800000003000 = ExecutionReceipt(trade_intent_id='ti-1', decision_hash='96a7f7a2d9d4bfb7c91fe5e414afc17908aeced3edef4bab4ddcf6c6cd7216...tective_stop_price=Decimal('1.09790'), receipt_hash='038feaf9a5ef4e6afd0e90aa6a3285ca8e7e5a04a6db9eff5d9b0ddfd0798f02').received_time_unix_ms\n +  and   1800000000000 = Event(kind=<EventKind.EXECUTION_RECEIPT: 'EXECUTION_RECEIPT'>, producer='vati-execution-router', event_time_ms=1800000... decision_time_ms=None, correlation_id='ti-1', hash='e53da3ed5e26111b7aa2aacc7f0cbf49282c1f552fd88fa7a0bb861a95a7dd19').received_time_ms"
+          }
+        ],
+        "errors": 0,
+        "skipped": 0,
+        "sha256": "d018ae2efeab828da16be8c443fc942fa977f67553ceb0b5690c9a349d6bbda2"
+      },
+      "restored": {
+        "tests": 10,
+        "failures": [],
+        "errors": 0,
+        "skipped": 0,
+        "sha256": "063e8400d30574f05838c98dd725891adb261614ab606028d6cc1a7811214171"
+      },
+      "caught": true,
+      "restored_pass": true
+    },
+    {
+      "name": "restart-invents-entry-arrival",
+      "path": "trading/vati/app/trade_lifecycle.py",
+      "before": "raise ValueError(\"native receipt availability remains unmeasured\")",
+      "after": "receipt = ExecutionReceipt(**{**receipt.__dict__, \"received_time_unix_ms\":opened_ms, \"receipt_hash\":\"\"}).sealed()",
+      "expected": "test_restart_restores_real_position_but_never_backfills",
+      "source_sha256": "352f57dc018b5964571bec6465c6116b2a11b4536b6ac45068d3355fe3b0c5ed",
+      "fault": {
+        "tests": 10,
+        "failures": [
+          {
+            "name": "test_restart_restores_real_position_but_never_backfills_an_unknown_receipt_time",
+            "message": "AssertionError: assert 1 == 0\n +  where 1 = count(<EventKind.TCA_RECORD: 'TCA_RECORD'>)\n +    where count = <vati.core.ledger.Ledger object at 0x7f37b047afc0>.count\n +    and   <EventKind.TCA_RECORD: 'TCA_RECORD'> = EventKind.TCA_RECORD"
+          }
+        ],
+        "errors": 0,
+        "skipped": 0,
+        "sha256": "c92d05a6f11fd7f8ef2a7861f717bcd55f7c467343b16e50cc2cd04996dc66a8"
+      },
+      "restored": {
+        "tests": 10,
+        "failures": [],
+        "errors": 0,
+        "skipped": 0,
+        "sha256": "234f33812b23dfb66801f907f5101f0611f57d854b271ae058db314b0ece9d09"
+      },
+      "caught": true,
+      "restored_pass": true
+    },
+    {
+      "name": "unknown-availability-learns-an-episode",
+      "path": "trading/vati/learning/episodes.py",
+      "before": "return None  # Known financial effect, unavailable causal learning time.",
+      "after": "pass  # Deliberately broken causal qualification.",
+      "expected": "test_experience_rejects_unmeasured_availability",
+      "source_sha256": "d1136dca507ec05d7b99c8c2aa9d9142055628e000562193e53cb78cdb24d5b1",
+      "fault": {
+        "tests": 10,
+        "failures": [
+          {
+            "name": "test_experience_rejects_unmeasured_availability_with_a_real_positive_control[False]",
+            "message": "AssertionError: assert (ExperienceEpisode(episode_id='ti-1', environment=<Environment.DEMO: 'DEMO'>, instrument='EURUSD', venue='mt5', account...'PROPOSED', artifact_hash='5a487c28fed8789f5b7ef496467baa767658eb6aa60d5b22ef8e54738afa14df', learning_cutoff_ref=None) is not None) == False"
+          }
+        ],
+        "errors": 0,
+        "skipped": 0,
+        "sha256": "dda77254a170ae2cff536af53f3337bd2ebe059da78ba5cfb3a58d0537be66fa"
+      },
+      "restored": {
+        "tests": 10,
+        "failures": [],
+        "errors": 0,
+        "skipped": 0,
+        "sha256": "3190d00428dcf2af1d29c792ac3fe52f4ff8214d32e9c75f3a821d395f26afb4"
+      },
+      "caught": true,
+      "restored_pass": true
+    },
+    {
+      "name": "unknown-clock-restores-new-risk",
+      "path": "trading/vati/execution/router.py",
+      "before": "self.kill.trip(KillSwitchTrigger.RECONCILIATION_FAILURE,now_ms)",
+      "after": "pass",
+      "expected": "test_clock_failure_after_a_real_fill",
+      "source_sha256": "efad7f1eb836192c86cb424f877b20b0b067989e73a1908d8b36570adbfac44d",
+      "fault": {
+        "tests": 10,
+        "failures": [
+          {
+            "name": "test_clock_failure_after_a_real_fill_keeps_effect_and_protection_but_withholds_learning_time[True]",
+            "message": "AssertionError: assert (None is None and False)\n +  where None = ExecutionReceipt(trade_intent_id='ti-1', decision_hash='086747e5db45c895aee89514fd3471219b3b6f97e18424971a9f16a3729337...tective_stop_price=Decimal('1.09790'), receipt_hash='712b747b48f832298ae463066f3a01d82db88b159756d79a489028bd5f32dff1').received_time_unix_ms\n +  and   False = KillSwitch(active=set(), history=[]).halted\n +    where KillSwitch(active=set(), history=[]) = <vati.execution.router.ExecutionRouter object at 0x7f4ba8629790>.kill"
+          },
+          {
+            "name": "test_clock_failure_after_a_real_fill_keeps_effect_and_protection_but_withholds_learning_time[None]",
+            "message": "AssertionError: assert (None is None and False)\n +  where None = ExecutionReceipt(trade_intent_id='ti-1', decision_hash='32212f7fdf1a416db790abc260ead8ca12a9a5296e98cdb3293c02f917ee3f...tective_stop_price=Decimal('1.09790'), receipt_hash='8dc2806351176f91cdc43126bd59ef1f127b5cf490225108e38c9a8a80ff3078').received_time_unix_ms\n +  and   False = KillSwitch(active=set(), history=[]).halted\n +    where KillSwitch(active=set(), history=[]) = <vati.execution.router.ExecutionRouter object at 0x7f4ba84aa3c0>.kill"
+          },
+          {
+            "name": "test_clock_failure_after_a_real_fill_keeps_effect_and_protection_but_withholds_learning_time[unavailable]",
+            "message": "AssertionError: assert (None is None and False)\n +  where None = ExecutionReceipt(trade_intent_id='ti-1', decision_hash='95341798089cc684272a9497cedc36e0d1474fb81eedd4c3e6f8604cf756c0...tective_stop_price=Decimal('1.09790'), receipt_hash='0b036926ba249778edee3eb562128510f8290d8236b1ddb819f18bd823bb60d1').received_time_unix_ms\n +  and   False = KillSwitch(active=set(), history=[]).halted\n +    where KillSwitch(active=set(), history=[]) = <vati.execution.router.ExecutionRouter object at 0x7f4ba8519af0>.kill"
+          },
+          {
+            "name": "test_clock_failure_after_a_real_fill_keeps_effect_and_protection_but_withholds_learning_time[-1]",
+            "message": "AssertionError: assert (None is None and False)\n +  where None = ExecutionReceipt(trade_intent_id='ti-1', decision_hash='c93516bbe6675cd6bf195fbe96c6c8db8c57c9ca9c86387276b9b5bca5b36c...tective_stop_price=Decimal('1.09790'), receipt_hash='285390890ed8c4433ea2cc56001ad527e13a2d0a4669c9d9d771324d52bff181').received_time_unix_ms\n +  and   False = KillSwitch(active=set(), history=[]).halted\n +    where KillSwitch(active=set(), history=[]) = <vati.execution.router.ExecutionRouter object at 0x7f4ba8519970>.kill"
+          },
+          {
+            "name": "test_clock_failure_after_a_real_fill_keeps_effect_and_protection_but_withholds_learning_time[throws]",
+            "message": "AssertionError: assert (None is None and False)\n +  where None = ExecutionReceipt(trade_intent_id='ti-1', decision_hash='5c9dd9f42ba454da6ee46abb0d35f3e13564e6f31549426916d14b7dae2166...tective_stop_price=Decimal('1.09790'), receipt_hash='2dc25a33fbb3884f229263a81eb73302f3b80465ca7a3be52135c400322fb069').received_time_unix_ms\n +  and   False = KillSwitch(active=set(), history=[]).halted\n +    where KillSwitch(active=set(), history=[]) = <vati.execution.router.ExecutionRouter object at 0x7f4ba851b8f0>.kill"
+          }
+        ],
+        "errors": 0,
+        "skipped": 0,
+        "sha256": "96693a3b8396396a8e51dbd5aa2d55eddd7607016808b49bea973e735376790e"
+      },
+      "restored": {
+        "tests": 10,
+        "failures": [],
+        "errors": 0,
+        "skipped": 0,
+        "sha256": "9e79bc439fd04df6163d0b44b3450d7c2ec4515bcab80322422b71a1b71fa228"
+      },
+      "caught": true,
+      "restored_pass": true
+    }
+  ],
+  "schema_oracle": {
+    "schema_sha256": "4b23a0a356dd9ed595965d167b39a4e85a361a831a6de8dda707ef9941bd732e",
+    "schema_valid": true,
+    "valid_property_cases": [
+      null,
+      0,
+      1800000003000,
+      9007199254740993
+    ],
+    "rejected_property_cases": [
+      true,
+      false,
+      -1,
+      "1800000003000",
+      {},
+      []
+    ],
+    "limitation": "Independent validation of the local availability property and full schema syntax; source execution/provenance are separate tests."
+  },
+  "retained_failed_attempts": {
+    "r1_r2": "Probe fixture errors: wrong private client transport attribute, then treating serialized request dict as object. Neither is a product finding.",
+    "r3": "New episode positive control compared serialized decimal text with Decimal; corrected exact string comparison.",
+    "r5": {
+      "path": "/tmp/van-receipt-availability-r5.xml",
+      "sha256": "59a6211a1431c0b60dade3419f46ec2c9eedeebb2364d7fdef3a2347156505ec",
+      "tests": 241,
+      "passed": 236,
+      "failures": [
+        {
+          "name": "test_actual_process_death_does_not_invent_or_lose_a_committed_lesson[before_append-0]",
+          "message": "AssertionError: Traceback (most recent call last):\n    File \"<string>\", line 4, in <module>\n  ModuleNotFoundError: No module named 'vati'\n  \nassert 1 == 23\n +  where 1 = CompletedProcess(args=['/workspace/van-audit/canon-backend-venv-2026-10-09/bin/python', '-c', \"\\nimport os,sys\\nfrom d...ack (most recent call last):\\n  File \"<string>\", line 4, in <module>\\nModuleNotFoundError: No module named \\'vati\\'\\n').returncode"
+        },
+        {
+          "name": "test_actual_process_death_does_not_invent_or_lose_a_committed_lesson[after_append-1]",
+          "message": "AssertionError: Traceback (most recent call last):\n    File \"<string>\", line 4, in <module>\n  ModuleNotFoundError: No module named 'vati'\n  \nassert 1 == 23\n +  where 1 = CompletedProcess(args=['/workspace/van-audit/canon-backend-venv-2026-10-09/bin/python', '-c', \"\\nimport os,sys\\nfrom d...ack (most recent call last):\\n  File \"<string>\", line 4, in <module>\\nModuleNotFoundError: No module named \\'vati\\'\\n').returncode"
+        }
+      ],
+      "errors": 0,
+      "skipped": [
+        {
+          "name": "test_postgres_native_learning_scope_uses_the_same_account_boundary",
+          "reason": "explicit isolated PostgreSQL learning fixture not available"
+        },
+        {
+          "name": "test_actual_book_builder_keeps_a_paper_live_policy_in_the_demo_cohort",
+          "reason": "requires real isolated PostgreSQL fixture"
+        },
+        {
+          "name": "test_actual_book_factory_rechecks_its_own_clock_before_the_native_sender",
+          "reason": "requires isolated PostgreSQL fixture"
+        }
+      ]
+    },
+    "r5_resolution": "Crash-injection child processes lacked vati because PYTHONPATH was not exported. Absolute source paths supplied to child environment; r6 executed both real process-death cases.",
+    "executor_failures": "Several commands could not start under native process/thread exhaustion; no application tests ran in those attempts. A fresh tty Python execve executed r6 with correct environment."
+  },
+  "hosted_prior_packet": {
+    "run_id": 40123338002,
+    "source_head": "3444ca5b46acff617e4910d34c785febec169595",
+    "postgres": {
+      "path": "/tmp/van-3444ca5b-hosted/van-postgres-ledger-report/postgres-ledger-report.xml",
+      "sha256": "324fa412fdb3ed5557d369c20795373e90797e1e1e1ef60924ec1b059df360c1",
+      "tests": 26,
+      "passed": 26,
+      "failures": [],
+      "errors": 0,
+      "skipped": []
+    },
+    "trading": {
+      "path": "/tmp/van-3444ca5b-hosted/van-postgres-ledger-report/trading-source-report.xml",
+      "sha256": "a66a32404b71056ae57d9f55febba37a562d59757b413674c114234b17ced12e",
+      "tests": 2989,
+      "passed": 2986,
+      "failures": [
+        {
+          "name": "test_false_text_from_order_check_cannot_reach_the_actual_send",
+          "message": "AssertionError: assert ('REJECTED' == 'REJECTED'\n  \n    REJECTED and ['sync_account', 'sync_account'] == ['sync_account', 'order_check']\n  \n  At index 1 diff: 'sync_account' != 'order_check'\n  \n  Full diff:\n    [\n        'sync_account',\n  -     'order_check',\n  +     'sync_account',\n    ])"
+        },
+        {
+          "name": "test_unconfirmed_native_stop_is_not_reported_protected_and_uses_the_actual_flatten_path",
+          "message": "Failed: DID NOT RAISE RouterError"
+        }
+      ],
+      "errors": 0,
+      "skipped": [
+        {
+          "name": "test_dial_resolver_selects_trading_knowledge_from_van_registry",
+          "reason": "dial-new checkout not available (set DIAL_REPO)"
+        }
+      ]
+    },
+    "old_boolean_fixture_correction": {
+      "path": "/tmp/van-3444-native-boolean-fixture-correction.xml",
+      "sha256": "8284d5eaa1caf1193ab3164439a140cedfb7050190b1a919ee644f3a0931e56b",
+      "tests": 3,
+      "passed": 3,
+      "failures": [],
+      "errors": 0,
+      "skipped": []
+    },
+    "voice": "NOT_RUN after trading step failure; prior14 source117 pass remains historical."
+  },
+  "limits": [
+    "Router entry receipt availability; direct legacy adapter and protective exit receipt clocks need separate review.",
+    "Unknown clocks preserve a known native effect, position protection and durable reconciliation halt. Event envelope stores an explicitly qualified last-known lower bound, not an invented arrival time.",
+    "Unmeasured original availability requires qualified future readback before causal learning; original ledger remains immutable.",
+    "No formal unit, native broker, financial, production, F15, BG-001, profit or S24 acceptance."
+  ],
+  "integrated_root": {
+    "tests": 51,
+    "passed": 51,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "xml_sha256": "be1daced4b6e9d138c141f9083a3eb007b32be474990ad58eff075250b4fa7ac"
+  },
+  "source_contracts": {
+    "direct_check_exit": 0,
+    "changed": [],
+    "log_sha256": "35a9b4641c85055b16c3a6458a7b1f99fb5df7ec0f5a6280ca45c3ab14cd7103",
+    "initial_nested_check": "Could not fork git show; source check did not execute to completion. Direct same-code check in declared runtime passed."
+  }
+}

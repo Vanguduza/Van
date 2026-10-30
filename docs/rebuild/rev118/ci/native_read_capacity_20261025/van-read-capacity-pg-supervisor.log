@@ -1,0 +1,9 @@
+Traceback (most recent call last):
+  File "/workspace/van-read-capacity-pg-20261025.py", line 23, in <module>
+    run(docker+['exec',name,'psql','-U','van_fixture','-d','postgres','-c','CREATE SCHEMA vati'])
+  File "/workspace/van-read-capacity-pg-20261025.py", line 10, in run
+    def run(args,**kwargs):return subprocess.run(args,env=env,check=True,text=True,capture_output=True,timeout=60,**kwargs)
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/subprocess.py", line 571, in run
+    raise CalledProcessError(retcode, process.args,
+subprocess.CalledProcessError: Command '['docker', '--host=unix:///var/run/docker.sock', 'exec', 'van-read-capacity-pg-20261025', 'psql', '-U', 'van_fixture', '-d', 'postgres', '-c', 'CREATE SCHEMA vati']' returned non-zero exit status 2.

@@ -1,0 +1,595 @@
+{
+ "schema": "van.rebuild.pre002.neg-rec-review/1",
+ "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE",
+ "method": "Each flagged requirement read against its cited identity text, bound contexts' T-SURFACE identities, owning units' WP domain NEG/REC scenarios (DOMAIN_SCENARIOS.json) and the cited master sections, with duplicated section numbers resolved to the inherited specification where context requires.",
+ "counts": {
+  "ADEQUATE_EXISTING_COVERAGE": 37,
+  "GAP_REFINEMENT_PROPOSED": 6
+ },
+ "citation_ambiguity": "The Rev1.18 master prefixes the whole-product contract (§1–§n) to the verbatim inherited specification, so 67 section numbers occur twice. Four identities cite such a number: T-NX-027 (§7.4), T-NX-032 (§8.4, §8.5), T-NX-036 (§8.2, §8.4) and T-NX-037 (§8.3). Context shows the inherited section is meant in each case.",
+ "reviews": [
+  {
+   "id": "VAN-NX-001",
+   "disposition": "GAP_REFINEMENT_PROPOSED",
+   "references": [
+    "T-NX-001",
+    "T-VAN-CX-020-NEG"
+   ],
+   "reasoning": "Only owner screenshot acceptance. T-VAN-CX-020-NEG rejects legacy UI leaks and hidden safety states but nothing detects drift of the two locked authorities themselves.",
+   "proposed_refinement": "NEG: changing either locked dark/light authority (image bytes or derived tokens) without a new owner lock record fails the visual-lock check. REC: theme switch, process death and dynamic type keep both authorities' tokens; a rejected candidate restores the last locked authority.",
+   "category_not_applicable": "Recovery is narrow for a static artefact; the runtime theme-switch case is the applicable one.",
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-NX-003",
+   "disposition": "ADEQUATE_EXISTING_COVERAGE",
+   "references": [
+    "T-SURFACE-001",
+    "T-SURFACE-002",
+    "T-SURFACE-003",
+    "T-SURFACE-006",
+    "T-BE-030-NEG",
+    "T-BE-030-REC"
+   ],
+   "reasoning": "T-SURFACE identities of the bound contexts require stale/error, process death and deep-link restoration; WP-SC-MOBILE-NEG (T-BE-030-NEG) covers malformed/expired deep links, no network and low memory. Note: the Android ICU regex defect found in VanRoute.concreteRoute on 2026-10-21 lives on this path; T-NX-003 would catch it on device.",
+   "proposed_refinement": null,
+   "category_not_applicable": null,
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-NX-004",
+   "disposition": "ADEQUATE_EXISTING_COVERAGE",
+   "references": [
+    "T-SURFACE-001",
+    "T-SURFACE-007",
+    "T-SURFACE-102",
+    "T-BE-030-NEG",
+    "T-BE-030-REC",
+    "master:18.2"
+   ],
+   "reasoning": "WP-SC-HOME-NEG: stale task vs healthy market stream stays distinguishable, replay does not notify twice. §18.2: critical risk preempts a celebrating orb; orb tap with a pending A4 approval grants nothing.",
+   "proposed_refinement": null,
+   "category_not_applicable": null,
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-NX-006",
+   "disposition": "ADEQUATE_EXISTING_COVERAGE",
+   "references": [
+    "T-SURFACE-102",
+    "T-SURFACE-103",
+    "T-SURFACE-104",
+    "T-SURFACE-105",
+    "T-SURFACE-107",
+    "T-BE-029-NEG",
+    "T-BE-029-REC"
+   ],
+   "reasoning": "WP-SC-FLOATING-NEG/REC: overlay denial, locked screen, service restart restriction, occlusion and battery saver use OS-compatible recovery without hidden mic capture.",
+   "proposed_refinement": null,
+   "category_not_applicable": null,
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-NX-008",
+   "disposition": "ADEQUATE_EXISTING_COVERAGE",
+   "references": [
+    "T-SURFACE-008",
+    "T-SURFACE-019",
+    "T-BE-030-NEG",
+    "T-VAN-CX-020-NEG"
+   ],
+   "reasoning": "T-SURFACE identities of the bound contexts require stale/error, process death and deep-link restoration; T-VAN-CX-020-NEG rejects unknown data that looks live; WP-SC-MOBILE-NEG covers no network and malformed deep links into the five destinations.",
+   "proposed_refinement": null,
+   "category_not_applicable": null,
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-NX-009",
+   "disposition": "ADEQUATE_EXISTING_COVERAGE",
+   "references": [
+    "T-SURFACE-021",
+    "T-SURFACE-026",
+    "T-BE-018-NEG",
+    "T-BE-018-REC",
+    "master:18.2"
+   ],
+   "reasoning": "WP-SC-CHART-NEG/REC: reconnect gaps, renderer failure and malformed bridge inputs preserve precision and never execute from a chart. §18.2: quote stops while candles continue → STALE/OFFLINE, no synthetic tick.",
+   "proposed_refinement": null,
+   "category_not_applicable": null,
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-NX-010",
+   "disposition": "ADEQUATE_EXISTING_COVERAGE",
+   "references": [
+    "T-SURFACE-040",
+    "T-SURFACE-041",
+    "T-BE-009-NEG",
+    "T-BE-009-REC",
+    "master:18.2"
+   ],
+   "reasoning": "WP-SC-ORDERS-NEG/REC: concurrent spend, partial fill, cancel race, unknown submission and restart preserve exposure and protection. §18.2 rows: fill without stop confirmation, close response lost (OUTCOME_UNKNOWN, no blind resend).",
+   "proposed_refinement": null,
+   "category_not_applicable": null,
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-NX-011",
+   "disposition": "ADEQUATE_EXISTING_COVERAGE",
+   "references": [
+    "T-SURFACE-010",
+    "T-SURFACE-011",
+    "T-BE-008-NEG",
+    "T-BE-008-REC"
+   ],
+   "reasoning": "BE-008 owns the requirement; WP-SC-MARKETS-NEG/REC: feed gap, delisting, alias collision, closure, entitlement denial, process death and duplicate alerts.",
+   "proposed_refinement": null,
+   "category_not_applicable": null,
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-NX-012",
+   "disposition": "ADEQUATE_EXISTING_COVERAGE",
+   "references": [
+    "T-SURFACE-072",
+    "T-BE-014-NEG",
+    "T-BE-014-REC",
+    "master:18.2"
+   ],
+   "reasoning": "WP-SC-NEWS-NEG: contradictory facts cannot create fabricated certainty. §18.2: an LLM-invented stop/probability/lot is rejected; deterministic facts only.",
+   "proposed_refinement": null,
+   "category_not_applicable": null,
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-NX-013",
+   "disposition": "ADEQUATE_EXISTING_COVERAGE",
+   "references": [
+    "T-SURFACE-072",
+    "T-SURFACE-073",
+    "T-BE-014-NEG",
+    "T-BE-014-REC",
+    "master:8.2#inherited"
+   ],
+   "reasoning": "Inherited §8.2 (Live sources): a category below its minimum healthy sources shows 'news coverage degraded' and inside a high-impact window the gap is itself a risk; WP-SC-NEWS-NEG/REC.",
+   "proposed_refinement": null,
+   "category_not_applicable": null,
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-NX-014",
+   "disposition": "ADEQUATE_EXISTING_COVERAGE",
+   "references": [
+    "T-SURFACE-086",
+    "T-SURFACE-087",
+    "T-BE-023-NEG",
+    "T-BE-023-REC"
+   ],
+   "reasoning": "WP-SC-WORK-NEG/REC: stale revision, concurrent edit, failed review and lost cancellation never fabricate progress or dispatch twice; original task/job reconciled.",
+   "proposed_refinement": null,
+   "category_not_applicable": null,
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-NX-015",
+   "disposition": "ADEQUATE_EXISTING_COVERAGE",
+   "references": [
+    "T-SURFACE-086",
+    "T-SURFACE-091",
+    "T-BE-023-NEG",
+    "master:18.2"
+   ],
+   "reasoning": "WP-SC-WORK-NEG includes cycles and stale revisions. §18.2: moving a graph node is a layout change only; two agents claiming one task show a conflict, not a manufactured assignment.",
+   "proposed_refinement": null,
+   "category_not_applicable": null,
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-NX-017",
+   "disposition": "ADEQUATE_EXISTING_COVERAGE",
+   "references": [
+    "T-SURFACE-096",
+    "T-SURFACE-097",
+    "T-BE-024-NEG",
+    "T-BE-024-REC",
+    "master:18.2"
+   ],
+   "reasoning": "WP-SC-AGENTS-NEG/REC: expired lease, late callback, revoked capability. §18.2: invalid/stale Muse provider approval refused with no click/retry side effect.",
+   "proposed_refinement": null,
+   "category_not_applicable": null,
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-NX-018",
+   "disposition": "ADEQUATE_EXISTING_COVERAGE",
+   "references": [
+    "T-SURFACE-108",
+    "T-SURFACE-109",
+    "T-BE-027-NEG",
+    "T-BE-028-NEG",
+    "T-BE-028-REC"
+   ],
+   "reasoning": "BE-027 and BE-028 own the requirement. WP-SC-MEMORY-NEG: stale index, revoked source and backups cannot revive erased material; WP-SC-AUTOMATION-NEG/REC: missed schedule, overlapping run, timeout after effect reconcile before retry.",
+   "proposed_refinement": null,
+   "category_not_applicable": null,
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-NX-019",
+   "disposition": "ADEQUATE_EXISTING_COVERAGE",
+   "references": [
+    "T-SURFACE-112",
+    "T-SURFACE-113",
+    "T-BE-002-NEG",
+    "T-BE-002-REC"
+   ],
+   "reasoning": "WP-SC-BOOTSTRAP-NEG/REC: expired provisioning, rotated certificate, lost/replaced/revoked handset; an old device cannot regain authority. WP-SC-SETTINGS-NEG: stale setting revision and expired enrollment stay distinct.",
+   "proposed_refinement": null,
+   "category_not_applicable": null,
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-NX-020",
+   "disposition": "ADEQUATE_EXISTING_COVERAGE",
+   "references": [
+    "T-SURFACE-106",
+    "T-BE-025-NEG",
+    "T-BE-025-REC",
+    "T-BE-026-NEG",
+    "T-BE-026-REC",
+    "T-BE-029-NEG"
+   ],
+   "reasoning": "Owners include BE-025, BE-026 and BE-029. WP-SC-REMOTE-NEG (unknown click outcome, revoked lease), WP-SC-ARTEMIS-NEG (disconnect, wrong APK, stale result stay unknown/failed), WP-SC-VOICE-NEG.",
+   "proposed_refinement": null,
+   "category_not_applicable": null,
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-NX-022",
+   "disposition": "ADEQUATE_EXISTING_COVERAGE",
+   "references": [
+    "T-SURFACE-112",
+    "T-VAN-CX-020-REC",
+    "master:15.1#inherited"
+   ],
+   "reasoning": "Inherited §15.1: escalation tiers degrade material effects while preserving status, text and controls; T-VAN-CX-020-REC reduces motion cost without removing semantics. A missed budget is a failing measurement by definition.",
+   "proposed_refinement": null,
+   "category_not_applicable": null,
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-NX-023",
+   "disposition": "ADEQUATE_EXISTING_COVERAGE",
+   "references": [
+    "T-VAN-CX-020-NEG",
+    "T-VAN-CX-002-NEG",
+    "T-VAN-LEAN-006-NEG",
+    "T-VAN-CX-017-REC"
+   ],
+   "reasoning": "T-VAN-CX-020-NEG rejects legacy UI leaking into new modules; T-VAN-CX-002-NEG rejects deleting a PR-only action; T-VAN-CX-017-REC reopens a unit when a missing capability is found.",
+   "proposed_refinement": null,
+   "category_not_applicable": "Recovery for a static admission check means reopening, which T-VAN-CX-017-REC provides.",
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-NX-024",
+   "disposition": "GAP_REFINEMENT_PROPOSED",
+   "references": [
+    "T-NX-024",
+    "T-VAN-CX-019-NEG",
+    "T-VAN-CX-019-REC"
+   ],
+   "reasoning": "T-VAN-CX-019-NEG/REC (swapped revision, self-declared signature, reused device evidence) are bound to PRE-003 only. BQ-006/QA-005 re-verify at the release head but inherit no negative, so a stale or self-issued receipt at release time is untested.",
+   "proposed_refinement": "Owner addition: bind T-VAN-CX-019-NEG and T-VAN-CX-019-REC additionally to BQ-006 and QA-005, executed against the release head rather than inherited from the PRE-003 pass.",
+   "category_not_applicable": null,
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-NX-025",
+   "disposition": "GAP_REFINEMENT_PROPOSED",
+   "references": [
+    "T-NX-025",
+    "T-BE-026-NEG",
+    "T-BE-026-REC",
+    "T-VAN-CX-019-NEG"
+   ],
+   "reasoning": "The on-device acceptance unit QA-004 carries only T-VAN-CX-020. The Artemis negatives (disconnect, wrong APK, stale result must stay unknown/failed) are owned by BE-026, so the owner decision itself has no bound refusal case.",
+   "proposed_refinement": "Owner addition: bind T-BE-026-NEG and T-BE-026-REC additionally to QA-004; refine T-NX-025: an owner decision recorded against an APK digest other than the installed one, or against evidence from another build, is refused.",
+   "category_not_applicable": null,
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-NX-026",
+   "disposition": "GAP_REFINEMENT_PROPOSED",
+   "references": [
+    "T-NX-026"
+   ],
+   "reasoning": "The identity requires the admission record to exist (39 REA ids and hashes, APK identities, static-only limits). Nothing tests refusal of a non-admitted record, a hash mismatch, or a static-only record cited as runtime evidence; MEMORY-family scenarios do not address research admission.",
+   "proposed_refinement": "NEG: a research record outside the admitted 39, a hash mismatch, or citing a static-only record as runtime/device evidence is refused by the REA gate. REC: a superseded record version invalidates dependent changes until re-admitted.",
+   "category_not_applicable": null,
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-NX-027",
+   "disposition": "ADEQUATE_EXISTING_COVERAGE",
+   "references": [
+    "T-SURFACE-041",
+    "T-BE-009-NEG",
+    "master:7.4.6#inherited",
+    "master:18.2"
+   ],
+   "reasoning": "Inherited §7.4 manual trading and §18.2 manual-trading rows: mandate absent → refused before preview; stop wider → refused; kill switch → entry refused while close/tighten work; double tap → one order; replayed biometric token refused. Note: T-NX-027 cites '§7.4', a number duplicated in the master (see AMBIGUITY).",
+   "proposed_refinement": null,
+   "category_not_applicable": null,
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-NX-031",
+   "disposition": "ADEQUATE_EXISTING_COVERAGE",
+   "references": [
+    "T-BE-011-NEG",
+    "master:7.4.6#inherited",
+    "master:7.4.7#inherited",
+    "master:18.2"
+   ],
+   "reasoning": "Cited §7.4.6–§7.4.7 and §18.2: anti-martingale refusals at review, approval and submission; owner stop never widened on handover; take-back cancels unsent actions, reconciles in-flight ones under a new epoch and completes only after readback. T-BE-011-NEG restates them.",
+   "proposed_refinement": null,
+   "category_not_applicable": null,
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-NX-048",
+   "disposition": "ADEQUATE_EXISTING_COVERAGE",
+   "references": [
+    "T-SURFACE-054",
+    "T-BE-004-NEG",
+    "T-BE-004-REC",
+    "master:7.9.11#inherited"
+   ],
+   "reasoning": "WP-SC-ACCOUNTS-NEG: observe-only access, KYC restriction, expired callback; §7.9.11 A1: link/OAuth attempts persist across app kill and a lost outcome is a visible retry/discard state.",
+   "proposed_refinement": null,
+   "category_not_applicable": null,
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-NX-049",
+   "disposition": "GAP_REFINEMENT_PROPOSED",
+   "references": [
+    "T-NX-049",
+    "master:7.9.3#inherited",
+    "master:7.9.10#inherited"
+   ],
+   "reasoning": "T-NX-049 cites only §7.9.3, which states the rotation order (new secret → verify → swap → destroy). The failure case is in §7.9.10 ('rotation never leaves the account without valid credentials'), which only T-NX-051 cites, and only for F-033.",
+   "proposed_refinement": "Refine T-NX-049 to cite §7.9.10's rotation clause: a verification failure or crash mid-rotation keeps the old credential valid and records the attempt; a server/login change forces re-verification before trading.",
+   "category_not_applicable": null,
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-NX-050",
+   "disposition": "ADEQUATE_EXISTING_COVERAGE",
+   "references": [
+    "T-NX-050",
+    "master:7.9.4#inherited"
+   ],
+   "reasoning": "Cited §7.9.4: delete/disconnect blocked with open positions, working orders, in-flight funds, unknown outcomes or live leases, checked against fresh state; cancelling a deletion returns RELINK_REQUIRED and never revives credentials or a broker-closed account.",
+   "proposed_refinement": null,
+   "category_not_applicable": null,
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-NX-051",
+   "disposition": "ADEQUATE_EXISTING_COVERAGE",
+   "references": [
+    "T-NX-051",
+    "T-BE-004-NEG",
+    "master:7.9.10#inherited"
+   ],
+   "reasoning": "Cited §7.9.10 F-033 regression: a withdrawal does not move drawdown tiers and a deposit does not mask a loss; WP-SC-ACCOUNTS-NEG: duplicate transfer and returned payment prevent false success.",
+   "proposed_refinement": null,
+   "category_not_applicable": null,
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-NX-052",
+   "disposition": "ADEQUATE_EXISTING_COVERAGE",
+   "references": [
+    "T-NX-052",
+    "master:7.9.6#inherited",
+    "master:7.9.7#inherited"
+   ],
+   "reasoning": "Cited §7.9.6–§7.9.7: demo and live never sum; DEGRADED/AUTH_EXPIRED/BROKER_MAINTENANCE states, reconnection backs off and a lost connection with open positions raises Attention.",
+   "proposed_refinement": null,
+   "category_not_applicable": null,
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-NX-041",
+   "disposition": "ADEQUATE_EXISTING_COVERAGE",
+   "references": [
+    "T-SURFACE-020",
+    "T-BE-018-NEG",
+    "T-BE-018-REC"
+   ],
+   "reasoning": "500-cycle lifecycle test (leak/teardown negatives) plus WP-SC-CHART-NEG/REC renderer failure and reconnect gaps.",
+   "proposed_refinement": null,
+   "category_not_applicable": null,
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-NX-042",
+   "disposition": "ADEQUATE_EXISTING_COVERAGE",
+   "references": [
+    "T-NX-042",
+    "T-BE-018-NEG"
+   ],
+   "reasoning": "The expectation already names negatives the keyword screen missed: bridge fuzzing and a forbidden order call; renderer swap is the recovery path.",
+   "proposed_refinement": null,
+   "category_not_applicable": null,
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-NX-043",
+   "disposition": "ADEQUATE_EXISTING_COVERAGE",
+   "references": [
+    "T-SURFACE-022",
+    "T-BE-018-NEG"
+   ],
+   "reasoning": "Anchor round-trip, undo/redo and cross-device sync plus WP-SC-CHART-NEG workspace conflicts preserving precision.",
+   "proposed_refinement": null,
+   "category_not_applicable": null,
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-NX-035",
+   "disposition": "ADEQUATE_EXISTING_COVERAGE",
+   "references": [
+    "T-SURFACE-085",
+    "T-NX-035"
+   ],
+   "reasoning": "The cited expectation is itself a refusal gate: candidates must pass deflated Sharpe, PBO and walk-forward before paper, so failing candidates are rejected; it learns from losers as well as winners.",
+   "proposed_refinement": null,
+   "category_not_applicable": "Recovery applies to the candidate pipeline's durable state and is carried by BE-022's generic T-BE-022-REC.",
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-NX-036",
+   "disposition": "ADEQUATE_EXISTING_COVERAGE",
+   "references": [
+    "T-BE-015-NEG",
+    "master:8.2#inherited"
+   ],
+   "reasoning": "Inherited §8.2: two prediction-market sources and markets below a liquidity floor are ignored; T-BE-015-NEG: missing marks stay missing and a thin sample cannot become calibrated probability; WP-SC-PREDICTION-NEG covers void/disputed resolution. T-NX-036 cites §8.2/§8.4, duplicated numbers (see AMBIGUITY).",
+   "proposed_refinement": null,
+   "category_not_applicable": null,
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-NX-038",
+   "disposition": "ADEQUATE_EXISTING_COVERAGE",
+   "references": [
+    "T-NX-038",
+    "T-BE-014-NEG"
+   ],
+   "reasoning": "The expectation is a gate (terms check and live probe per feed: a feed failing either is not added); WP-SC-NEWS-NEG covers an unavailable source.",
+   "proposed_refinement": null,
+   "category_not_applicable": null,
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-NX-033",
+   "disposition": "ADEQUATE_EXISTING_COVERAGE",
+   "references": [
+    "T-BE-017-NEG",
+    "master:8.10.9#inherited"
+   ],
+   "reasoning": "Cited §8.10.9 lists the bundle's negatives (early release value rejected, site lockup stands down without double-acting, spread above cap stands down, late entry refused, single or disagreeing sources); T-BE-017-NEG: SIGNED is not readiness; expiry disarms.",
+   "proposed_refinement": null,
+   "category_not_applicable": null,
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-NX-032",
+   "disposition": "ADEQUATE_EXISTING_COVERAGE",
+   "references": [
+    "T-SURFACE-074",
+    "T-BE-014-NEG",
+    "master:8.4#inherited"
+   ],
+   "reasoning": "Inherited §8.4 (History comparison): fewer than 10 close analogues → EVIDENCE_THIN, MISSING marks kept; WP-SC-NEWS-NEG. T-NX-032 cites §8.4–§8.5, which are duplicated numbers (see AMBIGUITY).",
+   "proposed_refinement": null,
+   "category_not_applicable": null,
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-NX-030",
+   "disposition": "ADEQUATE_EXISTING_COVERAGE",
+   "references": [
+    "T-NX-030",
+    "master:2.6"
+   ],
+   "reasoning": "§2.6 (cited): native strings come from one catalogue built from the table and a lint rule rejects uncalibrated certainty wording in trading UI strings; that is the negative.",
+   "proposed_refinement": null,
+   "category_not_applicable": "Recovery does not apply: a static string catalogue has no runtime state to recover.",
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-NX-053",
+   "disposition": "ADEQUATE_EXISTING_COVERAGE",
+   "references": [
+    "T-VAN-CX-001-NEG",
+    "T-VAN-CX-002-NEG",
+    "T-VAN-CX-019-NEG",
+    "T-VAN-CX-019-REC"
+   ],
+   "reasoning": "PRE-002 owns T-VAN-CX-001-NEG (old plan, omitted producer rejected); signature negatives (self-declared signature_valid) and revoked-evidence recovery are T-VAN-CX-019-NEG/REC in the same PRE chain.",
+   "proposed_refinement": null,
+   "category_not_applicable": null,
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-NX-057",
+   "disposition": "ADEQUATE_EXISTING_COVERAGE",
+   "references": [
+    "T-SURFACE-055",
+    "T-BE-004-NEG",
+    "master:7.9.10#inherited"
+   ],
+   "reasoning": "'REMOTE_CLOSED only on broker readback' is a no-false-closure negative; §7.9.10: OAuth cancel/timeout discard the attempt; investor-password MT5 accounts cannot send orders.",
+   "proposed_refinement": null,
+   "category_not_applicable": null,
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-NX-060",
+   "disposition": "ADEQUATE_EXISTING_COVERAGE",
+   "references": [
+    "T-NX-060",
+    "master:15.1#inherited",
+    "master:18.2",
+    "T-BE-030-NEG"
+   ],
+   "reasoning": "The requirement is itself a recovery requirement (process-death restore incl. pending provider and order references, inherited §15.1 device scope). §18.2: rotation with a popup open restores composition and anchor; WP-SC-MOBILE-NEG: low memory preserves state.",
+   "proposed_refinement": null,
+   "category_not_applicable": null,
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-NX-063",
+   "disposition": "ADEQUATE_EXISTING_COVERAGE",
+   "references": [
+    "T-SURFACE-004",
+    "T-BE-030-NEG",
+    "master:18.2"
+   ],
+   "reasoning": "Expectation: sources cited, budget not exceeded, stale marked. §18.2: a model rewrite of a brief that adds a price is rejected and the template text shown.",
+   "proposed_refinement": null,
+   "category_not_applicable": null,
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-NX-066",
+   "disposition": "ADEQUATE_EXISTING_COVERAGE",
+   "references": [
+    "T-SURFACE-111",
+    "T-BE-027-NEG",
+    "T-BE-027-REC"
+   ],
+   "reasoning": "Expectation: source deletion is not claimed as model unlearning; WP-SC-MEMORY-NEG/REC: stale index, derived cache and backups cannot silently revive erased material.",
+   "proposed_refinement": null,
+   "category_not_applicable": null,
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  },
+  {
+   "id": "VAN-NX-067",
+   "disposition": "GAP_REFINEMENT_PROPOSED",
+   "references": [
+    "T-NX-067",
+    "T-BE-027-NEG"
+   ],
+   "reasoning": "'Goal changes audited' is positive only, and WP-SC-MEMORY-NEG concerns erased material, not goal edits. No case covers an unauthorized edit, a stale revision, or a goal that widens data use beyond consent.",
+   "proposed_refinement": "NEG: a goal edit from a non-owner principal, against a stale goal revision, or widening data use beyond recorded consent is refused and audited. REC: concurrent edits resolve to one audited revision; restart preserves the last committed goal.",
+   "category_not_applicable": null,
+   "state": "AUTHOR_REVIEWED_PENDING_INDEPENDENT_CHALLENGE"
+  }
+ ]
+}

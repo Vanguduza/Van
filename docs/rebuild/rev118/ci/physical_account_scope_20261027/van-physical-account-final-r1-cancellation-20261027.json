@@ -1,0 +1,8 @@
+{
+  "observed_at_utc": "2026-10-27T04:37:43.797225+00:00",
+  "state": "CANCELLATION_REQUESTED_FOR_CONFIRMED_HOSTED_COLLECTION_FIX",
+  "controller_pid": 979667,
+  "test_pid": 979989,
+  "reason": "Published cognitive job122006997544 collection failed: optional psycopg imported at module load. Move import behind unchanged canonical actual-PG fixture; restart final at corrected hashes.",
+  "pass_claim": false
+}

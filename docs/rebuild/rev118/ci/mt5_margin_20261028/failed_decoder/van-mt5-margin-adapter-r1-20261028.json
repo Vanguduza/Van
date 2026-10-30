@@ -1,0 +1,23 @@
+{
+  "command": [
+    "/workspace/van-backend-venv-20261025/bin/python",
+    "tools/rebuild/source_storage_audit.py",
+    "--report",
+    "/workspace/van-mt5-margin-adapter-r1-20261028-audit.json",
+    "trading/tests/test_mt5_expected_margin.py",
+    "trading/tests/test_mt5_expected_margin_worker.py",
+    "trading/tests/test_mt5_worker.py",
+    "trading/tests/test_mt5_worker_funding.py",
+    "--junitxml=/workspace/van-mt5-margin-adapter-r1-20261028.xml",
+    "-q"
+  ],
+  "cwd": "/workspace/van-review-2026-10-18/publish",
+  "controller_pid": 198831,
+  "started_at_utc": "2026-10-28T06:31:36.735204+00:00",
+  "timeout_seconds": 300,
+  "state": "COMPLETED",
+  "command_pid": 198834,
+  "exit": 1,
+  "adopted_children_reaped": [],
+  "finished_at_utc": "2026-10-28T06:31:40.000632+00:00"
+}

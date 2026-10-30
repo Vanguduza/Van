@@ -111,7 +111,7 @@ async def test_status_without_ledger_is_degraded_not_fatal(client):
     ac, app = client
     r = await ac.get("/v1/trading/status")
     assert r.status_code == 200 and r.json()["ledger_available"] is False and "TRADING_LEDGER_UNAVAILABLE" in r.json()["degraded"]
-    assert (await ac.get("/v1/trading/tickets")).json() == {"tickets": []}
+    assert (await ac.get("/v1/trading/tickets")).json() == {"ledger_available": False, "tickets": []}
     r = await ac.post(
         "/v1/trading/halt",
         json={"owner_signature_ref": _halt_token(), "reason": "x"},
@@ -248,7 +248,14 @@ def test_service_never_exposes_an_order_path():
     # history, assessment). Each is a projection of the ledger; none of them is
     # a capability, which the banned-substring check below still proves.
     assert names == {"available", "status", "tickets", "halt", "confirm_ticket", "trade_book", "portfolio", "accounts", "market_state", "risk", "cognition", "trade_detail", "bars", "producer", "accounts_registry", "lake_root", "reporting_currency", "owner_authority",
-                     "positions", "events", "potential_trades", "history", "assessment"}
+                     "positions", "events", "potential_trades", "history", "assessment",
+                     "cognitive_fabric", "cognitive_slice", "cognitive_import",
+                     "native_depth_history", "native_source_root", "native_history_max_bytes",
+                     "instrument_catalog", "native_catalog_ledger_path"}
+    # Historical native captures use only the provisioned archive reader and
+    # its byte policy; the registered HTTP suite trips any broker collection.
+    # Cognitive projections are read-only; imports append bounded evidence only.
+    # Their effects are independently checked by the authority-tripwire regression below.
     for banned in ("order", "submit", "size", "cancel", "modify", "credential", "token"):
         assert not any(banned in n.lower() for n in names), banned
     # P0-TRADE-001 — the one field added since is the verifier for owner-signed acts, and
@@ -423,7 +430,7 @@ async def test_account_onboarding_is_device_signed_and_forwards_without_storing_
     from van_gateway.trading.accounts import LocalAccountControl
     from test_commander_accounts import FakeDeriv
     deriv = FakeDeriv()
-    app.state.onboarding.control = LocalAccountControl(str(tmp_path / "accounts.json"), str(tmp_path / "secrets"), deriv_connector=deriv.connector)
+    app.state.onboarding.control = LocalAccountControl(str(tmp_path / "accounts.json"), str(tmp_path / "secrets"), deriv_connector=deriv.connector, operation_ledger=str(tmp_path / "vati.sqlite"))
     app.state.trading.accounts_registry = str(tmp_path / "accounts.json")
     now = int(_time.time())
     from van_gateway.trading.accounts import requires_owner_approval
@@ -438,8 +445,9 @@ async def test_account_onboarding_is_device_signed_and_forwards_without_storing_
                 "action": action, "args": args}
         if approve and requires_owner_approval(action) and secret == "test-device-secret":
             challenge = await ac.post("/v1/trading/accounts/challenge", json=body)
-            if challenge.status_code == 200:
-                body["approval_proof"] = _approval_proof(challenge.json())
+            if challenge.status_code != 200:
+                return challenge
+            body["approval_proof"] = _approval_proof(challenge.json())
         return await ac.post("/v1/trading/accounts/action", json=body)
     assert (await act("account_upsert", {"alias": "paper_lab", "broker": "PAPER"}, secret="wrong")).status_code == 403
     assert (await act("account_upsert", {"alias": "paper_lab", "broker": "PAPER"}, issued=now - 3600)).status_code == 403
@@ -469,7 +477,8 @@ async def test_account_onboarding_is_device_signed_and_forwards_without_storing_
     assert st["url"].startswith("https://oauth.deriv.com/oauth2/authorize?app_id=1089") and st["callback"].endswith("/v1/trading/oauth/deriv/callback")
     assert (await act("oauth_pending", {"state": st["state"]})).json() == {"ready": False}
     cb = await ac.get(f"/v1/trading/oauth/deriv/callback?state={st['state']}&acct1=VRTC900&token1=a1-linked&cur1=USD&acct2=CR777&token2=a1-real&cur2=USD")
-    assert cb.status_code == 200 and "linked" in cb.text
+    assert cb.status_code == 200 and "authorization received" in cb.text
+    assert cb.headers["cache-control"] == "no-store" and cb.headers["referrer-policy"] == "no-referrer"
     pend = (await act("oauth_pending", {"state": st["state"]})).json()
     assert pend["ready"] and pend["accounts"] == [{"loginid": "VRTC900", "currency": "USD", "demo": True}, {"loginid": "CR777", "currency": "USD", "demo": False}] and "a1-" not in json.dumps(pend)
     row = await app.state.store.fetchone("SELECT payload_enc FROM trading_oauth_pending WHERE state = ?", (st["state"],))
@@ -485,4 +494,121 @@ async def test_account_onboarding_is_device_signed_and_forwards_without_storing_
     assert (await act("oauth_start", {"broker": "ctrader"})).status_code == 422
     # MT5-EA key issue returns the key once to the app, stores it on the VM
     k = (await act("mt5_ea_issue_key", {"alias": "mt5_ea", "login": "1", "server": "Demo"})).json()
-    assert len(k["signing_key"]) == 64 and (await act("account_remove", {"alias": "mt5_ea"})).json()["removed"]
+    assert len(k["signing_key"]) == 64
+    # No terminal has supplied funds/exposure facts for this newly issued key.
+    # The existing credential and profile must survive an unqualified unlink.
+    refused = await act("account_remove", {"alias": "mt5_ea"})
+    assert refused.status_code == 409, refused.text
+    assert (tmp_path / "secrets" / "mt5_ea.env").exists()
+    assert any(a["alias"] == "mt5_ea" for a in (await ac.get("/v1/trading/accounts")).json()["accounts"])
+    # Keep the positive paired/native unlink path on the known paper account.
+    assert (await act("account_remove", {"alias": "paper_lab"})).json()["removed"]
+
+
+def test_cognitive_projections_and_imports_cannot_reach_order_authority(tmp_path, monkeypatch):
+    """Exercise every new service method with real evidence and live authority tripwires."""
+    from van_gateway.trading.service import TradingService
+    from vati.cognition.fabric import TriAnalystPlane, FabricError
+    from vati.risk.authority import RiskAuthority
+    from vati.execution.router import ExecutionRouter
+    from vati.execution.ctrader.adapter import CtraderAdapter
+    from vati.arbiter.intent_factory import IntentFactory
+    from unittest.mock import Mock
+
+    authority = Mock(side_effect=AssertionError('cognitive evidence reached execution authority'))
+    for owner, methods in ((RiskAuthority, ('evaluate',)),
+                           (ExecutionRouter, ('execute', 'apply_preservation', 'apply_exits')),
+                           (CtraderAdapter, ('submit', 'modify_stop', 'close')),
+                           (IntentFactory, ('from_selected_candidate',))):
+        for method in methods:
+            monkeypatch.setattr(owner, method, authority)
+    monkeypatch.setattr('van_gateway.trading.service.time.time', lambda: 1)
+    path = tmp_path / 'cognitive-authority.sqlite'
+    ledger = Ledger(path)
+    plane = TriAnalystPlane(ledger, account_alias='test')
+    universe = plane.universe(instruments=[{'symbol':'XAUUSD', 'broker_symbol':'XAUUSD',
+        'asset_class':'METAL', 'contract_hash':'h', 'market_data_available':True,
+        'discovery_allowed':True, 'execution_supported':False,
+        'execution_eligibility_state':'RESEARCH_ONLY'}], broker='test', venue='test', now_ms=900)
+    evidence = plane.evidence(symbol='XAUUSD', state={'market_data_hash':'market-hash'},
+        source_refs=['market:canonical'], now_ms=950, deadline_ms=2000)
+    service = TradingService(str(path))
+    def snapshot():
+        return ledger.head(), tuple(event.hash for event in ledger.iter())
+    before = snapshot()
+    service.cognition()
+    service.cognitive_fabric('test')
+    for operation in ('trading-market', 'strategy-health', 'performance', 'tca', 'learning-episodes'):
+        service.cognitive_slice(operation)
+    assert snapshot() == before
+
+    signal = {'candidate_id':'signal', 'origin_lane':'META_ANALYST', 'provider_product':'personal-muse-free',
+        'universe_snapshot_id':universe['snapshot_id'], 'symbol':'XAUUSD', 'venue':'test',
+        'horizon':'SWING', 'initial_thesis':'Watch breakout', 'evidence_refs':['source'], 'expires_at_ms':2000}
+    service.cognitive_import('test', 'discovery', signal)
+    packet = {'packet_id':'meta-packet', 'candidate_id':'signal', 'analyst_lane':'META_ANALYST',
+        'analysis_lineage_id':'personal-muse-lineage', 'independence_class':'META_PERSONAL_MUSE',
+        'provider_product':'personal-muse-free', 'model_or_agent_id':'muse',
+        'evidence_epoch':evidence['evidence_epoch'], 'evidence_hash':evidence['content_hash'],
+        'generated_at_ms':1000, 'expires_at_ms':2000, 'prior_lane_outputs_seen':[],
+        'directional_thesis':'WATCH', 'supporting_evidence':['market:canonical'],
+        'contradicting_evidence':[], 'missing_inputs':[], 'uncertainty':'Bounded', 'abstain':False}
+    service.cognitive_import('test', 'packet', packet)
+    service.cognitive_import('test', 'focus', {'candidate_id':'signal', 'evidence_epoch':evidence['evidence_epoch'], 'reason':'bounded review'})
+    with pytest.raises(FabricError):
+        service.cognitive_import('test', 'admission', {'candidate_id':'signal', 'evidence_epoch':evidence['evidence_epoch']})
+    for operation, body in (('discovery', signal), ('packet', packet),
+                            ('focus', {'candidate_id':'signal','evidence_epoch':evidence['evidence_epoch'],'reason':'bounded'}),
+                            ('admission', {'candidate_id':'signal','evidence_epoch':evidence['evidence_epoch']})):
+        unchanged = snapshot()
+        with pytest.raises(FabricError):
+            service.cognitive_import('test', operation, {**body, 'approved_size':100})
+        assert snapshot() == unchanged
+    appended = list(ledger.iter())[len(before[1]):]
+    assert appended and all(event.kind == EventKind.COGNITIVE_FABRIC for event in appended)
+    assert authority.call_count == 0
+    ledger.close()
+
+
+@pytest.mark.asyncio
+async def test_existing_account_endpoint_exposes_recorded_learning_with_scope_and_source(client, tmp_path):
+    ac, app = client
+    report = {'status': 'ANALYSIS_ONLY', 'selection_authority': False, 'as_decided_preserved': True,
+        'scope': {'account_alias': 'paper_lab', 'environment': 'DEMO'},
+        'views': {'AS_DECIDED': {'USD': {'count': 1, 'net_pnl': '5'}},
+                  'RESTATED_ANALYSIS': {'USD': {'count': 1, 'net_pnl': '-3'}}}}
+    ledger = Ledger(tmp_path/'vati.sqlite')
+    event = make_event(EventKind.ACCOUNT_SNAPSHOT, 'vati-service',
+        {'account_alias': 'paper_lab', 'currency': 'USD', 'mode': 'DEMO_TRADER',
+         'restated_learning': report, 'learning_history_issue': 'native reconciliation pending'},
+        event_time_ms=1000, received_time_ms=1001, correlation_id='paper_lab')
+    ledger.append(event)
+    before = ledger.count(), ledger.head()
+    for route in ('/v1/trading/accounts', '/v1/trading/portfolio'):
+        response = await ac.get(route)
+        assert response.status_code == 200, response.text
+        row = response.json()['accounts'][0]
+        assert row['restated_learning']['views'] == report['views']
+        assert row['restated_learning']['source_event_hash'] == event.hash
+        assert row['restated_learning']['freshness'] == 'RECORDED_ACCOUNT_SNAPSHOT_ONLY'
+        assert row['learning_history_issue'] == 'native reconciliation pending'
+    assert (ledger.count(), ledger.head()) == before
+    ledger.close()
+
+
+@pytest.mark.parametrize('patch', [
+    {'scope': {'account_alias': 'other', 'environment': 'DEMO'}},
+    {'scope': {'account_alias': 'paper_lab', 'environment': 'LIVE'}},
+    {'selection_authority': True},
+])
+def test_account_learning_readback_refuses_other_accounts_cohorts_or_authority(patch, tmp_path):
+    from van_gateway.trading.service import TradingService
+    ledger = Ledger(tmp_path/'scope.sqlite')
+    report = {'status': 'ANALYSIS_ONLY', 'selection_authority': False, 'as_decided_preserved': True,
+        'scope': {'account_alias': 'paper_lab', 'environment': 'DEMO'}, 'views': {}, **patch}
+    ledger.append(make_event(EventKind.ACCOUNT_SNAPSHOT, 'vati-service',
+        {'account_alias': 'paper_lab', 'mode': 'DEMO_TRADER', 'restated_learning': report},
+        event_time_ms=1, received_time_ms=1, correlation_id='paper_lab'))
+    ledger.close()
+    assert TradingService(str(tmp_path/'scope.sqlite')).accounts()['accounts'][0]['restated_learning'] == {
+        'status': 'UNVERIFIED_REPORT', 'selection_authority': False}

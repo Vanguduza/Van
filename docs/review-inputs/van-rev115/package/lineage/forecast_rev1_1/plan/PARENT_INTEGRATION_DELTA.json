@@ -1,0 +1,240 @@
+{
+  "schema_version": "1.0",
+  "status": "SPECIFIED_NOT_APPLIED_TO_PARENT",
+  "parent_identity": [
+    {
+      "name": "VAN_NEXT_DEVELOPMENT_PLAN_REV1_10.md",
+      "sha256": "1b367e7507f2d371230891458ca1efc05c6fbb343b712d97ca170cecebbbc6e2",
+      "bytes": 75332,
+      "source": "User Library, materialized 2026-10-17; not modified"
+    },
+    {
+      "name": "VAN_NEXT_MASTER_BLUEPRINT_REV1_10_20261017.md",
+      "sha256": "dba347b9f02831d1a3a2d9570b4434f6a8b4b98f6f47862c830ff6784cb56f51",
+      "bytes": 285201,
+      "source": "User Library, materialized 2026-10-17; not modified"
+    }
+  ],
+  "parent_json_declared_sha256": "391bde124e1015302ebbe6b7db2211303f8e888683782d2db08203fced7ba6bd",
+  "preserve_original_parent_nodes": 76,
+  "preserved_parent_requirements": [
+    "VAN-NX-036",
+    "VAN-NX-032",
+    "VAN-NX-033"
+  ],
+  "preserved_parent_decisions": [
+    "OD-14"
+  ],
+  "preserve_news_paths": [
+    "D1",
+    "D2",
+    "D3",
+    "D4",
+    "D5",
+    "D6",
+    "D7"
+  ],
+  "new_requirement_ids": [
+    "VAN-ML-REQ-061",
+    "VAN-ML-REQ-062",
+    "VAN-ML-REQ-063",
+    "VAN-ML-REQ-064",
+    "VAN-ML-REQ-065",
+    "VAN-ML-REQ-066",
+    "VAN-ML-REQ-067",
+    "VAN-ML-REQ-068",
+    "VAN-ML-REQ-069",
+    "VAN-ML-REQ-070",
+    "VAN-ML-REQ-071",
+    "VAN-ML-REQ-072",
+    "VAN-ML-REQ-073",
+    "VAN-ML-REQ-074",
+    "VAN-ML-REQ-075",
+    "VAN-ML-REQ-076",
+    "VAN-ML-REQ-077",
+    "VAN-ML-REQ-078",
+    "VAN-ML-REQ-079",
+    "VAN-ML-REQ-080",
+    "VAN-ML-REQ-081",
+    "VAN-ML-REQ-082",
+    "VAN-ML-REQ-083",
+    "VAN-ML-REQ-084",
+    "VAN-ML-REQ-085",
+    "VAN-ML-REQ-086",
+    "VAN-ML-REQ-087",
+    "VAN-ML-REQ-088",
+    "VAN-ML-REQ-089",
+    "VAN-ML-REQ-090"
+  ],
+  "new_packet_ids": [
+    "VAN-ML-PKT-037",
+    "VAN-ML-PKT-038",
+    "VAN-ML-PKT-039",
+    "VAN-ML-PKT-040",
+    "VAN-ML-PKT-041",
+    "VAN-ML-PKT-042",
+    "VAN-ML-PKT-043",
+    "VAN-ML-PKT-044",
+    "VAN-ML-PKT-045",
+    "VAN-ML-PKT-046",
+    "VAN-ML-PKT-047",
+    "VAN-ML-PKT-048"
+  ],
+  "semantic_mapping": [
+    {
+      "child_packet_id": "VAN-ML-PKT-037",
+      "parent_units": [
+        "BE-003",
+        "BE-008",
+        "BE-014",
+        "BE-015",
+        "BE-033"
+      ],
+      "merge_at": "CONTRACT_SUBRECEIPT_BOUNDARY_NOT_WHOLE_UNIT_PREREQUISITE"
+    },
+    {
+      "child_packet_id": "VAN-ML-PKT-038",
+      "parent_units": [
+        "BE-003",
+        "BE-008",
+        "BE-014",
+        "BE-015"
+      ],
+      "merge_at": "CONTRACT_SUBRECEIPT_BOUNDARY_NOT_WHOLE_UNIT_PREREQUISITE"
+    },
+    {
+      "child_packet_id": "VAN-ML-PKT-039",
+      "parent_units": [
+        "BE-008",
+        "BE-014",
+        "BE-015",
+        "BE-016"
+      ],
+      "merge_at": "CONTRACT_SUBRECEIPT_BOUNDARY_NOT_WHOLE_UNIT_PREREQUISITE"
+    },
+    {
+      "child_packet_id": "VAN-ML-PKT-040",
+      "parent_units": [
+        "BE-014",
+        "BE-015",
+        "BE-016",
+        "BE-018"
+      ],
+      "merge_at": "CONTRACT_SUBRECEIPT_BOUNDARY_NOT_WHOLE_UNIT_PREREQUISITE"
+    },
+    {
+      "child_packet_id": "VAN-ML-PKT-044",
+      "parent_units": [
+        "BE-006",
+        "BE-009",
+        "BE-010",
+        "BE-011",
+        "BE-012",
+        "BE-019"
+      ],
+      "merge_at": "CONTRACT_SUBRECEIPT_BOUNDARY_NOT_WHOLE_UNIT_PREREQUISITE"
+    },
+    {
+      "child_packet_id": "VAN-ML-PKT-045",
+      "parent_units": [
+        "BE-009",
+        "BE-012",
+        "BE-019",
+        "BE-021",
+        "BE-022"
+      ],
+      "merge_at": "CONTRACT_SUBRECEIPT_BOUNDARY_NOT_WHOLE_UNIT_PREREQUISITE"
+    },
+    {
+      "child_packet_id": "VAN-ML-PKT-041",
+      "parent_units": [
+        "BE-015",
+        "BE-016",
+        "BE-021",
+        "BE-022"
+      ],
+      "merge_at": "CONTRACT_SUBRECEIPT_BOUNDARY_NOT_WHOLE_UNIT_PREREQUISITE"
+    },
+    {
+      "child_packet_id": "VAN-ML-PKT-042",
+      "parent_units": [
+        "BE-013",
+        "BE-015",
+        "BE-016",
+        "BE-021",
+        "BE-022"
+      ],
+      "merge_at": "CONTRACT_SUBRECEIPT_BOUNDARY_NOT_WHOLE_UNIT_PREREQUISITE"
+    },
+    {
+      "child_packet_id": "VAN-ML-PKT-043",
+      "parent_units": [
+        "BE-009",
+        "BE-011",
+        "BE-013",
+        "BE-015",
+        "BE-016",
+        "BE-017"
+      ],
+      "merge_at": "CONTRACT_SUBRECEIPT_BOUNDARY_NOT_WHOLE_UNIT_PREREQUISITE"
+    },
+    {
+      "child_packet_id": "VAN-ML-PKT-046",
+      "parent_units": [
+        "BE-009",
+        "BE-010",
+        "BE-012",
+        "BE-019",
+        "BE-021",
+        "BE-022"
+      ],
+      "merge_at": "CONTRACT_SUBRECEIPT_BOUNDARY_NOT_WHOLE_UNIT_PREREQUISITE"
+    },
+    {
+      "child_packet_id": "VAN-ML-PKT-047",
+      "parent_units": [
+        "BE-016",
+        "BE-021",
+        "BE-022",
+        "BQ-001",
+        "BQ-002",
+        "BQ-003"
+      ],
+      "merge_at": "CONTRACT_SUBRECEIPT_BOUNDARY_NOT_WHOLE_UNIT_PREREQUISITE"
+    },
+    {
+      "child_packet_id": "VAN-ML-PKT-048",
+      "parent_units": [
+        "BE-003",
+        "BE-015",
+        "BE-016",
+        "BE-017",
+        "BE-030",
+        "BE-031",
+        "BE-032",
+        "BE-033",
+        "BE-034",
+        "BQ-001",
+        "BQ-005",
+        "BQ-006"
+      ],
+      "merge_at": "CONTRACT_SUBRECEIPT_BOUNDARY_NOT_WHOLE_UNIT_PREREQUISITE"
+    }
+  ],
+  "parent_files_to_amend": [
+    "actual parent DEVELOPMENT_PLAN.json and rendered plan",
+    "parent master §8.2 §8.4 §8.5 and backend unit contracts",
+    "requirements/features/actions and backend consumer catalogue",
+    "BQ evidence and BG-001 exact scope bindings",
+    "FE-013 and other affected future-screen consumption contracts"
+  ],
+  "admission_conditions": [
+    "Current owner direction plus independently reviewed updated F0-F15 scope",
+    "Combined graph cycle/phase/ownership validation on actual parent files",
+    "No signed original inputs overwritten or historical evidence reused against changed semantics"
+  ],
+  "no_procurement_requirement": true,
+  "purchase_authorization": false,
+  "direct_event_contract_live_activation": false,
+  "parent_signed_files_modified": false
+}

@@ -1,0 +1,28 @@
+{
+  "schema_version": 1,
+  "authorization_id": "auth-20261021-owner-consolidation-test-discovery",
+  "project": "van",
+  "authority": "OWNER_DERIVED",
+  "owner_instruction_sha256": "d508284fb40d041695230949a04dcc0ba03f30c942519cbf1cc4d24ef9c57d84",
+  "owner_instruction_excerpt": "Perform repository consolidation with all branches evaluated so opus 5.5 will start on a a clean unpolluted repository",
+  "derivation": "Consolidation adds archived blueprint source/test snapshots; root pytest must select production suites rather than recursively collect evidence copies.",
+  "source": {
+    "kind": "owner_session_instruction",
+    "channel": "codex",
+    "owner_attested": true,
+    "device_signature_claimed": false,
+    "cryptographic_signature_claimed": false,
+    "signed_ingress_claimed": false
+  },
+  "issued_at_utc": "2026-10-21T10:55:54.653305+00:00",
+  "branch_scope": "consolidation/opus-clean-rev118-20261021",
+  "authorized_paths": [
+    "pytest.ini"
+  ],
+  "reusable": true,
+  "revoked": false,
+  "limitations": [
+    "Only enumerate all existing canonical Python suite roots for default discovery. Do not disable assertions, deselect failing production tests, or reduce an acceptance requirement.",
+    "No independent review or signed runtime authority claimed."
+  ]
+}

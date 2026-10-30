@@ -1,0 +1,18 @@
+{
+  "suite": "trading",
+  "command": [
+    "/workspace/.onboarding/van-venv/bin/python",
+    "-m",
+    "pytest",
+    "-q",
+    "trading/tests"
+  ],
+  "cwd": "/workspace/Van",
+  "started_at_utc": "2026-10-07T11:05:58.140145+00:00",
+  "finished_at_utc": "2026-10-07T11:06:43.125725+00:00",
+  "exit_code": 0,
+  "input_files": 310,
+  "source_unchanged": true,
+  "changed_inputs": [],
+  "live_device_executed": false
+}

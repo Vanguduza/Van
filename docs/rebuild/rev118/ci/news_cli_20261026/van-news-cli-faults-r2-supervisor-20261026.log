@@ -1,0 +1,5 @@
+Traceback (most recent call last):
+  File "/workspace/van-news-cli-faults-r2-20261026.py", line 24, in <module>
+    assert result['exit']==1 and result['assertion_failures']>0 and result['errors']==result['skipped']==result['audit_violations']==0,result
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: {'exit': 1, 'cases': 15, 'assertion_failures': 0, 'failures': 8, 'errors': 0, 'skipped': 0, 'audit_violations': 0, 'case': 'acknowledge-source-error-as-success', 'path': 'trading/vati/__main__.py', 'mutated_sha256': '74f9e9ea9d62416a6a1f89e057d704f089fcd2d41afa17e3459ab908279dab98'}

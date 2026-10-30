@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="3" skipped="0" tests="4" time="0.212" timestamp="2026-10-25T02:24:04.544755+00:00" hostname="56ae90b2c83c"><testcase classname="tests.test_market_monitor_measurements" name="test_full_scope_and_actual_availability_refusals[change0-SOURCE_SCOPE_MISMATCH]" time="0.002"><failure message="AssertionError: assert (not False and 'BASELINE' == 'UNAVAILABLE'&#10;  &#10;  - UNAVAILABLE&#10;  + BASELINE)">backend/tests/test_market_monitor_measurements.py:55: in test_full_scope_and_actual_availability_refusals
+    assert not fire and actual.state == 'UNAVAILABLE' and actual.reason == reason
+E   AssertionError: assert (not False and 'BASELINE' == 'UNAVAILABLE'
+E     
+E     - UNAVAILABLE
+E     + BASELINE)</failure></testcase><testcase classname="tests.test_market_monitor_measurements" name="test_full_scope_and_actual_availability_refusals[change1-SOURCE_SCOPE_MISMATCH]" time="0.001"><failure message="AssertionError: assert (not False and 'BASELINE' == 'UNAVAILABLE'&#10;  &#10;  - UNAVAILABLE&#10;  + BASELINE)">backend/tests/test_market_monitor_measurements.py:55: in test_full_scope_and_actual_availability_refusals
+    assert not fire and actual.state == 'UNAVAILABLE' and actual.reason == reason
+E   AssertionError: assert (not False and 'BASELINE' == 'UNAVAILABLE'
+E     
+E     - UNAVAILABLE
+E     + BASELINE)</failure></testcase><testcase classname="tests.test_market_monitor_measurements" name="test_full_scope_and_actual_availability_refusals[change2-SOURCE_SCOPE_MISMATCH]" time="0.001"><failure message="AssertionError: assert (not False and 'BASELINE' == 'UNAVAILABLE'&#10;  &#10;  - UNAVAILABLE&#10;  + BASELINE)">backend/tests/test_market_monitor_measurements.py:55: in test_full_scope_and_actual_availability_refusals
+    assert not fire and actual.state == 'UNAVAILABLE' and actual.reason == reason
+E   AssertionError: assert (not False and 'BASELINE' == 'UNAVAILABLE'
+E     
+E     - UNAVAILABLE
+E     + BASELINE)</failure></testcase><testcase classname="tests.test_market_monitor_measurements" name="test_full_scope_and_actual_availability_refusals[change3-SOURCE_FROM_FUTURE]" time="0.001" /></testsuite></testsuites>

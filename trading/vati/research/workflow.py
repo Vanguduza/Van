@@ -33,7 +33,7 @@ from vati.validation.builder import (
 class TradingResearchWorkflow:
     """Reachable slow-loop orchestrator with no live trading authority."""
 
-    def __init__(self, *, ledger=None, clock=None) -> None:
+    def __init__(self, *, ledger=None, clock=None, native_bar_partitions=None) -> None:
         self.ledger = ledger
         self.clock = clock or (lambda: int(time.time() * 1000))
         self.overlap = StrategyOverlapDetector()
@@ -42,6 +42,7 @@ class TradingResearchWorkflow:
         self.exit_research = ExitPolicyResearchEngine()
         self.evidence = TradingEvidenceCollector()
         self.disagreement = MarketDataDisagreementDetector()
+        self.native_bar_partitions = native_bar_partitions
 
     def _log(self, kind: EventKind, payload: dict, *, correlation_id: str = "") -> None:
         if self.ledger is None:
@@ -156,6 +157,50 @@ class TradingResearchWorkflow:
         TradingMandate mutation, capsule promotion, or protection mutation.
         """
         op = str(spec.get("operation", "")).strip().lower()
+
+        if op in {'dataset_candidate_publish','dataset_candidate_lookup','dataset_candidate_inspect'}:
+            from vati.research.dataset_archive import DatasetCandidateArchive
+            from vati.research.dataset_manifest import DatasetManifestCandidate, DatasetContractError, _json
+            from vati.research.dataset_sources import NativeDatasetSourceInspector
+            required={'operation','request_id'}
+            if op=='dataset_candidate_publish':required|={'manifest','expected_scope'}
+            if set(spec)!=required:raise DatasetContractError('DATASET_EXACT_OPERATION_FIELDS_REQUIRED')
+            inspector=NativeDatasetSourceInspector(self.native_bar_partitions) if self.native_bar_partitions is not None else None
+            archive=DatasetCandidateArchive(self.ledger,inspector,clock=self.clock)
+            if op=='dataset_candidate_publish':
+                result=archive.publish(spec['request_id'],DatasetManifestCandidate(_json(spec['manifest'])),
+                    expected_scope=spec['expected_scope'])
+            elif op=='dataset_candidate_lookup':result=archive.lookup(spec['request_id'])
+            else:result=archive.inspect(spec['request_id'])
+            return {'operation':op,'candidate_publication':result}
+
+        if op == "dataset_manifest_check":
+            from vati.research.dataset_manifest import DatasetManifestCandidate, DatasetContractError, _json
+            if set(spec) != {'operation', 'manifest'}:
+                raise DatasetContractError('DATASET_EXACT_OPERATION_FIELDS_REQUIRED')
+            # A local check deliberately returns unresolved, never READY. The
+            # actual owner resolvers and current policy are separate duties.
+            return {'operation': op, 'candidate': DatasetManifestCandidate(_json(spec['manifest'])).unresolved()}
+
+        if op == 'dataset_source_inspect':
+            from vati.research.dataset_manifest import DatasetManifestCandidate, DatasetContractError, _json
+            from vati.research.dataset_sources import NativeDatasetSourceInspector
+            if set(spec) != {'operation', 'manifest', 'expected_scope'}:
+                raise DatasetContractError('DATASET_EXACT_OPERATION_FIELDS_REQUIRED')
+            if self.native_bar_partitions is None:
+                raise DatasetContractError('DATASET_SOURCE_OWNER_UNAVAILABLE')
+            result = NativeDatasetSourceInspector(self.native_bar_partitions).inspect(
+                DatasetManifestCandidate(_json(spec['manifest'])), expected_scope=spec['expected_scope'])
+            return {'operation': op, 'candidate': result}
+
+        if op == "native_bar_source_partition":
+            from vati_forecast_worker.source_partitions import SourcePartitionError
+            if set(spec) != {"operation", "window", "expected_scope"}:
+                raise SourcePartitionError("PARTITION_EXACT_OPERATION_FIELDS_REQUIRED")
+            if self.native_bar_partitions is None:
+                raise SourcePartitionError("PARTITION_SOURCE_OWNER_UNAVAILABLE")
+            return {"operation": op, "partition": self.native_bar_partitions.publish(
+                spec["window"], expected_scope=spec["expected_scope"])}
 
         if op == "strategy_certificate":
             raw = dict(spec["validation"])

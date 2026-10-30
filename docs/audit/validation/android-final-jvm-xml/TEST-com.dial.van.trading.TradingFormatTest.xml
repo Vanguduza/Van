@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.dial.van.trading.TradingFormatTest" tests="11" skipped="0" failures="0" errors="0" timestamp="2026-10-07T22:11:48" hostname="052fefa249ff" time="0.009">
+  <properties/>
+  <testcase name="the float artefact never reaches the owner()" classname="com.dial.van.trading.TradingFormatTest" time="0.005"/>
+  <testcase name="a separator never lands inside the decimal()" classname="com.dial.van.trading.TradingFormatTest" time="0.001"/>
+  <testcase name="an unknown key reads as awkward English rather than as a field name()" classname="com.dial.van.trading.TradingFormatTest" time="0.0"/>
+  <testcase name="no ledger key reaches the owner as a ledger key()" classname="com.dial.van.trading.TradingFormatTest" time="0.001"/>
+  <testcase name="a signed number says which way it went()" classname="com.dial.van.trading.TradingFormatTest" time="0.0"/>
+  <testcase name="a missing number is a dash, not a zero()" classname="com.dial.van.trading.TradingFormatTest" time="0.0"/>
+  <testcase name="a small negative keeps its sign()" classname="com.dial.van.trading.TradingFormatTest" time="0.0"/>
+  <testcase name="money is grouped so the eye can count the digits()" classname="com.dial.van.trading.TradingFormatTest" time="0.001"/>
+  <testcase name="empty and unavailable are never the same sentence()" classname="com.dial.van.trading.TradingFormatTest" time="0.0"/>
+  <testcase name="prices keep their padding because a column has to scan()" classname="com.dial.van.trading.TradingFormatTest" time="0.0"/>
+  <testcase name="no empty state tells the owner to open a terminal()" classname="com.dial.van.trading.TradingFormatTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

@@ -1,0 +1,99 @@
+{
+  "schema": "van.rev118.native-collateral-margin-source/1",
+  "source_parent": "d156d943df32329c14c1abf147edebe7d6425820",
+  "observed_at_utc": "2026-10-28T05:54:31.790519+00:00",
+  "source_files_sha256": {
+    "trading/vati/execution/ctrader/adapter.py": "b6c7a92b42ba19addb8aa47c07a96a3b38f17224df38bc08a66d9c833f0ea036",
+    "trading/tests/test_ctrader_expected_margin.py": "08e0e277e6e2b9ccd9c064ee7839405bf6e5d4b5660785506c7af19a63f3c86d",
+    "trading/tests/test_native_margin_book.py": "d675414762e30f5271fde5fea843d6654b9cc52df3c4a927d16aee552bb8be56",
+    "trading/tests/test_native_margin_book_postgres.py": "acabe095518a2ca8b41c66dc894aeb15acc0c4755e6340c5a1bc57fa69a76e87",
+    "trading/tests/test_original_native_collateral.py": "34cf7aa8d69b72f6eff97c39dbf837a3f95c34abbcd868dfd78f53edbc78d8ec",
+    "trading/tests/test_original_native_collateral_postgres.py": "70cd0031ef6f8111db8d0da7dadee7c4332717ac361da9afae0e88eec610950d",
+    "trading/tests/test_physical_order_exposure.py": "d2ab325d9b36d4f8820e67baef06b5cd6455b71eef3e0ba2e6e95f5812dd1082",
+    "trading/tests/test_physical_order_exposure_postgres.py": "fd73cac76e09191a8308067131767dd35f57d893c7d6e2076876e855f75c0d17",
+    "trading/vati/execution/ctrader/margin_quote.py": "557986d5c8ca70cbcfbc7f059356e4a6d7a376e702d9298d29a24f30cfea2742",
+    "trading/vati/risk/native_collateral.py": "b1d84174e78fd794ceffe9295f0e873ad29b629004559857d2a0977213780d10",
+    "trading/vati/risk/native_margin_book.py": "5498fb248d3c1692388081cd4587d4545de59ffce90aa578bc36e61284b46ea7",
+    "trading/vati/risk/physical_orders.py": "6008a8a8e671725cf4f7fab3d8f6d3d4db9f374ac3e503857d4f30a00d007cbd"
+  },
+  "implementation": "Original native collateral now retains exact cash-backed bounds without borrowing credit-inclusive reported free margin. Original commands and receipts across aliases retain pending, partial, open, uncertain and proven-no-effect quantities; missing margin is never zero. The actual cTrader adapter reads pinned expected-margin protocol and a bounded SQL book captures original input/context/contract, exact native quantities and money scales with expiry inside the writer, replay, restart and independent readback. Current-price and GSL limitations remain explicit; no reservation/execution grant is issued. Final333 source/SQLite/PostgreSQL/protocol/recovery cases pass0skip/audit0;333unique callIDs once and1207pinnedPythonhashes match; ownedPG independently absent. Original failures retained, including native codec enum handling, missing-evidence PostgreSQL fixture expectation, nested-vs-outer ACK fixture and an incorrect module import. Published d156 artifact independently verifies4615tradingPASS/1declaredDDSskip,26PGPASS,117voicePASS; does not qualify these later changes. Shared reservations, active mandate/policy reconciliation, native finality, payment effects and all other canonical requirements remain open. No whole-unit/native/production/S24 acceptance.",
+  "source_result": {
+    "actual_outer_exit": 0,
+    "actual_inner_exit": 0,
+    "passed": 333,
+    "skipped": 0,
+    "audit_violations": 0,
+    "unique_call_identities_once": 333,
+    "pinned_python_inputs_matched": 1207,
+    "owned_postgres_independently_absent": true,
+    "raw": "ci/native_collateral_margin_20261028/sql_final"
+  },
+  "failure_history": {
+    "first_combined_SQL": {
+      "passed": 331,
+      "failed": 2
+    },
+    "initial_book_ACK_fixture": {
+      "passed": 42,
+      "failed": 1
+    },
+    "wrong_module_import": {
+      "passed": 37,
+      "failed": 20
+    },
+    "isolated_invalid_original_commands": {
+      "failed_before_fix": 4
+    },
+    "retained_as_failed": true
+  },
+  "published_parent_selected_artifact": {
+    "artifact_id": 12794822760,
+    "source_head": "d156d943df32329c14c1abf147edebe7d6425820",
+    "main_run": 40638560229,
+    "bytes": 179927,
+    "sha256": "734d84dfbf6a6866e9d48f03f85e7b9ac6ca052bc87f5226a82e4dc5133acc08",
+    "GitHub_digest_and_size_match": true,
+    "zip_CRC_paths_and_extracted_readback_verified": true,
+    "independent_junit_results": [
+      {
+        "file": "postgres-ledger-report.xml",
+        "cases": 26,
+        "passed": 26,
+        "failed_or_error": 0,
+        "skips": []
+      },
+      {
+        "file": "trading-source-report.xml",
+        "cases": 4616,
+        "passed": 4615,
+        "failed_or_error": 0,
+        "skips": [
+          {
+            "name": "test_dial_resolver_selects_trading_knowledge_from_van_registry",
+            "reason": {
+              "type": "pytest.skip",
+              "message": "dial-new checkout not available (set DIAL_REPO)"
+            }
+          }
+        ]
+      },
+      {
+        "file": "voice-source-report.xml",
+        "cases": 117,
+        "passed": 117,
+        "failed_or_error": 0,
+        "skips": []
+      }
+    ]
+  },
+  "limitations": [
+    "Original source data/readback only; not reservation admission or a new financial authority",
+    "Native expected-margin protocol is current-price estimate without order price and excludes ACCORDING_TO_GSL",
+    "MT5 prospective margin and full quote freshness qualification remain open",
+    "Pending reader is cold/bounded-workflow data; not installed as a full-history scan on each trading tick",
+    "Python storage audit is not an OS sandbox",
+    "Frozen programme and all formal/native/production acceptances unchanged"
+  ],
+  "formal_acceptances_issued": 0,
+  "next": "Complete all-origin shared reservation enforcement, including original policy/active mandate reconciliation and native settlement/release; continue canonical backend programme."
+}

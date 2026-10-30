@@ -1,0 +1,225 @@
+{
+  "schema": "van.rebuild.single-session-lease-source/1",
+  "source_parent": "396e036794c8ce96e5487099fa662da9d24a7db4",
+  "source_sha256": {
+    "trading/vati/app/service.py": "21be16fa1f82227684028db91f3dad2caf4eef3d585f5d7ea3817425578f907f",
+    "trading/vati/app/cycle.py": "0e4b2fc4f2721adf858195913eb177fc17043226c4de60164a4dce1c22be5efc",
+    "trading/vati/app/account_lease.py": "1f2df28d9cde198c51bc3b13febc484291bd7637cffb390f2b5c2021af95e2fc",
+    "trading/vati/app/sqlite_lease.py": "b8c462912661d0322bd7bba9932cafe124f3aae4e7916e703f5e6b997ab337ae",
+    "trading/tests/test_single_session_lease.py": "2c4d0c0d0a99ff687a585430dc9d18538385fe78f723e390dd8ca706c4d65a64",
+    "trading/tests/test_account_risk_recovery_scope.py": "2da44566f763f34bf86dfb6125e2b3135e60e97f5a51506696fd8dd5f87b8f87"
+  },
+  "valid_constructor_counterexamples": {
+    "tests": 2,
+    "failures": 2,
+    "errors": 0,
+    "skipped": 0,
+    "sha256": "23ca5c3ea0032a1274b25f98394d3d83d590b3d0ea0b4d6cbec690c2c07807d2"
+  },
+  "valid_late_control_counterexamples": {
+    "tests": 3,
+    "failures": 2,
+    "errors": 0,
+    "skipped": 0,
+    "sha256": "0a866ba9d679ac085bf69578af549f21f1a02d95a514de07dd95e7288225d817"
+  },
+  "full_trading_real_private_postgresql": {
+    "tests": 1968,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "sha256": "2d0e793a16a0ee554cf104b551831fd5270e6fbf3a12c72d146e08d567f50deb"
+  },
+  "focused": {
+    "tests": 64,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 3,
+    "sha256": "ffef8bf483695a318cb19ac32d75e3ea96c8ee4feb0440149c7b66fe9510990c"
+  },
+  "rebuild": {
+    "tests": 78,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "sha256": "39cb942c28440c85c3f5f6f29ce558a89a501e95638d6290fdb1cdde20b6c1a8"
+  },
+  "late_control_current_tests": {
+    "tests": 12,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 2,
+    "sha256": "4e4558db70d3e98a556cfd3869df29b7ad453544ff1eb6b25d3b2692bfc53d7b"
+  },
+  "source_faults": {
+    "records": [
+      {
+        "phase": "baseline",
+        "why": null,
+        "returncode": 0,
+        "log_sha256": "28cfab9402adeea763d7abe6f9e348a695865c73c424438dca01961522bbb653"
+      },
+      {
+        "phase": "mutation",
+        "why": "admit native venue entry with only local authority",
+        "returncode": 1,
+        "log_sha256": "caebbf2d452b65cd417e84dc510ecf17aecaf811c559274a71ba3ca496012d2f"
+      },
+      {
+        "phase": "mutation",
+        "why": "omit held native epoch from actual cycle submission",
+        "returncode": 1,
+        "log_sha256": "6f96a6c701117c07ed0721464d9b7d29bf9505f80f956c88b72ffaaf9e29602f"
+      },
+      {
+        "phase": "mutation",
+        "why": "bypass actual final guard after a valid early lease check",
+        "returncode": 1,
+        "log_sha256": "e9088ff1bc84943507943134cd8750d3eba22ae9982540b838882c6ca9258160"
+      },
+      {
+        "phase": "mutation",
+        "why": "report new-entry permission after native ownership changed",
+        "returncode": 1,
+        "log_sha256": "8fb363c07baaf82e1555d670f9c4f788e9bd0d0abaae875b4dbccb95aaabd8ac"
+      },
+      {
+        "phase": "mutation",
+        "why": "reclassify a delegated provider uncertainty as lease refusal",
+        "returncode": 1,
+        "log_sha256": "073274283ba7a2b9551c65afdad8f6bb9e0b7d36ce90fb7c467295773c5bac7a"
+      },
+      {
+        "phase": "mutation",
+        "why": "misreport simultaneous first PostgreSQL lease arbitration as store outage",
+        "returncode": 1,
+        "log_sha256": "f74bb78489ca5d6ed9502335e066513a6e4198e2151209587d7b9d8f203e80ee"
+      },
+      {
+        "phase": "mutation",
+        "why": "ignore owner halt/process stop arriving while acquiring native submission authority",
+        "returncode": 1,
+        "log_sha256": "7576d09215afcec78f3806259e9dec7c2761b0a333edb7710afb726579c96b75"
+      }
+    ],
+    "source_before_sha256": {
+      "trading/vati/app/service.py": "21be16fa1f82227684028db91f3dad2caf4eef3d585f5d7ea3817425578f907f",
+      "trading/vati/app/cycle.py": "0e4b2fc4f2721adf858195913eb177fc17043226c4de60164a4dce1c22be5efc",
+      "trading/vati/execution/router.py": "d89058bdfb078cae300d59a06911ebeded42dfdf0d9415ad949b165709e2bece",
+      "trading/vati/app/sqlite_lease.py": "b8c462912661d0322bd7bba9932cafe124f3aae4e7916e703f5e6b997ab337ae",
+      "trading/vati/app/account_lease.py": "1f2df28d9cde198c51bc3b13febc484291bd7637cffb390f2b5c2021af95e2fc"
+    },
+    "source_after_sha256": {
+      "trading/vati/app/service.py": "21be16fa1f82227684028db91f3dad2caf4eef3d585f5d7ea3817425578f907f",
+      "trading/vati/app/cycle.py": "0e4b2fc4f2721adf858195913eb177fc17043226c4de60164a4dce1c22be5efc",
+      "trading/vati/execution/router.py": "d89058bdfb078cae300d59a06911ebeded42dfdf0d9415ad949b165709e2bece",
+      "trading/vati/app/sqlite_lease.py": "b8c462912661d0322bd7bba9932cafe124f3aae4e7916e703f5e6b997ab337ae",
+      "trading/vati/app/account_lease.py": "1f2df28d9cde198c51bc3b13febc484291bd7637cffb390f2b5c2021af95e2fc"
+    },
+    "source_restored": true,
+    "journal_present": false
+  },
+  "initial_mutation_attempt": {
+    "records": [
+      {
+        "phase": "baseline",
+        "why": null,
+        "returncode": 0,
+        "log_sha256": "913a2ee4bacc120834417c930c2fb4bcb31850d1e4d4517cc8245747f2b9e7e0"
+      },
+      {
+        "phase": "mutation",
+        "why": "admit native venue entry with only local authority",
+        "returncode": 1,
+        "log_sha256": "3ea0b3a283e517dbda9c10ec406242bd0a70fb492a7daab0107b13765cfa68d7"
+      },
+      {
+        "phase": "mutation",
+        "why": "omit held native epoch from actual cycle submission",
+        "returncode": 1,
+        "log_sha256": "619387e12ff0ac05b9430d9ae6fc6a320daa6207649413bc92875d803c757240"
+      },
+      {
+        "phase": "mutation",
+        "why": "bypass actual final guard after a valid early lease check",
+        "returncode": 1,
+        "log_sha256": "42260edd917bb199457193e8240dd67a6a88c5392123519b8ff54b1345a893b5"
+      },
+      {
+        "phase": "mutation",
+        "why": "report new-entry permission after native ownership changed",
+        "returncode": 1,
+        "log_sha256": "f0be40986fd2dbefe8e9cb1e861cbabdd2edfb40a76f7ad55f2c7c3b7621a5de"
+      },
+      {
+        "phase": "mutation",
+        "why": "reclassify a delegated provider uncertainty as lease refusal",
+        "returncode": 0,
+        "log_sha256": "a037027db6b9553c04fbae68509b521317c35bc37c177aa3042a9d3c07d712ac"
+      },
+      {
+        "phase": "mutation",
+        "why": "misreport simultaneous first PostgreSQL lease arbitration as store outage",
+        "returncode": 1,
+        "log_sha256": "fd5a13ec57535b81a5807c49738712f0ff7fc659a3d3d744382454a4d74eda60"
+      }
+    ],
+    "source_before_sha256": {
+      "trading/vati/app/service.py": "2bd5c721af26e590ff37029232c814665e0e1ce1d32c18cb65ed694c95560263",
+      "trading/vati/app/cycle.py": "636b4050f33a597d4f4fd51ad6799a1e13f2d612b6b56d78e1e3b4a8bab513b0",
+      "trading/vati/execution/router.py": "d89058bdfb078cae300d59a06911ebeded42dfdf0d9415ad949b165709e2bece",
+      "trading/vati/app/sqlite_lease.py": "b8c462912661d0322bd7bba9932cafe124f3aae4e7916e703f5e6b997ab337ae",
+      "trading/vati/app/account_lease.py": "1f2df28d9cde198c51bc3b13febc484291bd7637cffb390f2b5c2021af95e2fc"
+    },
+    "source_after_sha256": {
+      "trading/vati/app/service.py": "2bd5c721af26e590ff37029232c814665e0e1ce1d32c18cb65ed694c95560263",
+      "trading/vati/app/cycle.py": "636b4050f33a597d4f4fd51ad6799a1e13f2d612b6b56d78e1e3b4a8bab513b0",
+      "trading/vati/execution/router.py": "d89058bdfb078cae300d59a06911ebeded42dfdf0d9415ad949b165709e2bece",
+      "trading/vati/app/sqlite_lease.py": "b8c462912661d0322bd7bba9932cafe124f3aae4e7916e703f5e6b997ab337ae",
+      "trading/vati/app/account_lease.py": "1f2df28d9cde198c51bc3b13febc484291bd7637cffb390f2b5c2021af95e2fc"
+    },
+    "source_restored": true,
+    "journal_present": false
+  },
+  "initial_mutation_note": "Inner store context receives no provider exception through public guard by design; neutral inner-context edit survived. Retarget actual public guard body rather than count neutral change as detected.",
+  "initial_full_trading": {
+    "tests": 1966,
+    "failures": 1,
+    "errors": 0,
+    "skipped": 0,
+    "sha256": "a94f93873d2fce1014adb717fa148e6210cbd130a2a55a94bd091d41ca85017f"
+  },
+  "initial_full_failure": "One older test manually attached a runner without native build/authority. Fixture upgraded to real persistent registry+ServiceConfig+build; original scope/refusal assertions retained.",
+  "intermediate_full_trading": {
+    "tests": 1966,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "sha256": "7c41f55486ec30f467b8dec4e896167fc83d2763ec5b7a07354f86bb7bfc1b9f"
+  },
+  "fixture_errors_not_counted_as_counterexamples": [
+    "Initial Deriv fixture lacked CredentialRef; corrected before two valid constructor failures",
+    "Initial late-control adapter spy omitted now_ms keyword; corrected before two valid REDUCED-vs-REFUSED control failures"
+  ],
+  "private_pg_cleanup": {
+    "stopped": true,
+    "removed": true
+  },
+  "private_fault_fixture_cleanup": {
+    "stopped": true,
+    "removed": true
+  },
+  "owner_registry_refresh": "Unchanged; read-only --check zero changes. All original feature/screen/function identities retained.",
+  "existing_framework_values": "Original30s lease TTL and2s entry-validity floor retained; no financial policy bounds selected.",
+  "remaining": [
+    "physical broker account identity across aliases/hosts",
+    "native identity migration and exposure/orders/unknown-money/lease/retention-safe retirement",
+    "complete single-symbol position-state restoration",
+    "native provider effect/adjudication and policy/epoch admission",
+    "host latency/contention and current deployment/provider/independent/S24 qualifications"
+  ],
+  "unit_acceptance": "NOT_ISSUED",
+  "native_host_effects_executed": 0,
+  "physical_s24_tests": 0,
+  "new_ui_implemented": false
+}

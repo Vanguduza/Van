@@ -1,0 +1,615 @@
+{
+  "schema": "van.rebuild.execution-ledger/1",
+  "purpose": "Compact continuation index for the Rev1.18 programme. Subordinate to the package plan; never a second roadmap.",
+  "canonical_inputs": {
+    "package": "docs/review-inputs/van-rev115/package",
+    "package_tree": "ac0226a22a95f51642cfeb37b3709b40f7cacf10",
+    "archive_sha256": "6c7c7c1cb4fbd4748c0d63ceb2add9bd460778b66fb3b2302e16de09ac3a57a8",
+    "blueprint_delivery_commit": "3c3379bd791f7bda7ab66c21bba550d6077ba853",
+    "plan_revision": "1.18",
+    "plan": "plan/DEVELOPMENT_PLAN.json",
+    "effective_tests": "verification/EFFECTIVE_TEST_CONTRACTS_REV118.json",
+    "instructions": [
+      "CLAUDE.md",
+      "CONSOLIDATION_STATE.json",
+      "docs/consolidation/START_HERE.md",
+      "docs/consolidation/OPUS_BUILD_PROMPT.md"
+    ]
+  },
+  "source_baseline": {
+    "branch": "consolidation/opus-clean-rev118-20261021",
+    "commit": "b02075f327ea8180ab6d269eba358cf8c5479878",
+    "working_branch": "ccr-9e07e1af-8mgz1p"
+  },
+  "scope_counts": {
+    "requirements": 324,
+    "acceptance_identities": 1610,
+    "units": 131,
+    "backend_units": 82,
+    "backend_verification_units": 12,
+    "frontend_units": 23,
+    "contexts": 234,
+    "owner_actions": 349,
+    "features": 93,
+    "source_atoms": 171,
+    "truth_atoms": 22,
+    "domain_scenarios": 72
+  },
+  "status_vocabulary": [
+    "NOT_STARTED",
+    "IN_PROGRESS",
+    "SOURCE_IMPLEMENTED",
+    "SOURCE_TESTED",
+    "INTEGRATED",
+    "DEPLOYED",
+    "LIVE_VERIFIED",
+    "QUALIFIED",
+    "OWNER_ACCEPTED",
+    "BLOCKED"
+  ],
+  "units": {
+    "PRE-001": {
+      "packet": "VAN-PKT-001",
+      "binding": {
+        "plan_revision": "1.18",
+        "unit_id": "PRE-001",
+        "scope_digest": "package tree ac0226a2",
+        "source_commit": "b02075f327ea8180ab6d269eba358cf8c5479878"
+      },
+      "status": "EVIDENCE_COMPLETE_EXCEPT_AP001_PENDING_INDEPENDENT_REVIEW",
+      "evidence": [
+        "docs/rebuild/rev118/pre001/STATUS.json",
+        "docs/rebuild/rev118/pre001/DISPOSITIONS.json",
+        "docs/rebuild/rev118/pre001/TEST_EVIDENCE.json"
+      ],
+      "open": {
+        "refs": 0,
+        "overlap": 0,
+        "source_files_unclassified": "0/2131",
+        "trace_findings": 5
+      },
+      "acceptance": {
+        "T-NX-071": "oracle green except AP-001 trace findings; independent verification pending",
+        "T-BF-015": "selftest 15/15; independent verification pending",
+        "T-VAN-CX-002-POS/NEG/REC": "dispositions + induced rejection evidence; independent review pending",
+        "T-HVA-002-POS/NEG/REC": "34 overlap rows resolved with executed tests; independent review pending"
+      },
+      "exit_requires": "all rows dispositioned with evidence, then INDEPENDENT review of the no-loss mapping (not self-issued)"
+    },
+    "PRE-002": {
+      "status": "AUTHOR_WORK_COMPLETE_PENDING_INDEPENDENT_CHALLENGE",
+      "depends": [
+        "PRE-001"
+      ],
+      "evidence": [
+        "docs/rebuild/rev118/pre002/PRE002_STATUS.md",
+        "docs/rebuild/rev118/pre002/OWNER_DECISION_REGISTER.json",
+        "docs/rebuild/rev118/pre002/AP-001/"
+      ]
+    },
+    "PRE-003": {
+      "status": "BLOCKED",
+      "depends": [
+        "PRE-002"
+      ],
+      "blocker": "BLK-001",
+      "submission": "docs/rebuild/rev118/pre003/REVIEW_SUBMISSION.md"
+    },
+    "ALL_BE_BQ_UX_FE_QA_REL": {
+      "status": "IN_PROGRESS",
+      "reason": "Owner directs autonomous candidate source construction; formal unit acceptance remains pending canonical dependencies. See CANDIDATE_SOURCE_PROGRESS.json for all 131 original units; no complete unit claimed."
+    },
+    "BE-003": {
+      "status": "IN_PROGRESS",
+      "candidate_source_only": true,
+      "acceptance": "NOT_ISSUED",
+      "evidence": [
+        "backend/tests/test_gateway_startup_storage.py",
+        "docs/rebuild/rev118/CANDIDATE_SOURCE_PROGRESS.json",
+        "docs/rebuild/rev118/backend/BE-003_009_010_ORIGINAL_ENTRY_RECOVERY.md",
+        "docs/rebuild/rev118/receipts/ORIGINAL_ENTRY_RECOVERY_SOURCE_20261022.json",
+        "backend/BE-003_006_COMMITTED_FUNDING_READS.md",
+        "receipts/COMMITTED_FUNDING_READS_SOURCE_20261026.json",
+        "backend/BE-003_009_COORDINATOR_INSTANCE_ARBITRATION.md",
+        "receipts/COORDINATOR_INSTANCE_SOURCE_20261026.json",
+        "receipts/MT5_ORIGINAL_SYMBOL_SOURCE_20261028.json",
+        "receipts/MT5_ORIGINAL_QUOTE_SOURCE_20261028.json",
+        "receipts/NATIVE_INSTRUMENT_CATALOG_SOURCE_20261028.json",
+        "receipts/MT5_FINAL_CASH_MARGIN_SOURCE_20261028.json",
+        "receipts/MT5_PENDING_RECEIPTS_SOURCE_20261028.json",
+        "receipts/MT5_PROJECTED_MARGIN_FLOOR_SOURCE_20261028.json",
+        "receipts/ENTRY_MARGIN_BINDING_SOURCE_20261028.json",
+        "receipts/ENTRY_DISPATCH_COMMIT_FENCE_SOURCE_20261029.json",
+        "receipts/DURABLE_COMMAND_CONTROLS_SOURCE_20261030.json",
+        "receipts/NATIVE_ORDER_RECOVERY_SOURCE_20261030.json",
+        "receipts/NATIVE_CANCEL_SOURCE_20261030.json",
+        "receipts/NATIVE_CLOSE_COST_SOURCE_20261030.json"
+      ]
+    },
+    "BE-006": {
+      "status": "IN_PROGRESS",
+      "candidate_source_only": true,
+      "acceptance": "NOT_ISSUED",
+      "evidence": [
+        "backend/BE-006_NATIVE_FUNDING_OBSERVATIONS.md; backend/FUNDING_OWNER_READ_CONTRACT.md; receipts/NATIVE_FUNDING_OBSERVATIONS_SOURCE_20261024.json",
+        "backend/BE-006_NATIVE_BALANCE_RECONCILIATION.md; receipts/NATIVE_BALANCE_RECONCILIATION_SOURCE_20261024.json",
+        "backend/BE-006_NATIVE_FUNDING_RISK_FENCE.md; receipts/NATIVE_FUNDING_RISK_FENCE_SOURCE_20261024.json",
+        "backend/BE-006_NATIVE_COMMAND_SCOPE_AND_SCHEMAS.md; receipts/NATIVE_COMMAND_SCOPE_AND_SCHEMA_SOURCE_20261024.json",
+        "backend/BE-006_FUNDING_BASELINE_PRESERVATION.md; receipts/FUNDING_BASELINE_PRESERVATION_SOURCE_20261024.json",
+        "backend/BE-004_006_NATIVE_ACCOUNT_OBSERVATION.md; receipts/NATIVE_ACCOUNT_OBSERVATION_SOURCE_20261024.json",
+        "backend/BE-006_DETERMINISTIC_REPORT_CONTEXT.md",
+        "receipts/FUNDING_REPORT_CONTEXT_SOURCE_20261026.json",
+        "backend/BE-006_EXACT_NATIVE_POSTINGS.md",
+        "receipts/EXACT_NATIVE_POSTINGS_SOURCE_20261026.json",
+        "backend/BE-006_NATIVE_VALUATION_LINEAGE.md",
+        "receipts/NATIVE_VALUATION_SOURCE_20261026.json",
+        "backend/BE-006_SAMPLED_FLOW_ADJUSTED_RISK.md",
+        "receipts/SAMPLED_FLOW_RISK_SOURCE_20261026.json",
+        "backend/BE-003_006_COMMITTED_FUNDING_READS.md",
+        "receipts/COMMITTED_FUNDING_READS_SOURCE_20261026.json",
+        "backend/BE-006_NATIVE_ARITHMETIC_CONTEXT.md",
+        "receipts/NATIVE_ARITHMETIC_CONTEXT_SOURCE_20261026.json",
+        "receipts/NATIVE_COLLATERAL_MARGIN_SOURCE_20261028.json",
+        "receipts/MT5_ORIGINAL_MARGIN_SOURCE_20261028.json",
+        "receipts/PHYSICAL_PENDING_STOP_RISK_SOURCE_20261028.json",
+        "receipts/NATIVE_CLOSE_OBSERVATIONS_SOURCE_20261028.json"
+      ]
+    },
+    "BE-020": {
+      "status": "IN_PROGRESS",
+      "candidate_source_only": true,
+      "acceptance": "NOT_ISSUED",
+      "evidence": [
+        "backend/BE-020_MARKET_MONITORS.md",
+        "receipts/MARKET_MONITORS_SOURCE_20261025.json",
+        "receipts/SAVED_SCREEN_RULES_SOURCE_20261025.json",
+        "receipts/WATCHLIST_MARKET_ROWS_SOURCE_20261025.json"
+      ]
+    },
+    "BE-008": {
+      "status": "IN_PROGRESS",
+      "candidate_source_only": true,
+      "acceptance": "NOT_ISSUED",
+      "evidence": [
+        "backend/BE-008_NATIVE_CTRADER_MARKET_READS.md",
+        "backend/BE-008_NATIVE_CTRADER_CONNECTION_LIFETIME.md",
+        "backend/BE-008_NATIVE_MARKET_ARCHIVE.md",
+        "receipts/NATIVE_MARKET_ARCHIVE_SOURCE_20261025.json",
+        "backend/BE-008_NATIVE_READ_BUDGETS.md",
+        "receipts/NATIVE_READ_BUDGET_SOURCE_20261025.json",
+        "backend/BE-008_NATIVE_SPOT_CONTRACT.md",
+        "receipts/NATIVE_SPOT_SOURCE_20261025.json",
+        "backend/BE-008_NATIVE_EVENT_SELECTION.md",
+        "receipts/NATIVE_EVENT_SELECTION_SOURCE_20261025.json",
+        "backend/BE-008_NATIVE_READ_CAPACITY.md",
+        "receipts/NATIVE_READ_CAPACITY_SOURCE_20261025.json",
+        "backend/BE-008_NATIVE_QUOTE_ARCHIVE.md",
+        "receipts/NATIVE_QUOTE_ARCHIVE_SOURCE_20261025.json",
+        "backend/VAN-ML-PKT-005_NATIVE_CATALOG_WINDOWS.md",
+        "receipts/NATIVE_DATASET_SOURCE_20261026.json",
+        "backend/VAN-ML-PKT-005_SOURCE_PARQUET.md",
+        "receipts/SOURCE_PARQUET_20261026.json",
+        "backend/VAN-ML-PKT-005_DATASET_SOURCE_RESOLUTION.md",
+        "receipts/DATASET_SOURCE_RESOLUTION_20261026.json",
+        "backend/BE-008_005_INACTIVE_HISTORY.md",
+        "receipts/INACTIVE_HISTORY_SOURCE_20261026.json",
+        "backend/BE-008_NATIVE_RAW_DEPTH.md",
+        "receipts/NATIVE_RAW_DEPTH_SOURCE_20261026.json",
+        "backend/BE-008_NATIVE_DEPTH_ARCHIVE.md",
+        "receipts/NATIVE_DEPTH_ARCHIVE_SOURCE_20261026.json",
+        "backend/BE-008_NATIVE_ARCHIVE_BYTE_BUDGET.md",
+        "receipts/NATIVE_ARCHIVE_BYTE_BUDGET_SOURCE_20261026.json",
+        "backend/BE-008_NATIVE_DEPTH_HISTORY_HTTP.md",
+        "receipts/NATIVE_DEPTH_HISTORY_HTTP_SOURCE_20261026.json",
+        "backend/BE-008_BAR_AGGREGATION_BOUNDARIES.md",
+        "receipts/BAR_AGGREGATION_SOURCE_20261026.json",
+        "receipts/PENDING_CURRENT_CONTRACT_SOURCE_20261028.json",
+        "receipts/MT5_ORIGINAL_SYMBOL_SOURCE_20261028.json",
+        "receipts/MT5_ORIGINAL_QUOTE_SOURCE_20261028.json",
+        "receipts/NATIVE_INSTRUMENT_CATALOG_SOURCE_20261028.json"
+      ]
+    },
+    "BE-014": {
+      "status": "IN_PROGRESS",
+      "candidate_source_only": true,
+      "acceptance": "NOT_ISSUED",
+      "evidence": [
+        "backend/BE-014_CALENDAR_CAUSAL_PUBLICATION.md",
+        "receipts/CALENDAR_CAUSAL_SOURCE_20261025.json",
+        "backend/BE-014_CALENDAR_FEED_BOUNDARIES.md",
+        "receipts/CALENDAR_FEED_SOURCE_20261025.json",
+        "backend/BE-014_NEWS_CAUSAL_BOUNDARIES.md",
+        "receipts/NEWS_CAUSAL_SOURCE_20261025.json",
+        "backend/BE-014_NEWS_DURABLE_PUBLICATION.md",
+        "receipts/NEWS_DURABLE_SOURCE_20261025.json",
+        "backend/BE-014_NEWS_RUNTIME_HEALTH.md",
+        "receipts/NEWS_RUNTIME_SOURCE_20261026.json",
+        "backend/BE-014_NEWS_PUBLISHER_LINEAGE.md",
+        "receipts/NEWS_PUBLISHER_LINEAGE_SOURCE_20261026.json",
+        "backend/BE-014_RSS_SOURCE_SNAPSHOTS.md",
+        "receipts/RSS_SOURCE_SNAPSHOTS_20261026.json",
+        "backend/BE-014_RSS_CLI_SOURCE.md",
+        "receipts/NEWS_CLI_SOURCE_20261026.json"
+      ]
+    },
+    "VAN-ML-PKT-004": {
+      "status": "IN_PROGRESS",
+      "candidate_source_only": true,
+      "acceptance": "NOT_ISSUED",
+      "depends": [
+        "BE-001",
+        "BE-002",
+        "BE-003",
+        "PRE-003"
+      ],
+      "evidence": [
+        "backend/VAN-ML-PKT-004_ISOLATED_SOURCE_RUNTIME.md",
+        "receipts/FORECAST_RUNTIME_SOURCE_20261026.json",
+        "backend/VAN-ML-PKT-004_WHEEL_REPRODUCIBILITY.md",
+        "receipts/FORECAST_BUILD_RECOVERY_20261026.json"
+      ]
+    },
+    "VAN-ML-PKT-005": {
+      "status": "IN_PROGRESS",
+      "candidate_source_only": true,
+      "acceptance": "NOT_ISSUED",
+      "depends": [
+        "BE-001",
+        "BE-008",
+        "BE-010",
+        "PRE-003",
+        "VAN-ML-PKT-004"
+      ],
+      "evidence": [
+        "backend/VAN-ML-PKT-005_NATIVE_CATALOG_WINDOWS.md",
+        "receipts/NATIVE_DATASET_SOURCE_20261026.json",
+        "backend/VAN-ML-PKT-005_SOURCE_PARQUET.md",
+        "receipts/SOURCE_PARQUET_20261026.json",
+        "backend/VAN-ML-PKT-005_DATASET_SOURCE_RESOLUTION.md",
+        "receipts/DATASET_SOURCE_RESOLUTION_20261026.json",
+        "backend/BE-008_005_INACTIVE_HISTORY.md",
+        "receipts/INACTIVE_HISTORY_SOURCE_20261026.json",
+        "backend/VAN-ML-PKT-005_DATASET_CANDIDATE_PUBLICATION.md",
+        "receipts/DATASET_CANDIDATE_PUBLICATION_20261026.json"
+      ]
+    },
+    "BE-007": {
+      "status": "IN_PROGRESS",
+      "candidate_source_only": true,
+      "acceptance": "NOT_ISSUED",
+      "evidence": [
+        "backend/BE-007_IMMUTABLE_FUNDING_DRAFTS.md",
+        "receipts/FUNDING_DRAFTS_SOURCE_20261027.json"
+      ]
+    },
+    "BE-009": {
+      "status": "IN_PROGRESS",
+      "candidate_source_only": true,
+      "acceptance": "NOT_ISSUED",
+      "evidence": [
+        "receipts/ORIGINAL_NATIVE_HISTORY_SOURCE_20261027.json",
+        "receipts/PHYSICAL_RISK_RUNTIME_SOURCE_20261028.json",
+        "receipts/HELD_PHYSICAL_RISK_RECOVERY_SOURCE_20261028.json",
+        "receipts/NATIVE_COLLATERAL_MARGIN_SOURCE_20261028.json",
+        "receipts/ORIGINAL_MANDATE_POLICY_SOURCE_20261028.json",
+        "receipts/MT5_ORIGINAL_MARGIN_SOURCE_20261028.json",
+        "receipts/PHYSICAL_PENDING_STOP_RISK_SOURCE_20261028.json",
+        "receipts/PENDING_CURRENT_CONTRACT_SOURCE_20261028.json",
+        "receipts/MT5_ORIGINAL_SYMBOL_SOURCE_20261028.json",
+        "receipts/MT5_ORIGINAL_QUOTE_SOURCE_20261028.json",
+        "receipts/MT5_FINAL_CASH_MARGIN_SOURCE_20261028.json",
+        "receipts/MT5_PENDING_RECEIPTS_SOURCE_20261028.json",
+        "receipts/MT5_PROJECTED_MARGIN_FLOOR_SOURCE_20261028.json",
+        "receipts/ENTRY_MARGIN_BINDING_SOURCE_20261028.json",
+        "receipts/PROVISIONAL_SHARED_RESOURCES_SOURCE_20261028.json",
+        "receipts/NATIVE_CLOSE_OBSERVATIONS_SOURCE_20261028.json",
+        "receipts/NATIVE_FEE_GROSS_ENTRY_SOURCE_20261028.json",
+        "receipts/NATIVE_RECEIPT_FEE_KNOWLEDGE_SOURCE_20261028.json",
+        "receipts/MT5_NATIVE_COST_SOURCE_20261029.json",
+        "receipts/ENTRY_DISPATCH_COMMIT_FENCE_SOURCE_20261029.json",
+        "receipts/DURABLE_COMMAND_CONTROLS_SOURCE_20261030.json",
+        "receipts/NATIVE_ORDER_RECOVERY_SOURCE_20261030.json",
+        "receipts/NATIVE_CANCEL_SOURCE_20261030.json",
+        "receipts/NATIVE_CLOSE_COST_SOURCE_20261030.json"
+      ]
+    },
+    "BE-010": {
+      "status": "IN_PROGRESS",
+      "candidate_source_only": true,
+      "acceptance": "NOT_ISSUED",
+      "evidence": [
+        "receipts/NATIVE_COLLATERAL_MARGIN_SOURCE_20261028.json",
+        "receipts/MT5_ORIGINAL_MARGIN_SOURCE_20261028.json",
+        "receipts/PHYSICAL_PENDING_STOP_RISK_SOURCE_20261028.json",
+        "receipts/PENDING_CURRENT_CONTRACT_SOURCE_20261028.json",
+        "receipts/MT5_ORIGINAL_SYMBOL_SOURCE_20261028.json",
+        "receipts/MT5_FINAL_CASH_MARGIN_SOURCE_20261028.json",
+        "receipts/MT5_PENDING_RECEIPTS_SOURCE_20261028.json",
+        "receipts/MT5_PROJECTED_MARGIN_FLOOR_SOURCE_20261028.json",
+        "receipts/ENTRY_MARGIN_BINDING_SOURCE_20261028.json",
+        "receipts/PROVISIONAL_SHARED_RESOURCES_SOURCE_20261028.json",
+        "receipts/NATIVE_CLOSE_OBSERVATIONS_SOURCE_20261028.json",
+        "receipts/EXACT_TCA_ARITHMETIC_SOURCE_20261028.json",
+        "receipts/NATIVE_FEE_GROSS_ENTRY_SOURCE_20261028.json",
+        "receipts/NATIVE_RECEIPT_FEE_KNOWLEDGE_SOURCE_20261028.json",
+        "receipts/MT5_NATIVE_COST_SOURCE_20261029.json",
+        "receipts/ENTRY_DISPATCH_COMMIT_FENCE_SOURCE_20261029.json",
+        "receipts/DURABLE_COMMAND_CONTROLS_SOURCE_20261030.json",
+        "receipts/NATIVE_ORDER_RECOVERY_SOURCE_20261030.json",
+        "receipts/NATIVE_CANCEL_SOURCE_20261030.json",
+        "receipts/NATIVE_CLOSE_COST_SOURCE_20261030.json"
+      ]
+    },
+    "BE-012": {
+      "status": "IN_PROGRESS",
+      "candidate_source_only": true,
+      "acceptance": "NOT_ISSUED",
+      "evidence": [
+        "receipts/EXACT_TCA_ARITHMETIC_SOURCE_20261028.json",
+        "receipts/NATIVE_FEE_GROSS_ENTRY_SOURCE_20261028.json",
+        "receipts/NATIVE_RECEIPT_FEE_KNOWLEDGE_SOURCE_20261028.json",
+        "receipts/MT5_NATIVE_COST_SOURCE_20261029.json"
+      ]
+    }
+  },
+  "blockers": [
+    {
+      "id": "BLK-001",
+      "what": "PRE-003 F15: DDS predevelopment-forensic-gate.mjs on the DIAL control host over the registered 'van' project pack (fingerprinted certificate, not a signature) plus owner scope-lock signature (OQ-05) and independent reviewer populating pack evidence",
+      "blocks": "Formal PRE-003-dependent unit acceptance, integration and activation; candidate source development continues under the owner autonomous-build instruction.",
+      "needed_from": "owner + trusted independent verifier via native DIAL",
+      "not_substitutable": "pack checker, generated PASS or this agent"
+    },
+    {
+      "id": "BLK-002",
+      "what": "Trusted-base Project Truth bootstrap absent on main (PR #94); PR #104 ledger job fails before judging",
+      "blocks": "main admission of any branch",
+      "needed_from": "owner/code-owner adoption through PR #94 policy"
+    },
+    {
+      "id": "BLK-003",
+      "what": "Replacement worker executes child/thread tests. Global DIAL status responds and typed Artemis tools are discoverable; no current S24/native binding or acceptance observed. Commander filesystem access returned monthly quota limit.",
+      "blocks": "Unobserved physical-device/native acceptance; candidate source work proceeds.",
+      "needed_from": "Admitted native control-host entrypoint for registry, root signer/reviewer and handset operations"
+    },
+    {
+      "id": "BLK-004",
+      "what": "18 actual owner decisions / 49 requirement dependencies after semantic review; source values and activation permissions remain distinct",
+      "blocks": "those units' START even after F15",
+      "needed_from": "Concrete decisions in pre002/challenge/review/DECISION_REGISTER.json"
+    },
+    {
+      "id": "BLK-005",
+      "what": "Native UUID/slug mapping unverified, not an observed identity mismatch. Certifier compares native registry identity with native pack identity, not package UUID directly.",
+      "blocks": "F15",
+      "needed_from": "Read-only native registry/pack readback"
+    },
+    {
+      "id": "BLK-006",
+      "what": "Exact publishedb58 main40463198811 is terminalFAILED:16public jobs success, trading4373passes/2original native margin-string failures/1DDSskip;two mandatory DDS/trusted-main prerequisites remain unwaived. Cognitive40463198935 fails the same2unique assertions;voice117was actually skipped after trading failed.21rawarchives/fullcanonical374caughtonce andexactpubliccoverage independently reconciled. Current uncommitted position/native-margin correction has1467actualSQL/HTTP passes0skip/audit0/1172Pythonhashes+1originalreferenceJSON matching/ownedPGabsent and224focused/165rebuild/13semanticprobes. Its own new hosted qualification is pending publication; parent failures remainfailed.",
+      "blocks": "Complete CI and trusted-base admission",
+      "needed_from": "DDS-only CI credential provisioning and documented trusted-base bootstrap/intake",
+      "prior_dated_observation": "Published4ef8fcf2/run40212892336 is terminalFAILED: gateway descriptor omission reproduced and repaired locally; original mutation335caught39unexecuted. DDS private CI read-key and trusted-main checker bootstrap still fail and are not waived. Current new-source hosted execution pending.",
+      "historical_source_observations": [
+        {
+          "observed_before": "2026-10-27T07:47:34.666802+00:00",
+          "what": "Exact published068267e2 main40454839376 is terminalFAILED on missing DDS contract read key and absent trusted-main checker; all17public source jobs succeeded. Earlier source regressions and failed/interrupted runs remain in their original dated evidence. Current risk arithmetic has1396local actualSQL/HTTP passes and13semantic safety probes; its own hosted qualification is pending publication. The two mandatory prerequisites are not waived."
+        }
+      ]
+    },
+    {
+      "id": "BLK-007",
+      "what": "AP-001 and AP-002 are verified proposals, not admitted. Original delivery remains unchanged.",
+      "blocks": "PRE-001/002 exit and PRE-003 submission admission",
+      "needed_from": "Owner/eligible independent amendment review through the documented procedure"
+    },
+    {
+      "id": "BLK-GH-CLI-20261025",
+      "what": "Injected GH_TOKEN invalid (actual HTTP401 and gh auth status); no supported worker refresh binding/helper exposed. Connected GitHub app can read CI but normal new git pushes require restored CLI access. No injected identity replacement or hook bypass attempted.",
+      "blocks": "Publication of new local source commits after3c6969eb; local source/testing/normal-hook commits and connected CI reads continue.",
+      "needed_from": "Supported worker GitHub CLI credential refresh; owner request pending.",
+      "status": "RESOLVED",
+      "resolved_at_utc": "2026-10-25T22:50:16.851349+00:00",
+      "resolution": "ActualCLIAPIexit0, normalgitpush and remote-ref readback5fa19136; recovery mechanism unknown, no token/identity replacement."
+    }
+  ],
+  "amendment_proposals": [
+    {
+      "id": "AP-001",
+      "finding": "Units BQ-003, BQ-004, QA-002, QA-003, REL-002 own zero acceptance identities (plan acceptance_test_ids empty; effective registry has no test with these units). The package's verify_review_contracts.py 79/79 does not detect it.",
+      "evidence": "docs/rebuild/rev118/pre002/AP-001/",
+      "proposal": "Bind explicit POS/NEG/REC acceptance identities to each unit (or record that each aggregates named existing IDs) through an admitted amendment; package left unchanged",
+      "status": "PROPOSED_NOT_ADMITTED",
+      "verifier": "tools/rebuild/ap001.py (13/13 selftest)"
+    }
+  ],
+  "delegation": {
+    "model_routing_available": "No delegation used in Codex continuation; complex work performed by lead",
+    "delegated_packets": [],
+    "note": "Opus unavailable; owner transferred build to Codex. No independent reviewer identity is inferred from another model or session."
+  },
+  "checkpoint": {
+    "updated_utc": "2026-10-28T05:23:50.455298+00:00",
+    "branch": "ccr-9e07e1af-8mgz1p",
+    "base": "b02075f327ea8180ab6d269eba358cf8c5479878",
+    "background_jobs": [],
+    "last_validation": "Held physical projection failures no longer turn a displayed shared peak into a fresh own-alias contribution. Four real producer/read-or-SQL-commit-ACK-loss counterexamples and two higher-native-equity counterexamples failed before correction. Recovery now independently retains the original native equity sample rather than the displayed aggregate; missing or held funding never seeds risk capital. Both original alias-scoped owner resets and the separately observed higher natural peak remain effective after replay. Two old account harnesses now initialize the real signed test mandate required by the actual service; all42 original assertion ASTs remain identical. Final494actualSQLite/PostgreSQL/HTTP/source/namespace/authority/replay/recovery/funding cases pass0skip/audit0;494unique callIDs once,all1201pinnedPythonhashes match,ownedPG independently absent. The83 focused checks overlap. Owner contracts unchanged and mutationpreflight374/383/0findings is consistency only. Published89661 full hosted trading remainsFAILED4607pass/2fixturefail/1DDSskip;26PGpassed andvoiceunexecuted afterfailure. Untracked collateral/order read components remain separate unfinished reservation foundations, not accepted features. Flow adjustment, all-origin collateral/reservations, original policy/active mandate reconciliation, pending/partial/uncertain/manual exposure, native settlement and all remaining canonical units stay open.0formal/native/production/S24acceptance.",
+    "environment_notes": [
+      "clone must be unshallowed (git fetch --unshallow) and PR heads fetched (+refs/pull/*/head:refs/remotes/origin/pr/*) before pre001.py",
+      "pytest from backend/requirements.txt in a venv",
+      "rsync needed for tests/hermes installer test",
+      "DDS sibling at /home/user/dial-development-system fetched origin/master 204f2f3b for F15 source reading",
+      "Gradle: repo.maven.apache.org returned 429 repeatedly; an init script adding https://maven-central.storage-download.googleapis.com/maven2/ resolved the same coordinates",
+      "Python 3.12 venv from backend/requirements.lock for CI-equivalent runs; stream-host venv from deploy/van-browser-stream/requirements.lock",
+      "Desktop Commander read-only device listing was refused by the session permission policy; native readback prepared as pre003/NATIVE_READBACK_REQUEST.md"
+    ],
+    "next_action": "Genuinehook/requiredbaselinecommittedverify/normalpush/readback/exactCI; finish account-wide collateral and all-origin reservation workflows under canonical scope.",
+    "previous_head": "83f2688a6414b5e81358c051418d0fe85ee0a3fb",
+    "current_packet": "HELD_PHYSICAL_RISK_RECOVERY_SOURCE",
+    "ci_credential_capability": "receipts/CI_CREDENTIAL_CAPABILITY_20261024.json: repo admin metadata available, integration secret/deploy-key reads403; no credential changes.",
+    "current_background_jobs": [],
+    "active_packet": "BE-009 exact arithmetic source locally qualified; genuine hook/publication pending; then original position projections and shared financial risk.",
+    "published_head": "e9cbdd69c9d98688e14b088c19c65e5df80c6e42",
+    "local_base_head": "89661bf72bfda9207000d3b9b346595ac41904ff",
+    "committed_ledger_verification": "PublishedE9actualGREEN177 required-baselineexit0; new schema sourceuncommitted",
+    "native_mql_source_compile": {
+      "head": "752d265b11ba643ed309481b110248f8b7fe323b",
+      "run": 40255331586,
+      "status": "SOURCE_COMPILED",
+      "evidence": "receipts/NATIVE_MQL_COMPILED_752d265b.json",
+      "qualification": "Signed compiler and deliberate invalid probe/source blob/artifact checks;network-blocked SDK initialization only;no account/broker/order/deployment/device acceptance"
+    },
+    "head": "e9cbdd69c9d98688e14b088c19c65e5df80c6e42",
+    "historical_background_job_observations": [
+      {
+        "kind": "van-ci",
+        "id": 40383599951,
+        "head": "9bf1acc4ed0239540d1ffffcc8cf9cf7eec16f82",
+        "state": "RUNNING_AT_CAPTURE;inspectactualoutcomes",
+        "not_acceptance": true
+      },
+      {
+        "kind": "van-forecast-runtime-source",
+        "id": 40383599772,
+        "head": "9bf1acc4ed0239540d1ffffcc8cf9cf7eec16f82",
+        "state": "RUNNING_AT_CAPTURE;inspectactualoutcomes",
+        "not_acceptance": true
+      }
+    ]
+  },
+  "observations": [
+    "OBS-001 BE-002 debug cleartext",
+    "OBS-002 BE-003 stale-claim retake reliance",
+    "OBS-003 BE-025 positive approval-resume test (corrected from BE-028)",
+    "OBS-004 BE-003 committed SQLite snapshot",
+    "OBS-005 legacy mutation registry and masked advisory failure",
+    "2026-10-25T20:55:24.803079+00:00: a921d0f2 committed through genuine hooks/GREEN136, still unpushed. Verified recovery ZIP SHA25694a927e727da70700c6daef52a19d272013ff454c9713e42c9dcb4fcb2dd0b59; genuine bundle requires3c6969eb, SHA25613687c41242eecac55661d1181137ee886ac946424d033ad9040f7d8e1e20c65. Connected GitHub recovery-only JSON blob88b03f8a54e9732d5a8e49b8a14bdc07d641f643 read back exactly; unreferenced blob is not normal branch publication or guaranteed long-term retention. Binary blob fetch was unsupported UTF8; JSON representation verified. DIAL checkpoint63449318-ad8b-4d6a-9b83-36dd078d65e7 reports source, accepts nothing.",
+    "2026-10-25T21:04:30.348392+00:00: Event selector5934d427 committed through genuine hooks/GREEN137. Verified55-file candidate ZIP272903bytes SHA25698fab1c910e5ff4252d5aee4d4e600d6e47b669b4a3d8773fb6112e8660f65c0. No normal push due invalid injected CLI credential. Current cloud observation still running/connected but secrets/outbound identities/runtime bindings/capabilities empty; no supported refresh tool discovered. Connected GitHub source metadata/recovery tools work, no commit/ref substitute.",
+    "2026-10-25T22:14:16.701534+00:00: Verified genuine three-commit bundle requires published3c6969eb,564737bytes SHA256f81eff58486bd4b3de64d855a60e8b80489f57cb0f966b2098bda544614d3f36. Recovery-only unreferenced JSON blob b4fbb38edd0f5e52db6da121a3ec53c552f5f071 read back exactly; not branch publication or guaranteed retention. DIAL checkpointd80b8879-84d9-49e4-89e7-c04734b332e2 reports source, accepts nothing. Remote3c6969eb readback unchanged; CLI refresh pending. Calendar candidate isolated at/workspace/van-calendar-source-20261025 onad1d3941, not yet applied to this checkout;14before failures and83focused pass/audit0; source-only pending integration, no unit milestone issued here.",
+    "2026-10-25T22:34:31.636665+00:00: Quote component genuinely committed047dacc6/GREEN139;1258-file manifest0mismatches. Verified89-file precommit ZIP836995bytes SHA256b692e47a332eadd77ea295e9e52ef4f4e0f140b24b7a997625bd62d6afb6fa6e. Calendar isolated candidate originalbytes checked and copied into main checkout after quote commit; current evidence498actualPG0skip/audit0, no unit acceptance. Source independence/entitlement/native availability remain unqualified; no actual financial/provider/production/device effects.",
+    "2026-10-25T22:50:16.851349+00:00: Publication blocker resolved by actual APIexit0, normalgitlsremote, normalpush and readback5fa19136. Refreshmechanism notestablished; no injectedtoken replacement or APIcommit/ref workaround. DIALcheckpoint1194ee96-a61f-46f6-bbdd-d8de21fdaae2 reports publishedsource/accepted0. NativeMQLcheckout failedSourceLog121313801954 preserved; no compilerexecution is claimed.",
+    "2026-10-25T23:21:42.039363+00:00: Calendar final532 actualPG0skip/audit0/exact hashes and25 controls;6 final supplemental faults caught/restored. Initial10assertionfailures and extra4long-fractionfailures retained, as is old qualification-oracle failure. Exact623 native SDK compilation passed; full van-ci still running with original2mandatory prerequisite failures. Prior5fa run40241410394 canceled by existing concurrency policy on623 push; partial only.",
+    "2026-10-25T23:34:56.429870+00:00: News source617 final actualPG0skip/audit0/exact hashes;51 finalcontrols and9 final faults assertion-caught/restored.16 distinct reproduced failures retained. In-memory component only, durable publication/recovery/sourcehealth remain.",
+    "2026-10-25T23:39:34.227884+00:00: Exact623 van-ci40242295555 terminalFAILURE on2 unwaived prerequisites; all17 public source jobs PASS. Actual reports/archives verified: gateway5775pass7skip,media198,trading3374pass1privateDDSskip,PG26,voice117,monitor258;374original mutants once;Android18pass4skip;browser1547pass1skip/foreground11/UID1/firewall10. Subsequent0b3f7601/08375724 unvalidated by623; both genuine local commits/GREEN143 ready for normal publication.",
+    "2026-10-26T00:02:50.712194+00:00: Durable news644 final actualPG0skip/audit0/exact hashes,76 controls with2PGdeselected executednative,8 supplemental faults assertion-caught/restored.13 functional failures+6 missingAPI contracts and1 harness NameError after24 passes retained. NativeMQL exactEA source compile verified, mainCI pending. No accepted units.",
+    "2026-10-26T00:10:29.246687+00:00: Final cold missing-receipt guards add2 actual regressions; finalR3 executes646 cases/0skip/audit0/exact source and test hashes.78 final controls plus2PGdeselected executed in PostgreSQL;8 final faults assertion-caught/restored. Earlier644/76/8 receipts retain their prior hashes and scope. PublishedEA artifact confirms3423trading pass/1privateDDSskip,PG26,voice117,monitor258 and374 original mutation identities caught once; mainbackend/browser still pending.",
+    "2026-10-26T01:33:27.917947+00:00: Runtime news final698 actualPG0skip/audit0/exact hashes,119controls with4PGdeselected executedfixture,10faults assertion-caught/restored. Broad1059 selection TIMEOUT1800 exit2,1057completed passes,audit0,2unfinished nowincludedfinal; XML1058 includesinterrupted, not1058passes. Before final heartbeat-only delta original broad hashes retained. ExactEA CI terminal17public pass/2unwaived mandatory prerequisite failures, actualcomplete raw reports preserved. No accepted unit.",
+    "2026-10-26T02:01:26.332512+00:00: Separate versioned durable publisher/story declarations bind original observation receipts without rewriting headline IDs/claims/history. Atomic publication/readback, marker-bound missing/conflicting/orphan recovery refusal;late declaration as-of clocks,rewritten syndicated clusters count once,unknown/conflicting origins visible,qualified independent sources0.734final actualPG0skip/audit0/exact source+test hashes;153controls+6PGdeselected executedfixture;8faults caught/restored.11baseline+2followup+1orphan failures and harness diagnostics retained. Full BE014 remains IN_PROGRESS. Published752d265b/normal readback/GREEN146;exact CI still running with2 unwaived mandatory failures;accepted0.",
+    "2026-10-26T02:29:43.145840+00:00: Explicit RSS2 profile wired through actual session/account news builders;original raw bytes/profile/parser/capture identity durably serialized/read back before parsing,stable first capture across replay,actual later ingress availability across lost commit replies. GUID/publisher declared lineage,explicit relevance,partial item diagnostics,DTD refusal/capacity/clock guards;cold raw integrity/visible-record checks and independent owner snapshots.768final actualPG0skip/audit0/exact hashes;185controls+8PGdeselected executedfixture;8supplemental faults caught/restored. Actual saved public Fed20-headline replay stable;latestOct16 remainsold;no native qualification.11baseline+2product followup failures and1stale-fixture error retained. Full BE014 remains IN_PROGRESS. Exact752 hostedCI terminal17public success/2unwaived mandatory failure;gateway5775/7skip,media198,trading3495/1DDSskip,PG26,voice117,monitor258,374canonicalmutants caughtonce,Android18/4emulator,browser1547/1+foreground11/UID1/firewall10. SignedMQLcompile exactsource verified. accepted0.",
+    "2026-10-26T08:54:55.365480+00:00: Derived native bar Parquet publication and cold original-source readback preserve exact prices, scope/row/revision identity and unknown native facts. Existing archive/file-lock/atomic writer owners reused; stable original-window replay and lost-ACK/orphan reconciliation; global output capacity refuses before write. Existing slow research workflow/CLI wired; ledger closed on all exits; actual T0 rejects Arrow. 48 native source controls,70 public research controls,302 final actual-PG-available regressions,0 skips/audit violations/exact source hashes/owned fixture independently absent;8 supplemental assertion faults caught/restored;108 rebuild passes. Selections overlap. Full DatasetManifest, real rights/consent, universe/calendar/gap and licensed joins remain open;no formal acceptance.",
+    "2026-10-26T09:35:22.715614+00:00: Exact canonical DatasetManifest schema registered in existing owner; bounded immutable candidate parser checks strict fields/references,exact fractional chronology,ASCII RFC3339,correction-policy boundaries and duplicate CLI keys. Existing slow workflow/CLI checks and source inspector resolve original native Parquet bytes,source manifest,row IDs/count/order and actual local availability through the existing archive owner; compound source objects,canonical scope/origin,creation/current policy,calendar/universe/feature/target/consent/entitlement remain explicitly unresolved.375 final actual-PG-available regressions0skip/audit0/exacthash/ownedfixtureindependentlyabsent;9final assertion faults caught/restored with163positive/restored controls;108rebuild. Original duplicate-key/Unicode regressions and malformed first test envelope retained. No complete DatasetManifest or unit admission.",
+    "2026-10-26T09:39:59.702059+00:00: Exact4637main40296406059 is terminalFAILURE:17publicjobsSUCCESS,2unwaived missing-private-DDS-key/trusted-main-checker failures. All15selected raw archives checkedsize/SHA/CRC/path/symlink;gateway5775passes/7declaredskips,media198,trading3744passes/1privateDDSskip,PG26,voice117,monitor258,browser1547/1+11/1/10,Androidemulator18/4,374canonicalidentities caughtonce/383edits. Exactforecast/Parquet40296406014bothjobsSUCCESS/actual48Parquetpasses0skip/audit0 and6upstreamfixedfixtures+3separatecoldmodelsparity0,232versions,bothcontainersremoved. These qualify published4637source components only,not this later uncommittedDatasetManifest/source-inspection packet or native/unit/production/S24.",
+    "2026-10-26T10:39:22.036648+00:00: Separate immutable NativeReadIdentity anchors hidden/nameless LIGHT/archived native IDs to the exact original catalog without execution fields or grants. Independent readonly reader refreshes exact catalog revision,queries native ID without active execution metadata/protective cache,and fences post-parse session/budget. Existing archive/collector/cold windows/Parquet consume the explicit new source type;quote owner and enabled NativeSymbolContract guard preserved.518final actual-PG-available regressions0skip/audit0/all final source/test hashesmatch/ownedfixtureindependentlyabsent;8assertionfaultscaught/restored/37controls;108rebuild. Fixture keyword/invalidarchivedname/exceptionbase failures retained. No provider/native/unit/owner/production/economic/S24 acceptance.",
+    "Immutable DatasetManifest candidate publication reuses dedicated existing SQLite/PostgreSQL ledgers, original native source inspection, writer-created time, request/record CAS, independent durable readback and historical replay. Lost ACK/current-byte failure/corrupt records/caller transactions/global capacity refuse truthfully. Existing slow workflow/CLI wired; always CANDIDATE_PUBLISHED_NOT_ADMITTED.45 new publication cases,563 final broad actual-PG-available passes,0 skips/audit violations,final hashes match/owned fixture independently absent;8 assertion-caught supplemental faults/23 positive plus23 restored controls;108 rebuild passes. R1 fixture and R3 actual error-reason failure retained. Full ML005 remains open.",
+    "Published e690d530/GREEN155/manifest3502 remotely verified. Parent164 main timed out full trading at35min,16public success/2unwaived mandatory failures;14raw archives and374 canonical cases/383edits independently reconciled. Currente690 forecastFAILED before Parquet tests due missing psycopg;CPU fixture artifact independentlyverified. Local recreated fixed source job114pass0skip/audit0/owned fixture absent;source shell cleanup/failure controls verified. Profile crash retained;original unprofiled native session1PASS82.41s. CI fixes uncommitted;all admission gates remain unissued.",
+    "Confirmed ambient Decimal rounding/traps/exponent settings changed or broke identical native-scoped unitization reports. Explicit report Context now fixes80-digit ROUND_HALF_EVEN and standard bounds/traps while exact Fraction calculations,normal outputs and all risk/unknown states remain unchanged.9actual regressions retained;24focused and219final actual-PG funding/cash/balance passes,0skips/audit0/final runtime-test hashes match/owned fixture independently absent. Startup-only refusal retained. Component only;fullBE006 remains IN_PROGRESS.",
+    "Exact6698 main40322142900 terminalFAILED on2unwaivedmandatoryprerequisites;all17publicjobsSUCCESS.15rawarchivesverified;trading3819+1privateDDSskip,PG26,voice117,gateway5775+7skips,media198,monitor258,browser/emulator originalchecks;374canonicalidentitiescaughtonce383edits. Dedicatedforecast40322141956bothSUCCESS actual114Parquet/SQL0skip/audit0 plus6synthetic/3coldparity0/232versions/kernel/cleanup/sourcehash/tree verified. Parent results do not qualify later funding-renderer source.",
+    "Exact9bf main40383599951 terminalFAILED only on two mandatory privateDDS/trusted-main prerequisites;17publicSUCCESS,3985trading+1declaredprivateDDSskip/PG26/voice117/gateway5775+7skip/media198/monitor258/browser/emulator and374canonicalidentitiescaughtonce383edits. Forecast40383599772SUCCESS114native+6synthetic+3cold parity0/232versions/kernel/cleanup/hashes/tree.16main+forecastarchives size/SHA/CRC verified; published9bf only.",
+    "Exact733b main40394743701 terminalFAILED on2unwaived mandatory privateDDS/trusted-main prerequisites;all17publicjobsSUCCESS.16main+forecastarchivesverified;trading4017+1declaredprivateDDSskip/PG26/voice117/gateway5775+7skip/media198/monitor258/browser1547+1skipplus11/1/10/emulator18+4skips.374canonicalidentitiescaughtonce383edits across9actualreports. Forecast40394743715SUCCESS114native/6synthetic/3coldparity0/232versions/kernel/cleanup/source-controller-reporthashes/tree-equivalent actualmerge96cd9f894123a5aab80b49ec6affac47ada89633. Published733b only;later arithmetic/depth not qualified by parent.",
+    "Exact0c main40402195836 terminalFAILED2unwaivedmandatoryprivateDDS/trusted-main prerequisites;all17publicSUCCESS.16archivesZIP/CRC/SHAverifiedandretained;4066trading+1privateDDSskip/PG26/voice117/gateway5775+7skip/media198/monitor258/browser/emulator and374canonicalidentitiescaughtonce383edits. Forecast40402195860SUCCESS114native+6synthetic+3cold/parity0/232versions/kernel/cleanup/source-controller-reporthashes/tree-equivalent testedmerge1a5dc32a04cd5bae15cc4c2feaf3c2eeec1a056b. Published0c only;laterdurabledepth/budget notqualified.",
+    "Registered paired-owner GET /v1/trading/market/depth-history reads original physical-scope DEPTH captures through existing TradingService/NativeDepthArchive. Server-only root/byte budget;strict selectors, explicit private refusal/NO_CAPTURE, original policy/revision/as-of, no repair/broker I/O/normalized prices/current freshness/rights or execution grant. Two active verification slots remain occupied across caller cancellation. 32 new cases;910 final actual SQLite/PostgreSQL/HTTP/private-topology passes,0 skips/audit violations,1148 final backend/trading runtime-test hashes match,owned fixture independently absent;3 assertion faults caught/6 positive+6 restored controls/exact source restored;122 rebuild/workflow/T0 checks. Original integration failed1/106 on exact service-surface allowlist;only3 new read-only names added,authority tripwires retained,focused2 and final910 passed. Counts overlap;BE008 IN_PROGRESS,unit/native/production acceptance NOT_ISSUED.",
+    "Existing BarAggregator now rejects regressed source timestamps, malformed/nonfinite/crossed ticks, negative volume and noninteger intervals before changing or publishing original state. Explicit fresh80digit contexts isolate midpoint/OHLC/volume/spread/range from caller settings; staged arithmetic preserves the original bar on overflow. Equal-time arrival order, negative prices/epochs and missing intervals without synthetic bars remain supported. finish() seals its emitted interval against reopening. Committed baseline17failures/4controls plus3later closed-interval failures retained.29newcases;965final actual SQLite/PostgreSQL/HTTP/private-topology passes0skip/audit0/all1149 runtime-testhashes match/ownedfixture independently absent;5supplemental behavioral faults caught29positive29restored/sourceexact;122rebuild/workflow/T0 checks. Source component only;BE008 IN_PROGRESS and all acceptance unissued.",
+    "Exact9255 main40411152887 terminalFAILED2mandatory/all17publicSUCCESS;19archives independentlysize/SHA/CRCverified;4125trading+1DDSskip/PG26/voice117/gateway5775+7/media198/monitor258/browser/emulator18+4,374identitiescaughtonce383edits. Forecast40411152890 independentlyverified114native/6synthetic/3cold/parity0/232versions/kernel/cleanup/source-controller-reporthashes/tree-equivalentmergecb9c7f2f9ade8e50bc8b21843cae2189b298dd21. LaterHTTP/aggregation not qualified by parent.",
+    "Two actual coordinator builders in one process previously shared hostname/PID lease identity. Real PostgreSQL reproduced a peer acquiring the live owner lease and peer shutdown releasing its authority: two failures and one expiry control. Each coordinator now gets a UUID instance suffix, matching the single-session runtime; logical account aliases, signed mandates, store CAS, epochs and submission guards are unchanged. Three focused cases and 1213 final SQL/HTTP/runtime/authority/recovery cases pass, with no skips or storage-audit violations. All 1,150 pinned backend/trading runtime and test hashes match; the owned PostgreSQL fixture is independently absent. This is a source component, not whole-unit, provider, native, production or owner acceptance. Physical-account aliases and shared financial reservations remain separate open work.",
+    "Immutable unapproved funding drafts now bind exact Money, owner/account claims, beneficiary/quote references, all fee assets, conversion reference, operation, original request, revision and expiry. The existing VATI ledger owner stores original drafts with SQL serialization, writer-lock expiry recheck, committed source reads, independent cold readback, lost-ACK/rollback recovery and explicit capacity refusal. Three paired-owner HTTP routes retain original receipts; bound request proof is not payment approval. Existing instrument and owner credential screens reject unsafe metadata before storage; strict JSON/encoded body limits and cancellation-safe worker admission apply. Native draft retention/deletion is explicitly excluded from inferred-memory erasure and remains unqualified. Final377 actual SQLite/PostgreSQL/HTTP/privacy/authority cases pass with0skips/audit violations, all1158 pinned source/test hashes match and owned fixture independently absent;122rebuild/workflow/T0 checks pass. New cases:45value,58dual-engine journal,18gateway and1bound-proof executions; counts overlap. Earlier fixture failures and the uncommitted prototype credential gap remain retained. BE007 is IN_PROGRESS; no payment/provider/native/unit/production/owner acceptance is issued.",
+    "Exact4cc7 main40415113142 terminalFAILED2mandatory/all17publicSUCCESS;19rawarchives verified,4125trading+1DDSskip/PG26/voice117/gateway5807+7/media198/monitor258/browser/emulator18+4,374canonicalidentities caught once383edits. Forecast40415113329 independentlyverified114native+6synthetic+3cold/parity0/232versions/kernel/cleanup/source-controller-reporthashes/tree-equivalentce864a6c59a0fdd59f0d874ef9e78985b03d2b78. Exact2a forecast40421043611 independentlyverified114+6+3/tree76184cd978eee3dc558a2778ecb5501f2685546d; whole2a main outcome separate. Later funding drafts not qualified by parent runs.",
+    "Exact2a main40421043580 is terminalFAILED;16public jobSUCCESS, public backend121915259747 CANCELLED at45minute boundary after successful actual5807gateway/7declaredskips+198media/coverageverify/artifactupload steps;2mandatory privateDDSkey/trustedmainchecker failures. Rawartifact reconciliation pending; preserve cancellation. Later funding source not validated by this run.",
+    "The existing A4 approval owner rechecks the original half-open expiry after its actual SQL writer wait and immediately before one-use consumption/atomic recovery receipt. It reconstructs the unchanged signedv2 challenge from exact request/record fields, refuses changed lineage/expiry/parameters, and uses a structured internal intent digest to remove legacy delimiter collisions. Unambiguous signed legacy challenges retain original encoding; ambiguous legacy text requests fresh proof. The existing device signature/enrolment/revocation/one-use controls remain. Malformed challenge lineage receives a private durable gateway denial. Four expiry regressions plus seven canonical-rebinding regressions reproduced; valid controls remain. Final514 actual SQLite/PostgreSQL/HTTP/privacy/authority cases pass0skip/audit0, all1160 pinned hashes match and owned fixture independently absent;27focused/124rebuild checks pass. The public backend CI job now has60minutes for its unchanged selected assertions/evidence/cleanup after exact2a cancellation at45minutes. No unit/native/production/economic/S24 acceptance.",
+    "Publishedf00495cf996aaf9adb0a177db61c083640c2965e via genuine hook/BOTH prior source+contract authorizations, actual GREEN169/required4fd baseline, manifest5702/zero mismatch/alltracked, normalpush+remote readback. Main40428024966 active at previous observation; inspect current status. Forecast40428025041 independentlyverified114native+6synthetic+3cold/parity0/232versions/kernel/cleanup/source-controller-report hashes/tree-equivalentb00aefba269ac245bc65fdf11688068d01801156. Exact2a main17archives independently verified,4157trading+1DDSskip/26PG/117voice/5807gateway+7/198media/258monitor/browser/emulator18+4/374canonicalidentities once383edits;publicbackendCANCELLED/two mandatory failures remain.",
+    "The existing backtest metrics owner now accumulates the original equity path with exact rational arithmetic and tracks maximum currency and percentage drawdown independently, converting only the final existing float report fields. An earlier50percent loss is retained after a later100currency/10percent loss; negative equity preserves150percent drawdown; a cent is not erased by large starting equity. The actual strategy-validation source producer retains that original worst percentage. Nine actual regressions/2controls reproduced against unchanged committed source. Eleven new tests include independent prefix-curve/scaling, hostile Decimal contexts and the real source producer.91focused and605final actual SQL/HTTP/accounting/authority/validation cases pass0skip/audit0, all1161 pinned hashes match, owned PostgreSQL fixture independently absent. Two supplemental in-memory faults caught with3positive/3restored controls; active source unchanged. Existing client fields/types, statistical/admission/owner gates and historical reports remain. No unit/native/production/economic/S24 acceptance.",
+    "Local5c584b2af6135660d46ba66216330b1c18704b2b completed genuine hooks and actual committed GREEN170 exit0 against4fd466dec3910ed5de614bfbf95887ad619df5ca;manifest5900/zero mismatch/alltracked. Publishedf00495cf996aaf9adb0a177db61c083640c2965e remains genuineGREEN169/manifest5702/normalpush+readback. Preserve exactf004 main40428024966 until terminal before nextpush. Forecast40428025041 independently verified in prior packet, not later A4/metrics source. No separate hosted qualification is assigned to unpushed local5c.",
+    "The existing PostgreSQL runtime-lease store now gives its outer submission guard exclusive ownership of its private connection/transaction. Same-thread reads and nested guards borrow it; other threads wait. Borrowed queries use native savepoints so actual PostgreSQL errors cannot abort the outer row locks. Only the outer exit rolls back; guarded body failures propagate, and reentrant lease mutation/close refuse before changing authority. Original actualSQL baseline3lock failures/1control; first4fixture failures retained separately. Intermediate source670pass did not qualify later2SQL-server-error failures/10controls; those led to savepoint repair. Stable67focused and672final actual PostgreSQL/SQLite/HTTP/runtime/accounting/authority cases pass0skip/audit0; all1162 pinned hashes match and owned fixture independently absent. Twelve new cases observe real peer lock waits/takeovers and retained epochs. Alias scope/current owner controls remain; physical-account duplicate-alias arbitration/shared reservations and full native admission remain required. No unit/native/production/economic/S24 acceptance.",
+    "Publishedca981d19615f614a1c41f78618e04ea1582d620e genuinehooks/actualGREEN171 required4fd baseline/manifest5927 zero mismatches alltracked/normalpush independentremote readback. Environmentstarting event recovered withactualcommand+child+joinedthreadPASS,97PID1zombies, no platformkills; checkoutcleanatpublishedheadbefore guardwork. Priorfinalbackups size/SHA/CRC and136parentfull evidencehashes verified. Exactparentf004 main40428024966 terminalFAILEDonly2mandatory/all17publicSUCCESS;19rawZIPs verified,4260trading+1DDSskip/26PG/117voice/5826gateway+7/198media/258monitor/browser/emulator18+4/374identities once383edits. Exactca981forecast40432745121 independentlyverified114native+6synthetic+3cold/parity0/232versions/kernel/cleanup/hashes/tree-equivalent49debf86b517d1fef56e21d299a45ecfc0e76f74. Main40432745614 remains separate; no parent result qualifies later guard source.",
+    "Current gateway A4 signatures and native runtime recovery now agree on the exact structured intent digest. Native verification also preserves original legacy signatures and authority references, while durable outbox readback must match the digest actually signed. Only the three typed native recovery actions retain unconsumed legacy challenges with their exact fixed command/text shape; generic delimiter ambiguity still refuses. A shared expiry predicate is called after writer acquisition and again immediately before consumption, preserving both fresh half-open deadline checks and the original canonical mutation identity. Published ca981 main remains FAILED:62gateway failures and one expired-approval mutation survivor plus two unwaived mandatory prerequisites. Local unchanged causal sources reproduced62failures/42controls; 131focused and59compatibility checks pass. Actual canonical C11 caught1/1, byte-exact restoration verified; this is not current execution of the full374case corpus. First broad run779pass/1correct command-expiry refusal used a live five-second positive fixture that took23seconds. A scoped deterministic test clock retained its TTL/assertions; all dedicated expiry boundaries remain unchanged. Six controls pass. A second broad attempt lost its controller with754recorded passing calls and no final report; original exit/cause are unknown. Its exact labeled PostgreSQL fixture was independently removed; that attempt is interrupted, never passed. The third run uses a recorded detached controller with its own deadline and cleanup. Stable current combined actualSQL/HTTP/accounting/authority/recovery run780pass/0skip/audit0, all1162source/test hashes match, owned PostgreSQL fixture independently absent.165rebuild/private-topology checks pass. PostgreSQL guard12new cases are included; earlier guard672 passes belong to their earlier snapshot. No unit/native/production/S24 acceptance.",
+    "Native sending profiles in both runtime builders now require the existing logical alias lease and an additional expected physical-account lease. The original alias/public epoch, holder, CAS, owner controls and native identity checks remain. cTrader uses the actual factory host and normalized account ID; MT5 bridge/EA share exact native server/login; Deriv uses native login/environment, excluding client app and endpoint aliases. Display, credential, route and currency labels cannot split one expected scope. Non-sending/paper/owner-ticket paths retain their original contract. Both rows remain locked through final submission; partial acquisition/renewal refuses and releases only this holder/epoch. Unchanged b0 actual PostgreSQL builders reproduced4duplicate-account failures with8controls. 128first focused,78extended and52current pure checks pass; counts overlap and earlier snapshots differ. The extended run includes actual peer lock waits across nested fences, guards, SQL errors and original body failures, plus retirement/profile/unknown-effect/recovery controls. Published b0 cognitive Python broad collection failed because its locked environment lacks optional psycopg. Imports in both PG test modules now occur behind the unchanged canonical pg_dsn fixture; no assertion, case or opt-in rule was removed. Controlled absent-driver collection changes from2errors to4388collected/0errors, not a runtime pass.79focused cognitive runtime cases also pass under that explicit absent-driver fixture. First combined run was deliberately interrupted for that fix, with raw signal/pytest teardown error retained and fixture independently absent. Stable current combined922actualSQL/HTTP cases pass 0skip/audit0/all1167source-test hashes matching/ownedPGindependentlyabsent;165rebuild/private-topology checks pass. This does not share financial history/reservations or solve alias handover/unknown-effect reconciliation, fence old binaries, qualify a mixed cohort or establish native connectivity. No unit, production, economic or S24 acceptance.",
+    "Exact published b0a61313e5167bafca4dbeea96f2bfcc5c7c6b90 main40448997885 is terminal FAILED on two unwaived mandatory prerequisites; all17public jobs succeeded. Nineteen raw main/forecast archives independently size/SHA/GitHubdigest/CRC/path verified. Actual4283trading/1DDSskip,26PostgreSQL, 117voice,5854gateway/7declaredskips,198media,258monitor, browser/firewall and emulator18/4declaredskips are retained. All374canonical identities caught exactly once/383edits/9reports/0survivor/0unexecuted; public selection hashes and canonical coverage verification match exact b0. Forecast40448997941 independently verifies114nativeSQL/Parquet,6synthetic fixtures,3separate cold models/parity0/232versions/kernel/cleanup/source-controller-report hashes and tree-equivalent62914c238308d5178b6b85ca15960449b28b0187. Separate cognitive40448997882 remains FAILED:79focusedpass, broad1collectionerror from optional-driver import, Androidsuccess. These results do not qualify later physical-scope/import correction. Local correction abafcf9094beaa3230e1959f999f13eb055fff9f is genuineGREEN173/manifest6671/clean before this evidence-only follow-up, with922current source cases0skip/audit0/1167hashes/PGabsent, 165rebuild and79focused controlled-absent-driver checks. No unit/native/production/economic/S24 acceptance.",
+    "Risk sizing, portfolio heat, currency legs, loss/drawdown and cost gates now use original bounded Decimal facts as exact Fractions for permission comparisons. Venue quantities round down exactly; new-position loss uses original quantity, price and tick terms. Repeating Decimal values are reports only. Fresh complete arithmetic contexts ignore caller/default precision, traps, exponent range and clamp without mutating them. All original signed mandate/intent bindings, refusal codes, public Decimal fields and owner ceilings remain. Original0682 causal sources reproduced7failures/1control; intermediate report-ratio, original-tick and cost boundaries each reproduced1failure with9/10/23controls. Final190focused cases and1396combined actualSQL/HTTP/accounting/authority/execution cases pass0skip/audit0; all1169source-test hashes match, ownedPGfixture independently absent. 165rebuild/private-topology cases pass. Existing13safetyprobes produce3passing controls and10semantic assertion detections with0crashcredit. The initial missing-owner probe run and intermediate runtime-exception outcomes remain invalid semantic evidence and are retained. Canonical registry preflight374cases/383edits has0findings, but that corpus has not executed on this uncommitted risk packet. Exact published0682 independently records4351trading/1DDSskip,26PG,117voice, 5854gateway/7skips,198media and374canonical cases caught once; main40454839376 remainsFAILED2mandatory prerequisites/all17publicSUCCESS. Forecast40454839421 independently verifies114native cases,6synthetic fixtures,3cold models/parity0/232versions/kernel/cleanup/hashes. Cognitive40454839472SUCCESS has79focused, 4143broad with245declaredPG/DDSskips and1568Androidsource cases. Parent evidence does not qualify later risk source. No unit/native/production/economic/S24 acceptance is issued.",
+    "Both actual native position producers and resting cycle entries now preserve original entry/stop/tick facts through optional StopRiskTerms. Exact heat and currency risk do not consume rounded tick reports. Native FULL_STAKE positions retain their builtin stake loss, and illiquid stop/haircut inputs are exact. Unknown symbol/model/protection still holds new risk. Legacy position/snapshot bodies omit absent optional terms and reproduce the original b58 hash fb9716a45f8e9959a6c4b8871c874d3d4836d2f0182502121f1bf15f074bf300, using a fixture generated by executing actual isolated original Git source. Native margin bounds restore original Decimal subtraction scale and minimum-value spelling; all permission comparisons use exact original fractions. The original native observation assertions remain unchanged. New projection baseline reproduced6failures/2controls on unchanged b58; margin regression reproduced2failures/30controls with unchanged causal sources. Corrected224focused cases pass. First broad run was deliberately interrupted for that confirmed hosted fix after666recorded passing calls; its signal/tmpstash teardown error and actual exit1 remain retained, not passed. Owned fixture was independently absent. Stable second combined actualSQL/HTTP/execution/accounting/authority run1467passed0skip/audit0; all1172Python source/test hashes and1legacy reference JSON hash match, owned PostgreSQL independently absent.165rebuild/private-topology cases and13semantic safety probes pass:3controls/10assertion detections/0crashcredit. Selections overlap. Registry preflight374identities/383edits has0findings, but the full corpus has not executed on this uncommitted source packet. Published b58 remains failed in its original hosted evidence, including 4373trading passes/2original string failures/1DDSskip. Mandatory DDS/trusted-main prerequisites remain unwaived. No unit, live-provider, production, economic or S24 acceptance is issued.",
+    "Optional immutable NativeAccountRiskContext binds original MT5 native source/query references and cTrader native account marks into actual risk snapshots, decisions and durable replay. The physical key omits presentation aliases, while the monetary scope and original source labels remain explicit. Both real snapshot producers capture the original source without provider/order I/O. Strict metadata validation binds provider/venue, alias, currency, original balance/equity, time and source references. Typed flags remain risk_capital_qualified=False and execution_authority=False. Legacy absent fields are omitted from serialization and hashing, including the original executed-b58 fixture hash. Actual SQLite decision/replay tests reject a changed source reference; original PostgreSQL query receipt and first availability survive restart/lost commit acknowledgement and cannot cross named ledgers. Expanded failure tests preserve original funding holds, baselines and private diagnostics. Two new-WIP builder failures were reproduced; both exact published74 methods retain the two original hold controls. The first broad run was deliberately interrupted after703 passing calls for that confirmed correction, actual exit2/ownedPG independently absent, not a passing run. Second run758passed/1failed: an inherited synthetic legacy fixture used asdict(currentclass) and thereby invented the new optional field in an old body. Executing the exact original published74 serializer independently proves the original b046...hash is unchanged. The test now uses that original output, retains both original hash assertions and adds exact body and historical hash comparisons. Its original failed run/exit1/ownedPG cleanup remain retained. Final308 focused and759 combined native/risk/account/execution/expiry/recovery/SQL/HTTP cases pass0skip/audit0; all759 independently collected identities execute once, including43 new cases. All1175Python source/test hashes and both original legacy reference JSONs match; the owned PostgreSQL fixture is independently absent. Final165 rebuild/private-topology cases and13 safety probes pass:3controls/10semantic assertion detections/0crashcredit. These selections overlap. The final38-file SQL/HTTP selection covers the changed integration; unchanged payment/provider authority selections from the interrupted broader run are not claimed as final-packet passes. Registry preflight374/383 has zero findings and is not mutation execution on this packet. Exact published74 independently verifies4414trading/1DDSskip, 26PG,117voice,5854gateway/7declaredskips,198media,258monitor and374canonicalidentities caught once. Main40471188480 remainsFAILED two mandatory prerequisites/all17public jobsSUCCESS. Four supporting workflows reportSUCCESS; original forecast source/kernel/cleanup/hash evidence and cognitive79/4206 with245declaredPG-DDSskips and1568Android source cases are reconciled. Parent CI does not qualify this new uncommitted source. No unit, native/provider, production, economic or S24 acceptance is issued.",
+    "Closed RiskSnapshot JSON Schema now declares optional native_account_context with every typed source field, provider/query rules and constant-false capital/execution flags. All27 original required fields, root closure, symbol terms and inherited optional broker-position identifier remain unchanged. Original optional stop/tick terms are explicitly typed. No runtime Python application changed. Actual original E9 schema rejects both actual MT5/cTrader serialized native outputs while both actual historical bodies pass. Corrected155 focused source/contract cases and204 rebuild/private-topology cases pass0skip/audit0; selections overlap.39 new JSON Schema cases use the existing pinned jsonschema4.26.0 rebuild lock; two additional structural guards preserve source/position dataclass coverage. Native fixtures were generated by actual source builders/serializers over isolated canonical fixtures, including actual SQLite MT5 query, not live providers or grants. The initial fixture-constructor/overstrict new parity attempts are retained as failures and corrected without changing existing contract requirements. Owner/frontend registries unchanged, consolidation0findings; mutationpreflight374/383 is not execution on this new schema packet. Exact E9 main40483893887 remainsFAILED3jobs:4456trading passes/1schemafailure/1DDSskip,26PG,voice actuallySKIPPED aftertradingfailure;16public jobsSUCCESS plus2mandatory failures. Cognitive40483894030 remainsFAILED79focused/4246broadpasses/1sameunique schemafailure/247declaredPG-DDSskips;Androidsuccess. All21 original archives are independentlyverified;374canonicalidentities caught exactlyonce/383edits. Forecast40483893906 independently verifies114native,6actualsyntheticupstreamcases,3cold models/parity0/232versions/kernel/cleanup/source-controller-reporthashes. Prior failures stay failed. No unit/native/provider/production/economic/S24acceptance is issued.",
+    "Physical-account baseline/streak runtime source now joins both native producers to original same-account history; own-origin basis references prevent aggregate peak feedback after alias-scoped resets. Original native direct/journal controls retain positive behavior, signature/source lineage, replay, issuer and queued-expiry checks without widening scope. Final444 actual SQLite/PostgreSQL/HTTP/namespace/owner/restart cases pass0skip/audit0;444unique call IDs once, all1196Python hashes and both original legacy fixtures match; ownedPG independently absent. 215rebuild/private-topology passes before final chronology refinement overlap; final444 cover it. Retained two actual chronology failures are fixed, and original fixture/schema failures remain recorded. Scope/owner/frontend/consolidation checks pass unchanged; mutationpreflight374/383 is consistency, not corpus execution. Exact publishedf74 main40517467959 remainsFAILED2mandatoryprerequisites/all17publicSUCCESS; original selected archive independently verifies4495trading/1DDSskip,26PG,117voice. Flow adjustment/collateral/all-origin reservations, native finality/reconciliation and all remaining programme requirements stay open. No whole unit/native/production/S24 acceptance.",
+    "Published25a actualgenuinehook/GREEN180/normalpush/independentreadback. Main40632571398 publictrading job122632125023 failed collection5errors from a documentary-only jsonschema test import; originalarchive verifies26PGpasses and5collectionerrors, voice unexecuted. Current2file test-only repair keeps native serialization tests in trading and moves strict JSONSchema optional-reference assertions to its existing isolated dependency owner. Actual35sourcechecks pass withjsonschema importsdenied;41schema checks pass;4610tradingitems collect withoutjsonschema, collectiononly/0runtimepasscredit;0skips/auditviolations. No runtime/workflow/lock/authority changes or acceptance. Future2file collateral WIP remains separate.",
+    "Held physical projection failures no longer turn a displayed shared peak into a fresh own-alias contribution. Four real producer/read-or-SQL-commit-ACK-loss counterexamples and two higher-native-equity counterexamples failed before correction. Recovery now independently retains the original native equity sample rather than the displayed aggregate; missing or held funding never seeds risk capital. Both original alias-scoped owner resets and the separately observed higher natural peak remain effective after replay. Two old account harnesses now initialize the real signed test mandate required by the actual service; all42 original assertion ASTs remain identical. Final494actualSQLite/PostgreSQL/HTTP/source/namespace/authority/replay/recovery/funding cases pass0skip/audit0;494unique callIDs once,all1201pinnedPythonhashes match,ownedPG independently absent. The83 focused checks overlap. Owner contracts unchanged and mutationpreflight374/383/0findings is consistency only. Published89661 full hosted trading remainsFAILED4607pass/2fixturefail/1DDSskip;26PGpassed andvoiceunexecuted afterfailure. Untracked collateral/order read components remain separate unfinished reservation foundations, not accepted features. Flow adjustment, all-origin collateral/reservations, original policy/active mandate reconciliation, pending/partial/uncertain/manual exposure, native settlement and all remaining canonical units stay open.0formal/native/production/S24acceptance.",
+    "Original native collateral now retains exact cash-backed bounds without borrowing credit-inclusive reported free margin. Original commands and receipts across aliases retain pending, partial, open, uncertain and proven-no-effect quantities; missing margin is never zero. The actual cTrader adapter reads pinned expected-margin protocol and a bounded SQL book captures original input/context/contract, exact native quantities and money scales with expiry inside the writer, replay, restart and independent readback. Current-price and GSL limitations remain explicit; no reservation/execution grant is issued. Final333 source/SQLite/PostgreSQL/protocol/recovery cases pass0skip/audit0;333unique callIDs once and1207pinnedPythonhashes match; ownedPG independently absent. Original failures retained, including native codec enum handling, missing-evidence PostgreSQL fixture expectation, nested-vs-outer ACK fixture and an incorrect module import. Published d156 artifact independently verifies4615tradingPASS/1declaredDDSskip,26PGPASS,117voicePASS; does not qualify these later changes. Shared reservations, active mandate/policy reconciliation, native finality, payment effects and all other canonical requirements remain open. No whole-unit/native/production/S24 acceptance.",
+    "Both existing risk producers now archive the actual effective mandate and original standing-signature/public-key evidence used by the real kernel. A separate temperament grant retains its exact signed raw input; normalization cannot substitute a different signature subject. Original readback independently checks policy/decision hashes, scope, lifetime and P256 signatures after SQL reopen or key rotation/removal/revocation, without re-admission. The result is immutable OriginalMandatePolicy data, not a TradingMandate or current grant. Legacy/invalid proof stays UNBOUND without dropping original native losses or history. Positive account approval and both original producer paths execute; no trade effect is issued by these readbacks. Final766actualsourceSQLitePostgreSQLHTTP/recovery/authority cases pass0skip/audit0;766unique callIDs once/all1210pinnedPythonhashes match/ownedPGabsent. The69focused checks overlap. Initial68PASS/1source-temperamentFAIL and764PASS/1PGfault-fixtureFAIL remain recorded, then corrected without weakening original assertions or owner controls. Published e12 original selected artifact independently verifies4708tradingPASS/1declaredDDSskip,26PGPASS,117voicePASS; four supporting workflowsSUCCESS, mainstillrunning with two independently confirmed mandatory admission failures. Full current active-policy arbitration, all-origin reservations, native finality, payment settlement and the entire unchanged programme remain open.0formal/native/production/S24acceptance.",
+    "Both MT5 source transports now implement original price/side/quantity-bound isolated-margin reads. Signed Windows worker validates native increments, representable inputs, original account/model/precision and unchanged deadline before/after SDK read; missing/invalid values never become zero. EA source adds capability-bound identity/18-field expiry framing, original binary64 metadata and UTC-second uncertainty, with no order_check/send effect. Actual signed HTTP/queue plus public-adapter/SQL readback paths execute on explicit SDK/EA source fixtures. Original native request nonce or queue ID is retained. Shared NativeMarginBook independently binds the existing risk-input account context, supports restart/expired historical data and lost storage ACK without native requery, and keeps reservation_amountNone/authorityFalse. Final1050actualsourceSQLitePostgreSQLHTTP/protocol/recovery/protection cases pass0skip/audit0;1050unique calls once/all1218pinnedPython-and-deploy-EA hashes match/ownedPG independently absent. Focused144 overlap. Initial51PASS/1decoder-exception-contractFAIL and110PASS/1sameFAIL remain recorded; invalid scope was already refused and the pure decoder now consistently raises ValueError. Native MetaEditor compilation of the modified EA is PENDING until exact-head hosted source job; actual Windows SDK/terminal/provider qualification and deployment NOT_ISSUED. This isolated estimate excludes existing positions/pending orders and does not replace all-origin reservations, current active-policy arbitration, native finality, settlement or the complete canonical backend/Android programme.0formal/native/production/S24acceptance.",
+    "Both actual native snapshot owners now carry original all-alias possible-fill stop-risk commitments into the existing RiskAuthority portfolio heat, position-count and currency-leg limits. Original commands, sealed approving inputs and native receipt position IDs bind the data; missing positions do not imply cancellation. Partial native coverage is counted once; independent opposing pending fills cannot prematurely cancel currency risk. Protection and execution authority remain explicitly false. Original native no-effect or a source-bound fully-filled close with current position absence can release position stop risk, never fee/cash settlement. Cache uses incremental rows between financial changes, retains original availability cutoffs and SQL reopen/namespace semantics. Two actual owner counterexamples failed APPROVED before the fix. Full trading plus original backend HTTP recovery/schema/workmap qualification: 4951 actual passes, 0 declared skips, no failures or storage-audit violations; every call once and all 1223 pinned input hashes match; owned PostgreSQL independently absent. Legacy snapshot bytes and hashes and the 27 original required schema fields remain intact. No formal unit/native/production/S24 acceptance issued.",
+    "Both actual native snapshot owners now retain original pending contract terms and separate current risk-owner supplied valuation terms. Exact pending loss uses the larger original/current loss without reducing original commitments. Missing current symbol terms or changed instrument/currency/unit/model hold new risk; independent protection retains its owner. Incremental cached histories revalue on each snapshot without another financial event/full scan. Four actual counterexamples on an independently exported exact eac4761f runtime approved while current heat/currency risk exceeded its signed limit; all four now refuse at their correct original gates. Original parent snapshots/decisions retain exact serialized bodies and hashes, but original-only valuation cannot authorize current risk. Full trading plus selected backend HTTP recovery/schema/scope checks: 4968 passes,0 skips/failures/audit violations,every call once,all1225 pinned inputs match,owned PostgreSQL independently absent.110 focused checks overlap.0formal/native/production/S24 acceptance issued.",
+    "MT5 signed SDK and authenticated EA source transports now expose original symbol terms with native loss/profit tick values, quantity/tick rules and base/profit/margin currencies. Both public adapters preserve original request/nonce or queue identity, exact deadline, account scope and original numeric/clock formats. Explicit zero loss value remains UNPRICED; no missing value becomes zero or LIVE. Two genuine legacy signed symbol reads accepted a switched login/currency while retaining the old label; post-SDK readback now fences login/server/currency/demo changes without changing stable legacy shape or requiring trading permission. EA adds separate SYMBOL_CONTRACT capability and18-field expiry frame outside entry claims. NativeSymbolBook independently binds the existing MT5 account-query journal before a risk decision exists, preserving SQL replay/reopen/namespace isolation, queued/writer expiry and lost-ACK recovery without native retry. Final full trading plus selected backend HTTP/schema/scope qualification:5026pass0skip/fail/audit,every call once,all1234 pinned input hashes match,ownedPostgreSQL independently absent.56focused checks overlap. Modified EA native compilation PENDING exact-source hosted evidence.0formal/native/production/S24acceptance issued.",
+    "Original MT5 quote snapshots now flow through both signed SDK and authenticated EA/public adapters and the existing original-account-query SQL owner. Both native account and contract observations are retained around tick access. Original bid/ask/last, native full-tick time, subscription/delay facts and exact integer volume remain explicit; last-trade volume is not lots or genuine depth. Causal view distinguishes missing ticks/sides/time, inconsistent/future time, crossed prices, unverified subscription/entitlement, delayed and stale data. It never invents native time from local receipt time or refreshes history on replay. Original symbol receipt shape and data-kind isolation remain compatible through shared SQL ownership. Final full trading plus selected backend HTTP/schema/scope qualification:5069pass0skip/fail/audit,every call once,all1241 pinned input hashes match,ownedPostgreSQL independently absent.57focused source passes overlap. New modified-EA compilation PENDING exact-source hosted evidence; parent symbol EA compilation is retained separately.0formal/native/production/S24acceptance issued.",
+    "Original native catalog discovery/alias resolution now reaches the registered paired-owner HTTP route through the existing dedicated catalog store. The new read-only SQLite opener creates/migrates no source and refuses writes. Discovery retains enabled/hidden/archived/omitted-name rows, realm/account identities and original availability. Exact-name collisions stay ambiguous even on a one-row page; explicit IDs disambiguate without trading permission. Source/selector/revision-bound pages preserve original history. Future captures, invalid/conflicting selectors and unavailable/corrupt/over-budget sources remain explicit; disconnected callers retain their owned read slots until completion. Existing frontend InstrumentRef is supplied only for representable original names, with no invented contract revision. Broad SQLr2 remains actualFAILED exit1:5159passed/1outdatedstrictpublic-methodinventoryassertion. The only subsequent AST change adds the two explicit readonly members to that expected set; every other assertion and banned capability check remains intact. Targeted SQLr3 reran the complete affected gateway module, catalog/HTTP/depth/private-core/schema/scope cases:228passed0skip/fail/audit,actualinner/outerexit0,all1255finalinputhashesmatch,ownedPostgreSQLindependentlyabsent. Both runs cover5160unique current-source case identities after that sole inventory correction; runtime input bytes are unchanged. This is reuse of unchanged runtime evidence plus an actual targeted rerun, not a single clean full rerun.84focusedpassesoverlap;30PostgreSQLcaseswereexplicitlydeselectedonlyinthefocusedrun. Frozen unit contracts/dependencies and allidentitysets/105sourcefunctioncontracthashesremainintact;source-rowhashupdatesareonlyactualcitationrefreshplusoneadditivecatalogextensionperexistingchartfeature/surface.0formal/native/production/S24acceptancesissued.",
+    "Final MT5 SDK and EA entry paths now calculate original native isolated margin and compare against cash-backed capacity before native handoff. Credit cannot fund entry risk; available amounts round down and requirements up at original account precision. SDK uses exact Fraction over original text; EA uses 17-digit original text and integer-string arithmetic. Scope and cash are rechecked around calculation and at the final guard; original identity/permission/deadline checks remain. Known insufficient and unavailable facts remain distinct; explicit zero native requirement works with positive cash. Market/limit/native side and protective tighten/close behavior are preserved. Baseline actual signed SDK fixture reached unsafe native sends in2cases; exact original published EA entry body also reached2unsafe simulated sends. These are explicit source fixtures, not connected brokers. Final full source qualification:5215passed0skip/fail/error/audit,actualinner/outerexit0,everycallonce,all1258inputhashesmatchincludingactualCPPfixture/SDK/EA/README,ownedPostgreSQLindependentlyabsent. Original failed attempts remain retained. Actual new EA MetaEditor compilation PENDING exact-source hosted job. Shared reservations/post-entry margin floors/fee-and-fill contingencies/full valuation and financial qualification remain open.0formal/native/production/S24acceptancesissued.",
+    "Actual native EA PLACED acknowledgments now remain ACCEPTED with the exact uint64 native order ID, zero filled quantity, no invented average fill or position, and only explicitly confirmed protection. Missing or invalid broker clocks remain unknown. Contradictory pending acknowledgments retain UNKNOWN and require original reconciliation. Submit independently reads the original durable SQL claim/result; timeout, stale account availability and replay cannot create a new claim or renew its completion. Valid original completion clocks and receipt hashes survive duplicate results, reopen and historical recovery. Corrupt/unavailable completion clocks withhold local receipt availability without erasing a known effect. Existing supported entry types remain MARKET; no new entry permission or native execution is added. Final full source qualification:5272passed0skip/fail/error/audit,actualinner/outerexit0,everycallonce,all1259inputhashesmatch,ownedPostgreSQLindependentlyabsent. 2880 original test functions retain identical AST.0formal/native/production/S24acceptancesissued.",
+    "Both native MT5 entry paths now preserve the existing RiskAuthority200% minimum after adding the original proposed isolated margin to native committed margin. Original cash excludes credit; money bounds round conservatively, and equality refuses. The lower original broker-reported level also remains binding. SDK uses exact Fraction; EA retains full original decimal mantissas/exponents and integer-string products, including sub-minor used margin and strictly above-floor reported fractions. Before/after/final facts cannot renew an originally insufficient margin budget. Known floor breach, insufficient free cash and unavailable facts remain distinct. Healthy/zero-requirement entries and protective tighten/close retain their existing paths. Neither path sizes or grants execution. Final full source qualification:5314passed0skip/fail/error/audit,actualinner/outerexit0,everycallonce,all1260inputhashesmatchplus2legacyfixtures,ownedPostgreSQLindependentlyabsent. 2951 original trading/rebuild test functions retain identical AST. New actual EA MetaEditor compilation PENDING exact-source hosted job. Shared reservations, fee/fill contingencies, native working-order and economic finality remain open.0formal/native/production/S24acceptancesissued.",
+    "The actual MT5 SDK/EA and cTrader runtime entry path now captures an original native margin read for the exact sealed intended order, stores its full command binding through the existing NativeMarginBook and independently reads the original committed receipt before ORDER_COMMAND. Original durable risk input, account/product/side/quantity and full command seal remain linked. MT5 retains original reference-price identity; cTrader explicitly retains provider-current-price-only semantics. Quote/command expiry is checked inside the SQL writer and again after current-risk reads; quotes and bindings share one monotonic committed storage clock; kill, lease, owner and existing execution guards retain authority. Historical replay preserves the first receipt, lost storage ACK remains typed unknown, and competing PostgreSQL writers retain one completion. This is source evidence/data-only, not a shared financial reservation or new order authority. Final clean SQL/HTTP qualification covers all 5348 independently discovered cases exactly once, with0fail/error/skip/storage violations, actual inner/outerexit0 and the owned PostgreSQL fixture independently absent. All 1265 source/fixture pins match; 2961 original trading/rebuild test functions retain identical AST;5 reviewed consumer-test fixture migrations retain behavioral assertions and expand exact native-read traces.0formal/native/production/S24acceptances issued.",
+    "Shared-resource source work remains IN_PROGRESS. Original sealed entry/native-margin/current-risk evidence and real signed mandate proof now feed exact projected cash, post-entry margin-floor equity, stop-risk, signed account/instrument slot counts and independent currency-leg intervals. The existing SQL writer retains one provisional hold across actual SQLite/PostgreSQL competitors; aliases share physical account capacity. Lost commit ACK, queued expiry, current-key revocation, original replay and resealed over-allocation retain explicit behavior. Original missing requirements are stored durably and cannot change with later code. Provisional holds cannot dispatch orders or qualify reservations. Broader pre-metadata-fix source:5390passed0; all1274pins matched before mutation. Final corrected source:122targeted SQL/source passes0 plus1independent receipt-replay pass. Only3new-component source/test inputs differ between these runs; all final source pins match, every current5391discovered case occurs in their coverage union, and all inherited test files remain byte-identical. These overlapping runs are not added together or called one current-source full run.0formal/native/production/S24acceptances.",
+    "Original native closing-balance observations now flow through the existing financial movement owner and existing ledger, not a second journal. An adjacent original native balance version supplies the exact scoped delta; original account marks, cash rows or prior closes can anchor it. Raw commission/conversion fields remain signed/unknown as observed; no component sign, zero fee, settled profit, spendable capital or parent release is inferred. The owner preserves original durable requests and readback, actual SQL serialization, unknown commit ACK, clock after queued writer-lock acquisition, namespaces and late source conflicts. Cash/deal IDs have separate identities and ambiguous shared native versions refuse double posting. Bounded catch-up and read-only projections retain pending/missing-anchor versus conflicting-version states. The actual funding capture now collects deals before materializing, so a new close appears in the same sweep. Final449source/SQLite/PostgreSQL/HTTP/consumer cases pass with0fail/error/skip/audit;449independently collected calls each execute once, all1277source/fixture pins match, and ownedPostgreSQL is independently absent. All inherited test files remain byte-identical. No whole-unit/native/provider/production/S24 acceptance is issued.",
+    "The existing receipt-to-TCA-to-durable-learning path now measures signed execution costs with exact rational arithmetic independently of caller Decimal precision, rounding, traps and exponent settings. Delay, submission and slippage plus recorded nonembedded charges equal direct signed fill-versus-reference cost; spread remains a separate embedded-cost diagnostic. Finite monetary values materialize exactly. Recurring ratios have original exact numerator/denominator and an explicit deterministic28digit display. New arithmetic claims are independently checked before broker/strategy-health or nested experience-artifact evidence is cached, including cold replay. Legacy numeric spelling and absence of the additive witness do not rewrite or alone invalidate original historical rows; changed economics still conflict. The receipt fee input does not attest complete native fees, financing, future obligations or settlement. Final5261actual trading/SQLite/PostgreSQL/HTTP consumer cases passed,0fail/error/skip/audit; independent collection and call IDs match exactly once, all1280input hashes match and ownedPostgreSQL is independently absent. All300inherited test files/3025test functions remain byte-identical. No whole-unit/native/provider/production/S24 acceptance or dispatch authority is issued.",
+    "The existing native margin/entry owner now reads original commission vintages and gross native entry volume. All four pinned commission types use exact native units; precise fields never fall back to deprecated fields or missing-as-zero. Minimums combine only in the same proven denomination; unknown conversion, financing, sign convention and charge-count bounds remain explicit. Conditional scenarios retain their exact inputs and confer no fee reservation. Original dispatched commands, verified receipts and deduplicated deal publications supply gross entry volume across aliases, preserving raw fees and original availability anchors. Fees, other orders, closes or changed history cannot reopen an entry allowance. A real counterexample showed the actual cached pending-risk owner accepting a zero-fill rejection after an original native fill arrived. It now reloads on deal statements and refuses native overfill or contradictory no-effect claims; original partial readback can restore conservative pending risk. Product code passed5303full trading/SQLite/PostgreSQL/HTTP cases plus2separately added and source-pinned recovery/ownership cases:5305unique current cases,0fail/error/skip/audit, current discovery/call IDs once across the final partition union, all1287source/fixture hashes matching and ownedPostgreSQL independently absent. This is two explicit partitions, not one clean current-collection run. All303inherited test files/3036original test functions remain byte-identical. Complete future fee/fill/price/multi-asset obligations, parent/child lifetime budgets, qualified policy/cohort and all-origin transactional reservations/economic settlement remain open. No unit/native/provider/production/S24 acceptance is issued.",
+    "Native cTrader execution receipts retain unknown commission/row precision as null rather than fee zero; actual fills, quantity, positions and protective stops survive missing or malformed optional charge metadata. Explicit zero and the existing recorded magnitude convention remain available; exact int64 charges survive hostile decimal contexts. The original sealed receipt fields/defaults remain compatible. Both runtime cost consumers and owner-confirmation adoption record cost-unavailable without emitting numeric TCA, and existing measured-receipt repair remains positive. SQLite/PostgreSQL original receipt readback and cold position/protection recovery preserve null and its original hash; no synthetic cost-learning evidence is produced. Derived price/gross PnL requires recorded charges, while reported net cash retains its explicit convention without a fabricated charge decomposition. Final full source run: 5334 passed,0fail/error/skip/storage violations; exact independent collection/call IDs each once, all1297input hashes matched; ownedPostgreSQL independently absent. All308inherited test files/3062original test functions remain unchanged. Original wire counterexamples and the failed intermediate full run are retained. This partial BE009/010/012 source packet does not complete native fees, economic finality, parent budgets, reservations or any unit/native/production/device acceptance.",
+    "Actual MT5 Windows-worker and EA producers read original entry-deal commission/fee components, bind native account/order/deal/position/symbol/side/volume and preserve explicit zero, signed components or unavailability. Optional cost reads cannot delay unprotected-fill recovery. Core parsing is exact under caller decimal traps and does not treat absent/mismatched data as0. Receipt-bound unavailable-cost facts are durable/idempotent; native fills, thesis, protection and real session restart survive unavailable costs without numericTCA. Later zero-effect receipts cannot replace original entry-cost knowledge. Owner replay restores the original cost ratio/model, including legacy records, without duplicateTCA/learning or overwriting conflicts. Final selected source suite:5385passed/0fail/error/skip/audit, one independently identical collection/call set eachonce, all1303input hashes matched, ownedPostgreSQL absent. All5334published-parent cases remain;308/310inherited test files are byte-identical and every original assertion/test signature remains unchanged across two documented fixture extensions. Five original full-suite failures and all intermediate failures remain retained. This partial BE009/010/012 source packet does not complete future fees, economic finality, parent budgets, reservations or formal/native/production/device acceptance.",
+    "The actual shared ExecutionRouter now serializes its final durable idempotency check and original command append under the existing SQLite/PostgreSQL writer. Transport requires an independently read committed command; a stale pre-existing router cannot resend the same key. Caller write/read transactions cannot dispatch staged commands. Grant/lease/kill/current controls and original deadlines are checked after writer acquisition and again after independent readback. Lost commit ACK/readback remains an original-command publication uncertainty with no transport attempt; confirmed post-commit refusal records source-bound NOT_DISPATCHED rather than inventing a native effect. Actual process death, concurrency, SQL lock wait, signed SDK handoff and restart preserve the original key. Final source suite:5,408 passed, zero failures/errors/skips/storage violations, one independently identical collection/call set each once; all1,305 input hashes matched and ownedPostgreSQL independently absent. All5,385 parent cases and all314 inherited test files/3088 original test functions/7597 assertions remain unchanged. Isolated published-parent reproduction fails both unsafe paths with652 input pins verified. Focused90 overlaps the final run. This entry publication fence does not complete parent/child budgets, all-origin reservations, native/economic reconciliation or formal/native/production/device acceptance.",
+    "Actual pre-trade controls now recover original account command times, keys and exact quantities from the shared SQLite/PostgreSQL ledger. Recreating a control owner cannot reset its configured rate window or erase the size history used by the fat-finger control. Only the exact independently committed current command is excluded from prior-history checks; its admission remains recorded. Invalid/future/conflicting/unbound history, changed joint configuration, a foreign ledger owner and unmerged legacy notes refuse new entries while protective reductions remain available. Optional PostgreSQL test imports now run inside the existing opted-in fixture boundary, preserving every assertion. Primary source qualification: 5,442 passed, zero failures/errors/skips/storage violations. Fresh backend-lock-only cognitive selection: 5,126 passed, 311 declared skips, zero failures/errors/storage violations; psycopg absent before and after. These overlapping suites are separate. All 1,308 input hashes and both discovery/event identity sets match; owned PostgreSQL is independently absent and dependency-light children reaped. All 3,100 original test signatures and 7,651 assertions remain unchanged across 316 inherited test files: 315 byte-identical, one optional-import relocation. This partial BE-003/009/010 packet does not complete immutable parent budgets, policy/cohort admission, all-origin financial reservations or native/economic reconciliation.",
+    "Original cTrader order details now retain account-bound raw order/deal facts, absent optional fields, conflicting execution totals and original query availability. The actual execution router reads an already dispatched native order through a durable request journal bound to its original command, native margin input and receipt-owned order identity. Reopened and repeated requests return their first committed result without another provider call. Writer acquisition rechecks expiry; staged caller transactions cannot query or publish original evidence; lost commit/readback acknowledgements require original-request recovery. The existing pending-risk owner observes new journal records and blocks fills contradicting no-effect receipts, overfill, changed deals and unreconciled native facts. A cancelled or empty snapshot does not release original pending quantity, prove flatness, finalize fees or authorize execution. Full affected source suite: 5,497 passed, no failures/errors/skips/storage violations; all 5,442 parent cases retained with 55 additional cases. Focused real PostgreSQL selection: 191 passed, no failures/errors/skips/storage violations. These overlapping suites are not additive. Owned PostgreSQL fixtures are independently absent. All inherited tests in trading/tests, backend/tests and tests/rebuild are byte-identical to the published parent. This is a partial BE-003/009/010 source packet; cancellation/amend/replace, full parent budgets, all-origin financial reservations and native qualification remain required.",
+    "Signed cancellation of an original CTrader pending entry now has a positive source path through the actual execution router, original command/receipt-bound query owner, registered-owner verifier, shared SQL journal, adapter and bounded framed transport. Exact target/deadline and original/current lease epochs are bound to the signed intent. Durable nonce/request admission precedes the native write; expiry, current key, lease and source checks repeat after writer acquisition/readback and at send. Storage admission reserves a result slot. Original requests never resend after restart, timeout or lost commit/reply; recovery reads the same native order. Pre-cancel snapshots cannot become post-cancel evidence, and replayed queries do not republish or roll back later knowledge. A newly signed attempt after explicit scoped cancellation rejection requires later native reconciliation; a still-working snapshot alone cannot clear an unknown attempt. Historical attempt disposition remains separate from current native observations. Closing and unowned orders refuse; new-entry halt does not disable the scoped reduction. Partial fills/raw responses and unavailable receipt time survive, without zero-fill cancellation receipts or financial release. Working zero-fill native orders now contradict an earlier no-effect receipt in the actual pending-risk owner. Affected source suite:5,556 passed, zero failures/errors/skips/storage violations; all5,497 parent cases retained and59 cases added. Focused real PostgreSQL selection:200 passed, zero failures/errors/skips/storage violations. Backend-lock-only new cases:53 passed and6 declared PostgreSQL skips; those same6 cases executed in real PostgreSQL. These suites overlap and are not additive. Owned PostgreSQL is independently absent. All653 inherited Python test files are byte-identical, preserving6,739 functions and17,926 assertions. This partial BE-003/009/010 source packet does not complete financial reservations/release, automatic qualified parent/child control, amendment/replacement, gateway/client controls, the provider matrix or native acceptance.",
+    "CTrader closing execution receipts now retain their own recorded commission and money precision. An absent/invalid optional charge remains unknown without erasing the actual fill, original order/position identity or protection. Separate immutable native commission provenance distinguishes actual measured zero from historical default zero without changing legacy receipt seal bodies. Missing original charge evidence remains unknown; a native deal cannot count under a second close request. Both actual trade-review consumers independently read committed original command, entry receipt, close receipts and ExitJournal requests/dispositions. They include each recorded exit charge once; replay does not charge twice. Partial-then-full closes use every recorded exit price/quantity and original entry quantity instead of the last price times the residual position. Exact rational arithmetic preserves the recorded aggregate. Original entry fees/TCA and receipt hashes remain immutable. Foreign, future, corrupted, conflicting, ambiguous or incomplete source holds an explicit unknown charge; independently reported net cash retains its existing precedence. Framed source peers, real SQLite and PostgreSQL cover both review consumers, restart/readback, replay and negative scope. Full affected suite: 5,604 passed with zero failures/errors/skips/storage violations, retaining all5,556 parent cases and48 new cases. Focused real PostgreSQL:138 passed with zero failures/errors/skips/storage violations. Backend-lock-only new cases:45 passed with3 declared PostgreSQL skips; those3 execute against real PostgreSQL. Suites overlap. All659 inherited Python test files are byte-identical, preserving6,770 test functions and18,026 assertions. Owned PostgreSQL fixtures are independently absent. This source packet retains the existing commission-magnitude convention and does not qualify signed rebates, all fees, multi-entry/deal economics, FX, cash reconciliation or settlement/finality. CTrader economic finality and all financial release/production/native acceptance remain unissued."
+  ],
+  "obligations": "obligations/OBLIGATIONS.json: preserved observations with source implementation evidence and explicit remaining native/unit obligations.",
+  "pre002_challenge": "pre002/challenge/: 324 author-prepared dossiers (AUTHOR_CHALLENGED_PENDING_INDEPENDENT_REVIEW)",
+  "pre002_reviews": "pre002/challenge/review/: NEG_REC_REVIEW (37 adequate / 6 gaps), PRODUCT_TRUTH_TRACE_REVIEW (189 classified), DECISION_REGISTER (49 real dependencies, 18 owner decisions)",
+  "amendments": {
+    "AP-001": "Original verified proposal retained; not admitted.",
+    "AP-002": "Standalone candidate 1618 / cumulative 1632; ten checks pass each, thirteen preservation regressions; not admitted."
+  },
+  "ci_prerequisite_commits": [
+    "0c7fa8cf DDS sibling checkout",
+    "17a7cb81 services stream-host environment"
+  ],
+  "continuation": {
+    "owner_instruction": "opus is nolonger available finish building from the current state to completion",
+    "lead": "Codex",
+    "recovered_head": "2a10b7884b9bcf214395d5c15815ab6d96f56845",
+    "pr": 105,
+    "report": "docs/rebuild/rev118/CONTINUATION_20261022.md",
+    "application_rebuild_started": true,
+    "baseline_maintenance_commits": [
+      "6ba1fef7",
+      "eba674ac",
+      "461186ef",
+      "637eaf96",
+      "fca473cc",
+      "c2a27848"
+    ],
+    "tested_android_head": "752d265b11ba643ed309481b110248f8b7fe323b",
+    "hosted_result": "receipts/HOSTED_SOURCE_752d265b.json",
+    "mutation_reconciliation": "ci/MUTATION_RECONCILIATION.md and ci/MUTATION_RECONCILIATION_MAPPING.json",
+    "verified_source_head": "f74aac3bf503478cd6800949b5541b4c17609d9c",
+    "source_qualification_run": 40517467959,
+    "latest_checkpoint_report": "docs/rebuild/rev118/CHECKPOINT_20261028_PHYSICAL_RISK.md",
+    "previous_verified_source": "3c6969ebbec39f2ad9f2836a6bd8acdb487adc34 published; exact CI40228254162 all17public jobs pass, two unchanged prerequisite failures",
+    "qualification_scope": "Physical-account baseline/streak runtime source now joins both native producers to original same-account history; own-origin basis references prevent aggregate peak feedback after alias-scoped resets. Original native direct/journal controls retain positive behavior, signature/source lineage, replay, issuer and queued-expiry checks without widening scope. Final444 actual SQLite/PostgreSQL/HTTP/namespace/owner/restart cases pass0skip/audit0;444unique call IDs once, all1196Python hashes and both original legacy fixtures match; ownedPG independently absent. 215rebuild/private-topology passes before final chronology refinement overlap; final444 cover it. Retained two actual chronology failures are fixed, and original fixture/schema failures remain recorded. Scope/owner/frontend/consolidation checks pass unchanged; mutationpreflight374/383 is consistency, not corpus execution. Exact publishedf74 main40517467959 remainsFAILED2mandatoryprerequisites/all17publicSUCCESS; original selected archive independently verifies4495trading/1DDSskip,26PG,117voice. Flow adjustment/collateral/all-origin reservations, native finality/reconciliation and all remaining programme requirements stay open. No whole unit/native/production/S24 acceptance."
+  },
+  "provenance_correction": {
+    "finding": "90 forecast hashes previously reported unverifiable",
+    "resolution": "All 90 requirement and 48 packet hashes match original bundled records with sorted, non-ASCII-escaped JSON and default separators.",
+    "evidence": "pre002/challenge/review/FORECAST_PROVENANCE.json",
+    "qualification": "Documentary source provenance; independent review remains separate."
+  },
+  "resolved_blockers": [
+    {
+      "id": "BLK-008",
+      "what": "All 374 original legacy mutations pass in source run 39725953372; 382 edits, zero survivors, exact per-case coverage. Original stale inputs, misleading CI status, invalid mutants and three complete-corpus survivors corrected with retained failure evidence.",
+      "blocks": "No remaining legacy source-corpus execution gap; independent unit/admission review remains separate.",
+      "needed_from": "Finish the full hosted corpus, triage any survivors/invalid executions, and retain independent preparation review of the semantic mappings.",
+      "status": "RESOLVED_SOURCE_VERIFICATION",
+      "evidence": "ci/MUTATION_CORPUS_c2a27848.json"
+    }
+  ],
+  "current_action": "Publish using genuine hooks, terminal required-baseline committed verification before normal push, independent exact remote readback and exact-head CI. Repair the confirmed family remaining cost-basis error after partial exits and later additions, and verify original lifetime history recovery and actual risk/expansion consumers. Complete the original native economic owner for per-deal/correction/bust/late charge identity, signed fees/rebates, carry/FX/principal and cash/finality; retain scalar ambiguity as unknown until that owner supplies evidence. Continue atomic amend versus cancel-replace, governed parent/child lifetime budgets, all-origin shared financial reservations/outbox/effect consumers, manual/payment/transfer/handover/provider reconciliation and nonduplicated release. Preserve immutable V1 missing-obligation receipts and native policy/runtime admission. Retain the intermittent Android deep-link instrumentation failure and inspect exact-head CI; unchanged parent replay passed18 cases with4 declared skips, without S24 acceptance. All82backend units,12 verification packets,38forecast/research backend units and every market/chart/voice/assistant/crypto/operations contract retain full scope. Android follows the actual BG-001 gate and uses the provisioned production profile on Van trading core; genuine signing and actual Artemis/S24 acceptance remain required. Profitability is evaluated with evidence, never guaranteed.",
+  "updated_at_utc": "2026-10-30T12:45:21.784793+00:00",
+  "execution_method": {
+    "path": "BUILD_EXECUTION_PLAN.md",
+    "scope_index": "SOURCE_WORKMAP.json",
+    "meaning": "Owner directs source reuse, full workflow completion, explicit gaps and compact evidence under the unchanged canonical programme. No omitted functions or silently weakened states/controls."
+  }
+}

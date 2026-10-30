@@ -1,0 +1,128 @@
+{
+  "schema": "van.rev118.physical-pending-stop-risk-source/1",
+  "source_parent": "42d8b386e61f2ea26730d4232cab494b3173320e",
+  "observed_at_utc": "2026-10-28T08:30:19.517726+00:00",
+  "source_files_sha256": {
+    "tests/rebuild/test_native_risk_schema.py": "3c0411053ec0b1e715451998d7ea6804749e72bd5c3cf3ba0b9e6b3e6ebec3d9",
+    "trading/tests/test_contract_schemas.py": "0c9e5f0ffbca29cf9c0ee35b2987bcf89bd9a5730b116f1f4b3956048c195d7f",
+    "trading/tests/test_physical_pending_risk.py": "d1fc5b77e83c425383e65d44df649eef61c340c55e03171a71bf35b26b60fdee",
+    "trading/tests/test_physical_pending_risk_postgres.py": "1032f10a45f895ac36b382b424320f0b6bf60ce9f94ee8054a4183c3a7589ec8",
+    "trading/vati/app/account_service.py": "86a026b7ba1ce93704249e7f17552790d466dd328c6c40e30879c2e0904e1be0",
+    "trading/vati/app/cycle.py": "91e70b873fc804530cc527dd8eb301a0424572396a0c8fddcc335f8f315c4fa5",
+    "trading/vati/contracts/schemas/risk_snapshot.schema.json": "594cc4772a05f479da4b38fc812474e44b96696887103fdb17be381a8fce3f8d",
+    "trading/vati/risk/authority.py": "76e35833f5d28394aac76c409021859e6939d88f0bc79f9d6420284bccb84cdd",
+    "trading/vati/risk/contracts.py": "b0833ee5a08d4a39d3d12475ca9a3375253addd33a164b913e4e865c1ecaea3e",
+    "trading/vati/risk/heat.py": "0ee31b8030a751fbf59f05152133532c7a1475bbcbeb23404e155f29afdaa23c",
+    "trading/vati/risk/pending.py": "19c63239c460fceeaa40a453951b6f7bc7a789ef825c1b67ace57cfcf395f7f7",
+    "trading/vati/risk/physical_pending.py": "f594bc8ef8bd5e56e79b08ebe2f9ebfd4fdde13fe780a0cadbd03280c326d0bb",
+    "trading/vati/risk/positions.py": "736b23a85c38efbbc9114619400828129e2e5969d0a9b382021c68693bce2966",
+    "trading/vati/risk/serde.py": "e1902a19521b977f1170e803740e8e65322efaf3f3a5d9ca54ca1200ac16a123"
+  },
+  "implementation": "Both actual native snapshot owners now carry original all-alias possible-fill stop-risk commitments into the existing RiskAuthority portfolio heat, position-count and currency-leg limits. Original commands, sealed approving inputs and native receipt position IDs bind the data; missing positions do not imply cancellation. Partial native coverage is counted once; independent opposing pending fills cannot prematurely cancel currency risk. Protection and execution authority remain explicitly false. Original native no-effect or a source-bound fully-filled close with current position absence can release position stop risk, never fee/cash settlement. Cache uses incremental rows between financial changes, retains original availability cutoffs and SQL reopen/namespace semantics. Two actual owner counterexamples failed APPROVED before the fix. Full trading plus original backend HTTP recovery/schema/workmap qualification: 4951 actual passes, 0 declared skips, no failures or storage-audit violations; every call once and all 1223 pinned input hashes match; owned PostgreSQL independently absent. Legacy snapshot bytes and hashes and the 27 original required schema fields remain intact. No formal unit/native/production/S24 acceptance issued.",
+  "source_result": {
+    "actual_outer_exit": 0,
+    "actual_inner_exit": 0,
+    "passed": 4951,
+    "skipped": [],
+    "audit_violations": 0,
+    "unique_call_identities_once": 4951,
+    "pinned_source_inputs_matched": 1223,
+    "owned_postgres_independently_absent": true,
+    "raw": "ci/physical_pending_risk_20261028/sql_final"
+  },
+  "retained_failed_attempts": [
+    "Baseline: both actual snapshot owners approved a second alias while first alias pending exposure was omitted (2 assertion failures).",
+    "Focused r2: new pending cases passed; legacy resting-position helper lost its existing behavior (2 assertion failures), restored without weakening its assertions.",
+    "Focused r3: 123 passes, two schema/dataclass extension equality failures; declared optional field lists updated, every original required field preserved.",
+    "Focused r4: 127 passes, three new limit-oracle fixture failures from inherited one-position default; fixture now supplies explicit independent position ceilings."
+  ],
+  "parent_hosted": {
+    "source_commit": "42d8b386e61f2ea26730d4232cab494b3173320e",
+    "artifact_id": 12799871385,
+    "bytes": 185452,
+    "sha256": "68ee64567319bc62be74fd7ed39c23de1b820e5f787aa7027a366a2818c30d78",
+    "xml": {
+      "extracted/trading-source-report.xml": {
+        "cases": 4790,
+        "passed": 4789,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 1
+      },
+      "extracted/voice-source-report.xml": {
+        "cases": 117,
+        "passed": 117,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "extracted/postgres-ledger-report.xml": {
+        "cases": 26,
+        "passed": 26,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      }
+    }
+  },
+  "parent_native_compile": {
+    "schema": "van.native-mql-independent-artifact-readback/1",
+    "requested_head": "42d8b386e61f2ea26730d4232cab494b3173320e",
+    "actual_tested_merge_head": "a7cf677461ac6c79035e06b1b85e7191393c6865",
+    "source_sha256": "9a8ab7349deba1c1fd492b056457f808c0876bbd69ff7a0aaa5f783ddc64bc50",
+    "source_blob_oid": "7be8290af4f28792039680fe1eaf16cd937bdd5b",
+    "source_bytes_and_blob_match": true,
+    "artifact": {
+      "artifact_id": 12800160977,
+      "workflow_run": 40651126241,
+      "source_head": "42d8b386e61f2ea26730d4232cab494b3173320e",
+      "bytes": 77863,
+      "sha256": "e32bd568e32847b43e9e033c6607ca6512028a3b43be27009d6c50f958d5be04",
+      "size_GitHub_digest_CRC_paths_extracted_readback_verified": true
+    },
+    "native_phase": "SOURCE_COMPILED",
+    "valid_official_installer_and_compiler_signatures": true,
+    "compile_cases": [
+      {
+        "name": "VanCompilerRejectionProbe",
+        "expected_success": false,
+        "process_exit_code": 0,
+        "errors": 4,
+        "warnings": 0,
+        "fresh_binary": false,
+        "started_at_utc": "2026-10-28T07:37:09.1544401Z",
+        "finished_at_utc": "2026-10-28T07:37:10.1728062Z",
+        "log_sha256": "fdbcc0da5c717862d0332b1b672d3511bbe7925c21b5d8e0c6c1c199e9ec59a7"
+      },
+      {
+        "name": "VanBridgeEA",
+        "expected_success": true,
+        "process_exit_code": 1,
+        "errors": 0,
+        "warnings": 0,
+        "fresh_binary": true,
+        "started_at_utc": "2026-10-28T07:37:10.1763132Z",
+        "finished_at_utc": "2026-10-28T07:37:12.1651536Z",
+        "log_sha256": "35103a727a391192f7d526544103baa2e684cc69a7a2b93f45f72effea230964",
+        "binary_sha256": "856edb90f0aa2200ff1a774bb45e9521961fdf188ea2458bd28f87a55f3dff0b"
+      }
+    ],
+    "fresh_binary_sha256": "856edb90f0aa2200ff1a774bb45e9521961fdf188ea2458bd28f87a55f3dff0b",
+    "native_compiler_process_exit_retained": 1,
+    "interpretation": "Actual native MetaEditor produced fresh matching EA binary,0errors0warnings; deliberate invalid source refused. Native compiler process exit is1 as reported; job judged actual fresh log/binary. No live terminal/account/order/provider/device acceptance."
+  },
+  "parent_main_workflow": "40651126263 terminal FAILURE:17 public jobs SUCCESS; missing DDS read key and absent trusted-main checker retained as failures",
+  "formal_acceptances_issued": 0,
+  "source_authorizations": [
+    "auth-20261022-owner-autonomous-candidate-build"
+  ],
+  "limitations": [
+    "Pending stop-risk projection is not a transactional collateral/cash/margin reservation or native permission.",
+    "Current active-policy arbitration, all-origin payment/manual commitments and current contract/FX revaluation remain programme obligations.",
+    "Own-alias working entries retain existing unresolved-entry reconciliation gates; this packet does not complete all multi-pending workflows.",
+    "Close-based release affects position stop risk only; no native fee/economic-finality or cash settlement qualification is inferred.",
+    "Paper resting-entry behavior remains compatible; full paper/account reservations remain in scope.",
+    "Local provider observations are explicit fixtures. Python storage audit is not an OS sandbox."
+  ],
+  "next": "Genuine hooks, committed required-baseline verification, normal push and exact-head hosted evidence; then actual shared reservation and active-policy work under the frozen full-scope programme."
+}

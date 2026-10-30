@@ -1,0 +1,29 @@
+# Owner runtime recovery contracts
+
+Candidate source for BE-003 and BE-009, using the existing owner approval, account lease and append-only ledger. No production, financial, native gate or handset qualification is issued here.
+
+The single-symbol runtime now has an owner control path for clearing one kill trigger, resetting an existing losing-streak scope, and rebasing the drawdown peak to the current verified account equity. These actions used to exist only as runtime methods. The new API exposes their state, exact owner review, approval, request and original-operation readback without giving Hermes or another agent a recovery capability.
+
+## Owner flow
+
+1. Read `GET /v1/trading/runtime/recovery/catalog` and `GET /v1/trading/runtime/recovery/state?account_alias=...&session_id=...` with the existing paired-device credentials and bound-device proof. The session ID is the actual runtime heartbeat identity. A missing, stale or ambiguous native review is refused.
+2. Submit the complete `vati.runtime-recovery/1` intent to `POST /v1/trading/runtime/recovery/challenge`. It binds the device, account, process session, action, arguments, review hash and issue time. The native review includes the lease epoch/holder, current profile and mandate references, kill causes/history, loss-scope state, risk-control evidence, drawdown peak and unresolved entry identities. Poll times and quote changes do not invalidate an otherwise unchanged review.
+3. Sign the existing A4 challenge with the paired P256 Android Keystore CryptoObject. The challenge is the existing `van-a4-approval-v2` statement, including device, source command, action, exact intent digest, original challenge ID and expiry. A successful biometric dialog without its signature is insufficient.
+4. Before sending `POST /v1/trading/runtime/recovery/request`, retain the exact intent and public proof, including the original challenge ID and challenge expiry. The gateway verifies the actual paired key and atomically stores a public dispatch receipt with consumption of that approval. A crash between approval consumption and native dispatch therefore preserves the original request. No private key or reusable trading bearer grant is generated or stored.
+5. Commander accepts the three recovery commands only from its dedicated signed `van-gateway` principal. They are absent from the agent tool catalogue. Its native journal records REQUESTED once; a matching duplicate returns that original state, and a changed actor/target/proof conflicts.
+6. The active session processes the queue under the current account lease. It rechecks the exact state reference, original session, current registered owner key, proof lifetime, native verified account/connection, unresolved entry state and position reconciliation. Broker reads precede the ledger transaction. Refused requests append no recovery effect. An applied domain effect and the final operation outcome share one transaction. Memory changes only after the durable outcome is confirmed; an uncertain commit reply is reconciled against that original operation.
+7. Read `GET /v1/trading/runtime/recovery/operations/{operation_id}`. Reads never dispatch or clear anything. APPLIED and REFUSED are native terminal outcomes; REQUESTED is queued, not applied. PENDING_DISPATCH means the gateway has a verified durable request without native confirmation. UNKNOWN means a dispatch response was uncertain. Resume only the exact original POST, whose native enqueue is idempotent. Never substitute a new operation to conceal an unresolved outcome.
+
+## Meaning of recovery
+
+APPLIED proves the named local recovery effect, not permission to submit a trade. `entry_authority_granted` remains false. Other kill triggers, unresolved native effects, native profile ceilings, mandate/mode validity, reconciliation, risk evaluation and the final submission fence remain in force. The ordinary runtime heartbeat reports actual current entry permission separately.
+
+Clearing OWNER_HALT cites its original halt events and applies only to this account. It cannot release another account from a global halt, release a newer halt, or silently undo a future owner halt after restart. Loss reset replay does not erase a later loss. A drawdown recovery records actual current verified account equity, never a supplied owner/UI number. Restart reconstructs the financial/risk events from their native evidence.
+
+The registry extends the existing `OF-TRADING-005` feature and `van.trading.halt` screen contract. The five routes and typed intent/proof schemas are exported from the actual application. The Android consumer is pending; no new UI/prototype is introduced before BG-001. Account-coordinator recovery, public-to-native owner-key revocation propagation, deferred provider identity/expiry, complete financial finality and all other original feature obligations remain separately tracked.
+
+Executed controls, induced failures, exact source hashes and limitations belong in `../receipts/RUNTIME_RECOVERY_SOURCE_20261023.json`. Source checks do not replace the original 1,610 acceptance contracts or issue an independent/native certificate.
+
+## Private proof shape hardening
+
+The proof parser now validates the original operation ID and strict integer expiry before native journal lookup. The journal applies the same validation to directly constructed objects; a malformed original read returns no operation. Ten counterexamples included an authenticated native HTTP500 for a list-valued ID. These now become explicit refusals without native events. Real signature, expiry, device ownership, replay, atomic effect and restart behavior remain covered by the real PostgreSQL recovery suite. The separate `../receipts/RUNTIME_RECOVERY_PROOF_SHAPE_SOURCE_20261023.json` retains the counterexamples, restored controls and deliberate regressions.

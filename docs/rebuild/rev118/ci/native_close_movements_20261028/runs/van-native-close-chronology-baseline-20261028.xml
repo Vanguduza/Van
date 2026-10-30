@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="2" skipped="0" tests="2" time="0.692" timestamp="2026-10-28T04:19:14.809866+00:00" hostname="6e9feff21467"><testcase classname="trading.tests.test_physical_financial_history" name="test_a_close_cannot_borrow_a_later_original_native_approval[publication]" time="0.525"><failure message="AssertionError: assert 'a413523f6e2c514148a8efecf576d2f749efd7b7387b91ed8d0c4963cbd6b3db' in ()&#10; +  where 'a413523f6e2c514148a8efecf576d2f749efd7b7387b91ed8d0c4963cbd6b3db' = Event(kind=&lt;EventKind.TRADE_REVIEW: 'TRADE_REVIEW'&gt;, producer='vati-cycle', event_time_ms=1800000000000, received_time...me_ms=None, correlation_id='not-yet-approved', hash='a413523f6e2c514148a8efecf576d2f749efd7b7387b91ed8d0c4963cbd6b3db').hash&#10; +  and   () = PhysicalFinancialHistory(physical_account_key='native-account:v1:77a8ab95f28c4eae55076950f2e569ef8c3474f78fd33ae54a4d5...0000000, received_time_ms=1800000000000)), unresolved_refs=(), execution_authority=False, risk_capital_qualified=False).unresolved_refs">tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-26/test_a_close_cannot_borrow_a_l0')
+eurusd = SymbolContract(symbol='EURUSD', venue='mt5', base_currency='EUR', quote_currency='USD', account_currency='USD', contra...=Decimal('0'), max_adv_participation=Decimal('0.10'), liquidity_haircut=Decimal('0'), round_trip_cost_pct=Decimal('0'))
+later = 'publication'
+
+    @pytest.mark.parametrize('later',['publication','availability'])
+    def test_a_close_cannot_borrow_a_later_original_native_approval(tmp_path,eurusd,later):
+        from conftest import intent
+        ledger,_,_,_,facts=native_facts(tmp_path,eurusd)
+        request=intent(trade_intent_id='not-yet-approved',account_alias=facts.account_alias)
+        if later=='publication':
+            # Same source clock still requires original approval to precede close.
+            from types import SimpleNamespace
+            bad=close(ledger,SimpleNamespace(correlation_id=request.trade_intent_id,
+                payload={'inputs':{'intent':{'strategy_id':request.strategy_id}}}),alias=facts.account_alias)
+            approval(ledger,facts,request.trade_intent_id)
+        else:
+            original=record(ledger,replace(facts,peak_equity=facts.equity,
+                day_start_equity=facts.equity,week_start_equity=facts.equity),
+                request=request,now_ms=NOW*1000+1)
+            assert original.payload['decision']['decision'] in {'APPROVED','REDUCED'}
+            bad=close(ledger,original,alias=facts.account_alias)
+        value=physical_financial_history(ledger,facts.native_account_context,available_at_ms=NOW*1000+1)
+&gt;       assert bad.hash in value.unresolved_refs
+E       AssertionError: assert 'a413523f6e2c514148a8efecf576d2f749efd7b7387b91ed8d0c4963cbd6b3db' in ()
+E        +  where 'a413523f6e2c514148a8efecf576d2f749efd7b7387b91ed8d0c4963cbd6b3db' = Event(kind=&lt;EventKind.TRADE_REVIEW: 'TRADE_REVIEW'&gt;, producer='vati-cycle', event_time_ms=1800000000000, received_time...me_ms=None, correlation_id='not-yet-approved', hash='a413523f6e2c514148a8efecf576d2f749efd7b7387b91ed8d0c4963cbd6b3db').hash
+E        +  and   () = PhysicalFinancialHistory(physical_account_key='native-account:v1:77a8ab95f28c4eae55076950f2e569ef8c3474f78fd33ae54a4d5...0000000, received_time_ms=1800000000000)), unresolved_refs=(), execution_authority=False, risk_capital_qualified=False).unresolved_refs
+
+trading/tests/test_physical_financial_history.py:151: AssertionError</failure></testcase><testcase classname="trading.tests.test_physical_financial_history" name="test_a_close_cannot_borrow_a_later_original_native_approval[availability]" time="0.012"><failure message="AssertionError: assert 'a413523f6e2c514148a8efecf576d2f749efd7b7387b91ed8d0c4963cbd6b3db' in ()&#10; +  where 'a413523f6e2c514148a8efecf576d2f749efd7b7387b91ed8d0c4963cbd6b3db' = Event(kind=&lt;EventKind.TRADE_REVIEW: 'TRADE_REVIEW'&gt;, producer='vati-cycle', event_time_ms=1800000000000, received_time...me_ms=None, correlation_id='not-yet-approved', hash='a413523f6e2c514148a8efecf576d2f749efd7b7387b91ed8d0c4963cbd6b3db').hash&#10; +  and   () = PhysicalFinancialHistory(physical_account_key='native-account:v1:77a8ab95f28c4eae55076950f2e569ef8c3474f78fd33ae54a4d5...0000000, received_time_ms=1800000000000)), unresolved_refs=(), execution_authority=False, risk_capital_qualified=False).unresolved_refs">tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-26/test_a_close_cannot_borrow_a_l1')
+eurusd = SymbolContract(symbol='EURUSD', venue='mt5', base_currency='EUR', quote_currency='USD', account_currency='USD', contra...=Decimal('0'), max_adv_participation=Decimal('0.10'), liquidity_haircut=Decimal('0'), round_trip_cost_pct=Decimal('0'))
+later = 'availability'
+
+    @pytest.mark.parametrize('later',['publication','availability'])
+    def test_a_close_cannot_borrow_a_later_original_native_approval(tmp_path,eurusd,later):
+        from conftest import intent
+        ledger,_,_,_,facts=native_facts(tmp_path,eurusd)
+        request=intent(trade_intent_id='not-yet-approved',account_alias=facts.account_alias)
+        if later=='publication':
+            # Same source clock still requires original approval to precede close.
+            from types import SimpleNamespace
+            bad=close(ledger,SimpleNamespace(correlation_id=request.trade_intent_id,
+                payload={'inputs':{'intent':{'strategy_id':request.strategy_id}}}),alias=facts.account_alias)
+            approval(ledger,facts,request.trade_intent_id)
+        else:
+            original=record(ledger,replace(facts,peak_equity=facts.equity,
+                day_start_equity=facts.equity,week_start_equity=facts.equity),
+                request=request,now_ms=NOW*1000+1)
+            assert original.payload['decision']['decision'] in {'APPROVED','REDUCED'}
+            bad=close(ledger,original,alias=facts.account_alias)
+        value=physical_financial_history(ledger,facts.native_account_context,available_at_ms=NOW*1000+1)
+&gt;       assert bad.hash in value.unresolved_refs
+E       AssertionError: assert 'a413523f6e2c514148a8efecf576d2f749efd7b7387b91ed8d0c4963cbd6b3db' in ()
+E        +  where 'a413523f6e2c514148a8efecf576d2f749efd7b7387b91ed8d0c4963cbd6b3db' = Event(kind=&lt;EventKind.TRADE_REVIEW: 'TRADE_REVIEW'&gt;, producer='vati-cycle', event_time_ms=1800000000000, received_time...me_ms=None, correlation_id='not-yet-approved', hash='a413523f6e2c514148a8efecf576d2f749efd7b7387b91ed8d0c4963cbd6b3db').hash
+E        +  and   () = PhysicalFinancialHistory(physical_account_key='native-account:v1:77a8ab95f28c4eae55076950f2e569ef8c3474f78fd33ae54a4d5...0000000, received_time_ms=1800000000000)), unresolved_refs=(), execution_authority=False, risk_capital_qualified=False).unresolved_refs
+
+trading/tests/test_physical_financial_history.py:151: AssertionError</failure></testcase></testsuite></testsuites>

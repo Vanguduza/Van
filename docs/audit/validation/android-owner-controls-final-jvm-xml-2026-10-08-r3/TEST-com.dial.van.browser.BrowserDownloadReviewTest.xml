@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.dial.van.browser.BrowserDownloadReviewTest" tests="6" skipped="0" failures="0" errors="0" timestamp="2026-10-08T06:47:27" hostname="052fefa249ff" time="0.01">
+  <properties/>
+  <testcase name="deletion needs exact receipt and independent record readback()" classname="com.dial.van.browser.BrowserDownloadReviewTest" time="0.004"/>
+  <testcase name="metadata absence stays unknown instead of a zero-byte empty file()" classname="com.dial.van.browser.BrowserDownloadReviewTest" time="0.001"/>
+  <testcase name="deletion requires advertised action identifier and a supported host transition()" classname="com.dial.van.browser.BrowserDownloadReviewTest" time="0.0"/>
+  <testcase name="host completion quarantined status and unknown state do not claim local transfer()" classname="com.dial.van.browser.BrowserDownloadReviewTest" time="0.0"/>
+  <testcase name="lost replies stale readback and wrong identifiers remain unknown without retry()" classname="com.dial.van.browser.BrowserDownloadReviewTest" time="0.002"/>
+  <testcase name="refusal unsupported action and cancellation do not invent removal()" classname="com.dial.van.browser.BrowserDownloadReviewTest" time="0.002"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

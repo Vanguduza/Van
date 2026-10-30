@@ -1,0 +1,38 @@
+{
+  "schema": "van.rebuild.calendar-feed-source/1",
+  "status": "SOURCE_TESTED_COMPONENT_NOT_UNIT_ACCEPTANCE",
+  "base_head": "623779fd54d0e1a48ae00c59620e0175671d597b",
+  "updated_at_utc": "2026-10-25T23:21:03.052438+00:00",
+  "source_sha256": {
+    "trading/vati/core/calendar_time.py": "595a99ef6df533f11f3d6cbd6459af3c59396f88908cced13ea4610911aea556",
+    "trading/vati/calendar/recorder.py": "f1804cf7a61d6b942298fcaa7ad46b0bddf1fe7a007857829a15f5a03ca2bcc3",
+    "trading/vati/intelligence/calendar_feed.py": "b4ca2bc92aaa4909a34dd52a6eaf4e2a4fdfa10da5068069748cbe0f3be89e25",
+    "trading/tests/test_calendar_feed_boundaries.py": "572b38410bdabf9cf487b9c1349c67c754ca1597325c716184d9825585ea8a3d",
+    "trading/tests/test_calendar_causal_boundaries.py": "aea33de6f8ff08d6072601139d23707ca478dff1f473200e9010c7cc1fcd774f",
+    "trading/tests/test_infra_live.py": "9e1cfb90cf3e33d29e5996a44f2c08b8d79fec4edf1bb34fad179e67cd77e0da"
+  },
+  "executed": {
+    "initial_before": "10 failed / 2 healthy controls; no setup errors",
+    "precision_before": "4 failed / 2 passed / 18 deselected; long fractional digits silently truncated by datetime",
+    "first_integration": "516 passed / 1 old live-qualification oracle failed / 3 PostgreSQL skips; original report retained",
+    "second_integration": "525 passed / 3 PostgreSQL skips",
+    "first_postgres": "528 passed / 0 skips / audit0 on earlier parser bytes; raw hash receipt retained",
+    "final_postgres": "532 passed / 0 skips / audit0 / exact final source hashes; actual pinned isolated PostgreSQL, owned container removed",
+    "final_controls": "25 passed / 0 skips / audit0 after supplemental fault restoration",
+    "supplemental_faults": "6 final assertion-caught / 0 setup errors / exact restoration; earlier 6 on prior bytes retained separately",
+    "rebuild": "108 passed on final source; owner/frontend contracts no drift, canonical mutation registry0findings (preflight only), consolidation0findings",
+    "canonical_mutations": "Registry preflight only for this local source; exact623 hosted 374-case execution is a separate earlier revision"
+  },
+  "evidence": "ci/calendar_feed_20261025",
+  "behavior": [
+    "Documented bare JSON arrays and object envelopes preserve rows; malformed envelopes refuse empty success",
+    "Explicit original event keys agree across schedule and observation; same-key time/name/currency conflict refuses",
+    "Explicit UTC offset and exact integer milliseconds, including historical epochs; original finer fractions cannot round down",
+    "Legacy label count and blackout behavior retained; report declares no native provider/live qualification"
+  ],
+  "limits": [
+    "Source component only, whole BE014 IN_PROGRESS and acceptance NOT_ISSUED",
+    "Schedule availability/native clocks/provider independence/entitlements/source health and ingestion remain",
+    "No unit/native/owner/F15/BG001/provider/economic/production/S24 acceptance"
+  ]
+}

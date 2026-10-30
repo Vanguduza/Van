@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="3" time="0.525" timestamp="2026-10-26T20:46:12.531332+00:00" hostname="2c5a245e39f1"><testcase classname="trading.tests.test_ctrader_native_depth" name="test_original_uint64_prices_id_and_cent_sizes_survive_without_float_or_price_scale_assumptions" time="0.017" /><testcase classname="trading.tests.test_ctrader_native_depth" name="test_native_changes_update_quote_ids_and_known_deletions_without_synthetic_levels" time="0.005" /><testcase classname="trading.tests.test_ctrader_native_depth" name="test_bad_native_change_latches_recovery_until_a_fresh_context[account]" time="0.003"><failure message="AssertionError: assert ('OBSERVED_PAR..._NATIVE_DEPTH' == 'RECOVERY_REQUIRED'&#10;  &#10;  - RECOVERY_REQUIRED&#10;  + OBSERVED_PARTIAL_NATIVE_DEPTH)">bad = 'account'
+
+    @pytest.mark.parametrize('bad',['account','symbol','bool_id','bool_size','price_zero','both_sides','no_side',
+                                  'duplicate','unknown_delete','overlap','event_capacity','backward_clock','bad_list'])
+    def test_bad_native_change_latches_recovery_until_a_fresh_context(bad):
+        c=contract();book=DepthBook(max_quotes=2);book.observe(c,1,change(),200000)
+        event=change();now=200000
+        if bad=='account':event['ctidTraderAccountId']=999
+        elif bad=='symbol':event['symbolId']=99
+        elif bad=='bool_id':event['newQuotes'][0]['id']=True
+        elif bad=='bool_size':event['newQuotes'][0]['size']=False
+        elif bad=='price_zero':event['newQuotes'][0]['bid']=0
+        elif bad=='both_sides':event['newQuotes'][0]['ask']=110109
+        elif bad=='no_side':event['newQuotes'][0].pop('bid')
+        elif bad=='duplicate':event['newQuotes'][1]=dict(event['newQuotes'][0])
+        elif bad=='unknown_delete':event.update(newQuotes=[],deletedQuotes=[99])
+        elif bad=='overlap':event.update(newQuotes=[event['newQuotes'][0]],deletedQuotes=[9007199254740993])
+        elif bad=='event_capacity':event['newQuotes']+= [{'id':3,'size':1,'ask':110109}]
+        elif bad=='backward_clock':now-=1
+        else:event['newQuotes']=None
+        book.observe(c,1,event,now)
+&gt;       body=snapshot(book,limit=2);assert body['state']=='RECOVERY_REQUIRED' and body['bids']==body['asks']==[]
+                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AssertionError: assert ('OBSERVED_PAR..._NATIVE_DEPTH' == 'RECOVERY_REQUIRED'
+E         
+E         - RECOVERY_REQUIRED
+E         + OBSERVED_PARTIAL_NATIVE_DEPTH)
+
+trading/tests/test_ctrader_native_depth.py:74: AssertionError</failure></testcase></testsuite></testsuites>

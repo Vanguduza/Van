@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.dial.van.session.WarmStandbyPolicyTest" tests="10" skipped="0" failures="0" errors="0" timestamp="2026-10-07T22:57:33" hostname="052fefa249ff" time="0.002">
+  <properties/>
+  <testcase name="charging pays for the spare that a low battery would not()" classname="com.dial.van.session.WarmStandbyPolicyTest" time="0.0"/>
+  <testcase name="an idle VAN lets the spare go cold()" classname="com.dial.van.session.WarmStandbyPolicyTest" time="0.0"/>
+  <testcase name="Data Saver does not close an unmetered spare()" classname="com.dial.van.session.WarmStandbyPolicyTest" time="0.0"/>
+  <testcase name="a low battery closes the spare even mid-interaction()" classname="com.dial.van.session.WarmStandbyPolicyTest" time="0.001"/>
+  <testcase name="a spare on the same road is not redundancy()" classname="com.dial.van.session.WarmStandbyPolicyTest" time="0.0"/>
+  <testcase name="a spare path is held while the owner is interacting()" classname="com.dial.van.session.WarmStandbyPolicyTest" time="0.0"/>
+  <testcase name="Data Saver closes a metered spare even while charging()" classname="com.dial.van.session.WarmStandbyPolicyTest" time="0.0"/>
+  <testcase name="only the authoritative path may carry a new owner message()" classname="com.dial.van.session.WarmStandbyPolicyTest" time="0.0"/>
+  <testcase name="a cold path carries nothing at all()" classname="com.dial.van.session.WarmStandbyPolicyTest" time="0.001"/>
+  <testcase name="a warm path carries heartbeats and cursors and nothing else()" classname="com.dial.van.session.WarmStandbyPolicyTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

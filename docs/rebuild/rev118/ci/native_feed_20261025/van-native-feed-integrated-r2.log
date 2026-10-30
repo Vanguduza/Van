@@ -1,0 +1,168 @@
+.F...................................................................... [ 80%]
+..................                                                       [100%]
+=================================== FAILURES ===================================
+__ test_adapter_authenticates_reads_and_trades_with_stop_in_the_same_request ___
+
+adapter = CtraderAdapter(transport=<vati.execution.ctrader.transport.CtraderTransport object at 0x7fed440ac410>, client_id='app-... _symbol_snapshot_valid=True, _money_digits=2, _currency='USD', _last_spot={1: (Decimal('1.101'), Decimal('1.10108'))})
+symbol = 'EURUSD', timeframe = 'H1', from_ms = 1699999980000
+to_ms = 1700010780000, count = 500
+
+    def read_trendbars(adapter, symbol: str, timeframe: str, *, from_ms: int, to_ms: int,
+                      count: int = 500) -> TrendbarObservation:
+        if not isinstance(symbol, str) or not symbol or len(symbol) > 256:
+            raise ValueError("native bar symbol required")
+        if not isinstance(timeframe, str) or timeframe not in PERIOD:
+            raise ValueError("unsupported native bar timeframe")
+        native_integer(from_ms, maximum=MAX_TIMESTAMP)
+        native_integer(to_ms, minimum=from_ms, maximum=MAX_TIMESTAMP)
+        native_integer(count, minimum=1, maximum=2001)
+        account = native_integer(adapter.ctid_trader_account_id, minimum=1)
+        period, step = PERIOD[timeframe]
+        adapter._ensure_auth()
+        sym = adapter.symbol(symbol)
+        product = native_integer(sym.symbol_id, minimum=1)
+        name, response = adapter.transport.call("ProtoOAGetTrendbarsReq", {
+            "ctidTraderAccountId": account, "fromTimestamp": from_ms, "toTimestamp": to_ms,
+            "period": period, "symbolId": product, "count": count})
+        try:
+            received = native_integer(adapter.clock(),maximum=253402300799000)
+            # The deprecated response timestamp must not redefine the original window.
+            if (name != "ProtoOAGetTrendbarsRes" or not isinstance(response,dict)
+                    or native_integer(response["ctidTraderAccountId"],minimum=1) != account
+                    or native_integer(response["symbolId"],minimum=1) != product
+                    or response["period"] != period):
+                raise ValueError("native response scope mismatch")
+            more = response.get("hasMore")
+            if more is not None and type(more) is not bool:
+                raise ValueError("native pagination state invalid")
+            rows = response.get("trendbar", [])
+            if not isinstance(rows,list) or len(rows) > count:
+                raise ValueError("native bar count invalid")
+            out, seen, excluded = [], set(), 0
+            with localcontext() as context:
+                context.prec = 80
+                for row in rows:
+                    if not isinstance(row,dict): raise ValueError("native bar invalid")
+                    low = native_integer(row["low"],minimum=-(2**63))
+                    opening, closing, high = [native_integer(row[k],maximum=2**64-1)
+                        for k in ("deltaOpen","deltaClose","deltaHigh")]
+                    volume = native_integer(row["volume"])
+                    start = native_integer(row["utcTimestampInMinutes"],maximum=2**32-1)*60_000
+                    if high < max(opening,closing): raise ValueError("native OHLC incoherent")
+                    if start in seen or not from_ms <= start <= to_ms or start > received:
+>                       raise ValueError("duplicate or outside-window native bar")
+E                       ValueError: duplicate or outside-window native bar
+
+trading/vati/execution/ctrader/feed.py:102: ValueError
+
+The above exception was the direct cause of the following exception:
+
+    def test_adapter_authenticates_reads_and_trades_with_stop_in_the_same_request():
+        fake = FakeCtrader(); ad = make_adapter(fake)
+        acct = ad.sync_account()
+        assert acct.equity == D("10053.09") and acct.balance == D("10053.09") and acct.verified and fake.host == "demo.ctraderapi.com"
+        assert [n for n, _ in fake.requests[:2]] == ["ProtoOAApplicationAuthReq", "ProtoOAAccountAuthReq"]
+        assert ad.symbols["EURUSD"].symbol_id == 1 and ad.symbols["EURUSD"].lots_to_volume(D("0.10")) == 1_000_000 and ad.symbols["XAUUSD"].lots_to_volume(D("0.5")) == 5000
+        assert ad.heartbeat(now_ms=1).connected and ad.positions() == []
+        cmd = OrderCommand("intent-42", "d" * 64, "k", "ct_demo", "ctrader", "EURUSD", Direction.LONG, "MARKET", D("0.10"), D("1.10008"), D("1.09808"), StopMode.VENUE, LossModel.STOP_DISTANCE, targets=(D("1.10608"),), strategy_id="FX-TREND-PULLBACK-01").sealed()
+        rec = ad.submit(cmd, now_ms=5)
+        assert rec.status == "FILLED" and rec.filled_qty == D("0.10") and rec.average_fill == D("1.10008") and rec.protective_stop_confirmed and rec.protective_stop_price == D("1.09808") and rec.broker_position_id == "100"
+        assert rec.fees == D("3.5")
+        req = next(b for n, b in fake.requests if n == "ProtoOANewOrderReq")
+        assert req["relativeStopLoss"] == 200 and req["relativeTakeProfit"] == 600 and req["label"] == "vati:intent-42" and req["clientOrderId"] == "intent-42" and req["volume"] == 1_000_000 and "stopLoss" not in req
+        pos = ad.positions()
+        assert len(pos) == 1 and pos[0].trade_intent_id == "intent-42" and pos[0].quantity == D("0.10") and pos[0].stop_price == D("1.09808") and pos[0].direction is Direction.LONG
+        # stops only tighten
+        assert ad.modify_stop("100", D("1.09900"), now_ms=6).status == "ACCEPTED"
+        assert ad.modify_stop("100", D("1.09000"), now_ms=7).reject_reason == "refusing to widen protective stop"
+        assert ad.modify_stop("999", D("1.1"), now_ms=7).status == "REJECTED"
+        closed = ad.close("100", None, now_ms=8, reason="TARGET")
+        assert closed.status == "FILLED" and closed.average_fill == D("1.1050") and ad.positions() == []
+        # rejections come back as receipts, never exceptions
+        assert ad.submit(OrderCommand(**{**cmd.__dict__, "protective_stop": None, "command_hash": ""}).sealed(), now_ms=9).reject_reason.startswith("cTrader orders require")
+        fake.reject_next_order = True
+        r2 = ad.submit(cmd, now_ms=10)
+        assert r2.status == "REJECTED" and r2.reject_reason == "NOT_ENOUGH_MONEY"
+        tiny = OrderCommand(**{**cmd.__dict__, "quantity": D("0.001"), "command_hash": ""}).sealed()
+        assert "below venue minimum" in ad.submit(tiny, now_ms=11).reject_reason
+        assert ad.submit(OrderCommand(**{**cmd.__dict__, "symbol": "GBPJPY", "command_hash": ""}).sealed(), now_ms=12).reject_reason.startswith("symbol GBPJPY not available")
+        # spots + trendbars
+        ad.subscribe_spots("EURUSD"); time.sleep(0.05)
+        assert ad.spot("EURUSD") == (D("1.101"), D("1.10108"))
+        # The fixture returns three 2023 bars: request that actual closed window.
+>       bars = trendbars(ad, "EURUSD", "H1", from_ms=28_333_333*60_000, to_ms=(28_333_333+3*60)*60_000)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+trading/tests/test_ctrader.py:174: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+trading/vati/execution/ctrader/feed.py:124: in trendbars
+    return list(read_trendbars(adapter,symbol,timeframe,from_ms=from_ms,to_ms=to_ms,count=count).bars)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+adapter = CtraderAdapter(transport=<vati.execution.ctrader.transport.CtraderTransport object at 0x7fed440ac410>, client_id='app-... _symbol_snapshot_valid=True, _money_digits=2, _currency='USD', _last_spot={1: (Decimal('1.101'), Decimal('1.10108'))})
+symbol = 'EURUSD', timeframe = 'H1', from_ms = 1699999980000
+to_ms = 1700010780000, count = 500
+
+    def read_trendbars(adapter, symbol: str, timeframe: str, *, from_ms: int, to_ms: int,
+                      count: int = 500) -> TrendbarObservation:
+        if not isinstance(symbol, str) or not symbol or len(symbol) > 256:
+            raise ValueError("native bar symbol required")
+        if not isinstance(timeframe, str) or timeframe not in PERIOD:
+            raise ValueError("unsupported native bar timeframe")
+        native_integer(from_ms, maximum=MAX_TIMESTAMP)
+        native_integer(to_ms, minimum=from_ms, maximum=MAX_TIMESTAMP)
+        native_integer(count, minimum=1, maximum=2001)
+        account = native_integer(adapter.ctid_trader_account_id, minimum=1)
+        period, step = PERIOD[timeframe]
+        adapter._ensure_auth()
+        sym = adapter.symbol(symbol)
+        product = native_integer(sym.symbol_id, minimum=1)
+        name, response = adapter.transport.call("ProtoOAGetTrendbarsReq", {
+            "ctidTraderAccountId": account, "fromTimestamp": from_ms, "toTimestamp": to_ms,
+            "period": period, "symbolId": product, "count": count})
+        try:
+            received = native_integer(adapter.clock(),maximum=253402300799000)
+            # The deprecated response timestamp must not redefine the original window.
+            if (name != "ProtoOAGetTrendbarsRes" or not isinstance(response,dict)
+                    or native_integer(response["ctidTraderAccountId"],minimum=1) != account
+                    or native_integer(response["symbolId"],minimum=1) != product
+                    or response["period"] != period):
+                raise ValueError("native response scope mismatch")
+            more = response.get("hasMore")
+            if more is not None and type(more) is not bool:
+                raise ValueError("native pagination state invalid")
+            rows = response.get("trendbar", [])
+            if not isinstance(rows,list) or len(rows) > count:
+                raise ValueError("native bar count invalid")
+            out, seen, excluded = [], set(), 0
+            with localcontext() as context:
+                context.prec = 80
+                for row in rows:
+                    if not isinstance(row,dict): raise ValueError("native bar invalid")
+                    low = native_integer(row["low"],minimum=-(2**63))
+                    opening, closing, high = [native_integer(row[k],maximum=2**64-1)
+                        for k in ("deltaOpen","deltaClose","deltaHigh")]
+                    volume = native_integer(row["volume"])
+                    start = native_integer(row["utcTimestampInMinutes"],maximum=2**32-1)*60_000
+                    if high < max(opening,closing): raise ValueError("native OHLC incoherent")
+                    if start in seen or not from_ms <= start <= to_ms or start > received:
+                        raise ValueError("duplicate or outside-window native bar")
+                    seen.add(start)
+                    if start+step > min(to_ms,received):
+                        excluded += 1
+                        continue
+                    out.append(Bar(symbol.upper(),start,start+step,Decimal(low+opening)/SCALE,
+                        Decimal(low+high)/SCALE,Decimal(low)/SCALE,Decimal(low+closing)/SCALE,
+                        Decimal(volume),volume,Decimal("0")))
+            return TrendbarObservation(account,product,symbol.upper(),timeframe,from_ms,to_ms,received,
+                getattr(adapter.transport,"host",None),getattr(sym,"contract_revision",None),more,
+                tuple(sorted(out,key=lambda b:b.start_ms)),excluded)
+        except (KeyError,TypeError,ValueError,ArithmeticError) as exc:
+>           raise VenueUnavailable("cTrader native trendbar scope, window or market fields invalid") from exc
+E           vati.execution.base.VenueUnavailable: cTrader native trendbar scope, window or market fields invalid
+
+trading/vati/execution/ctrader/feed.py:114: VenueUnavailable
+=========================== short test summary info ============================
+FAILED trading/tests/test_ctrader.py::test_adapter_authenticates_reads_and_trades_with_stop_in_the_same_request
+1 failed, 89 passed in 1.66s

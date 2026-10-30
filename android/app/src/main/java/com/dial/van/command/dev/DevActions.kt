@@ -40,6 +40,8 @@ import com.dial.van.dialdev.DialDevActionTarget
 import com.dial.van.dialdev.ProjectedAction
 import com.dial.van.gateway.GatewayHttpException
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import java.io.IOException
 import java.util.UUID
@@ -68,20 +70,58 @@ fun rememberDevActions(
     // Keyed on what the actions are *about* (the task/project), not on the target value: a
     // target that gains its workspace or decision id when the projection loads must not wipe
     // an `ACCEPTED · pending` row the owner is watching.
-    val stableKey = target.taskId ?: target.workspaceId ?: target.projectId
-    var statuses by remember(stableKey) { mutableStateOf<Map<DialDevActionKind, DialDevActionStatus>>(emptyMap()) }
-    var keys by remember(stableKey) { mutableStateOf<Map<DialDevActionKind, String>>(emptyMap()) }
+    val stableKey = listOf(target.projectId, target.taskId ?: target.workspaceId, target.decisionId)
+    val recovered = remember(stableKey) { runCatching { app.gatewayClient.dialDev.pendingActions(target) }.getOrDefault(emptyList()) }
+    var statuses by remember(stableKey) { mutableStateOf<Map<DialDevActionKind, DialDevActionStatus>>(
+        recovered.associate { original -> original.request().kind to (original.actionId?.let { DialDevActionStatus.Accepted(it) }
+            ?: DialDevActionStatus.Unconfirmed("The original request still needs reconciliation.")) }) }
+    var keys by remember(stableKey) { mutableStateOf<Map<DialDevActionKind, String>>(
+        recovered.associate { it.request().kind to it.request().idempotencyKey }) }
+
+    // Exact native reads also recover actions that have fallen out of bounded recent lists.
+    // This loop never posts, including after activity/process recreation.
+    LaunchedEffect(stableKey, statuses) {
+        while (isActive) {
+            val originals = runCatching { app.gatewayClient.dialDev.pendingActions(target) }.getOrDefault(emptyList())
+            val known = originals.filter { it.actionId != null }
+            if (known.isEmpty()) break
+            projection.setAwaitingOutcome(true)
+            for (original in known) {
+                try {
+                    val outcome = app.gatewayClient.dialDev.reconcileAction(original)
+                    if (outcome != null) {
+                        val latest = runCatching { app.gatewayClient.dialDev.pendingActions(target).firstOrNull {
+                            it.request().kind == original.request().kind
+                        } }
+                        if (latest.isFailure) continue
+                        if (DialDevActionReducer.observesCurrentOriginal(original.request().idempotencyKey,
+                                latest.getOrNull()?.request()?.idempotencyKey))
+                            statuses = statuses + (original.request().kind to outcome)
+                    }
+                } catch (cancel: CancellationException) {
+                    throw cancel
+                } catch (_: Exception) {
+                    // Keep the durable original. Unavailable readback is not a refusal.
+                }
+            }
+            delay(3000)
+        }
+    }
 
     // The projection, not the tap, moves an accepted action on.
     LaunchedEffect(projected, statuses) {
-        val reconciled = statuses.mapValues { (_, status) -> DialDevActionReducer.reconcile(status, projected) }
+        val pendingIds = runCatching { app.gatewayClient.dialDev.pendingActions(target).mapNotNull { it.actionId }.toSet() }.getOrDefault(
+            statuses.values.filterIsInstance<DialDevActionStatus.Accepted>().map { it.actionId }.toSet())
+        val reconciled = statuses.mapValues { (_, status) -> DialDevActionReducer.reconcileDurable(status, projected, pendingIds) }
         if (reconciled != statuses) statuses = reconciled
         projection.setAwaitingOutcome(reconciled.values.any(DialDevActionReducer::isPending))
     }
 
     val submit: suspend (DialDevActionKind, Map<String, String>) -> DialDevActionStatus = submit@{ kind, params ->
         if (!projection.online) {
-            val refused = DialDevActionStatus.NotSent("you're offline. VAN does not queue owner actions; they need a live view.")
+            val pending = runCatching { app.gatewayClient.dialDev.pendingActions(target).isNotEmpty() }.getOrDefault(true)
+            val refused = if (pending) DialDevActionStatus.Unconfirmed("You're offline; the original outcome remains unresolved.")
+                else DialDevActionStatus.NotSent("you're offline. VAN does not queue owner actions; they need a live view.")
             statuses = statuses + (kind to refused)
             return@submit refused
         }
@@ -108,7 +148,7 @@ fun rememberDevActions(
         } catch (io: IOException) {
             DialDevActionStatus.Unconfirmed("the connection dropped before DIAL answered.")
         } catch (other: Exception) {
-            DialDevActionStatus.NotSent(other.message ?: "VAN could not send the action.")
+            DialDevActionStatus.Unconfirmed("VAN could not confirm this control; reconcile the original before retrying.")
         }
         statuses = statuses + (kind to outcome)
         // STALE_VIEW: show the new state before any retry. ACCEPTED: start watching for the outcome.

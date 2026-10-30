@@ -7,7 +7,10 @@ from dataclasses import asdict
 from decimal import Decimal
 from typing import Any
 
-from vati.risk.contracts import Direction, KillSwitchTrigger, LossModel, MarketIntegrityState, OpenPosition, RiskSnapshot, StrategyState, SymbolContract, TradeIntent
+from vati.risk.contracts import Direction, KillSwitchTrigger, LossModel, MarketIntegrityState, NativeAccountRiskContext, OpenPosition, PendingRiskCommitment, RiskSnapshot, StopRiskTerms, StrategyState, SymbolContract, TradeIntent
+from vati.core.canonical import canonical_hash
+
+RISK_APPROVAL_SCHEMA_VERSION = 2
 
 DEC_FIELDS_INTENT = {"entry", "stop", "requested_risk_pct", "stake", "expected_gross_move_pct", "regime_multiplier", "confidence_multiplier", "volatility_multiplier", "liquidity_multiplier", "event_risk_multiplier", "correlation_multiplier"}
 
@@ -27,12 +30,32 @@ def _enc(v: Any) -> Any:
 
 
 def intent_to_dict(i: TradeIntent) -> dict: return _enc(asdict(i))
+def intent_binding_hash(i: TradeIntent) -> str: return canonical_hash(intent_to_dict(i))
+def mandate_binding_hash(mandate) -> str: return canonical_hash(_enc(asdict(mandate)))
 def contract_to_dict(c: SymbolContract) -> dict: return _enc(asdict(c))
-def position_to_dict(p: OpenPosition) -> dict: return _enc(asdict(p))
+def position_to_dict(p: OpenPosition) -> dict:
+    d = _enc(asdict(p))
+    if p.stop_terms is None:
+        d.pop('stop_terms')  # preserve every original legacy position body
+    if p.broker_position_id is None:
+        d.pop('broker_position_id')
+    return d
 
 
 def snapshot_to_dict(s: RiskSnapshot) -> dict:
     d = _enc(asdict(s))
+    if s.used_margin is None:
+        d.pop("used_margin")  # preserve original legacy snapshot bytes/hash
+    if s.native_account_context is None:
+        d.pop('native_account_context')
+    if s.native_risk_basis_ref is None:
+        d.pop('native_risk_basis_ref')
+    if not s.pending_risk_commitments:
+        d.pop('pending_risk_commitments')
+    else:
+        for pending in d['pending_risk_commitments']:
+            if pending['valuation_contract'] is None:
+                pending.pop('valuation_contract')
     d["symbol_contract"] = contract_to_dict(s.symbol_contract)
     d["open_positions"] = [position_to_dict(p) for p in s.open_positions]
     return d
@@ -61,6 +84,8 @@ def contract_from_dict(d: dict) -> SymbolContract:
 
 def position_from_dict(d: dict) -> OpenPosition:
     kw = dict(d)
+    if kw.get('stop_terms') is not None:
+        kw['stop_terms'] = StopRiskTerms(**{k: _D(v) for k, v in kw['stop_terms'].items()})
     for k in ("lots", "stop_distance", "value_per_price_unit_per_lot", "stake", "liquidity_haircut_per_unit"):
         if k in kw:
             kw[k] = _D(kw[k])
@@ -70,10 +95,27 @@ def position_from_dict(d: dict) -> OpenPosition:
 
 def snapshot_from_dict(d: dict) -> RiskSnapshot:
     kw = dict(d)
-    for k in ("equity", "balance", "peak_equity", "day_start_equity", "week_start_equity"):
-        kw[k] = _D(kw[k])
+    if 'pending_risk_commitments' in kw:
+        values=[]
+        for raw in kw['pending_risk_commitments']:
+            p=dict(raw);p['direction']=Direction(p['direction']);p['contract']=contract_from_dict(p['contract'])
+            if p.get('valuation_contract') is not None:
+                p['valuation_contract']=contract_from_dict(p['valuation_contract'])
+            for key in ('quantity','entry','stop'):
+                if p[key] is not None:p[key]=_D(p[key])
+            values.append(PendingRiskCommitment(**p))
+        kw['pending_risk_commitments']=tuple(values)
+    if kw.get('native_account_context') is not None:
+        kw['native_account_context'] = NativeAccountRiskContext(**kw['native_account_context'])
+    for k in ("equity", "balance", "peak_equity", "day_start_equity", "week_start_equity", "free_margin", "margin_level_pct", "used_margin"):
+        if k in kw:
+            kw[k] = _D(kw[k])
     kw["symbol_contract"] = contract_from_dict(kw["symbol_contract"])
     kw["open_positions"] = tuple(position_from_dict(p) for p in kw["open_positions"])
     kw["market_integrity"] = MarketIntegrityState(kw["market_integrity"])
     kw["kill_switch_triggers"] = frozenset(KillSwitchTrigger(t) for t in kw.get("kill_switch_triggers", []))
+    if "loss_streak_multiplier" in kw:
+        kw["loss_streak_multiplier"] = _D(kw["loss_streak_multiplier"])
+    if kw.get("drawdown_top_state") is not None:
+        kw["drawdown_top_state"] = StrategyState(kw["drawdown_top_state"])
     return RiskSnapshot(**kw)

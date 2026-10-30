@@ -1,0 +1,11 @@
+[Unit]
+Description=Periodic VAN Muse egress verification
+
+[Timer]
+OnBootSec=45s
+OnUnitActiveSec=5min
+AccuracySec=15s
+Unit=van-muse-egress-health.service
+
+[Install]
+WantedBy=timers.target

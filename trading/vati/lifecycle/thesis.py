@@ -407,13 +407,13 @@ class ThesisEngine:
             raise ThesisError(
                 f"{sealed.trade_intent_id} already has a sealed thesis; a claim is "
                 "made once")
-        self._theses[sealed.trade_intent_id] = sealed
         if self._ledger is not None:
             t = now_ms if now_ms is not None else sealed.created_ms
             self._ledger.append(make_event(
                 EventKind.TRADE_THESIS, self._producer, sealed.to_dict(),
                 event_time_ms=t, received_time_ms=t,
                 correlation_id=sealed.trade_intent_id))
+        self._theses[sealed.trade_intent_id] = sealed
         return sealed
 
     def thesis_for(self, trade_intent_id: str) -> Optional[TradeThesis]:

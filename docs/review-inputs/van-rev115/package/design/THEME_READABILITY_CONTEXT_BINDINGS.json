@@ -1,0 +1,3760 @@
+{
+  "amendment_date": "2026-10-21",
+  "bindings": [
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "VNX-S-HOME-01",
+      "frontend_units": [
+        "FE-004"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "VNX-S-HOME-02",
+      "frontend_units": [
+        "FE-004"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "VNX-S-HOME-03",
+      "frontend_units": [
+        "FE-004"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "VNX-S-HOME-04",
+      "frontend_units": [
+        "FE-004"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "VNX-S-HOME-05",
+      "frontend_units": [
+        "FE-004"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "VNX-S-HOME-06",
+      "frontend_units": [
+        "FE-004"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "VNX-S-HOME-07",
+      "frontend_units": [
+        "FE-004"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "VNX-S-TRADE-01",
+      "frontend_units": [
+        "FE-006"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "VNX-S-TRADE-02",
+      "frontend_units": [
+        "FE-006"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "VNX-S-TRADE-03",
+      "frontend_units": [
+        "FE-006"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "VNX-S-TRADE-04",
+      "frontend_units": [
+        "FE-006"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "VNX-S-TRADE-05",
+      "frontend_units": [
+        "FE-006"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "VNX-S-TRADE-06",
+      "frontend_units": [
+        "FE-006"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "VNX-S-TRADE-07",
+      "frontend_units": [
+        "FE-006"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "VNX-S-TRADE-08",
+      "frontend_units": [
+        "FE-006"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "VNX-S-TRADE-09",
+      "frontend_units": [
+        "FE-006"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "VNX-S-TRADE-10",
+      "frontend_units": [
+        "FE-006"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "VNX-S-TRADE-11",
+      "frontend_units": [
+        "FE-006"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "VNX-S-TRADE-12",
+      "frontend_units": [
+        "FE-006"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "VNX-S-CHART-01",
+      "frontend_units": [
+        "FE-007"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "VNX-S-CHART-02",
+      "frontend_units": [
+        "FE-007"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "VNX-S-CHART-03",
+      "frontend_units": [
+        "FE-008"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "VNX-S-CHART-04",
+      "frontend_units": [
+        "FE-008"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "VNX-S-CHART-05",
+      "frontend_units": [
+        "FE-008"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "VNX-S-CHART-06",
+      "frontend_units": [
+        "FE-008"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "VNX-S-CHART-07",
+      "frontend_units": [
+        "FE-008"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "VNX-S-CHART-08",
+      "frontend_units": [
+        "FE-008"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "VNX-S-CHART-09",
+      "frontend_units": [
+        "FE-008"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "VNX-S-CHART-10",
+      "frontend_units": [
+        "FE-008"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "VNX-S-CHART-11",
+      "frontend_units": [
+        "FE-008"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "VNX-S-CHART-12",
+      "frontend_units": [
+        "FE-008"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "VNX-S-CHART-13",
+      "frontend_units": [
+        "FE-008"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "VNX-S-CHART-14",
+      "frontend_units": [
+        "FE-008"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "VNX-S-CHART-15",
+      "frontend_units": [
+        "FE-008"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "VNX-S-CHART-16",
+      "frontend_units": [
+        "FE-008"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "VNX-S-CHART-17",
+      "frontend_units": [
+        "FE-007"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "VNX-S-CHART-18",
+      "frontend_units": [
+        "FE-007"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "VNX-S-CHART-19",
+      "frontend_units": [
+        "FE-014"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "VNX-S-CHART-20",
+      "frontend_units": [
+        "FE-007"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "VNX-S-ORDERS-01",
+      "frontend_units": [
+        "FE-009"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "VNX-S-ORDERS-02",
+      "frontend_units": [
+        "FE-009"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "VNX-S-ORDERS-03",
+      "frontend_units": [
+        "FE-009"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "VNX-S-ORDERS-04",
+      "frontend_units": [
+        "FE-009"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "VNX-S-ORDERS-05",
+      "frontend_units": [
+        "FE-009"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "VNX-S-ORDERS-06",
+      "frontend_units": [
+        "FE-009"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "VNX-S-ORDERS-07",
+      "frontend_units": [
+        "FE-009"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "VNX-S-ORDERS-08",
+      "frontend_units": [
+        "FE-009"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "VNX-S-ORDERS-09",
+      "frontend_units": [
+        "FE-009"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "VNX-S-ORDERS-10",
+      "frontend_units": [
+        "FE-009"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "VNX-S-ORDERS-11",
+      "frontend_units": [
+        "FE-011"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "VNX-S-ORDERS-12",
+      "frontend_units": [
+        "FE-011"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "VNX-S-ORDERS-13",
+      "frontend_units": [
+        "FE-011"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "VNX-S-ORDERS-14",
+      "frontend_units": [
+        "FE-009"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "VNX-S-ACCOUNTS-01",
+      "frontend_units": [
+        "FE-010"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "VNX-S-ACCOUNTS-02",
+      "frontend_units": [
+        "FE-010"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "VNX-S-ACCOUNTS-03",
+      "frontend_units": [
+        "FE-010"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "VNX-S-ACCOUNTS-04",
+      "frontend_units": [
+        "FE-010"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "VNX-S-ACCOUNTS-05",
+      "frontend_units": [
+        "FE-010"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "VNX-S-ACCOUNTS-06",
+      "frontend_units": [
+        "FE-010"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "VNX-S-ACCOUNTS-07",
+      "frontend_units": [
+        "FE-010"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "VNX-S-ACCOUNTS-08",
+      "frontend_units": [
+        "FE-010"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "VNX-S-ACCOUNTS-09",
+      "frontend_units": [
+        "FE-010"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "VNX-S-ACCOUNTS-10",
+      "frontend_units": [
+        "FE-010"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "VNX-S-ACCOUNTS-11",
+      "frontend_units": [
+        "FE-010"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "VNX-S-ACCOUNTS-12",
+      "frontend_units": [
+        "FE-010"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "VNX-S-ACCOUNTS-13",
+      "frontend_units": [
+        "FE-010"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "VNX-S-ACCOUNTS-14",
+      "frontend_units": [
+        "FE-010"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "VNX-S-ACCOUNTS-15",
+      "frontend_units": [
+        "FE-010"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "VNX-S-ACCOUNTS-16",
+      "frontend_units": [
+        "FE-010"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "VNX-S-ACCOUNTS-17",
+      "frontend_units": [
+        "FE-010"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "VNX-S-ACCOUNTS-18",
+      "frontend_units": [
+        "FE-010"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "VNX-S-INTEL-01",
+      "frontend_units": [
+        "FE-013"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "VNX-S-INTEL-02",
+      "frontend_units": [
+        "FE-013"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "VNX-S-INTEL-03",
+      "frontend_units": [
+        "FE-013"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "VNX-S-INTEL-04",
+      "frontend_units": [
+        "FE-013"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "VNX-S-INTEL-05",
+      "frontend_units": [
+        "FE-013"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "VNX-S-INTEL-06",
+      "frontend_units": [
+        "FE-013"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "VNX-S-INTEL-07",
+      "frontend_units": [
+        "FE-013"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "VNX-S-INTEL-08",
+      "frontend_units": [
+        "FE-013"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "VNX-S-INTEL-09",
+      "frontend_units": [
+        "FE-013"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "VNX-S-INTEL-10",
+      "frontend_units": [
+        "FE-014"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "VNX-S-INTEL-11",
+      "frontend_units": [
+        "FE-014"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "VNX-S-INTEL-12",
+      "frontend_units": [
+        "FE-014"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "VNX-S-INTEL-13",
+      "frontend_units": [
+        "FE-014"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "VNX-S-INTEL-14",
+      "frontend_units": [
+        "FE-014"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "VNX-S-WORK-01",
+      "frontend_units": [
+        "FE-015"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "VNX-S-WORK-02",
+      "frontend_units": [
+        "FE-015"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "VNX-S-WORK-03",
+      "frontend_units": [
+        "FE-015"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "VNX-S-WORK-04",
+      "frontend_units": [
+        "FE-015"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "VNX-S-WORK-05",
+      "frontend_units": [
+        "FE-015"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "VNX-S-WORK-06",
+      "frontend_units": [
+        "FE-015"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "VNX-S-WORK-07",
+      "frontend_units": [
+        "FE-016"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "VNX-S-WORK-08",
+      "frontend_units": [
+        "FE-016"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "VNX-S-WORK-09",
+      "frontend_units": [
+        "FE-015"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "VNX-S-WORK-10",
+      "frontend_units": [
+        "FE-015"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "VNX-S-WORK-11",
+      "frontend_units": [
+        "FE-016"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "VNX-S-WORK-12",
+      "frontend_units": [
+        "FE-016"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "VNX-S-WORK-13",
+      "frontend_units": [
+        "FE-018"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "VNX-S-WORK-14",
+      "frontend_units": [
+        "FE-015"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "VNX-S-WORK-15",
+      "frontend_units": [
+        "FE-015"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "VNX-S-WORK-16",
+      "frontend_units": [
+        "FE-015"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "VNX-S-PRESENCE-01",
+      "frontend_units": [
+        "FE-005"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "VNX-S-PRESENCE-02",
+      "frontend_units": [
+        "FE-005"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "VNX-S-PRESENCE-03",
+      "frontend_units": [
+        "FE-005"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "VNX-S-PRESENCE-04",
+      "frontend_units": [
+        "FE-005"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "VNX-S-PRESENCE-05",
+      "frontend_units": [
+        "FE-005"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "VNX-S-PRESENCE-06",
+      "frontend_units": [
+        "FE-005"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "VNX-S-MEMORY-01",
+      "frontend_units": [
+        "FE-019"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "VNX-S-MEMORY-02",
+      "frontend_units": [
+        "FE-019"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "VNX-S-MEMORY-03",
+      "frontend_units": [
+        "FE-019"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "VNX-S-MEMORY-04",
+      "frontend_units": [
+        "FE-019"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "VNX-S-MORE-01",
+      "frontend_units": [
+        "FE-022"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "VNX-S-MORE-02",
+      "frontend_units": [
+        "FE-022"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "VNX-S-MORE-03",
+      "frontend_units": [
+        "FE-022"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "VNX-S-MORE-04",
+      "frontend_units": [
+        "FE-022"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "van.home",
+      "frontend_units": [
+        "FE-004"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "van.attention",
+      "frontend_units": [
+        "FE-004"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "van.work",
+      "frontend_units": [
+        "FE-015"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "van.work.mission",
+      "frontend_units": [
+        "FE-015"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "van.work.activity",
+      "frontend_units": [
+        "FE-015"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "van.work.artemis",
+      "frontend_units": [
+        "FE-018"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "van.work.dev.home",
+      "frontend_units": [
+        "FE-015"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "van.work.dev.plan",
+      "frontend_units": [
+        "FE-015"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "van.work.dev.tasks",
+      "frontend_units": [
+        "FE-015"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "van.work.dev.graph",
+      "frontend_units": [
+        "FE-015"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "van.work.dev.task",
+      "frontend_units": [
+        "FE-015"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "van.work.dev.agents",
+      "frontend_units": [
+        "FE-016"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "van.work.dev.workspaces",
+      "frontend_units": [
+        "FE-018"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "van.work.dev.workspace",
+      "frontend_units": [
+        "FE-018"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "van.work.dev.evidence",
+      "frontend_units": [
+        "FE-015"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "van.work.dev.reviews",
+      "frontend_units": [
+        "FE-015"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "van.work.dev.memory",
+      "frontend_units": [
+        "FE-019"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "van.work.dev.research",
+      "frontend_units": [
+        "FE-018"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "van.work.dev.design",
+      "frontend_units": [
+        "FE-018"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "van.work.dev.ci",
+      "frontend_units": [
+        "FE-018"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "van.work.dev.security",
+      "frontend_units": [
+        "FE-018"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "van.work.browser",
+      "frontend_units": [
+        "FE-017"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "van.work.browser.tasks",
+      "frontend_units": [
+        "FE-017"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "van.work.browser.escalations",
+      "frontend_units": [
+        "FE-017"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "van.work.browser.sessions",
+      "frontend_units": [
+        "FE-017"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "van.work.browser.policy",
+      "frontend_units": [
+        "FE-017"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "van.browser.interactive",
+      "frontend_units": [
+        "FE-017"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "van.browser.downloads",
+      "frontend_units": [
+        "FE-017"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "van.browser.outcome",
+      "frontend_units": [
+        "FE-017"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "van.browser.action-plan",
+      "frontend_units": [
+        "FE-017"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "van.browser.file-provider",
+      "frontend_units": [
+        "FE-017"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "van.trading",
+      "frontend_units": [
+        "FE-009"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "van.trading.overview",
+      "frontend_units": [
+        "FE-009"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "van.trading.positions",
+      "frontend_units": [
+        "FE-009"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "van.trading.positions.detail",
+      "frontend_units": [
+        "FE-009"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "van.trading.potential",
+      "frontend_units": [
+        "FE-014"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "van.trading.history",
+      "frontend_units": [
+        "FE-011"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "van.trading.accounts",
+      "frontend_units": [
+        "FE-010"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "van.trading.cognition",
+      "frontend_units": [
+        "FE-014"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "van.trading.accounts.add",
+      "frontend_units": [
+        "FE-010"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "van.trading.strategies",
+      "frontend_units": [
+        "FE-012"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "van.trading.halt",
+      "frontend_units": [
+        "FE-009"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "van.trading.tickets",
+      "frontend_units": [
+        "FE-009"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "van.approval.trading-ticket",
+      "frontend_units": [
+        "FE-009"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "van.memory",
+      "frontend_units": [
+        "FE-019"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "van.memory.history",
+      "frontend_units": [
+        "FE-019"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "van.learning.adaptations",
+      "frontend_units": [
+        "FE-019"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "van.learning.goals",
+      "frontend_units": [
+        "FE-019"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "van.memory.privacy",
+      "frontend_units": [
+        "FE-019"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "van.attention.decision",
+      "frontend_units": [
+        "FE-004"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "van.work.mission-control",
+      "frontend_units": [
+        "FE-015"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "van.memory.record",
+      "frontend_units": [
+        "FE-019"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "van.permissions.grant",
+      "frontend_units": [
+        "FE-022"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "van.automation.plan",
+      "frontend_units": [
+        "FE-020"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "van.settings.speaker-profile",
+      "frontend_units": [
+        "FE-021"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "van.projects",
+      "frontend_units": [
+        "FE-015"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "van.projects.detail",
+      "frontend_units": [
+        "FE-015"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "van.projects.rationale",
+      "frontend_units": [
+        "FE-015"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "van.connected",
+      "frontend_units": [
+        "FE-022"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "van.settings",
+      "frontend_units": [
+        "FE-022"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "van.diagnostics",
+      "frontend_units": [
+        "FE-022"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "van.onboarding",
+      "frontend_units": [
+        "FE-022"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "van.provisioning",
+      "frontend_units": [
+        "FE-022"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "van.settings.voice",
+      "frontend_units": [
+        "FE-021"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "van.voice.turn",
+      "frontend_units": [
+        "FE-021"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "van.settings.notifications",
+      "frontend_units": [
+        "FE-022"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "van.floating",
+      "frontend_units": [
+        "FE-005"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "van.permissions",
+      "frontend_units": [
+        "FE-022"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "van.autonomy",
+      "frontend_units": [
+        "FE-022"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "van.understanding",
+      "frontend_units": [
+        "FE-019"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "van.reminders.manage",
+      "frontend_units": [
+        "FE-020"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "van.approval.detail",
+      "frontend_units": [
+        "FE-004"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "van.knowledge.research",
+      "frontend_units": [
+        "FE-019"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "van.knowledge.sources",
+      "frontend_units": [
+        "FE-019"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "van.automation.library",
+      "frontend_units": [
+        "FE-020"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "van.automation.intent",
+      "frontend_units": [
+        "FE-020"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "van.devices.provision",
+      "frontend_units": [
+        "FE-022"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "van.share.intake",
+      "frontend_units": [
+        "FE-017"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "van.next.orb-hub",
+      "frontend_units": [
+        "FE-004"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "van.next.trading.chart",
+      "frontend_units": [
+        "FE-007"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "van.next.trading.manual-review",
+      "frontend_units": [
+        "FE-009"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "van.next.trading.exit-sheet",
+      "frontend_units": [
+        "FE-009"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "van.next.trading.add-sheet",
+      "frontend_units": [
+        "FE-009"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "van.next.trading.handover-sheet",
+      "frontend_units": [
+        "FE-009"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "van.next.trading.markets",
+      "frontend_units": [
+        "FE-006"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "van.next.intel.news",
+      "frontend_units": [
+        "FE-013",
+        "FE-014"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "van.next.intel.news-story",
+      "frontend_units": [
+        "FE-013",
+        "FE-014"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "van.next.intel.calendar",
+      "frontend_units": [
+        "FE-013"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "van.next.intel.event-history",
+      "frontend_units": [
+        "FE-013"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "van.next.intel.news-coverage",
+      "frontend_units": [
+        "FE-013",
+        "FE-014"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "van.next.intel.news-live",
+      "frontend_units": [
+        "FE-013"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "van.next.trading.armed-ticket",
+      "frontend_units": [
+        "FE-013"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "van.next.trading.behaviour",
+      "frontend_units": [
+        "FE-014"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "van.next.trading.pattern-candidates",
+      "frontend_units": [
+        "FE-014"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "van.next.intel.keyword-watchlists",
+      "frontend_units": [
+        "FE-013"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "van.next.trading.replay",
+      "frontend_units": [
+        "FE-008"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "van.next.trading.alerts",
+      "frontend_units": [
+        "FE-006"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "van.next.trading.screener",
+      "frontend_units": [
+        "FE-006"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "van.next.trading.chart-tools",
+      "frontend_units": [
+        "FE-008"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "van.next.work.flow",
+      "frontend_units": [
+        "FE-015"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "van.next.work.agent-map",
+      "frontend_units": [
+        "FE-016"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "VAN-S-CX-STRATEGY-DEVELOPMENT",
+      "frontend_units": [
+        "FE-012"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "VAN-S-CX-CANDIDATE-COMPARISON",
+      "frontend_units": [
+        "FE-023"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "VAN-S-CX-EXPERIMENT-LEDGER",
+      "frontend_units": [
+        "FE-023"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "VAN-S-CX-LOCKOUT-SCOPES",
+      "frontend_units": [
+        "FE-011"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "VAN-S-CX-ORDER-RECONCILIATION",
+      "frontend_units": [
+        "FE-009"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "VAN-S-CX-MODEL-REGISTRY",
+      "frontend_units": [
+        "FE-023"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "VAN-S-CX-CALIBRATION",
+      "frontend_units": [
+        "FE-023"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "VAN-S-CX-EVENT-EXPECTATIONS",
+      "frontend_units": [
+        "FE-013"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "VAN-S-CX-EVENT-RESEARCH-LABS",
+      "frontend_units": [
+        "FE-023"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "VAN-S-CX-SOURCE-ADMISSION",
+      "frontend_units": [
+        "FE-022"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "VAN-S-CX-EVALUATOR-STATUS",
+      "frontend_units": [
+        "FE-023"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "VAN-S-CX-RISK-POLICY-ACTIVATION",
+      "frontend_units": [
+        "FE-012"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "CTX-HVA-DISCOVERY",
+      "frontend_units": [
+        "FE-023"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "CTX-HVA-SECURITY",
+      "frontend_units": [
+        "FE-023"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "CTX-HVA-WALLET",
+      "frontend_units": [
+        "FE-023"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "CTX-HVA-SELLABILITY",
+      "frontend_units": [
+        "FE-023"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "CTX-HVA-COHORT",
+      "frontend_units": [
+        "FE-023"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    },
+    {
+      "acceptance_refs": [
+        "T-VAN-CX-020-POS",
+        "T-VAN-CX-020-NEG",
+        "T-VAN-CX-020-REC"
+      ],
+      "context_id": "CTX-HVA-JUDGMENT",
+      "frontend_units": [
+        "FE-023"
+      ],
+      "required_evidence": "Rendered contrast, semantic state cues, scaling, focus and applicable error/recovery coverage; S24 environment matrix at QA-001.",
+      "themes": [
+        "dark",
+        "light"
+      ]
+    }
+  ],
+  "coverage": "ALL_234_EXISTING_CONTEXTS",
+  "native_scenarios_state": "NOT_RUN",
+  "new_application_test_ids": 0,
+  "normative_contract": "design/DARK_THEME_READABILITY_AMENDMENT_20261021.md",
+  "palette_source": "design/VAN_MATERIAL_TOKENS_REV2.json",
+  "schema": "van.theme.readability.bindings/1.0",
+  "status": "DESIGN_CONTRACT_NOT_RENDERED_OR_DEVICE_ACCEPTED",
+  "unit_rule": "Shared FE-001 plus every listed context frontend unit; UX-001/002/003 design and QA-001 final acceptance; retain BG-001. Acceptance refs refine existing contracts without changing registry-owned test-unit bindings."
+}

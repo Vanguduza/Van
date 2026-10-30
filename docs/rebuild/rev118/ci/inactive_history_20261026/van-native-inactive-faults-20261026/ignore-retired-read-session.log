@@ -1,0 +1,25 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+____________ test_retired_history_connection_cannot_publish_success ____________
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-417/test_retired_history_connectio0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f9b3d761190>
+
+    def test_retired_history_connection_cannot_publish_success(tmp_path,monkeypatch):
+        expected=identity(wire=True);peer=HistoryPeer();parent=make_adapter(peer);parent.clock=lambda:NOW
+        book=NativeMarketArchive(tmp_path/'native',clock=lambda:NOW+1000)
+        call=CtraderReadTransport.call
+        def retire(transport,message,*args,**kwargs):
+            result=call(transport,message,*args,**kwargs)
+            if message=='ProtoOAGetTrendbarsReq':transport.close()
+            return result
+        monkeypatch.setattr(CtraderReadTransport,'call',retire)
+        try:
+>           with pytest.raises(VenueUnavailable,match='session changed'):
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           Failed: DID NOT RAISE VenueUnavailable
+
+trading/tests/test_native_read_identity.py:208: Failed
+=========================== short test summary info ============================
+FAILED trading/tests/test_native_read_identity.py::test_retired_history_connection_cannot_publish_success
+1 failed in 0.78s

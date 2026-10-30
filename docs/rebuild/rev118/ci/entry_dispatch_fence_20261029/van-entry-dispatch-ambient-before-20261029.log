@@ -1,0 +1,26 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+_____ test_ambient_transaction_cannot_send_before_its_command_is_committed _____
+
+eurusd = SymbolContract(symbol='EURUSD', venue='mt5', base_currency='EUR', quote_currency='USD', account_currency='USD', contra...=Decimal('0'), max_adv_participation=Decimal('0.10'), liquidity_haircut=Decimal('0'), round_trip_cost_pct=Decimal('0'))
+
+    def test_ambient_transaction_cannot_send_before_its_command_is_committed(eurusd):
+        mandate, trade, decision = approved_entry(eurusd)
+        ledger, adapter = Ledger(), PaperAdapter()
+        try:
+            router = sender(ledger, adapter)
+            with ledger.atomic():
+                try:
+                    router.execute(trade, decision, mandate, now_ms=NOW*1000)
+                except RouterError:
+                    pass
+>               assert not adapter.positions(), 'native effect escaped an uncommitted caller transaction'
+E               AssertionError: native effect escaped an uncommitted caller transaction
+E               assert not [VenuePosition(position_id='P1', symbol='EURUSD', direction=<Direction.LONG: 'LONG'>, quantity=Decimal('0.18'), entry_...10017'), stop_price=Decimal('1.09790'), trade_intent_id='ti-1', loss_model=<LossModel.STOP_DISTANCE: 'STOP_DISTANCE'>)]
+E                +  where [VenuePosition(position_id='P1', symbol='EURUSD', direction=<Direction.LONG: 'LONG'>, quantity=Decimal('0.18'), entry_...10017'), stop_price=Decimal('1.09790'), trade_intent_id='ti-1', loss_model=<LossModel.STOP_DISTANCE: 'STOP_DISTANCE'>)] = positions()
+E                +    where positions = PaperAdapter(venue='paper', account_alias='paper_primary', equity=Decimal('10000'), currency='USD', spread=Decimal('0....=1, realised_pnl=Decimal('0'), closed=[], last_price={'EURUSD': Decimal('1.10010')}, pending={}, symbol_contracts=None).positions
+
+trading/tests/test_entry_dispatch_commit_fence.py:53: AssertionError
+=========================== short test summary info ============================
+FAILED trading/tests/test_entry_dispatch_commit_fence.py::test_ambient_transaction_cannot_send_before_its_command_is_committed
+1 failed in 0.56s

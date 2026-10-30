@@ -1,0 +1,7 @@
+{
+  "codebase_or_broker_runtime": false,
+  "decimal": "python decimal standard library",
+  "jsonschema": "4.26.0",
+  "python": "3.13.5",
+  "scope": "document_processing_only"
+}
