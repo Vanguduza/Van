@@ -32,6 +32,11 @@ class PhysicalPendingRisk:
             native_deals_available = self.context.provider=='CTRADER' and any(
                 e.kind is EventKind.FUNDING_DEAL_STATEMENT
                 and max(e.event_time_ms,e.received_time_ms)<=now_ms for _,e in rows)
+            from vati.execution.native_order_book import NativeOrderBook, EVENT as ORDER_OBSERVATION
+            native_orders_available = self.context.provider=='CTRADER' and any(
+                e.kind is EventKind.SESSION and isinstance(e.payload,dict)
+                and e.payload.get('event')==ORDER_OBSERVATION
+                and max(e.event_time_ms,e.received_time_ms)<=now_ms for _,e in rows)
             self._originals = {}
             for order in self.exposure.orders:
                 original = by_ref[order.original_input_ref]
@@ -43,6 +48,12 @@ class PhysicalPendingRisk:
                 ids = {by_ref[ref].payload.get('broker_position_id') for ref in order.receipt_refs}
                 ids.discard(None);ids.discard('')
                 self._originals[order.command_ref] = (contract,frozenset(ids))
+                if native_orders_available:
+                    observed = NativeOrderBook(self.ledger).for_command(cmd['command_hash'],available_at_ms=now_ms)
+                    if (observed['issues'] or order.state=='NO_EFFECT' and (
+                            observed['recorded_gross_deal_volume']>0
+                            or observed['maximum_reported_executed_volume']>0)):
+                        raise ValueError('original native order facts contradict or cannot reconcile pending exposure')
                 binding_ref=cmd.get('native_entry_margin_ref')
                 has_native_order=any(by_ref[ref].payload.get('broker_order_id') not in (None,'')
                     for ref in order.receipt_refs)
@@ -77,6 +88,8 @@ class PhysicalPendingRisk:
                     continue
                 if (event.kind in {EventKind.ORDER_COMMAND,EventKind.EXECUTION_RECEIPT,EventKind.TRADE_REVIEW,
                                   EventKind.FUNDING_DEAL_STATEMENT}
+                        or event.kind is EventKind.SESSION and isinstance(event.payload,dict)
+                        and event.payload.get('event')=='ORIGINAL_NATIVE_ORDER_OBSERVATION'
                         or event.kind is EventKind.RISK_DECISION and event.correlation_id in self._trades):
                     reload = True
             if reload:

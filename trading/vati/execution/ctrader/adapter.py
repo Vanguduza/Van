@@ -597,6 +597,10 @@ class CtraderAdapter:
         self._ensure_auth()
         return self._reconcile_raw()['order']
 
+    def order_details(self, order_id: int, *, context, deadline_ms: int):
+        from vati.execution.ctrader.orders import read_order_details
+        return read_order_details(self, order_id, context=context, deadline_ms=deadline_ms)
+
     def positions(self) -> list[VenuePosition]:
         self._ensure_auth()
         out = []

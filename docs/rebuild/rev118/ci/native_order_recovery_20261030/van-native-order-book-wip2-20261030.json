@@ -1,0 +1,20 @@
+{
+  "archive": "/workspace/van-native-order-book-wip2-20261030.zip",
+  "bytes": 46105,
+  "sha256": "24471292b1d5a9174a820ac62d27a2d012e094ecd82e79fc7febcb4fe3d619af",
+  "manifest": {
+    "base_commit": "748e98b35b2e757d5f615fa0d3bcfc0d93441c06",
+    "created_at_utc": "2026-10-30T10:15:23.965573+00:00",
+    "files": {
+      "trading/tests/test_ctrader_order_details.py": "ae014c69f113026984efb7cef806a0dbed772ee77049d106583348021284800f",
+      "trading/tests/test_native_order_book.py": "da7ce8a4d5a9fc2f6e7d72ec484f0a5cc0e9615ce1554ae8a361b52c057ec8e1",
+      "trading/tests/test_native_order_book_postgres.py": "2c329828ae61219361e22f34ec6a63f3ab053bf06ae96fe4d122ba598e171d7e",
+      "trading/vati/execution/ctrader/adapter.py": "528c3ece336c045305bbd5c286f3f3d9b54371c92f5ee9a5b5551560aca747d8",
+      "trading/vati/execution/ctrader/orders.py": "440f0ecaac0e1ae3de2807aa6a6a5efbc5c24beb1d548a87b87fb3c6ee27cc4f",
+      "trading/vati/execution/native_order_book.py": "3ee301cbf29220421ff6a814fc2062b1b3b6b2162ffe5cfbecb132d21f40b0a4",
+      "trading/vati/execution/router.py": "64dc124d6031623c01c975ac8a82a1b39acd6f85928c716eec2d2b1f16c38c99",
+      "trading/vati/risk/physical_pending.py": "01de204f9f81a66cf02379e42c1c133543a1c370c5c6a1b48d04d0f733cbd38d"
+    }
+  },
+  "verified": true
+}

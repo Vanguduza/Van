@@ -126,6 +126,17 @@ class ExecutionRouter:
         self.ledger.append(event)
         return event.hash
 
+    def observe_native_order(self, request_id, command_hash, margin_source_ref, native_order_id, *, deadline_ms):
+        """Read the original cTrader order; never submit, cancel or release it.
+
+        A replay reads its durable result even if the adapter is unavailable.
+        The book validates original command, receipt, account and instrument.
+        """
+        from vati.execution.native_order_book import NativeOrderBook
+        book = NativeOrderBook(self.ledger, clock=self.clock)
+        return book.capture(self.adapters.get('ctrader'), request_id, command_hash,
+                            margin_source_ref, native_order_id, deadline_ms=deadline_ms)
+
     def _commit_entry_command(self, command, payload, *, now_ms, decision_time_ms,
                               recheck):
         """Serialize the final duplicate check and commit before any transport.
