@@ -165,6 +165,22 @@ def closed_trade_pnl(entry, exit_price: Decimal, contract, reported_rows=()) -> 
         if not isinstance(entry["direction"], Direction):
             return PnlMeasurement(None, "UNKNOWN_DIRECTION")
         sign = Decimal("1") if entry["direction"] is Direction.LONG else Decimal("-1")
+        if 'recorded_exit_fills' in entry:
+            from vati.risk.arithmetic import fraction,decimal
+            from fractions import Fraction
+            legs=entry['recorded_exit_fills']
+            if type(legs) is not list or not legs or len(legs)>10000:
+                return PnlMeasurement(None,"UNKNOWN_RECORDED_CLOSE_EXECUTIONS")
+            total=Fraction(0);gross=Fraction(0)
+            for leg in legs:
+                qty=Decimal(leg['quantity']);price=Decimal(leg['price'])
+                if not qty.is_finite() or qty<=ZERO or not price.is_finite() or price<=ZERO:
+                    return PnlMeasurement(None,"UNKNOWN_RECORDED_CLOSE_EXECUTIONS")
+                total+=fraction(qty)
+                gross+=(fraction(price)-fraction(opened))*fraction(sign)*fraction(qty)*fraction(factor)
+            if total!=fraction(quantity):
+                return PnlMeasurement(None,"UNKNOWN_RECORDED_CLOSE_EXECUTIONS")
+            return PnlMeasurement(decimal(gross-fraction(fees)+fraction(carry)),"PRICE_DERIVED_NET_RECORDED_CHARGES")
         return PnlMeasurement((exit_price-opened)*sign*quantity*factor-fees+carry, "PRICE_DERIVED_NET_RECORDED_CHARGES")
     except (ValueError, TypeError, KeyError, ArithmeticError):
         return PnlMeasurement(None, "UNKNOWN_INPUTS")

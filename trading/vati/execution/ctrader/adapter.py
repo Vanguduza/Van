@@ -10,6 +10,8 @@ from __future__ import annotations
 
 import time
 import threading
+import json
+from collections import OrderedDict
 from dataclasses import dataclass, field, replace
 from decimal import Decimal, ROUND_DOWN, localcontext
 from vati.core.decimal_context import native_decimal_context
@@ -99,6 +101,30 @@ class CtraderAdapter:
     _depth_subscriptions: dict = field(default_factory=dict)
     _depth_control_states: dict = field(default_factory=dict)
     _depth_retired: set = field(default_factory=set)
+    _recorded_charges: Any = field(default_factory=OrderedDict,repr=False)
+
+    def _remember_native_charge(self,receipt,deal,symbol,*,closing):
+        from vati.core.canonical import canonical_json
+        from vati.execution.ctrader.charge_source import capture_charge_source,execution_ref
+        try:
+            source=capture_charge_source(receipt,deal,symbol,account_alias=self.account_alias,
+                native_account_id=self.ctid_trader_account_id,closing=closing)
+            key=execution_ref(receipt);encoded=canonical_json(source).encode()
+            # Conflicting native identities never overwrite an earlier source.
+            if key in self._recorded_charges and self._recorded_charges[key]!=encoded:
+                self._recorded_charges[key]=None
+            else:self._recorded_charges[key]=encoded
+            while len(self._recorded_charges)>128:self._recorded_charges.popitem(last=False)
+        except (KeyError,TypeError,ValueError,ArithmeticError):
+            pass  # Optional metadata cannot invalidate the independently known fill.
+        return receipt
+
+    def recorded_native_charge(self,receipt):
+        from vati.execution.ctrader.charge_source import execution_ref,validate_charge_source
+        encoded=self._recorded_charges.get(execution_ref(receipt))
+        if encoded is None:return None
+        body=json.loads(encoded)
+        return validate_charge_source(body,receipt,account_alias=self.account_alias,closing=body['closing'])
 
     # ------------------------------------------------------------ auth
     def _auth_is_current(self) -> bool:
@@ -725,9 +751,10 @@ class CtraderAdapter:
             if sl is not None and (not sl.is_finite() or sl<=0):sl=None
         except (TypeError,ValueError,ArithmeticError):sl=None
         state='FILLED' if et=='ORDER_FILLED' and native_quantity==volume else 'PARTIAL'
-        return ExecutionReceipt(cmd.trade_intent_id, cmd.decision_hash, self.venue, state, filled, px, cmd.entry_price, px, cmd.entry_price, sl is not None,
+        receipt=ExecutionReceipt(cmd.trade_intent_id, cmd.decision_hash, self.venue, state, filled, px, cmd.entry_price, px, cmd.entry_price, sl is not None,
                                 int(deal.get("executionTimestamp", now_ms)), now_ms, broker_order_id=str(deal.get("orderId", "")), broker_position_id=str(pos.get("positionId") or deal.get("positionId", "")),
                                 protective_stop_price=sl, fees=_recorded_commission(deal)).sealed()
+        return self._remember_native_charge(receipt,deal,sym,closing=False)
 
     def modify_stop(self, position_id: str, new_stop: Decimal, *, now_ms: int) -> ExecutionReceipt:
         self._ensure_auth()
@@ -801,8 +828,10 @@ class CtraderAdapter:
         if not protected and remaining.get('positionId')==int(position_id):
             try:protected=stop is not None and Decimal(str(stop)).is_finite() and Decimal(str(stop))>0
             except (TypeError,ValueError,ArithmeticError):protected=False
-        return ExecutionReceipt("", "", self.venue, state, sym.volume_to_lots(filled), price, ZERO, ZERO, ZERO,
-            protected,now_ms,now_ms,broker_order_id=str(order_id),broker_position_id=position_id,reject_reason=reason).sealed()
+        receipt=ExecutionReceipt("", "", self.venue, state, sym.volume_to_lots(filled), price, ZERO, ZERO, ZERO,
+            protected,now_ms,now_ms,broker_order_id=str(order_id),broker_position_id=position_id,
+            reject_reason=reason,fees=_recorded_commission(deal)).sealed()
+        return self._remember_native_charge(receipt,deal,sym,closing=True)
 
     # ------------------------------------------------------------ market data
     def subscribe_depth(self,symbol: str) -> None:

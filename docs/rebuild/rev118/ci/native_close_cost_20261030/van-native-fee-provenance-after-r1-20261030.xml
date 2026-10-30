@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="6" skipped="0" tests="84" time="2.461" timestamp="2026-10-30T12:28:17.009571+00:00" hostname="c80195087e61"><testcase classname="trading.tests.test_native_fee_provenance" name="test_historical_default_zero_close_without_native_charge_source_stays_unknown" time="0.037" /><testcase classname="trading.tests.test_ctrader_close_fee_knowledge" name="test_missing_close_charge_fields_do_not_become_measured_zero_or_erase_fill[missing0]" time="0.008" /><testcase classname="trading.tests.test_ctrader_close_fee_knowledge" name="test_missing_close_charge_fields_do_not_become_measured_zero_or_erase_fill[missing1]" time="0.007" /><testcase classname="trading.tests.test_ctrader_close_fee_knowledge" name="test_missing_close_charge_fields_do_not_become_measured_zero_or_erase_fill[missing2]" time="0.006" /><testcase classname="trading.tests.test_ctrader_close_fee_knowledge" name="test_measured_close_charge_uses_its_own_scale_and_existing_magnitude_convention[0-expected0]" time="0.008" /><testcase classname="trading.tests.test_ctrader_close_fee_knowledge" name="test_measured_close_charge_uses_its_own_scale_and_existing_magnitude_convention[-325-expected1]" time="0.009" /><testcase classname="trading.tests.test_ctrader_close_fee_knowledge" name="test_measured_close_charge_uses_its_own_scale_and_existing_magnitude_convention[325-expected2]" time="0.007" /><testcase classname="trading.tests.test_ctrader_close_fee_knowledge" name="test_unsupported_close_row_precision_keeps_execution_and_unknown_charge" time="0.028" /><testcase classname="trading.tests.test_ctrader_close_fee_knowledge" name="test_actual_account_close_review_does_not_invent_known_net_charges" time="0.014" /><testcase classname="trading.tests.test_ctrader_close_fee_knowledge" name="test_actual_account_review_includes_recorded_exit_charge_once" time="0.013"><failure message="AssertionError: assert Decimal('0') == Decimal('44.95')&#10; +  where Decimal('0') = TradeReview(trade_intent_id='fee-knowledge', strategy_id='FX-TREND-PULLBACK-01', r_multiple=Decimal('2.46'), pnl=Decim...LE', 'reason': 'ValueError', 'exit_receipt_refs': [], 'fees_final': False, 'cash_reconciled': False}}, broker_ok=False).pnl">tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-39/test_actual_account_review_inc0')
+
+    def test_actual_account_review_includes_recorded_exit_charge_once(tmp_path):
+        from vati.core import Ledger
+        ledger=Ledger(tmp_path/'close-cost-known.sqlite')
+        try:
+            out=account_close_review(ledger)
+            contract=out['life'].contracts['EURUSD']
+            expected=(out['receipt'].average_fill-out['entry'].average_fill)*out['entry'].filled_qty*contract.value_per_price_unit_per_lot
+            expected-=out['entry'].fees+out['receipt'].fees
+            assert out['receipt'].fees==D('3.25') and out['entry'].fees==D('1')
+&gt;           assert out['review'].pnl==expected
+E           AssertionError: assert Decimal('0') == Decimal('44.95')
+E            +  where Decimal('0') = TradeReview(trade_intent_id='fee-knowledge', strategy_id='FX-TREND-PULLBACK-01', r_multiple=Decimal('2.46'), pnl=Decim...LE', 'reason': 'ValueError', 'exit_receipt_refs': [], 'fees_final': False, 'cash_reconciled': False}}, broker_ok=False).pnl
+
+trading/tests/test_ctrader_close_fee_knowledge.py:113: AssertionError</failure></testcase><testcase classname="trading.tests.test_ctrader_close_fee_knowledge" name="test_native_close_cost_projection_reopens_original_sql_without_provider_io[missing0]" time="0.031"><failure message="AssertionError: assert None == Decimal('4.25')">tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-39/test_native_close_cost_project0')
+missing = ()
+
+    @pytest.mark.parametrize('missing',[(),('commission',)])
+    def test_native_close_cost_projection_reopens_original_sql_without_provider_io(tmp_path,missing):
+        from vati.core import Ledger
+        from vati.app.trade_lifecycle import AccountTradeLifecycle
+        from vati.execution.recorded_close_costs import recorded_close_cost_entry
+        ledger=Ledger(tmp_path/'durable-close-cost.sqlite');cold=None
+        try:
+            out=account_close_review(ledger,missing=missing)
+            cold=Ledger(ledger.path);count=ledger.count();sent=out['adapter'].transport.sent
+            projected=recorded_close_cost_entry(cold,out['original_entry_row'],
+                trade_intent_id=out['command'].trade_intent_id,venue='ctrader',
+                account_alias=out['command'].account_alias,available_at_ms=out['closed_at_ms'])
+&gt;           assert projected['fees']==(None if missing else D('4.25'))
+E           AssertionError: assert None == Decimal('4.25')
+
+trading/tests/test_ctrader_close_fee_knowledge.py:131: AssertionError</failure></testcase><testcase classname="trading.tests.test_ctrader_close_fee_knowledge" name="test_native_close_cost_projection_reopens_original_sql_without_provider_io[missing1]" time="0.014"><failure message="AssertionError: assert [] == ['7a09fb5ce9f...569c72e73543']&#10;  &#10;  Right contains one more item: '7a09fb5ce9ff3202acb99f069c5dba5833ffebb7284f14e8e615569c72e73543'&#10;  Use -v to get more diff">tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-39/test_native_close_cost_project1')
+missing = ('commission',)
+
+    @pytest.mark.parametrize('missing',[(),('commission',)])
+    def test_native_close_cost_projection_reopens_original_sql_without_provider_io(tmp_path,missing):
+        from vati.core import Ledger
+        from vati.app.trade_lifecycle import AccountTradeLifecycle
+        from vati.execution.recorded_close_costs import recorded_close_cost_entry
+        ledger=Ledger(tmp_path/'durable-close-cost.sqlite');cold=None
+        try:
+            out=account_close_review(ledger,missing=missing)
+            cold=Ledger(ledger.path);count=ledger.count();sent=out['adapter'].transport.sent
+            projected=recorded_close_cost_entry(cold,out['original_entry_row'],
+                trade_intent_id=out['command'].trade_intent_id,venue='ctrader',
+                account_alias=out['command'].account_alias,available_at_ms=out['closed_at_ms'])
+            assert projected['fees']==(None if missing else D('4.25'))
+            assert out['original_entry_row']['fees']==D('1')
+            from vati.core import EventKind
+            exits=[e for e in cold.iter(EventKind.EXECUTION_RECEIPT) if e.payload.get('exit_action')=='CLOSE']
+            assert len(exits)==1
+            restored=AccountTradeLifecycle._receipt_from_payload(exits[0].payload)
+            assert restored.receipt_hash==out['receipt'].receipt_hash and restored.fees==out['receipt'].fees
+&gt;           assert projected['recorded_close_costs']['exit_receipt_refs']==[exits[0].hash]
+E           AssertionError: assert [] == ['7a09fb5ce9f...569c72e73543']
+E             
+E             Right contains one more item: '7a09fb5ce9ff3202acb99f069c5dba5833ffebb7284f14e8e615569c72e73543'
+E             Use -v to get more diff
+
+trading/tests/test_ctrader_close_fee_knowledge.py:138: AssertionError</failure></testcase><testcase classname="trading.tests.test_ctrader_close_fee_knowledge" name="test_actual_single_symbol_review_consumes_original_exit_costs[missing0]" time="0.034"><failure message="AssertionError: assert 'UNKNOWN_CHARGES' == 'PRICE_DERIVE...ORDED_CHARGES'&#10;  &#10;  - PRICE_DERIVED_NET_RECORDED_CHARGES&#10;  + UNKNOWN_CHARGES">tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-39/test_actual_single_symbol_revi0')
+missing = ()
+
+    @pytest.mark.parametrize('missing',[(),('commission',)])
+    def test_actual_single_symbol_review_consumes_original_exit_costs(tmp_path,missing):
+        from dataclasses import replace
+        from vati.core import Ledger
+        from vati.app.cycle import DecisionCycle
+        from vati.intelligence.events import EventMatrix
+        from vati.market_data import FX_CALENDAR
+        from test_backtest_runner_cli import fx_cfg,fx_engine
+        ledger=Ledger(tmp_path/'single-close-cost.sqlite')
+        try:
+            out=account_close_review(ledger,missing=missing)
+            original_cfg=fx_cfg(out['life'].contracts['EURUSD'])
+            cfg=replace(original_cfg,venue='ctrader',account_alias=out['command'].account_alias,
+                        contract=out['life'].contracts['EURUSD'])
+            cycle=DecisionCycle(cfg=cfg,adapter=out['adapter'],ledger=ledger,engine=fx_engine(cfg),
+                cost_fn=lambda state:D('.0003'),calendar=FX_CALENDAR,events=EventMatrix())
+            cycle._entries[out['command'].trade_intent_id]=deepcopy(out['original_entry_row'])
+            cycle._on_close(out['command'].trade_intent_id,out['receipt'].average_fill,'OWNER',out['closed_at_ms'])
+            review=cycle.reviews[-1]
+&gt;           assert review.pnl_basis==('UNKNOWN_CHARGES' if missing else 'PRICE_DERIVED_NET_RECORDED_CHARGES')
+E           AssertionError: assert 'UNKNOWN_CHARGES' == 'PRICE_DERIVE...ORDED_CHARGES'
+E             
+E             - PRICE_DERIVED_NET_RECORDED_CHARGES
+E             + UNKNOWN_CHARGES
+
+trading/tests/test_ctrader_close_fee_knowledge.py:165: AssertionError</failure></testcase><testcase classname="trading.tests.test_ctrader_close_fee_knowledge" name="test_actual_single_symbol_review_consumes_original_exit_costs[missing1]" time="0.022" /><testcase classname="trading.tests.test_ctrader_close_fee_knowledge" name="test_replayed_identical_exit_receipt_does_not_charge_the_parent_twice" time="0.031"><failure message="AssertionError: assert (None == Decimal('4.25'))&#10; +  where Decimal('4.25') = D('4.25')">tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-39/test_replayed_identical_exit_r0')
+
+    def test_replayed_identical_exit_receipt_does_not_charge_the_parent_twice(tmp_path):
+        from dataclasses import asdict
+        from vati.core import Ledger,EventKind,make_event
+        from vati.execution.recorded_close_costs import recorded_close_cost_entry
+        ledger=Ledger(tmp_path/'replayed-close-cost.sqlite')
+        try:
+            out=account_close_review(ledger)
+            original=next(e for e in ledger.iter(EventKind.EXECUTION_RECEIPT) if e.payload.get('exit_action')=='CLOSE')
+            ledger.append(make_event(EventKind.EXECUTION_RECEIPT,original.producer,original.payload,
+                event_time_ms=out['closed_at_ms']+1,received_time_ms=out['closed_at_ms']+1,
+                correlation_id=original.correlation_id))
+            entry=recorded_close_cost_entry(ledger,out['original_entry_row'],trade_intent_id=original.correlation_id,
+                venue='ctrader',account_alias=out['command'].account_alias,available_at_ms=out['closed_at_ms']+1)
+&gt;           assert entry['fees']==D('4.25') and len(entry['recorded_exit_fills'])==1
+E           AssertionError: assert (None == Decimal('4.25'))
+E            +  where Decimal('4.25') = D('4.25')
+
+trading/tests/test_ctrader_close_fee_knowledge.py:185: AssertionError</failure></testcase><testcase classname="trading.tests.test_recorded_close_cost_scope" name="test_unbound_or_unavailable_close_cannot_supply_known_charges[alias]" time="0.022" /><testcase classname="trading.tests.test_recorded_close_cost_scope" name="test_unbound_or_unavailable_close_cannot_supply_known_charges[position]" time="0.013" /><testcase classname="trading.tests.test_recorded_close_cost_scope" name="test_unbound_or_unavailable_close_cannot_supply_known_charges[future]" time="0.015" /><testcase classname="trading.tests.test_recorded_close_cost_scope" name="test_unbound_or_unavailable_close_cannot_supply_known_charges[bad-seal]" time="0.019" /><testcase classname="trading.tests.test_recorded_close_cost_scope" name="test_unbound_or_unavailable_close_cannot_supply_known_charges[conflicting-cost]" time="0.026" /><testcase classname="trading.tests.test_recorded_close_cost_scope" name="test_unbound_or_unavailable_close_cannot_supply_known_charges[future-receipt-time]" time="0.014" /><testcase classname="trading.tests.test_recorded_close_cost_scope" name="test_independent_reported_net_cash_keeps_precedence_over_missing_charge_decomposition" time="0.012" /><testcase classname="trading.tests.test_recorded_close_cost_scope" name="test_actual_partial_then_full_native_closes_use_every_price_and_charge_once[False]" time="0.024"><failure message="AssertionError: assert (Decimal('2.00') == Decimal('2') and Decimal('0') == Decimal('32.95'))&#10; +  where Decimal('2.00') = ExecutionReceipt(trade_intent_id='', decision_hash='', venue='ctrader', status='FILLED', filled_qty=Decimal('0.06'), a...l('2.00'), protective_stop_price=None, receipt_hash='d2077eb5690da4af97e104f59cded8d6cb7b85e035f489c7dae4e4856e22351d').fees&#10; +  and   Decimal('2') = D('2')&#10; +  and   Decimal('0') = TradeReview(trade_intent_id='fee-knowledge', strategy_id='FX-TREND-PULLBACK-01', r_multiple=Decimal('2.46'), pnl=Decim...LE', 'reason': 'ValueError', 'exit_receipt_refs': [], 'fees_final': False, 'cash_reconciled': False}}, broker_ok=False).pnl&#10; +  and   Decimal('32.95') = D('32.95')">tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-39/test_actual_partial_then_full_0')
+missing_last = False
+
+    @pytest.mark.parametrize('missing_last',[False,True])
+    def test_actual_partial_then_full_native_closes_use_every_price_and_charge_once(tmp_path,missing_last):
+        from vati.lifecycle.family import FamilyMember,MemberRole
+        ledger=Ledger(tmp_path/'partial-native-costs.sqlite')
+        try:
+            with native_fill(commission=-100) as (adapter,command,entry):
+                life=entry_lifecycle(ledger,adapter,command,entry)
+                peer=adapter.transport._connector.__self__;original=peer.handle;closed=[]
+                def handle(name,body,cid):
+                    if name!='ProtoOAClosePositionReq':return original(name,body,cid)
+                    pid=body['positionId'];before=deepcopy(peer.positions[pid]);volume=body['volume']
+                    remaining=before['tradeData']['volume']-volume;index=len(closed)
+                    assert remaining&gt;=0
+                    if remaining:
+                        peer.positions[pid]['tradeData']['volume']=remaining
+                        position=deepcopy(peer.positions[pid])
+                    else:
+                        peer.positions.pop(pid);position={**before,'positionStatus':'POSITION_STATUS_CLOSED'}
+                    order_id=1001+index;price=(1.102,1.105)[index]
+                    deal={'dealId':2001+index,'orderId':order_id,'positionId':pid,'symbolId':before['tradeData']['symbolId'],
+                        'volume':volume,'filledVolume':volume,'tradeSide':'SELL','dealStatus':'FILLED',
+                        'createTimestamp':1700000000000,'executionTimestamp':1700000001000+index,
+                        'executionPrice':price,'commission':(-125,-200)[index],'moneyDigits':2}
+                    if missing_last and index==1:deal.pop('commission')
+                    closed.append(deepcopy(deal))
+                    return FakeCtrader.send(peer,'ProtoOAExecutionEvent',{'ctidTraderAccountId':12345,
+                        'executionType':'ORDER_FILLED','position':position,
+                        'order':{'orderId':order_id,'tradeData':{**before['tradeData'],'volume':volume,'tradeSide':'SELL'},
+                            'orderType':'MARKET','orderStatus':'ORDER_STATUS_FILLED','closingOrder':True},'deal':deal},cid)
+                peer.handle=handle
+                first=life.router.apply_preservation('ctrader',position_id=entry.broker_position_id,
+                    trade_intent_id=command.trade_intent_id,action='PARTIAL_CLOSE',quantity=D('.04'),
+                    now_ms=1700000001000,reason='PARTIAL')
+                assert first.status=='FILLED' and first.filled_qty==D('.04') and first.fees==D('1.25'), first.reject_reason
+                assert first.protective_stop_confirmed and adapter.positions()[0].quantity==D('.06')
+                family=life.families.for_intent(command.trade_intent_id)
+                life.families.apply(family.family_id,FamilyMember('actual-first-close',MemberRole.PARTIAL_EXIT,
+                    first.filled_qty,first.average_fill,1700000001000,command.trade_intent_id),now_ms=1700000001000)
+                life.entries[command.trade_intent_id]['quantity']=family.net_quantity
+                second=life.router.apply_preservation('ctrader',position_id=entry.broker_position_id,
+                    trade_intent_id=command.trade_intent_id,action='FULL_CLOSE',now_ms=1700000002000,reason='FULL')
+                assert second.status=='FILLED' and second.filled_qty==D('.06') and adapter.positions()==[]
+                life._on_close(command.trade_intent_id,second.average_fill,'FULL',1700000002000)
+                review=life.reviews[-1]
+                if missing_last:
+                    assert second.fees is None and review.pnl_basis=='UNKNOWN_CHARGES' and review.broker_ok is False
+                else:
+&gt;                   assert second.fees==D('2') and review.pnl==D('32.95')
+E                   AssertionError: assert (Decimal('2.00') == Decimal('2') and Decimal('0') == Decimal('32.95'))
+E                    +  where Decimal('2.00') = ExecutionReceipt(trade_intent_id='', decision_hash='', venue='ctrader', status='FILLED', filled_qty=Decimal('0.06'), a...l('2.00'), protective_stop_price=None, receipt_hash='d2077eb5690da4af97e104f59cded8d6cb7b85e035f489c7dae4e4856e22351d').fees
+E                    +  and   Decimal('2') = D('2')
+E                    +  and   Decimal('0') = TradeReview(trade_intent_id='fee-knowledge', strategy_id='FX-TREND-PULLBACK-01', r_multiple=Decimal('2.46'), pnl=Decim...LE', 'reason': 'ValueError', 'exit_receipt_refs': [], 'fees_final': False, 'cash_reconciled': False}}, broker_ok=False).pnl
+E                    +  and   Decimal('32.95') = D('32.95')
+
+trading/tests/test_recorded_close_cost_scope.py:107: AssertionError</failure></testcase><testcase classname="trading.tests.test_recorded_close_cost_scope" name="test_actual_partial_then_full_native_closes_use_every_price_and_charge_once[True]" time="0.018" /><testcase classname="trading.tests.test_native_receipt_fee_knowledge" name="test_missing_native_charge_fields_preserve_the_actual_fill[missing0]" time="0.008" /><testcase classname="trading.tests.test_native_receipt_fee_knowledge" name="test_missing_native_charge_fields_preserve_the_actual_fill[missing1]" time="0.015" /><testcase classname="trading.tests.test_native_receipt_fee_knowledge" name="test_missing_native_charge_fields_preserve_the_actual_fill[missing2]" time="0.007" /><testcase classname="trading.tests.test_native_receipt_fee_knowledge" name="test_explicit_zero_and_existing_recorded_magnitude_convention_survive[0-expected0]" time="0.007" /><testcase classname="trading.tests.test_native_receipt_fee_knowledge" name="test_explicit_zero_and_existing_recorded_magnitude_convention_survive[-350-expected1]" time="0.008" /><testcase classname="trading.tests.test_native_receipt_fee_knowledge" name="test_explicit_zero_and_existing_recorded_magnitude_convention_survive[350-expected2]" time="0.013" /><testcase classname="trading.tests.test_native_receipt_fee_knowledge" name="test_invalid_native_precision_cannot_erase_a_known_fill[-1]" time="0.010" /><testcase classname="trading.tests.test_native_receipt_fee_knowledge" name="test_invalid_native_precision_cannot_erase_a_known_fill[19]" time="0.006" /><testcase classname="trading.tests.test_native_receipt_fee_knowledge" name="test_signed_native_charge_limit_is_exact_under_hostile_decimal_context[-9223372036854775808]" time="0.001" /><testcase classname="trading.tests.test_native_receipt_fee_knowledge" name="test_signed_native_charge_limit_is_exact_under_hostile_decimal_context[9223372036854775807]" time="0.001" /><testcase classname="trading.tests.test_native_receipt_fee_knowledge" name="test_malformed_optional_charge_metadata_stays_unknown[None]" time="0.001" /><testcase classname="trading.tests.test_native_receipt_fee_knowledge" name="test_malformed_optional_charge_metadata_stays_unknown[row1]" time="0.000" /><testcase classname="trading.tests.test_native_receipt_fee_knowledge" name="test_malformed_optional_charge_metadata_stays_unknown[row2]" time="0.001" /><testcase classname="trading.tests.test_native_receipt_fee_knowledge" name="test_malformed_optional_charge_metadata_stays_unknown[row3]" time="0.001" /><testcase classname="trading.tests.test_native_receipt_fee_knowledge" name="test_malformed_optional_charge_metadata_stays_unknown[row4]" time="0.000" /><testcase classname="trading.tests.test_native_receipt_fee_knowledge" name="test_malformed_optional_charge_metadata_stays_unknown[row5]" time="0.000" /><testcase classname="trading.tests.test_native_receipt_fee_knowledge" name="test_malformed_optional_charge_metadata_stays_unknown[row6]" time="0.001" /><testcase classname="trading.tests.test_native_receipt_fee_knowledge" name="test_malformed_optional_charge_metadata_stays_unknown[row7]" time="0.001" /><testcase classname="trading.tests.test_native_receipt_fee_knowledge" name="test_unknown_fee_survives_real_sqlite_and_original_receipt_reopen" time="0.037" /><testcase classname="trading.tests.test_native_receipt_fee_knowledge" name="test_sealed_receipt_roundtrip_preserves_unknown_zero_and_known[None]" time="0.002" /><testcase classname="trading.tests.test_native_receipt_fee_knowledge" name="test_sealed_receipt_roundtrip_preserves_unknown_zero_and_known[fee1]" time="0.001" /><testcase classname="trading.tests.test_native_receipt_fee_knowledge" name="test_sealed_receipt_roundtrip_preserves_unknown_zero_and_known[fee2]" time="0.001" /><testcase classname="trading.tests.test_native_receipt_fee_knowledge" name="test_unknown_charge_withholds_derived_pnl_but_keeps_reported_net_cash[None-None]" time="0.001" /><testcase classname="trading.tests.test_native_receipt_fee_knowledge" name="test_unknown_charge_withholds_derived_pnl_but_keeps_reported_net_cash[GROSS_PRICE_MOVEMENT-None]" time="0.000" /><testcase classname="trading.tests.test_native_receipt_fee_knowledge" name="test_unknown_charge_withholds_derived_pnl_but_keeps_reported_net_cash[NET_CONFIRMED-expected2]" time="0.001" /><testcase classname="trading.tests.test_native_receipt_fee_knowledge" name="test_unknown_charge_withholds_derived_pnl_but_keeps_reported_net_cash[LEGACY-expected3]" time="0.000" /><testcase classname="trading.tests.test_native_receipt_fee_knowledge" name="test_cycle_records_unavailable_then_accepts_an_original_measured_receipt" time="0.006" /><testcase classname="trading.tests.test_native_receipt_fee_knowledge" name="test_owner_confirmation_keeps_protection_and_can_repair_missing_cost" time="0.004" /><testcase classname="trading.tests.test_account_lifecycle" name="test_attributed_venue_position_without_open_ledger_state_blocks" time="0.001" /><testcase classname="trading.tests.test_account_lifecycle" name="test_restart_restores_only_ledger_backed_position_and_protection" time="0.001" /><testcase classname="trading.tests.test_account_lifecycle" name="test_restart_protection_refuses_a_widened_stop" time="0.001" /><testcase classname="trading.tests.test_account_lifecycle" name="test_filled_entry_produces_tca_and_close_produces_review" time="0.002" /><testcase classname="trading.tests.test_account_lifecycle" name="test_account_service_replays_only_newly_closed_bars_and_only_advanced_symbols" time="0.009" /><testcase classname="trading.tests.test_account_lifecycle" name="test_signed_owner_ticket_confirmations_become_runtime_truth_once_and_replay_cleanly" time="0.007" /><testcase classname="trading.tests.test_exit_uncertainty" name="test_unknown_close_does_not_retry_on_the_next_market_update" time="0.003" /><testcase classname="trading.tests.test_exit_uncertainty" name="test_transport_exception_cannot_turn_into_a_blind_retry" time="0.001" /><testcase classname="trading.tests.test_exit_uncertainty" name="test_receipt_and_exit_disposition_are_committed_together" time="0.001" /><testcase classname="trading.tests.test_exit_uncertainty" name="test_two_ledger_writers_cannot_send_the_same_position_close" time="0.006" /><testcase classname="trading.tests.test_exit_uncertainty" name="test_process_death_keeps_the_original_attempt_fenced[after_request-0]" time="0.176" /><testcase classname="trading.tests.test_exit_uncertainty" name="test_process_death_keeps_the_original_attempt_fenced[after_effect-1]" time="0.167" /><testcase classname="trading.tests.test_exit_uncertainty" name="test_process_death_keeps_the_original_attempt_fenced[before_receipt_commit-1]" time="0.238" /><testcase classname="trading.tests.test_exit_uncertainty" name="test_process_death_keeps_the_original_attempt_fenced[after_receipt_commit-1]" time="0.237" /><testcase classname="trading.tests.test_exit_uncertainty" name="test_owner_sell_definition_is_durable_for_preservation_and_final_partial_keeps_protection" time="0.003" /><testcase classname="trading.tests.test_exit_uncertainty" name="test_owner_assertion_cannot_settle_an_unbound_exit_ticket[not_durable]" time="0.002" /><testcase classname="trading.tests.test_exit_uncertainty" name="test_owner_assertion_cannot_settle_an_unbound_exit_ticket[non_native]" time="0.002" /><testcase classname="trading.tests.test_exit_uncertainty" name="test_owner_assertion_cannot_settle_an_unbound_exit_ticket[wrong_ticket]" time="0.003" /><testcase classname="trading.tests.test_exit_uncertainty" name="test_full_native_owner_confirmation_resolves_without_another_transport" time="0.003" /><testcase classname="trading.tests.test_exit_uncertainty" name="test_missing_or_nonfinite_close_price_retains_entry_for_later_reconciliation[None-account]" time="0.003" /><testcase classname="trading.tests.test_exit_uncertainty" name="test_missing_or_nonfinite_close_price_retains_entry_for_later_reconciliation[None-single_symbol]" time="0.006" /><testcase classname="trading.tests.test_exit_uncertainty" name="test_missing_or_nonfinite_close_price_retains_entry_for_later_reconciliation[price1-account]" time="0.002" /><testcase classname="trading.tests.test_exit_uncertainty" name="test_missing_or_nonfinite_close_price_retains_entry_for_later_reconciliation[price1-single_symbol]" time="0.006" /><testcase classname="trading.tests.test_exit_uncertainty" name="test_missing_or_nonfinite_close_price_retains_entry_for_later_reconciliation[price2-account]" time="0.002" /><testcase classname="trading.tests.test_exit_uncertainty" name="test_missing_or_nonfinite_close_price_retains_entry_for_later_reconciliation[price2-single_symbol]" time="0.006" /><testcase classname="trading.tests.test_exit_uncertainty" name="test_restart_preserves_uncertainty_even_with_a_fresh_protection_projection" time="0.002" /><testcase classname="trading.tests.test_exit_uncertainty" name="test_upgrade_does_not_erase_a_legacy_unknown_close_receipt" time="0.001" /><testcase classname="trading.tests.test_exit_uncertainty" name="test_an_unknown_partial_preservation_close_blocks_another_close_request" time="0.001" /><testcase classname="trading.tests.test_exit_uncertainty" name="test_definitive_zero_fill_refusal_allows_a_later_protective_retry" time="0.002" /><testcase classname="trading.tests.test_exit_uncertainty" name="test_incomplete_or_wrong_position_receipt_cannot_remove_protection[patch0]" time="0.002" /><testcase classname="trading.tests.test_exit_uncertainty" name="test_incomplete_or_wrong_position_receipt_cannot_remove_protection[patch1]" time="0.002" /><testcase classname="trading.tests.test_exit_uncertainty" name="test_incomplete_or_wrong_position_receipt_cannot_remove_protection[patch2]" time="0.002" /></testsuite></testsuites>

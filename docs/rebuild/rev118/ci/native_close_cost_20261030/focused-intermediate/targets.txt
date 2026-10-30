@@ -1,0 +1,9 @@
+trading/tests/test_ctrader_close_fee_knowledge.py
+trading/tests/test_ctrader_close_fee_knowledge_postgres.py
+trading/tests/test_recorded_close_cost_scope.py
+trading/tests/test_native_receipt_fee_knowledge.py
+trading/tests/test_native_receipt_fee_knowledge_postgres.py
+trading/tests/test_account_lifecycle.py
+trading/tests/test_exit_uncertainty.py
+trading/tests/test_ctrader.py
+trading/tests/test_ctrader_original_outcomes.py

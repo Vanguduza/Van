@@ -1,0 +1,29 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+_ test_historical_default_zero_close_without_native_charge_source_stays_unknown _
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-38/test_historical_default_zero_c0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f09887a88c0>
+
+    def test_historical_default_zero_close_without_native_charge_source_stays_unknown(tmp_path,monkeypatch):
+        original=ExecutionRouter._log
+        def legacy_log(self,kind,payload,**kwargs):
+            payload=dict(payload)
+            if kind is EventKind.EXECUTION_RECEIPT:
+                payload.pop('recorded_native_charge',None)
+            return original(self,kind,payload,**kwargs)
+        monkeypatch.setattr(ExecutionRouter,'_log',legacy_log)
+        ledger=Ledger(tmp_path/'historical-default-zero.sqlite')
+        try:
+            out=account_close_review(ledger,commission=0)
+            assert out['receipt'].fees==D(0) and out['receipt'].status=='FILLED'
+>           assert out['review'].pnl_basis=='UNKNOWN_CHARGES'
+E           AssertionError: assert 'PRICE_DERIVE...ORDED_CHARGES' == 'UNKNOWN_CHARGES'
+E             
+E             - UNKNOWN_CHARGES
+E             + PRICE_DERIVED_NET_RECORDED_CHARGES
+
+trading/tests/test_native_fee_provenance.py:21: AssertionError
+=========================== short test summary info ============================
+FAILED trading/tests/test_native_fee_provenance.py::test_historical_default_zero_close_without_native_charge_source_stays_unknown
+1 failed in 0.62s

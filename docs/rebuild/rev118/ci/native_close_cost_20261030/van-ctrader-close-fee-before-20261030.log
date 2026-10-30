@@ -1,0 +1,79 @@
+FFF.FFF                                                                  [100%]
+=================================== FAILURES ===================================
+_ test_missing_close_charge_fields_do_not_become_measured_zero_or_erase_fill[missing0] _
+
+missing = ('commission',)
+
+    @pytest.mark.parametrize('missing',[('commission',),('moneyDigits',),('commission','moneyDigits')])
+    def test_missing_close_charge_fields_do_not_become_measured_zero_or_erase_fill(missing):
+        with native_close(missing=missing) as (adapter,command,entry,receipt):
+>           assert receipt.fees is None
+E           AssertionError: assert Decimal('0') is None
+E            +  where Decimal('0') = ExecutionReceipt(trade_intent_id='', decision_hash='', venue='ctrader', status='FILLED', filled_qty=Decimal('0.1'), av...imal('0'), protective_stop_price=None, receipt_hash='fff5f1b840c0db86a7bff87287157006a7cd8a123b6c8871ae2df34487b9915e').fees
+
+trading/tests/test_ctrader_close_fee_knowledge.py:34: AssertionError
+_ test_missing_close_charge_fields_do_not_become_measured_zero_or_erase_fill[missing1] _
+
+missing = ('moneyDigits',)
+
+    @pytest.mark.parametrize('missing',[('commission',),('moneyDigits',),('commission','moneyDigits')])
+    def test_missing_close_charge_fields_do_not_become_measured_zero_or_erase_fill(missing):
+        with native_close(missing=missing) as (adapter,command,entry,receipt):
+>           assert receipt.fees is None
+E           AssertionError: assert Decimal('0') is None
+E            +  where Decimal('0') = ExecutionReceipt(trade_intent_id='', decision_hash='', venue='ctrader', status='FILLED', filled_qty=Decimal('0.1'), av...imal('0'), protective_stop_price=None, receipt_hash='fff5f1b840c0db86a7bff87287157006a7cd8a123b6c8871ae2df34487b9915e').fees
+
+trading/tests/test_ctrader_close_fee_knowledge.py:34: AssertionError
+_ test_missing_close_charge_fields_do_not_become_measured_zero_or_erase_fill[missing2] _
+
+missing = ('commission', 'moneyDigits')
+
+    @pytest.mark.parametrize('missing',[('commission',),('moneyDigits',),('commission','moneyDigits')])
+    def test_missing_close_charge_fields_do_not_become_measured_zero_or_erase_fill(missing):
+        with native_close(missing=missing) as (adapter,command,entry,receipt):
+>           assert receipt.fees is None
+E           AssertionError: assert Decimal('0') is None
+E            +  where Decimal('0') = ExecutionReceipt(trade_intent_id='', decision_hash='', venue='ctrader', status='FILLED', filled_qty=Decimal('0.1'), av...imal('0'), protective_stop_price=None, receipt_hash='fff5f1b840c0db86a7bff87287157006a7cd8a123b6c8871ae2df34487b9915e').fees
+
+trading/tests/test_ctrader_close_fee_knowledge.py:34: AssertionError
+_ test_measured_close_charge_uses_its_own_scale_and_existing_magnitude_convention[-325-expected1] _
+
+commission = -325, expected = Decimal('3.25')
+
+    @pytest.mark.parametrize('commission,expected',[(0,D(0)),(-325,D('3.25')),(325,D('3.25'))])
+    def test_measured_close_charge_uses_its_own_scale_and_existing_magnitude_convention(commission,expected):
+        with native_close(commission=commission) as (adapter,command,entry,receipt):
+>           assert receipt.fees==expected
+E           AssertionError: assert Decimal('0') == Decimal('3.25')
+E            +  where Decimal('0') = ExecutionReceipt(trade_intent_id='', decision_hash='', venue='ctrader', status='FILLED', filled_qty=Decimal('0.1'), av...imal('0'), protective_stop_price=None, receipt_hash='fff5f1b840c0db86a7bff87287157006a7cd8a123b6c8871ae2df34487b9915e').fees
+
+trading/tests/test_ctrader_close_fee_knowledge.py:41: AssertionError
+_ test_measured_close_charge_uses_its_own_scale_and_existing_magnitude_convention[325-expected2] _
+
+commission = 325, expected = Decimal('3.25')
+
+    @pytest.mark.parametrize('commission,expected',[(0,D(0)),(-325,D('3.25')),(325,D('3.25'))])
+    def test_measured_close_charge_uses_its_own_scale_and_existing_magnitude_convention(commission,expected):
+        with native_close(commission=commission) as (adapter,command,entry,receipt):
+>           assert receipt.fees==expected
+E           AssertionError: assert Decimal('0') == Decimal('3.25')
+E            +  where Decimal('0') = ExecutionReceipt(trade_intent_id='', decision_hash='', venue='ctrader', status='FILLED', filled_qty=Decimal('0.1'), av...imal('0'), protective_stop_price=None, receipt_hash='fff5f1b840c0db86a7bff87287157006a7cd8a123b6c8871ae2df34487b9915e').fees
+
+trading/tests/test_ctrader_close_fee_knowledge.py:41: AssertionError
+___ test_unsupported_close_row_precision_keeps_execution_and_unknown_charge ____
+
+    def test_unsupported_close_row_precision_keeps_execution_and_unknown_charge():
+        with native_close(digits=19) as (adapter,command,entry,receipt):
+>           assert receipt.fees is None
+E           AssertionError: assert Decimal('0') is None
+E            +  where Decimal('0') = ExecutionReceipt(trade_intent_id='', decision_hash='', venue='ctrader', status='FILLED', filled_qty=Decimal('0.1'), av...imal('0'), protective_stop_price=None, receipt_hash='fff5f1b840c0db86a7bff87287157006a7cd8a123b6c8871ae2df34487b9915e').fees
+
+trading/tests/test_ctrader_close_fee_knowledge.py:46: AssertionError
+=========================== short test summary info ============================
+FAILED trading/tests/test_ctrader_close_fee_knowledge.py::test_missing_close_charge_fields_do_not_become_measured_zero_or_erase_fill[missing0]
+FAILED trading/tests/test_ctrader_close_fee_knowledge.py::test_missing_close_charge_fields_do_not_become_measured_zero_or_erase_fill[missing1]
+FAILED trading/tests/test_ctrader_close_fee_knowledge.py::test_missing_close_charge_fields_do_not_become_measured_zero_or_erase_fill[missing2]
+FAILED trading/tests/test_ctrader_close_fee_knowledge.py::test_measured_close_charge_uses_its_own_scale_and_existing_magnitude_convention[-325-expected1]
+FAILED trading/tests/test_ctrader_close_fee_knowledge.py::test_measured_close_charge_uses_its_own_scale_and_existing_magnitude_convention[325-expected2]
+FAILED trading/tests/test_ctrader_close_fee_knowledge.py::test_unsupported_close_row_precision_keeps_execution_and_unknown_charge
+6 failed, 1 passed in 1.35s

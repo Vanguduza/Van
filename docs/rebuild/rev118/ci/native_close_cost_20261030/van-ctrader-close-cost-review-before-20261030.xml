@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="2" skipped="0" tests="9" time="0.572" timestamp="2026-10-30T11:49:56.308141+00:00" hostname="c80195087e61"><testcase classname="trading.tests.test_ctrader_close_fee_knowledge" name="test_missing_close_charge_fields_do_not_become_measured_zero_or_erase_fill[missing0]" time="0.018" /><testcase classname="trading.tests.test_ctrader_close_fee_knowledge" name="test_missing_close_charge_fields_do_not_become_measured_zero_or_erase_fill[missing1]" time="0.007" /><testcase classname="trading.tests.test_ctrader_close_fee_knowledge" name="test_missing_close_charge_fields_do_not_become_measured_zero_or_erase_fill[missing2]" time="0.008" /><testcase classname="trading.tests.test_ctrader_close_fee_knowledge" name="test_measured_close_charge_uses_its_own_scale_and_existing_magnitude_convention[0-expected0]" time="0.007" /><testcase classname="trading.tests.test_ctrader_close_fee_knowledge" name="test_measured_close_charge_uses_its_own_scale_and_existing_magnitude_convention[-325-expected1]" time="0.008" /><testcase classname="trading.tests.test_ctrader_close_fee_knowledge" name="test_measured_close_charge_uses_its_own_scale_and_existing_magnitude_convention[325-expected2]" time="0.006" /><testcase classname="trading.tests.test_ctrader_close_fee_knowledge" name="test_unsupported_close_row_precision_keeps_execution_and_unknown_charge" time="0.008" /><testcase classname="trading.tests.test_ctrader_close_fee_knowledge" name="test_actual_account_close_review_does_not_invent_known_net_charges" time="0.014"><failure message="AssertionError: assert 'PRICE_DERIVE...ORDED_CHARGES' == 'UNKNOWN_CHARGES'&#10;  &#10;  - UNKNOWN_CHARGES&#10;  + PRICE_DERIVED_NET_RECORDED_CHARGES">tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-27/test_actual_account_close_revi0')
+
+    def test_actual_account_close_review_does_not_invent_known_net_charges(tmp_path):
+        from vati.core import Ledger
+        ledger=Ledger(tmp_path/'close-cost-review.sqlite')
+        try:
+            out=account_close_review(ledger,missing=('commission',))
+            assert out['receipt'].fees is None and out['receipt'].status=='FILLED'
+&gt;           assert out['review'].pnl_basis=='UNKNOWN_CHARGES'
+E           AssertionError: assert 'PRICE_DERIVE...ORDED_CHARGES' == 'UNKNOWN_CHARGES'
+E             
+E             - UNKNOWN_CHARGES
+E             + PRICE_DERIVED_NET_RECORDED_CHARGES
+
+trading/tests/test_ctrader_close_fee_knowledge.py:88: AssertionError</failure></testcase><testcase classname="trading.tests.test_ctrader_close_fee_knowledge" name="test_actual_account_review_includes_recorded_exit_charge_once" time="0.013"><failure message="AssertionError: assert Decimal('48.20') == Decimal('44.95')&#10; +  where Decimal('48.20') = TradeReview(trade_intent_id='fee-knowledge', strategy_id='FX-TREND-PULLBACK-01', r_multiple=Decimal('2.46'), pnl=Decim...alse, 'cash_reconciled': False, 'source_environment': None, 'source': 'PROVIDER_FINALITY_UNAVAILABLE'}, broker_ok=True).pnl">tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-27/test_actual_account_review_inc0')
+
+    def test_actual_account_review_includes_recorded_exit_charge_once(tmp_path):
+        from vati.core import Ledger
+        ledger=Ledger(tmp_path/'close-cost-known.sqlite')
+        try:
+            out=account_close_review(ledger)
+            contract=out['life'].contracts['EURUSD']
+            expected=(out['receipt'].average_fill-out['entry'].average_fill)*out['entry'].filled_qty*contract.value_per_price_unit_per_lot
+            expected-=out['entry'].fees+out['receipt'].fees
+            assert out['receipt'].fees==D('3.25') and out['entry'].fees==D('1')
+&gt;           assert out['review'].pnl==expected
+E           AssertionError: assert Decimal('48.20') == Decimal('44.95')
+E            +  where Decimal('48.20') = TradeReview(trade_intent_id='fee-knowledge', strategy_id='FX-TREND-PULLBACK-01', r_multiple=Decimal('2.46'), pnl=Decim...alse, 'cash_reconciled': False, 'source_environment': None, 'source': 'PROVIDER_FINALITY_UNAVAILABLE'}, broker_ok=True).pnl
+
+trading/tests/test_ctrader_close_fee_knowledge.py:104: AssertionError</failure></testcase></testsuite></testsuites>

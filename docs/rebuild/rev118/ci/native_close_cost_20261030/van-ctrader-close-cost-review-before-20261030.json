@@ -1,0 +1,19 @@
+{
+  "command": [
+    "/workspace/van-backend-venv-20261025/bin/python",
+    "-m",
+    "pytest",
+    "-q",
+    "trading/tests/test_ctrader_close_fee_knowledge.py",
+    "--junitxml=/workspace/van-ctrader-close-cost-review-before-20261030.xml"
+  ],
+  "cwd": "/workspace/van-review-2026-10-18/publish",
+  "controller_pid": 122915,
+  "started_at_utc": "2026-10-30T11:49:55.600580+00:00",
+  "timeout_seconds": 180,
+  "state": "COMPLETED",
+  "command_pid": 122918,
+  "exit": 1,
+  "adopted_children_reaped": [],
+  "finished_at_utc": "2026-10-30T11:49:57.070332+00:00"
+}

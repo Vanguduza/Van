@@ -1354,9 +1354,14 @@ class AccountTradeLifecycle:
             )
             self._family_halts.pop(family.family_id, None)
         entry["trade_intent_id"] = intent_id
+        from vati.execution.recorded_close_costs import recorded_close_cost_entry
+        entry = recorded_close_cost_entry(self.ledger,entry,trade_intent_id=intent_id,
+            venue=self.adapter.venue,account_alias=getattr(self.adapter,'account_alias',''),available_at_ms=now_ms)
         measured = closed_trade_pnl(entry, exit_price,
             self.contracts.get(str(entry["symbol"]).upper()), getattr(self.adapter, "closed", None))
         maturity = native_economic_maturity(self.adapter, intent_id, measured)
+        if 'recorded_close_costs' in entry:
+            maturity={**maturity,'recorded_close_costs':entry['recorded_close_costs']}
         from vati.execution.review import economic_outcome_final
         contract = self.contracts.get(str(entry['symbol']).upper())
         profit_final = economic_outcome_final(maturity, measured.basis,

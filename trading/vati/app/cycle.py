@@ -955,8 +955,13 @@ class DecisionCycle:
             return
         self._entries.pop(intent_id)
         e["trade_intent_id"] = intent_id
+        from vati.execution.recorded_close_costs import recorded_close_cost_entry
+        e = recorded_close_cost_entry(self.ledger,e,trade_intent_id=intent_id,
+            venue=self.adapter.venue,account_alias=self.cfg.account_alias,available_at_ms=now_ms)
         measured = closed_trade_pnl(e, exit_price, self.cfg.contract, getattr(self.adapter, "closed", None))
         maturity = native_economic_maturity(self.adapter, intent_id, measured)
+        if 'recorded_close_costs' in e:
+            maturity={**maturity,'recorded_close_costs':e['recorded_close_costs']}
         pnl = measured.amount if measured.amount is not None else ZERO
         initial_risk = initial_risk_from_ledger(self.ledger, intent_id,
             available_cutoff_ms=int(e.get("opened_ms") or 0) or None)

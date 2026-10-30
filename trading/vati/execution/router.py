@@ -349,6 +349,8 @@ class ExecutionRouter:
             self.protection.mark_close_pending(position_id)
         try:
             receipt = self.adapters[venue].close(position_id, quantity, now_ms=now_ms, reason=reason)
+            from vati.execution.ctrader.charge_source import receipt_charge_evidence
+            charge_evidence=receipt_charge_evidence(self.adapters[venue],receipt)
             state = self.exit_journal.receipt_state(receipt, venue=venue,
                 position_id=position_id, trade_intent_id=trade_intent_id)
             ticket = None
@@ -360,7 +362,7 @@ class ExecutionRouter:
                 receipt_ref = self._log(EventKind.EXECUTION_RECEIPT,
                     {**{k:(v.value if hasattr(v, "value") else v) for k,v in asdict(receipt).items()},
                      "exit_action": "CLOSE", "exit_reason": reason,
-                     "preservation_action": action, "exit_request_ref": request.hash},
+                     "preservation_action": action, "exit_request_ref": request.hash,**charge_evidence},
                     now_ms=now_ms, corr=receipt.trade_intent_id or trade_intent_id or position_id)
                 self.exit_journal.finish(request, state=state, receipt_event_ref=receipt_ref, now_ms=now_ms)
                 if state == "ACCEPTED" and ticket is not None:
@@ -757,8 +759,10 @@ class ExecutionRouter:
                 clock_evidence = {'receipt_availability': {'state':'UNAVAILABLE',
                     'received_at_ms':None,'dispatch_lower_bound_ms':now_ms}}
                 self.kill.trip(KillSwitchTrigger.RECONCILIATION_FAILURE,now_ms)
+            from vati.execution.ctrader.charge_source import receipt_charge_evidence
             self._log(EventKind.EXECUTION_RECEIPT,
-                {**{k: (v.value if hasattr(v, "value") else v) for k, v in asdict(receipt).items()}, **clock_evidence},
+                {**{k: (v.value if hasattr(v, "value") else v) for k, v in asdict(receipt).items()}, **clock_evidence,
+                 **receipt_charge_evidence(adapter,receipt)},
                 now_ms=received_ms if received_ms is not None else now_ms, corr=corr)
             if received_ms is None:
                 self._log(EventKind.KILL_SWITCH, {'trigger':'RECONCILIATION_FAILURE',

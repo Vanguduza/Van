@@ -1,0 +1,240 @@
+...............................................FFFF..................    [100%]
+=================================== FAILURES ===================================
+____ test_process_death_keeps_the_original_attempt_fenced[after_request-0] _____
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-28/test_process_death_keeps_the_o0')
+stage = 'after_request', effects = 0
+
+    @pytest.mark.parametrize("stage,effects", [("after_request", 0), ("after_effect", 1),
+        ("before_receipt_commit", 1), ("after_receipt_commit", 1)])
+    def test_process_death_keeps_the_original_attempt_fenced(tmp_path, stage, effects):
+        database, effect = tmp_path/"death.sqlite", tmp_path/"venue-effects.txt"
+        script = '''
+    import os,sys
+    from pathlib import Path
+    from decimal import Decimal as D
+    from vati.core.ledger import Ledger
+    from vati.core.events import EventKind
+    from vati.execution.router import ExecutionRouter
+    from vati.execution.protection import ProtectionManager
+    from vati.execution.base import ExecutionReceipt
+    from vati.risk import KillSwitch
+    from vati.risk.contracts import Direction
+    path,effect,stage=sys.argv[1:]
+    ledger=Ledger(path)
+    protection=ProtectionManager()
+    protection.register('position',symbol='TEST',direction=Direction.LONG,entry=D('100'),stop=D('90'),target=None,opened_ms=0)
+    class Adapter:
+        venue='probe'
+        def close(self,position_id,quantity,*,now_ms,reason):
+            with Path(effect).open('a') as stream:stream.write('applied\\n')
+            if stage=='after_effect':os._exit(23)
+            return ExecutionReceipt('intent','','probe','FILLED',D('1'),D('89'),D('100'),D('100'),D('100'),True,now_ms,now_ms,broker_position_id='position').sealed()
+    router=ExecutionRouter(ledger=ledger,adapters={'probe':Adapter()},kill_switch=KillSwitch(),protection=protection)
+    if stage=='after_request':
+        original=router.exit_journal.begin
+        def begin(**kwargs):
+            original(**kwargs)
+            os._exit(23)
+        router.exit_journal.begin=begin
+    if stage=='before_receipt_commit':
+        original=ledger.append
+        def append(event):
+            if event.kind is EventKind.EXIT_ATTEMPT and event.payload['state']=='CONFIRMED':os._exit(23)
+            return original(event)
+        ledger.append=append
+    if stage=='after_receipt_commit':protection.close_confirmed=lambda position_id:os._exit(23)
+    router.apply_exits('probe','TEST',D('89'),D('90'),now_ms=1)
+    raise AssertionError('crash injection not reached')
+    '''
+        result = subprocess.run([sys.executable,"-c",script,str(database),str(effect),stage],
+            cwd=Path(__file__).resolve().parents[2], text=True, capture_output=True)
+>       assert result.returncode == 23, result.stderr
+E       AssertionError: Traceback (most recent call last):
+E           File "<string>", line 5, in <module>
+E         ModuleNotFoundError: No module named 'vati'
+E         
+E       assert 1 == 23
+E        +  where 1 = CompletedProcess(args=['/workspace/van-backend-venv-20261025/bin/python', '-c', "\nimport os,sys\nfrom pathlib import ...ack (most recent call last):\n  File "<string>", line 5, in <module>\nModuleNotFoundError: No module named \'vati\'\n').returncode
+
+trading/tests/test_exit_uncertainty.py:156: AssertionError
+_____ test_process_death_keeps_the_original_attempt_fenced[after_effect-1] _____
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-28/test_process_death_keeps_the_o1')
+stage = 'after_effect', effects = 1
+
+    @pytest.mark.parametrize("stage,effects", [("after_request", 0), ("after_effect", 1),
+        ("before_receipt_commit", 1), ("after_receipt_commit", 1)])
+    def test_process_death_keeps_the_original_attempt_fenced(tmp_path, stage, effects):
+        database, effect = tmp_path/"death.sqlite", tmp_path/"venue-effects.txt"
+        script = '''
+    import os,sys
+    from pathlib import Path
+    from decimal import Decimal as D
+    from vati.core.ledger import Ledger
+    from vati.core.events import EventKind
+    from vati.execution.router import ExecutionRouter
+    from vati.execution.protection import ProtectionManager
+    from vati.execution.base import ExecutionReceipt
+    from vati.risk import KillSwitch
+    from vati.risk.contracts import Direction
+    path,effect,stage=sys.argv[1:]
+    ledger=Ledger(path)
+    protection=ProtectionManager()
+    protection.register('position',symbol='TEST',direction=Direction.LONG,entry=D('100'),stop=D('90'),target=None,opened_ms=0)
+    class Adapter:
+        venue='probe'
+        def close(self,position_id,quantity,*,now_ms,reason):
+            with Path(effect).open('a') as stream:stream.write('applied\\n')
+            if stage=='after_effect':os._exit(23)
+            return ExecutionReceipt('intent','','probe','FILLED',D('1'),D('89'),D('100'),D('100'),D('100'),True,now_ms,now_ms,broker_position_id='position').sealed()
+    router=ExecutionRouter(ledger=ledger,adapters={'probe':Adapter()},kill_switch=KillSwitch(),protection=protection)
+    if stage=='after_request':
+        original=router.exit_journal.begin
+        def begin(**kwargs):
+            original(**kwargs)
+            os._exit(23)
+        router.exit_journal.begin=begin
+    if stage=='before_receipt_commit':
+        original=ledger.append
+        def append(event):
+            if event.kind is EventKind.EXIT_ATTEMPT and event.payload['state']=='CONFIRMED':os._exit(23)
+            return original(event)
+        ledger.append=append
+    if stage=='after_receipt_commit':protection.close_confirmed=lambda position_id:os._exit(23)
+    router.apply_exits('probe','TEST',D('89'),D('90'),now_ms=1)
+    raise AssertionError('crash injection not reached')
+    '''
+        result = subprocess.run([sys.executable,"-c",script,str(database),str(effect),stage],
+            cwd=Path(__file__).resolve().parents[2], text=True, capture_output=True)
+>       assert result.returncode == 23, result.stderr
+E       AssertionError: Traceback (most recent call last):
+E           File "<string>", line 5, in <module>
+E         ModuleNotFoundError: No module named 'vati'
+E         
+E       assert 1 == 23
+E        +  where 1 = CompletedProcess(args=['/workspace/van-backend-venv-20261025/bin/python', '-c', "\nimport os,sys\nfrom pathlib import ...ack (most recent call last):\n  File "<string>", line 5, in <module>\nModuleNotFoundError: No module named \'vati\'\n').returncode
+
+trading/tests/test_exit_uncertainty.py:156: AssertionError
+_ test_process_death_keeps_the_original_attempt_fenced[before_receipt_commit-1] _
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-28/test_process_death_keeps_the_o2')
+stage = 'before_receipt_commit', effects = 1
+
+    @pytest.mark.parametrize("stage,effects", [("after_request", 0), ("after_effect", 1),
+        ("before_receipt_commit", 1), ("after_receipt_commit", 1)])
+    def test_process_death_keeps_the_original_attempt_fenced(tmp_path, stage, effects):
+        database, effect = tmp_path/"death.sqlite", tmp_path/"venue-effects.txt"
+        script = '''
+    import os,sys
+    from pathlib import Path
+    from decimal import Decimal as D
+    from vati.core.ledger import Ledger
+    from vati.core.events import EventKind
+    from vati.execution.router import ExecutionRouter
+    from vati.execution.protection import ProtectionManager
+    from vati.execution.base import ExecutionReceipt
+    from vati.risk import KillSwitch
+    from vati.risk.contracts import Direction
+    path,effect,stage=sys.argv[1:]
+    ledger=Ledger(path)
+    protection=ProtectionManager()
+    protection.register('position',symbol='TEST',direction=Direction.LONG,entry=D('100'),stop=D('90'),target=None,opened_ms=0)
+    class Adapter:
+        venue='probe'
+        def close(self,position_id,quantity,*,now_ms,reason):
+            with Path(effect).open('a') as stream:stream.write('applied\\n')
+            if stage=='after_effect':os._exit(23)
+            return ExecutionReceipt('intent','','probe','FILLED',D('1'),D('89'),D('100'),D('100'),D('100'),True,now_ms,now_ms,broker_position_id='position').sealed()
+    router=ExecutionRouter(ledger=ledger,adapters={'probe':Adapter()},kill_switch=KillSwitch(),protection=protection)
+    if stage=='after_request':
+        original=router.exit_journal.begin
+        def begin(**kwargs):
+            original(**kwargs)
+            os._exit(23)
+        router.exit_journal.begin=begin
+    if stage=='before_receipt_commit':
+        original=ledger.append
+        def append(event):
+            if event.kind is EventKind.EXIT_ATTEMPT and event.payload['state']=='CONFIRMED':os._exit(23)
+            return original(event)
+        ledger.append=append
+    if stage=='after_receipt_commit':protection.close_confirmed=lambda position_id:os._exit(23)
+    router.apply_exits('probe','TEST',D('89'),D('90'),now_ms=1)
+    raise AssertionError('crash injection not reached')
+    '''
+        result = subprocess.run([sys.executable,"-c",script,str(database),str(effect),stage],
+            cwd=Path(__file__).resolve().parents[2], text=True, capture_output=True)
+>       assert result.returncode == 23, result.stderr
+E       AssertionError: Traceback (most recent call last):
+E           File "<string>", line 5, in <module>
+E         ModuleNotFoundError: No module named 'vati'
+E         
+E       assert 1 == 23
+E        +  where 1 = CompletedProcess(args=['/workspace/van-backend-venv-20261025/bin/python', '-c', "\nimport os,sys\nfrom pathlib import ...ack (most recent call last):\n  File "<string>", line 5, in <module>\nModuleNotFoundError: No module named \'vati\'\n').returncode
+
+trading/tests/test_exit_uncertainty.py:156: AssertionError
+_ test_process_death_keeps_the_original_attempt_fenced[after_receipt_commit-1] _
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-28/test_process_death_keeps_the_o3')
+stage = 'after_receipt_commit', effects = 1
+
+    @pytest.mark.parametrize("stage,effects", [("after_request", 0), ("after_effect", 1),
+        ("before_receipt_commit", 1), ("after_receipt_commit", 1)])
+    def test_process_death_keeps_the_original_attempt_fenced(tmp_path, stage, effects):
+        database, effect = tmp_path/"death.sqlite", tmp_path/"venue-effects.txt"
+        script = '''
+    import os,sys
+    from pathlib import Path
+    from decimal import Decimal as D
+    from vati.core.ledger import Ledger
+    from vati.core.events import EventKind
+    from vati.execution.router import ExecutionRouter
+    from vati.execution.protection import ProtectionManager
+    from vati.execution.base import ExecutionReceipt
+    from vati.risk import KillSwitch
+    from vati.risk.contracts import Direction
+    path,effect,stage=sys.argv[1:]
+    ledger=Ledger(path)
+    protection=ProtectionManager()
+    protection.register('position',symbol='TEST',direction=Direction.LONG,entry=D('100'),stop=D('90'),target=None,opened_ms=0)
+    class Adapter:
+        venue='probe'
+        def close(self,position_id,quantity,*,now_ms,reason):
+            with Path(effect).open('a') as stream:stream.write('applied\\n')
+            if stage=='after_effect':os._exit(23)
+            return ExecutionReceipt('intent','','probe','FILLED',D('1'),D('89'),D('100'),D('100'),D('100'),True,now_ms,now_ms,broker_position_id='position').sealed()
+    router=ExecutionRouter(ledger=ledger,adapters={'probe':Adapter()},kill_switch=KillSwitch(),protection=protection)
+    if stage=='after_request':
+        original=router.exit_journal.begin
+        def begin(**kwargs):
+            original(**kwargs)
+            os._exit(23)
+        router.exit_journal.begin=begin
+    if stage=='before_receipt_commit':
+        original=ledger.append
+        def append(event):
+            if event.kind is EventKind.EXIT_ATTEMPT and event.payload['state']=='CONFIRMED':os._exit(23)
+            return original(event)
+        ledger.append=append
+    if stage=='after_receipt_commit':protection.close_confirmed=lambda position_id:os._exit(23)
+    router.apply_exits('probe','TEST',D('89'),D('90'),now_ms=1)
+    raise AssertionError('crash injection not reached')
+    '''
+        result = subprocess.run([sys.executable,"-c",script,str(database),str(effect),stage],
+            cwd=Path(__file__).resolve().parents[2], text=True, capture_output=True)
+>       assert result.returncode == 23, result.stderr
+E       AssertionError: Traceback (most recent call last):
+E           File "<string>", line 5, in <module>
+E         ModuleNotFoundError: No module named 'vati'
+E         
+E       assert 1 == 23
+E        +  where 1 = CompletedProcess(args=['/workspace/van-backend-venv-20261025/bin/python', '-c', "\nimport os,sys\nfrom pathlib import ...ack (most recent call last):\n  File "<string>", line 5, in <module>\nModuleNotFoundError: No module named \'vati\'\n').returncode
+
+trading/tests/test_exit_uncertainty.py:156: AssertionError
+=========================== short test summary info ============================
+FAILED trading/tests/test_exit_uncertainty.py::test_process_death_keeps_the_original_attempt_fenced[after_request-0]
+FAILED trading/tests/test_exit_uncertainty.py::test_process_death_keeps_the_original_attempt_fenced[after_effect-1]
+FAILED trading/tests/test_exit_uncertainty.py::test_process_death_keeps_the_original_attempt_fenced[before_receipt_commit-1]
+FAILED trading/tests/test_exit_uncertainty.py::test_process_death_keeps_the_original_attempt_fenced[after_receipt_commit-1]
+4 failed, 65 passed in 1.30s
