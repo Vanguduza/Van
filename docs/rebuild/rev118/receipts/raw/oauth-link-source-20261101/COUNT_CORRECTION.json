@@ -1,0 +1,19 @@
+{
+  "kind": "CORRECTED_REPORT_AND_FAILED_HANDOFF_ASSERTION",
+  "original_incorrect_status": "53 backend passes reported; actual terminal46",
+  "failed_handoff_assertion": "assert freshpass==104 and counts=={PASS:194,SKIP:2} and len(cases)==196",
+  "actual_at_failed_assertion": {
+    "fresh_backend": 46,
+    "fresh_caller": 51,
+    "scope_not_yet_run": 7,
+    "fresh_completed_pass": 97,
+    "native_reuse_pass": 90,
+    "native_reuse_skip": 2,
+    "composite_completed_pass": 187,
+    "unique_completed": 189
+  },
+  "failure_exit_code": 1,
+  "original_failed_handoff_not_written": true,
+  "captured_failure": "functions.exec terminal Traceback /tmp/van-link-r3-handoff.py line36 AssertionError; original tool transcript retained. This receipt records that observed failure, not a new test terminal.",
+  "correction": "Required prior-selected OAuth-scope7 subsequently executed separately; final unique totals will derive from JUnit; original report remains corrected."
+}

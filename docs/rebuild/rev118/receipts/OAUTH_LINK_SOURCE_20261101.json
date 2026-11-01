@@ -1,0 +1,62 @@
+{
+  "state": "REVIEWED_ORIGINAL_LINK_RECOVERY_SOURCE_NATIVE_PENDING",
+  "base": "b15b160a3c4f42b35808704f44f6e178342e2149",
+  "fingerprint": "36ae270ab7dea5e9f3001a1fc5c7613ca72ad375d64390cc199af469ba2df650",
+  "source_pins": {
+    "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt": "b36f12dbfee022ecefbabc2c527327536900a4eae5f9701e85551b211b0f162c",
+    "android/app/src/main/java/com/dial/van/trading/AccountOnboarding.kt": "eef746dc23d52040c27961a3984f1607567a85f3057a343cb71f569bf1fad3c7",
+    "android/app/src/main/java/com/dial/van/trading/AccountOperationRecovery.kt": "aa3be96fae6124a3a1713528bc4e80458962d7f18ad8df9492065ebf22b67afc",
+    "android/app/src/main/java/com/dial/van/trading/ui/AccountOnboardingScreen.kt": "db0b0939e3844a1e2eb9591962a83b53c7080bd673efaeb11506f49caaaab974",
+    "android/app/src/test/java/com/dial/van/trading/AccountOnboardingTest.kt": "f6aba55c2002d6084958b119e8b4a46bea8fc8e0ea504557087b6f372af1f7b8",
+    "android/app/src/test/java/com/dial/van/trading/AccountOperationRecoveryTest.kt": "af44d5a8b161e2e80b9cea4fc2f60a7474f78c77d312335f8211ed638ce27b32",
+    "backend/tests/test_owner_approval_original_binding.py": "bd6e6febc8254bb5190681117f634587c4e7e01967a1ae172e8f1ad3ba0f76b6",
+    "backend/tests/test_stateful_link_binding.py": "36df9402f2eb1703bf5b4827d9d002f1f109371aa38cdf2b9a79f83402876c62",
+    "backend/tests/test_trading_oauth_effects.py": "f032a701cea8f2a1b874b994451094f4d049e7a227f5387188b9ac6ccdd1ae14",
+    "backend/van_gateway/approval/service.py": "c5a1bdb43145ed99e05e3613aa4a3c3b6a9c93a6cf6caf22d5e5b8b080a299b5",
+    "backend/van_gateway/trading/accounts.py": "b67e898aa85844ecbd88094acac7a4ba116d555387139a22ea03e0d4dd7cba61",
+    "backend/van_gateway/trading/oauth_effects.py": "fcefbf2e640c301fd97c9bd2e4dccd9bc1640b9f7bdbeb065dd88d92c642e39e",
+    "trading/commander/accounts.py": "641d924886c388391dbc09631cf774a8f741b12e9c1ded9f70fc18f19807103d",
+    "trading/commander/app.py": "aded70458e7e2c0a8b7cd015518318ea7eb056602e02c628558ca5175c91120c",
+    "trading/tests/test_oauth_link_currentness.py": "b8283e2c8e319aa94d1dda46c8f19c63358322c39732a8b8817f567c591694e8"
+  },
+  "transport": "Existing read-only POST action=oauth_pending, no GET route added",
+  "authority": "Historical original binding is DATA, not effect permission. Fresh independently valid A4 and current owner/device/domain/native account version are joined before new LINK effect; original fact/expiry/ID not renewed or rewritten. RealVA beforeVB counterexample refuses409/no LINK/noauthorize; unchangedVA freshrealA4 positive preserves original expiry.",
+  "source_evidence": {
+    "author": "104freshPASS+90mappedunchangedPASS+2PGskip=196unique (194PASS2SKIP); no fresh fullsuite claim",
+    "independent": "12realpaired/A4/SQL controls passed with exact15pins and before-nativeVB ordering",
+    "integrated": "106PASS0skip/audit0 on unchanged15pins; focusedstateful/A4/expiry/privatecore, overlappingauthor evidence, not summedunique",
+    "Android": "Changed client/DTO/source not locally SDK/JVM compiled; original737MBcapacityrefusal retained. Actual oldb15SDKsuccess doesnot qualify newLINKsource. Fresh exactheadappSDK required.",
+    "PG": "Two declared skips remain unqualified; no fake provider effects",
+    "semantic": "All8reference-derivedartifactconsumer modules220PASS0skip/audit0/exit0;15sourcepinsbefore=after; distinctoverlappingselection, nofullnativeclaim",
+    "selection_rule": "Changedapprovalpublicmethod directcanonicalA4 clients+statefulactualHTTP/SQL/privatecore; all8ownerregistry/functionartifactsemanticconsumers selected by references. No blanketfull194rerun."
+  },
+  "history": {
+    "old_failed_reviews_and_runs": "Preserved by originalR1/R2/R3 handoffs/receipts; countcorrection explicit",
+    "fixture_cleanup_loss": "Original reviewer failed fixture cleanup loss is disclosed; later separate reproduction is NOT restoration",
+    "separate_reproduction_pointer": "raw/oauth-link-source-20261101/SEPARATE_REPRODUCTION_AFTER_LOSS.json"
+  },
+  "derived": "Ownergenerator4provenance/feature/screen outputs line/hashonly;487endpoints/380schemas bytesunchanged;all42groups105functionIDs78surfacesretained. Subsequentfrontendguardcorrectlydetectedrenderdriftafterownerregeneration;originalfalse-beforegeneration andtrue-aftergeneration histories retained;genuinerender--applythen--checkchangedfalse. NoexistingtestdirectlyreferencesrenderedMarkdown; all8semanticmodules220PASSsourcepinsunchanged.",
+  "live_draft": "app.py and unreviewed4source not applied; exclusive isolated worker remains separate",
+  "limits": "FullBE00411requirements21acceptance20contexts6LAC IN_PROGRESS/unaccepted. Native/provider/PG2/intakeentry67/privateDDSkey/trustedbase/BG001/S24/formal/unit/fullmatrix gates open. DIAL lastMCP Sessionterminated. Large rawlogs/fixtures stay volatiletmp.",
+  "at": "2026-11-01T23:09:38.671806+00:00",
+  "evidence": {
+    "FRONTEND_CHECK.json": "69dcc86a9d7aaffcadf4a70e58b379d8452c124dadc4347afbc9e57fbab7ae85",
+    "HANDOFF.json": "78991ced55ce4ae237c568a710f92e968ef38e2a84f4c16988e2f2dd03fec679",
+    "SEMANTIC_XML.xml": "2cd7438f8bb96f5f47fd87cca133bdf2bb3883d11bdbdb30d5c861680a04799b",
+    "INTEGRATED_RECEIPT.json": "8a9784e6d86d00b5275d09a0f2c6d73e5158f42ec698ef9d5879fa1c32ad39a6",
+    "SEPARATE_REPRODUCTION_AFTER_LOSS.json": "183ac72691e5dd43376b9746c90acd1343269cea642d6fe848e881448cf2dfa2",
+    "INDEPENDENT_REVIEW.json": "99077ea9f2d9291013d255297550a4ee7644c1fcc93928279e086f73707e5bff",
+    "SOURCE_PINS.json": "55fcc91de81d980b792567d23d026a2cf719303e5a13b4cae526954d4821084b",
+    "OWNER_CHECK.json": "35a9b4641c85055b16c3a6458a7b1f99fb5df7ec0f5a6280ca45c3ab14cd7103",
+    "SEMANTIC_AUDIT.json": "f159c056ef876b2852e522cf92ac940143fb1b43cf2b480fbad507dc745049bc",
+    "INTEGRATED_XML.xml": "c4598ae51aa03f23b1f2a35668d473b5d77f63670cfcc448f3bc21540b4bb96d",
+    "COUNT_CORRECTION.json": "9ed5120c126d303a29a8a190767aedd875200fc8d057a2683f1a1d7e31c44430",
+    "INTEGRATED_AUDIT.json": "f159c056ef876b2852e522cf92ac940143fb1b43cf2b480fbad507dc745049bc",
+    "FRONTEND_APPLY.json": "6d87bea55f2ed8ec080db391dd3a50a2c6d4b1c45adbcd631c888108b54cd454",
+    "SEMANTIC_RECEIPT.json": "2ad9e167f46af56bbf363b760b9760d932744443bbc070073c0b2da521d770c3",
+    "SOURCE.patch": "43d7446dba4c497f2d9d8a55ec42846e8903e82495b78de63c0bbc0906a62ae5",
+    "APPLY_RECEIPT.json": "9a68736990adf358b0a96959416c77e06a1ed6054c82bb0fe5a0a2eddcd52e0b",
+    "FRONTEND_BEFORE_APPLY.json": "e0c35350a0767b2a87aa38bff9116517d9e49b5a68fb714a53f49c9d49d747f4",
+    "DERIVED_DIFF.json": "1a5f7bbf14bdf15686791384fbf7baf2e8b08ded7b0e137b9acba6acd6ace8d2"
+  }
+}

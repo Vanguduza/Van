@@ -80,9 +80,10 @@ fun AccountOnboardingScreen(app: VanApplication, onDone: () -> Unit) {
     var busy by remember { mutableStateOf(false) }
     var recovery by remember { mutableStateOf(runCatching { app.gatewayClient.pendingAccountOperations() }) }
     var ownerReview by remember { mutableStateOf<Pair<String, () -> Unit>?>(null) }
+    var resumeReady by remember { mutableStateOf<Set<String>>(emptySet()) }
 
     fun submit(action: String, args: JsonObject, then: (AccountOnboarding.ActionOutcome) -> Unit = {}) {
-        if (action in AccountOperationRecovery.JOURNALED_ACTIONS && recovery.isFailure) {
+        if (AccountOperationRecovery.requiresOriginalReadback(action,args) && recovery.isFailure) {
             status = "Check the original account change before trying this account again."
             return
         }
@@ -91,7 +92,8 @@ fun AccountOnboardingScreen(app: VanApplication, onDone: () -> Unit) {
             busy = true; status = "Signing and sending…"
             scope.launch {
                 val outcome = runCatching { app.gatewayClient.tradingAccountAction(action, args, proof, approvedIssuedAt) }
-                    .fold(onSuccess = { (code, body) -> AccountOnboarding.parseOutcome(action, body, code) }, onFailure = {
+                    .fold(onSuccess = { (code, body) -> AccountOnboarding.parseOutcome(action, body, code,
+                        requireOriginalReceipt = action in AccountOperationRecovery.OAUTH_LINK_ACTIONS && args["state"] != null) }, onFailure = {
                         AccountOnboarding.ActionOutcome(false, "Account change not confirmed. Check the original result before trying again.") })
                 recovery = runCatching { app.gatewayClient.pendingAccountOperations() }
                 status = outcome.message; busy = false; then(outcome)
@@ -112,7 +114,9 @@ fun AccountOnboardingScreen(app: VanApplication, onDone: () -> Unit) {
             approvedIssuedAt = parsed?.get("issued_at_unix")?.jsonPrimitive?.longOrNull
             if (canonical.isNullOrBlank() || challengeId.isNullOrBlank() || approvedIssuedAt == null || expiresAt == null) {
                 busy = false
-                status = "Could not obtain an approval challenge; nothing was sent."
+                val refusal = challenge?.let { runCatching { Json.parseToJsonElement(it.second).jsonObject["detail"]?.jsonPrimitive?.contentOrNull }.getOrNull() }
+                status = refusal?.takeIf { it.contains("Original", ignoreCase = true) }?.take(240)
+                    ?: "Could not obtain an approval challenge; nothing was sent."
                 return@launch
             }
             val resolved = (parsed["resolved_review"] as? JsonObject)?.let(AccountOnboarding::resolvedReviewText)
@@ -168,7 +172,8 @@ fun AccountOnboardingScreen(app: VanApplication, onDone: () -> Unit) {
                 color = tokens.color.forStatusRole(StatusSemantics.ROLE_EVENT_RISK))
         }
         recovery.getOrNull().orEmpty().forEach { operation ->
-            item(key = "account-operation:" + (operation.scope?.nativeOwnerDomain ?: "unbound") + ":" + operation.operationId) {
+            val operationKey = (operation.scope?.nativeOwnerDomain ?: "unbound") + ":" + operation.operationId
+            item(key = "account-operation:" + operationKey) {
                 Column {
                     Text("${operation.alias}: original account change needs checking", style = tokens.type.body,
                         color = tokens.color.textSecondary)
@@ -178,12 +183,24 @@ fun AccountOnboardingScreen(app: VanApplication, onDone: () -> Unit) {
                         busy = true
                         scope.launch {
                             val outcome = runCatching { app.gatewayClient.tradingAccountOperation(operation) }
-                                .fold(onSuccess = { (code, body) -> AccountOnboarding.parseOutcome(operation.action, body, code) },
+                                .fold(onSuccess = { (code, body) ->
+                                    val result = runCatching { Json.parseToJsonElement(body).jsonObject }.getOrNull()
+                                    resumeReady = if (result?.get("effect_state")?.jsonPrimitive?.contentOrNull == "NOT_DISPATCHED")
+                                        resumeReady + operationKey else resumeReady - operationKey
+                                    AccountOnboarding.parseOutcome(operation.action, body, code, requireOriginalReceipt = operation.oauthState != null)
+                                },
                                     onFailure = { AccountOnboarding.ActionOutcome(false, "Original result is unavailable. No account change was repeated.") })
                             recovery = runCatching { app.gatewayClient.pendingAccountOperations() }
                             status = outcome.message; busy = false
                         }
                     }) { Text("Check original result") }
+                    if (operationKey in resumeReady && operation.dispatchStage == "PREPARED" && operation.oauthArguments != null) {
+                        Button(enabled = !busy, onClick = {
+                            val arguments = runCatching { app.gatewayClient.originalLinkResumeArguments(operation) }.getOrNull()
+                            if (arguments == null) status = "Original scope or dispatch proof changed. Check the original result; nothing was sent."
+                            else submit(operation.action, arguments)
+                        }) { Text("Review and resume original link") }
+                    }
                 }
             }
         }

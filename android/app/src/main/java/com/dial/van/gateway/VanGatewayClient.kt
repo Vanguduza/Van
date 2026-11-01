@@ -171,7 +171,8 @@ class VanGatewayClient(context: Context) {
     private data class AccountTransportActor(val actor: AccountOperationActor, val secret: String,
                                              val ingress: String, val access: String)
     @Volatile private var accountDomainWitness: AccountOperationActor? = null
-    private data class AccountApprovalSelection(val actor: AccountOperationActor, val requestIdentity: String)
+    private data class AccountApprovalSelection(val actor: AccountOperationActor, val requestIdentity: String,
+        val expiresAt: Long, val issuedAt: Long, val originalVersion: String?)
     private val accountChallengeActors = java.util.concurrent.ConcurrentHashMap<String,AccountApprovalSelection>()
 
     private fun accountTransportActor(): AccountTransportActor {
@@ -219,7 +220,9 @@ class VanGatewayClient(context: Context) {
     }
 
     private fun accountExchange(actor: AccountTransportActor, method: String, path: String, bodyText: String = "",
-                                beforeEffect: () -> Unit): Pair<Int,String> {
+                                beforeEffect: () -> Unit, beforeNetwork: () -> Unit = {}): Pair<Int,String> {
+        beforeEffect()
+        beforeNetwork()
         beforeEffect()
         val conn = open(actor.actor.scope.root + path)
         try {
@@ -251,11 +254,19 @@ class VanGatewayClient(context: Context) {
             "account_operation_original_profile_not_current"
         }
         val actor = accountCatalogSelection().first
-        val path = "/v1/trading/accounts/operations/${encodeSegment(value.operationId)}"
         accountOperations.recover(value,actor.actor,{ accountTransportActor().actor }) { guard ->
-            accountExchange(actor,"GET",path,beforeEffect=guard)
+            if (value.oauthState != null) {
+                val args = kotlinx.serialization.json.buildJsonObject { put("state", kotlinx.serialization.json.JsonPrimitive(value.oauthState)) }
+                val body = com.dial.van.trading.AccountOnboarding.requestBody(actor.secret,actor.actor.deviceId,
+                    System.currentTimeMillis()/1000L,"oauth_pending",args).toString()
+                accountExchange(actor,"POST","/v1/trading/accounts/action",body,guard)
+            } else accountExchange(actor,"GET","/v1/trading/accounts/operations/${encodeSegment(value.operationId)}",beforeEffect=guard)
         }
     }
+
+    /** Only a durable local PREPARED record can offer a new owner decision. */
+    fun originalLinkResumeArguments(value: PendingAccountOperation): JsonObject =
+        accountOperations.resumeArguments(value, accountTransportActor().actor.scope)
 
     /**
      * ADR-RB-025 — the hardware key this phone signs privileged requests with.
@@ -1101,8 +1112,9 @@ class VanGatewayClient(context: Context) {
         val challengeId = approvalProof?.get("challenge_id")?.let {
             (it as? kotlinx.serialization.json.JsonPrimitive)?.content
         }
+        val selection = challengeId?.let(accountChallengeActors::get)
         if (com.dial.van.trading.AccountOnboarding.requiresOwnerApproval(action)) {
-            check(challengeId != null && accountChallengeActors[challengeId] == AccountApprovalSelection(actor.actor,intentIdentity)) {
+            check(selection != null && selection.actor == actor.actor && selection.requestIdentity == intentIdentity) {
                 "account_operation_original_approval_profile_changed"
             }
         }
@@ -1111,14 +1123,32 @@ class VanGatewayClient(context: Context) {
             actor.secret, id, issuedAtUnix ?: System.currentTimeMillis() / 1000L, action, args, approvalProof,
         )
         val bodyText = body.toString()
-        val operation = if (action in AccountOperationRecovery.JOURNALED_ACTIONS) {
+        val resumeId = (args["original_operation_id"] as? kotlinx.serialization.json.JsonPrimitive)?.content
+        if (resumeId != null) {
+            check(action in AccountOperationRecovery.OAUTH_LINK_ACTIONS) { "invalid_original_link_resume" }
+            val original = accountOperations.pending(id).singleOrNull { it.operationId == resumeId && it.action == action && it.scope == actor.actor.scope }
+                ?: error("original_link_not_owned")
+            check(args == accountOperations.resumeArguments(original, actor.actor.scope)) { "original_link_resume_arguments_changed" }
+            return@withContext accountOperations.resume(original, actor.actor, { accountTransportActor().actor }) { guard ->
+                accountExchange(actor,"POST","/v1/trading/accounts/action",bodyText,guard,
+                    beforeNetwork = { accountOperations.markPossibleSend(original) })
+            }
+        }
+        val selectors = if (action in AccountOperationRecovery.OAUTH_LINK_ACTIONS && AccountOperationRecovery.resumableSelectors(args)) args else null
+        val operation = if (AccountOperationRecovery.requiresOriginalReadback(action,args)) {
             PendingAccountOperation(challengeId ?: error("account_operation_approval_missing"), action, id,
                 (args["alias"] as? kotlinx.serialization.json.JsonPrimitive)?.content?.trim()?.lowercase().orEmpty(),
-                actor.actor.scope, intentIdentity)
+                actor.actor.scope, intentIdentity,
+                if (action in AccountOperationRecovery.OAUTH_LINK_ACTIONS) (args["state"] as? kotlinx.serialization.json.JsonPrimitive)?.content else null,
+                if (selectors != null) "PREPARED" else "UNKNOWN", selectors,
+                if (selectors != null) selection?.expiresAt else null,
+                if (selectors != null) selection?.originalVersion else null,
+                if (selectors != null) selection?.issuedAt else null)
         } else null
         if (operation != null) {
             accountOperations.dispatch(operation,actor.actor,{ accountTransportActor().actor }) { guard ->
-                accountExchange(actor,"POST","/v1/trading/accounts/action",bodyText,guard)
+                accountExchange(actor,"POST","/v1/trading/accounts/action",bodyText,guard,
+                    beforeNetwork = { if (operation.oauthState != null) accountOperations.markPossibleSend(operation) })
             }
         } else {
             val context = currentCoroutineContext()
@@ -1142,9 +1172,15 @@ class VanGatewayClient(context: Context) {
         args: kotlinx.serialization.json.JsonObject,
     ): Pair<Int, String> = withContext(Dispatchers.IO) {
         val actor = accountCatalogSelection().first
-        if (action in AccountOperationRecovery.JOURNALED_ACTIONS) {
+        if (AccountOperationRecovery.requiresOriginalReadback(action,args)) {
             val alias = (args["alias"] as? kotlinx.serialization.json.JsonPrimitive)?.content?.trim()?.lowercase()
-            check(!accountOperations.blocks(action,alias,actor.actor.scope)) { "account_requires_original_operation_readback" }
+            val resumeId = (args["original_operation_id"] as? kotlinx.serialization.json.JsonPrimitive)?.content
+            if (resumeId != null) {
+                val original = accountOperations.pending(actor.actor.deviceId).singleOrNull {
+                    it.operationId == resumeId && it.action == action && it.scope == actor.actor.scope
+                } ?: error("original_link_not_owned")
+                check(args == accountOperations.resumeArguments(original, actor.actor.scope)) { "original_link_resume_arguments_changed" }
+            } else check(!accountOperations.blocks(action,alias,actor.actor.scope)) { "account_requires_original_operation_readback" }
         }
         val context = currentCoroutineContext()
         fun guard() {
@@ -1165,8 +1201,36 @@ class VanGatewayClient(context: Context) {
             val id = challenge.optString("approval_challenge_id")
             check(id.isNotBlank()) { "account_operation_approval_missing" }
             check(challenge.optLong("issued_at_unix") == issued) { "account_operation_approval_request_changed" }
+            var originalVersion: String? = null
+            if (action in AccountOperationRecovery.OAUTH_LINK_ACTIONS && AccountOperationRecovery.resumableSelectors(args)) {
+                // The opaque A4 challenge alone exposes no native version.
+                // Join its actual stored commitment via a lawful readonly
+                // request before showing approval or persisting PREPARED.
+                val lookup = kotlinx.serialization.json.buildJsonObject {
+                    put("state", args["state"]!!)
+                    put("original_binding", kotlinx.serialization.json.buildJsonObject {
+                        put("operation_id", kotlinx.serialization.json.JsonPrimitive(id))
+                        put("action", kotlinx.serialization.json.JsonPrimitive(action))
+                        put("issued_at_unix", kotlinx.serialization.json.JsonPrimitive(issued))
+                        put("semantic_args", args)
+                    })
+                }
+                val request = com.dial.van.trading.AccountOnboarding.requestBody(actor.secret,actor.actor.deviceId,
+                    System.currentTimeMillis()/1000L,"oauth_pending",lookup).toString()
+                val read = accountExchange(actor,"POST","/v1/trading/accounts/action",request,::guard)
+                guard()
+                if (read.first !in 200..299) return@withContext read
+                val fact = JSONObject(read.second).optJSONObject("original_link_binding") ?: error("original_link_binding_unavailable_hold")
+                check(fact.optString("operation_id") == id && fact.optString("action") == action &&
+                    fact.optString("device_id") == actor.actor.deviceId && fact.optString("account_control_domain") == actor.actor.scope.nativeOwnerDomain &&
+                    fact.optLong("issued_at_unix") == issued && fact.optLong("expires_at_unix") == challenge.optLong("approval_expires_at_unix") &&
+                    fact.optBoolean("historical_only") && !fact.optBoolean("execution_authority",true)) { "original_link_binding_mismatch_hold" }
+                originalVersion = fact.optString("resource_version").takeIf { it.matches(Regex("[0-9a-f]{64}")) }
+                    ?: error("original_link_native_version_unavailable_hold")
+            }
             accountChallengeActors[id] = AccountApprovalSelection(actor.actor,accountRequestIdentity(actor.secret,
-                com.dial.van.trading.AccountOnboarding.canonicalAction(actor.actor.deviceId,issued,action,args)))
+                com.dial.van.trading.AccountOnboarding.canonicalAction(actor.actor.deviceId,issued,action,args)),
+                challenge.optLong("approval_expires_at_unix"),issued,originalVersion)
         }
         reply
     }

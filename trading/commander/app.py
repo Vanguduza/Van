@@ -505,7 +505,7 @@ def create_app(settings: Optional[CommanderSettings] = None) -> FastAPI:
                 # at actual dispatch without trying to consume that nonce again.
                 current_account_authority()
                 values = parsed.args
-                if name == 'deriv_create_demo':
+                if name in {'deriv_create_demo','deriv_oauth_link','ctrader_link'}:
                     values = {**values, '_account_dispatch_guard': current_account_authority}
                     if legacy_demo:
                         def admit_legacy_demo():

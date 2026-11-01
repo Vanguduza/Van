@@ -147,6 +147,44 @@ class OwnerApprovalService:
             raise OwnerApprovalError("approval_challenge_expired")
         return now
 
+    async def original_binding_fact(self, *, challenge_id: str, device_id: str,
+                                    source_command_id: str, action_id: str, text: str,
+                                    parameters: dict[str, Any] | None = None) -> dict:
+        """Read an exact stored commitment as history, NEVER as a valid grant.
+
+        No issue, consume, deletion, TTL extension or verification exemption is
+        performed. Missing/consumed/pruned or legacy unbound records cannot be
+        reconstructed from the caller's labels.
+        """
+        row=await self.store.fetchone('SELECT value FROM runtime_meta WHERE key=?',(self.PREFIX+challenge_id,))
+        if row is None:raise OwnerApprovalError('original_approval_binding_unavailable_hold')
+        try:
+            record=json.loads(row['value'])
+            if not isinstance(record,dict):raise ValueError('invalid original record')
+            if set(record)!={'challenge_id','device_id','source_command_id','turn_id','action_id','intent_digest',
+                'intent_digest_schema','parameters_bound','parameters','canonical','expires_at_unix','created_at_unix'}:
+                raise ValueError('missing or legacy original commitment')
+            if (record.get('challenge_id')!=challenge_id or record.get('device_id')!=device_id
+                or record.get('source_command_id')!=source_command_id or record.get('action_id')!=action_id
+                or record.get('turn_id') is not None or record.get('intent_digest_schema')!=self.INTENT_SCHEMA
+                or type(record.get('parameters_bound')) is not bool
+                or record['parameters_bound']!=(parameters is not None) or record.get('parameters')!=parameters
+                or type(record.get('created_at_unix')) is not int or record['created_at_unix']<=0
+                or type(record.get('expires_at_unix')) is not int
+                or record['expires_at_unix']<=record['created_at_unix']):
+                raise ValueError('unbound original record')
+            expected=self.intent_digest(device_id=device_id,action_id=action_id,text=text,project_id=None,parameters=parameters)
+            canonical=self._canonical_challenge(challenge_id=challenge_id,device_id=device_id,
+                source_command_id=source_command_id,turn_id=None,action_id=action_id,
+                intent_digest=expected,expires_at_unix=record['expires_at_unix'])
+            if record.get('intent_digest')!=expected or record.get('canonical')!=canonical:
+                raise ValueError('original commitment differs')
+        except (ValueError,TypeError,KeyError):
+            raise OwnerApprovalError('original_approval_binding_corrupt_or_mismatched_hold') from None
+        return {'operation_id':challenge_id,'device_id':device_id,'action_id':action_id,
+            'expires_at_unix':record['expires_at_unix'],'created_at_unix':record['created_at_unix'],
+            'historical_only':True,'execution_authority':False}
+
     async def verify_and_consume(
         self,
         *,

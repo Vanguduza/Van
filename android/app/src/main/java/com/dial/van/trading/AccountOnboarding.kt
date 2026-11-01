@@ -222,13 +222,28 @@ object AccountOnboarding {
     // ------------------------------------------------------------ responses
     data class ActionOutcome(val ok: Boolean, val message: String, val account: AccountCard? = null, val signingKey: String? = null, val eaInputs: Map<String, String> = emptyMap(), val state: String? = null, val url: String? = null, val raw: JsonObject? = null)
 
-    fun parseOutcome(action: String, body: String, httpCode: Int): ActionOutcome {
+    fun parseOutcome(action: String, body: String, httpCode: Int, requireOriginalReceipt: Boolean = false): ActionOutcome {
         val o = parseObject(body) ?: return ActionOutcome(false, if (httpCode in 200..299) "Unreadable gateway reply" else "Gateway error $httpCode")
-        if (o.str("effect_state") == "UNKNOWN" || o.bool("reconciliation_required") == true)
+        if (o.str("effect_state") == "UNKNOWN" || o.bool("reconciliation_required") == true ||
+            o.bool("native_reconciliation_required") == true || o.str("scope_status") == "UNBOUND")
             return ActionOutcome(false, if (action == "deriv_create_demo")
                 "Original demo creation is unconfirmed. Hold creation and check its original result; do not create another account."
                 else "Original account change is unconfirmed. Check its original result before trying again.", raw = o)
         if (httpCode !in 200..299) return ActionOutcome(false, o.str("detail") ?: "Gateway error $httpCode", raw = o)
+        if (action in setOf("deriv_oauth_link", "ctrader_link")) {
+            if (o.str("effect_state") == "NOT_DISPATCHED") return ActionOutcome(false,
+                "Original link was not dispatched. Review and approve resume of the same link.", raw = o)
+            val bound = o.str("effect_state") in setOf("APPLIED", "REFUSED") &&
+                o.str("operation_id")?.matches(Regex("[A-Za-z0-9_-]{20,128}")) == true &&
+                o.str("oauth_state")?.matches(Regex("[A-Za-z0-9_-]{20,128}")) == true &&
+                !o.str("device_id").isNullOrBlank() &&
+                o.str("account_control_domain")?.matches(Regex("[0-9a-f]{64}")) == true &&
+                o.str("native_resource_version")?.matches(Regex("[0-9a-f]{64}")) == true &&
+                o.bool("reconciliation_required") == false
+            if ((requireOriginalReceipt && !bound) ||
+                (o.obj("account") == null && o.obj("result")?.obj("account") == null && o.str("effect_state") != "REFUSED"))
+                return ActionOutcome(false, "Broker authorization readiness is not original link completion. Check the original result; no link was repeated.", raw = o)
+        }
         if (o.str("effect_state") == "APPLIED" && o.obj("result") != null) {
             val original = o.obj("result")!!
             return ActionOutcome(true, if (original.bool("credential_export_available") == false)

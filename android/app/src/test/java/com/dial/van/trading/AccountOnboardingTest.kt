@@ -13,6 +13,28 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class AccountOnboardingTest {
+    @Test fun browserReadyIsNeverLinkCompletionButOrdinaryBrowserPollingAndLegacyLinkStayUsable() {
+        val browser = """{"ready":true,"broker":"deriv","accounts":[{"loginid":"VRTC900","currency":"USD"}]}"""
+        assertTrue(AccountOnboarding.parseOutcome("oauth_pending", browser, 200).ok)
+        for (action in listOf("deriv_oauth_link", "ctrader_link")) {
+            assertFalse(AccountOnboarding.parseOutcome(action, browser, 200).ok)
+            assertFalse(AccountOnboarding.parseOutcome(action, browser, 200, requireOriginalReceipt = true).ok)
+            val legacy = """{"account":{"alias":"existing_link","broker":"DERIV"}}"""
+            assertTrue(AccountOnboarding.parseOutcome(action, legacy, 200).ok)
+            assertFalse(AccountOnboarding.parseOutcome(action, legacy, 200, requireOriginalReceipt = true).ok)
+        }
+    }
+
+    @Test fun originalOAuthUncertaintyAndLegacyHistoryNeverBecomeSuccessfulLink() {
+        for (body in listOf(
+            """{"ready":false,"operation":"LINK","effect_state":"UNKNOWN","reconciliation_required":true}""",
+            """{"ready":false,"expired":true,"status":"RECORDED_APPLIED_UNBOUND","scope_status":"UNBOUND","native_reconciliation_required":true}""")) {
+            val outcome = AccountOnboarding.parseOutcome("deriv_oauth_link", body, 200)
+            assertFalse(outcome.ok)
+            assertTrue(outcome.message.contains("original", ignoreCase = true))
+        }
+    }
+
     private val args = buildJsonObject {
         put("alias", "deriv_demo"); put("broker", "DERIV"); put("label", "D\u00e9j\u00e0 vu")
         put("nested", buildJsonObject { put("z", 1); put("a", buildJsonArray { add(JsonPrimitive(1)); add(JsonPrimitive("two")); add(JsonPrimitive(true)); add(JsonNull) }) })

@@ -1,0 +1,1680 @@
+{
+  "schema": "van.be004.link-r3.frozen-source-handoff/1",
+  "at_utc": "2026-11-01T23:00:08.106182+00:00",
+  "state": "FROZEN_CANDIDATE_SOURCE_READY_FOR_INDEPENDENT_RECHECK",
+  "base": "b15b160a3c4f42b35808704f44f6e178342e2149",
+  "lane": "/workspace/van-lanes-20261101/accounts-demo-recovery",
+  "source_fingerprint": "36ae270ab7dea5e9f3001a1fc5c7613ca72ad375d64390cc199af469ba2df650",
+  "pins": "/tmp/van-be004-link-r3-final-pins.json",
+  "paths_sha256": {
+    "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt": "b36f12dbfee022ecefbabc2c527327536900a4eae5f9701e85551b211b0f162c",
+    "android/app/src/main/java/com/dial/van/trading/AccountOnboarding.kt": "eef746dc23d52040c27961a3984f1607567a85f3057a343cb71f569bf1fad3c7",
+    "android/app/src/main/java/com/dial/van/trading/AccountOperationRecovery.kt": "aa3be96fae6124a3a1713528bc4e80458962d7f18ad8df9492065ebf22b67afc",
+    "android/app/src/main/java/com/dial/van/trading/ui/AccountOnboardingScreen.kt": "db0b0939e3844a1e2eb9591962a83b53c7080bd673efaeb11506f49caaaab974",
+    "android/app/src/test/java/com/dial/van/trading/AccountOnboardingTest.kt": "f6aba55c2002d6084958b119e8b4a46bea8fc8e0ea504557087b6f372af1f7b8",
+    "android/app/src/test/java/com/dial/van/trading/AccountOperationRecoveryTest.kt": "af44d5a8b161e2e80b9cea4fc2f60a7474f78c77d312335f8211ed638ce27b32",
+    "backend/tests/test_owner_approval_original_binding.py": "bd6e6febc8254bb5190681117f634587c4e7e01967a1ae172e8f1ad3ba0f76b6",
+    "backend/tests/test_stateful_link_binding.py": "36df9402f2eb1703bf5b4827d9d002f1f109371aa38cdf2b9a79f83402876c62",
+    "backend/tests/test_trading_oauth_effects.py": "f032a701cea8f2a1b874b994451094f4d049e7a227f5387188b9ac6ccdd1ae14",
+    "backend/van_gateway/approval/service.py": "c5a1bdb43145ed99e05e3613aa4a3c3b6a9c93a6cf6caf22d5e5b8b080a299b5",
+    "backend/van_gateway/trading/accounts.py": "b67e898aa85844ecbd88094acac7a4ba116d555387139a22ea03e0d4dd7cba61",
+    "backend/van_gateway/trading/oauth_effects.py": "fcefbf2e640c301fd97c9bd2e4dccd9bc1640b9f7bdbeb065dd88d92c642e39e",
+    "trading/commander/accounts.py": "641d924886c388391dbc09631cf774a8f741b12e9c1ded9f70fc18f19807103d",
+    "trading/commander/app.py": "aded70458e7e2c0a8b7cd015518318ea7eb056602e02c628558ca5175c91120c",
+    "trading/tests/test_oauth_link_currentness.py": "b8283e2c8e319aa94d1dda46c8f19c63358322c39732a8b8817f567c591694e8"
+  },
+  "explicit_export": {
+    "schema": "van.be004.link-r3.explicit-source-export/1",
+    "base": "b15b160a3c4f42b35808704f44f6e178342e2149",
+    "source_fingerprint": "36ae270ab7dea5e9f3001a1fc5c7613ca72ad375d64390cc199af469ba2df650",
+    "paths": [
+      "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt",
+      "android/app/src/main/java/com/dial/van/trading/AccountOnboarding.kt",
+      "android/app/src/main/java/com/dial/van/trading/AccountOperationRecovery.kt",
+      "android/app/src/main/java/com/dial/van/trading/ui/AccountOnboardingScreen.kt",
+      "android/app/src/test/java/com/dial/van/trading/AccountOnboardingTest.kt",
+      "android/app/src/test/java/com/dial/van/trading/AccountOperationRecoveryTest.kt",
+      "backend/tests/test_owner_approval_original_binding.py",
+      "backend/tests/test_stateful_link_binding.py",
+      "backend/tests/test_trading_oauth_effects.py",
+      "backend/van_gateway/approval/service.py",
+      "backend/van_gateway/trading/accounts.py",
+      "backend/van_gateway/trading/oauth_effects.py",
+      "trading/commander/accounts.py",
+      "trading/commander/app.py",
+      "trading/tests/test_oauth_link_currentness.py"
+    ],
+    "patch": "/tmp/van-be004-link-r3-source-20261101.patch",
+    "patch_bytes": 145419,
+    "patch_sha256": "43d7446dba4c497f2d9d8a55ec42846e8903e82495b78de63c0bbc0906a62ae5",
+    "patch_members": 15,
+    "runtime_files_excluded": true,
+    "baseline_apply_all15_sha256_verified": true,
+    "preimage_sha256": {
+      "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt": "f5420e3d9fcf3e6c780813554380e0c7cbdfc40325f983cece648c9812abf0a3",
+      "android/app/src/main/java/com/dial/van/trading/AccountOnboarding.kt": "585a26eb1fa031b85d608f79e61ab2a6e7737683ec59c24ae7462f9606244cf4",
+      "android/app/src/main/java/com/dial/van/trading/AccountOperationRecovery.kt": "d2d8eb38f182c106ae475036110846e60c088a27b95dea21b6ad3546b4018c8f",
+      "android/app/src/main/java/com/dial/van/trading/ui/AccountOnboardingScreen.kt": "af87ea54db44088fe9e615a80e485c48535264eebdf4a0bb10c257bd3e86b33a",
+      "android/app/src/test/java/com/dial/van/trading/AccountOnboardingTest.kt": "b5826607de442ef390b9328a6386e58baa13766255c3fb74caffe04ade426538",
+      "android/app/src/test/java/com/dial/van/trading/AccountOperationRecoveryTest.kt": "d8c8cb6dc312ac8e101c9846b7f764bbc1bafd35ee4ad7250142eee6c922d390",
+      "backend/tests/test_trading_oauth_effects.py": "a7be22f9beadd7780d7fb23c58b8ea34e138ad5643c7174390f91f02025275fd",
+      "backend/van_gateway/approval/service.py": "51f5fcde9107d9bc75a7ba6d2002b978029e26f735286e390061921d37240ff8",
+      "backend/van_gateway/trading/accounts.py": "fc9f476a41c7189cfa7fc3738450581feaca64a4619720e6a464954becce4d3a",
+      "backend/van_gateway/trading/oauth_effects.py": "750f46e378f8fb25c9651e56f5be85a5111af675836ebb99dad48a4ed2cdb0bb",
+      "trading/commander/accounts.py": "b594e716b0af825eb32b15e10371349232ca025427a7bf46b220d0bd8861e66d",
+      "trading/commander/app.py": "024816b92c8260ca35adf12978cb6cda720efb5f398e2eb78ff6b043dc7940f4"
+    },
+    "applied_sha256": {
+      "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt": "b36f12dbfee022ecefbabc2c527327536900a4eae5f9701e85551b211b0f162c",
+      "android/app/src/main/java/com/dial/van/trading/AccountOnboarding.kt": "eef746dc23d52040c27961a3984f1607567a85f3057a343cb71f569bf1fad3c7",
+      "android/app/src/main/java/com/dial/van/trading/AccountOperationRecovery.kt": "aa3be96fae6124a3a1713528bc4e80458962d7f18ad8df9492065ebf22b67afc",
+      "android/app/src/main/java/com/dial/van/trading/ui/AccountOnboardingScreen.kt": "db0b0939e3844a1e2eb9591962a83b53c7080bd673efaeb11506f49caaaab974",
+      "android/app/src/test/java/com/dial/van/trading/AccountOnboardingTest.kt": "f6aba55c2002d6084958b119e8b4a46bea8fc8e0ea504557087b6f372af1f7b8",
+      "android/app/src/test/java/com/dial/van/trading/AccountOperationRecoveryTest.kt": "af44d5a8b161e2e80b9cea4fc2f60a7474f78c77d312335f8211ed638ce27b32",
+      "backend/tests/test_owner_approval_original_binding.py": "bd6e6febc8254bb5190681117f634587c4e7e01967a1ae172e8f1ad3ba0f76b6",
+      "backend/tests/test_stateful_link_binding.py": "36df9402f2eb1703bf5b4827d9d002f1f109371aa38cdf2b9a79f83402876c62",
+      "backend/tests/test_trading_oauth_effects.py": "f032a701cea8f2a1b874b994451094f4d049e7a227f5387188b9ac6ccdd1ae14",
+      "backend/van_gateway/approval/service.py": "c5a1bdb43145ed99e05e3613aa4a3c3b6a9c93a6cf6caf22d5e5b8b080a299b5",
+      "backend/van_gateway/trading/accounts.py": "b67e898aa85844ecbd88094acac7a4ba116d555387139a22ea03e0d4dd7cba61",
+      "backend/van_gateway/trading/oauth_effects.py": "fcefbf2e640c301fd97c9bd2e4dccd9bc1640b9f7bdbeb065dd88d92c642e39e",
+      "trading/commander/accounts.py": "641d924886c388391dbc09631cf774a8f741b12e9c1ded9f70fc18f19807103d",
+      "trading/commander/app.py": "aded70458e7e2c0a8b7cd015518318ea7eb056602e02c628558ca5175c91120c",
+      "trading/tests/test_oauth_link_currentness.py": "b8283e2c8e319aa94d1dda46c8f19c63358322c39732a8b8817f567c591694e8"
+    },
+    "owned_apply_fixture": "/tmp/van-link-r3-baseline-apply-18ef3t2c",
+    "owned_fixture_removed_after_verification": true
+  },
+  "consumed_equivalence": {
+    "base": "b15b160a3c4f42b35808704f44f6e178342e2149",
+    "dce_to_b15_all_equal": true,
+    "paths": {
+      "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt": {
+        "published_base_sha256": "f5420e3d9fcf3e6c780813554380e0c7cbdfc40325f983cece648c9812abf0a3",
+        "dce_preimage_sha256": "f5420e3d9fcf3e6c780813554380e0c7cbdfc40325f983cece648c9812abf0a3",
+        "dce_to_b15_equal": true,
+        "candidate_sha256": "b36f12dbfee022ecefbabc2c527327536900a4eae5f9701e85551b211b0f162c"
+      },
+      "android/app/src/main/java/com/dial/van/trading/AccountOnboarding.kt": {
+        "published_base_sha256": "585a26eb1fa031b85d608f79e61ab2a6e7737683ec59c24ae7462f9606244cf4",
+        "dce_preimage_sha256": "585a26eb1fa031b85d608f79e61ab2a6e7737683ec59c24ae7462f9606244cf4",
+        "dce_to_b15_equal": true,
+        "candidate_sha256": "eef746dc23d52040c27961a3984f1607567a85f3057a343cb71f569bf1fad3c7"
+      },
+      "android/app/src/main/java/com/dial/van/trading/AccountOperationRecovery.kt": {
+        "published_base_sha256": "d2d8eb38f182c106ae475036110846e60c088a27b95dea21b6ad3546b4018c8f",
+        "dce_preimage_sha256": "d2d8eb38f182c106ae475036110846e60c088a27b95dea21b6ad3546b4018c8f",
+        "dce_to_b15_equal": true,
+        "candidate_sha256": "aa3be96fae6124a3a1713528bc4e80458962d7f18ad8df9492065ebf22b67afc"
+      },
+      "android/app/src/main/java/com/dial/van/trading/ui/AccountOnboardingScreen.kt": {
+        "published_base_sha256": "af87ea54db44088fe9e615a80e485c48535264eebdf4a0bb10c257bd3e86b33a",
+        "dce_preimage_sha256": "af87ea54db44088fe9e615a80e485c48535264eebdf4a0bb10c257bd3e86b33a",
+        "dce_to_b15_equal": true,
+        "candidate_sha256": "db0b0939e3844a1e2eb9591962a83b53c7080bd673efaeb11506f49caaaab974"
+      },
+      "android/app/src/test/java/com/dial/van/trading/AccountOnboardingTest.kt": {
+        "published_base_sha256": "b5826607de442ef390b9328a6386e58baa13766255c3fb74caffe04ade426538",
+        "dce_preimage_sha256": "b5826607de442ef390b9328a6386e58baa13766255c3fb74caffe04ade426538",
+        "dce_to_b15_equal": true,
+        "candidate_sha256": "f6aba55c2002d6084958b119e8b4a46bea8fc8e0ea504557087b6f372af1f7b8"
+      },
+      "android/app/src/test/java/com/dial/van/trading/AccountOperationRecoveryTest.kt": {
+        "published_base_sha256": "d8c8cb6dc312ac8e101c9846b7f764bbc1bafd35ee4ad7250142eee6c922d390",
+        "dce_preimage_sha256": "d8c8cb6dc312ac8e101c9846b7f764bbc1bafd35ee4ad7250142eee6c922d390",
+        "dce_to_b15_equal": true,
+        "candidate_sha256": "af44d5a8b161e2e80b9cea4fc2f60a7474f78c77d312335f8211ed638ce27b32"
+      },
+      "backend/tests/test_owner_approval_original_binding.py": {
+        "published_base_sha256": null,
+        "dce_preimage_sha256": null,
+        "dce_to_b15_equal": true,
+        "candidate_sha256": "bd6e6febc8254bb5190681117f634587c4e7e01967a1ae172e8f1ad3ba0f76b6"
+      },
+      "backend/tests/test_stateful_link_binding.py": {
+        "published_base_sha256": null,
+        "dce_preimage_sha256": null,
+        "dce_to_b15_equal": true,
+        "candidate_sha256": "36df9402f2eb1703bf5b4827d9d002f1f109371aa38cdf2b9a79f83402876c62"
+      },
+      "backend/tests/test_trading_oauth_effects.py": {
+        "published_base_sha256": "a7be22f9beadd7780d7fb23c58b8ea34e138ad5643c7174390f91f02025275fd",
+        "dce_preimage_sha256": "a7be22f9beadd7780d7fb23c58b8ea34e138ad5643c7174390f91f02025275fd",
+        "dce_to_b15_equal": true,
+        "candidate_sha256": "f032a701cea8f2a1b874b994451094f4d049e7a227f5387188b9ac6ccdd1ae14"
+      },
+      "backend/van_gateway/approval/service.py": {
+        "published_base_sha256": "51f5fcde9107d9bc75a7ba6d2002b978029e26f735286e390061921d37240ff8",
+        "dce_preimage_sha256": "51f5fcde9107d9bc75a7ba6d2002b978029e26f735286e390061921d37240ff8",
+        "dce_to_b15_equal": true,
+        "candidate_sha256": "c5a1bdb43145ed99e05e3613aa4a3c3b6a9c93a6cf6caf22d5e5b8b080a299b5"
+      },
+      "backend/van_gateway/trading/accounts.py": {
+        "published_base_sha256": "fc9f476a41c7189cfa7fc3738450581feaca64a4619720e6a464954becce4d3a",
+        "dce_preimage_sha256": "fc9f476a41c7189cfa7fc3738450581feaca64a4619720e6a464954becce4d3a",
+        "dce_to_b15_equal": true,
+        "candidate_sha256": "b67e898aa85844ecbd88094acac7a4ba116d555387139a22ea03e0d4dd7cba61"
+      },
+      "backend/van_gateway/trading/oauth_effects.py": {
+        "published_base_sha256": "750f46e378f8fb25c9651e56f5be85a5111af675836ebb99dad48a4ed2cdb0bb",
+        "dce_preimage_sha256": "750f46e378f8fb25c9651e56f5be85a5111af675836ebb99dad48a4ed2cdb0bb",
+        "dce_to_b15_equal": true,
+        "candidate_sha256": "fcefbf2e640c301fd97c9bd2e4dccd9bc1640b9f7bdbeb065dd88d92c642e39e"
+      },
+      "trading/commander/accounts.py": {
+        "published_base_sha256": "b594e716b0af825eb32b15e10371349232ca025427a7bf46b220d0bd8861e66d",
+        "dce_preimage_sha256": "b594e716b0af825eb32b15e10371349232ca025427a7bf46b220d0bd8861e66d",
+        "dce_to_b15_equal": true,
+        "candidate_sha256": "641d924886c388391dbc09631cf774a8f741b12e9c1ded9f70fc18f19807103d"
+      },
+      "trading/commander/app.py": {
+        "published_base_sha256": "024816b92c8260ca35adf12978cb6cda720efb5f398e2eb78ff6b043dc7940f4",
+        "dce_preimage_sha256": "024816b92c8260ca35adf12978cb6cda720efb5f398e2eb78ff6b043dc7940f4",
+        "dce_to_b15_equal": true,
+        "candidate_sha256": "aded70458e7e2c0a8b7cd015518318ea7eb056602e02c628558ca5175c91120c"
+      },
+      "trading/tests/test_oauth_link_currentness.py": {
+        "published_base_sha256": null,
+        "dce_preimage_sha256": null,
+        "dce_to_b15_equal": true,
+        "candidate_sha256": "b8283e2c8e319aa94d1dda46c8f19c63358322c39732a8b8817f567c591694e8"
+      }
+    }
+  },
+  "preservation": {
+    "unleased_LAC_paths": {
+      "trading/vati/app/portfolio.py": true,
+      "backend/van_gateway/trading/service.py": true,
+      "trading/tests/test_portfolio_views.py": true,
+      "trading/tests/test_account_snapshot_freshness.py": true,
+      "backend/tests/test_accounts_freshness_api.py": true,
+      "backend/tests/test_trading_api.py": true,
+      "android/app/src/main/java/com/dial/van/trading/TradingRepository.kt": true,
+      "android/app/src/main/java/com/dial/van/trading/TradingModels.kt": true,
+      "android/app/src/test/java/com/dial/van/trading/TradingModelsTest.kt": true
+    },
+    "app_py_equals_b15": true,
+    "runtime_vault_files_never_read_or_exported": true,
+    "old_quarantined_export_not_read_or_used": true
+  },
+  "accepted_blocker": "BE004-LINK-R2-REVIEW01",
+  "before_actual_counterexample": {
+    "paired_A4": true,
+    "original_id_reused": true,
+    "old_version": "88cd6a1790de9c8938c7dbb035609a98c6e8f1ab3b3c3020b937d33216dfc88d",
+    "new_version": "92c713f5ca66362578392adb0657cedcf97fccde1cde9ccde4b41a1362762556",
+    "returned_native_version": "92c713f5ca66362578392adb0657cedcf97fccde1cde9ccde4b41a1362762556",
+    "HTTP": 200,
+    "controlled_authorize_calls": 1,
+    "original_A4_record_unchanged": true,
+    "LINK_absent_before_resume": true
+  },
+  "repair": {
+    "approval_lookup": "backend/van_gateway/approval/service.py::original_binding_fact reads exact v2 stored canonical/digest/parameter commitments; no issue/consume/delete/renewal or returned OwnerAuthority. Missing, consumed, legacy or corrupt facts HOLD.",
+    "existing_read_transport": "POST /v1/trading/accounts/action action=oauth_pending; original_binding mode reconstructs exact original action/device/native-domain/native-version/semantic arguments/issued-at against actual immutable A4. Returned DATA historical_only=true/execution_authority=false.",
+    "new_effect_guard": "Fresh real A4 binds all submitted resume selectors separately. Gateway verifies immutable original binding and unchanged current target generation before challenge and again before dispatch; native independent writer/CAS/current token/expiry/domain checks remain. SQL arbitration compares same original ID/domain/version and semantic intent. UNKNOWN/APPLIED cannot reopen or rebind.",
+    "client": "Production VanGatewayClient obtains verified original version/issued-at before approval/persistence/send. Existing encrypted pending schema5 stores only non-secret selectors. v4 PREPARED lacking original version evidence remains retained/unresumable; no automatic rebinding. PREPARED/MAY_HAVE_SENT and readiness-not-completion fixes preserved.",
+    "compatibility": "Healthy fresh no-resume callers remain unchanged; same-generation expired-original fact plus fresh actual A4 remains usable with original ID/expiry history and newly consumed permission recorded separately. Completed original outcome/history remains readable under lawful original scope, never fresh effect permission.",
+    "privacy": "No provider code/token/grant persisted on client; original_binding nested arguments redacted from existing audit; no runtime vault or authority material exported."
+  },
+  "after_actual_controls": {
+    "VA_to_VB": "PASS: actual paired signed+A4 VA original; native alias add/remove -> VB; full selectors for VA -> challenge409, no LINK row/no controlled authorize; original fact bytes unchanged.",
+    "forged_VB": "PASS: relabeling original version to current VB cannot satisfy original actual stored digest; challenge409/no LINK/provider call.",
+    "unchanged_VA": "PASS: original expired permission fact retained without renewal; independent read returns original VA; fresh real A4 resumes original ID, one controlled authorize, original expiry retained/new permission separate.",
+    "negative_closure": [
+      "body/issued-at/domain/missing/canonical/parameters/device/legacy-original fact refusal",
+      "read-only approval action/device/parameters/text mismatch and expiry-verification deletion unavailable-HOLD",
+      "delayed original/resume both orderings exactly one immutable original effect",
+      "SQL different first-winner ID cannot be adopted",
+      "existing unknown/partial/lost-ACK/process-death/legacy/collision/privacy/current scope controls retained in affected closure"
+    ]
+  },
+  "evidence": {
+    "fresh_R3_pass": 104,
+    "fresh_terminals": [
+      {
+        "schema": "van.be004.stateful-link-r3.source-proof-terminal/1",
+        "label": "final-backend",
+        "source_fingerprint": "36ae270ab7dea5e9f3001a1fc5c7613ca72ad375d64390cc199af469ba2df650",
+        "source_pins": "/tmp/van-be004-link-r3-final-pins.json",
+        "command": [
+          "/workspace/van-backend-venv-20261025/bin/python",
+          "-m",
+          "pytest",
+          "-v",
+          "-p",
+          "no:cacheprovider",
+          "-o",
+          "faulthandler_timeout=60",
+          "-o",
+          "asyncio_mode=auto",
+          "backend/tests/test_trading_oauth_effects.py",
+          "backend/tests/test_stateful_link_binding.py",
+          "backend/tests/test_owner_approval_original_binding.py",
+          "--basetemp=/tmp/van-be004-link-r3-final-backend-pytest",
+          "--junitxml=/tmp/van-be004-link-r3-final-backend.xml"
+        ],
+        "cwd": "/workspace/van-lanes-20261101/accounts-demo-recovery",
+        "exit_code": 0,
+        "guard_reason": null,
+        "wall_seconds": 151.7954803620014,
+        "owned_pid_and_pgid": 1044263,
+        "owned_process_terminal": true,
+        "raw_log": "/tmp/van-be004-link-r3-final-backend.log",
+        "raw_log_sha256": "369c9729e7e29d5a6683cac2f670c72a383668e03536755d850504af5ab52a4b",
+        "raw_bytes": 7872,
+        "junit": "/tmp/van-be004-link-r3-final-backend.xml",
+        "junit_sha256": "9cc0f51bf6bcf45fc44410d0340569fbd1239ffa24dc61646dcbe3805310e9a0",
+        "tmp_reserve_bytes": 2147483648,
+        "tmp_min_free_observed": 2978312192,
+        "admission_budget_bytes": 134217728,
+        "raw_cap_bytes": 8388608,
+        "selection_input_hashes": {
+          "backend/tests/test_trading_oauth_effects.py": "f032a701cea8f2a1b874b994451094f4d049e7a227f5387188b9ac6ccdd1ae14",
+          "backend/tests/test_stateful_link_binding.py": "36df9402f2eb1703bf5b4827d9d002f1f109371aa38cdf2b9a79f83402876c62",
+          "backend/tests/test_owner_approval_original_binding.py": "bd6e6febc8254bb5190681117f634587c4e7e01967a1ae172e8f1ad3ba0f76b6"
+        }
+      },
+      {
+        "schema": "van.be004.stateful-link-r3.source-proof-terminal/1",
+        "label": "final-callers",
+        "source_fingerprint": "36ae270ab7dea5e9f3001a1fc5c7613ca72ad375d64390cc199af469ba2df650",
+        "source_pins": "/tmp/van-be004-link-r3-final-pins.json",
+        "command": [
+          "/workspace/van-backend-venv-20261025/bin/python",
+          "-m",
+          "pytest",
+          "-v",
+          "-p",
+          "no:cacheprovider",
+          "-o",
+          "faulthandler_timeout=60",
+          "-o",
+          "asyncio_mode=auto",
+          "backend/tests/test_account_resource_binding.py",
+          "backend/tests/test_account_operation_recovery.py",
+          "backend/tests/test_account_update_review.py",
+          "backend/tests/test_account_unlink_review.py",
+          "backend/tests/test_account_approval_contract.py",
+          "trading/tests/test_commander_responsiveness.py",
+          "--basetemp=/tmp/van-be004-link-r3-final-callers-pytest",
+          "--junitxml=/tmp/van-be004-link-r3-final-callers.xml"
+        ],
+        "cwd": "/workspace/van-lanes-20261101/accounts-demo-recovery",
+        "exit_code": 0,
+        "guard_reason": null,
+        "wall_seconds": 89.7525069780022,
+        "owned_pid_and_pgid": 1051323,
+        "owned_process_terminal": true,
+        "raw_log": "/tmp/van-be004-link-r3-final-callers.log",
+        "raw_log_sha256": "5d522d18ee6afe4e8777f1984cffaf0050c7b84b44cb286dc7945c7f15ebbb9e",
+        "raw_bytes": 8346,
+        "junit": "/tmp/van-be004-link-r3-final-callers.xml",
+        "junit_sha256": "cd4b70d0be28d1287cf7a80b1b17b5825655e0d401b46ae6e032d51b165b8bc3",
+        "tmp_reserve_bytes": 2147483648,
+        "tmp_min_free_observed": 2900951040,
+        "admission_budget_bytes": 134217728,
+        "raw_cap_bytes": 8388608,
+        "selection_input_hashes": {
+          "backend/tests/test_account_resource_binding.py": "fc3fc4b8a094cc49f9cb96736f08131deb80f4fcd762bb1342c51c08d19b06ee",
+          "backend/tests/test_account_operation_recovery.py": "dab4bb9906c89d682afdb04221c6c586192ee86aeaed032eeb36f1a0caf2aa7d",
+          "backend/tests/test_account_update_review.py": "3011c269ee3ab22cdf8c17c1e4a21b1c186abdcb84d7ea776c8d6a3dbe84deff",
+          "backend/tests/test_account_unlink_review.py": "8b9d9e4111cfa17ed3ea2a27d7c6da79513aa5500c42d4a1750898d883caa253",
+          "backend/tests/test_account_approval_contract.py": "bee2039e3d776f77a703a7a34f9eae9cd299681348d2cf9ac2368c8322c60330",
+          "trading/tests/test_commander_responsiveness.py": "697de2e7527b8ddd44723f18589473b0effb66f49353fb0ff708941c20854272"
+        }
+      },
+      {
+        "schema": "van.be004.stateful-link-r3.source-proof-terminal/1",
+        "label": "final-scope",
+        "source_fingerprint": "36ae270ab7dea5e9f3001a1fc5c7613ca72ad375d64390cc199af469ba2df650",
+        "source_pins": "/tmp/van-be004-link-r3-final-pins.json",
+        "command": [
+          "/workspace/van-backend-venv-20261025/bin/python",
+          "-m",
+          "pytest",
+          "-v",
+          "-p",
+          "no:cacheprovider",
+          "-o",
+          "faulthandler_timeout=60",
+          "-o",
+          "asyncio_mode=auto",
+          "backend/tests/test_trading_oauth_scope.py",
+          "--basetemp=/tmp/van-be004-link-r3-final-scope-pytest",
+          "--junitxml=/tmp/van-be004-link-r3-final-scope.xml"
+        ],
+        "cwd": "/workspace/van-lanes-20261101/accounts-demo-recovery",
+        "exit_code": 0,
+        "guard_reason": null,
+        "wall_seconds": 29.645839288998104,
+        "owned_pid_and_pgid": 1055400,
+        "owned_process_terminal": true,
+        "raw_log": "/tmp/van-be004-link-r3-final-scope.log",
+        "raw_log_sha256": "13bbb99c24648220b34e2be9e9f9528a80050788834bca0537c62a9e3e98a5b1",
+        "raw_bytes": 1525,
+        "junit": "/tmp/van-be004-link-r3-final-scope.xml",
+        "junit_sha256": "a0f09dfcfee518ec04a14fbefdf19137d7f4ce4a47657389e5f2c77e24547dab",
+        "tmp_reserve_bytes": 2147483648,
+        "tmp_min_free_observed": 2886328320,
+        "admission_budget_bytes": 134217728,
+        "raw_cap_bytes": 8388608,
+        "selection_input_hashes": {
+          "backend/tests/test_trading_oauth_scope.py": "d14de3b0bba7d523beda7dbc3143bf83080c5a6ddb0be5670768b0d150636c00"
+        }
+      }
+    ],
+    "native_reuse": {
+      "terminal": {
+        "schema": "van.be004.stateful-link.source-proof-terminal/1",
+        "label": "r4-native",
+        "source_fingerprint": "797c2326f0ba0f03aed9abf86b43067517c38c9c69cd63cca89081d81d3314a8",
+        "source_pins": "/tmp/van-be004-link-final-r4-pins.json",
+        "command": [
+          "/workspace/van-backend-venv-20261025/bin/python",
+          "-m",
+          "pytest",
+          "-v",
+          "-p",
+          "no:cacheprovider",
+          "-o",
+          "faulthandler_timeout=60",
+          "-o",
+          "asyncio_mode=auto",
+          "trading/tests/test_oauth_link_currentness.py",
+          "trading/tests/test_commander_accounts.py",
+          "trading/tests/test_deriv_credential_verification.py",
+          "trading/tests/test_native_account_effects.py",
+          "trading/tests/test_demo_creation_recovery.py",
+          "--basetemp=/tmp/van-be004-link-r4-native-pytest",
+          "--junitxml=/tmp/van-be004-link-r4-native.xml"
+        ],
+        "cwd": "/workspace/van-lanes-20261101/accounts-demo-recovery",
+        "exit_code": 0,
+        "guard_reason": null,
+        "wall_seconds": 13.8808319009986,
+        "owned_pid_and_pgid": 932070,
+        "owned_process_terminal": true,
+        "raw_log": "/tmp/van-be004-link-r4-native.log",
+        "raw_log_sha256": "a567b2a2a320002725eeb2e3d2a0c1bb285d110d097c2e8eae6bb22c69a6b629",
+        "raw_bytes": 14045,
+        "junit": "/tmp/van-be004-link-r4-native.xml",
+        "junit_sha256": "f1673f712116cd2af000758e447a720dd4bfd51b9463cdbf64195b50dfde3357",
+        "tmp_reserve_bytes": 2147483648,
+        "tmp_min_free_observed": 3857960960,
+        "admission_budget_bytes": 134217728,
+        "raw_cap_bytes": 8388608,
+        "selection_input_hashes": {
+          "trading/tests/test_oauth_link_currentness.py": "b8283e2c8e319aa94d1dda46c8f19c63358322c39732a8b8817f567c591694e8",
+          "trading/tests/test_commander_accounts.py": "62cc77e75fbed8f6b8abd343c3897ac3b3ccb01f9ecb8366eb65f4a684ac4372",
+          "trading/tests/test_deriv_credential_verification.py": "dd077b622422e38cbeeb25e3dd80569c17965dd17b80462047ef0e6844669c7a",
+          "trading/tests/test_native_account_effects.py": "332a900ddc0207d9e9bc78a37e3d07a00571c5d7d2be91cc7c242ae3f6d05f8c",
+          "trading/tests/test_demo_creation_recovery.py": "1593fb9f62aeeb9f1a5fd3dc65b477e4abca8b70a2128d9f9a28524ed07431ad"
+        }
+      },
+      "unchanged_production_sha256": {
+        "trading/commander/accounts.py": "641d924886c388391dbc09631cf774a8f741b12e9c1ded9f70fc18f19807103d",
+        "trading/commander/app.py": "aded70458e7e2c0a8b7cd015518318ea7eb056602e02c628558ca5175c91120c"
+      },
+      "unchanged_test_input_sha256": {
+        "trading/tests/test_oauth_link_currentness.py": "b8283e2c8e319aa94d1dda46c8f19c63358322c39732a8b8817f567c591694e8",
+        "trading/tests/test_commander_accounts.py": "62cc77e75fbed8f6b8abd343c3897ac3b3ccb01f9ecb8366eb65f4a684ac4372",
+        "trading/tests/test_deriv_credential_verification.py": "dd077b622422e38cbeeb25e3dd80569c17965dd17b80462047ef0e6844669c7a",
+        "trading/tests/test_native_account_effects.py": "332a900ddc0207d9e9bc78a37e3d07a00571c5d7d2be91cc7c242ae3f6d05f8c",
+        "trading/tests/test_demo_creation_recovery.py": "1593fb9f62aeeb9f1a5fd3dc65b477e4abca8b70a2128d9f9a28524ed07431ad"
+      },
+      "reuse_reason": "R2 changes gateway owner/intent and Android readiness/producer/resume code only. Both native production files and the complete native test inputs are byte-identical to reviewed R1. All newly produced extended native binding/permission variants are freshly exercised through actual paired Local native dispatch in R2 backend42. No Python native implementation change or fictional rerun."
+    },
+    "native_reuse_reason": "R3 changes gateway historical binding and uncompiled client only; both native owner production files and five full native test input files byte-identical to prior terminal. Fresh paired R3 backend exercises current gateway -> actual controlled native dispatch. No fictional native rerun.",
+    "composite_pass": 194,
+    "composite_declared_PG_skips": 2,
+    "composite_unique": 196,
+    "NOT_fresh_full_suite_terminal": true,
+    "case_input_identity_mapping": [
+      {
+        "id": "tests.test_trading_oauth_effects::test_exact_callback_retry_does_not_exchange_a_provider_code_twice",
+        "status": "PASS",
+        "evidence": "/tmp/van-be004-link-r3-final-backend.xml",
+        "kind": "fresh-R3"
+      },
+      {
+        "id": "tests.test_trading_oauth_effects::test_conflicting_callback_cannot_replace_the_first_accepted_credentials",
+        "status": "PASS",
+        "evidence": "/tmp/van-be004-link-r3-final-backend.xml",
+        "kind": "fresh-R3"
+      },
+      {
+        "id": "tests.test_trading_oauth_effects::test_link_retry_after_a_lost_reply_returns_receipt_without_repeating_the_local_effect",
+        "status": "PASS",
+        "evidence": "/tmp/van-be004-link-r3-final-backend.xml",
+        "kind": "fresh-R3"
+      },
+      {
+        "id": "tests.test_trading_oauth_effects::test_concurrent_callback_is_refused_while_owner_polling_and_event_loop_remain_responsive",
+        "status": "PASS",
+        "evidence": "/tmp/van-be004-link-r3-final-backend.xml",
+        "kind": "fresh-R3"
+      },
+      {
+        "id": "tests.test_trading_oauth_effects::test_cancelled_token_exchange_keeps_unknown_and_a_new_state_cannot_reuse_the_code",
+        "status": "PASS",
+        "evidence": "/tmp/van-be004-link-r3-final-backend.xml",
+        "kind": "fresh-R3"
+      },
+      {
+        "id": "tests.test_trading_oauth_effects::test_link_effect_without_a_committed_receipt_is_not_repeated_or_bypassed_by_new_state[after_material_before_receipt]",
+        "status": "PASS",
+        "evidence": "/tmp/van-be004-link-r3-final-backend.xml",
+        "kind": "fresh-R3"
+      },
+      {
+        "id": "tests.test_trading_oauth_effects::test_link_effect_without_a_committed_receipt_is_not_repeated_or_bypassed_by_new_state[after_receipt_before_commit]",
+        "status": "PASS",
+        "evidence": "/tmp/van-be004-link-r3-final-backend.xml",
+        "kind": "fresh-R3"
+      },
+      {
+        "id": "tests.test_trading_oauth_effects::test_committed_link_receipt_survives_a_lost_response_and_a_new_reader",
+        "status": "PASS",
+        "evidence": "/tmp/van-be004-link-r3-final-backend.xml",
+        "kind": "fresh-R3"
+      },
+      {
+        "id": "tests.test_trading_oauth_effects::test_real_process_death_after_claim_leaves_unconfirmed_work_without_reexchange",
+        "status": "PASS",
+        "evidence": "/tmp/van-be004-link-r3-final-backend.xml",
+        "kind": "fresh-R3"
+      },
+      {
+        "id": "tests.test_trading_oauth_effects::test_invalid_link_alias_is_refused_before_claim_and_can_be_corrected",
+        "status": "PASS",
+        "evidence": "/tmp/van-be004-link-r3-final-backend.xml",
+        "kind": "fresh-R3"
+      },
+      {
+        "id": "tests.test_trading_oauth_effects::test_incomplete_provider_token_response_stays_unknown_and_cannot_be_reexchanged",
+        "status": "PASS",
+        "evidence": "/tmp/van-be004-link-r3-final-backend.xml",
+        "kind": "fresh-R3"
+      },
+      {
+        "id": "tests.test_trading_oauth_effects::test_missing_native_authorization_material_cannot_create_a_ready_account[acct1]",
+        "status": "PASS",
+        "evidence": "/tmp/van-be004-link-r3-final-backend.xml",
+        "kind": "fresh-R3"
+      },
+      {
+        "id": "tests.test_trading_oauth_effects::test_missing_native_authorization_material_cannot_create_a_ready_account[token1]",
+        "status": "PASS",
+        "evidence": "/tmp/van-be004-link-r3-final-backend.xml",
+        "kind": "fresh-R3"
+      },
+      {
+        "id": "tests.test_trading_oauth_effects::test_missing_native_authorization_material_cannot_create_a_ready_account[cur1]",
+        "status": "PASS",
+        "evidence": "/tmp/van-be004-link-r3-final-backend.xml",
+        "kind": "fresh-R3"
+      },
+      {
+        "id": "tests.test_trading_oauth_effects::test_an_encrypted_receipt_cannot_be_transplanted_to_another_link",
+        "status": "PASS",
+        "evidence": "/tmp/van-be004-link-r3-final-backend.xml",
+        "kind": "fresh-R3"
+      },
+      {
+        "id": "tests.test_trading_oauth_effects::test_encrypted_authorization_material_cannot_move_to_a_different_state",
+        "status": "PASS",
+        "evidence": "/tmp/van-be004-link-r3-final-backend.xml",
+        "kind": "fresh-R3"
+      },
+      {
+        "id": "tests.test_trading_oauth_effects::test_mismatched_native_link_receipt_stays_unconfirmed[change0]",
+        "status": "PASS",
+        "evidence": "/tmp/van-be004-link-r3-final-backend.xml",
+        "kind": "fresh-R3"
+      },
+      {
+        "id": "tests.test_trading_oauth_effects::test_mismatched_native_link_receipt_stays_unconfirmed[change1]",
+        "status": "PASS",
+        "evidence": "/tmp/van-be004-link-r3-final-backend.xml",
+        "kind": "fresh-R3"
+      },
+      {
+        "id": "tests.test_trading_oauth_effects::test_mismatched_native_link_receipt_stays_unconfirmed[change2]",
+        "status": "PASS",
+        "evidence": "/tmp/van-be004-link-r3-final-backend.xml",
+        "kind": "fresh-R3"
+      },
+      {
+        "id": "tests.test_trading_oauth_effects::test_a_new_link_cannot_replace_a_registered_alias_without_an_original_unresolved_effect",
+        "status": "PASS",
+        "evidence": "/tmp/van-be004-link-r3-final-backend.xml",
+        "kind": "fresh-R3"
+      },
+      {
+        "id": "tests.test_trading_oauth_effects::test_original_unconfirmed_link_read_does_not_depend_on_current_native_inventory",
+        "status": "PASS",
+        "evidence": "/tmp/van-be004-link-r3-final-backend.xml",
+        "kind": "fresh-R3"
+      },
+      {
+        "id": "tests.test_stateful_link_binding::test_original_oauth_link_domain_cannot_retarget_another_native_state",
+        "status": "PASS",
+        "evidence": "/tmp/van-be004-link-r3-final-backend.xml",
+        "kind": "fresh-R3"
+      },
+      {
+        "id": "tests.test_stateful_link_binding::test_original_link_result_is_bound_durable_and_readable_after_ack_loss[deriv]",
+        "status": "PASS",
+        "evidence": "/tmp/van-be004-link-r3-final-backend.xml",
+        "kind": "fresh-R3"
+      },
+      {
+        "id": "tests.test_stateful_link_binding::test_original_link_result_is_bound_durable_and_readable_after_ack_loss[ctrader]",
+        "status": "PASS",
+        "evidence": "/tmp/van-be004-link-r3-final-backend.xml",
+        "kind": "fresh-R3"
+      },
+      {
+        "id": "tests.test_stateful_link_binding::test_legacy_unbound_link_is_never_adopted_into_current_namespace[UNKNOWN]",
+        "status": "PASS",
+        "evidence": "/tmp/van-be004-link-r3-final-backend.xml",
+        "kind": "fresh-R3"
+      },
+      {
+        "id": "tests.test_stateful_link_binding::test_legacy_unbound_link_is_never_adopted_into_current_namespace[APPLIED]",
+        "status": "PASS",
+        "evidence": "/tmp/van-be004-link-r3-final-backend.xml",
+        "kind": "fresh-R3"
+      },
+      {
+        "id": "tests.test_stateful_link_binding::test_partial_link_holds_original_and_only_proved_other_native_domain_is_independent",
+        "status": "PASS",
+        "evidence": "/tmp/van-be004-link-r3-final-backend.xml",
+        "kind": "fresh-R3"
+      },
+      {
+        "id": "tests.test_stateful_link_binding::test_cached_receipt_fields_cannot_change_original_bound_scope[native_resource_version]",
+        "status": "PASS",
+        "evidence": "/tmp/van-be004-link-r3-final-backend.xml",
+        "kind": "fresh-R3"
+      },
+      {
+        "id": "tests.test_stateful_link_binding::test_cached_receipt_fields_cannot_change_original_bound_scope[account_control_domain]",
+        "status": "PASS",
+        "evidence": "/tmp/van-be004-link-r3-final-backend.xml",
+        "kind": "fresh-R3"
+      },
+      {
+        "id": "tests.test_stateful_link_binding::test_cached_receipt_fields_cannot_change_original_bound_scope[oauth_state]",
+        "status": "PASS",
+        "evidence": "/tmp/van-be004-link-r3-final-backend.xml",
+        "kind": "fresh-R3"
+      },
+      {
+        "id": "tests.test_stateful_link_binding::test_real_link_process_death_keeps_bound_original_unknown_without_native_resend",
+        "status": "PASS",
+        "evidence": "/tmp/van-be004-link-r3-final-backend.xml",
+        "kind": "fresh-R3"
+      },
+      {
+        "id": "tests.test_stateful_link_binding::test_authorization_readiness_is_not_link_completion_and_expired_prepared_grant_can_be_reconfirmed",
+        "status": "PASS",
+        "evidence": "/tmp/van-be004-link-r3-final-backend.xml",
+        "kind": "fresh-R3"
+      },
+      {
+        "id": "tests.test_stateful_link_binding::test_delayed_original_and_explicit_resume_arbitrate_one_immutable_original[True]",
+        "status": "PASS",
+        "evidence": "/tmp/van-be004-link-r3-final-backend.xml",
+        "kind": "fresh-R3"
+      },
+      {
+        "id": "tests.test_stateful_link_binding::test_delayed_original_and_explicit_resume_arbitrate_one_immutable_original[False]",
+        "status": "PASS",
+        "evidence": "/tmp/van-be004-link-r3-final-backend.xml",
+        "kind": "fresh-R3"
+      },
+      {
+        "id": "tests.test_stateful_link_binding::test_resume_id_cannot_adopt_a_different_original_winning_before_sql_claim",
+        "status": "PASS",
+        "evidence": "/tmp/van-be004-link-r3-final-backend.xml",
+        "kind": "fresh-R3"
+      },
+      {
+        "id": "tests.test_stateful_link_binding::test_prepared_resume_joins_immutable_actual_a4_without_rebasing[generation]",
+        "status": "PASS",
+        "evidence": "/tmp/van-be004-link-r3-final-backend.xml",
+        "kind": "fresh-R3"
+      },
+      {
+        "id": "tests.test_stateful_link_binding::test_prepared_resume_joins_immutable_actual_a4_without_rebasing[forged_generation]",
+        "status": "PASS",
+        "evidence": "/tmp/van-be004-link-r3-final-backend.xml",
+        "kind": "fresh-R3"
+      },
+      {
+        "id": "tests.test_stateful_link_binding::test_prepared_resume_joins_immutable_actual_a4_without_rebasing[body]",
+        "status": "PASS",
+        "evidence": "/tmp/van-be004-link-r3-final-backend.xml",
+        "kind": "fresh-R3"
+      },
+      {
+        "id": "tests.test_stateful_link_binding::test_prepared_resume_joins_immutable_actual_a4_without_rebasing[issued]",
+        "status": "PASS",
+        "evidence": "/tmp/van-be004-link-r3-final-backend.xml",
+        "kind": "fresh-R3"
+      },
+      {
+        "id": "tests.test_stateful_link_binding::test_prepared_resume_joins_immutable_actual_a4_without_rebasing[domain]",
+        "status": "PASS",
+        "evidence": "/tmp/van-be004-link-r3-final-backend.xml",
+        "kind": "fresh-R3"
+      },
+      {
+        "id": "tests.test_stateful_link_binding::test_prepared_resume_joins_immutable_actual_a4_without_rebasing[missing]",
+        "status": "PASS",
+        "evidence": "/tmp/van-be004-link-r3-final-backend.xml",
+        "kind": "fresh-R3"
+      },
+      {
+        "id": "tests.test_stateful_link_binding::test_prepared_resume_joins_immutable_actual_a4_without_rebasing[canonical]",
+        "status": "PASS",
+        "evidence": "/tmp/van-be004-link-r3-final-backend.xml",
+        "kind": "fresh-R3"
+      },
+      {
+        "id": "tests.test_stateful_link_binding::test_prepared_resume_joins_immutable_actual_a4_without_rebasing[parameters]",
+        "status": "PASS",
+        "evidence": "/tmp/van-be004-link-r3-final-backend.xml",
+        "kind": "fresh-R3"
+      },
+      {
+        "id": "tests.test_stateful_link_binding::test_prepared_resume_joins_immutable_actual_a4_without_rebasing[device]",
+        "status": "PASS",
+        "evidence": "/tmp/van-be004-link-r3-final-backend.xml",
+        "kind": "fresh-R3"
+      },
+      {
+        "id": "tests.test_stateful_link_binding::test_prepared_resume_joins_immutable_actual_a4_without_rebasing[legacy]",
+        "status": "PASS",
+        "evidence": "/tmp/van-be004-link-r3-final-backend.xml",
+        "kind": "fresh-R3"
+      },
+      {
+        "id": "tests.test_owner_approval_original_binding::test_exact_expired_original_fact_is_read_only_and_cannot_be_used_as_permission",
+        "status": "PASS",
+        "evidence": "/tmp/van-be004-link-r3-final-backend.xml",
+        "kind": "fresh-R3"
+      },
+      {
+        "id": "backend.tests.test_account_resource_binding::test_delayed_owner_approval_cannot_overwrite_a_newer_account[account_upsert]",
+        "status": "PASS",
+        "evidence": "/tmp/van-be004-link-r3-final-callers.xml",
+        "kind": "fresh-R3"
+      },
+      {
+        "id": "backend.tests.test_account_resource_binding::test_delayed_owner_approval_cannot_overwrite_a_newer_account[account_remove]",
+        "status": "PASS",
+        "evidence": "/tmp/van-be004-link-r3-final-callers.xml",
+        "kind": "fresh-R3"
+      },
+      {
+        "id": "backend.tests.test_account_resource_binding::test_approval_for_an_absent_alias_cannot_replace_a_later_registration",
+        "status": "PASS",
+        "evidence": "/tmp/van-be004-link-r3-final-callers.xml",
+        "kind": "fresh-R3"
+      },
+      {
+        "id": "backend.tests.test_account_resource_binding::test_native_cas_still_checks_changes_after_gateway_proof_verification",
+        "status": "PASS",
+        "evidence": "/tmp/van-be004-link-r3-final-callers.xml",
+        "kind": "fresh-R3"
+      },
+      {
+        "id": "backend.tests.test_account_resource_binding::test_credential_generation_change_invalidates_a_pending_local_edit",
+        "status": "PASS",
+        "evidence": "/tmp/van-be004-link-r3-final-callers.xml",
+        "kind": "fresh-R3"
+      },
+      {
+        "id": "backend.tests.test_account_resource_binding::test_a_disjoint_owner_edit_does_not_invalidate_this_account_approval",
+        "status": "PASS",
+        "evidence": "/tmp/van-be004-link-r3-final-callers.xml",
+        "kind": "fresh-R3"
+      },
+      {
+        "id": "backend.tests.test_account_resource_binding::test_restoring_old_metadata_does_not_restore_an_obsolete_approval",
+        "status": "PASS",
+        "evidence": "/tmp/van-be004-link-r3-final-callers.xml",
+        "kind": "fresh-R3"
+      },
+      {
+        "id": "backend.tests.test_account_resource_binding::test_device_cannot_supply_the_gateways_internal_resource_binding",
+        "status": "PASS",
+        "evidence": "/tmp/van-be004-link-r3-final-callers.xml",
+        "kind": "fresh-R3"
+      },
+      {
+        "id": "backend.tests.test_account_resource_binding::test_failed_native_readback_returns_refused_without_dispatching_a_change",
+        "status": "PASS",
+        "evidence": "/tmp/van-be004-link-r3-final-callers.xml",
+        "kind": "fresh-R3"
+      },
+      {
+        "id": "backend.tests.test_account_operation_recovery::test_authenticated_namespace_is_bound_to_approval_native_intent_and_original_read",
+        "status": "PASS",
+        "evidence": "/tmp/van-be004-link-r3-final-callers.xml",
+        "kind": "fresh-R3"
+      },
+      {
+        "id": "backend.tests.test_account_operation_recovery::test_native_writer_rechecks_descriptor_after_gateway_approval_consumption",
+        "status": "PASS",
+        "evidence": "/tmp/van-be004-link-r3-final-callers.xml",
+        "kind": "fresh-R3"
+      },
+      {
+        "id": "backend.tests.test_account_operation_recovery::test_original_demo_creation_runs_through_paired_a4_signed_commander_and_readback[provider_reply]",
+        "status": "PASS",
+        "evidence": "/tmp/van-be004-link-r3-final-callers.xml",
+        "kind": "fresh-R3"
+      },
+      {
+        "id": "backend.tests.test_account_operation_recovery::test_original_demo_creation_runs_through_paired_a4_signed_commander_and_readback[native_http_reply]",
+        "status": "PASS",
+        "evidence": "/tmp/van-be004-link-r3-final-callers.xml",
+        "kind": "fresh-R3"
+      },
+      {
+        "id": "backend.tests.test_account_operation_recovery::test_original_demo_creation_runs_through_paired_a4_signed_commander_and_readback[none]",
+        "status": "PASS",
+        "evidence": "/tmp/van-be004-link-r3-final-callers.xml",
+        "kind": "fresh-R3"
+      },
+      {
+        "id": "backend.tests.test_account_operation_recovery::test_lost_reply_is_unknown_then_native_readback_confirms_original_issue",
+        "status": "PASS",
+        "evidence": "/tmp/van-be004-link-r3-final-callers.xml",
+        "kind": "fresh-R3"
+      },
+      {
+        "id": "backend.tests.test_account_operation_recovery::test_failed_native_completion_blocks_new_approval_but_disjoint_account_works",
+        "status": "PASS",
+        "evidence": "/tmp/van-be004-link-r3-final-callers.xml",
+        "kind": "fresh-R3"
+      },
+      {
+        "id": "backend.tests.test_account_operation_recovery::test_absence_of_a_native_record_is_never_evidence_of_no_effect",
+        "status": "PASS",
+        "evidence": "/tmp/van-be004-link-r3-final-callers.xml",
+        "kind": "fresh-R3"
+      },
+      {
+        "id": "backend.tests.test_account_operation_recovery::test_operation_readback_uses_current_authenticated_device_not_a_query_override",
+        "status": "PASS",
+        "evidence": "/tmp/van-be004-link-r3-final-callers.xml",
+        "kind": "fresh-R3"
+      },
+      {
+        "id": "backend.tests.test_account_operation_recovery::test_device_cannot_inject_a_native_operation_context",
+        "status": "PASS",
+        "evidence": "/tmp/van-be004-link-r3-final-callers.xml",
+        "kind": "fresh-R3"
+      },
+      {
+        "id": "backend.tests.test_account_operation_recovery::test_approval_response_preserves_original_timestamp_across_biometric_delay",
+        "status": "PASS",
+        "evidence": "/tmp/van-be004-link-r3-final-callers.xml",
+        "kind": "fresh-R3"
+      },
+      {
+        "id": "backend.tests.test_account_operation_recovery::test_signed_remote_commander_lost_reply_is_recovered_by_original_native_identity[lost]",
+        "status": "PASS",
+        "evidence": "/tmp/van-be004-link-r3-final-callers.xml",
+        "kind": "fresh-R3"
+      },
+      {
+        "id": "backend.tests.test_account_operation_recovery::test_signed_remote_commander_lost_reply_is_recovered_by_original_native_identity[wrong-command]",
+        "status": "PASS",
+        "evidence": "/tmp/van-be004-link-r3-final-callers.xml",
+        "kind": "fresh-R3"
+      },
+      {
+        "id": "backend.tests.test_account_update_review::test_exact_native_before_after_is_signed_and_applied_without_losing_connection",
+        "status": "PASS",
+        "evidence": "/tmp/van-be004-link-r3-final-callers.xml",
+        "kind": "fresh-R3"
+      },
+      {
+        "id": "backend.tests.test_account_update_review::test_enable_disable_is_an_actual_owner_control_and_keeps_other_fields",
+        "status": "PASS",
+        "evidence": "/tmp/van-be004-link-r3-final-callers.xml",
+        "kind": "fresh-R3"
+      },
+      {
+        "id": "backend.tests.test_account_update_review::test_changed_resolved_semantics_cannot_reuse_an_approval_even_when_resource_is_unchanged",
+        "status": "PASS",
+        "evidence": "/tmp/van-be004-link-r3-final-callers.xml",
+        "kind": "fresh-R3"
+      },
+      {
+        "id": "backend.tests.test_account_update_review::test_final_native_writer_refuses_interpretation_drift_after_gateway_verification",
+        "status": "PASS",
+        "evidence": "/tmp/van-be004-link-r3-final-callers.xml",
+        "kind": "fresh-R3"
+      },
+      {
+        "id": "backend.tests.test_account_update_review::test_native_catalog_covers_exact_actions_and_exposes_enable_and_secret_input_contracts",
+        "status": "PASS",
+        "evidence": "/tmp/van-be004-link-r3-final-callers.xml",
+        "kind": "fresh-R3"
+      },
+      {
+        "id": "backend.tests.test_account_update_review::test_private_locator_or_incomplete_native_review_never_reaches_owner_approval",
+        "status": "PASS",
+        "evidence": "/tmp/van-be004-link-r3-final-callers.xml",
+        "kind": "fresh-R3"
+      },
+      {
+        "id": "backend.tests.test_account_unlink_review::test_signed_unlink_keeps_native_history_and_never_reports_broker_closure",
+        "status": "PASS",
+        "evidence": "/tmp/van-be004-link-r3-final-callers.xml",
+        "kind": "fresh-R3"
+      },
+      {
+        "id": "backend.tests.test_account_unlink_review::test_lost_native_reply_after_unlink_is_recovered_by_original_read_without_repetition",
+        "status": "PASS",
+        "evidence": "/tmp/van-be004-link-r3-final-callers.xml",
+        "kind": "fresh-R3"
+      },
+      {
+        "id": "backend.tests.test_account_unlink_review::test_active_runtime_refuses_unlink_before_an_owner_challenge_is_issued",
+        "status": "PASS",
+        "evidence": "/tmp/van-be004-link-r3-final-callers.xml",
+        "kind": "fresh-R3"
+      },
+      {
+        "id": "backend.tests.test_account_unlink_review::test_runtime_starting_after_proof_is_consumed_refuses_original_without_shredding",
+        "status": "PASS",
+        "evidence": "/tmp/van-be004-link-r3-final-callers.xml",
+        "kind": "fresh-R3"
+      },
+      {
+        "id": "backend.tests.test_account_unlink_review::test_catalog_requires_the_same_native_review_for_local_unlink",
+        "status": "PASS",
+        "evidence": "/tmp/van-be004-link-r3-final-callers.xml",
+        "kind": "fresh-R3"
+      },
+      {
+        "id": "backend.tests.test_account_unlink_review::test_exact_nonzero_native_funds_are_in_the_signed_owner_review",
+        "status": "PASS",
+        "evidence": "/tmp/van-be004-link-r3-final-callers.xml",
+        "kind": "fresh-R3"
+      },
+      {
+        "id": "backend.tests.test_account_unlink_review::test_native_funds_changing_after_gateway_preflight_requires_fresh_review",
+        "status": "PASS",
+        "evidence": "/tmp/van-be004-link-r3-final-callers.xml",
+        "kind": "fresh-R3"
+      },
+      {
+        "id": "backend.tests.test_account_unlink_review::test_incomplete_or_broker_closing_native_review_is_refused_before_signature[remote_account_closed-True]",
+        "status": "PASS",
+        "evidence": "/tmp/van-be004-link-r3-final-callers.xml",
+        "kind": "fresh-R3"
+      },
+      {
+        "id": "backend.tests.test_account_unlink_review::test_incomplete_or_broker_closing_native_review_is_refused_before_signature[retained_remote_funds-None]",
+        "status": "PASS",
+        "evidence": "/tmp/van-be004-link-r3-final-callers.xml",
+        "kind": "fresh-R3"
+      },
+      {
+        "id": "backend.tests.test_account_approval_contract::test_the_read_only_sets_agree",
+        "status": "PASS",
+        "evidence": "/tmp/van-be004-link-r3-final-callers.xml",
+        "kind": "fresh-R3"
+      },
+      {
+        "id": "backend.tests.test_account_approval_contract::test_the_action_lists_agree",
+        "status": "PASS",
+        "evidence": "/tmp/van-be004-link-r3-final-callers.xml",
+        "kind": "fresh-R3"
+      },
+      {
+        "id": "backend.tests.test_account_approval_contract::test_a_new_action_is_guarded_by_default",
+        "status": "PASS",
+        "evidence": "/tmp/van-be004-link-r3-final-callers.xml",
+        "kind": "fresh-R3"
+      },
+      {
+        "id": "backend.tests.test_account_approval_contract::test_the_credential_bearing_actions_are_all_guarded",
+        "status": "PASS",
+        "evidence": "/tmp/van-be004-link-r3-final-callers.xml",
+        "kind": "fresh-R3"
+      },
+      {
+        "id": "backend.tests.test_account_approval_contract::test_original_operation_recovery_sets_agree_at_native_and_android_boundaries",
+        "status": "PASS",
+        "evidence": "/tmp/van-be004-link-r3-final-callers.xml",
+        "kind": "fresh-R3"
+      },
+      {
+        "id": "backend.tests.test_account_approval_contract::test_the_read_only_actions_really_are_read_only",
+        "status": "PASS",
+        "evidence": "/tmp/van-be004-link-r3-final-callers.xml",
+        "kind": "fresh-R3"
+      },
+      {
+        "id": "backend.tests.test_account_approval_contract::test_the_weak_biometric_path_is_gone",
+        "status": "PASS",
+        "evidence": "/tmp/van-be004-link-r3-final-callers.xml",
+        "kind": "fresh-R3"
+      },
+      {
+        "id": "backend.tests.test_account_approval_contract::test_nothing_in_the_app_calls_the_weak_path",
+        "status": "PASS",
+        "evidence": "/tmp/van-be004-link-r3-final-callers.xml",
+        "kind": "fresh-R3"
+      },
+      {
+        "id": "backend.tests.test_account_approval_contract::test_the_device_sends_a_proof_for_a_guarded_action",
+        "status": "PASS",
+        "evidence": "/tmp/van-be004-link-r3-final-callers.xml",
+        "kind": "fresh-R3"
+      },
+      {
+        "id": "trading.tests.test_commander_responsiveness::test_native_health_and_status_remain_available_while_broker_verification_waits",
+        "status": "PASS",
+        "evidence": "/tmp/van-be004-link-r3-final-callers.xml",
+        "kind": "fresh-R3"
+      },
+      {
+        "id": "trading.tests.test_commander_responsiveness::test_cancelled_http_waiter_cannot_let_a_second_native_write_overtake_the_first",
+        "status": "PASS",
+        "evidence": "/tmp/van-be004-link-r3-final-callers.xml",
+        "kind": "fresh-R3"
+      },
+      {
+        "id": "trading.tests.test_commander_responsiveness::test_a_queued_signed_command_is_rechecked_before_actual_dispatch",
+        "status": "PASS",
+        "evidence": "/tmp/van-be004-link-r3-final-callers.xml",
+        "kind": "fresh-R3"
+      },
+      {
+        "id": "trading.tests.test_commander_responsiveness::test_lost_queued_http_waiters_do_not_reopen_capacity_for_unbounded_work",
+        "status": "PASS",
+        "evidence": "/tmp/van-be004-link-r3-final-callers.xml",
+        "kind": "fresh-R3"
+      },
+      {
+        "id": "trading.tests.test_commander_responsiveness::test_closed_native_lifecycle_refuses_new_writes_without_invoking_the_runner",
+        "status": "PASS",
+        "evidence": "/tmp/van-be004-link-r3-final-callers.xml",
+        "kind": "fresh-R3"
+      },
+      {
+        "id": "tests.test_trading_oauth_scope::test_missing_deriv_state_cannot_be_substituted_with_the_latest_owner_flow",
+        "status": "PASS",
+        "evidence": "/tmp/van-be004-link-r3-final-scope.xml",
+        "kind": "fresh-R3"
+      },
+      {
+        "id": "tests.test_trading_oauth_scope::test_one_brokers_callback_cannot_populate_another_brokers_state",
+        "status": "PASS",
+        "evidence": "/tmp/van-be004-link-r3-final-scope.xml",
+        "kind": "fresh-R3"
+      },
+      {
+        "id": "tests.test_trading_oauth_scope::test_pending_state_is_owned_by_the_device_that_started_it",
+        "status": "PASS",
+        "evidence": "/tmp/van-be004-link-r3-final-scope.xml",
+        "kind": "fresh-R3"
+      },
+      {
+        "id": "tests.test_trading_oauth_scope::test_legacy_unbound_state_is_not_adopted_by_the_current_device",
+        "status": "PASS",
+        "evidence": "/tmp/van-be004-link-r3-final-scope.xml",
+        "kind": "fresh-R3"
+      },
+      {
+        "id": "tests.test_trading_oauth_scope::test_a_restarted_pending_reader_preserves_the_original_device_owner",
+        "status": "PASS",
+        "evidence": "/tmp/van-be004-link-r3-final-scope.xml",
+        "kind": "fresh-R3"
+      },
+      {
+        "id": "tests.test_trading_oauth_scope::test_unreadable_encrypted_pending_state_is_an_explicit_error_not_an_empty_flow",
+        "status": "PASS",
+        "evidence": "/tmp/van-be004-link-r3-final-scope.xml",
+        "kind": "fresh-R3"
+      },
+      {
+        "id": "tests.test_trading_oauth_scope::test_expired_state_refuses_the_callback_and_releases_no_account_identifiers",
+        "status": "PASS",
+        "evidence": "/tmp/van-be004-link-r3-final-scope.xml",
+        "kind": "fresh-R3"
+      },
+      {
+        "id": "trading.tests.test_oauth_link_currentness::test_slow_authorization_cannot_overtake_original_link_currentness[expired]",
+        "status": "PASS",
+        "evidence": "/tmp/van-be004-link-r4-native.xml",
+        "kind": "unchanged-native-R1-reuse"
+      },
+      {
+        "id": "trading.tests.test_oauth_link_currentness::test_slow_authorization_cannot_overtake_original_link_currentness[namespace]",
+        "status": "PASS",
+        "evidence": "/tmp/van-be004-link-r4-native.xml",
+        "kind": "unchanged-native-R1-reuse"
+      },
+      {
+        "id": "trading.tests.test_oauth_link_currentness::test_slow_authorization_cannot_overtake_original_link_currentness[version]",
+        "status": "PASS",
+        "evidence": "/tmp/van-be004-link-r4-native.xml",
+        "kind": "unchanged-native-R1-reuse"
+      },
+      {
+        "id": "trading.tests.test_oauth_link_currentness::test_slow_authorization_cannot_overtake_original_link_currentness[authority]",
+        "status": "PASS",
+        "evidence": "/tmp/van-be004-link-r4-native.xml",
+        "kind": "unchanged-native-R1-reuse"
+      },
+      {
+        "id": "trading.tests.test_oauth_link_currentness::test_expiry_before_protected_credentials_preserves_partial_history",
+        "status": "PASS",
+        "evidence": "/tmp/van-be004-link-r4-native.xml",
+        "kind": "unchanged-native-R1-reuse"
+      },
+      {
+        "id": "trading.tests.test_oauth_link_currentness::test_actual_registered_signed_owner_rechecked_after_authorize[key]",
+        "status": "PASS",
+        "evidence": "/tmp/van-be004-link-r4-native.xml",
+        "kind": "unchanged-native-R1-reuse"
+      },
+      {
+        "id": "trading.tests.test_oauth_link_currentness::test_actual_registered_signed_owner_rechecked_after_authorize[time]",
+        "status": "PASS",
+        "evidence": "/tmp/van-be004-link-r4-native.xml",
+        "kind": "unchanged-native-R1-reuse"
+      },
+      {
+        "id": "trading.tests.test_oauth_link_currentness::test_queued_profile_writer_keeps_original_link_and_refuses_stale_preimage",
+        "status": "PASS",
+        "evidence": "/tmp/van-be004-link-r4-native.xml",
+        "kind": "unchanged-native-R1-reuse"
+      },
+      {
+        "id": "trading.tests.test_commander_accounts::test_upsert_credentials_verify_remove_never_echo_secrets",
+        "status": "PASS",
+        "evidence": "/tmp/van-be004-link-r4-native.xml",
+        "kind": "unchanged-native-R1-reuse"
+      },
+      {
+        "id": "trading.tests.test_commander_accounts::test_deriv_demo_creation_and_oauth_link",
+        "status": "PASS",
+        "evidence": "/tmp/van-be004-link-r4-native.xml",
+        "kind": "unchanged-native-R1-reuse"
+      },
+      {
+        "id": "trading.tests.test_commander_accounts::test_demo_provider_error_is_original_unknown_not_permission_to_create_again",
+        "status": "PASS",
+        "evidence": "/tmp/van-be004-link-r4-native.xml",
+        "kind": "unchanged-native-R1-reuse"
+      },
+      {
+        "id": "trading.tests.test_commander_accounts::test_ctrader_discover_exchange_and_link",
+        "status": "PASS",
+        "evidence": "/tmp/van-be004-link-r4-native.xml",
+        "kind": "unchanged-native-R1-reuse"
+      },
+      {
+        "id": "trading.tests.test_commander_accounts::test_mt5_ea_key_issue_and_verify",
+        "status": "PASS",
+        "evidence": "/tmp/van-be004-link-r4-native.xml",
+        "kind": "unchanged-native-R1-reuse"
+      },
+      {
+        "id": "trading.tests.test_commander_accounts::test_account_mutations_refuse_ambiguous_environment_flags_before_writing[account_upsert-args0]",
+        "status": "PASS",
+        "evidence": "/tmp/van-be004-link-r4-native.xml",
+        "kind": "unchanged-native-R1-reuse"
+      },
+      {
+        "id": "trading.tests.test_commander_accounts::test_account_mutations_refuse_ambiguous_environment_flags_before_writing[ctrader_link-args1]",
+        "status": "PASS",
+        "evidence": "/tmp/van-be004-link-r4-native.xml",
+        "kind": "unchanged-native-R1-reuse"
+      },
+      {
+        "id": "trading.tests.test_commander_accounts::test_account_mutations_refuse_ambiguous_environment_flags_before_writing[mt5_ea_issue_key-args2]",
+        "status": "PASS",
+        "evidence": "/tmp/van-be004-link-r4-native.xml",
+        "kind": "unchanged-native-R1-reuse"
+      },
+      {
+        "id": "trading.tests.test_deriv_credential_verification::test_unverified_rotation_keeps_the_previous_private_credential[patch0]",
+        "status": "PASS",
+        "evidence": "/tmp/van-be004-link-r4-native.xml",
+        "kind": "unchanged-native-R1-reuse"
+      },
+      {
+        "id": "trading.tests.test_deriv_credential_verification::test_unverified_rotation_keeps_the_previous_private_credential[patch1]",
+        "status": "PASS",
+        "evidence": "/tmp/van-be004-link-r4-native.xml",
+        "kind": "unchanged-native-R1-reuse"
+      },
+      {
+        "id": "trading.tests.test_deriv_credential_verification::test_unverified_rotation_keeps_the_previous_private_credential[patch2]",
+        "status": "PASS",
+        "evidence": "/tmp/van-be004-link-r4-native.xml",
+        "kind": "unchanged-native-R1-reuse"
+      },
+      {
+        "id": "trading.tests.test_deriv_credential_verification::test_unverified_rotation_keeps_the_previous_private_credential[patch3]",
+        "status": "PASS",
+        "evidence": "/tmp/van-be004-link-r4-native.xml",
+        "kind": "unchanged-native-R1-reuse"
+      },
+      {
+        "id": "trading.tests.test_deriv_credential_verification::test_first_native_verified_credential_pins_an_unbound_account",
+        "status": "PASS",
+        "evidence": "/tmp/van-be004-link-r4-native.xml",
+        "kind": "unchanged-native-R1-reuse"
+      },
+      {
+        "id": "trading.tests.test_deriv_credential_verification::test_oauth_link_checks_native_identity_before_creating_files",
+        "status": "PASS",
+        "evidence": "/tmp/van-be004-link-r4-native.xml",
+        "kind": "unchanged-native-R1-reuse"
+      },
+      {
+        "id": "trading.tests.test_deriv_credential_verification::test_oauth_alias_collision_does_not_overwrite_a_different_registered_binding",
+        "status": "PASS",
+        "evidence": "/tmp/van-be004-link-r4-native.xml",
+        "kind": "unchanged-native-R1-reuse"
+      },
+      {
+        "id": "trading.tests.test_deriv_credential_verification::test_read_only_oauth_token_retains_a_real_observe_link",
+        "status": "PASS",
+        "evidence": "/tmp/van-be004-link-r4-native.xml",
+        "kind": "unchanged-native-R1-reuse"
+      },
+      {
+        "id": "trading.tests.test_deriv_credential_verification::test_demo_alias_collision_is_checked_before_the_remote_creation_request",
+        "status": "PASS",
+        "evidence": "/tmp/van-be004-link-r4-native.xml",
+        "kind": "unchanged-native-R1-reuse"
+      },
+      {
+        "id": "trading.tests.test_native_account_effects::test_completed_original_returns_its_original_result_without_reissuing_a_key",
+        "status": "PASS",
+        "evidence": "/tmp/van-be004-link-r4-native.xml",
+        "kind": "unchanged-native-R1-reuse"
+      },
+      {
+        "id": "trading.tests.test_native_account_effects::test_operation_identity_cannot_be_reassigned_after_completion[change0]",
+        "status": "PASS",
+        "evidence": "/tmp/van-be004-link-r4-native.xml",
+        "kind": "unchanged-native-R1-reuse"
+      },
+      {
+        "id": "trading.tests.test_native_account_effects::test_operation_identity_cannot_be_reassigned_after_completion[change1]",
+        "status": "PASS",
+        "evidence": "/tmp/van-be004-link-r4-native.xml",
+        "kind": "unchanged-native-R1-reuse"
+      },
+      {
+        "id": "trading.tests.test_native_account_effects::test_operation_identity_cannot_be_reassigned_after_completion[change2]",
+        "status": "PASS",
+        "evidence": "/tmp/van-be004-link-r4-native.xml",
+        "kind": "unchanged-native-R1-reuse"
+      },
+      {
+        "id": "trading.tests.test_native_account_effects::test_operation_identity_cannot_be_reassigned_after_completion[change3]",
+        "status": "PASS",
+        "evidence": "/tmp/van-be004-link-r4-native.xml",
+        "kind": "unchanged-native-R1-reuse"
+      },
+      {
+        "id": "trading.tests.test_native_account_effects::test_failure_after_a_registry_effect_fences_original_and_new_approvals",
+        "status": "PASS",
+        "evidence": "/tmp/van-be004-link-r4-native.xml",
+        "kind": "unchanged-native-R1-reuse"
+      },
+      {
+        "id": "trading.tests.test_native_account_effects::test_validation_refusal_before_effect_does_not_permanently_fence_the_target",
+        "status": "PASS",
+        "evidence": "/tmp/van-be004-link-r4-native.xml",
+        "kind": "unchanged-native-R1-reuse"
+      },
+      {
+        "id": "trading.tests.test_native_account_effects::test_actual_child_death_after_native_effect_cannot_reopen_the_original_attempt",
+        "status": "PASS",
+        "evidence": "/tmp/van-be004-link-r4-native.xml",
+        "kind": "unchanged-native-R1-reuse"
+      },
+      {
+        "id": "trading.tests.test_native_account_effects::test_postcommit_reply_failure_reads_confirmed_history_without_another_effect",
+        "status": "PASS",
+        "evidence": "/tmp/van-be004-link-r4-native.xml",
+        "kind": "unchanged-native-R1-reuse"
+      },
+      {
+        "id": "trading.tests.test_native_account_effects::test_well_sealed_but_invalid_operation_history_refuses_all_new_effects[producer]",
+        "status": "PASS",
+        "evidence": "/tmp/van-be004-link-r4-native.xml",
+        "kind": "unchanged-native-R1-reuse"
+      },
+      {
+        "id": "trading.tests.test_native_account_effects::test_well_sealed_but_invalid_operation_history_refuses_all_new_effects[intent]",
+        "status": "PASS",
+        "evidence": "/tmp/van-be004-link-r4-native.xml",
+        "kind": "unchanged-native-R1-reuse"
+      },
+      {
+        "id": "trading.tests.test_native_account_effects::test_well_sealed_but_invalid_operation_history_refuses_all_new_effects[predecessor]",
+        "status": "PASS",
+        "evidence": "/tmp/van-be004-link-r4-native.xml",
+        "kind": "unchanged-native-R1-reuse"
+      },
+      {
+        "id": "trading.tests.test_native_account_effects::test_well_sealed_but_invalid_operation_history_refuses_all_new_effects[phase]",
+        "status": "PASS",
+        "evidence": "/tmp/van-be004-link-r4-native.xml",
+        "kind": "unchanged-native-R1-reuse"
+      },
+      {
+        "id": "trading.tests.test_native_account_effects::test_well_sealed_but_invalid_operation_history_refuses_all_new_effects[secret]",
+        "status": "PASS",
+        "evidence": "/tmp/van-be004-link-r4-native.xml",
+        "kind": "unchanged-native-R1-reuse"
+      },
+      {
+        "id": "trading.tests.test_native_account_effects::test_in_flight_scope_survives_authority_expiry_and_cold_reader",
+        "status": "PASS",
+        "evidence": "/tmp/van-be004-link-r4-native.xml",
+        "kind": "unchanged-native-R1-reuse"
+      },
+      {
+        "id": "trading.tests.test_native_account_effects::test_missing_native_operation_is_unknown_and_a_foreign_device_cannot_read_result",
+        "status": "PASS",
+        "evidence": "/tmp/van-be004-link-r4-native.xml",
+        "kind": "unchanged-native-R1-reuse"
+      },
+      {
+        "id": "trading.tests.test_native_account_effects::test_provider_link_cannot_bypass_an_unconfirmed_account_target",
+        "status": "PASS",
+        "evidence": "/tmp/van-be004-link-r4-native.xml",
+        "kind": "unchanged-native-R1-reuse"
+      },
+      {
+        "id": "trading.tests.test_native_account_effects::test_expired_original_authority_is_refused_before_any_native_effect",
+        "status": "PASS",
+        "evidence": "/tmp/van-be004-link-r4-native.xml",
+        "kind": "unchanged-native-R1-reuse"
+      },
+      {
+        "id": "trading.tests.test_native_account_effects::test_postgres_original_operation_is_atomic_and_isolated_between_named_ledgers",
+        "status": "SKIP",
+        "evidence": "/tmp/van-be004-link-r4-native.xml",
+        "kind": "unchanged-native-R1-reuse"
+      },
+      {
+        "id": "trading.tests.test_native_account_effects::test_actual_concurrent_native_claim_writers_cannot_admit_two_effects_for_a_target[sqlite]",
+        "status": "PASS",
+        "evidence": "/tmp/van-be004-link-r4-native.xml",
+        "kind": "unchanged-native-R1-reuse"
+      },
+      {
+        "id": "trading.tests.test_native_account_effects::test_actual_concurrent_native_claim_writers_cannot_admit_two_effects_for_a_target[postgres]",
+        "status": "SKIP",
+        "evidence": "/tmp/van-be004-link-r4-native.xml",
+        "kind": "unchanged-native-R1-reuse"
+      },
+      {
+        "id": "trading.tests.test_demo_creation_recovery::test_healthy_original_is_independently_verified_and_never_creates_again",
+        "status": "PASS",
+        "evidence": "/tmp/van-be004-link-r4-native.xml",
+        "kind": "unchanged-native-R1-reuse"
+      },
+      {
+        "id": "trading.tests.test_demo_creation_recovery::test_uncertain_remote_or_local_completion_fences_original_and_new_approval[reply]",
+        "status": "PASS",
+        "evidence": "/tmp/van-be004-link-r4-native.xml",
+        "kind": "unchanged-native-R1-reuse"
+      },
+      {
+        "id": "trading.tests.test_demo_creation_recovery::test_uncertain_remote_or_local_completion_fences_original_and_new_approval[identity]",
+        "status": "PASS",
+        "evidence": "/tmp/van-be004-link-r4-native.xml",
+        "kind": "unchanged-native-R1-reuse"
+      },
+      {
+        "id": "trading.tests.test_demo_creation_recovery::test_uncertain_remote_or_local_completion_fences_original_and_new_approval[credentials]",
+        "status": "PASS",
+        "evidence": "/tmp/van-be004-link-r4-native.xml",
+        "kind": "unchanged-native-R1-reuse"
+      },
+      {
+        "id": "trading.tests.test_demo_creation_recovery::test_uncertain_remote_or_local_completion_fences_original_and_new_approval[registry]",
+        "status": "PASS",
+        "evidence": "/tmp/van-be004-link-r4-native.xml",
+        "kind": "unchanged-native-R1-reuse"
+      },
+      {
+        "id": "trading.tests.test_demo_creation_recovery::test_uncertain_remote_or_local_completion_fences_original_and_new_approval[completion]",
+        "status": "PASS",
+        "evidence": "/tmp/van-be004-link-r4-native.xml",
+        "kind": "unchanged-native-R1-reuse"
+      },
+      {
+        "id": "trading.tests.test_demo_creation_recovery::test_ambiguous_provider_subject_overlaps_unresolved_known_subject[None-owner@example.com]",
+        "status": "PASS",
+        "evidence": "/tmp/van-be004-link-r4-native.xml",
+        "kind": "unchanged-native-R1-reuse"
+      },
+      {
+        "id": "trading.tests.test_demo_creation_recovery::test_ambiguous_provider_subject_overlaps_unresolved_known_subject[owner@example.com-None]",
+        "status": "PASS",
+        "evidence": "/tmp/van-be004-link-r4-native.xml",
+        "kind": "unchanged-native-R1-reuse"
+      },
+      {
+        "id": "trading.tests.test_demo_creation_recovery::test_ambiguous_provider_subject_overlaps_unresolved_known_subject[owner@example.com-bad-email]",
+        "status": "PASS",
+        "evidence": "/tmp/van-be004-link-r4-native.xml",
+        "kind": "unchanged-native-R1-reuse"
+      },
+      {
+        "id": "trading.tests.test_demo_creation_recovery::test_unverified_different_email_cannot_escape_but_unrelated_account_stays_operable",
+        "status": "PASS",
+        "evidence": "/tmp/van-be004-link-r4-native.xml",
+        "kind": "unchanged-native-R1-reuse"
+      },
+      {
+        "id": "trading.tests.test_demo_creation_recovery::test_lost_or_changed_vault_cannot_rekey_unresolved_creation[missing]",
+        "status": "PASS",
+        "evidence": "/tmp/van-be004-link-r4-native.xml",
+        "kind": "unchanged-native-R1-reuse"
+      },
+      {
+        "id": "trading.tests.test_demo_creation_recovery::test_lost_or_changed_vault_cannot_rekey_unresolved_creation[malformed]",
+        "status": "PASS",
+        "evidence": "/tmp/van-be004-link-r4-native.xml",
+        "kind": "unchanged-native-R1-reuse"
+      },
+      {
+        "id": "trading.tests.test_demo_creation_recovery::test_lost_or_changed_vault_cannot_rekey_unresolved_creation[replaced]",
+        "status": "PASS",
+        "evidence": "/tmp/van-be004-link-r4-native.xml",
+        "kind": "unchanged-native-R1-reuse"
+      },
+      {
+        "id": "trading.tests.test_demo_creation_recovery::test_lost_or_changed_vault_cannot_rekey_unresolved_creation[permissions]",
+        "status": "PASS",
+        "evidence": "/tmp/van-be004-link-r4-native.xml",
+        "kind": "unchanged-native-R1-reuse"
+      },
+      {
+        "id": "trading.tests.test_demo_creation_recovery::test_completed_history_remains_readable_without_vault_key",
+        "status": "PASS",
+        "evidence": "/tmp/van-be004-link-r4-native.xml",
+        "kind": "unchanged-native-R1-reuse"
+      },
+      {
+        "id": "trading.tests.test_demo_creation_recovery::test_authenticated_namespace_is_current_state_data_without_business_effect_or_revision",
+        "status": "PASS",
+        "evidence": "/tmp/van-be004-link-r4-native.xml",
+        "kind": "unchanged-native-R1-reuse"
+      },
+      {
+        "id": "trading.tests.test_demo_creation_recovery::test_namespace_vault_continuity_never_mints_an_independent_replacement[missing]",
+        "status": "PASS",
+        "evidence": "/tmp/van-be004-link-r4-native.xml",
+        "kind": "unchanged-native-R1-reuse"
+      },
+      {
+        "id": "trading.tests.test_demo_creation_recovery::test_namespace_vault_continuity_never_mints_an_independent_replacement[malformed]",
+        "status": "PASS",
+        "evidence": "/tmp/van-be004-link-r4-native.xml",
+        "kind": "unchanged-native-R1-reuse"
+      },
+      {
+        "id": "trading.tests.test_demo_creation_recovery::test_namespace_vault_continuity_never_mints_an_independent_replacement[conflicting]",
+        "status": "PASS",
+        "evidence": "/tmp/van-be004-link-r4-native.xml",
+        "kind": "unchanged-native-R1-reuse"
+      },
+      {
+        "id": "trading.tests.test_demo_creation_recovery::test_namespace_vault_continuity_never_mints_an_independent_replacement[missing_hint]",
+        "status": "PASS",
+        "evidence": "/tmp/van-be004-link-r4-native.xml",
+        "kind": "unchanged-native-R1-reuse"
+      },
+      {
+        "id": "trading.tests.test_demo_creation_recovery::test_namespace_commit_or_vault_write_loss_recovers_only_same_immutable_hint[vault_write]",
+        "status": "PASS",
+        "evidence": "/tmp/van-be004-link-r4-native.xml",
+        "kind": "unchanged-native-R1-reuse"
+      },
+      {
+        "id": "trading.tests.test_demo_creation_recovery::test_namespace_commit_or_vault_write_loss_recovers_only_same_immutable_hint[commit_ack]",
+        "status": "PASS",
+        "evidence": "/tmp/van-be004-link-r4-native.xml",
+        "kind": "unchanged-native-R1-reuse"
+      },
+      {
+        "id": "trading.tests.test_demo_creation_recovery::test_legacy_original_is_never_retroactively_bound_and_its_provider_fence_remains",
+        "status": "PASS",
+        "evidence": "/tmp/van-be004-link-r4-native.xml",
+        "kind": "unchanged-native-R1-reuse"
+      },
+      {
+        "id": "trading.tests.test_demo_creation_recovery::test_backup_namespace_continuity_and_independent_authenticated_native_stores",
+        "status": "PASS",
+        "evidence": "/tmp/van-be004-link-r4-native.xml",
+        "kind": "unchanged-native-R1-reuse"
+      },
+      {
+        "id": "trading.tests.test_demo_creation_recovery::test_original_demo_result_cannot_be_read_or_reassigned_by_another_device",
+        "status": "PASS",
+        "evidence": "/tmp/van-be004-link-r4-native.xml",
+        "kind": "unchanged-native-R1-reuse"
+      },
+      {
+        "id": "trading.tests.test_demo_creation_recovery::test_missing_original_creation_identity_cannot_invent_a_completed_account[client_id]",
+        "status": "PASS",
+        "evidence": "/tmp/van-be004-link-r4-native.xml",
+        "kind": "unchanged-native-R1-reuse"
+      },
+      {
+        "id": "trading.tests.test_demo_creation_recovery::test_missing_original_creation_identity_cannot_invent_a_completed_account[currency]",
+        "status": "PASS",
+        "evidence": "/tmp/van-be004-link-r4-native.xml",
+        "kind": "unchanged-native-R1-reuse"
+      },
+      {
+        "id": "trading.tests.test_demo_creation_recovery::test_missing_original_creation_identity_cannot_invent_a_completed_account[oauth_token]",
+        "status": "PASS",
+        "evidence": "/tmp/van-be004-link-r4-native.xml",
+        "kind": "unchanged-native-R1-reuse"
+      },
+      {
+        "id": "trading.tests.test_demo_creation_recovery::test_registered_signed_owner_current_key_is_rechecked_after_native_claim",
+        "status": "PASS",
+        "evidence": "/tmp/van-be004-link-r4-native.xml",
+        "kind": "unchanged-native-R1-reuse"
+      },
+      {
+        "id": "trading.tests.test_demo_creation_recovery::test_last_wire_guard_rechecks_after_slow_provider_connect[expiry]",
+        "status": "PASS",
+        "evidence": "/tmp/van-be004-link-r4-native.xml",
+        "kind": "unchanged-native-R1-reuse"
+      },
+      {
+        "id": "trading.tests.test_demo_creation_recovery::test_last_wire_guard_rechecks_after_slow_provider_connect[namespace]",
+        "status": "PASS",
+        "evidence": "/tmp/van-be004-link-r4-native.xml",
+        "kind": "unchanged-native-R1-reuse"
+      },
+      {
+        "id": "trading.tests.test_demo_creation_recovery::test_last_wire_guard_rechecks_after_slow_provider_connect[version]",
+        "status": "PASS",
+        "evidence": "/tmp/van-be004-link-r4-native.xml",
+        "kind": "unchanged-native-R1-reuse"
+      },
+      {
+        "id": "trading.tests.test_demo_creation_recovery::test_signed_current_token_is_rechecked_at_wire_after_connect",
+        "status": "PASS",
+        "evidence": "/tmp/van-be004-link-r4-native.xml",
+        "kind": "unchanged-native-R1-reuse"
+      },
+      {
+        "id": "trading.tests.test_demo_creation_recovery::test_transport_hook_is_per_call_and_refusal_does_not_leak_into_default_read_path",
+        "status": "PASS",
+        "evidence": "/tmp/van-be004-link-r4-native.xml",
+        "kind": "unchanged-native-R1-reuse"
+      },
+      {
+        "id": "trading.tests.test_demo_creation_recovery::test_legacy_signed_current_owner_without_private_metadata_has_original_intent[none]",
+        "status": "PASS",
+        "evidence": "/tmp/van-be004-link-r4-native.xml",
+        "kind": "unchanged-native-R1-reuse"
+      },
+      {
+        "id": "trading.tests.test_demo_creation_recovery::test_legacy_signed_current_owner_without_private_metadata_has_original_intent[provider_reply]",
+        "status": "PASS",
+        "evidence": "/tmp/van-be004-link-r4-native.xml",
+        "kind": "unchanged-native-R1-reuse"
+      },
+      {
+        "id": "trading.tests.test_demo_creation_recovery::test_legacy_signed_current_owner_without_private_metadata_has_original_intent[completed_reply]",
+        "status": "PASS",
+        "evidence": "/tmp/van-be004-link-r4-native.xml",
+        "kind": "unchanged-native-R1-reuse"
+      },
+      {
+        "id": "trading.tests.test_demo_creation_recovery::test_refusal_and_currentness_checks_precede_first_provider_send[expired]",
+        "status": "PASS",
+        "evidence": "/tmp/van-be004-link-r4-native.xml",
+        "kind": "unchanged-native-R1-reuse"
+      },
+      {
+        "id": "trading.tests.test_demo_creation_recovery::test_refusal_and_currentness_checks_precede_first_provider_send[version]",
+        "status": "PASS",
+        "evidence": "/tmp/van-be004-link-r4-native.xml",
+        "kind": "unchanged-native-R1-reuse"
+      },
+      {
+        "id": "trading.tests.test_demo_creation_recovery::test_refusal_and_currentness_checks_precede_first_provider_send[digest]",
+        "status": "PASS",
+        "evidence": "/tmp/van-be004-link-r4-native.xml",
+        "kind": "unchanged-native-R1-reuse"
+      },
+      {
+        "id": "trading.tests.test_demo_creation_recovery::test_refusal_and_currentness_checks_precede_first_provider_send[dispatch-revoked]",
+        "status": "PASS",
+        "evidence": "/tmp/van-be004-link-r4-native.xml",
+        "kind": "unchanged-native-R1-reuse"
+      },
+      {
+        "id": "trading.tests.test_demo_creation_recovery::test_refusal_and_currentness_checks_precede_first_provider_send[late-expiry]",
+        "status": "PASS",
+        "evidence": "/tmp/van-be004-link-r4-native.xml",
+        "kind": "unchanged-native-R1-reuse"
+      },
+      {
+        "id": "trading.tests.test_demo_creation_recovery::test_refusal_and_currentness_checks_precede_first_provider_send[malformed]",
+        "status": "PASS",
+        "evidence": "/tmp/van-be004-link-r4-native.xml",
+        "kind": "unchanged-native-R1-reuse"
+      },
+      {
+        "id": "trading.tests.test_demo_creation_recovery::test_real_process_death_after_send_retains_original_claim_and_never_resends",
+        "status": "PASS",
+        "evidence": "/tmp/van-be004-link-r4-native.xml",
+        "kind": "unchanged-native-R1-reuse"
+      },
+      {
+        "id": "trading.tests.test_demo_creation_recovery::test_real_process_key_race_and_provider_subject_arbitration[True]",
+        "status": "PASS",
+        "evidence": "/tmp/van-be004-link-r4-native.xml",
+        "kind": "unchanged-native-R1-reuse"
+      },
+      {
+        "id": "trading.tests.test_demo_creation_recovery::test_real_process_key_race_and_provider_subject_arbitration[False]",
+        "status": "PASS",
+        "evidence": "/tmp/van-be004-link-r4-native.xml",
+        "kind": "unchanged-native-R1-reuse"
+      }
+    ]
+  },
+  "history": {
+    "count_correction_receipt": "/tmp/van-be004-link-r3-handoff-count-correction-20261101.json",
+    "count_correction": "Initial status arithmetic said backend53; actual terminal is backend46. Final-scope7 separately executes omitted prior affected module; all final/composite totals derived from actual unique JUnit cases.",
+    "R3_dev1": {
+      "schema": "van.be004.stateful-link-r3.source-proof-terminal/1",
+      "label": "dev1",
+      "source_fingerprint": "6e2743f420c81f2a2727f62efa975c5a698b582b66fb363cf64cb46e4c13f0b7",
+      "source_pins": "/tmp/van-be004-link-r3-dev1-pins.json",
+      "command": [
+        "/workspace/van-backend-venv-20261025/bin/python",
+        "-m",
+        "pytest",
+        "-v",
+        "-p",
+        "no:cacheprovider",
+        "-o",
+        "faulthandler_timeout=60",
+        "-o",
+        "asyncio_mode=auto",
+        "backend/tests/test_stateful_link_binding.py",
+        "backend/tests/test_owner_approval_original_binding.py",
+        "--basetemp=/tmp/van-be004-link-r3-dev1-pytest",
+        "--junitxml=/tmp/van-be004-link-r3-dev1.xml"
+      ],
+      "cwd": "/workspace/van-lanes-20261101/accounts-demo-recovery",
+      "exit_code": 1,
+      "guard_reason": null,
+      "wall_seconds": 84.69068616000004,
+      "owned_pid_and_pgid": 1040156,
+      "owned_process_terminal": true,
+      "raw_log": "/tmp/van-be004-link-r3-dev1.log",
+      "raw_log_sha256": "2e8c087d6f9b23ba9916efd8e9ea76966f9edf51150dd536c2acfc1cbb883665",
+      "raw_bytes": 34396,
+      "junit": "/tmp/van-be004-link-r3-dev1.xml",
+      "junit_sha256": "536e9af594ea8b9e7ae157589ae0edb9437c442928582c9038bd21f2d6b5df27",
+      "tmp_reserve_bytes": 2147483648,
+      "tmp_min_free_observed": 3074318336,
+      "admission_budget_bytes": 134217728,
+      "raw_cap_bytes": 8388608,
+      "selection_input_hashes": {
+        "backend/tests/test_stateful_link_binding.py": "a6b093a76fddce14c5449db13650993a1bfb408aed26fba3a8619addc5251b44",
+        "backend/tests/test_owner_approval_original_binding.py": "bd6e6febc8254bb5190681117f634587c4e7e01967a1ae172e8f1ad3ba0f76b6"
+      }
+    },
+    "R3_dev1_result": "23PASS/2FAIL: both stronger challenge409 semantic mismatches tripped old helper expected200 after one-create delayed-order positives. Corrected only expected refusal stage; failed raw/XML/pins retained.",
+    "R2_frozen_handoff": "/tmp/van-be004-link-r2-handoff-20261101.json",
+    "R1_handoff": "/tmp/van-be004-link-handoff-20261101.json",
+    "original_R2_review": "/workspace/van-be004-link-independent-recheck-r2-20261101/review.json",
+    "old_fixture_loss": "Original reviewer completed failed fixture cleanup loss remains disclosed; raw/probe evidence retained. Separate later reproduction is NOT restoration.",
+    "separate_reproduction_pointer": "/workspace/van-be004-link-independent-recheck-r2-20261101/REPRODUCTION_AFTER_LOSS_POINTER.json",
+    "separate_reproduction_untouched": true
+  },
+  "qualification_limits": {
+    "source_only": true,
+    "Android": "Changed production and app unit source not compiled locally. Existing737441470-byte SDK/build footprint exceeds owned128MiB batch budget/workspace capacity. Prior capacity refusal retained at /tmp/van-be004-link-sdk-admission-20261101.json. Fresh hosted exact candidate :app:testDebugUnitTest :app:assembleDebug :app:lintDebug required after publication. No JVM/SDK/device pass claimed.",
+    "PG": "Two declared PG tests skipped; genuine PG qualification pending.",
+    "native_provider": "Injected controlled sockets/owned SQLite only, no genuine Deriv/ctrader/provider/account/financial effect or native admission proof. Global DIAL session terminated.",
+    "whole_BE004": "11 requirements/21 acceptance/20 contexts/6 LAC full original contract remains IN_PROGRESS/unaccepted; live application/remote closure genuine positive provider branches and all remaining unit/native/BG001/production/S24 gates not qualified."
+  },
+  "execution": {
+    "owned_jobs_terminal": true,
+    "workspace_free_bytes": 69926912,
+    "tmp_free_bytes": 2889904128,
+    "reserve_tmp_bytes": 2147483648,
+    "workspace_hard_floor_bytes": 33554432,
+    "workspace_admission_bytes": 67108864,
+    "run_budget_bytes": 134217728,
+    "no_main_commit_push_CI_provider_effect": true
+  }
+}

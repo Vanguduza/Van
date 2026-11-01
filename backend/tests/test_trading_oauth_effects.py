@@ -171,8 +171,11 @@ async def test_link_effect_without_a_committed_receipt_is_not_repeated_or_bypass
     audit=await app.state.store.fetchone("SELECT result FROM audit WHERE capability='trading.account.deriv_oauth_link' ORDER BY created_at_unix DESC,rowid DESC LIMIT 1")
     assert audit['result']=='unknown'
     app.state.onboarding.pending.effects.fault=None
-    row=await app.state.store.fetchone("SELECT phase,receipt_enc FROM trading_oauth_effects WHERE state=? AND operation='LINK'",(state,))
-    assert row['phase']=='UNKNOWN' and row['receipt_enc'] is None
+    row=await app.state.store.fetchone("SELECT * FROM trading_oauth_effects WHERE state=? AND operation='LINK'",(state,))
+    assert row['phase']=='UNKNOWN'
+    intent=app.state.onboarding.pending.effects._link_envelope(row)
+    assert intent['record_type']=='INTENT' and 'result' not in intent
+    assert intent['native_binding']['account_control_domain']==app.state.onboarding.control.domain()
     assert await app.state.onboarding.pending.get(state) is not None
     assert (await act(ac,'deriv_oauth_link',args)).status_code==409
     second=await ready_deriv(ac)
@@ -207,7 +210,9 @@ async def test_committed_link_receipt_survives_a_lost_response_and_a_new_reader(
     assert result['account']['alias']=='durable_link' and calls==['deriv_oauth_link']
     assert (await act(ac,'deriv_oauth_link',{**args,'alias':'different_alias'})).status_code==409
     pending=await act(ac,'oauth_pending',{'state':state})
-    assert pending.json()=={'ready':False,'expired':True}
+    assert pending.json()['ready'] is False and pending.json()['expired'] is True
+    assert pending.json()['status']=='APPLIED' and pending.json()['effect_state']=='APPLIED'
+    assert pending.json()['account']['alias']=='durable_link' and pending.json()['oauth_state']==state
 
 
 @pytest.mark.asyncio
@@ -294,7 +299,7 @@ async def test_an_encrypted_receipt_cannot_be_transplanted_to_another_link(clien
         assert (await act(ac,'deriv_oauth_link',{'state':state,'loginid':'VRTC900','alias':alias})).status_code==200
     rows=[await app.state.store.fetchone("SELECT receipt_enc FROM trading_oauth_effects WHERE state=? AND operation='LINK'",(state,)) for state in states]
     await app.state.store.execute("UPDATE trading_oauth_effects SET receipt_enc=? WHERE state=? AND operation='LINK'",(rows[1]['receipt_enc'],states[0]))
-    response=await act(ac,'deriv_oauth_link',{'state':states[0],'loginid':'VRTC900','alias':'first_link'})
+    response=await act(ac,'deriv_oauth_link',{'state':states[0],'loginid':'VRTC900','alias':'first_link'},expected_challenge_status=409)
     assert response.status_code==409
     assert calls==['deriv_oauth_link','deriv_oauth_link']
 

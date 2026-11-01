@@ -8,6 +8,159 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.CancellationException
 
 class AccountOperationRecoveryTest {
+    private fun preparedLink() = original.copy(operationId = "original_link_operation_123456", action = "deriv_oauth_link", alias = "linked_once",
+        oauthState = "original_oauth_state_123456789", dispatchStage = "PREPARED", originalApprovalExpiresAt = 123456L, originalResourceVersion = "c".repeat(64), originalIssuedAt = 123000L,
+        oauthArguments = parseObject("""{"state":"original_oauth_state_123456789","alias":"linked_once","loginid":"VRTC900"}""")!!)
+
+    @Test fun preparedReadinessIsNotCompletionAndResumeIsExplicitUnderFreshOwnerFlow() = runBlocking {
+        val disk = Disk(); val value = preparedLink(); val history = AccountOperationRecovery(disk)
+        val oldActor = AccountOperationActor(scope, value.deviceId, "old-token")
+        var current = oldActor; var links = 0
+        disk.afterSave = { current = oldActor.copy(credentialContext = "renewed-current-token") }
+        try { history.dispatch(value, oldActor, { current }) { links += 1; 200 to "{}" }; fail("changed actor must stop before exchange") }
+        catch (expected: IllegalStateException) { }
+        assertEquals(0, links); assertEquals("PREPARED", history.pending(value.deviceId).single().dispatchStage)
+        disk.afterSave = null
+        val ready = """{"ready":true,"broker":"deriv","accounts":[{"loginid":"VRTC900","currency":"USD"}]}"""
+        val recovered = history.recover(value, current, { current }) { 200 to ready }
+        assertEquals("NOT_DISPATCHED", parseObject(recovered.second)!!.str("effect_state"))
+        assertFalse(AccountOnboarding.parseOutcome(value.action, recovered.second, recovered.first, requireOriginalReceipt = true).ok)
+        assertEquals(listOf(value), history.pending(value.deviceId)); assertEquals(0, links)
+        val args = history.resumeArguments(value, scope)
+        assertEquals(value.oauthState, args.str("state")); assertEquals(value.operationId, args.str("original_operation_id"))
+        assertEquals(123456L, args.str("original_approval_expires_at_unix")!!.toLong())
+        assertEquals(value.originalResourceVersion, args.str("original_resource_version"))
+        assertEquals(value.originalIssuedAt, args.str("original_issued_at_unix")!!.toLong())
+        assertEquals(scope.nativeOwnerDomain, args.str("original_account_control_domain"))
+        // Actual client separately checks the new A4 selection; this state
+        // machine never obtains a grant from readiness or a missing ACK.
+        history.resume(value, current, { current }) { guard ->
+            guard(); history.markPossibleSend(value); guard(); links += 1
+            409 to """{"effect_state":"UNKNOWN","reconciliation_required":true}"""
+        }
+        assertEquals(1, links)
+        val sent = history.pending(value.deviceId).single()
+        assertEquals(value.operationId, sent.operationId); assertEquals("MAY_HAVE_SENT", sent.dispatchStage)
+        assertFalse(history.canResume(sent, scope))
+        val held = history.recover(sent, current, { current }) { 200 to ready }
+        assertEquals("UNKNOWN", parseObject(held.second)!!.str("effect_state"))
+        assertEquals(1, links); assertEquals(listOf(sent), history.pending(value.deviceId))
+    }
+
+    @Test fun durablePossibleSendMarkerPrecedesConnectionAndItsUncertainAckCannotAuthorizeResume() = runBlocking {
+        var text: String? = null; var writes = 0
+        val store = object : AccountOperationStore {
+            override fun load() = text
+            override fun save(value: String): Boolean { text = value; writes += 1; return writes == 1 }
+        }
+        val value = preparedLink(); val actor = AccountOperationActor(scope, value.deviceId, "current-token")
+        val history = AccountOperationRecovery(store); var connections = 0
+        try {
+            history.dispatch(value, actor, { actor }) { guard ->
+                guard(); history.markPossibleSend(value); guard(); connections += 1; 200 to "{}"
+            }
+            fail("uncertain durable marker must prevent connection")
+        } catch (expected: IllegalStateException) { }
+        assertEquals(0, connections)
+        val cold = AccountOperationRecovery(store); val original = cold.pending(value.deviceId).single()
+        assertEquals("MAY_HAVE_SENT", original.dispatchStage); assertFalse(cold.canResume(original, scope))
+        assertThrows(IllegalStateException::class.java) { cold.markPossibleSend(original) }
+        assertThrows(IllegalStateException::class.java) { cold.resumeArguments(original, scope) }
+    }
+
+    @Test fun legacyV4PreparedHasNoOriginalVersionProofAndCannotAdoptCurrentGeneration() {
+        val disk = Disk(); val value = preparedLink()
+        AccountOperationRecovery(disk).remember(value)
+        disk.text = disk.text!!.replace("van.android.account-operations/5", "van.android.account-operations/4")
+            .replace(",\"original_resource_version\":\"${value.originalResourceVersion}\"", "")
+            .replace(",\"original_issued_at_unix\":${value.originalIssuedAt}", "")
+        val cold = AccountOperationRecovery(disk); val old = cold.pending(value.deviceId).single()
+        assertEquals("PREPARED", old.dispatchStage); assertEquals(value.operationId, old.operationId)
+        assertNull(old.originalResourceVersion); assertNull(old.originalIssuedAt)
+        assertFalse(cold.canResume(old, scope))
+        assertThrows(IllegalStateException::class.java) { cold.resumeArguments(old, scope) }
+        assertEquals(listOf(old), cold.pending(value.deviceId))
+    }
+
+    @Test fun legacyV3LinkHasNoNeverSentProofAndReadinessCannotCompleteIt() = runBlocking {
+        val disk = Disk(); val value = preparedLink()
+        disk.text = """{"schema":"van.android.account-operations/3","operations":[{
+            "operation_id":"${value.operationId}","action":"${value.action}","device_id":"${value.deviceId}","alias":"${value.alias}",
+            "request_identity":"${value.requestIdentity}","oauth_state":"${value.oauthState}","scope":{
+            "root":"${scope.root}","profile_id":"${scope.profileId}","provisioning_id":"${scope.provisioningId}","native_owner_domain":"${scope.nativeOwnerDomain}"}}]}"""
+        val cold = AccountOperationRecovery(disk); val original = cold.pending(value.deviceId).single()
+        assertEquals("UNKNOWN", original.dispatchStage); assertNull(original.oauthArguments)
+        val actor = AccountOperationActor(scope, original.deviceId, "current-token")
+        val read = cold.recover(original, actor, { actor }) { 200 to """{"ready":true,"accounts":[]}""" }
+        assertEquals("UNKNOWN", parseObject(read.second)!!.str("effect_state"))
+        assertFalse(cold.canResume(original, scope)); assertEquals(listOf(original), cold.pending(value.deviceId))
+    }
+
+    @Test fun scopedV2HistoryRetainsOriginalBindingDuringOAuthStateMigration() {
+        val disk = Disk()
+        disk.text = """{"schema":"van.android.account-operations/2","operations":[{
+            "operation_id":"${original.operationId}","action":"${original.action}","device_id":"${original.deviceId}",
+            "alias":"${original.alias}","request_identity":"${original.requestIdentity}","scope":{
+            "root":"${scope.root}","profile_id":"${scope.profileId}","provisioning_id":"${scope.provisioningId}",
+            "native_owner_domain":"${scope.nativeOwnerDomain}"}}]}"""
+        val history = AccountOperationRecovery(disk)
+        assertEquals(listOf(original), history.pending(original.deviceId))
+        val link = original.copy(operationId = "original_link_operation_123456", action = "deriv_oauth_link", alias = "linked_once",
+            oauthState = "original_oauth_state_123456789")
+        history.remember(link)
+        assertEquals(listOf(original, link), AccountOperationRecovery(disk).pending(original.deviceId))
+        assertTrue(disk.text!!.contains("van.android.account-operations/5"))
+        assertEquals(scope, AccountOperationRecovery(disk).pending(original.deviceId).first().scope)
+    }
+
+    @Test fun oauthLinkPersistsOriginalStateBeforeSendAndReadsOnlyThatStateAfterRestart() = runBlocking {
+        val disk = Disk()
+        val original = PendingAccountOperation("original_link_operation_123456", "deriv_oauth_link", "owner-device", "linked_once",
+            scope, "b".repeat(64), "original_oauth_state_123456789")
+        val actor = AccountOperationActor(scope, original.deviceId, "current-token-context")
+        var sends = 0
+        AccountOperationRecovery(disk).dispatch(original, actor, { actor }) { guard ->
+            guard(); assertEquals(listOf(original), AccountOperationRecovery(disk).pending(original.deviceId))
+            sends += 1
+            409 to """{"effect_state":"UNKNOWN","reconciliation_required":true}"""
+        }
+        val cold = AccountOperationRecovery(disk)
+        assertEquals(original.oauthState, cold.pending(original.deviceId).single().oauthState)
+        assertThrows(IllegalStateException::class.java) { cold.remember(original.copy(operationId = "another_link_operation_123456")) }
+        val receipt = """{"operation_id":"${original.operationId}","device_id":"${original.deviceId}","action":"${original.action}",
+            "oauth_state":"${original.oauthState}","account_control_domain":"${scope.nativeOwnerDomain}",
+            "native_resource_version":"${"c".repeat(64)}","effect_state":"APPLIED","reconciliation_required":false,
+            "account":{"alias":"linked_once","broker":"DERIV"}}"""
+        assertFalse(cold.observe(original, receipt.replace(original.oauthState!!, "replacement_oauth_state_123456"), 200, scope))
+        assertFalse(cold.observe(original, receipt, 200, scope.copy(nativeOwnerDomain = "d".repeat(64))))
+        var reads = 0
+        cold.recover(original, actor, { actor }) { guard -> guard(); reads += 1; 200 to receipt }
+        assertEquals(1, sends); assertEquals(1, reads)
+        assertTrue(cold.pending(original.deviceId).isEmpty())
+        assertFalse(disk.text!!.contains("token")); assertFalse(disk.text!!.contains("verification_code"))
+        assertFalse(disk.text!!.contains("password")); assertFalse(disk.text!!.contains("signature"))
+    }
+
+    @Test fun oauthLinkFailedPersistenceAndChangedActorCannotDispatchOrClearOriginal() = runBlocking {
+        val disk = Disk()
+        val value = PendingAccountOperation("original_link_operation_123456", "ctrader_link", "owner-device", "linked_once",
+            scope, "b".repeat(64), "original_oauth_state_123456789")
+        val actor = AccountOperationActor(scope, value.deviceId, "current-token")
+        disk.writable = false; var sends = 0
+        try { AccountOperationRecovery(disk).dispatch(value, actor, { actor }) { sends += 1; 200 to "{}" }; fail("durable write must fail") }
+        catch (expected: IllegalStateException) { }
+        assertEquals(0, sends)
+        disk.writable = true
+        var current = actor
+        disk.afterSave = { current = actor.copy(credentialContext = "replacement-token") }
+        try { AccountOperationRecovery(disk).dispatch(value, actor, { current }) { sends += 1; 200 to "{}" }; fail("changed actor must refuse") }
+        catch (expected: IllegalStateException) { }
+        assertEquals(0, sends)
+        assertEquals(listOf(value), AccountOperationRecovery(disk).pending(value.deviceId))
+        assertFalse(AccountOperationRecovery(disk).observe(value,
+            """{"status":"RECORDED_APPLIED_UNBOUND","scope_status":"UNBOUND","native_reconciliation_required":true}""", 200, scope))
+    }
+
     private class Disk : AccountOperationStore {
         var text: String? = null
         var writable = true

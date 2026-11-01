@@ -31,6 +31,10 @@ class OAuthTargetBlocked(HTTPException):
         super().__init__(409,detail)
 
 
+RESUME_SELECTORS=frozenset({'original_operation_id','original_approval_expires_at_unix',
+    'original_resource_version','original_issued_at_unix','original_account_control_domain'})
+
+
 def fingerprint(value):
     return hashlib.sha256(json.dumps(value,sort_keys=True,separators=(',',':'),ensure_ascii=False).encode()).hexdigest()
 
@@ -41,6 +45,7 @@ class OAuthClaim:
     digest: str
     material: dict | None = field(repr=False)
     receipt: dict | None = field(repr=False)
+    binding: dict | None = field(default=None,repr=False)
 
 
 class OAuthEffects:
@@ -60,7 +65,74 @@ class OAuthEffects:
             PRIMARY KEY(state,operation))''')
         await self.store.execute('CREATE INDEX IF NOT EXISTS idx_trading_oauth_effect_target ON trading_oauth_effects(target_key,phase)')
 
-    def _receipt(self, row):
+    def _link_envelope(self, row):
+        """Existing encrypted column holds typed intent until actual completion.
+
+        INTENT is not a receipt, APPLIED, or authority. Legacy rows have no
+        provable original native scope and must never be adopted into one.
+        """
+        try:
+            value=json.loads(self.cipher.decrypt(row['receipt_enc'].encode()))
+            binding=value['native_binding']
+            keys={'schema','record_type','state','operation','request_digest','broker','owner_device_id','native_binding'}
+            if (value.get('schema')!='van.oauth-link-binding/1'
+                or set(value)!=(keys|{'result'} if row['phase']=='APPLIED' else keys)
+                or value.get('record_type')!=('RECEIPT' if row['phase']=='APPLIED' else 'INTENT')
+                or any(value.get(key)!=row[key] for key in ('state','operation','request_digest','broker','owner_device_id'))
+                or not isinstance(binding,dict)
+                or not {'account_control_domain','resource_version','operation_id','device_id','expires_at_unix'}<=set(binding)
+                or set(binding)-{'account_control_domain','resource_version','operation_id','device_id','expires_at_unix',
+                    'approval_operation_id','original_expires_at_unix'}
+                or binding['device_id']!=row['owner_device_id']
+                or any(not isinstance(binding.get(key),str) or not re.fullmatch(r'[0-9a-f]{64}',binding[key])
+                    for key in ('account_control_domain','resource_version'))
+                or not isinstance(binding['operation_id'],str)
+                or not re.fullmatch(r'[A-Za-z0-9_-]{20,128}',binding['operation_id'])
+                or type(binding['expires_at_unix']) is not int or binding['expires_at_unix']<=0
+                or ('original_expires_at_unix' in binding and (type(binding['original_expires_at_unix']) is not int or binding['original_expires_at_unix']<=0))
+                or ('approval_operation_id' in binding and (not isinstance(binding['approval_operation_id'],str)
+                    or not re.fullmatch(r'[A-Za-z0-9_-]{20,128}',binding['approval_operation_id'])))
+                or row['operation']!='LINK'):
+                raise ValueError('unbound original link')
+            return value
+        except Exception:
+            raise OAuthEffectUnconfirmed('Original OAuth link has no verifiable native scope; retain it unbound for reconciliation') from None
+
+    @staticmethod
+    def _same_scope(original, expected):
+        if expected is None or any(original.get(key)!=expected.get(key)
+            for key in ('account_control_domain','resource_version','device_id')):
+            raise OAuthTargetBlocked('Original OAuth link belongs to another native scope or version; do not rebind it')
+
+    @staticmethod
+    def _link_result(value,row):
+        from van_gateway.trading.account_contracts import PublicAccountRecord
+        binding=value['native_binding'];result=value.get('result')
+        try:
+            if not isinstance(result,dict) or set(result)!={'account','account_control_domain','operation_id','device_id',
+                'action','oauth_state','native_resource_version','effect_state','reconciliation_required'}:
+                raise ValueError('unexpected native link receipt fields')
+            account=PublicAccountRecord.model_validate(result['account'])
+            if (any(result.get(key)!=binding[bound] for key,bound in (
+                    ('account_control_domain','account_control_domain'),('operation_id','operation_id'),
+                    ('device_id','device_id'),('native_resource_version','resource_version')))
+                or result['action']!=('deriv_oauth_link' if row['broker']=='deriv' else 'ctrader_link')
+                or result['oauth_state']!=row['state'] or result['effect_state']!='APPLIED'
+                or result['reconciliation_required'] is not False
+                or row['target_key']!='account:'+account.alias or account.broker!=row['broker'].upper()
+                or account.mode not in {'DEMO_TRADER','OBSERVE'} or not account.login or not account.currency):
+                raise ValueError('mismatched original link receipt')
+        except Exception:
+            raise OAuthEffectUnconfirmed('Original link receipt is incomplete or differs from its sealed intent') from None
+        return result
+
+    def _receipt(self, row, *, native_binding=None):
+        if row['operation']=='LINK':
+            value=self._link_envelope(row)
+            self._same_scope(value['native_binding'],native_binding)
+            if row['phase']!='APPLIED' or not isinstance(value.get('result'),dict):
+                raise OAuthEffectUnconfirmed()
+            return self._link_result(value,row)
         try:
             result = json.loads(self.cipher.decrypt(row['receipt_enc'].encode()))
             if (not isinstance(result,dict) or result.get('schema')!='van.oauth-effect-receipt/1'
@@ -71,10 +143,53 @@ class OAuthEffects:
         except Exception:
             raise OAuthEffectUnconfirmed('OAuth receipt cannot be read; native reconciliation required') from None
 
-    async def begin(self,state,operation,broker,payload,*,owner_device_id=None,validate=None):
+    async def link_binding(self,state,broker,owner_device_id,account_control_domain):
+        row=await self.store.fetchone("SELECT * FROM trading_oauth_effects WHERE state=? AND operation='LINK'",(state,))
+        if row is None:return None
+        if not owner_device_id or row['owner_device_id']!=owner_device_id:
+            raise HTTPException(403,'OAuth state belongs to another device')
+        if row['broker']!=broker:raise HTTPException(400,'OAuth state belongs to a different broker')
+        binding=self._link_envelope(row)['native_binding']
+        if binding['account_control_domain']!=account_control_domain:
+            raise OAuthTargetBlocked('Original OAuth link native namespace is not selected')
+        return binding
+
+    async def link_record(self,state,owner_device_id):
+        row=await self.store.fetchone("SELECT * FROM trading_oauth_effects WHERE state=? AND operation='LINK'",(state,))
+        if row is None:return None
+        if not owner_device_id or row['owner_device_id']!=owner_device_id:
+            raise HTTPException(403,'OAuth state belongs to another device')
+        try:self._link_envelope(row)
+        except OAuthEffectUnconfirmed:
+            # Preserve genuinely recorded old completion as historical data;
+            # it is never original native-scope proof or an executable grant.
+            if row['phase']=='APPLIED':
+                try:
+                    value=json.loads(self.cipher.decrypt(row['receipt_enc'].encode()))
+                    if (value.get('schema')!='van.oauth-effect-receipt/1'
+                        or any(value.get(k)!=row[k] for k in ('state','operation','request_digest','broker','owner_device_id'))
+                        or not isinstance(value.get('result'),dict)):raise ValueError()
+                except Exception:raise OAuthEffectUnconfirmed('Historical link confirmation cannot be verified') from None
+            return {'legacy_unbound':True,'status':'RECORDED_APPLIED_UNBOUND' if row['phase']=='APPLIED' else 'OUTCOME_UNCONFIRMED'}
+        return dict(row)
+
+    async def require_original_semantics(self,state,broker,owner_device_id,domain,payload):
+        binding=await self.link_binding(state,broker,owner_device_id,domain)
+        if binding is None:raise OAuthEffectUnconfirmed('Original link intent is unavailable')
+        row=await self.store.fetchone("SELECT request_digest FROM trading_oauth_effects WHERE state=? AND operation='LINK'",(state,))
+        semantic={k:v for k,v in payload.items() if k not in RESUME_SELECTORS}
+        expected=fingerprint({'state':state,'operation':'LINK','broker':broker,'payload':semantic})
+        if row is None or row['request_digest']!=expected:
+            raise OAuthTargetBlocked('Original link semantic arguments differ; use a new reviewed operation')
+        return binding
+
+    async def begin(self,state,operation,broker,payload,*,owner_device_id=None,validate=None,native_binding=None):
         if operation not in {'CALLBACK','LINK'} or broker not in {'deriv','ctrader'}:
             raise ValueError('invalid native OAuth operation')
-        digest = fingerprint({'state':state,'operation':operation,'broker':broker,'payload':payload})
+        # A fresh A4 permission signs the entire submitted body, including
+        # resume selectors. They do not change the original business effect.
+        semantic_payload=({k:v for k,v in payload.items() if k not in RESUME_SELECTORS} if operation=='LINK' else payload)
+        digest = fingerprint({'state':state,'operation':operation,'broker':broker,'payload':semantic_payload})
         async with self.store.connection() as db:
             await db.execute('BEGIN IMMEDIATE')
             cursor = await db.execute('SELECT * FROM trading_oauth_effects WHERE state=? AND operation=?',(state,operation))
@@ -84,10 +199,18 @@ class OAuthEffects:
                     raise HTTPException(403,'OAuth state belongs to another device')
                 if existing['broker'] != broker or existing['request_digest'] != digest:
                     raise HTTPException(409,'OAuth operation conflicts with its original request')
+                original=self._link_envelope(existing)['native_binding'] if operation=='LINK' else None
+                if operation=='LINK':self._same_scope(original,native_binding)
+                if operation=='LINK' and 'original_operation_id' in payload and (
+                    payload['original_operation_id']!=original['operation_id'] or
+                    payload.get('original_approval_expires_at_unix')!=original.get('original_expires_at_unix',original['expires_at_unix']) or
+                    payload.get('original_resource_version')!=original['resource_version'] or
+                    payload.get('original_account_control_domain')!=original['account_control_domain']):
+                    raise OAuthTargetBlocked('Resume identity changed before original link arbitration')
                 if existing['phase'] == 'APPLIED':
-                    result = self._receipt(existing)
+                    result = self._receipt(existing,native_binding=native_binding)
                     await db.commit()
-                    return OAuthClaim(False,digest,None,result)
+                    return OAuthClaim(False,digest,None,result,original)
                 raise OAuthEffectUnconfirmed('OAuth operation outcome is unconfirmed; native reconciliation required before retry')
             cursor = await db.execute('SELECT * FROM trading_oauth_pending WHERE state=?',(state,))
             pending = self.decode_pending(await cursor.fetchone())
@@ -113,18 +236,37 @@ class OAuthEffects:
             if validate is not None:
                 validate(pending)
             if operation == 'LINK':
-                cursor = await db.execute("SELECT state FROM trading_oauth_effects WHERE target_key=? AND phase IN ('IN_FLIGHT','UNKNOWN') LIMIT 1",(target,))
+                if (not isinstance(native_binding,dict) or native_binding.get('device_id')!=owner
+                    or type(native_binding.get('expires_at_unix')) is not int
+                    or native_binding['expires_at_unix']<=int(time.time())):
+                    raise HTTPException(403,'Current verified original link admission is required')
+                cursor=await db.execute("SELECT * FROM trading_oauth_effects WHERE target_key=? AND phase IN ('IN_FLIGHT','UNKNOWN')",(target,))
+                for prior in await cursor.fetchall():
+                    try: prior_domain=self._link_envelope(prior)['native_binding']['account_control_domain']
+                    except OAuthEffectUnconfirmed: prior_domain=None
+                    if prior_domain in (None,native_binding.get('account_control_domain')):
+                        raise OAuthTargetBlocked('OAuth target has a prior effect requiring reconciliation; a new state cannot bypass it')
+                cursor=None
             else:
                 cursor = await db.execute('SELECT state FROM trading_oauth_effects WHERE target_key=? LIMIT 1',(target,))
-            if await cursor.fetchone() is not None:
+            if cursor is not None and await cursor.fetchone() is not None:
                 raise OAuthTargetBlocked('OAuth target has a prior effect requiring reconciliation; a new state cannot bypass it')
             now = int(time.time())
             await db.execute('''INSERT INTO trading_oauth_effects
                 (state,operation,broker,owner_device_id,request_digest,target_key,phase,worker_id,created_at_unix,updated_at_unix)
                 VALUES (?,?,?,?,?,?,'IN_FLIGHT',?,?,?)''',(state,operation,broker,owner,digest,target,self.worker,now,now))
+            if operation=='LINK':
+                envelope={'schema':'van.oauth-link-binding/1','record_type':'INTENT','state':state,
+                    'operation':operation,'request_digest':digest,'broker':broker,'owner_device_id':owner,
+                    'native_binding':native_binding}
+                # Validate the exact persisted format before its first claim.
+                encrypted_intent=self.cipher.encrypt(json.dumps(envelope).encode()).decode()
+                self._link_envelope({**envelope,'phase':'IN_FLIGHT','receipt_enc':encrypted_intent})
+                await db.execute("UPDATE trading_oauth_effects SET receipt_enc=? WHERE state=? AND operation=?",
+                    (encrypted_intent,state,operation))
             await db.commit()
         self.active.add((state,operation))
-        return OAuthClaim(True,digest,pending,None)
+        return OAuthClaim(True,digest,pending,None,native_binding)
 
     async def complete(self,state,operation,digest,receipt,*,patch=None,consume=False):
         if not isinstance(receipt,dict):
@@ -151,6 +293,10 @@ class OAuthEffects:
                 self.fault('after_material_before_receipt')
             envelope = {'schema':'van.oauth-effect-receipt/1',
                 **{key:row[key] for key in ('state','operation','request_digest','broker','owner_device_id')},'result':receipt}
+            if operation=='LINK':
+                original=self._link_envelope(row)
+                envelope={**original,'record_type':'RECEIPT','result':receipt}
+                self._link_result(envelope,row)
             encrypted = self.cipher.encrypt(json.dumps(envelope).encode()).decode()
             await db.execute("UPDATE trading_oauth_effects SET phase='APPLIED',receipt_enc=?,updated_at_unix=? WHERE state=? AND operation=?",(encrypted,int(time.time()),state,operation))
             if self.fault:
@@ -168,10 +314,10 @@ class OAuthEffects:
         finally:
             self.active.discard((state,operation))
 
-    async def applied(self,state,operation,digest):
+    async def applied(self,state,operation,digest,*,native_binding=None):
         row = await self.store.fetchone('SELECT * FROM trading_oauth_effects WHERE state=? AND operation=?',(state,operation))
         if row is not None and row['request_digest']==digest and row['phase']=='APPLIED':
-            return self._receipt(row)
+            return self._receipt(row,native_binding=native_binding)
         return None
 
     async def owns_link(self, state, broker, owner_device_id):
@@ -191,29 +337,43 @@ class OAuthEffects:
             raise HTTPException(400, 'OAuth state belongs to a different broker')
         return True
 
-    async def unresolved_link_target(self, alias):
+    async def unresolved_link_target(self, alias,account_control_domain=None):
         """Read uncertainty before classifying an alias as a new-link collision.
 
         This grants no execution: begin() still arbitrates the exact request,
         original actor and global target in its existing atomic transaction.
         """
-        row=await self.store.fetchone("""SELECT 1 FROM trading_oauth_effects
-            WHERE operation='LINK' AND target_key=? AND phase IN ('IN_FLIGHT','UNKNOWN') LIMIT 1""",
-            ('account:'+alias,))
-        return row is not None
+        rows=await self.store.fetchall("""SELECT * FROM trading_oauth_effects
+            WHERE operation='LINK' AND target_key=? AND phase IN ('IN_FLIGHT','UNKNOWN')""",('account:'+alias,))
+        for row in rows:
+            try: domain=self._link_envelope(row)['native_binding']['account_control_domain']
+            except OAuthEffectUnconfirmed:return True
+            if account_control_domain is None or domain==account_control_domain:return True
+        return False
 
-    async def unconfirmed(self,state,owner_device_id):
+    async def unconfirmed(self,state,owner_device_id,*,account_control_domain=None):
         row = await self.store.fetchone("""SELECT * FROM trading_oauth_effects WHERE state=?
             ORDER BY CASE operation WHEN 'LINK' THEN 1 ELSE 0 END DESC LIMIT 1""",(state,))
         if row is None:
             return None
         if row['owner_device_id'] != owner_device_id:
             raise HTTPException(403,'OAuth state belongs to another device')
+        binding=None
+        if row['operation']=='LINK':
+            binding=self._link_envelope(row)['native_binding']
+            if binding['account_control_domain']!=account_control_domain:
+                raise OAuthTargetBlocked('Original OAuth link native namespace is not selected')
         if row['phase'] == 'APPLIED':
-            self._receipt(row)
+            self._receipt(row,native_binding=binding)
             return None
         observed = (row['phase']=='IN_FLIGHT' and row['worker_id']==self.worker
                     and (state,row['operation']) in self.active)
-        return {'ready':False,'operation':row['operation'],
+        result={'ready':False,'operation':row['operation'],
                 'status':'IN_PROGRESS' if observed else 'OUTCOME_UNCONFIRMED',
                 'native_reconciliation_required':not observed}
+        if binding:
+            result.update(operation_id=binding['operation_id'],device_id=binding['device_id'],
+                action='deriv_oauth_link' if row['broker']=='deriv' else 'ctrader_link',oauth_state=state,
+                account_control_domain=binding['account_control_domain'],native_resource_version=binding['resource_version'],
+                effect_state='UNKNOWN',reconciliation_required=True)
+        return result

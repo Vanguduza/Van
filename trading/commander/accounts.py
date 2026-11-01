@@ -72,7 +72,7 @@ def _secrets_path(st: AccountControlSettings, alias: str) -> Path:
     return Path(st.secrets_dir) / f"{alias}.env"
 
 
-def _write_secrets(path: Path, values: dict[str, str], *, merge: bool = True) -> None:
+def _write_secrets(path: Path, values: dict[str, str], *, merge: bool = True, before_replace=None) -> None:
     from vati.core.file_lock import exclusive_state_lock
     from vati.accounts.registry import load_secret_file
 
@@ -81,6 +81,7 @@ def _write_secrets(path: Path, values: dict[str, str], *, merge: bool = True) ->
            or not isinstance(v, str) or "\n" in v or "\r" in v for k, v in values.items()):
         raise ValueError("credential file requires valid keys and single-line text values")
     with exclusive_state_lock(path):
+        if before_replace is not None:before_replace()
         if path.is_symlink():
             raise ValueError("credential destination must not be a symbolic link")
         # Validate old ownership/permissions even when replacing, before reading or changing it.
@@ -95,6 +96,7 @@ def _write_secrets(path: Path, values: dict[str, str], *, merge: bool = True) ->
                 stream.flush()
                 os.fsync(stream.fileno())
             os.chmod(temporary, 0o600)
+            if before_replace is not None:before_replace()
             os.replace(temporary, path)
         finally:
             if os.path.exists(temporary):
@@ -156,13 +158,14 @@ def build_account_handlers(st: AccountControlSettings) -> dict[str, Callable[[di
     def reg() -> AccountRegistry:
         return AccountRegistry(st.registry_path)
 
-    def upsert_record(alias: str, broker: str, *, mode: str = "DEMO_TRADER", currency: str = "USD", label: str = "", server: str = "", login: str = "", bridge_url: str = "", demo: bool = True, mandate_ref: str = "") -> dict:
+    def upsert_record(alias: str, broker: str, *, mode: str = "DEMO_TRADER", currency: str = "USD", label: str = "", server: str = "", login: str = "", bridge_url: str = "", demo: bool = True, mandate_ref: str = "", before_write=None, after_write=None) -> dict:
         r = reg()
         sec = _secrets_path(st, alias)
         if broker in ("DERIV", "CTRADER", "MT5_EA", "MT5"):
             if not sec.is_file():
                 mark_account_effect()
-                _write_secrets(sec, {})
+                if before_write is None:_write_secrets(sec, {})
+                else:_write_secrets(sec, {},before_replace=before_write)
             cref = CredentialRef(secrets_file=str(sec))
         else:
             cref = CredentialRef()
@@ -170,7 +173,13 @@ def build_account_handlers(st: AccountControlSettings) -> dict[str, Callable[[di
             candidate = Account(alias=alias, broker=broker, mode=mode, currency=currency, label=label or alias, server=server, login=login, bridge_url=bridge_url, credential_ref=cref, demo=demo, mandate_ref=mandate_ref)
             candidate.validate()
             mark_account_effect()
-            acc = r.replace(candidate) if alias in r.accounts else r.add(candidate)
+            if before_write is None:
+                acc = r.replace(candidate) if alias in r.accounts else r.add(candidate)
+            else:
+                with r._mutation_lock():
+                    before_write()
+                    acc = r.replace(candidate) if alias in r.accounts else r.add(candidate)
+                    if after_write is not None:after_write(current_resource_version(alias))
         except AccountRegistryError as exc:
             raise HTTPException(422, str(exc))
         return acc.public()
@@ -185,11 +194,19 @@ def build_account_handlers(st: AccountControlSettings) -> dict[str, Callable[[di
             raise HTTPException(422, "secret values must be single-line")
         return clean
 
-    def store_secrets(alias: str, broker: str, values: dict[str, Any]) -> list[str]:
+    def store_secrets(alias: str, broker: str, values: dict[str, Any], *, before_write=None, expected_version=None) -> list[str]:
         clean = clean_secrets(broker, values)
         mark_account_effect()
-        reg().touch(alias)
-        _write_secrets(_secrets_path(st, alias), clean)
+        if before_write is None:
+            reg().touch(alias)
+            _write_secrets(_secrets_path(st, alias), clean)
+        else:
+            with reg()._mutation_lock():
+                before_write()
+                if expected_version is not None and current_resource_version(alias)!=expected_version:
+                    raise HTTPException(409,'Account changed after original link registration; credentials were not replaced')
+                reg().touch(alias)
+                _write_secrets(_secrets_path(st, alias), clean,before_replace=before_write)
         return sorted(clean)
 
     def verify_deriv_material(*, app_id: str, token: str, login: str, currency: str,
@@ -517,9 +534,10 @@ def build_account_handlers(st: AccountControlSettings) -> dict[str, Callable[[di
             currency=currency, demo=None, require_trade=False)
         demo = bool(profile["is_virtual"])
         mode = "DEMO_TRADER" if demo and "trade" in profile["scopes"] else "OBSERVE"
-        pub = upsert_record(alias, "DERIV", currency=currency, label=str(a.get("label") or f"Deriv {loginid}"), server=app_id, login=loginid, demo=demo, mode=mode)
-        store_secrets(alias, "DERIV", {"DERIV_API_TOKEN": token, "DERIV_APP_ID": str(a.get("app_id") or "1089")})
-        return {"account": pub}
+        own_revision=[]
+        pub = upsert_record(alias, "DERIV", currency=currency, label=str(a.get("label") or f"Deriv {loginid}"), server=app_id, login=loginid, demo=demo, mode=mode,before_write=a.get('_link_before_registry'),after_write=own_revision.append)
+        store_secrets(alias, "DERIV", {"DERIV_API_TOKEN": token, "DERIV_APP_ID": str(a.get("app_id") or "1089")},before_write=a.get('_link_before_credentials'),expected_version=own_revision[0] if own_revision else None)
+        return {"account": pub,**({'account_control_domain':control_domain()} if st.operation_ledger else {})}
 
     # ------------------------------------------------------------ ctrader
     def ctrader_transport(is_live: bool):
@@ -564,9 +582,10 @@ def build_account_handlers(st: AccountControlSettings) -> dict[str, Callable[[di
         require_new_alias(alias)
         ctid = int(a["ctid_trader_account_id"])
         is_live = _boolean(a, "is_live", False)
-        pub = upsert_record(alias, "CTRADER", currency=str(a.get("currency") or "USD").upper(), label=str(a.get("label") or f"cTrader {ctid}"), server="live" if is_live else "demo", login=str(ctid), demo=not is_live, mode="DEMO_TRADER" if not is_live else "OBSERVE")
-        store_secrets(alias, "CTRADER", {"CTRADER_CLIENT_ID": a["client_id"], "CTRADER_CLIENT_SECRET": a["client_secret"], "CTRADER_ACCESS_TOKEN": a["access_token"], **({"CTRADER_REFRESH_TOKEN": a["refresh_token"]} if a.get("refresh_token") else {})})
-        return {"account": pub}
+        own_revision=[]
+        pub = upsert_record(alias, "CTRADER", currency=str(a.get("currency") or "USD").upper(), label=str(a.get("label") or f"cTrader {ctid}"), server="live" if is_live else "demo", login=str(ctid), demo=not is_live, mode="DEMO_TRADER" if not is_live else "OBSERVE",before_write=a.get('_link_before_registry'),after_write=own_revision.append)
+        store_secrets(alias, "CTRADER", {"CTRADER_CLIENT_ID": a["client_id"], "CTRADER_CLIENT_SECRET": a["client_secret"], "CTRADER_ACCESS_TOKEN": a["access_token"], **({"CTRADER_REFRESH_TOKEN": a["refresh_token"]} if a.get("refresh_token") else {})},before_write=a.get('_link_before_credentials'),expected_version=own_revision[0] if own_revision else None)
+        return {"account": pub,**({'account_control_domain':control_domain()} if st.operation_ledger else {})}
 
     # ------------------------------------------------------------ mt5 ea
     def cmd_mt5_ea_issue_key(a: dict) -> dict:
@@ -593,6 +612,16 @@ def build_account_handlers(st: AccountControlSettings) -> dict[str, Callable[[di
                         guard()
                     if '_expected_account_control_domain' in args and args['_expected_account_control_domain']!=control_domain():
                         raise AccountOperationBlocked('Account-control state namespace changed before native dispatch')
+                    if command in {'deriv_oauth_link','ctrader_link'} and '_oauth_link_admission' in args:
+                        admission=args['_oauth_link_admission']
+                        if (not isinstance(admission,dict) or admission.get('account_control_domain')!=args.get('_expected_account_control_domain')
+                            or admission.get('resource_version')!=args.get('_expected_resource_version')
+                            or not isinstance(admission.get('device_id'),str) or not admission['device_id']
+                            or not isinstance(admission.get('operation_id'),str)
+                            or not re.fullmatch(r'[A-Za-z0-9_-]{20,128}',admission['operation_id'])
+                            or type(admission.get('expires_at_unix')) is not int
+                            or admission['expires_at_unix']<=int(time.time())):
+                            raise HTTPException(403,'Original OAuth link admission expired or changed before native write')
                     if callable(guard):guard()
                 def check_version():
                     check_current_scope()
@@ -603,6 +632,8 @@ def build_account_handlers(st: AccountControlSettings) -> dict[str, Callable[[di
                             raise HTTPException(409, "account changed since owner approval; review the current account and approve again")
                     check_current_scope()
                 server_admitted = command=='deriv_create_demo' and '_native_operation' not in args and callable(args.get('_server_demo_admission'))
+                if command in {'deriv_oauth_link','ctrader_link'}:
+                    args={**args,'_link_before_registry':check_version,'_link_before_credentials':check_current_scope}
                 if server_admitted:
                     # Only the already authenticated registered owner route
                     # can supply this closure. Labels/metadata confer nothing.

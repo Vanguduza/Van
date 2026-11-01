@@ -40,7 +40,7 @@ def requires_owner_approval(action: str) -> bool:
     return action in ACTIONS and action not in READ_ONLY_ACTIONS
 
 
-SECRET_ARG_KEYS = {"secrets", "client_password", "token", "access_token", "refresh_token", "client_secret", "verification_code", "code"}
+SECRET_ARG_KEYS = {"secrets", "client_password", "token", "access_token", "refresh_token", "client_secret", "verification_code", "code", "original_binding"}
 MAX_AGE_S = 300
 PENDING_TTL_S = 900
 DERIV_OAUTH = "https://oauth.deriv.com/oauth2/authorize"
@@ -221,6 +221,86 @@ class AccountOnboarding:
     public_base_url: str
     deriv_app_id: str = "1089"
 
+    async def _link_scope(self,state,broker,owner_device_id,expected_domain=None):
+        from van_gateway.trading.oauth_effects import OAuthTargetBlocked
+        domain=await asyncio.to_thread(self.control.domain)
+        if expected_domain not in (None,domain):
+            raise OAuthTargetBlocked('Original OAuth link native namespace is not selected')
+        original=await self.pending.effects.link_binding(state,broker,owner_device_id,domain)
+        if await asyncio.to_thread(self.control.domain)!=domain:
+            raise OAuthTargetBlocked('OAuth link native namespace changed during original read')
+        return domain,original
+
+    @staticmethod
+    def _resume_selector(args,original=None):
+        from van_gateway.trading.oauth_effects import RESUME_SELECTORS
+        fields=RESUME_SELECTORS
+        if not fields.intersection(args):return None
+        identity=args.get('original_operation_id');expiry=args.get('original_approval_expires_at_unix')
+        if (not fields<=args.keys() or not isinstance(identity,str)
+            or not re.fullmatch(r'[A-Za-z0-9_-]{20,128}',identity) or type(expiry) is not int or expiry<=0
+            or type(args.get('original_issued_at_unix')) is not int or args['original_issued_at_unix']<=0
+            or any(not isinstance(args.get(key),str) or not re.fullmatch(r'[0-9a-f]{64}',args[key])
+                for key in ('original_resource_version','original_account_control_domain'))):
+            raise HTTPException(409,'Original link binding is missing or legacy-unbound; HOLD without adopting current data')
+        if original is not None and (identity!=original['operation_id']
+            or expiry!=original.get('original_expires_at_unix',original['expires_at_unix'])
+            or args['original_resource_version']!=original['resource_version']
+            or args['original_account_control_domain']!=original['account_control_domain']):
+            raise HTTPException(409,'Resume selectors differ from the immutable original link')
+        return identity,expiry
+
+    async def _historical_link_fact(self,action,semantic,identity,issued,owner,domain,*,version=None,expiry=None):
+        from van_gateway.approval.service import OwnerApprovalService,OwnerApprovalError
+        allowed={'alias','state','loginid','label','currency','ctid_trader_account_id','is_live'}
+        if (action not in {'deriv_oauth_link','ctrader_link'} or not isinstance(semantic,dict)
+            or not set(semantic)<=allowed or not isinstance(semantic.get('state'),str)
+            or not isinstance(identity,str) or not re.fullmatch(r'[A-Za-z0-9_-]{20,128}',identity)
+            or type(issued) is not int or issued<=0):
+            raise HTTPException(409,'Original link binding is incomplete; HOLD')
+        alias=semantic.get('alias')
+        if not isinstance(alias,str) or not re.fullmatch(r'[a-z0-9_]{3,32}',alias.strip().lower()):
+            raise HTTPException(409,'Original link subject is invalid; HOLD')
+        pending=await self.pending.get(semantic['state'])
+        if pending is None:raise HTTPException(409,'Original authorization material is unavailable; HOLD')
+        self._owner(pending,owner)
+        if pending['broker']!=('deriv' if action=='deriv_oauth_link' else 'ctrader'):
+            raise HTTPException(409,'Original broker binding differs; HOLD')
+        current=await asyncio.to_thread(self.control.resource_version,alias.strip().lower())
+        candidate=version if version is not None else current.get('resource_version')
+        if not isinstance(candidate,str) or not re.fullmatch(r'[0-9a-f]{64}',candidate):
+            raise HTTPException(409,'Original native version cannot be bound; HOLD')
+        try:
+            fact=await OwnerApprovalService(self.pending.store).original_binding_fact(challenge_id=identity,
+                device_id=owner,source_command_id='account:'+action,action_id='trading.account.'+action,
+                text=account_approval_text(owner,issued,action,semantic,candidate,domain),parameters=None)
+        except OwnerApprovalError as exc:
+            raise HTTPException(409,'Original A4 binding unavailable, corrupt or mismatched; HOLD: '+str(exc)) from None
+        if expiry is not None and fact['expires_at_unix']!=expiry:
+            raise HTTPException(409,'Original permission history differs; HOLD')
+        if current.get('alias')!=alias.strip().lower() or current.get('resource_version')!=candidate:
+            raise HTTPException(409,'Original target generation changed; an explicitly new reviewed operation is required')
+        if await asyncio.to_thread(self.control.domain)!=domain:
+            raise HTTPException(409,'Original native namespace changed during lookup; HOLD')
+        return {'operation_id':identity,'action':action,'device_id':owner,'account_control_domain':domain,
+            'resource_version':candidate,'issued_at_unix':issued,'expires_at_unix':fact['expires_at_unix'],
+            'historical_only':True,'execution_authority':False}
+
+    async def _verify_prepared_resume(self,action,args,owner,domain,original):
+        from van_gateway.trading.oauth_effects import RESUME_SELECTORS
+        resume=self._resume_selector(args,original)
+        if resume is None:return None
+        if args['original_account_control_domain']!=domain:
+            raise HTTPException(409,'Original namespace is not selected; HOLD')
+        broker='deriv' if action=='deriv_oauth_link' else 'ctrader'
+        if original is not None:
+            await self.pending.effects.require_original_semantics(args['state'],broker,owner,domain,args)
+            return original['resource_version']  # Historical result/UNKNOWN, never a new effect.
+        semantic={k:v for k,v in args.items() if k not in RESUME_SELECTORS}
+        fact=await self._historical_link_fact(action,semantic,resume[0],args['original_issued_at_unix'],owner,domain,
+            version=args['original_resource_version'],expiry=resume[1])
+        return fact['resource_version']
+
     def _cb(self, broker: str) -> str:
         return f"{self.public_base_url.rstrip('/')}/v1/trading/oauth/{broker}/callback"
 
@@ -264,6 +344,11 @@ class AccountOnboarding:
             return None
         if action in {"deriv_oauth_link", "ctrader_link"} and args.get("state"):
             broker = "deriv" if action == "deriv_oauth_link" else "ctrader"
+            domain,original=await self._link_scope(str(args['state']),broker,owner_device_id)
+            prepared_version=await self._verify_prepared_resume(action,args,owner_device_id,domain,original)
+            if original is not None:
+                return original['resource_version']
+            if prepared_version is not None:return prepared_version
             pending = await self.pending.get(str(args["state"]))
             if pending is None:
                 if await self.pending.effects.owns_link(str(args["state"]), broker, owner_device_id):
@@ -281,7 +366,7 @@ class AccountOnboarding:
         try:
             snapshot = await asyncio.to_thread(self.control.resource_version, alias)
             original_uncertainty=(action in {'deriv_oauth_link','ctrader_link'} and args.get('state')
-                and await self.pending.effects.unresolved_link_target(alias))
+                and await self.pending.effects.unresolved_link_target(alias,domain))
             if action in {'deriv_create_demo','deriv_oauth_link','ctrader_link'} and snapshot.get('state')=='REGISTERED' and not original_uncertainty:
                 raise HTTPException(409,'Account alias already exists; use a new alias or the verified update workflow')
             version = snapshot.get("resource_version")
@@ -322,7 +407,10 @@ class AccountOnboarding:
             await asyncio.shield(self.pending.effects.uncertain(state,operation,claim.digest,type(exc).__name__))
             if isinstance(exc,asyncio.CancelledError):
                 raise exc
-            receipt = await self.pending.effects.applied(state,operation,claim.digest)
+            if claim.binding:
+                await self._link_scope(state,claim.material['broker'] if claim.material else claim.receipt['account']['broker'].lower(),
+                    claim.binding['device_id'],claim.binding['account_control_domain'])
+            receipt = await self.pending.effects.applied(state,operation,claim.digest,native_binding=claim.binding)
             if receipt is not None:
                 return receipt
         except asyncio.CancelledError:
@@ -373,9 +461,31 @@ class AccountOnboarding:
         except BaseException as exc:
             return await self._recover_effect(state,"CALLBACK",claim,exc)
 
-    async def oauth_pending(self, args: dict, *, owner_device_id: str | None = None) -> dict:
+    async def oauth_pending(self, args: dict, *, owner_device_id: str | None = None, native_account_control_domain=None) -> dict:
         state = str(args.get("state", ""))
-        effect = await self.pending.effects.unconfirmed(state,owner_device_id)
+        if 'original_binding' in args:
+            request=args['original_binding']
+            if not isinstance(request,dict) or set(request)!={'operation_id','action','issued_at_unix','semantic_args'}:
+                raise HTTPException(409,'Original binding lookup is malformed; HOLD')
+            semantic=request['semantic_args']
+            if not isinstance(semantic,dict) or semantic.get('state')!=state:
+                raise HTTPException(409,'Original binding state differs; HOLD')
+            domain,original=await self._link_scope(state,'deriv' if request['action']=='deriv_oauth_link' else 'ctrader',owner_device_id,native_account_control_domain)
+            if original is not None:raise HTTPException(409,'Original link already has durable outcome; read it without preparing a new intent')
+            fact=await self._historical_link_fact(request['action'],semantic,request['operation_id'],request['issued_at_unix'],owner_device_id,domain)
+            return {'ready':False,'original_link_binding':fact}
+        link=await self.pending.effects.link_record(state,owner_device_id)
+        if link is not None:
+            if link.get('legacy_unbound'):
+                return {'ready':False,'expired':True,'operation':'LINK','status':link['status'],
+                    'scope_status':'UNBOUND','native_reconciliation_required':True}
+            domain,binding=await self._link_scope(state,link['broker'],owner_device_id,native_account_control_domain)
+            if link['phase']=='APPLIED':
+                result=self.pending.effects._receipt(link,native_binding=binding)
+                return {'ready':False,'expired':True,'operation':'LINK','status':'APPLIED',**result}
+        else:
+            domain=None
+        effect = await self.pending.effects.unconfirmed(state,owner_device_id,account_control_domain=domain)
         if effect is not None:
             return effect
         p = await self.pending.get(state)
@@ -393,10 +503,26 @@ class AccountOnboarding:
         if action == "oauth_start":
             return await self.oauth_start(args, owner_device_id=owner_device_id)
         if action == "oauth_pending":
-            return await self.oauth_pending(args, owner_device_id=owner_device_id)
+            return await self.oauth_pending(args, owner_device_id=owner_device_id,native_account_control_domain=native_account_control_domain)
         if action in {"deriv_oauth_link","ctrader_link"} and args.get("state"):
             broker = "deriv" if action=="deriv_oauth_link" else "ctrader"
             state = str(args["state"])
+            domain,original=await self._link_scope(state,broker,owner_device_id,native_account_control_domain)
+            prepared_version=await self._verify_prepared_resume(action,args,owner_device_id,domain,original)
+            resume=self._resume_selector(args,original)
+            if prepared_version is not None and native_resource_version!=prepared_version:
+                raise HTTPException(409,'Fresh permission does not match the immutable original native version; HOLD')
+            if original is not None and native_resource_version is None:
+                native_resource_version=original['resource_version']
+            if original is None and (not native_operation or native_operation.get('device_id')!=owner_device_id):
+                raise HTTPException(403,'Verified original owner link admission is required')
+            binding={**(original or {}),'account_control_domain':domain,'resource_version':native_resource_version,
+                'device_id':owner_device_id}
+            if original is None:
+                binding.update(operation_id=resume[0] if resume else native_operation.get('operation_id'),
+                    expires_at_unix=native_operation.get('expires_at_unix'),
+                    approval_operation_id=native_operation.get('operation_id'),
+                    original_expires_at_unix=resume[1] if resume else native_operation.get('expires_at_unix'))
             def validate(p):
                 if broker == "deriv":
                     if not any(a["loginid"].upper()==str(args.get("loginid","")).upper() for a in p.get("accounts",[])):
@@ -404,8 +530,9 @@ class AccountOnboarding:
                 elif (type(args.get("ctid_trader_account_id")) is not int or args["ctid_trader_account_id"]<=0
                       or type(args.get("is_live",False)) is not bool):
                     raise HTTPException(422,"cTrader account identity and environment must be typed")
-            claim = await self.pending.effects.begin(state,"LINK",broker,args,owner_device_id=owner_device_id,validate=validate)
+            claim = await self.pending.effects.begin(state,"LINK",broker,args,owner_device_id=owner_device_id,validate=validate,native_binding=binding)
             if not claim.fresh:
+                await self._link_scope(state,broker,owner_device_id,domain)
                 return claim.receipt
             try:
                 p = claim.material
@@ -418,6 +545,8 @@ class AccountOnboarding:
                 if native_resource_version is None:
                     raise HTTPException(409, "native account version is required before a new link")
                 values["_expected_resource_version"] = native_resource_version
+                values['_expected_account_control_domain']=domain
+                values['_oauth_link_admission']={**binding,'request_digest':claim.digest}
                 result = await asyncio.to_thread(self.control.run,action,values)
                 account_result = result.get("account") if isinstance(result,dict) else None
                 expected_login = values["loginid"] if broker=="deriv" else str(values["ctid_trader_account_id"])
@@ -426,9 +555,14 @@ class AccountOnboarding:
                     or account_result.get("broker") != broker.upper()
                     or str(account_result.get("login")) != str(expected_login)
                     or account_result.get("currency") != str(values["currency"]).upper()
-                    or account_result.get("mode") not in {"DEMO_TRADER","OBSERVE"}):
+                    or account_result.get("mode") not in {"DEMO_TRADER","OBSERVE"}
+                    or result.get('account_control_domain')!=domain):
                     raise ValueError("native account receipt does not match the requested link")
+                result={**result,'operation_id':binding['operation_id'],'device_id':owner_device_id,
+                    'action':action,'oauth_state':state,'native_resource_version':binding['resource_version'],
+                    'effect_state':'APPLIED','reconciliation_required':False}
                 await self.pending.effects.complete(state,"LINK",claim.digest,result,consume=True)
+                await self._link_scope(state,broker,owner_device_id,domain)
                 return result
             except BaseException as exc:
                 return await self._recover_effect(state,"LINK",claim,exc)

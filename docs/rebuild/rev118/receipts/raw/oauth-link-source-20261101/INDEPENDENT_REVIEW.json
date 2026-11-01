@@ -1,0 +1,131 @@
+{
+  "disposition": "NO_BLOCKING_FINDING_IN_BOUNDED_LINK_R3_SOURCE_RECHECK",
+  "closed": "BE004-LINK-R2-REVIEW01 original-generation rebase",
+  "source_fingerprint": "36ae270ab7dea5e9f3001a1fc5c7613ca72ad375d64390cc199af469ba2df650",
+  "source15_before_after": {
+    "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt": "b36f12dbfee022ecefbabc2c527327536900a4eae5f9701e85551b211b0f162c",
+    "android/app/src/main/java/com/dial/van/trading/AccountOnboarding.kt": "eef746dc23d52040c27961a3984f1607567a85f3057a343cb71f569bf1fad3c7",
+    "android/app/src/main/java/com/dial/van/trading/AccountOperationRecovery.kt": "aa3be96fae6124a3a1713528bc4e80458962d7f18ad8df9492065ebf22b67afc",
+    "android/app/src/main/java/com/dial/van/trading/ui/AccountOnboardingScreen.kt": "db0b0939e3844a1e2eb9591962a83b53c7080bd673efaeb11506f49caaaab974",
+    "android/app/src/test/java/com/dial/van/trading/AccountOnboardingTest.kt": "f6aba55c2002d6084958b119e8b4a46bea8fc8e0ea504557087b6f372af1f7b8",
+    "android/app/src/test/java/com/dial/van/trading/AccountOperationRecoveryTest.kt": "af44d5a8b161e2e80b9cea4fc2f60a7474f78c77d312335f8211ed638ce27b32",
+    "backend/tests/test_owner_approval_original_binding.py": "bd6e6febc8254bb5190681117f634587c4e7e01967a1ae172e8f1ad3ba0f76b6",
+    "backend/tests/test_stateful_link_binding.py": "36df9402f2eb1703bf5b4827d9d002f1f109371aa38cdf2b9a79f83402876c62",
+    "backend/tests/test_trading_oauth_effects.py": "f032a701cea8f2a1b874b994451094f4d049e7a227f5387188b9ac6ccdd1ae14",
+    "backend/van_gateway/approval/service.py": "c5a1bdb43145ed99e05e3613aa4a3c3b6a9c93a6cf6caf22d5e5b8b080a299b5",
+    "backend/van_gateway/trading/accounts.py": "b67e898aa85844ecbd88094acac7a4ba116d555387139a22ea03e0d4dd7cba61",
+    "backend/van_gateway/trading/oauth_effects.py": "fcefbf2e640c301fd97c9bd2e4dccd9bc1640b9f7bdbeb065dd88d92c642e39e",
+    "trading/commander/accounts.py": "641d924886c388391dbc09631cf774a8f741b12e9c1ded9f70fc18f19807103d",
+    "trading/commander/app.py": "aded70458e7e2c0a8b7cd015518318ea7eb056602e02c628558ca5175c91120c",
+    "trading/tests/test_oauth_link_currentness.py": "b8283e2c8e319aa94d1dda46c8f19c63358322c39732a8b8817f567c591694e8"
+  },
+  "patch_sha256": "43d7446dba4c497f2d9d8a55ec42846e8903e82495b78de63c0bbc0906a62ae5",
+  "exact15_baseline_apply_all_hashes_verified": true,
+  "accepted_boundary": {
+    "original_fact": "OwnerApprovalService.original_binding_fact only adds read-only exact v2 stored key/identity/canonical/intent digest/parameters/type checks. Expiry history is returned as factual data with execution_authority=false. Existing verify_and_consume/expiry/delete/fresh proof semantics unchanged. Missing/pruned/consumed/legacy/corrupt fact holds.",
+    "generation": "_historical_link_fact reconstructs original account_approval_text from action/device/semantic arguments/domain/version/issued-at; verifies stored original then compares actual native current version separately. Client v5 captures this fact before approval/persist/send. Resume joins original selectors and fresh signed A4; existing sealed LINK intent joins its immutable original scope. Native current registered authority/namespace/version writer fence unchanged.",
+    "client_source_only": "Persisted original version+issued-at are mandatory for canResume; v4 or earlier cannot acquire them from current target. PREPARED/MAY_HAVE_SENT marker and current actor/job checks retained. Read-only POST oauth_pending readiness is never bound completion/clear or automatic LINK replay. No JVM/SDK execution claimed."
+  },
+  "independent_actual": {
+    "PASS": 12,
+    "skips": 0,
+    "exit": 0,
+    "seconds": 46.887635946273804,
+    "terminal_receipt": "/tmp/van-link-r3-probe-ozlbki9y/terminal.json",
+    "terminal_sha256": "1fb7969886c0da31e57c7102c6cdeb2079ddde578b55ad1a191b1e0517dc6592",
+    "raw": "/tmp/van-link-r3-probe-ozlbki9y/raw.log",
+    "raw_sha256": "dd0509cf1d53e92b37ad4f12f2655b0234ffac9b5cc5f08363c74e620bb8be49",
+    "junit": "/tmp/van-link-r3-probe-ozlbki9y/junit.xml",
+    "junit_sha256": "eb4722f17756da1c2d9c4d1c0246b54cf9399f2a7e9dd44f08d9730999d249d6",
+    "critical_observation": {
+      "paired_A4": true,
+      "original_binding_verified_before_generation_change": true,
+      "original_version_selector_submitted": "88cd6a1790de9c8938c7dbb035609a98c6e8f1ab3b3c3020b937d33216dfc88d",
+      "LINK_rows_after": 0,
+      "original_id_reused": false,
+      "old_version": "88cd6a1790de9c8938c7dbb035609a98c6e8f1ab3b3c3020b937d33216dfc88d",
+      "new_version": "92c713f5ca66362578392adb0657cedcf97fccde1cde9ccde4b41a1362762556",
+      "returned_native_version": null,
+      "HTTP": 409,
+      "controlled_authorize_calls": 0,
+      "original_A4_record_unchanged": true,
+      "LINK_absent_before_resume": true
+    },
+    "critical_scope": "Actual paired HTTP/A4 and SQLite, controlled local native registry writer adds/removes PAPER alias between verified original fact and resume. Full original VA/version/issued/domain selectors submitted, refusal409/noLINK/no controlled authorize. Not missing-selector refusal.",
+    "other_controls": [
+      "same native generation expired original plus independently fresh real A4 completes once under original operation ID",
+      "old/resume both arrival orders",
+      "SQL different original first-winner identity cannot be adopted",
+      "forged current generation/original semantic body/domain/missing original/canonical corruption/wrong device refusal",
+      "read-only expired original fact; wrong identity/text/parameters denied; normal expired verification still rejects/deletes, later fact unavailable"
+    ],
+    "owned_cold_fixtures": "/tmp/van-link-r3-probe-ozlbki9y",
+    "inventory": "terminal.json retains each member SHA256/CRC32/path/owner/mode; all successful fixtures retained, no cleanup performed",
+    "child_reaped": true,
+    "process_group_absent": true,
+    "attempt_history": "Initial external controller had wrong pins-file path and failed before launching pytest or creating fixtures; corrected controller reused exact probe semantics. No false pass or candidate defect attributed."
+  },
+  "author_evidence_verified": {
+    "fresh_PASS": 104,
+    "fresh_groups": [
+      {
+        "label": "final-backend",
+        "cases": 46,
+        "raw_sha256": "369c9729e7e29d5a6683cac2f670c72a383668e03536755d850504af5ab52a4b",
+        "junit_sha256": "9cc0f51bf6bcf45fc44410d0340569fbd1239ffa24dc61646dcbe3805310e9a0"
+      },
+      {
+        "label": "final-callers",
+        "cases": 51,
+        "raw_sha256": "5d522d18ee6afe4e8777f1984cffaf0050c7b84b44cb286dc7945c7f15ebbb9e",
+        "junit_sha256": "cd4b70d0be28d1287cf7a80b1b17b5825655e0d401b46ae6e032d51b165b8bc3"
+      },
+      {
+        "label": "final-scope",
+        "cases": 7,
+        "raw_sha256": "13bbb99c24648220b34e2be9e9f9528a80050788834bca0537c62a9e3e98a5b1",
+        "junit_sha256": "a0f09dfcfee518ec04a14fbefdf19137d7f4ce4a47657389e5f2c77e24547dab"
+      }
+    ],
+    "reused_native_PASS": 90,
+    "reused_native_PGskip": 2,
+    "unique_classname_name": 196,
+    "not_one_fresh_terminal": true,
+    "exact15_export_applied_verified": true,
+    "pins": {
+      "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt": "b36f12dbfee022ecefbabc2c527327536900a4eae5f9701e85551b211b0f162c",
+      "android/app/src/main/java/com/dial/van/trading/AccountOnboarding.kt": "eef746dc23d52040c27961a3984f1607567a85f3057a343cb71f569bf1fad3c7",
+      "android/app/src/main/java/com/dial/van/trading/AccountOperationRecovery.kt": "aa3be96fae6124a3a1713528bc4e80458962d7f18ad8df9492065ebf22b67afc",
+      "android/app/src/main/java/com/dial/van/trading/ui/AccountOnboardingScreen.kt": "db0b0939e3844a1e2eb9591962a83b53c7080bd673efaeb11506f49caaaab974",
+      "android/app/src/test/java/com/dial/van/trading/AccountOnboardingTest.kt": "f6aba55c2002d6084958b119e8b4a46bea8fc8e0ea504557087b6f372af1f7b8",
+      "android/app/src/test/java/com/dial/van/trading/AccountOperationRecoveryTest.kt": "af44d5a8b161e2e80b9cea4fc2f60a7474f78c77d312335f8211ed638ce27b32",
+      "backend/tests/test_owner_approval_original_binding.py": "bd6e6febc8254bb5190681117f634587c4e7e01967a1ae172e8f1ad3ba0f76b6",
+      "backend/tests/test_stateful_link_binding.py": "36df9402f2eb1703bf5b4827d9d002f1f109371aa38cdf2b9a79f83402876c62",
+      "backend/tests/test_trading_oauth_effects.py": "f032a701cea8f2a1b874b994451094f4d049e7a227f5387188b9ac6ccdd1ae14",
+      "backend/van_gateway/approval/service.py": "c5a1bdb43145ed99e05e3613aa4a3c3b6a9c93a6cf6caf22d5e5b8b080a299b5",
+      "backend/van_gateway/trading/accounts.py": "b67e898aa85844ecbd88094acac7a4ba116d555387139a22ea03e0d4dd7cba61",
+      "backend/van_gateway/trading/oauth_effects.py": "fcefbf2e640c301fd97c9bd2e4dccd9bc1640b9f7bdbeb065dd88d92c642e39e",
+      "trading/commander/accounts.py": "641d924886c388391dbc09631cf774a8f741b12e9c1ded9f70fc18f19807103d",
+      "trading/commander/app.py": "aded70458e7e2c0a8b7cd015518318ea7eb056602e02c628558ca5175c91120c",
+      "trading/tests/test_oauth_link_currentness.py": "b8283e2c8e319aa94d1dda46c8f19c63358322c39732a8b8817f567c591694e8"
+    }
+  },
+  "native_reuse_verified_current_hashes": {
+    "trading/commander/accounts.py": "641d924886c388391dbc09631cf774a8f741b12e9c1ded9f70fc18f19807103d",
+    "trading/commander/app.py": "aded70458e7e2c0a8b7cd015518318ea7eb056602e02c628558ca5175c91120c",
+    "trading/tests/test_oauth_link_currentness.py": "b8283e2c8e319aa94d1dda46c8f19c63358322c39732a8b8817f567c591694e8",
+    "trading/tests/test_commander_accounts.py": "62cc77e75fbed8f6b8abd343c3897ac3b3ccb01f9ecb8366eb65f4a684ac4372",
+    "trading/tests/test_deriv_credential_verification.py": "dd077b622422e38cbeeb25e3dd80569c17965dd17b80462047ef0e6844669c7a",
+    "trading/tests/test_native_account_effects.py": "332a900ddc0207d9e9bc78a37e3d07a00571c5d7d2be91cc7c242ae3f6d05f8c",
+    "trading/tests/test_demo_creation_recovery.py": "1593fb9f62aeeb9f1a5fd3dc65b477e4abca8b70a2128d9f9a28524ed07431ad"
+  },
+  "case_mapping196_matches_actual_XML": true,
+  "old_evidence": "R2 old failure/loss disclosure unchanged. Separate REPRODUCED_AFTER_FIXTURE_CLEANUP_LOSS evidence and cold SQLite retained unchanged at /tmp/van-link-r2-reproduced-after-loss-aym40jlq; not restoration.",
+  "limits": [
+    "This is source recheck, not whole BE004/LAC/native/provider/formal/PG acceptance.",
+    "SDK/JVM new client uncompiled; refused737MB exceeds128MiB run budget. Exact future hosted app-unit/assemble/lint required.",
+    "Fresh104 passes are backend46+caller51+scope7; reuse unchanged native90PASS/2PGskip gives194PASS/2SKIP196unique. Not one fresh full-suite terminal; prior incorrect53 count remains corrected/disclosed by author.",
+    "Unleased LAC9 and app.py unchanged, runtime vault/old quarantined export not read or transferred.",
+    "No candidate/main edits, commits, CI, SDK/Gradle, network/provider/native financial effects or subagents."
+  ]
+}

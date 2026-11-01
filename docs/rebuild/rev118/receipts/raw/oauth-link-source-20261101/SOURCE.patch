@@ -1,0 +1,2015 @@
+diff --git a/android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt b/android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt
+index 6b666aaf..16a0d520 100644
+--- a/android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt
++++ b/android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt
+@@ -171,7 +171,8 @@ class VanGatewayClient(context: Context) {
+     private data class AccountTransportActor(val actor: AccountOperationActor, val secret: String,
+                                              val ingress: String, val access: String)
+     @Volatile private var accountDomainWitness: AccountOperationActor? = null
+-    private data class AccountApprovalSelection(val actor: AccountOperationActor, val requestIdentity: String)
++    private data class AccountApprovalSelection(val actor: AccountOperationActor, val requestIdentity: String,
++        val expiresAt: Long, val issuedAt: Long, val originalVersion: String?)
+     private val accountChallengeActors = java.util.concurrent.ConcurrentHashMap<String,AccountApprovalSelection>()
+ 
+     private fun accountTransportActor(): AccountTransportActor {
+@@ -219,7 +220,9 @@ class VanGatewayClient(context: Context) {
+     }
+ 
+     private fun accountExchange(actor: AccountTransportActor, method: String, path: String, bodyText: String = "",
+-                                beforeEffect: () -> Unit): Pair<Int,String> {
++                                beforeEffect: () -> Unit, beforeNetwork: () -> Unit = {}): Pair<Int,String> {
++        beforeEffect()
++        beforeNetwork()
+         beforeEffect()
+         val conn = open(actor.actor.scope.root + path)
+         try {
+@@ -251,12 +254,20 @@ class VanGatewayClient(context: Context) {
+             "account_operation_original_profile_not_current"
+         }
+         val actor = accountCatalogSelection().first
+-        val path = "/v1/trading/accounts/operations/${encodeSegment(value.operationId)}"
+         accountOperations.recover(value,actor.actor,{ accountTransportActor().actor }) { guard ->
+-            accountExchange(actor,"GET",path,beforeEffect=guard)
++            if (value.oauthState != null) {
++                val args = kotlinx.serialization.json.buildJsonObject { put("state", kotlinx.serialization.json.JsonPrimitive(value.oauthState)) }
++                val body = com.dial.van.trading.AccountOnboarding.requestBody(actor.secret,actor.actor.deviceId,
++                    System.currentTimeMillis()/1000L,"oauth_pending",args).toString()
++                accountExchange(actor,"POST","/v1/trading/accounts/action",body,guard)
++            } else accountExchange(actor,"GET","/v1/trading/accounts/operations/${encodeSegment(value.operationId)}",beforeEffect=guard)
+         }
+     }
+ 
++    /** Only a durable local PREPARED record can offer a new owner decision. */
++    fun originalLinkResumeArguments(value: PendingAccountOperation): JsonObject =
++        accountOperations.resumeArguments(value, accountTransportActor().actor.scope)
++
+     /**
+      * ADR-RB-025 — the hardware key this phone signs privileged requests with.
+      *
+@@ -1101,8 +1112,9 @@ class VanGatewayClient(context: Context) {
+         val challengeId = approvalProof?.get("challenge_id")?.let {
+             (it as? kotlinx.serialization.json.JsonPrimitive)?.content
+         }
++        val selection = challengeId?.let(accountChallengeActors::get)
+         if (com.dial.van.trading.AccountOnboarding.requiresOwnerApproval(action)) {
+-            check(challengeId != null && accountChallengeActors[challengeId] == AccountApprovalSelection(actor.actor,intentIdentity)) {
++            check(selection != null && selection.actor == actor.actor && selection.requestIdentity == intentIdentity) {
+                 "account_operation_original_approval_profile_changed"
+             }
+         }
+@@ -1111,14 +1123,32 @@ class VanGatewayClient(context: Context) {
+             actor.secret, id, issuedAtUnix ?: System.currentTimeMillis() / 1000L, action, args, approvalProof,
+         )
+         val bodyText = body.toString()
+-        val operation = if (action in AccountOperationRecovery.JOURNALED_ACTIONS) {
++        val resumeId = (args["original_operation_id"] as? kotlinx.serialization.json.JsonPrimitive)?.content
++        if (resumeId != null) {
++            check(action in AccountOperationRecovery.OAUTH_LINK_ACTIONS) { "invalid_original_link_resume" }
++            val original = accountOperations.pending(id).singleOrNull { it.operationId == resumeId && it.action == action && it.scope == actor.actor.scope }
++                ?: error("original_link_not_owned")
++            check(args == accountOperations.resumeArguments(original, actor.actor.scope)) { "original_link_resume_arguments_changed" }
++            return@withContext accountOperations.resume(original, actor.actor, { accountTransportActor().actor }) { guard ->
++                accountExchange(actor,"POST","/v1/trading/accounts/action",bodyText,guard,
++                    beforeNetwork = { accountOperations.markPossibleSend(original) })
++            }
++        }
++        val selectors = if (action in AccountOperationRecovery.OAUTH_LINK_ACTIONS && AccountOperationRecovery.resumableSelectors(args)) args else null
++        val operation = if (AccountOperationRecovery.requiresOriginalReadback(action,args)) {
+             PendingAccountOperation(challengeId ?: error("account_operation_approval_missing"), action, id,
+                 (args["alias"] as? kotlinx.serialization.json.JsonPrimitive)?.content?.trim()?.lowercase().orEmpty(),
+-                actor.actor.scope, intentIdentity)
++                actor.actor.scope, intentIdentity,
++                if (action in AccountOperationRecovery.OAUTH_LINK_ACTIONS) (args["state"] as? kotlinx.serialization.json.JsonPrimitive)?.content else null,
++                if (selectors != null) "PREPARED" else "UNKNOWN", selectors,
++                if (selectors != null) selection?.expiresAt else null,
++                if (selectors != null) selection?.originalVersion else null,
++                if (selectors != null) selection?.issuedAt else null)
+         } else null
+         if (operation != null) {
+             accountOperations.dispatch(operation,actor.actor,{ accountTransportActor().actor }) { guard ->
+-                accountExchange(actor,"POST","/v1/trading/accounts/action",bodyText,guard)
++                accountExchange(actor,"POST","/v1/trading/accounts/action",bodyText,guard,
++                    beforeNetwork = { if (operation.oauthState != null) accountOperations.markPossibleSend(operation) })
+             }
+         } else {
+             val context = currentCoroutineContext()
+@@ -1142,9 +1172,15 @@ class VanGatewayClient(context: Context) {
+         args: kotlinx.serialization.json.JsonObject,
+     ): Pair<Int, String> = withContext(Dispatchers.IO) {
+         val actor = accountCatalogSelection().first
+-        if (action in AccountOperationRecovery.JOURNALED_ACTIONS) {
++        if (AccountOperationRecovery.requiresOriginalReadback(action,args)) {
+             val alias = (args["alias"] as? kotlinx.serialization.json.JsonPrimitive)?.content?.trim()?.lowercase()
+-            check(!accountOperations.blocks(action,alias,actor.actor.scope)) { "account_requires_original_operation_readback" }
++            val resumeId = (args["original_operation_id"] as? kotlinx.serialization.json.JsonPrimitive)?.content
++            if (resumeId != null) {
++                val original = accountOperations.pending(actor.actor.deviceId).singleOrNull {
++                    it.operationId == resumeId && it.action == action && it.scope == actor.actor.scope
++                } ?: error("original_link_not_owned")
++                check(args == accountOperations.resumeArguments(original, actor.actor.scope)) { "original_link_resume_arguments_changed" }
++            } else check(!accountOperations.blocks(action,alias,actor.actor.scope)) { "account_requires_original_operation_readback" }
+         }
+         val context = currentCoroutineContext()
+         fun guard() {
+@@ -1165,8 +1201,36 @@ class VanGatewayClient(context: Context) {
+             val id = challenge.optString("approval_challenge_id")
+             check(id.isNotBlank()) { "account_operation_approval_missing" }
+             check(challenge.optLong("issued_at_unix") == issued) { "account_operation_approval_request_changed" }
++            var originalVersion: String? = null
++            if (action in AccountOperationRecovery.OAUTH_LINK_ACTIONS && AccountOperationRecovery.resumableSelectors(args)) {
++                // The opaque A4 challenge alone exposes no native version.
++                // Join its actual stored commitment via a lawful readonly
++                // request before showing approval or persisting PREPARED.
++                val lookup = kotlinx.serialization.json.buildJsonObject {
++                    put("state", args["state"]!!)
++                    put("original_binding", kotlinx.serialization.json.buildJsonObject {
++                        put("operation_id", kotlinx.serialization.json.JsonPrimitive(id))
++                        put("action", kotlinx.serialization.json.JsonPrimitive(action))
++                        put("issued_at_unix", kotlinx.serialization.json.JsonPrimitive(issued))
++                        put("semantic_args", args)
++                    })
++                }
++                val request = com.dial.van.trading.AccountOnboarding.requestBody(actor.secret,actor.actor.deviceId,
++                    System.currentTimeMillis()/1000L,"oauth_pending",lookup).toString()
++                val read = accountExchange(actor,"POST","/v1/trading/accounts/action",request,::guard)
++                guard()
++                if (read.first !in 200..299) return@withContext read
++                val fact = JSONObject(read.second).optJSONObject("original_link_binding") ?: error("original_link_binding_unavailable_hold")
++                check(fact.optString("operation_id") == id && fact.optString("action") == action &&
++                    fact.optString("device_id") == actor.actor.deviceId && fact.optString("account_control_domain") == actor.actor.scope.nativeOwnerDomain &&
++                    fact.optLong("issued_at_unix") == issued && fact.optLong("expires_at_unix") == challenge.optLong("approval_expires_at_unix") &&
++                    fact.optBoolean("historical_only") && !fact.optBoolean("execution_authority",true)) { "original_link_binding_mismatch_hold" }
++                originalVersion = fact.optString("resource_version").takeIf { it.matches(Regex("[0-9a-f]{64}")) }
++                    ?: error("original_link_native_version_unavailable_hold")
++            }
+             accountChallengeActors[id] = AccountApprovalSelection(actor.actor,accountRequestIdentity(actor.secret,
+-                com.dial.van.trading.AccountOnboarding.canonicalAction(actor.actor.deviceId,issued,action,args)))
++                com.dial.van.trading.AccountOnboarding.canonicalAction(actor.actor.deviceId,issued,action,args)),
++                challenge.optLong("approval_expires_at_unix"),issued,originalVersion)
+         }
+         reply
+     }
+diff --git a/android/app/src/main/java/com/dial/van/trading/AccountOnboarding.kt b/android/app/src/main/java/com/dial/van/trading/AccountOnboarding.kt
+index 1b1e4ccb..3515ac10 100644
+--- a/android/app/src/main/java/com/dial/van/trading/AccountOnboarding.kt
++++ b/android/app/src/main/java/com/dial/van/trading/AccountOnboarding.kt
+@@ -222,13 +222,28 @@ object AccountOnboarding {
+     // ------------------------------------------------------------ responses
+     data class ActionOutcome(val ok: Boolean, val message: String, val account: AccountCard? = null, val signingKey: String? = null, val eaInputs: Map<String, String> = emptyMap(), val state: String? = null, val url: String? = null, val raw: JsonObject? = null)
+ 
+-    fun parseOutcome(action: String, body: String, httpCode: Int): ActionOutcome {
++    fun parseOutcome(action: String, body: String, httpCode: Int, requireOriginalReceipt: Boolean = false): ActionOutcome {
+         val o = parseObject(body) ?: return ActionOutcome(false, if (httpCode in 200..299) "Unreadable gateway reply" else "Gateway error $httpCode")
+-        if (o.str("effect_state") == "UNKNOWN" || o.bool("reconciliation_required") == true)
++        if (o.str("effect_state") == "UNKNOWN" || o.bool("reconciliation_required") == true ||
++            o.bool("native_reconciliation_required") == true || o.str("scope_status") == "UNBOUND")
+             return ActionOutcome(false, if (action == "deriv_create_demo")
+                 "Original demo creation is unconfirmed. Hold creation and check its original result; do not create another account."
+                 else "Original account change is unconfirmed. Check its original result before trying again.", raw = o)
+         if (httpCode !in 200..299) return ActionOutcome(false, o.str("detail") ?: "Gateway error $httpCode", raw = o)
++        if (action in setOf("deriv_oauth_link", "ctrader_link")) {
++            if (o.str("effect_state") == "NOT_DISPATCHED") return ActionOutcome(false,
++                "Original link was not dispatched. Review and approve resume of the same link.", raw = o)
++            val bound = o.str("effect_state") in setOf("APPLIED", "REFUSED") &&
++                o.str("operation_id")?.matches(Regex("[A-Za-z0-9_-]{20,128}")) == true &&
++                o.str("oauth_state")?.matches(Regex("[A-Za-z0-9_-]{20,128}")) == true &&
++                !o.str("device_id").isNullOrBlank() &&
++                o.str("account_control_domain")?.matches(Regex("[0-9a-f]{64}")) == true &&
++                o.str("native_resource_version")?.matches(Regex("[0-9a-f]{64}")) == true &&
++                o.bool("reconciliation_required") == false
++            if ((requireOriginalReceipt && !bound) ||
++                (o.obj("account") == null && o.obj("result")?.obj("account") == null && o.str("effect_state") != "REFUSED"))
++                return ActionOutcome(false, "Broker authorization readiness is not original link completion. Check the original result; no link was repeated.", raw = o)
++        }
+         if (o.str("effect_state") == "APPLIED" && o.obj("result") != null) {
+             val original = o.obj("result")!!
+             return ActionOutcome(true, if (original.bool("credential_export_available") == false)
+diff --git a/android/app/src/main/java/com/dial/van/trading/AccountOperationRecovery.kt b/android/app/src/main/java/com/dial/van/trading/AccountOperationRecovery.kt
+index a2b9b0b8..5be39793 100644
+--- a/android/app/src/main/java/com/dial/van/trading/AccountOperationRecovery.kt
++++ b/android/app/src/main/java/com/dial/van/trading/AccountOperationRecovery.kt
+@@ -15,7 +15,10 @@ data class AccountOperationScope(val root: String, val profileId: String, val pr
+                                  val nativeOwnerDomain: String? = null)
+ data class AccountOperationActor(val scope: AccountOperationScope, val deviceId: String, val credentialContext: String)
+ data class PendingAccountOperation(val operationId: String, val action: String, val deviceId: String, val alias: String,
+-                                   val scope: AccountOperationScope? = null, val requestIdentity: String? = null)
++                                   val scope: AccountOperationScope? = null, val requestIdentity: String? = null,
++                                   val oauthState: String? = null, val dispatchStage: String = "UNKNOWN",
++                                   val oauthArguments: JsonObject? = null, val originalApprovalExpiresAt: Long? = null,
++                                   val originalResourceVersion: String? = null, val originalIssuedAt: Long? = null)
+ 
+ interface AccountOperationStore {
+     fun load(): String?
+@@ -25,8 +28,14 @@ interface AccountOperationStore {
+ 
+ class AccountOperationRecovery(private val store: AccountOperationStore) {
+     companion object {
+-        val JOURNALED_ACTIONS = setOf("account_upsert", "account_credentials", "account_remove", "mt5_ea_issue_key", "deriv_create_demo")
++        val OAUTH_LINK_ACTIONS = setOf("deriv_oauth_link", "ctrader_link")
++        val JOURNALED_ACTIONS = setOf("account_upsert", "account_credentials", "account_remove", "mt5_ea_issue_key", "deriv_create_demo") + OAUTH_LINK_ACTIONS
++        fun requiresOriginalReadback(action: String, args: JsonObject): Boolean =
++            action in JOURNALED_ACTIONS && (action !in OAUTH_LINK_ACTIONS || args.str("state") != null)
+         private val idPattern = Regex("^[A-Za-z0-9_-]{20,128}$")
++        private val selectorKeys = setOf("alias", "state", "loginid", "ctid_trader_account_id", "is_live", "currency", "label")
++        fun resumableSelectors(args: JsonObject): Boolean = args.keys.all { it in selectorKeys } &&
++            args.values.all { it is JsonPrimitive } && args.str("state")?.matches(idPattern) == true
+     }
+ 
+     private fun read(): List<PendingAccountOperation> {
+@@ -34,13 +43,16 @@ class AccountOperationRecovery(private val store: AccountOperationStore) {
+         val root = Json.parseToJsonElement(text) as? JsonObject ?: error("account_operation_history_unreadable")
+         check(root.keys == setOf("schema", "operations")) { "account_operation_history_unreadable" }
+         val version = root.str("schema")
+-        check(version in setOf("van.android.account-operations/1", "van.android.account-operations/2")) { "account_operation_history_unreadable" }
++        check(version in setOf("van.android.account-operations/1", "van.android.account-operations/2", "van.android.account-operations/3", "van.android.account-operations/4", "van.android.account-operations/5")) { "account_operation_history_unreadable" }
+         val entries = root["operations"] as? JsonArray ?: error("account_operation_history_unreadable")
+         val result = entries.map { entry ->
+             val row = entry as? JsonObject ?: error("account_operation_history_unreadable")
+             val legacy = version == "van.android.account-operations/1"
+             check(row.keys == if (legacy) setOf("operation_id", "action", "device_id", "alias") else
+-                setOf("operation_id", "action", "device_id", "alias", "scope", "request_identity"))
++                setOf("operation_id", "action", "device_id", "alias", "scope", "request_identity") +
++                    (if (version in setOf("van.android.account-operations/3", "van.android.account-operations/4", "van.android.account-operations/5")) setOf("oauth_state") else emptySet()) +
++                    (if (version in setOf("van.android.account-operations/4", "van.android.account-operations/5")) setOf("dispatch_stage", "oauth_arguments", "original_approval_expires_at_unix") else emptySet()) +
++                    (if (version == "van.android.account-operations/5") setOf("original_resource_version", "original_issued_at_unix") else emptySet()))
+             val scope = if (legacy || row["scope"] == JsonNull) null else {
+                 val binding = row.obj("scope") ?: error("unreadable_original_scope")
+                 check(binding.keys == setOf("root", "profile_id", "provisioning_id", "native_owner_domain"))
+@@ -50,7 +62,12 @@ class AccountOperationRecovery(private val store: AccountOperationStore) {
+             }
+             PendingAccountOperation(row.str("operation_id") ?: error("missing_operation_id"),
+                 row.str("action") ?: error("missing_action"), row.str("device_id") ?: error("missing_device"),
+-                row.str("alias") ?: error("missing_alias"), scope, if (legacy) null else row.str("request_identity")).also(::validate)
++                row.str("alias") ?: error("missing_alias"), scope, if (legacy) null else row.str("request_identity"),
++                row.str("oauth_state"), if (version in setOf("van.android.account-operations/4", "van.android.account-operations/5")) row.str("dispatch_stage") ?: error("missing_dispatch_stage") else "UNKNOWN",
++                if (version in setOf("van.android.account-operations/4", "van.android.account-operations/5")) row.obj("oauth_arguments") else null,
++                if (version in setOf("van.android.account-operations/4", "van.android.account-operations/5")) row.str("original_approval_expires_at_unix")?.toLongOrNull() else null,
++                if (version == "van.android.account-operations/5") row.str("original_resource_version") else null,
++                if (version == "van.android.account-operations/5") row.str("original_issued_at_unix")?.toLongOrNull() else null).also(::validate)
+         }
+         check(result.indices.all { i -> result.take(i).none {
+             it.operationId == result[i].operationId && samePossibleOwner(it, result[i])
+@@ -61,6 +78,15 @@ class AccountOperationRecovery(private val store: AccountOperationStore) {
+     private fun validate(value: PendingAccountOperation) {
+         require(idPattern.matches(value.operationId) && value.action in JOURNALED_ACTIONS && value.deviceId.isNotBlank())
+         require(AccountOnboarding.validateAlias(value.alias) == null)
++        require(if (value.action in OAUTH_LINK_ACTIONS) value.oauthState?.matches(idPattern) == true else value.oauthState == null)
++        require(value.dispatchStage in setOf("UNKNOWN", "PREPARED", "MAY_HAVE_SENT"))
++        if (value.oauthArguments != null) {
++            require(resumableSelectors(value.oauthArguments) && value.oauthArguments.str("state") == value.oauthState &&
++                value.oauthArguments.str("alias")?.trim()?.lowercase() == value.alias && value.originalApprovalExpiresAt?.let { it > 0 } == true)
++        }
++        if (value.dispatchStage == "PREPARED") require(value.oauthState != null && value.oauthArguments != null)
++        if (value.originalResourceVersion != null || value.originalIssuedAt != null)
++            require(value.originalResourceVersion?.matches(Regex("[0-9a-f]{64}")) == true && value.originalIssuedAt?.let { it > 0 } == true)
+         if (value.scope == null) require(value.requestIdentity == null) else {
+             require(value.scope.root.isNotBlank() && value.scope.profileId.isNotBlank())
+             val uri = java.net.URI(value.scope.root)
+@@ -75,8 +101,8 @@ class AccountOperationRecovery(private val store: AccountOperationStore) {
+     private fun samePossibleOwner(left: PendingAccountOperation, right: PendingAccountOperation): Boolean {
+         val a = left.scope?.nativeOwnerDomain
+         val b = right.scope?.nativeOwnerDomain
+-        // Local profiles, URLs, devices and provisioning labels are not native
+-        // owner-domain proof. Current gateway contracts expose no such proof.
++        // Only authenticated native descriptors distinguish control domains;
++        // local profiles, URLs, devices and provisioning labels do not.
+         return a == null || b == null || a == b
+     }
+ 
+@@ -88,11 +114,17 @@ class AccountOperationRecovery(private val store: AccountOperationStore) {
+ 
+     private fun write(entries: List<PendingAccountOperation>) {
+         val text = buildJsonObject {
+-            put("schema", "van.android.account-operations/2")
++            put("schema", "van.android.account-operations/5")
+             put("operations", JsonArray(entries.map { value -> buildJsonObject {
+                 put("operation_id", value.operationId); put("action", value.action)
+                 put("device_id", value.deviceId); put("alias", value.alias)
+                 put("request_identity", value.requestIdentity?.let(::JsonPrimitive) ?: JsonNull)
++                put("oauth_state", value.oauthState?.let(::JsonPrimitive) ?: JsonNull)
++                put("dispatch_stage", value.dispatchStage)
++                put("oauth_arguments", value.oauthArguments ?: JsonNull)
++                put("original_approval_expires_at_unix", value.originalApprovalExpiresAt?.let(::JsonPrimitive) ?: JsonNull)
++                put("original_resource_version", value.originalResourceVersion?.let(::JsonPrimitive) ?: JsonNull)
++                put("original_issued_at_unix", value.originalIssuedAt?.let(::JsonPrimitive) ?: JsonNull)
+                 put("scope", value.scope?.let { scope -> buildJsonObject {
+                     put("root", scope.root); put("profile_id", scope.profileId)
+                     put("provisioning_id", scope.provisioningId?.let(::JsonPrimitive) ?: JsonNull)
+@@ -124,16 +156,53 @@ class AccountOperationRecovery(private val store: AccountOperationStore) {
+         write(entries + value)
+     }
+ 
++    private fun sameRecord(a: PendingAccountOperation, b: PendingAccountOperation) =
++        a.copy(dispatchStage = "UNKNOWN") == b.copy(dispatchStage = "UNKNOWN")
++
++    @Synchronized fun markPossibleSend(value: PendingAccountOperation) {
++        val entries = read()
++        val original = entries.singleOrNull { sameRecord(it, value) } ?: error("account_operation_not_owned")
++        check(original.oauthState != null && original.dispatchStage != "MAY_HAVE_SENT") { "original_link_may_already_have_been_sent" }
++        write(entries.map { if (it == original) it.copy(dispatchStage = "MAY_HAVE_SENT") else it })
++    }
++
++    @Synchronized fun canResume(value: PendingAccountOperation, currentScope: AccountOperationScope?): Boolean = read().any {
++        sameRecord(it, value) && it.dispatchStage == "PREPARED" && it.oauthArguments != null &&
++            it.scope?.nativeOwnerDomain != null && it.scope == currentScope &&
++            it.originalResourceVersion != null && it.originalIssuedAt != null
++    }
++
++    @Synchronized fun resumeArguments(value: PendingAccountOperation, currentScope: AccountOperationScope?): JsonObject {
++        check(canResume(value, currentScope)) { "original_link_has_no_proven_never_sent_state" }
++        val original = read().single { sameRecord(it, value) }
++        return JsonObject(original.oauthArguments!!.toMutableMap().apply {
++            put("original_operation_id", JsonPrimitive(original.operationId))
++            put("original_approval_expires_at_unix", JsonPrimitive(original.originalApprovalExpiresAt!!))
++            put("original_resource_version", JsonPrimitive(original.originalResourceVersion!!))
++            put("original_issued_at_unix", JsonPrimitive(original.originalIssuedAt!!))
++            put("original_account_control_domain", JsonPrimitive(original.scope!!.nativeOwnerDomain!!))
++        })
++    }
++
+     @Synchronized fun observe(value: PendingAccountOperation, body: String, httpCode: Int,
+                               currentScope: AccountOperationScope? = null): Boolean {
+         val entries = read()
+-        check(entries.contains(value)) { "account_operation_not_owned" }
++        val original = entries.singleOrNull { sameRecord(it, value) } ?: error("account_operation_not_owned")
+         val result = parseObject(body) ?: return false
+         if (value.scope?.nativeOwnerDomain == null || value.scope != currentScope ||
+             result.str("account_control_domain") != value.scope.nativeOwnerDomain) return false
+         if (httpCode !in 200..299 || result.str("operation_id") != value.operationId ||
+             result.str("action") != value.action || result.bool("reconciliation_required") != false ||
+             result.str("effect_state") !in setOf("APPLIED", "REFUSED")) return false
++        if (value.oauthState != null) {
++            if (result.str("oauth_state") != value.oauthState || result.str("device_id") != value.deviceId ||
++                result.str("native_resource_version")?.matches(Regex("[0-9a-f]{64}")) != true) return false
++            if (result.str("effect_state") == "APPLIED") {
++                val account = (result.obj("result") ?: result).obj("account") ?: return false
++                if (account.str("alias") != value.alias || account.str("broker") !=
++                    if (value.action == "deriv_oauth_link") "DERIV" else "CTRADER") return false
++            }
++        }
+         if (value.action == "deriv_create_demo" && result.str("effect_state") == "APPLIED") {
+             val receipt = result.obj("result") ?: result
+             val account = receipt.obj("account") ?: return false
+@@ -143,7 +212,7 @@ class AccountOperationRecovery(private val store: AccountOperationStore) {
+                 account.str("currency").isNullOrBlank() || receipt.str("client_id") != account.str("login") ||
+                 receipt.str("currency") != account.str("currency")) return false
+         }
+-        write(entries.filterNot { it == value })
++        write(entries.filterNot { it == original })
+         return true
+     }
+ 
+@@ -185,6 +254,37 @@ class AccountOperationRecovery(private val store: AccountOperationStore) {
+         check(confirmed || parseObject(reply.second)?.str("effect_state") !in setOf("APPLIED","REFUSED")) {
+             "account_operation_original_receipt_unconfirmed"
+         }
++        if (value.oauthState != null && !confirmed) {
++            val body = parseObject(reply.second)
++            val prepared = reply.first in 200..299 && body != null && body.bool("ready") == true &&
++                body.str("effect_state") == null && canResume(value, actor.scope)
++            return reply.first to buildJsonObject {
++                put("operation_id", value.operationId); put("action", value.action)
++                put("effect_state", if (prepared) "NOT_DISPATCHED" else "UNKNOWN")
++                put("status", if (prepared) "OWNER_RECONFIRMATION_REQUIRED" else "ORIGINAL_LINK_UNCONFIRMED")
++                put("oauth_state", value.oauthState)
++                put("reconciliation_required", !prepared)
++                put("resume_requires_owner_approval", prepared)
++                // Preserve recorded historical facts (including unbound
++                // APPLIED), without turning them into this link's completion.
++                put("source_readback", body ?: JsonNull)
++            }.toString()
++        }
++        return reply
++    }
++
++    suspend fun resume(value: PendingAccountOperation, actor: AccountOperationActor,
++                       current: () -> AccountOperationActor, exchange: (() -> Unit) -> Pair<Int,String>): Pair<Int,String> {
++        val context = currentCoroutineContext()
++        fun guard() {
++            context.ensureActive()
++            check(actor == current() && value.deviceId == actor.deviceId && value.scope == actor.scope) { "account_operation_original_profile_not_current" }
++        }
++        guard(); check(canResume(value, actor.scope)) { "original_link_requires_hold" }
++        val reply = exchange(::guard)
++        guard()
++        val confirmed = observe(value, reply.second, reply.first, actor.scope)
++        check(confirmed || parseObject(reply.second)?.str("effect_state") !in setOf("APPLIED", "REFUSED")) { "account_operation_original_receipt_unconfirmed" }
+         return reply
+     }
+ }
+diff --git a/android/app/src/main/java/com/dial/van/trading/ui/AccountOnboardingScreen.kt b/android/app/src/main/java/com/dial/van/trading/ui/AccountOnboardingScreen.kt
+index 12b7420b..c20d06d4 100644
+--- a/android/app/src/main/java/com/dial/van/trading/ui/AccountOnboardingScreen.kt
++++ b/android/app/src/main/java/com/dial/van/trading/ui/AccountOnboardingScreen.kt
+@@ -80,9 +80,10 @@ fun AccountOnboardingScreen(app: VanApplication, onDone: () -> Unit) {
+     var busy by remember { mutableStateOf(false) }
+     var recovery by remember { mutableStateOf(runCatching { app.gatewayClient.pendingAccountOperations() }) }
+     var ownerReview by remember { mutableStateOf<Pair<String, () -> Unit>?>(null) }
++    var resumeReady by remember { mutableStateOf<Set<String>>(emptySet()) }
+ 
+     fun submit(action: String, args: JsonObject, then: (AccountOnboarding.ActionOutcome) -> Unit = {}) {
+-        if (action in AccountOperationRecovery.JOURNALED_ACTIONS && recovery.isFailure) {
++        if (AccountOperationRecovery.requiresOriginalReadback(action,args) && recovery.isFailure) {
+             status = "Check the original account change before trying this account again."
+             return
+         }
+@@ -91,7 +92,8 @@ fun AccountOnboardingScreen(app: VanApplication, onDone: () -> Unit) {
+             busy = true; status = "Signing and sending…"
+             scope.launch {
+                 val outcome = runCatching { app.gatewayClient.tradingAccountAction(action, args, proof, approvedIssuedAt) }
+-                    .fold(onSuccess = { (code, body) -> AccountOnboarding.parseOutcome(action, body, code) }, onFailure = {
++                    .fold(onSuccess = { (code, body) -> AccountOnboarding.parseOutcome(action, body, code,
++                        requireOriginalReceipt = action in AccountOperationRecovery.OAUTH_LINK_ACTIONS && args["state"] != null) }, onFailure = {
+                         AccountOnboarding.ActionOutcome(false, "Account change not confirmed. Check the original result before trying again.") })
+                 recovery = runCatching { app.gatewayClient.pendingAccountOperations() }
+                 status = outcome.message; busy = false; then(outcome)
+@@ -112,7 +114,9 @@ fun AccountOnboardingScreen(app: VanApplication, onDone: () -> Unit) {
+             approvedIssuedAt = parsed?.get("issued_at_unix")?.jsonPrimitive?.longOrNull
+             if (canonical.isNullOrBlank() || challengeId.isNullOrBlank() || approvedIssuedAt == null || expiresAt == null) {
+                 busy = false
+-                status = "Could not obtain an approval challenge; nothing was sent."
++                val refusal = challenge?.let { runCatching { Json.parseToJsonElement(it.second).jsonObject["detail"]?.jsonPrimitive?.contentOrNull }.getOrNull() }
++                status = refusal?.takeIf { it.contains("Original", ignoreCase = true) }?.take(240)
++                    ?: "Could not obtain an approval challenge; nothing was sent."
+                 return@launch
+             }
+             val resolved = (parsed["resolved_review"] as? JsonObject)?.let(AccountOnboarding::resolvedReviewText)
+@@ -168,7 +172,8 @@ fun AccountOnboardingScreen(app: VanApplication, onDone: () -> Unit) {
+                 color = tokens.color.forStatusRole(StatusSemantics.ROLE_EVENT_RISK))
+         }
+         recovery.getOrNull().orEmpty().forEach { operation ->
+-            item(key = "account-operation:" + (operation.scope?.nativeOwnerDomain ?: "unbound") + ":" + operation.operationId) {
++            val operationKey = (operation.scope?.nativeOwnerDomain ?: "unbound") + ":" + operation.operationId
++            item(key = "account-operation:" + operationKey) {
+                 Column {
+                     Text("${operation.alias}: original account change needs checking", style = tokens.type.body,
+                         color = tokens.color.textSecondary)
+@@ -178,12 +183,24 @@ fun AccountOnboardingScreen(app: VanApplication, onDone: () -> Unit) {
+                         busy = true
+                         scope.launch {
+                             val outcome = runCatching { app.gatewayClient.tradingAccountOperation(operation) }
+-                                .fold(onSuccess = { (code, body) -> AccountOnboarding.parseOutcome(operation.action, body, code) },
++                                .fold(onSuccess = { (code, body) ->
++                                    val result = runCatching { Json.parseToJsonElement(body).jsonObject }.getOrNull()
++                                    resumeReady = if (result?.get("effect_state")?.jsonPrimitive?.contentOrNull == "NOT_DISPATCHED")
++                                        resumeReady + operationKey else resumeReady - operationKey
++                                    AccountOnboarding.parseOutcome(operation.action, body, code, requireOriginalReceipt = operation.oauthState != null)
++                                },
+                                     onFailure = { AccountOnboarding.ActionOutcome(false, "Original result is unavailable. No account change was repeated.") })
+                             recovery = runCatching { app.gatewayClient.pendingAccountOperations() }
+                             status = outcome.message; busy = false
+                         }
+                     }) { Text("Check original result") }
++                    if (operationKey in resumeReady && operation.dispatchStage == "PREPARED" && operation.oauthArguments != null) {
++                        Button(enabled = !busy, onClick = {
++                            val arguments = runCatching { app.gatewayClient.originalLinkResumeArguments(operation) }.getOrNull()
++                            if (arguments == null) status = "Original scope or dispatch proof changed. Check the original result; nothing was sent."
++                            else submit(operation.action, arguments)
++                        }) { Text("Review and resume original link") }
++                    }
+                 }
+             }
+         }
+diff --git a/android/app/src/test/java/com/dial/van/trading/AccountOnboardingTest.kt b/android/app/src/test/java/com/dial/van/trading/AccountOnboardingTest.kt
+index 61486398..9919c37f 100644
+--- a/android/app/src/test/java/com/dial/van/trading/AccountOnboardingTest.kt
++++ b/android/app/src/test/java/com/dial/van/trading/AccountOnboardingTest.kt
+@@ -13,6 +13,28 @@ import org.junit.Assert.assertTrue
+ import org.junit.Test
+ 
+ class AccountOnboardingTest {
++    @Test fun browserReadyIsNeverLinkCompletionButOrdinaryBrowserPollingAndLegacyLinkStayUsable() {
++        val browser = """{"ready":true,"broker":"deriv","accounts":[{"loginid":"VRTC900","currency":"USD"}]}"""
++        assertTrue(AccountOnboarding.parseOutcome("oauth_pending", browser, 200).ok)
++        for (action in listOf("deriv_oauth_link", "ctrader_link")) {
++            assertFalse(AccountOnboarding.parseOutcome(action, browser, 200).ok)
++            assertFalse(AccountOnboarding.parseOutcome(action, browser, 200, requireOriginalReceipt = true).ok)
++            val legacy = """{"account":{"alias":"existing_link","broker":"DERIV"}}"""
++            assertTrue(AccountOnboarding.parseOutcome(action, legacy, 200).ok)
++            assertFalse(AccountOnboarding.parseOutcome(action, legacy, 200, requireOriginalReceipt = true).ok)
++        }
++    }
++
++    @Test fun originalOAuthUncertaintyAndLegacyHistoryNeverBecomeSuccessfulLink() {
++        for (body in listOf(
++            """{"ready":false,"operation":"LINK","effect_state":"UNKNOWN","reconciliation_required":true}""",
++            """{"ready":false,"expired":true,"status":"RECORDED_APPLIED_UNBOUND","scope_status":"UNBOUND","native_reconciliation_required":true}""")) {
++            val outcome = AccountOnboarding.parseOutcome("deriv_oauth_link", body, 200)
++            assertFalse(outcome.ok)
++            assertTrue(outcome.message.contains("original", ignoreCase = true))
++        }
++    }
++
+     private val args = buildJsonObject {
+         put("alias", "deriv_demo"); put("broker", "DERIV"); put("label", "D\u00e9j\u00e0 vu")
+         put("nested", buildJsonObject { put("z", 1); put("a", buildJsonArray { add(JsonPrimitive(1)); add(JsonPrimitive("two")); add(JsonPrimitive(true)); add(JsonNull) }) })
+diff --git a/android/app/src/test/java/com/dial/van/trading/AccountOperationRecoveryTest.kt b/android/app/src/test/java/com/dial/van/trading/AccountOperationRecoveryTest.kt
+index f5e1f72a..4f700c20 100644
+--- a/android/app/src/test/java/com/dial/van/trading/AccountOperationRecoveryTest.kt
++++ b/android/app/src/test/java/com/dial/van/trading/AccountOperationRecoveryTest.kt
+@@ -8,6 +8,159 @@ import kotlinx.coroutines.Job
+ import kotlinx.coroutines.CancellationException
+ 
+ class AccountOperationRecoveryTest {
++    private fun preparedLink() = original.copy(operationId = "original_link_operation_123456", action = "deriv_oauth_link", alias = "linked_once",
++        oauthState = "original_oauth_state_123456789", dispatchStage = "PREPARED", originalApprovalExpiresAt = 123456L, originalResourceVersion = "c".repeat(64), originalIssuedAt = 123000L,
++        oauthArguments = parseObject("""{"state":"original_oauth_state_123456789","alias":"linked_once","loginid":"VRTC900"}""")!!)
++
++    @Test fun preparedReadinessIsNotCompletionAndResumeIsExplicitUnderFreshOwnerFlow() = runBlocking {
++        val disk = Disk(); val value = preparedLink(); val history = AccountOperationRecovery(disk)
++        val oldActor = AccountOperationActor(scope, value.deviceId, "old-token")
++        var current = oldActor; var links = 0
++        disk.afterSave = { current = oldActor.copy(credentialContext = "renewed-current-token") }
++        try { history.dispatch(value, oldActor, { current }) { links += 1; 200 to "{}" }; fail("changed actor must stop before exchange") }
++        catch (expected: IllegalStateException) { }
++        assertEquals(0, links); assertEquals("PREPARED", history.pending(value.deviceId).single().dispatchStage)
++        disk.afterSave = null
++        val ready = """{"ready":true,"broker":"deriv","accounts":[{"loginid":"VRTC900","currency":"USD"}]}"""
++        val recovered = history.recover(value, current, { current }) { 200 to ready }
++        assertEquals("NOT_DISPATCHED", parseObject(recovered.second)!!.str("effect_state"))
++        assertFalse(AccountOnboarding.parseOutcome(value.action, recovered.second, recovered.first, requireOriginalReceipt = true).ok)
++        assertEquals(listOf(value), history.pending(value.deviceId)); assertEquals(0, links)
++        val args = history.resumeArguments(value, scope)
++        assertEquals(value.oauthState, args.str("state")); assertEquals(value.operationId, args.str("original_operation_id"))
++        assertEquals(123456L, args.str("original_approval_expires_at_unix")!!.toLong())
++        assertEquals(value.originalResourceVersion, args.str("original_resource_version"))
++        assertEquals(value.originalIssuedAt, args.str("original_issued_at_unix")!!.toLong())
++        assertEquals(scope.nativeOwnerDomain, args.str("original_account_control_domain"))
++        // Actual client separately checks the new A4 selection; this state
++        // machine never obtains a grant from readiness or a missing ACK.
++        history.resume(value, current, { current }) { guard ->
++            guard(); history.markPossibleSend(value); guard(); links += 1
++            409 to """{"effect_state":"UNKNOWN","reconciliation_required":true}"""
++        }
++        assertEquals(1, links)
++        val sent = history.pending(value.deviceId).single()
++        assertEquals(value.operationId, sent.operationId); assertEquals("MAY_HAVE_SENT", sent.dispatchStage)
++        assertFalse(history.canResume(sent, scope))
++        val held = history.recover(sent, current, { current }) { 200 to ready }
++        assertEquals("UNKNOWN", parseObject(held.second)!!.str("effect_state"))
++        assertEquals(1, links); assertEquals(listOf(sent), history.pending(value.deviceId))
++    }
++
++    @Test fun durablePossibleSendMarkerPrecedesConnectionAndItsUncertainAckCannotAuthorizeResume() = runBlocking {
++        var text: String? = null; var writes = 0
++        val store = object : AccountOperationStore {
++            override fun load() = text
++            override fun save(value: String): Boolean { text = value; writes += 1; return writes == 1 }
++        }
++        val value = preparedLink(); val actor = AccountOperationActor(scope, value.deviceId, "current-token")
++        val history = AccountOperationRecovery(store); var connections = 0
++        try {
++            history.dispatch(value, actor, { actor }) { guard ->
++                guard(); history.markPossibleSend(value); guard(); connections += 1; 200 to "{}"
++            }
++            fail("uncertain durable marker must prevent connection")
++        } catch (expected: IllegalStateException) { }
++        assertEquals(0, connections)
++        val cold = AccountOperationRecovery(store); val original = cold.pending(value.deviceId).single()
++        assertEquals("MAY_HAVE_SENT", original.dispatchStage); assertFalse(cold.canResume(original, scope))
++        assertThrows(IllegalStateException::class.java) { cold.markPossibleSend(original) }
++        assertThrows(IllegalStateException::class.java) { cold.resumeArguments(original, scope) }
++    }
++
++    @Test fun legacyV4PreparedHasNoOriginalVersionProofAndCannotAdoptCurrentGeneration() {
++        val disk = Disk(); val value = preparedLink()
++        AccountOperationRecovery(disk).remember(value)
++        disk.text = disk.text!!.replace("van.android.account-operations/5", "van.android.account-operations/4")
++            .replace(",\"original_resource_version\":\"${value.originalResourceVersion}\"", "")
++            .replace(",\"original_issued_at_unix\":${value.originalIssuedAt}", "")
++        val cold = AccountOperationRecovery(disk); val old = cold.pending(value.deviceId).single()
++        assertEquals("PREPARED", old.dispatchStage); assertEquals(value.operationId, old.operationId)
++        assertNull(old.originalResourceVersion); assertNull(old.originalIssuedAt)
++        assertFalse(cold.canResume(old, scope))
++        assertThrows(IllegalStateException::class.java) { cold.resumeArguments(old, scope) }
++        assertEquals(listOf(old), cold.pending(value.deviceId))
++    }
++
++    @Test fun legacyV3LinkHasNoNeverSentProofAndReadinessCannotCompleteIt() = runBlocking {
++        val disk = Disk(); val value = preparedLink()
++        disk.text = """{"schema":"van.android.account-operations/3","operations":[{
++            "operation_id":"${value.operationId}","action":"${value.action}","device_id":"${value.deviceId}","alias":"${value.alias}",
++            "request_identity":"${value.requestIdentity}","oauth_state":"${value.oauthState}","scope":{
++            "root":"${scope.root}","profile_id":"${scope.profileId}","provisioning_id":"${scope.provisioningId}","native_owner_domain":"${scope.nativeOwnerDomain}"}}]}"""
++        val cold = AccountOperationRecovery(disk); val original = cold.pending(value.deviceId).single()
++        assertEquals("UNKNOWN", original.dispatchStage); assertNull(original.oauthArguments)
++        val actor = AccountOperationActor(scope, original.deviceId, "current-token")
++        val read = cold.recover(original, actor, { actor }) { 200 to """{"ready":true,"accounts":[]}""" }
++        assertEquals("UNKNOWN", parseObject(read.second)!!.str("effect_state"))
++        assertFalse(cold.canResume(original, scope)); assertEquals(listOf(original), cold.pending(value.deviceId))
++    }
++
++    @Test fun scopedV2HistoryRetainsOriginalBindingDuringOAuthStateMigration() {
++        val disk = Disk()
++        disk.text = """{"schema":"van.android.account-operations/2","operations":[{
++            "operation_id":"${original.operationId}","action":"${original.action}","device_id":"${original.deviceId}",
++            "alias":"${original.alias}","request_identity":"${original.requestIdentity}","scope":{
++            "root":"${scope.root}","profile_id":"${scope.profileId}","provisioning_id":"${scope.provisioningId}",
++            "native_owner_domain":"${scope.nativeOwnerDomain}"}}]}"""
++        val history = AccountOperationRecovery(disk)
++        assertEquals(listOf(original), history.pending(original.deviceId))
++        val link = original.copy(operationId = "original_link_operation_123456", action = "deriv_oauth_link", alias = "linked_once",
++            oauthState = "original_oauth_state_123456789")
++        history.remember(link)
++        assertEquals(listOf(original, link), AccountOperationRecovery(disk).pending(original.deviceId))
++        assertTrue(disk.text!!.contains("van.android.account-operations/5"))
++        assertEquals(scope, AccountOperationRecovery(disk).pending(original.deviceId).first().scope)
++    }
++
++    @Test fun oauthLinkPersistsOriginalStateBeforeSendAndReadsOnlyThatStateAfterRestart() = runBlocking {
++        val disk = Disk()
++        val original = PendingAccountOperation("original_link_operation_123456", "deriv_oauth_link", "owner-device", "linked_once",
++            scope, "b".repeat(64), "original_oauth_state_123456789")
++        val actor = AccountOperationActor(scope, original.deviceId, "current-token-context")
++        var sends = 0
++        AccountOperationRecovery(disk).dispatch(original, actor, { actor }) { guard ->
++            guard(); assertEquals(listOf(original), AccountOperationRecovery(disk).pending(original.deviceId))
++            sends += 1
++            409 to """{"effect_state":"UNKNOWN","reconciliation_required":true}"""
++        }
++        val cold = AccountOperationRecovery(disk)
++        assertEquals(original.oauthState, cold.pending(original.deviceId).single().oauthState)
++        assertThrows(IllegalStateException::class.java) { cold.remember(original.copy(operationId = "another_link_operation_123456")) }
++        val receipt = """{"operation_id":"${original.operationId}","device_id":"${original.deviceId}","action":"${original.action}",
++            "oauth_state":"${original.oauthState}","account_control_domain":"${scope.nativeOwnerDomain}",
++            "native_resource_version":"${"c".repeat(64)}","effect_state":"APPLIED","reconciliation_required":false,
++            "account":{"alias":"linked_once","broker":"DERIV"}}"""
++        assertFalse(cold.observe(original, receipt.replace(original.oauthState!!, "replacement_oauth_state_123456"), 200, scope))
++        assertFalse(cold.observe(original, receipt, 200, scope.copy(nativeOwnerDomain = "d".repeat(64))))
++        var reads = 0
++        cold.recover(original, actor, { actor }) { guard -> guard(); reads += 1; 200 to receipt }
++        assertEquals(1, sends); assertEquals(1, reads)
++        assertTrue(cold.pending(original.deviceId).isEmpty())
++        assertFalse(disk.text!!.contains("token")); assertFalse(disk.text!!.contains("verification_code"))
++        assertFalse(disk.text!!.contains("password")); assertFalse(disk.text!!.contains("signature"))
++    }
++
++    @Test fun oauthLinkFailedPersistenceAndChangedActorCannotDispatchOrClearOriginal() = runBlocking {
++        val disk = Disk()
++        val value = PendingAccountOperation("original_link_operation_123456", "ctrader_link", "owner-device", "linked_once",
++            scope, "b".repeat(64), "original_oauth_state_123456789")
++        val actor = AccountOperationActor(scope, value.deviceId, "current-token")
++        disk.writable = false; var sends = 0
++        try { AccountOperationRecovery(disk).dispatch(value, actor, { actor }) { sends += 1; 200 to "{}" }; fail("durable write must fail") }
++        catch (expected: IllegalStateException) { }
++        assertEquals(0, sends)
++        disk.writable = true
++        var current = actor
++        disk.afterSave = { current = actor.copy(credentialContext = "replacement-token") }
++        try { AccountOperationRecovery(disk).dispatch(value, actor, { current }) { sends += 1; 200 to "{}" }; fail("changed actor must refuse") }
++        catch (expected: IllegalStateException) { }
++        assertEquals(0, sends)
++        assertEquals(listOf(value), AccountOperationRecovery(disk).pending(value.deviceId))
++        assertFalse(AccountOperationRecovery(disk).observe(value,
++            """{"status":"RECORDED_APPLIED_UNBOUND","scope_status":"UNBOUND","native_reconciliation_required":true}""", 200, scope))
++    }
++
+     private class Disk : AccountOperationStore {
+         var text: String? = null
+         var writable = true
+diff --git a/backend/tests/test_trading_oauth_effects.py b/backend/tests/test_trading_oauth_effects.py
+index cc948c9c..2f9063ce 100644
+--- a/backend/tests/test_trading_oauth_effects.py
++++ b/backend/tests/test_trading_oauth_effects.py
+@@ -171,8 +171,11 @@ async def test_link_effect_without_a_committed_receipt_is_not_repeated_or_bypass
+     audit=await app.state.store.fetchone("SELECT result FROM audit WHERE capability='trading.account.deriv_oauth_link' ORDER BY created_at_unix DESC,rowid DESC LIMIT 1")
+     assert audit['result']=='unknown'
+     app.state.onboarding.pending.effects.fault=None
+-    row=await app.state.store.fetchone("SELECT phase,receipt_enc FROM trading_oauth_effects WHERE state=? AND operation='LINK'",(state,))
+-    assert row['phase']=='UNKNOWN' and row['receipt_enc'] is None
++    row=await app.state.store.fetchone("SELECT * FROM trading_oauth_effects WHERE state=? AND operation='LINK'",(state,))
++    assert row['phase']=='UNKNOWN'
++    intent=app.state.onboarding.pending.effects._link_envelope(row)
++    assert intent['record_type']=='INTENT' and 'result' not in intent
++    assert intent['native_binding']['account_control_domain']==app.state.onboarding.control.domain()
+     assert await app.state.onboarding.pending.get(state) is not None
+     assert (await act(ac,'deriv_oauth_link',args)).status_code==409
+     second=await ready_deriv(ac)
+@@ -207,7 +210,9 @@ async def test_committed_link_receipt_survives_a_lost_response_and_a_new_reader(
+     assert result['account']['alias']=='durable_link' and calls==['deriv_oauth_link']
+     assert (await act(ac,'deriv_oauth_link',{**args,'alias':'different_alias'})).status_code==409
+     pending=await act(ac,'oauth_pending',{'state':state})
+-    assert pending.json()=={'ready':False,'expired':True}
++    assert pending.json()['ready'] is False and pending.json()['expired'] is True
++    assert pending.json()['status']=='APPLIED' and pending.json()['effect_state']=='APPLIED'
++    assert pending.json()['account']['alias']=='durable_link' and pending.json()['oauth_state']==state
+ 
+ 
+ @pytest.mark.asyncio
+@@ -294,7 +299,7 @@ async def test_an_encrypted_receipt_cannot_be_transplanted_to_another_link(clien
+         assert (await act(ac,'deriv_oauth_link',{'state':state,'loginid':'VRTC900','alias':alias})).status_code==200
+     rows=[await app.state.store.fetchone("SELECT receipt_enc FROM trading_oauth_effects WHERE state=? AND operation='LINK'",(state,)) for state in states]
+     await app.state.store.execute("UPDATE trading_oauth_effects SET receipt_enc=? WHERE state=? AND operation='LINK'",(rows[1]['receipt_enc'],states[0]))
+-    response=await act(ac,'deriv_oauth_link',{'state':states[0],'loginid':'VRTC900','alias':'first_link'})
++    response=await act(ac,'deriv_oauth_link',{'state':states[0],'loginid':'VRTC900','alias':'first_link'},expected_challenge_status=409)
+     assert response.status_code==409
+     assert calls==['deriv_oauth_link','deriv_oauth_link']
+ 
+diff --git a/backend/van_gateway/approval/service.py b/backend/van_gateway/approval/service.py
+index 4f562cb4..642dc24b 100644
+--- a/backend/van_gateway/approval/service.py
++++ b/backend/van_gateway/approval/service.py
+@@ -147,6 +147,44 @@ class OwnerApprovalService:
+             raise OwnerApprovalError("approval_challenge_expired")
+         return now
+ 
++    async def original_binding_fact(self, *, challenge_id: str, device_id: str,
++                                    source_command_id: str, action_id: str, text: str,
++                                    parameters: dict[str, Any] | None = None) -> dict:
++        """Read an exact stored commitment as history, NEVER as a valid grant.
++
++        No issue, consume, deletion, TTL extension or verification exemption is
++        performed. Missing/consumed/pruned or legacy unbound records cannot be
++        reconstructed from the caller's labels.
++        """
++        row=await self.store.fetchone('SELECT value FROM runtime_meta WHERE key=?',(self.PREFIX+challenge_id,))
++        if row is None:raise OwnerApprovalError('original_approval_binding_unavailable_hold')
++        try:
++            record=json.loads(row['value'])
++            if not isinstance(record,dict):raise ValueError('invalid original record')
++            if set(record)!={'challenge_id','device_id','source_command_id','turn_id','action_id','intent_digest',
++                'intent_digest_schema','parameters_bound','parameters','canonical','expires_at_unix','created_at_unix'}:
++                raise ValueError('missing or legacy original commitment')
++            if (record.get('challenge_id')!=challenge_id or record.get('device_id')!=device_id
++                or record.get('source_command_id')!=source_command_id or record.get('action_id')!=action_id
++                or record.get('turn_id') is not None or record.get('intent_digest_schema')!=self.INTENT_SCHEMA
++                or type(record.get('parameters_bound')) is not bool
++                or record['parameters_bound']!=(parameters is not None) or record.get('parameters')!=parameters
++                or type(record.get('created_at_unix')) is not int or record['created_at_unix']<=0
++                or type(record.get('expires_at_unix')) is not int
++                or record['expires_at_unix']<=record['created_at_unix']):
++                raise ValueError('unbound original record')
++            expected=self.intent_digest(device_id=device_id,action_id=action_id,text=text,project_id=None,parameters=parameters)
++            canonical=self._canonical_challenge(challenge_id=challenge_id,device_id=device_id,
++                source_command_id=source_command_id,turn_id=None,action_id=action_id,
++                intent_digest=expected,expires_at_unix=record['expires_at_unix'])
++            if record.get('intent_digest')!=expected or record.get('canonical')!=canonical:
++                raise ValueError('original commitment differs')
++        except (ValueError,TypeError,KeyError):
++            raise OwnerApprovalError('original_approval_binding_corrupt_or_mismatched_hold') from None
++        return {'operation_id':challenge_id,'device_id':device_id,'action_id':action_id,
++            'expires_at_unix':record['expires_at_unix'],'created_at_unix':record['created_at_unix'],
++            'historical_only':True,'execution_authority':False}
++
+     async def verify_and_consume(
+         self,
+         *,
+diff --git a/backend/van_gateway/trading/accounts.py b/backend/van_gateway/trading/accounts.py
+index 08653ea8..b08aa7f3 100644
+--- a/backend/van_gateway/trading/accounts.py
++++ b/backend/van_gateway/trading/accounts.py
+@@ -40,7 +40,7 @@ def requires_owner_approval(action: str) -> bool:
+     return action in ACTIONS and action not in READ_ONLY_ACTIONS
+ 
+ 
+-SECRET_ARG_KEYS = {"secrets", "client_password", "token", "access_token", "refresh_token", "client_secret", "verification_code", "code"}
++SECRET_ARG_KEYS = {"secrets", "client_password", "token", "access_token", "refresh_token", "client_secret", "verification_code", "code", "original_binding"}
+ MAX_AGE_S = 300
+ PENDING_TTL_S = 900
+ DERIV_OAUTH = "https://oauth.deriv.com/oauth2/authorize"
+@@ -221,6 +221,86 @@ class AccountOnboarding:
+     public_base_url: str
+     deriv_app_id: str = "1089"
+ 
++    async def _link_scope(self,state,broker,owner_device_id,expected_domain=None):
++        from van_gateway.trading.oauth_effects import OAuthTargetBlocked
++        domain=await asyncio.to_thread(self.control.domain)
++        if expected_domain not in (None,domain):
++            raise OAuthTargetBlocked('Original OAuth link native namespace is not selected')
++        original=await self.pending.effects.link_binding(state,broker,owner_device_id,domain)
++        if await asyncio.to_thread(self.control.domain)!=domain:
++            raise OAuthTargetBlocked('OAuth link native namespace changed during original read')
++        return domain,original
++
++    @staticmethod
++    def _resume_selector(args,original=None):
++        from van_gateway.trading.oauth_effects import RESUME_SELECTORS
++        fields=RESUME_SELECTORS
++        if not fields.intersection(args):return None
++        identity=args.get('original_operation_id');expiry=args.get('original_approval_expires_at_unix')
++        if (not fields<=args.keys() or not isinstance(identity,str)
++            or not re.fullmatch(r'[A-Za-z0-9_-]{20,128}',identity) or type(expiry) is not int or expiry<=0
++            or type(args.get('original_issued_at_unix')) is not int or args['original_issued_at_unix']<=0
++            or any(not isinstance(args.get(key),str) or not re.fullmatch(r'[0-9a-f]{64}',args[key])
++                for key in ('original_resource_version','original_account_control_domain'))):
++            raise HTTPException(409,'Original link binding is missing or legacy-unbound; HOLD without adopting current data')
++        if original is not None and (identity!=original['operation_id']
++            or expiry!=original.get('original_expires_at_unix',original['expires_at_unix'])
++            or args['original_resource_version']!=original['resource_version']
++            or args['original_account_control_domain']!=original['account_control_domain']):
++            raise HTTPException(409,'Resume selectors differ from the immutable original link')
++        return identity,expiry
++
++    async def _historical_link_fact(self,action,semantic,identity,issued,owner,domain,*,version=None,expiry=None):
++        from van_gateway.approval.service import OwnerApprovalService,OwnerApprovalError
++        allowed={'alias','state','loginid','label','currency','ctid_trader_account_id','is_live'}
++        if (action not in {'deriv_oauth_link','ctrader_link'} or not isinstance(semantic,dict)
++            or not set(semantic)<=allowed or not isinstance(semantic.get('state'),str)
++            or not isinstance(identity,str) or not re.fullmatch(r'[A-Za-z0-9_-]{20,128}',identity)
++            or type(issued) is not int or issued<=0):
++            raise HTTPException(409,'Original link binding is incomplete; HOLD')
++        alias=semantic.get('alias')
++        if not isinstance(alias,str) or not re.fullmatch(r'[a-z0-9_]{3,32}',alias.strip().lower()):
++            raise HTTPException(409,'Original link subject is invalid; HOLD')
++        pending=await self.pending.get(semantic['state'])
++        if pending is None:raise HTTPException(409,'Original authorization material is unavailable; HOLD')
++        self._owner(pending,owner)
++        if pending['broker']!=('deriv' if action=='deriv_oauth_link' else 'ctrader'):
++            raise HTTPException(409,'Original broker binding differs; HOLD')
++        current=await asyncio.to_thread(self.control.resource_version,alias.strip().lower())
++        candidate=version if version is not None else current.get('resource_version')
++        if not isinstance(candidate,str) or not re.fullmatch(r'[0-9a-f]{64}',candidate):
++            raise HTTPException(409,'Original native version cannot be bound; HOLD')
++        try:
++            fact=await OwnerApprovalService(self.pending.store).original_binding_fact(challenge_id=identity,
++                device_id=owner,source_command_id='account:'+action,action_id='trading.account.'+action,
++                text=account_approval_text(owner,issued,action,semantic,candidate,domain),parameters=None)
++        except OwnerApprovalError as exc:
++            raise HTTPException(409,'Original A4 binding unavailable, corrupt or mismatched; HOLD: '+str(exc)) from None
++        if expiry is not None and fact['expires_at_unix']!=expiry:
++            raise HTTPException(409,'Original permission history differs; HOLD')
++        if current.get('alias')!=alias.strip().lower() or current.get('resource_version')!=candidate:
++            raise HTTPException(409,'Original target generation changed; an explicitly new reviewed operation is required')
++        if await asyncio.to_thread(self.control.domain)!=domain:
++            raise HTTPException(409,'Original native namespace changed during lookup; HOLD')
++        return {'operation_id':identity,'action':action,'device_id':owner,'account_control_domain':domain,
++            'resource_version':candidate,'issued_at_unix':issued,'expires_at_unix':fact['expires_at_unix'],
++            'historical_only':True,'execution_authority':False}
++
++    async def _verify_prepared_resume(self,action,args,owner,domain,original):
++        from van_gateway.trading.oauth_effects import RESUME_SELECTORS
++        resume=self._resume_selector(args,original)
++        if resume is None:return None
++        if args['original_account_control_domain']!=domain:
++            raise HTTPException(409,'Original namespace is not selected; HOLD')
++        broker='deriv' if action=='deriv_oauth_link' else 'ctrader'
++        if original is not None:
++            await self.pending.effects.require_original_semantics(args['state'],broker,owner,domain,args)
++            return original['resource_version']  # Historical result/UNKNOWN, never a new effect.
++        semantic={k:v for k,v in args.items() if k not in RESUME_SELECTORS}
++        fact=await self._historical_link_fact(action,semantic,resume[0],args['original_issued_at_unix'],owner,domain,
++            version=args['original_resource_version'],expiry=resume[1])
++        return fact['resource_version']
++
+     def _cb(self, broker: str) -> str:
+         return f"{self.public_base_url.rstrip('/')}/v1/trading/oauth/{broker}/callback"
+ 
+@@ -264,6 +344,11 @@ class AccountOnboarding:
+             return None
+         if action in {"deriv_oauth_link", "ctrader_link"} and args.get("state"):
+             broker = "deriv" if action == "deriv_oauth_link" else "ctrader"
++            domain,original=await self._link_scope(str(args['state']),broker,owner_device_id)
++            prepared_version=await self._verify_prepared_resume(action,args,owner_device_id,domain,original)
++            if original is not None:
++                return original['resource_version']
++            if prepared_version is not None:return prepared_version
+             pending = await self.pending.get(str(args["state"]))
+             if pending is None:
+                 if await self.pending.effects.owns_link(str(args["state"]), broker, owner_device_id):
+@@ -281,7 +366,7 @@ class AccountOnboarding:
+         try:
+             snapshot = await asyncio.to_thread(self.control.resource_version, alias)
+             original_uncertainty=(action in {'deriv_oauth_link','ctrader_link'} and args.get('state')
+-                and await self.pending.effects.unresolved_link_target(alias))
++                and await self.pending.effects.unresolved_link_target(alias,domain))
+             if action in {'deriv_create_demo','deriv_oauth_link','ctrader_link'} and snapshot.get('state')=='REGISTERED' and not original_uncertainty:
+                 raise HTTPException(409,'Account alias already exists; use a new alias or the verified update workflow')
+             version = snapshot.get("resource_version")
+@@ -322,7 +407,10 @@ class AccountOnboarding:
+             await asyncio.shield(self.pending.effects.uncertain(state,operation,claim.digest,type(exc).__name__))
+             if isinstance(exc,asyncio.CancelledError):
+                 raise exc
+-            receipt = await self.pending.effects.applied(state,operation,claim.digest)
++            if claim.binding:
++                await self._link_scope(state,claim.material['broker'] if claim.material else claim.receipt['account']['broker'].lower(),
++                    claim.binding['device_id'],claim.binding['account_control_domain'])
++            receipt = await self.pending.effects.applied(state,operation,claim.digest,native_binding=claim.binding)
+             if receipt is not None:
+                 return receipt
+         except asyncio.CancelledError:
+@@ -373,9 +461,31 @@ class AccountOnboarding:
+         except BaseException as exc:
+             return await self._recover_effect(state,"CALLBACK",claim,exc)
+ 
+-    async def oauth_pending(self, args: dict, *, owner_device_id: str | None = None) -> dict:
++    async def oauth_pending(self, args: dict, *, owner_device_id: str | None = None, native_account_control_domain=None) -> dict:
+         state = str(args.get("state", ""))
+-        effect = await self.pending.effects.unconfirmed(state,owner_device_id)
++        if 'original_binding' in args:
++            request=args['original_binding']
++            if not isinstance(request,dict) or set(request)!={'operation_id','action','issued_at_unix','semantic_args'}:
++                raise HTTPException(409,'Original binding lookup is malformed; HOLD')
++            semantic=request['semantic_args']
++            if not isinstance(semantic,dict) or semantic.get('state')!=state:
++                raise HTTPException(409,'Original binding state differs; HOLD')
++            domain,original=await self._link_scope(state,'deriv' if request['action']=='deriv_oauth_link' else 'ctrader',owner_device_id,native_account_control_domain)
++            if original is not None:raise HTTPException(409,'Original link already has durable outcome; read it without preparing a new intent')
++            fact=await self._historical_link_fact(request['action'],semantic,request['operation_id'],request['issued_at_unix'],owner_device_id,domain)
++            return {'ready':False,'original_link_binding':fact}
++        link=await self.pending.effects.link_record(state,owner_device_id)
++        if link is not None:
++            if link.get('legacy_unbound'):
++                return {'ready':False,'expired':True,'operation':'LINK','status':link['status'],
++                    'scope_status':'UNBOUND','native_reconciliation_required':True}
++            domain,binding=await self._link_scope(state,link['broker'],owner_device_id,native_account_control_domain)
++            if link['phase']=='APPLIED':
++                result=self.pending.effects._receipt(link,native_binding=binding)
++                return {'ready':False,'expired':True,'operation':'LINK','status':'APPLIED',**result}
++        else:
++            domain=None
++        effect = await self.pending.effects.unconfirmed(state,owner_device_id,account_control_domain=domain)
+         if effect is not None:
+             return effect
+         p = await self.pending.get(state)
+@@ -393,10 +503,26 @@ class AccountOnboarding:
+         if action == "oauth_start":
+             return await self.oauth_start(args, owner_device_id=owner_device_id)
+         if action == "oauth_pending":
+-            return await self.oauth_pending(args, owner_device_id=owner_device_id)
++            return await self.oauth_pending(args, owner_device_id=owner_device_id,native_account_control_domain=native_account_control_domain)
+         if action in {"deriv_oauth_link","ctrader_link"} and args.get("state"):
+             broker = "deriv" if action=="deriv_oauth_link" else "ctrader"
+             state = str(args["state"])
++            domain,original=await self._link_scope(state,broker,owner_device_id,native_account_control_domain)
++            prepared_version=await self._verify_prepared_resume(action,args,owner_device_id,domain,original)
++            resume=self._resume_selector(args,original)
++            if prepared_version is not None and native_resource_version!=prepared_version:
++                raise HTTPException(409,'Fresh permission does not match the immutable original native version; HOLD')
++            if original is not None and native_resource_version is None:
++                native_resource_version=original['resource_version']
++            if original is None and (not native_operation or native_operation.get('device_id')!=owner_device_id):
++                raise HTTPException(403,'Verified original owner link admission is required')
++            binding={**(original or {}),'account_control_domain':domain,'resource_version':native_resource_version,
++                'device_id':owner_device_id}
++            if original is None:
++                binding.update(operation_id=resume[0] if resume else native_operation.get('operation_id'),
++                    expires_at_unix=native_operation.get('expires_at_unix'),
++                    approval_operation_id=native_operation.get('operation_id'),
++                    original_expires_at_unix=resume[1] if resume else native_operation.get('expires_at_unix'))
+             def validate(p):
+                 if broker == "deriv":
+                     if not any(a["loginid"].upper()==str(args.get("loginid","")).upper() for a in p.get("accounts",[])):
+@@ -404,8 +530,9 @@ class AccountOnboarding:
+                 elif (type(args.get("ctid_trader_account_id")) is not int or args["ctid_trader_account_id"]<=0
+                       or type(args.get("is_live",False)) is not bool):
+                     raise HTTPException(422,"cTrader account identity and environment must be typed")
+-            claim = await self.pending.effects.begin(state,"LINK",broker,args,owner_device_id=owner_device_id,validate=validate)
++            claim = await self.pending.effects.begin(state,"LINK",broker,args,owner_device_id=owner_device_id,validate=validate,native_binding=binding)
+             if not claim.fresh:
++                await self._link_scope(state,broker,owner_device_id,domain)
+                 return claim.receipt
+             try:
+                 p = claim.material
+@@ -418,6 +545,8 @@ class AccountOnboarding:
+                 if native_resource_version is None:
+                     raise HTTPException(409, "native account version is required before a new link")
+                 values["_expected_resource_version"] = native_resource_version
++                values['_expected_account_control_domain']=domain
++                values['_oauth_link_admission']={**binding,'request_digest':claim.digest}
+                 result = await asyncio.to_thread(self.control.run,action,values)
+                 account_result = result.get("account") if isinstance(result,dict) else None
+                 expected_login = values["loginid"] if broker=="deriv" else str(values["ctid_trader_account_id"])
+@@ -426,9 +555,14 @@ class AccountOnboarding:
+                     or account_result.get("broker") != broker.upper()
+                     or str(account_result.get("login")) != str(expected_login)
+                     or account_result.get("currency") != str(values["currency"]).upper()
+-                    or account_result.get("mode") not in {"DEMO_TRADER","OBSERVE"}):
++                    or account_result.get("mode") not in {"DEMO_TRADER","OBSERVE"}
++                    or result.get('account_control_domain')!=domain):
+                     raise ValueError("native account receipt does not match the requested link")
++                result={**result,'operation_id':binding['operation_id'],'device_id':owner_device_id,
++                    'action':action,'oauth_state':state,'native_resource_version':binding['resource_version'],
++                    'effect_state':'APPLIED','reconciliation_required':False}
+                 await self.pending.effects.complete(state,"LINK",claim.digest,result,consume=True)
++                await self._link_scope(state,broker,owner_device_id,domain)
+                 return result
+             except BaseException as exc:
+                 return await self._recover_effect(state,"LINK",claim,exc)
+diff --git a/backend/van_gateway/trading/oauth_effects.py b/backend/van_gateway/trading/oauth_effects.py
+index 2d8cdd1e..f9d70bc1 100644
+--- a/backend/van_gateway/trading/oauth_effects.py
++++ b/backend/van_gateway/trading/oauth_effects.py
+@@ -31,6 +31,10 @@ class OAuthTargetBlocked(HTTPException):
+         super().__init__(409,detail)
+ 
+ 
++RESUME_SELECTORS=frozenset({'original_operation_id','original_approval_expires_at_unix',
++    'original_resource_version','original_issued_at_unix','original_account_control_domain'})
++
++
+ def fingerprint(value):
+     return hashlib.sha256(json.dumps(value,sort_keys=True,separators=(',',':'),ensure_ascii=False).encode()).hexdigest()
+ 
+@@ -41,6 +45,7 @@ class OAuthClaim:
+     digest: str
+     material: dict | None = field(repr=False)
+     receipt: dict | None = field(repr=False)
++    binding: dict | None = field(default=None,repr=False)
+ 
+ 
+ class OAuthEffects:
+@@ -60,7 +65,74 @@ class OAuthEffects:
+             PRIMARY KEY(state,operation))''')
+         await self.store.execute('CREATE INDEX IF NOT EXISTS idx_trading_oauth_effect_target ON trading_oauth_effects(target_key,phase)')
+ 
+-    def _receipt(self, row):
++    def _link_envelope(self, row):
++        """Existing encrypted column holds typed intent until actual completion.
++
++        INTENT is not a receipt, APPLIED, or authority. Legacy rows have no
++        provable original native scope and must never be adopted into one.
++        """
++        try:
++            value=json.loads(self.cipher.decrypt(row['receipt_enc'].encode()))
++            binding=value['native_binding']
++            keys={'schema','record_type','state','operation','request_digest','broker','owner_device_id','native_binding'}
++            if (value.get('schema')!='van.oauth-link-binding/1'
++                or set(value)!=(keys|{'result'} if row['phase']=='APPLIED' else keys)
++                or value.get('record_type')!=('RECEIPT' if row['phase']=='APPLIED' else 'INTENT')
++                or any(value.get(key)!=row[key] for key in ('state','operation','request_digest','broker','owner_device_id'))
++                or not isinstance(binding,dict)
++                or not {'account_control_domain','resource_version','operation_id','device_id','expires_at_unix'}<=set(binding)
++                or set(binding)-{'account_control_domain','resource_version','operation_id','device_id','expires_at_unix',
++                    'approval_operation_id','original_expires_at_unix'}
++                or binding['device_id']!=row['owner_device_id']
++                or any(not isinstance(binding.get(key),str) or not re.fullmatch(r'[0-9a-f]{64}',binding[key])
++                    for key in ('account_control_domain','resource_version'))
++                or not isinstance(binding['operation_id'],str)
++                or not re.fullmatch(r'[A-Za-z0-9_-]{20,128}',binding['operation_id'])
++                or type(binding['expires_at_unix']) is not int or binding['expires_at_unix']<=0
++                or ('original_expires_at_unix' in binding and (type(binding['original_expires_at_unix']) is not int or binding['original_expires_at_unix']<=0))
++                or ('approval_operation_id' in binding and (not isinstance(binding['approval_operation_id'],str)
++                    or not re.fullmatch(r'[A-Za-z0-9_-]{20,128}',binding['approval_operation_id'])))
++                or row['operation']!='LINK'):
++                raise ValueError('unbound original link')
++            return value
++        except Exception:
++            raise OAuthEffectUnconfirmed('Original OAuth link has no verifiable native scope; retain it unbound for reconciliation') from None
++
++    @staticmethod
++    def _same_scope(original, expected):
++        if expected is None or any(original.get(key)!=expected.get(key)
++            for key in ('account_control_domain','resource_version','device_id')):
++            raise OAuthTargetBlocked('Original OAuth link belongs to another native scope or version; do not rebind it')
++
++    @staticmethod
++    def _link_result(value,row):
++        from van_gateway.trading.account_contracts import PublicAccountRecord
++        binding=value['native_binding'];result=value.get('result')
++        try:
++            if not isinstance(result,dict) or set(result)!={'account','account_control_domain','operation_id','device_id',
++                'action','oauth_state','native_resource_version','effect_state','reconciliation_required'}:
++                raise ValueError('unexpected native link receipt fields')
++            account=PublicAccountRecord.model_validate(result['account'])
++            if (any(result.get(key)!=binding[bound] for key,bound in (
++                    ('account_control_domain','account_control_domain'),('operation_id','operation_id'),
++                    ('device_id','device_id'),('native_resource_version','resource_version')))
++                or result['action']!=('deriv_oauth_link' if row['broker']=='deriv' else 'ctrader_link')
++                or result['oauth_state']!=row['state'] or result['effect_state']!='APPLIED'
++                or result['reconciliation_required'] is not False
++                or row['target_key']!='account:'+account.alias or account.broker!=row['broker'].upper()
++                or account.mode not in {'DEMO_TRADER','OBSERVE'} or not account.login or not account.currency):
++                raise ValueError('mismatched original link receipt')
++        except Exception:
++            raise OAuthEffectUnconfirmed('Original link receipt is incomplete or differs from its sealed intent') from None
++        return result
++
++    def _receipt(self, row, *, native_binding=None):
++        if row['operation']=='LINK':
++            value=self._link_envelope(row)
++            self._same_scope(value['native_binding'],native_binding)
++            if row['phase']!='APPLIED' or not isinstance(value.get('result'),dict):
++                raise OAuthEffectUnconfirmed()
++            return self._link_result(value,row)
+         try:
+             result = json.loads(self.cipher.decrypt(row['receipt_enc'].encode()))
+             if (not isinstance(result,dict) or result.get('schema')!='van.oauth-effect-receipt/1'
+@@ -71,10 +143,53 @@ class OAuthEffects:
+         except Exception:
+             raise OAuthEffectUnconfirmed('OAuth receipt cannot be read; native reconciliation required') from None
+ 
+-    async def begin(self,state,operation,broker,payload,*,owner_device_id=None,validate=None):
++    async def link_binding(self,state,broker,owner_device_id,account_control_domain):
++        row=await self.store.fetchone("SELECT * FROM trading_oauth_effects WHERE state=? AND operation='LINK'",(state,))
++        if row is None:return None
++        if not owner_device_id or row['owner_device_id']!=owner_device_id:
++            raise HTTPException(403,'OAuth state belongs to another device')
++        if row['broker']!=broker:raise HTTPException(400,'OAuth state belongs to a different broker')
++        binding=self._link_envelope(row)['native_binding']
++        if binding['account_control_domain']!=account_control_domain:
++            raise OAuthTargetBlocked('Original OAuth link native namespace is not selected')
++        return binding
++
++    async def link_record(self,state,owner_device_id):
++        row=await self.store.fetchone("SELECT * FROM trading_oauth_effects WHERE state=? AND operation='LINK'",(state,))
++        if row is None:return None
++        if not owner_device_id or row['owner_device_id']!=owner_device_id:
++            raise HTTPException(403,'OAuth state belongs to another device')
++        try:self._link_envelope(row)
++        except OAuthEffectUnconfirmed:
++            # Preserve genuinely recorded old completion as historical data;
++            # it is never original native-scope proof or an executable grant.
++            if row['phase']=='APPLIED':
++                try:
++                    value=json.loads(self.cipher.decrypt(row['receipt_enc'].encode()))
++                    if (value.get('schema')!='van.oauth-effect-receipt/1'
++                        or any(value.get(k)!=row[k] for k in ('state','operation','request_digest','broker','owner_device_id'))
++                        or not isinstance(value.get('result'),dict)):raise ValueError()
++                except Exception:raise OAuthEffectUnconfirmed('Historical link confirmation cannot be verified') from None
++            return {'legacy_unbound':True,'status':'RECORDED_APPLIED_UNBOUND' if row['phase']=='APPLIED' else 'OUTCOME_UNCONFIRMED'}
++        return dict(row)
++
++    async def require_original_semantics(self,state,broker,owner_device_id,domain,payload):
++        binding=await self.link_binding(state,broker,owner_device_id,domain)
++        if binding is None:raise OAuthEffectUnconfirmed('Original link intent is unavailable')
++        row=await self.store.fetchone("SELECT request_digest FROM trading_oauth_effects WHERE state=? AND operation='LINK'",(state,))
++        semantic={k:v for k,v in payload.items() if k not in RESUME_SELECTORS}
++        expected=fingerprint({'state':state,'operation':'LINK','broker':broker,'payload':semantic})
++        if row is None or row['request_digest']!=expected:
++            raise OAuthTargetBlocked('Original link semantic arguments differ; use a new reviewed operation')
++        return binding
++
++    async def begin(self,state,operation,broker,payload,*,owner_device_id=None,validate=None,native_binding=None):
+         if operation not in {'CALLBACK','LINK'} or broker not in {'deriv','ctrader'}:
+             raise ValueError('invalid native OAuth operation')
+-        digest = fingerprint({'state':state,'operation':operation,'broker':broker,'payload':payload})
++        # A fresh A4 permission signs the entire submitted body, including
++        # resume selectors. They do not change the original business effect.
++        semantic_payload=({k:v for k,v in payload.items() if k not in RESUME_SELECTORS} if operation=='LINK' else payload)
++        digest = fingerprint({'state':state,'operation':operation,'broker':broker,'payload':semantic_payload})
+         async with self.store.connection() as db:
+             await db.execute('BEGIN IMMEDIATE')
+             cursor = await db.execute('SELECT * FROM trading_oauth_effects WHERE state=? AND operation=?',(state,operation))
+@@ -84,10 +199,18 @@ class OAuthEffects:
+                     raise HTTPException(403,'OAuth state belongs to another device')
+                 if existing['broker'] != broker or existing['request_digest'] != digest:
+                     raise HTTPException(409,'OAuth operation conflicts with its original request')
++                original=self._link_envelope(existing)['native_binding'] if operation=='LINK' else None
++                if operation=='LINK':self._same_scope(original,native_binding)
++                if operation=='LINK' and 'original_operation_id' in payload and (
++                    payload['original_operation_id']!=original['operation_id'] or
++                    payload.get('original_approval_expires_at_unix')!=original.get('original_expires_at_unix',original['expires_at_unix']) or
++                    payload.get('original_resource_version')!=original['resource_version'] or
++                    payload.get('original_account_control_domain')!=original['account_control_domain']):
++                    raise OAuthTargetBlocked('Resume identity changed before original link arbitration')
+                 if existing['phase'] == 'APPLIED':
+-                    result = self._receipt(existing)
++                    result = self._receipt(existing,native_binding=native_binding)
+                     await db.commit()
+-                    return OAuthClaim(False,digest,None,result)
++                    return OAuthClaim(False,digest,None,result,original)
+                 raise OAuthEffectUnconfirmed('OAuth operation outcome is unconfirmed; native reconciliation required before retry')
+             cursor = await db.execute('SELECT * FROM trading_oauth_pending WHERE state=?',(state,))
+             pending = self.decode_pending(await cursor.fetchone())
+@@ -113,18 +236,37 @@ class OAuthEffects:
+             if validate is not None:
+                 validate(pending)
+             if operation == 'LINK':
+-                cursor = await db.execute("SELECT state FROM trading_oauth_effects WHERE target_key=? AND phase IN ('IN_FLIGHT','UNKNOWN') LIMIT 1",(target,))
++                if (not isinstance(native_binding,dict) or native_binding.get('device_id')!=owner
++                    or type(native_binding.get('expires_at_unix')) is not int
++                    or native_binding['expires_at_unix']<=int(time.time())):
++                    raise HTTPException(403,'Current verified original link admission is required')
++                cursor=await db.execute("SELECT * FROM trading_oauth_effects WHERE target_key=? AND phase IN ('IN_FLIGHT','UNKNOWN')",(target,))
++                for prior in await cursor.fetchall():
++                    try: prior_domain=self._link_envelope(prior)['native_binding']['account_control_domain']
++                    except OAuthEffectUnconfirmed: prior_domain=None
++                    if prior_domain in (None,native_binding.get('account_control_domain')):
++                        raise OAuthTargetBlocked('OAuth target has a prior effect requiring reconciliation; a new state cannot bypass it')
++                cursor=None
+             else:
+                 cursor = await db.execute('SELECT state FROM trading_oauth_effects WHERE target_key=? LIMIT 1',(target,))
+-            if await cursor.fetchone() is not None:
++            if cursor is not None and await cursor.fetchone() is not None:
+                 raise OAuthTargetBlocked('OAuth target has a prior effect requiring reconciliation; a new state cannot bypass it')
+             now = int(time.time())
+             await db.execute('''INSERT INTO trading_oauth_effects
+                 (state,operation,broker,owner_device_id,request_digest,target_key,phase,worker_id,created_at_unix,updated_at_unix)
+                 VALUES (?,?,?,?,?,?,'IN_FLIGHT',?,?,?)''',(state,operation,broker,owner,digest,target,self.worker,now,now))
++            if operation=='LINK':
++                envelope={'schema':'van.oauth-link-binding/1','record_type':'INTENT','state':state,
++                    'operation':operation,'request_digest':digest,'broker':broker,'owner_device_id':owner,
++                    'native_binding':native_binding}
++                # Validate the exact persisted format before its first claim.
++                encrypted_intent=self.cipher.encrypt(json.dumps(envelope).encode()).decode()
++                self._link_envelope({**envelope,'phase':'IN_FLIGHT','receipt_enc':encrypted_intent})
++                await db.execute("UPDATE trading_oauth_effects SET receipt_enc=? WHERE state=? AND operation=?",
++                    (encrypted_intent,state,operation))
+             await db.commit()
+         self.active.add((state,operation))
+-        return OAuthClaim(True,digest,pending,None)
++        return OAuthClaim(True,digest,pending,None,native_binding)
+ 
+     async def complete(self,state,operation,digest,receipt,*,patch=None,consume=False):
+         if not isinstance(receipt,dict):
+@@ -151,6 +293,10 @@ class OAuthEffects:
+                 self.fault('after_material_before_receipt')
+             envelope = {'schema':'van.oauth-effect-receipt/1',
+                 **{key:row[key] for key in ('state','operation','request_digest','broker','owner_device_id')},'result':receipt}
++            if operation=='LINK':
++                original=self._link_envelope(row)
++                envelope={**original,'record_type':'RECEIPT','result':receipt}
++                self._link_result(envelope,row)
+             encrypted = self.cipher.encrypt(json.dumps(envelope).encode()).decode()
+             await db.execute("UPDATE trading_oauth_effects SET phase='APPLIED',receipt_enc=?,updated_at_unix=? WHERE state=? AND operation=?",(encrypted,int(time.time()),state,operation))
+             if self.fault:
+@@ -168,10 +314,10 @@ class OAuthEffects:
+         finally:
+             self.active.discard((state,operation))
+ 
+-    async def applied(self,state,operation,digest):
++    async def applied(self,state,operation,digest,*,native_binding=None):
+         row = await self.store.fetchone('SELECT * FROM trading_oauth_effects WHERE state=? AND operation=?',(state,operation))
+         if row is not None and row['request_digest']==digest and row['phase']=='APPLIED':
+-            return self._receipt(row)
++            return self._receipt(row,native_binding=native_binding)
+         return None
+ 
+     async def owns_link(self, state, broker, owner_device_id):
+@@ -191,29 +337,43 @@ class OAuthEffects:
+             raise HTTPException(400, 'OAuth state belongs to a different broker')
+         return True
+ 
+-    async def unresolved_link_target(self, alias):
++    async def unresolved_link_target(self, alias,account_control_domain=None):
+         """Read uncertainty before classifying an alias as a new-link collision.
+ 
+         This grants no execution: begin() still arbitrates the exact request,
+         original actor and global target in its existing atomic transaction.
+         """
+-        row=await self.store.fetchone("""SELECT 1 FROM trading_oauth_effects
+-            WHERE operation='LINK' AND target_key=? AND phase IN ('IN_FLIGHT','UNKNOWN') LIMIT 1""",
+-            ('account:'+alias,))
+-        return row is not None
++        rows=await self.store.fetchall("""SELECT * FROM trading_oauth_effects
++            WHERE operation='LINK' AND target_key=? AND phase IN ('IN_FLIGHT','UNKNOWN')""",('account:'+alias,))
++        for row in rows:
++            try: domain=self._link_envelope(row)['native_binding']['account_control_domain']
++            except OAuthEffectUnconfirmed:return True
++            if account_control_domain is None or domain==account_control_domain:return True
++        return False
+ 
+-    async def unconfirmed(self,state,owner_device_id):
++    async def unconfirmed(self,state,owner_device_id,*,account_control_domain=None):
+         row = await self.store.fetchone("""SELECT * FROM trading_oauth_effects WHERE state=?
+             ORDER BY CASE operation WHEN 'LINK' THEN 1 ELSE 0 END DESC LIMIT 1""",(state,))
+         if row is None:
+             return None
+         if row['owner_device_id'] != owner_device_id:
+             raise HTTPException(403,'OAuth state belongs to another device')
++        binding=None
++        if row['operation']=='LINK':
++            binding=self._link_envelope(row)['native_binding']
++            if binding['account_control_domain']!=account_control_domain:
++                raise OAuthTargetBlocked('Original OAuth link native namespace is not selected')
+         if row['phase'] == 'APPLIED':
+-            self._receipt(row)
++            self._receipt(row,native_binding=binding)
+             return None
+         observed = (row['phase']=='IN_FLIGHT' and row['worker_id']==self.worker
+                     and (state,row['operation']) in self.active)
+-        return {'ready':False,'operation':row['operation'],
++        result={'ready':False,'operation':row['operation'],
+                 'status':'IN_PROGRESS' if observed else 'OUTCOME_UNCONFIRMED',
+                 'native_reconciliation_required':not observed}
++        if binding:
++            result.update(operation_id=binding['operation_id'],device_id=binding['device_id'],
++                action='deriv_oauth_link' if row['broker']=='deriv' else 'ctrader_link',oauth_state=state,
++                account_control_domain=binding['account_control_domain'],native_resource_version=binding['resource_version'],
++                effect_state='UNKNOWN',reconciliation_required=True)
++        return result
+diff --git a/trading/commander/accounts.py b/trading/commander/accounts.py
+index 61209c21..786254d6 100644
+--- a/trading/commander/accounts.py
++++ b/trading/commander/accounts.py
+@@ -72,7 +72,7 @@ def _secrets_path(st: AccountControlSettings, alias: str) -> Path:
+     return Path(st.secrets_dir) / f"{alias}.env"
+ 
+ 
+-def _write_secrets(path: Path, values: dict[str, str], *, merge: bool = True) -> None:
++def _write_secrets(path: Path, values: dict[str, str], *, merge: bool = True, before_replace=None) -> None:
+     from vati.core.file_lock import exclusive_state_lock
+     from vati.accounts.registry import load_secret_file
+ 
+@@ -81,6 +81,7 @@ def _write_secrets(path: Path, values: dict[str, str], *, merge: bool = True) ->
+            or not isinstance(v, str) or "\n" in v or "\r" in v for k, v in values.items()):
+         raise ValueError("credential file requires valid keys and single-line text values")
+     with exclusive_state_lock(path):
++        if before_replace is not None:before_replace()
+         if path.is_symlink():
+             raise ValueError("credential destination must not be a symbolic link")
+         # Validate old ownership/permissions even when replacing, before reading or changing it.
+@@ -95,6 +96,7 @@ def _write_secrets(path: Path, values: dict[str, str], *, merge: bool = True) ->
+                 stream.flush()
+                 os.fsync(stream.fileno())
+             os.chmod(temporary, 0o600)
++            if before_replace is not None:before_replace()
+             os.replace(temporary, path)
+         finally:
+             if os.path.exists(temporary):
+@@ -156,13 +158,14 @@ def build_account_handlers(st: AccountControlSettings) -> dict[str, Callable[[di
+     def reg() -> AccountRegistry:
+         return AccountRegistry(st.registry_path)
+ 
+-    def upsert_record(alias: str, broker: str, *, mode: str = "DEMO_TRADER", currency: str = "USD", label: str = "", server: str = "", login: str = "", bridge_url: str = "", demo: bool = True, mandate_ref: str = "") -> dict:
++    def upsert_record(alias: str, broker: str, *, mode: str = "DEMO_TRADER", currency: str = "USD", label: str = "", server: str = "", login: str = "", bridge_url: str = "", demo: bool = True, mandate_ref: str = "", before_write=None, after_write=None) -> dict:
+         r = reg()
+         sec = _secrets_path(st, alias)
+         if broker in ("DERIV", "CTRADER", "MT5_EA", "MT5"):
+             if not sec.is_file():
+                 mark_account_effect()
+-                _write_secrets(sec, {})
++                if before_write is None:_write_secrets(sec, {})
++                else:_write_secrets(sec, {},before_replace=before_write)
+             cref = CredentialRef(secrets_file=str(sec))
+         else:
+             cref = CredentialRef()
+@@ -170,7 +173,13 @@ def build_account_handlers(st: AccountControlSettings) -> dict[str, Callable[[di
+             candidate = Account(alias=alias, broker=broker, mode=mode, currency=currency, label=label or alias, server=server, login=login, bridge_url=bridge_url, credential_ref=cref, demo=demo, mandate_ref=mandate_ref)
+             candidate.validate()
+             mark_account_effect()
+-            acc = r.replace(candidate) if alias in r.accounts else r.add(candidate)
++            if before_write is None:
++                acc = r.replace(candidate) if alias in r.accounts else r.add(candidate)
++            else:
++                with r._mutation_lock():
++                    before_write()
++                    acc = r.replace(candidate) if alias in r.accounts else r.add(candidate)
++                    if after_write is not None:after_write(current_resource_version(alias))
+         except AccountRegistryError as exc:
+             raise HTTPException(422, str(exc))
+         return acc.public()
+@@ -185,11 +194,19 @@ def build_account_handlers(st: AccountControlSettings) -> dict[str, Callable[[di
+             raise HTTPException(422, "secret values must be single-line")
+         return clean
+ 
+-    def store_secrets(alias: str, broker: str, values: dict[str, Any]) -> list[str]:
++    def store_secrets(alias: str, broker: str, values: dict[str, Any], *, before_write=None, expected_version=None) -> list[str]:
+         clean = clean_secrets(broker, values)
+         mark_account_effect()
+-        reg().touch(alias)
+-        _write_secrets(_secrets_path(st, alias), clean)
++        if before_write is None:
++            reg().touch(alias)
++            _write_secrets(_secrets_path(st, alias), clean)
++        else:
++            with reg()._mutation_lock():
++                before_write()
++                if expected_version is not None and current_resource_version(alias)!=expected_version:
++                    raise HTTPException(409,'Account changed after original link registration; credentials were not replaced')
++                reg().touch(alias)
++                _write_secrets(_secrets_path(st, alias), clean,before_replace=before_write)
+         return sorted(clean)
+ 
+     def verify_deriv_material(*, app_id: str, token: str, login: str, currency: str,
+@@ -517,9 +534,10 @@ def build_account_handlers(st: AccountControlSettings) -> dict[str, Callable[[di
+             currency=currency, demo=None, require_trade=False)
+         demo = bool(profile["is_virtual"])
+         mode = "DEMO_TRADER" if demo and "trade" in profile["scopes"] else "OBSERVE"
+-        pub = upsert_record(alias, "DERIV", currency=currency, label=str(a.get("label") or f"Deriv {loginid}"), server=app_id, login=loginid, demo=demo, mode=mode)
+-        store_secrets(alias, "DERIV", {"DERIV_API_TOKEN": token, "DERIV_APP_ID": str(a.get("app_id") or "1089")})
+-        return {"account": pub}
++        own_revision=[]
++        pub = upsert_record(alias, "DERIV", currency=currency, label=str(a.get("label") or f"Deriv {loginid}"), server=app_id, login=loginid, demo=demo, mode=mode,before_write=a.get('_link_before_registry'),after_write=own_revision.append)
++        store_secrets(alias, "DERIV", {"DERIV_API_TOKEN": token, "DERIV_APP_ID": str(a.get("app_id") or "1089")},before_write=a.get('_link_before_credentials'),expected_version=own_revision[0] if own_revision else None)
++        return {"account": pub,**({'account_control_domain':control_domain()} if st.operation_ledger else {})}
+ 
+     # ------------------------------------------------------------ ctrader
+     def ctrader_transport(is_live: bool):
+@@ -564,9 +582,10 @@ def build_account_handlers(st: AccountControlSettings) -> dict[str, Callable[[di
+         require_new_alias(alias)
+         ctid = int(a["ctid_trader_account_id"])
+         is_live = _boolean(a, "is_live", False)
+-        pub = upsert_record(alias, "CTRADER", currency=str(a.get("currency") or "USD").upper(), label=str(a.get("label") or f"cTrader {ctid}"), server="live" if is_live else "demo", login=str(ctid), demo=not is_live, mode="DEMO_TRADER" if not is_live else "OBSERVE")
+-        store_secrets(alias, "CTRADER", {"CTRADER_CLIENT_ID": a["client_id"], "CTRADER_CLIENT_SECRET": a["client_secret"], "CTRADER_ACCESS_TOKEN": a["access_token"], **({"CTRADER_REFRESH_TOKEN": a["refresh_token"]} if a.get("refresh_token") else {})})
+-        return {"account": pub}
++        own_revision=[]
++        pub = upsert_record(alias, "CTRADER", currency=str(a.get("currency") or "USD").upper(), label=str(a.get("label") or f"cTrader {ctid}"), server="live" if is_live else "demo", login=str(ctid), demo=not is_live, mode="DEMO_TRADER" if not is_live else "OBSERVE",before_write=a.get('_link_before_registry'),after_write=own_revision.append)
++        store_secrets(alias, "CTRADER", {"CTRADER_CLIENT_ID": a["client_id"], "CTRADER_CLIENT_SECRET": a["client_secret"], "CTRADER_ACCESS_TOKEN": a["access_token"], **({"CTRADER_REFRESH_TOKEN": a["refresh_token"]} if a.get("refresh_token") else {})},before_write=a.get('_link_before_credentials'),expected_version=own_revision[0] if own_revision else None)
++        return {"account": pub,**({'account_control_domain':control_domain()} if st.operation_ledger else {})}
+ 
+     # ------------------------------------------------------------ mt5 ea
+     def cmd_mt5_ea_issue_key(a: dict) -> dict:
+@@ -593,6 +612,16 @@ def build_account_handlers(st: AccountControlSettings) -> dict[str, Callable[[di
+                         guard()
+                     if '_expected_account_control_domain' in args and args['_expected_account_control_domain']!=control_domain():
+                         raise AccountOperationBlocked('Account-control state namespace changed before native dispatch')
++                    if command in {'deriv_oauth_link','ctrader_link'} and '_oauth_link_admission' in args:
++                        admission=args['_oauth_link_admission']
++                        if (not isinstance(admission,dict) or admission.get('account_control_domain')!=args.get('_expected_account_control_domain')
++                            or admission.get('resource_version')!=args.get('_expected_resource_version')
++                            or not isinstance(admission.get('device_id'),str) or not admission['device_id']
++                            or not isinstance(admission.get('operation_id'),str)
++                            or not re.fullmatch(r'[A-Za-z0-9_-]{20,128}',admission['operation_id'])
++                            or type(admission.get('expires_at_unix')) is not int
++                            or admission['expires_at_unix']<=int(time.time())):
++                            raise HTTPException(403,'Original OAuth link admission expired or changed before native write')
+                     if callable(guard):guard()
+                 def check_version():
+                     check_current_scope()
+@@ -603,6 +632,8 @@ def build_account_handlers(st: AccountControlSettings) -> dict[str, Callable[[di
+                             raise HTTPException(409, "account changed since owner approval; review the current account and approve again")
+                     check_current_scope()
+                 server_admitted = command=='deriv_create_demo' and '_native_operation' not in args and callable(args.get('_server_demo_admission'))
++                if command in {'deriv_oauth_link','ctrader_link'}:
++                    args={**args,'_link_before_registry':check_version,'_link_before_credentials':check_current_scope}
+                 if server_admitted:
+                     # Only the already authenticated registered owner route
+                     # can supply this closure. Labels/metadata confer nothing.
+diff --git a/trading/commander/app.py b/trading/commander/app.py
+index b7c50159..a28ca404 100644
+--- a/trading/commander/app.py
++++ b/trading/commander/app.py
+@@ -505,7 +505,7 @@ def create_app(settings: Optional[CommanderSettings] = None) -> FastAPI:
+                 # at actual dispatch without trying to consume that nonce again.
+                 current_account_authority()
+                 values = parsed.args
+-                if name == 'deriv_create_demo':
++                if name in {'deriv_create_demo','deriv_oauth_link','ctrader_link'}:
+                     values = {**values, '_account_dispatch_guard': current_account_authority}
+                     if legacy_demo:
+                         def admit_legacy_demo():
+diff --git a/backend/tests/test_owner_approval_original_binding.py b/backend/tests/test_owner_approval_original_binding.py
+new file mode 100644
+--- /dev/null
++++ b/backend/tests/test_owner_approval_original_binding.py
+@@ -0,0 +1,23 @@
++"""Historical commitment reads cannot issue, renew or consume A4 permission."""
++import json
++import pytest
++from conftest_automation import make_store
++from van_gateway.approval.service import OwnerApprovalService, OwnerApprovalError
++
++@pytest.mark.asyncio
++async def test_exact_expired_original_fact_is_read_only_and_cannot_be_used_as_permission(tmp_path):
++    service=OwnerApprovalService(await make_store(tmp_path))
++    identity=dict(device_id='owner',source_command_id='account:deriv_oauth_link',action_id='trading.account.deriv_oauth_link',text='exact committed original version and domain',parameters={'alias':'original'})
++    challenge=await service.issue(**identity,turn_id=None,project_id=None,now_unix=1000)
++    key=service.PREFIX+challenge.challenge_id
++    before=await service.store.fetchone('SELECT value FROM runtime_meta WHERE key=?',(key,))
++    fact=await service.original_binding_fact(challenge_id=challenge.challenge_id,**identity)
++    assert fact['historical_only'] is True and fact['execution_authority'] is False
++    assert fact['expires_at_unix']==challenge.expires_at_unix
++    assert (await service.store.fetchone('SELECT value FROM runtime_meta WHERE key=?',(key,)))['value']==before['value']
++    for changed in ({'device_id':'other'},{'text':'different version'},{'parameters':{'alias':'other'}},{'action_id':'other'}):
++        with pytest.raises(OwnerApprovalError):await service.original_binding_fact(challenge_id=challenge.challenge_id,**{**identity,**changed})
++    with pytest.raises(OwnerApprovalError,match='expired'):
++        await service.verify_and_consume(**identity,turn_id=None,project_id=None,challenge_id=challenge.challenge_id,signature_b64='unused',now_unix=challenge.expires_at_unix)
++    with pytest.raises(OwnerApprovalError,match='unavailable'):
++        await service.original_binding_fact(challenge_id=challenge.challenge_id,**identity)
+diff --git a/backend/tests/test_stateful_link_binding.py b/backend/tests/test_stateful_link_binding.py
+new file mode 100644
+--- /dev/null
++++ b/backend/tests/test_stateful_link_binding.py
+@@ -0,0 +1,423 @@
++"""Owned paired-HTTP/A4/native-registry counterexample; no real provider."""
++import json
++from pathlib import Path
++import pytest
++from fastapi import HTTPException
++from test_trading_api import client,_env
++from test_trading_oauth_scope import act
++from test_account_resource_binding import approved
++from test_commander_accounts import FakeDeriv
++from van_gateway.trading.accounts import LocalAccountControl
++from vati.accounts import AccountRegistry
++
++async def owned_ready_deriv(ac):
++    started=await act(ac,'oauth_start',{'broker':'deriv','app_id':'1089'})
++    assert started.status_code==200
++    state=started.json()['state']
++    callback=await ac.get('/v1/trading/oauth/deriv/callback',params={
++        'state':state,'acct1':'VRTC900','token1':'a1-linked','cur1':'USD'})
++    assert callback.status_code==200
++    return state
++
++
++@pytest.mark.asyncio
++async def test_original_oauth_link_domain_cannot_retarget_another_native_state(client,tmp_path,monkeypatch):
++    ac,app=client;peer=FakeDeriv()
++    def control(name):return LocalAccountControl(str(tmp_path/(name+'-accounts.json')),str(tmp_path/(name+'-secrets')),
++        operation_ledger=str(tmp_path/(name+'-native.sqlite')),deriv_connector=peer.connector)
++    original=control('original');other=control('other')
++    app.state.onboarding.control=original
++    expected=original.domain();actual=other.domain();assert expected!=actual
++    started=await act(ac,'oauth_start',{'broker':'deriv','app_id':'1089'})
++    assert started.status_code==200,started.text
++    state=started.json()['state']
++    callback=await ac.get('/v1/trading/oauth/deriv/callback',params={'state':state,'acct1':'VRTC900','token1':'a1-linked','cur1':'USD'})
++    assert callback.status_code==200,callback.text
++    args={'state':state,'loginid':'VRTC900','alias':'linked_original'}
++    body=await approved(ac,'deriv_oauth_link',args)
++    captured={};run=original.run
++    def switched(command,values):
++        if command=='deriv_oauth_link':
++            captured['native_expected_domain_forwarded']=values.get('_expected_account_control_domain')==expected
++            return other.run(command,values)
++        return run(command,values)
++    monkeypatch.setattr(original,'run',switched)
++    response=await ac.post('/v1/trading/accounts/action',json=body,headers={'X-Van-Account-Control-Domain':expected})
++    other_exists=(tmp_path/'other-accounts.json').exists()
++    observation={'action':'stateful deriv_oauth_link','paired_http_and_real_a4':True,
++        'original_and_replacement_native_domains_distinct':expected!=actual,
++        'explicit_original_domain_header':True,**captured,'status_code':response.status_code,
++        'original_registry_exists':(tmp_path/'original-accounts.json').exists(),
++        'replacement_registry_exists':other_exists,
++        'replacement_registered_alias':AccountRegistry(tmp_path/'other-accounts.json').get('linked_original').alias if other_exists else None,
++        'controlled_authorize_calls':sum('authorize' in m for m in peer.msgs),
++        'controlled_remote_account_creates':sum('new_account_virtual' in m for m in peer.msgs)}
++    assert observation['native_expected_domain_forwarded'] is True
++    assert observation['controlled_authorize_calls']==0 and observation['controlled_remote_account_creates']==0
++    assert response.status_code==409 and not other_exists, 'Original-domain owner approval wrote a link into another native state namespace'
++
++
++@pytest.mark.asyncio
++@pytest.mark.parametrize('broker',['deriv','ctrader'])
++async def test_original_link_result_is_bound_durable_and_readable_after_ack_loss(client,tmp_path,monkeypatch,broker):
++    from van_gateway.storage.db import Store
++    from van_gateway.config import get_settings
++    from van_gateway.trading.accounts import AccountOnboarding,OAuthPending
++    ac,app=client;peer=FakeDeriv()
++    ctl=LocalAccountControl(str(tmp_path/'accounts.json'),str(tmp_path/'secrets'),
++        operation_ledger=str(tmp_path/'native.sqlite'),deriv_connector=peer.connector)
++    app.state.onboarding.control=ctl
++    run=ctl.run;calls=[]
++    def control(command,values):
++        if command=='ctrader_oauth_exchange':return {'access_token':'owned-fixture-access','refresh_token':'owned-fixture-refresh'}
++        if command in {'ctrader_link','deriv_oauth_link'}:calls.append(command)
++        return run(command,values)
++    monkeypatch.setattr(ctl,'run',control)
++    args={'broker':broker}
++    if broker=='ctrader':args.update(client_id='fixture-id',client_secret='fixture-secret')
++    started=await act(ac,'oauth_start',args);assert started.status_code==200
++    state=started.json()['state'];action='deriv_oauth_link' if broker=='deriv' else 'ctrader_link'
++    query={'state':state,'acct1':'VRTC900','token1':'a1-linked','cur1':'USD'} if broker=='deriv' else {'state':state,'code':'owned-fixture-code'}
++    assert (await ac.get('/v1/trading/oauth/'+broker+'/callback',params=query)).status_code==200
++    link={'state':state,'alias':'linked_once',**({'loginid':'VRTC900'} if broker=='deriv' else {'ctid_trader_account_id':12345,'is_live':False})}
++    body=await approved(ac,action,link);original=body['approval_proof']['challenge_id'];domain=ctl.domain()
++    before_version=ctl.resource_version('linked_once')['resource_version']
++    def drop(point):
++        if point=='after_commit_before_reply':raise TimeoutError('owned lost commit acknowledgement')
++    app.state.onboarding.pending.effects.fault=drop
++    first=await ac.post('/v1/trading/accounts/action',json=body)
++    assert first.status_code==200,first.text
++    app.state.onboarding.pending.effects.fault=None
++    receipt=first.json()
++    assert receipt['operation_id']==original and receipt['oauth_state']==state
++    assert receipt['native_resource_version']==before_version and receipt['account_control_domain']==domain
++    assert ctl.resource_version('linked_once')['resource_version']!=before_version
++    cold=AccountOnboarding(ctl,OAuthPending(Store(app.state.store.path),get_settings().google_token_fernet_key),app.state.onboarding.public_base_url)
++    recovered=await cold.run(action,link,owner_device_id='test-device')
++    assert recovered==receipt and calls==[action]
++    reread=await act(ac,'oauth_pending',{'state':state})
++    assert reread.status_code==200 and reread.json()['operation_id']==original
++    assert reread.json()['ready'] is False and reread.json()['expired'] is True
++    assert (await act(ac,action,link)).json()==receipt and calls==[action]
++    from dataclasses import replace
++    registry=AccountRegistry(tmp_path/'accounts.json');current=registry.get('linked_once')
++    registry.replace(replace(current,label='Current owner label'))
++    historical=await act(ac,'oauth_pending',{'state':state})
++    assert historical.json()['account']['label']==receipt['account']['label']
++    assert AccountRegistry(tmp_path/'accounts.json').get('linked_once').label=='Current owner label'
++    assert (await act(ac,action,{**link,'alias':'different_alias'})).status_code==409
++    with pytest.raises(HTTPException) as conflict:
++        await cold.run(action,link,owner_device_id='test-device',native_resource_version='f'*64)
++    assert conflict.value.status_code==409
++    other=LocalAccountControl(str(tmp_path/'other.json'),str(tmp_path/'other-secrets'),operation_ledger=str(tmp_path/'other.sqlite'))
++    app.state.onboarding.control=other
++    denied=await act(ac,'oauth_pending',{'state':state})
++    assert denied.status_code==409 and denied.json()['reconciliation_required']
++    assert not (tmp_path/'other.json').exists() and calls==[action]
++    text=json.dumps(receipt)
++    for secret in ['a1-linked','owned-fixture-access','owned-fixture-refresh','fixture-secret']:
++        assert secret not in text
++
++
++@pytest.mark.asyncio
++@pytest.mark.parametrize('phase',['UNKNOWN','APPLIED'])
++async def test_legacy_unbound_link_is_never_adopted_into_current_namespace(client,tmp_path,phase):
++    from van_gateway.trading.oauth_effects import fingerprint
++    ac,app=client
++    ctl=LocalAccountControl(str(tmp_path/'accounts.json'),str(tmp_path/'secrets'),operation_ledger=str(tmp_path/'native.sqlite'))
++    app.state.onboarding.control=ctl
++    state='legacy_oauth_original_state_123456';args={'state':state,'alias':'legacy_alias','loginid':'VRTC900'}
++    digest=fingerprint({'state':state,'operation':'LINK','broker':'deriv','payload':args})
++    effects=app.state.onboarding.pending.effects
++    envelope={'schema':'van.oauth-effect-receipt/1','state':state,'operation':'LINK','broker':'deriv',
++        'owner_device_id':'test-device','request_digest':digest,'result':{'account':{'alias':'legacy_alias'}}}
++    encoded=effects.cipher.encrypt(json.dumps(envelope).encode()).decode() if phase=='APPLIED' else None
++    await app.state.store.execute("INSERT INTO trading_oauth_effects VALUES(?,?,?,?,?,?,?,?,?,?,?,?)",
++        (state,'LINK','deriv','test-device',digest,'account:legacy_alias',phase,'legacy-worker',encoded,None,1,1))
++    result=await act(ac,'oauth_pending',{'state':state})
++    assert result.status_code==200 and result.json()['scope_status']=='UNBOUND'
++    assert result.json()['status']==('RECORDED_APPLIED_UNBOUND' if phase=='APPLIED' else 'OUTCOME_UNCONFIRMED')
++    blocked=await act(ac,'deriv_oauth_link',args,expected_challenge_status=409)
++    assert blocked.status_code==409 and not (tmp_path/'accounts.json').exists()
++    row=await app.state.store.fetchone("SELECT phase,receipt_enc FROM trading_oauth_effects WHERE state=? AND operation='LINK'",(state,))
++    assert row['phase']==phase and row['receipt_enc']==encoded
++
++
++@pytest.mark.asyncio
++async def test_partial_link_holds_original_and_only_proved_other_native_domain_is_independent(client,tmp_path,monkeypatch):
++    import commander.accounts as native_module
++    ac,app=client;peer=FakeDeriv()
++    def control(label):return LocalAccountControl(str(tmp_path/(label+'.json')),str(tmp_path/(label+'-secrets')),
++        operation_ledger=str(tmp_path/(label+'.sqlite')),deriv_connector=peer.connector)
++    original=control('first');other=control('other');app.state.onboarding.control=original
++    state=await owned_ready_deriv(ac);args={'state':state,'alias':'shared_alias','loginid':'VRTC900'}
++    write=native_module._write_secrets
++    def fail(path,values,**kwargs):
++        if 'DERIV_API_TOKEN' in values:raise OSError('owned failure after registry effect')
++        return write(path,values,**kwargs)
++    monkeypatch.setattr(native_module,'_write_secrets',fail)
++    prepared=await approved(ac,'deriv_oauth_link',args)
++    original_version=original.resource_version('shared_alias')['resource_version']
++    result=await ac.post('/v1/trading/accounts/action',json=prepared)
++    assert result.status_code==409 and result.json()['effect_state']=='UNKNOWN'
++    registry=AccountRegistry(tmp_path/'first.json')
++    assert registry.get('shared_alias').login=='VRTC900' and registry.credentials('shared_alias')=={}
++    monkeypatch.setattr(native_module,'_write_secrets',write)
++    unknown=await act(ac,'oauth_pending',{'state':state})
++    assert unknown.status_code==200 and unknown.json()['effect_state']=='UNKNOWN'
++    assert unknown.json()['oauth_state']==state and unknown.json()['reconciliation_required']
++    row_before=await app.state.store.fetchone("SELECT * FROM trading_oauth_effects WHERE state=? AND operation='LINK'",(state,))
++    original_binding=app.state.onboarding.pending.effects._link_envelope(row_before)['native_binding']
++    explicit={**args,'original_operation_id':original_binding['operation_id'],
++        'original_approval_expires_at_unix':original_binding.get('original_expires_at_unix',original_binding['expires_at_unix']),
++        'original_resource_version':original_version,'original_issued_at_unix':prepared['issued_at_unix'],
++        'original_account_control_domain':original.domain()}
++    assert (await act(ac,'deriv_oauth_link',explicit)).status_code==409
++    row_after=await app.state.store.fetchone("SELECT phase,receipt_enc FROM trading_oauth_effects WHERE state=? AND operation='LINK'",(state,))
++    assert row_after['phase']=='UNKNOWN' and row_after['receipt_enc']==row_before['receipt_enc']
++    assert (await act(ac,'deriv_oauth_link',args)).status_code==409
++    newstate=await owned_ready_deriv(ac)
++    assert (await act(ac,'deriv_oauth_link',{**args,'state':newstate})).status_code==409
++    assert sum('authorize' in m for m in peer.msgs)==1
++    # A protected authenticated native state descriptor proves local-state
++    # independence, never another remote customer or permission to trade.
++    app.state.onboarding.control=other
++    assert other.domain()!=original.domain()
++    separate=await owned_ready_deriv(ac)
++    applied=await act(ac,'deriv_oauth_link',{**args,'state':separate})
++    assert applied.status_code==200 and applied.json()['account_control_domain']==other.domain(),applied.text
++    assert AccountRegistry(tmp_path/'other.json').get('shared_alias').login=='VRTC900'
++    row=await app.state.store.fetchone("SELECT * FROM trading_oauth_effects WHERE state=? AND operation='LINK'",(state,))
++    assert row['phase']=='UNKNOWN'
++    intent=app.state.onboarding.pending.effects._link_envelope(row)
++    assert intent['record_type']=='INTENT' and 'result' not in intent
++    assert intent['native_binding']['account_control_domain']==original.domain()
++    assert sum('authorize' in m for m in peer.msgs)==2
++
++
++@pytest.mark.asyncio
++@pytest.mark.parametrize('field',['native_resource_version','account_control_domain','oauth_state'])
++async def test_cached_receipt_fields_cannot_change_original_bound_scope(client,tmp_path,field):
++    from test_trading_api import HDR,DEVICE_PEM
++    ac,app=client;peer=FakeDeriv()
++    ctl=LocalAccountControl(str(tmp_path/'accounts.json'),str(tmp_path/'secrets'),
++        operation_ledger=str(tmp_path/'native.sqlite'),deriv_connector=peer.connector)
++    app.state.onboarding.control=ctl
++    state=await owned_ready_deriv(ac)
++    result=await act(ac,'deriv_oauth_link',{'state':state,'alias':'linked_once','loginid':'VRTC900'})
++    assert result.status_code==200,result.text
++    ticket=await ac.post('/v1/devices/pairing-ticket',json={'label':'second','ttl_seconds':600},headers=HDR)
++    paired=await ac.post('/v1/devices/pair',json={'pairing_token':ticket.json()['pairing_token'],'device_id':'second-device',
++        'device_secret':'second-device-secret','public_key_pem':DEVICE_PEM,'label':'second'})
++    headers={'X-Van-Ingress-Token':paired.json()['ingress_token'],'X-Van-Device-Token':paired.json()['device_access_token']}
++    wrong=await act(ac,'oauth_pending',{'state':state},device='second-device',secret='second-device-secret',headers=headers)
++    assert wrong.status_code==403
++    invalid=await act(ac,'oauth_pending',{'state':state},headers={'X-Van-Device-Token':'invalid-current-token'})
++    assert invalid.status_code in {401,403}
++    # A validly encrypted storage fault still cannot change typed original
++    # scope/version/state. The recorded APPLIED row is never rewritten.
++    row=await app.state.store.fetchone("SELECT * FROM trading_oauth_effects WHERE state=? AND operation='LINK'",(state,))
++    effects=app.state.onboarding.pending.effects;envelope=effects._link_envelope(row)
++    envelope['result'][field]='f'*64 if field!='oauth_state' else 'another_oauth_state_123456789'
++    encoded=effects.cipher.encrypt(json.dumps(envelope).encode()).decode()
++    await app.state.store.execute("UPDATE trading_oauth_effects SET receipt_enc=? WHERE state=? AND operation='LINK'",(encoded,state))
++    hold=await act(ac,'oauth_pending',{'state':state})
++    assert hold.status_code==409 and hold.json()['effect_state']=='UNKNOWN'
++    preserved=await app.state.store.fetchone("SELECT phase,receipt_enc FROM trading_oauth_effects WHERE state=? AND operation='LINK'",(state,))
++    assert preserved['phase']=='APPLIED' and preserved['receipt_enc']==encoded
++    assert sum('authorize' in m for m in peer.msgs)==1
++
++
++@pytest.mark.asyncio
++async def test_real_link_process_death_keeps_bound_original_unknown_without_native_resend(client,tmp_path,monkeypatch):
++    import os,sys,subprocess,signal
++    ac,app=client
++    ctl=LocalAccountControl(str(tmp_path/'accounts.json'),str(tmp_path/'secrets'),operation_ledger=str(tmp_path/'native.sqlite'))
++    app.state.onboarding.control=ctl
++    state=await owned_ready_deriv(ac);args={'state':state,'alias':'process_link','loginid':'VRTC900'}
++    body=await approved(ac,'deriv_oauth_link',args);original=body['approval_proof']['challenge_id'];domain=ctl.domain()
++    script='''import os,json
++from fastapi.testclient import TestClient
++from van_gateway.app import create_app
++from van_gateway.trading.accounts import LocalAccountControl
++app=create_app()
++control=LocalAccountControl(os.environ['LINK_REGISTRY'],os.environ['LINK_SECRETS'],operation_ledger=os.environ['LINK_LEDGER'])
++run=control.run
++def exit_after_claim(command,args):
++ if command=='deriv_oauth_link':os._exit(73)
++ return run(command,args)
++control.run=exit_after_claim
++app.state.onboarding.control=control
++with TestClient(app) as client:
++ response=client.post('/v1/trading/accounts/action',json=json.loads(os.environ['LINK_BODY']),headers=json.loads(os.environ['LINK_HEADERS']))
++ raise SystemExit(74)
++'''
++    env=dict(os.environ,LINK_REGISTRY=str(tmp_path/'accounts.json'),LINK_SECRETS=str(tmp_path/'secrets'),
++        LINK_LEDGER=str(tmp_path/'native.sqlite'),LINK_BODY=json.dumps(body),
++        LINK_HEADERS=json.dumps({key:value for key,value in ac.headers.items() if key.lower().startswith('x-van-')}))
++    child=subprocess.Popen([sys.executable,'-c',script],env=env,stdout=subprocess.DEVNULL,stderr=subprocess.PIPE,start_new_session=True)
++    try:
++        try:_,error=child.communicate(timeout=30)
++        except subprocess.TimeoutExpired:
++            os.killpg(child.pid,signal.SIGKILL);child.communicate();raise
++        assert len(error)<65536 and child.returncode==73,error.decode()
++    finally:
++        if child.poll() is None:os.killpg(child.pid,signal.SIGKILL);child.wait(timeout=5)
++    row=await app.state.store.fetchone("SELECT * FROM trading_oauth_effects WHERE state=? AND operation='LINK'",(state,))
++    assert row['phase']=='IN_FLIGHT'
++    intent=app.state.onboarding.pending.effects._link_envelope(row)
++    assert intent['record_type']=='INTENT' and intent['native_binding']['operation_id']==original
++    assert intent['native_binding']['account_control_domain']==domain
++    assert not (tmp_path/'accounts.json').exists()
++    run=ctl.run
++    def no_resend(command,values):
++        assert command!='deriv_oauth_link','Original unknown link was resent'
++        return run(command,values)
++    monkeypatch.setattr(ctl,'run',no_resend)
++    read=await act(ac,'oauth_pending',{'state':state})
++    assert read.status_code==200 and read.json()['effect_state']=='UNKNOWN'
++    assert read.json()['operation_id']==original and read.json()['native_reconciliation_required']
++    assert (await act(ac,'deriv_oauth_link',args)).status_code==409
++    assert not (tmp_path/'accounts.json').exists()
++
++
++@pytest.mark.asyncio
++async def test_authorization_readiness_is_not_link_completion_and_expired_prepared_grant_can_be_reconfirmed(client,tmp_path,monkeypatch):
++    import time
++    from types import SimpleNamespace
++    import commander.accounts as native_module
++    import van_gateway.approval.service as approval_module
++    from van_gateway.approval.service import OwnerApprovalError
++    from van_gateway.trading.accounts import account_approval_text
++    ac,app=client;peer=FakeDeriv();clock=[int(time.time())]
++    monkeypatch.setattr(approval_module,'time',SimpleNamespace(time=lambda:clock[0]))
++    monkeypatch.setattr(native_module,'time',SimpleNamespace(time=lambda:clock[0]))
++    ctl=LocalAccountControl(str(tmp_path/'accounts.json'),str(tmp_path/'secrets'),operation_ledger=str(tmp_path/'native.sqlite'),deriv_connector=peer.connector)
++    app.state.onboarding.control=ctl
++    state=await owned_ready_deriv(ac);args={'state':state,'alias':'prepared_link','loginid':'VRTC900'}
++    original=await approved(ac,'deriv_oauth_link',args);identity=original['approval_proof']['challenge_id']
++    domain=ctl.domain();version=ctl.resource_version('prepared_link')['resource_version']
++    row=await app.state.store.fetchone('SELECT value FROM runtime_meta WHERE key=?',('owner_approval:'+identity,))
++    record=json.loads(row['value']);original_expiry=record['expires_at_unix']
++    read=await act(ac,'oauth_pending',{'state':state})
++    assert read.status_code==200 and read.json()['ready'] is True
++    assert all(field not in read.json() for field in ('effect_state','operation_id','account','result'))
++    assert await app.state.store.fetchone("SELECT 1 FROM trading_oauth_effects WHERE state=? AND operation='LINK'",(state,)) is None
++    assert not (tmp_path/'accounts.json').exists() and peer.msgs==[]
++    # The client PREPARED stage is proved by its durable no-network producer,
++    # never by this missing row/readiness. A fresh real permission is required.
++    clock[0]=original_expiry+1
++    # Historical commitment remains readable after expiry, without renewing it.
++    read_fact=await act(ac,'oauth_pending',{'state':state,'original_binding':{
++        'operation_id':identity,'action':'deriv_oauth_link','issued_at_unix':original['issued_at_unix'],'semantic_args':args}})
++    assert read_fact.status_code==200,read_fact.text
++    fact=read_fact.json()['original_link_binding']
++    assert fact['resource_version']==version and fact['execution_authority'] is False
++    assert (await app.state.store.fetchone('SELECT value FROM runtime_meta WHERE key=?',('owner_approval:'+identity,)))['value']==row['value']
++    resume={**args,'original_operation_id':identity,'original_approval_expires_at_unix':original_expiry,
++        'original_resource_version':version,'original_issued_at_unix':original['issued_at_unix'],
++        'original_account_control_domain':domain}
++    fresh=await approved(ac,'deriv_oauth_link',resume);fresh_grant=fresh['approval_proof']['challenge_id']
++    assert fresh_grant!=identity
++    completed=await ac.post('/v1/trading/accounts/action',json=fresh)
++    assert completed.status_code==200,completed.text
++    assert completed.json()['operation_id']==identity and completed.json()['oauth_state']==state
++    intentrow=await app.state.store.fetchone("SELECT * FROM trading_oauth_effects WHERE state=? AND operation='LINK'",(state,))
++    binding=app.state.onboarding.pending.effects._link_envelope(intentrow)['native_binding']
++    assert binding['operation_id']==identity and binding['original_expires_at_unix']==original_expiry
++    assert binding['approval_operation_id']==fresh_grant and binding['expires_at_unix']>clock[0]
++    assert (await act(ac,'oauth_pending',{'state':state})).json()['operation_id']==identity
++    assert sum('authorize' in m for m in peer.msgs)==1
++    assert AccountRegistry(tmp_path/'accounts.json').get('prepared_link').login=='VRTC900'
++
++
++@pytest.mark.asyncio
++@pytest.mark.parametrize('original_first',[True,False])
++async def test_delayed_original_and_explicit_resume_arbitrate_one_immutable_original(client,tmp_path,original_first):
++    ac,app=client;peer=FakeDeriv()
++    ctl=LocalAccountControl(str(tmp_path/'accounts.json'),str(tmp_path/'secrets'),operation_ledger=str(tmp_path/'native.sqlite'),deriv_connector=peer.connector)
++    app.state.onboarding.control=ctl
++    state=await owned_ready_deriv(ac);args={'state':state,'alias':'same_original','loginid':'VRTC900'}
++    original=await approved(ac,'deriv_oauth_link',args);identity=original['approval_proof']['challenge_id']
++    row=await app.state.store.fetchone('SELECT value FROM runtime_meta WHERE key=?',('owner_approval:'+identity,))
++    expiry=json.loads(row['value'])['expires_at_unix']
++    resume={**args,'original_operation_id':identity,'original_approval_expires_at_unix':expiry,
++        'original_resource_version':ctl.resource_version(args['alias'])['resource_version'],
++        'original_issued_at_unix':original['issued_at_unix'],'original_account_control_domain':ctl.domain()}
++    renewed=await approved(ac,'deriv_oauth_link',resume)
++    order=[original,renewed] if original_first else [renewed,original]
++    results=[await ac.post('/v1/trading/accounts/action',json=body) for body in order]
++    assert all(result.status_code==200 for result in results),[result.text for result in results]
++    assert results[0].json()==results[1].json() and results[0].json()['operation_id']==identity
++    assert sum('authorize' in m for m in peer.msgs)==1
++    mismatched={**resume,'original_operation_id':'wrong_original_operation_12345'}
++    assert (await act(ac,'deriv_oauth_link',mismatched,expected_challenge_status=409)).status_code==409
++    assert (await act(ac,'deriv_oauth_link',{**resume,'alias':'wrong_semantic_alias'},expected_challenge_status=409)).status_code==409
++    assert sum('authorize' in m for m in peer.msgs)==1
++
++
++@pytest.mark.asyncio
++async def test_resume_id_cannot_adopt_a_different_original_winning_before_sql_claim(client,tmp_path,monkeypatch):
++    ac,app=client;peer=FakeDeriv()
++    ctl=LocalAccountControl(str(tmp_path/'accounts.json'),str(tmp_path/'secrets'),operation_ledger=str(tmp_path/'native.sqlite'),deriv_connector=peer.connector)
++    app.state.onboarding.control=ctl
++    state=await owned_ready_deriv(ac);args={'state':state,'alias':'arbitrated_link','loginid':'VRTC900'}
++    prepared=await approved(ac,'deriv_oauth_link',args);identity=prepared['approval_proof']['challenge_id']
++    row=await app.state.store.fetchone('SELECT value FROM runtime_meta WHERE key=?',('owner_approval:'+identity,))
++    expiry=json.loads(row['value'])['expires_at_unix']
++    resume={**args,'original_operation_id':identity,'original_approval_expires_at_unix':expiry,
++        'original_resource_version':ctl.resource_version(args['alias'])['resource_version'],
++        'original_issued_at_unix':prepared['issued_at_unix'],'original_account_control_domain':ctl.domain()}
++    renewed=await approved(ac,'deriv_oauth_link',resume)
++    begin=app.state.onboarding.pending.effects.begin;winner=[]
++    async def race(state_value,operation,broker,payload,**kwargs):
++        if operation=='LINK' and payload.get('original_operation_id') and not winner:
++            winner.append(True)
++            actual=await act(ac,'deriv_oauth_link',args)
++            assert actual.status_code==200,actual.text
++            winner[0]=actual.json()['operation_id']
++        return await begin(state_value,operation,broker,payload,**kwargs)
++    monkeypatch.setattr(app.state.onboarding.pending.effects,'begin',race)
++    refused=await ac.post('/v1/trading/accounts/action',json=renewed)
++    assert refused.status_code==409 and winner[0]!=identity
++    original=await act(ac,'oauth_pending',{'state':state})
++    assert original.status_code==200 and original.json()['operation_id']==winner[0]
++    assert sum('authorize' in m for m in peer.msgs)==1
++
++
++@pytest.mark.asyncio
++@pytest.mark.parametrize('fault',['generation','forged_generation','body','issued','domain','missing','canonical','parameters','device','legacy'])
++async def test_prepared_resume_joins_immutable_actual_a4_without_rebasing(client,tmp_path,fault):
++    ac,app=client;peer=FakeDeriv()
++    ctl=LocalAccountControl(str(tmp_path/'accounts.json'),str(tmp_path/'secrets'),operation_ledger=str(tmp_path/'native.sqlite'),deriv_connector=peer.connector)
++    app.state.onboarding.control=ctl
++    state=await owned_ready_deriv(ac);args={'state':state,'alias':'original_generation','loginid':'VRTC900'}
++    original=await approved(ac,'deriv_oauth_link',args);identity=original['approval_proof']['challenge_id']
++    key='owner_approval:'+identity
++    row=await app.state.store.fetchone('SELECT value FROM runtime_meta WHERE key=?',(key,))
++    record=json.loads(row['value']);version=ctl.resource_version(args['alias'])['resource_version']
++    resume={**args,'original_operation_id':identity,'original_approval_expires_at_unix':record['expires_at_unix'],
++        'original_resource_version':version,'original_issued_at_unix':original['issued_at_unix'],
++        'original_account_control_domain':ctl.domain()}
++    if fault in {'generation','forged_generation'}:
++        assert (await act(ac,'account_upsert',{'alias':args['alias'],'broker':'PAPER'})).status_code==200
++        assert (await act(ac,'account_remove',{'alias':args['alias']})).status_code==200
++        current=ctl.resource_version(args['alias'])['resource_version'];assert current!=version
++        if fault=='forged_generation':resume['original_resource_version']=current
++    elif fault=='body':resume['label']='Unapproved original meaning'
++    elif fault=='issued':resume['original_issued_at_unix']+=1
++    elif fault=='domain':resume['original_account_control_domain']='f'*64
++    elif fault=='missing':await app.state.store.execute('DELETE FROM runtime_meta WHERE key=?',(key,))
++    elif fault=='legacy':resume.pop('original_resource_version')
++    else:
++        if fault=='canonical':record['canonical']+='corrupt'
++        elif fault=='parameters':record['parameters']={'invented':'not committed'}
++        elif fault=='device':record['device_id']='another-owner'
++        await app.state.store.execute('UPDATE runtime_meta SET value=? WHERE key=?',(json.dumps(record),key))
++    before=await app.state.store.fetchone('SELECT value FROM runtime_meta WHERE key=?',(key,))
++    denied=await act(ac,'deriv_oauth_link',resume,expected_challenge_status=409)
++    assert denied.status_code==409,denied.text
++    assert await app.state.store.fetchone("SELECT 1 FROM trading_oauth_effects WHERE state=? AND operation='LINK'",(state,)) is None
++    assert not any('authorize' in msg for msg in peer.msgs)
++    after=await app.state.store.fetchone('SELECT value FROM runtime_meta WHERE key=?',(key,))
++    assert (dict(after) if after else None)==(dict(before) if before else None)
+diff --git a/trading/tests/test_oauth_link_currentness.py b/trading/tests/test_oauth_link_currentness.py
+new file mode 100644
+--- /dev/null
++++ b/trading/tests/test_oauth_link_currentness.py
+@@ -0,0 +1,123 @@
++"""Actual native link writers/registered owner route, injected sockets only."""
++import json,time
++from pathlib import Path
++from types import SimpleNamespace
++import pytest
++from fastapi import HTTPException
++from fastapi.testclient import TestClient
++from commander.accounts import AccountControlSettings,build_account_handlers
++from commander.app import CommanderSettings,create_app
++from commander.auth import sign_headers,HDR_TS,SKEW_S
++from test_commander_accounts import FakeDeriv
++from vati.accounts import AccountRegistry,Account
++
++class DelayedAuthorization(FakeDeriv):
++    def __init__(self):super().__init__();self.after=None
++    def recv(self):
++        response=super().recv()
++        if self.after and self.msgs and 'authorize' in self.msgs[-1]:
++            callback,self.after=self.after,None;callback()
++        return response
++
++
++def fixture(tmp_path):
++    peer=DelayedAuthorization()
++    h=build_account_handlers(AccountControlSettings(str(tmp_path/'accounts.json'),str(tmp_path/'secrets'),
++        operation_ledger=str(tmp_path/'native.sqlite'),deriv_connector=peer.connector))
++    domain=h['account_revision']({})['account_control_domain']
++    version=h['account_revision']({'alias':'linked_once'})['resource_version']
++    args={'alias':'linked_once','loginid':'VRTC900','token':'a1-linked','currency':'USD',
++        '_expected_resource_version':version,'_expected_account_control_domain':domain,
++        '_oauth_link_admission':{'operation_id':'original_link_operation_123456','device_id':'owner-device',
++            'account_control_domain':domain,'resource_version':version,'expires_at_unix':int(time.time())+60}}
++    return peer,h,args
++
++
++@pytest.mark.parametrize('change',['expired','namespace','version','authority'])
++def test_slow_authorization_cannot_overtake_original_link_currentness(tmp_path,monkeypatch,change):
++    import commander.accounts as module
++    peer,h,args=fixture(tmp_path)
++    if change=='expired':
++        peer.after=lambda:monkeypatch.setattr(module,'time',SimpleNamespace(time=lambda:args['_oauth_link_admission']['expires_at_unix']))
++    elif change=='namespace':
++        peer.after=lambda:(tmp_path/'secrets/.account-control-domain.env').write_text('invalid-owned-namespace')
++    elif change=='version':
++        peer.after=lambda:AccountRegistry(tmp_path/'accounts.json').add(Account(alias='linked_once',broker='PAPER',mode='DEMO_TRADER',currency='USD'))
++    else:
++        revoked=[False]
++        def guard():
++            if revoked[0]:raise HTTPException(401,'owned native authority revoked')
++        args['_account_dispatch_guard']=guard;peer.after=lambda:revoked.__setitem__(0,True)
++    with pytest.raises(HTTPException):h['deriv_oauth_link'](args)
++    assert len([m for m in peer.msgs if 'authorize' in m])==1
++    assert not (tmp_path/'secrets/linked_once.env').exists()
++    if change=='version':assert AccountRegistry(tmp_path/'accounts.json').get('linked_once').broker=='PAPER'
++    else:assert not (tmp_path/'accounts.json').exists()
++
++
++def test_expiry_before_protected_credentials_preserves_partial_history(tmp_path,monkeypatch):
++    import commander.accounts as module
++    peer,h,args=fixture(tmp_path);write=module._write_secrets
++    def delayed(path,values,**kwargs):
++        if 'DERIV_API_TOKEN' in values:
++            monkeypatch.setattr(module,'time',SimpleNamespace(time=lambda:args['_oauth_link_admission']['expires_at_unix']))
++        return write(path,values,**kwargs)
++    monkeypatch.setattr(module,'_write_secrets',delayed)
++    with pytest.raises(HTTPException):h['deriv_oauth_link'](args)
++    registry=AccountRegistry(tmp_path/'accounts.json')
++    assert registry.get('linked_once').login=='VRTC900' and registry.credentials('linked_once')=={}
++
++
++@pytest.mark.parametrize('change',['key','time'])
++def test_actual_registered_signed_owner_rechecked_after_authorize(tmp_path,monkeypatch,change):
++    import commander.auth as auth
++    peer=DelayedAuthorization();token='owned-current-native-token-'*3
++    settings=CommanderSettings(tokens={'van-gateway':token},ledger=str(tmp_path/'native.sqlite'),
++        log_dir=str(tmp_path/'log'),units=(),account_control=AccountControlSettings(str(tmp_path/'accounts.json'),
++            str(tmp_path/'secrets'),deriv_connector=peer.connector))
++    app=create_app(settings)
++    with TestClient(app) as client:
++        def call(command,args):
++            path='/v1/cmd/'+command;body=json.dumps({'args':args}).encode()
++            return client.post(path,content=body,headers={**sign_headers(token,'POST',path,body),'content-type':'application/json'})
++        version=call('account_revision',{'alias':'linked_once'}).json()['result']['resource_version']
++        if change=='key':peer.after=lambda:settings.tokens.__setitem__('van-gateway','replacement-current-key-'*3)
++        else:peer.after=lambda:monkeypatch.setattr(auth,'time',SimpleNamespace(time=lambda:time.time()+SKEW_S+1))
++        response=call('deriv_oauth_link',{'alias':'linked_once','loginid':'VRTC900','token':'a1-linked','currency':'USD','_expected_resource_version':version})
++        assert response.status_code==401,response.text
++        assert not (tmp_path/'accounts.json').exists() and not (tmp_path/'secrets/linked_once.env').exists()
++        assert len([m for m in peer.msgs if 'authorize' in m])==1
++
++
++def test_queued_profile_writer_keeps_original_link_and_refuses_stale_preimage(tmp_path,monkeypatch):
++    from dataclasses import replace
++    from threading import Thread,Event
++    peer,h,args=fixture(tmp_path);public=Account.public;writers=[];failures=[]
++    attempted=Event();finished=Event()
++    def readback(account):
++        result=public(account)
++        if account.alias=='linked_once' and not writers:
++            def edit():
++                try:
++                    registry=AccountRegistry(tmp_path/'accounts.json');attempted.set()
++                    registry.replace(replace(registry.get('linked_once'),label='Newer owner edit'))
++                except BaseException as exc:failures.append(exc)
++                finally:finished.set()
++            writer=Thread(target=edit,daemon=True);writers.append(writer);writer.start()
++            assert attempted.wait(timeout=5) and not finished.is_set()
++        return result
++    monkeypatch.setattr(Account,'public',readback)
++    try:result=h['deriv_oauth_link'](args)
++    finally:
++        for writer in writers:writer.join(timeout=5)
++    from vati.accounts.registry import AccountRegistryError
++    assert writers and all(not writer.is_alive() for writer in writers)
++    assert len(failures)==1 and isinstance(failures[0],AccountRegistryError)
++    assert 'changed since read' in str(failures[0])
++    registry=AccountRegistry(tmp_path/'accounts.json')
++    assert result['account']['label']=='Deriv VRTC900'
++    assert registry.get('linked_once').label=='Deriv VRTC900'
++    registry.replace(replace(registry.get('linked_once'),label='Newer owner edit'))
++    assert registry.get('linked_once').label=='Newer owner edit'
++    assert result['account']['label']=='Deriv VRTC900'
++    assert registry.credentials('linked_once')['DERIV_API_TOKEN']=='a1-linked'
