@@ -30,10 +30,13 @@ def run_session(tmp_path, eurusd, steps=None):
 
 def test_portfolio_accounts_risk_and_market_state(tmp_path, eurusd):
     led, reg, lake, bars = run_session(tmp_path, eurusd)
-    acc = account_states(led, reg.public())
+    # This fixture's historical session is current at its source clock, not
+    # at the wall clock of the machine running the test years later.
+    source_now = list(led.iter(EventKind.ACCOUNT_SNAPSHOT))[-1].event_time_ms
+    acc = account_states(led, reg.public(), now_ms=source_now)
     assert len(acc) == 1 and acc[0]["alias"] == "paper_lab" and acc[0]["connection_state"] == "LIVE" and acc[0]["safety_identity"] == "PAPER" and D(acc[0]["equity"]) > 0
     assert acc[0]["drawdown_pct"] is not None and D(acc[0]["drawdown_pct"]) >= 0 and acc[0]["session_event"] == "STARTED"
-    pf = portfolio(led, reg.public())
+    pf = portfolio(led, reg.public(), now_ms=source_now)
     assert pf["totals"]["accounts_in_reporting_currency"] == 1 and D(pf["totals"]["equity"]) == D(acc[0]["equity"]) and pf["totals"]["accounts_in_other_currencies"] == []
     assert pf["data_state"]["EURUSD"]["state"] == "LIVE" and isinstance(pf["potential_trades"], list) and len(pf["recent_trades"]) <= 5
     assert pf["risk"]["kill_switch_active"] == [] and pf["risk"]["open_trades"] == len(pf["open_positions"])

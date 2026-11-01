@@ -516,7 +516,7 @@
               "file": "android/app/src/main/java/com/dial/van/trading/TradingRepository.kt",
               "line": 31,
               "ref": "WORKSPACE_PATCH",
-              "sha256": "6c1a9a9f5cd7cea10f84a99a9c94fe7d4cb4502be270f4f86e8039e770b89368",
+              "sha256": "f9ae9f30186ad5211239e890b7a304df490147f153cad9c3a68613aa56858b2f",
               "receiver": "client",
               "symbol": "tradingAssessment",
               "namespace": "VanGatewayClient",
@@ -525,7 +525,7 @@
                 "file": "android/app/src/main/java/com/dial/van/trading/TradingRepository.kt",
                 "line": 6,
                 "ref": "WORKSPACE_PATCH",
-                "sha256": "6c1a9a9f5cd7cea10f84a99a9c94fe7d4cb4502be270f4f86e8039e770b89368"
+                "sha256": "f9ae9f30186ad5211239e890b7a304df490147f153cad9c3a68613aa56858b2f"
               }
             }
           ],
@@ -924,7 +924,7 @@
           "file": "android/app/src/main/java/com/dial/van/trading/TradingRepository.kt",
           "line": 31,
           "ref": "WORKSPACE_PATCH",
-          "sha256": "6c1a9a9f5cd7cea10f84a99a9c94fe7d4cb4502be270f4f86e8039e770b89368",
+          "sha256": "f9ae9f30186ad5211239e890b7a304df490147f153cad9c3a68613aa56858b2f",
           "receiver": "client",
           "symbol": "tradingAssessment",
           "namespace": "VanGatewayClient",
@@ -933,7 +933,7 @@
             "file": "android/app/src/main/java/com/dial/van/trading/TradingRepository.kt",
             "line": 6,
             "ref": "WORKSPACE_PATCH",
-            "sha256": "6c1a9a9f5cd7cea10f84a99a9c94fe7d4cb4502be270f4f86e8039e770b89368"
+            "sha256": "f9ae9f30186ad5211239e890b7a304df490147f153cad9c3a68613aa56858b2f"
           },
           "endpoint_id": "VE-70d344b53103",
           "kind": "direct_client_method"
@@ -13397,7 +13397,7 @@
               "file": "android/app/src/main/java/com/dial/van/trading/TradingRepository.kt",
               "line": 14,
               "ref": "WORKSPACE_PATCH",
-              "sha256": "6c1a9a9f5cd7cea10f84a99a9c94fe7d4cb4502be270f4f86e8039e770b89368",
+              "sha256": "f9ae9f30186ad5211239e890b7a304df490147f153cad9c3a68613aa56858b2f",
               "receiver": "client",
               "symbol": "tradingPortfolio",
               "namespace": "VanGatewayClient",
@@ -13406,7 +13406,7 @@
                 "file": "android/app/src/main/java/com/dial/van/trading/TradingRepository.kt",
                 "line": 6,
                 "ref": "WORKSPACE_PATCH",
-                "sha256": "6c1a9a9f5cd7cea10f84a99a9c94fe7d4cb4502be270f4f86e8039e770b89368"
+                "sha256": "f9ae9f30186ad5211239e890b7a304df490147f153cad9c3a68613aa56858b2f"
               }
             }
           ],
@@ -13454,7 +13454,7 @@
               "file": "android/app/src/main/java/com/dial/van/trading/TradingRepository.kt",
               "line": 31,
               "ref": "WORKSPACE_PATCH",
-              "sha256": "6c1a9a9f5cd7cea10f84a99a9c94fe7d4cb4502be270f4f86e8039e770b89368",
+              "sha256": "f9ae9f30186ad5211239e890b7a304df490147f153cad9c3a68613aa56858b2f",
               "receiver": "client",
               "symbol": "tradingAssessment",
               "namespace": "VanGatewayClient",
@@ -13463,7 +13463,7 @@
                 "file": "android/app/src/main/java/com/dial/van/trading/TradingRepository.kt",
                 "line": 6,
                 "ref": "WORKSPACE_PATCH",
-                "sha256": "6c1a9a9f5cd7cea10f84a99a9c94fe7d4cb4502be270f4f86e8039e770b89368"
+                "sha256": "f9ae9f30186ad5211239e890b7a304df490147f153cad9c3a68613aa56858b2f"
               }
             }
           ],
@@ -13495,7 +13495,7 @@
               "file": "android/app/src/main/java/com/dial/van/trading/TradingRepository.kt",
               "line": 27,
               "ref": "WORKSPACE_PATCH",
-              "sha256": "6c1a9a9f5cd7cea10f84a99a9c94fe7d4cb4502be270f4f86e8039e770b89368",
+              "sha256": "f9ae9f30186ad5211239e890b7a304df490147f153cad9c3a68613aa56858b2f",
               "receiver": "client",
               "symbol": "tradingPositions",
               "namespace": "VanGatewayClient",
@@ -13504,7 +13504,7 @@
                 "file": "android/app/src/main/java/com/dial/van/trading/TradingRepository.kt",
                 "line": 6,
                 "ref": "WORKSPACE_PATCH",
-                "sha256": "6c1a9a9f5cd7cea10f84a99a9c94fe7d4cb4502be270f4f86e8039e770b89368"
+                "sha256": "f9ae9f30186ad5211239e890b7a304df490147f153cad9c3a68613aa56858b2f"
               }
             }
           ],
@@ -13536,7 +13536,7 @@
               "file": "android/app/src/main/java/com/dial/van/trading/TradingRepository.kt",
               "line": 28,
               "ref": "WORKSPACE_PATCH",
-              "sha256": "6c1a9a9f5cd7cea10f84a99a9c94fe7d4cb4502be270f4f86e8039e770b89368",
+              "sha256": "f9ae9f30186ad5211239e890b7a304df490147f153cad9c3a68613aa56858b2f",
               "receiver": "client",
               "symbol": "tradingEvents",
               "namespace": "VanGatewayClient",
@@ -13545,7 +13545,7 @@
                 "file": "android/app/src/main/java/com/dial/van/trading/TradingRepository.kt",
                 "line": 6,
                 "ref": "WORKSPACE_PATCH",
-                "sha256": "6c1a9a9f5cd7cea10f84a99a9c94fe7d4cb4502be270f4f86e8039e770b89368"
+                "sha256": "f9ae9f30186ad5211239e890b7a304df490147f153cad9c3a68613aa56858b2f"
               }
             },
             {
@@ -13631,7 +13631,7 @@
               "file": "android/app/src/main/java/com/dial/van/trading/TradingRepository.kt",
               "line": 10,
               "ref": "WORKSPACE_PATCH",
-              "sha256": "6c1a9a9f5cd7cea10f84a99a9c94fe7d4cb4502be270f4f86e8039e770b89368",
+              "sha256": "f9ae9f30186ad5211239e890b7a304df490147f153cad9c3a68613aa56858b2f",
               "receiver": "client",
               "symbol": "tradingStatus",
               "namespace": "VanGatewayClient",
@@ -13640,7 +13640,7 @@
                 "file": "android/app/src/main/java/com/dial/van/trading/TradingRepository.kt",
                 "line": 6,
                 "ref": "WORKSPACE_PATCH",
-                "sha256": "6c1a9a9f5cd7cea10f84a99a9c94fe7d4cb4502be270f4f86e8039e770b89368"
+                "sha256": "f9ae9f30186ad5211239e890b7a304df490147f153cad9c3a68613aa56858b2f"
               }
             }
           ],
@@ -13661,7 +13661,7 @@
           "file": "android/app/src/main/java/com/dial/van/trading/TradingRepository.kt",
           "line": 14,
           "ref": "WORKSPACE_PATCH",
-          "sha256": "6c1a9a9f5cd7cea10f84a99a9c94fe7d4cb4502be270f4f86e8039e770b89368",
+          "sha256": "f9ae9f30186ad5211239e890b7a304df490147f153cad9c3a68613aa56858b2f",
           "receiver": "client",
           "symbol": "tradingPortfolio",
           "namespace": "VanGatewayClient",
@@ -13670,7 +13670,7 @@
             "file": "android/app/src/main/java/com/dial/van/trading/TradingRepository.kt",
             "line": 6,
             "ref": "WORKSPACE_PATCH",
-            "sha256": "6c1a9a9f5cd7cea10f84a99a9c94fe7d4cb4502be270f4f86e8039e770b89368"
+            "sha256": "f9ae9f30186ad5211239e890b7a304df490147f153cad9c3a68613aa56858b2f"
           },
           "endpoint_id": "VE-df932ad7aa9c",
           "kind": "direct_client_method"
@@ -13706,7 +13706,7 @@
           "file": "android/app/src/main/java/com/dial/van/trading/TradingRepository.kt",
           "line": 31,
           "ref": "WORKSPACE_PATCH",
-          "sha256": "6c1a9a9f5cd7cea10f84a99a9c94fe7d4cb4502be270f4f86e8039e770b89368",
+          "sha256": "f9ae9f30186ad5211239e890b7a304df490147f153cad9c3a68613aa56858b2f",
           "receiver": "client",
           "symbol": "tradingAssessment",
           "namespace": "VanGatewayClient",
@@ -13715,7 +13715,7 @@
             "file": "android/app/src/main/java/com/dial/van/trading/TradingRepository.kt",
             "line": 6,
             "ref": "WORKSPACE_PATCH",
-            "sha256": "6c1a9a9f5cd7cea10f84a99a9c94fe7d4cb4502be270f4f86e8039e770b89368"
+            "sha256": "f9ae9f30186ad5211239e890b7a304df490147f153cad9c3a68613aa56858b2f"
           },
           "endpoint_id": "VE-70d344b53103",
           "kind": "direct_client_method"
@@ -13733,7 +13733,7 @@
           "file": "android/app/src/main/java/com/dial/van/trading/TradingRepository.kt",
           "line": 27,
           "ref": "WORKSPACE_PATCH",
-          "sha256": "6c1a9a9f5cd7cea10f84a99a9c94fe7d4cb4502be270f4f86e8039e770b89368",
+          "sha256": "f9ae9f30186ad5211239e890b7a304df490147f153cad9c3a68613aa56858b2f",
           "receiver": "client",
           "symbol": "tradingPositions",
           "namespace": "VanGatewayClient",
@@ -13742,7 +13742,7 @@
             "file": "android/app/src/main/java/com/dial/van/trading/TradingRepository.kt",
             "line": 6,
             "ref": "WORKSPACE_PATCH",
-            "sha256": "6c1a9a9f5cd7cea10f84a99a9c94fe7d4cb4502be270f4f86e8039e770b89368"
+            "sha256": "f9ae9f30186ad5211239e890b7a304df490147f153cad9c3a68613aa56858b2f"
           },
           "endpoint_id": "VE-17a8bae5d1a9",
           "kind": "direct_client_method"
@@ -13760,7 +13760,7 @@
           "file": "android/app/src/main/java/com/dial/van/trading/TradingRepository.kt",
           "line": 28,
           "ref": "WORKSPACE_PATCH",
-          "sha256": "6c1a9a9f5cd7cea10f84a99a9c94fe7d4cb4502be270f4f86e8039e770b89368",
+          "sha256": "f9ae9f30186ad5211239e890b7a304df490147f153cad9c3a68613aa56858b2f",
           "receiver": "client",
           "symbol": "tradingEvents",
           "namespace": "VanGatewayClient",
@@ -13769,7 +13769,7 @@
             "file": "android/app/src/main/java/com/dial/van/trading/TradingRepository.kt",
             "line": 6,
             "ref": "WORKSPACE_PATCH",
-            "sha256": "6c1a9a9f5cd7cea10f84a99a9c94fe7d4cb4502be270f4f86e8039e770b89368"
+            "sha256": "f9ae9f30186ad5211239e890b7a304df490147f153cad9c3a68613aa56858b2f"
           },
           "endpoint_id": "VE-3cd653f61b92",
           "kind": "direct_client_method"
@@ -13845,7 +13845,7 @@
           "file": "android/app/src/main/java/com/dial/van/trading/TradingRepository.kt",
           "line": 10,
           "ref": "WORKSPACE_PATCH",
-          "sha256": "6c1a9a9f5cd7cea10f84a99a9c94fe7d4cb4502be270f4f86e8039e770b89368",
+          "sha256": "f9ae9f30186ad5211239e890b7a304df490147f153cad9c3a68613aa56858b2f",
           "receiver": "client",
           "symbol": "tradingStatus",
           "namespace": "VanGatewayClient",
@@ -13854,7 +13854,7 @@
             "file": "android/app/src/main/java/com/dial/van/trading/TradingRepository.kt",
             "line": 6,
             "ref": "WORKSPACE_PATCH",
-            "sha256": "6c1a9a9f5cd7cea10f84a99a9c94fe7d4cb4502be270f4f86e8039e770b89368"
+            "sha256": "f9ae9f30186ad5211239e890b7a304df490147f153cad9c3a68613aa56858b2f"
           },
           "endpoint_id": "VE-7f665d15bcb7",
           "kind": "direct_client_method"
@@ -14678,7 +14678,7 @@
               "file": "android/app/src/main/java/com/dial/van/trading/TradingRepository.kt",
               "line": 27,
               "ref": "WORKSPACE_PATCH",
-              "sha256": "6c1a9a9f5cd7cea10f84a99a9c94fe7d4cb4502be270f4f86e8039e770b89368",
+              "sha256": "f9ae9f30186ad5211239e890b7a304df490147f153cad9c3a68613aa56858b2f",
               "receiver": "client",
               "symbol": "tradingPositions",
               "namespace": "VanGatewayClient",
@@ -14687,7 +14687,7 @@
                 "file": "android/app/src/main/java/com/dial/van/trading/TradingRepository.kt",
                 "line": 6,
                 "ref": "WORKSPACE_PATCH",
-                "sha256": "6c1a9a9f5cd7cea10f84a99a9c94fe7d4cb4502be270f4f86e8039e770b89368"
+                "sha256": "f9ae9f30186ad5211239e890b7a304df490147f153cad9c3a68613aa56858b2f"
               }
             }
           ],
@@ -14708,7 +14708,7 @@
           "file": "android/app/src/main/java/com/dial/van/trading/TradingRepository.kt",
           "line": 27,
           "ref": "WORKSPACE_PATCH",
-          "sha256": "6c1a9a9f5cd7cea10f84a99a9c94fe7d4cb4502be270f4f86e8039e770b89368",
+          "sha256": "f9ae9f30186ad5211239e890b7a304df490147f153cad9c3a68613aa56858b2f",
           "receiver": "client",
           "symbol": "tradingPositions",
           "namespace": "VanGatewayClient",
@@ -14717,7 +14717,7 @@
             "file": "android/app/src/main/java/com/dial/van/trading/TradingRepository.kt",
             "line": 6,
             "ref": "WORKSPACE_PATCH",
-            "sha256": "6c1a9a9f5cd7cea10f84a99a9c94fe7d4cb4502be270f4f86e8039e770b89368"
+            "sha256": "f9ae9f30186ad5211239e890b7a304df490147f153cad9c3a68613aa56858b2f"
           },
           "endpoint_id": "VE-17a8bae5d1a9",
           "kind": "direct_client_method"
@@ -15160,7 +15160,7 @@
               "file": "android/app/src/main/java/com/dial/van/trading/TradingRepository.kt",
               "line": 27,
               "ref": "WORKSPACE_PATCH",
-              "sha256": "6c1a9a9f5cd7cea10f84a99a9c94fe7d4cb4502be270f4f86e8039e770b89368",
+              "sha256": "f9ae9f30186ad5211239e890b7a304df490147f153cad9c3a68613aa56858b2f",
               "receiver": "client",
               "symbol": "tradingPositions",
               "namespace": "VanGatewayClient",
@@ -15169,7 +15169,7 @@
                 "file": "android/app/src/main/java/com/dial/van/trading/TradingRepository.kt",
                 "line": 6,
                 "ref": "WORKSPACE_PATCH",
-                "sha256": "6c1a9a9f5cd7cea10f84a99a9c94fe7d4cb4502be270f4f86e8039e770b89368"
+                "sha256": "f9ae9f30186ad5211239e890b7a304df490147f153cad9c3a68613aa56858b2f"
               }
             }
           ],
@@ -15201,7 +15201,7 @@
               "file": "android/app/src/main/java/com/dial/van/trading/TradingRepository.kt",
               "line": 19,
               "ref": "WORKSPACE_PATCH",
-              "sha256": "6c1a9a9f5cd7cea10f84a99a9c94fe7d4cb4502be270f4f86e8039e770b89368",
+              "sha256": "f9ae9f30186ad5211239e890b7a304df490147f153cad9c3a68613aa56858b2f",
               "receiver": "client",
               "symbol": "tradingTradeDetail",
               "namespace": "VanGatewayClient",
@@ -15210,7 +15210,7 @@
                 "file": "android/app/src/main/java/com/dial/van/trading/TradingRepository.kt",
                 "line": 6,
                 "ref": "WORKSPACE_PATCH",
-                "sha256": "6c1a9a9f5cd7cea10f84a99a9c94fe7d4cb4502be270f4f86e8039e770b89368"
+                "sha256": "f9ae9f30186ad5211239e890b7a304df490147f153cad9c3a68613aa56858b2f"
               }
             }
           ],
@@ -15242,7 +15242,7 @@
               "file": "android/app/src/main/java/com/dial/van/trading/TradingRepository.kt",
               "line": 28,
               "ref": "WORKSPACE_PATCH",
-              "sha256": "6c1a9a9f5cd7cea10f84a99a9c94fe7d4cb4502be270f4f86e8039e770b89368",
+              "sha256": "f9ae9f30186ad5211239e890b7a304df490147f153cad9c3a68613aa56858b2f",
               "receiver": "client",
               "symbol": "tradingEvents",
               "namespace": "VanGatewayClient",
@@ -15251,7 +15251,7 @@
                 "file": "android/app/src/main/java/com/dial/van/trading/TradingRepository.kt",
                 "line": 6,
                 "ref": "WORKSPACE_PATCH",
-                "sha256": "6c1a9a9f5cd7cea10f84a99a9c94fe7d4cb4502be270f4f86e8039e770b89368"
+                "sha256": "f9ae9f30186ad5211239e890b7a304df490147f153cad9c3a68613aa56858b2f"
               }
             },
             {
@@ -15337,7 +15337,7 @@
               "file": "android/app/src/main/java/com/dial/van/trading/TradingRepository.kt",
               "line": 15,
               "ref": "WORKSPACE_PATCH",
-              "sha256": "6c1a9a9f5cd7cea10f84a99a9c94fe7d4cb4502be270f4f86e8039e770b89368",
+              "sha256": "f9ae9f30186ad5211239e890b7a304df490147f153cad9c3a68613aa56858b2f",
               "receiver": "client",
               "symbol": "tradingMarketState",
               "namespace": "VanGatewayClient",
@@ -15346,7 +15346,7 @@
                 "file": "android/app/src/main/java/com/dial/van/trading/TradingRepository.kt",
                 "line": 6,
                 "ref": "WORKSPACE_PATCH",
-                "sha256": "6c1a9a9f5cd7cea10f84a99a9c94fe7d4cb4502be270f4f86e8039e770b89368"
+                "sha256": "f9ae9f30186ad5211239e890b7a304df490147f153cad9c3a68613aa56858b2f"
               }
             }
           ],
@@ -15367,7 +15367,7 @@
           "file": "android/app/src/main/java/com/dial/van/trading/TradingRepository.kt",
           "line": 27,
           "ref": "WORKSPACE_PATCH",
-          "sha256": "6c1a9a9f5cd7cea10f84a99a9c94fe7d4cb4502be270f4f86e8039e770b89368",
+          "sha256": "f9ae9f30186ad5211239e890b7a304df490147f153cad9c3a68613aa56858b2f",
           "receiver": "client",
           "symbol": "tradingPositions",
           "namespace": "VanGatewayClient",
@@ -15376,7 +15376,7 @@
             "file": "android/app/src/main/java/com/dial/van/trading/TradingRepository.kt",
             "line": 6,
             "ref": "WORKSPACE_PATCH",
-            "sha256": "6c1a9a9f5cd7cea10f84a99a9c94fe7d4cb4502be270f4f86e8039e770b89368"
+            "sha256": "f9ae9f30186ad5211239e890b7a304df490147f153cad9c3a68613aa56858b2f"
           },
           "endpoint_id": "VE-17a8bae5d1a9",
           "kind": "direct_client_method"
@@ -15394,7 +15394,7 @@
           "file": "android/app/src/main/java/com/dial/van/trading/TradingRepository.kt",
           "line": 19,
           "ref": "WORKSPACE_PATCH",
-          "sha256": "6c1a9a9f5cd7cea10f84a99a9c94fe7d4cb4502be270f4f86e8039e770b89368",
+          "sha256": "f9ae9f30186ad5211239e890b7a304df490147f153cad9c3a68613aa56858b2f",
           "receiver": "client",
           "symbol": "tradingTradeDetail",
           "namespace": "VanGatewayClient",
@@ -15403,7 +15403,7 @@
             "file": "android/app/src/main/java/com/dial/van/trading/TradingRepository.kt",
             "line": 6,
             "ref": "WORKSPACE_PATCH",
-            "sha256": "6c1a9a9f5cd7cea10f84a99a9c94fe7d4cb4502be270f4f86e8039e770b89368"
+            "sha256": "f9ae9f30186ad5211239e890b7a304df490147f153cad9c3a68613aa56858b2f"
           },
           "endpoint_id": "VE-09993102f92f",
           "kind": "direct_client_method"
@@ -15421,7 +15421,7 @@
           "file": "android/app/src/main/java/com/dial/van/trading/TradingRepository.kt",
           "line": 28,
           "ref": "WORKSPACE_PATCH",
-          "sha256": "6c1a9a9f5cd7cea10f84a99a9c94fe7d4cb4502be270f4f86e8039e770b89368",
+          "sha256": "f9ae9f30186ad5211239e890b7a304df490147f153cad9c3a68613aa56858b2f",
           "receiver": "client",
           "symbol": "tradingEvents",
           "namespace": "VanGatewayClient",
@@ -15430,7 +15430,7 @@
             "file": "android/app/src/main/java/com/dial/van/trading/TradingRepository.kt",
             "line": 6,
             "ref": "WORKSPACE_PATCH",
-            "sha256": "6c1a9a9f5cd7cea10f84a99a9c94fe7d4cb4502be270f4f86e8039e770b89368"
+            "sha256": "f9ae9f30186ad5211239e890b7a304df490147f153cad9c3a68613aa56858b2f"
           },
           "endpoint_id": "VE-3cd653f61b92",
           "kind": "direct_client_method"
@@ -15506,7 +15506,7 @@
           "file": "android/app/src/main/java/com/dial/van/trading/TradingRepository.kt",
           "line": 15,
           "ref": "WORKSPACE_PATCH",
-          "sha256": "6c1a9a9f5cd7cea10f84a99a9c94fe7d4cb4502be270f4f86e8039e770b89368",
+          "sha256": "f9ae9f30186ad5211239e890b7a304df490147f153cad9c3a68613aa56858b2f",
           "receiver": "client",
           "symbol": "tradingMarketState",
           "namespace": "VanGatewayClient",
@@ -15515,7 +15515,7 @@
             "file": "android/app/src/main/java/com/dial/van/trading/TradingRepository.kt",
             "line": 6,
             "ref": "WORKSPACE_PATCH",
-            "sha256": "6c1a9a9f5cd7cea10f84a99a9c94fe7d4cb4502be270f4f86e8039e770b89368"
+            "sha256": "f9ae9f30186ad5211239e890b7a304df490147f153cad9c3a68613aa56858b2f"
           },
           "endpoint_id": "VE-2cbdf3eedbfa",
           "kind": "direct_client_method"
@@ -17339,7 +17339,7 @@
               "file": "android/app/src/main/java/com/dial/van/trading/TradingRepository.kt",
               "line": 29,
               "ref": "WORKSPACE_PATCH",
-              "sha256": "6c1a9a9f5cd7cea10f84a99a9c94fe7d4cb4502be270f4f86e8039e770b89368",
+              "sha256": "f9ae9f30186ad5211239e890b7a304df490147f153cad9c3a68613aa56858b2f",
               "receiver": "client",
               "symbol": "tradingPotential",
               "namespace": "VanGatewayClient",
@@ -17348,7 +17348,7 @@
                 "file": "android/app/src/main/java/com/dial/van/trading/TradingRepository.kt",
                 "line": 6,
                 "ref": "WORKSPACE_PATCH",
-                "sha256": "6c1a9a9f5cd7cea10f84a99a9c94fe7d4cb4502be270f4f86e8039e770b89368"
+                "sha256": "f9ae9f30186ad5211239e890b7a304df490147f153cad9c3a68613aa56858b2f"
               }
             }
           ],
@@ -17369,7 +17369,7 @@
           "file": "android/app/src/main/java/com/dial/van/trading/TradingRepository.kt",
           "line": 29,
           "ref": "WORKSPACE_PATCH",
-          "sha256": "6c1a9a9f5cd7cea10f84a99a9c94fe7d4cb4502be270f4f86e8039e770b89368",
+          "sha256": "f9ae9f30186ad5211239e890b7a304df490147f153cad9c3a68613aa56858b2f",
           "receiver": "client",
           "symbol": "tradingPotential",
           "namespace": "VanGatewayClient",
@@ -17378,7 +17378,7 @@
             "file": "android/app/src/main/java/com/dial/van/trading/TradingRepository.kt",
             "line": 6,
             "ref": "WORKSPACE_PATCH",
-            "sha256": "6c1a9a9f5cd7cea10f84a99a9c94fe7d4cb4502be270f4f86e8039e770b89368"
+            "sha256": "f9ae9f30186ad5211239e890b7a304df490147f153cad9c3a68613aa56858b2f"
           },
           "endpoint_id": "VE-8f98fc5082e0",
           "kind": "direct_client_method"
@@ -17818,7 +17818,7 @@
               "file": "android/app/src/main/java/com/dial/van/trading/TradingRepository.kt",
               "line": 30,
               "ref": "WORKSPACE_PATCH",
-              "sha256": "6c1a9a9f5cd7cea10f84a99a9c94fe7d4cb4502be270f4f86e8039e770b89368",
+              "sha256": "f9ae9f30186ad5211239e890b7a304df490147f153cad9c3a68613aa56858b2f",
               "receiver": "client",
               "symbol": "tradingHistory",
               "namespace": "VanGatewayClient",
@@ -17827,7 +17827,7 @@
                 "file": "android/app/src/main/java/com/dial/van/trading/TradingRepository.kt",
                 "line": 6,
                 "ref": "WORKSPACE_PATCH",
-                "sha256": "6c1a9a9f5cd7cea10f84a99a9c94fe7d4cb4502be270f4f86e8039e770b89368"
+                "sha256": "f9ae9f30186ad5211239e890b7a304df490147f153cad9c3a68613aa56858b2f"
               }
             }
           ],
@@ -17848,7 +17848,7 @@
           "file": "android/app/src/main/java/com/dial/van/trading/TradingRepository.kt",
           "line": 30,
           "ref": "WORKSPACE_PATCH",
-          "sha256": "6c1a9a9f5cd7cea10f84a99a9c94fe7d4cb4502be270f4f86e8039e770b89368",
+          "sha256": "f9ae9f30186ad5211239e890b7a304df490147f153cad9c3a68613aa56858b2f",
           "receiver": "client",
           "symbol": "tradingHistory",
           "namespace": "VanGatewayClient",
@@ -17857,7 +17857,7 @@
             "file": "android/app/src/main/java/com/dial/van/trading/TradingRepository.kt",
             "line": 6,
             "ref": "WORKSPACE_PATCH",
-            "sha256": "6c1a9a9f5cd7cea10f84a99a9c94fe7d4cb4502be270f4f86e8039e770b89368"
+            "sha256": "f9ae9f30186ad5211239e890b7a304df490147f153cad9c3a68613aa56858b2f"
           },
           "endpoint_id": "VE-1bb8459d8122",
           "kind": "direct_client_method"
@@ -18301,7 +18301,7 @@
               "file": "android/app/src/main/java/com/dial/van/trading/TradingRepository.kt",
               "line": 18,
               "ref": "WORKSPACE_PATCH",
-              "sha256": "6c1a9a9f5cd7cea10f84a99a9c94fe7d4cb4502be270f4f86e8039e770b89368",
+              "sha256": "f9ae9f30186ad5211239e890b7a304df490147f153cad9c3a68613aa56858b2f",
               "receiver": "client",
               "symbol": "tradingAccounts",
               "namespace": "VanGatewayClient",
@@ -18310,7 +18310,7 @@
                 "file": "android/app/src/main/java/com/dial/van/trading/TradingRepository.kt",
                 "line": 6,
                 "ref": "WORKSPACE_PATCH",
-                "sha256": "6c1a9a9f5cd7cea10f84a99a9c94fe7d4cb4502be270f4f86e8039e770b89368"
+                "sha256": "f9ae9f30186ad5211239e890b7a304df490147f153cad9c3a68613aa56858b2f"
               }
             }
           ],
@@ -18331,7 +18331,7 @@
           "file": "android/app/src/main/java/com/dial/van/trading/TradingRepository.kt",
           "line": 18,
           "ref": "WORKSPACE_PATCH",
-          "sha256": "6c1a9a9f5cd7cea10f84a99a9c94fe7d4cb4502be270f4f86e8039e770b89368",
+          "sha256": "f9ae9f30186ad5211239e890b7a304df490147f153cad9c3a68613aa56858b2f",
           "receiver": "client",
           "symbol": "tradingAccounts",
           "namespace": "VanGatewayClient",
@@ -18340,7 +18340,7 @@
             "file": "android/app/src/main/java/com/dial/van/trading/TradingRepository.kt",
             "line": 6,
             "ref": "WORKSPACE_PATCH",
-            "sha256": "6c1a9a9f5cd7cea10f84a99a9c94fe7d4cb4502be270f4f86e8039e770b89368"
+            "sha256": "f9ae9f30186ad5211239e890b7a304df490147f153cad9c3a68613aa56858b2f"
           },
           "endpoint_id": "VE-74f3be9cd819",
           "kind": "direct_client_method"
@@ -18886,7 +18886,7 @@
               "file": "android/app/src/main/java/com/dial/van/trading/TradingRepository.kt",
               "line": 17,
               "ref": "WORKSPACE_PATCH",
-              "sha256": "6c1a9a9f5cd7cea10f84a99a9c94fe7d4cb4502be270f4f86e8039e770b89368",
+              "sha256": "f9ae9f30186ad5211239e890b7a304df490147f153cad9c3a68613aa56858b2f",
               "receiver": "client",
               "symbol": "tradingCognition",
               "namespace": "VanGatewayClient",
@@ -18895,7 +18895,7 @@
                 "file": "android/app/src/main/java/com/dial/van/trading/TradingRepository.kt",
                 "line": 6,
                 "ref": "WORKSPACE_PATCH",
-                "sha256": "6c1a9a9f5cd7cea10f84a99a9c94fe7d4cb4502be270f4f86e8039e770b89368"
+                "sha256": "f9ae9f30186ad5211239e890b7a304df490147f153cad9c3a68613aa56858b2f"
               }
             }
           ],
@@ -18916,7 +18916,7 @@
           "file": "android/app/src/main/java/com/dial/van/trading/TradingRepository.kt",
           "line": 17,
           "ref": "WORKSPACE_PATCH",
-          "sha256": "6c1a9a9f5cd7cea10f84a99a9c94fe7d4cb4502be270f4f86e8039e770b89368",
+          "sha256": "f9ae9f30186ad5211239e890b7a304df490147f153cad9c3a68613aa56858b2f",
           "receiver": "client",
           "symbol": "tradingCognition",
           "namespace": "VanGatewayClient",
@@ -18925,7 +18925,7 @@
             "file": "android/app/src/main/java/com/dial/van/trading/TradingRepository.kt",
             "line": 6,
             "ref": "WORKSPACE_PATCH",
-            "sha256": "6c1a9a9f5cd7cea10f84a99a9c94fe7d4cb4502be270f4f86e8039e770b89368"
+            "sha256": "f9ae9f30186ad5211239e890b7a304df490147f153cad9c3a68613aa56858b2f"
           },
           "endpoint_id": "VE-f8fa1e95ae19",
           "kind": "direct_client_method"
@@ -20042,7 +20042,7 @@
               "file": "android/app/src/main/java/com/dial/van/trading/TradingRepository.kt",
               "line": 24,
               "ref": "WORKSPACE_PATCH",
-              "sha256": "6c1a9a9f5cd7cea10f84a99a9c94fe7d4cb4502be270f4f86e8039e770b89368",
+              "sha256": "f9ae9f30186ad5211239e890b7a304df490147f153cad9c3a68613aa56858b2f",
               "receiver": "client",
               "symbol": "tradingPromotionCandidates",
               "namespace": "VanGatewayClient",
@@ -20051,7 +20051,7 @@
                 "file": "android/app/src/main/java/com/dial/van/trading/TradingRepository.kt",
                 "line": 6,
                 "ref": "WORKSPACE_PATCH",
-                "sha256": "6c1a9a9f5cd7cea10f84a99a9c94fe7d4cb4502be270f4f86e8039e770b89368"
+                "sha256": "f9ae9f30186ad5211239e890b7a304df490147f153cad9c3a68613aa56858b2f"
               }
             }
           ],
@@ -20154,7 +20154,7 @@
           "file": "android/app/src/main/java/com/dial/van/trading/TradingRepository.kt",
           "line": 24,
           "ref": "WORKSPACE_PATCH",
-          "sha256": "6c1a9a9f5cd7cea10f84a99a9c94fe7d4cb4502be270f4f86e8039e770b89368",
+          "sha256": "f9ae9f30186ad5211239e890b7a304df490147f153cad9c3a68613aa56858b2f",
           "receiver": "client",
           "symbol": "tradingPromotionCandidates",
           "namespace": "VanGatewayClient",
@@ -20163,7 +20163,7 @@
             "file": "android/app/src/main/java/com/dial/van/trading/TradingRepository.kt",
             "line": 6,
             "ref": "WORKSPACE_PATCH",
-            "sha256": "6c1a9a9f5cd7cea10f84a99a9c94fe7d4cb4502be270f4f86e8039e770b89368"
+            "sha256": "f9ae9f30186ad5211239e890b7a304df490147f153cad9c3a68613aa56858b2f"
           },
           "endpoint_id": "VE-4e3c1f240f76",
           "kind": "direct_client_method"
@@ -20931,7 +20931,7 @@
               "file": "android/app/src/main/java/com/dial/van/trading/TradingRepository.kt",
               "line": 10,
               "ref": "WORKSPACE_PATCH",
-              "sha256": "6c1a9a9f5cd7cea10f84a99a9c94fe7d4cb4502be270f4f86e8039e770b89368",
+              "sha256": "f9ae9f30186ad5211239e890b7a304df490147f153cad9c3a68613aa56858b2f",
               "receiver": "client",
               "symbol": "tradingStatus",
               "namespace": "VanGatewayClient",
@@ -20940,7 +20940,7 @@
                 "file": "android/app/src/main/java/com/dial/van/trading/TradingRepository.kt",
                 "line": 6,
                 "ref": "WORKSPACE_PATCH",
-                "sha256": "6c1a9a9f5cd7cea10f84a99a9c94fe7d4cb4502be270f4f86e8039e770b89368"
+                "sha256": "f9ae9f30186ad5211239e890b7a304df490147f153cad9c3a68613aa56858b2f"
               }
             }
           ],
@@ -21051,7 +21051,7 @@
           "file": "android/app/src/main/java/com/dial/van/trading/TradingRepository.kt",
           "line": 10,
           "ref": "WORKSPACE_PATCH",
-          "sha256": "6c1a9a9f5cd7cea10f84a99a9c94fe7d4cb4502be270f4f86e8039e770b89368",
+          "sha256": "f9ae9f30186ad5211239e890b7a304df490147f153cad9c3a68613aa56858b2f",
           "receiver": "client",
           "symbol": "tradingStatus",
           "namespace": "VanGatewayClient",
@@ -21060,7 +21060,7 @@
             "file": "android/app/src/main/java/com/dial/van/trading/TradingRepository.kt",
             "line": 6,
             "ref": "WORKSPACE_PATCH",
-            "sha256": "6c1a9a9f5cd7cea10f84a99a9c94fe7d4cb4502be270f4f86e8039e770b89368"
+            "sha256": "f9ae9f30186ad5211239e890b7a304df490147f153cad9c3a68613aa56858b2f"
           },
           "endpoint_id": "VE-7f665d15bcb7",
           "kind": "direct_client_method"
@@ -41728,7 +41728,7 @@
               "file": "android/app/src/main/java/com/dial/van/trading/TradingRepository.kt",
               "line": 21,
               "ref": "WORKSPACE_PATCH",
-              "sha256": "6c1a9a9f5cd7cea10f84a99a9c94fe7d4cb4502be270f4f86e8039e770b89368",
+              "sha256": "f9ae9f30186ad5211239e890b7a304df490147f153cad9c3a68613aa56858b2f",
               "receiver": "client",
               "symbol": "tradingTrades",
               "namespace": "VanGatewayClient",
@@ -41737,7 +41737,7 @@
                 "file": "android/app/src/main/java/com/dial/van/trading/TradingRepository.kt",
                 "line": 6,
                 "ref": "WORKSPACE_PATCH",
-                "sha256": "6c1a9a9f5cd7cea10f84a99a9c94fe7d4cb4502be270f4f86e8039e770b89368"
+                "sha256": "f9ae9f30186ad5211239e890b7a304df490147f153cad9c3a68613aa56858b2f"
               }
             }
           ],
@@ -41839,7 +41839,7 @@
           "file": "android/app/src/main/java/com/dial/van/trading/TradingRepository.kt",
           "line": 21,
           "ref": "WORKSPACE_PATCH",
-          "sha256": "6c1a9a9f5cd7cea10f84a99a9c94fe7d4cb4502be270f4f86e8039e770b89368",
+          "sha256": "f9ae9f30186ad5211239e890b7a304df490147f153cad9c3a68613aa56858b2f",
           "receiver": "client",
           "symbol": "tradingTrades",
           "namespace": "VanGatewayClient",
@@ -41848,7 +41848,7 @@
             "file": "android/app/src/main/java/com/dial/van/trading/TradingRepository.kt",
             "line": 6,
             "ref": "WORKSPACE_PATCH",
-            "sha256": "6c1a9a9f5cd7cea10f84a99a9c94fe7d4cb4502be270f4f86e8039e770b89368"
+            "sha256": "f9ae9f30186ad5211239e890b7a304df490147f153cad9c3a68613aa56858b2f"
           },
           "endpoint_id": "VE-ea378bd7e456",
           "kind": "direct_client_method"
@@ -68896,7 +68896,7 @@
               "file": "android/app/src/main/java/com/dial/van/trading/TradingRepository.kt",
               "line": 12,
               "ref": "WORKSPACE_PATCH",
-              "sha256": "6c1a9a9f5cd7cea10f84a99a9c94fe7d4cb4502be270f4f86e8039e770b89368",
+              "sha256": "f9ae9f30186ad5211239e890b7a304df490147f153cad9c3a68613aa56858b2f",
               "receiver": "client",
               "symbol": "tradingTickets",
               "namespace": "VanGatewayClient",
@@ -68905,7 +68905,7 @@
                 "file": "android/app/src/main/java/com/dial/van/trading/TradingRepository.kt",
                 "line": 6,
                 "ref": "WORKSPACE_PATCH",
-                "sha256": "6c1a9a9f5cd7cea10f84a99a9c94fe7d4cb4502be270f4f86e8039e770b89368"
+                "sha256": "f9ae9f30186ad5211239e890b7a304df490147f153cad9c3a68613aa56858b2f"
               }
             }
           ],
@@ -68999,7 +68999,7 @@
           "file": "android/app/src/main/java/com/dial/van/trading/TradingRepository.kt",
           "line": 12,
           "ref": "WORKSPACE_PATCH",
-          "sha256": "6c1a9a9f5cd7cea10f84a99a9c94fe7d4cb4502be270f4f86e8039e770b89368",
+          "sha256": "f9ae9f30186ad5211239e890b7a304df490147f153cad9c3a68613aa56858b2f",
           "receiver": "client",
           "symbol": "tradingTickets",
           "namespace": "VanGatewayClient",
@@ -69008,7 +69008,7 @@
             "file": "android/app/src/main/java/com/dial/van/trading/TradingRepository.kt",
             "line": 6,
             "ref": "WORKSPACE_PATCH",
-            "sha256": "6c1a9a9f5cd7cea10f84a99a9c94fe7d4cb4502be270f4f86e8039e770b89368"
+            "sha256": "f9ae9f30186ad5211239e890b7a304df490147f153cad9c3a68613aa56858b2f"
           },
           "endpoint_id": "VE-6d46328732b6",
           "kind": "direct_client_method"
@@ -69330,7 +69330,7 @@
               "file": "android/app/src/main/java/com/dial/van/trading/TradingRepository.kt",
               "line": 12,
               "ref": "WORKSPACE_PATCH",
-              "sha256": "6c1a9a9f5cd7cea10f84a99a9c94fe7d4cb4502be270f4f86e8039e770b89368",
+              "sha256": "f9ae9f30186ad5211239e890b7a304df490147f153cad9c3a68613aa56858b2f",
               "receiver": "client",
               "symbol": "tradingTickets",
               "namespace": "VanGatewayClient",
@@ -69339,7 +69339,7 @@
                 "file": "android/app/src/main/java/com/dial/van/trading/TradingRepository.kt",
                 "line": 6,
                 "ref": "WORKSPACE_PATCH",
-                "sha256": "6c1a9a9f5cd7cea10f84a99a9c94fe7d4cb4502be270f4f86e8039e770b89368"
+                "sha256": "f9ae9f30186ad5211239e890b7a304df490147f153cad9c3a68613aa56858b2f"
               }
             }
           ],
@@ -69433,7 +69433,7 @@
           "file": "android/app/src/main/java/com/dial/van/trading/TradingRepository.kt",
           "line": 12,
           "ref": "WORKSPACE_PATCH",
-          "sha256": "6c1a9a9f5cd7cea10f84a99a9c94fe7d4cb4502be270f4f86e8039e770b89368",
+          "sha256": "f9ae9f30186ad5211239e890b7a304df490147f153cad9c3a68613aa56858b2f",
           "receiver": "client",
           "symbol": "tradingTickets",
           "namespace": "VanGatewayClient",
@@ -69442,7 +69442,7 @@
             "file": "android/app/src/main/java/com/dial/van/trading/TradingRepository.kt",
             "line": 6,
             "ref": "WORKSPACE_PATCH",
-            "sha256": "6c1a9a9f5cd7cea10f84a99a9c94fe7d4cb4502be270f4f86e8039e770b89368"
+            "sha256": "f9ae9f30186ad5211239e890b7a304df490147f153cad9c3a68613aa56858b2f"
           },
           "endpoint_id": "VE-6d46328732b6",
           "kind": "direct_client_method"
@@ -75905,7 +75905,7 @@
     "android_receipt": null,
     "android_receipt_sha256": null,
     "scope": "Bounded current source-citation/endpoint refresh; previous reviews retained. Whole-product, Android, deployment/provider and handset qualifications remain separate.",
-    "source_review_manifest_sha256": "a59cdba77ab7d3ca2a5acc6452e758e9b3bef428dc67b13393dab65623ac89fd"
+    "source_review_manifest_sha256": "a793a672fe2e3e80c94a4562d61be79376f8c385eb1c27c62cb287f04970e718"
   },
   "repaired_mutations": [
     {

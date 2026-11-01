@@ -289,7 +289,7 @@ async def test_command_center_read_models_without_and_with_data(client, tmp_path
     ac, app = client
     pf = (await ac.get("/v1/trading/portfolio")).json()
     assert pf["ledger_available"] is False and pf["accounts"] == [] and pf["open_positions"] == []
-    assert (await ac.get("/v1/trading/accounts")).json() == {"accounts": [], "registry": "data/vati_accounts.json"}
+    assert (await ac.get("/v1/trading/accounts")).json() == {"accounts": [], "registry": "data/vati_accounts.json", "ledger_available": False}
     assert (await ac.get("/v1/trading/market-state")).json()["symbols"] == [] and (await ac.get("/v1/trading/risk")).json()["positions"] == []
     assert (await ac.get("/v1/trading/trades/nope")).status_code == 404
     b = (await ac.get("/v1/trading/bars?symbol=EURUSD&timeframe=H1")).json()

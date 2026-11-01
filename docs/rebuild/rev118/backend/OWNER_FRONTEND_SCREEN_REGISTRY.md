@@ -14,8 +14,8 @@ Owner-access endpoints and service dependencies are listed separately below. An 
 
 | Registry | SHA-256 |
 | --- | --- |
-| [owner_features.json](../../../../registries/owner_features.json) | `7fb026d9dc23f8de36e40cff133f3986b353417ab5013351706174531aa3d6cd` |
-| [owner_screens.json](../../../../registries/owner_screens.json) | `512ee6a05dd7d8a686ca0741ddc8eb4649e39b16d7c5354888a4d532381a8592` |
+| [owner_features.json](../../../../registries/owner_features.json) | `ccf9cdb097c67fc4c1f1990dc11f5a84b0a4df9eefc7f69f459e06ebfe231499` |
+| [owner_screens.json](../../../../registries/owner_screens.json) | `f2efa11cd9a79ec23ce23d5e0077fc8d458046ee2a0efcb5ef07b5d8202a7780` |
 | [owner_endpoints.json](../../../../registries/owner_endpoints.json) | `006d6a475b8617037eb4d75c8116d7213b7441c86d71be5001448cb6db4760d8` |
 | [owner_endpoint_schemas.json](../../../../registries/owner_endpoint_schemas.json) | `c9da4c7928d213b281064be06b858cd78508c8ca181ebcdcda0fd63ea672d756` |
 

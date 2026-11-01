@@ -1,0 +1,261 @@
+diff --git a/tests/contracts/test_artemis_console_boundary.py b/tests/contracts/test_artemis_console_boundary.py
+index 82e2f0fc..7411d3a4 100644
+--- a/tests/contracts/test_artemis_console_boundary.py
++++ b/tests/contracts/test_artemis_console_boundary.py
+@@ -1,12 +1,16 @@
+ from pathlib import Path
+ 
++ROOT = Path(__file__).resolve().parents[2]
++
+ 
+ def test_android_never_contains_private_artemis_console_credential_or_private_endpoint():
+-    android = Path("android/app/src/main/java/com/dial/van").read_text() if Path("android/app/src/main/java/com/dial/van").is_file() else ""
+-    # Walk Kotlin sources because the protected token is server-side only.
++    android = (ROOT / "android/app/src/main/java/com/dial/van").read_text() if (ROOT / "android/app/src/main/java/com/dial/van").is_file() else ""
++    # Walk actual nonempty Kotlin sources; an absent relative tree is not proof.
++    assert (ROOT / "android/app/src/main/java/com/dial/van").is_dir()
++    assert list((ROOT / "android/app/src/main/java/com/dial/van").rglob("*.kt"))
+     text = "\n".join(
+         p.read_text(encoding="utf-8")
+-        for p in Path("android/app/src/main/java/com/dial/van").rglob("*.kt")
++        for p in (ROOT / "android/app/src/main/java/com/dial/van").rglob("*.kt")
+     )
+     assert "artemis-console.token" not in text
+     assert "9135" not in text
+@@ -18,8 +22,8 @@ def test_console_session_is_hardware_device_proofed_and_proxy_is_hermes_governed
+ 
+     from van_gateway.app import app as gateway
+ 
+-    app = Path("backend/van_gateway/app.py").read_text(encoding="utf-8")
+-    console = Path("backend/van_gateway/artemis/console.py").read_text(encoding="utf-8")
++    app = (ROOT / "backend/van_gateway/app.py").read_text(encoding="utf-8")
++    console = (ROOT / "backend/van_gateway/artemis/console.py").read_text(encoding="utf-8")
+     ingress = next(
+         middleware.kwargs["dispatch"] for middleware in gateway.user_middleware
+         if getattr(middleware.kwargs.get("dispatch"), "__name__", "") == "require_ingress_auth"
+diff --git a/trading/tests/test_capsule_migration.py b/trading/tests/test_capsule_migration.py
+index cf847fb0..e29a7d37 100644
+--- a/trading/tests/test_capsule_migration.py
++++ b/trading/tests/test_capsule_migration.py
+@@ -2,6 +2,8 @@
+ 
+ from __future__ import annotations
+ 
++from pathlib import Path
++
+ import copy
+ import json
+ 
+@@ -15,7 +17,8 @@ from vati.strategies.migration import (
+     verify_migration,
+ )
+ 
+-CAPSULE = "trading/strategies/registry/FX-TREND-PULLBACK-01.json"
++ROOT = Path(__file__).resolve().parents[2]
++CAPSULE = str(ROOT / "trading/strategies/registry/FX-TREND-PULLBACK-01.json")
+ 
+ 
+ @pytest.fixture
+diff --git a/trading/tests/test_enhancement_closure.py b/trading/tests/test_enhancement_closure.py
+index e21537a0..17201305 100644
+--- a/trading/tests/test_enhancement_closure.py
++++ b/trading/tests/test_enhancement_closure.py
+@@ -6,6 +6,8 @@ can be deleted without another test failing, the correction was decorative.
+ 
+ from __future__ import annotations
+ 
++from pathlib import Path
++
+ import subprocess
+ import sys
+ from decimal import Decimal as D
+@@ -27,8 +29,9 @@ from vati.observability.enhancement_metrics import (
+     check_labels,
+ )
+ 
+-GUARD = "trading/tools/check_enhancement_architecture.py"
+-MIGRATE = "trading/tools/migrate_capsule_timeframes.py"
++ROOT = Path(__file__).resolve().parents[2]
++GUARD = str(ROOT / "trading/tools/check_enhancement_architecture.py")
++MIGRATE = str(ROOT / "trading/tools/migrate_capsule_timeframes.py")
+ 
+ 
+ # --- architecture guardrails ---------------------------------------------
+@@ -47,11 +50,11 @@ def test_guardrail_script_actually_fails_when_violated(tmp_path, monkeypatch):
+     import pathlib
+     import shutil
+ 
+-    src = pathlib.Path("trading")
++    src = (ROOT / "trading")
+     dst = tmp_path / "trading"
+     shutil.copytree(src, dst, ignore=shutil.ignore_patterns("__pycache__", "*.pyc"))
+     shutil.copytree(
+-        pathlib.Path("backend"), tmp_path / "backend",
++        (ROOT / "backend"), tmp_path / "backend",
+         ignore=shutil.ignore_patterns("__pycache__", "*.pyc"),
+     )
+ 
+@@ -70,7 +73,7 @@ def test_guardrail_script_actually_fails_when_violated(tmp_path, monkeypatch):
+ 
+ 
+ def test_capsule_migration_is_settled():
+-    r = subprocess.run([sys.executable, MIGRATE, "--check"], capture_output=True, text=True)
++    r = subprocess.run([sys.executable, MIGRATE, "--check"], cwd=ROOT, capture_output=True, text=True)
+     assert r.returncode == 0
+     assert "migration provenance reconciled" in r.stdout
+ 
+@@ -79,7 +82,7 @@ def test_every_capsule_has_a_timeframe_contract():
+     import glob
+     import json
+     from vati.intelligence.mtf import TimeframeContract
+-    for path in glob.glob("trading/strategies/registry/*.json"):
++    for path in glob.glob(str(ROOT / "trading/strategies/registry/*.json")):
+         doc = json.loads(open(path).read())
+         c = TimeframeContract.from_capsule(doc)
+         assert c is not None, path
+@@ -92,7 +95,7 @@ def test_migration_check_rejects_post_migration_capsule_drift(tmp_path):
+     import shutil
+     from vati.core.canonical import canonical_hash
+ 
+-    src = pathlib.Path("trading")
++    src = (ROOT / "trading")
+     dst = tmp_path / "trading"
+     shutil.copytree(src, dst, ignore=shutil.ignore_patterns("__pycache__", "*.pyc"))
+     cap = dst / "strategies" / "registry" / "FX-TREND-PULLBACK-01.json"
+@@ -113,7 +116,7 @@ def test_migration_check_rejects_post_migration_capsule_drift(tmp_path):
+ def test_every_migration_record_asserts_unchanged_logic():
+     import json
+     import pathlib
+-    p = pathlib.Path("trading/strategies/migrations/capsule_migrations.json")
++    p = (ROOT / "trading/strategies/migrations/capsule_migrations.json")
+     records = json.loads(p.read_text())
+     assert records
+     for r in records:
+@@ -254,7 +257,7 @@ def test_event_kind_source_has_no_duplicate_enum_member_names():
+     import ast
+     import pathlib
+ 
+-    tree = ast.parse(pathlib.Path("trading/vati/core/events.py").read_text())
++    tree = ast.parse((ROOT / "trading/vati/core/events.py").read_text())
+     event_kind = next(
+         n for n in tree.body
+         if isinstance(n, ast.ClassDef) and n.name == "EventKind"
+@@ -274,11 +277,11 @@ def test_promotion_join_guardrail_fails_when_gateway_route_is_removed(tmp_path):
+     # The guard reads both trading/ and its sibling backend/. Reproduce that
+     # repository shape and delete only the live promotion route string.
+     shutil.copytree(
+-        pathlib.Path("trading"), tmp_path / "trading",
++        (ROOT / "trading"), tmp_path / "trading",
+         ignore=shutil.ignore_patterns("__pycache__", "*.pyc"),
+     )
+     shutil.copytree(
+-        pathlib.Path("backend"), tmp_path / "backend",
++        (ROOT / "backend"), tmp_path / "backend",
+         ignore=shutil.ignore_patterns("__pycache__", "*.pyc"),
+     )
+     gateway = tmp_path / "backend" / "van_gateway" / "app.py"
+@@ -301,11 +304,11 @@ def test_certificate_producer_guardrail_fails_on_direct_production_construction(
+     import pathlib
+     import shutil
+ 
+-    src = pathlib.Path("trading")
++    src = (ROOT / "trading")
+     dst = tmp_path / "trading"
+     shutil.copytree(src, dst, ignore=shutil.ignore_patterns("__pycache__", "*.pyc"))
+     shutil.copytree(
+-        pathlib.Path("backend"), tmp_path / "backend",
++        (ROOT / "backend"), tmp_path / "backend",
+         ignore=shutil.ignore_patterns("__pycache__", "*.pyc"),
+     )
+     target = dst / "vati" / "learning" / "coverage.py"
+diff --git a/trading/tests/test_feature_contract.py b/trading/tests/test_feature_contract.py
+index a290fb4c..5dd2e6fd 100644
+--- a/trading/tests/test_feature_contract.py
++++ b/trading/tests/test_feature_contract.py
+@@ -2,6 +2,8 @@
+ 
+ from __future__ import annotations
+ 
++from pathlib import Path
++
+ import pytest
+ 
+ from vati.intelligence.feature_contract import (
+@@ -14,6 +16,7 @@ from vati.intelligence.feature_contract import (
+     requirements_from_capsule,
+ )
+ 
++ROOT = Path(__file__).resolve().parents[2]
+ V = FeatureContractValidator()
+ 
+ 
+@@ -115,7 +118,7 @@ def test_zse_context_features_are_available(zse_snapshot=None):
+ 
+ def test_requirements_read_the_key_nothing_read():
+     import json
+-    with open("trading/strategies/registry/FX-TREND-PULLBACK-01.json") as fh:
++    with open(ROOT / "trading/strategies/registry/FX-TREND-PULLBACK-01.json") as fh:
+         doc = json.load(fh)
+     reqs = requirements_from_capsule(doc)
+     assert {r.feature_id for r in reqs} == set(doc["required_features"])
+diff --git a/trading/tests/test_mt5_nonce_durability.py b/trading/tests/test_mt5_nonce_durability.py
+index f30e27dd..e702ed9e 100644
+--- a/trading/tests/test_mt5_nonce_durability.py
++++ b/trading/tests/test_mt5_nonce_durability.py
+@@ -47,7 +47,9 @@ client=Mt5BridgeClient(signing_key=KEY)
+ request=client.sign(BridgeRequest('order_send',1,1000000,{'alias':'fx_primary','symbol':'EURUSD','type':'BUY','volume':'0.1','price':'1.1','sl':'1.09','order_type':'MARKET'}))
+ print(json.dumps(worker.handle(request.__dict__)))
+ '''
+-    env=dict(os.environ,PYTHONPATH='trading:trading/tests:backend:backend/tests:.')
++    root=Path(__file__).resolve().parents[2]
++    env=dict(os.environ,PYTHONPATH=os.pathsep.join(str(root/path)
++        for path in ('trading','trading/tests','backend','backend/tests','.')))
+     responses=[json.loads(subprocess.run([sys.executable,'-c',code,str(config),str(effects)],
+         env=env,check=True,capture_output=True,text=True).stdout) for _ in range(2)]
+     assert responses[0]['status']=='FILLED'
+diff --git a/trading/tests/test_research_and_drift.py b/trading/tests/test_research_and_drift.py
+index d3679ae0..2fc20b68 100644
+--- a/trading/tests/test_research_and_drift.py
++++ b/trading/tests/test_research_and_drift.py
+@@ -2,6 +2,8 @@
+ 
+ from __future__ import annotations
+ 
++from pathlib import Path
++
+ import ast
+ import inspect
+ from decimal import Decimal as D
+@@ -55,7 +57,8 @@ from vati.research.trading_evidence import (
+ )
+ from vati.strategies.capsule import CapsuleRegistry
+ 
+-REG = "trading/strategies/registry"
++ROOT = Path(__file__).resolve().parents[2]
++REG = str(ROOT / "trading/strategies/registry")
+ 
+ 
+ # --- coverage -------------------------------------------------------------
+diff --git a/trading/tests/test_validation_certificates.py b/trading/tests/test_validation_certificates.py
+index 2f2a0158..78f78b7f 100644
+--- a/trading/tests/test_validation_certificates.py
++++ b/trading/tests/test_validation_certificates.py
+@@ -2,6 +2,8 @@
+ 
+ from __future__ import annotations
+ 
++from pathlib import Path
++
+ import dataclasses
+ from decimal import Decimal
+ 
+@@ -26,7 +28,8 @@ from vati.validation.builder import (
+     build_strategy_validation_certificate,
+ )
+ 
+-REG = "trading/strategies/registry"
++ROOT = Path(__file__).resolve().parents[2]
++REG = str(ROOT / "trading/strategies/registry")
+ 
+ 
+ # --- strategy certificate -------------------------------------------------

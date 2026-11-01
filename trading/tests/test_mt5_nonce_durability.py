@@ -47,7 +47,9 @@ client=Mt5BridgeClient(signing_key=KEY)
 request=client.sign(BridgeRequest('order_send',1,1000000,{'alias':'fx_primary','symbol':'EURUSD','type':'BUY','volume':'0.1','price':'1.1','sl':'1.09','order_type':'MARKET'}))
 print(json.dumps(worker.handle(request.__dict__)))
 '''
-    env=dict(os.environ,PYTHONPATH='trading:trading/tests:backend:backend/tests:.')
+    root=Path(__file__).resolve().parents[2]
+    env=dict(os.environ,PYTHONPATH=os.pathsep.join(str(root/path)
+        for path in ('trading','trading/tests','backend','backend/tests','.')))
     responses=[json.loads(subprocess.run([sys.executable,'-c',code,str(config),str(effects)],
         env=env,check=True,capture_output=True,text=True).stdout) for _ in range(2)]
     assert responses[0]['status']=='FILLED'

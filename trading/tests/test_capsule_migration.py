@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from pathlib import Path
+
 import copy
 import json
 
@@ -15,7 +17,8 @@ from vati.strategies.migration import (
     verify_migration,
 )
 
-CAPSULE = "trading/strategies/registry/FX-TREND-PULLBACK-01.json"
+ROOT = Path(__file__).resolve().parents[2]
+CAPSULE = str(ROOT / "trading/strategies/registry/FX-TREND-PULLBACK-01.json")
 
 
 @pytest.fixture

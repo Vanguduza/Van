@@ -55,6 +55,9 @@ REVIEWED_CITATION_REPLACEMENTS = {
     ("android/app/src/main/java/com/dial/van/command/settings/PermissionsRoute.kt",
      "                                val current = app.gatewayClient.permissionGrant(id)"):
      "                                    val current = app.gatewayClient.permissionGrant(id)",
+    ("android/app/src/main/java/com/dial/van/trading/TradingRepository.kt",
+     '    suspend fun accounts(): Loaded<List<AccountCard>> = load({ b -> parseObject(b)?.arr("accounts")?.map(AccountCard::from) }) { client.tradingAccounts() }'):
+     '    suspend fun accounts(): Loaded<List<AccountCard>> = load(AccountCard::parseList) { client.tradingAccounts() }',
     ("android/app/src/main/java/com/dial/van/trading/ui/AccountOnboardingScreen.kt",
      "                val outcome = runCatching { app.gatewayClient.tradingAccountAction(action, args, proof) }"):
      "                val outcome = runCatching { app.gatewayClient.tradingAccountAction(action, args, proof, approvedIssuedAt) }",
@@ -80,6 +83,10 @@ REVIEWED_CITATION_REASONS = {
     ('android/app/src/main/java/com/dial/van/command/settings/PermissionsRoute.kt', '                            app.gatewayClient.revokePermission(id).also { receipt ->'): 'Preserve the reviewed original-result and independent current-grant readback callback with snapshot/profile-bound invocation.',
     ('android/app/src/main/java/com/dial/van/command/settings/PermissionsRoute.kt', '                                val current = app.gatewayClient.permissionGrant(id)'): 'Preserve the reviewed original-result and independent current-grant readback callback with snapshot/profile-bound invocation.',
     ('android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt', '    suspend fun revokePermission(grantId: String): JSONObject = withContext(Dispatchers.IO) {'): 'Bind the reviewed grant snapshot and current profile to the durable original permission revocation exchange.',
+    ("android/app/src/main/java/com/dial/van/trading/TradingRepository.kt",
+     '    suspend fun accounts(): Loaded<List<AccountCard>> = load({ b -> parseObject(b)?.arr("accounts")?.map(AccountCard::from) }) { client.tradingAccounts() }'):
+     "Preserve the same actual tradingAccounts call while the reviewed AccountCard.parseList owner refuses unavailable-ledger data and retains per-account snapshot currentness; exact parser provenance is bound separately, with no execution authority.",
+
 }
 
 REVIEWED_DIRECT_CALL_REPLACEMENTS = {
@@ -565,11 +572,36 @@ def build(read=None):
         }
         for row in monitor_rows:
             row.setdefault("backend_contract_extensions", []).append(copy.deepcopy(extension))
+    # The same transport call now delegates unavailable/currentness parsing.
+    # Bind exact reviewed owners, rather than accepting an arbitrary client call.
+    account_parser = []
+    for file, anchor, role in (
+        ("android/app/src/main/java/com/dial/van/trading/TradingRepository.kt",
+         '    suspend fun accounts(): Loaded<List<AccountCard>> = load(AccountCard::parseList) { client.tradingAccounts() }',
+         "Same account transport call delegates to the reviewed typed parser"),
+        ("android/app/src/main/java/com/dial/van/trading/TradingModels.kt",
+         '        fun parseList(body: String): List<AccountCard>? {',
+         "Actual account-list parser entry"),
+        ("android/app/src/main/java/com/dial/van/trading/TradingModels.kt",
+         '            check(source.bool("ledger_available") != false) { "Native account ledger unavailable" }',
+         "Unavailable ledger remains unavailable rather than an empty/live account list"),
+        ("android/app/src/main/java/com/dial/van/trading/TradingModels.kt",
+         '            return source.arr("accounts").map(::from)',
+         "Typed account rows retain their exact original per-account snapshot readback"),
+    ):
+        data = (ROOT/file).read_bytes()
+        matches = [i+1 for i, line in enumerate(data.decode().splitlines()) if line == anchor]
+        if len(matches) != 1:
+            raise ValueError("Changed/non-unique account parser source requires review: "+file)
+        sources[file] = sha(data)
+        account_parser.append({"file":file, "line":matches[0], "sha256":sha(data),
+            "exact_anchor":anchor, "role":role})
     receipt = {"scope": "BOUNDED_SOURCE_REFERENCE_REFRESH_NOT_FULL_PRODUCT_REVIEW",
         "input_registry_commit": INPUT, "citation_source_commit": CITATION_BASE,
         "preserved_identity_sets": preserved, "citation_changes": changes,
         "deduplicated_current_callsites": deduplicated_callsites,
         "independent_google_withdrawal_status_readback": google_postcondition,
+        "account_read_delegated_parser_source": account_parser,
         "current_cited_source_sha256": sources, "endpoint_count": len(endpoints),
         "schema_count": len(schemas), "physical_cases_executed": 0,
         "owner_release": False, "deployment_accepted": False}

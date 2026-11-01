@@ -1,0 +1,48 @@
+{
+  "endpoint_count": 487,
+  "schemas": 380,
+  "endpoints_schemas_byte_semantics_unchanged": true,
+  "preserved": {
+    "owner_features": {
+      "rows": 42,
+      "function_references": 105,
+      "ordered_identities_unchanged": true
+    },
+    "owner_screens": {
+      "rows": 78,
+      "function_references": 139,
+      "ordered_identities_unchanged": true
+    }
+  },
+  "parser_provenance": [
+    {
+      "file": "android/app/src/main/java/com/dial/van/trading/TradingRepository.kt",
+      "line": 18,
+      "sha256": "f9ae9f30186ad5211239e890b7a304df490147f153cad9c3a68613aa56858b2f",
+      "exact_anchor": "    suspend fun accounts(): Loaded<List<AccountCard>> = load(AccountCard::parseList) { client.tradingAccounts() }",
+      "role": "Same account transport call delegates to the reviewed typed parser"
+    },
+    {
+      "file": "android/app/src/main/java/com/dial/van/trading/TradingModels.kt",
+      "line": 88,
+      "sha256": "880ddda71469a417d4ff27c8aeaa327db623b36bdd64b5056dc7c3e639fba1a9",
+      "exact_anchor": "        fun parseList(body: String): List<AccountCard>? {",
+      "role": "Actual account-list parser entry"
+    },
+    {
+      "file": "android/app/src/main/java/com/dial/van/trading/TradingModels.kt",
+      "line": 90,
+      "sha256": "880ddda71469a417d4ff27c8aeaa327db623b36bdd64b5056dc7c3e639fba1a9",
+      "exact_anchor": "            check(source.bool(\"ledger_available\") != false) { \"Native account ledger unavailable\" }",
+      "role": "Unavailable ledger remains unavailable rather than an empty/live account list"
+    },
+    {
+      "file": "android/app/src/main/java/com/dial/van/trading/TradingModels.kt",
+      "line": 91,
+      "sha256": "880ddda71469a417d4ff27c8aeaa327db623b36bdd64b5056dc7c3e639fba1a9",
+      "exact_anchor": "            return source.arr(\"accounts\").map(::from)",
+      "role": "Typed account rows retain their exact original per-account snapshot readback"
+    }
+  ],
+  "source9_seven_old18_exact": true
+}

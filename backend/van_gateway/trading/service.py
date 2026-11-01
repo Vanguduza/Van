@@ -142,16 +142,23 @@ class TradingService:
     def portfolio(self) -> dict[str, Any]:
         pf, _, _ = _import_portfolio()
         reg = self._registry_public()
-        empty = {"ledger_available": False, "reporting_currency": self.reporting_currency, "accounts": [{**a, "equity": None, "balance": None, "connection_state": "NEVER_SYNCED"} for a in reg],
+        now_ms = int(time.time()*1000)
+        empty = {"ledger_available": False, "reporting_currency": self.reporting_currency, "accounts": pf.unavailable_account_states(reg,now_ms=now_ms,staleness_ms=LEDGER_STALENESS_MS),
                  "totals": {}, "risk": {}, "exposure": {}, "recent_trades": [], "open_positions": [], "potential_trades": [], "data_state": {}}
-        out = self._with_ledger(lambda led: pf.portfolio(led, reg, reporting_currency=self.reporting_currency), empty=empty)
+        out = self._with_ledger(lambda led: pf.portfolio(led, reg, reporting_currency=self.reporting_currency,
+            now_ms=now_ms,staleness_ms=LEDGER_STALENESS_MS), empty=empty)
         out.setdefault("ledger_available", True)
         return out
 
     def accounts(self) -> dict[str, Any]:
         pf, _, _ = _import_portfolio()
         reg = self._registry_public()
-        return {"accounts": self._with_ledger(lambda led: pf.account_states(led, reg), empty=reg), "registry": self.accounts_registry or None}
+        now_ms = int(time.time()*1000)
+        out = self._with_ledger(lambda led: {"accounts":pf.account_states(led, reg,
+            now_ms=now_ms,staleness_ms=LEDGER_STALENESS_MS),"ledger_available":True},
+            empty={"accounts":pf.unavailable_account_states(reg,now_ms=now_ms,staleness_ms=LEDGER_STALENESS_MS),
+                "ledger_available":False})
+        return {**out,"registry":self.accounts_registry or None}
 
     def market_state(self, symbol: Optional[str] = None) -> dict[str, Any]:
         pf, _, _ = _import_portfolio()

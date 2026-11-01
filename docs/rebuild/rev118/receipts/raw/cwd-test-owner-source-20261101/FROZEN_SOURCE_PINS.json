@@ -1,0 +1,9 @@
+{
+  "trading/tests/test_capsule_migration.py": "f588b806f14e75ea337a5dff1c4c7a8b3044940a3da59176717c5da1e985b414",
+  "trading/tests/test_enhancement_closure.py": "27ca2d7e519aae2eeac2a27c0088f5312064487ab5b4dd01419f07937a01c026",
+  "trading/tests/test_feature_contract.py": "00600d60bbefa7438e305493ae6abed21e66b2b9089366b1f364d4f9c0d46146",
+  "trading/tests/test_research_and_drift.py": "e89772396b5f580c164b97d44bec6233a32f08c444343dcf17b267f4c47f1f5e",
+  "trading/tests/test_validation_certificates.py": "accbe86949c97a10b6826c72855e2c89b2f1a76c5b27c0b383adf28f60150764",
+  "trading/tests/test_mt5_nonce_durability.py": "039a2ec40ce1c9dcf07700dccc5f1412670a864d2c4a6699b09aa7d8f1832856",
+  "tests/contracts/test_artemis_console_boundary.py": "1c9f015f4ad322b6bfdba19fe768f6d6f8510a389dd0bdb43813978d1e3bc62f"
+}

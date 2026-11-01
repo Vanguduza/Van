@@ -355,6 +355,22 @@
       "new_sha256": "f5420e3d9fcf3e6c780813554380e0c7cbdfc40325f983cece648c9812abf0a3",
       "exact_anchor": "    suspend fun tradingAssessment(): String = withContext(Dispatchers.IO) {"
     },
+    "android/app/src/main/java/com/dial/van/trading/TradingRepository.kt:31": {
+      "file": "android/app/src/main/java/com/dial/van/trading/TradingRepository.kt",
+      "old_line": 31,
+      "new_line": 31,
+      "old_sha256": "6c1a9a9f5cd7cea10f84a99a9c94fe7d4cb4502be270f4f86e8039e770b89368",
+      "new_sha256": "f9ae9f30186ad5211239e890b7a304df490147f153cad9c3a68613aa56858b2f",
+      "exact_anchor": "    suspend fun assessment(): Loaded<AssessmentReadModel> = load(AssessmentReadModel::parse) { client.tradingAssessment() }"
+    },
+    "android/app/src/main/java/com/dial/van/trading/TradingRepository.kt:6": {
+      "file": "android/app/src/main/java/com/dial/van/trading/TradingRepository.kt",
+      "old_line": 6,
+      "new_line": 6,
+      "old_sha256": "6c1a9a9f5cd7cea10f84a99a9c94fe7d4cb4502be270f4f86e8039e770b89368",
+      "new_sha256": "f9ae9f30186ad5211239e890b7a304df490147f153cad9c3a68613aa56858b2f",
+      "exact_anchor": "class TradingRepository(private val client: VanGatewayClient) {"
+    },
     "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:2007": {
       "file": "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt",
       "old_line": 2007,
@@ -1988,6 +2004,14 @@
       "new_sha256": "f5420e3d9fcf3e6c780813554380e0c7cbdfc40325f983cece648c9812abf0a3",
       "exact_anchor": "    suspend fun tradingStatus(): String = withContext(Dispatchers.IO) { rawGet(\"/v1/trading/status\") }"
     },
+    "android/app/src/main/java/com/dial/van/trading/TradingRepository.kt:10": {
+      "file": "android/app/src/main/java/com/dial/van/trading/TradingRepository.kt",
+      "old_line": 10,
+      "new_line": 10,
+      "old_sha256": "6c1a9a9f5cd7cea10f84a99a9c94fe7d4cb4502be270f4f86e8039e770b89368",
+      "new_sha256": "f9ae9f30186ad5211239e890b7a304df490147f153cad9c3a68613aa56858b2f",
+      "exact_anchor": "    suspend fun status(): Loaded<TradingRuntimeReadModel> = load(TradingRuntimeReadModel::parse) { client.tradingStatus() }"
+    },
     "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:743": {
       "file": "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt",
       "old_line": 743,
@@ -1995,6 +2019,14 @@
       "old_sha256": "99bb9ba0510e75ed2ab18f0cd3ea74e03070b0a44bd4bd5f8c751874edf8941a",
       "new_sha256": "f5420e3d9fcf3e6c780813554380e0c7cbdfc40325f983cece648c9812abf0a3",
       "exact_anchor": "    suspend fun tradingPortfolio(): String = withContext(Dispatchers.IO) { rawGet(\"/v1/trading/portfolio\") }"
+    },
+    "android/app/src/main/java/com/dial/van/trading/TradingRepository.kt:14": {
+      "file": "android/app/src/main/java/com/dial/van/trading/TradingRepository.kt",
+      "old_line": 14,
+      "new_line": 14,
+      "old_sha256": "6c1a9a9f5cd7cea10f84a99a9c94fe7d4cb4502be270f4f86e8039e770b89368",
+      "new_sha256": "f9ae9f30186ad5211239e890b7a304df490147f153cad9c3a68613aa56858b2f",
+      "exact_anchor": "    suspend fun portfolio(): Loaded<PortfolioSummary> = load(PortfolioSummary::parse) { client.tradingPortfolio() }"
     },
     "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:1860": {
       "file": "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt",
@@ -2004,6 +2036,14 @@
       "new_sha256": "f5420e3d9fcf3e6c780813554380e0c7cbdfc40325f983cece648c9812abf0a3",
       "exact_anchor": "    suspend fun tradingPositions(): String = withContext(Dispatchers.IO) {"
     },
+    "android/app/src/main/java/com/dial/van/trading/TradingRepository.kt:27": {
+      "file": "android/app/src/main/java/com/dial/van/trading/TradingRepository.kt",
+      "old_line": 27,
+      "new_line": 27,
+      "old_sha256": "6c1a9a9f5cd7cea10f84a99a9c94fe7d4cb4502be270f4f86e8039e770b89368",
+      "new_sha256": "f9ae9f30186ad5211239e890b7a304df490147f153cad9c3a68613aa56858b2f",
+      "exact_anchor": "    suspend fun positions(): Loaded<PositionsReadModel> = load(PositionsReadModel::parse) { client.tradingPositions() }"
+    },
     "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:751": {
       "file": "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt",
       "old_line": 751,
@@ -2011,6 +2051,14 @@
       "old_sha256": "99bb9ba0510e75ed2ab18f0cd3ea74e03070b0a44bd4bd5f8c751874edf8941a",
       "new_sha256": "f5420e3d9fcf3e6c780813554380e0c7cbdfc40325f983cece648c9812abf0a3",
       "exact_anchor": "    suspend fun tradingRisk(): String = withContext(Dispatchers.IO) { rawGet(\"/v1/trading/risk\") }"
+    },
+    "android/app/src/main/java/com/dial/van/trading/TradingRepository.kt:16": {
+      "file": "android/app/src/main/java/com/dial/van/trading/TradingRepository.kt",
+      "old_line": 16,
+      "new_line": 16,
+      "old_sha256": "6c1a9a9f5cd7cea10f84a99a9c94fe7d4cb4502be270f4f86e8039e770b89368",
+      "new_sha256": "f9ae9f30186ad5211239e890b7a304df490147f153cad9c3a68613aa56858b2f",
+      "exact_anchor": "    suspend fun risk(): Loaded<RiskView> = load(RiskView::parse) { client.tradingRisk() }"
     },
     "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:747": {
       "file": "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt",
@@ -2020,6 +2068,14 @@
       "new_sha256": "f5420e3d9fcf3e6c780813554380e0c7cbdfc40325f983cece648c9812abf0a3",
       "exact_anchor": "    suspend fun tradingMarketState(symbol: String? = null): String = withContext(Dispatchers.IO) {"
     },
+    "android/app/src/main/java/com/dial/van/trading/TradingRepository.kt:15": {
+      "file": "android/app/src/main/java/com/dial/van/trading/TradingRepository.kt",
+      "old_line": 15,
+      "new_line": 15,
+      "old_sha256": "6c1a9a9f5cd7cea10f84a99a9c94fe7d4cb4502be270f4f86e8039e770b89368",
+      "new_sha256": "f9ae9f30186ad5211239e890b7a304df490147f153cad9c3a68613aa56858b2f",
+      "exact_anchor": "    suspend fun marketStates(symbol: String? = null): Loaded<List<MarketStateCard>> = load({ MarketStateCard.parseAll(it) }) { client.tradingMarketState(symbol) }"
+    },
     "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:755": {
       "file": "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt",
       "old_line": 755,
@@ -2027,6 +2083,14 @@
       "old_sha256": "99bb9ba0510e75ed2ab18f0cd3ea74e03070b0a44bd4bd5f8c751874edf8941a",
       "new_sha256": "f5420e3d9fcf3e6c780813554380e0c7cbdfc40325f983cece648c9812abf0a3",
       "exact_anchor": "    suspend fun tradingCognition(): String = withContext(Dispatchers.IO) { rawGet(\"/v1/trading/cognition\") }"
+    },
+    "android/app/src/main/java/com/dial/van/trading/TradingRepository.kt:17": {
+      "file": "android/app/src/main/java/com/dial/van/trading/TradingRepository.kt",
+      "old_line": 17,
+      "new_line": 17,
+      "old_sha256": "6c1a9a9f5cd7cea10f84a99a9c94fe7d4cb4502be270f4f86e8039e770b89368",
+      "new_sha256": "f9ae9f30186ad5211239e890b7a304df490147f153cad9c3a68613aa56858b2f",
+      "exact_anchor": "    suspend fun cognition(): Loaded<CognitionSnapshot> = load(CognitionSnapshot::parse) { client.tradingCognition() }"
     },
     "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:734": {
       "file": "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt",
@@ -2036,6 +2100,14 @@
       "new_sha256": "f5420e3d9fcf3e6c780813554380e0c7cbdfc40325f983cece648c9812abf0a3",
       "exact_anchor": "    suspend fun tradingTrades(view: String, limit: Int = 12): String = withContext(Dispatchers.IO) {"
     },
+    "android/app/src/main/java/com/dial/van/trading/TradingRepository.kt:21": {
+      "file": "android/app/src/main/java/com/dial/van/trading/TradingRepository.kt",
+      "old_line": 21,
+      "new_line": 21,
+      "old_sha256": "6c1a9a9f5cd7cea10f84a99a9c94fe7d4cb4502be270f4f86e8039e770b89368",
+      "new_sha256": "f9ae9f30186ad5211239e890b7a304df490147f153cad9c3a68613aa56858b2f",
+      "exact_anchor": "    suspend fun trades(view: TradeView): Loaded<List<TradeRow>> = load({ b -> (TradeBookParser.parse(view, b) as? TradeBookState.Ready)?.rows }) { client.tradingTrades(view.query, 100) }"
+    },
     "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:757": {
       "file": "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt",
       "old_line": 757,
@@ -2043,6 +2115,14 @@
       "old_sha256": "99bb9ba0510e75ed2ab18f0cd3ea74e03070b0a44bd4bd5f8c751874edf8941a",
       "new_sha256": "f5420e3d9fcf3e6c780813554380e0c7cbdfc40325f983cece648c9812abf0a3",
       "exact_anchor": "    suspend fun tradingTradeDetail(tradeIntentId: String): String = withContext(Dispatchers.IO) {"
+    },
+    "android/app/src/main/java/com/dial/van/trading/TradingRepository.kt:19": {
+      "file": "android/app/src/main/java/com/dial/van/trading/TradingRepository.kt",
+      "old_line": 19,
+      "new_line": 19,
+      "old_sha256": "6c1a9a9f5cd7cea10f84a99a9c94fe7d4cb4502be270f4f86e8039e770b89368",
+      "new_sha256": "f9ae9f30186ad5211239e890b7a304df490147f153cad9c3a68613aa56858b2f",
+      "exact_anchor": "    suspend fun tradeDetail(id: String): Loaded<TradeDetail> = load(TradeDetail::parse) { client.tradingTradeDetail(id) }"
     },
     "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:761": {
       "file": "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt",
@@ -2052,6 +2132,14 @@
       "new_sha256": "f5420e3d9fcf3e6c780813554380e0c7cbdfc40325f983cece648c9812abf0a3",
       "exact_anchor": "    suspend fun tradingBars(symbol: String, timeframe: String = \"H1\", limit: Int = 300): String = withContext(Dispatchers.IO) {"
     },
+    "android/app/src/main/java/com/dial/van/trading/TradingRepository.kt:20": {
+      "file": "android/app/src/main/java/com/dial/van/trading/TradingRepository.kt",
+      "old_line": 20,
+      "new_line": 20,
+      "old_sha256": "6c1a9a9f5cd7cea10f84a99a9c94fe7d4cb4502be270f4f86e8039e770b89368",
+      "new_sha256": "f9ae9f30186ad5211239e890b7a304df490147f153cad9c3a68613aa56858b2f",
+      "exact_anchor": "    suspend fun bars(symbol: String, timeframe: String, limit: Int = 300): Loaded<BarSeries> = load(BarSeries::parse) { client.tradingBars(symbol, timeframe, limit) }"
+    },
     "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:1864": {
       "file": "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt",
       "old_line": 1864,
@@ -2059,6 +2147,14 @@
       "old_sha256": "99bb9ba0510e75ed2ab18f0cd3ea74e03070b0a44bd4bd5f8c751874edf8941a",
       "new_sha256": "f5420e3d9fcf3e6c780813554380e0c7cbdfc40325f983cece648c9812abf0a3",
       "exact_anchor": "    suspend fun tradingEvents(limit: Int = 20): String = withContext(Dispatchers.IO) {"
+    },
+    "android/app/src/main/java/com/dial/van/trading/TradingRepository.kt:28": {
+      "file": "android/app/src/main/java/com/dial/van/trading/TradingRepository.kt",
+      "old_line": 28,
+      "new_line": 28,
+      "old_sha256": "6c1a9a9f5cd7cea10f84a99a9c94fe7d4cb4502be270f4f86e8039e770b89368",
+      "new_sha256": "f9ae9f30186ad5211239e890b7a304df490147f153cad9c3a68613aa56858b2f",
+      "exact_anchor": "    suspend fun events(limit: Int = 50): Loaded<EventsReadModel> = load(EventsReadModel::parse) { client.tradingEvents(limit) }"
     },
     "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:1868": {
       "file": "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt",
@@ -2068,6 +2164,14 @@
       "new_sha256": "f5420e3d9fcf3e6c780813554380e0c7cbdfc40325f983cece648c9812abf0a3",
       "exact_anchor": "    suspend fun tradingPotential(): String = withContext(Dispatchers.IO) {"
     },
+    "android/app/src/main/java/com/dial/van/trading/TradingRepository.kt:29": {
+      "file": "android/app/src/main/java/com/dial/van/trading/TradingRepository.kt",
+      "old_line": 29,
+      "new_line": 29,
+      "old_sha256": "6c1a9a9f5cd7cea10f84a99a9c94fe7d4cb4502be270f4f86e8039e770b89368",
+      "new_sha256": "f9ae9f30186ad5211239e890b7a304df490147f153cad9c3a68613aa56858b2f",
+      "exact_anchor": "    suspend fun potentialTrades(): Loaded<PotentialReadModel> = load(PotentialReadModel::parse) { client.tradingPotential() }"
+    },
     "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:1872": {
       "file": "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt",
       "old_line": 1872,
@@ -2076,6 +2180,14 @@
       "new_sha256": "f5420e3d9fcf3e6c780813554380e0c7cbdfc40325f983cece648c9812abf0a3",
       "exact_anchor": "    suspend fun tradingHistory(limit: Int = 50): String = withContext(Dispatchers.IO) {"
     },
+    "android/app/src/main/java/com/dial/van/trading/TradingRepository.kt:30": {
+      "file": "android/app/src/main/java/com/dial/van/trading/TradingRepository.kt",
+      "old_line": 30,
+      "new_line": 30,
+      "old_sha256": "6c1a9a9f5cd7cea10f84a99a9c94fe7d4cb4502be270f4f86e8039e770b89368",
+      "new_sha256": "f9ae9f30186ad5211239e890b7a304df490147f153cad9c3a68613aa56858b2f",
+      "exact_anchor": "    suspend fun history(limit: Int = 50): Loaded<HistoryReadModel> = load(HistoryReadModel::parse) { client.tradingHistory(limit) }"
+    },
     "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:745": {
       "file": "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt",
       "old_line": 745,
@@ -2083,6 +2195,16 @@
       "old_sha256": "99bb9ba0510e75ed2ab18f0cd3ea74e03070b0a44bd4bd5f8c751874edf8941a",
       "new_sha256": "f5420e3d9fcf3e6c780813554380e0c7cbdfc40325f983cece648c9812abf0a3",
       "exact_anchor": "    suspend fun tradingAccounts(): String = withContext(Dispatchers.IO) { rawGet(\"/v1/trading/accounts\") }"
+    },
+    "android/app/src/main/java/com/dial/van/trading/TradingRepository.kt:18": {
+      "file": "android/app/src/main/java/com/dial/van/trading/TradingRepository.kt",
+      "old_line": 18,
+      "new_line": 18,
+      "old_sha256": "6c1a9a9f5cd7cea10f84a99a9c94fe7d4cb4502be270f4f86e8039e770b89368",
+      "new_sha256": "f9ae9f30186ad5211239e890b7a304df490147f153cad9c3a68613aa56858b2f",
+      "exact_anchor": "    suspend fun accounts(): Loaded<List<AccountCard>> = load({ b -> parseObject(b)?.arr(\"accounts\")?.map(AccountCard::from) }) { client.tradingAccounts() }",
+      "reviewed_replacement_anchor": "    suspend fun accounts(): Loaded<List<AccountCard>> = load(AccountCard::parseList) { client.tradingAccounts() }",
+      "reason": "Preserve the same actual tradingAccounts call while the reviewed AccountCard.parseList owner refuses unavailable-ledger data and retains per-account snapshot currentness; exact parser provenance is bound separately, with no execution authority."
     },
     "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:883": {
       "file": "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt",
@@ -2126,6 +2248,14 @@
       "new_sha256": "f5420e3d9fcf3e6c780813554380e0c7cbdfc40325f983cece648c9812abf0a3",
       "exact_anchor": "    suspend fun tradingPromotionCandidates(): String = withContext(Dispatchers.IO) {"
     },
+    "android/app/src/main/java/com/dial/van/trading/TradingRepository.kt:24": {
+      "file": "android/app/src/main/java/com/dial/van/trading/TradingRepository.kt",
+      "old_line": 24,
+      "new_line": 24,
+      "old_sha256": "6c1a9a9f5cd7cea10f84a99a9c94fe7d4cb4502be270f4f86e8039e770b89368",
+      "new_sha256": "f9ae9f30186ad5211239e890b7a304df490147f153cad9c3a68613aa56858b2f",
+      "exact_anchor": "        load(StrategyPromotionCandidate::parseAll) { client.tradingPromotionCandidates() }"
+    },
     "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:793": {
       "file": "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt",
       "old_line": 793,
@@ -2149,6 +2279,14 @@
       "old_sha256": "99bb9ba0510e75ed2ab18f0cd3ea74e03070b0a44bd4bd5f8c751874edf8941a",
       "new_sha256": "f5420e3d9fcf3e6c780813554380e0c7cbdfc40325f983cece648c9812abf0a3",
       "exact_anchor": "    suspend fun tradingTickets(): String = withContext(Dispatchers.IO) { rawGet(\"/v1/trading/tickets\") }"
+    },
+    "android/app/src/main/java/com/dial/van/trading/TradingRepository.kt:12": {
+      "file": "android/app/src/main/java/com/dial/van/trading/TradingRepository.kt",
+      "old_line": 12,
+      "new_line": 12,
+      "old_sha256": "6c1a9a9f5cd7cea10f84a99a9c94fe7d4cb4502be270f4f86e8039e770b89368",
+      "new_sha256": "f9ae9f30186ad5211239e890b7a304df490147f153cad9c3a68613aa56858b2f",
+      "exact_anchor": "    suspend fun tickets(): Loaded<TradingTicketList> = load(TradingTicketList::parse) { client.tradingTickets() }"
     },
     "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:1733": {
       "file": "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt",
@@ -2444,6 +2582,36 @@
       "role": "Validate original receipt and independently observed current connection before completion"
     }
   ],
+  "account_read_delegated_parser_source": [
+    {
+      "file": "android/app/src/main/java/com/dial/van/trading/TradingRepository.kt",
+      "line": 18,
+      "sha256": "f9ae9f30186ad5211239e890b7a304df490147f153cad9c3a68613aa56858b2f",
+      "exact_anchor": "    suspend fun accounts(): Loaded<List<AccountCard>> = load(AccountCard::parseList) { client.tradingAccounts() }",
+      "role": "Same account transport call delegates to the reviewed typed parser"
+    },
+    {
+      "file": "android/app/src/main/java/com/dial/van/trading/TradingModels.kt",
+      "line": 88,
+      "sha256": "880ddda71469a417d4ff27c8aeaa327db623b36bdd64b5056dc7c3e639fba1a9",
+      "exact_anchor": "        fun parseList(body: String): List<AccountCard>? {",
+      "role": "Actual account-list parser entry"
+    },
+    {
+      "file": "android/app/src/main/java/com/dial/van/trading/TradingModels.kt",
+      "line": 90,
+      "sha256": "880ddda71469a417d4ff27c8aeaa327db623b36bdd64b5056dc7c3e639fba1a9",
+      "exact_anchor": "            check(source.bool(\"ledger_available\") != false) { \"Native account ledger unavailable\" }",
+      "role": "Unavailable ledger remains unavailable rather than an empty/live account list"
+    },
+    {
+      "file": "android/app/src/main/java/com/dial/van/trading/TradingModels.kt",
+      "line": 91,
+      "sha256": "880ddda71469a417d4ff27c8aeaa327db623b36bdd64b5056dc7c3e639fba1a9",
+      "exact_anchor": "            return source.arr(\"accounts\").map(::from)",
+      "role": "Typed account rows retain their exact original per-account snapshot readback"
+    }
+  ],
   "current_cited_source_sha256": {
     "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt": "f5420e3d9fcf3e6c780813554380e0c7cbdfc40325f983cece648c9812abf0a3",
     "android/app/src/main/java/com/dial/van/VanApplication.kt": "4352895086300653d40aaeb2a071f7d52109ced7821ca23a333d1bb1c6865f0f",
@@ -2453,7 +2621,7 @@
     "android/app/src/main/java/com/dial/van/projects/ProjectDetailRoute.kt": "3ee1ef7466ee32449c035ce4ec955ee2def69a676fbcab3def93e95d6ccb7364",
     "android/app/src/main/java/com/dial/van/projects/ProjectsRoute.kt": "63123fac63cf58fc205335bd5821b69e3d6de936bdbfe7d5424a960debb40732",
     "android/app/src/main/java/com/dial/van/command/attention/AttentionRoute.kt": "5a01fc1818cbdaf7c1147e46ef40c5ad3c1f594e788c492201edeced5ce3decc",
-    "android/app/src/main/java/com/dial/van/trading/TradingRepository.kt": "6c1a9a9f5cd7cea10f84a99a9c94fe7d4cb4502be270f4f86e8039e770b89368",
+    "android/app/src/main/java/com/dial/van/trading/TradingRepository.kt": "f9ae9f30186ad5211239e890b7a304df490147f153cad9c3a68613aa56858b2f",
     "android/app/src/main/java/com/dial/van/command/nav/VanNavModel.kt": "187616b948c9dbf6de5a2914f9b49f6ed444bba19b9de841dac1947db695bcd2",
     "android/app/src/main/java/com/dial/van/command/CommandCentreActivity.kt": "14c746d2024fccf594a99227b2e1685c6f35a7045933a5eb0c69cafc0c28d032",
     "android/app/src/main/java/com/dial/van/control/VanCommandController.kt": "be526ec82e92e141132ec9e5e9c8fb22a22ead9571dc47a26d179fe7873693d8",
@@ -2562,7 +2730,8 @@
     "android/app/src/main/java/com/dial/van/visual/VanCharacterAcceptance.kt": "7b282fa7815e4557cb4c2cd9e87d34ee9e5d4673b5fa5d93ecef2f1ded648e47",
     "android/app/src/main/java/com/dial/van/gateway/GoogleWithdrawalOperations.kt": "3718aea7c293fa376100aa712660513bd3f904ab4ccd149d02cbac67c8ffbce6",
     "trading/vati/contracts/schemas/native_account_observation.schema.json": "af0c32a5ac27d55218474da3c8ea24a049c3c7b1bc59dc9abf465ae4a2b83a9f",
-    "android/app/src/main/java/com/dial/van/trading/NativeAccountObservation.kt": "c6da23e70724022d1f813bb779b0e31661142565a8729949ca6a016ddf06927d"
+    "android/app/src/main/java/com/dial/van/trading/NativeAccountObservation.kt": "c6da23e70724022d1f813bb779b0e31661142565a8729949ca6a016ddf06927d",
+    "android/app/src/main/java/com/dial/van/trading/TradingModels.kt": "880ddda71469a417d4ff27c8aeaa327db623b36bdd64b5056dc7c3e639fba1a9"
   },
   "endpoint_count": 487,
   "schema_count": 380,

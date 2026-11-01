@@ -8,6 +8,7 @@ from __future__ import annotations
 from collections import defaultdict
 from decimal import Decimal
 from pathlib import Path
+import time
 from typing import Any, Optional
 
 from vati.app.tradebook import _collect, _entry_receipt, current_trades, past_trades, potential_trades
@@ -15,6 +16,9 @@ from vati.core.events import Event, EventKind
 from vati.core.ledger import Ledger
 
 ZERO = Decimal("0")
+# Display/readback currentness only; never risk or execution authority. The
+# gateway passes its existing LEDGER_STALENESS_MS policy explicitly as well.
+ACCOUNT_SNAPSHOT_STALENESS_MS = 15 * 60 * 1000
 
 
 def _d(v) -> Optional[Decimal]:
@@ -39,10 +43,40 @@ def _latest_by(ledger: Ledger, kind: EventKind, key) -> dict[str, Event]:
 
 
 # ------------------------------------------------------------------ accounts
-def account_states(ledger: Ledger, registry_public: list[dict]) -> list[dict[str, Any]]:
-    with ledger.read_snapshot():return _account_states(ledger,registry_public)
+def _snapshot_readback(event, *, now_ms, staleness_ms, unavailable=False):
+    source_ms = event.event_time_ms if event else None
+    age_ms = now_ms - source_ms if type(source_ms) is int and source_ms > 0 else None
+    if unavailable:
+        state, reason = 'UNAVAILABLE', 'LEDGER_UNAVAILABLE'
+    elif event is None:
+        state, reason = 'NEVER_SYNCED', 'NO_ACCOUNT_SNAPSHOT'
+    elif age_ms is None:
+        state, reason = 'LAST_KNOWN', 'INVALID_SOURCE_TIME'
+    elif age_ms < 0:
+        state, reason = 'LAST_KNOWN', 'FUTURE_SOURCE_TIME'
+    elif age_ms > staleness_ms:
+        state, reason = 'LAST_KNOWN', 'STALE_SOURCE_SNAPSHOT'
+    else:
+        state, reason = 'CURRENT', 'SOURCE_SNAPSHOT_WITHIN_DISPLAY_BOUND'
+    return {'state':state, 'reason':reason, 'source_revision':event.hash if event else None,
+        'source_event_time_ms':source_ms, 'source_received_time_ms':event.received_time_ms if event else None,
+        'read_at_ms':now_ms, 'age_ms':age_ms, 'staleness_threshold_ms':staleness_ms,
+        'execution_authority':False}
 
-def _account_states(ledger: Ledger, registry_public: list[dict]) -> list[dict[str, Any]]:
+
+def unavailable_account_states(registry_public, *, now_ms, staleness_ms=ACCOUNT_SNAPSHOT_STALENESS_MS):
+    return [{**a, 'equity':None, 'balance':None, 'connection_state':'UNAVAILABLE',
+        'snapshot_readback':_snapshot_readback(None,now_ms=now_ms,staleness_ms=staleness_ms,unavailable=True)}
+        for a in registry_public]
+
+
+def account_states(ledger: Ledger, registry_public: list[dict], *, now_ms=None,
+                   staleness_ms=ACCOUNT_SNAPSHOT_STALENESS_MS) -> list[dict[str, Any]]:
+    with ledger.read_snapshot():
+        captured_ms = int(time.time()*1000) if now_ms is None else now_ms
+        return _account_states(ledger,registry_public,now_ms=captured_ms,staleness_ms=staleness_ms)
+
+def _account_states(ledger: Ledger, registry_public: list[dict], *, now_ms, staleness_ms) -> list[dict[str, Any]]:
     snaps = _latest_by(ledger, EventKind.ACCOUNT_SNAPSHOT, lambda e: e.payload.get("account_alias"))
     sessions = _latest_by(ledger, EventKind.SESSION, lambda e: e.correlation_id.split(":")[0] if ":" in e.correlation_id else None)
     open_by_alias: dict[str, int] = defaultdict(int)
@@ -64,6 +98,9 @@ def _account_states(ledger: Ledger, registry_public: list[dict]) -> list[dict[st
                "connected": p.get("connected"), "verified": p.get("verified"), "open_positions": open_by_alias.get(a["alias"], p.get("open_positions", 0)), "kill_switch": p.get("kill_switch", []),
                "last_sync_ms": s.event_time_ms if s else None, "connection_state": ("LIVE" if p.get("connected") else "OFFLINE") if s else "NEVER_SYNCED", "session_event": sessions.get(a["alias"]).payload.get("event") if sessions.get(a["alias"]) else None}
         out.append(row)
+        row['snapshot_readback']=_snapshot_readback(s,now_ms=now_ms,staleness_ms=staleness_ms)
+        if row['snapshot_readback']['state']=='LAST_KNOWN':
+            row['connection_state']='STALE'
         row["risk_history_issue"] = p.get("risk_history_issue") or None
         row["learning_history_issue"] = p.get("learning_history_issue") or None
         from vati.readmodels.learning import reported_restated_learning
@@ -103,15 +140,21 @@ def _account_states(ledger: Ledger, registry_public: list[dict]) -> list[dict[st
                 'CURRENT_PROFILE_NATIVE_SCOPE_MISMATCH' if row['funding']['reason']=='CURRENT_PROFILE_NATIVE_SCOPE_MISMATCH' else 'NATIVE_SCOPE_UNBOUND')
             row.update(equity=None,balance=None,floating_pnl=None,connected=False,verified=False,connection_state='STALE',currency=a.get('currency'))
             row["margin"]={"state":"UNAVAILABLE","reason":unavailable_reason,"execution_authority":False}
+            row['snapshot_readback']={**row['snapshot_readback'],'state':'UNAVAILABLE','reason':unavailable_reason}
             row['raw_equity_change']={**row['raw_equity_change'],'day':None,'week':None,'drawdown_from_raw_peak':None}
     return out
 
 
-def portfolio(ledger: Ledger, registry_public: list[dict], *, reporting_currency: str = "USD") -> dict[str, Any]:
-    with ledger.read_snapshot():return _portfolio(ledger,registry_public,reporting_currency=reporting_currency)
+def portfolio(ledger: Ledger, registry_public: list[dict], *, reporting_currency: str = "USD",
+              now_ms=None, staleness_ms=ACCOUNT_SNAPSHOT_STALENESS_MS) -> dict[str, Any]:
+    with ledger.read_snapshot():
+        captured_ms = int(time.time()*1000) if now_ms is None else now_ms
+        return _portfolio(ledger,registry_public,reporting_currency=reporting_currency,
+            now_ms=captured_ms,staleness_ms=staleness_ms)
 
-def _portfolio(ledger: Ledger, registry_public: list[dict], *, reporting_currency: str = "USD") -> dict[str, Any]:
-    accounts = account_states(ledger, registry_public)
+def _portfolio(ledger: Ledger, registry_public: list[dict], *, reporting_currency: str = "USD",
+               now_ms, staleness_ms) -> dict[str, Any]:
+    accounts = _account_states(ledger, registry_public,now_ms=now_ms,staleness_ms=staleness_ms)
     same = [a for a in accounts if a["currency"] == reporting_currency and a["equity"] is not None]
     other = [a["alias"] for a in accounts if a["equity"] is not None and a["currency"] != reporting_currency]
     def tot(key):

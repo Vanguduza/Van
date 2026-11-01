@@ -6,6 +6,8 @@ can be deleted without another test failing, the correction was decorative.
 
 from __future__ import annotations
 
+from pathlib import Path
+
 import subprocess
 import sys
 from decimal import Decimal as D
@@ -27,8 +29,9 @@ from vati.observability.enhancement_metrics import (
     check_labels,
 )
 
-GUARD = "trading/tools/check_enhancement_architecture.py"
-MIGRATE = "trading/tools/migrate_capsule_timeframes.py"
+ROOT = Path(__file__).resolve().parents[2]
+GUARD = str(ROOT / "trading/tools/check_enhancement_architecture.py")
+MIGRATE = str(ROOT / "trading/tools/migrate_capsule_timeframes.py")
 
 
 # --- architecture guardrails ---------------------------------------------
@@ -47,11 +50,11 @@ def test_guardrail_script_actually_fails_when_violated(tmp_path, monkeypatch):
     import pathlib
     import shutil
 
-    src = pathlib.Path("trading")
+    src = (ROOT / "trading")
     dst = tmp_path / "trading"
     shutil.copytree(src, dst, ignore=shutil.ignore_patterns("__pycache__", "*.pyc"))
     shutil.copytree(
-        pathlib.Path("backend"), tmp_path / "backend",
+        (ROOT / "backend"), tmp_path / "backend",
         ignore=shutil.ignore_patterns("__pycache__", "*.pyc"),
     )
 
@@ -70,7 +73,7 @@ def test_guardrail_script_actually_fails_when_violated(tmp_path, monkeypatch):
 
 
 def test_capsule_migration_is_settled():
-    r = subprocess.run([sys.executable, MIGRATE, "--check"], capture_output=True, text=True)
+    r = subprocess.run([sys.executable, MIGRATE, "--check"], cwd=ROOT, capture_output=True, text=True)
     assert r.returncode == 0
     assert "migration provenance reconciled" in r.stdout
 
@@ -79,7 +82,7 @@ def test_every_capsule_has_a_timeframe_contract():
     import glob
     import json
     from vati.intelligence.mtf import TimeframeContract
-    for path in glob.glob("trading/strategies/registry/*.json"):
+    for path in glob.glob(str(ROOT / "trading/strategies/registry/*.json")):
         doc = json.loads(open(path).read())
         c = TimeframeContract.from_capsule(doc)
         assert c is not None, path
@@ -92,7 +95,7 @@ def test_migration_check_rejects_post_migration_capsule_drift(tmp_path):
     import shutil
     from vati.core.canonical import canonical_hash
 
-    src = pathlib.Path("trading")
+    src = (ROOT / "trading")
     dst = tmp_path / "trading"
     shutil.copytree(src, dst, ignore=shutil.ignore_patterns("__pycache__", "*.pyc"))
     cap = dst / "strategies" / "registry" / "FX-TREND-PULLBACK-01.json"
@@ -113,7 +116,7 @@ def test_migration_check_rejects_post_migration_capsule_drift(tmp_path):
 def test_every_migration_record_asserts_unchanged_logic():
     import json
     import pathlib
-    p = pathlib.Path("trading/strategies/migrations/capsule_migrations.json")
+    p = (ROOT / "trading/strategies/migrations/capsule_migrations.json")
     records = json.loads(p.read_text())
     assert records
     for r in records:
@@ -254,7 +257,7 @@ def test_event_kind_source_has_no_duplicate_enum_member_names():
     import ast
     import pathlib
 
-    tree = ast.parse(pathlib.Path("trading/vati/core/events.py").read_text())
+    tree = ast.parse((ROOT / "trading/vati/core/events.py").read_text())
     event_kind = next(
         n for n in tree.body
         if isinstance(n, ast.ClassDef) and n.name == "EventKind"
@@ -274,11 +277,11 @@ def test_promotion_join_guardrail_fails_when_gateway_route_is_removed(tmp_path):
     # The guard reads both trading/ and its sibling backend/. Reproduce that
     # repository shape and delete only the live promotion route string.
     shutil.copytree(
-        pathlib.Path("trading"), tmp_path / "trading",
+        (ROOT / "trading"), tmp_path / "trading",
         ignore=shutil.ignore_patterns("__pycache__", "*.pyc"),
     )
     shutil.copytree(
-        pathlib.Path("backend"), tmp_path / "backend",
+        (ROOT / "backend"), tmp_path / "backend",
         ignore=shutil.ignore_patterns("__pycache__", "*.pyc"),
     )
     gateway = tmp_path / "backend" / "van_gateway" / "app.py"
@@ -301,11 +304,11 @@ def test_certificate_producer_guardrail_fails_on_direct_production_construction(
     import pathlib
     import shutil
 
-    src = pathlib.Path("trading")
+    src = (ROOT / "trading")
     dst = tmp_path / "trading"
     shutil.copytree(src, dst, ignore=shutil.ignore_patterns("__pycache__", "*.pyc"))
     shutil.copytree(
-        pathlib.Path("backend"), tmp_path / "backend",
+        (ROOT / "backend"), tmp_path / "backend",
         ignore=shutil.ignore_patterns("__pycache__", "*.pyc"),
     )
     target = dst / "vati" / "learning" / "coverage.py"

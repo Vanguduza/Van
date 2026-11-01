@@ -1,0 +1,6 @@
+[
+  {
+    "nodeid": "trading.tests.test_vtil_borrow::test_dial_resolver_selects_trading_knowledge_from_van_registry",
+    "reason": "dial-new checkout not available (set DIAL_REPO)"
+  }
+]

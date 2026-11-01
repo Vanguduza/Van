@@ -1,0 +1,19 @@
+{
+  "schema": "van.be004.lac134.source-inputs/1",
+  "published_base": "ba817c4a6aeaf9a8272d81270f6d0abaf7c18feb",
+  "paths_sha256": {
+    "trading/vati/app/portfolio.py": "1072ec238104568bfece9ea4461824b63096ede0b559999af4c0da9c686b88e9",
+    "backend/van_gateway/trading/service.py": "cb28b870f1e454867cde618b1392285baaf6af31b87ac9dd7cbe8b1240efd1ed",
+    "trading/tests/test_portfolio_views.py": "3cb11f07d209342265cf1145001557fade4b618491f26b5cf504316608720d63",
+    "trading/tests/test_account_snapshot_freshness.py": "d052d7a831a4d7254747edf69a9274dcde09220663a6c78fa8f55587c0e2ed8d",
+    "backend/tests/test_accounts_freshness_api.py": "67e787c18ecf523142c1255d28640b56d8e34b9238907884ffe3375304c3798c",
+    "backend/tests/test_trading_api.py": "65d920eeacadd34589e1078bde5255d7c179893ebd5faa7b394e1991095c357a",
+    "android/app/src/main/java/com/dial/van/trading/TradingRepository.kt": "f9ae9f30186ad5211239e890b7a304df490147f153cad9c3a68613aa56858b2f",
+    "android/app/src/main/java/com/dial/van/trading/TradingModels.kt": "880ddda71469a417d4ff27c8aeaa327db623b36bdd64b5056dc7c3e639fba1a9",
+    "android/app/src/test/java/com/dial/van/trading/TradingModelsTest.kt": "1939c3bc6e8911f1a7aca4c0e7d9671249c779e867baddaf8daab945ce5660b4"
+  },
+  "source_fingerprint": "1cd68541b19f9c282a008a4ec8fb502e122775726a072cde04481db39a7049c7",
+  "prior18_R3_all_unchanged": true,
+  "workspace_free": 69738496,
+  "tmp_free": 4241043456
+}

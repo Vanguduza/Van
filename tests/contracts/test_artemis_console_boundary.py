@@ -1,12 +1,16 @@
 from pathlib import Path
 
+ROOT = Path(__file__).resolve().parents[2]
+
 
 def test_android_never_contains_private_artemis_console_credential_or_private_endpoint():
-    android = Path("android/app/src/main/java/com/dial/van").read_text() if Path("android/app/src/main/java/com/dial/van").is_file() else ""
-    # Walk Kotlin sources because the protected token is server-side only.
+    android = (ROOT / "android/app/src/main/java/com/dial/van").read_text() if (ROOT / "android/app/src/main/java/com/dial/van").is_file() else ""
+    # Walk actual nonempty Kotlin sources; an absent relative tree is not proof.
+    assert (ROOT / "android/app/src/main/java/com/dial/van").is_dir()
+    assert list((ROOT / "android/app/src/main/java/com/dial/van").rglob("*.kt"))
     text = "\n".join(
         p.read_text(encoding="utf-8")
-        for p in Path("android/app/src/main/java/com/dial/van").rglob("*.kt")
+        for p in (ROOT / "android/app/src/main/java/com/dial/van").rglob("*.kt")
     )
     assert "artemis-console.token" not in text
     assert "9135" not in text
@@ -18,8 +22,8 @@ def test_console_session_is_hardware_device_proofed_and_proxy_is_hermes_governed
 
     from van_gateway.app import app as gateway
 
-    app = Path("backend/van_gateway/app.py").read_text(encoding="utf-8")
-    console = Path("backend/van_gateway/artemis/console.py").read_text(encoding="utf-8")
+    app = (ROOT / "backend/van_gateway/app.py").read_text(encoding="utf-8")
+    console = (ROOT / "backend/van_gateway/artemis/console.py").read_text(encoding="utf-8")
     ingress = next(
         middleware.kwargs["dispatch"] for middleware in gateway.user_middleware
         if getattr(middleware.kwargs.get("dispatch"), "__name__", "") == "require_ingress_auth"

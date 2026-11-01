@@ -1,0 +1,71 @@
+{
+  "disposition": "NO_BLOCKING_FINDING_IN_BOUNDED_LAC134_SOURCE_REVIEW",
+  "fingerprint": "1cd68541b19f9c282a008a4ec8fb502e122775726a072cde04481db39a7049c7",
+  "source9_before_after_equal": true,
+  "source9_pins": {
+    "trading/vati/app/portfolio.py": "1072ec238104568bfece9ea4461824b63096ede0b559999af4c0da9c686b88e9",
+    "backend/van_gateway/trading/service.py": "cb28b870f1e454867cde618b1392285baaf6af31b87ac9dd7cbe8b1240efd1ed",
+    "trading/tests/test_portfolio_views.py": "3cb11f07d209342265cf1145001557fade4b618491f26b5cf504316608720d63",
+    "trading/tests/test_account_snapshot_freshness.py": "d052d7a831a4d7254747edf69a9274dcde09220663a6c78fa8f55587c0e2ed8d",
+    "backend/tests/test_accounts_freshness_api.py": "67e787c18ecf523142c1255d28640b56d8e34b9238907884ffe3375304c3798c",
+    "backend/tests/test_trading_api.py": "65d920eeacadd34589e1078bde5255d7c179893ebd5faa7b394e1991095c357a",
+    "android/app/src/main/java/com/dial/van/trading/TradingRepository.kt": "f9ae9f30186ad5211239e890b7a304df490147f153cad9c3a68613aa56858b2f",
+    "android/app/src/main/java/com/dial/van/trading/TradingModels.kt": "880ddda71469a417d4ff27c8aeaa327db623b36bdd64b5056dc7c3e639fba1a9",
+    "android/app/src/test/java/com/dial/van/trading/TradingModelsTest.kt": "1939c3bc6e8911f1a7aca4c0e7d9671249c779e867baddaf8daab945ce5660b4"
+  },
+  "prior18_R3_source_unchanged": true,
+  "export": "Exact9member patch independently applied to ba817 baseline, all9 resultinghashes verified. No runtimefiles/old18 members included.",
+  "patch_sha256": "4f30c1e280c9d494bfd7689724593fc7d5a603566cee7943a7bdca6035fed9f6",
+  "source_findings": [
+    "Age is derived from each actual ACCOUNT_SNAPSHOT.event_time_ms; event.hash is original source revision and originalreceivedclock retained. Unrelated global/session heartbeat cannot refresh account.",
+    "Exact existing15min bound reused: age<=900000 CURRENT; older/future/nonpositive typedinvalid LAST_KNOWN\u2192STALE. No source-time clamping to current. Fresh connectedLIVE/offlineOFFLINE, nooriginalNEVER_SYNCED, missingledgerUNAVAILABLE remain distinct.",
+    "One captured readclock and SQL snapshot per account/portfolio projection. Existing chronological ledger last-event choice preserved; lateoldsource cannot acquire freshness from its receivedclock.",
+    "Permitted historical money/totals remain. Existing nativebinding/funding/valuation/unavailable/sourcefamily restrictions retain precedence; source revision/currentness metadata is DATA with execution_authority=false. No executionpermission/provider proof/ledger event write.",
+    "Android actual TradingRepository.accounts uses AccountCard.parseList; explicit ledger_available=false throws into existing Loaded.Unavailable, retaining legacy nofield compatibility. ExactLong provenance DTO and existingSTALE/overall state reused without layout/action change. DTO compilation unexecuted here.",
+    "Test fixture currentclock adjustment preserves original positive assertions at source-time; existing missing-ledger exactshape assertion adds only truthful field. No assertion thinning."
+  ],
+  "independent_actual_probes": {
+    "cases": 2,
+    "pass": 2,
+    "exit": 0,
+    "source_PYTHONPATH": "Exact isolated lane trading/backend/testroots, explicit asyncplugin/AUTO, no cache writes",
+    "coverage": "Paired real HTTP+SQLite+registry with ancient1000ms, exactbound, future, zero, never, offline accounts and unrelatedcurrentSESSION. Accounts/portfolio agree, one serviceclock perread, originalhash/source/receipt clock/negativeage/threshold and historicalamount exact; globalstatusfresh does not un-stale ancientaccount. Restart reproduces facts; wrongcurrentdevice token refuses; originalrows/head/count/registrybytes unchanged. Missingledger false/unavailable withnoDBcreation; corruptSQLite raises and preservesbytes.",
+    "raw": "/tmp/van-lac134-independent-20261101.log",
+    "raw_hash": "2f5cb7a6e9f62dcab0e26e9c9ca3fcb454f0ae81366435270f2974692918f948",
+    "junit": "/tmp/van-lac134-independent-20261101.xml",
+    "junit_hash": "5446d1a0d5bd0227ad97833918f9359e7a6804714c43eb4b9e2632e7f8aed051",
+    "raw_cap": 8388608,
+    "original_diagnosis_failure_untouched": true
+  },
+  "author_frozen_terminals": {
+    "group_cases": [
+      107,
+      29,
+      58
+    ],
+    "unique": 194,
+    "fail": 0,
+    "error": 0,
+    "skip": 0,
+    "outer_exits": [
+      0,
+      0,
+      0
+    ],
+    "raw_junit_hashes_verified": true,
+    "not_single_full_programme_run": true
+  },
+  "cleanup": {
+    "owned_fixture_removed": "/tmp/van-lac134-independent-20261101",
+    "files": 14,
+    "inventory_hash": "b6ce0bba3f85540d3582200974dc092ea6ec8bb2a3d1ddd3807b42069d4776ef",
+    "no_cmdline_consumers": true
+  },
+  "qualification_remaining": [
+    "New TradingModelsTest/DTO/parser exactcandidate needs real hosted SDK fullappunit/assemble/lint; earlier ba817AndroidSUCCESS is not this newcandidate proof.",
+    "Source194 is three serialized terminal0 groups, not wholeunit/native/provider/PG/fullBE004 acceptance.",
+    "BE00411requirements/21acceptances/20contexts/6actions and BE002/BE003/PRE003/BG001/formal/native/production/backup/snapshot gates remain separate/unissued.",
+    "No source/mainwrites/commits/CI/Gradle/provider/network/native effects, newauthority records, financial policy or extraagents."
+  ],
+  "resources": "Own fixtures small and removed;2GiB reserve and8MiB rawcap; no archives or peer cleanup."
+}

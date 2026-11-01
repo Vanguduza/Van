@@ -1,0 +1,7 @@
+{
+  "exact_case_counter_equal": true,
+  "unique_cases": 1710,
+  "same_source_before_graph": true,
+  "case_ids_sha256": "98ca40e2710faad18427f7d9d16ba93e61af9de7844db1f079e16a5c0ffd5830",
+  "limits": "Paired CWD executions of same1710IDs, not3420unique; backend addsrelativefixture failure, bothretain2knownentry67failures."
+}

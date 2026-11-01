@@ -1,0 +1,35 @@
+{
+  "state": "FROZEN_SEVEN_TEST_OWNER_CWD_CORRECTIONS_FOR_INDEPENDENT_REVIEW",
+  "base": "ba792c27f906c1ca17b4d87d3c129d1b50e430a8",
+  "source_pins": {
+    "trading/tests/test_capsule_migration.py": "f588b806f14e75ea337a5dff1c4c7a8b3044940a3da59176717c5da1e985b414",
+    "trading/tests/test_enhancement_closure.py": "27ca2d7e519aae2eeac2a27c0088f5312064487ab5b4dd01419f07937a01c026",
+    "trading/tests/test_feature_contract.py": "00600d60bbefa7438e305493ae6abed21e66b2b9089366b1f364d4f9c0d46146",
+    "trading/tests/test_research_and_drift.py": "e89772396b5f580c164b97d44bec6233a32f08c444343dcf17b267f4c47f1f5e",
+    "trading/tests/test_validation_certificates.py": "accbe86949c97a10b6826c72855e2c89b2f1a76c5b27c0b383adf28f60150764",
+    "trading/tests/test_mt5_nonce_durability.py": "039a2ec40ce1c9dcf07700dccc5f1412670a864d2c4a6699b09aa7d8f1832856",
+    "tests/contracts/test_artemis_console_boundary.py": "1c9f015f4ad322b6bfdba19fe768f6d6f8510a389dd0bdb43813978d1e3bc62f"
+  },
+  "before_source_pins": {
+    "trading/tests/test_capsule_migration.py": "8e06781379faf96e284969b8a33782ec4c024e6da31722cd400c35c8841fc212",
+    "trading/tests/test_enhancement_closure.py": "d783dbc037f2919fc77122b435723a25ad8748feec9cd3d2ac44c29cbfd83200",
+    "trading/tests/test_feature_contract.py": "2b703d05269ada458a0f313be33923cac64e0102321ff7aabb6c45dcde70db39",
+    "trading/tests/test_research_and_drift.py": "f32db5f2d808e25a918608a2dd2f25436a19d6236bd6d55d944268484998663e",
+    "trading/tests/test_validation_certificates.py": "12a2bb555b73e85c0231e67ee140b59f815b327848454d69ab5396710edbdb70",
+    "trading/tests/test_mt5_nonce_durability.py": "43562383f6fa9cffa77d27b4459a2245c4c0b405d57f7b3b107e6584c951c603",
+    "tests/contracts/test_artemis_console_boundary.py": "0f87a5c72bda234654a455afe1dbe369277aafcd847156d26af58fd90fc4cf3c"
+  },
+  "archive_sha256": "1a748b2d0620eace9d63f12fee8b66ee4de970f763ea734448f036763307e722",
+  "patch_sha256": "102568cd418c401e41ad1c3e3a4907d9a6540ef7a09357217e5572ad01f27cd7",
+  "actual_controls": "CONTROLS.json:157unique IDs at EACH actualcheckout/backend cwd across sequentiallight+4heavy owners,314caseexecutions/0failure/error/skip; exact39historicalbad all observedpass both. Not314unique, notfull5715 suite/PG/nativequalification.",
+  "assertions": "ASSERTION_AST_PRESERVATION.json:all175original assertionASTs retainedinorder;2additionalnonemptyAndroidsourceguards prevent vacuousabsentscan. Validation_input_integrity consumer source unchanged.",
+  "behavior": "Resolve committedTESTASSET/script/source-reader roots from __file__, preserving sourcecontent/API/storage/nonce/cert assertions. MT5child keeps sameimportclosure/order absolute while actualchildcwd remainsinherited. Migrationpositive tool explicitly uses its committedcheckoutfixture cwd; corruptcopiedtools retaintmp_pathcwd. No globalchdir/runneroverride/production/ignore/skip/authority changes.",
+  "before_native": "/tmp/van-recovery-ba817-followup-ci-diagnosis-20261101/CLASSIFICATION.json retains38tradingbad(25FAIL13ERROR)/5715/1skip; pairedgatewayroot2same source_before and1710caseidentities, backend adds1relativeartemis source-readerbad plus2pendingentry67. Deduplicate sharedcases; no fulluniongreen.",
+  "mt5_before": "NONCE_BEFORE.json actualunchangedtestcallable underbackend: childstderr ModuleNotFoundError:test_mt5_worker, no effectfile; explicitly acontrolledFakeMT5 sourceprobe, notrealSDK.",
+  "original_native_skip": "trading.tests.test_vtil_borrow::test_dial_resolver_selects_trading_knowledge_from_van_registry skipped: dial-new checkout not available (set DIAL_REPO). Remainsunqualified, notsilentlypassed/removed.",
+  "other_classification": "DOCbackend same346PASS1missingyamlFAIL; scenarioscheckout8PASS thenAGPcheckout2PASS+strictparent.gradleBLOCKED; fixedCIcommitba792 remainslocal/unpushed andunchanged.",
+  "cleanup": "All10ownedtestchildren terminal/waited+emptyprocessgroup; eachownedfixtureinventory/no readableFD references, changedpubliccopiedmutantproofs preserved, thenonlyownfixturesremoved. maxownedpeak28,584,554B<128MiB. ADMISSION_REFUSAL.json preservesearlier64MiBworkspace refusal asunexecuted. Specificcompletedoriginalproofvenv coldarchived/granted2063files+4links/mode/SHA/CRC, mapbeforeremoval; old73/2failedproof staysfailed. Coldarchivevolatile/nonportable, notcurrentruntime.",
+  "limits": "No product/account/domain/financialsource changes; pendingentry67/auth/native/BG/unit/matrix/backup/snapshot gates unwaived. Originalwatch56665/run41341233137 untouched; no newnativepoll/cancel/rerun.",
+  "next": "Independent exact7path review; reviewedLAC1349 may integrate now that39beforefailures locallyresolved, but consumedinputchanges mustmap/rerun relevantcases, neverreuse157 onchangedinputs blindly. No7sourcecommit before review; preservealreadygenuineba792commit andpublishcoherentfinalcandidate normallyafterrequired4fdverify.",
+  "at_utc": "2026-11-01T20:05:10.942511+00:00"
+}

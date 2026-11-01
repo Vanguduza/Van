@@ -1,0 +1,1 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="0" skipped="0" tests="1" time="8.351" timestamp="2026-11-01T20:08:55.425200+00:00" hostname="07611d75dea7"><testcase classname="trading.tests.test_enhancement_closure" name="test_guardrail_script_actually_fails_when_violated" time="7.742" /></testsuite></testsuites>

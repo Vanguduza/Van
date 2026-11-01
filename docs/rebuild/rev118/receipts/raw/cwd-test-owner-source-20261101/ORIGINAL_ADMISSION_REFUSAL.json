@@ -1,0 +1,9 @@
+{
+  "state": "REFUSED_BEFORE_TEST_EXECUTION",
+  "workspace_free": 63422464,
+  "required_workspace": 67108864,
+  "tmp_free": 4130508800,
+  "tmp_reserve": 2147483648,
+  "source_changed": "Rootauthorized7testpathfixturecorrections only; original39badselectedexecutionNOT_RUN",
+  "at_utc": "2026-11-01T19:58:40.140528+00:00"
+}
