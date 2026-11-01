@@ -1,0 +1,44 @@
+{
+  "state": "CONFIRMED_NEW_INIT_EXPRESSION_FAILURE_SOURCE_FIX_SCOPE_PENDING",
+  "head": "dce5df6dcf30be9ee5158e5e0cb63caa4d4bc866",
+  "run": 41351792267,
+  "jobs": [
+    124983379153,
+    124983379092
+  ],
+  "failed_nodes": [
+    "tests/contracts/test_android_instrumentation_abi.py::test_actual_agp_direct_package_release_refuses_missing_core_deployment_profile",
+    "tests/contracts/test_android_production_target.py::test_actual_agp_valid_target_still_refuses_missing_production_signing"
+  ],
+  "cause_evidence": "Actual hosted assertions expected correct refusal messages but Gradleoutput truncated; exact new File(URI,String) expression independently fails cached Groovy3.0.22 constructor dispatch. Original full native stderr unavailable in uploaded fixture exclusions.",
+  "proposal": "Nested File(URI) parent then File(File,String) constructor; two testowners+exact structural/recorder oracle and real cachedGroovy regression only, root grant required. No production Gradle/workflow/native authority changes.",
+  "android": "Pure Kotlin success; actual AGP failure; Androidunit/build/lint skipped, no dceSDK inference",
+  "gateway_representative": {
+    "job": 124983379104,
+    "failed": 2,
+    "passed": 1893,
+    "deselected": 4192,
+    "seconds": 529.68,
+    "cause": "Only two pending protectedentry67 guards; no auth/evidence change"
+  },
+  "official_artifact": {
+    "id": 13100749032,
+    "bytes": 366055,
+    "sha256": "dd0051225957f512c35b5b4a7e9aa8dcf7041e02f88eab8280943a23ceb5c290",
+    "path": "/workspace/attachments/76a5be31-1270-48c8-b523-083917154fcb/github-actions-artifact-13100749032.zip"
+  },
+  "exact_decoded_logs": {
+    "JOB_124983379104_DECODED.log": "040d4250dc7a8f23a309efac6457bc79bde75801269b2911fe2ef5a765c1d5cf",
+    "JOB_124983379092_DECODED.log": "0459f7c609099de8eb049461937ff5a9e5ab5b2fa6fb1b0c0124187296629546",
+    "JOB_124983379153_DECODED.log": "a99922bd5561327cc192525a1324771d478915a334d9626ee4398a5a6edc7177"
+  },
+  "source_pins": {
+    "tests/contracts/test_android_instrumentation_abi.py": "00cebc810c199a29184436b0989637600f9350fa65506167e57651a84358ddef",
+    "tests/contracts/test_android_production_target.py": "abdb4ac40fbf90334d075f81ea626ace6803a392cdadc94d231a65c3db00b95c",
+    "tests/rebuild/test_canonical_source_audit.py": "14e200c2aa91e4db0b1735a51f7ea4a39f47c67452e54a42524fa6920d7330ac"
+  },
+  "watch": "Original96000 untouched; no duplicate/restart/cancel/reap",
+  "global_DIAL": "Last root actual refresh MCP Session terminated; no native/Artemis/device connectivity observed or recovered",
+  "limits": "Only representativebackend artifact read; pairedcheckout not asserted same beyond metadata. Native/fullmatrix failed/unqualified. Rawlogs/tmp andattachment volatile.",
+  "at_utc": "2026-11-01T21:44:36.021518+00:00"
+}

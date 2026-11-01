@@ -1,0 +1,84 @@
+{
+  "disposition": "NO_BLOCKING_FINDING_IN_BOUNDED_CONSTRUCTOR_RECHECK",
+  "base": "dce5df6dcf30be9ee5158e5e0cb63caa4d4bc866",
+  "pins_before": {
+    "tests/contracts/test_android_instrumentation_abi.py": "9879d8fdc9b6f0c1f92865addd81a0c0c8a774bb5efbeae74bdd082c366078ab",
+    "tests/contracts/test_android_production_target.py": "e7211f3a430fdfea9bcefa9b97313f4b702bbfca7d46614aff60d6d5bc96f24c",
+    "tests/rebuild/test_canonical_source_audit.py": "5a34cbbfacb136d305764408a413e85f02346cf730b1e855400afc4f33b6d227"
+  },
+  "pins_after": {
+    "tests/contracts/test_android_instrumentation_abi.py": "9879d8fdc9b6f0c1f92865addd81a0c0c8a774bb5efbeae74bdd082c366078ab",
+    "tests/contracts/test_android_production_target.py": "e7211f3a430fdfea9bcefa9b97313f4b702bbfca7d46614aff60d6d5bc96f24c",
+    "tests/rebuild/test_canonical_source_audit.py": "5a34cbbfacb136d305764408a413e85f02346cf730b1e855400afc4f33b6d227"
+  },
+  "patch_sha256": "d912df475e9a6b45f3ddeabab87a2dc91b1e57250fcbdb536bf6c6e716fffe70",
+  "archive_sha256": "eff13033b6e4e926ddbf66c28aa1bfd6c57684ea98d66d25c588a9722fda4aff",
+  "independent_actual_Groovy": [
+    {
+      "owner": "tests/contracts/test_android_instrumentation_abi.py",
+      "variant": "original",
+      "exit": 1,
+      "actual_paths": [],
+      "expected_constructor_failure": true,
+      "whole_generated_script": true
+    },
+    {
+      "owner": "tests/contracts/test_android_instrumentation_abi.py",
+      "variant": "fixed",
+      "exit": 0,
+      "actual_paths": [
+        "/tmp/van-dce-constructor-review-z_tsqfhc/0fixed quoted $ '\"/gradle-build-outputs/Van_",
+        "/tmp/van-dce-constructor-review-z_tsqfhc/0fixed quoted $ '\"/gradle-build-outputs/buildSrc_",
+        "/tmp/van-dce-constructor-review-z_tsqfhc/0fixed quoted $ '\"/gradle-build-outputs/Van_app"
+      ],
+      "expected_constructor_failure": false,
+      "whole_generated_script": true
+    },
+    {
+      "owner": "tests/contracts/test_android_production_target.py",
+      "variant": "original",
+      "exit": 1,
+      "actual_paths": [],
+      "expected_constructor_failure": true,
+      "whole_generated_script": true
+    },
+    {
+      "owner": "tests/contracts/test_android_production_target.py",
+      "variant": "fixed",
+      "exit": 0,
+      "actual_paths": [
+        "/tmp/van-dce-constructor-review-z_tsqfhc/1fixed quoted $ '\"/gradle-build-outputs/Van_",
+        "/tmp/van-dce-constructor-review-z_tsqfhc/1fixed quoted $ '\"/gradle-build-outputs/buildSrc_",
+        "/tmp/van-dce-constructor-review-z_tsqfhc/1fixed quoted $ '\"/gradle-build-outputs/Van_app"
+      ],
+      "expected_constructor_failure": false,
+      "whole_generated_script": true
+    }
+  ],
+  "runtime": {
+    "java_executable_sha256": "9cad3f2620d3ef2ed10b26f922af7e773d54fdaa05f615d6d6df014f3fec4155",
+    "java_version": "openjdk version \"21.0.13\" 2026-10-20 LTS\nOpenJDK Runtime Environment Temurin-21.0.13+9 (build 21.0.13+9-LTS)\nOpenJDK 64-Bit Server VM Temurin-21.0.13+9 (build 21.0.13+9-LTS, mixed mode, sharing)\n",
+    "groovy_jar_sha256": "c92c92c4b9b183f9981ba7399f36592e5e3ad6f4cdac7101b5a22cc17998d13f",
+    "Groovy": "3.0.22",
+    "Xmx": "64m",
+    "Gradle_SDK_network": false
+  },
+  "scope": "Whole literal generated from actual2 testowner setup statements evaluated using genuine cachedGroovy/JDK and controlled beforeProject/project/layout File receivers; actual constructor and canonicalpath resolution, not realGradle/AGP. Quoted/dollar/apostrophe/doublequote paths resolve exactly, root/buildSrc/app unique/external.",
+  "oracle_preserved": "Current exactrecorder/originalwholecoreAST oracle positives rerun forbothowners; only constructor tokens changed in literals/oracle. Allother focusedmoduleAST inclVTILcontrols identicaldce; all flags/assertions/cwd/wrapper/inputproject/signing/dryrun remain.",
+  "author136_verified": {
+    "cases": 136,
+    "fail": 0,
+    "error": 0,
+    "skip": 0,
+    "exit": 0,
+    "audit0": true
+  },
+  "review_correction": "Earlier review correctlyreserved actualAGPqualification but missed constructor validity in its SOURCE semantic review. Genuine whole-initGroovy execution now catches originalfailure and verifies correctedconstructor; no retroactive pass for oldcandidate.",
+  "cleanup": "Own wholeinit/receiver/oracle temporaryfiles auto removed;8MiBoutputcap and128MiBownedbudget. No globalcache/Gradle/SDK effects; JVMperfdata disabled and java.io.tmpdir owned.",
+  "limits": [
+    "Actual newexacthead hosted2AGPassertions+strictparentprovenance remainfuturequalification; dceactualfailure and skippedappunit/build/lint remainfailed/skipped.",
+    "No broaderfullmatrix/native/privatekey/unit/formal/S24/owner/entry67/intake/backup/snapshot gate waiver.",
+    "Originalwatch96000 untouched; no main/sourceedit/commit/CI/network/credentials/provider/nativeeffect/newagents."
+  ],
+  "archive_patch_before_after_verified": true
+}

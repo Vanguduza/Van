@@ -100,9 +100,9 @@ def test_actual_agp_direct_package_release_refuses_missing_core_deployment_profi
     init_script = tmp_path / "owned-build-dir.init.gradle"
     init_script.write_text(
         "gradle.beforeProject { project ->\n"
-        "    project.layout.buildDirectory.set(new File(new java.net.URI("
+        "    project.layout.buildDirectory.set(new File(new File(new java.net.URI("
         + json.dumps(output_root.as_uri())
-        + "), project.rootProject.name + project.path.replace(':', '_')))\n}\n",
+        + ")), project.rootProject.name + project.path.replace(':', '_')))\n}\n",
         encoding="utf-8",
     )
     result = subprocess.run(

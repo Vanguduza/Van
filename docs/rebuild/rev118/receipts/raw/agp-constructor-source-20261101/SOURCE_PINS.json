@@ -1,0 +1,5 @@
+{
+  "tests/contracts/test_android_instrumentation_abi.py": "9879d8fdc9b6f0c1f92865addd81a0c0c8a774bb5efbeae74bdd082c366078ab",
+  "tests/contracts/test_android_production_target.py": "e7211f3a430fdfea9bcefa9b97313f4b702bbfca7d46614aff60d6d5bc96f24c",
+  "tests/rebuild/test_canonical_source_audit.py": "5a34cbbfacb136d305764408a413e85f02346cf730b1e855400afc4f33b6d227"
+}

@@ -1,0 +1,29 @@
+from pathlib import Path
+import ast,subprocess,json,hashlib,os,datetime,shutil,resource
+r=Path('/workspace/van-review-2026-10-18/publish');e=Path(__file__).parent/'whole-init';e.mkdir(exist_ok=False);assert shutil.disk_usage('/workspace').free>=64*1024**2 and shutil.disk_usage('/tmp').free>=2*1024**3
+java=Path('/tmp/van-permission-revocation-jdk/jdk-21.0.13+9/bin/java');jar=next(Path('/tmp/van-permission-revocation-gradle/wrapper/dists').rglob('groovy-3.0.22.jar'))
+receiver=e/'receiver.groovy';receiver.write_text('''def paths = []
+def labels = [['Van', ':'], ['buildSrc', ':'], ['Van', ':app']]
+def projects = labels.collect { label ->
+    [rootProject: [name:label[0]], path:label[1], layout:[buildDirectory:[set: { File f -> paths.add(f.canonicalPath) }]]]
+}
+def gradle = [beforeProject: { Closure callback -> projects.each { callback(it) } }]
+new GroovyShell(new Binding([gradle:gradle])).evaluate(new File(args[0]))
+assert paths.size()==3 && paths.toSet().size()==3
+paths.each { println it }
+''')
+def cap():resource.setrlimit(resource.RLIMIT_FSIZE,(1024*1024,1024*1024))
+def run(script,label):
+ command=[str(java),'-Xmx64m','-cp',str(jar),'groovy.ui.GroovyMain',str(receiver),str(script)];x=subprocess.run(command,capture_output=True,text=True,timeout=20,cwd=e,preexec_fn=cap);(e/(label+'.stdout')).write_text(x.stdout);(e/(label+'.stderr')).write_text(x.stderr);return x
+results=[]
+for filename,function in [('test_android_instrumentation_abi.py','test_actual_agp_direct_package_release_refuses_missing_core_deployment_profile'),('test_android_production_target.py','test_actual_agp_valid_target_still_refuses_missing_production_signing')]:
+ n='tests/contracts/'+filename
+ for state,text in [('before',subprocess.check_output(['git','show','HEAD:'+n],cwd=r,text=True)),('after',(r/n).read_text())]:
+  fn=next(v for v in ast.parse(text).body if isinstance(v,ast.FunctionDef) and v.name==function);at=next(i for i,v in enumerate(fn.body) if isinstance(v,ast.Assign) and isinstance(v.targets[0],ast.Name) and v.targets[0].id=='output_root');setup=ast.Module(body=fn.body[at:at+3],type_ignores=[])
+  for index,suffix in enumerate(['ordinary','quoted $ \'"']):
+   temporary=e/(filename+'-'+state+'-'+str(index)+' '+suffix);temporary.mkdir();ns={'tmp_path':temporary,'json':json};exec(compile(setup,n,'exec'),ns);init=temporary/'owned-build-dir.init.gradle';x=run(init,filename+'-'+state+'-'+str(index));expected=[str((temporary/'gradle-build-outputs'/(name+path.replace(':','_'))).resolve()) for name,path in [('Van',':'),('buildSrc',':'),('Van',':app')]]
+   if state=='before':assert x.returncode!=0 and 'Could not find matching constructor for: java.io.File(URI, String)' in x.stderr
+   else:assert x.returncode==0 and x.stdout.splitlines()==expected and all(Path(v).is_relative_to(temporary) and not Path(v).is_relative_to(r) for v in expected)
+   results.append({'owner':n,'state':state,'path_case':suffix,'exit':x.returncode,'actual_paths':x.stdout.splitlines(),'init_sha256':hashlib.sha256(init.read_bytes()).hexdigest(),'error_kind':'File(URI,String) constructor refusal' if state=='before' else None})
+versions=subprocess.check_output([str(java),'-version'],stderr=subprocess.STDOUT,text=True);groovy=subprocess.check_output([str(java),'-Xmx64m','-cp',str(jar),'groovy.ui.GroovyMain','-e','println GroovySystem.version'],text=True)
+d={'state':'TERMINAL_PASS','scope':'Whole actual generated init literal executed with genuine cachedGroovy; controlled beforeProject/project/layout receivers, not Gradle/AGP/native qualification','java_version':versions,'groovy_version':groovy.strip(),'groovy_jar':str(jar),'jar_sha256':hashlib.sha256(jar.read_bytes()).hexdigest(),'receiver_sha256':hashlib.sha256(receiver.read_bytes()).hexdigest(),'results':results,'source_after':{n:hashlib.sha256((r/n).read_bytes()).hexdigest() for n in json.loads((e.parent/'SOURCE_BEFORE.json').read_text())},'network_or_gradle_or_sdk':False,'owned_bytes':sum(p.stat().st_size for p in e.rglob('*') if p.is_file()),'at':datetime.datetime.now(datetime.timezone.utc).isoformat()};assert d['owned_bytes']<128*1024**2;(e.parent/'WHOLE_INIT_RECEIPT.json').write_text(json.dumps(d,indent=2)+'\n');print({'real_groovy_probes':len(results),'before_fail':sum(v['state']=='before' and v['exit']!=0 for v in results),'after_pass':sum(v['state']=='after' and v['exit']==0 for v in results),'groovy':d['groovy_version'],'owned_bytes':d['owned_bytes']})

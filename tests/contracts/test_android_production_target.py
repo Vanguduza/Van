@@ -235,9 +235,9 @@ def test_actual_agp_valid_target_still_refuses_missing_production_signing(profil
     init_script = tmp_path / "owned-build-dir.init.gradle"
     init_script.write_text(
         "gradle.beforeProject { project ->\n"
-        "    project.layout.buildDirectory.set(new File(new java.net.URI("
+        "    project.layout.buildDirectory.set(new File(new File(new java.net.URI("
         + json.dumps(output_root.as_uri())
-        + "), project.rootProject.name + project.path.replace(':', '_')))\n}\n",
+        + ")), project.rootProject.name + project.path.replace(':', '_')))\n}\n",
         encoding="utf-8",
     )
     result = subprocess.run(

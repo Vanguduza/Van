@@ -1,0 +1,50 @@
+{
+  "state": "FROZEN_THREE_TEST_CONSTRUCTOR_FIX_FOR_INDEPENDENT_RECHECK",
+  "base": "dce5df6dcf30be9ee5158e5e0cb63caa4d4bc866",
+  "source_before": {
+    "tests/contracts/test_android_instrumentation_abi.py": "00cebc810c199a29184436b0989637600f9350fa65506167e57651a84358ddef",
+    "tests/contracts/test_android_production_target.py": "abdb4ac40fbf90334d075f81ea626ace6803a392cdadc94d231a65c3db00b95c",
+    "tests/rebuild/test_canonical_source_audit.py": "14e200c2aa91e4db0b1735a51f7ea4a39f47c67452e54a42524fa6920d7330ac"
+  },
+  "source_after": {
+    "tests/contracts/test_android_instrumentation_abi.py": "9879d8fdc9b6f0c1f92865addd81a0c0c8a774bb5efbeae74bdd082c366078ab",
+    "tests/contracts/test_android_production_target.py": "e7211f3a430fdfea9bcefa9b97313f4b702bbfca7d46614aff60d6d5bc96f24c",
+    "tests/rebuild/test_canonical_source_audit.py": "5a34cbbfacb136d305764408a413e85f02346cf730b1e855400afc4f33b6d227"
+  },
+  "exact_delta": {
+    "tests/contracts/test_android_instrumentation_abi.py": "Only exact File(URI,String)\u2192File(File(URI),String) literal/oracle tokens; all other bytes exactHEAD",
+    "tests/contracts/test_android_production_target.py": "Only exact File(URI,String)\u2192File(File(URI),String) literal/oracle tokens; all other bytes exactHEAD",
+    "tests/rebuild/test_canonical_source_audit.py": "Only exact File(URI,String)\u2192File(File(URI),String) literal/oracle tokens; all other bytes exactHEAD"
+  },
+  "patch_sha256": "d912df475e9a6b45f3ddeabab87a2dc91b1e57250fcbdb536bf6c6e716fffe70",
+  "archive_sha256": "eff13033b6e4e926ddbf66c28aa1bfd6c57684ea98d66d25c588a9722fda4aff",
+  "proofs": {
+    "actual_Groovy": "8 whole-generated-script executions,4originalconstructor refusals+4corrected positives across2owners and2pathshapes; controlled project/beforeProject/layout receivers; root/buildSrc/app outputs exact, unique, external. Java/JAR versions+identity inreceipt; not Gradle/AGP qualification",
+    "affected": "Actual136PASS0skip/audit0/exit0, sourcebefore=after,5,680,130Bpeak, allchildrenwaited/nochildren, ownedtestbasetemp cleaned",
+    "immutability": "Exact substitutions only; whole originalassertion/flags AST guard passes. ReviewedVTIL helper/workflow andall othersemantics unchanged; ambientNodeenvironmentunchanged/unqualified."
+  },
+  "raw_volatile": "/tmp/van-recovery-dce-ci-diagnosis-20261101",
+  "original_failed_run": {
+    "run": 41351792267,
+    "head": "dce5df6dcf30be9ee5158e5e0cb63caa4d4bc866",
+    "AGP": "twoassertionsFAIL bothrepresentativejobs; appunit/build/lintSKIPPED; no dceSDKsuccess claim",
+    "gateway104": "1893PASS2entry67FAIL; no protectedauth/evidence change"
+  },
+  "watch": "Original96000 retained untouched; no poll/reap/restart/cancel fromthisrepair",
+  "limits": "SOURCE proof only. Actual newAGP+parentstrictprovenance needs exacthostedterminal. Missingprivatekey/trustedbase/intake/native/provider/fullmatrix/owner/BG001/S24/unit gates remain open. OAuthR2isolated/unmixed. LastGlobalDIALMCP Sessionterminated no runtimeconnectivity recovery.",
+  "next": "Root independent narrowrecheck before docs/manifest/genuinecommit/required4fdverify/normalpush/exactreadbacks; no push yet",
+  "files": {
+    "SOURCE.zip": "eff13033b6e4e926ddbf66c28aa1bfd6c57684ea98d66d25c588a9722fda4aff",
+    "WHOLE_INIT_RECEIPT.json": "63ecae9e82bb40c2b531323faab7e471b7c92febfc243888f821e576d798aa67",
+    "CONTROLS_RECEIPT.json": "3f9f4c2eddd426174e587188a433b95431533df325a0924f59826f6c45619060",
+    "WHOLE_INIT_REGRESSION.py.txt": "77a136f1d48d9933bf71063bd0c13f6c6992ead0f04dd071417826f56d10404d",
+    "ACTUAL_GROOVY_RECEIVER.groovy.txt": "a7974aab3ffa7da3a42a5bb52fbd1269b6ce5a5cbdd63c588103cae9f9f80117",
+    "CONTROLS_AUDIT.json": "f159c056ef876b2852e522cf92ac940143fb1b43cf2b480fbad507dc745049bc",
+    "SOURCE_PINS.json": "a7c5faa893de7540db8bb155b8d6d4500ade99b02f394032103ef871dca5482c",
+    "BEFORE_PINS.json": "32a0ac9cb729d96d4b9ed9bc9fb514bae598bdab582e10b59e63ec3f5abc2679",
+    "CONTROLS_XML.xml": "09afbb26deae3bc1a2b49c8c1f0f895c6be352524cf5c0b9bf8b8f4343e05d28",
+    "SOURCE.patch": "d912df475e9a6b45f3ddeabab87a2dc91b1e57250fcbdb536bf6c6e716fffe70",
+    "DIAGNOSIS.json": "09ccc9c7357f7aea1e3aee218236050204daa32ba82d1949504b9b9440086ec0"
+  },
+  "at_utc": "2026-11-01T21:48:20.073912+00:00"
+}

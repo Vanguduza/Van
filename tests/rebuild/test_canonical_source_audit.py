@@ -562,7 +562,7 @@ def test_original_agp_invocations_route_only_project_cache_to_owned_external_fix
     old=next(n for n in ast.parse(original).body if isinstance(n,ast.FunctionDef) and n.name==function_name)
     current=next(n for n in ast.parse((root/relative).read_text()).body if isinstance(n,ast.FunctionDef) and n.name==function_name)
     without_cache=copy.deepcopy(current)
-    expected_setup=ast.parse('output_root = tmp_path / "gradle-build-outputs"\ninit_script = tmp_path / "owned-build-dir.init.gradle"\ninit_script.write_text(\n    "gradle.beforeProject { project ->\\n"\n    "    project.layout.buildDirectory.set(new File(new java.net.URI("\n    + json.dumps(output_root.as_uri())\n    + "), project.rootProject.name + project.path.replace(\':\', \'_\')))\\n}\\n",\n    encoding="utf-8",\n)\n').body
+    expected_setup=ast.parse('output_root = tmp_path / "gradle-build-outputs"\ninit_script = tmp_path / "owned-build-dir.init.gradle"\ninit_script.write_text(\n    "gradle.beforeProject { project ->\\n"\n    "    project.layout.buildDirectory.set(new File(new File(new java.net.URI("\n    + json.dumps(output_root.as_uri())\n    + ")), project.rootProject.name + project.path.replace(\':\', \'_\')))\\n}\\n",\n    encoding="utf-8",\n)\n').body
     setup_at=next(i for i,n in enumerate(without_cache.body) if isinstance(n,ast.Assign)
         and len(n.targets)==1 and isinstance(n.targets[0],ast.Name) and n.targets[0].id=='output_root')
     assert [ast.dump(n,include_attributes=False) for n in without_cache.body[setup_at:setup_at+len(expected_setup)]]==[
@@ -602,7 +602,7 @@ def test_original_agp_invocations_route_only_project_cache_to_owned_external_fix
         generated=init.read_text()
         output=temporary/'gradle-build-outputs'
         assert 'gradle.beforeProject { project ->' in generated
-        assert 'project.layout.buildDirectory.set(new File(new java.net.URI('+json.dumps(output.as_uri())+')' in generated
+        assert 'project.layout.buildDirectory.set(new File(new File(new java.net.URI('+json.dumps(output.as_uri())+'))' in generated
         assert "project.rootProject.name + project.path.replace(':', '_')" in generated
         # The real Gradle hook is source-proven by earlier retained compiler
         # output; these label/path controls are not new AGP execution evidence.
