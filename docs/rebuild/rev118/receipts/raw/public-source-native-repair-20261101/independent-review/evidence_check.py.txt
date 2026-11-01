@@ -1,0 +1,32 @@
+import base64,hashlib,json,subprocess,xml.etree.ElementTree as ET,zipfile
+from pathlib import Path
+from tools.rebuild import public_source_shards as proof
+R=Path('/workspace/van-review-2026-10-18/publish'); E=Path('/workspace/van-ci-shards-json-report-repair-20261101'); F=Path('/workspace/van-ci-shards-native-repair-freeze-r2-20261101'); O=Path('/workspace/van-ci-native-repair-independent-review-20261101')
+h=json.loads((F/'HANDOFF.json').read_text()); result={}
+def xmlstats(p):
+ ts=list(ET.parse(p).getroot().iter('testcase')); return {'cases':len(ts),'failures':sum(t.find('failure') is not None for t in ts),'errors':sum(t.find('error') is not None for t in ts),'skips':sum(t.find('skipped') is not None for t in ts)}
+a=json.loads((E/'before/receipt.json').read_text());assert a['without_plugin_exit']==0 and a['with_plugin_exit']!=0
+result['original_real_case']=xmlstats(E/'before/without-plugin.xml');assert result['original_real_case']==dict(cases=1,failures=0,errors=0,skips=0)
+b=json.loads((E/'permission-current/receipt.json').read_text());assert b['with_plugin_exit']==0 and b['actual_phase_events']==54 and len(b['actual_assigned_ids'])==18 and b['all_assigned_passed'] is True
+result['fixed_real_permission_module']=xmlstats(E/'permission-current/production-plugin/report.xml');assert result['fixed_real_permission_module']==dict(cases=18,failures=0,errors=0,skips=0)
+assert {r['when'] for r in b['exact_real_test_phases']}=={'setup','call','teardown'} and all(r['outcome']=='passed' for r in b['exact_real_test_phases'])
+assert hashlib.sha256((R/'backend/tests/test_owner_permission_integrity.py').read_bytes()).hexdigest()==a['real_test_sha256']==b['real_test_sha256']
+artifact=json.loads((E/'cache-current/production-plugin/generated-bytecode.json').read_text());state=json.loads((E/'cache-current/production-plugin/terminal.json').read_text());assert len(artifact['records'])==11
+for record in artifact['records']:
+ expected=proof._cache_proof(R,h['base'],record['path'],base64.b64decode(record['payload_base64'],validate=True),origin_root=state['root'],source_mtime=record['source_mtime'])
+ assert expected=={k:v for k,v in record.items() if k!='payload_base64'}
+result['actual_saved_module_cache_payloads_reverified_without_execution']=11
+result['final_guard_junit']=xmlstats(E/'instrument-and-cache-regression-final/tests.xml');assert result['final_guard_junit']==dict(cases=89,failures=0,errors=0,skips=0)
+c=json.loads((E/'instrument-and-cache-regression-final/receipt.json').read_text());assert c['exit']==0 and c['source_inputs_unchanged'] is True
+for p,want in h['source_pins'].items():assert c['before_sha256'][p]==c['after_sha256'][p]==hashlib.sha256((R/p).read_bytes()).hexdigest()==want
+assert subprocess.check_output(['git','diff','--name-only'],cwd=R,text=True).splitlines()==sorted(h['source_pins'])
+for p in ['.github/workflows/van-ci.yml','tools/ci/github-actions-ci.yml','tools/rebuild/requirements.lock','backend/tests/test_owner_permission_integrity.py']:
+ assert (R/p).read_bytes()==subprocess.check_output(['git','show',h['base']+':'+p],cwd=R)
+assert (R/'.github/workflows/van-ci.yml').read_bytes()==(R/'tools/ci/github-actions-ci.yml').read_bytes()
+result['three_path_only_delta_and_unchanged_workflow_mirror_dependencies_application_assertion']=True
+assert hashlib.sha256((F/'SOURCE.zip').read_bytes()).hexdigest()==h['source_archive_sha256'];assert hashlib.sha256((F/'SOURCE.patch').read_bytes()).hexdigest()==h['patch_sha256']
+assert subprocess.check_output(['git','diff','--binary'],cwd=R)==(F/'SOURCE.patch').read_bytes()
+with zipfile.ZipFile(F/'SOURCE.zip') as z:
+ for p,want in h['source_pins'].items():assert hashlib.sha256(z.read(p)).hexdigest()==want
+result['current_source_archive_patch_exact_after']=True
+(O/'evidence-check.json').write_text(json.dumps(result,indent=2));print(json.dumps(result))

@@ -1,0 +1,6 @@
+{"duration": 0.00027528700229595415, "nodeid": "backend/tests/test_000_cache_outputs.py::test_exact_native_sources_generate_owned_caches", "outcome": "passed", "skip_reason": null, "when": "setup"}
+{"duration": 0.10314073700283188, "nodeid": "backend/tests/test_000_cache_outputs.py::test_exact_native_sources_generate_owned_caches", "outcome": "passed", "skip_reason": null, "when": "call"}
+{"duration": 0.0010083320012199692, "nodeid": "backend/tests/test_000_cache_outputs.py::test_exact_native_sources_generate_owned_caches", "outcome": "passed", "skip_reason": null, "when": "teardown"}
+{"duration": 0.00021590300093521364, "nodeid": "backend/tests/test_instrument_sentinel_2.py::test_synthetic_instrument_sentinel", "outcome": "passed", "skip_reason": null, "when": "setup"}
+{"duration": 0.0003740640022442676, "nodeid": "backend/tests/test_instrument_sentinel_2.py::test_synthetic_instrument_sentinel", "outcome": "passed", "skip_reason": null, "when": "call"}
+{"duration": 0.00010457099779159762, "nodeid": "backend/tests/test_instrument_sentinel_2.py::test_synthetic_instrument_sentinel", "outcome": "passed", "skip_reason": null, "when": "teardown"}

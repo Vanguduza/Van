@@ -1,0 +1,1 @@
+{"state":"CONTROLLER_SETUP_FAILURE_NO_TESTS_EXECUTED","cause":"Owned preflight checks capacity/path absence but does not create basetemp; fixture.mkdir lacked parents=True. Corrected only external controller; no source/test change."}

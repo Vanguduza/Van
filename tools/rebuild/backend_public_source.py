@@ -103,7 +103,7 @@ def instrument_run(args):
         raise ValueError("gateway requires four workers; isolated media requires one")
     if not 0 <= args.shard_index < args.shards:
         raise ValueError("invalid shard index")
-    if any((args.output/name).exists() for name in ("run.json", "terminal.json", "phases.jsonl", "report.xml", "storage-audit.json")):
+    if any((args.output/name).exists() for name in ("run.json", "terminal.json", "phases.jsonl", "report.xml", "storage-audit.json", "generated-bytecode.json")):
         raise ValueError("fresh evidence folder required; preserve original run artifacts")
     sys.path.insert(0, str(ROOT))
     sys.dont_write_bytecode = True
@@ -141,13 +141,18 @@ def instrument_run(args):
     result = subprocess.run(cmd, cwd=ROOT, env={**os.environ, "PYTEST_DISABLE_PLUGIN_AUTOLOAD": "1",
                                               "PYTHONDONTWRITEBYTECODE": "1", "PYTHONNOUSERSITE": "1"})
     try:
+        outputs = evidence.archive_generated_bytecode(ROOT, args.expected_commit, source_before, args.output)
+        child_state = evidence.read_json(args.output/"terminal.json")
+        evidence.require(child_state.get("generated_cache_candidates") == outputs,
+                         "child/parent generated-cache observation differs")
+        receipt["generated_cache_outputs"] = outputs
         receipt.update(source_after=evidence.source_identity(ROOT, args.expected_commit),
             environment_after=evidence.environment_identity(args.runtime))
     except Exception as exc:
-        receipt["parent_observation_error"] = type(exc).__name__
+        receipt["parent_observation_error"] = {"type": type(exc).__name__, "message": str(exc)}
     receipt.update(terminal=True, exit=result.returncode,
         artifact_sha256={name: digest(args.output/name) for name in
-            ("terminal.json", "phases.jsonl", "storage-audit.json", *(() if collecting else ("report.xml",)))
+            ("terminal.json", "phases.jsonl", "storage-audit.json", "generated-bytecode.json", *(() if collecting else ("report.xml",)))
             if (args.output/name).is_file()})
     receipt_path.write_text(json.dumps(receipt, indent=2)+"\n")
     return result.returncode or int(bool(receipt.get("parent_observation_error")))

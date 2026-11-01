@@ -566,16 +566,16 @@
         }
       ]
     },
-    "updated_utc": "2026-11-01T11:25:39.040072+00:00",
+    "updated_utc": "2026-11-01T12:37:39.262006+00:00",
     "branch": "ccr-9e07e1af-8mgz1p",
-    "head": "34466d65da8bcce6ba7ee092edcda7f5fa025a79",
-    "published_head": "fd33b0759b9ae170f8bdfdf27f9afe7082da7830",
-    "committed_ledger_verification": "Publishedfd33 GREEN215. New34466 genuinecommit local/unpushed; final correctedhead required4fd committedverification pending.",
-    "current_packet": "PUBLIC_SOURCE_FOUR_WORKER_DOCUMENTARY_DEPENDENCY",
-    "active_packet": "Independentreviewed verified minimal anyio/idna documentaryfixturedependency; original8 CIsourcepins unchanged; original73/2 retained and corrected75/0skip actualhashedfresh proof.",
+    "head": "a5d63df4310ecda331aa5f6c6995ed46a42739f8",
+    "published_head": "a5d63df4310ecda331aa5f6c6995ed46a42739f8",
+    "committed_ledger_verification": "Publisheda5d genuinehook/GREEN217 required4fd baseline terminal0; current reviewedrepair needs newgenuinecommit/committedverify before normalpush.",
+    "current_packet": "PUBLIC_SOURCE_NATIVE_REPORTER_CACHE_REPAIR",
+    "active_packet": "Independentlyreviewed3path source correction: captured reporter serializer and strictpreinput/parentverifiedgeneratedbytecode output provenance; application/testassertions/workflows unchanged.",
     "current_background_jobs": [],
     "agent_assignments_ref": "delegation.active_assignments",
-    "next_action": "Sequential terminalmanifest0 then genuine normaldependencycorrectivecommit atop34466; required4fd466committedverifyterminal0 before freshremote/normalpush/readback and exactheadnativefour-worker/sourceCI. No reset/force/cancel/nativegate waiver.",
+    "next_action": "Sequential finalmanifest0/genuinecorrectivecommit/required4fdcommittedverifyterminal0/freshremote/normalpush/readback; then actualnewexactheadnative4worker/sourcequalification. Preservefaileda5d allpartialphases/925incomplete, no speedclaim/no nativegates waived.",
     "acceptance_issued": false,
     "continuation_history": [
       {
@@ -647,7 +647,7 @@
         "captured_at_utc": "2026-11-01T02:38:52.492703+00:00"
       }
     ],
-    "current_source_receipt": "docs/rebuild/rev118/receipts/PUBLIC_SOURCE_FOUR_WORKER_DOCUMENTARY_DEPENDENCY_20261101.json",
+    "current_source_receipt": "docs/rebuild/rev118/receipts/PUBLIC_SOURCE_NATIVE_REPORTER_CACHE_REPAIR_20261101.json",
     "history_20261101": [
       {
         "updated_utc": "2026-11-01T02:38:52.492703+00:00",
@@ -858,6 +858,20 @@
         "next_action": "Genuine hook commit, required4fd466 committed verification terminal0, normal push/readback and actual new exact-head CI; preserve all source inputs and triage actual failures.",
         "acceptance_issued": false,
         "current_source_receipt": "docs/rebuild/rev118/receipts/PUBLIC_SOURCE_FOUR_WORKER_SOURCE_20261101.json"
+      },
+      {
+        "updated_utc": "2026-11-01T11:25:39.040072+00:00",
+        "branch": "ccr-9e07e1af-8mgz1p",
+        "head": "34466d65da8bcce6ba7ee092edcda7f5fa025a79",
+        "published_head": "fd33b0759b9ae170f8bdfdf27f9afe7082da7830",
+        "committed_ledger_verification": "Publishedfd33 GREEN215. New34466 genuinecommit local/unpushed; final correctedhead required4fd committedverification pending.",
+        "current_packet": "PUBLIC_SOURCE_FOUR_WORKER_DOCUMENTARY_DEPENDENCY",
+        "active_packet": "Independentreviewed verified minimal anyio/idna documentaryfixturedependency; original8 CIsourcepins unchanged; original73/2 retained and corrected75/0skip actualhashedfresh proof.",
+        "current_background_jobs": [],
+        "agent_assignments_ref": "delegation.active_assignments",
+        "next_action": "Sequential terminalmanifest0 then genuine normaldependencycorrectivecommit atop34466; required4fd466committedverifyterminal0 before freshremote/normalpush/readback and exactheadnativefour-worker/sourceCI. No reset/force/cancel/nativegate waiver.",
+        "acceptance_issued": false,
+        "current_source_receipt": "docs/rebuild/rev118/receipts/PUBLIC_SOURCE_FOUR_WORKER_DOCUMENTARY_DEPENDENCY_20261101.json"
       }
     ]
   },
@@ -999,6 +1013,13 @@
       "status": "INDEPENDENT_SOURCE_REVIEW_PASS_NATIVE_EXECUTION_PENDING",
       "receipt": "docs/rebuild/rev118/receipts/PUBLIC_SOURCE_FOUR_WORKER_DOCUMENTARY_DEPENDENCY_20261101.json",
       "summary": "Fresh original documentarylock actual75=73pass2missinganyiofail; exactsame75caseIDs pass0skip after onlyanyio/idna verifiedclosure. Fourteen officialwheelhashes and fresh require-hashesinstalls+pipcheck0 independentlyverified. Original8source/workflow/testpins retained.34466 local/unpushed preserved, no rewrite; manifest/committedbaseline/normalpublication/native4workerqualification stillrequired."
+    },
+    {
+      "at_utc": "2026-11-01T12:37:39.262006+00:00",
+      "packet": "PUBLIC_SOURCE_NATIVE_REPORTER_CACHE_REPAIR",
+      "status": "INDEPENDENT_SOURCE_REVIEW_PASS_NATIVE_RERUN_REQUIRED",
+      "receipt": "docs/rebuild/rev118/receipts/PUBLIC_SOURCE_NATIVE_REPORTER_CACHE_REPAIR_20261101.json",
+      "summary": "Actuala5d nativefailed3tooling edges, aggregateFAILED and925assigned IDs incomplete/unknown. CaptureJSONserializer preservesrealpermissiontestpatch; parentvalidates onlynewexactcommittedsource cacheheaders/codegraph asdata thenarchives/retiresownedoutputs; strictprebytecode/config/data refusals remain.18unchangedrealcases54phases/11namednativecacheproofs/89finalfreshdoccases0skip andindependent10probes; scopesoverlap, no fullnativeacceptance/speedclaim. Originalfailure/artifact retained."
     }
   ],
   "obligations": "obligations/OBLIGATIONS.json: preserved observations with source implementation evidence and explicit remaining native/unit obligations.",
@@ -1052,8 +1073,8 @@
       "evidence": "ci/MUTATION_CORPUS_c2a27848.json"
     }
   ],
-  "current_action": "Sequential terminalmanifest0 then genuine normaldependencycorrectivecommit atop34466; required4fd466committedverifyterminal0 before freshremote/normalpush/readback and exactheadnativefour-worker/sourceCI. No reset/force/cancel/nativegate waiver.",
-  "updated_at_utc": "2026-11-01T11:25:39.040072+00:00",
+  "current_action": "Sequential finalmanifest0/genuinecorrectivecommit/required4fdcommittedverifyterminal0/freshremote/normalpush/readback; then actualnewexactheadnative4worker/sourcequalification. Preservefaileda5d allpartialphases/925incomplete, no speedclaim/no nativegates waived.",
+  "updated_at_utc": "2026-11-01T12:37:39.262006+00:00",
   "execution_method": {
     "path": "BUILD_EXECUTION_PLAN.md",
     "scope_index": "SOURCE_WORKMAP.json",

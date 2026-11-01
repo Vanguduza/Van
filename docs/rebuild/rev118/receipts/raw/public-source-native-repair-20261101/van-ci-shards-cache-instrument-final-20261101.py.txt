@@ -1,0 +1,45 @@
+from pathlib import Path
+import json,sys,os,subprocess,datetime,hashlib,xml.etree.ElementTree as ET
+sys.path.insert(0,'/workspace')
+from van_owned_basetemp_20261101 import preflight,cleanup
+mode=sys.argv[1];assert mode in ('original','fixed')
+parent=Path('/workspace/van-ci-shards-documentary-dependency-20261101');out=Path('/workspace/van-ci-shards-json-report-repair-20261101/instrument-and-cache-regression-final');out.mkdir(exist_ok=False)
+root=Path('/workspace/van-review-2026-10-18/publish')
+freeze=json.loads(Path('/workspace/van-ci-shards-wip-r2-20261101/FROZEN_REVIEW_HANDOFF.json').read_text())
+temp='/tmp/van-recovery-ci-shards-documentary-'+mode+'-json-report-and-cache-final-20261101'
+receipt={'started_at_utc':datetime.datetime.now(datetime.timezone.utc).isoformat(),'mode':mode,
+ 'preflight':preflight(temp),'source_parent':subprocess.check_output(['git','rev-parse','HEAD'],cwd=root,text=True).strip()}
+paths=[*freeze['owned_paths'],'tools/rebuild/requirements.lock']
+receipt['before_sha256']={p:hashlib.sha256((root/p).read_bytes()).hexdigest() for p in paths}
+assert all(receipt['before_sha256'][p]==h for p,h in freeze['owned_paths'].items() if p not in ('tools/rebuild/public_source_shards.py','tools/rebuild/backend_public_source.py','tests/rebuild/test_public_source_shards.py'))
+python=str(parent/(mode+'-venv/bin/python'))
+receipt['runtime']=json.loads(subprocess.check_output([python,'-c',
+ "import importlib.metadata as m,json;print(json.dumps({'packages':sorted((d.metadata['Name'],d.version) for d in m.distributions()),'pytest_entrypoints':sorted(e.value for e in m.entry_points(group='pytest11'))}))"],text=True))
+targets=['tests/rebuild/test_public_source_shards.py','tests/rebuild/test_backend_public_source.py','tests/rebuild/test_source_storage_audit.py']
+command=[python,'tools/rebuild/source_storage_audit.py','--report',str(out/'storage-audit.json'),*targets,
+ '--basetemp='+temp,'--junitxml='+str(out/'tests.xml'),'-q']
+receipt['command']=command
+try:
+ with (out/'tests.log').open('w') as log:
+  receipt['exit']=subprocess.run(command,cwd=root,env={**os.environ,'PYTHONPATH':'backend:backend/tests:trading:trading/tests:.'},
+    stdout=log,stderr=subprocess.STDOUT,timeout=300).returncode
+ cases=list(ET.parse(out/'tests.xml').getroot().iter('testcase'))
+ receipt['cases']=len(cases);receipt['failures']=[c.get('classname')+'::'+c.get('name') for c in cases if c.find('failure') is not None]
+ receipt['errors']=[c.get('classname')+'::'+c.get('name') for c in cases if c.find('error') is not None]
+ receipt['skips']=[c.get('classname')+'::'+c.get('name') for c in cases if c.find('skipped') is not None]
+ receipt['passed']=len(cases)-len(receipt['failures'])-len(receipt['errors'])-len(receipt['skips'])
+ assert not json.loads((out/'storage-audit.json').read_text())['forbidden_events']
+ if mode=='original':
+  expected={'tests.rebuild.test_public_source_shards::test_actual_pytest_plugin_records_full_collection_disjoint_execution_and_teardown_error',
+   'tests.rebuild.test_public_source_shards::test_actual_collect_refuses_untracked_and_ignored_inputs_but_accepts_inert_outputs'}
+  assert receipt['exit']==1 and set(receipt['failures'])==expected and not receipt['errors'] and not receipt['skips']
+  assert 'anyio.pytest_plugin' in (out/'tests.log').read_text() and "No module named 'anyio'" in (out/'tests.log').read_text()
+ else:
+  assert receipt['exit']==0 and receipt['cases']==89 and not receipt['failures'] and not receipt['errors'] and not receipt['skips']
+finally:
+ receipt['after_sha256']={p:hashlib.sha256((root/p).read_bytes()).hexdigest() for p in paths}
+ receipt['source_inputs_unchanged']=receipt['before_sha256']==receipt['after_sha256']
+ receipt['cleanup']=cleanup(temp,out)
+ receipt['completed_at_utc']=datetime.datetime.now(datetime.timezone.utc).isoformat()
+ (out/'receipt.json').write_text(json.dumps(receipt,indent=2)+'\n')
+print(json.dumps({k:receipt[k] for k in ('mode','exit','cases','passed','failures','errors','skips','source_inputs_unchanged')}))

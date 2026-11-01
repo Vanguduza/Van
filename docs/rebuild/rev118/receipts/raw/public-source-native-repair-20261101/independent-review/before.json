@@ -1,0 +1,5 @@
+{
+  "tools/rebuild/public_source_shards.py": "90e9e670940da327baace21335569a447f0d12e1b8aaed3061cd86fe55628837",
+  "tools/rebuild/backend_public_source.py": "f6cb4d2fdb4a661873c33fd10d0ab10e1fa59ef00be9ba3d82591a46bdbf72b5",
+  "tests/rebuild/test_public_source_shards.py": "ad15ef4db64ff1f3a06386af78b209e28bde8208d32632a6f41c5ac261f7db29"
+}

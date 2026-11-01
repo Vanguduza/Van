@@ -37,7 +37,7 @@ def write_json(path, value):
 
 def seal(folder):
     receipt = json.loads((folder / "run.json").read_text())
-    names = ["terminal.json", "phases.jsonl", "storage-audit.json"]
+    names = ["terminal.json", "phases.jsonl", "storage-audit.json", "generated-bytecode.json"]
     if receipt["mode"] == "execution":
         names.append("report.xml")
     receipt["artifact_sha256"] = {name: hashlib.sha256((folder / name).read_bytes()).hexdigest()
@@ -62,12 +62,14 @@ def frame(folder, selection, runtime, nodeids, costs, index, count, *, control=F
             "plugins": {p:"d"*64 for p in proof.EXPLICIT_PLUGINS[runtime]}, "autoload": False},
         "environment_after": copy.deepcopy(environment), "selection": selection,
         "selected": [r for r in selection["selected"] if gate.runtime(r["path"]) == runtime],
-        "collection_errors": [], "internal_errors": [], "pytest_exit": 0,
+        "collection_errors": [], "internal_errors": [], "pytest_exit": 0, "generated_cache_candidates": [],
         "instrument_sha256": hashlib.sha256(Path(proof.__file__).read_bytes()).hexdigest(), "costs": costs,
         "full_collection": sorted(nodeids), "assignment": bins, "assigned": bins[index],
         "shard_index": index, "shard_count": count, "full_collection_sha256": proof.fingerprint(sorted(nodeids)),
         "assignment_sha256": proof.fingerprint(bins)}
     write_json(folder / "terminal.json", state)
+    write_json(folder / "generated-bytecode.json", {"schema":"van.parent-verified-generated-bytecode/1",
+        "expected_commit":HEAD,"input_bytecode_paths":[],"records":[]})
     write_json(folder / "storage-audit.json", {"schema": "van.source-storage-audit/1", "forbidden_events": [],
         "source_sha256": hashlib.sha256(Path(proof.__file__).with_name("source_storage_audit.py").read_bytes()).hexdigest()})
     events = []
@@ -81,7 +83,7 @@ def frame(folder, selection, runtime, nodeids, costs, index, count, *, control=F
         (folder / "report.xml").write_bytes(ET.tostring(suite))
     (folder / "phases.jsonl").write_text("".join(json.dumps(e)+"\n" for e in events))
     write_json(folder / "run.json", {"expected_commit": HEAD, "workflow_run": CONTEXT,
-        "terminal": True, "exit": 0, "mode": state["mode"], "execution_id": state["execution_id"],
+        "terminal": True, "exit": 0, "mode": state["mode"], "execution_id": state["execution_id"], "generated_cache_outputs": [],
         "source_before": state["source_before"], "source_after": state["source_after"],
         "environment_before": copy.deepcopy(environment), "environment_after": copy.deepcopy(environment)})
     seal(folder)
@@ -334,6 +336,13 @@ def test_actual_pytest_plugin_records_full_collection_disjoint_execution_and_tea
         "--runtime","gateway","--shards","4","--expected-commit",commit,"--basetemp",str(tmp_path/"reused-temp")],
         cwd=repo,env=env,capture_output=True,text=True,timeout=90)
     assert retry.returncode!=0 and original.read_bytes()==original_bytes
+    cache_only=tmp_path/"retained-cache-evidence";cache_only.mkdir()
+    saved=cache_only/"generated-bytecode.json";saved.write_text('{"original":"retained output"}\n')
+    retry=subprocess.run([sys.executable,"tools/rebuild/backend_public_source.py","collect","--output",str(cache_only),
+        "--runtime","gateway","--shards","4","--expected-commit",commit,"--basetemp",str(tmp_path/"cache-reuse-temp")],
+        cwd=repo,env=env,capture_output=True,text=True,timeout=90)
+    assert retry.returncode!=0 and "fresh evidence folder" in retry.stderr
+    assert saved.read_text()=='{"original":"retained output"}\n' and not (cache_only/"terminal.json").exists()
     assert len(set(all_assigned))==4
     assert sum(code==0 for code,_ in outcomes)==3
     assert sum(any(e["when"]=="teardown" and e["outcome"]=="failed" for e in events) for _,events in outcomes)==1
@@ -409,3 +418,160 @@ def test_actual_collect_refuses_untracked_and_ignored_inputs_but_accepts_inert_o
     assert rejected.returncode!=0 and "foreign PYTHONPATH" in rejected.stderr and not (folder/"terminal.json").exists()
     # The extra-file policy refuses rather than modifying any original input/output.
     assert generated.read_text()=='{"synthetic_inert_output":true}\n' and cache.read_text()=="[]\n"
+
+
+def test_reporter_preserves_all_phases_without_changing_application_json_patch(tmp_path, monkeypatch):
+    from types import SimpleNamespace
+    monkeypatch.setattr(proof,"_STATE",{"output":str(tmp_path)})
+    def report(when):
+        return SimpleNamespace(nodeid="synthetic::original_json_refusal",when=when,
+                               outcome="passed",duration=0.125,skipped=False)
+    proof.pytest_runtest_logreport(report("setup"))
+    def too_deep(*args,**kwargs):
+        raise RecursionError("nested JSON")
+    with monkeypatch.context() as patch:
+        patch.setattr(json,"dumps",too_deep)
+        with pytest.raises(RecursionError,match="nested JSON"):
+            json.dumps({"application":"still patched"})
+        proof.pytest_runtest_logreport(report("call"))
+        assert json.dumps is too_deep
+    proof.pytest_runtest_logreport(report("teardown"))
+    events=[json.loads(line) for line in (tmp_path/"phases.jsonl").read_text().splitlines()]
+    assert [(e["when"],e["outcome"]) for e in events]==[(p,"passed") for p in ("setup","call","teardown")]
+    assert all(e["nodeid"]=="synthetic::original_json_refusal" for e in events)
+
+
+@pytest.mark.parametrize("failure",["encode","write"])
+def test_real_report_encoding_and_storage_errors_propagate_without_fake_events(tmp_path, monkeypatch, failure):
+    from types import SimpleNamespace
+    path=tmp_path/"phases.jsonl";path.write_text('{"earlier":"actual event"}\n');before=path.read_bytes()
+    monkeypatch.setattr(proof,"_STATE",{"output":str(tmp_path)})
+    report=SimpleNamespace(nodeid="synthetic::recording_failure",when="call",outcome="passed",duration=0.1,skipped=False)
+    with monkeypatch.context() as patch:
+        if failure=="encode":
+            def fail(*args,**kwargs):raise TypeError("real report encoding failure")
+            patch.setattr(proof,"_JSON_DUMPS",fail)
+            expected=TypeError
+        else:
+            class FailedWrite:
+                def __enter__(self):return self
+                def __exit__(self,*args):return False
+                def write(self,value):raise OSError("real report storage failure")
+            original=Path.open
+            def open_path(self,*args,**kwargs):
+                return FailedWrite() if self==path else original(self,*args,**kwargs)
+            patch.setattr(Path,"open",open_path)
+            expected=OSError
+        with pytest.raises(expected,match="real report"):
+            proof.pytest_runtest_logreport(report)
+    assert path.read_bytes()==before
+
+
+NATIVE_CACHE_SOURCES = (
+    "backend/van_gateway/__init__.py", "backend/van_gateway/config.py",
+    "backend/van_gateway/auth/__init__.py", "backend/van_gateway/auth/control_scopes.py",
+    "backend/van_gateway/learning/__init__.py", "backend/van_gateway/learning/schema.py",
+    "backend/van_gateway/private_core/__init__.py", "backend/van_gateway/private_core/app.py",
+    "backend/van_gateway/storage/__init__.py", "backend/van_gateway/storage/chart_migration.py",
+    "tools/runtime/preflight_owner_core.py",
+)
+
+
+@pytest.fixture
+def real_cache_source(tmp_path):
+    import shutil
+    import subprocess
+    repo=tmp_path/"exact-tracked-cache-source";repo.mkdir()
+    root=Path(__file__).resolve().parents[2]
+    for relative in NATIVE_CACHE_SOURCES:
+        target=repo/relative;target.parent.mkdir(parents=True,exist_ok=True);shutil.copyfile(root/relative,target)
+    # This constant explicitly exercises legitimate frozenset marshal ordering across hash seeds.
+    (repo/"seeded.py").write_text("def member(value):\n    return value in {"+','.join(repr('name-'+str(i)) for i in range(70))+"}\n")
+    (repo/"pytest.ini").write_text("[pytest]\n")
+    (repo/".gitignore").write_text("__pycache__/\n")
+    subprocess.run(["git","init","-q"],cwd=repo,check=True);subprocess.run(["git","add","."],cwd=repo,check=True)
+    subprocess.run(["git","-c","user.name=Generated cache source fixture","-c","user.email=source@example.test",
+                    "commit","-qm","Exact native failure module bytes plus explicit hash-seed fixture"],cwd=repo,check=True)
+    head=subprocess.check_output(["git","rev-parse","HEAD"],cwd=repo,text=True).strip()
+    return repo,head
+
+
+def compile_real_cache_sources(repo, seed="17", optimization=0, invalidation="TIMESTAMP"):
+    import os,subprocess,sys
+    paths=[str(repo/p) for p in (*NATIVE_CACHE_SOURCES,"seeded.py")]
+    command=("import py_compile,sys;[py_compile.compile(p,doraise=True,optimize="+str(optimization)
+             +",invalidation_mode=py_compile.PycInvalidationMode."+invalidation+") for p in sys.argv[1:]]")
+    subprocess.run([sys.executable,"-c",command,*paths],
+                   env={**os.environ,"PYTHONHASHSEED":seed},check=True,capture_output=True,text=True)
+
+
+def test_parent_validates_actual_native_module_caches_and_retires_only_verified_outputs(real_cache_source,tmp_path):
+    import base64
+    repo,head=real_cache_source;before=proof.source_identity(repo,head)
+    compile_real_cache_sources(repo)
+    # Valid committed-source caches still cannot be admitted as pre-run inputs.
+    with pytest.raises(ValueError,match="uncommitted executable"):
+        proof.source_identity(repo,head)
+    out=tmp_path/"inert-cache-archive";out.mkdir()
+    outputs=proof.archive_generated_bytecode(repo,head,before,out)
+    artifact=json.loads((out/"generated-bytecode.json").read_text())
+    assert len(outputs)==len(NATIVE_CACHE_SOURCES)+1 and artifact["input_bytecode_paths"]==[]
+    assert {r["source"] for r in artifact["records"]}==set(NATIVE_CACHE_SOURCES)|{"seeded.py"}
+    assert proof.source_identity(repo,head)==before and not list(repo.rglob("*.pyc"))
+    state={"root":str(repo),"generated_cache_candidates":outputs};receipt={"generated_cache_outputs":outputs}
+    proof.verify_generated_bytecode(out,repo,head,state,receipt)
+    first={r["source"]:r["code_identity_sha256"] for r in artifact["records"]}
+    compile_real_cache_sources(repo,seed="93")
+    second=tmp_path/"another-compiler-seed";second.mkdir()
+    proof.archive_generated_bytecode(repo,head,before,second)
+    assert {r["source"]:r["code_identity_sha256"] for r in json.loads((second/"generated-bytecode.json").read_text())["records"]}==first
+    # A valid header cannot authorize changed code; verify archived bytes independently too.
+    record=artifact["records"][-1];data=base64.b64decode(record["payload_base64"])
+    import marshal
+    forged=data[:16]+marshal.dumps(compile("raise RuntimeError('forged payload must never execute')",record["code_filename"],"exec"))
+    record["payload_base64"]=base64.b64encode(forged).decode()
+    write_json(out/"generated-bytecode.json",artifact)
+    with pytest.raises(ValueError,match="payload differs"):
+        proof.verify_generated_bytecode(out,repo,head,state,receipt)
+
+
+@pytest.mark.parametrize("invalidation,optimization",[("CHECKED_HASH",1),("UNCHECKED_HASH",2)])
+def test_exact_native_sources_hash_header_and_optimization_match(real_cache_source,tmp_path,invalidation,optimization):
+    repo,head=real_cache_source;before=proof.source_identity(repo,head)
+    compile_real_cache_sources(repo,optimization=optimization,invalidation=invalidation)
+    output=tmp_path/"verified-other-header";output.mkdir()
+    paths=proof.archive_generated_bytecode(repo,head,before,output)
+    state={"root":str(repo),"generated_cache_candidates":paths};receipt={"generated_cache_outputs":paths}
+    proof.verify_generated_bytecode(output,repo,head,state,receipt)
+    artifact=json.loads((output/"generated-bytecode.json").read_text())
+    assert all(r["optimization"]==optimization and r["flags"]==(3 if invalidation=="CHECKED_HASH" else 1) for r in artifact["records"])
+
+
+@pytest.mark.parametrize("damage",["preexisting","untracked-source","wrong-magic","wrong-flags","wrong-timestamp",
+                                  "forged-payload","wrong-interpreter","source-drift"])
+def test_generated_cache_provenance_refuses_bad_input_without_deleting_it(real_cache_source,tmp_path,damage):
+    import importlib.util,marshal,py_compile
+    repo,head=real_cache_source;before=proof.source_identity(repo,head)
+    compile_real_cache_sources(repo)
+    path=Path(importlib.util.cache_from_source(str(repo/"seeded.py")))
+    data=path.read_bytes()
+    if damage=="preexisting":
+        with pytest.raises(ValueError,match="uncommitted executable"):
+            proof.source_identity(repo,head)
+        assert path.read_bytes()==data
+        return
+    if damage=="untracked-source":
+        foreign=repo/"foreign.py";foreign.write_text("payload='untracked'\n")
+        py_compile.compile(str(foreign),doraise=True)
+        foreign.unlink()  # The orphan cache still cannot claim any tracked source owner.
+    elif damage=="wrong-magic":data=b"BAD!"+data[4:]
+    elif damage=="wrong-flags":data=data[:4]+(7).to_bytes(4,"little")+data[8:]
+    elif damage=="wrong-timestamp":data=data[:8]+((int.from_bytes(data[8:12],"little")+1)%2**32).to_bytes(4,"little")+data[12:]
+    elif damage=="forged-payload":data=data[:16]+marshal.dumps(compile("value='different code'",str(repo/"seeded.py"),"exec"))
+    elif damage=="wrong-interpreter":
+        renamed=path.with_name(path.name.replace("cpython-312","cpython-999"));path.rename(renamed);path=renamed
+    elif damage=="source-drift":(repo/"seeded.py").write_text("different='tracked source changed'\n")
+    path.write_bytes(data)
+    output=tmp_path/"refused-output";output.mkdir()
+    with pytest.raises(ValueError):proof.archive_generated_bytecode(repo,head,before,output)
+    assert path.read_bytes()==data and not (output/"generated-bytecode.json").exists()

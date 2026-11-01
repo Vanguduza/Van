@@ -1,0 +1,39 @@
+{
+  "schema": "van.public-backend-source-selection/1",
+  "selected": [
+    {
+      "path": "backend/tests/test_instrument_sentinel_0.py",
+      "sha256": "b89b5e89f6230422128df06db5ac85fa18c0596eb3af69577bb14dbab3d33c9c"
+    },
+    {
+      "path": "backend/tests/test_instrument_sentinel_1.py",
+      "sha256": "b89b5e89f6230422128df06db5ac85fa18c0596eb3af69577bb14dbab3d33c9c"
+    },
+    {
+      "path": "backend/tests/test_instrument_sentinel_2.py",
+      "sha256": "b89b5e89f6230422128df06db5ac85fa18c0596eb3af69577bb14dbab3d33c9c"
+    },
+    {
+      "path": "backend/tests/test_owner_permission_integrity.py",
+      "sha256": "8c0caf3bc3c97cf48a43933b330714da030eb84c6362d21517539ad3e1ac3920"
+    }
+  ],
+  "separate": [
+    {
+      "path": "tests/contracts/test_artemis_acceptance_plan.py",
+      "sha256": "44326b159a570be522380426f3e1cf9a16712294414b97e559f55cb67a77d571",
+      "reason": "PINNED_PRIVATE_DDS_SOURCE_REQUIRED"
+    },
+    {
+      "path": "tests/contracts/test_artemis_usb_acceptance.py",
+      "sha256": "44326b159a570be522380426f3e1cf9a16712294414b97e559f55cb67a77d571",
+      "reason": "PINNED_PRIVATE_DDS_SOURCE_REQUIRED"
+    },
+    {
+      "path": "tests/contracts/test_van_browser_core_firewall.py",
+      "sha256": "44326b159a570be522380426f3e1cf9a16712294414b97e559f55cb67a77d571",
+      "reason": "SEPARATE_PRIVILEGED_NAMESPACE_SOURCE_JOB"
+    }
+  ],
+  "qualification": "SOURCE_SUBSET_ONLY; private DDS, deployed hosts/devices and original required backend gate remain separate"
+}

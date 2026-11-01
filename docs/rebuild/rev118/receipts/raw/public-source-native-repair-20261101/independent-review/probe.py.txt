@@ -1,0 +1,34 @@
+import base64,hashlib,importlib.util,json,marshal,os,py_compile,shutil,struct,subprocess,sys,tempfile,zipfile
+from pathlib import Path
+import pytest
+ROOT=Path('/workspace/van-review-2026-10-18/publish');OUT=Path('/workspace/van-ci-native-repair-independent-review-20261101');E=Path('/workspace/van-ci-shards-native-repair-freeze-r2-20261101');h=json.loads((E/'HANDOFF.json').read_text())
+def pins():return {p:hashlib.sha256((ROOT/p).read_bytes()).hexdigest() for p in h['source_pins']}
+before=pins();assert before==h['source_pins'];(OUT/'before.json').write_text(json.dumps(before,indent=2));assert hashlib.sha256((E/'SOURCE.zip').read_bytes()).hexdigest()==h['source_archive_sha256'];assert hashlib.sha256((E/'SOURCE.patch').read_bytes()).hexdigest()==h['patch_sha256']
+with zipfile.ZipFile(E/'SOURCE.zip') as z:
+ for p,want in before.items():
+  names=[n for n in z.namelist() if n==p or n.endswith('/'+p)];assert len(names)==1;assert hashlib.sha256(z.read(names[0])).hexdigest()==want
+import tools.rebuild.public_source_shards as proof
+spec=importlib.util.spec_from_file_location('independent_native_repair_test_helpers',ROOT/'tests/rebuild/test_public_source_shards.py');tests=importlib.util.module_from_spec(spec);spec.loader.exec_module(tests)
+free=shutil.disk_usage('/tmp').free;assert free>=4*1024**3
+results=[]
+for case,fn in [('reporter keeps application json patch and records all3 phases',lambda p,m:tests.test_reporter_preserves_all_phases_without_changing_application_json_patch(p,m)),('true reporter encoding error propagates',lambda p,m:tests.test_real_report_encoding_and_storage_errors_propagate_without_fake_events(p,m,'encode')),('true reporter write error propagates',lambda p,m:tests.test_real_report_encoding_and_storage_errors_propagate_without_fake_events(p,m,'write'))]:
+ with tempfile.TemporaryDirectory(prefix='van-native-report-review-',dir='/tmp') as temp:
+  with pytest.MonkeyPatch.context() as mp:fn(Path(temp),mp)
+ results.append({'case':case,'result':'PASS'})
+for case,callback in [('actual11native modules+frozenset twohashseeds parentproof/archive/reverify',lambda fixture,p:tests.test_parent_validates_actual_native_module_caches_and_retires_only_verified_outputs(fixture,p)),('checkedhash opt1 parentproof/reverify',lambda fixture,p:tests.test_exact_native_sources_hash_header_and_optimization_match(fixture,p,'CHECKED_HASH',1)),('uncheckedhash opt2 parentproof/reverify',lambda fixture,p:tests.test_exact_native_sources_hash_header_and_optimization_match(fixture,p,'UNCHECKED_HASH',2)),('strict preexisting cache refused and preserved',lambda fixture,p:tests.test_generated_cache_provenance_refuses_bad_input_without_deleting_it(fixture,p,'preexisting')),('validheader forgedpayload refused and preserved',lambda fixture,p:tests.test_generated_cache_provenance_refuses_bad_input_without_deleting_it(fixture,p,'forged-payload'))]:
+ with tempfile.TemporaryDirectory(prefix='van-native-cache-review-',dir='/tmp') as temp:
+  p=Path(temp);fixture=tests.real_cache_source.__wrapped__(p);callback(fixture,p)
+ results.append({'case':case,'result':'PASS'})
+# Independent bool/int and signed-zero payload substitutions keep a valid header.
+with tempfile.TemporaryDirectory(prefix='van-native-typed-cache-review-',dir='/tmp') as temp:
+ root=Path(temp)/'source';root.mkdir();(root/'constants.py').write_text('FLAG=True\nZERO=0.0\n');(root/'pytest.ini').write_text('[pytest]\n');(root/'.gitignore').write_text('__pycache__/\n')
+ subprocess.run(['git','init','-q'],cwd=root,check=True);subprocess.run(['git','add','.'],cwd=root,check=True);subprocess.run(['git','-c','user.name=Owned SOURCE fixture','-c','user.email=source@example.test','-c','core.hooksPath=/dev/null','commit','-qm','isolated typed cache source'],cwd=root,check=True);head=subprocess.check_output(['git','rev-parse','HEAD'],cwd=root,text=True).strip()
+ py_compile.compile(str(root/'constants.py'),doraise=True);path=Path(importlib.util.cache_from_source(str(root/'constants.py')));data=path.read_bytes();decoded=marshal.loads(data[16:]);rel=str(path.relative_to(root));stamp=int((root/'constants.py').stat().st_mtime)%2**32
+ for case,change in [('bool-int',lambda x:1 if type(x)is bool else x),('signed-zero',lambda x:-0.0 if type(x)is float else x)]:
+  forged=data[:16]+marshal.dumps(decoded.replace(co_consts=tuple(change(v) for v in decoded.co_consts)))
+  try:proof._cache_proof(root,head,rel,forged,origin_root=str(root),source_mtime=stamp)
+  except ValueError as exc:assert 'payload differs' in str(exc)
+  else:raise AssertionError('typed constant substitution was accepted')
+  results.append({'case':'independent validheader '+case+' substitution','result':'REFUSES_AS_REQUIRED'})
+ assert proof._code_identity(True)!=proof._code_identity(1) and proof._code_identity(0.0)!=proof._code_identity(-0.0)
+after=pins();assert after==before;(OUT/'after.json').write_text(json.dumps(after,indent=2));record={'results':results,'storage_preflight':{'free_bytes_before':free,'reserve_bytes':4*1024**3},'production_import':proof.__file__,'production_import_sha256':before['tools/rebuild/public_source_shards.py'],'all3_archive_patch_before_after_pins_match':True,'owned_tmp_cleanup':True,'fixture_only_git_commits':True,'no_cache_import_or_execution':True,'native_fourworker_qualification':False};(OUT/'probe-results.json').write_text(json.dumps(record,indent=2));print(json.dumps({'results':results,'all3_archive_patch_before_after_pins_match':True,'owned_tmp_cleanup':True}))

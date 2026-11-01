@@ -1,0 +1,44 @@
+{
+  "run_id": 41302444387,
+  "head": "a5d63df4310ecda331aa5f6c6995ed46a42739f8",
+  "artifacts": [
+    {
+      "id": 13082470037,
+      "name": "van-backend-public-source-gateway-1",
+      "size_in_bytes": 540027,
+      "digest": "sha256:75795fe643e67bb4fdc28c997b7b4d5666878ceb85c982b05266e71ed9486f1c",
+      "expired": false
+    },
+    {
+      "id": 13082345000,
+      "name": "van-backend-public-source-gateway-2",
+      "size_in_bytes": 443494,
+      "digest": "sha256:3c990e30435d37b6bdeab6c336e99e86d88fb0b5331fee7f37a21534694c0b7f",
+      "expired": false
+    },
+    {
+      "id": 13082301523,
+      "name": "van-backend-public-source-gateway-3",
+      "size_in_bytes": 511708,
+      "digest": "sha256:45fa51f510fd41b4c84713a8308a986ac030e0be2858f14615425a36f29651ea",
+      "expired": false
+    },
+    {
+      "id": 13082129226,
+      "name": "van-backend-public-source",
+      "size_in_bytes": 3112118,
+      "digest": "sha256:8b4ed5ead0521a353c8d40dbf812642175c3e0d496feb8f128d4bb315a02754f",
+      "expired": false
+    },
+    {
+      "id": 13081859356,
+      "name": "van-backend-public-source-gateway-0",
+      "size_in_bytes": 670799,
+      "digest": "sha256:e9c85956ef2118a239fef8707f98bd6fd7cde8e5df3c2ccc776f3f9b5e2ed76b",
+      "expired": false
+    }
+  ],
+  "downloaded_artifact_id": 13082129226,
+  "local_zip": "/workspace/attachments/c75bcba0-26fe-4b70-bd91-54e22de0bc94/a5d63-backend-public-source-failed-artifact.zip",
+  "transport_observation": "A nested file_uri object was mistakenly printed and exposed its temporary signed download URL in tool output. URL fields are excluded from this intentionally limited metadata receipt; it is not a raw transport log. No URL is reproduced here. Actual artifact ZIP and decoded application job logs remain exact."
+}

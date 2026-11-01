@@ -1,0 +1,113 @@
+{
+  "started_at_utc": "2026-11-01T12:09:40.421153+00:00",
+  "mode": "permission-current",
+  "preflight": {
+    "path": "/tmp/van-recovery-ci-shards-json-report-permission-current-20261101",
+    "free_bytes_before": 4373053440,
+    "free_inodes_before": 2238279,
+    "minimum_free_bytes": 4294967296,
+    "no_preexisting_directory": true
+  },
+  "published_application_source": "a5d63df4310ecda331aa5f6c6995ed46a42739f8",
+  "focused_fixture_commit": "c1564e276fd8b4791527d4f9191ab53c5451068f",
+  "real_test_sha256": "8c0caf3bc3c97cf48a43933b330714da030eb84c6362d21517539ad3e1ac3920",
+  "helper_sha256": "90e9e670940da327baace21335569a447f0d12e1b8aaed3061cd86fe55628837",
+  "application_assertions": "Byte-exact unchanged whole original test module; only local focused selection, not native full-source qualification",
+  "command": [
+    "/workspace/van-backend-venv-20261025/bin/python",
+    "-B",
+    "tools/rebuild/backend_public_source.py",
+    "run-shard",
+    "--output",
+    "/workspace/van-ci-shards-json-report-repair-20261101/permission-current/production-plugin",
+    "--runtime",
+    "gateway",
+    "--shards",
+    "4",
+    "--shard-index",
+    "0",
+    "--expected-commit",
+    "c1564e276fd8b4791527d4f9191ab53c5451068f",
+    "--basetemp=/tmp/van-recovery-ci-shards-json-report-permission-current-20261101/with-plugin"
+  ],
+  "with_plugin_exit": 0,
+  "actual_assigned_ids": [
+    "backend/tests/test_owner_permission_integrity.py::test_concurrent_idempotency_recovery_reserves_only_one_canonical_admission",
+    "backend/tests/test_owner_permission_integrity.py::test_current_claim_loses_its_marker_and_cannot_bypass_revoked_consent",
+    "backend/tests/test_owner_permission_integrity.py::test_current_pointer_cannot_admit_another_parameter_set",
+    "backend/tests/test_owner_permission_integrity.py::test_current_witness_must_match_immutable_authenticated_source[change0]",
+    "backend/tests/test_owner_permission_integrity.py::test_current_witness_must_match_immutable_authenticated_source[change1]",
+    "backend/tests/test_owner_permission_integrity.py::test_current_witness_must_match_immutable_authenticated_source[change2]",
+    "backend/tests/test_owner_permission_integrity.py::test_current_witness_must_match_immutable_authenticated_source[change3]",
+    "backend/tests/test_owner_permission_integrity.py::test_current_witness_must_match_immutable_authenticated_source[change4]",
+    "backend/tests/test_owner_permission_integrity.py::test_grant_waiting_on_writer_rechecks_actual_owner_freshness[121000-permission_owner_approval_expired]",
+    "backend/tests/test_owner_permission_integrity.py::test_grant_waiting_on_writer_rechecks_actual_owner_freshness[31000-permission_owner_approval_expired]",
+    "backend/tests/test_owner_permission_integrity.py::test_invalid_unicode_is_a_bounded_parameter_refusal",
+    "backend/tests/test_owner_permission_integrity.py::test_ledger_insert_failure_rolls_back_permission_reservation_and_exact_retry_recovers",
+    "backend/tests/test_owner_permission_integrity.py::test_missing_immutable_witness_cannot_admit_current_marker",
+    "backend/tests/test_owner_permission_integrity.py::test_nested_scope_is_bounded_and_does_not_raise_recursion_errors[1100-permission_(parameters_invalid|scope_private_credentials_refused|scope_too_deep)]",
+    "backend/tests/test_owner_permission_integrity.py::test_nested_scope_is_bounded_and_does_not_raise_recursion_errors[17-permission_scope_too_deep]",
+    "backend/tests/test_owner_permission_integrity.py::test_no_exact_marker_still_allows_independent_fresh_native_parameter_set",
+    "backend/tests/test_owner_permission_integrity.py::test_readback_and_effect_agree_revoked_issuer_is_not_current",
+    "backend/tests/test_owner_permission_integrity.py::test_serializer_recursion_failure_is_an_explicit_refusal"
+  ],
+  "actual_full_collection": [
+    "backend/tests/test_instrument_sentinel_0.py::test_synthetic_instrument_sentinel",
+    "backend/tests/test_instrument_sentinel_1.py::test_synthetic_instrument_sentinel",
+    "backend/tests/test_instrument_sentinel_2.py::test_synthetic_instrument_sentinel",
+    "backend/tests/test_owner_permission_integrity.py::test_concurrent_idempotency_recovery_reserves_only_one_canonical_admission",
+    "backend/tests/test_owner_permission_integrity.py::test_current_claim_loses_its_marker_and_cannot_bypass_revoked_consent",
+    "backend/tests/test_owner_permission_integrity.py::test_current_pointer_cannot_admit_another_parameter_set",
+    "backend/tests/test_owner_permission_integrity.py::test_current_witness_must_match_immutable_authenticated_source[change0]",
+    "backend/tests/test_owner_permission_integrity.py::test_current_witness_must_match_immutable_authenticated_source[change1]",
+    "backend/tests/test_owner_permission_integrity.py::test_current_witness_must_match_immutable_authenticated_source[change2]",
+    "backend/tests/test_owner_permission_integrity.py::test_current_witness_must_match_immutable_authenticated_source[change3]",
+    "backend/tests/test_owner_permission_integrity.py::test_current_witness_must_match_immutable_authenticated_source[change4]",
+    "backend/tests/test_owner_permission_integrity.py::test_grant_waiting_on_writer_rechecks_actual_owner_freshness[121000-permission_owner_approval_expired]",
+    "backend/tests/test_owner_permission_integrity.py::test_grant_waiting_on_writer_rechecks_actual_owner_freshness[31000-permission_owner_approval_expired]",
+    "backend/tests/test_owner_permission_integrity.py::test_invalid_unicode_is_a_bounded_parameter_refusal",
+    "backend/tests/test_owner_permission_integrity.py::test_ledger_insert_failure_rolls_back_permission_reservation_and_exact_retry_recovers",
+    "backend/tests/test_owner_permission_integrity.py::test_missing_immutable_witness_cannot_admit_current_marker",
+    "backend/tests/test_owner_permission_integrity.py::test_nested_scope_is_bounded_and_does_not_raise_recursion_errors[1100-permission_(parameters_invalid|scope_private_credentials_refused|scope_too_deep)]",
+    "backend/tests/test_owner_permission_integrity.py::test_nested_scope_is_bounded_and_does_not_raise_recursion_errors[17-permission_scope_too_deep]",
+    "backend/tests/test_owner_permission_integrity.py::test_no_exact_marker_still_allows_independent_fresh_native_parameter_set",
+    "backend/tests/test_owner_permission_integrity.py::test_readback_and_effect_agree_revoked_issuer_is_not_current",
+    "backend/tests/test_owner_permission_integrity.py::test_serializer_recursion_failure_is_an_explicit_refusal"
+  ],
+  "exact_real_test_phases": [
+    {
+      "duration": 0.0001390309989801608,
+      "nodeid": "backend/tests/test_owner_permission_integrity.py::test_serializer_recursion_failure_is_an_explicit_refusal",
+      "outcome": "passed",
+      "skip_reason": null,
+      "when": "setup"
+    },
+    {
+      "duration": 0.0002184710028814152,
+      "nodeid": "backend/tests/test_owner_permission_integrity.py::test_serializer_recursion_failure_is_an_explicit_refusal",
+      "outcome": "passed",
+      "skip_reason": null,
+      "when": "call"
+    },
+    {
+      "duration": 7.412000195472501e-05,
+      "nodeid": "backend/tests/test_owner_permission_integrity.py::test_serializer_recursion_failure_is_an_explicit_refusal",
+      "outcome": "passed",
+      "skip_reason": null,
+      "when": "teardown"
+    }
+  ],
+  "actual_phase_events": 54,
+  "all_assigned_passed": true,
+  "cleanup": {
+    "path": "/tmp/van-recovery-ci-shards-json-report-permission-current-20261101",
+    "files": 2317,
+    "inventory": "/workspace/van-ci-shards-json-report-repair-20261101/permission-current/owned-temp-inventory.json",
+    "inventory_sha256": "2ea5641df6760e0430841de9bd2a1e4b2c048a952a2b479c5380ab38e3792379",
+    "free_bytes_before_cleanup": 4184805376,
+    "free_bytes_after_cleanup": 4259635200,
+    "free_inodes_after": 2234739,
+    "independently_absent": true
+  },
+  "completed_at_utc": "2026-11-01T12:10:08.151848+00:00"
+}

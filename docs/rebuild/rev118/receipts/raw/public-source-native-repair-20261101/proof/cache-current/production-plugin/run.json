@@ -1,0 +1,535 @@
+{
+  "expected_commit": "7394c24ec3aeb5093547fb853ad4d1a31cea4bb7",
+  "execution_id": "1f37fbaf-ed55-497f-be76-34be58c4a5b0",
+  "command": [
+    "/workspace/van-backend-venv-20261025/bin/python",
+    "-B",
+    "-s",
+    "/tmp/van-recovery-ci-shards-json-report-cache-current-20261101/focused-source/tools/rebuild/source_storage_audit.py",
+    "--report",
+    "/workspace/van-ci-shards-json-report-repair-20261101/cache-current/production-plugin/storage-audit.json",
+    "backend/tests/test_000_cache_outputs.py",
+    "backend/tests/test_instrument_sentinel_0.py",
+    "backend/tests/test_instrument_sentinel_1.py",
+    "backend/tests/test_instrument_sentinel_2.py",
+    "backend/tests/test_owner_permission_integrity.py",
+    "-q",
+    "--disable-warnings",
+    "-c",
+    "/tmp/van-recovery-ci-shards-json-report-cache-current-20261101/focused-source/pytest.ini",
+    "--rootdir=/tmp/van-recovery-ci-shards-json-report-cache-current-20261101/focused-source",
+    "--confcutdir=/tmp/van-recovery-ci-shards-json-report-cache-current-20261101/focused-source",
+    "-p",
+    "pytest_asyncio.plugin",
+    "-p",
+    "anyio.pytest_plugin",
+    "--basetemp=/tmp/van-recovery-ci-shards-json-report-cache-current-20261101/with-plugin",
+    "-p",
+    "tools.rebuild.public_source_shards",
+    "--van-source-output=/workspace/van-ci-shards-json-report-repair-20261101/cache-current/production-plugin",
+    "--van-source-root=/tmp/van-recovery-ci-shards-json-report-cache-current-20261101/focused-source",
+    "--van-source-execution-id=1f37fbaf-ed55-497f-be76-34be58c4a5b0",
+    "--van-source-runtime=gateway",
+    "--van-source-expected-commit=7394c24ec3aeb5093547fb853ad4d1a31cea4bb7",
+    "--van-source-shards=4",
+    "--van-source-index=1",
+    "--van-source-costs=/tmp/van-recovery-ci-shards-json-report-cache-current-20261101/focused-source/tools/rebuild/backend_public_source_costs.json",
+    "--junitxml=/workspace/van-ci-shards-json-report-repair-20261101/cache-current/production-plugin/report.xml"
+  ],
+  "source_before": {
+    "commit": "7394c24ec3aeb5093547fb853ad4d1a31cea4bb7",
+    "tree": "d01c7e41e5326a810950685db01ec0a2a2e96f6b",
+    "input_policy": "committed-inputs-parent-verified-cache-outputs/3",
+    "pytest_ini_sha256": "f0d599da4fd7a6dd5a24d6a26cdb593f9c8b9c81b43096fdcccfe04dc39a05b2"
+  },
+  "environment_before": {
+    "python": "3.12.14",
+    "implementation": "CPython",
+    "system": "Linux",
+    "machine": "x86_64",
+    "image_os": null,
+    "image_version": null,
+    "packages": [
+      [
+        "aiosqlite",
+        "0.22.1"
+      ],
+      [
+        "annotated-doc",
+        "0.0.5"
+      ],
+      [
+        "annotated-types",
+        "0.8.0"
+      ],
+      [
+        "anyio",
+        "4.15.1"
+      ],
+      [
+        "attrs",
+        "26.1.0"
+      ],
+      [
+        "certifi",
+        "2026.7.22"
+      ],
+      [
+        "cffi",
+        "2.1.1"
+      ],
+      [
+        "click",
+        "8.5.0"
+      ],
+      [
+        "cryptography",
+        "50.0.1"
+      ],
+      [
+        "fastapi",
+        "0.141.1"
+      ],
+      [
+        "greenlet",
+        "3.5.6"
+      ],
+      [
+        "h11",
+        "0.16.0"
+      ],
+      [
+        "httpcore",
+        "1.0.9"
+      ],
+      [
+        "httptools",
+        "0.8.0"
+      ],
+      [
+        "httpx",
+        "0.28.1"
+      ],
+      [
+        "idna",
+        "3.20"
+      ],
+      [
+        "iniconfig",
+        "2.3.0"
+      ],
+      [
+        "jsonschema",
+        "4.26.0"
+      ],
+      [
+        "jsonschema-specifications",
+        "2025.9.1"
+      ],
+      [
+        "nexus-rpc",
+        "1.4.0"
+      ],
+      [
+        "packaging",
+        "26.3"
+      ],
+      [
+        "pip",
+        "25.0.1"
+      ],
+      [
+        "playwright",
+        "1.63.0"
+      ],
+      [
+        "pluggy",
+        "1.6.0"
+      ],
+      [
+        "protobuf",
+        "7.36.2"
+      ],
+      [
+        "psycopg",
+        "3.2.9"
+      ],
+      [
+        "psycopg-binary",
+        "3.2.9"
+      ],
+      [
+        "pyarrow",
+        "25.0.1"
+      ],
+      [
+        "pycparser",
+        "3.0"
+      ],
+      [
+        "pydantic",
+        "2.13.5"
+      ],
+      [
+        "pydantic-settings",
+        "2.15.0"
+      ],
+      [
+        "pydantic_core",
+        "2.46.5"
+      ],
+      [
+        "pyee",
+        "13.0.1"
+      ],
+      [
+        "pygments",
+        "2.21.0"
+      ],
+      [
+        "pypdf",
+        "6.19.0"
+      ],
+      [
+        "pytest",
+        "9.1.1"
+      ],
+      [
+        "pytest-asyncio",
+        "1.4.0"
+      ],
+      [
+        "python-dotenv",
+        "1.2.3"
+      ],
+      [
+        "python-multipart",
+        "0.0.32"
+      ],
+      [
+        "pyyaml",
+        "6.0.3"
+      ],
+      [
+        "referencing",
+        "0.37.0"
+      ],
+      [
+        "rpds-py",
+        "2026.6.3"
+      ],
+      [
+        "starlette",
+        "1.6.0"
+      ],
+      [
+        "temporalio",
+        "1.33.0"
+      ],
+      [
+        "types-protobuf",
+        "7.35.1.20260906"
+      ],
+      [
+        "typing-inspection",
+        "0.4.4"
+      ],
+      [
+        "typing_extensions",
+        "4.16.0"
+      ],
+      [
+        "uvicorn",
+        "0.53.0"
+      ],
+      [
+        "uvloop",
+        "0.22.1"
+      ],
+      [
+        "watchfiles",
+        "1.3.0"
+      ],
+      [
+        "websockets",
+        "17.1"
+      ]
+    ],
+    "node": "v24.19.0",
+    "chromium_sha256": null,
+    "postgres_version": null,
+    "pytest_entrypoints": [
+      "anyio.pytest_plugin",
+      "pytest_asyncio.plugin"
+    ],
+    "pythonpath": [
+      "backend",
+      "backend/tests",
+      "trading",
+      "trading/tests",
+      "."
+    ],
+    "isolated_pg_fixture": null
+  },
+  "workflow_run": {
+    "id": "synthetic-real-permission-reporter-probe",
+    "attempt": "1"
+  },
+  "terminal": true,
+  "generated_cache_outputs": [
+    "backend/van_gateway/__pycache__/__init__.cpython-312.pyc",
+    "backend/van_gateway/__pycache__/config.cpython-312.pyc",
+    "backend/van_gateway/auth/__pycache__/__init__.cpython-312.pyc",
+    "backend/van_gateway/auth/__pycache__/control_scopes.cpython-312.pyc",
+    "backend/van_gateway/learning/__pycache__/__init__.cpython-312.pyc",
+    "backend/van_gateway/learning/__pycache__/schema.cpython-312.pyc",
+    "backend/van_gateway/private_core/__pycache__/__init__.cpython-312.pyc",
+    "backend/van_gateway/private_core/__pycache__/app.cpython-312.pyc",
+    "backend/van_gateway/storage/__pycache__/__init__.cpython-312.pyc",
+    "backend/van_gateway/storage/__pycache__/chart_migration.cpython-312.pyc",
+    "tools/runtime/__pycache__/preflight_owner_core.cpython-312.pyc"
+  ],
+  "source_after": {
+    "commit": "7394c24ec3aeb5093547fb853ad4d1a31cea4bb7",
+    "tree": "d01c7e41e5326a810950685db01ec0a2a2e96f6b",
+    "input_policy": "committed-inputs-parent-verified-cache-outputs/3",
+    "pytest_ini_sha256": "f0d599da4fd7a6dd5a24d6a26cdb593f9c8b9c81b43096fdcccfe04dc39a05b2"
+  },
+  "environment_after": {
+    "python": "3.12.14",
+    "implementation": "CPython",
+    "system": "Linux",
+    "machine": "x86_64",
+    "image_os": null,
+    "image_version": null,
+    "packages": [
+      [
+        "aiosqlite",
+        "0.22.1"
+      ],
+      [
+        "annotated-doc",
+        "0.0.5"
+      ],
+      [
+        "annotated-types",
+        "0.8.0"
+      ],
+      [
+        "anyio",
+        "4.15.1"
+      ],
+      [
+        "attrs",
+        "26.1.0"
+      ],
+      [
+        "certifi",
+        "2026.7.22"
+      ],
+      [
+        "cffi",
+        "2.1.1"
+      ],
+      [
+        "click",
+        "8.5.0"
+      ],
+      [
+        "cryptography",
+        "50.0.1"
+      ],
+      [
+        "fastapi",
+        "0.141.1"
+      ],
+      [
+        "greenlet",
+        "3.5.6"
+      ],
+      [
+        "h11",
+        "0.16.0"
+      ],
+      [
+        "httpcore",
+        "1.0.9"
+      ],
+      [
+        "httptools",
+        "0.8.0"
+      ],
+      [
+        "httpx",
+        "0.28.1"
+      ],
+      [
+        "idna",
+        "3.20"
+      ],
+      [
+        "iniconfig",
+        "2.3.0"
+      ],
+      [
+        "jsonschema",
+        "4.26.0"
+      ],
+      [
+        "jsonschema-specifications",
+        "2025.9.1"
+      ],
+      [
+        "nexus-rpc",
+        "1.4.0"
+      ],
+      [
+        "packaging",
+        "26.3"
+      ],
+      [
+        "pip",
+        "25.0.1"
+      ],
+      [
+        "playwright",
+        "1.63.0"
+      ],
+      [
+        "pluggy",
+        "1.6.0"
+      ],
+      [
+        "protobuf",
+        "7.36.2"
+      ],
+      [
+        "psycopg",
+        "3.2.9"
+      ],
+      [
+        "psycopg-binary",
+        "3.2.9"
+      ],
+      [
+        "pyarrow",
+        "25.0.1"
+      ],
+      [
+        "pycparser",
+        "3.0"
+      ],
+      [
+        "pydantic",
+        "2.13.5"
+      ],
+      [
+        "pydantic-settings",
+        "2.15.0"
+      ],
+      [
+        "pydantic_core",
+        "2.46.5"
+      ],
+      [
+        "pyee",
+        "13.0.1"
+      ],
+      [
+        "pygments",
+        "2.21.0"
+      ],
+      [
+        "pypdf",
+        "6.19.0"
+      ],
+      [
+        "pytest",
+        "9.1.1"
+      ],
+      [
+        "pytest-asyncio",
+        "1.4.0"
+      ],
+      [
+        "python-dotenv",
+        "1.2.3"
+      ],
+      [
+        "python-multipart",
+        "0.0.32"
+      ],
+      [
+        "pyyaml",
+        "6.0.3"
+      ],
+      [
+        "referencing",
+        "0.37.0"
+      ],
+      [
+        "rpds-py",
+        "2026.6.3"
+      ],
+      [
+        "starlette",
+        "1.6.0"
+      ],
+      [
+        "temporalio",
+        "1.33.0"
+      ],
+      [
+        "types-protobuf",
+        "7.35.1.20260906"
+      ],
+      [
+        "typing-inspection",
+        "0.4.4"
+      ],
+      [
+        "typing_extensions",
+        "4.16.0"
+      ],
+      [
+        "uvicorn",
+        "0.53.0"
+      ],
+      [
+        "uvloop",
+        "0.22.1"
+      ],
+      [
+        "watchfiles",
+        "1.3.0"
+      ],
+      [
+        "websockets",
+        "17.1"
+      ]
+    ],
+    "node": "v24.19.0",
+    "chromium_sha256": null,
+    "postgres_version": null,
+    "pytest_entrypoints": [
+      "anyio.pytest_plugin",
+      "pytest_asyncio.plugin"
+    ],
+    "pythonpath": [
+      "backend",
+      "backend/tests",
+      "trading",
+      "trading/tests",
+      "."
+    ],
+    "isolated_pg_fixture": null
+  },
+  "exit": 0,
+  "artifact_sha256": {
+    "terminal.json": "701da49db493e4090ceeae1738481b46a57098be8a502fd690eff5ce2ac884b7",
+    "phases.jsonl": "30e3a5442e03c8c1c589045a4a49f7f986be97a9b77a794d8c299daf4503fe3e",
+    "storage-audit.json": "5b754ed20f4a1fab58a2204711a5fbe815ef1a68539461ebf08888ec1a23e407",
+    "generated-bytecode.json": "fd35a037a1aab969838c0861d18de2513eb94af0294d21dbf336741ed6e510e8",
+    "report.xml": "affec275cbc51c2a14b32bc6ae7d9c357de07c70ed33c54272d7157f9aca2048"
+  }
+}

@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="1" failures="0" skipped="0" tests="18" time="5.093" timestamp="2026-11-01T11:48:08.997406+00:00" hostname="07611d75dea7"><testcase classname="backend.tests.test_owner_permission_integrity" name="test_grant_waiting_on_writer_rechecks_actual_owner_freshness[31000-permission_owner_approval_expired]" time="0.370"><properties><property name="van_source_nodeid" value="backend/tests/test_owner_permission_integrity.py::test_grant_waiting_on_writer_rechecks_actual_owner_freshness[31000-permission_owner_approval_expired]" /></properties></testcase><testcase classname="backend.tests.test_owner_permission_integrity" name="test_grant_waiting_on_writer_rechecks_actual_owner_freshness[121000-permission_owner_approval_expired]" time="0.340"><properties><property name="van_source_nodeid" value="backend/tests/test_owner_permission_integrity.py::test_grant_waiting_on_writer_rechecks_actual_owner_freshness[121000-permission_owner_approval_expired]" /></properties></testcase><testcase classname="backend.tests.test_owner_permission_integrity" name="test_current_claim_loses_its_marker_and_cannot_bypass_revoked_consent" time="0.326"><properties><property name="van_source_nodeid" value="backend/tests/test_owner_permission_integrity.py::test_current_claim_loses_its_marker_and_cannot_bypass_revoked_consent" /></properties></testcase><testcase classname="backend.tests.test_owner_permission_integrity" name="test_current_pointer_cannot_admit_another_parameter_set" time="0.306"><properties><property name="van_source_nodeid" value="backend/tests/test_owner_permission_integrity.py::test_current_pointer_cannot_admit_another_parameter_set" /></properties></testcase><testcase classname="backend.tests.test_owner_permission_integrity" name="test_current_witness_must_match_immutable_authenticated_source[change0]" time="0.308"><properties><property name="van_source_nodeid" value="backend/tests/test_owner_permission_integrity.py::test_current_witness_must_match_immutable_authenticated_source[change0]" /></properties></testcase><testcase classname="backend.tests.test_owner_permission_integrity" name="test_current_witness_must_match_immutable_authenticated_source[change1]" time="0.377"><properties><property name="van_source_nodeid" value="backend/tests/test_owner_permission_integrity.py::test_current_witness_must_match_immutable_authenticated_source[change1]" /></properties></testcase><testcase classname="backend.tests.test_owner_permission_integrity" name="test_current_witness_must_match_immutable_authenticated_source[change2]" time="0.301"><properties><property name="van_source_nodeid" value="backend/tests/test_owner_permission_integrity.py::test_current_witness_must_match_immutable_authenticated_source[change2]" /></properties></testcase><testcase classname="backend.tests.test_owner_permission_integrity" name="test_current_witness_must_match_immutable_authenticated_source[change3]" time="0.361"><properties><property name="van_source_nodeid" value="backend/tests/test_owner_permission_integrity.py::test_current_witness_must_match_immutable_authenticated_source[change3]" /></properties></testcase><testcase classname="backend.tests.test_owner_permission_integrity" name="test_current_witness_must_match_immutable_authenticated_source[change4]" time="0.315"><properties><property name="van_source_nodeid" value="backend/tests/test_owner_permission_integrity.py::test_current_witness_must_match_immutable_authenticated_source[change4]" /></properties></testcase><testcase classname="backend.tests.test_owner_permission_integrity" name="test_missing_immutable_witness_cannot_admit_current_marker" time="0.290"><properties><property name="van_source_nodeid" value="backend/tests/test_owner_permission_integrity.py::test_missing_immutable_witness_cannot_admit_current_marker" /></properties></testcase><testcase classname="backend.tests.test_owner_permission_integrity" name="test_readback_and_effect_agree_revoked_issuer_is_not_current" time="0.311"><properties><property name="van_source_nodeid" value="backend/tests/test_owner_permission_integrity.py::test_readback_and_effect_agree_revoked_issuer_is_not_current" /></properties></testcase><testcase classname="backend.tests.test_owner_permission_integrity" name="test_no_exact_marker_still_allows_independent_fresh_native_parameter_set" time="0.301"><properties><property name="van_source_nodeid" value="backend/tests/test_owner_permission_integrity.py::test_no_exact_marker_still_allows_independent_fresh_native_parameter_set" /></properties></testcase><testcase classname="backend.tests.test_owner_permission_integrity" name="test_concurrent_idempotency_recovery_reserves_only_one_canonical_admission" time="0.343"><properties><property name="van_source_nodeid" value="backend/tests/test_owner_permission_integrity.py::test_concurrent_idempotency_recovery_reserves_only_one_canonical_admission" /></properties></testcase><testcase classname="backend.tests.test_owner_permission_integrity" name="test_ledger_insert_failure_rolls_back_permission_reservation_and_exact_retry_recovers" time="0.371"><properties><property name="van_source_nodeid" value="backend/tests/test_owner_permission_integrity.py::test_ledger_insert_failure_rolls_back_permission_reservation_and_exact_retry_recovers" /></properties></testcase><testcase classname="backend.tests.test_owner_permission_integrity" name="test_nested_scope_is_bounded_and_does_not_raise_recursion_errors[17-permission_scope_too_deep]" time="0.001"><properties><property name="van_source_nodeid" value="backend/tests/test_owner_permission_integrity.py::test_nested_scope_is_bounded_and_does_not_raise_recursion_errors[17-permission_scope_too_deep]" /></properties></testcase><testcase classname="backend.tests.test_owner_permission_integrity" name="test_nested_scope_is_bounded_and_does_not_raise_recursion_errors[1100-permission_(parameters_invalid|scope_private_credentials_refused|scope_too_deep)]" time="0.002"><properties><property name="van_source_nodeid" value="backend/tests/test_owner_permission_integrity.py::test_nested_scope_is_bounded_and_does_not_raise_recursion_errors[1100-permission_(parameters_invalid|scope_private_credentials_refused|scope_too_deep)]" /></properties></testcase><testcase classname="backend.tests.test_owner_permission_integrity" name="test_serializer_recursion_failure_is_an_explicit_refusal" time="0.001" /><testcase classname="pytest" name="internal" time="0.000"><error message="internal error">Traceback (most recent call last):
+  File "/workspace/van-backend-venv-20261025/lib/python3.12/site-packages/_pytest/main.py", line 330, in wrap_session
+    session.exitstatus = doit(config, session) or 0
+                         ^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/van-backend-venv-20261025/lib/python3.12/site-packages/_pytest/main.py", line 384, in _main
+    config.hook.pytest_runtestloop(session=session)
+  File "/workspace/van-backend-venv-20261025/lib/python3.12/site-packages/pluggy/_hooks.py", line 512, in __call__
+    return self._hookexec(self.name, self._hookimpls.copy(), kwargs, firstresult)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/van-backend-venv-20261025/lib/python3.12/site-packages/pluggy/_manager.py", line 120, in _hookexec
+    return self._inner_hookexec(hook_name, methods, kwargs, firstresult)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/van-backend-venv-20261025/lib/python3.12/site-packages/pluggy/_callers.py", line 167, in _multicall
+    raise exception
+  File "/workspace/van-backend-venv-20261025/lib/python3.12/site-packages/pluggy/_callers.py", line 139, in _multicall
+    teardown.throw(exception)
+  File "/workspace/van-backend-venv-20261025/lib/python3.12/site-packages/_pytest/logging.py", line 816, in pytest_runtestloop
+    return (yield)  # Run all the tests.
+            ^^^^^
+  File "/workspace/van-backend-venv-20261025/lib/python3.12/site-packages/pluggy/_callers.py", line 139, in _multicall
+    teardown.throw(exception)
+  File "/workspace/van-backend-venv-20261025/lib/python3.12/site-packages/_pytest/terminal.py", line 708, in pytest_runtestloop
+    result = yield
+             ^^^^^
+  File "/workspace/van-backend-venv-20261025/lib/python3.12/site-packages/pluggy/_callers.py", line 121, in _multicall
+    res = hook_impl.function(*args)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/van-backend-venv-20261025/lib/python3.12/site-packages/_pytest/main.py", line 408, in pytest_runtestloop
+    item.config.hook.pytest_runtest_protocol(item=item, nextitem=nextitem)
+  File "/workspace/van-backend-venv-20261025/lib/python3.12/site-packages/pluggy/_hooks.py", line 512, in __call__
+    return self._hookexec(self.name, self._hookimpls.copy(), kwargs, firstresult)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/van-backend-venv-20261025/lib/python3.12/site-packages/pluggy/_manager.py", line 120, in _hookexec
+    return self._inner_hookexec(hook_name, methods, kwargs, firstresult)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/van-backend-venv-20261025/lib/python3.12/site-packages/pluggy/_callers.py", line 167, in _multicall
+    raise exception
+  File "/workspace/van-backend-venv-20261025/lib/python3.12/site-packages/pluggy/_callers.py", line 139, in _multicall
+    teardown.throw(exception)
+  File "/workspace/van-backend-venv-20261025/lib/python3.12/site-packages/_pytest/warnings.py", line 90, in pytest_runtest_protocol
+    return (yield)
+            ^^^^^
+  File "/workspace/van-backend-venv-20261025/lib/python3.12/site-packages/pluggy/_callers.py", line 139, in _multicall
+    teardown.throw(exception)
+  File "/workspace/van-backend-venv-20261025/lib/python3.12/site-packages/_pytest/assertion/__init__.py", line 205, in pytest_runtest_protocol
+    return (yield)
+            ^^^^^
+  File "/workspace/van-backend-venv-20261025/lib/python3.12/site-packages/pluggy/_callers.py", line 139, in _multicall
+    teardown.throw(exception)
+  File "/workspace/van-backend-venv-20261025/lib/python3.12/site-packages/_pytest/unittest.py", line 612, in pytest_runtest_protocol
+    return (yield)
+            ^^^^^
+  File "/workspace/van-backend-venv-20261025/lib/python3.12/site-packages/pluggy/_callers.py", line 139, in _multicall
+    teardown.throw(exception)
+  File "/workspace/van-backend-venv-20261025/lib/python3.12/site-packages/_pytest/faulthandler.py", line 102, in pytest_runtest_protocol
+    return (yield)
+            ^^^^^
+  File "/workspace/van-backend-venv-20261025/lib/python3.12/site-packages/pluggy/_callers.py", line 121, in _multicall
+    res = hook_impl.function(*args)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/van-backend-venv-20261025/lib/python3.12/site-packages/_pytest/runner.py", line 118, in pytest_runtest_protocol
+    runtestprotocol(item, nextitem=nextitem)
+  File "/workspace/van-backend-venv-20261025/lib/python3.12/site-packages/_pytest/runner.py", line 139, in runtestprotocol
+    reports.append(call_and_report(item, "call", log))
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/van-backend-venv-20261025/lib/python3.12/site-packages/_pytest/runner.py", line 256, in call_and_report
+    ihook.pytest_runtest_logreport(report=report)
+  File "/workspace/van-backend-venv-20261025/lib/python3.12/site-packages/pluggy/_hooks.py", line 512, in __call__
+    return self._hookexec(self.name, self._hookimpls.copy(), kwargs, firstresult)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/van-backend-venv-20261025/lib/python3.12/site-packages/pluggy/_manager.py", line 120, in _hookexec
+    return self._inner_hookexec(hook_name, methods, kwargs, firstresult)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/van-backend-venv-20261025/lib/python3.12/site-packages/pluggy/_callers.py", line 167, in _multicall
+    raise exception
+  File "/workspace/van-backend-venv-20261025/lib/python3.12/site-packages/pluggy/_callers.py", line 121, in _multicall
+    res = hook_impl.function(*args)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/van-recovery-ci-shards-json-report-before-20261101/focused-source/tools/rebuild/public_source_shards.py", line 259, in pytest_runtest_logreport
+    stream.write(json.dumps(event, sort_keys=True) + "\n")
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/van-recovery-ci-shards-json-report-before-20261101/focused-source/backend/tests/test_owner_permission_integrity.py", line 194, in too_deep
+    raise RecursionError("nested JSON")
+RecursionError: nested JSON</error></testcase></testsuite></testsuites>

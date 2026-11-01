@@ -1,0 +1,378 @@
+{
+  "schema": "van.public-source-native-reporter-cache-repair/1",
+  "at_utc": "2026-11-01T12:37:39.262006+00:00",
+  "source_parent": "a5d63df4310ecda331aa5f6c6995ed46a42739f8",
+  "authorization": "auth-20261022-owner-autonomous-candidate-build",
+  "frozen_source": {
+    "schema": "van.public-source-native-repair-review-handoff/1",
+    "at_utc": "2026-11-01T12:19:19.017310+00:00",
+    "state": "THREE_PATH_SOURCE_FROZEN_FOR_BOUNDED_INDEPENDENT_NATIVE_FAILURE_RECHECK_NOT_COMMITTED",
+    "base": "a5d63df4310ecda331aa5f6c6995ed46a42739f8",
+    "source_pins": {
+      "tools/rebuild/public_source_shards.py": "90e9e670940da327baace21335569a447f0d12e1b8aaed3061cd86fe55628837",
+      "tools/rebuild/backend_public_source.py": "f6cb4d2fdb4a661873c33fd10d0ab10e1fa59ef00be9ba3d82591a46bdbf72b5",
+      "tests/rebuild/test_public_source_shards.py": "ad15ef4db64ff1f3a06386af78b209e28bde8208d32632a6f41c5ac261f7db29"
+    },
+    "source_archive_sha256": "d2123b03dbe3f91c5e8a0ae9e63a1b811e1bf3a9d2dc3825827d37b5ce9c1d39",
+    "patch_sha256": "51c7b2298eea1934cbfd23a8899df58f607d020a777a4ccbe1594aba8219b0f0",
+    "archive_current_and_cached_applycheck": "PASS no index mutation",
+    "source_delta": [
+      "Capture original JSON serialization reference for every reporter write/fingerprint; do not alter application monkeypatches; true encode/write errors still raise",
+      "Strict pre-run bytecode refusal unchanged. Child reports cache candidates as UNVERIFIED; separate parent validates exact unchanged tracked source/header+full code graph, never executes/imports cache, records non-importable exact bytes and retires only hash-matching outputs absent at strict preflight",
+      "Full typed code graph/metadata comparison against fresh HEAD compilation accounts for legitimate frozenset marshal order/hash-seed differences; every code byte/constant/type/filename/position/exception-table field checked",
+      "Parent-generated cache artifact mandatory/hash-bound and independently reverified by aggregate; no source/config/data exception or test/child argv change",
+      "Freshness predicate includes new cache-evidence artifact so existing cache-only evidence cannot be overwritten"
+    ],
+    "completed_actual_proofs": {
+      "unchanged_real_case_baseline": {
+        "passed": 1,
+        "receipt": "/workspace/van-ci-shards-json-report-repair-20261101/before/receipt.json",
+        "source_test_sha256": "8c0caf3bc3c97cf48a43933b330714da030eb84c6362d21517539ad3e1ac3920"
+      },
+      "original_production_plugin_failure": "/workspace/van-ci-shards-json-report-repair-20261101/before/with-plugin.log",
+      "repaired_real_module": {
+        "assigned_passed": 18,
+        "phases": 54,
+        "exact_real_case": "setup/call/teardown allpassed",
+        "receipt": "/workspace/van-ci-shards-json-report-repair-20261101/permission-current/receipt.json"
+      },
+      "real_native_failure_named_module_caches": {
+        "modules": 11,
+        "assigned_fixture_cases": 2,
+        "phases": 6,
+        "receipt": "/workspace/van-ci-shards-json-report-repair-20261101/cache-current/receipt.json",
+        "actual_production_parent_artifact": "/workspace/van-ci-shards-json-report-repair-20261101/cache-current/production-plugin/generated-bytecode.json",
+        "notes": "Compiles exact named native failure modules using fresh child; parent independently validates/archives without importing/executing cached code."
+      },
+      "final_existing_and_new_instrument_guards": {
+        "passed": 89,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0,
+        "receipt": "/workspace/van-ci-shards-json-report-repair-20261101/instrument-and-cache-regression-final/receipt.json",
+        "junit": "/workspace/van-ci-shards-json-report-repair-20261101/instrument-and-cache-regression-final/tests.xml",
+        "storage_audit": "/workspace/van-ci-shards-json-report-repair-20261101/instrument-and-cache-regression-final/storage-audit.json",
+        "source3_before_after_exact": true,
+        "scope": "Actual tiny subprocesses plus protocol negatives; no full native qualification."
+      },
+      "coverage_notes": "Real module/cache production receipts precede only the adjacent fresh-output existence predicate addition; callback/cache logic and helper pin unchanged. Final89 rerun explicitly covers that stronger freshness guard. Do not sum overlapping scopes."
+    },
+    "required_refusal_controls": [
+      "Any preexisting repository cache, even valid exact-source cache",
+      "Untracked-source/orphan cache; wrong interpreter/flags/magic/timestamp; unchanged valid header with forged code body; tracked source drift",
+      "Different hash seeds/frozenset representation preserve exact typed semantic code graph; checked/unchecked hash headers and optimization-level/source match",
+      "True reporter encoding/storage failures propagate; existing actual teardown and resealed badphase/collection/source/nodeID/skip/partial controls remain fail-closed",
+      "All original untracked/ignored config/plugin/data/bytecode injection refusals retained"
+    ],
+    "native_failed_run": {
+      "head": "a5d63df4310ecda331aa5f6c6995ed46a42739f8",
+      "main_run": 41302444387,
+      "state": "TERMINAL_FAILED_AND_UNQUALIFIED",
+      "worker_jobs": {
+        "0": 124836027095,
+        "1": 124836027051,
+        "2": 124836027077,
+        "3": 124836027117
+      },
+      "worker_conclusions": [
+        "success",
+        "failure",
+        "failure",
+        "failure"
+      ],
+      "failures": {
+        "1": "Source identity rejected generated backend private-core/source caches",
+        "2": "CALL reporter used monkeypatched json.dumps; nestedJSON RecursionError; not evidence of failed domain assertion",
+        "3": "Source identity rejected generated tools/runtime/preflight_owner_core cache"
+      },
+      "aggregate_job": 124839120800,
+      "aggregate": "FAILED; no summary/fullunion qualification",
+      "official_aggregate_artifact": {
+        "id": 13082129226,
+        "sha256": "8b4ed5ead0521a353c8d40dbf812642175c3e0d496feb8f128d4bb315a02754f",
+        "metadata": "/workspace/van-ci-shards-json-report-repair-20261101/ARTIFACT_METADATA.json",
+        "extracted_raw": "/workspace/van-ci-shards-json-report-repair-20261101/native-failed-aggregate"
+      },
+      "partial_evidence": "/workspace/van-ci-shards-json-report-repair-20261101/NATIVE_TERMINAL_PARTIAL_EVIDENCE.json",
+      "observed_partial": "Worker0 complete433 (429pass4skip),worker1 complete2028 (1skip),worker2 complete920 of1845 (925incomplete/unknown; JUnit1error),worker3 complete1684. No recorded badphase events; this does NOT qualify incomplete/unexecuted cases or failed source provenance. Separate media198 actual JUnit0fail/error/skip. All originals remain failed.",
+      "timing": "Exact job/step timestamps retained in terminal metadata; no performance/speed claim from failed run or worker0 alone.",
+      "watch": "Original55878 reaped once after terminal watch1; no duplicate/restart/signals. NATIVE_WATCH_REAP.json retained."
+    },
+    "transport_output_correction": "/workspace/van-ci-shards-json-report-repair-20261101/ARTIFACT_METADATA.json",
+    "limits": [
+      "No application/Android/old assertion/native authority/workflow/credential/selection/skip/corpus edits",
+      "Bounded independent SOURCE review only; no native/unit/provider/production/device/signing/BG001 acceptance",
+      "Genuine corrective commit/required4fd baseline/normal publication and fresh native exact-head4worker execution still required; original run failed."
+    ],
+    "remaining": [
+      "Bounded independent recheck of three native tooling counterexamples and allowed/refused cache output boundary",
+      "Final docs/manifest/genuinehook normalcommit/required committed4fd verify/normalpush/readback",
+      "Actual future4worker/control/media/JUnit union+timing qualification; all prior failures kept"
+    ],
+    "owned_jobs": "No local test/controller active. Original55878 terminal/reaped. No Gradle used by integration; peer queue lane owns its current cache tasks."
+  },
+  "bounded_independent_review": {
+    "schema": "van.independent-ci-native-repair-source-review/1",
+    "at_utc": "2026-11-01T12:31:39.162373+00:00",
+    "reviewer": "policy_review_sol",
+    "disposition": "NO_BLOCKING_FINDING_WITHIN_BOUNDED_THREE_PATH_SOURCE_RECHECK",
+    "base": "a5d63df4310ecda331aa5f6c6995ed46a42739f8",
+    "candidate_root": "/workspace/van-review-2026-10-18/publish",
+    "source_before_after": {
+      "tools/rebuild/public_source_shards.py": "90e9e670940da327baace21335569a447f0d12e1b8aaed3061cd86fe55628837",
+      "tools/rebuild/backend_public_source.py": "f6cb4d2fdb4a661873c33fd10d0ab10e1fa59ef00be9ba3d82591a46bdbf72b5",
+      "tests/rebuild/test_public_source_shards.py": "ad15ef4db64ff1f3a06386af78b209e28bde8208d32632a6f41c5ac261f7db29"
+    },
+    "archive_sha256": "d2123b03dbe3f91c5e8a0ae9e63a1b811e1bf3a9d2dc3825827d37b5ce9c1d39",
+    "patch_sha256": "51c7b2298eea1934cbfd23a8899df58f607d020a777a4ccbe1594aba8219b0f0",
+    "exact_source_archive_patch_verified": true,
+    "blockers": [],
+    "reviewed_boundaries": [
+      {
+        "source": "tools/rebuild/public_source_shards.py:28,79,99,104,127,163,197,381,390,470",
+        "finding": "Captured original reporter serializer leaves application patches intact; real recorder errors propagate. Strict pre-run extras/bytecode check remains. Post-run candidates require unchanged tracked regular HEAD source, exact header/interpreter/optimization and fresh compiled typed full code graph; only verified same-hash outputs retired after nonimportable archive/readback. Aggregate independently repeats proof."
+      },
+      {
+        "source": "tools/rebuild/backend_public_source.py:106,144,157",
+        "finding": "Freshness guard includes generated-bytecode.json; parent compares child candidate list, hash-binds required cache archive, and returns nonzero for parent observation errors."
+      },
+      {
+        "source": "tests/rebuild/test_public_source_shards.py:340,423,445,508,539,552",
+        "finding": "Existing refusal assertions retained; fixtures adapted for new mandatory provenance. New reporter/cache/fresh-evidence refusals exercise repair without weakening application tests or gate selection."
+      }
+    ],
+    "independent_probes": {
+      "results": [
+        {
+          "case": "reporter keeps application json patch and records all3 phases",
+          "result": "PASS"
+        },
+        {
+          "case": "true reporter encoding error propagates",
+          "result": "PASS"
+        },
+        {
+          "case": "true reporter write error propagates",
+          "result": "PASS"
+        },
+        {
+          "case": "actual11native modules+frozenset twohashseeds parentproof/archive/reverify",
+          "result": "PASS"
+        },
+        {
+          "case": "checkedhash opt1 parentproof/reverify",
+          "result": "PASS"
+        },
+        {
+          "case": "uncheckedhash opt2 parentproof/reverify",
+          "result": "PASS"
+        },
+        {
+          "case": "strict preexisting cache refused and preserved",
+          "result": "PASS"
+        },
+        {
+          "case": "validheader forgedpayload refused and preserved",
+          "result": "PASS"
+        },
+        {
+          "case": "independent validheader bool-int substitution",
+          "result": "REFUSES_AS_REQUIRED"
+        },
+        {
+          "case": "independent validheader signed-zero substitution",
+          "result": "REFUSES_AS_REQUIRED"
+        }
+      ],
+      "storage_preflight": {
+        "free_bytes_before": 4344459264,
+        "reserve_bytes": 4294967296
+      },
+      "production_import": "/workspace/van-review-2026-10-18/publish/tools/rebuild/public_source_shards.py",
+      "production_import_sha256": "90e9e670940da327baace21335569a447f0d12e1b8aaed3061cd86fe55628837",
+      "all3_archive_patch_before_after_pins_match": true,
+      "owned_tmp_cleanup": true,
+      "fixture_only_git_commits": true,
+      "no_cache_import_or_execution": true,
+      "native_fourworker_qualification": false
+    },
+    "saved_evidence_independently_checked": {
+      "original_real_case": {
+        "cases": 1,
+        "failures": 0,
+        "errors": 0,
+        "skips": 0
+      },
+      "fixed_real_permission_module": {
+        "cases": 18,
+        "failures": 0,
+        "errors": 0,
+        "skips": 0
+      },
+      "actual_saved_module_cache_payloads_reverified_without_execution": 11,
+      "final_guard_junit": {
+        "cases": 89,
+        "failures": 0,
+        "errors": 0,
+        "skips": 0
+      },
+      "three_path_only_delta_and_unchanged_workflow_mirror_dependencies_application_assertion": true,
+      "current_source_archive_patch_exact_after": true
+    },
+    "artifacts": [
+      "probe.py",
+      "probe.log",
+      "probe-results.json",
+      "before.json",
+      "after.json",
+      "evidence_check.py",
+      "evidence-check.log",
+      "evidence-check.json"
+    ],
+    "cleanup": "Owned narrow /tmp fixtures removed via TemporaryDirectory; no own worker/child remains; production imports use -B and explicit source PYTHONPATH. Existing candidate caches observed dated before review were left untouched.",
+    "limits": [
+      "No edits to candidate source, commits, CI dispatch, Gradle, native effects, full local suites or cache execution/import. Tiny fixture-only git commits are isolated and removed.",
+      "Actual saved18-case permission receipt and11-module cache receipt precede only freshness-guard addition; final89-case receipt covers current3 pins. Independent probes rerun current repair callbacks/cache logic; counts overlap and are not summed.",
+      "Original native run remains FAILED/unqualified;925 cases incomplete/unknown, separate media198 passed is not fullunion evidence. No native four-worker qualification or speed claim.",
+      "Corrective publication and a future genuine exact-head native execution remain separate gates."
+    ]
+  },
+  "evidence_scopes": {
+    "unchanged_application_refusal_case_baseline": 1,
+    "unchanged_real_permission_module_cases": 18,
+    "real_permission_phases": 54,
+    "named_actual_native_failure_module_cache_proofs": 11,
+    "final_documentary_instrument_cases": 89,
+    "final_failed": 0,
+    "final_errors": 0,
+    "final_skipped": 0,
+    "independent_narrow_probes": 10,
+    "overlap": "Do not sum these scopes; none is full hosted-source/native qualification."
+  },
+  "original_native_attempt": "FAILED and unqualified at a5d; worker2 recorder abort plus workers1/3 strict generated-cache rejection.925assigned IDs incomplete/unknown; actual recorded phases and5skip IDs are preserved.198media actualJUnit pass does not repair failed aggregate. No speed inference.",
+  "input_and_output_contract": "Every preexisting repository bytecode still refuses, including valid exact-source caches. Only absent-before after-run outputs bound to unchanged tracked source/current interpreter+optimization/header and every typed code field/constant/position/exception table are independently verified outside test monkeypatches. Cached code is verifier data only, never imported/executed. Exact bytes are archived non-importably before hash-rechecked owned retirement; aggregate independently revalidates. No config/data/plugin scope exemption.",
+  "reporter_contract": "Capture original JSON callable without changing application monkeypatch lifetime; preserve every phase, fail closed on true encoding/storage failure. No assertion, skip, child command or application behavior change.",
+  "raw_sha256": {
+    "docs/rebuild/rev118/receipts/raw/public-source-native-repair-20261101/proof/ARTIFACT_METADATA.json": "4ffe89d909f88ab96bdfafdebc11b96794ece56c05180edf438506b4a5912eaa",
+    "docs/rebuild/rev118/receipts/raw/public-source-native-repair-20261101/proof/FROZEN_SOURCE_INPUTS.json": "ebf094f66fa1bd3a77417cc8485c2b96fe5e8b4e9b0e696f3284f2a7a86ee122",
+    "docs/rebuild/rev118/receipts/raw/public-source-native-repair-20261101/proof/INITIAL_SETUP_FAILURE.json": "60406e33204ebd240349aa514cf8d46596be36db0c33196ab1317ee8f5d5d605",
+    "docs/rebuild/rev118/receipts/raw/public-source-native-repair-20261101/proof/NATIVE_TERMINAL_PARTIAL_EVIDENCE.json": "b984d7bbee5467086347592f1b46d09add71333f8b24b986b1ac48308a51d897",
+    "docs/rebuild/rev118/receipts/raw/public-source-native-repair-20261101/proof/NATIVE_WATCH_REAP.json": "7215dd9c81db63444d7414de81527b28e910bf64c6825a8f5ce954bfeb4fcbb4",
+    "docs/rebuild/rev118/receipts/raw/public-source-native-repair-20261101/proof/after/production-plugin/collection.json": "4c8952c5a70bf36d56e321051b55ce1ca38c76d022586f74d605a55a86436c73",
+    "docs/rebuild/rev118/receipts/raw/public-source-native-repair-20261101/proof/after/production-plugin/phases.jsonl": "0af9e54e5e8a0408a57e3af84d7f1d52be0f677cf56805c5bda2e76bf0437013",
+    "docs/rebuild/rev118/receipts/raw/public-source-native-repair-20261101/proof/after/production-plugin/report.xml": "384acbb6f65cd77e239d764bd1b089a92b15bc5a6d6d75da2183e149fefbe12d",
+    "docs/rebuild/rev118/receipts/raw/public-source-native-repair-20261101/proof/after/production-plugin/run.json": "5ee166fd0c33a554f918aa8b935b79f0e8413b542e233fb7c02f75175f422aa9",
+    "docs/rebuild/rev118/receipts/raw/public-source-native-repair-20261101/proof/after/production-plugin/selection.json": "196739942283bc210dbd2d6d2ace53b3aa45b82cd30e1c71a8f6e490fbfb5320",
+    "docs/rebuild/rev118/receipts/raw/public-source-native-repair-20261101/proof/after/production-plugin/storage-audit.json": "f75b252be8c470edd2c62c34556177a2d71b3b3d0e9be591757f7d41597f202c",
+    "docs/rebuild/rev118/receipts/raw/public-source-native-repair-20261101/proof/after/production-plugin/terminal.json": "3dc833983370e835206f082334b74363b8392589a3d5a333f3c08f33d596bd4e",
+    "docs/rebuild/rev118/receipts/raw/public-source-native-repair-20261101/proof/after/receipt.json": "94583d17502ba44d35c4b43987ac87b309ec9755baf14b0b45ad54f8760a2810",
+    "docs/rebuild/rev118/receipts/raw/public-source-native-repair-20261101/proof/after/with-plugin.log": "a7ae7f5560fc0b99c6e012064c02020e92ab48e52b1a7767e360df28b1e314e8",
+    "docs/rebuild/rev118/receipts/raw/public-source-native-repair-20261101/proof/before/production-plugin/collection.json": "ffb41ce4cce496b3a673ebf648cac6228b7c80e99119ab958ba2c26990df6ac3",
+    "docs/rebuild/rev118/receipts/raw/public-source-native-repair-20261101/proof/before/production-plugin/phases.jsonl": "f189c7a5208ac4345fc55814935ec4680ca1bcea6dcf4908fa478acce49acf20",
+    "docs/rebuild/rev118/receipts/raw/public-source-native-repair-20261101/proof/before/production-plugin/report.xml": "bfafc8d1f38ece6393639e376a9668d79a78e40e6704360e0cbc0ec13472e0b3",
+    "docs/rebuild/rev118/receipts/raw/public-source-native-repair-20261101/proof/before/production-plugin/run.json": "daf388cfb22124cfb800175cde0fc9424ab28de77acb408a8c37cae4ad09813c",
+    "docs/rebuild/rev118/receipts/raw/public-source-native-repair-20261101/proof/before/production-plugin/selection.json": "196739942283bc210dbd2d6d2ace53b3aa45b82cd30e1c71a8f6e490fbfb5320",
+    "docs/rebuild/rev118/receipts/raw/public-source-native-repair-20261101/proof/before/receipt.json": "3bd4b5dc517f793db1899376a27638d30e7fde0a5bd7d70107d42cff8c4900da",
+    "docs/rebuild/rev118/receipts/raw/public-source-native-repair-20261101/proof/before/with-plugin.log": "3e195da251879bfbd59285c0a6ce1a4809184e0c6537135b86de12c99089fea1",
+    "docs/rebuild/rev118/receipts/raw/public-source-native-repair-20261101/proof/before/without-plugin-audit.json": "03b5b2afac2978cda8a845c9a6eec9e8d20b13abe2960e09fcc8f1fccbcc2cb7",
+    "docs/rebuild/rev118/receipts/raw/public-source-native-repair-20261101/proof/before/without-plugin.log": "b263d69c44b612282137de0281bd9556f3ac416582ffd664301063cbd8c10652",
+    "docs/rebuild/rev118/receipts/raw/public-source-native-repair-20261101/proof/before/without-plugin.xml": "445e0d7b4031e93c15e490f4fc8551b2235a0e2bf9125d3bcc6cd433711b248f",
+    "docs/rebuild/rev118/receipts/raw/public-source-native-repair-20261101/proof/cache-current/production-plugin/collection.json": "9d6fe8243ab2f42f268fa7094f3145b7e88b9bfc22937a7ef404d143638e117e",
+    "docs/rebuild/rev118/receipts/raw/public-source-native-repair-20261101/proof/cache-current/production-plugin/generated-bytecode.json": "fd35a037a1aab969838c0861d18de2513eb94af0294d21dbf336741ed6e510e8",
+    "docs/rebuild/rev118/receipts/raw/public-source-native-repair-20261101/proof/cache-current/production-plugin/phases.jsonl": "30e3a5442e03c8c1c589045a4a49f7f986be97a9b77a794d8c299daf4503fe3e",
+    "docs/rebuild/rev118/receipts/raw/public-source-native-repair-20261101/proof/cache-current/production-plugin/report.xml": "affec275cbc51c2a14b32bc6ae7d9c357de07c70ed33c54272d7157f9aca2048",
+    "docs/rebuild/rev118/receipts/raw/public-source-native-repair-20261101/proof/cache-current/production-plugin/run.json": "9044d025b3b8ed624ae32f6e3724b5de8409693b78dfa0e39268ed412fd7d646",
+    "docs/rebuild/rev118/receipts/raw/public-source-native-repair-20261101/proof/cache-current/production-plugin/selection.json": "3deedb77e2a0795437711f8a2bdde69c08b63c561e8085021778d896ea9f268f",
+    "docs/rebuild/rev118/receipts/raw/public-source-native-repair-20261101/proof/cache-current/production-plugin/storage-audit.json": "5b754ed20f4a1fab58a2204711a5fbe815ef1a68539461ebf08888ec1a23e407",
+    "docs/rebuild/rev118/receipts/raw/public-source-native-repair-20261101/proof/cache-current/production-plugin/terminal.json": "701da49db493e4090ceeae1738481b46a57098be8a502fd690eff5ce2ac884b7",
+    "docs/rebuild/rev118/receipts/raw/public-source-native-repair-20261101/proof/cache-current/receipt.json": "c649e1a0793a075835f1f7a7175162867f8ecf5a84a72cc513398471c1880e60",
+    "docs/rebuild/rev118/receipts/raw/public-source-native-repair-20261101/proof/cache-current/with-plugin.log": "e56004ae33f961048a62754e248267249d3eb2e5b64c506e7db5ba708877a6d9",
+    "docs/rebuild/rev118/receipts/raw/public-source-native-repair-20261101/proof/instrument-and-cache-regression/receipt.json": "56366c359012e86c3aa671ba99c16dd38b3e9eced0f7a650c64f4aacfef262ef",
+    "docs/rebuild/rev118/receipts/raw/public-source-native-repair-20261101/proof/instrument-and-cache-regression/storage-audit.json": "03b5b2afac2978cda8a845c9a6eec9e8d20b13abe2960e09fcc8f1fccbcc2cb7",
+    "docs/rebuild/rev118/receipts/raw/public-source-native-repair-20261101/proof/instrument-and-cache-regression/tests.log": "05211ceaec3083d4cdb46721b9787460d5b4a011ea6b24df238765cfd268f4f4",
+    "docs/rebuild/rev118/receipts/raw/public-source-native-repair-20261101/proof/instrument-and-cache-regression/tests.xml": "20b792d3c3ce72ef67b5f0fecbe9d7497a28d828abb47023adad83b9be6dabab",
+    "docs/rebuild/rev118/receipts/raw/public-source-native-repair-20261101/proof/instrument-and-cache-regression-final/receipt.json": "bc444320a09d6c552e462cc15cac4c10c3987a1a30891e2257673d789598b8e3",
+    "docs/rebuild/rev118/receipts/raw/public-source-native-repair-20261101/proof/instrument-and-cache-regression-final/storage-audit.json": "03b5b2afac2978cda8a845c9a6eec9e8d20b13abe2960e09fcc8f1fccbcc2cb7",
+    "docs/rebuild/rev118/receipts/raw/public-source-native-repair-20261101/proof/instrument-and-cache-regression-final/tests.log": "c3ccfb69d4bae0ec5daab9ead62c793f61ac30e1773ba68a973c9d5795e4abe1",
+    "docs/rebuild/rev118/receipts/raw/public-source-native-repair-20261101/proof/instrument-and-cache-regression-final/tests.xml": "410a9a38067f56bb6d22f08ce4f946aef4de6d763524526091bf264b589fe823",
+    "docs/rebuild/rev118/receipts/raw/public-source-native-repair-20261101/proof/instrument-regression/receipt.json": "c59ce09e34f74372eca5fa74d12faea1f3dfdb08ca10b5b1b3f0b65ccd6a3fef",
+    "docs/rebuild/rev118/receipts/raw/public-source-native-repair-20261101/proof/instrument-regression/storage-audit.json": "03b5b2afac2978cda8a845c9a6eec9e8d20b13abe2960e09fcc8f1fccbcc2cb7",
+    "docs/rebuild/rev118/receipts/raw/public-source-native-repair-20261101/proof/instrument-regression/tests.log": "1a1e5236c0f0751c7cb4e58f52998d5fba5889ab6a3d793080218c49f1fae53c",
+    "docs/rebuild/rev118/receipts/raw/public-source-native-repair-20261101/proof/instrument-regression/tests.xml": "89938905781f21903fe7246d8a904de8f98b43f9476accf635005b68dd822d9d",
+    "docs/rebuild/rev118/receipts/raw/public-source-native-repair-20261101/proof/native-124836027051-decoded.log": "3bc5d86ecc1b0ef9d9e56f7f7e6286a7031212710036e0c2814385fab2ccbd09",
+    "docs/rebuild/rev118/receipts/raw/public-source-native-repair-20261101/proof/native-124836027117-decoded.log": "d5791b30a8eb2517c94325bf5bdd07665adbe5d5009f3ffbd1f60facc04d6edc",
+    "docs/rebuild/rev118/receipts/raw/public-source-native-repair-20261101/proof/native-jobs-at-repair.jsons": "dedf3304b381e62e1f042465a6482bd28504628966e342f2fd3981ae91614743",
+    "docs/rebuild/rev118/receipts/raw/public-source-native-repair-20261101/proof/native-jobs-at-repair.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "docs/rebuild/rev118/receipts/raw/public-source-native-repair-20261101/proof/native-shard2-decoded.log": "ca172e298c4691ba73562c697507a96672f7495a7199e755aadadf949984af09",
+    "docs/rebuild/rev118/receipts/raw/public-source-native-repair-20261101/proof/native-terminal-jobs.jsons": "8c2f17281ec9d49fe2b56d660aa99a668658e62bd38d05040d3d1c47b3c90f3b",
+    "docs/rebuild/rev118/receipts/raw/public-source-native-repair-20261101/proof/native-terminal-jobs.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "docs/rebuild/rev118/receipts/raw/public-source-native-repair-20261101/proof/permission-current/production-plugin/collection.json": "ae107368b416ef50218ca89ad43ce496015b5a3b2f133abaec971ab83adf64f1",
+    "docs/rebuild/rev118/receipts/raw/public-source-native-repair-20261101/proof/permission-current/production-plugin/generated-bytecode.json": "698cffb3289aa1bc7b93add879604da20566cd6ba6b9630d5bda58171e21d95e",
+    "docs/rebuild/rev118/receipts/raw/public-source-native-repair-20261101/proof/permission-current/production-plugin/phases.jsonl": "d79fe2a117eb3bafa2a301ee387297f35f1f57fe5828d759ae43ea81a665ab8c",
+    "docs/rebuild/rev118/receipts/raw/public-source-native-repair-20261101/proof/permission-current/production-plugin/report.xml": "dfbdcdc027964a752da5b46ac6048122168e027781b5b5762a81efb12b3e61a4",
+    "docs/rebuild/rev118/receipts/raw/public-source-native-repair-20261101/proof/permission-current/production-plugin/run.json": "15392e25353424ae0c6050ba5ed7240c98ae112da596f2b7c1e5158c8f5ae4c3",
+    "docs/rebuild/rev118/receipts/raw/public-source-native-repair-20261101/proof/permission-current/production-plugin/selection.json": "196739942283bc210dbd2d6d2ace53b3aa45b82cd30e1c71a8f6e490fbfb5320",
+    "docs/rebuild/rev118/receipts/raw/public-source-native-repair-20261101/proof/permission-current/production-plugin/storage-audit.json": "fd1692d77560a4ec72a77e1ce1de1b0bd89adf6d9af71eb90103a0a5f6364aa1",
+    "docs/rebuild/rev118/receipts/raw/public-source-native-repair-20261101/proof/permission-current/production-plugin/terminal.json": "04d4f9fcb11070c597723aad511b9594a6d25eca15b8bf05ea6ca1da12b28bd9",
+    "docs/rebuild/rev118/receipts/raw/public-source-native-repair-20261101/proof/permission-current/receipt.json": "fe6b2c0c1a39ab68fa282a7f62c66bb706c6cf6719986bfac18cde51a35a9aed",
+    "docs/rebuild/rev118/receipts/raw/public-source-native-repair-20261101/proof/permission-current/with-plugin.log": "9102aba163649a24c9cdb14af7941bebfbc03c9126d371bf23db559484cad875",
+    "docs/rebuild/rev118/receipts/raw/public-source-native-repair-20261101/frozen-source/HANDOFF.json": "cb47a1c2c47f9bd255a45cd35ef115a06f2f593bd553c684e5b422b923525493",
+    "docs/rebuild/rev118/receipts/raw/public-source-native-repair-20261101/frozen-source/SOURCE.patch": "51c7b2298eea1934cbfd23a8899df58f607d020a777a4ccbe1594aba8219b0f0",
+    "docs/rebuild/rev118/receipts/raw/public-source-native-repair-20261101/frozen-source/SOURCE.zip": "d2123b03dbe3f91c5e8a0ae9e63a1b811e1bf3a9d2dc3825827d37b5ce9c1d39",
+    "docs/rebuild/rev118/receipts/raw/public-source-native-repair-20261101/independent-review/after.json": "b54b184b60c8a2b89b366361ff4c5c8d07807280b041a49e1fd92070eeac7b64",
+    "docs/rebuild/rev118/receipts/raw/public-source-native-repair-20261101/independent-review/before.json": "b54b184b60c8a2b89b366361ff4c5c8d07807280b041a49e1fd92070eeac7b64",
+    "docs/rebuild/rev118/receipts/raw/public-source-native-repair-20261101/independent-review/evidence-check.json": "b69c6d234a4e697330ce2125835740efa8288f4e577bc001f5f322ef21e313d2",
+    "docs/rebuild/rev118/receipts/raw/public-source-native-repair-20261101/independent-review/evidence-check.log": "cee391ebfa84b3f79832aeabfb136d52969f4e7f008ffbe3fa699dfb0bc13dfc",
+    "docs/rebuild/rev118/receipts/raw/public-source-native-repair-20261101/independent-review/evidence_check.py.txt": "681bd87be47decf2cb4d12daec82ba32408b80373e1f30e6f2814b67df804d84",
+    "docs/rebuild/rev118/receipts/raw/public-source-native-repair-20261101/independent-review/finalize.py.txt": "2de935e2d18532ad69cf597038235c2ccb6d5073aadb3b240f525af7102bb03e",
+    "docs/rebuild/rev118/receipts/raw/public-source-native-repair-20261101/independent-review/probe-results.json": "c2d0bbabdef547ae2f5bad532c1242b000b767e9a96a5ac6ae8d83bb3dcab731",
+    "docs/rebuild/rev118/receipts/raw/public-source-native-repair-20261101/independent-review/probe.log": "c8f1a7e833a8e9418312d329277c5aa19329774b0e1f23ce571a4f97d8f3d17d",
+    "docs/rebuild/rev118/receipts/raw/public-source-native-repair-20261101/independent-review/probe.py.txt": "4e13ced832481ae3e4fbfc6121ceac7083825fcddff6682a8960e977398ad8ea",
+    "docs/rebuild/rev118/receipts/raw/public-source-native-repair-20261101/independent-review/review.json": "dd4a6e29aea16471ce996638f58eae1a9eb83e575583804bc4bd498d8b849a73",
+    "docs/rebuild/rev118/receipts/raw/public-source-native-repair-20261101/native-a5d-official-aggregate.zip": "8b4ed5ead0521a353c8d40dbf812642175c3e0d496feb8f128d4bb315a02754f",
+    "docs/rebuild/rev118/receipts/raw/public-source-native-repair-20261101/van-ci-shards-json-report-repair-20261101.py.txt": "31f60b9f07c262e94636dca687d972a19f2528cd05d96e834fe38af831116a1c",
+    "docs/rebuild/rev118/receipts/raw/public-source-native-repair-20261101/van-ci-shards-complete-native-repair-20261101.py.txt": "d02fab551a2a6c1a2faa1e0b7d10de157e4972728e013126577cbcb39cfac6f6",
+    "docs/rebuild/rev118/receipts/raw/public-source-native-repair-20261101/van-ci-shards-cache-instrument-final-20261101.py.txt": "aeca5d2b64854e0612dd82de2ec48e79d31745d3fa23500a8211dac855d15564",
+    "docs/rebuild/rev118/receipts/raw/public-source-native-repair-20261101/van-ci-shards-native-watch-20261101.json": "980f8e586b2f03994a2d1c8ecc9f65f6a1bf5290709e8678bb94b5d2e12096c2"
+  },
+  "historical_executable_path_mapping": [
+    {
+      "original_external_path": "/workspace/van-ci-native-repair-independent-review-20261101/evidence_check.py",
+      "archived_path": "docs/rebuild/rev118/receipts/raw/public-source-native-repair-20261101/independent-review/evidence_check.py.txt",
+      "reason": "Immutable historical proof source, stored non-importably; original commands unchanged."
+    },
+    {
+      "original_external_path": "/workspace/van-ci-native-repair-independent-review-20261101/finalize.py",
+      "archived_path": "docs/rebuild/rev118/receipts/raw/public-source-native-repair-20261101/independent-review/finalize.py.txt",
+      "reason": "Immutable historical proof source, stored non-importably; original commands unchanged."
+    },
+    {
+      "original_external_path": "/workspace/van-ci-native-repair-independent-review-20261101/probe.py",
+      "archived_path": "docs/rebuild/rev118/receipts/raw/public-source-native-repair-20261101/independent-review/probe.py.txt",
+      "reason": "Immutable historical proof source, stored non-importably; original commands unchanged."
+    },
+    {
+      "original_external_path": "/workspace/van-ci-shards-json-report-repair-20261101.py",
+      "archived_path": "docs/rebuild/rev118/receipts/raw/public-source-native-repair-20261101/van-ci-shards-json-report-repair-20261101.py.txt",
+      "reason": "Immutable historical proof source, stored non-importably; original commands unchanged."
+    },
+    {
+      "original_external_path": "/workspace/van-ci-shards-complete-native-repair-20261101.py",
+      "archived_path": "docs/rebuild/rev118/receipts/raw/public-source-native-repair-20261101/van-ci-shards-complete-native-repair-20261101.py.txt",
+      "reason": "Immutable historical proof source, stored non-importably; original commands unchanged."
+    },
+    {
+      "original_external_path": "/workspace/van-ci-shards-cache-instrument-final-20261101.py",
+      "archived_path": "docs/rebuild/rev118/receipts/raw/public-source-native-repair-20261101/van-ci-shards-cache-instrument-final-20261101.py.txt",
+      "reason": "Immutable historical proof source, stored non-importably; original commands unchanged."
+    }
+  ],
+  "storage": "Official failed aggregate ZIP retained once; extracted duplicate49files remain external. Redundant decoded JSON wrappers and full cleanup inventories remain external, with receipt digests retained. Exact logs/XML/source/context proofs are archived here.",
+  "transport_fact": "ARTIFACT_METADATA.json preserves actual accidental nested signed-link output fact; transport fields intentionally excluded and not represented as original raw bytes. Actual decoded application logs and official artifact ZIP/digest are unchanged.",
+  "remaining": [
+    "Normal corrective commit/genuinehook and required4fd committedverify terminal0 before freshremote/normalpush",
+    "Fresh actual exact-headfour-worker/control/media/assignment/phase/JUnit union must qualify; originala5d remainsFAILED",
+    "No source/native speed or native/unit/BG001/provider/device/signing/deployment/release certificate issued; mandatoryDDS/trustedchecker gates unwaived"
+  ],
+  "current_source_ci_barrier": "Originala5d native main/source jobs terminalFAILED with confirmed reviewed tooling corrections; no manualcancel or concurrency modification."
+}

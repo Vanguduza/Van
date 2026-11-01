@@ -6,15 +6,26 @@ import hashlib
 import copy
 import shutil
 import importlib.metadata
+import importlib.util
 import json
+import base64
+import marshal
+import io
 import os
 from pathlib import Path
 import platform
+import re
+import struct
 import subprocess
 import sys
+import types
 import xml.etree.ElementTree as ET
 
 import pytest
+
+# CALL reports run before test monkeypatch teardown. Preserve the original
+# primitive without altering application patches; real encode/write errors raise.
+_JSON_DUMPS = json.dumps
 
 SCHEMA = "van.public-source-node-ledger/1"
 _STATE = None
@@ -43,7 +54,7 @@ def generated_evidence_path(path):
     names = {"selection.json", "tested-commit.txt", "collection.json", "terminal.json",
              "run.json", "phases.jsonl", "storage-audit.json", "report.xml", "summary.json",
              "gateway-report.xml", "media-report.xml", "gateway-storage-audit.json",
-             "media-storage-audit.json"}
+             "media-storage-audit.json", "generated-bytecode.json"}
     return (len(parts) >= 3 and parts[0] == "artifacts"
             and parts[1] in {"backend-public-source", *(f"backend-public-source-gateway-{i}" for i in range(4))}
             and parts[-1] in names)
@@ -55,7 +66,7 @@ def require(condition, message):
 
 
 def encoded(value):
-    return json.dumps(value, sort_keys=True, separators=(",", ":")).encode()
+    return _JSON_DUMPS(value, sort_keys=True, separators=(",", ":")).encode()
 
 
 def fingerprint(value):
@@ -66,7 +77,7 @@ def read_json(path):
     return json.loads(Path(path).read_text())
 
 
-def source_identity(root, expected_commit):
+def _source_observation(root, expected_commit, *, after_run=False):
     root = Path(root)
     head = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=root, text=True).strip()
     require(head == expected_commit, "checkout differs from expected exact head")
@@ -75,14 +86,131 @@ def source_identity(root, expected_commit):
     extra = set()
     for flags in (("--others", "--exclude-standard"), ("--others", "--ignored", "--exclude-standard")):
         extra.update(p for p in subprocess.check_output(["git", "ls-files", "-z", *flags], cwd=root).decode().split("\0") if p)
-    rejected = sorted(p for p in extra if (root/p).is_symlink() or not generated_evidence_path(p))
+    candidates = sorted(p for p in extra if "__pycache__" in Path(p).parts and p.endswith(".pyc")) if after_run else []
+    rejected = sorted(p for p in extra if (root/p).is_symlink()
+                      or (p not in candidates and not generated_evidence_path(p)))
     require(not rejected, "uncommitted executable/config/fixture inputs outside explicit inert outputs: " + ", ".join(rejected[:10]))
     config = root / "pytest.ini"
     require(config.is_file() and subprocess.check_output(["git", "ls-files", "--", "pytest.ini"], cwd=root).strip(),
             "committed root pytest.ini required")
     tree = subprocess.check_output(["git", "rev-parse", "HEAD^{tree}"], cwd=root, text=True).strip()
-    return {"commit": head, "tree": tree, "input_policy": "committed-inputs-explicit-inert-outputs/2",
-            "pytest_ini_sha256": hashlib.sha256(config.read_bytes()).hexdigest()}
+    return ({"commit": head, "tree": tree, "input_policy": "committed-inputs-parent-verified-cache-outputs/3",
+             "pytest_ini_sha256": hashlib.sha256(config.read_bytes()).hexdigest()}, candidates)
+
+
+def source_identity(root, expected_commit):
+    # Every new collection/execution refuses repository bytecode, even valid caches.
+    return _source_observation(root, expected_commit)[0]
+
+
+def _code_identity(value, depth=0):
+    """Typed code/constant graph; frozenset wire order and interning are not code semantics."""
+    require(depth < 256, "generated code graph exceeds bounded depth")
+    if type(value) is types.CodeType:
+        fields = ("co_argcount", "co_posonlyargcount", "co_kwonlyargcount", "co_nlocals", "co_stacksize",
+                  "co_flags", "co_code", "co_consts", "co_names", "co_varnames", "co_freevars", "co_cellvars",
+                  "co_filename", "co_name", "co_qualname", "co_firstlineno", "co_linetable", "co_exceptiontable")
+        return ["code", {name:_code_identity(getattr(value,name),depth+1) for name in fields}]
+    if type(value) is tuple:
+        return ["tuple", [_code_identity(v,depth+1) for v in value]]
+    if type(value) is frozenset:
+        return ["frozenset", sorted((_code_identity(v,depth+1) for v in value),key=encoded)]
+    if type(value) is bytes:return ["bytes",value.hex()]
+    if type(value) is float:return ["float",struct.pack("!d",value).hex()]
+    if type(value) is complex:return ["complex",struct.pack("!dd",value.real,value.imag).hex()]
+    if type(value) in (str,int,bool):return [type(value).__name__,value]
+    if value is None:return ["None"]
+    if value is Ellipsis:return ["Ellipsis"]
+    raise ValueError("unsupported generated code constant")
+
+
+def _cache_proof(root, expected_commit, relative, data, *, origin_root, source_mtime):
+    """Decode only as verifier data; compare every code field to fresh committed compilation. Never execute/import it."""
+    root = Path(root)
+    path = Path(relative)
+    require(not path.is_absolute() and ".." not in path.parts and path.parent.name == "__pycache__",
+            "noncanonical generated cache path")
+    match = re.fullmatch(r"(.+)\." + re.escape(sys.implementation.cache_tag) + r"(?:\.opt-([12]))?\.pyc", path.name)
+    require(match is not None, "wrong interpreter/optimization cache name")
+    source = path.parent.parent / (match[1] + ".py")
+    mode = subprocess.check_output(["git", "ls-tree", expected_commit, "--", source.as_posix()], cwd=root)
+    require(mode.startswith((b"100644 blob ", b"100755 blob ")), "cache source is not exact tracked regular source")
+    original = subprocess.check_output(["git", "show", expected_commit + ":" + source.as_posix()], cwd=root)
+    require(len(data) >= 16 and data[:4] == importlib.util.MAGIC_NUMBER, "wrong generated cache magic/header")
+    flags = int.from_bytes(data[4:8], "little")
+    require(flags in (0, 1, 3), "invalid generated cache flags")
+    require(type(source_mtime) is int and 0 <= source_mtime < 2**32, "missing original source timestamp")
+    if flags == 0:
+        require(int.from_bytes(data[8:12], "little") == source_mtime
+                and int.from_bytes(data[12:16], "little") == len(original) % 2**32,
+                "generated cache timestamp/size differs from original source")
+    else:
+        require(data[8:16] == importlib.util.source_hash(original), "generated cache source hash differs")
+    require(Path(origin_root).is_absolute(), "missing original compile root")
+    filename = str(Path(origin_root) / source)
+    optimization = int(match[2] or 0)
+    expected = _code_identity(compile(original, filename, "exec", dont_inherit=True, optimize=optimization))
+    stream = io.BytesIO(data[16:])
+    decoded = marshal.load(stream)
+    require(type(decoded) is types.CodeType and stream.tell() == len(data)-16, "invalid/trailing generated code payload")
+    observed = _code_identity(decoded)
+    require(observed == expected, "generated cache payload differs from exact committed compilation")
+    return {"path": relative, "source": source.as_posix(), "source_sha256": hashlib.sha256(original).hexdigest(),
+            "source_mtime": source_mtime, "source_size": len(original), "flags": flags,
+            "optimization": optimization, "code_filename": filename,
+            "code_identity_sha256":fingerprint(expected), "cache_sha256": hashlib.sha256(data).hexdigest()}
+
+
+def archive_generated_bytecode(root, expected_commit, before, output):
+    """Parent-only post-child validation; archive then retire only verified own outputs."""
+    root = Path(root).resolve()
+    after, candidates = _source_observation(root, expected_commit, after_run=True)
+    require(after == before, "source drift before generated-cache validation")
+    records = []
+    for relative in candidates:
+        path = root / relative
+        require(path.stat().st_size <= 8 * 1024 * 1024, "generated cache exceeds bounded evidence size")
+        data = path.read_bytes()
+        # Derive only a candidate source path here; _cache_proof validates the full name/mode.
+        name = path.name.split("." + sys.implementation.cache_tag, 1)[0]
+        source = path.parent.parent / (name + ".py")
+        require(source.is_file() and not source.is_symlink(), "cache source absent or symlinked")
+        original = subprocess.check_output(["git", "show", expected_commit + ":" + str(source.relative_to(root))], cwd=root)
+        require(source.read_bytes() == original, "cache source changed from committed bytes")
+        proof = _cache_proof(root, expected_commit, relative, data, origin_root=str(root),
+                             source_mtime=int(source.stat().st_mtime) % 2**32)
+        records.append({**proof, "payload_base64": base64.b64encode(data).decode("ascii")})
+    artifact = {"schema": "van.parent-verified-generated-bytecode/1", "expected_commit": expected_commit,
+                "input_bytecode_paths": [], "records": records}
+    destination = Path(output) / "generated-bytecode.json"
+    destination.write_text(_JSON_DUMPS(artifact, indent=2) + "\n")
+    require(read_json(destination) == artifact, "generated cache evidence readback failed")
+    for record in records:
+        path = root / record["path"]
+        require(not path.is_symlink() and hashlib.sha256(path.read_bytes()).hexdigest() == record["cache_sha256"],
+                "generated cache changed during archive")
+        path.unlink()  # Absent at strict preflight; exact verified output retained non-importably above.
+    require(source_identity(root, expected_commit) == before, "unexpected inputs after output retirement")
+    return candidates
+
+
+def verify_generated_bytecode(folder, root, expected_commit, state, receipt):
+    artifact = read_json(Path(folder) / "generated-bytecode.json")
+    require(artifact.get("schema") == "van.parent-verified-generated-bytecode/1"
+            and artifact.get("expected_commit") == expected_commit and artifact.get("input_bytecode_paths") == [],
+            "missing parent verified generated-cache provenance")
+    records = artifact.get("records")
+    require(isinstance(records, list), "missing generated-cache records")
+    paths = [r["path"] for r in records]
+    require(paths == sorted(set(paths)) == state.get("generated_cache_candidates")
+            == receipt.get("generated_cache_outputs"), "generated-cache candidate/output disagreement")
+    for record in records:
+        require(len(record["payload_base64"]) <= 12*1024*1024, "generated cache artifact exceeds bounded size")
+        data = base64.b64decode(record["payload_base64"], validate=True)
+        expected = _cache_proof(root, expected_commit, record["path"], data,
+                                origin_root=state["root"], source_mtime=record["source_mtime"])
+        require({k:v for k,v in record.items() if k != "payload_base64"} == expected,
+                "generated cache proof differs from committed source compilation")
 
 
 def effective_pytest_inputs(config, root, runtime):
@@ -231,7 +359,7 @@ def pytest_collection_modifyitems(config, items):
         config.hook.pytest_deselected(items=dropped)
     for item in items:
         item.user_properties.append(("van_source_nodeid", item.nodeid))
-    (Path(state["output"]) / "collection.json").write_text(json.dumps(state, indent=2) + "\n")
+    (Path(state["output"]) / "collection.json").write_text(_JSON_DUMPS(state, indent=2) + "\n")
 
 
 def pytest_collectreport(report):
@@ -256,17 +384,18 @@ def pytest_runtest_logreport(report):
     event = {"nodeid": report.nodeid, "when": report.when, "outcome": report.outcome,
              "duration": report.duration, "skip_reason": reason}
     with (Path(_STATE["output"]) / "phases.jsonl").open("a") as stream:
-        stream.write(json.dumps(event, sort_keys=True) + "\n")
+        stream.write(_JSON_DUMPS(event, sort_keys=True) + "\n")
 
 
 def pytest_sessionfinish(session, exitstatus):
     state = getattr(session.config, "_van_source_evidence", None)
     if state is None:
         return
-    state.update(pytest_exit=int(exitstatus),
-                 source_after=source_identity(state["root"], state["expected_commit"]),
+    source_after, candidates = _source_observation(state["root"], state["expected_commit"], after_run=True)
+    state.update(pytest_exit=int(exitstatus), generated_cache_candidates=candidates,
+                 source_after=source_after,
                  environment_after=environment_identity(state["runtime"]))
-    (Path(state["output"]) / "terminal.json").write_text(json.dumps(state, indent=2) + "\n")
+    (Path(state["output"]) / "terminal.json").write_text(_JSON_DUMPS(state, indent=2) + "\n")
 
 
 def approved_skip(nodeid, reason):
@@ -338,10 +467,11 @@ def verify_snapshot(folder, manifest, runtime, expected_commit, costs, root, *, 
     require(state.get("full_collection_sha256") == fingerprint(full)
             and state.get("assignment_sha256") == fingerprint(bins), "collection/assignment digest mismatch")
     for name, digest in receipt.get("artifact_sha256", {}).items():
-        require(name in {"terminal.json", "phases.jsonl", "report.xml", "storage-audit.json"}, "foreign receipt artifact")
+        require(name in {"terminal.json", "phases.jsonl", "report.xml", "storage-audit.json", "generated-bytecode.json"}, "foreign receipt artifact")
         require(hashlib.sha256((folder / name).read_bytes()).hexdigest() == digest, "worker artifact hash mismatch")
-    mandatory = {"terminal.json", "phases.jsonl", "storage-audit.json"} | (set() if collection else {"report.xml"})
+    mandatory = {"terminal.json", "phases.jsonl", "storage-audit.json", "generated-bytecode.json"} | (set() if collection else {"report.xml"})
     require(set(receipt.get("artifact_sha256", {})) == mandatory, "incomplete worker artifact receipt")
+    verify_generated_bytecode(folder, root, expected_commit, state, receipt)
     audit = read_json(folder / "storage-audit.json")
     require(audit.get("schema") == "van.source-storage-audit/1" and audit.get("forbidden_events") == []
             and audit.get("source_sha256") == hashlib.sha256(Path(__file__).with_name("source_storage_audit.py").read_bytes()).hexdigest(),
@@ -440,7 +570,7 @@ def verify_shards(output, expected_commit, job_result, *, root, shard_count=4):
             combined.append(copy.deepcopy(suite))
         child_audits.append({"shard": index, "sha256": hashlib.sha256((folder/"storage-audit.json").read_bytes()).hexdigest()})
     (output/"gateway-report.xml").write_bytes(ET.tostring(combined))
-    (output/"gateway-storage-audit.json").write_text(json.dumps({"forbidden_events": [],
+    (output/"gateway-storage-audit.json").write_text(_JSON_DUMPS({"forbidden_events": [],
         "scope": "Derived union of four independently verified child audits; original artifacts retained",
         "child_audits": child_audits}, indent=2)+"\n")
     shutil.copyfile(output/"media/report.xml", output/"media-report.xml")
