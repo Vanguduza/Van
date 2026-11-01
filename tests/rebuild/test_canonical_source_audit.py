@@ -540,3 +540,57 @@ def test_live_foreign_uid_still_refuses_and_root_profile_still_requires_zero(can
         with pytest.raises(ValueError,match='root fixture'):audit.verify_environment('browser_uid',record,root)
     finally:
         audit.cleanup_basetemp(value,root,'execution',child_started=False,child_terminal=False,children_remaining=[])
+
+
+@pytest.mark.parametrize('filename,function_name,refusal,has_profile',[
+    ('test_android_instrumentation_abi.py','test_actual_agp_direct_package_release_refuses_missing_core_deployment_profile',
+     'Release deployment target refused: VAN_DEPLOYMENT_PROFILE_FILE is required for van-trading-core releases',False),
+    ('test_android_production_target.py','test_actual_agp_valid_target_still_refuses_missing_production_signing',
+     'Release signing refused: android/keystore.properties missing.',True),
+])
+def test_original_agp_invocations_route_only_project_cache_to_owned_external_fixture(tmp_path,filename,function_name,refusal,has_profile):
+    """Execute original invocation bodies with a controlled recorder, not actual AGP.
+
+    The immutable before AST proves all original guard assertions, wrapper/cwd,
+    task/signing/profile flags, timeout and skip policy survive the two new args.
+    """
+    import ast
+    from types import SimpleNamespace
+    root=Path(__file__).resolve().parents[2];relative='tests/contracts/'+filename
+    original=subprocess.check_output(['git','show','ba817c4a6aeaf9a8272d81270f6d0abaf7c18feb:'+relative],cwd=root,text=True)
+    old=next(n for n in ast.parse(original).body if isinstance(n,ast.FunctionDef) and n.name==function_name)
+    current=next(n for n in ast.parse((root/relative).read_text()).body if isinstance(n,ast.FunctionDef) and n.name==function_name)
+    without_cache=copy.deepcopy(current)
+    invocation=next(n for n in ast.walk(without_cache) if isinstance(n,ast.Call)
+        and isinstance(n.func,ast.Attribute) and n.func.attr=='run' and isinstance(n.func.value,ast.Name) and n.func.value.id=='subprocess')
+    args=invocation.args[0].elts
+    offset=next(i for i,n in enumerate(args) if isinstance(n,ast.Constant) and n.value=='--project-cache-dir')
+    del args[offset:offset+2]
+    assert ast.dump(without_cache,include_attributes=False)==ast.dump(old,include_attributes=False)
+    fixture_root=tmp_path/'controlled-checkout';(fixture_root/'android').mkdir(parents=True)
+    wrapper=str(fixture_root/'android/gradlew');calls=[]
+    def record(command,**kwargs):
+        calls.append((command,kwargs))
+        return SimpleNamespace(returncode=1,stdout=refusal,stderr='')
+    # Only this extracted test function is executed: no module imports, Java,
+    # Gradle, cryptography, signing material or production effect is substituted.
+    runnable=copy.deepcopy(current);runnable.decorator_list=[]
+    namespace={'ROOT':fixture_root,'os':SimpleNamespace(environ={'VAN_ANDROID_GRADLE_BIN':wrapper}),
+        'subprocess':SimpleNamespace(run=record),'pytest':pytest}
+    exec(compile(ast.Module(body=[runnable],type_ignores=[]),str(root/relative),'exec'),namespace)
+    owned=[]
+    for index in range(2):
+        temporary=tmp_path/('owned-case-'+str(index));temporary.mkdir()
+        profile=temporary/'deployment-profile.json';profile.write_text('{}')
+        kwargs={'tmp_path':temporary}
+        if has_profile:kwargs['profile']=lambda:profile
+        namespace[function_name](**kwargs)
+        command,options=calls[-1]
+        assert command[0]==wrapper and options=={'cwd':fixture_root/'android','capture_output':True,'text':True,'timeout':180}
+        assert command.count('--project-cache-dir')==1
+        cache=Path(command[command.index('--project-cache-dir')+1])
+        assert cache==temporary/'gradle-project-cache' and cache.parent==temporary
+        assert cache.is_absolute() and not cache.is_relative_to(root) and not cache.is_relative_to(fixture_root)
+        assert ':app:packageRelease' in command and '--dry-run' in command
+        owned.append(cache)
+    assert owned[0]!=owned[1] and len(calls)==2

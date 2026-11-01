@@ -1,0 +1,107 @@
+[
+  {
+    "artifact_id": 13097630295,
+    "bytes": 433343,
+    "official_sha256": "8c74af6cd4a2c2d15c9ea35a3437311a695a960c3e107c19f68c9150215d848e",
+    "states": [
+      {
+        "member": "collect/receipt.json",
+        "state": "TERMINAL",
+        "profile": "documentary",
+        "cwd": "checkout",
+        "collect_only": true,
+        "exit": 0,
+        "reason_type": null,
+        "reason": null,
+        "cleanup_error": null
+      },
+      {
+        "member": "execute/receipt.json",
+        "state": "FAILED",
+        "profile": "documentary",
+        "cwd": "checkout",
+        "collect_only": false,
+        "exit": 1,
+        "reason_type": null,
+        "reason": null,
+        "cleanup_error": null
+      }
+    ],
+    "junit": [
+      {
+        "member": "execute/report.xml",
+        "cases": 347,
+        "failures": 1,
+        "errors": 0,
+        "skips": 0,
+        "bad": [
+          {
+            "nodeid": "tests.rebuild.test_canonical_source_audit::test_added_profile_install_overlays_preserve_their_declared_lock_versions",
+            "message": "ModuleNotFoundError: No module named 'yaml'"
+          }
+        ]
+      }
+    ],
+    "pytest_failure_summaries": [
+      {
+        "member": "collect/pytest.log",
+        "lines": []
+      },
+      {
+        "member": "execute/pytest.log",
+        "lines": [
+          "FAILED tests/rebuild/test_canonical_source_audit.py::test_added_profile_install_overlays_preserve_their_declared_lock_versions - ModuleNotFoundError: No module named 'yaml'"
+        ]
+      }
+    ]
+  },
+  {
+    "artifact_id": 13097168862,
+    "bytes": 360804,
+    "official_sha256": "b2fe647d528ca2ab88d0d0a7beb399e5047163987749e92f8591915b57f5385e",
+    "states": [
+      {
+        "member": "collect/receipt.json",
+        "state": "TERMINAL",
+        "profile": "scenarios",
+        "cwd": "backend",
+        "collect_only": true,
+        "exit": 0,
+        "reason_type": null,
+        "reason": null,
+        "cleanup_error": null
+      },
+      {
+        "member": "execute/receipt.json",
+        "state": "TERMINAL",
+        "profile": "scenarios",
+        "cwd": "backend",
+        "collect_only": false,
+        "exit": 0,
+        "reason_type": null,
+        "reason": null,
+        "cleanup_error": null
+      }
+    ],
+    "junit": [
+      {
+        "member": "execute/report.xml",
+        "cases": 8,
+        "failures": 0,
+        "errors": 0,
+        "skips": 0,
+        "bad": []
+      }
+    ],
+    "pytest_failure_summaries": [
+      {
+        "member": "collect/pytest.log",
+        "lines": []
+      },
+      {
+        "member": "execute/pytest.log",
+        "lines": []
+      }
+    ]
+  }
+]

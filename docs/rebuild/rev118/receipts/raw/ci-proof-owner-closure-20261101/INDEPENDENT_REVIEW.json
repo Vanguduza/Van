@@ -1,0 +1,54 @@
+{
+  "disposition": "NO_BLOCKING_FINDING_IN_BOUNDED_SOURCE_REVIEW",
+  "base": "ba817c4a6aeaf9a8272d81270f6d0abaf7c18feb",
+  "pins_before": {
+    "tools/rebuild/requirements.lock": "c78cc4d3b5e258e0e78d4d27cea6577d07d2c373cd1d5e47c924a22a7f7839b4",
+    "tests/rebuild/test_canonical_source_audit.py": "174dd4bf7de121eec28f08264022c3a19bcddf7d4d671ccc17dc3f3f53b3dbd8",
+    "tests/contracts/test_android_instrumentation_abi.py": "97e79cd5ef3ca1eed235d0267a6f2e48ad131ad1c39b060d3a3dc8059bae2ffe",
+    "tests/contracts/test_android_production_target.py": "9ed798582fce61760971ca723542a6130641a350a6b920b4aa2e3c4ae72a9e40",
+    "docs/rebuild/rev118/pre003/SUBMISSION_MANIFEST.json": "1d0553edfe22732501073fde4c2e3795f002f662c90c2c453fddf9ddf0bbe8d6"
+  },
+  "pins_after": {
+    "tools/rebuild/requirements.lock": "c78cc4d3b5e258e0e78d4d27cea6577d07d2c373cd1d5e47c924a22a7f7839b4",
+    "tests/rebuild/test_canonical_source_audit.py": "174dd4bf7de121eec28f08264022c3a19bcddf7d4d671ccc17dc3f3f53b3dbd8",
+    "tests/contracts/test_android_instrumentation_abi.py": "97e79cd5ef3ca1eed235d0267a6f2e48ad131ad1c39b060d3a3dc8059bae2ffe",
+    "tests/contracts/test_android_production_target.py": "9ed798582fce61760971ca723542a6130641a350a6b920b4aa2e3c4ae72a9e40",
+    "docs/rebuild/rev118/pre003/SUBMISSION_MANIFEST.json": "1d0553edfe22732501073fde4c2e3795f002f662c90c2c453fddf9ddf0bbe8d6"
+  },
+  "archive_sha256": "7093d4d5eab30efa966b9cffa3b07fe8c44de8c142b06ae7d6f0d0bad0d6282f",
+  "patch_sha256": "7eb1f262927c897d09b6de638b78b2a2cd70b55ecb22d5c14bbb21d65495982d",
+  "dependency": "Only PyYAML6.0.3 added; all14 existing exact pins retained. Actual parser6.0.3 imported from retained fresh documentary env. Preserved local official-TLS metadata snapshot/wheel SHA/size and wheelMETADATA matched, no Requires-Dist. No independent network/install rerun.",
+  "controls": [
+    {
+      "function": "test_actual_agp_direct_package_release_refuses_missing_core_deployment_profile",
+      "current_body_immutable_baseline_AST_plus_only_cache_argv": true,
+      "two_owned_unique_outsidecheckout_cache_paths": true,
+      "wrong_refusal_message_rejected_by_original_assertions": true
+    },
+    {
+      "function": "test_actual_agp_valid_target_still_refuses_missing_production_signing",
+      "current_body_immutable_baseline_AST_plus_only_cache_argv": true,
+      "two_owned_unique_outsidecheckout_cache_paths": true,
+      "wrong_refusal_message_rejected_by_original_assertions": true
+    }
+  ],
+  "test_oracle": "Actual existing test-function bodies executed against controlled argv/result recorder; immutable ba817 AST compared after removing only two new official project-cache-dir arguments. No AGP/native result claimed. Wrong unrelated failure still rejected.",
+  "scope": "Exactly5paths: 4 semantic plus derived manifest; no workflow/helper/strictprovenance/sourceproduct change. Canonicalmanifest diff only current hashrefs for documentarylock+focusedtest. Original AGP6.0.2 setup untouched; newdocumentarylock compatible with backend6.0.3.",
+  "provided_terminal_verified": {
+    "cases": 97,
+    "failure": 0,
+    "error": 0,
+    "skip": 0,
+    "exit": 0,
+    "audit0": true,
+    "locked15package_install_and_pipcheck_exit0": true,
+    "beforemissingyamlretained": true
+  },
+  "own_fixtures_removed": true,
+  "limits": [
+    "No install/network/Gradle/SDK/browser/provider/native/CI effects, edits, commits or subagents.",
+    "Recorded command routing/AST assertion equivalence proves SOURCE only; actual hosted project-cache-routing and parent exactsource proof are future qualification.",
+    "Existing ba817 failed documentary/parentprovenance runs stayFAILED/unqualified, actual prior2AGP assertion passes not a current rerun.",
+    "All fullmatrix/unit/formal/native/backup/snapshot gates and PR106 remain separate."
+  ]
+}

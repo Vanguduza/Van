@@ -97,7 +97,8 @@ def test_actual_agp_direct_package_release_refuses_missing_core_deployment_profi
         pytest.skip("requires an unconfigured production signing environment")
     result = subprocess.run(
         [os.environ["VAN_ANDROID_GRADLE_BIN"], "--no-daemon", "--console=plain",
-         "--max-workers=2", ":app:packageRelease", "--dry-run"],
+         "--max-workers=2", "--project-cache-dir", str(tmp_path / "gradle-project-cache"),
+         ":app:packageRelease", "--dry-run"],
         cwd=ROOT / "android", capture_output=True, text=True, timeout=180,
     )
     output = result.stdout + result.stderr

@@ -14,3 +14,5 @@ typing-extensions==4.16.0
 # Native gateway-plugin parity for real source-instrument subprocess fixtures.
 anyio==4.15.1
 idna==3.20
+# Workflow semantic controls use the same exact parser as the backend-locked profiles.
+PyYAML==6.0.3

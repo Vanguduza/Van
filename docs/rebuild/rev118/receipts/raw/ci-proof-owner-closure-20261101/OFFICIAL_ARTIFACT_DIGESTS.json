@@ -1,0 +1,20 @@
+[
+  {
+    "artifact_id": 13097630295,
+    "bytes": 433343,
+    "official_sha256": "8c74af6cd4a2c2d15c9ea35a3437311a695a960c3e107c19f68c9150215d848e",
+    "saved_path": "/tmp/van-recovery-ba817-three-job-diagnosis-20261101/ARTIFACT_13097630295.zip"
+  },
+  {
+    "artifact_id": 13097168862,
+    "bytes": 360804,
+    "official_sha256": "b2fe647d528ca2ab88d0d0a7beb399e5047163987749e92f8591915b57f5385e",
+    "saved_path": "/tmp/van-recovery-ba817-three-job-diagnosis-20261101/ARTIFACT_13097168862.zip"
+  },
+  {
+    "artifact_id": 13097064761,
+    "bytes": 317309,
+    "official_sha256": "e9fec3429f6d2bd323e812b22f9020a9ae8af5f84636da5d24140d128f9e0e70",
+    "saved_path": "/tmp/van-recovery-ba817-three-job-diagnosis-20261101/ARTIFACT_13097064761.zip"
+  }
+]

@@ -232,6 +232,7 @@ def test_actual_agp_valid_target_still_refuses_missing_production_signing(profil
         pytest.skip("requires an unconfigured production signing environment")
     result = subprocess.run(
         [os.environ["VAN_ANDROID_GRADLE_BIN"], "--no-daemon", "--console=plain", "--max-workers=2",
+         "--project-cache-dir", str(tmp_path / "gradle-project-cache"),
          ":app:packageRelease", "--dry-run", f"-PVAN_DEPLOYMENT_PROFILE_FILE={profile()}"],
         cwd=ROOT / "android", capture_output=True, text=True, timeout=180,
     )

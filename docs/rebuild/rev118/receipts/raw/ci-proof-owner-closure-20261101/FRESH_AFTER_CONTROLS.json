@@ -1,0 +1,111 @@
+{
+  "state": "TERMINAL",
+  "source_before": {
+    "tools/rebuild/requirements.lock": "c78cc4d3b5e258e0e78d4d27cea6577d07d2c373cd1d5e47c924a22a7f7839b4",
+    "tests/rebuild/test_canonical_source_audit.py": "174dd4bf7de121eec28f08264022c3a19bcddf7d4d671ccc17dc3f3f53b3dbd8",
+    "tests/contracts/test_android_instrumentation_abi.py": "97e79cd5ef3ca1eed235d0267a6f2e48ad131ad1c39b060d3a3dc8059bae2ffe",
+    "tests/contracts/test_android_production_target.py": "9ed798582fce61760971ca723542a6130641a350a6b920b4aa2e3c4ae72a9e40"
+  },
+  "steps": [
+    {
+      "label": "install-after",
+      "command": [
+        "/tmp/van-recovery-ba817-ci-repair-20261101/venv/bin/python",
+        "-B",
+        "-m",
+        "pip",
+        "install",
+        "--no-cache-dir",
+        "--no-compile",
+        "--no-index",
+        "--find-links",
+        "/workspace/van-ci-shards-documentary-dependency-20261101/wheels",
+        "--find-links",
+        "/tmp/van-recovery-ba817-ci-repair-20261101/wheels",
+        "--require-hashes",
+        "-r",
+        "/tmp/van-recovery-ba817-ci-repair-20261101/AFTER_HASHED.lock"
+      ],
+      "exit": 0,
+      "seconds": 3.8941068959975382,
+      "peak_owned_bytes": 24496211,
+      "tmp_min_free": 4148899840,
+      "child_pid": 863766,
+      "child_waited": true
+    },
+    {
+      "label": "pip-check",
+      "command": [
+        "/tmp/van-recovery-ba817-ci-repair-20261101/venv/bin/python",
+        "-B",
+        "-m",
+        "pip",
+        "check"
+      ],
+      "exit": 0,
+      "seconds": 0.816150190999906,
+      "peak_owned_bytes": 24497954,
+      "tmp_min_free": 4148654080,
+      "child_pid": 863997,
+      "child_waited": true
+    },
+    {
+      "label": "focused-after",
+      "command": [
+        "/tmp/van-recovery-ba817-ci-repair-20261101/venv/bin/python",
+        "-B",
+        "tools/rebuild/source_storage_audit.py",
+        "--report",
+        "/tmp/van-recovery-ba817-ci-repair-20261101/storage-audit.json",
+        "tests/rebuild/test_canonical_source_audit.py",
+        "tests/contracts/test_ci_public_source_shards.py",
+        "tests/contracts/test_ci_workflow_is_what_it_claims.py",
+        "--basetemp=/tmp/van-recovery-ba817-ci-repair-20261101/pytest-after",
+        "--junitxml=/tmp/van-recovery-ba817-ci-repair-20261101/AFTER.xml",
+        "-q"
+      ],
+      "exit": 0,
+      "seconds": 20.487202894000802,
+      "peak_owned_bytes": 28701942,
+      "tmp_min_free": 4138389504,
+      "child_pid": 863998,
+      "child_waited": true
+    }
+  ],
+  "budget_bytes": 134217728,
+  "tmp_reserve": 2147483648,
+  "workspace_admission": 67108864,
+  "file_cap": 8388608,
+  "started": "2026-11-01T19:36:03.162580+00:00",
+  "runtime": "One genuinely fresh before-lock venv; same exact closure upgraded by full after --require-hashes projection, all15 observedversions/pipcheck required. Not a second recreated venv. Before one actual missingyaml failure remains failed.",
+  "installed_versions": {
+    "pyyaml": "6.0.3",
+    "jsonschema": "4.26.0",
+    "jsonschema-specifications": "2025.9.1",
+    "pytest-asyncio": "1.4.0",
+    "anyio": "4.15.1",
+    "pytest": "9.1.1",
+    "referencing": "0.37.0",
+    "attrs": "26.1.0",
+    "idna": "3.20",
+    "iniconfig": "2.3.0",
+    "packaging": "26.3",
+    "pluggy": "1.6.0",
+    "pygments": "2.21.0",
+    "rpds-py": "2026.6.3",
+    "typing-extensions": "4.16.0",
+    "pip": "25.0.1"
+  },
+  "exit": 0,
+  "tests": 97,
+  "failures": [],
+  "errors": [],
+  "skips": [],
+  "source_after": {
+    "tools/rebuild/requirements.lock": "c78cc4d3b5e258e0e78d4d27cea6577d07d2c373cd1d5e47c924a22a7f7839b4",
+    "tests/rebuild/test_canonical_source_audit.py": "174dd4bf7de121eec28f08264022c3a19bcddf7d4d671ccc17dc3f3f53b3dbd8",
+    "tests/contracts/test_android_instrumentation_abi.py": "97e79cd5ef3ca1eed235d0267a6f2e48ad131ad1c39b060d3a3dc8059bae2ffe",
+    "tests/contracts/test_android_production_target.py": "9ed798582fce61760971ca723542a6130641a350a6b920b4aa2e3c4ae72a9e40"
+  },
+  "completed": "2026-11-01T19:36:28.504603+00:00"
+}

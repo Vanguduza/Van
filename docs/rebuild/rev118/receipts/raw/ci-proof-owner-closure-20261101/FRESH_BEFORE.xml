@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="1" time="0.130" timestamp="2026-11-01T19:33:53.956937+00:00" hostname="07611d75dea7"><testcase classname="tests.rebuild.test_canonical_source_audit" name="test_added_profile_install_overlays_preserve_their_declared_lock_versions" time="0.001"><failure message="ModuleNotFoundError: No module named 'yaml'">def test_added_profile_install_overlays_preserve_their_declared_lock_versions():
+        """A setup overlay must not make the owning profile refuse before collection."""
+        import re
+&gt;       import yaml
+E       ModuleNotFoundError: No module named 'yaml'
+
+tests/rebuild/test_canonical_source_audit.py:347: ModuleNotFoundError</failure></testcase></testsuite></testsuites>

@@ -1,0 +1,17 @@
+{
+  "source": "Root bounded exact-head step read reported in current session; this worker did not repeat the native read.",
+  "head": "ba817c4a6aeaf9a8272d81270f6d0abaf7c18feb",
+  "run_id": 41341233137,
+  "job_id": 124951486518,
+  "root_observed_conclusion": "SUCCESS",
+  "root_observed_steps": [
+    "Pure Kotlin",
+    "Actual AGP refusal controls",
+    "Android unit tests/build/lint",
+    "debug APK upload/visual"
+  ],
+  "instrumentation_job": 124951486840,
+  "instrumentation_last_root_observed": "IN_PROGRESS at instrumentation step",
+  "limits": "Actual successful existing unfiltered build-owner steps for published R3; no target JUnit/testcount or newAccountOperationRecoveryTest/AccountOnboardingTest execution inferred. No production signing/S24/fullmatrix/native acceptance. Not compileproof for later LAC134 source. No artifact retrieved here.",
+  "at_utc": "2026-11-01T19:39:44.385102+00:00"
+}
