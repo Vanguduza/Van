@@ -9,6 +9,9 @@ import yaml
 ROOT = Path(__file__).resolve().parents[2]
 BASE = "fd33b0759b9ae170f8bdfdf27f9afe7082da7830"
 
+# Explicit additive OBL004 audit jobs; every original job and global boundary remains below.
+OBL004_JOBS = {'obl004-backend-gateway', 'obl004-browser-namespace', 'obl004-forecast-source', 'obl004-documentary', 'obl004-canonical-matrix', 'obl004-trading-pg', 'obl004-private-dds', 'obl004-backend-public-source', 'obl004-scenarios'}
+
 
 def workflows():
     old = subprocess.check_output(["git", "show", BASE+":.github/workflows/van-ci.yml"], cwd=ROOT)
@@ -18,7 +21,7 @@ def workflows():
 def test_every_other_job_trigger_and_concurrency_boundary_is_unchanged():
     before, after = workflows()
     assert {k:v for k,v in before.items() if k != "jobs"} == {k:v for k,v in after.items() if k != "jobs"}
-    assert set(after["jobs"]) == set(before["jobs"]) | {"backend-public-source-gateway"}
+    assert set(after["jobs"]) == set(before["jobs"]) | {"backend-public-source-gateway"} | OBL004_JOBS
     for name, job in before["jobs"].items():
         if name != "backend-public-source": assert after["jobs"][name] == job, name
 
@@ -122,3 +125,87 @@ def test_workflow_installer_mirror_and_frozen_mutation_source_remain_exact():
     row = json.loads(rows.splitlines()[-1])
     assert "auth-20261022-owner-mutation-registry-reconciliation" in row["authorization_ids"]
     assert "tools/audit/mutation_suite.py" in row["changed_files"]
+
+
+def _expanded_check_contexts(jobs):
+    import itertools
+    import re
+    contexts=[]
+    for job_id,job in jobs.items():
+        matrix=job.get('strategy',{}).get('matrix',{})
+        axes={k:v for k,v in matrix.items() if k not in {'include','exclude'}}
+        rows=[dict(zip(axes,values)) for values in itertools.product(*axes.values())] if axes else matrix.get('include',[{}])
+        assert not matrix.get('exclude'), 'unexpected matrix exclusion requires explicit coverage'
+        for row in rows:
+            name=job.get('name')
+            if name is None:
+                name=job_id+(' ('+', '.join(str(v) for v in row.values())+')' if row else '')
+            else:
+                name=re.sub(r'\$\{\{\s*matrix\.(\w+)\s*\}\}',lambda m:str(row[m[1]]),name)
+            assert '${{' not in name
+            contexts.append(name)
+    return contexts
+
+
+def _assert_obl004_hosted_transport_and_contexts(workflow):
+    import fnmatch
+    import re
+    import shlex
+    jobs=workflow['jobs'];contexts=_expanded_check_contexts(jobs)
+    assert len(contexts)==len(set(contexts)), 'displayed check contexts collide'
+    join=jobs['obl004-canonical-matrix']
+    download=next(s for s in join['steps'] if s.get('uses','').startswith('actions/download-artifact') and 'pattern' in s['with'])
+    assert download['with']=={'pattern':'van-obl004-profile-*','path':'${{ runner.temp }}/obl004-profiles','merge-multiple':False}
+    join_command=next(s['run'] for s in join['steps'] if 'canonical_source_audit.py join' in s.get('run',''))
+    assert '--reports "$RUNNER_TEMP/obl004-profiles"' in join_command
+    normalize=next(s['run'] for s in join['steps'] if 'removeprefix' in s.get('run',''))
+    assert "removeprefix('van-obl004-profile-')" in normalize
+    profiles=[]
+    for job_id,job in jobs.items():
+        for step in job.get('steps',[]):
+            if not step.get('uses','').startswith('actions/upload-artifact'):continue
+            value=step['with']['path']
+            # Action inputs evaluate expressions, never shell environment syntax.
+            assert not re.search(r'\$(?:[A-Za-z_]\w*|\{[A-Za-z_]\w*\})',re.sub(r'\$\{\{.*?\}\}','',value)), (job_id,value)
+            name=step['with']['name']
+            if not name.startswith('van-obl004-profile-'):continue
+            profiles.append(name)
+            assert fnmatch.fnmatch(name,download['with']['pattern'])
+            assert job['strategy']['matrix']=={'cwd':['checkout','backend']}
+            profile=name.removeprefix('van-obl004-profile-').split('-${{')[0]
+            assert value=='${{ runner.temp }}/obl004-audit/'+profile+'-${{ matrix.cwd }}/\n!${{ runner.temp }}/obl004-audit/'+profile+'-${{ matrix.cwd }}/**/basetemp/**'
+            for cwd in ('checkout','backend'):
+                resolve=lambda text:text.replace('${{ runner.temp }}','/owned-runner-temp').replace('$RUNNER_TEMP','/owned-runner-temp').replace('${{ matrix.cwd }}',cwd)
+                included,excluded=resolve(value).splitlines()
+                assert excluded=='!'+included+'**/basetemp/**'
+                commands=[s['run'] for s in job['steps'] if '--profile '+profile+' ' in s.get('run','')]
+                assert len(commands)==2
+                outputs=[]
+                for command in commands:
+                    words=shlex.split(resolve(command));outputs.append(words[words.index('--output')+1])
+                assert set(outputs)=={included+'collect',included+'execute'}
+                assert resolve(name).removeprefix('van-obl004-profile-')==profile+'-'+cwd
+    assert len(profiles)==9 and len(set(profiles))==9
+    final=next(s for s in join['steps'] if s.get('uses','').startswith('actions/upload-artifact'))
+    assert final['with']['path']=='${{ runner.temp }}/obl004-full-matrix.json'
+
+
+def test_all_upload_paths_resolve_to_real_producers_and_expanded_checks_are_unique():
+    _,current=workflows()
+    _assert_obl004_hosted_transport_and_contexts(current)
+
+
+def test_hosted_transport_and_context_controls_reject_the_reviewed_regressions():
+    import copy
+    import pytest
+    _,current=workflows()
+    for damage in ('literal-shell-path','lost-exclusion','worker-name','aggregate-name','matrix-name','final-upload'):
+        candidate=copy.deepcopy(current);jobs=candidate['jobs']
+        upload=next(s for s in jobs['obl004-documentary']['steps'] if s.get('uses','').startswith('actions/upload-artifact'))
+        if damage=='literal-shell-path':upload['with']['path']=upload['with']['path'].replace('${{ runner.temp }}','$RUNNER_TEMP')
+        elif damage=='lost-exclusion':upload['with']['path']=upload['with']['path'].splitlines()[0]
+        elif damage=='worker-name':jobs['obl004-backend-gateway']['name']=jobs['backend-public-source-gateway']['name']
+        elif damage=='aggregate-name':jobs['obl004-backend-public-source']['name']=jobs['backend-public-source']['name']
+        elif damage=='matrix-name':jobs['obl004-documentary']['name']='same-context'
+        else:next(s for s in jobs['obl004-canonical-matrix']['steps'] if s.get('uses','').startswith('actions/upload-artifact'))['with']['path']='$RUNNER_TEMP/obl004-full-matrix.json'
+        with pytest.raises(AssertionError):_assert_obl004_hosted_transport_and_contexts(candidate)

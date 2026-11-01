@@ -60,6 +60,22 @@ def generated_evidence_path(path):
             and parts[-1] in names)
 
 
+def protected_identity(root):
+    result = {}
+    for relative in ('data', 'backend/data'):
+        base = Path(root) / relative
+        rows = []
+        if base.is_symlink():
+            rows.append({'path': '.', 'kind': 'link', 'value': os.readlink(base)})
+        elif base.exists():
+            for path in sorted(base.rglob('*')):
+                rows.append({'path': path.relative_to(base).as_posix(),
+                    'kind': 'link' if path.is_symlink() else 'file' if path.is_file() else 'directory',
+                    'value': os.readlink(path) if path.is_symlink() else hashlib.sha256(path.read_bytes()).hexdigest() if path.is_file() else None})
+        result[relative] = {'exists': base.exists(), 'entries': rows, 'sha256': fingerprint(rows)}
+    return result
+
+
 def require(condition, message):
     if not condition:
         raise ValueError(message)
@@ -297,6 +313,7 @@ def pytest_addoption(parser):
     group.addoption("--van-source-root")
     group.addoption("--van-source-expected-commit")
     group.addoption("--van-source-execution-id")
+    group.addoption("--van-source-cwd", choices=("checkout", "backend"), default="checkout")
     group.addoption("--van-source-runtime", choices=("gateway", "media"))
     group.addoption("--van-source-shards", type=int, default=1)
     group.addoption("--van-source-index", type=int, default=0)
@@ -319,13 +336,17 @@ def pytest_configure(config):
     require(expected and runtime and config.getoption("--van-source-execution-id"), "exact head, runtime and fresh execution identity required")
     folder = Path(output)
     folder.mkdir(parents=True, exist_ok=True)
+    execution_cwd = config.getoption("--van-source-cwd")
+    invocation_cwd = gate.execution_directory(root, execution_cwd)
+    require(Path.cwd().resolve() == invocation_cwd, "actual pytest cwd differs from selected canonical cwd")
     selection = gate.plan(root)
     selected = [r for r in selection["selected"] if gate.runtime(r["path"]) == runtime]
-    _STATE = {"schema": SCHEMA, "runtime": runtime, "expected_commit": expected,
+    _STATE = {"invocation_cwd": str(invocation_cwd), "execution_cwd": execution_cwd, "schema": SCHEMA, "runtime": runtime, "expected_commit": expected,
               "workflow_run": {"id": os.environ.get("GITHUB_RUN_ID"), "attempt": os.environ.get("GITHUB_RUN_ATTEMPT")},
               "mode": "collection" if config.option.collectonly else "execution",
               "execution_id": config.getoption("--van-source-execution-id"),
               "source_before": source_identity(root, expected),
+              "protected_before": protected_identity(root),
               "pytest_inputs": effective_pytest_inputs(config, root, runtime),
               "environment_before": environment_identity(runtime),
               "selection": selection, "selected": selected,
@@ -392,7 +413,7 @@ def pytest_sessionfinish(session, exitstatus):
     if state is None:
         return
     source_after, candidates = _source_observation(state["root"], state["expected_commit"], after_run=True)
-    state.update(pytest_exit=int(exitstatus), generated_cache_candidates=candidates,
+    state.update(protected_after=protected_identity(state["root"]), pytest_exit=int(exitstatus), generated_cache_candidates=candidates,
                  source_after=source_after,
                  environment_after=environment_identity(state["runtime"]))
     (Path(state["output"]) / "terminal.json").write_text(_JSON_DUMPS(state, indent=2) + "\n")
@@ -406,13 +427,17 @@ def approved_skip(nodeid, reason):
                for allowed_path, test in gate.ALLOWED_SKIPS.get(reason, ()))
 
 
-def verify_snapshot(folder, manifest, runtime, expected_commit, costs, root, *, collection):
+def verify_snapshot(folder, manifest, runtime, expected_commit, costs, root, *, collection, execution_cwd="checkout"):
     """Validate a terminal worker, including storage and subprocess evidence."""
     from tools.rebuild import backend_public_source as gate
     folder = Path(folder)
     state = read_json(folder / "terminal.json")
     receipt = read_json(folder / "run.json")
     require(state.get("schema") == SCHEMA, "unknown node evidence schema")
+    invocation_cwd = gate.execution_directory(root, execution_cwd)
+    require(state.get("execution_cwd") == receipt.get("execution_cwd") == execution_cwd
+            and state.get("invocation_cwd") == receipt.get("invocation_cwd") == str(invocation_cwd),
+            "wrong or missing actual execution cwd")
     require(state.get("execution_id") and state.get("execution_id") == receipt.get("execution_id"), "stale/different execution receipt")
     require(not receipt.get("parent_observation_error"), "parent source/runtime identity observation failed")
     require(state.get("mode") == ("collection" if collection else "execution"), "wrong evidence mode")
@@ -421,6 +446,9 @@ def verify_snapshot(folder, manifest, runtime, expected_commit, costs, root, *, 
             "different workflow run/attempt")
     require(state.get("runtime") == runtime and state.get("expected_commit") == expected_commit,
             "wrong runtime or tested head")
+    require(state.get("protected_before") == state.get("protected_after")
+            == receipt.get("protected_before") == receipt.get("protected_after") == protected_identity(root),
+            "protected-directory snapshot changed or missing")
     expected_source = source_identity(root, expected_commit)
     require(state.get("source_before") == expected_source == state.get("source_after")
             == receipt.get("source_before") == receipt.get("source_after"), "source identity drift")
@@ -474,7 +502,9 @@ def verify_snapshot(folder, manifest, runtime, expected_commit, costs, root, *, 
     verify_generated_bytecode(folder, root, expected_commit, state, receipt)
     audit = read_json(folder / "storage-audit.json")
     require(audit.get("schema") == "van.source-storage-audit/1" and audit.get("forbidden_events") == []
-            and audit.get("source_sha256") == hashlib.sha256(Path(__file__).with_name("source_storage_audit.py").read_bytes()).hexdigest(),
+            and audit.get("source_sha256") == hashlib.sha256(Path(__file__).with_name("source_storage_audit.py").read_bytes()).hexdigest()
+            and audit.get("root") == str(Path(root).resolve())
+            and audit.get("invocation_cwd") == str(invocation_cwd),
             "missing/wrong source-storage instrument or violation")
     events = [json.loads(line) for line in (folder / "phases.jsonl").read_text().splitlines()]
     if collection:
@@ -519,7 +549,7 @@ def verify_snapshot(folder, manifest, runtime, expected_commit, costs, root, *, 
     return state, outcomes, skipped
 
 
-def verify_shards(output, expected_commit, job_result, *, root, shard_count=4):
+def verify_shards(output, expected_commit, job_result, *, root, shard_count=4, execution_cwd="checkout"):
     """The required gate has no status-only or legacy-module-count fallback."""
     from tools.rebuild import backend_public_source as gate
     output = Path(output)
@@ -529,13 +559,13 @@ def verify_shards(output, expected_commit, job_result, *, root, shard_count=4):
     require(manifest == gate.plan(root), "aggregate selection/source drift")
     costs = read_json(Path(root) / "tools/rebuild/backend_public_source_costs.json")
     control, _, _ = verify_snapshot(output / "gateway-control", manifest, "gateway", expected_commit,
-                                    costs, root, collection=True)
+                                    costs, root, collection=True, execution_cwd=execution_cwd)
     require(control["shard_count"] == shard_count, "wrong control assignment cardinality")
     all_outcomes, skips, receipts = {}, [], []
     for index in range(shard_count):
         folder = output / "shards" / ("van-backend-public-source-gateway-" + str(index))
         state, outcomes, declared = verify_snapshot(folder, manifest, "gateway", expected_commit,
-                                                    costs, root, collection=False)
+                                                    costs, root, collection=False, execution_cwd=execution_cwd)
         require(state["shard_index"] == index and state["shard_count"] == shard_count, "wrong shard identity")
         require(state["full_collection"] == control["full_collection"]
                 and state["assignment"] == control["assignment"], "full collection/assignment disagreement")
@@ -548,9 +578,9 @@ def verify_shards(output, expected_commit, job_result, *, root, shard_count=4):
                          hashlib.sha256((folder / "terminal.json").read_bytes()).hexdigest()})
     require(Counter(all_outcomes.keys()) == Counter(control["full_collection"]), "gateway exact execution union is incomplete")
     media_control, _, _ = verify_snapshot(output / "media-control", manifest, "media", expected_commit,
-                                          costs, root, collection=True)
+                                          costs, root, collection=True, execution_cwd=execution_cwd)
     media, outcomes, declared = verify_snapshot(output / "media", manifest, "media", expected_commit,
-                                                costs, root, collection=False)
+                                                costs, root, collection=False, execution_cwd=execution_cwd)
     require(media["shard_count"] == 1 and media["shard_index"] == 0, "wrong isolated media worker")
     require(media["full_collection"] == media_control["full_collection"]
             and media["environment_before"] == media_control["environment_before"], "media collection/environment differs")

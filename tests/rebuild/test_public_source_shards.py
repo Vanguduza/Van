@@ -45,8 +45,11 @@ def seal(folder):
     write_json(folder / "run.json", receipt)
 
 
-def frame(folder, selection, runtime, nodeids, costs, index, count, *, control=False):
+def frame(folder, selection, runtime, nodeids, costs, index, count, *, control=False, root=None):
     folder.mkdir(parents=True)
+    root = root or next(p/"synthetic-source" for p in folder.parents if (p/"synthetic-source").is_dir())
+    cwd_identity = {"execution_cwd": "checkout", "invocation_cwd": str(root.resolve()),
+        "protected_before": proof.protected_identity(root), "protected_after": proof.protected_identity(root)}
     bins = proof.assignment(nodeids, [r for r in selection["selected"] if gate.runtime(r["path"]) == runtime], costs, count)
     environment = {"python": "3.12.12", "implementation": "CPython", "system": "Linux", "machine": "x86_64",
         "image_os": "ubuntu24", "image_version": "synthetic-instrument-image", "packages": [["synthetic", "0"]],
@@ -55,7 +58,7 @@ def frame(folder, selection, runtime, nodeids, costs, index, count, *, control=F
         "pythonpath": list(proof.CANONICAL_PYTHONPATH),
         "postgres_version": 170011 if runtime == "gateway" else None,
         "isolated_pg_fixture": "1" if runtime == "gateway" else None}
-    state = {"schema": proof.SCHEMA, "mode": "collection" if control else "execution", "runtime": runtime,
+    state = {**cwd_identity, "schema": proof.SCHEMA, "mode": "collection" if control else "execution", "runtime": runtime,
         "expected_commit": HEAD, "execution_id": "synthetic-"+folder.name, "workflow_run": CONTEXT, "source_before": {"commit": HEAD, "tree": "b"*40},
         "source_after": {"commit": HEAD, "tree": "b"*40}, "environment_before": environment,
         "pytest_inputs": {"config_sha256": hashlib.sha256(b"[pytest]\n").hexdigest(),
@@ -70,7 +73,7 @@ def frame(folder, selection, runtime, nodeids, costs, index, count, *, control=F
     write_json(folder / "terminal.json", state)
     write_json(folder / "generated-bytecode.json", {"schema":"van.parent-verified-generated-bytecode/1",
         "expected_commit":HEAD,"input_bytecode_paths":[],"records":[]})
-    write_json(folder / "storage-audit.json", {"schema": "van.source-storage-audit/1", "forbidden_events": [],
+    write_json(folder / "storage-audit.json", {"root": str(root.resolve()), "invocation_cwd": str(root.resolve()), "schema": "van.source-storage-audit/1", "forbidden_events": [],
         "source_sha256": hashlib.sha256(Path(proof.__file__).with_name("source_storage_audit.py").read_bytes()).hexdigest()})
     events = []
     suite = ET.Element("testsuite")
@@ -82,7 +85,7 @@ def frame(folder, selection, runtime, nodeids, costs, index, count, *, control=F
             ET.SubElement(ET.SubElement(case, "properties"), "property", name="van_source_nodeid", value=node)
         (folder / "report.xml").write_bytes(ET.tostring(suite))
     (folder / "phases.jsonl").write_text("".join(json.dumps(e)+"\n" for e in events))
-    write_json(folder / "run.json", {"expected_commit": HEAD, "workflow_run": CONTEXT,
+    write_json(folder / "run.json", {**cwd_identity, "expected_commit": HEAD, "workflow_run": CONTEXT,
         "terminal": True, "exit": 0, "mode": state["mode"], "execution_id": state["execution_id"], "generated_cache_outputs": [],
         "source_before": state["source_before"], "source_after": state["source_after"],
         "environment_before": copy.deepcopy(environment), "environment_after": copy.deepcopy(environment)})
@@ -93,6 +96,7 @@ def frame(folder, selection, runtime, nodeids, costs, index, count, *, control=F
 def instrument(tmp_path, monkeypatch):
     root = tmp_path / "synthetic-source"
     root.mkdir()
+    (root/".git").mkdir()
     (root/"pytest.ini").write_text("[pytest]\n")
     paths = ["backend/tests/test_a.py", "backend/tests/test_b.py", "backend/tests/test_c.py",
         "backend/tests/test_jev_no_generic_executor.py", "services/source/test_media.py",
@@ -105,6 +109,7 @@ def instrument(tmp_path, monkeypatch):
     cost = root / "tools/rebuild/backend_public_source_costs.json"
     cost.parent.mkdir(parents=True)
     write_json(cost, costs)
+    (cost.parent/"source_storage_audit.py").write_bytes(Path(proof.__file__).with_name("source_storage_audit.py").read_bytes())
     selection = gate.plan(root)
     gateway = [r["path"] + "::" + ("test_no_fabric_or_generic_operation_survives_the_b1_validator[fixture]"
         if r["path"].endswith("test_jev_no_generic_executor.py") else "test_case")
@@ -602,7 +607,7 @@ def test_default_environment_verify_cli_creates_no_bytecode_and_refuses_foreign_
             *((out/"shards"/f"van-backend-public-source-gateway-{i}","gateway",gateway,i,4,False) for i in range(4)),
             (out/"media-control","media",media,0,1,True),(out/"media","media",media,0,1,False)]
     for folder,runtime,nodes,index,count,control in frames:
-        frame(folder,selection,runtime,nodes,costs,index,count,control=control)
+        frame(folder,selection,runtime,nodes,costs,index,count,control=control,root=repo)
         state=json.loads((folder/"terminal.json").read_text());receipt=json.loads((folder/"run.json").read_text())
         state.update(source_before=original_source,source_after=original_source,root=str(repo))
         receipt.update(source_before=original_source,source_after=original_source)

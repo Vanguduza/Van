@@ -1185,3 +1185,702 @@ jobs:
           name: van-mutation-report-${{ matrix.label }}
           path: artifacts/mutation/
           if-no-files-found: warn
+
+  # Additive OBL004 SOURCE audit only; native/private/unit admissions remain separate.
+  obl004-backend-gateway:
+    name: OBL004 backend-cwd gateway (${{ matrix.shard }})
+    strategy:
+      fail-fast: false
+      max-parallel: 4
+      matrix:
+        shard:
+        - 0
+        - 1
+        - 2
+        - 3
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    services:
+      postgres:
+        image: postgres:17.11-bookworm@sha256:858bb5e98eed02eb8cafbcdc007f9a65d1b613972028944a8ec2133ccaf80d27
+        env:
+          POSTGRES_USER: van_fixture
+          POSTGRES_PASSWORD: van_ephemeral_test_only
+          POSTGRES_DB: postgres
+        ports:
+        - 5432:5432
+        options: --health-cmd "pg_isready -U van_fixture -d postgres" --health-interval 5s --health-timeout 5s --health-retries
+          12
+    env:
+      PYTHONPATH: backend:backend/tests:trading:trading/tests:.
+      VATI_TEST_PG_DSN: postgresql://van_fixture:van_ephemeral_test_only@127.0.0.1:5432/postgres
+      VATI_TEST_PG_ISOLATED_FIXTURE: '1'
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        ref: ${{ github.event.pull_request.head.sha || github.sha }}
+        fetch-depth: 0
+    - uses: actions/setup-node@v4
+      with:
+        node-version: 24.19.0
+    - uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
+    - name: Install original locked public source dependencies
+      run: |
+        python -m pip install -r backend/requirements.lock
+        python -m pip install --no-deps psycopg==3.2.9 psycopg-binary==3.2.9
+        python -m pip install pytest==9.1.1 pytest-asyncio==1.4.0
+        python -m pip install --no-deps Pillow==12.3.0
+        python -m playwright install chromium
+    - name: Resolve actual Chromium and initialize the disposable schema
+      run: |
+        python - <<'PYCODE'
+        import os
+        from pathlib import Path
+        import psycopg
+        from playwright.sync_api import sync_playwright
+        with sync_playwright() as p:
+            executable = Path(p.chromium.executable_path)
+        assert executable.is_file() and os.access(executable, os.X_OK)
+        with open(os.environ["GITHUB_ENV"], "a") as env:
+            env.write(f"VAN_TEST_CHROMIUM={executable}\n")
+            for key in ("NO_PROXY", "no_proxy"):
+                env.write(key+"="+",".join(["127.0.0.1", "localhost", "::1", os.environ.get(key, "")])+"\n")
+        with psycopg.connect(os.environ["VATI_TEST_PG_DSN"]) as conn:
+            conn.execute("CREATE SCHEMA vati")
+        PYCODE
+    - name: Inventory the unchanged public source scope
+      run: |
+        python tools/rebuild/backend_public_source.py plan --output artifacts/backend-public-source-gateway-${{ matrix.shard }}
+        git rev-parse HEAD > artifacts/backend-public-source-gateway-${{ matrix.shard }}/tested-commit.txt
+    - name: Execute exact assigned gateway nodes on this isolated worker
+      run: python tools/rebuild/backend_public_source.py run-shard --execution-cwd backend --output artifacts/backend-public-source-gateway-${{
+        matrix.shard }} --runtime gateway --shards 4 --shard-index ${{ matrix.shard }} --expected-commit "${{ github.event.pull_request.head.sha
+        || github.sha }}" --basetemp="${{ runner.temp }}/van-public-gateway-${{ matrix.shard }}"
+    - uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: van-obl004-backend-gateway-${{ matrix.shard }}
+        path: artifacts/backend-public-source-gateway-${{ matrix.shard }}/
+        if-no-files-found: error
+  obl004-backend-public-source:
+    name: OBL004 backend-cwd public source
+    needs:
+    - obl004-backend-gateway
+    if: always()
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    services:
+      postgres:
+        image: postgres:17.11-bookworm@sha256:858bb5e98eed02eb8cafbcdc007f9a65d1b613972028944a8ec2133ccaf80d27
+        env:
+          POSTGRES_USER: van_fixture
+          POSTGRES_PASSWORD: van_ephemeral_test_only
+          POSTGRES_DB: postgres
+        ports:
+        - 5432:5432
+        options: --health-cmd "pg_isready -U van_fixture -d postgres" --health-interval 5s --health-timeout 5s --health-retries
+          12
+    env:
+      PYTHONPATH: backend:backend/tests:trading:trading/tests:.
+      VATI_TEST_PG_DSN: postgresql://van_fixture:van_ephemeral_test_only@127.0.0.1:5432/postgres
+      VATI_TEST_PG_ISOLATED_FIXTURE: '1'
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        ref: ${{ github.event.pull_request.head.sha || github.sha }}
+        fetch-depth: 0
+    - uses: actions/setup-node@v4
+      with:
+        node-version: 24.19.0
+    - uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
+    - name: Install original locked public source dependencies
+      run: |
+        python -m pip install -r backend/requirements.lock
+        python -m pip install --no-deps psycopg==3.2.9 psycopg-binary==3.2.9
+        python -m pip install pytest==9.1.1 pytest-asyncio==1.4.0
+        python -m pip install --no-deps Pillow==12.3.0
+        python -m playwright install chromium
+    - name: Resolve actual Chromium and initialize the disposable schema
+      run: |
+        python - <<'PYCODE'
+        import os
+        from pathlib import Path
+        import psycopg
+        from playwright.sync_api import sync_playwright
+        with sync_playwright() as p:
+            executable = Path(p.chromium.executable_path)
+        assert executable.is_file() and os.access(executable, os.X_OK)
+        with open(os.environ["GITHUB_ENV"], "a") as env:
+            env.write(f"VAN_TEST_CHROMIUM={executable}\n")
+            for key in ("NO_PROXY", "no_proxy"):
+                env.write(key+"="+",".join(["127.0.0.1", "localhost", "::1", os.environ.get(key, "")])+"\n")
+        with psycopg.connect(os.environ["VATI_TEST_PG_DSN"]) as conn:
+            conn.execute("CREATE SCHEMA vati")
+        PYCODE
+    - name: Inventory every public source module and explicit separate dependencies
+      run: |
+        python tools/rebuild/backend_public_source.py plan --output artifacts/backend-public-source
+        git rev-parse HEAD > artifacts/backend-public-source/tested-commit.txt
+    - uses: actions/download-artifact@v4
+      if: always()
+      with:
+        pattern: van-obl004-backend-gateway-*
+        path: artifacts/backend-public-source/shards
+        merge-multiple: false
+    - name: Bind downloaded backend-cwd shards to original verifier directory identities
+      if: always()
+      run: |-
+        python - <<'PYCODE'
+        from pathlib import Path
+        root=Path('artifacts/backend-public-source/shards')
+        for index in range(4):
+            source=root/f'van-obl004-backend-gateway-{index}'
+            destination=root/f'van-backend-public-source-gateway-{index}'
+            assert not destination.exists()
+            source.rename(destination)
+        PYCODE
+    - name: Independently collect the full gateway scope without executing cases
+      if: always()
+      run: python tools/rebuild/backend_public_source.py collect --execution-cwd backend --output artifacts/backend-public-source/gateway-control
+        --runtime gateway --shards 4 --expected-commit "${{ github.event.pull_request.head.sha || github.sha }}" --basetemp="${{
+        runner.temp }}/van-public-gateway-control"
+    - name: Execute media service cases with their separate hashed runtime
+      if: always()
+      run: |
+        python -m venv "$RUNNER_TEMP/public-media-venv"
+        "$RUNNER_TEMP/public-media-venv/bin/python" -m pip install --require-hashes -r deploy/van-browser-stream/requirements.lock
+        "$RUNNER_TEMP/public-media-venv/bin/python" -m pip install pytest==9.1.1 pytest-asyncio==1.4.0
+        "$RUNNER_TEMP/public-media-venv/bin/python" tools/rebuild/backend_public_source.py collect --execution-cwd backend \
+          --output artifacts/backend-public-source/media-control --runtime media --shards 1 \
+          --expected-commit "${{ github.event.pull_request.head.sha || github.sha }}" \
+          --basetemp="$RUNNER_TEMP/van-public-media-control"
+        "$RUNNER_TEMP/public-media-venv/bin/python" tools/rebuild/backend_public_source.py run-shard --execution-cwd backend \
+          --output artifacts/backend-public-source/media --runtime media --shards 1 --shard-index 0 \
+          --expected-commit "${{ github.event.pull_request.head.sha || github.sha }}" \
+          --basetemp="$RUNNER_TEMP/van-public-media-source"
+    - name: Require exact full collection and terminal execution union with declared skips
+      if: always()
+      run: python tools/rebuild/backend_public_source.py verify-shards --execution-cwd backend --output artifacts/backend-public-source
+        --shards 4 --expected-commit "${{ github.event.pull_request.head.sha || github.sha }}" --job-result "${{ needs.obl004-backend-gateway.result
+        }}"
+    - uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: van-obl004-backend-public-source
+        path: artifacts/backend-public-source/
+        if-no-files-found: error
+  obl004-documentary:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        cwd:
+        - checkout
+        - backend
+    env:
+      PYTHONPATH: ${{ github.workspace }}/backend:${{ github.workspace }}/backend/tests:${{ github.workspace }}/trading:${{
+        github.workspace }}/trading/tests:${{ github.workspace }}
+      PYTHONDONTWRITEBYTECODE: '1'
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        ref: ${{ github.event.pull_request.head.sha || github.sha }}
+        fetch-depth: 0
+    - uses: actions/setup-node@v4
+      with:
+        node-version: 24.19.0
+    - uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
+    - name: Install original fixture-owner locked dependencies
+      run: python -m pip install -r tools/rebuild/requirements.lock
+    - name: Collect original documentary source inventory in actual cwd
+      run: python -B -s "$GITHUB_WORKSPACE/tools/rebuild/canonical_source_audit.py" run --profile documentary --cwd "${{ matrix.cwd
+        }}" --expected-commit "${{ github.event.pull_request.head.sha || github.sha }}" --collect-only --output "$RUNNER_TEMP/obl004-audit/documentary-${{
+        matrix.cwd }}/collect"
+    - name: Execute exact assigned documentary source phases in actual cwd
+      if: always()
+      run: python -B -s "$GITHUB_WORKSPACE/tools/rebuild/canonical_source_audit.py" run --profile documentary --cwd "${{ matrix.cwd
+        }}" --expected-commit "${{ github.event.pull_request.head.sha || github.sha }}" --output "$RUNNER_TEMP/obl004-audit/documentary-${{
+        matrix.cwd }}/execute"
+    - uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: van-obl004-profile-documentary-${{ matrix.cwd }}
+        path: |-
+          ${{ runner.temp }}/obl004-audit/documentary-${{ matrix.cwd }}/
+          !${{ runner.temp }}/obl004-audit/documentary-${{ matrix.cwd }}/**/basetemp/**
+  obl004-trading-pg:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        cwd:
+        - checkout
+        - backend
+    env:
+      PYTHONPATH: ${{ github.workspace }}/backend:${{ github.workspace }}/backend/tests:${{ github.workspace }}/trading:${{
+        github.workspace }}/trading/tests:${{ github.workspace }}
+      PYTHONDONTWRITEBYTECODE: '1'
+      VATI_TEST_PG_DSN: postgresql://van_fixture:van_ephemeral_test_only@127.0.0.1:5432/postgres
+      VATI_TEST_PG_ISOLATED_FIXTURE: '1'
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        ref: ${{ github.event.pull_request.head.sha || github.sha }}
+        fetch-depth: 0
+    - uses: actions/setup-node@v4
+      with:
+        node-version: 24.19.0
+    - uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
+    - name: Install original fixture-owner locked dependencies
+      run: |-
+        python -m pip install -r backend/requirements.lock
+        python -m pip install --no-deps psycopg==3.2.9 psycopg-binary==3.2.9
+    - name: Initialize the disposable test schema
+      run: |
+        python - <<'PY'
+        import os, psycopg
+        assert psycopg.__version__ == "3.2.9"
+        with psycopg.connect(os.environ["VATI_TEST_PG_DSN"]) as connection:
+            connection.execute("CREATE SCHEMA vati")
+        PY
+    - name: Collect original trading_pg source inventory in actual cwd
+      run: python -B -s "$GITHUB_WORKSPACE/tools/rebuild/canonical_source_audit.py" run --profile trading_pg --cwd "${{ matrix.cwd
+        }}" --expected-commit "${{ github.event.pull_request.head.sha || github.sha }}" --collect-only --output "$RUNNER_TEMP/obl004-audit/trading_pg-${{
+        matrix.cwd }}/collect"
+    - name: Execute exact assigned trading_pg source phases in actual cwd
+      if: always()
+      run: python -B -s "$GITHUB_WORKSPACE/tools/rebuild/canonical_source_audit.py" run --profile trading_pg --cwd "${{ matrix.cwd
+        }}" --expected-commit "${{ github.event.pull_request.head.sha || github.sha }}" --output "$RUNNER_TEMP/obl004-audit/trading_pg-${{
+        matrix.cwd }}/execute"
+    - uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: van-obl004-profile-trading_pg-${{ matrix.cwd }}
+        path: |-
+          ${{ runner.temp }}/obl004-audit/trading_pg-${{ matrix.cwd }}/
+          !${{ runner.temp }}/obl004-audit/trading_pg-${{ matrix.cwd }}/**/basetemp/**
+    services:
+      postgres:
+        image: postgres:17.11-bookworm@sha256:858bb5e98eed02eb8cafbcdc007f9a65d1b613972028944a8ec2133ccaf80d27
+        env:
+          POSTGRES_USER: van_fixture
+          POSTGRES_PASSWORD: van_ephemeral_test_only
+          POSTGRES_DB: postgres
+        ports:
+        - 5432:5432
+        options: --health-cmd "pg_isready -U van_fixture -d postgres" --health-interval 5s --health-timeout 5s --health-retries
+          12
+  obl004-scenarios:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        cwd:
+        - checkout
+        - backend
+    env:
+      PYTHONPATH: ${{ github.workspace }}/backend:${{ github.workspace }}/backend/tests:${{ github.workspace }}/trading:${{
+        github.workspace }}/trading/tests:${{ github.workspace }}
+      PYTHONDONTWRITEBYTECODE: '1'
+      VAN_ANDROID_GRADLE_BIN: ${{ github.workspace }}/android/gradlew
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        ref: ${{ github.event.pull_request.head.sha || github.sha }}
+        fetch-depth: 0
+    - uses: actions/setup-node@v4
+      with:
+        node-version: 24.19.0
+    - uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
+    - name: Install original fixture-owner locked dependencies
+      run: python -m pip install -r backend/requirements.lock
+    - name: Collect original scenarios source inventory in actual cwd
+      run: python -B -s "$GITHUB_WORKSPACE/tools/rebuild/canonical_source_audit.py" run --profile scenarios --cwd "${{ matrix.cwd
+        }}" --expected-commit "${{ github.event.pull_request.head.sha || github.sha }}" --collect-only --output "$RUNNER_TEMP/obl004-audit/scenarios-${{
+        matrix.cwd }}/collect"
+    - name: Execute exact assigned scenarios source phases in actual cwd
+      if: always()
+      run: python -B -s "$GITHUB_WORKSPACE/tools/rebuild/canonical_source_audit.py" run --profile scenarios --cwd "${{ matrix.cwd
+        }}" --expected-commit "${{ github.event.pull_request.head.sha || github.sha }}" --output "$RUNNER_TEMP/obl004-audit/scenarios-${{
+        matrix.cwd }}/execute"
+    - uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: van-obl004-profile-scenarios-${{ matrix.cwd }}
+        path: |-
+          ${{ runner.temp }}/obl004-audit/scenarios-${{ matrix.cwd }}/
+          !${{ runner.temp }}/obl004-audit/scenarios-${{ matrix.cwd }}/**/basetemp/**
+    - uses: actions/setup-java@v4
+      with:
+        distribution: temurin
+        java-version: '17'
+    - name: Install original AGP refusal-control Python overlay
+      run: python -m pip install pytest==9.1.1 PyYAML==6.0.2
+    - name: Collect original android_guards source inventory in actual cwd
+      run: python -B -s "$GITHUB_WORKSPACE/tools/rebuild/canonical_source_audit.py" run --profile android_guards --cwd "${{
+        matrix.cwd }}" --expected-commit "${{ github.event.pull_request.head.sha || github.sha }}" --collect-only --output
+        "$RUNNER_TEMP/obl004-audit/android_guards-${{ matrix.cwd }}/collect"
+    - name: Execute exact assigned android_guards source phases in actual cwd
+      if: always()
+      run: python -B -s "$GITHUB_WORKSPACE/tools/rebuild/canonical_source_audit.py" run --profile android_guards --cwd "${{
+        matrix.cwd }}" --expected-commit "${{ github.event.pull_request.head.sha || github.sha }}" --output "$RUNNER_TEMP/obl004-audit/android_guards-${{
+        matrix.cwd }}/execute"
+    - uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: van-obl004-profile-android_guards-${{ matrix.cwd }}
+        path: |-
+          ${{ runner.temp }}/obl004-audit/android_guards-${{ matrix.cwd }}/
+          !${{ runner.temp }}/obl004-audit/android_guards-${{ matrix.cwd }}/**/basetemp/**
+  obl004-browser-namespace:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        cwd:
+        - checkout
+        - backend
+    env:
+      PYTHONPATH: ${{ github.workspace }}/backend:${{ github.workspace }}/backend/tests:${{ github.workspace }}/trading:${{
+        github.workspace }}/trading/tests:${{ github.workspace }}
+      PYTHONDONTWRITEBYTECODE: '1'
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        ref: ${{ github.event.pull_request.head.sha || github.sha }}
+        fetch-depth: 0
+    - uses: actions/setup-node@v4
+      with:
+        node-version: 24.19.0
+    - uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
+    - name: Install original fixture-owner locked dependencies
+      run: |-
+        python -m pip install -r backend/requirements.lock
+        python -m playwright install chromium
+    - name: Resolve the lock-selected actual Chromium
+      run: |
+        python - <<'PYCODE'
+        import os
+        from pathlib import Path
+        from playwright.sync_api import sync_playwright
+        with sync_playwright() as p:
+            executable = Path(p.chromium.executable_path)
+        assert executable.is_file() and os.access(executable, os.X_OK), executable
+        assert Path("/usr/bin/openssl").is_file()
+        with open(os.environ["GITHUB_ENV"], "a") as env:
+            env.write(f"VAN_TEST_CHROMIUM={executable}\n")
+        PYCODE
+    - name: Collect original browser source inventory in actual cwd
+      run: python -B -s "$GITHUB_WORKSPACE/tools/rebuild/canonical_source_audit.py" run --profile browser --cwd "${{ matrix.cwd
+        }}" --expected-commit "${{ github.event.pull_request.head.sha || github.sha }}" --collect-only --output "$RUNNER_TEMP/obl004-audit/browser-${{
+        matrix.cwd }}/collect"
+    - name: Execute exact assigned browser source phases in actual cwd
+      if: always()
+      run: python -B -s "$GITHUB_WORKSPACE/tools/rebuild/canonical_source_audit.py" run --profile browser --cwd "${{ matrix.cwd
+        }}" --expected-commit "${{ github.event.pull_request.head.sha || github.sha }}" --output "$RUNNER_TEMP/obl004-audit/browser-${{
+        matrix.cwd }}/execute"
+    - uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: van-obl004-profile-browser-${{ matrix.cwd }}
+        path: |-
+          ${{ runner.temp }}/obl004-audit/browser-${{ matrix.cwd }}/
+          !${{ runner.temp }}/obl004-audit/browser-${{ matrix.cwd }}/**/basetemp/**
+    - name: Install the namespace firewall test prerequisite from signed Ubuntu sources
+      run: |
+        ubuntu_list="$RUNNER_TEMP/van-browser-source-ubuntu.list"
+        cat > "$ubuntu_list" <<'APT'
+        deb [signed-by=/usr/share/keyrings/ubuntu-archive-keyring.gpg] https://archive.ubuntu.com/ubuntu noble main universe
+        deb [signed-by=/usr/share/keyrings/ubuntu-archive-keyring.gpg] https://archive.ubuntu.com/ubuntu noble-updates main universe
+        deb [signed-by=/usr/share/keyrings/ubuntu-archive-keyring.gpg] https://security.ubuntu.com/ubuntu noble-security main universe
+        APT
+        sudo apt-get -o Dir::Etc::sourcelist="$ubuntu_list" -o Dir::Etc::sourceparts=- update
+        sudo apt-get -o Dir::Etc::sourcelist="$ubuntu_list" -o Dir::Etc::sourceparts=- install --yes --no-install-recommends nftables
+        uname -sr > $RUNNER_TEMP/obl004-kernel-version.txt
+        sudo nft --version > $RUNNER_TEMP/obl004-nft-version.txt
+    - name: Collect original browser_uid source inventory in actual cwd
+      run: sudo env GIT_CONFIG_COUNT=1 GIT_CONFIG_KEY_0=safe.directory GIT_CONFIG_VALUE_0="$GITHUB_WORKSPACE" PYTHONPATH="$PYTHONPATH"
+        PYTHONDONTWRITEBYTECODE=1 GITHUB_RUN_ID="$GITHUB_RUN_ID" GITHUB_RUN_ATTEMPT="$GITHUB_RUN_ATTEMPT" ImageOS="$ImageOS"
+        ImageVersion="$ImageVersion" VAN_TEST_CHROMIUM="$VAN_TEST_CHROMIUM" "$(command -v python)" -B -s "$GITHUB_WORKSPACE/tools/rebuild/canonical_source_audit.py"
+        run --profile browser_uid --cwd "${{ matrix.cwd }}" --expected-commit "${{ github.event.pull_request.head.sha || github.sha
+        }}" --collect-only --output "$RUNNER_TEMP/obl004-audit/browser_uid-${{ matrix.cwd }}/collect"
+    - name: Execute exact assigned browser_uid source phases in actual cwd
+      if: always()
+      run: sudo env GIT_CONFIG_COUNT=1 GIT_CONFIG_KEY_0=safe.directory GIT_CONFIG_VALUE_0="$GITHUB_WORKSPACE" PYTHONPATH="$PYTHONPATH"
+        PYTHONDONTWRITEBYTECODE=1 GITHUB_RUN_ID="$GITHUB_RUN_ID" GITHUB_RUN_ATTEMPT="$GITHUB_RUN_ATTEMPT" ImageOS="$ImageOS"
+        ImageVersion="$ImageVersion" VAN_TEST_CHROMIUM="$VAN_TEST_CHROMIUM" "$(command -v python)" -B -s "$GITHUB_WORKSPACE/tools/rebuild/canonical_source_audit.py"
+        run --profile browser_uid --cwd "${{ matrix.cwd }}" --expected-commit "${{ github.event.pull_request.head.sha || github.sha
+        }}" --output "$RUNNER_TEMP/obl004-audit/browser_uid-${{ matrix.cwd }}/execute"
+    - uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: van-obl004-profile-browser_uid-${{ matrix.cwd }}
+        path: |-
+          ${{ runner.temp }}/obl004-audit/browser_uid-${{ matrix.cwd }}/
+          !${{ runner.temp }}/obl004-audit/browser_uid-${{ matrix.cwd }}/**/basetemp/**
+    - name: Collect original namespace source inventory in actual cwd
+      run: sudo env GIT_CONFIG_COUNT=1 GIT_CONFIG_KEY_0=safe.directory GIT_CONFIG_VALUE_0="$GITHUB_WORKSPACE" PYTHONPATH="$PYTHONPATH"
+        PYTHONDONTWRITEBYTECODE=1 GITHUB_RUN_ID="$GITHUB_RUN_ID" GITHUB_RUN_ATTEMPT="$GITHUB_RUN_ATTEMPT" ImageOS="$ImageOS"
+        ImageVersion="$ImageVersion" VAN_TEST_CHROMIUM="$VAN_TEST_CHROMIUM" "$(command -v python)" -B -s "$GITHUB_WORKSPACE/tools/rebuild/canonical_source_audit.py"
+        run --profile namespace --cwd "${{ matrix.cwd }}" --expected-commit "${{ github.event.pull_request.head.sha || github.sha
+        }}" --collect-only --output "$RUNNER_TEMP/obl004-audit/namespace-${{ matrix.cwd }}/collect"
+    - name: Execute exact assigned namespace source phases in actual cwd
+      if: always()
+      run: sudo env GIT_CONFIG_COUNT=1 GIT_CONFIG_KEY_0=safe.directory GIT_CONFIG_VALUE_0="$GITHUB_WORKSPACE" PYTHONPATH="$PYTHONPATH"
+        PYTHONDONTWRITEBYTECODE=1 GITHUB_RUN_ID="$GITHUB_RUN_ID" GITHUB_RUN_ATTEMPT="$GITHUB_RUN_ATTEMPT" ImageOS="$ImageOS"
+        ImageVersion="$ImageVersion" VAN_TEST_CHROMIUM="$VAN_TEST_CHROMIUM" "$(command -v python)" -B -s "$GITHUB_WORKSPACE/tools/rebuild/canonical_source_audit.py"
+        run --profile namespace --cwd "${{ matrix.cwd }}" --expected-commit "${{ github.event.pull_request.head.sha || github.sha
+        }}" --output "$RUNNER_TEMP/obl004-audit/namespace-${{ matrix.cwd }}/execute"
+    - uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: van-obl004-profile-namespace-${{ matrix.cwd }}
+        path: |-
+          ${{ runner.temp }}/obl004-audit/namespace-${{ matrix.cwd }}/
+          !${{ runner.temp }}/obl004-audit/namespace-${{ matrix.cwd }}/**/basetemp/**
+  obl004-private-dds:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        cwd:
+        - checkout
+        - backend
+    env:
+      PYTHONPATH: ${{ github.workspace }}/backend:${{ github.workspace }}/backend/tests:${{ github.workspace }}/trading:${{
+        github.workspace }}/trading/tests:${{ github.workspace }}
+      PYTHONDONTWRITEBYTECODE: '1'
+      DDS_CONTRACT_KEY_AVAILABLE: ${{ secrets.DDS_CONTRACT_READ_DEPLOY_KEY != '' }}
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        ref: ${{ github.event.pull_request.head.sha || github.sha }}
+        fetch-depth: 0
+    - uses: actions/setup-node@v4
+      with:
+        node-version: 24.19.0
+    - uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
+    - name: Install original fixture-owner locked dependencies
+      run: python -m pip install -r backend/requirements.lock
+    - name: Check out pinned DDS source contracts (sibling)
+      uses: actions/checkout@v4
+      with:
+        repository: Vanguduza/dial-development-system
+        ref: 64d6b7158c723b7700e5b53175ea8048d4e92d00
+        ssh-key: ${{ secrets.DDS_CONTRACT_READ_DEPLOY_KEY }}
+        persist-credentials: false
+        path: .dds-contract-pin
+        sparse-checkout-cone-mode: false
+        sparse-checkout: |
+          agent-system/orchestration/android-testing-mcp.mjs
+          agent-system/orchestration/android-testing-plane.mjs
+          deploy/netcup/hermes-control/artemis/dial_artemis_mcp_bridge.py
+          agent-system/orchestration/engineering-resource-registry.mjs
+          agent-system/orchestration/engineering-resource-resolver.mjs
+          agent-system/orchestration/skill-registry.mjs
+          agent-system/orchestration/skill-resolver.mjs
+          agent-system/orchestration/state-store.mjs
+      if: env.DDS_CONTRACT_KEY_AVAILABLE == 'true'
+    - name: Verify pinned DDS contract blobs and place the sibling
+      run: |
+        set -euo pipefail
+        cd .dds-contract-pin
+        test "$(git rev-parse HEAD)" = 64d6b7158c723b7700e5b53175ea8048d4e92d00
+        while read -r blob path; do
+          test "$(git hash-object "$path")" = "$blob" || { echo "::error file=$path::DDS contract blob mismatch"; exit 1; }
+        done <<'EOF'
+        4aca852dea44cb07401ca92bf970eb3a78c1db2d agent-system/orchestration/android-testing-mcp.mjs
+        c99f02f3df35f6b9aa880923dd6b01ca3118d644 agent-system/orchestration/android-testing-plane.mjs
+        9134ddc864ab174c000b6e434d2675ba01352006 deploy/netcup/hermes-control/artemis/dial_artemis_mcp_bridge.py
+        ae3d794c69acedcc2aadcfe3c280d0456dc353ff agent-system/orchestration/engineering-resource-registry.mjs
+        2d7a6fe97753a080fc32763155dfb8959794ba84 agent-system/orchestration/engineering-resource-resolver.mjs
+        e51df40224a674f6a08d203bf89fffc88bc8a33b agent-system/orchestration/skill-registry.mjs
+        da029793d95407cdee21c4957f6483d8d3eb64a4 agent-system/orchestration/skill-resolver.mjs
+        a9af6f44d4d9dd9624f99d2677ec6ca1dbce200c agent-system/orchestration/state-store.mjs
+        EOF
+        cd ..
+        mv .dds-contract-pin ../dial-development-system
+      if: env.DDS_CONTRACT_KEY_AVAILABLE == 'true'
+    - name: Collect original private_dds source inventory in actual cwd
+      run: python -B -s "$GITHUB_WORKSPACE/tools/rebuild/canonical_source_audit.py" run --profile private_dds --cwd "${{ matrix.cwd
+        }}" --expected-commit "${{ github.event.pull_request.head.sha || github.sha }}" --collect-only --output "$RUNNER_TEMP/obl004-audit/private_dds-${{
+        matrix.cwd }}/collect"
+    - name: Execute exact assigned private_dds source phases in actual cwd
+      if: always()
+      run: python -B -s "$GITHUB_WORKSPACE/tools/rebuild/canonical_source_audit.py" run --profile private_dds --cwd "${{ matrix.cwd
+        }}" --expected-commit "${{ github.event.pull_request.head.sha || github.sha }}" --output "$RUNNER_TEMP/obl004-audit/private_dds-${{
+        matrix.cwd }}/execute"
+    - uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: van-obl004-profile-private_dds-${{ matrix.cwd }}
+        path: |-
+          ${{ runner.temp }}/obl004-audit/private_dds-${{ matrix.cwd }}/
+          !${{ runner.temp }}/obl004-audit/private_dds-${{ matrix.cwd }}/**/basetemp/**
+  obl004-forecast-source:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        cwd:
+        - checkout
+        - backend
+    env:
+      PYTHONPATH: ${{ github.workspace }}/backend:${{ github.workspace }}/backend/tests:${{ github.workspace }}/trading:${{
+        github.workspace }}/trading/tests:${{ github.workspace }}
+      PYTHONDONTWRITEBYTECODE: '1'
+      VATI_TEST_PG_DSN: postgresql://van_fixture:van_ephemeral_test_only@127.0.0.1:5432/postgres
+      VATI_TEST_PG_ISOLATED_FIXTURE: '1'
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        ref: ${{ github.event.pull_request.head.sha || github.sha }}
+        fetch-depth: 0
+    - uses: actions/setup-node@v4
+      with:
+        node-version: 24.19.0
+    - uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
+    - name: Install declared source dependencies and the exact locked Arrow wheel
+      run: |
+        python -m pip install -r backend/requirements.lock -r tools/rebuild/requirements.lock
+        python - <<'PY'
+        from pathlib import Path
+        source=Path('trading/vati_forecast_worker/locks/research-cp312-linux-x86_64.wheel.lock').read_text()
+        lines=[line for line in source.splitlines() if line.startswith('pyarrow==')]
+        assert len(lines)==1
+        Path('/tmp/van-source-arrow.lock').write_text(lines[0]+'\n')
+        PY
+        python -m pip install --no-deps --require-hashes -r /tmp/van-source-arrow.lock
+        python -m pip install --no-deps psycopg==3.2.9 psycopg-binary==3.2.9
+    - name: Initialize the disposable test schema
+      run: |
+        python - <<'PY'
+        import os, psycopg
+        assert psycopg.__version__ == "3.2.9"
+        with psycopg.connect(os.environ["VATI_TEST_PG_DSN"]) as connection:
+            connection.execute("CREATE SCHEMA vati")
+        PY
+    - name: Collect original forecast source inventory in actual cwd
+      run: python -B -s "$GITHUB_WORKSPACE/tools/rebuild/canonical_source_audit.py" run --profile forecast --cwd "${{ matrix.cwd
+        }}" --expected-commit "${{ github.event.pull_request.head.sha || github.sha }}" --collect-only --output "$RUNNER_TEMP/obl004-audit/forecast-${{
+        matrix.cwd }}/collect"
+    - name: Execute exact assigned forecast source phases in actual cwd
+      if: always()
+      run: python -B -s "$GITHUB_WORKSPACE/tools/rebuild/canonical_source_audit.py" run --profile forecast --cwd "${{ matrix.cwd
+        }}" --expected-commit "${{ github.event.pull_request.head.sha || github.sha }}" --output "$RUNNER_TEMP/obl004-audit/forecast-${{
+        matrix.cwd }}/execute"
+    - uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: van-obl004-profile-forecast-${{ matrix.cwd }}
+        path: |-
+          ${{ runner.temp }}/obl004-audit/forecast-${{ matrix.cwd }}/
+          !${{ runner.temp }}/obl004-audit/forecast-${{ matrix.cwd }}/**/basetemp/**
+    services:
+      postgres:
+        image: postgres:17.11-bookworm@sha256:858bb5e98eed02eb8cafbcdc007f9a65d1b613972028944a8ec2133ccaf80d27
+        env:
+          POSTGRES_USER: van_fixture
+          POSTGRES_PASSWORD: van_ephemeral_test_only
+          POSTGRES_DB: postgres
+        ports:
+        - 5432:5432
+        options: --health-cmd "pg_isready -U van_fixture -d postgres" --health-interval 5s --health-timeout 5s --health-retries
+          12
+  obl004-canonical-matrix:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    if: always()
+    needs:
+    - backend-public-source
+    - obl004-backend-gateway
+    - obl004-backend-public-source
+    - obl004-documentary
+    - obl004-trading-pg
+    - obl004-scenarios
+    - obl004-browser-namespace
+    - obl004-private-dds
+    - obl004-forecast-source
+    env:
+      PYTHONPATH: ${{ github.workspace }}/backend:${{ github.workspace }}/backend/tests:${{ github.workspace }}/trading:${{
+        github.workspace }}/trading/tests:${{ github.workspace }}
+      PYTHONDONTWRITEBYTECODE: '1'
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        ref: ${{ github.event.pull_request.head.sha || github.sha }}
+        fetch-depth: 0
+    - uses: actions/setup-node@v4
+      with:
+        node-version: 24.19.0
+    - uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
+    - name: Install original source verifier dependencies
+      run: python -m pip install -r backend/requirements.lock
+    - uses: actions/download-artifact@v4
+      if: always()
+      with:
+        name: van-backend-public-source
+        path: ${{ runner.temp }}/obl004-public-root
+    - uses: actions/download-artifact@v4
+      if: always()
+      with:
+        name: van-obl004-backend-public-source
+        path: ${{ runner.temp }}/obl004-public-backend
+    - uses: actions/download-artifact@v4
+      if: always()
+      with:
+        pattern: van-obl004-profile-*
+        path: ${{ runner.temp }}/obl004-profiles
+        merge-multiple: false
+    - name: Normalize exact owned profile artifact directory identities
+      if: always()
+      run: |-
+        python - <<'PYCODE'
+        import os
+        from pathlib import Path
+        root=Path(os.environ['RUNNER_TEMP'])/'obl004-profiles'
+        for source in root.glob('van-obl004-profile-*'):
+            destination=root/source.name.removeprefix('van-obl004-profile-')
+            assert not destination.exists()
+            source.rename(destination)
+        PYCODE
+    - name: Join every canonical root, actual cwd, exact node/phase/runtime/storage snapshot
+      if: always()
+      run: |-
+        python -B -s tools/rebuild/canonical_source_audit.py join \
+          --expected-commit "${{ github.event.pull_request.head.sha || github.sha }}" \
+          --reports "$RUNNER_TEMP/obl004-profiles" \
+          --public-root "$RUNNER_TEMP/obl004-public-root" \
+          --public-backend "$RUNNER_TEMP/obl004-public-backend" \
+          --public-root-result "${{ needs.backend-public-source.result }}" \
+          --public-backend-result "${{ needs.obl004-backend-public-source.result }}" \
+          --output "$RUNNER_TEMP/obl004-full-matrix.json"
+    - uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: van-obl004-canonical-matrix
+        path: ${{ runner.temp }}/obl004-full-matrix.json

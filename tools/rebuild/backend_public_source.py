@@ -93,8 +93,20 @@ def verify(manifest, report, audit, root=ROOT):
         "isolated_runtimes":audits,
         "limits":expected["qualification"],"certificates_issued":[]}
 
+def execution_directory(root, name):
+    root = Path(root).resolve()
+    if name not in {"checkout", "backend"}:
+        raise ValueError("unknown execution cwd")
+    directory = root if name == "checkout" else root / "backend"
+    from tools.rebuild.source_storage_audit import checkout_root
+    if checkout_root(directory, root) != root:
+        raise ValueError("execution cwd is not the same canonical checkout")
+    return directory
+
+
 def instrument_run(args):
     """One isolated runtime/process, with exact collection and phase evidence."""
+    args.output = args.output.resolve()
     if args.basetemp is None or args.runtime is None or not args.expected_commit:
         raise ValueError("node evidence requires runtime, owned basetemp and expected exact commit")
     if os.environ.get("PYTEST_ADDOPTS") or os.environ.get("PYTEST_PLUGINS"):
@@ -111,6 +123,8 @@ def instrument_run(args):
     evidence.import_path_identity(ROOT)
     if any(os.environ.get(k) for k in ("PYTHONHOME", "PYTHONUSERBASE", "PYTHONSTARTUP", "PYTHONINSPECT", "PYTHONOPTIMIZE")):
         raise ValueError("ambient Python startup/import overrides are forbidden")
+    execution_cwd = getattr(args, "execution_cwd", "checkout")
+    invocation_cwd = execution_directory(ROOT, execution_cwd)
     source_before = evidence.source_identity(ROOT, args.expected_commit)
     environment_before = evidence.environment_identity(args.runtime)
     execution_id = str(uuid.uuid4())
@@ -121,24 +135,24 @@ def instrument_run(args):
     manifest.write_text(json.dumps(selection, indent=2) + "\n")
     selected = [r["path"] for r in selection["selected"] if runtime(r["path"]) == args.runtime]
     cmd = [sys.executable, "-B", "-s", str(ROOT/"tools/rebuild/source_storage_audit.py"),
-        "--report", str(args.output/"storage-audit.json"), *selected, "-q", "--disable-warnings",
+        "--checkout-root", str(ROOT), "--report", str(args.output/"storage-audit.json"), *[str(ROOT/p) for p in selected], "-q", "--disable-warnings",
         "-c", str(ROOT/"pytest.ini"), "--rootdir="+str(ROOT), "--confcutdir="+str(ROOT),
         *[arg for plugin in evidence.EXPLICIT_PLUGINS[args.runtime] for arg in ("-p", plugin)],
         "--basetemp="+str(args.basetemp), "-p", "tools.rebuild.public_source_shards",
         "--van-source-output="+str(args.output.resolve()), "--van-source-root="+str(ROOT),
         "--van-source-execution-id="+execution_id, "--van-source-runtime="+args.runtime, "--van-source-expected-commit="+args.expected_commit,
-        "--van-source-shards="+str(args.shards), "--van-source-index="+str(args.shard_index),
+        "--van-source-cwd="+execution_cwd, "--van-source-shards="+str(args.shards), "--van-source-index="+str(args.shard_index),
         "--van-source-costs="+str(ROOT/"tools/rebuild/backend_public_source_costs.json")]
     collecting = args.command == "collect"
     cmd += ["--collect-only"] if collecting else ["--junitxml="+str(args.output/"report.xml")]
-    receipt = {"expected_commit": args.expected_commit, "execution_id": execution_id, "command": cmd,
+    receipt = {"protected_before": evidence.protected_identity(ROOT), "invocation_cwd": str(invocation_cwd), "execution_cwd": execution_cwd, "expected_commit": args.expected_commit, "execution_id": execution_id, "command": cmd,
         "source_before": source_before, "environment_before": environment_before,
         "workflow_run": {"id": os.environ.get("GITHUB_RUN_ID"),
                          "attempt": os.environ.get("GITHUB_RUN_ATTEMPT")},
         "terminal": False}
     receipt_path = args.output/"run.json"
     receipt_path.write_text(json.dumps(receipt, indent=2)+"\n")
-    result = subprocess.run(cmd, cwd=ROOT, env={**os.environ, "PYTEST_DISABLE_PLUGIN_AUTOLOAD": "1",
+    result = subprocess.run(cmd, cwd=invocation_cwd, env={**os.environ, "PYTHONPATH": os.pathsep.join(str(ROOT/p) for p in evidence.CANONICAL_PYTHONPATH), "PYTEST_DISABLE_PLUGIN_AUTOLOAD": "1",
                                               "PYTHONDONTWRITEBYTECODE": "1", "PYTHONNOUSERSITE": "1"})
     try:
         outputs = evidence.archive_generated_bytecode(ROOT, args.expected_commit, source_before, args.output)
@@ -146,7 +160,7 @@ def instrument_run(args):
         evidence.require(child_state.get("generated_cache_candidates") == outputs,
                          "child/parent generated-cache observation differs")
         receipt["generated_cache_outputs"] = outputs
-        receipt.update(source_after=evidence.source_identity(ROOT, args.expected_commit),
+        receipt.update(protected_after=evidence.protected_identity(ROOT), source_after=evidence.source_identity(ROOT, args.expected_commit),
             environment_after=evidence.environment_identity(args.runtime))
     except Exception as exc:
         receipt["parent_observation_error"] = {"type": type(exc).__name__, "message": str(exc)}
@@ -161,7 +175,7 @@ def main():
     a=argparse.ArgumentParser(description=__doc__)
     a.add_argument("command",choices=("plan","run","verify","collect","run-shard","verify-shards"));a.add_argument("--output",type=Path,required=True)
     a.add_argument("--basetemp",type=Path);a.add_argument("--runtime",choices=("gateway","media"))
-    a.add_argument("--expected-commit");a.add_argument("--shards",type=int,default=4)
+    a.add_argument("--execution-cwd", choices=("checkout", "backend"), default="checkout");a.add_argument("--expected-commit");a.add_argument("--shards",type=int,default=4)
     a.add_argument("--shard-index",type=int,default=0)
     a.add_argument("--job-result",choices=("success","failure","cancelled","skipped"))
     args=a.parse_args();args.output.mkdir(exist_ok=True,parents=True)
@@ -179,9 +193,11 @@ def main():
         sys.path.insert(0, str(ROOT))
         from tools.rebuild.public_source_shards import verify_shards
         result = verify_shards(args.output, args.expected_commit, args.job_result,
-            root=ROOT, shard_count=args.shards)
+            root=ROOT, shard_count=args.shards, execution_cwd=args.execution_cwd)
         (args.output/"summary.json").write_text(json.dumps(result,indent=2)+"\n")
         print(json.dumps(result,indent=2));return 0
+    if args.execution_cwd != "checkout":
+        raise ValueError("legacy module-only run/verify cannot qualify a different cwd; use node/phase evidence")
     d=json.loads(manifest.read_text())
     if d!=plan():raise ValueError("selection drifted before source execution")
     if args.command=="run":

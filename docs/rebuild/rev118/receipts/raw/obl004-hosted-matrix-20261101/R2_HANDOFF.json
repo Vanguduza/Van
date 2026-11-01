@@ -1,0 +1,71 @@
+{
+  "state": "FROZEN_R2_SOURCE_REVIEW_READY",
+  "base": "53c3457c417a8545380ab8c4e538c727c862dfba",
+  "worktree": "/workspace/van-lanes-20261101/obl004-hosted-matrix",
+  "source_pins": "FINAL_SOURCE_PINS.json",
+  "r1_reference": "R1_REFERENCE.json",
+  "r2_changed_paths": [
+    ".github/workflows/van-ci.yml",
+    "tools/ci/github-actions-ci.yml",
+    "tests/contracts/test_ci_public_source_shards.py"
+  ],
+  "delta": {
+    "path": "/workspace/van-obl004-hosted-matrix-r2-20261101/R2_DELTA.patch",
+    "sha256": "8c0965803d0c1afecf2d5335c5e82e96f53c9787e794121fc498388335c97024",
+    "bytes": 17342
+  },
+  "full_patch": {
+    "path": "/workspace/van-obl004-hosted-matrix-r2-20261101/FINAL_FULL.patch",
+    "sha256": "3ea0ef84179324cb908d6e09e5939431d4ad6423d12ca5d0ef27dae8e06662c7",
+    "bytes": 167368
+  },
+  "archive": {
+    "path": "/workspace/van-obl004-hosted-matrix-r2-20261101/FINAL_SOURCE.zip",
+    "sha256": "595f6235990733e6855073d19d36d7a29dfd92c10d35e5b49397bc8f5dec7768",
+    "bytes": 91627
+  },
+  "review_fixes": {
+    "OBL004-HOSTED-REVIEW01": "all9 profile upload inclusions/exclusions resolve via runner.temp; final aggregate expression unchanged",
+    "OBL004-HOSTED-REVIEW02": "only two additive display names distinct; all expanded matrix contexts unique"
+  },
+  "terminal": {
+    "receipt": "FINAL_RECEIPT.json",
+    "passed": 18,
+    "skipped": 0,
+    "exit": 0,
+    "source_pins_unchanged": true,
+    "children_remaining": []
+  },
+  "before": "BEFORE_RECEIPT.json actualexit1; original review.json and R1 archive unchanged",
+  "preservation": {
+    "original_jobs": 12,
+    "additive_jobs": 9,
+    "old_job_objects_and_nonjob_fields_identical": true,
+    "mirror_identical": true,
+    "artifact_names_unchanged": true,
+    "final_aggregate_upload_unchanged": true
+  },
+  "reused_evidence": {
+    "unchanged_source_paths": [
+      "tools/rebuild/backend_public_source.py",
+      "tools/rebuild/public_source_shards.py",
+      "tools/rebuild/canonical_source_audit.py",
+      "tests/rebuild/test_public_source_shards.py",
+      "tests/rebuild/test_canonical_source_audit.py",
+      "backend/tests/test_gateway_startup_storage.py"
+    ],
+    "r1_175": "/workspace/van-obl004-hosted-matrix-20261101/FINAL04_RECEIPT.json (R1 run, not relabeled R2)",
+    "independent_cli_phase": "/workspace/van-obl004-hosted-matrix-independent-review-20261101/review.json; helpers/source unchanged",
+    "mutation": "/workspace/van-obl004-hosted-matrix-20261101/FINAL_MUTATION_PREFLIGHT.json;374/383 unchanged/NOT_RUN"
+  },
+  "limits": [
+    "No hosted dispatch, matrix execution or fullqualification claimed",
+    "Ten fullroot/cwd cells remain UNEXECUTED pending actual hosted source/runtime/phase/JUnit/storage proof",
+    "Native/private prerequisite absence remains BLOCKED, no authority or admission issuance",
+    "No product/helper changes, commits/pushes/generators or account app edits"
+  ],
+  "free_bytes": {
+    "workspace": 46018560,
+    "tmp": 4467904512
+  }
+}

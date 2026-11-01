@@ -1,0 +1,71 @@
+{
+  "state": "TERMINAL",
+  "preflight": {
+    "path": "/tmp/van-recovery-obl004-matrix-integration-20261101",
+    "free_bytes_before": 4438646784,
+    "free_inodes_before": 2237926,
+    "minimum_free_bytes": 4294967296,
+    "no_preexisting_directory": true
+  },
+  "source_before": {
+    ".github/workflows/van-ci.yml": "da6069dbe578341aacf4f86585c9e531f7bdb95358658a200e2a184149a993f3",
+    "tools/ci/github-actions-ci.yml": "da6069dbe578341aacf4f86585c9e531f7bdb95358658a200e2a184149a993f3",
+    "tools/rebuild/backend_public_source.py": "ff70d356dc7c6e4ea148a478f15399bea0aa8cc7dceaa72b76407f4480b4cbb3",
+    "tools/rebuild/public_source_shards.py": "edabed3737ec4ddd641687c7c3ca7b743c5655367089e2063a3628627211128b",
+    "tools/rebuild/canonical_source_audit.py": "88f7b3efe0791b6a366a0d08e7f3eb6ea7eef0e5c8ec53a145c2771e442cc768",
+    "tests/rebuild/test_public_source_shards.py": "d7bce1c24d8a47062a659c440878b8e78d7c7212a5fb5664eaa59c39affe6bdd",
+    "tests/rebuild/test_canonical_source_audit.py": "a20d46a9122fb966572c0433d6250e8c0dd1b9f33b42168b8bb0fa85e75cc92d",
+    "tests/contracts/test_ci_public_source_shards.py": "c47fc2f7627122dba81805a17c772311a79e68e63b1008da074f32c1304219bd",
+    "backend/tests/test_gateway_startup_storage.py": "797e7f4a54eab7a1b9a51eb96b720f959a3db4dd1de11afb8d60fe2fc37f174a"
+  },
+  "targets": [
+    "tests/rebuild/test_canonical_source_audit.py",
+    "tests/contracts/test_ci_public_source_shards.py",
+    "tests/contracts/test_ci_workflow_is_what_it_claims.py",
+    "backend/tests/test_gateway_startup_storage.py"
+  ],
+  "reuse": "R1actual175 and R2actual18 + independentCLI/adversarial evidence kept separate; no fictitious rerun. This is narrow current integrated workflow/canonical/startup guard execution.",
+  "output_file_limit_bytes": 16777216,
+  "started": "2026-11-01T17:56:23.892509+00:00",
+  "command": [
+    "/workspace/van-backend-venv-20261025/bin/python",
+    "-B",
+    "tools/rebuild/source_storage_audit.py",
+    "--report",
+    "/workspace/van-obl004-matrix-integration-20261101/storage-audit.json",
+    "tests/rebuild/test_canonical_source_audit.py",
+    "tests/contracts/test_ci_public_source_shards.py",
+    "tests/contracts/test_ci_workflow_is_what_it_claims.py",
+    "backend/tests/test_gateway_startup_storage.py",
+    "--basetemp=/tmp/van-recovery-obl004-matrix-integration-20261101",
+    "--junitxml=/workspace/van-obl004-matrix-integration-20261101/tests.xml",
+    "-q"
+  ],
+  "exit": 0,
+  "tests": 81,
+  "failures": 0,
+  "errors": 0,
+  "skipped": 0,
+  "completed": "2026-11-01T17:56:59.081022+00:00",
+  "source_after": {
+    ".github/workflows/van-ci.yml": "da6069dbe578341aacf4f86585c9e531f7bdb95358658a200e2a184149a993f3",
+    "tools/ci/github-actions-ci.yml": "da6069dbe578341aacf4f86585c9e531f7bdb95358658a200e2a184149a993f3",
+    "tools/rebuild/backend_public_source.py": "ff70d356dc7c6e4ea148a478f15399bea0aa8cc7dceaa72b76407f4480b4cbb3",
+    "tools/rebuild/public_source_shards.py": "edabed3737ec4ddd641687c7c3ca7b743c5655367089e2063a3628627211128b",
+    "tools/rebuild/canonical_source_audit.py": "88f7b3efe0791b6a366a0d08e7f3eb6ea7eef0e5c8ec53a145c2771e442cc768",
+    "tests/rebuild/test_public_source_shards.py": "d7bce1c24d8a47062a659c440878b8e78d7c7212a5fb5664eaa59c39affe6bdd",
+    "tests/rebuild/test_canonical_source_audit.py": "a20d46a9122fb966572c0433d6250e8c0dd1b9f33b42168b8bb0fa85e75cc92d",
+    "tests/contracts/test_ci_public_source_shards.py": "c47fc2f7627122dba81805a17c772311a79e68e63b1008da074f32c1304219bd",
+    "backend/tests/test_gateway_startup_storage.py": "797e7f4a54eab7a1b9a51eb96b720f959a3db4dd1de11afb8d60fe2fc37f174a"
+  },
+  "cleanup": {
+    "path": "/tmp/van-recovery-obl004-matrix-integration-20261101",
+    "files": 1258,
+    "inventory": "/workspace/van-obl004-matrix-integration-20261101/owned-temp-inventory.json",
+    "inventory_sha256": "7b1a0a359c5e705e264243c7bdfaa2452363a2116c835848bc5c90c7a669f320",
+    "free_bytes_before_cleanup": 4427317248,
+    "free_bytes_after_cleanup": 4438646784,
+    "free_inodes_after": 2237926,
+    "independently_absent": true
+  }
+}

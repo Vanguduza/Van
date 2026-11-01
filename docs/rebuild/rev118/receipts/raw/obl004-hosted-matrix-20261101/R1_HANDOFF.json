@@ -1,0 +1,72 @@
+{
+  "state": "FROZEN_SOURCE_REVIEW_READY",
+  "base": "53c3457c417a8545380ab8c4e538c727c862dfba",
+  "worktree": "/workspace/van-lanes-20261101/obl004-hosted-matrix",
+  "source_pins": "FINAL_SOURCE_PINS.json",
+  "paths": [
+    ".github/workflows/van-ci.yml",
+    "tools/ci/github-actions-ci.yml",
+    "tools/rebuild/backend_public_source.py",
+    "tools/rebuild/public_source_shards.py",
+    "tools/rebuild/canonical_source_audit.py",
+    "tests/rebuild/test_public_source_shards.py",
+    "tests/rebuild/test_canonical_source_audit.py",
+    "tests/contracts/test_ci_public_source_shards.py",
+    "backend/tests/test_gateway_startup_storage.py"
+  ],
+  "patch": {
+    "path": "/workspace/van-obl004-hosted-matrix-20261101/FINAL.patch",
+    "sha256": "0867baa4e643b27b6f6e2dbf235ae967a481d3f86c9075ab34f14d2187bcaf07"
+  },
+  "archive": {
+    "path": "/workspace/van-obl004-hosted-matrix-20261101/FINAL_SOURCE.zip",
+    "sha256": "f9ef4305ac904f82c5b7bb53c8f37b9e0b38422739b231ae0bb17636f0ce3550",
+    "members_verified": 9
+  },
+  "tests": {
+    "receipt": "FINAL04_RECEIPT.json",
+    "passed": 175,
+    "skipped": 0,
+    "exit": 0,
+    "source_pins_unchanged": true,
+    "children_remaining": []
+  },
+  "mutation": "FINAL_MUTATION_PREFLIGHT.json:374 cases/383 edits/anchors valid; execution NOT_RUN",
+  "workflow_preservation": "WORKFLOW_PRESERVATION.json:12 original jobs unchanged/nine additive IDs/mirror byte-identical",
+  "native_routing": "four exact prerequisite nodes require existing DDS/Java17 AGP owning execution; original non-owning skip evidence retained, unexpected outcomes fail closed",
+  "na": "B1_APPLICABILITY.json:exact click/scroll/select negative probes only, source hashes/reason checked; disclosed separately, never passes",
+  "startup_evidence": [
+    "NATIVE_53C_STARTUP_BEFORE_SANITIZED.log",
+    "STARTUP_HOME_BEFORE_RECEIPT.json",
+    "STARTUP03_RECEIPT.json",
+    "STARTUP04_RECEIPT.json",
+    "STARTUP05_RECEIPT.json",
+    "STARTUP06_RECEIPT.json"
+  ],
+  "prior_failures": [
+    "FOCUSED01_RECEIPT.json",
+    "FOCUSED03_RECEIPT.json",
+    "JOBSET_BEFORE_RECEIPT.json"
+  ],
+  "cleanup": [
+    "COMPLETED_FOCUSED_FIXTURE_CLEANUP.json",
+    "FOCUSED03_CLEANUP.json"
+  ],
+  "android_account_owner": "ANDROID_ACCOUNT_OWNER.json; existing unchanged app compile/test/assemble/lint owner, exact integrated accounts candidate hosted proof pending; no tenth job",
+  "limits": [
+    "No hosted matrix execution or full cwd qualification claimed",
+    "Missing native/private/runtime prerequisites BLOCK full qualification",
+    "No native/unit/admission certificates or source performance claim",
+    "Original historical WAL/SHM disposition remains separately open",
+    "No commits/pushes/generators/authority changes"
+  ],
+  "remaining": [
+    "Independent source review",
+    "Sole integrator apply/publish after review",
+    "Fresh exact-head hosted matrix execution including native-owner capabilities and actual phase/JUnit/source/cwd/storage evidence"
+  ],
+  "free_bytes": {
+    "workspace": 49987584,
+    "tmp": 4347060224
+  }
+}

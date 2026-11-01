@@ -1,0 +1,12 @@
+{
+  "at_utc": "2026-11-01T17:39:52.942917+00:00",
+  "session_id": 6187,
+  "head": "53c3457c417a8545380ab8c4e538c727c862dfba",
+  "run_id": 41324788973,
+  "original_receipt_state": "WATCH_COMPLETED_ONLY_SOURCE_EVIDENCE_UNOBSERVED",
+  "original_watch_exit": 1,
+  "resume_attempt": "one write_stdin attempt returned Unknown process id; not retried",
+  "controller_pid": 725795,
+  "controller_proc_exists": false,
+  "claim": "Terminal controller receipt retained; no successful reaping or replacement watcher claimed; no process signal"
+}
