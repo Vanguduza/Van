@@ -1,0 +1,115 @@
+{
+  "schema": "van.android-reviewed-revocation-caller-repair/1",
+  "at_utc": "2026-11-01T07:54:08.964744+00:00",
+  "source_parent": "25a48fd705825f5eec1264696e91536694cfb82f",
+  "authorizations": [
+    "auth-20261022-owner-autonomous-candidate-build",
+    "auth-20261022-owner-owner-contract-refresh"
+  ],
+  "actual_hosted_failures": {
+    "jobs": [
+      124785597713,
+      124785598037
+    ],
+    "head": "25a48fd705825f5eec1264696e91536694cfb82f",
+    "shared_failure": ":app:compileDebugKotlin; missing dp import and MissionRepository missing reviewed/reviewedProfile arguments",
+    "instrumentation_distinction": "Emulator offline also reported during boot; compilation failed before assertions. No independent instrumentation assertion failure or test count inferred.",
+    "preserved": true
+  },
+  "repair": {
+    "permissions_route": "Import existing Compose dp unit; unchanged reviewed-confirmation flow and design.",
+    "repository": "Require and forward the exact caller-reviewed JSONObject plus captured profile to the existing gateway method; expose corresponding original-detail/profile reads. No fresh selection, empty legacy request, caller deletion, authority creation or auto-confirmation.",
+    "caller_inventory": "All Android Kotlin source sets searched for direct calls and function references. Only reviewed UI call and repository delegate; no repository revocation caller. Existing WorkRoute and MissionControls functions preserved.",
+    "citation": "One explicit original MissionRepository anchor mapped to reviewed three-argument forwarder through genuine guarded exporter; initial guard refusal retained."
+  },
+  "actual_application_compilation": {
+    "exit": 0,
+    "at_utc": "2026-11-01T07:53:01.348941+00:00",
+    "command": "JAVA_HOME=/tmp/van-permission-revocation-jdk/jdk-21.0.13+9 GRADLE_USER_HOME=/tmp/van-permission-revocation-gradle ANDROID_HOME=/tmp/van-android-sdk-20261101/sdk ANDROID_USER_HOME=/tmp/van-android-sdk-20261101/user ./gradlew :app:compileDebugKotlin --no-daemon --max-workers=2 -I /tmp/van-android-sdk-20261101/build-dir.init.gradle -Djavax.net.ssl.trustStore=/etc/ssl/certs/java/cacerts -Dhttps.proxyHost=proxy -Dhttps.proxyPort=8080 -Dhttp.proxyHost=proxy -Dhttp.proxyPort=8080",
+    "cwd": "/workspace/van-review-2026-10-18/publish/android",
+    "result": "BUILD SUCCESSFUL in6m41s;18tasks executed",
+    "source_pins": {
+      "android/app/src/main/java/com/dial/van/command/settings/PermissionsRoute.kt": "3b6b161210b9c49703d8f23335d2c44a73fe25d940c656a1299122c05e725639",
+      "android/app/src/main/java/com/dial/van/mission/MissionRepository.kt": "5a95fba70a2b77f4083791830380c74e92a228b74a9a5d7431101cbdd3dd2a32",
+      "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt": "04f333a5d8312831f31c04546e14277106da44622e8eec4293673de42de1778e",
+      "android/app/src/main/java/com/dial/van/command/work/MissionControls.kt": "9ad358ba7e3c645edf9a93ca329d5117cfa18595cc46d0cedc3d17d15b426eff",
+      "android/app/src/main/java/com/dial/van/command/work/WorkRoute.kt": "75ded073f196a66529467ffc52acb5f7b82c50ce69e4d7fe1493c29edffb3609"
+    },
+    "actual_output_classes": {
+      "MissionRepository.class": {
+        "path": "/tmp/van-android-sdk-20261101/app-build/_app/tmp/kotlin-classes/debug/com/dial/van/mission/MissionRepository.class",
+        "sha256": "7555028464217fef012a2025bf8f5c35983137f35e3355b7a9427dda28163d82"
+      },
+      "PermissionsRouteKt.class": {
+        "path": "/tmp/van-android-sdk-20261101/app-build/_app/tmp/kotlin-classes/debug/com/dial/van/command/settings/PermissionsRouteKt.class",
+        "sha256": "cb35fe8608f356c80d39ace80775634fa27aab290969370c86e66e7b457ce8f0"
+      },
+      "VanGatewayClient.class": {
+        "path": "/tmp/van-android-sdk-20261101/app-build/_app/tmp/kotlin-classes/debug/com/dial/van/gateway/VanGatewayClient.class",
+        "sha256": "4ab8d3e2acdd22a97e793f6c4b90ce629bf3116dbcd4ea716f68ade06d29ab15"
+      }
+    },
+    "not_claimed": "No unit/lint/instrumentation/SDKhandset/native acceptance."
+  },
+  "registry_cases": {
+    "passed": 26,
+    "skipped": 0,
+    "suite": "actual endpoint registry, owner refresh, source workmap"
+  },
+  "contracts": {
+    "endpoints": 486,
+    "schemas": 379,
+    "endpoint_schema_documents_unchanged": true,
+    "features": 42,
+    "functions": 105,
+    "surfaces": 78,
+    "actions": 349
+  },
+  "source_pins": {
+    "android/app/src/main/java/com/dial/van/command/settings/PermissionsRoute.kt": "3b6b161210b9c49703d8f23335d2c44a73fe25d940c656a1299122c05e725639",
+    "android/app/src/main/java/com/dial/van/mission/MissionRepository.kt": "5a95fba70a2b77f4083791830380c74e92a228b74a9a5d7431101cbdd3dd2a32",
+    "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt": "04f333a5d8312831f31c04546e14277106da44622e8eec4293673de42de1778e"
+  },
+  "scope_limits": [
+    "Actual app debug Kotlin compilation only; no unit/lint/instrumentation test completion inferred.",
+    "First offline build failed on uncached AGP, retained separately from source compilation.",
+    "Genuine owned SDK/JDK/Gradle setup uses verified official metadata/TLS/system CA; output location redirect only, no security/compiler assertion bypass.",
+    "Source/native/unit/BG001/provider/device/production/signing/release acceptance unissued; trusted checker and DDS read-key mandatory gates unwaived.",
+    "Prior25a Android failures and32d/backend/family historical failures remain failed.",
+    "Google LAC230 packet remains isolated unless explicitly integrated and independently reviewed; no installer edit."
+  ],
+  "raw_files": {
+    "docs/rebuild/rev118/receipts/raw/android-reviewed-revocation-20261101/workmap-apply.log": "6e20f8f2172ee5c1d1fce0a0c754de3b77fe5a107aa568cdf51b6c0797a54037",
+    "docs/rebuild/rev118/receipts/raw/android-reviewed-revocation-20261101/workmap-apply-reviewed.log": "6e20f8f2172ee5c1d1fce0a0c754de3b77fe5a107aa568cdf51b6c0797a54037",
+    "docs/rebuild/rev118/receipts/raw/android-reviewed-revocation-20261101/job-124785597713-original.log": "5a8290ec21f59047817c0cc79414f4d12cdc69262fc9172cf6f6f8185ac8cbd5",
+    "docs/rebuild/rev118/receipts/raw/android-reviewed-revocation-20261101/owner-apply.log": "d2d9ffd5c210a80e9e731498051ecdbf878c202127f4f680d2387d40304409ea",
+    "docs/rebuild/rev118/receipts/raw/android-reviewed-revocation-20261101/app-compile-online-r1.log": "d877f5587949928ad9a873be357479704c311c54a485ee0ffbbfa83b7bd2bb53",
+    "docs/rebuild/rev118/receipts/raw/android-reviewed-revocation-20261101/app-compile-offline-before.log": "40885fee6bf1b7ad34a634860100e46f01c4d2f8113ed07e25a93d4f383d242e",
+    "docs/rebuild/rev118/receipts/raw/android-reviewed-revocation-20261101/sdk-licenses.log": "bd5f070c2165eeddc53fd5c04be59d436b5c7eec96c097a32cd5c7cb98ba4c4a",
+    "docs/rebuild/rev118/receipts/raw/android-reviewed-revocation-20261101/owner-apply-reviewed.log": "27e56df32ffa1a0f411b17cabd923f7a5148acafcee3def8864224e41a3ff808",
+    "docs/rebuild/rev118/receipts/raw/android-reviewed-revocation-20261101/frontend-apply-reviewed.log": "6d87bea55f2ed8ec080db391dd3a50a2c6d4b1c45adbcd631c888108b54cd454",
+    "docs/rebuild/rev118/receipts/raw/android-reviewed-revocation-20261101/job-124785598037-original.log": "f35bfb1d4c7c3b7ae9a5849bf0d358f259ff0f1382bc92fc9a609f7b430b1ec7",
+    "docs/rebuild/rev118/receipts/raw/android-reviewed-revocation-20261101/frontend-apply.log": "d987258f8bad7eb00fbf07943ef75fd0d8da5641b0e32cd76429907b3d5a380f",
+    "docs/rebuild/rev118/receipts/raw/android-reviewed-revocation-20261101/sdk-command-tools-metadata.json": "b23f18135a85798436d3765676f4b9c32857f8c2e8318773f7b270600599db00",
+    "docs/rebuild/rev118/receipts/raw/android-reviewed-revocation-20261101/selection.json": "2a4fc58438d872be38a62f020454e5d48aaab4af6c6d883f51e5e39a815db0d3",
+    "docs/rebuild/rev118/receipts/raw/android-reviewed-revocation-20261101/WIP_BACKUP.json": "e963fd142d49939987c31b7db579f8764eb58f9fd136dda782ca7602a3315ea5",
+    "docs/rebuild/rev118/receipts/raw/android-reviewed-revocation-20261101/canonical-kotlin-consumer-inventory.txt": "bd84928e7561a294d7be1a2fd8155ae5f8f7835c05196c9ba6cc98e3cec1170b",
+    "docs/rebuild/rev118/receipts/raw/android-reviewed-revocation-20261101/sdk-install.log": "312509d75b498cc92d2cbb274cb1c2b960da260f2553c916d86b1100a57557cf",
+    "docs/rebuild/rev118/receipts/raw/android-reviewed-revocation-20261101/consolidation.log": "d87b8fe5f7b2b4ca7312b9ba93c4e1aa24ae2301f775aa6f915d81572aec7870",
+    "docs/rebuild/rev118/receipts/raw/android-reviewed-revocation-20261101/mutation-consistency.log": "131959a4576e7b5a8ebd678f508cca5c1107c9e4cc15c27d3c22121e5ac1b299",
+    "docs/rebuild/rev118/receipts/raw/android-reviewed-revocation-20261101/APP_COMPILE_RECEIPT.json": "945f96c3a0dedb5f5ec457a955ef01945320e441c41c38857080ed4cf153d64c",
+    "docs/rebuild/rev118/receipts/raw/android-reviewed-revocation-20261101/SDK_SETUP_RECEIPT.json": "7409f88cf6a5cc1b14a1e45a0a91af2dbc26a299311f30c0cedd3ce92822bb05",
+    "docs/rebuild/rev118/receipts/raw/android-reviewed-revocation-20261101/original-hosted-snapshot.json": "6cf70fe9218ba8cba2115e0bca564308f10c57a934d4ef225cec30aa777714f0",
+    "docs/rebuild/rev118/receipts/raw/android-reviewed-revocation-20261101/registry-cases/owned-temp-inventory.json": "63104ff5dd4142a4fcaf9ea0974c52e58d121a51f24373094cddeb671372faa5",
+    "docs/rebuild/rev118/receipts/raw/android-reviewed-revocation-20261101/registry-cases/tests.xml": "b690a4038058ed775bc7f0e61f7bb24f22bb5c1634c5713f3bb2693e727f7439",
+    "docs/rebuild/rev118/receipts/raw/android-reviewed-revocation-20261101/registry-cases/storage-audit.json": "03b5b2afac2978cda8a845c9a6eec9e8d20b13abe2960e09fcc8f1fccbcc2cb7",
+    "docs/rebuild/rev118/receipts/raw/android-reviewed-revocation-20261101/registry-cases/receipt.json": "1cfe7d9bbd465e59c3176d38c0fce86b71b2a2024d8bcb7a09771cd3e251b8e0",
+    "docs/rebuild/rev118/receipts/raw/android-reviewed-revocation-20261101/registry-cases/tests.log": "28bf70f44057d3187bda1a3199cd9b49f5eb38cbbbb0a79aa1e48e7308f75639",
+    "docs/rebuild/rev118/receipts/raw/android-reviewed-revocation-20261101/final-guards/workmap.log": "6e20f8f2172ee5c1d1fce0a0c754de3b77fe5a107aa568cdf51b6c0797a54037",
+    "docs/rebuild/rev118/receipts/raw/android-reviewed-revocation-20261101/final-guards/receipt.json": "d3158be7330bb03a15e65d3a2d1503dd782d570f64802d053147cdc01485bc0f",
+    "docs/rebuild/rev118/receipts/raw/android-reviewed-revocation-20261101/final-guards/mutation.log": "131959a4576e7b5a8ebd678f508cca5c1107c9e4cc15c27d3c22121e5ac1b299",
+    "docs/rebuild/rev118/receipts/raw/android-reviewed-revocation-20261101/final-guards/frontend.log": "69dcc86a9d7aaffcadf4a70e58b379d8452c124dadc4347afbc9e57fbab7ae85",
+    "docs/rebuild/rev118/receipts/raw/android-reviewed-revocation-20261101/final-guards/owner.log": "35a9b4641c85055b16c3a6458a7b1f99fb5df7ec0f5a6280ca45c3ab14cd7103",
+    "docs/rebuild/rev118/receipts/raw/android-reviewed-revocation-20261101/final-guards/consolidation.log": "d87b8fe5f7b2b4ca7312b9ba93c4e1aa24ae2301f775aa6f915d81572aec7870"
+  }
+}

@@ -169,7 +169,7 @@
               "file": "android/app/src/main/java/com/dial/van/mission/MissionRepository.kt",
               "line": 54,
               "ref": "WORKSPACE_PATCH",
-              "sha256": "2275ae57d7eb2ec232567a84b7a425246353246a586abf7498049642ea0218b1",
+              "sha256": "5a95fba70a2b77f4083791830380c74e92a228b74a9a5d7431101cbdd3dd2a32",
               "receiver": "client",
               "symbol": "health",
               "namespace": "VanGatewayClient",
@@ -178,7 +178,7 @@
                 "file": "android/app/src/main/java/com/dial/van/mission/MissionRepository.kt",
                 "line": 29,
                 "ref": "WORKSPACE_PATCH",
-                "sha256": "2275ae57d7eb2ec232567a84b7a425246353246a586abf7498049642ea0218b1"
+                "sha256": "5a95fba70a2b77f4083791830380c74e92a228b74a9a5d7431101cbdd3dd2a32"
               }
             }
           ],
@@ -267,7 +267,7 @@
               "file": "android/app/src/main/java/com/dial/van/mission/MissionRepository.kt",
               "line": 34,
               "ref": "WORKSPACE_PATCH",
-              "sha256": "2275ae57d7eb2ec232567a84b7a425246353246a586abf7498049642ea0218b1",
+              "sha256": "5a95fba70a2b77f4083791830380c74e92a228b74a9a5d7431101cbdd3dd2a32",
               "receiver": "client",
               "symbol": "missions",
               "namespace": "VanGatewayClient",
@@ -276,14 +276,14 @@
                 "file": "android/app/src/main/java/com/dial/van/mission/MissionRepository.kt",
                 "line": 29,
                 "ref": "WORKSPACE_PATCH",
-                "sha256": "2275ae57d7eb2ec232567a84b7a425246353246a586abf7498049642ea0218b1"
+                "sha256": "5a95fba70a2b77f4083791830380c74e92a228b74a9a5d7431101cbdd3dd2a32"
               }
             },
             {
               "file": "android/app/src/main/java/com/dial/van/mission/MissionRepository.kt",
               "line": 60,
               "ref": "WORKSPACE_PATCH",
-              "sha256": "2275ae57d7eb2ec232567a84b7a425246353246a586abf7498049642ea0218b1",
+              "sha256": "5a95fba70a2b77f4083791830380c74e92a228b74a9a5d7431101cbdd3dd2a32",
               "receiver": "client",
               "symbol": "missions",
               "namespace": "VanGatewayClient",
@@ -292,7 +292,7 @@
                 "file": "android/app/src/main/java/com/dial/van/mission/MissionRepository.kt",
                 "line": 29,
                 "ref": "WORKSPACE_PATCH",
-                "sha256": "2275ae57d7eb2ec232567a84b7a425246353246a586abf7498049642ea0218b1"
+                "sha256": "5a95fba70a2b77f4083791830380c74e92a228b74a9a5d7431101cbdd3dd2a32"
               }
             },
             {
@@ -527,7 +527,7 @@
           "file": "android/app/src/main/java/com/dial/van/mission/MissionRepository.kt",
           "line": 54,
           "ref": "WORKSPACE_PATCH",
-          "sha256": "2275ae57d7eb2ec232567a84b7a425246353246a586abf7498049642ea0218b1",
+          "sha256": "5a95fba70a2b77f4083791830380c74e92a228b74a9a5d7431101cbdd3dd2a32",
           "receiver": "client",
           "symbol": "health",
           "namespace": "VanGatewayClient",
@@ -536,7 +536,7 @@
             "file": "android/app/src/main/java/com/dial/van/mission/MissionRepository.kt",
             "line": 29,
             "ref": "WORKSPACE_PATCH",
-            "sha256": "2275ae57d7eb2ec232567a84b7a425246353246a586abf7498049642ea0218b1"
+            "sha256": "5a95fba70a2b77f4083791830380c74e92a228b74a9a5d7431101cbdd3dd2a32"
           },
           "endpoint_id": "VE-74fac65f350e",
           "kind": "direct_client_method"
@@ -599,7 +599,7 @@
           "file": "android/app/src/main/java/com/dial/van/mission/MissionRepository.kt",
           "line": 34,
           "ref": "WORKSPACE_PATCH",
-          "sha256": "2275ae57d7eb2ec232567a84b7a425246353246a586abf7498049642ea0218b1",
+          "sha256": "5a95fba70a2b77f4083791830380c74e92a228b74a9a5d7431101cbdd3dd2a32",
           "receiver": "client",
           "symbol": "missions",
           "namespace": "VanGatewayClient",
@@ -608,7 +608,7 @@
             "file": "android/app/src/main/java/com/dial/van/mission/MissionRepository.kt",
             "line": 29,
             "ref": "WORKSPACE_PATCH",
-            "sha256": "2275ae57d7eb2ec232567a84b7a425246353246a586abf7498049642ea0218b1"
+            "sha256": "5a95fba70a2b77f4083791830380c74e92a228b74a9a5d7431101cbdd3dd2a32"
           },
           "endpoint_id": "VE-2f81bbca1537",
           "kind": "direct_client_method"
@@ -617,7 +617,7 @@
           "file": "android/app/src/main/java/com/dial/van/mission/MissionRepository.kt",
           "line": 60,
           "ref": "WORKSPACE_PATCH",
-          "sha256": "2275ae57d7eb2ec232567a84b7a425246353246a586abf7498049642ea0218b1",
+          "sha256": "5a95fba70a2b77f4083791830380c74e92a228b74a9a5d7431101cbdd3dd2a32",
           "receiver": "client",
           "symbol": "missions",
           "namespace": "VanGatewayClient",
@@ -626,7 +626,7 @@
             "file": "android/app/src/main/java/com/dial/van/mission/MissionRepository.kt",
             "line": 29,
             "ref": "WORKSPACE_PATCH",
-            "sha256": "2275ae57d7eb2ec232567a84b7a425246353246a586abf7498049642ea0218b1"
+            "sha256": "5a95fba70a2b77f4083791830380c74e92a228b74a9a5d7431101cbdd3dd2a32"
           },
           "endpoint_id": "VE-2f81bbca1537",
           "kind": "direct_client_method"
@@ -2389,7 +2389,7 @@
               "file": "android/app/src/main/java/com/dial/van/mission/MissionRepository.kt",
               "line": 34,
               "ref": "WORKSPACE_PATCH",
-              "sha256": "2275ae57d7eb2ec232567a84b7a425246353246a586abf7498049642ea0218b1",
+              "sha256": "5a95fba70a2b77f4083791830380c74e92a228b74a9a5d7431101cbdd3dd2a32",
               "receiver": "client",
               "symbol": "missions",
               "namespace": "VanGatewayClient",
@@ -2398,14 +2398,14 @@
                 "file": "android/app/src/main/java/com/dial/van/mission/MissionRepository.kt",
                 "line": 29,
                 "ref": "WORKSPACE_PATCH",
-                "sha256": "2275ae57d7eb2ec232567a84b7a425246353246a586abf7498049642ea0218b1"
+                "sha256": "5a95fba70a2b77f4083791830380c74e92a228b74a9a5d7431101cbdd3dd2a32"
               }
             },
             {
               "file": "android/app/src/main/java/com/dial/van/mission/MissionRepository.kt",
               "line": 60,
               "ref": "WORKSPACE_PATCH",
-              "sha256": "2275ae57d7eb2ec232567a84b7a425246353246a586abf7498049642ea0218b1",
+              "sha256": "5a95fba70a2b77f4083791830380c74e92a228b74a9a5d7431101cbdd3dd2a32",
               "receiver": "client",
               "symbol": "missions",
               "namespace": "VanGatewayClient",
@@ -2414,7 +2414,7 @@
                 "file": "android/app/src/main/java/com/dial/van/mission/MissionRepository.kt",
                 "line": 29,
                 "ref": "WORKSPACE_PATCH",
-                "sha256": "2275ae57d7eb2ec232567a84b7a425246353246a586abf7498049642ea0218b1"
+                "sha256": "5a95fba70a2b77f4083791830380c74e92a228b74a9a5d7431101cbdd3dd2a32"
               }
             },
             {
@@ -2478,7 +2478,7 @@
               "file": "android/app/src/main/java/com/dial/van/mission/MissionRepository.kt",
               "line": 62,
               "ref": "WORKSPACE_PATCH",
-              "sha256": "2275ae57d7eb2ec232567a84b7a425246353246a586abf7498049642ea0218b1",
+              "sha256": "5a95fba70a2b77f4083791830380c74e92a228b74a9a5d7431101cbdd3dd2a32",
               "receiver": "client",
               "symbol": "mission",
               "namespace": "VanGatewayClient",
@@ -2487,14 +2487,14 @@
                 "file": "android/app/src/main/java/com/dial/van/mission/MissionRepository.kt",
                 "line": 29,
                 "ref": "WORKSPACE_PATCH",
-                "sha256": "2275ae57d7eb2ec232567a84b7a425246353246a586abf7498049642ea0218b1"
+                "sha256": "5a95fba70a2b77f4083791830380c74e92a228b74a9a5d7431101cbdd3dd2a32"
               }
             },
             {
               "file": "android/app/src/main/java/com/dial/van/mission/MissionRepository.kt",
               "line": 66,
               "ref": "WORKSPACE_PATCH",
-              "sha256": "2275ae57d7eb2ec232567a84b7a425246353246a586abf7498049642ea0218b1",
+              "sha256": "5a95fba70a2b77f4083791830380c74e92a228b74a9a5d7431101cbdd3dd2a32",
               "receiver": "client",
               "symbol": "mission",
               "namespace": "VanGatewayClient",
@@ -2503,7 +2503,7 @@
                 "file": "android/app/src/main/java/com/dial/van/mission/MissionRepository.kt",
                 "line": 29,
                 "ref": "WORKSPACE_PATCH",
-                "sha256": "2275ae57d7eb2ec232567a84b7a425246353246a586abf7498049642ea0218b1"
+                "sha256": "5a95fba70a2b77f4083791830380c74e92a228b74a9a5d7431101cbdd3dd2a32"
               }
             }
           ],
@@ -2551,7 +2551,7 @@
               "file": "android/app/src/main/java/com/dial/van/mission/MissionRepository.kt",
               "line": 67,
               "ref": "WORKSPACE_PATCH",
-              "sha256": "2275ae57d7eb2ec232567a84b7a425246353246a586abf7498049642ea0218b1",
+              "sha256": "5a95fba70a2b77f4083791830380c74e92a228b74a9a5d7431101cbdd3dd2a32",
               "receiver": "client",
               "symbol": "missionActivity",
               "namespace": "VanGatewayClient",
@@ -2560,7 +2560,7 @@
                 "file": "android/app/src/main/java/com/dial/van/mission/MissionRepository.kt",
                 "line": 29,
                 "ref": "WORKSPACE_PATCH",
-                "sha256": "2275ae57d7eb2ec232567a84b7a425246353246a586abf7498049642ea0218b1"
+                "sha256": "5a95fba70a2b77f4083791830380c74e92a228b74a9a5d7431101cbdd3dd2a32"
               }
             }
           ],
@@ -2592,7 +2592,7 @@
               "file": "android/app/src/main/java/com/dial/van/mission/MissionRepository.kt",
               "line": 83,
               "ref": "WORKSPACE_PATCH",
-              "sha256": "2275ae57d7eb2ec232567a84b7a425246353246a586abf7498049642ea0218b1",
+              "sha256": "5a95fba70a2b77f4083791830380c74e92a228b74a9a5d7431101cbdd3dd2a32",
               "receiver": "client",
               "symbol": "missionEvidence",
               "namespace": "VanGatewayClient",
@@ -2601,7 +2601,7 @@
                 "file": "android/app/src/main/java/com/dial/van/mission/MissionRepository.kt",
                 "line": 29,
                 "ref": "WORKSPACE_PATCH",
-                "sha256": "2275ae57d7eb2ec232567a84b7a425246353246a586abf7498049642ea0218b1"
+                "sha256": "5a95fba70a2b77f4083791830380c74e92a228b74a9a5d7431101cbdd3dd2a32"
               }
             }
           ],
@@ -2633,7 +2633,7 @@
               "file": "android/app/src/main/java/com/dial/van/mission/MissionRepository.kt",
               "line": 89,
               "ref": "WORKSPACE_PATCH",
-              "sha256": "2275ae57d7eb2ec232567a84b7a425246353246a586abf7498049642ea0218b1",
+              "sha256": "5a95fba70a2b77f4083791830380c74e92a228b74a9a5d7431101cbdd3dd2a32",
               "receiver": "client",
               "symbol": "activityFeed",
               "namespace": "VanGatewayClient",
@@ -2642,7 +2642,7 @@
                 "file": "android/app/src/main/java/com/dial/van/mission/MissionRepository.kt",
                 "line": 29,
                 "ref": "WORKSPACE_PATCH",
-                "sha256": "2275ae57d7eb2ec232567a84b7a425246353246a586abf7498049642ea0218b1"
+                "sha256": "5a95fba70a2b77f4083791830380c74e92a228b74a9a5d7431101cbdd3dd2a32"
               }
             }
           ],
@@ -2681,7 +2681,7 @@
           "file": "android/app/src/main/java/com/dial/van/mission/MissionRepository.kt",
           "line": 34,
           "ref": "WORKSPACE_PATCH",
-          "sha256": "2275ae57d7eb2ec232567a84b7a425246353246a586abf7498049642ea0218b1",
+          "sha256": "5a95fba70a2b77f4083791830380c74e92a228b74a9a5d7431101cbdd3dd2a32",
           "receiver": "client",
           "symbol": "missions",
           "namespace": "VanGatewayClient",
@@ -2690,7 +2690,7 @@
             "file": "android/app/src/main/java/com/dial/van/mission/MissionRepository.kt",
             "line": 29,
             "ref": "WORKSPACE_PATCH",
-            "sha256": "2275ae57d7eb2ec232567a84b7a425246353246a586abf7498049642ea0218b1"
+            "sha256": "5a95fba70a2b77f4083791830380c74e92a228b74a9a5d7431101cbdd3dd2a32"
           },
           "endpoint_id": "VE-2f81bbca1537",
           "kind": "direct_client_method"
@@ -2699,7 +2699,7 @@
           "file": "android/app/src/main/java/com/dial/van/mission/MissionRepository.kt",
           "line": 60,
           "ref": "WORKSPACE_PATCH",
-          "sha256": "2275ae57d7eb2ec232567a84b7a425246353246a586abf7498049642ea0218b1",
+          "sha256": "5a95fba70a2b77f4083791830380c74e92a228b74a9a5d7431101cbdd3dd2a32",
           "receiver": "client",
           "symbol": "missions",
           "namespace": "VanGatewayClient",
@@ -2708,7 +2708,7 @@
             "file": "android/app/src/main/java/com/dial/van/mission/MissionRepository.kt",
             "line": 29,
             "ref": "WORKSPACE_PATCH",
-            "sha256": "2275ae57d7eb2ec232567a84b7a425246353246a586abf7498049642ea0218b1"
+            "sha256": "5a95fba70a2b77f4083791830380c74e92a228b74a9a5d7431101cbdd3dd2a32"
           },
           "endpoint_id": "VE-2f81bbca1537",
           "kind": "direct_client_method"
@@ -2762,7 +2762,7 @@
           "file": "android/app/src/main/java/com/dial/van/mission/MissionRepository.kt",
           "line": 62,
           "ref": "WORKSPACE_PATCH",
-          "sha256": "2275ae57d7eb2ec232567a84b7a425246353246a586abf7498049642ea0218b1",
+          "sha256": "5a95fba70a2b77f4083791830380c74e92a228b74a9a5d7431101cbdd3dd2a32",
           "receiver": "client",
           "symbol": "mission",
           "namespace": "VanGatewayClient",
@@ -2771,7 +2771,7 @@
             "file": "android/app/src/main/java/com/dial/van/mission/MissionRepository.kt",
             "line": 29,
             "ref": "WORKSPACE_PATCH",
-            "sha256": "2275ae57d7eb2ec232567a84b7a425246353246a586abf7498049642ea0218b1"
+            "sha256": "5a95fba70a2b77f4083791830380c74e92a228b74a9a5d7431101cbdd3dd2a32"
           },
           "endpoint_id": "VE-d3e2c34b7805",
           "kind": "direct_client_method"
@@ -2780,7 +2780,7 @@
           "file": "android/app/src/main/java/com/dial/van/mission/MissionRepository.kt",
           "line": 66,
           "ref": "WORKSPACE_PATCH",
-          "sha256": "2275ae57d7eb2ec232567a84b7a425246353246a586abf7498049642ea0218b1",
+          "sha256": "5a95fba70a2b77f4083791830380c74e92a228b74a9a5d7431101cbdd3dd2a32",
           "receiver": "client",
           "symbol": "mission",
           "namespace": "VanGatewayClient",
@@ -2789,7 +2789,7 @@
             "file": "android/app/src/main/java/com/dial/van/mission/MissionRepository.kt",
             "line": 29,
             "ref": "WORKSPACE_PATCH",
-            "sha256": "2275ae57d7eb2ec232567a84b7a425246353246a586abf7498049642ea0218b1"
+            "sha256": "5a95fba70a2b77f4083791830380c74e92a228b74a9a5d7431101cbdd3dd2a32"
           },
           "endpoint_id": "VE-d3e2c34b7805",
           "kind": "direct_client_method"
@@ -2825,7 +2825,7 @@
           "file": "android/app/src/main/java/com/dial/van/mission/MissionRepository.kt",
           "line": 67,
           "ref": "WORKSPACE_PATCH",
-          "sha256": "2275ae57d7eb2ec232567a84b7a425246353246a586abf7498049642ea0218b1",
+          "sha256": "5a95fba70a2b77f4083791830380c74e92a228b74a9a5d7431101cbdd3dd2a32",
           "receiver": "client",
           "symbol": "missionActivity",
           "namespace": "VanGatewayClient",
@@ -2834,7 +2834,7 @@
             "file": "android/app/src/main/java/com/dial/van/mission/MissionRepository.kt",
             "line": 29,
             "ref": "WORKSPACE_PATCH",
-            "sha256": "2275ae57d7eb2ec232567a84b7a425246353246a586abf7498049642ea0218b1"
+            "sha256": "5a95fba70a2b77f4083791830380c74e92a228b74a9a5d7431101cbdd3dd2a32"
           },
           "endpoint_id": "VE-49f6dcd57177",
           "kind": "direct_client_method"
@@ -2852,7 +2852,7 @@
           "file": "android/app/src/main/java/com/dial/van/mission/MissionRepository.kt",
           "line": 83,
           "ref": "WORKSPACE_PATCH",
-          "sha256": "2275ae57d7eb2ec232567a84b7a425246353246a586abf7498049642ea0218b1",
+          "sha256": "5a95fba70a2b77f4083791830380c74e92a228b74a9a5d7431101cbdd3dd2a32",
           "receiver": "client",
           "symbol": "missionEvidence",
           "namespace": "VanGatewayClient",
@@ -2861,7 +2861,7 @@
             "file": "android/app/src/main/java/com/dial/van/mission/MissionRepository.kt",
             "line": 29,
             "ref": "WORKSPACE_PATCH",
-            "sha256": "2275ae57d7eb2ec232567a84b7a425246353246a586abf7498049642ea0218b1"
+            "sha256": "5a95fba70a2b77f4083791830380c74e92a228b74a9a5d7431101cbdd3dd2a32"
           },
           "endpoint_id": "VE-c472993970d4",
           "kind": "direct_client_method"
@@ -2879,7 +2879,7 @@
           "file": "android/app/src/main/java/com/dial/van/mission/MissionRepository.kt",
           "line": 89,
           "ref": "WORKSPACE_PATCH",
-          "sha256": "2275ae57d7eb2ec232567a84b7a425246353246a586abf7498049642ea0218b1",
+          "sha256": "5a95fba70a2b77f4083791830380c74e92a228b74a9a5d7431101cbdd3dd2a32",
           "receiver": "client",
           "symbol": "activityFeed",
           "namespace": "VanGatewayClient",
@@ -2888,7 +2888,7 @@
             "file": "android/app/src/main/java/com/dial/van/mission/MissionRepository.kt",
             "line": 29,
             "ref": "WORKSPACE_PATCH",
-            "sha256": "2275ae57d7eb2ec232567a84b7a425246353246a586abf7498049642ea0218b1"
+            "sha256": "5a95fba70a2b77f4083791830380c74e92a228b74a9a5d7431101cbdd3dd2a32"
           },
           "endpoint_id": "VE-317b565f499e",
           "kind": "direct_client_method"
@@ -3704,7 +3704,7 @@
               "file": "android/app/src/main/java/com/dial/van/mission/MissionRepository.kt",
               "line": 125,
               "ref": "WORKSPACE_PATCH",
-              "sha256": "2275ae57d7eb2ec232567a84b7a425246353246a586abf7498049642ea0218b1",
+              "sha256": "5a95fba70a2b77f4083791830380c74e92a228b74a9a5d7431101cbdd3dd2a32",
               "receiver": "client",
               "symbol": "cancelMission",
               "namespace": "VanGatewayClient",
@@ -3713,7 +3713,7 @@
                 "file": "android/app/src/main/java/com/dial/van/mission/MissionRepository.kt",
                 "line": 29,
                 "ref": "WORKSPACE_PATCH",
-                "sha256": "2275ae57d7eb2ec232567a84b7a425246353246a586abf7498049642ea0218b1"
+                "sha256": "5a95fba70a2b77f4083791830380c74e92a228b74a9a5d7431101cbdd3dd2a32"
               }
             }
           ],
@@ -3745,7 +3745,7 @@
               "file": "android/app/src/main/java/com/dial/van/mission/MissionRepository.kt",
               "line": 128,
               "ref": "WORKSPACE_PATCH",
-              "sha256": "2275ae57d7eb2ec232567a84b7a425246353246a586abf7498049642ea0218b1",
+              "sha256": "5a95fba70a2b77f4083791830380c74e92a228b74a9a5d7431101cbdd3dd2a32",
               "receiver": "client",
               "symbol": "messageMission",
               "namespace": "VanGatewayClient",
@@ -3754,7 +3754,7 @@
                 "file": "android/app/src/main/java/com/dial/van/mission/MissionRepository.kt",
                 "line": 29,
                 "ref": "WORKSPACE_PATCH",
-                "sha256": "2275ae57d7eb2ec232567a84b7a425246353246a586abf7498049642ea0218b1"
+                "sha256": "5a95fba70a2b77f4083791830380c74e92a228b74a9a5d7431101cbdd3dd2a32"
               }
             }
           ],
@@ -3996,7 +3996,7 @@
           "file": "android/app/src/main/java/com/dial/van/mission/MissionRepository.kt",
           "line": 125,
           "ref": "WORKSPACE_PATCH",
-          "sha256": "2275ae57d7eb2ec232567a84b7a425246353246a586abf7498049642ea0218b1",
+          "sha256": "5a95fba70a2b77f4083791830380c74e92a228b74a9a5d7431101cbdd3dd2a32",
           "receiver": "client",
           "symbol": "cancelMission",
           "namespace": "VanGatewayClient",
@@ -4005,7 +4005,7 @@
             "file": "android/app/src/main/java/com/dial/van/mission/MissionRepository.kt",
             "line": 29,
             "ref": "WORKSPACE_PATCH",
-            "sha256": "2275ae57d7eb2ec232567a84b7a425246353246a586abf7498049642ea0218b1"
+            "sha256": "5a95fba70a2b77f4083791830380c74e92a228b74a9a5d7431101cbdd3dd2a32"
           },
           "endpoint_id": "VE-a9de18603483",
           "kind": "direct_client_method"
@@ -4023,7 +4023,7 @@
           "file": "android/app/src/main/java/com/dial/van/mission/MissionRepository.kt",
           "line": 128,
           "ref": "WORKSPACE_PATCH",
-          "sha256": "2275ae57d7eb2ec232567a84b7a425246353246a586abf7498049642ea0218b1",
+          "sha256": "5a95fba70a2b77f4083791830380c74e92a228b74a9a5d7431101cbdd3dd2a32",
           "receiver": "client",
           "symbol": "messageMission",
           "namespace": "VanGatewayClient",
@@ -4032,7 +4032,7 @@
             "file": "android/app/src/main/java/com/dial/van/mission/MissionRepository.kt",
             "line": 29,
             "ref": "WORKSPACE_PATCH",
-            "sha256": "2275ae57d7eb2ec232567a84b7a425246353246a586abf7498049642ea0218b1"
+            "sha256": "5a95fba70a2b77f4083791830380c74e92a228b74a9a5d7431101cbdd3dd2a32"
           },
           "endpoint_id": "VE-1d2505634f4b",
           "kind": "direct_client_method"
@@ -4429,7 +4429,7 @@
                 "file": "android/app/src/main/java/com/dial/van/mission/MissionRepository.kt",
                 "line": 125,
                 "ref": "WORKSPACE_PATCH",
-                "sha256": "2275ae57d7eb2ec232567a84b7a425246353246a586abf7498049642ea0218b1"
+                "sha256": "5a95fba70a2b77f4083791830380c74e92a228b74a9a5d7431101cbdd3dd2a32"
               },
               {
                 "file": "android/app/src/main/java/com/dial/van/mission/MissionIntervention.kt",
@@ -5673,7 +5673,7 @@
               "file": "android/app/src/main/java/com/dial/van/mission/MissionRepository.kt",
               "line": 33,
               "ref": "WORKSPACE_PATCH",
-              "sha256": "2275ae57d7eb2ec232567a84b7a425246353246a586abf7498049642ea0218b1",
+              "sha256": "5a95fba70a2b77f4083791830380c74e92a228b74a9a5d7431101cbdd3dd2a32",
               "receiver": "client",
               "symbol": "needsYou",
               "namespace": "VanGatewayClient",
@@ -5682,7 +5682,7 @@
                 "file": "android/app/src/main/java/com/dial/van/mission/MissionRepository.kt",
                 "line": 29,
                 "ref": "WORKSPACE_PATCH",
-                "sha256": "2275ae57d7eb2ec232567a84b7a425246353246a586abf7498049642ea0218b1"
+                "sha256": "5a95fba70a2b77f4083791830380c74e92a228b74a9a5d7431101cbdd3dd2a32"
               }
             }
           ],
@@ -5803,7 +5803,7 @@
               "file": "android/app/src/main/java/com/dial/van/mission/MissionRepository.kt",
               "line": 132,
               "ref": "WORKSPACE_PATCH",
-              "sha256": "2275ae57d7eb2ec232567a84b7a425246353246a586abf7498049642ea0218b1",
+              "sha256": "5a95fba70a2b77f4083791830380c74e92a228b74a9a5d7431101cbdd3dd2a32",
               "receiver": "client",
               "symbol": "resolveDecision",
               "namespace": "VanGatewayClient",
@@ -5812,7 +5812,7 @@
                 "file": "android/app/src/main/java/com/dial/van/mission/MissionRepository.kt",
                 "line": 29,
                 "ref": "WORKSPACE_PATCH",
-                "sha256": "2275ae57d7eb2ec232567a84b7a425246353246a586abf7498049642ea0218b1"
+                "sha256": "5a95fba70a2b77f4083791830380c74e92a228b74a9a5d7431101cbdd3dd2a32"
               }
             }
           ],
@@ -5933,7 +5933,7 @@
           "file": "android/app/src/main/java/com/dial/van/mission/MissionRepository.kt",
           "line": 33,
           "ref": "WORKSPACE_PATCH",
-          "sha256": "2275ae57d7eb2ec232567a84b7a425246353246a586abf7498049642ea0218b1",
+          "sha256": "5a95fba70a2b77f4083791830380c74e92a228b74a9a5d7431101cbdd3dd2a32",
           "receiver": "client",
           "symbol": "needsYou",
           "namespace": "VanGatewayClient",
@@ -5942,7 +5942,7 @@
             "file": "android/app/src/main/java/com/dial/van/mission/MissionRepository.kt",
             "line": 29,
             "ref": "WORKSPACE_PATCH",
-            "sha256": "2275ae57d7eb2ec232567a84b7a425246353246a586abf7498049642ea0218b1"
+            "sha256": "5a95fba70a2b77f4083791830380c74e92a228b74a9a5d7431101cbdd3dd2a32"
           },
           "endpoint_id": "VE-a1156fd05054",
           "kind": "direct_client_method"
@@ -6041,7 +6041,7 @@
           "file": "android/app/src/main/java/com/dial/van/mission/MissionRepository.kt",
           "line": 132,
           "ref": "WORKSPACE_PATCH",
-          "sha256": "2275ae57d7eb2ec232567a84b7a425246353246a586abf7498049642ea0218b1",
+          "sha256": "5a95fba70a2b77f4083791830380c74e92a228b74a9a5d7431101cbdd3dd2a32",
           "receiver": "client",
           "symbol": "resolveDecision",
           "namespace": "VanGatewayClient",
@@ -6050,7 +6050,7 @@
             "file": "android/app/src/main/java/com/dial/van/mission/MissionRepository.kt",
             "line": 29,
             "ref": "WORKSPACE_PATCH",
-            "sha256": "2275ae57d7eb2ec232567a84b7a425246353246a586abf7498049642ea0218b1"
+            "sha256": "5a95fba70a2b77f4083791830380c74e92a228b74a9a5d7431101cbdd3dd2a32"
           },
           "endpoint_id": "VE-1df5172aa202",
           "kind": "direct_client_method"
@@ -6843,9 +6843,9 @@
           "android_callsites": [
             {
               "file": "android/app/src/main/java/com/dial/van/command/settings/PermissionsRoute.kt",
-              "line": 157,
+              "line": 158,
               "ref": "WORKSPACE_PATCH",
-              "sha256": "a5a4f749ae9fbe614e3b44309675be0f507a5d779a4ed5c2b02ce8a589484eeb",
+              "sha256": "3b6b161210b9c49703d8f23335d2c44a73fe25d940c656a1299122c05e725639",
               "receiver": "app.gatewayClient",
               "symbol": "authorityDescriptor",
               "namespace": "VanGatewayClient",
@@ -6977,9 +6977,9 @@
         },
         {
           "file": "android/app/src/main/java/com/dial/van/command/settings/PermissionsRoute.kt",
-          "line": 157,
+          "line": 158,
           "ref": "WORKSPACE_PATCH",
-          "sha256": "a5a4f749ae9fbe614e3b44309675be0f507a5d779a4ed5c2b02ce8a589484eeb",
+          "sha256": "3b6b161210b9c49703d8f23335d2c44a73fe25d940c656a1299122c05e725639",
           "receiver": "app.gatewayClient",
           "symbol": "authorityDescriptor",
           "namespace": "VanGatewayClient",
@@ -11065,7 +11065,7 @@
               "file": "android/app/src/main/java/com/dial/van/mission/MissionRepository.kt",
               "line": 106,
               "ref": "WORKSPACE_PATCH",
-              "sha256": "2275ae57d7eb2ec232567a84b7a425246353246a586abf7498049642ea0218b1",
+              "sha256": "5a95fba70a2b77f4083791830380c74e92a228b74a9a5d7431101cbdd3dd2a32",
               "receiver": "client",
               "symbol": "understanding",
               "namespace": "VanGatewayClient",
@@ -11074,7 +11074,7 @@
                 "file": "android/app/src/main/java/com/dial/van/mission/MissionRepository.kt",
                 "line": 29,
                 "ref": "WORKSPACE_PATCH",
-                "sha256": "2275ae57d7eb2ec232567a84b7a425246353246a586abf7498049642ea0218b1"
+                "sha256": "5a95fba70a2b77f4083791830380c74e92a228b74a9a5d7431101cbdd3dd2a32"
               }
             }
           ],
@@ -11122,7 +11122,7 @@
               "file": "android/app/src/main/java/com/dial/van/mission/MissionRepository.kt",
               "line": 118,
               "ref": "WORKSPACE_PATCH",
-              "sha256": "2275ae57d7eb2ec232567a84b7a425246353246a586abf7498049642ea0218b1",
+              "sha256": "5a95fba70a2b77f4083791830380c74e92a228b74a9a5d7431101cbdd3dd2a32",
               "receiver": "client",
               "symbol": "confirmUnderstanding",
               "namespace": "VanGatewayClient",
@@ -11131,7 +11131,7 @@
                 "file": "android/app/src/main/java/com/dial/van/mission/MissionRepository.kt",
                 "line": 29,
                 "ref": "WORKSPACE_PATCH",
-                "sha256": "2275ae57d7eb2ec232567a84b7a425246353246a586abf7498049642ea0218b1"
+                "sha256": "5a95fba70a2b77f4083791830380c74e92a228b74a9a5d7431101cbdd3dd2a32"
               }
             }
           ],
@@ -11179,7 +11179,7 @@
               "file": "android/app/src/main/java/com/dial/van/mission/MissionRepository.kt",
               "line": 120,
               "ref": "WORKSPACE_PATCH",
-              "sha256": "2275ae57d7eb2ec232567a84b7a425246353246a586abf7498049642ea0218b1",
+              "sha256": "5a95fba70a2b77f4083791830380c74e92a228b74a9a5d7431101cbdd3dd2a32",
               "receiver": "client",
               "symbol": "correctUnderstanding",
               "namespace": "VanGatewayClient",
@@ -11188,7 +11188,7 @@
                 "file": "android/app/src/main/java/com/dial/van/mission/MissionRepository.kt",
                 "line": 29,
                 "ref": "WORKSPACE_PATCH",
-                "sha256": "2275ae57d7eb2ec232567a84b7a425246353246a586abf7498049642ea0218b1"
+                "sha256": "5a95fba70a2b77f4083791830380c74e92a228b74a9a5d7431101cbdd3dd2a32"
               }
             }
           ],
@@ -11236,7 +11236,7 @@
               "file": "android/app/src/main/java/com/dial/van/mission/MissionRepository.kt",
               "line": 121,
               "ref": "WORKSPACE_PATCH",
-              "sha256": "2275ae57d7eb2ec232567a84b7a425246353246a586abf7498049642ea0218b1",
+              "sha256": "5a95fba70a2b77f4083791830380c74e92a228b74a9a5d7431101cbdd3dd2a32",
               "receiver": "client",
               "symbol": "rejectUnderstanding",
               "namespace": "VanGatewayClient",
@@ -11245,7 +11245,7 @@
                 "file": "android/app/src/main/java/com/dial/van/mission/MissionRepository.kt",
                 "line": 29,
                 "ref": "WORKSPACE_PATCH",
-                "sha256": "2275ae57d7eb2ec232567a84b7a425246353246a586abf7498049642ea0218b1"
+                "sha256": "5a95fba70a2b77f4083791830380c74e92a228b74a9a5d7431101cbdd3dd2a32"
               }
             }
           ],
@@ -11484,7 +11484,7 @@
           "file": "android/app/src/main/java/com/dial/van/mission/MissionRepository.kt",
           "line": 106,
           "ref": "WORKSPACE_PATCH",
-          "sha256": "2275ae57d7eb2ec232567a84b7a425246353246a586abf7498049642ea0218b1",
+          "sha256": "5a95fba70a2b77f4083791830380c74e92a228b74a9a5d7431101cbdd3dd2a32",
           "receiver": "client",
           "symbol": "understanding",
           "namespace": "VanGatewayClient",
@@ -11493,7 +11493,7 @@
             "file": "android/app/src/main/java/com/dial/van/mission/MissionRepository.kt",
             "line": 29,
             "ref": "WORKSPACE_PATCH",
-            "sha256": "2275ae57d7eb2ec232567a84b7a425246353246a586abf7498049642ea0218b1"
+            "sha256": "5a95fba70a2b77f4083791830380c74e92a228b74a9a5d7431101cbdd3dd2a32"
           },
           "endpoint_id": "VE-642271170af5",
           "kind": "direct_client_method"
@@ -11529,7 +11529,7 @@
           "file": "android/app/src/main/java/com/dial/van/mission/MissionRepository.kt",
           "line": 118,
           "ref": "WORKSPACE_PATCH",
-          "sha256": "2275ae57d7eb2ec232567a84b7a425246353246a586abf7498049642ea0218b1",
+          "sha256": "5a95fba70a2b77f4083791830380c74e92a228b74a9a5d7431101cbdd3dd2a32",
           "receiver": "client",
           "symbol": "confirmUnderstanding",
           "namespace": "VanGatewayClient",
@@ -11538,7 +11538,7 @@
             "file": "android/app/src/main/java/com/dial/van/mission/MissionRepository.kt",
             "line": 29,
             "ref": "WORKSPACE_PATCH",
-            "sha256": "2275ae57d7eb2ec232567a84b7a425246353246a586abf7498049642ea0218b1"
+            "sha256": "5a95fba70a2b77f4083791830380c74e92a228b74a9a5d7431101cbdd3dd2a32"
           },
           "endpoint_id": "VE-45c051d1e101",
           "kind": "direct_client_method"
@@ -11574,7 +11574,7 @@
           "file": "android/app/src/main/java/com/dial/van/mission/MissionRepository.kt",
           "line": 120,
           "ref": "WORKSPACE_PATCH",
-          "sha256": "2275ae57d7eb2ec232567a84b7a425246353246a586abf7498049642ea0218b1",
+          "sha256": "5a95fba70a2b77f4083791830380c74e92a228b74a9a5d7431101cbdd3dd2a32",
           "receiver": "client",
           "symbol": "correctUnderstanding",
           "namespace": "VanGatewayClient",
@@ -11583,7 +11583,7 @@
             "file": "android/app/src/main/java/com/dial/van/mission/MissionRepository.kt",
             "line": 29,
             "ref": "WORKSPACE_PATCH",
-            "sha256": "2275ae57d7eb2ec232567a84b7a425246353246a586abf7498049642ea0218b1"
+            "sha256": "5a95fba70a2b77f4083791830380c74e92a228b74a9a5d7431101cbdd3dd2a32"
           },
           "endpoint_id": "VE-31e09178fe07",
           "kind": "direct_client_method"
@@ -11619,7 +11619,7 @@
           "file": "android/app/src/main/java/com/dial/van/mission/MissionRepository.kt",
           "line": 121,
           "ref": "WORKSPACE_PATCH",
-          "sha256": "2275ae57d7eb2ec232567a84b7a425246353246a586abf7498049642ea0218b1",
+          "sha256": "5a95fba70a2b77f4083791830380c74e92a228b74a9a5d7431101cbdd3dd2a32",
           "receiver": "client",
           "symbol": "rejectUnderstanding",
           "namespace": "VanGatewayClient",
@@ -11628,7 +11628,7 @@
             "file": "android/app/src/main/java/com/dial/van/mission/MissionRepository.kt",
             "line": 29,
             "ref": "WORKSPACE_PATCH",
-            "sha256": "2275ae57d7eb2ec232567a84b7a425246353246a586abf7498049642ea0218b1"
+            "sha256": "5a95fba70a2b77f4083791830380c74e92a228b74a9a5d7431101cbdd3dd2a32"
           },
           "endpoint_id": "VE-4faa1c1d1666",
           "kind": "direct_client_method"
@@ -12403,7 +12403,7 @@
               "file": "android/app/src/main/java/com/dial/van/mission/MissionRepository.kt",
               "line": 106,
               "ref": "WORKSPACE_PATCH",
-              "sha256": "2275ae57d7eb2ec232567a84b7a425246353246a586abf7498049642ea0218b1",
+              "sha256": "5a95fba70a2b77f4083791830380c74e92a228b74a9a5d7431101cbdd3dd2a32",
               "receiver": "client",
               "symbol": "understanding",
               "namespace": "VanGatewayClient",
@@ -12412,7 +12412,7 @@
                 "file": "android/app/src/main/java/com/dial/van/mission/MissionRepository.kt",
                 "line": 29,
                 "ref": "WORKSPACE_PATCH",
-                "sha256": "2275ae57d7eb2ec232567a84b7a425246353246a586abf7498049642ea0218b1"
+                "sha256": "5a95fba70a2b77f4083791830380c74e92a228b74a9a5d7431101cbdd3dd2a32"
               }
             }
           ],
@@ -12460,7 +12460,7 @@
               "file": "android/app/src/main/java/com/dial/van/mission/MissionRepository.kt",
               "line": 123,
               "ref": "WORKSPACE_PATCH",
-              "sha256": "2275ae57d7eb2ec232567a84b7a425246353246a586abf7498049642ea0218b1",
+              "sha256": "5a95fba70a2b77f4083791830380c74e92a228b74a9a5d7431101cbdd3dd2a32",
               "receiver": "client",
               "symbol": "confirmAdaptation",
               "namespace": "VanGatewayClient",
@@ -12469,7 +12469,7 @@
                 "file": "android/app/src/main/java/com/dial/van/mission/MissionRepository.kt",
                 "line": 29,
                 "ref": "WORKSPACE_PATCH",
-                "sha256": "2275ae57d7eb2ec232567a84b7a425246353246a586abf7498049642ea0218b1"
+                "sha256": "5a95fba70a2b77f4083791830380c74e92a228b74a9a5d7431101cbdd3dd2a32"
               }
             }
           ],
@@ -12517,7 +12517,7 @@
               "file": "android/app/src/main/java/com/dial/van/mission/MissionRepository.kt",
               "line": 122,
               "ref": "WORKSPACE_PATCH",
-              "sha256": "2275ae57d7eb2ec232567a84b7a425246353246a586abf7498049642ea0218b1",
+              "sha256": "5a95fba70a2b77f4083791830380c74e92a228b74a9a5d7431101cbdd3dd2a32",
               "receiver": "client",
               "symbol": "revertAdaptation",
               "namespace": "VanGatewayClient",
@@ -12526,7 +12526,7 @@
                 "file": "android/app/src/main/java/com/dial/van/mission/MissionRepository.kt",
                 "line": 29,
                 "ref": "WORKSPACE_PATCH",
-                "sha256": "2275ae57d7eb2ec232567a84b7a425246353246a586abf7498049642ea0218b1"
+                "sha256": "5a95fba70a2b77f4083791830380c74e92a228b74a9a5d7431101cbdd3dd2a32"
               }
             }
           ],
@@ -12601,7 +12601,7 @@
           "file": "android/app/src/main/java/com/dial/van/mission/MissionRepository.kt",
           "line": 106,
           "ref": "WORKSPACE_PATCH",
-          "sha256": "2275ae57d7eb2ec232567a84b7a425246353246a586abf7498049642ea0218b1",
+          "sha256": "5a95fba70a2b77f4083791830380c74e92a228b74a9a5d7431101cbdd3dd2a32",
           "receiver": "client",
           "symbol": "understanding",
           "namespace": "VanGatewayClient",
@@ -12610,7 +12610,7 @@
             "file": "android/app/src/main/java/com/dial/van/mission/MissionRepository.kt",
             "line": 29,
             "ref": "WORKSPACE_PATCH",
-            "sha256": "2275ae57d7eb2ec232567a84b7a425246353246a586abf7498049642ea0218b1"
+            "sha256": "5a95fba70a2b77f4083791830380c74e92a228b74a9a5d7431101cbdd3dd2a32"
           },
           "endpoint_id": "VE-642271170af5",
           "kind": "direct_client_method"
@@ -12646,7 +12646,7 @@
           "file": "android/app/src/main/java/com/dial/van/mission/MissionRepository.kt",
           "line": 123,
           "ref": "WORKSPACE_PATCH",
-          "sha256": "2275ae57d7eb2ec232567a84b7a425246353246a586abf7498049642ea0218b1",
+          "sha256": "5a95fba70a2b77f4083791830380c74e92a228b74a9a5d7431101cbdd3dd2a32",
           "receiver": "client",
           "symbol": "confirmAdaptation",
           "namespace": "VanGatewayClient",
@@ -12655,7 +12655,7 @@
             "file": "android/app/src/main/java/com/dial/van/mission/MissionRepository.kt",
             "line": 29,
             "ref": "WORKSPACE_PATCH",
-            "sha256": "2275ae57d7eb2ec232567a84b7a425246353246a586abf7498049642ea0218b1"
+            "sha256": "5a95fba70a2b77f4083791830380c74e92a228b74a9a5d7431101cbdd3dd2a32"
           },
           "endpoint_id": "VE-287dc9cf6049",
           "kind": "direct_client_method"
@@ -12691,7 +12691,7 @@
           "file": "android/app/src/main/java/com/dial/van/mission/MissionRepository.kt",
           "line": 122,
           "ref": "WORKSPACE_PATCH",
-          "sha256": "2275ae57d7eb2ec232567a84b7a425246353246a586abf7498049642ea0218b1",
+          "sha256": "5a95fba70a2b77f4083791830380c74e92a228b74a9a5d7431101cbdd3dd2a32",
           "receiver": "client",
           "symbol": "revertAdaptation",
           "namespace": "VanGatewayClient",
@@ -12700,7 +12700,7 @@
             "file": "android/app/src/main/java/com/dial/van/mission/MissionRepository.kt",
             "line": 29,
             "ref": "WORKSPACE_PATCH",
-            "sha256": "2275ae57d7eb2ec232567a84b7a425246353246a586abf7498049642ea0218b1"
+            "sha256": "5a95fba70a2b77f4083791830380c74e92a228b74a9a5d7431101cbdd3dd2a32"
           },
           "endpoint_id": "VE-cfbff17fa74f",
           "kind": "direct_client_method"
@@ -13380,9 +13380,9 @@
             },
             {
               "file": "android/app/src/main/java/com/dial/van/mission/MissionRepository.kt",
-              "line": 141,
+              "line": 145,
               "ref": "WORKSPACE_PATCH",
-              "sha256": "2275ae57d7eb2ec232567a84b7a425246353246a586abf7498049642ea0218b1",
+              "sha256": "5a95fba70a2b77f4083791830380c74e92a228b74a9a5d7431101cbdd3dd2a32",
               "receiver": "client",
               "symbol": "technologyRadar",
               "namespace": "VanGatewayClient",
@@ -13391,7 +13391,7 @@
                 "file": "android/app/src/main/java/com/dial/van/mission/MissionRepository.kt",
                 "line": 29,
                 "ref": "WORKSPACE_PATCH",
-                "sha256": "2275ae57d7eb2ec232567a84b7a425246353246a586abf7498049642ea0218b1"
+                "sha256": "5a95fba70a2b77f4083791830380c74e92a228b74a9a5d7431101cbdd3dd2a32"
               }
             }
           ],
@@ -13437,9 +13437,9 @@
             },
             {
               "file": "android/app/src/main/java/com/dial/van/mission/MissionRepository.kt",
-              "line": 142,
+              "line": 146,
               "ref": "WORKSPACE_PATCH",
-              "sha256": "2275ae57d7eb2ec232567a84b7a425246353246a586abf7498049642ea0218b1",
+              "sha256": "5a95fba70a2b77f4083791830380c74e92a228b74a9a5d7431101cbdd3dd2a32",
               "receiver": "client",
               "symbol": "evalReport",
               "namespace": "VanGatewayClient",
@@ -13448,7 +13448,7 @@
                 "file": "android/app/src/main/java/com/dial/van/mission/MissionRepository.kt",
                 "line": 29,
                 "ref": "WORKSPACE_PATCH",
-                "sha256": "2275ae57d7eb2ec232567a84b7a425246353246a586abf7498049642ea0218b1"
+                "sha256": "5a95fba70a2b77f4083791830380c74e92a228b74a9a5d7431101cbdd3dd2a32"
               }
             }
           ],
@@ -13634,9 +13634,9 @@
         },
         {
           "file": "android/app/src/main/java/com/dial/van/mission/MissionRepository.kt",
-          "line": 141,
+          "line": 145,
           "ref": "WORKSPACE_PATCH",
-          "sha256": "2275ae57d7eb2ec232567a84b7a425246353246a586abf7498049642ea0218b1",
+          "sha256": "5a95fba70a2b77f4083791830380c74e92a228b74a9a5d7431101cbdd3dd2a32",
           "receiver": "client",
           "symbol": "technologyRadar",
           "namespace": "VanGatewayClient",
@@ -13645,7 +13645,7 @@
             "file": "android/app/src/main/java/com/dial/van/mission/MissionRepository.kt",
             "line": 29,
             "ref": "WORKSPACE_PATCH",
-            "sha256": "2275ae57d7eb2ec232567a84b7a425246353246a586abf7498049642ea0218b1"
+            "sha256": "5a95fba70a2b77f4083791830380c74e92a228b74a9a5d7431101cbdd3dd2a32"
           },
           "endpoint_id": "VE-2f4e0abc0135",
           "kind": "direct_client_method"
@@ -13679,9 +13679,9 @@
         },
         {
           "file": "android/app/src/main/java/com/dial/van/mission/MissionRepository.kt",
-          "line": 142,
+          "line": 146,
           "ref": "WORKSPACE_PATCH",
-          "sha256": "2275ae57d7eb2ec232567a84b7a425246353246a586abf7498049642ea0218b1",
+          "sha256": "5a95fba70a2b77f4083791830380c74e92a228b74a9a5d7431101cbdd3dd2a32",
           "receiver": "client",
           "symbol": "evalReport",
           "namespace": "VanGatewayClient",
@@ -13690,7 +13690,7 @@
             "file": "android/app/src/main/java/com/dial/van/mission/MissionRepository.kt",
             "line": 29,
             "ref": "WORKSPACE_PATCH",
-            "sha256": "2275ae57d7eb2ec232567a84b7a425246353246a586abf7498049642ea0218b1"
+            "sha256": "5a95fba70a2b77f4083791830380c74e92a228b74a9a5d7431101cbdd3dd2a32"
           },
           "endpoint_id": "VE-68d130529919",
           "kind": "direct_client_method"
@@ -14466,7 +14466,7 @@
               "file": "android/app/src/main/java/com/dial/van/mission/MissionRepository.kt",
               "line": 34,
               "ref": "WORKSPACE_PATCH",
-              "sha256": "2275ae57d7eb2ec232567a84b7a425246353246a586abf7498049642ea0218b1",
+              "sha256": "5a95fba70a2b77f4083791830380c74e92a228b74a9a5d7431101cbdd3dd2a32",
               "receiver": "client",
               "symbol": "missions",
               "namespace": "VanGatewayClient",
@@ -14475,14 +14475,14 @@
                 "file": "android/app/src/main/java/com/dial/van/mission/MissionRepository.kt",
                 "line": 29,
                 "ref": "WORKSPACE_PATCH",
-                "sha256": "2275ae57d7eb2ec232567a84b7a425246353246a586abf7498049642ea0218b1"
+                "sha256": "5a95fba70a2b77f4083791830380c74e92a228b74a9a5d7431101cbdd3dd2a32"
               }
             },
             {
               "file": "android/app/src/main/java/com/dial/van/mission/MissionRepository.kt",
               "line": 60,
               "ref": "WORKSPACE_PATCH",
-              "sha256": "2275ae57d7eb2ec232567a84b7a425246353246a586abf7498049642ea0218b1",
+              "sha256": "5a95fba70a2b77f4083791830380c74e92a228b74a9a5d7431101cbdd3dd2a32",
               "receiver": "client",
               "symbol": "missions",
               "namespace": "VanGatewayClient",
@@ -14491,7 +14491,7 @@
                 "file": "android/app/src/main/java/com/dial/van/mission/MissionRepository.kt",
                 "line": 29,
                 "ref": "WORKSPACE_PATCH",
-                "sha256": "2275ae57d7eb2ec232567a84b7a425246353246a586abf7498049642ea0218b1"
+                "sha256": "5a95fba70a2b77f4083791830380c74e92a228b74a9a5d7431101cbdd3dd2a32"
               }
             },
             {
@@ -14796,7 +14796,7 @@
           "file": "android/app/src/main/java/com/dial/van/mission/MissionRepository.kt",
           "line": 34,
           "ref": "WORKSPACE_PATCH",
-          "sha256": "2275ae57d7eb2ec232567a84b7a425246353246a586abf7498049642ea0218b1",
+          "sha256": "5a95fba70a2b77f4083791830380c74e92a228b74a9a5d7431101cbdd3dd2a32",
           "receiver": "client",
           "symbol": "missions",
           "namespace": "VanGatewayClient",
@@ -14805,7 +14805,7 @@
             "file": "android/app/src/main/java/com/dial/van/mission/MissionRepository.kt",
             "line": 29,
             "ref": "WORKSPACE_PATCH",
-            "sha256": "2275ae57d7eb2ec232567a84b7a425246353246a586abf7498049642ea0218b1"
+            "sha256": "5a95fba70a2b77f4083791830380c74e92a228b74a9a5d7431101cbdd3dd2a32"
           },
           "endpoint_id": "VE-2f81bbca1537",
           "kind": "direct_client_method"
@@ -14814,7 +14814,7 @@
           "file": "android/app/src/main/java/com/dial/van/mission/MissionRepository.kt",
           "line": 60,
           "ref": "WORKSPACE_PATCH",
-          "sha256": "2275ae57d7eb2ec232567a84b7a425246353246a586abf7498049642ea0218b1",
+          "sha256": "5a95fba70a2b77f4083791830380c74e92a228b74a9a5d7431101cbdd3dd2a32",
           "receiver": "client",
           "symbol": "missions",
           "namespace": "VanGatewayClient",
@@ -14823,7 +14823,7 @@
             "file": "android/app/src/main/java/com/dial/van/mission/MissionRepository.kt",
             "line": 29,
             "ref": "WORKSPACE_PATCH",
-            "sha256": "2275ae57d7eb2ec232567a84b7a425246353246a586abf7498049642ea0218b1"
+            "sha256": "5a95fba70a2b77f4083791830380c74e92a228b74a9a5d7431101cbdd3dd2a32"
           },
           "endpoint_id": "VE-2f81bbca1537",
           "kind": "direct_client_method"
@@ -16339,9 +16339,9 @@
           "android_callsites": [
             {
               "file": "android/app/src/main/java/com/dial/van/command/settings/PermissionsRoute.kt",
-              "line": 41,
+              "line": 42,
               "ref": "WORKSPACE_PATCH",
-              "sha256": "a5a4f749ae9fbe614e3b44309675be0f507a5d779a4ed5c2b02ce8a589484eeb",
+              "sha256": "3b6b161210b9c49703d8f23335d2c44a73fe25d940c656a1299122c05e725639",
               "receiver": "app.gatewayClient",
               "symbol": "permissions",
               "namespace": "VanGatewayClient",
@@ -16357,7 +16357,7 @@
               "file": "android/app/src/main/java/com/dial/van/mission/MissionRepository.kt",
               "line": 135,
               "ref": "WORKSPACE_PATCH",
-              "sha256": "2275ae57d7eb2ec232567a84b7a425246353246a586abf7498049642ea0218b1",
+              "sha256": "5a95fba70a2b77f4083791830380c74e92a228b74a9a5d7431101cbdd3dd2a32",
               "receiver": "client",
               "symbol": "permissions",
               "namespace": "VanGatewayClient",
@@ -16366,7 +16366,7 @@
                 "file": "android/app/src/main/java/com/dial/van/mission/MissionRepository.kt",
                 "line": 29,
                 "ref": "WORKSPACE_PATCH",
-                "sha256": "2275ae57d7eb2ec232567a84b7a425246353246a586abf7498049642ea0218b1"
+                "sha256": "5a95fba70a2b77f4083791830380c74e92a228b74a9a5d7431101cbdd3dd2a32"
               }
             }
           ],
@@ -16396,9 +16396,9 @@
           "android_callsites": [
             {
               "file": "android/app/src/main/java/com/dial/van/command/settings/PermissionsRoute.kt",
-              "line": 90,
+              "line": 91,
               "ref": "WORKSPACE_PATCH",
-              "sha256": "a5a4f749ae9fbe614e3b44309675be0f507a5d779a4ed5c2b02ce8a589484eeb",
+              "sha256": "3b6b161210b9c49703d8f23335d2c44a73fe25d940c656a1299122c05e725639",
               "receiver": "app.gatewayClient",
               "symbol": "revokePermission",
               "namespace": "VanGatewayClient",
@@ -16412,9 +16412,9 @@
             },
             {
               "file": "android/app/src/main/java/com/dial/van/mission/MissionRepository.kt",
-              "line": 136,
+              "line": 139,
               "ref": "WORKSPACE_PATCH",
-              "sha256": "2275ae57d7eb2ec232567a84b7a425246353246a586abf7498049642ea0218b1",
+              "sha256": "5a95fba70a2b77f4083791830380c74e92a228b74a9a5d7431101cbdd3dd2a32",
               "receiver": "client",
               "symbol": "revokePermission",
               "namespace": "VanGatewayClient",
@@ -16423,7 +16423,7 @@
                 "file": "android/app/src/main/java/com/dial/van/mission/MissionRepository.kt",
                 "line": 29,
                 "ref": "WORKSPACE_PATCH",
-                "sha256": "2275ae57d7eb2ec232567a84b7a425246353246a586abf7498049642ea0218b1"
+                "sha256": "5a95fba70a2b77f4083791830380c74e92a228b74a9a5d7431101cbdd3dd2a32"
               }
             }
           ],
@@ -16453,9 +16453,9 @@
           "android_callsites": [
             {
               "file": "android/app/src/main/java/com/dial/van/command/settings/PermissionsRoute.kt",
-              "line": 103,
+              "line": 104,
               "ref": "WORKSPACE_PATCH",
-              "sha256": "a5a4f749ae9fbe614e3b44309675be0f507a5d779a4ed5c2b02ce8a589484eeb",
+              "sha256": "3b6b161210b9c49703d8f23335d2c44a73fe25d940c656a1299122c05e725639",
               "receiver": "app.gatewayClient",
               "symbol": "autonomy",
               "namespace": "VanGatewayClient",
@@ -16469,9 +16469,9 @@
             },
             {
               "file": "android/app/src/main/java/com/dial/van/mission/MissionRepository.kt",
-              "line": 137,
+              "line": 141,
               "ref": "WORKSPACE_PATCH",
-              "sha256": "2275ae57d7eb2ec232567a84b7a425246353246a586abf7498049642ea0218b1",
+              "sha256": "5a95fba70a2b77f4083791830380c74e92a228b74a9a5d7431101cbdd3dd2a32",
               "receiver": "client",
               "symbol": "autonomy",
               "namespace": "VanGatewayClient",
@@ -16480,7 +16480,7 @@
                 "file": "android/app/src/main/java/com/dial/van/mission/MissionRepository.kt",
                 "line": 29,
                 "ref": "WORKSPACE_PATCH",
-                "sha256": "2275ae57d7eb2ec232567a84b7a425246353246a586abf7498049642ea0218b1"
+                "sha256": "5a95fba70a2b77f4083791830380c74e92a228b74a9a5d7431101cbdd3dd2a32"
               }
             }
           ],
@@ -16510,9 +16510,9 @@
           "android_callsites": [
             {
               "file": "android/app/src/main/java/com/dial/van/command/settings/PermissionsRoute.kt",
-              "line": 157,
+              "line": 158,
               "ref": "WORKSPACE_PATCH",
-              "sha256": "a5a4f749ae9fbe614e3b44309675be0f507a5d779a4ed5c2b02ce8a589484eeb",
+              "sha256": "3b6b161210b9c49703d8f23335d2c44a73fe25d940c656a1299122c05e725639",
               "receiver": "app.gatewayClient",
               "symbol": "authorityDescriptor",
               "namespace": "VanGatewayClient",
@@ -16551,9 +16551,9 @@
           "android_callsites": [
             {
               "file": "android/app/src/main/java/com/dial/van/command/settings/PermissionsRoute.kt",
-              "line": 164,
+              "line": 165,
               "ref": "WORKSPACE_PATCH",
-              "sha256": "a5a4f749ae9fbe614e3b44309675be0f507a5d779a4ed5c2b02ce8a589484eeb",
+              "sha256": "3b6b161210b9c49703d8f23335d2c44a73fe25d940c656a1299122c05e725639",
               "receiver": "app.gatewayClient",
               "symbol": "capabilityStatus",
               "namespace": "VanGatewayClient",
@@ -16567,9 +16567,9 @@
             },
             {
               "file": "android/app/src/main/java/com/dial/van/mission/MissionRepository.kt",
-              "line": 140,
+              "line": 144,
               "ref": "WORKSPACE_PATCH",
-              "sha256": "2275ae57d7eb2ec232567a84b7a425246353246a586abf7498049642ea0218b1",
+              "sha256": "5a95fba70a2b77f4083791830380c74e92a228b74a9a5d7431101cbdd3dd2a32",
               "receiver": "client",
               "symbol": "capabilityStatus",
               "namespace": "VanGatewayClient",
@@ -16578,7 +16578,7 @@
                 "file": "android/app/src/main/java/com/dial/van/mission/MissionRepository.kt",
                 "line": 29,
                 "ref": "WORKSPACE_PATCH",
-                "sha256": "2275ae57d7eb2ec232567a84b7a425246353246a586abf7498049642ea0218b1"
+                "sha256": "5a95fba70a2b77f4083791830380c74e92a228b74a9a5d7431101cbdd3dd2a32"
               }
             }
           ],
@@ -16738,9 +16738,9 @@
             },
             {
               "file": "android/app/src/main/java/com/dial/van/command/settings/PermissionsRoute.kt",
-              "line": 92,
+              "line": 93,
               "ref": "WORKSPACE_PATCH",
-              "sha256": "a5a4f749ae9fbe614e3b44309675be0f507a5d779a4ed5c2b02ce8a589484eeb",
+              "sha256": "3b6b161210b9c49703d8f23335d2c44a73fe25d940c656a1299122c05e725639",
               "receiver": "app.gatewayClient",
               "symbol": "permissionGrant",
               "namespace": "VanGatewayClient",
@@ -16768,9 +16768,9 @@
         },
         {
           "file": "android/app/src/main/java/com/dial/van/command/settings/PermissionsRoute.kt",
-          "line": 41,
+          "line": 42,
           "ref": "WORKSPACE_PATCH",
-          "sha256": "a5a4f749ae9fbe614e3b44309675be0f507a5d779a4ed5c2b02ce8a589484eeb",
+          "sha256": "3b6b161210b9c49703d8f23335d2c44a73fe25d940c656a1299122c05e725639",
           "receiver": "app.gatewayClient",
           "symbol": "permissions",
           "namespace": "VanGatewayClient",
@@ -16788,7 +16788,7 @@
           "file": "android/app/src/main/java/com/dial/van/mission/MissionRepository.kt",
           "line": 135,
           "ref": "WORKSPACE_PATCH",
-          "sha256": "2275ae57d7eb2ec232567a84b7a425246353246a586abf7498049642ea0218b1",
+          "sha256": "5a95fba70a2b77f4083791830380c74e92a228b74a9a5d7431101cbdd3dd2a32",
           "receiver": "client",
           "symbol": "permissions",
           "namespace": "VanGatewayClient",
@@ -16797,7 +16797,7 @@
             "file": "android/app/src/main/java/com/dial/van/mission/MissionRepository.kt",
             "line": 29,
             "ref": "WORKSPACE_PATCH",
-            "sha256": "2275ae57d7eb2ec232567a84b7a425246353246a586abf7498049642ea0218b1"
+            "sha256": "5a95fba70a2b77f4083791830380c74e92a228b74a9a5d7431101cbdd3dd2a32"
           },
           "endpoint_id": "VE-4338fb24f4fb",
           "kind": "direct_client_method"
@@ -16813,9 +16813,9 @@
         },
         {
           "file": "android/app/src/main/java/com/dial/van/command/settings/PermissionsRoute.kt",
-          "line": 90,
+          "line": 91,
           "ref": "WORKSPACE_PATCH",
-          "sha256": "a5a4f749ae9fbe614e3b44309675be0f507a5d779a4ed5c2b02ce8a589484eeb",
+          "sha256": "3b6b161210b9c49703d8f23335d2c44a73fe25d940c656a1299122c05e725639",
           "receiver": "app.gatewayClient",
           "symbol": "revokePermission",
           "namespace": "VanGatewayClient",
@@ -16831,9 +16831,9 @@
         },
         {
           "file": "android/app/src/main/java/com/dial/van/mission/MissionRepository.kt",
-          "line": 136,
+          "line": 139,
           "ref": "WORKSPACE_PATCH",
-          "sha256": "2275ae57d7eb2ec232567a84b7a425246353246a586abf7498049642ea0218b1",
+          "sha256": "5a95fba70a2b77f4083791830380c74e92a228b74a9a5d7431101cbdd3dd2a32",
           "receiver": "client",
           "symbol": "revokePermission",
           "namespace": "VanGatewayClient",
@@ -16842,7 +16842,7 @@
             "file": "android/app/src/main/java/com/dial/van/mission/MissionRepository.kt",
             "line": 29,
             "ref": "WORKSPACE_PATCH",
-            "sha256": "2275ae57d7eb2ec232567a84b7a425246353246a586abf7498049642ea0218b1"
+            "sha256": "5a95fba70a2b77f4083791830380c74e92a228b74a9a5d7431101cbdd3dd2a32"
           },
           "endpoint_id": "VE-3f1397b662d0",
           "kind": "direct_client_method"
@@ -16858,9 +16858,9 @@
         },
         {
           "file": "android/app/src/main/java/com/dial/van/command/settings/PermissionsRoute.kt",
-          "line": 103,
+          "line": 104,
           "ref": "WORKSPACE_PATCH",
-          "sha256": "a5a4f749ae9fbe614e3b44309675be0f507a5d779a4ed5c2b02ce8a589484eeb",
+          "sha256": "3b6b161210b9c49703d8f23335d2c44a73fe25d940c656a1299122c05e725639",
           "receiver": "app.gatewayClient",
           "symbol": "autonomy",
           "namespace": "VanGatewayClient",
@@ -16876,9 +16876,9 @@
         },
         {
           "file": "android/app/src/main/java/com/dial/van/mission/MissionRepository.kt",
-          "line": 137,
+          "line": 141,
           "ref": "WORKSPACE_PATCH",
-          "sha256": "2275ae57d7eb2ec232567a84b7a425246353246a586abf7498049642ea0218b1",
+          "sha256": "5a95fba70a2b77f4083791830380c74e92a228b74a9a5d7431101cbdd3dd2a32",
           "receiver": "client",
           "symbol": "autonomy",
           "namespace": "VanGatewayClient",
@@ -16887,7 +16887,7 @@
             "file": "android/app/src/main/java/com/dial/van/mission/MissionRepository.kt",
             "line": 29,
             "ref": "WORKSPACE_PATCH",
-            "sha256": "2275ae57d7eb2ec232567a84b7a425246353246a586abf7498049642ea0218b1"
+            "sha256": "5a95fba70a2b77f4083791830380c74e92a228b74a9a5d7431101cbdd3dd2a32"
           },
           "endpoint_id": "VE-a85c6a8e08b8",
           "kind": "direct_client_method"
@@ -16903,9 +16903,9 @@
         },
         {
           "file": "android/app/src/main/java/com/dial/van/command/settings/PermissionsRoute.kt",
-          "line": 157,
+          "line": 158,
           "ref": "WORKSPACE_PATCH",
-          "sha256": "a5a4f749ae9fbe614e3b44309675be0f507a5d779a4ed5c2b02ce8a589484eeb",
+          "sha256": "3b6b161210b9c49703d8f23335d2c44a73fe25d940c656a1299122c05e725639",
           "receiver": "app.gatewayClient",
           "symbol": "authorityDescriptor",
           "namespace": "VanGatewayClient",
@@ -16930,9 +16930,9 @@
         },
         {
           "file": "android/app/src/main/java/com/dial/van/command/settings/PermissionsRoute.kt",
-          "line": 164,
+          "line": 165,
           "ref": "WORKSPACE_PATCH",
-          "sha256": "a5a4f749ae9fbe614e3b44309675be0f507a5d779a4ed5c2b02ce8a589484eeb",
+          "sha256": "3b6b161210b9c49703d8f23335d2c44a73fe25d940c656a1299122c05e725639",
           "receiver": "app.gatewayClient",
           "symbol": "capabilityStatus",
           "namespace": "VanGatewayClient",
@@ -16948,9 +16948,9 @@
         },
         {
           "file": "android/app/src/main/java/com/dial/van/mission/MissionRepository.kt",
-          "line": 140,
+          "line": 144,
           "ref": "WORKSPACE_PATCH",
-          "sha256": "2275ae57d7eb2ec232567a84b7a425246353246a586abf7498049642ea0218b1",
+          "sha256": "5a95fba70a2b77f4083791830380c74e92a228b74a9a5d7431101cbdd3dd2a32",
           "receiver": "client",
           "symbol": "capabilityStatus",
           "namespace": "VanGatewayClient",
@@ -16959,7 +16959,7 @@
             "file": "android/app/src/main/java/com/dial/van/mission/MissionRepository.kt",
             "line": 29,
             "ref": "WORKSPACE_PATCH",
-            "sha256": "2275ae57d7eb2ec232567a84b7a425246353246a586abf7498049642ea0218b1"
+            "sha256": "5a95fba70a2b77f4083791830380c74e92a228b74a9a5d7431101cbdd3dd2a32"
           },
           "endpoint_id": "VE-d06858d76a7f",
           "kind": "direct_client_method"
@@ -17083,9 +17083,9 @@
         },
         {
           "file": "android/app/src/main/java/com/dial/van/command/settings/PermissionsRoute.kt",
-          "line": 92,
+          "line": 93,
           "ref": "WORKSPACE_PATCH",
-          "sha256": "a5a4f749ae9fbe614e3b44309675be0f507a5d779a4ed5c2b02ce8a589484eeb",
+          "sha256": "3b6b161210b9c49703d8f23335d2c44a73fe25d940c656a1299122c05e725639",
           "receiver": "app.gatewayClient",
           "symbol": "permissionGrant",
           "namespace": "VanGatewayClient",
@@ -17453,9 +17453,9 @@
         "source_citations": [
           {
             "file": "android/app/src/main/java/com/dial/van/command/settings/PermissionsRoute.kt",
-            "line": 35,
+            "line": 36,
             "ref": "WORKSPACE_PATCH",
-            "sha256": "a5a4f749ae9fbe614e3b44309675be0f507a5d779a4ed5c2b02ce8a589484eeb"
+            "sha256": "3b6b161210b9c49703d8f23335d2c44a73fe25d940c656a1299122c05e725639"
           }
         ],
         "functions": [
@@ -17469,9 +17469,9 @@
             "source_citations": [
               {
                 "file": "android/app/src/main/java/com/dial/van/command/settings/PermissionsRoute.kt",
-                "line": 35,
+                "line": 36,
                 "ref": "WORKSPACE_PATCH",
-                "sha256": "a5a4f749ae9fbe614e3b44309675be0f507a5d779a4ed5c2b02ce8a589484eeb"
+                "sha256": "3b6b161210b9c49703d8f23335d2c44a73fe25d940c656a1299122c05e725639"
               }
             ],
             "authority_gate": "read only"
@@ -17486,9 +17486,9 @@
             "source_citations": [
               {
                 "file": "android/app/src/main/java/com/dial/van/command/settings/PermissionsRoute.kt",
-                "line": 35,
+                "line": 36,
                 "ref": "WORKSPACE_PATCH",
-                "sha256": "a5a4f749ae9fbe614e3b44309675be0f507a5d779a4ed5c2b02ce8a589484eeb"
+                "sha256": "3b6b161210b9c49703d8f23335d2c44a73fe25d940c656a1299122c05e725639"
               }
             ],
             "authority_gate": "fresh bound owner proof; exact active grant owned by requesting device; withdrawal grants no new authority"
@@ -17503,9 +17503,9 @@
             "source_citations": [
               {
                 "file": "android/app/src/main/java/com/dial/van/command/settings/PermissionsRoute.kt",
-                "line": 35,
+                "line": 36,
                 "ref": "WORKSPACE_PATCH",
-                "sha256": "a5a4f749ae9fbe614e3b44309675be0f507a5d779a4ed5c2b02ce8a589484eeb"
+                "sha256": "3b6b161210b9c49703d8f23335d2c44a73fe25d940c656a1299122c05e725639"
               }
             ],
             "authority_gate": "read only; earned history cannot mint authority"
@@ -17520,9 +17520,9 @@
             "source_citations": [
               {
                 "file": "android/app/src/main/java/com/dial/van/command/settings/PermissionsRoute.kt",
-                "line": 35,
+                "line": 36,
                 "ref": "WORKSPACE_PATCH",
-                "sha256": "a5a4f749ae9fbe614e3b44309675be0f507a5d779a4ed5c2b02ce8a589484eeb"
+                "sha256": "3b6b161210b9c49703d8f23335d2c44a73fe25d940c656a1299122c05e725639"
               }
             ],
             "authority_gate": "read only"
@@ -17537,9 +17537,9 @@
             "source_citations": [
               {
                 "file": "android/app/src/main/java/com/dial/van/command/settings/PermissionsRoute.kt",
-                "line": 35,
+                "line": 36,
                 "ref": "WORKSPACE_PATCH",
-                "sha256": "a5a4f749ae9fbe614e3b44309675be0f507a5d779a4ed5c2b02ce8a589484eeb"
+                "sha256": "3b6b161210b9c49703d8f23335d2c44a73fe25d940c656a1299122c05e725639"
               }
             ],
             "authority_gate": "read only; no in-app URL/token setup"
@@ -17555,9 +17555,9 @@
             "source_citations": [
               {
                 "file": "android/app/src/main/java/com/dial/van/command/settings/PermissionsRoute.kt",
-                "line": 35,
+                "line": 36,
                 "ref": "WORKSPACE_PATCH",
-                "sha256": "a5a4f749ae9fbe614e3b44309675be0f507a5d779a4ed5c2b02ce8a589484eeb"
+                "sha256": "3b6b161210b9c49703d8f23335d2c44a73fe25d940c656a1299122c05e725639"
               },
               {
                 "file": "backend/van_gateway/proactive/owner_control.py",
@@ -22075,7 +22075,7 @@
               "file": "android/app/src/main/java/com/dial/van/mission/MissionRepository.kt",
               "line": 132,
               "ref": "WORKSPACE_PATCH",
-              "sha256": "2275ae57d7eb2ec232567a84b7a425246353246a586abf7498049642ea0218b1",
+              "sha256": "5a95fba70a2b77f4083791830380c74e92a228b74a9a5d7431101cbdd3dd2a32",
               "receiver": "client",
               "symbol": "resolveDecision",
               "namespace": "VanGatewayClient",
@@ -22084,7 +22084,7 @@
                 "file": "android/app/src/main/java/com/dial/van/mission/MissionRepository.kt",
                 "line": 29,
                 "ref": "WORKSPACE_PATCH",
-                "sha256": "2275ae57d7eb2ec232567a84b7a425246353246a586abf7498049642ea0218b1"
+                "sha256": "5a95fba70a2b77f4083791830380c74e92a228b74a9a5d7431101cbdd3dd2a32"
               }
             }
           ],
@@ -22626,7 +22626,7 @@
           "file": "android/app/src/main/java/com/dial/van/mission/MissionRepository.kt",
           "line": 132,
           "ref": "WORKSPACE_PATCH",
-          "sha256": "2275ae57d7eb2ec232567a84b7a425246353246a586abf7498049642ea0218b1",
+          "sha256": "5a95fba70a2b77f4083791830380c74e92a228b74a9a5d7431101cbdd3dd2a32",
           "receiver": "client",
           "symbol": "resolveDecision",
           "namespace": "VanGatewayClient",
@@ -22635,7 +22635,7 @@
             "file": "android/app/src/main/java/com/dial/van/mission/MissionRepository.kt",
             "line": 29,
             "ref": "WORKSPACE_PATCH",
-            "sha256": "2275ae57d7eb2ec232567a84b7a425246353246a586abf7498049642ea0218b1"
+            "sha256": "5a95fba70a2b77f4083791830380c74e92a228b74a9a5d7431101cbdd3dd2a32"
           },
           "endpoint_id": "VE-1df5172aa202",
           "kind": "direct_client_method"
@@ -31312,7 +31312,7 @@
               "file": "android/app/src/main/java/com/dial/van/mission/MissionRepository.kt",
               "line": 34,
               "ref": "WORKSPACE_PATCH",
-              "sha256": "2275ae57d7eb2ec232567a84b7a425246353246a586abf7498049642ea0218b1",
+              "sha256": "5a95fba70a2b77f4083791830380c74e92a228b74a9a5d7431101cbdd3dd2a32",
               "receiver": "client",
               "symbol": "missions",
               "namespace": "VanGatewayClient",
@@ -31321,14 +31321,14 @@
                 "file": "android/app/src/main/java/com/dial/van/mission/MissionRepository.kt",
                 "line": 29,
                 "ref": "WORKSPACE_PATCH",
-                "sha256": "2275ae57d7eb2ec232567a84b7a425246353246a586abf7498049642ea0218b1"
+                "sha256": "5a95fba70a2b77f4083791830380c74e92a228b74a9a5d7431101cbdd3dd2a32"
               }
             },
             {
               "file": "android/app/src/main/java/com/dial/van/mission/MissionRepository.kt",
               "line": 60,
               "ref": "WORKSPACE_PATCH",
-              "sha256": "2275ae57d7eb2ec232567a84b7a425246353246a586abf7498049642ea0218b1",
+              "sha256": "5a95fba70a2b77f4083791830380c74e92a228b74a9a5d7431101cbdd3dd2a32",
               "receiver": "client",
               "symbol": "missions",
               "namespace": "VanGatewayClient",
@@ -31337,7 +31337,7 @@
                 "file": "android/app/src/main/java/com/dial/van/mission/MissionRepository.kt",
                 "line": 29,
                 "ref": "WORKSPACE_PATCH",
-                "sha256": "2275ae57d7eb2ec232567a84b7a425246353246a586abf7498049642ea0218b1"
+                "sha256": "5a95fba70a2b77f4083791830380c74e92a228b74a9a5d7431101cbdd3dd2a32"
               }
             },
             {
@@ -31593,7 +31593,7 @@
           "file": "android/app/src/main/java/com/dial/van/mission/MissionRepository.kt",
           "line": 34,
           "ref": "WORKSPACE_PATCH",
-          "sha256": "2275ae57d7eb2ec232567a84b7a425246353246a586abf7498049642ea0218b1",
+          "sha256": "5a95fba70a2b77f4083791830380c74e92a228b74a9a5d7431101cbdd3dd2a32",
           "receiver": "client",
           "symbol": "missions",
           "namespace": "VanGatewayClient",
@@ -31602,7 +31602,7 @@
             "file": "android/app/src/main/java/com/dial/van/mission/MissionRepository.kt",
             "line": 29,
             "ref": "WORKSPACE_PATCH",
-            "sha256": "2275ae57d7eb2ec232567a84b7a425246353246a586abf7498049642ea0218b1"
+            "sha256": "5a95fba70a2b77f4083791830380c74e92a228b74a9a5d7431101cbdd3dd2a32"
           },
           "endpoint_id": "VE-2f81bbca1537",
           "kind": "direct_client_method"
@@ -31611,7 +31611,7 @@
           "file": "android/app/src/main/java/com/dial/van/mission/MissionRepository.kt",
           "line": 60,
           "ref": "WORKSPACE_PATCH",
-          "sha256": "2275ae57d7eb2ec232567a84b7a425246353246a586abf7498049642ea0218b1",
+          "sha256": "5a95fba70a2b77f4083791830380c74e92a228b74a9a5d7431101cbdd3dd2a32",
           "receiver": "client",
           "symbol": "missions",
           "namespace": "VanGatewayClient",
@@ -31620,7 +31620,7 @@
             "file": "android/app/src/main/java/com/dial/van/mission/MissionRepository.kt",
             "line": 29,
             "ref": "WORKSPACE_PATCH",
-            "sha256": "2275ae57d7eb2ec232567a84b7a425246353246a586abf7498049642ea0218b1"
+            "sha256": "5a95fba70a2b77f4083791830380c74e92a228b74a9a5d7431101cbdd3dd2a32"
           },
           "endpoint_id": "VE-2f81bbca1537",
           "kind": "direct_client_method"
@@ -34949,7 +34949,7 @@
               "file": "android/app/src/main/java/com/dial/van/mission/MissionRepository.kt",
               "line": 54,
               "ref": "WORKSPACE_PATCH",
-              "sha256": "2275ae57d7eb2ec232567a84b7a425246353246a586abf7498049642ea0218b1",
+              "sha256": "5a95fba70a2b77f4083791830380c74e92a228b74a9a5d7431101cbdd3dd2a32",
               "receiver": "client",
               "symbol": "health",
               "namespace": "VanGatewayClient",
@@ -34958,7 +34958,7 @@
                 "file": "android/app/src/main/java/com/dial/van/mission/MissionRepository.kt",
                 "line": 29,
                 "ref": "WORKSPACE_PATCH",
-                "sha256": "2275ae57d7eb2ec232567a84b7a425246353246a586abf7498049642ea0218b1"
+                "sha256": "5a95fba70a2b77f4083791830380c74e92a228b74a9a5d7431101cbdd3dd2a32"
               }
             }
           ],
@@ -35105,7 +35105,7 @@
           "file": "android/app/src/main/java/com/dial/van/mission/MissionRepository.kt",
           "line": 54,
           "ref": "WORKSPACE_PATCH",
-          "sha256": "2275ae57d7eb2ec232567a84b7a425246353246a586abf7498049642ea0218b1",
+          "sha256": "5a95fba70a2b77f4083791830380c74e92a228b74a9a5d7431101cbdd3dd2a32",
           "receiver": "client",
           "symbol": "health",
           "namespace": "VanGatewayClient",
@@ -35114,7 +35114,7 @@
             "file": "android/app/src/main/java/com/dial/van/mission/MissionRepository.kt",
             "line": 29,
             "ref": "WORKSPACE_PATCH",
-            "sha256": "2275ae57d7eb2ec232567a84b7a425246353246a586abf7498049642ea0218b1"
+            "sha256": "5a95fba70a2b77f4083791830380c74e92a228b74a9a5d7431101cbdd3dd2a32"
           },
           "endpoint_id": "VE-74fac65f350e",
           "kind": "direct_client_method"
@@ -35825,7 +35825,7 @@
               "file": "android/app/src/main/java/com/dial/van/mission/MissionRepository.kt",
               "line": 54,
               "ref": "WORKSPACE_PATCH",
-              "sha256": "2275ae57d7eb2ec232567a84b7a425246353246a586abf7498049642ea0218b1",
+              "sha256": "5a95fba70a2b77f4083791830380c74e92a228b74a9a5d7431101cbdd3dd2a32",
               "receiver": "client",
               "symbol": "health",
               "namespace": "VanGatewayClient",
@@ -35834,7 +35834,7 @@
                 "file": "android/app/src/main/java/com/dial/van/mission/MissionRepository.kt",
                 "line": 29,
                 "ref": "WORKSPACE_PATCH",
-                "sha256": "2275ae57d7eb2ec232567a84b7a425246353246a586abf7498049642ea0218b1"
+                "sha256": "5a95fba70a2b77f4083791830380c74e92a228b74a9a5d7431101cbdd3dd2a32"
               }
             }
           ],
@@ -36015,7 +36015,7 @@
           "file": "android/app/src/main/java/com/dial/van/mission/MissionRepository.kt",
           "line": 54,
           "ref": "WORKSPACE_PATCH",
-          "sha256": "2275ae57d7eb2ec232567a84b7a425246353246a586abf7498049642ea0218b1",
+          "sha256": "5a95fba70a2b77f4083791830380c74e92a228b74a9a5d7431101cbdd3dd2a32",
           "receiver": "client",
           "symbol": "health",
           "namespace": "VanGatewayClient",
@@ -36024,7 +36024,7 @@
             "file": "android/app/src/main/java/com/dial/van/mission/MissionRepository.kt",
             "line": 29,
             "ref": "WORKSPACE_PATCH",
-            "sha256": "2275ae57d7eb2ec232567a84b7a425246353246a586abf7498049642ea0218b1"
+            "sha256": "5a95fba70a2b77f4083791830380c74e92a228b74a9a5d7431101cbdd3dd2a32"
           },
           "endpoint_id": "VE-74fac65f350e",
           "kind": "direct_client_method"
@@ -47876,7 +47876,7 @@
     "android_receipt": null,
     "android_receipt_sha256": null,
     "scope": "Bounded current source-citation/endpoint refresh; previous reviews retained. Whole-product, Android, deployment/provider and handset qualifications remain separate.",
-    "source_review_manifest_sha256": "3221fc317dbda40c3ff690799c692dcfc8ca91a7f635cabbbb8f4e37b9d3d546"
+    "source_review_manifest_sha256": "a3a65b39b59a99e955c36d5dfab9771f4bf33cf96d2f906c030e892b8a574d3e"
   },
   "functional_wiring_status_semantics": {
     "SOURCE_WIRED_REQUIRES_ACCEPTANCE": "Supported source producer/consumer path is reviewed; stated provider, deployment, visual or physical acceptance remains required.",

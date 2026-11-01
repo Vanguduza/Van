@@ -1,0 +1,13 @@
+{
+  "at_utc": "2026-11-01T07:47:02.677945+00:00",
+  "base": "25a48fd705825f5eec1264696e91536694cfb82f",
+  "pins": {
+    "android/app/src/main/java/com/dial/van/command/settings/PermissionsRoute.kt": "3b6b161210b9c49703d8f23335d2c44a73fe25d940c656a1299122c05e725639",
+    "android/app/src/main/java/com/dial/van/mission/MissionRepository.kt": "5a95fba70a2b77f4083791830380c74e92a228b74a9a5d7431101cbdd3dd2a32",
+    "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt": "04f333a5d8312831f31c04546e14277106da44622e8eec4293673de42de1778e",
+    "android/app/src/main/java/com/dial/van/command/work/MissionControls.kt": "9ad358ba7e3c645edf9a93ca329d5117cfa18595cc46d0cedc3d17d15b426eff",
+    "android/app/src/main/java/com/dial/van/command/work/WorkRoute.kt": "75ded073f196a66529467ffc52acb5f7b82c50ce69e4d7fe1493c29edffb3609"
+  },
+  "selection": "All Kotlin source-set rg consumers: existing reviewed UI call plus repository forwarder; no repository revoke caller or function-reference consumer exists. Preserve WorkRoute/MissionControls original operations.",
+  "original_failure": "Two hosted jobs compileDebugKotlin failure; no instrumentation assertion execution inferred from emulator offline."
+}

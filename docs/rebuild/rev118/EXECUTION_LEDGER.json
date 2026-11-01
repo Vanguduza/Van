@@ -566,16 +566,16 @@
         }
       ]
     },
-    "updated_utc": "2026-11-01T07:31:17.362775+00:00",
+    "updated_utc": "2026-11-01T07:54:08.964744+00:00",
     "branch": "ccr-9e07e1af-8mgz1p",
-    "head": "32d519332ecd251d932e841db84ca0a25712b255",
-    "published_head": "32d519332ecd251d932e841db84ca0a25712b255",
+    "head": "25a48fd705825f5eec1264696e91536694cfb82f",
+    "published_head": "25a48fd705825f5eec1264696e91536694cfb82f",
     "committed_ledger_verification": "Publishedca135 genuinehook/GREEN210 required4fd466baseline terminal0 before normalpush; current evidence-packaging repair still requires genuinecommit/committedverify before normalpush.",
-    "current_packet": "LAC210_AND_REENROLLMENT_SOURCE_INTEGRATION",
-    "active_packet": "Reviewed LAC210 exact-scope recovery plus original privileged revocation/CAS, OWNER_STATE retention and atomic original rebind audit repair. Actual source evidence only; historical five-failure hosted run remains failed.",
+    "current_packet": "ANDROID_REVIEWED_REVOCATION_CALLER_REPAIR",
+    "active_packet": "Actual25a Kotlin compile failures repaired through preserved exact-reviewed repository delegate and missing dp import. Genuine app compilation verified; no test/native acceptance inferred.",
     "current_background_jobs": [],
     "agent_assignments_ref": "delegation.active_assignments",
-    "next_action": "Genuine hooks, required4fd466 baseline committed verification terminal0, normal push/readback and exact-head hosted CI; mandatory trusted-checker/DDS-key gates unwaived.",
+    "next_action": "Genuine hook commit, required4fd466 committed verification terminal0, normal push/readback and exact-head hosted CI. Mandatory trusted-checker/DDS-key prerequisites unwaived.",
     "acceptance_issued": false,
     "continuation_history": [
       {
@@ -647,7 +647,7 @@
         "captured_at_utc": "2026-11-01T02:38:52.492703+00:00"
       }
     ],
-    "current_source_receipt": "docs/rebuild/rev118/receipts/LAC210_REENROLLMENT_SOURCE_INTEGRATION_20261101.json",
+    "current_source_receipt": "docs/rebuild/rev118/receipts/ANDROID_REVIEWED_REVOCATION_CALLER_REPAIR_20261101.json",
     "history_20261101": [
       {
         "updated_utc": "2026-11-01T02:38:52.492703+00:00",
@@ -782,6 +782,20 @@
         "next_action": "Genuinehook/required4fd466baselinecommittedverifyterminal0/normalpush/remotereadback/newexactheadCI. ExistingLAC210backendlane remains isolated; installerauthorizationpending; no native/unitgate waiver.",
         "acceptance_issued": false,
         "current_source_receipt": "docs/rebuild/rev118/receipts/EVIDENCE_SOURCE_PACKAGING_REPAIR_20261101.json"
+      },
+      {
+        "updated_utc": "2026-11-01T07:31:17.362775+00:00",
+        "branch": "ccr-9e07e1af-8mgz1p",
+        "head": "32d519332ecd251d932e841db84ca0a25712b255",
+        "published_head": "32d519332ecd251d932e841db84ca0a25712b255",
+        "committed_ledger_verification": "Publishedca135 genuinehook/GREEN210 required4fd466baseline terminal0 before normalpush; current evidence-packaging repair still requires genuinecommit/committedverify before normalpush.",
+        "current_packet": "LAC210_AND_REENROLLMENT_SOURCE_INTEGRATION",
+        "active_packet": "Reviewed LAC210 exact-scope recovery plus original privileged revocation/CAS, OWNER_STATE retention and atomic original rebind audit repair. Actual source evidence only; historical five-failure hosted run remains failed.",
+        "current_background_jobs": [],
+        "agent_assignments_ref": "delegation.active_assignments",
+        "next_action": "Genuine hooks, required4fd466 baseline committed verification terminal0, normal push/readback and exact-head hosted CI; mandatory trusted-checker/DDS-key gates unwaived.",
+        "acceptance_issued": false,
+        "current_source_receipt": "docs/rebuild/rev118/receipts/LAC210_REENROLLMENT_SOURCE_INTEGRATION_20261101.json"
       }
     ]
   },
@@ -888,6 +902,13 @@
       "status": "AFFECTED_SOURCE_AND_INDEPENDENT_REVIEW_PASS",
       "receipt": "docs/rebuild/rev118/receipts/LAC210_REENROLLMENT_SOURCE_INTEGRATION_20261101.json",
       "formal_acceptance_issued": false
+    },
+    {
+      "at_utc": "2026-11-01T07:54:08.964744+00:00",
+      "packet": "ANDROID_REVIEWED_REVOCATION_CALLER_REPAIR",
+      "status": "GENUINE_APP_KOTLIN_COMPILATION_PASS",
+      "receipt": "docs/rebuild/rev118/receipts/ANDROID_REVIEWED_REVOCATION_CALLER_REPAIR_20261101.json",
+      "formal_acceptance_issued": false
     }
   ],
   "obligations": "obligations/OBLIGATIONS.json: preserved observations with source implementation evidence and explicit remaining native/unit obligations.",
@@ -941,8 +962,8 @@
       "evidence": "ci/MUTATION_CORPUS_c2a27848.json"
     }
   ],
-  "current_action": "Genuine hooks, required4fd466 baseline committed verification terminal0, normal push/readback and exact-head hosted CI; mandatory trusted-checker/DDS-key gates unwaived.",
-  "updated_at_utc": "2026-11-01T07:31:17.362775+00:00",
+  "current_action": "Genuine hook commit, required4fd466 committed verification terminal0, normal push/readback and exact-head hosted CI. Mandatory trusted-checker/DDS-key prerequisites unwaived.",
+  "updated_at_utc": "2026-11-01T07:54:08.964744+00:00",
   "execution_method": {
     "path": "BUILD_EXECUTION_PLAN.md",
     "scope_index": "SOURCE_WORKMAP.json",

@@ -25,6 +25,9 @@ LEGACY_GENERATION = "c36d6a21bea1618707e353912d3f5b9508eca5ba"
 REGISTRIES = frozenset("registries/"+name+".json" for name in (
     "owner_endpoints", "owner_endpoint_schemas", "owner_features", "owner_screens"))
 REVIEWED_CITATION_REPLACEMENTS = {
+    ("android/app/src/main/java/com/dial/van/mission/MissionRepository.kt",
+     "    suspend fun revokePermission(grantId: String) = client.revokePermission(grantId)"):
+     "    suspend fun revokePermission(grantId: String, reviewed: JSONObject, reviewedProfile: String) =",
     ("android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt",
      "    suspend fun revokePermission(grantId: String): JSONObject = withContext(Dispatchers.IO) {"):
      "    suspend fun revokePermission(grantId: String, reviewed: JSONObject, reviewedProfile: String): JSONObject = withContext(Dispatchers.IO) {",
@@ -41,6 +44,7 @@ REVIEWED_CITATION_REPLACEMENTS = {
 
 
 REVIEWED_CITATION_REASONS = {
+    ('android/app/src/main/java/com/dial/van/mission/MissionRepository.kt', '    suspend fun revokePermission(grantId: String) = client.revokePermission(grantId)'): 'Preserve repository forwarding with the exact caller-reviewed grant and captured profile; no fresh selection on confirmation.',
     ('android/app/src/main/java/com/dial/van/command/settings/PermissionsRoute.kt', '                            app.gatewayClient.revokePermission(id).also { receipt ->'): 'Preserve the reviewed original-result and independent current-grant readback callback with snapshot/profile-bound invocation.',
     ('android/app/src/main/java/com/dial/van/command/settings/PermissionsRoute.kt', '                                val current = app.gatewayClient.permissionGrant(id)'): 'Preserve the reviewed original-result and independent current-grant readback callback with snapshot/profile-bound invocation.',
     ('android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt', '    suspend fun revokePermission(grantId: String): JSONObject = withContext(Dispatchers.IO) {'): 'Bind the reviewed grant snapshot and current profile to the durable original permission revocation exchange.',

@@ -133,7 +133,11 @@ class MissionRepository(private val client: VanGatewayClient) {
 
     /** §36 — permissions, and §§30-31 — what Van may do unprompted. */
     suspend fun permissions(): JSONObject = client.permissions()
-    suspend fun revokePermission(grantId: String) = client.revokePermission(grantId)
+    suspend fun permissionGrant(grantId: String): JSONObject = client.permissionGrant(grantId)
+    fun permissionProfileIdentity(): String = client.permissionProfileIdentity()
+    /** Forward the exact owner-reviewed details/profile; never fetch a new selection on confirmation. */
+    suspend fun revokePermission(grantId: String, reviewed: JSONObject, reviewedProfile: String) =
+        client.revokePermission(grantId, reviewed, reviewedProfile)
     suspend fun autonomy(): JSONObject = client.autonomy()
 
     /** Technical drill-downs (§48): capabilities, radar, the eval scoreboard. */

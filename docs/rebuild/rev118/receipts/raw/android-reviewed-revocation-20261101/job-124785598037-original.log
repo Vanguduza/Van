@@ -1,0 +1,945 @@
+﻿2026-11-01T07:35:48.4225527Z Current runner version: '2.338.2'
+2026-11-01T07:35:48.4245073Z ##[group]Runner Image Provisioner
+2026-11-01T07:35:48.4245716Z Hosted Compute Agent
+2026-11-01T07:35:48.4246088Z Version: 20261021.618
+2026-11-01T07:35:48.4246463Z Commit: 21505ad2541d5be6135ed84fc33697146cf75b8e
+2026-11-01T07:35:48.4246957Z Build Date: 2026-10-21T00:45:21Z
+2026-11-01T07:35:48.4247396Z Worker ID: {47907dcc-8312-4e0f-a998-772471a79f3f}
+2026-11-01T07:35:48.4247837Z Region: southcentralus
+2026-11-01T07:35:48.4248200Z Cloud: Azure
+2026-11-01T07:35:48.4248538Z ##[endgroup]
+2026-11-01T07:35:48.4249562Z ##[group]Operating System
+2026-11-01T07:35:48.4250014Z Ubuntu
+2026-11-01T07:35:48.4250355Z 26.04.1
+2026-11-01T07:35:48.4250729Z LTS
+2026-11-01T07:35:48.4251062Z ##[endgroup]
+2026-11-01T07:35:48.4251455Z ##[group]Runner Image
+2026-11-01T07:35:48.4251863Z Image: ubuntu-26.04
+2026-11-01T07:35:48.4252207Z Version: 20261025.179.1
+2026-11-01T07:35:48.4253046Z Included Software: https://github.com/actions/runner-images/blob/ubuntu26/20261025.179/images/ubuntu/Ubuntu2604-Readme.md
+2026-11-01T07:35:48.4253966Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu26%2F20261025.179
+2026-11-01T07:35:48.4254555Z ##[endgroup]
+2026-11-01T07:35:48.4255275Z ##[group]GITHUB_TOKEN Permissions
+2026-11-01T07:35:48.4256647Z Contents: read
+2026-11-01T07:35:48.4256980Z Metadata: read
+2026-11-01T07:35:48.4257387Z Packages: read
+2026-11-01T07:35:48.4257756Z ##[endgroup]
+2026-11-01T07:35:48.4259716Z Secret source: Actions
+2026-11-01T07:35:48.4260307Z Cache mode: write
+2026-11-01T07:35:48.4260923Z Prepare workflow directory
+2026-11-01T07:35:48.4482960Z Prepare all required actions
+2026-11-01T07:35:48.4516134Z Getting action download info
+2026-11-01T07:35:48.7488790Z Download action repository 'actions/checkout@v4' (SHA:11d5960a326750d5838078e36cf38b85af677262)
+2026-11-01T07:35:48.8427056Z Download action repository 'actions/setup-java@v4' (SHA:cf277c60eb25467037889841efdb72551f06f6c3)
+2026-11-01T07:35:49.3780667Z Download action repository 'actions/setup-python@v5' (SHA:a26af69be951a213d495a4c3e4e4022e16d87065)
+2026-11-01T07:35:49.4534203Z Download action repository 'reactivecircus/android-emulator-runner@v2' (SHA:a421e43855164a8197daf9d8d40fe71c6996bb0d)
+2026-11-01T07:35:49.8212047Z Download action repository 'actions/upload-artifact@v4' (SHA:ea165f8d65b6e75b540449e92b4886f43607fa02)
+2026-11-01T07:35:50.0296707Z Complete job name: android-instrumentation
+2026-11-01T07:35:50.1078406Z ##[group]Run actions/checkout@v4
+2026-11-01T07:35:50.1079172Z with:
+2026-11-01T07:35:50.1079814Z   repository: Vanguduza/Van
+2026-11-01T07:35:50.1084467Z   token: ***
+2026-11-01T07:35:50.1084971Z   ssh-strict: true
+2026-11-01T07:35:50.1085494Z   ssh-user: git
+2026-11-01T07:35:50.1086034Z   persist-credentials: true
+2026-11-01T07:35:50.1086614Z   clean: true
+2026-11-01T07:35:50.1087161Z   sparse-checkout-cone-mode: true
+2026-11-01T07:35:50.1087787Z   fetch-depth: 1
+2026-11-01T07:35:50.1088309Z   fetch-tags: false
+2026-11-01T07:35:50.1088859Z   show-progress: true
+2026-11-01T07:35:50.1089491Z   lfs: false
+2026-11-01T07:35:50.1089987Z   submodules: false
+2026-11-01T07:35:50.1090531Z   set-safe-directory: true
+2026-11-01T07:35:50.1091144Z   allow-unsafe-pr-checkout: false
+2026-11-01T07:35:50.1091842Z ##[endgroup]
+2026-11-01T07:35:50.3391380Z Syncing repository: Vanguduza/Van
+2026-11-01T07:35:50.3393953Z ##[group]Getting Git version info
+2026-11-01T07:35:50.3394817Z Working directory is '/home/runner/work/Van/Van'
+2026-11-01T07:35:50.3396339Z [command]/usr/bin/git version
+2026-11-01T07:35:50.3399333Z git version 2.56.0
+2026-11-01T07:35:50.3412603Z ##[endgroup]
+2026-11-01T07:35:50.3423765Z Temporarily overriding HOME='/home/runner/work/_temp/6c17f8a1-993c-43de-be53-336b26efba71' before making global git config changes
+2026-11-01T07:35:50.3426280Z Adding repository directory to the temporary git global config as a safe directory
+2026-11-01T07:35:50.3428218Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/Van/Van
+2026-11-01T07:35:50.3489107Z Deleting the contents of '/home/runner/work/Van/Van'
+2026-11-01T07:35:50.3492206Z ##[group]Initializing the repository
+2026-11-01T07:35:50.3495632Z [command]/usr/bin/git init /home/runner/work/Van/Van
+2026-11-01T07:35:50.3992428Z hint: Using 'master' as the name for the initial branch. This default branch name
+2026-11-01T07:35:50.3995688Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+2026-11-01T07:35:50.3997158Z hint: to use in all of your new repositories, which will suppress this warning,
+2026-11-01T07:35:50.4000739Z hint: call:
+2026-11-01T07:35:50.4002475Z hint:
+2026-11-01T07:35:50.4005036Z hint: 	git config --global init.defaultBranch <name>
+2026-11-01T07:35:50.4006322Z hint:
+2026-11-01T07:35:50.4008605Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+2026-11-01T07:35:50.4012478Z hint: 'development'. The just-created branch can be renamed via this command:
+2026-11-01T07:35:50.4013380Z hint:
+2026-11-01T07:35:50.4013995Z hint: 	git branch -m <name>
+2026-11-01T07:35:50.4014836Z hint:
+2026-11-01T07:35:50.4015929Z hint: Disable this message with "git config set advice.defaultBranchName false"
+2026-11-01T07:35:50.4021653Z Initialized empty Git repository in /home/runner/work/Van/Van/.git/
+2026-11-01T07:35:50.4032968Z [command]/usr/bin/git remote add origin https://github.com/Vanguduza/Van
+2026-11-01T07:35:50.4117740Z ##[endgroup]
+2026-11-01T07:35:50.4119243Z ##[group]Disabling automatic garbage collection
+2026-11-01T07:35:50.4120495Z [command]/usr/bin/git config --local gc.auto 0
+2026-11-01T07:35:50.4151012Z ##[endgroup]
+2026-11-01T07:35:50.4152295Z ##[group]Setting up auth
+2026-11-01T07:35:50.4156478Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-11-01T07:35:50.4185603Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-11-01T07:35:50.4561331Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-11-01T07:35:50.4594228Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-11-01T07:35:50.4831963Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-11-01T07:35:50.4865096Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-11-01T07:35:50.5099272Z [command]/usr/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+2026-11-01T07:35:50.5137520Z ##[endgroup]
+2026-11-01T07:35:50.5139046Z ##[group]Fetching the repository
+2026-11-01T07:35:50.5146039Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +721e4179b52312c21c7b5a50a6dfa0759dd30ce7:refs/remotes/pull/105/merge
+2026-11-01T07:35:56.1279153Z From https://github.com/Vanguduza/Van
+2026-11-01T07:35:56.1280034Z  * [new ref]         721e4179b52312c21c7b5a50a6dfa0759dd30ce7 -> pull/105/merge
+2026-11-01T07:35:56.1282751Z ##[endgroup]
+2026-11-01T07:35:56.1283195Z ##[group]Determining the checkout info
+2026-11-01T07:35:56.1284935Z ##[endgroup]
+2026-11-01T07:35:56.1289135Z [command]/usr/bin/git sparse-checkout disable
+2026-11-01T07:35:56.1334423Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+2026-11-01T07:35:56.1364423Z ##[group]Checking out the ref
+2026-11-01T07:35:56.1366778Z [command]/usr/bin/git checkout --progress --force refs/remotes/pull/105/merge
+2026-11-01T07:35:57.1515230Z Updating files:  72% (13174/18055)
+2026-11-01T07:35:57.1606628Z Updating files:  73% (13181/18055)
+2026-11-01T07:35:57.1745421Z Updating files:  74% (13361/18055)
+2026-11-01T07:35:57.1820634Z Updating files:  75% (13542/18055)
+2026-11-01T07:35:57.1892323Z Updating files:  76% (13722/18055)
+2026-11-01T07:35:57.1981597Z Updating files:  77% (13903/18055)
+2026-11-01T07:35:57.2222782Z Updating files:  78% (14083/18055)
+2026-11-01T07:35:57.2410088Z Updating files:  79% (14264/18055)
+2026-11-01T07:35:57.2577166Z Updating files:  80% (14444/18055)
+2026-11-01T07:35:57.2685254Z Updating files:  81% (14625/18055)
+2026-11-01T07:35:57.2862789Z Updating files:  82% (14806/18055)
+2026-11-01T07:35:57.3075655Z Updating files:  83% (14986/18055)
+2026-11-01T07:35:57.3180177Z Updating files:  84% (15167/18055)
+2026-11-01T07:35:57.3322445Z Updating files:  85% (15347/18055)
+2026-11-01T07:35:57.3402404Z Updating files:  86% (15528/18055)
+2026-11-01T07:35:57.3481807Z Updating files:  87% (15708/18055)
+2026-11-01T07:35:57.4178821Z Updating files:  88% (15889/18055)
+2026-11-01T07:35:57.4288551Z Updating files:  89% (16069/18055)
+2026-11-01T07:35:57.4403096Z Updating files:  90% (16250/18055)
+2026-11-01T07:35:57.4740369Z Updating files:  91% (16431/18055)
+2026-11-01T07:35:57.5085842Z Updating files:  92% (16611/18055)
+2026-11-01T07:35:57.5302286Z Updating files:  93% (16792/18055)
+2026-11-01T07:35:57.5402363Z Updating files:  94% (16972/18055)
+2026-11-01T07:35:57.5494502Z Updating files:  95% (17153/18055)
+2026-11-01T07:35:57.5580527Z Updating files:  96% (17333/18055)
+2026-11-01T07:35:57.5673065Z Updating files:  97% (17514/18055)
+2026-11-01T07:35:57.5756076Z Updating files:  98% (17694/18055)
+2026-11-01T07:35:57.7183236Z Updating files:  99% (17875/18055)
+2026-11-01T07:35:57.7184001Z Updating files: 100% (18055/18055)
+2026-11-01T07:35:57.7184689Z Updating files: 100% (18055/18055), done.
+2026-11-01T07:35:57.7320688Z Note: switching to 'refs/remotes/pull/105/merge'.
+2026-11-01T07:35:57.7320914Z 
+2026-11-01T07:35:57.7321040Z You are in 'detached HEAD' state. You can look around, make experimental
+2026-11-01T07:35:57.7321547Z changes and commit them, and you can discard any commits you make in this
+2026-11-01T07:35:57.7321953Z state without impacting any branches by switching back to a branch.
+2026-11-01T07:35:57.7322192Z 
+2026-11-01T07:35:57.7322354Z If you want to create a new branch to retain commits you create, you may
+2026-11-01T07:35:57.7322844Z do so (now or later) by using -c with the switch command. Example:
+2026-11-01T07:35:57.7323059Z 
+2026-11-01T07:35:57.7323164Z   git switch -c <new-branch-name>
+2026-11-01T07:35:57.7323315Z 
+2026-11-01T07:35:57.7323419Z Or undo this operation with:
+2026-11-01T07:35:57.7323567Z 
+2026-11-01T07:35:57.7323645Z   git switch -
+2026-11-01T07:35:57.7324053Z 
+2026-11-01T07:35:57.7324263Z Turn off this advice by setting config variable advice.detachedHead to false
+2026-11-01T07:35:57.7324518Z 
+2026-11-01T07:35:57.7324801Z HEAD is now at 721e417 Merge 25a48fd705825f5eec1264696e91536694cfb82f into 8eb1889822fc8a83f219977c15340172e16acd91
+2026-11-01T07:35:57.7453893Z ##[endgroup]
+2026-11-01T07:35:57.7509823Z [command]/usr/bin/git log -1 --format=%H
+2026-11-01T07:35:57.7532292Z 721e4179b52312c21c7b5a50a6dfa0759dd30ce7
+2026-11-01T07:35:57.7771724Z ##[group]Run actions/setup-java@v4
+2026-11-01T07:35:57.7771895Z with:
+2026-11-01T07:35:57.7772045Z   distribution: temurin
+2026-11-01T07:35:57.7772178Z   java-version: 17
+2026-11-01T07:35:57.7772301Z   java-package: jdk
+2026-11-01T07:35:57.7772424Z   check-latest: false
+2026-11-01T07:35:57.7772547Z   server-id: github
+2026-11-01T07:35:57.7772672Z   server-username: GITHUB_ACTOR
+2026-11-01T07:35:57.7772822Z   server-password: GITHUB_TOKEN
+2026-11-01T07:35:57.7772978Z   overwrite-settings: true
+2026-11-01T07:35:57.7773129Z   job-status: success
+2026-11-01T07:35:57.7774494Z   token: ***
+2026-11-01T07:35:57.7774629Z ##[endgroup]
+2026-11-01T07:35:57.8999330Z ##[warning]setup-java v4 is deprecated and will no longer receive updates. Please migrate to actions/setup-java@v5.
+2026-11-01T07:35:57.9004847Z ##[group]Installed distributions
+2026-11-01T07:35:57.9023387Z Resolved Java 17.0.21+9 from tool-cache
+2026-11-01T07:35:57.9023844Z Setting Java 17.0.21+9 as the default
+2026-11-01T07:35:57.9030766Z (node:2180) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-11-01T07:35:57.9031782Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-11-01T07:35:57.9033319Z Creating toolchains.xml for JDK version 17 from temurin
+2026-11-01T07:35:57.9096535Z Writing to /home/runner/.m2/toolchains.xml
+2026-11-01T07:35:57.9097194Z 
+2026-11-01T07:35:57.9097358Z Java configuration:
+2026-11-01T07:35:57.9097742Z   Distribution: temurin
+2026-11-01T07:35:57.9098015Z   Version: 17.0.21+9
+2026-11-01T07:35:57.9098236Z   Path: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.21-9/x64
+2026-11-01T07:35:57.9098399Z 
+2026-11-01T07:35:57.9098691Z ##[endgroup]
+2026-11-01T07:35:57.9115902Z Creating settings.xml with server-id: github
+2026-11-01T07:35:57.9125681Z Writing to /home/runner/.m2/settings.xml
+2026-11-01T07:35:57.9360750Z ##[group]Run actions/setup-python@v5
+2026-11-01T07:35:57.9360924Z with:
+2026-11-01T07:35:57.9361044Z   python-version: 3.12
+2026-11-01T07:35:57.9361174Z   check-latest: false
+2026-11-01T07:35:57.9362572Z   token: ***
+2026-11-01T07:35:57.9362711Z   update-environment: true
+2026-11-01T07:35:57.9362857Z   allow-prereleases: false
+2026-11-01T07:35:57.9362988Z   freethreaded: false
+2026-11-01T07:35:57.9363109Z env:
+2026-11-01T07:35:57.9363280Z   JAVA_HOME: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.21-9/x64
+2026-11-01T07:35:57.9363550Z   JAVA_HOME_17_X64: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.21-9/x64
+2026-11-01T07:35:57.9363757Z ##[endgroup]
+2026-11-01T07:35:58.0265915Z ##[group]Installed versions
+2026-11-01T07:35:58.0351806Z (node:2192) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-11-01T07:35:58.0352463Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-11-01T07:35:58.0352987Z Successfully set up CPython (3.12.15)
+2026-11-01T07:35:58.0353436Z ##[endgroup]
+2026-11-01T07:35:58.0471424Z ##[group]Run echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+2026-11-01T07:35:58.0471973Z [36;1mecho 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules[0m
+2026-11-01T07:35:58.0472291Z [36;1msudo udevadm control --reload-rules[0m
+2026-11-01T07:35:58.0472474Z [36;1msudo udevadm trigger --name-match=kvm[0m
+2026-11-01T07:35:58.0515661Z shell: /usr/bin/bash -e {0}
+2026-11-01T07:35:58.0515822Z env:
+2026-11-01T07:35:58.0516009Z   JAVA_HOME: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.21-9/x64
+2026-11-01T07:35:58.0516285Z   JAVA_HOME_17_X64: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.21-9/x64
+2026-11-01T07:35:58.0516537Z   pythonLocation: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-11-01T07:35:58.0516945Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.15/x64/lib/pkgconfig
+2026-11-01T07:35:58.0517236Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-11-01T07:35:58.0517455Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-11-01T07:35:58.0517675Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-11-01T07:35:58.0517904Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.15/x64/lib
+2026-11-01T07:35:58.0518090Z ##[endgroup]
+2026-11-01T07:35:58.0684575Z KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"
+2026-11-01T07:35:58.1157724Z ##[group]Run python -m pip install --disable-pip-version-check "Pillow==12.3.0" "vtracer==0.6.15" "PyYAML==6.0.2"
+2026-11-01T07:35:58.1158200Z [36;1mpython -m pip install --disable-pip-version-check "Pillow==12.3.0" "vtracer==0.6.15" "PyYAML==6.0.2"[0m
+2026-11-01T07:35:58.1158506Z [36;1mpython tools/rebuild/ci_ubuntu_libraries.py[0m
+2026-11-01T07:35:58.1158694Z [36;1mtmp="$(mktemp -d)"[0m
+2026-11-01T07:35:58.1158972Z [36;1mcurl -fsSL https://releases.rive.app/cli/v1.1.1/rive-linux-x64.tar.gz -o "$tmp/rive.tar.gz"[0m
+2026-11-01T07:35:58.1159584Z [36;1mecho "41684e9d99fea98e01c2c155e07ec985130b95b640410dc0fbe4ca30c271a7d5  $tmp/rive.tar.gz" | sha256sum -c -[0m
+2026-11-01T07:35:58.1159917Z [36;1mtar -xzf "$tmp/rive.tar.gz" -C "$tmp"[0m
+2026-11-01T07:35:58.1160290Z [36;1mrive_bin="$(find "$tmp" -type f -name rive -perm -u+x -print -quit)"[0m
+2026-11-01T07:35:58.1160507Z [36;1mtest -n "$rive_bin"[0m
+2026-11-01T07:35:58.1160711Z [36;1mmkdir -p "$RUNNER_TEMP/van-character-forge-bin"[0m
+2026-11-01T07:35:58.1160967Z [36;1minstall -m 0755 "$rive_bin" "$RUNNER_TEMP/van-character-forge-bin/rive"[0m
+2026-11-01T07:35:58.1161226Z [36;1mexport PATH="$RUNNER_TEMP/van-character-forge-bin:$PATH"[0m
+2026-11-01T07:35:58.1161481Z [36;1mpython -m tools.character_forge.build_candidate_b_rive_prototype[0m
+2026-11-01T07:35:58.1161848Z [36;1mtest -s visual-authority/character-forge/08-prototypes/candidate-b-mechanics/build/van_candidate_b_mechanics_proto.riv[0m
+2026-11-01T07:35:58.1196221Z shell: /usr/bin/bash -e {0}
+2026-11-01T07:35:58.1197036Z env:
+2026-11-01T07:35:58.1197280Z   JAVA_HOME: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.21-9/x64
+2026-11-01T07:35:58.1197573Z   JAVA_HOME_17_X64: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.21-9/x64
+2026-11-01T07:35:58.1197858Z   pythonLocation: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-11-01T07:35:58.1199140Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.15/x64/lib/pkgconfig
+2026-11-01T07:35:58.1199975Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-11-01T07:35:58.1200274Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-11-01T07:35:58.1200682Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-11-01T07:35:58.1200905Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.15/x64/lib
+2026-11-01T07:35:58.1201093Z ##[endgroup]
+2026-11-01T07:35:58.9647096Z Collecting Pillow==12.3.0
+2026-11-01T07:35:59.0262678Z   Downloading pillow-12.3.0-cp312-cp312-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl.metadata (9.1 kB)
+2026-11-01T07:35:59.0546809Z Collecting vtracer==0.6.15
+2026-11-01T07:35:59.0704811Z   Downloading vtracer-0.6.15-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (4.3 kB)
+2026-11-01T07:35:59.0988392Z Collecting PyYAML==6.0.2
+2026-11-01T07:35:59.1136726Z   Downloading PyYAML-6.0.2-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (2.1 kB)
+2026-11-01T07:35:59.1334401Z Downloading pillow-12.3.0-cp312-cp312-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl (6.9 MB)
+2026-11-01T07:35:59.2609945Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 6.9/6.9 MB 72.0 MB/s  0:00:00
+2026-11-01T07:35:59.2816121Z Downloading vtracer-0.6.15-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (1.1 MB)
+2026-11-01T07:35:59.2867050Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 1.1/1.1 MB 259.9 MB/s  0:00:00
+2026-11-01T07:35:59.3012275Z Downloading PyYAML-6.0.2-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (767 kB)
+2026-11-01T07:35:59.3055406Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 767.5/767.5 kB 181.4 MB/s  0:00:00
+2026-11-01T07:35:59.3431942Z Installing collected packages: vtracer, PyYAML, Pillow
+2026-11-01T07:35:59.6300140Z 
+2026-11-01T07:35:59.6300967Z Successfully installed Pillow-12.3.0 PyYAML-6.0.2 vtracer-0.6.15
+2026-11-01T07:35:59.7464024Z Get:1 file:/etc/apt/apt-mirrors.txt Mirrorlist [144 B]
+2026-11-01T07:35:59.8925379Z Hit:2 http://azure.archive.ubuntu.com/ubuntu resolute InRelease
+2026-11-01T07:35:59.8986769Z Get:3 http://azure.archive.ubuntu.com/ubuntu resolute-updates InRelease [137 kB]
+2026-11-01T07:35:59.9014409Z Get:4 http://azure.archive.ubuntu.com/ubuntu resolute-backports InRelease [137 kB]
+2026-11-01T07:35:59.9022103Z Get:5 http://azure.archive.ubuntu.com/ubuntu resolute-security InRelease [137 kB]
+2026-11-01T07:35:59.9175028Z Get:6 http://azure.archive.ubuntu.com/ubuntu resolute-updates/main amd64v3 Packages [804 kB]
+2026-11-01T07:35:59.9280350Z Get:7 http://azure.archive.ubuntu.com/ubuntu resolute-updates/main Translation-en [184 kB]
+2026-11-01T07:35:59.9300238Z Get:8 http://azure.archive.ubuntu.com/ubuntu resolute-updates/universe amd64v3 Packages [375 kB]
+2026-11-01T07:35:59.9310070Z Get:9 http://azure.archive.ubuntu.com/ubuntu resolute-updates/universe Translation-en [118 kB]
+2026-11-01T07:35:59.9324399Z Get:10 http://azure.archive.ubuntu.com/ubuntu resolute-updates/restricted amd64v3 Packages [543 kB]
+2026-11-01T07:35:59.9363175Z Get:11 http://azure.archive.ubuntu.com/ubuntu resolute-updates/restricted Translation-en [112 kB]
+2026-11-01T07:35:59.9374912Z Get:12 http://azure.archive.ubuntu.com/ubuntu resolute-security/main amd64v3 Packages [608 kB]
+2026-11-01T07:35:59.9397571Z Get:13 http://azure.archive.ubuntu.com/ubuntu resolute-security/main Translation-en [141 kB]
+2026-11-01T07:35:59.9408729Z Get:14 http://azure.archive.ubuntu.com/ubuntu resolute-security/universe amd64v3 Packages [206 kB]
+2026-11-01T07:35:59.9420531Z Get:15 http://azure.archive.ubuntu.com/ubuntu resolute-security/universe Translation-en [67.9 kB]
+2026-11-01T07:36:02.0884890Z Fetched 3570 kB in 0s (10.5 MB/s)
+2026-11-01T07:36:02.5841375Z Reading package lists...
+2026-11-01T07:36:02.6118446Z Reading package lists...
+2026-11-01T07:36:02.7684657Z Building dependency tree...
+2026-11-01T07:36:02.7690730Z Reading state information...
+2026-11-01T07:36:02.7994693Z libgl1 is already the newest version (1.7.0-3).
+2026-11-01T07:36:02.7995041Z libgl1 set to manually installed.
+2026-11-01T07:36:02.7995318Z libx11-6 is already the newest version (2:1.8.13-1ubuntu0.1).
+2026-11-01T07:36:02.7995659Z libx11-6 set to manually installed.
+2026-11-01T07:36:02.7995926Z libxkbcommon0 is already the newest version (1.13.1-1).
+2026-11-01T07:36:02.7996204Z libxkbcommon0 set to manually installed.
+2026-11-01T07:36:02.7996499Z libfontconfig1 is already the newest version (2.17.1-3ubuntu1).
+2026-11-01T07:36:02.7996807Z libfontconfig1 set to manually installed.
+2026-11-01T07:36:02.7997113Z libfreetype6 is already the newest version (2.14.2+dfsg-1ubuntu0.2).
+2026-11-01T07:36:02.7997426Z libfreetype6 set to manually installed.
+2026-11-01T07:36:02.7997697Z libxcb1 is already the newest version (1.17.0-2ubuntu1).
+2026-11-01T07:36:02.7997970Z libxcb1 set to manually installed.
+2026-11-01T07:36:02.8432798Z Solving dependencies...
+2026-11-01T07:36:02.9156327Z The following additional packages will be installed:
+2026-11-01T07:36:02.9162051Z   libegl-mesa0
+2026-11-01T07:36:02.9328007Z The following NEW packages will be installed:
+2026-11-01T07:36:02.9334838Z   libegl-mesa0 libegl1 libgles2
+2026-11-01T07:36:02.9509844Z 0 upgraded, 3 newly installed, 0 to remove and 15 not upgraded.
+2026-11-01T07:36:02.9510143Z Need to get 182 kB of archives.
+2026-11-01T07:36:02.9510342Z After this operation, 686 kB of additional disk space will be used.
+2026-11-01T07:36:02.9510580Z Get:1 file:/etc/apt/apt-mirrors.txt Mirrorlist [144 B]
+2026-11-01T07:36:03.0050495Z Get:2 http://azure.archive.ubuntu.com/ubuntu resolute-updates/main amd64v3 libegl-mesa0 amd64 26.0.8-1ubuntu0.3 [134 kB]
+2026-11-01T07:36:03.0361291Z Get:3 http://azure.archive.ubuntu.com/ubuntu resolute/main amd64v3 libegl1 amd64 1.7.0-3 [29.8 kB]
+2026-11-01T07:36:03.0648479Z Get:4 http://azure.archive.ubuntu.com/ubuntu resolute/main amd64v3 libgles2 amd64 1.7.0-3 [17.5 kB]
+2026-11-01T07:36:04.3262306Z Fetched 182 kB in 0s (1458 kB/s)
+2026-11-01T07:36:04.3453425Z Selecting previously unselected package libegl-mesa0:amd64.
+2026-11-01T07:36:04.3697322Z (Reading database ... 
+2026-11-01T07:36:04.3697561Z (Reading database ... 5%
+2026-11-01T07:36:04.3698144Z (Reading database ... 10%
+2026-11-01T07:36:04.3698330Z (Reading database ... 15%
+2026-11-01T07:36:04.3698484Z (Reading database ... 20%
+2026-11-01T07:36:04.3698927Z (Reading database ... 25%
+2026-11-01T07:36:04.3699120Z (Reading database ... 30%
+2026-11-01T07:36:04.3699259Z (Reading database ... 35%
+2026-11-01T07:36:04.3699618Z (Reading database ... 40%
+2026-11-01T07:36:04.3699847Z (Reading database ... 45%
+2026-11-01T07:36:04.3700058Z (Reading database ... 50%
+2026-11-01T07:36:04.4464561Z (Reading database ... 55%
+2026-11-01T07:36:04.6445793Z (Reading database ... 60%
+2026-11-01T07:36:04.7880031Z (Reading database ... 65%
+2026-11-01T07:36:04.9486131Z (Reading database ... 70%
+2026-11-01T07:36:05.0896221Z (Reading database ... 75%
+2026-11-01T07:36:05.2501237Z (Reading database ... 80%
+2026-11-01T07:36:05.4811452Z (Reading database ... 85%
+2026-11-01T07:36:05.6635633Z (Reading database ... 90%
+2026-11-01T07:36:05.7968862Z (Reading database ... 95%
+2026-11-01T07:36:05.7969220Z (Reading database ... 100%
+2026-11-01T07:36:05.7969741Z (Reading database ... 212715 files and directories currently installed.)
+2026-11-01T07:36:05.8007263Z Preparing to unpack .../libegl-mesa0_26.0.8-1ubuntu0.3_amd64v3.deb ...
+2026-11-01T07:36:05.8168379Z Unpacking libegl-mesa0:amd64 (26.0.8-1ubuntu0.3) ...
+2026-11-01T07:36:05.8402782Z Selecting previously unselected package libegl1:amd64.
+2026-11-01T07:36:05.8510333Z Preparing to unpack .../libegl1_1.7.0-3_amd64v3.deb ...
+2026-11-01T07:36:05.8517542Z Unpacking libegl1:amd64 (1.7.0-3) ...
+2026-11-01T07:36:05.8734221Z Selecting previously unselected package libgles2:amd64.
+2026-11-01T07:36:05.8841483Z Preparing to unpack .../libgles2_1.7.0-3_amd64v3.deb ...
+2026-11-01T07:36:05.8849212Z Unpacking libgles2:amd64 (1.7.0-3) ...
+2026-11-01T07:36:05.9208101Z Setting up libegl-mesa0:amd64 (26.0.8-1ubuntu0.3) ...
+2026-11-01T07:36:05.9226208Z Setting up libgles2:amd64 (1.7.0-3) ...
+2026-11-01T07:36:05.9242894Z Setting up libegl1:amd64 (1.7.0-3) ...
+2026-11-01T07:36:05.9262911Z Processing triggers for libc-bin (2.43-2ubuntu2.4) ...
+2026-11-01T07:36:08.2787670Z 
+2026-11-01T07:36:08.2788290Z Running kernel seems to be up-to-date.
+2026-11-01T07:36:08.2788515Z 
+2026-11-01T07:36:08.2788608Z Restarting services...
+2026-11-01T07:36:08.2865099Z 
+2026-11-01T07:36:08.2865542Z Service restarts being deferred:
+2026-11-01T07:36:08.2868716Z  systemctl restart hosted-compute-agent.service
+2026-11-01T07:36:08.2868929Z 
+2026-11-01T07:36:08.2870035Z No containers need to be restarted.
+2026-11-01T07:36:08.2870227Z 
+2026-11-01T07:36:08.2870348Z No user sessions are running outdated binaries.
+2026-11-01T07:36:08.2870540Z 
+2026-11-01T07:36:08.2870711Z No VM guests are running outdated hypervisor (qemu) binaries on this host.
+2026-11-01T07:36:10.2766199Z /tmp/tmp.rkPkZc1mmW/rive.tar.gz: OK
+2026-11-01T07:36:13.6082662Z {
+2026-11-01T07:36:13.6082950Z   "schema_version": 1,
+2026-11-01T07:36:13.6083255Z   "status": "NON_CANONICAL_MECHANICS_PROTOTYPE",
+2026-11-01T07:36:13.6083716Z   "candidate_b_sha256": "cf7f51793692bfe8ea2e5f58f1a12e64d3a76468a85cb19d76d0db64ccef374c",
+2026-11-01T07:36:13.6084210Z   "scene_sha256": "164e6ad0cf38db6a9d3ab5192037d529bd6324c2f06d84cff790084e61c53efe",
+2026-11-01T07:36:13.6084665Z   "rive_sha256": "772f517720f3e39b76b1a93291673d5dabf44c63d0349b2e57259df6d7635457",
+2026-11-01T07:36:13.6085005Z   "rive_version": "rive 1.1.1",
+2026-11-01T07:36:13.6085216Z   "artboard": "Van",
+2026-11-01T07:36:13.6085363Z   "state_machine": "VanRuntime",
+2026-11-01T07:36:13.6085499Z   "durable_states": 18,
+2026-11-01T07:36:13.6085627Z   "finite_actions": 14,
+2026-11-01T07:36:13.6085748Z   "visemes": 5,
+2026-11-01T07:36:13.6085862Z   "trace_paths": 183,
+2026-11-01T07:36:13.6085987Z   "vector_trace_sha256": {
+2026-11-01T07:36:13.6086179Z     "body": "7a9e81c4f912159412221098106ff7f6dc501f22041a103a95ba91f307165023",
+2026-11-01T07:36:13.6086457Z     "head": "d3f47113f344b8c225e267c39f29c87e911544014645fcf79583a21b697738f7",
+2026-11-01T07:36:13.6086978Z     "forearm_l": "2b3d9f8143cdd088d6c958ead2e80686aaf865676a5739037a11475b5c49a8bf",
+2026-11-01T07:36:13.6087263Z     "forearm_r": "90518ba5f6f962f7b1a3edab8c838840bc35f9e66ab8fc6173511d6018d5d142",
+2026-11-01T07:36:13.6087537Z     "orb": "7d1ab93f40568e062b56ff1a643a080645d0d4ebfe0d879704b0ddf8b6cde606"
+2026-11-01T07:36:13.6087745Z   },
+2026-11-01T07:36:13.6087882Z   "aura_embedded": false,
+2026-11-01T07:36:13.6088025Z   "production_admissible": false,
+2026-11-01T07:36:13.6088359Z   "note": "Candidate-B cut-out traced to non-canonical vectors for mechanics proof; M1 reviewed semantic vectors and M2 owner pass remain mandatory."
+2026-11-01T07:36:13.6088679Z }
+2026-11-01T07:36:13.6237571Z ##[group]Run prototype="visual-authority/character-forge/08-prototypes/candidate-b-mechanics/build/van_candidate_b_mechanics_proto.riv"
+2026-11-01T07:36:13.6238233Z [36;1mprototype="visual-authority/character-forge/08-prototypes/candidate-b-mechanics/build/van_candidate_b_mechanics_proto.riv"[0m
+2026-11-01T07:36:13.6238612Z [36;1mtest_candidate="android/app/src/androidTest/assets/van_candidate.riv"[0m
+2026-11-01T07:36:13.6238882Z [36;1mdebug_candidate="android/app/src/debug/assets/van_candidate.riv"[0m
+2026-11-01T07:36:13.6239103Z [36;1mif [[ -f "$prototype" ]]; then[0m
+2026-11-01T07:36:13.6239319Z [36;1m  mkdir -p "$(dirname "$test_candidate")" "$(dirname "$debug_candidate")"[0m
+2026-11-01T07:36:13.6239816Z [36;1m  cp "$prototype" "$test_candidate"[0m
+2026-11-01T07:36:13.6239989Z [36;1m  cp "$prototype" "$debug_candidate"[0m
+2026-11-01T07:36:13.6240209Z [36;1m  printf '%s\n' core > android/app/src/androidTest/assets/forge_mode.txt[0m
+2026-11-01T07:36:13.6240495Z [36;1m  printf '%s\n' core > android/app/src/debug/assets/forge_mode.txt[0m
+2026-11-01T07:36:13.6240813Z [36;1m  echo "Bound Candidate B mechanics prototype to androidTest and the debug host used by RiveContractTest."[0m
+2026-11-01T07:36:13.6241078Z [36;1mfi[0m
+2026-11-01T07:36:13.6265896Z shell: /usr/bin/bash -e {0}
+2026-11-01T07:36:13.6266035Z env:
+2026-11-01T07:36:13.6266206Z   JAVA_HOME: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.21-9/x64
+2026-11-01T07:36:13.6266474Z   JAVA_HOME_17_X64: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.21-9/x64
+2026-11-01T07:36:13.6266715Z   pythonLocation: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-11-01T07:36:13.6266948Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.15/x64/lib/pkgconfig
+2026-11-01T07:36:13.6267174Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-11-01T07:36:13.6267383Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-11-01T07:36:13.6267592Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-11-01T07:36:13.6267806Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.15/x64/lib
+2026-11-01T07:36:13.6267992Z ##[endgroup]
+2026-11-01T07:36:13.6407087Z Bound Candidate B mechanics prototype to androidTest and the debug host used by RiveContractTest.
+2026-11-01T07:36:13.6429844Z ##[group]Run mkdir -p artifacts/character-forge
+2026-11-01T07:36:13.6430149Z [36;1mmkdir -p artifacts/character-forge[0m
+2026-11-01T07:36:13.6430365Z [36;1mcandidate="android/app/src/androidTest/assets/van_candidate.riv"[0m
+2026-11-01T07:36:13.6430607Z [36;1mproduction="android/app/src/main/assets/van.riv"[0m
+2026-11-01T07:36:13.6430792Z [36;1mif [[ -f "$candidate" ]]; then[0m
+2026-11-01T07:36:13.6431033Z [36;1m  sha256sum "$candidate" | awk '{print $1}' > artifacts/character-forge/van_candidate.sha256[0m
+2026-11-01T07:36:13.6431270Z [36;1melse[0m
+2026-11-01T07:36:13.6431451Z [36;1m  printf '%s\n' NO_RIVE_ASSET > artifacts/character-forge/van_candidate.sha256[0m
+2026-11-01T07:36:13.6431658Z [36;1mfi[0m
+2026-11-01T07:36:13.6431775Z [36;1mif [[ -f "$production" ]]; then[0m
+2026-11-01T07:36:13.6432018Z [36;1m  sha256sum "$production" | awk '{print $1}' > artifacts/character-forge/van_production.sha256[0m
+2026-11-01T07:36:13.6432268Z [36;1melse[0m
+2026-11-01T07:36:13.6432466Z [36;1m  printf '%s\n' NO_RIVE_ASSET > artifacts/character-forge/van_production.sha256[0m
+2026-11-01T07:36:13.6432681Z [36;1mfi[0m
+2026-11-01T07:36:13.6455024Z shell: /usr/bin/bash -e {0}
+2026-11-01T07:36:13.6465948Z env:
+2026-11-01T07:36:13.6466144Z   JAVA_HOME: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.21-9/x64
+2026-11-01T07:36:13.6466528Z   JAVA_HOME_17_X64: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.21-9/x64
+2026-11-01T07:36:13.6466779Z   pythonLocation: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-11-01T07:36:13.6467005Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.15/x64/lib/pkgconfig
+2026-11-01T07:36:13.6467226Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-11-01T07:36:13.6467445Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-11-01T07:36:13.6467655Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-11-01T07:36:13.6468033Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.15/x64/lib
+2026-11-01T07:36:13.6468213Z ##[endgroup]
+2026-11-01T07:36:13.6576520Z ##[group]Run python3 android/tools/package_voice_assets.py --acquire
+2026-11-01T07:36:13.6576813Z [36;1mpython3 android/tools/package_voice_assets.py --acquire[0m
+2026-11-01T07:36:13.6598653Z shell: /usr/bin/bash -e {0}
+2026-11-01T07:36:13.6598791Z env:
+2026-11-01T07:36:13.6598959Z   JAVA_HOME: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.21-9/x64
+2026-11-01T07:36:13.6599220Z   JAVA_HOME_17_X64: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.21-9/x64
+2026-11-01T07:36:13.6599647Z   pythonLocation: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-11-01T07:36:13.6599944Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.15/x64/lib/pkgconfig
+2026-11-01T07:36:13.6600168Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-11-01T07:36:13.6600375Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-11-01T07:36:13.6600582Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-11-01T07:36:13.6600820Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.15/x64/lib
+2026-11-01T07:36:13.6600998Z ##[endgroup]
+2026-11-01T07:36:23.7498387Z {"file_bytes": 224852871, "file_count": 45, "manifest_sha256": "7fa17db389349bd587c1f061c7162f9a4c419a552c9d57cd03e8e937bf935e30", "owner_profile_included": false, "status": "VERIFIED"}
+2026-11-01T07:36:23.7499074Z {"file_bytes": 224852871, "file_count": 45, "manifest_sha256": "7fa17db389349bd587c1f061c7162f9a4c419a552c9d57cd03e8e937bf935e30", "owner_profile_included": false, "status": "VERIFIED"}
+2026-11-01T07:36:23.7693096Z ##[group]Run reactivecircus/android-emulator-runner@v2
+2026-11-01T07:36:23.7693286Z with:
+2026-11-01T07:36:23.7693408Z   api-level: 31
+2026-11-01T07:36:23.7693526Z   arch: x86_64
+2026-11-01T07:36:23.7693638Z   target: google_apis
+2026-11-01T07:36:23.7693761Z   profile: pixel_6
+2026-11-01T07:36:23.7694009Z   emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
+2026-11-01T07:36:23.7694280Z   disable-animations: true
+2026-11-01T07:36:23.7694420Z   working-directory: android
+2026-11-01T07:36:23.7695197Z   script: chmod +x gradlew
+bash -c 'set +e; ./gradlew :app:connectedDebugAndroidTest -PVAN_TEST_ABI=x86_64 --console=plain; result=$?; mkdir -p app/build/reports/voice-runtime; adb logcat -d -v threadtime VanVoiceRuntime:I AndroidRuntime:E "*:S" > app/build/reports/voice-runtime/logcat.txt; exit "$result"'
+find app/build/outputs/connected_android_test_additional_output -type f -print || echo "no screenshots captured"
+
+2026-11-01T07:36:23.7695995Z   cores: 2
+2026-11-01T07:36:23.7696101Z   avd-name: test
+2026-11-01T07:36:23.7696224Z   force-avd-creation: true
+2026-11-01T07:36:23.7696360Z   emulator-boot-timeout: 600
+2026-11-01T07:36:23.7696497Z   emulator-port: 5554
+2026-11-01T07:36:23.7696629Z   disable-spellchecker: false
+2026-11-01T07:36:23.7696770Z   disable-linux-hw-accel: auto
+2026-11-01T07:36:23.7696906Z   enable-hw-keyboard: false
+2026-11-01T07:36:23.7697037Z   channel: stable
+2026-11-01T07:36:23.7697150Z env:
+2026-11-01T07:36:23.7697320Z   JAVA_HOME: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.21-9/x64
+2026-11-01T07:36:23.7697580Z   JAVA_HOME_17_X64: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.21-9/x64
+2026-11-01T07:36:23.7697824Z   pythonLocation: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-11-01T07:36:23.7698053Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.15/x64/lib/pkgconfig
+2026-11-01T07:36:23.7698276Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-11-01T07:36:23.7698481Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-11-01T07:36:23.7698683Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-11-01T07:36:23.7698889Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.15/x64/lib
+2026-11-01T07:36:23.7699069Z ##[endgroup]
+2026-11-01T07:36:23.8174315Z ##[group]Configure emulator
+2026-11-01T07:36:23.8174807Z API level: 31
+2026-11-01T07:36:23.8175037Z System image API level: 31
+2026-11-01T07:36:23.8175657Z target: google_apis
+2026-11-01T07:36:23.8175858Z CPU architecture: x86_64
+2026-11-01T07:36:23.8176072Z Hardware profile: pixel_6
+2026-11-01T07:36:23.8176263Z Cores: 2
+2026-11-01T07:36:23.8176441Z RAM size: 
+2026-11-01T07:36:23.8176601Z Heap size: 
+2026-11-01T07:36:23.8176810Z SD card path or size: 
+2026-11-01T07:36:23.8178219Z Disk size: 
+2026-11-01T07:36:23.8178385Z AVD name: test
+2026-11-01T07:36:23.8178535Z force avd creation: true
+2026-11-01T07:36:23.8178744Z Emulator boot timeout: 600
+2026-11-01T07:36:23.8178975Z emulator port: 5554
+2026-11-01T07:36:23.8179495Z emulator options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
+2026-11-01T07:36:23.8179774Z disable animations: true
+2026-11-01T07:36:23.8179909Z disable spellchecker: false
+2026-11-01T07:36:23.8180057Z disable Linux hardware acceleration: false
+2026-11-01T07:36:23.8180222Z enable hardware keyboard: false
+2026-11-01T07:36:23.8180369Z custom working directory: android
+2026-11-01T07:36:23.8180525Z Channel: 0 (stable)
+2026-11-01T07:36:23.8181300Z Script:
+2026-11-01T07:36:23.8181654Z chmod +x gradlew
+2026-11-01T07:36:23.8182347Z bash -c 'set +e; ./gradlew :app:connectedDebugAndroidTest -PVAN_TEST_ABI=x86_64 --console=plain; result=$?; mkdir -p app/build/reports/voice-runtime; adb logcat -d -v threadtime VanVoiceRuntime:I AndroidRuntime:E "*:S" > app/build/reports/voice-runtime/logcat.txt; exit "$result"'
+2026-11-01T07:36:23.8183046Z find app/build/outputs/connected_android_test_additional_output -type f -print || echo "no screenshots captured"
+2026-11-01T07:36:23.8183705Z Pre emulator launch script:
+2026-11-01T07:36:23.8184065Z ##[endgroup]
+2026-11-01T07:36:23.8184277Z ##[group]Install Android SDK
+2026-11-01T07:36:23.8230314Z [command]/usr/bin/sh -c \yes | sdkmanager --licenses > /dev/null
+2026-11-01T07:36:27.1992435Z Installing latest build tools, platform tools, and platform.
+2026-11-01T07:36:27.2000857Z [command]/usr/bin/sh -c \sdkmanager --install 'build-tools;37.0.0' platform-tools 'platforms;android-31'> /dev/null
+2026-11-01T07:36:37.0204880Z Installing latest emulator.
+2026-11-01T07:36:37.0213426Z [command]/usr/bin/sh -c \sdkmanager --install emulator --channel=0 > /dev/null
+2026-11-01T07:36:45.4444097Z Installing system images.
+2026-11-01T07:36:45.4452741Z [command]/usr/bin/sh -c \sdkmanager --install 'system-images;android-31;google_apis;x86_64' --channel=0 > /dev/null
+2026-11-01T07:37:23.0571011Z ##[endgroup]
+2026-11-01T07:37:23.0571950Z ##[group]Create AVD
+2026-11-01T07:37:23.0572658Z Creating AVD.
+2026-11-01T07:37:23.0590287Z [command]/usr/bin/sh -c \echo no | avdmanager create avd --force -n test --package 'system-images;android-31;google_apis;x86_64' --device 'pixel_6'
+2026-11-01T07:37:23.7161014Z Loading local repository...                                                     
+2026-11-01T07:37:23.8927622Z [=========                              ] 25% Loading local repository...       
+2026-11-01T07:37:23.8928056Z Auto-selecting single ABI x86_64
+2026-11-01T07:37:24.2222006Z [command]/usr/bin/sh -c \printf 'hw.cpu.ncore=2\n' >> /home/runner/.android/avd/test.avd/config.ini
+2026-11-01T07:37:24.2244890Z ##[endgroup]
+2026-11-01T07:37:24.2246344Z ##[group]Launch Emulator
+2026-11-01T07:37:24.2247966Z Starting emulator.
+2026-11-01T07:37:24.2256275Z [command]/usr/bin/sh -c \/usr/local/lib/android/sdk/emulator/emulator -port 5554 -avd test -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none &
+2026-11-01T07:37:24.2352404Z INFO         | Android emulator version 37.2.13.0 (build_id 16740729) (CL:N/A)
+2026-11-01T07:37:24.2352713Z INFO         | Graphics backend: gfxstream
+2026-11-01T07:37:24.2353000Z INFO         | Found systemPath /usr/local/lib/android/sdk/system-images/android-31/google_apis/x86_64/
+2026-11-01T07:37:24.6416441Z INFO         | Saving last run QEMU version for the AVD to 2
+2026-11-01T07:37:24.6416967Z WARNING      | Please update the emulator to one that supports the feature(s): Vulkan
+2026-11-01T07:37:24.6417390Z ##############################################################################
+2026-11-01T07:37:24.6418092Z ##                        WARNING - ACTION REQUIRED                         ##
+2026-11-01T07:37:24.6418507Z ##  Consider using the '-metrics-collection' flag to help improve the       ##
+2026-11-01T07:37:24.6418962Z ##  emulator by sending anonymized usage data. Or use the '-no-metrics'     ##
+2026-11-01T07:37:24.6419540Z ##  flag to bypass this warning and turn off the metrics collection.        ##
+2026-11-01T07:37:24.6419989Z ##  In a future release this warning will turn into a one-time blocking     ##
+2026-11-01T07:37:24.6420454Z ##  prompt to ask for explicit user input regarding metrics collection.     ##
+2026-11-01T07:37:24.6420831Z ##                                                                          ##
+2026-11-01T07:37:24.6421216Z ##  Please see '-help-metrics-collection' for more details. You can use     ##
+2026-11-01T07:37:24.6421675Z ##  '-metrics-to-file' or '-metrics-to-console' flags to see what type of   ##
+2026-11-01T07:37:24.6422150Z ##  data is being collected by emulator as part of usage statistics.        ##
+2026-11-01T07:37:24.6422528Z ##############################################################################
+2026-11-01T07:37:24.6422854Z INFO         | Guest GLES Driver: Auto (ext controls)
+2026-11-01T07:37:24.6423286Z INFO         | emuglConfig_init: vulkan_mode_selected:swiftshader gles_mode_selected:swiftshader
+2026-11-01T07:37:24.6423725Z INFO         | Checking system compatibility:
+2026-11-01T07:37:24.6424026Z INFO         |   Checking: hasSufficientDiskSpace
+2026-11-01T07:37:24.6424705Z INFO         |      Ok: Disk space requirements to run avd: `test` are met
+2026-11-01T07:37:24.6425041Z INFO         |   Checking: hasSufficientHwGpu
+2026-11-01T07:37:24.6425370Z INFO         |      Ok: Hardware GPU compatibility checks are not required
+2026-11-01T07:37:24.6425714Z INFO         |   Checking: hasSufficientSystem
+2026-11-01T07:37:24.6426044Z INFO         |      Ok: System requirements to run avd: `test` are met
+2026-11-01T07:37:24.6426788Z WARNING      | Feature QuickbootFileBacked is disabled due to stability issues, if you really want that, the environment variable ANDROID_EMU_FORCE_QUICKBOOT_FILE_BACKED need to set to 1
+2026-11-01T07:37:24.6427510Z ERROR        | Unable to connect to adb daemon on port: 5037
+2026-11-01T07:37:24.6440903Z INFO         | Storing crashdata in: /tmp/android-runner/emu-crash-37.2.13.db, detection is enabled for process: 2996
+2026-11-01T07:37:24.6441458Z INFO         | Initializing gfxstream backend
+2026-11-01T07:37:24.6451178Z INFO         | startOpenglesRendererImpl: gpu info
+2026-11-01T07:37:24.6451512Z INFO         | 
+2026-11-01T07:37:24.6453416Z INFO         | initIcdPaths: ICD set to 'swiftshader', using Swiftshader ICD
+2026-11-01T07:37:24.6454386Z INFO         | Setting ICD filenames for the loader = /usr/local/lib/android/sdk/emulator/lib64/vulkan/vk_swiftshader_icd.json
+2026-11-01T07:37:24.6454900Z INFO         | SharedLibrary::open for [/usr/local/lib/android/sdk/emulator/qemu/linux-x86_64/lib64/vulkan/libvulkan.so]
+2026-11-01T07:37:24.6455340Z INFO         | SharedLibrary::open for [/usr/local/lib/android/sdk/emulator/qemu/linux-x86_64/lib64/vulkan/libvulkan.so.1]
+2026-11-01T07:37:24.6455781Z INFO         | SharedLibrary::open for [/usr/local/lib/android/sdk/emulator/lib64/vulkan/libvulkan.so]
+2026-11-01T07:37:24.6457036Z INFO         | Added library: /usr/local/lib/android/sdk/emulator/lib64/vulkan/libvulkan.so
+2026-11-01T07:37:24.6493387Z INFO         | Selecting Vulkan device: SwiftShader Device (Subzero), Version: 1.3.0
+2026-11-01T07:37:24.6493817Z INFO         | Using Vulkan externalMemoryMode: OpaqueFd for VkEmulation
+2026-11-01T07:37:24.6920157Z INFO         | Format VK_FORMAT_G10X6_B10X6R10X6_2PLANE_422_UNORM_3PACK16 does not support YCbCr sampler conversion
+2026-11-01T07:37:24.6943160Z INFO         | SharedLibrary::open for [libX11]
+2026-11-01T07:37:24.6944375Z WARNING      | Could not open libX11.so, try libX11.so.6
+2026-11-01T07:37:24.6944802Z INFO         | SharedLibrary::open for [libX11.so.6]
+2026-11-01T07:37:24.6945566Z INFO         | SharedLibrary::open for [libX11-xcb]
+2026-11-01T07:37:24.6963947Z WARNING      | Could not open libX11-xcb.so, try libX11-xcb.so.1
+2026-11-01T07:37:24.6964175Z INFO         | SharedLibrary::open for [libX11-xcb.so.1]
+2026-11-01T07:37:24.7007814Z INFO         | Initializing VkEmulation features:
+2026-11-01T07:37:24.7008133Z INFO         |     glInteropSupported: false
+2026-11-01T07:37:24.7008422Z INFO         |     useDeferredCommands: true
+2026-11-01T07:37:24.7014400Z INFO         |     createResourceWithRequirements: true
+2026-11-01T07:37:24.7014792Z INFO         |     useVulkanComposition: false
+2026-11-01T07:37:24.7015075Z INFO         |     useVulkanNativeSwapchain: false
+2026-11-01T07:37:24.7015354Z INFO         |     enable guestRenderDoc: false
+2026-11-01T07:37:24.7015610Z INFO         |     ASTC LDR emulation mode: Gpu
+2026-11-01T07:37:24.7015889Z INFO         |     enable ETC2 emulation: true
+2026-11-01T07:37:24.7016168Z INFO         |     enable Ycbcr emulation: false
+2026-11-01T07:37:24.7016456Z INFO         |     guestVulkanOnly: false
+2026-11-01T07:37:24.7016746Z INFO         |     useDedicatedAllocations: false
+2026-11-01T07:37:24.7017063Z INFO         |     guestVulkanMaxApiVersion: 1.3.0
+2026-11-01T07:37:24.7017377Z INFO         |     enableProtectedMemoryEmulation: false
+2026-11-01T07:37:24.7017714Z INFO         | Graphics Adapter Vendor Google (Google Inc.)
+2026-11-01T07:37:24.7017993Z INFO         | Graphics Adapter Android Emulator OpenGL ES Translator (Google SwiftShader)
+2026-11-01T07:37:24.7018531Z INFO         | Graphics API Version OpenGL ES 3.0 (OpenGL ES 3.0 SwiftShader 4.0.0.1)
+2026-11-01T07:37:24.7019892Z INFO         | Graphics API Extensions GL_OES_EGL_sync GL_OES_EGL_image GL_OES_EGL_image_external GL_OES_depth24 GL_OES_depth32 GL_OES_element_index_uint GL_OES_texture_float GL_OES_texture_float_linear GL_OES_compressed_paletted_texture GL_OES_compressed_ETC1_RGB8_texture GL_OES_depth_texture GL_OES_texture_half_float GL_OES_texture_half_float_linear GL_OES_packed_depth_stencil GL_OES_vertex_half_float GL_OES_standard_derivatives GL_OES_texture_npot GL_OES_rgb8_rgba8 GL_EXT_color_buffer_float GL_EXT_color_buffer_half_float GL_EXT_texture_format_BGRA8888 GL_APPLE_texture_format_BGRA8888 
+2026-11-01T07:37:24.7021031Z INFO         | Graphics Device Extensions N/A
+2026-11-01T07:37:24.7021225Z INFO         | Disabling sparse binding feature support
+2026-11-01T07:37:24.7096358Z INFO         | Sending adb public key [QAAAAPuYr/3NTe3r1ybFGBrs1nhzmKXifJ47cGSvyafarcFu2VZ/F8jgtXtnC4t0a5oQNGaZybwApsWSwOEheDeL5yl9nJusazTUju5qP+gy2JsdbpfEA9VhLq49LB0LnOGggPlMzXIwPoG42pd36E2ogWb/pxneu97qARc8CeHlna08E9gujvaxr84+wNxzAy64956xekxjYesZtmJ46HrTlA/nnvOl6C5aM6IlpVtJa+Hjt73dDKo2vmBlxVqzopZJ9RaCf7MJ7YmIxepXozwrzBF3Vd3zDkHeWM50HAcn86u2wHLRjHhCe5tmOgqyQTyU8aQpcrfLXlt0SSNWx/Ckly2n0UK4drWt/qAw/9fh/vKFdgqQWjKOwHQHqQ1btmdVLanXM9saTQsv9UP6zJFIDhhgHnV0lvJLmR0AGjGKPz3QpKXecHwqdXKrJBl1H7KBsdJq4QqmUcVhbQFUWRVEPNRhX4E1h4oHyyMC2jRqZPiU7sv308IafQOPcBPqz83xzs1SibiZSFOL66VTaNW3ZXkzOCx5NlXEs623lQft3aKwVYOHTP5YeaAk3nqEotvv881dhcpnfULmVNSDtATt2hPFaptWZ3aj30DuWSUxPG2lpOSzc+ZYXugYyOzO6N7LXeHbixeMkbW2v66ZmFTyRt1Kg5giipSJRqjQwo8WYcWr1Kp5YwEAAQA= runner@unknown]
+2026-11-01T07:37:24.7098564Z INFO         | Userspace boot properties:
+2026-11-01T07:37:24.7098801Z INFO         |   androidboot.boot_devices=pci0000:00/0000:00:03.0 pci0000:00/0000:00:06.0
+2026-11-01T07:37:24.7099057Z INFO         |   androidboot.dalvik.vm.heapsize=512m
+2026-11-01T07:37:24.7099262Z INFO         |   androidboot.debug.hwui.renderer=skiagl
+2026-11-01T07:37:24.7099657Z INFO         |   androidboot.debug.sf.nobootanimation=1
+2026-11-01T07:37:24.7099850Z INFO         |   androidboot.hardware=ranchu
+2026-11-01T07:37:24.7100046Z INFO         |   androidboot.hardware.gltransport=pipe
+2026-11-01T07:37:24.7100241Z INFO         |   androidboot.hardware.vulkan=ranchu
+2026-11-01T07:37:24.7100421Z INFO         |   androidboot.logcat=*:V
+2026-11-01T07:37:24.7100626Z INFO         |   androidboot.opengles.version=196608
+2026-11-01T07:37:24.7100960Z INFO         |   androidboot.qemu=1
+2026-11-01T07:37:24.7103033Z INFO         |   androidboot.qemu.adb.pubkey=QAAAAPuYr/3NTe3r1ybFGBrs1nhzmKXifJ47cGSvyafarcFu2VZ/F8jgtXtnC4t0a5oQNGaZybwApsWSwOEheDeL5yl9nJusazTUju5qP+gy2JsdbpfEA9VhLq49LB0LnOGggPlMzXIwPoG42pd36E2ogWb/pxneu97qARc8CeHlna08E9gujvaxr84+wNxzAy64956xekxjYesZtmJ46HrTlA/nnvOl6C5aM6IlpVtJa+Hjt73dDKo2vmBlxVqzopZJ9RaCf7MJ7YmIxepXozwrzBF3Vd3zDkHeWM50HAcn86u2wHLRjHhCe5tmOgqyQTyU8aQpcrfLXlt0SSNWx/Ckly2n0UK4drWt/qAw/9fh/vKFdgqQWjKOwHQHqQ1btmdVLanXM9saTQsv9UP6zJFIDhhgHnV0lvJLmR0AGjGKPz3QpKXecHwqdXKrJBl1H7KBsdJq4QqmUcVhbQFUWRVEPNRhX4E1h4oHyyMC2jRqZPiU7sv308IafQOPcBPqz83xzs1SibiZSFOL66VTaNW3ZXkzOCx5NlXEs623lQft3aKwVYOHTP5YeaAk3nqEotvv881dhcpnfULmVNSDtATt2hPFaptWZ3aj30DuWSUxPG2lpOSzc+ZYXugYyOzO6N7LXeHbixeMkbW2v66ZmFTyRt1Kg5giipSJRqjQwo8WYcWr1Kp5YwEAAQA= runner@unknown
+2026-11-01T07:37:24.7105122Z INFO         |   androidboot.qemu.avd_name=test
+2026-11-01T07:37:24.7105344Z INFO         |   androidboot.qemu.camera_hq_edge_processing=0
+2026-11-01T07:37:24.7105557Z INFO         |   androidboot.qemu.camera_protocol_ver=1
+2026-11-01T07:37:24.7105762Z INFO         |   androidboot.qemu.cpuvulkan.version=4202496
+2026-11-01T07:37:24.7105990Z INFO         |   androidboot.qemu.gltransport.drawFlushInterval=800
+2026-11-01T07:37:24.7106223Z INFO         |   androidboot.qemu.gltransport.name=pipe
+2026-11-01T07:37:24.7106420Z INFO         |   androidboot.qemu.hwcodec.avcdec=2
+2026-11-01T07:37:24.7106610Z INFO         |   androidboot.qemu.hwcodec.hevcdec=2
+2026-11-01T07:37:24.7106802Z INFO         |   androidboot.qemu.hwcodec.vpxdec=2
+2026-11-01T07:37:24.7107137Z INFO         |   androidboot.qemu.settings.system.screen_off_timeout=2147483647
+2026-11-01T07:37:24.7107371Z INFO         |   androidboot.qemu.skin=1080x2400
+2026-11-01T07:37:24.7107554Z INFO         |   androidboot.qemu.virtiowifi=1
+2026-11-01T07:37:24.7107735Z INFO         |   androidboot.qemu.vsync=60
+2026-11-01T07:37:24.7107917Z INFO         |   androidboot.serialno=EMULATOR37X2X13X0
+2026-11-01T07:37:24.7108211Z INFO         |   androidboot.vbmeta.digest=7d2f2089ebfa11b6d9898d8053a23a0cd276a4a3e20e863d19239c82bb94076d
+2026-11-01T07:37:24.7108500Z INFO         |   androidboot.vbmeta.hash_alg=sha256
+2026-11-01T07:37:24.7108683Z INFO         |   androidboot.vbmeta.size=6208
+2026-11-01T07:37:24.7108864Z INFO         |   androidboot.veritymode=enforcing
+2026-11-01T07:37:24.7280901Z WARNING: cannnot unmap ptr 0x7451d2c01000 as it is in the protected range from 0x745152c00000 to 0x7451d2e00000
+2026-11-01T07:37:24.7532289Z INFO         | Monitoring duration of emulator setup.
+2026-11-01T07:37:25.7450413Z INFO         | Activated packet streamer for bluetooth emulation
+2026-11-01T07:37:25.7451410Z INFO         | Successfully initialized netsim WiFi
+2026-11-01T07:37:25.7479760Z INFO         | Setting display: 0 configuration to: 1080x2400, dpi: 420x420 
+2026-11-01T07:37:25.7480168Z INFO         | setDisplayActiveConfig: id:0, 1080x2400
+2026-11-01T07:37:25.7480413Z INFO         | emulatorSetupEnvironment: Environment scene is not required
+2026-11-01T07:37:25.7527774Z INFO         | Loading snapshot 'default_boot'...
+2026-11-01T07:37:25.7528512Z WARNING      | Failed to process .ini file /home/runner/.android/emu-update-last-check.ini for reading.
+2026-11-01T07:37:25.7731335Z WARNING      | Device 'cache' does not have the requested snapshot 'default_boot'
+2026-11-01T07:37:25.7731675Z 
+2026-11-01T07:37:25.7731818Z WARNING      | Failed to load snapshot 'default_boot'
+2026-11-01T07:37:25.7732454Z USER_INFO    | The emulator is performing a cold boot without a saved state because there's no snapshot and you have configured it not to save on exit.
+2026-11-01T07:37:25.8785072Z WARNING      | Failed to process .ini file /home/runner/.android/emu-update-last-check.ini for reading.
+2026-11-01T07:37:34.2303000Z [command]/usr/local/lib/android/sdk/platform-tools/adb -s emulator-5554 shell getprop sys.boot_completed
+2026-11-01T07:37:34.2338720Z * daemon not running; starting now at tcp:5037
+2026-11-01T07:37:34.3011052Z * daemon started successfully
+2026-11-01T07:37:34.3011916Z adb: device offline
+2026-11-01T07:37:34.3014024Z The process '/usr/local/lib/android/sdk/platform-tools/adb' failed with exit code 1
+2026-11-01T07:37:36.3096538Z [command]/usr/local/lib/android/sdk/platform-tools/adb -s emulator-5554 shell getprop sys.boot_completed
+2026-11-01T07:37:36.3118613Z The process '/usr/local/lib/android/sdk/platform-tools/adb' failed with exit code 1
+2026-11-01T07:37:36.3119053Z adb: device offline
+2026-11-01T07:37:38.3148774Z [command]/usr/local/lib/android/sdk/platform-tools/adb -s emulator-5554 shell getprop sys.boot_completed
+2026-11-01T07:37:38.3330294Z 
+2026-11-01T07:37:40.3378660Z [command]/usr/local/lib/android/sdk/platform-tools/adb -s emulator-5554 shell getprop sys.boot_completed
+2026-11-01T07:37:40.3489952Z 
+2026-11-01T07:37:42.3568092Z [command]/usr/local/lib/android/sdk/platform-tools/adb -s emulator-5554 shell getprop sys.boot_completed
+2026-11-01T07:37:42.3830420Z 
+2026-11-01T07:37:44.3852335Z [command]/usr/local/lib/android/sdk/platform-tools/adb -s emulator-5554 shell getprop sys.boot_completed
+2026-11-01T07:37:44.4159730Z 
+2026-11-01T07:37:46.4196078Z [command]/usr/local/lib/android/sdk/platform-tools/adb -s emulator-5554 shell getprop sys.boot_completed
+2026-11-01T07:37:46.4448003Z 
+2026-11-01T07:37:48.4500102Z [command]/usr/local/lib/android/sdk/platform-tools/adb -s emulator-5554 shell getprop sys.boot_completed
+2026-11-01T07:37:48.4903640Z 
+2026-11-01T07:37:50.4954679Z [command]/usr/local/lib/android/sdk/platform-tools/adb -s emulator-5554 shell getprop sys.boot_completed
+2026-11-01T07:37:50.5082116Z 
+2026-11-01T07:37:52.5186954Z [command]/usr/local/lib/android/sdk/platform-tools/adb -s emulator-5554 shell getprop sys.boot_completed
+2026-11-01T07:37:52.6011236Z 
+2026-11-01T07:37:54.6038862Z [command]/usr/local/lib/android/sdk/platform-tools/adb -s emulator-5554 shell getprop sys.boot_completed
+2026-11-01T07:37:54.7168851Z 1
+2026-11-01T07:37:54.7260652Z Emulator booted.
+2026-11-01T07:37:54.7300783Z [command]/usr/local/lib/android/sdk/platform-tools/adb -s emulator-5554 shell input keyevent 82
+2026-11-01T07:37:57.5271084Z INFO         | Boot completed in 33269 ms
+2026-11-01T07:37:57.5292412Z INFO         | Increasing screen off timeout, logcat buffer size to 2M.
+2026-11-01T07:38:01.9951378Z Disabling animations.
+2026-11-01T07:38:02.0016870Z [command]/usr/local/lib/android/sdk/platform-tools/adb -s emulator-5554 shell settings put global window_animation_scale 0.0
+2026-11-01T07:38:02.1927998Z [command]/usr/local/lib/android/sdk/platform-tools/adb -s emulator-5554 shell settings put global transition_animation_scale 0.0
+2026-11-01T07:38:02.2549069Z [command]/usr/local/lib/android/sdk/platform-tools/adb -s emulator-5554 shell settings put global animator_duration_scale 0.0
+2026-11-01T07:38:02.3324631Z ##[endgroup]
+2026-11-01T07:38:02.3383340Z [command]/usr/bin/sh -c chmod +x gradlew
+2026-11-01T07:38:02.3465188Z [command]/usr/bin/sh -c bash -c 'set +e; ./gradlew :app:connectedDebugAndroidTest -PVAN_TEST_ABI=x86_64 --console=plain; result=$?; mkdir -p app/build/reports/voice-runtime; adb logcat -d -v threadtime VanVoiceRuntime:I AndroidRuntime:E "*:S" > app/build/reports/voice-runtime/logcat.txt; exit "$result"'
+2026-11-01T07:38:02.5480334Z Downloading https://services.gradle.org/distributions/gradle-8.11.1-bin.zip
+2026-11-01T07:38:04.4632487Z .............10%.............20%.............30%.............40%.............50%.............60%.............70%.............80%.............90%.............100%
+2026-11-01T07:38:05.6816122Z 
+2026-11-01T07:38:05.6830476Z Welcome to Gradle 8.11.1!
+2026-11-01T07:38:05.6831012Z 
+2026-11-01T07:38:05.6831415Z Here are the highlights of this release:
+2026-11-01T07:38:05.6831945Z  - Parallel load and store for Configuration Cache
+2026-11-01T07:38:05.6832276Z  - Java compilation errors at the end of the build output
+2026-11-01T07:38:05.6832599Z  - Consolidated report for warnings and deprecations
+2026-11-01T07:38:05.6832822Z 
+2026-11-01T07:38:05.6833057Z For more details see https://docs.gradle.org/8.11.1/release-notes.html
+2026-11-01T07:38:05.6833673Z 
+2026-11-01T07:38:05.7804849Z Starting a Gradle Daemon (subsequent builds will be faster)
+2026-11-01T07:38:42.8932778Z > Task :buildSrc:compileJava
+2026-11-01T07:38:42.8957734Z > Task :buildSrc:compileGroovy NO-SOURCE
+2026-11-01T07:38:42.9026632Z > Task :buildSrc:processResources NO-SOURCE
+2026-11-01T07:38:42.9055872Z > Task :buildSrc:classes
+2026-11-01T07:38:42.9827627Z > Task :buildSrc:jar
+2026-11-01T07:39:21.4820089Z 
+2026-11-01T07:39:21.4858524Z > Task :app:assertVoiceAssetsAreSealed
+2026-11-01T07:39:21.4870844Z {"file_bytes": 224852871, "file_count": 45, "manifest_sha256": "7fa17db389349bd587c1f061c7162f9a4c419a552c9d57cd03e8e937bf935e30", "owner_profile_included": false, "status": "VERIFIED"}
+2026-11-01T07:39:21.4902103Z 
+2026-11-01T07:39:21.4929716Z > Task :app:assertVoiceRuntimeIsShippable
+2026-11-01T07:39:21.4990468Z > Task :app:checkKotlinGradlePluginConfigurationErrors
+2026-11-01T07:39:21.5020224Z > Task :app:preBuild UP-TO-DATE
+2026-11-01T07:39:21.5065465Z > Task :app:preDebugBuild UP-TO-DATE
+2026-11-01T07:39:21.5810922Z > Task :app:generateDebugBuildConfig
+2026-11-01T07:39:34.1802924Z > Task :app:generateDebugResValues
+2026-11-01T07:39:34.2801280Z > Task :app:checkDebugAarMetadata
+2026-11-01T07:39:34.3803899Z > Task :app:mapDebugSourceSetPaths
+2026-11-01T07:39:34.3804667Z > Task :app:generateDebugResources
+2026-11-01T07:39:35.0805137Z > Task :app:packageDebugResources
+2026-11-01T07:39:35.5810815Z > Task :app:createDebugCompatibleScreenManifests
+2026-11-01T07:39:35.5840534Z > Task :app:extractDeepLinksDebug
+2026-11-01T07:39:35.6821330Z > Task :app:mergeDebugResources
+2026-11-01T07:39:35.6830059Z > Task :app:parseDebugLocalResources
+2026-11-01T07:39:35.8823424Z 
+2026-11-01T07:39:35.8839673Z > Task :app:processDebugMainManifest
+2026-11-01T07:39:35.8841276Z /home/runner/work/Van/Van/android/app/src/debug/AndroidManifest.xml Warning:
+2026-11-01T07:39:35.8849898Z 	meta-data#app.rive.runtime.kotlin.RiveInitializer was tagged at AndroidManifest.xml:0 to remove other declarations but no other declaration present
+2026-11-01T07:39:35.8850545Z 
+2026-11-01T07:39:35.8850800Z > Task :app:processDebugManifest
+2026-11-01T07:39:35.9801494Z > Task :app:preDebugAndroidTestBuild SKIPPED
+2026-11-01T07:39:35.9801857Z > Task :app:javaPreCompileDebug
+2026-11-01T07:39:37.3802923Z > Task :app:processDebugAndroidTestManifest
+2026-11-01T07:39:37.3808037Z > Task :app:generateDebugAndroidTestBuildConfig
+2026-11-01T07:39:37.3843829Z > Task :app:checkDebugAndroidTestAarMetadata
+2026-11-01T07:39:37.3844376Z > Task :app:generateDebugAndroidTestResValues
+2026-11-01T07:39:37.3844973Z > Task :app:mapDebugAndroidTestSourceSetPaths
+2026-11-01T07:39:37.3845546Z > Task :app:generateDebugAndroidTestResources
+2026-11-01T07:39:37.5830874Z > Task :app:javaPreCompileDebugAndroidTest
+2026-11-01T07:39:37.5850048Z > Task :app:mergeDebugShaders
+2026-11-01T07:39:37.5885143Z > Task :app:compileDebugShaders NO-SOURCE
+2026-11-01T07:39:37.5895253Z > Task :app:generateDebugAssets UP-TO-DATE
+2026-11-01T07:39:37.5920396Z > Task :app:generateVanBuildProvenance
+2026-11-01T07:39:37.6807784Z > Task :app:mergeDebugAndroidTestResources
+2026-11-01T07:39:38.3800771Z > Task :app:mergeDebugAssets
+2026-11-01T07:39:38.7815853Z > Task :app:processDebugManifestForPackage
+2026-11-01T07:39:38.9804184Z > Task :app:processDebugAndroidTestResources
+2026-11-01T07:39:39.1851664Z > Task :app:desugarDebugFileDependencies
+2026-11-01T07:39:40.6890532Z > Task :app:processDebugResources
+2026-11-01T07:39:42.0806245Z > Task :app:checkDebugDuplicateClasses
+2026-11-01T07:39:45.0811081Z > Task :app:compressDebugAssets
+2026-11-01T07:40:12.0821568Z > Task :app:compileDebugKotlin
+2026-11-01T07:40:18.3840525Z > Task :app:mergeExtDexDebug
+2026-11-01T07:41:17.4827628Z > Task :app:mergeDebugJniLibFolders
+2026-11-01T07:41:17.4850478Z > Task :app:mergeLibDexDebug
+2026-11-01T07:41:18.6803983Z > Task :app:mergeDebugNativeLibs
+2026-11-01T07:41:18.9825292Z > Task :app:validateSigningDebug
+2026-11-01T07:41:19.0934405Z > Task :app:writeDebugAppMetadata
+2026-11-01T07:41:19.0964067Z > Task :app:writeDebugSigningConfigVersions
+2026-11-01T07:41:19.1841078Z > Task :app:mergeDebugAndroidTestShaders
+2026-11-01T07:41:19.1870392Z > Task :app:compileDebugAndroidTestShaders NO-SOURCE
+2026-11-01T07:41:19.1966308Z > Task :app:generateDebugAndroidTestAssets UP-TO-DATE
+2026-11-01T07:41:19.8816394Z 
+2026-11-01T07:41:19.8850688Z > Task :app:stripDebugDebugSymbols
+2026-11-01T07:41:19.8876252Z Unable to strip the following libraries, packaging them as they are: libc++_shared.so, libjingle_peerconnection_so.so, libonnxruntime.so, librive-android.so, libsherpa-onnx-c-api.so, libsherpa-onnx-cxx-api.so, libsherpa-onnx-jni.so. Run with --info option to learn more.
+2026-11-01T07:41:19.8944030Z 
+2026-11-01T07:41:19.8980571Z > Task :app:mergeDebugAndroidTestAssets
+2026-11-01T07:41:19.9003495Z > Task :app:compressDebugAndroidTestAssets
+2026-11-01T07:41:19.9030276Z > Task :app:desugarDebugAndroidTestFileDependencies
+2026-11-01T07:41:20.3860646Z > Task :app:mergeDebugAndroidTestJniLibFolders
+2026-11-01T07:41:20.3950467Z > Task :app:checkDebugAndroidTestDuplicateClasses
+2026-11-01T07:41:20.3950914Z > Task :app:mergeDebugAndroidTestNativeLibs NO-SOURCE
+2026-11-01T07:41:27.4820804Z > Task :app:mergeLibDexDebugAndroidTest
+2026-11-01T07:41:27.4841793Z > Task :app:mergeExtDexDebugAndroidTest
+2026-11-01T07:41:27.4842539Z > Task :app:stripDebugAndroidTestDebugSymbols NO-SOURCE
+2026-11-01T07:41:27.4843117Z > Task :app:validateSigningDebugAndroidTest
+2026-11-01T07:41:27.4843611Z > Task :app:writeDebugAndroidTestSigningConfigVersions
+2026-11-01T07:41:32.8809491Z 
+2026-11-01T07:41:32.8826653Z > Task :app:compileDebugKotlin FAILED
+2026-11-01T07:41:32.8841712Z e: file:///home/runner/work/Van/Van/android/app/src/main/java/com/dial/van/command/settings/PermissionsRoute.kt:76:77 Unresolved reference: dp
+2026-11-01T07:41:32.8860304Z e: file:///home/runner/work/Van/Van/android/app/src/main/java/com/dial/van/mission/MissionRepository.kt:136:77 No value passed for parameter 'reviewed'
+2026-11-01T07:41:32.8861528Z e: file:///home/runner/work/Van/Van/android/app/src/main/java/com/dial/van/mission/MissionRepository.kt:136:77 No value passed for parameter 'reviewedProfile'
+2026-11-01T07:41:32.9800586Z 
+2026-11-01T07:41:32.9841283Z FAILURE: Build failed with an exception.
+2026-11-01T07:41:32.9842484Z 
+2026-11-01T07:41:32.9842719Z * What went wrong:
+2026-11-01T07:41:32.9843119Z Execution failed for task ':app:compileDebugKotlin'.
+2026-11-01T07:41:32.9847931Z > A failure occurred while executing org.jetbrains.kotlin.compilerRunner.GradleCompilerRunnerWithWorkers$GradleKotlinCompilerWorkAction
+2026-11-01T07:41:32.9848703Z    > Compilation error. See log for more details
+2026-11-01T07:41:32.9848910Z 
+2026-11-01T07:41:32.9848998Z * Try:
+2026-11-01T07:41:32.9849257Z > Run with --stacktrace option to get the stack trace.
+2026-11-01T07:41:32.9849826Z > Run with --info or --debug option to get more log output.
+2026-11-01T07:41:32.9850162Z > Run with --scan to get full insights.
+2026-11-01T07:41:32.9850471Z > Get more help at https://help.gradle.org.
+2026-11-01T07:41:32.9850688Z 
+2026-11-01T07:41:32.9850787Z BUILD FAILED in 3m 30s
+2026-11-01T07:41:32.9851021Z 54 actionable tasks: 54 executed
+2026-11-01T07:41:33.5152307Z ##[error]The process '/usr/bin/sh' failed with exit code 1
+2026-11-01T07:41:33.5153653Z ##[group]Terminate Emulator
+2026-11-01T07:41:33.5178115Z [command]/usr/local/lib/android/sdk/platform-tools/adb -s emulator-5554 emu kill
+2026-11-01T07:41:33.5213410Z OK: killing emulator, bye bye
+2026-11-01T07:41:33.5213605Z OK
+2026-11-01T07:41:33.5218274Z ##[endgroup]
+2026-11-01T07:41:33.5219134Z INFO         | Wait for emulator (pid 2996) 20 seconds to shutdown gracefully before kill;you can set environment variable ANDROID_EMULATOR_WAIT_TIME_BEFORE_KILL(in seconds) to change the default value (20 seconds)
+2026-11-01T07:41:33.5219983Z 
+2026-11-01T07:41:38.6589236Z INFO         | Saving with gfxstream=1
+2026-11-01T07:41:38.7282282Z INFO         | Saving snapshot 'default_boot' took 5182 ms
+2026-11-01T07:41:38.9597484Z ERROR        | stop: Not implemented
+2026-11-01T07:41:38.9598373Z WARNING      | Emulator client has not yet been configured.. Call configure me first!
+2026-11-01T07:41:38.9829828Z INFO         | removeAll
+2026-11-01T07:41:39.2321245Z WARNING      | Netsim Wifi dns:///localhost:33199 is gone due to Stream removed (CANCELLED)
+2026-11-01T07:41:39.7603395Z ##[group]Run python3 -m tools.character_forge.ci_binding summarise \
+2026-11-01T07:41:39.7603708Z [36;1mpython3 -m tools.character_forge.ci_binding summarise \[0m
+2026-11-01T07:41:39.7603969Z [36;1m  --results android/app/build/outputs/androidTest-results \[0m
+2026-11-01T07:41:39.7604211Z [36;1m  --out artifacts/character-forge/van_validation.json[0m
+2026-11-01T07:41:39.7604422Z [36;1mmkdir -p artifacts/character-forge/junit[0m
+2026-11-01T07:41:39.7604776Z [36;1mfind android/app/build/outputs/androidTest-results -name '*.xml' -exec cp {} artifacts/character-forge/junit/ \; 2>/dev/null || true[0m
+2026-11-01T07:41:39.8658631Z shell: /usr/bin/bash -e {0}
+2026-11-01T07:41:39.8658830Z env:
+2026-11-01T07:41:39.8659032Z   JAVA_HOME: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.21-9/x64
+2026-11-01T07:41:39.8659323Z   JAVA_HOME_17_X64: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.21-9/x64
+2026-11-01T07:41:39.8659829Z   pythonLocation: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-11-01T07:41:39.8660074Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.15/x64/lib/pkgconfig
+2026-11-01T07:41:39.8660318Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-11-01T07:41:39.8660539Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-11-01T07:41:39.8660759Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-11-01T07:41:39.8660984Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.15/x64/lib
+2026-11-01T07:41:39.8661203Z   ANDROID_AVD_HOME: /home/runner/.android/avd
+2026-11-01T07:41:39.8661370Z ##[endgroup]
+2026-11-01T07:41:40.0150554Z {"mode": "core", "result": "NOT_RUN", "reasons": ["no RiveContractTest results were produced"]}
+2026-11-01T07:41:40.0857854Z ##[group]Run actions/upload-artifact@v4
+2026-11-01T07:41:40.0858044Z with:
+2026-11-01T07:41:40.0858178Z   name: van-instrumentation-report
+2026-11-01T07:41:40.0858376Z   path: android/app/build/reports/androidTests/connected
+2026-11-01T07:41:40.0858575Z   if-no-files-found: warn
+2026-11-01T07:41:40.0858719Z   compression-level: 6
+2026-11-01T07:41:40.0858856Z   overwrite: false
+2026-11-01T07:41:40.0858986Z   include-hidden-files: false
+2026-11-01T07:41:40.0859129Z env:
+2026-11-01T07:41:40.0859308Z   JAVA_HOME: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.21-9/x64
+2026-11-01T07:41:40.0859792Z   JAVA_HOME_17_X64: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.21-9/x64
+2026-11-01T07:41:40.0860057Z   pythonLocation: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-11-01T07:41:40.0860305Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.15/x64/lib/pkgconfig
+2026-11-01T07:41:40.0860551Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-11-01T07:41:40.0860827Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-11-01T07:41:40.0861049Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-11-01T07:41:40.0861277Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.15/x64/lib
+2026-11-01T07:41:40.0861487Z   ANDROID_AVD_HOME: /home/runner/.android/avd
+2026-11-01T07:41:40.0861655Z ##[endgroup]
+2026-11-01T07:41:40.3460660Z (node:3767) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-11-01T07:41:40.3461651Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-11-01T07:41:40.3473815Z ##[warning]No files were found with the provided path: android/app/build/reports/androidTests/connected. No artifacts will be uploaded.
+2026-11-01T07:41:40.3991962Z ##[group]Run actions/upload-artifact@v4
+2026-11-01T07:41:40.3992194Z with:
+2026-11-01T07:41:40.3992327Z   name: van-voice-runtime
+2026-11-01T07:41:40.3992487Z   path: android/app/build/reports/voice-runtime
+2026-11-01T07:41:40.3992993Z   if-no-files-found: warn
+2026-11-01T07:41:40.3993146Z   compression-level: 6
+2026-11-01T07:41:40.3993281Z   overwrite: false
+2026-11-01T07:41:40.3993415Z   include-hidden-files: false
+2026-11-01T07:41:40.3993558Z env:
+2026-11-01T07:41:40.3993741Z   JAVA_HOME: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.21-9/x64
+2026-11-01T07:41:40.3994023Z   JAVA_HOME_17_X64: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.21-9/x64
+2026-11-01T07:41:40.3994286Z   pythonLocation: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-11-01T07:41:40.3994536Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.15/x64/lib/pkgconfig
+2026-11-01T07:41:40.3994781Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-11-01T07:41:40.3995049Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-11-01T07:41:40.3995277Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-11-01T07:41:40.3995505Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.15/x64/lib
+2026-11-01T07:41:40.3995720Z   ANDROID_AVD_HOME: /home/runner/.android/avd
+2026-11-01T07:41:40.3995886Z ##[endgroup]
+2026-11-01T07:41:40.5270226Z (node:3779) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-11-01T07:41:40.5270665Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-11-01T07:41:40.5308695Z With the provided path, there will be 1 file uploaded
+2026-11-01T07:41:40.5312657Z Artifact name is valid!
+2026-11-01T07:41:40.5313760Z Root directory input is valid!
+2026-11-01T07:41:40.8236615Z Beginning upload of artifact content to blob storage
+2026-11-01T07:41:40.8394838Z (node:3779) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
+2026-11-01T07:41:40.9748829Z Uploaded bytes 136
+2026-11-01T07:41:41.0176936Z Finished uploading artifact content to blob storage!
+2026-11-01T07:41:41.0177467Z SHA256 digest of uploaded artifact zip is 0bd12418be74abc7e7466895e081cf760816383aa8968e1440645d425c4a8388
+2026-11-01T07:41:41.0177975Z Finalizing artifact upload
+2026-11-01T07:41:41.4590398Z Artifact van-voice-runtime.zip successfully finalized. Artifact ID 13075780537
+2026-11-01T07:41:41.4591232Z Artifact van-voice-runtime has been successfully uploaded! Final size is 136 bytes. Artifact ID is 13075780537
+2026-11-01T07:41:41.4594184Z Artifact download URL: https://github.com/Vanguduza/Van/actions/runs/41285417143/artifacts/13075780537
+2026-11-01T07:41:41.4979683Z ##[group]Run actions/upload-artifact@v4
+2026-11-01T07:41:41.4979877Z with:
+2026-11-01T07:41:41.4980030Z   name: van-character-forge-validation-binding
+2026-11-01T07:41:41.4980233Z   path: artifacts/character-forge
+2026-11-01T07:41:41.4980400Z   if-no-files-found: error
+2026-11-01T07:41:41.4980577Z   compression-level: 6
+2026-11-01T07:41:41.4980721Z   overwrite: false
+2026-11-01T07:41:41.4980862Z   include-hidden-files: false
+2026-11-01T07:41:41.4981032Z env:
+2026-11-01T07:41:41.4981228Z   JAVA_HOME: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.21-9/x64
+2026-11-01T07:41:41.4981601Z   JAVA_HOME_17_X64: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.21-9/x64
+2026-11-01T07:41:41.4981892Z   pythonLocation: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-11-01T07:41:41.4982163Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.15/x64/lib/pkgconfig
+2026-11-01T07:41:41.4982431Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-11-01T07:41:41.4982786Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-11-01T07:41:41.4983069Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-11-01T07:41:41.4983325Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.15/x64/lib
+2026-11-01T07:41:41.4983561Z   ANDROID_AVD_HOME: /home/runner/.android/avd
+2026-11-01T07:41:41.4983747Z ##[endgroup]
+2026-11-01T07:41:41.6222760Z (node:3794) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-11-01T07:41:41.6223558Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-11-01T07:41:41.6300460Z With the provided path, there will be 3 files uploaded
+2026-11-01T07:41:41.6301000Z Artifact name is valid!
+2026-11-01T07:41:41.6307281Z Root directory input is valid!
+2026-11-01T07:41:41.9396308Z Beginning upload of artifact content to blob storage
+2026-11-01T07:41:41.9634615Z (node:3794) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
+2026-11-01T07:41:42.1000041Z Uploaded bytes 961
+2026-11-01T07:41:42.1380185Z Finished uploading artifact content to blob storage!
+2026-11-01T07:41:42.1380936Z SHA256 digest of uploaded artifact zip is 0596f8cc9dc5624e8d034cb02a052d1cbc216443d0a1d2bbf39ae18057351853
+2026-11-01T07:41:42.1382167Z Finalizing artifact upload
+2026-11-01T07:41:42.5799332Z Artifact van-character-forge-validation-binding.zip successfully finalized. Artifact ID 13074897423
+2026-11-01T07:41:42.5800102Z Artifact van-character-forge-validation-binding has been successfully uploaded! Final size is 961 bytes. Artifact ID is 13074897423
+2026-11-01T07:41:42.5804593Z Artifact download URL: https://github.com/Vanguduza/Van/actions/runs/41285417143/artifacts/13074897423
+2026-11-01T07:41:42.5955010Z ##[group]Run actions/upload-artifact@v4
+2026-11-01T07:41:42.5955200Z with:
+2026-11-01T07:41:42.5955348Z   name: van-instrumentation-screenshots
+2026-11-01T07:41:42.5955595Z   path: android/app/build/outputs/connected_android_test_additional_output
+2026-11-01T07:41:42.5955836Z   if-no-files-found: warn
+2026-11-01T07:41:42.5955994Z   compression-level: 6
+2026-11-01T07:41:42.5956139Z   overwrite: false
+2026-11-01T07:41:42.5956287Z   include-hidden-files: false
+2026-11-01T07:41:42.5956443Z env:
+2026-11-01T07:41:42.5956628Z   JAVA_HOME: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.21-9/x64
+2026-11-01T07:41:42.5956950Z   JAVA_HOME_17_X64: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.21-9/x64
+2026-11-01T07:41:42.5957222Z   pythonLocation: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-11-01T07:41:42.5957494Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.15/x64/lib/pkgconfig
+2026-11-01T07:41:42.5957751Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-11-01T07:41:42.5958012Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-11-01T07:41:42.5958251Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-11-01T07:41:42.5958496Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.15/x64/lib
+2026-11-01T07:41:42.5958714Z   ANDROID_AVD_HOME: /home/runner/.android/avd
+2026-11-01T07:41:42.5958893Z ##[endgroup]
+2026-11-01T07:41:42.7210898Z (node:3811) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-11-01T07:41:42.7211634Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-11-01T07:41:42.7224691Z ##[warning]No files were found with the provided path: android/app/build/outputs/connected_android_test_additional_output. No artifacts will be uploaded.
+2026-11-01T07:41:42.7462380Z Post job cleanup.
+2026-11-01T07:41:42.8554702Z (node:3823) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-11-01T07:41:42.8555150Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-11-01T07:41:42.8755835Z Post job cleanup.
+2026-11-01T07:41:42.9442109Z [command]/usr/bin/git version
+2026-11-01T07:41:42.9477035Z git version 2.56.0
+2026-11-01T07:41:42.9521551Z Temporarily overriding HOME='/home/runner/work/_temp/cb6b69e5-9e9b-4841-a13e-588d315578dc' before making global git config changes
+2026-11-01T07:41:42.9526972Z Adding repository directory to the temporary git global config as a safe directory
+2026-11-01T07:41:42.9527815Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/Van/Van
+2026-11-01T07:41:42.9582171Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-11-01T07:41:42.9626970Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-11-01T07:41:43.0020833Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-11-01T07:41:43.0057996Z http.https://github.com/.extraheader
+2026-11-01T07:41:43.0068039Z [command]/usr/bin/git config --local --unset-all http.https://github.com/.extraheader
+2026-11-01T07:41:43.0115867Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-11-01T07:41:43.0397415Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-11-01T07:41:43.0430881Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-11-01T07:41:43.0845207Z Cleaning up orphan processes
+2026-11-01T07:41:43.1244589Z Terminate orphan process: pid (3151) (adb)
+2026-11-01T07:41:43.1301251Z Terminate orphan process: pid (3322) (java)
+2026-11-01T07:41:43.1373119Z Terminate orphan process: pid (3650) (java)
+2026-11-01T07:41:43.1482584Z ##[warning]Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/checkout@v4, actions/setup-java@v4, actions/setup-python@v5, actions/upload-artifact@v4. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
