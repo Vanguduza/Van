@@ -54,8 +54,11 @@ async def test_signed_unlink_keeps_native_history_and_never_reports_broker_closu
     ledger=Ledger(str(tmp_path/'vati.sqlite'))
     try:
         assert ledger.verify_chain()[0]
-        rows=[e for e in ledger.iter(EventKind.ACCOUNT_OPERATION) if e.payload['intent']['command']=='account_remove']
+        from commander.account_effects import AccountEffectJournal
+        rows=[e for e in AccountEffectJournal(ledger).business_events() if e.payload['intent']['command']=='account_remove']
         assert len(rows)==2 and [e.payload['phase'] for e in rows]==['IN_FLIGHT','APPLIED']
+        internal=[e for e in ledger.iter(EventKind.ACCOUNT_OPERATION) if AccountEffectJournal.internal_namespace_metadata(e)]
+        assert len(internal)==1 and 'phase' not in internal[0].payload and 'intent' not in internal[0].payload
     finally:ledger.close()
 
 

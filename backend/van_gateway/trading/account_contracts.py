@@ -95,6 +95,7 @@ class AccountChallengeResponse(BaseModel):
     approval_expires_at_unix: int
     resolved_action_id: str
     resolved_review: AccountResolvedReview | None=None
+    account_control_domain: str=Field(pattern='^[0-9a-f]{64}$')
 
 
 class AccountActionDefinition(BaseModel):
@@ -109,3 +110,4 @@ class AccountActionCatalog(BaseModel):
     schema_name: Literal['van.account-actions/1']=Field(alias='schema')
     actions: list[AccountActionDefinition]
     credential_keys_by_broker: dict[str,list[str]]
+    account_control_domain: str=Field(pattern='^[0-9a-f]{64}$')

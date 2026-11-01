@@ -52,7 +52,9 @@ def test_completed_original_returns_its_original_result_without_reissuing_a_key(
     assert state['effect_state']=='APPLIED' and state['native_event_ref'] and state['result']==second
     led=Ledger(tmp_path/'native.sqlite')
     try:
-        assert len(list(led.iter(EventKind.ACCOUNT_OPERATION)))==2 and led.verify_chain()[0]
+        assert len(AccountEffectJournal(led).business_events())==2 and led.verify_chain()[0]
+        internal=[event for event in led.iter(EventKind.ACCOUNT_OPERATION) if AccountEffectJournal.internal_namespace_metadata(event)]
+        assert len(internal)==1 and 'phase' not in internal[0].payload and 'intent' not in internal[0].payload
         assert first['signing_key'] not in json.dumps([asdict(e) for e in led.iter()])
     finally: led.close()
 

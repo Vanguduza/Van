@@ -7,6 +7,18 @@ from test_trading_api import client, _env, _approval_proof, DEVICE_PEM, HDR
 from van_gateway.trading.accounts import canonical_action, requires_owner_approval
 
 
+@pytest.fixture(autouse=True)
+def isolated_native_account_state(tmp_path,monkeypatch,_env):
+    # This module already gets a fresh native ledger from _env. Its control
+    # namespace must use that SAME owned state, never a shared default vault.
+    from van_gateway.config import get_settings
+    monkeypatch.setenv('VAN_VATI_ACCOUNTS_REGISTRY',str(tmp_path/'accounts.json'))
+    monkeypatch.setenv('VAN_VATI_SECRETS_DIR',str(tmp_path/'secrets'))
+    get_settings.cache_clear()
+    yield
+    get_settings.cache_clear()
+
+
 async def act(ac, action, args, *, device='test-device', secret='test-device-secret', headers=None, expected_challenge_status=200):
     import hashlib,hmac
     issued = int(time.time())

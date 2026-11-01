@@ -7,6 +7,8 @@ from contextlib import asynccontextmanager
 import threading
 import weakref
 import json
+import hashlib
+import secrets
 import os
 import platform
 import re
@@ -489,17 +491,36 @@ def create_app(settings: Optional[CommanderSettings] = None) -> FastAPI:
                 "credential and strategy mutations require the authenticated van-gateway principal",
             )
         try:
-            require_resource_version(name, parsed.args)
-            def invoke():
-                # Admission already consumed the one-use nonce on the event
-                # loop. Recheck the signed envelope against CURRENT keys/time
-                # at actual dispatch without trying to consume that nonce again.
+            legacy_demo=name=='deriv_create_demo' and '_native_operation' not in parsed.args
+            require_resource_version(name, parsed.args,server_owned_demo=legacy_demo)
+            def current_account_authority():
                 current, reason, current_principal = verify_request_principal(
                     st.load_tokens(), request.headers, "POST", f"/v1/cmd/{name}",
                     body, nonces=NonceCache())
                 if not current or current_principal != principal:
                     raise HTTPException(401, "command authorization expired or changed before execution: " + reason)
-                return handlers[name](parsed.args)
+            def invoke():
+                # Admission already consumed the one-use nonce on the event
+                # loop. Recheck the signed envelope against CURRENT keys/time
+                # at actual dispatch without trying to consume that nonce again.
+                current_account_authority()
+                values = parsed.args
+                if name == 'deriv_create_demo':
+                    values = {**values, '_account_dispatch_guard': current_account_authority}
+                    if legacy_demo:
+                        def admit_legacy_demo():
+                            from commander.auth import HDR_TS,HDR_SIG,SKEW_S
+                            from vati.core.canonical import canonical_hash
+                            current_account_authority()
+                            # Inert identity for this already authenticated
+                            # gateway-principal command, not OwnerAuthority.
+                            return {'operation_id':'legacy-demo-'+secrets.token_urlsafe(24),
+                                'device_id':'commander:'+principal,
+                                'authority_ref':'authenticated-commander-request:'+hashlib.sha256(request.headers[HDR_SIG].encode()).hexdigest(),
+                                'expires_at_unix':int(request.headers[HDR_TS])+SKEW_S,
+                                'request_digest':canonical_hash({k:v for k,v in parsed.args.items() if not k.startswith('_')})}
+                        values['_server_demo_admission']=admit_legacy_demo
+                return handlers[name](values)
 
             if name in PARALLEL_COMMANDS:
                 result = await asyncio.to_thread(invoke)

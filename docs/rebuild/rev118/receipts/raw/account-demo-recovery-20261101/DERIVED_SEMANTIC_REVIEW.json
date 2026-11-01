@@ -1,0 +1,27 @@
+{
+  "registries/owner_endpoints.json": {
+    "endpoint_count": 487,
+    "identity_and_non_source_fields_unchanged": true
+  },
+  "registries/owner_endpoint_schemas.json": {
+    "schema_count": 380,
+    "changed_only_domain_fields": [
+      "AccountActionCatalog",
+      "AccountChallengeResponse",
+      "AccountOperationResponse"
+    ],
+    "new_required_response_fields": [
+      "AccountActionCatalog.account_control_domain",
+      "AccountChallengeResponse.account_control_domain"
+    ],
+    "optional_response_field": "AccountOperationResponse.account_control_domain"
+  },
+  "registries/owner_features.json": {
+    "identity_count": 42,
+    "ordered_identities_unchanged": true
+  },
+  "registries/owner_screens.json": {
+    "identity_count": 78,
+    "ordered_identities_unchanged": true
+  }
+}

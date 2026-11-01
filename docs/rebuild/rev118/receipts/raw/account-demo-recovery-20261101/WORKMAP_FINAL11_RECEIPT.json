@@ -1,0 +1,80 @@
+{
+  "started": "2026-11-01T19:13:15.966929+00:00",
+  "preflight": {
+    "path": "/tmp/van-recovery-be004-workmap-final-20261101",
+    "free_bytes_before": 4329701376,
+    "free_inodes_before": 2236214,
+    "minimum_free_bytes": 4294967296,
+    "no_preexisting_directory": true
+  },
+  "source_before": {
+    "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt": "f5420e3d9fcf3e6c780813554380e0c7cbdfc40325f983cece648c9812abf0a3",
+    "android/app/src/main/java/com/dial/van/trading/AccountOnboarding.kt": "585a26eb1fa031b85d608f79e61ab2a6e7737683ec59c24ae7462f9606244cf4",
+    "android/app/src/main/java/com/dial/van/trading/AccountOperationRecovery.kt": "d2d8eb38f182c106ae475036110846e60c088a27b95dea21b6ad3546b4018c8f",
+    "android/app/src/main/java/com/dial/van/trading/ui/AccountOnboardingScreen.kt": "af87ea54db44088fe9e615a80e485c48535264eebdf4a0bb10c257bd3e86b33a",
+    "android/app/src/test/java/com/dial/van/trading/AccountOperationRecoveryTest.kt": "d8c8cb6dc312ac8e101c9846b7f764bbc1bafd35ee4ad7250142eee6c922d390",
+    "backend/tests/test_account_operation_recovery.py": "dab4bb9906c89d682afdb04221c6c586192ee86aeaed032eeb36f1a0caf2aa7d",
+    "backend/tests/test_account_unlink_review.py": "8b9d9e4111cfa17ed3ea2a27d7c6da79513aa5500c42d4a1750898d883caa253",
+    "backend/tests/test_trading_oauth_scope.py": "d14de3b0bba7d523beda7dbc3143bf83080c5a6ddb0be5670768b0d150636c00",
+    "backend/van_gateway/app.py": "2949bcc8e076b0599c6e8ab40eefa2b49e93d6a86c19807d662b96dfffa4da16",
+    "backend/van_gateway/trading/account_contracts.py": "651df53274e3f68e566d1fd694ad7ebb67c79517183764971fb777054a81fc61",
+    "backend/van_gateway/trading/accounts.py": "fc9f476a41c7189cfa7fc3738450581feaca64a4619720e6a464954becce4d3a",
+    "trading/commander/account_effects.py": "d6be385b527a6ea180023208dadfc2b1f815bfa5ea4c0a9af0aa574457a028b6",
+    "trading/commander/accounts.py": "b594e716b0af825eb32b15e10371349232ca025427a7bf46b220d0bd8861e66d",
+    "trading/commander/app.py": "024816b92c8260ca35adf12978cb6cda720efb5f398e2eb78ff6b043dc7940f4",
+    "trading/tests/test_commander_accounts.py": "62cc77e75fbed8f6b8abd343c3897ac3b3ccb01f9ecb8366eb65f4a684ac4372",
+    "trading/tests/test_demo_creation_recovery.py": "1593fb9f62aeeb9f1a5fd3dc65b477e4abca8b70a2128d9f9a28524ed07431ad",
+    "trading/tests/test_native_account_effects.py": "332a900ddc0207d9e9bc78a37e3d07a00571c5d7d2be91cc7c242ae3f6d05f8c",
+    "trading/vati/execution/transports/deriv_ws.py": "c53c897c9d5b1c154c6a53367b702b655520a362d34ff5df34758ac88b2545c7"
+  },
+  "targets": [
+    "tests/rebuild/test_source_workmap.py"
+  ],
+  "selection": "Only existing source-workmap semantic module after canonical index regeneration; original229pass/1workmapfail staysfailed and unchanged229 consumer results reused explicitly. Initial final-controller setup refused pre-execution because outputdir was notfresh; no tests ran in that attempt.",
+  "target_sha256": {
+    "tests/rebuild/test_source_workmap.py": "f9b7a1b3b6839593b8fb7274cab913f3df0813ce6e8e4e2f4f39fa9889822542"
+  },
+  "command": [
+    "/workspace/van-backend-venv-20261025/bin/python",
+    "-B",
+    "tools/rebuild/source_storage_audit.py",
+    "--report",
+    "/workspace/van-be004-integration-20261101/workmap-final-checks/storage-audit.json",
+    "tests/rebuild/test_source_workmap.py",
+    "--basetemp=/tmp/van-recovery-be004-workmap-final-20261101",
+    "--junitxml=/workspace/van-be004-integration-20261101/workmap-final-checks/tests.xml",
+    "-q"
+  ],
+  "exit": 0,
+  "tests": 11,
+  "failures": 0,
+  "errors": 0,
+  "skipped": 0,
+  "completed": "2026-11-01T19:13:18.620938+00:00",
+  "source_after": {
+    "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt": "f5420e3d9fcf3e6c780813554380e0c7cbdfc40325f983cece648c9812abf0a3",
+    "android/app/src/main/java/com/dial/van/trading/AccountOnboarding.kt": "585a26eb1fa031b85d608f79e61ab2a6e7737683ec59c24ae7462f9606244cf4",
+    "android/app/src/main/java/com/dial/van/trading/AccountOperationRecovery.kt": "d2d8eb38f182c106ae475036110846e60c088a27b95dea21b6ad3546b4018c8f",
+    "android/app/src/main/java/com/dial/van/trading/ui/AccountOnboardingScreen.kt": "af87ea54db44088fe9e615a80e485c48535264eebdf4a0bb10c257bd3e86b33a",
+    "android/app/src/test/java/com/dial/van/trading/AccountOperationRecoveryTest.kt": "d8c8cb6dc312ac8e101c9846b7f764bbc1bafd35ee4ad7250142eee6c922d390",
+    "backend/tests/test_account_operation_recovery.py": "dab4bb9906c89d682afdb04221c6c586192ee86aeaed032eeb36f1a0caf2aa7d",
+    "backend/tests/test_account_unlink_review.py": "8b9d9e4111cfa17ed3ea2a27d7c6da79513aa5500c42d4a1750898d883caa253",
+    "backend/tests/test_trading_oauth_scope.py": "d14de3b0bba7d523beda7dbc3143bf83080c5a6ddb0be5670768b0d150636c00",
+    "backend/van_gateway/app.py": "2949bcc8e076b0599c6e8ab40eefa2b49e93d6a86c19807d662b96dfffa4da16",
+    "backend/van_gateway/trading/account_contracts.py": "651df53274e3f68e566d1fd694ad7ebb67c79517183764971fb777054a81fc61",
+    "backend/van_gateway/trading/accounts.py": "fc9f476a41c7189cfa7fc3738450581feaca64a4619720e6a464954becce4d3a",
+    "trading/commander/account_effects.py": "d6be385b527a6ea180023208dadfc2b1f815bfa5ea4c0a9af0aa574457a028b6",
+    "trading/commander/accounts.py": "b594e716b0af825eb32b15e10371349232ca025427a7bf46b220d0bd8861e66d",
+    "trading/commander/app.py": "024816b92c8260ca35adf12978cb6cda720efb5f398e2eb78ff6b043dc7940f4",
+    "trading/tests/test_commander_accounts.py": "62cc77e75fbed8f6b8abd343c3897ac3b3ccb01f9ecb8366eb65f4a684ac4372",
+    "trading/tests/test_demo_creation_recovery.py": "1593fb9f62aeeb9f1a5fd3dc65b477e4abca8b70a2128d9f9a28524ed07431ad",
+    "trading/tests/test_native_account_effects.py": "332a900ddc0207d9e9bc78a37e3d07a00571c5d7d2be91cc7c242ae3f6d05f8c",
+    "trading/vati/execution/transports/deriv_ws.py": "c53c897c9d5b1c154c6a53367b702b655520a362d34ff5df34758ac88b2545c7"
+  },
+  "state": "TERMINAL",
+  "cleanup": {
+    "path": "/tmp/van-recovery-be004-workmap-final-20261101",
+    "created": false,
+    "independently_absent": true
+  }
+}

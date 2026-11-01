@@ -24,6 +24,8 @@ import com.dial.van.trading.StrategyPromotionProtocol
 import com.dial.van.trading.AccountOperationRecovery
 import com.dial.van.trading.AccountOperationStore
 import com.dial.van.trading.PendingAccountOperation
+import com.dial.van.trading.AccountOperationScope
+import com.dial.van.trading.AccountOperationActor
 import com.dial.van.trading.RuntimeRecoveryIntent
 import com.dial.van.trading.RuntimeRecoveryChallenge
 import com.dial.van.trading.RuntimeRecoveryProtocol
@@ -165,21 +167,94 @@ class VanGatewayClient(context: Context) {
     fun pendingAccountOperations(): List<PendingAccountOperation> =
         deviceId?.let(accountOperations::pending).orEmpty()
 
-    suspend fun tradingAccountOperation(value: PendingAccountOperation): Pair<Int, String> = withContext(Dispatchers.IO) {
-        require(value.deviceId == deviceId) { "account_operation_owner_changed" }
-        val path = "/v1/trading/accounts/operations/${encodeSegment(value.operationId)}"
-        val conn = open("$baseUrl$path").apply {
-            requestMethod = "GET"; applyIngressAuth(this)
-            proofHeaders("GET", path, "").forEach { (name, header) -> setRequestProperty(name, header) }
-            connectTimeout = 15_000; readTimeout = 30_000
+    /** Tokens stay on this stack; only original non-secret selection is durable. */
+    private data class AccountTransportActor(val actor: AccountOperationActor, val secret: String,
+                                             val ingress: String, val access: String)
+    @Volatile private var accountDomainWitness: AccountOperationActor? = null
+    private data class AccountApprovalSelection(val actor: AccountOperationActor, val requestIdentity: String)
+    private val accountChallengeActors = java.util.concurrent.ConcurrentHashMap<String,AccountApprovalSelection>()
+
+    private fun accountTransportActor(): AccountTransportActor {
+        val root = baseUrl
+        val device = deviceId ?: error("not_enrolled")
+        val secret = deviceSecret ?: error("not_enrolled")
+        val ingress = ingressToken?.takeIf { it.isNotBlank() } ?: error("ingress_token_unconfigured")
+        val access = deviceAccessToken?.takeIf { it.isNotBlank() } ?: error("device_access_token_unconfigured")
+        val profile = java.security.MessageDigest.getInstance("SHA-256").digest(root.toByteArray(Charsets.UTF_8))
+            .joinToString("") { "%02x".format(it) }
+        val context = accountRequestIdentity(secret, "$root\n$device\n$ingress\n$access")
+        val scope = AccountOperationScope(root, profile, prefs.getString(KEY_PROVISIONING_FINGERPRINT, null))
+        val local = AccountOperationActor(scope, device, context)
+        val witness = accountDomainWitness?.takeIf {
+            it.copy(scope = it.scope.copy(nativeOwnerDomain = null)) == local
         }
+        return AccountTransportActor(witness ?: local,secret,ingress,access)
+    }
+
+    private suspend fun accountCatalogSelection(): Pair<AccountTransportActor,String> {
+        val context = currentCoroutineContext()
+        val original = accountTransportActor()
+        fun guard() {
+            context.ensureActive()
+            check(original.actor == accountTransportActor().actor) { "account_operation_actor_or_profile_changed" }
+        }
+        val reply = accountExchange(original,"GET","/v1/trading/accounts/catalog",beforeEffect=::guard)
+        guard()
+        if (reply.first !in 200..299) throw GatewayHttpException(reply.first,reply.second)
+        val domain = JSONObject(reply.second).optString("account_control_domain")
+        check(domain.matches(Regex("[0-9a-f]{64}"))) { "authenticated_account_control_namespace_unavailable" }
+        val selected = original.actor.copy(scope=original.actor.scope.copy(nativeOwnerDomain=domain))
+        // This is current authenticated native state correlation DATA, never
+        // identity/authority inferred from a root, profile label or caller field.
+        accountDomainWitness = selected
+        context.ensureActive()
+        check(selected == accountTransportActor().actor) { "account_operation_actor_or_profile_changed" }
+        return original.copy(actor=selected) to reply.second
+    }
+
+    private fun accountRequestIdentity(secret: String, body: String): String = Mac.getInstance("HmacSHA256").run {
+        init(SecretKeySpec(secret.toByteArray(StandardCharsets.UTF_8), "HmacSHA256"))
+        doFinal(("van-original-account-request|" + body).toByteArray(StandardCharsets.UTF_8))
+            .joinToString("") { "%02x".format(it) }
+    }
+
+    private fun accountExchange(actor: AccountTransportActor, method: String, path: String, bodyText: String = "",
+                                beforeEffect: () -> Unit): Pair<Int,String> {
+        beforeEffect()
+        val conn = open(actor.actor.scope.root + path)
         try {
+            beforeEffect()
+            conn.requestMethod = method
+            conn.setRequestProperty("X-Van-Ingress-Token", actor.ingress)
+            conn.setRequestProperty("X-Van-Device-Token", actor.access)
+            actor.actor.scope.nativeOwnerDomain?.let { conn.setRequestProperty("X-Van-Account-Control-Domain",it) }
+            proofHeaders(method,path,bodyText).forEach { (key,value) -> conn.setRequestProperty(key,value) }
+            conn.connectTimeout = 15_000; conn.readTimeout = if (method == "POST") 90_000 else 30_000
+            if (method == "POST") {
+                conn.setRequestProperty("Content-Type", "application/json"); conn.doOutput = true
+                beforeEffect()
+                conn.outputStream.use { beforeEffect(); it.write(bodyText.toByteArray(StandardCharsets.UTF_8)) }
+            }
+            beforeEffect()
             val code = conn.responseCode
             val stream = if (code in 200..299) conn.inputStream else conn.errorStream
-            val body = stream?.bufferedReader()?.use { it.readText() } ?: "{}"
-            accountOperations.observe(value, body, code)
-            code to body
+            val reply = stream?.bufferedReader()?.use { it.readText() } ?: "{}"
+            beforeEffect()
+            return code to reply
         } finally { conn.disconnect() }
+    }
+
+    suspend fun tradingAccountOperation(value: PendingAccountOperation): Pair<Int, String> = withContext(Dispatchers.IO) {
+        check(value.scope != null && value.requestIdentity != null) { "account_operation_original_scope_unbound" }
+        val local = accountTransportActor().actor
+        check(value.deviceId == local.deviceId && value.scope.copy(nativeOwnerDomain=null) == local.scope.copy(nativeOwnerDomain=null)) {
+            "account_operation_original_profile_not_current"
+        }
+        val actor = accountCatalogSelection().first
+        val path = "/v1/trading/accounts/operations/${encodeSegment(value.operationId)}"
+        accountOperations.recover(value,actor.actor,{ accountTransportActor().actor }) { guard ->
+            accountExchange(actor,"GET",path,beforeEffect=guard)
+        }
     }
 
     /**
@@ -908,7 +983,7 @@ class VanGatewayClient(context: Context) {
     suspend fun tradingPortfolio(): String = withContext(Dispatchers.IO) { rawGet("/v1/trading/portfolio") }
 
     suspend fun tradingAccounts(): String = withContext(Dispatchers.IO) { rawGet("/v1/trading/accounts") }
-    suspend fun tradingAccountCatalog(): String = withContext(Dispatchers.IO) { rawGet("/v1/trading/accounts/catalog") }
+    suspend fun tradingAccountCatalog(): String = withContext(Dispatchers.IO) { accountCatalogSelection().second }
 
     suspend fun tradingMarketState(symbol: String? = null): String = withContext(Dispatchers.IO) {
         rawGet("/v1/trading/market-state" + (symbol?.let { "?symbol=${encodeQuery(it)}" } ?: ""))
@@ -1019,40 +1094,40 @@ class VanGatewayClient(context: Context) {
         require(!com.dial.van.trading.AccountOnboarding.requiresOwnerApproval(action) || issuedAtUnix != null) {
             "original_approved_account_timestamp_required"
         }
-        val id = deviceId ?: error("not_enrolled")
-        val secret = deviceSecret ?: error("not_enrolled")
+        val actor = accountTransportActor()
+        val intentIdentity = accountRequestIdentity(actor.secret,
+            com.dial.van.trading.AccountOnboarding.canonicalAction(actor.actor.deviceId,
+                issuedAtUnix ?: System.currentTimeMillis()/1000L,action,args))
+        val challengeId = approvalProof?.get("challenge_id")?.let {
+            (it as? kotlinx.serialization.json.JsonPrimitive)?.content
+        }
+        if (com.dial.van.trading.AccountOnboarding.requiresOwnerApproval(action)) {
+            check(challengeId != null && accountChallengeActors[challengeId] == AccountApprovalSelection(actor.actor,intentIdentity)) {
+                "account_operation_original_approval_profile_changed"
+            }
+        }
+        val id = actor.actor.deviceId
         val body = com.dial.van.trading.AccountOnboarding.requestBody(
-            secret, id, issuedAtUnix ?: System.currentTimeMillis() / 1000L, action, args, approvalProof,
+            actor.secret, id, issuedAtUnix ?: System.currentTimeMillis() / 1000L, action, args, approvalProof,
         )
         val bodyText = body.toString()
-        val conn = open("$baseUrl/v1/trading/accounts/action").apply {
-            requestMethod = "POST"
-            setRequestProperty("Content-Type", "application/json")
-            applyIngressAuth(this)
-            proofHeaders("POST", "/v1/trading/accounts/action", bodyText).forEach { (name, value) -> setRequestProperty(name, value) }
-            doOutput = true
-            connectTimeout = 15_000
-            readTimeout = 90_000
-        }
-        // P0-AND-012 — `requestBody` returns a JsonObject, not a String. This read
-        // `body.toByteArray(...)`, which does not exist on JsonObject, so the
-        // trading account-action path has never compiled.
         val operation = if (action in AccountOperationRecovery.JOURNALED_ACTIONS) {
-            val challengeId = approvalProof?.get("challenge_id")?.let {
-                (it as? kotlinx.serialization.json.JsonPrimitive)?.content
-            } ?: error("account_operation_approval_missing")
-            PendingAccountOperation(challengeId, action, id,
-                (args["alias"] as? kotlinx.serialization.json.JsonPrimitive)?.content?.trim()?.lowercase().orEmpty())
+            PendingAccountOperation(challengeId ?: error("account_operation_approval_missing"), action, id,
+                (args["alias"] as? kotlinx.serialization.json.JsonPrimitive)?.content?.trim()?.lowercase().orEmpty(),
+                actor.actor.scope, intentIdentity)
         } else null
-        try {
-            if (operation != null) accountOperations.remember(operation)
-            conn.outputStream.use { it.write(bodyText.toByteArray(StandardCharsets.UTF_8)) }
-            val code = conn.responseCode
-            val stream = if (code in 200..299) conn.inputStream else conn.errorStream
-            val reply = stream?.bufferedReader()?.use { it.readText() } ?: "{}"
-            if (operation != null) accountOperations.observe(operation, reply, code)
-            code to reply
-        } finally { conn.disconnect() }
+        if (operation != null) {
+            accountOperations.dispatch(operation,actor.actor,{ accountTransportActor().actor }) { guard ->
+                accountExchange(actor,"POST","/v1/trading/accounts/action",bodyText,guard)
+            }
+        } else {
+            val context = currentCoroutineContext()
+            fun guard() {
+                context.ensureActive()
+                check(actor.actor == accountTransportActor().actor) { "account_operation_actor_or_profile_changed" }
+            }
+            accountExchange(actor,"POST","/v1/trading/accounts/action",bodyText,::guard)
+        }
     }
 
     /**
@@ -1066,25 +1141,34 @@ class VanGatewayClient(context: Context) {
         action: String,
         args: kotlinx.serialization.json.JsonObject,
     ): Pair<Int, String> = withContext(Dispatchers.IO) {
-        val id = deviceId ?: error("not_enrolled")
-        val secret = deviceSecret ?: error("not_enrolled")
-        val body = com.dial.van.trading.AccountOnboarding.requestBody(
-            secret, id, System.currentTimeMillis() / 1000L, action, args,
-        )
-        val bodyText = body.toString()
-        val conn = open("$baseUrl/v1/trading/accounts/challenge").apply {
-            requestMethod = "POST"
-            setRequestProperty("Content-Type", "application/json")
-            applyIngressAuth(this)
-            proofHeaders("POST", "/v1/trading/accounts/challenge", bodyText).forEach { (name, value) -> setRequestProperty(name, value) }
-            doOutput = true
-            connectTimeout = 15_000
-            readTimeout = 30_000
+        val actor = accountCatalogSelection().first
+        if (action in AccountOperationRecovery.JOURNALED_ACTIONS) {
+            val alias = (args["alias"] as? kotlinx.serialization.json.JsonPrimitive)?.content?.trim()?.lowercase()
+            check(!accountOperations.blocks(action,alias,actor.actor.scope)) { "account_requires_original_operation_readback" }
         }
-        conn.outputStream.use { it.write(bodyText.toByteArray(StandardCharsets.UTF_8)) }
-        val code = conn.responseCode
-        val stream = if (code in 200..299) conn.inputStream else conn.errorStream
-        code to (stream?.bufferedReader()?.use { it.readText() } ?: "")
+        val context = currentCoroutineContext()
+        fun guard() {
+            context.ensureActive()
+            check(actor.actor == accountTransportActor().actor) { "account_operation_actor_or_profile_changed" }
+        }
+        val issued = System.currentTimeMillis()/1000L
+        val body = com.dial.van.trading.AccountOnboarding.requestBody(
+            actor.secret, actor.actor.deviceId, issued, action, args,
+        ).toString()
+        val reply = accountExchange(actor,"POST","/v1/trading/accounts/challenge",body,::guard)
+        guard()
+        if (reply.first in 200..299) {
+            val challenge = JSONObject(reply.second)
+            check(challenge.optString("account_control_domain") == actor.actor.scope.nativeOwnerDomain) {
+                "account_operation_approval_namespace_changed"
+            }
+            val id = challenge.optString("approval_challenge_id")
+            check(id.isNotBlank()) { "account_operation_approval_missing" }
+            check(challenge.optLong("issued_at_unix") == issued) { "account_operation_approval_request_changed" }
+            accountChallengeActors[id] = AccountApprovalSelection(actor.actor,accountRequestIdentity(actor.secret,
+                com.dial.van.trading.AccountOnboarding.canonicalAction(actor.actor.deviceId,issued,action,args)))
+        }
+        reply
     }
 
     suspend fun decisions(): JSONArray = withContext(Dispatchers.IO) {

@@ -85,10 +85,14 @@ class DerivWebSocketTransport:
                 self.authorized_profile = None
                 self._token_fingerprint = None
 
-    def _exchange_locked(self, msg: dict[str, Any], *, expires_at_ms=None, clock=None) -> dict[str, Any]:
+    def _exchange_locked(self, msg: dict[str, Any], *, expires_at_ms=None, clock=None, before_send=None) -> dict[str, Any]:
         self._req += 1
         req_id = self._req
         wire=json.dumps({**msg, "req_id": req_id})
+        # Per-call owner currentness/possible-send boundary, after connect and
+        # serialization. Refusal is outside transport uncertainty conversion;
+        # no mutable instance hook can leak into a later trading/read request.
+        if before_send is not None:before_send()
         # Auth/reconnect/serialization have finished; this is the last check
         # before the financial write. Never reclassify a later lost reply.
         if expires_at_ms is not None:
@@ -136,8 +140,8 @@ class DerivWebSocketTransport:
         self._token_fingerprint = hashlib.sha256(token.encode()).digest()
         return response
 
-    def __call__(self, msg: dict[str, Any]) -> dict[str, Any]:
-        return self._call(msg)
+    def __call__(self, msg: dict[str, Any], *, before_send=None) -> dict[str, Any]:
+        return self._call(msg) if before_send is None else self._call(msg,before_send=before_send)
 
     def call_entry(self, msg: dict[str, Any], *, expires_at_ms, clock) -> dict[str, Any]:
         fields = {'buy': {'buy', 'price', 'passthrough'},
@@ -149,18 +153,19 @@ class DerivWebSocketTransport:
         require_entry_deadline(expires_at_ms,clock)
         return self._call(msg,expires_at_ms=expires_at_ms,clock=clock)
 
-    def _call(self, msg, *, expires_at_ms=None, clock=None):
+    def _call(self, msg, *, expires_at_ms=None, clock=None, before_send=None):
         with self._lock:
             # The entry fence is held through the broker send/response, sharing
             # Commander lock order. It does not fence reduce-only protection.
             scope = self.entry_scope() if self.entry_scope and self.ENTRY_CALLS.intersection(msg) else nullcontext()
             try:
                 with scope:
-                    return self._call_locked(msg,expires_at_ms=expires_at_ms,clock=clock)
+                    if before_send is None:return self._call_locked(msg,expires_at_ms=expires_at_ms,clock=clock)
+                    return self._call_locked(msg,expires_at_ms=expires_at_ms,clock=clock,before_send=before_send)
             except (AccountRegistryError, StateFileLockError):
                 return {"error": "Deriv account entry binding or mode changed", "error_code": "EntryBindingRefused"}
 
-    def _call_locked(self, msg: dict[str, Any], *, expires_at_ms=None, clock=None) -> dict[str, Any]:
+    def _call_locked(self, msg: dict[str, Any], *, expires_at_ms=None, clock=None, before_send=None) -> dict[str, Any]:
         private = bool(self.PRIVATE_CALLS.intersection(msg))
         # Bound proposals also require current native identity before quoting.
         needs_auth = "authorize" in msg or private or (self.identity is not None and bool(self.ENTRY_CALLS.intersection(msg)))
@@ -178,7 +183,8 @@ class DerivWebSocketTransport:
             authorized = self._authorize_locked(token)
             if "authorize" in msg or authorized.get("error"):
                 return authorized
-        return self._exchange_locked(msg,expires_at_ms=expires_at_ms,clock=clock)
+        if before_send is None:return self._exchange_locked(msg,expires_at_ms=expires_at_ms,clock=clock)
+        return self._exchange_locked(msg,expires_at_ms=expires_at_ms,clock=clock,before_send=before_send)
 
 
 class DerivMarketFeed:

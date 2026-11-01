@@ -16,6 +16,7 @@ import re
 import secrets as pysecrets
 import time
 import tempfile
+import hashlib
 from dataclasses import dataclass, field, replace
 from functools import wraps
 from pathlib import Path
@@ -24,7 +25,8 @@ from typing import Any, Callable, Optional
 from fastapi import HTTPException
 from commander.account_config import resolve_account_config,validate_deriv_endpoint
 from commander.account_effects import (AccountEffectError, AccountEffectJournal, AccountOperationUnconfirmed,
-    AccountOperationBlocked, JOURNALED_COMMANDS, invoke_account_effect, mark_account_effect, operation_intent, readback)
+    AccountOperationBlocked, JOURNALED_COMMANDS, invoke_account_effect, mark_account_effect, operation_intent, readback,
+    require_current_account_effect)
 
 ALIAS_RE = re.compile(r"^[a-z0-9_]{3,32}$")
 BROKER_SECRET_KEYS = {
@@ -39,8 +41,8 @@ ACCOUNT_MUTATIONS = frozenset({"account_upsert", "account_credentials", "account
 ACCOUNT_COMMANDS = ("account_upsert", "account_credentials", "account_remove", "account_verify", "account_revision", "account_review", "account_operation", "deriv_verify_email", "deriv_create_demo", "deriv_oauth_link", "ctrader_discover", "ctrader_oauth_exchange", "ctrader_link", "mt5_ea_issue_key")
 ACCOUNT_TOOL_SCHEMAS = {
     "account_review": {"description": "Resolve exact public before/after settings or local-unlink safety facts without broker effects. Native readonly checks may use host credentials; credential values and locators are never exported.", "properties": {"action": {"type": "string"}, "args": {"type": "object"}}, "required": ["action", "args"]},
-    "account_operation": {"description": "Read the original native account-operation outcome for its gateway-authenticated owner device. No effect or credential export.", "properties": {"operation_id": {"type": "string"}, "device_id": {"type": "string"}}, "required": ["operation_id", "device_id"]},
-    "account_revision": {"description": "Read the native non-secret account configuration version for exact owner-intent binding.", "properties": {"alias": {"type": "string"}}, "required": ["alias"]},
+    "account_operation": {"description": "Read the original native account-operation outcome for its gateway-authenticated owner device and selected native control domain. No effect or credential export; domain data confers no authority.", "properties": {"operation_id": {"type": "string"}, "device_id": {"type": "string"}, "account_control_domain": {"type":"string","pattern":"^[0-9a-f]{64}$"}}, "required": ["operation_id", "device_id"]},
+    "account_revision": {"description": "Read the authenticated native account-control state namespace and, when alias is supplied, its exact configuration version. Namespace data confers no authority.", "properties": {"alias": {"type": "string"}}},
     "account_upsert": {"description": "Register a new account or edit specified public settings. Existing omitted settings and credentials are preserved. New accounts require broker; native identity changes require verified migration.", "properties": {"alias": {"type": "string"}, "broker": {"type": "string"}, "mode": {"type": "string"}, "currency": {"type": "string"}, "label": {"type": "string"}, "server": {"type": "string"}, "login": {"type": "string"}, "bridge_url": {"type": "string"}, "demo": {"type": "boolean"}, "enabled": {"type": "boolean"}, "notes": {"type": "string"}, "venue": {"type": "string"}, "mandate_ref": {"type": "string"}}, "required": ["alias"]},
     "account_credentials": {"description": "Store credential values for an alias in its 0600 secrets file (allowlisted keys per broker). Values are never echoed.", "properties": {"alias": {"type": "string"}, "secrets": {"type": "object"}}, "required": ["alias", "secrets"]},
     "account_remove": {"description": "Unlink the VAN-local account only after exact owner review, inactive runtime and fresh known funds, positions, pending orders and original outcomes. Keeps history and remote account/funds; no broker closure or money movement.", "properties": {"alias": {"type": "string"}}, "required": ["alias"]},
@@ -120,7 +122,7 @@ def _alias(a: dict) -> str:
     return alias
 
 
-def require_resource_version(command: str, args: dict) -> None:
+def require_resource_version(command: str, args: dict, *, server_owned_demo=False) -> None:
     """Required on actual gateway/Commander ingress; direct handlers are native code."""
     if command not in ACCOUNT_MUTATIONS:
         return
@@ -128,7 +130,8 @@ def require_resource_version(command: str, args: dict) -> None:
     expected = args.get("_expected_resource_version")
     if not isinstance(expected, str) or not re.fullmatch(r"[0-9a-f]{64}", expected):
         raise HTTPException(409, "native account resource version is required before mutation")
-    if command in JOURNALED_COMMANDS:
+    if command in JOURNALED_COMMANDS and not (
+        command=='deriv_create_demo' and server_owned_demo and '_native_operation' not in args):
         try:
             operation_intent(command, args)
         except AccountEffectError as exc:
@@ -219,9 +222,64 @@ def build_account_handlers(st: AccountControlSettings) -> dict[str, Callable[[di
             raise HTTPException(409, "account alias already exists; use the approved account update flow")
 
     # ------------------------------------------------------------ generic
+    def control_domain(native_ledger=None):
+        """Current protected state correlation; never retrospective authority."""
+        from vati.accounts.registry import load_secret_file
+        from vati.core.file_lock import exclusive_state_lock
+        from commander.account_effects import PRODUCER,SCHEMA
+        from vati.core.events import EventKind,make_event
+        path=Path(st.secrets_dir)/'.account-control-domain.env'
+        led=native_ledger if native_ledger is not None else open_operation_ledger()
+        try:
+            with exclusive_state_lock(path):
+                with led.atomic():
+                    states=AccountEffectJournal(led)._states()
+                    hints={target.split(':',1)[1] for state in states.values() for target in state.intent.targets
+                        if target.startswith('account-control-domain:')}
+                    hints.update(event.payload['account_control_domain'] for event in led.iter(EventKind.ACCOUNT_OPERATION)
+                        if AccountEffectJournal.internal_namespace_metadata(event))
+                    if len(hints)>1 or any(not re.fullmatch(r'[0-9a-f]{64}',hint) for hint in hints):
+                        raise AccountOperationBlocked('Native account-control namespace conflicts; reconcile original state')
+                    if path.is_symlink():raise AccountOperationBlocked('Native account-control namespace vault is unsafe')
+                    missing=not path.exists()
+                    if not missing and not hints:
+                        raise AccountOperationBlocked('Immutable native account-control namespace hint is unavailable')
+                    domain=(next(iter(hints)) if hints else pysecrets.token_hex(32)) if missing else load_secret_file(str(path)).get('ACCOUNT_CONTROL_DOMAIN','')
+                    if not re.fullmatch(r'[0-9a-f]{64}',domain) or hints and hints!={domain}:
+                        raise AccountOperationBlocked('Native account-control namespace continuity is unknown')
+                    if not hints:
+                        # Controlled one-time CURRENT-state metadata migration.
+                        # The explicit INTERNAL row has no business intent,
+                        # APPLIED phase, account revision or issuer principal.
+                        # Legacy originals remain unbound and all their native
+                        # uncertainty/provider fences continue to apply.
+                        stamp=int(time.time())
+                        led.append(make_event(EventKind.ACCOUNT_OPERATION,PRODUCER,
+                            {'schema':SCHEMA,'record_type':'INTERNAL_NAMESPACE_METADATA',
+                             'account_control_domain':domain,'legacy_originals_bound':False,'authority_issued':False},
+                            event_time_ms=stamp*1000,received_time_ms=stamp*1000,
+                            correlation_id='internal-account-control-namespace'))
+                # Commit the immutable hint BEFORE attempting vault persistence.
+                # A lost commit acknowledgement/write failure restores the same
+                # unique hint on retry, rather than minting an independent ID.
+                if missing:_write_secrets(path,{'ACCOUNT_CONTROL_DOMAIN':domain},merge=False)
+                return domain
+        except HTTPException:raise
+        except Exception:
+            raise AccountOperationBlocked('Native account-control namespace cannot be verified; reconciliation required') from None
+        finally:
+            if native_ledger is None:led.close()
+
+    def current_resource_version(alias):
+        from vati.accounts.resource_version import resource_snapshot
+        return resource_snapshot(reg(),alias)['resource_version']
+
     def cmd_account_revision(a: dict) -> dict:
         from vati.accounts.resource_version import resource_snapshot
-        return resource_snapshot(reg(), _alias(a))
+        domain=control_domain()
+        if 'alias' not in a:return {'account_control_domain':domain}
+        snapshot=resource_snapshot(reg(), _alias(a))
+        return {**snapshot,'account_control_domain':domain}
 
     def retirement_review(values,*,inside_removal=False,native_ledger=None):
         from commander.account_retirement import inspect_retirement,require_idle_runtime,authority_path
@@ -243,7 +301,7 @@ def build_account_handlers(st: AccountControlSettings) -> dict[str, Callable[[di
                     operation_id=(values.get('_native_operation') or {}).get('operation_id'))
                 body={'schema':'vati.account-review/1','action':'account_remove','alias':alias,
                     'request_digest':canonical_hash({k:v for k,v in values.items() if not k.startswith('_')}),
-                    'resource_version':cmd_account_revision({'alias':alias})['resource_version'],
+                    'resource_version':current_resource_version(alias),
                     'before':current.public(),'after':None,'changed_fields':['local_link'],'retirement':facts}
                 return {**body,'review_digest':canonical_hash(body)}
         finally:
@@ -258,7 +316,7 @@ def build_account_handlers(st: AccountControlSettings) -> dict[str, Callable[[di
         values=a['args']; alias=_alias(values)
         with reg().operation_lock(alias):
             registry=reg(); current=registry.accounts.get(alias)
-            candidate=resolve_account_config(values,alias=alias,current=current,secret_path=_secrets_path(st,alias))
+            candidate=resolve_account_config({k:v for k,v in values.items() if k!='_expected_account_control_domain'},alias=alias,current=current,secret_path=_secrets_path(st,alias))
             before=current.public() if current else None; after=candidate.public()
             public_args={key:value for key,value in values.items() if not key.startswith('_')}
             body={'schema':'vati.account-review/1','action':'account_upsert','alias':alias,
@@ -275,6 +333,9 @@ def build_account_handlers(st: AccountControlSettings) -> dict[str, Callable[[di
         return open_ledger(st.operation_ledger)
 
     def cmd_account_operation(a: dict) -> dict:
+        current=control_domain()
+        if a.get('account_control_domain') not in (None,current):
+            raise AccountOperationBlocked('Original account-control namespace is not selected')
         led = open_operation_ledger()
         try:
             state = AccountEffectJournal(led).status(a.get("operation_id"), a.get("device_id"))
@@ -294,7 +355,7 @@ def build_account_handlers(st: AccountControlSettings) -> dict[str, Callable[[di
                 raise HTTPException(409,'Resolved account settings changed since owner review; current connection retained')
         alias = _alias(a)
         registry=reg(); current=registry.accounts.get(alias)
-        candidate=resolve_account_config(a,alias=alias,current=current,secret_path=_secrets_path(st,alias))
+        candidate=resolve_account_config({k:v for k,v in a.items() if k!='_expected_account_control_domain'},alias=alias,current=current,secret_path=_secrets_path(st,alias))
         if current is None and candidate.credential_ref.secrets_file:
             mark_account_effect()
             _write_secrets(Path(candidate.credential_ref.secrets_file),{})
@@ -353,7 +414,7 @@ def build_account_handlers(st: AccountControlSettings) -> dict[str, Callable[[di
             if cleanup!=review['retirement']['credential_cleanup']:
                 raise HTTPException(409,'Credential reference ownership changed; review local unlink again')
             with exclusive_state_lock(target) if target is not None else nullcontext():
-                if cmd_account_revision({'alias':alias})['resource_version']!=review['resource_version']:
+                if current_resource_version(alias)!=review['resource_version']:
                     raise HTTPException(409,'Native credential generation changed; local connection retained')
                 mark_account_effect()
                 current.remove(alias)
@@ -403,19 +464,45 @@ def build_account_handlers(st: AccountControlSettings) -> dict[str, Callable[[di
         alias = _alias(a)
         require_new_alias(alias)
         app_id = str(a.get("app_id") or "1089")
+        if (not str(a.get("verification_code", "")).strip()
+            or not isinstance(a.get("client_password"), str) or not a["client_password"]
+            or not re.fullmatch(r"[a-zA-Z]{2}", str(a.get("residence", "")))
+            or not re.fullmatch(r"[0-9]+", app_id)):
+            raise HTTPException(422, "Demo creation needs a verification code, password, residence and valid app ID")
         t = deriv_transport(app_id)
-        r = t({"new_account_virtual": 1, "verification_code": str(a["verification_code"]).strip(), "client_password": str(a["client_password"]), "residence": str(a["residence"]).lower(), "type": "trading"})
+        def possible_send():
+            require_current_account_effect()
+            mark_account_effect()
+        try:
+            require_current_account_effect()
+            r = t({"new_account_virtual": 1, "verification_code": str(a["verification_code"]).strip(), "client_password": a["client_password"], "residence": str(a["residence"]).lower(), "type": "trading"},before_send=possible_send)
+        finally:
+            t.close()
         if r.get("error"):
             raise HTTPException(502, f"Deriv: {r['error']}")
-        nav = r.get("new_account_virtual", {})
-        token = nav.get("oauth_token")
-        if not token:
-            raise HTTPException(502, "Deriv did not return an account token")
+        nav = r.get("new_account_virtual")
+        if (not isinstance(nav, dict) or any(not isinstance(nav.get(key), str) or not nav[key].strip()
+            for key in ('client_id','currency','oauth_token'))):
+            raise HTTPException(502, "Original demo creation returned incomplete native identity; reconciliation required")
+        token = nav['oauth_token']
         verify_deriv_material(app_id=app_id, token=token, login=str(nav.get("client_id", "")),
             currency=str(nav.get("currency", "USD")), demo=True, require_trade=True)
-        pub = upsert_record(alias, "DERIV", currency=str(nav.get("currency", "USD")), label=str(a.get("label") or f"Deriv demo {nav.get('client_id', '')}"), server=app_id, login=str(nav.get("client_id", "")), demo=True)
+        upsert_record(alias, "DERIV", currency=str(nav.get("currency", "USD")), label=str(a.get("label") or f"Deriv demo {nav.get('client_id', '')}"), server=app_id, login=str(nav.get("client_id", "")), demo=True)
         store_secrets(alias, "DERIV", {"DERIV_API_TOKEN": token, "DERIV_APP_ID": app_id})
-        return {"account": pub, "client_id": nav.get("client_id"), "currency": nav.get("currency"), "note": "virtual account created; token stored on van-trading-core"}
+        # Complete only from persisted material and independent native identity
+        # readback. A failure after remote creation stays UNKNOWN, even if the
+        # local record exists; an absent record never proves remote no-effect.
+        saved = reg()
+        account = saved.get(alias)
+        material = saved.credentials(alias)
+        verify_deriv_material(app_id=app_id, token=material.get("DERIV_API_TOKEN", ""),
+            login=account.login, currency=account.currency, demo=True, require_trade=True)
+        if (account.broker != "DERIV" or not account.demo or account.mode != "DEMO_TRADER"
+            or account.server != app_id or account.login != str(nav.get("client_id", ""))
+            or material.get("DERIV_APP_ID") != app_id):
+            raise HTTPException(409, "Original demo creation requires reconciliation of persisted native identity")
+        return {"account": account.public(), "client_id": account.login, "currency": account.currency,
+            "note": "virtual account created; native identity verified from stored credentials"}
 
     def cmd_deriv_oauth_link(a: dict) -> dict:
         alias = _alias(a)
@@ -500,12 +587,27 @@ def build_account_handlers(st: AccountControlSettings) -> dict[str, Callable[[di
             alias = _alias(args)
             path = Path(st.registry_path).resolve()
             with exclusive_state_lock(path.with_name(path.name + ".operation." + alias)):
+                def check_current_scope():
+                    guard = args.get('_account_dispatch_guard')
+                    if callable(guard):
+                        guard()
+                    if '_expected_account_control_domain' in args and args['_expected_account_control_domain']!=control_domain():
+                        raise AccountOperationBlocked('Account-control state namespace changed before native dispatch')
+                    if callable(guard):guard()
                 def check_version():
+                    check_current_scope()
                     if "_expected_resource_version" in args:
                         expected = args["_expected_resource_version"]
-                        actual = cmd_account_revision({"alias": alias})["resource_version"]
+                        actual = current_resource_version(alias)
                         if not isinstance(expected, str) or expected != actual:
                             raise HTTPException(409, "account changed since owner approval; review the current account and approve again")
+                    check_current_scope()
+                server_admitted = command=='deriv_create_demo' and '_native_operation' not in args and callable(args.get('_server_demo_admission'))
+                if server_admitted:
+                    # Only the already authenticated registered owner route
+                    # can supply this closure. Labels/metadata confer nothing.
+                    check_current_scope()
+                    args={**args,'_native_operation':args['_server_demo_admission']()}
                 if command not in JOURNALED_COMMANDS or "_native_operation" not in args:
                     # Internal native handler seams; real Local/HTTP ingress
                     # separately requires the verified operation context.
@@ -519,18 +621,72 @@ def build_account_handlers(st: AccountControlSettings) -> dict[str, Callable[[di
                             led.close()
                     check_version()
                     return handler(args)
-                intent = operation_intent(command, args)
                 led = open_operation_ledger()
                 try:
                     journal = AccountEffectJournal(led)
+                    domain=control_domain()
+                    if args.get('_expected_account_control_domain') not in (None,domain):
+                        raise AccountOperationBlocked('Account-control state namespace changed before native dispatch')
+                    args={**args,'_expected_account_control_domain':domain}
+                    digest_key = None
+                    if command == 'deriv_create_demo':
+                        from vati.accounts.registry import load_secret_file
+                        key_path = Path(st.secrets_dir) / '.demo-operation-digest.env'
+                        # Same protected native vault as broker credentials,
+                        # never an owner key or an authority grant. Do not
+                        # regenerate a lost/replaced key over durable history.
+                        with exclusive_state_lock(key_path):
+                            states = journal._states()
+                            previous = [state for state in states.values()
+                                if state.intent.command == command]
+                            if key_path.is_symlink():
+                                raise AccountOperationBlocked('Original demo digest vault is unsafe; hold for reconciliation')
+                            if not key_path.exists():
+                                if previous:
+                                    raise AccountOperationBlocked('Original demo digest vault is unavailable; hold for reconciliation')
+                                _write_secrets(key_path, {'DEMO_DIGEST_KEY': pysecrets.token_hex(32)}, merge=False)
+                            try:
+                                raw_key = load_secret_file(str(key_path)).get('DEMO_DIGEST_KEY', '')
+                            except (AccountRegistryError, OSError):
+                                raise AccountOperationBlocked('Original demo digest vault cannot be read safely; hold for reconciliation') from None
+                            if not re.fullmatch(r'[0-9a-f]{64}',raw_key):
+                                raise AccountOperationBlocked('Original demo digest vault is invalid; hold for reconciliation')
+                            digest_key = bytes.fromhex(raw_key)
+                            pin = 'deriv-demo-key:' + hashlib.sha256(digest_key).hexdigest()
+                            if any(pin not in state.intent.targets for state in previous):
+                                raise AccountOperationBlocked('Original demo digest vault changed; hold for reconciliation')
+                    intent = operation_intent(command, args, digest_key=digest_key)
+                    def legacy_result(state):
+                        if state.phase=='REFUSED':
+                            raise HTTPException(state.result['status_code'],state.result['detail'])
+                        return {**state.result,'operation_id':state.intent.operation_id,
+                            'device_id':state.intent.device_id,'action':command,'effect_state':'APPLIED',
+                            'reconciliation_required':False,'account_control_domain':readback(state)['account_control_domain']}
+                    if server_admitted:
+                        # A lost legacy acknowledgement cannot discard the
+                        # server-owned original identity or reopen provisioning.
+                        for state in journal._states().values():
+                            if state.intent.command!=command:continue
+                            if state.phase in {'IN_FLIGHT','UNKNOWN'}:
+                                if state.intent.device_id==intent.device_id:
+                                    raise AccountOperationUnconfirmed(state.intent.operation_id)
+                                raise AccountOperationBlocked()
+                            if (state.intent.device_id==intent.device_id
+                                and state.intent.request_digest==intent.request_digest
+                                and state.intent.resource_version==intent.resource_version
+                                and state.intent.targets==intent.targets):
+                                check_current_scope()
+                                return legacy_result(state)
                     # Known-result reads retain the ORIGINAL version. Never
                     # rebase a completed request onto today's registry record.
                     existing = journal.status(intent.operation_id, intent.device_id)
                     if existing is None:
                         check_version()
-                    return invoke_account_effect(journal, intent, lambda: handler(args))
+                    result = invoke_account_effect(journal, intent, lambda: handler(args),
+                        dispatch_guard=check_version if command=='deriv_create_demo' else args.get('_account_dispatch_guard'))
+                    return legacy_result(journal.status(intent.operation_id,intent.device_id)) if server_admitted else result
                 except AccountEffectError:
-                    raise AccountOperationUnconfirmed(intent.operation_id) from None
+                    raise AccountOperationUnconfirmed(args.get('_native_operation',{}).get('operation_id')) from None
                 finally:
                     led.close()
         return invoke
@@ -541,12 +697,22 @@ def build_account_handlers(st: AccountControlSettings) -> dict[str, Callable[[di
             from commander.account_retirement import retirement_scope
             alias=_alias(args)
             ledger=open_operation_ledger()
+            try:
+                domain=control_domain(ledger)
+                if args.get('_expected_account_control_domain') not in (None,domain):
+                    raise AccountOperationBlocked('Account-control namespace changed before local unlink')
+            except BaseException:
+                ledger.close()
+                raise
+            args={**args,'_expected_account_control_domain':domain}
             def retire():
                 # The unique original journal claim is durable before taking
                 # lease -> alias locks. No ledger transaction spans venue IO.
                 with retirement_scope(st,alias),reg().operation_lock(alias):
                     if '_expected_resource_version' in args:
-                        if args['_expected_resource_version']!=cmd_account_revision({'alias':alias})['resource_version']:
+                        if args['_expected_account_control_domain']!=control_domain(ledger):
+                            raise AccountOperationBlocked('Account-control namespace changed before local unlink')
+                        if args['_expected_resource_version']!=current_resource_version(alias):
                             raise HTTPException(409,'Account changed since owner approval; local connection retained')
                     return handler(args,native_ledger=ledger)
             try:
@@ -570,4 +736,6 @@ SECRET_ARG_KEYS = {"secrets", "client_password", "token", "access_token", "refre
 
 
 def redact_args(args: dict) -> dict:
-    return {k: ("[REDACTED]" if k in SECRET_ARG_KEYS else v) for k, v in args.items()}
+    return {k: ("[REDACTED]" if k in SECRET_ARG_KEYS else
+                {key: ('[REDACTED]' if key in {'request_digest','authority_ref'} else value) for key,value in v.items()}
+                if k=='_native_operation' and isinstance(v,dict) else v) for k, v in args.items()}

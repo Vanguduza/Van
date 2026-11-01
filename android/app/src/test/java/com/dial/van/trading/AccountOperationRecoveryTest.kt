@@ -2,21 +2,63 @@ package com.dial.van.trading
 
 import org.junit.Assert.*
 import org.junit.Test
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withContext
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.CancellationException
 
 class AccountOperationRecoveryTest {
     private class Disk : AccountOperationStore {
         var text: String? = null
         var writable = true
+        var afterSave: (() -> Unit)? = null
         override fun load() = text
         override fun save(value: String): Boolean {
             if (!writable) return false
-            text = value; return true
+            text = value; afterSave?.invoke(); return true
         }
     }
-    private val original = PendingAccountOperation("original_operation_id_12345", "mt5_ea_issue_key", "owner-device", "owner_mt5")
+    private val scope = AccountOperationScope("https://gateway.fixture", "profile-fixture", "provision-fixture", "a".repeat(64))
+    private val original = PendingAccountOperation("original_operation_id_12345", "mt5_ea_issue_key", "owner-device", "owner_mt5", scope, "b".repeat(64))
+
+    @Test fun demoCreationPersistsBeforeDispatchAndColdRecoveryNeverAuthorizesResend() {
+        val disk = Disk()
+        val demo = original.copy(action = "deriv_create_demo", alias = "owner_demo")
+        assertTrue(AccountOperationRecovery.JOURNALED_ACTIONS.contains(demo.action))
+        AccountOperationRecovery(disk).remember(demo)
+        val cold = AccountOperationRecovery(disk)
+        assertEquals(listOf(demo), cold.pending(demo.deviceId))
+        assertThrows(IllegalStateException::class.java) { cold.remember(demo) }
+        assertThrows(IllegalStateException::class.java) { cold.remember(demo.copy(operationId = "another_operation_id_12345")) }
+        assertThrows(IllegalStateException::class.java) { cold.remember(demo.copy(operationId = "another_operation_id_12345", alias = "changed_alias")) }
+        val unknown = """{"operation_id":"${demo.operationId}","action":"deriv_create_demo","effect_state":"UNKNOWN","reconciliation_required":true}"""
+        assertFalse(cold.observe(demo, unknown, 200, scope))
+        assertEquals(listOf(demo), AccountOperationRecovery(disk).pending(demo.deviceId))
+        val outcome = AccountOnboarding.parseOutcome(demo.action, unknown, 409)
+        assertFalse(outcome.ok); assertTrue(outcome.message.contains("Hold creation"))
+        assertTrue(outcome.message.contains("do not create another account"))
+        assertFalse(disk.text!!.contains("password")); assertFalse(disk.text!!.contains("email"))
+        assertFalse(disk.text!!.contains("verification_code")); assertFalse(disk.text!!.contains("args"))
+        disk.writable = false
+        assertThrows(IllegalStateException::class.java) { cold.remember(demo.copy(operationId = "unrelated_operation_id_12345", alias = "independent")) }
+    }
+
+    @Test fun demoOriginalClearsOnlyFromItsBoundNativeDemoReceipt() {
+        val disk = Disk()
+        val demo = original.copy(action = "deriv_create_demo", alias = "owner_demo")
+        val history = AccountOperationRecovery(disk); history.remember(demo)
+        val receipt = """{"operation_id":"${demo.operationId}","action":"deriv_create_demo","effect_state":"APPLIED","reconciliation_required":false,"account_control_domain":"${scope.nativeOwnerDomain}","result":{"account":{"alias":"owner_demo","broker":"DERIV","mode":"DEMO_TRADER","demo":true,"safety_identity":"DEMO","login":"VRTC900","currency":"USD"},"client_id":"VRTC900","currency":"USD"}}"""
+        for (invalid in listOf(receipt.replace("owner_demo", "foreign_alias"), receipt.replace("\"demo\":true", "\"demo\":false"),
+            receipt.replace("\"client_id\":\"VRTC900\"", "\"client_id\":\"OTHER\""), receipt.replace("DEMO_TRADER", "AUTONOMOUS_LIVE"))) {
+            assertFalse(history.observe(demo, invalid, 200, scope))
+            assertEquals(listOf(demo), history.pending(demo.deviceId))
+        }
+        assertTrue(history.observe(demo, receipt, 200, scope))
+        assertTrue(history.pending(demo.deviceId).isEmpty())
+    }
     private fun response(state: String = "APPLIED", id: String = original.operationId,
                          action: String = original.action, reconcile: Boolean = false) =
-        """{"operation_id":"$id","action":"$action","effect_state":"$state","reconciliation_required":$reconcile,"result":{"account":{"alias":"owner_mt5"},"credential_export_available":false}}"""
+        """{"operation_id":"$id","action":"$action","effect_state":"$state","reconciliation_required":$reconcile,"account_control_domain":"${scope.nativeOwnerDomain}","result":{"account":{"alias":"owner_mt5"},"credential_export_available":false}}"""
 
     @Test fun coldReaderRetainsOriginalIdentityAndNeverStoresArgumentsProofOrCredentials() {
         val disk = Disk(); AccountOperationRecovery(disk).remember(original)
@@ -48,17 +90,17 @@ class AccountOperationRecoveryTest {
         val disk = Disk(); val history = AccountOperationRecovery(disk); history.remember(original)
         for (body in listOf("bad json", "{}", response("UNKNOWN", reconcile = true), response(id="different_operation_id_12345"),
             response(action="account_remove"), response(reconcile=true))) {
-            assertFalse(history.observe(original, body, 200))
+            assertFalse(history.observe(original, body, 200, scope))
             assertEquals(listOf(original), history.pending(original.deviceId))
         }
-        assertFalse(history.observe(original, response(), 502))
-        assertTrue(history.observe(original, response(), 200))
+        assertFalse(history.observe(original, response(), 502, scope))
+        assertTrue(history.observe(original, response(), 200, scope))
         assertTrue(AccountOperationRecovery(disk).pending(original.deviceId).isEmpty())
     }
 
     @Test fun refusalCanClearButAnUnreadableOrMissingHistoryCannotBeReplaced() {
         val disk = Disk(); val history = AccountOperationRecovery(disk); history.remember(original)
-        assertTrue(history.observe(original, response("REFUSED"), 200))
+        assertTrue(history.observe(original, response("REFUSED"), 200, scope))
         disk.text = "corrupt original state"
         assertThrows(Exception::class.java) { history.remember(original) }
         assertEquals("corrupt original state", disk.text)
@@ -67,7 +109,7 @@ class AccountOperationRecoveryTest {
     @Test fun failureToSaveAConfirmedReadbackStillKeepsTheOriginalIdentity() {
         val disk = Disk(); val history = AccountOperationRecovery(disk); history.remember(original)
         disk.writable = false
-        assertThrows(IllegalStateException::class.java) { history.observe(original, response(), 200) }
+        assertThrows(IllegalStateException::class.java) { history.observe(original, response(), 200, scope) }
         assertEquals(listOf(original), history.pending(original.deviceId))
     }
 
@@ -81,5 +123,132 @@ class AccountOperationRecoveryTest {
         assertTrue(knownWithoutExport.message.contains("not retained"))
         val uncertain = AccountOnboarding.parseOutcome(original.action, response("UNKNOWN", reconcile=true), 409)
         assertFalse(uncertain.ok); assertTrue(uncertain.message.contains("original result"))
+    }
+
+    @Test fun actualDispatchStateMachineFencesActorChangesAtEveryEffectBoundary() = runBlocking {
+        val start = AccountOperationActor(scope,original.deviceId,"current-token-context")
+        val changes = listOf(start.copy(scope=scope.copy(root="https://replacement.fixture")),
+            start.copy(scope=scope.copy(profileId="replacement-profile")),
+            start.copy(scope=scope.copy(provisioningId="replacement-provision")),
+            start.copy(scope=scope.copy(nativeOwnerDomain="c".repeat(64))),
+            start.copy(deviceId="replacement-device"),start.copy(credentialContext="rotated-token-context"))
+        for (changed in changes) for (stage in listOf("before","persist","request","response")) {
+            val disk=Disk();val history=AccountOperationRecovery(disk)
+            var current=if(stage=="before") changed else start
+            var effects=0
+            if(stage=="persist") disk.afterSave={current=changed}
+            try {
+                history.dispatch(original,start,{current}) { guard ->
+                    if(stage=="request") current=changed
+                    guard(); effects++
+                    if(stage=="response") current=changed
+                    200 to response()
+                }
+                fail("Changed original scope must refuse")
+            } catch (_: IllegalStateException) { }
+            assertEquals(if(stage=="response") 1 else 0,effects)
+            assertEquals(if(stage=="before") emptyList() else listOf(original),history.pending(original.deviceId))
+        }
+    }
+
+    @Test fun cancelledJobNeverSendsAfterPersistenceOrClearsAfterAnEffect() = runBlocking {
+        val actor=AccountOperationActor(scope,original.deviceId,"live-token-context")
+        for (stage in listOf("persist","request","response")) {
+            val disk=Disk();val history=AccountOperationRecovery(disk);val job=Job();var effects=0
+            if(stage=="persist") disk.afterSave={job.cancel()}
+            try {
+                withContext(job) {
+                    history.dispatch(original,actor,{actor}) { guard ->
+                        if(stage=="request") job.cancel()
+                        guard();effects++
+                        if(stage=="response") job.cancel()
+                        200 to response()
+                    }
+                }
+                fail("Cancelled caller must stop")
+            } catch (_: CancellationException) { }
+            assertEquals(if(stage=="response") 1 else 0,effects)
+            assertEquals(listOf(original),history.pending(original.deviceId))
+        }
+    }
+
+    @Test fun originalReadRequiresLawfulOriginalScopeAndRechecksAfterReply() = runBlocking {
+        val actor=AccountOperationActor(scope,original.deviceId,"current-token-context")
+        val changes=listOf(actor.copy(scope=scope.copy(root="https://replacement.fixture")),
+            actor.copy(scope=scope.copy(nativeOwnerDomain="c".repeat(64))),actor.copy(deviceId="other-device"),
+            actor.copy(credentialContext="new-token"))
+        for(changed in changes) {
+            val disk=Disk();val history=AccountOperationRecovery(disk);history.remember(original)
+            var current=actor;var requests=0
+            try {
+                history.recover(original,actor,{current}) { guard ->
+                    guard();requests++;current=changed
+                    200 to response()
+                }
+                fail("Reply from changed context cannot complete original")
+            } catch (_: IllegalStateException) { }
+            assertEquals(1,requests);assertEquals(listOf(original),history.pending(original.deviceId))
+        }
+        val disk=Disk();val history=AccountOperationRecovery(disk);history.remember(original)
+        val wrong=actor.copy(scope=scope.copy(root="https://replacement.fixture"));var requests=0
+        try { history.recover(original,wrong,{wrong}) {requests++;200 to response()};fail("Wrong original root") }
+        catch (_: IllegalStateException) { }
+        assertEquals(0,requests)
+        // Current lawful credential renewal can read the SAME original domain;
+        // no old token is persisted or reused as an execution grant.
+        val renewed=actor.copy(credentialContext="lawful-renewed-token")
+        history.recover(original,renewed,{renewed}) {guard->guard();200 to response()}
+        assertTrue(history.pending(original.deviceId).isEmpty())
+    }
+
+    @Test fun legacyUnboundRecordsAreRetainedAndNeverGuessedIntoCurrentProfile() = runBlocking {
+        val disk=Disk()
+        disk.text="""{"schema":"van.android.account-operations/1","operations":[{"operation_id":"${original.operationId}","action":"deriv_create_demo","device_id":"${original.deviceId}","alias":"${original.alias}"}]}"""
+        val history=AccountOperationRecovery(disk);val legacy=history.pending(original.deviceId).single()
+        assertNull(legacy.scope);assertNull(legacy.requestIdentity)
+        assertFalse(history.observe(legacy,response(action="deriv_create_demo"),200,scope))
+        var requests=0;val actor=AccountOperationActor(scope,original.deviceId,"current")
+        try { history.recover(legacy,actor,{actor}) {requests++;200 to response()};fail("Unbound original") }
+        catch (_: IllegalStateException) { }
+        assertEquals(0,requests)
+        assertThrows(IllegalStateException::class.java) {history.remember(original.copy(action="deriv_create_demo"))}
+        assertTrue(history.blocks("deriv_create_demo","other_alias",scope.copy(nativeOwnerDomain="c".repeat(64))))
+        // An unrelated original can be written without deleting or rebinding
+        // the legacy row during the existing-store v1→v2 migration.
+        history.remember(original.copy(operationId="unrelated_operation_id_12345",alias="independent"))
+        val cold=AccountOperationRecovery(disk).pending(original.deviceId)
+        assertEquals(2,cold.size);assertEquals(legacy,cold.first());assertNull(cold.first().scope)
+    }
+
+    @Test fun authenticatedIndependentDomainsCoexistButProfileLabelsDoNotEstablishIndependence() {
+        // Descriptor fixtures represent data from the authenticated native
+        // producer contract, never domain identities derived from these URLs.
+        val disk=Disk();val history=AccountOperationRecovery(disk)
+        val a=original.copy(action="deriv_create_demo")
+        val b=a.copy(scope=scope.copy(root="https://other.fixture",profileId="other-local-profile",nativeOwnerDomain="c".repeat(64)))
+        history.remember(a);history.remember(b)
+        assertEquals(listOf(a,b),AccountOperationRecovery(disk).pending(original.deviceId))
+        assertFalse(history.observe(a,response(action="deriv_create_demo"),200,b.scope))
+        assertEquals(2,history.pending(original.deviceId).size)
+        val sameNativeDifferentRoot=a.copy(operationId="another_operation_id_12345",scope=scope.copy(root="https://alias.fixture"))
+        assertThrows(IllegalStateException::class.java) {history.remember(sameNativeDifferentRoot)}
+        assertTrue(history.blocks("deriv_create_demo","other_alias",sameNativeDifferentRoot.scope!!))
+        val trulyOther=scope.copy(nativeOwnerDomain="d".repeat(64))
+        assertFalse(history.blocks("deriv_create_demo","other_alias",trulyOther))
+    }
+
+    @Test fun completedOriginalFromIndependentDomainCannotClearOrRetargetAnotherOriginal() = runBlocking {
+        val disk=Disk();val history=AccountOperationRecovery(disk)
+        val a=original.copy(action="deriv_create_demo")
+        val b=a.copy(scope=scope.copy(root="https://other.fixture",nativeOwnerDomain="c".repeat(64)))
+        history.remember(a);history.remember(b)
+        val body="""{"operation_id":"${b.operationId}","action":"deriv_create_demo","effect_state":"APPLIED","reconciliation_required":false,"account_control_domain":"${b.scope!!.nativeOwnerDomain}","result":{"account":{"alias":"${b.alias}","broker":"DERIV","mode":"DEMO_TRADER","demo":true,"safety_identity":"DEMO","login":"VRTC900","currency":"USD"},"client_id":"VRTC900","currency":"USD"}}"""
+        val actorA=AccountOperationActor(scope,original.deviceId,"current-a")
+        try {history.recover(a,actorA,{actorA}) {200 to body};fail("Foreign domain receipt must remain unconfirmed")}
+        catch (_: IllegalStateException) { }
+        assertEquals(listOf(a,b),history.pending(original.deviceId))
+        val actorB=AccountOperationActor(b.scope!!,b.deviceId,"current-b")
+        history.recover(b,actorB,{actorB}) {guard->guard();200 to body}
+        assertEquals(listOf(a),AccountOperationRecovery(disk).pending(original.deviceId))
     }
 }

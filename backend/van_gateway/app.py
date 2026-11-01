@@ -334,6 +334,7 @@ class AccountOperationResponse(BaseModel):
     reconciliation_required: bool
     result: dict | None = None
     native_event_ref: str
+    account_control_domain: str | None = None
 
 
 class AccountChallengeRequest(BaseModel):
@@ -3782,7 +3783,8 @@ def create_app() -> FastAPI:
             for option in definition.get('oneOf',[]): mark_private_inputs(option)
         for definition in schemas.values(): mark_private_inputs(definition)
         schemas['account_credentials']['properties']['secrets']['additionalProperties']={'type':'string','writeOnly':True}
-        return {'schema':'van.account-actions/1',
+        domain=await asyncio.to_thread(onboarding.control.domain)
+        return {'schema':'van.account-actions/1','account_control_domain':domain,
             'actions':[{'action':action,'requires_owner_approval':requires_owner_approval(action),
                 'requires_resolved_review':action in {'account_upsert','account_remove'},
                 'supports_original_operation_readback':action in JOURNALED_COMMANDS,
@@ -3804,12 +3806,16 @@ def create_app() -> FastAPI:
                 detail="this action is read-only and needs no owner approval",
             )
         native_version,native_review = await onboarding.approval_context(req.action, req.args, owner_device_id=req.device_id)
+        domain=await asyncio.to_thread(onboarding.control.domain)
+        expected_domain=request.headers.get('X-Van-Account-Control-Domain')
+        if expected_domain and expected_domain!=domain:
+            raise HTTPException(409,'Account-control namespace changed before owner approval')
         challenge = await app.state.orchestrator.approvals.issue(
             device_id=req.device_id,
             source_command_id=f"account:{req.action}",
             turn_id=None,
             action_id=f"trading.account.{req.action}",
-            text=account_approval_text(req.device_id, req.issued_at_unix, req.action, req.args, native_version),
+            text=account_approval_text(req.device_id, req.issued_at_unix, req.action, req.args, native_version,domain),
             project_id=None,
             parameters={'native_review':native_review} if native_review else None,
         )
@@ -3820,6 +3826,7 @@ def create_app() -> FastAPI:
             "approval_expires_at_unix": challenge.expires_at_unix,
             "resolved_action_id": f"trading.account.{req.action}",
             "resolved_review":native_review,
+            'account_control_domain':domain,
         }
 
     @app.get("/v1/trading/accounts/operations/{operation_id}", response_model=AccountOperationResponse,
@@ -3835,9 +3842,12 @@ def create_app() -> FastAPI:
         if not re.fullmatch(r"[A-Za-z0-9_-]{20,128}", operation_id):
             raise HTTPException(422, "invalid account operation identity")
         try:
+            domain=request.headers.get('X-Van-Account-Control-Domain')
+            if domain:
+                return await asyncio.to_thread(onboarding.control.operation,operation_id,device_id,domain)
             return await asyncio.to_thread(onboarding.control.operation, operation_id, device_id)
         except HTTPException as exc:
-            if getattr(exc, "effect_state", None) == "UNKNOWN":
+            if getattr(exc, "effect_state", None) == "UNKNOWN" or getattr(exc,'reconciliation_required',False):
                 return JSONResponse(status_code=409, content=AccountActionConflictResponse(
                     detail="Original native operation is unconfirmed; do not repeat its effects",
                     effect_state="UNKNOWN", reconciliation_required=True, operation_id=operation_id).model_dump())
@@ -3850,6 +3860,13 @@ def create_app() -> FastAPI:
     @app.post("/v1/trading/accounts/action", responses={409:{"model":AccountActionConflictResponse}})
     async def trading_account_action(request: Request, req: AccountActionRequest):
         await _authenticate_account_action(request, req)
+        from commander.account_effects import JOURNALED_COMMANDS
+        expected_domain=request.headers.get('X-Van-Account-Control-Domain')
+        if expected_domain and expected_domain!=await asyncio.to_thread(onboarding.control.domain):
+            return JSONResponse(status_code=409,content=AccountActionConflictResponse(
+                detail='Original account-control namespace is not selected',effect_state='REFUSED',
+                reconciliation_required=True).model_dump())
+        native_domain=expected_domain or (await asyncio.to_thread(onboarding.control.domain) if requires_owner_approval(req.action) else None)
         native_version = None
         native_operation = None
         native_review = None
@@ -3889,7 +3906,7 @@ def create_app() -> FastAPI:
                     turn_id=None,
                     action_id=f"trading.account.{req.action}",
                     text=account_approval_text(
-                        req.device_id, req.issued_at_unix, req.action, req.args, native_version
+                        req.device_id, req.issued_at_unix, req.action, req.args, native_version,native_domain
                     ),
                     project_id=None,
                     parameters={'native_review':native_review} if native_review else None,
@@ -3904,7 +3921,7 @@ def create_app() -> FastAPI:
                 )
                 raise HTTPException(status_code=403, detail=str(exc)) from exc
         try:
-            result = await onboarding.run(req.action, req.args, owner_device_id=req.device_id, native_resource_version=native_version, native_operation=native_operation, native_review=native_review)
+            result = await onboarding.run(req.action, req.args, owner_device_id=req.device_id, native_resource_version=native_version, native_operation=native_operation, native_review=native_review,native_account_control_domain=native_domain)
         except HTTPException as exc:
             unknown = isinstance(exc,OAuthEffectUnconfirmed) or getattr(exc, "effect_state", None) == "UNKNOWN"
             reconcile = unknown or isinstance(exc,OAuthTargetBlocked) or getattr(exc, "reconciliation_required", False)
@@ -3934,8 +3951,10 @@ def create_app() -> FastAPI:
         )
         from commander.account_effects import JOURNALED_COMMANDS
         if req.action in JOURNALED_COMMANDS and native_operation:
+            original=await asyncio.to_thread(onboarding.control.operation,native_operation['operation_id'],req.device_id)
             return {**result, "operation_id":native_operation["operation_id"], "action":req.action,
-                    "effect_state":"APPLIED", "reconciliation_required":False}
+                    "effect_state":"APPLIED", "reconciliation_required":False,
+                    'account_control_domain':original.get('account_control_domain')}
         return result
 
     def _strategy_promotion_text(req) -> str:

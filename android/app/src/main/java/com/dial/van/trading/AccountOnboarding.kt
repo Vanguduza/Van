@@ -225,7 +225,9 @@ object AccountOnboarding {
     fun parseOutcome(action: String, body: String, httpCode: Int): ActionOutcome {
         val o = parseObject(body) ?: return ActionOutcome(false, if (httpCode in 200..299) "Unreadable gateway reply" else "Gateway error $httpCode")
         if (o.str("effect_state") == "UNKNOWN" || o.bool("reconciliation_required") == true)
-            return ActionOutcome(false, "Original account change is unconfirmed. Check its original result before trying again.", raw = o)
+            return ActionOutcome(false, if (action == "deriv_create_demo")
+                "Original demo creation is unconfirmed. Hold creation and check its original result; do not create another account."
+                else "Original account change is unconfirmed. Check its original result before trying again.", raw = o)
         if (httpCode !in 200..299) return ActionOutcome(false, o.str("detail") ?: "Gateway error $httpCode", raw = o)
         if (o.str("effect_state") == "APPLIED" && o.obj("result") != null) {
             val original = o.obj("result")!!

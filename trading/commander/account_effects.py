@@ -7,6 +7,8 @@ this journal does not create owner authority or store credential values.
 from dataclasses import asdict, dataclass
 from contextvars import ContextVar
 import json
+import hmac
+import hashlib
 import re
 import time
 
@@ -17,7 +19,7 @@ from vati.core.events import EventKind, make_event
 
 PRODUCER = "vati-native-account-control"
 SCHEMA = "vati.native-account-operation/1"
-JOURNALED_COMMANDS = frozenset({"account_upsert", "account_credentials", "account_remove", "mt5_ea_issue_key"})
+JOURNALED_COMMANDS = frozenset({"account_upsert", "account_credentials", "account_remove", "mt5_ea_issue_key", "deriv_create_demo"})
 _effect_started = ContextVar("native_account_effect_started", default=None)
 
 
@@ -28,22 +30,65 @@ def mark_account_effect():
         marker[0] = True
 
 
-def operation_intent(command, args):
+def require_current_account_effect():
+    """Recheck the consumed authority immediately before the first remote send."""
+    marker = _effect_started.get()
+    if marker is None:
+        raise HTTPException(403, "Verified original account operation is required before provider dispatch")
+    if marker[2] is not None:
+        marker[2]()
+    if int(time.time()) >= marker[1].expires_at_unix:
+        raise HTTPException(403, "Original owner authority expired before provider dispatch; no effect started")
+
+
+def operation_intent(command, args, *, digest_key=None):
     raw = args.get("_native_operation")
     if not isinstance(raw, dict):
         raise AccountEffectError("verified native account operation is required")
     values = {key: value for key, value in args.items() if not key.startswith("_")}
     alias = str(values.get("alias", "")).strip().lower()
+    targets = ("account:" + alias,)
+    domain=args.get('_expected_account_control_domain')
+    if domain is not None:
+        if not isinstance(domain,str) or not re.fullmatch(r'[0-9a-f]{64}',domain):
+            raise AccountEffectError('Native account-control namespace is invalid')
+        targets+=('account-control-domain:'+domain,)
+    if command == "deriv_create_demo":
+        # This native owner/state namespace has no verified remote customer
+        # identity before provisioning. All its unresolved Deriv creations
+        # overlap. Caller email, code, app ID, device, alias or profile labels
+        # cannot prove another remote customer is independent. A separately
+        # admitted native owner/provider has its own journal.
+        targets += ("deriv-demo-provisioning",)
+        if digest_key is not None:
+            targets += ("deriv-demo-key:" + hashlib.sha256(digest_key).hexdigest(),)
+    request_digest = canonical_hash(values)
+    if raw.get("request_digest") != request_digest:
+        raise AccountEffectConflict("native operation request differs from its verified dispatch")
+    if command == "deriv_create_demo" and digest_key is not None:
+        request_digest = hmac.new(digest_key, request_digest.encode(), hashlib.sha256).hexdigest()
+    authority_ref=raw.get('authority_ref')
+    if command=='deriv_create_demo' and digest_key is not None:
+        if not isinstance(authority_ref,str) or not authority_ref:
+            raise AccountEffectError('Original authenticated request reference is required')
+        # The A4 reference can itself commit to a secret-bearing request.
+        # Persist its keyed reference, never an offline-guessable commitment.
+        authority_ref=hmac.new(digest_key,('authority-ref:'+authority_ref).encode(),hashlib.sha256).hexdigest()
     intent = AccountEffectIntent(
         operation_id=raw.get("operation_id"), device_id=raw.get("device_id"),
-        authority_ref=raw.get("authority_ref"), command=command,
-        targets=("account:" + alias,), request_digest=canonical_hash(values),
+        authority_ref=authority_ref, command=command,
+        targets=targets, request_digest=request_digest,
         resource_version=args.get("_expected_resource_version"),
         expires_at_unix=raw.get("expires_at_unix"))
     intent.validate()
-    if raw.get("request_digest") != intent.request_digest:
-        raise AccountEffectConflict("native operation request differs from its verified dispatch")
     return intent
+
+
+def targets_overlap(left, right):
+    # Key fingerprints attest vault continuity, not a shared mutable subject.
+    a = {target for target in left if not target.startswith(('deriv-demo-key:','account-control-domain:'))}
+    b = {target for target in right if not target.startswith(('deriv-demo-key:','account-control-domain:'))}
+    return bool(a.intersection(b))
 
 
 def public_account_result(command, result):
@@ -84,18 +129,20 @@ class AccountOperationUnconfirmed(HTTPException):
 class AccountOperationBlocked(HTTPException):
     reconciliation_required = True
 
-    def __init__(self):
-        super().__init__(409, "Account target has an unconfirmed original native operation; reconciliation required")
+    def __init__(self, detail=None):
+        super().__init__(409, detail or "Account target has an unconfirmed original native operation; reconciliation required")
 
 
 def readback(state):
     return {"operation_id": state.intent.operation_id, "action": state.intent.command,
             "effect_state": state.phase if state.phase in {"APPLIED", "REFUSED"} else "UNKNOWN",
             "native_phase": state.phase, "reconciliation_required": state.phase in {"IN_FLIGHT", "UNKNOWN"},
-            "result": state.result, "native_event_ref": state.event_ref}
+            "result": state.result, "native_event_ref": state.event_ref,
+            'account_control_domain':next((target.split(':',1)[1] for target in state.intent.targets
+                if target.startswith('account-control-domain:')),None)}
 
 
-def invoke_account_effect(journal, intent, handler):
+def invoke_account_effect(journal, intent, handler, *, dispatch_guard=None):
     """Caller holds the alias fence; no ledger transaction spans the handler."""
     try:
         claim = journal.claim(intent)
@@ -109,7 +156,7 @@ def invoke_account_effect(journal, intent, handler):
         return claim.result
     if claim.phase == "REFUSED":
         raise HTTPException(claim.result["status_code"], claim.result["detail"])
-    marker = [False]
+    marker = [False, intent, dispatch_guard]
     context = _effect_started.set(marker)
     try:
         result = handler()
@@ -175,12 +222,30 @@ class AccountEffectJournal:
     def __init__(self, ledger):
         self.ledger = ledger
 
+    @staticmethod
+    def internal_namespace_metadata(event):
+        p=event.payload
+        if p.get('record_type')!='INTERNAL_NAMESPACE_METADATA':return False
+        if (event.producer!=PRODUCER or p.get('schema')!=SCHEMA
+            or set(p)!={'schema','record_type','account_control_domain','legacy_originals_bound','authority_issued'}
+            or not isinstance(p.get('account_control_domain'),str)
+            or not re.fullmatch(r'[0-9a-f]{64}',p['account_control_domain'])
+            or p.get('legacy_originals_bound') is not False or p.get('authority_issued') is not False):
+            raise AccountEffectUnknown('Native account-control internal metadata is ambiguous')
+        return True
+
+    def business_events(self):
+        self._states()  # Validate the complete protected chain and both variants.
+        return [event for event in self.ledger.iter(EventKind.ACCOUNT_OPERATION)
+            if not self.internal_namespace_metadata(event)]
+
     def _states(self):
         if not self.ledger.verify_chain()[0]:
             raise AccountEffectUnknown("native account operation history failed integrity verification")
         states = {}
         for event in self.ledger.iter(EventKind.ACCOUNT_OPERATION):
             try:
+                if self.internal_namespace_metadata(event):continue
                 p = event.payload
                 if event.producer != PRODUCER or p.get("schema") != SCHEMA:
                     raise ValueError
@@ -257,14 +322,14 @@ class AccountEffectJournal:
             if now >= intent.expires_at_unix:
                 raise AccountEffectAuthorityExpired("native operation authority expired before dispatch")
             for state in states.values():
-                if state.phase in {"IN_FLIGHT", "UNKNOWN"} and set(intent.targets).intersection(state.intent.targets):
+                if state.phase in {"IN_FLIGHT", "UNKNOWN"} and targets_overlap(intent.targets,state.intent.targets):
                     raise AccountEffectConflict("native target has an original effect requiring reconciliation")
             return self._append(intent, "IN_FLIGHT", "", now=now)
 
     def require_clear_targets(self, targets):
         with self.ledger.atomic():
             for state in self._states().values():
-                if state.phase in {"IN_FLIGHT", "UNKNOWN"} and set(targets).intersection(state.intent.targets):
+                if state.phase in {"IN_FLIGHT", "UNKNOWN"} and targets_overlap(targets,state.intent.targets):
                     raise AccountEffectConflict("native target has an original effect requiring reconciliation")
 
     def refuse(self, claim, status_code, *, now_unix=None):

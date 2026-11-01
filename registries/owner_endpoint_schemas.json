@@ -24,13 +24,19 @@
             },
             "type": "object",
             "title": "Credential Keys By Broker"
+          },
+          "account_control_domain": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$",
+            "title": "Account Control Domain"
           }
         },
         "type": "object",
         "required": [
           "schema",
           "actions",
-          "credential_keys_by_broker"
+          "credential_keys_by_broker",
+          "account_control_domain"
         ],
         "title": "AccountActionCatalog"
       },
@@ -213,6 +219,11 @@
                 "type": "null"
               }
             ]
+          },
+          "account_control_domain": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$",
+            "title": "Account Control Domain"
           }
         },
         "type": "object",
@@ -221,7 +232,8 @@
           "approval_challenge",
           "issued_at_unix",
           "approval_expires_at_unix",
-          "resolved_action_id"
+          "resolved_action_id",
+          "account_control_domain"
         ],
         "title": "AccountChallengeResponse"
       },
@@ -273,6 +285,17 @@
           "native_event_ref": {
             "type": "string",
             "title": "Native Event Ref"
+          },
+          "account_control_domain": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Account Control Domain"
           }
         },
         "type": "object",

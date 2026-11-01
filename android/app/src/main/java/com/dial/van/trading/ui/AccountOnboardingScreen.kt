@@ -82,9 +82,7 @@ fun AccountOnboardingScreen(app: VanApplication, onDone: () -> Unit) {
     var ownerReview by remember { mutableStateOf<Pair<String, () -> Unit>?>(null) }
 
     fun submit(action: String, args: JsonObject, then: (AccountOnboarding.ActionOutcome) -> Unit = {}) {
-        val alias = args["alias"]?.jsonPrimitive?.contentOrNull?.trim()?.lowercase()
-        if (action in AccountOperationRecovery.JOURNALED_ACTIONS && (recovery.isFailure ||
-                recovery.getOrNull().orEmpty().any { it.alias == alias })) {
+        if (action in AccountOperationRecovery.JOURNALED_ACTIONS && recovery.isFailure) {
             status = "Check the original account change before trying this account again."
             return
         }
@@ -170,10 +168,12 @@ fun AccountOnboardingScreen(app: VanApplication, onDone: () -> Unit) {
                 color = tokens.color.forStatusRole(StatusSemantics.ROLE_EVENT_RISK))
         }
         recovery.getOrNull().orEmpty().forEach { operation ->
-            item(key = "account-operation:" + operation.operationId) {
+            item(key = "account-operation:" + (operation.scope?.nativeOwnerDomain ?: "unbound") + ":" + operation.operationId) {
                 Column {
                     Text("${operation.alias}: original account change needs checking", style = tokens.type.body,
                         color = tokens.color.textSecondary)
+                    Text(if (operation.scope == null) "Legacy connection is unbound; native owner reconciliation is required."
+                        else "Original connection: ${operation.scope.root}", style = tokens.type.label, color = tokens.color.textSecondary)
                     Button(enabled = !busy, onClick = {
                         busy = true
                         scope.launch {

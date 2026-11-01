@@ -89,8 +89,6 @@ def test_deriv_demo_creation_and_oauth_link(env):
     assert post(client, "deriv_verify_email", {"email": "not-an-email"}).status_code == 422
     r = post(client, "deriv_verify_email", {"email": "owner@example.com", "app_id": "1089"}).json()["result"]
     assert r["sent"] and deriv.msgs[-1] == {"verify_email": "owner@example.com", "type": "account_opening"}
-    bad = post(client, "deriv_create_demo", {"alias": "deriv_demo", "verification_code": "WRONG", "client_password": "Pa55word!", "residence": "zw"})
-    assert bad.status_code == 502 and "code expired" in bad.json()["detail"]
     r = post(client, "deriv_create_demo", {"alias": "deriv_demo", "verification_code": "ABC123", "client_password": "Pa55word!", "residence": "ZW"})
     assert r.status_code == 200 and r.json()["result"]["client_id"] == "VRTC900" and "Pa55word" not in r.text and "a1-virtualtoken" not in r.text
     creation = next(m for m in reversed(deriv.msgs) if "new_account_virtual" in m)
@@ -101,6 +99,20 @@ def test_deriv_demo_creation_and_oauth_link(env):
     r = post(client, "deriv_oauth_link", {"alias": "deriv_real", "loginid": "CR12345", "token": "a1-live", "currency": "USD"}).json()["result"]
     assert r["account"]["safety_identity"] == "READ ONLY" and r["account"]["demo"] is False and r["account"]["mode"] == "OBSERVE"   # a real account starts read-only until an owner mandate says otherwise
     assert (tmp / "log" / "commander-audit.jsonl").read_text().count("a1-linked") == 0
+
+
+def test_demo_provider_error_is_original_unknown_not_permission_to_create_again(env):
+    client, tmp, deriv, _ = env
+    args = {"alias":"deriv_demo", "verification_code":"WRONG", "client_password":"Pa55word!", "residence":"zw"}
+    bad = post(client,"deriv_create_demo",args)
+    assert bad.status_code == 409 and bad.json()['detail']['code']=='account_operation_unconfirmed'
+    original = bad.json()['detail']['operation_id']
+    state = post(client,'account_operation',{'operation_id':original,'device_id':'source-test-owner'})
+    assert state.json()['result']['effect_state']=='UNKNOWN'
+    retry = post(client,'deriv_create_demo',{**args,'alias':'other_alias','verification_code':'ABC123'})
+    assert retry.status_code==409
+    assert len([m for m in deriv.msgs if 'new_account_virtual' in m])==1
+    assert not (tmp/'accounts.json').exists()
 
 
 def test_ctrader_discover_exchange_and_link(env):

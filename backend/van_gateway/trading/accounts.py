@@ -54,9 +54,10 @@ def canonical_action(device_id: str, issued_at_unix: int, action: str, args: dic
     return "|".join(["trading-account", device_id, str(issued_at_unix), action, hashlib.sha256(canonical_args(args)).hexdigest()])
 
 
-def account_approval_text(device_id: str, issued_at_unix: int, action: str, args: dict, resource_version: str | None) -> str:
+def account_approval_text(device_id: str, issued_at_unix: int, action: str, args: dict, resource_version: str | None, account_control_domain: str | None = None) -> str:
     text = canonical_action(device_id, issued_at_unix, action, args)
-    return text if resource_version is None else text + "|native-resource:" + resource_version
+    text=text if resource_version is None else text + "|native-resource:" + resource_version
+    return text if account_control_domain is None else text+'|native-account-control:'+account_control_domain
 
 
 def redact(args: dict) -> dict:
@@ -87,11 +88,15 @@ class LocalAccountControl:
     def resource_version(self, alias: str) -> dict:
         return self.handlers["account_revision"]({"alias": alias})
 
+    def domain(self) -> str:
+        return self.handlers['account_revision']({})['account_control_domain']
+
     def review(self, action: str, args: dict) -> dict:
         return self.run('account_review',{'action':action,'args':args})
 
-    def operation(self, operation_id: str, device_id: str) -> dict:
-        return self.run("account_operation", {"operation_id": operation_id, "device_id": device_id})
+    def operation(self, operation_id: str, device_id: str, account_control_domain: str | None = None) -> dict:
+        return self.run("account_operation", {"operation_id": operation_id, "device_id": device_id,
+            **({'account_control_domain':account_control_domain} if account_control_domain else {})})
 
 
 class CommanderAccountControl:
@@ -108,11 +113,15 @@ class CommanderAccountControl:
     def resource_version(self, alias: str) -> dict:
         return self.run("account_revision", {"alias": alias})
 
+    def domain(self) -> str:
+        return self.run('account_revision',{})['account_control_domain']
+
     def review(self, action: str, args: dict) -> dict:
         return self.run('account_review',{'action':action,'args':args})
 
-    def operation(self, operation_id: str, device_id: str) -> dict:
-        return self.run("account_operation", {"operation_id": operation_id, "device_id": device_id})
+    def operation(self, operation_id: str, device_id: str, account_control_domain: str | None = None) -> dict:
+        return self.run("account_operation", {"operation_id": operation_id, "device_id": device_id,
+            **({'account_control_domain':account_control_domain} if account_control_domain else {})})
 
     def run(self, cmd: str, args: dict) -> dict:
         _trading_path()
@@ -380,7 +389,7 @@ class AccountOnboarding:
         accts = await asyncio.to_thread(self.control.run,"ctrader_discover", {"client_id": p["client_id"], "client_secret": p["client_secret"], "access_token": p["access_token"]})
         return {"ready": True, "broker": "ctrader", "accounts": accts.get("accounts", []), "errors": accts.get("errors", [])}
 
-    async def run(self, action: str, args: dict, *, owner_device_id: str | None = None, native_resource_version: str | None = None, native_operation: dict | None = None, native_review: dict | None = None) -> dict:
+    async def run(self, action: str, args: dict, *, owner_device_id: str | None = None, native_resource_version: str | None = None, native_operation: dict | None = None, native_review: dict | None = None, native_account_control_domain: str | None = None) -> dict:
         if action == "oauth_start":
             return await self.oauth_start(args, owner_device_id=owner_device_id)
         if action == "oauth_pending":
@@ -428,6 +437,8 @@ class AccountOnboarding:
         _trading_path()
         from commander.accounts import ACCOUNT_MUTATIONS
         values = dict(args)
+        if native_account_control_domain is not None:
+            values['_expected_account_control_domain']=native_account_control_domain
         if action in ACCOUNT_MUTATIONS:
             if native_resource_version is None:
                 raise HTTPException(409, "native account version is required before mutation")
