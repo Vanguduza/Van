@@ -1,0 +1,22 @@
+{
+  "schema": "van.auth-exact-pg-supplement/1",
+  "at_utc": "2026-11-01T02:08:21.771563+00:00",
+  "targets": [
+    "backend/tests/test_runtime_recovery_expired_dispatch.py::test_expired_first_delivery_is_durable_refusal_and_never_reopened[postgres]",
+    "backend/tests/test_runtime_recovery_expired_dispatch.py::test_expired_invalid_proof_cannot_create_a_native_refusal_record[postgres-expiry]",
+    "backend/tests/test_runtime_recovery_expired_dispatch.py::test_expired_invalid_proof_cannot_create_a_native_refusal_record[postgres-intent]",
+    "backend/tests/test_runtime_recovery_expired_dispatch.py::test_expired_invalid_proof_cannot_create_a_native_refusal_record[postgres-key]",
+    "backend/tests/test_runtime_recovery_expired_dispatch.py::test_expired_invalid_proof_cannot_create_a_native_refusal_record[postgres-signature]",
+    "backend/tests/test_runtime_recovery_expired_dispatch.py::test_nonexpired_but_not_yet_valid_original_cannot_be_reclassified_as_expired[postgres]",
+    "backend/tests/test_runtime_recovery_expired_dispatch.py::test_pending_original_wins_over_expiry_without_being_reclassified_no_effect[postgres]",
+    "backend/tests/test_runtime_recovery_expired_dispatch.py::test_two_native_connections_at_expiry_choose_one_original_admission[postgres]",
+    "backend/tests/test_runtime_recovery_journal.py::test_control_does_not_become_applied_without_actual_owned_effect_evidence[postgres]",
+    "backend/tests/test_runtime_recovery_journal.py::test_exact_original_recovery_read_survives_restart_and_expiry[postgres]",
+    "backend/tests/test_runtime_recovery_journal.py::test_independent_native_connections_claim_the_same_original_only_once[postgres]",
+    "backend/tests/test_runtime_recovery_journal.py::test_original_control_cannot_change_actor_args_or_outcome[postgres]",
+    "backend/tests/test_runtime_recovery_journal.py::test_recovery_and_its_domain_effect_roll_back_together[postgres]"
+  ],
+  "original_skipped_xml_sha256": "4e2a5a0fbb939ffbbe4969a18a94c76f58e8007dc08163be06e6e4622adb0dd7",
+  "source_pins_sha256": "7fd5c7b2571ebf6738509a4e74ded7bf2721c4b08e27b78555eb05fbe0ac2fe9",
+  "purpose": "Exact13affected PostgreSQL variants; original173skip evidence remains historical, no native qualification."
+}

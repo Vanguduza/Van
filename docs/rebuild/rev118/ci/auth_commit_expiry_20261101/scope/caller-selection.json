@@ -1,0 +1,480 @@
+{
+  "meaning": "Conservative static direct-caller and transitive local test-helper/module import closure. Not a proof of arbitrary dynamic dependency coverage. Root selects qualification scope; original entirebackend result remains required.",
+  "changed_functions": [
+    "AuthService.pair_device",
+    "AuthService.renew_grant"
+  ],
+  "direct": [
+    "backend/tests/test_a4_owner_approval.py",
+    "backend/tests/test_auth_throttle.py",
+    "backend/tests/test_bootstrap_recovery_api.py",
+    "backend/tests/test_browser_mission_binding_regression.py",
+    "backend/tests/test_browser_producer_api.py",
+    "backend/tests/test_browser_quality_api.py",
+    "backend/tests/test_browser_takeover_and_downloads.py",
+    "backend/tests/test_browser_task_read_auth.py",
+    "backend/tests/test_command_creates_mission.py",
+    "backend/tests/test_command_execution_result.py",
+    "backend/tests/test_command_recovery.py",
+    "backend/tests/test_context_lifecycle_governance.py",
+    "backend/tests/test_control_scopes.py",
+    "backend/tests/test_credential_expiry_and_rotation.py",
+    "backend/tests/test_device_proof_enforcement.py",
+    "backend/tests/test_dial_dev_proxy.py",
+    "backend/tests/test_extra_apis.py",
+    "backend/tests/test_gateway.py",
+    "backend/tests/test_gmail_owner_send_approval.py",
+    "backend/tests/test_google_credential_planes.py",
+    "backend/tests/test_google_owner_revoke_and_scrub.py",
+    "backend/tests/test_ingress_trust_boundary.py",
+    "backend/tests/test_interactive_browser_api.py",
+    "backend/tests/test_lane_auth_commit_expiry.py",
+    "backend/tests/test_local_typed_actions.py",
+    "backend/tests/test_mtls_live.py",
+    "backend/tests/test_observability_routes.py",
+    "backend/tests/test_owner_context_is_real.py",
+    "backend/tests/test_pairing_recovery.py",
+    "backend/tests/test_pairing_security.py",
+    "backend/tests/test_project_isolation_audit.py",
+    "backend/tests/test_rev31_runtime_wiring.py",
+    "backend/tests/test_runtime_hermes_surface.py",
+    "backend/tests/test_runtime_recovery_faults.py",
+    "backend/tests/test_session_socket_binding.py",
+    "backend/tests/test_session_transport_api.py",
+    "backend/tests/test_speaker_binding_status.py",
+    "backend/tests/test_trading_api.py",
+    "backend/tests/test_trading_oauth_scope.py",
+    "backend/tests/test_trading_readmodels.py",
+    "backend/tests/test_visual_acceptance.py",
+    "backend/tests/test_voice_speaker_authority.py"
+  ],
+  "transitive_import_edges": [
+    {
+      "consumer": "backend/tests/test_owner_automation_plans.py",
+      "fixture_or_helper_module": "backend/tests/test_device_proof_enforcement.py"
+    },
+    {
+      "consumer": "backend/tests/test_account_operation_recovery.py",
+      "fixture_or_helper_module": "backend/tests/test_trading_api.py"
+    },
+    {
+      "consumer": "backend/tests/test_account_operation_recovery.py",
+      "fixture_or_helper_module": "backend/tests/test_trading_oauth_scope.py"
+    },
+    {
+      "consumer": "backend/tests/test_browser_sealed_resume.py",
+      "fixture_or_helper_module": "backend/tests/test_local_typed_actions.py"
+    },
+    {
+      "consumer": "backend/tests/test_market_monitor_gateway.py",
+      "fixture_or_helper_module": "backend/tests/test_local_typed_actions.py"
+    },
+    {
+      "consumer": "backend/tests/test_owner_approval_parameters.py",
+      "fixture_or_helper_module": "backend/tests/test_gateway.py"
+    },
+    {
+      "consumer": "backend/tests/test_hosted_provider_fault_boundaries.py",
+      "fixture_or_helper_module": "backend/tests/test_extra_apis.py"
+    },
+    {
+      "consumer": "backend/tests/test_session_open_recovery.py",
+      "fixture_or_helper_module": "backend/tests/test_session_transport_api.py"
+    },
+    {
+      "consumer": "backend/tests/test_account_runtime_recovery_gateway.py",
+      "fixture_or_helper_module": "backend/tests/test_trading_api.py"
+    },
+    {
+      "consumer": "backend/tests/test_market_monitor_bound_device.py",
+      "fixture_or_helper_module": "backend/tests/test_device_proof_enforcement.py"
+    },
+    {
+      "consumer": "backend/tests/test_owner_permissions.py",
+      "fixture_or_helper_module": "backend/tests/test_local_typed_actions.py"
+    },
+    {
+      "consumer": "backend/tests/test_session_operation_recovery.py",
+      "fixture_or_helper_module": "backend/tests/test_command_recovery.py"
+    },
+    {
+      "consumer": "backend/tests/test_session_operation_recovery.py",
+      "fixture_or_helper_module": "backend/tests/test_session_transport_api.py"
+    },
+    {
+      "consumer": "backend/tests/test_trading_oauth_effects.py",
+      "fixture_or_helper_module": "backend/tests/test_trading_api.py"
+    },
+    {
+      "consumer": "backend/tests/test_trading_oauth_effects.py",
+      "fixture_or_helper_module": "backend/tests/test_trading_oauth_scope.py"
+    },
+    {
+      "consumer": "backend/tests/test_owner_declaration_writers.py",
+      "fixture_or_helper_module": "backend/tests/test_device_proof_enforcement.py"
+    },
+    {
+      "consumer": "backend/tests/test_lane_auth_commit_expiry_http.py",
+      "fixture_or_helper_module": "backend/tests/test_pairing_recovery.py"
+    },
+    {
+      "consumer": "backend/tests/test_owner_decision_mission_control_api.py",
+      "fixture_or_helper_module": "backend/tests/test_session_transport_api.py"
+    },
+    {
+      "consumer": "backend/tests/test_browser_owner_file_grants.py",
+      "fixture_or_helper_module": "backend/tests/test_browser_producer_api.py"
+    },
+    {
+      "consumer": "backend/tests/test_runtime_recovery_gateway.py",
+      "fixture_or_helper_module": "backend/tests/test_trading_api.py"
+    },
+    {
+      "consumer": "backend/tests/test_mtls_machine_ingress.py",
+      "fixture_or_helper_module": "backend/tests/test_mtls_live.py"
+    },
+    {
+      "consumer": "backend/tests/test_owner_trading_ticket_confirmation.py",
+      "fixture_or_helper_module": "backend/tests/test_local_typed_actions.py"
+    },
+    {
+      "consumer": "backend/tests/test_document_value_integrity.py",
+      "fixture_or_helper_module": "backend/tests/test_local_typed_actions.py"
+    },
+    {
+      "consumer": "backend/tests/test_funding_owner_api.py",
+      "fixture_or_helper_module": "backend/tests/test_trading_api.py"
+    },
+    {
+      "consumer": "backend/tests/test_chart_workspace_privacy_inventory.py",
+      "fixture_or_helper_module": "backend/tests/test_local_typed_actions.py"
+    },
+    {
+      "consumer": "backend/tests/test_chart_workspace_gateway.py",
+      "fixture_or_helper_module": "backend/tests/test_local_typed_actions.py"
+    },
+    {
+      "consumer": "backend/tests/test_automation_owner_commands.py",
+      "fixture_or_helper_module": "backend/tests/test_a4_owner_approval.py"
+    },
+    {
+      "consumer": "backend/tests/test_browser_artifact_owner_http_e2e.py",
+      "fixture_or_helper_module": "backend/tests/test_browser_producer_api.py"
+    },
+    {
+      "consumer": "backend/tests/test_owner_approval_canonical_binding.py",
+      "fixture_or_helper_module": "backend/tests/test_gateway.py"
+    },
+    {
+      "consumer": "backend/tests/test_document_publication_gateway.py",
+      "fixture_or_helper_module": "backend/tests/test_local_typed_actions.py"
+    },
+    {
+      "consumer": "backend/tests/test_gmail_mission_sent_readback.py",
+      "fixture_or_helper_module": "backend/tests/test_gmail_owner_send_approval.py"
+    },
+    {
+      "consumer": "backend/tests/test_hermes_callback_recovery.py",
+      "fixture_or_helper_module": "backend/tests/test_command_execution_result.py"
+    },
+    {
+      "consumer": "backend/tests/test_native_account_observation_api.py",
+      "fixture_or_helper_module": "backend/tests/test_trading_api.py"
+    },
+    {
+      "consumer": "backend/tests/test_owner_goal_gateway.py",
+      "fixture_or_helper_module": "backend/tests/test_local_typed_actions.py"
+    },
+    {
+      "consumer": "backend/tests/test_native_depth_history.py",
+      "fixture_or_helper_module": "backend/tests/test_trading_api.py"
+    },
+    {
+      "consumer": "backend/tests/test_native_owner_key_revocation.py",
+      "fixture_or_helper_module": "backend/tests/test_trading_api.py"
+    },
+    {
+      "consumer": "backend/tests/test_chart_workspace_bound_device.py",
+      "fixture_or_helper_module": "backend/tests/test_device_proof_enforcement.py"
+    },
+    {
+      "consumer": "backend/tests/test_owner_domain_autonomy.py",
+      "fixture_or_helper_module": "backend/tests/test_local_typed_actions.py"
+    },
+    {
+      "consumer": "backend/tests/test_decision_resolution_recovery.py",
+      "fixture_or_helper_module": "backend/tests/test_session_transport_api.py"
+    },
+    {
+      "consumer": "backend/tests/test_owner_standing_disable.py",
+      "fixture_or_helper_module": "backend/tests/test_local_typed_actions.py"
+    },
+    {
+      "consumer": "backend/tests/test_browser_task_preparation.py",
+      "fixture_or_helper_module": "backend/tests/test_browser_producer_api.py"
+    },
+    {
+      "consumer": "backend/tests/test_browser_artifact_admission.py",
+      "fixture_or_helper_module": "backend/tests/test_browser_producer_api.py"
+    },
+    {
+      "consumer": "backend/tests/test_native_balance_owner_api.py",
+      "fixture_or_helper_module": "backend/tests/test_trading_api.py"
+    },
+    {
+      "consumer": "backend/tests/test_owner_memory_erasure.py",
+      "fixture_or_helper_module": "backend/tests/test_local_typed_actions.py"
+    },
+    {
+      "consumer": "backend/tests/test_account_unlink_review.py",
+      "fixture_or_helper_module": "backend/tests/test_trading_api.py"
+    },
+    {
+      "consumer": "backend/tests/test_account_unlink_review.py",
+      "fixture_or_helper_module": "backend/tests/test_trading_oauth_scope.py"
+    },
+    {
+      "consumer": "backend/tests/test_watch_delivery_gateway.py",
+      "fixture_or_helper_module": "backend/tests/test_local_typed_actions.py"
+    },
+    {
+      "consumer": "backend/tests/test_browser_owner_command_e2e.py",
+      "fixture_or_helper_module": "backend/tests/test_browser_producer_api.py"
+    },
+    {
+      "consumer": "backend/tests/test_browser_owner_command_e2e.py",
+      "fixture_or_helper_module": "backend/tests/test_local_typed_actions.py"
+    },
+    {
+      "consumer": "backend/tests/test_local_admission_cancellation.py",
+      "fixture_or_helper_module": "backend/tests/test_device_proof_enforcement.py"
+    },
+    {
+      "consumer": "backend/tests/test_local_admission_cancellation.py",
+      "fixture_or_helper_module": "backend/tests/test_local_typed_actions.py"
+    },
+    {
+      "consumer": "backend/tests/test_market_monitor_commands.py",
+      "fixture_or_helper_module": "backend/tests/test_a4_owner_approval.py"
+    },
+    {
+      "consumer": "backend/tests/test_market_monitor_commands.py",
+      "fixture_or_helper_module": "backend/tests/test_local_typed_actions.py"
+    },
+    {
+      "consumer": "backend/tests/test_account_resource_binding.py",
+      "fixture_or_helper_module": "backend/tests/test_trading_api.py"
+    },
+    {
+      "consumer": "backend/tests/test_account_resource_binding.py",
+      "fixture_or_helper_module": "backend/tests/test_trading_oauth_scope.py"
+    },
+    {
+      "consumer": "backend/tests/test_browser_action_plans.py",
+      "fixture_or_helper_module": "backend/tests/test_browser_producer_api.py"
+    },
+    {
+      "consumer": "backend/tests/test_artifact_provider_gateway_tls.py",
+      "fixture_or_helper_module": "backend/tests/test_mtls_live.py"
+    },
+    {
+      "consumer": "backend/tests/test_conversation_gateway_history.py",
+      "fixture_or_helper_module": "backend/tests/test_local_typed_actions.py"
+    },
+    {
+      "consumer": "backend/tests/test_owner_record_controls.py",
+      "fixture_or_helper_module": "backend/tests/test_device_proof_enforcement.py"
+    },
+    {
+      "consumer": "backend/tests/test_dial_dev_original_outcome.py",
+      "fixture_or_helper_module": "backend/tests/test_dial_dev_proxy.py"
+    },
+    {
+      "consumer": "backend/tests/test_native_instrument_catalog_http.py",
+      "fixture_or_helper_module": "backend/tests/test_trading_api.py"
+    },
+    {
+      "consumer": "backend/tests/test_payment_draft_gateway.py",
+      "fixture_or_helper_module": "backend/tests/test_trading_api.py"
+    },
+    {
+      "consumer": "backend/tests/test_voice_response_api.py",
+      "fixture_or_helper_module": "backend/tests/test_command_execution_result.py"
+    },
+    {
+      "consumer": "backend/tests/test_payment_draft_bound_device.py",
+      "fixture_or_helper_module": "backend/tests/test_device_proof_enforcement.py"
+    },
+    {
+      "consumer": "backend/tests/test_account_update_review.py",
+      "fixture_or_helper_module": "backend/tests/test_trading_api.py"
+    },
+    {
+      "consumer": "backend/tests/test_account_update_review.py",
+      "fixture_or_helper_module": "backend/tests/test_trading_oauth_scope.py"
+    },
+    {
+      "consumer": "backend/tests/test_reminder_delivery_gateway.py",
+      "fixture_or_helper_module": "backend/tests/test_local_typed_actions.py"
+    },
+    {
+      "consumer": "backend/tests/test_document_publication_integrity.py",
+      "fixture_or_helper_module": "backend/tests/test_document_value_integrity.py"
+    },
+    {
+      "consumer": "backend/tests/test_owner_approval_expiry_boundaries.py",
+      "fixture_or_helper_module": "backend/tests/test_owner_approval_parameters.py"
+    },
+    {
+      "consumer": "backend/tests/test_browser_repeated_owner_work.py",
+      "fixture_or_helper_module": "backend/tests/test_browser_owner_command_e2e.py"
+    },
+    {
+      "consumer": "backend/tests/test_browser_repeated_owner_work.py",
+      "fixture_or_helper_module": "backend/tests/test_owner_memory_erasure.py"
+    },
+    {
+      "consumer": "backend/tests/test_owner_record_erasure.py",
+      "fixture_or_helper_module": "backend/tests/test_owner_memory_erasure.py"
+    },
+    {
+      "consumer": "backend/tests/test_learning_projection_availability.py",
+      "fixture_or_helper_module": "backend/tests/test_owner_memory_erasure.py"
+    },
+    {
+      "consumer": "backend/tests/test_runtime_recovery_outbox.py",
+      "fixture_or_helper_module": "backend/tests/test_runtime_recovery_gateway.py"
+    },
+    {
+      "consumer": "backend/tests/test_intent_source_privacy.py",
+      "fixture_or_helper_module": "backend/tests/test_owner_memory_erasure.py"
+    },
+    {
+      "consumer": "backend/tests/test_approval_learning_gateway.py",
+      "fixture_or_helper_module": "backend/tests/test_owner_memory_erasure.py"
+    },
+    {
+      "consumer": "backend/tests/test_learning_recovery.py",
+      "fixture_or_helper_module": "backend/tests/test_owner_memory_erasure.py"
+    },
+    {
+      "consumer": "backend/tests/test_memory_erasure_original_operation.py",
+      "fixture_or_helper_module": "backend/tests/test_owner_memory_erasure.py"
+    }
+  ],
+  "selected_tests": [
+    "backend/tests/test_a4_owner_approval.py",
+    "backend/tests/test_account_operation_recovery.py",
+    "backend/tests/test_account_resource_binding.py",
+    "backend/tests/test_account_runtime_recovery_gateway.py",
+    "backend/tests/test_account_unlink_review.py",
+    "backend/tests/test_account_update_review.py",
+    "backend/tests/test_approval_learning_gateway.py",
+    "backend/tests/test_artifact_provider_gateway_tls.py",
+    "backend/tests/test_auth_throttle.py",
+    "backend/tests/test_automation_owner_commands.py",
+    "backend/tests/test_bootstrap_recovery_api.py",
+    "backend/tests/test_browser_action_plans.py",
+    "backend/tests/test_browser_artifact_admission.py",
+    "backend/tests/test_browser_artifact_owner_http_e2e.py",
+    "backend/tests/test_browser_mission_binding_regression.py",
+    "backend/tests/test_browser_owner_command_e2e.py",
+    "backend/tests/test_browser_owner_file_grants.py",
+    "backend/tests/test_browser_producer_api.py",
+    "backend/tests/test_browser_quality_api.py",
+    "backend/tests/test_browser_repeated_owner_work.py",
+    "backend/tests/test_browser_sealed_resume.py",
+    "backend/tests/test_browser_takeover_and_downloads.py",
+    "backend/tests/test_browser_task_preparation.py",
+    "backend/tests/test_browser_task_read_auth.py",
+    "backend/tests/test_chart_workspace_bound_device.py",
+    "backend/tests/test_chart_workspace_gateway.py",
+    "backend/tests/test_chart_workspace_privacy_inventory.py",
+    "backend/tests/test_command_creates_mission.py",
+    "backend/tests/test_command_execution_result.py",
+    "backend/tests/test_command_recovery.py",
+    "backend/tests/test_context_lifecycle_governance.py",
+    "backend/tests/test_control_scopes.py",
+    "backend/tests/test_conversation_gateway_history.py",
+    "backend/tests/test_credential_expiry_and_rotation.py",
+    "backend/tests/test_decision_resolution_recovery.py",
+    "backend/tests/test_device_auth_persistence.py",
+    "backend/tests/test_device_proof_enforcement.py",
+    "backend/tests/test_dial_dev_original_outcome.py",
+    "backend/tests/test_dial_dev_proxy.py",
+    "backend/tests/test_document_publication_gateway.py",
+    "backend/tests/test_document_publication_integrity.py",
+    "backend/tests/test_document_value_integrity.py",
+    "backend/tests/test_extra_apis.py",
+    "backend/tests/test_funding_owner_api.py",
+    "backend/tests/test_gateway.py",
+    "backend/tests/test_gmail_mission_sent_readback.py",
+    "backend/tests/test_gmail_owner_send_approval.py",
+    "backend/tests/test_google_credential_planes.py",
+    "backend/tests/test_google_owner_revoke_and_scrub.py",
+    "backend/tests/test_hermes_callback_recovery.py",
+    "backend/tests/test_hosted_provider_fault_boundaries.py",
+    "backend/tests/test_ingress_trust_boundary.py",
+    "backend/tests/test_intent_source_privacy.py",
+    "backend/tests/test_interactive_browser_api.py",
+    "backend/tests/test_lane_auth_commit_expiry.py",
+    "backend/tests/test_lane_auth_commit_expiry_http.py",
+    "backend/tests/test_learning_projection_availability.py",
+    "backend/tests/test_learning_recovery.py",
+    "backend/tests/test_local_admission_cancellation.py",
+    "backend/tests/test_local_typed_actions.py",
+    "backend/tests/test_market_monitor_bound_device.py",
+    "backend/tests/test_market_monitor_commands.py",
+    "backend/tests/test_market_monitor_gateway.py",
+    "backend/tests/test_memory_erasure_original_operation.py",
+    "backend/tests/test_mtls_live.py",
+    "backend/tests/test_mtls_machine_ingress.py",
+    "backend/tests/test_native_account_observation_api.py",
+    "backend/tests/test_native_balance_owner_api.py",
+    "backend/tests/test_native_depth_history.py",
+    "backend/tests/test_native_instrument_catalog_http.py",
+    "backend/tests/test_native_owner_key_revocation.py",
+    "backend/tests/test_observability_routes.py",
+    "backend/tests/test_owner_approval_canonical_binding.py",
+    "backend/tests/test_owner_approval_expiry_boundaries.py",
+    "backend/tests/test_owner_approval_parameters.py",
+    "backend/tests/test_owner_automation_plans.py",
+    "backend/tests/test_owner_context_is_real.py",
+    "backend/tests/test_owner_decision_mission_control_api.py",
+    "backend/tests/test_owner_declaration_writers.py",
+    "backend/tests/test_owner_domain_autonomy.py",
+    "backend/tests/test_owner_goal_gateway.py",
+    "backend/tests/test_owner_memory_erasure.py",
+    "backend/tests/test_owner_permissions.py",
+    "backend/tests/test_owner_record_controls.py",
+    "backend/tests/test_owner_record_erasure.py",
+    "backend/tests/test_owner_standing_disable.py",
+    "backend/tests/test_owner_trading_ticket_confirmation.py",
+    "backend/tests/test_pairing_recovery.py",
+    "backend/tests/test_pairing_security.py",
+    "backend/tests/test_payment_draft_bound_device.py",
+    "backend/tests/test_payment_draft_gateway.py",
+    "backend/tests/test_project_isolation_audit.py",
+    "backend/tests/test_reminder_delivery_gateway.py",
+    "backend/tests/test_rev31_runtime_wiring.py",
+    "backend/tests/test_runtime_hermes_surface.py",
+    "backend/tests/test_runtime_recovery_faults.py",
+    "backend/tests/test_runtime_recovery_gateway.py",
+    "backend/tests/test_runtime_recovery_outbox.py",
+    "backend/tests/test_session_open_recovery.py",
+    "backend/tests/test_session_operation_recovery.py",
+    "backend/tests/test_session_socket_binding.py",
+    "backend/tests/test_session_transport_api.py",
+    "backend/tests/test_speaker_binding_status.py",
+    "backend/tests/test_trading_api.py",
+    "backend/tests/test_trading_oauth_effects.py",
+    "backend/tests/test_trading_oauth_scope.py",
+    "backend/tests/test_trading_readmodels.py",
+    "backend/tests/test_visual_acceptance.py",
+    "backend/tests/test_voice_response_api.py",
+    "backend/tests/test_voice_speaker_authority.py",
+    "backend/tests/test_watch_delivery_gateway.py"
+  ],
+  "automatic_conftest_expansion": [],
+  "new_successor_session_tests_excluded": "Untracked session successor tests depend on session successor production changes, not part of auth-only final candidate."
+}

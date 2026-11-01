@@ -1,0 +1,39 @@
+{
+  "base": "1b53cf9199dc3b8ec01cbc4a6125cc90afad2ae6",
+  "worktree": "/workspace/van-lanes-20261101/backend",
+  "files": {
+    "backend/van_gateway/auth/service.py": "7e9e8909fe08bc28b09c3f37a3b39d26fbe30f53e6f2bcfbeaaf348d391971d5",
+    "backend/tests/test_lane_auth_commit_expiry.py": "562449e4bad53627645e41b9f7ce48d18f5556ed8b0a9e8e2534b36cb822f6c3",
+    "backend/tests/test_lane_auth_commit_expiry_http.py": "b245d280b9bc62b310629b4086df1bb9f6490dd8f667d4e079c4e63f0c54bada"
+  },
+  "results": [
+    {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "tests": "61",
+      "time": "76.557",
+      "timestamp": "2026-11-01T01:14:12.167226+00:00",
+      "hostname": "b6ffa15f7e81"
+    }
+  ],
+  "environment": {
+    "PYTHONPATH": "backend:backend/tests:trading:trading/tests:."
+  },
+  "command": [
+    "/workspace/van-backend-venv-20261025/bin/python",
+    "-m",
+    "pytest",
+    "backend/tests/test_lane_auth_commit_expiry.py",
+    "backend/tests/test_lane_auth_commit_expiry_http.py",
+    "backend/tests/test_credential_expiry_and_rotation.py",
+    "backend/tests/test_device_auth_persistence.py",
+    "backend/tests/test_pairing_recovery.py",
+    "-q",
+    "--junitxml=/workspace/van-auth-midtransaction-final-20261101.xml"
+  ],
+  "before": "/workspace/van-auth-midtransaction-before-20261101.xml",
+  "caller_map": "/workspace/van-auth-midtransaction-caller-map-20261101.json",
+  "scope": "Source-only BE002 pairing admission and grant renewal expiry; no public renewal endpoint added; completed original pairing recovery retained; prior suite remains predecessor evidence."
+}

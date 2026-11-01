@@ -1,0 +1,15 @@
+[
+  {
+    "command_id": "2e57bde7-4c35-4c4f-b6b7-b3be833261b9",
+    "issued_at_unix": 1793498466,
+    "expires_at_unix": 1793498476,
+    "authority_recorded_at_ms": 1793498467290,
+    "execution": {
+      "status": "VERIFIED_SUCCESS",
+      "error_code": null,
+      "submitted_at_ms": 1793498467442,
+      "verified_at_ms": 1793498467459,
+      "updated_at_unix_ms": 1793498467459
+    }
+  }
+]

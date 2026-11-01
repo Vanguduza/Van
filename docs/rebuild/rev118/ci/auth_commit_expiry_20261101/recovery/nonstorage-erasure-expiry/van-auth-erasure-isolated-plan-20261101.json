@@ -1,0 +1,12 @@
+{
+  "schema": "van.auth-approved-isolated-replay/1",
+  "at_utc": "2026-11-01T02:01:00.946823+00:00",
+  "recovery_cases": [
+    "backend/tests/test_owner_record_erasure.py::test_actual_record_a4_erasure_retains_unselected_record_and_retry_receipt"
+  ],
+  "original_xml": "/workspace/van-auth-selected-storage-recovery-r1-20261101/recovery.xml",
+  "original_xml_sha256": "615b830d62ad5e1645f4dd66426055dafd3629f66e76efe1f98a799309248fb8",
+  "original_terminal_sha256": "861690955d7eb1d6df5ef05a3c80a69b68fcce7199870b983f718da3c989a9d2",
+  "root_decision": "One exact unchanged isolated replay after recorded10second deadline exhaustion; no source/fixture/deadline/assertion edits.",
+  "source_unchanged": true
+}

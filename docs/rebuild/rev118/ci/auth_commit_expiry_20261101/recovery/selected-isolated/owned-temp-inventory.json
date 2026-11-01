@@ -1,0 +1,21 @@
+{
+  "directory": "/tmp/van-recovery-auth-erasure-isolated-20261101",
+  "at_utc": "2026-11-01T02:01:08.500592+00:00",
+  "files": [
+    {
+      "path": "test_actual_record_a4_erasure_0/gw.sqlite3-shm",
+      "bytes": 32768,
+      "sha256": "fd4c9fda9cd3f9ae7c962b0ddf37232294d55580e1aa165aa06129b8549389eb"
+    },
+    {
+      "path": "test_actual_record_a4_erasure_0/gw.sqlite3-wal",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "test_actual_record_a4_erasure_0/gw.sqlite3",
+      "bytes": 2048000,
+      "sha256": "c01d4f63f75da856c5a05c8107bca7964738c5035706ca0b0c770d2e3f8b631c"
+    }
+  ]
+}

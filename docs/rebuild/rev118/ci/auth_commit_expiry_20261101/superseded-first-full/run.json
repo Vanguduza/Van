@@ -1,0 +1,21 @@
+{
+  "command": [
+    "/workspace/van-backend-venv-20261025/bin/python",
+    "tools/rebuild/source_storage_audit.py",
+    "--report",
+    "/workspace/van-auth-integrated-backend-full-audit-20261101.json",
+    "backend/tests",
+    "--junitxml=/workspace/van-auth-integrated-backend-full-20261101.xml",
+    "-q"
+  ],
+  "cwd": "/workspace/van-review-2026-10-18/publish",
+  "controller_pid": 5171,
+  "started_at_utc": "2026-11-01T00:46:25.816945+00:00",
+  "timeout_seconds": 2400,
+  "state": "COMPLETED",
+  "command_pid": 5177,
+  "timed_out": true,
+  "exit": -15,
+  "adopted_children_reaped": [],
+  "finished_at_utc": "2026-11-01T01:26:26.041009+00:00"
+}

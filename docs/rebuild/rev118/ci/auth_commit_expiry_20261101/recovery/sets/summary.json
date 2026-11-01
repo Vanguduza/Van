@@ -1,0 +1,45 @@
+{
+  "at_utc": "2026-11-01T01:40:30.490694+00:00",
+  "source_unchanged": true,
+  "plans": [
+    {
+      "label": "selected",
+      "expected_unique_cases": 1527,
+      "observed_unique_cases": 1053,
+      "fully_passed_original_cases": 938,
+      "declared_skip_cases": 1,
+      "failed_or_error_cases": 114,
+      "unexecuted_cases": 474,
+      "recovery_cases": 588,
+      "recovery_count": 588,
+      "original_xml": "/workspace/van-auth-corrected-affected-20261101.xml",
+      "original_failed_run_reclassified_as_success": false
+    },
+    {
+      "label": "remainder",
+      "expected_unique_cases": 4416,
+      "observed_unique_cases": 4416,
+      "fully_passed_original_cases": 3258,
+      "declared_skip_cases": 159,
+      "failed_or_error_cases": 999,
+      "unexecuted_cases": 0,
+      "recovery_cases": 999,
+      "recovery_count": 999,
+      "original_xml": "/workspace/van-auth-corrected-remainder-20261101.xml",
+      "original_failed_run_reclassified_as_success": false
+    },
+    {
+      "label": "successor",
+      "expected_unique_cases": 5775,
+      "observed_unique_cases": 5775,
+      "fully_passed_original_cases": 5725,
+      "declared_skip_cases": 0,
+      "failed_or_error_cases": 50,
+      "unexecuted_cases": 0,
+      "recovery_cases": 50,
+      "recovery_count": 50,
+      "original_xml": "/workspace/van-successor-regression-pg-r2-20261101/full-trading.xml",
+      "original_failed_run_reclassified_as_success": false
+    }
+  ]
+}

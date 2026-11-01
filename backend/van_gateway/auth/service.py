@@ -156,9 +156,10 @@ class AuthService:
         access_token = device_access_token if recoverable else secrets.token_urlsafe(32)
         access_token_hash = hashlib.sha256(access_token.encode("utf-8")).hexdigest()
         ticket_hash = hashlib.sha256(pairing_token.encode("utf-8")).hexdigest()
-        now = int(time.time())
         async with self.store.connection() as db:
             await db.execute("BEGIN IMMEDIATE")
+            # Waiting for the writer cannot extend a pairing ticket's authority.
+            now = int(time.time())
             if recoverable or hardware_proved:
                 # A handler's proof must still name a live hardware binding at the
                 # enrollment's commit boundary. Revocation must not race a receipt retry.
@@ -218,6 +219,7 @@ class AuthService:
                 (ticket_hash,),
             )
             ticket = await cur.fetchone()
+            now = int(time.time())
             if ticket is None or ticket["used_at_unix"] is not None or int(ticket["expires_at_unix"]) <= now:
                 await db.rollback()
                 raise AuthError("pairing_ticket_invalid", "Pairing ticket invalid or expired")
@@ -231,6 +233,11 @@ class AuthService:
                 code = "device_revoked" if existing["revoked_at_unix"] is not None else "already_enrolled"
                 raise AuthError(code, "Device cannot be enrolled")
             effective_label = label or ticket["label"]
+            # Awaited identity reads can cross expiry even after the writer was
+            # acquired. Check before the first enrollment effect as well.
+            now = int(time.time())
+            if int(ticket["expires_at_unix"]) <= now:
+                raise AuthError("pairing_ticket_invalid", "Pairing ticket invalid or expired")
             await db.execute(
                 "INSERT INTO devices(device_id, public_key_pem, enrolled_at_unix, revoked_at_unix, label, encrypted_secret, access_token_hash) VALUES (?, ?, ?, NULL, ?, ?, ?)",
                 (device_id, public_key_pem, now, effective_label, encrypted_secret, access_token_hash),
@@ -255,6 +262,10 @@ class AuthService:
                     "VALUES (?, ?, ?, ?, ?)",
                     (ticket_hash, device_id, request_hash, access_token_hash, now),
                 )
+            # None of these writes is public yet. Expiry during an awaited write
+            # rolls back device, grant, consumed ticket and recovery receipt together.
+            if int(ticket["expires_at_unix"]) <= int(time.time()):
+                raise AuthError("pairing_ticket_invalid", "Pairing ticket invalid or expired")
             await db.commit()
         self._device_secrets[device_id] = device_secret.encode("utf-8")
         return PairingResult(DeviceRecord(device_id, public_key_pem, now, None, effective_label), access_token)
@@ -330,19 +341,33 @@ class AuthService:
         An expired grant is deliberately not renewable: re-pairing is the path back, and
         silently reviving a grant the owner let lapse would make the expiry decorative.
         """
-        stamp = int(time.time()) if now is None else now
-        status = await self.grant_status(device_id, now=stamp)
-        if status["state"] in {"ABSENT", "REVOKED", "EXPIRED"}:
-            raise AuthError(
-                "grant_not_renewable",
-                f"enrolment grant for {device_id} is {status['state']}; pair the device again",
+        async with self.store.connection() as db:
+            await db.execute("BEGIN IMMEDIATE")
+            cursor = await db.execute(
+                "SELECT g.expires_at_unix, g.revoked_at_unix, "
+                "d.revoked_at_unix AS device_revoked_at_unix "
+                "FROM capability_grants g JOIN devices d ON d.device_id = g.device_id "
+                "WHERE g.grant_id = ? AND g.device_id = ?",
+                (f"enroll-{device_id}", device_id),
             )
-        await self.store.execute(
-            "UPDATE capability_grants SET expires_at_unix = ? WHERE grant_id = ? "
-            "AND revoked_at_unix IS NULL",
-            (stamp + ENROLMENT_GRANT_SECONDS, f"enroll-{device_id}"),
-        )
-        return await self.grant_status(device_id, now=stamp)
+            grant = await cursor.fetchone()
+            # Check the live authority after acquiring the writer, never a pre-lock
+            # status snapshot. Revocation and renewal share this same SQL boundary.
+            stamp = int(time.time()) if now is None else now
+            if (grant is None or grant["revoked_at_unix"] is not None
+                    or grant["device_revoked_at_unix"] is not None
+                    or int(grant["expires_at_unix"]) <= stamp):
+                raise AuthError("grant_not_renewable", "Enrollment grant is absent, revoked or expired; pair the device again")
+            await db.execute(
+                "UPDATE capability_grants SET expires_at_unix = ? WHERE grant_id = ?",
+                (max(int(grant["expires_at_unix"]), stamp + ENROLMENT_GRANT_SECONDS), f"enroll-{device_id}"),
+            )
+            # Check the original grant, not the proposed extension, after the write.
+            commit_stamp = int(time.time()) if now is None else now
+            if int(grant["expires_at_unix"]) <= commit_stamp:
+                raise AuthError("grant_not_renewable", "Enrollment grant expired before renewal committed; pair the device again")
+            await db.commit()
+        return await self.grant_status(device_id, now=commit_stamp)
 
     async def expiring_grants(self, *, now: int | None = None) -> list[dict]:
         """Every live grant that is expired or due for renewal, for the degraded surface."""

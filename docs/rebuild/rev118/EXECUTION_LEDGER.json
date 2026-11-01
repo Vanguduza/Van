@@ -424,58 +424,190 @@
     }
   ],
   "delegation": {
-    "model_routing_available": "No delegation used in Codex continuation; complex work performed by lead",
+    "historical_before_20261101": {
+      "model_routing_available": "No delegation used in Codex continuation; complex work performed by lead",
+      "delegated_packets": [],
+      "note": "Opus unavailable; owner transferred build to Codex. No independent reviewer identity is inferred from another model or session."
+    },
+    "owner_direction": "Implement adopted coordinated continuation plan, including parallel agents.",
+    "model_routing_available": "Owner-directed routing: Astra for root/current-frontier decisions only; gpt-6.1-sol medium for implementation/debugging/tests/integration and appropriate review; gpt-6-luna low for bounded inventory/checkpoint/evidence formatting. No Astra implementation, records, or full-history workers.",
     "delegated_packets": [],
-    "note": "Opus unavailable; owner transferred build to Codex. No independent reviewer identity is inferred from another model or session."
+    "active_assignments": [
+      {
+        "agent": "/root/implementation_sol",
+        "model": "gpt-6.1-sol",
+        "effort": "medium",
+        "worktree": "/workspace/van-review-2026-10-18/publish",
+        "base": "1b53cf9199dc3b8ec01cbc4a6125cc90afad2ae6",
+        "state": "AUTH_EXACT_COMPOSITE_SOURCE_QUALIFIED_PUBLICATION_EXECUTION",
+        "write_scope": "Designated integration source/docs, actual evidence and normal hook/verify/publication; root retains architecture/scope decisions.",
+        "next": "Genuine auth publication, then frozen family11/session5 successor integration and publication; no unit/native acceptance."
+      }
+    ],
+    "integration_owner": "root",
+    "note": "Agents return patch/files and actual receipts. No independent review identity or native acceptance is inferred.",
+    "model_worker_concurrency_default": 2,
+    "model_policy": "MODEL_ROUTING_POLICY_20261101.json",
+    "assignment_history": [
+      {
+        "captured_at_utc": "2026-11-01T02:10:55.197649+00:00",
+        "meaning": "Previous agents completed/interrupted; frozen handoffs retained after owner model-routing correction.",
+        "assignments": [
+          {
+            "agent": "family_implementation",
+            "worktree": "/workspace/van-lanes-20261101/family",
+            "base": "1b53cf9199dc3b8ec01cbc4a6125cc90afad2ae6",
+            "units": [
+              "BE-003",
+              "BE-009",
+              "BE-010",
+              "BE-012",
+              "BE-013"
+            ],
+            "state": "CORRECTED_SOURCE_FROZEN_FOCUSED_PG_REVIEWED_BROAD_INTEGRATION_PENDING",
+            "write_scope": "Assigned lifecycle/app files plus trading/vati/execution/recovery_scope.py and trading/vati/core/ledger_pg.py; new family tests only. Current source frozen; next-workflow inspection only.",
+            "exit": "Complete family accounting, original lifetime recovery and actual consumers with focused SQL/replay/negative evidence; no independent acceptance."
+          },
+          {
+            "agent": "backend_lane",
+            "worktree": "/workspace/van-lanes-20261101/backend",
+            "base": "1b53cf9199dc3b8ec01cbc4a6125cc90afad2ae6",
+            "state": "REPAIRING_CONFIRMED_MID_TRANSACTION_PAIRING_EXPIRY",
+            "write_scope": "backend/van_gateway/auth/service.py and new backend/tests/test_lane_auth_commit_expiry{,_http}.py in isolated backend lane; integration source frozen until original test terminal.",
+            "exit": "Original pairing and renewal authority rechecked inside writer, positive signed HTTP recovery, durable renewal/rollback and queued revocation tests; final backend qualification pending.",
+            "units": [
+              "BE-002",
+              "BE-003"
+            ],
+            "successor_assignment": {
+              "units": [
+                "BE-002",
+                "BE-003"
+              ],
+              "state": "SOURCE_FROZEN_124_FOCUSED_PASS_INTEGRATED_QUALIFICATION_PENDING",
+              "write_scope": [
+                "backend/van_gateway/session/service.py",
+                "backend/van_gateway/session/router.py",
+                "backend/tests/test_lane_session_commit_expiry.py",
+                "backend/van_gateway/app.py",
+                "backend/van_gateway/ops/retention.py"
+              ],
+              "base": "1b53cf9199dc3b8ec01cbc4a6125cc90afad2ae6",
+              "dependency": "Consumed session interfaces exist at base; disjoint from frozen auth workflow and family lane. No contract changes assigned.",
+              "exit": "Original terminal replay retained; expired authority cannot dispatch new effects after writer wait; actual SQL/HTTP/recovery tests; queued successor only."
+            }
+          },
+          {
+            "agent": "family_verification",
+            "base": "1b53cf9199dc3b8ec01cbc4a6125cc90afad2ae6",
+            "state": "CORRECTED_READER_SOURCE_REVIEW_COMPLETED_NO_SCOPED_BLOCKER",
+            "write_scope": "No production writes; uniquely named external probe artifacts only",
+            "exit": "Concrete requirement-bound family accounting/recovery/consumer findings before freeze; not native certification."
+          },
+          {
+            "agent": "continuation_records",
+            "base": "1b53cf9199dc3b8ec01cbc4a6125cc90afad2ae6",
+            "state": "PLAN_RECORDS_INTEGRATED_EXTERNAL_EVIDENCE_FINALIZERS_PREPARING",
+            "write_scope": "BUILD_EXECUTION_PLAN.md and EXECUTION_LEDGER.json designated fields only",
+            "exit": "Adopt exact coordinated method without changing original programme or acceptance."
+          }
+        ]
+      }
+    ],
+    "architecture_decision_owner": "/root (gpt-6-astra decisions only)"
   },
   "checkpoint": {
-    "updated_utc": "2026-10-28T05:23:50.455298+00:00",
-    "branch": "ccr-9e07e1af-8mgz1p",
-    "base": "b02075f327ea8180ab6d269eba358cf8c5479878",
-    "background_jobs": [],
-    "last_validation": "Held physical projection failures no longer turn a displayed shared peak into a fresh own-alias contribution. Four real producer/read-or-SQL-commit-ACK-loss counterexamples and two higher-native-equity counterexamples failed before correction. Recovery now independently retains the original native equity sample rather than the displayed aggregate; missing or held funding never seeds risk capital. Both original alias-scoped owner resets and the separately observed higher natural peak remain effective after replay. Two old account harnesses now initialize the real signed test mandate required by the actual service; all42 original assertion ASTs remain identical. Final494actualSQLite/PostgreSQL/HTTP/source/namespace/authority/replay/recovery/funding cases pass0skip/audit0;494unique callIDs once,all1201pinnedPythonhashes match,ownedPG independently absent. The83 focused checks overlap. Owner contracts unchanged and mutationpreflight374/383/0findings is consistency only. Published89661 full hosted trading remainsFAILED4607pass/2fixturefail/1DDSskip;26PGpassed andvoiceunexecuted afterfailure. Untracked collateral/order read components remain separate unfinished reservation foundations, not accepted features. Flow adjustment, all-origin collateral/reservations, original policy/active mandate reconciliation, pending/partial/uncertain/manual exposure, native settlement and all remaining canonical units stay open.0formal/native/production/S24acceptance.",
-    "environment_notes": [
-      "clone must be unshallowed (git fetch --unshallow) and PR heads fetched (+refs/pull/*/head:refs/remotes/origin/pr/*) before pre001.py",
-      "pytest from backend/requirements.txt in a venv",
-      "rsync needed for tests/hermes installer test",
-      "DDS sibling at /home/user/dial-development-system fetched origin/master 204f2f3b for F15 source reading",
-      "Gradle: repo.maven.apache.org returned 429 repeatedly; an init script adding https://maven-central.storage-download.googleapis.com/maven2/ resolved the same coordinates",
-      "Python 3.12 venv from backend/requirements.lock for CI-equivalent runs; stream-host venv from deploy/van-browser-stream/requirements.lock",
-      "Desktop Commander read-only device listing was refused by the session permission policy; native readback prepared as pre003/NATIVE_READBACK_REQUEST.md"
-    ],
-    "next_action": "Genuinehook/requiredbaselinecommittedverify/normalpush/readback/exactCI; finish account-wide collateral and all-origin reservation workflows under canonical scope.",
-    "previous_head": "83f2688a6414b5e81358c051418d0fe85ee0a3fb",
-    "current_packet": "HELD_PHYSICAL_RISK_RECOVERY_SOURCE",
-    "ci_credential_capability": "receipts/CI_CREDENTIAL_CAPABILITY_20261024.json: repo admin metadata available, integration secret/deploy-key reads403; no credential changes.",
-    "current_background_jobs": [],
-    "active_packet": "BE-009 exact arithmetic source locally qualified; genuine hook/publication pending; then original position projections and shared financial risk.",
-    "published_head": "e9cbdd69c9d98688e14b088c19c65e5df80c6e42",
-    "local_base_head": "89661bf72bfda9207000d3b9b346595ac41904ff",
-    "committed_ledger_verification": "PublishedE9actualGREEN177 required-baselineexit0; new schema sourceuncommitted",
-    "native_mql_source_compile": {
-      "head": "752d265b11ba643ed309481b110248f8b7fe323b",
-      "run": 40255331586,
-      "status": "SOURCE_COMPILED",
-      "evidence": "receipts/NATIVE_MQL_COMPILED_752d265b.json",
-      "qualification": "Signed compiler and deliberate invalid probe/source blob/artifact checks;network-blocked SDK initialization only;no account/broker/order/deployment/device acceptance"
-    },
-    "head": "e9cbdd69c9d98688e14b088c19c65e5df80c6e42",
-    "historical_background_job_observations": [
-      {
-        "kind": "van-ci",
-        "id": 40383599951,
-        "head": "9bf1acc4ed0239540d1ffffcc8cf9cf7eec16f82",
-        "state": "RUNNING_AT_CAPTURE;inspectactualoutcomes",
-        "not_acceptance": true
+    "historical_before_20261101": {
+      "updated_utc": "2026-10-28T05:23:50.455298+00:00",
+      "branch": "ccr-9e07e1af-8mgz1p",
+      "base": "b02075f327ea8180ab6d269eba358cf8c5479878",
+      "background_jobs": [],
+      "last_validation": "Held physical projection failures no longer turn a displayed shared peak into a fresh own-alias contribution. Four real producer/read-or-SQL-commit-ACK-loss counterexamples and two higher-native-equity counterexamples failed before correction. Recovery now independently retains the original native equity sample rather than the displayed aggregate; missing or held funding never seeds risk capital. Both original alias-scoped owner resets and the separately observed higher natural peak remain effective after replay. Two old account harnesses now initialize the real signed test mandate required by the actual service; all42 original assertion ASTs remain identical. Final494actualSQLite/PostgreSQL/HTTP/source/namespace/authority/replay/recovery/funding cases pass0skip/audit0;494unique callIDs once,all1201pinnedPythonhashes match,ownedPG independently absent. The83 focused checks overlap. Owner contracts unchanged and mutationpreflight374/383/0findings is consistency only. Published89661 full hosted trading remainsFAILED4607pass/2fixturefail/1DDSskip;26PGpassed andvoiceunexecuted afterfailure. Untracked collateral/order read components remain separate unfinished reservation foundations, not accepted features. Flow adjustment, all-origin collateral/reservations, original policy/active mandate reconciliation, pending/partial/uncertain/manual exposure, native settlement and all remaining canonical units stay open.0formal/native/production/S24acceptance.",
+      "environment_notes": [
+        "clone must be unshallowed (git fetch --unshallow) and PR heads fetched (+refs/pull/*/head:refs/remotes/origin/pr/*) before pre001.py",
+        "pytest from backend/requirements.txt in a venv",
+        "rsync needed for tests/hermes installer test",
+        "DDS sibling at /home/user/dial-development-system fetched origin/master 204f2f3b for F15 source reading",
+        "Gradle: repo.maven.apache.org returned 429 repeatedly; an init script adding https://maven-central.storage-download.googleapis.com/maven2/ resolved the same coordinates",
+        "Python 3.12 venv from backend/requirements.lock for CI-equivalent runs; stream-host venv from deploy/van-browser-stream/requirements.lock",
+        "Desktop Commander read-only device listing was refused by the session permission policy; native readback prepared as pre003/NATIVE_READBACK_REQUEST.md"
+      ],
+      "next_action": "Genuinehook/requiredbaselinecommittedverify/normalpush/readback/exactCI; finish account-wide collateral and all-origin reservation workflows under canonical scope.",
+      "previous_head": "83f2688a6414b5e81358c051418d0fe85ee0a3fb",
+      "current_packet": "HELD_PHYSICAL_RISK_RECOVERY_SOURCE",
+      "ci_credential_capability": "receipts/CI_CREDENTIAL_CAPABILITY_20261024.json: repo admin metadata available, integration secret/deploy-key reads403; no credential changes.",
+      "current_background_jobs": [],
+      "active_packet": "BE-009 exact arithmetic source locally qualified; genuine hook/publication pending; then original position projections and shared financial risk.",
+      "published_head": "e9cbdd69c9d98688e14b088c19c65e5df80c6e42",
+      "local_base_head": "89661bf72bfda9207000d3b9b346595ac41904ff",
+      "committed_ledger_verification": "PublishedE9actualGREEN177 required-baselineexit0; new schema sourceuncommitted",
+      "native_mql_source_compile": {
+        "head": "752d265b11ba643ed309481b110248f8b7fe323b",
+        "run": 40255331586,
+        "status": "SOURCE_COMPILED",
+        "evidence": "receipts/NATIVE_MQL_COMPILED_752d265b.json",
+        "qualification": "Signed compiler and deliberate invalid probe/source blob/artifact checks;network-blocked SDK initialization only;no account/broker/order/deployment/device acceptance"
       },
+      "head": "e9cbdd69c9d98688e14b088c19c65e5df80c6e42",
+      "historical_background_job_observations": [
+        {
+          "kind": "van-ci",
+          "id": 40383599951,
+          "head": "9bf1acc4ed0239540d1ffffcc8cf9cf7eec16f82",
+          "state": "RUNNING_AT_CAPTURE;inspectactualoutcomes",
+          "not_acceptance": true
+        },
+        {
+          "kind": "van-forecast-runtime-source",
+          "id": 40383599772,
+          "head": "9bf1acc4ed0239540d1ffffcc8cf9cf7eec16f82",
+          "state": "RUNNING_AT_CAPTURE;inspectactualoutcomes",
+          "not_acceptance": true
+        }
+      ]
+    },
+    "updated_utc": "2026-11-01T02:10:55.197649+00:00",
+    "branch": "ccr-9e07e1af-8mgz1p",
+    "head": "1b53cf9199dc3b8ec01cbc4a6125cc90afad2ae6",
+    "published_head": "1b53cf9199dc3b8ec01cbc4a6125cc90afad2ae6",
+    "committed_ledger_verification": "GREEN205 terminal success before normal push; remote equality rechecked20261101",
+    "current_packet": "AUTH_COMMIT_EXPIRY_SOURCE",
+    "active_packet": "Corrected auth exact composite:5943identities,5783passed,160declaredskips,0unresolvedbad/unexecuted; focused61/review59overlap. Original timedout/failed runs and10second erasure timing sensitivity retained; unchanged isolated erasure passed. Exact13PGsupplement passed. Family/session successor frozen:boundary441 and composite5775pass/0skip; queued afterauth publication.",
+    "current_background_jobs": [],
+    "agent_assignments_ref": "delegation.active_assignments",
+    "next_action": "Run mandatory source/manifest guards, genuine hook commit, required-baseline committed verification before normal push, independent remote readback and exact-head hosted CI; then integrate queued family/session source. No acceptance issued.",
+    "acceptance_issued": false,
+    "continuation_history": [
       {
-        "kind": "van-forecast-runtime-source",
-        "id": 40383599772,
-        "head": "9bf1acc4ed0239540d1ffffcc8cf9cf7eec16f82",
-        "state": "RUNNING_AT_CAPTURE;inspectactualoutcomes",
-        "not_acceptance": true
+        "updated_utc": "2026-11-01T01:14:21.642465+00:00",
+        "branch": "ccr-9e07e1af-8mgz1p",
+        "head": "1b53cf9199dc3b8ec01cbc4a6125cc90afad2ae6",
+        "published_head": "1b53cf9199dc3b8ec01cbc4a6125cc90afad2ae6",
+        "committed_ledger_verification": "GREEN205 terminal success before normal push; remote equality rechecked20261101",
+        "current_packet": "FAMILY_ORIGINAL_ACCOUNTING_AND_LIFETIME_RECOVERY",
+        "active_packet": "Pairing original full suite running; newly reproduced mid-transaction expiry repair blocks publication. Family corrected PostgreSQL reader passed66 with review; original broad successor run has14 account recovery failures and remains running. Session successor frozen; no acceptance.",
+        "current_background_jobs": [
+          {
+            "kind": "local-source-test",
+            "session_id": 39363,
+            "receipt": "/workspace/van-auth-integrated-backend-full-20261101.json",
+            "state": "RUNNING_ORIGINAL_SOURCE_NOT_LATER_REPAIR"
+          },
+          {
+            "kind": "local-source-test",
+            "session_id": 8913,
+            "receipt": "/workspace/van-successor-regression-pg-r1-20261101/receipt.json",
+            "state": "RUNNING_WITH_14_CONFIRMED_FAILURES_NOT_QUALIFIED"
+          }
+        ],
+        "agent_assignments_ref": "delegation.active_assignments",
+        "next_action": "Preserve original terminal outcomes; integrate reviewed pairing and family corrections only after frozen runs finish, qualify corrected inputs, then genuine hooks/committed verification/normal publication.",
+        "acceptance_issued": false,
+        "current_action": "Published1b53cf9199dc3b8ec01cbc4a6125cc90afad2ae6 has GREEN205 before normal push and independently rechecked remote equality. Adopted coordinated lanes now execute with one integration owner; family repair is the first active implementation and the original backend pairing/renewal candidate is under full testing while a newly reproduced mid-transaction expiry gap is repaired in isolation. The session successor is frozen with124 focused passes. Family committed-reader correction passed66 actual PostgreSQL cases; corrected broad integration remains pending after14 original recovery failures. Next candidate requires genuine hooks, terminal required-baseline committed verification before normal push, independent readback and exact-head CI. Repair the confirmed family remaining cost-basis error after partial exits and later additions, and verify original lifetime history recovery and actual risk/expansion consumers. Complete the original native economic owner for per-deal/correction/bust/late charge identity, signed fees/rebates, carry/FX/principal and cash/finality; retain scalar ambiguity as unknown until that owner supplies evidence. Continue atomic amend versus cancel-replace, governed parent/child lifetime budgets, all-origin shared financial reservations/outbox/effect consumers, manual/payment/transfer/handover/provider reconciliation and nonduplicated release. Preserve immutable V1 missing-obligation receipts and native policy/runtime admission. Retain the intermittent Android deep-link instrumentation failure and inspect exact-head CI; unchanged parent replay passed18 cases with4 declared skips, without S24 acceptance. All82backend units,12 verification packets,38forecast/research backend units and every market/chart/voice/assistant/crypto/operations contract retain full scope. Android follows the actual BG-001 gate and uses the provisioned production profile on Van trading core; genuine signing and actual Artemis/S24 acceptance remain required. Profitability is evaluated with evidence, never guaranteed.",
+        "captured_at_utc": "2026-11-01T02:10:55.197649+00:00"
       }
-    ]
+    ],
+    "current_source_receipt": "receipts/AUTH_COMMIT_EXPIRY_SOURCE_20261101.json"
   },
   "observations": [
     "OBS-001 BE-002 debug cleartext",
@@ -605,11 +737,25 @@
       "evidence": "ci/MUTATION_CORPUS_c2a27848.json"
     }
   ],
-  "current_action": "Publish using genuine hooks, terminal required-baseline committed verification before normal push, independent exact remote readback and exact-head CI. Repair the confirmed family remaining cost-basis error after partial exits and later additions, and verify original lifetime history recovery and actual risk/expansion consumers. Complete the original native economic owner for per-deal/correction/bust/late charge identity, signed fees/rebates, carry/FX/principal and cash/finality; retain scalar ambiguity as unknown until that owner supplies evidence. Continue atomic amend versus cancel-replace, governed parent/child lifetime budgets, all-origin shared financial reservations/outbox/effect consumers, manual/payment/transfer/handover/provider reconciliation and nonduplicated release. Preserve immutable V1 missing-obligation receipts and native policy/runtime admission. Retain the intermittent Android deep-link instrumentation failure and inspect exact-head CI; unchanged parent replay passed18 cases with4 declared skips, without S24 acceptance. All82backend units,12 verification packets,38forecast/research backend units and every market/chart/voice/assistant/crypto/operations contract retain full scope. Android follows the actual BG-001 gate and uses the provisioned production profile on Van trading core; genuine signing and actual Artemis/S24 acceptance remain required. Profitability is evaluated with evidence, never guaranteed.",
-  "updated_at_utc": "2026-10-30T12:45:21.784793+00:00",
+  "current_action": "Corrected pairing/renewal authority through writer/await boundaries is source-qualified by exact5943case composite coverage:5783passed and160declaredskips, with every failed/error/unexecuted case accounted for and exact13actualPostgreSQLvariants executed. Original timedout and failed runs remain such; the inherited10second positive erasure case retains actualexpired denial and unchanged5.337second isolatedpass, without a performance guarantee. All663inheritedtestfiles remain byte-identical. Auth genuinehook/required-baseline committedverification/normalpush/readback/exactCI is nowexecuting. Frozen family11/session5 successor has441boundary and5775composite passes/0skip; integrate/publish it afterauth. Wholeunits and native/provider/production/S24acceptance remainunissued. Complete the original native economic owner for per-deal/correction/bust/late charge identity, signed fees/rebates, carry/FX/principal and cash/finality; retain scalar ambiguity as unknown until that owner supplies evidence. Continue atomic amend versus cancel-replace, governed parent/child lifetime budgets, all-origin shared financial reservations/outbox/effect consumers, manual/payment/transfer/handover/provider reconciliation and nonduplicated release. Preserve immutable V1 missing-obligation receipts and native policy/runtime admission. Retain the intermittent Android deep-link instrumentation failure and inspect exact-head CI; unchanged parent replay passed18 cases with4 declared skips, without S24 acceptance. All82backend units,12 verification packets,38forecast/research backend units and every market/chart/voice/assistant/crypto/operations contract retain full scope. Android follows the actual BG-001 gate and uses the provisioned production profile on Van trading core; genuine signing and actual Artemis/S24 acceptance remain required. Profitability is evaluated with evidence, never guaranteed.",
+  "updated_at_utc": "2026-11-01T02:10:55.197649+00:00",
   "execution_method": {
     "path": "BUILD_EXECUTION_PLAN.md",
     "scope_index": "SOURCE_WORKMAP.json",
-    "meaning": "Owner directs source reuse, full workflow completion, explicit gaps and compact evidence under the unchanged canonical programme. No omitted functions or silently weakened states/controls."
+    "meaning": "Owner adopted coordinated continuation with up to seven eligible agents, isolated ownership, one integration queue, complete workflow batches and reusable source-bound evidence. Original scope/dependencies and independent gates remain unchanged.",
+    "adopted_at_utc": "2026-11-01T00:44:42.774946+00:00",
+    "dispatch": "Resume current family workflow; additional lanes use original canonical sequence, obligation order and ID among stage-eligible disjoint workflows.",
+    "work_in_progress": "One assignment per worker; one final candidate and at most one completed successor awaiting integration.",
+    "model_default": "Owner-directed routing: Astra for root/current-frontier decisions only; gpt-6.1-sol medium for implementation/debugging/tests/integration and appropriate review; gpt-6-luna low for bounded inventory/checkpoint/evidence formatting. No Astra implementation, records, or full-history workers.",
+    "model_policy_history": [
+      {
+        "historical_policy": true,
+        "superseded_at_utc": "2026-11-01T01:31:24.062374+00:00",
+        "execution_method_model_default": "Inherit current model and effort; no alternate model policy inferred.",
+        "delegation_model_routing_available": "Agents inherit current model and effort. Root remains coordinator and architectural decision owner.",
+        "reason": "Owner explicitly corrects routing: Astra decisions only, lesser models for suitable execution work."
+      }
+    ],
+    "model_policy": "MODEL_ROUTING_POLICY_20261101.json"
   }
 }
