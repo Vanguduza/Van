@@ -25,6 +25,12 @@ LEGACY_GENERATION = "c36d6a21bea1618707e353912d3f5b9508eca5ba"
 REGISTRIES = frozenset("registries/"+name+".json" for name in (
     "owner_endpoints", "owner_endpoint_schemas", "owner_features", "owner_screens"))
 REVIEWED_CITATION_REPLACEMENTS = {
+    ("android/app/src/main/java/com/dial/van/command/connected/ConnectedRoute.kt",
+     "                    val outcome = ConnectedReadback.revoke(request = { app.gatewayClient.googleOwnerRevoke() }, read = { app.gatewayClient.googleStatus() })"):
+     "                    val result = app.gatewayClient.googleOwnerRevoke(reviewed, reviewedProfile)",
+    ("android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt",
+     "    suspend fun googleOwnerRevoke(): JSONObject = withContext(Dispatchers.IO) {"):
+     "    suspend fun googleOwnerRevoke(reviewed: JSONObject, reviewedProfile: String): JSONObject = withContext(Dispatchers.IO) {",
     ("android/app/src/main/java/com/dial/van/mission/MissionRepository.kt",
      "    suspend fun revokePermission(grantId: String) = client.revokePermission(grantId)"):
      "    suspend fun revokePermission(grantId: String, reviewed: JSONObject, reviewedProfile: String) =",
@@ -44,6 +50,8 @@ REVIEWED_CITATION_REPLACEMENTS = {
 
 
 REVIEWED_CITATION_REASONS = {
+    ('android/app/src/main/java/com/dial/van/command/connected/ConnectedRoute.kt', '                    val outcome = ConnectedReadback.revoke(request = { app.gatewayClient.googleOwnerRevoke() }, read = { app.gatewayClient.googleStatus() })'): 'Preserve the existing confirmed Workspace withdrawal using its reviewed generation/profile, durable original receipt and independent current connection read.',
+    ('android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt', '    suspend fun googleOwnerRevoke(): JSONObject = withContext(Dispatchers.IO) {'): 'Bind the reviewed Workspace connection generation/caller/profile before persisted original delivery and readback.',
     ('android/app/src/main/java/com/dial/van/mission/MissionRepository.kt', '    suspend fun revokePermission(grantId: String) = client.revokePermission(grantId)'): 'Preserve repository forwarding with the exact caller-reviewed grant and captured profile; no fresh selection on confirmation.',
     ('android/app/src/main/java/com/dial/van/command/settings/PermissionsRoute.kt', '                            app.gatewayClient.revokePermission(id).also { receipt ->'): 'Preserve the reviewed original-result and independent current-grant readback callback with snapshot/profile-bound invocation.',
     ('android/app/src/main/java/com/dial/van/command/settings/PermissionsRoute.kt', '                                val current = app.gatewayClient.permissionGrant(id)'): 'Preserve the reviewed original-result and independent current-grant readback callback with snapshot/profile-bound invocation.',
@@ -178,6 +186,26 @@ def build(read=None):
         *(r for r in documents["owner_screens"]["screens"] if r["id"] in {"van.permissions","van.permissions.grant"}),
     ):
         row.setdefault("backend_contract_extensions",[]).append(copy.deepcopy(permission_extension))
+    google_original = next(r for r in endpoint_doc["endpoints"] if
+        (r["method"], r["path"]) == ("GET", "/v1/google/owner-revocations/{operation_id}"))
+    google_extension = {
+        "method": "GET", "path": google_original["path"], "endpoint_id": google_original["endpoint_id"],
+        "source_ref": google_original["source"], "authentication": google_original["authentication"],
+        "device_proof_required_when_bound": google_original["device_proof_required_when_bound"],
+        "client_namespace": "VanGatewayClient", "client_function": "googleOwnerRevoke",
+        "source_status": "CANDIDATE_SOURCE_TESTED_EXISTING_ANDROID_CALLER_NATIVE_ACCEPTANCE_PENDING",
+        "canonical_units": ["BE-002", "BE-031"], "action_ids": ["LAC-230"],
+        "specification_operation_id": "WP-ACT-LAC-230",
+        "authority": "READ_ORIGINAL_LOCAL_WORKSPACE_WITHDRAWAL_NO_PROVIDER_TOKEN_REVOCATION",
+        "scope": "Current lawful stable owner/device/profile reads immutable original local credential withdrawal; pending effects still require the original current context and exact generation. Completed history never retargets a replacement connection or creates provider authority.",
+        "specification": "docs/rebuild/rev118/backend/BE-002_LAC230_WORKSPACE_WITHDRAWAL.md",
+        "new_ui_implemented": False, "live_qualified": False,
+    }
+    for row in (
+        next(r for r in documents["owner_features"]["features"] if r["id"] == "OF-GOOGLE-001"),
+        next(r for r in documents["owner_screens"]["screens"] if r["id"] == "van.connected"),
+    ):
+        row.setdefault("backend_contract_extensions", []).append(copy.deepcopy(google_extension))
     browser = next(r for r in documents["owner_features"]["features"] if r["id"] == "OF-BROWSER-001")
     endpoint = next(r for r in endpoint_doc["endpoints"] if r["path"].endswith("/{task_id}/resume-contract"))
     browser.setdefault("backend_contract_extensions", []).append({

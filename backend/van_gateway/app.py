@@ -706,6 +706,7 @@ def create_app() -> FastAPI:
         gemini_runtime_configured=settings.google_gemini_runtime_configured,
         cloud_runtime_configured=settings.google_cloud_runtime_configured,
         consumer_connected_capabilities=settings.google_consumer_connected_capabilities,
+        workspace_source=google,
     )
     # Rev 1 §7 — one canonical declaration set. Readiness is delegated to the
     # subsystems that already own it, so this registry never becomes a third
@@ -3155,8 +3156,16 @@ def create_app() -> FastAPI:
             raise HTTPException(status_code=503, detail=str(exc)) from exc
 
     @app.get("/v1/google/status")
-    async def google_status():
-        return await google.status()
+    async def google_status(request: Request):
+        result = (await google.status()).model_dump(mode='json')
+        device_id = getattr(request.state, 'van_device_id', None)
+        if device_id:
+            try:
+                result.update(await google.withdrawal_detail(device_id=device_id,
+                    access_token_hash=hashlib.sha256(request.headers.get('X-Van-Device-Token','').encode()).hexdigest()))
+            except GoogleAuthError as exc:
+                raise HTTPException(503, str(exc)) from exc
+        return JSONResponse(result, headers={'Cache-Control':'no-store'})
 
     @app.get("/v1/google/planes")
     async def google_credential_planes():
@@ -3201,24 +3210,51 @@ def create_app() -> FastAPI:
         await google.revoke()
         return await google.status()
 
-    @app.post("/v1/google/owner-revoke")
-    async def google_owner_revoke(request: Request):
-        """GAP-F-024 — the owner can cut Google from the phone.
+    def google_withdrawal_error(exc: GoogleAuthError) -> HTTPException:
+        code = str(exc)
+        status = (404 if code == 'workspace_withdrawal_not_found' else
+                  403 if code in {'workspace_caller_not_current','workspace_withdrawal_wrong_caller',
+                                  'workspace_withdrawal_caller_changed'} else
+                  422 if code in {'workspace_withdrawal_request_invalid'} else 409)
+        return HTTPException(status, code)
 
-        Revocation was reachable only with the internal-control credential (an operator
-        on the host). A compromised token is exactly when the owner is not at the host,
-        so this route is device-authenticated and device-proofed like every other
-        owner mutation. Connect stays on the host: consent needs the OAuth client secret.
+    @app.post("/v1/google/owner-revoke")
+    async def google_owner_revoke(request: Request, body: dict[str, Any] | None = None):
+        """LAC-230: device-proofed withdrawal of the selected local credential.
+
+        The original immutable receipt is independent of current connection status.
+        Host connect and internal revoke retain their existing internal authority.
         """
-        device_id = getattr(request.state, "van_device_id", None)
+        device_id = getattr(request.state, 'van_device_id', None)
         if not device_id:
-            raise HTTPException(status_code=403, detail="device_identity_required")
-        await google.revoke()
-        await audit.record(
-            result="ok", device_id=device_id, capability="google.owner_revoke",
-            after={"status": "revoked"},
-        )
-        return await google.status()
+            raise HTTPException(403, 'device_identity_required')
+        try:
+            kwargs = dict(device_id=device_id,
+                access_token_hash=hashlib.sha256(request.headers.get('X-Van-Device-Token','').encode()).hexdigest(),
+                proof_required=getattr(request.state,'van_device_proved',False))
+            result = (await google.withdraw_selected(body, **kwargs) if body else
+                      await google.withdraw_legacy(**kwargs))
+        except GoogleAuthError as exc:
+            raise google_withdrawal_error(exc) from exc
+        await audit.record(result='ok' if result['state']=='APPLIED' else 'refused',
+            device_id=device_id, capability="google.owner_revoke",
+            after={'status':'revoked' if result['state']=='APPLIED' else 'unchanged',
+                   'operation_id':result['operation_id'], 'connection_generation':result['connection_generation']})
+        status = (await google.status()).model_dump(mode='json')
+        return JSONResponse({**status, 'withdrawal_receipt':result},
+            status_code=409 if result['state']=='REFUSED' else 200, headers={'Cache-Control':'no-store'})
+
+    @app.get('/v1/google/owner-revocations/{operation_id}')
+    async def original_google_owner_revoke(operation_id: str, request: Request):
+        device_id = getattr(request.state, 'van_device_id', None)
+        if not device_id:
+            raise HTTPException(403, 'device_identity_required')
+        try:
+            result = await google.original_withdrawal(operation_id, device_id=device_id,
+                access_token_hash=hashlib.sha256(request.headers.get('X-Van-Device-Token','').encode()).hexdigest())
+        except GoogleAuthError as exc:
+            raise google_withdrawal_error(exc) from exc
+        return JSONResponse(result, headers={'Cache-Control':'no-store'})
 
     @app.get("/v1/google/mesh")
     async def google_mesh():

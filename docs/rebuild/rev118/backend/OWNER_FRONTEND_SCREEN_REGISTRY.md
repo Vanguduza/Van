@@ -1,6 +1,6 @@
 # VAN current frontend screen and feature registry
 
-Current source inventory: **42 features, 105 source functions, 78 screens/hosted surfaces, 486 endpoint declarations and 379 schemas**.
+Current source inventory: **42 features, 105 source functions, 78 screens/hosted surfaces, 487 endpoint declarations and 379 schemas**.
 
 This generated document renders the current source contracts, including gaps and unverified states. It does not declare features complete, qualify live services or authorize a redesigned frontend. No new frontend/prototype before BG-001. Current source features are distinct from the frozen Rev1.18 programme of **93 planned features, 349 owner actions, 324 requirements, 1,610 acceptance identities and 131 units**. The complete planned scope remains in [the frozen package](../../../review-inputs/van-rev115/package/) and its [backend consumption contract](../../../review-inputs/van-rev115/package/contracts/BACKEND_TO_FRONTEND_CONSUMPTION_CONTRACT.md).
 
@@ -14,9 +14,9 @@ Owner-access endpoints and service dependencies are listed separately below. An 
 
 | Registry | SHA-256 |
 | --- | --- |
-| [owner_features.json](../../../../registries/owner_features.json) | `9e5314222162f5c9be86ae7e3f7bf043ade36d10e68d0e9cb85f33883fc8c946` |
-| [owner_screens.json](../../../../registries/owner_screens.json) | `321099a7d5588f901ca7d920629e370b75182a84d6bdbaaeef6afff39f6da1a8` |
-| [owner_endpoints.json](../../../../registries/owner_endpoints.json) | `f0e8c5b0b024e0ea9d3f5a54b1787601bdebbf003cc6f525aa15a7e42f91d24b` |
+| [owner_features.json](../../../../registries/owner_features.json) | `33cbc8a00e7e9195c4f6caf2644bcf95fb24aafa4705275994b62750002df128` |
+| [owner_screens.json](../../../../registries/owner_screens.json) | `b4f73cc9ae320dc88ccd3040f6db259246629c1ca9b3ca5ed97cd85e50514e58` |
+| [owner_endpoints.json](../../../../registries/owner_endpoints.json) | `bbcd3a9e583196de6dbc60eaecf90137aa44997864a8502519dcebd26740e345` |
 | [owner_endpoint_schemas.json](../../../../registries/owner_endpoint_schemas.json) | `d01f395c5b90783ee2ef08b7686b373e0059f27077e44541554c399dabdc9118` |
 
 Regenerate with `python3 tools/rebuild/render_frontend_registry.py --apply`; verify with `--check`.
@@ -1431,6 +1431,12 @@ Wiring: `SOURCE_WIRED_REQUIRES_ACCEPTANCE`; frontend integration: `PARTIAL_OWNER
 | POST | /v1/google/owner-revoke | DIRECT_OWNER_ROUTE / INGRESS_BEARER_AND_PAIRED_DEVICE | VanGatewayClient.googleOwnerRevoke |
 | GET | /v1/dial-dev/infrastructure | DIRECT_OWNER_ROUTE / INGRESS_BEARER_AND_PAIRED_DEVICE | VanGatewayClient.DialDevClient.dialDev.infrastructure |
 | GET | /v1/google/status | DIRECT_OWNER_ROUTE / INGRESS_BEARER_AND_PAIRED_DEVICE | VanGatewayClient.googleStatus |
+
+**Backend/client extensions — consumer status is explicit**
+
+| Method / path | Client | Status | Scope |
+| --- | --- | --- | --- |
+| GET /v1/google/owner-revocations/{operation_id} | VanGatewayClient.googleOwnerRevoke | CANDIDATE_SOURCE_TESTED_EXISTING_ANDROID_CALLER_NATIVE_ACCEPTANCE_PENDING | Current lawful stable owner/device/profile reads immutable original local credential withdrawal; pending effects still require the original current context and exact generation. Completed history never retargets a replacement connection or creates provider authority. |
 
 ### van.settings — Settings & Devices
 
@@ -5289,6 +5295,12 @@ Wiring: `SOURCE_WIRED_REQUIRES_ACCEPTANCE`; integration: `PARTIAL_OWNER_SURFACE`
 | GET | /v1/google/mesh | DIRECT_OWNER_ROUTE / INGRESS_BEARER_AND_PAIRED_DEVICE | VanGatewayClient.googleMesh |
 | GET | /v1/google/capabilities | DIRECT_OWNER_ROUTE / INGRESS_BEARER_AND_PAIRED_DEVICE | .UNWIRED |
 | POST | /v1/google/owner-revoke | DIRECT_OWNER_ROUTE / INGRESS_BEARER_AND_PAIRED_DEVICE | VanGatewayClient.googleOwnerRevoke |
+
+**Backend/client extensions — consumer status is explicit**
+
+| Method / path | Client | Status | Scope |
+| --- | --- | --- | --- |
+| GET /v1/google/owner-revocations/{operation_id} | VanGatewayClient.googleOwnerRevoke | CANDIDATE_SOURCE_TESTED_EXISTING_ANDROID_CALLER_NATIVE_ACCEPTANCE_PENDING | Current lawful stable owner/device/profile reads immutable original local credential withdrawal; pending effects still require the original current context and exact generation. Completed history never retargets a replacement connection or creates provider authority. |
 
 ### OF-GOOGLE-002 — Workspace owner operations
 

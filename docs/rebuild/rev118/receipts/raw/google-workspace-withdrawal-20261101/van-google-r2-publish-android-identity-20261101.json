@@ -1,0 +1,6 @@
+{
+  "actual_current_publish_android_inputs": 638,
+  "all_equal_actual_compiled_google_snapshot": true,
+  "compile_receipt": "/workspace/van-google-app-compile-20261101/receipt.json",
+  "qualification": "Actual app Kotlin compiler proof reused by exact638input identity, not helper inference; no native/test acceptance."
+}

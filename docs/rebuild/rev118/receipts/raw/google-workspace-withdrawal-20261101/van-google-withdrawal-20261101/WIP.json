@@ -1,0 +1,8 @@
+{
+  "state": "FROZEN_R2_READY_INDEPENDENT_RECHECK",
+  "base": "7df732de4c0a4f84bafadda658654a0ab8788553",
+  "handoff": "/workspace/van-google-withdrawal-20261101/HANDOFF_R2.json",
+  "pins": "/workspace/van-google-withdrawal-20261101/FROZEN_INPUTS_R2.json",
+  "active_jobs": [],
+  "source_edits": "NONE untilreview; no commits/push/generators"
+}

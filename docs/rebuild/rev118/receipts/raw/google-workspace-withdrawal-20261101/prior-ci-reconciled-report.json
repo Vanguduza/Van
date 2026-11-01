@@ -1,0 +1,507 @@
+{
+  "at_utc": "2026-11-01T08:03:43.500396+00:00",
+  "scope": "One bounded exact-head readback during actualGooglecompilerwait; no rerun/poll/mutation/securitychange",
+  "runs": {
+    "41285417143": {
+      "head": "25a48fd705825f5eec1264696e91536694cfb82f",
+      "status": "completed",
+      "conclusion": "cancelled",
+      "counts": {
+        "completed": 19
+      },
+      "failures": [
+        {
+          "id": 124785597961,
+          "name": "backend",
+          "failed_steps": [
+            "Require the DDS contract read key"
+          ]
+        },
+        {
+          "id": 124785598022,
+          "name": "android-and-visual-evidence",
+          "failed_steps": [
+            "Android unit tests, build and lint"
+          ]
+        },
+        {
+          "id": 124785598037,
+          "name": "android-instrumentation",
+          "failed_steps": [
+            "Instrumentation tests (owner surface, Floating VAN)"
+          ]
+        },
+        {
+          "id": 124785598044,
+          "name": "project-truth-ledger",
+          "failed_steps": [
+            "Project Truth ledger (trusted checker, every new commit has an authorized row)"
+          ]
+        },
+        {
+          "id": 124786753943,
+          "name": "character-forge-gate",
+          "failed_steps": [
+            "Rive asset present means RiveContractTest must have passed"
+          ]
+        }
+      ],
+      "backend_public": [
+        {
+          "id": 124785598002,
+          "status": "completed",
+          "conclusion": "cancelled"
+        }
+      ],
+      "mutations": [
+        {
+          "id": 124785597949,
+          "name": "mutation (kotlin-3, kotlin, 3/4)",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 124785598020,
+          "name": "mutation (kotlin-0, kotlin, 0/4)",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 124785598065,
+          "name": "mutation (python-0, python, 0/4)",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 124785598080,
+          "name": "mutation (browser-agent, browser-agent, 0/1)",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 124785598092,
+          "name": "mutation (python-3, python, 3/4)",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 124785598104,
+          "name": "mutation (kotlin-2, kotlin, 2/4)",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 124785598106,
+          "name": "mutation (python-2, python, 2/4)",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 124785598125,
+          "name": "mutation (kotlin-1, kotlin, 1/4)",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 124785598146,
+          "name": "mutation (python-1, python, 1/4)",
+          "status": "completed",
+          "conclusion": "success"
+        }
+      ]
+    },
+    "41286883563": {
+      "head": "7df732de4c0a4f84bafadda658654a0ab8788553",
+      "status": "in_progress",
+      "conclusion": null,
+      "counts": {
+        "in_progress": 13,
+        "completed": 5
+      },
+      "failures": [
+        {
+          "id": 124789974161,
+          "name": "backend",
+          "failed_steps": [
+            "Require the DDS contract read key"
+          ]
+        },
+        {
+          "id": 124789974171,
+          "name": "project-truth-ledger",
+          "failed_steps": [
+            "Project Truth ledger (trusted checker, every new commit has an authorized row)"
+          ]
+        }
+      ],
+      "backend_public": [
+        {
+          "id": 124789973958,
+          "status": "in_progress",
+          "conclusion": null
+        }
+      ],
+      "mutations": [
+        {
+          "id": 124789974064,
+          "name": "mutation (kotlin-3, kotlin, 3/4)",
+          "status": "in_progress",
+          "conclusion": null
+        },
+        {
+          "id": 124789974090,
+          "name": "mutation (python-2, python, 2/4)",
+          "status": "in_progress",
+          "conclusion": null
+        },
+        {
+          "id": 124789974120,
+          "name": "mutation (kotlin-1, kotlin, 1/4)",
+          "status": "in_progress",
+          "conclusion": null
+        },
+        {
+          "id": 124789974130,
+          "name": "mutation (browser-agent, browser-agent, 0/1)",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 124789974139,
+          "name": "mutation (python-0, python, 0/4)",
+          "status": "in_progress",
+          "conclusion": null
+        },
+        {
+          "id": 124789974142,
+          "name": "mutation (python-1, python, 1/4)",
+          "status": "in_progress",
+          "conclusion": null
+        },
+        {
+          "id": 124789974146,
+          "name": "mutation (kotlin-2, kotlin, 2/4)",
+          "status": "in_progress",
+          "conclusion": null
+        },
+        {
+          "id": 124789974158,
+          "name": "mutation (python-3, python, 3/4)",
+          "status": "in_progress",
+          "conclusion": null
+        },
+        {
+          "id": 124789974182,
+          "name": "mutation (kotlin-0, kotlin, 0/4)",
+          "status": "in_progress",
+          "conclusion": null
+        }
+      ]
+    }
+  },
+  "25a_mutations": {
+    "head": "25a48fd705825f5eec1264696e91536694cfb82f",
+    "executed": 374,
+    "caught": 374,
+    "survivors": 0,
+    "jobs": [
+      {
+        "id": 124785597949,
+        "name": "mutation (kotlin-3, kotlin, 3/4)",
+        "status": "completed",
+        "conclusion": "success",
+        "groups": [
+          {
+            "caught": 29,
+            "executed": 29
+          }
+        ],
+        "executed": 29,
+        "caught": 29,
+        "survivors": 0,
+        "CAUGHT_line_count": 29,
+        "raw_log": "job-124785597949.log",
+        "sha256": "722c9f124ba1c774227d3d7e50146019c09b5c257a7fee3a69075bba4e5c08b3"
+      },
+      {
+        "id": 124785598020,
+        "name": "mutation (kotlin-0, kotlin, 0/4)",
+        "status": "completed",
+        "conclusion": "success",
+        "groups": [
+          {
+            "caught": 29,
+            "executed": 29
+          }
+        ],
+        "executed": 29,
+        "caught": 29,
+        "survivors": 0,
+        "CAUGHT_line_count": 29,
+        "raw_log": "job-124785598020.log",
+        "sha256": "d6a8faebc2b4157706a25f86f1953ea8b6ba4906aefba84ed611dd2951ee0097"
+      },
+      {
+        "id": 124785598065,
+        "name": "mutation (python-0, python, 0/4)",
+        "status": "completed",
+        "conclusion": "success",
+        "groups": [
+          {
+            "caught": 5,
+            "executed": 5
+          },
+          {
+            "caught": 10,
+            "executed": 10
+          },
+          {
+            "caught": 8,
+            "executed": 8
+          },
+          {
+            "caught": 6,
+            "executed": 6
+          },
+          {
+            "caught": 15,
+            "executed": 15
+          },
+          {
+            "caught": 7,
+            "executed": 7
+          },
+          {
+            "caught": 5,
+            "executed": 5
+          },
+          {
+            "caught": 3,
+            "executed": 3
+          }
+        ],
+        "executed": 59,
+        "caught": 59,
+        "survivors": 0,
+        "CAUGHT_line_count": 59,
+        "raw_log": "job-124785598065.log",
+        "sha256": "4577d24b3151ef67bbba4a9b0de85e536afa23299a8532fc0b1f31bc333a9863"
+      },
+      {
+        "id": 124785598080,
+        "name": "mutation (browser-agent, browser-agent, 0/1)",
+        "status": "completed",
+        "conclusion": "success",
+        "groups": [
+          {
+            "caught": 26,
+            "executed": 26
+          }
+        ],
+        "executed": 26,
+        "caught": 26,
+        "survivors": 0,
+        "CAUGHT_line_count": 26,
+        "raw_log": "job-124785598080.log",
+        "sha256": "82b81fb0b14a3eda79cc4ae23be0a45be8f73752091c77e96867d265cf611b2b"
+      },
+      {
+        "id": 124785598092,
+        "name": "mutation (python-3, python, 3/4)",
+        "status": "completed",
+        "conclusion": "success",
+        "groups": [
+          {
+            "caught": 3,
+            "executed": 3
+          },
+          {
+            "caught": 3,
+            "executed": 3
+          },
+          {
+            "caught": 6,
+            "executed": 6
+          },
+          {
+            "caught": 6,
+            "executed": 6
+          },
+          {
+            "caught": 12,
+            "executed": 12
+          },
+          {
+            "caught": 11,
+            "executed": 11
+          },
+          {
+            "caught": 10,
+            "executed": 10
+          },
+          {
+            "caught": 6,
+            "executed": 6
+          }
+        ],
+        "executed": 57,
+        "caught": 57,
+        "survivors": 0,
+        "CAUGHT_line_count": 57,
+        "raw_log": "job-124785598092.log",
+        "sha256": "f4985be52bf3846b3483de4db2d38f784f9679388cbc2a3b87c671132079b75e"
+      },
+      {
+        "id": 124785598104,
+        "name": "mutation (kotlin-2, kotlin, 2/4)",
+        "status": "completed",
+        "conclusion": "success",
+        "groups": [
+          {
+            "caught": 29,
+            "executed": 29
+          }
+        ],
+        "executed": 29,
+        "caught": 29,
+        "survivors": 0,
+        "CAUGHT_line_count": 29,
+        "raw_log": "job-124785598104.log",
+        "sha256": "f2e014704d3869c04919765110a2695cdb545685996e00bbca1409a3b2b724d0"
+      },
+      {
+        "id": 124785598106,
+        "name": "mutation (python-2, python, 2/4)",
+        "status": "completed",
+        "conclusion": "success",
+        "groups": [
+          {
+            "caught": 12,
+            "executed": 12
+          },
+          {
+            "caught": 3,
+            "executed": 3
+          },
+          {
+            "caught": 11,
+            "executed": 11
+          },
+          {
+            "caught": 5,
+            "executed": 5
+          },
+          {
+            "caught": 10,
+            "executed": 10
+          },
+          {
+            "caught": 4,
+            "executed": 4
+          },
+          {
+            "caught": 6,
+            "executed": 6
+          },
+          {
+            "caught": 7,
+            "executed": 7
+          }
+        ],
+        "executed": 58,
+        "caught": 58,
+        "survivors": 0,
+        "CAUGHT_line_count": 58,
+        "raw_log": "job-124785598106.log",
+        "sha256": "dcf04c4f33bb53f8bcf573f9f7d2e1172440f3286d6657ff1b2df5f78df7d90c"
+      },
+      {
+        "id": 124785598125,
+        "name": "mutation (kotlin-1, kotlin, 1/4)",
+        "status": "completed",
+        "conclusion": "success",
+        "groups": [
+          {
+            "caught": 29,
+            "executed": 29
+          }
+        ],
+        "executed": 29,
+        "caught": 29,
+        "survivors": 0,
+        "CAUGHT_line_count": 29,
+        "raw_log": "job-124785598125.log",
+        "sha256": "c29ff8bce8ded1fff8ec0b64cc88e31b68d3b84576870f25ee8a8cef8aecfe42"
+      },
+      {
+        "id": 124785598146,
+        "name": "mutation (python-1, python, 1/4)",
+        "status": "completed",
+        "conclusion": "success",
+        "groups": [
+          {
+            "caught": 3,
+            "executed": 3
+          },
+          {
+            "caught": 8,
+            "executed": 8
+          },
+          {
+            "caught": 13,
+            "executed": 13
+          },
+          {
+            "caught": 5,
+            "executed": 5
+          },
+          {
+            "caught": 11,
+            "executed": 11
+          },
+          {
+            "caught": 6,
+            "executed": 6
+          },
+          {
+            "caught": 4,
+            "executed": 4
+          },
+          {
+            "caught": 8,
+            "executed": 8
+          }
+        ],
+        "executed": 58,
+        "caught": 58,
+        "survivors": 0,
+        "CAUGHT_line_count": 58,
+        "raw_log": "job-124785598146.log",
+        "sha256": "6147367bebf28c751e14727f62ba4983aebe2af7542b5fc6ae9572f346305071"
+      }
+    ],
+    "baseline": "Harness requires unmodified controls before mutants; actual control testcase totals not emitted/unknown; no registry substitution."
+  },
+  "25a_backend_public": {
+    "job": 124785598002,
+    "terminal": "CANCELLED",
+    "actual_summary": "198 followup contract checks passed. No completed primary pytest summary or final source pass/skip count observed; partial progress not reused.",
+    "qualification": "NOT_COMPLETE_NOT_PASS"
+  },
+  "25a_failures": "Original Android compile failures retained; android-and-visual job confirms same dp/repository compiler root cause; character-forge gate reports noRiveContractTest results produced (missing prerequisite execution), not a failed Rive assertion. Overallmaincancelled notgreen.",
+  "7df": "Mainrunning13jobs/5terminal atcapture; DDS/trustedchecker failed; backendpublicrunning and8mutationjobsrunning/1success. Newhead aggregate execution/source totals unknown.",
+  "raw_logs": {
+    "job-124785598106.log": "dcf04c4f33bb53f8bcf573f9f7d2e1172440f3286d6657ff1b2df5f78df7d90c",
+    "job-124785598080.log": "82b81fb0b14a3eda79cc4ae23be0a45be8f73752091c77e96867d265cf611b2b",
+    "job-124785598020.log": "d6a8faebc2b4157706a25f86f1953ea8b6ba4906aefba84ed611dd2951ee0097",
+    "job-124785598002.log": "445c326a94daa9ea75c05b807d9e7d987ccee76abc69acb32927ddb7d070b17e",
+    "job-124786753943.log": "28e666d7869164b2936934e7707d203d769c1a7f1416ac15e2ab9cd9b256316f",
+    "job-124785598146.log": "6147367bebf28c751e14727f62ba4983aebe2af7542b5fc6ae9572f346305071",
+    "job-124785598104.log": "f2e014704d3869c04919765110a2695cdb545685996e00bbca1409a3b2b724d0",
+    "job-124785598065.log": "4577d24b3151ef67bbba4a9b0de85e536afa23299a8532fc0b1f31bc333a9863",
+    "job-124785598092.log": "f4985be52bf3846b3483de4db2d38f784f9679388cbc2a3b87c671132079b75e",
+    "job-124785598125.log": "c29ff8bce8ded1fff8ec0b64cc88e31b68d3b84576870f25ee8a8cef8aecfe42",
+    "job-124785598022.log": "5a59838ee723b05fbc79b69f71bf772fe0ec7b734542cda2a1045a88cec8461f",
+    "job-124785597949.log": "722c9f124ba1c774227d3d7e50146019c09b5c257a7fee3a69075bba4e5c08b3"
+  }
+}

@@ -1,0 +1,34 @@
+........F.                                                               [100%]
+=================================== FAILURES ===================================
+__________ test_revoke_reconnect_requires_new_workspace_certification __________
+
+tmp_path = PosixPath('/tmp/van-google-withdrawal-journal/test_revoke_reconnect_requires0')
+
+    @pytest.mark.asyncio
+    async def test_revoke_reconnect_requires_new_workspace_certification(tmp_path):
+        store = Store(str(tmp_path / "google.sqlite3"))
+        await store.migrate()
+        registry = GoogleCapabilityRegistry(str(Path(__file__).resolve().parents[2] / "registries/google_capabilities.json"))
+        broker = GoogleIdentityBroker(store, registry)
+        google = GoogleService(store, Fernet.generate_key().decode())
+        await broker.register_principal(subject="synthetic-owner")
+        await google.store_refresh_token("owner", "synthetic-token", ["https://www.googleapis.com/auth/gmail.readonly"])
+        for capability in ("workspace_api", "stitch", "gemini"):
+            await broker.record_capability_evidence(capability, state=GoogleCapabilityState.READY, evidence_pointer=f"synthetic://{capability}")
+        router = GoogleCapabilityRouter(store, broker)
+        request = GoogleRouteRequest(owner_intent_id="synthetic-intent", intent="workspace_operation", action_class=ActionClass.A2)
+        assert (await router.plan(request, workspace=await google.status())).status == "planned"
+    
+        await google.revoke()
+        status = await broker.capability_status("workspace_api", workspace=await google.status())
+        assert status.state == GoogleCapabilityState.AUTH_REQUIRED
+        assert status.evidence_pointer == "synthetic://workspace_api"
+        # The capability registry invokes the broker without a Workspace status argument.
+        declaration = SimpleNamespace(health_probe="workspace_api", capability_id="google.workspace_api")
+>       assert (await GoogleMeshReadiness(broker).is_ready(declaration))[0] is False
+E       assert True is False
+
+backend/tests/test_google_readiness_revocation.py:39: AssertionError
+=========================== short test summary info ============================
+FAILED backend/tests/test_google_readiness_revocation.py::test_revoke_reconnect_requires_new_workspace_certification
+1 failed, 9 passed, 1 deselected in 20.81s

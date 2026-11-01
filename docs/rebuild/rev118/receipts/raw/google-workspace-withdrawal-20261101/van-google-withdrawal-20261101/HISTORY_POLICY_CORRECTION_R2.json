@@ -1,0 +1,15 @@
+{
+  "finding": "LAC230-REVIEW-01",
+  "root_decision": "Currentlawfulsameowner/device/profile can read/replay immutable terminal history; pendingoldauthorizationcontext cannotauthorizefreshmutation.",
+  "old_assertion_superseded": "test_actor_currentness tokenreplacement branch expected exception. It now asserts durable REFUSED/request_not_current/noeffect withoriginalcontext retained. Retiredbinding/currentrevocation negativesunchanged.",
+  "stable_subject_proof": "Originalsealedrequest owner_id/caller_device_id/targetgeneration/revision/op alreadyexists; AuthService.pair_device refuses anyexistingdeviceIDincludingrevokedtombstones. CurrentAuthService/readpolicy remainsrequired; no oldcontext rewritten ascurrent.",
+  "unchanged_original_artifacts": [
+    "FROZEN_INPUTS.json",
+    "HANDOFF.json",
+    "LAC230_FROZEN.patch",
+    "LAC230_FROZEN_SOURCE.zip",
+    "/workspace/van-lac230-independent-review-20261101/review.json",
+    "/workspace/van-lac230-independent-review-20261101/probe-results.json"
+  ],
+  "no_new_rotation_feature": true
+}

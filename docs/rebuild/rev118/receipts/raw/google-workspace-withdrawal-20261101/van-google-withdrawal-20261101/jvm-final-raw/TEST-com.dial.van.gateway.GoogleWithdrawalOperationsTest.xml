@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.dial.van.gateway.GoogleWithdrawalOperationsTest" tests="8" skipped="0" failures="0" errors="0" timestamp="2026-11-01T07:54:59" hostname="07611d75dea7" time="0.136">
+  <properties/>
+  <testcase name="durable refusal clears only original and requires new explicit confirmation()" classname="com.dial.van.gateway.GoogleWithdrawalOperationsTest" time="0.042"/>
+  <testcase name="restart reads original without POST and replacement remains independently visible()" classname="com.dial.van.gateway.GoogleWithdrawalOperationsTest" time="0.013"/>
+  <testcase name="unknown original remains stable across new proposal and explicit replacement selection()" classname="com.dial.van.gateway.GoogleWithdrawalOperationsTest" time="0.009"/>
+  <testcase name="failed protected persistence blocks POST()" classname="com.dial.van.gateway.GoogleWithdrawalOperationsTest" time="0.004"/>
+  <testcase name="original operation is persisted before POST and lost reply recovers via original read()" classname="com.dial.van.gateway.GoogleWithdrawalOperationsTest" time="0.01"/>
+  <testcase name="profile or caller switch cannot post or clear another original()" classname="com.dial.van.gateway.GoogleWithdrawalOperationsTest" time="0.009"/>
+  <testcase name="cancellation propagates and original remains recoverable without a replacement POST()" classname="com.dial.van.gateway.GoogleWithdrawalOperationsTest" time="0.006"/>
+  <testcase name="changed receipt or unconfirmed current original cannot clear history()" classname="com.dial.van.gateway.GoogleWithdrawalOperationsTest" time="0.03"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

@@ -178,9 +178,15 @@ class GoogleIdentityBroker:
         gemini_runtime_configured: bool = False,
         cloud_runtime_configured: bool = False,
         consumer_connected_capabilities: str = "",
+        workspace_source: Any | None = None,
     ) -> None:
         self.store = store
         self.registry = registry
+        self.workspace_source = workspace_source
+        if workspace_source is not None:
+            workspace_source.workspace_readiness_aliases = tuple(sorted({
+                item.identity_alias for item in registry.list()
+                if self._workspace_owner(item) == 'owner'}))
         self.default_ai_plan = ai_plan.upper()
         self.cloud_project_id = cloud_project_id
         self.gemini_runtime_configured = gemini_runtime_configured
@@ -216,6 +222,64 @@ class GoogleIdentityBroker:
             return GooglePrincipalStatus(owner_id=owner_id, registered=False)
         return GooglePrincipalStatus(owner_id=owner_id, registered=True, account_kind=row["account_kind"], ai_plan=row["ai_plan"], subject_hash_present=bool(row["subject_hash"]), status=row["status"], updated_at_unix=row["updated_at_unix"])
 
+    def _workspace_owner(self, descriptor) -> str | None:
+        if descriptor.credential_plane != GoogleCredentialPlane.WORKSPACE_OAUTH:
+            return None
+        # The existing runtime has one gateway Workspace credential. The registry
+        # owns identity resolution; delegated identities do not inherit it merely
+        # by using the same string prefix or credential-plane label.
+        if descriptor.identity_alias == self.registry.default_identity:
+            return 'owner'
+        policy = self.registry.delegated_identities.get(descriptor.identity_alias, {})
+        if (policy.get('workspace_access') is True and policy.get('credential_inheritance') is True
+            and descriptor.capability_id in policy.get('allowed_capabilities', [])):
+            return 'owner'
+        return None
+
+    async def begin_workspace_probe(self, capability_id: str) -> dict:
+        """Capture BEFORE the caller observes its provider canary; confers no READY."""
+        descriptor = self.registry.get(capability_id)
+        owner = self._workspace_owner(descriptor)
+        if not owner or self.workspace_source is None:
+            raise ValueError('workspace_credential_lineage_unavailable')
+        async with self.store.connection() as db:
+            await db.execute('BEGIN')
+            detail = await self.workspace_source._connection(db, owner)
+        if not detail['connected']:
+            raise ValueError('workspace_oauth_not_connected')
+        payload = dict(schema='van.workspace-probe/1', capability_id=capability_id,
+                       identity_alias=descriptor.identity_alias, credential_owner_id=owner,
+                       connection_generation=detail['connection_generation'],
+                       source_revision=detail['source_revision'])
+        return {**payload, 'probe_token': self.workspace_source._seal(payload)}
+
+    async def _workspace_evidence_current(self, db, descriptor, metadata) -> bool:
+        owner = self._workspace_owner(descriptor)
+        if not owner or self.workspace_source is None or not isinstance(metadata, dict):
+            return False
+        probe = metadata.get('workspace_probe')
+        if not isinstance(probe, dict) or 'probe_token' not in probe:
+            return False
+        try:
+            sealed = self.workspace_source._open(probe['probe_token'])
+            body = {k:v for k,v in probe.items() if k != 'probe_token'}
+            detail = await self.workspace_source._connection(db, owner)
+            return bool(sealed == body and set(body) == {'schema','capability_id','identity_alias',
+                'credential_owner_id','connection_generation','source_revision'} and
+                body['schema'] == 'van.workspace-probe/1' and
+                body['capability_id'] == descriptor.capability_id and
+                body['identity_alias'] == descriptor.identity_alias and
+                body['credential_owner_id'] == owner and detail['connected'] and
+                body['connection_generation'] == detail['connection_generation'] and
+                body['source_revision'] == detail['source_revision'])
+        except (ValueError, TypeError, KeyError, AttributeError):
+            return False
+        except Exception as exc:
+            from van_gateway.google.service import GoogleAuthError
+            if isinstance(exc, GoogleAuthError):
+                return False
+            raise
+
     async def record_capability_evidence(self, capability_id: str, *, state: GoogleCapabilityState, credential_plane: GoogleCredentialPlane | None = None, evidence_pointer: str | None = None, metadata: dict[str, Any] | None = None, owner_id: str | None = None) -> None:
         descriptor = self.registry.get(capability_id)
         selected_identity = descriptor.identity_alias
@@ -225,21 +289,29 @@ class GoogleIdentityBroker:
         plane = credential_plane or descriptor.credential_plane
         now = int(time.time())
         verified_at = now if state == GoogleCapabilityState.READY else None
-        await self.store.execute(
-            """
-            INSERT INTO google_capability_connections(capability_id, owner_id, state, credential_plane, evidence_pointer, verified_at_unix, metadata_json, updated_at_unix)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-            ON CONFLICT(capability_id) DO UPDATE SET
-              owner_id=excluded.owner_id,
-              state=excluded.state,
-              credential_plane=excluded.credential_plane,
-              evidence_pointer=excluded.evidence_pointer,
-              verified_at_unix=excluded.verified_at_unix,
-              metadata_json=excluded.metadata_json,
-              updated_at_unix=excluded.updated_at_unix
-            """,
-            (capability_id, owner_id, state.value, plane.value, evidence_pointer, verified_at, Store.dumps(metadata or {}), now),
-        )
+        async with self.store.connection() as db:
+            await db.execute('BEGIN IMMEDIATE')
+            if descriptor.credential_plane == GoogleCredentialPlane.WORKSPACE_OAUTH:
+                if plane != descriptor.credential_plane:
+                    raise ValueError('google_credential_plane_mismatch')
+                if state == GoogleCapabilityState.READY and not await self._workspace_evidence_current(db, descriptor, metadata):
+                    raise ValueError('workspace_canary_generation_unverified')
+            await db.execute(
+                """
+                INSERT INTO google_capability_connections(capability_id, owner_id, state, credential_plane, evidence_pointer, verified_at_unix, metadata_json, updated_at_unix)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                ON CONFLICT(capability_id) DO UPDATE SET
+                  owner_id=excluded.owner_id,
+                  state=excluded.state,
+                  credential_plane=excluded.credential_plane,
+                  evidence_pointer=excluded.evidence_pointer,
+                  verified_at_unix=excluded.verified_at_unix,
+                  metadata_json=excluded.metadata_json,
+                  updated_at_unix=excluded.updated_at_unix
+                """,
+                (capability_id, owner_id, state.value, plane.value, evidence_pointer, verified_at, Store.dumps(metadata or {}), now),
+            )
+            await db.commit()
 
     async def _evidence(self, capability_id: str) -> Any | None:
         return await self.store.fetchone("SELECT * FROM google_capability_connections WHERE capability_id = ?", (capability_id,))
@@ -268,10 +340,37 @@ class GoogleIdentityBroker:
         if evidence is not None:
             state = GoogleCapabilityState(evidence["state"])
             reason = "certification_evidence"
+            if descriptor.credential_plane == GoogleCredentialPlane.WORKSPACE_OAUTH and state == GoogleCapabilityState.READY:
+                async with self.store.connection() as db:
+                    await db.execute('BEGIN')
+                    # Re-read the evidence in the same snapshot as credential lineage.
+                    current = await (await db.execute(
+                        'SELECT * FROM google_capability_connections WHERE capability_id=?',
+                        (capability_id,))).fetchone()
+                    try:
+                        metadata = json.loads(current['metadata_json']) if current else None
+                    except (ValueError, TypeError):
+                        metadata = None
+                    valid = bool(current and current['owner_id'] == selected_identity and
+                                 current['credential_plane'] == descriptor.credential_plane.value and
+                                 current['state'] == GoogleCapabilityState.READY.value and
+                                 await self._workspace_evidence_current(db, descriptor, metadata))
+                    connected = False
+                    owner = self._workspace_owner(descriptor)
+                    if owner and self.workspace_source is not None:
+                        try:
+                            connected = (await self.workspace_source._connection(db, owner))['connected']
+                        except Exception as exc:
+                            from van_gateway.google.service import GoogleAuthError
+                            if not isinstance(exc, GoogleAuthError):
+                                raise
+                    if not valid:
+                        state = GoogleCapabilityState.CONFIGURED if connected else GoogleCapabilityState.AUTH_REQUIRED
+                        reason = 'workspace_canary_generation_unverified'
             if not principal.registered and state in {GoogleCapabilityState.CONFIGURED, GoogleCapabilityState.READY}:
                 state = GoogleCapabilityState.UNVERIFIED
                 reason = "canonical_google_principal_not_registered"
-            return GoogleCapabilityStatus(capability_id=descriptor.capability_id, family=descriptor.family, display_name=descriptor.display_name, credential_plane=descriptor.credential_plane, identity_alias=selected_identity, state=state, reason=reason, public_api=descriptor.public_api, configured_by_account=principal.registered, evidence_pointer=evidence["evidence_pointer"], verified_at_unix=evidence["verified_at_unix"])
+            return GoogleCapabilityStatus(capability_id=descriptor.capability_id, family=descriptor.family, display_name=descriptor.display_name, credential_plane=descriptor.credential_plane, identity_alias=selected_identity, state=state, reason=reason, public_api=descriptor.public_api, configured_by_account=principal.registered, evidence_pointer=evidence["evidence_pointer"], verified_at_unix=(None if descriptor.credential_plane == GoogleCredentialPlane.WORKSPACE_OAUTH and state != GoogleCapabilityState.READY else evidence["verified_at_unix"]))
 
         plane = descriptor.credential_plane
         state = GoogleCapabilityState.UNAVAILABLE

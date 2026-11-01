@@ -1,0 +1,25 @@
+android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:693:    suspend fun googleStatus(): JSONObject = withContext(Dispatchers.IO) { getJson("/v1/google/status") }
+android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:2065:    private val googleWithdrawals = GoogleWithdrawalOperations(object : GoogleWithdrawalStore {
+android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:2073:    suspend fun recoverGoogleWithdrawals(): Int = withContext(Dispatchers.IO) {
+android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:2085:    suspend fun googleOwnerRevoke(reviewed: JSONObject, reviewedProfile: String): JSONObject = withContext(Dispatchers.IO) {
+android/app/src/main/java/com/dial/van/gateway/GoogleWithdrawalOperations.kt:18:class GoogleWithdrawalOperations(private val store: GoogleWithdrawalStore) {
+android/app/src/main/java/com/dial/van/command/connected/ConnectedRoute.kt:61:            val recovery = ConnectedReadback.source { JSONObject().put("recovered", app.gatewayClient.recoverGoogleWithdrawals()) }
+android/app/src/main/java/com/dial/van/command/connected/ConnectedRoute.kt:62:            val w = ConnectedReadback.source { app.gatewayClient.googleStatus() }
+android/app/src/main/java/com/dial/van/command/connected/ConnectedRoute.kt:169:                    val result = app.gatewayClient.googleOwnerRevoke(reviewed, reviewedProfile)
+android/app/src/main/java/com/dial/van/command/connected/ConnectedRoute.kt:170:                    val outcome = ConnectedReadback.withdrawal(result)
+android/verification/src/test/kotlin/com/dial/van/gateway/GoogleWithdrawalOperationsTest.kt:8:class GoogleWithdrawalOperationsTest {
+android/verification/src/test/kotlin/com/dial/van/gateway/GoogleWithdrawalOperationsTest.kt:31:        val store = Store(); val journal = GoogleWithdrawalOperations(store); var calls = 0
+android/verification/src/test/kotlin/com/dial/van/gateway/GoogleWithdrawalOperationsTest.kt:40:        val store = Store(); val journal = GoogleWithdrawalOperations(store)
+android/verification/src/test/kotlin/com/dial/van/gateway/GoogleWithdrawalOperationsTest.kt:42:        val restarted = GoogleWithdrawalOperations(store)
+android/verification/src/test/kotlin/com/dial/van/gateway/GoogleWithdrawalOperationsTest.kt:50:        val store = Store(); val journal = GoogleWithdrawalOperations(store)
+android/verification/src/test/kotlin/com/dial/van/gateway/GoogleWithdrawalOperationsTest.kt:57:        assertEquals(2, GoogleWithdrawalOperations(store).pending("profile-one", "device-one").size)
+android/verification/src/test/kotlin/com/dial/van/gateway/GoogleWithdrawalOperationsTest.kt:60:        val store = Store(); val journal = GoogleWithdrawalOperations(store)
+android/verification/src/test/kotlin/com/dial/van/gateway/GoogleWithdrawalOperationsTest.kt:73:            val store = Store(); val journal = GoogleWithdrawalOperations(store)
+android/verification/src/test/kotlin/com/dial/van/gateway/GoogleWithdrawalOperationsTest.kt:81:        val store = Store(); val journal = GoogleWithdrawalOperations(store)
+android/verification/src/test/kotlin/com/dial/van/gateway/GoogleWithdrawalOperationsTest.kt:90:        val store = Store(); val journal = GoogleWithdrawalOperations(store)
+android/verification/src/test/kotlin/com/dial/van/gateway/GoogleWithdrawalOperationsTest.kt:103:            GoogleWithdrawalOperations(store).revoke("profile-one", "device-one", detail(), { "profile-one" }, { "device-one" },
+android/verification/src/test/kotlin/com/dial/van/gateway/GoogleWithdrawalOperationsTest.kt:108:        val store = Store(); val journal = GoogleWithdrawalOperations(store); var reads = 0
+android/verification/src/test/kotlin/com/dial/van/gateway/GoogleWithdrawalOperationsTest.kt:114:        assertEquals(1, GoogleWithdrawalOperations(store).pending("profile-one", "device-one").size)
+android/verification/src/test/kotlin/com/dial/van/command/connected/ConnectedReadbackTest.kt:30:        val outcome = ConnectedReadback.revoke(request = { requests++; disconnected }, read = { reads++; disconnected })
+android/verification/src/test/kotlin/com/dial/van/command/connected/ConnectedReadbackTest.kt:40:            val outcome = ConnectedReadback.revoke(request = {
+android/verification/src/test/kotlin/com/dial/van/command/connected/ConnectedReadbackTest.kt:63:            ConnectedReadback.revoke(request = { throw CancellationException("screen gone") }, read = { JSONObject() })

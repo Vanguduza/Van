@@ -1,0 +1,50 @@
+{
+  "imports": {
+    "service": "/workspace/van-lanes-20261101/google-withdrawal/backend/van_gateway/google/service.py",
+    "mesh": "/workspace/van-lanes-20261101/google-withdrawal/backend/van_gateway/google/mesh.py"
+  },
+  "results": [
+    {
+      "case": "explicit reconnect identical token bytes creates newgeneration",
+      "result": "PASS",
+      "extra": null
+    },
+    {
+      "case": "canary originalprobe lineage/currentgen without statusargument",
+      "result": "PASS",
+      "extra": null
+    },
+    {
+      "case": "actualHTTP withdrawal wins delayedOAuth noprovidercall",
+      "result": "PASS",
+      "extra": null
+    },
+    {
+      "case": "pending expiry versus completed historical recovery",
+      "result": "PASS",
+      "extra": null
+    },
+    {
+      "case": "tampered original sealedreceipt preserves replacement",
+      "result": "PASS",
+      "extra": null
+    },
+    {
+      "case": "sameprincipal normalgrant renewal and modeledtokenreplacement history",
+      "result": "OBSERVED",
+      "extra": {
+        "normal_existing_enrollment_renewal_receipt_status": 200,
+        "trusted_token_replacement_modeled_not_existing_rotation_producer": true,
+        "actual_http_status_with_newtoken": 200,
+        "original_receipt_status_after_token_replacement": 403,
+        "original_receipt_error": {
+          "detail": "workspace_withdrawal_wrong_caller"
+        },
+        "original_sealed_record_sha256": "1376cffaaf8602014643cc2e03b54bbe0539f7626991784eaca75286acb848a0",
+        "original_unchanged": true
+      }
+    }
+  ],
+  "all12source_archive_patchpins_verified_unchanged": true,
+  "owned_tmp_cleanup": true
+}

@@ -2,6 +2,8 @@ from __future__ import annotations
 
 import base64
 import hashlib
+import json
+import uuid
 import re
 import time
 from datetime import datetime
@@ -50,11 +52,14 @@ class GoogleService:
         transport: Any | None = None,
         oauth: Any | None = None,
         documents: DocumentService | None = None,
+        workspace_identity: str = "owner_google_account",
     ) -> None:
         self.store = store
         self.transport = transport
         self.oauth = oauth
         self.documents = documents
+        self.workspace_identity = workspace_identity
+        self.workspace_readiness_aliases = (workspace_identity,)
         self._fernet: Fernet | None = None
         if fernet_key:
             try:
@@ -94,35 +99,303 @@ class GoogleService:
                 raise GoogleAuthError(f"scope_not_allowed:{scope}")
         token = self._fernet.encrypt(refresh_token.encode("utf-8")).decode("ascii")
         now = int(time.time())
-        await self.store.execute("""
-            INSERT INTO google_connections(owner_id, encrypted_refresh_token, scopes_json, status, updated_at_unix)
-            VALUES (?, ?, ?, 'active', ?)
-            ON CONFLICT(owner_id) DO UPDATE SET
-              encrypted_refresh_token=excluded.encrypted_refresh_token,
-              scopes_json=excluded.scopes_json,
-              status='active',
-              updated_at_unix=excluded.updated_at_unix
-            """, (owner_id, token, Store.dumps(scopes), now))
-        # A new refresh credential needs its own canary. Retain the previous receipt
-        # for diagnosis, but do not let it certify a replacement credential.
-        await self.store.execute(
-            "UPDATE google_capability_connections SET state = 'CONFIGURED', "
-            "verified_at_unix = NULL, updated_at_unix = ? "
-            "WHERE credential_plane = 'workspace_oauth'",
-            (now,),
-        )
+        # Explicit connect/reconnect establishes a new logical connection even when
+        # the owner, scopes or token bytes are reused. Access-token refresh never
+        # calls this producer and cannot advance this generation.
+        async with self.store.connection() as db:
+            await db.execute("BEGIN IMMEDIATE")
+            await db.execute("""
+                INSERT INTO google_connections(owner_id, encrypted_refresh_token, scopes_json, status, updated_at_unix)
+                VALUES (?, ?, ?, 'active', ?)
+                ON CONFLICT(owner_id) DO UPDATE SET
+                  encrypted_refresh_token=excluded.encrypted_refresh_token,
+                  scopes_json=excluded.scopes_json, status='active',
+                  updated_at_unix=excluded.updated_at_unix
+                """, (owner_id, token, Store.dumps(scopes), now))
+            await self._record_connection(db, owner_id, uuid.uuid4().hex)
+            # Credential, generation and readiness are one local writer commit.
+            # The previous canary remains diagnostic evidence for its own credential.
+            await self._invalidate_workspace_readiness(db, owner_id, 'CONFIGURED', now)
+            await db.commit()
+
+    @staticmethod
+    def _digest(value: Any) -> str:
+        return hashlib.sha256(Store.dumps(value).encode()).hexdigest()
+
+    def _seal(self, value: dict) -> str:
+        if not self._fernet:
+            raise GoogleAuthError("encryption_key_missing")
+        return self._fernet.encrypt(Store.dumps(value).encode()).decode()
+
+    def _open(self, value: str) -> dict:
+        if not self._fernet:
+            raise GoogleAuthError("encryption_key_missing")
+        try:
+            result = json.loads(self._fernet.decrypt(value.encode()))
+            if not isinstance(result, dict):
+                raise ValueError("not_object")
+            return result
+        except (InvalidToken, ValueError, TypeError, UnicodeError) as exc:
+            raise GoogleAuthError("workspace_record_integrity_failed") from exc
+
+    @staticmethod
+    def _connection_key(owner_id: str) -> str:
+        return "google_connection_generation:" + GoogleService._digest(owner_id)
+
+    async def _connection(self, db, owner_id: str) -> dict:
+        row = await (await db.execute(
+            "SELECT * FROM google_connections WHERE owner_id=?", (owner_id,))).fetchone()
+        row = dict(row) if row else None
+        meta = await (await db.execute(
+            "SELECT value FROM runtime_meta WHERE key=?", (self._connection_key(owner_id),))).fetchone()
+        if meta:
+            original = self._open(meta['value'])
+            if (set(original) != {'schema', 'owner_id', 'generation', 'row_digest'}
+                or original['schema'] != 'van.google-connection/1'
+                or original['owner_id'] != owner_id
+                or not isinstance(original['generation'], str) or not original['generation']
+                or original['row_digest'] != self._digest(row)):
+                raise GoogleAuthError('workspace_record_integrity_failed')
+            generation = original['generation']
+        else:
+            # Existing installations remain inspectable without a write on GET.
+            # The first explicit reconnect gets a fresh generation, including when
+            # it supplies the exact same token bytes as this legacy connection.
+            generation = 'legacy-' + self._digest({'owner_id': owner_id, 'row': row})
+        scopes = json.loads(row['scopes_json']) if row else []
+        return dict(owner_id=owner_id, connection_generation=generation,
+                    source_revision=self._digest({'owner_id': owner_id, 'generation': generation, 'scopes': scopes}),
+                    connected=bool(row and row['status'] == 'active' and row['encrypted_refresh_token']),
+                    scopes=scopes, credential_plane='workspace_oauth',
+                    effect_scope='gateway_held_workspace_credential_only')
+
+    async def _record_connection(self, db, owner_id: str, generation: str) -> None:
+        row = await (await db.execute(
+            "SELECT * FROM google_connections WHERE owner_id=?", (owner_id,))).fetchone()
+        value = self._seal(dict(schema='van.google-connection/1', owner_id=owner_id,
+                                generation=generation, row_digest=self._digest(dict(row) if row else None)))
+        await db.execute(
+            "INSERT INTO runtime_meta(key,value,updated_at_unix_ms) VALUES(?,?,?) "
+            "ON CONFLICT(key) DO UPDATE SET value=excluded.value,updated_at_unix_ms=excluded.updated_at_unix_ms",
+            (self._connection_key(owner_id), value, int(time.time()*1000)))
+
+    async def connection_detail(self, owner_id: str = 'owner') -> dict:
+        async with self.store.connection() as db:
+            await db.execute('BEGIN')
+            return await self._connection(db, owner_id)
+
+    async def _withdraw_connection(self, db, owner_id: str, generation: str) -> None:
+        now = int(time.time())
+        await db.execute("UPDATE google_connections SET status='revoked', encrypted_refresh_token='', "
+                         "updated_at_unix=? WHERE owner_id=?", (now, owner_id))
+        await self._record_connection(db, owner_id, generation)
+        await self._invalidate_workspace_readiness(db, owner_id, 'AUTH_REQUIRED', now)
+
+    async def _invalidate_workspace_readiness(self, db, owner_id: str, state: str, now: int) -> None:
+        # Aliases are derived from the actual broker registry when it is wired.
+        # A non-default credential owner never inherits the canonical owner's rows.
+        aliases = self.workspace_readiness_aliases if owner_id == 'owner' else (owner_id,)
+        if not aliases:
+            return
+        placeholders = ','.join('?' for _ in aliases)
+        await db.execute(
+            "UPDATE google_capability_connections SET state=?,verified_at_unix=NULL,updated_at_unix=? "
+            "WHERE credential_plane='workspace_oauth' AND owner_id IN ("+placeholders+")",
+            (state, now, *aliases))
 
     async def revoke(self, owner_id: str = "owner") -> None:
-        now = int(time.time())
-        await self.store.execute("UPDATE google_connections SET status = 'revoked', encrypted_refresh_token = '', updated_at_unix = ? WHERE owner_id = ?", (now, owner_id))
-        # Readiness consumers do not all receive GoogleService.status(). Invalidate
-        # this plane's live verdict at the revocation boundary as well.
-        await self.store.execute(
-            "UPDATE google_capability_connections SET state = 'AUTH_REQUIRED', "
-            "verified_at_unix = NULL, updated_at_unix = ? "
-            "WHERE credential_plane = 'workspace_oauth'",
-            (now,),
-        )
+        # Existing internal-control operation is a new explicit current withdrawal.
+        # The phone adapter must instead use its selected original operation receipt.
+        async with self.store.connection() as db:
+            await db.execute('BEGIN IMMEDIATE')
+            detail = await self._connection(db, owner_id)
+            await self._withdraw_connection(db, owner_id, detail['connection_generation'])
+            await db.commit()
+
+    async def _withdrawal_actor(self, db, device_id: str, access_token_hash: str | None,
+                                proof_required: bool = False) -> str:
+        row = await (await db.execute('SELECT * FROM devices WHERE device_id=?', (device_id,))).fetchone()
+        if (not row or row['revoked_at_unix'] is not None
+            or access_token_hash is not None and row['access_token_hash'] != access_token_hash):
+            raise GoogleAuthError('workspace_caller_not_current')
+        binding = await (await db.execute(
+            'SELECT binding_id,status,device_key_fingerprint FROM owner_device_bindings WHERE device_id=?',
+            (device_id,))).fetchone()
+        if binding and binding['status'] != 'ACTIVE':
+            raise GoogleAuthError('workspace_caller_not_current')
+        return self._digest(dict(device_id=device_id, enrolled_at_unix=row['enrolled_at_unix'],
+                                 public_key_pem=row['public_key_pem'], access_token_hash=row['access_token_hash'],
+                                 binding=dict(binding) if binding else None))
+
+    async def withdrawal_detail(self, *, device_id: str, access_token_hash: str | None = None,
+                                owner_id: str = 'owner') -> dict:
+        """An inert, bounded proposal. No connection, grant or operation is written by GET."""
+        async with self.store.connection() as db:
+            await db.execute('BEGIN')
+            actor = await self._withdrawal_actor(db, device_id, access_token_hash)
+            detail = await self._connection(db, owner_id)
+        return {**detail, 'withdrawal_request': self._new_withdrawal_request(detail, device_id, actor)}
+
+    def _new_withdrawal_request(self, detail: dict, device_id: str, actor: str) -> dict:
+        owner_id = detail['owner_id']
+        issued = int(time.time()*1000)
+        request = dict(operation_id='workspace-withdraw-'+uuid.uuid4().hex,
+                       caller_device_id=device_id, owner_id=owner_id,
+                       connection_generation=detail['connection_generation'],
+                       expected_revision=detail['source_revision'])
+        token = dict(schema='van.google-withdrawal-proposal/1', request=request,
+                     caller_context=actor, issued_at_ms=issued, deadline_ms=issued+600000)
+        return {**request, 'request_token': self._seal(token)}
+
+    def _withdrawal_request(self, request: dict) -> tuple[dict, dict]:
+        fields = {'operation_id', 'caller_device_id', 'owner_id', 'connection_generation',
+                  'expected_revision', 'request_token'}
+        if (not isinstance(request, dict) or set(request) != fields
+            or any(not isinstance(v, str) or not v or len(v)>16384 for v in request.values())
+            or not re.fullmatch(r'workspace-withdraw-[a-f0-9]{32}', request['operation_id'])):
+            raise GoogleAuthError('workspace_withdrawal_request_invalid')
+        body = {k:v for k,v in request.items() if k != 'request_token'}
+        token = self._open(request['request_token'])
+        if (set(token) != {'schema','request','caller_context','issued_at_ms','deadline_ms'}
+            or token['schema'] != 'van.google-withdrawal-proposal/1' or token['request'] != body
+            or not isinstance(token['caller_context'], str)
+            or type(token['issued_at_ms']) is not int or type(token['deadline_ms']) is not int
+            or token['deadline_ms']-token['issued_at_ms'] != 600000):
+            raise GoogleAuthError('workspace_withdrawal_request_invalid')
+        return body, token
+
+    @staticmethod
+    def _withdrawal_key(operation_id: str) -> str:
+        return 'google_owner_withdrawal:' + operation_id
+
+    async def _original_withdrawal(self, db, operation_id: str) -> dict | None:
+        row = await (await db.execute('SELECT value FROM runtime_meta WHERE key=?',
+                                     (self._withdrawal_key(operation_id),))).fetchone()
+        if not row:
+            return None
+        record = self._open(row['value'])
+        if (set(record) != {'schema','request','request_digest','caller_context','result'}
+            or record['schema'] != 'van.google-withdrawal-result/1'
+            or not isinstance(record['request'], dict) or not isinstance(record['result'], dict)
+            or record['request_digest'] != self._digest(record['request'])
+            or record['request'].get('operation_id') != operation_id):
+            raise GoogleAuthError('workspace_record_integrity_failed')
+        body, token = self._withdrawal_request(record['request'])
+        result = record['result']
+        if (record['caller_context'] != token['caller_context']
+            or any(result.get(k) != body[k] for k in body)
+            or result.get('request_deadline_ms') != token['deadline_ms']
+            or result.get('state') not in {'APPLIED','REFUSED'}
+            or result.get('effect_scope') != 'gateway_held_workspace_credential_only'
+            or result.get('provider_token_revoked') is not False):
+            raise GoogleAuthError('workspace_record_integrity_failed')
+        return record
+
+    async def withdraw_selected(self, request: dict, *, device_id: str,
+                                access_token_hash: str | None = None,
+                                proof_required: bool = False, owner_id: str = 'owner') -> dict:
+        body, token = self._withdrawal_request(request)
+        if body['caller_device_id'] != device_id or body['owner_id'] != owner_id:
+            raise GoogleAuthError('workspace_withdrawal_wrong_caller')
+        async with self.store.connection() as db:
+            await db.execute('BEGIN IMMEDIATE')
+            result = await self._withdraw_in_writer(db, request, body, token, device_id,
+                                                    access_token_hash, proof_required)
+            await db.commit()
+            return result
+
+    async def _withdraw_in_writer(self, db, request, body, token, device_id,
+                                  access_token_hash, proof_required):
+        actor = await self._withdrawal_actor(db, device_id, access_token_hash, proof_required)
+        original = await self._original_withdrawal(db, body['operation_id'])
+        if original:
+            # AuthService never re-enrolls an existing device_id, including its
+            # revoked tombstone. The already sealed owner/device/target/op are
+            # stable history subjects; an old access-token digest is not current
+            # read authority. Current lawful authentication was checked above.
+            if original['request'] != request:
+                raise GoogleAuthError('workspace_withdrawal_operation_conflict')
+            return original['result']
+        now = int(time.time()*1000)
+        reason = ('workspace_withdrawal_request_not_current' if token['caller_context'] != actor else
+                  'workspace_withdrawal_request_expired' if now >= token['deadline_ms'] else
+                  'workspace_withdrawal_request_not_current' if now+30000 < token['issued_at_ms'] else None)
+        if reason is None:
+            detail = await self._connection(db, body['owner_id'])
+            if (detail['connection_generation'] != body['connection_generation'] or
+                detail['source_revision'] != body['expected_revision']):
+                reason = 'workspace_withdrawal_stale_connection'
+        changed = False
+        if reason is None:
+            # Recheck the immutable original request lease inside the writer
+            # immediately before the local effect, including a delayed read.
+            if int(time.time()*1000) >= token['deadline_ms']:
+                reason = 'workspace_withdrawal_request_expired'
+            else:
+                changed = detail['connected']
+                await self._withdraw_connection(db, body['owner_id'], body['connection_generation'])
+        result = {**body, 'state': 'REFUSED' if reason else 'APPLIED',
+                  'withdrawn': reason is None, 'changed': changed, 'reason_code': reason,
+                  'completed_at_ms': now, 'request_deadline_ms': token['deadline_ms'],
+                  'effect_scope': 'gateway_held_workspace_credential_only',
+                  'provider_token_revoked': False}
+        record = dict(schema='van.google-withdrawal-result/1', request=request,
+                      request_digest=self._digest(request), caller_context=token['caller_context'], result=result)
+        await db.execute('INSERT INTO runtime_meta(key,value,updated_at_unix_ms) VALUES(?,?,?)',
+                         (self._withdrawal_key(body['operation_id']), self._seal(record), now))
+        return result
+
+    async def withdraw_legacy(self, *, device_id: str, access_token_hash: str | None = None,
+                              proof_required: bool = False, owner_id: str = 'owner') -> dict:
+        """Capture one unambiguous original legacy intent; never select a replacement.
+
+        A new connection or changed caller context requires an explicitly reviewed
+        operation. Empty transport retries cannot express that new owner intent.
+        """
+        key = 'google_legacy_owner_withdrawal:' + self._digest({'owner_id':owner_id, 'device_id':device_id})
+        async with self.store.connection() as db:
+            await db.execute('BEGIN IMMEDIATE')
+            actor = await self._withdrawal_actor(db, device_id, access_token_hash, proof_required)
+            detail = await self._connection(db, owner_id)
+            saved = await (await db.execute('SELECT value FROM runtime_meta WHERE key=?', (key,))).fetchone()
+            if saved:
+                pointer = self._open(saved['value'])
+                if set(pointer) != {'schema','request','caller_context'} or pointer['schema'] != 'van.google-legacy-withdrawal/1':
+                    raise GoogleAuthError('workspace_record_integrity_failed')
+                request = pointer['request']
+                body, token = self._withdrawal_request(request)
+                if (body['owner_id'] != owner_id or body['caller_device_id'] != device_id
+                    or body['connection_generation'] != detail['connection_generation']):
+                    raise GoogleAuthError('workspace_explicit_operation_required')
+                original = await self._original_withdrawal(db, body['operation_id'])
+                if (not original or original['request'] != request
+                    or pointer['caller_context'] != token['caller_context']):
+                    raise GoogleAuthError('workspace_record_integrity_failed')
+                result = await self._withdraw_in_writer(db, request, body, token, device_id,
+                                                        access_token_hash, proof_required)
+            else:
+                request = self._new_withdrawal_request(detail, device_id, actor)
+                body, token = self._withdrawal_request(request)
+                result = await self._withdraw_in_writer(db, request, body, token, device_id,
+                                                        access_token_hash, proof_required)
+                pointer = dict(schema='van.google-legacy-withdrawal/1', request=request, caller_context=actor)
+                await db.execute('INSERT INTO runtime_meta(key,value,updated_at_unix_ms) VALUES(?,?,?)',
+                                 (key, self._seal(pointer), int(time.time()*1000)))
+            await db.commit()
+            return result
+
+    async def original_withdrawal(self, operation_id: str, *, device_id: str,
+                                  access_token_hash: str | None = None, owner_id: str = 'owner') -> dict:
+        async with self.store.connection() as db:
+            await db.execute('BEGIN')
+            await self._withdrawal_actor(db, device_id, access_token_hash)
+            record = await self._original_withdrawal(db, operation_id)
+            if not record:
+                raise GoogleAuthError('workspace_withdrawal_not_found')
+            if (record['request']['caller_device_id'] != device_id
+                or record['request']['owner_id'] != owner_id):
+                raise GoogleAuthError('workspace_withdrawal_wrong_caller')
+            return record['result']
 
     async def _refresh_token(self, owner_id: str) -> str:
         if not self._fernet:
@@ -141,16 +414,45 @@ class GoogleService:
         return self.transport
 
     async def _api_token(self, owner_id: str) -> str:
-        refresh = await self._refresh_token(owner_id)
+        # Capture the credential and logical connection from one read snapshot.
+        # A potentially slow OAuth exchange must never authorize a call using a
+        # connection which was withdrawn or replaced while that exchange ran.
+        async with self.store.connection() as db:
+            await db.execute('BEGIN')
+            original = await self._connection(db, owner_id)
+            row = await (await db.execute(
+                'SELECT encrypted_refresh_token FROM google_connections WHERE owner_id=?',
+                (owner_id,))).fetchone()
+            if not original['connected'] or not row:
+                raise GoogleAuthError('not_connected')
+            if not self._fernet:
+                raise GoogleAuthError('encryption_key_missing')
+            try:
+                refresh = self._fernet.decrypt(row['encrypted_refresh_token'].encode()).decode()
+            except (InvalidToken, UnicodeError) as exc:
+                raise GoogleAuthError('token_decrypt_failed') from exc
         transport = self._require_transport()
-        if not getattr(transport, "requires_access_token", True):
-            return refresh
-        if self.oauth is None:
-            raise GoogleAuthError("oauth_refresh_unavailable")
-        try:
-            return await self.oauth.access_token(refresh)
-        except RuntimeError as exc:
-            raise GoogleAuthError(str(exc)) from exc
+        if not getattr(transport, 'requires_access_token', True):
+            token = refresh
+        else:
+            if self.oauth is None:
+                raise GoogleAuthError('oauth_refresh_unavailable')
+            try:
+                token = await self.oauth.access_token(refresh)
+            except RuntimeError as exc:
+                raise GoogleAuthError(str(exc)) from exc
+        # This is local effect admission, serialized with withdrawal/reconnect.
+        # Calls already admitted may have external outcomes and must reconcile
+        # their existing action receipt; withdrawal blocks the next admission.
+        async with self.store.connection() as db:
+            await db.execute('BEGIN IMMEDIATE')
+            current = await self._connection(db, owner_id)
+            if (not current['connected'] or
+                current['connection_generation'] != original['connection_generation'] or
+                current['source_revision'] != original['source_revision']):
+                raise GoogleAuthError('workspace_connection_withdrawn_or_replaced')
+            await db.commit()
+        return token
 
     async def _provider_call(self, method: str, *args: Any, owner_id: str = "owner") -> Any:
         token = await self._api_token(owner_id)

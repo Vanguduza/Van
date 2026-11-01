@@ -2059,11 +2059,43 @@ class VanGatewayClient(context: Context) {
 
     /**
      * POST /v1/google/owner-revoke — the owner cutting Google from the phone. Device-proofed
-     * like every other owner mutation (GAP-F-024); `google.revoke()` + `google.status()` is
-     * the whole of the route's own effect, so nothing further is required in the body.
+     * like every other owner mutation (GAP-F-024). Persist the reviewed original
+     * generation before POST and recover its receipt before reading current access.
      */
-    suspend fun googleOwnerRevoke(): JSONObject = withContext(Dispatchers.IO) {
-        postProved("/v1/google/owner-revoke", JSONObject())
+    private val googleWithdrawals = GoogleWithdrawalOperations(object : GoogleWithdrawalStore {
+        override fun load(): String? = prefs.getString("google_withdrawal_originals_v1", null)
+        override fun save(value: String): Boolean = prefs.edit().putString("google_withdrawal_originals_v1", value).commit()
+    })
+    private fun originalGoogleWithdrawal(original: PendingGoogleWithdrawal): JSONObject? = try {
+        getJson("/v1/google/owner-revocations/${encodeSegment(original.operationId)}")
+    } catch (failure: GatewayHttpException) { if (failure.code == 404) null else throw failure }
+
+    suspend fun recoverGoogleWithdrawals(): Int = withContext(Dispatchers.IO) {
+        val owner = deviceId ?: return@withContext 0
+        try {
+            googleWithdrawals.recover(permissionProfileIdentity(), owner,
+                currentProfile = { permissionProfileIdentity() }, currentDevice = { deviceId },
+                originalResult = { originalGoogleWithdrawal(it) }, detail = { getJson("/v1/google/status") })
+        } catch (cancelled: kotlinx.coroutines.CancellationException) { throw cancelled }
+        catch (failure: Exception) {
+            throw java.io.IOException("Workspace withdrawal history could not be confirmed. Refresh before retrying.", failure)
+        }
+    }
+
+    suspend fun googleOwnerRevoke(reviewed: JSONObject, reviewedProfile: String): JSONObject = withContext(Dispatchers.IO) {
+        val owner = deviceId ?: error("The active owner changed. Review Workspace access again.")
+        try {
+            googleWithdrawals.revoke(reviewedProfile, owner, reviewed,
+                currentProfile = { permissionProfileIdentity() }, currentDevice = { deviceId },
+                originalResult = { originalGoogleWithdrawal(it) },
+                submit = { postProved("/v1/google/owner-revoke", JSONObject(it.requestBody)) },
+                detail = { getJson("/v1/google/status") })
+        } catch (cancelled: kotlinx.coroutines.CancellationException) { throw cancelled }
+        catch (failure: GatewayHttpException) {
+            throw java.io.IOException("Workspace access changed or could not be confirmed. Refresh its current details before confirming again.", failure)
+        } catch (failure: IllegalStateException) {
+            throw IllegalStateException("Workspace withdrawal could not be confirmed. Review current access and refresh before retrying.", failure)
+        }
     }
 
     // ---------------------------------------------------------------- trading (read-only)

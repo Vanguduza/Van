@@ -1,0 +1,19 @@
+{
+  "at_utc": "2026-11-01T08:06:52.011872+00:00",
+  "no_active_owned_processes": true,
+  "removed_terminal_owned_fixtures": [
+    {
+      "path": "/tmp/van-google-history-counterexample",
+      "bytes": 6156288
+    },
+    {
+      "path": "/tmp/van-google-history-repair",
+      "bytes": 10260480
+    },
+    {
+      "path": "/tmp/van-google-history-affected",
+      "bytes": 167055360
+    }
+  ],
+  "preserved": "Allrawlogs/failureSQLitezip/oldandnewsourcearchives/pins; integrationcompiler/JDK/Gradle/SDK caches untouched"
+}

@@ -1,0 +1,156 @@
+FFF                                                                      [100%]
+=================================== FAILURES ===================================
+_ test_completed_history_current_same_principal_credential_replacement_preserves_original[APPLIED] _
+
+client = (<httpx.AsyncClient object at 0x7f82a93b49e0>, <fastapi.applications.FastAPI object at 0x7f82a8e83d10>)
+terminal_state = 'APPLIED'
+
+    @pytest.mark.asyncio
+    @pytest.mark.parametrize('terminal_state', ['APPLIED','REFUSED'])
+    async def test_completed_history_current_same_principal_credential_replacement_preserves_original(client, terminal_state):
+        """SOURCE trusted replacement diagnostic, not a production token-rotation route."""
+        import hashlib
+        ac, app = client
+        google = app.state.google
+        await google.store_refresh_token('owner', 'SOURCE-original', [SCOPE])
+        request = (await ac.get('/v1/google/status')).json()['withdrawal_request']
+        if terminal_state == 'REFUSED':
+            await google.store_refresh_token('owner', 'SOURCE-replacement', [SCOPE])
+        completed = await ac.post('/v1/google/owner-revoke', json=request)
+        receipt = completed.json()['withdrawal_receipt']
+        assert receipt['state'] == terminal_state
+        key = google._withdrawal_key(request['operation_id'])
+        original = (await app.state.store.fetchone('SELECT value FROM runtime_meta WHERE key=?',(key,)))['value']
+        # Existing ordinary grant renewal does not rotate credentials and still permits history.
+        device = request['caller_device_id']
+        await app.state.auth.renew_grant(device)
+        assert (await ac.get('/v1/google/owner-revocations/'+request['operation_id'])).status_code == 200
+        before = dict(await app.state.store.fetchone('SELECT * FROM devices WHERE device_id=?',(device,)))
+        current = 'SOURCE-trusted-current-token-replacement-0123456789'
+        await app.state.store.execute('UPDATE devices SET access_token_hash=? WHERE device_id=?',
+                                     (hashlib.sha256(current.encode()).hexdigest(),device))
+        ac.headers['X-Van-Device-Token'] = current
+        assert (await app.state.auth.require_access_token(current)).device_id == device
+        assert (await ac.get('/v1/google/status')).status_code == 200
+        history = await ac.get('/v1/google/owner-revocations/'+request['operation_id'])
+>       assert history.status_code == 200, history.text
+E       AssertionError: {"detail":"workspace_withdrawal_wrong_caller"}
+E       assert 403 == 200
+E        +  where 403 = <Response [403 Forbidden]>.status_code
+
+backend/tests/test_google_owner_withdrawal_recovery.py:538: AssertionError
+----------------------------- Captured stdout call -----------------------------
+{"action_class": null, "command_id": null, "correlation_id": null, "degraded_code": null, "detail": {"duration_ms": 662.95, "method": "GET", "route": "/v1/google/status"}, "device_id": null, "error_class": null, "level": "INFO", "logger": "van.request", "message": "request", "mission_id": null, "principal": null, "result": "200", "service": "van-gateway", "ts": "2026-11-01T08:01:09.794Z"}
+{"action_class": null, "command_id": null, "correlation_id": null, "degraded_code": null, "detail": {"duration_ms": 41.06, "method": "POST", "route": "/v1/google/owner-revoke"}, "device_id": null, "error_class": null, "level": "INFO", "logger": "van.request", "message": "request", "mission_id": null, "principal": null, "result": "200", "service": "van-gateway", "ts": "2026-11-01T08:01:09.845Z"}
+{"action_class": null, "command_id": null, "correlation_id": null, "degraded_code": null, "detail": {"duration_ms": 44, "fired": 0, "job": "reminders.fire_due", "published": 0}, "device_id": null, "error_class": null, "level": "INFO", "logger": "van.scheduler", "message": "scheduled job completed", "mission_id": null, "principal": null, "result": "OK", "service": "van-gateway", "ts": "2026-11-01T08:01:09.865Z"}
+{"action_class": null, "command_id": null, "correlation_id": null, "degraded_code": null, "detail": {"duration_ms": 39, "expired": 0, "job": "missions.expire_overdue"}, "device_id": null, "error_class": null, "level": "INFO", "logger": "van.scheduler", "message": "scheduled job completed", "mission_id": null, "principal": null, "result": "OK", "service": "van-gateway", "ts": "2026-11-01T08:01:09.923Z"}
+{"action_class": null, "command_id": null, "correlation_id": null, "degraded_code": null, "detail": {"duration_ms": 17.57, "method": "GET", "route": "/v1/google/owner-revocations/{operation_id}"}, "device_id": null, "error_class": null, "level": "INFO", "logger": "van.request", "message": "request", "mission_id": null, "principal": null, "result": "200", "service": "van-gateway", "ts": "2026-11-01T08:01:09.933Z"}
+{"action_class": null, "command_id": null, "correlation_id": null, "degraded_code": null, "detail": {"duration_ms": 10, "job": "missions.publish_terminal", "published": 0}, "device_id": null, "error_class": null, "level": "INFO", "logger": "van.scheduler", "message": "scheduled job completed", "mission_id": null, "principal": null, "result": "OK", "service": "van-gateway", "ts": "2026-11-01T08:01:09.945Z"}
+{"action_class": null, "command_id": null, "correlation_id": null, "degraded_code": null, "detail": {"duration_ms": 28, "job": "learning.repair_missions", "pending": 0, "repaired": 0, "retry_pending": 0}, "device_id": null, "error_class": null, "level": "INFO", "logger": "van.scheduler", "message": "scheduled job completed", "mission_id": null, "principal": null, "result": "OK", "service": "van-gateway", "ts": "2026-11-01T08:01:10.005Z"}
+{"action_class": null, "command_id": null, "correlation_id": null, "degraded_code": null, "detail": {"duration_ms": 49.67, "method": "GET", "route": "/v1/google/status"}, "device_id": null, "error_class": null, "level": "INFO", "logger": "van.request", "message": "request", "mission_id": null, "principal": null, "result": "200", "service": "van-gateway", "ts": "2026-11-01T08:01:10.030Z"}
+{"action_class": null, "command_id": null, "correlation_id": null, "degraded_code": null, "detail": {"duration_ms": 19.37, "method": "GET", "route": "/v1/google/owner-revocations/{operation_id}"}, "device_id": null, "error_class": null, "level": "INFO", "logger": "van.request", "message": "request", "mission_id": null, "principal": null, "result": "403", "service": "van-gateway", "ts": "2026-11-01T08:01:10.072Z"}
+------------------------------ Captured log call -------------------------------
+INFO     van.request:logging.py:112 request
+INFO     van.request:logging.py:112 request
+INFO     van.scheduler:logging.py:112 scheduled job completed
+INFO     van.scheduler:logging.py:112 scheduled job completed
+INFO     van.request:logging.py:112 request
+INFO     van.scheduler:logging.py:112 scheduled job completed
+INFO     van.scheduler:logging.py:112 scheduled job completed
+INFO     van.request:logging.py:112 request
+INFO     van.request:logging.py:112 request
+_ test_completed_history_current_same_principal_credential_replacement_preserves_original[REFUSED] _
+
+client = (<httpx.AsyncClient object at 0x7f82a8957920>, <fastapi.applications.FastAPI object at 0x7f82a6509b80>)
+terminal_state = 'REFUSED'
+
+    @pytest.mark.asyncio
+    @pytest.mark.parametrize('terminal_state', ['APPLIED','REFUSED'])
+    async def test_completed_history_current_same_principal_credential_replacement_preserves_original(client, terminal_state):
+        """SOURCE trusted replacement diagnostic, not a production token-rotation route."""
+        import hashlib
+        ac, app = client
+        google = app.state.google
+        await google.store_refresh_token('owner', 'SOURCE-original', [SCOPE])
+        request = (await ac.get('/v1/google/status')).json()['withdrawal_request']
+        if terminal_state == 'REFUSED':
+            await google.store_refresh_token('owner', 'SOURCE-replacement', [SCOPE])
+        completed = await ac.post('/v1/google/owner-revoke', json=request)
+        receipt = completed.json()['withdrawal_receipt']
+        assert receipt['state'] == terminal_state
+        key = google._withdrawal_key(request['operation_id'])
+        original = (await app.state.store.fetchone('SELECT value FROM runtime_meta WHERE key=?',(key,)))['value']
+        # Existing ordinary grant renewal does not rotate credentials and still permits history.
+        device = request['caller_device_id']
+        await app.state.auth.renew_grant(device)
+        assert (await ac.get('/v1/google/owner-revocations/'+request['operation_id'])).status_code == 200
+        before = dict(await app.state.store.fetchone('SELECT * FROM devices WHERE device_id=?',(device,)))
+        current = 'SOURCE-trusted-current-token-replacement-0123456789'
+        await app.state.store.execute('UPDATE devices SET access_token_hash=? WHERE device_id=?',
+                                     (hashlib.sha256(current.encode()).hexdigest(),device))
+        ac.headers['X-Van-Device-Token'] = current
+        assert (await app.state.auth.require_access_token(current)).device_id == device
+        assert (await ac.get('/v1/google/status')).status_code == 200
+        history = await ac.get('/v1/google/owner-revocations/'+request['operation_id'])
+>       assert history.status_code == 200, history.text
+E       AssertionError: {"detail":"workspace_withdrawal_wrong_caller"}
+E       assert 403 == 200
+E        +  where 403 = <Response [403 Forbidden]>.status_code
+
+backend/tests/test_google_owner_withdrawal_recovery.py:538: AssertionError
+----------------------------- Captured stdout call -----------------------------
+{"action_class": null, "command_id": null, "correlation_id": null, "degraded_code": null, "detail": {"duration_ms": 524.16, "method": "GET", "route": "/v1/google/status"}, "device_id": null, "error_class": null, "level": "INFO", "logger": "van.request", "message": "request", "mission_id": null, "principal": null, "result": "200", "service": "van-gateway", "ts": "2026-11-01T08:01:12.803Z"}
+{"action_class": null, "command_id": null, "correlation_id": null, "degraded_code": null, "detail": {"duration_ms": 28, "fired": 0, "job": "reminders.fire_due", "published": 0}, "device_id": null, "error_class": null, "level": "INFO", "logger": "van.scheduler", "message": "scheduled job completed", "mission_id": null, "principal": null, "result": "OK", "service": "van-gateway", "ts": "2026-11-01T08:01:12.847Z"}
+{"action_class": null, "command_id": null, "correlation_id": null, "degraded_code": null, "detail": {"duration_ms": 31.0, "method": "POST", "route": "/v1/google/owner-revoke"}, "device_id": null, "error_class": null, "level": "INFO", "logger": "van.request", "message": "request", "mission_id": null, "principal": null, "result": "409", "service": "van-gateway", "ts": "2026-11-01T08:01:12.855Z"}
+{"action_class": null, "command_id": null, "correlation_id": null, "degraded_code": null, "detail": {"duration_ms": 12.94, "method": "GET", "route": "/v1/google/owner-revocations/{operation_id}"}, "device_id": null, "error_class": null, "level": "INFO", "logger": "van.request", "message": "request", "mission_id": null, "principal": null, "result": "200", "service": "van-gateway", "ts": "2026-11-01T08:01:12.906Z"}
+{"action_class": null, "command_id": null, "correlation_id": null, "degraded_code": null, "detail": {"duration_ms": 49, "expired": 0, "job": "missions.expire_overdue"}, "device_id": null, "error_class": null, "level": "INFO", "logger": "van.scheduler", "message": "scheduled job completed", "mission_id": null, "principal": null, "result": "OK", "service": "van-gateway", "ts": "2026-11-01T08:01:12.908Z"}
+{"action_class": null, "command_id": null, "correlation_id": null, "degraded_code": null, "detail": {"duration_ms": 10, "job": "missions.publish_terminal", "published": 0}, "device_id": null, "error_class": null, "level": "INFO", "logger": "van.scheduler", "message": "scheduled job completed", "mission_id": null, "principal": null, "result": "OK", "service": "van-gateway", "ts": "2026-11-01T08:01:12.933Z"}
+{"action_class": null, "command_id": null, "correlation_id": null, "degraded_code": null, "detail": {"duration_ms": 13, "job": "learning.repair_missions", "pending": 0, "repaired": 0, "retry_pending": 0}, "device_id": null, "error_class": null, "level": "INFO", "logger": "van.scheduler", "message": "scheduled job completed", "mission_id": null, "principal": null, "result": "OK", "service": "van-gateway", "ts": "2026-11-01T08:01:12.961Z"}
+{"action_class": null, "command_id": null, "correlation_id": null, "degraded_code": null, "detail": {"duration_ms": 37.65, "method": "GET", "route": "/v1/google/status"}, "device_id": null, "error_class": null, "level": "INFO", "logger": "van.request", "message": "request", "mission_id": null, "principal": null, "result": "200", "service": "van-gateway", "ts": "2026-11-01T08:01:12.993Z"}
+{"action_class": null, "command_id": null, "correlation_id": null, "degraded_code": null, "detail": {"duration_ms": 10.17, "method": "GET", "route": "/v1/google/owner-revocations/{operation_id}"}, "device_id": null, "error_class": null, "level": "INFO", "logger": "van.request", "message": "request", "mission_id": null, "principal": null, "result": "403", "service": "van-gateway", "ts": "2026-11-01T08:01:13.011Z"}
+------------------------------ Captured log call -------------------------------
+INFO     van.request:logging.py:112 request
+INFO     van.scheduler:logging.py:112 scheduled job completed
+INFO     van.request:logging.py:112 request
+INFO     van.request:logging.py:112 request
+INFO     van.scheduler:logging.py:112 scheduled job completed
+INFO     van.scheduler:logging.py:112 scheduled job completed
+INFO     van.scheduler:logging.py:112 scheduled job completed
+INFO     van.request:logging.py:112 request
+INFO     van.request:logging.py:112 request
+_ test_pending_original_context_replacement_is_durable_refusal_without_new_effect _
+
+client = (<httpx.AsyncClient object at 0x7f82a6d61a30>, <fastapi.applications.FastAPI object at 0x7f82a6357170>)
+
+    @pytest.mark.asyncio
+    async def test_pending_original_context_replacement_is_durable_refusal_without_new_effect(client):
+        import hashlib
+        ac, app = client
+        google = app.state.google
+        await google.store_refresh_token('owner','SOURCE-still-current',[SCOPE])
+        request = (await ac.get('/v1/google/status')).json()['withdrawal_request']
+        original_token = google._open(request['request_token'])
+        current = 'SOURCE-trusted-current-pending-token-0123456789'
+        await app.state.store.execute('UPDATE devices SET access_token_hash=? WHERE device_id=?',
+            (hashlib.sha256(current.encode()).hexdigest(),request['caller_device_id']))
+        ac.headers['X-Van-Device-Token'] = current
+        assert (await ac.get('/v1/google/status')).status_code == 200
+        result = await ac.post('/v1/google/owner-revoke',json=request)
+>       assert result.status_code == 409
+E       assert 403 == 409
+E        +  where 403 = <Response [403 Forbidden]>.status_code
+
+backend/tests/test_google_owner_withdrawal_recovery.py:562: AssertionError
+----------------------------- Captured stdout call -----------------------------
+{"action_class": null, "command_id": null, "correlation_id": null, "degraded_code": null, "detail": {"duration_ms": 474.01, "method": "GET", "route": "/v1/google/status"}, "device_id": null, "error_class": null, "level": "INFO", "logger": "van.request", "message": "request", "mission_id": null, "principal": null, "result": "200", "service": "van-gateway", "ts": "2026-11-01T08:01:15.289Z"}
+{"action_class": null, "command_id": null, "correlation_id": null, "degraded_code": null, "detail": {"duration_ms": 24.43, "method": "GET", "route": "/v1/google/status"}, "device_id": null, "error_class": null, "level": "INFO", "logger": "van.request", "message": "request", "mission_id": null, "principal": null, "result": "200", "service": "van-gateway", "ts": "2026-11-01T08:01:15.350Z"}
+{"action_class": null, "command_id": null, "correlation_id": null, "degraded_code": null, "detail": {"duration_ms": 9.14, "method": "POST", "route": "/v1/google/owner-revoke"}, "device_id": null, "error_class": null, "level": "INFO", "logger": "van.request", "message": "request", "mission_id": null, "principal": null, "result": "403", "service": "van-gateway", "ts": "2026-11-01T08:01:15.374Z"}
+------------------------------ Captured log call -------------------------------
+INFO     van.request:logging.py:112 request
+INFO     van.request:logging.py:112 request
+INFO     van.request:logging.py:112 request
+=========================== short test summary info ============================
+FAILED backend/tests/test_google_owner_withdrawal_recovery.py::test_completed_history_current_same_principal_credential_replacement_preserves_original[APPLIED]
+FAILED backend/tests/test_google_owner_withdrawal_recovery.py::test_completed_history_current_same_principal_credential_replacement_preserves_original[REFUSED]
+FAILED backend/tests/test_google_owner_withdrawal_recovery.py::test_pending_original_context_replacement_is_durable_refusal_without_new_effect
+3 failed, 26 deselected in 10.37s

@@ -1,0 +1,236 @@
+{
+  "directory": "/tmp/van-recovery-google-r2-integration-boundary-20261101",
+  "at_utc": "2026-11-01T08:12:29.738968+00:00",
+  "files": [
+    {
+      "path": "test_disconnected_workspace_ov0/google.sqlite3",
+      "bytes": 1916928,
+      "sha256": "670349f24fc18dbfdd304af3124f7acd292fff1a9bc895020474fb5b828d6a02"
+    },
+    {
+      "path": "test_revoke_reconnect_requires0/google.sqlite3",
+      "bytes": 1916928,
+      "sha256": "4dd0c1b0dd0acbd93a4d8f96af2b1ab8ff637f1566ffa730a37add0f011810c7"
+    },
+    {
+      "path": "test_completed_legacy_history_0/g.sqlite3",
+      "bytes": 2060288,
+      "sha256": "8054b31f1d2d44d4bd56df2038ebd5f57ef27b0359d6da55f87f1203be1efd5a"
+    },
+    {
+      "path": "test_completed_history_wrong_o0/g.sqlite3",
+      "bytes": 2052096,
+      "sha256": "295ac8e2ab73b4681059c09721d9168ab34de9618f45fe161d494bf194aad57e"
+    },
+    {
+      "path": "test_pending_original_context_0/g.sqlite3",
+      "bytes": 2052096,
+      "sha256": "0394143e44891fcf0ca55dc18b15ad4224ecc158ce19b6c36dce8e8c9867efec"
+    },
+    {
+      "path": "test_completed_history_current1/g.sqlite3",
+      "bytes": 2052096,
+      "sha256": "7892e00127667c3bf08c626b6eda19257c88b7cd81f74627fb6840f82e43ac13"
+    },
+    {
+      "path": "test_completed_history_current0/g.sqlite3",
+      "bytes": 2052096,
+      "sha256": "a6c702c03c3b1c003b7f644c3ce89d2aae23a9ca3780d134caf3eafbc8ad3216"
+    },
+    {
+      "path": "test_actor_currentness_is_rech1/g.sqlite3",
+      "bytes": 2052096,
+      "sha256": "59badb5191adb39664dfb3e82bed46b166ae15820b8ef8ac4dfc7546140f42fb"
+    },
+    {
+      "path": "test_actor_currentness_is_rech0/g.sqlite3",
+      "bytes": 2052096,
+      "sha256": "4a8b0e4be10f5703e17d3d676c56b68e0c44298695179a86a6ee543b6b940b7f"
+    },
+    {
+      "path": "test_actual_http_withdrawal_wi0/g.sqlite3",
+      "bytes": 2052096,
+      "sha256": "e60f9f02c43ccdeab81193ab4e5bf9c63ec5e78a1809793905a5ff6d97c06327"
+    },
+    {
+      "path": "test_configured_strict_binding0/g.sqlite3",
+      "bytes": 2052096,
+      "sha256": "ec7f86f13df12d5272dc6df9ad92a2aedec6b84003223cfcc79be16e6b032e8e"
+    },
+    {
+      "path": "test_existing_internal_revoke_0/g.sqlite3",
+      "bytes": 2052096,
+      "sha256": "65d4d8d823166b545d43df1567d2e327052ffcd072fe48d08f303855c78f27bc"
+    },
+    {
+      "path": "test_http_stale_original_refus0/g.sqlite3",
+      "bytes": 2064384,
+      "sha256": "de7731b88cae443d18d6ce9eb574f8f962aabe8d579bbb6dd2c900bfc3960ba5"
+    },
+    {
+      "path": "test_current_lawful_other_devi0/g.sqlite3",
+      "bytes": 2052096,
+      "sha256": "f5e280588eaf163dac40fbbbb3e0e0f03c58840a5e1d7738b2c67559a8e6caa0"
+    },
+    {
+      "path": "test_http_original_readback_an0/g.sqlite3",
+      "bytes": 2052096,
+      "sha256": "c05e04ebc1747957ca955feae0de0d8c2a3b4e6f5167af9ecbf1ad60a5f4e69b"
+    },
+    {
+      "path": "test_legacy_first_operation_re0/g.sqlite3",
+      "bytes": 2064384,
+      "sha256": "25ed91b0597cf21391acb912e5cab8f404dcc0c2453284db16d399646fb207f2"
+    },
+    {
+      "path": "test_selected_request_changed_0/g.sqlite3",
+      "bytes": 2052096,
+      "sha256": "ae01244871bcb0f0da83bc2326a56dea1973dafc15c04c22c34674ac99617ed5"
+    },
+    {
+      "path": "test_receipt_insert_failure_ro0/g.sqlite3",
+      "bytes": 2052096,
+      "sha256": "8faff49371a71429c2d1a8098dd9e368c1284eaeae549474b01c3963e2dda4c1"
+    },
+    {
+      "path": "test_registry_bound_alias_inva0/g.sqlite3",
+      "bytes": 2052096,
+      "sha256": "06011ed30793df7291b04ce1392cbc4125ec03144cc1003be5152aca05be98db"
+    },
+    {
+      "path": "test_workspace_ready_without_o0/g.sqlite3",
+      "bytes": 2052096,
+      "sha256": "78a5e641bfbe89178ecec8aafee2a322f842d390a88cf06fd27c86aa3ca36347"
+    },
+    {
+      "path": "test_workspace_canary_binds_or0/g.sqlite3",
+      "bytes": 2052096,
+      "sha256": "72ee33d6ba23fee930abb5d7e55bc6a9a1db4f08881c3161c92163c16c8f5343"
+    },
+    {
+      "path": "test_submitted_call_remains_ob0/g.sqlite3",
+      "bytes": 2052096,
+      "sha256": "0bf094dc24dae0fc319ed4705fb17ed8347b54524b3f11dc4572d91fcefabbd9"
+    },
+    {
+      "path": "test_withdrawal_or_reconnect_w1/g.sqlite3",
+      "bytes": 2052096,
+      "sha256": "d256a049b6ddaf1aebe78a0845abefe2f688b8726e893a4b7d8d2051a2330154"
+    },
+    {
+      "path": "test_withdrawal_or_reconnect_w0/g.sqlite3",
+      "bytes": 2052096,
+      "sha256": "bdc7993d3b6463c9b71df97a5137cca40756447e03b9a280630d3062d612c8bd"
+    },
+    {
+      "path": "test_tampered_original_receipt0/g.sqlite3",
+      "bytes": 2052096,
+      "sha256": "135856bbd4de7e9b889224d90449a818ba047850c0beb41e4b4c8071946a973d"
+    },
+    {
+      "path": "test_expired_pending_refuses_b0/g.sqlite3",
+      "bytes": 2060288,
+      "sha256": "c4aa5a41db957acfcc10358d058259c2e6b07b444450d34a76381a90fcbabe0b"
+    },
+    {
+      "path": "test_readonly_proposal_creates0/g.sqlite3",
+      "bytes": 2052096,
+      "sha256": "184f831bdbcd9d7f9b9c63c0e90e61a27a14ee6bdc547327c246329cf6be1469"
+    },
+    {
+      "path": "test_old_selection_refuses_new0/g.sqlite3",
+      "bytes": 2052096,
+      "sha256": "fa2fddbb58dbde1dd6c3acdd8cf90b210fed813111eef29859c994a676be1e6e"
+    },
+    {
+      "path": "test_selected_withdrawal_origi0/g.sqlite3",
+      "bytes": 2052096,
+      "sha256": "2f6e413488aa0221b64df71dc4b27985138b5b6eec92f4b2afbba6867e384e1b"
+    },
+    {
+      "path": "test_withdrawal_readiness_fail0/g.sqlite3",
+      "bytes": 2052096,
+      "sha256": "0822b3287e1da9c1cc6a1b2d216d6160f63d1e3914ab86f719c2ac34f3d5931a"
+    },
+    {
+      "path": "test_routine_token_refresh_pre0/g.sqlite3",
+      "bytes": 2052096,
+      "sha256": "5b9f177a0a2d37b5adeb0030254470b2f5a4dfc0250691e46be0c9a2791d3fa2"
+    },
+    {
+      "path": "test_explicit_connect_is_new_g0/g.sqlite3",
+      "bytes": 2052096,
+      "sha256": "52c898f55c9360d47e76831ed7922e54d83b22fbcd10294c3af91b7ad9fed7e6"
+    },
+    {
+      "path": "test_lost_revoke_reply_retry_c0/g.sqlite3",
+      "bytes": 2060288,
+      "sha256": "3e3cd5e0500bc8238f717b56dd8967ca7348ca244f42ec44150d328b632d7f1c"
+    },
+    {
+      "path": "test_main_uses_supplied_object2/registries/owner_features.json",
+      "bytes": 40,
+      "sha256": "5f95304ededc389d40d77ab0310844600571f468b0ba258207dad114201b33f7"
+    },
+    {
+      "path": "test_main_uses_supplied_object2/registries/owner_endpoint_schemas.json",
+      "bytes": 48,
+      "sha256": "4270adbba9f5bced311f0a1351b6167d475f3508bd648ecc0a2bd9d6f12f8b90"
+    },
+    {
+      "path": "test_main_uses_supplied_object2/registries/owner_screens.json",
+      "bytes": 39,
+      "sha256": "049fa29c55511ffedae5585d315391a47fae0974a635fc7c3b4d1467c8499b0c"
+    },
+    {
+      "path": "test_main_uses_supplied_object2/registries/owner_endpoints.json",
+      "bytes": 41,
+      "sha256": "8735384ef96de32c82ce40acaac8788f654c9d0e00bc9166c9b9372e81541323"
+    },
+    {
+      "path": "test_main_uses_supplied_object1/registries/owner_features.json",
+      "bytes": 40,
+      "sha256": "5f95304ededc389d40d77ab0310844600571f468b0ba258207dad114201b33f7"
+    },
+    {
+      "path": "test_main_uses_supplied_object1/registries/owner_endpoint_schemas.json",
+      "bytes": 48,
+      "sha256": "4270adbba9f5bced311f0a1351b6167d475f3508bd648ecc0a2bd9d6f12f8b90"
+    },
+    {
+      "path": "test_main_uses_supplied_object1/registries/owner_screens.json",
+      "bytes": 49,
+      "sha256": "534ac00e277f4006a0556409206742a8d627ce2e34c0d2b11ddba787d282b670"
+    },
+    {
+      "path": "test_main_uses_supplied_object1/registries/owner_endpoints.json",
+      "bytes": 41,
+      "sha256": "8735384ef96de32c82ce40acaac8788f654c9d0e00bc9166c9b9372e81541323"
+    },
+    {
+      "path": "test_main_uses_supplied_object0/registries/owner_features.json",
+      "bytes": 48,
+      "sha256": "714334ce3e8c262e27836e497d796d19307579b1a58b3e5b4f3e6d1e9717a305"
+    },
+    {
+      "path": "test_main_uses_supplied_object0/registries/owner_endpoint_schemas.json",
+      "bytes": 56,
+      "sha256": "1ee7e884fab8f9723c5c29f30eefe54d4602a96fb8bb7559fb575fff142898f6"
+    },
+    {
+      "path": "test_main_uses_supplied_object0/registries/owner_screens.json",
+      "bytes": 47,
+      "sha256": "02355c5a333585bbfdc959dfc3949c09f63ea29e9b5d45c7f2ef872a454c274f"
+    },
+    {
+      "path": "test_main_uses_supplied_object0/registries/owner_endpoints.json",
+      "bytes": 49,
+      "sha256": "461d46e6aa8c1dbac9ea48606fb6c42059afb7e84dc8c961bd66a7a5c107bb78"
+    },
+    {
+      "path": "test_actual_lazy_asgi_start_mi0/runtime/gateway.sqlite3",
+      "bytes": 2052096,
+      "sha256": "a3a55d2a763435e3e6c4d34703df5b85a5a5d5b7261cd66a781fbe5e1a3ddba2"
+    }
+  ]
+}

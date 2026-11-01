@@ -1,0 +1,33 @@
+import asyncio,hashlib,json,tempfile,time
+from pathlib import Path
+import pytest
+from test_google_owner_revoke_and_scrub import client,_settings
+from test_google_owner_withdrawal_recovery import SCOPE
+from van_gateway.ops.retention import RetentionService
+OUT=Path('/workspace/van-google-withdrawal-20261101')
+async def main():
+ with tempfile.TemporaryDirectory(prefix='van-google-history-retention-',dir='/tmp') as temp:
+  with pytest.MonkeyPatch.context() as mp:
+   settings=_settings.__wrapped__(Path(temp),mp);next(settings);fixture=client.__wrapped__();ac,app=await anext(fixture)
+   try:
+    g=app.state.google;await g.store_refresh_token('owner','SOURCE-original',[SCOPE])
+    first=await ac.post('/v1/google/owner-revoke');assert first.status_code==200
+    original=first.json()['withdrawal_receipt'];await g.store_refresh_token('owner','SOURCE-replacement',[SCOPE])
+    prefixes=('google_owner_withdrawal:%','google_connection_generation:%','google_legacy_owner_withdrawal:%')
+    for prefix in prefixes:await app.state.store.execute('UPDATE runtime_meta SET updated_at_unix_ms=1 WHERE key LIKE ?',(prefix,))
+    before={r['key']:hashlib.sha256(r['value'].encode()).hexdigest() for r in await app.state.store.fetchall("SELECT key,value FROM runtime_meta WHERE key LIKE 'google_owner_withdrawal:%' OR key LIKE 'google_connection_generation:%' OR key LIKE 'google_legacy_owner_withdrawal:%'")}
+    assert len(before)==3,before
+    await RetentionService(app.state.store).prune(now_ms=int(time.time()*1000)+5*365*86400000,tables=('runtime_meta','google_connections','google_capability_connections'))
+    after={r['key']:hashlib.sha256(r['value'].encode()).hexdigest() for r in await app.state.store.fetchall("SELECT key,value FROM runtime_meta WHERE key LIKE 'google_owner_withdrawal:%' OR key LIKE 'google_connection_generation:%' OR key LIKE 'google_legacy_owner_withdrawal:%'")}
+    assert before==after
+    history=await ac.get('/v1/google/owner-revocations/'+original['operation_id']);assert history.status_code==200 and history.json()==original
+    retry=await ac.post('/v1/google/owner-revoke');assert retry.status_code==409,retry.text
+    assert await g._refresh_token('owner')=='SOURCE-replacement'
+    result={'result':'PASS','all_three_prefix_values_unchanged':True,'row_count':3,'aged_updated_at_ms':1,'prune_horizon_years':5,'legacy_retry_after_reconnect_status':retry.status_code,'completed_original_status':history.status_code,'credential_replacement_preserved':True,'retention_owner_policy':'runtime_meta/google_connections/google_capability_connections remain OWNER_STATE no ordinary age-prune; explicit owner privacy erase policy not changed/tested','owned_tmp_cleanup':True}
+   finally:
+    try:await anext(fixture)
+    except StopAsyncIteration:pass
+    try:next(settings)
+    except StopIteration:pass
+ return result
+r=asyncio.run(main());(OUT/'HISTORY_RETENTION_RESULTS.json').write_text(json.dumps(r,indent=2));print(json.dumps(r))

@@ -1,0 +1,57 @@
+E                                                                        [100%]
+==================================== ERRORS ====================================
+_ ERROR at setup of test_lost_revoke_reply_retry_cannot_withdraw_reconnected_generation _
+
+self = <Coroutine test_lost_revoke_reply_retry_cannot_withdraw_reconnected_generation>
+
+    def setup(self) -> None:
+        runner_fixture_id = f"_{self._loop_scope}_scoped_runner"
+        if runner_fixture_id not in self.fixturenames:
+            self.fixturenames.append(runner_fixture_id)
+        # When loop factories are configured, resolve the loop factory
+        # fixture early so that a factory variant change cascades cache
+        # invalidation before any async fixture checks its cache.
+        hook_caller = self.config.hook.pytest_asyncio_loop_factories
+        if hook_caller.get_hookimpls():
+            _ = self._request.getfixturevalue(_asyncio_loop_factory.__name__)
+>       return super().setup()
+               ^^^^^^^^^^^^^^^
+
+../../van-backend-venv-20261025/lib/python3.12/site-packages/pytest_asyncio/plugin.py:558: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../../van-backend-venv-20261025/lib/python3.12/site-packages/pytest_asyncio/plugin.py:944: in pytest_fixture_setup
+    hook_result = yield
+                  ^^^^^
+../../van-backend-venv-20261025/lib/python3.12/site-packages/pytest_asyncio/plugin.py:407: in _asyncgen_fixture_wrapper
+    result = runner.run(setup(), context=context)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/asyncio/runners.py:118: in run
+    return self._loop.run_until_complete(task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/asyncio/base_events.py:691: in run_until_complete
+    return future.result()
+           ^^^^^^^^^^^^^^^
+../../van-backend-venv-20261025/lib/python3.12/site-packages/pytest_asyncio/plugin.py:403: in setup
+    res = await gen_obj.__anext__()
+          ^^^^^^^^^^^^^^^^^^^^^^^^^
+backend/tests/test_google_owner_revoke_and_scrub.py:34: in client
+    app = create_app()
+          ^^^^^^^^^^^^
+backend/van_gateway/app.py:680: in create_app
+    else LocalAccountControl(settings.vati_accounts_registry, settings.vati_secrets_dir, operation_ledger=settings.vati_ledger_path)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <van_gateway.trading.accounts.LocalAccountControl object at 0x7f775ca2b3e0>
+registry_path = 'data/vati_accounts.json', secrets_dir = 'data/vati_secrets'
+overrides = {'operation_ledger': 'data/vati_ledger.sqlite3'}
+
+    def __init__(self, registry_path: str, secrets_dir: str, **overrides: Any) -> None:
+        _trading_path()
+>       from commander.accounts import AccountControlSettings, build_account_handlers
+E       ModuleNotFoundError: No module named 'commander'
+
+backend/van_gateway/trading/accounts.py:77: ModuleNotFoundError
+=========================== short test summary info ============================
+ERROR backend/tests/test_google_owner_withdrawal_recovery.py::test_lost_revoke_reply_retry_cannot_withdraw_reconnected_generation
+1 error in 2.12s

@@ -1,0 +1,41 @@
+android/verification/src/test/kotlin/com/dial/van/gateway/GoogleWithdrawalOperationsTest.kt:8:class GoogleWithdrawalOperationsTest {
+android/verification/src/test/kotlin/com/dial/van/gateway/GoogleWithdrawalOperationsTest.kt:31:        val store = Store(); val journal = GoogleWithdrawalOperations(store); var calls = 0
+android/verification/src/test/kotlin/com/dial/van/gateway/GoogleWithdrawalOperationsTest.kt:40:        val store = Store(); val journal = GoogleWithdrawalOperations(store)
+android/verification/src/test/kotlin/com/dial/van/gateway/GoogleWithdrawalOperationsTest.kt:42:        val restarted = GoogleWithdrawalOperations(store)
+android/verification/src/test/kotlin/com/dial/van/gateway/GoogleWithdrawalOperationsTest.kt:50:        val store = Store(); val journal = GoogleWithdrawalOperations(store)
+android/verification/src/test/kotlin/com/dial/van/gateway/GoogleWithdrawalOperationsTest.kt:57:        assertEquals(2, GoogleWithdrawalOperations(store).pending("profile-one", "device-one").size)
+android/verification/src/test/kotlin/com/dial/van/gateway/GoogleWithdrawalOperationsTest.kt:60:        val store = Store(); val journal = GoogleWithdrawalOperations(store)
+android/verification/src/test/kotlin/com/dial/van/gateway/GoogleWithdrawalOperationsTest.kt:73:            val store = Store(); val journal = GoogleWithdrawalOperations(store)
+android/verification/src/test/kotlin/com/dial/van/gateway/GoogleWithdrawalOperationsTest.kt:81:        val store = Store(); val journal = GoogleWithdrawalOperations(store)
+android/verification/src/test/kotlin/com/dial/van/gateway/GoogleWithdrawalOperationsTest.kt:90:        val store = Store(); val journal = GoogleWithdrawalOperations(store)
+android/verification/src/test/kotlin/com/dial/van/gateway/GoogleWithdrawalOperationsTest.kt:103:            GoogleWithdrawalOperations(store).revoke("profile-one", "device-one", detail(), { "profile-one" }, { "device-one" },
+android/verification/src/test/kotlin/com/dial/van/gateway/GoogleWithdrawalOperationsTest.kt:108:        val store = Store(); val journal = GoogleWithdrawalOperations(store); var reads = 0
+android/verification/src/test/kotlin/com/dial/van/gateway/GoogleWithdrawalOperationsTest.kt:114:        assertEquals(1, GoogleWithdrawalOperations(store).pending("profile-one", "device-one").size)
+backend/tests/test_google_owner_withdrawal_recovery.py:81:    receipt = await google.withdraw_selected(request, device_id=device)
+backend/tests/test_google_owner_withdrawal_recovery.py:90:    assert await restarted.original_withdrawal(request['operation_id'], device_id=device) == receipt
+backend/tests/test_google_owner_withdrawal_recovery.py:91:    assert await restarted.withdraw_selected(request, device_id=device) == receipt
+backend/tests/test_google_owner_withdrawal_recovery.py:108:    result = await google.withdraw_selected(request, device_id=device)
+backend/tests/test_google_owner_withdrawal_recovery.py:111:    assert await google.withdraw_selected(request, device_id=device) == result
+backend/tests/test_google_owner_withdrawal_recovery.py:136:    result = await google.withdraw_selected(first, device_id=device)
+backend/tests/test_google_owner_withdrawal_recovery.py:139:    assert await google.withdraw_selected(first, device_id=device) == result
+backend/tests/test_google_owner_withdrawal_recovery.py:140:    refusal = await google.withdraw_selected(pending, device_id=device)
+backend/tests/test_google_owner_withdrawal_recovery.py:153:    await google.withdraw_selected(request, device_id=device)
+backend/tests/test_google_owner_withdrawal_recovery.py:158:        await google.withdraw_selected(request, device_id=device)
+backend/tests/test_google_owner_withdrawal_recovery.py:331:        await google.withdraw_selected(request, device_id=device)
+backend/tests/test_google_owner_withdrawal_recovery.py:349:            await google.withdraw_selected(changed, device_id=device)
+backend/tests/test_google_owner_withdrawal_recovery.py:351:        await google.withdraw_selected(request, device_id='SOURCE-other-device')
+backend/tests/test_google_owner_withdrawal_recovery.py:354:        await google.withdraw_selected(request, device_id=device)
+backend/tests/test_google_owner_withdrawal_recovery.py:364:    first = await google.withdraw_legacy(device_id=device)
+backend/tests/test_google_owner_withdrawal_recovery.py:366:    assert await google.withdraw_legacy(device_id=device) == first
+backend/tests/test_google_owner_withdrawal_recovery.py:369:        await google.withdraw_legacy(device_id=device)
+backend/tests/test_google_owner_withdrawal_recovery.py:372:    second = await google.withdraw_selected(request, device_id=device)
+backend/tests/test_google_owner_withdrawal_recovery.py:374:    assert await google.original_withdrawal(first['operation_id'], device_id=device) == first
+backend/tests/test_google_owner_withdrawal_recovery.py:509:        result = await google.withdraw_selected(request,device_id=device)
+backend/tests/test_google_owner_withdrawal_recovery.py:514:            await google.withdraw_selected(request,device_id=device)
+backend/tests/test_google_owner_withdrawal_recovery.py:593:        await google.original_withdrawal(request['operation_id'],device_id=device,owner_id='SOURCE-other-owner')
+backend/tests/test_google_owner_withdrawal_recovery.py:595:        await google.withdraw_selected(request,device_id=device,owner_id='SOURCE-other-owner')
+backend/tests/test_google_owner_withdrawal_recovery.py:604:        await different_profile.original_withdrawal(request['operation_id'],device_id=device)
+android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:2065:    private val googleWithdrawals = GoogleWithdrawalOperations(object : GoogleWithdrawalStore {
+android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:2085:    suspend fun googleOwnerRevoke(reviewed: JSONObject, reviewedProfile: String): JSONObject = withContext(Dispatchers.IO) {
+android/app/src/main/java/com/dial/van/gateway/GoogleWithdrawalOperations.kt:18:class GoogleWithdrawalOperations(private val store: GoogleWithdrawalStore) {
+android/app/src/main/java/com/dial/van/command/connected/ConnectedRoute.kt:169:                    val result = app.gatewayClient.googleOwnerRevoke(reviewed, reviewedProfile)

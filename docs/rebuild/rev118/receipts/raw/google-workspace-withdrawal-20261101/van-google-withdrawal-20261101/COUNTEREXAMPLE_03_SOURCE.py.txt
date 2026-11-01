@@ -1,0 +1,22 @@
+"""LAC-230: exact original connection withdrawal and recovery (SOURCE fixtures)."""
+import pytest
+
+from test_google_owner_revoke_and_scrub import _settings, client
+
+SCOPE = 'https://www.googleapis.com/auth/gmail.readonly'
+
+
+@pytest.mark.asyncio
+async def test_lost_revoke_reply_retry_cannot_withdraw_reconnected_generation(client):
+    ac, app = client
+    await app.state.google.store_refresh_token('owner', 'SOURCE-original', [SCOPE])
+    first = await ac.post('/v1/google/owner-revoke')
+    assert first.status_code == 200
+    assert first.json()['connected'] is False
+    # Legitimate explicit host reconnect, including reuse of the same logical owner ID.
+    await app.state.google.store_refresh_token('owner', 'SOURCE-replacement', [SCOPE])
+    assert (await ac.get('/v1/google/status')).json()['connected'] is True
+    # Transport retry of the lost first reply must not select this new connection.
+    retry = await ac.post('/v1/google/owner-revoke')
+    assert retry.status_code in (200, 409)
+    assert (await ac.get('/v1/google/status')).json()['connected'] is True

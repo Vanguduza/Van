@@ -1,0 +1,126 @@
+{
+  "directory": "/tmp/van-recovery-google-r2-crossowner-guards-20261101",
+  "at_utc": "2026-11-01T08:13:32.437798+00:00",
+  "files": [
+    {
+      "path": "test_exact_cognitive_record_er0/gw.sqlite3",
+      "bytes": 2080768,
+      "sha256": "8493538cc977cb84cd457501e2a5a732c1c1541947a64e2e6822b84b08ad9f00"
+    },
+    {
+      "path": "test_new_dependent_link_after_0/gw.sqlite3",
+      "bytes": 2052096,
+      "sha256": "361f0c7368f571d937b67da3765455a63a514c393a3ae617d029e1fa7c432211"
+    },
+    {
+      "path": "test_exact_intent_record_closu0/gw.sqlite3",
+      "bytes": 2080768,
+      "sha256": "42513229058901eed1d22ed66417568ed9996d3c81be0b19619dd3b8760a9641"
+    },
+    {
+      "path": "test_changed_record_after_appr0/gw.sqlite3",
+      "bytes": 2052096,
+      "sha256": "3edec8777794c868d5c4b61d5c136d342fb17fc3abcbd9b8bf062e9752e350f3"
+    },
+    {
+      "path": "test_actual_record_a4_erasure_0/gw.sqlite3",
+      "bytes": 2076672,
+      "sha256": "9774c761302da000573233f1ebae8936bd953b165b797fdcd81ee4c84f060606"
+    },
+    {
+      "path": "test_expiry_during_erasure_rol0/gw.sqlite3",
+      "bytes": 2052096,
+      "sha256": "4abdce7227815585dffb2605c9eac0f2409b254856fd1ffbe6e89db96092c2ba"
+    },
+    {
+      "path": "test_erasure_rechecks_actual_c0/gw.sqlite3",
+      "bytes": 2052096,
+      "sha256": "6cf5180ac433dc92d48361193bfcad387722d5fcaa57aee1977db2020e5d1e0f"
+    },
+    {
+      "path": "test_erasure_rechecks_device_r0/gw.sqlite3",
+      "bytes": 2052096,
+      "sha256": "e8cda83f2c8943b5fadbee9bf88b3bc1f250a32bbf12d43c8dc1bcc50365b953"
+    },
+    {
+      "path": "test_unknown_or_untrusted_memo0/gw.sqlite3",
+      "bytes": 2052096,
+      "sha256": "071ea913836d8ed04dfeea2f89a4f43fce0ea2d5ddad89dbbb551c4639435f9d"
+    },
+    {
+      "path": "test_independent_observer_dete0/gw.sqlite3",
+      "bytes": 2068480,
+      "sha256": "e254433e9c44684a7ea8e0398ca7662e696191420465d546da43efb30f647eab"
+    },
+    {
+      "path": "test_intent_node_scope_removes0/gw.sqlite3",
+      "bytes": 2076672,
+      "sha256": "579160e92211071c131253e55ddbeb92c68e5842d4227665a589dc9da462923f"
+    },
+    {
+      "path": "test_approval_cannot_move_to_o0/gw.sqlite3",
+      "bytes": 2072576,
+      "sha256": "556f9aa08699046389ec23156d7c799d1449cfa796fe3e7efb28b21ef4a43c49"
+    },
+    {
+      "path": "test_all_erasure_matches_allow0/gw.sqlite3",
+      "bytes": 2080768,
+      "sha256": "23a3a594e5e4f4111b1f7063d06b6190a474357931f1a74910d3da0a63cec57a"
+    },
+    {
+      "path": "test_memory_store_erasure_requ0/gw.sqlite3",
+      "bytes": 2068480,
+      "sha256": "1098a752d7b13afdbdaab22ec21bfaa1048ce26366d9dcfef5dd4efb6c896e30"
+    },
+    {
+      "path": "test_a_prune_is_visible_afterw0/van.sqlite3",
+      "bytes": 1916928,
+      "sha256": "2f831242ee22578866f96bb5489787c530c0d6f0b0a2ab0a13ba1559cf47c70c"
+    },
+    {
+      "path": "test_a_tampered_row_after_an_a0/van.sqlite3",
+      "bytes": 1916928,
+      "sha256": "0b981266d27e2064b253747007dbbcded6fa8d338c24f9e03ec15becc5adaac1"
+    },
+    {
+      "path": "test_pruning_the_audit_prefix_0/van.sqlite3",
+      "bytes": 1916928,
+      "sha256": "a859cf86a4c7043467a9a2688f7d850211f9f5e24b4e40ef435b10668196d4ea"
+    },
+    {
+      "path": "test_the_audit_log_is_not_touc0/van.sqlite3",
+      "bytes": 1916928,
+      "sha256": "f8dd0e25fc8111be2be700b4709b6a93f1736a67aef9c77e8244ba3b794752ef"
+    },
+    {
+      "path": "test_an_orphaned_child_row_is_0/van.sqlite3",
+      "bytes": 1916928,
+      "sha256": "da6aeda9e9fa2f82c61dc8d363a0afb707925983cfba065561715a460bfce432"
+    },
+    {
+      "path": "test_session_retirement_preser0/van.sqlite3",
+      "bytes": 1916928,
+      "sha256": "6ce4756ab34be49d9a2d9f012389b1ea8a7cd5b3c26cd11a701846d49f798f81"
+    },
+    {
+      "path": "test_recovery_authority_surviv0/van.sqlite3",
+      "bytes": 1916928,
+      "sha256": "22e3d578e24a7a1d6dafb5113f88ce49a23a078bbe894e07f8b39d4baf1fe09c"
+    },
+    {
+      "path": "test_owner_state_is_never_prun0/van.sqlite3",
+      "bytes": 1916928,
+      "sha256": "a9893969d489c84ee44285d8fe3e621c1dc1759cf34a215e180b07b4c9b9d596"
+    },
+    {
+      "path": "test_a_row_past_its_horizon_go0/van.sqlite3",
+      "bytes": 1916928,
+      "sha256": "4b75ea12ed7eaabd1de445407ab82a6c953592554223aa61d3088851a4fdfebe"
+    },
+    {
+      "path": "test_every_table_in_the_live_s0/van.sqlite3",
+      "bytes": 1916928,
+      "sha256": "a368f7aa9a7fcb7219005d2f94063587e044c2bfdf6f379431a7e5aba2a7527d"
+    }
+  ]
+}

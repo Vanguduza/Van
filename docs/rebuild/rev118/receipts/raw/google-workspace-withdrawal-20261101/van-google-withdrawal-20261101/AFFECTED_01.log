@@ -1,0 +1,89 @@
+............................................FF.......................... [ 60%]
+................................................                         [100%]
+=================================== FAILURES ===================================
+__________ test_revoke_reconnect_requires_new_workspace_certification __________
+
+tmp_path = PosixPath('/tmp/van-google-withdrawal-affected-01/test_revoke_reconnect_requires0')
+
+    @pytest.mark.asyncio
+    async def test_revoke_reconnect_requires_new_workspace_certification(tmp_path):
+        store = Store(str(tmp_path / "google.sqlite3"))
+        await store.migrate()
+        registry = GoogleCapabilityRegistry(str(Path(__file__).resolve().parents[2] / "registries/google_capabilities.json"))
+        broker = GoogleIdentityBroker(store, registry)
+        google = GoogleService(store, Fernet.generate_key().decode())
+        await broker.register_principal(subject="synthetic-owner")
+        await google.store_refresh_token("owner", "synthetic-token", ["https://www.googleapis.com/auth/gmail.readonly"])
+        for capability in ("workspace_api", "stitch", "gemini"):
+>           await broker.record_capability_evidence(capability, state=GoogleCapabilityState.READY, evidence_pointer=f"synthetic://{capability}")
+
+backend/tests/test_google_readiness_revocation.py:28: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <van_gateway.google.mesh.GoogleIdentityBroker object at 0x7f3b850b3b60>
+capability_id = 'workspace_api', state = <GoogleCapabilityState.READY: 'READY'>
+credential_plane = None, evidence_pointer = 'synthetic://workspace_api'
+metadata = None, owner_id = 'owner_google_account'
+
+    async def record_capability_evidence(self, capability_id: str, *, state: GoogleCapabilityState, credential_plane: GoogleCredentialPlane | None = None, evidence_pointer: str | None = None, metadata: dict[str, Any] | None = None, owner_id: str | None = None) -> None:
+        descriptor = self.registry.get(capability_id)
+        selected_identity = descriptor.identity_alias
+        if owner_id is not None and owner_id != selected_identity:
+            raise ValueError("google_identity_binding_mismatch")
+        owner_id = selected_identity
+        plane = credential_plane or descriptor.credential_plane
+        now = int(time.time())
+        verified_at = now if state == GoogleCapabilityState.READY else None
+        async with self.store.connection() as db:
+            await db.execute('BEGIN IMMEDIATE')
+            if descriptor.credential_plane == GoogleCredentialPlane.WORKSPACE_OAUTH:
+                if plane != descriptor.credential_plane:
+                    raise ValueError('google_credential_plane_mismatch')
+                if state == GoogleCapabilityState.READY and not await self._workspace_evidence_current(db, descriptor, metadata):
+>                   raise ValueError('workspace_canary_generation_unverified')
+E                   ValueError: workspace_canary_generation_unverified
+
+backend/van_gateway/google/mesh.py:298: ValueError
+___________ test_disconnected_workspace_overrides_old_ready_receipt ____________
+
+tmp_path = PosixPath('/tmp/van-google-withdrawal-affected-01/test_disconnected_workspace_ov0')
+
+    @pytest.mark.asyncio
+    async def test_disconnected_workspace_overrides_old_ready_receipt(tmp_path):
+        store = Store(str(tmp_path / "google.sqlite3"))
+        await store.migrate()
+        broker = GoogleIdentityBroker(store, GoogleCapabilityRegistry(str(Path(__file__).resolve().parents[2] / "registries/google_capabilities.json")))
+        await broker.register_principal(subject="synthetic-owner")
+>       await broker.record_capability_evidence("workspace_api", state=GoogleCapabilityState.READY, evidence_pointer="synthetic://stale")
+
+backend/tests/test_google_readiness_revocation.py:61: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <van_gateway.google.mesh.GoogleIdentityBroker object at 0x7f3b874119a0>
+capability_id = 'workspace_api', state = <GoogleCapabilityState.READY: 'READY'>
+credential_plane = None, evidence_pointer = 'synthetic://stale', metadata = None
+owner_id = 'owner_google_account'
+
+    async def record_capability_evidence(self, capability_id: str, *, state: GoogleCapabilityState, credential_plane: GoogleCredentialPlane | None = None, evidence_pointer: str | None = None, metadata: dict[str, Any] | None = None, owner_id: str | None = None) -> None:
+        descriptor = self.registry.get(capability_id)
+        selected_identity = descriptor.identity_alias
+        if owner_id is not None and owner_id != selected_identity:
+            raise ValueError("google_identity_binding_mismatch")
+        owner_id = selected_identity
+        plane = credential_plane or descriptor.credential_plane
+        now = int(time.time())
+        verified_at = now if state == GoogleCapabilityState.READY else None
+        async with self.store.connection() as db:
+            await db.execute('BEGIN IMMEDIATE')
+            if descriptor.credential_plane == GoogleCredentialPlane.WORKSPACE_OAUTH:
+                if plane != descriptor.credential_plane:
+                    raise ValueError('google_credential_plane_mismatch')
+                if state == GoogleCapabilityState.READY and not await self._workspace_evidence_current(db, descriptor, metadata):
+>                   raise ValueError('workspace_canary_generation_unverified')
+E                   ValueError: workspace_canary_generation_unverified
+
+backend/van_gateway/google/mesh.py:298: ValueError
+=========================== short test summary info ============================
+FAILED backend/tests/test_google_readiness_revocation.py::test_revoke_reconnect_requires_new_workspace_certification
+FAILED backend/tests/test_google_readiness_revocation.py::test_disconnected_workspace_overrides_old_ready_receipt
+2 failed, 118 passed in 64.23s (0:01:04)

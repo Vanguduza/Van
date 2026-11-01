@@ -1,0 +1,25 @@
+{
+  "results": [
+    {
+      "state": "APPLIED",
+      "result": "PASS",
+      "producer": "Actual frozen R1 GoogleService imported from preserved archive (SOURCE fixture)",
+      "producer_sha256": "e63d2d1ca14793d7c3542efa15bc8e65190e8e007aff7ee3e5311c2527730912",
+      "original_cipher_sha256_unchanged": "1b6a14451165a0719f621e7404a56cdca31c24ea4a0b5e432ff1162178b2683e",
+      "r2_get_status": 200,
+      "r2_post_status": 200,
+      "modeled_trusted_current_token_replacement_not_public_rotation": true
+    },
+    {
+      "state": "REFUSED",
+      "result": "PASS",
+      "producer": "Actual frozen R1 GoogleService imported from preserved archive (SOURCE fixture)",
+      "producer_sha256": "e63d2d1ca14793d7c3542efa15bc8e65190e8e007aff7ee3e5311c2527730912",
+      "original_cipher_sha256_unchanged": "3c83ed2c98ac2a67b2572bc73a273912c64655b86a377ec908e8a08706e47e9b",
+      "r2_get_status": 200,
+      "r2_post_status": 409,
+      "modeled_trusted_current_token_replacement_not_public_rotation": true
+    }
+  ],
+  "owned_tmp_cleanup": true
+}

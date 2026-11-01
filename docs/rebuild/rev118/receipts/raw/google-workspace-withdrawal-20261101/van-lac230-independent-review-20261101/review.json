@@ -1,0 +1,81 @@
+{
+  "schema": "van.independent-lac230-source-review/1",
+  "state": "BOUNDED_FROZEN_SOURCE_REVIEW_BLOCKED_ONE_ROOT_ACCEPTED_CONTRACT_FINDING",
+  "reviewer": "Sol medium independent bounded SOURCE review; root decisions only",
+  "base": "25a48fd705825f5eec1264696e91536694cfb82f",
+  "source_identity": {
+    "frozen_paths": 12,
+    "all_archive_patch_current_before_after_final_pins_verified_unchanged": true,
+    "before": "before.json",
+    "after": [
+      "after.json",
+      "final-source-pins.json"
+    ],
+    "patch_sha256": "bcd75129273e25424cabfd53e89d1c75862414f98411e8ec623990adb13b84e0",
+    "archive_sha256": "15ce19b344d2f30d242cc1d246507ed4d85d15e3977fc0dd865a8d486f802882"
+  },
+  "canonical_scope": {
+    "action": "LAC-230 / WP-ACT-LAC-230 / T-LAC-230",
+    "units": [
+      "BE-002",
+      "BE-031"
+    ],
+    "source": "docs/review-inputs/van-rev115/package/traceability/LEGACY_349_ACTIONS.json:3850",
+    "finding": "Explicit confirmation and original readback for withdrawal of local gateway-held Workspace credential, not account-wide Google/provider-token revocation. Existing OF-GOOGLE-001 and van.connected mapping retained; no new service/authority/sender."
+  },
+  "blocking_findings": [
+    {
+      "id": "LAC230-REVIEW-01",
+      "state": "ROOT_ACCEPTED_SOURCE_CONTRACT_BLOCKER",
+      "path": "backend/van_gateway/google/service.py:391",
+      "related": [
+        "backend/van_gateway/google/service.py:309",
+        "backend/van_gateway/google/service.py:215"
+      ],
+      "finding": "Completed immutable original read requires historical actor digest equal current actor digest, including ephemeral access_token_hash. Current lawful same stable principal with trusted current credential replacement is authenticated by existing source/realHTTP but receives403 for original completed history. Stable historical read and fresh mutation authority must remain distinct.",
+      "probe": "probe-results.json",
+      "observed": {
+        "existing_ordinary_renew_grant_then_original_httpget": 200,
+        "modeled_trusted_current_sameprincipal_token_replacement_status_httpget": 200,
+        "original_completed_httpget_after_modeledreplacement": 403,
+        "error": "workspace_withdrawal_wrong_caller",
+        "original_sealed_record_sha256": "1376cffaaf8602014643cc2e03b54bbe0539f7626991784eaca75286acb848a0",
+        "record_bytes_unchanged": true
+      },
+      "boundary": "This is explicitly NOT an existing production rotation/renewal-route defect. Existing renew_grant changes grant expiry without token rotation and passes. No ordinary token rotation producer/HTTPrenew route was found; trusted sameprincipal replacement is an explicit SOURCE fixture diagnostic accepted by root as stableprincipal historical-read contract. No public rotation capability is requested. Pending changed-token context must still refuse fresh mutation; current lawful stable caller/device/profile checks and original receipt bytes/hash remain required."
+    }
+  ],
+  "positive_bounded_evidence": [
+    "Identical refresh-token bytes on explicit reconnect establish new logical generation; routine OAuth access-token exchange does not advance it (source review and exact reconnect probe PASS).",
+    "Original immutable operation/generation/CAS and protected receipt survive lostreply/reconnect/restart and expiry; stale pending selections refuse without clearing replacement. Pendingexpiry/completedafterdeadline probe PASS.",
+    "Credential withdrawal, original receipt and registry-owned inheriting Workspace readiness invalidation share writer transaction; original canary captures generation before observation and writer/readers verify same lineage. Probe PASS; independent Gemini/antigravity planes preserved by registry mapping.",
+    "Actual HTTP withdrawal wins delayed OAuth exchange and no fresh provider call occurs: PASS. Already admitted/submitted effects keep existing reconciliation path; next admission checks current generation.",
+    "Tampered original encrypted receipt fails closed, original forensic row and replacement credential retained: PASS.",
+    "Age-prune probe ages actual original withdrawal journal, generation and legacy slot rows to timestamp1 and prunes five years ahead; all3 hashes unchanged, originalGET200, old legacy retry409 and replacement credential retained: PASS. These rows/table are existing OWNER_STATE; explicit owner privacy-erasure policy remains unchanged.",
+    "Android reviewed profile+generation persisted beforePOST, originalGET and independent current status separate, cancellation explicitly propagates and pending original retained. All5 active roots searched for changed callers: sole production googleOwnerRevoke caller is ConnectedRoute; no MissionRepository forwarding caller."
+  ],
+  "probe_artifacts": {
+    "http_and_identity": "probe-results.json",
+    "retention": "retention-probe-results.json",
+    "logs": [
+      "probe-http.log",
+      "probe-retention.log"
+    ],
+    "initial_environment_failure_preserved": "probe-failed-fixture-gate.log (public FakeGoogleTransport guard outside pytest); rerun process explicitly opt-in SOURCE synthetic transport only",
+    "imports": "probe-results.json",
+    "owned_tmp_cleanup": true,
+    "source_edits_native_effects_gradle": false
+  },
+  "current_test_evidence": {
+    "backend": "worker121pass0skip, exact frozenpins; reviewer independently ran5 substantive probes plus principal diagnostic and retention probe, not broad121 suite",
+    "jvm": "Final current production12cases0fail/error/skip terminal0 now available. Reviewer independently parsed actual2XML and verified receipt before/after all12 pins; jvm-verified-evidence.json. Earlier11 pass before final helper change is historical only.",
+    "fullapp": "Separate permission repair genuine appcompile evidence does not establish Google candidate VanGatewayClient/Compose/fullapp compile; requires new integrated exactsource test."
+  },
+  "remaining_integration_and_qualification": [
+    "Narrow backend owner repair for accepted history contract then new frozen r2 and independent exact-counterexample recheck. Original packet/artifacts and sealed outcome hash must remain preserved.",
+    "Actual owner-source citation replacement ConnectedRoute/VanGatewayClient and original-readbackGET mapping need integration owner review/registry refresh under existing action; no generated blessing.",
+    "Guarded reconciliation to actual published Android repair base, current runtime-consumer/retention recheck, full integrated Android compilation, hooks/committed verification/normal push/readback/exact-headCI remain required.",
+    "Active-root source search found no production/native Workspace canary producer wiring. Native canary qualification remains explicitly unproved; no fakeREADY/certification substituted.",
+    "No native Google account-wide provider revocation, new financial/host authority, unit/gate/device/release acceptance or waiver is issued."
+  ]
+}

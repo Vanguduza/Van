@@ -1,0 +1,36 @@
+{
+  "at_utc": "2026-11-01T08:08:55.309244+00:00",
+  "base": "7df732de4c0a4f84bafadda658654a0ab8788553",
+  "before": {
+    "android/app/src/main/java/com/dial/van/command/connected/ConnectedReadback.kt": "0848fddf335fed357e6121814325d71b5c18ac3a2aa917fe0bb70361ba45d7ec",
+    "android/app/src/main/java/com/dial/van/command/connected/ConnectedRoute.kt": "d9328ea0b06b5957919f0f24e5dda5a13e8173aba1ecb53d3deb8c296f1fe20a",
+    "android/app/src/main/java/com/dial/van/gateway/GoogleWithdrawalOperations.kt": null,
+    "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt": "04f333a5d8312831f31c04546e14277106da44622e8eec4293673de42de1778e",
+    "android/verification/build.gradle.kts": "398ab4b703fb52d71dd8db8faf7c939de7a86b781f0b26cc0199d2edf4745152",
+    "android/verification/src/test/kotlin/com/dial/van/gateway/GoogleWithdrawalOperationsTest.kt": null,
+    "backend/tests/test_gateway.py": "0490fd9d92406674009bfecb9f36fbafbb08e53aff60db763d492f3e1faa6094",
+    "backend/tests/test_google_owner_withdrawal_recovery.py": null,
+    "backend/tests/test_google_readiness_revocation.py": "21febf2f603a9616789955b9a5882995d49c2dd33f39a31212aec2f21db466e4",
+    "backend/van_gateway/app.py": "a7a00a8d082c4cccd8b5648cdd2faa4be2b79ea0e4b2fb6795de74a25d68379a",
+    "backend/van_gateway/google/mesh.py": "40a96b730ca461a42bbe51fed44b8b3f51cf4ac216a5926f8ad7a5540e51391a",
+    "backend/van_gateway/google/service.py": "fe7150002185f86fddce456799167666fa475acc2c464e440f5e5f0b17651eaa"
+  },
+  "after": {
+    "android/app/src/main/java/com/dial/van/command/connected/ConnectedReadback.kt": "358bbb7fa78b24ca33805892a0bf4c7d23147c989156cc26267a14445411b0e1",
+    "android/app/src/main/java/com/dial/van/command/connected/ConnectedRoute.kt": "6e89096f6773455dfca27ef29ca2a79b9a23e4c76184d017cc06e53b380c213d",
+    "android/app/src/main/java/com/dial/van/gateway/GoogleWithdrawalOperations.kt": "3718aea7c293fa376100aa712660513bd3f904ab4ccd149d02cbac67c8ffbce6",
+    "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt": "26cdf2e26203594b2113a5b661dda2ea33770cfba1f9aafbc1c22302c048c3ad",
+    "android/verification/build.gradle.kts": "b1342705f7e5fbf4eba602b8efb81fecafb758966b7537a07a9106e6af2dcf0c",
+    "android/verification/src/test/kotlin/com/dial/van/gateway/GoogleWithdrawalOperationsTest.kt": "a8deed3c0eb4f407d3a46ace4298e88644f4dc474d3e7dfcf2a89034e211a006",
+    "backend/tests/test_gateway.py": "02d99600efd79bb926a9e242d8bc688ca4c3141230ecd199194b4d8d113f816b",
+    "backend/tests/test_google_owner_withdrawal_recovery.py": "05afcfe9f5be2a65265dda052f6a3e1675306ece0e510b63f830cd6cac6ca921",
+    "backend/tests/test_google_readiness_revocation.py": "43ef8e6eefdbcb6a244b295d831591e7a8c0977832837b8a19d91f5e50a8ce42",
+    "backend/van_gateway/app.py": "0cd6c5024d5f73e1049f0bdef10c803c959cde4eeeb5976264ca1122c55c3470",
+    "backend/van_gateway/google/mesh.py": "c71799762b72636c15d0d4667bb08b860c260306994e3b8fba8cbc89dde514be",
+    "backend/van_gateway/google/service.py": "b11df1e73c751393b72371fb0f0745c465b6d8e81bd631c21980a9bccb7a154a"
+  },
+  "archive_sha256": "f5b3dbae965365a100b2c1e22a6588981e2a8dadf6269352591018f42b66c771",
+  "patch_sha256": "d1654c4c89fa5cd6595bf873b034e255bb765e06675d0b40a7549a5c24f45c35",
+  "independent_review": "R2recheckpending; no publicationallowed",
+  "unrelated_changes_overwritten": false
+}

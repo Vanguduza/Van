@@ -46,6 +46,8 @@ fun ConnectedRoute(app: VanApplication) {
     var loading by remember { mutableStateOf(false) }
     var observedAt by remember { mutableStateOf(0L) }
     var confirmRevoke by remember { mutableStateOf(false) }
+    var reviewedWorkspace by remember { mutableStateOf<JSONObject?>(null) }
+    var reviewedProfile by remember { mutableStateOf("") }
     var revoking by remember { mutableStateOf(false) }
     var revokeUncertain by remember { mutableStateOf(false) }
     var revokeNotice by remember { mutableStateOf<String?>(null) }
@@ -56,6 +58,7 @@ fun ConnectedRoute(app: VanApplication) {
         try {
             val h = ConnectedReadback.source { app.gatewayClient.health() }
             val p = ConnectedReadback.source { app.gatewayClient.googlePlanes() }
+            val recovery = ConnectedReadback.source { JSONObject().put("recovered", app.gatewayClient.recoverGoogleWithdrawals()) }
             val w = ConnectedReadback.source { app.gatewayClient.googleStatus() }
             h.value?.let { health = it }
             p.value?.let { planes = it }
@@ -64,14 +67,15 @@ fun ConnectedRoute(app: VanApplication) {
                 h.failure?.let { put("Service health", it) }
                 p.failure?.let { put("Google planes and capabilities", it) }
                 w.failure?.let { put("Workspace connection", it) }
+                recovery.failure?.let { put("Workspace recovery", it) }
             }
-            if (w.value != null) revokeUncertain = false
+            if (w.value != null && recovery.failure == null) revokeUncertain = false
             observedAt = System.currentTimeMillis()
         } finally { loading = false }
     }
     LaunchedEffect(Unit) { refresh() }
     val connected = if (workspace?.has("connected") == true && !workspace!!.isNull("connected")) workspace!!.optBoolean("connected") else null
-    val canRevoke = connected == true && "Workspace connection" !in failures && !loading && !revoking && !revokeUncertain
+    val canRevoke = connected == true && "Workspace connection" !in failures && "Workspace recovery" !in failures && !loading && !revoking && !revokeUncertain
 
     LazyColumn(modifier = Modifier.fillMaxSize().padding(horizontal = tokens.space.pageGutter),
         verticalArrangement = Arrangement.spacedBy(tokens.space.space3), contentPadding = PaddingValues(vertical = tokens.space.space3)) {
@@ -143,7 +147,11 @@ fun ConnectedRoute(app: VanApplication) {
             }
             Text(message, style = tokens.type.body, color = tokens.color.textPrimary)
             if (planes?.optJSONObject("principal")?.optBoolean("registered") == true) Text("The canonical owner principal is registered. Registration alone does not establish credential or capability readiness.", style = tokens.type.label, color = tokens.color.textSecondary)
-            OutlinedButton(enabled = canRevoke, onClick = { confirmRevoke = true }) { Text(if (revoking) "Confirming revocation…" else "Revoke Workspace access") }
+            OutlinedButton(enabled = canRevoke, onClick = {
+                reviewedWorkspace = workspace?.let { JSONObject(it.toString()) }
+                reviewedProfile = app.gatewayClient.permissionProfileIdentity()
+                confirmRevoke = true
+            }) { Text(if (revoking) "Confirming revocation…" else "Revoke Workspace access") }
             revokeNotice?.let { Text(it, style = tokens.type.label, color = tokens.color.textSecondary) }
         } } }
     }
@@ -157,14 +165,22 @@ fun ConnectedRoute(app: VanApplication) {
             revokeNotice = "Requesting Workspace revocation…"
             scope.launch {
                 try {
-                    val outcome = ConnectedReadback.revoke(request = { app.gatewayClient.googleOwnerRevoke() }, read = { app.gatewayClient.googleStatus() })
+                    val reviewed = reviewedWorkspace ?: error("Refresh Workspace access before confirming.")
+                    val result = app.gatewayClient.googleOwnerRevoke(reviewed, reviewedProfile)
+                    val outcome = ConnectedReadback.withdrawal(result)
                     outcome.status?.let { workspace = it }
-                    revokeNotice = if (outcome.confirmed) "Workspace credential revocation was confirmed by a fresh connection read." else outcome.error
+                    revokeNotice = if (outcome.confirmed) {
+                        if (outcome.status?.optBoolean("connected") == true) "The original withdrawal was confirmed. Workspace was connected again afterward. Review current access before changing it."
+                        else "Workspace credential withdrawal was confirmed by its original receipt and a fresh connection read."
+                    } else outcome.error
                     revokeUncertain = !outcome.confirmed
                     if (outcome.confirmed) refresh()
                 } catch (cancel: CancellationException) {
                     revokeNotice = "Workspace revocation was interrupted and may already have been applied. Refresh its connection state before trying again."
                     throw cancel
+                } catch (failure: Exception) {
+                    revokeNotice = failure.message ?: "Workspace withdrawal is unconfirmed. Refresh before retrying."
+                    revokeUncertain = true
                 } finally { revoking = false }
             }
         }) { Text("Revoke Workspace") } }, dismissButton = { OutlinedButton(onClick = { confirmRevoke = false }) { Text("Cancel") } })

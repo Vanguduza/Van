@@ -1,0 +1,11 @@
+{
+  "old_base": "32d519332ecd251d932e841db84ca0a25712b255",
+  "new_base": "25a48fd705825f5eec1264696e91536694cfb82f",
+  "owned_paths_unchanged_between_bases": true,
+  "source_sha256": {
+    "backend/van_gateway/google/service.py": "4e5c8a07b8fcfc40b097649e5ba9f4aef9f115720c371c4843845f0872f702a6",
+    "backend/van_gateway/google/mesh.py": "417db99053ff55d988c17348b22659dd51bdb83031d4e3f1f5cd18cdab720c88",
+    "backend/tests/test_google_owner_withdrawal_recovery.py": "2332d42bced8b211b19fd82fcfd6fb58db4b54055ceeff567beb4c4538153d66"
+  },
+  "untracked_test_in_backup": true
+}

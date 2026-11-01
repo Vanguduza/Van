@@ -1,0 +1,125 @@
+{
+  "schema": "van.rebuild.mutation-registry-preflight/1",
+  "registry_sha256": "cbf114a3374538eeb1403d3f066ee4f22d2405b32e6a7f6b752fa9fe0d9a99df",
+  "mutation_count": 374,
+  "edit_count": 383,
+  "findings": [
+    {
+      "kind": "SOURCE_TARGET_MISSING",
+      "path": "tools/ci/restore_debug_keystore.sh",
+      "mutation": "C22 a keystore Android cannot open is accepted and the build signs with the runner's"
+    },
+    {
+      "kind": "SOURCE_TARGET_MISSING",
+      "path": "tools/ci/restore_debug_keystore.sh",
+      "mutation": "C22 the no-key run stops naming the consequence"
+    },
+    {
+      "kind": "SOURCE_TARGET_MISSING",
+      "path": "tools/ci/restore_debug_keystore.sh",
+      "mutation": "C22 a run with no key falls through into the restore path"
+    },
+    {
+      "kind": "SOURCE_TARGET_MISSING",
+      "path": "tools/ci/record_apk_signing_identity.sh",
+      "mutation": "C22 an apksigner that prints no certificate publishes an empty identity"
+    },
+    {
+      "kind": "SOURCE_TARGET_MISSING",
+      "path": "tools/ci/record_apk_signing_identity.sh",
+      "mutation": "C22 a build that produced no APK still reports a signature"
+    },
+    {
+      "kind": "SOURCE_TARGET_MISSING",
+      "path": ".github/workflows/van-ci.yml",
+      "mutation": "C22 the identity stays on the runner"
+    },
+    {
+      "kind": "SOURCE_TARGET_MISSING",
+      "path": "tools/ci/maturity_gate.py",
+      "mutation": "C21 the gate stops recognising a deleted class"
+    },
+    {
+      "kind": "SOURCE_TARGET_MISSING",
+      "path": "tools/ci/maturity_gate.py",
+      "mutation": "C21 the gate stops recognising a deleted Kotlin function"
+    },
+    {
+      "kind": "SOURCE_TARGET_MISSING",
+      "path": "tools/ci/maturity_gate.py",
+      "mutation": "C21 the gate stops recognising a deleted Python function"
+    },
+    {
+      "kind": "SOURCE_TARGET_MISSING",
+      "path": "tools/ci/ledger_reconcile.py",
+      "mutation": "C18 a test-path reference counts as a production consumer"
+    },
+    {
+      "kind": "SOURCE_TARGET_MISSING",
+      "path": "tools/ci/ledger_reconcile.py",
+      "mutation": "C18 a test_-named file counts as a production consumer"
+    },
+    {
+      "kind": "SOURCE_TARGET_MISSING",
+      "path": "tools/ci/ledger_reconcile.py",
+      "mutation": "C18 a reference from dead code counts as integration"
+    },
+    {
+      "kind": "SOURCE_TARGET_MISSING",
+      "path": "tools/ci/ledger_reconcile.py",
+      "mutation": "C18 stop failing when the ledger understates"
+    },
+    {
+      "kind": "SOURCE_TARGET_MISSING",
+      "path": "tools/ci/ledger_reconcile.py",
+      "mutation": "C18 an entry with no symbols counts as verified"
+    },
+    {
+      "kind": "SOURCE_TARGET_MISSING",
+      "path": "tools/ci/ledger_reconcile.py",
+      "mutation": "C18 check classes that assert nothing about reachability"
+    },
+    {
+      "kind": "SOURCE_TARGET_MISSING",
+      "path": ".github/workflows/van-ci.yml",
+      "mutation": "C12 drop the APK upload entirely"
+    },
+    {
+      "kind": "SOURCE_TARGET_MISSING",
+      "path": "tools/ci/github-actions-ci.yml",
+      "mutation": "C12 drop the APK upload entirely"
+    },
+    {
+      "kind": "SOURCE_TARGET_MISSING",
+      "path": ".github/workflows/van-ci.yml",
+      "mutation": "C12 publish an empty artefact instead of failing"
+    },
+    {
+      "kind": "SOURCE_TARGET_MISSING",
+      "path": "tools/ci/github-actions-ci.yml",
+      "mutation": "C12 publish an empty artefact instead of failing"
+    },
+    {
+      "kind": "SOURCE_TARGET_MISSING",
+      "path": ".github/workflows/van-ci.yml",
+      "mutation": "C12 point the upload at a variant the build never assembles"
+    },
+    {
+      "kind": "SOURCE_TARGET_MISSING",
+      "path": "tools/ci/github-actions-ci.yml",
+      "mutation": "C12 point the upload at a variant the build never assembles"
+    },
+    {
+      "kind": "SOURCE_TARGET_MISSING",
+      "path": ".github/workflows/van-ci.yml",
+      "mutation": "C12 stop assembling the APK but keep uploading it"
+    },
+    {
+      "kind": "SOURCE_TARGET_MISSING",
+      "path": "tools/ci/github-actions-ci.yml",
+      "mutation": "C12 stop assembling the APK but keep uploading it"
+    }
+  ],
+  "execution_state": "NOT_RUN",
+  "status": "INVALID_REGISTRY"
+}

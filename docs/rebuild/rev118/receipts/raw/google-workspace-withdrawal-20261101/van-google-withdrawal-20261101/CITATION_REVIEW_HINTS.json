@@ -1,0 +1,30 @@
+{
+  "mapping": "OF-GOOGLE-001 / van.connected / LAC-230 / WP-ACT-LAC-230 / T-LAC-230",
+  "new_readonly_receipt_endpoint": "GET /v1/google/owner-revocations/{operation_id}",
+  "public_action_identity_change": false,
+  "expected_owner_guard": "Changed/non-unique citation requires review: android/app/src/main/java/com/dial/van/command/connected/ConnectedRoute.kt:160",
+  "replacement_citations": [
+    {
+      "file": "android/app/src/main/java/com/dial/van/command/connected/ConnectedRoute.kt",
+      "old_anchor": "                    val outcome = ConnectedReadback.revoke(request = { app.gatewayClient.googleOwnerRevoke() }, read = { app.gatewayClient.googleStatus() })",
+      "new_anchor": "                    val result = app.gatewayClient.googleOwnerRevoke(reviewed, reviewedProfile)",
+      "reason": "Existing confirmed selection now invokes persisted originalgeneration/profile exchange; ConnectedReadback.withdrawal consumes validated originalreceipt+independentcurrentstatus."
+    },
+    {
+      "file": "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt",
+      "old_anchor": "    suspend fun googleOwnerRevoke(): JSONObject = withContext(Dispatchers.IO) {",
+      "new_anchor": "    suspend fun googleOwnerRevoke(reviewed: JSONObject, reviewedProfile: String): JSONObject = withContext(Dispatchers.IO) {",
+      "reason": "Explicit reviewed connectiongeneration/caller/profile intent persists before POST and original readback."
+    }
+  ],
+  "derived_files_for_integration_only": [
+    "registries/owner_endpoints.json",
+    "registries/owner_endpoint_schemas.json",
+    "registries/owner_features.json",
+    "registries/owner_screens.json",
+    "docs/rebuild/rev118/backend/OWNER_REGISTRY_SOURCE_REFRESH_20261022.json",
+    "docs/rebuild/rev118/backend/OWNER_REGISTRY_GENERATION.json",
+    "docs/rebuild/rev118/backend/OWNER_FRONTEND_SCREEN_REGISTRY.md"
+  ],
+  "note": "List is expected generator footprint, not a claim everyfilewilldrift. No generator writes in lane; integrationowner must inspect actualoutputs."
+}

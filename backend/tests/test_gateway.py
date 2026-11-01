@@ -397,10 +397,16 @@ async def test_health_exposes_workspace_ready_truth(client):
         ["https://www.googleapis.com/auth/gmail.readonly"],
     )
     from van_gateway.google.mesh import GoogleCapabilityState
+    from van_gateway.google.transport import FakeGoogleTransport
+    # SOURCE canary: capture the original connection before its fixture observation.
+    app.state.google.transport = FakeGoogleTransport()
+    probe = await app.state.google_broker.begin_workspace_probe('workspace_api')
+    await app.state.google.gmail_search('SOURCE-canary')
     await app.state.google_broker.record_capability_evidence(
         "workspace_api",
         state=GoogleCapabilityState.READY,
         evidence_pointer="live://test/workspace-canary",
+        metadata={'workspace_probe':probe},
     )
 
     response = await ac.get("/health")

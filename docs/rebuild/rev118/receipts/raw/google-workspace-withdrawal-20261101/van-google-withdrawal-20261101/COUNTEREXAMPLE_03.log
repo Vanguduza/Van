@@ -1,0 +1,40 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+_____ test_lost_revoke_reply_retry_cannot_withdraw_reconnected_generation ______
+
+client = (<httpx.AsyncClient object at 0x7f3004065040>, <fastapi.applications.FastAPI object at 0x7f3003b90c80>)
+
+    @pytest.mark.asyncio
+    async def test_lost_revoke_reply_retry_cannot_withdraw_reconnected_generation(client):
+        ac, app = client
+        await app.state.google.store_refresh_token('owner', 'SOURCE-original', [SCOPE])
+        first = await ac.post('/v1/google/owner-revoke')
+        assert first.status_code == 200
+        assert first.json()['connected'] is False
+        # Legitimate explicit host reconnect, including reuse of the same logical owner ID.
+        await app.state.google.store_refresh_token('owner', 'SOURCE-replacement', [SCOPE])
+        assert (await ac.get('/v1/google/status')).json()['connected'] is True
+        # Transport retry of the lost first reply must not select this new connection.
+        retry = await ac.post('/v1/google/owner-revoke')
+        assert retry.status_code in (200, 409)
+>       assert (await ac.get('/v1/google/status')).json()['connected'] is True
+E       assert False is True
+
+backend/tests/test_google_owner_withdrawal_recovery.py:22: AssertionError
+----------------------------- Captured stdout call -----------------------------
+{"action_class": null, "command_id": null, "correlation_id": null, "degraded_code": null, "detail": {"duration_ms": 289.05, "method": "POST", "route": "/v1/google/owner-revoke"}, "device_id": null, "error_class": null, "level": "INFO", "logger": "van.request", "message": "request", "mission_id": null, "principal": null, "result": "200", "service": "van-gateway", "ts": "2026-11-01T07:27:42.441Z"}
+{"action_class": null, "command_id": null, "correlation_id": null, "degraded_code": null, "detail": {"duration_ms": 9.39, "method": "GET", "route": "/v1/google/status"}, "device_id": null, "error_class": null, "level": "INFO", "logger": "van.request", "message": "request", "mission_id": null, "principal": null, "result": "200", "service": "van-gateway", "ts": "2026-11-01T07:27:42.479Z"}
+{"action_class": null, "command_id": null, "correlation_id": null, "degraded_code": null, "detail": {"duration_ms": 27, "fired": 0, "job": "reminders.fire_due", "published": 0}, "device_id": null, "error_class": null, "level": "INFO", "logger": "van.scheduler", "message": "scheduled job completed", "mission_id": null, "principal": null, "result": "OK", "service": "van-gateway", "ts": "2026-11-01T07:27:42.503Z"}
+{"action_class": null, "command_id": null, "correlation_id": null, "degraded_code": null, "detail": {"duration_ms": 26.65, "method": "POST", "route": "/v1/google/owner-revoke"}, "device_id": null, "error_class": null, "level": "INFO", "logger": "van.request", "message": "request", "mission_id": null, "principal": null, "result": "200", "service": "van-gateway", "ts": "2026-11-01T07:27:42.514Z"}
+{"action_class": null, "command_id": null, "correlation_id": null, "degraded_code": null, "detail": {"duration_ms": 17, "expired": 0, "job": "missions.expire_overdue"}, "device_id": null, "error_class": null, "level": "INFO", "logger": "van.scheduler", "message": "scheduled job completed", "mission_id": null, "principal": null, "result": "OK", "service": "van-gateway", "ts": "2026-11-01T07:27:42.532Z"}
+{"action_class": null, "command_id": null, "correlation_id": null, "degraded_code": null, "detail": {"duration_ms": 19.5, "method": "GET", "route": "/v1/google/status"}, "device_id": null, "error_class": null, "level": "INFO", "logger": "van.request", "message": "request", "mission_id": null, "principal": null, "result": "200", "service": "van-gateway", "ts": "2026-11-01T07:27:42.543Z"}
+------------------------------ Captured log call -------------------------------
+INFO     van.request:logging.py:112 request
+INFO     van.request:logging.py:112 request
+INFO     van.scheduler:logging.py:112 scheduled job completed
+INFO     van.request:logging.py:112 request
+INFO     van.scheduler:logging.py:112 scheduled job completed
+INFO     van.request:logging.py:112 request
+=========================== short test summary info ============================
+FAILED backend/tests/test_google_owner_withdrawal_recovery.py::test_lost_revoke_reply_retry_cannot_withdraw_reconnected_generation
+1 failed in 3.26s
