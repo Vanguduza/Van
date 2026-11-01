@@ -1,0 +1,46 @@
+{
+  "directory": "/tmp/van-recovery-family-native-membership-r3-20261101",
+  "at_utc": "2026-11-01T03:16:28.925164+00:00",
+  "files": [
+    {
+      "path": "test_original_child_close_surv0/membership.sqlite",
+      "bytes": 45056,
+      "sha256": "3b994cf21a4fe48f0b0032b387e2c53c67f7dcbaf37941dd63dc64a9836bb735"
+    },
+    {
+      "path": "test_a_netted_position_cannot_0/membership.sqlite",
+      "bytes": 40960,
+      "sha256": "e6b42dd0f487e7fb4c5aca88b9f3b6dc853a0bfc69f00771fb1d4463b591a139"
+    },
+    {
+      "path": "test_current_unknown_or_foreig3/membership.sqlite",
+      "bytes": 40960,
+      "sha256": "fdfc461533cb2465c2490d003a8cd4bec6a6e9fa56ea94f03fba6a93c81d5e1f"
+    },
+    {
+      "path": "test_current_unknown_or_foreig2/membership.sqlite",
+      "bytes": 40960,
+      "sha256": "fdfc461533cb2465c2490d003a8cd4bec6a6e9fa56ea94f03fba6a93c81d5e1f"
+    },
+    {
+      "path": "test_current_unknown_or_foreig1/membership.sqlite",
+      "bytes": 40960,
+      "sha256": "fdfc461533cb2465c2490d003a8cd4bec6a6e9fa56ea94f03fba6a93c81d5e1f"
+    },
+    {
+      "path": "test_current_unknown_or_foreig0/membership.sqlite",
+      "bytes": 40960,
+      "sha256": "fdfc461533cb2465c2490d003a8cd4bec6a6e9fa56ea94f03fba6a93c81d5e1f"
+    },
+    {
+      "path": "test_original_hedged_legs_keep0/membership.sqlite",
+      "bytes": 40960,
+      "sha256": "fdfc461533cb2465c2490d003a8cd4bec6a6e9fa56ea94f03fba6a93c81d5e1f"
+    },
+    {
+      "path": "owner-authority0/owner_authority_keys.json",
+      "bytes": 212,
+      "sha256": "82aa545553f36358b6aad8f09eeb798fad6f95dc86d76c69212fb6eaeb8d67d6"
+    }
+  ]
+}

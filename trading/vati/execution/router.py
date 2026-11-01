@@ -16,7 +16,7 @@ from typing import Callable, Optional
 from vati.core.canonical import canonical_hash
 from vati.core.events import EventKind, make_event
 from vati.core.ledger import Ledger, LedgerError, committed_source_snapshot, require_committed_source_read
-from vati.execution.base import ExecutionReceipt, OrderCommand, StopMode, VenueAdapter
+from vati.execution.base import ExecutionReceipt, OrderCommand, StopMode, VenueAdapter, VenueUnavailable
 from vati.execution.exit_journal import ExitJournal, ExitPending
 from vati.execution.protection import ProtectionManager
 from vati.execution.policy_templates import DO_NOT_EXECUTE, LIMIT_AT_TOUCH, entry_compatible, slippage_bound_in_price, template as execution_template
@@ -339,40 +339,78 @@ class ExecutionRouter:
                 now_ms=now_ms, corr=position_id)
 
     def _send_close(self, venue: str, *, position_id: str, trade_intent_id: str,
-                    quantity: Optional[Decimal], action: str, reason: str, now_ms: int) -> ExecutionReceipt:
+                    quantity: Optional[Decimal], action: str, reason: str, now_ms: int,
+                    family_action_ref=None, family_target_ref=None, family_effect_guard=None) -> ExecutionReceipt:
+        # ProtectionManager addresses a native position, rather than an intent.
+        # Join its close to the original managed entry before publishing the
+        # request. An empty request identity must not orphan a valid child-leg
+        # receipt from its family after restart. Unresolved legacy protection
+        # retains its existing urgent path and remains unqualified family data.
+        if not trade_intent_id:
+            from vati.execution.recovery_scope import NativePositionHistory, PositionRecoveryError
+            from vati.core.ledger import LedgerError
+            try:
+                adapter=self.adapters[venue]
+                positions=([p for p in adapter.positions() if p.position_id==position_id]
+                    if callable(getattr(adapter,"positions",None)) and getattr(adapter,"account_alias",None) else [])
+                if len(positions)==1:
+                    history=NativePositionHistory(self.ledger,account_alias=adapter.account_alias,venue=venue)
+                    if history.position_command(positions[0]) is not None:
+                        trade_intent_id=positions[0].trade_intent_id
+            except (VenueUnavailable,PositionRecoveryError,LedgerError,OSError,ValueError,KeyError):
+                pass
         try:
+            family_binding = ({} if family_action_ref is None and family_target_ref is None else
+                dict(family_action_ref=family_action_ref, family_target_ref=family_target_ref))
             request = self.exit_journal.begin(venue=venue, position_id=position_id,
-                trade_intent_id=trade_intent_id, action=action, quantity=quantity, reason=reason, now_ms=now_ms)
+                trade_intent_id=trade_intent_id, action=action, quantity=quantity, reason=reason,
+                now_ms=now_ms, **family_binding)
         except ExitPending as exc:
             raise ExitInFlight(str(exc)) from exc
         if position_id in self.protection.rules:
             self.protection.mark_close_pending(position_id)
+        from contextlib import nullcontext
+        transport_started = False
         try:
-            receipt = self.adapters[venue].close(position_id, quantity, now_ms=now_ms, reason=reason)
-            from vati.execution.ctrader.charge_source import receipt_charge_evidence
-            charge_evidence=receipt_charge_evidence(self.adapters[venue],receipt)
-            state = self.exit_journal.receipt_state(receipt, venue=venue,
-                position_id=position_id, trade_intent_id=trade_intent_id)
-            ticket = None
-            if state == "ACCEPTED" and receipt.execution_channel == "OWNER_TICKET":
-                ticket = getattr(self.adapters[venue], "tickets", {}).get(receipt.broker_order_id)
-                if ticket is None or ticket.side != "SELL" or ticket.source_position_id != position_id:
-                    state = "UNKNOWN"
-            with self.ledger.atomic():
-                receipt_ref = self._log(EventKind.EXECUTION_RECEIPT,
-                    {**{k:(v.value if hasattr(v, "value") else v) for k,v in asdict(receipt).items()},
-                     "exit_action": "CLOSE", "exit_reason": reason,
-                     "preservation_action": action, "exit_request_ref": request.hash,**charge_evidence},
-                    now_ms=now_ms, corr=receipt.trade_intent_id or trade_intent_id or position_id)
-                self.exit_journal.finish(request, state=state, receipt_event_ref=receipt_ref, now_ms=now_ms)
-                if state == "ACCEPTED" and ticket is not None:
-                    self._log(EventKind.OWNER_TICKET, {"ticket": receipt.broker_order_id,
-                        "symbol": ticket.symbol, "side": "SELL", "position_id": position_id,
-                        "trade_intent_id": receipt.trade_intent_id, "exit_reason": reason,
-                        "qty": str(ticket.quantity_shares), "limit_price": str(ticket.limit_price),
-                        "exit_request_ref": request.hash}, now_ms=now_ms,
-                        corr=receipt.trade_intent_id or trade_intent_id or position_id)
+            with (family_effect_guard() if family_effect_guard is not None else nullcontext()):
+                transport_started = True
+                receipt = self.adapters[venue].close(position_id, quantity, now_ms=now_ms, reason=reason)
+                from vati.execution.ctrader.charge_source import receipt_charge_evidence
+                charge_evidence=receipt_charge_evidence(self.adapters[venue],receipt)
+                state = self.exit_journal.receipt_state(receipt, venue=venue,
+                    position_id=position_id, trade_intent_id=trade_intent_id)
+                ticket = None
+                if state == "ACCEPTED" and receipt.execution_channel == "OWNER_TICKET":
+                    ticket = getattr(self.adapters[venue], "tickets", {}).get(receipt.broker_order_id)
+                    if ticket is None or ticket.side != "SELL" or ticket.source_position_id != position_id:
+                        state = "UNKNOWN"
+                with self.ledger.atomic():
+                    receipt_ref = self._log(EventKind.EXECUTION_RECEIPT,
+                        {**{k:(v.value if hasattr(v, "value") else v) for k,v in asdict(receipt).items()},
+                         "exit_action": "CLOSE", "exit_reason": reason,
+                         "preservation_action": action, "exit_request_ref": request.hash,**charge_evidence},
+                        now_ms=now_ms, corr=receipt.trade_intent_id or trade_intent_id or position_id)
+                    self.exit_journal.finish(request, state=state, receipt_event_ref=receipt_ref, now_ms=now_ms)
+                    if state == "ACCEPTED" and ticket is not None:
+                        self._log(EventKind.OWNER_TICKET, {"ticket": receipt.broker_order_id,
+                            "symbol": ticket.symbol, "side": "SELL", "position_id": position_id,
+                            "trade_intent_id": receipt.trade_intent_id, "exit_reason": reason,
+                            "qty": str(ticket.quantity_shares), "limit_price": str(ticket.limit_price),
+                            "exit_request_ref": request.hash}, now_ms=now_ms,
+                            corr=receipt.trade_intent_id or trade_intent_id or position_id)
         except BaseException:
+            if not transport_started:
+                # The existing guard refused before the adapter was invoked.
+                # This is local authority evidence, never a fabricated native receipt.
+                with self.ledger.atomic():
+                    refusal = self._log(EventKind.SESSION,
+                        {"event": "FAMILY_DISPATCH_NOT_SENT", "exit_request_ref": request.hash,
+                         "position_id": position_id, "venue": venue}, now_ms=now_ms,
+                        corr=trade_intent_id or position_id)
+                    self.exit_journal.finish(request,state="NOT_EXECUTED",receipt_event_ref=None,
+                        dispatch_refusal_ref=refusal,now_ms=now_ms)
+                self.protection.close_failed(position_id)
+                raise
             # The request is already durable. Even a missing response or a
             # receipt-persistence failure cannot authorize another send.
             self._uncertain_exit(position_id, now_ms=now_ms, request_ref=request.hash)
@@ -815,7 +853,8 @@ class ExecutionRouter:
                            trade_intent_id: str, action: str,
                            now_ms: int, new_stop: Optional[Decimal] = None,
                            quantity: Optional[Decimal] = None,
-                           reason: str = "REV51_PRESERVATION") -> Optional[ExecutionReceipt]:
+                           reason: str = "REV51_PRESERVATION",
+                           family_action_ref=None, family_target_ref=None, family_effect_guard=None) -> Optional[ExecutionReceipt]:
         """Execute a deterministic preservation action through the router boundary.
 
         This path cannot add exposure. Software-stop tightening mutates only the
@@ -855,7 +894,9 @@ class ExecutionRouter:
         if action == "FULL_CLOSE":
             quantity = None
         return self._send_close(venue, position_id=position_id, trade_intent_id=trade_intent_id,
-            action=action, quantity=quantity, now_ms=now_ms, reason=reason)
+            action=action, quantity=quantity, now_ms=now_ms, reason=reason,
+            family_action_ref=family_action_ref, family_target_ref=family_target_ref,
+            family_effect_guard=family_effect_guard)
 
     def apply_exits(self, venue: str, symbol: str, bid: Decimal, ask: Decimal, *, now_ms: int) -> list[ExecutionReceipt]:
         adapter = self.adapters[venue]

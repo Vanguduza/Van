@@ -1,0 +1,32 @@
+{
+  "source_parent": "2728a83ce203fec867dc536c8d4341c2ce4415cb",
+  "targets": [
+    "trading/tests/test_family_action_journal.py",
+    "trading/tests/test_family_add_caller.py",
+    "trading/tests/test_family_governed_workflow.py",
+    "trading/tests/test_family_native_action_contract.py",
+    "trading/tests/test_family_native_membership.py",
+    "trading/tests/test_family_native_protection.py",
+    "trading/tests/test_family_native_supervision.py",
+    "trading/tests/test_family_outcome_restatements.py",
+    "trading/tests/test_family_paper_close_capability.py",
+    "trading/tests/test_family_unknown_independence.py",
+    "trading/tests/test_lifecycle_operational_grant.py",
+    "trading/tests/test_lifecycle_private_governance.py",
+    "trading/tests/test_active_trade_e2e.py",
+    "trading/tests/test_rev51_preservation.py",
+    "trading/tests/test_rev51_expansion.py",
+    "trading/tests/test_family_original_accounting.py",
+    "trading/tests/test_family_durable_projection.py",
+    "trading/tests/test_exit_uncertainty.py",
+    "trading/tests/test_account_lifecycle.py",
+    "trading/tests/test_account_trade_lifecycle.py",
+    "trading/tests/test_native_position_recovery_scope.py",
+    "trading/tests/test_restated_trade_projection.py",
+    "trading/tests/test_position_adjustment.py",
+    "trading/tests/test_account_coordinator.py"
+  ],
+  "selection_reason": "All new non-PG family policy/action/journal/membership/protection/outcome/governance tests, plus actual existing mark/ADD/adjustment/account/recovery/uncertain-exit/restatement consumers. Actual PG source scenarios and declared-PG cases independently run in final PG r2, not inferred from local skips.",
+  "broader_hosted_regression": "REQUIRED_ON_PUBLISHED_EXACT_HEAD",
+  "suites_overlap": true
+}

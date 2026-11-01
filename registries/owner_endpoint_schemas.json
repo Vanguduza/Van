@@ -4795,6 +4795,16 @@
             "type": "integer",
             "title": "Revoked Client Certificates"
           },
+          "certificate_retirement_phase": {
+            "type": "string",
+            "enum": [
+              "PENDING",
+              "APPLIED",
+              "UNKNOWN"
+            ],
+            "title": "Certificate Retirement Phase",
+            "default": "PENDING"
+          },
           "native_authority_revocation": {
             "$ref": "#/components/schemas/NativeOwnerKeyRevocationState"
           }
@@ -11431,9 +11441,59 @@
         "properties": {
           "reason": {
             "type": "string",
+            "maxLength": 1000,
+            "minLength": 1,
             "title": "Reason"
+          },
+          "operation_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 128,
+                "minLength": 16
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Operation Id"
+          },
+          "expected_binding_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Expected Binding Id"
+          },
+          "expected_bound_at_ms": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Expected Bound At Ms"
+          },
+          "gateway_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Gateway Url"
           }
         },
+        "additionalProperties": false,
         "type": "object",
         "required": [
           "reason"

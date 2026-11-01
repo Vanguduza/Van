@@ -117,6 +117,26 @@ def build(read=None):
         preserved[name] = {"rows": len(rows), "function_ids": [f["id"] for r in rows
             for f in r["current_implementation"]["functions"]]}
         walk(rows)
+    # Existing LAC-348 original replacement receipt; no new owner action/UI.
+    reenrollment = next(r for r in endpoint_doc["endpoints"] if
+        (r["method"], r["path"]) == ("GET", "/v1/devices/rebindings/{operation_id}"))
+    reenrollment_extension = {
+        "method": "GET", "path": reenrollment["path"], "endpoint_id": reenrollment["endpoint_id"],
+        "source_ref": reenrollment["source"], "authentication": reenrollment["authentication"],
+        "device_proof_required_when_bound": reenrollment["device_proof_required_when_bound"],
+        "source_status": "CANDIDATE_BACKEND_SOURCE_TESTED_INSTALLER_PATH_AUTHORIZATION_PENDING",
+        "authority": "READ_ORIGINAL_REENROLLMENT_ONLY_NO_RETIREMENT_OR_CREDENTIAL_MINT",
+        "canonical_units": ["BE-002"], "action_ids": ["LAC-348"],
+        "specification_operation_id": "WP-ACT-LAC-348", "requirement_ids": ["VAN-NX-021"],
+        "scope": "Dedicated DEVICE_ENROLMENT operator reads the exact original replacement operation, protected response and original deadline; no new retirement, credential mint, expiry extension, owner action or Android consumer is inferred.",
+        "specification": "docs/rebuild/rev118/backend/BE-002_LAC348_DEVICE_REENROLLMENT.md",
+        "new_ui_implemented": False, "live_qualified": False,
+    }
+    for row in (
+        next(r for r in documents["owner_features"]["features"] if r["id"] == "OF-PROVISION-001"),
+        next(r for r in documents["owner_screens"]["screens"] if r["id"] == "van.devices.provision"),
+    ):
+        row.setdefault("backend_contract_extensions", []).append(copy.deepcopy(reenrollment_extension))
     browser = next(r for r in documents["owner_features"]["features"] if r["id"] == "OF-BROWSER-001")
     endpoint = next(r for r in endpoint_doc["endpoints"] if r["path"].endswith("/{task_id}/resume-contract"))
     browser.setdefault("backend_contract_extensions", []).append({

@@ -1,0 +1,24 @@
+F................................                                        [100%]
+=================================== FAILURES ===================================
+________ test_original_hedged_legs_keep_their_own_quantities_and_stops _________
+
+tmp_path = PosixPath('/tmp/van-recovery-family-native-membership-r1-20261101/test_original_hedged_legs_keep0')
+
+    def test_original_hedged_legs_keep_their_own_quantities_and_stops(tmp_path):
+        with closing(Ledger(tmp_path/'membership.sqlite')) as ledger:
+            life,adapter,root,child,entry,added = recorded_scale(ledger,netted=False)
+            before = ledger.count()
+            actual = snapshot(ledger,life,adapter,root)
+            legs = {leg.position_id: leg for leg in actual.legs}
+            assert actual.known and not actual.ambiguous
+            assert legs[entry.broker_position_id].remaining == D('.06')
+            assert legs[added.broker_position_id].remaining == D('.05')
+            assert actual.remaining_exact == D('.11')
+>           assert all(leg.protection_confirmed for leg in legs.values())
+E           assert False
+E            +  where False = all(<generator object test_original_hedged_legs_keep_their_own_quantities_and_stops.<locals>.<genexpr> at 0x7f2e3776d0c0>)
+
+trading/tests/test_family_native_membership.py:30: AssertionError
+=========================== short test summary info ============================
+FAILED trading/tests/test_family_native_membership.py::test_original_hedged_legs_keep_their_own_quantities_and_stops
+1 failed, 32 passed in 1.01s

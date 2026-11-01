@@ -451,20 +451,19 @@ class TestOwnerDeviceBinding:
         assert rows[0]["revoke_reason"] == "phone lost"
 
     async def test_rebinding_revokes_and_issues_in_one_step(self, tmp_path):
-        service, _ = await self._service(tmp_path)
-        token, challenge = await service.create_bootstrap_token(now_ms=1_000)
-        pem, _ = _keypair()
-        await service.bind(
-            token=token, device_id="s24", public_key_pem=pem,
-            attestation_extension=_attestation(challenge.encode()), now_ms=1_100,
-        )
-        new_token, new_challenge = await service.rebind_token(
-            reason="replaced handset", now_ms=4_000
-        )
+        # The durable recovery owner also retires paired/native authority before the
+        # replacement credential becomes usable; the binding owner cannot do that alone.
+        from test_owner_device_reenrollment_recovery import setup
+        fixture = await setup(tmp_path)
+        service = fixture.bindings
+        fixture.native.available = True
+        result = await fixture.service.start(**fixture.request)
+        assert result["phase"] == "READY"
+        new_token, new_challenge = result["bootstrap_token"], result["attestation_challenge"]
         replacement_pem, _ = _keypair()
         binding = await service.bind(
             token=new_token, device_id="s24-new", public_key_pem=replacement_pem,
-            attestation_extension=_attestation(new_challenge.encode()), now_ms=4_100,
+            attestation_extension=_attestation(new_challenge.encode()),
         )
         assert binding.device_id == "s24-new"
         assert (await service.active()).device_id == "s24-new"

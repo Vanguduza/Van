@@ -90,6 +90,7 @@ class CommanderSettings:
         "VAN_OWNER_AUTHORITY_KEYS",
         "/var/lib/van-trading/owner_authority_keys.json",
     )
+    lifecycle_policy_qualification_keys: str = os.environ.get("VATI_LIFECYCLE_QUALIFICATION_KEYS", "")
     account_control: Optional[AccountControlSettings] = None   # injected for tests; else derived
     units: tuple[str, ...] = tuple(filter(None, os.environ.get("VAN_COMMANDER_UNITS", ",".join(DEFAULT_UNITS)).split(",")))
     backtest_timeout_s: int = int(os.environ.get("VAN_COMMANDER_BACKTEST_TIMEOUT", "600"))
@@ -434,6 +435,12 @@ def create_app(settings: Optional[CommanderSettings] = None) -> FastAPI:
                     owner_authority_keys_path=st.owner_authority_keys,
                 ))}
     assert set(handlers) == set(COMMANDS) == set(TOOL_SCHEMAS)
+    # Source owner integration only. No new command, HTTP route or MCP surface:
+    # frozen public action binding still requires its own reviewed amendment.
+    from commander.lifecycle_policies import LifecyclePolicyControls, LifecyclePolicySettings, qualification_reader
+    app.state.lifecycle_policy_controls = LifecyclePolicyControls(LifecyclePolicySettings(
+        ledger=st.ledger,owner_authority=st.owner_authority(),
+        qualification_authority=qualification_reader(st.lifecycle_policy_qualification_keys)))
 
     # ------------------------------------------------------------ routes
     @app.get("/health")

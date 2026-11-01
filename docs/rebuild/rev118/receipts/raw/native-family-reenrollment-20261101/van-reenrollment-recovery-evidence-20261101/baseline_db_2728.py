@@ -1,0 +1,2708 @@
+from __future__ import annotations
+
+import asyncio
+import json
+import time
+from contextlib import asynccontextmanager
+from pathlib import Path
+from typing import Any, AsyncIterator
+
+import aiosqlite
+
+SCHEMA_VERSION = 59
+
+from van_gateway.storage.chart_migration import MIGRATION_56
+from van_gateway.learning.schema import MIGRATION_57
+from van_gateway.storage.monitor_migrations import MIGRATION_58, MIGRATION_59
+
+MIGRATION_41 = """
+CREATE TABLE IF NOT EXISTS automation_owner_plans (
+ device_id TEXT NOT NULL REFERENCES devices(device_id), idempotency_key TEXT NOT NULL,
+ request_digest TEXT NOT NULL, state TEXT NOT NULL, result_json TEXT,
+ created_at_ms INTEGER NOT NULL, completed_at_ms INTEGER,
+ PRIMARY KEY(device_id,idempotency_key)
+);
+"""
+
+MIGRATION_39 = """
+CREATE TABLE IF NOT EXISTS decision_details (
+ decision_id TEXT PRIMARY KEY REFERENCES decisions(id), choices_json TEXT NOT NULL,
+ evidence_json TEXT NOT NULL, mission_id TEXT REFERENCES missions(mission_id),
+ blocking INTEGER NOT NULL DEFAULT 1, expires_at_unix INTEGER,
+ revision INTEGER NOT NULL DEFAULT 1, selected_choice_id TEXT, answer_note TEXT,
+ answered_at_unix INTEGER, resolution_request_id TEXT, resolution_request_hash TEXT,
+ create_request_id TEXT UNIQUE, create_request_hash TEXT
+);
+CREATE INDEX IF NOT EXISTS idx_decision_details_expiry ON decision_details(expires_at_unix,decision_id);
+"""
+
+MIGRATION_40 = """
+CREATE TABLE IF NOT EXISTS mission_execution_controls (
+ mission_id TEXT PRIMARY KEY REFERENCES missions(mission_id),
+ generation INTEGER NOT NULL DEFAULT 0 CHECK(generation >= 0),
+ desired_execution TEXT NOT NULL DEFAULT 'RUNNING' CHECK(desired_execution IN ('RUNNING','PAUSED')),
+ hermes_run_id TEXT, updated_at_ms INTEGER NOT NULL
+);
+CREATE TABLE IF NOT EXISTS mission_control_requests (
+ control_id TEXT PRIMARY KEY, mission_id TEXT NOT NULL REFERENCES missions(mission_id),
+ request_id TEXT NOT NULL, operation TEXT NOT NULL CHECK(operation IN ('PAUSE','RESUME','DIRECTION')),
+ expected_generation INTEGER NOT NULL CHECK(expected_generation >= 0),
+ generation INTEGER NOT NULL CHECK(generation > 0), payload_digest TEXT NOT NULL,
+ canonical_payload_json TEXT NOT NULL, requested_by TEXT NOT NULL, direction TEXT,
+ desired_execution TEXT NOT NULL CHECK(desired_execution IN ('RUNNING','PAUSED')),
+ hermes_run_id TEXT, owner_receipt_json TEXT NOT NULL, created_at_ms INTEGER NOT NULL,
+ worker_ack_json TEXT, worker_ack_digest TEXT, checkpoint_ref TEXT, acknowledged_at_ms INTEGER,
+ UNIQUE(mission_id,request_id), UNIQUE(mission_id,generation)
+);
+CREATE INDEX IF NOT EXISTS idx_mission_control_pending ON mission_control_requests(mission_id,operation,generation,acknowledged_at_ms);
+"""
+
+MIGRATION_35 = """
+ALTER TABLE browser_interactive_sessions ADD COLUMN acked_media_epoch TEXT;
+ALTER TABLE browser_interactive_sessions ADD COLUMN acked_frame_sequence INTEGER;
+ALTER TABLE browser_downloads ADD COLUMN producer_session_id TEXT;
+ALTER TABLE browser_downloads ADD COLUMN host_deleted_at_ms INTEGER;
+-- Authenticated producer connections are durable, one-use grant bindings. A new
+-- connection fences the previous one; neither a signed token nor a stale media
+-- process is allowed to invent current session authority.
+CREATE TABLE IF NOT EXISTS browser_stream_producers (
+  producer_session_id TEXT PRIMARY KEY,
+  grant_id TEXT NOT NULL UNIQUE REFERENCES browser_stream_grants(grant_id),
+  session_id TEXT NOT NULL REFERENCES browser_interactive_sessions(session_id),
+  producer_principal_sha256 TEXT NOT NULL,
+  profile_lease_id TEXT NOT NULL,
+  profile_generation INTEGER NOT NULL,
+  created_at_ms INTEGER NOT NULL,
+  revoked_at_ms INTEGER,
+  revoke_reason TEXT,
+  observed_viewport_revision INTEGER,
+  observed_frame_sequence INTEGER NOT NULL DEFAULT 0,
+  observed_at_ms INTEGER
+  ,pending_chooser_id TEXT
+  ,pending_chooser_target_id TEXT
+);
+CREATE INDEX IF NOT EXISTS idx_stream_producer_session
+  ON browser_stream_producers(session_id, revoked_at_ms);
+
+CREATE TABLE IF NOT EXISTS browser_owner_transfer_grants (
+  transfer_id TEXT PRIMARY KEY,
+  token_sha256 TEXT NOT NULL UNIQUE,
+  producer_session_id TEXT NOT NULL REFERENCES browser_stream_producers(producer_session_id),
+  session_id TEXT NOT NULL REFERENCES browser_interactive_sessions(session_id),
+  owner_device_id TEXT NOT NULL,
+  operation TEXT NOT NULL,
+  resource_id TEXT NOT NULL,
+  target_id TEXT NOT NULL,
+  profile_lease_id TEXT NOT NULL,
+  profile_generation INTEGER NOT NULL,
+  control_lease_id TEXT NOT NULL,
+  control_generation INTEGER NOT NULL,
+  viewport_revision INTEGER NOT NULL,
+  metadata_json TEXT NOT NULL,
+  created_at_ms INTEGER NOT NULL,
+  expires_at_ms INTEGER NOT NULL,
+  consumed_at_ms INTEGER
+);
+
+CREATE TABLE IF NOT EXISTS browser_control_producer_grants (
+  grant_id TEXT PRIMARY KEY,
+  task_id TEXT NOT NULL REFERENCES browser_tasks(task_id),
+  session_id TEXT NOT NULL REFERENCES browser_interactive_sessions(session_id),
+  target_id TEXT NOT NULL,
+  proxy_principal_sha256 TEXT NOT NULL,
+  caller_common_name TEXT NOT NULL,
+  scope TEXT NOT NULL,
+  control_lease_id TEXT NOT NULL,
+  control_generation INTEGER NOT NULL,
+  profile_lease_id TEXT NOT NULL,
+  profile_generation INTEGER NOT NULL,
+  step_budget INTEGER NOT NULL,
+  steps_used INTEGER NOT NULL DEFAULT 0,
+  deadline_ms INTEGER NOT NULL,
+  created_at_ms INTEGER NOT NULL,
+  revoked_at_ms INTEGER,
+  UNIQUE(task_id, session_id, caller_common_name)
+);
+"""
+
+MIGRATION_34 = """
+ALTER TABLE owner_device_bindings ADD COLUMN attestation_challenge TEXT;
+"""
+
+MIGRATION_33 = """
+-- Signed certificate-chain validation is separate from historical extension metadata.
+ALTER TABLE owner_device_bindings ADD COLUMN attestation_chain_verified INTEGER NOT NULL DEFAULT 0;
+"""
+
+
+MIGRATION_17 = """
+-- P1-SEC-005: the command nonce was covered by the v2 signature and then never stored,
+-- so a captured command could be replayed inside its validity window. A UNIQUE nonce per
+-- device makes the second presentation fail at the database rather than at nobody.
+CREATE TABLE IF NOT EXISTS command_nonces (
+  device_id TEXT NOT NULL,
+  nonce TEXT NOT NULL,
+  command_id TEXT NOT NULL,
+  consumed_at_unix INTEGER NOT NULL,
+  PRIMARY KEY (device_id, nonce)
+);
+CREATE INDEX IF NOT EXISTS idx_command_nonces_consumed
+  ON command_nonces(consumed_at_unix);
+
+-- P1-SEC-006: the owner-authority audit log was a flat table with a random UUID and no
+-- ordering, so rows could be inserted, altered or deleted undetectably. The VATI trading
+-- ledger already had a verifiable chain; the authority log did not.
+ALTER TABLE audit ADD COLUMN chain_seq INTEGER;
+ALTER TABLE audit ADD COLUMN prev_hash TEXT;
+ALTER TABLE audit ADD COLUMN entry_hash TEXT;
+CREATE UNIQUE INDEX IF NOT EXISTS idx_audit_chain_seq ON audit(chain_seq);
+"""
+
+MIGRATION_18 = """
+-- P0-EXEC-001: an accepted owner command produced no durable work record. The orchestrator
+-- now opens exactly one mission per command, and this index is what makes "exactly one"
+-- true under concurrency rather than merely intended: a second create for the same
+-- source command fails at the database.
+CREATE UNIQUE INDEX IF NOT EXISTS idx_missions_source_command
+  ON missions(json_extract(authority_envelope_json, '$.source_command_id'))
+  WHERE json_extract(authority_envelope_json, '$.source_command_id') IS NOT NULL;
+"""
+
+MIGRATION_19 = """
+-- P1-LEARN-001: the learning stores had correct invariants and no caller that recorded a
+-- real outcome, so VanEval scored a system that had done nothing the same as one that had
+-- done everything right. This is the table the production feed writes to.
+CREATE TABLE IF NOT EXISTS learning_outcomes (
+  outcome_id TEXT PRIMARY KEY,
+  mission_id TEXT NOT NULL,
+  outcome_kind TEXT NOT NULL,
+  goal TEXT NOT NULL,
+  verification_status TEXT,
+  evidence_refs_json TEXT NOT NULL DEFAULT '[]',
+  recorded_at_ms INTEGER NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_learning_outcomes_kind
+  ON learning_outcomes(outcome_kind, recorded_at_ms);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_learning_outcomes_mission
+  ON learning_outcomes(mission_id);
+"""
+
+MIGRATION_20 = """
+-- P3-OPS-001: the audit log is hash-chained, so it cannot be pruned the way every other
+-- table can. It can be pruned from the *start*, provided the verifier is told where the
+-- surviving chain begins and what hash it must link back to. This table is that record.
+--
+-- The anchor is itself evidence: it says how many rows were removed and what the last
+-- removed row hashed to, so a prune is visible rather than being indistinguishable from
+-- a deletion someone performed by hand.
+CREATE TABLE IF NOT EXISTS audit_chain_anchors (
+  anchor_seq INTEGER PRIMARY KEY,
+  anchor_hash TEXT NOT NULL,
+  pruned_rows INTEGER NOT NULL,
+  created_at_unix INTEGER NOT NULL
+);
+
+-- P3-OPS-005: reminder and attention dedupe lived in a Python dict, so a restart
+-- re-surfaced an item the owner had already dismissed. Suppression is a decision the
+-- owner made; it belongs in the database with everything else they decided.
+CREATE TABLE IF NOT EXISTS notification_suppressions (
+  suppression_key TEXT PRIMARY KEY,
+  channel TEXT NOT NULL,
+  subject_ref TEXT NOT NULL,
+  reason TEXT NOT NULL,
+  suppressed_until_unix INTEGER,
+  created_at_unix INTEGER NOT NULL,
+  updated_at_unix INTEGER NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_notification_suppressions_channel
+  ON notification_suppressions(channel, suppressed_until_unix);
+
+-- P3-OPS-004: fire_due had no scheduler, so a reminder that came due was never
+-- dispatched by the system itself. A scheduler needs to know what it already ran, or a
+-- restart re-fires everything that was ever due.
+CREATE TABLE IF NOT EXISTS scheduler_runs (
+  job_name TEXT NOT NULL,
+  run_at_unix INTEGER NOT NULL,
+  finished_at_unix INTEGER,
+  outcome TEXT NOT NULL,
+  detail_json TEXT NOT NULL DEFAULT '{}',
+  PRIMARY KEY (job_name, run_at_unix)
+);
+CREATE INDEX IF NOT EXISTS idx_scheduler_runs_job
+  ON scheduler_runs(job_name, run_at_unix DESC);
+"""
+
+
+MIGRATION_21 = """
+-- P1-LEARN-003: `StrategyLearning` keys everything on `mission_class` and no mission
+-- carried one, so §25's "which capability sequences work" and §41's "measurable strategy
+-- improvement in >= 3 production mission classes" were both unanswerable: the store had
+-- the right invariants, a promotion gate that refused without eval evidence, and no way
+-- for a row to ever exist. The class is the typed resolver's intent, which the command
+-- path already computes and then discarded.
+ALTER TABLE missions ADD COLUMN mission_class TEXT NOT NULL DEFAULT 'GENERAL_OWNER_INTENT';
+CREATE INDEX IF NOT EXISTS idx_missions_class ON missions(mission_class, state);
+
+-- P1-LEARN-002: nothing prevented learning from widening authority. A strategy is a
+-- capability sequence, and a sequence exercised under an A4 envelope offered back to a
+-- mission capped at A2 would be exactly that: authority acquired by accumulation rather
+-- than by an owner decision. The ceiling a strategy was actually exercised under is
+-- recorded here so it can be compared with the asking mission's envelope, and it only
+-- ever rises to what has genuinely been run.
+ALTER TABLE execution_strategies ADD COLUMN max_action_class TEXT NOT NULL DEFAULT 'A1';
+CREATE INDEX IF NOT EXISTS idx_execution_strategies_lookup
+  ON execution_strategies(mission_class, promotion_state);
+"""
+
+MIGRATION_22 = """
+-- P0-OPS-011: an IN_FLIGHT idempotency claim had no lease. A gateway that died between
+-- claiming a key and completing it left the row IN_FLIGHT forever, and every later retry
+-- of that command raised "still in flight". The idempotency key is part of the signed
+-- request, so the owner could not work around it by changing it: that command became
+-- permanently unrepeatable, and the only cure was editing the database.
+--
+-- claim_count records how many times a claim has been taken, so a recovered claim is
+-- visible rather than looking like the first attempt.
+ALTER TABLE idempotency ADD COLUMN claim_count INTEGER NOT NULL DEFAULT 1;
+"""
+
+MIGRATION_23 = """
+-- P1-LEARN-005: strategy outcomes were a boolean, and False meant failure_count + 1. Every
+-- non-verified terminal state therefore punished the strategy — an owner cancelling, a
+-- policy refusal, an unsafe refusal, a deadline expiry and an UNVERIFIABLE run all read as
+-- "this approach does not work", and none of them says that.
+--
+-- The third counter exists so INCONCLUSIVE is recorded rather than discarded: a strategy
+-- that keeps being cancelled is worth seeing, and it is not the same as one that keeps
+-- failing.
+ALTER TABLE execution_strategies ADD COLUMN inconclusive_count INTEGER NOT NULL DEFAULT 0;
+"""
+
+MIGRATION_24 = """
+-- P2-MEM-003: every mission goal was promoted straight into the standing-intent graph, so
+-- "what is on my calendar?" became a long-lived owner objective that stayed ACTIVE until
+-- the ninety-day stale sweep. §77's conflict detection then has transient commands to
+-- contradict genuine long-term goals with, and the owner model fills with noise that looks
+-- like evidence.
+--
+-- A horizon separates what the owner *asked for once* from what they are *trying to do*.
+-- Everything starts EPHEMERAL. Promotion to STANDING requires evidence — repetition, or an
+-- explicit owner statement — and is recorded with what caused it.
+ALTER TABLE intent_nodes ADD COLUMN horizon TEXT NOT NULL DEFAULT 'EPHEMERAL';
+ALTER TABLE intent_nodes ADD COLUMN observation_count INTEGER NOT NULL DEFAULT 1;
+-- Provenance: what promoted this, so a standing intent can be argued with.
+ALTER TABLE intent_nodes ADD COLUMN promoted_reason TEXT;
+ALTER TABLE intent_nodes ADD COLUMN promoted_at_ms INTEGER;
+CREATE INDEX IF NOT EXISTS idx_intent_nodes_horizon ON intent_nodes(horizon, status);
+"""
+
+MIGRATION_25 = """
+-- P2-CTX-003: a correction that superseded without recording what it superseded.
+--
+-- OwnerFactCandidate.supersedes_fact_id and ContextEdgeCandidate.supersedes_edge_id were
+-- read by admit_fact and admit_edge, used to close the prior record's validity window, and
+-- then thrown away: neither INSERT carried the column, because neither table had one. So
+-- the graph kept the *effect* of a correction and lost the *fact* of it.
+--
+-- The consequence is not abstract. Two facts about the same subject and predicate with
+-- adjacent validity windows look exactly the same whether one replaced the other or both
+-- simply expired on their own. The owner asking "why does VAN believe this now, and what
+-- did it believe before?" could not be answered, which is the whole of revision history.
+ALTER TABLE owner_facts ADD COLUMN supersedes_fact_id TEXT;
+ALTER TABLE owner_context_edges ADD COLUMN supersedes_edge_id TEXT;
+
+-- History is walked backwards from the newest record, so the index is on the link column.
+CREATE INDEX IF NOT EXISTS idx_owner_facts_supersedes
+  ON owner_facts(supersedes_fact_id);
+CREATE INDEX IF NOT EXISTS idx_owner_edges_supersedes
+  ON owner_context_edges(supersedes_edge_id);
+
+-- Contradictions are found by grouping on the identity a requirement resolves against.
+-- Without this the conflict scan is a full table sort on every call.
+CREATE INDEX IF NOT EXISTS idx_owner_facts_identity
+  ON owner_facts(subject, predicate, scope, authority);
+"""
+
+MIGRATION_26 = """
+-- §15's assumption gate could be cleared by the actor it exists to restrain.
+--
+-- `blocking_assumptions` blocks on status ACTIVE, and `resolve_assumption` demanded
+-- evidence for VERIFIED only. FALSIFIED, EXPIRED and SUPERSEDED all leave ACTIVE and all
+-- were settable by assertion, so the caller that recorded a CRITICAL assumption could
+-- supersede it a moment later and proceed. That is P0-VERIFY-001's shape one level up: a
+-- check whose subject is permitted to mark it passed.
+--
+-- SUPERSEDED now has to name what replaced it, which is the difference between a
+-- correction and a deletion, and the replacement is a new blocking assumption unless it is
+-- itself resolved with evidence.
+ALTER TABLE assumption_ledger ADD COLUMN superseded_by TEXT;
+
+CREATE INDEX IF NOT EXISTS idx_assumption_superseded
+  ON assumption_ledger(superseded_by);
+"""
+
+MIGRATION_27 = """
+-- Remote Browser Rev 1.5 §§5.3, 5.6, 5.7 — the interactive browser session, and the
+-- owner-device binding that decides which handset may open one.
+--
+-- Everything here is additive. The existing browser_profiles, browser_tasks and
+-- browser_evidence tables stay exactly where they are and keep their meaning: §5.6 is
+-- explicit that the interactive session extends the Browser Fabric rather than forking a
+-- second one, and a second profile registry is how two answers to "who holds this profile"
+-- would appear.
+
+-- §5.3 — the profile lease becomes renewable and gains a holder kind.
+--
+-- It was task-shaped: one task_id, five minutes, no renewal. An interactive session is held
+-- by a person for as long as they are looking at it, so a non-renewable lease would end the
+-- owner's session mid-scroll. `lease_generation` is the fence: a lease that has been taken
+-- again has a higher generation, so an actuation packet carrying the old one is rejected
+-- rather than applied to whoever holds the profile now.
+ALTER TABLE browser_profiles ADD COLUMN lease_holder_kind TEXT;
+ALTER TABLE browser_profiles ADD COLUMN lease_holder_id TEXT;
+ALTER TABLE browser_profiles ADD COLUMN lease_generation INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE browser_profiles ADD COLUMN lease_acquired_at_ms INTEGER;
+
+-- §5.1 — the session itself.
+CREATE TABLE IF NOT EXISTS browser_interactive_sessions (
+  session_id TEXT PRIMARY KEY,
+  owner_device_id TEXT NOT NULL,
+  profile_alias TEXT NOT NULL,
+  profile_lease_id TEXT,
+  state TEXT NOT NULL,
+
+  active_target_id TEXT,
+  active_url_digest TEXT,
+
+  viewport_width INTEGER NOT NULL,
+  viewport_height INTEGER NOT NULL,
+  device_scale_factor REAL NOT NULL,
+  -- §8.1: actuation carries a viewport revision and a stale one is refused, never
+  -- transformed. The acked revision is what the device has actually rendered.
+  viewport_revision INTEGER NOT NULL DEFAULT 1,
+  acked_viewport_revision INTEGER,
+
+  requested_fps INTEGER NOT NULL,
+  negotiated_codec TEXT,
+  negotiated_transport TEXT,
+
+  control_holder TEXT NOT NULL,
+  control_lease_id TEXT,
+  control_generation INTEGER NOT NULL DEFAULT 0,
+
+  created_at_ms INTEGER NOT NULL,
+  connected_at_ms INTEGER,
+  last_client_seen_at_ms INTEGER,
+  last_profile_lease_renewed_at_ms INTEGER,
+  suspended_at_ms INTEGER,
+  expires_at_ms INTEGER NOT NULL,
+  terminated_at_ms INTEGER,
+  final_reason TEXT,
+
+  -- ADR-RB-018: a session attaches to the Mission its command already created. It never
+  -- creates a second one for the same owner request.
+  mission_id TEXT,
+  originating_command_id TEXT,
+  idempotency_key TEXT
+);
+
+CREATE INDEX IF NOT EXISTS idx_interactive_sessions_device
+  ON browser_interactive_sessions(owner_device_id, state);
+CREATE INDEX IF NOT EXISTS idx_interactive_sessions_profile
+  ON browser_interactive_sessions(profile_alias, state);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_interactive_sessions_idempotency
+  ON browser_interactive_sessions(idempotency_key)
+  WHERE idempotency_key IS NOT NULL;
+
+-- §5.4 — who may actuate, which is a different question from who holds the profile.
+--
+-- The UNIQUE (session_id, generation) is the whole mechanism: a generation is issued once,
+-- so a replayed or late packet naming an earlier one cannot be mistaken for current
+-- authority. Without it "control_generation" would be a number nobody enforces.
+CREATE TABLE IF NOT EXISTS browser_control_leases (
+  control_lease_id TEXT PRIMARY KEY,
+  session_id TEXT NOT NULL,
+  holder TEXT NOT NULL,
+  issued_for TEXT NOT NULL,
+  issued_at_ms INTEGER NOT NULL,
+  expires_at_ms INTEGER NOT NULL,
+  generation INTEGER NOT NULL,
+  revoked_at_ms INTEGER,
+  revoke_reason TEXT,
+  FOREIGN KEY (session_id) REFERENCES browser_interactive_sessions(session_id)
+);
+
+CREATE UNIQUE INDEX IF NOT EXISTS idx_control_lease_generation
+  ON browser_control_leases(session_id, generation);
+CREATE INDEX IF NOT EXISTS idx_control_lease_session
+  ON browser_control_leases(session_id, issued_at_ms);
+
+-- §5.5 — the short-lived grant the stream runtime verifies.
+--
+-- The nonce is UNIQUE because the grant is one-time: redeeming it twice is either a replay
+-- or a second device holding a copy, and both are refusals rather than warnings.
+CREATE TABLE IF NOT EXISTS browser_stream_grants (
+  grant_id TEXT PRIMARY KEY,
+  session_id TEXT NOT NULL,
+  device_id TEXT NOT NULL,
+  kid TEXT NOT NULL,
+  profile_alias TEXT NOT NULL,
+  scope_json TEXT NOT NULL,
+  nonce TEXT NOT NULL,
+  issued_at_ms INTEGER NOT NULL,
+  expires_at_ms INTEGER NOT NULL,
+  redeemed_at_ms INTEGER,
+  revoked_at_ms INTEGER,
+  FOREIGN KEY (session_id) REFERENCES browser_interactive_sessions(session_id)
+);
+
+CREATE UNIQUE INDEX IF NOT EXISTS idx_stream_grant_nonce ON browser_stream_grants(nonce);
+CREATE INDEX IF NOT EXISTS idx_stream_grant_session
+  ON browser_stream_grants(session_id, issued_at_ms);
+
+-- §17 — tabs, as the Gateway knows them. The URL is stored as a digest: §5.1 keeps
+-- active_url_digest rather than the URL for the same reason browser evidence is digest-only.
+CREATE TABLE IF NOT EXISTS browser_session_targets (
+  session_id TEXT NOT NULL,
+  target_id TEXT NOT NULL,
+  title TEXT,
+  url_digest TEXT,
+  opener_target_id TEXT,
+  is_active INTEGER NOT NULL DEFAULT 0,
+  created_at_ms INTEGER NOT NULL,
+  closed_at_ms INTEGER,
+  PRIMARY KEY (session_id, target_id),
+  FOREIGN KEY (session_id) REFERENCES browser_interactive_sessions(session_id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_session_targets_active
+  ON browser_session_targets(session_id, is_active);
+
+-- ADR-RB-008 — durable state changes are persisted; pixels and pointer motion are not.
+CREATE TABLE IF NOT EXISTS browser_session_events (
+  event_id TEXT PRIMARY KEY,
+  session_id TEXT NOT NULL,
+  event_type TEXT NOT NULL,
+  severity TEXT NOT NULL,
+  summary TEXT NOT NULL,
+  payload_json TEXT,
+  evidence_ref TEXT,
+  occurred_at_ms INTEGER NOT NULL,
+  FOREIGN KEY (session_id) REFERENCES browser_interactive_sessions(session_id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_session_events_session
+  ON browser_session_events(session_id, occurred_at_ms);
+
+-- §18 — a download is a durable owner-visible object, not a transient browser state.
+CREATE TABLE IF NOT EXISTS browser_downloads (
+  download_id TEXT PRIMARY KEY,
+  session_id TEXT NOT NULL,
+  target_id TEXT,
+  suggested_name TEXT NOT NULL,
+  mime_type TEXT,
+  byte_size INTEGER,
+  content_sha256 TEXT,
+  url_digest TEXT,
+  state TEXT NOT NULL,
+  failure_reason TEXT,
+  evidence_ref TEXT,
+  created_at_ms INTEGER NOT NULL,
+  completed_at_ms INTEGER,
+  FOREIGN KEY (session_id) REFERENCES browser_interactive_sessions(session_id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_browser_downloads_session
+  ON browser_downloads(session_id, created_at_ms);
+
+-- §5.7 / §0D.3 — one owner device, enforced by the database rather than by a model check.
+--
+-- Build.MODEL comparison would pass on any other S24 Ultra. What cannot be copied is the
+-- private half of a hardware-backed key, so the binding is a public-key fingerprint and the
+-- partial unique index is what makes "exactly one active owner device" true under
+-- concurrency instead of merely intended.
+CREATE TABLE IF NOT EXISTS owner_device_bindings (
+  binding_id TEXT PRIMARY KEY,
+  owner_principal_id TEXT NOT NULL,
+  device_id TEXT NOT NULL UNIQUE,
+  device_key_fingerprint TEXT NOT NULL UNIQUE,
+  public_key_pem TEXT NOT NULL,
+  key_security_level TEXT NOT NULL,
+  app_package_name TEXT NOT NULL,
+  app_signing_cert_sha256 TEXT NOT NULL,
+  attestation_root_fingerprint TEXT,
+  verified_boot_state TEXT,
+  os_version TEXT,
+  os_patch_level TEXT,
+  status TEXT NOT NULL,
+  bound_at_ms INTEGER NOT NULL,
+  last_proof_at_ms INTEGER,
+  revoked_at_ms INTEGER,
+  revoke_reason TEXT
+);
+
+CREATE UNIQUE INDEX IF NOT EXISTS uq_active_owner_device
+  ON owner_device_bindings(owner_principal_id)
+  WHERE status = 'ACTIVE';
+
+CREATE TABLE IF NOT EXISTS device_attestation_events (
+  event_id TEXT PRIMARY KEY,
+  device_id TEXT,
+  challenge TEXT NOT NULL,
+  outcome TEXT NOT NULL,
+  refusal_reason TEXT,
+  key_security_level TEXT,
+  verified_boot_state TEXT,
+  attestation_root_fingerprint TEXT,
+  app_package_name TEXT,
+  app_signing_cert_sha256 TEXT,
+  os_version TEXT,
+  os_patch_level TEXT,
+  detail_json TEXT,
+  occurred_at_ms INTEGER NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_attestation_events_device
+  ON device_attestation_events(device_id, occurred_at_ms);
+
+-- ADR-RB-026 — enrolment is single-use and short-lived. The token is stored as a hash for
+-- the same reason a password would be: a readable bootstrap token in the database is a
+-- second copy of the only credential that can bind a new device.
+CREATE TABLE IF NOT EXISTS owner_device_bootstrap_tokens (
+  token_id TEXT PRIMARY KEY,
+  token_sha256 TEXT NOT NULL UNIQUE,
+  owner_principal_id TEXT NOT NULL,
+  challenge TEXT NOT NULL,
+  created_at_ms INTEGER NOT NULL,
+  expires_at_ms INTEGER NOT NULL,
+  consumed_at_ms INTEGER,
+  consumed_by_device_id TEXT,
+  revoked_at_ms INTEGER,
+  note TEXT
+);
+
+CREATE INDEX IF NOT EXISTS idx_bootstrap_tokens_expiry
+  ON owner_device_bootstrap_tokens(expires_at_ms);
+
+-- ADR-RB-024/027 — connectivity is signed configuration the device verifies, never a form
+-- the owner fills in. Versions are kept so a rotation can be rolled back to the manifest
+-- that was actually working.
+CREATE TABLE IF NOT EXISTS connectivity_config_versions (
+  version_id TEXT PRIMARY KEY,
+  manifest_sha256 TEXT NOT NULL,
+  manifest_json TEXT NOT NULL,
+  signature TEXT NOT NULL,
+  signing_kid TEXT NOT NULL,
+  status TEXT NOT NULL,
+  issued_at_ms INTEGER NOT NULL,
+  activated_at_ms INTEGER,
+  retired_at_ms INTEGER
+);
+
+CREATE UNIQUE INDEX IF NOT EXISTS uq_connectivity_active
+  ON connectivity_config_versions(status)
+  WHERE status = 'ACTIVE';
+
+-- §5.6 — the events table is extended, not replaced.
+--
+-- Rev 1.2 proposed a second realtime store. The existing table is a live production
+-- contract with an Android reducer and a per-device cursor on the other end of it, so the
+-- realtime envelope is built from additive columns and the globally monotonic `seq` stays
+-- the cursor. Per-device sequences are deliberately NOT introduced: two sequence spaces is
+-- how a replay gap becomes invisible.
+ALTER TABLE events ADD COLUMN event_id TEXT;
+ALTER TABLE events ADD COLUMN target_device_id TEXT;
+ALTER TABLE events ADD COLUMN occurred_at_ms INTEGER;
+ALTER TABLE events ADD COLUMN mission_id TEXT;
+ALTER TABLE events ADD COLUMN command_id TEXT;
+ALTER TABLE events ADD COLUMN correlation_id TEXT;
+
+-- Pre-migration rows get a deterministic identity rather than NULL, so a client that
+-- de-duplicates on event_id does not silently fall back to "everything before this point is
+-- unidentifiable". target_device_id stays NULL, which under the filter below means
+-- broadcast — the semantics those rows already had.
+UPDATE events
+   SET event_id = 'legacy-event:' || seq,
+       occurred_at_ms = created_at_unix * 1000
+ WHERE event_id IS NULL;
+
+CREATE UNIQUE INDEX IF NOT EXISTS idx_events_event_id
+  ON events(event_id) WHERE event_id IS NOT NULL;
+CREATE INDEX IF NOT EXISTS idx_events_device_seq ON events(target_device_id, seq);
+CREATE INDEX IF NOT EXISTS idx_events_mission_seq ON events(mission_id, seq);
+"""
+
+
+MIGRATION_28 = """
+-- Rev 1.5 §20 — the durable VAN⇄Hermes logical session.
+--
+-- §0B's invariant is that no feature depends on one physical connection, which only means
+-- anything if the session outlives the process that served it. These tables are what make
+-- "the same session" true after a Gateway restart rather than only after a socket blip.
+
+CREATE TABLE IF NOT EXISTS van_sessions (
+  van_session_id TEXT PRIMARY KEY,
+  session_epoch INTEGER NOT NULL,
+  device_id TEXT NOT NULL,
+  principal_type TEXT NOT NULL,
+  state TEXT NOT NULL,
+  created_at_ms INTEGER NOT NULL,
+  last_resumed_at_ms INTEGER,
+  last_client_event_seq INTEGER NOT NULL DEFAULT 0,
+  last_server_ack_seq INTEGER NOT NULL DEFAULT 0,
+  -- §20.9: exactly one path epoch may produce new upstream owner messages.
+  authoritative_path_epoch INTEGER NOT NULL DEFAULT 0,
+  closed_at_ms INTEGER
+);
+
+CREATE INDEX IF NOT EXISTS idx_van_sessions_device
+  ON van_sessions(device_id, state);
+
+-- §20.6 — the paths a session has actually used, with the route each one traversed.
+--
+-- route_id is stored rather than derived because route diversity is a deployment fact:
+-- two protocols over one ingress share a route, and only the deployment knows that.
+CREATE TABLE IF NOT EXISTS van_session_paths (
+  van_session_id TEXT NOT NULL,
+  path_epoch INTEGER NOT NULL,
+  path_id TEXT NOT NULL,
+  path_class TEXT NOT NULL,
+  route_id TEXT NOT NULL,
+  health TEXT NOT NULL,
+  opened_at_ms INTEGER NOT NULL,
+  last_rx_ms INTEGER,
+  retired_at_ms INTEGER,
+  PRIMARY KEY (van_session_id, path_epoch),
+  FOREIGN KEY (van_session_id) REFERENCES van_sessions(van_session_id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_van_session_paths_route
+  ON van_session_paths(van_session_id, route_id);
+
+-- §20.12 — effectively-once at the application layer, over an at-least-once transport.
+--
+-- The digest is what separates "the client lost the acknowledgement" from "a different
+-- command arrived under a key that has been seen". Storing only the key would make those
+-- two indistinguishable, and the safe answer to the second is to execute nothing.
+CREATE TABLE IF NOT EXISTS van_session_messages (
+  message_id TEXT PRIMARY KEY,
+  van_session_id TEXT NOT NULL,
+  idempotency_key TEXT,
+  command_id TEXT,
+  kind TEXT NOT NULL,
+  payload_digest TEXT NOT NULL,
+  path_epoch INTEGER NOT NULL,
+  admitted_state TEXT NOT NULL,
+  result_json TEXT,
+  created_at_ms INTEGER NOT NULL,
+  FOREIGN KEY (van_session_id) REFERENCES van_sessions(van_session_id)
+);
+
+CREATE UNIQUE INDEX IF NOT EXISTS uq_session_idempotency
+  ON van_session_messages(van_session_id, idempotency_key)
+  WHERE idempotency_key IS NOT NULL;
+
+CREATE INDEX IF NOT EXISTS idx_session_messages_command
+  ON van_session_messages(command_id);
+"""
+
+MIGRATION_29 = """
+-- GAP-F-002 — a reminder row said nothing about who asked for it: the owner, through the
+-- gateway's own `reminder.create` typed action, or Hermes on the owner's behalf through
+-- POST /v1/runtime/reminders (`HermesReminderCreateBody`'s own docstring in runtime_api.py
+-- named this gap explicitly: "reminders has no free-form metadata column to hold them").
+-- Additive, and backfilled to the value every existing reminder already has by
+-- construction: it was created by the owner device, the only producer that existed before
+-- this migration.
+ALTER TABLE reminders ADD COLUMN source TEXT NOT NULL DEFAULT 'owner_device';
+"""
+
+MIGRATION_30 = """
+-- VAN Character Forge Rev 2 §15. The acceptance record binds an owner-authority
+-- signature to the exact authored Rive bytes and the APK/device that displayed them.
+-- UNIQUE(token) makes replay of the same signed verdict idempotent.
+CREATE TABLE IF NOT EXISTS visual_acceptances (
+  id TEXT PRIMARY KEY,
+  rive_sha256 TEXT NOT NULL,
+  apk_sha256 TEXT NOT NULL,
+  token TEXT NOT NULL UNIQUE,
+  key_id TEXT NOT NULL,
+  device_model TEXT NOT NULL,
+  android_build TEXT NOT NULL,
+  verified_at INTEGER NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_visual_acceptances_latest
+  ON visual_acceptances(verified_at DESC);
+"""
+
+MIGRATION_31 = """
+-- A worker can report before the create-run response reaches the gateway. The inbox
+-- retains authenticated lifecycle reports until a real dispatch receipt binds the run.
+-- Workers never select or create that binding themselves.
+CREATE TABLE IF NOT EXISTS hermes_run_bindings (
+  hermes_run_id TEXT PRIMARY KEY,
+  mission_id TEXT NOT NULL UNIQUE,
+  bound_at_ms INTEGER NOT NULL,
+  started_at_ms INTEGER,
+  FOREIGN KEY (mission_id) REFERENCES missions(mission_id)
+);
+CREATE TABLE IF NOT EXISTS hermes_result_inbox (
+  result_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  hermes_run_id TEXT NOT NULL,
+  outcome TEXT NOT NULL,
+  summary TEXT NOT NULL,
+  received_at_ms INTEGER NOT NULL,
+  state TEXT NOT NULL DEFAULT 'RECEIVED',
+  lease_owner TEXT,
+  lease_until_ms INTEGER,
+  applied_at_ms INTEGER,
+  refusal_code TEXT,
+  UNIQUE (hermes_run_id, outcome)
+);
+CREATE INDEX IF NOT EXISTS idx_hermes_result_pending
+  ON hermes_result_inbox(state, lease_until_ms, result_id);
+"""
+
+MIGRATION_32 = """
+-- Recover a lost first pairing reply using the client-known token and a fresh proof
+-- from the already bound hardware key. No recoverable copy of the access token exists.
+CREATE TABLE IF NOT EXISTS pairing_attempts (
+  pairing_ticket_hash TEXT PRIMARY KEY,
+  device_id TEXT NOT NULL UNIQUE,
+  request_hash TEXT NOT NULL,
+  access_token_hash TEXT NOT NULL,
+  created_at_unix INTEGER NOT NULL,
+  FOREIGN KEY (device_id) REFERENCES devices(device_id)
+);
+"""
+
+MIGRATION_36 = """
+CREATE TABLE IF NOT EXISTS automation_runtime_bindings (
+  artifact_id TEXT PRIMARY KEY REFERENCES automation_artifacts(artifact_id),
+  ir_json TEXT NOT NULL, semantic_graph_json TEXT NOT NULL, runtime_graph_json TEXT,
+  semantic_digest TEXT NOT NULL, full_digest TEXT,
+  binding_state TEXT NOT NULL DEFAULT 'CANDIDATE', n8n_workflow_id TEXT,
+  readiness_errors_json TEXT NOT NULL, created_at_ms INTEGER NOT NULL, updated_at_ms INTEGER NOT NULL
+);
+CREATE TABLE IF NOT EXISTS automation_worker_steps (
+  run_id TEXT NOT NULL REFERENCES automation_runs(run_id), step_id TEXT NOT NULL,
+  request_digest TEXT NOT NULL, state TEXT NOT NULL, result_json TEXT,
+  result_digest TEXT, created_at_ms INTEGER NOT NULL, completed_at_ms INTEGER,
+  PRIMARY KEY(run_id,step_id)
+);
+CREATE TABLE IF NOT EXISTS automation_worker_dedupe (
+  artifact_id TEXT NOT NULL, step_id TEXT NOT NULL, content_digest TEXT NOT NULL,
+  updated_at_ms INTEGER NOT NULL, PRIMARY KEY(artifact_id,step_id)
+);
+CREATE TABLE IF NOT EXISTS automation_worker_files (
+  file_id TEXT PRIMARY KEY, run_id TEXT NOT NULL REFERENCES automation_runs(run_id),
+  content BLOB, content_sha256 TEXT NOT NULL, size_bytes INTEGER NOT NULL,
+  filename TEXT NOT NULL, state TEXT NOT NULL, created_at_ms INTEGER NOT NULL, deleted_at_ms INTEGER
+);
+CREATE TABLE IF NOT EXISTS automation_worker_evidence (
+  evidence_id TEXT PRIMARY KEY, run_id TEXT NOT NULL REFERENCES automation_runs(run_id),
+  step_id TEXT NOT NULL, payload_json TEXT NOT NULL, content_digest TEXT NOT NULL,
+  snapshot_id TEXT NOT NULL, source_trust TEXT NOT NULL, created_at_ms INTEGER NOT NULL
+);
+"""
+
+MIGRATION_37 = """
+CREATE TABLE IF NOT EXISTS automation_standing_firings (
+  authority_id TEXT NOT NULL, trigger_key TEXT NOT NULL, state TEXT NOT NULL,
+  run_id TEXT, error_code TEXT, created_at_ms INTEGER NOT NULL, completed_at_ms INTEGER,
+  PRIMARY KEY(authority_id,trigger_key)
+);
+CREATE TABLE IF NOT EXISTS automation_n8n_resources (
+  resource_key TEXT PRIMARY KEY, credential_id TEXT NOT NULL, workflow_id TEXT,
+  graph_json TEXT, created_at_ms INTEGER NOT NULL
+);
+CREATE TABLE IF NOT EXISTS automation_credential_bindings (
+  alias TEXT PRIMARY KEY, credential_class TEXT NOT NULL, admitted INTEGER NOT NULL,
+  n8n_credential_id TEXT, gateway_capability TEXT
+);
+"""
+
+MIGRATION_38 = """
+ALTER TABLE automation_runtime_bindings ADD COLUMN dependencies_json TEXT NOT NULL DEFAULT '{}';
+ALTER TABLE automation_worker_dedupe ADD COLUMN generation INTEGER NOT NULL DEFAULT 0;
+-- The earlier cache recorded observation before required delivery. It cannot be
+-- promoted into a delivered checkpoint. Immutable callbacks/events remain intact.
+DELETE FROM automation_worker_dedupe;
+"""
+
+MIGRATION_42 = "\n-- OpenMuse→VAN Convergence Rev 1. Owner Artifact Projection, Document Fabric,\n-- Goals/Watches, Suggestions and self-hosted conversation state. These are all\n-- subordinate to existing VAN command/mission/action authority.\n\nCREATE TABLE IF NOT EXISTS owner_artifacts (\n  artifact_id TEXT PRIMARY KEY,\n  owner_id TEXT NOT NULL DEFAULT 'owner',\n  project_id TEXT,\n  command_id TEXT,\n  mission_id TEXT,\n  execution_id TEXT,\n  kind TEXT NOT NULL,\n  title TEXT NOT NULL,\n  summary TEXT NOT NULL DEFAULT '',\n  mime_type TEXT,\n  byte_size INTEGER,\n  canonical_source_type TEXT NOT NULL,\n  canonical_source_id TEXT NOT NULL,\n  canonical_source_digest TEXT NOT NULL,\n  content_ref TEXT,\n  preview_ref TEXT,\n  evidence_refs_json TEXT NOT NULL DEFAULT '[]',\n  sensitivity TEXT NOT NULL DEFAULT 'OWNER_PRIVATE',\n  created_at_ms INTEGER NOT NULL,\n  expires_at_ms INTEGER\n);\nCREATE INDEX IF NOT EXISTS idx_owner_artifacts_mission\n  ON owner_artifacts(mission_id, created_at_ms);\nCREATE INDEX IF NOT EXISTS idx_owner_artifacts_project\n  ON owner_artifacts(project_id, created_at_ms);\nCREATE INDEX IF NOT EXISTS idx_owner_artifacts_kind\n  ON owner_artifacts(kind, created_at_ms);\n\nCREATE TABLE IF NOT EXISTS documents (\n  document_id TEXT PRIMARY KEY,\n  filename TEXT NOT NULL,\n  mime_type TEXT NOT NULL,\n  project_id TEXT,\n  command_id TEXT,\n  mission_id TEXT,\n  execution_id TEXT,\n  source_artifact_id TEXT NOT NULL,\n  output_artifact_id TEXT,\n  source_path TEXT NOT NULL,\n  output_path TEXT,\n  source_sha256 TEXT NOT NULL,\n  output_sha256 TEXT,\n  page_count INTEGER NOT NULL,\n  form_kind TEXT NOT NULL,\n  fields_json TEXT NOT NULL DEFAULT '[]',\n  status TEXT NOT NULL,\n  error_code TEXT,\n  created_at_ms INTEGER NOT NULL,\n  updated_at_ms INTEGER NOT NULL,\n  FOREIGN KEY(source_artifact_id) REFERENCES owner_artifacts(artifact_id),\n  FOREIGN KEY(output_artifact_id) REFERENCES owner_artifacts(artifact_id)\n);\nCREATE INDEX IF NOT EXISTS idx_documents_mission ON documents(mission_id, created_at_ms);\nCREATE INDEX IF NOT EXISTS idx_documents_project ON documents(project_id, created_at_ms);\n\nCREATE TABLE IF NOT EXISTS owner_goals (\n  goal_id TEXT PRIMARY KEY,\n  title TEXT NOT NULL,\n  description TEXT NOT NULL DEFAULT '',\n  status TEXT NOT NULL DEFAULT 'ACTIVE',\n  priority INTEGER NOT NULL DEFAULT 50,\n  project_id TEXT,\n  evidence_refs_json TEXT NOT NULL DEFAULT '[]',\n  created_at_ms INTEGER NOT NULL,\n  updated_at_ms INTEGER NOT NULL,\n  completed_at_ms INTEGER\n);\nCREATE INDEX IF NOT EXISTS idx_owner_goals_state ON owner_goals(status, priority, updated_at_ms);\n\nCREATE TABLE IF NOT EXISTS goal_milestones (\n  milestone_id TEXT PRIMARY KEY,\n  goal_id TEXT NOT NULL,\n  title TEXT NOT NULL,\n  done INTEGER NOT NULL DEFAULT 0,\n  due_at_ms INTEGER,\n  sort_order INTEGER NOT NULL DEFAULT 0,\n  created_at_ms INTEGER NOT NULL,\n  updated_at_ms INTEGER NOT NULL,\n  FOREIGN KEY(goal_id) REFERENCES owner_goals(goal_id)\n);\nCREATE INDEX IF NOT EXISTS idx_goal_milestones_goal ON goal_milestones(goal_id, sort_order);\n\nCREATE TABLE IF NOT EXISTS goal_mission_links (\n  goal_id TEXT NOT NULL,\n  mission_id TEXT NOT NULL,\n  linked_at_ms INTEGER NOT NULL,\n  PRIMARY KEY(goal_id, mission_id),\n  FOREIGN KEY(goal_id) REFERENCES owner_goals(goal_id)\n);\n\nCREATE TABLE IF NOT EXISTS watches (\n  watch_id TEXT PRIMARY KEY,\n  goal_id TEXT,\n  title TEXT NOT NULL,\n  source_kind TEXT NOT NULL,\n  target TEXT NOT NULL,\n  condition_json TEXT NOT NULL DEFAULT '{}',\n  interval_seconds INTEGER NOT NULL,\n  status TEXT NOT NULL DEFAULT 'ACTIVE',\n  consecutive_failures INTEGER NOT NULL DEFAULT 0,\n  failure_streak INTEGER NOT NULL DEFAULT 0,\n  next_run_at_ms INTEGER NOT NULL,\n  last_success_at_ms INTEGER,\n  last_observation_json TEXT,\n  created_at_ms INTEGER NOT NULL,\n  updated_at_ms INTEGER NOT NULL,\n  FOREIGN KEY(goal_id) REFERENCES owner_goals(goal_id)\n);\nCREATE INDEX IF NOT EXISTS idx_watches_due ON watches(status, next_run_at_ms);\n\nCREATE TABLE IF NOT EXISTS watch_runs (\n  run_id TEXT PRIMARY KEY,\n  watch_id TEXT NOT NULL,\n  status TEXT NOT NULL,\n  observation_json TEXT,\n  changed INTEGER NOT NULL DEFAULT 0,\n  error_code TEXT,\n  created_at_ms INTEGER NOT NULL,\n  FOREIGN KEY(watch_id) REFERENCES watches(watch_id)\n);\nCREATE INDEX IF NOT EXISTS idx_watch_runs_watch ON watch_runs(watch_id, created_at_ms);\n\nCREATE TABLE IF NOT EXISTS suggestions (\n  suggestion_id TEXT PRIMARY KEY,\n  title TEXT NOT NULL,\n  rationale TEXT NOT NULL,\n  proposed_prompt TEXT NOT NULL,\n  edited_prompt TEXT,\n  source_refs_json TEXT NOT NULL DEFAULT '[]',\n  status TEXT NOT NULL DEFAULT 'NEW',\n  attention_id TEXT,\n  project_id TEXT,\n  created_at_ms INTEGER NOT NULL,\n  updated_at_ms INTEGER NOT NULL,\n  decided_at_ms INTEGER\n);\nCREATE INDEX IF NOT EXISTS idx_suggestions_state ON suggestions(status, created_at_ms);\n\nCREATE TABLE IF NOT EXISTS conversation_threads (\n  thread_id TEXT PRIMARY KEY,\n  title TEXT NOT NULL,\n  kind TEXT NOT NULL DEFAULT 'SIDE',\n  status TEXT NOT NULL DEFAULT 'ACTIVE',\n  project_id TEXT,\n  created_at_ms INTEGER NOT NULL,\n  updated_at_ms INTEGER NOT NULL,\n  archived_at_ms INTEGER\n);\nCREATE UNIQUE INDEX IF NOT EXISTS uq_main_conversation\n  ON conversation_threads(kind) WHERE kind = 'MAIN';\n\nCREATE TABLE IF NOT EXISTS conversation_messages (\n  message_id TEXT PRIMARY KEY,\n  thread_id TEXT NOT NULL,\n  role TEXT NOT NULL,\n  body TEXT NOT NULL,\n  command_id TEXT,\n  mission_id TEXT,\n  artifact_refs_json TEXT NOT NULL DEFAULT '[]',\n  terminal INTEGER NOT NULL DEFAULT 0,\n  created_at_ms INTEGER NOT NULL,\n  FOREIGN KEY(thread_id) REFERENCES conversation_threads(thread_id)\n);\nCREATE INDEX IF NOT EXISTS idx_conversation_messages_thread\n  ON conversation_messages(thread_id, created_at_ms);\n\nCREATE TABLE IF NOT EXISTS conversation_drafts (\n  thread_id TEXT PRIMARY KEY,\n  draft_text TEXT NOT NULL DEFAULT '',\n  updated_at_ms INTEGER NOT NULL,\n  FOREIGN KEY(thread_id) REFERENCES conversation_threads(thread_id)\n);\n"
+
+MIGRATION_43 = '\n-- OMV-002/009 — a computer worker is an executor, not authority. A durable lease generation\n-- fences stale executors after restart/preemption before they can publish completion.\nCREATE TABLE IF NOT EXISTS computer_worker_leases (\n  surface TEXT PRIMARY KEY,\n  lease_id TEXT NOT NULL,\n  generation INTEGER NOT NULL,\n  holder_id TEXT NOT NULL,\n  expires_at_ms INTEGER NOT NULL,\n  released_at_ms INTEGER,\n  updated_at_ms INTEGER NOT NULL\n);\n\nCREATE TABLE IF NOT EXISTS computer_worker_receipts (\n  receipt_id TEXT PRIMARY KEY,\n  operation_id TEXT NOT NULL,\n  surface TEXT NOT NULL,\n  lease_id TEXT NOT NULL,\n  generation INTEGER NOT NULL,\n  output_sha256 TEXT NOT NULL,\n  exit_code INTEGER,\n  truncated INTEGER NOT NULL DEFAULT 0,\n  created_at_ms INTEGER NOT NULL,\n  FOREIGN KEY(operation_id) REFERENCES computer_operations(operation_id)\n);\nCREATE INDEX IF NOT EXISTS idx_computer_worker_receipts_operation\n  ON computer_worker_receipts(operation_id, created_at_ms);\n'
+
+MIGRATION_44 = "\n-- OMV-006 — queued follow-ups belong to a conversation thread but are not execution\n-- authority. They become work only when promoted through the normal owner/Hermes command path.\nCREATE TABLE IF NOT EXISTS conversation_followups (\n  followup_id TEXT PRIMARY KEY,\n  thread_id TEXT NOT NULL,\n  prompt TEXT NOT NULL,\n  status TEXT NOT NULL DEFAULT 'QUEUED',\n  command_id TEXT,\n  created_at_ms INTEGER NOT NULL,\n  updated_at_ms INTEGER NOT NULL,\n  FOREIGN KEY(thread_id) REFERENCES conversation_threads(thread_id)\n);\nCREATE INDEX IF NOT EXISTS idx_conversation_followups_thread\n  ON conversation_followups(thread_id, status, created_at_ms);\n"
+
+MIGRATION_45 = """
+CREATE TABLE IF NOT EXISTS mission_projection_outbox (
+ mission_id TEXT PRIMARY KEY REFERENCES missions(mission_id),
+ created_at_ms INTEGER NOT NULL, attempts INTEGER NOT NULL DEFAULT 0, last_failure TEXT
+);
+"""
+
+MEMORY_FABRIC_MIGRATION_31 = """
+-- Memory Fabric Programme A, contracts C1/C2 — Owner Model origin provenance, revision
+-- fence and correction outbox. Every statement is idempotent (IF NOT EXISTS / OR IGNORE /
+-- NOT EXISTS guards), so re-running this script against a database that already has it
+-- changes nothing.
+
+-- C1. Per-episode origin. An assertion used to hold a bare list of episode refs, so the
+-- ladder could not tell a mission VAN watched happen from a Hindsight/OpenViking/model
+-- derivation that merely *cited* a mission id — and the derived one was a vote. Origin is
+-- recorded per (assertion, episode, origin), never per assertion; only SYSTEM_OBSERVED
+-- rows count toward promotion.
+CREATE TABLE IF NOT EXISTS owner_model_episodes (
+  assertion_id TEXT NOT NULL
+    REFERENCES owner_cognitive_model(assertion_id) ON DELETE CASCADE,
+  episode_ref TEXT NOT NULL,
+  origin TEXT NOT NULL CHECK (origin IN (
+    'OWNER_EXPLICIT', 'SYSTEM_OBSERVED', 'HINDSIGHT_DERIVED',
+    'OPENVIKING_RETRIEVED', 'MODEL_INFERRED'
+  )),
+  evidence_refs_json TEXT NOT NULL DEFAULT '[]',
+  recorded_at_ms INTEGER NOT NULL,
+  PRIMARY KEY (assertion_id, episode_ref, origin)
+);
+CREATE INDEX IF NOT EXISTS idx_owner_model_episodes_origin
+  ON owner_model_episodes(assertion_id, origin);
+
+-- Legacy backfill. A legacy supporting ref becomes SYSTEM_OBSERVED only if it resolves,
+-- after the same normalisation `OwnerCognitiveModel._require_episode` applies
+-- (`<lowercase kind>:<trimmed id>`), to a real `missions.mission_id` or `audit.command_id`.
+-- That is what the only pre-existing producer (the internal observe route) wrote after
+-- P1-SYM-001; anything else (free text, `hindsight://…`, a mission that does not exist,
+-- rows from before P1-SYM-001 made episodes resolvable) cannot be proven to be something
+-- VAN saw, so it is kept for provenance under its raw spelling as MODEL_INFERRED, which
+-- never evidences. Resolved refs are stored normalised, so two spellings of one mission are
+-- one episode. The trimmed set is ASCII whitespace; an id padded with other Unicode
+-- whitespace fails to resolve here and is labelled MODEL_INFERRED (the fail-closed side).
+--
+-- Never-relabel / idempotency: the NOT EXISTS guard skips a legacy ref if an episode row of
+-- any origin already exists under either its raw or its normalised spelling, so a re-run —
+-- even after the missing mission has since been created — never changes an origin.
+INSERT OR IGNORE INTO owner_model_episodes(
+  assertion_id, episode_ref, origin, evidence_refs_json, recorded_at_ms
+)
+WITH legacy AS (
+  SELECT a.assertion_id, CAST(j.value AS TEXT) AS raw, a.updated_at_ms AS at_ms
+    FROM owner_cognitive_model a, json_each(a.supporting_episode_refs_json) j
+), parsed AS (
+  SELECT assertion_id, raw, at_ms,
+         CASE WHEN instr(raw, ':') > 0
+              THEN lower(trim(substr(raw, 1, instr(raw, ':') - 1), ' ' || char(9, 10, 11, 12, 13)))
+         END AS kind,
+         CASE WHEN instr(raw, ':') > 0
+              THEN trim(substr(raw, instr(raw, ':') + 1), ' ' || char(9, 10, 11, 12, 13))
+         END AS ident
+    FROM legacy
+), classified AS (
+  SELECT assertion_id, raw, at_ms,
+         CASE WHEN ident IS NOT NULL AND ident != '' AND (
+                (kind = 'mission' AND EXISTS (SELECT 1 FROM missions m WHERE m.mission_id = ident))
+             OR (kind = 'command' AND EXISTS (SELECT 1 FROM audit c WHERE c.command_id = ident)))
+              THEN kind || ':' || ident
+         END AS resolved
+    FROM parsed
+)
+SELECT c.assertion_id, COALESCE(c.resolved, c.raw),
+       CASE WHEN c.resolved IS NULL THEN 'MODEL_INFERRED' ELSE 'SYSTEM_OBSERVED' END,
+       '[]', c.at_ms
+  FROM classified c
+ WHERE NOT EXISTS (
+   SELECT 1 FROM owner_model_episodes e
+    WHERE e.assertion_id = c.assertion_id
+      AND e.episode_ref IN (c.raw, COALESCE(c.resolved, c.raw))
+ );
+
+-- A ladder state is only as good as the episodes under it. A legacy CANDIDATE/EVIDENCED
+-- whose support no longer counts (its refs did not resolve) is demoted to what its
+-- SYSTEM_OBSERVED count supports — demote only, never promote. Owner states (CONFIRMED,
+-- REJECTED, CONTESTED) and SUPERSEDED rows are not touched. Deterministic from the episode
+-- table, so a re-run is a no-op.
+UPDATE owner_cognitive_model
+   SET state = CASE WHEN (SELECT COUNT(DISTINCT e.episode_ref) FROM owner_model_episodes e
+                           WHERE e.assertion_id = owner_cognitive_model.assertion_id
+                             AND e.origin = 'SYSTEM_OBSERVED') >= 2
+                    THEN 'CANDIDATE' ELSE 'OBSERVED' END
+ WHERE (state = 'EVIDENCED' AND (SELECT COUNT(DISTINCT e.episode_ref) FROM owner_model_episodes e
+                                  WHERE e.assertion_id = owner_cognitive_model.assertion_id
+                                    AND e.origin = 'SYSTEM_OBSERVED') < 3)
+    OR (state = 'CANDIDATE' AND (SELECT COUNT(DISTINCT e.episode_ref) FROM owner_model_episodes e
+                                  WHERE e.assertion_id = owner_cognitive_model.assertion_id
+                                    AND e.origin = 'SYSTEM_OBSERVED') < 2);
+
+-- `supporting_episode_refs_json` means SYSTEM_OBSERVED refs only from here on (the
+-- model writes it that way); bring legacy rows into line, and recompute ladder-state
+-- confidence from the admissible count with the model's formula (owner-state and
+-- SUPERSEDED confidence is left as written). Idempotent.
+UPDATE owner_cognitive_model
+   SET supporting_episode_refs_json = COALESCE((
+         SELECT json_group_array(ref) FROM (
+           SELECT DISTINCT e.episode_ref AS ref FROM owner_model_episodes e
+            WHERE e.assertion_id = owner_cognitive_model.assertion_id
+              AND e.origin = 'SYSTEM_OBSERVED' ORDER BY e.episode_ref)), '[]'),
+       confidence = CASE
+         WHEN state NOT IN ('OBSERVED', 'CANDIDATE', 'EVIDENCED') THEN confidence
+         ELSE (SELECT CASE WHEN n = 0 THEN 0.0 ELSE MIN(0.95, 0.2 + 0.25 * (n - 1)) END
+                 FROM (SELECT COUNT(DISTINCT e.episode_ref) AS n FROM owner_model_episodes e
+                        WHERE e.assertion_id = owner_cognitive_model.assertion_id
+                          AND e.origin = 'SYSTEM_OBSERVED'))
+       END;
+
+-- C2. A strictly monotonic revision per owner principal, advanced inside the same
+-- transaction as every authoritative Owner Model mutation. Deliberately NOT forgettable:
+-- resetting it would let a capsule issued at an old revision match again later.
+CREATE TABLE IF NOT EXISTS owner_model_revisions (
+  owner_principal_id TEXT PRIMARY KEY,
+  owner_model_revision INTEGER NOT NULL CHECK (owner_model_revision >= 0),
+  updated_at_ms INTEGER NOT NULL
+);
+-- Owners that already hold assertions start at 1 (a capsule could not have been issued
+-- against them before this migration, so any value >= 1 is safe; 1 is the smallest).
+INSERT OR IGNORE INTO owner_model_revisions(owner_principal_id, owner_model_revision, updated_at_ms)
+SELECT DISTINCT owner_principal_id, 1, CAST(strftime('%s','now') AS INTEGER) * 1000
+  FROM owner_cognitive_model;
+
+-- Durable correction/invalidation outbox: one row per (event, target), written in the
+-- same transaction as the Owner Model commit and revision bump. Delivery is at-least-once
+-- per target; a receipt is recorded per target. No distributed atomicity is claimed — the
+-- synchronous guarantee is the revision fence above.
+CREATE TABLE IF NOT EXISTS owner_model_outbox (
+  outbox_id TEXT NOT NULL,
+  target TEXT NOT NULL CHECK (target IN (
+    'HINDSIGHT_OWNER', 'OPENVIKING_OWNER_PROJECTION', 'PERSONAL_CONTEXT_CACHE'
+  )),
+  owner_principal_id TEXT NOT NULL,
+  owner_model_revision INTEGER NOT NULL,
+  event_kind TEXT NOT NULL,
+  payload_json TEXT NOT NULL DEFAULT '{}',
+  status TEXT NOT NULL DEFAULT 'PENDING' CHECK (status IN ('PENDING', 'DELIVERED')),
+  attempts INTEGER NOT NULL DEFAULT 0,
+  receipt TEXT,
+  last_error TEXT,
+  created_at_ms INTEGER NOT NULL,
+  last_attempt_at_ms INTEGER,
+  delivered_at_ms INTEGER,
+  PRIMARY KEY (outbox_id, target)
+);
+CREATE INDEX IF NOT EXISTS idx_owner_model_outbox_pending
+  ON owner_model_outbox(status, created_at_ms);
+
+-- The owner's forget path (context/forget.py) deletes assertions outside the Owner Model
+-- class. Without this trigger that deletion would leave the revision unchanged, and a
+-- capsule issued before the forget would still verify as current. The trigger runs in the
+-- deleting statement's transaction, so the fence and the invalidation rows commit (or
+-- roll back) with the delete. The payload carries ids and field names only, never values.
+CREATE TRIGGER IF NOT EXISTS trg_owner_model_forget_fence
+AFTER DELETE ON owner_cognitive_model
+BEGIN
+  INSERT INTO owner_model_revisions(owner_principal_id, owner_model_revision, updated_at_ms)
+  VALUES (OLD.owner_principal_id, 1, CAST(strftime('%s','now') AS INTEGER) * 1000)
+  ON CONFLICT(owner_principal_id) DO UPDATE SET
+    owner_model_revision = owner_model_revision + 1,
+    updated_at_ms = MAX(updated_at_ms, excluded.updated_at_ms);
+  INSERT OR IGNORE INTO owner_model_outbox(
+    outbox_id, target, owner_principal_id, owner_model_revision, event_kind,
+    payload_json, status, attempts, created_at_ms
+  )
+  SELECT 'omo_forget_' || OLD.assertion_id || '_' || r.owner_model_revision, t.target,
+         OLD.owner_principal_id, r.owner_model_revision, 'FORGOTTEN',
+         json_object('assertion_ids', json_array(OLD.assertion_id), 'field', OLD.field),
+         'PENDING', 0, CAST(strftime('%s','now') AS INTEGER) * 1000
+    FROM owner_model_revisions r,
+         (SELECT 'HINDSIGHT_OWNER' AS target
+          UNION ALL SELECT 'OPENVIKING_OWNER_PROJECTION'
+          UNION ALL SELECT 'PERSONAL_CONTEXT_CACHE') t
+   WHERE r.owner_principal_id = OLD.owner_principal_id;
+END;
+"""
+
+# ---------------------------------------------------------------------------- migration 32
+#
+# Why 32 and not an edit of 31: `Store.migrate()` applies a version once and records it in
+# `schema_migrations`; it never re-reads the SQL of an applied version. Migration 31 has been
+# pushed on the Memory Fabric branch, so any database that already ran it would silently keep
+# the defects below if they were fixed only inside 31. A new version reaches both a fresh
+# database (31 then 32) and one that already ran 31. Every statement in the repair script is
+# deterministic from the tables it reads, so re-running it changes nothing.
+
+def _m32_resolved_principal(column: str) -> str:
+    """A stored principal, with `device:<id>` resolved through owner_device_bindings."""
+    return (f"(CASE WHEN substr({column}, 1, 7) = 'device:' THEN COALESCE(("
+            f"SELECT b.owner_principal_id FROM owner_device_bindings b "
+            f"WHERE b.device_id = substr({column}, 8) LIMIT 1), {column}) ELSE {column} END)")
+
+
+def _m32_foreign(ref: str, owner: str) -> str:
+    """True when anything attributes episode `ref` to a principal other than `owner`.
+
+    The same rule as `OwnerCognitiveModel._foreign_principal` (O2)."""
+    principal = _m32_resolved_principal("m.owner_principal_id")
+    return f"""(
+      (substr({ref}, 1, 8) = 'mission:' AND EXISTS (
+         SELECT 1 FROM missions m WHERE m.mission_id = substr({ref}, 9)
+            AND {principal} != {owner}))
+   OR (substr({ref}, 1, 8) = 'command:' AND (
+         EXISTS (SELECT 1 FROM missions m WHERE json_valid(m.authority_envelope_json)
+                    AND json_extract(m.authority_envelope_json, '$.source_command_id')
+                        = substr({ref}, 9)
+                    AND {principal} != {owner})
+      OR EXISTS (SELECT 1 FROM audit c JOIN owner_device_bindings b ON b.device_id = c.device_id
+                  WHERE c.command_id = substr({ref}, 9) AND b.owner_principal_id != {owner}))))"""
+
+
+# The episode identity the ladder counts (M4) — the same expression as
+# `owner_model.EPISODE_KEY_SQL`, frozen here because an applied migration must not change.
+_M32_KEY = (
+    "COALESCE(CASE WHEN substr(e.episode_ref, 1, 8) = 'mission:' THEN ("
+    "SELECT 'command:' || NULLIF(trim(json_extract(m.authority_envelope_json, "
+    "'$.source_command_id')), '') FROM missions m "
+    "WHERE m.mission_id = substr(e.episode_ref, 9) "
+    "AND json_valid(m.authority_envelope_json)) END, e.episode_ref)"
+)
+_M32_VOTES = (
+    f"(SELECT COUNT(DISTINCT {_M32_KEY}) FROM owner_model_episodes e "
+    "WHERE e.assertion_id = owner_cognitive_model.assertion_id "
+    "AND e.origin = 'SYSTEM_OBSERVED')"
+)
+# What evidence alone can produce (OwnerCognitiveModel._ladder). Autonomy-bearing fields
+# stop at CANDIDATE.
+_M32_LADDER = (
+    f"(CASE WHEN {_M32_VOTES} >= 3 AND field NOT IN ("
+    "'delegation_preferences', 'accepted_risk_patterns', 'interruption_preferences') "
+    f"THEN 'EVIDENCED' WHEN {_M32_VOTES} >= 2 THEN 'CANDIDATE' ELSE 'OBSERVED' END)"
+)
+_M32_RANK = "(CASE {s} WHEN 'EVIDENCED' THEN 2 WHEN 'CANDIDATE' THEN 1 ELSE 0 END)"
+
+MIGRATION_32_OWNER_MODEL_REPAIR = f"""
+-- Memory Fabric Programme A, reviewer D findings M4, M5 and O2. Idempotent.
+
+-- Snapshot, so the revision fence can be advanced for exactly the owners this changes.
+DROP TABLE IF EXISTS temp.m32_before;
+CREATE TEMP TABLE m32_before AS
+  SELECT assertion_id, owner_principal_id, state, confidence, supporting_episode_refs_json
+    FROM owner_cognitive_model;
+
+-- O2. An episode another principal owns was never evidence about this owner. Migration 31
+-- (and observe() until now) never read missions.owner_principal_id, so such an episode may
+-- be stored as SYSTEM_OBSERVED. It is kept for provenance as MODEL_INFERRED, which never
+-- evidences: the same fail-closed label 31 gives any legacy ref it cannot vouch for.
+INSERT OR IGNORE INTO owner_model_episodes(
+  assertion_id, episode_ref, origin, evidence_refs_json, recorded_at_ms
+)
+SELECT e.assertion_id, e.episode_ref, 'MODEL_INFERRED', e.evidence_refs_json, e.recorded_at_ms
+  FROM owner_model_episodes e JOIN owner_cognitive_model a ON a.assertion_id = e.assertion_id
+ WHERE e.origin = 'SYSTEM_OBSERVED' AND {_m32_foreign("e.episode_ref", "a.owner_principal_id")};
+DELETE FROM owner_model_episodes
+ WHERE origin = 'SYSTEM_OBSERVED' AND EXISTS (
+   SELECT 1 FROM owner_cognitive_model a
+    WHERE a.assertion_id = owner_model_episodes.assertion_id
+      AND {_m32_foreign("owner_model_episodes.episode_ref", "a.owner_principal_id")});
+
+-- M5. CONFIRMED means the owner said so, and confirm()/correct() are the only writers that
+-- set owner_confirmed_at_ms. A CONFIRMED row without it was minted by the pre-P1-SYM-001
+-- evidence ladder (three free strings made CONFIRMED) and 31 left it alone, so the capsule
+-- labelled it owner_stated at S0 with zero evidencing episodes. It is recomputed from its
+-- SYSTEM_OBSERVED votes like any ladder state: EVIDENCED at best, never CONFIRMED.
+-- M4/O2. Ladder states are re-checked against the vote count after the relabel above and
+-- with a mission and its source command counted once. Demote only, never promote.
+UPDATE owner_cognitive_model
+   SET state = CASE
+         WHEN state = 'CONFIRMED' THEN {_M32_LADDER}
+         WHEN {_M32_RANK.format(s=_M32_LADDER)} < {_M32_RANK.format(s="state")} THEN {_M32_LADDER}
+         ELSE state END
+ WHERE state IN ('OBSERVED', 'CANDIDATE', 'EVIDENCED')
+    OR (state = 'CONFIRMED' AND owner_confirmed_at_ms IS NULL);
+
+-- Supporting refs are SYSTEM_OBSERVED refs; ladder-state confidence follows the vote count
+-- with the model's formula. Owner states and SUPERSEDED keep their confidence.
+UPDATE owner_cognitive_model
+   SET supporting_episode_refs_json = COALESCE((
+         SELECT json_group_array(ref) FROM (
+           SELECT DISTINCT e.episode_ref AS ref FROM owner_model_episodes e
+            WHERE e.assertion_id = owner_cognitive_model.assertion_id
+              AND e.origin = 'SYSTEM_OBSERVED' ORDER BY e.episode_ref)), '[]'),
+       confidence = CASE
+         WHEN state NOT IN ('OBSERVED', 'CANDIDATE', 'EVIDENCED') THEN confidence
+         WHEN {_M32_VOTES} = 0 THEN 0.0
+         ELSE MIN(0.95, 0.2 + 0.25 * ({_M32_VOTES} - 1))
+       END;
+
+-- C2. A capsule issued before this repair carries the old labels (an M5 row as
+-- owner_stated). Advancing the revision of every owner whose assertions changed makes the
+-- fence refuse it. Owners with no change keep their revision, so a re-run bumps nothing.
+UPDATE owner_model_revisions
+   SET owner_model_revision = owner_model_revision + 1,
+       updated_at_ms = MAX(updated_at_ms, CAST(strftime('%s','now') AS INTEGER) * 1000)
+ WHERE owner_principal_id IN (
+   SELECT b.owner_principal_id FROM m32_before b JOIN owner_cognitive_model a
+     ON a.assertion_id = b.assertion_id
+    WHERE a.state IS NOT b.state OR a.confidence IS NOT b.confidence
+       OR a.supporting_episode_refs_json IS NOT b.supporting_episode_refs_json);
+DROP TABLE IF EXISTS temp.m32_before;
+"""
+
+MIGRATION_32_OUTBOX_DELIVERY = """
+-- Outbox starvation. drain_outbox read the oldest 100 PENDING rows across every target, so
+-- rows for a target with no handler, or rows whose handler always fails, filled every
+-- batch and handled targets were never reached. Delivery now schedules each row on its
+-- own: a failure sets next_attempt_at_ms (exponential backoff) and, past the attempt
+-- budget, dead_lettered_at_ms. A dead-lettered row stays PENDING (the status CHECK is
+-- unchanged) and is never selected again; it is the operator's to inspect.
+-- The two columns (MIGRATION_32_OUTBOX_COLUMNS) are added by Store._ensure_m32_outbox_columns
+-- before this script runs: ALTER TABLE ADD COLUMN cannot be guarded in SQL, and a crash
+-- between this script and its schema_migrations row must leave a database that migrates.
+CREATE INDEX IF NOT EXISTS idx_owner_model_outbox_due
+  ON owner_model_outbox(status, target, dead_lettered_at_ms, created_at_ms);
+"""
+
+MEMORY_FABRIC_MIGRATION_32 = MIGRATION_32_OWNER_MODEL_REPAIR + MIGRATION_32_OUTBOX_DELIVERY
+
+# (column, declared type) added to owner_model_outbox by migration 32's guarded pre-step,
+# in this order (A-MIN-VAN, reviewer D2: the plain ALTERs were not re-runnable).
+MIGRATION_32_OUTBOX_COLUMNS: tuple[tuple[str, str], ...] = (
+    ("next_attempt_at_ms", "INTEGER"),
+    ("dead_lettered_at_ms", "INTEGER"),
+)
+
+
+# Converge overlapping migration numbers from independent historical feature branches.
+# Existing attestation flags remain unchanged; absent flags default to unverified.
+MIGRATION_48 = "\n".join((MIGRATION_31, MIGRATION_32, MIGRATION_33, MIGRATION_34,
+                           MIGRATION_35, MIGRATION_36, MIGRATION_37, MIGRATION_38))
+
+BROWSER_HARDENING_MIGRATION_34 = '\n-- Review I4 MINOR-C. End states are sticky at the database, not only in the service.\n-- BrowserTaskService._write_status is the one guarded status writer (its UPDATE carries\n-- `status NOT IN (<terminal>)`), but the only thing enforcing "one writer" was a source\n-- regex that `UPDATE main.browser_tasks` or `UPDATE "browser_tasks"` walked past. These\n-- triggers refuse, whoever writes, a status change out of a terminal status\n-- (browser/service.py TERMINAL_TASK_STATUSES; tests pin the two lists together), and an\n-- INSERT OR REPLACE over a terminal task (REPLACE deletes then inserts, so no UPDATE\n-- trigger would see it). Deleting a row (retention) is unaffected.\nCREATE TRIGGER IF NOT EXISTS browser_tasks_terminal_status_sticky\nBEFORE UPDATE OF status ON browser_tasks\nWHEN OLD.status IN (\'COMPLETED\', \'FAILED\', \'DENIED\', \'BLOCKED_POLICY\', \'BLOCKED_UNSAFE\',\n                    \'CANCELLED\', \'EXPIRED\')\n  AND NEW.status IS NOT OLD.status\nBEGIN\n  SELECT RAISE(ABORT, \'browser_task_terminal_status\');\nEND;\n\nCREATE TRIGGER IF NOT EXISTS browser_tasks_terminal_not_replaced\nBEFORE INSERT ON browser_tasks\nWHEN EXISTS (\n  SELECT 1 FROM browser_tasks\n  WHERE task_id = NEW.task_id\n    AND status IN (\'COMPLETED\', \'FAILED\', \'DENIED\', \'BLOCKED_POLICY\', \'BLOCKED_UNSAFE\',\n                   \'CANCELLED\', \'EXPIRED\')\n)\nBEGIN\n  SELECT RAISE(ABORT, \'browser_task_terminal_status\');\nEND;\n'
+
+BROWSER_HARDENING_MIGRATION_35 = "\n-- Review I5 D1. Migration 34 kept a terminal *status* sticky, but a terminal task could still\n-- be resurrected: DELETE then INSERT the same task_id as PENDING, or rename its task_id and\n-- INSERT the old one; and its other columns stayed writable. Now:\n--   * a task_id that reached a terminal status is tombstoned (by trigger, on INSERT or\n--     UPDATE, and backfilled here); an INSERT of a tombstoned task_id is refused, whether or\n--     not the row still exists. The tombstone outlives the row, so retention may still\n--     DELETE browser_tasks rows; tombstones themselves cannot be deleted or changed;\n--   * a task's identity columns never change once written;\n--   * a terminal row's evidence (evidence_pointer, completed_at_ms) never changes. Its\n--     error_code and updated_at_ms stay writable: review I4 pinned that an ended task may\n--     be touched without a status change.\n-- The terminal list is browser/service.py TERMINAL_TASK_STATUSES (tests pin the lists).\nCREATE TABLE IF NOT EXISTS browser_task_tombstones (\n  task_id TEXT PRIMARY KEY,\n  terminal_status TEXT NOT NULL,\n  tombstoned_at_ms INTEGER NOT NULL\n);\n\nINSERT OR IGNORE INTO browser_task_tombstones(task_id, terminal_status, tombstoned_at_ms)\n  SELECT task_id, status, CAST(strftime('%s', 'now') AS INTEGER) * 1000 FROM browser_tasks\n  WHERE status IN ('COMPLETED', 'FAILED', 'DENIED', 'BLOCKED_POLICY', 'BLOCKED_UNSAFE',\n                     'CANCELLED', 'EXPIRED');\n\nCREATE TRIGGER IF NOT EXISTS browser_tasks_tombstone_on_terminal_insert\nAFTER INSERT ON browser_tasks\nWHEN NEW.status IN ('COMPLETED', 'FAILED', 'DENIED', 'BLOCKED_POLICY', 'BLOCKED_UNSAFE',\n                     'CANCELLED', 'EXPIRED')\nBEGIN\n  INSERT OR IGNORE INTO browser_task_tombstones(task_id, terminal_status, tombstoned_at_ms)\n  VALUES (NEW.task_id, NEW.status, CAST(strftime('%s', 'now') AS INTEGER) * 1000);\nEND;\n\nCREATE TRIGGER IF NOT EXISTS browser_tasks_tombstone_on_terminal_update\nAFTER UPDATE OF status ON browser_tasks\nWHEN NEW.status IN ('COMPLETED', 'FAILED', 'DENIED', 'BLOCKED_POLICY', 'BLOCKED_UNSAFE',\n                     'CANCELLED', 'EXPIRED')\nBEGIN\n  INSERT OR IGNORE INTO browser_task_tombstones(task_id, terminal_status, tombstoned_at_ms)\n  VALUES (NEW.task_id, NEW.status, CAST(strftime('%s', 'now') AS INTEGER) * 1000);\nEND;\n\nCREATE TRIGGER IF NOT EXISTS browser_tasks_tombstoned_id_not_reinserted\nBEFORE INSERT ON browser_tasks\nWHEN EXISTS (SELECT 1 FROM browser_task_tombstones WHERE task_id = NEW.task_id)\nBEGIN\n  SELECT RAISE(ABORT, 'browser_task_terminal_status');\nEND;\n\nCREATE TRIGGER IF NOT EXISTS browser_tasks_identity_immutable\nBEFORE UPDATE ON browser_tasks\nWHEN NEW.task_id IS NOT OLD.task_id\n  OR NEW.command_id IS NOT OLD.command_id\n  OR NEW.execution_id IS NOT OLD.execution_id\n  OR NEW.capability_id IS NOT OLD.capability_id\n  OR NEW.profile_alias IS NOT OLD.profile_alias\n  OR NEW.strategy IS NOT OLD.strategy\n  OR NEW.autonomy_tier IS NOT OLD.autonomy_tier\n  OR NEW.action_class IS NOT OLD.action_class\n  OR NEW.target_domain IS NOT OLD.target_domain\n  OR NEW.goal IS NOT OLD.goal\n  OR NEW.started_at_ms IS NOT OLD.started_at_ms\nBEGIN\n  SELECT RAISE(ABORT, 'browser_task_identity_immutable');\nEND;\n\nCREATE TRIGGER IF NOT EXISTS browser_tasks_terminal_evidence_frozen\nBEFORE UPDATE OF evidence_pointer, completed_at_ms ON browser_tasks\nWHEN OLD.status IN ('COMPLETED', 'FAILED', 'DENIED', 'BLOCKED_POLICY', 'BLOCKED_UNSAFE',\n                     'CANCELLED', 'EXPIRED')\n  AND (NEW.evidence_pointer IS NOT OLD.evidence_pointer\n       OR NEW.completed_at_ms IS NOT OLD.completed_at_ms)\nBEGIN\n  SELECT RAISE(ABORT, 'browser_task_terminal_status');\nEND;\n\nCREATE TRIGGER IF NOT EXISTS browser_task_tombstones_no_delete\nBEFORE DELETE ON browser_task_tombstones\nBEGIN\n  SELECT RAISE(ABORT, 'browser_task_tombstone_immutable');\nEND;\n\nCREATE TRIGGER IF NOT EXISTS browser_task_tombstones_no_update\nBEFORE UPDATE ON browser_task_tombstones\nBEGIN\n  SELECT RAISE(ABORT, 'browser_task_tombstone_immutable');\nEND;\n"
+
+BROWSER_HARDENING_MIGRATION_36 = '\n-- Owner decision 2026-09-30 — browser automation stays inside the task\'s own truth. The\n-- pages a task may act on are recorded with the task (browser/task_scope.py): declared by\n-- Hermes at creation, else the target domain\'s origin, and widened only by an owner\n-- approval. NULL (every task created before this migration) is "no scope": the router, the\n-- assignment workers and the Harness refuse every action on it (fail closed).\nALTER TABLE browser_tasks ADD COLUMN scope_json TEXT;\n'
+
+BROWSER_HARDENING_MIGRATION_37 = '\n-- Owner decision 2026-09-30 (answer to review I6 M4: "Network-effect guard"). Whether a browser\n-- task was admitted as mutating (``mutating=true`` at creation, which BrowserPolicyEngine.\n-- check_task admits only for a gateway_authorized_only profile and a mutation-admitted\n-- domain) is recorded with the task. The Harness blocks every network write during an\n-- automated action unless the task is admitted as mutating. 0 (every task created before\n-- this migration) is non-mutating: fail closed.\nALTER TABLE browser_tasks ADD COLUMN mutating INTEGER NOT NULL DEFAULT 0;\n'
+
+BROWSER_HARDENING_MIGRATION_38 = "\n-- Review I7 minor 8 (unit G11). browser_tasks.mutating (whether the Harness's network-effect\n-- guard lets the task write) and browser_tasks.scope_json (the pages it may act on) are task\n-- truth set at creation. Neither may change afterwards: the identity trigger now covers both,\n-- so a running task cannot be flipped to mutating or have its scope rewritten in place. Owner\n-- widening stays what it was: an approval row read at load time, never an edit of the task.\nDROP TRIGGER IF EXISTS browser_tasks_identity_immutable;\nCREATE TRIGGER browser_tasks_identity_immutable\nBEFORE UPDATE ON browser_tasks\nWHEN NEW.task_id IS NOT OLD.task_id\n  OR NEW.command_id IS NOT OLD.command_id\n  OR NEW.execution_id IS NOT OLD.execution_id\n  OR NEW.capability_id IS NOT OLD.capability_id\n  OR NEW.profile_alias IS NOT OLD.profile_alias\n  OR NEW.strategy IS NOT OLD.strategy\n  OR NEW.autonomy_tier IS NOT OLD.autonomy_tier\n  OR NEW.action_class IS NOT OLD.action_class\n  OR NEW.target_domain IS NOT OLD.target_domain\n  OR NEW.goal IS NOT OLD.goal\n  OR NEW.started_at_ms IS NOT OLD.started_at_ms\n  OR NEW.mutating IS NOT OLD.mutating\n  OR NEW.scope_json IS NOT OLD.scope_json\nBEGIN\n  SELECT RAISE(ABORT, 'browser_task_identity_immutable');\nEND;\n"
+
+ACQUISITION_MIGRATION_31 = "\n-- VAN Autonomous Web Acquisition Fabric Rev 1.\n-- Durable crawl orchestration is internal to VAN so Browser Harness/Hermes retain authority.\nCREATE TABLE IF NOT EXISTS web_acquisition_items (\n  item_id TEXT PRIMARY KEY,\n  canonical_url TEXT NOT NULL,\n  url_digest TEXT NOT NULL,\n  domain TEXT NOT NULL,\n  profile_alias TEXT NOT NULL,\n  source TEXT NOT NULL,\n  parent_item_id TEXT,\n  depth INTEGER NOT NULL DEFAULT 0,\n  priority INTEGER NOT NULL DEFAULT 50,\n  preferred_route TEXT,\n  route TEXT,\n  state TEXT NOT NULL DEFAULT 'QUEUED',\n  attempt_count INTEGER NOT NULL DEFAULT 0,\n  max_attempts INTEGER NOT NULL DEFAULT 5,\n  next_eligible_at_ms INTEGER,\n  lease_owner TEXT,\n  lease_token TEXT,\n  lease_expires_at_ms INTEGER,\n  checkpoint_ref TEXT,\n  last_failure_class TEXT,\n  last_error_code TEXT,\n  metadata_json TEXT NOT NULL DEFAULT '{}',\n  created_at_ms INTEGER NOT NULL,\n  updated_at_ms INTEGER NOT NULL,\n  completed_at_ms INTEGER,\n  FOREIGN KEY(parent_item_id) REFERENCES web_acquisition_items(item_id)\n);\n\nCREATE UNIQUE INDEX IF NOT EXISTS uq_web_acquisition_identity\n  ON web_acquisition_items(url_digest, profile_alias);\nCREATE INDEX IF NOT EXISTS idx_web_acquisition_ready\n  ON web_acquisition_items(state, next_eligible_at_ms, priority DESC, created_at_ms);\nCREATE INDEX IF NOT EXISTS idx_web_acquisition_domain\n  ON web_acquisition_items(domain, state, lease_expires_at_ms);\nCREATE INDEX IF NOT EXISTS idx_web_acquisition_lease\n  ON web_acquisition_items(lease_owner, lease_expires_at_ms);\n\nCREATE TABLE IF NOT EXISTS web_domain_controls (\n  domain TEXT PRIMARY KEY,\n  max_concurrency INTEGER NOT NULL DEFAULT 2,\n  min_delay_ms INTEGER NOT NULL DEFAULT 0,\n  cooldown_until_ms INTEGER,\n  last_claimed_at_ms INTEGER,\n  error_score INTEGER NOT NULL DEFAULT 0,\n  updated_at_ms INTEGER NOT NULL\n);\n\nCREATE TABLE IF NOT EXISTS web_acquisition_sessions (\n  session_id TEXT PRIMARY KEY,\n  profile_alias TEXT NOT NULL,\n  domain_scope TEXT NOT NULL,\n  network_identity_ref TEXT,\n  state TEXT NOT NULL DEFAULT 'READY',\n  use_count INTEGER NOT NULL DEFAULT 0,\n  failure_count INTEGER NOT NULL DEFAULT 0,\n  created_at_ms INTEGER NOT NULL,\n  updated_at_ms INTEGER NOT NULL,\n  retired_at_ms INTEGER\n);\n\nCREATE INDEX IF NOT EXISTS idx_web_acquisition_sessions_ready\n  ON web_acquisition_sessions(profile_alias, domain_scope, state, failure_count, use_count);\n\nCREATE TABLE IF NOT EXISTS web_domain_skills (\n  skill_id TEXT PRIMARY KEY,\n  domain TEXT NOT NULL,\n  goal_class TEXT NOT NULL,\n  version INTEGER NOT NULL,\n  state TEXT NOT NULL DEFAULT 'CANDIDATE',\n  route TEXT NOT NULL,\n  artifact_ref TEXT NOT NULL,\n  site_fingerprint TEXT,\n  success_assertions_json TEXT NOT NULL DEFAULT '[]',\n  failure_signatures_json TEXT NOT NULL DEFAULT '[]',\n  evidence_refs_json TEXT NOT NULL DEFAULT '[]',\n  qualified_at_ms INTEGER,\n  superseded_by TEXT,\n  created_at_ms INTEGER NOT NULL,\n  updated_at_ms INTEGER NOT NULL\n);\n\nCREATE UNIQUE INDEX IF NOT EXISTS uq_web_domain_skill_version\n  ON web_domain_skills(domain, goal_class, version);\nCREATE INDEX IF NOT EXISTS idx_web_domain_skill_hot\n  ON web_domain_skills(domain, goal_class, state, version DESC);\n\nCREATE TABLE IF NOT EXISTS web_acquisition_events (\n  event_id TEXT PRIMARY KEY,\n  item_id TEXT NOT NULL,\n  event_type TEXT NOT NULL,\n  route TEXT,\n  summary TEXT NOT NULL,\n  detail_json TEXT NOT NULL DEFAULT '{}',\n  evidence_ref TEXT,\n  occurred_at_ms INTEGER NOT NULL,\n  FOREIGN KEY(item_id) REFERENCES web_acquisition_items(item_id)\n);\n\nCREATE INDEX IF NOT EXISTS idx_web_acquisition_events_item\n  ON web_acquisition_events(item_id, occurred_at_ms);\n"
+
+ACQUISITION_MIGRATION_32 = "\n-- VAN Web Acquisition hardening: content-addressed custody, skill canaries and cost telemetry.\nALTER TABLE web_domain_skills ADD COLUMN golden_case_refs_json TEXT NOT NULL DEFAULT '[]';\nALTER TABLE web_domain_skills ADD COLUMN canary_pass_count INTEGER NOT NULL DEFAULT 0;\nALTER TABLE web_domain_skills ADD COLUMN canary_fail_count INTEGER NOT NULL DEFAULT 0;\nALTER TABLE web_domain_skills ADD COLUMN last_canary_at_ms INTEGER;\n\nCREATE TABLE IF NOT EXISTS web_acquisition_evidence (\n  evidence_id TEXT PRIMARY KEY,\n  item_id TEXT NOT NULL,\n  chain_seq INTEGER NOT NULL UNIQUE,\n  prev_hash TEXT NOT NULL,\n  entry_hash TEXT NOT NULL,\n  kind TEXT NOT NULL,\n  content_digest TEXT NOT NULL,\n  source_url_digest TEXT NOT NULL,\n  route TEXT,\n  artifact_ref TEXT,\n  manifest_digest TEXT NOT NULL,\n  signature_ref TEXT,\n  integrity_state TEXT NOT NULL,\n  byte_size INTEGER NOT NULL DEFAULT 0,\n  manifest_json TEXT NOT NULL,\n  created_at_ms INTEGER NOT NULL,\n  FOREIGN KEY(item_id) REFERENCES web_acquisition_items(item_id)\n);\n\nCREATE INDEX IF NOT EXISTS idx_web_acquisition_evidence_item\n  ON web_acquisition_evidence(item_id, created_at_ms);\nCREATE INDEX IF NOT EXISTS idx_web_acquisition_evidence_digest\n  ON web_acquisition_evidence(content_digest);\n\nCREATE TABLE IF NOT EXISTS web_domain_skill_canaries (\n  canary_id TEXT PRIMARY KEY,\n  skill_id TEXT NOT NULL,\n  passed INTEGER NOT NULL,\n  observed_fingerprint TEXT,\n  evidence_ref TEXT NOT NULL,\n  latency_ms INTEGER,\n  created_at_ms INTEGER NOT NULL,\n  FOREIGN KEY(skill_id) REFERENCES web_domain_skills(skill_id)\n);\n\nCREATE INDEX IF NOT EXISTS idx_web_domain_skill_canaries_skill\n  ON web_domain_skill_canaries(skill_id, created_at_ms DESC);\n\nCREATE TABLE IF NOT EXISTS web_acquisition_telemetry (\n  telemetry_id TEXT PRIMARY KEY,\n  item_id TEXT NOT NULL,\n  route TEXT NOT NULL,\n  success INTEGER NOT NULL,\n  latency_ms INTEGER NOT NULL DEFAULT 0,\n  byte_count INTEGER NOT NULL DEFAULT 0,\n  verified_records INTEGER NOT NULL DEFAULT 0,\n  cost_micros INTEGER NOT NULL DEFAULT 0,\n  recorded_at_ms INTEGER NOT NULL,\n  FOREIGN KEY(item_id) REFERENCES web_acquisition_items(item_id)\n);\n\nCREATE INDEX IF NOT EXISTS idx_web_acquisition_telemetry_route\n  ON web_acquisition_telemetry(route, recorded_at_ms);\n"
+
+MIGRATIONS: dict[int, str] = {
+    1: """
+    CREATE TABLE IF NOT EXISTS schema_migrations (
+      version INTEGER PRIMARY KEY,
+      applied_at_unix INTEGER NOT NULL
+    );
+
+    CREATE TABLE IF NOT EXISTS devices (
+      device_id TEXT PRIMARY KEY,
+      public_key_pem TEXT NOT NULL,
+      enrolled_at_unix INTEGER NOT NULL,
+      revoked_at_unix INTEGER,
+      label TEXT
+    );
+
+    CREATE TABLE IF NOT EXISTS idempotency (
+      idempotency_key TEXT PRIMARY KEY,
+      request_hash TEXT NOT NULL,
+      status TEXT NOT NULL,
+      response_json TEXT,
+      created_at_unix INTEGER NOT NULL,
+      updated_at_unix INTEGER NOT NULL
+    );
+
+    CREATE TABLE IF NOT EXISTS attention (
+      id TEXT PRIMARY KEY,
+      title TEXT NOT NULL,
+      severity TEXT NOT NULL,
+      state TEXT NOT NULL,
+      source TEXT NOT NULL,
+      project_id TEXT,
+      created_at_unix INTEGER NOT NULL,
+      updated_at_unix INTEGER NOT NULL,
+      dedupe_key TEXT NOT NULL UNIQUE,
+      snooze_until_unix INTEGER,
+      payload_json TEXT NOT NULL
+    );
+
+    CREATE TABLE IF NOT EXISTS reminders (
+      id TEXT PRIMARY KEY,
+      text TEXT NOT NULL,
+      due_at_unix INTEGER NOT NULL,
+      status TEXT NOT NULL,
+      project_id TEXT,
+      idempotency_key TEXT NOT NULL UNIQUE,
+      chain_follow_up_text TEXT,
+      chain_follow_up_offset_seconds INTEGER,
+      created_at_unix INTEGER NOT NULL,
+      updated_at_unix INTEGER NOT NULL
+    );
+
+    CREATE TABLE IF NOT EXISTS decisions (
+      id TEXT PRIMARY KEY,
+      title TEXT NOT NULL,
+      body TEXT NOT NULL,
+      status TEXT NOT NULL,
+      source TEXT NOT NULL,
+      hermes_ref TEXT,
+      created_at_unix INTEGER NOT NULL,
+      updated_at_unix INTEGER NOT NULL
+    );
+
+    CREATE TABLE IF NOT EXISTS audit (
+      id TEXT PRIMARY KEY,
+      command_id TEXT,
+      device_id TEXT,
+      project_id TEXT,
+      capability TEXT,
+      approval TEXT,
+      model_delegate TEXT,
+      tool TEXT,
+      before_json TEXT,
+      after_json TEXT,
+      result TEXT NOT NULL,
+      failure_reason TEXT,
+      evidence_pointer TEXT,
+      created_at_unix INTEGER NOT NULL
+    );
+
+    CREATE TABLE IF NOT EXISTS events (
+      seq INTEGER PRIMARY KEY AUTOINCREMENT,
+      event_type TEXT NOT NULL,
+      payload_json TEXT NOT NULL,
+      created_at_unix INTEGER NOT NULL
+    );
+
+    CREATE TABLE IF NOT EXISTS event_cursors (
+      device_id TEXT PRIMARY KEY,
+      last_seq INTEGER NOT NULL,
+      updated_at_unix INTEGER NOT NULL
+    );
+
+    CREATE TABLE IF NOT EXISTS google_connections (
+      owner_id TEXT PRIMARY KEY,
+      encrypted_refresh_token TEXT NOT NULL,
+      scopes_json TEXT NOT NULL,
+      status TEXT NOT NULL,
+      updated_at_unix INTEGER NOT NULL
+    );
+
+    CREATE TABLE IF NOT EXISTS project_truth_cache (
+      project_id TEXT PRIMARY KEY,
+      truth_sha TEXT,
+      repo_sha TEXT,
+      truth_json TEXT,
+      updated_at_unix INTEGER NOT NULL,
+      stale INTEGER NOT NULL DEFAULT 0
+    );
+
+    CREATE TABLE IF NOT EXISTS capability_grants (
+      grant_id TEXT PRIMARY KEY,
+      device_id TEXT NOT NULL,
+      capabilities_json TEXT NOT NULL,
+      expires_at_unix INTEGER NOT NULL,
+      task_id TEXT,
+      revoked_at_unix INTEGER,
+      created_at_unix INTEGER NOT NULL
+    );
+    """,
+    2: """
+    CREATE TABLE IF NOT EXISTS google_principal (
+      owner_id TEXT PRIMARY KEY,
+      subject_hash TEXT NOT NULL,
+      account_kind TEXT NOT NULL,
+      ai_plan TEXT NOT NULL,
+      status TEXT NOT NULL,
+      updated_at_unix INTEGER NOT NULL
+    );
+
+    CREATE TABLE IF NOT EXISTS google_capability_connections (
+      capability_id TEXT PRIMARY KEY,
+      owner_id TEXT NOT NULL,
+      state TEXT NOT NULL,
+      credential_plane TEXT NOT NULL,
+      evidence_pointer TEXT,
+      verified_at_unix INTEGER,
+      metadata_json TEXT NOT NULL,
+      updated_at_unix INTEGER NOT NULL
+    );
+
+    CREATE TABLE IF NOT EXISTS google_jobs (
+      job_id TEXT PRIMARY KEY,
+      owner_intent_id TEXT NOT NULL,
+      project_id TEXT,
+      capability_id TEXT NOT NULL,
+      action_class TEXT NOT NULL,
+      truth_sha TEXT,
+      grant_id TEXT,
+      input_hash TEXT NOT NULL,
+      status TEXT NOT NULL,
+      output_hash TEXT,
+      evidence_pointer TEXT,
+      created_at_unix INTEGER NOT NULL,
+      updated_at_unix INTEGER NOT NULL
+    );
+
+    CREATE TABLE IF NOT EXISTS google_artifacts (
+      artifact_id TEXT PRIMARY KEY,
+      job_id TEXT NOT NULL,
+      project_id TEXT,
+      source_provider TEXT NOT NULL,
+      source_tool TEXT NOT NULL,
+      tool_version TEXT,
+      input_hashes_json TEXT NOT NULL,
+      output_hash TEXT NOT NULL,
+      trust TEXT NOT NULL,
+      validation_state TEXT NOT NULL,
+      parent_artifact_ids_json TEXT NOT NULL,
+      created_at_unix INTEGER NOT NULL
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_google_jobs_project
+      ON google_jobs(project_id, created_at_unix);
+
+    CREATE INDEX IF NOT EXISTS idx_google_artifacts_job
+      ON google_artifacts(job_id, created_at_unix);
+    """,
+    3: """
+    ALTER TABLE devices ADD COLUMN encrypted_secret TEXT;
+    """,
+    4: """
+    ALTER TABLE devices ADD COLUMN access_token_hash TEXT;
+
+    CREATE UNIQUE INDEX IF NOT EXISTS idx_devices_access_token_hash
+      ON devices(access_token_hash)
+      WHERE access_token_hash IS NOT NULL;
+
+    CREATE TABLE IF NOT EXISTS pairing_tickets (
+      ticket_hash TEXT PRIMARY KEY,
+      label TEXT,
+      expires_at_unix INTEGER NOT NULL,
+      used_at_unix INTEGER,
+      created_at_unix INTEGER NOT NULL
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_pairing_tickets_expiry
+      ON pairing_tickets(expires_at_unix, used_at_unix);
+    """,
+    5: """
+    CREATE UNIQUE INDEX IF NOT EXISTS idx_devices_access_token_hash
+      ON devices(access_token_hash)
+      WHERE access_token_hash IS NOT NULL;
+
+    CREATE TABLE IF NOT EXISTS pairing_tickets (
+      ticket_hash TEXT PRIMARY KEY,
+      label TEXT,
+      expires_at_unix INTEGER NOT NULL,
+      used_at_unix INTEGER,
+      created_at_unix INTEGER NOT NULL
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_pairing_tickets_expiry
+      ON pairing_tickets(expires_at_unix, used_at_unix);
+
+    CREATE TABLE IF NOT EXISTS runtime_meta (
+      key TEXT PRIMARY KEY,
+      value TEXT NOT NULL,
+      updated_at_unix_ms INTEGER NOT NULL
+    );
+
+    CREATE TABLE IF NOT EXISTS owner_facts (
+      fact_id TEXT PRIMARY KEY,
+      subject TEXT NOT NULL,
+      predicate TEXT NOT NULL,
+      value_json TEXT NOT NULL,
+      authority TEXT NOT NULL,
+      source_trust TEXT NOT NULL,
+      source_ref TEXT NOT NULL,
+      confidence_permille INTEGER NOT NULL CHECK(confidence_permille BETWEEN 0 AND 1000),
+      confidence_profile_version INTEGER NOT NULL,
+      scope TEXT NOT NULL,
+      valid_from_ms INTEGER NOT NULL,
+      valid_until_ms INTEGER,
+      observed_at_ms INTEGER NOT NULL,
+      last_verified_at_ms INTEGER,
+      sensitivity TEXT NOT NULL,
+      revision INTEGER NOT NULL,
+      content_digest TEXT NOT NULL,
+      created_at_unix_ms INTEGER NOT NULL,
+      updated_at_unix_ms INTEGER NOT NULL
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_owner_facts_lookup
+      ON owner_facts(subject, predicate, scope, valid_from_ms, valid_until_ms);
+    CREATE INDEX IF NOT EXISTS idx_owner_facts_revision
+      ON owner_facts(revision);
+
+    CREATE TABLE IF NOT EXISTS owner_context_edges (
+      edge_id TEXT PRIMARY KEY,
+      from_node TEXT NOT NULL,
+      predicate TEXT NOT NULL,
+      to_node TEXT NOT NULL,
+      scope TEXT NOT NULL,
+      authority TEXT NOT NULL,
+      source_trust TEXT NOT NULL,
+      source_ref TEXT NOT NULL,
+      confidence_permille INTEGER NOT NULL CHECK(confidence_permille BETWEEN 0 AND 1000),
+      confidence_profile_version INTEGER NOT NULL,
+      valid_from_ms INTEGER NOT NULL,
+      valid_until_ms INTEGER,
+      observed_at_ms INTEGER NOT NULL,
+      sensitivity TEXT NOT NULL,
+      revision INTEGER NOT NULL
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_owner_edges_from
+      ON owner_context_edges(from_node, predicate, scope, valid_from_ms, valid_until_ms);
+    CREATE INDEX IF NOT EXISTS idx_owner_edges_to
+      ON owner_context_edges(to_node, predicate, scope, valid_from_ms, valid_until_ms);
+
+    CREATE TABLE IF NOT EXISTS context_snapshots (
+      snapshot_id TEXT PRIMARY KEY,
+      command_id TEXT NOT NULL,
+      kernel_revision INTEGER NOT NULL,
+      fact_ids_json TEXT NOT NULL,
+      graph_evidence_refs_json TEXT NOT NULL,
+      live_state_refs_json TEXT NOT NULL,
+      policy_refs_json TEXT NOT NULL,
+      compiled_at_ms INTEGER NOT NULL,
+      digest TEXT NOT NULL
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_context_snapshots_command
+      ON context_snapshots(command_id, compiled_at_ms);
+
+    CREATE TABLE IF NOT EXISTS action_definitions (
+      action_id TEXT PRIMARY KEY,
+      action_class TEXT NOT NULL,
+      mutates_state INTEGER NOT NULL,
+      allowed_principals_json TEXT NOT NULL,
+      verifier_type TEXT NOT NULL,
+      no_stale_replay INTEGER NOT NULL DEFAULT 0,
+      max_age_seconds INTEGER,
+      parameter_schema_json TEXT NOT NULL,
+      enabled INTEGER NOT NULL DEFAULT 1,
+      updated_at_unix_ms INTEGER NOT NULL
+    );
+
+    CREATE TABLE IF NOT EXISTS action_executions (
+      execution_id TEXT PRIMARY KEY,
+      command_id TEXT NOT NULL,
+      turn_id TEXT,
+      action_id TEXT NOT NULL,
+      action_class TEXT NOT NULL,
+      principal_type TEXT NOT NULL,
+      requested_by TEXT NOT NULL,
+      status TEXT NOT NULL,
+      idempotency_key TEXT NOT NULL UNIQUE,
+      snapshot_id TEXT,
+      parameters_digest TEXT NOT NULL,
+      submitted_at_ms INTEGER,
+      verified_at_ms INTEGER,
+      correlation_json TEXT NOT NULL,
+      evidence_pointer TEXT,
+      error_code TEXT,
+      updated_at_unix_ms INTEGER NOT NULL,
+      FOREIGN KEY(action_id) REFERENCES action_definitions(action_id),
+      FOREIGN KEY(snapshot_id) REFERENCES context_snapshots(snapshot_id)
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_action_exec_command
+      ON action_executions(command_id, updated_at_unix_ms);
+
+    CREATE TABLE IF NOT EXISTS action_receipts (
+      receipt_id TEXT PRIMARY KEY,
+      execution_id TEXT NOT NULL,
+      status TEXT NOT NULL,
+      verifier_type TEXT NOT NULL,
+      correlation_json TEXT NOT NULL,
+      observed_postcondition_json TEXT NOT NULL,
+      evidence_pointer TEXT,
+      created_at_unix_ms INTEGER NOT NULL,
+      FOREIGN KEY(execution_id) REFERENCES action_executions(execution_id)
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_action_receipts_execution
+      ON action_receipts(execution_id, created_at_unix_ms);
+
+    CREATE TABLE IF NOT EXISTS research_evidence (
+      evidence_id TEXT PRIMARY KEY,
+      research_id TEXT NOT NULL,
+      query_hash TEXT NOT NULL,
+      source_url TEXT NOT NULL,
+      source_title TEXT,
+      source_domain TEXT,
+      source_trust TEXT NOT NULL,
+      published_at TEXT,
+      retrieved_at_unix_ms INTEGER NOT NULL,
+      content_digest TEXT NOT NULL,
+      evidence_json TEXT NOT NULL
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_research_evidence_research
+      ON research_evidence(research_id, retrieved_at_unix_ms);
+    """,
+    6: """
+    -- Rev 1.3 §152/§411 Automation & Browser Fabric.  One semantic migration carrying
+    -- automation capability/artifact/run/event/intent state, the standing-automation
+    -- authority root, durable run-grant nonces, and browser task/evidence/profile state.
+
+    CREATE TABLE IF NOT EXISTS automation_capabilities (
+      capability_id TEXT PRIMARY KEY,
+      semantic_name TEXT NOT NULL,
+      engine TEXT NOT NULL,
+      runtime_workflow_ref TEXT,
+      action_class TEXT NOT NULL,
+      mutates_state INTEGER NOT NULL,
+      input_schema_json TEXT NOT NULL,
+      output_schema_json TEXT NOT NULL,
+      allowed_principals_json TEXT NOT NULL,
+      allowed_origin_channels_json TEXT NOT NULL,
+      latency_class TEXT NOT NULL,
+      duration_class TEXT NOT NULL,
+      required_context_json TEXT NOT NULL,
+      required_credentials_json TEXT NOT NULL,
+      verifier_type TEXT NOT NULL,
+      idempotency_policy TEXT NOT NULL,
+      evidence_policy TEXT NOT NULL,
+      lifecycle_state TEXT NOT NULL,
+      workflow_ir_digest TEXT NOT NULL,
+      policy_version TEXT NOT NULL,
+      compiler_version TEXT NOT NULL,
+      created_at_ms INTEGER NOT NULL,
+      updated_at_ms INTEGER NOT NULL
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_automation_capabilities_state
+      ON automation_capabilities(lifecycle_state, semantic_name);
+
+    CREATE TABLE IF NOT EXISTS automation_artifacts (
+      artifact_id TEXT PRIMARY KEY,
+      capability_id TEXT NOT NULL,
+      version INTEGER NOT NULL,
+      workflow_ir_digest TEXT NOT NULL,
+      compiled_semantic_digest TEXT NOT NULL,
+      compiled_full_digest TEXT NOT NULL,
+      n8n_workflow_id TEXT,
+      compiler_version TEXT NOT NULL,
+      node_catalog_version TEXT NOT NULL,
+      policy_version TEXT NOT NULL,
+      source_refs_json TEXT NOT NULL,
+      validation_report_digest TEXT,
+      lifecycle_state TEXT NOT NULL,
+      created_at_ms INTEGER NOT NULL,
+      validated_at_ms INTEGER,
+      admitted_at_ms INTEGER,
+      UNIQUE(capability_id, version),
+      FOREIGN KEY(capability_id) REFERENCES automation_capabilities(capability_id)
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_automation_artifacts_cap
+      ON automation_artifacts(capability_id, version);
+
+    CREATE TABLE IF NOT EXISTS automation_runs (
+      run_id TEXT PRIMARY KEY,
+      capability_id TEXT NOT NULL,
+      artifact_id TEXT NOT NULL,
+      command_id TEXT,
+      turn_id TEXT,
+      execution_id TEXT,
+      n8n_execution_id TEXT,
+      status TEXT NOT NULL,
+      action_class TEXT NOT NULL,
+      input_digest TEXT NOT NULL,
+      output_digest TEXT,
+      evidence_pointer TEXT,
+      verifier_status TEXT,
+      error_code TEXT,
+      started_at_ms INTEGER NOT NULL,
+      submitted_at_ms INTEGER,
+      verified_at_ms INTEGER,
+      completed_at_ms INTEGER,
+      updated_at_ms INTEGER NOT NULL
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_automation_runs_cap_time
+      ON automation_runs(capability_id, started_at_ms);
+
+    CREATE INDEX IF NOT EXISTS idx_automation_runs_exec
+      ON automation_runs(execution_id);
+
+    CREATE TABLE IF NOT EXISTS automation_external_events (
+      event_id TEXT PRIMARY KEY,
+      source_system TEXT NOT NULL,
+      source_account_alias TEXT,
+      event_type TEXT NOT NULL,
+      observed_at_ms INTEGER,
+      received_at_ms INTEGER NOT NULL,
+      payload_schema_id TEXT NOT NULL,
+      payload_digest TEXT NOT NULL,
+      source_trust TEXT NOT NULL,
+      sensitivity TEXT NOT NULL,
+      dedupe_key TEXT NOT NULL UNIQUE,
+      evidence_pointer TEXT,
+      payload_json TEXT NOT NULL
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_external_events_type_time
+      ON automation_external_events(event_type, received_at_ms);
+
+    CREATE TABLE IF NOT EXISTS automation_standing_intents (
+      intent_id TEXT PRIMARY KEY,
+      owner_goal TEXT NOT NULL,
+      trigger_json TEXT NOT NULL,
+      scope_json TEXT NOT NULL,
+      allowed_effects_json TEXT NOT NULL,
+      expires_at_ms INTEGER,
+      capability_id TEXT NOT NULL,
+      workflow_version INTEGER NOT NULL,
+      action_class TEXT NOT NULL,
+      owner_approval_ref TEXT,
+      enabled INTEGER NOT NULL,
+      created_at_ms INTEGER NOT NULL,
+      updated_at_ms INTEGER NOT NULL
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_standing_intents_cap
+      ON automation_standing_intents(capability_id, enabled);
+
+    -- Rev 1.3 §389.  The owner-authorized root from which a scheduled/event run derives an
+    -- ordinary CommandAuthorityRecord.  source_device_id is the revocation root (§392) and is
+    -- deliberately NOT NULL: §394 forbids making device binding optional for automation.
+    CREATE TABLE IF NOT EXISTS standing_automation_authorities (
+      authority_id TEXT PRIMARY KEY,
+      standing_intent_id TEXT NOT NULL,
+      source_command_id TEXT NOT NULL,
+      source_device_id TEXT NOT NULL,
+      source_turn_id TEXT,
+      source_snapshot_id TEXT NOT NULL,
+      source_context_digest TEXT NOT NULL,
+      principal_type TEXT NOT NULL,
+      requested_by TEXT NOT NULL,
+      capability_id TEXT NOT NULL,
+      artifact_id TEXT NOT NULL,
+      workflow_version INTEGER NOT NULL,
+      action_class_ceiling TEXT NOT NULL,
+      trigger_digest TEXT NOT NULL,
+      parameter_constraints_json TEXT NOT NULL,
+      parameter_constraints_digest TEXT NOT NULL,
+      allowed_effects_json TEXT NOT NULL,
+      allowed_domains_json TEXT NOT NULL,
+      issued_at_ms INTEGER NOT NULL,
+      expires_at_ms INTEGER,
+      revoked_at_ms INTEGER,
+      owner_authority_evidence_ref TEXT NOT NULL,
+      policy_version TEXT NOT NULL,
+      FOREIGN KEY(standing_intent_id) REFERENCES automation_standing_intents(intent_id)
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_standing_authorities_intent
+      ON standing_automation_authorities(standing_intent_id, revoked_at_ms);
+
+    CREATE INDEX IF NOT EXISTS idx_standing_authorities_device
+      ON standing_automation_authorities(source_device_id, revoked_at_ms);
+
+    -- Rev 1.3 §§160-161, 412.  Durable replay protection for run capability grants.
+    -- In-memory-only replay protection is explicitly not acceptable.
+    CREATE TABLE IF NOT EXISTS automation_run_nonces (
+      nonce_hash TEXT PRIMARY KEY,
+      grant_id TEXT NOT NULL,
+      run_id TEXT NOT NULL,
+      command_id TEXT NOT NULL,
+      capability_id TEXT NOT NULL,
+      artifact_id TEXT NOT NULL,
+      artifact_version INTEGER NOT NULL,
+      standing_authority_id TEXT,
+      context_snapshot_id TEXT NOT NULL,
+      input_digest TEXT NOT NULL,
+      action_class_ceiling TEXT NOT NULL,
+      allowed_operations_json TEXT NOT NULL,
+      allowed_domains_json TEXT NOT NULL,
+      grant_kind TEXT NOT NULL,
+      max_uses INTEGER NOT NULL DEFAULT 1,
+      use_count INTEGER NOT NULL DEFAULT 0,
+      status TEXT NOT NULL,
+      issued_at_ms INTEGER NOT NULL,
+      expires_at_ms INTEGER NOT NULL,
+      consumed_at_ms INTEGER,
+      revoked_at_ms INTEGER
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_run_nonces_run
+      ON automation_run_nonces(run_id, status);
+
+    CREATE INDEX IF NOT EXISTS idx_run_nonces_grant
+      ON automation_run_nonces(grant_id);
+
+    CREATE TABLE IF NOT EXISTS browser_tasks (
+      task_id TEXT PRIMARY KEY,
+      command_id TEXT,
+      execution_id TEXT,
+      capability_id TEXT,
+      profile_alias TEXT NOT NULL,
+      strategy TEXT NOT NULL,
+      autonomy_tier TEXT NOT NULL,
+      action_class TEXT NOT NULL,
+      target_domain TEXT NOT NULL,
+      goal TEXT NOT NULL,
+      status TEXT NOT NULL,
+      evidence_pointer TEXT,
+      error_code TEXT,
+      started_at_ms INTEGER NOT NULL,
+      completed_at_ms INTEGER,
+      updated_at_ms INTEGER NOT NULL
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_browser_tasks_status
+      ON browser_tasks(status, started_at_ms);
+
+    CREATE TABLE IF NOT EXISTS browser_evidence (
+      evidence_id TEXT PRIMARY KEY,
+      task_id TEXT NOT NULL,
+      kind TEXT NOT NULL,
+      url_digest TEXT NOT NULL,
+      dom_digest TEXT,
+      screenshot_digest TEXT,
+      extraction_digest TEXT,
+      source_trust TEXT NOT NULL,
+      injection_assessment TEXT NOT NULL,
+      contains_secrets INTEGER NOT NULL DEFAULT 0,
+      created_at_ms INTEGER NOT NULL,
+      evidence_json TEXT NOT NULL,
+      FOREIGN KEY(task_id) REFERENCES browser_tasks(task_id)
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_browser_evidence_task
+      ON browser_evidence(task_id, created_at_ms);
+
+    CREATE TABLE IF NOT EXISTS browser_profiles (
+      profile_alias TEXT PRIMARY KEY,
+      persistence TEXT NOT NULL,
+      authentication TEXT NOT NULL,
+      mutation_policy TEXT NOT NULL,
+      secret_ref TEXT,
+      lease_holder TEXT,
+      lease_expires_at_ms INTEGER,
+      last_verified_at_ms INTEGER,
+      created_at_ms INTEGER NOT NULL,
+      updated_at_ms INTEGER NOT NULL
+    );
+    """,
+    7: """
+    -- Rev 3.1 browser escalation/resume. DecisionService remains the owner
+    -- authority; this table only binds a browser checkpoint to that decision.
+    CREATE TABLE IF NOT EXISTS browser_escalations (
+      escalation_id TEXT PRIMARY KEY,
+      task_id TEXT NOT NULL,
+      decision_id TEXT NOT NULL UNIQUE,
+      boundary_type TEXT NOT NULL,
+      reason_code TEXT NOT NULL,
+      summary TEXT NOT NULL,
+      why_required TEXT NOT NULL,
+      risk_summary TEXT NOT NULL,
+      current_scope_json TEXT NOT NULL,
+      requested_scope_delta_json TEXT NOT NULL,
+      current_action_class TEXT NOT NULL,
+      required_action_class TEXT,
+      pending_step TEXT,
+      evidence_refs_json TEXT NOT NULL,
+      session_lease_ref TEXT,
+      idempotency_key TEXT NOT NULL UNIQUE,
+      status TEXT NOT NULL,
+      expires_at_ms INTEGER,
+      created_at_ms INTEGER NOT NULL,
+      updated_at_ms INTEGER NOT NULL,
+      FOREIGN KEY(task_id) REFERENCES browser_tasks(task_id),
+      FOREIGN KEY(decision_id) REFERENCES decisions(id)
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_browser_escalations_task
+      ON browser_escalations(task_id, status, created_at_ms);
+    """,
+    8: """
+    -- Owner-approved browser scope deltas become a separate durable authorization.
+    CREATE TABLE IF NOT EXISTS browser_scope_authorizations (
+      authorization_id TEXT PRIMARY KEY,
+      escalation_id TEXT NOT NULL UNIQUE,
+      task_id TEXT NOT NULL,
+      decision_id TEXT NOT NULL,
+      approved_domains_json TEXT NOT NULL,
+      approved_action_class_ceiling TEXT,
+      status TEXT NOT NULL,
+      issued_at_ms INTEGER NOT NULL,
+      expires_at_ms INTEGER,
+      consumed_at_ms INTEGER,
+      FOREIGN KEY(escalation_id) REFERENCES browser_escalations(escalation_id),
+      FOREIGN KEY(task_id) REFERENCES browser_tasks(task_id),
+      FOREIGN KEY(decision_id) REFERENCES decisions(id)
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_browser_scope_auth_task
+      ON browser_scope_authorizations(task_id, status, issued_at_ms);
+    """,
+    9: """
+    -- Rev 1.3 §§76-78, 101-102, 243-246 — operating a fabric, not just building it.
+
+    -- §76. One row per admitted workflow version. Health is per version because a
+    -- repair produces a new version, and the old version's failures are not the
+    -- new one's record.
+    CREATE TABLE IF NOT EXISTS automation_workflow_health (
+      capability_id TEXT NOT NULL,
+      workflow_version INTEGER NOT NULL,
+      runs INTEGER NOT NULL DEFAULT 0,
+      verified_successes INTEGER NOT NULL DEFAULT 0,
+      failures INTEGER NOT NULL DEFAULT 0,
+      consecutive_failures INTEGER NOT NULL DEFAULT 0,
+      total_duration_ms INTEGER NOT NULL DEFAULT 0,
+      duration_samples_json TEXT NOT NULL DEFAULT '[]',
+      p95_duration_ms INTEGER,
+      repair_count INTEGER NOT NULL DEFAULT 0,
+      last_verified_at_ms INTEGER,
+      last_failure_class TEXT,
+      status TEXT NOT NULL DEFAULT 'GREEN',
+      updated_at_ms INTEGER NOT NULL,
+      PRIMARY KEY (capability_id, workflow_version)
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_automation_health_status
+      ON automation_workflow_health(status, updated_at_ms);
+
+    -- §§78, 243-245. Repair lineage. The admitted workflow is never mutated in
+    -- place, so every repair is a row pointing at the artifact it replaced.
+    CREATE TABLE IF NOT EXISTS automation_repairs (
+      repair_id TEXT PRIMARY KEY,
+      capability_id TEXT NOT NULL,
+      failing_artifact_id TEXT NOT NULL,
+      failing_run_id TEXT,
+      failure_class TEXT NOT NULL,
+      error_code TEXT,
+      decision TEXT NOT NULL,
+      candidate_artifact_id TEXT,
+      superseded_artifact_id TEXT,
+      promoted_at_ms INTEGER,
+      detail_json TEXT NOT NULL DEFAULT '{}',
+      created_at_ms INTEGER NOT NULL
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_automation_repairs_cap
+      ON automation_repairs(capability_id, created_at_ms);
+
+    -- §246. Bounded retry ends somewhere, and that somewhere is a row an owner
+    -- or operator can act on — never an infinite retry.
+    CREATE TABLE IF NOT EXISTS automation_dead_letter (
+      dead_letter_id TEXT PRIMARY KEY,
+      run_id TEXT,
+      event_id TEXT,
+      capability_id TEXT,
+      failure_class TEXT NOT NULL,
+      last_error_code TEXT,
+      attempt_count INTEGER NOT NULL DEFAULT 1,
+      evidence_refs_json TEXT NOT NULL DEFAULT '[]',
+      next_action TEXT NOT NULL,
+      detail_json TEXT NOT NULL DEFAULT '{}',
+      created_at_ms INTEGER NOT NULL,
+      updated_at_ms INTEGER NOT NULL,
+      resolved_at_ms INTEGER,
+      resolution TEXT
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_automation_dead_letter_open
+      ON automation_dead_letter(resolved_at_ms, created_at_ms);
+
+    CREATE UNIQUE INDEX IF NOT EXISTS uq_automation_dead_letter_run
+      ON automation_dead_letter(run_id) WHERE run_id IS NOT NULL;
+
+    -- §101. Per-run timing, so the ladder's claims are measured rather than
+    -- asserted. `cache_state` is what makes the HOT hit rate observable.
+    CREATE TABLE IF NOT EXISTS automation_run_telemetry (
+      run_id TEXT PRIMARY KEY,
+      capability_id TEXT,
+      workflow_version INTEGER,
+      cache_state TEXT NOT NULL,
+      compile_time_ms INTEGER NOT NULL DEFAULT 0,
+      dispatch_time_ms INTEGER NOT NULL DEFAULT 0,
+      execution_time_ms INTEGER NOT NULL DEFAULT 0,
+      external_wait_ms INTEGER NOT NULL DEFAULT 0,
+      verification_time_ms INTEGER NOT NULL DEFAULT 0,
+      retry_count INTEGER NOT NULL DEFAULT 0,
+      failure_count INTEGER NOT NULL DEFAULT 0,
+      recorded_at_ms INTEGER NOT NULL
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_automation_run_telemetry_time
+      ON automation_run_telemetry(recorded_at_ms);
+
+    -- §102. One row per capability-acquisition attempt. The core success metric
+    -- is that the HOT share of these rises over time.
+    CREATE TABLE IF NOT EXISTS automation_generation_telemetry (
+      generation_id TEXT PRIMARY KEY,
+      goal_class TEXT NOT NULL,
+      medium TEXT NOT NULL,
+      outcome TEXT NOT NULL,
+      pattern_reused INTEGER NOT NULL DEFAULT 0,
+      ir_cache_hit INTEGER NOT NULL DEFAULT 0,
+      first_use_latency_ms INTEGER NOT NULL DEFAULT 0,
+      recorded_at_ms INTEGER NOT NULL
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_automation_generation_time
+      ON automation_generation_telemetry(recorded_at_ms);
+    """,
+    10: """
+    -- Rev 1 §§3, 5, 34, 46 — Mission Core. The single owner-visible unit of work.
+
+    -- §3.1. Additive only: no existing subsystem table is altered or dropped, so
+    -- browser tasks, automation runs and Google jobs keep their own state and are
+    -- referenced from mission_activities rather than absorbed into it.
+    CREATE TABLE IF NOT EXISTS missions (
+      mission_id TEXT PRIMARY KEY,
+      owner_principal_id TEXT NOT NULL,
+      project_id TEXT,
+      origin TEXT NOT NULL,
+      origin_channel TEXT NOT NULL,
+      title TEXT NOT NULL,
+      goal TEXT NOT NULL,
+      success_contract_json TEXT NOT NULL DEFAULT '{}',
+      constraints_json TEXT NOT NULL DEFAULT '[]',
+      authority_envelope_json TEXT NOT NULL DEFAULT '{}',
+      sensitivity TEXT NOT NULL DEFAULT 'ROUTINE',
+      context_snapshot_id TEXT,
+      state TEXT NOT NULL DEFAULT 'CAPTURED',
+      priority INTEGER NOT NULL DEFAULT 50,
+      created_at_ms INTEGER NOT NULL,
+      updated_at_ms INTEGER NOT NULL,
+      deadline_ms INTEGER,
+      attention_policy TEXT NOT NULL DEFAULT 'NORMAL',
+      plan_revision INTEGER NOT NULL DEFAULT 0,
+      current_phase TEXT,
+      parent_mission_id TEXT,
+      final_outcome TEXT,
+      verification_state TEXT NOT NULL DEFAULT 'PENDING',
+      verification_record_json TEXT,
+      learning_record_id TEXT,
+      FOREIGN KEY(parent_mission_id) REFERENCES missions(mission_id)
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_missions_state
+      ON missions(state, updated_at_ms);
+    CREATE INDEX IF NOT EXISTS idx_missions_owner_project
+      ON missions(owner_principal_id, project_id, updated_at_ms);
+
+    -- §5. Modular execution under one mission. `executor_ref` points at the
+    -- specialist row (browser_tasks.task_id, automation_runs.run_id, ...) so the
+    -- subsystem stays authoritative for its own execution detail.
+    CREATE TABLE IF NOT EXISTS mission_activities (
+      activity_id TEXT PRIMARY KEY,
+      mission_id TEXT NOT NULL,
+      activity_type TEXT NOT NULL,
+      capability_id TEXT NOT NULL,
+      executor TEXT NOT NULL,
+      executor_ref TEXT,
+      input_contract_json TEXT NOT NULL DEFAULT '{}',
+      authority_ref TEXT,
+      state TEXT NOT NULL DEFAULT 'PENDING',
+      attempt INTEGER NOT NULL DEFAULT 1,
+      started_at_ms INTEGER NOT NULL,
+      ended_at_ms INTEGER,
+      dependency_activity_ids_json TEXT NOT NULL DEFAULT '[]',
+      checkpoint_ref TEXT,
+      error_class TEXT,
+      retry_policy TEXT NOT NULL DEFAULT 'NONE',
+      verification_contract_json TEXT NOT NULL DEFAULT '{}',
+      FOREIGN KEY(mission_id) REFERENCES missions(mission_id)
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_mission_activities_mission
+      ON mission_activities(mission_id, started_at_ms);
+    CREATE INDEX IF NOT EXISTS idx_mission_activities_executor_ref
+      ON mission_activities(executor, executor_ref);
+
+    -- §34. The owner-visible timeline. Raw provider logs stay in their own
+    -- tables and are technical drill-down; this is what the Activity page reads.
+    CREATE TABLE IF NOT EXISTS mission_events (
+      event_id TEXT PRIMARY KEY,
+      mission_id TEXT NOT NULL,
+      activity_id TEXT,
+      event_type TEXT NOT NULL,
+      actor TEXT NOT NULL,
+      occurred_at_ms INTEGER NOT NULL,
+      severity TEXT NOT NULL DEFAULT 'INFO',
+      owner_visibility INTEGER NOT NULL DEFAULT 1,
+      summary TEXT NOT NULL DEFAULT '',
+      evidence_ref TEXT,
+      FOREIGN KEY(mission_id) REFERENCES missions(mission_id)
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_mission_events_mission
+      ON mission_events(mission_id, occurred_at_ms);
+    CREATE INDEX IF NOT EXISTS idx_mission_events_owner_feed
+      ON mission_events(owner_visibility, occurred_at_ms);
+    """,
+    11: """
+    -- Rev 1 §7 — the canonical capability declaration set, materialized.
+
+    -- This table holds DECLARATIONS, never readiness. Readiness stays with the
+    -- subsystem that already owns it (automation_artifacts lifecycle, the Google
+    -- mesh, ExternalRuntimeRegistry evidence) and is reached through
+    -- `readiness_source`. That is what lets this registry be canonical without
+    -- becoming a third copy of state those subsystems already maintain.
+    CREATE TABLE IF NOT EXISTS capability_registry (
+      capability_id TEXT PRIMARY KEY,
+      manifest_version TEXT NOT NULL,
+      manifest_digest TEXT NOT NULL,
+      declaration_json TEXT NOT NULL,
+      capability_class TEXT NOT NULL,
+      authority_class TEXT NOT NULL,
+      readiness_source TEXT NOT NULL,
+      provider TEXT NOT NULL,
+      executor TEXT NOT NULL,
+      created_at_ms INTEGER NOT NULL,
+      updated_at_ms INTEGER NOT NULL,
+      withdrawn_at_ms INTEGER
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_capability_registry_class
+      ON capability_registry(capability_class, withdrawn_at_ms);
+    CREATE INDEX IF NOT EXISTS idx_capability_registry_digest
+      ON capability_registry(manifest_digest);
+
+    -- §8 — the route decision is persisted as evidence: what was considered,
+    -- what was rejected and why. A routing choice nobody can reconstruct is a
+    -- routing choice nobody can audit.
+    CREATE TABLE IF NOT EXISTS capability_route_decisions (
+      decision_id TEXT PRIMARY KEY,
+      mission_id TEXT,
+      goal_class TEXT NOT NULL,
+      selected_capability_id TEXT,
+      candidates_json TEXT NOT NULL DEFAULT '[]',
+      rejected_json TEXT NOT NULL DEFAULT '[]',
+      fallback_chain_json TEXT NOT NULL DEFAULT '[]',
+      routing_policy_version TEXT NOT NULL,
+      manifest_digest TEXT NOT NULL,
+      decided_at_ms INTEGER NOT NULL
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_capability_route_decisions_mission
+      ON capability_route_decisions(mission_id, decided_at_ms);
+    """,
+    12: """
+    -- Rev 1 §§64-65, 68, 72, 76-78, 87 — the owner-understanding layer.
+
+    -- §64. How the owner works, not who they are. Every field is an assertion
+    -- with a state and evidence, never a settled truth, so it can be corrected.
+    CREATE TABLE IF NOT EXISTS owner_cognitive_model (
+      assertion_id TEXT PRIMARY KEY,
+      owner_principal_id TEXT NOT NULL,
+      field TEXT NOT NULL,
+      value TEXT NOT NULL,
+      state TEXT NOT NULL DEFAULT 'OBSERVED',
+      confidence REAL NOT NULL DEFAULT 0.0,
+      evidence_refs_json TEXT NOT NULL DEFAULT '[]',
+      supporting_episode_refs_json TEXT NOT NULL DEFAULT '[]',
+      project_id TEXT,
+      temporary INTEGER NOT NULL DEFAULT 0,
+      superseded_by TEXT,
+      owner_confirmed_at_ms INTEGER,
+      last_revalidated_at_ms INTEGER,
+      created_at_ms INTEGER NOT NULL,
+      updated_at_ms INTEGER NOT NULL
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_owner_model_field
+      ON owner_cognitive_model(owner_principal_id, field, state);
+
+    -- §65. Why a decision went the way it did, so patterns can be learned and,
+    -- crucially, falsified by later outcomes.
+    CREATE TABLE IF NOT EXISTS decision_fingerprints (
+      decision_id TEXT PRIMARY KEY,
+      mission_id TEXT,
+      context_json TEXT NOT NULL DEFAULT '{}',
+      options_considered_json TEXT NOT NULL DEFAULT '[]',
+      owner_choice TEXT NOT NULL,
+      owner_stated_reason TEXT,
+      inferred_reason TEXT,
+      tradeoffs_json TEXT NOT NULL DEFAULT '[]',
+      evidence_used_json TEXT NOT NULL DEFAULT '[]',
+      rejected_alternatives_json TEXT NOT NULL DEFAULT '[]',
+      outcome TEXT,
+      reassessment TEXT,
+      created_at_ms INTEGER NOT NULL,
+      updated_at_ms INTEGER NOT NULL
+    );
+
+    -- §76. Owner words mapped to operational meaning, with anti-examples so the
+    -- mapping is falsifiable rather than merely plausible.
+    CREATE TABLE IF NOT EXISTS shared_vocabulary (
+      term TEXT NOT NULL,
+      project_id TEXT NOT NULL DEFAULT '',
+      owner_meaning TEXT NOT NULL,
+      system_operationalization TEXT NOT NULL,
+      examples_json TEXT NOT NULL DEFAULT '[]',
+      anti_examples_json TEXT NOT NULL DEFAULT '[]',
+      confidence REAL NOT NULL DEFAULT 0.0,
+      evidence_refs_json TEXT NOT NULL DEFAULT '[]',
+      created_at_ms INTEGER NOT NULL,
+      updated_at_ms INTEGER NOT NULL,
+      PRIMARY KEY (term, project_id)
+    );
+
+    -- §77. Long-lived goals and how they relate, so a newer instruction that
+    -- contradicts an older one is visible rather than silently winning.
+    CREATE TABLE IF NOT EXISTS intent_nodes (
+      intent_id TEXT PRIMARY KEY,
+      owner_goal TEXT NOT NULL,
+      first_observed_ms INTEGER NOT NULL,
+      latest_observed_ms INTEGER NOT NULL,
+      projects_json TEXT NOT NULL DEFAULT '[]',
+      constraints_json TEXT NOT NULL DEFAULT '[]',
+      status TEXT NOT NULL DEFAULT 'ACTIVE',
+      priority INTEGER NOT NULL DEFAULT 50
+    );
+
+    CREATE TABLE IF NOT EXISTS intent_edges (
+      edge_id TEXT PRIMARY KEY,
+      from_intent_id TEXT NOT NULL,
+      to_intent_id TEXT NOT NULL,
+      edge_type TEXT NOT NULL,
+      evidence_ref TEXT,
+      created_at_ms INTEGER NOT NULL,
+      FOREIGN KEY(from_intent_id) REFERENCES intent_nodes(intent_id),
+      FOREIGN KEY(to_intent_id) REFERENCES intent_nodes(intent_id)
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_intent_edges_from
+      ON intent_edges(from_intent_id, edge_type);
+
+    CREATE TABLE IF NOT EXISTS intent_missions (
+      intent_id TEXT NOT NULL,
+      mission_id TEXT NOT NULL,
+      linked_at_ms INTEGER NOT NULL,
+      PRIMARY KEY (intent_id, mission_id)
+    );
+
+    -- §78. Why a project exists and what was already rejected. Scoped, and
+    -- explicitly not a replacement for Project Truth.
+    CREATE TABLE IF NOT EXISTS strategic_memory (
+      entry_id TEXT PRIMARY KEY,
+      project_id TEXT NOT NULL,
+      entry_type TEXT NOT NULL,
+      statement TEXT NOT NULL,
+      rationale TEXT,
+      evidence_refs_json TEXT NOT NULL DEFAULT '[]',
+      superseded_by TEXT,
+      created_at_ms INTEGER NOT NULL,
+      updated_at_ms INTEGER NOT NULL
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_strategic_memory_project
+      ON strategic_memory(project_id, entry_type);
+
+    -- §72. Where VAN compensates rather than imitates. Task observations only.
+    CREATE TABLE IF NOT EXISTS cognitive_complement_map (
+      entry_id TEXT PRIMARY KEY,
+      domain TEXT NOT NULL UNIQUE,
+      owner_strength TEXT,
+      owner_vulnerability_candidate TEXT,
+      van_strength TEXT,
+      preferred_collaboration_pattern TEXT,
+      confidence REAL NOT NULL DEFAULT 0.0,
+      evidence_refs_json TEXT NOT NULL DEFAULT '[]',
+      created_at_ms INTEGER NOT NULL,
+      updated_at_ms INTEGER NOT NULL
+    );
+
+    -- §87. What changed about how VAN works with the owner, and whether the
+    -- owner may reverse it.
+    CREATE TABLE IF NOT EXISTS symbiotic_growth (
+      change_id TEXT PRIMARY KEY,
+      observed_pattern TEXT NOT NULL,
+      previous_behavior TEXT NOT NULL,
+      new_behavior TEXT NOT NULL,
+      reason TEXT NOT NULL,
+      evidence_refs_json TEXT NOT NULL DEFAULT '[]',
+      owner_confirmation_required INTEGER NOT NULL DEFAULT 1,
+      owner_confirmed_at_ms INTEGER,
+      reverted_at_ms INTEGER,
+      reversible INTEGER NOT NULL DEFAULT 1,
+      effective_from_ms INTEGER,
+      created_at_ms INTEGER NOT NULL
+    );
+    """,
+    13: """
+    -- Rev 1 §§66, 68-71, 75, 88 — the critical reasoning layer.
+
+    -- §66. Structured conclusions only. §13 forbids persisting hidden
+    -- chain-of-thought, so there is no column for it: what survives an
+    -- assessment is the facts, assumptions, alternatives and the confidence.
+    CREATE TABLE IF NOT EXISTS reasoning_assessments (
+      assessment_id TEXT PRIMARY KEY,
+      mission_id TEXT,
+      problem_statement TEXT NOT NULL,
+      known_facts_json TEXT NOT NULL DEFAULT '[]',
+      assumptions_json TEXT NOT NULL DEFAULT '[]',
+      uncertainties_json TEXT NOT NULL DEFAULT '[]',
+      contradictions_json TEXT NOT NULL DEFAULT '[]',
+      hypotheses_json TEXT NOT NULL DEFAULT '[]',
+      alternatives_json TEXT NOT NULL DEFAULT '[]',
+      failure_modes_json TEXT NOT NULL DEFAULT '[]',
+      counterfactuals_json TEXT NOT NULL DEFAULT '[]',
+      recommended_next_action TEXT,
+      confidence REAL NOT NULL DEFAULT 0.0,
+      evidence_refs_json TEXT NOT NULL DEFAULT '[]',
+      challenge_mode TEXT NOT NULL DEFAULT 'BALANCED',
+      critic_findings_json TEXT NOT NULL DEFAULT '[]',
+      verifier_findings_json TEXT NOT NULL DEFAULT '[]',
+      created_at_ms INTEGER NOT NULL
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_reasoning_mission
+      ON reasoning_assessments(mission_id, created_at_ms);
+
+    -- §68. Mission-scoped assumptions, and whether anyone checked them.
+    CREATE TABLE IF NOT EXISTS assumption_ledger (
+      assumption_id TEXT PRIMARY KEY,
+      mission_id TEXT NOT NULL,
+      claim TEXT NOT NULL,
+      source TEXT NOT NULL,
+      importance TEXT NOT NULL DEFAULT 'MEDIUM',
+      confidence REAL NOT NULL DEFAULT 0.5,
+      testability TEXT NOT NULL DEFAULT 'UNKNOWN',
+      verification_plan TEXT,
+      status TEXT NOT NULL DEFAULT 'ACTIVE',
+      resolved_evidence_refs_json TEXT NOT NULL DEFAULT '[]',
+      created_at_ms INTEGER NOT NULL,
+      updated_at_ms INTEGER NOT NULL,
+      FOREIGN KEY(mission_id) REFERENCES missions(mission_id)
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_assumption_mission
+      ON assumption_ledger(mission_id, status, importance);
+
+    -- §71. Every time VAN agreed or disagreed with the owner on a factual
+    -- premise, so the anti-sycophancy metrics are measured rather than claimed.
+    CREATE TABLE IF NOT EXISTS premise_assessments (
+      premise_id TEXT PRIMARY KEY,
+      mission_id TEXT,
+      owner_premise TEXT NOT NULL,
+      van_position TEXT NOT NULL,
+      evidence_refs_json TEXT NOT NULL DEFAULT '[]',
+      semantic_class TEXT NOT NULL,
+      corrected INTEGER NOT NULL DEFAULT 0,
+      agreed_without_evidence INTEGER NOT NULL DEFAULT 0,
+      created_at_ms INTEGER NOT NULL
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_premise_created
+      ON premise_assessments(created_at_ms);
+    """,
+    14: """
+    -- Rev 1 §§10, 11, 27, 31 — attention scoring, proactive autonomy, trust.
+
+    -- §10. Candidates are scored and may be suppressed; the existing `attention`
+    -- table stays the owner-visible queue, and this records why something did or
+    -- did not reach it.
+    CREATE TABLE IF NOT EXISTS attention_candidates (
+      candidate_id TEXT PRIMARY KEY,
+      source TEXT NOT NULL,
+      dedupe_key TEXT NOT NULL,
+      importance REAL NOT NULL DEFAULT 0.0,
+      urgency REAL NOT NULL DEFAULT 0.0,
+      actionability REAL NOT NULL DEFAULT 0.0,
+      novelty REAL NOT NULL DEFAULT 0.0,
+      owner_relevance REAL NOT NULL DEFAULT 0.0,
+      confidence REAL NOT NULL DEFAULT 0.0,
+      interruption_cost REAL NOT NULL DEFAULT 0.0,
+      score REAL NOT NULL DEFAULT 0.0,
+      disposition TEXT NOT NULL,
+      reason TEXT,
+      related_mission_id TEXT,
+      summary TEXT NOT NULL DEFAULT '',
+      expiry_ms INTEGER,
+      created_at_ms INTEGER NOT NULL
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_attention_candidates_dedupe
+      ON attention_candidates(dedupe_key, created_at_ms);
+
+    -- §31. Trust is earned from verified outcomes and lost hard on false success.
+    CREATE TABLE IF NOT EXISTS domain_trust (
+      domain TEXT PRIMARY KEY,
+      verified_successes INTEGER NOT NULL DEFAULT 0,
+      meaningful_failures INTEGER NOT NULL DEFAULT 0,
+      false_successes INTEGER NOT NULL DEFAULT 0,
+      owner_overrides INTEGER NOT NULL DEFAULT 0,
+      recovery_successes INTEGER NOT NULL DEFAULT 0,
+      current_autonomy_ceiling TEXT NOT NULL DEFAULT 'S1',
+      owner_granted_ceiling TEXT,
+      updated_at_ms INTEGER NOT NULL
+    );
+
+    -- §11. Proactive missions and the standing policy that allowed them.
+    CREATE TABLE IF NOT EXISTS proactive_policies (
+      policy_id TEXT PRIMARY KEY,
+      domain TEXT NOT NULL,
+      autonomy_level TEXT NOT NULL,
+      mission_class TEXT NOT NULL,
+      owner_granted_at_ms INTEGER,
+      owner_evidence_ref TEXT,
+      enabled INTEGER NOT NULL DEFAULT 1,
+      created_at_ms INTEGER NOT NULL,
+      updated_at_ms INTEGER NOT NULL
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_proactive_policies_domain
+      ON proactive_policies(domain, enabled);
+    """,
+    15: """
+    -- Rev 1 §§79-84, 24-25, 40 — external reality, evolution, benchmarks, eval.
+
+    -- §79. What the evidence says now, kept strictly apart from what the owner
+    -- thinks. §22 makes the separation mandatory to stop personalisation
+    -- becoming an echo chamber.
+    CREATE TABLE IF NOT EXISTS external_reality (
+      observation_id TEXT PRIMARY KEY,
+      subject TEXT NOT NULL,
+      claim TEXT NOT NULL,
+      source_kind TEXT NOT NULL,
+      source_ref TEXT NOT NULL,
+      observed_at_ms INTEGER NOT NULL,
+      confidence REAL NOT NULL DEFAULT 0.5,
+      superseded_by TEXT,
+      contradicts_owner_belief INTEGER NOT NULL DEFAULT 0
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_external_reality_subject
+      ON external_reality(subject, observed_at_ms);
+
+    -- §82. One row per technology VAN knows about, with its pipeline state.
+    CREATE TABLE IF NOT EXISTS technology_capabilities (
+      technology_id TEXT PRIMARY KEY,
+      name TEXT NOT NULL,
+      category TEXT NOT NULL,
+      version TEXT,
+      source TEXT,
+      licence TEXT,
+      security_profile TEXT,
+      strengths_json TEXT NOT NULL DEFAULT '[]',
+      weaknesses_json TEXT NOT NULL DEFAULT '[]',
+      integration_cost TEXT,
+      migration_risk TEXT,
+      owner_value TEXT,
+      pipeline_state TEXT NOT NULL DEFAULT 'DISCOVERED',
+      benchmark_digest TEXT,
+      owner_decision_ref TEXT,
+      last_evaluated_at_ms INTEGER,
+      created_at_ms INTEGER NOT NULL,
+      updated_at_ms INTEGER NOT NULL
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_technology_state
+      ON technology_capabilities(pipeline_state, category);
+
+    -- §83. VAN-specific benchmark results. §24 forbids relying on public
+    -- leaderboards, so a technology's standing here is measured on VAN tasks.
+    CREATE TABLE IF NOT EXISTS benchmark_runs (
+      run_id TEXT PRIMARY KEY,
+      suite TEXT NOT NULL,
+      technology_id TEXT,
+      task_count INTEGER NOT NULL DEFAULT 0,
+      passed INTEGER NOT NULL DEFAULT 0,
+      failed INTEGER NOT NULL DEFAULT 0,
+      median_latency_ms INTEGER,
+      total_cost_micros INTEGER,
+      results_json TEXT NOT NULL DEFAULT '[]',
+      harness_version TEXT NOT NULL,
+      created_at_ms INTEGER NOT NULL
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_benchmark_suite
+      ON benchmark_runs(suite, technology_id, created_at_ms);
+
+    -- §25. Which capability sequences actually work for which mission class.
+    CREATE TABLE IF NOT EXISTS execution_strategies (
+      strategy_id TEXT PRIMARY KEY,
+      mission_class TEXT NOT NULL,
+      capability_sequence_json TEXT NOT NULL DEFAULT '[]',
+      conditions_json TEXT NOT NULL DEFAULT '{}',
+      success_count INTEGER NOT NULL DEFAULT 0,
+      failure_count INTEGER NOT NULL DEFAULT 0,
+      median_latency_ms INTEGER,
+      median_cost_micros INTEGER,
+      verification_quality REAL NOT NULL DEFAULT 0.0,
+      promotion_state TEXT NOT NULL DEFAULT 'EXPERIMENTAL',
+      eval_run_id TEXT,
+      last_evaluated_at_ms INTEGER,
+      created_at_ms INTEGER NOT NULL,
+      updated_at_ms INTEGER NOT NULL
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_strategy_class
+      ON execution_strategies(mission_class, promotion_state);
+
+    -- §40. Versioned eval runs across the >9 dimensions.
+    CREATE TABLE IF NOT EXISTS eval_runs (
+      eval_run_id TEXT PRIMARY KEY,
+      suite TEXT NOT NULL,
+      dimension TEXT NOT NULL,
+      measured INTEGER NOT NULL DEFAULT 0,
+      sample_size INTEGER NOT NULL DEFAULT 0,
+      score REAL,
+      target REAL,
+      meets_target INTEGER,
+      unmeasurable_reason TEXT,
+      details_json TEXT NOT NULL DEFAULT '{}',
+      harness_version TEXT NOT NULL,
+      created_at_ms INTEGER NOT NULL
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_eval_dimension
+      ON eval_runs(dimension, created_at_ms);
+    """,
+    16: """
+    -- Rev 1 §§34, 36, 38 — permissions the owner can read, and computer use.
+
+    -- §34/§36. One owner-readable place for every standing grant, with where it
+    -- came from and when it was last used. A grant nobody can see is a grant
+    -- nobody can revoke.
+    CREATE TABLE IF NOT EXISTS permission_grants (
+      grant_id TEXT PRIMARY KEY,
+      permission TEXT NOT NULL,
+      display_name TEXT NOT NULL,
+      scope TEXT NOT NULL DEFAULT '',
+      origin TEXT NOT NULL,
+      origin_evidence_ref TEXT,
+      granted_at_ms INTEGER NOT NULL,
+      expires_at_ms INTEGER,
+      last_used_at_ms INTEGER,
+      use_count INTEGER NOT NULL DEFAULT 0,
+      revoked_at_ms INTEGER,
+      revocation_reason TEXT
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_permission_grants_live
+      ON permission_grants(revoked_at_ms, permission);
+
+    -- §38. The Browser Fabric generalised: a typed operation against any target
+    -- surface, bound to a mission, with its own evidence and verifier.
+    CREATE TABLE IF NOT EXISTS computer_operations (
+      operation_id TEXT PRIMARY KEY,
+      mission_id TEXT,
+      activity_id TEXT,
+      surface TEXT NOT NULL,
+      target_application TEXT NOT NULL,
+      operation_type TEXT NOT NULL,
+      action_class TEXT NOT NULL,
+      scope_json TEXT NOT NULL DEFAULT '{}',
+      checkpoint_ref TEXT,
+      evidence_ref TEXT,
+      verifier_type TEXT NOT NULL DEFAULT 'NONE',
+      state TEXT NOT NULL DEFAULT 'PENDING',
+      error_code TEXT,
+      started_at_ms INTEGER NOT NULL,
+      completed_at_ms INTEGER
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_computer_operations_mission
+      ON computer_operations(mission_id, started_at_ms);
+    """,
+    17: MIGRATION_17,
+    18: MIGRATION_18,
+    19: MIGRATION_19,
+    20: MIGRATION_20,
+    21: MIGRATION_21,
+    22: MIGRATION_22,
+    23: MIGRATION_23,
+    24: MIGRATION_24,
+    25: MIGRATION_25,
+    26: MIGRATION_26,
+    27: MIGRATION_27,
+    28: MIGRATION_28,
+    29: MIGRATION_29,
+    30: MIGRATION_30,
+    31: MIGRATION_31,
+    32: MIGRATION_32,
+    33: MIGRATION_33,
+    34: MIGRATION_34,
+    35: MIGRATION_35,
+    36: MIGRATION_36,
+    37: MIGRATION_37,
+    38: MIGRATION_38,
+    39: MIGRATION_39,
+    40: MIGRATION_40,
+    41: MIGRATION_41,
+    42: MIGRATION_42,
+    43: MIGRATION_43,
+    44: MIGRATION_44,
+    45: MIGRATION_45,
+    46: MEMORY_FABRIC_MIGRATION_31,
+    47: MEMORY_FABRIC_MIGRATION_32,
+    48: MIGRATION_48,
+    49: BROWSER_HARDENING_MIGRATION_34,
+    50: BROWSER_HARDENING_MIGRATION_35,
+    51: BROWSER_HARDENING_MIGRATION_36,
+    52: BROWSER_HARDENING_MIGRATION_37,
+    53: BROWSER_HARDENING_MIGRATION_38,
+    54: ACQUISITION_MIGRATION_31,
+    55: ACQUISITION_MIGRATION_32,
+    56: MIGRATION_56,
+    57: MIGRATION_57,
+    58: MIGRATION_58,
+    59: MIGRATION_59,
+
+}
+
+
+class Store:
+    def __init__(self, path: str) -> None:
+        self.path = path
+
+    @asynccontextmanager
+    async def connection(self) -> AsyncIterator[aiosqlite.Connection]:
+        Path(self.path).parent.mkdir(parents=True, exist_ok=True)
+        # Cancellation must not abandon the worker that is opening this connection.
+        # Shutdown used to close the event loop while that worker still held futures.
+        opening = asyncio.ensure_future(aiosqlite.connect(self.path))
+        try:
+            db = await asyncio.shield(opening)
+        except asyncio.CancelledError:
+            try:
+                db = await self._drain_connection_task(opening)
+            except Exception:
+                pass
+            else:
+                await self._drain_connection_task(asyncio.create_task(db.close()))
+            raise
+        try:
+            db.row_factory = aiosqlite.Row
+            await db.execute("PRAGMA foreign_keys = ON")
+            # A fresh connection per query with journal_mode=delete and no busy timeout is
+            # why two concurrent identical signed commands could both pass the idempotency
+            # SELECT (finding P1-SEC-005). WAL lets readers and one writer coexist; the
+            # busy timeout makes a contended write wait rather than raise immediately.
+            await db.execute("PRAGMA journal_mode = WAL")
+            await db.execute("PRAGMA busy_timeout = 5000")
+            await db.execute("PRAGMA synchronous = NORMAL")
+            yield db
+        finally:
+            closing = asyncio.create_task(db.close())
+            try:
+                await asyncio.shield(closing)
+            except asyncio.CancelledError:
+                await self._drain_connection_task(closing)
+                raise
+
+    @staticmethod
+    async def _drain_connection_task(task: asyncio.Future):
+        """Finish private connection cleanup despite repeated caller cancellation."""
+        while not task.done():
+            try:
+                await asyncio.shield(task)
+            except asyncio.CancelledError:
+                continue
+        return task.result()
+
+    @staticmethod
+    async def _ensure_access_token_column(db: aiosqlite.Connection) -> None:
+        """Converge databases that already recorded either historical v4 migration.
+
+        VATI v4 introduced ``devices.access_token_hash`` and pairing tickets while
+        the parallel Rev 3.1 lineage used v4 for owner-runtime tables.  A database
+        may therefore legitimately report schema version 4 with either shape.
+        Version 5 heals the missing VATI column before creating indexes/tables.
+        """
+        cur = await db.execute("PRAGMA table_info(devices)")
+        columns = {str(row["name"]) for row in await cur.fetchall()}
+        if "access_token_hash" not in columns:
+            await db.execute("ALTER TABLE devices ADD COLUMN access_token_hash TEXT")
+            await db.commit()
+
+    @staticmethod
+    async def _ensure_m32_outbox_columns(db: aiosqlite.Connection) -> None:
+        """Migration 32's outbox columns, added only when absent.
+
+        ``executescript`` autocommits statement by statement, so a process that dies after
+        migration 32's script but before its ``schema_migrations`` row leaves the columns in
+        place with version 31 recorded; a plain ``ALTER TABLE ... ADD COLUMN`` would then fail
+        every later migrate with "duplicate column name". The rest of 32 is idempotent.
+        """
+        cur = await db.execute("PRAGMA table_info(owner_model_outbox)")
+        columns = {str(row["name"]) for row in await cur.fetchall()}
+        for name, decl in MIGRATION_32_OUTBOX_COLUMNS:
+            if name not in columns:
+                await db.execute(f"ALTER TABLE owner_model_outbox ADD COLUMN {name} {decl}")
+        await db.commit()
+
+    @staticmethod
+    async def _guard_fork_columns(db: aiosqlite.Connection, script: str) -> str:
+        """Skip only already-present ADD COLUMN statements in explicit fork repairs.
+
+        Historical branch numbers overlap, and a crash can apply a column before
+        recording its migration. Existing data and evidence flags are preserved.
+        An incompatible declared column type fails the upgrade.
+        """
+        import re
+        pattern = re.compile(
+            r"(?mi)^ALTER TABLE ([a-z_]+) ADD COLUMN ([a-z_]+) ([^;]+);"
+        )
+        skipped: set[str] = set()
+        for match in pattern.finditer(script):
+            table, column, declaration = match.groups()
+            cur = await db.execute(f"PRAGMA table_info({table})")
+            columns = {str(row["name"]): row for row in await cur.fetchall()}
+            if column in columns:
+                expected_type = declaration.split()[0].upper()
+                if str(columns[column]["type"]).upper() != expected_type:
+                    raise ValueError(f"incompatible_fork_column:{table}.{column}")
+                skipped.add(match.group(0))
+        return pattern.sub(lambda m: "" if m.group(0) in skipped else m.group(0), script)
+
+    async def migrate(self) -> None:
+        async with self.connection() as db:
+            await db.execute(
+                """
+                CREATE TABLE IF NOT EXISTS schema_migrations (
+                  version INTEGER PRIMARY KEY,
+                  applied_at_unix INTEGER NOT NULL
+                )
+                """
+            )
+            await db.commit()
+            cur = await db.execute("SELECT COALESCE(MAX(version), 0) FROM schema_migrations")
+            row = await cur.fetchone()
+            current = int(row[0])
+            for version in sorted(MIGRATIONS):
+                if version <= current:
+                    continue
+                if version == 5:
+                    await self._ensure_access_token_column(db)
+                if version == 47:
+                    await self._ensure_m32_outbox_columns(db)
+                script = MIGRATIONS[version]
+                if version in (48, 51, 52, 54, 55):
+                    script = await self._guard_fork_columns(db, script)
+                await db.executescript(script)
+                await db.execute(
+                    "INSERT INTO schema_migrations(version, applied_at_unix) VALUES (?, ?)",
+                    (version, int(time.time())),
+                )
+                await db.commit()
+
+    async def execute(self, sql: str, params: tuple[Any, ...] = ()) -> None:
+        async with self.connection() as db:
+            await db.execute(sql, params)
+            await db.commit()
+
+    async def fetchone(self, sql: str, params: tuple[Any, ...] = ()) -> aiosqlite.Row | None:
+        async with self.connection() as db:
+            cur = await db.execute(sql, params)
+            return await cur.fetchone()
+
+    async def fetchall(self, sql: str, params: tuple[Any, ...] = ()) -> list[aiosqlite.Row]:
+        async with self.connection() as db:
+            cur = await db.execute(sql, params)
+            return await cur.fetchall()
+
+    @staticmethod
+    def dumps(obj: Any) -> str:
+        return json.dumps(obj, sort_keys=True, separators=(",", ":"))

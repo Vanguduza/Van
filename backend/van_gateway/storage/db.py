@@ -9,8 +9,9 @@ from typing import Any, AsyncIterator
 
 import aiosqlite
 
-SCHEMA_VERSION = 59
+SCHEMA_VERSION = 60
 
+from van_gateway.storage.reenrollment_migration import MIGRATION_60
 from van_gateway.storage.chart_migration import MIGRATION_56
 from van_gateway.learning.schema import MIGRATION_57
 from van_gateway.storage.monitor_migrations import MIGRATION_58, MIGRATION_59
@@ -2549,6 +2550,7 @@ MIGRATIONS: dict[int, str] = {
     57: MIGRATION_57,
     58: MIGRATION_58,
     59: MIGRATION_59,
+    60: MIGRATION_60,
 
 }
 

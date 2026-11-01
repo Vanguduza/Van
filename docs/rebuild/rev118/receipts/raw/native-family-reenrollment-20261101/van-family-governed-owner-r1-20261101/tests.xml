@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="21" time="1.310" timestamp="2026-11-01T03:28:56.943763+00:00" hostname="b6ffa15f7e81"><testcase classname="trading.tests.test_lifecycle_operational_grant" name="test_synthetic_source_admission_exact_readback_restart_and_expiry" time="0.050" /><testcase classname="trading.tests.test_lifecycle_operational_grant" name="test_no_boolean_or_self_signed_or_wrong_scope_qualification_can_admit[missing-issuer]" time="0.008" /><testcase classname="trading.tests.test_lifecycle_operational_grant" name="test_no_boolean_or_self_signed_or_wrong_scope_qualification_can_admit[signature]" time="0.005" /><testcase classname="trading.tests.test_lifecycle_operational_grant" name="test_no_boolean_or_self_signed_or_wrong_scope_qualification_can_admit[scope]" time="0.004" /><testcase classname="trading.tests.test_lifecycle_operational_grant" name="test_no_boolean_or_self_signed_or_wrong_scope_qualification_can_admit[native]" time="0.003" /><testcase classname="trading.tests.test_lifecycle_operational_grant" name="test_no_boolean_or_self_signed_or_wrong_scope_qualification_can_admit[gates]" time="0.004" /><testcase classname="trading.tests.test_lifecycle_operational_grant" name="test_no_boolean_or_self_signed_or_wrong_scope_qualification_can_admit[same-key]" time="0.004" /><testcase classname="trading.tests.test_lifecycle_operational_grant" name="test_no_boolean_or_self_signed_or_wrong_scope_qualification_can_admit[owner]" time="0.004" /><testcase classname="trading.tests.test_lifecycle_operational_grant" name="test_revoke_is_current_owner_signed_cas_and_never_readmits_original" time="0.007" /><testcase classname="trading.tests.test_lifecycle_operational_grant" name="test_last_fence_read_expiry_and_signer_revocation_prevent_new_effect" time="0.005" /><testcase classname="trading.tests.test_family_governed_workflow" name="test_real_current_mandate_original_source_and_independent_issuer_join" time="0.334"><failure message="vati.risk.operational_grant.PolicyAdmissionError: original family mandate/command identity differs">tmp_path = PosixPath('/tmp/van-recovery-family-governed-owner-r1-20261101/test_real_current_mandate_orig0')
+
+    def test_real_current_mandate_original_source_and_independent_issuer_join(tmp_path):
+        w,store,time,admitted,plan,history=admitted_source_world(tmp_path)
+        try:
+&gt;           assert authorize(w,store,admitted,plan,history) is None
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+trading/tests/test_family_governed_workflow.py:84: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+trading/tests/test_family_governed_workflow.py:77: in authorize
+    return store.authorize_plan(admitted,plan,history=history,mandate=w.mandate,authority=w.authority,
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;vati.risk.operational_grant.OperationalOptimizationGrants object at 0x7f0c30da25a0&gt;
+event = Event(kind=&lt;EventKind.SESSION: 'SESSION'&gt;, producer='vati-lifecycle-policy-admission', event_time_ms=1800000000000, re... correlation_id='synthetic-source-only-grant', hash='7cdfa172573622ac86123789cda91da784d632f4bf219fe5bd09a4f65d412b67')
+plan = FamilyActionPlan(snapshot=FamilySnapshot(family_id='family:ti-e2e-1', family_revision='33f4ddd74539ae0b173f5b8ed2e103c...7'), ('lease_ref', '7'), ('original_mandate_ref', '0b0c6b3155ea389221a6761b0b51336fc2f57cec8d589a2c8b7451279ed8d9d3')))
+history = &lt;vati.execution.recovery_scope.NativePositionHistory object at 0x7f0c30da28d0&gt;
+mandate = TradingMandate(mandate_id='mandate-fx-primary', version='1.0.0', account_alias='fx_primary', venue='paper', mode=&lt;Auth...se)), strategy_risk_budgets={}, trading_temperament=None, strategy_temperaments={}, temperament_owner_signature_ref='')
+authority = &lt;vati.risk.authority.RiskAuthority object at 0x7f0c30d61940&gt;
+adapter = PaperAdapter(venue='paper', account_alias='fx_primary', equity=Decimal('10000'), currency='USD', spread=Decimal('0.000...ecimal('0.01'), partial_min=Decimal('0'), partial_max=None, minimum_remaining=Decimal('0'), revision='paper-close/1')})
+family_risk_pct = Decimal('0.004'), lease_epoch = 7
+fence_ref = 'synthetic-current-account-fence', explicit_signature = None
+
+    def authorize_plan(self, event, plan, *, history, mandate, authority, adapter,
+                       family_risk_pct, lease_epoch, fence_ref, explicit_signature=None):
+        """Join real current owners; a planner flag/reference cannot admit effects."""
+        from vati.risk.mandate import TradingMandate
+        from vati.risk.authority import RiskAuthority
+        from vati.risk.serde import mandate_binding_hash
+        from vati.risk.mandate_source import validate_mandate_source
+        from vati.execution.paper import PaperAdapter
+        from vati.lifecycle.family_actions import EXPLICIT_LEGS_V1
+        now=self.clock()
+        event=self.current(event.payload['grant_id'],expected_ref=event.hash)
+        grant=event.payload['grant'];scope=grant['scope'];binding=dict(plan.authority_refs)
+        owner_verified=self.owner.verify(event.payload['owner_signature'],act='lifecycle-policy-grant',
+            subject=subject(grant),now_unix=now//1000,single_use=False,
+            max_lifetime_seconds=MAX_STANDING_LIFETIME_SECONDS)
+        mandate_keys=getattr(mandate,'_verified_owner_key_bindings',())
+        if (not mandate_keys or mandate_keys[0] is None
+                or mandate_keys[0].public_key_sha256 != owner_verified._verified_key_binding.public_key_sha256
+                or not mandate_keys[0].is_current()):
+            raise PolicyAdmissionError('lifecycle grant owner is not the current mandate owner')
+        if (type(mandate) is not TradingMandate or not isinstance(authority,RiskAuthority)
+                or not mandate.authority_matches_policy() or not mandate.owner_keys_current()
+                or not mandate.signed_at_unix*1000 &lt;= now &lt; mandate.expires_at_unix*1000
+                or mandate_binding_hash(authority.mandate) != mandate_binding_hash(mandate)
+                or plan.policy.mode != 'ADMITTED' or plan.policy.qualification_ref != grant['qualification_hash']
+                or plan.policy.policy_id != grant['policy_id'] or plan.policy.version != grant['policy_version']
+                or plan.policy.artifact_hash != grant['policy_hash']
+                or plan.policy.implementation_hash != grant['source_hash']
+                or binding['grant_ref'] != event.hash or binding['current_mandate_ref'] != mandate_binding_hash(mandate)
+                or binding['fence_ref'] != fence_ref or binding['lease_ref'] != str(lease_epoch)
+                or plan.snapshot.account_alias != scope['account_alias']
+                or adapter.account_alias != scope['account_alias'] or mandate.account_alias != scope['account_alias']
+                or plan.snapshot.venue != scope['venue'] or adapter.venue != scope['venue']
+                or mandate.venue != scope['venue'] or plan.action not in grant['operations']
+                or plan.requested_quantity &gt; quantity(grant['max_requested_quantity'])
+                or amount(family_risk_pct) &gt; amount(quantity(grant['max_family_risk_pct']))
+                or not plan.snapshot.known):
+            raise PolicyAdmissionError('lifecycle plan lacks exact current policy/mandate/risk/native authority')
+        if scope['environment']=='PAPER' and type(adapter) is not PaperAdapter:
+            raise PolicyAdmissionError('SOURCE paper qualification cannot authorize another native provider')
+        refs=set();caps=set()
+        for leg in plan.snapshot.legs:
+            if leg.remaining == 0:
+                continue
+            command=history.commands.get(leg.trade_intent_id)
+            if (command is None or command[0].get('strategy_id') != scope['strategy_id']
+                    or command[0].get('strategy_version') != scope['strategy_version']
+                    or leg.close_rules is None):
+                raise PolicyAdmissionError('original native command/cohort differs from lifecycle grant')
+            capture=getattr(adapter,'close_capability_capture',lambda _pid:None)(leg.position_id)
+            if (not isinstance(capture,dict) or capture.get('schema') != scope['native_cohort']
+                    or capture.get('environment',capture.get('contract',{}).get('environment')) != scope['environment']
+                    or capture.get('contract_ref') != leg.close_rules.contract_ref
+                    or capture.get('evidence_ref') != leg.close_rules.evidence_ref
+                    or (scope['environment']!='PAPER' and capture.get('provider_qualified') is not True)):
+                raise PolicyAdmissionError('current actual native capability revision differs from original lifecycle plan')
+            refs.add(leg.close_rules.contract_ref);caps.add(leg.close_rules.evidence_ref)
+        if refs != set(scope['native_contract_refs']) or caps != set(scope['native_capability_refs']):
+            raise PolicyAdmissionError('lifecycle grant native contract/capability set differs')
+        original=next((e for e in history.rows if e.hash == binding['original_mandate_ref']
+            and e.kind is EventKind.RISK_DECISION and e.producer in {'vati-account-service','vati-cycle','vati-account-lifecycle'}),None)
+        if original is None:
+            raise PolicyAdmissionError('original family mandate source is not bound')
+        intent=original.payload.get('inputs',{}).get('intent',{})
+        if (intent.get('account_alias') != scope['account_alias'] or intent.get('venue') != scope['venue']
+                or intent.get('strategy_id') != scope['strategy_id']
+                or intent.get('strategy_version') != scope['strategy_version']
+                or intent.get('trade_intent_id') not in {leg.trade_intent_id for leg in plan.snapshot.legs}
+                or not any(history.commands[leg.trade_intent_id][0].get('decision_hash') == intent.get('decision_hash')
+                    for leg in plan.snapshot.legs if leg.trade_intent_id == intent.get('trade_intent_id'))):
+&gt;           raise PolicyAdmissionError('original family mandate/command identity differs')
+E           vati.risk.operational_grant.PolicyAdmissionError: original family mandate/command identity differs
+
+trading/vati/risk/operational_grant.py:301: PolicyAdmissionError</failure></testcase><testcase classname="trading.tests.test_family_governed_workflow" name="test_current_effect_context_cannot_borrow_an_admitted_grants_scope[environment]" time="0.034" /><testcase classname="trading.tests.test_family_governed_workflow" name="test_current_effect_context_cannot_borrow_an_admitted_grants_scope[account]" time="0.025" /><testcase classname="trading.tests.test_family_governed_workflow" name="test_current_effect_context_cannot_borrow_an_admitted_grants_scope[venue]" time="0.035" /><testcase classname="trading.tests.test_family_governed_workflow" name="test_current_effect_context_cannot_borrow_an_admitted_grants_scope[cohort]" time="0.025" /><testcase classname="trading.tests.test_family_governed_workflow" name="test_current_effect_context_cannot_borrow_an_admitted_grants_scope[contract]" time="0.026" /><testcase classname="trading.tests.test_family_governed_workflow" name="test_current_effect_context_cannot_borrow_an_admitted_grants_scope[policy]" time="0.025" /><testcase classname="trading.tests.test_family_governed_workflow" name="test_current_effect_context_cannot_borrow_an_admitted_grants_scope[grant]" time="0.039" /><testcase classname="trading.tests.test_family_governed_workflow" name="test_current_effect_context_cannot_borrow_an_admitted_grants_scope[mandate]" time="0.027" /><testcase classname="trading.tests.test_family_governed_workflow" name="test_current_effect_context_cannot_borrow_an_admitted_grants_scope[lease]" time="0.021" /><testcase classname="trading.tests.test_family_governed_workflow" name="test_current_effect_context_cannot_borrow_an_admitted_grants_scope[migration]" time="0.039" /></testsuite></testsuites>

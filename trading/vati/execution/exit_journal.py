@@ -74,12 +74,26 @@ class ExitJournal:
             rows[event.correlation_id] = event
         return tuple(e for e in rows.values() if e.payload["state"] not in TERMINAL) + tuple(self._legacy_unknowns())
 
-    def begin(self, *, venue, position_id, trade_intent_id, action, quantity, reason, now_ms):
+    def begin(self, *, venue, position_id, trade_intent_id, action, quantity, reason, now_ms,
+              family_action_ref=None, family_target_ref=None):
         if not venue or not position_id or action not in {"FULL_CLOSE", "PARTIAL_CLOSE"}:
             raise ValueError("protective exit requires an exact venue, position and action")
         if action == "PARTIAL_CLOSE" and (not isinstance(quantity, Decimal) or not quantity.is_finite() or quantity <= 0):
             raise ValueError("partial close quantity must be finite and positive")
         with self.ledger.atomic():
+            if family_action_ref is not None or family_target_ref is not None:
+                from vati.lifecycle.family_action_journal import FamilyActionJournal, target_ref, quantity as target_quantity
+                journal = FamilyActionJournal(self.ledger)
+                plan = next((e for e in journal.plans() if e.hash == family_action_ref), None)
+                target = None if plan is None else next((t for t in plan.payload['plan']['targets']
+                    if target_ref(plan.hash, t) == family_target_ref), None)
+                if (target is None or plan.payload['plan']['snapshot']['venue'] != venue
+                        or target['position_id'] != position_id or target['trade_intent_id'] != trade_intent_id
+                        or target['action'] != action or target_quantity(target['quantity']) <= 0
+                        or (action == 'PARTIAL_CLOSE' and target_quantity(target['quantity']) != quantity)):
+                    raise ValueError('native close is not bound to its original family leg target')
+                if journal.target_attempt(plan, target) is not None:
+                    raise ExitPending('original family leg target already attempted; observe its original receipt')
             if self.legacy_uncertain(venue, position_id) is not None:
                 raise ExitPending("legacy protective exit outcome unknown; native reconciliation required before retry")
             previous = self.latest(venue, position_id)
@@ -91,12 +105,14 @@ class ExitJournal:
                 "position_id": position_id, "trade_intent_id": trade_intent_id,
                 "action": action, "quantity": None if quantity is None else str(quantity),
                 "reason": reason, "previous_state_ref": previous.hash if previous else None}
+            if family_action_ref is not None:
+                payload.update(family_action_ref=family_action_ref, family_target_ref=family_target_ref)
             event = make_event(EventKind.EXIT_ATTEMPT, self.producer, payload,
                 event_time_ms=now_ms, received_time_ms=now_ms, correlation_id=self.scope(venue, position_id))
             self.ledger.append(event)
         return event
 
-    def finish(self, request, *, state, receipt_event_ref, now_ms):
+    def finish(self, request, *, state, receipt_event_ref, now_ms, dispatch_refusal_ref=None):
         """Caller holds the ledger transaction that also appends the receipt."""
         if state not in {"ACCEPTED", "UNKNOWN", *TERMINAL}:
             raise ValueError("invalid exit disposition")
@@ -106,9 +122,10 @@ class ExitJournal:
                 raise LedgerError("exit receipt does not bind the current transport attempt")
             if current.payload["state"] in TERMINAL:
                 raise LedgerError("exit attempt already terminal; a stale receipt cannot reopen it")
+            extras = {} if dispatch_refusal_ref is None else {"dispatch_refusal_ref": dispatch_refusal_ref}
             event = make_event(EventKind.EXIT_ATTEMPT, self.producer,
                 {**request.payload, "state": state, "request_ref": request.hash,
-                 "receipt_event_ref": receipt_event_ref},
+                 "receipt_event_ref": receipt_event_ref, **extras},
                 event_time_ms=now_ms, received_time_ms=now_ms, correlation_id=request.correlation_id)
             self.ledger.append(event)
         return event

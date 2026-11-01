@@ -3,7 +3,7 @@ weights (Rev 4 improvement: quantified) and hashes."""
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from copy import deepcopy
 from decimal import Decimal
 from enum import Enum
@@ -181,6 +181,17 @@ def episode_from_ledger(ledger: Ledger, trade_intent_id: str, *, environment: En
         evidence_refs=tuple(x for x in (dec.hash, entry_rec.hash if entry_rec else None, tca.hash if tca else None, rev.hash if rev else None) if x),
         learning_cutoff_ref=available_through,
     )
+    if rev is not None and rev.payload.get("family_outcome") is not None:
+        family=rev.payload["family_outcome"]
+        if (family.get("version")!="family-outcome/1"
+                or family.get("original_root_intent_id")!=trade_intent_id
+                or not family.get("family_id") or not isinstance(family.get("legs"),list)
+                or len(family["legs"])<2 or family.get("child_learning_trials")!=0):
+            return None
+        ep=replace(ep,execution={**ep.execution,"family_native_legs":deepcopy(family["legs"])},
+            outcome={**ep.outcome,"family_id":family["family_id"],"economic_final":family["economic_final"]},
+            review={**ep.review,"learning_unit":"POSITION_FAMILY","family_id":family["family_id"]},
+            evidence_refs=tuple(dict.fromkeys((*ep.evidence_refs,*family["source_refs"]))),artifact_hash="")
     return ep.sealed()
 
 

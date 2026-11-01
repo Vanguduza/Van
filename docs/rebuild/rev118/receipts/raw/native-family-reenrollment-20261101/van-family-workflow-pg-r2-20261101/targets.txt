@@ -1,0 +1,6 @@
+trading/tests/test_family_native_workflow_postgres.py
+trading/tests/test_family_committed_recovery_postgres.py
+trading/tests/test_family_durable_projection_postgres.py
+trading/tests/test_postgres_ledger_isolation.py
+trading/tests/test_paper_contract_valuation.py
+trading/tests/test_lifecycle_private_governance.py

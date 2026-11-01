@@ -171,6 +171,23 @@ class PositionRiskEnvelope:
         return canonical_hash(self.body())
 
 
+@dataclass(frozen=True)
+class NativeFamilyRiskEnvelope(PositionRiskEnvelope):
+    """Per-leg native stop risk; no aggregate stop certifies protection."""
+    native_membership_ref: str = ""
+    leg_protections: tuple = ()
+    native_risk_known: bool = False
+
+    @property
+    def risk_is_known(self) -> bool:
+        return self.native_risk_known
+
+    def body(self):
+        return {**super().body(), "native_membership_ref": self.native_membership_ref,
+                "leg_protections": list(self.leg_protections),
+                "envelope_version": "native-family-risk-envelope/1"}
+
+
 class EnvelopeCalculator:
     """Computes envelopes, and decides what banked profit is allowed to mean."""
 
@@ -242,6 +259,40 @@ class EnvelopeCalculator:
                 EventKind.POSITION_RISK_ENVELOPE, self._producer, env.body(),
                 event_time_ms=now_ms, received_time_ms=now_ms,
                 correlation_id=family.family_id))
+        return env
+
+    def compute_native(self, family, snapshot, *, mark, value_per_price_unit, equity, now_ms):
+        """Keep family economics, but sum the actual independent native risks."""
+        if (snapshot.family_id != family.family_id or snapshot.account_alias != family.account_alias
+                or snapshot.symbol != family.symbol or snapshot.direction != family.direction.value):
+            raise ValueError("native family risk scope differs from original family")
+        mark, vpu = dec(mark), dec(value_per_price_unit)
+        known = snapshot.known and snapshot.remaining_exact == family.accounting()[0]
+        risk = Fraction(0); protections = []
+        for leg in snapshot.legs:
+            active = leg.remaining is None or leg.remaining > ZERO
+            confirmed = not active or (leg.protection_confirmed and leg.stop is not None)
+            known = known and confirmed
+            protections.append({"position_id": leg.position_id, "trade_intent_id": leg.trade_intent_id,
+                "remaining": None if leg.remaining is None else str(leg.remaining),
+                "stop": None if leg.stop is None else str(leg.stop), "confirmed": confirmed,
+                "source_refs": list(leg.source_refs)})
+            if active and leg.remaining is not None and leg.stop is not None:
+                distance = (fraction(mark)-fraction(leg.stop) if family.direction is Direction.LONG
+                            else fraction(leg.stop)-fraction(mark))
+                risk += max(Fraction(0), distance) * fraction(leg.remaining) * fraction(vpu)
+        env = NativeFamilyRiskEnvelope(family_id=family.family_id, account_alias=family.account_alias,
+            symbol=family.symbol, net_quantity=family.net_quantity, average_entry=family.average_entry,
+            current_stop=None, mark=mark, value_per_price_unit=vpu, open_risk_money=decimal(risk),
+            realised_money=decimal(family.accounting()[3]*fraction(vpu)),
+            unrealised_money=decimal(family.unrealised_exact(mark)*fraction(vpu)),
+            protected_profit_credit=ZERO, haircut_reason=(HaircutReason.NO_CERTIFICATE if known
+                else HaircutReason.STOP_UNKNOWN), equity=dec(equity), assessed_ms=now_ms,
+            _credit_exact=Fraction(0),native_membership_ref=snapshot.digest,
+            leg_protections=tuple(protections), native_risk_known=bool(known))
+        if self._ledger is not None:
+            self._ledger.append(make_event(EventKind.POSITION_RISK_ENVELOPE,self._producer,env.body(),
+                event_time_ms=now_ms,received_time_ms=now_ms,correlation_id=family.family_id))
         return env
 
     def portfolio_worst_case(self, envelopes: list[PositionRiskEnvelope]) -> dict[str, Any]:

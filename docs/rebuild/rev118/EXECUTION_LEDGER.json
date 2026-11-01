@@ -566,16 +566,16 @@
         }
       ]
     },
-    "updated_utc": "2026-11-01T03:40:30.918282+00:00",
+    "updated_utc": "2026-11-01T06:04:08.214630+00:00",
     "branch": "ccr-9e07e1af-8mgz1p",
-    "head": "d43bd396765204a4843cdb7485535e9fcd7af3ce",
-    "published_head": "d43bd396765204a4843cdb7485535e9fcd7af3ce",
-    "committed_ledger_verification": "Family/session required4fd466baseline committed GREEN207 terminal0 before normalpush; independent gitlsremote and connectedPR105 exactheadmatch.",
-    "current_packet": "OWNER_CONTRACT_CITATION_REFRESH",
-    "active_packet": "The exact d43 hosted backend source run failed one endpoint-registry assertion (5,897 passed, seven declared skips); its required coverage step also failed. The session helper inserted 50 app.py lines and shifted derived route citations. The prior packet missed the owner/frontend registry dependency in its final guards. The exact local case reproduced the failure. Canonical regeneration changes only source/source_ref line citations, generation hashes and the rendered registry input hashes; routes, schemas, authentication, roles, actions and test assertions are unchanged. All 484 endpoints, 378 schemas, 42 feature groups, 105 functions and 78 surfaces retain their exact identities. Earlier 479/369 checkpoint figures were stale, not removal targets. The affected registry/preimage selection passes 29 cases with zero skips or storage violations; owner and frontend regeneration checks report no drift. The intermediate sparse-checkout fixture failure and original hosted/local failures remain failed in the raw evidence. No full backend suite was rerun locally for this derived-only correction.",
+    "head": "2728a83ce203fec867dc536c8d4341c2ce4415cb",
+    "published_head": "2728a83ce203fec867dc536c8d4341c2ce4415cb",
+    "committed_ledger_verification": "Published2728 GREEN209 terminal0 before normalpush. Current combined candidate genuinehook/committed4fd466baselineverify still required before normalpush.",
+    "current_packet": "ORIGINAL_NATIVE_FAMILY_AND_DEVICE_REENROLLMENT_SOURCE",
+    "active_packet": "Reviewed complete same-direction SOURCE family caller/journal/protection/recovery/one-outcome workflow and existingLAC348 backend replacement recovery.167combinedboundarypass;336affectedpass1declaredPGskip and55actualPGpass0skip overlap; backend229beforefinalmigrationrepair plus34final. All3independent family counterexamples closed,13backend+37familyexactpins integrated; no native/device/unit acceptance.",
     "current_background_jobs": [],
     "agent_assignments_ref": "delegation.active_assignments",
-    "next_action": "Genuinehook/requiredbaselinecommittedverify/normalpush/independentreadback/exactCI; then resume saved full multiposition source workflow, with no helper-only publication.",
+    "next_action": "Genuinehook/required4fd466baselinecommittedverifyterminal0/normalpush/remotereadback/exactheadhostedCI. After reviewedpublishedbase dispatch existingBE002/LAC210 exactconsentinspection/recoverablescopedrevoke; no unchosen financial policy or installer-uncovered edit.",
     "acceptance_issued": false,
     "continuation_history": [
       {
@@ -647,7 +647,7 @@
         "captured_at_utc": "2026-11-01T02:38:52.492703+00:00"
       }
     ],
-    "current_source_receipt": "receipts/OWNER_CONTRACT_CITATION_REFRESH_20261101.json",
+    "current_source_receipt": "docs/rebuild/rev118/receipts/ORIGINAL_NATIVE_FAMILY_AND_REENROLLMENT_SOURCE_20261101.json",
     "history_20261101": [
       {
         "updated_utc": "2026-11-01T02:38:52.492703+00:00",
@@ -740,6 +740,20 @@
           }
         ],
         "current_source_receipt": "receipts/SESSION_MUTATION_ANCHOR_RECONCILIATION_20261101.json"
+      },
+      {
+        "updated_utc": "2026-11-01T03:40:30.918282+00:00",
+        "branch": "ccr-9e07e1af-8mgz1p",
+        "head": "d43bd396765204a4843cdb7485535e9fcd7af3ce",
+        "published_head": "d43bd396765204a4843cdb7485535e9fcd7af3ce",
+        "committed_ledger_verification": "Family/session required4fd466baseline committed GREEN207 terminal0 before normalpush; independent gitlsremote and connectedPR105 exactheadmatch.",
+        "current_packet": "OWNER_CONTRACT_CITATION_REFRESH",
+        "active_packet": "The exact d43 hosted backend source run failed one endpoint-registry assertion (5,897 passed, seven declared skips); its required coverage step also failed. The session helper inserted 50 app.py lines and shifted derived route citations. The prior packet missed the owner/frontend registry dependency in its final guards. The exact local case reproduced the failure. Canonical regeneration changes only source/source_ref line citations, generation hashes and the rendered registry input hashes; routes, schemas, authentication, roles, actions and test assertions are unchanged. All 484 endpoints, 378 schemas, 42 feature groups, 105 functions and 78 surfaces retain their exact identities. Earlier 479/369 checkpoint figures were stale, not removal targets. The affected registry/preimage selection passes 29 cases with zero skips or storage violations; owner and frontend regeneration checks report no drift. The intermediate sparse-checkout fixture failure and original hosted/local failures remain failed in the raw evidence. No full backend suite was rerun locally for this derived-only correction.",
+        "current_background_jobs": [],
+        "agent_assignments_ref": "delegation.active_assignments",
+        "next_action": "Genuinehook/requiredbaselinecommittedverify/normalpush/independentreadback/exactCI; then resume saved full multiposition source workflow, with no helper-only publication.",
+        "acceptance_issued": false,
+        "current_source_receipt": "receipts/OWNER_CONTRACT_CITATION_REFRESH_20261101.json"
       }
     ]
   },
@@ -825,6 +839,13 @@
       "receipt": "docs/rebuild/rev118/receipts/OWNER_CONTRACT_CITATION_REFRESH_20261101.json",
       "summary": "The exact d43 hosted backend source run failed one endpoint-registry assertion (5,897 passed, seven declared skips); its required coverage step also failed. The session helper inserted 50 app.py lines and shifted derived route citations. The prior packet missed the owner/frontend registry dependency in its final guards. The exact local case reproduced the failure. Canonical regeneration changes only source/source_ref line citations, generation hashes and the rendered registry input hashes; routes, schemas, authentication, roles, actions and test assertions are unchanged. All 484 endpoints, 378 schemas, 42 feature groups, 105 functions and 78 surfaces retain their exact identities. Earlier 479/369 checkpoint figures were stale, not removal targets. The affected registry/preimage selection passes 29 cases with zero skips or storage violations; owner and frontend regeneration checks report no drift. The intermediate sparse-checkout fixture failure and original hosted/local failures remain failed in the raw evidence. No full backend suite was rerun locally for this derived-only correction.",
       "source_acceptance_only": true
+    },
+    {
+      "at_utc": "2026-11-01T06:04:08.214630+00:00",
+      "packet": "ORIGINAL_NATIVE_FAMILY_AND_DEVICE_REENROLLMENT_SOURCE",
+      "status": "SOURCE_TESTED_INTEGRATION_PREPARED_NOT_NATIVE_ACCEPTANCE",
+      "receipt": "docs/rebuild/rev118/receipts/ORIGINAL_NATIVE_FAMILY_AND_REENROLLMENT_SOURCE_20261101.json",
+      "formal_acceptance_issued": false
     }
   ],
   "obligations": "obligations/OBLIGATIONS.json: preserved observations with source implementation evidence and explicit remaining native/unit obligations.",
@@ -878,8 +899,8 @@
       "evidence": "ci/MUTATION_CORPUS_c2a27848.json"
     }
   ],
-  "current_action": "Genuinehook/requiredbaselinecommittedverify/normalpush/independentreadback/exactCI; then resume saved full multiposition source workflow, with no helper-only publication.",
-  "updated_at_utc": "2026-11-01T03:40:30.918282+00:00",
+  "current_action": "Genuinehook/required4fd466baselinecommittedverifyterminal0/normalpush/remotereadback/exactheadhostedCI. After reviewedpublishedbase dispatch existingBE002/LAC210 exactconsentinspection/recoverablescopedrevoke; no unchosen financial policy or installer-uncovered edit.",
+  "updated_at_utc": "2026-11-01T06:04:08.214630+00:00",
   "execution_method": {
     "path": "BUILD_EXECUTION_PLAN.md",
     "scope_index": "SOURCE_WORKMAP.json",

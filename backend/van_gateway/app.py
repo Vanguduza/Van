@@ -17,7 +17,7 @@ from pathlib import Path
 
 from fastapi import FastAPI, Header, HTTPException, Request
 from fastapi.responses import JSONResponse, PlainTextResponse, RedirectResponse
-from pydantic import BaseModel, Field, StrictBool, ValidationError
+from pydantic import BaseModel, ConfigDict, Field, StrictBool, ValidationError
 
 from van_gateway.action.service import ActionPolicyError
 from van_gateway.artemis.console import ArtemisConsoleProxy
@@ -472,7 +472,12 @@ class ProvisioningStatusBody(BaseModel):
     bootstrap_token: str = Field(min_length=32, max_length=256)
 
 class RebindBody(BaseModel):
-    reason: str
+    model_config = ConfigDict(extra="forbid")
+    reason: str = Field(min_length=1, max_length=1000)
+    operation_id: str | None = Field(default=None, min_length=16, max_length=128)
+    expected_binding_id: str | None = None
+    expected_bound_at_ms: int | None = Field(default=None, strict=True, ge=0)
+    gateway_url: str | None = None
 
 
 def _read_stream_signing_key(path: str) -> str:
@@ -1156,13 +1161,15 @@ def create_app() -> FastAPI:
         speech_cleanup = asyncio.create_task(expire_speech_text())
         recovery_dispatch = asyncio.create_task(runtime_recovery_dispatcher.run())
         revocation_dispatch = asyncio.create_task(native_owner_revocations.run())
+        reenrollment_dispatch = asyncio.create_task(owner_device_reenrollment.run())
         try:
             yield
         finally:
             speech_cleanup.cancel()
             recovery_dispatch.cancel()
             revocation_dispatch.cancel()
-            await asyncio.gather(speech_cleanup, recovery_dispatch, revocation_dispatch, return_exceptions=True)
+            reenrollment_dispatch.cancel()
+            await asyncio.gather(speech_cleanup, recovery_dispatch, revocation_dispatch, reenrollment_dispatch, return_exceptions=True)
             speech_streams.clear()
             await dial_dev_attention.stop()
             await scheduler.stop()
@@ -1678,6 +1685,11 @@ def create_app() -> FastAPI:
         ),
         kid=settings.connectivity_signing_kid,
     )
+    from van_gateway.auth.reenrollment import OwnerDeviceReenrollment
+    owner_device_reenrollment = OwnerDeviceReenrollment(store=store, auth=auth,
+        native_revocations=native_owner_revocations, device_ca=lambda: app.state.device_ca,
+        connectivity=connectivity_config)
+    app.state.owner_device_reenrollment = owner_device_reenrollment
     app.state.owner_device_bindings = owner_device_bindings
     app.state.connectivity_config = connectivity_config
     app.state.van_sessions = van_sessions
@@ -1774,6 +1786,8 @@ def create_app() -> FastAPI:
         if method == "POST" and path in {"/v1/devices/enroll", "/v1/devices/pairing-ticket"}:
             # The scope that can mint owner-device authority, and the reason this module
             # exists. Not granted to the legacy token.
+            return ControlScope.DEVICE_ENROLMENT
+        if method == "GET" and re.fullmatch(r"/v1/devices/rebindings/[^/]+", path):
             return ControlScope.DEVICE_ENROLMENT
         if method == "GET" and re.fullmatch(r"/v1/devices/[^/]+/revocations/[^/]+", path):
             return ControlScope.DEVICE_ENROLMENT
@@ -2213,6 +2227,21 @@ def create_app() -> FastAPI:
                 except (ValueError, binascii.Error) as exc:
                     raise DeviceBindingError("device_proof_malformed") from exc
                 raw_body = await request.body()
+                # Original pairing recovery retains its 409 unavailable outcome when
+                # paired authority was retired. Verify the archived exact proof solely
+                # to report that refusal; it cannot authorize enrollment or renewal.
+                retired = await store.fetchone("SELECT revoked_at_unix FROM devices WHERE device_id=?", (body.device_id,))
+                if body.device_access_token is not None and retired is not None and retired["revoked_at_unix"] is not None:
+                    archived = await binding_service.for_device(body.device_id)
+                    if archived is not None:
+                        from van_gateway.auth.device_proof import verify_request_proof, DeviceProofError
+                        try:
+                            verify_request_proof(public_key_pem=archived.public_key_pem, signature=signature,
+                                method="POST", path="/v1/devices/pair", device_id=body.device_id,
+                                issued_at_ms=issued_at_ms, body=raw_body)
+                        except DeviceProofError as exc:
+                            raise DeviceBindingError(exc.reason) from exc
+                        raise AuthError("pairing_recovery_unavailable", "Original pairing credentials are no longer active")
                 binding = await binding_service.require_proof(
                     device_id=body.device_id, signature=signature, method="POST",
                     path="/v1/devices/pair", issued_at_ms=issued_at_ms, body=raw_body,
@@ -2302,9 +2331,21 @@ def create_app() -> FastAPI:
             native_revocation = await auth.revoke(device_id)
         except AuthError as exc:
             raise HTTPException(status_code=404, detail=exc.message) from exc
-        revoked_executions = await owner_runtime.actions.revoke_privileged_for_device(f"device:{device_id}")
-        device_ca = getattr(app.state, "device_ca", None)
-        revoked_certificates = device_ca.revoke_device(device_id) if device_ca is not None else 0
+        await owner_runtime.actions.revoke_privileged_for_device(f"device:{device_id}")
+        retirement = await store.fetchone("SELECT actions_retired FROM device_certificate_retirements WHERE device_id=?", (device_id,))
+        revoked_executions = retirement["actions_retired"] if retirement else 0
+        revoked_certificates = 0
+        certificate_retirement_phase = "PENDING"
+        try:
+            revoked_certificates = await owner_device_reenrollment.retire_certificates(device_id) or 0
+            certificate_receipt = await store.fetchone(
+                "SELECT certificates_retired_at_ms FROM device_certificate_retirements WHERE device_id=?", (device_id,))
+            if certificate_receipt is not None and certificate_receipt["certificates_retired_at_ms"] is not None:
+                certificate_retirement_phase = "APPLIED"
+        except Exception:
+            # Local CA/file/marker failure cannot delay independent native retirement.
+            certificate_retirement_phase = "UNKNOWN"
+            logging.getLogger("van.device-retirement").warning("original device certificate retirement remains pending")
         try:
             native_revocation = await native_owner_revocations.reconcile_operation(native_revocation['operation_id'])
         except (OSError, ValueError, TypeError):
@@ -2314,6 +2355,7 @@ def create_app() -> FastAPI:
             "device_id": device_id,
             "revoked_privileged_executions": revoked_executions,
             "revoked_client_certificates": revoked_certificates,
+            "certificate_retirement_phase": certificate_retirement_phase,
             "native_authority_revocation": native_revocation,
         }
 
@@ -2341,7 +2383,15 @@ def create_app() -> FastAPI:
         if not isinstance(csr_pem, str) or len(csr_pem) > 8192:
             raise HTTPException(status_code=400, detail="csr_invalid")
         try:
-            issued = device_ca.issue_client(csr_pem, device_id, days=settings.mtls_client_cert_days)
+            # The SQL writer fences a proof checked before retirement from issuing a
+            # certificate after the CA outbox has independently completed its readback.
+            async with store.connection() as db:
+                await db.execute("BEGIN IMMEDIATE")
+                live = await (await db.execute("SELECT revoked_at_unix FROM devices WHERE device_id=?", (device_id,))).fetchone()
+                if live is None or live["revoked_at_unix"] is not None:
+                    raise HTTPException(403, "device_revoked")
+                issued = device_ca.issue_client(csr_pem, device_id, days=settings.mtls_client_cert_days)
+                await db.commit()
         except PkiError as exc:
             raise HTTPException(status_code=400, detail=exc.code) from exc
         return {
@@ -2387,7 +2437,10 @@ def create_app() -> FastAPI:
     @app.post("/v1/devices/bootstrap/create")
     async def create_bootstrap(body: BootstrapCreateBody):
         """ADR-RB-026 — the installer's one-time credential, for the deployment pipeline."""
-        token, challenge = await _require_binding_service().create_bootstrap_token(note=body.note)
+        try:
+            token, challenge = await _require_binding_service().create_bootstrap_token(note=body.note)
+        except DeviceBindingError as exc:
+            raise HTTPException(409, exc.reason) from exc
         await audit.record(
             result="ok", capability="device.bootstrap.create", after={"note": body.note}
         )
@@ -2418,9 +2471,12 @@ def create_app() -> FastAPI:
             validated_gateway_url = validate_gateway_url(body.gateway_url)
         except ConnectivityError as exc:
             raise HTTPException(status_code=400, detail=exc.reason) from exc
-        token, challenge = await _require_binding_service().create_bootstrap_token(
-            note=body.note, ttl_ms=PROVISIONING_TTL_MS,
-        )
+        try:
+            token, challenge = await _require_binding_service().create_bootstrap_token(
+                note=body.note, ttl_ms=PROVISIONING_TTL_MS,
+            )
+        except DeviceBindingError as exc:
+            raise HTTPException(409, exc.reason) from exc
         # Both credentials, minted together, because provisioning is one act. A device
         # that paired but did not bind would hold working tokens and no hardware identity,
         # which is §0D.3's failure exactly: an APK copied to another handset would work.
@@ -2610,18 +2666,42 @@ def create_app() -> FastAPI:
             "last_proof_at_ms": binding.last_proof_at_ms,
         }
 
-    @app.post("/v1/devices/rebind")
-    async def rebind_owner_device(body: RebindBody):
-        """§0D.3's recovery path: revoke the current binding and issue one enrolment token.
+    def _rebind_error(exc):
+        status = 404 if exc.reason == "rebind_operation_unknown" else 409
+        if exc.reason in {"connectivity_signing_unconfigured", "device_secret_encryption_unconfigured", "rebind_original_response_unavailable"}:
+            status = 503
+        return HTTPException(status_code=status, detail=exc.reason)
 
-        Administrative on purpose. A device that could rebind on its own behalf would be a
-        way to become the owner's phone by asserting that it is.
-        """
-        token, challenge = await _require_binding_service().rebind_token(reason=body.reason)
-        await audit.record(
-            result="ok", capability="device.rebind", after={"reason": body.reason}
-        )
-        return {"bootstrap_token": token, "attestation_challenge": challenge}
+    @app.post("/v1/devices/rebind")
+    async def rebind_owner_device(body: RebindBody, x_van_internal_token: str | None = Header(default=None)):
+        """Recover one exact replacement intent under the dedicated installer scope."""
+        require_internal_control(x_van_internal_token, ControlScope.DEVICE_ENROLMENT)
+        _require_binding_service()
+        try:
+            result = await owner_device_reenrollment.start(
+                operator_id=hashlib.sha256(x_van_internal_token.encode()).hexdigest(),
+                reason=body.reason, operation_id=body.operation_id,
+                expected_binding_id=body.expected_binding_id, expected_bound_at_ms=body.expected_bound_at_ms,
+                gateway_url=body.gateway_url)
+        except DeviceBindingError as exc:
+            raise _rebind_error(exc) from exc
+        except AuthError as exc:
+            raise HTTPException(503, exc.code) from exc
+        except ConnectivityError as exc:
+            raise HTTPException(400, exc.reason) from exc
+        return JSONResponse(result, headers={"Cache-Control": "no-store"})
+
+    @app.get("/v1/devices/rebindings/{operation_id}")
+    async def original_device_rebinding(operation_id: str, x_van_internal_token: str | None = Header(default=None)):
+        require_internal_control(x_van_internal_token, ControlScope.DEVICE_ENROLMENT)
+        try:
+            result = await owner_device_reenrollment.recover(operation_id=operation_id,
+                operator_id=hashlib.sha256(x_van_internal_token.encode()).hexdigest(), reconcile=False)
+        except DeviceBindingError as exc:
+            raise _rebind_error(exc) from exc
+        except AuthError as exc:
+            raise HTTPException(503, exc.code) from exc
+        return JSONResponse(result, headers={"Cache-Control": "no-store"})
 
     @app.get("/v1/connectivity/manifest")
     async def connectivity_manifest(request: Request, known_version: int = 0):

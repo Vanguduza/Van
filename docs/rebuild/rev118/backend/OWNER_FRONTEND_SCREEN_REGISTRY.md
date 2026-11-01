@@ -1,6 +1,6 @@
 # VAN current frontend screen and feature registry
 
-Current source inventory: **42 features, 105 source functions, 78 screens/hosted surfaces, 484 endpoint declarations and 378 schemas**.
+Current source inventory: **42 features, 105 source functions, 78 screens/hosted surfaces, 485 endpoint declarations and 378 schemas**.
 
 This generated document renders the current source contracts, including gaps and unverified states. It does not declare features complete, qualify live services or authorize a redesigned frontend. No new frontend/prototype before BG-001. Current source features are distinct from the frozen Rev1.18 programme of **93 planned features, 349 owner actions, 324 requirements, 1,610 acceptance identities and 131 units**. The complete planned scope remains in [the frozen package](../../../review-inputs/van-rev115/package/) and its [backend consumption contract](../../../review-inputs/van-rev115/package/contracts/BACKEND_TO_FRONTEND_CONSUMPTION_CONTRACT.md).
 
@@ -14,10 +14,10 @@ Owner-access endpoints and service dependencies are listed separately below. An 
 
 | Registry | SHA-256 |
 | --- | --- |
-| [owner_features.json](../../../../registries/owner_features.json) | `6810bad6b131deb30bea2460fdfb78a932936137069fdf1fea1bdba52af2ae0c` |
-| [owner_screens.json](../../../../registries/owner_screens.json) | `445f747bcfbe3a2a1cbf82005c44a697c98da2bae943f62670dec3d10ffbadc8` |
-| [owner_endpoints.json](../../../../registries/owner_endpoints.json) | `5365b2e8f45399c86bf6cdd8c07e3d0da49f0af1d00753ca7a3a968c03949e40` |
-| [owner_endpoint_schemas.json](../../../../registries/owner_endpoint_schemas.json) | `6819288c0d2db8c552fe4914edbc7aa553b4b0e869eb98eef4e6700ff3a8b83d` |
+| [owner_features.json](../../../../registries/owner_features.json) | `a8393d5789001360ab99cb73fb48bd5b122522eff703b0a532a9477396d04b51` |
+| [owner_screens.json](../../../../registries/owner_screens.json) | `d96e1377ac8e76b7588a02595d5867dce7e4b238fa7f34c2d211ddda729cca05` |
+| [owner_endpoints.json](../../../../registries/owner_endpoints.json) | `c16b25754613c9b26832a5911b3cd9448e729a01e750686da526052b6bf1b760` |
+| [owner_endpoint_schemas.json](../../../../registries/owner_endpoint_schemas.json) | `cc7d42b39c7c9ffad6fc7f5b1e1c5f69fc31e918cbdcd5e85ca260012ecf86f6` |
 
 Regenerate with `python3 tools/rebuild/render_frontend_registry.py --apply`; verify with `--check`.
 
@@ -3291,6 +3291,12 @@ Wiring: `SOURCE_WIRED_REQUIRES_ACCEPTANCE`; frontend integration: `AUTOMATIC_REA
 | POST | /v1/device-binding/certify | DIRECT_OWNER_ROUTE / INGRESS_BEARER_AND_PAIRED_DEVICE | VanGatewayClient.ensureCertifiedIdentity |
 | POST | /v1/devices/provisioning-status | HERMES_SERVICE_ONLY / INTERNAL_CONTROL:device_enrolment | .UNWIRED |
 
+**Backend/client extensions — consumer status is explicit**
+
+| Method / path | Client | Status | Scope |
+| --- | --- | --- | --- |
+| GET /v1/devices/rebindings/{operation_id} | .UNWIRED | CANDIDATE_BACKEND_SOURCE_TESTED_INSTALLER_PATH_AUTHORIZATION_PENDING | Dedicated DEVICE_ENROLMENT operator reads the exact original replacement operation, protected response and original deadline; no new retirement, credential mint, expiry extension, owner action or Android consumer is inferred. |
+
 **Service dependencies (not Android owner access)**
 
 - VE-4af2782b0c0a
@@ -6153,6 +6159,12 @@ Wiring: `SOURCE_WIRED_REQUIRES_ACCEPTANCE`; integration: `PARTIAL_OWNER_SURFACE`
 | POST | /v1/devices/bootstrap/recover | DIRECT_OWNER_ROUTE / CONSUMED_BOOTSTRAP_TOKEN_AND_EXACT_ACTIVE_DEVICE_PROOF | VanGatewayClient.recoverBootstrap |
 | POST | /v1/device-binding/certify | DIRECT_OWNER_ROUTE / INGRESS_BEARER_AND_PAIRED_DEVICE | VanGatewayClient.ensureCertifiedIdentity |
 | POST | /v1/devices/provisioning-status | HERMES_SERVICE_ONLY / INTERNAL_CONTROL:device_enrolment | .UNWIRED |
+
+**Backend/client extensions — consumer status is explicit**
+
+| Method / path | Client | Status | Scope |
+| --- | --- | --- | --- |
+| GET /v1/devices/rebindings/{operation_id} | .UNWIRED | CANDIDATE_BACKEND_SOURCE_TESTED_INSTALLER_PATH_AUTHORIZATION_PENDING | Dedicated DEVICE_ENROLMENT operator reads the exact original replacement operation, protected response and original deadline; no new retirement, credential mint, expiry extension, owner action or Android consumer is inferred. |
 
 **Service dependencies (not Android owner access)**
 

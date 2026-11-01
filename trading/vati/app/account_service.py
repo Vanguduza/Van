@@ -189,10 +189,13 @@ class AccountCoordinatorService:
         self.authority = RiskAuthority(mandate)
         self.contracts = {spec.symbol: contract_from_dict({**spec.contract, "venue": account.router_venue})
                           for spec in self.specs.values()}
-        self.adapter = self.adapter or build_adapter(account, registry, symbol_contracts=self.contracts)
+        self.adapter = self.adapter or build_adapter(account, registry, symbol_contracts=self.contracts, paper_close_contracts=c.paper_close_contracts)
         from vati.execution.paper import PaperAdapter
         if isinstance(self.adapter, PaperAdapter):
             self.adapter.bind_contracts(self.contracts)
+            if c.paper_close_contracts:
+                from vati.app.service import paper_close_contracts_from_config
+                self.adapter.bind_close_contracts(paper_close_contracts_from_config(c.paper_close_contracts))
         self._ledger = open_ledger(c.ledger)
         from vati.cognition.fabric import TriAnalystPlane
         self.tri_analyst = TriAnalystPlane(self._ledger, account_alias=c.account_alias,
@@ -378,6 +381,13 @@ class AccountCoordinatorService:
         if self.learning.recovery_issue:
             self.kill.trip(KillSwitchTrigger.RECONCILIATION_FAILURE, self.clock())
         self.news = self._build_news(events)
+        from vati.risk.operational_grant import OperationalOptimizationGrants, qualification_reader
+        from vati.authority import OwnerAuthorityVerifier
+        lifecycle_grants = OperationalOptimizationGrants(self._ledger,
+            owner_authority=OwnerAuthorityVerifier(
+                registry_path=getattr(c,"owner_authority_keys", "") or None),
+            qualification_authority=qualification_reader(getattr(c,"lifecycle_policy_qualification_keys", "")),
+            clock=self.clock)
         self.lifecycle = AccountTradeLifecycle(
             ledger=self._ledger,
             adapter=self.adapter,
@@ -400,6 +410,10 @@ class AccountCoordinatorService:
             # `ExecutionRouter` — never a second execution path.
             authority=self.authority,
             mandate=mandate,
+            mandate_input=c.mandate,
+            operational_grants=lifecycle_grants,
+            family_policy_grant_id=getattr(c,"lifecycle_policy_grant_id", "") or None,
+            runtime_lease=self.lease,
             news=self.news,
             execute_add_fn=self._execute_delta,
             market_state_fn=lambda symbol: (

@@ -13,13 +13,60 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from decimal import Decimal
+from fractions import Fraction
 from typing import ClassVar, Optional
 
 from vati.execution.base import AccountState, ExecutionReceipt, Health, OrderCommand, StopMode, VenuePosition
 from vati.risk.contracts import Direction, LossModel, SymbolContract
+from vati.core.canonical import canonical_hash
 
 ZERO = Decimal("0")
 DAY_MS = 86_400_000
+
+
+@dataclass(frozen=True)
+class PaperCloseContract:
+    """Explicit simulator close grid, independently configured from entry limits.
+
+    No default native quantum is invented for legacy continuous-Decimal paper
+    positions. Binding this contract changes the simulator's actual partial
+    close acceptance, so the capture below reports an owner-enforced capability.
+    It is paper provenance, never native-provider qualification.
+    """
+    quantity_quantum: Decimal
+    partial_min: Decimal = ZERO
+    partial_max: Optional[Decimal] = None
+    minimum_remaining: Decimal = ZERO
+    revision: str = "paper-close/1"
+
+    def __post_init__(self):
+        for value in (self.quantity_quantum, self.partial_min, self.minimum_remaining):
+            if not isinstance(value, Decimal) or not value.is_finite() or value < ZERO:
+                raise ValueError("paper close constraint must be finite and nonnegative")
+        if self.quantity_quantum <= ZERO or not self.revision:
+            raise ValueError("paper close quantum and revision are required")
+        if self.partial_max is not None and (not isinstance(self.partial_max, Decimal)
+                or not self.partial_max.is_finite() or self.partial_max <= ZERO
+                or self.partial_max < self.partial_min):
+            raise ValueError("paper partial close maximum is invalid")
+
+    def body(self):
+        return {"schema": self.revision, "quantity_quantum": str(self.quantity_quantum),
+                "partial_min": str(self.partial_min),
+                "partial_max": None if self.partial_max is None else str(self.partial_max),
+                "minimum_remaining": str(self.minimum_remaining),
+                "full_close_odd_lot": True, "provider_qualified": False,
+                "environment": "PAPER", "authority_effect": "NONE"}
+
+    @property
+    def digest(self):
+        return canonical_hash(self.body())
+
+    def permits_partial(self, quantity, remaining):
+        q, rest, step = Fraction(quantity), Fraction(remaining), Fraction(self.quantity_quantum)
+        return (q > 0 and q < rest and q % step == 0 and q >= Fraction(self.partial_min)
+                and (self.partial_max is None or q <= Fraction(self.partial_max))
+                and rest - q >= Fraction(self.minimum_remaining))
 
 
 @dataclass
@@ -42,11 +89,57 @@ class PaperAdapter:
     pending: dict[str, dict] = field(default_factory=dict)
     symbol_contracts: Optional[dict[str, SymbolContract]] = None
     _contract_values: Optional[dict[str, tuple[LossModel, Decimal]]] = field(default=None, init=False, repr=False)
+    close_contracts: Optional[dict[str, PaperCloseContract]] = None
+    _close_contracts: dict[str, PaperCloseContract] = field(default_factory=dict, init=False, repr=False)
     supported_entry_types: ClassVar[tuple] = ("MARKET", "LIMIT", "PASSIVE_LIMIT", "STOP")
 
     def __post_init__(self) -> None:
+        if self.close_contracts is not None:
+            self.bind_close_contracts(self.close_contracts)
         if self.symbol_contracts is not None:
             self.bind_contracts(self.symbol_contracts)
+
+    def bind_close_contracts(self, contracts: dict[str, PaperCloseContract]) -> None:
+        owned = {}
+        for symbol, contract in contracts.items():
+            if not isinstance(symbol, str) or not symbol or not isinstance(contract, PaperCloseContract):
+                raise ValueError("paper native close contract identity is invalid")
+            key = symbol.upper()
+            if key in owned:
+                raise ValueError("paper native close contract symbol is ambiguous")
+            owned[key] = contract
+        for position in self._positions.values():
+            if owned.get(position["symbol"].upper()) != position.get("close_contract"):
+                raise ValueError("paper close contract cannot change an original open position")
+        for pending in self.pending.values():
+            symbol = pending["cmd"].symbol.upper()
+            if owned.get(symbol) != self._close_contracts.get(symbol):
+                raise ValueError("paper close contract cannot change an original pending order")
+        self._close_contracts = owned
+        self.close_contracts = dict(owned)
+
+    def close_capability_capture(self, position_id: str) -> dict | None:
+        """Read this adapter's actual pinned close contract; never an input grant."""
+        position = self._positions.get(position_id)
+        if position is None or self.inject_disconnect:
+            return None
+        contract = position.get("close_contract")
+        descriptor = (contract.body() if contract is not None else
+                      {"schema": "paper-continuous-close/1", "quantity_quantum": None,
+                       "partial_min": "0", "partial_max": None, "minimum_remaining": "0",
+                       "full_close_odd_lot": True, "provider_qualified": False,
+                       "environment": "PAPER", "authority_effect": "NONE"})
+        scope = {"account_alias": self.account_alias, "venue": self.venue,
+                 "position_id": position_id, "symbol": position["symbol"],
+                 "trade_intent_id": position["intent"]}
+        body = {"schema": "paper-native-close-capture/1", "scope": scope,
+                "risk": {"loss_model": position["loss_model"].value,
+                         "value_per_price_unit_per_lot": str(position["vppu"]),
+                         "account_currency": self.currency},
+                "contract": descriptor, "contract_ref": canonical_hash(descriptor),
+                "partial_allowed": contract is not None, "full_close_allowed": True,
+                "provider_qualified": False, "authority_effect": "NONE"}
+        return {**body, "evidence_ref": canonical_hash(body)}
 
     def bind_contracts(self, contracts: dict[str, SymbolContract]) -> None:
         """Pin simulated money units before entry; never rescale an open lot."""
@@ -149,7 +242,8 @@ class PaperAdapter:
                                 "stop": cmd.protective_stop if stop_ok and cmd.stop_mode is StopMode.VENUE else None,
                                 "intent": cmd.trade_intent_id, "loss_model": cmd.loss_model,
                                 "vppu": self._contract_values[cmd.symbol.upper()][1] if self._contract_values is not None else self.value_per_price_unit_per_lot if cmd.loss_model is LossModel.STOP_DISTANCE else Decimal(1),
-                                "targets": cmd.targets, "opened_ms": now_ms}
+                                "targets": cmd.targets, "opened_ms": now_ms,
+                                "close_contract": self._close_contracts.get(cmd.symbol.upper())}
         if not reason:
             self.last_price[cmd.symbol] = cmd.entry_price
         return ExecutionReceipt(cmd.trade_intent_id, cmd.decision_hash, self.venue, "FILLED", cmd.quantity, fill, cmd.entry_price, cmd.entry_price, cmd.entry_price,
@@ -199,6 +293,12 @@ class PaperAdapter:
         p = self._positions[position_id]
         if quantity is not None and (not isinstance(quantity, Decimal) or not quantity.is_finite() or quantity <= ZERO):
             raise ValueError("paper close quantity must be finite and positive")
+        contract = p.get("close_contract")
+        if (quantity is not None and quantity < p["qty"] and contract is not None
+                and not contract.permits_partial(quantity, p["qty"])):
+            return ExecutionReceipt(p["intent"], "", self.venue, "REJECTED", ZERO, None,
+                ZERO, ZERO, ZERO, False, now_ms, now_ms, broker_position_id=position_id,
+                reject_reason="paper native partial-close constraints refused the exact target").sealed()
         qty = p["qty"] if quantity is None else min(quantity, p["qty"])
         px = self.last_price.get(p["symbol"], p["entry"])
         half = self.spread / 2

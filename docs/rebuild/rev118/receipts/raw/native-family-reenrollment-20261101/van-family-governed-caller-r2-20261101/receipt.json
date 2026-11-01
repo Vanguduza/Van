@@ -1,0 +1,53 @@
+{
+  "started_at_utc": "2026-11-01T03:52:46.462449+00:00",
+  "source_parent": "2728a83ce203fec867dc536c8d4341c2ce4415cb",
+  "owned_temp_preflight": {
+    "path": "/tmp/van-recovery-family-governed-caller-r2-20261101",
+    "free_bytes_before": 8923205632,
+    "free_inodes_before": 2304130,
+    "minimum_free_bytes": 4294967296,
+    "no_preexisting_directory": true
+  },
+  "source_pins": {
+    "trading/vati/execution/paper.py": "f7a84387195d4259f9658893d96167d02fd33a9acf2a3162bcd1b4324d00ce7e",
+    "trading/vati/lifecycle/family_actions.py": "c83a0e9f453492f4207a7f0ddf2e0cd9b6f5863ce8db47d0958bdf9f9c43e406",
+    "trading/vati/lifecycle/family.py": "32e79c9a4eb7fbfb7489bbb1f0ed1dbc629b1d34f58d66cf0cfc369177d51ab8",
+    "trading/vati/lifecycle/family_membership.py": "8f713bbe62639bff48303a036a940905ae7ed90aff57df14320e00aef7e5b476",
+    "trading/vati/lifecycle/family_action_journal.py": "28df2cc05b358fa00f1f2a674f676b004fc92fcb000eb179272e29c53d24558e",
+    "trading/vati/execution/exit_journal.py": "669c71707d6d43bcbe02ed3f643a51650ca5778e937836fb5730bf90f3fb691b",
+    "trading/vati/execution/router.py": "64425fe610638670afd889387561c2095cfaef3ca36fcd0de0e05a9b4cfa5815",
+    "trading/vati/app/trade_lifecycle.py": "8974f4cb0f2ab48850ddd27ca19152e4aeb66ca12e2816dff9ddce2e0ac6b23f",
+    "trading/vati/risk/operational_grant.py": "61b118ad2032c003b739fe79fbde7faf212e57795061ea5eada25df3af11a3e5",
+    "trading/vati/lifecycle/family_execution.py": "6c9d2e4684df7a8a9d360e79441e551e1a9ee171a13c8999999d7f20fa82a3f4",
+    "trading/vati/lifecycle/family_runtime.py": "529b2ed081d3109b03beb8533caadc0a80c103c71a5ebe8726db12a2f5ca4500",
+    "trading/tests/test_lifecycle_operational_grant.py": "bbd029c8bb431c04ed3d16223e426deb3451a33b0b345a387c3843ba0334657b",
+    "trading/tests/test_family_governed_workflow.py": "ed33a2d3571da127ad0efd78a8a142eeae2604a42b4b1dfab98cd188715bddc3",
+    "trading/tests/test_family_action_journal.py": "4110dafefe11114809b58b552af744dcdf17f45aba9e441bc3897ea23ade0c7a",
+    "trading/tests/test_exit_uncertainty.py": "c2a1f426a08718ec66cc720c0512198e60c5cab80906b066af0edd6dd2c46916"
+  },
+  "command": [
+    "/workspace/van-backend-venv-20261025/bin/python",
+    "tools/rebuild/source_storage_audit.py",
+    "--report",
+    "/workspace/van-family-governed-caller-r2-20261101/storage-audit.json",
+    "trading/tests/test_lifecycle_operational_grant.py",
+    "trading/tests/test_family_governed_workflow.py",
+    "trading/tests/test_family_action_journal.py",
+    "trading/tests/test_exit_uncertainty.py",
+    "--basetemp=/tmp/van-recovery-family-governed-caller-r2-20261101",
+    "--junitxml=/workspace/van-family-governed-caller-r2-20261101/tests.xml",
+    "-q"
+  ],
+  "exit": 0,
+  "owned_temp_cleanup": {
+    "path": "/tmp/van-recovery-family-governed-caller-r2-20261101",
+    "files": 38,
+    "inventory": "/workspace/van-family-governed-caller-r2-20261101/owned-temp-inventory.json",
+    "inventory_sha256": "8e5eeb06f0a1052ce68c8af8185b03ace871ba8a3c22ac43dff5e1a1852bf028",
+    "free_bytes_before_cleanup": 8922005504,
+    "free_bytes_after_cleanup": 8923205632,
+    "free_inodes_after": 2304130,
+    "independently_absent": true
+  },
+  "completed_at_utc": "2026-11-01T03:52:49.651708+00:00"
+}

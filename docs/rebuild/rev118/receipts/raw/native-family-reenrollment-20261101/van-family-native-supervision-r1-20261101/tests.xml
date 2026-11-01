@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="18" time="2.040" timestamp="2026-11-01T05:01:58.403934+00:00" hostname="b6ffa15f7e81"><testcase classname="trading.tests.test_family_native_supervision" name="test_mark_supervises_once_and_records_independent_native_stop_evidence" time="0.505" /><testcase classname="trading.tests.test_family_native_supervision" name="test_missing_native_stop_forces_full_family_close_without_partial_policy_admission" time="0.043"><failure message="TypeError: replace() should be called on dataclass instances">tmp_path = PosixPath('/tmp/van-recovery-family-native-supervision-r1-20261101/test_missing_native_stop_force0')
+
+    def test_missing_native_stop_forces_full_family_close_without_partial_policy_admission(tmp_path):
+        w,store,time,grant,plan,history=admitted_source_world(tmp_path,actual_runtime_lease=True,add_child=True,max_quantity='.20')
+        try:
+            positions=w.adapter.positions();pid=positions[-1].position_id
+            # The actual simulator native owner loses a stop; a remembered manager
+            # rule must not replace this observed absence.
+            from dataclasses import replace
+&gt;           w.adapter._positions[pid]=replace(w.adapter._positions[pid],stop_price=None)
+                                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+trading/tests/test_family_native_supervision.py:30: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+obj = {'symbol': 'EURUSD', 'direction': &lt;Direction.LONG: 'LONG'&gt;, 'qty': Decimal('0.03'), 'entry': Decimal('1.10607'), ...}
+changes = {'stop_price': None}
+
+    def replace(obj, /, **changes):
+        """Return a new object replacing specified fields with new values.
+    
+        This is especially useful for frozen classes.  Example usage::
+    
+          @dataclass(frozen=True)
+          class C:
+              x: int
+              y: int
+    
+          c = C(1, 2)
+          c1 = replace(c, x=3)
+          assert c1.x == 3 and c1.y == 2
+        """
+    
+        # We're going to mutate 'changes', but that's okay because it's a
+        # new dict, even if called with 'replace(obj, **my_changes)'.
+    
+        if not _is_dataclass_instance(obj):
+&gt;           raise TypeError("replace() should be called on dataclass instances")
+E           TypeError: replace() should be called on dataclass instances
+
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/dataclasses.py:1559: TypeError</failure></testcase><testcase classname="trading.tests.test_family_unknown_independence" name="test_original_unknown_full_target_is_not_resent_and_other_full_leg_executes" time="0.082" /><testcase classname="trading.tests.test_family_unknown_independence" name="test_committed_other_writer_revocation_refuses_next_target_but_native_stop_survives" time="0.083" /><testcase classname="trading.tests.test_family_governed_workflow" name="test_real_current_mandate_original_source_and_independent_issuer_join" time="0.025" /><testcase classname="trading.tests.test_family_governed_workflow" name="test_current_effect_context_cannot_borrow_an_admitted_grants_scope[environment]" time="0.032" /><testcase classname="trading.tests.test_family_governed_workflow" name="test_current_effect_context_cannot_borrow_an_admitted_grants_scope[account]" time="0.023" /><testcase classname="trading.tests.test_family_governed_workflow" name="test_current_effect_context_cannot_borrow_an_admitted_grants_scope[venue]" time="0.029" /><testcase classname="trading.tests.test_family_governed_workflow" name="test_current_effect_context_cannot_borrow_an_admitted_grants_scope[cohort]" time="0.024" /><testcase classname="trading.tests.test_family_governed_workflow" name="test_current_effect_context_cannot_borrow_an_admitted_grants_scope[contract]" time="0.032" /><testcase classname="trading.tests.test_family_governed_workflow" name="test_current_effect_context_cannot_borrow_an_admitted_grants_scope[policy]" time="0.032" /><testcase classname="trading.tests.test_family_governed_workflow" name="test_current_effect_context_cannot_borrow_an_admitted_grants_scope[grant]" time="0.026" /><testcase classname="trading.tests.test_family_governed_workflow" name="test_current_effect_context_cannot_borrow_an_admitted_grants_scope[mandate]" time="0.029" /><testcase classname="trading.tests.test_family_governed_workflow" name="test_current_effect_context_cannot_borrow_an_admitted_grants_scope[lease]" time="0.026" /><testcase classname="trading.tests.test_family_governed_workflow" name="test_current_effect_context_cannot_borrow_an_admitted_grants_scope[migration]" time="0.028" /><testcase classname="trading.tests.test_family_governed_workflow" name="test_admitted_partial_effect_is_exact_durable_and_original_receipt_replays_after_revoke" time="0.039" /><testcase classname="trading.tests.test_family_governed_workflow" name="test_real_lifecycle_caller_uses_its_actual_runtime_owner_and_retains_exact_request" time="0.050" /><testcase classname="trading.tests.test_family_governed_workflow" name="test_real_add_then_proportional_residual_then_all_native_legs_close_once" time="0.244" /></testsuite></testsuites>

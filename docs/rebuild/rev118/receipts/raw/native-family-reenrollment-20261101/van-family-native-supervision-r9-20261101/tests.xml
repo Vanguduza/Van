@@ -1,0 +1,592 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="13" skipped="0" tests="207" time="16.975" timestamp="2026-11-01T05:35:18.114700+00:00" hostname="07611d75dea7"><testcase classname="trading.tests.test_family_native_supervision" name="test_mark_supervises_once_and_records_independent_native_stop_evidence" time="0.401" /><testcase classname="trading.tests.test_family_native_supervision" name="test_missing_native_stop_forces_full_family_close_without_partial_policy_admission" time="0.116" /><testcase classname="trading.tests.test_family_native_supervision" name="test_cold_recovery_restores_original_membership_and_full_native_targets" time="0.130" /><testcase classname="trading.tests.test_family_native_supervision" name="test_cold_flat_recovery_reduces_original_receipts_and_consumes_once_after_policy_expiry" time="0.171" /><testcase classname="trading.tests.test_family_native_supervision" name="test_independent_tighten_rechecks_current_lease_before_each_native_effect" time="0.050" /><testcase classname="trading.tests.test_family_native_supervision" name="test_cold_optional_policy_expiry_does_not_disable_existing_mandatory_family_protection" time="0.143" /><testcase classname="trading.tests.test_family_native_supervision" name="test_cold_expired_optional_policy_keeps_independent_native_stops_in_one_original_trial" time="0.146" /><testcase classname="trading.tests.test_family_unknown_independence" name="test_original_unknown_full_target_is_not_resent_and_other_full_leg_executes" time="0.078" /><testcase classname="trading.tests.test_family_unknown_independence" name="test_committed_other_writer_revocation_refuses_next_target_but_native_stop_survives" time="0.062" /><testcase classname="trading.tests.test_family_governed_workflow" name="test_real_current_mandate_original_source_and_independent_issuer_join" time="0.031" /><testcase classname="trading.tests.test_family_governed_workflow" name="test_current_effect_context_cannot_borrow_an_admitted_grants_scope[environment]" time="0.031" /><testcase classname="trading.tests.test_family_governed_workflow" name="test_current_effect_context_cannot_borrow_an_admitted_grants_scope[account]" time="0.022" /><testcase classname="trading.tests.test_family_governed_workflow" name="test_current_effect_context_cannot_borrow_an_admitted_grants_scope[venue]" time="0.023" /><testcase classname="trading.tests.test_family_governed_workflow" name="test_current_effect_context_cannot_borrow_an_admitted_grants_scope[cohort]" time="0.032" /><testcase classname="trading.tests.test_family_governed_workflow" name="test_current_effect_context_cannot_borrow_an_admitted_grants_scope[contract]" time="0.023" /><testcase classname="trading.tests.test_family_governed_workflow" name="test_current_effect_context_cannot_borrow_an_admitted_grants_scope[policy]" time="0.023" /><testcase classname="trading.tests.test_family_governed_workflow" name="test_current_effect_context_cannot_borrow_an_admitted_grants_scope[grant]" time="0.022" /><testcase classname="trading.tests.test_family_governed_workflow" name="test_current_effect_context_cannot_borrow_an_admitted_grants_scope[mandate]" time="0.028" /><testcase classname="trading.tests.test_family_governed_workflow" name="test_current_effect_context_cannot_borrow_an_admitted_grants_scope[lease]" time="0.028" /><testcase classname="trading.tests.test_family_governed_workflow" name="test_current_effect_context_cannot_borrow_an_admitted_grants_scope[migration]" time="0.022" /><testcase classname="trading.tests.test_family_governed_workflow" name="test_admitted_partial_effect_is_exact_durable_and_original_receipt_replays_after_revoke" time="0.047" /><testcase classname="trading.tests.test_family_governed_workflow" name="test_real_lifecycle_caller_uses_its_actual_runtime_owner_and_retains_exact_request" time="0.042" /><testcase classname="trading.tests.test_family_governed_workflow" name="test_real_add_then_proportional_residual_then_all_native_legs_close_once" time="0.243" /><testcase classname="trading.tests.test_family_governed_workflow" name="test_explicit_original_targets_need_distinct_exact_signed_authority_and_replay_once" time="0.067" /><testcase classname="trading.tests.test_family_paper_close_capability" name="test_paper_close_capture_is_bound_to_original_position_and_enforced_grid" time="0.001" /><testcase classname="trading.tests.test_family_paper_close_capability" name="test_paper_close_binding_cannot_rewrite_an_open_or_pending_original_contract" time="0.001" /><testcase classname="trading.tests.test_family_paper_close_capability" name="test_legacy_continuous_paper_owner_does_not_invent_an_automatic_partial_quantum" time="0.001" /><testcase classname="trading.tests.test_family_paper_close_capability" name="test_service_close_configuration_is_explicit_and_does_not_reinterpret_entry_limits" time="0.001" /><testcase classname="trading.tests.test_family_outcome_restatements" name="test_pending_actual_owner_read_then_first_qualified_outcome_one_trial" time="0.143" /><testcase classname="trading.tests.test_family_outcome_restatements" name="test_source_owner_late_cash_revision_replaces_same_parent_without_new_trial" time="0.182" /><testcase classname="trading.tests.test_family_outcome_restatements" name="test_source_native_owner_cannot_substitute_deal_scope_or_sequence[currency]" time="0.117" /><testcase classname="trading.tests.test_family_outcome_restatements" name="test_source_native_owner_cannot_substitute_deal_scope_or_sequence[deal]" time="0.115" /><testcase classname="trading.tests.test_family_outcome_restatements" name="test_source_native_owner_cannot_substitute_deal_scope_or_sequence[quantity]" time="0.134" /><testcase classname="trading.tests.test_family_outcome_restatements" name="test_source_native_owner_cannot_substitute_deal_scope_or_sequence[source-ref]" time="0.127" /><testcase classname="trading.tests.test_family_outcome_restatements" name="test_source_native_owner_cannot_substitute_deal_scope_or_sequence[sequence]" time="0.129" /><testcase classname="trading.tests.test_family_outcome_restatements" name="test_source_native_owner_cannot_substitute_deal_scope_or_sequence[environment]" time="0.120" /><testcase classname="trading.tests.test_family_outcome_restatements" name="test_legacy_review_hash_shape_stays_unchanged" time="0.001" /><testcase classname="trading.tests.test_active_trade_e2e" name="test_one_trade_from_sealed_claim_to_lesson_learned" time="0.051" /><testcase classname="trading.tests.test_active_trade_e2e" name="test_the_same_path_refuses_to_add_when_the_authority_says_no" time="0.016" /><testcase classname="trading.tests.test_active_trade_e2e" name="test_capsule_health_is_driven_by_the_decision_axis_downwards_only" time="0.945" /><testcase classname="trading.tests.test_rev51_preservation" name="test_a_scale_in_joins_the_family_rather_than_starting_a_trade" time="0.001" /><testcase classname="trading.tests.test_rev51_preservation" name="test_the_average_entry_is_weighted_not_chosen" time="0.001" /><testcase classname="trading.tests.test_rev51_preservation" name="test_a_partial_exit_realises_against_the_running_average" time="0.001" /><testcase classname="trading.tests.test_rev51_preservation" name="test_a_short_family_realises_with_the_right_sign" time="0.001" /><testcase classname="trading.tests.test_rev51_preservation" name="test_closing_more_than_is_held_is_refused" time="0.001" /><testcase classname="trading.tests.test_rev51_preservation" name="test_a_family_closes_when_its_net_quantity_reaches_zero" time="0.000" /><testcase classname="trading.tests.test_rev51_preservation" name="test_a_closed_family_does_not_reopen" time="0.001" /><testcase classname="trading.tests.test_rev51_preservation" name="test_a_family_stop_moves_toward_the_position_and_never_away" time="0.000" /><testcase classname="trading.tests.test_rev51_preservation" name="test_a_member_carrying_a_wider_stop_does_not_widen_the_family" time="0.001" /><testcase classname="trading.tests.test_rev51_preservation" name="test_venue_disagreement_is_a_state_that_blocks_new_risk" time="0.000" /><testcase classname="trading.tests.test_rev51_preservation" name="test_agreement_clears_a_divergence" time="0.001" /><testcase classname="trading.tests.test_rev51_preservation" name="test_a_family_is_found_from_any_of_its_intents" time="0.000" /><testcase classname="trading.tests.test_rev51_preservation" name="test_a_family_opens_with_a_root_member" time="0.000" /><testcase classname="trading.tests.test_rev51_preservation" name="test_families_are_ledgered_on_every_change" time="0.002" /><testcase classname="trading.tests.test_rev51_preservation" name="test_banked_profit_is_worth_nothing_without_a_certificate" time="0.002" /><testcase classname="trading.tests.test_rev51_preservation" name="test_an_independent_certificate_credits_only_part_of_the_profit" time="0.001" /><testcase classname="trading.tests.test_rev51_preservation" name="test_a_self_asserted_certificate_is_not_independent_evidence" time="0.003" /><testcase classname="trading.tests.test_rev51_preservation" name="test_an_expired_certificate_gives_zero_not_its_last_value" time="0.001" /><testcase classname="trading.tests.test_rev51_preservation" name="test_a_diverged_family_earns_no_credit" time="0.003" /><testcase classname="trading.tests.test_rev51_preservation" name="test_a_loss_making_family_earns_no_credit" time="0.005" /><testcase classname="trading.tests.test_rev51_preservation" name="test_an_unknown_stop_is_unbounded_risk_not_zero_risk" time="0.001" /><testcase classname="trading.tests.test_rev51_preservation" name="test_open_risk_is_computed_at_the_family_level" time="0.003" /><testcase classname="trading.tests.test_rev51_preservation" name="test_a_stop_already_through_the_mark_carries_no_further_risk" time="0.001" /><testcase classname="trading.tests.test_rev51_preservation" name="test_the_portfolio_view_names_unknown_risk_rather_than_counting_it_as_zero" time="0.001" /><testcase classname="trading.tests.test_rev51_preservation" name="test_envelopes_are_ledgered_per_family" time="0.002" /><testcase classname="trading.tests.test_rev51_preservation" name="test_preservation_has_no_action_that_adds_exposure" time="0.000" /><testcase classname="trading.tests.test_rev51_preservation" name="test_a_healthy_family_needs_nothing_and_blocks_nothing" time="0.001" /><testcase classname="trading.tests.test_rev51_preservation" name="test_an_unprotected_family_is_closed_immediately" time="0.003" /><testcase classname="trading.tests.test_rev51_preservation" name="test_an_invalidated_thesis_is_closed_immediately" time="0.001" /><testcase classname="trading.tests.test_rev51_preservation" name="test_a_diverged_family_is_closed_immediately" time="0.001" /><testcase classname="trading.tests.test_rev51_preservation" name="test_reaching_one_r_moves_the_stop_to_the_entry" time="0.001" /><testcase classname="trading.tests.test_rev51_preservation" name="test_a_larger_excursion_trails_the_stop_further" time="0.001" /><testcase classname="trading.tests.test_rev51_preservation" name="test_a_proposed_stop_is_never_looser_and_never_through_the_mark" time="0.001" /><testcase classname="trading.tests.test_rev51_preservation" name="test_handing_back_a_real_gain_takes_half_off" time="0.001" /><testcase classname="trading.tests.test_rev51_preservation" name="test_an_impaired_family_halts_new_risk_even_with_nothing_to_tighten" time="0.001" /><testcase classname="trading.tests.test_rev51_preservation" name="test_an_unknown_family_risk_halts_new_risk" time="0.001" /><testcase classname="trading.tests.test_rev51_preservation" name="test_a_high_account_worst_case_halts_new_risk_everywhere" time="0.001" /><testcase classname="trading.tests.test_rev51_preservation" name="test_a_modest_account_worst_case_does_not_halt" time="0.001" /><testcase classname="trading.tests.test_rev51_preservation" name="test_every_reason_emitted_has_a_description" time="0.001" /><testcase classname="trading.tests.test_rev51_preservation" name="test_preservation_reads_no_model_output" time="0.004" /><testcase classname="trading.tests.test_rev51_preservation" name="test_actions_are_ledgered_but_no_action_is_not" time="0.002" /><testcase classname="trading.tests.test_rev51_preservation" name="test_risk_authority_is_the_only_component_that_turns_preservation_into_new_risk_refusal" time="0.004" /><testcase classname="trading.tests.test_rev51_preservation" name="test_account_lifecycle_wires_family_health_envelope_preservation_and_shadow_expansion" time="0.001" /><testcase classname="trading.tests.test_rev51_expansion" name="test_an_unregistered_strategy_does_not_scale" time="0.001" /><testcase classname="trading.tests.test_rev51_expansion" name="test_scaling_is_off_unless_explicitly_enabled" time="0.000" /><testcase classname="trading.tests.test_rev51_expansion" name="test_each_add_must_be_smaller_than_the_one_before" time="0.001" /><testcase classname="trading.tests.test_rev51_expansion" name="test_more_permitted_adds_than_declared_sizes_is_refused" time="0.001" /><testcase classname="trading.tests.test_rev51_expansion" name="test_a_fraction_above_the_root_is_refused" time="0.001" /><testcase classname="trading.tests.test_rev51_expansion" name="test_fractions_run_out_rather_than_repeating" time="0.000" /><testcase classname="trading.tests.test_rev51_expansion" name="test_a_disabled_policy_offers_no_fraction_at_all" time="0.000" /><testcase classname="trading.tests.test_rev51_expansion" name="test_configuration_with_an_unknown_field_is_refused" time="0.000" /><testcase classname="trading.tests.test_rev51_expansion" name="test_configuration_builds_a_usable_policy" time="0.001" /><testcase classname="trading.tests.test_rev51_expansion" name="test_the_registry_reports_which_strategies_may_scale" time="0.000" /><testcase classname="trading.tests.test_rev51_expansion" name="test_expansion_ships_in_shadow_mode" time="0.000" /><testcase classname="trading.tests.test_rev51_expansion" name="test_a_qualifying_family_produces_a_proposal_that_shadow_withholds" time="0.001" /><testcase classname="trading.tests.test_rev51_expansion" name="test_the_engine_states_a_requested_risk_and_stops_there" time="0.001" /><testcase classname="trading.tests.test_rev51_expansion" name="test_preservation_having_anything_to_say_stands_the_proposal_down" time="0.001" /><testcase classname="trading.tests.test_rev51_expansion" name="test_a_disabled_policy_declines" time="0.001" /><testcase classname="trading.tests.test_rev51_expansion" name="test_a_position_that_has_not_paid_for_itself_declines" time="0.001" /><testcase classname="trading.tests.test_rev51_expansion" name="test_anything_less_than_the_required_health_declines" time="0.001" /><testcase classname="trading.tests.test_rev51_expansion" name="test_an_unsecured_stop_declines" time="0.001" /><testcase classname="trading.tests.test_rev51_expansion" name="test_the_cooldown_is_respected" time="0.001" /><testcase classname="trading.tests.test_rev51_expansion" name="test_an_open_event_window_declines" time="0.001" /><testcase classname="trading.tests.test_rev51_expansion" name="test_adds_run_out" time="0.001" /><testcase classname="trading.tests.test_rev51_expansion" name="test_open_risk_is_measured_from_the_mark_so_unrealised_gain_is_at_stake" time="0.001" /><testcase classname="trading.tests.test_rev51_expansion" name="test_a_family_already_at_the_policy_ceiling_declines" time="0.001" /><testcase classname="trading.tests.test_rev51_expansion" name="test_a_diverged_family_declines" time="0.001" /><testcase classname="trading.tests.test_rev51_expansion" name="test_every_decline_reason_is_named_and_described" time="0.001" /><testcase classname="trading.tests.test_rev51_expansion" name="test_live_mode_makes_the_proposal_a_candidate_only_with_admitted_evidence" time="0.001" /><testcase classname="trading.tests.test_rev51_expansion" name="test_live_mode_cannot_start_without_a_promotion_record" time="0.001" /><testcase classname="trading.tests.test_rev51_expansion" name="test_live_mode_refuses_a_rejected_or_failed_promotion_record" time="0.001" /><testcase classname="trading.tests.test_rev51_expansion" name="test_live_mode_refuses_policy_or_strategy_drift_after_admission" time="0.001" /><testcase classname="trading.tests.test_rev51_expansion" name="test_proposals_are_ledgered_against_the_family" time="0.001" /><testcase classname="trading.tests.test_rev51_expansion" name="test_the_do_nothing_baseline_is_always_compared_against" time="0.001" /><testcase classname="trading.tests.test_rev51_expansion" name="test_a_policy_that_helped_shows_a_positive_delta" time="0.001" /><testcase classname="trading.tests.test_rev51_expansion" name="test_a_policy_that_hurt_shows_a_negative_delta" time="0.001" /><testcase classname="trading.tests.test_rev51_expansion" name="test_open_families_are_excluded_and_counted" time="0.000" /><testcase classname="trading.tests.test_rev51_expansion" name="test_adds_are_only_priced_at_marks_the_family_traded_through" time="0.000" /><testcase classname="trading.tests.test_rev51_expansion" name="test_the_cooldown_is_honoured_in_replay" time="0.001" /><testcase classname="trading.tests.test_rev51_expansion" name="test_a_small_sample_is_not_evidence" time="0.000" /><testcase classname="trading.tests.test_rev51_expansion" name="test_a_sufficient_sample_reports_evidence" time="0.001" /><testcase classname="trading.tests.test_rev51_expansion" name="test_the_worst_family_outcome_is_reported_beside_the_mean" time="0.000" /><testcase classname="trading.tests.test_rev51_expansion" name="test_the_comparison_states_its_assumptions_and_is_not_a_recommendation" time="0.000" /><testcase classname="trading.tests.test_rev51_expansion" name="test_a_thin_comparison_names_no_best_policy" time="0.001" /><testcase classname="trading.tests.test_rev51_expansion" name="test_the_comparison_digest_is_stable" time="0.000" /><testcase classname="trading.tests.test_family_original_accounting" name="test_actual_remaining_family_basis_after_reduction_and_new_add[LONG-expected_average0-mark0]" time="0.001" /><testcase classname="trading.tests.test_family_original_accounting" name="test_actual_remaining_family_basis_after_reduction_and_new_add[SHORT-expected_average1-mark1]" time="0.002" /><testcase classname="trading.tests.test_family_original_accounting" name="test_family_fold_does_not_take_precision_or_mutate_flags_from_ambient_decimal_context" time="0.001" /><testcase classname="trading.tests.test_family_original_accounting" name="test_actual_cold_lifecycle_retains_original_gross_added_instead_of_reopening_exit_budget" time="0.010" /><testcase classname="trading.tests.test_family_durable_projection" name="test_failed_publication_preserves_members_and_fences_risk[add]" time="0.004" /><testcase classname="trading.tests.test_family_durable_projection" name="test_failed_publication_preserves_members_and_fences_risk[stop]" time="0.004" /><testcase classname="trading.tests.test_family_durable_projection" name="test_failed_publication_preserves_members_and_fences_risk[reconcile]" time="0.005" /><testcase classname="trading.tests.test_family_durable_projection" name="test_lost_ack_reads_original_committed_family_and_replay_does_not_add_twice" time="0.005" /><testcase classname="trading.tests.test_family_durable_projection" name="test_failed_open_never_publishes_root_or_intent" time="0.002" /><testcase classname="trading.tests.test_family_durable_projection" name="test_rounded_average_cannot_authorise_a_stop_below_exact_entry" time="0.001" /><testcase classname="trading.tests.test_family_durable_projection" name="test_actual_envelope_and_account_verdict_do_not_use_ambient_precision" time="0.003" /><testcase classname="trading.tests.test_family_durable_projection" name="test_new_snapshot_cannot_rewrite_original_family_or_scope[members]" time="0.007" /><testcase classname="trading.tests.test_family_durable_projection" name="test_new_snapshot_cannot_rewrite_original_family_or_scope[account]" time="0.006" /><testcase classname="trading.tests.test_family_durable_projection" name="test_new_snapshot_cannot_rewrite_original_family_or_scope[symbol]" time="0.007" /><testcase classname="trading.tests.test_family_durable_projection" name="test_new_snapshot_cannot_rewrite_original_family_or_scope[direction]" time="0.007" /><testcase classname="trading.tests.test_family_durable_projection" name="test_new_snapshot_cannot_rewrite_original_family_or_scope[producer]" time="0.007" /><testcase classname="trading.tests.test_family_durable_projection" name="test_netted_native_quantity_above_root_request_recovers_verified_original_family" time="0.009" /><testcase classname="trading.tests.test_family_durable_projection" name="test_actual_paper_hedged_members_keep_one_lifetime_budget_and_each_native_stop" time="0.010" /><testcase classname="trading.tests.test_family_durable_projection" name="test_legacy_current_position_restores_protection_but_cannot_supply_a_lifetime_budget" time="0.002" /><testcase classname="trading.tests.test_family_durable_projection" name="test_closing_one_held_hedged_position_does_not_close_the_other_family_members" time="0.011" /><testcase classname="trading.tests.test_family_durable_projection" name="test_failed_second_recovery_cannot_lose_history_hold_during_actual_supervision[account]" time="0.009" /><testcase classname="trading.tests.test_family_durable_projection" name="test_failed_second_recovery_cannot_lose_history_hold_during_actual_supervision[malformed_member]" time="0.008" /><testcase classname="trading.tests.test_family_durable_projection" name="test_failed_second_recovery_cannot_lose_history_hold_during_actual_supervision[malformed_root_id]" time="0.009" /><testcase classname="trading.tests.test_family_durable_projection" name="test_expansion_requested_headroom_never_exceeds_exact_policy_remainder[700000]" time="0.001" /><testcase classname="trading.tests.test_family_durable_projection" name="test_expansion_requested_headroom_never_exceeds_exact_policy_remainder[900000]" time="0.001" /><testcase classname="trading.tests.test_family_durable_projection" name="test_expansion_requested_headroom_never_exceeds_exact_policy_remainder[1100000]" time="0.002" /><testcase classname="trading.tests.test_family_durable_projection" name="test_breakeven_stop_report_rounds_toward_protection_not_below_exact_basis" time="0.002" /><testcase classname="trading.tests.test_exit_uncertainty" name="test_unknown_close_does_not_retry_on_the_next_market_update" time="0.002"><failure message="AttributeError: 'CloseProbe' object has no attribute 'positions'">def test_unknown_close_does_not_retry_on_the_next_market_update():
+        adapter = CloseProbe()
+        router = build(Ledger(), adapter)
+&gt;       assert mark(router)[0].status == "UNKNOWN"
+               ^^^^^^^^^^^^
+
+trading/tests/test_exit_uncertainty.py:54: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+trading/tests/test_exit_uncertainty.py:48: in mark
+    return router.apply_exits("probe", "TEST", D("89"), D("90"), now_ms=when)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/execution/router.py:915: in apply_exits
+    r = self._send_close(venue, position_id=ins.position_id, trade_intent_id="",
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;vati.execution.router.ExecutionRouter object at 0x7fd0358f7cb0&gt;
+venue = 'probe', position_id = 'position', trade_intent_id = '', quantity = None
+action = 'FULL_CLOSE', reason = 'STRUCTURE', now_ms = 1
+family_action_ref = None, family_target_ref = None, family_effect_guard = None
+
+    def _send_close(self, venue: str, *, position_id: str, trade_intent_id: str,
+                    quantity: Optional[Decimal], action: str, reason: str, now_ms: int,
+                    family_action_ref=None, family_target_ref=None, family_effect_guard=None) -&gt; ExecutionReceipt:
+        # ProtectionManager addresses a native position, rather than an intent.
+        # Join its close to the original managed entry before publishing the
+        # request. An empty request identity must not orphan a valid child-leg
+        # receipt from its family after restart. Unresolved legacy protection
+        # retains its existing urgent path and remains unqualified family data.
+        if not trade_intent_id:
+            from vati.execution.recovery_scope import NativePositionHistory, PositionRecoveryError
+            from vati.core.ledger import LedgerError
+            try:
+                adapter=self.adapters[venue]
+&gt;               positions=[p for p in adapter.positions() if p.position_id==position_id]
+                                      ^^^^^^^^^^^^^^^^^
+E               AttributeError: 'CloseProbe' object has no attribute 'positions'
+
+trading/vati/execution/router.py:354: AttributeError</failure></testcase><testcase classname="trading.tests.test_exit_uncertainty" name="test_transport_exception_cannot_turn_into_a_blind_retry" time="0.002"><failure message="AttributeError: 'CloseProbe' object has no attribute 'positions'">def test_transport_exception_cannot_turn_into_a_blind_retry():
+        adapter = CloseProbe(error=TimeoutError("response lost after venue may have applied close"))
+        router = build(Ledger(), adapter)
+        with pytest.raises(TimeoutError):
+&gt;           mark(router)
+
+trading/tests/test_exit_uncertainty.py:65: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+trading/tests/test_exit_uncertainty.py:48: in mark
+    return router.apply_exits("probe", "TEST", D("89"), D("90"), now_ms=when)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/execution/router.py:915: in apply_exits
+    r = self._send_close(venue, position_id=ins.position_id, trade_intent_id="",
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;vati.execution.router.ExecutionRouter object at 0x7fd0357e2120&gt;
+venue = 'probe', position_id = 'position', trade_intent_id = '', quantity = None
+action = 'FULL_CLOSE', reason = 'STRUCTURE', now_ms = 1
+family_action_ref = None, family_target_ref = None, family_effect_guard = None
+
+    def _send_close(self, venue: str, *, position_id: str, trade_intent_id: str,
+                    quantity: Optional[Decimal], action: str, reason: str, now_ms: int,
+                    family_action_ref=None, family_target_ref=None, family_effect_guard=None) -&gt; ExecutionReceipt:
+        # ProtectionManager addresses a native position, rather than an intent.
+        # Join its close to the original managed entry before publishing the
+        # request. An empty request identity must not orphan a valid child-leg
+        # receipt from its family after restart. Unresolved legacy protection
+        # retains its existing urgent path and remains unqualified family data.
+        if not trade_intent_id:
+            from vati.execution.recovery_scope import NativePositionHistory, PositionRecoveryError
+            from vati.core.ledger import LedgerError
+            try:
+                adapter=self.adapters[venue]
+&gt;               positions=[p for p in adapter.positions() if p.position_id==position_id]
+                                      ^^^^^^^^^^^^^^^^^
+E               AttributeError: 'CloseProbe' object has no attribute 'positions'
+
+trading/vati/execution/router.py:354: AttributeError</failure></testcase><testcase classname="trading.tests.test_exit_uncertainty" name="test_receipt_and_exit_disposition_are_committed_together" time="0.001"><failure message="AttributeError: 'CloseProbe' object has no attribute 'positions'">def test_receipt_and_exit_disposition_are_committed_together():
+        class FailingLedger(Ledger):
+            fail_once = True
+    
+            def append(self, event):
+                if event.kind is EventKind.EXIT_ATTEMPT and event.payload["state"] != "REQUESTED" and self.fail_once:
+                    self.fail_once = False
+                    raise OSError("injected disk failure after receipt insert")
+                return super().append(event)
+        adapter = CloseProbe()
+        ledger = FailingLedger()
+        router = build(ledger, adapter)
+        with pytest.raises(OSError, match="disk failure"):
+&gt;           mark(router)
+
+trading/tests/test_exit_uncertainty.py:83: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+trading/tests/test_exit_uncertainty.py:48: in mark
+    return router.apply_exits("probe", "TEST", D("89"), D("90"), now_ms=when)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/execution/router.py:915: in apply_exits
+    r = self._send_close(venue, position_id=ins.position_id, trade_intent_id="",
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;vati.execution.router.ExecutionRouter object at 0x7fd035708290&gt;
+venue = 'probe', position_id = 'position', trade_intent_id = '', quantity = None
+action = 'FULL_CLOSE', reason = 'STRUCTURE', now_ms = 1
+family_action_ref = None, family_target_ref = None, family_effect_guard = None
+
+    def _send_close(self, venue: str, *, position_id: str, trade_intent_id: str,
+                    quantity: Optional[Decimal], action: str, reason: str, now_ms: int,
+                    family_action_ref=None, family_target_ref=None, family_effect_guard=None) -&gt; ExecutionReceipt:
+        # ProtectionManager addresses a native position, rather than an intent.
+        # Join its close to the original managed entry before publishing the
+        # request. An empty request identity must not orphan a valid child-leg
+        # receipt from its family after restart. Unresolved legacy protection
+        # retains its existing urgent path and remains unqualified family data.
+        if not trade_intent_id:
+            from vati.execution.recovery_scope import NativePositionHistory, PositionRecoveryError
+            from vati.core.ledger import LedgerError
+            try:
+                adapter=self.adapters[venue]
+&gt;               positions=[p for p in adapter.positions() if p.position_id==position_id]
+                                      ^^^^^^^^^^^^^^^^^
+E               AttributeError: 'CloseProbe' object has no attribute 'positions'
+
+trading/vati/execution/router.py:354: AttributeError</failure></testcase><testcase classname="trading.tests.test_exit_uncertainty" name="test_two_ledger_writers_cannot_send_the_same_position_close" time="10.004"><failure message="assert False&#10; +  where False = wait(10)&#10; +    where wait = &lt;threading.Event at 0x7fd0356311f0: unset&gt;.wait">tmp_path = PosixPath('/tmp/van-recovery-family-native-supervision-r9-20261101/test_two_ledger_writers_cannot0')
+
+    def test_two_ledger_writers_cannot_send_the_same_position_close(tmp_path):
+        entered, release = threading.Event(), threading.Event()
+        class Blocking(CloseProbe):
+            def close(self, *args, **kwargs):
+                entered.set()
+                assert release.wait(10)
+                return super().close(*args, **kwargs)
+        adapter, path = Blocking(), tmp_path/"writers.sqlite"
+        def run(when):
+            return mark(build(Ledger(path), adapter), when)
+        with ThreadPoolExecutor(max_workers=2) as pool:
+            first = pool.submit(run, 1)
+&gt;           assert entered.wait(10)
+E           assert False
+E            +  where False = wait(10)
+E            +    where wait = &lt;threading.Event at 0x7fd0356311f0: unset&gt;.wait
+
+trading/tests/test_exit_uncertainty.py:102: AssertionError</failure></testcase><testcase classname="trading.tests.test_exit_uncertainty" name="test_process_death_keeps_the_original_attempt_fenced[after_request-0]" time="0.192"><failure message="AssertionError: Traceback (most recent call last):&#10;    File &quot;&lt;string&gt;&quot;, line 36, in &lt;module&gt;&#10;    File &quot;/workspace/van-lanes-20261101/family-multiposition/trading/vati/execution/router.py&quot;, line 915, in apply_exits&#10;      r = self._send_close(venue, position_id=ins.position_id, trade_intent_id=&quot;&quot;,&#10;          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^&#10;    File &quot;/workspace/van-lanes-20261101/family-multiposition/trading/vati/execution/router.py&quot;, line 354, in _send_close&#10;      positions=[p for p in adapter.positions() if p.position_id==position_id]&#10;                            ^^^^^^^^^^^^^^^^^&#10;  AttributeError: 'Adapter' object has no attribute 'positions'&#10;  &#10;assert 1 == 23&#10; +  where 1 = CompletedProcess(args=['/workspace/van-backend-venv-20261025/bin/python', '-c', &quot;\nimport os,sys\nfrom pathlib import ...id]\n                          ^^^^^^^^^^^^^^^^^\nAttributeError: \'Adapter\' object has no attribute \'positions\'\n').returncode">tmp_path = PosixPath('/tmp/van-recovery-family-native-supervision-r9-20261101/test_process_death_keeps_the_o0')
+stage = 'after_request', effects = 0
+
+    @pytest.mark.parametrize("stage,effects", [("after_request", 0), ("after_effect", 1),
+        ("before_receipt_commit", 1), ("after_receipt_commit", 1)])
+    def test_process_death_keeps_the_original_attempt_fenced(tmp_path, stage, effects):
+        database, effect = tmp_path/"death.sqlite", tmp_path/"venue-effects.txt"
+        script = '''
+    import os,sys
+    from pathlib import Path
+    from decimal import Decimal as D
+    from vati.core.ledger import Ledger
+    from vati.core.events import EventKind
+    from vati.execution.router import ExecutionRouter
+    from vati.execution.protection import ProtectionManager
+    from vati.execution.base import ExecutionReceipt
+    from vati.risk import KillSwitch
+    from vati.risk.contracts import Direction
+    path,effect,stage=sys.argv[1:]
+    ledger=Ledger(path)
+    protection=ProtectionManager()
+    protection.register('position',symbol='TEST',direction=Direction.LONG,entry=D('100'),stop=D('90'),target=None,opened_ms=0)
+    class Adapter:
+        venue='probe'
+        def close(self,position_id,quantity,*,now_ms,reason):
+            with Path(effect).open('a') as stream:stream.write('applied\\n')
+            if stage=='after_effect':os._exit(23)
+            return ExecutionReceipt('intent','','probe','FILLED',D('1'),D('89'),D('100'),D('100'),D('100'),True,now_ms,now_ms,broker_position_id='position').sealed()
+    router=ExecutionRouter(ledger=ledger,adapters={'probe':Adapter()},kill_switch=KillSwitch(),protection=protection)
+    if stage=='after_request':
+        original=router.exit_journal.begin
+        def begin(**kwargs):
+            original(**kwargs)
+            os._exit(23)
+        router.exit_journal.begin=begin
+    if stage=='before_receipt_commit':
+        original=ledger.append
+        def append(event):
+            if event.kind is EventKind.EXIT_ATTEMPT and event.payload['state']=='CONFIRMED':os._exit(23)
+            return original(event)
+        ledger.append=append
+    if stage=='after_receipt_commit':protection.close_confirmed=lambda position_id:os._exit(23)
+    router.apply_exits('probe','TEST',D('89'),D('90'),now_ms=1)
+    raise AssertionError('crash injection not reached')
+    '''
+        result = subprocess.run([sys.executable,"-c",script,str(database),str(effect),stage],
+            cwd=Path(__file__).resolve().parents[2], text=True, capture_output=True)
+&gt;       assert result.returncode == 23, result.stderr
+E       AssertionError: Traceback (most recent call last):
+E           File "&lt;string&gt;", line 36, in &lt;module&gt;
+E           File "/workspace/van-lanes-20261101/family-multiposition/trading/vati/execution/router.py", line 915, in apply_exits
+E             r = self._send_close(venue, position_id=ins.position_id, trade_intent_id="",
+E                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           File "/workspace/van-lanes-20261101/family-multiposition/trading/vati/execution/router.py", line 354, in _send_close
+E             positions=[p for p in adapter.positions() if p.position_id==position_id]
+E                                   ^^^^^^^^^^^^^^^^^
+E         AttributeError: 'Adapter' object has no attribute 'positions'
+E         
+E       assert 1 == 23
+E        +  where 1 = CompletedProcess(args=['/workspace/van-backend-venv-20261025/bin/python', '-c', "\nimport os,sys\nfrom pathlib import ...id]\n                          ^^^^^^^^^^^^^^^^^\nAttributeError: \'Adapter\' object has no attribute \'positions\'\n').returncode
+
+trading/tests/test_exit_uncertainty.py:156: AssertionError</failure></testcase><testcase classname="trading.tests.test_exit_uncertainty" name="test_process_death_keeps_the_original_attempt_fenced[after_effect-1]" time="0.158"><failure message="AssertionError: Traceback (most recent call last):&#10;    File &quot;&lt;string&gt;&quot;, line 36, in &lt;module&gt;&#10;    File &quot;/workspace/van-lanes-20261101/family-multiposition/trading/vati/execution/router.py&quot;, line 915, in apply_exits&#10;      r = self._send_close(venue, position_id=ins.position_id, trade_intent_id=&quot;&quot;,&#10;          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^&#10;    File &quot;/workspace/van-lanes-20261101/family-multiposition/trading/vati/execution/router.py&quot;, line 354, in _send_close&#10;      positions=[p for p in adapter.positions() if p.position_id==position_id]&#10;                            ^^^^^^^^^^^^^^^^^&#10;  AttributeError: 'Adapter' object has no attribute 'positions'&#10;  &#10;assert 1 == 23&#10; +  where 1 = CompletedProcess(args=['/workspace/van-backend-venv-20261025/bin/python', '-c', &quot;\nimport os,sys\nfrom pathlib import ...id]\n                          ^^^^^^^^^^^^^^^^^\nAttributeError: \'Adapter\' object has no attribute \'positions\'\n').returncode">tmp_path = PosixPath('/tmp/van-recovery-family-native-supervision-r9-20261101/test_process_death_keeps_the_o1')
+stage = 'after_effect', effects = 1
+
+    @pytest.mark.parametrize("stage,effects", [("after_request", 0), ("after_effect", 1),
+        ("before_receipt_commit", 1), ("after_receipt_commit", 1)])
+    def test_process_death_keeps_the_original_attempt_fenced(tmp_path, stage, effects):
+        database, effect = tmp_path/"death.sqlite", tmp_path/"venue-effects.txt"
+        script = '''
+    import os,sys
+    from pathlib import Path
+    from decimal import Decimal as D
+    from vati.core.ledger import Ledger
+    from vati.core.events import EventKind
+    from vati.execution.router import ExecutionRouter
+    from vati.execution.protection import ProtectionManager
+    from vati.execution.base import ExecutionReceipt
+    from vati.risk import KillSwitch
+    from vati.risk.contracts import Direction
+    path,effect,stage=sys.argv[1:]
+    ledger=Ledger(path)
+    protection=ProtectionManager()
+    protection.register('position',symbol='TEST',direction=Direction.LONG,entry=D('100'),stop=D('90'),target=None,opened_ms=0)
+    class Adapter:
+        venue='probe'
+        def close(self,position_id,quantity,*,now_ms,reason):
+            with Path(effect).open('a') as stream:stream.write('applied\\n')
+            if stage=='after_effect':os._exit(23)
+            return ExecutionReceipt('intent','','probe','FILLED',D('1'),D('89'),D('100'),D('100'),D('100'),True,now_ms,now_ms,broker_position_id='position').sealed()
+    router=ExecutionRouter(ledger=ledger,adapters={'probe':Adapter()},kill_switch=KillSwitch(),protection=protection)
+    if stage=='after_request':
+        original=router.exit_journal.begin
+        def begin(**kwargs):
+            original(**kwargs)
+            os._exit(23)
+        router.exit_journal.begin=begin
+    if stage=='before_receipt_commit':
+        original=ledger.append
+        def append(event):
+            if event.kind is EventKind.EXIT_ATTEMPT and event.payload['state']=='CONFIRMED':os._exit(23)
+            return original(event)
+        ledger.append=append
+    if stage=='after_receipt_commit':protection.close_confirmed=lambda position_id:os._exit(23)
+    router.apply_exits('probe','TEST',D('89'),D('90'),now_ms=1)
+    raise AssertionError('crash injection not reached')
+    '''
+        result = subprocess.run([sys.executable,"-c",script,str(database),str(effect),stage],
+            cwd=Path(__file__).resolve().parents[2], text=True, capture_output=True)
+&gt;       assert result.returncode == 23, result.stderr
+E       AssertionError: Traceback (most recent call last):
+E           File "&lt;string&gt;", line 36, in &lt;module&gt;
+E           File "/workspace/van-lanes-20261101/family-multiposition/trading/vati/execution/router.py", line 915, in apply_exits
+E             r = self._send_close(venue, position_id=ins.position_id, trade_intent_id="",
+E                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           File "/workspace/van-lanes-20261101/family-multiposition/trading/vati/execution/router.py", line 354, in _send_close
+E             positions=[p for p in adapter.positions() if p.position_id==position_id]
+E                                   ^^^^^^^^^^^^^^^^^
+E         AttributeError: 'Adapter' object has no attribute 'positions'
+E         
+E       assert 1 == 23
+E        +  where 1 = CompletedProcess(args=['/workspace/van-backend-venv-20261025/bin/python', '-c', "\nimport os,sys\nfrom pathlib import ...id]\n                          ^^^^^^^^^^^^^^^^^\nAttributeError: \'Adapter\' object has no attribute \'positions\'\n').returncode
+
+trading/tests/test_exit_uncertainty.py:156: AssertionError</failure></testcase><testcase classname="trading.tests.test_exit_uncertainty" name="test_process_death_keeps_the_original_attempt_fenced[before_receipt_commit-1]" time="0.165"><failure message="AssertionError: Traceback (most recent call last):&#10;    File &quot;&lt;string&gt;&quot;, line 36, in &lt;module&gt;&#10;    File &quot;/workspace/van-lanes-20261101/family-multiposition/trading/vati/execution/router.py&quot;, line 915, in apply_exits&#10;      r = self._send_close(venue, position_id=ins.position_id, trade_intent_id=&quot;&quot;,&#10;          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^&#10;    File &quot;/workspace/van-lanes-20261101/family-multiposition/trading/vati/execution/router.py&quot;, line 354, in _send_close&#10;      positions=[p for p in adapter.positions() if p.position_id==position_id]&#10;                            ^^^^^^^^^^^^^^^^^&#10;  AttributeError: 'Adapter' object has no attribute 'positions'&#10;  &#10;assert 1 == 23&#10; +  where 1 = CompletedProcess(args=['/workspace/van-backend-venv-20261025/bin/python', '-c', &quot;\nimport os,sys\nfrom pathlib import ...id]\n                          ^^^^^^^^^^^^^^^^^\nAttributeError: \'Adapter\' object has no attribute \'positions\'\n').returncode">tmp_path = PosixPath('/tmp/van-recovery-family-native-supervision-r9-20261101/test_process_death_keeps_the_o2')
+stage = 'before_receipt_commit', effects = 1
+
+    @pytest.mark.parametrize("stage,effects", [("after_request", 0), ("after_effect", 1),
+        ("before_receipt_commit", 1), ("after_receipt_commit", 1)])
+    def test_process_death_keeps_the_original_attempt_fenced(tmp_path, stage, effects):
+        database, effect = tmp_path/"death.sqlite", tmp_path/"venue-effects.txt"
+        script = '''
+    import os,sys
+    from pathlib import Path
+    from decimal import Decimal as D
+    from vati.core.ledger import Ledger
+    from vati.core.events import EventKind
+    from vati.execution.router import ExecutionRouter
+    from vati.execution.protection import ProtectionManager
+    from vati.execution.base import ExecutionReceipt
+    from vati.risk import KillSwitch
+    from vati.risk.contracts import Direction
+    path,effect,stage=sys.argv[1:]
+    ledger=Ledger(path)
+    protection=ProtectionManager()
+    protection.register('position',symbol='TEST',direction=Direction.LONG,entry=D('100'),stop=D('90'),target=None,opened_ms=0)
+    class Adapter:
+        venue='probe'
+        def close(self,position_id,quantity,*,now_ms,reason):
+            with Path(effect).open('a') as stream:stream.write('applied\\n')
+            if stage=='after_effect':os._exit(23)
+            return ExecutionReceipt('intent','','probe','FILLED',D('1'),D('89'),D('100'),D('100'),D('100'),True,now_ms,now_ms,broker_position_id='position').sealed()
+    router=ExecutionRouter(ledger=ledger,adapters={'probe':Adapter()},kill_switch=KillSwitch(),protection=protection)
+    if stage=='after_request':
+        original=router.exit_journal.begin
+        def begin(**kwargs):
+            original(**kwargs)
+            os._exit(23)
+        router.exit_journal.begin=begin
+    if stage=='before_receipt_commit':
+        original=ledger.append
+        def append(event):
+            if event.kind is EventKind.EXIT_ATTEMPT and event.payload['state']=='CONFIRMED':os._exit(23)
+            return original(event)
+        ledger.append=append
+    if stage=='after_receipt_commit':protection.close_confirmed=lambda position_id:os._exit(23)
+    router.apply_exits('probe','TEST',D('89'),D('90'),now_ms=1)
+    raise AssertionError('crash injection not reached')
+    '''
+        result = subprocess.run([sys.executable,"-c",script,str(database),str(effect),stage],
+            cwd=Path(__file__).resolve().parents[2], text=True, capture_output=True)
+&gt;       assert result.returncode == 23, result.stderr
+E       AssertionError: Traceback (most recent call last):
+E           File "&lt;string&gt;", line 36, in &lt;module&gt;
+E           File "/workspace/van-lanes-20261101/family-multiposition/trading/vati/execution/router.py", line 915, in apply_exits
+E             r = self._send_close(venue, position_id=ins.position_id, trade_intent_id="",
+E                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           File "/workspace/van-lanes-20261101/family-multiposition/trading/vati/execution/router.py", line 354, in _send_close
+E             positions=[p for p in adapter.positions() if p.position_id==position_id]
+E                                   ^^^^^^^^^^^^^^^^^
+E         AttributeError: 'Adapter' object has no attribute 'positions'
+E         
+E       assert 1 == 23
+E        +  where 1 = CompletedProcess(args=['/workspace/van-backend-venv-20261025/bin/python', '-c', "\nimport os,sys\nfrom pathlib import ...id]\n                          ^^^^^^^^^^^^^^^^^\nAttributeError: \'Adapter\' object has no attribute \'positions\'\n').returncode
+
+trading/tests/test_exit_uncertainty.py:156: AssertionError</failure></testcase><testcase classname="trading.tests.test_exit_uncertainty" name="test_process_death_keeps_the_original_attempt_fenced[after_receipt_commit-1]" time="0.170"><failure message="AssertionError: Traceback (most recent call last):&#10;    File &quot;&lt;string&gt;&quot;, line 36, in &lt;module&gt;&#10;    File &quot;/workspace/van-lanes-20261101/family-multiposition/trading/vati/execution/router.py&quot;, line 915, in apply_exits&#10;      r = self._send_close(venue, position_id=ins.position_id, trade_intent_id=&quot;&quot;,&#10;          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^&#10;    File &quot;/workspace/van-lanes-20261101/family-multiposition/trading/vati/execution/router.py&quot;, line 354, in _send_close&#10;      positions=[p for p in adapter.positions() if p.position_id==position_id]&#10;                            ^^^^^^^^^^^^^^^^^&#10;  AttributeError: 'Adapter' object has no attribute 'positions'&#10;  &#10;assert 1 == 23&#10; +  where 1 = CompletedProcess(args=['/workspace/van-backend-venv-20261025/bin/python', '-c', &quot;\nimport os,sys\nfrom pathlib import ...id]\n                          ^^^^^^^^^^^^^^^^^\nAttributeError: \'Adapter\' object has no attribute \'positions\'\n').returncode">tmp_path = PosixPath('/tmp/van-recovery-family-native-supervision-r9-20261101/test_process_death_keeps_the_o3')
+stage = 'after_receipt_commit', effects = 1
+
+    @pytest.mark.parametrize("stage,effects", [("after_request", 0), ("after_effect", 1),
+        ("before_receipt_commit", 1), ("after_receipt_commit", 1)])
+    def test_process_death_keeps_the_original_attempt_fenced(tmp_path, stage, effects):
+        database, effect = tmp_path/"death.sqlite", tmp_path/"venue-effects.txt"
+        script = '''
+    import os,sys
+    from pathlib import Path
+    from decimal import Decimal as D
+    from vati.core.ledger import Ledger
+    from vati.core.events import EventKind
+    from vati.execution.router import ExecutionRouter
+    from vati.execution.protection import ProtectionManager
+    from vati.execution.base import ExecutionReceipt
+    from vati.risk import KillSwitch
+    from vati.risk.contracts import Direction
+    path,effect,stage=sys.argv[1:]
+    ledger=Ledger(path)
+    protection=ProtectionManager()
+    protection.register('position',symbol='TEST',direction=Direction.LONG,entry=D('100'),stop=D('90'),target=None,opened_ms=0)
+    class Adapter:
+        venue='probe'
+        def close(self,position_id,quantity,*,now_ms,reason):
+            with Path(effect).open('a') as stream:stream.write('applied\\n')
+            if stage=='after_effect':os._exit(23)
+            return ExecutionReceipt('intent','','probe','FILLED',D('1'),D('89'),D('100'),D('100'),D('100'),True,now_ms,now_ms,broker_position_id='position').sealed()
+    router=ExecutionRouter(ledger=ledger,adapters={'probe':Adapter()},kill_switch=KillSwitch(),protection=protection)
+    if stage=='after_request':
+        original=router.exit_journal.begin
+        def begin(**kwargs):
+            original(**kwargs)
+            os._exit(23)
+        router.exit_journal.begin=begin
+    if stage=='before_receipt_commit':
+        original=ledger.append
+        def append(event):
+            if event.kind is EventKind.EXIT_ATTEMPT and event.payload['state']=='CONFIRMED':os._exit(23)
+            return original(event)
+        ledger.append=append
+    if stage=='after_receipt_commit':protection.close_confirmed=lambda position_id:os._exit(23)
+    router.apply_exits('probe','TEST',D('89'),D('90'),now_ms=1)
+    raise AssertionError('crash injection not reached')
+    '''
+        result = subprocess.run([sys.executable,"-c",script,str(database),str(effect),stage],
+            cwd=Path(__file__).resolve().parents[2], text=True, capture_output=True)
+&gt;       assert result.returncode == 23, result.stderr
+E       AssertionError: Traceback (most recent call last):
+E           File "&lt;string&gt;", line 36, in &lt;module&gt;
+E           File "/workspace/van-lanes-20261101/family-multiposition/trading/vati/execution/router.py", line 915, in apply_exits
+E             r = self._send_close(venue, position_id=ins.position_id, trade_intent_id="",
+E                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           File "/workspace/van-lanes-20261101/family-multiposition/trading/vati/execution/router.py", line 354, in _send_close
+E             positions=[p for p in adapter.positions() if p.position_id==position_id]
+E                                   ^^^^^^^^^^^^^^^^^
+E         AttributeError: 'Adapter' object has no attribute 'positions'
+E         
+E       assert 1 == 23
+E        +  where 1 = CompletedProcess(args=['/workspace/van-backend-venv-20261025/bin/python', '-c', "\nimport os,sys\nfrom pathlib import ...id]\n                          ^^^^^^^^^^^^^^^^^\nAttributeError: \'Adapter\' object has no attribute \'positions\'\n').returncode
+
+trading/tests/test_exit_uncertainty.py:156: AssertionError</failure></testcase><testcase classname="trading.tests.test_exit_uncertainty" name="test_owner_sell_definition_is_durable_for_preservation_and_final_partial_keeps_protection" time="0.003" /><testcase classname="trading.tests.test_exit_uncertainty" name="test_owner_assertion_cannot_settle_an_unbound_exit_ticket[not_durable]" time="0.002" /><testcase classname="trading.tests.test_exit_uncertainty" name="test_owner_assertion_cannot_settle_an_unbound_exit_ticket[non_native]" time="0.002" /><testcase classname="trading.tests.test_exit_uncertainty" name="test_owner_assertion_cannot_settle_an_unbound_exit_ticket[wrong_ticket]" time="0.003" /><testcase classname="trading.tests.test_exit_uncertainty" name="test_full_native_owner_confirmation_resolves_without_another_transport" time="0.002" /><testcase classname="trading.tests.test_exit_uncertainty" name="test_missing_or_nonfinite_close_price_retains_entry_for_later_reconciliation[None-account]" time="0.007" /><testcase classname="trading.tests.test_exit_uncertainty" name="test_missing_or_nonfinite_close_price_retains_entry_for_later_reconciliation[None-single_symbol]" time="0.005" /><testcase classname="trading.tests.test_exit_uncertainty" name="test_missing_or_nonfinite_close_price_retains_entry_for_later_reconciliation[price1-account]" time="0.002" /><testcase classname="trading.tests.test_exit_uncertainty" name="test_missing_or_nonfinite_close_price_retains_entry_for_later_reconciliation[price1-single_symbol]" time="0.007" /><testcase classname="trading.tests.test_exit_uncertainty" name="test_missing_or_nonfinite_close_price_retains_entry_for_later_reconciliation[price2-account]" time="0.004" /><testcase classname="trading.tests.test_exit_uncertainty" name="test_missing_or_nonfinite_close_price_retains_entry_for_later_reconciliation[price2-single_symbol]" time="0.008" /><testcase classname="trading.tests.test_exit_uncertainty" name="test_restart_preserves_uncertainty_even_with_a_fresh_protection_projection" time="0.003"><failure message="AttributeError: 'CloseProbe' object has no attribute 'positions'">tmp_path = PosixPath('/tmp/van-recovery-family-native-supervision-r9-20261101/test_restart_preserves_uncerta0')
+
+    def test_restart_preserves_uncertainty_even_with_a_fresh_protection_projection(tmp_path):
+        path = tmp_path/"uncertain.sqlite"
+        adapter = CloseProbe()
+        original = build(Ledger(path), adapter)
+&gt;       mark(original)
+
+trading/tests/test_exit_uncertainty.py:263: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+trading/tests/test_exit_uncertainty.py:48: in mark
+    return router.apply_exits("probe", "TEST", D("89"), D("90"), now_ms=when)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/execution/router.py:915: in apply_exits
+    r = self._send_close(venue, position_id=ins.position_id, trade_intent_id="",
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;vati.execution.router.ExecutionRouter object at 0x7fd0355d89b0&gt;
+venue = 'probe', position_id = 'position', trade_intent_id = '', quantity = None
+action = 'FULL_CLOSE', reason = 'STRUCTURE', now_ms = 1
+family_action_ref = None, family_target_ref = None, family_effect_guard = None
+
+    def _send_close(self, venue: str, *, position_id: str, trade_intent_id: str,
+                    quantity: Optional[Decimal], action: str, reason: str, now_ms: int,
+                    family_action_ref=None, family_target_ref=None, family_effect_guard=None) -&gt; ExecutionReceipt:
+        # ProtectionManager addresses a native position, rather than an intent.
+        # Join its close to the original managed entry before publishing the
+        # request. An empty request identity must not orphan a valid child-leg
+        # receipt from its family after restart. Unresolved legacy protection
+        # retains its existing urgent path and remains unqualified family data.
+        if not trade_intent_id:
+            from vati.execution.recovery_scope import NativePositionHistory, PositionRecoveryError
+            from vati.core.ledger import LedgerError
+            try:
+                adapter=self.adapters[venue]
+&gt;               positions=[p for p in adapter.positions() if p.position_id==position_id]
+                                      ^^^^^^^^^^^^^^^^^
+E               AttributeError: 'CloseProbe' object has no attribute 'positions'
+
+trading/vati/execution/router.py:354: AttributeError</failure></testcase><testcase classname="trading.tests.test_exit_uncertainty" name="test_upgrade_does_not_erase_a_legacy_unknown_close_receipt" time="0.002" /><testcase classname="trading.tests.test_exit_uncertainty" name="test_an_unknown_partial_preservation_close_blocks_another_close_request" time="0.002" /><testcase classname="trading.tests.test_exit_uncertainty" name="test_definitive_zero_fill_refusal_allows_a_later_protective_retry" time="0.001"><failure message="AttributeError: 'CloseProbe' object has no attribute 'positions'">def test_definitive_zero_fill_refusal_allows_a_later_protective_retry():
+        adapter = CloseProbe(status="REJECTED")
+        router = build(Ledger(), adapter)
+&gt;       assert mark(router)[0].status == "REJECTED"
+               ^^^^^^^^^^^^
+
+trading/tests/test_exit_uncertainty.py:300: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+trading/tests/test_exit_uncertainty.py:48: in mark
+    return router.apply_exits("probe", "TEST", D("89"), D("90"), now_ms=when)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/execution/router.py:915: in apply_exits
+    r = self._send_close(venue, position_id=ins.position_id, trade_intent_id="",
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;vati.execution.router.ExecutionRouter object at 0x7fd035698d70&gt;
+venue = 'probe', position_id = 'position', trade_intent_id = '', quantity = None
+action = 'FULL_CLOSE', reason = 'STRUCTURE', now_ms = 1
+family_action_ref = None, family_target_ref = None, family_effect_guard = None
+
+    def _send_close(self, venue: str, *, position_id: str, trade_intent_id: str,
+                    quantity: Optional[Decimal], action: str, reason: str, now_ms: int,
+                    family_action_ref=None, family_target_ref=None, family_effect_guard=None) -&gt; ExecutionReceipt:
+        # ProtectionManager addresses a native position, rather than an intent.
+        # Join its close to the original managed entry before publishing the
+        # request. An empty request identity must not orphan a valid child-leg
+        # receipt from its family after restart. Unresolved legacy protection
+        # retains its existing urgent path and remains unqualified family data.
+        if not trade_intent_id:
+            from vati.execution.recovery_scope import NativePositionHistory, PositionRecoveryError
+            from vati.core.ledger import LedgerError
+            try:
+                adapter=self.adapters[venue]
+&gt;               positions=[p for p in adapter.positions() if p.position_id==position_id]
+                                      ^^^^^^^^^^^^^^^^^
+E               AttributeError: 'CloseProbe' object has no attribute 'positions'
+
+trading/vati/execution/router.py:354: AttributeError</failure></testcase><testcase classname="trading.tests.test_exit_uncertainty" name="test_incomplete_or_wrong_position_receipt_cannot_remove_protection[patch0]" time="0.001"><failure message="AttributeError: 'Malformed' object has no attribute 'positions'">patch = {'status': 'FILLED'}
+
+    @pytest.mark.parametrize("patch", [dict(status="FILLED"), dict(status="CANCELLED",filled_qty=D("1")),
+        dict(status="FILLED",filled_qty=D("1"),average_fill=D("99"),broker_position_id="another")])
+    def test_incomplete_or_wrong_position_receipt_cannot_remove_protection(patch):
+        class Malformed(CloseProbe):
+            def close(self, *args, **kwargs):
+                return replace(super().close(*args, **kwargs), **patch).sealed()
+        adapter = Malformed()
+        router = build(Ledger(), adapter)
+        with pytest.raises(RouterError, match="reconcil"):
+&gt;           mark(router)
+
+trading/tests/test_exit_uncertainty.py:315: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+trading/tests/test_exit_uncertainty.py:48: in mark
+    return router.apply_exits("probe", "TEST", D("89"), D("90"), now_ms=when)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/execution/router.py:915: in apply_exits
+    r = self._send_close(venue, position_id=ins.position_id, trade_intent_id="",
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;vati.execution.router.ExecutionRouter object at 0x7fd0356306e0&gt;
+venue = 'probe', position_id = 'position', trade_intent_id = '', quantity = None
+action = 'FULL_CLOSE', reason = 'STRUCTURE', now_ms = 1
+family_action_ref = None, family_target_ref = None, family_effect_guard = None
+
+    def _send_close(self, venue: str, *, position_id: str, trade_intent_id: str,
+                    quantity: Optional[Decimal], action: str, reason: str, now_ms: int,
+                    family_action_ref=None, family_target_ref=None, family_effect_guard=None) -&gt; ExecutionReceipt:
+        # ProtectionManager addresses a native position, rather than an intent.
+        # Join its close to the original managed entry before publishing the
+        # request. An empty request identity must not orphan a valid child-leg
+        # receipt from its family after restart. Unresolved legacy protection
+        # retains its existing urgent path and remains unqualified family data.
+        if not trade_intent_id:
+            from vati.execution.recovery_scope import NativePositionHistory, PositionRecoveryError
+            from vati.core.ledger import LedgerError
+            try:
+                adapter=self.adapters[venue]
+&gt;               positions=[p for p in adapter.positions() if p.position_id==position_id]
+                                      ^^^^^^^^^^^^^^^^^
+E               AttributeError: 'Malformed' object has no attribute 'positions'
+
+trading/vati/execution/router.py:354: AttributeError</failure></testcase><testcase classname="trading.tests.test_exit_uncertainty" name="test_incomplete_or_wrong_position_receipt_cannot_remove_protection[patch1]" time="0.002"><failure message="AttributeError: 'Malformed' object has no attribute 'positions'">patch = {'status': 'CANCELLED', 'filled_qty': Decimal('1')}
+
+    @pytest.mark.parametrize("patch", [dict(status="FILLED"), dict(status="CANCELLED",filled_qty=D("1")),
+        dict(status="FILLED",filled_qty=D("1"),average_fill=D("99"),broker_position_id="another")])
+    def test_incomplete_or_wrong_position_receipt_cannot_remove_protection(patch):
+        class Malformed(CloseProbe):
+            def close(self, *args, **kwargs):
+                return replace(super().close(*args, **kwargs), **patch).sealed()
+        adapter = Malformed()
+        router = build(Ledger(), adapter)
+        with pytest.raises(RouterError, match="reconcil"):
+&gt;           mark(router)
+
+trading/tests/test_exit_uncertainty.py:315: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+trading/tests/test_exit_uncertainty.py:48: in mark
+    return router.apply_exits("probe", "TEST", D("89"), D("90"), now_ms=when)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/execution/router.py:915: in apply_exits
+    r = self._send_close(venue, position_id=ins.position_id, trade_intent_id="",
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;vati.execution.router.ExecutionRouter object at 0x7fd0355daa20&gt;
+venue = 'probe', position_id = 'position', trade_intent_id = '', quantity = None
+action = 'FULL_CLOSE', reason = 'STRUCTURE', now_ms = 1
+family_action_ref = None, family_target_ref = None, family_effect_guard = None
+
+    def _send_close(self, venue: str, *, position_id: str, trade_intent_id: str,
+                    quantity: Optional[Decimal], action: str, reason: str, now_ms: int,
+                    family_action_ref=None, family_target_ref=None, family_effect_guard=None) -&gt; ExecutionReceipt:
+        # ProtectionManager addresses a native position, rather than an intent.
+        # Join its close to the original managed entry before publishing the
+        # request. An empty request identity must not orphan a valid child-leg
+        # receipt from its family after restart. Unresolved legacy protection
+        # retains its existing urgent path and remains unqualified family data.
+        if not trade_intent_id:
+            from vati.execution.recovery_scope import NativePositionHistory, PositionRecoveryError
+            from vati.core.ledger import LedgerError
+            try:
+                adapter=self.adapters[venue]
+&gt;               positions=[p for p in adapter.positions() if p.position_id==position_id]
+                                      ^^^^^^^^^^^^^^^^^
+E               AttributeError: 'Malformed' object has no attribute 'positions'
+
+trading/vati/execution/router.py:354: AttributeError</failure></testcase><testcase classname="trading.tests.test_exit_uncertainty" name="test_incomplete_or_wrong_position_receipt_cannot_remove_protection[patch2]" time="0.005"><failure message="AttributeError: 'Malformed' object has no attribute 'positions'">patch = {'status': 'FILLED', 'filled_qty': Decimal('1'), 'average_fill': Decimal('99'), 'broker_position_id': 'another'}
+
+    @pytest.mark.parametrize("patch", [dict(status="FILLED"), dict(status="CANCELLED",filled_qty=D("1")),
+        dict(status="FILLED",filled_qty=D("1"),average_fill=D("99"),broker_position_id="another")])
+    def test_incomplete_or_wrong_position_receipt_cannot_remove_protection(patch):
+        class Malformed(CloseProbe):
+            def close(self, *args, **kwargs):
+                return replace(super().close(*args, **kwargs), **patch).sealed()
+        adapter = Malformed()
+        router = build(Ledger(), adapter)
+        with pytest.raises(RouterError, match="reconcil"):
+&gt;           mark(router)
+
+trading/tests/test_exit_uncertainty.py:315: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+trading/tests/test_exit_uncertainty.py:48: in mark
+    return router.apply_exits("probe", "TEST", D("89"), D("90"), now_ms=when)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+trading/vati/execution/router.py:915: in apply_exits
+    r = self._send_close(venue, position_id=ins.position_id, trade_intent_id="",
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;vati.execution.router.ExecutionRouter object at 0x7fd0355d98b0&gt;
+venue = 'probe', position_id = 'position', trade_intent_id = '', quantity = None
+action = 'FULL_CLOSE', reason = 'STRUCTURE', now_ms = 1
+family_action_ref = None, family_target_ref = None, family_effect_guard = None
+
+    def _send_close(self, venue: str, *, position_id: str, trade_intent_id: str,
+                    quantity: Optional[Decimal], action: str, reason: str, now_ms: int,
+                    family_action_ref=None, family_target_ref=None, family_effect_guard=None) -&gt; ExecutionReceipt:
+        # ProtectionManager addresses a native position, rather than an intent.
+        # Join its close to the original managed entry before publishing the
+        # request. An empty request identity must not orphan a valid child-leg
+        # receipt from its family after restart. Unresolved legacy protection
+        # retains its existing urgent path and remains unqualified family data.
+        if not trade_intent_id:
+            from vati.execution.recovery_scope import NativePositionHistory, PositionRecoveryError
+            from vati.core.ledger import LedgerError
+            try:
+                adapter=self.adapters[venue]
+&gt;               positions=[p for p in adapter.positions() if p.position_id==position_id]
+                                      ^^^^^^^^^^^^^^^^^
+E               AttributeError: 'Malformed' object has no attribute 'positions'
+
+trading/vati/execution/router.py:354: AttributeError</failure></testcase><testcase classname="trading.tests.test_account_lifecycle" name="test_attributed_venue_position_without_open_ledger_state_blocks" time="0.001" /><testcase classname="trading.tests.test_account_lifecycle" name="test_restart_restores_only_ledger_backed_position_and_protection" time="0.002" /><testcase classname="trading.tests.test_account_lifecycle" name="test_restart_protection_refuses_a_widened_stop" time="0.001" /><testcase classname="trading.tests.test_account_lifecycle" name="test_filled_entry_produces_tca_and_close_produces_review" time="0.003" /><testcase classname="trading.tests.test_account_lifecycle" name="test_account_service_replays_only_newly_closed_bars_and_only_advanced_symbols" time="0.009" /><testcase classname="trading.tests.test_account_lifecycle" name="test_signed_owner_ticket_confirmations_become_runtime_truth_once_and_replay_cleanly" time="0.048" /><testcase classname="trading.tests.test_account_trade_lifecycle" name="test_owner_buy_replay_repairs_missing_tca_exactly_once_after_receipt_commit" time="0.004" /><testcase classname="trading.tests.test_account_trade_lifecycle" name="test_owner_sell_replay_repairs_missing_review_exactly_once_after_receipt_commit" time="0.002" /><testcase classname="trading.tests.test_account_trade_lifecycle" name="test_regular_broker_restart_repairs_missing_tca_exactly_once" time="0.009" /><testcase classname="trading.tests.test_account_trade_lifecycle" name="test_corrupt_durable_fill_receipt_is_not_promoted_into_recovered_tca" time="0.008" /><testcase classname="trading.tests.test_account_trade_lifecycle" name="test_downstream_evidence_lookup_exhausts_transactional_iterator" time="0.001" /><testcase classname="trading.tests.test_account_trade_lifecycle" name="test_restart_protection_restore_cannot_widen_the_original_stop" time="0.001" /><testcase classname="trading.tests.test_native_position_recovery_scope" name="test_native_recovery_cannot_adopt_a_label_with_missing_or_conflicting_provenance[foreign-owner]" time="0.002" /><testcase classname="trading.tests.test_native_position_recovery_scope" name="test_native_recovery_cannot_adopt_a_label_with_missing_or_conflicting_provenance[ambiguous-owner]" time="0.002" /><testcase classname="trading.tests.test_native_position_recovery_scope" name="test_native_recovery_cannot_adopt_a_label_with_missing_or_conflicting_provenance[wrong-symbol]" time="0.001" /><testcase classname="trading.tests.test_native_position_recovery_scope" name="test_native_recovery_cannot_adopt_a_label_with_missing_or_conflicting_provenance[wrong-venue]" time="0.001" /><testcase classname="trading.tests.test_native_position_recovery_scope" name="test_native_recovery_cannot_adopt_a_label_with_missing_or_conflicting_provenance[foreign-producer]" time="0.002" /><testcase classname="trading.tests.test_native_position_recovery_scope" name="test_native_recovery_cannot_adopt_a_label_with_missing_or_conflicting_provenance[bad-command-seal]" time="0.002" /><testcase classname="trading.tests.test_native_position_recovery_scope" name="test_native_recovery_cannot_adopt_a_label_with_missing_or_conflicting_provenance[wrong-correlation]" time="0.001" /><testcase classname="trading.tests.test_native_position_recovery_scope" name="test_native_recovery_cannot_adopt_a_label_with_missing_or_conflicting_provenance[missing-native-stop]" time="0.001" /><testcase classname="trading.tests.test_native_position_recovery_scope" name="test_native_recovery_cannot_adopt_a_label_with_missing_or_conflicting_provenance[excess-quantity]" time="0.002" /><testcase classname="trading.tests.test_native_position_recovery_scope" name="test_native_recovery_cannot_adopt_a_label_with_missing_or_conflicting_provenance[missing-position-identity]" time="0.002" /><testcase classname="trading.tests.test_native_position_recovery_scope" name="test_genuine_native_partial_position_and_tighter_stop_are_recoverable_without_sending" time="0.002" /><testcase classname="trading.tests.test_native_position_recovery_scope" name="test_unrelated_or_invalid_tca_cannot_replace_this_positions_native_cost[foreign-owner]" time="0.002" /><testcase classname="trading.tests.test_native_position_recovery_scope" name="test_unrelated_or_invalid_tca_cannot_replace_this_positions_native_cost[foreign-producer]" time="0.001" /><testcase classname="trading.tests.test_native_position_recovery_scope" name="test_unrelated_or_invalid_tca_cannot_replace_this_positions_native_cost[invalid-units]" time="0.002" /><testcase classname="trading.tests.test_native_position_recovery_scope" name="test_recovery_preserves_a_genuine_historical_command_before_lease_epoch_existed" time="0.001" /><testcase classname="trading.tests.test_native_position_recovery_scope" name="test_invalid_native_chain_cannot_be_used_for_position_recovery" time="0.001" /><testcase classname="trading.tests.test_native_position_recovery_scope" name="test_current_mandate_alias_cannot_relabel_a_different_native_adapter" time="0.001" /></testsuite></testsuites>

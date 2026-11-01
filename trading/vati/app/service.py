@@ -95,6 +95,12 @@ class ServiceConfig:
     news: dict = field(default_factory=dict)
     #: Native public owner keys, shared with Commander; no private signing key.
     owner_authority_keys: str = ""
+    #: Internal lifecycle governance selection; no default admission or activation.
+    lifecycle_policy_grant_id: str = ""
+    lifecycle_policy_qualification_keys: str = ""
+    #: Explicit simulator close capability; empty preserves continuous legacy closes.
+    #: Entry constraints never supply a close grid.
+    paper_close_contracts: dict = field(default_factory=dict)
 
     @classmethod
     def load(cls, path: str | Path) -> "ServiceConfig":
@@ -108,13 +114,33 @@ class ServiceConfig:
 from vati.learning.scope import ENVIRONMENT_FOR_MODE
 
 
-def build_adapter(account: Account, registry: AccountRegistry, *, equity_hint: Decimal = Decimal("10000"), deriv_connector=None, symbol_contracts=None) -> VenueAdapter:
+def paper_close_contracts_from_config(config):
+    """The simulator enforces these explicit close contracts itself."""
+    from vati.execution.paper import PaperCloseContract
+    if not isinstance(config,dict):raise ValueError("paper close contracts must be a symbol mapping")
+    result={}
+    allowed={'quantity_quantum','partial_min','partial_max','minimum_remaining','revision'}
+    for symbol,body in config.items():
+        if (not isinstance(symbol,str) or not symbol or symbol!=symbol.upper() or not isinstance(body,dict)
+                or set(body)-allowed or not {'quantity_quantum','revision'}<=set(body)):
+            raise ValueError("explicit paper close capability schema/revision is invalid")
+        values={key:(Decimal(str(value)) if key!='revision' and value is not None else value)
+            for key,value in body.items()}
+        result[symbol]=PaperCloseContract(**values)
+    return result
+
+
+def build_adapter(account: Account, registry: AccountRegistry, *, equity_hint: Decimal = Decimal("10000"), deriv_connector=None, symbol_contracts=None, paper_close_contracts=None) -> VenueAdapter:
     """Adapter from the account record. Credentials are resolved inside the transport and never returned."""
     from vati.accounts.access import bind_entry_authority
     def bound(adapter):
         return bind_entry_authority(adapter, registry, account)
     if account.broker == BrokerKind.PAPER:
-        return bound(PaperAdapter(venue=account.router_venue, account_alias=account.alias, currency=account.currency, equity=equity_hint, symbol_contracts=symbol_contracts))
+        return bound(PaperAdapter(venue=account.router_venue, account_alias=account.alias, currency=account.currency,
+            equity=equity_hint, symbol_contracts=symbol_contracts,
+            close_contracts=paper_close_contracts_from_config(paper_close_contracts or {})))
+    if paper_close_contracts:
+        raise ValueError("paper close capability configuration cannot qualify a native adapter")
     if account.broker == BrokerKind.MT5:
         from vati.execution.mt5_identity import Mt5Identity
         identity = Mt5Identity.from_account(account)
@@ -208,9 +234,11 @@ class SessionService:
         if not shared and account.broker != BrokerKind.PAPER and mandate.mode.value in SENDING_MODES:
             raise RuntimeError("native venue entry requires the shared PostgreSQL VATI authority store; a local lease is not a cross-host fence")
         contract = contract_from_dict({**c.contract, "venue": account.router_venue})
-        self.adapter = self.adapter or build_adapter(account, registry, symbol_contracts={c.symbol: contract})
+        self.adapter = self.adapter or build_adapter(account, registry, symbol_contracts={c.symbol: contract}, paper_close_contracts=c.paper_close_contracts)
         if isinstance(self.adapter, PaperAdapter):
             self.adapter.bind_contracts({c.symbol: contract})
+            if c.paper_close_contracts:
+                self.adapter.bind_close_contracts(paper_close_contracts_from_config(c.paper_close_contracts))
         self._ledger = open_ledger(c.ledger)
         from vati.app.account_lease import PostgresLeaseStore
         from vati.app.physical_account_lease import build_runtime_lease

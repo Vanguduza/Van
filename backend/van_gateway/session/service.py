@@ -98,6 +98,9 @@ class VanHermesSessionService:
         )
         async with self.store.connection() as db:
             await db.execute("BEGIN IMMEDIATE")
+            device = await (await db.execute("SELECT revoked_at_unix FROM devices WHERE device_id=?", (device_id,))).fetchone()
+            if device is not None and device["revoked_at_unix"] is not None:
+                raise SessionError("device_revoked")
             cur = await db.execute("SELECT device_id,state FROM van_sessions WHERE van_session_id = ?", (session_id,))
             prior = await cur.fetchone()
             if prior is not None:

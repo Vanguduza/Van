@@ -1,0 +1,42 @@
+{
+  "schema": "van.frozen-family-independent-source-review/1",
+  "state": "BLOCKED_PENDING_TWO_REPAIRS",
+  "reviewed_base": "2728a83ce203fec867dc536c8d4341c2ce4415cb",
+  "reviewed_source_pins": "before.json / after.json; all37 exact frozen pins verified at first probe interval",
+  "recoverable_archive_verified": true,
+  "review_scope": "SOURCE same-direction multi-ticket workflow, no source edits/commits/native effects; root decisions only. Bounded external actual SQLite/Paper probes, no broad suites/containers.",
+  "blocking_findings": [
+    {
+      "id": "FAM-REVIEW-01",
+      "path": "trading/vati/execution/router.py:349",
+      "finding": "Optional empty-intent attribution reads adapter.positions before original urgent close request. Standard VenueUnavailable from actual adapters escapes narrow exception list, preventing existing close dispatch. Read failure must leave attribution unknown without suppressing lawful legacy close. Do not broadly mask programmer faults.",
+      "probe": "probe-results.json",
+      "observed": "VenueUnavailable propagated; close_calls=0",
+      "root_disposition": "ACCEPTED; targeted source repair authorized to implementation owner"
+    },
+    {
+      "id": "FAM-REVIEW-02",
+      "path": "trading/vati/lifecycle/family_actions.py:314",
+      "related": "trading/vati/lifecycle/family_protection.py:47",
+      "finding": "A new mandatory FULL_CLOSE after earlier independent first-leg close took effect but reply was lost cannot bind plan because whole-family snapshot is unknown. Known sibling remains open. Passing within-one-original-full-action UNKNOWN isolation does not cover preexisting unknown before new mandatory decision.",
+      "probe": "probe-preexisting-unknown-results.json",
+      "observed": "Original firstleg native absent/UNKNOWN; sibling P2 before and after; FamilyActionError a bound requested quantity is required.",
+      "root_disposition": "ACCEPTED; mandatory full may independently close exact confirmed native sibling with original membership/capability/authority/fence while unknown stays unresolved/no resend. Partial/proportional still requires known snapshot."
+    }
+  ],
+  "positive_independent_probes": [
+    "Pending economics now persist immutable pending SESSION and later actual owner maturity yields first root review and one trial: PASS (interim finality freeze corrected).",
+    "Authentic configured SOURCE native-owner late cash observation emits immutable evidence-bound TRADE_REVIEW_REVISION replacing same parent in RestatedTradeProjection; original episode unchanged and count remains1: PASS.",
+    "Cold recovery with expired optional policy retains mandatory family full close and one root review/experience: PASS.",
+    "UNKNOWN during original full action is never resent; other original full leg executes: PASS."
+  ],
+  "other_bounded_source_observations": [
+    "PROPORTIONAL_FLOOR_V1 uses exact rational per-leg floors without rounding up or redistributing residual. Journal records actual versus requested amounts; earlier .04\u2192.03/.01 INCOMPLETE evidence retained in interim report.",
+    "Current owner/independent issuer, exact source policy hash, original native membership/revision, actual close capability/environment/strategy and per-target lease/fence checks remain distinct. Production issuer absence is NOT_QUALIFIED; no public action registered.",
+    "Actual post-action native risk is derived inside authorize_plan and compared with native equity plus original/current/grant bounds. Withdrawn interim risk-input concern remains withdrawn; redundant input was removed.",
+    "Only CLOSE receipts reduce native quantities; MODIFY_STOP cannot account as close. Original entry/risk denominator joins account coordinator evidence; child native fills remain one root family trial.",
+    "Late fact revisions preserve knowledge/decision histories and use existing restated analysis projection; no second learning trial. Synthetic SOURCE correction producer is explicit and production correction owner remains NOT_QUALIFIED.",
+    "Actual source evidence332pass1PGskip, exactPGcase1pass andPG50/0skip are worker-reported pinned test evidence, not independently rerun/full-unit/native acceptance."
+  ],
+  "next": "After authorized fixes, retain original failed probes, independently recheck both exact counterexamples and narrow affected source pins; no final approval until repaired source freeze is supplied."
+}

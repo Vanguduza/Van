@@ -1,0 +1,33 @@
+{
+  "command": [
+    "/workspace/van-backend-venv-20261025/bin/python",
+    "tools/rebuild/source_storage_audit.py",
+    "--report",
+    "/workspace/van-family-native-contract-r1-20261101/storage-audit.json",
+    "trading/tests/test_family_native_action_contract.py",
+    "--basetemp=/tmp/van-recovery-family-native-contract-r1-20261101",
+    "--junitxml=/workspace/van-family-native-contract-r1-20261101/tests.xml",
+    "-q"
+  ],
+  "exit": 0,
+  "at_utc": "2026-11-01T03:00:53.102180+00:00",
+  "source_parent": "d43bd396765204a4843cdb7485535e9fcd7af3ce",
+  "scope": "Newsourcecontract only; not fullworkflow qualification",
+  "owned_temp_preflight": {
+    "path": "/tmp/van-recovery-family-native-contract-r1-20261101",
+    "free_bytes_before": 8923205632,
+    "free_inodes_before": 2304131,
+    "minimum_free_bytes": 4294967296,
+    "no_preexisting_directory": true
+  },
+  "owned_temp_cleanup": {
+    "path": "/tmp/van-recovery-family-native-contract-r1-20261101",
+    "files": 1,
+    "inventory": "/workspace/van-family-native-contract-r1-20261101/owned-temp-inventory.json",
+    "inventory_sha256": "9012041a91cefb1fe68c7eaf91d451710df17e0e883b4e7b3c5036563acae961",
+    "free_bytes_before_cleanup": 8923201536,
+    "free_bytes_after_cleanup": 8923205632,
+    "free_inodes_after": 2304131,
+    "independently_absent": true
+  }
+}

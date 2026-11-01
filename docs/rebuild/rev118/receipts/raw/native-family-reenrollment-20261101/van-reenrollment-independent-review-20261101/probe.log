@@ -1,0 +1,3 @@
+native owner-key revocation remains pending
+native owner-key revocation remains pending
+{"imports": {"reenrollment": "/workspace/van-lanes-20261101/reenrollment/backend/van_gateway/auth/reenrollment.py"}, "results": [{"case": "migration60 interrupted DDL restart preserving original intent", "result": "PASS"}, {"case": "competing original intents and normal revoke barrier", "result": "PASS"}], "source_pins_match_handoff": true, "source_unchanged_during_probe": true, "temporary_cleanup": "Owned /tmp TemporaryDirectory removed after each probe; no native transport, actual SQLite and fixture CA only."}

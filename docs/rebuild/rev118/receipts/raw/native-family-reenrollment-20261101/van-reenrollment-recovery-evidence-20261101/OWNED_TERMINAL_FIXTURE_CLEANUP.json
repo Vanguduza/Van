@@ -1,0 +1,33 @@
+{
+  "terminal_controllers": [
+    51965,
+    88519,
+    90325,
+    87733,
+    88468
+  ],
+  "removed_fixtures": [
+    {
+      "path": "/tmp/van-reenrollment-migration-counterexample-01",
+      "bytes": 1918219
+    },
+    {
+      "path": "/tmp/van-reenrollment-migration-final-01",
+      "bytes": 54518006
+    },
+    {
+      "path": "/tmp/van-reenrollment-resume-affected-01",
+      "bytes": 386778515
+    },
+    {
+      "path": "/tmp/van-reenrollment-resume-focused-01",
+      "bytes": 48494487
+    },
+    {
+      "path": "/tmp/van-reenrollment-resume-installer-01",
+      "bytes": 2055616
+    }
+  ],
+  "raw_logs_retained_in": "/workspace/van-reenrollment-recovery-evidence-20261101",
+  "children": "actualprocessdeathtests waited/asserted27/28exit; no ownedpytest remains"
+}

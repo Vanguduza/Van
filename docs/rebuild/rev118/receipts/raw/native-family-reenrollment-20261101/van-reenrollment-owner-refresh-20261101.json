@@ -1,0 +1,12 @@
+{
+  "changed": [
+    "registries/owner_endpoints.json",
+    "registries/owner_endpoint_schemas.json",
+    "docs/rebuild/rev118/backend/OWNER_REGISTRY_SOURCE_REFRESH_20261022.json",
+    "registries/owner_features.json",
+    "registries/owner_screens.json",
+    "docs/rebuild/rev118/backend/OWNER_REGISTRY_GENERATION.json"
+  ],
+  "applied": true,
+  "scope": "SOURCE_CONTRACTS_ONLY"
+}

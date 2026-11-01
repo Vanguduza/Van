@@ -1,0 +1,33 @@
+...F............................................                         [100%]
+=================================== FAILURES ===================================
+_ test_preexisting_independent_unknown_cannot_block_new_mandatory_other_leg_close _
+
+tmp_path = PosixPath('/tmp/van-recovery-family-review-repairs-focused-r1-20261101/test_preexisting_independent_u0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7efc03a84530>
+
+    def test_preexisting_independent_unknown_cannot_block_new_mandatory_other_leg_close(tmp_path,monkeypatch):
+        import pytest
+        w,store,time,grant,plan,history=admitted_source_world(tmp_path,
+            actual_runtime_lease=True,add_child=True,max_quantity='.20')
+        try:
+            family=w.lifecycle.families.get(plan.snapshot.family_id)
+            root=w.lifecycle.entries['ti-e2e-1']['broker_position_id'];close=w.adapter.close;calls=[]
+            def lost_original_reply(pid,*args,**kwargs):
+                calls.append(pid);receipt=close(pid,*args,**kwargs)
+                if pid==root:raise OSError('synthetic earlier independent native close reply lost')
+                return receipt
+            monkeypatch.setattr(w.adapter,'close',lost_original_reply)
+            with pytest.raises(OSError):
+                w.router.apply_preservation('paper',position_id=root,trade_intent_id='ti-e2e-1',
+                    action='FULL_CLOSE',now_ms=time[0],reason='EARLIER_INDEPENDENT_FULL')
+            original=w.router.exit_journal.latest('paper',root)
+>           assert original.payload['state']=='UNKNOWN' and len(w.adapter.positions())==1
+E           AssertionError: assert ('REQUESTED' == 'UNKNOWN'
+E             
+E             - UNKNOWN
+E             + REQUESTED)
+
+trading/tests/test_family_unknown_independence.py:114: AssertionError
+=========================== short test summary info ============================
+FAILED trading/tests/test_family_unknown_independence.py::test_preexisting_independent_unknown_cannot_block_new_mandatory_other_leg_close
+1 failed, 47 passed in 3.13s

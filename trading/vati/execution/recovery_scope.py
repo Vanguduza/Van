@@ -1,5 +1,6 @@
 """Native account/command provenance for restart recovery; never an order path."""
-from contextlib import nullcontext
+from contextlib import nullcontext, closing
+from pathlib import Path
 from dataclasses import fields
 from decimal import Decimal,InvalidOperation
 
@@ -39,9 +40,17 @@ class NativePositionHistory:
         # its eventual effect/outcome commit. Its staged rows are not original
         # evidence: use a separate, scoped read-only owner in that case.
         independent = getattr(ledger, 'committed_reader', None)
-        owns_writer = (getattr(ledger, '_atomic_depth', 0) > 0
+        connection=getattr(ledger,'_conn',None)
+        owns_writer = ((getattr(ledger, '_atomic_depth', 0) > 0
+                        or getattr(connection,'in_transaction',False))
                        and not getattr(ledger, '_read_snapshot_depth', 0))
-        source_context = independent() if owns_writer and callable(independent) else nullcontext(ledger)
+        readonly=getattr(ledger,'open_read_only',None)
+        if owns_writer and callable(independent):
+            source_context=independent()
+        elif owns_writer and callable(readonly):
+            source_context=closing(readonly(Path(ledger.path).resolve()))
+        else:
+            source_context=nullcontext(ledger)
         with source_context as source, committed_source_snapshot(source):
             if not source.verify_chain()[0]:
                 raise PositionRecoveryError('native recovery ledger chain is invalid')

@@ -1,0 +1,21 @@
+{
+  "directory": "/tmp/van-recovery-family-native-supervision-debug-r1-20261101",
+  "at_utc": "2026-11-01T05:33:13.432570+00:00",
+  "files": [
+    {
+      "path": "test_cold_expired_optional_pol0/vati.sqlite",
+      "bytes": 81920,
+      "sha256": "fab3ffe044255ab2d22aca9bb64865700071c852b5483f7a621e1d5badefd1d8"
+    },
+    {
+      "path": "owner-authority0/owner_authority_keys.json.lock",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "owner-authority0/owner_authority_keys.json",
+      "bytes": 212,
+      "sha256": "7f38ff0c83e34c514c0e09561577d3c56e681231aa0b6da2748951362db3cd20"
+    }
+  ]
+}

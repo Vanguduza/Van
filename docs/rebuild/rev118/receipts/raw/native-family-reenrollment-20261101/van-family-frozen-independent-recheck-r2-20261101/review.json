@@ -1,0 +1,68 @@
+{
+  "schema": "van.independent-family-source-recheck/2",
+  "state": "THREE_ACCEPTED_COUNTEREXAMPLES_CLOSED_NO_REMAINING_BLOCKING_FINDING_IN_BOUNDED_SCOPE",
+  "base": "2728a83ce203fec867dc536c8d4341c2ce4415cb",
+  "reviewer": "Sol medium independent bounded SOURCE review; root retains all decisions",
+  "source_identity": {
+    "manifest": "/workspace/van-family-workflow-freeze-r2-20261101/FROZEN_SOURCE_INPUTS.json",
+    "exact_paths": 37,
+    "changed_since_previous_freeze": 9,
+    "all_current_archive_before_after_final_pins_match": true,
+    "before": "before.json",
+    "after": "after.json",
+    "final": "final-source-pins.json",
+    "imports": "probe-results.json",
+    "previous_failing_receipts_preserved": [
+      "/workspace/van-family-frozen-independent-review-20261101/review.json",
+      "/workspace/van-family-review-partial-race-counterexample-r1-20261101/receipt.json"
+    ]
+  },
+  "blocking_findings": [],
+  "closed_findings": [
+    {
+      "id": "FAM-REVIEW-01",
+      "disposition": "CLOSED_SOURCE_REVIEW_AND_PROBE",
+      "path": "trading/vati/execution/router.py:361",
+      "evidence": "Explicit standard VenueUnavailable catch preserves urgent ProtectionManager and original direct router close transport/journal. Missing original attribution remains empty and family quantity unknown; actual requests/outcomes bind position and original transport. No guessed intent, no resend. Catch remains narrow and does not mask arbitrary programmer exceptions."
+    },
+    {
+      "id": "FAM-REVIEW-02",
+      "disposition": "CLOSED_SOURCE_REVIEW_AND_PROBE",
+      "path": "trading/vati/lifecycle/family_actions.py:357",
+      "related": [
+        "trading/vati/lifecycle/family_protection.py:47",
+        "trading/vati/lifecycle/family_action_journal.py:102"
+      ],
+      "evidence": "New mandatory full plan independently binds known original sibling target and actual capability under original authority/current fence; unknown original obligation has no new request. Original independent UNKNOWN hash remains unchanged. Aggregate requested/residual quantities remain null, state INCOMPLETE/unresolved, no invented flat family/outcome. Both native-effect-happened and not-observed variants pass; original independent counterexample also passes."
+    },
+    {
+      "id": "FAM-REVIEW-03",
+      "disposition": "CLOSED_SOURCE_REVIEW_AND_PROBE",
+      "path": "trading/vati/lifecycle/family_execution.py:113",
+      "related": [
+        "trading/vati/lifecycle/family_membership.py:81",
+        "trading/vati/lifecycle/family_membership.py:156"
+      ],
+      "evidence": "Writer-bound guard refreshes original durable history and native quantities after its own original request commits. Exemption validates exact committed action/target, unique request and no prior outcome. Other leg requests remain unresolved even if observed native quantity unchanged. Reproduced planning\u2192writer competing UNKNOWN race now refuses all automatic partial effects and preserves original obligation."
+    }
+  ],
+  "independent_probes": {
+    "terminal_exit": 0,
+    "artifact": "probe-results.json",
+    "log": "probe.log",
+    "count": 6,
+    "all_passed": true,
+    "description": "Three actual SOURCE regression scenarios including two FAM02 effect variants plus original independently authored FAM01/FAM02 counterexamples; actual SQLite/Paper and synthetic owner fixture; explicit current worktree PYTHONPATH. No PG/container/native effects.",
+    "owned_tmp_cleanup": "Each external /tmp TemporaryDirectory cleaned on exit; registry keys confined to owned temporary fixture."
+  },
+  "prior_positive_review_retained": [
+    "Pending finality\u2192first qualified root review and one trial; immutable late fact restatement same parent; cold optional expiry retains mandatory full protection; original full action UNKNOWN no resend and other leg executes. Those source paths were positive in original37-pin bounded review.",
+    "Withdrawn interim risk concern remains withdrawn. Actual post-action native risk enforcement and original risk denominator/source membership remain distinct from quantity allocation."
+  ],
+  "evidence_limits": [
+    "Worker-reported affected336pass1declaredPGskip and actualPG55/0skip include exact skipped case and partial race; this independent recheck ran only six narrow SOURCE probes and did not rerun broader suites or PG.",
+    "Two Commander files unchanged from original freeze are pinned in final affected receipt and original freeze; PG controller omitted Commander directory hash coverage. This is explicit coverage limitation, not a claim PG tested those files.",
+    "No new public action registration, native/provider qualification or native correction producer, financial authority, estate activation, device/release/unit acceptance, PRE/F15/BG PASS or gate waiver is issued.",
+    "Normal hooks, reviewed integration, committed verification/publication and exact published-head hosted CI remain required. Source changes invalidate affected review pins."
+  ]
+}

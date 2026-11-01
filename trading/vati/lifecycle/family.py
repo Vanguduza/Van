@@ -390,7 +390,9 @@ class FamilyRegistry:
                                 and row.hash == canonical_hash(row.body())
                                 and row.event_time_ms <= member.occurred_ms
                                 and row.payload.get("parent_trade_intent_id") == trade_intent_id
-                                and row.payload.get("inputs", {}).get("intent", {}).get("decision_hash")
+                                and (row.payload.get("decision", {}).get("decision_hash")
+                                     if row.payload.get("decision") else
+                                     row.payload.get("inputs", {}).get("intent", {}).get("decision_hash"))
                                     == child[0].get("decision_hash")]
                     if not ancestry:
                         raise FamilyError("scale member lacks original parent ancestry")
@@ -404,7 +406,12 @@ class FamilyRegistry:
                             or (member.role is MemberRole.ROOT
                                 and r.get("broker_position_id") != position_id)):
                         continue
+                    if (not member.adds and member.member_id.startswith("family-native-receipt:")
+                            and member.member_id != "family-native-receipt:"+r.get("receipt_hash", "")):
+                        continue
                     if not member.adds:
+                        from vati.execution.native_protection import original_native_protection
+                        native_protection = original_native_protection(history, receipt_event)
                         request = next((row for row in history.rows
                             if row.kind is EventKind.EXIT_ATTEMPT
                             and row.hash == r.get("exit_request_ref")
@@ -414,17 +421,25 @@ class FamilyRegistry:
                             and row.payload.get("state") == "REQUESTED"
                             and row.payload.get("venue") == history.venue
                             and row.payload.get("position_id") == r.get("broker_position_id")
-                            and row.payload.get("position_id") == position_id
+                            and row.payload.get("position_id") in {
+                                original.payload.get("broker_position_id")
+                                for original in receipts
+                                if original.correlation_id == member.trade_intent_id
+                                and not original.payload.get("exit_action")
+                                and original.payload.get("status") in {"FILLED", "PARTIAL"}
+                                and original.received_time_ms <= row.received_time_ms
+                                and original.payload.get("broker_position_id")
+                            }
                             and row.payload.get("trade_intent_id") == member.trade_intent_id
                             and row.received_time_ms <= receipt_event.received_time_ms), None)
-                        if request is None or not any(
+                        if native_protection is None and (request is None or not any(
                             row.kind is EventKind.EXIT_ATTEMPT
                             and row.producer == "vati-execution-router"
                             and row.hash == canonical_hash(row.body())
                             and row.payload.get("request_ref") == request.hash
                             and row.payload.get("receipt_event_ref") == receipt_event.hash
                             and row.payload.get("state") in {"CONFIRMED", "PARTIAL_CONFIRMED", "UNKNOWN"}
-                            for row in history.rows):
+                            for row in history.rows)):
                             continue
                     try:
                         if (Decimal(str(r.get("filled_qty"))) == member.quantity

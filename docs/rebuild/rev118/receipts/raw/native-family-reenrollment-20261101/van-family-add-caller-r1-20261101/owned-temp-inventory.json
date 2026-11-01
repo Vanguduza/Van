@@ -1,0 +1,36 @@
+{
+  "directory": "/tmp/van-recovery-family-add-caller-r1-20261101",
+  "at_utc": "2026-11-01T03:20:23.034304+00:00",
+  "files": [
+    {
+      "path": "test_capsule_health_is_driven_0/vati.sqlite",
+      "bytes": 1404928,
+      "sha256": "67f8d6c6d7b78fad8caef7b8f76e266cc1011cb86bcedb500849fd65dee165d1"
+    },
+    {
+      "path": "test_the_same_path_refuses_to_0/vati.sqlite",
+      "bytes": 40960,
+      "sha256": "d7d55d9f8493da2d2a81151e500be1bcf57871642aa4324cf805def79ab2ab6e"
+    },
+    {
+      "path": "test_one_trade_from_sealed_cla0/vati.sqlite",
+      "bytes": 69632,
+      "sha256": "59a30a1672c38e5c207c7e657d4f0a4c074d3ddcd87dca0cb8ffb55ef292c0f3"
+    },
+    {
+      "path": "test_actual_add_caller_retains0/vati.sqlite",
+      "bytes": 40960,
+      "sha256": "f51ef01bbee544def8ba303c768958bd6a1d242acf4c20939064d2b8d90d5f72"
+    },
+    {
+      "path": "owner-authority0/owner_authority_keys.json.lock",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "owner-authority0/owner_authority_keys.json",
+      "bytes": 212,
+      "sha256": "1f8cda5efd81b6fb0753bc93fad9e44fc300eb37635c6cfa9d92dbf8898d8164"
+    }
+  ]
+}

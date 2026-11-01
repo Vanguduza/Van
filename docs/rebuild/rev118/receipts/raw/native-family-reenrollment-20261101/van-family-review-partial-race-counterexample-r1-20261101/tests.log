@@ -1,0 +1,39 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+___ test_partial_dispatch_rereads_new_other_leg_unknown_under_current_writer ___
+
+tmp_path = PosixPath('/tmp/van-recovery-family-review-partial-race-counterexample-r1-20261101/test_partial_dispatch_rereads_0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f96aef3ae40>
+
+    def test_partial_dispatch_rereads_new_other_leg_unknown_under_current_writer(tmp_path,monkeypatch):
+        from vati.lifecycle.family_actions import FamilyActionError
+        w,store,time,grant,plan,history=admitted_source_world(tmp_path,
+            actual_runtime_lease=True,add_child=True,max_quantity='.20')
+        try:
+            before={p.position_id:p.quantity for p in w.adapter.positions()}
+            sibling=next(p for p in w.adapter.positions() if p.trade_intent_id!='ti-e2e-1')
+            apply=w.router.apply_preservation;close=w.adapter.close;injected=[]
+            def uncertain(pid,*args,**kwargs):
+                if pid==sibling.position_id:raise OSError('synthetic competing original close outcome unknown')
+                return close(pid,*args,**kwargs)
+            def interposed(*args,**kwargs):
+                if not injected:
+                    injected.append(True)
+                    with pytest.raises(OSError):
+                        apply('paper',position_id=sibling.position_id,trade_intent_id=sibling.trade_intent_id,
+                            action='FULL_CLOSE',now_ms=time[0],reason='COMPETING_ORIGINAL_UNKNOWN')
+                return apply(*args,**kwargs)
+            monkeypatch.setattr(w.adapter,'close',uncertain)
+            monkeypatch.setattr(w.router,'apply_preservation',interposed)
+            with pytest.raises(FamilyActionError):
+                w.lifecycle.request_family_reduction(plan.snapshot.family_id,action_key='partial-with-new-unknown',
+                    action='PARTIAL_CLOSE',requested_quantity=D('.04'),now_ms=time[0])
+>           assert not w.adapter.closed
+E           AssertionError: assert not [{'close_id': 'P1:close:1', 'pnl_scope': 'EXECUTION_DELTA', 'position_id': 'P1', 'intent': 'ti-e2e-1', ...}]
+E            +  where [{'close_id': 'P1:close:1', 'pnl_scope': 'EXECUTION_DELTA', 'position_id': 'P1', 'intent': 'ti-e2e-1', ...}] = PaperAdapter(venue='paper', account_alias='fx_primary', equity=Decimal('10011.7200000'), currency='USD', spread=Decima...ecimal('0.01'), partial_min=Decimal('0'), partial_max=None, minimum_remaining=Decimal('0'), revision='paper-close/1')}).closed
+E            +    where PaperAdapter(venue='paper', account_alias='fx_primary', equity=Decimal('10011.7200000'), currency='USD', spread=Decima...ecimal('0.01'), partial_min=Decimal('0'), partial_max=None, minimum_remaining=Decimal('0'), revision='paper-close/1')}) = <test_active_trade_e2e.World object at 0x7f96aef3ad80>.adapter
+
+trading/tests/test_family_unknown_independence.py:163: AssertionError
+=========================== short test summary info ============================
+FAILED trading/tests/test_family_unknown_independence.py::test_partial_dispatch_rereads_new_other_leg_unknown_under_current_writer
+1 failed in 0.91s

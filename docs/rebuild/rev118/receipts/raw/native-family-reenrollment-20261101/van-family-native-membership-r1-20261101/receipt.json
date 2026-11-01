@@ -1,0 +1,44 @@
+{
+  "started_at_utc": "2026-11-01T03:15:22.192211+00:00",
+  "source_parent": "d43bd396765204a4843cdb7485535e9fcd7af3ce",
+  "owned_temp_preflight": {
+    "path": "/tmp/van-recovery-family-native-membership-r1-20261101",
+    "free_bytes_before": 8923205632,
+    "free_inodes_before": 2304131,
+    "minimum_free_bytes": 4294967296,
+    "no_preexisting_directory": true
+  },
+  "source_pins": {
+    "trading/vati/execution/paper.py": "b0d7c6a71f2422a66ec16b4e7cf8da677d95f0543706f64ea06b8e5f5a47882a",
+    "trading/vati/lifecycle/family_actions.py": "8a80e8113a97631896fc7bc406b799088a83cce37587a998bd1a721a03075fbe",
+    "trading/vati/lifecycle/family.py": "e9131a3758fcaa59f9ef43e18ab124c0a2fe6193d520295aceee5b1899a10709",
+    "trading/vati/lifecycle/family_membership.py": "7ee8e7f85993d79d41cc25115899d9d7f41125713b163cf08c8ff1259d850171",
+    "trading/tests/test_family_native_membership.py": "e0939460c6c74cce2a2572e4a23c38f9bca8cd3eb8da2d96b4fb77007680f618",
+    "trading/tests/test_family_durable_projection.py": "4b3b897e3ef77d4f2ae256ab0b0ac48406fcb54aafddeb61b2ba6fd0b6d73c8e",
+    "trading/tests/test_family_original_accounting.py": "f5d2f46de09b9e475b9fbfdc7fc0b4710fa5f558a2d313b592989caf16edf696"
+  },
+  "command": [
+    "/workspace/van-backend-venv-20261025/bin/python",
+    "tools/rebuild/source_storage_audit.py",
+    "--report",
+    "/workspace/van-family-native-membership-r1-20261101/storage-audit.json",
+    "trading/tests/test_family_native_membership.py",
+    "trading/tests/test_family_durable_projection.py",
+    "trading/tests/test_family_original_accounting.py",
+    "--basetemp=/tmp/van-recovery-family-native-membership-r1-20261101",
+    "--junitxml=/workspace/van-family-native-membership-r1-20261101/tests.xml",
+    "-q"
+  ],
+  "exit": 1,
+  "owned_temp_cleanup": {
+    "path": "/tmp/van-recovery-family-native-membership-r1-20261101",
+    "files": 25,
+    "inventory": "/workspace/van-family-native-membership-r1-20261101/owned-temp-inventory.json",
+    "inventory_sha256": "eaff8dd7f60171b75236d77cd31d37f733dfa7fc674629c91e82202b68173cba",
+    "free_bytes_before_cleanup": 8922345472,
+    "free_bytes_after_cleanup": 8923205632,
+    "free_inodes_after": 2304131,
+    "independently_absent": true
+  },
+  "completed_at_utc": "2026-11-01T03:15:23.821525+00:00"
+}

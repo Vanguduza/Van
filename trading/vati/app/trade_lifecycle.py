@@ -103,6 +103,12 @@ class AccountTradeLifecycle:
     proposals: list = field(default_factory=list)
     _delta_intent_cache: dict = field(default_factory=dict)
     _family_halts: dict[str, tuple[str, ...]] = field(default_factory=dict)
+    operational_grants: Optional[object] = None
+    family_policy_grant_id: Optional[str] = None
+    runtime_lease: Optional[object] = None
+    mandate_input: Optional[Mapping] = None
+    #: No production native correction producer is supplied by this source packet.
+    native_economic_observations: Optional[object] = None
 
     def __post_init__(self) -> None:
         self.families = FamilyRegistry(ledger=self.ledger)
@@ -367,6 +373,14 @@ class AccountTradeLifecycle:
                 "stop": current_stop,
                 "direction": position.direction,
                 "strategy_id": str(payload.get("strategy_id", "")),
+                "strategy_version": str(payload.get("strategy_version", "")),
+                "strategy_state": next((event.payload.get("inputs",{}).get("intent",{}).get("strategy_state")
+                    for event in history.rows if event.kind is EventKind.RISK_DECISION
+                    and event.correlation_id==iid
+                    and event.producer in {"vati-account-coordinator","vati-cycle","vati-account-lifecycle"}
+                    and event.payload.get("decision",{}).get("approval_schema_version")==2
+                    and event.payload.get("decision",{}).get("intent_hash")==canonical_hash(event.payload.get("inputs",{}).get("intent",{}))
+                    and event.payload.get("decision",{}).get("decision_hash")==payload.get("decision_hash")),None),
                 "cost_pct": self.modelled_costs.get(
                     symbol, contract.round_trip_cost_pct),
                 "decision_price": Decimal(str(
@@ -490,7 +504,14 @@ class AccountTradeLifecycle:
                 self.entries[iid]["cost_ratio"] = cost_ratio
 
             restored.append(iid)
-        return tuple(sorted(restored)), tuple(sorted(unresolved))
+        from vati.lifecycle.family_action_journal import FamilyActionJournal
+        if self.family_policy_grant_id or FamilyActionJournal(self.ledger).plans():
+            from vati.lifecycle.family_recovery import recover_original_native_families
+            clock=(self.operational_grants.clock if self.operational_grants is not None else self.router.clock)
+            if callable(clock):
+                _,family_unresolved=recover_original_native_families(self,now_ms=clock())
+                unresolved.extend(family_unresolved)
+        return tuple(sorted(restored)), tuple(sorted(set(unresolved)))
 
     def adopt_owner_buy_confirmation(
         self,
@@ -519,6 +540,7 @@ class AccountTradeLifecycle:
             "stop": stop,
             "direction": direction,
             "strategy_id": str(order_payload.get("strategy_id", "")),
+            "strategy_version": str(order_payload.get("strategy_version", "")),
             "cost_pct": self.modelled_costs.get(symbol, contract.round_trip_cost_pct),
             "decision_price": Decimal(str(order_payload["entry_price"])),
             "quantity": receipt.filled_qty,
@@ -673,6 +695,8 @@ class AccountTradeLifecycle:
             "stop": intent.stop,
             "direction": intent.direction,
             "strategy_id": intent.strategy_id,
+            "strategy_version": intent.strategy_version,
+            "strategy_state": intent.strategy_state.value,
             "cost_pct": modelled_cost_pct,
             "decision_price": intent.entry,
             "quantity": receipt.filled_qty,
@@ -1015,6 +1039,11 @@ class AccountTradeLifecycle:
         position_id = str(row.get("broker_position_id") or "")
         if action is Adjustment.HOLD:
             return
+        if (family is not None and len({m.trade_intent_id for m in family.members if m.adds}) > 1
+                and action is not Adjustment.ADD):
+            from vati.lifecycle.family_supervision import execute_native_family_adjustment
+            execute_native_family_adjustment(self,family,proposal,now_ms=now_ms)
+            return
         if action is Adjustment.MOVE_PROTECTION and proposal.new_stop is not None:
             if position_id:
                 # execution/protection.py refuses a widening; this can only tighten.
@@ -1048,6 +1077,16 @@ class AccountTradeLifecycle:
         approved = str(getattr(decision.decision, "value", decision.decision))
 
         if action is Adjustment.ADD:
+            if row.get("family_execution_available") is False:
+                self._family_halts[family.family_id] = ("HEDGED_FAMILY_EXECUTION_UNAVAILABLE",)
+                return
+            if family is not None:
+                from vati.lifecycle.family_action_journal import FamilyActionJournal
+                journal=FamilyActionJournal(self.ledger)
+                if any(event.correlation_id==family.family_id and journal.progress(event)["state"]!="COMPLETE"
+                       for event in journal.plans()):
+                    self._family_halts[family.family_id] = ("FAMILY_ACTION_RESIDUAL_OR_UNKNOWN",)
+                    return
             if approved not in ("APPROVED", "REDUCED") or self.execute_add_fn is None:
                 return
             receipt = self.execute_add_fn(self._delta_intent_cache[intent_id], decision)
@@ -1064,8 +1103,30 @@ class AccountTradeLifecycle:
                     ),
                     now_ms=now_ms,
                 )
-                row["quantity"] = family.net_quantity
-                row["scale_ins_used"] = family.scale_ins
+                # A hedged child is a native leg of this same lifetime trade,
+                # not aggregate quantity assigned to the root's position ID.
+                if receipt.broker_position_id and receipt.broker_position_id != position_id:
+                    child = dict(row)
+                    child.update(quantity=receipt.filled_qty,
+                        broker_position_id=receipt.broker_position_id,
+                        entry=receipt.average_fill or mark, decision_price=mark,
+                        stop=self._delta_intent_cache[intent_id].stop,
+                        opened_ms=receipt.received_time_unix_ms,
+                        best_price=receipt.average_fill or mark,
+                        worst_price=receipt.average_fill or mark,
+                        protective_stop_confirmed=receipt.protective_stop_confirmed,
+                        fees=receipt.fees, family_id=family.family_id,
+                        family_root_intent_id=family.members[0].trade_intent_id,
+                        family_history_known=True, scale_ins_used=family.scale_ins,
+                        open=True, pending=False)
+                    self.entries[receipt.trade_intent_id] = child
+                else:
+                    # A real netting adapter has kept one original native ID.
+                    row["quantity"] = family.net_quantity
+                for member in family.members:
+                    member_row = self.entries.get(member.trade_intent_id)
+                    if member_row is not None:
+                        member_row["scale_ins_used"] = family.scale_ins
             return
 
         # REDUCE / PARTIAL_TAKE
@@ -1127,6 +1188,11 @@ class AccountTradeLifecycle:
                  "reason": "no risk authority or mandate is bound to this lifecycle"},
                 now_ms=now_ms, corr=intent_id)
             return None
+        if proposal.action is Adjustment.ADD and (not row.get("strategy_version") or not row.get("strategy_state")):
+            self._log(EventKind.SESSION,{"event":"ADJUSTMENT_NOT_AUTHORISED",
+                "action":proposal.action.value,"reason":"original strategy revision/state unavailable"},
+                now_ms=now_ms,corr=intent_id)
+            return None
         snapshot = None
         if self.snapshot_fn is not None:
             try:
@@ -1184,15 +1250,104 @@ class AccountTradeLifecycle:
         )
         decision = self.authority.evaluate_safe(delta, snapshot)
         self._delta_intent_cache[intent_id] = delta
+        from vati.risk.mandate_source import capture_mandate_source
+        original_mandate = (capture_mandate_source(self.mandate,self.mandate_input,now_ms=now_ms)
+            if self.mandate_input is not None else {"state":"UNAVAILABLE","execution_authority":False})
         self._log(
             EventKind.RISK_DECISION,
             {"inputs": {"intent": intent_to_dict(delta),
-                        "snapshot": snapshot_to_dict(snapshot)},
+                        "snapshot": snapshot_to_dict(snapshot),
+                        "original_mandate_source": original_mandate},
              "decision": decision.to_dict(),
              "adjustment": proposal.body() | {"proposal_hash": proposal.digest},
              "parent_trade_intent_id": intent_id},
             now_ms=now_ms, corr=delta.trade_intent_id)
         return decision
+
+    def request_family_reduction(self, family_id: str, *, action_key: str,
+                                 action: str, now_ms: int,
+                                 requested_quantity=None, explicit_targets=None,
+                                 explicit_signature=None, preview: bool = False):
+        """Internal original lifecycle caller; not a public command surface.
+
+        Policy selection comes from the configured existing governance owner.
+        The caller cannot supply a grant, native capability, lease or mandate.
+        """
+        from fractions import Fraction
+        from vati.execution.recovery_scope import NativePositionHistory
+        from vati.lifecycle.family_actions import FamilyPolicy, FamilyActionError, plan_reduction, exact_decimal, number
+        from vati.lifecycle.family_action_journal import FamilyActionJournal
+        from vati.lifecycle.family_execution import execute_original_action, reduce_original_receipts
+        from vati.lifecycle.family_membership import original_native_snapshot
+        from vati.lifecycle.family_runtime import runtime_fence_ref
+        from vati.risk.serde import mandate_binding_hash
+        from vati.risk.operational_grant import OperationalOptimizationGrants
+        if type(preview) is not bool:
+            raise FamilyActionError('family preview flag must be explicit boolean')
+        family = self.families.get(family_id)
+        journal = FamilyActionJournal(self.ledger)
+        request_hash = canonical_hash(dict(family_id=family_id, action=action,
+            requested_quantity=number(requested_quantity),
+            explicit_targets=None if explicit_targets is None else {k:number(v) for k,v in sorted(explicit_targets.items())},
+            explicit_signature_hash=None if explicit_signature is None else canonical_hash(explicit_signature)))
+        original = journal.find(family_id, action_key)
+        if original is not None:
+            if original.payload.get('request_hash') != request_hash:
+                raise FamilyActionError('original family request payload differs')
+            reduce_original_receipts(self, original, now_ms=now_ms)
+            progress = journal.progress(original)
+            if all(target['state'] != 'UNEXECUTED' for target in progress['targets']):
+                return progress
+        if (not isinstance(self.operational_grants, OperationalOptimizationGrants)
+                or not self.family_policy_grant_id or self.runtime_lease is None
+                or self.mandate is None or self.authority is None):
+            raise FamilyActionError('NOT_QUALIFIED: lifecycle governance/current runtime owners unavailable')
+        grants = self.operational_grants
+        current = grants.latest(self.family_policy_grant_id)
+        if current is None or current.payload['state'] != 'ADMITTED':
+            raise FamilyActionError('NOT_QUALIFIED: lifecycle policy has no current admitted grant')
+        current = grants.current(self.family_policy_grant_id, expected_ref=current.hash)
+        grant = current.payload['grant']
+        epoch = self.runtime_lease.epoch
+        fence = runtime_fence_ref(self.runtime_lease)
+        history = NativePositionHistory(self.ledger, account_alias=self.adapter.account_alias, venue=self.adapter.venue)
+        snapshot = original_native_snapshot(history, family, self.adapter)
+        if not snapshot.known and (original is None or action!='FULL_CLOSE'):
+            raise FamilyActionError('original family/native membership is unresolved')
+        root = family.members[0].trade_intent_id
+        command = history.commands.get(root)
+        original_risk = next((event for event in history.rows
+            if event.kind is EventKind.RISK_DECISION and event.correlation_id == root
+            and event.payload.get('decision', {}).get('decision_hash') == command[0]['decision_hash']), None) if command else None
+        if original_risk is None:
+            raise FamilyActionError('original family risk/mandate source is unavailable')
+        if original is None:
+            policy = FamilyPolicy(policy_id=grant['policy_id'], version=grant['policy_version'],
+                mode='ADMITTED', qualification_ref=grant['qualification_hash'])
+            plan = plan_reduction(snapshot, policy=policy, action=action,
+                requested_quantity=requested_quantity, explicit_targets=explicit_targets,
+                authority_refs=dict(original_mandate_ref=original_risk.hash,
+                    current_mandate_ref=mandate_binding_hash(self.mandate),grant_ref=current.hash,
+                    lease_ref=str(epoch),fence_ref=fence))
+            if preview:
+                return {"plan": plan.body(), "plan_hash": plan.digest, "execution_authority": False}
+            # Admission validation is separate from durable plan publication.
+            explicit_ref = grants.authorize_plan(current,plan,history=history,mandate=self.mandate,
+                authority=self.authority,adapter=self.adapter,
+                lease_epoch=epoch,fence_ref=fence,explicit_signature=explicit_signature)
+            original = journal.prepare(plan,action_key=action_key,now_ms=now_ms,
+                request_hash=request_hash,explicit_authority_ref=explicit_ref)
+        result = execute_original_action(self,original,grants=grants,mandate=self.mandate,
+            authority=self.authority,lease_epoch=epoch,fence_ref=fence,
+            lease_fence=lambda value:self.runtime_lease.fence(value,now_ms=grants.clock()),
+            lease_submission_guard=lambda value:self.runtime_lease.submission_guard(value,now_ms=grants.clock()),
+            explicit_signature=explicit_signature,now_ms=now_ms)
+        if result["unresolved_native_effect"] or (result["state"]!="COMPLETE" and family.is_open):
+            self._family_halts[family_id] = ("FAMILY_ACTION_RESIDUAL_OR_UNKNOWN",)
+        if family.net_quantity==ZERO:
+            from vati.lifecycle.family_outcome import publish_family_outcome
+            publish_family_outcome(self,family_id,reason=action,now_ms=now_ms)
+        return result
 
     def _supervise_open_families(self, symbol: str, bid: Decimal, ask: Decimal,
                                  *, now_ms: int) -> None:
@@ -1202,11 +1357,18 @@ class AccountTradeLifecycle:
         except Exception:
             equity = ZERO
 
+        seen_families = set()
         for intent_id, row in list(self.entries.items()):
             if not row.get("open") or str(row.get("symbol", "")).upper() != symbol.upper():
                 continue
             family = self.families.for_intent(intent_id)
-            if family is None or not family.is_open:
+            if family is None or not family.is_open or family.family_id in seen_families:
+                continue
+            seen_families.add(family.family_id)
+            if len({m.trade_intent_id for m in family.members if m.adds}) > 1:
+                from vati.lifecycle.family_supervision import supervise_native_family
+                supervise_native_family(self, family, bid=bid, ask=ask,
+                    equity=equity, now_ms=now_ms)
                 continue
             direction = row["direction"]
             mark = bid if direction is Direction.LONG else ask
@@ -1371,7 +1533,16 @@ class AccountTradeLifecycle:
         receipts = list(self.router.apply_exits(
             self.adapter.venue, symbol, bid, ask, now_ms=now_ms))
         if hasattr(self.adapter, "mark"):
-            receipts += self.adapter.mark(symbol, bid, ask, now_ms=now_ms)  # type: ignore[attr-defined]
+            native_receipts = self.adapter.mark(symbol, bid, ask, now_ms=now_ms)  # type: ignore[attr-defined]
+            for receipt in native_receipts:
+                family = self.families.for_intent(receipt.trade_intent_id)
+                if (family is not None and len({m.trade_intent_id for m in family.members if m.adds}) > 1
+                        and receipt.reject_reason in {"VENUE_STOP","VENUE_TARGET"}):
+                    from vati.execution.native_protection import observe_paper_native_protection
+                    observe_paper_native_protection(self.router,self.adapter,receipt,now_ms=now_ms)
+                    if not any(p.position_id==receipt.broker_position_id for p in self.adapter.positions()):
+                        self.protection.close_confirmed(receipt.broker_position_id)
+            receipts += native_receipts
         for receipt in receipts:
             if (
                 receipt.status == "FILLED"
@@ -1406,8 +1577,28 @@ class AccountTradeLifecycle:
             self._log(EventKind.SESSION, {"event": "CLOSE_PRICE_UNRESOLVED",
                 "reason": reason, "position_id": entry.get("broker_position_id")}, now_ms=now_ms, corr=intent_id)
             return
-        self.entries.pop(intent_id)
         family = self.families.for_intent(intent_id)
+        if (family is not None and (entry.get("family_execution_available") is not False
+                or entry.get("family_native_protection_available"))
+                and len({m.trade_intent_id for m in family.members if m.adds}) > 1):
+            from vati.execution.recovery_scope import NativePositionHistory
+            from vati.lifecycle.family_actions import FamilyActionError
+            from vati.lifecycle.family_outcome import publish_family_outcome
+            history = NativePositionHistory(self.ledger,account_alias=self.adapter.account_alias,venue=self.adapter.venue)
+            native_ids = {e.payload.get("broker_position_id") for e in history.events(EventKind.EXECUTION_RECEIPT)
+                if not e.payload.get("exit_action") and e.correlation_id in
+                   {m.trade_intent_id for m in family.members if m.adds}
+                and e.payload.get("status") in {"FILLED","PARTIAL"}}
+            if len(native_ids) > 1:
+                try:
+                    publish_family_outcome(self,family.family_id,reason=reason,now_ms=now_ms)
+                except (FamilyActionError, ValueError, KeyError) as exc:
+                    self._family_halts[family.family_id] = ("ORIGINAL_FAMILY_OUTCOME_UNRESOLVED",)
+                    self._log(EventKind.SESSION,{"event":"ORIGINAL_FAMILY_OUTCOME_UNRESOLVED",
+                        "error_type":type(exc).__name__,"detail":str(exc)[:240]},
+                        now_ms=now_ms,corr=family.family_id)
+                return
+        self.entries.pop(intent_id)
         if (family is not None and family.net_quantity > ZERO
                 and entry.get("family_execution_available") is not False):
             self.families.apply(
@@ -1624,7 +1815,7 @@ class AccountTradeLifecycle:
         return verdict
 
     def _learn(self, intent_id: str, review, cost_ratio: Decimal, now_ms: int,
-               *, process_ok: Optional[bool] = None) -> None:
+               *, process_ok: Optional[bool] = None, deduplicate_episode: bool = False) -> None:
         """Reduce-only learning, with capsule health driven by decision quality.
 
         GAP-F-003. `process_ok` used to be the literal `True` on every close, so
@@ -1652,12 +1843,16 @@ class AccountTradeLifecycle:
             cost_ratio=cost_ratio,
         )
         if episode is not None:
-            self._log(
-                EventKind.TRADE_EXPERIENCE_ARTIFACT,
-                to_payload(episode),
-                now_ms=now_ms,
-                corr=intent_id,
-            )
+            if deduplicate_episode:
+                with self.ledger.atomic():
+                    existing=next((event for event in self.ledger.iter(EventKind.TRADE_EXPERIENCE_ARTIFACT,
+                        correlation_id=intent_id) if event.producer=="vati-account-lifecycle"
+                        and event.payload.get("review",{}).get("source_review_ref")==episode.review.get("source_review_ref")),None)
+                    if existing is not None:
+                        return
+                    self._log(EventKind.TRADE_EXPERIENCE_ARTIFACT,to_payload(episode),now_ms=now_ms,corr=intent_id)
+            else:
+                self._log(EventKind.TRADE_EXPERIENCE_ARTIFACT,to_payload(episode),now_ms=now_ms,corr=intent_id)
             self.admission.propose(
                 episode.artifact_hash,
                 knowledge_class="TRADE_EXPERIENCE",

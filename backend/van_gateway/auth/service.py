@@ -158,6 +158,13 @@ class AuthService:
         ticket_hash = hashlib.sha256(pairing_token.encode("utf-8")).hexdigest()
         async with self.store.connection() as db:
             await db.execute("BEGIN IMMEDIATE")
+            from van_gateway.auth.retirement import require_enrollment_available, require_fresh_approval_key
+            from van_gateway.auth.device_binding import DeviceBindingError
+            try:
+                await require_enrollment_available(db)
+            except DeviceBindingError as exc:
+                raise AuthError(exc.reason, "Owner device retirement is pending") from exc
+            await require_fresh_approval_key(db, public_key_pem)
             # Waiting for the writer cannot extend a pairing ticket's authority.
             now = int(time.time())
             if recoverable or hardware_proved:
@@ -283,24 +290,34 @@ class AuthService:
         return DeviceRecord(row["device_id"], row["public_key_pem"], int(row["enrolled_at_unix"]), None, row["label"])
 
     async def enroll(self, device_id: str, device_secret: str, public_key_pem: str, label: str | None = None) -> DeviceRecord:
-        existing = await self.store.fetchone("SELECT device_id, revoked_at_unix FROM devices WHERE device_id = ?", (device_id,))
-        if existing is not None:
-            if existing["revoked_at_unix"] is not None:
-                raise AuthError("device_revoked", "Device was revoked; re-enrollment denied")
-            raise AuthError("already_enrolled", "Device already enrolled")
+        from van_gateway.auth.retirement import require_enrollment_available, require_fresh_approval_key
+        from van_gateway.auth.device_binding import DeviceBindingError
         cipher = self._cipher()
         encrypted_secret = cipher.encrypt(device_secret.encode("utf-8")).decode("utf-8")
-        now = int(time.time())
-        await self.store.execute(
-            "INSERT INTO devices(device_id, public_key_pem, enrolled_at_unix, revoked_at_unix, label, encrypted_secret) VALUES (?, ?, ?, NULL, ?, ?)",
-            (device_id, public_key_pem, now, label, encrypted_secret),
-        )
-        self._device_secrets[device_id] = device_secret.encode("utf-8")
         secret_hash = hashlib.sha256(device_secret.encode("utf-8")).hexdigest()
-        await self.store.execute(
-            "INSERT INTO capability_grants(grant_id, device_id, capabilities_json, expires_at_unix, task_id, revoked_at_unix, created_at_unix) VALUES (?, ?, ?, ?, NULL, NULL, ?)",
-            (f"enroll-{device_id}", device_id, Store.dumps({"secret_sha256": secret_hash, "capabilities": ["owner"]}), now + ENROLMENT_GRANT_SECONDS, now),
-        )
+        async with self.store.connection() as db:
+            await db.execute("BEGIN IMMEDIATE")
+            existing = await (await db.execute("SELECT revoked_at_unix FROM devices WHERE device_id=?", (device_id,))).fetchone()
+            if existing is not None:
+                if existing["revoked_at_unix"] is not None:
+                    raise AuthError("device_revoked", "Device was revoked; re-enrollment denied")
+                raise AuthError("already_enrolled", "Device already enrolled")
+            try:
+                await require_enrollment_available(db)
+            except DeviceBindingError as exc:
+                raise AuthError(exc.reason, "Owner device retirement is pending") from exc
+            await require_fresh_approval_key(db, public_key_pem)
+            now = int(time.time())
+            await db.execute(
+                "INSERT INTO devices(device_id, public_key_pem, enrolled_at_unix, revoked_at_unix, label, encrypted_secret) VALUES (?, ?, ?, NULL, ?, ?)",
+                (device_id, public_key_pem, now, label, encrypted_secret),
+            )
+            await db.execute(
+                "INSERT INTO capability_grants(grant_id, device_id, capabilities_json, expires_at_unix, task_id, revoked_at_unix, created_at_unix) VALUES (?, ?, ?, ?, NULL, NULL, ?)",
+                (f"enroll-{device_id}", device_id, Store.dumps({"secret_sha256": secret_hash, "capabilities": ["owner"]}), now + ENROLMENT_GRANT_SECONDS, now),
+            )
+            await db.commit()
+        self._device_secrets[device_id] = device_secret.encode("utf-8")
         return DeviceRecord(device_id, public_key_pem, now, None, label)
 
     async def grant_status(self, device_id: str, *, now: int | None = None) -> dict:
@@ -384,29 +401,18 @@ class AuthService:
         self._device_secrets[device_id] = device_secret.encode("utf-8")
 
     async def revoke(self, device_id: str) -> dict:
-        from van_gateway.auth.native_revocation import pending_record, public, PREFIX
-        import json
-        now = int(time.time())
+        from van_gateway.auth.retirement import retire_device
+        now = int(time.time() * 1000)
         async with self.store.connection() as db:
             await db.execute('BEGIN IMMEDIATE')
-            cursor = await db.execute('SELECT device_id,public_key_pem,revoked_at_unix FROM devices WHERE device_id=?',(device_id,))
-            row = await cursor.fetchone()
+            row = await (await db.execute('SELECT public_key_pem FROM devices WHERE device_id=?', (device_id,))).fetchone()
             if row is None:
                 raise AuthError("unknown_device", "Device not found")
-            record=pending_record(device_id,row['public_key_pem'],int(row['revoked_at_unix']) if row['revoked_at_unix'] is not None else now)
-            await db.execute(
-                "UPDATE capability_grants SET revoked_at_unix = ? WHERE device_id = ? AND revoked_at_unix IS NULL",
-                (now, device_id),
-            )
-            await db.execute(
-                "UPDATE devices SET revoked_at_unix = COALESCE(revoked_at_unix, ?) WHERE device_id = ?",
-                (now, device_id),
-            )
-            await db.execute('INSERT OR IGNORE INTO runtime_meta(key,value,updated_at_unix_ms) VALUES(?,?,?)',
-                (PREFIX+record['operation_id'],json.dumps(record,sort_keys=True,separators=(',',':')),now*1000))
+            record = await retire_device(db, device_id=device_id, public_key_pem=row['public_key_pem'],
+                                         now_ms=now, reason="device revoked")
             await db.commit()
         self._device_secrets.pop(device_id, None)
-        return public(record)
+        return record
 
     async def require_device(self, device_id: str) -> DeviceRecord:
         row = await self.store.fetchone(

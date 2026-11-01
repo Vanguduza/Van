@@ -97,18 +97,23 @@ class OwnerDeviceBindingService:
             raise DeviceBindingError("bootstrap_ttl_invalid")
         token = secrets.token_urlsafe(32)
         challenge = secrets.token_urlsafe(24)
-        await self.store.execute(
-            """
-            INSERT INTO owner_device_bootstrap_tokens(
-              token_id, token_sha256, owner_principal_id, challenge,
-              created_at_ms, expires_at_ms, note
-            ) VALUES (?, ?, ?, ?, ?, ?, ?)
-            """,
-            (
-                f"boot_{uuid.uuid4().hex}", _sha256(token), owner_principal_id, challenge,
-                now, now + ttl_ms, note,
-            ),
-        )
+        from van_gateway.auth.retirement import require_enrollment_available
+        async with self.store.connection() as db:
+            await db.execute("BEGIN IMMEDIATE")
+            await require_enrollment_available(db, owner_principal_id=owner_principal_id)
+            await db.execute(
+                """
+                INSERT INTO owner_device_bootstrap_tokens(
+                  token_id, token_sha256, owner_principal_id, challenge,
+                  created_at_ms, expires_at_ms, note
+                ) VALUES (?, ?, ?, ?, ?, ?, ?)
+                """,
+                (
+                    f"boot_{uuid.uuid4().hex}", _sha256(token), owner_principal_id, challenge,
+                    now, now + ttl_ms, note,
+                ),
+            )
+            await db.commit()
         return token, challenge
 
     async def challenge_for(self, token: str, *, now_ms: int | None = None) -> str:
@@ -259,6 +264,9 @@ class OwnerDeviceBindingService:
         fingerprint = key_fingerprint(public_key_pem)
         binding_id = f"bind_{uuid.uuid4().hex}"
         async with self.store.connection() as db:
+            await db.execute("BEGIN IMMEDIATE")
+            from van_gateway.auth.retirement import require_enrollment_available
+            await require_enrollment_available(db, owner_principal_id=owner_principal_id)
             # Recheck expiry at the atomic consumption, after cryptographic validation.
             consumed_now = int(time.time() * 1000) if now_ms is None else now
             cur = await db.execute(
@@ -378,18 +386,12 @@ class OwnerDeviceBindingService:
         self, *, reason: str, owner_principal_id: str = OWNER_PRINCIPAL,
         now_ms: int | None = None,
     ) -> tuple[str, str]:
-        """§0D.3's recovery: revoke, then issue one bootstrap token for the new phone.
+        """Compatibility refusal: replacement requires the durable scoped intent owner.
 
-        Both halves in one call, because a revoke without a way back is how an owner ends
-        up locked out of their own assistant, and a token issued without a revoke would
-        mean two phones could be bound at once — which the database would refuse anyway,
-        confusingly, at the last possible moment.
+        This old helper cannot bind an operator, original generation or native retirement
+        receipt. Production recovery uses OwnerDeviceReenrollment through the scoped API.
         """
-        now = int(time.time() * 1000) if now_ms is None else now_ms
-        await self.revoke(owner_principal_id=owner_principal_id, reason=reason, now_ms=now)
-        return await self.create_bootstrap_token(
-            note=f"rebind: {reason}", now_ms=now, owner_principal_id=owner_principal_id
-        )
+        raise DeviceBindingError("rebind_operation_identity_required")
 
     # ------------------------------------------------------------------ internals
 

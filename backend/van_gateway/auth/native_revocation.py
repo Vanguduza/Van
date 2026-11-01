@@ -53,6 +53,7 @@ class DeviceRevocationResponse(BaseModel):
     device_id: str
     revoked_privileged_executions: int
     revoked_client_certificates: int
+    certificate_retirement_phase: Literal['PENDING','APPLIED','UNKNOWN'] = 'PENDING'
     native_authority_revocation: NativeOwnerKeyRevocationState
 
 

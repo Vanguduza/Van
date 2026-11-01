@@ -1,0 +1,483 @@
+{
+  "old_endpoint_count": 484,
+  "new_endpoint_count": 485,
+  "added_endpoints": [
+    {
+      "endpoint_id": "VE-f1227fcf2ee3",
+      "method": "GET",
+      "path": "/v1/devices/rebindings/{operation_id}",
+      "authentication": "INTERNAL_CONTROL:device_enrolment",
+      "device_proof_required_when_bound": false,
+      "registration": "DEFAULT",
+      "condition": null,
+      "source": "backend/van_gateway/app.py:2694",
+      "summary": "Original Device Rebinding",
+      "tags": [],
+      "parameters": [
+        {
+          "name": "operation_id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "title": "Operation Id"
+          }
+        },
+        {
+          "name": "x-van-internal-token",
+          "in": "header",
+          "required": false,
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "X-Van-Internal-Token"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json": {
+              "schema": {}
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "openapi_components": "owner_endpoint_schemas.json",
+      "readiness": "REPOSITORY_DECLARATION_ONLY"
+    }
+  ],
+  "removed_endpoint_ids": [],
+  "old_schema_count": 378,
+  "new_schema_count": 378,
+  "changed_schema_names": [
+    "DeviceRevocationResponse",
+    "RebindBody"
+  ],
+  "new_schema_names": [],
+  "removed_schema_names": [],
+  "existing_endpoint_changed_fields": {
+    "VE-caa1a831cd8f": [
+      "source"
+    ],
+    "VE-e499aab47970": [
+      "source"
+    ],
+    "VE-24ce7a0ad2b5": [
+      "source"
+    ],
+    "VE-74fac65f350e": [
+      "source"
+    ],
+    "VE-60a00fc4d7df": [
+      "source"
+    ],
+    "VE-0d52fa6a8208": [
+      "source"
+    ],
+    "VE-467f8589d6e2": [
+      "source"
+    ],
+    "VE-5fd968b8c564": [
+      "source"
+    ],
+    "VE-dfdea2cac2d4": [
+      "source"
+    ],
+    "VE-99c915714d69": [
+      "source"
+    ],
+    "VE-276a5ba5fcd5": [
+      "source"
+    ],
+    "VE-d3271755e9f9": [
+      "source"
+    ],
+    "VE-9bf8803c7b87": [
+      "source"
+    ],
+    "VE-e1308a8edf69": [
+      "source"
+    ],
+    "VE-675e5084631e": [
+      "source"
+    ],
+    "VE-4f28e519027f": [
+      "source"
+    ],
+    "VE-bf3a9fa9f698": [
+      "source"
+    ],
+    "VE-bdc7ae21680f": [
+      "source"
+    ],
+    "VE-d499de7845c7": [
+      "source"
+    ],
+    "VE-b2aa094f0895": [
+      "source"
+    ],
+    "VE-a28ca11d646f": [
+      "source"
+    ],
+    "VE-a595c39c916b": [
+      "source"
+    ],
+    "VE-e34cb19da2b8": [
+      "source"
+    ],
+    "VE-0e0d11add643": [
+      "source"
+    ],
+    "VE-23aaa05d4d7b": [
+      "source"
+    ],
+    "VE-653f456730e2": [
+      "source"
+    ],
+    "VE-73060808bad1": [
+      "source"
+    ],
+    "VE-79d86c59cb7d": [
+      "source"
+    ],
+    "VE-a980fcccde77": [
+      "source"
+    ],
+    "VE-5edfc10fdeb8": [
+      "source"
+    ],
+    "VE-c225e5628af2": [
+      "source"
+    ],
+    "VE-dde356e9a07a": [
+      "source"
+    ],
+    "VE-9139dc13f70d": [
+      "source"
+    ],
+    "VE-124dc7291c8f": [
+      "source"
+    ],
+    "VE-7deffb936a64": [
+      "source"
+    ],
+    "VE-5e6f768ddb6f": [
+      "source"
+    ],
+    "VE-a760f5ffdf00": [
+      "source"
+    ],
+    "VE-7b962dca04ce": [
+      "source"
+    ],
+    "VE-be1d235e3e07": [
+      "source"
+    ],
+    "VE-28ddaa1a1e70": [
+      "source"
+    ],
+    "VE-b6d0fb44ce1a": [
+      "source"
+    ],
+    "VE-25b6b4f8427b": [
+      "source"
+    ],
+    "VE-e512dd0faab4": [
+      "source"
+    ],
+    "VE-1c26e9d71245": [
+      "source"
+    ],
+    "VE-85624e3859a7": [
+      "source"
+    ],
+    "VE-74f3be9cd819": [
+      "source"
+    ],
+    "VE-ab7afddc7f0e": [
+      "source"
+    ],
+    "VE-23d73eb21056": [
+      "source"
+    ],
+    "VE-70d344b53103": [
+      "source"
+    ],
+    "VE-606f97aabb6e": [
+      "source"
+    ],
+    "VE-f8fa1e95ae19": [
+      "source"
+    ],
+    "VE-44b9e1ce75ef": [
+      "source"
+    ],
+    "VE-3cd653f61b92": [
+      "source"
+    ],
+    "VE-1bb8459d8122": [
+      "source"
+    ],
+    "VE-2cbdf3eedbfa": [
+      "source"
+    ],
+    "VE-78837b67b4b1": [
+      "source"
+    ],
+    "VE-df932ad7aa9c": [
+      "source"
+    ],
+    "VE-17a8bae5d1a9": [
+      "source"
+    ],
+    "VE-8f98fc5082e0": [
+      "source"
+    ],
+    "VE-677a08ec2f59": [
+      "source"
+    ],
+    "VE-7f665d15bcb7": [
+      "source"
+    ],
+    "VE-4e3c1f240f76": [
+      "source"
+    ],
+    "VE-6d46328732b6": [
+      "source"
+    ],
+    "VE-ea378bd7e456": [
+      "source"
+    ],
+    "VE-09993102f92f": [
+      "source"
+    ],
+    "VE-3392f0bf0347": [
+      "source"
+    ],
+    "VE-283395557248": [
+      "source"
+    ],
+    "VE-58acb470990d": [
+      "source"
+    ],
+    "VE-0e647a608e2d": [
+      "source"
+    ],
+    "VE-4ba05ec6f378": [
+      "source"
+    ],
+    "VE-111eaeddcbae": [
+      "source"
+    ],
+    "VE-0beb4965cbed": [
+      "source"
+    ],
+    "VE-22eb664c104d": [
+      "source"
+    ],
+    "VE-43c88e765bac": [
+      "source"
+    ],
+    "VE-8794adb0e020": [
+      "source"
+    ],
+    "VE-707c9b5fe978": [
+      "source"
+    ],
+    "VE-c6da947f101a": [
+      "source"
+    ],
+    "VE-c5699137ca9e": [
+      "source"
+    ],
+    "VE-9a334ccde451": [
+      "source"
+    ],
+    "VE-12f97f4f182d": [
+      "source"
+    ],
+    "VE-1ad4c8a16c4c": [
+      "source"
+    ],
+    "VE-5395c5240898": [
+      "source"
+    ],
+    "VE-5d1aabff1d9a": [
+      "source"
+    ],
+    "VE-19b6d1f6331b": [
+      "source"
+    ],
+    "VE-d8d924027316": [
+      "source"
+    ],
+    "VE-eeff85661f65": [
+      "source"
+    ],
+    "VE-fec7d126a803": [
+      "source"
+    ],
+    "VE-cf82eafbdeb9": [
+      "source"
+    ],
+    "VE-90761687deb9": [
+      "source"
+    ],
+    "VE-46283550c868": [
+      "source"
+    ],
+    "VE-4618336736dd": [
+      "source"
+    ],
+    "VE-184568bf5191": [
+      "source"
+    ],
+    "VE-7366bb1b0445": [
+      "source"
+    ],
+    "VE-1df5172aa202": [
+      "source"
+    ],
+    "VE-c30376b402c7": [
+      "source"
+    ],
+    "VE-890375698504": [
+      "source"
+    ],
+    "VE-b0d2d3d8a692": [
+      "source"
+    ],
+    "VE-50cbf40f4346": [
+      "source"
+    ],
+    "VE-7601e79b5b4b": [
+      "source"
+    ],
+    "VE-926510230ebc": [
+      "source"
+    ],
+    "VE-782ff5cd38db": [
+      "source"
+    ],
+    "VE-a8ee887314af": [
+      "source"
+    ],
+    "VE-663f1ad87ce5": [
+      "source"
+    ],
+    "VE-4af2782b0c0a": [
+      "source"
+    ],
+    "VE-ee36d5515d2e": [
+      "source",
+      "parameters"
+    ],
+    "VE-b452420ac05f": [
+      "source"
+    ],
+    "VE-e3e70a794549": [
+      "source"
+    ],
+    "VE-b129ec214cc7": [
+      "source"
+    ],
+    "VE-592e2db652f5": [
+      "source"
+    ],
+    "VE-351f73de9c2b": [
+      "source"
+    ],
+    "VE-6803d34c7357": [
+      "source"
+    ],
+    "VE-ef1163f48404": [
+      "source"
+    ],
+    "VE-a4decae315ba": [
+      "source"
+    ],
+    "VE-4c628c3e5a78": [
+      "source"
+    ],
+    "VE-ee3147e6bef1": [
+      "source"
+    ],
+    "VE-9c32d0654235": [
+      "source"
+    ],
+    "VE-0cb573a7c345": [
+      "source"
+    ],
+    "VE-0fcdf930d2d3": [
+      "source"
+    ],
+    "VE-0075332ffdca": [
+      "source"
+    ],
+    "VE-76745fbf7102": [
+      "source"
+    ],
+    "VE-9ef85a0d6e7a": [
+      "source"
+    ],
+    "VE-d7f6562ce04b": [
+      "source"
+    ],
+    "VE-9765b88983e2": [
+      "source"
+    ],
+    "VE-b6932785a6e1": [
+      "source"
+    ],
+    "VE-7110235ee7ad": [
+      "source"
+    ],
+    "VE-0a22c152320d": [
+      "source"
+    ],
+    "VE-969da3ba694a": [
+      "source"
+    ],
+    "VE-ad4fc9e37cb1": [
+      "source"
+    ],
+    "VE-273a47874923": [
+      "source"
+    ],
+    "VE-b2920c7de8db": [
+      "source"
+    ],
+    "VE-c30a0ba46d55": [
+      "source"
+    ],
+    "VE-6ec4d3b06e96": [
+      "source"
+    ],
+    "VE-616eccd8f8b6": [
+      "source"
+    ]
+  },
+  "counts_preserved": {
+    "owner_features": 42,
+    "owner_screens": 78
+  }
+}
