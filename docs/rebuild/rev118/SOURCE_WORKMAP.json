@@ -42,11 +42,11 @@
     },
     "source_features": {
       "path": "registries/owner_features.json",
-      "sha256": "33cbc8a00e7e9195c4f6caf2644bcf95fb24aafa4705275994b62750002df128"
+      "sha256": "aeb8fe20b2944ee5e1ef3bb6999654a9cf845ee8699f244fcca631fb61273173"
     },
     "source_surfaces": {
       "path": "registries/owner_screens.json",
-      "sha256": "b4f73cc9ae320dc88ccd3040f6db259246629c1ca9b3ca5ed97cd85e50514e58"
+      "sha256": "a0480dd16a72916092cae75d90e3b2e9384ea3be815ff7a70f0e12bff1055b77"
     },
     "inherited_source": {
       "path": "docs/rebuild/rev118/pre001/SOURCE_CLASSIFICATION.json",
@@ -2691,8 +2691,8 @@
       "OF-LEARNING-003": "66f1d31f5f441665e41eff527d6adcdcbb189d89d9da3239c7451c20e7017418",
       "OF-PROJECT-001": "dec20db5af7eaaa1ebb08de2fe73248cebead2b6851eb14ce9b96acd1cd0a082",
       "OF-PROJECT-002": "4d0435546e243037658feb8390a537311c1a536b5fdaca57f6b32c08811ca401",
-      "OF-AUTHORITY-001": "e700d821e84bbab4c6b3ffad8c75e007918ec3fb7870274753bc4b6939ffcba1",
-      "OF-GOOGLE-001": "4bfb027b12c4ee85c63ff748b4279cb4563c2780be0dd4d27fe2fc0bf14d22ac",
+      "OF-AUTHORITY-001": "90026acd03862902d5e04ebbcf4e064af1d944c8972d1d4204d41ce693193ae1",
+      "OF-GOOGLE-001": "c5e4c168719537710e1424e3d266e04e31a7b0c3414c2930c369177f15bbf9bf",
       "OF-GOOGLE-002": "7f67dd28f3610d9eddb5a60b11817a2ece6b7e9b19b3cef2e84f9be92e5d3c63",
       "OF-KNOWLEDGE-001": "aee2f6c6482d2605029eb92a2ae538a22c3431346c218c599c31bf9681e3ae8d",
       "OF-AUTOMATION-001": "63308154d014829474f8d36629ad02ded56ec12845742f74d776ffd28326cbd8",
@@ -2744,7 +2744,7 @@
       "van.memory": "fc515b105b98d33585ed412f6c46bf020f8cdce5b50534aa994657e27c50d640",
       "van.projects": "3e6d3867e7c279942633fbd153cb298297c9e4c87e5ea88c0d70126f5adc22e1",
       "van.projects.detail": "dbab0c9f2ac60907a008835979fd840f234123d33533a9c011aa9d9b5336d79b",
-      "van.connected": "875294607eacdcf40322074872b1d0d961e3a010732bca08f7db506c522f3ce7",
+      "van.connected": "d452ed733446c7a804a6ab5792ca18ee9d2fab294efac0659f44d624080a1060",
       "van.settings": "d5b7c0c6861a773a913173f79bd7ad14c2f58ea3eb85a86d0f1f41f1aba92175",
       "van.settings.voice": "ae880cdcea466a6d8a01e4d58e0f16899dfcd5575ed58486657750646da47a9c",
       "van.settings.notifications": "686bc4a17e6aafc8f3239c25a9b22d099073cb9c2271caddfe4d046c229470fe",
@@ -2766,7 +2766,7 @@
       "van.floating": "562b7a68cb34fe2d69d48da2e02229dfefdba24b3dcf9d9852c7786d0db1c22f",
       "van.voice.turn": "2e62edfe165ee22c16f62553df032ad9f262516c2880a623023649c80ab04b71",
       "van.browser.interactive": "493bc1a63685f743535a959c3c58894b152d5b0165f80ce5e86f5ab3b1b61c52",
-      "van.permissions": "90b9480ebd1e6b1329ca6704bfccbfe3688978b8131cb03aadcbd76c3d142f96",
+      "van.permissions": "de8ab631f315e08aa2f930d396dfaa65e6108b03e3163c913c05eac04d98f108",
       "van.autonomy": "017cb0257a6ed65812c9f0ddc2fa439fd38b2f3edfd1053c8dd81235d062b760",
       "van.understanding": "223e8cb0d6130d14a78a3445ba183ea0e8dcdf5bd58d77196c0e5ae30cc5b345",
       "van.reminders.manage": "8658ba3068ed9d0cbfb6a9e2a845a91dce68853e44a1de10026d2659554df60e",
@@ -2792,7 +2792,7 @@
       "van.attention.decision": "e913b1e6bdadf070e35d97587042ebe4b8fddaf900869d11eb2020dbb3a6cff8",
       "van.work.mission-control": "131f09655533c8064a1beb4b66cbd265cb6e277028fc7663f437b376efea6100",
       "van.memory.record": "e33d0dc9acae25037044ff002721413a8384ba2e041076ed92137c275cd83c4f",
-      "van.permissions.grant": "1e28e5a3fe81f832b1fbbeced190a3c2afab1059389292c3fe95c2fba011fd08",
+      "van.permissions.grant": "2202eeb2f7ab67318f306e87646555f439921a2a7daf832587f20458f14ca0da",
       "van.automation.plan": "d05e618a447e94324edcd26f7b2158e6ac58cb4b2147199e2952e259f95589fc",
       "van.browser.action-plan": "30e694d2af83bb35975df290c8d54016baf805f9fa5431dcc38dccac95b49577",
       "van.browser.file-provider": "6e3a4ebadf9cbe611f1249a6b453aea70cc4a05db4a06748db4cf54e629c8b8b",

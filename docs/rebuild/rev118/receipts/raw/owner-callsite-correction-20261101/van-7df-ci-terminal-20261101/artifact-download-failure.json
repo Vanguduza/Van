@@ -1,0 +1,8 @@
+{
+  "command": "gh run download41286883563 --namevan-backend-public-source",
+  "exit": 1,
+  "cause": "Artifact redirected GET403 Forbidden",
+  "original_stderr_sha256": "6adeebd4738a28d5b12375993d52f772efe81b422c553b37da60fa78eb827032",
+  "redirect_query_removed": true,
+  "application_failure_logs_unchanged": true
+}

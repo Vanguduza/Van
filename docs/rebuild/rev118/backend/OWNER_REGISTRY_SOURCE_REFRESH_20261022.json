@@ -1087,7 +1087,18 @@
       "new_sha256": "5a95fba70a2b77f4083791830380c74e92a228b74a9a5d7431101cbdd3dd2a32",
       "exact_anchor": "    suspend fun revokePermission(grantId: String) = client.revokePermission(grantId)",
       "reviewed_replacement_anchor": "    suspend fun revokePermission(grantId: String, reviewed: JSONObject, reviewedProfile: String) =",
-      "reason": "Preserve repository forwarding with the exact caller-reviewed grant and captured profile; no fresh selection on confirmation."
+      "reference_role": "method_declaration_provenance",
+      "reason": "Retain the actual declaration separately from the direct client invocation that shared its original line."
+    },
+    "android/app/src/main/java/com/dial/van/mission/MissionRepository.kt:136:direct-client-call": {
+      "file": "android/app/src/main/java/com/dial/van/mission/MissionRepository.kt",
+      "old_line": 136,
+      "new_line": 140,
+      "old_sha256": "2275ae57d7eb2ec232567a84b7a425246353246a586abf7498049642ea0218b1",
+      "new_sha256": "5a95fba70a2b77f4083791830380c74e92a228b74a9a5d7431101cbdd3dd2a32",
+      "exact_anchor": "    suspend fun revokePermission(grantId: String) = client.revokePermission(grantId)",
+      "reviewed_replacement_anchor": "        client.revokePermission(grantId, reviewed, reviewedProfile)",
+      "reason": "Bind this direct callsite to its actual invocation, separately from other symbols in the original shared anchor. Workspace status refresh is distinct from the independently recorded withdrawal-exchange status callback."
     },
     "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:1496": {
       "file": "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt",
@@ -1235,15 +1246,15 @@
       "new_sha256": "6e89096f6773455dfca27ef29ca2a79b9a23e4c76184d017cc06e53b380c213d",
       "exact_anchor": "            val w = ConnectedReadback.source { app.gatewayClient.googleStatus() }"
     },
-    "android/app/src/main/java/com/dial/van/command/connected/ConnectedRoute.kt:160": {
+    "android/app/src/main/java/com/dial/van/command/connected/ConnectedRoute.kt:160:direct-client-call": {
       "file": "android/app/src/main/java/com/dial/van/command/connected/ConnectedRoute.kt",
       "old_line": 160,
-      "new_line": 169,
+      "new_line": 62,
       "old_sha256": "d9328ea0b06b5957919f0f24e5dda5a13e8173aba1ecb53d3deb8c296f1fe20a",
       "new_sha256": "6e89096f6773455dfca27ef29ca2a79b9a23e4c76184d017cc06e53b380c213d",
       "exact_anchor": "                    val outcome = ConnectedReadback.revoke(request = { app.gatewayClient.googleOwnerRevoke() }, read = { app.gatewayClient.googleStatus() })",
-      "reviewed_replacement_anchor": "                    val result = app.gatewayClient.googleOwnerRevoke(reviewed, reviewedProfile)",
-      "reason": "Preserve the existing confirmed Workspace withdrawal using its reviewed generation/profile, durable original receipt and independent current connection read."
+      "reviewed_replacement_anchor": "            val w = ConnectedReadback.source { app.gatewayClient.googleStatus() }",
+      "reason": "Bind this direct callsite to its actual invocation, separately from other symbols in the original shared anchor. Workspace status refresh is distinct from the independently recorded withdrawal-exchange status callback."
     },
     "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt:1833": {
       "file": "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt",
@@ -1278,6 +1289,16 @@
       "exact_anchor": "    suspend fun googleOwnerRevoke(): JSONObject = withContext(Dispatchers.IO) {",
       "reviewed_replacement_anchor": "    suspend fun googleOwnerRevoke(reviewed: JSONObject, reviewedProfile: String): JSONObject = withContext(Dispatchers.IO) {",
       "reason": "Bind the reviewed Workspace connection generation/caller/profile before persisted original delivery and readback."
+    },
+    "android/app/src/main/java/com/dial/van/command/connected/ConnectedRoute.kt:160": {
+      "file": "android/app/src/main/java/com/dial/van/command/connected/ConnectedRoute.kt",
+      "old_line": 160,
+      "new_line": 169,
+      "old_sha256": "d9328ea0b06b5957919f0f24e5dda5a13e8173aba1ecb53d3deb8c296f1fe20a",
+      "new_sha256": "6e89096f6773455dfca27ef29ca2a79b9a23e4c76184d017cc06e53b380c213d",
+      "exact_anchor": "                    val outcome = ConnectedReadback.revoke(request = { app.gatewayClient.googleOwnerRevoke() }, read = { app.gatewayClient.googleStatus() })",
+      "reviewed_replacement_anchor": "                    val result = app.gatewayClient.googleOwnerRevoke(reviewed, reviewedProfile)",
+      "reason": "Preserve the existing confirmed Workspace withdrawal using its reviewed generation/profile, durable original receipt and independent current connection read."
     },
     "android/app/src/main/java/com/dial/van/command/connected/ConnectedRoute.kt:39": {
       "file": "android/app/src/main/java/com/dial/van/command/connected/ConnectedRoute.kt",
@@ -2242,6 +2263,115 @@
       "exact_anchor": "    suspend fun latestVisualAcceptance(): JSONObject = withContext(Dispatchers.IO) {"
     }
   },
+  "deduplicated_current_callsites": [
+    {
+      "endpoint_id": "VE-5e6f768ddb6f",
+      "callsite": {
+        "file": "android/app/src/main/java/com/dial/van/command/connected/ConnectedRoute.kt",
+        "line": 62,
+        "ref": "WORKSPACE_PATCH",
+        "sha256": "6e89096f6773455dfca27ef29ca2a79b9a23e4c76184d017cc06e53b380c213d",
+        "receiver": "app.gatewayClient",
+        "symbol": "googleStatus",
+        "namespace": "VanGatewayClient",
+        "invocation_kind": "direct_client_method",
+        "receiver_type_citation": {
+          "file": "android/app/src/main/java/com/dial/van/VanApplication.kt",
+          "line": 118,
+          "ref": "WORKSPACE_PATCH",
+          "sha256": "9266a15f2caddfc1598daa7fdb95850cccc8b1969bf6429d9762178eac1bd59a"
+        }
+      },
+      "reason": "Identical current observed callsite after reviewed retarget; historical anchor provenance remains in citation_changes."
+    },
+    {
+      "endpoint_id": null,
+      "callsite": {
+        "file": "android/app/src/main/java/com/dial/van/command/connected/ConnectedRoute.kt",
+        "line": 62,
+        "ref": "WORKSPACE_PATCH",
+        "sha256": "6e89096f6773455dfca27ef29ca2a79b9a23e4c76184d017cc06e53b380c213d",
+        "receiver": "app.gatewayClient",
+        "symbol": "googleStatus",
+        "namespace": "VanGatewayClient",
+        "invocation_kind": "direct_client_method",
+        "receiver_type_citation": {
+          "file": "android/app/src/main/java/com/dial/van/VanApplication.kt",
+          "line": 118,
+          "ref": "WORKSPACE_PATCH",
+          "sha256": "9266a15f2caddfc1598daa7fdb95850cccc8b1969bf6429d9762178eac1bd59a"
+        },
+        "endpoint_id": "VE-5e6f768ddb6f",
+        "kind": "direct_client_method"
+      },
+      "reason": "Identical current observed callsite after reviewed retarget; historical anchor provenance remains in citation_changes."
+    },
+    {
+      "endpoint_id": "VE-5e6f768ddb6f",
+      "callsite": {
+        "file": "android/app/src/main/java/com/dial/van/command/connected/ConnectedRoute.kt",
+        "line": 62,
+        "ref": "WORKSPACE_PATCH",
+        "sha256": "6e89096f6773455dfca27ef29ca2a79b9a23e4c76184d017cc06e53b380c213d",
+        "receiver": "app.gatewayClient",
+        "symbol": "googleStatus",
+        "namespace": "VanGatewayClient",
+        "invocation_kind": "direct_client_method",
+        "receiver_type_citation": {
+          "file": "android/app/src/main/java/com/dial/van/VanApplication.kt",
+          "line": 118,
+          "ref": "WORKSPACE_PATCH",
+          "sha256": "9266a15f2caddfc1598daa7fdb95850cccc8b1969bf6429d9762178eac1bd59a"
+        }
+      },
+      "reason": "Identical current observed callsite after reviewed retarget; historical anchor provenance remains in citation_changes."
+    },
+    {
+      "endpoint_id": null,
+      "callsite": {
+        "file": "android/app/src/main/java/com/dial/van/command/connected/ConnectedRoute.kt",
+        "line": 62,
+        "ref": "WORKSPACE_PATCH",
+        "sha256": "6e89096f6773455dfca27ef29ca2a79b9a23e4c76184d017cc06e53b380c213d",
+        "receiver": "app.gatewayClient",
+        "symbol": "googleStatus",
+        "namespace": "VanGatewayClient",
+        "invocation_kind": "direct_client_method",
+        "receiver_type_citation": {
+          "file": "android/app/src/main/java/com/dial/van/VanApplication.kt",
+          "line": 118,
+          "ref": "WORKSPACE_PATCH",
+          "sha256": "9266a15f2caddfc1598daa7fdb95850cccc8b1969bf6429d9762178eac1bd59a"
+        },
+        "endpoint_id": "VE-5e6f768ddb6f",
+        "kind": "direct_client_method"
+      },
+      "reason": "Identical current observed callsite after reviewed retarget; historical anchor provenance remains in citation_changes."
+    }
+  ],
+  "independent_google_withdrawal_status_readback": [
+    {
+      "file": "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt",
+      "line": 2092,
+      "sha256": "26cdf2e26203594b2113a5b661dda2ea33770cfba1f9aafbc1c22302c048c3ad",
+      "exact_anchor": "                detail = { getJson(\"/v1/google/status\") })",
+      "role": "Exact withdrawal exchange supplies an independent current-status transport callback"
+    },
+    {
+      "file": "android/app/src/main/java/com/dial/van/gateway/GoogleWithdrawalOperations.kt",
+      "line": 118,
+      "sha256": "3718aea7c293fa376100aa712660513bd3f904ab4ccd149d02cbac67c8ffbce6",
+      "exact_anchor": "        val current = if (observed.optString(\"state\") == \"APPLIED\") detail() else null",
+      "role": "After observing the original APPLIED receipt, invoke the independent current-status callback"
+    },
+    {
+      "file": "android/app/src/main/java/com/dial/van/gateway/GoogleWithdrawalOperations.kt",
+      "line": 120,
+      "sha256": "3718aea7c293fa376100aa712660513bd3f904ab4ccd149d02cbac67c8ffbce6",
+      "exact_anchor": "        observe(original, observed, current)",
+      "role": "Validate original receipt and independently observed current connection before completion"
+    }
+  ],
   "current_cited_source_sha256": {
     "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt": "26cdf2e26203594b2113a5b661dda2ea33770cfba1f9aafbc1c22302c048c3ad",
     "android/app/src/main/java/com/dial/van/VanApplication.kt": "9266a15f2caddfc1598daa7fdb95850cccc8b1969bf6429d9762178eac1bd59a",
@@ -2358,6 +2488,7 @@
     "android/app/src/main/java/com/dial/van/command/dev/DevWorkspacesRoute.kt": "9bf318301f27f2d3bcad851dc575dc527b97c13f47ae731e66cde0675a5ab5e2",
     "android/app/src/main/java/com/dial/van/command/artemis/ArtemisConsoleRoute.kt": "67ca665acc636cb6d4f4669d1b495273062ceae5c4a73c0b26aa418c8ef3b818",
     "android/app/src/main/java/com/dial/van/visual/VanCharacterAcceptance.kt": "7b282fa7815e4557cb4c2cd9e87d34ee9e5d4673b5fa5d93ecef2f1ded648e47",
+    "android/app/src/main/java/com/dial/van/gateway/GoogleWithdrawalOperations.kt": "3718aea7c293fa376100aa712660513bd3f904ab4ccd149d02cbac67c8ffbce6",
     "trading/vati/contracts/schemas/native_account_observation.schema.json": "af0c32a5ac27d55218474da3c8ea24a049c3c7b1bc59dc9abf465ae4a2b83a9f",
     "android/app/src/main/java/com/dial/van/trading/NativeAccountObservation.kt": "c6da23e70724022d1f813bb779b0e31661142565a8729949ca6a016ddf06927d"
   },

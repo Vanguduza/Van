@@ -1,0 +1,41 @@
+{
+  "owner": {
+    "command": [
+      "/workspace/van-backend-venv-20261025/bin/python",
+      "tools/rebuild/refresh_owner_source_contracts.py",
+      "--check"
+    ],
+    "exit": 0
+  },
+  "frontend": {
+    "command": [
+      "/workspace/van-backend-venv-20261025/bin/python",
+      "tools/rebuild/render_frontend_registry.py",
+      "--check"
+    ],
+    "exit": 0
+  },
+  "workmap": {
+    "command": [
+      "/workspace/van-backend-venv-20261025/bin/python",
+      "tools/rebuild/workmap.py",
+      "--check"
+    ],
+    "exit": 0
+  },
+  "mutation": {
+    "command": [
+      "/workspace/van-backend-venv-20261025/bin/python",
+      "tools/rebuild/mutation_registry.py",
+      "--check"
+    ],
+    "exit": 0
+  },
+  "consolidation": {
+    "command": [
+      "/workspace/van-backend-venv-20261025/bin/python",
+      "tools/consolidation/verify.py"
+    ],
+    "exit": 0
+  }
+}

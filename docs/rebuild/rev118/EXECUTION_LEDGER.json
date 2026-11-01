@@ -566,22 +566,16 @@
         }
       ]
     },
-    "updated_utc": "2026-11-01T08:18:23.287531+00:00",
+    "updated_utc": "2026-11-01T09:12:40.270153+00:00",
     "branch": "ccr-9e07e1af-8mgz1p",
-    "head": "7df732de4c0a4f84bafadda658654a0ab8788553",
+    "head": "607c3e12fc8e822eec2f599dba084b89124f9454",
     "published_head": "7df732de4c0a4f84bafadda658654a0ab8788553",
     "committed_ledger_verification": "Publishedca135 genuinehook/GREEN210 required4fd466baseline terminal0 before normalpush; current evidence-packaging repair still requires genuinecommit/committedverify before normalpush.",
-    "current_packet": "LAC230_WORKSPACE_WITHDRAWAL_SOURCE",
-    "active_packet": "Reviewed exactgeneration localWorkspacewithdrawal, durableoriginalhistory/currentpendingauthority and actualWorkspaceREADY lineage through existingAndroidcaller; no provider-wide/nativeactivation claim.",
-    "current_background_jobs": [
-      {
-        "run": 41286883563,
-        "head": "7df732de4c0a4f84bafadda658654a0ab8788553",
-        "purpose": "Current source CI publication barrier; ownedreadonlywatch36262"
-      }
-    ],
+    "current_packet": "OWNER_CALLSITE_METADATA_CORRECTION",
+    "active_packet": "VerifiedGoogle607c plus narrowactual7dfregistrycallsite correction; declaration139/call140 and Googleactualrefresh62 separatelyfromexchangeindependentreadback; source/testbytesunchanged.",
+    "current_background_jobs": [],
     "agent_assignments_ref": "delegation.active_assignments",
-    "next_action": "Genuine hooks/required4fd466 committed verify, retain7df sourceCI terminal publication barrier before normalpush; then independent remote/exactheadCI readback. Mandatorytrustedchecker/DDSkeyunwaived.",
+    "next_action": "Genuinecorrectivecommit/required4fd466committedverifyterminal0/normalpush/readback andnewexactheadCI. Prior7dfsourceFAILED5945/1/7+media198 retained; barrierterminalwithconfirmedcorrectedfailure; no nativegates waived.",
     "acceptance_issued": false,
     "continuation_history": [
       {
@@ -653,7 +647,7 @@
         "captured_at_utc": "2026-11-01T02:38:52.492703+00:00"
       }
     ],
-    "current_source_receipt": "docs/rebuild/rev118/receipts/GOOGLE_WORKSPACE_WITHDRAWAL_SOURCE_20261101.json",
+    "current_source_receipt": "docs/rebuild/rev118/receipts/OWNER_CALLSITE_METADATA_CORRECTION_20261101.json",
     "history_20261101": [
       {
         "updated_utc": "2026-11-01T02:38:52.492703+00:00",
@@ -816,6 +810,26 @@
         "next_action": "Genuine hook commit, required4fd466 committed verification terminal0, normal push/readback and exact-head hosted CI. Mandatory trusted-checker/DDS-key prerequisites unwaived.",
         "acceptance_issued": false,
         "current_source_receipt": "docs/rebuild/rev118/receipts/ANDROID_REVIEWED_REVOCATION_CALLER_REPAIR_20261101.json"
+      },
+      {
+        "updated_utc": "2026-11-01T08:18:23.287531+00:00",
+        "branch": "ccr-9e07e1af-8mgz1p",
+        "head": "7df732de4c0a4f84bafadda658654a0ab8788553",
+        "published_head": "7df732de4c0a4f84bafadda658654a0ab8788553",
+        "committed_ledger_verification": "Publishedca135 genuinehook/GREEN210 required4fd466baseline terminal0 before normalpush; current evidence-packaging repair still requires genuinecommit/committedverify before normalpush.",
+        "current_packet": "LAC230_WORKSPACE_WITHDRAWAL_SOURCE",
+        "active_packet": "Reviewed exactgeneration localWorkspacewithdrawal, durableoriginalhistory/currentpendingauthority and actualWorkspaceREADY lineage through existingAndroidcaller; no provider-wide/nativeactivation claim.",
+        "current_background_jobs": [
+          {
+            "run": 41286883563,
+            "head": "7df732de4c0a4f84bafadda658654a0ab8788553",
+            "purpose": "Current source CI publication barrier; ownedreadonlywatch36262"
+          }
+        ],
+        "agent_assignments_ref": "delegation.active_assignments",
+        "next_action": "Genuine hooks/required4fd466 committed verify, retain7df sourceCI terminal publication barrier before normalpush; then independent remote/exactheadCI readback. Mandatorytrustedchecker/DDSkeyunwaived.",
+        "acceptance_issued": false,
+        "current_source_receipt": "docs/rebuild/rev118/receipts/GOOGLE_WORKSPACE_WITHDRAWAL_SOURCE_20261101.json"
       }
     ]
   },
@@ -936,6 +950,13 @@
       "status": "SOURCE_REVIEW_AND_ACTUAL_CONSUMER_COMPILER_PROOFS_PASS",
       "receipt": "docs/rebuild/rev118/receipts/GOOGLE_WORKSPACE_WITHDRAWAL_SOURCE_20261101.json",
       "formal_acceptance_issued": false
+    },
+    {
+      "at_utc": "2026-11-01T09:12:40.270153+00:00",
+      "packet": "OWNER_CALLSITE_METADATA_CORRECTION",
+      "status": "EXACT_FAILED_NODE_AND_ALL_SEMANTIC_CONSUMERS_PASS",
+      "receipt": "docs/rebuild/rev118/receipts/OWNER_CALLSITE_METADATA_CORRECTION_20261101.json",
+      "formal_acceptance_issued": false
     }
   ],
   "obligations": "obligations/OBLIGATIONS.json: preserved observations with source implementation evidence and explicit remaining native/unit obligations.",
@@ -989,8 +1010,8 @@
       "evidence": "ci/MUTATION_CORPUS_c2a27848.json"
     }
   ],
-  "current_action": "Genuine hooks/required4fd466 committed verify, retain7df sourceCI terminal publication barrier before normalpush; then independent remote/exactheadCI readback. Mandatorytrustedchecker/DDSkeyunwaived.",
-  "updated_at_utc": "2026-11-01T08:18:23.287531+00:00",
+  "current_action": "Genuinecorrectivecommit/required4fd466committedverifyterminal0/normalpush/readback andnewexactheadCI. Prior7dfsourceFAILED5945/1/7+media198 retained; barrierterminalwithconfirmedcorrectedfailure; no nativegates waived.",
+  "updated_at_utc": "2026-11-01T09:12:40.270153+00:00",
   "execution_method": {
     "path": "BUILD_EXECUTION_PLAN.md",
     "scope_index": "SOURCE_WORKMAP.json",

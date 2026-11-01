@@ -1,0 +1,4 @@
+tests/rebuild/test_owner_registry_refresh.py
+tests/contracts/test_artemis_acceptance_plan.py
+tests/contracts/test_owner_endpoint_registry.py
+tests/contracts/test_owner_redesign_registry.py

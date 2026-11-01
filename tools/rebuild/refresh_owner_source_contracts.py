@@ -58,6 +58,17 @@ REVIEWED_CITATION_REASONS = {
     ('android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt', '    suspend fun revokePermission(grantId: String): JSONObject = withContext(Dispatchers.IO) {'): 'Bind the reviewed grant snapshot and current profile to the durable original permission revocation exchange.',
 }
 
+REVIEWED_DIRECT_CALL_REPLACEMENTS = {
+    ("android/app/src/main/java/com/dial/van/command/connected/ConnectedRoute.kt",
+     "                    val outcome = ConnectedReadback.revoke(request = { app.gatewayClient.googleOwnerRevoke() }, read = { app.gatewayClient.googleStatus() })",
+     "app.gatewayClient", "googleStatus"):
+     "            val w = ConnectedReadback.source { app.gatewayClient.googleStatus() }",
+    ("android/app/src/main/java/com/dial/van/mission/MissionRepository.kt",
+     "    suspend fun revokePermission(grantId: String) = client.revokePermission(grantId)",
+     "client", "revokePermission"):
+     "        client.revokePermission(grantId, reviewed, reviewedProfile)",
+}
+
 
 def git_file(ref, path):
     return subprocess.run(["git", "show", ref+":"+path], cwd=ROOT, check=True, capture_output=True).stdout
@@ -103,7 +114,7 @@ def build(read=None):
     endpoint_doc = export()
     schemas = endpoint_doc.pop("schemas")
     endpoints = {r["endpoint_id"]: r for r in endpoint_doc["endpoints"]}
-    changes, sources = {}, {}
+    changes, sources, deduplicated_callsites = {}, {}, []
 
     def walk(value):
         if isinstance(value, dict):
@@ -117,23 +128,54 @@ def build(read=None):
                         raise ValueError("Unreviewed citation source: "+file)
                     anchor = old.decode().splitlines()[value["line"]-1]
                     current_anchor = REVIEWED_CITATION_REPLACEMENTS.get((file, anchor), anchor)
+                    direct_anchor = None
+                    if value.get("invocation_kind") == "direct_client_method":
+                        direct_anchor = REVIEWED_DIRECT_CALL_REPLACEMENTS.get(
+                            (file, anchor, value.get("receiver"), value.get("symbol")))
+                    if direct_anchor is not None:
+                        current_anchor = direct_anchor
                     lines = data.decode().splitlines()
                     matches = [i+1 for i, line in enumerate(lines) if line == current_anchor]
                     if len(matches) != 1:
                         raise ValueError("Changed/non-unique citation requires review: "+file+":"+str(value["line"]))
                     key = file+":"+str(value["line"])
+                    if direct_anchor is not None:
+                        declaration_anchor = REVIEWED_CITATION_REPLACEMENTS.get((file, anchor))
+                        if declaration_anchor and declaration_anchor.lstrip().startswith("suspend fun "):
+                            declarations = [i+1 for i, line in enumerate(lines) if line == declaration_anchor]
+                            if len(declarations) != 1:
+                                raise ValueError("Changed/non-unique declaration provenance requires review: "+file)
+                            changes[key] = {"file": file, "old_line": value["line"],
+                                "new_line": declarations[0], "old_sha256": value.get("sha256"),
+                                "new_sha256": sha(data), "exact_anchor": anchor,
+                                "reviewed_replacement_anchor": declaration_anchor,
+                                "reference_role": "method_declaration_provenance",
+                                "reason": "Retain the actual declaration separately from the direct client invocation that shared its original line."}
+                        key += ":direct-client-call"
                     changes[key] = {"file": file, "old_line": value["line"], "new_line": matches[0],
                         "old_sha256": value.get("sha256"), "new_sha256": sha(data), "exact_anchor": anchor}
                     if current_anchor != anchor:
                         changes[key].update(reviewed_replacement_anchor=current_anchor,
-                            reason=REVIEWED_CITATION_REASONS.get((file, anchor),
-                                "Preserve the exact timestamp used in the existing owner approval, including biometric delay"))
+                            reason=("Bind this direct callsite to its actual invocation, separately from other symbols in the original shared anchor. Workspace status refresh is distinct from the independently recorded withdrawal-exchange status callback." if direct_anchor is not None else REVIEWED_CITATION_REASONS.get((file, anchor),
+                                "Preserve the exact timestamp used in the existing owner approval, including biometric delay")))
                     value.update(line=matches[0], sha256=sha(data))
             if "endpoint_id" in value and "source_ref" in value:
                 value["source_ref"] = endpoints[value["endpoint_id"]]["source"]
             for key, child in value.items():
                 if not key.startswith(("baseline", "historical")):
                     walk(child)
+                    if key == "android_callsites" and isinstance(child, list):
+                        seen, unique = set(), []
+                        for call in child:
+                            identity = json.dumps(call, sort_keys=True)
+                            if identity in seen:
+                                deduplicated_callsites.append({"endpoint_id": value.get("endpoint_id"),
+                                    "callsite": copy.deepcopy(call),
+                                    "reason": "Identical current observed callsite after reviewed retarget; historical anchor provenance remains in citation_changes."})
+                            else:
+                                seen.add(identity)
+                                unique.append(call)
+                        child[:] = unique
         elif isinstance(value, list):
             for child in value:
                 walk(child)
@@ -186,6 +228,26 @@ def build(read=None):
         *(r for r in documents["owner_screens"]["screens"] if r["id"] in {"van.permissions","van.permissions.grant"}),
     ):
         row.setdefault("backend_contract_extensions",[]).append(copy.deepcopy(permission_extension))
+    # This exchange readback is separate from the UI's current-status refresh.
+    google_postcondition = []
+    for file, anchor, role in (
+        ("android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt",
+         '                detail = { getJson("/v1/google/status") })',
+         "Exact withdrawal exchange supplies an independent current-status transport callback"),
+        ("android/app/src/main/java/com/dial/van/gateway/GoogleWithdrawalOperations.kt",
+         '        val current = if (observed.optString("state") == "APPLIED") detail() else null',
+         "After observing the original APPLIED receipt, invoke the independent current-status callback"),
+        ("android/app/src/main/java/com/dial/van/gateway/GoogleWithdrawalOperations.kt",
+         '        observe(original, observed, current)',
+         "Validate original receipt and independently observed current connection before completion"),
+    ):
+        data = (ROOT/file).read_bytes()
+        matches = [i+1 for i, line in enumerate(data.decode().splitlines()) if line == anchor]
+        if len(matches) != 1:
+            raise ValueError("Changed/non-unique withdrawal postcondition source requires review: "+file)
+        sources[file] = sha(data)
+        google_postcondition.append({"file": file, "line": matches[0], "sha256": sha(data),
+            "exact_anchor": anchor, "role": role})
     google_original = next(r for r in endpoint_doc["endpoints"] if
         (r["method"], r["path"]) == ("GET", "/v1/google/owner-revocations/{operation_id}"))
     google_extension = {
@@ -193,6 +255,7 @@ def build(read=None):
         "source_ref": google_original["source"], "authentication": google_original["authentication"],
         "device_proof_required_when_bound": google_original["device_proof_required_when_bound"],
         "client_namespace": "VanGatewayClient", "client_function": "googleOwnerRevoke",
+        "independent_withdrawal_status_readback": google_postcondition,
         "source_status": "CANDIDATE_SOURCE_TESTED_EXISTING_ANDROID_CALLER_NATIVE_ACCEPTANCE_PENDING",
         "canonical_units": ["BE-002", "BE-031"], "action_ids": ["LAC-230"],
         "specification_operation_id": "WP-ACT-LAC-230",
@@ -481,6 +544,8 @@ def build(read=None):
     receipt = {"scope": "BOUNDED_SOURCE_REFERENCE_REFRESH_NOT_FULL_PRODUCT_REVIEW",
         "input_registry_commit": INPUT, "citation_source_commit": CITATION_BASE,
         "preserved_identity_sets": preserved, "citation_changes": changes,
+        "deduplicated_current_callsites": deduplicated_callsites,
+        "independent_google_withdrawal_status_readback": google_postcondition,
         "current_cited_source_sha256": sources, "endpoint_count": len(endpoints),
         "schema_count": len(schemas), "physical_cases_executed": 0,
         "owner_release": False, "deployment_accepted": False}

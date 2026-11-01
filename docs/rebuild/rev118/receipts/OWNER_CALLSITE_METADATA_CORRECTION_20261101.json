@@ -1,0 +1,346 @@
+{
+  "schema": "van.owner-callsite-metadata-correction/1",
+  "at_utc": "2026-11-01T09:12:40.270153+00:00",
+  "source_parent": "607c3e12fc8e822eec2f599dba084b89124f9454",
+  "published_failed_head": "7df732de4c0a4f84bafadda658654a0ab8788553",
+  "authorizations": [
+    "auth-20261022-owner-autonomous-candidate-build",
+    "auth-20261022-owner-owner-contract-refresh"
+  ],
+  "actual_failed_ci": {
+    "artifact_id": 13076598634,
+    "archive_sha256": "0e45d1f3c5d00440d5e8d15e2ad2fc41fbe305253249565b0add12db73721881",
+    "exact_tested_commit": "7df732de4c0a4f84bafadda658654a0ab8788553",
+    "runtimes": {
+      "media-report.xml": {
+        "tests": 198,
+        "failed": 0,
+        "errors": 0,
+        "skips": [],
+        "passed": 198
+      },
+      "gateway-report.xml": {
+        "tests": 5953,
+        "failed": 1,
+        "errors": 0,
+        "skips": [
+          {
+            "class": "backend.tests.test_jev_browser_eligibility",
+            "name": "test_vendored_dds_files_are_the_audited_blobs",
+            "reason": "DDS checkout not present; blob hashes pinned above"
+          },
+          {
+            "class": "backend.tests.test_jev_no_generic_executor",
+            "name": "test_no_fabric_or_generic_operation_survives_the_b1_validator[click]",
+            "reason": "member of the B1 closed set by definition"
+          },
+          {
+            "class": "backend.tests.test_jev_no_generic_executor",
+            "name": "test_no_fabric_or_generic_operation_survives_the_b1_validator[scroll]",
+            "reason": "member of the B1 closed set by definition"
+          },
+          {
+            "class": "backend.tests.test_jev_no_generic_executor",
+            "name": "test_no_fabric_or_generic_operation_survives_the_b1_validator[select]",
+            "reason": "member of the B1 closed set by definition"
+          },
+          {
+            "class": "tests.contracts.test_android_instrumentation_abi",
+            "name": "test_actual_agp_direct_package_release_refuses_missing_core_deployment_profile",
+            "reason": "opt-in actual AGP release guard check"
+          },
+          {
+            "class": "tests.contracts.test_android_production_target",
+            "name": "test_actual_agp_valid_target_still_refuses_missing_production_signing",
+            "reason": "opt-in actual AGP signing guard check"
+          },
+          {
+            "class": "tests.contracts.test_ci_dds_contract_pin",
+            "name": "test_recorded_blobs_are_the_pinned_dds_blobs_when_dds_is_present",
+            "reason": "no DDS git clone beside this checkout; the CI step verifies the same table itself"
+          }
+        ],
+        "passed": 5945
+      }
+    },
+    "phase": "TerminalFailed_NOT_TIMEOUT",
+    "primary_elapsed_seconds": 2784.21,
+    "coverage": "FAILED source cases missing, failed or errored",
+    "exact_failure": "tests/contracts/test_owner_redesign_registry.py::test_current_function_citations_and_callsites_are_exact_production_source",
+    "separate_media_count_correction": "198followup are separate media SOURCE runtime cases, not extra gatewaycontract cases",
+    "application_failure_log_sha256": "342e88e80eb25589e12d5d309cda1cf8773c982f436093e8be093eb6925457dd",
+    "transport": "CLI403 error was redacted for temporary redirect; sanitized log explicitly not original raw transport. Supportedconnector archive matches officialSHA; applicationlog/JUnitbytesexact.",
+    "original_watch": "Session36262 reaped terminal0 wrapper; actualnativewatchreceipt exit1 at08:46:54.060217; not restarted/signalled."
+  },
+  "cause": "The reviewed old single-line repository declaration and direct call split into two lines. Shared source-anchor remapping incorrectly placed a direct call at declaration139. The analogous old Google UI expression contained revoke andstatus calls; onlyrevoke remainedat169, status methodcall livesinrefresh62. Unchanged semanticguard correctly failed.",
+  "repair": {
+    "repository_provenance": [
+      {
+        "file": "android/app/src/main/java/com/dial/van/mission/MissionRepository.kt",
+        "old_line": 136,
+        "new_line": 139,
+        "old_sha256": "2275ae57d7eb2ec232567a84b7a425246353246a586abf7498049642ea0218b1",
+        "new_sha256": "5a95fba70a2b77f4083791830380c74e92a228b74a9a5d7431101cbdd3dd2a32",
+        "exact_anchor": "    suspend fun revokePermission(grantId: String) = client.revokePermission(grantId)",
+        "reviewed_replacement_anchor": "    suspend fun revokePermission(grantId: String, reviewed: JSONObject, reviewedProfile: String) =",
+        "reference_role": "method_declaration_provenance",
+        "reason": "Retain the actual declaration separately from the direct client invocation that shared its original line."
+      },
+      {
+        "file": "android/app/src/main/java/com/dial/van/mission/MissionRepository.kt",
+        "old_line": 136,
+        "new_line": 140,
+        "old_sha256": "2275ae57d7eb2ec232567a84b7a425246353246a586abf7498049642ea0218b1",
+        "new_sha256": "5a95fba70a2b77f4083791830380c74e92a228b74a9a5d7431101cbdd3dd2a32",
+        "exact_anchor": "    suspend fun revokePermission(grantId: String) = client.revokePermission(grantId)",
+        "reviewed_replacement_anchor": "        client.revokePermission(grantId, reviewed, reviewedProfile)",
+        "reason": "Bind this direct callsite to its actual invocation, separately from other symbols in the original shared anchor. Workspace status refresh is distinct from the independently recorded withdrawal-exchange status callback."
+      }
+    ],
+    "google_current_callsite": "Exact existing googleStatus invocation at canonicalrefresh62; identical CURRENT observed callsite records deduplicated with historical provenance retained.",
+    "independent_revoke_postcondition": [
+      {
+        "file": "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt",
+        "line": 2092,
+        "sha256": "26cdf2e26203594b2113a5b661dda2ea33770cfba1f9aafbc1c22302c048c3ad",
+        "exact_anchor": "                detail = { getJson(\"/v1/google/status\") })",
+        "role": "Exact withdrawal exchange supplies an independent current-status transport callback"
+      },
+      {
+        "file": "android/app/src/main/java/com/dial/van/gateway/GoogleWithdrawalOperations.kt",
+        "line": 118,
+        "sha256": "3718aea7c293fa376100aa712660513bd3f904ab4ccd149d02cbac67c8ffbce6",
+        "exact_anchor": "        val current = if (observed.optString(\"state\") == \"APPLIED\") detail() else null",
+        "role": "After observing the original APPLIED receipt, invoke the independent current-status callback"
+      },
+      {
+        "file": "android/app/src/main/java/com/dial/van/gateway/GoogleWithdrawalOperations.kt",
+        "line": 120,
+        "sha256": "3718aea7c293fa376100aa712660513bd3f904ab4ccd149d02cbac67c8ffbce6",
+        "exact_anchor": "        observe(original, observed, current)",
+        "role": "Validate original receipt and independently observed current connection before completion"
+      }
+    ],
+    "postcondition_limit": "Refresh62 is NOT used as proof of revoke completion. Actual exchange rawGET callback, afteroriginalreceipt detail() and observe(original,current) remain separately evidenced.",
+    "deduplicated_current_callsites": [
+      {
+        "endpoint_id": "VE-5e6f768ddb6f",
+        "callsite": {
+          "file": "android/app/src/main/java/com/dial/van/command/connected/ConnectedRoute.kt",
+          "line": 62,
+          "ref": "WORKSPACE_PATCH",
+          "sha256": "6e89096f6773455dfca27ef29ca2a79b9a23e4c76184d017cc06e53b380c213d",
+          "receiver": "app.gatewayClient",
+          "symbol": "googleStatus",
+          "namespace": "VanGatewayClient",
+          "invocation_kind": "direct_client_method",
+          "receiver_type_citation": {
+            "file": "android/app/src/main/java/com/dial/van/VanApplication.kt",
+            "line": 118,
+            "ref": "WORKSPACE_PATCH",
+            "sha256": "9266a15f2caddfc1598daa7fdb95850cccc8b1969bf6429d9762178eac1bd59a"
+          }
+        },
+        "reason": "Identical current observed callsite after reviewed retarget; historical anchor provenance remains in citation_changes."
+      },
+      {
+        "endpoint_id": null,
+        "callsite": {
+          "file": "android/app/src/main/java/com/dial/van/command/connected/ConnectedRoute.kt",
+          "line": 62,
+          "ref": "WORKSPACE_PATCH",
+          "sha256": "6e89096f6773455dfca27ef29ca2a79b9a23e4c76184d017cc06e53b380c213d",
+          "receiver": "app.gatewayClient",
+          "symbol": "googleStatus",
+          "namespace": "VanGatewayClient",
+          "invocation_kind": "direct_client_method",
+          "receiver_type_citation": {
+            "file": "android/app/src/main/java/com/dial/van/VanApplication.kt",
+            "line": 118,
+            "ref": "WORKSPACE_PATCH",
+            "sha256": "9266a15f2caddfc1598daa7fdb95850cccc8b1969bf6429d9762178eac1bd59a"
+          },
+          "endpoint_id": "VE-5e6f768ddb6f",
+          "kind": "direct_client_method"
+        },
+        "reason": "Identical current observed callsite after reviewed retarget; historical anchor provenance remains in citation_changes."
+      },
+      {
+        "endpoint_id": "VE-5e6f768ddb6f",
+        "callsite": {
+          "file": "android/app/src/main/java/com/dial/van/command/connected/ConnectedRoute.kt",
+          "line": 62,
+          "ref": "WORKSPACE_PATCH",
+          "sha256": "6e89096f6773455dfca27ef29ca2a79b9a23e4c76184d017cc06e53b380c213d",
+          "receiver": "app.gatewayClient",
+          "symbol": "googleStatus",
+          "namespace": "VanGatewayClient",
+          "invocation_kind": "direct_client_method",
+          "receiver_type_citation": {
+            "file": "android/app/src/main/java/com/dial/van/VanApplication.kt",
+            "line": 118,
+            "ref": "WORKSPACE_PATCH",
+            "sha256": "9266a15f2caddfc1598daa7fdb95850cccc8b1969bf6429d9762178eac1bd59a"
+          }
+        },
+        "reason": "Identical current observed callsite after reviewed retarget; historical anchor provenance remains in citation_changes."
+      },
+      {
+        "endpoint_id": null,
+        "callsite": {
+          "file": "android/app/src/main/java/com/dial/van/command/connected/ConnectedRoute.kt",
+          "line": 62,
+          "ref": "WORKSPACE_PATCH",
+          "sha256": "6e89096f6773455dfca27ef29ca2a79b9a23e4c76184d017cc06e53b380c213d",
+          "receiver": "app.gatewayClient",
+          "symbol": "googleStatus",
+          "namespace": "VanGatewayClient",
+          "invocation_kind": "direct_client_method",
+          "receiver_type_citation": {
+            "file": "android/app/src/main/java/com/dial/van/VanApplication.kt",
+            "line": 118,
+            "ref": "WORKSPACE_PATCH",
+            "sha256": "9266a15f2caddfc1598daa7fdb95850cccc8b1969bf6429d9762178eac1bd59a"
+          },
+          "endpoint_id": "VE-5e6f768ddb6f",
+          "kind": "direct_client_method"
+        },
+        "reason": "Identical current observed callsite after reviewed retarget; historical anchor provenance remains in citation_changes."
+      }
+    ],
+    "application_and_test_bytes": "Allandroid/backend/trading/services/hermes/tests bytes unchanged from607c; exact638Android inputhashes stillmatch actualwholeappKotlincompiledsnapshot."
+  },
+  "selection_correction": {
+    "receipt": {
+      "selection": "Reference-derived all existing contract/rebuild consumers of generated owner registry/function artifacts, plus explicit source-workmap semantic consumer; direct and imported artemis_acceptance readers included. Broad registry collisions (project mounts, unrelated productiongate registries, ledgerregistry) classified unrelated rather than blanket-running them.",
+      "files": {
+        "tests/contracts/test_artemis_acceptance_plan.py": "bda2cf2ffa37cb235b94fb6e379984b3387ca08a7f04bd1adc4681d743565773",
+        "tests/contracts/test_artemis_usb_acceptance.py": "e2687ec756a176bae44db75febb03c30173e78542ba306f6a5713a1d2eede6ad",
+        "tests/contracts/test_ci_dds_contract_pin.py": "f7bf8a075362adedb187e1541cee8c5126bff598145010376aa293834530715a",
+        "tests/contracts/test_native_artemis_plan.py": "23e3b2f3b61d06944d24f4431f9227fc9f73b39609b7e360f9b9627c67115be3",
+        "tests/contracts/test_owner_endpoint_registry.py": "90d7d18869d6d30b936c6ec54610cbdda673d79cfc314b2ef2e676d49b9f4c7b",
+        "tests/contracts/test_owner_redesign_registry.py": "f62be41f47f127ffc83275aca417ad8d00c31a34d27d599fa46006e5e2ab74c3",
+        "tests/rebuild/test_owner_registry_refresh.py": "2fc772f4612293aa46184a52ca302c2b6507ab56a5b04fb56f58e8551616ba48",
+        "tests/rebuild/test_source_workmap.py": "f9b7a1b3b6839593b8fb7274cab913f3df0813ce6e8e4e2f4f39fa9889822542"
+      },
+      "existing_assertions_modified": false
+    },
+    "rule": "Whenever ownerregistry/generator/function artifacts change, enumerate all direct and imported-builder semantic consumers across canonicaltests via references; no hard-coded26case subset.",
+    "module_count": 8
+  },
+  "actual_tests": {
+    "exact_original_failed_node_final": "PASS; contained in fullowner-redesign module below",
+    "final_semantic_modules": 8,
+    "final_semantic_cases": 220,
+    "failed": 0,
+    "errors": 0,
+    "skipped": 0,
+    "earlier_source_runs": "Original7df5945pass1fail7skip retained; first localmetadatarepair exposed analogousGooglecallerwronganchor beforepublication, preserved; initial220pass before addedseparate139provenance alsoretained. No failure relabelledgreen.",
+    "media_correction": "198followup cases are separate mediaSOURCE runtime, not additional gatewaycontract cases."
+  },
+  "canonical_guards": {
+    "owner": {
+      "command": [
+        "/workspace/van-backend-venv-20261025/bin/python",
+        "tools/rebuild/refresh_owner_source_contracts.py",
+        "--check"
+      ],
+      "exit": 0
+    },
+    "frontend": {
+      "command": [
+        "/workspace/van-backend-venv-20261025/bin/python",
+        "tools/rebuild/render_frontend_registry.py",
+        "--check"
+      ],
+      "exit": 0
+    },
+    "workmap": {
+      "command": [
+        "/workspace/van-backend-venv-20261025/bin/python",
+        "tools/rebuild/workmap.py",
+        "--check"
+      ],
+      "exit": 0
+    },
+    "mutation": {
+      "command": [
+        "/workspace/van-backend-venv-20261025/bin/python",
+        "tools/rebuild/mutation_registry.py",
+        "--check"
+      ],
+      "exit": 0
+    },
+    "consolidation": {
+      "command": [
+        "/workspace/van-backend-venv-20261025/bin/python",
+        "tools/consolidation/verify.py"
+      ],
+      "exit": 0
+    }
+  },
+  "preservation": {
+    "endpoints": 487,
+    "schemas": 379,
+    "endpoint_schema_documents": "byte-identical to607c",
+    "features": 42,
+    "functions": 105,
+    "surfaces": 78,
+    "actions": 349,
+    "application_test_assertions_unchanged": true,
+    "workflow_and_template_unchanged": true
+  },
+  "source_ci_publication_barrier": "7df required jobs terminal; confirmedmetadatafailure is now narrowly corrected/verified. Rootauthorizes normal correctivepublication aftergenuinehook/baselineverify. TwoDDSkey/trustedchecker admissionfailures remain unwaived.",
+  "transport_evidence": "OriginalCLIartifactdownload403 stderr contained a temporary redirect query. Sanitizedtransportlog is explicitly NOT originalrawbytes; originalstderrSHA recorded and redirect removed. Applicationfailurelog/JUnit/officialartifactZIPbytes+digest exact. Supportedconnector downloadused; no credential/securitychange.",
+  "watch_reconciliation": "Originalboundedreadonlywatch36262 completedexit1 and its execwrapper wasreaped once; not restarted/signalled.",
+  "deferred_performance": "No workflow edits; source2784.21sec timing retained for separatefourworker proposal. Currentpublication not delayed for refactor.",
+  "qualification": "SOURCE CANDIDATE ONLY. Googlelocalwithdrawal complete-scope evidence retained inpriorreceipt; BE031 external/nativecanaryproducer/sourceintegration debt and native/unit/BG001/provider/device/signing/deployment/releaseacceptance remainopen.",
+  "raw_files": {
+    "docs/rebuild/rev118/receipts/raw/owner-callsite-correction-20261101/van-7df-ci-terminal-20261101/JUNIT_RESULTS.json": "221937fe8adc3e6d3a3f9b5a62708742cc3ad726b3ff92d697e101f5d6df0afd",
+    "docs/rebuild/rev118/receipts/raw/owner-callsite-correction-20261101/van-7df-ci-terminal-20261101/SEMANTIC_CONSUMER_SELECTION.json": "3be457c58fac90e19bf1a760cdcca02969f6f507e7aec09c5652d938b34e1799",
+    "docs/rebuild/rev118/receipts/raw/owner-callsite-correction-20261101/van-7df-ci-terminal-20261101/SHARD_TIMING_ESTIMATE.json": "41b7509f90c8535e4802edfd6ef4ec3dc40331a51a8ff18fb69b964976e92e33",
+    "docs/rebuild/rev118/receipts/raw/owner-callsite-correction-20261101/van-7df-ci-terminal-20261101/TERMINAL_EVIDENCE.json": "e0b0d91a93e88a1a3c6a997381d644f68b8b4cd02ea593389ef912f783f3b185",
+    "docs/rebuild/rev118/receipts/raw/owner-callsite-correction-20261101/van-7df-ci-terminal-20261101/TIMING_EVIDENCE.json": "6a680cd30c0f81903cfa2246902557c8a0b89a44ed62fd43547cf33ef693c699",
+    "docs/rebuild/rev118/receipts/raw/owner-callsite-correction-20261101/van-7df-ci-terminal-20261101/all-registry-consumer-references.txt": "3bfd7746ae58b9b3bc6a2d6723e0bd606e8a91f56dc026c9346eb982ff556f4b",
+    "docs/rebuild/rev118/receipts/raw/owner-callsite-correction-20261101/van-7df-ci-terminal-20261101/artifact-connector/gateway-report.xml": "b6e9b1127bbb7776dab4d1cadd6a6aefdd8ec1aea270f33471c527ba58bd8c1c",
+    "docs/rebuild/rev118/receipts/raw/owner-callsite-correction-20261101/van-7df-ci-terminal-20261101/artifact-connector/gateway-storage-audit.json": "128b04a8c8f58c8d4d335db930e1fabd533499ca88e5c1c3afb2e49eb25caea1",
+    "docs/rebuild/rev118/receipts/raw/owner-callsite-correction-20261101/van-7df-ci-terminal-20261101/artifact-connector/media-report.xml": "c26395db077d14e66024c3e6b0d008db11fea5a1c9d414caff8186a00c15e3f7",
+    "docs/rebuild/rev118/receipts/raw/owner-callsite-correction-20261101/van-7df-ci-terminal-20261101/artifact-connector/media-storage-audit.json": "128b04a8c8f58c8d4d335db930e1fabd533499ca88e5c1c3afb2e49eb25caea1",
+    "docs/rebuild/rev118/receipts/raw/owner-callsite-correction-20261101/van-7df-ci-terminal-20261101/artifact-connector/selection.json": "53f6441ef47966d0e1a963ca6202d11dd45f267cececef37cb1ba0431e133ed3",
+    "docs/rebuild/rev118/receipts/raw/owner-callsite-correction-20261101/van-7df-ci-terminal-20261101/artifact-connector/tested-commit.txt": "589c35447662fabf07038cc3b9c9587dc59d7d69fa6f38c1d2c55bfec60353bf",
+    "docs/rebuild/rev118/receipts/raw/owner-callsite-correction-20261101/van-7df-ci-terminal-20261101/artifact-download-failure.json": "0c6aea6878972fe841085c12f18dc4c855cc96d98371ce46daf5cac9f7208637",
+    "docs/rebuild/rev118/receipts/raw/owner-callsite-correction-20261101/van-7df-ci-terminal-20261101/artifact-download.log": "2d0c7b8845d0b711ebdedd5ae1bce3f78d29cd929ca8221993df645c36ba2e5d",
+    "docs/rebuild/rev118/receipts/raw/owner-callsite-correction-20261101/van-7df-ci-terminal-20261101/backend-public.log": "342e88e80eb25589e12d5d309cda1cf8773c982f436093e8be093eb6925457dd",
+    "docs/rebuild/rev118/receipts/raw/owner-callsite-correction-20261101/van-7df-ci-terminal-20261101/exact-failed-node-after.log": "790ed0896869db470309391812d6e7346bf3cd9e42d45917c66607952ee1fa14",
+    "docs/rebuild/rev118/receipts/raw/owner-callsite-correction-20261101/van-7df-ci-terminal-20261101/exact-failed-node-final.log": "0c33791aa03cbc8826ba04efd1b062adb3baa875c47625e4de7090bd753d7635",
+    "docs/rebuild/rev118/receipts/raw/owner-callsite-correction-20261101/van-7df-ci-terminal-20261101/generated-owner-consumers.txt": "1c8a4209f6d6f05690d4f4813cf524f0a774295bd73e48392672a6a3c9ff7088",
+    "docs/rebuild/rev118/receipts/raw/owner-callsite-correction-20261101/van-7df-ci-terminal-20261101/jobs.jsons": "725bc1130ed0c542c64b3e2dbfa80a36cbef43f0e53b6a3102210fc4e51febe7",
+    "docs/rebuild/rev118/receipts/raw/owner-callsite-correction-20261101/van-7df-ci-terminal-20261101/registry-consumer-candidates.txt": "cab07b54b9410ec87f36f2e7fe4e456790279f3de085f6b4fbe4483b6d307c7b",
+    "docs/rebuild/rev118/receipts/raw/owner-callsite-correction-20261101/van-7df-callsite-all-semantic-consumers-20261101/owned-temp-inventory.json": "8a050f9b41d87623920b3ebebc75a744a55d21d593f339dc03175f7023cb25c6",
+    "docs/rebuild/rev118/receipts/raw/owner-callsite-correction-20261101/van-7df-callsite-all-semantic-consumers-20261101/receipt.json": "356fcd6cffffb8c8bde79a2d45e50a383196515e083750c8fa97a7356e9ea366",
+    "docs/rebuild/rev118/receipts/raw/owner-callsite-correction-20261101/van-7df-callsite-all-semantic-consumers-20261101/storage-audit.json": "03b5b2afac2978cda8a845c9a6eec9e8d20b13abe2960e09fcc8f1fccbcc2cb7",
+    "docs/rebuild/rev118/receipts/raw/owner-callsite-correction-20261101/van-7df-callsite-all-semantic-consumers-20261101/tests.log": "41d15906dfc547486f1b637a79dc05cf9be0593d5916140341cfc9978551e9ff",
+    "docs/rebuild/rev118/receipts/raw/owner-callsite-correction-20261101/van-7df-callsite-all-semantic-consumers-20261101/tests.xml": "d509cae5bb4280d82d54ef4f8fcdc5b71e38505c595ec640e523220e74bfab4c",
+    "docs/rebuild/rev118/receipts/raw/owner-callsite-correction-20261101/van-7df-callsite-semantic-final-20261101/owned-temp-inventory.json": "696c15d70dba40e45b69d98b6f4bef8048c4cce863339e31e4e9287dd2977773",
+    "docs/rebuild/rev118/receipts/raw/owner-callsite-correction-20261101/van-7df-callsite-semantic-final-20261101/receipt.json": "03cb1d1c5ce3e9fd60169865a70f2a3dba378b36a3dfb5de89cf0a5ac36d06f3",
+    "docs/rebuild/rev118/receipts/raw/owner-callsite-correction-20261101/van-7df-callsite-semantic-final-20261101/storage-audit.json": "03b5b2afac2978cda8a845c9a6eec9e8d20b13abe2960e09fcc8f1fccbcc2cb7",
+    "docs/rebuild/rev118/receipts/raw/owner-callsite-correction-20261101/van-7df-callsite-semantic-final-20261101/tests.log": "4d4b279e11e694003784806e0d465e36f4c63ddf73cd1493946b91ffe25dba60",
+    "docs/rebuild/rev118/receipts/raw/owner-callsite-correction-20261101/van-7df-callsite-semantic-final-20261101/tests.xml": "65d8ab06230507d588bf18aed868ff70e9a437c2a5609f2ccd5a4149e38de1ec",
+    "docs/rebuild/rev118/receipts/raw/owner-callsite-correction-20261101/van-7df-callsite-final-guards-20261101/consolidation.log": "d87b8fe5f7b2b4ca7312b9ba93c4e1aa24ae2301f775aa6f915d81572aec7870",
+    "docs/rebuild/rev118/receipts/raw/owner-callsite-correction-20261101/van-7df-callsite-final-guards-20261101/frontend.log": "69dcc86a9d7aaffcadf4a70e58b379d8452c124dadc4347afbc9e57fbab7ae85",
+    "docs/rebuild/rev118/receipts/raw/owner-callsite-correction-20261101/van-7df-callsite-final-guards-20261101/mutation.log": "131959a4576e7b5a8ebd678f508cca5c1107c9e4cc15c27d3c22121e5ac1b299",
+    "docs/rebuild/rev118/receipts/raw/owner-callsite-correction-20261101/van-7df-callsite-final-guards-20261101/owner.log": "35a9b4641c85055b16c3a6458a7b1f99fb5df7ec0f5a6280ca45c3ab14cd7103",
+    "docs/rebuild/rev118/receipts/raw/owner-callsite-correction-20261101/van-7df-callsite-final-guards-20261101/receipt.json": "d3158be7330bb03a15e65d3a2d1503dd782d570f64802d053147cdc01485bc0f",
+    "docs/rebuild/rev118/receipts/raw/owner-callsite-correction-20261101/van-7df-callsite-final-guards-20261101/workmap.log": "6e20f8f2172ee5c1d1fce0a0c754de3b77fe5a107aa568cdf51b6c0797a54037",
+    "docs/rebuild/rev118/receipts/raw/owner-callsite-correction-20261101/van-7df-callsite-owner-refresh-provenance-20261101.log": "27e56df32ffa1a0f411b17cabd923f7a5148acafcee3def8864224e41a3ff808",
+    "docs/rebuild/rev118/receipts/raw/owner-callsite-correction-20261101/van-7df-callsite-frontend-refresh-provenance-20261101.log": "6d87bea55f2ed8ec080db391dd3a50a2c6d4b1c45adbcd631c888108b54cd454",
+    "docs/rebuild/rev118/receipts/raw/owner-callsite-correction-20261101/van-7df-callsite-workmap-refresh-provenance-20261101.log": "6e20f8f2172ee5c1d1fce0a0c754de3b77fe5a107aa568cdf51b6c0797a54037",
+    "docs/rebuild/rev118/receipts/raw/owner-callsite-correction-20261101/van-7df-google-integration-ci-watch-20261101.json": "8e9169ecadf8859375554eb7e0a72a7910ee2be317b773e43a6a41ca51b93e08",
+    "docs/rebuild/rev118/receipts/raw/owner-callsite-correction-20261101/van-google-r2-ci-watch-owned-observation-20261101.json": "a0a64254c37635886e8a5611e29908723b43acb8ae8dd8e0a288ccc502adf042",
+    "docs/rebuild/rev118/receipts/raw/owner-callsite-correction-20261101/van-google-r2-ci-watch-controller-command-20261101.sh.txt": "db0151b5bd26d78b8e8c78c03281787d935e7c9a0105f9d906030690498c7347",
+    "docs/rebuild/rev118/receipts/raw/owner-callsite-correction-20261101/van-7df-ci-reconciled-luna-20261101.json": "b35a87e23b818166e07d62da74dfbfc1382861ff447e4959e9e91b9bcca26b6e",
+    "docs/rebuild/rev118/receipts/raw/owner-callsite-correction-20261101/official-backend-public-source-artifact.zip": "0e45d1f3c5d00440d5e8d15e2ad2fc41fbe305253249565b0add12db73721881",
+    "docs/rebuild/rev118/receipts/raw/owner-callsite-correction-20261101/packaged-topology.log": "37cb23fbf2c07bbe26e2a595bdf52fed651fad263676040165a991df9c3a6fec"
+  },
+  "post_packaging_topology_guard": "Unchanged exactprivatecoretopologycase1pass; no source-discovery/assertion change"
+}

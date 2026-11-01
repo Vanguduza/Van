@@ -1,0 +1,161 @@
+{
+  "captured_at_utc": "2026-11-01T08:28:39.017160+00:00",
+  "repository": "Vanguduza/Van",
+  "exact_head": "7df732de4c0a4f84bafadda658654a0ab8788553",
+  "main_run_id": 41286883563,
+  "read_only": true,
+  "commands": [
+    "gh api --paginate repos/Vanguduza/Van/actions/runs?head_sha=7df732de4c0a4f84bafadda658654a0ab8788553&per_page=100",
+    "gh api repos/Vanguduza/Van/actions/runs/<run-id>/jobs?per_page=100",
+    "GitHub connector github_fetch_workflow_job_logs(repo_full_name=Vangu[d]uza/Van, job_id=<mutation job>)"
+  ],
+  "run_snapshot": {
+    "all_event_runs": 7,
+    "terminal_success_workflows": 6,
+    "main_run_status": "in_progress",
+    "main_run_conclusion": null,
+    "main_jobs": 19,
+    "success_jobs": 16,
+    "mandatory_failure_jobs": [
+      {
+        "id": 124789974161,
+        "name": "backend",
+        "failed_step": "Require the DDS contract read key"
+      },
+      {
+        "id": 124789974171,
+        "name": "project-truth-ledger",
+        "failed_step": "Project Truth ledger (trusted checker, every new commit has an authorized row)"
+      }
+    ],
+    "only_nonterminal_source_job": {
+      "id": 124789973958,
+      "name": "backend-public-source",
+      "status": "in_progress",
+      "started_at": "2026-11-01T07:59:01Z",
+      "active_step": "Execute remaining backend, contract and Hermes source cases",
+      "step_started_at": "2026-11-01T07:59:55Z",
+      "elapsed_at_snapshot": "44m41s",
+      "configured_timeout_minutes": 60
+    },
+    "other_source_jobs_terminal_success": [
+      "android-and-visual-evidence:124789974044",
+      "market-monitor-source:124789974140",
+      "browser-guard-source:124789974282",
+      "android-instrumentation:124789974170",
+      "postgres-ledger:124789974151",
+      "rebuild-documentary:124789974199"
+    ],
+    "character_forge_gate": "success 124792720747",
+    "all_nine_mutation_jobs_success": true
+  },
+  "primary_source_evidence": {
+    "status": "not terminal",
+    "test_count": null,
+    "skip_count": null,
+    "failure_count": null,
+    "reason": "Still executing at the 08:44:36Z snapshot; no terminal logs fetched"
+  },
+  "mutation_logs": {
+    "source": "supported GitHub connector decoded job-log API; one read per completed mutation job",
+    "jobs": [
+      {
+        "job_id": 124789974064,
+        "executed": 29,
+        "caught": 29,
+        "survivors": 0
+      },
+      {
+        "job_id": 124789974090,
+        "executed": 58,
+        "caught": 58,
+        "survivors": 0
+      },
+      {
+        "job_id": 124789974120,
+        "executed": 29,
+        "caught": 29,
+        "survivors": 0
+      },
+      {
+        "job_id": 124789974130,
+        "executed": 26,
+        "caught": 26,
+        "survivors": 0
+      },
+      {
+        "job_id": 124789974139,
+        "executed": 59,
+        "caught": 59,
+        "survivors": 0
+      },
+      {
+        "job_id": 124789974142,
+        "executed": 58,
+        "caught": 58,
+        "survivors": 0
+      },
+      {
+        "job_id": 124789974146,
+        "executed": 29,
+        "caught": 29,
+        "survivors": 0
+      },
+      {
+        "job_id": 124789974158,
+        "executed": 57,
+        "caught": 57,
+        "survivors": 0
+      },
+      {
+        "job_id": 124789974182,
+        "executed": 29,
+        "caught": 29,
+        "survivors": 0
+      }
+    ],
+    "total_executed": 374,
+    "total_caught": 374,
+    "total_survivors": 0,
+    "deduplication_basis": "Nine distinct completed shards, counted once each; per-job terminal CAUGHT summaries summed, no registry count substituted",
+    "baseline_validation": "Unknown; registry preflight explicitly says baselines and mutations not executed at preflight stage, and no separate completed baseline-control summary established from retrieved logs"
+  },
+  "watcher": "Existing read-only watch session 36262 remains active per handoff; not touched, duplicated, cancelled, restarted, or polled",
+  "historical": "25a48 CI remains cancelled with no primary source summary; not reused. 32d519 remains failed; no older result used to qualify 7df.",
+  "limits": "Mandatory DDS-key and trusted-checker failures remain unwaived. Current backend-public-source result and primary test/skip counts remain unknown.",
+  "observation_history": [
+    {
+      "captured_at_utc": "2026-11-01T08:44:36.494121+00:00",
+      "commands": [
+        "gh api repos/Vanguduza/Van/actions/runs?head_sha=7df732de4c0a4f84bafadda658654a0ab8788553&per_page=100 (previous paginated snapshot; this refresh read exact run and its jobs)",
+        "gh api repos/Vanguduza/Van/actions/runs/41286883563",
+        "gh api repos/Vanguduza/Van/actions/runs/41286883563/jobs?per_page=100",
+        "gh api repos/Vanguduza/Van/contents/.github/workflows/van-ci.yml?ref=7df732de4c0a4f84bafadda658654a0ab8788553"
+      ],
+      "watch_receipt": "/workspace/van-7df-google-integration-ci-watch-20261101.json absent at capture; existing session 36262 untouched",
+      "main_run_status": "in_progress",
+      "backend_public_source_job": {
+        "id": 124789973958,
+        "status": "in_progress",
+        "started_at": "2026-11-01T07:59:01Z",
+        "active_step": "Execute remaining backend, contract and Hermes source cases",
+        "step_started_at": "2026-11-01T07:59:55Z",
+        "elapsed_at_capture": "44m41s from active step start"
+      },
+      "workflow_timeout_minutes": 60,
+      "primary_source_counts": "unknown; still running, no terminal log read",
+      "barrier_cleared": false,
+      "mandatory_failures_preserved": [
+        124789974161,
+        124789974171
+      ],
+      "mutation_evidence_unchanged": {
+        "executed": 374,
+        "caught": 374,
+        "survivors": 0
+      },
+      "prior_25a_status": "cancelled; no primary source summary, preserved"
+    }
+  ],
+  "latest_capture_at_utc": "2026-11-01T08:44:36.494121+00:00"
+}

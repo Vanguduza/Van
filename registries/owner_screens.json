@@ -27543,22 +27543,6 @@
                 "ref": "WORKSPACE_PATCH",
                 "sha256": "9266a15f2caddfc1598daa7fdb95850cccc8b1969bf6429d9762178eac1bd59a"
               }
-            },
-            {
-              "file": "android/app/src/main/java/com/dial/van/command/connected/ConnectedRoute.kt",
-              "line": 169,
-              "ref": "WORKSPACE_PATCH",
-              "sha256": "6e89096f6773455dfca27ef29ca2a79b9a23e4c76184d017cc06e53b380c213d",
-              "receiver": "app.gatewayClient",
-              "symbol": "googleStatus",
-              "namespace": "VanGatewayClient",
-              "invocation_kind": "direct_client_method",
-              "receiver_type_citation": {
-                "file": "android/app/src/main/java/com/dial/van/VanApplication.kt",
-                "line": 118,
-                "ref": "WORKSPACE_PATCH",
-                "sha256": "9266a15f2caddfc1598daa7fdb95850cccc8b1969bf6429d9762178eac1bd59a"
-              }
             }
           ],
           "callsite_validation": "REVIEWED_EXACT_RECEIVER_AND_METHOD_SOURCE_NO_LIVE_CLAIM"
@@ -27721,24 +27705,6 @@
         {
           "file": "android/app/src/main/java/com/dial/van/command/connected/ConnectedRoute.kt",
           "line": 62,
-          "ref": "WORKSPACE_PATCH",
-          "sha256": "6e89096f6773455dfca27ef29ca2a79b9a23e4c76184d017cc06e53b380c213d",
-          "receiver": "app.gatewayClient",
-          "symbol": "googleStatus",
-          "namespace": "VanGatewayClient",
-          "invocation_kind": "direct_client_method",
-          "receiver_type_citation": {
-            "file": "android/app/src/main/java/com/dial/van/VanApplication.kt",
-            "line": 118,
-            "ref": "WORKSPACE_PATCH",
-            "sha256": "9266a15f2caddfc1598daa7fdb95850cccc8b1969bf6429d9762178eac1bd59a"
-          },
-          "endpoint_id": "VE-5e6f768ddb6f",
-          "kind": "direct_client_method"
-        },
-        {
-          "file": "android/app/src/main/java/com/dial/van/command/connected/ConnectedRoute.kt",
-          "line": 169,
           "ref": "WORKSPACE_PATCH",
           "sha256": "6e89096f6773455dfca27ef29ca2a79b9a23e4c76184d017cc06e53b380c213d",
           "receiver": "app.gatewayClient",
@@ -28430,6 +28396,29 @@
           "device_proof_required_when_bound": false,
           "client_namespace": "VanGatewayClient",
           "client_function": "googleOwnerRevoke",
+          "independent_withdrawal_status_readback": [
+            {
+              "file": "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt",
+              "line": 2092,
+              "sha256": "26cdf2e26203594b2113a5b661dda2ea33770cfba1f9aafbc1c22302c048c3ad",
+              "exact_anchor": "                detail = { getJson(\"/v1/google/status\") })",
+              "role": "Exact withdrawal exchange supplies an independent current-status transport callback"
+            },
+            {
+              "file": "android/app/src/main/java/com/dial/van/gateway/GoogleWithdrawalOperations.kt",
+              "line": 118,
+              "sha256": "3718aea7c293fa376100aa712660513bd3f904ab4ccd149d02cbac67c8ffbce6",
+              "exact_anchor": "        val current = if (observed.optString(\"state\") == \"APPLIED\") detail() else null",
+              "role": "After observing the original APPLIED receipt, invoke the independent current-status callback"
+            },
+            {
+              "file": "android/app/src/main/java/com/dial/van/gateway/GoogleWithdrawalOperations.kt",
+              "line": 120,
+              "sha256": "3718aea7c293fa376100aa712660513bd3f904ab4ccd149d02cbac67c8ffbce6",
+              "exact_anchor": "        observe(original, observed, current)",
+              "role": "Validate original receipt and independently observed current connection before completion"
+            }
+          ],
           "source_status": "CANDIDATE_SOURCE_TESTED_EXISTING_ANDROID_CALLER_NATIVE_ACCEPTANCE_PENDING",
           "canonical_units": [
             "BE-002",
@@ -47810,7 +47799,7 @@
             },
             {
               "file": "android/app/src/main/java/com/dial/van/mission/MissionRepository.kt",
-              "line": 139,
+              "line": 140,
               "ref": "WORKSPACE_PATCH",
               "sha256": "5a95fba70a2b77f4083791830380c74e92a228b74a9a5d7431101cbdd3dd2a32",
               "receiver": "client",
@@ -48229,7 +48218,7 @@
         },
         {
           "file": "android/app/src/main/java/com/dial/van/mission/MissionRepository.kt",
-          "line": 139,
+          "line": 140,
           "ref": "WORKSPACE_PATCH",
           "sha256": "5a95fba70a2b77f4083791830380c74e92a228b74a9a5d7431101cbdd3dd2a32",
           "receiver": "client",
@@ -71767,7 +71756,7 @@
             },
             {
               "file": "android/app/src/main/java/com/dial/van/mission/MissionRepository.kt",
-              "line": 139,
+              "line": 140,
               "ref": "WORKSPACE_PATCH",
               "sha256": "5a95fba70a2b77f4083791830380c74e92a228b74a9a5d7431101cbdd3dd2a32",
               "receiver": "client",
@@ -71950,7 +71939,7 @@
         },
         {
           "file": "android/app/src/main/java/com/dial/van/mission/MissionRepository.kt",
-          "line": 139,
+          "line": 140,
           "ref": "WORKSPACE_PATCH",
           "sha256": "5a95fba70a2b77f4083791830380c74e92a228b74a9a5d7431101cbdd3dd2a32",
           "receiver": "client",
@@ -75916,7 +75905,7 @@
     "android_receipt": null,
     "android_receipt_sha256": null,
     "scope": "Bounded current source-citation/endpoint refresh; previous reviews retained. Whole-product, Android, deployment/provider and handset qualifications remain separate.",
-    "source_review_manifest_sha256": "2da0590492507f102dd8f8b0cbd66f5e315d894563223d18a1eaf801cbe5e819"
+    "source_review_manifest_sha256": "8e2fe5c5cf13c369965bacd9d1ec3f35c6dcf201a3cf51317f46ca28e0bb60dd"
   },
   "repaired_mutations": [
     {

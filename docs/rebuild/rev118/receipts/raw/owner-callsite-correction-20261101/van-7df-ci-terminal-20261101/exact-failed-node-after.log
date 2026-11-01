@@ -1,0 +1,40 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+__ test_current_function_citations_and_callsites_are_exact_production_source ___
+
+    def test_current_function_citations_and_callsites_are_exact_production_source():
+        import hashlib
+        import re
+        rows = read("owner_features.json")["features"] + read("owner_screens.json")["screens"]
+        for row in rows:
+            endpoint_ids = {r["endpoint_id"] for r in row["endpoint_refs"]}
+            functions = row["current_implementation"]["functions"]
+            assert len({f["id"] for f in functions}) == len(functions), row["id"]
+            for function in functions:
+                assert function["owner_action"] and function["source_citations"]
+                assert set(function["endpoint_ids"]) <= endpoint_ids, (row["id"], function["id"])
+                for citation in function["source_citations"]:
+                    if citation["ref"] == "WORKSPACE_PATCH":
+                        source = ROOT / citation["file"]
+                        assert citation["sha256"] == hashlib.sha256(source.read_bytes()).hexdigest()
+                        assert 0 < citation["line"] <= len(source.read_text().splitlines())
+            for endpoint in row["endpoint_refs"]:
+                for call in endpoint["android_callsites"]:
+                    if call["ref"] != "WORKSPACE_PATCH" or call["invocation_kind"] != "direct_client_method":
+                        continue
+                    line = (ROOT / call["file"]).read_text().splitlines()[call["line"] - 1]
+                    expression = call["receiver"] + "." + call["symbol"]
+                    if call["receiver"] == "this":
+                        expression = call["symbol"]
+>                   assert re.search(re.escape(expression) + r"\s*\(", line), (row["id"], call)
+E                   AssertionError: ('OF-GOOGLE-001', {'file': 'android/app/src/main/java/com/dial/van/command/connected/ConnectedRoute.kt', 'line': 169, 'ref': 'WORKSPACE_PATCH', 'sha256': '6e89096f6773455dfca27ef29ca2a79b9a23e4c76184d017cc06e53b380c213d', ...})
+E                   assert None
+E                    +  where None = <function search at 0x7f49f0d4fba0>(('app\\.gatewayClient\\.googleStatus' + '\\s*\\('), '                    val result = app.gatewayClient.googleOwnerRevoke(reviewed, reviewedProfile)')
+E                    +    where <function search at 0x7f49f0d4fba0> = <module 're' from '/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/re/__init__.py'>.search
+E                    +    and   'app\\.gatewayClient\\.googleStatus' = <function escape at 0x7f49f0d6c180>('app.gatewayClient.googleStatus')
+E                    +      where <function escape at 0x7f49f0d6c180> = <module 're' from '/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/re/__init__.py'>.escape
+
+tests/contracts/test_owner_redesign_registry.py:171: AssertionError
+=========================== short test summary info ============================
+FAILED tests/contracts/test_owner_redesign_registry.py::test_current_function_citations_and_callsites_are_exact_production_source
+1 failed in 0.50s
