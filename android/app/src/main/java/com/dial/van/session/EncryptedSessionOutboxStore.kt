@@ -51,14 +51,16 @@ class EncryptedSessionOutboxStore(
     }
 
     /**
-     * Everything still queued, oldest first.
+     * Every original session record, including expired delivery metadata, oldest first.
+     * The session owner reconciles originals before deciding expiry/forget. Merely
+     * returning an expired record does not authorize replay or renew its deadline.
      *
      * A row that does not map back is skipped rather than guessed at: [OutboxPersistence]
      * returns null for a record that was not written by this path, and inventing the
      * missing policy is how a stored approval becomes a silent replay.
      */
     override fun restore(): List<Pair<OutboxEntry, String>> =
-        records.recordsOfKind(OutboxPersistence.SESSION_KIND)
+        records.recoveryRecordsOfKind(OutboxPersistence.SESSION_KIND)
             .mapNotNull { command ->
                 OutboxPersistence.toEntry(command)?.let { it to command.payloadJson }
             }

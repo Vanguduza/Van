@@ -251,6 +251,7 @@ sourceSets {
             // claim about a file nothing runs.
             "com/dial/van/session/EncryptedSessionOutboxStore.kt",
             "com/dial/van/session/SessionReconciliation.kt",
+            "com/dial/van/session/OriginalCommandReference.kt",
             // The decision a catch block used to make silently: whether a command
             // whose dispatch failed may be held, and what the owner is told.
             "com/dial/van/session/OfflineSubmission.kt",

@@ -167,6 +167,89 @@ class CommandOrchestrator:
             and not req.no_stale_replay
         )
 
+    @staticmethod
+    def original_command_canonical(req: CommandRequest) -> str:
+        """Pure subject/signature binding shared by admission and historical lookup.
+
+        This returns data only; it performs no freshness, nonce or admission action.
+        """
+        if req.signature_version == 1:
+            if not CommandOrchestrator._legacy_provenance_is_default(req):
+                raise AuthError(
+                    "legacy_signature_cannot_bind_provenance",
+                    "Signature v1 cannot carry Rev 3.1 provenance/replay fields",
+                )
+            canonical = AuthService.canonical_command(
+                req.command_id,
+                req.idempotency_key,
+                req.device_id,
+                req.issued_at_unix,
+                req.text,
+                req.action_class.value,
+                req.project_id,
+            )
+        elif req.signature_version == 2:
+            if req.speaker_evidence_milli is not None:
+                raise AuthError(
+                    "unsigned_speaker_evidence",
+                    "Signature v2 cannot bind speaker evidence; use signature v3",
+                )
+            if req.principal_type != PrincipalType.OWNER_DEVICE:
+                raise AuthError("invalid_owner_device_principal", "Owner-device ingress must use OWNER_DEVICE principal")
+            expected_requester = f"device:{req.device_id}"
+            if req.requested_by != expected_requester:
+                raise AuthError("requested_by_mismatch", "requested_by must match authenticated owner device")
+            canonical = AuthService.canonical_command_v2(
+                command_id=req.command_id,
+                idempotency_key=req.idempotency_key,
+                device_id=req.device_id,
+                issued_at_unix=req.issued_at_unix,
+                text=req.text,
+                action_class=req.action_class.value,
+                project_id=req.project_id,
+                turn_id=req.turn_id,
+                origin_channel=req.origin_channel.value,
+                principal_type=req.principal_type.value,
+                requested_by=req.requested_by,
+                expires_at_unix=req.expires_at_unix,
+                nonce=req.nonce,
+                context_capsule_revision=req.context_capsule_revision,
+                context_capsule_hash=req.context_capsule_hash,
+                speech_evidence_ref=req.speech_evidence_ref,
+                no_stale_replay=req.no_stale_replay,
+                context_trust=req.context_trust.value,
+            )
+        elif req.signature_version == 3:
+            if req.principal_type != PrincipalType.OWNER_DEVICE:
+                raise AuthError("invalid_owner_device_principal", "Owner-device ingress must use OWNER_DEVICE principal")
+            expected_requester = f"device:{req.device_id}"
+            if req.requested_by != expected_requester:
+                raise AuthError("requested_by_mismatch", "requested_by must match authenticated owner device")
+            canonical = AuthService.canonical_command_v3(
+                command_id=req.command_id,
+                idempotency_key=req.idempotency_key,
+                device_id=req.device_id,
+                issued_at_unix=req.issued_at_unix,
+                text=req.text,
+                action_class=req.action_class.value,
+                project_id=req.project_id,
+                turn_id=req.turn_id,
+                origin_channel=req.origin_channel.value,
+                principal_type=req.principal_type.value,
+                requested_by=req.requested_by,
+                expires_at_unix=req.expires_at_unix,
+                nonce=req.nonce,
+                context_capsule_revision=req.context_capsule_revision,
+                context_capsule_hash=req.context_capsule_hash,
+                speech_evidence_ref=req.speech_evidence_ref,
+                speaker_evidence_milli=req.speaker_evidence_milli,
+                no_stale_replay=req.no_stale_replay,
+                context_trust=req.context_trust.value,
+            )
+        else:
+            raise AuthError("unsupported_signature_version", "Unsupported command signature version")
+        return canonical
+
     def _is_local_action(self, action_id: str | None) -> bool:
         return bool(action_id and (action_id in self.local_executors or (self.automation is not None
                     and action_id.startswith(("automation.workflow.", "automation.plan.admit.")))))
@@ -208,81 +291,7 @@ class CommandOrchestrator:
 
         try:
             await self.auth.require_device(req.device_id)
-            if req.signature_version == 1:
-                if not self._legacy_provenance_is_default(req):
-                    raise AuthError(
-                        "legacy_signature_cannot_bind_provenance",
-                        "Signature v1 cannot carry Rev 3.1 provenance/replay fields",
-                    )
-                canonical = AuthService.canonical_command(
-                    req.command_id,
-                    req.idempotency_key,
-                    req.device_id,
-                    req.issued_at_unix,
-                    req.text,
-                    req.action_class.value,
-                    req.project_id,
-                )
-            elif req.signature_version == 2:
-                if req.speaker_evidence_milli is not None:
-                    raise AuthError(
-                        "unsigned_speaker_evidence",
-                        "Signature v2 cannot bind speaker evidence; use signature v3",
-                    )
-                if req.principal_type != PrincipalType.OWNER_DEVICE:
-                    raise AuthError("invalid_owner_device_principal", "Owner-device ingress must use OWNER_DEVICE principal")
-                expected_requester = f"device:{req.device_id}"
-                if req.requested_by != expected_requester:
-                    raise AuthError("requested_by_mismatch", "requested_by must match authenticated owner device")
-                canonical = AuthService.canonical_command_v2(
-                    command_id=req.command_id,
-                    idempotency_key=req.idempotency_key,
-                    device_id=req.device_id,
-                    issued_at_unix=req.issued_at_unix,
-                    text=req.text,
-                    action_class=req.action_class.value,
-                    project_id=req.project_id,
-                    turn_id=req.turn_id,
-                    origin_channel=req.origin_channel.value,
-                    principal_type=req.principal_type.value,
-                    requested_by=req.requested_by,
-                    expires_at_unix=req.expires_at_unix,
-                    nonce=req.nonce,
-                    context_capsule_revision=req.context_capsule_revision,
-                    context_capsule_hash=req.context_capsule_hash,
-                    speech_evidence_ref=req.speech_evidence_ref,
-                    no_stale_replay=req.no_stale_replay,
-                    context_trust=req.context_trust.value,
-                )
-            elif req.signature_version == 3:
-                if req.principal_type != PrincipalType.OWNER_DEVICE:
-                    raise AuthError("invalid_owner_device_principal", "Owner-device ingress must use OWNER_DEVICE principal")
-                expected_requester = f"device:{req.device_id}"
-                if req.requested_by != expected_requester:
-                    raise AuthError("requested_by_mismatch", "requested_by must match authenticated owner device")
-                canonical = AuthService.canonical_command_v3(
-                    command_id=req.command_id,
-                    idempotency_key=req.idempotency_key,
-                    device_id=req.device_id,
-                    issued_at_unix=req.issued_at_unix,
-                    text=req.text,
-                    action_class=req.action_class.value,
-                    project_id=req.project_id,
-                    turn_id=req.turn_id,
-                    origin_channel=req.origin_channel.value,
-                    principal_type=req.principal_type.value,
-                    requested_by=req.requested_by,
-                    expires_at_unix=req.expires_at_unix,
-                    nonce=req.nonce,
-                    context_capsule_revision=req.context_capsule_revision,
-                    context_capsule_hash=req.context_capsule_hash,
-                    speech_evidence_ref=req.speech_evidence_ref,
-                    speaker_evidence_milli=req.speaker_evidence_milli,
-                    no_stale_replay=req.no_stale_replay,
-                    context_trust=req.context_trust.value,
-                )
-            else:
-                raise AuthError("unsupported_signature_version", "Unsupported command signature version")
+            canonical = self.original_command_canonical(req)
             self.auth.verify_signature(req.device_id, canonical, req.signature)
         except AuthError as exc:
             # P1-SEC-007, soft posture: the signature has already been judged invalid, so

@@ -1,0 +1,48 @@
+{
+  "target_and_exact_test_hashes": {
+    "android/app/src/main/java/com/dial/van/queue/EncryptedCommandQueue.kt": {
+      "r1": "2ff06e4cb29ebfb64629ffe959bec09cad818317173091765b870e9dbb974c7b",
+      "r2": "2ff06e4cb29ebfb64629ffe959bec09cad818317173091765b870e9dbb974c7b",
+      "integrated": "2ff06e4cb29ebfb64629ffe959bec09cad818317173091765b870e9dbb974c7b"
+    },
+    "android/app/src/main/java/com/dial/van/session/EncryptedSessionOutboxStore.kt": {
+      "r1": "5803b76b96b8f0220263dea3180ba118d7fd8c9fcaf2a825c3d1fa69ed4cda09",
+      "r2": "5803b76b96b8f0220263dea3180ba118d7fd8c9fcaf2a825c3d1fa69ed4cda09",
+      "integrated": "5803b76b96b8f0220263dea3180ba118d7fd8c9fcaf2a825c3d1fa69ed4cda09"
+    },
+    "android/app/src/main/java/com/dial/van/session/SessionReconciliation.kt": {
+      "r1": "d0c023573fc80ee12c976b61ef0a7ff56e4db7265ca19fddaee4ee511cb61500",
+      "r2": "d0c023573fc80ee12c976b61ef0a7ff56e4db7265ca19fddaee4ee511cb61500",
+      "integrated": "d0c023573fc80ee12c976b61ef0a7ff56e4db7265ca19fddaee4ee511cb61500"
+    },
+    "tests/contracts/test_encrypted_queue_writes_are_off_the_main_thread.py": {
+      "r1": "92aa49927869ff5f5875de6576b24a69c5ecb00bf99bb38e3bf91767b1df49ab",
+      "r2": "92aa49927869ff5f5875de6576b24a69c5ecb00bf99bb38e3bf91767b1df49ab",
+      "integrated": "92aa49927869ff5f5875de6576b24a69c5ecb00bf99bb38e3bf91767b1df49ab"
+    },
+    "android/verification/src/test/kotlin/com/dial/van/session/SessionOutboxDurabilityTest.kt": {
+      "r1": "9cc68c517b9d61441a3a11dec2a5d074575f77b5da5de30eedb701238c36cd01",
+      "r2": "9cc68c517b9d61441a3a11dec2a5d074575f77b5da5de30eedb701238c36cd01",
+      "integrated": "9cc68c517b9d61441a3a11dec2a5d074575f77b5da5de30eedb701238c36cd01"
+    },
+    "android/verification/src/test/kotlin/com/dial/van/session/SessionReconciliationTest.kt": {
+      "r1": "91fb482c40c3d33203878d92cf74fcdf582cf6f3509a6a32e1ae5682b1369cbf",
+      "r2": "91fb482c40c3d33203878d92cf74fcdf582cf6f3509a6a32e1ae5682b1369cbf",
+      "integrated": "91fb482c40c3d33203878d92cf74fcdf582cf6f3509a6a32e1ae5682b1369cbf"
+    }
+  },
+  "scope": "Reuse captured C39/C36 actual semantic mutation runs because exact target+selectedtestbytes unchanged throughR2/integration. OtherR2transitivecallerpaths changed; currentR2SDK43/JVM73 controls separatelyvalidate source compatibility. This is not fullcurrent374execution; native exacthead required.",
+  "r2_changed_transitive_paths": [
+    "android/app/src/test/java/com/dial/van/queue/SessionRecoveryActualStoreTest.kt",
+    "android/app/src/main/java/com/dial/van/VanApplication.kt",
+    "android/app/src/main/java/com/dial/van/control/VanCommandController.kt",
+    "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt",
+    "android/app/src/main/java/com/dial/van/queue/CommandQueueModels.kt",
+    "android/app/src/main/java/com/dial/van/session/DurableOutbox.kt",
+    "android/app/src/main/java/com/dial/van/session/OutboxPersistence.kt",
+    "android/app/src/main/java/com/dial/van/session/VanHermesSessionManager.kt",
+    "android/verification/src/test/kotlin/com/dial/van/control/VanCommandControllerTest.kt",
+    "android/verification/src/test/kotlin/com/dial/van/gateway/VanGatewayClient.kt"
+  ],
+  "five_vs_four": "Four registry edits have missing oldtext; fifth generic C39 .commit() textstill exists but nowhitsunrelatedboolean fullclear guard, producinginvalidtype mutant. Retarget actualdurabilityhelper as typevalid asyncwrite mutation; retain same originalcaseID/invariant."
+}

@@ -11,6 +11,8 @@ import com.dial.van.status.VanCommandStatus
 import com.dial.van.status.commandStatusFor
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -151,6 +153,7 @@ class VanCommandController(
      * It returns whether the command was actually stored.
      */
     var storeForLater: ((body: org.json.JSONObject, needsReconfirm: Boolean) -> Boolean)? = null
+    var storeOriginalForLater: ((org.json.JSONObject, Boolean, String, Boolean) -> Boolean)? = null
 
     fun selectProject(projectId: String?) {
         _state.update { it.copy(selectedProjectId = projectId) }
@@ -271,6 +274,12 @@ class VanCommandController(
         // a synchronous `commit()`, and the scope's default pool is sized for CPU work.
         scope.launch(Dispatchers.IO) {
             var preparedBody: String? = null
+            val originalProfile = gateway.permissionProfileIdentity()
+            var priorHttpAttempt = false
+            var originalOwned = false
+            var recoveryRequired = false
+            val operation = currentCoroutineContext()
+            val originalDevice = gateway.deviceIdOrEmpty()
             try {
                 val response = gateway.dispatchCommand(
                     text = normalized,
@@ -285,15 +294,49 @@ class VanCommandController(
                     speechEvidenceRef = command.speechEvidenceRef,
                     speakerEvidenceMilli = command.speakerEvidenceMilli,
                     clientContext = command.clientContext,
-                    onPreparedCommand = { preparedBody = it },
+                    onPreparedCommand = {
+                        check(gateway.permissionProfileIdentity() == originalProfile) { "Active profile changed" }
+                        preparedBody = it
+                    },
+                    beforeDispatch = {
+                        operation.ensureActive()
+                        check(gateway.permissionProfileIdentity() == originalProfile && gateway.deviceIdOrEmpty() == originalDevice) {
+                            "Active owner or profile changed"
+                        }
+                        // Recovery-only ownership precedes any uncertain HTTP effect.
+                        // Mark ambiguous BEFORE transport; this is never replay authority.
+                        val policy = OfflineSubmission.decide(command.actionClass, false, false, "")
+                        if (storeOriginalForLater != null && policy is OfflineSubmission.Verdict.Store) {
+                            recoveryRequired = true
+                            if (!originalOwned) {
+                                originalOwned = storeSignedBody(command, policy.needsReconfirm, preparedBody, originalProfile, true)
+                                check(originalOwned) { "Original recovery could not be saved" }
+                            }
+                        }
+                        operation.ensureActive()
+                        check(gateway.permissionProfileIdentity() == originalProfile && gateway.deviceIdOrEmpty() == originalDevice) {
+                            "Active owner or profile changed"
+                        }
+                        priorHttpAttempt = true
+                    },
                 )
                 recordResponse(command, response)
             } catch (cancelled: CancellationException) {
+                if (priorHttpAttempt) recordFailure(command, cancelled, preparedBody, originalProfile, true, originalOwned)
+                else recordUnsent(command, "Cancelled before dispatch. Original recovery data was retained if saved.")
                 throw cancelled
             } catch (t: Throwable) {
-                recordFailure(command, t, preparedBody)
+                if (recoveryRequired && !priorHttpAttempt) recordUnsent(command, if (!originalOwned)
+                    "Not sent: original recovery could not be saved." else "Not sent: owner context changed. Original recovery data was retained.")
+                else recordFailure(command, t, preparedBody, originalProfile, priorHttpAttempt, originalOwned)
             }
         }
+    }
+
+    private fun recordUnsent(command: VanOwnerCommand, message: String) {
+        _state.update { it.copy(submitting = false, lastError = message,
+            messages = it.messages + VanConversationMessage(role = VanMessageRole.SYSTEM,
+                text = message, projectId = command.projectId, status = VanCommandStatus.REFUSED)) }
     }
 
     /** A local refusal of this exact pending challenge never grants execution authority. */
@@ -601,7 +644,7 @@ class VanCommandController(
      * replayed later and whether an A4 may be stored at all are the two rules worth
      * getting right, and they belong somewhere a test can execute them.
      */
-    private fun recordFailure(command: VanOwnerCommand, throwable: Throwable, preparedBody: String? = null) {
+    private fun recordFailure(command: VanOwnerCommand, throwable: Throwable, preparedBody: String? = null, originalProfile: String? = null, priorHttpAttempt: Boolean = false, originalOwned: Boolean = false) {
         val safeMessage = throwable.message?.take(240) ?: throwable::class.java.simpleName
         // An HTTP status came back, so the command arrived and was answered. A timeout or
         // a dropped connection did not, and only that may be held.
@@ -618,13 +661,18 @@ class VanCommandController(
             failureSummary = safeMessage,
             noStaleReplay = command.noStaleReplay,
         )
-        val stored = when (verdict) {
-            is OfflineSubmission.Verdict.Store -> storeSignedBody(command, verdict.needsReconfirm, preparedBody)
+        val stored = originalOwned || when (verdict) {
+            is OfflineSubmission.Verdict.Store -> storeSignedBody(command, verdict.needsReconfirm, preparedBody, originalProfile, priorHttpAttempt)
             is OfflineSubmission.Verdict.Drop -> false
         }
         // Said rather than assumed. A build with no outbox behind `storeForLater`, or a
         // store that refused, must not leave the owner told their work was saved.
-        val text = if (stored) verdict.ownerMessage else when (verdict) {
+        val text = if (gatewayAnswered) verdict.ownerMessage
+            else if (stored && storeOriginalForLater != null && priorHttpAttempt)
+            "Saved the original request. Its delivery outcome is unconfirmed; VAN will recover that original result."
+            else if (stored) verdict.ownerMessage
+            else if (priorHttpAttempt) "Original delivery outcome is unconfirmed; recovery was not saved. Check its state before issuing it again."
+            else when (verdict) {
             is OfflineSubmission.Verdict.Drop -> verdict.ownerMessage
             is OfflineSubmission.Verdict.Store -> "Not sent, and not saved: $safeMessage"
         }
@@ -634,7 +682,9 @@ class VanCommandController(
                     role = VanMessageRole.SYSTEM,
                     text = text,
                     projectId = command.projectId,
-                    status = if (stored) VanCommandStatus.QUEUED else VanCommandStatus.FAILED,
+                    status = if (gatewayAnswered) VanCommandStatus.REFUSED else if (stored) VanCommandStatus.QUEUED
+                        else if (priorHttpAttempt) VanCommandStatus.UNKNOWN else VanCommandStatus.FAILED,
+                    commandId = preparedBody?.let { raw -> runCatching { org.json.JSONObject(raw).optString("command_id").takeIf { it.isNotBlank() } }.getOrNull() },
                 ),
                 submitting = false,
                 lastError = if (stored) null else safeMessage,
@@ -655,10 +705,29 @@ class VanCommandController(
      * under the old idempotency key, causing a conflict against the original attempt.
      * The prepared body also retains client context and any original replay expiry.
      */
-    private fun storeSignedBody(command: VanOwnerCommand, needsReconfirm: Boolean, preparedBody: String?): Boolean {
-        val store = storeForLater ?: return false
+    private fun storeSignedBody(command: VanOwnerCommand, needsReconfirm: Boolean, preparedBody: String?, originalProfile: String?, priorHttpAttempt: Boolean): Boolean {
         val body = OfflineSubmission.preparedReplay(preparedBody, command.idempotencyKey) ?: return false
-        return store(body, needsReconfirm)
+        storeOriginalForLater?.let { return originalProfile != null && it(body, needsReconfirm, originalProfile, priorHttpAttempt) }
+        return storeForLater?.invoke(body, needsReconfirm) ?: false
+    }
+
+    /** Project an already-owned original result without inferring native completion. */
+    fun reportRecoveredOriginal(readback: org.json.JSONObject) {
+        val result = readback.optJSONObject("result") ?: return
+        val command = result.optString("command_id").takeIf { it.isNotBlank() } ?: return
+        val owner = readback.optJSONObject("owner_result")
+        val missionState = owner?.optString("mission_state")?.takeUnless { it.isBlank() || it == "null" }
+        val status = if (missionState != null) OwnerStatusProjection.fromMissionState(missionState)
+                     else OwnerStatusProjection.fromCommandResult(result.optString("status"))
+        val line = "Original request recovered. ${OwnerStatusProjection.sentenceFor(status)}"
+        _state.update { current ->
+            val found = current.messages.any { it.role == VanMessageRole.SYSTEM && it.commandId == command }
+            current.copy(messages = if (found) current.messages.map {
+                if (it.role == VanMessageRole.SYSTEM && it.commandId == command)
+                    it.copy(text = line, status = commandStatusFor(status)) else it
+            } else current.messages + VanConversationMessage(role = VanMessageRole.SYSTEM,
+                text = line, commandId = command, status = commandStatusFor(status)))
+        }
     }
 
     /**

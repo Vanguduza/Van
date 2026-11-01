@@ -98,6 +98,12 @@ class VanHermesSessionManager(
     private val reconnectDelayMillis: (Int) -> Long = { attempt ->
         (1_000L shl attempt.coerceIn(0, 5)).coerceAtMost(30_000L)
     },
+    /** Selection only, never an authorization grant; production reads its actual client. */
+    private val ownerSelection: () -> Pair<String, String> = {
+        gateway.permissionProfileIdentity() to gateway.deviceIdOrEmpty()
+    },
+    /** Existing owner UI consumes the actual original outcome, never a native-success inference. */
+    private val onRecoveredOriginal: (JSONObject) -> Unit = {},
 ) {
 
     var onSpeechResume: () -> Unit = {}
@@ -152,6 +158,10 @@ class VanHermesSessionManager(
 
     private val outbox = ArrayDeque<QueuedMessage>()
     private val inFlight = LinkedHashMap<String, JSONObject>()
+    // Metadata for the existing explicitly transient branch, never persisted or
+    // represented as durable restart recovery. The existing outbox/inFlight own bytes.
+    private val transientEntries = LinkedHashMap<String, OutboxEntry>()
+    private val transientOwners = LinkedHashMap<String, Pair<String, String>>()
     private var outboxRestored = false
     private var restoredSessionConflict = false
     private val _state = MutableStateFlow(State(outboxIsDurable = store != null))
@@ -216,6 +226,9 @@ class VanHermesSessionManager(
         payload: JSONObject,
         actionClass: String,
         requiresLiveOwnerContext: Boolean = false,
+        originalProfile: String? = null,
+        priorTransportAttempt: Boolean = false,
+        httpPreparation: Boolean = false,
     ): SubmissionOutcome {
         // §20.14 — storable with no session, because that is what offline means.
         //
@@ -225,7 +238,38 @@ class VanHermesSessionManager(
         // is stored addressed to nothing and `flushOutbox` rebinds it to the session that
         // exists by then. A live socket is still required to *send*, which is the branch
         // below; only storage tolerates the placeholder.
-        val sessionId = _state.value.vanSessionId ?: SessionEnvelope.UNBOUND_SESSION_ID
+        val selected = ownerSelection()
+        val profile = originalProfile ?: selected.first
+        val originalDevice = if (priorTransportAttempt) payload.optString("device_id") else selected.second
+        if (originalDevice.isBlank() || profile.isBlank()) return SubmissionOutcome.Refused("original_owner_unknown")
+        val sameProfile = profile == selected.first && originalDevice == selected.second
+        val sessionId = _state.value.vanSessionId?.takeIf { sameProfile } ?: SessionEnvelope.UNBOUND_SESSION_ID
+        if (kind == "command.submit" && payload.optString("command_id").isNotBlank() &&
+            payload.optString("idempotency_key").isNotBlank()) {
+            val originals = store?.restore() ?: transientEntries.values.mapNotNull { original ->
+                val raw = inFlight[original.messageId] ?: outbox.firstOrNull { it.entry.messageId == original.messageId }?.envelope
+                raw?.let { original to it.toString() }
+            }
+            for ((original, raw) in originals) {
+                val outer = runCatching { JSONObject(raw) }.getOrNull() ?: continue
+                val originalBody = outer.optJSONObject("payload") ?: continue
+                if (outer.optString("kind") != kind || originalBody.optString("command_id") != payload.optString("command_id") ||
+                    originalBody.optString("idempotency_key") != payload.optString("idempotency_key")) continue
+                if (original.profileId != profile || outer.optString("device_id") != originalDevice ||
+                    SessionEnvelope.payloadDigest(originalBody) != SessionEnvelope.payloadDigest(payload)) {
+                    return SubmissionOutcome.Refused("original_command_selection_changed")
+                }
+                if (priorTransportAttempt && original.sessionOnlyOrigin == true) {
+                    val observed = original.copy(neverDispatched = false, sessionOnlyOrigin = false)
+                    if (store != null) store.persist(observed, raw) else transientEntries[original.messageId] = observed
+                    outbox.indexOfFirst { it.entry.messageId == original.messageId }.takeIf { it >= 0 }?.let { index ->
+                        outbox[index] = outbox[index].copy(entry = observed)
+                    }
+                }
+                return if (original.messageId in inFlight) SubmissionOutcome.Sent(original.messageId)
+                       else SubmissionOutcome.Queued(original.messageId)
+            }
+        }
         val messageId = "msg_${UUID.randomUUID()}"
         // §20.12 — lifted out of the payload and onto the envelope.
         //
@@ -239,7 +283,7 @@ class VanHermesSessionManager(
             vanSessionId = sessionId,
             sessionEpoch = _state.value.sessionEpoch,
             pathEpoch = _state.value.pathEpoch,
-            deviceId = gateway.deviceIdOrEmpty(),
+            deviceId = originalDevice,
             kind = kind,
             createdAtMs = System.currentTimeMillis(),
             payload = payload,
@@ -251,6 +295,19 @@ class VanHermesSessionManager(
         // Classify before either storage or a live write: send only queues bytes locally.
         // Eligible work must survive a kill even when the link looked healthy at submit.
         // A4/A5 and other prohibited classes stay solely in memory on a live path.
+        val storedAt = System.currentTimeMillis()
+        val originalIssued = if (kind == "command.submit" && payload.has("issued_at_unix")) {
+            val seconds = payload.optLong("issued_at_unix", 0)
+            if (seconds <= 0 || seconds > (Long.MAX_VALUE - DurableOutbox.DEFAULT_TTL_MS) / 1000) return SubmissionOutcome.Refused("original_command_time_invalid")
+            seconds * 1000
+        } else storedAt
+        val defaultDeadline = originalIssued + DurableOutbox.DEFAULT_TTL_MS
+        val signedDeadline = if (kind == "command.submit" && payload.has("expires_at_unix") && !payload.isNull("expires_at_unix")) {
+            val seconds = payload.optLong("expires_at_unix", 0)
+            if (seconds <= 0 || seconds > Long.MAX_VALUE / 1000) return SubmissionOutcome.Refused("original_command_expiry_invalid")
+            seconds * 1000
+        } else defaultDeadline
+        val originalDeadline = minOf(defaultDeadline, signedDeadline)
         val entry = DurableOutbox.admit(
             messageId = messageId,
             commandId = commandId ?: messageId,
@@ -259,12 +316,20 @@ class VanHermesSessionManager(
             actionClass = actionClass,
             requiresLiveOwnerContext = requiresLiveOwnerContext,
             payloadRef = envelope.getString("message_id"),
-            nowMs = System.currentTimeMillis(),
+            nowMs = originalIssued,
+            ttlMs = originalDeadline - originalIssued,
         )
-        if (entry != null) store?.persist(entry, envelope.toString())
+        if (entry != null) envelope.put("expires_at_ms", entry.expiresAtMs)
+        val originalEntry = entry?.copy(neverDispatched = !priorTransportAttempt, profileId = profile,
+            sessionOnlyOrigin = !priorTransportAttempt, httpPrepared = if (httpPreparation) true else null)
+        if (originalEntry != null) {
+            if (store != null) store.persist(originalEntry, envelope.toString())
+            else transientEntries[messageId] = originalEntry
+        } else transientOwners[messageId] = profile to originalDevice
 
-        val live = socket.takeIf { socketReady }
-        if (live != null && live.send(envelope.toString())) {
+        val live = socket.takeIf { socketReady && sameProfile && !priorTransportAttempt }
+        val deliveryAttempted = live != null && prepareSessionSend(originalEntry, envelope)
+        if (deliveryAttempted && live!!.send(envelope.toString())) {
             inFlight[envelope.getString("message_id")] = envelope
             return SubmissionOutcome.Sent(envelope.getString("message_id"))
         }
@@ -272,7 +337,7 @@ class VanHermesSessionManager(
 
         // Written before it is queued in memory, not after. The other order loses the
         // command to a kill in between, and the whole point of this record is the kill.
-        outbox.addLast(QueuedMessage(entry, envelope))
+        outbox.addLast(QueuedMessage((originalEntry ?: entry).let { if (deliveryAttempted) it.copy(neverDispatched = false) else it }, envelope))
         publishOutboxDepth()
         return if (entry.storability == CommandStorability.REQUIRE_RECONFIRM_ON_RECONNECT) {
             SubmissionOutcome.QueuedNeedsReconfirm(entry.messageId)
@@ -292,12 +357,15 @@ class VanHermesSessionManager(
         val index = outbox.indexOfFirst { it.entry.messageId == messageId }
         if (index < 0) return false
         val queued = outbox[index]
+        if (!currentOriginal(queued.entry, queued.envelope) ||
+            (queued.entry.neverDispatched != true && !ownedTransportRecovery(queued.entry, queued.envelope))) return false
         val reconfirmed = OwnerReconfirmationSurface.reconfirm(queued.entry, nowMs)
             ?: return false
         // §20.15 — the owner said yes, and that has to outlive the app. A reconfirmation
         // held only in memory means the owner is asked twice for the same command, which
         // is the failure mode that trains someone to stop reading the question.
-        store?.persist(reconfirmed, queued.envelope.toString())
+        if (store != null) store.persist(reconfirmed, queued.envelope.toString())
+        else transientEntries[messageId] = reconfirmed
         outbox[index] = queued.copy(entry = reconfirmed)
         return true
     }
@@ -314,7 +382,13 @@ class VanHermesSessionManager(
         nowMs: Long = System.currentTimeMillis(),
     ): List<OwnerReconfirmationRequest> =
         outbox.mapNotNull { queued ->
-            OwnerReconfirmationSurface.project(queued.entry, queued.envelope, nowMs)
+            if (!currentOriginal(queued.entry, queued.envelope) ||
+                (queued.entry.neverDispatched != true && !ownedTransportRecovery(queued.entry, queued.envelope))) return@mapNotNull null
+            OwnerReconfirmationSurface.project(queued.entry, queued.envelope, nowMs)?.let { request ->
+                if (queued.entry.neverDispatched == true) request else request.copy(
+                    ownerReadableState = "Original outcome unconfirmed. Confirm recovery of this same operation.",
+                    recoveryOnly = true)
+            }
         }
 
     /**
@@ -346,18 +420,61 @@ class VanHermesSessionManager(
         nowMs: Long = System.currentTimeMillis(),
     ): Boolean {
         val queued = outbox.firstOrNull { it.entry.messageId == messageId } ?: return false
+        if (!currentOriginal(queued.entry, queued.envelope) || queued.entry.neverDispatched != true) return false
         if (OwnerReconfirmationSurface.project(queued.entry, queued.envelope, nowMs) == null) {
             return false
         }
         if (!outbox.remove(queued)) return false
         store?.forget(messageId)
+        transientEntries.remove(messageId)
+        transientOwners.remove(messageId)
         publishOutboxDepth()
         return true
     }
 
+    private val recoveryHeld = mutableSetOf<String>()
+    private val originalRecoveryAllowed = mutableSetOf<String>()
+
+    private fun currentOriginal(entry: OutboxEntry, envelope: JSONObject): Boolean =
+        ownerSelection().let { (profile, device) -> entry.profileId == profile &&
+            envelope.optString("device_id") == device }
+
+    private fun ownedTransportRecovery(entry: OutboxEntry, envelope: JSONObject): Boolean =
+        entry.messageId in originalRecoveryAllowed && entry.sessionOnlyOrigin == true &&
+            envelope.optString("kind") in setOf("mission.message", "mission.cancel", "decision.answer") &&
+            envelope.optString("van_session_id") == _state.value.vanSessionId &&
+            entry.expiresAtMs - entry.createdAtMs <= DurableOutbox.DEFAULT_TTL_MS &&
+            !entry.expired(System.currentTimeMillis())
+
+    /** Commit loss-of-never-sent provenance before any socket can observe the bytes. */
+    private fun prepareSessionSend(entry: OutboxEntry?, envelope: JSONObject): Boolean {
+        if (entry == null) return transientOwners[envelope.optString("message_id")] == ownerSelection()
+        if (!currentOriginal(entry, envelope) || entry.expired(System.currentTimeMillis())) return false
+        val attempted = entry.copy(neverDispatched = false)
+        val durable = store
+        if (durable == null) {
+            transientEntries[entry.messageId] = attempted
+            return true
+        }
+        return runCatching { durable.persist(attempted, envelope.toString()) }.isSuccess
+    }
+
+    @Synchronized
+    private fun originalCommandReferences(): List<JSONObject> = (store?.restore() ?: transientEntries.values.mapNotNull { entry ->
+        val original = inFlight[entry.messageId] ?: outbox.firstOrNull { it.entry.messageId == entry.messageId }?.envelope
+        original?.let { entry to it.toString() }
+    }).mapNotNull { (entry, raw) ->
+        runCatching { ownerSelection().let { (profile, device) ->
+            OriginalCommandReference.fromStored(entry, JSONObject(raw), profile, device)
+        } }.getOrNull()
+    }.take(50)
+
     /** §20.15 — what the owner's screen shows for each queued item. */
     fun queuedForOwner(nowMs: Long = System.currentTimeMillis()): List<Pair<String, String>> =
-        outbox.map { it.entry.messageId to DurableOutbox.ownerReadableState(it.entry, nowMs) }
+        outbox.map { it.entry.messageId to if (it.entry.neverDispatched != true || it.entry.messageId in recoveryHeld)
+            if (it.entry.httpPrepared == true) "Original request prepared; delivery remains unconfirmed"
+            else "Delivery held; the original outcome is unconfirmed"
+            else DurableOutbox.ownerReadableState(it.entry, nowMs) }
 
     sealed class SubmissionOutcome {
         data class Sent(val messageId: String) : SubmissionOutcome()
@@ -645,8 +762,17 @@ class VanHermesSessionManager(
                         // Accepted or refused, it is answered and no longer in flight. A
                         // refusal left in flight would be re-sent by the next resume, which
                         // is sending the Gateway something it has already declined.
+                        val original = store?.restore()?.firstOrNull { it.first.messageId == frame.messageId }
+                        if (original != null) {
+                            val envelope = runCatching { JSONObject(original.second) }.getOrNull() ?: return
+                            if (!currentOriginal(original.first, envelope) ||
+                                envelope.optString("van_session_id") != _state.value.vanSessionId) return
+                        } else if (frame.messageId !in inFlight ||
+                            (transientEntries[frame.messageId] == null && transientOwners[frame.messageId] != ownerSelection())) return
                         inFlight.remove(frame.messageId)
                         store?.forget(frame.messageId)
+                        transientEntries.remove(frame.messageId)
+                        transientOwners.remove(frame.messageId)
                     }
                     SessionDownstream.Frame.Unrecognised -> Unit
                 }
@@ -743,6 +869,14 @@ class VanHermesSessionManager(
         failover = null
     }
 
+    /** Reconcile existing originals on the owner's existing retry control. */
+    fun requestRecovery() {
+        scope.launch {
+            val current = synchronized(this@VanHermesSessionManager) { socket?.let { it to connectionGeneration } }
+            if (current == null) start() else resume(current.first, current.second)
+        }
+    }
+
     /**
      * §20.9 — re-establish the session, and say honestly which of the three things happened.
      *
@@ -763,6 +897,7 @@ class VanHermesSessionManager(
                 pendingCommandIds = pendingIdentities().map {
                     SessionReconciliation.identityOf(it.messageId, it.commandId)
                 },
+                originalCommandReferences = originalCommandReferences(),
                 pathId = activePathId,
                 routeId = "primary-ingress",
                 pathClass = if (usingHttpCarrier) "B_STREAMING" else "A_REALTIME",
@@ -870,13 +1005,13 @@ class VanHermesSessionManager(
             )
             failover = null
             suspectAtNanos = 0L
-            val sentEntries = store?.restore().orEmpty().map { it.first }
-                .filter { it.messageId in inFlight }
-            val dropped = DurableOutbox.abandonAll(outbox.map { it.entry } + sentEntries, store)
+            val droppable = outbox.filter { it.entry.neverDispatched == true && currentOriginal(it.entry, it.envelope) }
+            val dropped = DurableOutbox.abandonAll(droppable.map { it.entry }, store)
             abandoned += dropped
             tell(dropped, System.currentTimeMillis())
-            outbox.clear()
-            inFlight.clear()
+            outbox.removeAll(droppable.toSet())
+            dropped.forEach { transientEntries.remove(it.messageId); transientOwners.remove(it.messageId) }
+            recoveryHeld.addAll(outbox.map { it.entry.messageId } + inFlight.keys)
             publishOutboxDepth()
             // The socket's handshake belongs to the old id; attach to the new session.
             transportFailed(webSocket, generation, "previous session is gone; this is a new one")
@@ -938,17 +1073,23 @@ class VanHermesSessionManager(
     @Synchronized
     private fun pendingIdentities(): List<SessionReconciliation.Pending> {
         val pending = mutableListOf<SessionReconciliation.Pending>()
+        val originals = store?.restore()?.associate { it.first.messageId to it.first } ?: transientEntries
         for ((messageId, envelope) in inFlight) {
-            pending += SessionReconciliation.Pending(
-                messageId = messageId,
-                commandId = envelope.optString("command_id").takeIf { it.isNotBlank() },
-            )
+            val original = originals[messageId]
+            if (original != null) {
+                if (!currentOriginal(original, envelope)) continue
+            } else if (transientOwners[messageId] != ownerSelection()) continue
+            pending += SessionReconciliation.Pending(messageId,
+                envelope.optString("command_id").takeIf { it.isNotBlank() },
+                kind = envelope.optString("kind"), sessionOnlyOrigin = original?.sessionOnlyOrigin == true,
+                sameOriginalSession = envelope.optString("van_session_id") == _state.value.vanSessionId)
         }
         for (queued in outbox) {
-            pending += SessionReconciliation.Pending(
-                messageId = queued.entry.messageId,
-                commandId = queued.entry.commandId,
-            )
+            if (!currentOriginal(queued.entry, queued.envelope)) continue
+            pending += SessionReconciliation.Pending(queued.entry.messageId, queued.entry.commandId,
+                neverDispatched = queued.entry.neverDispatched == true,
+                kind = queued.envelope.optString("kind"), sessionOnlyOrigin = queued.entry.sessionOnlyOrigin == true,
+                sameOriginalSession = queued.envelope.optString("van_session_id") == _state.value.vanSessionId)
         }
         return pending
     }
@@ -956,7 +1097,7 @@ class VanHermesSessionManager(
     @Synchronized
     private fun adoptCursor(resume: JSONObject) {
         lastEventSeq = resume.optLong("replay_from_seq", lastEventSeq)
-        val answers = resume.optJSONObject("command_states") ?: return
+        val answers = resume.optJSONObject("command_states") ?: JSONObject()
         val states = buildMap<String, String> {
             answers.keys().forEach { key -> put(key, answers.optString(key)) }
         }
@@ -965,10 +1106,32 @@ class VanHermesSessionManager(
         // the identity the question was asked by is the identity the answer is matched
         // by. Anything the Gateway did not recognise stays exactly where it is and goes
         // again under its own message id and idempotency key.
-        val settled = SessionReconciliation.plan(pendingIdentities(), states).settle.toSet()
+        val receipts = resume.optJSONObject("original_command_results") ?: JSONObject()
+        val originals = store?.restore() ?: transientEntries.values.mapNotNull { entry ->
+            (inFlight[entry.messageId] ?: outbox.firstOrNull { it.entry.messageId == entry.messageId }?.envelope)
+                ?.let { entry to it.toString() }
+        }
+        val verified = mutableMapOf<String, JSONObject>()
+        val (profile, device) = ownerSelection()
+        for ((entry, raw) in originals) {
+            if (states[entry.commandId] != "ORIGINAL_COMPLETED") continue
+            val envelope = runCatching { JSONObject(raw) }.getOrNull() ?: continue
+            OriginalCommandReference.verifiedResult(entry, envelope, profile, device,
+                receipts.optJSONObject(entry.commandId))?.let { verified[entry.messageId] = it }
+        }
+        val pending = pendingIdentities().map { it.copy(verifiedOriginalRead = it.messageId in verified) }
+        val plan = SessionReconciliation.plan(pending, states)
+        recoveryHeld.clear()
+        recoveryHeld.addAll(plan.hold)
+        originalRecoveryAllowed.clear()
+        originalRecoveryAllowed.addAll(plan.resend)
+        val settled = plan.settle.toSet()
         if (settled.isEmpty()) return
+        // The read fact names the existing durable result owner. Notify with its
+        // actual accepted/running/refused state before releasing delivery metadata.
+        settled.mapNotNull { verified[it] }.forEach(onRecoveredOriginal)
         inFlight.keys.removeAll(settled)
-        settled.forEach { store?.forget(it) }
+        settled.forEach { store?.forget(it); transientEntries.remove(it); transientOwners.remove(it) }
         // Removed from the queue *and* from the disk. Leaving the record behind is the
         // restart loop: restored on the next start, flushed again, and the owner's one
         // instruction performed once more after every process death.
@@ -991,9 +1154,15 @@ class VanHermesSessionManager(
         val sessionId = local.vanSessionId ?: return
         val pending = inFlight.values.toList()
         for (envelope in pending) {
-            val readdressed = SessionEnvelope.readdress(
-                SessionEnvelope.rebind(envelope, sessionId, local.sessionEpoch), local.pathEpoch,
-            )
+            val messageId = envelope.getString("message_id")
+            if (messageId in recoveryHeld) continue
+            val entry = if (store != null) store.restore().firstOrNull { it.first.messageId == messageId }?.first
+                else transientEntries[messageId]
+            if (entry == null || !currentOriginal(entry, envelope) || !ownedTransportRecovery(entry, envelope) ||
+                DurableOutbox.flush(entry, System.currentTimeMillis()) !is FlushVerdict.Send ||
+                envelope.optString("van_session_id") != sessionId) continue
+            val readdressed = SessionEnvelope.readdress(envelope, local.pathEpoch)
+            if (!prepareSessionSend(entry, readdressed)) continue
             if (!live.send(readdressed.toString())) {
                 // The new path died during the resume. Keep it in flight rather than
                 // dropping it: the next resume will try again, and losing it here would
@@ -1024,12 +1193,18 @@ class VanHermesSessionManager(
                 held.addLast(queued)
                 continue
             }
+            if (!currentOriginal(queued.entry, queued.envelope) || queued.entry.messageId in recoveryHeld ||
+                (queued.entry.neverDispatched != true && !ownedTransportRecovery(queued.entry, queued.envelope))) {
+                held.addLast(queued)
+                continue
+            }
             when (DurableOutbox.flush(queued.entry, now)) {
                 is FlushVerdict.Expired -> {
                     // Dropped, not held: the window closed and the owner is told it did
                     // not happen rather than asked about something they have forgotten.
                     expired += queued.entry
                     store?.forget(queued.entry.messageId)
+                    transientEntries.remove(queued.entry.messageId)
                     tell(listOf(queued.entry), now)
                 }
                 is FlushVerdict.NeedsReconfirmation, is FlushVerdict.Refused -> {
@@ -1052,6 +1227,10 @@ class VanHermesSessionManager(
                         queued.envelope
                     }
                     val readdressed = SessionEnvelope.readdress(bound, epoch)
+                    if (!prepareSessionSend(queued.entry, readdressed)) {
+                        held.addLast(queued)
+                        continue
+                    }
                     if (live.send(readdressed.toString())) {
                         inFlight[readdressed.getString("message_id")] = readdressed
                         // WebSocket.send only enqueues bytes. Keep the durable record until
@@ -1060,9 +1239,11 @@ class VanHermesSessionManager(
                         // The socket went away mid-flush. Everything after this keeps its
                         // order, which is why the remainder is moved rather than retried.
                         val attempted = queued.copy(
-                            entry = DurableOutbox.attempted(queued.entry, _state.value.authoritativePathId),
+                            entry = DurableOutbox.attempted(queued.entry, _state.value.authoritativePathId).copy(neverDispatched = false),
+                            envelope = readdressed,
                         )
-                        store?.persist(attempted.entry, attempted.envelope.toString())
+                        if (store != null) store.persist(attempted.entry, attempted.envelope.toString())
+                        else transientEntries[attempted.entry.messageId] = attempted.entry
                         held.addLast(attempted)
                         stop = true
                     }

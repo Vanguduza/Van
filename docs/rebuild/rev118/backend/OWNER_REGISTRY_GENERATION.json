@@ -1,11 +1,11 @@
 {
   "schema": "van.rebuild.owner-registry-generation/1",
-  "source_receipt_sha256": "8e2fe5c5cf13c369965bacd9d1ec3f35c6dcf201a3cf51317f46ca28e0bb60dd",
+  "source_receipt_sha256": "5d532c8dd1b96dd13dafcb8babb98927168995f8b8076ada06384858ba132a8f",
   "outputs": {
-    "registries/owner_endpoint_schemas.json": "d01f395c5b90783ee2ef08b7686b373e0059f27077e44541554c399dabdc9118",
-    "registries/owner_endpoints.json": "bbcd3a9e583196de6dbc60eaecf90137aa44997864a8502519dcebd26740e345",
-    "registries/owner_features.json": "aeb8fe20b2944ee5e1ef3bb6999654a9cf845ee8699f244fcca631fb61273173",
-    "registries/owner_screens.json": "a0480dd16a72916092cae75d90e3b2e9384ea3be815ff7a70f0e12bff1055b77"
+    "registries/owner_endpoint_schemas.json": "68e782eeceda99dcd5291a6d6c70365adf17fe4e7c2e7614bd1fd84667b2957e",
+    "registries/owner_endpoints.json": "1582d4f7414ff63ecae6e22ece1e0963ecd47623c53fe426a0931a932346ddca",
+    "registries/owner_features.json": "e65586036102bc1127b9ba2faf539aceace7629cce51d1a14db87ea13d4a4939",
+    "registries/owner_screens.json": "0608485ae4d1cf9df62420f5369493f736794cbfabda9eb64012527f7a4725e9"
   },
   "qualification": "Derived source inventory only; no owner/native/admission signature."
 }

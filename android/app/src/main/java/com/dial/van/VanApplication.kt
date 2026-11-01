@@ -251,7 +251,9 @@ class VanApplication : Application(), VoiceInputCallback, TtsOutputCallback {
     override fun onCreate() {
         super.onCreate()
         instance = this
-        commandQueue = EncryptedCommandQueue(this)
+        commandQueue = EncryptedCommandQueue(this) {
+            if (::gatewayClient.isInitialized) gatewayClient.currentQueueOwner() else null
+        }
         notificationPolicyStore = NotificationPolicyStore(this)
         degradedModeStore = DegradedModeStore()
         // GAP-F-010 — the gateway's `/health.degraded[]` reaches the device's degraded
@@ -310,6 +312,7 @@ class VanApplication : Application(), VoiceInputCallback, TtsOutputCallback {
             // which is the surface they are already looking at. Without a reader here the
             // work is dropped in silence, which is the half of the failure that is worse.
             onUndelivered = { commandController.reportUndelivered(it) },
+            onRecoveredOriginal = commandController::reportRecoveredOriginal,
             // §20.1's SHALL. Durable downstream pages go into the reducer the REST floor
             // already uses, so the owner has one history rather than two that disagree.
             onDownstreamPage = { eventStream.apply(it) },
@@ -500,7 +503,7 @@ class VanApplication : Application(), VoiceInputCallback, TtsOutputCallback {
      * session, which is §20.3's whole point.
      */
     internal fun startVanSession() {
-        commandController.storeForLater = ::storeCommandForLater
+        commandController.storeOriginalForLater = ::storeCommandForLater
         // `Dispatchers.IO`, not the scope's default. `start()` restores the outbox, which
         // reads and decrypts every stored record, and `Dispatchers.Default` is sized to
         // the CPU count: a blocking read there stalls work that has nothing to do with
@@ -557,6 +560,8 @@ class VanApplication : Application(), VoiceInputCallback, TtsOutputCallback {
     private fun storeCommandForLater(
         body: JSONObject,
         requiresLiveOwnerContext: Boolean,
+        originalProfile: String,
+        priorHttpAttempt: Boolean,
     ): Boolean {
         val outcome = runCatching {
             vanSession.submit(
@@ -565,6 +570,11 @@ class VanApplication : Application(), VoiceInputCallback, TtsOutputCallback {
                 // less is refused as `command_payload_invalid` when the outbox flushes,
                 // hours after the owner was told it was saved.
                 payload = body,
+                originalProfile = originalProfile,
+                priorTransportAttempt = priorHttpAttempt,
+                // This callback now owns recovery before direct HTTP. Prepared is
+                // provenance only; a crash still leaves dispatch uncertain.
+                httpPreparation = priorHttpAttempt,
                 actionClass = body.optString("action_class", "A1"),
                 requiresLiveOwnerContext = requiresLiveOwnerContext,
             )
@@ -657,7 +667,10 @@ class VanApplication : Application(), VoiceInputCallback, TtsOutputCallback {
     }
 
     /** The owner pressing "Try again" on a degraded subsystem (P3-AND-005). */
-    fun requestReplay() = queueReplayer.replayAsync(ReplayReason.OWNER_REQUESTED)
+    fun requestReplay() {
+        queueReplayer.replayAsync(ReplayReason.OWNER_REQUESTED)
+        vanSession.requestRecovery()
+    }
 
     /** Re-read what the device actually reports. Called when a screen resumes. */
     fun refreshSubsystemHealth() {

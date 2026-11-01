@@ -11,6 +11,11 @@ import android.speech.SpeechRecognizer
 import androidx.biometric.BiometricManager
 import androidx.core.content.ContextCompat
 import com.dial.van.VanApplication
+import com.dial.van.queue.QueueRestoreRequest
+import com.dial.van.queue.QueueRestoreResult
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.withContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import com.dial.van.notification.VanNotificationListenerService
@@ -32,10 +37,17 @@ object DeviceSignals {
 
     fun read(app: VanApplication): SubsystemSignals {
         val context: Context = app
+        val inventory = runCatching { app.commandQueue.restoreInventory() }
+        val sessionRecovery = runCatching { app.commandQueue.recoveryRecordsOfKind("SESSION_ENVELOPE")
+            .count { it.sessionNeverDispatched != true } }
         return SubsystemSignals(
             overlayPermissionGranted = Settings.canDrawOverlays(context),
             overlayRunning = FloatingOverlayService.isRunning(),
-            queuedCommands = runCatching { app.commandQueue.size() }.getOrDefault(0),
+            queuedCommands = inventory.getOrNull()?.eligibleUnsent ?: 0,
+            heldQueuedCommands = inventory.getOrNull()?.heldGeneric ?: 0,
+            foreignQueueRecords = inventory.getOrNull()?.foreignOwned ?: 0,
+            queueStorageUncertain = inventory.isFailure || sessionRecovery.isFailure || (inventory.getOrNull()?.unreadable ?: 0) > 0,
+            heldOwnerRecovery = sessionRecovery.getOrDefault(0),
             queueReplayFailures = app.queueReplayer.consecutiveFailures(),
             notificationListenerConnected = notificationListenerEnabled(context),
             microphonePermissionGranted = ContextCompat.checkSelfPermission(
@@ -50,12 +62,14 @@ object DeviceSignals {
 
     /** Push what the device reports into the store the health screens read. */
     fun publish(app: VanApplication) {
-        for (verdict in SubsystemHealth.evaluate(read(app))) {
-            when (verdict.status) {
-                SubsystemStatus.WORKING -> app.degradedModeStore.markWorking(verdict.id)
-                else -> app.degradedModeStore.mark(
-                    verdict.id, verdict.status, verdict.detail, verdict.restoreAction,
-                )
+        app.appScope.launch(Dispatchers.IO) {
+            for (verdict in SubsystemHealth.evaluate(read(app))) {
+                when (verdict.status) {
+                    SubsystemStatus.WORKING -> app.degradedModeStore.markWorking(verdict.id)
+                    else -> app.degradedModeStore.mark(
+                        verdict.id, verdict.status, verdict.detail, verdict.restoreAction,
+                    )
+                }
             }
         }
     }
@@ -83,22 +97,26 @@ object DeviceSignals {
                 app.requestReplay()
                 true
             }
-            RestoreAction.CLEAR_QUEUE -> {
-                // Off the thread that handled the tap. The queue commits synchronously so
-                // the outbox's "saved" is true when said, which makes this an encrypted
-                // disk write — and this one is reached from a button on a screen.
-                app.appScope.launch(Dispatchers.IO) {
-                    app.commandQueue.clear()
-                    publish(app)
-                }
-                true
-            }
+            // The existing Settings control opens exact native review first. An
+            // unreviewed generic action can never stand in for that owner confirmation.
+            RestoreAction.CLEAR_QUEUE -> false
             RestoreAction.RESTART_OVERLAY -> {
                 FloatingOverlayService.start(context)
                 true
             }
             RestoreAction.CONTACT_SUPPORT, RestoreAction.NONE -> false
         }
+
+    suspend fun reviewQueue(app: VanApplication): QueueRestoreRequest = withContext(Dispatchers.IO) {
+        app.gatewayClient.refreshQueueCurrentness()
+        app.commandQueue.pendingRestores().firstOrNull() ?: app.commandQueue.reviewDiscard()
+    }
+
+    suspend fun discardReviewed(app: VanApplication, original: QueueRestoreRequest): QueueRestoreResult = withContext(Dispatchers.IO) {
+        app.gatewayClient.refreshQueueCurrentness()
+        val operation = currentCoroutineContext()
+        app.commandQueue.discardReviewed(original) { !operation.isActive }.also { publish(app) }
+    }
 
     private fun settingsIntentFor(context: Context, subsystemId: String): Intent = when (subsystemId) {
         "overlay" -> Intent(

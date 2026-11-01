@@ -11,6 +11,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.Button
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
@@ -22,6 +24,12 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.saveable.rememberSaveable
+import com.dial.van.degraded.RestoreAction
+import com.dial.van.queue.QueueRestoreRequest
+import kotlinx.coroutines.CancellationException
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -75,6 +83,10 @@ fun SettingsRoute(
     var gatewayDegradedError by remember { mutableStateOf<String?>(null) }
     var unfixable by remember { mutableStateOf<String?>(null) }
     var characterAcceptanceStatus by remember { mutableStateOf<String?>(null) }
+    var queueReview by rememberSaveable { mutableStateOf<String?>(null) }
+    var queueRestoreResult by rememberSaveable { mutableStateOf<String?>(null) }
+    var queueRestoring by remember { mutableStateOf(false) }
+    var queueAttempted by rememberSaveable { mutableStateOf(false) }
     val characterAcceptance = remember(context, app.gatewayClient) {
         (context as? FragmentActivity)?.let { VanCharacterAcceptance(it, app.gatewayClient) }
     }
@@ -92,6 +104,40 @@ fun SettingsRoute(
     // composition; the bridge holds a plain last-value rather than a `StateFlow`, so this is
     // as live as this screen gets without `visual/` growing observable state for it.
     val rendererStatus = DegradedBridge.lastRendererStatus
+
+    queueReview?.let { sealedSelection ->
+        val reviewed = runCatching { Json.decodeFromString<QueueRestoreRequest>(sealedSelection) }.getOrNull()
+        if (reviewed == null) {
+            LaunchedEffect(sealedSelection) { queueRestoreResult = "Review the current queue again."; queueReview = null }
+        } else {
+            AlertDialog(
+                onDismissRequest = { if (!queueRestoring && !queueAttempted) queueReview = null },
+                title = { Text("Discard selected unsent commands?") },
+                text = { Text("This discards ${reviewed.items.size} selected unsent commands from this device. Submitted work and session or captured-context recovery stay with their existing owners.") },
+                confirmButton = { TextButton(enabled = !queueRestoring, onClick = {
+                    queueRestoring = true
+                    queueAttempted = true
+                    scope.launch {
+                        try {
+                            val result = DeviceSignals.discardReviewed(app, reviewed)
+                            queueRestoreResult = when (result.state) {
+                                "APPLIED" -> "Discarded ${result.removedIds.size} selected unsent commands."
+                                "REFUSED" -> "The queue or current owner changed. Review the queue again."
+                                else -> "The local outcome is unconfirmed. Reopen VAN to recover the original result."
+                            }
+                            if (result.state == "APPLIED" || result.state == "REFUSED") { queueReview = null; queueAttempted = false }
+                        } catch (cancelled: CancellationException) {
+                            queueRestoreResult = "The original restore outcome needs recovery."
+                            throw cancelled
+                        } catch (_: Exception) {
+                            queueRestoreResult = "Restore held. Current owner or storage could not be confirmed."
+                        } finally { queueRestoring = false; app.refreshSubsystemHealth() }
+                    }
+                }) { Text(if (queueRestoring) "Checking original result…" else "Discard selected") } },
+                dismissButton = { TextButton(enabled = !queueRestoring && !queueAttempted, onClick = { queueReview = null }) { Text("Keep commands") } },
+            )
+        }
+    }
 
     LazyColumn(
         modifier = Modifier.fillMaxSize().padding(horizontal = tokens.space.pageGutter),
@@ -212,12 +258,23 @@ fun SettingsRoute(
             // own gateway-mapped list (below) deliberately does not carry buttons for. Legacy
             // `VanGlassStyle`-based, same reasoning as the Browser & Automation children.
             DegradedPanel(degradedState.subsystems, legacyGlassFor(degradedState)) { subsystem ->
-                if (!DeviceSignals.perform(context, app, subsystem)) {
+                if (subsystem.restoreAction == RestoreAction.CLEAR_QUEUE) {
+                    if (queueReview == null && !queueRestoring) scope.launch {
+                        queueRestoring = true
+                        try {
+                            queueReview = Json.encodeToString(DeviceSignals.reviewQueue(app))
+                            queueRestoreResult = null
+                        } catch (cancelled: CancellationException) { throw cancelled }
+                        catch (_: Exception) { queueRestoreResult = "Restore held. Connect and confirm the current owner before discarding commands." }
+                        finally { queueRestoring = false }
+                    }
+                } else if (!DeviceSignals.perform(context, app, subsystem)) {
                     unfixable = subsystem.label
                 }
                 app.refreshSubsystemHealth()
             }
         }
+        queueRestoreResult?.let { line -> item { Text(line, style = tokens.type.label, color = tokens.color.textSecondary) } }
         unfixable?.let { label ->
             item {
                 Text(

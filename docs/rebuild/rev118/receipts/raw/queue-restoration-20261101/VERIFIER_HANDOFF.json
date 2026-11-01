@@ -1,0 +1,32 @@
+{
+  "at_utc": "2026-11-01T13:18:34.005780+00:00",
+  "state": "FROZEN_MINIMAL_VERIFIER_IMPORT_REPAIR_FOR_INDEPENDENT_RECHECK",
+  "base": "c0063940a7573597934e62ada558d4dc942cfad0",
+  "source_pins": {
+    "tools/rebuild/backend_public_source.py": "0069399c90a9b7d0f3773a95e3070aa9132c6378dad3d318785b3cc2d1425542",
+    "tests/rebuild/test_public_source_shards.py": "72ca5fe5b0fbc1726b89cb0b4d4dc4237ced0b5284b2d6e824e27d8b19c7b80f"
+  },
+  "zip_sha256": "81b81d9234b6f1ee9784a8be6ac10c4fd6a42bc96d52e6ad80aef460b4065b56",
+  "patch_sha256": "f821a7a9a5f50918649bd5275c9f4991afe0d26dbef65b6e1d9e88642e5e07a8",
+  "cached_applycheck": "PASS no index mutation",
+  "actual_native_failure": "/workspace/van-queue-integration-20261101/C006_AGGREGATE_DECODED.log",
+  "cause": "Default verify-shards parent imports its own project helpers while bytecode writes enabled, creates tools/rebuild caches and then fails strict provenance. Four nativeworkers succeeded; native aggregateFAILED, notqualified; media198pass4.31s retained.",
+  "minimal_fix": "Set parent sys.dont_write_bytecode=True before projecthelper import in verify-shards only; strict preexisting/foreign bytecode refusal, cachecodegraph proof and all workflow/selection/skips/assertions unchanged",
+  "real_default_env_before": {
+    "exit": 1,
+    "test_cases": 1,
+    "actual_error": "Same native own-cache ValueError after productionCLI helperimport",
+    "receipt": "/workspace/van-queue-integration-20261101/verify-cli-before-valid-owned-path/receipt.json"
+  },
+  "after": {
+    "exit": 0,
+    "tests": 3,
+    "skips": 0,
+    "receipt": "/workspace/van-queue-integration-20261101/verify-cli-after-valid-owned-path/receipt.json",
+    "controls": "New clean default-env productionCLI with inherited PYTHONDONTWRITEBYTECODE removed; complete synthetic protocol positive/no newsourcecache then actual foreigncache refusal/unmodifiedbytes. Existing actual producer/control/media/teardownerror and named-native-cache proof pass. Syntheticreceiptconformance is NOT native/sourcecasequalification."
+  },
+  "queue_41pins_unchanged": true,
+  "other_source_semantics": "No helpercodegraph/workflow/dependency/application changes by CIfix. QueueR2 application41 is a separately reviewed integration, not part of this2pathreview.",
+  "owned_jobs": "No local regressioncontroller active; originalnative watch22371 not restarted/cancelled.",
+  "remaining": "Bounded independent2path recheck then combine reviewedqueue/derived source/evidence in one genuinecandidate ifallguards pass; originalc006aggregate remainsFAILED, newnative rerun required."
+}

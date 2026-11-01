@@ -575,3 +575,48 @@ def test_generated_cache_provenance_refuses_bad_input_without_deleting_it(real_c
     output=tmp_path/"refused-output";output.mkdir()
     with pytest.raises(ValueError):proof.archive_generated_bytecode(repo,head,before,output)
     assert path.read_bytes()==data and not (output/"generated-bytecode.json").exists()
+
+
+def test_default_environment_verify_cli_creates_no_bytecode_and_refuses_foreign_input(tmp_path,monkeypatch):
+    """Real CLI conformance with synthetic receipts, not application/native execution."""
+    import os,shutil,subprocess,sys
+    repo=tmp_path/"clean-default-verifier";repo.mkdir()
+    source=Path(__file__).resolve().parents[2]
+    for rel in ("tools/rebuild/backend_public_source.py","tools/rebuild/public_source_shards.py",
+                "tools/rebuild/source_storage_audit.py"):
+        path=repo/rel;path.parent.mkdir(parents=True,exist_ok=True);shutil.copyfile(source/rel,path)
+    for rel in (*gate.PRIVATE,gate.FIREWALL,*(f"backend/tests/test_cli_{i}.py" for i in range(4)),"services/source/test_media.py"):
+        path=repo/rel;path.parent.mkdir(parents=True,exist_ok=True);path.write_text("def test_case():\n    assert True\n")
+    (repo/"pytest.ini").write_text("[pytest]\n");(repo/".gitignore").write_text("__pycache__/\n")
+    costs={"costs":{}};write_json(repo/"tools/rebuild/backend_public_source_costs.json",costs)
+    subprocess.run(["git","init","-q"],cwd=repo,check=True);subprocess.run(["git","add","."],cwd=repo,check=True)
+    subprocess.run(["git","-c","user.name=Default verifier fixture","-c","user.email=source@example.test",
+                    "commit","-qm","Synthetic protocol and exact production verifier files"],cwd=repo,check=True)
+    head=subprocess.check_output(["git","rev-parse","HEAD"],cwd=repo,text=True).strip()
+    monkeypatch.setitem(globals(),"HEAD",head)
+    original_source=proof.source_identity(repo,head)
+    selection=gate.plan(repo);gateway=[r["path"]+"::test_case" for r in selection["selected"] if gate.runtime(r["path"])=="gateway"]
+    media=["services/source/test_media.py::test_case"];out=tmp_path/"complete-synthetic-protocol";out.mkdir()
+    write_json(out/"selection.json",selection)
+    frames=[(out/"gateway-control","gateway",gateway,0,4,True),
+            *((out/"shards"/f"van-backend-public-source-gateway-{i}","gateway",gateway,i,4,False) for i in range(4)),
+            (out/"media-control","media",media,0,1,True),(out/"media","media",media,0,1,False)]
+    for folder,runtime,nodes,index,count,control in frames:
+        frame(folder,selection,runtime,nodes,costs,index,count,control=control)
+        state=json.loads((folder/"terminal.json").read_text());receipt=json.loads((folder/"run.json").read_text())
+        state.update(source_before=original_source,source_after=original_source,root=str(repo))
+        receipt.update(source_before=original_source,source_after=original_source)
+        write_json(folder/"terminal.json",state);write_json(folder/"run.json",receipt);seal(folder)
+    env={**os.environ,"PYTHONPATH":os.pathsep.join(str(repo/p) for p in proof.CANONICAL_PYTHONPATH),
+         "GITHUB_RUN_ID":CONTEXT["id"],"GITHUB_RUN_ATTEMPT":CONTEXT["attempt"]}
+    env.pop("PYTHONDONTWRITEBYTECODE",None)  # Match the production aggregate's default environment.
+    command=[sys.executable,"tools/rebuild/backend_public_source.py","verify-shards","--output",str(out),
+             "--expected-commit",head,"--job-result","success"]
+    result=subprocess.run(command,cwd=repo,env=env,capture_output=True,text=True,timeout=90)
+    assert result.returncode==0,result.stdout+result.stderr
+    assert json.loads((out/"summary.json").read_text())["tests"]==5
+    assert not list(repo.rglob("*.pyc")) and proof.source_identity(repo,head)==original_source
+    foreign=repo/"foreign/__pycache__/untrusted.cpython-312.pyc";foreign.parent.mkdir(parents=True);foreign.write_bytes(b"foreign bytecode input")
+    refused=subprocess.run(command,cwd=repo,env=env,capture_output=True,text=True,timeout=90)
+    assert refused.returncode!=0 and "uncommitted executable/config/fixture inputs" in refused.stderr
+    assert foreign.read_bytes()==b"foreign bytecode input"

@@ -30,6 +30,8 @@ import com.dial.van.trading.RuntimeRecoveryProtocol
 import com.dial.van.trading.RuntimeRecoveryOperations
 import com.dial.van.trading.PendingRuntimeRecovery
 import com.dial.van.visual.VanLiveVisualState
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
@@ -331,6 +333,54 @@ class VanGatewayClient(context: Context) {
 
     suspend fun deviceBindingStatus(): JSONObject = withContext(Dispatchers.IO) {
         getJson("/v1/device-binding/status")
+    }
+
+    @Volatile private var queueCurrentnessWitness: com.dial.van.queue.QueueOwnerScope? = null
+
+    private fun queueActorSnapshot(): com.dial.van.queue.QueueOwnerScope? {
+        if (!isPaired()) return null
+        val profile = permissionProfileIdentity()
+        val device = deviceId ?: return null
+        val context = java.security.MessageDigest.getInstance("SHA-256")
+            .digest(listOf(profile, device, deviceAccessToken, deviceSecret).joinToString("\n").toByteArray())
+            .joinToString("") { "%02x".format(it) }
+        return com.dial.van.queue.QueueOwnerScope(profile, device, context, 0)
+    }
+
+    /** Cached currentness evidence, not an offline lease or mutation grant. */
+    fun currentQueueOwner(): com.dial.van.queue.QueueOwnerScope? {
+        val witness = queueCurrentnessWitness ?: return null
+        val current = queueActorSnapshot() ?: return null
+        return witness.takeIf { it.sameActor(current) && it.current(System.currentTimeMillis()) }
+    }
+
+    suspend fun refreshQueueCurrentness(): com.dial.van.queue.QueueOwnerScope {
+        queueCurrentnessWitness = null
+        val original = queueActorSnapshot() ?: error("Current owner unavailable")
+        var status = deviceBindingStatus()
+        var policy = status.optJSONObject("owner_mutation_policy") ?: error("Owner policy unavailable")
+        if (policy.optBoolean("proof_required", false)) {
+            val root = baseUrl
+            var expectedIssued: String? = null
+            status = JSONObject(rawGet("/v1/device-binding/status", root,
+                beforeRequest = { check(original.sameActor(queueActorSnapshot() ?: error("Current owner unavailable"))) },
+                freshHeaders = {
+                    proofHeaders("GET", "/v1/device-binding/status", "").also {
+                        expectedIssued = it["X-Van-Device-Proof-Issued-At"]
+                        check(expectedIssued != null) { "Current owner proof unavailable" }
+                    }
+                }))
+            check(status.optBoolean("current_request_proof_verified", false) &&
+                status.optString("current_request_proof_issued_at_ms") == expectedIssued) { "Current read proof unconfirmed" }
+            policy = status.optJSONObject("owner_mutation_policy") ?: error("Owner policy unavailable")
+        }
+        check(policy.optBoolean("eligible", false)) { "Current owner is not eligible" }
+        val current = queueActorSnapshot() ?: error("Current owner changed")
+        check(original.sameActor(current)) { "Current owner changed" }
+        // Bound this observation locally; it confers no authority after loss of currentness.
+        val witness = original.copy(observedUntilMs = System.currentTimeMillis() + 30_000)
+        queueCurrentnessWitness = witness
+        return witness
     }
 
     /**
@@ -1397,8 +1447,20 @@ class VanGatewayClient(context: Context) {
         pathId: String,
         routeId: String,
         pathClass: String = "A_REALTIME",
+        originalCommandReferences: List<JSONObject> = emptyList(),
     ): JSONObject = withContext(Dispatchers.IO) {
+        val originalRoot = baseUrl
+        val originalProfile = permissionProfileIdentity()
+        val originalDevice = deviceId
+        val originalReadToken = deviceAccessToken
+        fun currentRead() {
+            check(baseUrl == originalRoot && permissionProfileIdentity() == originalProfile &&
+                deviceId == originalDevice && deviceAccessToken == originalReadToken) { "Active owner or profile changed" }
+        }
+        check(originalCommandReferences.all { it.optString("profile_id") == originalProfile &&
+            it.optString("device_id") == originalDevice }) { "Original recovery selection changed" }
         val body = JSONObject()
+            .put("original_command_references", JSONArray(originalCommandReferences))
             .put("van_session_id", vanSessionId)
             .put("session_epoch", sessionEpoch)
             .put("last_event_seq", lastEventSeq)
@@ -1407,7 +1469,11 @@ class VanGatewayClient(context: Context) {
             .put("route_id", routeId)
             .put("path_class", pathClass)
         try {
-            postProved("$SESSION_PREFIX/resume", body).also { response ->
+            postRawAt(originalRoot, "$SESSION_PREFIX/resume", body.toString(), useIngress = true, freshHeaders = {
+                currentRead()
+                proofHeaders("POST", "$SESSION_PREFIX/resume", body.toString())
+            }).also { response ->
+                currentRead()
                 if (response.optBoolean("accepted", false)) storeSessionIdentity(vanSessionId,
                     response.getInt("session_epoch"), response.getInt("new_path_epoch"))
             }
@@ -2017,6 +2083,18 @@ class VanGatewayClient(context: Context) {
         getJson("/v1/commands/${encodeSegment(commandId)}")
     }
 
+    suspend fun originalCommandStatus(commandId: String, profile: String, originalDevice: String): JSONObject = withContext(Dispatchers.IO) {
+        val root = baseUrl
+        val token = deviceAccessToken
+        fun current() {
+            check(permissionProfileIdentity() == profile && deviceId == originalDevice && deviceAccessToken == token) {
+                "Active owner or profile changed"
+            }
+        }
+        current()
+        JSONObject(rawGet("/v1/commands/${encodeSegment(commandId)}", root, ::current)).also { current() }
+    }
+
     /** Speech projects existing work and never submits that work again. */
     suspend fun openSpokenResult(request: com.dial.van.control.SpokenCommandResult): JSONObject =
         withContext(Dispatchers.IO) {
@@ -2281,7 +2359,12 @@ class VanGatewayClient(context: Context) {
         clientContext: Map<String, String> = emptyMap(),
         /** The exact signed bytes that must be retained if the HTTP result is lost. */
         onPreparedCommand: (String) -> Unit = {},
+        beforeDispatch: () -> Unit = {},
     ): JSONObject = withContext(Dispatchers.IO) {
+        val operation = currentCoroutineContext()
+        val originalRoot = baseUrl
+        val originalDevice = deviceId
+        val originalToken = deviceAccessToken
         val body = buildCommandBody(
             text = text,
             actionClass = actionClass,
@@ -2307,7 +2390,18 @@ class VanGatewayClient(context: Context) {
         onPreparedCommand(bodyText)
         VanLiveVisualState.dispatchStarted()
         try {
-            val response = postRawAt(baseUrl, "/v1/commands", bodyText, useIngress = true)
+            val response = postRawAt(originalRoot, "/v1/commands", bodyText, useIngress = true, freshHeaders = {
+                check(baseUrl == originalRoot && deviceId == originalDevice && deviceAccessToken == originalToken) {
+                    "Active owner or profile changed"
+                }
+                operation.ensureActive()
+                beforeDispatch()
+                operation.ensureActive()
+                check(baseUrl == originalRoot && deviceId == originalDevice && deviceAccessToken == originalToken) {
+                    "Active owner or profile changed"
+                }
+                proofHeaders("POST", "/v1/commands", bodyText)
+            })
             publishCommandVisualStatus(response)
             response
         } catch (exc: Throwable) {
@@ -2494,10 +2588,13 @@ class VanGatewayClient(context: Context) {
         conn.inputStream.use { it.readBytes() }
     }
 
-    private fun rawGet(path: String): String = withRetry {
-        val conn = open("$baseUrl$path").apply {
+    private fun rawGet(path: String, rootUrl: String? = null, beforeRequest: () -> Unit = {},
+                       freshHeaders: () -> Map<String, String> = { emptyMap() }): String = withRetry {
+        beforeRequest()
+        val conn = open("${rootUrl ?: baseUrl}$path").apply {
             requestMethod = "GET"
             applyIngressAuth(this)
+            freshHeaders().forEach { (name, value) -> setRequestProperty(name, value) }
             connectTimeout = 15_000
             readTimeout = 30_000
         }

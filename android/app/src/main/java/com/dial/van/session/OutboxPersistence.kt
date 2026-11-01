@@ -67,6 +67,10 @@ object OutboxPersistence {
         storability = entry.storability.name,
         requiresLiveOwnerContext = entry.requiresLiveOwnerContext,
         reconfirmedAtEpochMs = entry.reconfirmedAtMs,
+        sessionNeverDispatched = entry.neverDispatched,
+        sessionProfileId = entry.profileId,
+        sessionOnlyOrigin = entry.sessionOnlyOrigin,
+        sessionHttpPrepared = entry.httpPrepared,
         lastAttemptPath = entry.lastAttemptPath,
         turnId = entry.turnId,
     )
@@ -101,6 +105,10 @@ object OutboxPersistence {
             lastAttemptPath = command.lastAttemptPath,
             attemptCount = command.attemptCount,
             reconfirmedAtMs = command.reconfirmedAtEpochMs,
+            neverDispatched = command.sessionNeverDispatched,
+            profileId = command.sessionProfileId,
+            sessionOnlyOrigin = command.sessionOnlyOrigin,
+            httpPrepared = command.sessionHttpPrepared,
         )
     }
 

@@ -5,6 +5,7 @@ import com.dial.van.degraded.DegradedModeStore
 import com.dial.van.degraded.RestoreAction
 import com.dial.van.queue.CommandKind
 import com.dial.van.queue.EncryptedCommandQueue
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -20,11 +21,15 @@ import org.json.JSONObject
  */
 class QueueReplayer(
     private val queue: EncryptedCommandQueue,
-    private val gateway: VanGatewayClient,
+    private val transport: QueueReplayTransport,
     private val degraded: DegradedModeStore,
     private val scope: CoroutineScope,
     private val clock: () -> Long = SystemClock::elapsedRealtime,
 ) {
+    constructor(queue: EncryptedCommandQueue, gateway: VanGatewayClient, degraded: DegradedModeStore,
+                scope: CoroutineScope, clock: () -> Long = SystemClock::elapsedRealtime) :
+        this(queue, GatewayQueueReplayTransport(gateway), degraded, scope, clock)
+
     /**
      * P3-AND-006 — `replayAsync()` was called exactly once, at application start. A command
      * the owner issued in a tunnel sat in the queue until they next killed and reopened the
@@ -75,7 +80,6 @@ class QueueReplayer(
         scope.launch(Dispatchers.IO) {
             try {
                 replayNow()
-                synchronized(lock) { failures = 0 }
             } catch (exc: Throwable) {
                 synchronized(lock) { failures += 1 }
                 throw exc
@@ -86,84 +90,72 @@ class QueueReplayer(
     }
 
     suspend fun replayNow(): Int {
-        if (!gateway.isEnrolled()) {
+        if (!transport.isEnrolled()) {
             degraded.markBroken("gateway", "Device not enrolled", RestoreAction.OPEN_SETTINGS)
+            synchronized(lock) { failures += 1 }
             return 0
         }
         var sent = 0
+        var failed = false
+        // Already claimed work is read by its original command identity; never remint it.
+        for (held in queue.heldGeneric()) {
+            val heldOwner = held.genericOwner ?: continue
+            val original = held.genericPreparedBody?.let { runCatching { JSONObject(it) }.getOrNull() } ?: continue
+            try {
+                val receipt = transport.commandStatus(original.getString("command_id"), heldOwner.profileId, heldOwner.deviceId)
+                queue.recordGenericReceipt(held.id, held.genericClaimId ?: continue, receipt.toString())
+            } catch (cancelled: CancellationException) { throw cancelled }
+            catch (_: Exception) { failed = true } // Missing/unavailable is not authoritative absence.
+        }
         for (cmd in queue.drainExecutable()) {
-            // There are three different things in the one canonical durable queue, and
-            // treating "not an owner command" as "discard" destroyed two of them:
-            //
-            // * CONTEXT_INGEST is third-party data. It must cross the data-only ingress
-            //   lane and can never be promoted into owner authority.
-            // * SESSION_ENVELOPE belongs to VanHermesSessionManager. The generic replayer
-            //   must leave it untouched so process-death recovery can restore it.
-            // * everything else is owner-authored work and may use /v1/commands.
-            //
-            // The old branch removed both first categories. Because application startup
-            // starts this replayer before the session manager restores its outbox, a
-            // durable session command could be deleted from disk before restore read it.
             when (ReplayDispatchPolicy.route(cmd.kind)) {
-                QueueReplayRoute.SESSION_OUTBOX -> continue
+                QueueReplayRoute.SESSION_OUTBOX, QueueReplayRoute.UNKNOWN_HELD -> continue
                 QueueReplayRoute.CAPTURED_CONTEXT -> {
-                    try {
-                        val payload = JSONObject(cmd.payloadJson)
-                        gateway.ingestCapturedContext(payload)
-                        queue.remove(cmd.id)
-                        sent += 1
-                        degraded.markWorking("gateway")
-                    } catch (ex: Exception) {
-                        queue.markAttempt(cmd.id, ex.message)
-                        degraded.markBroken(
-                            "gateway",
-                            ex.message ?: "context_ingest_failed",
-                            RestoreAction.RETRY_CONNECTION,
-                        )
+                    // Captured data's existing owner applies its own expiry; generic
+                    // cleanup never makes that decision on behalf of this branch.
+                    if (cmd.isExpired()) {
+                        queue.finishCapturedContext(cmd, expiredOnly = true)
+                        continue
                     }
+                    try {
+                        transport.ingestCapturedContext(JSONObject(cmd.payloadJson))
+                        queue.finishCapturedContext(cmd)
+                        sent += 1
+                    } catch (cancelled: CancellationException) { throw cancelled }
+                    catch (ex: Exception) { failed = true }
                     continue
                 }
                 QueueReplayRoute.OWNER_COMMAND -> Unit
             }
+            val claimed = queue.claimGeneric(cmd.id, queue.genericRevision(cmd)) ?: continue
+            val claim = claimed.genericClaimId ?: continue
+            var prepared: String? = null
             try {
-                val payload = JSONObject(cmd.payloadJson)
-                // No fallback to the serialized envelope. A queued command without command
-                // text is malformed, not an invitation to send the whole payload.
-                val text = ReplayDispatchPolicy.commandTextOrNull(payload)
-                if (text == null) {
-                    queue.remove(cmd.id)
-                    continue
-                }
-                val action = payload.optString("action_class", "A1")
-                val project = if (payload.has("project_id")) payload.optString("project_id") else null
-                val result = gateway.dispatchCommand(
-                    text = text,
-                    actionClass = action,
-                    projectId = project?.takeIf { it.isNotBlank() },
-                    idempotencyKey = cmd.idempotencyKey,
-                    issuedAtUnix = cmd.createdAtEpochMs / 1000L,
-                )
-                val status = result.optString("status")
-                if (
-                    status == "expired" ||
-                    status == "accepted" ||
-                    status == "denied" ||
-                    status == "degraded" ||
-                    status == "approval_required" ||
-                    status == "conflict" ||
-                    status == "rejected_untrusted"
-                ) {
-                    queue.remove(cmd.id)
-                    sent += 1
+                val payload = JSONObject(claimed.payloadJson)
+                val text = ReplayDispatchPolicy.commandTextOrNull(payload) ?: error("Original command text unavailable")
+                val result = transport.dispatch(claimed, text,
+                    onPrepared = { exact -> queue.recordGenericPrepared(claimed.id, claim, exact); prepared = exact },
+                    beforeDispatch = {
+                        queue.recordGenericPrepared(claimed.id, claim, prepared ?: error("Original command unavailable"))
+                    })
+                if (result.optString("status") == "in_flight") {
+                    queue.recordGenericUnknown(claimed.id, claim, "Original command result pending")
+                    failed = true
                 } else {
-                    queue.markAttempt(cmd.id, status)
+                    queue.recordGenericReceipt(claimed.id, claim, result.toString())
+                    sent += 1
                 }
-                degraded.markWorking("gateway")
+            } catch (cancelled: CancellationException) {
+                queue.recordGenericUnknown(claimed.id, claim, "Delivery cancelled; original outcome unconfirmed")
+                throw cancelled
             } catch (ex: Exception) {
-                queue.markAttempt(cmd.id, ex.message)
-                degraded.markBroken("gateway", ex.message ?: "replay_failed", RestoreAction.RETRY_CONNECTION)
+                queue.recordGenericUnknown(claimed.id, claim, "Original outcome unconfirmed")
+                failed = true
             }
         }
+        synchronized(lock) { failures = if (failed) failures + 1 else 0 }
+        if (failed) degraded.markBroken("gateway", "Original queued outcomes need recovery", RestoreAction.RETRY_CONNECTION)
+        else degraded.markWorking("gateway")
         return sent
     }
 }
@@ -181,6 +173,7 @@ enum class QueueReplayRoute {
     OWNER_COMMAND,
     CAPTURED_CONTEXT,
     SESSION_OUTBOX,
+    UNKNOWN_HELD,
 }
 
 object ReplayDispatchPolicy {
@@ -195,7 +188,10 @@ object ReplayDispatchPolicy {
     fun route(kind: String): QueueReplayRoute = when (kind) {
         CommandKind.CONTEXT_INGEST.name -> QueueReplayRoute.CAPTURED_CONTEXT
         CommandKind.SESSION_ENVELOPE.name -> QueueReplayRoute.SESSION_OUTBOX
-        else -> QueueReplayRoute.OWNER_COMMAND
+        CommandKind.ATTENTION.name, CommandKind.DECISION.name, CommandKind.TASK.name,
+        CommandKind.REMINDER.name, CommandKind.MEMORY.name, CommandKind.CONNECTION.name,
+        CommandKind.HERMES_DISPATCH.name -> QueueReplayRoute.OWNER_COMMAND
+        else -> QueueReplayRoute.UNKNOWN_HELD
     }
 
     /** True only for queue kinds that represent an owner-authored command. */
@@ -209,4 +205,30 @@ object ReplayDispatchPolicy {
      */
     fun commandTextOrNull(payload: JSONObject): String? =
         payload.optString("text", "").takeIf { it.isNotBlank() }
+}
+
+
+/** Existing gateway transport seam; owns no queue, retry identity or execution authority. */
+interface QueueReplayTransport {
+    fun isEnrolled(): Boolean
+    suspend fun ingestCapturedContext(payload: JSONObject)
+    suspend fun commandStatus(commandId: String, profile: String, device: String): JSONObject
+    suspend fun dispatch(command: com.dial.van.queue.QueuedCommand, text: String,
+                         onPrepared: (String) -> Unit, beforeDispatch: () -> Unit): JSONObject
+}
+
+private class GatewayQueueReplayTransport(private val gateway: VanGatewayClient) : QueueReplayTransport {
+    override fun isEnrolled() = gateway.isEnrolled()
+    override suspend fun ingestCapturedContext(payload: JSONObject) { gateway.ingestCapturedContext(payload) }
+    override suspend fun commandStatus(commandId: String, profile: String, device: String) = gateway.originalCommandStatus(commandId, profile, device)
+    override suspend fun dispatch(command: com.dial.van.queue.QueuedCommand, text: String,
+                                  onPrepared: (String) -> Unit, beforeDispatch: () -> Unit): JSONObject {
+        val payload = JSONObject(command.payloadJson)
+        return gateway.dispatchCommand(text = text, actionClass = command.actionClassEnum().name,
+            projectId = payload.optString("project_id").takeIf { it.isNotBlank() },
+            idempotencyKey = command.idempotencyKey, issuedAtUnix = command.createdAtEpochMs / 1000,
+            expiresAtUnix = command.expiresAtEpochMs / 1000,
+            noStaleReplay = command.replayPolicyEnum() == com.dial.van.queue.ReplayPolicy.NO_STALE_REPLAY,
+            onPreparedCommand = onPrepared, beforeDispatch = beforeDispatch)
+    }
 }

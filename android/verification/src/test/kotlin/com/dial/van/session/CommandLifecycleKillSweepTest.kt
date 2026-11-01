@@ -59,6 +59,12 @@ class CommandLifecycleKillSweepTest {
                 .map { json.decodeFromString(QueuedCommand.serializer(), it) }
                 .filter { it.kind == kind && !it.isExpired(NOW) }
                 .sortedBy { it.createdAtEpochMs }
+
+        override fun recoveryRecordsOfKind(kind: String): List<QueuedCommand> =
+            bytes.values
+                .map { json.decodeFromString(QueuedCommand.serializer(), it) }
+                .filter { it.kind == kind }
+                .sortedBy { it.createdAtEpochMs }
     }
 
     /** What the Gateway ended up holding, and what the owner ended up being told. */

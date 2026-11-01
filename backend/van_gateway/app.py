@@ -1601,24 +1601,14 @@ def create_app() -> FastAPI:
     app.include_router(build_voice_router(bound_speech))
 
     async def _resume_snapshot(
-        *, device_id: str, van_session_id: str, pending_command_ids: list[str]
+        *, device_id: str, van_session_id: str, pending_command_ids: list[str],
+        original_command_references: list[dict] | None = None,
     ) -> dict:
-        """§20.11 — what the Gateway authoritatively knows about what the client lost.
+        """Read original ownership and results; missing evidence never proves absence.
 
-        Answered from two places, because the Gateway knows a thing in two ways and the
-        client cannot tell which applies. A mission is the richer answer and is preferred.
-        Failing that, `van_session_messages` is the §20.12 admission table. A
-        completed result settles its message; an admitted row without a result
-        remains RESULT_PENDING and must not silently leave the device outbox.
-
-        Consulting only the mission table made every answer for an admitted-but-missionless
-        message `UNKNOWN`, which the client correctly reads as *resend*. The command was
-        not lost, but it was re-sent on every single resume for the life of the session,
-        because nothing the client could ever receive would settle it.
-
-        `UNKNOWN` is emitted rather than the key omitted: the client treats both as
-        resend, and sending it makes "I looked and I do not have this" a statement the
-        client can be tested against rather than an absence it has to infer.
+        The current endpoint retains its ordinary current-device proof. Historical
+        signature verification below consumes no old nonce and grants no execution
+        authority, even when the original request has expired.
         """
         states: dict[str, str] = {}
         for identity in pending_command_ids[:50]:
@@ -1640,11 +1630,23 @@ def create_app() -> FastAPI:
             )
             states[identity] = ("RESULT_PENDING" if row is not None and row["result_json"] is None else
                                 row["admitted_state"] if row is not None else "UNKNOWN")
+        original_results = {}
+        if original_command_references:
+            from van_gateway.session.command_reference import read_original_commands
+            original_states, original_results = await read_original_commands(
+                store=store, auth=auth, sessions=van_sessions,
+                device_id=device_id, van_session_id=van_session_id,
+                pending_command_ids=pending_command_ids,
+                references=original_command_references, read_owned_result=_read_command_result,
+                missions=missions, actions=owner_runtime.actions,
+            )
+            states.update(original_states)
         cursor_row = await store.fetchone(
             "SELECT last_seq FROM event_cursors WHERE device_id = ?", (device_id,)
         )
         return {
             "command_states": states,
+            "original_command_results": original_results,
             "authoritative_event_cursor": int(cursor_row["last_seq"]) if cursor_row else 0,
             # §21.16 — where the owner actually got to in the spoken answer. Absent when
             # there is nothing in flight, which is the ordinary case.
@@ -1829,6 +1831,33 @@ def create_app() -> FastAPI:
         # permissions, reminders and privacy controls as those routers grew.
         return True
 
+    async def current_device_mutation_policy(device_id: str, *, certifying: bool = False):
+        """Existing owner-policy facts only; no proof, nonce or mutation grant."""
+        facts = {"binding_required": settings.require_device_binding,
+                 "proof_required": False, "eligible": False, "reason": None}
+        if owner_device_bindings is None:
+            facts.update(eligible=not settings.require_device_binding,
+                         reason="owner_device_binding_unconfigured" if settings.require_device_binding else None)
+            return facts, None, 503
+        own_binding = await owner_device_bindings.for_device(device_id)
+        if own_binding is not None and own_binding.status.value != "ACTIVE":
+            facts["reason"] = "device_binding_not_active"
+            return facts, None, 403
+        binding = await owner_device_bindings.active()
+        if binding is None:
+            facts.update(eligible=not settings.require_device_binding,
+                         reason="device_not_bound" if settings.require_device_binding else None)
+            return facts, None, 403
+        facts["proof_required"] = True
+        if binding.device_id != device_id:
+            facts["reason"] = "device_not_owner_device"
+            return facts, None, 403
+        if settings.require_device_binding and not binding.attestation_chain_verified and not certifying:
+            facts["reason"] = "device_attestation_recertification_required"
+            return facts, binding, 403
+        facts["eligible"] = True
+        return facts, binding, 200
+
     async def enforce_device_proof(request: Request, device_id: str) -> JSONResponse | None:
         """Refuse a privileged request from a bound device that did not sign it.
 
@@ -1841,30 +1870,12 @@ def create_app() -> FastAPI:
         `/v1/device-binding/status` reports `bound: false`, and `settings.require_device_
         binding` turns the fallback off for a deployment that has finished enrolling.
         """
-        if owner_device_bindings is None:
-            if settings.require_device_binding:
-                return JSONResponse(
-                    status_code=503,
-                    content={"detail": "owner_device_binding_unconfigured"},
-                )
+        policy, binding, refusal_status = await current_device_mutation_policy(
+            device_id, certifying=request.url.path == "/v1/device-binding/certify")
+        if not policy["eligible"]:
+            return JSONResponse(status_code=refusal_status, content={"detail": policy["reason"]})
+        if not policy["proof_required"]:
             return None
-        # Once *any* device is bound, the owner has one device and this is not a question
-        # about the caller: a second paired phone asking to be treated as unbound is the
-        # downgrade §0E.1 D5 forbids. A first version asked `for_device(device_id)`, so a
-        # second paired device skipped the gate entirely by never having enrolled — the
-        # proof was mandatory only for the device that had already proved itself.
-        binding = await owner_device_bindings.active()
-        if binding is None:
-            if settings.require_device_binding:
-                return JSONResponse(status_code=403, content={"detail": "device_not_bound"})
-            return None
-        if binding.device_id != device_id:
-            return JSONResponse(
-                status_code=403, content={"detail": "device_not_owner_device"}
-            )
-        if (settings.require_device_binding and not binding.attestation_chain_verified
-                and request.url.path != "/v1/device-binding/certify"):
-            return JSONResponse(status_code=403, content={"detail": "device_attestation_recertification_required"})
 
         signature_b64 = request.headers.get("X-Van-Device-Proof", "")
         issued_at_raw = request.headers.get("X-Van-Device-Proof-Issued-At", "")
@@ -2634,11 +2645,30 @@ def create_app() -> FastAPI:
         device_id = getattr(request.state, "van_device_id", None)
         if not device_id:
             raise HTTPException(status_code=403, detail="device_identity_required")
+        policy, _, refusal_status = await current_device_mutation_policy(device_id)
+        proof_supplied = bool(request.headers.get("X-Van-Device-Proof") or request.headers.get("X-Van-Device-Proof-Issued-At"))
+        if proof_supplied:
+            if not policy["eligible"]:
+                return JSONResponse(status_code=refusal_status, content={"detail": policy["reason"]}, headers={"Cache-Control": "no-store"})
+            if not policy["proof_required"]:
+                return JSONResponse(status_code=401, content={"detail": "device_not_bound"}, headers={"Cache-Control": "no-store"})
+            refusal = await enforce_device_proof(request, device_id)
+            if refusal is not None:
+                refusal.headers["Cache-Control"] = "no-store"
+                return refusal
+            policy, _, _ = await current_device_mutation_policy(device_id)
+        current_proof = bool(getattr(request.state, "van_device_proved", False))
+
+        def current_response(value):
+            return JSONResponse(content={**value, "current_request_proof_verified": current_proof,
+                "current_request_proof_issued_at_ms": int(request.headers["X-Van-Device-Proof-Issued-At"]) if current_proof else None},
+                headers={"Cache-Control": "no-store", "Pragma": "no-cache",
+                         "Vary": "X-Van-Device-Token, X-Van-Device-Proof, X-Van-Device-Proof-Issued-At"})
         if owner_device_bindings is None:
-            return {"configured": False, "bound": False, "reason": "binding_unconfigured"}
+            return current_response({"configured": False, "bound": False, "reason": "binding_unconfigured", "owner_mutation_policy": policy})
         binding = await owner_device_bindings.for_device(device_id)
         if binding is None:
-            return {"configured": True, "bound": False}
+            return current_response({"configured": True, "bound": False, "owner_mutation_policy": policy})
         approval_fingerprint = None
         try:
             paired = await auth.require_device(device_id)
@@ -2651,8 +2681,9 @@ def create_app() -> FastAPI:
                     serialization.Encoding.DER, serialization.PublicFormat.SubjectPublicKeyInfo)).hexdigest()
             except (ValueError, TypeError):
                 pass
-        return {
+        return current_response({
             "configured": True,
+            "owner_mutation_policy": policy,
             "bound": binding.status.value == "ACTIVE",
             "device_id": device_id,
             "binding_id": binding.binding_id,
@@ -2665,7 +2696,7 @@ def create_app() -> FastAPI:
             "bound_at_ms": binding.bound_at_ms,
             "attestation_chain_verified": binding.attestation_chain_verified,
             "last_proof_at_ms": binding.last_proof_at_ms,
-        }
+        })
 
     def _rebind_error(exc):
         status = 404 if exc.reason == "rebind_operation_unknown" else 409

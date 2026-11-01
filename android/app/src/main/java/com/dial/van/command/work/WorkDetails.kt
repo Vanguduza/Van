@@ -109,20 +109,20 @@ internal fun ReconfirmationPanel(app: VanApplication) {
                             scope.launch {
                                 val accepted = withContext(Dispatchers.IO) { app.vanSession.reconfirmAndFlush(request.messageId) }
                                 notice = if (accepted) {
-                                    "Confirmed. VAN will send it on the current path, or the next one that becomes available."
+                                    "Confirmed. VAN will recover this original operation on an available path."
                                 } else {
-                                    "That queued command is no longer waiting for confirmation."
+                                    "The original queue state changed. Review current details."
                                 }
                                 refresh()
                             }
                         }) { Text("Confirm") }
-                        OutlinedButton(onClick = {
+                        OutlinedButton(enabled = !request.recoveryOnly, onClick = {
                             scope.launch {
                                 val cancelled = withContext(Dispatchers.IO) { app.vanSession.cancelReconfirmation(request.messageId) }
                                 notice = if (cancelled) {
                                     "Cancelled. VAN will not send that queued command."
                                 } else {
-                                    "That queued command is no longer waiting for confirmation."
+                                    "The original queue state changed. Review current details."
                                 }
                                 refresh()
                             }

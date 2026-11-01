@@ -9968,6 +9968,63 @@
         ],
         "title": "OriginChannel"
       },
+      "OriginalCommandReference": {
+        "properties": {
+          "van_session_id": {
+            "type": "string",
+            "maxLength": 128,
+            "minLength": 1,
+            "title": "Van Session Id"
+          },
+          "message_id": {
+            "type": "string",
+            "maxLength": 128,
+            "minLength": 1,
+            "title": "Message Id"
+          },
+          "command_id": {
+            "type": "string",
+            "maxLength": 128,
+            "minLength": 1,
+            "title": "Command Id"
+          },
+          "device_id": {
+            "type": "string",
+            "maxLength": 128,
+            "minLength": 1,
+            "title": "Device Id"
+          },
+          "profile_id": {
+            "type": "string",
+            "maxLength": 128,
+            "minLength": 1,
+            "title": "Profile Id"
+          },
+          "idempotency_key": {
+            "type": "string",
+            "maxLength": 128,
+            "minLength": 1,
+            "title": "Idempotency Key"
+          },
+          "command_request": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Command Request"
+          }
+        },
+        "type": "object",
+        "required": [
+          "van_session_id",
+          "message_id",
+          "command_id",
+          "device_id",
+          "profile_id",
+          "idempotency_key",
+          "command_request"
+        ],
+        "title": "OriginalCommandReference",
+        "description": "Original evidence for lookup only, never a replacement execution request."
+      },
       "OwnerApprovalProof": {
         "properties": {
           "challenge_id": {
@@ -12097,6 +12154,14 @@
             },
             "type": "array",
             "title": "Pending Command Ids"
+          },
+          "original_command_references": {
+            "items": {
+              "$ref": "#/components/schemas/OriginalCommandReference"
+            },
+            "type": "array",
+            "maxItems": 50,
+            "title": "Original Command References"
           },
           "active_turn_id": {
             "anyOf": [

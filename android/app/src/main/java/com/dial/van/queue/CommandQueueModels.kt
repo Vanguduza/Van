@@ -107,6 +107,21 @@ data class QueuedCommand(
 
     /** The owner turn this belongs to, so a resumed session can group it. */
     val turnId: String? = null,
+
+    // LAC-234: only the local producer may establish UNSENT for generic owner
+    // work. Legacy rows and foreign-owner session/context records are never
+    // upgraded merely because they are present in the canonical queue.
+    val genericOwner: QueueOwnerScope? = null,
+    val genericDeliveryState: String? = null,
+    val genericClaimId: String? = null,
+    val genericClaimOwner: QueueOwnerScope? = null,
+    val genericPreparedBody: String? = null,
+    val genericReceiptJson: String? = null,
+    /** Session-owner delivery evidence; null is legacy/ambiguous, never guessed. */
+    val sessionNeverDispatched: Boolean? = null,
+    val sessionProfileId: String? = null,
+    val sessionOnlyOrigin: Boolean? = null,
+    val sessionHttpPrepared: Boolean? = null,
 ) {
     fun isExpired(nowMs: Long = System.currentTimeMillis()): Boolean = nowMs >= expiresAtEpochMs
 
@@ -170,6 +185,10 @@ interface OutboxRecordStore {
 
     /** Every non-expired record of this kind, oldest first. */
     fun recordsOfKind(kind: String): List<QueuedCommand>
+
+    /** All original records for this owning recovery policy, including expired metadata.
+     * No default may silently filter them, and this read grants no replay authority. */
+    fun recoveryRecordsOfKind(kind: String): List<QueuedCommand>
 }
 
 data class QueueEnqueueRequest(
@@ -180,4 +199,58 @@ data class QueueEnqueueRequest(
     val replayPolicy: ReplayPolicy = ReplayPolicy.NORMAL,
     val idempotencyKey: String? = null,
     val ttlMs: Long = COMMAND_QUEUE_DEFAULT_TTL_MS,
+)
+
+
+/** A current local identity/authentication witness; this is not an issued grant. */
+@Serializable
+data class QueueOwnerScope(
+    val profileId: String,
+    val deviceId: String,
+    val authContext: String,
+    val observedUntilMs: Long,
+) {
+    fun samePrincipal(other: QueueOwnerScope): Boolean = profileId == other.profileId && deviceId == other.deviceId
+    fun sameActor(other: QueueOwnerScope): Boolean = samePrincipal(other) && authContext == other.authContext
+    fun current(nowMs: Long): Boolean = profileId.isNotBlank() && deviceId.isNotBlank() && authContext.isNotBlank() && nowMs < observedUntilMs
+}
+
+@Serializable
+data class QueueRestoreItem(val id: String, val revision: String)
+
+/** Exact reviewed local batch. The token seals this inert request with the existing queue key. */
+@Serializable
+data class QueueRestoreRequest(
+    val operationId: String,
+    val owner: QueueOwnerScope,
+    val items: List<QueueRestoreItem>,
+    val revision: String,
+    val issuedAtMs: Long,
+    val deadlineMs: Long,
+    val requestToken: String = "",
+)
+
+@Serializable
+data class QueueRestoreResult(
+    val operationId: String,
+    val owner: QueueOwnerScope,
+    val revision: String,
+    val state: String,
+    val selectedIds: List<String>,
+    val removedIds: List<String>,
+    val reason: String? = null,
+    val completedAtMs: Long,
+    val requestDeadlineMs: Long,
+    val externalCancellationClaimed: Boolean = false,
+)
+
+@Serializable
+data class QueueRestoreRecord(val request: QueueRestoreRequest, val result: QueueRestoreResult? = null)
+
+@Serializable
+data class QueueRestoreInventory(
+    val eligibleUnsent: Int,
+    val heldGeneric: Int,
+    val foreignOwned: Int,
+    val unreadable: Int,
 )

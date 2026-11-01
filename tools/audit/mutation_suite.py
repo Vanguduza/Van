@@ -17,7 +17,7 @@ ALL = [
  # --- checkpoint 39: a durable write must not run on the thread that draws ----------
  (["../tests/contracts/test_encrypted_queue_writes_are_off_the_main_thread.py"], [
    ("../android/app/src/main/java/com/dial/van/queue/EncryptedCommandQueue.kt",
-    ".commit()", ".apply()",
+    '            if (!editor.commit()) {', '            editor.apply()\n            if (false) {',
     "C39 the outbox says saved before the bytes are down"),
    ("../android/app/src/main/java/com/dial/van/notification/VanNotificationListenerService.kt",
     "        app.appScope.launch(Dispatchers.IO) {\n", "",
@@ -26,10 +26,8 @@ ALL = [
    # Keystore and cannot be executed here, so the property is checked by shape. A first
    # version put this in the Gradle group and it survived — nothing there runs the file.
    ("../android/app/src/main/java/com/dial/van/queue/EncryptedCommandQueue.kt",
-    "        val editor = indexPrefs.edit()\n"
-    "        for (id in listIds()) editor.remove(blobKey(id))\n"
-    "        editor.putString(KEY_INDEX, \"\").commit()",
-    "        for (id in listIds()) remove(id)",
+    '            val editor = indexPrefs.edit()\n            for (id in listIds()) editor.remove(blobKey(id))',
+    '            for (id in listIds()) remove(id)\n            val editor = indexPrefs.edit()',
     "C39 discarding the queue is one synchronous write per command, from a button"),
  ]),
  # --- checkpoint 38: two languages, one question about the same bytes ---------------
@@ -1281,18 +1279,16 @@ KOTLIN = [
   "        Unit",
   "C36 a delivered command is never forgotten, and is re-sent after every restart"),
  (f"{APP_KT}/session/EncryptedSessionOutboxStore.kt",
-  "        records.recordsOfKind(OutboxPersistence.SESSION_KIND)",
-  "        records.recordsOfKind(\"COMMAND\")",
+  '        records.recoveryRecordsOfKind(OutboxPersistence.SESSION_KIND)',
+  '        records.recoveryRecordsOfKind("COMMAND")',
   "C36 a restart finds an empty outbox and the owner's queued work is gone"),
  ('android/app/src/main/java/com/dial/van/session/SessionReconciliation.kt',
- '        if (state == null || state == UNKNOWN || state == RESULT_PENDING) Verdict.RESEND else '
- 'Verdict.SETTLE',
- '        if (state == null || state == RESULT_PENDING) Verdict.RESEND else Verdict.SETTLE',
+ '        else -> Verdict.HOLD',
+ '        else -> Verdict.SETTLE',
  'C36 a command the Gateway has never heard of is treated as delivered'),
  ('android/app/src/main/java/com/dial/van/session/SessionReconciliation.kt',
- '        if (state == null || state == UNKNOWN || state == RESULT_PENDING) Verdict.RESEND else '
- 'Verdict.SETTLE',
- '        Verdict.RESEND',
+ '        in ownedResults -> Verdict.SETTLE',
+ '        in ownedResults -> Verdict.RESEND',
  'C36 a command the Gateway is already running is sent a second time'),
  (f"{APP_KT}/session/SessionReconciliation.kt",
   "        commandId?.takeIf { it.isNotBlank() && it != messageId } ?: messageId",

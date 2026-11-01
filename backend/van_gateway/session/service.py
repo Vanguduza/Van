@@ -168,6 +168,7 @@ class VanHermesSessionService:
         *,
         path: TransportPathDescriptor | None = None,
         command_states: dict[str, str] | None = None,
+        original_command_results: dict[str, dict] | None = None,
         authoritative_event_cursor: int | None = None,
         response_state: dict | None = None,
         now_ms: int | None = None,
@@ -216,6 +217,7 @@ class VanHermesSessionService:
             # event_id makes that harmless it also makes it pointless.
             replay_from_seq=request.last_event_seq + 1,
             command_states=dict(command_states or {}),
+            original_command_results=dict(original_command_results or {}),
             response_state=response_state,
         )
 

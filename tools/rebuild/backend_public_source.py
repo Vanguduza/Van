@@ -173,6 +173,9 @@ def main():
     if args.command == "verify-shards":
         if not args.expected_commit or not args.job_result:
             a.error("verify-shards requires expected commit and actual prerequisite job result")
+        # The verifier must not create its own repository bytecode before its
+        # strict input check. Existing/foreign caches remain forbidden inputs.
+        sys.dont_write_bytecode = True
         sys.path.insert(0, str(ROOT))
         from tools.rebuild.public_source_shards import verify_shards
         result = verify_shards(args.output, args.expected_commit, args.job_result,

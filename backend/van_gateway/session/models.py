@@ -198,6 +198,7 @@ class ResumeResult(BaseModel):
     authoritative_event_cursor: int
     replay_from_seq: int
     command_states: dict[str, str] = Field(default_factory=dict)
+    original_command_results: dict[str, dict] = Field(default_factory=dict)
     response_state: dict | None = None
     refusal: str | None = None
 

@@ -193,4 +193,100 @@ class VanCommandControllerTest {
             .put("resolved_action_id", "message.send").put("effective_action_class", "A4")
             .put("resolved_parameters", JSONObject().put("recipient", "recipient@example.test"))
     }
+    @Test fun `recovered original lookup preserves running rather than declaring native completion`() {
+        val scope = kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.SupervisorJob())
+        val controller = VanCommandController(VanGatewayClient(), scope)
+        controller.reportRecoveredOriginal(JSONObject().put("result", JSONObject().put("command_id", "original")
+            .put("status", "accepted")).put("owner_result", JSONObject().put("mission_state", "RUNNING")))
+        // Existing RUNNING -> WORKING -> ACCEPTED projection is preserved; this is not native success.
+        assertEquals(com.dial.van.status.VanCommandStatus.ACCEPTED, controller.state.value.messages.single().status)
+        assertEquals("original", controller.state.value.messages.single().commandId)
+        controller.reportRecoveredOriginal(JSONObject().put("result", JSONObject().put("command_id", "original")
+            .put("status", "accepted")).put("owner_result", JSONObject().put("mission_state", "RUNNING")))
+        assertEquals(1, controller.state.value.messages.size)
+        scope.coroutineContext[kotlinx.coroutines.Job]?.cancel()
+    }
+    @Test fun `recovered original refusal remains refused instead of accepted or completed`() {
+        val scope = kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.SupervisorJob())
+        val controller = VanCommandController(VanGatewayClient(), scope)
+        controller.reportRecoveredOriginal(JSONObject().put("result", JSONObject().put("command_id", "original-refusal")
+            .put("status", "denied")))
+        assertEquals(com.dial.van.status.VanCommandStatus.REFUSED, controller.state.value.messages.single().status)
+        scope.coroutineContext[kotlinx.coroutines.Job]?.cancel()
+    }
+
+    @Test fun `canonical original is owned before transport and post dispatch cancellation cannot lose it`() = runBlocking {
+        for (cancelled in listOf(false, true)) {
+            val f = Fixture(); val originals = CopyOnWriteArrayList<String>(); var transports = 0
+            try {
+                f.controller.storeOriginalForLater = { body, _, profile, attempted ->
+                    assertEquals("SOURCE-test-profile", profile); assertTrue(attempted)
+                    originals += body.toString(); true
+                }
+                f.gateway.onCommand = { body ->
+                    transports++
+                    assertEquals(1, originals.size)
+                    assertEquals(body.toString(), originals.single())
+                    if (cancelled) throw java.util.concurrent.CancellationException("SOURCE after dispatch")
+                    throw IOException("SOURCE reply lost")
+                }
+                f.controller.submitText("read status", VanCommandSource.CHAT)
+                f.submitted()
+                assertEquals(1, transports); assertEquals(1, originals.size)
+                assertEquals(f.gateway.preparedCommands.single(), originals.single())
+                assertTrue(f.saved.isEmpty(), "No second legacy save or new original")
+                assertEquals(VanCommandStatus.QUEUED, f.controller.state.value.messages.last().status)
+                assertTrue(f.controller.state.value.messages.last().text.contains("unconfirmed"))
+            } finally { f.close() }
+        }
+    }
+    @Test fun `configured canonical recovery refusal or exception prevents HTTP without fallback`() = runBlocking {
+        for (throws in listOf(false, true)) {
+            val f = Fixture(); var writes = 0; var transports = 0
+            try {
+                f.controller.storeOriginalForLater = { _, _, _, _ -> writes++; if (throws) error("SOURCE disk failure") else false }
+                f.gateway.onCommand = { transports++; error("must not dispatch") }
+                f.controller.submitText("read status", VanCommandSource.CHAT); f.submitted()
+                assertEquals(1, writes); assertEquals(0, transports); assertTrue(f.saved.isEmpty())
+                assertEquals(VanCommandStatus.REFUSED, f.controller.state.value.messages.last().status)
+            } finally { f.close() }
+        }
+    }
+    @Test fun `cancellation after durable reservation but before HTTP refuses without losing the original`() = runBlocking {
+        val f = Fixture(); var writes = 0; var transports = 0
+        try {
+            f.controller.storeOriginalForLater = { _, _, _, _ -> writes++; f.scope.cancel(); true }
+            f.gateway.onCommand = { transports++; error("must not dispatch") }
+            f.controller.submitText("read status", VanCommandSource.CHAT)
+            await { !f.controller.state.value.submitting && writes == 1 }
+            assertEquals(0, transports); assertTrue(f.saved.isEmpty())
+            assertEquals(VanCommandStatus.REFUSED, f.controller.state.value.messages.last().status)
+        } finally { f.close() }
+    }
+    @Test fun `owner profile or device switch during canonical reservation prevents HTTP`() = runBlocking {
+        for (device in listOf(false, true)) {
+            val f = Fixture(); var writes = 0; var transports = 0
+            try {
+                f.controller.storeOriginalForLater = { _, _, _, _ ->
+                    writes++; if (device) f.gateway.selectedDevice = "foreign" else f.gateway.selectedProfile = "foreign"; true
+                }
+                f.gateway.onCommand = { transports++; error("must not dispatch") }
+                f.controller.submitText("read status", VanCommandSource.CHAT); f.submitted()
+                assertEquals(1, writes); assertEquals(0, transports)
+                assertEquals(VanCommandStatus.REFUSED, f.controller.state.value.messages.last().status)
+            } finally { f.close() }
+        }
+    }
+    @Test fun `optional transient direct HTTP and never storable classes retain live dispatch`() = runBlocking {
+        for (action in listOf("A1", "A4", "A5")) {
+            val f = Fixture()
+            try {
+                f.controller.storeForLater = null
+                if (action != "A1") f.controller.storeOriginalForLater = { _, _, _, _ -> error("must not store A4 or A5") }
+                f.controller.submit(VanOwnerCommand("read status", VanCommandSource.CHAT, actionClass = action)); f.submitted()
+                assertEquals(1, f.gateway.preparedCommands.size); assertEquals(VanCommandStatus.ACCEPTED, f.controller.state.value.messages.last().status)
+            } finally { f.close() }
+        }
+    }
+
 }

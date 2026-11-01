@@ -25,6 +25,18 @@ LEGACY_GENERATION = "c36d6a21bea1618707e353912d3f5b9508eca5ba"
 REGISTRIES = frozenset("registries/"+name+".json" for name in (
     "owner_endpoints", "owner_endpoint_schemas", "owner_features", "owner_screens"))
 REVIEWED_CITATION_REPLACEMENTS = {
+    ("android/app/src/main/java/com/dial/van/session/VanHermesSessionManager.kt",
+     "        if (live != null && live.send(envelope.toString())) {"):
+     "        if (deliveryAttempted && live!!.send(envelope.toString())) {",
+    ("android/app/src/main/java/com/dial/van/gateway/QueueReplayer.kt",
+     "                        gateway.ingestCapturedContext(payload)"):
+     "    override suspend fun ingestCapturedContext(payload: JSONObject) { gateway.ingestCapturedContext(payload) }",
+    ("android/app/src/main/java/com/dial/van/gateway/QueueReplayer.kt",
+     "    private val gateway: VanGatewayClient,"):
+     "private class GatewayQueueReplayTransport(private val gateway: VanGatewayClient) : QueueReplayTransport {",
+    ("android/app/src/main/java/com/dial/van/gateway/QueueReplayer.kt",
+     "                val result = gateway.dispatchCommand("):
+     "        return gateway.dispatchCommand(text = text, actionClass = command.actionClassEnum().name,",
     ("android/app/src/main/java/com/dial/van/command/connected/ConnectedRoute.kt",
      "                    val outcome = ConnectedReadback.revoke(request = { app.gatewayClient.googleOwnerRevoke() }, read = { app.gatewayClient.googleStatus() })"):
      "                    val result = app.gatewayClient.googleOwnerRevoke(reviewed, reviewedProfile)",
@@ -50,6 +62,18 @@ REVIEWED_CITATION_REPLACEMENTS = {
 
 
 REVIEWED_CITATION_REASONS = {
+    ("android/app/src/main/java/com/dial/van/session/VanHermesSessionManager.kt",
+     "        if (live != null && live.send(envelope.toString())) {"):
+     "Retain the actual original session-envelope WebSocket send after the reviewed durable ownership and current-context boundary; no new transport or command authority.",
+    ("android/app/src/main/java/com/dial/van/gateway/QueueReplayer.kt",
+     "                        gateway.ingestCapturedContext(payload)"):
+     "Retain captured-context ingress through the same actual GatewayClient invocation in the private transport; third-party content is never promoted to an owner command by replay.",
+    ("android/app/src/main/java/com/dial/van/gateway/QueueReplayer.kt",
+     "    private val gateway: VanGatewayClient,"):
+     "The same existing GatewayClient receiver is now owned by the private replay transport; the compatibility constructor wires it into the same queue owner without granting new authority.",
+    ("android/app/src/main/java/com/dial/van/gateway/QueueReplayer.kt",
+     "                val result = gateway.dispatchCommand("):
+     "Preserve the existing queue's real gateway invocation through its reviewed transport seam, exact prepared original, current owner/profile fence and independent result readback; the seam grants no execution authority.",
     ('android/app/src/main/java/com/dial/van/command/connected/ConnectedRoute.kt', '                    val outcome = ConnectedReadback.revoke(request = { app.gatewayClient.googleOwnerRevoke() }, read = { app.gatewayClient.googleStatus() })'): 'Preserve the existing confirmed Workspace withdrawal using its reviewed generation/profile, durable original receipt and independent current connection read.',
     ('android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt', '    suspend fun googleOwnerRevoke(): JSONObject = withContext(Dispatchers.IO) {'): 'Bind the reviewed Workspace connection generation/caller/profile before persisted original delivery and readback.',
     ('android/app/src/main/java/com/dial/van/mission/MissionRepository.kt', '    suspend fun revokePermission(grantId: String) = client.revokePermission(grantId)'): 'Preserve repository forwarding with the exact caller-reviewed grant and captured profile; no fresh selection on confirmation.',

@@ -45,7 +45,8 @@ class VanHermesSessionManagerTest {
                 factory.sockets.last().resultPending(sent.messageId)
                 await { factory.sockets.size == index + 2 }
                 factory.sockets.last().open()
-                await { factory.sockets.last().sent.size == 1 }
+                await { gateway.resumeCalls.get() == index + 2 && manager.state.value.pathEpoch == index + 3 }
+                assertTrue(factory.sockets.last().sent.isEmpty())
             }
             assertTrue(httpSockets.isEmpty())
             assertEquals(3, factory.sockets.size)
@@ -203,7 +204,7 @@ class VanHermesSessionManagerTest {
         } finally { f.dispose() }
     }
 
-    @Test fun `ordinary reconnect resends unknown commands with original message and idempotency identities`() = runBlocking {
+    @Test fun `ordinary reconnect holds ambiguous commands with original message and idempotency identities`() = runBlocking {
         val f = Fixture()
         try {
             f.connected()
@@ -217,23 +218,29 @@ class VanHermesSessionManagerTest {
             assertEquals("2", second.request().header("X-Van-Device-Proof-Issued-At"))
             assertEquals("session_1", second.request().url.queryParameter("van_session_id"))
             second.open()
-            await { second.sent.size == 2 }
-            assertEquals(ids(first), ids(second))
-            first.sent.zip(second.sent).forEach { (before, after) ->
+            await { f.gateway.resumeCalls.get() == 2 && f.manager.state.value.pathEpoch == 3 }
+            assertTrue(second.sent.isEmpty())
+            val held = f.store.restore().map { it.second }
+            assertEquals(ids(first), held.map { JSONObject(it).getString("message_id") })
+            first.sent.zip(held).forEach { (before, after) ->
                 val a = JSONObject(before); val b = JSONObject(after)
                 assertEquals(a.getString("idempotency_key"), b.getString("idempotency_key"))
                 assertEquals(a.getString("payload_digest"), b.getString("payload_digest"))
-                assertTrue(b.getInt("path_epoch") > a.getInt("path_epoch"))
+                assertEquals(a.getInt("path_epoch"), b.getInt("path_epoch"))
             }
             assertEquals(1, f.gateway.openCalls.get())
         } finally { f.dispose() }
     }
 
-    @Test fun `failed resend retains every unvisited pending command for the next reconnect`() = runBlocking {
+    @Test fun `failed proven session owner recovery retains every unvisited original for the next reconnect`() = runBlocking {
         val f = Fixture()
         try {
+            f.gateway.onResume = { call, pending -> JSONObject().put("accepted", true).put("session_epoch", 1)
+                .put("new_path_epoch", call + 1).put("command_states", JSONObject().also { states ->
+                    pending.forEach { states.put(it, "UNKNOWN") }
+                }) }
             f.connected()
-            repeat(3) { f.manager.submit("command.submit", payload("command_$it"), "A1") }
+            repeat(3) { f.manager.submit("mission.message", payload("command_$it").put("mission_id", "SOURCE-owned-mission"), "A1") }
             val first = f.factory.sockets.single()
             first.fail()
             val second = f.nextSocket(2)
@@ -286,7 +293,7 @@ class VanHermesSessionManagerTest {
         } finally { f.dispose() }
     }
 
-    @Test fun `pending server result retains durable work and retries with its original identity`() = runBlocking {
+    @Test fun `pending server result requires exact original read or live acknowledgment without resubmission`() = runBlocking {
         val f = Fixture()
         try {
             f.connected()
@@ -301,12 +308,19 @@ class VanHermesSessionManagerTest {
             assertEquals(1, f.store.restore().size)
             val second = f.nextSocket(2)
             second.open()
-            await { second.sent.size == 1 }
-            assertEquals(ids(first), ids(second))
+            await { f.gateway.resumeCalls.get() == 2 && f.manager.state.value.pathEpoch == 3 }
+            assertTrue(second.sent.isEmpty())
+            assertEquals(listOf(sent.messageId), f.store.restore().map { it.first.messageId })
             assertEquals(JSONObject(first.sent.single()).getString("idempotency_key"),
-                JSONObject(second.sent.single()).getString("idempotency_key"))
+                JSONObject(f.store.restore().single().second).getString("idempotency_key"))
             assertEquals(1, f.store.restore().size)
-            second.acknowledge(sent.messageId)
+            f.gateway.onResume = { call, _ -> JSONObject().put("accepted", true).put("session_epoch", 1)
+                .put("new_path_epoch", call + 1).put("command_states", JSONObject().put("pending-result", "ADMITTED")) }
+            f.manager.requestRecovery()
+            await { f.gateway.resumeCalls.get() == 3 }
+            assertEquals(1, f.store.restore().size, "ID-only ADMITTED lacks the exact original reference")
+            assertTrue(second.sent.isEmpty())
+            second.acknowledge(sent.messageId) // Exact authenticated live ACK remains authoritative.
             assertTrue(f.store.restore().isEmpty())
             assertEquals(1, f.gateway.openCalls.get())
         } finally { f.dispose() }
@@ -326,13 +340,27 @@ class VanHermesSessionManagerTest {
     @Test fun `resume reconciliation removes a durable in flight entry before process restart`() = runBlocking {
         val f = Fixture()
         try {
-            f.manager.submit("command.submit", payload("admitted"), "A1")
+            val body = payload("admitted").put("device_id", f.gateway.deviceIdOrEmpty())
+                .put("idempotency_key", "SOURCE-original-inner-key").put("signature", "SOURCE-original-signature")
+                .put("issued_at_unix", System.currentTimeMillis() / 1000)
+            f.manager.submit("command.submit", body, "A1")
             f.connected()
             await { f.factory.sockets.single().sent.size == 1 }
             assertEquals(1, f.store.restore().size)
             f.gateway.onResume = { call, _ ->
+                val (entry, raw) = f.store.restore().single()
+                val reference = OriginalCommandReference.fromStored(entry, JSONObject(raw),
+                    f.gateway.permissionProfileIdentity(), f.gateway.deviceIdOrEmpty())!!
+                val receipt = JSONObject().put("reference", reference).put("request_hash", "a".repeat(64))
+                    .put("history_owner", "command_mission")
+                    .put("result", JSONObject().put("command_id", "admitted")
+                        .put("idempotency_key", "SOURCE-original-inner-key").put("status", "accepted")
+                        .put("mission_id", "SOURCE-original-mission"))
+                    .put("owner_result", JSONObject().put("command_id", "admitted")
+                        .put("mission_id", "SOURCE-original-mission").put("mission_state", "RUNNING"))
                 JSONObject().put("accepted", true).put("session_epoch", 1).put("new_path_epoch", call + 1)
-                    .put("command_states", JSONObject().put("admitted", "ADMITTED"))
+                    .put("command_states", JSONObject().put("admitted", "ORIGINAL_COMPLETED"))
+                    .put("original_command_results", JSONObject().put("admitted", receipt))
             }
             f.factory.sockets.single().fail()
             val second = f.nextSocket(2)
@@ -362,10 +390,12 @@ class VanHermesSessionManagerTest {
                     .put("session_epoch", 1).put("path_epoch", 1) }
                 restarted.connected()
                 val second = restarted.factory.sockets.single()
-                await { second.sent.size == 1 }
-                assertEquals(ids(first), ids(second))
+                await { restarted.gateway.resumeCalls.get() == 1 && restarted.manager.state.value.supervisor == SupervisorState.SINGLE_PATH }
+                assertTrue(second.sent.isEmpty())
+                val held = restarted.store.restore().single()
+                assertEquals(ids(first), listOf(held.first.messageId))
                 assertEquals(JSONObject(first.sent.single()).getString("idempotency_key"),
-                    JSONObject(second.sent.single()).getString("idempotency_key"))
+                    JSONObject(held.second).getString("idempotency_key"))
             } finally { restarted.dispose() }
         } finally { f.dispose() }
     }
@@ -383,12 +413,13 @@ class VanHermesSessionManagerTest {
                 restarted.gateway.onResume = { _, _ -> JSONObject().put("accepted", true)
                     .put("session_epoch", 1).put("new_path_epoch", 3).put("command_states", JSONObject()) }
                 restarted.connected()
-                await { restarted.factory.sockets.single().sent.size == 1 }
-                assertEquals(listOf(outcome.messageId), ids(restarted.factory.sockets.single()))
+                await { restarted.gateway.resumeCalls.get() == 1 && restarted.manager.state.value.pathEpoch == 3 }
+                assertTrue(restarted.factory.sockets.single().sent.isEmpty())
+                assertEquals(listOf(outcome.messageId), restarted.store.restore().map { it.first.messageId })
                 assertEquals(0, restarted.gateway.openCalls.get(), "resume the recorded session before opening another")
-                val sent = JSONObject(restarted.factory.sockets.single().sent.single())
+                val sent = JSONObject(restarted.store.restore().single().second)
                 assertEquals("session_1", sent.getString("van_session_id"))
-                assertEquals(3, sent.getInt("path_epoch"))
+                assertEquals(JSONObject(f.factory.sockets.single().sent.single()).getInt("path_epoch"), sent.getInt("path_epoch"))
             } finally { restarted.dispose() }
         } finally { f.dispose() }
     }

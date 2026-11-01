@@ -37,7 +37,10 @@ class VanGatewayClient {
     fun restoredSessionIdentity(): JSONObject? = restoredIdentity
 
     fun isPaired() = paired
-    fun deviceIdOrEmpty() = "test-device"
+    @Volatile var selectedDevice = "test-device"
+    @Volatile var selectedProfile = "SOURCE-test-profile"
+    fun deviceIdOrEmpty() = selectedDevice
+    fun permissionProfileIdentity() = selectedProfile
     fun ensureTlsIdentity() = Unit
     fun tlsTransport(url: String): Pair<SSLSocketFactory, X509TrustManager>? = null
     fun sessionSocketUrl(vanSessionId: String) = "wss://gateway.invalid/v1/session/ws?van_session_id=$vanSessionId"
@@ -57,6 +60,7 @@ class VanGatewayClient {
         turnId: String? = null, originChannel: String = "UI", expiresAtUnix: Long? = null,
         noStaleReplay: Boolean = false, speechEvidenceRef: String? = null, speakerEvidenceMilli: Int? = null,
         clientContext: Map<String, String> = emptyMap(), onPreparedCommand: (String) -> Unit = {},
+        beforeDispatch: () -> Unit = {},
     ): JSONObject {
         val call = commandCalls.incrementAndGet()
         val body = JSONObject().put("command_id", "prepared-command-$call").put("nonce", "prepared-nonce-$call")
@@ -69,6 +73,7 @@ class VanGatewayClient {
         val prepared = body.toString()
         preparedCommands += prepared
         onPreparedCommand(prepared)
+        beforeDispatch()
         return onCommand(body)
     }
     suspend fun sessionOpen(pathId: String, routeId: String, protocol: String = "WSS", pathClass: String = "A_REALTIME"): JSONObject = onOpen(openCalls.incrementAndGet())
@@ -78,6 +83,7 @@ class VanGatewayClient {
         vanSessionId: String, sessionEpoch: Int, lastEventSeq: Long,
         pendingCommandIds: List<String>, pathId: String, routeId: String,
         pathClass: String = "A_REALTIME",
+        originalCommandReferences: List<JSONObject> = emptyList(),
     ): JSONObject {
         pendingRequests += pendingCommandIds
         resumePaths += pathId to pathClass

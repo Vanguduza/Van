@@ -40,6 +40,14 @@ data class OutboxEntry(
     val attemptCount: Int = 0,
     /** Set when the owner has been asked again and said yes. */
     val reconfirmedAtMs: Long? = null,
+    /** Only a producer which has not attempted any transport may establish true. */
+    val neverDispatched: Boolean? = null,
+    /** Captured by the producer; legacy absence is not rebound to the current profile. */
+    val profileId: String? = null,
+    /** Producer fact: no direct-HTTP attempt precedes this original session operation. */
+    val sessionOnlyOrigin: Boolean? = null,
+    /** Exact producer preparation before HTTP; does not prove whether HTTP ran. */
+    val httpPrepared: Boolean? = null,
 ) {
     fun expired(nowMs: Long): Boolean = nowMs >= expiresAtMs
 }

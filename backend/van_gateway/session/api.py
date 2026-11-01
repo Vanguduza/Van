@@ -23,7 +23,7 @@ from typing import Any
 import anyio
 from fastapi import APIRouter, HTTPException, Request, WebSocket, WebSocketDisconnect
 from fastapi.responses import StreamingResponse
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 
 from van_gateway.auth.device_binding import DeviceBindingError
 from van_gateway.command.nonce import CommandNonceService, NonceReplay
@@ -67,11 +67,31 @@ class OpenSessionBody(BaseModel):
     path_class: PathClass = PathClass.A_REALTIME
 
 
+class OriginalCommandReference(BaseModel):
+    """Original evidence for lookup only, never a replacement execution request."""
+
+    van_session_id: str = Field(min_length=1, max_length=128)
+    message_id: str = Field(min_length=1, max_length=128)
+    command_id: str = Field(min_length=1, max_length=128)
+    device_id: str = Field(min_length=1, max_length=128)
+    profile_id: str = Field(min_length=1, max_length=128)
+    idempotency_key: str = Field(min_length=1, max_length=128)
+    command_request: dict[str, Any]
+
+    @field_validator("command_request")
+    @classmethod
+    def bounded_original(cls, value):
+        if len(json.dumps(value, separators=(",", ":")).encode()) > 65_536:
+            raise ValueError("original_command_reference_too_large")
+        return value
+
+
 class ResumeBody(BaseModel):
     van_session_id: str
     session_epoch: int
     last_event_seq: int = 0
     pending_command_ids: list[str] = Field(default_factory=list)
+    original_command_references: list[OriginalCommandReference] = Field(default_factory=list, max_length=50)
     active_turn_id: str | None = None
     active_response_id: str | None = None
     last_received_response_segment: int = 0
@@ -194,6 +214,7 @@ def build_session_router(
                 # too. Without this the Gateway could only answer from the mission table.
                 van_session_id=body.van_session_id,
                 pending_command_ids=body.pending_command_ids,
+                original_command_references=[ref.model_dump() for ref in body.original_command_references],
             )
         result = await sessions.resume(
             ResumeRequest(
@@ -213,6 +234,7 @@ def build_session_router(
                 endpoint=f"{SESSION_PREFIX}/events-stream", route_id=body.route_id,
             ),
             command_states=snapshot.get("command_states"),
+            original_command_results=snapshot.get("original_command_results"),
             authoritative_event_cursor=snapshot.get("authoritative_event_cursor"),
             # §21.16 — the spoken cursor. Without this the resume tells the client where
             # its *commands* got to and says nothing about where its answer got to, so a

@@ -1020,6 +1020,13 @@
       "status": "INDEPENDENT_SOURCE_REVIEW_PASS_NATIVE_RERUN_REQUIRED",
       "receipt": "docs/rebuild/rev118/receipts/PUBLIC_SOURCE_NATIVE_REPORTER_CACHE_REPAIR_20261101.json",
       "summary": "Actuala5d nativefailed3tooling edges, aggregateFAILED and925assigned IDs incomplete/unknown. CaptureJSONserializer preservesrealpermissiontestpatch; parentvalidates onlynewexactcommittedsource cacheheaders/codegraph asdata thenarchives/retiresownedoutputs; strictprebytecode/config/data refusals remain.18unchangedrealcases54phases/11namednativecacheproofs/89finalfreshdoccases0skip andindependent10probes; scopesoverlap, no fullnativeacceptance/speedclaim. Originalfailure/artifact retained."
+    },
+    {
+      "at_utc": "2026-11-01T13:47:03.210509+00:00",
+      "scope": "BE002/LAC234 selected queue restoration + verifier startup correction",
+      "evidence": "receipts/QUEUE_RESTORATION_AND_VERIFIER_SOURCE_20261101.json",
+      "status": "INDEPENDENT_SOURCE_REVIEW_PASSED_PENDING_PUBLICATION",
+      "meaning": "Original R1 cancellation loss remains failed; original metadata refusals and a5d native failure retained. Exactc006 four workers succeeded but aggregate124856084035 FAILED from verifier-parent bytecode;198 separate media cases passed4.31s. No complete union or speed qualification. Fix suppresses verifier own bytecode before helper import; strict foreign/preexisting-input refusal unchanged."
     }
   ],
   "obligations": "obligations/OBLIGATIONS.json: preserved observations with source implementation evidence and explicit remaining native/unit obligations.",
@@ -1073,8 +1080,8 @@
       "evidence": "ci/MUTATION_CORPUS_c2a27848.json"
     }
   ],
-  "current_action": "Sequential finalmanifest0/genuinecorrectivecommit/required4fdcommittedverifyterminal0/freshremote/normalpush/readback; then actualnewexactheadnative4worker/sourcequalification. Preservefaileda5d allpartialphases/925incomplete, no speedclaim/no nativegates waived.",
-  "updated_at_utc": "2026-11-01T12:37:39.262006+00:00",
+  "current_action": "Genuine combined queue/verifier commit; required committed4fd verification terminal0; fresh remote normalpush/readback; exact-head four-worker union/media/source and374mutation execution. No native qualification inferred.",
+  "updated_at_utc": "2026-11-01T13:47:03.210509+00:00",
   "execution_method": {
     "path": "BUILD_EXECUTION_PLAN.md",
     "scope_index": "SOURCE_WORKMAP.json",

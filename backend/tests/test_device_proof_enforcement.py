@@ -304,7 +304,13 @@ class TestWhatIsNotGated:
         status = await ac.get("/v1/device-binding/status", headers=_base_headers(enrolled))
 
         assert created.status_code == 200
-        assert status.json() == {"configured": True, "bound": False}
+        assert status.json() == {
+            "configured": True, "bound": False,
+            "owner_mutation_policy": {"binding_required": False, "proof_required": False,
+                                      "eligible": True, "reason": None},
+            "current_request_proof_verified": False,
+            "current_request_proof_issued_at_ms": None,
+        }
 
     async def test_enrolment_itself_is_never_gated_on_a_key_it_is_creating(self, client):
         """Otherwise the first enrolment on a fresh device could never succeed."""

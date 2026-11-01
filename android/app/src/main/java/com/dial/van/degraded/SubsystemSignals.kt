@@ -24,7 +24,7 @@ data class SubsystemSignals(
     val overlayPermissionGranted: Boolean = false,
     /** The overlay service is running right now. */
     val overlayRunning: Boolean = false,
-    /** Items sitting in the encrypted queue because they could not be sent. */
+    /** Proven UNSENT generic owner commands eligible for the selected local restore. */
     val queuedCommands: Int = 0,
     /** Consecutive failed replay attempts. */
     val queueReplayFailures: Int = 0,
@@ -38,6 +38,10 @@ data class SubsystemSignals(
     val strongBiometricAvailable: Boolean = false,
     /** The owner has enrolled at least one strong biometric. */
     val biometricEnrolled: Boolean = false,
+    val heldQueuedCommands: Int = 0,
+    val foreignQueueRecords: Int = 0,
+    val queueStorageUncertain: Boolean = false,
+    val heldOwnerRecovery: Int = 0,
 )
 
 /** One subsystem's resolved truth: what it is, and what the owner can do about it. */
@@ -85,6 +89,11 @@ object SubsystemHealth {
     }
 
     private fun queue(s: SubsystemSignals): SubsystemVerdict = when {
+        s.queueStorageUncertain -> SubsystemVerdict(
+            "queue", SubsystemStatus.BROKEN,
+            "Queue storage could not be confirmed. Keep saved work and reopen VAN before changing it.",
+            RestoreAction.CONTACT_SUPPORT,
+        )
         s.queueReplayFailures >= REPLAY_FAILURE_THRESHOLD -> SubsystemVerdict(
             "queue", SubsystemStatus.BROKEN,
             "${s.queuedCommands} command(s) are waiting and VAN cannot send them",
@@ -92,14 +101,24 @@ object SubsystemHealth {
         )
         s.queuedCommands >= QUEUE_BACKLOG_THRESHOLD -> SubsystemVerdict(
             "queue", SubsystemStatus.BROKEN,
-            "${s.queuedCommands} commands are queued and not draining",
+            "${s.queuedCommands} proven unsent owner commands can be reviewed; held and other-owner records are kept",
             RestoreAction.CLEAR_QUEUE,
+        )
+        s.heldQueuedCommands > 0 || s.heldOwnerRecovery > 0 -> SubsystemVerdict(
+            "queue", SubsystemStatus.WONT_DO,
+            "${s.heldQueuedCommands} generic command(s) and ${s.heldOwnerRecovery} session record(s) need current-owner confirmation or original-result recovery; unverified records remain held",
+            RestoreAction.RETRY_CONNECTION,
         )
         s.queuedCommands > 0 -> SubsystemVerdict(
             // Not a fault. A few queued items with no failures is VAN working offline,
             // which is the feature.
             "queue", SubsystemStatus.WORKING,
             "${s.queuedCommands} command(s) queued offline, waiting to send",
+            RestoreAction.NONE,
+        )
+        s.foreignQueueRecords > 0 -> SubsystemVerdict(
+            "queue", SubsystemStatus.WORKING,
+            "${s.foreignQueueRecords} record(s) remain with their session or captured-context owner; generic restore does not discard them",
             RestoreAction.NONE,
         )
         else -> SubsystemVerdict(
@@ -160,7 +179,7 @@ object SubsystemHealth {
         RestoreAction.RETRY_CONNECTION -> "Try again"
         RestoreAction.OPEN_SETTINGS -> "Open settings"
         RestoreAction.REQUEST_PERMISSION -> "Give permission"
-        RestoreAction.CLEAR_QUEUE -> "Clear the queue"
+        RestoreAction.CLEAR_QUEUE -> "Review unsent commands"
         RestoreAction.RESTART_OVERLAY -> "Start the assistant"
         RestoreAction.CONTACT_SUPPORT -> "Get help"
         RestoreAction.NONE -> ""
@@ -171,7 +190,7 @@ object SubsystemHealth {
         RestoreAction.RETRY_CONNECTION -> "VAN will try to reach the gateway again."
         RestoreAction.OPEN_SETTINGS -> "This opens the Android setting VAN needs you to change."
         RestoreAction.REQUEST_PERMISSION -> "VAN will ask you for the permission it is missing."
-        RestoreAction.CLEAR_QUEUE -> "This discards the commands VAN could not send."
+        RestoreAction.CLEAR_QUEUE -> "Review the exact unsent batch before discarding it. Held outcomes and session/context records are kept."
         RestoreAction.RESTART_OVERLAY -> "This starts the floating assistant again."
         RestoreAction.CONTACT_SUPPORT -> "This one is not something you can fix from here."
         RestoreAction.NONE -> ""
