@@ -1,0 +1,73 @@
+{
+  "schema_version": 1,
+  "authorization_id": "auth-20261101-owner-redteam67-exact-correction",
+  "project": "van",
+  "authority": "OWNER_EXPLICIT",
+  "status": "PROPOSED_PENDING_OWNER_CODEOWNER_REVIEW_AND_TRUSTED_BASE_MERGE",
+  "owner_instruction_sha256": "340001d5373a57abdebed99f035ede797170019667d7686cb78d8756d06cda35",
+  "owner_instruction_excerpt": "Authorize exact-path intake",
+  "derivation": "The owner authorized preparation of the exact-path intake proposal after reviewing a concrete entry67 evidence/recovery-note correction. This record is proposed for code-owner review; it does not authorize its own addition or any code/evidence change before trusted intake.",
+  "source": {
+    "kind": "owner_session_instruction",
+    "channel": "codex",
+    "owner_answer_verbatim": "Authorize exact-path intake",
+    "question_scope": "Exact-path authorization intake for evidence/van-system-audit/red_team_register.json, only entry67 evidence citations and recovery note, independently reviewed R2 proposal.",
+    "question_verbatim_available_in_worker": false,
+    "question_scope_provenance": "Root relayed the already-presented exact-path question and owner answer in the current assignment. This field is a scope description, not a fabricated verbatim question.",
+    "owner_attested": true,
+    "device_signature_claimed": false,
+    "cryptographic_signature_claimed": false,
+    "signed_ingress_claimed": false
+  },
+  "issued_at_utc": "2026-11-01T14:43:00.579473+00:00",
+  "branch_scope": "Owner-reviewed intake onto ccr-9e07e1af-8mgz1p, followed only by its exact pinned entry67 correction on that programme branch.",
+  "authorized_paths": [
+    "evidence/van-system-audit/red_team_register.json"
+  ],
+  "reusable": true,
+  "revoked": false,
+  "exact_correction": {
+    "base_commit": "629a986019a4eb298f58dd98c62e6bcbade36ab7",
+    "path": "evidence/van-system-audit/red_team_register.json",
+    "entry_selector": "scenarios[n=67]",
+    "allowed_fields": [
+      "evidence",
+      "note"
+    ],
+    "preimage_sha256": "423a74a4cd7e5fb7f57ec21c19e00e47f9d8513806bb3138d8edfa44ca2da4a6",
+    "postimage_sha256": "6cfb855946008b61b8794339bd5db26456b5bd6921afc7c7eb5799cbd60c8c43",
+    "unified_patch_sha256": "4c10039bd606b7af429459423018807bcb8570194b446d7485c5325590114bac",
+    "before_entry": {
+      "scenario": "a reconnect silently discards the owner's unacknowledged command",
+      "status": "PASS",
+      "evidence": [
+        "android/verification/src/test/kotlin/com/dial/van/session/SessionReconciliationTest.kt::a command the Gateway has never heard of is sent again",
+        "backend/tests/test_session_transport_api.py::TestWhatAResumeSaysAboutWhatTheClientLost::test_a_message_the_gateway_has_never_seen_is_reported_unknown"
+      ],
+      "note": "This was the live behaviour, not a hypothetical. The phone asked by message id, the Gateway answered by command id, so every answer was `UNKNOWN` \u2014 and the phone then dropped every key it had asked about. `UNKNOWN` is the one answer that means resend. Both halves now come from one function, and silence is treated the same as `UNKNOWN` so the Gateway's fifty-id cap cannot lose the fifty-first command.",
+      "n": 67
+    },
+    "after_entry": {
+      "scenario": "a reconnect silently discards the owner's unacknowledged command",
+      "status": "PASS",
+      "evidence": [
+        "android/verification/src/test/kotlin/com/dial/van/session/SessionReconciliationTest.kt::an ambiguous original not known to the Gateway is held",
+        "android/verification/src/test/kotlin/com/dial/van/session/SessionReconciliationTest.kt::an unanswered ambiguous original is held",
+        "android/verification/src/test/kotlin/com/dial/van/session/SessionReconciliationTest.kt::producer proven fresh work still delivers while absence and pending remain distinct",
+        "backend/tests/test_session_transport_api.py::TestWhatAResumeSaysAboutWhatTheClientLost::test_a_message_the_gateway_has_never_seen_is_reported_unknown"
+      ],
+      "note": "Ambiguous command.submit/direct-HTTP originals, including RESULT_PENDING, remain held for original-result readback and cannot be resent. Producer-proven never-dispatched commands retain their existing currentness, expiry and reconfirmation rules. Independently, producer-proven SESSION_ONLY mission.message, mission.cancel and decision.answer retain same-envelope idempotent recovery under existing original-session, current-owner, TTL and reconfirmation checks. These facts grant no new execution or cleanup authority.",
+      "n": 67
+    },
+    "independent_review": "/workspace/van-629a-additional-independent-review-20261101/review.json"
+  },
+  "effectiveness": "PROPOSED ONLY. Do not use this proposal locally to authorize the evidence correction. The repository intake procedure requires owner code-owner review and merge onto the trusted programme base first. No approval/merge/activation is claimed.",
+  "technical_scope_limit": "reusable:true is technically required for genuine staged hooks to select a record before a future correction commit SHA exists. The existing checker enforces the exact file and trusted-base boundary; it does NOT enforce these content hashes, branch metadata, proposed status or one-use human limits. The owner permission remains ONLY this one pinned entry67 correction. Future changes require separately established owner scope, even if path matching alone would pass.",
+  "limitations": [
+    "Only the pinned preimage-to-postimage entry67 evidence/note correction; preserve all other bytes and entries, statuses, scenarios and checker assertions.",
+    "No broad evidence/** scope; no checker, authorization-history, installer, production, workflow or credential changes.",
+    "No new dispatch/cleanup authority: ambiguous command.submit/directHTTP originals stay held; existing producer-proven never-dispatched and original SESSION_ONLY recovery rules remain.",
+    "No device, cryptographic, native, unit, provider, production, financial or release qualification.",
+    "Do not self-approve or merge intake. Do not apply evidence before trusted owner intake. Existing records and ledger rows remain immutable."
+  ]
+}
