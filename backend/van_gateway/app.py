@@ -1464,6 +1464,55 @@ def create_app() -> FastAPI:
         result = await delegate(envelope.payload, device_id)
         return None if envelope.kind == "command.submit" and result.get("status") == "in_flight" else result
 
+    async def _read_session_result(envelope, device_id: str) -> dict | None:
+        """Read original domain receipts without extending execution authority.
+
+        A matching current cancellation/decision state alone cannot prove this
+        operation completed. Those cases retain pending recovery unless the
+        original session result was committed.
+        """
+        payload = envelope.payload
+        if envelope.kind == "command.submit":
+            from van_gateway.models import CommandResult
+            try:
+                request = CommandRequest(**{**payload, "device_id": device_id})
+            except ValidationError:
+                return None
+            row = await store.fetchone(
+                "SELECT request_hash,status,response_json FROM idempotency WHERE idempotency_key=?",
+                (request.idempotency_key,),
+            )
+            if (row is None or row["status"] != "COMPLETED"
+                    or row["request_hash"] != IdempotencyService.request_hash(request.model_dump())):
+                return None
+            try:
+                result = CommandResult(**json.loads(row["response_json"]))
+            except (TypeError, ValueError):
+                return None
+            if result.command_id != request.command_id or result.idempotency_key != request.idempotency_key:
+                return None
+            if result.status in {"degraded", "in_flight"}:
+                return None
+            return result.model_dump(mode="json")
+        if envelope.kind != "mission.message":
+            return None
+        mission_id = str(payload.get("mission_id") or "")
+        text = str(payload.get("text") or payload.get("message") or "")
+        mission = await missions.get(mission_id) if mission_id else None
+        if not text or mission is None or mission.owner_principal_id != f"device:{device_id}":
+            return None
+        operation_key = Store.dumps([envelope.van_session_id, envelope.idempotency_key or envelope.message_id])
+        event_id = f"mev_{hashlib.sha256(Store.dumps([mission_id, operation_key]).encode()).hexdigest()}"
+        row = await store.fetchone("SELECT * FROM mission_events WHERE event_id=?", (event_id,))
+        if (row is None or row["mission_id"] != mission_id
+                or row["event_type"] != MissionEventType.MISSION_MESSAGE.value
+                or row["actor"] != PrincipalType.OWNER_DEVICE.value
+                or row["summary"] != text[:500] or row["activity_id"] is not None
+                or row["severity"] != "INFO" or row["owner_visibility"] != 1
+                or row["evidence_ref"] is not None):
+            return None
+        return {"event_id": event_id, "recorded": True}
+
     # Rev 1.5 §20.2 — all four kinds the router knows, delegated to the authorities that
     # already exist.
     #
@@ -1480,6 +1529,7 @@ def create_app() -> FastAPI:
             cancel_mission=_cancel_mission_through_session,
             message_mission=_message_mission_through_session,
             recover_result=_recover_session_result,
+            read_result=_read_session_result,
         ),
     )
 

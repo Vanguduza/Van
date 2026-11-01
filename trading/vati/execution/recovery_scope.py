@@ -1,9 +1,11 @@
 """Native account/command provenance for restart recovery; never an order path."""
+from contextlib import nullcontext
 from dataclasses import fields
 from decimal import Decimal,InvalidOperation
 
 from vati.core.canonical import canonical_hash
 from vati.core.events import EventKind
+from vati.core.ledger import committed_source_snapshot
 from vati.execution.base import OrderCommand,ExecutionReceipt
 
 
@@ -33,9 +35,17 @@ class NativePositionHistory:
     def __init__(self,ledger,*,account_alias,venue):
         if not isinstance(account_alias,str) or not account_alias or not isinstance(venue,str) or not venue:
             raise PositionRecoveryError('native account/venue binding is unavailable')
-        if not ledger.verify_chain()[0]:
-            raise PositionRecoveryError('native recovery ledger chain is invalid')
-        self.rows=tuple(ledger.iter())
+        # Recovery review may run while the owner holds the writer lock for
+        # its eventual effect/outcome commit. Its staged rows are not original
+        # evidence: use a separate, scoped read-only owner in that case.
+        independent = getattr(ledger, 'committed_reader', None)
+        owns_writer = (getattr(ledger, '_atomic_depth', 0) > 0
+                       and not getattr(ledger, '_read_snapshot_depth', 0))
+        source_context = independent() if owns_writer and callable(independent) else nullcontext(ledger)
+        with source_context as source, committed_source_snapshot(source):
+            if not source.verify_chain()[0]:
+                raise PositionRecoveryError('native recovery ledger chain is invalid')
+            self.rows=tuple(source.iter())
         self.account_alias=account_alias;self.venue=venue
         self.commands={};self.command_refs={};self.conflicts=set()
         candidates={};identities={};refs={}
@@ -91,7 +101,7 @@ class NativePositionHistory:
                 continue
             yield event
 
-    def position_command(self,position):
+    def position_command(self,position, *, family=None):
         if not isinstance(position.position_id,str) or not position.position_id:
             return None
         joined=self.commands.get(position.trade_intent_id)
@@ -100,7 +110,16 @@ class NativePositionHistory:
         p=joined[0]
         try:
             if (position.symbol!=p['symbol'] or position.direction!=p['direction']
-                or position.loss_model!=p['loss_model'] or _positive(position.quantity)>_positive(p['quantity'])):
+                or position.loss_model!=p['loss_model']):
+                return None
+            quantity = _positive(position.quantity)
+            if family is None:
+                if quantity > _positive(p['quantity']):
+                    return None
+            elif (family.account_alias != self.account_alias or family.symbol != p['symbol']
+                    or family.direction != position.direction
+                    or not family.members or family.members[0].trade_intent_id != position.trade_intent_id
+                    or family.net_quantity != quantity):
                 return None
             _positive(position.entry_price)
         except (KeyError,ValueError,TypeError,InvalidOperation):

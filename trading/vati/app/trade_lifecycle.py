@@ -26,7 +26,7 @@ from vati.execution.review import native_economic_maturity
 from vati.learning.hooks import LearningHooks, to_payload
 from vati.lifecycle.envelope import EnvelopeCalculator
 from vati.lifecycle.expansion import ProfitExpansionEngine
-from vati.lifecycle.family import FamilyMember, FamilyRegistry, MemberRole
+from vati.lifecycle.family import FamilyError, FamilyMember, FamilyRegistry, MemberRole
 from vati.lifecycle.preservation import ActionKind, PreservationEngine
 from vati.lifecycle.scale_policy import (
     Adjustment, AdjustmentPolicyRegistry, PositionAdjustmentEngine, ScalePolicyRegistry,
@@ -198,13 +198,19 @@ class AccountTradeLifecycle:
         unresolved and reconciliation blocks new risk.
         """
         from vati.execution.recovery_scope import NativePositionHistory,PositionRecoveryError
+        from vati.core.ledger import LedgerError
         alias=getattr(self.mandate,'account_alias',None) or getattr(self.adapter,'account_alias',None)
         if alias!=getattr(self.adapter,'account_alias',None):
             return (),('native-position-account-binding-conflict',)
         try:
             history=NativePositionHistory(self.ledger,account_alias=alias,venue=self.adapter.venue)
-        except (PositionRecoveryError,OSError):
+        except (PositionRecoveryError,OSError,LedgerError):
+            self._family_halts["native-position-history"] = ("FAMILY_HISTORY_UNRESOLVED",)
+            for family in self.families.open_families():
+                family.state = type(family.state).DIVERGED
+                family.divergence_detail = "original family history unavailable"
             return (),('native-position-history-unavailable',)
+        self._family_halts.pop("native-position-history", None)
 
         latest_stops: dict[str, Decimal] = {}
         entry_receipts: dict[str, dict] = {}
@@ -267,10 +273,26 @@ class AccountTradeLifecycle:
 
         restored: list[str] = []
         unresolved: list[str] = []
-        for position in self.adapter.positions():
+        native_positions = tuple(self.adapter.positions())
+        for position in native_positions:
             iid = str(position.trade_intent_id or "")
             joined = history.position_command(position)
+            if joined is None and iid in history.commands:
+                try:
+                    original_family = self.families.restore(history,
+                        family_id=f"family:{iid}", trade_intent_id=iid,
+                        symbol=position.symbol, direction=position.direction,
+                        position_id=position.position_id)
+                    if original_family is not None:
+                        joined = history.position_command(position, family=original_family)
+                except (FamilyError, KeyError, TypeError, ValueError, ArithmeticError):
+                    pass
             if not iid or joined is None:
+                self._family_halts[f"family:{iid}"] = ("FAMILY_HISTORY_UNRESOLVED",)
+                prior_family = self.families.for_intent(iid)
+                if prior_family is not None:
+                    prior_family.state = type(prior_family.state).DIVERGED
+                    prior_family.divergence_detail = "original family position scope unresolved"
                 unresolved.append(position.position_id)
                 continue
             payload, opened_ms = joined
@@ -319,6 +341,26 @@ class AccountTradeLifecycle:
                     self.protection.mark_close_pending(position.position_id)
 
             family_id = f"family:{iid}"
+            # A hedged child retains its original family instead of opening
+            # another lifetime budget. Lookup is only a lead: restore validates
+            # original commands, ancestry, sealed fills and complete membership.
+            discovery_invalid = False
+            try:
+                family_roots = {(event.payload["members"][0].get("trade_intent_id")
+                                 if isinstance(event.payload["members"][0], dict) else iid)
+                    for event in history.rows if event.kind is EventKind.POSITION_FAMILY
+                    and isinstance(event.payload.get("members"), list) and event.payload["members"]
+                    and any(isinstance(member, dict) and member.get("trade_intent_id") == iid
+                            for member in event.payload["members"])}
+                if any(type(root) is not str or not root for root in family_roots):
+                    raise FamilyError("invalid original family root identity")
+            except (FamilyError, TypeError, AttributeError, KeyError):
+                family_roots = set()
+                discovery_invalid = True
+            original_family_root = iid
+            if len(family_roots) == 1:
+                original_family_root = next(iter(family_roots))
+                family_id = f"family:{original_family_root}"
             self.entries[iid] = {
                 "symbol": symbol,
                 "entry": position.entry_price,
@@ -342,37 +384,64 @@ class AccountTradeLifecycle:
                 "fees": None,
                 "family_id": family_id,
             }
-            if self.families.for_intent(iid) is None:
-                root = FamilyMember(
-                    member_id=f"{iid}:root",
-                    role=MemberRole.ROOT,
-                    quantity=position.quantity,
-                    price=position.entry_price,
-                    occurred_ms=opened_ms,
-                    trade_intent_id=iid,
-                    stop=initial_stop,
-                )
-                family = self.families.open_family(
-                    family_id=family_id,
-                    account_alias=str(payload.get("account_alias") or ""),
-                    symbol=symbol,
-                    direction=position.direction,
-                    root=root,
-                    now_ms=opened_ms,
-                    emit=False,
-                )
-                if current_stop is not None and family.current_stop is not None:
-                    tighter = (
-                        current_stop > family.current_stop
-                        if position.direction is Direction.LONG
-                        else current_stop < family.current_stop
-                    )
-                    if tighter:
-                        self.families.tighten_stop(
-                            family_id, current_stop, now_ms=opened_ms, emit=False)
-                self.families.reconcile(
-                    family_id, venue_quantity=position.quantity,
-                    now_ms=opened_ms, emit=False)
+            try:
+                if discovery_invalid:
+                    raise FamilyError("original family discovery is malformed")
+                family = self.families.restore(
+                    history, family_id=family_id, trade_intent_id=original_family_root,
+                    symbol=symbol, direction=position.direction,
+                    position_id=(position.position_id if original_family_root == iid else
+                        str(entry_receipts.get(original_family_root, {}).get("broker_position_id") or "")))
+                if len(family_roots) > 1:
+                    raise FamilyError("native intent has conflicting original families")
+                if family is None:
+                    # Native entry and protection remain recoverable. Missing
+                    # original family history cannot manufacture lifetime fills
+                    # from either the requested quantity or current residual.
+                    self.entries[iid]["family_history_known"] = False
+                    self._family_halts[family_id] = ("FAMILY_HISTORY_UNRESOLVED",)
+                else:
+                    family_intents = {member.trade_intent_id for member in family.members if member.adds}
+                    family_positions = [native for native in native_positions
+                                        if native.trade_intent_id in family_intents]
+                    hedged = len(family_positions) > 1 or original_family_root != iid
+                    if hedged:
+                        # Current execution consumer dispatches to one native
+                        # position. Preserve all original counters/protection,
+                        # but never send aggregate exposure to that one target.
+                        family.state = type(family.state).DIVERGED
+                        family.divergence_detail = "hedged family execution consumer qualification pending"
+                        self.entries[iid]["family_history_known"] = True
+                        self.entries[iid]["scale_ins_used"] = family.scale_ins
+                        self.entries[iid]["family_execution_available"] = False
+                        self._family_halts[family_id] = ("HEDGED_FAMILY_EXECUTION_UNAVAILABLE",)
+                    else:
+                        if current_stop is not None and family.current_stop is not None:
+                            tighter = (current_stop > family.current_stop
+                                       if position.direction is Direction.LONG
+                                       else current_stop < family.current_stop)
+                            if tighter:
+                                self.families.tighten_stop(
+                                    family_id, current_stop, now_ms=opened_ms, emit=False)
+                        self.families.reconcile(family_id,
+                            venue_quantity=position.quantity, now_ms=opened_ms, emit=False)
+                        self.entries[iid]["scale_ins_used"] = family.scale_ins
+                        if not family.is_open:
+                            raise FamilyError("original family and native quantity diverge")
+                        self.entries[iid]["family_history_known"] = True
+                        if self._family_halts.get(family_id) == ("FAMILY_HISTORY_UNRESOLVED",):
+                            self._family_halts.pop(family_id, None)
+            except (FamilyError, KeyError, TypeError, ValueError, ArithmeticError):
+                # Protection has already been reconstructed from current venue
+                # truth. Keep it while withholding any new family risk.
+                self._family_halts[family_id] = ("FAMILY_HISTORY_UNRESOLVED",)
+                self.entries[iid]["family_history_known"] = False
+                prior_family = self.families.for_intent(iid)
+                if prior_family is not None:
+                    prior_family.state = type(prior_family.state).DIVERGED
+                    prior_family.divergence_detail = "original family history unresolved"
+                unresolved.append(iid)
+                continue
 
             recovered_receipt = None
             if iid in entry_receipts:
@@ -986,17 +1055,17 @@ class AccountTradeLifecycle:
                 self.families.apply(
                     family.family_id,
                     FamilyMember(
-                        member_id=f"{intent_id}:add:{now_ms}",
+                        member_id=f"{intent_id}:add:{receipt.receipt_hash}",
                         role=MemberRole.SCALE_IN,
                         quantity=receipt.filled_qty,
                         price=receipt.average_fill or mark,
                         occurred_ms=now_ms,
-                        trade_intent_id=intent_id,
+                        trade_intent_id=receipt.trade_intent_id,
                     ),
                     now_ms=now_ms,
                 )
-                row["quantity"] = Decimal(str(row.get("quantity", ZERO))) + receipt.filled_qty
-                row["scale_ins_used"] = int(row.get("scale_ins_used", 0)) + 1
+                row["quantity"] = family.net_quantity
+                row["scale_ins_used"] = family.scale_ins
             return
 
         # REDUCE / PARTIAL_TAKE
@@ -1339,7 +1408,8 @@ class AccountTradeLifecycle:
             return
         self.entries.pop(intent_id)
         family = self.families.for_intent(intent_id)
-        if family is not None and family.net_quantity > ZERO:
+        if (family is not None and family.net_quantity > ZERO
+                and entry.get("family_execution_available") is not False):
             self.families.apply(
                 family.family_id,
                 FamilyMember(

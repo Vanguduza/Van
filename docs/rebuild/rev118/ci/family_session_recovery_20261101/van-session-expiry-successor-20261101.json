@@ -1,0 +1,31 @@
+{
+  "base": "1b53cf9199dc3b8ec01cbc4a6125cc90afad2ae6",
+  "files": {
+    "backend/van_gateway/session/service.py": "2a6c0a1d064a22d3945f84883088bca9174f040b18cf7f1cdd5ae244944f8eac",
+    "backend/van_gateway/session/router.py": "a4ac504cbfd6e885b285c8959aeae4543600c26f362e1ae85e36989660972c55",
+    "backend/van_gateway/app.py": "e09319aa0c6309c96eb739a69acea83c4448886fa73af7a79905156c49ca18f0",
+    "backend/van_gateway/ops/retention.py": "a8aa790bde24ad6705f7f81b5b2349506f431de860f380b55155799030dd6e43",
+    "backend/tests/test_lane_session_commit_expiry.py": "b8a835ac41bedced5334c27f2f0ffe423e2349baa536cfb450f2d232f4848c0a"
+  },
+  "auth_predecessor_unchanged": {
+    "backend/van_gateway/auth/service.py": "a495f075cdc70c93fce664942a3832bb24327da56118ac5aff2a2b439db2cf66",
+    "backend/tests/test_lane_auth_commit_expiry.py": "bc4d79ed6ec7085af59465d4c45286e04bff51868a6e5a1b77104882e6cb476e",
+    "backend/tests/test_lane_auth_commit_expiry_http.py": "b245d280b9bc62b310629b4086df1bb9f6490dd8f667d4e079c4e63f0c54bada"
+  },
+  "results": [
+    {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "tests": "124",
+      "time": "95.706",
+      "timestamp": "2026-11-01T00:54:52.781836+00:00",
+      "hostname": "b6ffa15f7e81"
+    }
+  ],
+  "qualification": "SOURCE_TESTED_PARTIAL_BE002_BE003_NO_FORMAL_ACCEPTANCE",
+  "patch": "/workspace/van-session-expiry-successor-20261101.patch",
+  "new_test_source": "/workspace/van-lanes-20261101/backend/backend/tests/test_lane_session_commit_expiry.py",
+  "remaining": "Expired unresolved cancellation/decision effects require original operation-specific domain receipts; coincident current state is not treated as original completion. Legacy unknown expiry cannot authorize effects; recorded terminal/domain receipts remain readable."
+}

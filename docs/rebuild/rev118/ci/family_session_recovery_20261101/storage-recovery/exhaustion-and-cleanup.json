@@ -1,0 +1,58 @@
+{
+  "schema": "van.storage-exhaustion-recovery/1",
+  "at_utc": "2026-11-01T01:38:42.880809+00:00",
+  "signals": [
+    {
+      "pid": 171858,
+      "signal": "SIGINT",
+      "verified_owned_command_before_signal": true
+    }
+  ],
+  "not_signalled": [
+    {
+      "pid": 260479,
+      "reason": "Remainder already terminal1 before second signal; guard refused signalling nonexistent completed process."
+    }
+  ],
+  "original_successor_failure": "/workspace/van-successor-regression-pg-r2-20261101/failure-analysis-input.json",
+  "cause": "Owned original full timeout left4.9GBtestfixtures; cumulative retainedtmp fixtures exhausted8.8GB /tmp. Workflow cleanup failure, not unexplained platform outage.",
+  "original_source_unchanged": true,
+  "cleanup": [
+    {
+      "directory": "/tmp/pytest-of-agent/pytest-7",
+      "inventory": "/workspace/van-owned-originalfull-temp-inventory-20261101.json",
+      "inventory_sha256": "165b1a383d99c4beb232ce1fbc3a5a2cdfbc361eb8602503e7de4044f54f4629",
+      "files": 4663,
+      "free_bytes_before": 8192,
+      "free_bytes_after": 5181018112,
+      "removed": true
+    },
+    {
+      "directory": "/tmp/pytest-of-agent/pytest-36",
+      "inventory": "/workspace/van-owned-pytest-36-temp-inventory-20261101.json",
+      "inventory_sha256": "e893f48822bedb0d710953e9116b29ba595fb098c4a3749fac57765264883078",
+      "files": 1387,
+      "free_bytes_before": 5181018112,
+      "free_bytes_after": 6697480192,
+      "removed": true
+    },
+    {
+      "directory": "/tmp/pytest-of-agent/pytest-39",
+      "inventory": "/workspace/van-owned-pytest-39-temp-inventory-20261101.json",
+      "inventory_sha256": "1e0c9ef70e769d550475b2d8aa48f46dd651415819c731cc8482949d69c7d799",
+      "files": 2501,
+      "free_bytes_before": 6697480192,
+      "free_bytes_after": 8521261056,
+      "removed": true
+    },
+    {
+      "directory": "/tmp/pytest-of-agent/pytest-38",
+      "inventory": "/workspace/van-owned-pytest-38-temp-inventory-20261101.json",
+      "inventory_sha256": "b7bdd938f9edc8f72d2a61eaef1e900c91e83f1f4c6e0fe57d455bd2dc5e4f4a",
+      "files": 10854,
+      "free_bytes_before": 8521261056,
+      "free_bytes_after": 8925097984,
+      "removed": true
+    }
+  ]
+}

@@ -73,6 +73,8 @@ class SessionDelegates:
     cancel_mission: Callable[[dict, str], Awaitable[dict]] | None = None
     message_mission: Callable[[dict, str], Awaitable[dict]] | None = None
     recover_result: Callable[[SessionEnvelope, str], Awaitable[dict | None]] | None = None
+    # This callback only observes an already committed original domain result.
+    read_result: Callable[[SessionEnvelope, str], Awaitable[dict | None]] | None = None
 
 
 @dataclass(frozen=True)
@@ -97,11 +99,6 @@ class SessionRouter:
             return RoutedResult(False, envelope.kind, refusal=REJECT_WRONG_DIRECTION)
         if envelope.kind not in UPSTREAM_KINDS:
             return RoutedResult(False, envelope.kind, refusal=REJECT_UNKNOWN_KIND)
-        if envelope.expires_at_ms is not None and envelope.expires_at_ms <= now:
-            # §20.14's freshness policy, enforced at the door. A command that was worth
-            # doing twenty minutes ago is not automatically worth doing now, and the outbox
-            # cannot be the only thing deciding that.
-            return RoutedResult(False, envelope.kind, refusal=REJECT_EXPIRED)
 
         try:
             session = await self.sessions.accept_upstream(envelope, now_ms=now)
@@ -111,6 +108,9 @@ class SessionRouter:
         if envelope.kind in {"session.heartbeat", "session.ack"}:
             # Liveness, not work. Deliberately not passed through admission: a heartbeat
             # under an idempotency key would occupy one for no reason.
+            stamp = int(time.time() * 1000) if now_ms is None else now_ms
+            if envelope.expires_at_ms is not None and envelope.expires_at_ms <= stamp:
+                return RoutedResult(False, envelope.kind, refusal=REJECT_EXPIRED)
             return RoutedResult(True, envelope.kind, result={"ok": True})
 
         # Resolved *before* admission, and that order is the fix rather than a tidy-up.
@@ -128,7 +128,7 @@ class SessionRouter:
             return RoutedResult(False, envelope.kind, refusal=REJECT_UNKNOWN_KIND)
 
         try:
-            admission, existing = await self.sessions.admit(envelope, now_ms=now)
+            admission, existing = await self.sessions.admit(envelope, now_ms=now_ms)
         except SessionError as exc:
             return RoutedResult(False, envelope.kind, refusal=exc.reason)
         if admission is CommandAdmission.CONFLICT:
@@ -140,6 +140,21 @@ class SessionRouter:
             # first result is the whole point: re-executing would be the duplicate the
             # idempotency key exists to prevent.
             retryable = envelope.kind == "command.submit" and existing is not None and existing.get("status") in {"degraded", "in_flight"}
+            if existing is None or retryable:
+                if self.delegates.read_result is not None:
+                    observed = await self.delegates.read_result(envelope, session.device_id)
+                    if observed is not None:
+                        await self.sessions.record_result(envelope, observed, replace_retryable=retryable)
+                        return RoutedResult(True, envelope.kind, result=observed, admission=admission)
+                try:
+                    expiry = await self.sessions.execution_expiry(envelope)
+                except SessionError as exc:
+                    return RoutedResult(False, envelope.kind, refusal=exc.reason, admission=admission)
+                stamp = int(time.time() * 1000) if now_ms is None else now_ms
+                if expiry is not None and expiry <= stamp:
+                    # An expired execution window is not proof that the old effect
+                    # did not happen. Keep its admission and reconcile by readback.
+                    return RoutedResult(False, envelope.kind, refusal=REJECT_RESULT_PENDING, admission=admission)
             if (existing is None or retryable) and self.delegates.recover_result is not None:
                 token = CURRENT_OPERATION.set(envelope)
                 try:
@@ -158,6 +173,13 @@ class SessionRouter:
                 return RoutedResult(False, envelope.kind, refusal=REJECT_RESULT_PENDING, admission=admission)
             return RoutedResult(True, envelope.kind, result=existing, admission=admission)
 
+        try:
+            expiry = await self.sessions.execution_expiry(envelope)
+        except SessionError as exc:
+            return RoutedResult(False, envelope.kind, refusal=exc.reason, admission=admission)
+        stamp = int(time.time() * 1000) if now_ms is None else now_ms
+        if expiry is not None and expiry <= stamp:
+            return RoutedResult(False, envelope.kind, refusal=REJECT_EXPIRED, admission=admission)
         token = CURRENT_OPERATION.set(envelope)
         try:
             result = await delegate(envelope.payload, session.device_id)

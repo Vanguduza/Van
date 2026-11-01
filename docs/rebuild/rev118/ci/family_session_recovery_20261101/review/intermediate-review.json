@@ -1,0 +1,32 @@
+{
+  "review_stage": "intermediate candidate before fixes; source not final-frozen",
+  "source_base": "1b53cf9199dc3b8ec01cbc4a6125cc90afad2ae6",
+  "worktree": "/workspace/van-lanes-20261101/family",
+  "production_files_written_by_reviewer": false,
+  "observations": [
+    {
+      "case": "cross-symbol foreign receipt inserted as SCALE_IN",
+      "result": "REFUSED",
+      "exception": "FamilyError: scale member lacks its original child command",
+      "script": "cross_symbol_restore.py"
+    },
+    {
+      "case": "valid recovery then foreign-account family snapshot and next supervision tick",
+      "result": "DEFECT_CONFIRMED",
+      "observed": "second recovery unresolved; hold True with old OPEN family; actual supervision tick clears hold to False",
+      "script": "recovery_hold_probe.py"
+    },
+    {
+      "case": "malformed first family member and later matching intent member",
+      "result": "DEFECT_CONFIRMED",
+      "exception": "AttributeError: str object has no attribute get in family_roots discovery outside try/fence",
+      "script": "malformed_member_probe.py"
+    },
+    {
+      "case": "existing candidate durable regression file",
+      "result": "16 passed",
+      "junit": "durable.xml"
+    }
+  ],
+  "implementation_response": "Both new defects acknowledged; source unfrozen for corrections and new regressions. Rerun pending new freeze."
+}

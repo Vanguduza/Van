@@ -310,9 +310,48 @@ class VanHermesSessionService:
                 result = prior[0]["result_json"]
                 await db.commit()
                 return CommandAdmission.ALREADY_KNOWN, json.loads(result) if result is not None else None
+            now = int(time.time() * 1000) if now_ms is None else now_ms
+            if envelope.expires_at_ms is not None and envelope.expires_at_ms <= now:
+                raise SessionError("session_message_expired")
             await self._record_message(envelope, digest, CommandAdmission.ADMITTED, None, now, db=db)
+            await db.execute(
+                "INSERT INTO runtime_meta(key,value,updated_at_unix_ms) VALUES (?,?,?)",
+                (f"session_expiry:{envelope.message_id}", Store.dumps({
+                    "expires_at_ms": envelope.expires_at_ms,
+                    "payload_digest": digest,
+                    "van_session_id": envelope.van_session_id,
+                }), now),
+            )
             await db.commit()
             return CommandAdmission.ADMITTED, None
+
+    async def execution_expiry(self, envelope: SessionEnvelope) -> int | None:
+        """Read the original admission's deadline; a retry cannot renew authority.
+
+        Missing legacy metadata leaves execution uncertain. Existing result readback
+        does not require this execution permission.
+        """
+        row = await self.store.fetchone(
+            "SELECT r.value FROM van_session_messages m LEFT JOIN runtime_meta r "
+            "ON r.key = 'session_expiry:' || m.message_id "
+            "WHERE m.van_session_id=? AND (m.message_id=? OR m.idempotency_key=?) "
+            "AND m.kind=? AND m.payload_digest=?",
+            (envelope.van_session_id, envelope.message_id, envelope.idempotency_key,
+             envelope.kind, envelope.digest()),
+        )
+        try:
+            original = json.loads(row["value"]) if row is not None else None
+            expiry = original["expires_at_ms"]
+            valid = (original["van_session_id"] == envelope.van_session_id
+                     and original["payload_digest"] == envelope.digest()
+                     and (expiry is None or type(expiry) is int))
+        except (KeyError, TypeError, ValueError):
+            valid = False
+        if not valid:
+            raise SessionError("session_original_expiry_unavailable")
+        if expiry != envelope.expires_at_ms:
+            raise SessionError("session_original_expiry_conflict")
+        return expiry
 
     async def forget_message(self, envelope: SessionEnvelope) -> None:
         """Un-record a message that was admitted and then not carried out.
@@ -322,11 +361,17 @@ class VanHermesSessionService:
         idempotency key stays taken and the owner's resend is answered with a success
         that never happened.
         """
-        await self.store.execute(
-            "DELETE FROM van_session_messages WHERE message_id = ? AND van_session_id = ? "
-            "AND kind = ? AND payload_digest = ? AND result_json IS NULL",
-            (envelope.message_id, envelope.van_session_id, envelope.kind, envelope.digest()),
-        )
+        async with self.store.connection() as db:
+            await db.execute("BEGIN IMMEDIATE")
+            removed = await db.execute(
+                "DELETE FROM van_session_messages WHERE message_id = ? AND van_session_id = ? "
+                "AND kind = ? AND payload_digest = ? AND result_json IS NULL",
+                (envelope.message_id, envelope.van_session_id, envelope.kind, envelope.digest()),
+            )
+            if removed.rowcount:
+                await db.execute("DELETE FROM runtime_meta WHERE key=?",
+                                 (f"session_expiry:{envelope.message_id}",))
+            await db.commit()
 
     async def record_result(
         self, envelope: SessionEnvelope, result: dict, *, now_ms: int | None = None,

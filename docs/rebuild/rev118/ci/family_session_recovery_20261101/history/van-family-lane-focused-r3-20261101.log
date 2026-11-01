@@ -1,0 +1,73 @@
+..............F..................................F...................... [ 98%]
+.                                                                        [100%]
+=================================== FAILURES ===================================
+_ test_genuine_native_partial_position_and_tighter_stop_are_recoverable_without_sending _
+
+    def test_genuine_native_partial_position_and_tighter_stop_are_recoverable_without_sending():
+        ledger=Ledger();adapter=PaperAdapter(account_alias='acct',slippage=D('0'))
+        command=_command('original-native-intent');publish(ledger,command)
+        receipt=adapter.submit(command,now_ms=1000)
+        adapter._positions[receipt.broker_position_id]['qty']/=2
+        adapter.modify_stop(receipt.broker_position_id,D('1.095'),now_ms=1100)
+        lifecycle=_lifecycle(ledger,adapter);before=adapter._seq
+        restored,unresolved=lifecycle.recover_from_venue()
+>       assert restored==(command.trade_intent_id,) and not unresolved and adapter._seq==before
+E       AssertionError: assert (() == ('original-native-intent',)
+E         
+E         Right contains one more item: 'original-native-intent'
+E         Use -v to get more diff)
+
+trading/tests/test_native_position_recovery_scope.py:53: AssertionError
+_____ test_actual_signed_worker_fill_stop_and_close_never_invent_fee_zero ______
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-6/test_actual_signed_worker_fill0')
+
+    def test_actual_signed_worker_fill_stop_and_close_never_invent_fee_zero(tmp_path):
+        worker, client, native = build(tmp_path)
+        adapter = Mt5BridgeAdapter(client, clock=lambda:1000000)
+        cmd = replace(command(1001000), strategy_id='FX-TREND-PULLBACK-01', strategy_version='1.0.0', command_hash='').sealed()
+        receipt = adapter.submit(cmd, now_ms=1000000)
+        assert receipt.status == 'FILLED' and receipt.filled_qty == D('.1')
+        assert receipt.protective_stop_confirmed and len(adapter.positions()) == 1
+        assert receipt.fees is None
+        from test_account_lifecycle import _lifecycle as native_lifecycle, _append_command
+        ledger = Ledger(tmp_path/'actual-native-receipt.sqlite3')
+        try:
+            _append_command(ledger, cmd, now=1000000)
+            ledger.append(make_event(EventKind.EXECUTION_RECEIPT, 'vati-execution-router', asdict(receipt),
+                event_time_ms=receipt.broker_time_unix_ms, received_time_ms=receipt.received_time_unix_ms,
+                correlation_id=cmd.trade_intent_id))
+            life = native_lifecycle(ledger, adapter)
+            intent = TradeIntent(trade_intent_id=cmd.trade_intent_id, idempotency_key=cmd.idempotency_key,
+                account_alias=cmd.account_alias, venue=cmd.venue, symbol=cmd.symbol, direction=cmd.direction,
+                strategy_id=cmd.strategy_id, strategy_version=cmd.strategy_version, strategy_state=StrategyState.DEMO,
+                entry=cmd.entry_price, stop=cmd.protective_stop, requested_risk_pct=D('.005'),
+                decision_hash=cmd.decision_hash, market_snapshot_hash='m'*64)
+            life.record_entry(intent=intent, receipt=receipt,
+                state=SimpleNamespace(session=SimpleNamespace(value='LONDON'), event_window=SimpleNamespace(value='NONE')),
+                modelled_cost_pct=D('.0003'), software_stop=False)
+            assert life.entries[cmd.trade_intent_id]['fees'] is None and life.entries[cmd.trade_intent_id]['open']
+            durable = next(ledger.iter(EventKind.EXECUTION_RECEIPT))
+            assert AccountTradeLifecycle._receipt_from_payload(durable.payload) == receipt
+            cold = native_lifecycle(ledger, adapter)
+>           assert cold.recover_from_venue() == ((cmd.trade_intent_id,), ())
+E           AssertionError: assert ((), ('deadline-original',)) == (('deadline-original',), ())
+E             
+E             At index 0 diff: () != ('deadline-original',)
+E             Use -v to get more diff
+
+trading/tests/test_mt5_owner_cost_knowledge.py:51: AssertionError
+=============================== warnings summary ===============================
+../../van-backend-venv-20261025/lib/python3.12/site-packages/fastapi/testclient.py:1
+  /workspace/van-backend-venv-20261025/lib/python3.12/site-packages/fastapi/testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+    from starlette.testclient import TestClient as TestClient  # noqa
+
+../../van-backend-venv-20261025/lib/python3.12/site-packages/starlette/testclient.py:53
+  /workspace/van-backend-venv-20261025/lib/python3.12/site-packages/starlette/testclient.py:53: DeprecationWarning: The anyio.abc.BlockingPortal alias is deprecated, use anyio.from_thread.BlockingPortal instead.
+    _PortalFactoryType = Callable[[], AbstractContextManager[anyio.abc.BlockingPortal]]
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED trading/tests/test_native_position_recovery_scope.py::test_genuine_native_partial_position_and_tighter_stop_are_recoverable_without_sending
+FAILED trading/tests/test_mt5_owner_cost_knowledge.py::test_actual_signed_worker_fill_stop_and_close_never_invent_fee_zero
+2 failed, 71 passed, 2 warnings in 3.81s

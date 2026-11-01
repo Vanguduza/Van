@@ -32,10 +32,12 @@ from typing import Any, Optional, Sequence
 
 from vati.core.canonical import canonical_hash, dec
 from vati.core.events import EventKind, make_event
+from vati.core.decimal_context import native_decimal_context
 from vati.lifecycle.envelope import PositionRiskEnvelope
 from vati.lifecycle.family import FamilyState, PositionFamily
 from vati.lifecycle.trade_health import HealthState, TradeHealth
 from vati.risk.contracts import Direction
+from vati.risk.arithmetic import fraction, decimal
 
 PRODUCER = "vati-preservation"
 PRESERVATION_VERSION = "preservation/5.1.0"
@@ -194,17 +196,17 @@ class PreservationEngine:
     def _tighten_to(self, family: PositionFamily, health: TradeHealth,
                     mark: Decimal) -> Optional[tuple[Decimal, str]]:
         """The tightest defensible stop, or None when none is available."""
-        entry = family.average_entry
+        entry = family.average_entry_exact
         if entry is None or family.current_stop is None or family.original_stop is None:
             return None
-        risk_distance = abs(entry - family.original_stop)
+        risk_distance = abs(entry - fraction(family.original_stop))
         if risk_distance <= ZERO:
             return None
 
         candidate: Optional[Decimal] = None
         why = ""
         if health.mfe_r >= TRAIL_TRIGGER_R:
-            give = risk_distance * health.mfe_r * TRAIL_FRACTION
+            give = risk_distance * fraction(health.mfe_r) * fraction(TRAIL_FRACTION)
             candidate = entry + give if family.direction is Direction.LONG else entry - give
             why = "TRAIL_ADVANCED"
         elif health.mfe_r >= BREAKEVEN_TRIGGER_R:
@@ -217,12 +219,20 @@ class PreservationEngine:
         # side of the current price is an exit, and exits are the exit path's
         # business, not the stop's.
         if family.direction is Direction.LONG:
-            if candidate <= family.current_stop or candidate >= mark:
+            if candidate <= fraction(family.current_stop) or candidate >= fraction(mark):
                 return None
         else:
-            if candidate >= family.current_stop or candidate <= mark:
+            if candidate >= fraction(family.current_stop) or candidate <= fraction(mark):
                 return None
-        return candidate, why
+        proposed = decimal(candidate)
+        if family.direction is Direction.LONG and fraction(proposed) < candidate:
+            proposed = proposed.next_plus(context=native_decimal_context())
+        elif family.direction is Direction.SHORT and fraction(proposed) > candidate:
+            proposed = proposed.next_minus(context=native_decimal_context())
+        if (family.direction is Direction.LONG and not family.current_stop < proposed < mark
+                or family.direction is Direction.SHORT and not family.current_stop > proposed > mark):
+            return None
+        return proposed, why
 
     # ----------------------------------------------------------------- account
     def account_verdict(self, envelopes: Sequence[PositionRiskEnvelope], *,
@@ -230,17 +240,17 @@ class PreservationEngine:
         """One verdict for the whole account, evaluated before new entries."""
         equity = dec(equity)
         unknown = [e.family_id for e in envelopes if not e.risk_is_known]
-        worst = sum((e.worst_case_loss for e in envelopes if e.risk_is_known), ZERO)
-        pct = (worst / equity) if equity > ZERO else None
+        worst = sum((e.worst_case_exact for e in envelopes if e.risk_is_known), 0)
+        pct = (worst / fraction(equity)) if equity > ZERO else None
 
         if unknown:
             return self._act(None, ActionKind.HALT_NEW_RISK, Urgency.PROMPT,
                              ("RISK_UNKNOWN",), now_ms,
                              detail=f"families with unknown risk: {', '.join(sorted(unknown))}")
-        if pct is not None and pct >= ACCOUNT_HALT_WORST_CASE_PCT:
+        if pct is not None and pct >= fraction(ACCOUNT_HALT_WORST_CASE_PCT):
             return self._act(None, ActionKind.HALT_NEW_RISK, Urgency.PROMPT,
                              ("ACCOUNT_WORST_CASE_HIGH",), now_ms,
-                             detail=f"worst case {pct} of equity")
+                             detail=f"worst case {decimal(pct)} of equity")
         return self._act(None, ActionKind.NONE, Urgency.ROUTINE, (), now_ms)
 
     # --------------------------------------------------------------- internals

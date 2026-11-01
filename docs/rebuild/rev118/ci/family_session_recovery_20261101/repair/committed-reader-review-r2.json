@@ -1,0 +1,31 @@
+{
+  "schema": "van.family-committed-reader-review/1",
+  "observed_at_utc": "2026-11-01T01:13:47.379715+00:00",
+  "source_base": "1b53cf9199dc3b8ec01cbc4a6125cc90afad2ae6",
+  "source_pins": {
+    "trading/vati/core/ledger_pg.py": "81be80c128890718e34c99f4e98dd0b09df614f602986deaa482476195375707",
+    "trading/vati/execution/recovery_scope.py": "16b722a2e2397ef75e890508ab1ee01988d83e5e9fa27f4a18254ef904c159fe",
+    "trading/tests/test_family_committed_recovery_postgres.py": "40acad3cfafd3a097b93a7ea2dff81825bcf66dfd5cfe0ee663c2c4c8612d339"
+  },
+  "pins_match_test_receipt": true,
+  "reviewed_behavior": [
+    "Independent connection uses original configured factory and DSN, retaining exact ledger namespace.",
+    "No constructor schema or chain-head writes; existing schema and namespace validated under REPEATABLE READ READ ONLY.",
+    "Committed guard unchanged; original caller writer staged rows excluded, writer transaction remains intact.",
+    "Full chain verification and captured rows share one snapshot.",
+    "finally closes reader on consumer failure.",
+    "New tests prove namespace exclusion, staged exclusion, original rollback, stable read snapshot, blocked append, connection close and database read-only/isolation settings."
+  ],
+  "test_evidence_readback": {
+    "directory": "/workspace/van-family-committed-reader-pg-r2-20261101",
+    "passed": 66,
+    "failed": 0,
+    "errors": 0,
+    "skips": 0,
+    "audit_events": 0,
+    "exit": 0,
+    "owned_fixture_independently_absent": true
+  },
+  "remaining_review_blockers": [],
+  "limitations": "Read-only source review and independent original-artifact readback; reviewer did not independently rerun PostgreSQL. Integrated broad regression remains root-owned. No native or formal acceptance."
+}

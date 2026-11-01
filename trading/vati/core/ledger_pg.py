@@ -66,7 +66,8 @@ class PostgresLedger:
         self.path = dsn
         self.name = ledger_name
         self._atomic_depth = 0
-        self._conn = (connect or psycopg.connect)(dsn)
+        self._connect = connect or psycopg.connect
+        self._conn = self._connect(dsn)
         self._conn.autocommit = False
         try:
             with self._conn.cursor() as cur:
@@ -83,6 +84,32 @@ class PostgresLedger:
             self._conn.rollback()
             self._conn.close()
             raise
+
+    @contextmanager
+    def committed_reader(self):
+        """Read original commits without touching this owner's transaction.
+
+        Recovery can hold the writer lock while examining previously committed
+        native facts. A normal constructor performs initialization writes and
+        would contend with that lock, so this owner only opens and validates
+        the existing namespace inside a database-enforced read-only snapshot.
+        """
+        reader = PostgresLedger.__new__(PostgresLedger)
+        reader.path, reader.name = self.path, self.name
+        reader._atomic_depth = 0
+        reader._connect = self._connect
+        reader._conn = reader._connect(reader.path)
+        try:
+            reader._conn.autocommit = False
+            with reader.read_snapshot():
+                with reader._conn.cursor() as cursor:
+                    require_scoped_schema(cursor)
+                    cursor.execute('SELECT 1 FROM vati.chain_head WHERE ledger = %s', (reader.name,))
+                    if cursor.fetchone() is None:
+                        raise LedgerError('committed reader ledger namespace is unavailable')
+                yield reader
+        finally:
+            reader.close()
 
     # ------------------------------------------------------------------ write
     @contextmanager

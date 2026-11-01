@@ -1,0 +1,73 @@
+FFF                                                                      [100%]
+=================================== FAILURES ===================================
+______ test_expiry_during_real_writer_wait_prevents_admission_and_effect _______
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-11/test_expiry_during_real_writer0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f7b63ff9e80>
+
+    @pytest.mark.asyncio
+    async def test_expiry_during_real_writer_wait_prevents_admission_and_effect(tmp_path, monkeypatch):
+        clock, store, service, router, envelope, calls = await setup(tmp_path, monkeypatch)
+        started = asyncio.Event()
+        execute = aiosqlite.Connection.execute
+        async def observed(db, sql, *args, **kwargs):
+            if sql == 'BEGIN IMMEDIATE': started.set()
+            return await execute(db, sql, *args, **kwargs)
+        async with store.connection() as blocker:
+            await blocker.execute('BEGIN IMMEDIATE')
+            monkeypatch.setattr(aiosqlite.Connection, 'execute', observed)
+            task = asyncio.create_task(router.route(envelope))
+            try:
+                await asyncio.wait_for(started.wait(), 2)
+                assert not task.done()
+                clock[0] = 2.0
+                await blocker.commit()
+                result = await asyncio.wait_for(task, 3)
+>               assert not result.accepted and result.refusal == 'session_message_expired'
+E               AssertionError: assert (not True)
+E                +  where True = RoutedResult(accepted=True, kind='mission.message', result={'recorded': True}, refusal=None, admission=<CommandAdmission.ADMITTED: 'ADMITTED'>).accepted
+
+backend/tests/test_lane_session_commit_expiry.py:46: AssertionError
+___ test_committed_terminal_result_remains_readable_after_expiry_and_restart ___
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-11/test_committed_terminal_result0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f7b6401e120>
+
+    @pytest.mark.asyncio
+    async def test_committed_terminal_result_remains_readable_after_expiry_and_restart(tmp_path, monkeypatch):
+        clock, store, service, router, envelope, calls = await setup(tmp_path, monkeypatch)
+        first = await router.route(envelope)
+        assert first.accepted
+        clock[0] = 2.0
+        router.sessions = VanHermesSessionService(Store(store.path))
+        replay = await router.route(envelope)
+>       assert replay.accepted and replay.result == first.result
+E       AssertionError: assert (False)
+E        +  where False = RoutedResult(accepted=False, kind='mission.message', result=None, refusal='session_message_expired', admission=None).accepted
+
+backend/tests/test_lane_session_commit_expiry.py:62: AssertionError
+_______ test_pending_original_cannot_be_reauthorized_with_changed_expiry _______
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-11/test_pending_original_cannot_b0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f7b6401e390>
+
+    @pytest.mark.asyncio
+    async def test_pending_original_cannot_be_reauthorized_with_changed_expiry(tmp_path, monkeypatch):
+        clock, store, service, router, envelope, calls = await setup(tmp_path, monkeypatch)
+        await service.admit(envelope)
+        async def recover(request, device):
+            calls.append(request.payload)
+            return {'recorded': True}
+        router.delegates.recover_result = recover
+        clock[0] = 2.0
+        replay = await router.route(envelope.model_copy(update={'expires_at_ms': 3000}))
+>       assert not replay.accepted
+E       AssertionError: assert not True
+E        +  where True = RoutedResult(accepted=True, kind='mission.message', result={'recorded': True}, refusal=None, admission=<CommandAdmission.ALREADY_KNOWN: 'ALREADY_KNOWN'>).accepted
+
+backend/tests/test_lane_session_commit_expiry.py:75: AssertionError
+=========================== short test summary info ============================
+FAILED backend/tests/test_lane_session_commit_expiry.py::test_expiry_during_real_writer_wait_prevents_admission_and_effect
+FAILED backend/tests/test_lane_session_commit_expiry.py::test_committed_terminal_result_remains_readable_after_expiry_and_restart
+FAILED backend/tests/test_lane_session_commit_expiry.py::test_pending_original_cannot_be_reauthorized_with_changed_expiry
+3 failed in 0.89s

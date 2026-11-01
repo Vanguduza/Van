@@ -1,0 +1,94 @@
+{
+  "source_base": "1b53cf9199dc3b8ec01cbc4a6125cc90afad2ae6",
+  "handoff_manifest_sha256": "2c8aff3b632de2601a158beedb54c08edf065564ea9d1bc347094095e30907d2",
+  "verified_files": [
+    {
+      "path": "trading/vati/app/trade_lifecycle.py",
+      "sha256": "344bc6ef006e008f858337f706aa09286bf74f8cba56583b4428c1b912a4941d",
+      "size": 85512,
+      "base_sha256": "92006a2ec5fef6b0395af5630e4694fc9603cef3a9846373aa40aba068a078f4"
+    },
+    {
+      "path": "trading/vati/execution/recovery_scope.py",
+      "sha256": "34631a62e3cae4af24e1014e58fdbd2646d13c53124be45757cc5c9c9ac84825",
+      "size": 6129,
+      "base_sha256": "86485e26ce300d453c94dfe78041a472e3efb0d11c927a7c8fa755d29e780b97"
+    },
+    {
+      "path": "trading/vati/lifecycle/envelope.py",
+      "sha256": "e72790ca109e46109e76862c9d9b7746d52a9d15d592e49f8cd6c35ec75a48eb",
+      "size": 11140,
+      "base_sha256": "fcd84d466b10e66c57cddfbccd510ab5af5e9e3132bf7fbdea7e26d488f2f477"
+    },
+    {
+      "path": "trading/vati/lifecycle/expansion.py",
+      "sha256": "47ce7532ef6972ad86890397d7ba20320685fe21a3064780ae88f19e01aa16da",
+      "size": 15708,
+      "base_sha256": "315d704db16fab23dcd958da3b66a32fc74da0e1ae7644e52a7af5fed8456604"
+    },
+    {
+      "path": "trading/vati/lifecycle/family.py",
+      "sha256": "71942d5be3cc180cd4028bfe037a4090385e881b38d8cf1ddf3d4e0f615e8c08",
+      "size": 24505,
+      "base_sha256": "321eb64bd1285e76737bfa89d7286805634c8c93b888514c3c97e64467386694"
+    },
+    {
+      "path": "trading/vati/lifecycle/preservation.py",
+      "sha256": "d0238aa07d7c5be252377a60ccb95826e6a987ae2d0c105e3680f29a7e97b589",
+      "size": 12722,
+      "base_sha256": "0cf752d7b653c24d42ff6f88a2c4c044eb18c0177a3a4e00567f995ad43589a4"
+    },
+    {
+      "path": "trading/tests/test_family_original_accounting.py",
+      "sha256": "f5d2f46de09b9e475b9fbfdc7fc0b4710fa5f558a2d313b592989caf16edf696",
+      "size": 5651,
+      "base_sha256": null
+    },
+    {
+      "path": "trading/tests/test_family_durable_projection.py",
+      "sha256": "4b3b897e3ef77d4f2ae256ab0b0ac48406fcb54aafddeb61b2ba6fd0b6d73c8e",
+      "size": 15363,
+      "base_sha256": null
+    }
+  ],
+  "before_after_pins_match": true,
+  "observed_at_utc": "2026-11-01T00:59:45.092517+00:00",
+  "results": [
+    {
+      "script": "cross_symbol_restore.py",
+      "exit_code": 1,
+      "asserted_expected_result": true,
+      "stdout": "",
+      "stderr": "Traceback (most recent call last):\n  File \"/workspace/van-family-verification-20261101/cross_symbol_restore.py\", line 23, in <module>\n    restored=FamilyRegistry().restore(history,family_id='family:root',trade_intent_id='root',symbol='EURUSD',direction=root.direction,position_id=receipts[0].broker_position_id)\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspace/van-lanes-20261101/family/trading/vati/lifecycle/family.py\", line 385, in restore\n    raise FamilyError(\"scale member lacks its original child command\")\nvati.lifecycle.family.FamilyError: scale member lacks its original child command\n"
+    },
+    {
+      "script": "recovery_hold_probe.py",
+      "exit_code": 0,
+      "asserted_expected_result": true,
+      "stdout": "first (('original-family-restart',), ())\nsecond ((), ('original-family-restart',)) hold_before True state FamilyState.DIVERGED\nhold_after True state FamilyState.DIVERGED\n",
+      "stderr": ""
+    },
+    {
+      "script": "malformed_member_probe.py",
+      "exit_code": 0,
+      "asserted_expected_result": true,
+      "stdout": "first (('original-family-restart',), ())\nsecond ((), ('original-family-restart',)) hold_before True state FamilyState.DIVERGED\nhold_after True state FamilyState.DIVERGED\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "/workspace/van-backend-venv-20261025/bin/python",
+        "-m",
+        "pytest",
+        "-q",
+        "trading/tests/test_family_original_accounting.py",
+        "trading/tests/test_family_durable_projection.py",
+        "--junitxml=/workspace/van-family-verification-20261101/final-targeted.xml"
+      ],
+      "exit_code": 0,
+      "stdout": "...........................                                              [100%]\n27 passed in 0.59s\n",
+      "stderr": ""
+    }
+  ],
+  "limitations": "Source regression review only; actual PostgreSQL and full affected regression remain root-owned. Full hedged execution owner remains explicitly open. No formal/native acceptance."
+}

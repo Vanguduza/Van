@@ -474,6 +474,18 @@ class RetentionService:
                         predicate += (f" AND NOT EXISTS(SELECT 1 FROM {dependent} "
                                       f"WHERE {dependent}.{column}={policy.table}.{parent_column})")
                     await remove_children(policy.table, predicate, parameters)
+                    if policy.table == "van_session_messages":
+                        # The original execution deadline has exactly the message's
+                        # lifetime. Remove only metadata joined to this selected
+                        # message and session, under the same retention writer.
+                        await db.execute(
+                            "DELETE FROM runtime_meta WHERE key IN ("
+                            "SELECT 'session_expiry:' || message_id FROM van_session_messages "
+                            f"WHERE {predicate} AND van_session_id = CASE "
+                            "WHEN json_valid(runtime_meta.value) THEN "
+                            "json_extract(runtime_meta.value, '$.van_session_id') END)",
+                            parameters,
+                        )
                     cursor = await db.execute(f"DELETE FROM {policy.table} WHERE {predicate}", parameters)
                     results.append(PruneResult(
                         table=policy.table, deleted=int(cursor.rowcount or 0),
