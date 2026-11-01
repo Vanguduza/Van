@@ -57,6 +57,13 @@ FORGETTABLE: tuple[ForgettableStore, ...] = (
 #: Named, with the reason, rather than silently omitted. Someone auditing this list should
 #: be able to see that the omission was decided rather than forgotten.
 DELIBERATELY_KEPT: dict[str, str] = {
+    "account_application_drafts": (
+        "Explicitly owner-authored account intent previews, not inferred memory. "
+        "Original bodies and their artifact projections are removed together through "
+        "DELETE /v1/trading/accounts/application-drafts/{operation_id} with the exact digest. "
+        "Expiry affects review freshness, not retention. Minimal opaque original-operation "
+        "hash/identity receipts prevent erased content being recreated by a delayed retry."
+    ),
     "native_funding_drafts": (
         "Saved funding drafts are explicit owner work, outside this inferred-memory erasure. "
         "They remain unapproved and cannot authorize a payment. Their separate native "

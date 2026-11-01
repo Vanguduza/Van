@@ -1167,6 +1167,7 @@ def create_app() -> FastAPI:
         try:
             yield
         finally:
+            await app.state.account_application_drafts.drain()
             speech_cleanup.cancel()
             recovery_dispatch.cancel()
             revocation_dispatch.cancel()
@@ -1832,7 +1833,7 @@ def create_app() -> FastAPI:
         # permissions, reminders and privacy controls as those routers grew.
         return True
 
-    async def current_device_mutation_policy(device_id: str, *, certifying: bool = False):
+    async def current_device_mutation_policy(device_id: str, *, certifying: bool = False, _db=None):
         """Existing owner-policy facts only; no proof, nonce or mutation grant."""
         facts = {"binding_required": settings.require_device_binding,
                  "proof_required": False, "eligible": False, "reason": None}
@@ -1840,11 +1841,20 @@ def create_app() -> FastAPI:
             facts.update(eligible=not settings.require_device_binding,
                          reason="owner_device_binding_unconfigured" if settings.require_device_binding else None)
             return facts, None, 503
-        own_binding = await owner_device_bindings.for_device(device_id)
+        if _db is None:
+            own_binding = await owner_device_bindings.for_device(device_id)
+        else:
+            from van_gateway.auth.device_binding import _row_to_binding
+            row = await (await _db.execute('SELECT * FROM owner_device_bindings WHERE device_id=?', (device_id,))).fetchone()
+            own_binding = None if row is None else _row_to_binding(row)
         if own_binding is not None and own_binding.status.value != "ACTIVE":
             facts["reason"] = "device_binding_not_active"
             return facts, None, 403
-        binding = await owner_device_bindings.active()
+        if _db is None:
+            binding = await owner_device_bindings.active()
+        else:
+            row = await (await _db.execute("SELECT * FROM owner_device_bindings WHERE owner_principal_id='owner' AND status='ACTIVE'")).fetchone()
+            binding = None if row is None else _row_to_binding(row)
         if binding is None:
             facts.update(eligible=not settings.require_device_binding,
                          reason="device_not_bound" if settings.require_device_binding else None)
@@ -3752,6 +3762,35 @@ def create_app() -> FastAPI:
 
         if abs(int(_time.time()) - req.issued_at_unix) > 300:
             raise HTTPException(status_code=403, detail="stale owner action; sign again")
+
+    # LAC-135 only: owner-authored preview, never provider onboarding/approval.
+    from van_gateway.trading.account_application_drafts import (
+        AccountApplicationDrafts, DraftError, build_account_application_draft_router, digest as draft_digest)
+
+    async def authorize_account_draft(db, caller, mutating):
+        row = await (await db.execute(
+            'SELECT access_token_hash,revoked_at_unix FROM devices WHERE device_id=?',
+            (caller['device_id'],))).fetchone()
+        if (caller['owner_id'] != 'owner' or not row or row['revoked_at_unix'] is not None
+                or row['access_token_hash'] != caller['access_token_hash']):
+            raise DraftError('ACCOUNT_DRAFT_CALLER_NOT_CURRENT',403)
+        if mutating:
+            policy, _, _ = await current_device_mutation_policy(caller['device_id'], _db=db)
+            if not policy['eligible'] or policy['proof_required'] and not caller['proved']:
+                raise DraftError('ACCOUNT_DRAFT_OWNER_POLICY_REFUSED',403)
+        configuration = {**account_application_drafts.policy(),
+            'require_device_binding': settings.require_device_binding,
+            'binding_service_configured': owner_device_bindings is not None,
+            'expected_package': settings.owner_device_package,
+            'expected_signing_cert_sha256': settings.owner_device_signing_cert_sha256,
+            'attestation_roots_digest': draft_digest(sorted(settings.owner_device_attestation_roots.split(',')))}
+        return {'owner_id':'owner','device_id':caller['device_id'],
+            'profile_context':{'state':'SINGLE_OWNER_GATEWAY','account_profile_ref':None,
+                'configuration_digest':draft_digest(configuration)}}
+
+    account_application_drafts = AccountApplicationDrafts(store, artifacts, authorize_account_draft)
+    app.state.account_application_drafts = account_application_drafts
+    app.include_router(build_account_application_draft_router(account_application_drafts))
 
     @app.get('/v1/trading/accounts/catalog',response_model=AccountActionCatalog)
     async def trading_account_catalog(request: Request):

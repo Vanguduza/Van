@@ -1,0 +1,47 @@
+{
+  "state": "REVIEWED_LAC135_BACKEND_DRAFT_SOURCE_ANDROID_PROVIDER_OPEN",
+  "base": "6a0196a951dfb62413f76d3d91ceb855b16f6030",
+  "reviewed_export_base": "b15b160a3c4f42b35808704f44f6e178342e2149",
+  "preimages_equal": true,
+  "source_pins": {
+    "backend/van_gateway/trading/account_application_drafts.py": "4ba0fd716762156346180fa327b7373bad4a470cddb12e2946355efa15ae5ccd",
+    "backend/tests/test_account_application_drafts.py": "a9a01817ddab26970e8f8eed54249e213091e28209a503b2549acc5bfdd06ff2",
+    "backend/van_gateway/app.py": "5dd80495c8a2627bfa2ddc7cf3477b3f5e129a0113e18b2370a23e99e0438140",
+    "backend/van_gateway/context/forget.py": "6fed25f2f105938d6e5be3ebbd98f3ac1bb8b36aee3fbf1b1dc19cbeb87a2625"
+  },
+  "behavior": "Owner-authored durable preview stores exactbody/operation/context/revision and artifactprojection atomically; currentwriter owner/device/digest/policy validation beforechange; originalhistory/replay/privacyerase separate fromnewgeneration. Gap-free canonicalpublication/proven-currenterase chain required; absent/null/unsupported/stale head isUNKNOWN notvirgin; no invented recovery. Explicitownererase removesbody/projection evenunknownselection withoutlaunderinghead.",
+  "context": "ActualSINGLE_OWNER_GATEWAY/account_profile_ref=null andnonsecretpolicyconfigurationdigest. Unresolvedprovider/no URL/issuer guessed; execution_authority=false. Preview is not LAC137/providerapplication/approval/financialeffect.",
+  "memory": "ExistingOwnerState inferredmemoryerase semanticsunchanged;descriptiveinventory distinguishes explicitownerwork. ExactownerdraftDELETE andminimalopaqueoriginalidentity/tombstone preserved; noblanketprivacywaiver.",
+  "evidence_scope": {
+    "author": "Current53 plusdistinctcoldprocess1=54uniquePASS0skip. Old71 originalsource and independent3PASS1FAIL remainhistorical, notrelabeledcurrentterminal.",
+    "independent": "7actualpairedSQLiteprobes close acceptedR1 falsegeneration; all4 source/archive/patch/basepins exact.",
+    "integrated": "101PASS0skip/audit0 on exact4pins with current6aapprovalcomposition;9selecteddraftcases+existingauth/artifact/memoryerase/retention/privatecore. Overlappingauthor evidence notsummedunique.",
+    "Android": "PersistedAndroiddraftproducer/selection remainsOPEN forlaterexclusivelease; noUIredesign/BG001, no newSDKclaim.",
+    "provider": "No submission/LAC137/nativeprovider/financial/approvalauthority frompreview. Allwholeunit/native/provider/S24/formal/intake/privateDDSkey/trustedbase/fullmatrix gatesOPEN.",
+    "semantic": "All8reference-derivedregistry/functionartifact consumers220PASS0skip/audit0/exit0;4pinsbefore=after. Distinctoverlap/no nativeacceptance."
+  },
+  "derived": "Genuineowner6outputs/frontendsourcecitationrender.487\u2192491 endpoints,380\u2192393 typedmodels;all487originalIDs and380schemas preserved;oldendpointchangesonlysourcecitations. All349actions/234contexts/105functions/42groups/78surfaces unchanged.",
+  "failure_history": "R1review3pass1fail, exactbeforefalsegeneration admission, R2source53+cold1 kept distinct in originalhandoff/rawtmp; no historical green rewrite.",
+  "raw_volatility": "Larger original logs/fixtures andsourceZIP stay original/tmp paths with digests inHANDOFF; persistence acrossenvironmentreplacement notguaranteed. Compactsourcepatch/pins/review/proofs preservedhere.",
+  "next": "Finish8semanticconsumers/canonicalguards/manifest,genuinecommit/4fdverify/normalpush onlyaftercurrent6a SOURCEbarrier, exactreadbacks/onenewheadwatch. Original21319 remainsowneduntilactualterminal.",
+  "at": "2026-11-01T23:25:36.056523+00:00",
+  "evidence": {
+    "FRONTEND_CHECK.json": "69dcc86a9d7aaffcadf4a70e58b379d8452c124dadc4347afbc9e57fbab7ae85",
+    "HANDOFF.json": "3cbdeead211404de1a384f0904c5c46135996a0b693843aa0ca919372e39c77e",
+    "AUTHOR_COLD_RECEIPT.json": "62759b8aa98584413d726fb302dfda234b60f1103d04ae85b0183314f7315f17",
+    "SEMANTIC_XML.xml": "00482f58ab403aade375674b75d8b9556f21f9e9f5fdf402e74f0f521e4cf64e",
+    "INTEGRATED_RECEIPT.json": "5b41273e5d534704d935e0965426a42a8c09cc768ce382794efc0adca77da048",
+    "DERIVED_REVIEW.json": "1d17af98e132e63cd69f4760cba537371f39d2263bde7544b744d4f2c7e5ca32",
+    "INDEPENDENT_REVIEW.json": "39e9e34f624a37dad397965c2caf8a66216376451649dd4bb7c8b9bbcd4e7e8f",
+    "SOURCE_PINS.json": "6a80682bf9a7609deb019f754ad655525aab38a8d0e8a9f8b704d2a0dc8880d5",
+    "OWNER_CHECK.json": "35a9b4641c85055b16c3a6458a7b1f99fb5df7ec0f5a6280ca45c3ab14cd7103",
+    "SEMANTIC_AUDIT.json": "f159c056ef876b2852e522cf92ac940143fb1b43cf2b480fbad507dc745049bc",
+    "INTEGRATED_XML.xml": "d363e878ca66a45a38df87896ef7ef71a6bb0e47fc71b87681dede62021f53e8",
+    "INTEGRATED_AUDIT.json": "f159c056ef876b2852e522cf92ac940143fb1b43cf2b480fbad507dc745049bc",
+    "SEMANTIC_RECEIPT.json": "840fd2cedca9a2f43c3196b70f46f4fd370ec41a520f0f115f3129b29b0b7190",
+    "SOURCE.patch": "abd9a35fb1ccfcda7b295e3d742331472feffcf238bf0c5f40caa306672bbb26",
+    "R1_FAILED_REVIEW.json": "6f1454219299abe7daa4d564832a47b9b19a73144b9242f5862abba4bdfdb0a9",
+    "APPLY_RECEIPT.json": "4e696217c324aafa1e1e449e1a3ef5b9d5b03f727f259e73565d37daa5cc4c1f",
+    "AUTHOR_FINAL_RECEIPT.json": "2bf7ee4c58147f54a25fab219daaf952db13a593471375cec2751931cb14a20e"
+  }
+}

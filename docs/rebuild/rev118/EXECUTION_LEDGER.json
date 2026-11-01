@@ -566,13 +566,13 @@
         }
       ]
     },
-    "updated_utc": "2026-11-01T23:09:38.671806+00:00",
+    "updated_utc": "2026-11-01T23:25:36.056523+00:00",
     "branch": "ccr-9e07e1af-8mgz1p",
-    "head": "b15b160a3c4f42b35808704f44f6e178342e2149",
-    "published_head": "b15b160a3c4f42b35808704f44f6e178342e2149",
-    "committed_ledger_verification": "GREEN227 terminal0 on publishedb15; reviewedLINKcandidate final4fd pending",
-    "current_packet": "OAUTH_LINK_R3_SOURCE",
-    "active_packet": "Exact15reviewedsourcepaths plus genuineownerderivedrecords;106integratedSOURCEpasses0skip/audit0;194authorPASS2PGskip mapped196unique; noSDK/nativequalification",
+    "head": "6a0196a951dfb62413f76d3d91ceb855b16f6030",
+    "published_head": "6a0196a951dfb62413f76d3d91ceb855b16f6030",
+    "committed_ledger_verification": "GREEN228 terminal0 on published6a; reviewedLAC135candidate final4fd pending",
+    "current_packet": "LAC135_BACKEND_LIVE_DRAFT_R2",
+    "active_packet": "Exact4reviewedsourcepaths+genuineadditivecontracts;54authorunique+101integratedSOURCEpasses separatelyoverlapping;Android/providerOPEN",
     "current_background_jobs": [
       {
         "run_id": 41341233137,
@@ -582,7 +582,7 @@
       }
     ],
     "agent_assignments_ref": "delegation.active_assignments",
-    "next_action": "Finish8semanticconsumers/canonicalguards/manifest,genuinecommit,required4fdverify,normalpush/exactreadbacks andoneexactheadwatch; old67706 reapedonce terminalCI1. FreshnewLINKSDK/PG/native qualificationspending; unreviewedlive-draftsourceexcluded.",
+    "next_action": "Finish8semanticconsumers/canonicalguards/manifest,genuinecommit/4fdverify/normalpush onlyaftercurrent6a SOURCEbarrier, exactreadbacks/onenewheadwatch. Original21319 remainsowneduntilactualterminal.",
     "acceptance_issued": false,
     "continuation_history": [
       {
@@ -654,7 +654,7 @@
         "captured_at_utc": "2026-11-01T02:38:52.492703+00:00"
       }
     ],
-    "current_source_receipt": "receipts/OAUTH_LINK_SOURCE_20261101.json",
+    "current_source_receipt": "receipts/ACCOUNT_LIVE_DRAFT_SOURCE_20261101.json",
     "history_20261101": [
       {
         "updated_utc": "2026-11-01T02:38:52.492703+00:00",
@@ -1409,11 +1409,155 @@
         "publication_note": "Dated prepublication checkpoint names actual last verified published base; exact containing commit is resolved with git rev-parse. External continuation records subsequent publication, without self-referential commit hashes.",
         "source_ci_receipt": "receipts/raw/agp-constructor-source-20261101/DIAGNOSIS.json",
         "intake_PR106": "OPEN_READY_UNMERGED_PROPOSAL_NOT_USED"
+      },
+      {
+        "historical_before_20261101": {
+          "updated_utc": "2026-10-28T05:23:50.455298+00:00",
+          "branch": "ccr-9e07e1af-8mgz1p",
+          "base": "b02075f327ea8180ab6d269eba358cf8c5479878",
+          "background_jobs": [],
+          "last_validation": "Held physical projection failures no longer turn a displayed shared peak into a fresh own-alias contribution. Four real producer/read-or-SQL-commit-ACK-loss counterexamples and two higher-native-equity counterexamples failed before correction. Recovery now independently retains the original native equity sample rather than the displayed aggregate; missing or held funding never seeds risk capital. Both original alias-scoped owner resets and the separately observed higher natural peak remain effective after replay. Two old account harnesses now initialize the real signed test mandate required by the actual service; all42 original assertion ASTs remain identical. Final494actualSQLite/PostgreSQL/HTTP/source/namespace/authority/replay/recovery/funding cases pass0skip/audit0;494unique callIDs once,all1201pinnedPythonhashes match,ownedPG independently absent. The83 focused checks overlap. Owner contracts unchanged and mutationpreflight374/383/0findings is consistency only. Published89661 full hosted trading remainsFAILED4607pass/2fixturefail/1DDSskip;26PGpassed andvoiceunexecuted afterfailure. Untracked collateral/order read components remain separate unfinished reservation foundations, not accepted features. Flow adjustment, all-origin collateral/reservations, original policy/active mandate reconciliation, pending/partial/uncertain/manual exposure, native settlement and all remaining canonical units stay open.0formal/native/production/S24acceptance.",
+          "environment_notes": [
+            "clone must be unshallowed (git fetch --unshallow) and PR heads fetched (+refs/pull/*/head:refs/remotes/origin/pr/*) before pre001.py",
+            "pytest from backend/requirements.txt in a venv",
+            "rsync needed for tests/hermes installer test",
+            "DDS sibling at /home/user/dial-development-system fetched origin/master 204f2f3b for F15 source reading",
+            "Gradle: repo.maven.apache.org returned 429 repeatedly; an init script adding https://maven-central.storage-download.googleapis.com/maven2/ resolved the same coordinates",
+            "Python 3.12 venv from backend/requirements.lock for CI-equivalent runs; stream-host venv from deploy/van-browser-stream/requirements.lock",
+            "Desktop Commander read-only device listing was refused by the session permission policy; native readback prepared as pre003/NATIVE_READBACK_REQUEST.md"
+          ],
+          "next_action": "Genuinehook/requiredbaselinecommittedverify/normalpush/readback/exactCI; finish account-wide collateral and all-origin reservation workflows under canonical scope.",
+          "previous_head": "83f2688a6414b5e81358c051418d0fe85ee0a3fb",
+          "current_packet": "HELD_PHYSICAL_RISK_RECOVERY_SOURCE",
+          "ci_credential_capability": "receipts/CI_CREDENTIAL_CAPABILITY_20261024.json: repo admin metadata available, integration secret/deploy-key reads403; no credential changes.",
+          "current_background_jobs": [],
+          "active_packet": "BE-009 exact arithmetic source locally qualified; genuine hook/publication pending; then original position projections and shared financial risk.",
+          "published_head": "e9cbdd69c9d98688e14b088c19c65e5df80c6e42",
+          "local_base_head": "89661bf72bfda9207000d3b9b346595ac41904ff",
+          "committed_ledger_verification": "PublishedE9actualGREEN177 required-baselineexit0; new schema sourceuncommitted",
+          "native_mql_source_compile": {
+            "head": "752d265b11ba643ed309481b110248f8b7fe323b",
+            "run": 40255331586,
+            "status": "SOURCE_COMPILED",
+            "evidence": "receipts/NATIVE_MQL_COMPILED_752d265b.json",
+            "qualification": "Signed compiler and deliberate invalid probe/source blob/artifact checks;network-blocked SDK initialization only;no account/broker/order/deployment/device acceptance"
+          },
+          "head": "e9cbdd69c9d98688e14b088c19c65e5df80c6e42",
+          "historical_background_job_observations": [
+            {
+              "kind": "van-ci",
+              "id": 40383599951,
+              "head": "9bf1acc4ed0239540d1ffffcc8cf9cf7eec16f82",
+              "state": "RUNNING_AT_CAPTURE;inspectactualoutcomes",
+              "not_acceptance": true
+            },
+            {
+              "kind": "van-forecast-runtime-source",
+              "id": 40383599772,
+              "head": "9bf1acc4ed0239540d1ffffcc8cf9cf7eec16f82",
+              "state": "RUNNING_AT_CAPTURE;inspectactualoutcomes",
+              "not_acceptance": true
+            }
+          ]
+        },
+        "updated_utc": "2026-11-01T23:09:38.671806+00:00",
+        "branch": "ccr-9e07e1af-8mgz1p",
+        "head": "b15b160a3c4f42b35808704f44f6e178342e2149",
+        "published_head": "b15b160a3c4f42b35808704f44f6e178342e2149",
+        "committed_ledger_verification": "GREEN227 terminal0 on publishedb15; reviewedLINKcandidate final4fd pending",
+        "current_packet": "OAUTH_LINK_R3_SOURCE",
+        "active_packet": "Exact15reviewedsourcepaths plus genuineownerderivedrecords;106integratedSOURCEpasses0skip/audit0;194authorPASS2PGskip mapped196unique; noSDK/nativequalification",
+        "current_background_jobs": [
+          {
+            "run_id": 41341233137,
+            "watch_session": 56665,
+            "receipt": "/workspace/van-account-runtime-ci-watch-20261101.json",
+            "state": "Originalreadonlywatch; actualterminalreconciliationrequired, neverduplicate/cancel"
+          }
+        ],
+        "agent_assignments_ref": "delegation.active_assignments",
+        "next_action": "Finish8semanticconsumers/canonicalguards/manifest,genuinecommit,required4fdverify,normalpush/exactreadbacks andoneexactheadwatch; old67706 reapedonce terminalCI1. FreshnewLINKSDK/PG/native qualificationspending; unreviewedlive-draftsourceexcluded.",
+        "acceptance_issued": false,
+        "continuation_history": [
+          {
+            "updated_utc": "2026-11-01T01:14:21.642465+00:00",
+            "branch": "ccr-9e07e1af-8mgz1p",
+            "head": "1b53cf9199dc3b8ec01cbc4a6125cc90afad2ae6",
+            "published_head": "1b53cf9199dc3b8ec01cbc4a6125cc90afad2ae6",
+            "committed_ledger_verification": "GREEN205 terminal success before normal push; remote equality rechecked20261101",
+            "current_packet": "FAMILY_ORIGINAL_ACCOUNTING_AND_LIFETIME_RECOVERY",
+            "active_packet": "Pairing original full suite running; newly reproduced mid-transaction expiry repair blocks publication. Family corrected PostgreSQL reader passed66 with review; original broad successor run has14 account recovery failures and remains running. Session successor frozen; no acceptance.",
+            "current_background_jobs": [
+              {
+                "kind": "local-source-test",
+                "session_id": 39363,
+                "receipt": "/workspace/van-auth-integrated-backend-full-20261101.json",
+                "state": "RUNNING_ORIGINAL_SOURCE_NOT_LATER_REPAIR"
+              },
+              {
+                "kind": "local-source-test",
+                "session_id": 8913,
+                "receipt": "/workspace/van-successor-regression-pg-r1-20261101/receipt.json",
+                "state": "RUNNING_WITH_14_CONFIRMED_FAILURES_NOT_QUALIFIED"
+              }
+            ],
+            "agent_assignments_ref": "delegation.active_assignments",
+            "next_action": "Preserve original terminal outcomes; integrate reviewed pairing and family corrections only after frozen runs finish, qualify corrected inputs, then genuine hooks/committed verification/normal publication.",
+            "acceptance_issued": false,
+            "current_action": "Published1b53cf9199dc3b8ec01cbc4a6125cc90afad2ae6 has GREEN205 before normal push and independently rechecked remote equality. Adopted coordinated lanes now execute with one integration owner; family repair is the first active implementation and the original backend pairing/renewal candidate is under full testing while a newly reproduced mid-transaction expiry gap is repaired in isolation. The session successor is frozen with124 focused passes. Family committed-reader correction passed66 actual PostgreSQL cases; corrected broad integration remains pending after14 original recovery failures. Next candidate requires genuine hooks, terminal required-baseline committed verification before normal push, independent readback and exact-head CI. Repair the confirmed family remaining cost-basis error after partial exits and later additions, and verify original lifetime history recovery and actual risk/expansion consumers. Complete the original native economic owner for per-deal/correction/bust/late charge identity, signed fees/rebates, carry/FX/principal and cash/finality; retain scalar ambiguity as unknown until that owner supplies evidence. Continue atomic amend versus cancel-replace, governed parent/child lifetime budgets, all-origin shared financial reservations/outbox/effect consumers, manual/payment/transfer/handover/provider reconciliation and nonduplicated release. Preserve immutable V1 missing-obligation receipts and native policy/runtime admission. Retain the intermittent Android deep-link instrumentation failure and inspect exact-head CI; unchanged parent replay passed18 cases with4 declared skips, without S24 acceptance. All82backend units,12 verification packets,38forecast/research backend units and every market/chart/voice/assistant/crypto/operations contract retain full scope. Android follows the actual BG-001 gate and uses the provisioned production profile on Van trading core; genuine signing and actual Artemis/S24 acceptance remain required. Profitability is evaluated with evidence, never guaranteed.",
+            "captured_at_utc": "2026-11-01T02:10:55.197649+00:00"
+          },
+          {
+            "updated_utc": "2026-11-01T02:10:55.197649+00:00",
+            "branch": "ccr-9e07e1af-8mgz1p",
+            "head": "1b53cf9199dc3b8ec01cbc4a6125cc90afad2ae6",
+            "published_head": "1b53cf9199dc3b8ec01cbc4a6125cc90afad2ae6",
+            "committed_ledger_verification": "GREEN205 terminal success before normal push; remote equality rechecked20261101",
+            "current_packet": "AUTH_COMMIT_EXPIRY_SOURCE",
+            "active_packet": "Corrected auth exact composite:5943identities,5783passed,160declaredskips,0unresolvedbad/unexecuted; focused61/review59overlap. Original timedout/failed runs and10second erasure timing sensitivity retained; unchanged isolated erasure passed. Exact13PGsupplement passed. Family/session successor frozen:boundary441 and composite5775pass/0skip; queued afterauth publication.",
+            "current_background_jobs": [],
+            "agent_assignments_ref": "delegation.active_assignments",
+            "next_action": "Run mandatory source/manifest guards, genuine hook commit, required-baseline committed verification before normal push, independent remote readback and exact-head hosted CI; then integrate queued family/session source. No acceptance issued.",
+            "acceptance_issued": false,
+            "current_source_receipt": "receipts/AUTH_COMMIT_EXPIRY_SOURCE_20261101.json",
+            "current_action": "Corrected pairing/renewal authority through writer/await boundaries is source-qualified by exact5943case composite coverage:5783passed and160declaredskips, with every failed/error/unexecuted case accounted for and exact13actualPostgreSQLvariants executed. Original timedout and failed runs remain such; the inherited10second positive erasure case retains actualexpired denial and unchanged5.337second isolatedpass, without a performance guarantee. All663inheritedtestfiles remain byte-identical. Auth genuinehook/required-baseline committedverification/normalpush/readback/exactCI is nowexecuting. Frozen family11/session5 successor has441boundary and5775composite passes/0skip; integrate/publish it afterauth. Wholeunits and native/provider/production/S24acceptance remainunissued. Complete the original native economic owner for per-deal/correction/bust/late charge identity, signed fees/rebates, carry/FX/principal and cash/finality; retain scalar ambiguity as unknown until that owner supplies evidence. Continue atomic amend versus cancel-replace, governed parent/child lifetime budgets, all-origin shared financial reservations/outbox/effect consumers, manual/payment/transfer/handover/provider reconciliation and nonduplicated release. Preserve immutable V1 missing-obligation receipts and native policy/runtime admission. Retain the intermittent Android deep-link instrumentation failure and inspect exact-head CI; unchanged parent replay passed18 cases with4 declared skips, without S24 acceptance. All82backend units,12 verification packets,38forecast/research backend units and every market/chart/voice/assistant/crypto/operations contract retain full scope. Android follows the actual BG-001 gate and uses the provisioned production profile on Van trading core; genuine signing and actual Artemis/S24 acceptance remain required. Profitability is evaluated with evidence, never guaranteed.",
+            "captured_at_utc": "2026-11-01T02:18:07.793161+00:00"
+          },
+          {
+            "updated_utc": "2026-11-01T02:18:07.793161+00:00",
+            "branch": "ccr-9e07e1af-8mgz1p",
+            "head": "d15283c55c843d1b961592dabc60f9665e5a7c11",
+            "published_head": "d15283c55c843d1b961592dabc60f9665e5a7c11",
+            "committed_ledger_verification": "Auth required4fd466baseline committed GREEN206 terminal0 before normalpush; gitlsremote and connectedPR105 exacthead match.",
+            "current_packet": "FAMILY_SESSION_RECOVERY_SOURCE",
+            "active_packet": "Auth d15283c5 published with5943exact composite identities:5783pass/160declaredskips. Family11/session5 now integrated at the exact tested pins:boundary441 and composite5775pass/0skip; original14sourcefailures and50storage failures remainfailed, exact50recoverypassed. Genuine successorhook/verify/push pending; no native/fullunit acceptance.",
+            "current_background_jobs": [
+              {
+                "kind": "hosted-source-ci",
+                "run_id": 41264446462,
+                "head": "d15283c55c843d1b961592dabc60f9665e5a7c11",
+                "observed_state": "QUEUED_AT_AUTH_READBACK",
+                "meaning": "Exactoriginal authrun; not final successorqualification."
+              }
+            ],
+            "agent_assignments_ref": "delegation.active_assignments",
+            "next_action": "Genuine successorhook commit, required-baseline committed verification before normalpush, independentremote readback and exactheadCI; update existing draftPR105 to final combinedbehavior. Root retains nextworkflow architecture decision; fullhedged multi-position effects and all canonical obligations remainopen.",
+            "acceptance_issued": false,
+            "current_source_receipt": "receipts/FAMILY_SESSION_RECOVERY_SOURCE_20261101.json",
+            "current_action": "Auth d15283c55c843d1b961592dabc60f9665e5a7c11 is published through genuinehook/GREEN206/normalpush and independentremote equality. Its5943identity composite has5783passes/160declaredskips with all originalfailed/interrupted records retained, including actual10second erasure timing sensitivity and unchanged5.337second isolatedpass. Family11/session5 exacttestedsource nowintegrates family remainingbasis/lifetime recovery/actual riskconsumers, independent committed PostgreSQL reader and originalsessionexpiry/read-onlyoriginalresultrecovery. Boundary441 and exactaffected5775casecomposite have0failure/error/skip/auditviolations; original14sourcefailures and50storage failures remainfailed, exact50freshPGrecoverypassed. All663inheritedtests remain byte-identical. Genuine successorhook/required-baselinecommittedverify/normalpush/readback/exactCI and finaldraftPR105 update areexecuting. Fullhedged multi-position execution/protection/review, wholeunits and native/provider/production/S24acceptance remainunissued. Complete the original native economic owner for per-deal/correction/bust/late charge identity, signed fees/rebates, carry/FX/principal and cash/finality; retain scalar ambiguity as unknown until that owner supplies evidence. Continue atomic amend versus cancel-replace, governed parent/child lifetime budgets, all-origin shared financial reservations/outbox/effect consumers, manual/payment/transfer/handover/provider reconciliation and nonduplicated release. Preserve immutable V1 missing-obligation receipts and native policy/runtime admission. Retain the intermittent Android deep-link instrumentation failure and inspect exact-head CI; unchanged parent replay passed18 cases with4 declared skips, without S24 acceptance. All82backend units,12 verification packets,38forecast/research backend units and every market/chart/voice/assistant/crypto/operations contract retain full scope. Android follows the actual BG-001 gate and uses the provisioned production profile on Van trading core; genuine signing and actual Artemis/S24 acceptance remain required. Profitability is evaluated with evidence, never guaranteed.",
+            "captured_at_utc": "2026-11-01T02:38:52.492703+00:00"
+          }
+        ],
+        "current_source_receipt": "receipts/OAUTH_LINK_SOURCE_20261101.json",
+        "last_verified_published_base": "b15b160a3c4f42b35808704f44f6e178342e2149",
+        "publication_note": "Dated prepublication checkpoint names actual last verified published base; exact containing commit is resolved with git rev-parse. External continuation records subsequent publication, without self-referential commit hashes.",
+        "source_ci_receipt": "receipts/raw/oauth-link-source-20261101/INTEGRATED_RECEIPT.json",
+        "intake_PR106": "OPEN_READY_UNMERGED_PROPOSAL_NOT_USED"
       }
     ],
-    "last_verified_published_base": "b15b160a3c4f42b35808704f44f6e178342e2149",
+    "last_verified_published_base": "6a0196a951dfb62413f76d3d91ceb855b16f6030",
     "publication_note": "Dated prepublication checkpoint names actual last verified published base; exact containing commit is resolved with git rev-parse. External continuation records subsequent publication, without self-referential commit hashes.",
-    "source_ci_receipt": "receipts/raw/oauth-link-source-20261101/INTEGRATED_RECEIPT.json",
+    "source_ci_receipt": "receipts/raw/account-live-draft-source-20261101/INTEGRATED_RECEIPT.json",
     "intake_PR106": "OPEN_READY_UNMERGED_PROPOSAL_NOT_USED"
   },
   "observations": [
@@ -1667,8 +1811,8 @@
       "evidence": "ci/MUTATION_CORPUS_c2a27848.json"
     }
   ],
-  "current_action": "Finish8semanticconsumers/canonicalguards/manifest,genuinecommit,required4fdverify,normalpush/exactreadbacks andoneexactheadwatch; old67706 reapedonce terminalCI1. FreshnewLINKSDK/PG/native qualificationspending; unreviewedlive-draftsourceexcluded.",
-  "updated_at_utc": "2026-11-01T23:09:38.671806+00:00",
+  "current_action": "Finish8semanticconsumers/canonicalguards/manifest,genuinecommit/4fdverify/normalpush onlyaftercurrent6a SOURCEbarrier, exactreadbacks/onenewheadwatch. Original21319 remainsowneduntilactualterminal.",
+  "updated_at_utc": "2026-11-01T23:25:36.056523+00:00",
   "execution_method": {
     "path": "BUILD_EXECUTION_PLAN.md",
     "scope_index": "SOURCE_WORKMAP.json",

@@ -1,0 +1,97 @@
+{
+  "state": "TERMINAL",
+  "source_before": {
+    "backend/van_gateway/trading/account_application_drafts.py": "4ba0fd716762156346180fa327b7373bad4a470cddb12e2946355efa15ae5ccd",
+    "backend/tests/test_account_application_drafts.py": "a9a01817ddab26970e8f8eed54249e213091e28209a503b2549acc5bfdd06ff2",
+    "backend/van_gateway/app.py": "5dd80495c8a2627bfa2ddc7cf3477b3f5e129a0113e18b2370a23e99e0438140",
+    "backend/van_gateway/context/forget.py": "6fed25f2f105938d6e5be3ebbd98f3ac1bb8b36aee3fbf1b1dc19cbeb87a2625"
+  },
+  "scope": "Actual completecanonical/workflowcontrols oncombined6sourcepaths; exactownedAGPoutputinit setup/argv/coreASTcontrol +allVTIL controls retained. Controlledfixturemodels only; no newAGP/SDK/platformNode/hosted/privatequalification. Earlier136VTIL4 run retainedonitsoriginalinputpins, not silentlyreusedastestfileunchanged.",
+  "outer_node_inputs_shape": {
+    "NODE_OPTIONS": {
+      "present": false,
+      "nonempty": false,
+      "sha256": null
+    },
+    "NODE_PATH": {
+      "present": true,
+      "nonempty": true,
+      "sha256": "dbc7bc884f72c70bb3d320e868da710a56a621286fba48b3c6b610776b41b4fd"
+    },
+    "NODE_COMPILE_CACHE": {
+      "present": false,
+      "nonempty": false,
+      "sha256": null
+    },
+    "NODE_DISABLE_COMPILE_CACHE": {
+      "present": false,
+      "nonempty": false,
+      "sha256": null
+    }
+  },
+  "tmp_reserve": 2147483648,
+  "owned_run_budget": 134217728,
+  "file_cap": 8388608,
+  "started": "2026-11-01T23:22:37.164051+00:00",
+  "command": [
+    "/workspace/van-backend-venv-20261025/bin/python",
+    "-B",
+    "/workspace/van-review-2026-10-18/publish/tools/rebuild/source_storage_audit.py",
+    "--checkout-root",
+    "/workspace/van-review-2026-10-18/publish",
+    "--report",
+    "/tmp/van-recovery-live-draft-integrated-20261101/audit.json",
+    "backend/tests/test_device_proof_enforcement.py",
+    "backend/tests/test_owner_artifacts.py",
+    "backend/tests/test_owner_memory_erasure.py",
+    "backend/tests/test_ops_retention.py",
+    "tests/contracts/test_van_private_core_topology.py",
+    "backend/tests/test_account_application_drafts.py::test_real_paired_http_atomic_preview_cold_readback_and_no_effect",
+    "backend/tests/test_account_application_drafts.py::test_bound_exact_proof_legacy_and_strict_absent_policy",
+    "backend/tests/test_account_application_drafts.py::test_current_owner_history_is_distinct_from_original_caller_mutation",
+    "backend/tests/test_account_application_drafts.py::test_waiting_writer_expiry_is_original_durable_refusal_not_renewal",
+    "backend/tests/test_account_application_drafts.py::test_stale_selection_refuses_and_private_owner_context_is_server_derived",
+    "backend/tests/test_account_application_drafts.py::test_openapi_has_typed_non_effect_contract_and_safe_field_refusal",
+    "backend/tests/test_account_application_drafts.py::test_null999_selection_cannot_admit_unproven_generation",
+    "backend/tests/test_account_application_drafts.py::test_proven_erase_empty_family_and_later_generations_preserve_original_history",
+    "backend/tests/test_account_application_drafts.py::test_explicit_privacy_erase_does_not_launder_corrupt_selection_into_valid_empty",
+    "--rootdir=/workspace/van-review-2026-10-18/publish",
+    "-c",
+    "/workspace/van-review-2026-10-18/publish/pytest.ini",
+    "-p",
+    "pytest_asyncio.plugin",
+    "-p",
+    "anyio.pytest_plugin",
+    "--basetemp=/tmp/van-recovery-pytest-live-draft-integrated-20261101",
+    "--junitxml=/tmp/van-recovery-live-draft-integrated-20261101/tests.xml",
+    "-q"
+  ],
+  "exit": 0,
+  "child_pid": 1114609,
+  "child_waited": true,
+  "peak_owned_bytes": 80912591,
+  "seconds": 99.87004985500243,
+  "children_remaining": [],
+  "tests": 101,
+  "failures": 0,
+  "errors": 0,
+  "skips": 0,
+  "cleanup": {
+    "path": "/tmp/van-recovery-pytest-live-draft-integrated-20261101",
+    "files": 59,
+    "inventory": "/tmp/van-recovery-live-draft-integrated-20261101/owned-temp-inventory.json",
+    "inventory_sha256": "96aecd42a0459961c7003a6d2ff3a47a24c3145cf6ab3bb6368d0cfd342789b4",
+    "free_bytes_before_cleanup": 2611601408,
+    "free_bytes_after_cleanup": 2691022848,
+    "free_inodes_after": 2206131,
+    "independently_absent": true
+  },
+  "source_after": {
+    "backend/van_gateway/trading/account_application_drafts.py": "4ba0fd716762156346180fa327b7373bad4a470cddb12e2946355efa15ae5ccd",
+    "backend/tests/test_account_application_drafts.py": "a9a01817ddab26970e8f8eed54249e213091e28209a503b2549acc5bfdd06ff2",
+    "backend/van_gateway/app.py": "5dd80495c8a2627bfa2ddc7cf3477b3f5e129a0113e18b2370a23e99e0438140",
+    "backend/van_gateway/context/forget.py": "6fed25f2f105938d6e5be3ebbd98f3ac1bb8b36aee3fbf1b1dc19cbeb87a2625"
+  },
+  "outer_node_environment_unchanged": true,
+  "completed": "2026-11-01T23:24:17.256267+00:00"
+}

@@ -5529,6 +5529,283 @@
         "type": "object",
         "title": "DraftBody"
       },
+      "DraftCanonical": {
+        "properties": {
+          "schema": {
+            "type": "string",
+            "const": "van.account-application-draft/1",
+            "title": "Schema"
+          },
+          "request": {
+            "$ref": "#/components/schemas/DraftInput"
+          },
+          "context": {
+            "$ref": "#/components/schemas/DraftContext"
+          },
+          "source_revision": {
+            "$ref": "#/components/schemas/SourceRevision"
+          },
+          "draft_id": {
+            "type": "string",
+            "pattern": "^ad_[0-9a-f]{64}$",
+            "title": "Draft Id"
+          },
+          "selection_revision": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Selection Revision"
+          },
+          "created_at_ms": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Created At Ms"
+          },
+          "expires_at_ms": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Expires At Ms"
+          },
+          "state": {
+            "type": "string",
+            "const": "DRAFT_STORED_NOT_SUBMITTED",
+            "title": "State"
+          },
+          "provider_selection": {
+            "$ref": "#/components/schemas/UnresolvedProvider"
+          },
+          "execution_authority": {
+            "type": "boolean",
+            "const": false,
+            "title": "Execution Authority"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "schema",
+          "request",
+          "context",
+          "source_revision",
+          "draft_id",
+          "selection_revision",
+          "created_at_ms",
+          "expires_at_ms",
+          "state",
+          "provider_selection",
+          "execution_authority"
+        ],
+        "title": "DraftCanonical"
+      },
+      "DraftContext": {
+        "properties": {
+          "owner_id": {
+            "type": "string",
+            "const": "owner",
+            "title": "Owner Id"
+          },
+          "device_id": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Device Id"
+          },
+          "profile_context": {
+            "$ref": "#/components/schemas/ProfileContext"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "owner_id",
+          "device_id",
+          "profile_context"
+        ],
+        "title": "DraftContext"
+      },
+      "DraftInput": {
+        "properties": {
+          "operation_id": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{12}4[0-9a-f]{3}[89ab][0-9a-f]{15}$",
+            "title": "Operation Id"
+          },
+          "family_id": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{12}4[0-9a-f]{3}[89ab][0-9a-f]{15}$",
+            "title": "Family Id"
+          },
+          "expected_revision": {
+            "type": "integer",
+            "maximum": 1000000.0,
+            "minimum": 0.0,
+            "title": "Expected Revision"
+          },
+          "variant": {
+            "type": "string",
+            "const": "OPEN_NEW_LIVE",
+            "title": "Variant"
+          },
+          "broker_kind": {
+            "type": "string",
+            "enum": [
+              "DERIV",
+              "CTRADER",
+              "MT5",
+              "MT5_EA",
+              "ZSE_OWNER_TICKET"
+            ],
+            "title": "Broker Kind"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "operation_id",
+          "family_id",
+          "expected_revision",
+          "variant",
+          "broker_kind"
+        ],
+        "title": "DraftInput"
+      },
+      "DraftReceipt": {
+        "properties": {
+          "schema": {
+            "type": "string",
+            "const": "van.account-application-draft-receipt/1",
+            "title": "Schema"
+          },
+          "operation_id": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{12}4[0-9a-f]{3}[89ab][0-9a-f]{15}$",
+            "title": "Operation Id"
+          },
+          "draft_id": {
+            "type": "string",
+            "pattern": "^ad_[0-9a-f]{64}$",
+            "title": "Draft Id"
+          },
+          "family_id": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{12}4[0-9a-f]{3}[89ab][0-9a-f]{15}$",
+            "title": "Family Id"
+          },
+          "selection_revision": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Selection Revision"
+          },
+          "body_digest": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$",
+            "title": "Body Digest"
+          },
+          "artifact_id": {
+            "type": "string",
+            "title": "Artifact Id"
+          },
+          "artifact_digest": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$",
+            "title": "Artifact Digest"
+          },
+          "created_at_ms": {
+            "type": "integer",
+            "title": "Created At Ms"
+          },
+          "expires_at_ms": {
+            "type": "integer",
+            "title": "Expires At Ms"
+          },
+          "state": {
+            "type": "string",
+            "const": "DRAFT_STORED_NOT_SUBMITTED",
+            "title": "State"
+          },
+          "provider_qualified": {
+            "type": "boolean",
+            "const": false,
+            "title": "Provider Qualified"
+          },
+          "execution_authority": {
+            "type": "boolean",
+            "const": false,
+            "title": "Execution Authority"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "schema",
+          "operation_id",
+          "draft_id",
+          "family_id",
+          "selection_revision",
+          "body_digest",
+          "artifact_id",
+          "artifact_digest",
+          "created_at_ms",
+          "expires_at_ms",
+          "state",
+          "provider_qualified",
+          "execution_authority"
+        ],
+        "title": "DraftReceipt"
+      },
+      "DraftView": {
+        "properties": {
+          "receipt": {
+            "$ref": "#/components/schemas/DraftReceipt"
+          },
+          "body": {
+            "$ref": "#/components/schemas/DraftCanonical"
+          },
+          "selection_current": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Selection Current"
+          },
+          "current_selection_state": {
+            "type": "string",
+            "enum": [
+              "CURRENT",
+              "SUPERSEDED",
+              "UNKNOWN"
+            ],
+            "title": "Current Selection State"
+          },
+          "freshness": {
+            "type": "string",
+            "enum": [
+              "NOT_YET_ISSUED",
+              "EXPIRED",
+              "WITHIN_ORIGINAL_WINDOW"
+            ],
+            "title": "Freshness"
+          },
+          "effect_confirmation_eligible": {
+            "type": "boolean",
+            "const": false,
+            "title": "Effect Confirmation Eligible"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "receipt",
+          "body",
+          "selection_current",
+          "current_selection_state",
+          "freshness",
+          "effect_confirmation_eligible"
+        ],
+        "title": "DraftView"
+      },
       "DrawingCondition": {
         "properties": {
           "kind": {
@@ -5863,6 +6140,113 @@
           "UNKNOWN"
         ],
         "title": "EpistemicState"
+      },
+      "EraseInput": {
+        "properties": {
+          "expected_digest": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$",
+            "title": "Expected Digest"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "expected_digest"
+        ],
+        "title": "EraseInput"
+      },
+      "EraseResult": {
+        "properties": {
+          "state": {
+            "type": "string",
+            "enum": [
+              "ERASED",
+              "NO_DRAFT_CONTENT"
+            ],
+            "title": "State"
+          },
+          "operation_id": {
+            "type": "string",
+            "title": "Operation Id"
+          },
+          "body_digest": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Body Digest"
+          },
+          "canonical_bodies_removed": {
+            "type": "integer",
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "Canonical Bodies Removed"
+          },
+          "projections_removed": {
+            "type": "integer",
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "Projections Removed"
+          },
+          "execution_authority": {
+            "type": "boolean",
+            "const": false,
+            "title": "Execution Authority"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "state",
+          "operation_id",
+          "canonical_bodies_removed",
+          "projections_removed",
+          "execution_authority"
+        ],
+        "title": "EraseResult"
+      },
+      "ErasedView": {
+        "properties": {
+          "state": {
+            "type": "string",
+            "const": "ERASED",
+            "title": "State"
+          },
+          "operation_id": {
+            "type": "string",
+            "title": "Operation Id"
+          },
+          "canonical_bodies_remaining": {
+            "type": "integer",
+            "const": 0,
+            "title": "Canonical Bodies Remaining"
+          },
+          "projections_remaining": {
+            "type": "integer",
+            "const": 0,
+            "title": "Projections Remaining"
+          },
+          "execution_authority": {
+            "type": "boolean",
+            "const": false,
+            "title": "Execution Authority"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "state",
+          "operation_id",
+          "canonical_bodies_remaining",
+          "projections_remaining",
+          "execution_authority"
+        ],
+        "title": "ErasedView"
       },
       "EvaluationStatus": {
         "properties": {
@@ -11361,6 +11745,32 @@
         ],
         "title": "PrincipalType"
       },
+      "ProfileContext": {
+        "properties": {
+          "state": {
+            "type": "string",
+            "const": "SINGLE_OWNER_GATEWAY",
+            "title": "State"
+          },
+          "account_profile_ref": {
+            "type": "null",
+            "title": "Account Profile Ref"
+          },
+          "configuration_digest": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$",
+            "title": "Configuration Digest"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "state",
+          "account_profile_ref",
+          "configuration_digest"
+        ],
+        "title": "ProfileContext"
+      },
       "ProjectTruthBody": {
         "properties": {
           "truth": {
@@ -11659,6 +12069,59 @@
           "reason"
         ],
         "title": "RebindBody"
+      },
+      "RefusedView": {
+        "properties": {
+          "state": {
+            "type": "string",
+            "const": "REFUSED",
+            "title": "State"
+          },
+          "operation_id": {
+            "type": "string",
+            "title": "Operation Id"
+          },
+          "request_digest": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$",
+            "title": "Request Digest"
+          },
+          "caller_device_id": {
+            "type": "string",
+            "title": "Caller Device Id"
+          },
+          "reason": {
+            "type": "string",
+            "const": "ACCOUNT_DRAFT_REQUEST_EXPIRED",
+            "title": "Reason"
+          },
+          "received_at_ms": {
+            "type": "integer",
+            "title": "Received At Ms"
+          },
+          "expires_at_ms": {
+            "type": "integer",
+            "title": "Expires At Ms"
+          },
+          "execution_authority": {
+            "type": "boolean",
+            "const": false,
+            "title": "Execution Authority"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "state",
+          "operation_id",
+          "request_digest",
+          "caller_device_id",
+          "reason",
+          "received_at_ms",
+          "expires_at_ms",
+          "execution_authority"
+        ],
+        "title": "RefusedView"
       },
       "RegisterProfileBody": {
         "properties": {
@@ -13576,6 +14039,44 @@
         ],
         "title": "ScreenRuleView"
       },
+      "SelectionView": {
+        "properties": {
+          "family_id": {
+            "type": "string",
+            "title": "Family Id"
+          },
+          "revision": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Revision"
+          },
+          "draft_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Draft Id"
+          },
+          "effect_confirmation_eligible": {
+            "type": "boolean",
+            "const": false,
+            "title": "Effect Confirmation Eligible"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "family_id",
+          "revision",
+          "draft_id",
+          "effect_confirmation_eligible"
+        ],
+        "title": "SelectionView"
+      },
       "SemanticClass": {
         "type": "string",
         "enum": [
@@ -13611,6 +14112,27 @@
           "SECRET"
         ],
         "title": "SensitivityClass"
+      },
+      "SourceRevision": {
+        "properties": {
+          "kind": {
+            "type": "string",
+            "const": "MODULE_FILE_AT_SERVICE_START",
+            "title": "Kind"
+          },
+          "sha256": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$",
+            "title": "Sha256"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "kind",
+          "sha256"
+        ],
+        "title": "SourceRevision"
       },
       "SourceTrust": {
         "type": "string",
@@ -14220,6 +14742,37 @@
         ],
         "title": "TransitionBody",
         "description": "P0-VERIFY-001 \u2014 there is deliberately no `verification` field.\n\nIt used to accept a VerificationRecord from the caller, and the audit drove a mission\nto VERIFIED_SUCCESS through this route with `verifier_version: \"i-say-so/1.0\"` and\n`evidence_refs: [\"evidence://trust-me\"]`. A receipt written by whoever is claiming the\noutcome is the claim restated, not evidence for it. The gateway now runs the verifier\nthe mission's own success contract names, and the record it produces is the only one\nthat can be stored, so there is nothing useful a caller could put here.\n\nPydantic is configured to reject unknown fields on this body rather than ignore them,\nso an old client still sending `verification` gets a 422 and learns the rule instead of\nbelieving it was honoured."
+      },
+      "UnresolvedProvider": {
+        "properties": {
+          "state": {
+            "type": "string",
+            "const": "UNRESOLVED",
+            "title": "State"
+          },
+          "descriptor_ref": {
+            "type": "null",
+            "title": "Descriptor Ref"
+          },
+          "version": {
+            "type": "null",
+            "title": "Version"
+          },
+          "effect_confirmation_eligible": {
+            "type": "boolean",
+            "const": false,
+            "title": "Effect Confirmation Eligible"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "state",
+          "descriptor_ref",
+          "version",
+          "effect_confirmation_eligible"
+        ],
+        "title": "UnresolvedProvider"
       },
       "ValidationError": {
         "properties": {

@@ -1,0 +1,49 @@
+{
+  "endpoints_before": 487,
+  "endpoints_after": 491,
+  "all_original_identities_preserved": true,
+  "original_endpoint_changed_fields": {
+    "source": 135
+  },
+  "added_endpoints": [
+    {
+      "endpoint_id": "VE-e6f7086adac8",
+      "method": "GET",
+      "path": "/v1/trading/accounts/application-drafts/{operation_id}"
+    },
+    {
+      "endpoint_id": "VE-12175a71c23f",
+      "method": "DELETE",
+      "path": "/v1/trading/accounts/application-drafts/{operation_id}"
+    },
+    {
+      "endpoint_id": "VE-951b3d9c2935",
+      "method": "POST",
+      "path": "/v1/trading/accounts/application-drafts"
+    },
+    {
+      "endpoint_id": "VE-44bdee6b1510",
+      "method": "GET",
+      "path": "/v1/trading/accounts/application-drafts/selections/{family_id}"
+    }
+  ],
+  "schemas_before": 380,
+  "schemas_after": 393,
+  "old_schemas_exact": true,
+  "added_schemas": [
+    "DraftCanonical",
+    "DraftContext",
+    "DraftInput",
+    "DraftReceipt",
+    "DraftView",
+    "EraseInput",
+    "EraseResult",
+    "ErasedView",
+    "ProfileContext",
+    "RefusedView",
+    "SelectionView",
+    "SourceRevision",
+    "UnresolvedProvider"
+  ],
+  "frozen_actions_changed": false
+}

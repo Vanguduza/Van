@@ -2733,8 +2733,8 @@
     "android/app/src/main/java/com/dial/van/trading/NativeAccountObservation.kt": "c6da23e70724022d1f813bb779b0e31661142565a8729949ca6a016ddf06927d",
     "android/app/src/main/java/com/dial/van/trading/TradingModels.kt": "880ddda71469a417d4ff27c8aeaa327db623b36bdd64b5056dc7c3e639fba1a9"
   },
-  "endpoint_count": 487,
-  "schema_count": 380,
+  "endpoint_count": 491,
+  "schema_count": 393,
   "physical_cases_executed": 0,
   "owner_release": false,
   "deployment_accepted": false
