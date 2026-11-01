@@ -1,0 +1,19 @@
+{
+  "schema": "van.obl004.runtime-repair-source/1",
+  "at_utc": "2026-11-01T19:06:12.277496+00:00",
+  "published_base": "4084a0bd04fd507889fe61b426c8f96bea29c054",
+  "source_pins": "raw/obl004-runtime-repair-20261101/R4_SOURCE_PINS.json",
+  "behavior": "Repair only additive runtime closure and per-invocation short owned pytest basetemp. Exact additive PyYAML6.0.3 matches backendlock in installer, producer and verifier; original AGP6.0.2 remains unchanged. Short unique pytest- temp is outside checkout, receipts join actual child path/execution and producer UID. Live owner UID/inode/mode/marker remains strict; archived reader binds producer environment/profile rather than reader UID. Verified terminal empty-child cleanup only; uncertainty retains fixtures.",
+  "actual_source_evidence": "R4 actual95pass0skip/exit0/audit0, unchanged4pins; current modeled producer/readback UID distinction and malformed/mismatched/live/rootprofile refusal. Prior R3 actual85 and separate11 real CLI/socket/marker controls overlap, not added to totals. R1 real minimalPyYAML3-to2-to3 demonstrates only one-package installation, while R2/R4 closure tests model locked distribution/Java17 metadata; no full native runtime claim.",
+  "failed_history": "Original4084 run41334969955 remainsFAILED/BLOCKED: setup zero-pytest version contradiction, actual trading pytest- key guard and browser AF_UNIX path overflow; expected privateDDS prerequisite and pending redteam remain blocked. R1/R3 independent blockers and initialR4 94pass/1 fixturePYTHONPATH failure retained. Full canonical matrix unqualified; prior partial successes do not prove complete union.",
+  "watch": {
+    "session": 93403,
+    "run": 41334969955,
+    "exit": 1,
+    "completed": "2026-11-01T18:40:24.375577+00:00",
+    "reconcile": "One write_stdin returned completed original controller JSON; wrapperexit0 with watch exit1. Successfully reaped; no restart/signal/duplicatewatch.",
+    "receipt": "/workspace/van-obl004-matrix-watch-20261101.json"
+  },
+  "limits": "SOURCE instrument repair only. No original12jobs/gates/triggers/permissions/concurrency, product/account code, lock/assertion, package or native prerequisite change. OBL004 fullfive-root/two-cwd matrix, snapshot-owner/backup/default-path, native/formal/unit/BG001 and source-revocation owner obligations remain open. PR106 open/ready/unmerged at last actual read, proposedauthorization unused/protectedevidence unchanged.",
+  "next": "Genuine CIrepair commit; hold push for independently reviewed separate accountpacket decision, then required4fd committedverification and one normalpush/exactreadbacks/boundedwatch; actual fresh artifacts required for qualification."
+}

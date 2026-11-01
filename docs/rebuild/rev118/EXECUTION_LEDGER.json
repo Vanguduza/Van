@@ -566,16 +566,16 @@
         }
       ]
     },
-    "updated_utc": "2026-11-01T18:00:08.410942+00:00",
+    "updated_utc": "2026-11-01T19:06:12.277496+00:00",
     "branch": "ccr-9e07e1af-8mgz1p",
-    "head": "53c3457c417a8545380ab8c4e538c727c862dfba",
-    "published_head": "53c3457c417a8545380ab8c4e538c727c862dfba",
-    "committed_ledger_verification": "Published53c genuinehook/GREEN220 required4fd terminal0; currentmatrixsource needs new committed verification before normalpush.",
-    "current_packet": "OBL004_HOSTED_CANONICAL_MATRIX_SOURCE",
-    "active_packet": "Reviewed9pathsintegrated;81currentinstrumentcontrols/0skip; all10fullauditcellsUNEXECUTED.",
+    "head": "4084a0bd04fd507889fe61b426c8f96bea29c054",
+    "published_head": "4084a0bd04fd507889fe61b426c8f96bea29c054",
+    "committed_ledger_verification": "GREEN221 required4fd terminal0 on published4084; current runtime repair awaiting genuine commit/final committedverification.",
+    "current_packet": "OBL004_RUNTIME_REPAIR_SOURCE_R4",
+    "active_packet": "Reviewed4path runtime/shorttemp repair;95actualpasses0skip/audit0; fullmatrix notqualified.",
     "current_background_jobs": [],
     "agent_assignments_ref": "delegation.active_assignments",
-    "next_action": "Genuinehooks/required4fd committedverify/normalpush/exactreadbacks; one ownedbounded watch. Read actual originalsourcegate and newprofile/aggregate artifacts to terminal via safetransport; diagnose realfailures without weakening controls.",
+    "next_action": "Genuine CIrepair commit; hold push for independently reviewed separate accountpacket decision, then required4fd committedverification and one normalpush/exactreadbacks/boundedwatch; actual fresh artifacts required for qualification.",
     "acceptance_issued": false,
     "continuation_history": [
       {
@@ -647,7 +647,7 @@
         "captured_at_utc": "2026-11-01T02:38:52.492703+00:00"
       }
     ],
-    "current_source_receipt": "receipts/OBL004_HOSTED_MATRIX_SOURCE_20261101.json",
+    "current_source_receipt": "receipts/OBL004_RUNTIME_REPAIR_SOURCE_20261101.json",
     "history_20261101": [
       {
         "updated_utc": "2026-11-01T02:38:52.492703+00:00",
@@ -902,11 +902,28 @@
         "publication_note": "Dated prepublication checkpoint names actual last verified published base; exact containing commit is resolved with git rev-parse. External continuation records subsequent publication, without self-referential commit hashes.",
         "source_ci_receipt": "receipts/raw/be003-original-recovery-auditor-20261101/629A_TERMINAL_JOBS.json",
         "intake_PR106": "OPEN_READY_UNMERGED_NOT_EFFECTIVE_EVIDENCE_UNCHANGED"
+      },
+      {
+        "updated_utc": "2026-11-01T18:00:08.410942+00:00",
+        "branch": "ccr-9e07e1af-8mgz1p",
+        "head": "53c3457c417a8545380ab8c4e538c727c862dfba",
+        "published_head": "53c3457c417a8545380ab8c4e538c727c862dfba",
+        "committed_ledger_verification": "Published53c genuinehook/GREEN220 required4fd terminal0; currentmatrixsource needs new committed verification before normalpush.",
+        "current_packet": "OBL004_HOSTED_CANONICAL_MATRIX_SOURCE",
+        "active_packet": "Reviewed9pathsintegrated;81currentinstrumentcontrols/0skip; all10fullauditcellsUNEXECUTED.",
+        "agent_assignments_ref": "delegation.active_assignments",
+        "next_action": "Genuinehooks/required4fd committedverify/normalpush/exactreadbacks; one ownedbounded watch. Read actual originalsourcegate and newprofile/aggregate artifacts to terminal via safetransport; diagnose realfailures without weakening controls.",
+        "acceptance_issued": false,
+        "current_source_receipt": "receipts/OBL004_HOSTED_MATRIX_SOURCE_20261101.json",
+        "last_verified_published_base": "53c3457c417a8545380ab8c4e538c727c862dfba",
+        "publication_note": "Dated prepublication checkpoint names actual last verified published base; exact containing commit is resolved with git rev-parse. External continuation records subsequent publication, without self-referential commit hashes.",
+        "source_ci_receipt": "receipts/raw/obl004-hosted-matrix-20261101/SOURCE53_WATCH_TERMINAL.json",
+        "intake_PR106": "OPEN_READY_UNMERGED_PROPOSAL_NOT_USED"
       }
     ],
-    "last_verified_published_base": "53c3457c417a8545380ab8c4e538c727c862dfba",
+    "last_verified_published_base": "4084a0bd04fd507889fe61b426c8f96bea29c054",
     "publication_note": "Dated prepublication checkpoint names actual last verified published base; exact containing commit is resolved with git rev-parse. External continuation records subsequent publication, without self-referential commit hashes.",
-    "source_ci_receipt": "receipts/raw/obl004-hosted-matrix-20261101/SOURCE53_WATCH_TERMINAL.json",
+    "source_ci_receipt": "receipts/raw/obl004-runtime-repair-20261101/HOSTED_PROFILE_FAILURES.json",
     "intake_PR106": "OPEN_READY_UNMERGED_PROPOSAL_NOT_USED"
   },
   "observations": [
@@ -1075,6 +1092,13 @@
       "status": "INDEPENDENT_SOURCE_REVIEW_PASSED_FULL_MATRIX_UNEXECUTED",
       "evidence": "receipts/OBL004_HOSTED_MATRIX_SOURCE_20261101.json",
       "limits": "Allfull10matrixcellsUNEXECUTED; no OBL004/BE003/formalunit/BG001/native/provider/device/production/release acceptance. Historical WAL/SHM attribution, tracked snapshot-owner disposition, backup/defaultpath and authentic source-revocation owner remain separate. No unreviewed account/product/nativefield changes."
+    },
+    {
+      "at_utc": "2026-11-01T19:06:12.277496+00:00",
+      "scope": "OBL004 runtime repair SOURCE only",
+      "status": "INDEPENDENT_R4_SOURCE_RECHECK_PASSED_FULL_MATRIX_UNQUALIFIED",
+      "evidence": "receipts/OBL004_RUNTIME_REPAIR_SOURCE_20261101.json",
+      "limits": "SOURCE instrument repair only. No original12jobs/gates/triggers/permissions/concurrency, product/account code, lock/assertion, package or native prerequisite change. OBL004 fullfive-root/two-cwd matrix, snapshot-owner/backup/default-path, native/formal/unit/BG001 and source-revocation owner obligations remain open. PR106 open/ready/unmerged at last actual read, proposedauthorization unused/protectedevidence unchanged."
     }
   ],
   "obligations": "obligations/OBLIGATIONS.json: preserved observations with source implementation evidence and explicit remaining native/unit obligations.",
@@ -1128,8 +1152,8 @@
       "evidence": "ci/MUTATION_CORPUS_c2a27848.json"
     }
   ],
-  "current_action": "Genuinehooks/required4fd committedverify/normalpush/exactreadbacks; one ownedbounded watch. Read actual originalsourcegate and newprofile/aggregate artifacts to terminal via safetransport; diagnose realfailures without weakening controls.",
-  "updated_at_utc": "2026-11-01T18:00:08.410942+00:00",
+  "current_action": "Genuine CIrepair commit; hold push for independently reviewed separate accountpacket decision, then required4fd committedverification and one normalpush/exactreadbacks/boundedwatch; actual fresh artifacts required for qualification.",
+  "updated_at_utc": "2026-11-01T19:06:12.277496+00:00",
   "execution_method": {
     "path": "BUILD_EXECUTION_PLAN.md",
     "scope_index": "SOURCE_WORKMAP.json",

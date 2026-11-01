@@ -17,6 +17,9 @@ from pathlib import Path
 import platform
 import re
 import signal
+import shutil
+import stat
+import tempfile
 import subprocess
 import sys
 import time
@@ -52,7 +55,9 @@ PROFILES = {
     'browser_uid': {'owner':'browser-guard-source listener UID', 'locks':BACKEND_LOCK, 'chromium':True, 'root':True},
     'namespace': {'owner':'browser-guard-source namespace firewall', 'locks':BACKEND_LOCK, 'root':True, 'nft':True},
     'private_dds': {'owner':'backend pinned private DDS contract', 'locks':BACKEND_LOCK, 'dds':True},
-    'android_guards': {'owner':'android-and-visual-evidence actual AGP refusal controls', 'locks':BACKEND_LOCK, 'agp':True},
+    # This additive audit runtime uses BACKEND_LOCK, including PyYAML6.0.3.
+    # The unchanged original Android owner's separate6.0.2 overlay stays intact.
+    'android_guards': {'owner':'android-and-visual-evidence actual AGP refusal controls', 'locks':BACKEND_LOCK, 'agp':True, 'pyyaml':'6.0.3'},
     'scenarios': {'owner':'backend lock, existing tests/scenarios ASGI owner fixtures', 'locks':BACKEND_LOCK},
     'forecast': {'owner':'van-forecast-runtime-source', 'locks':('backend/requirements.lock','tools/rebuild/requirements.lock',
           'trading/vati_forecast_worker/locks/research-cp312-linux-x86_64.wheel.lock'), 'pg':True, 'arrow':True},
@@ -71,6 +76,51 @@ def dump(path, value):
 
 def load(path):
     return json.loads(Path(path).read_text())
+
+def validate_basetemp(value, root, execution_id, *, live=False, producer_uid=None):
+    """Bind a short owned parent; pytest may recreate only its child directory."""
+    parent=Path(value['parent']);path=Path(value['path'])
+    require(parent.parent==Path('/tmp') and re.fullmatch(r'pytest-vca-[a-z0-9_]{8}',parent.name)
+        and path==parent/'b' and not path.is_relative_to(Path(root).resolve())
+        and len(os.fsencode(path))<=32,'invalid owned short pytest basetemp')
+    require(value['execution_id']==execution_id and value['root']==str(Path(root).resolve())
+        and type(value['uid']) is int and 0<=value['uid']<2**32-1
+        and type(value['device']) is int and value['device']>=0
+        and type(value['inode']) is int and value['inode']>0,'foreign basetemp execution/owner')
+    if live:
+        require(value['uid']==os.getuid(),'foreign live basetemp process owner')
+    else:
+        require(type(producer_uid) is int and 0<=producer_uid<2**32-1
+            and value['uid']==producer_uid,'basetemp differs from original producer owner')
+    if live:
+        info=parent.lstat()
+        require(stat.S_ISDIR(info.st_mode) and stat.S_IMODE(info.st_mode)==0o700
+            and info.st_uid==value['uid'] and info.st_dev==value['device'] and info.st_ino==value['inode'],
+            'owned basetemp parent changed')
+        marker=parent/'owner.json'
+        require(not marker.is_symlink() and load(marker)==value,'owned basetemp marker changed')
+    return path
+
+
+def create_basetemp(root, execution_id):
+    parent=Path(tempfile.mkdtemp(prefix='pytest-vca-',dir='/tmp'))
+    info=parent.stat()
+    value={'parent':str(parent),'path':str(parent/'b'),'execution_id':execution_id,
+        'root':str(Path(root).resolve()),'uid':info.st_uid,'device':info.st_dev,'inode':info.st_ino}
+    dump(parent/'owner.json',value)
+    validate_basetemp(value,root,execution_id,live=True)
+    return value
+
+
+def cleanup_basetemp(value, root, execution_id, *, child_started, child_terminal, children_remaining):
+    result={'path':value['path'],'execution_id':execution_id,
+        'identity_sha256':hashlib.sha256(_JSON_DUMPS(value,sort_keys=True).encode()).hexdigest()}
+    if (child_started and not child_terminal) or children_remaining!=[]:
+        return {**result,'state':'RETAINED_UNVERIFIED_CHILD_TERMINATION'}
+    validate_basetemp(value,root,execution_id,live=True)
+    shutil.rmtree(value['parent'])
+    return {**result,'state':'REMOVED_OWNED_TERMINAL'}
+
 
 def protected(root):
     return proof.protected_identity(root)
@@ -159,7 +209,7 @@ def environment(profile, root):
         java=subprocess.run(['java','-version'],capture_output=True,text=True,timeout=10)
         require(java.returncode==0 and re.search(r'version \"17[.\"]',java.stderr),'original Java17 prerequisite unavailable')
         result['java_version']=java.stderr.strip();result['pyyaml']=versions.get('pyyaml')
-        require(result['pyyaml']=='6.0.2','original AGP Python overlay mismatch')
+        require(result['pyyaml']==spec['pyyaml'],'additive backend-locked AGP Python overlay mismatch')
     if spec.get('dds'):
         sibling=Path(root).parent/'dial-development-system'
         require(sibling.is_dir(),'pinned private DDS prerequisite unavailable')
@@ -183,7 +233,7 @@ def verify_environment(profile, value, root):
     if spec.get('root'):require(value.get('uid')==0,'missing original root fixture')
     if spec.get('nft'):require(value.get('nft_version'),'missing actual namespace fixture')
     if spec.get('agp'):
-        require(value.get('agp_wrapper_sha256')==sha(Path(root)/'android/gradlew') and re.search(r'version \"17[.\"]',value.get('java_version','')) and value.get('pyyaml')=='6.0.2','missing original AGP runtime')
+        require(value.get('agp_wrapper_sha256')==sha(Path(root)/'android/gradlew') and re.search(r'version \"17[.\"]',value.get('java_version','')) and value.get('pyyaml')==spec['pyyaml'],'missing additive backend-locked AGP runtime')
     if spec.get('dds'):require(value.get('dds_commit')=='64d6b7158c723b7700e5b53175ea8048d4e92d00','missing exact private DDS prerequisite')
 
 
@@ -209,6 +259,15 @@ def pytest_configure(config):
     state['protected_before']=protected(root)
     state['collection_errors']=[];state['internal_errors']=[]
     _STATE=state;config._van_canonical_state=state
+
+def pytest_sessionstart(session):
+    state=getattr(session.config,'_van_canonical_state',None)
+    if state is None:return
+    expected=validate_basetemp(state['basetemp'],state['root'],state['execution_id'],live=True)
+    actual=session.config._tmp_path_factory.getbasetemp().resolve()
+    require(actual==expected,'wrong actual pytest basetemp')
+    state['actual_basetemp']=str(actual)
+
 
 def pytest_collection_modifyitems(config, items):
     state=getattr(config,'_van_canonical_state',None)
@@ -247,12 +306,12 @@ def pytest_sessionfinish(session,exitstatus):
         child_protected_after=protected(Path(_STATE['root'])))
     dump(Path(_STATE['output'])/'terminal.json',_STATE)
 
-def build_pytest_arguments(root, output, profile, manifest, collect_only):
+def build_pytest_arguments(root, output, profile, manifest, collect_only, basetemp):
     root,output=Path(root),Path(output)
     arguments=[*selectors(manifest,profile,root),'-c',str(root/'pytest.ini'),
         '--rootdir='+str(root),'--confcutdir='+str(root),'-p','pytest_asyncio.plugin',
         '-p','anyio.pytest_plugin','-p','tools.rebuild.canonical_source_audit',
-        '--van-canonical-state='+str(output/'input.json'),'--basetemp='+str(output/'basetemp'),'-q']
+        '--van-canonical-state='+str(output/'input.json'),'--basetemp='+str(basetemp),'-q']
     return arguments+(['--collect-only'] if collect_only else ['--junitxml='+str(output/'report.xml')])
 
 
@@ -265,6 +324,7 @@ def run(args):
         'root':str(root),'output':str(output),'execution_id':str(uuid.uuid4()),
         'workflow':{'id':os.environ.get('GITHUB_RUN_ID'),'attempt':os.environ.get('GITHUB_RUN_ATTEMPT')},
         'collect_only':args.collect_only,'terminal':False}
+    child_started=False;child_terminal=False;remaining=[]
     try:
         require(baseline['workflow']['id'] and baseline['workflow']['attempt'],'explicit current workflow identity required')
         require(not any(os.environ.get(k) for k in ('PYTEST_ADDOPTS','PYTEST_PLUGINS','PYTHONHOME','PYTHONUSERBASE','PYTHONSTARTUP','PYTHONINSPECT','PYTHONOPTIMIZE')),'ambient selection/import override')
@@ -275,18 +335,21 @@ def run(args):
         cwd=public.execution_directory(root,args.cwd)
         chosen=selectors(baseline['manifest'],args.profile,root);require(chosen,'profile has no selectors')
         baseline['actual_cwd']=str(cwd)
+        baseline['basetemp']=create_basetemp(root,baseline['execution_id'])
         state=output/'input.json';dump(state,baseline)
         (output/'phases.jsonl').write_text('')
         command=[sys.executable,'-B','-s',str(root/'tools/rebuild/source_storage_audit.py'),
             '--checkout-root',str(root),'--report',str(output/'storage-audit.json'),
-            *build_pytest_arguments(root,output,args.profile,baseline['manifest'],args.collect_only)]
+            *build_pytest_arguments(root,output,args.profile,baseline['manifest'],args.collect_only,baseline['basetemp']['path'])]
         env={**os.environ,'PYTHONPATH':os.pathsep.join(str(root/p) for p in proof.CANONICAL_PYTHONPATH),
             'PYTEST_DISABLE_PLUGIN_AUTOLOAD':'1','PYTHONDONTWRITEBYTECODE':'1','PYTHONNOUSERSITE':'1'}
         with (output/'pytest.log').open('w') as log:
             child=subprocess.Popen(command,cwd=cwd,env=env,stdout=log,stderr=subprocess.STDOUT,start_new_session=True)
+            child_started=True;remaining=None
             try:exitcode=child.wait(timeout=args.timeout_seconds)
             except subprocess.TimeoutExpired:
                 os.killpg(child.pid,signal.SIGKILL);exitcode=child.wait();baseline['timed_out']=True
+        child_terminal=True
         remaining=[line for line in subprocess.check_output(['ps','-eo','pid=,pgid=,stat='],text=True).splitlines() if len(line.split())==3 and line.split()[1]==str(child.pid) and not line.split()[2].startswith('Z')]
         baseline.update(child_pid=child.pid,exit=exitcode,command=command,children_remaining=remaining)
         if remaining:
@@ -302,6 +365,12 @@ def run(args):
     except Exception as exc:
         baseline.update(state='BLOCKED',reason_type=type(exc).__name__,reason=str(exc))
         baseline.setdefault('exit',None)
+    if 'basetemp' in baseline:
+        try:
+            baseline['basetemp_cleanup']=cleanup_basetemp(baseline['basetemp'],root,baseline['execution_id'],
+                child_started=child_started,child_terminal=child_terminal,children_remaining=remaining)
+        except Exception as exc:
+            baseline.update(state='BLOCKED',cleanup_error=type(exc).__name__+': '+str(exc))
     baseline['terminal']=True
     baseline['artifacts']={p.name:sha(p) for p in output.iterdir() if p.is_file() and p.name!='receipt.json'}
     dump(output/'receipt.json',baseline)
@@ -316,10 +385,18 @@ def verify_profile(folder,manifest,profile,cwd,commit,root):
     require(receipt['actual_cwd']==state['actual_cwd']==str(public.execution_directory(root,cwd)),'wrong actual parent cwd')
     require(isinstance(receipt.get('execution_id'),str) and receipt['execution_id'] and receipt['execution_id']==state['execution_id'] and receipt['workflow']==state['workflow']==
         {'id':os.environ.get('GITHUB_RUN_ID'),'attempt':os.environ.get('GITHUB_RUN_ATTEMPT')},'foreign execution/workflow')
-    expected=proof.source_identity(root,commit)
-    require(receipt['source_before']==receipt['source_after']==state['child_source_before']==state['child_source_after']==expected,'source drift')
     require(receipt['environment_before']==receipt['environment_after']==state['child_environment_before']==state['child_environment_after'],'environment/profile drift')
     verify_environment(profile,receipt['environment_before'],root)
+    require(receipt['basetemp']==state['basetemp'],'foreign basetemp identity')
+    basetemp=validate_basetemp(receipt['basetemp'],root,receipt['execution_id'],
+        producer_uid=receipt['environment_before'].get('uid'))
+    cleanup=receipt.get('basetemp_cleanup',{})
+    require(state.get('actual_basetemp')==str(basetemp) and cleanup=={
+        'path':str(basetemp),'execution_id':receipt['execution_id'],'state':'REMOVED_OWNED_TERMINAL',
+        'identity_sha256':hashlib.sha256(_JSON_DUMPS(receipt['basetemp'],sort_keys=True).encode()).hexdigest()},
+        'missing or foreign terminal basetemp cleanup')
+    expected=proof.source_identity(root,commit)
+    require(receipt['source_before']==receipt['source_after']==state['child_source_before']==state['child_source_after']==expected,'source drift')
     require(receipt['protected_before']==receipt['protected_after']==state['protected_before']==state['child_protected_after']==protected(root),'protected-directory snapshot drift')
     require(not state['collection_errors'] and not state['internal_errors'],'collection/internal failure')
     require(state['pytest_inputs']['config_sha256']==sha(Path(root)/'pytest.ini') and state['pytest_inputs']['autoload'] is False,'wrong config/plugins')
@@ -336,7 +413,7 @@ def verify_profile(folder,manifest,profile,cwd,commit,root):
     command=receipt['command']
     prefix=['-B','-s',str(Path(root)/'tools/rebuild/source_storage_audit.py'),'--checkout-root',str(root),'--report',str(folder/'storage-audit.json')]
     require(type(state.get('collect_only')) is bool and receipt.get('collect_only')==state['collect_only'],'phase identity differs')
-    expected_arguments=build_pytest_arguments(root,folder,profile,manifest,state['collect_only'])
+    expected_arguments=build_pytest_arguments(root,folder,profile,manifest,state['collect_only'],basetemp)
     require(command[1:8]==prefix and command[8:]==state['pytest_arguments']==expected_arguments,'recorded actual pytest invocation differs')
     chosen=selectors(manifest,profile,root)
     require(command[8:8+len(chosen)]==chosen,'absolute original selectors differ')

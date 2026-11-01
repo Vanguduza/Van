@@ -1,0 +1,59 @@
+{
+  "state": "TERMINAL",
+  "preflight": {
+    "path": "/tmp/van-recovery-obl004-runtime-setup-r4-final-checks-20261101",
+    "free_bytes_before": 4354977792,
+    "free_inodes_before": 2234645,
+    "minimum_free_bytes": 4294967296,
+    "no_preexisting_directory": true
+  },
+  "source_before": {
+    ".github/workflows/van-ci.yml": "3ab3df781f9bb1444bd853f1b5035fb3a57db51a422aed9c7708738b7ac5d407",
+    "tests/rebuild/test_canonical_source_audit.py": "cad9b6f6f69cfda849ed4fbef4b2e2b2919ce28360c1a8b01fb524a3c71eda35",
+    "tools/ci/github-actions-ci.yml": "3ab3df781f9bb1444bd853f1b5035fb3a57db51a422aed9c7708738b7ac5d407",
+    "tools/rebuild/canonical_source_audit.py": "7f977e794725fd529736f822ba183a3e2d2348c57826fcaf1e588bc9f1dd056c"
+  },
+  "targets": [
+    "tests/rebuild/test_canonical_source_audit.py",
+    "tests/contracts/test_ci_public_source_shards.py",
+    "tests/contracts/test_ci_workflow_is_what_it_claims.py"
+  ],
+  "reuse": "R1actual175 and R2actual18 + independentCLI/adversarial evidence kept separate; no fictitious rerun. This is narrow current integrated workflow/canonical/startup guard execution.",
+  "output_file_limit_bytes": 16777216,
+  "started": "2026-11-01T19:01:45.015101+00:00",
+  "command": [
+    "/workspace/van-backend-venv-20261025/bin/python",
+    "-B",
+    "tools/rebuild/source_storage_audit.py",
+    "--report",
+    "/workspace/van-obl004-runtime-setup-repair-r4-20261101/checks-final/storage-audit.json",
+    "tests/rebuild/test_canonical_source_audit.py",
+    "tests/contracts/test_ci_public_source_shards.py",
+    "tests/contracts/test_ci_workflow_is_what_it_claims.py",
+    "--basetemp=/tmp/van-recovery-obl004-runtime-setup-r4-final-checks-20261101",
+    "--junitxml=/workspace/van-obl004-runtime-setup-repair-r4-20261101/checks-final/tests.xml",
+    "-q"
+  ],
+  "exit": 0,
+  "tests": 95,
+  "failures": 0,
+  "errors": 0,
+  "skipped": 0,
+  "completed": "2026-11-01T19:02:01.195240+00:00",
+  "source_after": {
+    ".github/workflows/van-ci.yml": "3ab3df781f9bb1444bd853f1b5035fb3a57db51a422aed9c7708738b7ac5d407",
+    "tests/rebuild/test_canonical_source_audit.py": "cad9b6f6f69cfda849ed4fbef4b2e2b2919ce28360c1a8b01fb524a3c71eda35",
+    "tools/ci/github-actions-ci.yml": "3ab3df781f9bb1444bd853f1b5035fb3a57db51a422aed9c7708738b7ac5d407",
+    "tools/rebuild/canonical_source_audit.py": "7f977e794725fd529736f822ba183a3e2d2348c57826fcaf1e588bc9f1dd056c"
+  },
+  "cleanup": {
+    "path": "/tmp/van-recovery-obl004-runtime-setup-r4-final-checks-20261101",
+    "files": 1272,
+    "inventory": "/workspace/van-obl004-runtime-setup-repair-r4-20261101/checks-final/owned-temp-inventory.json",
+    "inventory_sha256": "7c36cc46e1b5d8a3ccd7bbe714fc10dbe762861a366a0c1827be6970a5b5f78c",
+    "free_bytes_before_cleanup": 4335845376,
+    "free_bytes_after_cleanup": 4344549376,
+    "free_inodes_after": 2234595,
+    "independently_absent": true
+  }
+}

@@ -1,0 +1,82 @@
+{
+  "disposition": "BLOCKED_ROOT_ACCEPTED_ARCHIVED_PRODUCER_UID_READER_MISMATCH",
+  "id": "OBL004-RUNNER-R3-REVIEW01",
+  "scope": "Only short basetemp/lifecycle delta over approved R2, four-path freeze on4084",
+  "source": [
+    "tools/rebuild/canonical_source_audit.py:88",
+    "tools/rebuild/canonical_source_audit.py:383",
+    ".github/workflows/van-ci.yml:1618",
+    ".github/workflows/van-ci.yml:1638",
+    ".github/workflows/van-ci.yml:1874"
+  ],
+  "finding": "validate_basetemp requires recorded creator uid == os.getuid even live=False in verify_profile. UID0 sudo browser_uid/namespace producers therefore cannot be verified by ordinary nonroot aggregate reader.",
+  "proof": {
+    "pins_before": {
+      ".github/workflows/van-ci.yml": "3ab3df781f9bb1444bd853f1b5035fb3a57db51a422aed9c7708738b7ac5d407",
+      "tools/ci/github-actions-ci.yml": "3ab3df781f9bb1444bd853f1b5035fb3a57db51a422aed9c7708738b7ac5d407",
+      "tests/rebuild/test_canonical_source_audit.py": "f2c5746079dea90d45e7871e23a3dc920991e810e1d7d51feea3a70d26820115",
+      "tools/rebuild/canonical_source_audit.py": "4cd1d3167bc2a1606e495c89e6e3b5ecf2209fe09afdd86ffd9c8b11895ebac6"
+    },
+    "pins_after": {
+      ".github/workflows/van-ci.yml": "3ab3df781f9bb1444bd853f1b5035fb3a57db51a422aed9c7708738b7ac5d407",
+      "tools/ci/github-actions-ci.yml": "3ab3df781f9bb1444bd853f1b5035fb3a57db51a422aed9c7708738b7ac5d407",
+      "tests/rebuild/test_canonical_source_audit.py": "f2c5746079dea90d45e7871e23a3dc920991e810e1d7d51feea3a70d26820115",
+      "tools/rebuild/canonical_source_audit.py": "4cd1d3167bc2a1606e495c89e6e3b5ecf2209fe09afdd86ffd9c8b11895ebac6"
+    },
+    "archive_sha256": "3d397823660798203498c547a2da8b42f16de1d816708e1fef746fd2b035ca76",
+    "patch_sha256": "83ef09ae9b955b30d4efa196e2881164cdcad6ceedb4e5c99b80c819123e0f1c",
+    "r3_delta_sha256": "e3b9c0067c5d4c1d98dada86a7ab06aaf67bd6161b0ab3f14e889cf07fb14d5f",
+    "callable_source": "/workspace/van-review-2026-10-18/publish/tools/rebuild/canonical_source_audit.py",
+    "positive_controls": [
+      {
+        "case": "real_socket_shortpath_unique0700",
+        "accepted": true,
+        "socket_bytes": 70
+      },
+      {
+        "case": "retain_False_[]",
+        "retained": true
+      },
+      {
+        "case": "retain_True_None",
+        "retained": true
+      },
+      {
+        "case": "retain_True_['modeled-live-child']",
+        "retained": true
+      }
+    ],
+    "actual_cross_uid_archived_validator": {
+      "producer_uid": 0,
+      "actual_reader_uid": 1000,
+      "result": "REFUSED",
+      "reason": "foreign basetemp execution/owner",
+      "evidence_scope": "Actual nonroot process invokes production archived validator on modeled rootproducer UID0 record. Workflow sudo producer UID0 is source-proven; this is not actual root-profile hosted execution."
+    },
+    "cross_uid_exit": 1,
+    "all_created_owned_parents_removed": true,
+    "author85_terminal_verified": true
+  },
+  "reproduction_limits": "Production archived validator called by actual UID1000 process on modeled UID0 producer identity. Workflow sudo/root producer and ordinary join are exact source facts. Not actual hosted root-profile execution or a native fulljoin result.",
+  "minimal_repair": "Live creation/sessionstart/cleanup retains actual current-process UID plus lstat device/inode/0700/marker checks. Nonlive archived validation binds recorded temp UID to exact joined producer environment UID/profile; root profiles still require0 under unchanged verify_environment. Reject mismatched producer uid, malformed ownership, changed path/execution/marker/inode and unverifiable cleanup. Do not waive ownership checks generally or run aggregate as root to hide mismatch. Add actual producer/readback UID distinction regression and retain sameuid/live cleanup refusal controls.",
+  "positive_findings": [
+    "Unique0700 owned /tmp/pytest-vca-XXXXXXXX/b short parents; exact representative browser Unix socket path binds and has pytest- marker.",
+    "Own live owner validation succeeded and true terminal cleanup removed own parents. Unwaited/unknown/live-child classifications retained fixtures; no shared directory deletion.",
+    "Source-bound actual pytest factory path, explicit command --basetemp and nonce/root/owner receipt join checks added without status-only fallback. Source/environment/phase/JUnit/cwd/protectedstorage checks and artifact names remain.",
+    "Workflows byte-identical approved R2. Original12jobs/topfields/gates, additive strict6.0.3 closure and original AGP owner6.0.2 are untouched.",
+    "Author actual85case XML verified0failure/error/skip, outerexit0/audit0; original failed hosted PG/browser runs remain failed and unqualified."
+  ],
+  "artifacts": {
+    "probe": "probe.py",
+    "terminal_proof": "probe.json",
+    "raw_refusal": "cross-uid.log",
+    "source_pins_before_after_equal": true,
+    "all_created_own_temp_parents_removed": true
+  },
+  "history_note": "An initial probe asserted local UID0 before testing crossuid and stopped; local UID is1000. Its owned parents were already removed in finally. Corrected probe explicitly models producer0 and uses actual reader1000; no root process execution claim.",
+  "limits": [
+    "No fullmatrix/browser/native/PG/install/Gradle/CI/network/financial effects or candidate edits.",
+    "Existing failed run41334969955 staysFAILED/BLOCKED; no qualification/performance/native-admission claim.",
+    "All full10cells/formal/unit/native/backup/snapshot-owner gaps and PR106 remain separate/open."
+  ]
+}

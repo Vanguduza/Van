@@ -1528,7 +1528,7 @@ jobs:
         distribution: temurin
         java-version: '17'
     - name: Install original AGP refusal-control Python overlay
-      run: python -m pip install pytest==9.1.1 PyYAML==6.0.2
+      run: python -m pip install pytest==9.1.1
     - name: Collect original android_guards source inventory in actual cwd
       run: python -B -s "$GITHUB_WORKSPACE/tools/rebuild/canonical_source_audit.py" run --profile android_guards --cwd "${{
         matrix.cwd }}" --expected-commit "${{ github.event.pull_request.head.sha || github.sha }}" --collect-only --output

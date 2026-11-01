@@ -87,6 +87,11 @@ def test_actual_cli_collection_execution_and_independent_readback_bind_cwd(canon
     manifest=audit.inventory(root)
     state,outcomes,_=audit.verify_profile(output/'execute',manifest,'documentary',cwd,head,root)
     assert state['actual_cwd']==str(root if cwd=='checkout' else root/'backend')
+    receipt=audit.load(output/'execute'/'receipt.json')
+    assert state['actual_basetemp']==receipt['basetemp']['path']
+    assert 'pytest-' in state['actual_basetemp']
+    assert receipt['basetemp_cleanup']['state']=='REMOVED_OWNED_TERMINAL'
+    assert not Path(receipt['basetemp']['parent']).exists()
     assert list(outcomes)==['tests/rebuild/test_fixture.py::test_current_cwd']
     assert outcomes['tests/rebuild/test_fixture.py::test_current_cwd']=={'setup':'passed','call':'passed','teardown':'passed'}
     assert state['protected_before']==state['child_protected_after']==audit.protected(root)
@@ -129,7 +134,8 @@ def actual_phase_receipt(tmp_path_factory):
 
 @pytest.mark.parametrize('damage',['wrong-cwd','wrong-actual-cwd','source','protected','lock','missing-call',
     'duplicate-phase','foreign-phase','failed-setup','missing-junit','lost-file','storage-cwd','storage-write',
-    'collect-only','foreign-artifact','aborted','selector-override','foreign-plugin','wrong-config-cut'])
+    'collect-only','foreign-artifact','aborted','selector-override','foreign-plugin','wrong-config-cut',
+    'temp-execution','temp-actual','temp-cleanup','temp-path'])
 def test_resealed_actual_phase_receipts_fail_closed(actual_phase_receipt,monkeypatch,damage):
     root,head,out,env=actual_phase_receipt
     for key in ('PYTHONPATH','GITHUB_RUN_ID','GITHUB_RUN_ATTEMPT'):monkeypatch.setenv(key,env[key])
@@ -157,6 +163,12 @@ def test_resealed_actual_phase_receipts_fail_closed(actual_phase_receipt,monkeyp
         elif damage=='collect-only':state['collect_only']=True
         elif damage=='foreign-artifact':receipt['artifacts']['unexpected.json']='f'*64
         elif damage=='aborted':receipt['terminal']=False
+        elif damage=='temp-execution':
+            state['basetemp']['execution_id']=receipt['basetemp']['execution_id']='foreign'
+        elif damage=='temp-actual':state['actual_basetemp']=str(root/'unowned')
+        elif damage=='temp-cleanup':receipt['basetemp_cleanup']['state']='RETAINED_UNVERIFIED_CHILD_TERMINATION'
+        elif damage=='temp-path':
+            state['basetemp']['path']=receipt['basetemp']['path']=str(root/'basetemp')
         elif damage in {'selector-override','foreign-plugin','wrong-config-cut'}:
             arguments=state['pytest_arguments']
             if damage=='selector-override':arguments.extend(['-k','narrow'])
@@ -327,3 +339,204 @@ def test_public_nonowning_skips_and_exact_b1_na_are_never_native_passes(tmp_path
         executed,disclosed=audit.public_owned_execution(nodes,'gateway',skips,manifest,tmp_path)
         assert executed=={normal} and len(disclosed)==1 and disclosed[0]['id']==na
         assert disclosed[0]['source_sha256']==audit.B1_NA_PRODUCERS
+
+
+def test_added_profile_install_overlays_preserve_their_declared_lock_versions():
+    """A setup overlay must not make the owning profile refuse before collection."""
+    import re
+    import yaml
+    root = Path(__file__).resolve().parents[2]
+    original = yaml.safe_load(subprocess.check_output([
+        'git', 'show', '53c3457c417a8545380ab8c4e538c727c862dfba:.github/workflows/van-ci.yml'
+    ], cwd=root))
+    current = yaml.safe_load((root/'.github/workflows/van-ci.yml').read_text())
+    for identity in sorted(set(current['jobs']) - set(original['jobs'])):
+        commands = [step['run'] for step in current['jobs'][identity].get('steps', []) if 'run' in step]
+        profiles = {name for command in commands for name in re.findall(r'--profile\s+(\w+)', command)}
+        overlays = {name.lower().replace('_', '-'): version
+            for command in commands if re.search(r'\bpip\s+install\b', command)
+            for name, version in re.findall(r'([\w.-]+)==([^\s\"\';]+)', command)}
+        # Public gateway/media and the join keep their separate existing owners;
+        # only actual canonical profile commands assert these declared locks.
+        for profile in profiles:
+            assert profile in audit.PROFILES, (identity, profile)
+            for lock in audit.PROFILES[profile]['locks']:
+                for name, version in re.findall(r'^([\w.-]+)==([^\s;\\]+)', (root/lock).read_text(), re.M):
+                    normalized = name.lower().replace('_', '-')
+                    if normalized in overlays:
+                        assert overlays[normalized] == version, (identity, profile, name, version, overlays[normalized])
+
+
+@pytest.fixture
+def modeled_backend_locked_agp_runtime(tmp_path, monkeypatch):
+    """Production callables on SOURCE modeled metadata/Java; no AGP qualification."""
+    import re
+    from types import SimpleNamespace
+    root = tmp_path/'modeled-backend-locked-agp'
+    (root/'backend').mkdir(parents=True)
+    actual = Path(__file__).resolve().parents[2]
+    (root/'backend/requirements.lock').write_bytes((actual/'backend/requirements.lock').read_bytes())
+    (root/'android').mkdir()
+    wrapper = root/'android/gradlew'
+    wrapper.write_text('SOURCE wrapper identity fixture; never executed\n')
+    versions = {name.lower().replace('_', '-'): version for name, version in re.findall(
+        r'^([\w.-]+)==([^\s;\\]+)', (root/'backend/requirements.lock').read_text(), re.M)}
+    assert versions['pyyaml'] == '6.0.3'
+    monkeypatch.setattr(audit.importlib.metadata, 'distributions', lambda: [
+        SimpleNamespace(metadata={'Name': name}, version=version) for name, version in versions.items()])
+    monkeypatch.setattr(audit.importlib.metadata, 'entry_points', lambda **kwargs: [])
+    monkeypatch.setenv('PYTHONPATH', os.pathsep.join(str(root/path) for path in audit.proof.CANONICAL_PYTHONPATH))
+    monkeypatch.setenv('VAN_ANDROID_GRADLE_BIN', str(wrapper))
+    java = {'returncode': 0, 'stderr': 'openjdk version "17.0.99"\nSOURCE modeled Java17, not executed'}
+    def modeled_java(command, **kwargs):
+        assert command == ['java', '-version']
+        assert kwargs.get('timeout') == 10
+        return subprocess.CompletedProcess(command, java['returncode'], stdout='', stderr=java['stderr'])
+    monkeypatch.setattr(audit.subprocess, 'run', modeled_java)
+    return root, versions, java
+
+
+def test_additive_agp_producer_and_verifier_accept_the_same_declared_closure(modeled_backend_locked_agp_runtime):
+    root, _, _ = modeled_backend_locked_agp_runtime
+    value = audit.environment('android_guards', root)
+    assert value['pyyaml'] == dict(value['packages'])['pyyaml'] == '6.0.3'
+    assert value['agp_wrapper_sha256'] == audit.sha(root/'android/gradlew')
+    audit.verify_environment('android_guards', value, root)
+
+
+@pytest.mark.parametrize('damage', ['version', 'lock', 'java', 'java-exit', 'wrapper'])
+def test_additive_agp_producer_refuses_wrong_modeled_installed_closure(modeled_backend_locked_agp_runtime, monkeypatch, damage):
+    root, versions, java = modeled_backend_locked_agp_runtime
+    if damage == 'version': versions['pyyaml'] = '6.0.2'
+    elif damage == 'lock': (root/'backend/requirements.lock').unlink()
+    elif damage == 'java': java['stderr'] = 'openjdk version "21.0.9"'
+    elif damage == 'java-exit': java['returncode'] = 1
+    else: monkeypatch.setenv('VAN_ANDROID_GRADLE_BIN', str(root/'foreign-gradlew'))
+    with pytest.raises(ValueError): audit.environment('android_guards', root)
+
+
+@pytest.mark.parametrize('damage', ['package-version', 'agp-version', 'lock', 'java', 'wrapper', 'wrapper-source'])
+def test_additive_agp_verifier_refuses_modeled_receipt_tampering(modeled_backend_locked_agp_runtime, damage):
+    root, _, _ = modeled_backend_locked_agp_runtime
+    value = audit.environment('android_guards', root)
+    if damage == 'package-version': value['packages'] = [(name, '6.0.2' if name == 'pyyaml' else version) for name, version in value['packages']]
+    elif damage == 'agp-version': value['pyyaml'] = '6.0.2'
+    elif damage == 'lock': value['locks']['backend/requirements.lock'] = '0'*64
+    elif damage == 'java': value['java_version'] = 'openjdk version "21.0.9"'
+    elif damage == 'wrapper': value['agp_wrapper_sha256'] = '0'*64
+    else: (root/'android/gradlew').write_text('SOURCE deliberately changed wrapper')
+    with pytest.raises(ValueError): audit.verify_environment('android_guards', value, root)
+
+
+def test_short_owned_basetemp_supports_real_unix_socket_and_original_key_guard(tmp_path):
+    import socket
+    root=tmp_path/'checkout';root.mkdir()
+    first=audit.create_basetemp(root,'first-execution')
+    second=audit.create_basetemp(root,'second-execution')
+    try:
+        assert first['path']!=second['path']
+        base=audit.validate_basetemp(first,root,'first-execution',live=True)
+        assert not base.is_relative_to(root)
+        # Exact original test-key guard; registry content is an owned fixture.
+        key_path=base/'owner-authority0'/'owner_authority_keys.json'
+        assert 'pytest-' in str(key_path)
+        key_path.parent.mkdir(parents=True);key_path.write_text('{}')
+        # Actual failing browser relative path, on the same AF_UNIX boundary.
+        path=base/'test_a_bare_lf_smuggled_reques0'/'egress.sock'
+        path.parent.mkdir(parents=True)
+        assert len(os.fsencode(path))<=107
+        with socket.socket(socket.AF_UNIX,socket.SOCK_STREAM) as server:server.bind(str(path))
+    finally:
+        for value,identity in ((first,'first-execution'),(second,'second-execution')):
+            result=audit.cleanup_basetemp(value,root,identity,child_started=True,child_terminal=True,children_remaining=[])
+            assert result['state']=='REMOVED_OWNED_TERMINAL' and not Path(value['parent']).exists()
+
+
+@pytest.mark.parametrize('terminal,remaining',[(False,[]),(True,None),(True,['owned-live-child'])])
+def test_unknown_or_live_child_retains_owned_basetemp(tmp_path,terminal,remaining):
+    value=audit.create_basetemp(tmp_path,'owned-execution')
+    original=(Path(value['parent'])/'owner.json').read_bytes()
+    try:
+        result=audit.cleanup_basetemp(value,tmp_path,'owned-execution',child_started=True,
+            child_terminal=terminal,children_remaining=remaining)
+        assert result['state']=='RETAINED_UNVERIFIED_CHILD_TERMINATION'
+        assert (Path(value['parent'])/'owner.json').read_bytes()==original
+    finally:
+        audit.cleanup_basetemp(value,tmp_path,'owned-execution',child_started=True,child_terminal=True,children_remaining=[])
+
+
+@pytest.mark.parametrize('damage',['execution','root','path','marker','mode'])
+def test_owned_basetemp_identity_refuses_foreign_cleanup(tmp_path,damage):
+    value=audit.create_basetemp(tmp_path,'original-execution');original=copy.deepcopy(value)
+    marker=Path(value['parent'])/'owner.json'
+    try:
+        if damage=='execution':value['execution_id']='foreign'
+        elif damage=='root':value['root']=str(tmp_path/'other')
+        elif damage=='path':value['path']=str(tmp_path/'unowned')
+        elif damage=='marker':marker.write_text('{}')
+        else:Path(value['parent']).chmod(0o755)
+        with pytest.raises(ValueError):
+            audit.cleanup_basetemp(value,tmp_path,'original-execution',child_started=True,child_terminal=True,children_remaining=[])
+        assert Path(original['parent']).exists()
+    finally:
+        Path(original['parent']).chmod(0o700);audit.dump(marker,original)
+        audit.cleanup_basetemp(original,tmp_path,'original-execution',child_started=True,child_terminal=True,children_remaining=[])
+
+
+@pytest.mark.parametrize('producer_uid',[0,1000])
+def test_archived_profile_binds_joined_producer_not_current_reader(actual_phase_receipt,monkeypatch,producer_uid):
+    """Actual production readback, modeled producer UID; no root execution claim."""
+    root,head,out,env=actual_phase_receipt
+    for key in ('PYTHONPATH','GITHUB_RUN_ID','GITHUB_RUN_ATTEMPT'):monkeypatch.setenv(key,env[key])
+    originals={p:p.read_bytes() for p in out.iterdir() if p.is_file()}
+    state=audit.load(out/'terminal.json');receipt=audit.load(out/'receipt.json')
+    try:
+        for value in (receipt['environment_before'],receipt['environment_after'],state['child_environment_before'],state['child_environment_after']):value['uid']=producer_uid
+        state['basetemp']['uid']=receipt['basetemp']['uid']=producer_uid
+        receipt['basetemp_cleanup']['identity_sha256']=audit.hashlib.sha256(audit._JSON_DUMPS(receipt['basetemp'],sort_keys=True).encode()).hexdigest()
+        audit.dump(out/'terminal.json',state)
+        receipt['artifacts']['terminal.json']=audit.sha(out/'terminal.json');audit.dump(out/'receipt.json',receipt)
+        # Read with the actual current process and then the modeled inverse UID.
+        audit.verify_profile(out,audit.inventory(root),'documentary','backend',head,root)
+        monkeypatch.setattr(audit.os,'getuid',lambda:1000 if producer_uid==0 else 0)
+        audit.verify_profile(out,audit.inventory(root),'documentary','backend',head,root)
+        receipt['environment_before']['uid']=producer_uid+1
+        audit.dump(out/'receipt.json',receipt)
+        with pytest.raises(ValueError,match='environment/profile drift'):
+            audit.verify_profile(out,audit.inventory(root),'documentary','backend',head,root)
+    finally:
+        for path,data in originals.items():path.write_bytes(data)
+
+
+@pytest.mark.parametrize('uid',[None,True,-1,2**32-1,'0',1.5,'mismatched-integer'])
+def test_archived_temp_refuses_malformed_or_mismatched_producer_uid(tmp_path,uid):
+    if uid=='mismatched-integer':uid=os.getuid()+1
+    value=audit.create_basetemp(tmp_path,'execution')
+    try:
+        with pytest.raises(ValueError,match='producer owner'):
+            audit.validate_basetemp(value,tmp_path,'execution',producer_uid=uid)
+        altered={**value,'uid':uid}
+        with pytest.raises(ValueError):
+            audit.validate_basetemp(altered,tmp_path,'execution',producer_uid=os.getuid())
+    finally:
+        audit.cleanup_basetemp(value,tmp_path,'execution',child_started=False,child_terminal=False,children_remaining=[])
+
+
+def test_live_foreign_uid_still_refuses_and_root_profile_still_requires_zero(canonical_fixture,monkeypatch):
+    root,_=canonical_fixture
+    value=audit.create_basetemp(root,'execution')
+    try:
+        foreign={**value,'uid':0 if os.getuid()!=0 else 1000}
+        with pytest.raises(ValueError,match='live basetemp process owner'):
+            audit.validate_basetemp(foreign,root,'execution',live=True)
+        (root/'backend/requirements.lock').write_text((root/'tools/rebuild/requirements.lock').read_text())
+        monkeypatch.setenv('PYTHONPATH',os.pathsep.join(str(root/p) for p in audit.proof.CANONICAL_PYTHONPATH))
+        record=audit.environment('documentary',root)
+        record.update(profile='browser_uid',owner=audit.PROFILES['browser_uid']['owner'],
+            locks={'backend/requirements.lock':audit.sha(root/'backend/requirements.lock')},chromium_sha256='a'*64,uid=0)
+        audit.verify_environment('browser_uid',record,root)
+        audit.validate_basetemp(foreign if foreign['uid']==0 else value,root,'execution',producer_uid=0)
+        record['uid']=1000
+        with pytest.raises(ValueError,match='root fixture'):audit.verify_environment('browser_uid',record,root)
+    finally:
+        audit.cleanup_basetemp(value,root,'execution',child_started=False,child_terminal=False,children_remaining=[])
