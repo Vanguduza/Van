@@ -1,0 +1,31 @@
+{
+  "at_utc": "2026-11-01T10:20:02.510529+00:00",
+  "scope": "Only2completed officialpublicdownloadarchives; not installedruntime/cache/fixture/source/worktree",
+  "verified_archives": [
+    {
+      "path": "/tmp/van-android-sdk-20261101/command-tools.zip",
+      "bytes": 181052239,
+      "sha256": "0877a1d048fe4a24efe2eff536ca4223f7adeb58648bb81909d33c446918cfa8"
+    },
+    {
+      "path": "/tmp/van-permission-revocation-jdk/jdk.tar.gz",
+      "bytes": 207858352,
+      "sha256": "d7f5d5cf865a2902b70ff549b97586a7d3f234e016f041ab447ea740c7d66d1c"
+    }
+  ],
+  "matching_open_handles": [],
+  "peer_owner": "Confirmednoarchiveconsumer; usesinstalledSDK/JDK/cache only",
+  "free_bytes_before": 4003672064,
+  "free_bytes_after": 4392587264,
+  "installed_sdk_jdk_preserved": true,
+  "shared_gradle_queue_fixtures_untouched": true,
+  "installed_runtime_identity_sha256": {
+    "/tmp/van-permission-revocation-jdk/jdk-21.0.13+9/bin/java": "9cad3f2620d3ef2ed10b26f922af7e773d54fdaa05f615d6d6df014f3fec4155",
+    "/tmp/van-android-sdk-20261101/sdk/platforms/android-36/android.jar": "d9eb9da824d9e247a352f570f01e1169e725b2954bca9e283a71786c59b59f9a"
+  },
+  "provenance": {
+    "JDK": "Earlier officialvendor/extraction/genuineSDKcompilation evidence; tar SHA matches originalvendor metadata, only tar unlinked",
+    "SDK": "Earlier officialrepository archive SHA1/size/extraction/APPcompile evidence; only command-tools ZIP unlinked",
+    "runtime_paths_modified": false
+  }
+}

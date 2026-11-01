@@ -1,0 +1,381 @@
+{
+  "schema": "van.public-source-four-worker-source/1",
+  "at_utc": "2026-11-01T11:07:30.211975+00:00",
+  "source_parent": "fd33b0759b9ae170f8bdfdf27f9afe7082da7830",
+  "authorizations": [
+    "auth-20261022-owner-autonomous-candidate-build",
+    "auth-20261021-owner-rev118-ci-prerequisites",
+    "auth-20261021-owner-rev118-ci-workflow-template"
+  ],
+  "source_freeze": {
+    "at_utc": "2026-11-01T10:57:38.003709+00:00",
+    "state": "R2_FROZEN_FOR_INDEPENDENT_CI4_REVIEW_01_RECHECK_NOT_COMMITTED_NOT_NATIVE_QUALIFIED",
+    "base": "fd33b0759b9ae170f8bdfdf27f9afe7082da7830",
+    "owned_paths": {
+      ".github/workflows/van-ci.yml": "d01072bb9580f97191c42887f66edb0bc4b67e52790c971e548987f079e54292",
+      "tools/ci/github-actions-ci.yml": "d01072bb9580f97191c42887f66edb0bc4b67e52790c971e548987f079e54292",
+      "tools/rebuild/backend_public_source.py": "36d743ea8489c39b67cda800b0b1016cb32b0b3df779a5714d6d5288b06cac0b",
+      "tools/rebuild/public_source_shards.py": "cbab1119dfbe47c7d7a27b45590c009559d60d719a6483c761f37b48ed8b4973",
+      "tools/rebuild/backend_public_source_costs.json": "87bea238bd0bbd85bc75bf5a3f1271284d2da7d8833a60ef2805e5f9220f1779",
+      "tests/rebuild/test_public_source_shards.py": "ae895b4887587e8df0a4ed9d687b7b9139ec3b6975b107af2933cd8cb4cf75fc",
+      "tests/contracts/test_ci_public_source_shards.py": "5d80f268b9af8b9827e025af3c9fd2f37edbd110301be6257568190fcb5eb87a",
+      "docs/rebuild/rev118/ci/PUBLIC_SOURCE_SHARDS_20261101.md": "9f81c330dff73bf9124f8808ea46c0b9191ba6de7fc083cc57908e8ce3331177"
+    },
+    "before_sha256": {
+      ".github/workflows/van-ci.yml": "dac912c785c2993a2498f00f9073842efdb3646a46ae70faf0b9f95c24792535",
+      "tools/ci/github-actions-ci.yml": "dac912c785c2993a2498f00f9073842efdb3646a46ae70faf0b9f95c24792535",
+      "tools/rebuild/backend_public_source.py": "8c1a4ce1e6e92905a609efc52ed1ac9467696eb4b1b86d49656839e31f61ddd4",
+      "tools/rebuild/public_source_shards.py": null,
+      "tools/rebuild/backend_public_source_costs.json": null,
+      "tests/rebuild/test_public_source_shards.py": null,
+      "tests/contracts/test_ci_public_source_shards.py": null,
+      "docs/rebuild/rev118/ci/PUBLIC_SOURCE_SHARDS_20261101.md": null
+    },
+    "changed_since_r1": [
+      "tools/rebuild/backend_public_source.py",
+      "tools/rebuild/public_source_shards.py",
+      "tests/rebuild/test_public_source_shards.py",
+      "docs/rebuild/rev118/ci/PUBLIC_SOURCE_SHARDS_20261101.md"
+    ],
+    "archive_sha256": "7199a898e5802790898b63eb93abaaffea603b89f5057c0820c004420722b82c",
+    "patch_sha256": "7bf7270ed1ab6d7fc8586af31cd1571fd6c12ff50a08fb4ce146216fb92d4358",
+    "archive_current_bytes_verified": true,
+    "cached_applycheck": "PASS no index mutation",
+    "original_review": "/workspace/van-ci-shards-independent-review-20261101/review.json",
+    "original_counterexample": "/workspace/van-ci-shards-independent-review-20261101/untracked-collection-results.json",
+    "original_archive": "/workspace/van-ci-shards-wip-r1-20261101/SOURCE.zip",
+    "original_archive_sha256": "87bfc6e299e450c9bc2320c791f12ce1deb444b5172475a939685b32b890de0b",
+    "actual_instrument_tests": {
+      "passed": 92,
+      "skipped": 0,
+      "seconds": 18.07,
+      "receipt": "/workspace/van-ci-shards-focused-r12-20261101/receipt.json",
+      "junit": "/workspace/van-ci-shards-focused-r12-20261101/tests.xml",
+      "log": "/workspace/van-ci-shards-focused-r12-20261101/tests.log",
+      "storage_audit": "/workspace/van-ci-shards-focused-r12-20261101/storage-audit.json",
+      "all_before_after_pins_unchanged": true
+    },
+    "actual_runtime_parity": {
+      "receipt": "/workspace/van-ci-shards-runtime-parity-20261101/PARITY_RECEIPT.json",
+      "gateway_original_explicit_full_collection": 5990,
+      "media_original_explicit_full_collection": 198,
+      "effective_config_root_conftest_cut_plugin_sources_entrypoints_nodeids": "identical within each original locked runtime",
+      "scope": "Full collection only. Zero application cases executed by parity checks; not native hosted qualification. Gateway backend lock versions all equal; media genuine require-hashes lock plus original observed pytest versions."
+    },
+    "repair_contract": [
+      "Refuse EVERY ordinary/ignored untracked input except exact inert public-evidence filenames under explicit artifact roots and exact root pytest-cache data filenames; no extension-only trust",
+      "Refuse added conftest, Python/plugin/native/bytecode/config AND data consumed by parametrization; no .gitignore authority or owner-file deletion",
+      "Committed root pytest.ini, explicit root/confcutdir and canonical original PYTHONPATH; no foreign import/startup/optimized assertion inputs",
+      "Disable ambient plugin autoload and explicitly preserve observed gateway asyncio+anyio vs media asyncio-only; native installed entrypoints must match; effective config/plugin code hashes and environment imported paths verified",
+      "Real tiny producers preserve tracked conftest fixtures, full collection/execute/media/control/teardown; actual ordinary+ignored collector/data/config/bytecode injection refuses with original8 IDs and inert-output positive8 IDs"
+    ],
+    "preserved_failures": [
+      "R6 and R8 reserve refusal before tests",
+      "R9 unknown-hook naming instrument error (87pass2fail), corrected without application changes",
+      "R11 synthetic fixture ignored its uncommitted costs JSON (91pass1fail); guard correctly refused, fixture committed its original costs before final92pass",
+      "Original independent CI4-REVIEW-01 omission and all prior native failed/cancelled runs"
+    ],
+    "workflow_scope": "Required backend-public-source ID/display name retained; other jobs/top-level triggers/concurrency/permissions/environment/fixtures unchanged; exact mirror and frozen mutation bytes checked in final92cases. No new authorization/checker/ledger/native credential scope.",
+    "remaining": [
+      "Independent exact counterexample recheck before commit/push",
+      "Final canonical/manifest/genuine hooks/required4fd baseline verification and normal publication",
+      "Future exact-head native4 isolated worker terminal execution/union/skips/failures and actual runtime evidence; no speed/qualification from estimates"
+    ],
+    "owned_jobs": "All local instrument/parity controllers terminal/reaped; no active watch or SDK/Gradle task from this lane",
+    "native_fd33_readback": "/workspace/van-ci-shards-wip-r1-20261101/FD33_CI_FREEZE_READBACK.json"
+  },
+  "bounded_independent_source_review": {
+    "schema": "van.independent-ci-four-worker-source-recheck/2",
+    "state": "CI4_REVIEW01_CLOSED_NO_REMAINING_BLOCKING_FINDING_IN_BOUNDED_SOURCE_SCOPE",
+    "base": "fd33b0759b9ae170f8bdfdf27f9afe7082da7830",
+    "reviewer": "Sol medium independent bounded SOURCE recheck; root decisions only",
+    "source_identity": {
+      "owned_paths": 8,
+      "changed_since_r1": [
+        "tools/rebuild/backend_public_source.py",
+        "tools/rebuild/public_source_shards.py",
+        "tests/rebuild/test_public_source_shards.py",
+        "docs/rebuild/rev118/ci/PUBLIC_SOURCE_SHARDS_20261101.md"
+      ],
+      "all_current_archive_patch_before_after_final_pins_verified": true,
+      "before": "before.json",
+      "after": [
+        "after.json",
+        "final-source-pins.json"
+      ],
+      "archive_sha256": "7199a898e5802790898b63eb93abaaffea603b89f5057c0820c004420722b82c",
+      "patch_sha256": "7bf7270ed1ab6d7fc8586af31cd1571fd6c12ff50a08fb4ce146216fb92d4358",
+      "original_failure_preserved": "/workspace/van-ci-shards-independent-review-20261101/untracked-collection-results.json"
+    },
+    "blocking_findings": [],
+    "closed_finding": {
+      "id": "CI4-REVIEW-01",
+      "path": "tools/rebuild/public_source_shards.py:64",
+      "related": [
+        "tools/rebuild/public_source_shards.py:88",
+        "tools/rebuild/backend_public_source.py:108"
+      ],
+      "disposition": "CLOSED_SOURCE_AND_ACTUAL_PRODUCER_RECHECK",
+      "finding": "Ordinary and ignored additional paths are inventoried and refused before pytest collection unless exact inert generated output policy admits them. No blanket .gitignore trust; symlink/executable/config/plugin/bytecode and ignored parametrization data are refused. Committed root pytest.ini, canonical root/confcut/import paths, original explicit runtime plugins and effective plugin/config code hashes are bound; ambient plugin/startup/optimized assertion inputs cannot silently replace committed scope."
+    },
+    "independent_probes": {
+      "artifact": "probe-results.json",
+      "script": "probe-provenance.py",
+      "results": [
+        "Clean committed8case inventory with tracked conftest: PASS.",
+        "Tiny actual trackedfixture shard executes2 cases with full setup/call/teardown passed: PASS.",
+        "Explicit allowed inert artifact/cache data still collects8 cases: PASS.",
+        "Ordinary extra config, ignored conftest, ignored parametrization data, ignored bytecode, ignored plugin, and executable in generated evidence tree: all REFUSE before collection without deleting original injections.",
+        "Original root untracked collector omission condition: clean8 then injected rootconftest which would drop half now REFUSES before collection; no reduced inventory or terminal qualification produced."
+      ],
+      "preflight": "Owned /tmp fixture preflight retained unchanged4GiB reserve",
+      "cleanup": "All bounded subprocess children terminal/reaped; owned TemporaryDirectory repo/basetemps removed; tiny fixture-only Git commits establish real expectedHEAD, no candidate commit/edit/CI dispatch/nativeeffects.",
+      "imports": "Exact8-pinned production CLI/helper/auditor copies; explicit original canonical fixturePYTHONPATH; no receipt or sourceidentity mocking.",
+      "raw_logs": [
+        "clean.log",
+        "tracked-fixture-execution.log",
+        "inert-generated.log",
+        "ordinary-untracked-config.log",
+        "ignored-conftest.log",
+        "ignored-data.log",
+        "ignored-bytecode.log",
+        "ignored-plugin.log",
+        "generated-tree-executable.log",
+        "original-counterexample-clean.log",
+        "original-counterexample-untracked-root.log"
+      ]
+    },
+    "verified_evidence": "verified-structural-parity-evidence.json",
+    "structural_result": {
+      "requiredgate_id_name": "backend-public-source retained",
+      "all_other_jobs_and_top_level_boundaries": "UNCHANGED from fd33",
+      "matrix": "4 fresh isolated workers, fail-fast false, max-parallel4; no shared fixture pytest process",
+      "workflow_mirror": "BYTE_IDENTICAL",
+      "scope_and_skips": "Original plan/roots/exclusions/runtime/five approvedskip mappings AST unchanged",
+      "test_preservation": "Original R1 test names retained and no per-function assertion-count reduction; actualproducer cases strengthened",
+      "frozen_mutation_corpus": "UNCHANGED"
+    },
+    "runtime_parity": {
+      "source": "/workspace/van-ci-shards-runtime-parity-20261101/PARITY_RECEIPT.json",
+      "independently_parsed_original_explicit_artifacts": "Complete JSON equality for fullnodeIDs/config/root/confcut/plugin sources+entrypoints, no collectionerrors, terminal0, sourcepins beforeafter equal",
+      "gateway": {
+        "collected": 5990,
+        "plugins": [
+          "pytest_asyncio.plugin",
+          "anyio.pytest_plugin"
+        ]
+      },
+      "media": {
+        "collected": 198,
+        "plugins": [
+          "pytest_asyncio.plugin"
+        ]
+      },
+      "limit": "Collection only; zero application test execution from parity and no native worker qualification."
+    },
+    "test_evidence": {
+      "r12_actual_xml_readback": {
+        "tests": 92,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "scope": "Verification instrument/workflow/legacy/auditor checks incl tinyrealpytest producers. Overlaps prior sets; not aggregate unique application count. No large suite independently rerun."
+    },
+    "remaining_requirements": [
+      "Final canonical/manifest/authorization/genuine hooks/required baseline verification and normal publication/readback belong integration owner. Existing mirror-only template authority stays narrow; no trustedchecker/ledger/authrecord/frozenmutation edits or gate waiver.",
+      "Future published exacthead native4 isolated worker execution/control/assignment/phase/JUnit union, exact declared skips and actual jobtimings required before qualification or measured speed claim.",
+      "No native/unit/BG/provider/device/signing/deployment/release acceptance issued. Source changes invalidate affected review pins; original R1 failure/source/archives preserved."
+    ]
+  },
+  "actual_local_instrument": {
+    "passed": 92,
+    "failed": 0,
+    "errored": 0,
+    "skipped": 0,
+    "seconds": 18.07,
+    "evidence": "raw/public-source-four-worker-20261101/van-ci-shards-focused-r12-20261101/",
+    "scope": "Instrument fixtures and actual tiny pytest subprocesses plus unchanged original auditor/legacy/workflow contracts. Not application/native four-worker case totals."
+  },
+  "actual_original_explicit_parity": {
+    "gateway_collection": 5990,
+    "separate_media_collection": 198,
+    "executed_application_cases": 0,
+    "same_effective_config_root_cut_entrypoints_plugin_code_and_nodeids": true,
+    "receipt": "raw/public-source-four-worker-20261101/van-ci-shards-runtime-parity-20261101/PARITY_RECEIPT.json"
+  },
+  "published_base_source_ci": {
+    "head": "fd33b0759b9ae170f8bdfdf27f9afe7082da7830",
+    "run_id": 41292926568,
+    "returned_jobs": 19,
+    "all_returned_jobs_terminal": true,
+    "backend_public_source": "SUCCESS including execution, separate media and complete coverage/declared-skip gate steps",
+    "only_failures": [
+      "DDS read-key prerequisite",
+      "Project Truth trusted checker"
+    ],
+    "actual_test_skip_mutation_case_totals": "UNKNOWN_NOT_FETCHED_OR_INFERRED",
+    "source_publication_barrier": "TERMINAL_SOURCE_SUCCESS",
+    "limits": "Two mandatory admission failures remain unwaived; job conclusions do not supply case counts."
+  },
+  "preserved_invariants": [
+    "Same required backend-public-source job ID/display name",
+    "Original selection/exclusions/five exact skip approvals and separately hashed media runtime",
+    "All other workflow job bodies and top-level trigger/concurrency/permissions/credential boundaries unchanged",
+    "Mirror byte-identical; no trusted checker/ledger implementation/auth record/corpus change",
+    "Application roots and assertions unchanged; frozen131/324/1610/234/349/93; Android42/105/78 unchanged"
+  ],
+  "prior_failures": "Original untracked collector8-to4 omission retained; R6/R8 reserve refusals unexecuted; R9 instrument hook-name failure and R11 synthetic uncommitted-cost fixture refusal retained. Earlier native failures/cancellations remain failed/cancelled, no partial pass reuse.",
+  "timing": "Historical7df46m24 primary run and estimated693/685/685/685s placement costs only. Future actual native four-worker timing/execution required before speed or source qualification.",
+  "raw_sha256": {
+    "docs/rebuild/rev118/receipts/raw/public-source-four-worker-20261101/van-ci-shards-wip-r1-20261101/CHECKPOINT.json": "dad669640c16cda04358fc6720dd258bbba67640c67a3836441fa0bdb5e6c66b",
+    "docs/rebuild/rev118/receipts/raw/public-source-four-worker-20261101/van-ci-shards-wip-r1-20261101/FD33_CI_FREEZE_READBACK.json": "79e1acf2526979fcd021692c20f5863de3126f0fa095d1ca9398067488de7ad5",
+    "docs/rebuild/rev118/receipts/raw/public-source-four-worker-20261101/van-ci-shards-wip-r1-20261101/FROZEN_REVIEW_HANDOFF.json": "2ffc00a6c6c2b42dff70fb8f3a6f0f1f63145a0725b9d1d0d0f63b1719560af6",
+    "docs/rebuild/rev118/receipts/raw/public-source-four-worker-20261101/van-ci-shards-wip-r1-20261101/SOURCE.patch": "247eee1ac6b4120b4516b4557aa9755a756bfcc0de2484107583bc41d46ed3d8",
+    "docs/rebuild/rev118/receipts/raw/public-source-four-worker-20261101/van-ci-shards-wip-r1-20261101/SOURCE.zip": "87bfc6e299e450c9bc2320c791f12ce1deb444b5172475a939685b32b890de0b",
+    "docs/rebuild/rev118/receipts/raw/public-source-four-worker-20261101/van-ci-shards-wip-r2-20261101/FROZEN_REVIEW_HANDOFF.json": "0f6c9153fbe2c44474a94fbcea46b849ad3f271fb1978bc932c70198556f51f4",
+    "docs/rebuild/rev118/receipts/raw/public-source-four-worker-20261101/van-ci-shards-wip-r2-20261101/SOURCE.patch": "7bf7270ed1ab6d7fc8586af31cd1571fd6c12ff50a08fb4ce146216fb92d4358",
+    "docs/rebuild/rev118/receipts/raw/public-source-four-worker-20261101/van-ci-shards-wip-r2-20261101/SOURCE.zip": "7199a898e5802790898b63eb93abaaffea603b89f5057c0820c004420722b82c",
+    "docs/rebuild/rev118/receipts/raw/public-source-four-worker-20261101/van-ci-shards-independent-review-20261101/after.json": "e4c55cf2bc4cde7bf49f20234f660e47a0bc02ad401673c93f8b092b54e4fffd",
+    "docs/rebuild/rev118/receipts/raw/public-source-four-worker-20261101/van-ci-shards-independent-review-20261101/before.json": "e4c55cf2bc4cde7bf49f20234f660e47a0bc02ad401673c93f8b092b54e4fffd",
+    "docs/rebuild/rev118/receipts/raw/public-source-four-worker-20261101/van-ci-shards-independent-review-20261101/clean-control.log": "9d2299fd2c11b151a230c8cf97be4568998923ad324ac6e231f7534201091e98",
+    "docs/rebuild/rev118/receipts/raw/public-source-four-worker-20261101/van-ci-shards-independent-review-20261101/collection-module-skip.log": "ec6ab17edd68b3e7dc107fbc9558b7923c528506bd79ae4beed2ae3d65a6ab9c",
+    "docs/rebuild/rev118/receipts/raw/public-source-four-worker-20261101/van-ci-shards-independent-review-20261101/edge-results.json": "f516304adf9ed56ab1b1e2e6db2157c93b6887a0de5d0865b7c9c8be59fc8d01",
+    "docs/rebuild/rev118/receipts/raw/public-source-four-worker-20261101/van-ci-shards-independent-review-20261101/empty-inventory.log": "c5a0ac829050a3359d0ded3ab5c7d0203b9de9dc87813a050e87cc4d748e84c1",
+    "docs/rebuild/rev118/receipts/raw/public-source-four-worker-20261101/van-ci-shards-independent-review-20261101/empty-shard.log": "ec498c015124b8a2e4916f36612b02be363e5eb7f1ceaa2bd93c4a96cc72e012",
+    "docs/rebuild/rev118/receipts/raw/public-source-four-worker-20261101/van-ci-shards-independent-review-20261101/final-source-pins.json": "e4c55cf2bc4cde7bf49f20234f660e47a0bc02ad401673c93f8b092b54e4fffd",
+    "docs/rebuild/rev118/receipts/raw/public-source-four-worker-20261101/van-ci-shards-independent-review-20261101/probe-edges.log": "02464487c6d4151f7822a0ef418e9a0289b175722663f406b03b349631d6dd29",
+    "docs/rebuild/rev118/receipts/raw/public-source-four-worker-20261101/van-ci-shards-independent-review-20261101/probe-edges.py.txt": "7b3aea797ae3e1790f56b9e38898712ddb15986a8eee963f7a30187bf0502253",
+    "docs/rebuild/rev118/receipts/raw/public-source-four-worker-20261101/van-ci-shards-independent-review-20261101/probe-untracked-collection.log": "d75b7a4a0dfa6ec14632045b8e470fdbb1ca4d5d642f6627c1a39a4181ce04d3",
+    "docs/rebuild/rev118/receipts/raw/public-source-four-worker-20261101/van-ci-shards-independent-review-20261101/probe-untracked-collection.py.txt": "7b2560009354c84a30084102a359fcb19fcccbaccc92c42b1834b3ac809906d8",
+    "docs/rebuild/rev118/receipts/raw/public-source-four-worker-20261101/van-ci-shards-independent-review-20261101/review.json": "64c821c772bac6db0a34686ad23904e0fe81cdd3356e7b44eb01a6a1a2afa988",
+    "docs/rebuild/rev118/receipts/raw/public-source-four-worker-20261101/van-ci-shards-independent-review-20261101/structural-verification.json": "c1719c6a650b26205d24b9483f0ff32454e2ba47491e9690993410b395e1499a",
+    "docs/rebuild/rev118/receipts/raw/public-source-four-worker-20261101/van-ci-shards-independent-review-20261101/teardown-failure.log": "e5676116c7938d72782d8c08a9b415370ab01324e50d63b227bde0f1d753cf1e",
+    "docs/rebuild/rev118/receipts/raw/public-source-four-worker-20261101/van-ci-shards-independent-review-20261101/untracked-collection-results.json": "9d8ffa6161d5012f3cdc5e2eeaf7a9e5f77bc99e23895c773794976864ce92b9",
+    "docs/rebuild/rev118/receipts/raw/public-source-four-worker-20261101/van-ci-shards-independent-review-20261101/untracked-config-control.log": "ea5ec1e67fd22005c4036a9dd47669a8a49772f30613ee5d62ad036675185b4b",
+    "docs/rebuild/rev118/receipts/raw/public-source-four-worker-20261101/van-ci-shards-independent-recheck-r2-20261101/after.json": "fcfd11b17275caa87bda16b3b51ea2af15ec2a45b8b4c6f3a33a00c01d9f96b9",
+    "docs/rebuild/rev118/receipts/raw/public-source-four-worker-20261101/van-ci-shards-independent-recheck-r2-20261101/before.json": "fcfd11b17275caa87bda16b3b51ea2af15ec2a45b8b4c6f3a33a00c01d9f96b9",
+    "docs/rebuild/rev118/receipts/raw/public-source-four-worker-20261101/van-ci-shards-independent-recheck-r2-20261101/clean.log": "861f8c9f4d1521be2f3d69dd24277fe69c58d711d83a9dc07255d7bafaea3948",
+    "docs/rebuild/rev118/receipts/raw/public-source-four-worker-20261101/van-ci-shards-independent-recheck-r2-20261101/final-source-pins.json": "fcfd11b17275caa87bda16b3b51ea2af15ec2a45b8b4c6f3a33a00c01d9f96b9",
+    "docs/rebuild/rev118/receipts/raw/public-source-four-worker-20261101/van-ci-shards-independent-recheck-r2-20261101/generated-tree-executable.log": "178d5b4411e45c78690f8dbe6a8c8cb960e5b474846529d90ab512512af88205",
+    "docs/rebuild/rev118/receipts/raw/public-source-four-worker-20261101/van-ci-shards-independent-recheck-r2-20261101/ignored-bytecode.log": "d607cc59c437ae826fc38f2b80a6e39f392222bb2351f685aef9666d21f14900",
+    "docs/rebuild/rev118/receipts/raw/public-source-four-worker-20261101/van-ci-shards-independent-recheck-r2-20261101/ignored-conftest.log": "9fae7928f8324df175d35ac9d6764a0db0604297e42ad942ca4a6e0a92116c30",
+    "docs/rebuild/rev118/receipts/raw/public-source-four-worker-20261101/van-ci-shards-independent-recheck-r2-20261101/ignored-data.log": "881130d4082b7df33efc77e930670e8509436da2d250d9874656b4572ee980ec",
+    "docs/rebuild/rev118/receipts/raw/public-source-four-worker-20261101/van-ci-shards-independent-recheck-r2-20261101/ignored-plugin.log": "ef80e0667fd45bd8c6da140c578b6c1e142c69415331197da606952f82eb8c7e",
+    "docs/rebuild/rev118/receipts/raw/public-source-four-worker-20261101/van-ci-shards-independent-recheck-r2-20261101/inert-generated.log": "dcddfeaa1d701cffa13e4aae2f24182a9a54f0811646e818752485cf4a30aac1",
+    "docs/rebuild/rev118/receipts/raw/public-source-four-worker-20261101/van-ci-shards-independent-recheck-r2-20261101/ordinary-untracked-config.log": "69f2389205ebe0a2d5da474ee5ffb30e6559f3d74afb4b7750b86c74042ffa70",
+    "docs/rebuild/rev118/receipts/raw/public-source-four-worker-20261101/van-ci-shards-independent-recheck-r2-20261101/original-counterexample-clean.log": "09853609b0b3a291891e7ed4ec6d860ecf544e180dc56c5cc853573f12695d40",
+    "docs/rebuild/rev118/receipts/raw/public-source-four-worker-20261101/van-ci-shards-independent-recheck-r2-20261101/original-counterexample-untracked-root.log": "e2296ab051a53c51afa1e2a8aa444b5c4e197fadb80d7ffa6ca7117a335d3dc2",
+    "docs/rebuild/rev118/receipts/raw/public-source-four-worker-20261101/van-ci-shards-independent-recheck-r2-20261101/probe-provenance.log": "fb635944eb7ba56663f4d72d9c627a259d81c25b469845b5eb41338c40af59b3",
+    "docs/rebuild/rev118/receipts/raw/public-source-four-worker-20261101/van-ci-shards-independent-recheck-r2-20261101/probe-provenance.py.txt": "49e8ad725fd7abb443c0b59629a77f4485e6773fef85d01a9c1a67847e2f0a39",
+    "docs/rebuild/rev118/receipts/raw/public-source-four-worker-20261101/van-ci-shards-independent-recheck-r2-20261101/probe-results.json": "08914f3b678cfb8d755aba9667bafbefdd86c6c0591927cc3cda3a16f6eadaad",
+    "docs/rebuild/rev118/receipts/raw/public-source-four-worker-20261101/van-ci-shards-independent-recheck-r2-20261101/review.json": "2ae22d188c0f82776e017202a2e037640c11725e0b4e75a3bae92f2c88beffd6",
+    "docs/rebuild/rev118/receipts/raw/public-source-four-worker-20261101/van-ci-shards-independent-recheck-r2-20261101/tracked-fixture-execution.log": "3977257c5078474429e43c27347dd575d0c7508974f77ed4aacdc550ea7caf5b",
+    "docs/rebuild/rev118/receipts/raw/public-source-four-worker-20261101/van-ci-shards-independent-recheck-r2-20261101/verified-structural-parity-evidence.json": "793f436a3692cbee172a5cd6d03d6fc3e1a5468ed45372faa8358e5da55fe300",
+    "docs/rebuild/rev118/receipts/raw/public-source-four-worker-20261101/van-ci-shards-focused-r6-20261101/PREFLIGHT_FAILURE.json": "ba964933402ac667ec60772a057f87f95e411c84b6322caa580cf2a39842fb84",
+    "docs/rebuild/rev118/receipts/raw/public-source-four-worker-20261101/van-ci-shards-focused-r7-20261101/owned-temp-inventory.json": "4e9cb5ca76e94f6c8f71e49fc9077a8394077ee09ec15eee2f050f257dde0970",
+    "docs/rebuild/rev118/receipts/raw/public-source-four-worker-20261101/van-ci-shards-focused-r7-20261101/receipt.json": "c9294f5bb5ff101360997b57c004fa087be4b4a2a4680a23d80702afc89351ee",
+    "docs/rebuild/rev118/receipts/raw/public-source-four-worker-20261101/van-ci-shards-focused-r7-20261101/storage-audit.json": "03b5b2afac2978cda8a845c9a6eec9e8d20b13abe2960e09fcc8f1fccbcc2cb7",
+    "docs/rebuild/rev118/receipts/raw/public-source-four-worker-20261101/van-ci-shards-focused-r7-20261101/tests.log": "8484ef112d9de8e90d3845457e04a6559163fb1eb58c5541afdc891607807c39",
+    "docs/rebuild/rev118/receipts/raw/public-source-four-worker-20261101/van-ci-shards-focused-r7-20261101/tests.xml": "4e675e14d83fdf0a6771dfc1f671af3c9cb6b5256d4e12598604c71ee0394c38",
+    "docs/rebuild/rev118/receipts/raw/public-source-four-worker-20261101/van-ci-shards-focused-r8-20261101/PREFLIGHT_FAILURE.json": "8ab2275a30a77b0580693bde152414af68f25f6ba0a9efa87792c4ba3590aad4",
+    "docs/rebuild/rev118/receipts/raw/public-source-four-worker-20261101/van-ci-shards-focused-r9-20261101/owned-temp-inventory.json": "be49cc4307c8242f32689880288a5c01afc14d7441585eb7233147f49a0df398",
+    "docs/rebuild/rev118/receipts/raw/public-source-four-worker-20261101/van-ci-shards-focused-r9-20261101/receipt.json": "0fd3c355dab4017c726ba7fa31aabc65b5e314031d6d5d7f674ee024be14a4d5",
+    "docs/rebuild/rev118/receipts/raw/public-source-four-worker-20261101/van-ci-shards-focused-r9-20261101/storage-audit.json": "03b5b2afac2978cda8a845c9a6eec9e8d20b13abe2960e09fcc8f1fccbcc2cb7",
+    "docs/rebuild/rev118/receipts/raw/public-source-four-worker-20261101/van-ci-shards-focused-r9-20261101/tests.log": "f4343e783097f65c65caaaefe4559f2228b34f34262ddf547d7a8e2cfecdb6de",
+    "docs/rebuild/rev118/receipts/raw/public-source-four-worker-20261101/van-ci-shards-focused-r9-20261101/tests.xml": "c9bec102daf3818c8476b42c5a9bb3c47d87a197c320bdd9af3497b01663e47c",
+    "docs/rebuild/rev118/receipts/raw/public-source-four-worker-20261101/van-ci-shards-focused-r10-20261101/owned-temp-inventory.json": "df29635a1688a8b9bcbbfbcd9ad12127bbf1b775aa06b6a2af7f68211c86ca9a",
+    "docs/rebuild/rev118/receipts/raw/public-source-four-worker-20261101/van-ci-shards-focused-r10-20261101/receipt.json": "aea4f4ed5cb64620a409fce2ea00ac5b93b1eaf7268047f97efb5b38dd5ebd5b",
+    "docs/rebuild/rev118/receipts/raw/public-source-four-worker-20261101/van-ci-shards-focused-r10-20261101/storage-audit.json": "03b5b2afac2978cda8a845c9a6eec9e8d20b13abe2960e09fcc8f1fccbcc2cb7",
+    "docs/rebuild/rev118/receipts/raw/public-source-four-worker-20261101/van-ci-shards-focused-r10-20261101/tests.log": "60c11aa55c8bd60f2cc34dd939c9657928a8955ebfe9fc91b7fac8e9ae6d75b2",
+    "docs/rebuild/rev118/receipts/raw/public-source-four-worker-20261101/van-ci-shards-focused-r10-20261101/tests.xml": "4cbb978b35732586f62e5cebd1b0000e511fd61e2b1560b74f25253c9b7f924e",
+    "docs/rebuild/rev118/receipts/raw/public-source-four-worker-20261101/van-ci-shards-focused-r11-20261101/owned-temp-inventory.json": "7d00ceff72cda3ab550d521da296f6696e5401b8222efda2d766e18b0c1d0f99",
+    "docs/rebuild/rev118/receipts/raw/public-source-four-worker-20261101/van-ci-shards-focused-r11-20261101/receipt.json": "3a31aee7ccfecd249aff7893f385aee1247778b532632dd5ef5ee745b96b8435",
+    "docs/rebuild/rev118/receipts/raw/public-source-four-worker-20261101/van-ci-shards-focused-r11-20261101/storage-audit.json": "03b5b2afac2978cda8a845c9a6eec9e8d20b13abe2960e09fcc8f1fccbcc2cb7",
+    "docs/rebuild/rev118/receipts/raw/public-source-four-worker-20261101/van-ci-shards-focused-r11-20261101/tests.log": "300233ddf3a0ead92a46e9da3594900f381c135f97c07c80c2fead9968e9748f",
+    "docs/rebuild/rev118/receipts/raw/public-source-four-worker-20261101/van-ci-shards-focused-r11-20261101/tests.xml": "cea2deec1779146b7d3c97f735299ed1315de7663e934d03c06fab2da40826bf",
+    "docs/rebuild/rev118/receipts/raw/public-source-four-worker-20261101/van-ci-shards-focused-r12-20261101/owned-temp-inventory.json": "03ff62c302b085d088e12bb5581985df1db1b0d05d9dec4755e766b9c943c00f",
+    "docs/rebuild/rev118/receipts/raw/public-source-four-worker-20261101/van-ci-shards-focused-r12-20261101/receipt.json": "e495b5a617416eb0f59a68cb144a00431b745c51886c0453baa27f52adf79176",
+    "docs/rebuild/rev118/receipts/raw/public-source-four-worker-20261101/van-ci-shards-focused-r12-20261101/storage-audit.json": "03b5b2afac2978cda8a845c9a6eec9e8d20b13abe2960e09fcc8f1fccbcc2cb7",
+    "docs/rebuild/rev118/receipts/raw/public-source-four-worker-20261101/van-ci-shards-focused-r12-20261101/tests.log": "2b53717d619bb34a62519e5ef9cd83a724bcb81062d002e348f16f565dc3dcc1",
+    "docs/rebuild/rev118/receipts/raw/public-source-four-worker-20261101/van-ci-shards-focused-r12-20261101/tests.xml": "3658296dead7cd7ab655cb2e680d613396ebd66380e2010b72ec54f65cede873",
+    "docs/rebuild/rev118/receipts/raw/public-source-four-worker-20261101/van-ci-shards-final-guards-20261101/consolidation.log": "d87b8fe5f7b2b4ca7312b9ba93c4e1aa24ae2301f775aa6f915d81572aec7870",
+    "docs/rebuild/rev118/receipts/raw/public-source-four-worker-20261101/van-ci-shards-final-guards-20261101/frontend.log": "69dcc86a9d7aaffcadf4a70e58b379d8452c124dadc4347afbc9e57fbab7ae85",
+    "docs/rebuild/rev118/receipts/raw/public-source-four-worker-20261101/van-ci-shards-final-guards-20261101/mutation.log": "131959a4576e7b5a8ebd678f508cca5c1107c9e4cc15c27d3c22121e5ac1b299",
+    "docs/rebuild/rev118/receipts/raw/public-source-four-worker-20261101/van-ci-shards-final-guards-20261101/owner.log": "35a9b4641c85055b16c3a6458a7b1f99fb5df7ec0f5a6280ca45c3ab14cd7103",
+    "docs/rebuild/rev118/receipts/raw/public-source-four-worker-20261101/van-ci-shards-final-guards-20261101/receipt.json": "d3158be7330bb03a15e65d3a2d1503dd782d570f64802d053147cdc01485bc0f",
+    "docs/rebuild/rev118/receipts/raw/public-source-four-worker-20261101/van-ci-shards-final-guards-20261101/workmap.log": "6e20f8f2172ee5c1d1fce0a0c754de3b77fe5a107aa568cdf51b6c0797a54037",
+    "docs/rebuild/rev118/receipts/raw/public-source-four-worker-20261101/van-ci-shards-runtime-parity-20261101/PARITY_RECEIPT.json": "f52bc8bf6f10884dee44893c2f1c54282d1f430b7bbf926c9a2d7b8d10a7161e",
+    "docs/rebuild/rev118/receipts/raw/public-source-four-worker-20261101/van-ci-shards-runtime-parity-20261101/gateway-explicit-audit.json": "03b5b2afac2978cda8a845c9a6eec9e8d20b13abe2960e09fcc8f1fccbcc2cb7",
+    "docs/rebuild/rev118/receipts/raw/public-source-four-worker-20261101/van-ci-shards-runtime-parity-20261101/gateway-explicit.json": "7b5d7ba8fd25aaf2b0175e595705352b72a2734e75926ec270ba87ce5086eed2",
+    "docs/rebuild/rev118/receipts/raw/public-source-four-worker-20261101/van-ci-shards-runtime-parity-20261101/gateway-explicit.log": "e7f8481a542133fa20dcd92ace19b1ff9964c0862f7c6b7d9c12624e79dc1f80",
+    "docs/rebuild/rev118/receipts/raw/public-source-four-worker-20261101/van-ci-shards-runtime-parity-20261101/gateway-original-audit.json": "03b5b2afac2978cda8a845c9a6eec9e8d20b13abe2960e09fcc8f1fccbcc2cb7",
+    "docs/rebuild/rev118/receipts/raw/public-source-four-worker-20261101/van-ci-shards-runtime-parity-20261101/gateway-original.json": "7b5d7ba8fd25aaf2b0175e595705352b72a2734e75926ec270ba87ce5086eed2",
+    "docs/rebuild/rev118/receipts/raw/public-source-four-worker-20261101/van-ci-shards-runtime-parity-20261101/gateway-original.log": "8feb08905487412f631a769f722220c18bf141d32b2a2a9c02bb88835b3bf99c",
+    "docs/rebuild/rev118/receipts/raw/public-source-four-worker-20261101/van-ci-shards-runtime-parity-20261101/media-explicit-audit.json": "03b5b2afac2978cda8a845c9a6eec9e8d20b13abe2960e09fcc8f1fccbcc2cb7",
+    "docs/rebuild/rev118/receipts/raw/public-source-four-worker-20261101/van-ci-shards-runtime-parity-20261101/media-explicit.json": "934b827707edaeec53b6fe7b2282f6bdd4ada1998788c93c47ba3dfdbf5cb3cc",
+    "docs/rebuild/rev118/receipts/raw/public-source-four-worker-20261101/van-ci-shards-runtime-parity-20261101/media-explicit.log": "56eb088569596b87c43131038e23a2c7616aa8086116b4fb7ba214fc7f3ebde9",
+    "docs/rebuild/rev118/receipts/raw/public-source-four-worker-20261101/van-ci-shards-runtime-parity-20261101/media-lock-install.log": "2fc876d28d84f9405c67f81ea4fb42d0c06de1bc445c6b92755b34900dd6a809",
+    "docs/rebuild/rev118/receipts/raw/public-source-four-worker-20261101/van-ci-shards-runtime-parity-20261101/media-original-audit.json": "03b5b2afac2978cda8a845c9a6eec9e8d20b13abe2960e09fcc8f1fccbcc2cb7",
+    "docs/rebuild/rev118/receipts/raw/public-source-four-worker-20261101/van-ci-shards-runtime-parity-20261101/media-original.json": "934b827707edaeec53b6fe7b2282f6bdd4ada1998788c93c47ba3dfdbf5cb3cc",
+    "docs/rebuild/rev118/receipts/raw/public-source-four-worker-20261101/van-ci-shards-runtime-parity-20261101/media-original.log": "aa92fa4979f8de53cd3483c8d551013595a3a699cb2998f23b8850ea5467b26e",
+    "docs/rebuild/rev118/receipts/raw/public-source-four-worker-20261101/van-ci-shards-runtime-parity-20261101/media-pytest-install.log": "89ecc161ba9f3d923b5c2728b86842f147347141c5169c22d2f0414c3ed53177",
+    "docs/rebuild/rev118/receipts/raw/public-source-four-worker-20261101/van-ci-shards-runtime-parity-20261101/parity_observer.py.txt": "3b1002e9686a4cc2d789206809a60fe3331b1ba7d838f9774bf569e5254359fe",
+    "docs/rebuild/rev118/receipts/raw/public-source-four-worker-20261101/van-ci-shards-runtime-parity-20261101/run.py.txt": "174959fbea03ec4b3c4a014401d669b5858655f62629394ea4f67c86a6640d44",
+    "docs/rebuild/rev118/receipts/raw/public-source-four-worker-20261101/van-ci-shards-temp-cache-reclamation-20261101.json": "82d3192e1e352035c219e73938f1c7415e85f2bbd82f3ede419934d13f52390a",
+    "docs/rebuild/rev118/receipts/raw/public-source-four-worker-20261101/van-backend-public-four-worker-proposal-20261101.md": "4759aaf346f5b33aad3df7981ac8544147a86f989283e960b183c54e82800f16",
+    "docs/rebuild/rev118/receipts/raw/public-source-four-worker-20261101/van-backend-public-four-worker-proposal-20261101.json": "254e79f1ca0e18cbeaf7f56a0fde269a34097a6a4ad7cfdb213b94d3db7dbc4e",
+    "docs/rebuild/rev118/receipts/raw/public-source-four-worker-20261101/van-ci-shards-focused-r12-20261101.py.txt": "f9b7114b35140182ae193dd02452e8728d7315d4b512a9b47164db3de655b921",
+    "docs/rebuild/rev118/receipts/raw/public-source-four-worker-20261101/van-ci-shards-packaging-topology-20261101/tests.xml": "c0b9ca329f4fe18340848b53158507d109c014284c533e6bb60a01a758558c27",
+    "docs/rebuild/rev118/receipts/raw/public-source-four-worker-20261101/van-ci-shards-packaging-topology-20261101/storage-audit.json": "03b5b2afac2978cda8a845c9a6eec9e8d20b13abe2960e09fcc8f1fccbcc2cb7",
+    "docs/rebuild/rev118/receipts/raw/public-source-four-worker-20261101/van-ci-shards-packaging-topology-20261101/receipt.json": "95127f88bd8fc13fa52d6f710581237f3d097b73c614c5eb6fca3fbafadb8a4a",
+    "docs/rebuild/rev118/receipts/raw/public-source-four-worker-20261101/van-ci-shards-packaging-topology-20261101/tests.log": "ee1012a0c9f8c33879d4ee8e1744d5e13ed5e33ecba133ddc07752840f28426e"
+  },
+  "historical_executable_path_mapping": [
+    {
+      "original_external_path": "/workspace/van-ci-shards-independent-review-20261101/probe-edges.py",
+      "archived_path": "docs/rebuild/rev118/receipts/raw/public-source-four-worker-20261101/van-ci-shards-independent-review-20261101/probe-edges.py.txt",
+      "reason": "Historical executable snapshot stored as non-importable evidence; original commands retain historical paths."
+    },
+    {
+      "original_external_path": "/workspace/van-ci-shards-independent-review-20261101/probe-untracked-collection.py",
+      "archived_path": "docs/rebuild/rev118/receipts/raw/public-source-four-worker-20261101/van-ci-shards-independent-review-20261101/probe-untracked-collection.py.txt",
+      "reason": "Historical executable snapshot stored as non-importable evidence; original commands retain historical paths."
+    },
+    {
+      "original_external_path": "/workspace/van-ci-shards-independent-recheck-r2-20261101/probe-provenance.py",
+      "archived_path": "docs/rebuild/rev118/receipts/raw/public-source-four-worker-20261101/van-ci-shards-independent-recheck-r2-20261101/probe-provenance.py.txt",
+      "reason": "Historical executable snapshot stored as non-importable evidence; original commands retain historical paths."
+    },
+    {
+      "original_external_path": "/workspace/van-ci-shards-runtime-parity-20261101/parity_observer.py",
+      "archived_path": "docs/rebuild/rev118/receipts/raw/public-source-four-worker-20261101/van-ci-shards-runtime-parity-20261101/parity_observer.py.txt",
+      "reason": "Historical executable snapshot stored as non-importable evidence; original commands retain historical paths."
+    },
+    {
+      "original_external_path": "/workspace/van-ci-shards-runtime-parity-20261101/run.py",
+      "archived_path": "docs/rebuild/rev118/receipts/raw/public-source-four-worker-20261101/van-ci-shards-runtime-parity-20261101/run.py.txt",
+      "reason": "Historical executable snapshot stored as non-importable evidence; original commands retain historical paths."
+    },
+    {
+      "original_external_path": "/workspace/van-ci-shards-focused-r12-20261101.py",
+      "archived_path": "docs/rebuild/rev118/receipts/raw/public-source-four-worker-20261101/van-ci-shards-focused-r12-20261101.py.txt",
+      "reason": "Historical executable snapshot stored as non-importable evidence; original commands retain historical paths."
+    }
+  ],
+  "limits": [
+    "Candidate verification SOURCE implementation/review only; no native certificate or acceptance issued",
+    "Native four fresh hosted execution/phase/collection union still UNEXECUTED; complete required exact-head execution must qualify",
+    "No source/native credentials, issuer, production/deployment/provider/device/signing/BG001 authority changed",
+    "BE031 native canary producer wiring remains separate SOURCE integration debt; installer scope still pending"
+  ],
+  "next": "Genuine hook commit, required4fd466 committed verification terminal0, normal push/readback and actual new exact-head CI; preserve all source inputs and triage actual failures.",
+  "packaging_topology": {
+    "actual_original_guard": "tests/contracts/test_van_private_core_topology.py::test_only_private_core_modules_touch_the_protected_tables",
+    "passed": 1,
+    "failed": 0,
+    "skipped": 0,
+    "audit_events": 0,
+    "scope": "New historical source snapshots remain non-importable evidence; no active protected-store implementation changed."
+  }
+}

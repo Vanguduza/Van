@@ -1,0 +1,8 @@
+{
+  "state": "PROPOSAL_ONLY_NO_WORKFLOW_EDITS",
+  "brief": "/workspace/van-backend-public-four-worker-proposal-20261101.md",
+  "sha256": "4759aaf346f5b33aad3df7981ac8544147a86f989283e960b183c54e82800f16",
+  "evidence": "/workspace/van-7df-ci-terminal-20261101/SHARD_TIMING_ESTIMATE.json",
+  "implementation_approval": "REQUIRED_FROM_ROOT_BEFORE_WORKFLOW_EDITS",
+  "current_priority": "Finish approved metadata corrective publication; do not delay it for this proposal."
+}

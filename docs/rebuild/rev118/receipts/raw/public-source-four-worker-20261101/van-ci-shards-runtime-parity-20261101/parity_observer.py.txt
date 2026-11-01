@@ -1,0 +1,31 @@
+"""Read-only SOURCE instrumentation: observe original/equivalent collection, never select."""
+import json, os, hashlib, importlib.metadata
+from pathlib import Path
+
+def pytest_configure(config):
+    config._parity_result = {
+        'rootpath':str(config.rootpath), 'inipath':str(config.inipath),
+        'effective_confcutdir':str(config.pluginmanager._confcutdir),
+        'config_sha256':hashlib.sha256(Path(config.inipath).read_bytes()).hexdigest(),
+        'pytest_entrypoints':sorted((e.dist.metadata['Name'],e.dist.version,e.name,e.value)
+                                   for e in importlib.metadata.entry_points(group='pytest11')),
+        'collection_errors':[], 'full_collection':[],
+    }
+
+def pytest_collectreport(report):
+    if report.failed:
+        # Config recorded independently; failed collection is also retained by pytest/log/XML.
+        pass
+
+def pytest_collection_finish(session):
+    value=session.config._parity_result
+    value['full_collection']=[i.nodeid for i in session.items]
+    value['collection_errors']=session.testsfailed
+    value['plugins']={getattr(p,'__name__',str(n)):hashlib.sha256(Path(p.__file__).read_bytes()).hexdigest()
+                      for n,p in session.config.pluginmanager.list_name_plugin()
+                      if p is not None and getattr(p,'__file__',None)}
+
+def pytest_sessionfinish(session, exitstatus):
+    value=session.config._parity_result
+    value['exit']=int(exitstatus)
+    Path(os.environ['VAN_PARITY_OUTPUT']).write_text(json.dumps(value,indent=2)+'\n')

@@ -1,0 +1,81 @@
+{
+  "storage_preflight": {
+    "free_bytes": 4349505536,
+    "reserve_bytes": 4294967296
+  },
+  "producer_sources": {
+    "tools/rebuild/backend_public_source.py": "1ce37661196ae512c8d6f8d98b4ab02e27dc3efcecaed9140362ab1caa0121f4",
+    "tools/rebuild/public_source_shards.py": "a167505a48f2686854a2a3b4bd5c5fd8744221a40f37017bfcbef6ce8395306a"
+  },
+  "result": "REPRODUCED_UNTRACKED_PYTEST_SOURCE_OMISSION_NOT_DETECTED",
+  "clean": {
+    "full_collection": [
+      "backend/tests/test_case_0.py::test_dropped_0",
+      "backend/tests/test_case_0.py::test_kept_0",
+      "backend/tests/test_case_1.py::test_dropped_1",
+      "backend/tests/test_case_1.py::test_kept_1",
+      "backend/tests/test_case_2.py::test_dropped_2",
+      "backend/tests/test_case_2.py::test_kept_2",
+      "backend/tests/test_case_3.py::test_dropped_3",
+      "backend/tests/test_case_3.py::test_kept_3"
+    ],
+    "source_before": {
+      "commit": "9c96f98e8111ec1aa73734eb28c1ae5a8970dda6",
+      "tree": "038f19ba87110a66a5990d43a490dae5eea8ce33"
+    },
+    "source_after": {
+      "commit": "9c96f98e8111ec1aa73734eb28c1ae5a8970dda6",
+      "tree": "038f19ba87110a66a5990d43a490dae5eea8ce33"
+    },
+    "parent_source_before": {
+      "commit": "9c96f98e8111ec1aa73734eb28c1ae5a8970dda6",
+      "tree": "038f19ba87110a66a5990d43a490dae5eea8ce33"
+    },
+    "parent_source_after": {
+      "commit": "9c96f98e8111ec1aa73734eb28c1ae5a8970dda6",
+      "tree": "038f19ba87110a66a5990d43a490dae5eea8ce33"
+    },
+    "exit": 0,
+    "forbidden_events": []
+  },
+  "altered": {
+    "full_collection": [
+      "backend/tests/test_case_0.py::test_kept_0",
+      "backend/tests/test_case_1.py::test_kept_1",
+      "backend/tests/test_case_2.py::test_kept_2",
+      "backend/tests/test_case_3.py::test_kept_3"
+    ],
+    "source_before": {
+      "commit": "9c96f98e8111ec1aa73734eb28c1ae5a8970dda6",
+      "tree": "038f19ba87110a66a5990d43a490dae5eea8ce33"
+    },
+    "source_after": {
+      "commit": "9c96f98e8111ec1aa73734eb28c1ae5a8970dda6",
+      "tree": "038f19ba87110a66a5990d43a490dae5eea8ce33"
+    },
+    "parent_source_before": {
+      "commit": "9c96f98e8111ec1aa73734eb28c1ae5a8970dda6",
+      "tree": "038f19ba87110a66a5990d43a490dae5eea8ce33"
+    },
+    "parent_source_after": {
+      "commit": "9c96f98e8111ec1aa73734eb28c1ae5a8970dda6",
+      "tree": "038f19ba87110a66a5990d43a490dae5eea8ce33"
+    },
+    "exit": 0,
+    "forbidden_events": []
+  },
+  "untracked_source": [
+    "__pycache__/conftest.cpython-312-pytest-9.1.1.pyc",
+    "backend/tests/__pycache__/test_case_0.cpython-312-pytest-9.1.1.pyc",
+    "backend/tests/__pycache__/test_case_1.cpython-312-pytest-9.1.1.pyc",
+    "backend/tests/__pycache__/test_case_2.cpython-312-pytest-9.1.1.pyc",
+    "backend/tests/__pycache__/test_case_3.cpython-312-pytest-9.1.1.pyc",
+    "conftest.py",
+    "tools/rebuild/__pycache__/backend_public_source.cpython-312.pyc",
+    "tools/rebuild/__pycache__/public_source_shards.cpython-312-pytest-9.1.1.pyc",
+    "tools/rebuild/__pycache__/public_source_shards.cpython-312.pyc"
+  ],
+  "fixture_repository_commit_only": true,
+  "native_qualification": false,
+  "owned_tmp_cleanup": true
+}

@@ -1,0 +1,21 @@
+from pathlib import Path
+import sys,subprocess,json,datetime,hashlib,os
+sys.path.insert(0,'/workspace')
+from van_owned_basetemp_20261101 import preflight,cleanup
+root=Path('/workspace/van-review-2026-10-18/publish')
+out=Path('/workspace/van-ci-shards-focused-r12-20261101');out.mkdir(exist_ok=False)
+temp='/tmp/van-recovery-ci-shards-focused-r12-20261101'
+receipt={'started_at_utc':datetime.datetime.now(datetime.timezone.utc).isoformat(),'source_parent':'fd33b0759b9ae170f8bdfdf27f9afe7082da7830','owned_temp_preflight':preflight(temp)}
+targets=['tests/rebuild/test_public_source_shards.py','tests/rebuild/test_backend_public_source.py','tests/rebuild/test_source_storage_audit.py','tests/contracts/test_ci_public_source_shards.py','tests/contracts/test_ci_workflow_is_what_it_claims.py','tests/contracts/test_ci_dds_contract_pin.py']
+receipt['source_pins']={str(p.relative_to(root)):hashlib.sha256(p.read_bytes()).hexdigest() for p in [root/'trading/vati/execution/paper.py',root/'trading/vati/lifecycle/family_actions.py',root/'trading/vati/lifecycle/family.py',root/'trading/vati/lifecycle/family_membership.py',root/'trading/vati/lifecycle/family_action_journal.py',root/'trading/vati/execution/exit_journal.py',root/'trading/vati/execution/router.py',root/'trading/vati/app/trade_lifecycle.py',root/'trading/vati/risk/operational_grant.py',root/'trading/vati/lifecycle/family_execution.py',root/'trading/vati/lifecycle/family_protection.py',root/'trading/vati/lifecycle/family_supervision.py',root/'trading/vati/lifecycle/family_recovery.py',root/'trading/vati/lifecycle/family_recovery.py',root/'trading/vati/lifecycle/envelope.py',root/'trading/vati/lifecycle/family_runtime.py',root/'trading/vati/lifecycle/family_outcome.py',root/'trading/vati/execution/family_economics.py',root/'trading/vati/execution/recovery_scope.py',root/'trading/vati/learning/episodes.py',root/'trading/commander/lifecycle_policies.py',root/'trading/commander/app.py',root/'trading/vati/app/service.py',root/'trading/vati/app/account_service.py',*[root/t.split("::")[0] for t in targets]]}
+for rel in ['backend/van_gateway/google/service.py','backend/van_gateway/google/mesh.py','backend/van_gateway/app.py','backend/van_gateway/action/service.py','backend/van_gateway/auth/reenrollment.py','backend/van_gateway/audit/service.py','backend/van_gateway/ops/retention.py','backend/van_gateway/context/forget.py']:
+ receipt['source_pins'][rel]=hashlib.sha256((root/rel).read_bytes()).hexdigest()
+for rel in ['.github/workflows/van-ci.yml','tools/ci/github-actions-ci.yml','tools/rebuild/backend_public_source.py','tools/rebuild/public_source_shards.py','tools/rebuild/backend_public_source_costs.json','docs/rebuild/rev118/ci/PUBLIC_SOURCE_SHARDS_20261101.md']:
+ receipt['source_pins'][rel]=hashlib.sha256((root/rel).read_bytes()).hexdigest()
+cmd=['/workspace/van-backend-venv-20261025/bin/python','tools/rebuild/source_storage_audit.py','--report',str(out/'storage-audit.json'),*targets,'--basetemp='+temp,'--junitxml='+str(out/'tests.xml'),'-q'];receipt['command']=cmd
+with (out/'tests.log').open('w') as log:
+ try:receipt['exit']=subprocess.run(cmd,cwd=root,env={**os.environ, "PYTHONPATH":":".join(str(root/p) for p in ("backend","backend/tests","trading","trading/tests","."))},stdout=log,stderr=subprocess.STDOUT,timeout=900).returncode
+ except subprocess.TimeoutExpired:receipt['state']='TIMEOUT';raise
+ finally:
+  receipt['source_after_pins']={rel:hashlib.sha256((root/rel).read_bytes()).hexdigest() for rel in receipt['source_pins']};receipt['source_pins_unchanged']=receipt['source_after_pins']==receipt['source_pins'];receipt['owned_temp_cleanup']=cleanup(temp,out);receipt['completed_at_utc']=datetime.datetime.now(datetime.timezone.utc).isoformat();(out/'receipt.json').write_text(json.dumps(receipt,indent=2)+'\n')
+print(json.dumps({'exit':receipt['exit'],'receipt':str(out/'receipt.json')}))

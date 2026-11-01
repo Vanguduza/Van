@@ -1,0 +1,59 @@
+{
+  "results": [
+    {
+      "case": "collection-module-skip",
+      "result": "REFUSES_AS_REQUIRED",
+      "parent_exit": 3,
+      "pytest_exit": 3,
+      "phases": [],
+      "owned_tmp_cleanup": true
+    },
+    {
+      "case": "empty-inventory",
+      "result": "REFUSES_AS_REQUIRED",
+      "parent_exit": 3,
+      "pytest_exit": 3,
+      "phases": [],
+      "owned_tmp_cleanup": true
+    },
+    {
+      "case": "empty-shard",
+      "result": "REFUSES_AS_REQUIRED",
+      "parent_exit": 3,
+      "pytest_exit": 3,
+      "phases": [],
+      "owned_tmp_cleanup": true
+    },
+    {
+      "case": "teardown-failure",
+      "result": "REFUSES_AS_REQUIRED",
+      "parent_exit": 1,
+      "pytest_exit": 1,
+      "phases": [
+        {
+          "duration": 0.000418511001043953,
+          "nodeid": "backend/tests/test_case_0.py::test_case_0",
+          "outcome": "passed",
+          "skip_reason": null,
+          "when": "setup"
+        },
+        {
+          "duration": 0.00010855200162041001,
+          "nodeid": "backend/tests/test_case_0.py::test_case_0",
+          "outcome": "passed",
+          "skip_reason": null,
+          "when": "call"
+        },
+        {
+          "duration": 0.0016890070000954438,
+          "nodeid": "backend/tests/test_case_0.py::test_case_0",
+          "outcome": "failed",
+          "skip_reason": null,
+          "when": "teardown"
+        }
+      ],
+      "owned_tmp_cleanup": true
+    }
+  ],
+  "native_four_worker_qualification": false
+}

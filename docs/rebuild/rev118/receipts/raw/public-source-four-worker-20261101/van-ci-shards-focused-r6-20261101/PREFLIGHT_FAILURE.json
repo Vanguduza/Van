@@ -1,0 +1,9 @@
+{
+  "at_utc": "2026-11-01T10:17:34.121904+00:00",
+  "state": "PREFLIGHT_REFUSED_NO_TESTS_EXECUTED",
+  "rule": "Existingownedtemp4GiB+100000inode reserve unchanged",
+  "available_bytes": 3976720384,
+  "available_inodes": 2246698,
+  "source_parent": "fd33b0759b9ae170f8bdfdf27f9afe7082da7830",
+  "next": "Inspect/reclaim only completedownedpublicdownloadcache with verifiedidentity; no queueactivefixture/sharedGradle/runtime deletion."
+}

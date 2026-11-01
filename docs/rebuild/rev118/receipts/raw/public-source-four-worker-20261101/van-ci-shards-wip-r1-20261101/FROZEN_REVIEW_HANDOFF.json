@@ -1,0 +1,70 @@
+{
+  "at_utc": "2026-11-01T10:30:30.202243+00:00",
+  "state": "FROZEN_FOR_INDEPENDENT_SOURCE_REVIEW_NOT_COMMITTED_NOT_NATIVE_QUALIFIED",
+  "base": "fd33b0759b9ae170f8bdfdf27f9afe7082da7830",
+  "owned_paths": {
+    ".github/workflows/van-ci.yml": "d01072bb9580f97191c42887f66edb0bc4b67e52790c971e548987f079e54292",
+    "tools/ci/github-actions-ci.yml": "d01072bb9580f97191c42887f66edb0bc4b67e52790c971e548987f079e54292",
+    "tools/rebuild/backend_public_source.py": "1ce37661196ae512c8d6f8d98b4ab02e27dc3efcecaed9140362ab1caa0121f4",
+    "tools/rebuild/public_source_shards.py": "a167505a48f2686854a2a3b4bd5c5fd8744221a40f37017bfcbef6ce8395306a",
+    "tools/rebuild/backend_public_source_costs.json": "87bea238bd0bbd85bc75bf5a3f1271284d2da7d8833a60ef2805e5f9220f1779",
+    "tests/rebuild/test_public_source_shards.py": "c24da2f50078af023f285e5d9db9f76f90e8695449ec89391e5b58e4aa4bb16c",
+    "tests/contracts/test_ci_public_source_shards.py": "5d80f268b9af8b9827e025af3c9fd2f37edbd110301be6257568190fcb5eb87a",
+    "docs/rebuild/rev118/ci/PUBLIC_SOURCE_SHARDS_20261101.md": "5d97ac54d6ce32e2139944c86315e7bd266c79d7b51ccdf65d26aed9552b6ff6"
+  },
+  "before_sha256": {
+    ".github/workflows/van-ci.yml": "dac912c785c2993a2498f00f9073842efdb3646a46ae70faf0b9f95c24792535",
+    "tools/ci/github-actions-ci.yml": "dac912c785c2993a2498f00f9073842efdb3646a46ae70faf0b9f95c24792535",
+    "tools/rebuild/backend_public_source.py": "8c1a4ce1e6e92905a609efc52ed1ac9467696eb4b1b86d49656839e31f61ddd4",
+    "tools/rebuild/public_source_shards.py": null,
+    "tools/rebuild/backend_public_source_costs.json": null,
+    "tests/rebuild/test_public_source_shards.py": null,
+    "tests/contracts/test_ci_public_source_shards.py": null,
+    "docs/rebuild/rev118/ci/PUBLIC_SOURCE_SHARDS_20261101.md": null
+  },
+  "archive_sha256": "87bfc6e299e450c9bc2320c791f12ce1deb444b5172475a939685b32b890de0b",
+  "patch_sha256": "247eee1ac6b4120b4516b4557aa9755a756bfcc0de2484107583bc41d46ed3d8",
+  "archive_bytes_verified": true,
+  "cached_applycheck": "PASS no indexmutation",
+  "actual_tests": {
+    "initial_instrument": 53,
+    "expanded_instrument": 71,
+    "parent_identity_and_control_media": 74,
+    "strict_evidence": 78,
+    "final_owned_audit": {
+      "exit": 0,
+      "passed": 88,
+      "skipped": 0,
+      "receipt": "/workspace/van-ci-shards-focused-r7-20261101/receipt.json"
+    },
+    "scope": "Syntheticprotocol and tinyrealpytestproducer instrumentchecks, existingworkflow/legacy/auditorcontracts; NOT full application or native4worker execution"
+  },
+  "owned_jobs": {
+    "R7session42202": "TERMINAL0 cleanupverified",
+    "R6": "PREFLIGHT_REFUSED_NO_TESTS_EXECUTED unchanged4GiBreserve",
+    "native_watch36262": "Prior7dfterminal/reaped; no newwatch"
+  },
+  "cache_receipt": "/workspace/van-ci-shards-temp-cache-reclamation-20261101.json",
+  "native_fd33_last_readback": "/workspace/van-fd33-ci-during-shard-implementation-20261101.json;19jobs18terminal,onlybackendpublicrunning,2mandatoryadmissionfailures; source/skip/executioncountunknown",
+  "remaining": [
+    "Independent bounded source review before commit/push",
+    "Final canonical/manifest/authorization/hook/baseline verification and normal publication",
+    "Future exact-head actual 4-worker execution/collection/phase evidence, approved skips, and measured job runtime before qualification or speed claim"
+  ],
+  "invariants": "Originalselection/exclusions/approvedskips/mediaruntime and everyotherjobtriggerconcurrencycredentials/trustedchecker/authrecord/frozenmutationcorpus unchanged; requiredbackend-public-source name+ID retained.",
+  "source_archive_patch_current_bytes_verified": true,
+  "review_focus": [
+    "Exact SHA, clean source, current run/attempt and source/environment equality across independent full collection/control and all 4 producer outputs",
+    "Whole-file deterministic placement only; every original selected case/approved skip and media runtime retained",
+    "Actual phase+nodeID+JUnit execution union; failed/error/setup/teardown/unknown/missing/duplicate/foreign/status-only/collection-only/unapproved-skip artifacts fail closed",
+    "Original backend-public-source ID/displayed required gate retained; all other job bodies/top-level triggers/concurrency/permissions unchanged; mirror byte-identical",
+    "Tiny real pytest producers and separate collection/media dispatch prove instrument behavior only; native fresh-worker execution and actual runtime still required"
+  ],
+  "review_evidence": [
+    "/workspace/van-ci-shards-focused-r7-20261101/receipt.json",
+    "/workspace/van-ci-shards-focused-r7-20261101/tests.xml",
+    "/workspace/van-ci-shards-focused-r7-20261101/storage-audit.json",
+    "/workspace/van-ci-shards-focused-r7-20261101/tests.log"
+  ],
+  "native_base_readback": "/workspace/van-ci-shards-wip-r1-20261101/FD33_CI_FREEZE_READBACK.json"
+}

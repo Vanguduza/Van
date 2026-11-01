@@ -1,0 +1,10 @@
+{
+  ".github/workflows/van-ci.yml": "d01072bb9580f97191c42887f66edb0bc4b67e52790c971e548987f079e54292",
+  "tools/ci/github-actions-ci.yml": "d01072bb9580f97191c42887f66edb0bc4b67e52790c971e548987f079e54292",
+  "tools/rebuild/backend_public_source.py": "1ce37661196ae512c8d6f8d98b4ab02e27dc3efcecaed9140362ab1caa0121f4",
+  "tools/rebuild/public_source_shards.py": "a167505a48f2686854a2a3b4bd5c5fd8744221a40f37017bfcbef6ce8395306a",
+  "tools/rebuild/backend_public_source_costs.json": "87bea238bd0bbd85bc75bf5a3f1271284d2da7d8833a60ef2805e5f9220f1779",
+  "tests/rebuild/test_public_source_shards.py": "c24da2f50078af023f285e5d9db9f76f90e8695449ec89391e5b58e4aa4bb16c",
+  "tests/contracts/test_ci_public_source_shards.py": "5d80f268b9af8b9827e025af3c9fd2f37edbd110301be6257568190fcb5eb87a",
+  "docs/rebuild/rev118/ci/PUBLIC_SOURCE_SHARDS_20261101.md": "5d97ac54d6ce32e2139944c86315e7bd266c79d7b51ccdf65d26aed9552b6ff6"
+}

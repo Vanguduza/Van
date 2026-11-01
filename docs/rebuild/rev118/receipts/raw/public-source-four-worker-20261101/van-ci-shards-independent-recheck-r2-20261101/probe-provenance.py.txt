@@ -1,0 +1,47 @@
+import hashlib,json,os,shutil,subprocess,tempfile,zipfile
+from pathlib import Path
+OUT=Path('/workspace/van-ci-shards-independent-recheck-r2-20261101');ROOT=Path('/workspace/van-review-2026-10-18/publish');E=Path('/workspace/van-ci-shards-wip-r2-20261101');h=json.loads((E/'FROZEN_REVIEW_HANDOFF.json').read_text())
+def pins():return {p:hashlib.sha256((ROOT/p).read_bytes()).hexdigest() for p in h['owned_paths']}
+before=pins();assert before==h['owned_paths'];(OUT/'before.json').write_text(json.dumps(before,indent=2));assert hashlib.sha256((E/'SOURCE.zip').read_bytes()).hexdigest()==h['archive_sha256'];assert hashlib.sha256((E/'SOURCE.patch').read_bytes()).hexdigest()==h['patch_sha256']
+with zipfile.ZipFile(E/'SOURCE.zip') as z:
+ for p,want in before.items():
+  ns=[n for n in z.namelist() if n==p or n.endswith('/'+p)];assert len(ns)==1;assert hashlib.sha256(z.read(ns[0])).hexdigest()==want
+free=shutil.disk_usage('/tmp').free;assert free>=4*1024**3
+results=[]
+with tempfile.TemporaryDirectory(prefix='van-ci-r2-provenance-review-',dir='/tmp') as temp:
+ base=Path(temp);repo=base/'source';repo.mkdir()
+ for rel in ('tools/rebuild/backend_public_source.py','tools/rebuild/public_source_shards.py','tools/rebuild/source_storage_audit.py'):
+  dest=repo/rel;dest.parent.mkdir(parents=True,exist_ok=True);shutil.copyfile(ROOT/rel,dest)
+ (repo/'tools/rebuild/backend_public_source_costs.json').write_text('{"costs":{}}');(repo/'pytest.ini').write_text('[pytest]\n')
+ (repo/'.gitignore').write_text('backend/tests/conftest.py\nignored_inputs/\nparameters.json\n__pycache__/\nartifacts/\n.pytest_cache/\n')
+ (repo/'conftest.py').write_text('import pytest\n@pytest.fixture\ndef committed_guard():\n    return True\n')
+ for rel in ('tests/contracts/test_artemis_acceptance_plan.py','tests/contracts/test_artemis_usb_acceptance.py','tests/contracts/test_van_browser_core_firewall.py'):
+  p=repo/rel;p.parent.mkdir(parents=True,exist_ok=True);p.write_text('# excluded fixture\n')
+ for i in range(4):
+  p=repo/f'backend/tests/test_case_{i}.py';p.parent.mkdir(parents=True,exist_ok=True);p.write_text('import json\nfrom pathlib import Path\nimport pytest\np=Path(__file__).resolve().parents[2]/"parameters.json"\nvalues=json.loads(p.read_text()) if p.exists() else [1,2]\n@pytest.mark.parametrize("value",values)\ndef test_case(value,committed_guard):\n    assert committed_guard and value>0\n')
+ subprocess.run(['git','init','-q'],cwd=repo,check=True);subprocess.run(['git','add','.'],cwd=repo,check=True);subprocess.run(['git','-c','user.name=Owned SOURCE fixture','-c','user.email=source@example.test','-c','core.hooksPath=/dev/null','commit','-qm','isolated source fixture'],cwd=repo,check=True)
+ head=subprocess.check_output(['git','rev-parse','HEAD'],cwd=repo,text=True).strip();env={**os.environ,'PYTHONPATH':os.pathsep.join(str(repo/p) for p in ('backend','backend/tests','trading','trading/tests','.')),'PYTHONDONTWRITEBYTECODE':'1','GITHUB_RUN_ID':'independent-r2-source-fixture','GITHUB_RUN_ATTEMPT':'1'}
+ for key in ('PYTEST_ADDOPTS','PYTEST_PLUGINS','VATI_TEST_PG_DSN'):env.pop(key,None)
+ def collect(label,execute=False):
+  output=base/label;cmd=[os.sys.executable,'-B','-s',str(repo/'tools/rebuild/backend_public_source.py'),'run-shard' if execute else 'collect','--output',str(output),'--runtime','gateway','--shards','4','--shard-index','0','--expected-commit',head,'--basetemp',str(base/(label+'-temp'))]
+  run=subprocess.run(cmd,cwd=repo,env=env,text=True,capture_output=True,timeout=30);(OUT/(label+'.log')).write_text(run.stdout+run.stderr);return run,output
+ clean,output=collect('clean');assert clean.returncode==0,clean.stderr
+ state=json.loads((output/'terminal.json').read_text());assert len(state['full_collection'])==8 and 'conftest.py' in state['pytest_inputs']['plugins'];results.append({'case':'clean committed8case inventory and tracked conftest','result':'PASS','collection_count':8})
+ # Execute tracked fixture in a real tiny shard, independently of any native4worker qualification.
+ tracked,folder=collect('tracked-fixture-execution',True);assert tracked.returncode==0,tracked.stderr
+ phases=[json.loads(line) for line in (folder/'phases.jsonl').read_text().splitlines()];assert len(phases)==6 and all(p['outcome']=='passed' for p in phases);results.append({'case':'actual trackedfixture shard2cases setupcallteardown','result':'PASS','executed_cases':2})
+ generated=repo/'artifacts/backend-public-source/gateway-control/terminal.json';generated.parent.mkdir(parents=True,exist_ok=True);generated.write_text('{"inert_generated_fixture":true}')
+ cache=repo/'.pytest_cache/v/cache/nodeids';cache.parent.mkdir(parents=True,exist_ok=True);cache.write_text('[]')
+ positive,folder=collect('inert-generated');assert positive.returncode==0,positive.stderr;assert len(json.loads((folder/'terminal.json').read_text())['full_collection'])==8;results.append({'case':'explicit inert generatedoutput retains8case inventory','result':'PASS','collection_count':8})
+ drop='def pytest_collection_modifyitems(items):\n    items[:] = [i for i in items if not i.nodeid.endswith("[2]")]\n'
+ # The same original rootconftest omission requires an untracked root file. Preserve baseline trackedfixture via backend/tests tracked sibling instead.
+ # Use ordinary new nested conftest in a selected directory to exercise the same omission payload; root ordinary injection separately tracked source drift is refused.
+ injections=[('ordinary-untracked-config','extra_untracked.ini','[pytest]\naddopts=-k nothing\n'),('ignored-conftest','backend/tests/conftest.py',drop),('ignored-data','parameters.json','[1]'),('ignored-bytecode','__pycache__/injected.pyc','synthetic bytecode'),('ignored-plugin','ignored_inputs/plugin.py',drop),('generated-tree-executable','artifacts/backend-public-source/conftest.py',drop)]
+ for label,rel,content in injections:
+  path=repo/rel;path.parent.mkdir(parents=True,exist_ok=True);path.write_text(content);failed,folder=collect(label);assert failed.returncode!=0 and 'uncommitted executable/config/fixture inputs' in failed.stderr and not (folder/'terminal.json').exists(),failed.stderr
+  assert path.read_text()==content;path.unlink();results.append({'case':label,'result':'REFUSES_BEFORE_COLLECTION','exit':failed.returncode})
+ # Original rootconftest8→4 payload on an untracked path, using trackedfixture at backend/tests fixture provider.
+ (repo/'conftest.py').unlink();newfixture=repo/'backend/tests/conftest.py';newfixture.write_text('import pytest\n@pytest.fixture\ndef committed_guard():\n    return True\n');subprocess.run(['git','add','-u'],cwd=repo,check=True);subprocess.run(['git','add','-f','backend/tests/conftest.py'],cwd=repo,check=True);subprocess.run(['git','-c','user.name=Owned SOURCE fixture','-c','user.email=source@example.test','-c','core.hooksPath=/dev/null','commit','-qm','fixture owns nested conftest'],cwd=repo,check=True);head=subprocess.check_output(['git','rev-parse','HEAD'],cwd=repo,text=True).strip()
+ baseline2,folder=collect('original-counterexample-clean');assert baseline2.returncode==0,baseline2.stderr;assert len(json.loads((folder/'terminal.json').read_text())['full_collection'])==8
+ (repo/'conftest.py').write_text(drop);refused,folder=collect('original-counterexample-untracked-root');assert refused.returncode!=0 and 'uncommitted executable/config/fixture inputs' in refused.stderr and not (folder/'terminal.json').exists();assert (repo/'conftest.py').read_text()==drop;results.append({'case':'original real8to4 rootconftest omission','result':'REFUSES_BEFORE_COLLECTION','clean_count':8,'exit':refused.returncode,'reduced_inventory_produced':False})
+after=pins();assert after==before;(OUT/'after.json').write_text(json.dumps(after,indent=2));record={'results':results,'source_preflight':{'free_bytes_before':free,'reserve_bytes':4*1024**3},'all8_archive_patch_source_pins_verified_unchanged':True,'owned_tmp_cleanup':True,'fixture_only_git_commits':True,'native_fourworker_qualification':False};(OUT/'probe-results.json').write_text(json.dumps(record,indent=2));print(json.dumps([{'case':p['case'],'result':p['result']} for p in results]))

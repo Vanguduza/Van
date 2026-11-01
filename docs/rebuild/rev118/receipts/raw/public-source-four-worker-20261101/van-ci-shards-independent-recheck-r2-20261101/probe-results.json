@@ -1,0 +1,64 @@
+{
+  "results": [
+    {
+      "case": "clean committed8case inventory and tracked conftest",
+      "result": "PASS",
+      "collection_count": 8
+    },
+    {
+      "case": "actual trackedfixture shard2cases setupcallteardown",
+      "result": "PASS",
+      "executed_cases": 2
+    },
+    {
+      "case": "explicit inert generatedoutput retains8case inventory",
+      "result": "PASS",
+      "collection_count": 8
+    },
+    {
+      "case": "ordinary-untracked-config",
+      "result": "REFUSES_BEFORE_COLLECTION",
+      "exit": 1
+    },
+    {
+      "case": "ignored-conftest",
+      "result": "REFUSES_BEFORE_COLLECTION",
+      "exit": 1
+    },
+    {
+      "case": "ignored-data",
+      "result": "REFUSES_BEFORE_COLLECTION",
+      "exit": 1
+    },
+    {
+      "case": "ignored-bytecode",
+      "result": "REFUSES_BEFORE_COLLECTION",
+      "exit": 1
+    },
+    {
+      "case": "ignored-plugin",
+      "result": "REFUSES_BEFORE_COLLECTION",
+      "exit": 1
+    },
+    {
+      "case": "generated-tree-executable",
+      "result": "REFUSES_BEFORE_COLLECTION",
+      "exit": 1
+    },
+    {
+      "case": "original real8to4 rootconftest omission",
+      "result": "REFUSES_BEFORE_COLLECTION",
+      "clean_count": 8,
+      "exit": 1,
+      "reduced_inventory_produced": false
+    }
+  ],
+  "source_preflight": {
+    "free_bytes_before": 4710363136,
+    "reserve_bytes": 4294967296
+  },
+  "all8_archive_patch_source_pins_verified_unchanged": true,
+  "owned_tmp_cleanup": true,
+  "fixture_only_git_commits": true,
+  "native_fourworker_qualification": false
+}

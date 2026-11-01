@@ -1,0 +1,104 @@
+{
+  "schema": "van.independent-ci-four-worker-source-recheck/2",
+  "state": "CI4_REVIEW01_CLOSED_NO_REMAINING_BLOCKING_FINDING_IN_BOUNDED_SOURCE_SCOPE",
+  "base": "fd33b0759b9ae170f8bdfdf27f9afe7082da7830",
+  "reviewer": "Sol medium independent bounded SOURCE recheck; root decisions only",
+  "source_identity": {
+    "owned_paths": 8,
+    "changed_since_r1": [
+      "tools/rebuild/backend_public_source.py",
+      "tools/rebuild/public_source_shards.py",
+      "tests/rebuild/test_public_source_shards.py",
+      "docs/rebuild/rev118/ci/PUBLIC_SOURCE_SHARDS_20261101.md"
+    ],
+    "all_current_archive_patch_before_after_final_pins_verified": true,
+    "before": "before.json",
+    "after": [
+      "after.json",
+      "final-source-pins.json"
+    ],
+    "archive_sha256": "7199a898e5802790898b63eb93abaaffea603b89f5057c0820c004420722b82c",
+    "patch_sha256": "7bf7270ed1ab6d7fc8586af31cd1571fd6c12ff50a08fb4ce146216fb92d4358",
+    "original_failure_preserved": "/workspace/van-ci-shards-independent-review-20261101/untracked-collection-results.json"
+  },
+  "blocking_findings": [],
+  "closed_finding": {
+    "id": "CI4-REVIEW-01",
+    "path": "tools/rebuild/public_source_shards.py:64",
+    "related": [
+      "tools/rebuild/public_source_shards.py:88",
+      "tools/rebuild/backend_public_source.py:108"
+    ],
+    "disposition": "CLOSED_SOURCE_AND_ACTUAL_PRODUCER_RECHECK",
+    "finding": "Ordinary and ignored additional paths are inventoried and refused before pytest collection unless exact inert generated output policy admits them. No blanket .gitignore trust; symlink/executable/config/plugin/bytecode and ignored parametrization data are refused. Committed root pytest.ini, canonical root/confcut/import paths, original explicit runtime plugins and effective plugin/config code hashes are bound; ambient plugin/startup/optimized assertion inputs cannot silently replace committed scope."
+  },
+  "independent_probes": {
+    "artifact": "probe-results.json",
+    "script": "probe-provenance.py",
+    "results": [
+      "Clean committed8case inventory with tracked conftest: PASS.",
+      "Tiny actual trackedfixture shard executes2 cases with full setup/call/teardown passed: PASS.",
+      "Explicit allowed inert artifact/cache data still collects8 cases: PASS.",
+      "Ordinary extra config, ignored conftest, ignored parametrization data, ignored bytecode, ignored plugin, and executable in generated evidence tree: all REFUSE before collection without deleting original injections.",
+      "Original root untracked collector omission condition: clean8 then injected rootconftest which would drop half now REFUSES before collection; no reduced inventory or terminal qualification produced."
+    ],
+    "preflight": "Owned /tmp fixture preflight retained unchanged4GiB reserve",
+    "cleanup": "All bounded subprocess children terminal/reaped; owned TemporaryDirectory repo/basetemps removed; tiny fixture-only Git commits establish real expectedHEAD, no candidate commit/edit/CI dispatch/nativeeffects.",
+    "imports": "Exact8-pinned production CLI/helper/auditor copies; explicit original canonical fixturePYTHONPATH; no receipt or sourceidentity mocking.",
+    "raw_logs": [
+      "clean.log",
+      "tracked-fixture-execution.log",
+      "inert-generated.log",
+      "ordinary-untracked-config.log",
+      "ignored-conftest.log",
+      "ignored-data.log",
+      "ignored-bytecode.log",
+      "ignored-plugin.log",
+      "generated-tree-executable.log",
+      "original-counterexample-clean.log",
+      "original-counterexample-untracked-root.log"
+    ]
+  },
+  "verified_evidence": "verified-structural-parity-evidence.json",
+  "structural_result": {
+    "requiredgate_id_name": "backend-public-source retained",
+    "all_other_jobs_and_top_level_boundaries": "UNCHANGED from fd33",
+    "matrix": "4 fresh isolated workers, fail-fast false, max-parallel4; no shared fixture pytest process",
+    "workflow_mirror": "BYTE_IDENTICAL",
+    "scope_and_skips": "Original plan/roots/exclusions/runtime/five approvedskip mappings AST unchanged",
+    "test_preservation": "Original R1 test names retained and no per-function assertion-count reduction; actualproducer cases strengthened",
+    "frozen_mutation_corpus": "UNCHANGED"
+  },
+  "runtime_parity": {
+    "source": "/workspace/van-ci-shards-runtime-parity-20261101/PARITY_RECEIPT.json",
+    "independently_parsed_original_explicit_artifacts": "Complete JSON equality for fullnodeIDs/config/root/confcut/plugin sources+entrypoints, no collectionerrors, terminal0, sourcepins beforeafter equal",
+    "gateway": {
+      "collected": 5990,
+      "plugins": [
+        "pytest_asyncio.plugin",
+        "anyio.pytest_plugin"
+      ]
+    },
+    "media": {
+      "collected": 198,
+      "plugins": [
+        "pytest_asyncio.plugin"
+      ]
+    },
+    "limit": "Collection only; zero application test execution from parity and no native worker qualification."
+  },
+  "test_evidence": {
+    "r12_actual_xml_readback": {
+      "tests": 92,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "scope": "Verification instrument/workflow/legacy/auditor checks incl tinyrealpytest producers. Overlaps prior sets; not aggregate unique application count. No large suite independently rerun."
+  },
+  "remaining_requirements": [
+    "Final canonical/manifest/authorization/genuine hooks/required baseline verification and normal publication/readback belong integration owner. Existing mirror-only template authority stays narrow; no trustedchecker/ledger/authrecord/frozenmutation edits or gate waiver.",
+    "Future published exacthead native4 isolated worker execution/control/assignment/phase/JUnit union, exact declared skips and actual jobtimings required before qualification or measured speed claim.",
+    "No native/unit/BG/provider/device/signing/deployment/release acceptance issued. Source changes invalidate affected review pins; original R1 failure/source/archives preserved."
+  ]
+}

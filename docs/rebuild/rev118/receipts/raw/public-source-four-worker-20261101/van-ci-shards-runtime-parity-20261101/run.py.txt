@@ -1,0 +1,51 @@
+from pathlib import Path
+import os,sys,json,subprocess,hashlib,datetime,importlib.util
+sys.path.insert(0,'/workspace')
+from van_owned_basetemp_20261101 import preflight,cleanup
+root=Path('/workspace/van-review-2026-10-18/publish')
+out=Path(__file__).parent
+temp='/tmp/van-recovery-ci-shards-runtime-parity-20261101'
+spec=importlib.util.spec_from_file_location('parity_scope',root/'tools/rebuild/backend_public_source.py')
+gate=importlib.util.module_from_spec(spec);spec.loader.exec_module(gate)
+receipt={'started_at_utc':datetime.datetime.now(datetime.timezone.utc).isoformat(),
+ 'scope':'Read-only complete collection/config/plugin parity; no application case execution or native worker qualification',
+ 'preflight':preflight(temp),'runs':[]}
+selection=gate.plan(root)
+paths=[root/'pytest.ini',root/'backend/requirements.lock',root/'deploy/van-browser-stream/requirements.lock',
+       root/'trading/tests/conftest.py',*[root/r['path'] for r in selection['selected']]]
+receipt['before_sha256']={str(p.relative_to(root)):hashlib.sha256(p.read_bytes()).hexdigest() for p in paths}
+try:
+ for runtime,python,plugins in (
+  ('gateway','/workspace/van-backend-venv-20261025/bin/python',('pytest_asyncio.plugin','anyio.pytest_plugin')),
+  ('media',str(out/'media-venv/bin/python'),('pytest_asyncio.plugin',))):
+  for mode in ('original','explicit'):
+   result_path=out/(runtime+'-'+mode+'.json')
+   env={**os.environ,'PYTHONDONTWRITEBYTECODE':'1','PYTHONHASHSEED':'0',
+        'PYTHONPATH':':'.join(str(root/p) for p in ('backend','backend/tests','trading','trading/tests','.'))+':'+str(out),
+        'VAN_PARITY_OUTPUT':str(result_path)}
+   env.pop('PYTEST_DISABLE_PLUGIN_AUTOLOAD',None);env.pop('PYTEST_ADDOPTS',None);env.pop('PYTEST_PLUGINS',None)
+   env.pop('VATI_TEST_PG_DSN',None);env.pop('VATI_TEST_PG_ISOLATED_FIXTURE',None)
+   selected=[r['path'] for r in selection['selected'] if gate.runtime(r['path'])==runtime]
+   cmd=[python,'-B','-s','tools/rebuild/source_storage_audit.py','--report',str(out/(runtime+'-'+mode+'-audit.json')),
+        *selected,'-q','--disable-warnings','--collect-only','--basetemp='+temp+'/'+runtime+'-'+mode,'-p','parity_observer']
+   if mode=='explicit':
+    env['PYTEST_DISABLE_PLUGIN_AUTOLOAD']='1'
+    cmd+=['-c',str(root/'pytest.ini'),'--rootdir='+str(root),'--confcutdir='+str(root)]
+    cmd += [a for p in plugins for a in ('-p',p)]
+   with (out/(runtime+'-'+mode+'.log')).open('w') as log:
+    process=subprocess.run(cmd,cwd=root,env=env,stdout=log,stderr=subprocess.STDOUT,timeout=240)
+   receipt['runs'].append({'runtime':runtime,'mode':mode,'command':cmd,'exit':process.returncode,'result':str(result_path)})
+   assert process.returncode==0, runtime+' '+mode+' collection failed'
+  old=json.loads((out/(runtime+'-original.json')).read_text());new=json.loads((out/(runtime+'-explicit.json')).read_text())
+  assert old==new, runtime+' effective input/collection parity differs'
+  receipt[runtime]={'collected':len(old['full_collection']),'identical_original_explicit':True,
+    'rootpath':old['rootpath'],'inipath':old['inipath'],'effective_confcutdir':old['effective_confcutdir'],
+    'pytest_entrypoints':old['pytest_entrypoints']}
+ receipt['after_sha256']={str(p.relative_to(root)):hashlib.sha256(p.read_bytes()).hexdigest() for p in paths}
+ assert receipt['before_sha256']==receipt['after_sha256']
+ receipt['exit']=0
+finally:
+ receipt['cleanup']=cleanup(temp,out)
+ receipt['completed_at_utc']=datetime.datetime.now(datetime.timezone.utc).isoformat()
+ (out/'PARITY_RECEIPT.json').write_text(json.dumps(receipt,indent=2)+'\n')
+print(json.dumps({k:v for k,v in receipt.items() if k in ('exit','gateway','media')}))

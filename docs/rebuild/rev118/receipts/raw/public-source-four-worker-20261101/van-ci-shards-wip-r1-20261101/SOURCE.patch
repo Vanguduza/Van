@@ -1,0 +1,3115 @@
+diff --git a/.github/workflows/van-ci.yml b/.github/workflows/van-ci.yml
+index 21dcf4ca..e40838b5 100644
+--- a/.github/workflows/van-ci.yml
++++ b/.github/workflows/van-ci.yml
+@@ -415,7 +415,90 @@ jobs:
+ 
+   # Supplemental public-source coverage. The original backend job below still
+   # requires pinned private DDS contracts and remains an independent required gate.
++  backend-public-source-gateway:
++    name: backend-public-source-gateway (${{ matrix.shard }})
++    strategy:
++      fail-fast: false
++      max-parallel: 4
++      matrix:
++        shard: [0, 1, 2, 3]
++    runs-on: ubuntu-24.04
++    # Exact2a completed all source assertions and uploaded evidence at the
++    # previous45minute boundary, but GitHub cancelled its job during cleanup.
++    timeout-minutes: 60
++    services:
++      postgres:
++        image: postgres:17.11-bookworm@sha256:858bb5e98eed02eb8cafbcdc007f9a65d1b613972028944a8ec2133ccaf80d27
++        env:
++          POSTGRES_USER: van_fixture
++          POSTGRES_PASSWORD: van_ephemeral_test_only
++          POSTGRES_DB: postgres
++        ports:
++          - 5432:5432
++        options: >-
++          --health-cmd "pg_isready -U van_fixture -d postgres"
++          --health-interval 5s --health-timeout 5s --health-retries 12
++    env:
++      PYTHONPATH: backend:backend/tests:trading:trading/tests:.
++      VATI_TEST_PG_DSN: postgresql://van_fixture:van_ephemeral_test_only@127.0.0.1:5432/postgres
++      VATI_TEST_PG_ISOLATED_FIXTURE: '1'
++    steps:
++      - uses: actions/checkout@v4
++        with:
++          ref: ${{ github.event.pull_request.head.sha || github.sha }}
++          fetch-depth: 0
++      - uses: actions/setup-node@v4
++        with:
++          node-version: "24.19.0"
++      - uses: actions/setup-python@v5
++        with:
++          python-version: "3.12"
++      - name: Install original locked public source dependencies
++        run: |
++          python -m pip install -r backend/requirements.lock
++          python -m pip install --no-deps psycopg==3.2.9 psycopg-binary==3.2.9
++          python -m pip install pytest==9.1.1 pytest-asyncio==1.4.0
++          python -m pip install --no-deps Pillow==12.3.0
++          python -m playwright install chromium
++      - name: Resolve actual Chromium and initialize the disposable schema
++        run: |
++          python - <<'PYCODE'
++          import os
++          from pathlib import Path
++          import psycopg
++          from playwright.sync_api import sync_playwright
++          with sync_playwright() as p:
++              executable = Path(p.chromium.executable_path)
++          assert executable.is_file() and os.access(executable, os.X_OK)
++          with open(os.environ["GITHUB_ENV"], "a") as env:
++              env.write(f"VAN_TEST_CHROMIUM={executable}\n")
++              for key in ("NO_PROXY", "no_proxy"):
++                  env.write(key+"="+",".join(["127.0.0.1", "localhost", "::1", os.environ.get(key, "")])+"\n")
++          with psycopg.connect(os.environ["VATI_TEST_PG_DSN"]) as conn:
++              conn.execute("CREATE SCHEMA vati")
++          PYCODE
++      - name: Inventory the unchanged public source scope
++        run: |
++          python tools/rebuild/backend_public_source.py plan --output artifacts/backend-public-source-gateway-${{ matrix.shard }}
++          git rev-parse HEAD > artifacts/backend-public-source-gateway-${{ matrix.shard }}/tested-commit.txt
++      - name: Execute exact assigned gateway nodes on this isolated worker
++        run: >-
++          python tools/rebuild/backend_public_source.py run-shard
++          --output artifacts/backend-public-source-gateway-${{ matrix.shard }}
++          --runtime gateway --shards 4 --shard-index ${{ matrix.shard }}
++          --expected-commit "${{ github.event.pull_request.head.sha || github.sha }}"
++          --basetemp="${{ runner.temp }}/van-public-gateway-${{ matrix.shard }}"
++      - uses: actions/upload-artifact@v4
++        if: always()
++        with:
++          name: van-backend-public-source-gateway-${{ matrix.shard }}
++          path: artifacts/backend-public-source-gateway-${{ matrix.shard }}/
++          if-no-files-found: error
++
+   backend-public-source:
++    name: backend-public-source
++    needs: [backend-public-source-gateway]
++    if: always()
+     runs-on: ubuntu-24.04
+     # Exact2a completed all source assertions and uploaded evidence at the
+     # previous45minute boundary, but GitHub cancelled its job during cleanup.
+@@ -475,24 +558,41 @@ jobs:
+         run: |
+           python tools/rebuild/backend_public_source.py plan --output artifacts/backend-public-source
+           git rev-parse HEAD > artifacts/backend-public-source/tested-commit.txt
+-      - name: Execute remaining backend, contract and Hermes source cases
++      - uses: actions/download-artifact@v4
++        if: always()
++        with:
++          pattern: van-backend-public-source-gateway-*
++          path: artifacts/backend-public-source/shards
++          merge-multiple: false
++      - name: Independently collect the full gateway scope without executing cases
++        if: always()
+         run: >-
+-          python tools/rebuild/backend_public_source.py run
+-          --output artifacts/backend-public-source
+-          --runtime gateway
+-          --basetemp="${{ runner.temp }}/van-backend-public-source"
++          python tools/rebuild/backend_public_source.py collect
++          --output artifacts/backend-public-source/gateway-control
++          --runtime gateway --shards 4
++          --expected-commit "${{ github.event.pull_request.head.sha || github.sha }}"
++          --basetemp="${{ runner.temp }}/van-public-gateway-control"
+       - name: Execute media service cases with their separate hashed runtime
+         if: always()
+         run: |
+           python -m venv "$RUNNER_TEMP/public-media-venv"
+           "$RUNNER_TEMP/public-media-venv/bin/python" -m pip install --require-hashes -r deploy/van-browser-stream/requirements.lock
+           "$RUNNER_TEMP/public-media-venv/bin/python" -m pip install pytest==9.1.1 pytest-asyncio==1.4.0
+-          "$RUNNER_TEMP/public-media-venv/bin/python" tools/rebuild/backend_public_source.py run \
+-            --output artifacts/backend-public-source --runtime media \
++          "$RUNNER_TEMP/public-media-venv/bin/python" tools/rebuild/backend_public_source.py collect \
++            --output artifacts/backend-public-source/media-control --runtime media --shards 1 \
++            --expected-commit "${{ github.event.pull_request.head.sha || github.sha }}" \
++            --basetemp="$RUNNER_TEMP/van-public-media-control"
++          "$RUNNER_TEMP/public-media-venv/bin/python" tools/rebuild/backend_public_source.py run-shard \
++            --output artifacts/backend-public-source/media --runtime media --shards 1 --shard-index 0 \
++            --expected-commit "${{ github.event.pull_request.head.sha || github.sha }}" \
+             --basetemp="$RUNNER_TEMP/van-public-media-source"
+-      - name: Require complete selected coverage and exact declared prerequisite skips
++      - name: Require exact full collection and terminal execution union with declared skips
+         if: always()
+-        run: python tools/rebuild/backend_public_source.py verify --output artifacts/backend-public-source
++        run: >-
++          python tools/rebuild/backend_public_source.py verify-shards
++          --output artifacts/backend-public-source --shards 4
++          --expected-commit "${{ github.event.pull_request.head.sha || github.sha }}"
++          --job-result "${{ needs.backend-public-source-gateway.result }}"
+       - uses: actions/upload-artifact@v4
+         if: always()
+         with:
+diff --git a/tools/ci/github-actions-ci.yml b/tools/ci/github-actions-ci.yml
+index 21dcf4ca..e40838b5 100644
+--- a/tools/ci/github-actions-ci.yml
++++ b/tools/ci/github-actions-ci.yml
+@@ -415,7 +415,90 @@ jobs:
+ 
+   # Supplemental public-source coverage. The original backend job below still
+   # requires pinned private DDS contracts and remains an independent required gate.
++  backend-public-source-gateway:
++    name: backend-public-source-gateway (${{ matrix.shard }})
++    strategy:
++      fail-fast: false
++      max-parallel: 4
++      matrix:
++        shard: [0, 1, 2, 3]
++    runs-on: ubuntu-24.04
++    # Exact2a completed all source assertions and uploaded evidence at the
++    # previous45minute boundary, but GitHub cancelled its job during cleanup.
++    timeout-minutes: 60
++    services:
++      postgres:
++        image: postgres:17.11-bookworm@sha256:858bb5e98eed02eb8cafbcdc007f9a65d1b613972028944a8ec2133ccaf80d27
++        env:
++          POSTGRES_USER: van_fixture
++          POSTGRES_PASSWORD: van_ephemeral_test_only
++          POSTGRES_DB: postgres
++        ports:
++          - 5432:5432
++        options: >-
++          --health-cmd "pg_isready -U van_fixture -d postgres"
++          --health-interval 5s --health-timeout 5s --health-retries 12
++    env:
++      PYTHONPATH: backend:backend/tests:trading:trading/tests:.
++      VATI_TEST_PG_DSN: postgresql://van_fixture:van_ephemeral_test_only@127.0.0.1:5432/postgres
++      VATI_TEST_PG_ISOLATED_FIXTURE: '1'
++    steps:
++      - uses: actions/checkout@v4
++        with:
++          ref: ${{ github.event.pull_request.head.sha || github.sha }}
++          fetch-depth: 0
++      - uses: actions/setup-node@v4
++        with:
++          node-version: "24.19.0"
++      - uses: actions/setup-python@v5
++        with:
++          python-version: "3.12"
++      - name: Install original locked public source dependencies
++        run: |
++          python -m pip install -r backend/requirements.lock
++          python -m pip install --no-deps psycopg==3.2.9 psycopg-binary==3.2.9
++          python -m pip install pytest==9.1.1 pytest-asyncio==1.4.0
++          python -m pip install --no-deps Pillow==12.3.0
++          python -m playwright install chromium
++      - name: Resolve actual Chromium and initialize the disposable schema
++        run: |
++          python - <<'PYCODE'
++          import os
++          from pathlib import Path
++          import psycopg
++          from playwright.sync_api import sync_playwright
++          with sync_playwright() as p:
++              executable = Path(p.chromium.executable_path)
++          assert executable.is_file() and os.access(executable, os.X_OK)
++          with open(os.environ["GITHUB_ENV"], "a") as env:
++              env.write(f"VAN_TEST_CHROMIUM={executable}\n")
++              for key in ("NO_PROXY", "no_proxy"):
++                  env.write(key+"="+",".join(["127.0.0.1", "localhost", "::1", os.environ.get(key, "")])+"\n")
++          with psycopg.connect(os.environ["VATI_TEST_PG_DSN"]) as conn:
++              conn.execute("CREATE SCHEMA vati")
++          PYCODE
++      - name: Inventory the unchanged public source scope
++        run: |
++          python tools/rebuild/backend_public_source.py plan --output artifacts/backend-public-source-gateway-${{ matrix.shard }}
++          git rev-parse HEAD > artifacts/backend-public-source-gateway-${{ matrix.shard }}/tested-commit.txt
++      - name: Execute exact assigned gateway nodes on this isolated worker
++        run: >-
++          python tools/rebuild/backend_public_source.py run-shard
++          --output artifacts/backend-public-source-gateway-${{ matrix.shard }}
++          --runtime gateway --shards 4 --shard-index ${{ matrix.shard }}
++          --expected-commit "${{ github.event.pull_request.head.sha || github.sha }}"
++          --basetemp="${{ runner.temp }}/van-public-gateway-${{ matrix.shard }}"
++      - uses: actions/upload-artifact@v4
++        if: always()
++        with:
++          name: van-backend-public-source-gateway-${{ matrix.shard }}
++          path: artifacts/backend-public-source-gateway-${{ matrix.shard }}/
++          if-no-files-found: error
++
+   backend-public-source:
++    name: backend-public-source
++    needs: [backend-public-source-gateway]
++    if: always()
+     runs-on: ubuntu-24.04
+     # Exact2a completed all source assertions and uploaded evidence at the
+     # previous45minute boundary, but GitHub cancelled its job during cleanup.
+@@ -475,24 +558,41 @@ jobs:
+         run: |
+           python tools/rebuild/backend_public_source.py plan --output artifacts/backend-public-source
+           git rev-parse HEAD > artifacts/backend-public-source/tested-commit.txt
+-      - name: Execute remaining backend, contract and Hermes source cases
++      - uses: actions/download-artifact@v4
++        if: always()
++        with:
++          pattern: van-backend-public-source-gateway-*
++          path: artifacts/backend-public-source/shards
++          merge-multiple: false
++      - name: Independently collect the full gateway scope without executing cases
++        if: always()
+         run: >-
+-          python tools/rebuild/backend_public_source.py run
+-          --output artifacts/backend-public-source
+-          --runtime gateway
+-          --basetemp="${{ runner.temp }}/van-backend-public-source"
++          python tools/rebuild/backend_public_source.py collect
++          --output artifacts/backend-public-source/gateway-control
++          --runtime gateway --shards 4
++          --expected-commit "${{ github.event.pull_request.head.sha || github.sha }}"
++          --basetemp="${{ runner.temp }}/van-public-gateway-control"
+       - name: Execute media service cases with their separate hashed runtime
+         if: always()
+         run: |
+           python -m venv "$RUNNER_TEMP/public-media-venv"
+           "$RUNNER_TEMP/public-media-venv/bin/python" -m pip install --require-hashes -r deploy/van-browser-stream/requirements.lock
+           "$RUNNER_TEMP/public-media-venv/bin/python" -m pip install pytest==9.1.1 pytest-asyncio==1.4.0
+-          "$RUNNER_TEMP/public-media-venv/bin/python" tools/rebuild/backend_public_source.py run \
+-            --output artifacts/backend-public-source --runtime media \
++          "$RUNNER_TEMP/public-media-venv/bin/python" tools/rebuild/backend_public_source.py collect \
++            --output artifacts/backend-public-source/media-control --runtime media --shards 1 \
++            --expected-commit "${{ github.event.pull_request.head.sha || github.sha }}" \
++            --basetemp="$RUNNER_TEMP/van-public-media-control"
++          "$RUNNER_TEMP/public-media-venv/bin/python" tools/rebuild/backend_public_source.py run-shard \
++            --output artifacts/backend-public-source/media --runtime media --shards 1 --shard-index 0 \
++            --expected-commit "${{ github.event.pull_request.head.sha || github.sha }}" \
+             --basetemp="$RUNNER_TEMP/van-public-media-source"
+-      - name: Require complete selected coverage and exact declared prerequisite skips
++      - name: Require exact full collection and terminal execution union with declared skips
+         if: always()
+-        run: python tools/rebuild/backend_public_source.py verify --output artifacts/backend-public-source
++        run: >-
++          python tools/rebuild/backend_public_source.py verify-shards
++          --output artifacts/backend-public-source --shards 4
++          --expected-commit "${{ github.event.pull_request.head.sha || github.sha }}"
++          --job-result "${{ needs.backend-public-source-gateway.result }}"
+       - uses: actions/upload-artifact@v4
+         if: always()
+         with:
+diff --git a/tools/rebuild/backend_public_source.py b/tools/rebuild/backend_public_source.py
+index dd083662..59dd19fc 100644
+--- a/tools/rebuild/backend_public_source.py
++++ b/tools/rebuild/backend_public_source.py
+@@ -4,6 +4,8 @@ from __future__ import annotations
+ import argparse
+ import hashlib
+ import json
++import os
++import uuid
+ import subprocess
+ import sys
+ from collections import Counter
+@@ -91,14 +93,80 @@ def verify(manifest, report, audit, root=ROOT):
+         "isolated_runtimes":audits,
+         "limits":expected["qualification"],"certificates_issued":[]}
+ 
++def instrument_run(args):
++    """One isolated runtime/process, with exact collection and phase evidence."""
++    if args.basetemp is None or args.runtime is None or not args.expected_commit:
++        raise ValueError("node evidence requires runtime, owned basetemp and expected exact commit")
++    if os.environ.get("PYTEST_ADDOPTS") or os.environ.get("PYTEST_PLUGINS"):
++        raise ValueError("inherited pytest selection/plugin overrides are not canonical source scope")
++    if args.shards != (4 if args.runtime == "gateway" else 1):
++        raise ValueError("gateway requires four workers; isolated media requires one")
++    if not 0 <= args.shard_index < args.shards:
++        raise ValueError("invalid shard index")
++    if any((args.output/name).exists() for name in ("run.json", "terminal.json", "phases.jsonl", "report.xml", "storage-audit.json")):
++        raise ValueError("fresh evidence folder required; preserve original run artifacts")
++    sys.path.insert(0, str(ROOT))
++    from tools.rebuild import public_source_shards as evidence
++    source_before = evidence.source_identity(ROOT, args.expected_commit)
++    environment_before = evidence.environment_identity(args.runtime)
++    execution_id = str(uuid.uuid4())
++    selection = plan()
++    manifest = args.output / "selection.json"
++    if manifest.exists() and json.loads(manifest.read_text()) != selection:
++        raise ValueError("selection drifted before node collection/execution")
++    manifest.write_text(json.dumps(selection, indent=2) + "\n")
++    selected = [r["path"] for r in selection["selected"] if runtime(r["path"]) == args.runtime]
++    cmd = [sys.executable, str(ROOT/"tools/rebuild/source_storage_audit.py"),
++        "--report", str(args.output/"storage-audit.json"), *selected, "-q", "--disable-warnings",
++        "--basetemp="+str(args.basetemp), "-p", "tools.rebuild.public_source_shards",
++        "--van-source-output="+str(args.output.resolve()), "--van-source-root="+str(ROOT),
++        "--van-source-execution-id="+execution_id, "--van-source-runtime="+args.runtime, "--van-source-expected-commit="+args.expected_commit,
++        "--van-source-shards="+str(args.shards), "--van-source-index="+str(args.shard_index),
++        "--van-source-costs="+str(ROOT/"tools/rebuild/backend_public_source_costs.json")]
++    collecting = args.command == "collect"
++    cmd += ["--collect-only"] if collecting else ["--junitxml="+str(args.output/"report.xml")]
++    receipt = {"expected_commit": args.expected_commit, "execution_id": execution_id, "command": cmd,
++        "source_before": source_before, "environment_before": environment_before,
++        "workflow_run": {"id": os.environ.get("GITHUB_RUN_ID"),
++                         "attempt": os.environ.get("GITHUB_RUN_ATTEMPT")},
++        "terminal": False}
++    receipt_path = args.output/"run.json"
++    receipt_path.write_text(json.dumps(receipt, indent=2)+"\n")
++    result = subprocess.run(cmd, cwd=ROOT)
++    try:
++        receipt.update(source_after=evidence.source_identity(ROOT, args.expected_commit),
++            environment_after=evidence.environment_identity(args.runtime))
++    except Exception as exc:
++        receipt["parent_observation_error"] = type(exc).__name__
++    receipt.update(terminal=True, exit=result.returncode,
++        artifact_sha256={name: digest(args.output/name) for name in
++            ("terminal.json", "phases.jsonl", "storage-audit.json", *(() if collecting else ("report.xml",)))
++            if (args.output/name).is_file()})
++    receipt_path.write_text(json.dumps(receipt, indent=2)+"\n")
++    return result.returncode or int(bool(receipt.get("parent_observation_error")))
++
+ def main():
+     a=argparse.ArgumentParser(description=__doc__)
+-    a.add_argument("command",choices=("plan","run","verify"));a.add_argument("--output",type=Path,required=True)
++    a.add_argument("command",choices=("plan","run","verify","collect","run-shard","verify-shards"));a.add_argument("--output",type=Path,required=True)
+     a.add_argument("--basetemp",type=Path);a.add_argument("--runtime",choices=("gateway","media"))
++    a.add_argument("--expected-commit");a.add_argument("--shards",type=int,default=4)
++    a.add_argument("--shard-index",type=int,default=0)
++    a.add_argument("--job-result",choices=("success","failure","cancelled","skipped"))
+     args=a.parse_args();args.output.mkdir(exist_ok=True,parents=True)
+     manifest=args.output/"selection.json";report=args.output/"report.xml";audit=args.output/"storage-audit.json"
+     if args.command=="plan":
+         d=plan();manifest.write_text(json.dumps(d,indent=2)+"\n");print({"selected":len(d["selected"]),"separate":len(d["separate"])});return 0
++    if args.command in {"collect", "run-shard"}:
++        return instrument_run(args)
++    if args.command == "verify-shards":
++        if not args.expected_commit or not args.job_result:
++            a.error("verify-shards requires expected commit and actual prerequisite job result")
++        sys.path.insert(0, str(ROOT))
++        from tools.rebuild.public_source_shards import verify_shards
++        result = verify_shards(args.output, args.expected_commit, args.job_result,
++            root=ROOT, shard_count=args.shards)
++        (args.output/"summary.json").write_text(json.dumps(result,indent=2)+"\n")
++        print(json.dumps(result,indent=2));return 0
+     d=json.loads(manifest.read_text())
+     if d!=plan():raise ValueError("selection drifted before source execution")
+     if args.command=="run":
+diff --git a/tools/rebuild/public_source_shards.py b/tools/rebuild/public_source_shards.py
+new file mode 100644
+index 00000000..aa7b6c56
+--- /dev/null
++++ b/tools/rebuild/public_source_shards.py
+@@ -0,0 +1,376 @@
++"""Exact node/phase evidence for isolated public-source workers, not native admission."""
++from __future__ import annotations
++
++from collections import Counter, defaultdict
++import hashlib
++import copy
++import shutil
++import importlib.metadata
++import json
++import os
++from pathlib import Path
++import platform
++import subprocess
++import sys
++import xml.etree.ElementTree as ET
++
++import pytest
++
++SCHEMA = "van.public-source-node-ledger/1"
++_STATE = None
++
++
++def require(condition, message):
++    if not condition:
++        raise ValueError(message)
++
++
++def encoded(value):
++    return json.dumps(value, sort_keys=True, separators=(",", ":")).encode()
++
++
++def fingerprint(value):
++    return hashlib.sha256(encoded(value)).hexdigest()
++
++
++def read_json(path):
++    return json.loads(Path(path).read_text())
++
++
++def source_identity(root, expected_commit):
++    root = Path(root)
++    head = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=root, text=True).strip()
++    require(head == expected_commit, "checkout differs from expected exact head")
++    changed = subprocess.check_output(["git", "diff", "--no-ext-diff", "--name-only", "HEAD", "--"], cwd=root, text=True)
++    require(not changed.strip(), "tracked source differs from tested commit")
++    tree = subprocess.check_output(["git", "rev-parse", "HEAD^{tree}"], cwd=root, text=True).strip()
++    return {"commit": head, "tree": tree}
++
++
++def environment_identity(runtime):
++    packages = sorted({(d.metadata.get("Name", "").lower(), d.version)
++                       for d in importlib.metadata.distributions()})
++    chromium = os.environ.get("VAN_TEST_CHROMIUM")
++    pg_version = None
++    if runtime == "gateway" and os.environ.get("VATI_TEST_PG_DSN"):
++        import psycopg
++        with psycopg.connect(os.environ["VATI_TEST_PG_DSN"]) as conn:
++            pg_version = conn.info.server_version
++    node = subprocess.run(["node", "--version"], capture_output=True, text=True)
++    return {"python": platform.python_version(), "implementation": platform.python_implementation(),
++            "system": platform.system(), "machine": platform.machine(),
++            "image_os": os.environ.get("ImageOS"), "image_version": os.environ.get("ImageVersion"),
++            "packages": packages, "node": node.stdout.strip() if node.returncode == 0 else None,
++            "chromium_sha256": hashlib.sha256(Path(chromium).read_bytes()).hexdigest() if chromium else None,
++            "postgres_version": pg_version,
++            "isolated_pg_fixture": os.environ.get("VATI_TEST_PG_ISOLATED_FIXTURE") if runtime == "gateway" else None}
++
++
++def assignment(nodeids, selected, costs, shard_count):
++    """Whole-file LPT; historical cost affects placement, never inclusion."""
++    require(shard_count > 0, "invalid shard count")
++    require(len(nodeids) == len(set(nodeids)) and nodeids, "empty or duplicate collection")
++    files = {r["path"]: r["sha256"] for r in selected}
++    grouped = defaultdict(list)
++    for node in nodeids:
++        path = node.split("::", 1)[0]
++        require(path in files and "::" in node, "foreign collected node: " + node)
++        grouped[path].append(node)
++    require(set(grouped) == set(files), "selected module missing from full collection")
++    loads = [0.0] * shard_count
++    bins = [[] for _ in loads]
++    work = []
++    for path, nodes in grouped.items():
++        previous = costs.get("costs", {}).get(path, {})
++        weight = (float(previous["seconds"]) if previous.get("test_source_sha256") == files[path]
++                  else float(len(nodes)))
++        require(weight >= 0 and weight < float("inf"), "invalid historical weight")
++        work.append((path, weight))
++    for path, weight in sorted(work, key=lambda x: (-x[1], x[0])):
++        index = min(range(shard_count), key=lambda i: (loads[i], i))
++        bins[index].extend(grouped[path])
++        loads[index] += weight
++    require(all(bins), "empty execution shard; revise explicit worker count")
++    return [sorted(nodes) for nodes in bins]
++
++
++def pytest_addoption(parser):
++    group = parser.getgroup("van-source-evidence")
++    group.addoption("--van-source-output")
++    group.addoption("--van-source-root")
++    group.addoption("--van-source-expected-commit")
++    group.addoption("--van-source-execution-id")
++    group.addoption("--van-source-runtime", choices=("gateway", "media"))
++    group.addoption("--van-source-shards", type=int, default=1)
++    group.addoption("--van-source-index", type=int, default=0)
++    group.addoption("--van-source-costs")
++
++
++def pytest_configure(config):
++    global _STATE
++    output = config.getoption("--van-source-output")
++    if not output:
++        return
++    require(not config.option.keyword and not config.option.markexpr and not config.option.deselect
++            and not getattr(config.option, "lf", False)
++            and getattr(config.option, "numprocesses", None) in (None, 0),
++            "test selection overrides or shared-store parallelism are forbidden")
++    from tools.rebuild import backend_public_source as gate
++    root = Path(config.getoption("--van-source-root")).resolve()
++    runtime = config.getoption("--van-source-runtime")
++    expected = config.getoption("--van-source-expected-commit")
++    require(expected and runtime and config.getoption("--van-source-execution-id"), "exact head, runtime and fresh execution identity required")
++    folder = Path(output)
++    folder.mkdir(parents=True, exist_ok=True)
++    selection = gate.plan(root)
++    selected = [r for r in selection["selected"] if gate.runtime(r["path"]) == runtime]
++    _STATE = {"schema": SCHEMA, "runtime": runtime, "expected_commit": expected,
++              "workflow_run": {"id": os.environ.get("GITHUB_RUN_ID"), "attempt": os.environ.get("GITHUB_RUN_ATTEMPT")},
++              "mode": "collection" if config.option.collectonly else "execution",
++              "execution_id": config.getoption("--van-source-execution-id"),
++              "source_before": source_identity(root, expected),
++              "environment_before": environment_identity(runtime),
++              "selection": selection, "selected": selected,
++              "shard_count": config.getoption("--van-source-shards"),
++              "shard_index": config.getoption("--van-source-index"),
++              "collection_errors": [], "internal_errors": [],
++              "instrument_sha256": hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
++              "costs": read_json(config.getoption("--van-source-costs"))}
++    _STATE["root"] = str(root)
++    _STATE["output"] = str(folder)
++    (folder / "phases.jsonl").write_text("")
++    config._van_source_evidence = _STATE
++
++
++@pytest.hookimpl(trylast=True)
++def pytest_collection_modifyitems(config, items):
++    state = getattr(config, "_van_source_evidence", None)
++    if state is None:
++        return
++    full = [item.nodeid for item in items]
++    bins = assignment(full, state["selected"], state["costs"], state["shard_count"])
++    index = state["shard_index"]
++    require(0 <= index < len(bins), "invalid execution shard")
++    state.update(full_collection=sorted(full), assignment=bins, assigned=bins[index])
++    state["full_collection_sha256"] = fingerprint(state["full_collection"])
++    state["assignment_sha256"] = fingerprint(bins)
++    if state["mode"] == "execution":
++        own = set(bins[index])
++        dropped = [item for item in items if item.nodeid not in own]
++        items[:] = [item for item in items if item.nodeid in own]
++        config.hook.pytest_deselected(items=dropped)
++    for item in items:
++        item.user_properties.append(("van_source_nodeid", item.nodeid))
++    (Path(state["output"]) / "collection.json").write_text(json.dumps(state, indent=2) + "\n")
++
++
++def pytest_collectreport(report):
++    if _STATE is not None and report.failed:
++        _STATE["collection_errors"].append(str(report.nodeid))
++
++
++def pytest_internalerror(excrepr, excinfo):
++    if _STATE is not None:
++        _STATE["internal_errors"].append(str(excrepr))
++
++
++def pytest_runtest_logreport(report):
++    if _STATE is None:
++        return
++    reason = None
++    if report.skipped:
++        value = report.longrepr
++        reason = str(value[2] if isinstance(value, tuple) else value)
++        if reason.startswith("Skipped: "):
++            reason = reason[len("Skipped: "):]
++    event = {"nodeid": report.nodeid, "when": report.when, "outcome": report.outcome,
++             "duration": report.duration, "skip_reason": reason}
++    with (Path(_STATE["output"]) / "phases.jsonl").open("a") as stream:
++        stream.write(json.dumps(event, sort_keys=True) + "\n")
++
++
++def pytest_sessionfinish(session, exitstatus):
++    state = getattr(session.config, "_van_source_evidence", None)
++    if state is None:
++        return
++    state.update(pytest_exit=int(exitstatus),
++                 source_after=source_identity(state["root"], state["expected_commit"]),
++                 environment_after=environment_identity(state["runtime"]))
++    (Path(state["output"]) / "terminal.json").write_text(json.dumps(state, indent=2) + "\n")
++
++
++def approved_skip(nodeid, reason):
++    from tools.rebuild import backend_public_source as gate
++    path, _, name = nodeid.partition("::")
++    name = name.rsplit("::", 1)[-1]
++    return any(path == allowed_path and (name == test or name.startswith(test + "["))
++               for allowed_path, test in gate.ALLOWED_SKIPS.get(reason, ()))
++
++
++def verify_snapshot(folder, manifest, runtime, expected_commit, costs, root, *, collection):
++    """Validate a terminal worker, including storage and subprocess evidence."""
++    from tools.rebuild import backend_public_source as gate
++    folder = Path(folder)
++    state = read_json(folder / "terminal.json")
++    receipt = read_json(folder / "run.json")
++    require(state.get("schema") == SCHEMA, "unknown node evidence schema")
++    require(state.get("execution_id") and state.get("execution_id") == receipt.get("execution_id"), "stale/different execution receipt")
++    require(not receipt.get("parent_observation_error"), "parent source/runtime identity observation failed")
++    require(state.get("mode") == ("collection" if collection else "execution"), "wrong evidence mode")
++    require(state.get("workflow_run") == receipt.get("workflow_run") ==
++            {"id": os.environ.get("GITHUB_RUN_ID"), "attempt": os.environ.get("GITHUB_RUN_ATTEMPT")},
++            "different workflow run/attempt")
++    require(state.get("runtime") == runtime and state.get("expected_commit") == expected_commit,
++            "wrong runtime or tested head")
++    expected_source = source_identity(root, expected_commit)
++    require(state.get("source_before") == expected_source == state.get("source_after")
++            == receipt.get("source_before") == receipt.get("source_after"), "source identity drift")
++    require(type(receipt.get("exit")) is int and type(state.get("pytest_exit")) is int, "invalid exit evidence type")
++    require(receipt.get("expected_commit") == expected_commit and receipt.get("exit") == 0
++            and receipt.get("terminal") is True and state.get("pytest_exit") == 0,
++            "nonterminal or unsuccessful actual subprocess")
++    require(state.get("collection_errors") == [] and state.get("internal_errors") == [], "missing or failed collection/internal evidence")
++    require(state.get("selection") == manifest, "selection/source bytes differ")
++    require(state.get("environment_before") == state.get("environment_after")
++            == receipt.get("environment_before") == receipt.get("environment_after"), "worker/parent environment drift")
++    environment = state["environment_before"]
++    require(set(environment) == {"python", "implementation", "system", "machine", "image_os", "image_version",
++        "packages", "node", "chromium_sha256", "postgres_version", "isolated_pg_fixture"},
++        "incomplete environment identity")
++    require(environment["packages"] and environment["node"] == "v24.19.0"
++            and environment["image_os"] == "ubuntu24" and environment["image_version"]
++            and len(environment.get("chromium_sha256") or "") == 64, "missing pinned hosted runtime identity")
++    require(environment.get("python", "").startswith("3.12.") and environment.get("system") == "Linux",
++            "unsupported source worker runtime")
++    if runtime == "gateway":
++        require(environment.get("postgres_version") == 170011
++                and environment.get("isolated_pg_fixture") == "1", "missing pinned isolated PostgreSQL fixture")
++    require(state.get("instrument_sha256") == hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
++            "different execution instrument")
++    require(state.get("costs") == costs, "different assignment costs")
++    selected = [r for r in manifest["selected"] if gate.runtime(r["path"]) == runtime]
++    require(state.get("selected") == selected, "worker selected a different runtime scope")
++    full = state.get("full_collection", [])
++    bins = assignment(full, selected, costs, state["shard_count"])
++    require(state.get("assignment") == bins and state.get("assigned") == bins[state["shard_index"]],
++            "assignment differs from deterministic full collection")
++    require(state.get("full_collection_sha256") == fingerprint(full)
++            and state.get("assignment_sha256") == fingerprint(bins), "collection/assignment digest mismatch")
++    for name, digest in receipt.get("artifact_sha256", {}).items():
++        require(name in {"terminal.json", "phases.jsonl", "report.xml", "storage-audit.json"}, "foreign receipt artifact")
++        require(hashlib.sha256((folder / name).read_bytes()).hexdigest() == digest, "worker artifact hash mismatch")
++    mandatory = {"terminal.json", "phases.jsonl", "storage-audit.json"} | (set() if collection else {"report.xml"})
++    require(set(receipt.get("artifact_sha256", {})) == mandatory, "incomplete worker artifact receipt")
++    audit = read_json(folder / "storage-audit.json")
++    require(audit.get("schema") == "van.source-storage-audit/1" and audit.get("forbidden_events") == []
++            and audit.get("source_sha256") == hashlib.sha256(Path(__file__).with_name("source_storage_audit.py").read_bytes()).hexdigest(),
++            "missing/wrong source-storage instrument or violation")
++    events = [json.loads(line) for line in (folder / "phases.jsonl").read_text().splitlines()]
++    if collection:
++        require(not events, "collect-only control executed test effects")
++        return state, {}, []
++    assigned = set(state["assigned"])
++    phases = defaultdict(dict)
++    for event in events:
++        node, when = event.get("nodeid"), event.get("when")
++        require(node in assigned and when in {"setup", "call", "teardown"}, "foreign execution phase")
++        require(when not in phases[node], "duplicate execution phase or hidden rerun")
++        require(event.get("outcome") in {"passed", "skipped"}, "failed/error execution phase")
++        phases[node][when] = event
++    require(set(phases) == assigned, "missing actual execution identities")
++    outcomes, skipped = {}, []
++    for node, reports in phases.items():
++        require("setup" in reports and "teardown" in reports, "incomplete setup/teardown")
++        require(reports["teardown"]["outcome"] == "passed", "teardown did not pass")
++        setup_skip = reports["setup"]["outcome"] == "skipped"
++        require(set(reports) == ({"setup", "teardown"} if setup_skip else {"setup", "call", "teardown"}),
++                "missing/extra case phase")
++        skip_events = [event for event in reports.values() if event["outcome"] == "skipped"]
++        if skip_events:
++            require(len(skip_events) == 1 and approved_skip(node, skip_events[0].get("skip_reason")),
++                    "unapproved case/phase skip: " + node)
++            outcomes[node] = "skipped"
++            skipped.append({"id": node, "reason": skip_events[0]["skip_reason"]})
++        else:
++            outcomes[node] = "passed"
++    junit = {}
++    for case in ET.parse(folder / "report.xml").getroot().iter("testcase"):
++        properties = case.findall("./properties/property[@name='van_source_nodeid']")
++        require(len(properties) == 1, "JUnit lacks one exact node identity")
++        node = properties[0].get("value")
++        require(node in assigned and node not in junit, "foreign/duplicate JUnit identity")
++        require(case.find("failure") is None and case.find("error") is None, "failed/error JUnit case")
++        skip = case.find("skipped")
++        junit[node] = "skipped" if skip is not None else "passed"
++        if skip is not None:
++            require(approved_skip(node, skip.get("message", "")), "unapproved JUnit skip")
++    require(junit == outcomes, "JUnit/phase execution union differs")
++    return state, outcomes, skipped
++
++
++def verify_shards(output, expected_commit, job_result, *, root, shard_count=4):
++    """The required gate has no status-only or legacy-module-count fallback."""
++    from tools.rebuild import backend_public_source as gate
++    output = Path(output)
++    require(os.environ.get("GITHUB_RUN_ID") and os.environ.get("GITHUB_RUN_ATTEMPT"), "native workflow run identity required")
++    require(shard_count == 4 and job_result == "success", "all four execution workers must finish successfully")
++    manifest = read_json(output / "selection.json")
++    require(manifest == gate.plan(root), "aggregate selection/source drift")
++    costs = read_json(Path(root) / "tools/rebuild/backend_public_source_costs.json")
++    control, _, _ = verify_snapshot(output / "gateway-control", manifest, "gateway", expected_commit,
++                                    costs, root, collection=True)
++    require(control["shard_count"] == shard_count, "wrong control assignment cardinality")
++    all_outcomes, skips, receipts = {}, [], []
++    for index in range(shard_count):
++        folder = output / "shards" / ("van-backend-public-source-gateway-" + str(index))
++        state, outcomes, declared = verify_snapshot(folder, manifest, "gateway", expected_commit,
++                                                    costs, root, collection=False)
++        require(state["shard_index"] == index and state["shard_count"] == shard_count, "wrong shard identity")
++        require(state["full_collection"] == control["full_collection"]
++                and state["assignment"] == control["assignment"], "full collection/assignment disagreement")
++        require(state["environment_before"] == control["environment_before"], "gateway workers have different environments")
++        require(not set(all_outcomes) & set(outcomes), "duplicate execution across shards")
++        all_outcomes.update(outcomes)
++        skips.extend(declared)
++        receipts.append({"shard": index, "tests": len(outcomes), "terminal_sha256":
++                         hashlib.sha256((folder / "terminal.json").read_bytes()).hexdigest()})
++    require(Counter(all_outcomes.keys()) == Counter(control["full_collection"]), "gateway exact execution union is incomplete")
++    media_control, _, _ = verify_snapshot(output / "media-control", manifest, "media", expected_commit,
++                                          costs, root, collection=True)
++    media, outcomes, declared = verify_snapshot(output / "media", manifest, "media", expected_commit,
++                                                costs, root, collection=False)
++    require(media["shard_count"] == 1 and media["shard_index"] == 0, "wrong isolated media worker")
++    require(media["full_collection"] == media_control["full_collection"]
++            and media["environment_before"] == media_control["environment_before"], "media collection/environment differs")
++    require(Counter(outcomes.keys()) == Counter(media_control["full_collection"]), "media exact execution union incomplete")
++    require(not set(all_outcomes) & set(outcomes), "cross-runtime duplicate execution")
++    all_outcomes.update(outcomes)
++    skips.extend(declared)
++    # Compatibility artifacts are derived only AFTER exact phase/identity validation.
++    # Originals remain under their shard folders; this is not a single-process run.
++    combined = ET.Element("testsuites", name="derived-exact-gateway-shard-union")
++    child_audits = []
++    for index in range(shard_count):
++        folder = output / "shards" / ("van-backend-public-source-gateway-" + str(index))
++        xml = ET.parse(folder/"report.xml").getroot()
++        for suite in (list(xml) if xml.tag == "testsuites" else [xml]):
++            combined.append(copy.deepcopy(suite))
++        child_audits.append({"shard": index, "sha256": hashlib.sha256((folder/"storage-audit.json").read_bytes()).hexdigest()})
++    (output/"gateway-report.xml").write_bytes(ET.tostring(combined))
++    (output/"gateway-storage-audit.json").write_text(json.dumps({"forbidden_events": [],
++        "scope": "Derived union of four independently verified child audits; original artifacts retained",
++        "child_audits": child_audits}, indent=2)+"\n")
++    shutil.copyfile(output/"media/report.xml", output/"media-report.xml")
++    shutil.copyfile(output/"media/storage-audit.json", output/"media-storage-audit.json")
++    runtimes = {name: {"junit_sha256": hashlib.sha256((output/(name+"-report.xml")).read_bytes()).hexdigest(),
++        "storage_audit_sha256": hashlib.sha256((output/(name+"-storage-audit.json")).read_bytes()).hexdigest(),
++        "tests": len(control["full_collection"] if name == "gateway" else media["full_collection"])}
++        for name in ("gateway", "media")}
++    return {"status": "PUBLIC_SOURCE_SUBSET_PASS", "tested_commit": expected_commit,
++            "tests": len(all_outcomes), "passed": sum(v == "passed" for v in all_outcomes.values()),
++            "declared_unexecuted": skips, "gateway_shards": receipts,
++            "execution_mode": "FOUR_ISOLATED_GATEWAY_WORKERS_PLUS_SEPARATE_MEDIA",
++            "isolated_runtimes": runtimes,
++            "exact_collection_sha256": fingerprint(sorted(all_outcomes)),
++            "separate_modules": manifest["separate"], "limits": manifest["qualification"],
++            "certificates_issued": [], "proof": "Exact full collection, deterministic whole-file assignment, actual setup/call/teardown and JUnit union; all runtimes terminal"}
+diff --git a/tools/rebuild/backend_public_source_costs.json b/tools/rebuild/backend_public_source_costs.json
+new file mode 100644
+index 00000000..6833af1d
+--- /dev/null
++++ b/tools/rebuild/backend_public_source_costs.json
+@@ -0,0 +1,1918 @@
++{
++  "schema": "van.public-source-historical-assignment-costs/1",
++  "historical_head": "7df732de4c0a4f84bafadda658654a0ab8788553",
++  "artifact_sha256": "0e45d1f3c5d00440d5e8d15e2ad2fc41fbe305253249565b0add12db73721881",
++  "purpose": "Assignment only; never collection scope, skip approval or qualification. Historical JUnit whole-file summed time; current source SHA must match or deterministic collected-case count fallback applies.",
++  "costs": {
++    "backend/tests/test_a4_owner_approval.py": {
++      "seconds": 2.046,
++      "cases": 1,
++      "test_source_sha256": "cda4701a3ae6943986d460c0b743059a7127b74326419cb7636812a574884ab4"
++    },
++    "backend/tests/test_account_approval_contract.py": {
++      "seconds": 0.02,
++      "cases": 9,
++      "test_source_sha256": "bee2039e3d776f77a703a7a34f9eae9cd299681348d2cf9ac2368c8322c60330"
++    },
++    "backend/tests/test_account_operation_recovery.py": {
++      "seconds": 11.409,
++      "cases": 8,
++      "test_source_sha256": "1f181162a28d3a3e3f4a3578f00804e03ded12c847fa474d13e355f98aeabe09"
++    },
++    "backend/tests/test_account_resource_binding.py": {
++      "seconds": 13.030999999999999,
++      "cases": 9,
++      "test_source_sha256": "fc3fc4b8a094cc49f9cb96736f08131deb80f4fcd762bb1342c51c08d19b06ee"
++    },
++    "backend/tests/test_account_runtime_recovery_gateway.py": {
++      "seconds": 2.566,
++      "cases": 1,
++      "test_source_sha256": "349567e58df2530e3da61fdfefe45ce7c815669f3138a45d58b2f056e68d2c73"
++    },
++    "backend/tests/test_account_unlink_review.py": {
++      "seconds": 12.899000000000001,
++      "cases": 9,
++      "test_source_sha256": "745d96d603d9468b27acd463245bc9194c8a12c83d8b4c93cac0e0a1de6c2af9"
++    },
++    "backend/tests/test_account_update_review.py": {
++      "seconds": 8.804,
++      "cases": 6,
++      "test_source_sha256": "3011c269ee3ab22cdf8c17c1e4a21b1c186abdcb84d7ea776c8d6a3dbe84deff"
++    },
++    "backend/tests/test_action_receipt_authority.py": {
++      "seconds": 1.836,
++      "cases": 6,
++      "test_source_sha256": "7939706f309a7e0b93e8d9bc66ff830ccb88f308dcfe4a11a1be22cfbbc93684"
++    },
++    "backend/tests/test_action_runtime_autonomy.py": {
++      "seconds": 1.8519999999999999,
++      "cases": 13,
++      "test_source_sha256": "a6812948400c9609dd936920605ecfc1c5373d891b38f1396ebbb0a7ecfca7ea"
++    },
++    "backend/tests/test_approval_learning_gateway.py": {
++      "seconds": 11.386,
++      "cases": 5,
++      "test_source_sha256": "40d49a198a6f1fa265b29af9527feedec07707c2da318a4011a4deb4aa8544c4"
++    },
++    "backend/tests/test_approval_learning_integrity.py": {
++      "seconds": 3.5670000000000006,
++      "cases": 23,
++      "test_source_sha256": "deb0c35666a50510fb0ee68d90c463f8259a05dd5e9f897892f9fc7e326a07eb"
++    },
++    "backend/tests/test_artemis_console.py": {
++      "seconds": 0.008,
++      "cases": 3,
++      "test_source_sha256": "f15b9fd72298a4954fe5d4bed0bddc7fdec1cf2b3437eaf4a764a771573d9059"
++    },
++    "backend/tests/test_artifact_provider_gateway_tls.py": {
++      "seconds": 2.848,
++      "cases": 2,
++      "test_source_sha256": "da39907ee2ba800e923916a486cec64ec467f736c042b79c189a2274ee1fb805"
++    },
++    "backend/tests/test_assignment_plan_target_class.py": {
++      "seconds": 2.3470000000000004,
++      "cases": 18,
++      "test_source_sha256": "213a7690994720f402ded9624183d9dfe677835b6d7125b897d7d3f3296c64e0"
++    },
++    "backend/tests/test_assignment_stagehand_target_class.py": {
++      "seconds": 1.6429999999999998,
++      "cases": 13,
++      "test_source_sha256": "e7d0638b0412bf191a1fcde261ee37cc372f7488eade45a2f838b912c79e660c"
++    },
++    "backend/tests/test_attention_concurrent_delivery.py": {
++      "seconds": 0.525,
++      "cases": 3,
++      "test_source_sha256": "a4384d96201dce0110f6932f182977abebf3a7fefcd201786941bd36ae45b4dd"
++    },
++    "backend/tests/test_attention_is_one_engine.py": {
++      "seconds": 0.916,
++      "cases": 10,
++      "test_source_sha256": "3d7baedcf01ee10c96459ea543be675e8a72f427c6e6ee482034afdbc4536621"
++    },
++    "backend/tests/test_attestation_chain.py": {
++      "seconds": 0.011000000000000003,
++      "cases": 11,
++      "test_source_sha256": "131495410cacf6aef5a32f0579a4ae4db11513d3586baac153360838ef5a49ae"
++    },
++    "backend/tests/test_auth_throttle.py": {
++      "seconds": 21.132,
++      "cases": 26,
++      "test_source_sha256": "09012a3862fbec90b33e1ca83469f88eb524d3324644e1ad4d9d696e1cd8f054"
++    },
++    "backend/tests/test_authority_descriptor.py": {
++      "seconds": 0.369,
++      "cases": 26,
++      "test_source_sha256": "c0cc1efc626a16a92f9df0463582eca8122a5fcc400c1cd1ec7ff5fb7ef42073"
++    },
++    "backend/tests/test_authority_execution_identity.py": {
++      "seconds": 2.6879999999999997,
++      "cases": 18,
++      "test_source_sha256": "c22628c0454795d374db2b49a47336861c8768860e3e03ad7759f49e9e7fa8d6"
++    },
++    "backend/tests/test_automation_api.py": {
++      "seconds": 8.972000000000003,
++      "cases": 28,
++      "test_source_sha256": "f9a90156a4c27e1dd7ab0bfcd3b5cfcfe17dba1317885a725f7eb84fbe59c21a"
++    },
++    "backend/tests/test_automation_binding_validation.py": {
++      "seconds": 0.04000000000000003,
++      "cases": 40,
++      "test_source_sha256": "409c2a064c4ca3159f18176a6c5219dae8754af0cd429ddf0a3eb776103c9d5d"
++    },
++    "backend/tests/test_automation_compiler.py": {
++      "seconds": 0.8820000000000001,
++      "cases": 37,
++      "test_source_sha256": "5bd3b94b6e8b9e1e77d68068249bf6e218ee76d53fec43ed3d280d24daa8b908"
++    },
++    "backend/tests/test_automation_dispatch.py": {
++      "seconds": 11.515,
++      "cases": 24,
++      "test_source_sha256": "d5d146d910873fe54b3ac23e32cef76004c6a1df97f238cc78705140b29f9f04"
++    },
++    "backend/tests/test_automation_event_ingress.py": {
++      "seconds": 11.639000000000003,
++      "cases": 10,
++      "test_source_sha256": "daec03311e02b02581792c964796b8e4cd4e16c4a3216373d65ed1e86576a3b9"
++    },
++    "backend/tests/test_automation_health_api.py": {
++      "seconds": 13.698999999999998,
++      "cases": 13,
++      "test_source_sha256": "dd1576aa67f1873e3a1510b1aa0d9aaf018c1fae4f37cc1ed296b084f60b328d"
++    },
++    "backend/tests/test_automation_hot_warm_cold.py": {
++      "seconds": 1.496,
++      "cases": 29,
++      "test_source_sha256": "2f64402de1a306ae8599252465c4f741fb4dfa1913fb4b0db0ed6c2589543e26"
++    },
++    "backend/tests/test_automation_operations.py": {
++      "seconds": 3.814,
++      "cases": 26,
++      "test_source_sha256": "6cea840345667c6ea8b31948a17273261f6a2108ed13da4591ec1129518c2642"
++    },
++    "backend/tests/test_automation_owner_commands.py": {
++      "seconds": 8.803999999999998,
++      "cases": 16,
++      "test_source_sha256": "c911224afcd0f5429b932ba293873a6a4c9343af3701d25ecc767ddc6abf3646"
++    },
++    "backend/tests/test_automation_primitive_policy.py": {
++      "seconds": 0.06200000000000005,
++      "cases": 62,
++      "test_source_sha256": "f9128f16d5d82ae8c17d2591fd38586db6c20ec958835de11b50a48d49db0d14"
++    },
++    "backend/tests/test_automation_provisioning.py": {
++      "seconds": 3.5659999999999994,
++      "cases": 22,
++      "test_source_sha256": "fce5c1b4dd4e8c66f0b3ed2a50fdebf1c889fef494136be237464c83d4bf93ba"
++    },
++    "backend/tests/test_automation_run_grants.py": {
++      "seconds": 2.388,
++      "cases": 16,
++      "test_source_sha256": "70a1d6cdf35225560234eb8007a75c392e5fb0442d48f1147f4af9797fb4509a"
++    },
++    "backend/tests/test_automation_security_contracts.py": {
++      "seconds": 1.3749999999999998,
++      "cases": 36,
++      "test_source_sha256": "3e66d083babc611729dbd353b80a90bd1d58e0f62a24ee6398bbed37cc51ef93"
++    },
++    "backend/tests/test_automation_typed_dsl.py": {
++      "seconds": 0.06700000000000005,
++      "cases": 77,
++      "test_source_sha256": "9901dc6f01e220589f1f7eba8ff3cbca91e7f81d13f4f025e072409f8386b078"
++    },
++    "backend/tests/test_automation_typed_runtime.py": {
++      "seconds": 18.117,
++      "cases": 22,
++      "test_source_sha256": "957a41e551a8749187d218c24c4f8d9cd46afc305bdc882edd638f198d371953"
++    },
++    "backend/tests/test_automation_worker_predicate_types.py": {
++      "seconds": 11.75,
++      "cases": 16,
++      "test_source_sha256": "5d9505c8f516b4196e2128f296b6beb0a52af9c3b330250e7ae1728217fc454e"
++    },
++    "backend/tests/test_automation_worker_runtime.py": {
++      "seconds": 32.765,
++      "cases": 50,
++      "test_source_sha256": "39453cd5d44548eeed388ab2d57b4fca8fce9b076f375f8a478a1b693bbf9374"
++    },
++    "backend/tests/test_bootstrap_recovery_api.py": {
++      "seconds": 32.724,
++      "cases": 23,
++      "test_source_sha256": "b3f44fc5e7a5f8e4f626cf81d18a5af04827dd35649136a95c476769294a6a03"
++    },
++    "backend/tests/test_calendar_effect_readback.py": {
++      "seconds": 6.083000000000001,
++      "cases": 18,
++      "test_source_sha256": "dca38c3e772e404e8663df6e90e46a220087f4614711fea0388535d92fdff04e"
++    },
++    "backend/tests/test_capability_registry.py": {
++      "seconds": 3.4860000000000007,
++      "cases": 28,
++      "test_source_sha256": "00f279270d3cec22b896f2677ef8133906ff32efb9fa9c3569a85251b869214e"
++    },
++    "backend/tests/test_chart_workspace_backup.py": {
++      "seconds": 0.173,
++      "cases": 1,
++      "test_source_sha256": "637e8d5a80490fa47e9b853bd7ee5db01452560c0b1f1b9cda2bcf44b39b9ab8"
++    },
++    "backend/tests/test_chart_workspace_bound_device.py": {
++      "seconds": 1.128,
++      "cases": 1,
++      "test_source_sha256": "f44762b648a495cad3866bf4877f6d4dea317d149a660831422f7a69845e900e"
++    },
++    "backend/tests/test_chart_workspace_gateway.py": {
++      "seconds": 4.423,
++      "cases": 2,
++      "test_source_sha256": "7b7fbf25d6ddc2afe4c0ca05da51966274724dee0ff00c32682ee59d43e1661f"
++    },
++    "backend/tests/test_chart_workspace_persistence.py": {
++      "seconds": 3.602999999999997,
++      "cases": 54,
++      "test_source_sha256": "6823115a148477b62933e692ba7c84d2e25f0fedbbf9eabbce856340259f2378"
++    },
++    "backend/tests/test_chart_workspace_privacy_inventory.py": {
++      "seconds": 1.264,
++      "cases": 1,
++      "test_source_sha256": "358c87f11db61801bec303c985f1b65f03fdf2e6b95d888c5446e130740ffdef"
++    },
++    "backend/tests/test_cognition_is_real.py": {
++      "seconds": 2.26,
++      "cases": 29,
++      "test_source_sha256": "9763c44aab0ca9b32858ac789b5dc29aef01babc5c3c50c96aec3175bc6df7a6"
++    },
++    "backend/tests/test_cognitive_fabric.py": {
++      "seconds": 2.232,
++      "cases": 13,
++      "test_source_sha256": "d69fe7abd6a7fbb1c0ddb18e19f69dbbd2bb44259fbe6e60c6674c0580abc988"
++    },
++    "backend/tests/test_cognitive_twin.py": {
++      "seconds": 0.02,
++      "cases": 5,
++      "test_source_sha256": "58edd3141ab1c1389258cbf4984a941059f97b2f3ef9918e47bd4ddcb0091cad"
++    },
++    "backend/tests/test_command_authority_constraints.py": {
++      "seconds": 0.15,
++      "cases": 1,
++      "test_source_sha256": "8b6717bbda94e15706e77e7c15d4e6cf8cf1f8107f6893f0025d8ade14aceb41"
++    },
++    "backend/tests/test_command_creates_mission.py": {
++      "seconds": 31.675,
++      "cases": 18,
++      "test_source_sha256": "03e018e9213c57253343561baefde57682c289753aee0e64df24da412e613566"
++    },
++    "backend/tests/test_command_execution_result.py": {
++      "seconds": 18.839000000000002,
++      "cases": 14,
++      "test_source_sha256": "0ce5ac3542a7602a9a937ca1e4459fef5bc013e1ceb832431fb9f6f250078328"
++    },
++    "backend/tests/test_command_mission_creation_race.py": {
++      "seconds": 0.41000000000000003,
++      "cases": 3,
++      "test_source_sha256": "f55f6202ee3e7f71c34284395037f5bef9d45572e2db86e55cfad078a8087664"
++    },
++    "backend/tests/test_command_recovery.py": {
++      "seconds": 21.569999999999993,
++      "cases": 13,
++      "test_source_sha256": "097ac7b9df7c71fbc6ca3d0231dae7967531f629b87909828cc1ef157191d96f"
++    },
++    "backend/tests/test_command_success_contract.py": {
++      "seconds": 3.4290000000000003,
++      "cases": 25,
++      "test_source_sha256": "1338327919f9e21463e0bc7fec139992da63d98e53655a11b76f10a8b80f5c89"
++    },
++    "backend/tests/test_commander_config_identity.py": {
++      "seconds": 0.01,
++      "cases": 2,
++      "test_source_sha256": "78b6436b00fd4a10fd1e263b6a8a72b8898115e9b24f9c428c68177f1838b050"
++    },
++    "backend/tests/test_computer_worker.py": {
++      "seconds": 0.7280000000000001,
++      "cases": 6,
++      "test_source_sha256": "aeba60646c177b63b4842f0a5df74289fdad4973992be656ae587d8646c3a16f"
++    },
++    "backend/tests/test_config_production_safety.py": {
++      "seconds": 0.2040000000000001,
++      "cases": 40,
++      "test_source_sha256": "f6035630fb0847a9bf3bed8b67a4460b6d82d5580a7504c4ed3c1031347379c7"
++    },
++    "backend/tests/test_context_admission_api.py": {
++      "seconds": 1.861,
++      "cases": 2,
++      "test_source_sha256": "4ced9ca4940192c51fe2aff428a32b00bdae5cb3b48825ac1929f0dd102c9616"
++    },
++    "backend/tests/test_context_graph.py": {
++      "seconds": 1.412,
++      "cases": 4,
++      "test_source_sha256": "9b5ef44109b159f811bfe52121951df0815a3aec71e8773c920d74a96d9b5414"
++    },
++    "backend/tests/test_context_lifecycle_governance.py": {
++      "seconds": 5.731999999999999,
++      "cases": 16,
++      "test_source_sha256": "5c29a430841cc9397893e889de7fab0dea95408bc1a9d297f0bf35313e71bbd6"
++    },
++    "backend/tests/test_context_retrieval.py": {
++      "seconds": 1.731,
++      "cases": 5,
++      "test_source_sha256": "772d02bf9fbf66552f057a084fc01167aac5898100a767731a655102859dbf98"
++    },
++    "backend/tests/test_context_snapshot_lineage.py": {
++      "seconds": 0.153,
++      "cases": 1,
++      "test_source_sha256": "20227d81e68876717eb20f140d30074da7401ded2574d34652715891d85d2609"
++    },
++    "backend/tests/test_control_scopes.py": {
++      "seconds": 8.636999999999999,
++      "cases": 19,
++      "test_source_sha256": "1dd8980946ced326246e3134ddf650f57d9994ef46d3a4acddb341818856741c"
++    },
++    "backend/tests/test_conversation_gateway_history.py": {
++      "seconds": 2.428,
++      "cases": 2,
++      "test_source_sha256": "7302a2295aa1976323ae5bbb4292b59fad37c612b566c2e35e554b7ad797271e"
++    },
++    "backend/tests/test_conversation_state_integrity.py": {
++      "seconds": 3.2059999999999995,
++      "cases": 21,
++      "test_source_sha256": "e59861b0efc316f65dad0edf5edad2a5e67741fbfdbe170da9691c34b5f6df86"
++    },
++    "backend/tests/test_conversation_store.py": {
++      "seconds": 0.45899999999999996,
++      "cases": 3,
++      "test_source_sha256": "b7cffe8e36fb124a81175015be722328fae41c90075350aad219048f6d9a2169"
++    },
++    "backend/tests/test_correlation_predicate_declared.py": {
++      "seconds": 1.537,
++      "cases": 28,
++      "test_source_sha256": "e8757af78ee7558724655aeea69e1def101fe76bc89caf184feb9c72dcd39df9"
++    },
++    "backend/tests/test_credential_expiry_and_rotation.py": {
++      "seconds": 7.691,
++      "cases": 17,
++      "test_source_sha256": "921f559ede26cfd8c875b5157021023cb8d25c8e0e82c937a79bf0dff2bfacf6"
++    },
++    "backend/tests/test_decision_details.py": {
++      "seconds": 3.158999999999999,
++      "cases": 27,
++      "test_source_sha256": "bd52a51caeaf10df4e9be2fe2b70c374b19f70933baee186258151f1d402ac8c"
++    },
++    "backend/tests/test_decision_resolution_recovery.py": {
++      "seconds": 3.191,
++      "cases": 12,
++      "test_source_sha256": "ec01c5453eccb04ff7ec851fa0c1c882ab11272e7c9a8f32980c02697c938a19"
++    },
++    "backend/tests/test_degraded_catalog_is_exhaustive.py": {
++      "seconds": 0.01900000000000001,
++      "cases": 46,
++      "test_source_sha256": "e6cc3b7f522c00b479c9e93000269074c7e2034aed20f6536793d4ecf55b49fc"
++    },
++    "backend/tests/test_device_auth_persistence.py": {
++      "seconds": 0.396,
++      "cases": 3,
++      "test_source_sha256": "26e03a2bb07fdb85a97c0f3c2011a4cf705ffe1bbbacbcfddc41c1669e8dd0cf"
++    },
++    "backend/tests/test_device_proof_enforcement.py": {
++      "seconds": 13.204,
++      "cases": 11,
++      "test_source_sha256": "e515923ea81473a5f053f4904a4c30facad66ff77d835083ddf3f51c67575b79"
++    },
++    "backend/tests/test_dial_dev_attention.py": {
++      "seconds": 3.4369999999999994,
++      "cases": 29,
++      "test_source_sha256": "1c2cbd2e9340b6eb687ba01582bf12b521af061cce88943cab4be1dfd3af67a0"
++    },
++    "backend/tests/test_dial_dev_credential_failure.py": {
++      "seconds": 0.004,
++      "cases": 1,
++      "test_source_sha256": "0211e26dd7129248bdeb2d9bfe96893bd8f178d00ff4890d99c025d569a65524"
++    },
++    "backend/tests/test_dial_dev_original_outcome.py": {
++      "seconds": 8.399,
++      "cases": 7,
++      "test_source_sha256": "9ebba38dc783ff39eb9300c1fe6538220a293532ea20a2a9f0860da165a20026"
++    },
++    "backend/tests/test_dial_dev_product_mtls.py": {
++      "seconds": 10.734999999999996,
++      "cases": 21,
++      "test_source_sha256": "dc6bdfd9b6213a925f990219e681ccb7605efae6afab19a3946c08e932cec0f9"
++    },
++    "backend/tests/test_dial_dev_proxy.py": {
++      "seconds": 136.28699999999998,
++      "cases": 119,
++      "test_source_sha256": "12947852dffea6af2f19a63be320bb5772527618abdd5132cd62dcc0662780ad"
++    },
++    "backend/tests/test_dial_dev_stream_lifecycle.py": {
++      "seconds": 0.6890000000000002,
++      "cases": 15,
++      "test_source_sha256": "df14faf115b51d4b126bcf6108035124556a254767f58c575454539fab059653"
++    },
++    "backend/tests/test_dispatch_run_needs_verified_receipt.py": {
++      "seconds": 4.506,
++      "cases": 6,
++      "test_source_sha256": "c9b04e7373b490c6b953ada41fac41988f6d8e8a41a5ee5e4400d909d977bdfe"
++    },
++    "backend/tests/test_document_fabric.py": {
++      "seconds": 0.41800000000000004,
++      "cases": 5,
++      "test_source_sha256": "8038b49a52430925c6725678dad42e4da1623170d3ee9a2a9ac1f07dfe3ff2cb"
++    },
++    "backend/tests/test_document_publication_gateway.py": {
++      "seconds": 6.154999999999999,
++      "cases": 5,
++      "test_source_sha256": "10ea21cdca743251339861bdd4db904ce1eef12f78b78cf6c3a3eb91fc92105a"
++    },
++    "backend/tests/test_document_publication_google.py": {
++      "seconds": 2.224,
++      "cases": 1,
++      "test_source_sha256": "46f5777a5d6528354a6681c5a8a06bf13c2dec5864cda46f98af1663e0600fe2"
++    },
++    "backend/tests/test_document_publication_integrity.py": {
++      "seconds": 3.886,
++      "cases": 24,
++      "test_source_sha256": "136617870d0fe366a571b22899fd22d1899a0dbab8d91c212d2208e7408a2d77"
++    },
++    "backend/tests/test_document_value_integrity.py": {
++      "seconds": 9.046,
++      "cases": 16,
++      "test_source_sha256": "07b5b1d025bf7f05c44a319feee26c889c142f1dc709e47f02be9b128f5bf16a"
++    },
++    "backend/tests/test_epistemics_context_understanding.py": {
++      "seconds": 3.319,
++      "cases": 27,
++      "test_source_sha256": "7b61812c3a034d0ac33ff3865956647df3c3f415097e89699c2f21d1332ce06e"
++    },
++    "backend/tests/test_external_reality_and_benchmarks.py": {
++      "seconds": 1.4640000000000002,
++      "cases": 10,
++      "test_source_sha256": "913b7ae66831d4726dd7d769c929a36c3824a438c70e065a7fbfdb6a1fc9cb4a"
++    },
++    "backend/tests/test_extra_apis.py": {
++      "seconds": 14.123999999999999,
++      "cases": 11,
++      "test_source_sha256": "1d93f9584ea7bde0734d32df7efec4dc6ab852ebaeb6fa01f082a8b13e6de180"
++    },
++    "backend/tests/test_funding_owner_api.py": {
++      "seconds": 3.45,
++      "cases": 2,
++      "test_source_sha256": "0b846acb14a66081f455f438773ed17e7c57c24765d1dd36f508fa4bba3c94b0"
++    },
++    "backend/tests/test_gateway.py": {
++      "seconds": 21.715,
++      "cases": 16,
++      "test_source_sha256": "0490fd9d92406674009bfecb9f36fbafbb08e53aff60db763d492f3e1faa6094"
++    },
++    "backend/tests/test_gateway_startup_storage.py": {
++      "seconds": 4.295,
++      "cases": 8,
++      "test_source_sha256": "45dc550bf63661790af9911810888efeac8bfb853bcdfe247131d6645032f646"
++    },
++    "backend/tests/test_github_independent_verification.py": {
++      "seconds": 0.05800000000000003,
++      "cases": 39,
++      "test_source_sha256": "0685f9691a7a64b74c36cc927be0fb539198468f8728cdd659d817a3580fb885"
++    },
++    "backend/tests/test_gmail_mime_and_frozen_send.py": {
++      "seconds": 5.9910000000000005,
++      "cases": 27,
++      "test_source_sha256": "0ec0341dab70b0183ade379af59ed8ac66589e9892b9147ae8bf808deebcbfe2"
++    },
++    "backend/tests/test_gmail_mission_sent_readback.py": {
++      "seconds": 11.965,
++      "cases": 6,
++      "test_source_sha256": "1897e6c6e97c7db3d18a79f3c942a8f8084a26c72bb001d24e32df35fcf29957"
++    },
++    "backend/tests/test_gmail_owner_send_approval.py": {
++      "seconds": 10.264000000000001,
++      "cases": 14,
++      "test_source_sha256": "957b21710de202bc0dc832e1f0d1d01d2a606454f8bfbc2f0b0e585586aecca7"
++    },
++    "backend/tests/test_goals_watches.py": {
++      "seconds": 1.0190000000000001,
++      "cases": 5,
++      "test_source_sha256": "6b17c63917611dabd61fb5f791d9ee5f52a384e3e3ad49df5ff19dbd62d129f3"
++    },
++    "backend/tests/test_google_capabilities_have_routes.py": {
++      "seconds": 5.966,
++      "cases": 8,
++      "test_source_sha256": "537137a99a701122a59ebf3fcd8e9b6d172a20bbbbfab1efa955ece11999a1bf"
++    },
++    "backend/tests/test_google_credential_planes.py": {
++      "seconds": 5.939,
++      "cases": 20,
++      "test_source_sha256": "cf3476007b2a1119e49675d4f810185a4f15224a9d0af1f47faac194ee93d6ce"
++    },
++    "backend/tests/test_google_mesh.py": {
++      "seconds": 2.2279999999999993,
++      "cases": 18,
++      "test_source_sha256": "c05abbdc50a30ade0daffefaee81bdd43fb9d9c27db3526c3f442c3af018b100"
++    },
++    "backend/tests/test_google_openmuse_depth.py": {
++      "seconds": 0.20800000000000002,
++      "cases": 7,
++      "test_source_sha256": "5fbafe6d68e05404b6fb089d6b7cdd53d41fcd96b1eaebcd64716eb719634101"
++    },
++    "backend/tests/test_google_owner_revoke_and_scrub.py": {
++      "seconds": 4.072,
++      "cases": 3,
++      "test_source_sha256": "58fab545589ed0082b794ed68fe71868d63b7727bd23bb1f9444659ea75109ed"
++    },
++    "backend/tests/test_google_provider_http_contracts.py": {
++      "seconds": 1.749,
++      "cases": 30,
++      "test_source_sha256": "cfd338f5daa61be59df4a17b69887160a73365818261c87ee5a8b0d805d5004c"
++    },
++    "backend/tests/test_google_readiness_revocation.py": {
++      "seconds": 0.42000000000000004,
++      "cases": 2,
++      "test_source_sha256": "21febf2f603a9616789955b9a5882995d49c2dd33f39a31212aec2f21db466e4"
++    },
++    "backend/tests/test_hermes_bridge.py": {
++      "seconds": 0.037000000000000026,
++      "cases": 33,
++      "test_source_sha256": "f481d6695a5421cbafa718b6cab50d0183bd92cfe23f6ea0a2b74ad99e86d823"
++    },
++    "backend/tests/test_hermes_callback_recovery.py": {
++      "seconds": 10.135000000000002,
++      "cases": 13,
++      "test_source_sha256": "e08a805cf21dc6fbd4e08ed48dd62033daa82d2c9131eec1f8da0641424d63cf"
++    },
++    "backend/tests/test_hermes_google_attestation.py": {
++      "seconds": 0.652,
++      "cases": 3,
++      "test_source_sha256": "5195b524fc31011769c132f518a3537e69550da6bd06f0fb5a37ba3fed720892"
++    },
++    "backend/tests/test_hosted_provider_fault_boundaries.py": {
++      "seconds": 43.07899999999999,
++      "cases": 39,
++      "test_source_sha256": "cf7597f1d42cce093bc695295dc15384c22bfa28e0de11e0f75e274f480b7cdf"
++    },
++    "backend/tests/test_ingress_trust_boundary.py": {
++      "seconds": 18.497999999999998,
++      "cases": 21,
++      "test_source_sha256": "fba4ba9df3c45cb36979943fa835bb4ab2669ae8392adde7eee6d643903b996a"
++    },
++    "backend/tests/test_intent_memory_integrity.py": {
++      "seconds": 1.8179999999999998,
++      "cases": 12,
++      "test_source_sha256": "b1657a1ad5331012e4f640ddf43187c21499684da26045dbf3e70deceb7ae90a"
++    },
++    "backend/tests/test_intent_source_privacy.py": {
++      "seconds": 8.824,
++      "cases": 12,
++      "test_source_sha256": "da11084d159f7fa91b3418c33fc280c030e3014c0b922a287329c3075708e8af"
++    },
++    "backend/tests/test_interaction_router_ledger.py": {
++      "seconds": 1.4589999999999999,
++      "cases": 10,
++      "test_source_sha256": "4286af5dcd0b03f1dd0313c97e06c479cbf94e7f88fb15a4974f14ca1b327a1c"
++    },
++    "backend/tests/test_interactive_browser_api.py": {
++      "seconds": 35.193000000000005,
++      "cases": 23,
++      "test_source_sha256": "9c0ef4aafffa5c9ec9351d226fbd5d9d8d4515e1f0a177070f354e86d4c51f63"
++    },
++    "backend/tests/test_interactive_browser_session.py": {
++      "seconds": 9.068,
++      "cases": 52,
++      "test_source_sha256": "74be645a22b42140e04da805102359c09f968956662ee6cf5060d8372e0eeb25"
++    },
++    "backend/tests/test_irreversible_work_waits_on_assumptions.py": {
++      "seconds": 15.176000000000002,
++      "cases": 31,
++      "test_source_sha256": "59ed66d0ef4e3051e2f64169767afed0a69e234f65682049faeb363c70575b43"
++    },
++    "backend/tests/test_jev_attention_integration.py": {
++      "seconds": 0.41300000000000003,
++      "cases": 3,
++      "test_source_sha256": "dfd1033a56b005f2f01e68a2de63d5efe344c193e872be8993cc0649f9293a4e"
++    },
++    "backend/tests/test_jev_b2_leak_regressions.py": {
++      "seconds": 0.06600000000000003,
++      "cases": 47,
++      "test_source_sha256": "d4ec1ce03961f9e0b95c66d567cc1d1880ad4e2c3e49fb6c46956b7e07419704"
++    },
++    "backend/tests/test_jev_browser_eligibility.py": {
++      "seconds": 0.09900000000000007,
++      "cases": 133,
++      "test_source_sha256": "62a2c658529c5f0dfd0b05b2613dfc775b3445733369e34ae767f30aa08488be"
++    },
++    "backend/tests/test_jev_control.py": {
++      "seconds": 0.004,
++      "cases": 6,
++      "test_source_sha256": "40a742d8440b152fb807b6898689578380170b1b7fb42b8c230b7435774ae0c3"
++    },
++    "backend/tests/test_jev_critic_integration.py": {
++      "seconds": 0.501,
++      "cases": 4,
++      "test_source_sha256": "c8995bf15edb0ac7b85bc7f6d7a00c013f9e8a6045c1c7cd7a5a425f8b79d009"
++    },
++    "backend/tests/test_jev_no_generic_executor.py": {
++      "seconds": 0.04000000000000002,
++      "cases": 60,
++      "test_source_sha256": "1c068cbd999812350fb61139b2523e27ef19df72b1fe8c58dd5a38d98f239081"
++    },
++    "backend/tests/test_jev_readback_missing_is_unverifiable.py": {
++      "seconds": 0.022000000000000013,
++      "cases": 22,
++      "test_source_sha256": "a96c2c2056555ef7c25022e00701dc8e51928322f709c3481b0871499b16659b"
++    },
++    "backend/tests/test_knowledge_cloud_token_contract.py": {
++      "seconds": 0.603,
++      "cases": 7,
++      "test_source_sha256": "3990e28b49860be04e65c93d95a865c5dcf3352cba766153a61ccb899061295a"
++    },
++    "backend/tests/test_knowledge_runtime.py": {
++      "seconds": 2.427,
++      "cases": 13,
++      "test_source_sha256": "edfdf91753743fee3253aaa9e4b0561dc02f1a4388c70bfdbfb7846e9af451d7"
++    },
++    "backend/tests/test_lane_auth_commit_expiry.py": {
++      "seconds": 1.32,
++      "cases": 9,
++      "test_source_sha256": "562449e4bad53627645e41b9f7ce48d18f5556ed8b0a9e8e2534b36cb822f6c3"
++    },
++    "backend/tests/test_lane_auth_commit_expiry_http.py": {
++      "seconds": 2.41,
++      "cases": 2,
++      "test_source_sha256": "b245d280b9bc62b310629b4086df1bb9f6490dd8f667d4e079c4e63f0c54bada"
++    },
++    "backend/tests/test_lane_session_commit_expiry.py": {
++      "seconds": 10.429000000000002,
++      "cases": 15,
++      "test_source_sha256": "b8a835ac41bedced5334c27f2f0ffe423e2349baa536cfb450f2d232f4848c0a"
++    },
++    "backend/tests/test_learning_projection_availability.py": {
++      "seconds": 2.26,
++      "cases": 4,
++      "test_source_sha256": "09b839e2dee510d383010bb60e8a4855a7b817ab6fd841f7d9fd3f58948e7bf7"
++    },
++    "backend/tests/test_learning_read_back.py": {
++      "seconds": 17.662999999999997,
++      "cases": 11,
++      "test_source_sha256": "8daa4f8be3e07a2d2109d6c7a5cd75615f84347234167b5b7adc75cd18002a3e"
++    },
++    "backend/tests/test_learning_records_and_bounds.py": {
++      "seconds": 8.552,
++      "cases": 24,
++      "test_source_sha256": "919cd78636b94165c48b9b8ade1904ce56648f07a829ed52a728b7c89e232ef2"
++    },
++    "backend/tests/test_learning_recovery.py": {
++      "seconds": 15.234999999999998,
++      "cases": 31,
++      "test_source_sha256": "e3c9ff3bc98fd2a8a3cbbd426e6a3437450b23783bf101dcd5d50c3bd26275c1"
++    },
++    "backend/tests/test_local_admission_cancellation.py": {
++      "seconds": 3.5090000000000003,
++      "cases": 2,
++      "test_source_sha256": "9db7855325f6c5843dec8daa97efbe5ffd437631a1f5c5a281f170bb75c93ae2"
++    },
++    "backend/tests/test_local_typed_actions.py": {
++      "seconds": 16.054,
++      "cases": 8,
++      "test_source_sha256": "89550ca9fd622094cd303a556245e02ed26c0ad094d1900abcd670e57cd421a2"
++    },
++    "backend/tests/test_market_monitor_bound_device.py": {
++      "seconds": 1.094,
++      "cases": 1,
++      "test_source_sha256": "c9fd23b811b9d70179d468022d24d0a466547f78f3ca43fa6ad1ebe92ca377eb"
++    },
++    "backend/tests/test_market_monitor_commands.py": {
++      "seconds": 8.132,
++      "cases": 47,
++      "test_source_sha256": "0c92c04e39d9a1a25c9973a2a8c38cd93ad5a920e34a3fe312e8c802efe0d8d4"
++    },
++    "backend/tests/test_market_monitor_gateway.py": {
++      "seconds": 7.6,
++      "cases": 5,
++      "test_source_sha256": "37597c17f0f832ea01c4528d6cbb7e07bbf5b51bf5f11ccd7ed5e9f62eb83f84"
++    },
++    "backend/tests/test_market_monitor_measurements.py": {
++      "seconds": 0.06500000000000003,
++      "cases": 31,
++      "test_source_sha256": "ed56d301cf329c13b1cf01d71e032588688de75e15cec28e54dbfad841a8c3c7"
++    },
++    "backend/tests/test_market_monitor_persistence.py": {
++      "seconds": 1.5090000000000001,
++      "cases": 10,
++      "test_source_sha256": "6a949a5eee7c646c7759c6a0d2de60e365a7f6cd4cc785455e647d70f0d7d50a"
++    },
++    "backend/tests/test_market_monitor_runtime.py": {
++      "seconds": 1.592,
++      "cases": 10,
++      "test_source_sha256": "080385688dea5663dd41e92dfaaad847f4f94569c3e12fc74f27f2bdc03ba3be"
++    },
++    "backend/tests/test_memory_erasure_original_operation.py": {
++      "seconds": 21.688,
++      "cases": 11,
++      "test_source_sha256": "c24fd1169acf13e74ec4d3554db2635586b43d06bf50d4584e620df69f719e9f"
++    },
++    "backend/tests/test_mission_binding_api.py": {
++      "seconds": 6.32,
++      "cases": 21,
++      "test_source_sha256": "304d60edce071b4ed542bedb27a0d343a85fcf56dae05d289d8a4b3b8a8f3193"
++    },
++    "backend/tests/test_mission_capture_atomicity.py": {
++      "seconds": 1.3079999999999998,
++      "cases": 6,
++      "test_source_sha256": "3d2c93c9697637cd0535114ee940b7689b97c25196380058a2491ec6ee7ee892"
++    },
++    "backend/tests/test_mission_control_action_fence.py": {
++      "seconds": 0.605,
++      "cases": 3,
++      "test_source_sha256": "242ad21b7432cb5546c154f7cb1e7de9d84f8d3942b5c55567eedb9a1fd72209"
++    },
++    "backend/tests/test_mission_core.py": {
++      "seconds": 3.396,
++      "cases": 23,
++      "test_source_sha256": "93bb05f28f7186256bb0e06268fce9cc199982ceefe46e65b2c1d95827607691"
++    },
++    "backend/tests/test_mission_dependency_graph.py": {
++      "seconds": 1.7310000000000003,
++      "cases": 20,
++      "test_source_sha256": "ef23de8b3cabf977647a7ec5bd1234cf25d476d1117617594b47badb5ceea89b"
++    },
++    "backend/tests/test_mission_execution_control.py": {
++      "seconds": 9.463999999999999,
++      "cases": 59,
++      "test_source_sha256": "6c68c4291aa615d9a4fe6ce0f8ed6a5d35e3cc6f0f9e976979caac6f352840b4"
++    },
++    "backend/tests/test_mtls_live.py": {
++      "seconds": 16.910999999999998,
++      "cases": 9,
++      "test_source_sha256": "3321bdbe889809ba9b4947f79277c3505b01069ba24984ead48bbbb460f90a36"
++    },
++    "backend/tests/test_mtls_machine_ingress.py": {
++      "seconds": 12.164999999999997,
++      "cases": 11,
++      "test_source_sha256": "645cb0e032efe900de83cb4479a2121a67b011381b8d2c256d4ff6df9bcd6871"
++    },
++    "backend/tests/test_mtls_pki.py": {
++      "seconds": 0.4440000000000001,
++      "cases": 19,
++      "test_source_sha256": "9d1f3d87ed18cd2f5ab56e331814164577900ecad1c862b52d501817e3846935"
++    },
++    "backend/tests/test_n8n_invocation.py": {
++      "seconds": 0.132,
++      "cases": 18,
++      "test_source_sha256": "4ce5f5922a3c6099ee85929e0ba88678ff541cf2403843a2e738af4572010988"
++    },
++    "backend/tests/test_native_account_observation_api.py": {
++      "seconds": 3.644,
++      "cases": 3,
++      "test_source_sha256": "c26a9f902422a9ca0fb3d576543f890201c819a7d8fa675d4d5722ddc986d9da"
++    },
++    "backend/tests/test_native_balance_owner_api.py": {
++      "seconds": 1.214,
++      "cases": 1,
++      "test_source_sha256": "87a951195e4f096e5268a7c1ceea320ae6855be5cedc1083e2bc4e65c53647ca"
++    },
++    "backend/tests/test_native_depth_history.py": {
++      "seconds": 34.001000000000005,
++      "cases": 32,
++      "test_source_sha256": "3925d399516cd3f8fca1430c655ba9b330d30285b138f8fd5e257df3423194c0"
++    },
++    "backend/tests/test_native_instrument_catalog_http.py": {
++      "seconds": 23.830999999999992,
++      "cases": 18,
++      "test_source_sha256": "27ded6c2ae2ed881abd320f01defd0d501abd6efe5563daa42b22cf5ba27eeb6"
++    },
++    "backend/tests/test_native_owner_key_revocation.py": {
++      "seconds": 49.211999999999975,
++      "cases": 31,
++      "test_source_sha256": "eb4cc6abed6b05b1350ef742515c8ef7e59bbe9a8e366dc6650bfdea4ee36753"
++    },
++    "backend/tests/test_network_candidate_projection.py": {
++      "seconds": 0.034,
++      "cases": 2,
++      "test_source_sha256": "a3326c24ba42c348705c9a9281809e6251ced605bdd99dade21100a5809cbaab"
++    },
++    "backend/tests/test_oauth_callback_escaping.py": {
++      "seconds": 3.272,
++      "cases": 4,
++      "test_source_sha256": "be5b25ba53bfd87a1c33e1bf8eaf79dcc6083d6e2ffaea5d2962a3f43ea7edbe"
++    },
++    "backend/tests/test_observability_alerts.py": {
++      "seconds": 0.010000000000000002,
++      "cases": 12,
++      "test_source_sha256": "39e0171849a45b7f75fb74dee004f31bff3d146523e9772c32f152c4983743cb"
++    },
++    "backend/tests/test_observability_logging.py": {
++      "seconds": 0.005,
++      "cases": 8,
++      "test_source_sha256": "2e20ed4728f608d67ef0fb8e772174b53a4ef30eb6557979c585e1e132032d8d"
++    },
++    "backend/tests/test_observability_metrics.py": {
++      "seconds": 0.007,
++      "cases": 19,
++      "test_source_sha256": "28937c3a44e1239902be11116dd20039c441dd0a9b0a1155058c6474cb16f564"
++    },
++    "backend/tests/test_observability_routes.py": {
++      "seconds": 11.476,
++      "cases": 8,
++      "test_source_sha256": "6f87f22c0871941b7059fa2165f53e6d8cb0ae8fff60cc48dd63365aea24b68b"
++    },
++    "backend/tests/test_observed_learning_producers.py": {
++      "seconds": 5.473,
++      "cases": 18,
++      "test_source_sha256": "737d9df8a6a641eee9822f1741a89ba823a132a99a4845d20c2275d423606629"
++    },
++    "backend/tests/test_one_jev_system.py": {
++      "seconds": 0.9470000000000001,
++      "cases": 11,
++      "test_source_sha256": "a4b3ef960ff9bf3ea2efdcbb3b30247fe4565ef9db0a8c27d2960bf5c6d2aca3"
++    },
++    "backend/tests/test_openapi_operation_identity.py": {
++      "seconds": 2.117,
++      "cases": 1,
++      "test_source_sha256": "1edc21ba4359d83388e68c0151af50c659295cbc713eaa88349ee315f9b5cec0"
++    },
++    "backend/tests/test_openmuse_regressions.py": {
++      "seconds": 0.336,
++      "cases": 3,
++      "test_source_sha256": "c3df9816f1ebf28700118fa5ee753121c2af79fbf4091d7c0bde2ba9d644c5c0"
++    },
++    "backend/tests/test_ops_backup.py": {
++      "seconds": 3.1430000000000007,
++      "cases": 14,
++      "test_source_sha256": "ac2a2f7ddfa71f8beb6c44456f9ddce7f10f26423e4ccef276bb6540c6299398"
++    },
++    "backend/tests/test_ops_device_pki.py": {
++      "seconds": 1.209,
++      "cases": 5,
++      "test_source_sha256": "ff89c6e764dfde2976d0c0cfc25e673aa8e68e7065e0539c776f6513a45ef37b"
++    },
++    "backend/tests/test_ops_pki.py": {
++      "seconds": 1.4090000000000003,
++      "cases": 7,
++      "test_source_sha256": "3014b0dbd1b52f49ea3de47e6b012351208fc7bf5a033445330c98e077721810"
++    },
++    "backend/tests/test_ops_retention.py": {
++      "seconds": 1.803,
++      "cases": 13,
++      "test_source_sha256": "c277c23a95acd70b5bd0c6098eace83c073e89a76ab3008113529513ac9b9915"
++    },
++    "backend/tests/test_ops_scheduler.py": {
++      "seconds": 4.437,
++      "cases": 8,
++      "test_source_sha256": "7e858ca5f07c9495813ec42dfc666b0157a1dc73392bc34a6d8d251f48392091"
++    },
++    "backend/tests/test_ops_suppression.py": {
++      "seconds": 1.0250000000000001,
++      "cases": 8,
++      "test_source_sha256": "e832b2e8773c8268cb12adec05f75219e5a75df2656437924fde7b2831cba63a"
++    },
++    "backend/tests/test_owner_approval_canonical_binding.py": {
++      "seconds": 4.545,
++      "cases": 19,
++      "test_source_sha256": "e4ab1a3403b690eef97823322d092be9aa03aacba40e4174c68924f8db3fa6ec"
++    },
++    "backend/tests/test_owner_approval_expiry_boundaries.py": {
++      "seconds": 0.714,
++      "cases": 5,
++      "test_source_sha256": "43e49b33767c9c3df4c7cdef49df118b4845501a56e2396a083dd9abca1638b2"
++    },
++    "backend/tests/test_owner_approval_parameters.py": {
++      "seconds": 1.49,
++      "cases": 3,
++      "test_source_sha256": "cc54f3690e0e70a53938d24131c71b40299d6b8157e2fe1be054adc541a92c56"
++    },
++    "backend/tests/test_owner_artifacts.py": {
++      "seconds": 0.249,
++      "cases": 2,
++      "test_source_sha256": "011bc7f4bb5d66003d9885bc2f18b7aa283d1bd0349548c59fa38a8e5c0e1c5a"
++    },
++    "backend/tests/test_owner_automation_plans.py": {
++      "seconds": 5.01,
++      "cases": 4,
++      "test_source_sha256": "f7823af082f53cb1372e23b608b9f1a881282d4809f0bcd869945376fd25e71b"
++    },
++    "backend/tests/test_owner_context_is_real.py": {
++      "seconds": 12.824,
++      "cases": 25,
++      "test_source_sha256": "ed8e15a8ebf5239ee8b322356534a1c9e2cffde112d9e023bb4b0541b43bbef4"
++    },
++    "backend/tests/test_owner_decision_mission_control_api.py": {
++      "seconds": 9.661999999999999,
++      "cases": 5,
++      "test_source_sha256": "da687b50e44277d334636b9dedf20cbf3fe7144140e59ef69f45bc24a576c9e9"
++    },
++    "backend/tests/test_owner_declaration_writers.py": {
++      "seconds": 52.498999999999995,
++      "cases": 32,
++      "test_source_sha256": "368ddbeafcc71de4a005a0b19075835d9d6a6e256f1c147c2ab096663139c26c"
++    },
++    "backend/tests/test_owner_device_binding.py": {
++      "seconds": 2.3679999999999994,
++      "cases": 36,
++      "test_source_sha256": "f85cb62b7b31575578da6b55cc0093b4bfc700f113c62ce19cbedfa83b9ac7f4"
++    },
++    "backend/tests/test_owner_device_provisioning.py": {
++      "seconds": 25.441000000000003,
++      "cases": 28,
++      "test_source_sha256": "920c7b2ed845bff4e4ab12639c762b82392db2252e839b705b215aad628170d2"
++    },
++    "backend/tests/test_owner_device_reenrollment_api.py": {
++      "seconds": 8.303,
++      "cases": 5,
++      "test_source_sha256": "ff2e791b82351befcf54ffc1c162e3fb7e4032095df4625a86e3eea514fc485f"
++    },
++    "backend/tests/test_owner_device_reenrollment_recovery.py": {
++      "seconds": 6.5440000000000005,
++      "cases": 21,
++      "test_source_sha256": "b059a669b85065488575554b89f39eed0bcbb434ad7bc1bc739f40c1272ce20e"
++    },
++    "backend/tests/test_owner_domain_autonomy.py": {
++      "seconds": 21.146,
++      "cases": 23,
++      "test_source_sha256": "9f06b92bf3420a92c59fb1ca16d00d28ce0598118a6b5343e8d2875c1ede20f6"
++    },
++    "backend/tests/test_owner_goal_gateway.py": {
++      "seconds": 3.905,
++      "cases": 2,
++      "test_source_sha256": "903f55b7384031584a08cd01116e0ae393b8f1c7cb588ee5762c1ca729cd2072"
++    },
++    "backend/tests/test_owner_goal_integrity.py": {
++      "seconds": 1.447,
++      "cases": 15,
++      "test_source_sha256": "aad4762ca17676a5314d6c269dfb03472ff2d18c27bc1bef7a6003394be23485"
++    },
++    "backend/tests/test_owner_memory_erasure.py": {
++      "seconds": 17.314,
++      "cases": 9,
++      "test_source_sha256": "cb02d3ae776a4f20a33811fb5a2c7b190ceb704d180155d0f69d1710ef88da31"
++    },
++    "backend/tests/test_owner_memory_has_a_producer.py": {
++      "seconds": 4.111,
++      "cases": 23,
++      "test_source_sha256": "249a7212161246cdc1afd2cfb5d4ff4474c3071c9b67c277cd40d536201843eb"
++    },
++    "backend/tests/test_owner_model_episode_identity.py": {
++      "seconds": 0.938,
++      "cases": 5,
++      "test_source_sha256": "b6cda503ad38ee0e9d150e09929ad81c97d0832ad773d72277a926927fb968e4"
++    },
++    "backend/tests/test_owner_model_migration.py": {
++      "seconds": 1.153,
++      "cases": 7,
++      "test_source_sha256": "70e88e3703689370ebea8e7c0e4415f92e4525c64601eef7d37d1e003705ca32"
++    },
++    "backend/tests/test_owner_model_migration_32.py": {
++      "seconds": 0.9440000000000001,
++      "cases": 5,
++      "test_source_sha256": "d7732d53585493dff9a25509697a3af72be9407d11c87c36295a29330028f2d1"
++    },
++    "backend/tests/test_owner_model_origin_provenance.py": {
++      "seconds": 4.127,
++      "cases": 17,
++      "test_source_sha256": "27f31740dcf94b1f2e70f4cb28be41b4677bea1b668d8a3f5346b499082c6bae"
++    },
++    "backend/tests/test_owner_model_outbox_starvation.py": {
++      "seconds": 2.591,
++      "cases": 4,
++      "test_source_sha256": "b94b03dca42810269d1a8db134477d3ef312c82ac58fa227791941cbee71b430"
++    },
++    "backend/tests/test_owner_model_revision_outbox.py": {
++      "seconds": 3.5169999999999995,
++      "cases": 21,
++      "test_source_sha256": "f47c5d0fa561ab04a30098f819feb1ff3f0a2aa090e36c03b998e0df370b1a06"
++    },
++    "backend/tests/test_owner_permission_integrity.py": {
++      "seconds": 4.4540000000000015,
++      "cases": 18,
++      "test_source_sha256": "8c0caf3bc3c97cf48a43933b330714da030eb84c6362d21517539ad3e1ac3920"
++    },
++    "backend/tests/test_owner_permission_revocation_recovery.py": {
++      "seconds": 37.64,
++      "cases": 18,
++      "test_source_sha256": "006aeee872ee6d6560cae6bc8d6bcae2784e7b95d3c2dd2f91a13035b9595862"
++    },
++    "backend/tests/test_owner_permissions.py": {
++      "seconds": 14.198,
++      "cases": 16,
++      "test_source_sha256": "ee911ff377b78a2bdff9a52f4f1023d9bc2cef0495d7da45df65685c0341a788"
++    },
++    "backend/tests/test_owner_record_controls.py": {
++      "seconds": 10.334,
++      "cases": 5,
++      "test_source_sha256": "64b2450cb65343854988a88aac40a12e32e4fbcade957755fcce300b6a26179d"
++    },
++    "backend/tests/test_owner_record_erasure.py": {
++      "seconds": 10.404,
++      "cases": 5,
++      "test_source_sha256": "d8f31fd6dd1885820274944a6d99f4f39d8142e47af98d2244bd0c9ed3df1d00"
++    },
++    "backend/tests/test_owner_runtime.py": {
++      "seconds": 2.6109999999999998,
++      "cases": 9,
++      "test_source_sha256": "015476f9c67c479dfa8c8e79d09606fcf7dddc2efe65f5e439f9db30204b3ee4"
++    },
++    "backend/tests/test_owner_service_projections.py": {
++      "seconds": 3.845,
++      "cases": 10,
++      "test_source_sha256": "3ea5986d03149e95c69e31b845de1d710bc3a542bcbfd25641174deca9807bb0"
++    },
++    "backend/tests/test_owner_standing_disable.py": {
++      "seconds": 13.151,
++      "cases": 8,
++      "test_source_sha256": "090526136ff158c711f8b31e526fc54fa2dd7984e17d9151a6340dca9eb5b0f1"
++    },
++    "backend/tests/test_owner_status_kotlin_contract.py": {
++      "seconds": 0.008,
++      "cases": 8,
++      "test_source_sha256": "8375b66e58df7be3589bfcb0c4ed7e77609a543174b73f209edf4d3e1f0731a8"
++    },
++    "backend/tests/test_owner_trading_ticket_confirmation.py": {
++      "seconds": 8.173,
++      "cases": 14,
++      "test_source_sha256": "16ff784d1c3a61e69c7a9af6f8035d8de14576828e6e0a088f557c2e4f9c7fde"
++    },
++    "backend/tests/test_owner_work_status.py": {
++      "seconds": 0.01900000000000001,
++      "cases": 37,
++      "test_source_sha256": "d2fb6a1b22b10b96d5f1d4937c8923cb0355f64683628c1e73dbc32df10fb1a3"
++    },
++    "backend/tests/test_pairing_recovery.py": {
++      "seconds": 44.563,
++      "cases": 30,
++      "test_source_sha256": "7dfbb242807268995f37909700085596d296ed8d41d70fc8348a79b486303810"
++    },
++    "backend/tests/test_pairing_security.py": {
++      "seconds": 8.259,
++      "cases": 7,
++      "test_source_sha256": "85a1c949a78797cd95a69c38f08ff72c4b0155fc07a647e31d70e8f5df8bdbea"
++    },
++    "backend/tests/test_payment_boundary.py": {
++      "seconds": 0.04400000000000003,
++      "cases": 68,
++      "test_source_sha256": "cbad97580cd8413c875241fa91f1cec4f8c85b29de2b7f749a6d144d587884f5"
++    },
++    "backend/tests/test_payment_draft_bound_device.py": {
++      "seconds": 3.153,
++      "cases": 1,
++      "test_source_sha256": "de12fcb4f77f5c4838013cc9e7a7869aa200f1eb1a9de432716f32a04bfe2a54"
++    },
++    "backend/tests/test_payment_draft_gateway.py": {
++      "seconds": 21.978,
++      "cases": 18,
++      "test_source_sha256": "66c5dc410b9054efae4c09d7472c5785cebfecc035059ee7b4dc9394a7e25e54"
++    },
++    "backend/tests/test_permission_revocation_retention_integration.py": {
++      "seconds": 3.905,
++      "cases": 1,
++      "test_source_sha256": "48efe5158643a3eb1c82e28eb3ff3fec17ee8d1d532228a63d40cb917c201df5"
++    },
++    "backend/tests/test_permissions_computeruse_verifiers.py": {
++      "seconds": 1.665999999999999,
++      "cases": 22,
++      "test_source_sha256": "7eef001bc89b0033260b695edcb13588e5e07a8f5e8bfb9d6006441084d44a63"
++    },
++    "backend/tests/test_personal_context_resolver.py": {
++      "seconds": 3.074,
++      "cases": 15,
++      "test_source_sha256": "bdc6af6a234ce21e79790a0fe30c9b7557818e074215a08f8df30b02287602b7"
++    },
++    "backend/tests/test_postcondition_predicate_required.py": {
++      "seconds": 0.398,
++      "cases": 12,
++      "test_source_sha256": "4c12d5b2fde36d95f9bb9bf04573a9afe99a490741118823abf2d17f052f4160"
++    },
++    "backend/tests/test_proactive_evolution_eval.py": {
++      "seconds": 3.248,
++      "cases": 25,
++      "test_source_sha256": "d01cb1bb8b36d435edb81729867b98d56cf14e74ef282b4c0c3021226b77eebe"
++    },
++    "backend/tests/test_proactive_followups.py": {
++      "seconds": 3.077,
++      "cases": 16,
++      "test_source_sha256": "2d91d0911620d1af7efb16c41dd4ab0f616eeeb342c0c157fbfa3a4ce4e064c4"
++    },
++    "backend/tests/test_production_activation_gates.py": {
++      "seconds": 0.7690000000000003,
++      "cases": 51,
++      "test_source_sha256": "1789184623ca8bbeca62426c00c1e4f25005c6c3ef0ed21b233acfbd0f59dab0"
++    },
++    "backend/tests/test_project_isolation_audit.py": {
++      "seconds": 12.681000000000001,
++      "cases": 8,
++      "test_source_sha256": "6a8ab59141e24c0b61ed72ea75abe11f231e7c2370cfd7770b6d4be1c73b63e2"
++    },
++    "backend/tests/test_provider_transport.py": {
++      "seconds": 0.3540000000000001,
++      "cases": 48,
++      "test_source_sha256": "502ba18506bd8a4ef43b3ca108301f0ac1dae5efd0e4ab8e7d7b9699e83a719a"
++    },
++    "backend/tests/test_recovery_matrix.py": {
++      "seconds": 3.8789999999999996,
++      "cases": 26,
++      "test_source_sha256": "9ad5d45acf6510c5fc10e02fcdcae74dba3aaa52a861d02727b4a5d8a290f0ec"
++    },
++    "backend/tests/test_reenrollment_crossowner_invariants.py": {
++      "seconds": 0.8220000000000001,
++      "cases": 3,
++      "test_source_sha256": "c550c6b441083e9a56c192fb2f94bf136bceab3427f607c1777e1848b418d428"
++    },
++    "backend/tests/test_relationship_calibration.py": {
++      "seconds": 2.543,
++      "cases": 15,
++      "test_source_sha256": "7add93e830d6005282ca775e34e12716f78bbc0b2b98a112a4125c976945fde1"
++    },
++    "backend/tests/test_reminder_delivery_gateway.py": {
++      "seconds": 2.4939999999999998,
++      "cases": 2,
++      "test_source_sha256": "f88cd5958dc5eebf6a6ec237068ba32f2faf3ec1d05eeda80c44eefa25b9c19c"
++    },
++    "backend/tests/test_reminder_state_integrity.py": {
++      "seconds": 2.2520000000000002,
++      "cases": 21,
++      "test_source_sha256": "3876e8cafb2817fb3b511d9830f6b08f92b9de4ebf1b8909116706bfd89c133d"
++    },
++    "backend/tests/test_replay_and_audit_chain.py": {
++      "seconds": 1.668,
++      "cases": 12,
++      "test_source_sha256": "d2eb5f4b8ad6f18b43f6eb01c770be62c2a17470f3d32ed40c7a9ad5b60af7e0"
++    },
++    "backend/tests/test_rev31_runtime_wiring.py": {
++      "seconds": 8.186,
++      "cases": 6,
++      "test_source_sha256": "cd2b95cc3d9f9fe95590c0204ae30175357f82530e9aba78b43c537b5034d41f"
++    },
++    "backend/tests/test_runtime_hermes_surface.py": {
++      "seconds": 18.93,
++      "cases": 16,
++      "test_source_sha256": "a670647e9e8a87192201e277ea0e10cc475d4f50e82a8cab587c8735d1e8d2f2"
++    },
++    "backend/tests/test_runtime_recovery_bad_proof.py": {
++      "seconds": 1.271,
++      "cases": 10,
++      "test_source_sha256": "c8c1fecd9d3ef5ab0fc2da6422b5b6d3614ee489a8d174d954e1fe4fc258605b"
++    },
++    "backend/tests/test_runtime_recovery_expired_dispatch.py": {
++      "seconds": 2.972,
++      "cases": 21,
++      "test_source_sha256": "51c15eb4faee2f0708010074b2502e51c21365fcac34c87fc381cfd1b0a4f7fa"
++    },
++    "backend/tests/test_runtime_recovery_faults.py": {
++      "seconds": 4.044,
++      "cases": 3,
++      "test_source_sha256": "05b4d321a1f2feb5b89f32abbf6df4e23947984f8bf5ed26414efeb8e0e45c63"
++    },
++    "backend/tests/test_runtime_recovery_gateway.py": {
++      "seconds": 12.69,
++      "cases": 7,
++      "test_source_sha256": "17209f6f7b91de38f61d197b3693f085dc1762f1011d2f5576b887826bea87e8"
++    },
++    "backend/tests/test_runtime_recovery_journal.py": {
++      "seconds": 1.494,
++      "cases": 10,
++      "test_source_sha256": "2efbfc5b156bb2dc804d481891f2337e1744a2a83401878730dd84784d37fbd4"
++    },
++    "backend/tests/test_runtime_recovery_outbox.py": {
++      "seconds": 22.886999999999997,
++      "cases": 14,
++      "test_source_sha256": "6a2057f73c223e7197d03645c5e5eef15f10ed8e286d2ec5e84e42b3721a9c87"
++    },
++    "backend/tests/test_runtime_recovery_protocol.py": {
++      "seconds": 2.785,
++      "cases": 21,
++      "test_source_sha256": "d103db3d0c0e83787204aa03efcfcad51f6422a7ded7a8b96fb3057eb31f17e6"
++    },
++    "backend/tests/test_runtime_resolver_api.py": {
++      "seconds": 1.7229999999999999,
++      "cases": 2,
++      "test_source_sha256": "3773163198d1dd037e530eb3754d2f3c01eb044b7b5cb535c5a331bd334cd566"
++    },
++    "backend/tests/test_saved_screen_rules.py": {
++      "seconds": 1.1019999999999999,
++      "cases": 7,
++      "test_source_sha256": "90f5b40a6f2ee299938abe7659f47a98ea3fd18453795d3ded64220276dafa54"
++    },
++    "backend/tests/test_scoped_internal_control_reaches_routers.py": {
++      "seconds": 3.002,
++      "cases": 3,
++      "test_source_sha256": "93f5ac55b1bb9444d9e50950ebac2385a04f1e32a4ee2ae7f1c6ad3430ced69f"
++    },
++    "backend/tests/test_sealed_parameter_completeness.py": {
++      "seconds": 0.5750000000000001,
++      "cases": 10,
++      "test_source_sha256": "3db57174bb7092dae28db6d08a01c44115795c293091e9ce03891db9bb37e951"
++    },
++    "backend/tests/test_session_open_recovery.py": {
++      "seconds": 7.775000000000001,
++      "cases": 15,
++      "test_source_sha256": "b69d5b7400cfbe0bfffb78fc71fca41b0352da9841be8424d2e4c31b7e874e1d"
++    },
++    "backend/tests/test_session_operation_recovery.py": {
++      "seconds": 14.21,
++      "cases": 18,
++      "test_source_sha256": "b896d693fa604d995eb71e48de7b6bcb5c2d2e985c86ce7d3ebb8a549df2b9f9"
++    },
++    "backend/tests/test_session_socket_binding.py": {
++      "seconds": 22.052999999999997,
++      "cases": 16,
++      "test_source_sha256": "a669fb24a20c26bebcf4429efb8b10a79693757cdea0202b64578f327880ab4c"
++    },
++    "backend/tests/test_session_transport_api.py": {
++      "seconds": 23.752,
++      "cases": 16,
++      "test_source_sha256": "f8603b46ab346a07b8e22c186729a8dbcc7cebe3618aca540b46d55587cdfe9f"
++    },
++    "backend/tests/test_speaker_binding_status.py": {
++      "seconds": 2.491,
++      "cases": 2,
++      "test_source_sha256": "74b128ddd19d46eae3d57c59f5a9c9afb88200f688adbba3ab41f31f5b10fbe7"
++    },
++    "backend/tests/test_speech_sync.py": {
++      "seconds": 0.0,
++      "cases": 3,
++      "test_source_sha256": "0818735fc00c3facc0e82bd1675a946cee25e709c1752dab068c5ee5898ea621"
++    },
++    "backend/tests/test_stagehand_adapter_gate.py": {
++      "seconds": 1.747,
++      "cases": 12,
++      "test_source_sha256": "1e9579af19752a79583e4b257a539602e60176ec976bd7d8dfa6bd6d9414530a"
++    },
++    "backend/tests/test_stagehand_dns_pinning.py": {
++      "seconds": 3.2599999999999993,
++      "cases": 8,
++      "test_source_sha256": "1df85da38fb12f89e2d6d2bbb2c02e6acbce2c73ccbc9259308bffd01a7f3798"
++    },
++    "backend/tests/test_stagehand_placement.py": {
++      "seconds": 0.8370000000000005,
++      "cases": 73,
++      "test_source_sha256": "427f6de484f677734636fd1c24fc8c5192f8f91f14ef97e68a785b885b6d8cba"
++    },
++    "backend/tests/test_standing_automation_authority.py": {
++      "seconds": 2.323,
++      "cases": 14,
++      "test_source_sha256": "b17ded43990a23d3683c157d0f6946f1ad4da9c6a09e9586e635415a7a20f6e4"
++    },
++    "backend/tests/test_standing_run_producer.py": {
++      "seconds": 4.213,
++      "cases": 17,
++      "test_source_sha256": "eb62ec3792c17699978979786b9ea4f911aa330e578c4da0a8fc52a0defc31be"
++    },
++    "backend/tests/test_storage_cancellation.py": {
++      "seconds": 0.033,
++      "cases": 3,
++      "test_source_sha256": "b602c3749b24d0b8cbec2954368508c903385555c691d40efa7fbb05d53a5cf6"
++    },
++    "backend/tests/test_suggestions.py": {
++      "seconds": 0.309,
++      "cases": 2,
++      "test_source_sha256": "25fa8545d870f86d9ad96ef4e9a14602689a61924df8a9ab6a6f7250cc603895"
++    },
++    "backend/tests/test_temporal_durable_runtime.py": {
++      "seconds": 0.023,
++      "cases": 4,
++      "test_source_sha256": "68d0a8ca6af8a2f9a7e542e379e218c581439972652be93c65b75ccd8638cd91"
++    },
++    "backend/tests/test_timeparse.py": {
++      "seconds": 0.0,
++      "cases": 2,
++      "test_source_sha256": "9d4726b0a04e1c2f16a5f5e20df126a70017dd42c73a591248399f903816c5fd"
++    },
++    "backend/tests/test_trading_api.py": {
++      "seconds": 16.905000000000005,
++      "cases": 15,
++      "test_source_sha256": "40b596964983b1ff35455623acac9a0839ecf915b680f962503c0207c4f66d8b"
++    },
++    "backend/tests/test_trading_cognition_api.py": {
++      "seconds": 0.02,
++      "cases": 3,
++      "test_source_sha256": "431218b5b131d746b168e75444e2bdf3809fd916f1ad99f2efbd52604dd0b899"
++    },
++    "backend/tests/test_trading_event_bridge.py": {
++      "seconds": 0.81,
++      "cases": 3,
++      "test_source_sha256": "6ef6e4bcaeca8a54f4b118ef6710ab69c42e20fb2d9ce3435ac7fae839fe3bd3"
++    },
++    "backend/tests/test_trading_oauth_effects.py": {
++      "seconds": 34.73199999999999,
++      "cases": 21,
++      "test_source_sha256": "a7be22f9beadd7780d7fb23c58b8ea34e138ad5643c7174390f91f02025275fd"
++    },
++    "backend/tests/test_trading_oauth_scope.py": {
++      "seconds": 10.543000000000001,
++      "cases": 7,
++      "test_source_sha256": "092d722c451a8e801aab58757b242e20a511291ca36d88631007f10760b5ccd4"
++    },
++    "backend/tests/test_trading_readmodels.py": {
++      "seconds": 2.73,
++      "cases": 9,
++      "test_source_sha256": "848abdfc79401eeacd098df623fb086357701e25b2b91e1ace4127d133673569"
++    },
++    "backend/tests/test_trading_ticket_atomic.py": {
++      "seconds": 0.08099999999999999,
++      "cases": 7,
++      "test_source_sha256": "e9ba02c223b38759973d07a2e3f9022042958f01c6b5df57ba04481582ce7e37"
++    },
++    "backend/tests/test_typed_command_resolver.py": {
++      "seconds": 0.002,
++      "cases": 9,
++      "test_source_sha256": "fc24fc46d97bc0c0cfd52ac67e2e4607301d26a218f2db01ec41c54d52f5f88c"
++    },
++    "backend/tests/test_van_hermes_session.py": {
++      "seconds": 4.32,
++      "cases": 31,
++      "test_source_sha256": "fa39711dd0d961559f2a1456cb33a7acc5aa770874b54d5c61055b7fed14cb2e"
++    },
++    "backend/tests/test_van_private_core_service.py": {
++      "seconds": 1.423,
++      "cases": 7,
++      "test_source_sha256": "d2672f49c40f6bf07d24d3c56e0d6d724c9d515f307d30530c472027539dae35"
++    },
++    "backend/tests/test_verification_is_performed.py": {
++      "seconds": 3.591999999999999,
++      "cases": 21,
++      "test_source_sha256": "7e0873ebf4cebf5d68fbb485d271942bd88bdfd8ff5e37643a29cfe7a19f1bc5"
++    },
++    "backend/tests/test_verifier_type_strict.py": {
++      "seconds": 0.024000000000000014,
++      "cases": 25,
++      "test_source_sha256": "1616420012c599be6690c9706a78923e400fce11c3dc8d74cb77c0296997369d"
++    },
++    "backend/tests/test_visual_acceptance.py": {
++      "seconds": 9.094999999999999,
++      "cases": 6,
++      "test_source_sha256": "a6cc3bd819776a06e12836339098e00602ae7edfff0a1203c05092402296f064"
++    },
++    "backend/tests/test_voice_response_api.py": {
++      "seconds": 27.791999999999998,
++      "cases": 15,
++      "test_source_sha256": "6f547b808092b557bf52289c0a81ec6ab33580b0b1971f906db7043c82822f86"
++    },
++    "backend/tests/test_voice_speaker_authority.py": {
++      "seconds": 7.708,
++      "cases": 7,
++      "test_source_sha256": "87405b38de9896376f9eef84388f390a488a91e8bf69cad5e6c581bf38737374"
++    },
++    "backend/tests/test_voice_speech_cues.py": {
++      "seconds": 0.0,
++      "cases": 12,
++      "test_source_sha256": "16a316b57ff856c9bae30606fa25f12f2ffb5a5b9e53a85296ad89dc5fc30021"
++    },
++    "backend/tests/test_voice_speech_stream.py": {
++      "seconds": 0.05500000000000001,
++      "cases": 23,
++      "test_source_sha256": "8ff7f350d3b9bb014ec3096be14449185668eb4da7ddf5bf070c91a5a0f0ebf7"
++    },
++    "backend/tests/test_voice_stream_binding.py": {
++      "seconds": 0.011000000000000003,
++      "cases": 15,
++      "test_source_sha256": "c8980f467317d29d8f249ef14099c883755ebcbdaeaf40536e40c544ef6e5fd0"
++    },
++    "backend/tests/test_voice_stream_continuity.py": {
++      "seconds": 0.0,
++      "cases": 3,
++      "test_source_sha256": "8c2815c6ffa4f62bda7587ff578305b3354ee5acf02aefa2bfe56bab946fc567"
++    },
++    "backend/tests/test_watch_delivery_gateway.py": {
++      "seconds": 4.031,
++      "cases": 2,
++      "test_source_sha256": "655322e664d46b58c8891eee5a7607987a76ab2671bd0ce7ce25f6f1220c2a06"
++    },
++    "backend/tests/test_watch_observation_integrity.py": {
++      "seconds": 2.902,
++      "cases": 17,
++      "test_source_sha256": "d34447177e29dc94cf75e1b034f5dae27029f118adc1d15fecaa9dc43aacb115"
++    },
++    "backend/tests/test_watchlist_market_projection.py": {
++      "seconds": 0.316,
++      "cases": 21,
++      "test_source_sha256": "205c6aeab452d6ea2673f34b5dbf01a556f0f9707f83a8fb8f707284689a6c5b"
++    },
++    "backend/tests/test_web_acquisition.py": {
++      "seconds": 2.573,
++      "cases": 23,
++      "test_source_sha256": "39878d28e05c88d80bd018748949c1c71b403351a0f4394afb85feab277ae96f"
++    },
++    "backend/tests/test_web_acquisition_api.py": {
++      "seconds": 1.626,
++      "cases": 7,
++      "test_source_sha256": "73a52db68a6bd7e647d1bfe41bd779a37bff9927669ef2ccec624c1d70c5d825"
++    },
++    "backend/tests/test_web_acquisition_runtime.py": {
++      "seconds": 0.659,
++      "cases": 5,
++      "test_source_sha256": "9d497a1b09a361656524e80601508e00dc504f1287fae8d3d20f1b02dc184713"
++    },
++    "backend/tests/test_workspace_oauth_tool.py": {
++      "seconds": 0.025,
++      "cases": 4,
++      "test_source_sha256": "bb4ab13076e0a023530c2372b887134e67993a5d70609b226a983eafda312f82"
++    },
++    "hermes/policy/tests/test_van_policy_hook.py": {
++      "seconds": 0.028000000000000018,
++      "cases": 46,
++      "test_source_sha256": "ada2d332706a57aa27010d4ae5bfb37adc71d76d283418fe7776b290dc8d4c14"
++    },
++    "tests/contracts/test_android_cleartext_policy.py": {
++      "seconds": 0.003,
++      "cases": 3,
++      "test_source_sha256": "7ef1c2d3f258502a5d1879e7edbdadac19a1e5f8f622986754c15609252119d3"
++    },
++    "tests/contracts/test_android_compiles_at_all.py": {
++      "seconds": 1.9349999999999996,
++      "cases": 5,
++      "test_source_sha256": "4f1fdcdd0dda025e12a356f31dc36ddc0bfd6fd3a667d771f5a65c76cbd689fd"
++    },
++    "tests/contracts/test_android_dashboard_navigation.py": {
++      "seconds": 0.013000000000000001,
++      "cases": 10,
++      "test_source_sha256": "fb60e6782c519e7a38d751838c3ab0908217265c0cdbe1a233bfc16f9361eb1b"
++    },
++    "tests/contracts/test_android_design_lint.py": {
++      "seconds": 1.746,
++      "cases": 9,
++      "test_source_sha256": "402f83e792193341840e6ea4976f9fa8a04e40a4a6a2df31a6129ff31b2e9151"
++    },
++    "tests/contracts/test_android_gateway_routes_match.py": {
++      "seconds": 0.006,
++      "cases": 6,
++      "test_source_sha256": "beffa28098ff451ce26a8bafe61de2bf9ee872202ee1f2ed24233fd3e37c742c"
++    },
++    "tests/contracts/test_android_instrumentation_abi.py": {
++      "seconds": 0.068,
++      "cases": 11,
++      "test_source_sha256": "ace18dcee0f956363f6dc8db77671ad4fc4735094942fa98825181806565aa2d"
++    },
++    "tests/contracts/test_android_overlay_split.py": {
++      "seconds": 0.004,
++      "cases": 4,
++      "test_source_sha256": "8a06971ff30591feb5ba9e89cd3492638cc7692f9561197c16395ddaab537662"
++    },
++    "tests/contracts/test_android_permissions_match_the_apis_used.py": {
++      "seconds": 0.33699999999999997,
++      "cases": 5,
++      "test_source_sha256": "d7d32c586b0d0f1866ca7a7413691a107ab95994cde7541856bc9e2d3f471235"
++    },
++    "tests/contracts/test_android_production_target.py": {
++      "seconds": 4.871999999999998,
++      "cases": 52,
++      "test_source_sha256": "d8ceee726093e4ff63eeedeacbbbf07fad2f19bee0834d69d70b809a3c5ae176"
++    },
++    "tests/contracts/test_android_regex_compiles_under_icu.py": {
++      "seconds": 0.159,
++      "cases": 2,
++      "test_source_sha256": "27ad50c3555ab04700b4a57171bc2a99b73f7bc887998aaea75bd8321b456d52"
++    },
++    "tests/contracts/test_android_storage_policy.py": {
++      "seconds": 0.14,
++      "cases": 3,
++      "test_source_sha256": "84e97da1d65c31c7210b2229f05dc144f423fd98c14c31c7ac2afa225a54530b"
++    },
++    "tests/contracts/test_artemis_console_boundary.py": {
++      "seconds": 0.42100000000000004,
++      "cases": 2,
++      "test_source_sha256": "0f87a5c72bda234654a455afe1dbe369277aafcd847156d26af58fd90fc4cf3c"
++    },
++    "tests/contracts/test_asr_acquisition_provenance.py": {
++      "seconds": 0.001,
++      "cases": 1,
++      "test_source_sha256": "660b9cfe8a34f9a8190930c3edbbdab8bbcd3b5a5c5b4e7b3340cfbd0a805227"
++    },
++    "tests/contracts/test_aura_runtime_contract.py": {
++      "seconds": 0.013000000000000001,
++      "cases": 7,
++      "test_source_sha256": "08f13981d163f22aa4996682ce7d44ed2f4f351b230da472989449b65ad54cd9"
++    },
++    "tests/contracts/test_authority_map.py": {
++      "seconds": 2.989,
++      "cases": 14,
++      "test_source_sha256": "803e9c23c387a0efeb6a064b42f69048c8e3379dcad8c4ab395c55b3264b61c7"
++    },
++    "tests/contracts/test_automation_browser_governance.py": {
++      "seconds": 1.4019999999999997,
++      "cases": 88,
++      "test_source_sha256": "566332ea111d0ef8ba1769666b0a16f3c6c7a408ee0337524ec46ed4772fcbdb"
++    },
++    "tests/contracts/test_backend_dependencies_are_pinned.py": {
++      "seconds": 0.005,
++      "cases": 5,
++      "test_source_sha256": "75852c7d170fb1390e9ac1cf3d97b995b96a5837f7d889b11aeb18fe98d341d0"
++    },
++    "tests/contracts/test_browser_input_protocol_matches.py": {
++      "seconds": 0.013000000000000005,
++      "cases": 14,
++      "test_source_sha256": "f3db2a12abf2344f6bf3cefcba2faddc3668202544ce7ac2c2fbcbbec51a9c06"
++    },
++    "tests/contracts/test_browser_profile_deployment.py": {
++      "seconds": 0.22900000000000004,
++      "cases": 29,
++      "test_source_sha256": "61dc932783e5287717c697555ca709a3a363a9090b489a4276a22106624a6033"
++    },
++    "tests/contracts/test_browser_profile_egress.py": {
++      "seconds": 0.07000000000000003,
++      "cases": 34,
++      "test_source_sha256": "230c732dd8c2fab7c400e94c282dbb67ee9f7cb55cbb733f900ccabd8bc5aaad"
++    },
++    "tests/contracts/test_browser_window_and_entry_contract.py": {
++      "seconds": 0.009000000000000001,
++      "cases": 9,
++      "test_source_sha256": "fff0067523105f0ad598d1b85e954c2504f9400834d3667a4e1eba372bd554d2"
++    },
++    "tests/contracts/test_candidate_b_mechanics_prototype.py": {
++      "seconds": 0.018000000000000002,
++      "cases": 3,
++      "test_source_sha256": "3ec13a5c6e48f0aa8bc3f1ff08cffb5f06f3e126ea89c31e5f97ad3a80539652"
++    },
++    "tests/contracts/test_canonical_tree_sentinels.py": {
++      "seconds": 0.002,
++      "cases": 2,
++      "test_source_sha256": "989977718ab94f671dca13a1bd9224117716d9e2c6d014348c3bebf5635390a8"
++    },
++    "tests/contracts/test_capability_namespaces_are_distinct.py": {
++      "seconds": 0.639,
++      "cases": 5,
++      "test_source_sha256": "5175db1a87109eb66640ac6d0ae53972f7604983c9f5e10389a4f76f35f1bc61"
++    },
++    "tests/contracts/test_character_forge_asset_pack.py": {
++      "seconds": 0.23400000000000004,
++      "cases": 10,
++      "test_source_sha256": "e2b7393c4b2a5d5e2c4e28f532aeb9462213b39ead2bfec531b71cc014d72e9a"
++    },
++    "tests/contracts/test_character_forge_bootstrap.py": {
++      "seconds": 0.14800000000000002,
++      "cases": 20,
++      "test_source_sha256": "91f067ee3d4c8a34f984649aa95ff705de0195bba861817ed40db71d09c96181"
++    },
++    "tests/contracts/test_character_forge_ci_binding.py": {
++      "seconds": 0.221,
++      "cases": 11,
++      "test_source_sha256": "81de62f798579d0c33377b9d0b1ea2f8fdb224a9945066bf7e1244c43e8bda4b"
++    },
++    "tests/contracts/test_character_forge_manifest.py": {
++      "seconds": 0.038,
++      "cases": 6,
++      "test_source_sha256": "e0356b1b4edcfd11cfb73c730ac5a4c38b47418ac2665307682e4762100fbe15"
++    },
++    "tests/contracts/test_character_forge_mutations.py": {
++      "seconds": 0.22700000000000004,
++      "cases": 23,
++      "test_source_sha256": "199aa54c15f635392c5d66b3f0b10a9c702e0ba6111e10512beb48be0f47422e"
++    },
++    "tests/contracts/test_character_forge_production_v3.py": {
++      "seconds": 0.066,
++      "cases": 11,
++      "test_source_sha256": "51e874267c3bb4bef344c29030c9b1e6ae68500d7b600088d8d99e785f8c0e4c"
++    },
++    "tests/contracts/test_character_forge_proportions.py": {
++      "seconds": 0.039,
++      "cases": 8,
++      "test_source_sha256": "6b311978b36eda54ef1b845fdee7fb0e6e62a9021cf093fe79bdb2352ad7ede9"
++    },
++    "tests/contracts/test_character_forge_reference_pack.py": {
++      "seconds": 0.643,
++      "cases": 12,
++      "test_source_sha256": "a51d58ae45da8625d7d517d948c1f125310d54e6151120f645bd5134c93245f7"
++    },
++    "tests/contracts/test_character_forge_release.py": {
++      "seconds": 0.002,
++      "cases": 2,
++      "test_source_sha256": "9e11d98a2cac1e23fc9fcb81da18de7a4f5ef351d729ed9b4f0a14efdac51308"
++    },
++    "tests/contracts/test_character_forge_status.py": {
++      "seconds": 0.07200000000000001,
++      "cases": 12,
++      "test_source_sha256": "e45948be763d06a07215aae5ad38d65928cd3c71b33aaee708548125e88c053e"
++    },
++    "tests/contracts/test_character_forge_svg.py": {
++      "seconds": 0.051,
++      "cases": 4,
++      "test_source_sha256": "d086ef0d022477e7227ec4e77fd7feb98a3fdc4091e55207f426f340b459e4db"
++    },
++    "tests/contracts/test_ci_dds_contract_pin.py": {
++      "seconds": 0.5760000000000002,
++      "cases": 7,
++      "test_source_sha256": "f7bf8a075362adedb187e1541cee8c5126bff598145010376aa293834530715a"
++    },
++    "tests/contracts/test_ci_mutation_status.py": {
++      "seconds": 0.55,
++      "cases": 5,
++      "test_source_sha256": "1eb825a80b8dd1f7e719ecb612f26d0b4e57b9b921d335ad77e1eaf23da51b52"
++    },
++    "tests/contracts/test_ci_workflow_is_what_it_claims.py": {
++      "seconds": 0.003,
++      "cases": 4,
++      "test_source_sha256": "5cb1d16befa774f1ea42062a91aefd5014e41aa8cdcd185ba8257dfb60a8e2a1"
++    },
++    "tests/contracts/test_closure_record_is_current.py": {
++      "seconds": 0.013000000000000005,
++      "cases": 9,
++      "test_source_sha256": "f51da124c211931d7367062cc3bec767833f8951789c199c461e7fef14260d16"
++    },
++    "tests/contracts/test_commander_principal_provisioning.py": {
++      "seconds": 0.001,
++      "cases": 2,
++      "test_source_sha256": "f975e9af46791e140be6efe4274c290b40579c224f12816d79cd179c5246363a"
++    },
++    "tests/contracts/test_connectivity_key_tool.py": {
++      "seconds": 0.047,
++      "cases": 6,
++      "test_source_sha256": "4320ff0bf85dc0f21c8a1e1e4ddc567044a035d27327dd3d39d8d230ee08f04b"
++    },
++    "tests/contracts/test_context_ingest_queue_routing.py": {
++      "seconds": 0.003,
++      "cases": 3,
++      "test_source_sha256": "15e0168a7addf8aab3a7be1cab8c233cd2a2e14b081758aa3f7384c66adbe6b8"
++    },
++    "tests/contracts/test_cross_language_vectors.py": {
++      "seconds": 0.009000000000000001,
++      "cases": 11,
++      "test_source_sha256": "8cc0ba3a80d1e33dca5cbe472ef74133af87931a452c912355b23436bdb739aa"
++    },
++    "tests/contracts/test_debug_signing_identity.py": {
++      "seconds": 2.984,
++      "cases": 12,
++      "test_source_sha256": "5d0f3f5a6dfccf5acdce4607e0fee500c3ea5f2a9779eabdf59c73e22e3d84b3"
++    },
++    "tests/contracts/test_device_checklist_matches_probe.py": {
++      "seconds": 0.006,
++      "cases": 3,
++      "test_source_sha256": "26f0e0d337dc9319b4c0bbe449a1e190f22d2d7004a56bc80fa8103aedb0301e"
++    },
++    "tests/contracts/test_device_telemetry_contract.py": {
++      "seconds": 0.005,
++      "cases": 6,
++      "test_source_sha256": "c0908e22acd7b04c025d3fd7cdb8cdb843d8ee9d41826e59aa9f91a05537618a"
++    },
++    "tests/contracts/test_dial_dev_boundary.py": {
++      "seconds": 0.908,
++      "cases": 13,
++      "test_source_sha256": "89d2ab3017351480139af1323d9bf552a974e3396b2b994b4768f119eb1dcb44"
++    },
++    "tests/contracts/test_encrypted_queue_writes_are_off_the_main_thread.py": {
++      "seconds": 0.07100000000000001,
++      "cases": 4,
++      "test_source_sha256": "4eabd554dea36b5216564d005ce97fc0a45b45e7018c83d05c01e9e75140657d"
++    },
++    "tests/contracts/test_fable_anti_gap_check.py": {
++      "seconds": 0.184,
++      "cases": 2,
++      "test_source_sha256": "1cb27d0dac9f573e97970bf620be91d3edd023d1c538097bd1e53f5cf0e84c8b"
++    },
++    "tests/contracts/test_foreground_services_are_started.py": {
++      "seconds": 0.14100000000000001,
++      "cases": 5,
++      "test_source_sha256": "9774f7453f9eaf695bede5d77c02e2c3b40ada3fc88f6c62298d12d7c0ce452b"
++    },
++    "tests/contracts/test_gateway_runtime_staging.py": {
++      "seconds": 0.003,
++      "cases": 2,
++      "test_source_sha256": "c4eba0cb42f41e54a9a2d0d5290e9f8fc2cff78a560fc0d4e2ede89e4065f55f"
++    },
++    "tests/contracts/test_jev_effect_owner_reference.py": {
++      "seconds": 3.665,
++      "cases": 29,
++      "test_source_sha256": "352cb510e9d50f82e2cf6abfe449826ce8366e93b21b7b87d678cc14d544e14c"
++    },
++    "tests/contracts/test_kotlin_reachability.py": {
++      "seconds": 68.63500000000002,
++      "cases": 13,
++      "test_source_sha256": "6d16af7f627146ff5b139f8b3378e6977293a01af1e5bd1c2f35b0ac9ee9c979"
++    },
++    "tests/contracts/test_kotlin_reachability_stripper.py": {
++      "seconds": 0.007,
++      "cases": 9,
++      "test_source_sha256": "86fe47aac933611700ef4259ef839051141505511dabbb9795fcbea6970e9d5d"
++    },
++    "tests/contracts/test_ledger_reconcile.py": {
++      "seconds": 3.848,
++      "cases": 14,
++      "test_source_sha256": "93a49f2b9a81bdfff5209de64dfbde6f8e6c661fa826fed423b4803b302e6a18"
++    },
++    "tests/contracts/test_live_acceptance_runner.py": {
++      "seconds": 0.035,
++      "cases": 22,
++      "test_source_sha256": "97e29672f9046744091a94b16a3738e92e0142df98bc1db9d67b776ab086e59f"
++    },
++    "tests/contracts/test_maturity_gate.py": {
++      "seconds": 2.071999999999999,
++      "cases": 22,
++      "test_source_sha256": "d5d8a165fc9da7b06af72390dede6f19bd6b5592b2bc55e66e32b5a734f49d54"
++    },
++    "tests/contracts/test_muse_security_source.py": {
++      "seconds": 0.04600000000000001,
++      "cases": 21,
++      "test_source_sha256": "9f3883b04329f21cf794e40c7b20d1871369fcd0e9fbb0bcd21dff54a3d27c86"
++    },
++    "tests/contracts/test_mutation_harness_recovers.py": {
++      "seconds": 6.58,
++      "cases": 5,
++      "test_source_sha256": "bcfb81caf965f2869931390b12639ca5e10db5e092bba1bc3689aabb0980d7bf"
++    },
++    "tests/contracts/test_native_artemis_plan.py": {
++      "seconds": 4.854999999999997,
++      "cases": 39,
++      "test_source_sha256": "23e3b2f3b61d06944d24f4431f9227fc9f73b39609b7e360f9b9627c67115be3"
++    },
++    "tests/contracts/test_offline_intent_windows_agree.py": {
++      "seconds": 0.003,
++      "cases": 3,
++      "test_source_sha256": "2b2e263164e36186092111734c222b578e75d05163788a9565859272adffc29d"
++    },
++    "tests/contracts/test_openmuse_van_convergence.py": {
++      "seconds": 0.021,
++      "cases": 3,
++      "test_source_sha256": "815907ad10e8c71a456b37ed1f79f96ffc2048fc317909af8a167cb9de5443f6"
++    },
++    "tests/contracts/test_owner_core_deployment_profile.py": {
++      "seconds": 4.689000000000002,
++      "cases": 74,
++      "test_source_sha256": "b02e630c1beac662c7bfd09fef595ad979b6e4600e12769b2905911ea5925f89"
++    },
++    "tests/contracts/test_owner_core_network_policy.py": {
++      "seconds": 0.25500000000000006,
++      "cases": 41,
++      "test_source_sha256": "a93af88a64d5d3951033442fcefa6f20a46eafa52c9ea0a5476cd3704d67e70c"
++    },
++    "tests/contracts/test_owner_core_only_network_policy.py": {
++      "seconds": 0.066,
++      "cases": 33,
++      "test_source_sha256": "8712d25f990ae568a695cc251259df42396feedddc149365c24ab094f62d1bb0"
++    },
++    "tests/contracts/test_owner_core_rollback.py": {
++      "seconds": 0.58,
++      "cases": 7,
++      "test_source_sha256": "1d66d052c0c9065600838bb95ae9b0d2f3c30c23274633db2bce8daddb2be539"
++    },
++    "tests/contracts/test_owner_device_provisioning.py": {
++      "seconds": 0.402,
++      "cases": 10,
++      "test_source_sha256": "747c5bad46b2b094750a20a43eda212dfb754b8d6570156ab3e974a2a3df39d5"
++    },
++    "tests/contracts/test_owner_endpoint_registry.py": {
++      "seconds": 4.627,
++      "cases": 5,
++      "test_source_sha256": "90d7d18869d6d30b936c6ec54610cbdda673d79cfc314b2ef2e676d49b9f4c7b"
++    },
++    "tests/contracts/test_owner_redesign_registry.py": {
++      "seconds": 0.546,
++      "cases": 14,
++      "test_source_sha256": "f62be41f47f127ffc83275aca417ad8d00c31a34d27d599fa46006e5e2ab74c3"
++    },
++    "tests/contracts/test_owner_release_packet.py": {
++      "seconds": 0.7350000000000004,
++      "cases": 45,
++      "test_source_sha256": "9b5116f46c46e5a5445659cc44f34f6589ed6afa92f81578b9d4caff0e119cac"
++    },
++    "tests/contracts/test_owner_runtime_mcp_contract.py": {
++      "seconds": 0.11600000000000002,
++      "cases": 16,
++      "test_source_sha256": "423320a5266c377def21754ab198c15295772f054d4fa8a5e49a4f1183b198c6"
++    },
++    "tests/contracts/test_owner_surfaces_are_reachable.py": {
++      "seconds": 0.007,
++      "cases": 10,
++      "test_source_sha256": "f50b8faf5aa2a452eff99e3ec9b3cc1893646d5b71e628ca5acd7d17919edd39"
++    },
++    "tests/contracts/test_pre_phone_host_acceptance.py": {
++      "seconds": 0.15000000000000002,
++      "cases": 13,
++      "test_source_sha256": "bb4d570e49421557bc9d0ee9d88c73b08ac5ddbfa9440faaac37dbf486a8733f"
++    },
++    "tests/contracts/test_production_acceptance.py": {
++      "seconds": 0.6890000000000001,
++      "cases": 15,
++      "test_source_sha256": "f51be8b468e5268789a944a14a82a72d1974df4c61845d4949b7baadf6ab2db1"
++    },
++    "tests/contracts/test_project_canonical_state.py": {
++      "seconds": 0.003,
++      "cases": 4,
++      "test_source_sha256": "e597f0f16c0544c52c7cd9350480364b2dd5602770faa6175dd75e004633ae1b"
++    },
++    "tests/contracts/test_project_mount_isolation.py": {
++      "seconds": 0.003,
++      "cases": 3,
++      "test_source_sha256": "f2f7644467130d95bbb308f42593254bb6e484471504ee5f2298cc4618fcea17"
++    },
++    "tests/contracts/test_project_truth_ledger.py": {
++      "seconds": 693.1379999999999,
++      "cases": 50,
++      "test_source_sha256": "ead304b7921143f871b1c4ed41c68212ac3cb6caba2fae4910bf5d111c165f5c"
++    },
++    "tests/contracts/test_provisioning_installer_acceptance.py": {
++      "seconds": 1.0259999999999985,
++      "cases": 21,
++      "test_source_sha256": "4fc9c4bcb02c18da63a5d8589c39120f75eeec75d74279d3d8a6ab3ef3b3599b"
++    },
++    "tests/contracts/test_reconstructed_gap_register.py": {
++      "seconds": 0.006,
++      "cases": 6,
++      "test_source_sha256": "b1d072585c206ed0f4e6497e204db90a6c10762c079769420e070773396e7e8e"
++    },
++    "tests/contracts/test_red_team_register.py": {
++      "seconds": 2.5780000000000003,
++      "cases": 16,
++      "test_source_sha256": "dcc00c8639222e04528bf89ab8d80bc5e5947abe2f4642177dadad28f017d63d"
++    },
++    "tests/contracts/test_release_build_is_bound.py": {
++      "seconds": 0.010000000000000002,
++      "cases": 15,
++      "test_source_sha256": "7969af607788727bba0c724cbaada2e8c5a246f3e27d27b0fcb688fbfee7d84c"
++    },
++    "tests/contracts/test_remote_browser_dependencies.py": {
++      "seconds": 0.007,
++      "cases": 7,
++      "test_source_sha256": "07a59ebca763a000bc30beca8aaa18eb47caeb2ac528aa3ebc00867f3246f0c0"
++    },
++    "tests/contracts/test_remote_browser_matrix.py": {
++      "seconds": 0.2230000000000001,
++      "cases": 34,
++      "test_source_sha256": "9b191b8d20d378ca78b1fb504ce7c7f5fc1d450d46d2015d970751d6f8bebb4d"
++    },
++    "tests/contracts/test_rive_contract.py": {
++      "seconds": 0.001,
++      "cases": 7,
++      "test_source_sha256": "fb44f2a65c1a82f43d71cbdbbc7af4e575fdefcad43310d7eb5b7d6384ae2ad8"
++    },
++    "tests/contracts/test_runtime_installer_paths.py": {
++      "seconds": 14.751,
++      "cases": 7,
++      "test_source_sha256": "5fae13738bc13c851e8528ce718f3baf7612f5c113dd31ac590765fad2cb1526"
++    },
++    "tests/contracts/test_session_epoch_contract.py": {
++      "seconds": 0.155,
++      "cases": 6,
++      "test_source_sha256": "ce24f000802027e7d45d388ff4763b7d7c7a5e1c636286cd2fdecebf04cd894c"
++    },
++    "tests/contracts/test_session_is_driven.py": {
++      "seconds": 0.20900000000000002,
++      "cases": 4,
++      "test_source_sha256": "f10f47d9f6bd57c0095c1d7763528b578f9ff5339df9b2097153570a7a95f64c"
++    },
++    "tests/contracts/test_session_socket_frames.py": {
++      "seconds": 0.004,
++      "cases": 5,
++      "test_source_sha256": "85e7a2233d467f589a210c09af59ff016deaf21d2f7ba9691293361fa76bdc9a"
++    },
++    "tests/contracts/test_stagehand_worker_runtime.py": {
++      "seconds": 0.545,
++      "cases": 4,
++      "test_source_sha256": "69f96d26767e2ea96e426e8a68622105235aff4384f1b657cc1296928c15fcc3"
++    },
++    "tests/contracts/test_stored_command_is_deliverable.py": {
++      "seconds": 0.003,
++      "cases": 3,
++      "test_source_sha256": "bf7174339a0316557d73008684b515cd6c344289509e54a3cf187f8f1d207f3d"
++    },
++    "tests/contracts/test_stream_host_readiness_is_earned.py": {
++      "seconds": 0.394,
++      "cases": 5,
++      "test_source_sha256": "94ba61e87df448e08eec20e2d6ccafeefbf39b1735fa4ca8fccb6f04f0c47712"
++    },
++    "tests/contracts/test_task_scope_shared_url_rule.py": {
++      "seconds": 0.38500000000000023,
++      "cases": 28,
++      "test_source_sha256": "a314f24442f6f6fb4e25590ef47fecfce8c024670965e87f9dcf2583ac0ec49b"
++    },
++    "tests/contracts/test_the_apk_leaves_ci.py": {
++      "seconds": 0.02,
++      "cases": 6,
++      "test_source_sha256": "5fa328743a0a07ebebecba92ed1d67d95c1470a8ea52f6fa9446af54cdeb4622"
++    },
++    "tests/contracts/test_the_runtime_envelope_governs.py": {
++      "seconds": 0.024,
++      "cases": 9,
++      "test_source_sha256": "76c1cf462d8c9ae5742b4229754ebd5b3be7d5f4561a2b03638f03aa1225adae"
++    },
++    "tests/contracts/test_van_browser_core_egress_proxy.py": {
++      "seconds": 1.2420000000000002,
++      "cases": 83,
++      "test_source_sha256": "7888cccbfbf79cc864e59963745e167b11f8feb3a2784587ad37b9b9504831cf"
++    },
++    "tests/contracts/test_van_browser_core_zone.py": {
++      "seconds": 1.265,
++      "cases": 25,
++      "test_source_sha256": "2488f41dc442fd6fef9745c645b6becefb1b5095f1001013a8d6b83e30ec7448"
++    },
++    "tests/contracts/test_van_direct_mtls_deploy.py": {
++      "seconds": 2.9139999999999997,
++      "cases": 6,
++      "test_source_sha256": "07495b51c4e8629d842566f94d679db8e8963e60457034672bf076b48a6f9570"
++    },
++    "tests/contracts/test_van_mtls_renewal.py": {
++      "seconds": 1.818,
++      "cases": 4,
++      "test_source_sha256": "ffa14a8dadc5bbe6cfe0f8ebc2b2071854bc2b596451b5e8e81abdaa2fccc40c"
++    },
++    "tests/contracts/test_van_private_core_topology.py": {
++      "seconds": 14.838999999999997,
++      "cases": 57,
++      "test_source_sha256": "b2e9c4a6160182db77b92f8bdaaf103549cb7385cbdb1f23abfa08185dd1f8fc"
++    },
++    "tests/hermes/test_full_trading_commander.py": {
++      "seconds": 0.026,
++      "cases": 10,
++      "test_source_sha256": "7ea99f6ad5311b037e02f9d44bc092852693091aef3aa0fbc00a6d8bdf496cf7"
++    },
++    "tests/hermes/test_profile_layout.py": {
++      "seconds": 1.3509999999999993,
++      "cases": 19,
++      "test_source_sha256": "3806690942d70099e675726dead247518c7aa26ffed309aa5130654239acf012"
++    },
++    "tests/hermes/test_spmrf_trading_memory.py": {
++      "seconds": 0.017,
++      "cases": 6,
++      "test_source_sha256": "b74a19371dc8eb678d3ab8af57d6eacfadfcd6cc529852e4277cf9a674f2f3f1"
++    }
++  }
++}
+diff --git a/tests/rebuild/test_public_source_shards.py b/tests/rebuild/test_public_source_shards.py
+new file mode 100644
+index 00000000..dffdacc8
+--- /dev/null
++++ b/tests/rebuild/test_public_source_shards.py
+@@ -0,0 +1,308 @@
++"""Synthetic verification-instrument evidence; never application/native execution."""
++from __future__ import annotations
++import copy
++import hashlib
++import json
++from pathlib import Path
++import xml.etree.ElementTree as ET
++
++import pytest
++from tools.rebuild import backend_public_source as gate
++from tools.rebuild import public_source_shards as proof
++
++HEAD = "a" * 40
++CONTEXT = {"id": "synthetic-instrument-run", "attempt": "1"}
++
++
++def write_json(path, value):
++    path.write_text(json.dumps(value))
++
++
++def seal(folder):
++    receipt = json.loads((folder / "run.json").read_text())
++    names = ["terminal.json", "phases.jsonl", "storage-audit.json"]
++    if receipt["mode"] == "execution":
++        names.append("report.xml")
++    receipt["artifact_sha256"] = {name: hashlib.sha256((folder / name).read_bytes()).hexdigest()
++                                   for name in names if (folder / name).exists()}
++    write_json(folder / "run.json", receipt)
++
++
++def frame(folder, selection, runtime, nodeids, costs, index, count, *, control=False):
++    folder.mkdir(parents=True)
++    bins = proof.assignment(nodeids, [r for r in selection["selected"] if gate.runtime(r["path"]) == runtime], costs, count)
++    environment = {"python": "3.12.12", "implementation": "CPython", "system": "Linux", "machine": "x86_64",
++        "image_os": "ubuntu24", "image_version": "synthetic-instrument-image", "packages": [["synthetic", "0"]],
++        "node": "v24.19.0", "chromium_sha256": "c"*64,
++        "postgres_version": 170011 if runtime == "gateway" else None,
++        "isolated_pg_fixture": "1" if runtime == "gateway" else None}
++    state = {"schema": proof.SCHEMA, "mode": "collection" if control else "execution", "runtime": runtime,
++        "expected_commit": HEAD, "execution_id": "synthetic-"+folder.name, "workflow_run": CONTEXT, "source_before": {"commit": HEAD, "tree": "b"*40},
++        "source_after": {"commit": HEAD, "tree": "b"*40}, "environment_before": environment,
++        "environment_after": copy.deepcopy(environment), "selection": selection,
++        "selected": [r for r in selection["selected"] if gate.runtime(r["path"]) == runtime],
++        "collection_errors": [], "internal_errors": [], "pytest_exit": 0,
++        "instrument_sha256": hashlib.sha256(Path(proof.__file__).read_bytes()).hexdigest(), "costs": costs,
++        "full_collection": sorted(nodeids), "assignment": bins, "assigned": bins[index],
++        "shard_index": index, "shard_count": count, "full_collection_sha256": proof.fingerprint(sorted(nodeids)),
++        "assignment_sha256": proof.fingerprint(bins)}
++    write_json(folder / "terminal.json", state)
++    write_json(folder / "storage-audit.json", {"schema": "van.source-storage-audit/1", "forbidden_events": [],
++        "source_sha256": hashlib.sha256(Path(proof.__file__).with_name("source_storage_audit.py").read_bytes()).hexdigest()})
++    events = []
++    suite = ET.Element("testsuite")
++    if not control:
++        for node in bins[index]:
++            for when in ("setup", "call", "teardown"):
++                events.append({"nodeid": node, "when": when, "outcome": "passed", "skip_reason": None})
++            case = ET.SubElement(suite, "testcase", classname=node.split("::")[0], name="synthetic_instrument_case")
++            ET.SubElement(ET.SubElement(case, "properties"), "property", name="van_source_nodeid", value=node)
++        (folder / "report.xml").write_bytes(ET.tostring(suite))
++    (folder / "phases.jsonl").write_text("".join(json.dumps(e)+"\n" for e in events))
++    write_json(folder / "run.json", {"expected_commit": HEAD, "workflow_run": CONTEXT,
++        "terminal": True, "exit": 0, "mode": state["mode"], "execution_id": state["execution_id"],
++        "source_before": state["source_before"], "source_after": state["source_after"],
++        "environment_before": copy.deepcopy(environment), "environment_after": copy.deepcopy(environment)})
++    seal(folder)
++
++
++@pytest.fixture
++def instrument(tmp_path, monkeypatch):
++    root = tmp_path / "synthetic-source"
++    paths = ["backend/tests/test_a.py", "backend/tests/test_b.py", "backend/tests/test_c.py",
++        "backend/tests/test_jev_no_generic_executor.py", "services/source/test_media.py",
++        *gate.PRIVATE, gate.FIREWALL]
++    for rel in paths:
++        p = root / rel
++        p.parent.mkdir(parents=True, exist_ok=True)
++        p.write_text("# synthetic verification-instrument source, not application acceptance\n")
++    costs = {"schema": "synthetic-assignment-costs", "costs": {}}
++    cost = root / "tools/rebuild/backend_public_source_costs.json"
++    cost.parent.mkdir(parents=True)
++    write_json(cost, costs)
++    selection = gate.plan(root)
++    gateway = [r["path"] + "::" + ("test_no_fabric_or_generic_operation_survives_the_b1_validator[fixture]"
++        if r["path"].endswith("test_jev_no_generic_executor.py") else "test_case")
++        for r in selection["selected"] if gate.runtime(r["path"]) == "gateway"]
++    media = ["services/source/test_media.py::test_case"]
++    out = tmp_path / "evidence"
++    out.mkdir()
++    write_json(out / "selection.json", selection)
++    monkeypatch.setenv("GITHUB_RUN_ID", CONTEXT["id"])
++    monkeypatch.setenv("GITHUB_RUN_ATTEMPT", CONTEXT["attempt"])
++    monkeypatch.setattr(proof, "source_identity", lambda root, expected: {"commit": HEAD, "tree": "b"*40})
++    frame(out / "gateway-control", selection, "gateway", gateway, costs, 0, 4, control=True)
++    for i in range(4):
++        frame(out / "shards" / f"van-backend-public-source-gateway-{i}", selection, "gateway", gateway, costs, i, 4)
++    frame(out / "media-control", selection, "media", media, costs, 0, 1, control=True)
++    frame(out / "media", selection, "media", media, costs, 0, 1)
++    return root, out
++
++
++def judge(instrument, result="success"):
++    root, out = instrument
++    return proof.verify_shards(out, HEAD, result, root=root)
++
++
++def worker(out, index=0):
++    return out / "shards" / f"van-backend-public-source-gateway-{index}"
++
++
++def test_complete_synthetic_protocol_preserves_scope_and_issues_no_certificate(instrument):
++    result = judge(instrument)
++    assert result["tests"] == result["passed"] == 5
++    assert len(result["gateway_shards"]) == 4 and result["certificates_issued"] == []
++    assert len(result["separate_modules"]) == 3
++
++
++@pytest.mark.parametrize("damage", ["missing-shard", "missing-artifact", "wrong-head", "wrong-tree",
++    "wrong-run", "stale-execution", "parent-source-drift", "parent-environment-drift", "different-environment", "missing-environment", "selection-drop", "collection-omission",
++    "collection-duplicate", "collection-foreign", "assignment-disagreement", "foreign-phase",
++    "duplicate-phase", "setup-failure", "call-failure", "teardown-error", "aborted-call",
++    "collection-only", "status-only", "nonterminal", "nonzero-exit", "collection-error",
++    "unexpected-skip", "duplicate-junit", "foreign-junit", "junit-error", "source-storage",
++    "artifact-hash", "missing-media", "control-executed", "null-audit", "wrong-auditor", "null-collection-errors", "boolean-exit"])
++def test_semantically_bad_receipts_fail_even_with_resealed_artifact_hashes(instrument, damage):
++    _, out = instrument
++    folder = worker(out)
++    state = json.loads((folder / "terminal.json").read_text())
++    events = [json.loads(x) for x in (folder / "phases.jsonl").read_text().splitlines()]
++    receipt = json.loads((folder / "run.json").read_text())
++    if damage == "missing-shard":
++        (folder / "terminal.json").unlink()
++    elif damage == "missing-artifact":
++        (folder / "phases.jsonl").unlink()
++    elif damage == "wrong-head": state["expected_commit"] = "d"*40
++    elif damage == "wrong-tree": state["source_after"]["tree"] = "d"*40
++    elif damage == "wrong-run": state["workflow_run"] = {"id": "old-run", "attempt": "1"}
++    elif damage == "stale-execution": receipt["execution_id"] = "old-execution"
++    elif damage == "parent-source-drift": receipt["source_after"]["tree"] = "wrong"
++    elif damage == "parent-environment-drift": receipt["environment_after"]["packages"] = [["changed", "1"]]
++    elif damage == "different-environment":
++        state["environment_before"]["packages"] = state["environment_after"]["packages"] = [["different", "1"]]
++        receipt["environment_before"]["packages"] = receipt["environment_after"]["packages"] = [["different", "1"]]
++    elif damage == "missing-environment":
++        del state["environment_before"]["packages"]
++        del state["environment_after"]["packages"]
++    elif damage == "selection-drop": state["selection"]["selected"].pop()
++    elif damage == "collection-omission": state["full_collection"].pop()
++    elif damage == "collection-duplicate": state["full_collection"].append(state["full_collection"][0])
++    elif damage == "collection-foreign": state["full_collection"].append("outside/test_foreign.py::test_case")
++    elif damage == "assignment-disagreement": state["assignment"][0], state["assignment"][1] = state["assignment"][1], state["assignment"][0]
++    elif damage == "foreign-phase": events[0]["nodeid"] = "outside/test_foreign.py::test_case"
++    elif damage == "duplicate-phase": events.append(copy.deepcopy(events[0]))
++    elif damage in {"setup-failure", "call-failure", "teardown-error"}:
++        when = {"setup-failure": "setup", "call-failure": "call", "teardown-error": "teardown"}[damage]
++        next(x for x in events if x["when"] == when)["outcome"] = "failed"
++    elif damage == "aborted-call": events = [x for x in events if x["when"] != "call"]
++    elif damage == "collection-only": state["mode"] = "collection"
++    elif damage == "status-only": events = []
++    elif damage == "nonterminal": receipt["terminal"] = False
++    elif damage == "nonzero-exit": receipt["exit"] = state["pytest_exit"] = 1
++    elif damage == "collection-error": state["collection_errors"].append("failed import")
++    elif damage == "unexpected-skip":
++        event = next(x for x in events if x["when"] == "call")
++        event.update(outcome="skipped", skip_reason="unapproved source skip")
++    elif damage in {"duplicate-junit", "foreign-junit", "junit-error"}:
++        xml = ET.parse(folder / "report.xml"); case = xml.getroot()[0]
++        if damage == "duplicate-junit": xml.getroot().append(copy.deepcopy(case))
++        elif damage == "foreign-junit": case.find("./properties/property").set("value", "outside/test_foreign.py::test_case")
++        else: ET.SubElement(case, "error", message="late teardown failure")
++        xml.write(folder / "report.xml")
++    elif damage == "source-storage": write_json(folder / "storage-audit.json", {"forbidden_events": ["checkout-write"]})
++    elif damage == "null-audit": write_json(folder / "storage-audit.json", {"forbidden_events": None})
++    elif damage == "wrong-auditor":
++        data=json.loads((folder/"storage-audit.json").read_text());data["source_sha256"]="wrong";write_json(folder/"storage-audit.json",data)
++    elif damage == "null-collection-errors": state["collection_errors"]=None
++    elif damage == "boolean-exit": receipt["exit"]=state["pytest_exit"]=False
++    elif damage == "missing-media": (out / "media/report.xml").unlink()
++    elif damage == "control-executed":
++        (out / "gateway-control/phases.jsonl").write_text(json.dumps(events[0])+"\n")
++        seal(out / "gateway-control")
++    if damage not in {"missing-shard"}: write_json(folder / "terminal.json", state)
++    if damage != "missing-artifact":
++        (folder / "phases.jsonl").write_text("".join(json.dumps(x)+"\n" for x in events))
++    write_json(folder / "run.json", receipt)
++    seal(folder)
++    if damage == "missing-media": seal(out / "media")
++    if damage == "artifact-hash":
++        (folder / "phases.jsonl").write_text("corrupted after receipt")
++    with pytest.raises((ValueError, FileNotFoundError)):
++        judge(instrument)
++
++
++@pytest.mark.parametrize("result", ["failure", "cancelled", "skipped"])
++def test_job_status_is_necessary_but_never_sufficient(instrument, result):
++    with pytest.raises(ValueError): judge(instrument, result)
++
++
++def test_exact_declared_skip_remains_disclosed_and_not_counted_as_pass(instrument):
++    _, out = instrument
++    node = "backend/tests/test_jev_no_generic_executor.py::test_no_fabric_or_generic_operation_survives_the_b1_validator[fixture]"
++    folder = next(worker(out, i) for i in range(4) if node in json.loads((worker(out, i)/"terminal.json").read_text())["assigned"])
++    events = [json.loads(x) for x in (folder/"phases.jsonl").read_text().splitlines()]
++    next(x for x in events if x["when"] == "call").update(outcome="skipped", skip_reason="member of the B1 closed set by definition")
++    (folder/"phases.jsonl").write_text("".join(json.dumps(x)+"\n" for x in events))
++    xml = ET.parse(folder/"report.xml")
++    ET.SubElement(xml.getroot()[0], "skipped", message="member of the B1 closed set by definition")
++    xml.write(folder/"report.xml"); seal(folder)
++    result = judge(instrument)
++    assert result["tests"] == 5 and result["passed"] == 4
++    assert result["declared_unexecuted"] == [{"id": node, "reason": "member of the B1 closed set by definition"}]
++
++
++def test_historical_weights_cannot_remove_cases_and_require_matching_source_hash():
++    selected = [{"path": f"test_{i}.py", "sha256": str(i)} for i in range(8)]
++    nodes = [r["path"]+"::test_case" for r in selected]
++    costs = {"costs": {"test_0.py": {"seconds": 1000, "test_source_sha256": "0"},
++                       "test_1.py": {"seconds": 9999, "test_source_sha256": "wrong"}}}
++    bins = proof.assignment(nodes, selected, costs, 4)
++    assert sorted(n for b in bins for n in b) == sorted(nodes)
++    assert bins[0] == ["test_0.py::test_case"]
++    assert proof.assignment(list(reversed(nodes)), selected, costs, 4) == bins
++
++
++def test_actual_pytest_plugin_records_full_collection_disjoint_execution_and_teardown_error(tmp_path):
++    """Tiny real subprocesses test the instrument, not native four-worker qualification."""
++    import os
++    import shutil
++    import subprocess
++    import sys
++    repo = tmp_path / "synthetic-instrument-project"
++    repo.mkdir()
++    source_root = Path(__file__).resolve().parents[2]
++    for rel in ("tools/rebuild/backend_public_source.py", "tools/rebuild/public_source_shards.py",
++                "tools/rebuild/source_storage_audit.py", "tools/rebuild/backend_public_source_costs.json"):
++        p = repo/rel;p.parent.mkdir(parents=True, exist_ok=True);shutil.copyfile(source_root/rel,p)
++    for rel in gate.PRIVATE | {gate.FIREWALL}:
++        p=repo/rel;p.parent.mkdir(parents=True,exist_ok=True);p.write_text("# separate synthetic fixture\n")
++    for index in range(4):
++        p=repo/f"backend/tests/test_fixture_{index}.py";p.parent.mkdir(parents=True,exist_ok=True)
++        p.write_text("import pytest\n@pytest.fixture\ndef resource():\n    yield\n"+
++                     ("    raise AssertionError('synthetic teardown counterexample')\n" if index==0 else "")+
++                     f"def test_fixture_{index}(resource):\n    assert 1 == 1\n")
++    media_source=repo/"services/source/test_media.py"
++    media_source.parent.mkdir(parents=True,exist_ok=True)
++    media_source.write_text("def test_media_fixture():\n    assert True\n")
++    subprocess.run(["git","init","-q"],cwd=repo,check=True)
++    subprocess.run(["git","add","."],cwd=repo,check=True)
++    subprocess.run(["git","-c","user.name=Source instrument fixture","-c","user.email=source@example.test",
++                    "commit","-qm","Synthetic verification instrument inputs"],cwd=repo,check=True)
++    commit=subprocess.check_output(["git","rev-parse","HEAD"],cwd=repo,text=True).strip()
++    env={**os.environ,"PYTHONPATH":str(repo),"PYTHONDONTWRITEBYTECODE":"1",
++         "GITHUB_RUN_ID":"synthetic-instrument-subprocess","GITHUB_RUN_ATTEMPT":"1"}
++    env.pop("VATI_TEST_PG_DSN",None);env.pop("VATI_TEST_PG_ISOLATED_FIXTURE",None)
++    evidence=tmp_path/"full-cli-evidence"
++    subprocess.run([sys.executable,"tools/rebuild/backend_public_source.py","plan","--output",str(evidence)],
++                   cwd=repo,env=env,check=True,capture_output=True,text=True)
++    for runtime, count in (("gateway",4),("media",1)):
++        control=evidence/(runtime+"-control")
++        result=subprocess.run([sys.executable,"tools/rebuild/backend_public_source.py","collect","--output",str(control),
++            "--runtime",runtime,"--shards",str(count),"--expected-commit",commit,
++            "--basetemp",str(tmp_path/(runtime+"-control-temp"))],cwd=repo,env=env,capture_output=True,text=True,timeout=90)
++        assert result.returncode==0, result.stdout+result.stderr
++        state=json.loads((control/"terminal.json").read_text())
++        assert state["mode"]=="collection" and not (control/"phases.jsonl").read_text()
++        assert len(state["full_collection"])==(4 if runtime=="gateway" else 1)
++    media=evidence/"media"
++    result=subprocess.run([sys.executable,"tools/rebuild/backend_public_source.py","run-shard","--output",str(media),
++        "--runtime","media","--shards","1","--expected-commit",commit,
++        "--basetemp",str(tmp_path/"media-temp")],cwd=repo,env=env,capture_output=True,text=True,timeout=90)
++    assert result.returncode==0, result.stdout+result.stderr
++    media_state=json.loads((media/"terminal.json").read_text())
++    assert media_state["runtime"]=="media" and len(media_state["assigned"])==1
++    all_assigned=[];outcomes=[]
++    for index in range(4):
++        out=evidence/"shards"/f"van-backend-public-source-gateway-{index}"
++        cmd=[sys.executable,"tools/rebuild/backend_public_source.py","run-shard","--output",str(out),
++             "--runtime","gateway","--shards","4","--shard-index",str(index),"--expected-commit",commit,
++             "--basetemp",str(tmp_path/f"worker-temp-{index}")]
++        result=subprocess.run(cmd,cwd=repo,env=env,capture_output=True,text=True,timeout=90)
++        receipt=json.loads((out/"run.json").read_text());state=json.loads((out/"terminal.json").read_text())
++        assert receipt["exit"]==result.returncode and receipt["terminal"] is True
++        assert state["source_before"]==state["source_after"] and state["expected_commit"]==commit
++        assert len(state["full_collection"])==4 and len(state["assigned"])==1
++        events=[json.loads(x) for x in (out/"phases.jsonl").read_text().splitlines()]
++        assert {x["when"] for x in events}=={"setup","call","teardown"}
++        cases=list(ET.parse(out/"report.xml").getroot().iter("testcase"));assert len(cases)==1
++        assert cases[0].find("./properties/property[@name='van_source_nodeid']").get("value")==state["assigned"][0]
++        all_assigned.extend(state["assigned"]);outcomes.append((result.returncode,events))
++    result=subprocess.run([sys.executable,"tools/rebuild/backend_public_source.py","verify-shards","--output",str(evidence),
++        "--expected-commit",commit,"--job-result","success"],cwd=repo,env=env,capture_output=True,text=True,timeout=90)
++    assert result.returncode!=0  # A real failed teardown cannot become a status-only success.
++    assert not (evidence/"summary.json").exists()
++    for key,value in (("PYTEST_ADDOPTS","-k fixture_0"),("PYTEST_PLUGINS","unsupported_plugin")):
++        rejected=tmp_path/("rejected-"+key)
++        attempt=subprocess.run([sys.executable,"tools/rebuild/backend_public_source.py","collect","--output",str(rejected),
++            "--runtime","gateway","--shards","4","--expected-commit",commit,"--basetemp",str(tmp_path/(key+"-temp"))],
++            cwd=repo,env={**env,key:value},capture_output=True,text=True,timeout=90)
++        assert attempt.returncode!=0 and not (rejected/"terminal.json").exists()
++    original=evidence/"shards/van-backend-public-source-gateway-0/terminal.json"
++    original_bytes=original.read_bytes()
++    retry=subprocess.run([sys.executable,"tools/rebuild/backend_public_source.py","run-shard","--output",str(original.parent),
++        "--runtime","gateway","--shards","4","--expected-commit",commit,"--basetemp",str(tmp_path/"reused-temp")],
++        cwd=repo,env=env,capture_output=True,text=True,timeout=90)
++    assert retry.returncode!=0 and original.read_bytes()==original_bytes
++    assert len(set(all_assigned))==4
++    assert sum(code==0 for code,_ in outcomes)==3
++    assert sum(any(e["when"]=="teardown" and e["outcome"]=="failed" for e in events) for _,events in outcomes)==1
+diff --git a/tests/contracts/test_ci_public_source_shards.py b/tests/contracts/test_ci_public_source_shards.py
+new file mode 100644
+index 00000000..04340690
+--- /dev/null
++++ b/tests/contracts/test_ci_public_source_shards.py
+@@ -0,0 +1,79 @@
++"""Public source sharding preserves the original required gate and other CI jobs."""
++from pathlib import Path
++import subprocess
++import yaml
++
++ROOT = Path(__file__).resolve().parents[2]
++BASE = "fd33b0759b9ae170f8bdfdf27f9afe7082da7830"
++
++
++def workflows():
++    old = subprocess.check_output(["git", "show", BASE+":.github/workflows/van-ci.yml"], cwd=ROOT)
++    return yaml.safe_load(old), yaml.safe_load((ROOT/".github/workflows/van-ci.yml").read_text())
++
++
++def test_every_other_job_trigger_and_concurrency_boundary_is_unchanged():
++    before, after = workflows()
++    assert {k:v for k,v in before.items() if k != "jobs"} == {k:v for k,v in after.items() if k != "jobs"}
++    assert set(after["jobs"]) == set(before["jobs"]) | {"backend-public-source-gateway"}
++    for name, job in before["jobs"].items():
++        if name != "backend-public-source": assert after["jobs"][name] == job, name
++
++
++def test_original_required_gate_is_an_always_running_fail_closed_aggregate():
++    _, after = workflows()
++    gate = after["jobs"]["backend-public-source"]
++    assert gate["name"] == "backend-public-source"
++    assert gate["needs"] == ["backend-public-source-gateway"] and gate["if"] == "always()"
++    verify = next(s for s in gate["steps"] if "verify-shards" in s.get("run", ""))
++    assert verify["if"] == "always()"
++    assert '--job-result "${{ needs.backend-public-source-gateway.result }}"' in verify["run"]
++    assert '--expected-commit "${{ github.event.pull_request.head.sha || github.sha }}"' in verify["run"]
++    assert not gate.get("continue-on-error", False)
++
++
++def test_four_workers_are_fresh_native_fixtures_with_the_original_dependencies():
++    before, after = workflows()
++    old = before["jobs"]["backend-public-source"]
++    worker = after["jobs"]["backend-public-source-gateway"]
++    assert worker["strategy"] == {"fail-fast": False, "max-parallel": 4, "matrix": {"shard": [0,1,2,3]}}
++    assert not worker.get("continue-on-error", False)
++    for job in (worker, after["jobs"]["backend-public-source"]):
++        for key in ("runs-on", "services", "env", "timeout-minutes"): assert job[key] == old[key], key
++        assert job["steps"][:5] == old["steps"][:5]
++    command = next(s["run"] for s in worker["steps"] if "run-shard" in s.get("run", ""))
++    assert "--shards 4 --shard-index ${{ matrix.shard }}" in command
++    assert '--expected-commit "${{ github.event.pull_request.head.sha || github.sha }}"' in command
++    assert 'runner.temp }}/van-public-gateway-${{ matrix.shard }}' in command
++    assert "pytest-xdist" not in command and " -n " not in command
++
++
++def test_independent_full_collection_and_separate_hashed_media_runtime_remain():
++    _, after = workflows()
++    steps = after["jobs"]["backend-public-source"]["steps"]
++    control = next(s for s in steps if "--runtime gateway --shards 4" in s.get("run", ""))
++    assert control["if"] == "always()" and " collect " in " ".join(control["run"].split())
++    media = next(s for s in steps if 'python -m venv "$RUNNER_TEMP/public-media-venv"' in s.get("run", ""))
++    assert media["if"] == "always()"
++    assert "--require-hashes -r deploy/van-browser-stream/requirements.lock" in media["run"]
++    assert "--runtime media --shards 1" in media["run"]
++    assert "media-control" in media["run"] and "run-shard" in media["run"]
++
++
++def test_all_shard_evidence_and_original_named_aggregate_artifact_are_uploaded():
++    _, after = workflows()
++    worker = after["jobs"]["backend-public-source-gateway"]
++    upload = next(s for s in worker["steps"] if s.get("uses") == "actions/upload-artifact@v4")
++    assert upload["if"] == "always()" and upload["with"]["if-no-files-found"] == "error"
++    assert upload["with"]["name"] == "van-backend-public-source-gateway-${{ matrix.shard }}"
++    aggregate = after["jobs"]["backend-public-source"]
++    download = next(s for s in aggregate["steps"] if s.get("uses") == "actions/download-artifact@v4")
++    assert download["if"] == "always()" and download["with"]["merge-multiple"] is False
++    final = next(s for s in aggregate["steps"] if s.get("uses") == "actions/upload-artifact@v4")
++    assert final["if"] == "always()" and final["with"]["name"] == "van-backend-public-source"
++
++
++def test_workflow_installer_mirror_and_frozen_mutation_source_remain_exact():
++    assert (ROOT/".github/workflows/van-ci.yml").read_bytes() == (ROOT/"tools/ci/github-actions-ci.yml").read_bytes()
++    previous = subprocess.check_output(["git", "show", BASE+":tools/audit/mutation_suite.py"], cwd=ROOT)
++    assert (ROOT/"tools/audit/mutation_suite.py").read_bytes() == previous
+diff --git a/docs/rebuild/rev118/ci/PUBLIC_SOURCE_SHARDS_20261101.md b/docs/rebuild/rev118/ci/PUBLIC_SOURCE_SHARDS_20261101.md
+new file mode 100644
+index 00000000..45be69a7
+--- /dev/null
++++ b/docs/rebuild/rev118/ci/PUBLIC_SOURCE_SHARDS_20261101.md
+@@ -0,0 +1,17 @@
++# Public-source qualification on four isolated workers
++
++This candidate changes the existing public-source verification instrument and its workflow ownership, not product scope or native authority. `backend-public-source` remains the required job ID and displayed gate. All other jobs, triggers, admission checks, global concurrency, credentials and the 374-case mutation corpus remain unchanged; the workflow installer mirror stays byte-identical.
++
++Four fresh Ubuntu24.04 workers each have the original pinned PostgreSQL17.11 container/schema, locked gateway dependencies, Node24.19.0, real Chromium and separate temporary test storage. Each runs one pytest process. There is no shared database between workers and no xdist or parallel pytest processes inside a worker. The original explicit selected-file roots, separate/private/browser exclusions and exact approved-skip vocabulary remain. Every collected class/parameter identity remains in scope; costs never decide inclusion.
++
++The ordinary pytest collection produces exact nodeIDs before whole-file deterministic assignment. Historical measured file durations apply only when the current test-source hash matches the recorded source. Changed/new files use their collected case count as a deterministic placement fallback. Files stay together, ties use path and worker index, and test order inside a file remains pytest's order. Four workers must agree with the required gate's independent full collect-only control. Collection errors, selectors, inherited pytest override flags and shared-store parallelism cannot silently reduce the inventory.
++
++Each execution captures real setup/call/teardown reports, exact nodeID properties in JUnit and the unchanged storage audit. Parent command observations independently bind the expected GitHub head, clean tracked source/tree, software/package/image/Chromium identity and actual isolated PostgreSQL version before and after pytest. A fresh execution nonce binds the parent receipt and child evidence; workflow run and attempt must match. Original evidence folders cannot be overwritten. Partial, stale, collection-only or status-only artifacts do not qualify. Teardown failures count as failures even when the call passed. Every skip requires its original exact case/reason approval and remains declared unexecuted rather than passed.
++
++The existing required gate waits for all four execution workers with fail-fast disabled, then independently validates collection/assignment and the exact execution union. Missing, foreign or duplicate IDs, absent shards/artifacts, unsuccessful/nonterminal receipts, wrong source/environment/run identities and storage events fail the aggregate. The separate media runtime still uses its own hashed lock/venv and independently collected/executed exact identities. Existing named artifact and runtime-report fields remain available; combined gateway reports are explicitly derived from four verified shard reports, with original reports retained. They are not a single-process full-suite run. There is no fallback from the required gate to legacy module-count verification.
++
++Native qualification requires the future exact-head hosted execution. Local tests exercise the verification instrument with explicitly synthetic protocol fixtures and tiny real pytest subprocesses, including an actual teardown counterexample, collect-only controls and isolated media dispatch. They are not application test totals, native four-worker execution or performance evidence. Current source construction issues no native/unit/BG001/provider/device/signing/deployment/release certificate; private DDS and other original mandatory gates remain separate and unwaived.
++
++The historical timing input comes from the exact7df official backend artifact (SHA256 0e45d1f3c5d00440d5e8d15e2ad2fc41fbe305253249565b0add12db73721881). That failed run retains5,945passes/one metadata failure/seven declared skips, plus198 separate media passes. Its gateway pytest walltime was46m24; reported case times sum2,749.541s. The ledger contract file accounts for693.138s. Historical whole-file partition estimates are about693/685/685/685s, excluding clone/setup/collection/service overhead; these are not measured shard runtimes or a promised speedup. The metadata failure and earlier cancelled runs remain failed/cancelled. Actual future job/step timings and exact execution receipts are required before reporting performance.
++
++Implementation belongs to existing `tools/rebuild/backend_public_source.py` and its sibling node-evidence instrument. Candidate source/workflow authorization covers the live workflow, rebuild tools and tests. The existing workflow-template authorization covers only `tools/ci/github-actions-ci.yml` as the identical mirror; no other tools/ci edit, trusted checker/ledger change, new credential or new authorization record is inferred. A failed worker rerun cannot silently reuse a different-attempt artifact; every source receipt must satisfy the current run/attempt evidence contract.
