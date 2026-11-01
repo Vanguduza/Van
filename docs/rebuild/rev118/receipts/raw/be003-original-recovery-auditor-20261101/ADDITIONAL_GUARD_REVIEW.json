@@ -1,0 +1,89 @@
+{
+  "schema": "van.independent629a-additional-guards-redteam-proposal-review/1",
+  "at_utc": "2026-11-01T14:25:48.944700+00:00",
+  "disposition": "NO_BLOCKING_FINDING_IN_TWO_AUTHORIZED_TEST_CORRECTIONS_OR_EXTERNAL_R2_DESCRIPTION_OWNER_SCOPE_STILL_PENDING",
+  "candidate_test_blockers": [],
+  "base": "629a986019a4eb298f58dd98c62e6bcbade36ab7",
+  "source_before_after": {
+    "tests/contracts/test_context_ingest_queue_routing.py": "154469d1cbe29b621a1f4fbbb3e32f42ae821b16017c4b6b3999503218629215",
+    "tests/contracts/test_ci_public_source_shards.py": "25e84f752657fdb17c0849577bc1d7ee37fcfa4d4d39ac5d0cbcb28fda10a464"
+  },
+  "archive_sha256": "8abbf3c932034dee028dc96d60d0eb3fdc0b4a28a9b4e944df8204d6740a2a04",
+  "patch_sha256": "68982a7bd58a2f79fc16e5e7dca8ab0720a26764da2d68beea568514ad5344b1",
+  "reviewed_two_guards": {
+    "routing": "Combined SESSION_OUTBOX+UNKNOWN_HELD continue arm precedes context/owner routing and generic claim; no generic remove/purge; captured-context expiry/completion owner and cancellation propagation asserted. Independent actual current guard call PASS; actual runtime consumer source already reviewed/unchanged.",
+    "corpus": "Immutable fd33 original SHA, exact published629a approved catalogue SHA and exact pinned five-retarget receipt bound. Reverses only ten literal editstrings in their five namedcase tuples and demands complete original AST equality plus published629a ledger reconciliation authorization. Preserves all374 IDs/order/target/testselection/383edits/otherexecution helpers, workflow mirror/gates; no arbitrary rebasing. Independent actual current guard call PASS."
+  },
+  "evidence": {
+    "test_two_pins_archive_before_after_exact": true,
+    "prior_two_test_and_production41_exact": true,
+    "independent_current_routing_and_corpus_guard_calls": "PASS",
+    "provided_seven_modules_actual_XML": 27,
+    "provided_audit_forbidden_events": 0,
+    "external_register_only_entry67_changed": true,
+    "unchanged_checker_current_rejects_proposal_accepts": true,
+    "actual_reusable_authorizations_covering_proposed_change": [],
+    "installed_hook_path": ".githooks",
+    "protected_before_after": {
+      "ledger": "ef257815478a756ff6af9a1d00c64ba3036f599900c0876d38eca9bf5b6cd5ce",
+      "index": "f12dd2321fe40a7d58d5cd80e012399d13357337e31ad9622f63192ecc687f56",
+      "register": "423a74a4cd7e5fb7f57ec21c19e00e47f9d8513806bb3138d8edfa44ca2da4a6"
+    },
+    "proposal_wording_issue": "Unqualified Only never-dispatched may resend/RESULT_PENDING remains held omits lawful producer-proven same-session SESSION_ONLY mission.message/mission.cancel/decision.answer same-envelope idempotent recovery exception. Scope these statements to command.submit/directHTTP, or explicitly retain exception."
+  },
+  "actual7module_supplement": {
+    "tests": 27,
+    "exit": 0,
+    "failure_error_skip": 0,
+    "audit_forbidden_events": 0,
+    "old_refusal_preserved": true,
+    "full_JVM1369_reuse": "All Android inputs unchanged since earlier actual full1369 terminal; no new JVM/SDK/Gradle execution by reviewer."
+  },
+  "external_redteam": {
+    "R1_finding": "Root-accepted description blocker: unqualified never-dispatched-only resend and RESULT_PENDING hold wording omitted preserved lawful SESSION_ONLY same-envelope recovery. R1 proposal/archive/hook receipt unchanged.",
+    "R2_origin": "Root supplied exact replacement policy description. Reviewer independently checked actual SessionReconciliation+manager predicates, then mechanically replaced only one external note field. No owner/evidence/source implementation authored.",
+    "R2_proposal": "/workspace/van-629a-additional-independent-review-20261101/redteam-proposal-r2/PROPOSAL_R2.json",
+    "R2_register": "/workspace/van-629a-additional-independent-review-20261101/redteam-proposal-r2/red_team_register.json",
+    "R2_patch": "/workspace/van-629a-additional-independent-review-20261101/redteam-proposal-r2/REDTEAM67_R2_PROPOSED.patch",
+    "R2_register_sha256": "6cfb855946008b61b8794339bd5db26456b5bd6921afc7c7eb5799cbd60c8c43",
+    "R2_patch_sha256": "4c10039bd606b7af429459423018807bcb8570194b446d7485c5325590114bac",
+    "only_main_to_R2_entry": 67,
+    "only_R1_to_R2_field": "note",
+    "R2_source_accuracy": "Ambiguous command.submit/directHTTP including RESULT_PENDING stays held/no resend for original owned-readback; fresh producer work retains currentness/expiry/reconfirmation. Producer-proven SESSION_ONLY exact3kinds retain same-envelope idempotent recovery with originalsession/currentowner/TTL/reconfirmation checks. No fresh execution/cleanup authority.",
+    "checker": "Actual unchanged checker independently rejects main obsoletecitation, accepts externalR1 and correctedR2; no checker-code change needed."
+  },
+  "authorization_boundary": {
+    "actual_current_reusable_records_covering_change": [],
+    "actual_hooks_path": ".githooks",
+    "hook_source": ".githooks/pre-commit:7 delegates exec project_truth_ledger.py record --stage --hook pre-commit",
+    "governing_source": [
+      "tools/ci/project_truth_ledger.py:507 staged changes need reusable or applicable introduced-commit scope",
+      "tools/ci/project_truth_ledger.py:521 path_cover enforces exclusions/authorized_paths",
+      "tools/ci/project_truth_ledger.py:952 uncovered staged files refuse before write with exit3"
+    ],
+    "genuine_existing_receipt": "/workspace/van-629a-guard-repair-20261101/redteam-proposal/GENUINE_HOOK_SCOPE_REFUSAL.log",
+    "genuine_existing_refusal": "Actual installed-hook alternate-index invocation exit3 retained; refusal explicitly names evidence/van-system-audit/red_team_register.json. No bypass/allow-uncovered/checker alteration. Scope depends on path/change, so corrected note does not create coverage.",
+    "needed_next": "One pending concrete owner scope extension for exactly protected entry67 reconciliation; reviewer did not create record or alter main register/index/ledger. Root handles owner question after reviewing externalR2."
+  },
+  "protected_main_before_after": {
+    "ledger": "ef257815478a756ff6af9a1d00c64ba3036f599900c0876d38eca9bf5b6cd5ce",
+    "index": "f12dd2321fe40a7d58d5cd80e012399d13357337e31ad9622f63192ecc687f56",
+    "register": "423a74a4cd7e5fb7f57ec21c19e00e47f9d8513806bb3138d8edfa44ca2da4a6"
+  },
+  "artifacts": [
+    "check.py",
+    "check.log",
+    "checks.json",
+    "check-setup-failure.log",
+    "derive_r2.py",
+    "derive-r2.log",
+    "redteam-proposal-r2/PROPOSAL_R2.json",
+    "before.json",
+    "after.json"
+  ],
+  "limits": [
+    "No candidate edits/commits, uncoveredpath/authorization/index/ledger writes, CI/watch/native effects, Gradle/broad suites, new agents. ExternalR2 proposal only was created under explicit root authorization.",
+    "Current redteam main remains failing until authorized correction; overall629a source gate remainsFAILED and native union unknown/unqualified. Earlier failed baselines/mutantsNOT_RUN and original watcher57805 preserved.",
+    "27sourcecases/audit and priorJVM1369 are genuine source evidence, not fullcorpus/native/owner acceptance or speed claim."
+  ]
+}

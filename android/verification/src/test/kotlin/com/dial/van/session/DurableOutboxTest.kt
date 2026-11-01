@@ -45,9 +45,34 @@ class DurableOutboxTest {
                 "messageId", "commandId", "idempotencyKey", "turnId", "createdAtMs",
                 "expiresAtMs", "storability", "actionClass", "requiresLiveOwnerContext",
                 "payloadRef", "lastAttemptPath", "attemptCount", "reconfirmedAtMs",
+                "neverDispatched", "profileId", "sessionOnlyOrigin", "httpPrepared",
             ),
             fields,
         )
+        // Nullable producer facts constrain original recovery; none is a command body,
+        // signature or fresh permission. Legacy absence must remain unknown.
+        val legacy = assertNotNull(admit())
+        assertNull(legacy.neverDispatched)
+        assertNull(legacy.profileId)
+        assertNull(legacy.sessionOnlyOrigin)
+        assertNull(legacy.httpPrepared)
+        val producerTypes = OutboxEntry::class.java.declaredFields
+            .filter { it.name in setOf("neverDispatched", "profileId", "sessionOnlyOrigin", "httpPrepared") }
+            .associate { it.name to it.type }
+        assertEquals(mapOf(
+            "neverDispatched" to java.lang.Boolean::class.java,
+            "profileId" to String::class.java,
+            "sessionOnlyOrigin" to java.lang.Boolean::class.java,
+            "httpPrepared" to java.lang.Boolean::class.java,
+        ), producerTypes)
+        val metadata = legacy.copy(neverDispatched = false, profileId = "original-profile",
+            sessionOnlyOrigin = false, httpPrepared = true)
+        val payload = "SOURCE exact signed payload stays in the canonical queue"
+        val stored = OutboxPersistence.toCommand(metadata, payload)
+        assertEquals(payload, stored.payloadJson)
+        val restored = assertNotNull(OutboxPersistence.toEntry(stored))
+        assertEquals(metadata.copy(payloadRef = metadata.messageId), restored)
+        assertTrue(!restored.toString().contains(payload))
     }
 
     @Test

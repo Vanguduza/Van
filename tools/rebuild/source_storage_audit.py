@@ -1,8 +1,11 @@
 #!/usr/bin/env python3
 """Run source tests while refusing runtime storage in the checkout's data roots.
 
-This is test instrumentation, not an operating-system sandbox. Run from the
+This is test instrumentation, not an operating-system sandbox. Run within the
 frozen product checkout; the instrument itself may be pinned independently.
+The checkout is identified from the invocation directory, never an arbitrary
+override or the instrument's own location. Pytest arguments retain their usual
+meaning relative to the invocation directory.
 """
 from __future__ import annotations
 
@@ -116,17 +119,47 @@ def selftest():
         return {"rejected": rejected, "allowed_read_and_external_write": True}
 
 
+def checkout_root(cwd: Path, requested: Path | None = None) -> Path:
+    """Bind the protected trees to the checkout, including a backend/ invocation.
+
+    Git worktrees may use a .git file rather than a directory. These markers
+    identify the source checkout without launching a process or importing tests.
+    Explicit selection must confirm that same root; it cannot hide its data tree.
+    StorageAudit(root) itself remains usable for isolated synthetic fixtures.
+    """
+    current = cwd.resolve()
+    candidates = [p for p in (current, *current.parents)
+                  if (p / ".git").exists() and (p / "pytest.ini").is_file()
+                  and (p / "backend" / "tests").is_dir()
+                  and (p / "tools" / "rebuild" / "source_storage_audit.py").is_file()]
+    if not candidates:
+        raise ValueError("invoke the auditor within the source checkout; checkout root is unavailable")
+    if len(candidates) != 1:
+        raise ValueError("ambiguous nested source checkouts; refusing to narrow the protected root")
+    found = candidates[0]
+    if requested is not None and requested.resolve() != found:
+        raise ValueError("--checkout-root differs from the invocation's source checkout")
+    return found
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--selftest", action="store_true")
     parser.add_argument("--report", type=Path)
+    parser.add_argument("--checkout-root", type=Path,
+                        help="confirm the checkout containing cwd; cannot select a different tree")
     args, pytest_args = parser.parse_known_args()
     if args.selftest:
         print(json.dumps(selftest()))
         return 0
     if args.report is None:
         parser.error("--report is required")
-    audit = StorageAudit(Path.cwd())
+    invocation_cwd = Path.cwd().resolve()
+    try:
+        root = checkout_root(invocation_cwd, args.checkout_root)
+    except ValueError as exc:
+        parser.error(str(exc))
+    audit = StorageAudit(root)
     report_path = args.report.resolve()
     sys.addaudithook(audit)
     tool_sha256 = hashlib.sha256(Path(__file__).read_bytes()).hexdigest()
@@ -134,12 +167,13 @@ def main():
         report_path.write_text(json.dumps({
             "schema": "van.source-storage-audit/1", "forbidden_events": audit.violations,
             "source_sha256": tool_sha256,
-            "root": str(audit.root), "scope": "SQLite opens, path-based writable opens and directory/link/rename/delete events under data and backend/data",
+            "root": str(audit.root), "invocation_cwd": str(invocation_cwd),
+            "scope": "SQLite opens, path-based writable opens and directory/link/rename/delete events under data and backend/data",
             "limits": "Python audit events only; directory-fd-relative open events lack their directory handle; existing fd writes, native-library raw I/O and external processes are not an OS sandbox. Git state is checked separately.",
         }, indent=2) + "\n")
     try:
         import pytest
-        return pytest.main(pytest_args or ["backend/tests", "tests/contracts", "-q"])
+        return pytest.main(pytest_args or [str(root / "backend/tests"), str(root / "tests/contracts"), "-q"])
     finally:
         # Persist the actual instrument result before interpreter globals clear.
         report()

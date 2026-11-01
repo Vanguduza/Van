@@ -1,0 +1,73 @@
+{
+  "state": "EXACT_THREE_HOSTED_PG_CASES_REUSED",
+  "metadata": {
+    "run_id": 41313426404,
+    "job_id": 124868393631,
+    "job_name": "postgres-ledger",
+    "job_status": "completed",
+    "job_conclusion": "success",
+    "published_head": "629a986019a4eb298f58dd98c62e6bcbade36ab7",
+    "actual_tested_merge": "3ba2f1e8fbee7e7bd3fa91ce347d249e68927def",
+    "artifact_id": 13085738874,
+    "artifact_name": "van-postgres-ledger-report",
+    "artifact_digest": "sha256:8a24b5791797a1d9bcb6d2cfc65c13df5894d631c3a41ae176a112dca4b997d5",
+    "retrieval": "Connected GitHub jobs/artifacts/logs; ZIP local extraction unavailable after CLI redirect403. Exact three PASS lines verified in supported connector job logs; no XML reuse claim.",
+    "URLs_redacted": true
+  },
+  "exact_case_pass_lines": {
+    "trading/tests/test_runtime_learning_cohort.py::test_actual_book_builder_keeps_a_paper_live_policy_in_the_demo_cohort": [
+      "2026-11-01T13:59:26.7778600Z trading/tests/test_runtime_learning_cohort.py::test_actual_book_builder_keeps_a_paper_live_policy_in_the_demo_cohort PASSED [ 92%]"
+    ],
+    "trading/tests/test_learning_account_scope.py::test_postgres_native_learning_scope_uses_the_same_account_boundary": [
+      "2026-11-01T13:56:12.4115811Z trading/tests/test_learning_account_scope.py::test_postgres_native_learning_scope_uses_the_same_account_boundary PASSED [ 34%]"
+    ],
+    "trading/tests/test_restated_trade_projection.py::test_postgres_native_projection_crash_restart_and_logical_ledger_isolation": [
+      "2026-11-01T13:59:06.8283292Z trading/tests/test_restated_trade_projection.py::test_postgres_native_projection_crash_restart_and_logical_ledger_isolation PASSED [ 83%]"
+    ]
+  },
+  "source_mapping": {
+    "actual_tested_merge": "3ba2f1e8fbee7e7bd3fa91ce347d249e68927def",
+    "published_source_head": "629a986019a4eb298f58dd98c62e6bcbade36ab7",
+    "connector_compare": "HOSTED_MERGE_SOURCE_COMPARISON.json; complete files[]/ahead1/behind0, merge tree identical to629",
+    "current_relevant_source_pins_match_629": {
+      "trading/vati/learning/runtime_cohort.py": "6c33805aa6e0b2827cf5410f59367b4f6a603cd3ce7c3a7cf3b5496209991a88",
+      "trading/vati/learning/scope.py": "7cce8f9fc7ec9f63da8a3d14ec5476e1ec350f2e0bb2baf075d0db2d38e25738",
+      "trading/vati/learning/evidence.py": "0c9d3ec1efca967bfb93c801b40e8c42744d1d5c9a7c8112b6c7f7208c720c06",
+      "trading/vati/learning/episodes.py": "0dc5b3574ef6a30a43150686abf638bd246687f7872a7286682cf5b73ac90077",
+      "trading/vati/learning/hooks.py": "ed8a2aa1ce7429c39e05bcc70d54bfe044373a8b75a8c8c5c42e85ce0583bf62",
+      "trading/vati/learning/replay.py": "f42e75048adf4cdc5e466bcc8992711fd7f3ed25251dd70acb4965d7ecc8a5f4",
+      "trading/vati/learning/restatement.py": "416ca5d0bc2e083efa3d66def1439e1e3c90fd572d0a7bf4d13e476761d511a9",
+      "trading/vati/learning/projection_store.py": "20fff3ffbb9d7ef160a2d6ee3e98556e7f2b8d92c98746d82ac69a9a5ee053c5",
+      "trading/vati/app/service.py": "1fbf30ce7b79620b759fa11c20f6daad48dd2bcccba2388174c13a1316fbe5e6",
+      "trading/vati/app/account_service.py": "1469ca9a3fc419754999a9e9575f08b3f396cc429763906afb1d0c285c1abc45",
+      "trading/vati/app/cycle.py": "fc31a0061e679e60c6059c25832fa37c8055baf9df3287a42ca3a0863b0c881d",
+      "trading/vati/app/trade_lifecycle.py": "3a3547830986540f1382720924d7a055ac50e46870c7314128bc41c4fe29d926",
+      "trading/vati/core/canonical.py": "2b5bd78b575ce1092af9d44ec5f5b23e20bde1e3d489202bdd613032ec344bdb",
+      "trading/vati/core/events.py": "5f46f070021eadc478784c816b8e3eb81479659c04f160be2a221487a0f6ff76",
+      "trading/vati/core/ledger.py": "68e23c1867118036c2cc6f644c1eb4c7e69c8fc849854b05ca8843f05dc50517",
+      "trading/vati/core/ledger_pg.py": "81be80c128890718e34c99f4e98dd0b09df614f602986deaa482476195375707",
+      "trading/vati/execution/paper.py": "f7a84387195d4259f9658893d96167d02fd33a9acf2a3162bcd1b4324d00ce7e",
+      "backend/van_gateway/trading/service.py": "1d35aef8ddc7e2f3b6046902c784f5ea200d2e78be2333aacd947463e342f243",
+      "trading/tests/test_runtime_learning_cohort.py": "50b00b7c874d4450934b55b4069ba69e9456ff748ba4b44b8c72518e2a26a5c1",
+      "trading/tests/test_learning_account_scope.py": "a0eae00dd087152a61c621af783bd7d9e2bb6e2268be6f0443c41222a208c054",
+      "trading/tests/test_learning_evidence.py": "def76009ed270ac19e4a5fe537e3f880f05087dfc291c9d9c8b167677ef5a4d5",
+      "trading/tests/test_restated_trade_projection.py": "fd7ef39e1240fe739d3a3e2f89dc056943e75acf0001ea3193d1bba097f75576"
+    },
+    "OBL002_R2_overlay": "Three reviewed command-recovery files differ, preserved unchanged and not part of these three learning/PG producer-consumer paths. No same-head whole-program acceptance inferred."
+  },
+  "runtime": {
+    "python": "3.12.15",
+    "PostgreSQL": "17.11",
+    "image": "postgres:17.11-bookworm@sha256:858bb5e98eed02eb8cafbcdc007f9a65d1b613972028944a8ec2133ccaf80d27",
+    "psycopg": "3.2.9",
+    "fixture": "Fresh GitHub-hosted isolated postgres service; VATI_TEST_PG_ISOLATED_FIXTURE=1"
+  },
+  "job_terminal": "completed/success; original Public trading step5695passed1declaredskip; exact3listedcases individually PASSED, no skip/failure markers",
+  "proof_kind": "Genuine exact hosted job-log/source-pin reuse, not local rerun or fabricated JUnit",
+  "sanitized_log_sha256": "20e3500d3185e29653cac1dd7c20607dce8d6b4478789d12a3bc948edfc8b84a",
+  "artifact_zip": "Artifact exists/id+digest preserved; connector returned provider file reference but local CLI retrieval403, no local ZIP/XML assertion. All persisted job URLs redacted; no redirect retried/bypassed.",
+  "local_history": "Original current SOURCE111pass3skip remains untouched; this receipt separately discharges those exact PG execution gaps by verified hosted evidence. Local Docker creation explicitly capacity-refused, no daemon modification.",
+  "native_or_unit_acceptance": false,
+  "source_edits": [],
+  "actual_jobs": []
+}

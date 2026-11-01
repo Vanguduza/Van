@@ -27,8 +27,8 @@ from van_gateway.context.models import ReadinessState
 from van_gateway.context.service import OwnerContextService
 from van_gateway.degraded.registry import DegradedRegistry
 from van_gateway.hermes.bridge import HermesBridge, HermesBridgeError
-from van_gateway.idempotency.service import IdempotencyConflict, IdempotencyInFlight, IdempotencyService
-from van_gateway.mission.models import MissionState
+from van_gateway.idempotency.service import IdempotencyConflict, IdempotencyInFlight, IdempotencyReceiptCorrupt, IdempotencyService
+from van_gateway.mission.models import MissionState, AuthorityEnvelope
 from van_gateway.mission.service import MissionError
 from van_gateway.observability import instruments
 from van_gateway.observability.logging import log_event
@@ -272,7 +272,27 @@ class CommandOrchestrator:
         try:
             prior = await self.idempotency.begin(req.idempotency_key, payload)
             if prior is not None:
-                return CommandResult(**prior)
+                checked = await self.idempotency.read_original(req.idempotency_key, payload)
+                if checked.get('status') in {'outcome_unknown', 'in_flight'}:
+                    sealed = await self._original_authority(req)
+                    mission = await self.missions.existing_for_command(req.command_id) if self.missions else None
+                    if (sealed is not None and sealed.request_hash == self.idempotency.request_hash(payload)
+                        and sealed.device_id == req.device_id and sealed.requested_by == req.requested_by):
+                        self._original_resolution(sealed)
+                        self._original_context(sealed)
+                        if sealed.typed_action_id == 'memory.remember':
+                            recovered = await self._recover_memory_result(req, sealed, mission)
+                            if recovered is not None:
+                                return recovered
+                        run = await self._read_owned_run_receipt(req, mission)
+                        if run is not None:
+                            return await self._complete_hermes_acceptance(req, mission, sealed, run,
+                                before={'original_observed_result_recovery': True})
+                return CommandResult(**checked)
+        except (IdempotencyReceiptCorrupt, json.JSONDecodeError):
+            return CommandResult(status="outcome_unknown", command_id=req.command_id,
+                idempotency_key=req.idempotency_key,
+                message="Original command receipt is unverifiable; reconcile without reissuing")
         except IdempotencyConflict:
             result = CommandResult(
                 status="conflict",
@@ -313,11 +333,16 @@ class CommandOrchestrator:
                 message=message,
             )
             await self.audit.record(result="denied", command_id=req.command_id, device_id=req.device_id, failure_reason=reason)
-            await self.idempotency.fail(req.idempotency_key, result.model_dump())
+            result = await self._publish_original(req, result, failed=True)
             return result
         self.throttle.record_success("command_signature", req.device_id)
 
-        sealed = await self.authority.get(req.command_id)
+        try:
+            sealed = await self._original_authority(req)
+        except IdempotencyReceiptCorrupt:
+            return CommandResult(status='outcome_unknown', command_id=req.command_id,
+                idempotency_key=req.idempotency_key,
+                message='Original authority is unverifiable; no action was reissued')
         if sealed is not None:
             return await self._resume_sealed_dispatch(req, sealed, payload)
 
@@ -334,7 +359,7 @@ class CommandOrchestrator:
                 device_id=req.device_id,
                 failure_reason="speaker_evidence_non_voice_origin",
             )
-            await self.idempotency.fail(req.idempotency_key, result.model_dump())
+            result = await self._publish_original(req, result, failed=True)
             return result
 
 
@@ -362,7 +387,7 @@ class CommandOrchestrator:
                     device_id=req.device_id,
                     failure_reason=f"nonce_replay:{replay.original_command_id}",
                 )
-                await self.idempotency.complete(req.idempotency_key, result.model_dump())
+                result = await self._publish_original(req, result)
                 return result
 
         from van_gateway.automation.commands import (AutomationCommandDenied, AutomationPlanExecutor,
@@ -383,7 +408,7 @@ class CommandOrchestrator:
                                    message=str(exc))
             await self.audit.record(result="denied", command_id=req.command_id, device_id=req.device_id,
                                     failure_reason="typed_owner_command_refused")
-            await self.idempotency.complete(req.idempotency_key, result.model_dump())
+            result = await self._publish_original(req, result)
             return result
         effective_action_class = self.resolver.stronger_class(req.action_class, resolution.canonical_action_class)
         effective_no_stale_replay = req.no_stale_replay or resolution.no_stale_replay
@@ -402,7 +427,7 @@ class CommandOrchestrator:
                 message="Owner intent expiry reached; refusing replay",
             )
             await self.audit.record(result="expired", command_id=req.command_id, device_id=req.device_id, failure_reason="explicit_expiry")
-            await self.idempotency.complete(req.idempotency_key, result.model_dump())
+            result = await self._publish_original(req, result)
             return result
 
         command_age = max(0, now - req.issued_at_unix)
@@ -414,7 +439,7 @@ class CommandOrchestrator:
                 message="Typed action intent expired; refusing stale execution",
             )
             await self.audit.record(result="expired", command_id=req.command_id, device_id=req.device_id, failure_reason="typed_action_expired")
-            await self.idempotency.complete(req.idempotency_key, result.model_dump())
+            result = await self._publish_original(req, result)
             return result
         if command_age > self.owner_intent_max_age_seconds:
             result = CommandResult(
@@ -424,7 +449,7 @@ class CommandOrchestrator:
                 message="Owner intent expired; refusing stale offline replay",
             )
             await self.audit.record(result="expired", command_id=req.command_id, device_id=req.device_id, failure_reason="stale_intent")
-            await self.idempotency.complete(req.idempotency_key, result.model_dump())
+            result = await self._publish_original(req, result)
             return result
 
         # P1-COH-003 — the gate comes from the descriptor rather than from a second copy
@@ -443,7 +468,7 @@ class CommandOrchestrator:
                 message="A5 prohibited action",
             )
             await self.audit.record(result="denied", command_id=req.command_id, device_id=req.device_id, failure_reason="A5")
-            await self.idempotency.complete(req.idempotency_key, result.model_dump())
+            result = await self._publish_original(req, result)
             return result
 
         if speaker_evidence is not None:
@@ -468,7 +493,7 @@ class CommandOrchestrator:
                     failure_reason="voice_speaker_mismatch",
                     before={"speaker_evidence": speaker_evidence.value},
                 )
-                await self.idempotency.complete(req.idempotency_key, result.model_dump())
+                result = await self._publish_original(req, result)
                 return result
             if voice_disposition is SpeakerDisposition.REQUIRE_OWNER_APPROVAL:
                 required_gate = Gate.OWNER_APPROVAL
@@ -491,7 +516,7 @@ class CommandOrchestrator:
                     approval="not_applicable",
                     failure_reason="a4_requires_exact_typed_action",
                 )
-                await self.idempotency.complete(req.idempotency_key, result.model_dump())
+                result = await self._publish_original(req, result)
                 return result
 
             if resolution.action_id == "google.gmail.send":
@@ -505,7 +530,7 @@ class CommandOrchestrator:
                     or preview_trust is ContentTrust.UNTRUSTED):
                     result = CommandResult(status="denied", command_id=req.command_id,
                         idempotency_key=req.idempotency_key, message="Gmail send preview requires a direct owner command")
-                    await self.idempotency.complete(req.idempotency_key, result.model_dump())
+                    result = await self._publish_original(req, result)
                     return result
                 try:
                     if self.google is None:
@@ -532,7 +557,7 @@ class CommandOrchestrator:
                         effective_action_class=effective_action_class)
                     await self.audit.record(result="degraded", command_id=req.command_id, device_id=req.device_id,
                         failure_reason="gmail_send_preview_unavailable", after={"error_class": type(exc).__name__})
-                    await self.idempotency.complete(req.idempotency_key, result.model_dump())
+                    result = await self._publish_original(req, result)
                     return result
 
             if req.approval_proof is None:
@@ -553,7 +578,7 @@ class CommandOrchestrator:
                         resolved_action_id=resolution.action_id, effective_action_class=effective_action_class)
                     await self.audit.record(result="denied", command_id=req.command_id, device_id=req.device_id,
                         approval="not_issued", failure_reason=str(exc))
-                    await self.idempotency.complete(req.idempotency_key, result.model_dump())
+                    result = await self._publish_original(req, result)
                     return result
                 result = CommandResult(
                     status="approval_required",
@@ -578,7 +603,7 @@ class CommandOrchestrator:
                     approval="biometric_challenge_issued",
                     failure_reason="a4_owner_proof_missing",
                 )
-                await self.idempotency.complete(req.idempotency_key, result.model_dump())
+                result = await self._publish_original(req, result)
                 return result
 
             if req.approval_proof.algorithm != OwnerApprovalService.ALGORITHM:
@@ -597,7 +622,7 @@ class CommandOrchestrator:
                     approval="invalid",
                     failure_reason="approval_algorithm_unsupported",
                 )
-                await self.idempotency.complete(req.idempotency_key, result.model_dump())
+                result = await self._publish_original(req, result)
                 return result
 
             try:
@@ -642,7 +667,7 @@ class CommandOrchestrator:
                     approval="invalid",
                     failure_reason=reason,
                 )
-                await self.idempotency.complete(req.idempotency_key, result.model_dump())
+                result = await self._publish_original(req, result)
                 return result
             self.throttle.record_success("approval_challenge", req.device_id)
             owner_approved = True
@@ -668,7 +693,7 @@ class CommandOrchestrator:
                     device_id=req.device_id,
                     failure_reason="invalid_no_stale_replay_window",
                 )
-                await self.idempotency.complete(req.idempotency_key, result.model_dump())
+                result = await self._publish_original(req, result)
                 return result
 
         # Trust is derived here, never taken from the request. A device signature proves
@@ -714,7 +739,7 @@ class CommandOrchestrator:
                     device_id=req.device_id,
                     failure_reason=reason,
                 )
-                await self.idempotency.complete(req.idempotency_key, result.model_dump())
+                result = await self._publish_original(req, result)
                 return result
 
         # P0-EXEC-001. This is the first point at which the command is established as
@@ -790,7 +815,7 @@ class CommandOrchestrator:
                     failure_reason="truth_gate",
                     before={**truth, **before},
                 )
-                await self.idempotency.complete(req.idempotency_key, result.model_dump())
+                result = await self._publish_original(req, result)
                 return result
             if truth.get("ok"):
                 truth_sha = str(truth.get("truth_sha") or "")
@@ -843,7 +868,7 @@ class CommandOrchestrator:
                 failure_reason=f"context_snapshot:{exc.__class__.__name__}",
                 before=before,
             )
-            await self.idempotency.complete(req.idempotency_key, result.model_dump())
+            result = await self._publish_original(req, result)
             return result
 
         self.degraded.set(DegradedCode.OWNER_CONTEXT_UNAVAILABLE, False)
@@ -957,6 +982,24 @@ class CommandOrchestrator:
         try:
             await self.authority.seal(authority_record)
         except CommandAuthorityError as exc:
+            # A live original may outlast the idempotency lease. A same-request
+            # seal loser must not publish its newly built context as a denial or
+            # execute beside the winner. This is read-only original recovery.
+            try:
+                winner = await self._original_authority(req)
+            except IdempotencyReceiptCorrupt:
+                return CommandResult(status='outcome_unknown', command_id=req.command_id,
+                    idempotency_key=req.idempotency_key,
+                    message='Original authority is unverifiable; no action was reissued')
+            if (winner is not None and winner.request_hash == self.idempotency.request_hash(payload)
+                    and winner.device_id == req.device_id):
+                prior = await self.idempotency.read_original(req.idempotency_key, payload)
+                if prior is not None:
+                    return CommandResult(**prior)
+                return CommandResult(status="in_flight", command_id=req.command_id,
+                    idempotency_key=req.idempotency_key, mission_id=mission.mission_id if mission else None,
+                    context_snapshot_id=winner.snapshot_id,
+                    message="The original command is still being reconciled; no second action was dispatched")
             if mission is not None:
                 await self.missions.note_stall(mission, reason=f"authority_seal_failed:{exc}")
             result = CommandResult(
@@ -975,7 +1018,7 @@ class CommandOrchestrator:
                 failure_reason=str(exc),
                 before=before,
             )
-            await self.idempotency.complete(req.idempotency_key, result.model_dump())
+            result = await self._publish_original(req, result)
             return result
 
         if mission is not None:
@@ -1016,8 +1059,12 @@ class CommandOrchestrator:
         *, before: dict[str, Any],
     ) -> CommandResult:
         dispatch_metadata = authority_record.dispatch_metadata
-        resolution = CommandResolution.model_validate(dispatch_metadata["typed_resolution"])
-        context_gaps = dispatch_metadata["canonical_context"].get("context_gaps", [])
+        try:
+            resolution = self._original_resolution(authority_record)
+            context_gaps = self._original_context(authority_record).get('context_gaps', [])
+        except IdempotencyReceiptCorrupt:
+            return await self._sealed_refusal(req, authority_record, status='outcome_unknown', mission=mission,
+                reason='Original dispatch evidence is unverifiable; no action was reissued')
         effective_action_class = authority_record.effective_action_class
         effective_no_stale_replay = authority_record.no_stale_replay
         owner_approved = authority_record.owner_approved
@@ -1036,11 +1083,18 @@ class CommandOrchestrator:
                 mission_id=mission.mission_id if mission else None,
             )
             await self.audit.record(result="degraded", command_id=req.command_id, device_id=req.device_id, failure_reason="hermes_offline", before=before)
-            await self.idempotency.fail(req.idempotency_key, result.model_dump())
+            result = await self._publish_original(req, result, failed=True)
             return result
         self.degraded.set(DegradedCode.HERMES_OFFLINE, False)
 
-        await self._set_dispatch_state(req.command_id, "IN_FLIGHT")
+        try:
+            claimed = await self._claim_dispatch(req, authority_record, mission)
+        except CommandAuthorityError as exc:
+            return await self._sealed_refusal(req, authority_record,
+                status="expired" if str(exc) == 'command_authority_expired' else "denied", mission=mission,
+                reason="The original command cannot start under its current authority or mission controls")
+        if not claimed:
+            return await self._resume_sealed_dispatch(req, authority_record, req.model_dump())
         try:
             # P3-OBS-002 — Hermes dispatch latency is Gate 11's "Hermes callback
             # latency" for the synchronous half: how long the owner waits before VAN
@@ -1070,7 +1124,7 @@ class CommandOrchestrator:
                 mission_id=mission.mission_id if mission else None,
             )
             await self.audit.record(result="degraded", command_id=req.command_id, device_id=req.device_id, failure_reason=exc.code, before=before)
-            await self.idempotency.fail(req.idempotency_key, result.model_dump())
+            result = await self._publish_original(req, result, failed=True)
             return result
 
         # Persist the real receipt before audit, callbacks or verification can fail. An
@@ -1131,15 +1185,147 @@ class CommandOrchestrator:
             max_age_seconds=resolution.max_age_seconds,
             context_gaps=context_gaps,
         )
-        await self.idempotency.complete(req.idempotency_key, result.model_dump())
+        result = await self._publish_original(req, result)
         return result
 
+    async def _original_authority(self, req):
+        try:
+            return await self.authority.get(req.command_id)
+        except (ValueError, TypeError) as exc:
+            raise IdempotencyReceiptCorrupt('Original authority domain shape is malformed') from exc
+
+    @staticmethod
+    def _original_resolution(record):
+        value = record.dispatch_metadata.get('typed_resolution')
+        if not isinstance(value, dict):
+            raise IdempotencyReceiptCorrupt('Original typed resolution is not an object')
+        try:
+            return CommandResolution.model_validate(value)
+        except ValueError as exc:
+            raise IdempotencyReceiptCorrupt('Original typed resolution is malformed') from exc
+
+    @staticmethod
+    def _original_context(record):
+        value = record.dispatch_metadata.get('canonical_context')
+        if (not isinstance(value, dict) or value.get('snapshot_id') != record.snapshot_id
+            or value.get('digest') != record.context_digest):
+            raise IdempotencyReceiptCorrupt('Original context subject differs')
+        for field in ('fact_ids', 'live_state_refs', 'policy_refs'):
+            if field in value and (not isinstance(value[field], list)
+                or any(not isinstance(item, str) for item in value[field])):
+                raise IdempotencyReceiptCorrupt('Original context references are malformed')
+        gaps = value.get('context_gaps', [])
+        if not isinstance(gaps, list) or any(not isinstance(item, dict) for item in gaps):
+            raise IdempotencyReceiptCorrupt('Original context observations are malformed')
+        return value
+
+    async def _publish_original(self, req: CommandRequest, result: CommandResult, *, failed: bool = False) -> CommandResult:
+        try:
+            return CommandResult(**await self.idempotency.publish_original(
+                req.idempotency_key, req.model_dump(), result.model_dump(), failed=failed))
+        except IdempotencyConflict:
+            # Forensic data remains intact. Corruption is not authority to retry.
+            return CommandResult(status="outcome_unknown", command_id=req.command_id,
+                idempotency_key=req.idempotency_key, mission_id=result.mission_id,
+                message="Original command receipt could not be verified; reconcile without reissuing")
+
+    async def _claim_dispatch(self, req: CommandRequest, record: CommandAuthorityRecord, mission=None) -> bool:
+        # The marker is an execution fence, not a grant. All original admission
+        # checks remain mandatory; the same writer prevents overlapping resumptions.
+        async with self.authority.store.connection() as db:
+            await db.execute("BEGIN IMMEDIATE")
+            try:
+                row = await (await db.execute("SELECT value FROM runtime_meta WHERE key=?",
+                    (f"command_dispatch:{req.command_id}",))).fetchone()
+                if row is not None and row['value'] != 'RETRYABLE':
+                    await db.rollback()
+                    return False
+                sealed_row = await (await db.execute('SELECT value FROM runtime_meta WHERE key=?',
+                    ('command_authority:' + req.command_id,))).fetchone()
+                try:
+                    current_seal = json.loads(sealed_row['value']) if sealed_row else None
+                except (ValueError, TypeError):
+                    current_seal = None
+                if current_seal != record.model_dump(mode='json'):
+                    raise CommandAuthorityError('current_original_seal_unverifiable')
+                from van_gateway.mission.control import require_mission_dispatch, MissionControlError
+                # Bind the exact captured mission, rather than treating a missing
+                # source-command lookup as a missionless exemption after a race.
+                if mission is None:
+                    if self.missions is not None:
+                        raise CommandAuthorityError('required_original_mission_missing')
+                    # missions=None is the existing explicit constructor contract.
+                    # It cannot borrow an already recorded mission from another path.
+                    unexpected = await (await db.execute("SELECT mission_id FROM missions WHERE "
+                        "json_valid(authority_envelope_json) AND json_extract(authority_envelope_json, '$.source_command_id')=?",
+                        (req.command_id,))).fetchone()
+                    if unexpected is not None:
+                        raise CommandAuthorityError('unexpected_original_mission')
+                else:
+                    current_mission = await (await db.execute('SELECT * FROM missions WHERE mission_id=?',
+                        (mission.mission_id,))).fetchone()
+                    try:
+                        envelope = self.idempotency.evidence_object(
+                            current_mission['authority_envelope_json'] if current_mission else None,
+                            'Original mission authority')
+                        AuthorityEnvelope.model_validate(envelope)
+                        if (current_mission is None or current_mission['owner_principal_id'] != 'device:' + req.device_id
+                            or envelope.get('source_command_id') != req.command_id
+                            or envelope != mission.authority_envelope.model_dump(mode='json')
+                            or mission.authority_envelope.source_command_id != req.command_id
+                            or mission.owner_principal_id != 'device:' + req.device_id):
+                            raise CommandAuthorityError('original_mission_subject_mismatch')
+                        await require_mission_dispatch(self.authority.store, current_mission['mission_id'], db=db)
+                    except (MissionControlError, IdempotencyReceiptCorrupt, ValueError) as exc:
+                        raise CommandAuthorityError('original_mission_evidence_unverifiable') from exc
+                snapshot = await (await db.execute('SELECT command_id,digest FROM context_snapshots WHERE snapshot_id=?',
+                    (record.snapshot_id,))).fetchone()
+                if (snapshot is None or snapshot['command_id'] != req.command_id
+                    or snapshot['digest'] != record.context_digest):
+                    raise CommandAuthorityError('original_snapshot_subject_mismatch')
+                now = int(time.time())
+                device = await (await db.execute("SELECT revoked_at_unix FROM devices WHERE device_id=?", (record.device_id,))).fetchone()
+                try:
+                    resolution = self._original_resolution(record)
+                    self._original_context(record)
+                except IdempotencyReceiptCorrupt as exc:
+                    raise CommandAuthorityError('original_dispatch_evidence_unverifiable') from exc
+                age = max(0, now-record.issued_at_unix)
+                if (device is None or device['revoked_at_unix'] is not None
+                    or record.device_id != req.device_id or record.requested_by != req.requested_by
+                    or record.principal_type != req.principal_type
+                    or record.request_hash != self.idempotency.request_hash(req.model_dump())):
+                    raise CommandAuthorityError('current_original_dispatch_authority_refused')
+                if ((record.expires_at_unix is not None and now >= record.expires_at_unix)
+                    or age > self.owner_intent_max_age_seconds
+                    or (resolution.max_age_seconds is not None and age > resolution.max_age_seconds)):
+                    raise CommandAuthorityError('command_authority_expired')
+                await db.execute("INSERT INTO runtime_meta(key,value,updated_at_unix_ms) VALUES(?,?,?) "
+                    "ON CONFLICT(key) DO UPDATE SET value=excluded.value,updated_at_unix_ms=excluded.updated_at_unix_ms",
+                    (f"command_dispatch:{req.command_id}", 'IN_FLIGHT', int(time.time()*1000)))
+                await db.commit()
+                return True
+            except BaseException:
+                await db.rollback()
+                raise
+
     async def _set_dispatch_state(self, command_id: str, state: str) -> None:
-        await self.authority.store.execute(
-            "INSERT INTO runtime_meta(key, value, updated_at_unix_ms) VALUES (?, ?, ?) "
-            "ON CONFLICT(key) DO UPDATE SET value=excluded.value, updated_at_unix_ms=excluded.updated_at_unix_ms",
-            (f"command_dispatch:{command_id}", state, int(time.time() * 1000)),
-        )
+        async with self.authority.store.connection() as db:
+            await db.execute('BEGIN IMMEDIATE')
+            try:
+                row = await (await db.execute('SELECT value FROM runtime_meta WHERE key=?',
+                    (f'command_dispatch:{command_id}',))).fetchone()
+                if row is not None and (row['value'] == 'ACCEPTED' or
+                    (row['value'] == 'UNKNOWN' and state in {'IN_FLIGHT', 'RETRYABLE'})):
+                    await db.rollback()
+                    return
+                await db.execute("INSERT INTO runtime_meta(key,value,updated_at_unix_ms) VALUES(?,?,?) "
+                    "ON CONFLICT(key) DO UPDATE SET value=excluded.value,updated_at_unix_ms=excluded.updated_at_unix_ms",
+                    (f'command_dispatch:{command_id}', state, int(time.time()*1000)))
+                await db.commit()
+            except BaseException:
+                await db.rollback()
+                raise
 
     async def _sealed_refusal(self, req: CommandRequest, record: CommandAuthorityRecord,
                               *, status: str, reason: str, mission=None) -> CommandResult:
@@ -1150,11 +1336,14 @@ class CommandOrchestrator:
         )
         await self.audit.record(result=status, command_id=req.command_id, device_id=req.device_id,
                                 failure_reason=reason)
-        await self.idempotency.complete(req.idempotency_key, result.model_dump())
+        result = await self._publish_original(req, result)
         return result
 
     async def _unknown_dispatch(self, req: CommandRequest, mission,
                                 record: CommandAuthorityRecord, *, reason: str) -> CommandResult:
+        prior = await self.idempotency.read_original(req.idempotency_key, req.model_dump())
+        if prior is not None:
+            return CommandResult(**prior)
         await self._set_dispatch_state(req.command_id, "UNKNOWN")
         if mission is not None and mission.state is MissionState.AUTHORIZED:
             mission = await self.missions.missions.transition(
@@ -1172,6 +1361,25 @@ class CommandOrchestrator:
             reason="Hermes may have accepted this command. Reconcile its command ID before resending.",
         )
 
+    async def _read_owned_run_receipt(self, req, mission):
+        row = await self.authority.store.fetchone('SELECT value FROM runtime_meta WHERE key=?',
+            (f'command_run_receipt:{req.command_id}',))
+        if row is None:
+            return None
+        try:
+            run = json.loads(row['value'])
+            run_id = run.get('id')
+            if not isinstance(run_id, str) or not run_id or run_id.strip() != run_id:
+                raise ValueError('Original run identity missing')
+            owner = await self.missions.missions.for_hermes_run(run_id) if self.missions else None
+            if owner is None or mission is None or owner.mission_id != mission.mission_id:
+                raise ValueError('Original run ownership unresolved')
+            return run
+        except (ValueError, TypeError, AttributeError, MissionError) as exc:
+            # An opaque ID alone cannot prove ownership, completion or absence.
+            # Keep the original journal; no native run GET exists on this bridge.
+            raise IdempotencyReceiptCorrupt('Original run ownership unresolved') from exc
+
     async def _resume_sealed_dispatch(self, req: CommandRequest, record: CommandAuthorityRecord,
                                       payload: dict[str, Any]) -> CommandResult:
         """Retry only the same signed request, under its original immutable context.
@@ -1182,23 +1390,34 @@ class CommandOrchestrator:
         idempotency claim from blindly repeating a possibly accepted remote operation.
         """
         mission = await self.missions.existing_for_command(req.command_id) if self.missions else None
-        if record.request_hash != self.idempotency.request_hash(payload):
+        if (record.request_hash != self.idempotency.request_hash(payload)
+            or record.device_id != req.device_id or record.requested_by != req.requested_by
+            or record.principal_type != req.principal_type):
             return await self._sealed_refusal(req, record, status="denied", mission=mission,
                                               reason="Signed request differs from the sealed command")
+        try:
+            resolution = self._original_resolution(record)
+            self._original_context(record)
+        except IdempotencyReceiptCorrupt:
+            return await self._sealed_refusal(req, record, status='outcome_unknown', mission=mission,
+                reason='Original dispatch evidence is unverifiable; no action was reissued')
         if record.typed_action_id in {DOMAIN_CEILING_ACTION, "owner.permission.grant"}:
             recovered = await self._recover_domain_ceiling(req, record, mission)
             if recovered is not None:
                 return recovered
-        receipt = await self.authority.store.fetchone(
-            "SELECT value FROM runtime_meta WHERE key = ?", (f"command_run_receipt:{req.command_id}",),
-        )
-        if receipt is not None:
-            # This only reconstructs an observed acceptance receipt. It does not renew
-            # owner authority, resume canceled work or issue another Hermes operation.
-            return await self._complete_hermes_acceptance(
-                req, mission, record, json.loads(receipt["value"]),
-                before={"recovered_run_receipt": True},
-            )
+        try:
+            run = await self._read_owned_run_receipt(req, mission)
+        except IdempotencyReceiptCorrupt:
+            return await self._sealed_refusal(req, record, status='outcome_unknown', mission=mission,
+                reason='Original run evidence is unresolved; no action was reissued')
+        if run is not None:
+            # Original acceptance history, not new execution-capable authority.
+            return await self._complete_hermes_acceptance(req, mission, record, run,
+                before={"recovered_run_receipt": True})
+        if record.typed_action_id == 'memory.remember':
+            recovered = await self._recover_memory_result(req, record, mission)
+            if recovered is not None:
+                return recovered
         if mission is not None and mission.is_terminal:
             return await self._sealed_refusal(req, record, status="denied", mission=mission,
                                               reason="command_mission_terminal")
@@ -1239,6 +1458,62 @@ class CommandOrchestrator:
             before={"canonical_context": record.dispatch_metadata["canonical_context"],
                     "command_resolution": record.dispatch_metadata["typed_resolution"], "retry": True},
         )
+
+    async def _recover_memory_result(self, req, record, mission) -> CommandResult | None:
+        """Read a proved original memory effect; never execute or renew its authority."""
+        if self.actions is None or mission is None:
+            return None
+        row = await self.authority.store.fetchone('SELECT execution_id FROM action_executions WHERE command_id=? AND idempotency_key=?',
+            (req.command_id, req.idempotency_key))
+        if row is None:
+            return None
+        try:
+            execution = await self.actions.get_execution(row['execution_id'])
+        except (ValueError, TypeError) as exc:
+            return await self._sealed_refusal(req, record, status='outcome_unknown', mission=mission,
+                reason='Original local execution evidence is unverifiable; no action was reissued')
+        if (execution is None or execution.action_id != 'memory.remember'
+            or execution.snapshot_id != record.snapshot_id or execution.requested_by != record.requested_by
+            or execution.parameters_digest != self.actions.digest_parameters(record.typed_parameter_constraints)
+            or execution.status is not ExecutionStatus.VERIFIED_SUCCESS
+            or mission.state is not MissionState.VERIFIED_SUCCESS):
+            return None
+        receipt = await self.authority.store.fetchone('SELECT * FROM action_receipts WHERE execution_id=? AND status=? ORDER BY created_at_unix_ms DESC LIMIT 1',
+            (execution.execution_id, ExecutionStatus.VERIFIED_SUCCESS.value))
+        audit = await self.authority.store.fetchone("SELECT * FROM audit WHERE command_id=? AND device_id=? AND result='accepted' AND model_delegate='gateway:local' ORDER BY created_at_unix DESC LIMIT 1",
+            (req.command_id, req.device_id))
+        try:
+            observation = self.idempotency.evidence_object(
+                receipt['observed_postcondition_json'] if receipt else None, 'Original local observation')
+            self.idempotency.evidence_identity(observation.get('fact_id'), 'original fact')
+            fact_row = await self.authority.store.fetchone('SELECT * FROM owner_facts WHERE fact_id=?', (observation.get('fact_id'),))
+            fact = self.context.row_to_fact(fact_row) if fact_row else None
+            expected = record.typed_parameter_constraints
+            audit_result = self.idempotency.evidence_object(audit['after_json'] if audit else None, 'Original local audit')
+            local = self.idempotency.local_result(audit_result.get('local_execution'))
+            if (mission.owner_principal_id != 'device:' + req.device_id
+                or mission.authority_envelope.source_command_id != req.command_id
+                or fact is None or fact.authority.value != 'CANONICAL_OWNER' or fact.source_ref != 'owner-device:' + req.device_id
+                or fact.subject != expected['subject'] or fact.predicate != expected['predicate']
+                or fact.value != expected['value'] or fact.scope != expected.get('scope', 'global')
+                or receipt['evidence_pointer'] != 'owner-fact:' + fact.fact_id
+                or local['execution_id'] != execution.execution_id or local['action_id'] != execution.action_id
+                or local.get('evidence_ref') != receipt['evidence_pointer']
+                or local['verification_state'] != receipt['status']
+                or ('mission_state' in audit_result and audit_result['mission_state'] != mission.state.value)):
+                return await self._sealed_refusal(req, record, status='outcome_unknown', mission=mission,
+                    reason='Original local effect evidence is incomplete; no action was reissued')
+            result = CommandResult(status='accepted', command_id=req.command_id, idempotency_key=req.idempotency_key,
+                message=local['summary'], mission_id=mission.mission_id, evidence_id=audit['id'],
+                context_snapshot_id=record.snapshot_id, resolved_action_id=execution.action_id,
+                effective_action_class=record.effective_action_class, no_stale_replay=record.no_stale_replay,
+                max_age_seconds=CommandResolution.model_validate(record.dispatch_metadata['typed_resolution']).max_age_seconds,
+                execution_id=execution.execution_id, local_execution=local,
+                context_gaps=record.dispatch_metadata['canonical_context'].get('context_gaps', []))
+            return await self._publish_original(req, result)
+        except (IdempotencyReceiptCorrupt, ValueError, TypeError, KeyError):
+            return await self._sealed_refusal(req, record, status='outcome_unknown', mission=mission,
+                reason='Original local effect evidence is unverifiable; no action was reissued')
 
     async def _recover_domain_ceiling(self, req, record, mission) -> CommandResult | None:
         """Recover only committed target evidence; never execute or renew a grant.
@@ -1315,7 +1590,7 @@ class CommandOrchestrator:
             effective_action_class=record.effective_action_class, no_stale_replay=True, max_age_seconds=30,
             execution_id=execution.execution_id, local_execution=local_execution,
             context_gaps=record.dispatch_metadata.get("canonical_context", {}).get("context_gaps", []))
-        await self.idempotency.complete(req.idempotency_key, result.model_dump())
+        result = await self._publish_original(req, result)
         return result
 
     async def _execute_local_action(
@@ -1374,7 +1649,7 @@ class CommandOrchestrator:
                 result="degraded", command_id=req.command_id, device_id=req.device_id,
                 project_id=req.project_id, failure_reason="local_action_unregistered", before=before,
             )
-            await self.idempotency.complete(req.idempotency_key, result.model_dump())
+            result = await self._publish_original(req, result)
             return result
 
         try:
@@ -1408,7 +1683,7 @@ class CommandOrchestrator:
                 result="degraded", command_id=req.command_id, device_id=req.device_id,
                 project_id=req.project_id, failure_reason=str(exc), before=before,
             )
-            await self.idempotency.complete(req.idempotency_key, result.model_dump())
+            result = await self._publish_original(req, result)
             return result
 
         if execution.status != ExecutionStatus.AUTHORIZED:
@@ -1444,7 +1719,7 @@ class CommandOrchestrator:
                 result=result_status, command_id=req.command_id, device_id=req.device_id,
                 project_id=req.project_id, failure_reason=execution.error_code, before=before,
             )
-            await self.idempotency.complete(req.idempotency_key, result.model_dump())
+            result = await self._publish_original(req, result)
             return result
 
         try:
@@ -1601,7 +1876,7 @@ class CommandOrchestrator:
             local_execution=local_execution,
             context_gaps=context_gaps,
         )
-        await self.idempotency.complete(req.idempotency_key, result.model_dump())
+        result = await self._publish_original(req, result)
         return result
 
     async def _fail_local_action(
@@ -1680,7 +1955,7 @@ class CommandOrchestrator:
             local_execution=local_execution,
             context_gaps=context_gaps,
         )
-        await self.idempotency.complete(req.idempotency_key, result.model_dump())
+        result = await self._publish_original(req, result)
         return result
 
     async def _permitted_strategies(

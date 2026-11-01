@@ -1,0 +1,64 @@
+{
+  "state": "FROZEN_R2_READY_FOR_INDEPENDENT_RECHECK",
+  "published_foundation": "629a986019a4eb298f58dd98c62e6bcbade36ab7",
+  "worktree": "/workspace/van-lanes-20261101/mission-effect-recovery",
+  "owned_paths": {
+    "backend/van_gateway/idempotency/service.py": "a14062fb2796ccece057a399045ec6ae43abc5a40c105a386ab63ca8b4875cc4",
+    "backend/van_gateway/orchestrator.py": "6908f3543211cde119d008d64ae5a285e6d5fbebf7a547c44dcb469d6ec5c492",
+    "backend/tests/test_orchestrator_original_effect_recovery.py": "b2a97c941449bbaaa7e157be350e8a79cc953efb2a6794318d11dd77ba00869d"
+  },
+  "scope": "Original BE003 OBL-002 / OBS-002 source recovery; three independent review blockers only",
+  "review": "/workspace/van-be003-independent-review-20261101/review.json",
+  "R1_preserved": "/workspace/van-be003-obl002-20261101/HANDOFF.json; R1_BEFORE_SOURCE.zip/R1_PINS.json",
+  "before": {
+    "receipt": "BEFORE01_RECEIPT.json",
+    "actual_exit": 1,
+    "tests": 3,
+    "failures": 3
+  },
+  "early_after": "EXACT_AFTER02_RECEIPT.json:3passed exit0 on earlier R2 pins; NESTED03_RECEIPT.json:15passed exit0 on earlier R2 pins",
+  "final_affected": {
+    "receipt": "AFFECTED04_RECEIPT.json",
+    "raw": "AFFECTED04.log",
+    "junit": "AFFECTED04.xml",
+    "selection": "AFFECTED_SELECTION.txt",
+    "actual_exit": 0,
+    "elapsed_seconds": 454.41,
+    "junit_counts": {
+      "tests": 254,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "inputs_unchanged": true,
+    "children_remaining": [],
+    "composition": "original231 +20addedcontrols +3exactindependentprobes"
+  },
+  "guards": "FINAL_GUARDS.json: owner/frontend unchanged;374/383 mutation anchors valid NOT_RUN",
+  "artifacts": {
+    "FROZEN_R2_SOURCE.zip": "5f4a659e839d7e8ec61d7994637ff16e97f255cb23ede814d6ea2ad841c5f481",
+    "FROZEN_R2_FULL.patch": "19ad4d4bae77e7e45c2483b1f0143ee5962259075a5a568b7a27c9f5d2f869d2",
+    "R2_VS_R1.patch": "a32ed5debe28c6c606d6f0facd3546bbb83e67ae4e5ffb7ee5baf00747149700"
+  },
+  "implementation": [
+    "Malformed domain/nested authority/run/local observation/audit/result evidence returns original UNKNOWN without replacing original bytes or effects",
+    "Dispatch writer binds exact captured mission owner/source/envelope and original context snapshot under the marker claim; explicit constructor missions=None remains supported",
+    "Actual real MemoryRememberExecutor/OwnerFactAuthor/local fact/readback and restart controls preserved; no second write"
+  ],
+  "prior_index_mutation": "R1 INDEX_MUTANT12 expected two AssertionErrors exit1 remains separate proof; no registry/catalog changes",
+  "cleanup": [
+    "R1_FIXTURE_CLEANUP.json",
+    "COMPLETED_R2_FIXTURE_CLEANUP.json"
+  ],
+  "limits": [
+    "SOURCE controlled Hermes bridge; no native run GET or native effect qualification",
+    "SQLite supported owner actual; no PostgreSQL adapter claim",
+    "SourceCrash await injection and new app/store restart; not native process-death proof",
+    "Formal/native BE002/PRE003/BE003 acceptance unissued; OBL004 separate"
+  ],
+  "no_commits_push_migrations_generators_authority_edits": true,
+  "next": "Independent R2 recheck; sole integrator applies exact reviewed three-file pins on actual published foundation; author idle",
+  "final_archive_verified": true,
+  "full_patch_reverse_apply_check_exit": 0,
+  "actual_jobs": []
+}

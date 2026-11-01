@@ -1,0 +1,161 @@
+{
+  "schema": "van.independent-obl004-auditor-root-source-review/1",
+  "at_utc": "2026-11-01T15:40:38.157931+00:00",
+  "disposition": "NO_BLOCKING_FINDING_IN_THREE_PATH_ROOT_CORRECTION_FULL_OBL004_REMAINS_UNQUALIFIED",
+  "blockers": [],
+  "base": "629a986019a4eb298f58dd98c62e6bcbade36ab7",
+  "source_before_after": {
+    "tools/rebuild/source_storage_audit.py": "96f39729cc8cf6adcfb82a0de1308b5fb6ff47999a4b684bd41782ab89d7e1de",
+    "tests/rebuild/test_source_storage_audit.py": "092f4bff0ef1702574b166e83556c4d0ce3193b2f44dad469e60a38ab5bfdfa7",
+    "backend/tests/test_gateway_startup_storage.py": "2c6f75b9cdf4fc76c2217f2514235f1f463591b2a2a670045c88ed9c8e16231a"
+  },
+  "archive_sha256": "5c3db5c5911d811536ecd6c6772dc7f0273960f6da9f5251243246843eb919e1",
+  "patch_sha256": "defc17503bb752d039d3119558b66142c5c63e00c2d89c2a3ef21aae287ca291",
+  "source_archive_patch_before_after_exact": true,
+  "bounded_source_review": [
+    "CLI selects invocation checkout from existing markers/ancestor set before importingpytest; requestedroot may onlyconfirmsame root, never toolfilelocation or backend/foreign tree.Outside/ambiguousnested calls failbeforepytest/effect; root/defaultselectors anchored while explicitpytestargs retain actualcwd semantics.",
+    "Actual StorageAudit(root) entireclass AST byte-semantically unchanged: protected data/backenddata logical+physical/URI/symlink/dirfd/write/SQLite/namespace guards retained. No app/config/Store/lazyapp changes.",
+    "Freshimport tests run explicit-B/no-bytecode children at bothcwd with missing/ownedDB. Beforeeffectaudithook refuses writableopen/mkdir/SQLite/network/process and HOME/.env reads; exactimportmodule path asserted. This is controlled importinstrumentation with cache suppression, not bareinterpreter/OSsandbox or fullapplication lifecycle qualification.",
+    "New ownedWAL lifecycle uses realStore absolutefixture, commits row, observes liveWAL/SHM then naturalclose removal/reopen. Does not attribute historicalsidecars or authorize deleting trackeddata. Existing productionrefusal/startup assertions retained."
+  ],
+  "independent_probes": {
+    "results": [
+      {
+        "case": "actual default-root CLI cwd=.",
+        "exit": 0,
+        "two_before_write_refusals": true
+      },
+      {
+        "case": "actual default-root CLI cwd=backend",
+        "exit": 0,
+        "two_before_write_refusals": true
+      },
+      {
+        "case": "backend-override",
+        "exit": 2,
+        "before_pytest_report": true
+      },
+      {
+        "case": "foreign-valid-checkout",
+        "exit": 2,
+        "before_pytest_report": true
+      },
+      {
+        "case": "outside-cwd",
+        "exit": 2,
+        "before_pytest_report": true
+      },
+      {
+        "case": "nested-ambiguous-default-root",
+        "exit": 2,
+        "before_pytest_report": true
+      }
+    ],
+    "preflight_free_bytes": 4719927296,
+    "reserve_bytes": 4294967296,
+    "StorageAudit_class_AST_unchanged": true,
+    "three_pins_archive_patch_before_after_exact": true,
+    "owned_temp_cleanup": true,
+    "synthetic_markers": "Explicit isolated own fixtures, not native checkout identity/admission",
+    "production_tool": "/workspace/van-lanes-20261101/obl004-storage-audit/tools/rebuild/source_storage_audit.py"
+  },
+  "evidence_reuse_judgment": {
+    "finding": "Accept bounded96+11 composite reuse, not a single107terminal or fullaudit PASS.",
+    "basis": "Parsed actualXML107/102pass5fail R1 and107/106pass1fail R2. Excluding all11startupcases leaves96passed unchangedauditor/directinstrument cases. Parsed final11startupallpassXML/exit0; unionexact107IDs with only documented startupclassname alias normalization. Threecandidatepins identicalallruns; two unchangedinstrument testmodules remainexact629; only additional sourceenvironment difference is verified exactbaseline trading/VATI/commander sparse materialization, no product/test/assertion edit. These96 cases exercise auditor/generatedisolated instrumentfixtures, not fulltrading runtime, so reuse is bounded and supported.",
+    "actual_checks": {
+      "actual_R1": {
+        "tests": 107,
+        "pass": 102,
+        "fail": 5,
+        "terminal": "FAILED_preserved"
+      },
+      "actual_R2": {
+        "tests": 107,
+        "pass": 106,
+        "fail": 1,
+        "terminal": "FAILED_preserved"
+      },
+      "actual_R3_final_startup": {
+        "tests": 11,
+        "pass": 11,
+        "terminal_exit": 0
+      },
+      "valid_unique_composite": {
+        "earlier_byteidentical_instrument_passes": 96,
+        "replacement_all_startup_cases": 11,
+        "unique": 107,
+        "single107terminal_claim": false,
+        "JUnit_only_declared_startup_aliases_normalized": true
+      },
+      "three_pins_unchanged_all_runs": true,
+      "all_three_run_audits_forbidden_empty": true,
+      "two_direct_instrument_consumers_unchanged_baseline": true,
+      "materialized_trading_git_tree_exact": true,
+      "app_config_Store_lazy_source_unchanged": true,
+      "matrix": {
+        "canonical_roots": [
+          "backend/tests",
+          "tests",
+          "services",
+          "hermes/policy/tests",
+          "trading/tests"
+        ],
+        "runtime_profiles": [
+          "gateway",
+          "media",
+          "documentary",
+          "trading_postgres",
+          "browser_namespace",
+          "forecast_native_source"
+        ],
+        "cwd_choices": [
+          ".",
+          "backend"
+        ],
+        "cells": 10,
+        "all_full_cells_unexecuted": true,
+        "backup_defaultpath_native_and_snapshot_owner_disposition_pending": true
+      }
+    },
+    "old_failures": "Both earlier failedterminals and sparse-import errors preserved, not relabeled green. Finalstartup replaces all11 rather than selectively ignoring1failure."
+  },
+  "qualification_remaining": {
+    "unit": "BE003 OBL004 fullroot/startup-storage audit remains open; no acceptance issued",
+    "original_required_cells": "Every original5canonicalroot x2cwd, all10currently UNEXECUTED; narrow6CLIprobes and107uniqueaffectedcases do notfillwholecells.",
+    "canonical_roots": [
+      "backend/tests",
+      "tests",
+      "services",
+      "hermes/policy/tests",
+      "trading/tests"
+    ],
+    "runtimes": [
+      "gateway",
+      "media",
+      "documentary",
+      "trading_postgres",
+      "browser_namespace",
+      "forecast_native_source"
+    ],
+    "required_work": "Execute exactcurrenthead fullselectedoriginalroots undermatchingdeclaredlockedruntime/profile and both actualcwd with collection/execution/audit/snapshot evidence, retaining browser/private/PG/native prerequisite boundaries.BE003/BE002/PRE003/native gates remain separate. Existing sourceworker hardcodeschildcwdROOT, so a backendcwdlabel without actualchangedinvocation cannot count. Hostedmatrix plan requires root design authorization; no workflowchange implemented here.",
+    "backup_defaultpaths": "tools/ops/backup.py outside defaultcanonicalpytest roots: productiondefaultpath/nativebackup owner-scoped qualification remains separate, not executed or disabled.",
+    "snapshot_owner": "UnexplainedhistoricalWAL/SHM producer remainsunknown; trackedDB fixture/retention ownerdecision unresolved. No deletion or evidence attribution inferred."
+  },
+  "artifacts": [
+    "probe.py",
+    "probe.log",
+    "probe-results.json",
+    "before.json",
+    "after.json",
+    "evidence.py",
+    "evidence-check.json",
+    "evidence-check.log",
+    "evidence-harness-setup-failure.log"
+  ],
+  "cleanup": "All reviewer-owned CLI fixture/process calls bounded30s and terminated; TemporaryDirectory removed.Own/tmp preflight>=4GiB.No peer/author/shared/SDKdirs deleted.",
+  "limits": [
+    "No candidate sourceedits/commits/generators/Gradle/CI/newagents/nativeeffects or broadsuite rerun. Six narrow actualCLI calls only, on labeled owned syntheticmarker fixtures with real frozen productiontool.",
+    "Actual childguard tests/currentStore runtime effects are SOURCE fixtures, not native admission, historical snapshot proof, fullunit or fullmatrix qualification.",
+    "Original redteam intake/evidence scope and other active author probes remain separate; no authority inferred from PR/readiness/sourcepass."
+  ]
+}

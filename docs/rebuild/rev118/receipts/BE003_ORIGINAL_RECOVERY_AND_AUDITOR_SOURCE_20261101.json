@@ -1,0 +1,31 @@
+{
+  "schema": "van.be003.original-recovery-auditor-source/1",
+  "at_utc": "2026-11-01T16:01:22.788426+00:00",
+  "last_verified_published_base": "629a986019a4eb298f58dd98c62e6bcbade36ab7",
+  "reviewed_source_paths": 10,
+  "source_pins": "raw/be003-original-recovery-auditor-20261101/TEN_SOURCE_PINS.json",
+  "behavior": {
+    "OBL002": "Stale claim/loser cannot overwrite original accepted receipt. Recovery handles malformed domain/evidence shapes as UNKNOWN; writer joins original mission owner/source/envelope/context before effects, preserving supported missionless constructor and original native uncertainty.",
+    "OBL004": "Auditor root binds invocation checkout; backend cwd protects both checkout data trees. Arbitrary/ambiguous root selection refuses before pytest. StorageAudit(root) protections unchanged; guarded missing-env imports and owned WAL lifecycle added. Full qualification matrix remains open.",
+    "compatibility": "Metadata exact primitive-only shape/legacy null/persistence guard and prepared signed-byte ownership/routing contracts updated to actual reviewed producers; workflow/mutation core guard binds original fd33 plus exact authorized five retargets, not arbitrary current self-equality."
+  },
+  "actual_source_evidence": {
+    "combined": "314 actual integrated original-effect/startup/session/tool/registry cases, zero failures/errors/skips, storageaudit0 and snapshot/directory fingerprints unchanged.",
+    "OBL002_R2": "254 actual affected SOURCE passes0skip, independent3counterexamples closed; raw initial failedcases retained.",
+    "OBL004": "107 unique affected source IDs via96 unchanged instrument cases plus final11 startup cases, not a single107greenrun. Earlier102/5fail and106/1fail terminals remainFAILED; exactbaseline materialization and source hash reuse retained.",
+    "compatibility": "1369 actual whole declared JVM verification tests/0skip and27 actual Python guard cases; scopes overlap current314. Android app/main/unit/compiler inputs unchanged, only historical644 verificationtest delta explicitly bound. No new SDK/native assertion.",
+    "PG_reuse": "Exact3 prior declared isolatedPG skips have actual629 hosted PASSED lines with22 current source pins unchanged and identical testedmerge tree. No XML extraction or completePG/nativequalification inferred."
+  },
+  "canonical_guards": "Owner checkchanged[]/frontendunchanged/workmapconsistent;374IDs/383edits anchorpreflight0 is NOT_RUN, not fullcorpus execution. Initial systempython ownerexport missingaiosqlite retained as runtime failure; correct qualifiedvenv check0.",
+  "pending_intake": {
+    "PR": 106,
+    "head": "f20dce7ecc982ececc73bb3b338f9309bdb4ae22",
+    "state": "open/ready/unmerged at observed readback",
+    "effective": false,
+    "protected_evidence_applied": false,
+    "source_gate": "Currentredteamentry67 remains knownFAILED pending actual owner codeowner intake and exactpatch. Sourcecandidate publication under old valid records does not waive that gate."
+  },
+  "native_CI_history": "Exact629 run41313426404 and aggregate124872010597 FAILED. Gateway0 succeeded;1/2/3 failed actual contract/citation assertions. Kotlin/Python affected mutation jobs failed baseline controls, mutantsNOT_RUN. Job success or registry consistency is not execution totals. Originalwatch57805 terminalexit1; one resumeUnknownprocessid, no successfulreap/restart/signal claimed. a5d/c006 failures remain retained.",
+  "remaining": "All5canonicalroots\u00d72cwd fullOBL004 cells UNEXECUTED; no wholeOBL004/BE003/unit/native/BG001 release acceptance. Six actual runtime profiles, tool/backup/default-path scope, historicalunknownWAL/SHM and snapshot-owner disposition remain open. SO023REC authentic source-revocation producer/currentness contract remains unbound; metadata digest observations are not invented requirements or grants. No installer/credential/financial/provider activation.",
+  "next": "Genuinehooks/required4fdcommittedverification/normalpush/readback/exactheadCI; root must approve hosted OBL004 coverage/control design before workflow edits. Preserve blockedredteam gate until trustedintake."
+}

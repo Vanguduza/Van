@@ -1,0 +1,78 @@
+{
+  "schema": "van.independent-629a-two-test-compatibility-review/1",
+  "at_utc": "2026-11-01T14:13:56.385779+00:00",
+  "disposition": "NO_BLOCKING_FINDING_WITHIN_FROZEN_TWO_TEST_CORRECTION_OVERALL629a_GATE_REMAINS_FAILED",
+  "blockers_within_two_path_patch": [],
+  "base": "629a986019a4eb298f58dd98c62e6bcbade36ab7",
+  "source_before_after": {
+    "android/verification/src/test/kotlin/com/dial/van/session/DurableOutboxTest.kt": "3efcb86bbf1b1117b2ddff116c87da06c5e1f1168e6b948f2679ebdb5f633666",
+    "tests/contracts/test_stored_command_is_deliverable.py": "0afba04d8124f9c4134e99b50214d8b01f9883c77aaabd6b69e7d71cad893a6d"
+  },
+  "archive_patch_current_verified": true,
+  "archive_sha256": "c7bb97522cb2e900c7e701e900eac123a2b1bbbde2feec3e5296f2b180498b96",
+  "patch_sha256": "164ffd6b49ec162f36e5f31b63a21742473f7fdb041ddab943c4b457a69eaf72",
+  "only_two_tests_changed": true,
+  "review": {
+    "canonical": "Read inherited docs/VAN_REMOTE_BROWSER_PRODUCTION_BLUEPRINT_REV_1_5.md20.14\u201320.15; required original command/message/idempotency/turn/time/class/freshness/live-context/path/attempt metadata and classification remain; no destructive stale replay or parallel payload store.",
+    "metadata": "Exact declared-field set assertion retained; four admitted fields constrained to nullable boxedBoolean/String types and legacy nulls. Actual production OutboxPersistence.toCommand/toEntry roundtrip asserts allfour facts and exact separate canonical payload. Inline payload remains absent from metadata; original test names/all othertests preserved.",
+    "delivery": "Old raw baseUrl/callback spellings replaced by stricter captured root/device/token, build/serialize-once, same original body/proof bytes, freshHeaders before outputStream, current profile/device, pretransport ownership/check ordering, originalPrepared recovery/no resign assertions. Actual existing productioncontroller byteidentity/one-send/persistencefailure/cancellation tests executed in full supplied JVM suite, not assumed from text.",
+    "scope": "No application/source weakening or feature/authority changes; all41 reviewed candidate paths unchanged."
+  },
+  "evidence_independently_verified": {
+    "full_declared_JVM_XML": 1369,
+    "JVM_failures_errors_skips": 0,
+    "JVM_actual_terminal_exit": 0,
+    "current_JVM_input_inventory_exact": true,
+    "old644_inventory_delta": [
+      "android/verification/src/test/kotlin/com/dial/van/session/DurableOutboxTest.kt"
+    ],
+    "SDK_reuse": "Actual app/main/appunit/compiler inputs unchanged; only verification test differs. Reuse prior SDK43 mapped source proof, no fresh SDK/fullapp/native acceptance claim.",
+    "exact_Python_module_actual_terminal": 3,
+    "Python_exit": 0,
+    "six_affected_modules": {
+      "state": "REFUSED_UNEXECUTED",
+      "cause": "4GiB ownedtemp reserve",
+      "required_bytes": 4294967296,
+      "observed_free_bytes": 4222750720,
+      "tests_run": false,
+      "retry": "Only after original reserve clears; no weakening"
+    },
+    "current_storage_readonly_free_bytes": 4419313664,
+    "no_sixmodule_rerun_by_reviewer": true
+  },
+  "native_failure_addendum": {
+    "source": "One supported decoded logs+steps read for each exact job, no polling loop; raw logs retained with SHA inventory. Job9 execution step failed for all3, uploads succeeded. These are actual pytest assertion failures, not inferred post-run cache failures.",
+    "job1": {
+      "id": 124868393704,
+      "summary": "1failed1780passed2skipped; old exact SESSION_OUTBOX->continue spelling in test_context_ingest_queue_routing::test_generic_replayer_preserves_session_outbox_records",
+      "covered_by_two_test_fix": false
+    },
+    "job2": {
+      "id": 124868393750,
+      "summary": "1failed1812passed3skipped; test_ci_public_source_shards::test_workflow_installer_mirror_and_frozen_mutation_source_remain_exact still demands old mutation_suite bytes despite independently reviewed five retained semantic retargets",
+      "covered_by_two_test_fix": false
+    },
+    "job3": {
+      "id": 124868393576,
+      "summary": "3failed1868passed1skipped; two test_red_team_register assertions reference obsolete Section67 test citation; old test_stored_command_is_deliverable raw-post assertion also fails",
+      "stored_command_failure_covered": true,
+      "red_team_failures_covered": false
+    },
+    "uncovered_boundaries": [
+      "session-outbox routing source guard spelling",
+      "exact reconciled mutation-source expectation",
+      "red-team Section67 test citation"
+    ],
+    "disposition": "Root notified for separate narrow repair. Overall629a source gate FAILED; no full worker union/native acceptance or speed claim. Four Kotlin/Python mutation baseline failures are not caught mutants; mutants NOT_RUN. Original watcher57805 untouched.",
+    "raw_log_sha256": {
+      "124868393704": "a588c7056160763280ca623886a6c29e85c12d411996b896252b1923195b8db0",
+      "124868393750": "7b5a39bba821684fe1a3351ca373e0e98cac166660cfc23d7367d156e1481c00",
+      "124868393576": "da41c3beb8f5943b4ea776cf945b13758368e97beb40701118a3223a9a379158"
+    }
+  },
+  "limits": [
+    "Read-only source/receipts/decoded native failure review; no candidate edits, commits, CI effects/poll loop, Gradle/broad suites/subagents.",
+    "Sixmodule proof explicitly refused/unexecuted at original4GiB reserve; no lowering reserve or deleting shared/peer/active data. Root subsequently reports safe owned reclamation for later separately authorized work.",
+    "No publication/genuineexactheadnative qualification granted by this bounded tests-only disposition."
+  ]
+}

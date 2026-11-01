@@ -80,13 +80,36 @@ def test_the_offline_path_stores_the_body_prepared_before_dispatch():
     assert "val body = buildCommandBody(" in dispatched
     assert "val bodyText = body.toString()" in dispatched
     assert dispatched.index("onPreparedCommand(bodyText)") < dispatched.index("postRawAt(")
-    assert re.search(r'postRawAt\(baseUrl,\s*"/v1/commands",\s*bodyText', dispatched)
-    assert "onPreparedCommand = { preparedBody = it }" in controller
-    assert "recordFailure(command, t, preparedBody)" in controller
+    # The original actor/root are captured before preparation, rather than rereading
+    # a mutable profile after an owner switches accounts while transport is pending.
+    for capture in ("val originalRoot = baseUrl", "val originalDevice = deviceId",
+                    "val originalToken = deviceAccessToken"):
+        assert dispatched.index(capture) < dispatched.index("val body = buildCommandBody(")
+    assert dispatched.count("buildCommandBody(") == 1
+    assert dispatched.count("val bodyText = body.toString()") == 1
+    assert re.search(r'postRawAt\(originalRoot,\s*"/v1/commands",\s*bodyText', dispatched)
+    assert 'proofHeaders("POST", "/v1/commands", bodyText)' in dispatched
+    assert "baseUrl == originalRoot && deviceId == originalDevice && deviceAccessToken == originalToken" in dispatched
+    assert dispatched.index("beforeDispatch()") < dispatched.index('proofHeaders("POST", "/v1/commands", bodyText)')
+    transport_start = dispatch_source.index("private fun postRawAt(")
+    transport_end = dispatch_source.index("private fun postProved(", transport_start)
+    transport = dispatch_source[transport_start:transport_end]
+    assert transport.index("freshHeaders?.invoke()") < transport.index("conn.outputStream.use")
+    assert "it.write(body.toString().toByteArray(StandardCharsets.UTF_8))" in transport
+    prepared = controller.index("onPreparedCommand = {")
+    before_send = controller.index("beforeDispatch = {", prepared)
+    failure = controller.index("recordResponse(command, response)", before_send)
+    assert "preparedBody = it" in controller[prepared:before_send]
+    before_transport = controller[before_send:failure]
+    assert "gateway.permissionProfileIdentity() == originalProfile" in before_transport
+    assert "gateway.deviceIdOrEmpty() == originalDevice" in before_transport
+    assert before_transport.index("originalOwned = storeSignedBody(") < before_transport.index("check(originalOwned)") < before_transport.index("priorHttpAttempt = true")
+    assert "recordFailure(command, t, preparedBody, originalProfile, priorHttpAttempt, originalOwned)" in controller
     stored = controller.index("private fun storeSignedBody(")
-    following = controller[stored:controller.index("fun reportUndelivered(", stored)]
+    following = controller[stored:controller.index("fun reportRecoveredOriginal(", stored)]
     assert "OfflineSubmission.preparedReplay(preparedBody, command.idempotencyKey)" in following
-    assert "return store(body, needsReconfirm)" in following
+    assert "it(body, needsReconfirm, originalProfile, priorHttpAttempt)" in following
+    assert "storeForLater?.invoke(body, needsReconfirm)" in following
     assert "buildCommandBody(" not in following, "offline recovery must not re-sign an uncertain dispatch"
 
 

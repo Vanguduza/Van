@@ -1,0 +1,80 @@
+{
+  "schema": "van.independent-be003-obl002-r2-source-recheck/1",
+  "at_utc": "2026-11-01T15:19:10.516158+00:00",
+  "disposition": "ALL_THREE_ACCEPTED_BLOCKERS_CLOSED_NO_BLOCKING_FINDING_WITHIN_BOUNDED_R2_RECHECK",
+  "blockers": [],
+  "base": "629a986019a4eb298f58dd98c62e6bcbade36ab7",
+  "source_before_after": {
+    "backend/van_gateway/idempotency/service.py": "a14062fb2796ccece057a399045ec6ae43abc5a40c105a386ab63ca8b4875cc4",
+    "backend/van_gateway/orchestrator.py": "6908f3543211cde119d008d64ae5a285e6d5fbebf7a547c44dcb469d6ec5c492",
+    "backend/tests/test_orchestrator_original_effect_recovery.py": "b2a97c941449bbaaa7e157be350e8a79cc953efb2a6794318d11dd77ba00869d"
+  },
+  "source_archive_patch_exact": true,
+  "artifact_hashes": {
+    "FROZEN_R2_SOURCE.zip": "5f4a659e839d7e8ec61d7994637ff16e97f255cb23ede814d6ea2ad841c5f481",
+    "FROZEN_R2_FULL.patch": "19ad4d4bae77e7e45c2483b1f0143ee5962259075a5a568b7a27c9f5d2f869d2",
+    "R2_VS_R1.patch": "a32ed5debe28c6c606d6f0facd3546bbb83e67ae4e5ffb7ee5baf00747149700"
+  },
+  "closed_findings": [
+    {
+      "id": "BE003-REVIEW-01",
+      "result": "Exact original mission-envelope[] HTTP repro now passes explicit200UNKNOWN, originalreceipt unchanged and only original1controlledPOST. evidence_object/domainCommandResult/CommandAuthorityRecord/AuthorityEnvelope and typedidentity validation bound corrupted authority/run/result JSON without blanket catchall."
+    },
+    {
+      "id": "BE003-REVIEW-02",
+      "result": "Exact verified realMemoryRemember/OwnerFactAuthor effect crash+postcondition[] repro now passes explicit200UNKNOWN with originalfactcount1/no secondwrite. ObservationfactID/audit/localexecution typedshape and ID/status/evidencepointer joins validated; verified proof still reads originalactualfact and constraints."
+    },
+    {
+      "id": "BE003-REVIEW-03",
+      "result": "Exact healthawait missionowner-switch repro now refuses/holds with0controlledPOST. SameBEGINIMMEDIATE dispatchclaim checks capturedmissionID/currentowner/source-command/fullauthorityenvelope, originalcontextsnapshot command/digest, controls, seal/request/device/age before markercommit. Explicit missionless constructor remains separate and rejects borrowing an existingmission."
+    }
+  ],
+  "source_review": [
+    "Object/domain/nested evidence validation raises domain IdempotencyReceiptCorrupt/CommandAuthorityError. Catchlists are explicit schema/decode/lookup failures, not broad Exception suppression; rollback BaseException handlers rethrow.",
+    "Original completedpublication guards, exactrequesthash/currentHTTPcaller binding, legacyowned-run-event fallback, nonce/signature semantics and no reissue paths preserved. No new receiptowner/authority/schema/service.",
+    "Original memory effect still requires actualownerfact canonicalauthority+source+subject/predicate/value/scope, execution sealedparameterdigest/snapshot/requester and ownedreceipt/audit evidence; statusstrings alone are insufficient.",
+    "Currentmission controls/device revocation and expiredsealedintent checks remain before newdispatch; originalhistorical completed receipts do not become new execution authority. Bridge has no nativeoriginalrunGET; unbound/ambiguous evidence heldUNKNOWN without fabricatednativeproof."
+  ],
+  "independent_evidence": {
+    "exact_original_HTTP_SQLite_repros": 3,
+    "failures_errors_skips": 0,
+    "actual_pytest_exit": 0,
+    "elapsed_log": "3passed in8.32s",
+    "original_repro_sources": "/workspace/van-be003-independent-review-20261101/test_original_corrupt_shapes.py and test_dispatch_mission_owner.py, unchanged from R1 failures",
+    "preflight": {
+      "free_bytes": 4741554176,
+      "reserve_bytes": 4294967296,
+      "author_completed_cleanup_confirmed": true
+    },
+    "imports": "Explicit candidate backend/test/root PYTHONPATH;-B;actualspec paths checked",
+    "owned_fixture_cleanup": "Only reviewer-owned exact-three tree archived/hashreadback/removed. Author-owned AFFECTED04 cleanup was separately confirmed before launch; no peer/shared/SDK/active trees touched."
+  },
+  "provided_evidence_verified": {
+    "final_AFFECTED04": {
+      "actual_exit": 0,
+      "tests": 254,
+      "failures_errors_skips": 0,
+      "inputs_unchanged": true,
+      "children_remaining": [],
+      "composition": "original231+20addedcontrols+3exactoriginalprobes; overlaps independent3, not summed"
+    },
+    "positive_branches": "Final254XML includes genuine explicitmissionless, legacyownedrunevent and actualverifiedmemoryrestart positives.",
+    "earlier_after": "EXACT_AFTER02/NESTED03 are earlierR2pins, not promoted as final; final254currentpins used.",
+    "R1_failures": "Actual3BEFORE01 assertionfailures +originalreview/rawfixtures preserved; R1sourcearchive SHA unchanged.",
+    "guards": "Supplied owner/frontend read-only unchanged and374/383 anchors valid; full374NOT_RUN."
+  },
+  "artifacts": [
+    "before.json",
+    "after.json",
+    "preflight.json",
+    "exact-three.log",
+    "exact-three.xml",
+    "EXACT_THREE_FIXTURES.zip",
+    "owned-cleanup.json"
+  ],
+  "limits": [
+    "Bounded SOURCE recovery review only; actualSQLiteHTTP/localMemory effect, Hermes transport controlled. No actualremote/nativeeffect, processdeath, PGadapter, unit/nativeadmission/BE002/PRE003/BE003/BG001 or full374 acceptance.",
+    "Reviewer performed no candidateedits/commits/Gradle/CI/newagents/broadunchangedsuites. Only exact3independent fixtureprobes after reserveallowed; actual final254 is supplied genuine terminal evidence.",
+    "OBL004 and unrelatedredteam intake/evidenceauthorization remain separate. Soleintegrationowner exacthashapply/hook/baseline/publication gates required."
+  ]
+}

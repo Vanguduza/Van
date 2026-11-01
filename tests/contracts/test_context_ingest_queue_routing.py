@@ -9,7 +9,20 @@ def _read(path: str) -> str:
 
 def test_generic_replayer_preserves_session_outbox_records():
     source = _read("android/app/src/main/java/com/dial/van/gateway/QueueReplayer.kt")
-    assert "QueueReplayRoute.SESSION_OUTBOX -> continue" in source
+    # Both session work and unresolved/foreign kinds retain their original owner.
+    # This arm must precede the generic command claim, not merely exist somewhere.
+    replay = source[source.index("suspend fun replayNow()") : source.index("enum class QueueReplayRoute")]
+    held = replay.index("QueueReplayRoute.SESSION_OUTBOX, QueueReplayRoute.UNKNOWN_HELD -> continue")
+    context = replay.index("QueueReplayRoute.CAPTURED_CONTEXT -> {")
+    command = replay.index("QueueReplayRoute.OWNER_COMMAND -> Unit")
+    claim = replay.index("queue.claimGeneric(")
+    assert held < context < command < claim
+    assert "queue.remove(" not in replay
+    assert "queue.purgeExpired(" not in replay
+    context_branch = replay[context:command]
+    assert "queue.finishCapturedContext(cmd, expiredOnly = true)" in context_branch
+    assert context_branch.index("transport.ingestCapturedContext(") < context_branch.index("queue.finishCapturedContext(cmd)")
+    assert "catch (cancelled: CancellationException) { throw cancelled }" in context_branch
     assert "SESSION_ENVELOPE" in source
     # The historical defect deleted every non-command record before the session restore.
     assert "if (!ReplayDispatchPolicy.mayDispatch(cmd.kind)) {\n                queue.remove(cmd.id)" not in source

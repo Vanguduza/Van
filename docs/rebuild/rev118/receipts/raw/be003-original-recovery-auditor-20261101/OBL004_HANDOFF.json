@@ -1,0 +1,52 @@
+{
+  "state": "FROZEN_THREE_PATH_OBL004_ROOT_GAP_FOR_INDEPENDENT_SOURCE_REVIEW",
+  "base": "629a986019a4eb298f58dd98c62e6bcbade36ab7",
+  "worktree": "/workspace/van-lanes-20261101/obl004-storage-audit",
+  "source_pins": {
+    "tools/rebuild/source_storage_audit.py": "96f39729cc8cf6adcfb82a0de1308b5fb6ff47999a4b684bd41782ab89d7e1de",
+    "tests/rebuild/test_source_storage_audit.py": "092f4bff0ef1702574b166e83556c4d0ce3193b2f44dad469e60a38ab5bfdfa7",
+    "backend/tests/test_gateway_startup_storage.py": "2c6f75b9cdf4fc76c2217f2514235f1f463591b2a2a670045c88ed9c8e16231a"
+  },
+  "before_pins": {
+    "tools/rebuild/source_storage_audit.py": "4cc5cc653c4ec97966044fd3b87ac1b0f81b81acfe409ba250a0b51e96970402",
+    "tests/rebuild/test_source_storage_audit.py": "f6bf7f503a3f51d59721d3ef1830b8316b00125a6ec8eeb9b4cb37e2984fc1c2",
+    "backend/tests/test_gateway_startup_storage.py": "45dc550bf63661790af9911810888efeac8bfb853bcdfe247131d6645032f646"
+  },
+  "archive_sha256": "5c3db5c5911d811536ecd6c6772dc7f0273960f6da9f5251243246843eb919e1",
+  "patch_sha256": "defc17503bb752d039d3119558b66142c5c63e00c2d89c2a3ef21aae287ca291",
+  "reverse_apply_check": 0,
+  "original_counterexample": "/workspace/van-obl004-readonly-20261101/FINDINGS.json; originalCLI backendcwd silentlymissedownedparentdata. Initial capture/tempfile/loggingbeforeeffect refusals preserved separately.",
+  "invariants": "StorageAudit(root) class unchanged; all existing protectedpath/URI/symlink/directoryfd checks and originaltests retained. CLI anchors checkout from cwdmarkers, confirms optionalroot cannot selectforeign/backend subtree, refuses outside/ambiguousnestedcheckout before importingpytest. Externalinstrument location grantsno rootauthority. Defaulttargetpaths rootanchored; explicitpytestargs retain cwd semantics.",
+  "actual_tests": {
+    "direct_modules": [
+      "tests/rebuild/test_source_storage_audit.py",
+      "backend/tests/test_gateway_startup_storage.py",
+      "tests/rebuild/test_public_source_shards.py",
+      "tests/rebuild/test_backend_public_source.py"
+    ],
+    "composite": "/workspace/van-obl004-implementation-20261101/AFFECTED_COMPOSITE.json",
+    "unique_pass": 107,
+    "skips": 0,
+    "old_runs": "R1 actual102pass5missingvati fixturefail;R2 actual106pass1missingcommander fixturefail; both retainedFAILED. Finalstartup11pass0skip; no source/assertion change betweenruns.",
+    "storage_audits": "Eachactualrun forbidden_events empty; newpositiveownedCLI sentinel probes deliberately generate their own2rejected writes and preservebytes. Existingrealphase/shard/plugin/media/cache/proofadversarial tests run as affectedinstrument controls, not nativequalification.",
+    "new_startup": "4guardedfreshimports root/backend x missing/ownedDB; exactimportmodule path; zero writable/DB/directory/network/process/defaultenv/HOME reads. Existingproduction4negative+actualASGI startup preserved; ownedWAL lifecycle positive added."
+  },
+  "qualification_matrix": "/workspace/van-obl004-implementation-20261101/QUALIFICATION_MATRIX.json",
+  "full_OBL004": "NOT_CLOSED: all5canonicalroots x2cwd fullcellsUNEXECUTED_CURRENT_CANDIDATE; no fullsuite/source/native/unit acceptance. Matrixretains exactdeclaredprofiles/separateservices/browser/PG/private/native slices and proposes additivehostedqualification forrootdecision only. No workflow edit.",
+  "materialized_baseline_dependencies": {
+    "base": "629a986019a4eb298f58dd98c62e6bcbade36ab7",
+    "trading_source_tree_git_oid": "63584cc3cfd5d53c2b7f699cbad9430181223469",
+    "R1": "trading absent;4import+startup failed before runtime assertions",
+    "R2": "trading/vati exactbaseline present;startup commander import missing, other106case passes preserved",
+    "R3": "full trading tree materialized with normal sparsecheckoutadd; alltracked bytes exactHEAD, no authorchange outside3paths",
+    "source_hash_reuse": "Earlier96 auditor/directinstrument cases unchanged; complete finalstartup11 replaces its11cases; no single107terminal0 claim."
+  },
+  "main_preservation": {
+    "four_test_WIP_exact": true,
+    "tracked_snapshot_sha256": "2599f07d79e698115dddf647deef263efb927d8de6c8bafc7a08e935fa29f95e",
+    "pending_intake_PR106": "Ready/open/unmerged per root latestread; recordnotused, evidenceunmodified."
+  },
+  "original_watch": "Root /workspace/van-queue-watch-57805-terminal-observation-20261101.json: originalwatchreceipt terminalexit1, originalcontrollerabsent; one resume returnedUnknownprocessid, not retried. No successfulreap/replacement/signal claim.",
+  "owned_jobs": [],
+  "next": "Independentnarrow3pathsource review; rootbindshostedmatrixdesign separately. No commit/push or sourceapplicationtomain inthisauthorstage."
+}

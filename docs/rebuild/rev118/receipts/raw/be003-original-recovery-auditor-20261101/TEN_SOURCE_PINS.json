@@ -1,0 +1,12 @@
+{
+  "android/verification/src/test/kotlin/com/dial/van/session/DurableOutboxTest.kt": "3efcb86bbf1b1117b2ddff116c87da06c5e1f1168e6b948f2679ebdb5f633666",
+  "tests/contracts/test_ci_public_source_shards.py": "25e84f752657fdb17c0849577bc1d7ee37fcfa4d4d39ac5d0cbcb28fda10a464",
+  "tests/contracts/test_context_ingest_queue_routing.py": "154469d1cbe29b621a1f4fbbb3e32f42ae821b16017c4b6b3999503218629215",
+  "tests/contracts/test_stored_command_is_deliverable.py": "0afba04d8124f9c4134e99b50214d8b01f9883c77aaabd6b69e7d71cad893a6d",
+  "backend/van_gateway/idempotency/service.py": "a14062fb2796ccece057a399045ec6ae43abc5a40c105a386ab63ca8b4875cc4",
+  "backend/van_gateway/orchestrator.py": "6908f3543211cde119d008d64ae5a285e6d5fbebf7a547c44dcb469d6ec5c492",
+  "backend/tests/test_orchestrator_original_effect_recovery.py": "b2a97c941449bbaaa7e157be350e8a79cc953efb2a6794318d11dd77ba00869d",
+  "tools/rebuild/source_storage_audit.py": "96f39729cc8cf6adcfb82a0de1308b5fb6ff47999a4b684bd41782ab89d7e1de",
+  "tests/rebuild/test_source_storage_audit.py": "092f4bff0ef1702574b166e83556c4d0ce3193b2f44dad469e60a38ab5bfdfa7",
+  "backend/tests/test_gateway_startup_storage.py": "2c6f75b9cdf4fc76c2217f2514235f1f463591b2a2a670045c88ed9c8e16231a"
+}
