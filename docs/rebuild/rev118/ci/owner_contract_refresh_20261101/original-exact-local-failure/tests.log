@@ -1,0 +1,21 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+_________ test_saved_endpoints_match_gateway_and_conditional_contracts _________
+
+    def test_saved_endpoints_match_gateway_and_conditional_contracts():
+        actual = exporter().export()
+        schemas = actual.pop("schemas")
+        saved = json.loads((ROOT / "registries/owner_endpoints.json").read_text())
+>       assert saved == actual, "Regenerate using tools/audit/export_owner_endpoints.py"
+E       AssertionError: Regenerate using tools/audit/export_owner_endpoints.py
+E       assert {'schema_vers....', ...], ...} == {'schema_vers....', ...], ...}
+E         
+E         Omitting 4 identical items, use -vv to show
+E         Differing items:
+E         {'endpoints': [{'endpoint_id': 'VE-8f74886a5b7d', 'method': 'DELETE', 'path': '/v1/browser/interactive-sessions/{sessi...ath': '/v1/trading/charts/workspaces/{workspace_id}', 'authentication': 'INGRESS_BEARER_AND_PAIRED_DEVICE', ...}, ...]} != {'endpoints': [{'endpoint_id': 'VE-8f74886a5b7d', 'method': 'DELETE', 'path': '/v1/browser/interactive-sessions/{sessi...ath': '/v1/trading/charts/workspaces/{workspace_id}', 'authentication': 'INGRESS_BEARER_AND_PAIRED_DEVICE', ...}, ...]}
+E         Use -v to get more diff
+
+tests/contracts/test_owner_endpoint_registry.py:26: AssertionError
+=========================== short test summary info ============================
+FAILED tests/contracts/test_owner_endpoint_registry.py::test_saved_endpoints_match_gateway_and_conditional_contracts
+1 failed in 8.05s

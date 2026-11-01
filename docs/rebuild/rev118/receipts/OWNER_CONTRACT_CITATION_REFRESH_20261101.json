@@ -1,0 +1,4400 @@
+{
+  "schema": "van.owner-contract-citation-refresh/1",
+  "at_utc": "2026-11-01T03:40:30.918282+00:00",
+  "source_parent": "d43bd396765204a4843cdb7485535e9fcd7af3ce",
+  "authorizations": [
+    "auth-20261022-owner-owner-contract-refresh",
+    "auth-20261022-owner-autonomous-candidate-build"
+  ],
+  "scope": "Canonical derived citations/generation/rendering only; application, routes, schemas, security and inherited assertions unchanged.",
+  "original_hosted_failure": {
+    "head": "d43bd396765204a4843cdb7485535e9fcd7af3ce",
+    "run": 41266388959,
+    "job": 124730079370,
+    "state": "FAILED_RETAINED",
+    "case": "tests/contracts/test_owner_endpoint_registry.py::test_saved_endpoints_match_gateway_and_conditional_contracts",
+    "counts": {
+      "passed": 5897,
+      "failed": 1,
+      "skipped": 7
+    },
+    "coverage_step": "FAILED: source cases missing, failed or errored"
+  },
+  "original_exact_local_reproduction": {
+    "passed": 0,
+    "failed": 1,
+    "assertion": "Regenerate using tools/audit/export_owner_endpoints.py"
+  },
+  "cause": "f875 session helper inserted50 app.py lines; prior final guard set omitted owner/frontend registry checks for this source-location dependency.",
+  "semantic_diff": {
+    "at_utc": "2026-11-01T03:38:01.437797+00:00",
+    "source_parent": "d43bd396765204a4843cdb7485535e9fcd7af3ce",
+    "source_change": "f8758db746582439819c1c1129ca64a8cf9fca7d inserted50 app.py lines before cited route declarations",
+    "only_derived_source_line_citations_and_generation_hashes_changed": true,
+    "changes": [
+      {
+        "path": [
+          "docs/rebuild/rev118/backend/OWNER_REGISTRY_GENERATION.json",
+          "outputs",
+          "registries/owner_endpoints.json"
+        ],
+        "before": "1641af598b1672ea0c4ef159403493d7e8a3f88cca815c39e126e72eb0671651",
+        "after": "5365b2e8f45399c86bf6cdd8c07e3d0da49f0af1d00753ca7a3a968c03949e40"
+      },
+      {
+        "path": [
+          "docs/rebuild/rev118/backend/OWNER_REGISTRY_GENERATION.json",
+          "outputs",
+          "registries/owner_features.json"
+        ],
+        "before": "ae7b3416847599ebc5d009a535418c43c7ab0491e979edfcaf2da41d28c905ac",
+        "after": "6810bad6b131deb30bea2460fdfb78a932936137069fdf1fea1bdba52af2ae0c"
+      },
+      {
+        "path": [
+          "docs/rebuild/rev118/backend/OWNER_REGISTRY_GENERATION.json",
+          "outputs",
+          "registries/owner_screens.json"
+        ],
+        "before": "3364d1196e99c6a935fd157ffe04335c67a656938b5363b4d3f10fc278e4ba49",
+        "after": "445f747bcfbe3a2a1cbf82005c44a697c98da2bae943f62670dec3d10ffbadc8"
+      },
+      {
+        "path": [
+          "registries/owner_endpoints.json",
+          "endpoints",
+          2,
+          "source"
+        ],
+        "before": "backend/van_gateway/app.py:2795",
+        "after": "backend/van_gateway/app.py:2845"
+      },
+      {
+        "path": [
+          "registries/owner_endpoints.json",
+          "endpoints",
+          3,
+          "source"
+        ],
+        "before": "backend/van_gateway/app.py:2731",
+        "after": "backend/van_gateway/app.py:2781"
+      },
+      {
+        "path": [
+          "registries/owner_endpoints.json",
+          "endpoints",
+          9,
+          "source"
+        ],
+        "before": "backend/van_gateway/app.py:2088",
+        "after": "backend/van_gateway/app.py:2138"
+      },
+      {
+        "path": [
+          "registries/owner_endpoints.json",
+          "endpoints",
+          10,
+          "source"
+        ],
+        "before": "backend/van_gateway/app.py:2009",
+        "after": "backend/van_gateway/app.py:2059"
+      },
+      {
+        "path": [
+          "registries/owner_endpoints.json",
+          "endpoints",
+          11,
+          "source"
+        ],
+        "before": "backend/van_gateway/app.py:2091",
+        "after": "backend/van_gateway/app.py:2141"
+      },
+      {
+        "path": [
+          "registries/owner_endpoints.json",
+          "endpoints",
+          12,
+          "source"
+        ],
+        "before": "backend/van_gateway/app.py:2097",
+        "after": "backend/van_gateway/app.py:2147"
+      },
+      {
+        "path": [
+          "registries/owner_endpoints.json",
+          "endpoints",
+          14,
+          "source"
+        ],
+        "before": "backend/van_gateway/app.py:2085",
+        "after": "backend/van_gateway/app.py:2135"
+      },
+      {
+        "path": [
+          "registries/owner_endpoints.json",
+          "endpoints",
+          15,
+          "source"
+        ],
+        "before": "backend/van_gateway/app.py:2085",
+        "after": "backend/van_gateway/app.py:2135"
+      },
+      {
+        "path": [
+          "registries/owner_endpoints.json",
+          "endpoints",
+          16,
+          "source"
+        ],
+        "before": "backend/van_gateway/app.py:2074",
+        "after": "backend/van_gateway/app.py:2124"
+      },
+      {
+        "path": [
+          "registries/owner_endpoints.json",
+          "endpoints",
+          17,
+          "source"
+        ],
+        "before": "backend/van_gateway/app.py:2085",
+        "after": "backend/van_gateway/app.py:2135"
+      },
+      {
+        "path": [
+          "registries/owner_endpoints.json",
+          "endpoints",
+          20,
+          "source"
+        ],
+        "before": "backend/van_gateway/app.py:3151",
+        "after": "backend/van_gateway/app.py:3201"
+      },
+      {
+        "path": [
+          "registries/owner_endpoints.json",
+          "endpoints",
+          28,
+          "source"
+        ],
+        "before": "backend/van_gateway/app.py:2591",
+        "after": "backend/van_gateway/app.py:2641"
+      },
+      {
+        "path": [
+          "registries/owner_endpoints.json",
+          "endpoints",
+          60,
+          "source"
+        ],
+        "before": "backend/van_gateway/app.py:2587",
+        "after": "backend/van_gateway/app.py:2637"
+      },
+      {
+        "path": [
+          "registries/owner_endpoints.json",
+          "endpoints",
+          63,
+          "source"
+        ],
+        "before": "backend/van_gateway/app.py:2576",
+        "after": "backend/van_gateway/app.py:2626"
+      },
+      {
+        "path": [
+          "registries/owner_endpoints.json",
+          "endpoints",
+          64,
+          "source"
+        ],
+        "before": "backend/van_gateway/app.py:2781",
+        "after": "backend/van_gateway/app.py:2831"
+      },
+      {
+        "path": [
+          "registries/owner_endpoints.json",
+          "endpoints",
+          65,
+          "source"
+        ],
+        "before": "backend/van_gateway/app.py:2741",
+        "after": "backend/van_gateway/app.py:2791"
+      },
+      {
+        "path": [
+          "registries/owner_endpoints.json",
+          "endpoints",
+          66,
+          "source"
+        ],
+        "before": "backend/van_gateway/app.py:2764",
+        "after": "backend/van_gateway/app.py:2814"
+      },
+      {
+        "path": [
+          "registries/owner_endpoints.json",
+          "endpoints",
+          67,
+          "source"
+        ],
+        "before": "backend/van_gateway/app.py:2723",
+        "after": "backend/van_gateway/app.py:2773"
+      },
+      {
+        "path": [
+          "registries/owner_endpoints.json",
+          "endpoints",
+          76,
+          "source"
+        ],
+        "before": "backend/van_gateway/app.py:2657",
+        "after": "backend/van_gateway/app.py:2707"
+      },
+      {
+        "path": [
+          "registries/owner_endpoints.json",
+          "endpoints",
+          78,
+          "source"
+        ],
+        "before": "backend/van_gateway/app.py:3402",
+        "after": "backend/van_gateway/app.py:3452"
+      },
+      {
+        "path": [
+          "registries/owner_endpoints.json",
+          "endpoints",
+          79,
+          "source"
+        ],
+        "before": "backend/van_gateway/app.py:2524",
+        "after": "backend/van_gateway/app.py:2574"
+      },
+      {
+        "path": [
+          "registries/owner_endpoints.json",
+          "endpoints",
+          80,
+          "source"
+        ],
+        "before": "backend/van_gateway/app.py:2230",
+        "after": "backend/van_gateway/app.py:2280"
+      },
+      {
+        "path": [
+          "registries/owner_endpoints.json",
+          "endpoints",
+          107,
+          "source"
+        ],
+        "before": "backend/van_gateway/app.py:3414",
+        "after": "backend/van_gateway/app.py:3464"
+      },
+      {
+        "path": [
+          "registries/owner_endpoints.json",
+          "endpoints",
+          111,
+          "source"
+        ],
+        "before": "backend/van_gateway/app.py:2982",
+        "after": "backend/van_gateway/app.py:3032"
+      },
+      {
+        "path": [
+          "registries/owner_endpoints.json",
+          "endpoints",
+          112,
+          "source"
+        ],
+        "before": "backend/van_gateway/app.py:2893",
+        "after": "backend/van_gateway/app.py:2943"
+      },
+      {
+        "path": [
+          "registries/owner_endpoints.json",
+          "endpoints",
+          113,
+          "source"
+        ],
+        "before": "backend/van_gateway/app.py:3097",
+        "after": "backend/van_gateway/app.py:3147"
+      },
+      {
+        "path": [
+          "registries/owner_endpoints.json",
+          "endpoints",
+          114,
+          "source"
+        ],
+        "before": "backend/van_gateway/app.py:3011",
+        "after": "backend/van_gateway/app.py:3061"
+      },
+      {
+        "path": [
+          "registries/owner_endpoints.json",
+          "endpoints",
+          115,
+          "source"
+        ],
+        "before": "backend/van_gateway/app.py:3003",
+        "after": "backend/van_gateway/app.py:3053"
+      },
+      {
+        "path": [
+          "registries/owner_endpoints.json",
+          "endpoints",
+          116,
+          "source"
+        ],
+        "before": "backend/van_gateway/app.py:2934",
+        "after": "backend/van_gateway/app.py:2984"
+      },
+      {
+        "path": [
+          "registries/owner_endpoints.json",
+          "endpoints",
+          117,
+          "source"
+        ],
+        "before": "backend/van_gateway/app.py:2826",
+        "after": "backend/van_gateway/app.py:2876"
+      },
+      {
+        "path": [
+          "registries/owner_endpoints.json",
+          "endpoints",
+          118,
+          "source"
+        ],
+        "before": "backend/van_gateway/app.py:2853",
+        "after": "backend/van_gateway/app.py:2903"
+      },
+      {
+        "path": [
+          "registries/owner_endpoints.json",
+          "endpoints",
+          119,
+          "source"
+        ],
+        "before": "backend/van_gateway/app.py:3107",
+        "after": "backend/van_gateway/app.py:3157"
+      },
+      {
+        "path": [
+          "registries/owner_endpoints.json",
+          "endpoints",
+          120,
+          "source"
+        ],
+        "before": "backend/van_gateway/app.py:3093",
+        "after": "backend/van_gateway/app.py:3143"
+      },
+      {
+        "path": [
+          "registries/owner_endpoints.json",
+          "endpoints",
+          121,
+          "source"
+        ],
+        "before": "backend/van_gateway/app.py:3031",
+        "after": "backend/van_gateway/app.py:3081"
+      },
+      {
+        "path": [
+          "registries/owner_endpoints.json",
+          "endpoints",
+          122,
+          "source"
+        ],
+        "before": "backend/van_gateway/app.py:3027",
+        "after": "backend/van_gateway/app.py:3077"
+      },
+      {
+        "path": [
+          "registries/owner_endpoints.json",
+          "endpoints",
+          123,
+          "source"
+        ],
+        "before": "backend/van_gateway/app.py:3019",
+        "after": "backend/van_gateway/app.py:3069"
+      },
+      {
+        "path": [
+          "registries/owner_endpoints.json",
+          "endpoints",
+          145,
+          "source"
+        ],
+        "before": "backend/van_gateway/app.py:3364",
+        "after": "backend/van_gateway/app.py:3414"
+      },
+      {
+        "path": [
+          "registries/owner_endpoints.json",
+          "endpoints",
+          146,
+          "source"
+        ],
+        "before": "backend/van_gateway/app.py:3379",
+        "after": "backend/van_gateway/app.py:3429"
+      },
+      {
+        "path": [
+          "registries/owner_endpoints.json",
+          "endpoints",
+          147,
+          "source"
+        ],
+        "before": "backend/van_gateway/app.py:3340",
+        "after": "backend/van_gateway/app.py:3390"
+      },
+      {
+        "path": [
+          "registries/owner_endpoints.json",
+          "endpoints",
+          148,
+          "source"
+        ],
+        "before": "backend/van_gateway/app.py:3391",
+        "after": "backend/van_gateway/app.py:3441"
+      },
+      {
+        "path": [
+          "registries/owner_endpoints.json",
+          "endpoints",
+          157,
+          "source"
+        ],
+        "before": "backend/van_gateway/app.py:2946",
+        "after": "backend/van_gateway/app.py:2996"
+      },
+      {
+        "path": [
+          "registries/owner_endpoints.json",
+          "endpoints",
+          163,
+          "source"
+        ],
+        "before": "backend/van_gateway/app.py:3406",
+        "after": "backend/van_gateway/app.py:3456"
+      },
+      {
+        "path": [
+          "registries/owner_endpoints.json",
+          "endpoints",
+          165,
+          "source"
+        ],
+        "before": "backend/van_gateway/app.py:3410",
+        "after": "backend/van_gateway/app.py:3460"
+      },
+      {
+        "path": [
+          "registries/owner_endpoints.json",
+          "endpoints",
+          166,
+          "source"
+        ],
+        "before": "backend/van_gateway/app.py:2614",
+        "after": "backend/van_gateway/app.py:2664"
+      },
+      {
+        "path": [
+          "registries/owner_endpoints.json",
+          "endpoints",
+          193,
+          "source"
+        ],
+        "before": "backend/van_gateway/app.py:3487",
+        "after": "backend/van_gateway/app.py:3537"
+      },
+      {
+        "path": [
+          "registries/owner_endpoints.json",
+          "endpoints",
+          194,
+          "source"
+        ],
+        "before": "backend/van_gateway/app.py:3558",
+        "after": "backend/van_gateway/app.py:3608"
+      },
+      {
+        "path": [
+          "registries/owner_endpoints.json",
+          "endpoints",
+          195,
+          "source"
+        ],
+        "before": "backend/van_gateway/app.py:3628",
+        "after": "backend/van_gateway/app.py:3678"
+      },
+      {
+        "path": [
+          "registries/owner_endpoints.json",
+          "endpoints",
+          196,
+          "source"
+        ],
+        "before": "backend/van_gateway/app.py:3483",
+        "after": "backend/van_gateway/app.py:3533"
+      },
+      {
+        "path": [
+          "registries/owner_endpoints.json",
+          "endpoints",
+          197,
+          "source"
+        ],
+        "before": "backend/van_gateway/app.py:3522",
+        "after": "backend/van_gateway/app.py:3572"
+      },
+      {
+        "path": [
+          "registries/owner_endpoints.json",
+          "endpoints",
+          203,
+          "source"
+        ],
+        "before": "backend/van_gateway/app.py:3510",
+        "after": "backend/van_gateway/app.py:3560"
+      },
+      {
+        "path": [
+          "registries/owner_endpoints.json",
+          "endpoints",
+          204,
+          "source"
+        ],
+        "before": "backend/van_gateway/app.py:3499",
+        "after": "backend/van_gateway/app.py:3549"
+      },
+      {
+        "path": [
+          "registries/owner_endpoints.json",
+          "endpoints",
+          205,
+          "source"
+        ],
+        "before": "backend/van_gateway/app.py:3471",
+        "after": "backend/van_gateway/app.py:3521"
+      },
+      {
+        "path": [
+          "registries/owner_endpoints.json",
+          "endpoints",
+          208,
+          "source"
+        ],
+        "before": "backend/van_gateway/app.py:3479",
+        "after": "backend/van_gateway/app.py:3529"
+      },
+      {
+        "path": [
+          "registries/owner_endpoints.json",
+          "endpoints",
+          209,
+          "source"
+        ],
+        "before": "backend/van_gateway/app.py:3491",
+        "after": "backend/van_gateway/app.py:3541"
+      },
+      {
+        "path": [
+          "registries/owner_endpoints.json",
+          "endpoints",
+          220,
+          "source"
+        ],
+        "before": "backend/van_gateway/app.py:3923",
+        "after": "backend/van_gateway/app.py:3973"
+      },
+      {
+        "path": [
+          "registries/owner_endpoints.json",
+          "endpoints",
+          221,
+          "source"
+        ],
+        "before": "backend/van_gateway/app.py:3460",
+        "after": "backend/van_gateway/app.py:3510"
+      },
+      {
+        "path": [
+          "registries/owner_endpoints.json",
+          "endpoints",
+          222,
+          "source"
+        ],
+        "before": "backend/van_gateway/app.py:3467",
+        "after": "backend/van_gateway/app.py:3517"
+      },
+      {
+        "path": [
+          "registries/owner_endpoints.json",
+          "endpoints",
+          223,
+          "source"
+        ],
+        "before": "backend/van_gateway/app.py:3475",
+        "after": "backend/van_gateway/app.py:3525"
+      },
+      {
+        "path": [
+          "registries/owner_endpoints.json",
+          "endpoints",
+          224,
+          "source"
+        ],
+        "before": "backend/van_gateway/app.py:3495",
+        "after": "backend/van_gateway/app.py:3545"
+      },
+      {
+        "path": [
+          "registries/owner_endpoints.json",
+          "endpoints",
+          228,
+          "source"
+        ],
+        "before": "backend/van_gateway/app.py:3449",
+        "after": "backend/van_gateway/app.py:3499"
+      },
+      {
+        "path": [
+          "registries/owner_endpoints.json",
+          "endpoints",
+          229,
+          "source"
+        ],
+        "before": "backend/van_gateway/app.py:3777",
+        "after": "backend/van_gateway/app.py:3827"
+      },
+      {
+        "path": [
+          "registries/owner_endpoints.json",
+          "endpoints",
+          230,
+          "source"
+        ],
+        "before": "backend/van_gateway/app.py:3976",
+        "after": "backend/van_gateway/app.py:4026"
+      },
+      {
+        "path": [
+          "registries/owner_endpoints.json",
+          "endpoints",
+          231,
+          "source"
+        ],
+        "before": "backend/van_gateway/app.py:3453",
+        "after": "backend/van_gateway/app.py:3503"
+      },
+      {
+        "path": [
+          "registries/owner_endpoints.json",
+          "endpoints",
+          232,
+          "source"
+        ],
+        "before": "backend/van_gateway/app.py:3515",
+        "after": "backend/van_gateway/app.py:3565"
+      },
+      {
+        "path": [
+          "registries/owner_endpoints.json",
+          "endpoints",
+          241,
+          "source"
+        ],
+        "before": "backend/van_gateway/app.py:3967",
+        "after": "backend/van_gateway/app.py:4017"
+      },
+      {
+        "path": [
+          "registries/owner_endpoints.json",
+          "endpoints",
+          245,
+          "source"
+        ],
+        "before": "backend/van_gateway/app.py:2094",
+        "after": "backend/van_gateway/app.py:2144"
+      },
+      {
+        "path": [
+          "registries/owner_endpoints.json",
+          "endpoints",
+          246,
+          "source"
+        ],
+        "before": "backend/van_gateway/app.py:2088",
+        "after": "backend/van_gateway/app.py:2138"
+      },
+      {
+        "path": [
+          "registries/owner_endpoints.json",
+          "endpoints",
+          247,
+          "source"
+        ],
+        "before": "backend/van_gateway/app.py:2091",
+        "after": "backend/van_gateway/app.py:2141"
+      },
+      {
+        "path": [
+          "registries/owner_endpoints.json",
+          "endpoints",
+          248,
+          "source"
+        ],
+        "before": "backend/van_gateway/app.py:2097",
+        "after": "backend/van_gateway/app.py:2147"
+      },
+      {
+        "path": [
+          "registries/owner_endpoints.json",
+          "endpoints",
+          249,
+          "source"
+        ],
+        "before": "backend/van_gateway/app.py:2085",
+        "after": "backend/van_gateway/app.py:2135"
+      },
+      {
+        "path": [
+          "registries/owner_endpoints.json",
+          "endpoints",
+          250,
+          "source"
+        ],
+        "before": "backend/van_gateway/app.py:2085",
+        "after": "backend/van_gateway/app.py:2135"
+      },
+      {
+        "path": [
+          "registries/owner_endpoints.json",
+          "endpoints",
+          251,
+          "source"
+        ],
+        "before": "backend/van_gateway/app.py:2085",
+        "after": "backend/van_gateway/app.py:2135"
+      },
+      {
+        "path": [
+          "registries/owner_endpoints.json",
+          "endpoints",
+          252,
+          "source"
+        ],
+        "before": "backend/van_gateway/app.py:2094",
+        "after": "backend/van_gateway/app.py:2144"
+      },
+      {
+        "path": [
+          "registries/owner_endpoints.json",
+          "endpoints",
+          253,
+          "source"
+        ],
+        "before": "backend/van_gateway/app.py:2088",
+        "after": "backend/van_gateway/app.py:2138"
+      },
+      {
+        "path": [
+          "registries/owner_endpoints.json",
+          "endpoints",
+          254,
+          "source"
+        ],
+        "before": "backend/van_gateway/app.py:2091",
+        "after": "backend/van_gateway/app.py:2141"
+      },
+      {
+        "path": [
+          "registries/owner_endpoints.json",
+          "endpoints",
+          255,
+          "source"
+        ],
+        "before": "backend/van_gateway/app.py:2097",
+        "after": "backend/van_gateway/app.py:2147"
+      },
+      {
+        "path": [
+          "registries/owner_endpoints.json",
+          "endpoints",
+          256,
+          "source"
+        ],
+        "before": "backend/van_gateway/app.py:2085",
+        "after": "backend/van_gateway/app.py:2135"
+      },
+      {
+        "path": [
+          "registries/owner_endpoints.json",
+          "endpoints",
+          257,
+          "source"
+        ],
+        "before": "backend/van_gateway/app.py:2085",
+        "after": "backend/van_gateway/app.py:2135"
+      },
+      {
+        "path": [
+          "registries/owner_endpoints.json",
+          "endpoints",
+          258,
+          "source"
+        ],
+        "before": "backend/van_gateway/app.py:2085",
+        "after": "backend/van_gateway/app.py:2135"
+      },
+      {
+        "path": [
+          "registries/owner_endpoints.json",
+          "endpoints",
+          259,
+          "source"
+        ],
+        "before": "backend/van_gateway/app.py:2094",
+        "after": "backend/van_gateway/app.py:2144"
+      },
+      {
+        "path": [
+          "registries/owner_endpoints.json",
+          "endpoints",
+          264,
+          "source"
+        ],
+        "before": "backend/van_gateway/app.py:2088",
+        "after": "backend/van_gateway/app.py:2138"
+      },
+      {
+        "path": [
+          "registries/owner_endpoints.json",
+          "endpoints",
+          265,
+          "source"
+        ],
+        "before": "backend/van_gateway/app.py:2085",
+        "after": "backend/van_gateway/app.py:2135"
+      },
+      {
+        "path": [
+          "registries/owner_endpoints.json",
+          "endpoints",
+          266,
+          "source"
+        ],
+        "before": "backend/van_gateway/app.py:2085",
+        "after": "backend/van_gateway/app.py:2135"
+      },
+      {
+        "path": [
+          "registries/owner_endpoints.json",
+          "endpoints",
+          267,
+          "source"
+        ],
+        "before": "backend/van_gateway/app.py:2061",
+        "after": "backend/van_gateway/app.py:2111"
+      },
+      {
+        "path": [
+          "registries/owner_endpoints.json",
+          "endpoints",
+          268,
+          "source"
+        ],
+        "before": "backend/van_gateway/app.py:2085",
+        "after": "backend/van_gateway/app.py:2135"
+      },
+      {
+        "path": [
+          "registries/owner_endpoints.json",
+          "endpoints",
+          269,
+          "source"
+        ],
+        "before": "backend/van_gateway/app.py:3139",
+        "after": "backend/van_gateway/app.py:3189"
+      },
+      {
+        "path": [
+          "registries/owner_endpoints.json",
+          "endpoints",
+          270,
+          "source"
+        ],
+        "before": "backend/van_gateway/app.py:3155",
+        "after": "backend/van_gateway/app.py:3205"
+      },
+      {
+        "path": [
+          "registries/owner_endpoints.json",
+          "endpoints",
+          271,
+          "source"
+        ],
+        "before": "backend/van_gateway/app.py:3160",
+        "after": "backend/van_gateway/app.py:3210"
+      },
+      {
+        "path": [
+          "registries/owner_endpoints.json",
+          "endpoints",
+          345,
+          "source"
+        ],
+        "before": "backend/van_gateway/app.py:2305",
+        "after": "backend/van_gateway/app.py:2355"
+      },
+      {
+        "path": [
+          "registries/owner_endpoints.json",
+          "endpoints",
+          347,
+          "source"
+        ],
+        "before": "backend/van_gateway/app.py:2696",
+        "after": "backend/van_gateway/app.py:2746"
+      },
+      {
+        "path": [
+          "registries/owner_endpoints.json",
+          "endpoints",
+          348,
+          "source"
+        ],
+        "before": "backend/van_gateway/app.py:3196",
+        "after": "backend/van_gateway/app.py:3246"
+      },
+      {
+        "path": [
+          "registries/owner_endpoints.json",
+          "endpoints",
+          353,
+          "source"
+        ],
+        "before": "backend/van_gateway/app.py:2651",
+        "after": "backend/van_gateway/app.py:2701"
+      },
+      {
+        "path": [
+          "registries/owner_endpoints.json",
+          "endpoints",
+          355,
+          "source"
+        ],
+        "before": "backend/van_gateway/app.py:2661",
+        "after": "backend/van_gateway/app.py:2711"
+      },
+      {
+        "path": [
+          "registries/owner_endpoints.json",
+          "endpoints",
+          356,
+          "source"
+        ],
+        "before": "backend/van_gateway/app.py:2509",
+        "after": "backend/van_gateway/app.py:2559"
+      },
+      {
+        "path": [
+          "registries/owner_endpoints.json",
+          "endpoints",
+          357,
+          "source"
+        ],
+        "before": "backend/van_gateway/app.py:2427",
+        "after": "backend/van_gateway/app.py:2477"
+      },
+      {
+        "path": [
+          "registries/owner_endpoints.json",
+          "endpoints",
+          358,
+          "source"
+        ],
+        "before": "backend/van_gateway/app.py:2404",
+        "after": "backend/van_gateway/app.py:2454"
+      },
+      {
+        "path": [
+          "registries/owner_endpoints.json",
+          "endpoints",
+          359,
+          "source"
+        ],
+        "before": "backend/van_gateway/app.py:2337",
+        "after": "backend/van_gateway/app.py:2387"
+      },
+      {
+        "path": [
+          "registries/owner_endpoints.json",
+          "endpoints",
+          360,
+          "source"
+        ],
+        "before": "backend/van_gateway/app.py:2487",
+        "after": "backend/van_gateway/app.py:2537"
+      },
+      {
+        "path": [
+          "registries/owner_endpoints.json",
+          "endpoints",
+          361,
+          "source"
+        ],
+        "before": "backend/van_gateway/app.py:2218",
+        "after": "backend/van_gateway/app.py:2268"
+      },
+      {
+        "path": [
+          "registries/owner_endpoints.json",
+          "endpoints",
+          362,
+          "source"
+        ],
+        "before": "backend/van_gateway/app.py:2128",
+        "after": "backend/van_gateway/app.py:2178"
+      },
+      {
+        "path": [
+          "registries/owner_endpoints.json",
+          "endpoints",
+          363,
+          "source"
+        ],
+        "before": "backend/van_gateway/app.py:2113",
+        "after": "backend/van_gateway/app.py:2163"
+      },
+      {
+        "path": [
+          "registries/owner_endpoints.json",
+          "endpoints",
+          364,
+          "source"
+        ],
+        "before": "backend/van_gateway/app.py:2346",
+        "after": "backend/van_gateway/app.py:2396"
+      },
+      {
+        "path": [
+          "registries/owner_endpoints.json",
+          "endpoints",
+          365,
+          "source"
+        ],
+        "before": "backend/van_gateway/app.py:2413",
+        "after": "backend/van_gateway/app.py:2463"
+      },
+      {
+        "path": [
+          "registries/owner_endpoints.json",
+          "endpoints",
+          366,
+          "source"
+        ],
+        "before": "backend/van_gateway/app.py:2563",
+        "after": "backend/van_gateway/app.py:2613"
+      },
+      {
+        "path": [
+          "registries/owner_endpoints.json",
+          "endpoints",
+          367,
+          "source"
+        ],
+        "before": "backend/van_gateway/app.py:2270",
+        "after": "backend/van_gateway/app.py:2320"
+      },
+      {
+        "path": [
+          "registries/owner_endpoints.json",
+          "endpoints",
+          368,
+          "source"
+        ],
+        "before": "backend/van_gateway/app.py:2245",
+        "after": "backend/van_gateway/app.py:2295"
+      },
+      {
+        "path": [
+          "registries/owner_endpoints.json",
+          "endpoints",
+          373,
+          "source"
+        ],
+        "before": "backend/van_gateway/app.py:4040",
+        "after": "backend/van_gateway/app.py:4090"
+      },
+      {
+        "path": [
+          "registries/owner_endpoints.json",
+          "endpoints",
+          377,
+          "source"
+        ],
+        "before": "backend/van_gateway/app.py:2907",
+        "after": "backend/van_gateway/app.py:2957"
+      },
+      {
+        "path": [
+          "registries/owner_endpoints.json",
+          "endpoints",
+          378,
+          "source"
+        ],
+        "before": "backend/van_gateway/app.py:2990",
+        "after": "backend/van_gateway/app.py:3040"
+      },
+      {
+        "path": [
+          "registries/owner_endpoints.json",
+          "endpoints",
+          379,
+          "source"
+        ],
+        "before": "backend/van_gateway/app.py:3059",
+        "after": "backend/van_gateway/app.py:3109"
+      },
+      {
+        "path": [
+          "registries/owner_endpoints.json",
+          "endpoints",
+          380,
+          "source"
+        ],
+        "before": "backend/van_gateway/app.py:2864",
+        "after": "backend/van_gateway/app.py:2914"
+      },
+      {
+        "path": [
+          "registries/owner_endpoints.json",
+          "endpoints",
+          381,
+          "source"
+        ],
+        "before": "backend/van_gateway/app.py:2968",
+        "after": "backend/van_gateway/app.py:3018"
+      },
+      {
+        "path": [
+          "registries/owner_endpoints.json",
+          "endpoints",
+          382,
+          "source"
+        ],
+        "before": "backend/van_gateway/app.py:2921",
+        "after": "backend/van_gateway/app.py:2971"
+      },
+      {
+        "path": [
+          "registries/owner_endpoints.json",
+          "endpoints",
+          383,
+          "source"
+        ],
+        "before": "backend/van_gateway/app.py:3102",
+        "after": "backend/van_gateway/app.py:3152"
+      },
+      {
+        "path": [
+          "registries/owner_endpoints.json",
+          "endpoints",
+          384,
+          "source"
+        ],
+        "before": "backend/van_gateway/app.py:3115",
+        "after": "backend/van_gateway/app.py:3165"
+      },
+      {
+        "path": [
+          "registries/owner_endpoints.json",
+          "endpoints",
+          385,
+          "source"
+        ],
+        "before": "backend/van_gateway/app.py:3074",
+        "after": "backend/van_gateway/app.py:3124"
+      },
+      {
+        "path": [
+          "registries/owner_endpoints.json",
+          "endpoints",
+          386,
+          "source"
+        ],
+        "before": "backend/van_gateway/app.py:3068",
+        "after": "backend/van_gateway/app.py:3118"
+      },
+      {
+        "path": [
+          "registries/owner_endpoints.json",
+          "endpoints",
+          397,
+          "source"
+        ],
+        "before": "backend/van_gateway/app.py:3179",
+        "after": "backend/van_gateway/app.py:3229"
+      },
+      {
+        "path": [
+          "registries/owner_endpoints.json",
+          "endpoints",
+          398,
+          "source"
+        ],
+        "before": "backend/van_gateway/app.py:3314",
+        "after": "backend/van_gateway/app.py:3364"
+      },
+      {
+        "path": [
+          "registries/owner_endpoints.json",
+          "endpoints",
+          402,
+          "source"
+        ],
+        "before": "backend/van_gateway/app.py:2607",
+        "after": "backend/van_gateway/app.py:2657"
+      },
+      {
+        "path": [
+          "registries/owner_endpoints.json",
+          "endpoints",
+          403,
+          "source"
+        ],
+        "before": "backend/van_gateway/app.py:2638",
+        "after": "backend/van_gateway/app.py:2688"
+      },
+      {
+        "path": [
+          "registries/owner_endpoints.json",
+          "endpoints",
+          404,
+          "source"
+        ],
+        "before": "backend/van_gateway/app.py:2628",
+        "after": "backend/van_gateway/app.py:2678"
+      },
+      {
+        "path": [
+          "registries/owner_endpoints.json",
+          "endpoints",
+          405,
+          "source"
+        ],
+        "before": "backend/van_gateway/app.py:2618",
+        "after": "backend/van_gateway/app.py:2668"
+      },
+      {
+        "path": [
+          "registries/owner_endpoints.json",
+          "endpoints",
+          443,
+          "source"
+        ],
+        "before": "backend/van_gateway/app.py:3653",
+        "after": "backend/van_gateway/app.py:3703"
+      },
+      {
+        "path": [
+          "registries/owner_endpoints.json",
+          "endpoints",
+          444,
+          "source"
+        ],
+        "before": "backend/van_gateway/app.py:3595",
+        "after": "backend/van_gateway/app.py:3645"
+      },
+      {
+        "path": [
+          "registries/owner_endpoints.json",
+          "endpoints",
+          447,
+          "source"
+        ],
+        "before": "backend/van_gateway/app.py:3503",
+        "after": "backend/van_gateway/app.py:3553"
+      },
+      {
+        "path": [
+          "registries/owner_endpoints.json",
+          "endpoints",
+          449,
+          "source"
+        ],
+        "before": "backend/van_gateway/app.py:3980",
+        "after": "backend/van_gateway/app.py:4030"
+      },
+      {
+        "path": [
+          "registries/owner_endpoints.json",
+          "endpoints",
+          460,
+          "source"
+        ],
+        "before": "backend/van_gateway/app.py:3812",
+        "after": "backend/van_gateway/app.py:3862"
+      },
+      {
+        "path": [
+          "registries/owner_endpoints.json",
+          "endpoints",
+          461,
+          "source"
+        ],
+        "before": "backend/van_gateway/app.py:3790",
+        "after": "backend/van_gateway/app.py:3840"
+      },
+      {
+        "path": [
+          "registries/owner_endpoints.json",
+          "endpoints",
+          462,
+          "source"
+        ],
+        "before": "backend/van_gateway/app.py:4004",
+        "after": "backend/van_gateway/app.py:4054"
+      },
+      {
+        "path": [
+          "registries/owner_endpoints.json",
+          "endpoints",
+          469,
+          "source"
+        ],
+        "before": "backend/van_gateway/app.py:3952",
+        "after": "backend/van_gateway/app.py:4002"
+      },
+      {
+        "path": [
+          "registries/owner_endpoints.json",
+          "endpoints",
+          476,
+          "source"
+        ],
+        "before": "backend/van_gateway/app.py:2670",
+        "after": "backend/van_gateway/app.py:2720"
+      },
+      {
+        "path": [
+          "registries/owner_features.json",
+          "features",
+          0,
+          "endpoint_refs",
+          0,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:2009",
+        "after": "backend/van_gateway/app.py:2059"
+      },
+      {
+        "path": [
+          "registries/owner_features.json",
+          "features",
+          0,
+          "endpoint_refs",
+          1,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:2591",
+        "after": "backend/van_gateway/app.py:2641"
+      },
+      {
+        "path": [
+          "registries/owner_features.json",
+          "features",
+          0,
+          "endpoint_refs",
+          3,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:3151",
+        "after": "backend/van_gateway/app.py:3201"
+      },
+      {
+        "path": [
+          "registries/owner_features.json",
+          "features",
+          0,
+          "endpoint_refs",
+          4,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:3483",
+        "after": "backend/van_gateway/app.py:3533"
+      },
+      {
+        "path": [
+          "registries/owner_features.json",
+          "features",
+          1,
+          "endpoint_refs",
+          0,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:2305",
+        "after": "backend/van_gateway/app.py:2355"
+      },
+      {
+        "path": [
+          "registries/owner_features.json",
+          "features",
+          1,
+          "endpoint_refs",
+          1,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:2587",
+        "after": "backend/van_gateway/app.py:2637"
+      },
+      {
+        "path": [
+          "registries/owner_features.json",
+          "features",
+          4,
+          "endpoint_refs",
+          0,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:3151",
+        "after": "backend/van_gateway/app.py:3201"
+      },
+      {
+        "path": [
+          "registries/owner_features.json",
+          "features",
+          4,
+          "endpoint_refs",
+          1,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:3155",
+        "after": "backend/van_gateway/app.py:3205"
+      },
+      {
+        "path": [
+          "registries/owner_features.json",
+          "features",
+          4,
+          "endpoint_refs",
+          2,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:3160",
+        "after": "backend/van_gateway/app.py:3210"
+      },
+      {
+        "path": [
+          "registries/owner_features.json",
+          "features",
+          5,
+          "endpoint_refs",
+          1,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:2657",
+        "after": "backend/van_gateway/app.py:2707"
+      },
+      {
+        "path": [
+          "registries/owner_features.json",
+          "features",
+          5,
+          "endpoint_refs",
+          2,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:2661",
+        "after": "backend/van_gateway/app.py:2711"
+      },
+      {
+        "path": [
+          "registries/owner_features.json",
+          "features",
+          6,
+          "endpoint_refs",
+          0,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:2305",
+        "after": "backend/van_gateway/app.py:2355"
+      },
+      {
+        "path": [
+          "registries/owner_features.json",
+          "features",
+          6,
+          "endpoint_refs",
+          2,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:2946",
+        "after": "backend/van_gateway/app.py:2996"
+      },
+      {
+        "path": [
+          "registries/owner_features.json",
+          "features",
+          7,
+          "endpoint_refs",
+          0,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:2607",
+        "after": "backend/van_gateway/app.py:2657"
+      },
+      {
+        "path": [
+          "registries/owner_features.json",
+          "features",
+          7,
+          "endpoint_refs",
+          1,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:2638",
+        "after": "backend/van_gateway/app.py:2688"
+      },
+      {
+        "path": [
+          "registries/owner_features.json",
+          "features",
+          7,
+          "endpoint_refs",
+          2,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:2614",
+        "after": "backend/van_gateway/app.py:2664"
+      },
+      {
+        "path": [
+          "registries/owner_features.json",
+          "features",
+          7,
+          "endpoint_refs",
+          3,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:2618",
+        "after": "backend/van_gateway/app.py:2668"
+      },
+      {
+        "path": [
+          "registries/owner_features.json",
+          "features",
+          7,
+          "endpoint_refs",
+          4,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:2628",
+        "after": "backend/van_gateway/app.py:2678"
+      },
+      {
+        "path": [
+          "registries/owner_features.json",
+          "features",
+          7,
+          "backend_contract_extensions",
+          0,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:2614",
+        "after": "backend/van_gateway/app.py:2664"
+      },
+      {
+        "path": [
+          "registries/owner_features.json",
+          "features",
+          7,
+          "backend_contract_extensions",
+          1,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:2607",
+        "after": "backend/van_gateway/app.py:2657"
+      },
+      {
+        "path": [
+          "registries/owner_features.json",
+          "features",
+          7,
+          "backend_contract_extensions",
+          2,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:2638",
+        "after": "backend/van_gateway/app.py:2688"
+      },
+      {
+        "path": [
+          "registries/owner_features.json",
+          "features",
+          7,
+          "backend_contract_extensions",
+          3,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:2628",
+        "after": "backend/van_gateway/app.py:2678"
+      },
+      {
+        "path": [
+          "registries/owner_features.json",
+          "features",
+          7,
+          "backend_contract_extensions",
+          4,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:2618",
+        "after": "backend/van_gateway/app.py:2668"
+      },
+      {
+        "path": [
+          "registries/owner_features.json",
+          "features",
+          8,
+          "endpoint_refs",
+          0,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:2696",
+        "after": "backend/van_gateway/app.py:2746"
+      },
+      {
+        "path": [
+          "registries/owner_features.json",
+          "features",
+          8,
+          "endpoint_refs",
+          1,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:2795",
+        "after": "backend/van_gateway/app.py:2845"
+      },
+      {
+        "path": [
+          "registries/owner_features.json",
+          "features",
+          9,
+          "endpoint_refs",
+          0,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:2723",
+        "after": "backend/van_gateway/app.py:2773"
+      },
+      {
+        "path": [
+          "registries/owner_features.json",
+          "features",
+          9,
+          "endpoint_refs",
+          1,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:2741",
+        "after": "backend/van_gateway/app.py:2791"
+      },
+      {
+        "path": [
+          "registries/owner_features.json",
+          "features",
+          9,
+          "endpoint_refs",
+          2,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:2731",
+        "after": "backend/van_gateway/app.py:2781"
+      },
+      {
+        "path": [
+          "registries/owner_features.json",
+          "features",
+          9,
+          "endpoint_refs",
+          3,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:2305",
+        "after": "backend/van_gateway/app.py:2355"
+      },
+      {
+        "path": [
+          "registries/owner_features.json",
+          "features",
+          9,
+          "endpoint_refs",
+          4,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:2587",
+        "after": "backend/van_gateway/app.py:2637"
+      },
+      {
+        "path": [
+          "registries/owner_features.json",
+          "features",
+          10,
+          "endpoint_refs",
+          0,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:2764",
+        "after": "backend/van_gateway/app.py:2814"
+      },
+      {
+        "path": [
+          "registries/owner_features.json",
+          "features",
+          10,
+          "endpoint_refs",
+          1,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:2781",
+        "after": "backend/van_gateway/app.py:2831"
+      },
+      {
+        "path": [
+          "registries/owner_features.json",
+          "features",
+          10,
+          "endpoint_refs",
+          2,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:2696",
+        "after": "backend/van_gateway/app.py:2746"
+      },
+      {
+        "path": [
+          "registries/owner_features.json",
+          "features",
+          14,
+          "endpoint_refs",
+          0,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:3406",
+        "after": "backend/van_gateway/app.py:3456"
+      },
+      {
+        "path": [
+          "registries/owner_features.json",
+          "features",
+          14,
+          "endpoint_refs",
+          1,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:3410",
+        "after": "backend/van_gateway/app.py:3460"
+      },
+      {
+        "path": [
+          "registries/owner_features.json",
+          "features",
+          14,
+          "endpoint_refs",
+          3,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:3151",
+        "after": "backend/van_gateway/app.py:3201"
+      },
+      {
+        "path": [
+          "registries/owner_features.json",
+          "features",
+          14,
+          "endpoint_refs",
+          4,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:2741",
+        "after": "backend/van_gateway/app.py:2791"
+      },
+      {
+        "path": [
+          "registries/owner_features.json",
+          "features",
+          16,
+          "endpoint_refs",
+          5,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:2305",
+        "after": "backend/van_gateway/app.py:2355"
+      },
+      {
+        "path": [
+          "registries/owner_features.json",
+          "features",
+          17,
+          "endpoint_refs",
+          0,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:3027",
+        "after": "backend/van_gateway/app.py:3077"
+      },
+      {
+        "path": [
+          "registries/owner_features.json",
+          "features",
+          17,
+          "endpoint_refs",
+          1,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:3031",
+        "after": "backend/van_gateway/app.py:3081"
+      },
+      {
+        "path": [
+          "registries/owner_features.json",
+          "features",
+          17,
+          "endpoint_refs",
+          2,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:3093",
+        "after": "backend/van_gateway/app.py:3143"
+      },
+      {
+        "path": [
+          "registries/owner_features.json",
+          "features",
+          17,
+          "endpoint_refs",
+          3,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:3097",
+        "after": "backend/van_gateway/app.py:3147"
+      },
+      {
+        "path": [
+          "registries/owner_features.json",
+          "features",
+          17,
+          "endpoint_refs",
+          4,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:3074",
+        "after": "backend/van_gateway/app.py:3124"
+      },
+      {
+        "path": [
+          "registries/owner_features.json",
+          "features",
+          18,
+          "endpoint_refs",
+          0,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:2305",
+        "after": "backend/van_gateway/app.py:2355"
+      },
+      {
+        "path": [
+          "registries/owner_features.json",
+          "features",
+          18,
+          "endpoint_refs",
+          1,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:2826",
+        "after": "backend/van_gateway/app.py:2876"
+      },
+      {
+        "path": [
+          "registries/owner_features.json",
+          "features",
+          18,
+          "endpoint_refs",
+          2,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:2968",
+        "after": "backend/van_gateway/app.py:3018"
+      },
+      {
+        "path": [
+          "registries/owner_features.json",
+          "features",
+          18,
+          "endpoint_refs",
+          3,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:2921",
+        "after": "backend/van_gateway/app.py:2971"
+      },
+      {
+        "path": [
+          "registries/owner_features.json",
+          "features",
+          18,
+          "endpoint_refs",
+          4,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:2982",
+        "after": "backend/van_gateway/app.py:3032"
+      },
+      {
+        "path": [
+          "registries/owner_features.json",
+          "features",
+          18,
+          "endpoint_refs",
+          5,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:2990",
+        "after": "backend/van_gateway/app.py:3040"
+      },
+      {
+        "path": [
+          "registries/owner_features.json",
+          "features",
+          18,
+          "endpoint_refs",
+          6,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:3003",
+        "after": "backend/van_gateway/app.py:3053"
+      },
+      {
+        "path": [
+          "registries/owner_features.json",
+          "features",
+          18,
+          "endpoint_refs",
+          7,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:3011",
+        "after": "backend/van_gateway/app.py:3061"
+      },
+      {
+        "path": [
+          "registries/owner_features.json",
+          "features",
+          18,
+          "endpoint_refs",
+          8,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:3019",
+        "after": "backend/van_gateway/app.py:3069"
+      },
+      {
+        "path": [
+          "registries/owner_features.json",
+          "features",
+          18,
+          "endpoint_refs",
+          9,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:2907",
+        "after": "backend/van_gateway/app.py:2957"
+      },
+      {
+        "path": [
+          "registries/owner_features.json",
+          "features",
+          18,
+          "endpoint_refs",
+          10,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:2946",
+        "after": "backend/van_gateway/app.py:2996"
+      },
+      {
+        "path": [
+          "registries/owner_features.json",
+          "features",
+          19,
+          "endpoint_refs",
+          0,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:2305",
+        "after": "backend/van_gateway/app.py:2355"
+      },
+      {
+        "path": [
+          "registries/owner_features.json",
+          "features",
+          20,
+          "endpoint_refs",
+          0,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:2305",
+        "after": "backend/van_gateway/app.py:2355"
+      },
+      {
+        "path": [
+          "registries/owner_features.json",
+          "features",
+          21,
+          "endpoint_refs",
+          6,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:2661",
+        "after": "backend/van_gateway/app.py:2711"
+      },
+      {
+        "path": [
+          "registries/owner_features.json",
+          "features",
+          21,
+          "endpoint_refs",
+          12,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:2305",
+        "after": "backend/van_gateway/app.py:2355"
+      },
+      {
+        "path": [
+          "registries/owner_features.json",
+          "features",
+          23,
+          "endpoint_refs",
+          2,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:2305",
+        "after": "backend/van_gateway/app.py:2355"
+      },
+      {
+        "path": [
+          "registries/owner_features.json",
+          "features",
+          24,
+          "endpoint_refs",
+          9,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:2305",
+        "after": "backend/van_gateway/app.py:2355"
+      },
+      {
+        "path": [
+          "registries/owner_features.json",
+          "features",
+          25,
+          "endpoint_refs",
+          0,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:2305",
+        "after": "backend/van_gateway/app.py:2355"
+      },
+      {
+        "path": [
+          "registries/owner_features.json",
+          "features",
+          27,
+          "endpoint_refs",
+          0,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:2305",
+        "after": "backend/van_gateway/app.py:2355"
+      },
+      {
+        "path": [
+          "registries/owner_features.json",
+          "features",
+          27,
+          "endpoint_refs",
+          1,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:3151",
+        "after": "backend/van_gateway/app.py:3201"
+      },
+      {
+        "path": [
+          "registries/owner_features.json",
+          "features",
+          27,
+          "endpoint_refs",
+          3,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:3414",
+        "after": "backend/van_gateway/app.py:3464"
+      },
+      {
+        "path": [
+          "registries/owner_features.json",
+          "features",
+          28,
+          "endpoint_refs",
+          0,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:3196",
+        "after": "backend/van_gateway/app.py:3246"
+      },
+      {
+        "path": [
+          "registries/owner_features.json",
+          "features",
+          28,
+          "endpoint_refs",
+          1,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:3179",
+        "after": "backend/van_gateway/app.py:3229"
+      },
+      {
+        "path": [
+          "registries/owner_features.json",
+          "features",
+          28,
+          "endpoint_refs",
+          2,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:3151",
+        "after": "backend/van_gateway/app.py:3201"
+      },
+      {
+        "path": [
+          "registries/owner_features.json",
+          "features",
+          29,
+          "endpoint_refs",
+          0,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:3196",
+        "after": "backend/van_gateway/app.py:3246"
+      },
+      {
+        "path": [
+          "registries/owner_features.json",
+          "features",
+          30,
+          "endpoint_refs",
+          0,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:2128",
+        "after": "backend/van_gateway/app.py:2178"
+      },
+      {
+        "path": [
+          "registries/owner_features.json",
+          "features",
+          30,
+          "endpoint_refs",
+          1,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:2404",
+        "after": "backend/van_gateway/app.py:2454"
+      },
+      {
+        "path": [
+          "registries/owner_features.json",
+          "features",
+          30,
+          "endpoint_refs",
+          2,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:2427",
+        "after": "backend/van_gateway/app.py:2477"
+      },
+      {
+        "path": [
+          "registries/owner_features.json",
+          "features",
+          30,
+          "endpoint_refs",
+          3,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:2270",
+        "after": "backend/van_gateway/app.py:2320"
+      },
+      {
+        "path": [
+          "registries/owner_features.json",
+          "features",
+          30,
+          "endpoint_refs",
+          4,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:2524",
+        "after": "backend/van_gateway/app.py:2574"
+      },
+      {
+        "path": [
+          "registries/owner_features.json",
+          "features",
+          30,
+          "endpoint_refs",
+          5,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:2576",
+        "after": "backend/van_gateway/app.py:2626"
+      },
+      {
+        "path": [
+          "registries/owner_features.json",
+          "features",
+          30,
+          "endpoint_refs",
+          6,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:2487",
+        "after": "backend/van_gateway/app.py:2537"
+      },
+      {
+        "path": [
+          "registries/owner_features.json",
+          "features",
+          30,
+          "endpoint_refs",
+          7,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:2509",
+        "after": "backend/van_gateway/app.py:2559"
+      },
+      {
+        "path": [
+          "registries/owner_features.json",
+          "features",
+          30,
+          "endpoint_refs",
+          8,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:2413",
+        "after": "backend/van_gateway/app.py:2463"
+      },
+      {
+        "path": [
+          "registries/owner_features.json",
+          "features",
+          31,
+          "endpoint_refs",
+          0,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:2009",
+        "after": "backend/van_gateway/app.py:2059"
+      },
+      {
+        "path": [
+          "registries/owner_features.json",
+          "features",
+          31,
+          "endpoint_refs",
+          1,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:3402",
+        "after": "backend/van_gateway/app.py:3452"
+      },
+      {
+        "path": [
+          "registries/owner_features.json",
+          "features",
+          31,
+          "endpoint_refs",
+          2,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:2524",
+        "after": "backend/van_gateway/app.py:2574"
+      },
+      {
+        "path": [
+          "registries/owner_features.json",
+          "features",
+          32,
+          "endpoint_refs",
+          0,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:2009",
+        "after": "backend/van_gateway/app.py:2059"
+      },
+      {
+        "path": [
+          "registries/owner_features.json",
+          "features",
+          32,
+          "endpoint_refs",
+          1,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:3379",
+        "after": "backend/van_gateway/app.py:3429"
+      },
+      {
+        "path": [
+          "registries/owner_features.json",
+          "features",
+          32,
+          "endpoint_refs",
+          2,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:3364",
+        "after": "backend/van_gateway/app.py:3414"
+      },
+      {
+        "path": [
+          "registries/owner_features.json",
+          "features",
+          32,
+          "endpoint_refs",
+          3,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:3391",
+        "after": "backend/van_gateway/app.py:3441"
+      },
+      {
+        "path": [
+          "registries/owner_features.json",
+          "features",
+          32,
+          "endpoint_refs",
+          4,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:3414",
+        "after": "backend/van_gateway/app.py:3464"
+      },
+      {
+        "path": [
+          "registries/owner_features.json",
+          "features",
+          33,
+          "endpoint_refs",
+          0,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:3449",
+        "after": "backend/van_gateway/app.py:3499"
+      },
+      {
+        "path": [
+          "registries/owner_features.json",
+          "features",
+          33,
+          "endpoint_refs",
+          1,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:3483",
+        "after": "backend/van_gateway/app.py:3533"
+      },
+      {
+        "path": [
+          "registries/owner_features.json",
+          "features",
+          33,
+          "endpoint_refs",
+          2,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:3460",
+        "after": "backend/van_gateway/app.py:3510"
+      },
+      {
+        "path": [
+          "registries/owner_features.json",
+          "features",
+          33,
+          "endpoint_refs",
+          3,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:3467",
+        "after": "backend/van_gateway/app.py:3517"
+      },
+      {
+        "path": [
+          "registries/owner_features.json",
+          "features",
+          33,
+          "endpoint_refs",
+          4,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:3495",
+        "after": "backend/van_gateway/app.py:3545"
+      },
+      {
+        "path": [
+          "registries/owner_features.json",
+          "features",
+          33,
+          "endpoint_refs",
+          5,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:3491",
+        "after": "backend/van_gateway/app.py:3541"
+      },
+      {
+        "path": [
+          "registries/owner_features.json",
+          "features",
+          33,
+          "endpoint_refs",
+          6,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:3510",
+        "after": "backend/van_gateway/app.py:3560"
+      },
+      {
+        "path": [
+          "registries/owner_features.json",
+          "features",
+          34,
+          "endpoint_refs",
+          0,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:3453",
+        "after": "backend/van_gateway/app.py:3503"
+      },
+      {
+        "path": [
+          "registries/owner_features.json",
+          "features",
+          34,
+          "endpoint_refs",
+          1,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:3515",
+        "after": "backend/van_gateway/app.py:3565"
+      },
+      {
+        "path": [
+          "registries/owner_features.json",
+          "features",
+          34,
+          "endpoint_refs",
+          2,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:3522",
+        "after": "backend/van_gateway/app.py:3572"
+      },
+      {
+        "path": [
+          "registries/owner_features.json",
+          "features",
+          34,
+          "endpoint_refs",
+          3,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:3471",
+        "after": "backend/van_gateway/app.py:3521"
+      },
+      {
+        "path": [
+          "registries/owner_features.json",
+          "features",
+          34,
+          "endpoint_refs",
+          4,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:3475",
+        "after": "backend/van_gateway/app.py:3525"
+      },
+      {
+        "path": [
+          "registries/owner_features.json",
+          "features",
+          34,
+          "endpoint_refs",
+          5,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:3479",
+        "after": "backend/van_gateway/app.py:3529"
+      },
+      {
+        "path": [
+          "registries/owner_features.json",
+          "features",
+          35,
+          "endpoint_refs",
+          0,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:3487",
+        "after": "backend/van_gateway/app.py:3537"
+      },
+      {
+        "path": [
+          "registries/owner_features.json",
+          "features",
+          35,
+          "endpoint_refs",
+          1,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:3595",
+        "after": "backend/van_gateway/app.py:3645"
+      },
+      {
+        "path": [
+          "registries/owner_features.json",
+          "features",
+          35,
+          "endpoint_refs",
+          2,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:3653",
+        "after": "backend/van_gateway/app.py:3703"
+      },
+      {
+        "path": [
+          "registries/owner_features.json",
+          "features",
+          35,
+          "endpoint_refs",
+          3,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:3923",
+        "after": "backend/van_gateway/app.py:3973"
+      },
+      {
+        "path": [
+          "registries/owner_features.json",
+          "features",
+          35,
+          "backend_contract_extensions",
+          0,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:3628",
+        "after": "backend/van_gateway/app.py:3678"
+      },
+      {
+        "path": [
+          "registries/owner_features.json",
+          "features",
+          35,
+          "backend_contract_extensions",
+          1,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:3558",
+        "after": "backend/van_gateway/app.py:3608"
+      },
+      {
+        "path": [
+          "registries/owner_features.json",
+          "features",
+          35,
+          "backend_contract_extensions",
+          2,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:3487",
+        "after": "backend/van_gateway/app.py:3537"
+      },
+      {
+        "path": [
+          "registries/owner_features.json",
+          "features",
+          35,
+          "backend_contract_extensions",
+          3,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:3460",
+        "after": "backend/van_gateway/app.py:3510"
+      },
+      {
+        "path": [
+          "registries/owner_features.json",
+          "features",
+          36,
+          "endpoint_refs",
+          0,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:3777",
+        "after": "backend/van_gateway/app.py:3827"
+      },
+      {
+        "path": [
+          "registries/owner_features.json",
+          "features",
+          36,
+          "endpoint_refs",
+          1,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:3790",
+        "after": "backend/van_gateway/app.py:3840"
+      },
+      {
+        "path": [
+          "registries/owner_features.json",
+          "features",
+          36,
+          "endpoint_refs",
+          2,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:3812",
+        "after": "backend/van_gateway/app.py:3862"
+      },
+      {
+        "path": [
+          "registries/owner_features.json",
+          "features",
+          37,
+          "endpoint_refs",
+          0,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:3980",
+        "after": "backend/van_gateway/app.py:4030"
+      },
+      {
+        "path": [
+          "registries/owner_features.json",
+          "features",
+          37,
+          "endpoint_refs",
+          1,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:3976",
+        "after": "backend/van_gateway/app.py:4026"
+      },
+      {
+        "path": [
+          "registries/owner_features.json",
+          "features",
+          37,
+          "endpoint_refs",
+          2,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:4004",
+        "after": "backend/van_gateway/app.py:4054"
+      },
+      {
+        "path": [
+          "registries/owner_features.json",
+          "features",
+          37,
+          "endpoint_refs",
+          3,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:2305",
+        "after": "backend/van_gateway/app.py:2355"
+      },
+      {
+        "path": [
+          "registries/owner_features.json",
+          "features",
+          37,
+          "endpoint_refs",
+          4,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:3449",
+        "after": "backend/van_gateway/app.py:3499"
+      },
+      {
+        "path": [
+          "registries/owner_features.json",
+          "features",
+          40,
+          "endpoint_refs",
+          0,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:2061",
+        "after": "backend/van_gateway/app.py:2111"
+      },
+      {
+        "path": [
+          "registries/owner_features.json",
+          "features",
+          41,
+          "endpoint_refs",
+          0,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:3414",
+        "after": "backend/van_gateway/app.py:3464"
+      },
+      {
+        "path": [
+          "registries/owner_features.json",
+          "features",
+          41,
+          "endpoint_refs",
+          1,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:3952",
+        "after": "backend/van_gateway/app.py:4002"
+      },
+      {
+        "path": [
+          "registries/owner_features.json",
+          "features",
+          41,
+          "endpoint_refs",
+          2,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:3967",
+        "after": "backend/van_gateway/app.py:4017"
+      },
+      {
+        "path": [
+          "registries/owner_screens.json",
+          "screens",
+          0,
+          "endpoint_refs",
+          2,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:2009",
+        "after": "backend/van_gateway/app.py:2059"
+      },
+      {
+        "path": [
+          "registries/owner_screens.json",
+          "screens",
+          0,
+          "endpoint_refs",
+          3,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:3151",
+        "after": "backend/van_gateway/app.py:3201"
+      },
+      {
+        "path": [
+          "registries/owner_screens.json",
+          "screens",
+          0,
+          "endpoint_refs",
+          4,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:2591",
+        "after": "backend/van_gateway/app.py:2641"
+      },
+      {
+        "path": [
+          "registries/owner_screens.json",
+          "screens",
+          0,
+          "endpoint_refs",
+          5,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:2614",
+        "after": "backend/van_gateway/app.py:2664"
+      },
+      {
+        "path": [
+          "registries/owner_screens.json",
+          "screens",
+          0,
+          "endpoint_refs",
+          6,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:3483",
+        "after": "backend/van_gateway/app.py:3533"
+      },
+      {
+        "path": [
+          "registries/owner_screens.json",
+          "screens",
+          1,
+          "endpoint_refs",
+          0,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:3151",
+        "after": "backend/van_gateway/app.py:3201"
+      },
+      {
+        "path": [
+          "registries/owner_screens.json",
+          "screens",
+          1,
+          "endpoint_refs",
+          1,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:2657",
+        "after": "backend/van_gateway/app.py:2707"
+      },
+      {
+        "path": [
+          "registries/owner_screens.json",
+          "screens",
+          1,
+          "endpoint_refs",
+          2,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:3155",
+        "after": "backend/van_gateway/app.py:3205"
+      },
+      {
+        "path": [
+          "registries/owner_screens.json",
+          "screens",
+          1,
+          "endpoint_refs",
+          3,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:3160",
+        "after": "backend/van_gateway/app.py:3210"
+      },
+      {
+        "path": [
+          "registries/owner_screens.json",
+          "screens",
+          1,
+          "endpoint_refs",
+          4,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:2661",
+        "after": "backend/van_gateway/app.py:2711"
+      },
+      {
+        "path": [
+          "registries/owner_screens.json",
+          "screens",
+          2,
+          "endpoint_refs",
+          0,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:2305",
+        "after": "backend/van_gateway/app.py:2355"
+      },
+      {
+        "path": [
+          "registries/owner_screens.json",
+          "screens",
+          2,
+          "endpoint_refs",
+          1,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:2587",
+        "after": "backend/van_gateway/app.py:2637"
+      },
+      {
+        "path": [
+          "registries/owner_screens.json",
+          "screens",
+          2,
+          "endpoint_refs",
+          4,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:2009",
+        "after": "backend/van_gateway/app.py:2059"
+      },
+      {
+        "path": [
+          "registries/owner_screens.json",
+          "screens",
+          2,
+          "endpoint_refs",
+          8,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:2946",
+        "after": "backend/van_gateway/app.py:2996"
+      },
+      {
+        "path": [
+          "registries/owner_screens.json",
+          "screens",
+          4,
+          "endpoint_refs",
+          0,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:3414",
+        "after": "backend/van_gateway/app.py:3464"
+      },
+      {
+        "path": [
+          "registries/owner_screens.json",
+          "screens",
+          5,
+          "endpoint_refs",
+          0,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:2061",
+        "after": "backend/van_gateway/app.py:2111"
+      },
+      {
+        "path": [
+          "registries/owner_screens.json",
+          "screens",
+          8,
+          "endpoint_refs",
+          1,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:2661",
+        "after": "backend/van_gateway/app.py:2711"
+      },
+      {
+        "path": [
+          "registries/owner_screens.json",
+          "screens",
+          8,
+          "endpoint_refs",
+          2,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:2305",
+        "after": "backend/van_gateway/app.py:2355"
+      },
+      {
+        "path": [
+          "registries/owner_screens.json",
+          "screens",
+          12,
+          "endpoint_refs",
+          0,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:3460",
+        "after": "backend/van_gateway/app.py:3510"
+      },
+      {
+        "path": [
+          "registries/owner_screens.json",
+          "screens",
+          12,
+          "endpoint_refs",
+          1,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:3483",
+        "after": "backend/van_gateway/app.py:3533"
+      },
+      {
+        "path": [
+          "registries/owner_screens.json",
+          "screens",
+          12,
+          "endpoint_refs",
+          2,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:3467",
+        "after": "backend/van_gateway/app.py:3517"
+      },
+      {
+        "path": [
+          "registries/owner_screens.json",
+          "screens",
+          12,
+          "endpoint_refs",
+          3,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:3471",
+        "after": "backend/van_gateway/app.py:3521"
+      },
+      {
+        "path": [
+          "registries/owner_screens.json",
+          "screens",
+          12,
+          "endpoint_refs",
+          4,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:3449",
+        "after": "backend/van_gateway/app.py:3499"
+      },
+      {
+        "path": [
+          "registries/owner_screens.json",
+          "screens",
+          13,
+          "endpoint_refs",
+          0,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:3467",
+        "after": "backend/van_gateway/app.py:3517"
+      },
+      {
+        "path": [
+          "registries/owner_screens.json",
+          "screens",
+          14,
+          "endpoint_refs",
+          0,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:3467",
+        "after": "backend/van_gateway/app.py:3517"
+      },
+      {
+        "path": [
+          "registries/owner_screens.json",
+          "screens",
+          14,
+          "endpoint_refs",
+          1,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:3515",
+        "after": "backend/van_gateway/app.py:3565"
+      },
+      {
+        "path": [
+          "registries/owner_screens.json",
+          "screens",
+          14,
+          "endpoint_refs",
+          2,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:3471",
+        "after": "backend/van_gateway/app.py:3521"
+      },
+      {
+        "path": [
+          "registries/owner_screens.json",
+          "screens",
+          14,
+          "endpoint_refs",
+          3,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:3491",
+        "after": "backend/van_gateway/app.py:3541"
+      },
+      {
+        "path": [
+          "registries/owner_screens.json",
+          "screens",
+          15,
+          "endpoint_refs",
+          0,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:3475",
+        "after": "backend/van_gateway/app.py:3525"
+      },
+      {
+        "path": [
+          "registries/owner_screens.json",
+          "screens",
+          16,
+          "endpoint_refs",
+          0,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:3479",
+        "after": "backend/van_gateway/app.py:3529"
+      },
+      {
+        "path": [
+          "registries/owner_screens.json",
+          "screens",
+          17,
+          "endpoint_refs",
+          0,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:3487",
+        "after": "backend/van_gateway/app.py:3537"
+      },
+      {
+        "path": [
+          "registries/owner_screens.json",
+          "screens",
+          17,
+          "backend_contract_extensions",
+          0,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:3487",
+        "after": "backend/van_gateway/app.py:3537"
+      },
+      {
+        "path": [
+          "registries/owner_screens.json",
+          "screens",
+          17,
+          "backend_contract_extensions",
+          1,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:3460",
+        "after": "backend/van_gateway/app.py:3510"
+      },
+      {
+        "path": [
+          "registries/owner_screens.json",
+          "screens",
+          18,
+          "endpoint_refs",
+          0,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:3510",
+        "after": "backend/van_gateway/app.py:3560"
+      },
+      {
+        "path": [
+          "registries/owner_screens.json",
+          "screens",
+          19,
+          "endpoint_refs",
+          0,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:3595",
+        "after": "backend/van_gateway/app.py:3645"
+      },
+      {
+        "path": [
+          "registries/owner_screens.json",
+          "screens",
+          19,
+          "endpoint_refs",
+          1,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:3653",
+        "after": "backend/van_gateway/app.py:3703"
+      },
+      {
+        "path": [
+          "registries/owner_screens.json",
+          "screens",
+          19,
+          "backend_contract_extensions",
+          0,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:3628",
+        "after": "backend/van_gateway/app.py:3678"
+      },
+      {
+        "path": [
+          "registries/owner_screens.json",
+          "screens",
+          19,
+          "backend_contract_extensions",
+          1,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:3558",
+        "after": "backend/van_gateway/app.py:3608"
+      },
+      {
+        "path": [
+          "registries/owner_screens.json",
+          "screens",
+          19,
+          "backend_contract_extensions",
+          2,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:3487",
+        "after": "backend/van_gateway/app.py:3537"
+      },
+      {
+        "path": [
+          "registries/owner_screens.json",
+          "screens",
+          19,
+          "backend_contract_extensions",
+          3,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:3460",
+        "after": "backend/van_gateway/app.py:3510"
+      },
+      {
+        "path": [
+          "registries/owner_screens.json",
+          "screens",
+          20,
+          "endpoint_refs",
+          0,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:3777",
+        "after": "backend/van_gateway/app.py:3827"
+      },
+      {
+        "path": [
+          "registries/owner_screens.json",
+          "screens",
+          20,
+          "endpoint_refs",
+          1,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:3790",
+        "after": "backend/van_gateway/app.py:3840"
+      },
+      {
+        "path": [
+          "registries/owner_screens.json",
+          "screens",
+          20,
+          "endpoint_refs",
+          2,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:3812",
+        "after": "backend/van_gateway/app.py:3862"
+      },
+      {
+        "path": [
+          "registries/owner_screens.json",
+          "screens",
+          21,
+          "endpoint_refs",
+          0,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:2305",
+        "after": "backend/van_gateway/app.py:2355"
+      },
+      {
+        "path": [
+          "registries/owner_screens.json",
+          "screens",
+          21,
+          "endpoint_refs",
+          1,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:2587",
+        "after": "backend/van_gateway/app.py:2637"
+      },
+      {
+        "path": [
+          "registries/owner_screens.json",
+          "screens",
+          21,
+          "endpoint_refs",
+          2,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:3449",
+        "after": "backend/van_gateway/app.py:3499"
+      },
+      {
+        "path": [
+          "registries/owner_screens.json",
+          "screens",
+          22,
+          "endpoint_refs",
+          0,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:2741",
+        "after": "backend/van_gateway/app.py:2791"
+      },
+      {
+        "path": [
+          "registries/owner_screens.json",
+          "screens",
+          22,
+          "endpoint_refs",
+          1,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:2781",
+        "after": "backend/van_gateway/app.py:2831"
+      },
+      {
+        "path": [
+          "registries/owner_screens.json",
+          "screens",
+          22,
+          "endpoint_refs",
+          2,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:2696",
+        "after": "backend/van_gateway/app.py:2746"
+      },
+      {
+        "path": [
+          "registries/owner_screens.json",
+          "screens",
+          22,
+          "endpoint_refs",
+          3,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:2795",
+        "after": "backend/van_gateway/app.py:2845"
+      },
+      {
+        "path": [
+          "registries/owner_screens.json",
+          "screens",
+          22,
+          "endpoint_refs",
+          4,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:2305",
+        "after": "backend/van_gateway/app.py:2355"
+      },
+      {
+        "path": [
+          "registries/owner_screens.json",
+          "screens",
+          22,
+          "endpoint_refs",
+          5,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:2764",
+        "after": "backend/van_gateway/app.py:2814"
+      },
+      {
+        "path": [
+          "registries/owner_screens.json",
+          "screens",
+          23,
+          "endpoint_refs",
+          0,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:3406",
+        "after": "backend/van_gateway/app.py:3456"
+      },
+      {
+        "path": [
+          "registries/owner_screens.json",
+          "screens",
+          23,
+          "endpoint_refs",
+          2,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:3151",
+        "after": "backend/van_gateway/app.py:3201"
+      },
+      {
+        "path": [
+          "registries/owner_screens.json",
+          "screens",
+          23,
+          "endpoint_refs",
+          3,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:2741",
+        "after": "backend/van_gateway/app.py:2791"
+      },
+      {
+        "path": [
+          "registries/owner_screens.json",
+          "screens",
+          23,
+          "endpoint_refs",
+          4,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:3410",
+        "after": "backend/van_gateway/app.py:3460"
+      },
+      {
+        "path": [
+          "registries/owner_screens.json",
+          "screens",
+          24,
+          "endpoint_refs",
+          0,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:3410",
+        "after": "backend/van_gateway/app.py:3460"
+      },
+      {
+        "path": [
+          "registries/owner_screens.json",
+          "screens",
+          24,
+          "endpoint_refs",
+          2,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:3151",
+        "after": "backend/van_gateway/app.py:3201"
+      },
+      {
+        "path": [
+          "registries/owner_screens.json",
+          "screens",
+          24,
+          "endpoint_refs",
+          3,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:2657",
+        "after": "backend/van_gateway/app.py:2707"
+      },
+      {
+        "path": [
+          "registries/owner_screens.json",
+          "screens",
+          24,
+          "endpoint_refs",
+          4,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:2741",
+        "after": "backend/van_gateway/app.py:2791"
+      },
+      {
+        "path": [
+          "registries/owner_screens.json",
+          "screens",
+          24,
+          "endpoint_refs",
+          6,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:2305",
+        "after": "backend/van_gateway/app.py:2355"
+      },
+      {
+        "path": [
+          "registries/owner_screens.json",
+          "screens",
+          25,
+          "endpoint_refs",
+          0,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:2009",
+        "after": "backend/van_gateway/app.py:2059"
+      },
+      {
+        "path": [
+          "registries/owner_screens.json",
+          "screens",
+          25,
+          "endpoint_refs",
+          1,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:3031",
+        "after": "backend/van_gateway/app.py:3081"
+      },
+      {
+        "path": [
+          "registries/owner_screens.json",
+          "screens",
+          25,
+          "endpoint_refs",
+          2,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:3074",
+        "after": "backend/van_gateway/app.py:3124"
+      },
+      {
+        "path": [
+          "registries/owner_screens.json",
+          "screens",
+          25,
+          "endpoint_refs",
+          4,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:3027",
+        "after": "backend/van_gateway/app.py:3077"
+      },
+      {
+        "path": [
+          "registries/owner_screens.json",
+          "screens",
+          26,
+          "endpoint_refs",
+          0,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:3402",
+        "after": "backend/van_gateway/app.py:3452"
+      },
+      {
+        "path": [
+          "registries/owner_screens.json",
+          "screens",
+          26,
+          "endpoint_refs",
+          1,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:3952",
+        "after": "backend/van_gateway/app.py:4002"
+      },
+      {
+        "path": [
+          "registries/owner_screens.json",
+          "screens",
+          44,
+          "endpoint_refs",
+          0,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:2305",
+        "after": "backend/van_gateway/app.py:2355"
+      },
+      {
+        "path": [
+          "registries/owner_screens.json",
+          "screens",
+          44,
+          "endpoint_refs",
+          1,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:3453",
+        "after": "backend/van_gateway/app.py:3503"
+      },
+      {
+        "path": [
+          "registries/owner_screens.json",
+          "screens",
+          45,
+          "endpoint_refs",
+          0,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:2305",
+        "after": "backend/van_gateway/app.py:2355"
+      },
+      {
+        "path": [
+          "registries/owner_screens.json",
+          "screens",
+          46,
+          "endpoint_refs",
+          20,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:2305",
+        "after": "backend/van_gateway/app.py:2355"
+      },
+      {
+        "path": [
+          "registries/owner_screens.json",
+          "screens",
+          47,
+          "endpoint_refs",
+          5,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:2305",
+        "after": "backend/van_gateway/app.py:2355"
+      },
+      {
+        "path": [
+          "registries/owner_screens.json",
+          "screens",
+          48,
+          "endpoint_refs",
+          3,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:2305",
+        "after": "backend/van_gateway/app.py:2355"
+      },
+      {
+        "path": [
+          "registries/owner_screens.json",
+          "screens",
+          50,
+          "endpoint_refs",
+          0,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:2614",
+        "after": "backend/van_gateway/app.py:2664"
+      },
+      {
+        "path": [
+          "registries/owner_screens.json",
+          "screens",
+          50,
+          "endpoint_refs",
+          1,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:2638",
+        "after": "backend/van_gateway/app.py:2688"
+      },
+      {
+        "path": [
+          "registries/owner_screens.json",
+          "screens",
+          50,
+          "endpoint_refs",
+          2,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:2618",
+        "after": "backend/van_gateway/app.py:2668"
+      },
+      {
+        "path": [
+          "registries/owner_screens.json",
+          "screens",
+          50,
+          "endpoint_refs",
+          3,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:2628",
+        "after": "backend/van_gateway/app.py:2678"
+      },
+      {
+        "path": [
+          "registries/owner_screens.json",
+          "screens",
+          50,
+          "backend_contract_extensions",
+          0,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:2614",
+        "after": "backend/van_gateway/app.py:2664"
+      },
+      {
+        "path": [
+          "registries/owner_screens.json",
+          "screens",
+          50,
+          "backend_contract_extensions",
+          1,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:2607",
+        "after": "backend/van_gateway/app.py:2657"
+      },
+      {
+        "path": [
+          "registries/owner_screens.json",
+          "screens",
+          50,
+          "backend_contract_extensions",
+          2,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:2638",
+        "after": "backend/van_gateway/app.py:2688"
+      },
+      {
+        "path": [
+          "registries/owner_screens.json",
+          "screens",
+          50,
+          "backend_contract_extensions",
+          3,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:2628",
+        "after": "backend/van_gateway/app.py:2678"
+      },
+      {
+        "path": [
+          "registries/owner_screens.json",
+          "screens",
+          50,
+          "backend_contract_extensions",
+          4,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:2618",
+        "after": "backend/van_gateway/app.py:2668"
+      },
+      {
+        "path": [
+          "registries/owner_screens.json",
+          "screens",
+          51,
+          "endpoint_refs",
+          0,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:2764",
+        "after": "backend/van_gateway/app.py:2814"
+      },
+      {
+        "path": [
+          "registries/owner_screens.json",
+          "screens",
+          52,
+          "endpoint_refs",
+          0,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:2305",
+        "after": "backend/van_gateway/app.py:2355"
+      },
+      {
+        "path": [
+          "registries/owner_screens.json",
+          "screens",
+          52,
+          "endpoint_refs",
+          2,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:2946",
+        "after": "backend/van_gateway/app.py:2996"
+      },
+      {
+        "path": [
+          "registries/owner_screens.json",
+          "screens",
+          56,
+          "endpoint_refs",
+          0,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:2305",
+        "after": "backend/van_gateway/app.py:2355"
+      },
+      {
+        "path": [
+          "registries/owner_screens.json",
+          "screens",
+          57,
+          "endpoint_refs",
+          0,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:2305",
+        "after": "backend/van_gateway/app.py:2355"
+      },
+      {
+        "path": [
+          "registries/owner_screens.json",
+          "screens",
+          58,
+          "endpoint_refs",
+          1,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:2305",
+        "after": "backend/van_gateway/app.py:2355"
+      },
+      {
+        "path": [
+          "registries/owner_screens.json",
+          "screens",
+          59,
+          "endpoint_refs",
+          9,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:2305",
+        "after": "backend/van_gateway/app.py:2355"
+      },
+      {
+        "path": [
+          "registries/owner_screens.json",
+          "screens",
+          60,
+          "endpoint_refs",
+          0,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:2128",
+        "after": "backend/van_gateway/app.py:2178"
+      },
+      {
+        "path": [
+          "registries/owner_screens.json",
+          "screens",
+          60,
+          "endpoint_refs",
+          1,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:2404",
+        "after": "backend/van_gateway/app.py:2454"
+      },
+      {
+        "path": [
+          "registries/owner_screens.json",
+          "screens",
+          60,
+          "endpoint_refs",
+          2,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:2427",
+        "after": "backend/van_gateway/app.py:2477"
+      },
+      {
+        "path": [
+          "registries/owner_screens.json",
+          "screens",
+          60,
+          "endpoint_refs",
+          3,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:2270",
+        "after": "backend/van_gateway/app.py:2320"
+      },
+      {
+        "path": [
+          "registries/owner_screens.json",
+          "screens",
+          60,
+          "endpoint_refs",
+          4,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:2524",
+        "after": "backend/van_gateway/app.py:2574"
+      },
+      {
+        "path": [
+          "registries/owner_screens.json",
+          "screens",
+          60,
+          "endpoint_refs",
+          5,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:2576",
+        "after": "backend/van_gateway/app.py:2626"
+      },
+      {
+        "path": [
+          "registries/owner_screens.json",
+          "screens",
+          60,
+          "endpoint_refs",
+          6,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:2487",
+        "after": "backend/van_gateway/app.py:2537"
+      },
+      {
+        "path": [
+          "registries/owner_screens.json",
+          "screens",
+          60,
+          "endpoint_refs",
+          7,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:2509",
+        "after": "backend/van_gateway/app.py:2559"
+      },
+      {
+        "path": [
+          "registries/owner_screens.json",
+          "screens",
+          60,
+          "endpoint_refs",
+          8,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:2413",
+        "after": "backend/van_gateway/app.py:2463"
+      },
+      {
+        "path": [
+          "registries/owner_screens.json",
+          "screens",
+          61,
+          "endpoint_refs",
+          0,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:2009",
+        "after": "backend/van_gateway/app.py:2059"
+      },
+      {
+        "path": [
+          "registries/owner_screens.json",
+          "screens",
+          61,
+          "endpoint_refs",
+          1,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:3379",
+        "after": "backend/van_gateway/app.py:3429"
+      },
+      {
+        "path": [
+          "registries/owner_screens.json",
+          "screens",
+          61,
+          "endpoint_refs",
+          2,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:3364",
+        "after": "backend/van_gateway/app.py:3414"
+      },
+      {
+        "path": [
+          "registries/owner_screens.json",
+          "screens",
+          61,
+          "endpoint_refs",
+          3,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:3391",
+        "after": "backend/van_gateway/app.py:3441"
+      },
+      {
+        "path": [
+          "registries/owner_screens.json",
+          "screens",
+          61,
+          "endpoint_refs",
+          4,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:3414",
+        "after": "backend/van_gateway/app.py:3464"
+      },
+      {
+        "path": [
+          "registries/owner_screens.json",
+          "screens",
+          63,
+          "endpoint_refs",
+          0,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:2128",
+        "after": "backend/van_gateway/app.py:2178"
+      },
+      {
+        "path": [
+          "registries/owner_screens.json",
+          "screens",
+          63,
+          "endpoint_refs",
+          1,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:2404",
+        "after": "backend/van_gateway/app.py:2454"
+      },
+      {
+        "path": [
+          "registries/owner_screens.json",
+          "screens",
+          63,
+          "endpoint_refs",
+          2,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:2427",
+        "after": "backend/van_gateway/app.py:2477"
+      },
+      {
+        "path": [
+          "registries/owner_screens.json",
+          "screens",
+          63,
+          "endpoint_refs",
+          3,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:2487",
+        "after": "backend/van_gateway/app.py:2537"
+      },
+      {
+        "path": [
+          "registries/owner_screens.json",
+          "screens",
+          63,
+          "endpoint_refs",
+          4,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:2509",
+        "after": "backend/van_gateway/app.py:2559"
+      },
+      {
+        "path": [
+          "registries/owner_screens.json",
+          "screens",
+          63,
+          "endpoint_refs",
+          5,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:2413",
+        "after": "backend/van_gateway/app.py:2463"
+      },
+      {
+        "path": [
+          "registries/owner_screens.json",
+          "screens",
+          64,
+          "endpoint_refs",
+          0,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:3196",
+        "after": "backend/van_gateway/app.py:3246"
+      },
+      {
+        "path": [
+          "registries/owner_screens.json",
+          "screens",
+          65,
+          "endpoint_refs",
+          0,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:2723",
+        "after": "backend/van_gateway/app.py:2773"
+      },
+      {
+        "path": [
+          "registries/owner_screens.json",
+          "screens",
+          65,
+          "endpoint_refs",
+          1,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:2305",
+        "after": "backend/van_gateway/app.py:2355"
+      },
+      {
+        "path": [
+          "registries/owner_screens.json",
+          "screens",
+          65,
+          "endpoint_refs",
+          2,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:2587",
+        "after": "backend/van_gateway/app.py:2637"
+      },
+      {
+        "path": [
+          "registries/owner_screens.json",
+          "screens",
+          65,
+          "endpoint_refs",
+          3,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:2741",
+        "after": "backend/van_gateway/app.py:2791"
+      },
+      {
+        "path": [
+          "registries/owner_screens.json",
+          "screens",
+          66,
+          "endpoint_refs",
+          1,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:2305",
+        "after": "backend/van_gateway/app.py:2355"
+      },
+      {
+        "path": [
+          "registries/owner_screens.json",
+          "screens",
+          68,
+          "endpoint_refs",
+          0,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:3976",
+        "after": "backend/van_gateway/app.py:4026"
+      },
+      {
+        "path": [
+          "registries/owner_screens.json",
+          "screens",
+          68,
+          "endpoint_refs",
+          1,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:2305",
+        "after": "backend/van_gateway/app.py:2355"
+      },
+      {
+        "path": [
+          "registries/owner_screens.json",
+          "screens",
+          69,
+          "endpoint_refs",
+          0,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:3976",
+        "after": "backend/van_gateway/app.py:4026"
+      },
+      {
+        "path": [
+          "registries/owner_screens.json",
+          "screens",
+          69,
+          "endpoint_refs",
+          1,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:2305",
+        "after": "backend/van_gateway/app.py:2355"
+      },
+      {
+        "path": [
+          "registries/owner_screens.json",
+          "screens",
+          72,
+          "endpoint_refs",
+          4,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:2305",
+        "after": "backend/van_gateway/app.py:2355"
+      },
+      {
+        "path": [
+          "registries/owner_screens.json",
+          "screens",
+          73,
+          "endpoint_refs",
+          1,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:2305",
+        "after": "backend/van_gateway/app.py:2355"
+      },
+      {
+        "path": [
+          "registries/owner_screens.json",
+          "screens",
+          74,
+          "endpoint_refs",
+          6,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:2305",
+        "after": "backend/van_gateway/app.py:2355"
+      },
+      {
+        "path": [
+          "registries/owner_screens.json",
+          "screens",
+          75,
+          "endpoint_refs",
+          4,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:2305",
+        "after": "backend/van_gateway/app.py:2355"
+      },
+      {
+        "path": [
+          "registries/owner_screens.json",
+          "screens",
+          76,
+          "endpoint_refs",
+          5,
+          "source_ref"
+        ],
+        "before": "backend/van_gateway/app.py:2305",
+        "after": "backend/van_gateway/app.py:2355"
+      }
+    ],
+    "counts": {
+      "endpoints": 484,
+      "schemas": 378,
+      "groups": 42,
+      "functions": 105,
+      "surfaces": 78
+    },
+    "earlier_instruction_inventory_counts": {
+      "endpoints": 479,
+      "schemas": 369,
+      "disposition": "Historical counts; actual committed d43 inventory484/378 is preserved, no removals to force older figures"
+    },
+    "routes_schemas_authentication_roles_actions_changed": false,
+    "guard_gap": "Previous packet omitted canonical owner/frontend registry --check after app.py source-location input changed. Exact hosted and local original failure retained.",
+    "after_pins": {
+      "docs/rebuild/rev118/backend/OWNER_REGISTRY_GENERATION.json": "c3d37b94fe89aa5426e12ebe7f861f5a445ace6e613b5fa736f24c4b9818c77f",
+      "registries/owner_endpoints.json": "5365b2e8f45399c86bf6cdd8c07e3d0da49f0af1d00753ca7a3a968c03949e40",
+      "registries/owner_features.json": "6810bad6b131deb30bea2460fdfb78a932936137069fdf1fea1bdba52af2ae0c",
+      "registries/owner_screens.json": "445f747bcfbe3a2a1cbf82005c44a697c98da2bae943f62670dec3d10ffbadc8"
+    }
+  },
+  "affected_final": {
+    "passed": 29,
+    "failed": 0,
+    "errors": 0,
+    "skipped": 0,
+    "storage_violations": 0,
+    "actual_import_origins": "affected-final/actual-imports.json",
+    "owned_temp_cleanup": {
+      "path": "/tmp/van-recovery-d43-endpoint-registry-affected-r3-20261101",
+      "files": 12,
+      "inventory": "/workspace/van-d43-endpoint-registry-affected-r3-20261101/owned-temp-inventory.json",
+      "inventory_sha256": "09e6b2e0b86fcd3f56ae0d9c75c3ee232fd60cd5da9d4ca2eb419311f8dc7ffd",
+      "free_bytes_before_cleanup": 8923156480,
+      "free_bytes_after_cleanup": 8923205632,
+      "free_inodes_after": 2304130,
+      "independently_absent": true
+    }
+  },
+  "intermediate_local_failure": "28 passed/1 failed because sparse fix worktree omitted committed historical registry snapshot fixture; raw failure retained, exact original fixture directory included before final29pass. No assertion/fixture bytes changed.",
+  "canonical_checks": {
+    "owner_registry_changed": [],
+    "frontend_registry_changed": false,
+    "scope": "Exact derived outputs; no runtime acceptance"
+  },
+  "published_d43_mutation_result": {
+    "executed": 374,
+    "caught": 374,
+    "survivors": 0,
+    "terminal_success_jobs": 9,
+    "basis": "Completed exact-head hosted job log summaries retained in original-hosted/exact-head-readback.json; distinct from registry374-ID/383-edit consistency."
+  },
+  "known_mandatory_blockers": [
+    "Project Truth trusted checker failure",
+    "DDS contract read credential unavailable"
+  ],
+  "new_candidate_exact_head_ci": "REQUIRED_AFTER_NORMAL_PUSH",
+  "unit_native_production_device_acceptance": "NOT_ISSUED",
+  "frozen_scope_unchanged": {
+    "units": 131,
+    "requirements": 324,
+    "acceptance_identities": 1610,
+    "contexts": 234,
+    "owner_actions": 349,
+    "planned_features": 93
+  },
+  "raw_files": {
+    "docs/rebuild/rev118/ci/owner_contract_refresh_20261101/original-exact-local-failure/actual-imports.json": "b88ed0b2f66db37b285bf5452d4938136076ab5a3fcf001c9c43b21a0a80d804",
+    "docs/rebuild/rev118/ci/owner_contract_refresh_20261101/original-exact-local-failure/receipt.json": "a85633a71b63fd366294f160e71562a59c7d113a3ba669dfc86773513687d35d",
+    "docs/rebuild/rev118/ci/owner_contract_refresh_20261101/original-exact-local-failure/storage-audit.json": "8d3c6218f4d1d48009234e9ff51d12a90b25d4a7a52627d4cb79dae1341042b2",
+    "docs/rebuild/rev118/ci/owner_contract_refresh_20261101/original-exact-local-failure/tests.log": "5596189f72ad8128b46687e7ff6cfd1e7f1ee1f17f7be43c54c33684686a4628",
+    "docs/rebuild/rev118/ci/owner_contract_refresh_20261101/original-exact-local-failure/tests.xml": "40d3b69a2b3c0ac7b7d82b93ed2200a7fe921ef4d662a085a559525c9deb9350",
+    "docs/rebuild/rev118/ci/owner_contract_refresh_20261101/intermediate-sparse-fixture-missing/actual-imports.json": "b88ed0b2f66db37b285bf5452d4938136076ab5a3fcf001c9c43b21a0a80d804",
+    "docs/rebuild/rev118/ci/owner_contract_refresh_20261101/intermediate-sparse-fixture-missing/owned-temp-inventory.json": "4ac30ee1002faee969ac30937314f6a7b64e35a8276fd171548f81cd996a0c2c",
+    "docs/rebuild/rev118/ci/owner_contract_refresh_20261101/intermediate-sparse-fixture-missing/receipt.json": "e10d0e399a764c7c7a22d3f49f9a1c1029a64146212a56440c18737f175e2288",
+    "docs/rebuild/rev118/ci/owner_contract_refresh_20261101/intermediate-sparse-fixture-missing/storage-audit.json": "8d3c6218f4d1d48009234e9ff51d12a90b25d4a7a52627d4cb79dae1341042b2",
+    "docs/rebuild/rev118/ci/owner_contract_refresh_20261101/intermediate-sparse-fixture-missing/tests.log": "af7090c7599ff5e2ffc9204b771f38e1909dae24932884a2d6fa354724b81598",
+    "docs/rebuild/rev118/ci/owner_contract_refresh_20261101/intermediate-sparse-fixture-missing/tests.xml": "248b61fdec48cce61ebcc1ada6569981c50bf1a27d9a7ff7e98d4b2a61c3e99b",
+    "docs/rebuild/rev118/ci/owner_contract_refresh_20261101/affected-final/actual-imports.json": "b88ed0b2f66db37b285bf5452d4938136076ab5a3fcf001c9c43b21a0a80d804",
+    "docs/rebuild/rev118/ci/owner_contract_refresh_20261101/affected-final/owned-temp-inventory.json": "09e6b2e0b86fcd3f56ae0d9c75c3ee232fd60cd5da9d4ca2eb419311f8dc7ffd",
+    "docs/rebuild/rev118/ci/owner_contract_refresh_20261101/affected-final/receipt.json": "6131a03ca1e00a616feb98daf3dd7e211062c8e464f99e1e1fe5586cc690438b",
+    "docs/rebuild/rev118/ci/owner_contract_refresh_20261101/affected-final/storage-audit.json": "8d3c6218f4d1d48009234e9ff51d12a90b25d4a7a52627d4cb79dae1341042b2",
+    "docs/rebuild/rev118/ci/owner_contract_refresh_20261101/affected-final/tests.log": "9d66f6fe277a4760ac65222a0a08465d6ee588a399222028342fb5249fa7e95f",
+    "docs/rebuild/rev118/ci/owner_contract_refresh_20261101/affected-final/tests.xml": "680dcbd098f30cf506645eb34200785155f59e23f56823fe2f6f958f0cb1b978",
+    "docs/rebuild/rev118/ci/owner_contract_refresh_20261101/original-hosted/backend-public-source.log": "5be83fc5117277d6c9e4448121e905153c7cd8de241538e4cab8919f73e3bd8f",
+    "docs/rebuild/rev118/ci/owner_contract_refresh_20261101/original-hosted/exact-head-readback.json": "085230cc0dbad0cc457d85f19d07749521d82457f1897ae8bdf307b3ad3d6b6d",
+    "docs/rebuild/rev118/ci/owner_contract_refresh_20261101/original-hosted/failure-readback.json": "35aed6202d735b43559bcd4002d829cd08abf985108af9c628db097418cfd7e9",
+    "docs/rebuild/rev118/ci/owner_contract_refresh_20261101/semantic-diff.json": "fbd3409e97c11c9986f7dba7fc8ef177f1ea82408771f87c40dbcc69cc2c03f3",
+    "docs/rebuild/rev118/ci/owner_contract_refresh_20261101/integration.json": "ddbeebdef4274ef2edd24a54eef5a669307547d45d504a458755fa7d905961a3",
+    "docs/rebuild/rev118/ci/owner_contract_refresh_20261101/canonical-refresh.log": "6c32c5b30894340ca87006c503a65df8f45863449b0e37839998ba7abbf67a55",
+    "docs/rebuild/rev118/ci/owner_contract_refresh_20261101/frontend-render.log": "6d87bea55f2ed8ec080db391dd3a50a2c6d4b1c45adbcd631c888108b54cd454",
+    "docs/rebuild/rev118/ci/owner_contract_refresh_20261101/canonical-owner-check.json": "35a9b4641c85055b16c3a6458a7b1f99fb5df7ec0f5a6280ca45c3ab14cd7103",
+    "docs/rebuild/rev118/ci/owner_contract_refresh_20261101/frontend-check.json": "69dcc86a9d7aaffcadf4a70e58b379d8452c124dadc4347afbc9e57fbab7ae85",
+    "docs/rebuild/rev118/ci/owner_contract_refresh_20261101/semantic-diff-builder.py": "413270ad9a046aeb571850ebec1a2f8df2556062e2ad2903d90f12efc8addc40",
+    "docs/rebuild/rev118/ci/owner_contract_refresh_20261101/affected-controller.py": "a3b1db5562379b9b085c26eeb700360ec5cc568a05675bc2627ae41ca3415972",
+    "docs/rebuild/rev118/ci/owner_contract_refresh_20261101/import-proof-runner.py": "304c05f5148e8696b3ead8fc777497f36c0072659065457632a398822bca4f27",
+    "docs/rebuild/rev118/ci/owner_contract_refresh_20261101/owned-temp-helper.py": "269a50d3584068bf78e28a3b52fa75810b063f5bde31d0eecf8f89b79f67b163",
+    "docs/rebuild/rev118/ci/owner_contract_refresh_20261101/evidence-builder.py": "92181d6e86ae0560cd2c5234644471e20074172fafa9038a1543804ebbb38eb3",
+    "docs/rebuild/rev118/ci/owner_contract_refresh_20261101/final-main-guards/van-owner-contract-final-main-check-20261101.log": "35a9b4641c85055b16c3a6458a7b1f99fb5df7ec0f5a6280ca45c3ab14cd7103",
+    "docs/rebuild/rev118/ci/owner_contract_refresh_20261101/final-main-guards/van-owner-contract-final-main-frontend-check-20261101.log": "69dcc86a9d7aaffcadf4a70e58b379d8452c124dadc4347afbc9e57fbab7ae85",
+    "docs/rebuild/rev118/ci/owner_contract_refresh_20261101/final-main-guards/van-owner-contract-workmap-check-20261101.log": "af839d884e4e935b4bfec8027bee5fc1d7476fd52b7023fc26434807ab122897",
+    "docs/rebuild/rev118/ci/owner_contract_refresh_20261101/final-main-guards/van-owner-contract-workmap-apply-20261101.log": "6e20f8f2172ee5c1d1fce0a0c754de3b77fe5a107aa568cdf51b6c0797a54037",
+    "docs/rebuild/rev118/ci/owner_contract_refresh_20261101/final-main-guards/van-owner-contract-workmap-diff-20261101.json": "1166281c1b3cc54d454b36466339cd1f6d1ae1f1f88233775836e4250e4c88fd",
+    "docs/rebuild/rev118/ci/owner_contract_refresh_20261101/final-main-guards/van-owner-contract-workmap-final-check-20261101.log": "6e20f8f2172ee5c1d1fce0a0c754de3b77fe5a107aa568cdf51b6c0797a54037",
+    "docs/rebuild/rev118/ci/owner_contract_refresh_20261101/final-main-guards/van-owner-contract-consolidation-check-20261101.log": "d87b8fe5f7b2b4ca7312b9ba93c4e1aa24ae2301f775aa6f915d81572aec7870"
+  },
+  "final_main_guards": {
+    "owner_registry": "TERMINAL_0_NO_DRIFT",
+    "frontend_registry": "TERMINAL_0_NO_DRIFT",
+    "workmap": "Initial check truthfully detected changed current owner source hashes; canonical apply changed only80 feature/surface input/full-row hashes, no canonical identity/contract/dependency; final check terminal0",
+    "consolidation": "TERMINAL_0_NO_FINDINGS",
+    "at_utc": "2026-11-01T03:41:37.039011+00:00"
+  }
+}

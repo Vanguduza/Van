@@ -1,0 +1,725 @@
+{
+  "changes": [
+    {
+      "path": [
+        "inputs",
+        "source_features",
+        "sha256"
+      ],
+      "before": "ae7b3416847599ebc5d009a535418c43c7ab0491e979edfcaf2da41d28c905ac",
+      "after": "6810bad6b131deb30bea2460fdfb78a932936137069fdf1fea1bdba52af2ae0c"
+    },
+    {
+      "path": [
+        "inputs",
+        "source_surfaces",
+        "sha256"
+      ],
+      "before": "3364d1196e99c6a935fd157ffe04335c67a656938b5363b4d3f10fc278e4ba49",
+      "after": "445f747bcfbe3a2a1cbf82005c44a697c98da2bae943f62670dec3d10ffbadc8"
+    },
+    {
+      "path": [
+        "identity_contract_hashes",
+        "source_features",
+        "OF-HOME-001"
+      ],
+      "before": "7548ffc13cd5fb8a0667f717d7a7b45fbf909dd0d541a909886638c04d36f80d",
+      "after": "20d5dedf99a1ae4894dbd68ec7ff61cc6242da4625da7364ffdffb49f6d44ff7"
+    },
+    {
+      "path": [
+        "identity_contract_hashes",
+        "source_features",
+        "OF-COMMAND-001"
+      ],
+      "before": "b54a5478fc200175d7f26cd9b4e679e0484b256b3ccbc08b37855770004b72a4",
+      "after": "6cf5881a6627017295e320a43bc57516d807df1755b699447368bbd290c0f775"
+    },
+    {
+      "path": [
+        "identity_contract_hashes",
+        "source_features",
+        "OF-ATTENTION-001"
+      ],
+      "before": "901d359d5ce46ce17ca36abb8c2d3df7311ff512e3e4903491106e39edc9f3e3",
+      "after": "e64987c6b9b90fac00ca31f88d0e7d45740838a3bc8d215213016de4e848580e"
+    },
+    {
+      "path": [
+        "identity_contract_hashes",
+        "source_features",
+        "OF-DECISION-001"
+      ],
+      "before": "77933fd363d20e3b9f9531819d4381e5226f0566ff23f86389b343b70b4ee3e4",
+      "after": "3d267f0f24d91469df99d79692f0abf62af0dd9aed63e253b2d1a2154e47d4ec"
+    },
+    {
+      "path": [
+        "identity_contract_hashes",
+        "source_features",
+        "OF-APPROVAL-001"
+      ],
+      "before": "98da2a9d76d82d74a06ad732b7bd5b59ff1a8b9becbc6a0cc07ba648d4c59ab4",
+      "after": "0a4a8637246267d934f13603a90b8a3911e4593822bc54d574b6d13dd78c055b"
+    },
+    {
+      "path": [
+        "identity_contract_hashes",
+        "source_features",
+        "OF-REMINDER-001"
+      ],
+      "before": "1367b2b08893e98248fa97cd55a81d6d331435c8ad3a693564eb3fa79e430986",
+      "after": "51d8a7df181733539e23a732b63d218da5b7d269a367c6170069ea194790afe1"
+    },
+    {
+      "path": [
+        "identity_contract_hashes",
+        "source_features",
+        "OF-MEMORY-001"
+      ],
+      "before": "8d437a0b36700e10976d4150f074ad92d95c9fbe7c482866c4eafdf028071377",
+      "after": "c98adfb2bf372e9b1144d99fd38ddd758eb66c561d9e819031d200a6b923b545"
+    },
+    {
+      "path": [
+        "identity_contract_hashes",
+        "source_features",
+        "OF-MEMORY-002"
+      ],
+      "before": "53a6830b52cba9b5f62e7149a888843a2897b37ebb81308f095369c2fcc70b36",
+      "after": "b621ddb503d9309e873a3126a8fa482630471b12cc74c03dc6acf8563d7f65c3"
+    },
+    {
+      "path": [
+        "identity_contract_hashes",
+        "source_features",
+        "OF-MEMORY-003"
+      ],
+      "before": "339867314c6cbc67979a1ddbfa651c409cbe5e5e8b4a7a58e758fedda237073a",
+      "after": "c9e3150c6124c1ea6e470502fdca0bcbe0dec32a703dd27e759b8f6f2b259bf1"
+    },
+    {
+      "path": [
+        "identity_contract_hashes",
+        "source_features",
+        "OF-PROJECT-001"
+      ],
+      "before": "b7d2617b913176d9255aa7df6c5d5710718073a771cdb856f53efd9a51ffaaa1",
+      "after": "a3cc84e4f8a8f2aec95d5152822e8758af931cf4e9ad1069fc1c78178a64b602"
+    },
+    {
+      "path": [
+        "identity_contract_hashes",
+        "source_features",
+        "OF-AUTHORITY-001"
+      ],
+      "before": "5ed2b09cda5725d75715a0f4f43f33e4fa5299e17b0aea7e124547d0ef829bd3",
+      "after": "9570acee504ffa9f4bf9e89803e1aef5bb71860a4d47e3adeea0b19f86496bee"
+    },
+    {
+      "path": [
+        "identity_contract_hashes",
+        "source_features",
+        "OF-GOOGLE-001"
+      ],
+      "before": "63dcf19cfb2c3401415fcdc46918963a7e71c9ac0d81bb7908109a9e6de7f077",
+      "after": "f0488dc1fa6fd59f23c873030dcf4a1666dad92cd12e56231722c505e150f261"
+    },
+    {
+      "path": [
+        "identity_contract_hashes",
+        "source_features",
+        "OF-GOOGLE-002"
+      ],
+      "before": "9d4f4b78c6d0f170f17f031194e2c000a84b4b416fc1e1229c2422d26d0899bc",
+      "after": "01a1cf719f655af256961e56ce640918f4f3593ab3a610b45bacc7c481be8696"
+    },
+    {
+      "path": [
+        "identity_contract_hashes",
+        "source_features",
+        "OF-KNOWLEDGE-001"
+      ],
+      "before": "ac9ac5204de028496d6a548843aa50c6e429f1fcafcfc6ff916091d63167fe11",
+      "after": "fefe1fa323a6065d0807a90e24cd2e2a410946f703d9dc36ed234c828483ba35"
+    },
+    {
+      "path": [
+        "identity_contract_hashes",
+        "source_features",
+        "OF-AUTOMATION-001"
+      ],
+      "before": "af64045b84e1ea9b47c94238993962a3b14dfdd756ea2e6038e94e46902c681a",
+      "after": "a78c300aee1283fe91fbf162279219d51e8ec213ee936a1808f9067b685787e8"
+    },
+    {
+      "path": [
+        "identity_contract_hashes",
+        "source_features",
+        "OF-BROWSER-001"
+      ],
+      "before": "47223b428e4861792e39c359a8260e525180016813a95409bc31063a71a06813",
+      "after": "9efb12fe89350c911b8a42d3591f0ee675893f508739a665116c8bb48e7e7078"
+    },
+    {
+      "path": [
+        "identity_contract_hashes",
+        "source_features",
+        "OF-BROWSER-003"
+      ],
+      "before": "7e884e2ef82e23b1fba20abbe7d7fcc3f6ceafddba7d6cd383681d87fbda2d7b",
+      "after": "91867a889c080a8739d09055c965f493f199fac1af87d8b42e8eff76b65f22cc"
+    },
+    {
+      "path": [
+        "identity_contract_hashes",
+        "source_features",
+        "OF-BROWSER-004"
+      ],
+      "before": "c38c2a87bd1264c91c1c6aaa94dc68cf25e24225f1f8953052e6c70f7214fa75",
+      "after": "b373592baf44440df51497c64895242c80afd2fc179754a5e9723a2b8e263acd"
+    },
+    {
+      "path": [
+        "identity_contract_hashes",
+        "source_features",
+        "OF-VOICE-001"
+      ],
+      "before": "ff51da7cea1258e9f946bf7d28f47c8777e5b65543da4ff8e8d924ff0a151b6c",
+      "after": "52ec89b27926b67f64b8653f62c52699d396b229e310556340407d9053dd3d84"
+    },
+    {
+      "path": [
+        "identity_contract_hashes",
+        "source_features",
+        "OF-OVERLAY-001"
+      ],
+      "before": "181e75e3e109b6df21a20b894d7760f373237021abdaa821e24a0f7625bd5f8e",
+      "after": "7ed01229827233c9ad404a27c4c2671bdd87a36c544b854a64dd179ebd029413"
+    },
+    {
+      "path": [
+        "identity_contract_hashes",
+        "source_features",
+        "OF-NOTIFICATION-001"
+      ],
+      "before": "9869a29bcff4ea765d86e3be9ccc0853320007caff42a9cfd8390a0b4157b08d",
+      "after": "44348e105c07f23f99dfa4ddde73e3d4779441761298cd5d5687197432defe7c"
+    },
+    {
+      "path": [
+        "identity_contract_hashes",
+        "source_features",
+        "OF-SHARE-001"
+      ],
+      "before": "7bc3f9e649d117174a8150864669a6964f19b6be8cab51d4ed53a4ceafc0b7d4",
+      "after": "01782a2b80efa21ed2b71f2a4af34da419f5db6cb06c2863c3003cb4618aa8e2"
+    },
+    {
+      "path": [
+        "identity_contract_hashes",
+        "source_features",
+        "OF-PROVISION-001"
+      ],
+      "before": "5ef49e623005ced7484c4ff12b95c72dcd13e7b81584a44d23a060024e2a5e86",
+      "after": "e1ee26ee18f896a151924bfc0d224af619d93c4021d6f6b4a9f74f3448602b85"
+    },
+    {
+      "path": [
+        "identity_contract_hashes",
+        "source_features",
+        "OF-SETTINGS-001"
+      ],
+      "before": "b20f621bc4651d069ff6ab63f89105f9c23d41f6d1e7e12b2a2b1afecfb839d4",
+      "after": "3ae0cd0062851519e6fde79972b8d7fe65d6147d91121c91a3b67845cf7c2a83"
+    },
+    {
+      "path": [
+        "identity_contract_hashes",
+        "source_features",
+        "OF-DIAGNOSTICS-001"
+      ],
+      "before": "c736212f5727d989924efff2020c71aadf59442b94a638a44bbe51c5b2e417ab",
+      "after": "7023f94c3c80d162be0df88068f0d6046304fa4ce4090e4071ba9f5dadcf8b7f"
+    },
+    {
+      "path": [
+        "identity_contract_hashes",
+        "source_features",
+        "OF-TRADING-001"
+      ],
+      "before": "db46aa794773ad284a5ff3ef54ad6d87ed22580735a13c13dfdeea72ed4c9842",
+      "after": "a81d279f382984d5f6fabdc665d31bf7f8bc4d51736186c9a61ee7e0fed69136"
+    },
+    {
+      "path": [
+        "identity_contract_hashes",
+        "source_features",
+        "OF-TRADING-002"
+      ],
+      "before": "de5d668be885f59d0b016e950a8fdfc1e7ba8009eb9a4fbbb1018c67b6e7c222",
+      "after": "bf942e883ef52e038de235499920095e4c56f5b2f3ce1952c7f0ef6a8350a9ad"
+    },
+    {
+      "path": [
+        "identity_contract_hashes",
+        "source_features",
+        "OF-TRADING-003"
+      ],
+      "before": "d44421971d7cbc35dc8fac9ad884c08adafb4efe9e01ab29e5afb3c970f08d9c",
+      "after": "36fe53d5a8b086f5f476182aaff1070a73d76a3e971408ea1ae43c85f1c498dc"
+    },
+    {
+      "path": [
+        "identity_contract_hashes",
+        "source_features",
+        "OF-TRADING-004"
+      ],
+      "before": "5adc9c68d4f219d33812cf83fc831924b70ec2fd1daae85fc746316101cd19cd",
+      "after": "1c0c336e1da719a060d1c961570c2db971dbfedc5bc8bc62182799809f2a17da"
+    },
+    {
+      "path": [
+        "identity_contract_hashes",
+        "source_features",
+        "OF-TRADING-005"
+      ],
+      "before": "6650549937d0843eb8173ff7cfdb196bf5b24fc5011bb232e9a80bb18a0fbcce",
+      "after": "0a3ca9a8dc2ea3b633a35effbb1b310259d1a2d66b2b8bd1d73193f17f19785b"
+    },
+    {
+      "path": [
+        "identity_contract_hashes",
+        "source_features",
+        "OF-ARTEMIS-001"
+      ],
+      "before": "96e175245cb8d1caa9191ecb98908bb7c305834722ddf02ac7a88a461f894f16",
+      "after": "47e0720bbd19bcb3369c9929ca2df84dc2a250d5886106fd4c7899db39285bee"
+    },
+    {
+      "path": [
+        "identity_contract_hashes",
+        "source_features",
+        "OF-EMBODIMENT-001"
+      ],
+      "before": "40d0b385ece61ccccb58903f053e821813a5171520c5040fe5dd031fd61baed6",
+      "after": "481e839744c07205985975a57a30058b9dd1d2ed04f068f0195cd9714dfc8b5f"
+    },
+    {
+      "path": [
+        "identity_contract_hashes",
+        "source_surfaces",
+        "van.home"
+      ],
+      "before": "0d77869e6af4f68ebd59687149cd00cf534321f6414cfc001275d58a902a841c",
+      "after": "31c5b20d687d44133d2fb491b83fca58046a2e39af0d75410759028ed02a01af"
+    },
+    {
+      "path": [
+        "identity_contract_hashes",
+        "source_surfaces",
+        "van.attention"
+      ],
+      "before": "b356d41729f7219506537088a7b587882d5509e50e736c987809cb3553598de1",
+      "after": "fb73419ebdb70748cdd85f9051d9ec02b33d0b5112e9b9a6404593d92452c8c5"
+    },
+    {
+      "path": [
+        "identity_contract_hashes",
+        "source_surfaces",
+        "van.work"
+      ],
+      "before": "a4a76204c46df774a32acbcd57c72bc924b4b34e52da41693fd98aaf428a8295",
+      "after": "031f8c8fa80aed6196a3195e9dc3e876acc569116dba1bf1815d5bb219b7eae7"
+    },
+    {
+      "path": [
+        "identity_contract_hashes",
+        "source_surfaces",
+        "van.work.activity"
+      ],
+      "before": "fbaa8d81df0d57f043c27c0973154f9953163da7b76b1256095874c572bea838",
+      "after": "3c9b5f7881ed7a9355bba80125ca029454f1fedb9342377ab116b00a7281325a"
+    },
+    {
+      "path": [
+        "identity_contract_hashes",
+        "source_surfaces",
+        "van.work.artemis"
+      ],
+      "before": "c3e631446c08b8685bdbb4fb5ba75d0e5e9691a5da84a1d568e6a48cefba3276",
+      "after": "5425b3bab5ffdb7767f13911b5e458ddd0e348a4def1ac6e18f0c95432d56da0"
+    },
+    {
+      "path": [
+        "identity_contract_hashes",
+        "source_surfaces",
+        "van.work.browser.escalations"
+      ],
+      "before": "f9ea515a9694361fe2446568ab2f1f82111e874125137645fd204514e2e223a9",
+      "after": "9e9d99ae1436fc2105f70954ad266feeb1eb7ffde87f6bc5c7ca801c732454e4"
+    },
+    {
+      "path": [
+        "identity_contract_hashes",
+        "source_surfaces",
+        "van.trading.overview"
+      ],
+      "before": "3b1ca715c1af5a5d639c7d874b9745bb206e243646cf9c5a405f54024cdcb763",
+      "after": "4e60da201ae3f947279faa6100559a297cd6e7c2cfd3766b4da4bc428440281e"
+    },
+    {
+      "path": [
+        "identity_contract_hashes",
+        "source_surfaces",
+        "van.trading.positions"
+      ],
+      "before": "965ec6c24ee130a0c2d395953200df2b29cefd9b58dd58e10dca12327d6b8de2",
+      "after": "5f984587af4cfcec2ba4e469ff5b4b9659de0776998c4ec4d896c6656efa1ece"
+    },
+    {
+      "path": [
+        "identity_contract_hashes",
+        "source_surfaces",
+        "van.trading.positions.detail"
+      ],
+      "before": "9d3d650353afce4bb8c107937410f697913e6c9286de22832814e4c5576194b4",
+      "after": "10cce09459170878389db1e4887c63d05e416eb89e5f730655ea1506408e89a6"
+    },
+    {
+      "path": [
+        "identity_contract_hashes",
+        "source_surfaces",
+        "van.trading.potential"
+      ],
+      "before": "d9f8647769c627984ec1c04a5538ff301bf40be011569c3f8877ce2e761da0c0",
+      "after": "f1f5d484a75f3b1c9a6e0bbee04f91f9d094534ad276863a751e8530cffca57c"
+    },
+    {
+      "path": [
+        "identity_contract_hashes",
+        "source_surfaces",
+        "van.trading.history"
+      ],
+      "before": "2b9f76a4e710a239a6822b0ba241d03e1e711a80bd054ac514f92d9b5c45ab58",
+      "after": "558d78501abe01b442e745eb82ab94f072a5fecff5e9da74d8b55fd1612dadcf"
+    },
+    {
+      "path": [
+        "identity_contract_hashes",
+        "source_surfaces",
+        "van.trading.accounts"
+      ],
+      "before": "b437eaa4bdc78066b502a67a5f3c34bf8f60e9d0a4d5893c020b0c6507ad0495",
+      "after": "cf8b99535eb21514fa454fd208fcc7dd64886b6777c81094719f8c412257ab22"
+    },
+    {
+      "path": [
+        "identity_contract_hashes",
+        "source_surfaces",
+        "van.trading.cognition"
+      ],
+      "before": "3f3eee55694caf27b29a0667b3b15ff9645aed70cd52dde09225a9cd4baecce3",
+      "after": "8e53b489087b4f3596fb952cfc15189a24e5b90374911162b6140651cf7097ea"
+    },
+    {
+      "path": [
+        "identity_contract_hashes",
+        "source_surfaces",
+        "van.trading.accounts.add"
+      ],
+      "before": "a5dd4aa6b493197466172c15163b1ead813dfda0a7cf7e4ac936825b10cf7546",
+      "after": "929e2e0d95858214aacf1a4ec07e9a47e4f2288d9336449236fd63b5782d96b7"
+    },
+    {
+      "path": [
+        "identity_contract_hashes",
+        "source_surfaces",
+        "van.trading.strategies"
+      ],
+      "before": "a8c603707552d88acc0df2ae20389c86bc4070e899545f70076b9f8656874788",
+      "after": "5f0521c62de6c38e1f16e467d44d417aa3cf37dbd8a4e3536f1b4665c825c004"
+    },
+    {
+      "path": [
+        "identity_contract_hashes",
+        "source_surfaces",
+        "van.trading.halt"
+      ],
+      "before": "70c81773ec40ab35e5e8cb6efc36690c27eb3737411695c0768f82fe949551ae",
+      "after": "e38d3aa10d8a27201631f0cab7acb9422a4b76aa8f5ee5d3f6271670f58fe063"
+    },
+    {
+      "path": [
+        "identity_contract_hashes",
+        "source_surfaces",
+        "van.memory"
+      ],
+      "before": "b42997599c7df4cd136195666a77081bb7d4f97d844f071c59d689ec6523d828",
+      "after": "9b800100c9b9d14825d4cac23ec75b1aaea64fc4a0e91d96db09f5df61267819"
+    },
+    {
+      "path": [
+        "identity_contract_hashes",
+        "source_surfaces",
+        "van.projects"
+      ],
+      "before": "bf6ae2896cbbc9225c8cf2d80cb010b011651cd3af6342b6cb723652ab4e3404",
+      "after": "2c4591c657c177f281501419792ee6c8afb6849729400fdcf9fe110c6a335a2e"
+    },
+    {
+      "path": [
+        "identity_contract_hashes",
+        "source_surfaces",
+        "van.projects.detail"
+      ],
+      "before": "8626aab6f1e9e3034a79a30e6371047c475551853c7f45359a2cf0a2cabf859b",
+      "after": "9289d3caa9ed6240ddf47c4955ba1b6079fc5cf81814f42cf57e827336dbfcb4"
+    },
+    {
+      "path": [
+        "identity_contract_hashes",
+        "source_surfaces",
+        "van.connected"
+      ],
+      "before": "22e751675e14bad43ec1c7c8c2e099a35d893f25fb27e6f76fb75ab57effd93c",
+      "after": "86ac4b151577977455fdec99099f2be11c98a4057fdd1f14caa8e375b3807c9e"
+    },
+    {
+      "path": [
+        "identity_contract_hashes",
+        "source_surfaces",
+        "van.settings"
+      ],
+      "before": "3dddac198182061ca343fc6ddc95921b628e318fc46e33ffbdd2dc8672772fa3",
+      "after": "0106ff3680d10a14b668d26ce422f3a40ef3d80fab72b5a5dfa74156f918cd87"
+    },
+    {
+      "path": [
+        "identity_contract_hashes",
+        "source_surfaces",
+        "van.floating"
+      ],
+      "before": "96273323cfbe2abd8a2d2bc7940aa236e9391b9d3b6242feebb6c821c6c29f21",
+      "after": "26cb4a6941b62d65fcf091b99948fcbda210d84b31c8d8dd50c91f9d2dbd8a85"
+    },
+    {
+      "path": [
+        "identity_contract_hashes",
+        "source_surfaces",
+        "van.voice.turn"
+      ],
+      "before": "4a31860d4de717a7c969d4704a7a82106a7e87204c3204a164ff3e16254358e4",
+      "after": "67d367be51393738e28ff7467429e78f30ba225c0af6974d73ed000decfa8cd3"
+    },
+    {
+      "path": [
+        "identity_contract_hashes",
+        "source_surfaces",
+        "van.browser.interactive"
+      ],
+      "before": "db3f744e0dd6a2c390b291c1948c351b75c8fd0844420522d8e15405619b33c2",
+      "after": "8f2ce7e3e24e8d5fc3c2c95a8c1ddd2be3eb8a9ab493a9a29c3595a5658f5769"
+    },
+    {
+      "path": [
+        "identity_contract_hashes",
+        "source_surfaces",
+        "van.permissions"
+      ],
+      "before": "0eea13c56c9c71bdcce7a758503972ac61e93d7db8a352b372530b3aca5de659",
+      "after": "0b1c0ddf0ff487dbe4d3f63ed9f7065df7b8e181040199607bf79d9d77f7a59c"
+    },
+    {
+      "path": [
+        "identity_contract_hashes",
+        "source_surfaces",
+        "van.autonomy"
+      ],
+      "before": "153b89bffbc12f3b137c335c3d2d46d8de3ac98f5339cc1ebbdd4eaf5c994f5d",
+      "after": "b319447882b69906b728bdbf08e3016db587d6396668c03c765696f7ac4f9d68"
+    },
+    {
+      "path": [
+        "identity_contract_hashes",
+        "source_surfaces",
+        "van.reminders.manage"
+      ],
+      "before": "8f721bfc1502a038f33134c7d454b1cd2bcc421316c282f550dcc7493e0509eb",
+      "after": "83fef6d04a9c23620cfef9e7dd542eeab9b68906dac2e025e16386191aee7784"
+    },
+    {
+      "path": [
+        "identity_contract_hashes",
+        "source_surfaces",
+        "van.memory.history"
+      ],
+      "before": "2bfaa8ff1396ec26ab9a2df93629053b8e878bb39295081631005996f7fd9234",
+      "after": "bb2f09addd9e2356ac7a686984b124885486a106a74eac1fb9665d22de5aa147"
+    },
+    {
+      "path": [
+        "identity_contract_hashes",
+        "source_surfaces",
+        "van.approval.detail"
+      ],
+      "before": "5113b4c255a5df25c83079a82d9fd716b1569b6aa1af6d18b79f46bf049eb022",
+      "after": "14344571a3ce08f1c4a60e7b211428de7c9c81ae0d1431a3721569b98f0b71f2"
+    },
+    {
+      "path": [
+        "identity_contract_hashes",
+        "source_surfaces",
+        "van.knowledge.research"
+      ],
+      "before": "f5cc77bf1a57e644a341c7c91c02420a9ceaa24957c56c084fd7df58df3bdbf8",
+      "after": "c2176cd22d755165a6d84e247841f73937580cfffccfedf96893689c5c6a84d8"
+    },
+    {
+      "path": [
+        "identity_contract_hashes",
+        "source_surfaces",
+        "van.automation.library"
+      ],
+      "before": "4354b636a1ffc47f7309c55525ea0aab3977c4da5b638026a11e0b7666856da9",
+      "after": "6dbd065c4fff8a428e477385373c3a0406c266cedef0757765a6a880f313356f"
+    },
+    {
+      "path": [
+        "identity_contract_hashes",
+        "source_surfaces",
+        "van.automation.intent"
+      ],
+      "before": "b8d26fb6e52bc700897d1877a9b2e6ab626a1273bd46d5f2b566a613d7c58bde",
+      "after": "7f74dde7bb259f4e10e0855877ea9218cd905358e9aef9a362619cfe2a7afe51"
+    },
+    {
+      "path": [
+        "identity_contract_hashes",
+        "source_surfaces",
+        "van.browser.downloads"
+      ],
+      "before": "9f3bc9ccb42825e75fe2eccec0e403b958ecb8c768565f392f935d4134da8198",
+      "after": "335386da5a7993ada0fa32eb866c98175d5eb562d2dcac0312bead7c759bc5e8"
+    },
+    {
+      "path": [
+        "identity_contract_hashes",
+        "source_surfaces",
+        "van.devices.provision"
+      ],
+      "before": "71c6676cd555d99abbc7b6ae4713be250842f69418b0d3f56562a69104089b9f",
+      "after": "36ffa92d7c91fab5e7cd0b9d0afcfce03db95ca979d76c6a91675f1c76ab8d06"
+    },
+    {
+      "path": [
+        "identity_contract_hashes",
+        "source_surfaces",
+        "van.diagnostics"
+      ],
+      "before": "23aba615dc34c1037b439a8c7e72dd99d6a274dce2e3d81f14d0793c7cacd51b",
+      "after": "4442f420ad52b61305315ab67ec32274b92f0cd3a0e3ea374a6212490852df58"
+    },
+    {
+      "path": [
+        "identity_contract_hashes",
+        "source_surfaces",
+        "van.provisioning"
+      ],
+      "before": "48a3445ed0ddb6562aa61e76b6ccbc4eaba5cc48d806a301793ce0bfb8add395",
+      "after": "2ae3ba19098f2a3a8df1b03763c2b56bb0ec2aea5c273b70868b6a92e8637195"
+    },
+    {
+      "path": [
+        "identity_contract_hashes",
+        "source_surfaces",
+        "van.share.intake"
+      ],
+      "before": "ec6ce61ace2af2dd0643a8f1faf7dded377301205d7793d7a2b644dd26a57659",
+      "after": "d89b3585db3ac7e0718fb0a5e8bdbf4374831dab2b289a8a841459679b633064"
+    },
+    {
+      "path": [
+        "identity_contract_hashes",
+        "source_surfaces",
+        "van.memory.privacy"
+      ],
+      "before": "9c508872bda29b179403dac1f7d824a81be8b0cc509dafa92114d28b3e1f819c",
+      "after": "d16b3371fd1a594082a09e71ced978a94e2de5fe592a375c1dc0d0d0487a0f8b"
+    },
+    {
+      "path": [
+        "identity_contract_hashes",
+        "source_surfaces",
+        "van.knowledge.sources"
+      ],
+      "before": "8c09711ecf3ad8b961b57c577e9ea6f1b9b9940421449737d7835cc2331db3b4",
+      "after": "443cb3d2eb8d01ffea7fd3a9d7bce2ea04cfa773ba0b792f83fc66e567d40883"
+    },
+    {
+      "path": [
+        "identity_contract_hashes",
+        "source_surfaces",
+        "van.trading.tickets"
+      ],
+      "before": "3444f7fcbf66f5bf4c9737bd4d45ca93198bdc2c67946e0236bdca47a6aeb6dd",
+      "after": "57f9ab7d0528651ec0907cd00223ed6218e0aca57c19187c45ee4289cf40e07b"
+    },
+    {
+      "path": [
+        "identity_contract_hashes",
+        "source_surfaces",
+        "van.approval.trading-ticket"
+      ],
+      "before": "e185c8f90dbba121d81e687f3ba51df0e7126991cdd02fbc1faedaed0aa0c0b6",
+      "after": "0ebfe6336372660db9043ae3db0ec89b5fc9f161f9dbb0f5ecac518405ee3e56"
+    },
+    {
+      "path": [
+        "identity_contract_hashes",
+        "source_surfaces",
+        "van.memory.record"
+      ],
+      "before": "f05f7a25922235e270f7bbb20decc592418bd1423f3c2c88e41732b3a3ebbc21",
+      "after": "1060790be8f123d27e487cbe18b491b02acebd3f3e194ae5955bccab65c7015f"
+    },
+    {
+      "path": [
+        "identity_contract_hashes",
+        "source_surfaces",
+        "van.permissions.grant"
+      ],
+      "before": "ac17ea5e68c3049bdc724564ffee15a1d9c2100207182419479ec2aee12750bf",
+      "after": "12bde3d8b5726f178c4eaee7f7ab6a6993091a67f60c6a9cafa4a0582bb97a4c"
+    },
+    {
+      "path": [
+        "identity_contract_hashes",
+        "source_surfaces",
+        "van.automation.plan"
+      ],
+      "before": "cdcde315ede93de34a98b14ca11b7417d048da0e49c3ddce06fe16163f72d9ce",
+      "after": "c3a807009721dc2e18c71bbb58d9760e971c2980cdb18a33db2094044d3d1084"
+    },
+    {
+      "path": [
+        "identity_contract_hashes",
+        "source_surfaces",
+        "van.browser.action-plan"
+      ],
+      "before": "7102e5cacee58275e919b99db1eae6173344b226fd34441356ca9b6423b13d4b",
+      "after": "02453055874a21581f72d8583fd9f2d3aba9896b602fc4b1c7709a8f29a0b3e7"
+    },
+    {
+      "path": [
+        "identity_contract_hashes",
+        "source_surfaces",
+        "van.browser.file-provider"
+      ],
+      "before": "10a73ba50d13b6e09e87916e6e38f5546934c9d1b15cb53dd0779af6bf835705",
+      "after": "08b2f58098b11cf43b6bd8fbe557acf6eb809ec553ac41e7914514c77ed68dfd"
+    }
+  ],
+  "no_identity_or_collection_shape_changed": true
+}

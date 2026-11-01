@@ -1,0 +1,37 @@
+{
+  "started_at_utc": "2026-11-01T03:35:26.354976+00:00",
+  "source_parent": "d43bd396765204a4843cdb7485535e9fcd7af3ce",
+  "owned_temp_preflight": {
+    "path": "/tmp/van-recovery-d43-endpoint-reproduce-r1-20261101",
+    "free_bytes_before": 8923205632,
+    "free_inodes_before": 2304130,
+    "minimum_free_bytes": 4294967296,
+    "no_preexisting_directory": true
+  },
+  "source_pins": {
+    "backend/van_gateway/app.py": "e09319aa0c6309c96eb739a69acea83c4448886fa73af7a79905156c49ca18f0",
+    "registries/owner_endpoints.json": "1641af598b1672ea0c4ef159403493d7e8a3f88cca815c39e126e72eb0671651",
+    "registries/owner_endpoint_schemas.json": "6819288c0d2db8c552fe4914edbc7aa553b4b0e869eb98eef4e6700ff3a8b83d",
+    "tools/audit/export_owner_endpoints.py": "2516a71afea980abc8dfd77cdb41f70978998163b93fa09caafb386b241812f3",
+    "pytest.ini": "f0d599da4fd7a6dd5a24d6a26cdb593f9c8b9c81b43096fdcccfe04dc39a05b2",
+    "tests/contracts/test_owner_endpoint_registry.py": "90d7d18869d6d30b936c6ec54610cbdda673d79cfc314b2ef2e676d49b9f4c7b"
+  },
+  "command": [
+    "/workspace/van-backend-venv-20261025/bin/python",
+    "/workspace/van-source-import-proof-runner-20261101.py",
+    "/workspace/van-d43-endpoint-reproduce-r1-20261101/actual-imports.json",
+    "--report",
+    "/workspace/van-d43-endpoint-reproduce-r1-20261101/storage-audit.json",
+    "tests/contracts/test_owner_endpoint_registry.py::test_saved_endpoints_match_gateway_and_conditional_contracts",
+    "--basetemp=/tmp/van-recovery-d43-endpoint-reproduce-r1-20261101",
+    "--junitxml=/workspace/van-d43-endpoint-reproduce-r1-20261101/tests.xml",
+    "-q"
+  ],
+  "exit": 1,
+  "owned_temp_cleanup": {
+    "path": "/tmp/van-recovery-d43-endpoint-reproduce-r1-20261101",
+    "created": false,
+    "independently_absent": true
+  },
+  "completed_at_utc": "2026-11-01T03:35:35.690152+00:00"
+}

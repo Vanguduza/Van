@@ -14,9 +14,9 @@ Owner-access endpoints and service dependencies are listed separately below. An 
 
 | Registry | SHA-256 |
 | --- | --- |
-| [owner_features.json](../../../../registries/owner_features.json) | `ae7b3416847599ebc5d009a535418c43c7ab0491e979edfcaf2da41d28c905ac` |
-| [owner_screens.json](../../../../registries/owner_screens.json) | `3364d1196e99c6a935fd157ffe04335c67a656938b5363b4d3f10fc278e4ba49` |
-| [owner_endpoints.json](../../../../registries/owner_endpoints.json) | `1641af598b1672ea0c4ef159403493d7e8a3f88cca815c39e126e72eb0671651` |
+| [owner_features.json](../../../../registries/owner_features.json) | `6810bad6b131deb30bea2460fdfb78a932936137069fdf1fea1bdba52af2ae0c` |
+| [owner_screens.json](../../../../registries/owner_screens.json) | `445f747bcfbe3a2a1cbf82005c44a697c98da2bae943f62670dec3d10ffbadc8` |
+| [owner_endpoints.json](../../../../registries/owner_endpoints.json) | `5365b2e8f45399c86bf6cdd8c07e3d0da49f0af1d00753ca7a3a968c03949e40` |
 | [owner_endpoint_schemas.json](../../../../registries/owner_endpoint_schemas.json) | `6819288c0d2db8c552fe4914edbc7aa553b4b0e869eb98eef4e6700ff3a8b83d` |
 
 Regenerate with `python3 tools/rebuild/render_frontend_registry.py --apply`; verify with `--check`.

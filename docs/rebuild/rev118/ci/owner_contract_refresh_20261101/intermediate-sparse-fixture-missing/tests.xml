@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="29" time="6.223" timestamp="2026-11-01T03:38:01.932906+00:00" hostname="b6ffa15f7e81"><testcase classname="tests.contracts.test_owner_endpoint_registry" name="test_saved_endpoints_match_gateway_and_conditional_contracts" time="4.441" /><testcase classname="tests.contracts.test_owner_endpoint_registry" name="test_redesign_cannot_treat_internal_control_as_phone_authority" time="0.249" /><testcase classname="tests.contracts.test_owner_endpoint_registry" name="test_console_and_socket_authentication_do_not_invent_credential_bypasses" time="0.275" /><testcase classname="tests.contracts.test_owner_endpoint_registry" name="test_owner_file_contract_and_optional_effect_plans_have_resolved_actual_request_schemas" time="0.251" /><testcase classname="tests.contracts.test_owner_endpoint_registry" name="test_provider_admission_uses_separate_attested_transport_and_actual_typed_drafts" time="0.247" /><testcase classname="tests.contracts.test_owner_redesign_registry" name="test_every_owner_feature_and_screen_has_a_resolvable_contract" time="0.047" /><testcase classname="tests.contracts.test_owner_redesign_registry" name="test_missing_and_external_features_cannot_be_presented_as_working" time="0.036" /><testcase classname="tests.contracts.test_owner_redesign_registry" name="test_existing_components_and_required_controls_are_not_fake_routes" time="0.031" /><testcase classname="tests.contracts.test_owner_redesign_registry" name="test_android_callsite_aggregation_preserves_exact_endpoint_and_namespace" time="0.028" /><testcase classname="tests.contracts.test_owner_redesign_registry" name="test_current_owner_surfaces_have_actual_navigation_or_honest_modal_hosts" time="0.019" /><testcase classname="tests.contracts.test_owner_redesign_registry" name="test_destructive_erasure_contract_uses_observed_a4_command_instead_of_legacy_delete" time="0.013" /><testcase classname="tests.contracts.test_owner_redesign_registry" name="test_current_function_citations_and_callsites_are_exact_production_source" time="0.169" /><testcase classname="tests.contracts.test_owner_redesign_registry" name="test_browser_current_contract_tracks_approved_effects_and_unbound_external_file_provider" time="0.046" /><testcase classname="tests.contracts.test_owner_redesign_registry" name="test_file_provider_registry_matches_native_action_scope_without_phone_service_authority" time="0.011" /><testcase classname="tests.contracts.test_owner_redesign_registry" name="test_voice_registry_distinguishes_actual_generic_runtime_from_owner_speaker_enrollment" time="0.012" /><testcase classname="tests.contracts.test_owner_redesign_registry" name="test_local_speaker_registry_has_actual_hosted_controls_without_remote_action_authority" time="0.035" /><testcase classname="tests.contracts.test_owner_redesign_registry" name="test_provider_observation_registry_keeps_original_uncertainty_and_replacement_fence" time="0.011" /><testcase classname="tests.contracts.test_owner_redesign_registry" name="test_trading_ticket_surfaces_preserve_exact_receipt_authority_and_real_route" time="0.020" /><testcase classname="tests.contracts.test_owner_redesign_registry" name="test_current_registry_binds_current_review_and_keeps_local_vs_external_qualification_separate" time="0.024"><failure message="FileNotFoundError: [Errno 2] No such file or directory: '/workspace/van-lanes-20261101/d43-endpoint-ci-fix/docs/audit/validation/registry-before-final-wiring/owner_features.json'">def test_current_registry_binds_current_review_and_keeps_local_vs_external_qualification_separate():
+        import hashlib
+    
+        feature_doc = read("owner_features.json")
+        screen_doc = read("owner_screens.json")
+        features = {f["id"]: f for f in feature_doc["features"]}
+        for document in (feature_doc, screen_doc):
+            qualification = document["current_source_qualification"]
+            review = ROOT / qualification["source_review_manifest"]
+            assert qualification["source_review_manifest_sha256"] == hashlib.sha256(review.read_bytes()).hexdigest()
+            assert qualification["physical_cases_executed"] == 0
+            assert qualification["owner_release"] is False and qualification["deployment_accepted"] is False
+            if qualification["status"] == "SOURCE_REVIEWED_LOCAL_VALIDATION_PASSED":
+                manifest = ROOT / qualification["source_freeze_manifest"]
+                assert qualification["source_freeze_sha256"] == hashlib.sha256(manifest.read_bytes()).hexdigest()
+                receipt = ROOT / qualification["android_receipt"]
+                assert qualification["android_receipt_sha256"] == hashlib.sha256(receipt.read_bytes()).hexdigest()
+            else:
+                assert qualification["status"] == "SOURCE_REVIEWED_FINAL_VALIDATION_PENDING"
+                assert qualification["android_receipt"] is None
+        ceiling = features["OF-AUTHORITY-001"]
+        change = next(f for f in ceiling["current_implementation"]["functions"] if f["id"].endswith(":set-domain-ceiling"))
+        assert "A4" in change["authority_gate"] and "S0..S4" in change["authority_gate"]
+        grant = next(f for f in ceiling["current_implementation"]["functions"] if f["id"].endswith(":grant-exact-consent"))
+        assert "A4" in grant["authority_gate"] and "use limit" in grant["authority_gate"]
+        assert ceiling["functional_wiring_status"] == "SOURCE_WIRED_REQUIRES_ACCEPTANCE"
+        learning = features["OF-LEARNING-001"]
+        for suffix in (":define-vocabulary", ":set-collaboration-preference"):
+            action = next(f for f in learning["current_implementation"]["functions"] if f["id"].endswith(suffix))
+            assert "owner" in action["authority_gate"] and "session/epoch" in action["authority_gate"]
+        for identity in ("OF-BROWSER-001", "OF-LEARNING-003", "OF-AUTOMATION-001"):
+            assert features[identity]["functional_wiring_status"] == "SOURCE_WIRED_REQUIRES_ACCEPTANCE"
+        for row in feature_doc["features"] + screen_doc["screens"]:
+            verification = row["current_implementation"]["verification"]
+            assert verification["device_live"] == "UNVERIFIED"
+            assert verification["deployment_live"] == "UNVERIFIED"
+            history = row.get("historical_source_state")
+            if history:
+                path = ROOT / history["registry_snapshot"]
+&gt;               assert history["registry_snapshot_sha256"] == hashlib.sha256(path.read_bytes()).hexdigest()
+                                                                             ^^^^^^^^^^^^^^^^^
+
+tests/contracts/test_owner_redesign_registry.py:379: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/pathlib.py:1019: in read_bytes
+    with self.open(mode='rb') as f:
+         ^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = PosixPath('/workspace/van-lanes-20261101/d43-endpoint-ci-fix/docs/audit/validation/registry-before-final-wiring/owner_features.json')
+mode = 'rb', buffering = -1, encoding = None, errors = None, newline = None
+
+    def open(self, mode='r', buffering=-1, encoding=None,
+             errors=None, newline=None):
+        """
+        Open the file pointed to by this path and return a file object, as
+        the built-in open() function does.
+        """
+        if "b" not in mode:
+            encoding = io.text_encoding(encoding)
+&gt;       return io.open(self, mode, buffering, encoding, errors, newline)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       FileNotFoundError: [Errno 2] No such file or directory: '/workspace/van-lanes-20261101/d43-endpoint-ci-fix/docs/audit/validation/registry-before-final-wiring/owner_features.json'
+
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/pathlib.py:1013: FileNotFoundError</failure></testcase><testcase classname="tests.rebuild.test_owner_registry_refresh" name="test_original_and_previous_generated_registry_are_safe_preimages" time="0.001" /><testcase classname="tests.rebuild.test_owner_registry_refresh" name="test_local_owner_edits_are_never_replaced_even_when_head_generation_is_valid" time="0.000" /><testcase classname="tests.rebuild.test_owner_registry_refresh" name="test_a_broken_generation_cannot_authorize_refreshing_even_its_untouched_files[source_receipt]" time="0.001" /><testcase classname="tests.rebuild.test_owner_registry_refresh" name="test_a_broken_generation_cannot_authorize_refreshing_even_its_untouched_files[one_registry]" time="0.001" /><testcase classname="tests.rebuild.test_owner_registry_refresh" name="test_a_broken_generation_cannot_authorize_refreshing_even_its_untouched_files[missing_output]" time="0.001" /><testcase classname="tests.rebuild.test_owner_registry_refresh" name="test_a_broken_generation_cannot_authorize_refreshing_even_its_untouched_files[unknown_schema]" time="0.000" /><testcase classname="tests.rebuild.test_owner_registry_refresh" name="test_an_arbitrary_committed_registry_is_not_automatically_a_generated_preimage" time="0.000" /><testcase classname="tests.rebuild.test_owner_registry_refresh" name="test_main_uses_supplied_object_reader_and_keeps_all_preimage_checks[none]" time="0.006" /><testcase classname="tests.rebuild.test_owner_registry_refresh" name="test_main_uses_supplied_object_reader_and_keeps_all_preimage_checks[owner_edit]" time="0.003" /><testcase classname="tests.rebuild.test_owner_registry_refresh" name="test_main_uses_supplied_object_reader_and_keeps_all_preimage_checks[source_receipt]" time="0.002" /></testsuite></testsuites>

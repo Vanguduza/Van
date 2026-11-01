@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="1" time="8.048" timestamp="2026-11-01T03:35:26.817427+00:00" hostname="b6ffa15f7e81"><testcase classname="tests.contracts.test_owner_endpoint_registry" name="test_saved_endpoints_match_gateway_and_conditional_contracts" time="7.935"><failure message="AssertionError: Regenerate using tools/audit/export_owner_endpoints.py&#10;assert {'schema_vers....', ...], ...} == {'schema_vers....', ...], ...}&#10;  &#10;  Omitting 4 identical items, use -vv to show&#10;  Differing items:&#10;  {'endpoints': [{'endpoint_id': 'VE-8f74886a5b7d', 'method': 'DELETE', 'path': '/v1/browser/interactive-sessions/{sessi...ath': '/v1/trading/charts/workspaces/{workspace_id}', 'authentication': 'INGRESS_BEARER_AND_PAIRED_DEVICE', ...}, ...]} != {'endpoints': [{'endpoint_id': 'VE-8f74886a5b7d', 'method': 'DELETE', 'path': '/v1/browser/interactive-sessions/{sessi...ath': '/v1/trading/charts/workspaces/{workspace_id}', 'authentication': 'INGRESS_BEARER_AND_PAIRED_DEVICE', ...}, ...]}&#10;  Use -v to get more diff">def test_saved_endpoints_match_gateway_and_conditional_contracts():
+        actual = exporter().export()
+        schemas = actual.pop("schemas")
+        saved = json.loads((ROOT / "registries/owner_endpoints.json").read_text())
+&gt;       assert saved == actual, "Regenerate using tools/audit/export_owner_endpoints.py"
+E       AssertionError: Regenerate using tools/audit/export_owner_endpoints.py
+E       assert {'schema_vers....', ...], ...} == {'schema_vers....', ...], ...}
+E         
+E         Omitting 4 identical items, use -vv to show
+E         Differing items:
+E         {'endpoints': [{'endpoint_id': 'VE-8f74886a5b7d', 'method': 'DELETE', 'path': '/v1/browser/interactive-sessions/{sessi...ath': '/v1/trading/charts/workspaces/{workspace_id}', 'authentication': 'INGRESS_BEARER_AND_PAIRED_DEVICE', ...}, ...]} != {'endpoints': [{'endpoint_id': 'VE-8f74886a5b7d', 'method': 'DELETE', 'path': '/v1/browser/interactive-sessions/{sessi...ath': '/v1/trading/charts/workspaces/{workspace_id}', 'authentication': 'INGRESS_BEARER_AND_PAIRED_DEVICE', ...}, ...]}
+E         Use -v to get more diff
+
+tests/contracts/test_owner_endpoint_registry.py:26: AssertionError</failure></testcase></testsuite></testsuites>
