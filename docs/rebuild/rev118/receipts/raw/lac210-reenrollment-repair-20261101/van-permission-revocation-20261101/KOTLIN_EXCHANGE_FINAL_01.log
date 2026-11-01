@@ -1,0 +1,45 @@
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/8.11.1/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build 
+> Task :checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :compileKotlin
+> Task :compileJava NO-SOURCE
+> Task :processResources NO-SOURCE
+> Task :classes UP-TO-DATE
+> Task :jar
+> Task :compileTestKotlin
+> Task :compileTestJava NO-SOURCE
+> Task :processTestResources UP-TO-DATE
+> Task :testClasses UP-TO-DATE
+
+> Task :test
+
+GatewayMutationRetryTest > legacy one return pairing is not retryable and prepared bound pairing is() PASSED
+
+GatewayMutationRetryTest > lost create response does not automatically create a second unkeyed resource() PASSED
+
+GatewayMutationRetryTest > only documented stable operation identities permit mutation retries() PASSED
+
+GatewayMutationRetryTest > uncertain server response stays unknown and explicit refusals keep their response() PASSED
+
+PermissionRevocationOperationsTest > unavailable readback keeps original and restart never resubmits applied effect() PASSED
+
+PermissionRevocationOperationsTest > wrong scope unknown and malformed receipt cannot discard original() PASSED
+
+PermissionRevocationOperationsTest > only explicit different reviewed generation creates fresh intent and old unknown is retained() PASSED
+
+PermissionRevocationOperationsTest > corrupt history never starts a replacement operation() PASSED
+
+PermissionRevocationOperationsTest > profile or caller switch prevents any original lookup or mutation() PASSED
+
+PermissionRevocationOperationsTest > unverified local target can be withdrawn without claiming a historic issuer() PASSED
+
+PermissionRevocationOperationsTest > save failure precedes network and failed cleanup retains known original() PASSED
+
+PermissionRevocationOperationsTest > actual caller exchange recovers lost commit response with one effect and independent detail() PASSED
+
+PermissionRevocationOperationsTest > terminal refusal does not clear later explicit operation() PASSED
+
+PermissionRevocationOperationsTest > original body deadline and distinct historic issuer survive process restart() PASSED
+
+BUILD SUCCESSFUL in 1m 50s
+5 actionable tasks: 4 executed, 1 up-to-date

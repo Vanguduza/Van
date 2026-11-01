@@ -1,0 +1,347 @@
+{
+  "head": "32d519332ecd251d932e841db84ca0a25712b255",
+  "at_utc": "2026-11-01T07:07:11.980502+00:00",
+  "method": "All9actualdecodedjoblogs: sum each printed groupN/Mcaught once, crosscheck explicitCAUGHT lines and finalSURVIVORSnone; notregistrycounts",
+  "jobs": [
+    {
+      "id": 124773374035,
+      "name": "mutation (browser-agent, browser-agent, 0/1)",
+      "head": "32d519332ecd251d932e841db84ca0a25712b255",
+      "job_status": "success",
+      "group_summaries": [
+        {
+          "caught": 26,
+          "executed": 26
+        }
+      ],
+      "caught": 26,
+      "executed": 26,
+      "CAUGHT_line_count": 26,
+      "survivor_section_none": true,
+      "log_file": "/workspace/van-32d519-ci-evidence-recovery-20261101/job-124773374035-connector.log",
+      "log_sha256": "5437ae7b43644e2feb55a5f15e04dd1cdf51ec48da65b362afa029ccffb40d96",
+      "baseline_markers": [
+        "2026-11-01T06:32:26.0665969Z   \"status\": \"ANCHORS_VALID_BASELINES_AND_MUTATIONS_NOT_EXECUTED\""
+      ]
+    },
+    {
+      "id": 124773374059,
+      "name": "mutation (python-1, python, 1/4)",
+      "head": "32d519332ecd251d932e841db84ca0a25712b255",
+      "job_status": "success",
+      "group_summaries": [
+        {
+          "caught": 3,
+          "executed": 3
+        },
+        {
+          "caught": 8,
+          "executed": 8
+        },
+        {
+          "caught": 13,
+          "executed": 13
+        },
+        {
+          "caught": 5,
+          "executed": 5
+        },
+        {
+          "caught": 11,
+          "executed": 11
+        },
+        {
+          "caught": 6,
+          "executed": 6
+        },
+        {
+          "caught": 4,
+          "executed": 4
+        },
+        {
+          "caught": 8,
+          "executed": 8
+        }
+      ],
+      "caught": 58,
+      "executed": 58,
+      "CAUGHT_line_count": 58,
+      "survivor_section_none": true,
+      "log_file": "/workspace/van-32d519-ci-evidence-recovery-20261101/job-124773374059-connector.log",
+      "log_sha256": "222cc8597d8146ebd644d93d0fef85ebceb0bb58b9b015eb07869589b658059e",
+      "baseline_markers": [
+        "2026-11-01T06:32:30.7132511Z   \"status\": \"ANCHORS_VALID_BASELINES_AND_MUTATIONS_NOT_EXECUTED\""
+      ]
+    },
+    {
+      "id": 124773374081,
+      "name": "mutation (kotlin-3, kotlin, 3/4)",
+      "head": "32d519332ecd251d932e841db84ca0a25712b255",
+      "job_status": "success",
+      "group_summaries": [
+        {
+          "caught": 29,
+          "executed": 29
+        }
+      ],
+      "caught": 29,
+      "executed": 29,
+      "CAUGHT_line_count": 29,
+      "survivor_section_none": true,
+      "log_file": "/workspace/van-32d519-ci-evidence-recovery-20261101/job-124773374081-connector.log",
+      "log_sha256": "1594ea9c8a8b673fd5e737aa6c638e9fe63836056895ed910eac77211c43b9e1",
+      "baseline_markers": [
+        "2026-11-01T06:34:35.5348890Z BrowserControlMutationTest > take control changes authority only after matching receipt and readback() PASSED",
+        "2026-11-01T06:34:35.5420227Z BrowserControlMutationTest > refused take control retains latest confirmed state without readback or retry() PASSED",
+        "2026-11-01T06:34:35.5442673Z BrowserControlMutationTest > cancelled request retains confirmed authority with unknown outcome and input held() PASSED",
+        "2026-11-01T06:34:35.5512561Z BrowserControlMutationTest > repeated concurrent taps admit one unkeyed control mutation and old completion cannot clear a new one() PASSED",
+        "2026-11-01T06:34:35.5526025Z BrowserControlMutationTest > rendered viewport acknowledgment requires exact peer frame proof and independent usable state() PASSED",
+        "2026-11-01T06:34:35.5582147Z BrowserControlMutationTest > cancellation propagates through controls and shared result capture() PASSED",
+        "2026-11-01T06:34:35.5612514Z BrowserControlMutationTest > lost handoff readback is unknown and mutation is not retried() PASSED",
+        "2026-11-01T06:34:35.5632677Z BrowserControlMutationTest > control receipt cannot certify another holder session lease or old generation() PASSED"
+      ]
+    },
+    {
+      "id": 124773374111,
+      "name": "mutation (python-0, python, 0/4)",
+      "head": "32d519332ecd251d932e841db84ca0a25712b255",
+      "job_status": "success",
+      "group_summaries": [
+        {
+          "caught": 5,
+          "executed": 5
+        },
+        {
+          "caught": 10,
+          "executed": 10
+        },
+        {
+          "caught": 8,
+          "executed": 8
+        },
+        {
+          "caught": 6,
+          "executed": 6
+        },
+        {
+          "caught": 15,
+          "executed": 15
+        },
+        {
+          "caught": 7,
+          "executed": 7
+        },
+        {
+          "caught": 5,
+          "executed": 5
+        },
+        {
+          "caught": 3,
+          "executed": 3
+        }
+      ],
+      "caught": 59,
+      "executed": 59,
+      "CAUGHT_line_count": 59,
+      "survivor_section_none": true,
+      "log_file": "/workspace/van-32d519-ci-evidence-recovery-20261101/job-124773374111-connector.log",
+      "log_sha256": "884a1998008eb46823ae9bcb3a83c427f3e93bfe8802897f43c0b95309d17adb",
+      "baseline_markers": [
+        "2026-11-01T06:32:27.0622692Z   \"status\": \"ANCHORS_VALID_BASELINES_AND_MUTATIONS_NOT_EXECUTED\""
+      ]
+    },
+    {
+      "id": 124773374130,
+      "name": "mutation (kotlin-2, kotlin, 2/4)",
+      "head": "32d519332ecd251d932e841db84ca0a25712b255",
+      "job_status": "success",
+      "group_summaries": [
+        {
+          "caught": 29,
+          "executed": 29
+        }
+      ],
+      "caught": 29,
+      "executed": 29,
+      "CAUGHT_line_count": 29,
+      "survivor_section_none": true,
+      "log_file": "/workspace/van-32d519-ci-evidence-recovery-20261101/job-124773374130-connector.log",
+      "log_sha256": "227c1b4d72386bac4a5d511189af492500bb8fa9488d7c44fae31e52dc5327b1",
+      "baseline_markers": [
+        "2026-11-01T06:34:07.3656972Z BrowserControlMutationTest > take control changes authority only after matching receipt and readback() PASSED",
+        "2026-11-01T06:34:07.3659069Z BrowserControlMutationTest > refused take control retains latest confirmed state without readback or retry() PASSED",
+        "2026-11-01T06:34:07.3661001Z BrowserControlMutationTest > cancelled request retains confirmed authority with unknown outcome and input held() PASSED",
+        "2026-11-01T06:34:07.3663434Z BrowserControlMutationTest > repeated concurrent taps admit one unkeyed control mutation and old completion cannot clear a new one() PASSED",
+        "2026-11-01T06:34:07.3671689Z BrowserControlMutationTest > rendered viewport acknowledgment requires exact peer frame proof and independent usable state() PASSED",
+        "2026-11-01T06:34:07.3673635Z BrowserControlMutationTest > cancellation propagates through controls and shared result capture() PASSED",
+        "2026-11-01T06:34:07.3675635Z BrowserControlMutationTest > lost handoff readback is unknown and mutation is not retried() PASSED",
+        "2026-11-01T06:34:07.3677455Z BrowserControlMutationTest > control receipt cannot certify another holder session lease or old generation() PASSED"
+      ]
+    },
+    {
+      "id": 124773374151,
+      "name": "mutation (python-2, python, 2/4)",
+      "head": "32d519332ecd251d932e841db84ca0a25712b255",
+      "job_status": "success",
+      "group_summaries": [
+        {
+          "caught": 12,
+          "executed": 12
+        },
+        {
+          "caught": 3,
+          "executed": 3
+        },
+        {
+          "caught": 11,
+          "executed": 11
+        },
+        {
+          "caught": 5,
+          "executed": 5
+        },
+        {
+          "caught": 10,
+          "executed": 10
+        },
+        {
+          "caught": 4,
+          "executed": 4
+        },
+        {
+          "caught": 6,
+          "executed": 6
+        },
+        {
+          "caught": 7,
+          "executed": 7
+        }
+      ],
+      "caught": 58,
+      "executed": 58,
+      "CAUGHT_line_count": 58,
+      "survivor_section_none": true,
+      "log_file": "/workspace/van-32d519-ci-evidence-recovery-20261101/job-124773374151-connector.log",
+      "log_sha256": "dfd09f40fc33e21de2edee45c714830445678a2fc26b46b04b2a5abd61c5a5bf",
+      "baseline_markers": [
+        "2026-11-01T06:32:54.7709176Z   \"status\": \"ANCHORS_VALID_BASELINES_AND_MUTATIONS_NOT_EXECUTED\""
+      ]
+    },
+    {
+      "id": 124773374157,
+      "name": "mutation (kotlin-0, kotlin, 0/4)",
+      "head": "32d519332ecd251d932e841db84ca0a25712b255",
+      "job_status": "success",
+      "group_summaries": [
+        {
+          "caught": 29,
+          "executed": 29
+        }
+      ],
+      "caught": 29,
+      "executed": 29,
+      "CAUGHT_line_count": 29,
+      "survivor_section_none": true,
+      "log_file": "/workspace/van-32d519-ci-evidence-recovery-20261101/job-124773374157-connector.log",
+      "log_sha256": "ff898d3e9460979a7a669d36dfa6f472e058fcf30ee89b1078894985f897acc3",
+      "baseline_markers": [
+        "2026-11-01T06:34:16.3352132Z BrowserControlMutationTest > take control changes authority only after matching receipt and readback() PASSED",
+        "2026-11-01T06:34:16.3402925Z BrowserControlMutationTest > refused take control retains latest confirmed state without readback or retry() PASSED",
+        "2026-11-01T06:34:16.3418805Z BrowserControlMutationTest > cancelled request retains confirmed authority with unknown outcome and input held() PASSED",
+        "2026-11-01T06:34:16.3420775Z BrowserControlMutationTest > repeated concurrent taps admit one unkeyed control mutation and old completion cannot clear a new one() PASSED",
+        "2026-11-01T06:34:16.3422753Z BrowserControlMutationTest > rendered viewport acknowledgment requires exact peer frame proof and independent usable state() PASSED",
+        "2026-11-01T06:34:16.3424509Z BrowserControlMutationTest > cancellation propagates through controls and shared result capture() PASSED",
+        "2026-11-01T06:34:16.3426039Z BrowserControlMutationTest > lost handoff readback is unknown and mutation is not retried() PASSED",
+        "2026-11-01T06:34:16.3427800Z BrowserControlMutationTest > control receipt cannot certify another holder session lease or old generation() PASSED"
+      ]
+    },
+    {
+      "id": 124773374176,
+      "name": "mutation (kotlin-1, kotlin, 1/4)",
+      "head": "32d519332ecd251d932e841db84ca0a25712b255",
+      "job_status": "success",
+      "group_summaries": [
+        {
+          "caught": 29,
+          "executed": 29
+        }
+      ],
+      "caught": 29,
+      "executed": 29,
+      "CAUGHT_line_count": 29,
+      "survivor_section_none": true,
+      "log_file": "/workspace/van-32d519-ci-evidence-recovery-20261101/job-124773374176-connector.log",
+      "log_sha256": "583496775eec3a1c3a4b5b0fcf4f0649a21fb93f00c206ca07dada712f03b404",
+      "baseline_markers": [
+        "2026-11-01T06:34:15.0454096Z BrowserControlMutationTest > take control changes authority only after matching receipt and readback() PASSED",
+        "2026-11-01T06:34:15.0475928Z BrowserControlMutationTest > refused take control retains latest confirmed state without readback or retry() PASSED",
+        "2026-11-01T06:34:15.0545702Z BrowserControlMutationTest > cancelled request retains confirmed authority with unknown outcome and input held() PASSED",
+        "2026-11-01T06:34:15.1136166Z BrowserControlMutationTest > repeated concurrent taps admit one unkeyed control mutation and old completion cannot clear a new one() PASSED",
+        "2026-11-01T06:34:15.1185734Z BrowserControlMutationTest > rendered viewport acknowledgment requires exact peer frame proof and independent usable state() PASSED",
+        "2026-11-01T06:34:15.1245779Z BrowserControlMutationTest > cancellation propagates through controls and shared result capture() PASSED",
+        "2026-11-01T06:34:15.1306268Z BrowserControlMutationTest > lost handoff readback is unknown and mutation is not retried() PASSED",
+        "2026-11-01T06:34:15.1355774Z BrowserControlMutationTest > control receipt cannot certify another holder session lease or old generation() PASSED"
+      ]
+    },
+    {
+      "id": 124773374261,
+      "name": "mutation (python-3, python, 3/4)",
+      "head": "32d519332ecd251d932e841db84ca0a25712b255",
+      "job_status": "success",
+      "group_summaries": [
+        {
+          "caught": 3,
+          "executed": 3
+        },
+        {
+          "caught": 3,
+          "executed": 3
+        },
+        {
+          "caught": 6,
+          "executed": 6
+        },
+        {
+          "caught": 6,
+          "executed": 6
+        },
+        {
+          "caught": 12,
+          "executed": 12
+        },
+        {
+          "caught": 11,
+          "executed": 11
+        },
+        {
+          "caught": 10,
+          "executed": 10
+        },
+        {
+          "caught": 6,
+          "executed": 6
+        }
+      ],
+      "caught": 57,
+      "executed": 57,
+      "CAUGHT_line_count": 57,
+      "survivor_section_none": true,
+      "log_file": "/workspace/van-32d519-ci-evidence-recovery-20261101/job-124773374261-connector.log",
+      "log_sha256": "8c160d134b1acf3da1455d43d9465d04f713ca692bbe817515b81003a6014431",
+      "baseline_markers": [
+        "2026-11-01T06:33:45.2902959Z   \"status\": \"ANCHORS_VALID_BASELINES_AND_MUTATIONS_NOT_EXECUTED\""
+      ]
+    }
+  ],
+  "totals": {
+    "executed": 374,
+    "caught": 374,
+    "survivors": 0
+  },
+  "baseline_validation": {
+    "unmodified_baseline_gate": "The exact32d harness tools/audit/mutation.py:86-96 executes an unmodified baseline and raises before any mutant if nonzero. Recovered actual logs show each executed group reaching mutation verdicts and final SURVIVORSnone.",
+    "control_group_count": 37,
+    "individual_baseline_testcase_counts": "NOT_EMITTED_IN_LOGS; unknown, not invented",
+    "not_registry_inference": true
+  }
+}

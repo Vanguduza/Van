@@ -12,7 +12,7 @@ import re
 import time
 from typing import Any
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Request
 
 from van_gateway.capability.permissions import KNOWN_PERMISSIONS, _SECRET_SHAPED
 from van_gateway.models import ActionClass, PrincipalType
@@ -243,6 +243,7 @@ async def enforce_permission_scope(store: Store, *, action_id: str, parameters: 
         device = await (await connection.execute("SELECT revoked_at_unix FROM devices WHERE device_id=?", (current["device_id"],))).fetchone()
         if not row or row["revoked_at_ms"] is not None or row["expires_at_ms"] <= now or not device or device["revoked_at_unix"] is not None:
             raise OwnerPermissionDenied("permission_scope_revoked_or_expired")
+        await _validated_permission_uses(connection,row,current['parameters'])
         if prior and (not isinstance(prior, dict) or prior.get("grant_id") != current["grant_id"]
             or prior.get("scope_digest") != digest(current["parameters"])
             or prior.get("action_id") != action_id or digest(prior.get("parameters")) != digest(parameters)):
@@ -299,14 +300,264 @@ def build_owner_permission_router(store: Store) -> APIRouter:
     @router.get("/contracts")
     async def contracts(): return await permission_contracts(store)
     @router.get("/grants/{grant_id}")
-    async def detail(grant_id: str):
-        row=await store.fetchone("SELECT * FROM permission_grants WHERE grant_id=?",(grant_id,))
-        if not row: raise HTTPException(status_code=404,detail="permission_grant_not_found")
-        result=dict(row)
-        if str(row["origin_evidence_ref"] or "").startswith("owner-permission://"):
-            result["exact_scope"]=json.loads(row["scope"])
-            result["native_authority_required"]=True
-            result["use_count_semantics"] = USE_COUNT_SEMANTICS
-            result["fresh_native_approval_per_use"] = next((c["fresh_native_approval_per_use"] for c in (await permission_contracts(store))["contracts"] if c["action_id"]==result["exact_scope"]["action_id"]),True)
-        return result
+    async def detail(grant_id: str, request: Request):
+        from van_gateway.capability.permissions import PermissionError_
+        try:
+            cipher=request.app.state.auth._fernet
+            return await owner_grant_detail(store,grant_id,device_id=getattr(request.state,"van_device_id",None),cipher=cipher,
+                access_token_hash=hashlib.sha256(request.headers.get("X-Van-Device-Token","").encode()).hexdigest())
+        except PermissionError_ as exc:
+            raise permission_http_error(exc) from exc
     return router
+
+
+def permission_http_error(exc):
+    status=404 if exc.code in {"permission_grant_not_found","permission_revocation_unknown"} else 403 if exc.code in {"permission_device_mismatch","permission_device_revoked"} else 503 if exc.code in {"permission_scope_integrity_failed","permission_revocation_history_unavailable"} else 409
+    return HTTPException(status_code=status,detail=exc.code)
+
+# LAC-210 uses the existing permission registry and runtime_meta original journal.
+# A receipt never grants provider/native authority or replaces the grant owner.
+REVOCATION_PREFIX = 'owner_permission_revocation:'
+REVOCATION_SCHEMA = 'van.owner-permission-revocation/1'
+REVOCATION_REQUEST_TTL_MS = 600_000
+REFUSALS = {'permission_revocation_stale_revision','permission_revocation_request_expired','permission_revocation_caller_changed'}
+
+async def _validated_permission_uses(db,row,parameters):
+    count=row['use_count']
+    if type(count) is not int or not 0<=count<=parameters['max_uses']:
+        raise OwnerPermissionDenied('permission_use_count_integrity_failed')
+    claims=await (await db.execute(
+        "SELECT key,value FROM runtime_meta WHERE key GLOB ? AND CASE WHEN json_valid(value) "
+        "THEN json_extract(value,'$.grant_id')=? ELSE 0 END LIMIT 1001",
+        (CLAIM_PREFIX+'*',row['grant_id']),
+    )).fetchall()
+    if count!=len(claims):raise OwnerPermissionDenied('permission_use_count_integrity_failed')
+    for claim in claims:
+        value=json.loads(claim['value'])
+        if (set(value)!={'grant_id','scope_digest','action_id','parameters'}
+            or not claim['key'][len(CLAIM_PREFIX):] or value['scope_digest']!=digest(parameters)
+            or value['action_id']!=parameters['action_id'] or digest(value['parameters'])!=digest(parameters['parameters'])):
+            raise OwnerPermissionDenied('permission_use_count_integrity_failed')
+    return count
+
+async def _raw_meta(db,key):
+    row=await (await db.execute('SELECT value FROM runtime_meta WHERE key=?',(key,))).fetchone()
+    return row['value'] if row else None
+
+async def grant_detail_in_snapshot(db,grant_id,*,now_ms=None):
+    from van_gateway.capability.permissions import PermissionError_
+    row=await (await db.execute('SELECT * FROM permission_grants WHERE grant_id=?',(grant_id,))).fetchone()
+    if row is None:raise PermissionError_('permission_grant_not_found')
+    immutable={k:row[k] for k in ('grant_id','permission','display_name','scope','origin','origin_evidence_ref','granted_at_ms','expires_at_ms')}
+    result=dict(row)
+    now=int(time.time()*1000) if now_ms is None else now_ms
+    bound=False;accounting=False;witness=None;raw_witness=None;raw_authority=None
+    owner_source=str(row['origin_evidence_ref'] or '').startswith('owner-permission://')
+    if owner_source:
+        command_id=str(row['origin_evidence_ref'])[len('owner-permission://'):]
+        raw_witness=await _raw_meta(db,WITNESS_PREFIX+command_id)
+        from van_gateway.command.authority import CommandAuthorityService
+        raw_authority=await _raw_meta(db,CommandAuthorityService.PREFIX+command_id)
+        try:
+            if not raw_witness or len(raw_witness)>32768 or not raw_authority or len(raw_authority)>65536:
+                raise ValueError('original source unavailable')
+            witness=json.loads(raw_witness)
+            params=permission_parameters(json.loads(row['scope']))
+            bound=await _source_bound(db,witness,row,params)
+        except (ValueError,TypeError,KeyError,AttributeError,RecursionError):
+            bound=False
+    if bound:
+        try:
+            current=await _meta(db,scope_key(params['action_id'],params['parameters']))
+            current_matches=isinstance(current,dict) and digest(current)==digest(witness)
+            await _validated_permission_uses(db,row,params)
+            accounting=True
+        except (ValueError,TypeError,KeyError):current_matches=False
+        issuer=await (await db.execute('SELECT revoked_at_unix FROM devices WHERE device_id=?',(witness['device_id'],))).fetchone()
+        definition=await (await db.execute('SELECT enabled,action_class FROM action_definitions WHERE action_id=?',(params['action_id'],))).fetchone()
+        available=bool(definition and definition['enabled'] and definition['action_class']!='A5')
+        remaining=max(0,params['max_uses']-row['use_count']) if accounting else None
+        live=bool(accounting and row['revoked_at_ms'] is None and row['expires_at_ms']>now and issuer and issuer['revoked_at_unix'] is None)
+        usable=bool(live and current_matches and available and remaining and remaining>0)
+        state=('CORRUPT' if not accounting else 'REVOKED' if row['revoked_at_ms'] is not None else
+            'EXPIRED' if row['expires_at_ms']<=now else 'ISSUER_REVOKED' if not issuer or issuer['revoked_at_unix'] is not None else
+            'SUPERSEDED' if not current_matches else 'UNAVAILABLE' if not available else 'EXHAUSTED' if remaining==0 else 'CURRENT')
+        result.update(exact_scope=params,device_id=witness['device_id'],grant_device_id=witness['device_id'],
+            max_uses=params['max_uses'],remaining_uses=remaining,effective_remaining_uses=remaining if usable else 0,
+            grant_current=usable,source_verified=True,accounting_verified=accounting,
+            use_count_semantics=USE_COUNT_SEMANTICS if accounting else 'UNVERIFIED_STORED_COUNT',
+            fresh_native_approval_per_use=not definition or definition['action_class']=='A4',
+            effect_scope='EXACT_OWNER_CONSENT_WITH_INDEPENDENT_NATIVE_AUTHORITY')
+    else:
+        state='CORRUPT' if owner_source else 'REVOKED' if row['revoked_at_ms'] is not None else 'EXPIRED' if row['expires_at_ms'] is not None and row['expires_at_ms']<=now else 'SOURCE_UNVERIFIED'
+        result.update(device_id=None,grant_device_id=None,max_uses=None,remaining_uses=None,effective_remaining_uses=0,
+            grant_current=False,source_verified=False,accounting_verified=False,use_count_semantics='UNVERIFIED_STORED_COUNT',
+            effect_scope='LOCAL_REGISTRY_ONLY_CORRUPT_SOURCE' if owner_source else 'LOCAL_REGISTRY_ONLY_SOURCE_UNVERIFIED')
+    # Untrusted source fields remain visible as stored claims, never as authority;
+    # credential-shaped values are redacted even when corrupt history is inspected.
+    for field in ('scope','origin_evidence_ref','display_name'):
+        if _SECRET_SHAPED.search(str(result.get(field) or '')):result[field]='[redacted credential-shaped stored value]'
+    result.update(authority_state=state,native_authority_required=True,observed_at_ms=now)
+    result['source_digest']=digest({'grant':immutable,'witness_raw':raw_witness,'authority_raw':raw_authority})
+    # Protective withdrawal selects immutable authority generation, not a moving
+    # reservation counter. Accounting is independently read/preserved in this snapshot.
+    result['source_revision']=digest({'grant_id':grant_id,'source':result['source_digest']})
+    result['accounting_revision']=digest({'use_count':row['use_count'],'last_used_at_ms':row['last_used_at_ms'],
+        'revoked_at_ms':row['revoked_at_ms'],'revocation_reason':row['revocation_reason'],'state':state})
+    return result
+
+async def _revocation_actor(db,device_id,*,access_token_hash=None,proof_required=False):
+    from van_gateway.capability.permissions import PermissionError_
+    row=await (await db.execute('SELECT * FROM devices WHERE device_id=?',(device_id,))).fetchone()
+    if not row or row['revoked_at_unix'] is not None or access_token_hash is not None and row['access_token_hash']!=access_token_hash:
+        raise PermissionError_('permission_device_revoked')
+    binding=await (await db.execute('SELECT binding_id,status,device_key_fingerprint FROM owner_device_bindings WHERE device_id=?',(device_id,))).fetchone()
+    if proof_required and (not binding or binding['status']!='ACTIVE'):
+        raise PermissionError_('permission_device_revoked')
+    return digest({'caller_device_id':device_id,'enrolled_at_unix':row['enrolled_at_unix'],
+        'public_key_pem':row['public_key_pem'],'access_token_hash':row['access_token_hash'],
+        'binding':dict(binding) if binding else None})
+
+async def owner_grant_detail(store,grant_id,*,device_id=None,cipher=None,access_token_hash=None):
+    import uuid
+    async with store.connection() as db:
+        await db.execute('BEGIN')
+        detail=await grant_detail_in_snapshot(db,grant_id)
+        if device_id is not None:
+            caller=await _revocation_actor(db,device_id,access_token_hash=access_token_hash)
+            detail['caller_device_id']=device_id
+            detail['revocation_request_available']=cipher is not None
+            if cipher is None:detail['revocation_unavailable_reason']='protected_operation_storage_unavailable'
+            if cipher is not None:
+                # Stateless inert proposal: GET creates no command, grant or journal row.
+                proposal=dict(operation_id='permission-revoke-'+uuid.uuid4().hex,caller_device_id=device_id,
+                    grant_device_id=detail['grant_device_id'],expected_revision=detail['source_revision'],
+                    expected_source_digest=detail['source_digest'])
+                token=dict(schema='van.permission-revocation-request/1',request=proposal,grant_id=grant_id,
+                    caller_context=caller,issued_at_ms=detail['observed_at_ms'],expires_at_ms=detail['observed_at_ms']+REVOCATION_REQUEST_TTL_MS)
+                detail['revocation_request']={**proposal,'request_token':cipher.encrypt(Store.dumps(token).encode()).decode()}
+        return detail
+
+REQUEST_FIELDS={'operation_id','caller_device_id','grant_device_id','expected_revision','expected_source_digest','request_token'}
+RESULT_FIELDS={'operation_id','grant_id','caller_device_id','grant_device_id','state','revoked','revoked_at_ms',
+    'source_digest','expected_revision','effect_scope','native_authority_issued','reason_code','changed','request_deadline_ms'}
+
+def _decode_request(cipher,request,grant_id):
+    from cryptography.fernet import InvalidToken
+    from van_gateway.capability.permissions import PermissionError_
+    try:
+        raw=request['request_token']
+        if not isinstance(raw,str) or not 1<=len(raw)<=16384:raise ValueError('token shape')
+        token=json.loads(cipher.decrypt(raw.encode()))
+        proposal={k:request[k] for k in REQUEST_FIELDS if k!='request_token'}
+        if (set(token)!={'schema','request','grant_id','caller_context','issued_at_ms','expires_at_ms'}
+            or token['schema']!='van.permission-revocation-request/1' or token['grant_id']!=grant_id
+            or token['request']!=proposal or type(token['issued_at_ms']) is not int or type(token['expires_at_ms']) is not int
+            or token['expires_at_ms']-token['issued_at_ms']!=REVOCATION_REQUEST_TTL_MS):raise ValueError('request binding')
+        return token
+    except (InvalidToken,ValueError,TypeError,KeyError,AttributeError):
+        raise PermissionError_('permission_revocation_request_invalid') from None
+
+async def _original_revocation(db,*,operation_id,grant_id,device_id,cipher):
+    from cryptography.fernet import InvalidToken
+    from van_gateway.capability.permissions import PermissionError_
+    raw=await _raw_meta(db,REVOCATION_PREFIX+operation_id)
+    if raw is None:return None
+    try:
+        record=json.loads(cipher.decrypt(raw.encode()))
+        if set(record)!={'schema','grant_id','request','request_digest','source_digest','revocation_digest','result'} or record['schema']!=REVOCATION_SCHEMA:
+            raise ValueError('original schema')
+        request=record['request'];result=record['result']
+        if (set(request)!=REQUEST_FIELDS or set(result)!=RESULT_FIELDS or digest(request)!=record['request_digest']
+            or request['operation_id']!=operation_id or result['operation_id']!=operation_id
+            or result['grant_id']!=record['grant_id'] or result['caller_device_id']!=request['caller_device_id']
+            or result['expected_revision']!=request['expected_revision'] or result['source_digest']!=record['source_digest']
+            or result['native_authority_issued'] is not False or result['state'] not in {'APPLIED','REFUSED'}
+            or type(result['request_deadline_ms']) is not int or result['request_deadline_ms']<=0
+            or request['request_token'] is not None and result['grant_device_id']!=request['grant_device_id']):raise ValueError('original binding')
+        if result['state']=='APPLIED':
+            if (result['revoked'] is not True or type(result['revoked_at_ms']) is not int or result['revoked_at_ms']<=0
+                or result['reason_code'] is not None or type(result['changed']) is not bool):raise ValueError('applied outcome')
+        elif result['revoked'] is not False or result['revoked_at_ms'] is not None or result['changed'] is not False or result['reason_code'] not in REFUSALS:
+            raise ValueError('refused outcome')
+    except (InvalidToken,ValueError,TypeError,KeyError,AttributeError):
+        raise PermissionError_('permission_revocation_history_unavailable') from None
+    if request['caller_device_id']!=device_id:raise PermissionError_('permission_device_mismatch')
+    if record['grant_id']!=grant_id:raise PermissionError_('permission_revocation_operation_conflict')
+    if result['state']=='REFUSED':return record
+    detail=await grant_detail_in_snapshot(db,grant_id)
+    if (detail['source_digest']!=record['source_digest'] or detail['grant_device_id']!=result['grant_device_id']
+        or detail['effect_scope']!=result['effect_scope']
+        or detail['revoked_at_ms']!=result['revoked_at_ms']
+        or digest({'revoked_at_ms':detail['revoked_at_ms'],'reason':detail['revocation_reason']})!=record['revocation_digest']):
+        raise PermissionError_('permission_revocation_subject_changed')
+    return record
+
+async def revoke_permission_grant(store,*,grant_id,device_id,cipher,operation_id=None,caller_device_id=None,
+        grant_device_id=None,expected_revision=None,expected_source_digest=None,request_token=None,
+        access_token_hash=None,proof_required=False):
+    from van_gateway.capability.permissions import PermissionError_
+    received_at=int(time.time()*1000)
+    legacy=operation_id is None
+    if legacy:
+        if any(v is not None for v in (caller_device_id,grant_device_id,expected_revision,expected_source_digest,request_token)):
+            raise PermissionError_('permission_revocation_identity_required')
+        operation_id='legacy-'+digest({'grant_id':grant_id,'caller_device_id':device_id})
+        caller_device_id=device_id
+    else:
+        if caller_device_id is None:raise PermissionError_('permission_revocation_precondition_required')
+        if caller_device_id!=device_id:raise PermissionError_('permission_device_mismatch')
+        if (not isinstance(operation_id,str) or not re.fullmatch(r'[A-Za-z0-9][A-Za-z0-9._-]{15,127}',operation_id)
+            or not isinstance(expected_revision,str) or not re.fullmatch(r'[0-9a-f]{64}',expected_revision)
+            or not isinstance(expected_source_digest,str) or not re.fullmatch(r'[0-9a-f]{64}',expected_source_digest)):
+            raise PermissionError_('permission_revocation_precondition_required')
+    request=dict(operation_id=operation_id,caller_device_id=caller_device_id,grant_device_id=grant_device_id,
+        expected_revision=expected_revision,expected_source_digest=expected_source_digest,request_token=request_token)
+    async with store.connection() as db:
+        await db.execute('BEGIN IMMEDIATE')
+        caller=await _revocation_actor(db,device_id,access_token_hash=access_token_hash,proof_required=proof_required)
+        try:
+            original=await _original_revocation(db,operation_id=operation_id,grant_id=grant_id,device_id=device_id,cipher=cipher)
+        except PermissionError_ as exc:
+            if legacy and exc.code=='permission_revocation_subject_changed':raise PermissionError_('permission_revocation_identity_required') from exc
+            raise
+        if original is not None:
+            if digest(request)!=original['request_digest']:raise PermissionError_('permission_revocation_operation_conflict')
+            return original['result']
+        token=_decode_request(cipher,request,grant_id) if not legacy else None
+        detail=await grant_detail_in_snapshot(db,grant_id)
+        if not legacy and (detail['source_digest']!=expected_source_digest or detail['grant_device_id']!=grant_device_id):
+            raise PermissionError_('permission_revocation_subject_changed')
+        if legacy and detail['revoked_at_ms'] is not None:
+            raise PermissionError_('permission_revocation_original_identity_required')
+        now=int(time.time()*1000)
+        deadline=token['expires_at_ms'] if token else received_at+REVOCATION_REQUEST_TTL_MS
+        refusal=('permission_revocation_request_expired' if now>=deadline or token and now+30000<token['issued_at_ms'] else
+            'permission_revocation_caller_changed' if token and caller!=token['caller_context'] else
+            'permission_revocation_stale_revision' if not legacy and detail['source_revision']!=expected_revision else None)
+        changed=False;stamp=detail['revoked_at_ms'];reason=detail['revocation_reason']
+        if refusal is None and stamp is None:
+            now=int(time.time()*1000)
+            update=await db.execute("UPDATE permission_grants SET revoked_at_ms=?,revocation_reason='owner revoked' "
+                "WHERE grant_id=? AND revoked_at_ms IS NULL AND CAST((julianday('now')-2440587.5)*86400000 AS INTEGER)<?",(now,grant_id,deadline))
+            if update.rowcount!=1:refusal='permission_revocation_request_expired'
+            else:changed=True;stamp=now;reason='owner revoked'
+        result=dict(operation_id=operation_id,grant_id=grant_id,caller_device_id=device_id,grant_device_id=detail['grant_device_id'],
+            state='REFUSED' if refusal else 'APPLIED',revoked=False if refusal else True,revoked_at_ms=None if refusal else stamp,
+            source_digest=detail['source_digest'],expected_revision=expected_revision,effect_scope=detail['effect_scope'],
+            native_authority_issued=False,reason_code=refusal,changed=changed,request_deadline_ms=deadline)
+        record=dict(schema=REVOCATION_SCHEMA,grant_id=grant_id,request=request,request_digest=digest(request),
+            source_digest=detail['source_digest'],revocation_digest=digest({'revoked_at_ms':stamp,'reason':reason}),result=result)
+        await db.execute('INSERT INTO runtime_meta(key,value,updated_at_unix_ms) VALUES(?,?,?)',
+            (REVOCATION_PREFIX+operation_id,cipher.encrypt(Store.dumps(record).encode()).decode(),now))
+        await db.commit()
+        return result
+
+async def original_permission_revocation(store,*,operation_id,grant_id,device_id,cipher,access_token_hash=None):
+    from van_gateway.capability.permissions import PermissionError_
+    async with store.connection() as db:
+        await db.execute('BEGIN')
+        await _revocation_actor(db,device_id,access_token_hash=access_token_hash)
+        record=await _original_revocation(db,operation_id=operation_id,grant_id=grant_id,device_id=device_id,cipher=cipher)
+        if record is None:raise PermissionError_('permission_revocation_unknown')
+        return record['result']

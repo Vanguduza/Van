@@ -88,9 +88,13 @@ internal fun PermissionGrantDetailDialog(app: VanApplication, grantId: String, o
         Column(modifier = Modifier.heightIn(max = 420.dp).verticalScroll(rememberScrollState())) {
             OwnerDataSection("Current grant $grantId", load = { app.gatewayClient.permissionGrant(grantId) }) { row, _ ->
                 Text("${row.ownerValue("permission")}\nOrigin: ${row.ownerValue("origin_evidence_ref")}")
-                val nativeAdmissions = row.optBoolean("native_authority_required")
+                val nativeAdmissions = row.optString("use_count_semantics") == "CANONICAL_EFFECT_ADMISSION_RESERVATIONS"
                 Text("Expires ${ownerTime(row.optLong("expires_at_ms"))}\nRevoked ${ownerTime(row.optLong("revoked_at_ms"))}\n${row.optInt("use_count")} ${if (nativeAdmissions) "admissions charged" else "uses"} · last ${if (nativeAdmissions) "admission" else "use"} ${ownerTime(row.optLong("last_used_at_ms"))}")
                 if (nativeAdmissions) Text("An admission reserves the budget before execution. Interrupted or uncertain execution remains charged; this count does not prove provider completion.")
+                if (row.optBoolean("source_verified") && row.optBoolean("accounting_verified")) {
+                    Text("Maximum ${row.optInt("max_uses")} admissions · ${row.optInt("remaining_uses")} remaining · ${row.optInt("effective_remaining_uses")} currently available")
+                    Text("Current state: ${row.ownerValue("authority_state")}")
+                } else Text("This registry entry needs review. Current available authority is zero. Revoking it does not confirm provider access was removed.")
                 row.optJSONObject("exact_scope")?.let { Text(it.toString(2)) }
                 Text(if (row.optBoolean("native_authority_required")) "Every effect still requires independent canonical action authority." else "This historical grant has no supplied native consumption contract.")
                 if (row.optBoolean("fresh_native_approval_per_use")) Text("Fresh native biometric approval is required for each A4 use.")

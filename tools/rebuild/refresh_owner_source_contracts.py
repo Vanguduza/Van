@@ -25,9 +25,25 @@ LEGACY_GENERATION = "c36d6a21bea1618707e353912d3f5b9508eca5ba"
 REGISTRIES = frozenset("registries/"+name+".json" for name in (
     "owner_endpoints", "owner_endpoint_schemas", "owner_features", "owner_screens"))
 REVIEWED_CITATION_REPLACEMENTS = {
+    ("android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt",
+     "    suspend fun revokePermission(grantId: String): JSONObject = withContext(Dispatchers.IO) {"):
+     "    suspend fun revokePermission(grantId: String, reviewed: JSONObject, reviewedProfile: String): JSONObject = withContext(Dispatchers.IO) {",
+    ("android/app/src/main/java/com/dial/van/command/settings/PermissionsRoute.kt",
+     "                            app.gatewayClient.revokePermission(id).also { receipt ->"):
+     "                                app.gatewayClient.revokePermission(id, selected, profile).also { receipt ->",
+    ("android/app/src/main/java/com/dial/van/command/settings/PermissionsRoute.kt",
+     "                                val current = app.gatewayClient.permissionGrant(id)"):
+     "                                    val current = app.gatewayClient.permissionGrant(id)",
     ("android/app/src/main/java/com/dial/van/trading/ui/AccountOnboardingScreen.kt",
      "                val outcome = runCatching { app.gatewayClient.tradingAccountAction(action, args, proof) }"):
      "                val outcome = runCatching { app.gatewayClient.tradingAccountAction(action, args, proof, approvedIssuedAt) }",
+}
+
+
+REVIEWED_CITATION_REASONS = {
+    ('android/app/src/main/java/com/dial/van/command/settings/PermissionsRoute.kt', '                            app.gatewayClient.revokePermission(id).also { receipt ->'): 'Preserve the reviewed original-result and independent current-grant readback callback with snapshot/profile-bound invocation.',
+    ('android/app/src/main/java/com/dial/van/command/settings/PermissionsRoute.kt', '                                val current = app.gatewayClient.permissionGrant(id)'): 'Preserve the reviewed original-result and independent current-grant readback callback with snapshot/profile-bound invocation.',
+    ('android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt', '    suspend fun revokePermission(grantId: String): JSONObject = withContext(Dispatchers.IO) {'): 'Bind the reviewed grant snapshot and current profile to the durable original permission revocation exchange.',
 }
 
 
@@ -98,7 +114,8 @@ def build(read=None):
                         "old_sha256": value.get("sha256"), "new_sha256": sha(data), "exact_anchor": anchor}
                     if current_anchor != anchor:
                         changes[key].update(reviewed_replacement_anchor=current_anchor,
-                            reason="Preserve the exact timestamp used in the existing owner approval, including biometric delay")
+                            reason=REVIEWED_CITATION_REASONS.get((file, anchor),
+                                "Preserve the exact timestamp used in the existing owner approval, including biometric delay"))
                     value.update(line=matches[0], sha256=sha(data))
             if "endpoint_id" in value and "source_ref" in value:
                 value["source_ref"] = endpoints[value["endpoint_id"]]["source"]
@@ -137,6 +154,26 @@ def build(read=None):
         next(r for r in documents["owner_screens"]["screens"] if r["id"] == "van.devices.provision"),
     ):
         row.setdefault("backend_contract_extensions", []).append(copy.deepcopy(reenrollment_extension))
+    permission_original = next(r for r in endpoint_doc["endpoints"] if
+        (r["method"],r["path"]) == ("GET","/v1/permissions/{grant_id}/revocations/{operation_id}"))
+    permission_extension = {
+        "method":"GET", "path":permission_original["path"], "endpoint_id":permission_original["endpoint_id"],
+        "source_ref":permission_original["source"], "authentication":permission_original["authentication"],
+        "device_proof_required_when_bound":permission_original["device_proof_required_when_bound"],
+        "client_namespace":"VanGatewayClient", "client_function":"revokePermission",
+        "source_status":"CANDIDATE_SOURCE_TESTED_EXISTING_ANDROID_CALLER_NATIVE_ACCEPTANCE_PENDING",
+        "canonical_units":["BE-002"], "action_ids":["LAC-210"],
+        "specification_operation_id":"WP-ACT-LAC-210",
+        "authority":"READ_ORIGINAL_LOCAL_PERMISSION_REVOCATION_NO_PROVIDER_OR_EFFECT_UNDO",
+        "scope":"Current lawful original caller reads exact original local grant withdrawal. Inert reviewed proposals, persisted original request, scoped historical target, current writer authority, generation-stable accounting and readback remain separate from provider/native authority and submitted effect reconciliation.",
+        "specification":"docs/rebuild/rev118/backend/BE-002_LAC210_PERMISSION_REVOCATION.md",
+        "new_ui_implemented":False, "live_qualified":False,
+    }
+    for row in (
+        next(r for r in documents["owner_features"]["features"] if r["id"]=="OF-AUTHORITY-001"),
+        *(r for r in documents["owner_screens"]["screens"] if r["id"] in {"van.permissions","van.permissions.grant"}),
+    ):
+        row.setdefault("backend_contract_extensions",[]).append(copy.deepcopy(permission_extension))
     browser = next(r for r in documents["owner_features"]["features"] if r["id"] == "OF-BROWSER-001")
     endpoint = next(r for r in endpoint_doc["endpoints"] if r["path"].endswith("/{task_id}/resume-contract"))
     browser.setdefault("backend_contract_extensions", []).append({

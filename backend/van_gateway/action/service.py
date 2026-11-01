@@ -395,11 +395,22 @@ class ActionRuntime:
         return self._row_to_execution(row) if row is not None else None
 
     async def revoke_privileged_for_device(self, requested_by: str) -> int:
+        from van_gateway.action.models import TERMINAL_EXECUTION_STATUSES
         now = int(time.time() * 1000)
+        terminal = tuple(sorted(status.value for status in TERMINAL_EXECUTION_STATUSES))
+        placeholders = ",".join("?" for _ in terminal)
         async with self.store.connection() as db:
-            count = await revoke_privileged_in_transaction(db, requested_by, now)
+            cur = await db.execute(
+                f"""
+                UPDATE action_executions
+                SET status=?, error_code='DEVICE_OR_GRANT_REVOKED', updated_at_unix_ms=?
+                WHERE requested_by=? AND action_class IN ('A2','A3','A4')
+                  AND status NOT IN ({placeholders})
+                """,
+                (ExecutionStatus.REVOKED.value, now, requested_by, *terminal),
+            )
             await db.commit()
-            return count
+            return int(cur.rowcount if cur.rowcount is not None and cur.rowcount >= 0 else 0)
 
     async def _persist_execution(self, execution: ActionExecution, *, permission_parameters: dict[str, Any] | None = None) -> ActionExecution:
         async with self.store.connection() as db:

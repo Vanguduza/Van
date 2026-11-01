@@ -1,0 +1,269 @@
+{
+  "schema": "van.lac210-reenrollment-integration-source/1",
+  "at_utc": "2026-11-01T07:31:17.362775+00:00",
+  "source_parent": "32d519332ecd251d932e841db84ca0a25712b255",
+  "authorizations": [
+    "auth-20261022-owner-autonomous-candidate-build",
+    "auth-20261022-owner-owner-contract-refresh"
+  ],
+  "scope": "Existing BE002/LAC210 inspection and recoverable scoped revocation plus five actual reenrollment cross-owner source regressions; no installer edit, native/provider effect, new authority or frozen action.",
+  "historical_failed_ci": {
+    "head": "32d519332ecd251d932e841db84ca0a25712b255",
+    "run": 41281187766,
+    "job": 124773373901,
+    "passed": 5919,
+    "failed": 5,
+    "skipped": 7,
+    "coverage_gate": "FAILED source cases missing, failed or errored; 198 contract checks passed",
+    "failure_receipt": "docs/rebuild/rev118/receipts/raw/lac210-reenrollment-repair-20261101/van-32d519-ci-evidence-recovery-20261101/backend-public-failure-summary.json",
+    "disposition": "Original failed run remains failed. Exact five cases reproduced locally before repair."
+  },
+  "repairs": {
+    "explicit_revocation": "Restores original 2728 privileged owner revocation/CAS states and correlation/evidence; device-retirement helper separately preserves submitted/verifying/unknown effects. Authorization revocation does not undo native effects.",
+    "retention": "Two durable original security barrier/receipt tables classified OWNER_STATE; runtime_meta already OWNER_STATE and original permission revocation prefix survives age pruning and existing OwnerMemory erasure. No blanket owner-erasure exemption or changed privacy contract.",
+    "audit": "Original device.rebind label appended once through unchanged audit chain in same original replacement writer; rollback includes audit and retirement, concurrent lost-ACK replay/readback emits no new event and no credential material."
+  },
+  "lac210": {
+    "frozen_path_count": 10,
+    "source_pins_unchanged": true,
+    "worker_evidence": "149 unique backend source cases and14 pure JVM helper/caller cases passed zero skips; suites overlap current integration.",
+    "independent_review": "Five actual HTTP/SQLite/guard probes pass; exact10 archive/patch/current pins independently verified; no blocking finding.",
+    "android_limits": "No full Android/Compose/VanGatewayClient app compile or handset/native acceptance inferred.",
+    "original_receipt": "Exact selected grant generation and source witness, durable original operation, current lawful caller and writer guard; historical cleanup never reinterpreted as new grant authority."
+  },
+  "current_integrated_tests": {
+    "van-32d-lac210-reenrollment-combined-r1-20261101": {
+      "passed": 105,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "receipt": "docs/rebuild/rev118/receipts/raw/lac210-reenrollment-repair-20261101/van-32d-lac210-reenrollment-combined-r1-20261101/receipt.json"
+    },
+    "van-32d-lac210-direct-clients-r1-20261101": {
+      "passed": 36,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "receipt": "docs/rebuild/rev118/receipts/raw/lac210-reenrollment-repair-20261101/van-32d-lac210-direct-clients-r1-20261101/receipt.json"
+    },
+    "van-32d-lac210-registry-guards-r1-20261101": {
+      "passed": 26,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "receipt": "docs/rebuild/rev118/receipts/raw/lac210-reenrollment-repair-20261101/van-32d-lac210-registry-guards-r1-20261101/receipt.json"
+    }
+  },
+  "guards": {
+    "mutation": {
+      "command": [
+        "/workspace/van-backend-venv-20261025/bin/python",
+        "tools/rebuild/mutation_registry.py",
+        "--check"
+      ],
+      "exit": 0
+    },
+    "owner": {
+      "command": [
+        "/workspace/van-backend-venv-20261025/bin/python",
+        "tools/rebuild/refresh_owner_source_contracts.py",
+        "--check"
+      ],
+      "exit": 0
+    },
+    "frontend": {
+      "command": [
+        "/workspace/van-backend-venv-20261025/bin/python",
+        "tools/rebuild/render_frontend_registry.py",
+        "--check"
+      ],
+      "exit": 0
+    },
+    "workmap": {
+      "command": [
+        "/workspace/van-backend-venv-20261025/bin/python",
+        "tools/rebuild/workmap.py",
+        "--check"
+      ],
+      "exit": 0
+    },
+    "consolidation": {
+      "command": [
+        "/workspace/van-backend-venv-20261025/bin/python",
+        "tools/consolidation/verify.py"
+      ],
+      "exit": 0
+    }
+  },
+  "source_pins": {
+    "android/app/src/main/java/com/dial/van/command/settings/OwnerPermissionGrantSection.kt": "06895fce77e4af2fdb723796a3ccf924be8bd7a46d21087da31c24566428cfb5",
+    "android/app/src/main/java/com/dial/van/command/settings/PermissionsRoute.kt": "a5a4f749ae9fbe614e3b44309675be0f507a5d779a4ed5c2b02ce8a589484eeb",
+    "android/app/src/main/java/com/dial/van/gateway/PermissionRevocationOperations.kt": "5d557b6843ad7db516f655392a2807cf57423bb81afee2421cc2fcb0e6e6d6b6",
+    "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt": "04f333a5d8312831f31c04546e14277106da44622e8eec4293673de42de1778e",
+    "android/verification/build.gradle.kts": "398ab4b703fb52d71dd8db8faf7c939de7a86b781f0b26cc0199d2edf4745152",
+    "android/verification/src/test/kotlin/com/dial/van/gateway/PermissionRevocationOperationsTest.kt": "c9aca6ae9c4b3b51d85f91da6529e2bc9298755d264bbb81ab1ba512a78779af",
+    "backend/tests/test_owner_permission_revocation_recovery.py": "006aeee872ee6d6560cae6bc8d6bcae2784e7b95d3c2dd2f91a13035b9595862",
+    "backend/van_gateway/capability/owner_permissions.py": "d0c63a67da49f6a030877472b1c3b9d5c54a51d16f6a46d21af088ed4ba04d91",
+    "backend/van_gateway/capability/permissions.py": "f4e97e617f9b0cb45d2e560384d7dbe119b515e7c5f475cc7f52c55957b21415",
+    "backend/van_gateway/understanding/api.py": "a5462a5ee1872cea822f410a77205117dfec55f99d61c84b66db7aee45f0cdd3",
+    "backend/van_gateway/action/service.py": "f3643fd0a99a1c6e08d1f1a901a9fdd2e03c214384e96198ce0593db00aa7bfe",
+    "backend/van_gateway/audit/service.py": "22077b60246e3b9992d0d704a389c320aac6f7a2c1b0d479cac62699ca4aa02b",
+    "backend/van_gateway/auth/reenrollment.py": "9cda11adb84c22baed2b43b42d13cefd351fd0268e499a5f4cce9ba3ccc2c983",
+    "backend/van_gateway/ops/retention.py": "5f103afbf0ce5e624f812838118eb748dfa4102006b984d091abd05fbed4fd31",
+    "backend/tests/test_reenrollment_crossowner_invariants.py": "c550c6b441083e9a56c192fb2f94bf136bceab3427f607c1777e1848b418d428",
+    "backend/tests/test_permission_revocation_retention_integration.py": "48efe5158643a3eb1c82e28eb3ff3fec17ee8d1d532228a63d40cb917c201df5"
+  },
+  "contracts": {
+    "old_endpoints": 485,
+    "new_endpoints": 486,
+    "removed": [],
+    "added": [
+      "VE-a7dd7e2f8c76"
+    ],
+    "old_schemas": 378,
+    "new_schemas": 379,
+    "all_old_schemas_byte_semantics_preserved": true,
+    "features": 42,
+    "functions": 105,
+    "surfaces": 78,
+    "actions": 349,
+    "citation_review": "Three reviewed original Android anchors updated to actual reviewed-snapshot/profile and durable recovery caller; no authority inferred from citations."
+  },
+  "historical_mutation_execution": {
+    "head": "32d519332ecd251d932e841db84ca0a25712b255",
+    "executed": 374,
+    "caught": 374,
+    "survivors": 0,
+    "jobs": 9,
+    "method": "Actual decoded job logs, deduplicated printed group summaries crosschecked with explicit CAUGHT lines. Each group requires valid unmodified control. Individual baseline-case totals not emitted/unknown. Current registry preflight 374 identities/383 edits is consistency only; new exact-head execution remains required."
+  },
+  "evidence_packaging": "Historical Python snapshots use .py.txt; captured original commands/paths remain historical and are not rewritten as new execution. Raw bytes/hashes preserved.",
+  "limits": [
+    "Trusted-checker and DDS-key mandatory prerequisites remain failed/unwaived.",
+    "Earlier ca135 and32d source failures, intermediate fixture and setup failures remain preserved.",
+    "Installer scope remains external/pending; native policy/public lifecycle admission and native economic correction qualification remain unissued.",
+    "No unit/BG001/provider/production/device/deployment/release acceptance."
+  ],
+  "raw_files": {
+    "docs/rebuild/rev118/receipts/raw/lac210-reenrollment-repair-20261101/van-32d519-ci-evidence-recovery-20261101/RECOVERY_REPORT.json": "68af8b762612bd7164725f85323841a18445591280fe220cf20980ca7d695b7f",
+    "docs/rebuild/rev118/receipts/raw/lac210-reenrollment-repair-20261101/van-32d519-ci-evidence-recovery-20261101/backend-public-connector-response.json": "f14f5d99b780ee99f7778e0d439b50f4d7f47e98baa2ddfb49450371696b2c95",
+    "docs/rebuild/rev118/receipts/raw/lac210-reenrollment-repair-20261101/van-32d519-ci-evidence-recovery-20261101/backend-public-failure-summary.json": "62068f1b1bfda0218fc22b6e2c5aa9a971bf657fc0a03814861851c42b35dac8",
+    "docs/rebuild/rev118/receipts/raw/lac210-reenrollment-repair-20261101/van-32d519-ci-evidence-recovery-20261101/commands.json": "15361e7afa807231506b42f409c0bfcd82eb624bf69b0e041f597f8f7e14911c",
+    "docs/rebuild/rev118/receipts/raw/lac210-reenrollment-repair-20261101/van-32d519-ci-evidence-recovery-20261101/job-124773373901-connector.log": "a6b56db5f6f08f91f630505da7bc42fac06009177d9c10aec34f40ef6452ae77",
+    "docs/rebuild/rev118/receipts/raw/lac210-reenrollment-repair-20261101/van-32d519-ci-evidence-recovery-20261101/job-124773374035-connector-response.json": "8e2a2af37cb039f9a5e6729ceb227764a0478857c177b0b46e0086454279da12",
+    "docs/rebuild/rev118/receipts/raw/lac210-reenrollment-repair-20261101/van-32d519-ci-evidence-recovery-20261101/job-124773374035-connector.log": "5437ae7b43644e2feb55a5f15e04dd1cdf51ec48da65b362afa029ccffb40d96",
+    "docs/rebuild/rev118/receipts/raw/lac210-reenrollment-repair-20261101/van-32d519-ci-evidence-recovery-20261101/job-124773374059-connector-response.json": "d7224fd89fc1b66efb76e48c4c38a3b15bd0bbb8cc44448b8f9e804b352e82fc",
+    "docs/rebuild/rev118/receipts/raw/lac210-reenrollment-repair-20261101/van-32d519-ci-evidence-recovery-20261101/job-124773374059-connector.log": "222cc8597d8146ebd644d93d0fef85ebceb0bb58b9b015eb07869589b658059e",
+    "docs/rebuild/rev118/receipts/raw/lac210-reenrollment-repair-20261101/van-32d519-ci-evidence-recovery-20261101/job-124773374081-connector-response.json": "c7219cd291ca78bd3a74bf60bfe8d4f805f53e5a657741036247f89f19ef15d2",
+    "docs/rebuild/rev118/receipts/raw/lac210-reenrollment-repair-20261101/van-32d519-ci-evidence-recovery-20261101/job-124773374081-connector.log": "1594ea9c8a8b673fd5e737aa6c638e9fe63836056895ed910eac77211c43b9e1",
+    "docs/rebuild/rev118/receipts/raw/lac210-reenrollment-repair-20261101/van-32d519-ci-evidence-recovery-20261101/job-124773374111-connector-response.json": "75bcdcb4134ce24621d84f663f00e803f22de55bc514a5345752ef0539ccb69f",
+    "docs/rebuild/rev118/receipts/raw/lac210-reenrollment-repair-20261101/van-32d519-ci-evidence-recovery-20261101/job-124773374111-connector.log": "884a1998008eb46823ae9bcb3a83c427f3e93bfe8802897f43c0b95309d17adb",
+    "docs/rebuild/rev118/receipts/raw/lac210-reenrollment-repair-20261101/van-32d519-ci-evidence-recovery-20261101/job-124773374130-connector-response.json": "612cd2c7e2550cd64a043b88ecd15282e5f852d989a5466c5b24ca527919de3f",
+    "docs/rebuild/rev118/receipts/raw/lac210-reenrollment-repair-20261101/van-32d519-ci-evidence-recovery-20261101/job-124773374130-connector.log": "227c1b4d72386bac4a5d511189af492500bb8fa9488d7c44fae31e52dc5327b1",
+    "docs/rebuild/rev118/receipts/raw/lac210-reenrollment-repair-20261101/van-32d519-ci-evidence-recovery-20261101/job-124773374151-connector-response.json": "e1e21e74550e80aa3794dde0e09180ae407bed43ab72530b7e66f0e79020cc15",
+    "docs/rebuild/rev118/receipts/raw/lac210-reenrollment-repair-20261101/van-32d519-ci-evidence-recovery-20261101/job-124773374151-connector.log": "dfd09f40fc33e21de2edee45c714830445678a2fc26b46b04b2a5abd61c5a5bf",
+    "docs/rebuild/rev118/receipts/raw/lac210-reenrollment-repair-20261101/van-32d519-ci-evidence-recovery-20261101/job-124773374157-connector-response.json": "dd1793eda388bddc2cfc3c69dc7b927829911c91a3e3e03605f96dd74701b400",
+    "docs/rebuild/rev118/receipts/raw/lac210-reenrollment-repair-20261101/van-32d519-ci-evidence-recovery-20261101/job-124773374157-connector.log": "ff898d3e9460979a7a669d36dfa6f472e058fcf30ee89b1078894985f897acc3",
+    "docs/rebuild/rev118/receipts/raw/lac210-reenrollment-repair-20261101/van-32d519-ci-evidence-recovery-20261101/job-124773374176-connector-response.json": "40cf3c646f8c49aa10715eaa32ce444d4c29593e6ff763836537023f472a042b",
+    "docs/rebuild/rev118/receipts/raw/lac210-reenrollment-repair-20261101/van-32d519-ci-evidence-recovery-20261101/job-124773374176-connector.log": "583496775eec3a1c3a4b5b0fcf4f0649a21fb93f00c206ca07dada712f03b404",
+    "docs/rebuild/rev118/receipts/raw/lac210-reenrollment-repair-20261101/van-32d519-ci-evidence-recovery-20261101/job-124773374261-connector-response.json": "effe812f3252945ab4097610489c54d59203381ef1c75851afd509fc1114c272",
+    "docs/rebuild/rev118/receipts/raw/lac210-reenrollment-repair-20261101/van-32d519-ci-evidence-recovery-20261101/job-124773374261-connector.log": "8c160d134b1acf3da1455d43d9465d04f713ca692bbe817515b81003a6014431",
+    "docs/rebuild/rev118/receipts/raw/lac210-reenrollment-repair-20261101/van-32d519-ci-evidence-recovery-20261101/mutation-execution-summary.json": "cc5daf3b8c82cbd7b42b8a01633fd5063669b25f77446ee9d9b9fdcf92a276d5",
+    "docs/rebuild/rev118/receipts/raw/lac210-reenrollment-repair-20261101/van-32d-backend-crossowner-before-r1-20261101/owned-temp-inventory.json": "93f7e384c2cf0412e0ace9c3234ec0e4a532e48d1f48c327846e221a8556a2ce",
+    "docs/rebuild/rev118/receipts/raw/lac210-reenrollment-repair-20261101/van-32d-backend-crossowner-before-r1-20261101/receipt.json": "0b7b35745f4c349cad04859c30a825c465aecb989c2bb9c17b24d0e9d23a674b",
+    "docs/rebuild/rev118/receipts/raw/lac210-reenrollment-repair-20261101/van-32d-backend-crossowner-before-r1-20261101/storage-audit.json": "03b5b2afac2978cda8a845c9a6eec9e8d20b13abe2960e09fcc8f1fccbcc2cb7",
+    "docs/rebuild/rev118/receipts/raw/lac210-reenrollment-repair-20261101/van-32d-backend-crossowner-before-r1-20261101/tests.log": "983e6ee23945f4b8a36e8958bdc9c02f8254cd7dffcf95107f29f59db8ed71b7",
+    "docs/rebuild/rev118/receipts/raw/lac210-reenrollment-repair-20261101/van-32d-backend-crossowner-before-r1-20261101/tests.xml": "80a0d06b450b16b4d0e1117938c93c46dc7465b7e18c74a1f2ca46f5e0975b73",
+    "docs/rebuild/rev118/receipts/raw/lac210-reenrollment-repair-20261101/van-32d-backend-crossowner-focused-r1-20261101/owned-temp-inventory.json": "6d8b4a6e7ffa5c3c727420b81add3d15c14ca63fe097b0159661efde19fed863",
+    "docs/rebuild/rev118/receipts/raw/lac210-reenrollment-repair-20261101/van-32d-backend-crossowner-focused-r1-20261101/receipt.json": "f86d4904a3852a00db8711572311c2b0839fc23c031bdb9a329fe5253e67ba8b",
+    "docs/rebuild/rev118/receipts/raw/lac210-reenrollment-repair-20261101/van-32d-backend-crossowner-focused-r1-20261101/storage-audit.json": "03b5b2afac2978cda8a845c9a6eec9e8d20b13abe2960e09fcc8f1fccbcc2cb7",
+    "docs/rebuild/rev118/receipts/raw/lac210-reenrollment-repair-20261101/van-32d-backend-crossowner-focused-r1-20261101/tests.log": "b9be0f7e951523e5b79e868096d2352c416db3055b127295e4370d509e1e9205",
+    "docs/rebuild/rev118/receipts/raw/lac210-reenrollment-repair-20261101/van-32d-backend-crossowner-focused-r1-20261101/tests.xml": "a9196cef0457565aa1d260735a0baec10ce2dcdbff439070ed161f6188d1ccec",
+    "docs/rebuild/rev118/receipts/raw/lac210-reenrollment-repair-20261101/van-32d-lac210-reenrollment-combined-r1-20261101/owned-temp-inventory.json": "3d6e6cf59c8bd85fb3a7f75c44787c16d9e6cbdcc209596b8f874827859c3919",
+    "docs/rebuild/rev118/receipts/raw/lac210-reenrollment-repair-20261101/van-32d-lac210-reenrollment-combined-r1-20261101/receipt.json": "29db24d4bff041c42b185af0d8146180a1c5667eb7a6a3bd9fcbd716edd56965",
+    "docs/rebuild/rev118/receipts/raw/lac210-reenrollment-repair-20261101/van-32d-lac210-reenrollment-combined-r1-20261101/storage-audit.json": "03b5b2afac2978cda8a845c9a6eec9e8d20b13abe2960e09fcc8f1fccbcc2cb7",
+    "docs/rebuild/rev118/receipts/raw/lac210-reenrollment-repair-20261101/van-32d-lac210-reenrollment-combined-r1-20261101/tests.log": "bd3aeaec4897080ee221c2f65598e157f5a713a2ddf82d4e6cf30817584ef20b",
+    "docs/rebuild/rev118/receipts/raw/lac210-reenrollment-repair-20261101/van-32d-lac210-reenrollment-combined-r1-20261101/tests.xml": "13fe93dd78a7d1948248f6ef3e9e338066e4abd74f94b3d97212cd086184487c",
+    "docs/rebuild/rev118/receipts/raw/lac210-reenrollment-repair-20261101/van-32d-lac210-direct-clients-r1-20261101/owned-temp-inventory.json": "4e69cc0075b39a89120e0b257b8c334b9a7475f5a50f8bd00a8f5a612025480a",
+    "docs/rebuild/rev118/receipts/raw/lac210-reenrollment-repair-20261101/van-32d-lac210-direct-clients-r1-20261101/receipt.json": "2c26983188a0f093e50481b06399fb8f8a8c092c646c4be909a735025cf4c168",
+    "docs/rebuild/rev118/receipts/raw/lac210-reenrollment-repair-20261101/van-32d-lac210-direct-clients-r1-20261101/storage-audit.json": "03b5b2afac2978cda8a845c9a6eec9e8d20b13abe2960e09fcc8f1fccbcc2cb7",
+    "docs/rebuild/rev118/receipts/raw/lac210-reenrollment-repair-20261101/van-32d-lac210-direct-clients-r1-20261101/tests.log": "89650cd7b44eb0b796960a6e9beec1103b66288b769e685ce45ca084bd04c619",
+    "docs/rebuild/rev118/receipts/raw/lac210-reenrollment-repair-20261101/van-32d-lac210-direct-clients-r1-20261101/tests.xml": "84c1500047b2f819cad02f9564166bae5b8ca02347c7f830049dd60cb03cce97",
+    "docs/rebuild/rev118/receipts/raw/lac210-reenrollment-repair-20261101/van-32d-lac210-registry-guards-r1-20261101/owned-temp-inventory.json": "684e79425b950c4b1bf4a47a6006b8bef0c7126c67ab95878427616a45613751",
+    "docs/rebuild/rev118/receipts/raw/lac210-reenrollment-repair-20261101/van-32d-lac210-registry-guards-r1-20261101/receipt.json": "eddca94efbf7a493ff2c7b064b06ea362cea37ee40ee8a82609bfeef3ceb6cf7",
+    "docs/rebuild/rev118/receipts/raw/lac210-reenrollment-repair-20261101/van-32d-lac210-registry-guards-r1-20261101/storage-audit.json": "03b5b2afac2978cda8a845c9a6eec9e8d20b13abe2960e09fcc8f1fccbcc2cb7",
+    "docs/rebuild/rev118/receipts/raw/lac210-reenrollment-repair-20261101/van-32d-lac210-registry-guards-r1-20261101/tests.log": "cda7efccc5f28feaaaf3b7fe18379421ff3ec989b1daeea7ad0ccf43b5a30b30",
+    "docs/rebuild/rev118/receipts/raw/lac210-reenrollment-repair-20261101/van-32d-lac210-registry-guards-r1-20261101/tests.xml": "ce8294e30ea57007815f37a4a73ad0cf8a52c0e8bab234bc29fc107955ea02c5",
+    "docs/rebuild/rev118/receipts/raw/lac210-reenrollment-repair-20261101/van-32d-lac210-final-guards-20261101/consolidation.log": "d87b8fe5f7b2b4ca7312b9ba93c4e1aa24ae2301f775aa6f915d81572aec7870",
+    "docs/rebuild/rev118/receipts/raw/lac210-reenrollment-repair-20261101/van-32d-lac210-final-guards-20261101/frontend.log": "69dcc86a9d7aaffcadf4a70e58b379d8452c124dadc4347afbc9e57fbab7ae85",
+    "docs/rebuild/rev118/receipts/raw/lac210-reenrollment-repair-20261101/van-32d-lac210-final-guards-20261101/mutation.log": "131959a4576e7b5a8ebd678f508cca5c1107c9e4cc15c27d3c22121e5ac1b299",
+    "docs/rebuild/rev118/receipts/raw/lac210-reenrollment-repair-20261101/van-32d-lac210-final-guards-20261101/owner.log": "35a9b4641c85055b16c3a6458a7b1f99fb5df7ec0f5a6280ca45c3ab14cd7103",
+    "docs/rebuild/rev118/receipts/raw/lac210-reenrollment-repair-20261101/van-32d-lac210-final-guards-20261101/receipt.json": "18ddf54c1bce649e5899d24a529e344bd91dcae02bd10c2e92da211f9d1c8353",
+    "docs/rebuild/rev118/receipts/raw/lac210-reenrollment-repair-20261101/van-32d-lac210-final-guards-20261101/workmap.log": "6e20f8f2172ee5c1d1fce0a0c754de3b77fe5a107aa568cdf51b6c0797a54037",
+    "docs/rebuild/rev118/receipts/raw/lac210-reenrollment-repair-20261101/van-permission-revocation-20261101/BASE_32D519_RECONCILIATION.json": "cae235e50c0426c2e60eb1450f9f502cc5df1a43bb0038c1a05c7999cc97f2a3",
+    "docs/rebuild/rev118/receipts/raw/lac210-reenrollment-repair-20261101/van-permission-revocation-20261101/CA135_RECONCILIATION.json": "ed050bb689847ef92bc359acf5db7a9e2a0c28e2a1ab5ca23a1f4f3ebaeaa421",
+    "docs/rebuild/rev118/receipts/raw/lac210-reenrollment-repair-20261101/van-permission-revocation-20261101/CITATION_REVIEW_HINTS.json": "6d2569847b043c73395f0c0a1f8612bce920c90bc9133145896cb4a3eb01b190",
+    "docs/rebuild/rev118/receipts/raw/lac210-reenrollment-repair-20261101/van-permission-revocation-20261101/CORE_TEST_FILE_BEFORE_WRITER_APPEND.py.txt": "895cf4fa7a8fbe3d835319d447b4cc58145a86eaad4d6d449669206a485e8773",
+    "docs/rebuild/rev118/receipts/raw/lac210-reenrollment-repair-20261101/van-permission-revocation-20261101/COUNTEREXAMPLE_01.log": "a2f3321fac9794cdf698ea35b7b39febbac20ec6e38117c674c7acbc6cfad666",
+    "docs/rebuild/rev118/receipts/raw/lac210-reenrollment-repair-20261101/van-permission-revocation-20261101/COVERAGE.json": "a75fb2860873a7c77e45a67721bbf561673f4e3cf1d90fd7431df05985e19b69",
+    "docs/rebuild/rev118/receipts/raw/lac210-reenrollment-repair-20261101/van-permission-revocation-20261101/FINAL_AFFECTED_01.log": "1969c7bdcb78ca3d8e0995b8af70d41e50d371542e14c0c74d2452854753fcd7",
+    "docs/rebuild/rev118/receipts/raw/lac210-reenrollment-repair-20261101/van-permission-revocation-20261101/FINAL_COLLECTED_IDENTITIES.log": "3fbf9fdfd37c7ceb8a9fa74af7bde9019aa724faa35b413cab04b8a87bb23b9f",
+    "docs/rebuild/rev118/receipts/raw/lac210-reenrollment-repair-20261101/van-permission-revocation-20261101/FINAL_CORE_01.log": "0ee962b4d329a673d035fe3ab647311bf439eecaf0147e2a6acb3733abc708c9",
+    "docs/rebuild/rev118/receipts/raw/lac210-reenrollment-repair-20261101/van-permission-revocation-20261101/FOCUSED_01.log": "10ae0000371346b98be68b5d99886666d541ae3e2c3ded018fecab4331cbb000",
+    "docs/rebuild/rev118/receipts/raw/lac210-reenrollment-repair-20261101/van-permission-revocation-20261101/FOCUSED_02.log": "eef7650aa71c639e35e67f4d1bee122eacbd31a0f86794cd99bd4dd675326f32",
+    "docs/rebuild/rev118/receipts/raw/lac210-reenrollment-repair-20261101/van-permission-revocation-20261101/FOCUSED_03.log": "8b8481711ddc992fa74e21dbf549c8a761d935b98fcb667512ff5e6680c499c0",
+    "docs/rebuild/rev118/receipts/raw/lac210-reenrollment-repair-20261101/van-permission-revocation-20261101/FOUNDATION.json": "e0ec9e3121944bd47fe6b8f3b9e2753b33fd9068f6add41a2172fb1e62c55064",
+    "docs/rebuild/rev118/receipts/raw/lac210-reenrollment-repair-20261101/van-permission-revocation-20261101/FRONTEND_FINAL.log": "69dcc86a9d7aaffcadf4a70e58b379d8452c124dadc4347afbc9e57fbab7ae85",
+    "docs/rebuild/rev118/receipts/raw/lac210-reenrollment-repair-20261101/van-permission-revocation-20261101/FROZEN_INPUTS.json": "68b181f6ecb8f0f499ef158d0c32227e5cc82239d3bb27665356654d6042e0c7",
+    "docs/rebuild/rev118/receipts/raw/lac210-reenrollment-repair-20261101/van-permission-revocation-20261101/HANDOFF.json": "8755b0e99f078ea37e0d6beb3328acc63907b4f11bc8546770a08a143b46ccd7",
+    "docs/rebuild/rev118/receipts/raw/lac210-reenrollment-repair-20261101/van-permission-revocation-20261101/JDK_DOWNLOAD.log": "c15d7e3b5781dc8c5d69ba9465cf3da6817121053202670773292dcbedf5639f",
+    "docs/rebuild/rev118/receipts/raw/lac210-reenrollment-repair-20261101/van-permission-revocation-20261101/JDK_SETUP.log": "3524b6db2167f536e62027068c21ff673acaffc47ffc4abbfe824ade471f835c",
+    "docs/rebuild/rev118/receipts/raw/lac210-reenrollment-repair-20261101/van-permission-revocation-20261101/JDK_VENDOR_METADATA.json": "f94a683c90c11c348270559e3f5d6dc6d2119fbb7a821c28f951a4a832cefd78",
+    "docs/rebuild/rev118/receipts/raw/lac210-reenrollment-repair-20261101/van-permission-revocation-20261101/JVM_TERMINAL.json": "868b8e071d87625c63516668ff6ebfdb30a0558db493117bd3c79f8c5131ee19",
+    "docs/rebuild/rev118/receipts/raw/lac210-reenrollment-repair-20261101/van-permission-revocation-20261101/KOTLIN_01.log": "59af69664cc14b7a59a839ac78610e939be07caf6c0508aba54db8f7a6e34243",
+    "docs/rebuild/rev118/receipts/raw/lac210-reenrollment-repair-20261101/van-permission-revocation-20261101/KOTLIN_02.log": "51211cff8c9970398d4e3fc8943daddc1ac859780d9e5c39e4ed78025a137720",
+    "docs/rebuild/rev118/receipts/raw/lac210-reenrollment-repair-20261101/van-permission-revocation-20261101/KOTLIN_03.log": "bb09c145103b2dc9c3ad496f958eab02868046f324cef7e5053b83331dc0f648",
+    "docs/rebuild/rev118/receipts/raw/lac210-reenrollment-repair-20261101/van-permission-revocation-20261101/KOTLIN_04.log": "66aef775f8237dc6599c501d87714f08b0241424e3d9163684727dae8c9ad5ed",
+    "docs/rebuild/rev118/receipts/raw/lac210-reenrollment-repair-20261101/van-permission-revocation-20261101/KOTLIN_CHANGED_SOURCE_FINAL.log": "4ebfb3093d4202c6c1039131ae1f8b4414e899b892a38bbef65bb50b4e4cf459",
+    "docs/rebuild/rev118/receipts/raw/lac210-reenrollment-repair-20261101/van-permission-revocation-20261101/KOTLIN_EXCHANGE_FINAL_01.log": "8fa2b86bcf92ee756d6ab3f5a8f9a899726bb622c9da632144a56f7eb1959c09",
+    "docs/rebuild/rev118/receipts/raw/lac210-reenrollment-repair-20261101/van-permission-revocation-20261101/KOTLIN_FINAL.log": "715ab4ddfb4200c965b25db6d81c33308031ab51dcec0da3a172f901c29ba1f0",
+    "docs/rebuild/rev118/receipts/raw/lac210-reenrollment-repair-20261101/van-permission-revocation-20261101/KOTLIN_PRE_STRICT_CONTROL.log": "715ab4ddfb4200c965b25db6d81c33308031ab51dcec0da3a172f901c29ba1f0",
+    "docs/rebuild/rev118/receipts/raw/lac210-reenrollment-repair-20261101/van-permission-revocation-20261101/LAC210_FROZEN.patch": "e4fe85b9ac707bbea9c6a2a2615a17e64b045b1bd927f6cbd555b66d705395eb",
+    "docs/rebuild/rev118/receipts/raw/lac210-reenrollment-repair-20261101/van-permission-revocation-20261101/LAC210_FROZEN_SOURCE.zip": "60d45bf34816dfc66ae85671e8429806ef7ddc621a7b039038c5b2b44175a902",
+    "docs/rebuild/rev118/receipts/raw/lac210-reenrollment-repair-20261101/van-permission-revocation-20261101/MUTATION_PREFLIGHT_FINAL.log": "131959a4576e7b5a8ebd678f508cca5c1107c9e4cc15c27d3c22121e5ac1b299",
+    "docs/rebuild/rev118/receipts/raw/lac210-reenrollment-repair-20261101/van-permission-revocation-20261101/OWNER_FINAL.log": "e0ed5c43b93788beb0144ffd4ef7f55d438cc69dbaeeab34ab65ad0dffef1f81",
+    "docs/rebuild/rev118/receipts/raw/lac210-reenrollment-repair-20261101/van-permission-revocation-20261101/OWN_LAC210_PRE_CA135.patch": "50652803ef16c0c2d7c404b4612ae449e7eff53d2aa5c8b22247a677b678ec7f",
+    "docs/rebuild/rev118/receipts/raw/lac210-reenrollment-repair-20261101/van-permission-revocation-20261101/POLICY_CORRECTED_01.log": "29426a3dc138d111a7a8daaada072499baca17ba5d7d852cdc40c1fef15cc3fd",
+    "docs/rebuild/rev118/receipts/raw/lac210-reenrollment-repair-20261101/van-permission-revocation-20261101/POLICY_CORRECTION.json": "24a856e5014ca9d148b1212496897bfe0f649cbfd56b9595fe9f94dd93fe2526",
+    "docs/rebuild/rev118/receipts/raw/lac210-reenrollment-repair-20261101/van-permission-revocation-20261101/PREPARE_WORKDIR_FAILURE.json": "3d2055c0e19e1b331b733e3ce4754f0cbfaef39298e1ed67cb7b76d9bd9d9141",
+    "docs/rebuild/rev118/receipts/raw/lac210-reenrollment-repair-20261101/van-permission-revocation-20261101/PRE_32D519_WIP.zip": "6cd57a56a0002ba1e38e5bd66ba019c88ad4b528be12cfb62369a370646f36cd",
+    "docs/rebuild/rev118/receipts/raw/lac210-reenrollment-repair-20261101/van-permission-revocation-20261101/PRE_CA135_WIP.zip": "11b43a3ad47521c921b4ae8cc33582ed02b1d9faead4de9692916f64050a9417",
+    "docs/rebuild/rev118/receipts/raw/lac210-reenrollment-repair-20261101/van-permission-revocation-20261101/RECOVERY_01.log": "670c0e9fd00157492c1440247f6681c086067c05d3eb24973f108af2875d9689",
+    "docs/rebuild/rev118/receipts/raw/lac210-reenrollment-repair-20261101/van-permission-revocation-20261101/TERMINAL_CLEANUP.json": "0f842fa3d6013eff4b4a126c7314c77252d0d4e8ed85b19352dd8569d6829c6e",
+    "docs/rebuild/rev118/receipts/raw/lac210-reenrollment-repair-20261101/van-permission-revocation-20261101/WORKMAP_FINAL.log": "6e20f8f2172ee5c1d1fce0a0c754de3b77fe5a107aa568cdf51b6c0797a54037",
+    "docs/rebuild/rev118/receipts/raw/lac210-reenrollment-repair-20261101/van-permission-revocation-20261101/jvm-raw/TEST-com.dial.van.gateway.GatewayMutationRetryTest.xml": "5534f044875290b32080b8b35086037b3a11a52af10d263942f82851611f85c0",
+    "docs/rebuild/rev118/receipts/raw/lac210-reenrollment-repair-20261101/van-permission-revocation-20261101/jvm-raw/TEST-com.dial.van.gateway.PermissionRevocationOperationsTest.xml": "30307f5f060bfb15d3fbd129f8163b7ee9e87a8e33ebcfe2d252fcd2e5bd477c",
+    "docs/rebuild/rev118/receipts/raw/lac210-reenrollment-repair-20261101/van-lac210-independent-review-20261101/after-http.json": "8370f2dec19540bd3924756f5862f626ec79bffd9248058eae20d6df4a075c13",
+    "docs/rebuild/rev118/receipts/raw/lac210-reenrollment-repair-20261101/van-lac210-independent-review-20261101/after-jvm.json": "8370f2dec19540bd3924756f5862f626ec79bffd9248058eae20d6df4a075c13",
+    "docs/rebuild/rev118/receipts/raw/lac210-reenrollment-repair-20261101/van-lac210-independent-review-20261101/before.json": "8370f2dec19540bd3924756f5862f626ec79bffd9248058eae20d6df4a075c13",
+    "docs/rebuild/rev118/receipts/raw/lac210-reenrollment-repair-20261101/van-lac210-independent-review-20261101/final-source-pins.json": "8370f2dec19540bd3924756f5862f626ec79bffd9248058eae20d6df4a075c13",
+    "docs/rebuild/rev118/receipts/raw/lac210-reenrollment-repair-20261101/van-lac210-independent-review-20261101/http-probe-results.json": "3a5dd6a91dbb928cf93f9ceae226b6c27ab3e1c0c4c49a53e7bd1044592d97b3",
+    "docs/rebuild/rev118/receipts/raw/lac210-reenrollment-repair-20261101/van-lac210-independent-review-20261101/http-probe.log": "726bf85f35c37b62931d6077dab36cbc0d38041f11502b7041e7142b37288334",
+    "docs/rebuild/rev118/receipts/raw/lac210-reenrollment-repair-20261101/van-lac210-independent-review-20261101/jvm-compile.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "docs/rebuild/rev118/receipts/raw/lac210-reenrollment-repair-20261101/van-lac210-independent-review-20261101/jvm-import-pins.json": "034a8e98469ffe7970102c8b26586e4e9ce2b29acecf6810a5a3e161d905bad5",
+    "docs/rebuild/rev118/receipts/raw/lac210-reenrollment-repair-20261101/van-lac210-independent-review-20261101/jvm-probe-results.json": "dd948a7309e05bdf2469664f07d4e190b23ea9af1a0972ebf35ebe7d27153d6c",
+    "docs/rebuild/rev118/receipts/raw/lac210-reenrollment-repair-20261101/van-lac210-independent-review-20261101/jvm-probe.log": "8f300dc5adf3dbcd9b4032b1529a9cf1d8563fa9f076d75a234f17612d514b00",
+    "docs/rebuild/rev118/receipts/raw/lac210-reenrollment-repair-20261101/van-lac210-independent-review-20261101/probe-http.py.txt": "2df168b550409c9d095addf929be941bfa0e7b423228dc98e0d1d305570480d1",
+    "docs/rebuild/rev118/receipts/raw/lac210-reenrollment-repair-20261101/van-lac210-independent-review-20261101/review.json": "d85bfc42b6948f70b36a7b8ddac8d86ccc6a372540c45e038ef5ff3d9089a376",
+    "docs/rebuild/rev118/receipts/raw/lac210-reenrollment-repair-20261101/van-lac210-independent-review-20261101/run-jvm-probe.py.txt": "f41099f292d7f413fa2a80ccc98949abd6ad13b5a9b268ff5f5c5482527c0980",
+    "docs/rebuild/rev118/receipts/raw/lac210-reenrollment-repair-20261101/van-lac210-integrated-20261101.json": "898681acedc2b45b18ea9e9f89102a65726f439d0fd8ce6cde6e255dfb421880",
+    "docs/rebuild/rev118/receipts/raw/lac210-reenrollment-repair-20261101/van-lac210-reviewed-citation-preimages-20261101.json": "29012604e7f3e52c14e978b6a2770003a1eb6b8147a36289fc51b11137f3912a",
+    "docs/rebuild/rev118/receipts/raw/lac210-reenrollment-repair-20261101/van-lac210-reenrollment-packaged-topology-20261101.log": "702d6a8da3b6b88eaa8c40c04a99ae02fa9f99aa936764f41d64516d1e1ef8d5",
+    "docs/rebuild/rev118/receipts/raw/lac210-reenrollment-repair-20261101/van-lac210-reenrollment-packaged-consolidation-20261101.log": "d87b8fe5f7b2b4ca7312b9ba93c4e1aa24ae2301f775aa6f915d81572aec7870"
+  },
+  "post_packaging_checks": {
+    "unchanged_topology_case": "1passed0skip after all archived evidence copied",
+    "consolidation": "terminal0",
+    "manifest": "12430files0mismatches before these two raw proofs; rebuilt after receipt update"
+  }
+}

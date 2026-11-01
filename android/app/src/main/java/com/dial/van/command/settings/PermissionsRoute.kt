@@ -13,6 +13,7 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -59,18 +60,42 @@ fun PermissionsRoute(app: VanApplication, onBack: () -> Unit, onOpenRoute: (Stri
                 val revoked = body.optJSONArray("revoked").ownerRows()
                 if (revoked.isNotEmpty()) SectionHeader("Revoked permissions")
                 revoked.forEach { Text("${it.ownerValue("permission")} · revoked ${ownerTime(it.optLong("revoked_at_ms"))}", style = tokens.type.label, color = tokens.color.textSecondary) }
-                revoking?.let { grant -> AlertDialog(onDismissRequest = { revoking = null }, title = { Text("Revoke ${grant.ownerValue("display_name")}?") }, text = { Text("VAN will lose this standing permission. Completed effects are unchanged. Any later authority must be granted through a supported owner approval.") }, confirmButton = {
-                    Button(enabled = actions.canMutate, onClick = {
-                        val id = grant.getString("grant_id"); revoking = null
-                        actions.mutate("revoke:$id", "Permission revocation independently read back.") {
-                            app.gatewayClient.revokePermission(id).also { receipt ->
-                                check(receipt.optString("grant_id") == id && receipt.optBoolean("revoked")) { "Revocation was not confirmed." }
-                                val current = app.gatewayClient.permissionGrant(id)
-                                check(current.optString("grant_id") == id && !current.isNull("revoked_at_ms") && current.optLong("revoked_at_ms") > 0L) { "The revoked grant could not be independently read back." }
-                            }
+                revoking?.let { grant ->
+                    val id = grant.getString("grant_id")
+                    var reviewed by remember(id) { mutableStateOf<org.json.JSONObject?>(null) }
+                    var reviewedProfile by remember(id) { mutableStateOf("") }
+                    var reviewFailed by remember(id) { mutableStateOf(false) }
+                    LaunchedEffect(id) {
+                        val profile = app.gatewayClient.permissionProfileIdentity()
+                        runCatching { app.gatewayClient.permissionGrant(id) }.onSuccess {
+                            if (app.gatewayClient.permissionProfileIdentity() == profile) { reviewedProfile = profile; reviewed = it }
+                            else reviewFailed = true
+                        }.onFailure { reviewFailed = true }
+                    }
+                    AlertDialog(onDismissRequest = { revoking = null }, title = { Text("Revoke ${grant.ownerValue("display_name")}?") }, text = {
+                        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                            Text("Revoke this exact grant. Provider access is managed separately; completed effects are unchanged. Later actions still need their own current authority.")
+                            val current = reviewed
+                            if (current != null) {
+                                Text("${current.ownerValue("permission")} · ${current.ownerValue("authority_state")}")
+                                Text("Scope: ${current.ownerValue("scope")}")
+                            } else Text(if (reviewFailed) "Permission details are unavailable. Close and review them again before confirming." else "Reading current permission details…")
                         }
-                    }) { Text("Revoke permission") }
-                }, dismissButton = { TextButton(onClick = { revoking = null }) { Text("Keep permission") } }) }
+                    }, confirmButton = {
+                        Button(enabled = actions.canMutate && reviewed != null, onClick = {
+                            val selected = reviewed ?: return@Button
+                            val profile = reviewedProfile
+                            revoking = null
+                            actions.mutate("revoke:$id", "Permission revocation independently read back.") {
+                                app.gatewayClient.revokePermission(id, selected, profile).also { receipt ->
+                                    check(receipt.optString("grant_id") == id && receipt.optBoolean("revoked")) { "Revocation was not confirmed." }
+                                    val current = app.gatewayClient.permissionGrant(id)
+                                    check(current.optString("grant_id") == id && !current.isNull("revoked_at_ms") && current.optLong("revoked_at_ms") > 0L) { "The revoked grant could not be independently read back." }
+                                }
+                            }
+                        }) { Text("Revoke permission") }
+                    }, dismissButton = { TextButton(onClick = { revoking = null }) { Text("Keep permission") } })
+                }
                 inspecting?.let { PermissionGrantDetailDialog(app, it, onDismiss = { inspecting = null }) }
             }
         }

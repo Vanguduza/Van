@@ -1,0 +1,5 @@
+{
+  "state": "FAILED_PREPARATION_NO_SOURCE_WRITTEN",
+  "cause": "Relative source paths were evaluated from android/verification, FileNotFoundError; following JVM control ran unchanged earlier source successfully; no final changed-source pass inferred",
+  "corrective_action": "Apply source edits from worktree root, rerun changed-source JVM controls"
+}

@@ -1,0 +1,64 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+____ test_lost_successful_revocation_reply_recovers_instead_of_conflicting _____
+
+client = (<httpx.AsyncClient object at 0x7f9720bae7e0>, <fastapi.applications.FastAPI object at 0x7f97203ef080>, {'create_run': 0})
+
+    async def test_lost_successful_revocation_reply_recovers_instead_of_conflicting(client):
+        ac,app,_=client
+        grant_id,_=await grant(ac,app)
+        path='/v1/permissions/'+grant_id+'/revoke'
+        first=await ac.post(path,json={})
+        assert first.status_code==200,first.text
+        retry=await ac.post(path,json={})
+>       assert retry.status_code==200,retry.text
+E       AssertionError: {"detail":"PERMISSION_ALREADY_REVOKED"}
+E       assert 409 == 200
+E        +  where 409 = <Response [409 Conflict]>.status_code
+
+backend/tests/test_owner_permission_revocation_recovery.py:27: AssertionError
+----------------------------- Captured stdout call -----------------------------
+{"action_class": null, "command_id": null, "correlation_id": null, "degraded_code": null, "detail": {"duration_ms": 331.19, "method": "POST", "route": "/v1/devices/pairing-ticket"}, "device_id": null, "error_class": null, "level": "INFO", "logger": "van.request", "message": "request", "mission_id": null, "principal": null, "result": "200", "service": "van-gateway", "ts": "2026-11-01T06:07:53.087Z"}
+{"action_class": null, "command_id": null, "correlation_id": null, "degraded_code": null, "detail": {"duration_ms": 22.22, "method": "POST", "route": "/v1/devices/pair"}, "device_id": null, "error_class": null, "level": "INFO", "logger": "van.request", "message": "request", "mission_id": null, "principal": null, "result": "200", "service": "van-gateway", "ts": "2026-11-01T06:07:53.111Z"}
+{"action_class": "A4", "command_id": "2eec612a-3d57-44c4-90f5-fc7327b86dd3", "correlation_id": "corr_e92729923d0b", "degraded_code": null, "detail": {"hermes_run_id": null, "origin_channel": "UI", "requires_approval": true, "resolved_action_id": "owner.permission.grant"}, "device_id": "dev-erasure", "error_class": null, "level": "WARNING", "logger": "van.command", "message": "command outcome", "mission_id": null, "principal": "OWNER_DEVICE", "result": "approval_required", "service": "van-gateway", "ts": "2026-11-01T06:07:53.192Z"}
+{"action_class": null, "command_id": null, "correlation_id": null, "degraded_code": null, "detail": {"duration_ms": 68.94, "method": "POST", "route": "/v1/commands"}, "device_id": null, "error_class": null, "level": "INFO", "logger": "van.request", "message": "request", "mission_id": null, "principal": null, "result": "200", "service": "van-gateway", "ts": "2026-11-01T06:07:53.193Z"}
+{"action_class": null, "command_id": null, "correlation_id": null, "degraded_code": null, "detail": {"duration_ms": 25, "fired": 0, "job": "reminders.fire_due", "published": 0}, "device_id": null, "error_class": null, "level": "INFO", "logger": "van.scheduler", "message": "scheduled job completed", "mission_id": null, "principal": null, "result": "OK", "service": "van-gateway", "ts": "2026-11-01T06:07:53.245Z"}
+{"action_class": null, "command_id": null, "correlation_id": null, "degraded_code": null, "detail": {"duration_ms": 19, "expired": 0, "job": "missions.expire_overdue"}, "device_id": null, "error_class": null, "level": "INFO", "logger": "van.scheduler", "message": "scheduled job completed", "mission_id": null, "principal": null, "result": "OK", "service": "van-gateway", "ts": "2026-11-01T06:07:53.275Z"}
+{"action_class": null, "command_id": null, "correlation_id": null, "degraded_code": null, "detail": {"duration_ms": 9, "job": "missions.publish_terminal", "published": 0}, "device_id": null, "error_class": null, "level": "INFO", "logger": "van.scheduler", "message": "scheduled job completed", "mission_id": null, "principal": null, "result": "OK", "service": "van-gateway", "ts": "2026-11-01T06:07:53.305Z"}
+{"action_class": null, "command_id": null, "correlation_id": null, "degraded_code": null, "detail": {"duration_ms": 13, "job": "learning.repair_missions", "pending": 0, "repaired": 0, "retry_pending": 0}, "device_id": null, "error_class": null, "level": "INFO", "logger": "van.scheduler", "message": "scheduled job completed", "mission_id": null, "principal": null, "result": "OK", "service": "van-gateway", "ts": "2026-11-01T06:07:53.324Z"}
+{"action_class": null, "command_id": null, "correlation_id": null, "degraded_code": null, "detail": {"audit_pruned": 0, "automation_transient_retired": 0, "deleted": 0, "duration_ms": 43, "job": "ops.retention", "tables": 79}, "device_id": null, "error_class": null, "level": "INFO", "logger": "van.scheduler", "message": "scheduled job completed", "mission_id": null, "principal": null, "result": "OK", "service": "van-gateway", "ts": "2026-11-01T06:07:53.370Z"}
+{"action_class": null, "command_id": null, "correlation_id": null, "degraded_code": null, "detail": {"duration_ms": 76, "job": "proactive.follow_ups", "produced": {"decisions_open": 0, "intents_stale": 0, "missions_expired": 0, "missions_waiting": 0}, "total": 0}, "device_id": null, "error_class": null, "level": "INFO", "logger": "van.scheduler", "message": "scheduled job completed", "mission_id": null, "principal": null, "result": "OK", "service": "van-gateway", "ts": "2026-11-01T06:07:53.458Z"}
+{"action_class": null, "command_id": null, "correlation_id": null, "degraded_code": null, "detail": {"checked": 0, "due": 0, "duration_ms": 14, "failed": 0, "job": "owner.watches", "published": 0, "triggered": 0}, "device_id": null, "error_class": null, "level": "INFO", "logger": "van.scheduler", "message": "scheduled job completed", "mission_id": null, "principal": null, "result": "OK", "service": "van-gateway", "ts": "2026-11-01T06:07:53.480Z"}
+{"action_class": null, "command_id": null, "correlation_id": null, "degraded_code": null, "detail": {"duration_ms": 10, "job": "trading.publish_closed", "ledger_available": false, "published": 0}, "device_id": null, "error_class": null, "level": "INFO", "logger": "van.scheduler", "message": "scheduled job completed", "mission_id": null, "principal": null, "result": "OK", "service": "van-gateway", "ts": "2026-11-01T06:07:53.500Z"}
+{"action_class": null, "command_id": null, "correlation_id": null, "degraded_code": null, "detail": {"attention_projected": 0, "duration_ms": 14, "evaluated": 0, "job": "trading.market_monitors", "triggered": 0}, "device_id": null, "error_class": null, "level": "INFO", "logger": "van.scheduler", "message": "scheduled job completed", "mission_id": null, "principal": null, "result": "OK", "service": "van-gateway", "ts": "2026-11-01T06:07:53.528Z"}
+{"action_class": null, "command_id": null, "correlation_id": null, "degraded_code": null, "detail": {"demoted": 0, "duration_ms": 8, "job": "learning.auto_demote"}, "device_id": null, "error_class": null, "level": "INFO", "logger": "van.scheduler", "message": "scheduled job completed", "mission_id": null, "principal": null, "result": "OK", "service": "van-gateway", "ts": "2026-11-01T06:07:53.548Z"}
+{"action_class": null, "command_id": null, "correlation_id": null, "degraded_code": null, "detail": {"duration_ms": 8, "job": "understanding.mark_stale_intents", "marked_stale": 0}, "device_id": null, "error_class": null, "level": "INFO", "logger": "van.scheduler", "message": "scheduled job completed", "mission_id": null, "principal": null, "result": "OK", "service": "van-gateway", "ts": "2026-11-01T06:07:53.562Z"}
+{"action_class": null, "command_id": null, "correlation_id": "corr_d29575d706ac", "degraded_code": null, "detail": {"duration_ms": 399, "verification_state": "VERIFIED"}, "device_id": null, "error_class": null, "level": "INFO", "logger": "van.mission", "message": "mission finished", "mission_id": "msn_2c9527830405466385d7b5547eb2c06b", "principal": null, "result": "VERIFIED_SUCCESS", "service": "van-gateway", "ts": "2026-11-01T06:07:53.679Z"}
+{"action_class": "A4", "command_id": "0f5921f9-941d-42c5-ade2-88f264d77220", "correlation_id": "corr_d29575d706ac", "degraded_code": null, "detail": {"hermes_run_id": null, "origin_channel": "UI", "requires_approval": false, "resolved_action_id": "owner.permission.grant"}, "device_id": "dev-erasure", "error_class": null, "level": "INFO", "logger": "van.command", "message": "command outcome", "mission_id": "msn_2c9527830405466385d7b5547eb2c06b", "principal": "OWNER_DEVICE", "result": "accepted", "service": "van-gateway", "ts": "2026-11-01T06:07:53.789Z"}
+{"action_class": null, "command_id": null, "correlation_id": null, "degraded_code": null, "detail": {"duration_ms": 607.55, "method": "POST", "route": "/v1/commands"}, "device_id": null, "error_class": null, "level": "INFO", "logger": "van.request", "message": "request", "mission_id": null, "principal": null, "result": "200", "service": "van-gateway", "ts": "2026-11-01T06:07:53.813Z"}
+{"action_class": null, "command_id": null, "correlation_id": null, "degraded_code": null, "detail": {"duration_ms": 6.63, "method": "POST", "route": "/v1/permissions/{grant_id}/revoke"}, "device_id": null, "error_class": null, "level": "INFO", "logger": "van.request", "message": "request", "mission_id": null, "principal": null, "result": "200", "service": "van-gateway", "ts": "2026-11-01T06:07:53.829Z"}
+{"action_class": null, "command_id": null, "correlation_id": null, "degraded_code": null, "detail": {"duration_ms": 6.02, "method": "POST", "route": "/v1/permissions/{grant_id}/revoke"}, "device_id": null, "error_class": null, "level": "INFO", "logger": "van.request", "message": "request", "mission_id": null, "principal": null, "result": "409", "service": "van-gateway", "ts": "2026-11-01T06:07:53.840Z"}
+------------------------------ Captured log call -------------------------------
+INFO     van.request:logging.py:112 request
+INFO     van.request:logging.py:112 request
+WARNING  van.command:logging.py:112 command outcome
+INFO     van.request:logging.py:112 request
+INFO     van.scheduler:logging.py:112 scheduled job completed
+INFO     van.scheduler:logging.py:112 scheduled job completed
+INFO     van.scheduler:logging.py:112 scheduled job completed
+INFO     van.scheduler:logging.py:112 scheduled job completed
+INFO     van.scheduler:logging.py:112 scheduled job completed
+INFO     van.scheduler:logging.py:112 scheduled job completed
+INFO     van.scheduler:logging.py:112 scheduled job completed
+INFO     van.scheduler:logging.py:112 scheduled job completed
+INFO     van.scheduler:logging.py:112 scheduled job completed
+INFO     van.scheduler:logging.py:112 scheduled job completed
+INFO     van.scheduler:logging.py:112 scheduled job completed
+INFO     van.mission:logging.py:112 mission finished
+INFO     van.command:logging.py:112 command outcome
+INFO     van.request:logging.py:112 request
+INFO     van.request:logging.py:112 request
+INFO     van.request:logging.py:112 request
+=========================== short test summary info ============================
+FAILED backend/tests/test_owner_permission_revocation_recovery.py::test_lost_successful_revocation_reply_recovers_instead_of_conflicting
+1 failed in 6.43s

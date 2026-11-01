@@ -22,7 +22,7 @@ import json
 
 from fastapi import APIRouter, Header, HTTPException, Query, Request
 from fastapi.responses import JSONResponse
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 from van_gateway.auth.control_scopes import ControlScope, require_scoped_internal
 from van_gateway.attention.scoring import AttentionScorer
@@ -75,6 +75,16 @@ from van_gateway.understanding.records import OwnerRecords
 from van_gateway.understanding.record_models import (
     MemoryRecordView, MemoryRecordPage, MemoryRecordErasurePlan, LearningProducersView,
 )
+
+
+class PermissionRevocationBody(BaseModel):
+    model_config=ConfigDict(extra="forbid")
+    operation_id: str | None = Field(default=None,min_length=16,max_length=128)
+    caller_device_id: str | None = Field(default=None,min_length=1,max_length=128)
+    grant_device_id: str | None = Field(default=None,min_length=1,max_length=128)
+    expected_revision: str | None = None
+    expected_source_digest: str | None = None
+    request_token: str | None = Field(default=None,max_length=16384)
 
 
 class ObserveBody(BaseModel):
@@ -519,10 +529,36 @@ class UnderstandingApi:
             return await self.permissions.owner_view()
 
         @router.post("/permissions/{grant_id}/revoke")
-        async def revoke_permission(grant_id: str):
-            if not await self.permissions.revoke(grant_id):
-                raise HTTPException(status_code=409, detail="PERMISSION_ALREADY_REVOKED")
-            return {"grant_id": grant_id, "revoked": True}
+        async def revoke_permission(grant_id: str, request: Request, body: PermissionRevocationBody | None = None):
+            from van_gateway.capability.owner_permissions import permission_http_error
+            from van_gateway.capability.permissions import PermissionError_
+            from van_gateway.auth.service import AuthError
+            try:
+                result=await self.permissions.revoke_original(grant_id=grant_id,
+                    device_id=getattr(request.state,"van_device_id",None),cipher=request.app.state.auth._cipher(),
+                    access_token_hash=__import__('hashlib').sha256(request.headers.get("X-Van-Device-Token","").encode()).hexdigest(),
+                    proof_required=getattr(request.state,"van_device_proved",False),
+                    **(body or PermissionRevocationBody()).model_dump())
+                return JSONResponse(result,status_code=409 if result["state"]=="REFUSED" else 200,headers={"Cache-Control":"no-store"})
+            except PermissionError_ as exc:
+                raise permission_http_error(exc) from exc
+            except AuthError as exc:
+                raise HTTPException(503,exc.code) from exc
+
+        @router.get("/permissions/{grant_id}/revocations/{operation_id}")
+        async def original_permission_revoke(grant_id: str, operation_id: str, request: Request):
+            from van_gateway.capability.owner_permissions import original_permission_revocation, permission_http_error
+            from van_gateway.capability.permissions import PermissionError_
+            from van_gateway.auth.service import AuthError
+            try:
+                result=await original_permission_revocation(self.store,grant_id=grant_id,operation_id=operation_id,
+                    device_id=getattr(request.state,"van_device_id",None),cipher=request.app.state.auth._cipher(),
+                    access_token_hash=__import__('hashlib').sha256(request.headers.get("X-Van-Device-Token","").encode()).hexdigest())
+                return JSONResponse(result,headers={"Cache-Control":"no-store"})
+            except PermissionError_ as exc:
+                raise permission_http_error(exc) from exc
+            except AuthError as exc:
+                raise HTTPException(503,exc.code) from exc
 
         @router.get("/technology-radar")
         async def technology_radar():

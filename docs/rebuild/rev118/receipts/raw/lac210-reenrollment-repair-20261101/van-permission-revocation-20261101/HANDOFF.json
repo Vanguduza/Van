@@ -1,0 +1,97 @@
+{
+  "schema": "van.lac210-source-handoff/1",
+  "state": "FROZEN_SOURCE_TESTED_REVIEW_PENDING",
+  "base": "32d519332ecd251d932e841db84ca0a25712b255",
+  "worktree": "/workspace/van-lanes-20261101/permission-revocation",
+  "source_files": {
+    "android/app/src/main/java/com/dial/van/command/settings/OwnerPermissionGrantSection.kt": "06895fce77e4af2fdb723796a3ccf924be8bd7a46d21087da31c24566428cfb5",
+    "android/app/src/main/java/com/dial/van/command/settings/PermissionsRoute.kt": "a5a4f749ae9fbe614e3b44309675be0f507a5d779a4ed5c2b02ce8a589484eeb",
+    "android/app/src/main/java/com/dial/van/gateway/PermissionRevocationOperations.kt": "5d557b6843ad7db516f655392a2807cf57423bb81afee2421cc2fcb0e6e6d6b6",
+    "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt": "04f333a5d8312831f31c04546e14277106da44622e8eec4293673de42de1778e",
+    "android/verification/build.gradle.kts": "398ab4b703fb52d71dd8db8faf7c939de7a86b781f0b26cc0199d2edf4745152",
+    "android/verification/src/test/kotlin/com/dial/van/gateway/PermissionRevocationOperationsTest.kt": "c9aca6ae9c4b3b51d85f91da6529e2bc9298755d264bbb81ab1ba512a78779af",
+    "backend/tests/test_owner_permission_revocation_recovery.py": "006aeee872ee6d6560cae6bc8d6bcae2784e7b95d3c2dd2f91a13035b9595862",
+    "backend/van_gateway/capability/owner_permissions.py": "d0c63a67da49f6a030877472b1c3b9d5c54a51d16f6a46d21af088ed4ba04d91",
+    "backend/van_gateway/capability/permissions.py": "f4e97e617f9b0cb45d2e560384d7dbe119b515e7c5f475cc7f52c55957b21415",
+    "backend/van_gateway/understanding/api.py": "a5462a5ee1872cea822f410a77205117dfec55f99d61c84b66db7aee45f0cdd3"
+  },
+  "patch": "/workspace/van-permission-revocation-20261101/LAC210_FROZEN.patch",
+  "patch_sha256": "e4fe85b9ac707bbea9c6a2a2615a17e64b045b1bd927f6cbd555b66d705395eb",
+  "archive": "/workspace/van-permission-revocation-20261101/LAC210_FROZEN_SOURCE.zip",
+  "archive_sha256": "60d45bf34816dfc66ae85671e8429806ef7ddc621a7b039038c5b2b44175a902",
+  "readback": "All10frozen source hashes and baseline-index git apply --check --cached verified; no commit/staging/push",
+  "canonical": {
+    "unit": "BE-002",
+    "packet": "VAN-PKT-005",
+    "sequence": 5,
+    "requirements": [
+      "VAN-NX-007",
+      "VAN-NX-021"
+    ],
+    "primary_action": "LAC-210",
+    "specification_operation_id": "WP-ACT-LAC-210",
+    "acceptance_refs": [
+      "T-LAC-210",
+      "T-BE-002-POS",
+      "T-BE-002-NEG",
+      "T-BE-002-REC",
+      "T-BE-002-SEC",
+      "T-BE-002-INT"
+    ],
+    "formal_dependencies": [
+      "BE-001",
+      "PRE-003"
+    ],
+    "formal_acceptance": "NOT_ISSUED",
+    "authority": "auth-20261022-owner-autonomous-candidate-build; backend/Android candidate source only"
+  },
+  "behavior": {
+    "read": "Exact archived source identity, current usage accounting/max/remaining/effective ceiling, CORRUPT/unverified/expired/revoked-source states. Current caller and historic target issuer are distinct.",
+    "request": "Readonly detail issues inert stateless sealed proposal bound to exact caller-context/op/target source-generation/CAS and server-owned10min deadline; no grant/operation/command write. Proposal confers no authority.",
+    "writer": "Existing PermissionRegistry plus existing runtime_meta journal; current caller/token/proof binding rechecked under SQL writer. Source validity guards use, not lawful defensive management. Counter increments never stale same-generation protective revocation.",
+    "durable_result": "Exact original request/result encrypted with existing protected AuthService key in same transaction as grant withdrawal; legacy first unambiguous operation uses exact caller+grant+generation, ambiguity409; explicit already-revoked intent is honest no-op preserving original timestamp.",
+    "recovery": "Current lawful original caller recovers completed original after request expiry, never remints/extends old request. Pending expired/current-context-changed intent gets durable REFUSED. Tampered original journal fails closed; original forensic data retained.",
+    "caller": "Real VanGatewayClient uses tested PermissionRevocationOperations exchange, original body in existing EncryptedSharedPreferences before network, exact original-result+independent current grant readback before clearing. Caller/profile and reviewed source generation scoped. New explicit reviewed generation can coexist with oldUNKNOWN without retarget/clear.",
+    "effect": "Actual ActionRuntime admission\u2192HTTP revoke writer races and future-use refusal; previously SUBMITTED effects remain reconcilable. Existing canonical native/A4/provider authority still independently required.",
+    "legacy": "Current lawful owner retains metadata-only cleanup of legacy/corrupt target; explicit source-unverified/effective0/local-only labels and credential-shaped field redaction. No provider/native retirement claim."
+  },
+  "evidence": {
+    "backend": "51core+98affected=149unique source cases,0skips; COVERAGE.json identities/pins/logs",
+    "jvm": "10persisted exchange/helper+4existing retry cases pass,0skips; JVM_TERMINAL.json+rawXML+KOTLIN_EXCHANGE_FINAL_01.log",
+    "original_counterexample": "COUNTEREXAMPLE_01.log: actual first200/lostreply retry409 reproduced before source fix",
+    "superseded_controls": "POLICY_CORRECTION.json records prevented issuer==caller/target-expiry/accounting-CAS narrowing; earlier provisional passes not final canonical evidence",
+    "environment_failures": "KOTLIN_01 connection/JRE missingcompiler/KOTLIN_03 CAtrust and PREPARE_WORKDIR_FAILURE retained; resolved via genuine vendor-checksum JDK/systemtrust; no TLS weakening",
+    "base_reconciliation": [
+      "FOUNDATION.json",
+      "CA135_RECONCILIATION.json",
+      "BASE_32D519_RECONCILIATION.json"
+    ],
+    "guards": {
+      "diff": "PASS",
+      "hooks": "INSTALLED .githooks",
+      "mutation": "374/383 retained anchors valid; corpus execution NOT_RUN",
+      "workmap": "PASS131/324/1610/234/349/93 and42/105/78 preserved",
+      "frontend_render": "PASS against currently committed registries only; regenerate after owner refresh",
+      "owner": "BLOCKED expected changed citation review VanGatewayClient.kt:1492; no generated writes; CITATION_REVIEW_HINTS.json"
+    }
+  },
+  "integration_required": [
+    "Independent root review of complete10path workflow and current-policy oracles; no issuer==caller/target-expiry/accounting-starvation regression",
+    "Sole integration owner applies LAC210_FROZEN.patch, reviews actual changed Android anchors then refreshes owner-source contracts and frontend registry; existing OF-AUTHORITY-001/van.permissions.grant/LAC210 mapping, no new public action",
+    "No schema/migration/db.py change; original runtime_meta canonical-state retention should preserve new original receipt prefix owner_permission_revocation: (coordinate existing retention owner)",
+    "Reconcile onto actual new published reenrollment-repair base via guarded backup/hash-preserving normal flow. Integration writer owns app.py/action/service.py/ops/retention.py repairs; no LAC210 overlap",
+    "Run final combined guards/manifest/genuine hooks/required-baseline verify/normal push/readback/exact-head hosted CI; known32d public-CI device-wide action-revoke/retention/audit integration repairs remain separate",
+    "SDK36/full Android app+Compose+VanGatewayClient native compile not performed locally; genuine exact-head Android compilation/CI and device/release/provider/native/unit gates remain required",
+    "No installer tools/provisioning edits/authorization extension in this packet"
+  ],
+  "runtime": {
+    "jdk": "/tmp/van-permission-revocation-jdk/jdk-21.0.13+9",
+    "gradle_user_home": "/tmp/van-permission-revocation-gradle",
+    "vendor_metadata": "JDK_VENDOR_METADATA.json checksum verified",
+    "trust": "system /etc/ssl/certs/java/cacerts with actualproxy; no verification disabled",
+    "cache_ownership": "Both worker-owned/tmp, retained for review rerun; no unrelated caches modified"
+  },
+  "current_jobs": [],
+  "cleanup": "TERMINAL_CLEANUP.json; all owned pytest/Gradle controllers terminal, no active jobs; raw results/child streams retained; only own terminal fixtures removed; review JDK/cache retained",
+  "baseline_ci_limit": "Root reports32d publicbackend5failed/5919passed/7skipped in prior reenrollment explicitdevice-wide revoke/retention/audit integration; designated integration owner repairing disjoint app.py/action/service.py/ops/retention.py. These are not waived or LAC210 passes. Next actualbase requires guarded reconciliation and narrow real-runtime-consumer recheck."
+}

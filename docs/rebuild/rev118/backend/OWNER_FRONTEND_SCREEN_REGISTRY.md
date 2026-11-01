@@ -1,6 +1,6 @@
 # VAN current frontend screen and feature registry
 
-Current source inventory: **42 features, 105 source functions, 78 screens/hosted surfaces, 485 endpoint declarations and 378 schemas**.
+Current source inventory: **42 features, 105 source functions, 78 screens/hosted surfaces, 486 endpoint declarations and 379 schemas**.
 
 This generated document renders the current source contracts, including gaps and unverified states. It does not declare features complete, qualify live services or authorize a redesigned frontend. No new frontend/prototype before BG-001. Current source features are distinct from the frozen Rev1.18 programme of **93 planned features, 349 owner actions, 324 requirements, 1,610 acceptance identities and 131 units**. The complete planned scope remains in [the frozen package](../../../review-inputs/van-rev115/package/) and its [backend consumption contract](../../../review-inputs/van-rev115/package/contracts/BACKEND_TO_FRONTEND_CONSUMPTION_CONTRACT.md).
 
@@ -14,10 +14,10 @@ Owner-access endpoints and service dependencies are listed separately below. An 
 
 | Registry | SHA-256 |
 | --- | --- |
-| [owner_features.json](../../../../registries/owner_features.json) | `a8393d5789001360ab99cb73fb48bd5b122522eff703b0a532a9477396d04b51` |
-| [owner_screens.json](../../../../registries/owner_screens.json) | `d96e1377ac8e76b7588a02595d5867dce7e4b238fa7f34c2d211ddda729cca05` |
-| [owner_endpoints.json](../../../../registries/owner_endpoints.json) | `c16b25754613c9b26832a5911b3cd9448e729a01e750686da526052b6bf1b760` |
-| [owner_endpoint_schemas.json](../../../../registries/owner_endpoint_schemas.json) | `cc7d42b39c7c9ffad6fc7f5b1e1c5f69fc31e918cbdcd5e85ca260012ecf86f6` |
+| [owner_features.json](../../../../registries/owner_features.json) | `7410a65d84338e9449055d1436a7ddc889e945e61421dd6617e21f26f28a94e7` |
+| [owner_screens.json](../../../../registries/owner_screens.json) | `f12dd9c43c0a9b0d04f999b6434bcf9a26b6a3c73790d037b56d76d8d88c51a8` |
+| [owner_endpoints.json](../../../../registries/owner_endpoints.json) | `f0e8c5b0b024e0ea9d3f5a54b1787601bdebbf003cc6f525aa15a7e42f91d24b` |
+| [owner_endpoint_schemas.json](../../../../registries/owner_endpoint_schemas.json) | `d01f395c5b90783ee2ef08b7686b373e0059f27077e44541554c399dabdc9118` |
 
 Regenerate with `python3 tools/rebuild/render_frontend_registry.py --apply`; verify with `--check`.
 
@@ -2486,6 +2486,12 @@ Wiring: `SOURCE_WIRED_REQUIRES_ACCEPTANCE`; frontend integration: `OWNER_CONTROL
 | GET | /v1/permissions/contracts | DIRECT_OWNER_ROUTE / INGRESS_BEARER_AND_PAIRED_DEVICE | VanGatewayClient.permissionContracts |
 | GET | /v1/permissions/grants/{grant_id} | DIRECT_OWNER_ROUTE / INGRESS_BEARER_AND_PAIRED_DEVICE | VanGatewayClient.permissionGrant |
 
+**Backend/client extensions — consumer status is explicit**
+
+| Method / path | Client | Status | Scope |
+| --- | --- | --- | --- |
+| GET /v1/permissions/{grant_id}/revocations/{operation_id} | VanGatewayClient.revokePermission | CANDIDATE_SOURCE_TESTED_EXISTING_ANDROID_CALLER_NATIVE_ACCEPTANCE_PENDING | Current lawful original caller reads exact original local grant withdrawal. Inert reviewed proposals, persisted original request, scoped historical target, current writer authority, generation-stable accounting and readback remain separate from provider/native authority and submitted effect reconciliation. |
+
 ### van.autonomy — Autonomy
 
 Owner goal: Inspect and control autonomy.
@@ -3940,6 +3946,12 @@ Wiring: `SOURCE_WIRED_REQUIRES_ACCEPTANCE`; frontend integration: `OWNER_CONTROL
 | GET | /v1/permissions/grants/{grant_id} | DIRECT_OWNER_ROUTE / INGRESS_BEARER_AND_PAIRED_DEVICE | VanGatewayClient.permissionGrant |
 | POST | /v1/permissions/{grant_id}/revoke | DIRECT_OWNER_ROUTE / INGRESS_BEARER_AND_PAIRED_DEVICE | VanGatewayClient.revokePermission |
 
+**Backend/client extensions — consumer status is explicit**
+
+| Method / path | Client | Status | Scope |
+| --- | --- | --- | --- |
+| GET /v1/permissions/{grant_id}/revocations/{operation_id} | VanGatewayClient.revokePermission | CANDIDATE_SOURCE_TESTED_EXISTING_ANDROID_CALLER_NATIVE_ACCEPTANCE_PENDING | Current lawful original caller reads exact original local grant withdrawal. Inert reviewed proposals, persisted original request, scoped historical target, current writer authority, generation-stable accounting and readback remain separate from provider/native authority and submitted effect reconciliation. |
+
 ### van.automation.plan — Automation candidate, admission and exact run evidence
 
 Owner goal: Inspect bounded automation and disable standing work.
@@ -5217,6 +5229,12 @@ Wiring: `SOURCE_WIRED_REQUIRES_ACCEPTANCE`; integration: `OWNER_CONTROLS_SOURCE_
 | POST | /v1/commands | DIRECT_OWNER_ROUTE / INGRESS_BEARER_AND_PAIRED_DEVICE | VanGatewayClient.dispatchCommand |
 | GET | /v1/permissions/contracts | DIRECT_OWNER_ROUTE / INGRESS_BEARER_AND_PAIRED_DEVICE | VanGatewayClient.permissionContracts |
 | GET | /v1/permissions/grants/{grant_id} | DIRECT_OWNER_ROUTE / INGRESS_BEARER_AND_PAIRED_DEVICE | VanGatewayClient.permissionGrant |
+
+**Backend/client extensions — consumer status is explicit**
+
+| Method / path | Client | Status | Scope |
+| --- | --- | --- | --- |
+| GET /v1/permissions/{grant_id}/revocations/{operation_id} | VanGatewayClient.revokePermission | CANDIDATE_SOURCE_TESTED_EXISTING_ANDROID_CALLER_NATIVE_ACCEPTANCE_PENDING | Current lawful original caller reads exact original local grant withdrawal. Inert reviewed proposals, persisted original request, scoped historical target, current writer authority, generation-stable accounting and readback remain separate from provider/native authority and submitted effect reconciliation. |
 
 ### OF-GOOGLE-001 — Google account planes and revocation
 

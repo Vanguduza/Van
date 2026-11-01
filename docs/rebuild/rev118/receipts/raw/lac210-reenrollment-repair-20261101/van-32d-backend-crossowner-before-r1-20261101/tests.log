@@ -1,0 +1,192 @@
+FFFFF                                                                    [100%]
+=================================== FAILURES ===================================
+_ test_post_effect_transition_cannot_overwrite_committed_revocation[submitted] _
+
+ledger = <van_gateway.storage.db.Store object at 0x7ff687efd850>
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7ff687efd640>
+transition = 'submitted'
+
+    @pytest.mark.parametrize("transition", ["submitted", "verifying", "failed"])
+    async def test_post_effect_transition_cannot_overwrite_committed_revocation(ledger, monkeypatch, transition):
+        service = await runtime(ledger)
+        await service.begin(**begin_args())
+        await service.mark_executing("execution")
+        if transition == "verifying":
+            await service.mark_submitted("execution", correlation={"operation": "original"}, evidence_pointer="original-evidence")
+    
+        original_get = service.get_execution
+        revoked = None
+    
+        async def read_then_revoke(execution_id):
+            nonlocal revoked
+            captured = await original_get(execution_id)
+            if revoked is None:
+                assert await service.revoke_privileged_for_device("device:owner") == 1
+                revoked = await original_get(execution_id)
+            return captured
+    
+        monkeypatch.setattr(service, "get_execution", read_then_revoke)
+        if transition == "submitted":
+>           result = await service.mark_submitted("execution", correlation={"operation": "late-result"}, evidence_pointer="late-evidence")
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+backend/tests/test_authority_execution_identity.py:128: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+backend/van_gateway/action/service.py:261: in mark_submitted
+    current = await self.get_execution(execution_id)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+execution_id = 'execution'
+
+    async def read_then_revoke(execution_id):
+        nonlocal revoked
+        captured = await original_get(execution_id)
+        if revoked is None:
+>           assert await service.revoke_privileged_for_device("device:owner") == 1
+E           assert 0 == 1
+
+backend/tests/test_authority_execution_identity.py:122: AssertionError
+_ test_post_effect_transition_cannot_overwrite_committed_revocation[verifying] _
+
+ledger = <van_gateway.storage.db.Store object at 0x7ff687efc620>
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7ff687efe4b0>
+transition = 'verifying'
+
+    @pytest.mark.parametrize("transition", ["submitted", "verifying", "failed"])
+    async def test_post_effect_transition_cannot_overwrite_committed_revocation(ledger, monkeypatch, transition):
+        service = await runtime(ledger)
+        await service.begin(**begin_args())
+        await service.mark_executing("execution")
+        if transition == "verifying":
+            await service.mark_submitted("execution", correlation={"operation": "original"}, evidence_pointer="original-evidence")
+    
+        original_get = service.get_execution
+        revoked = None
+    
+        async def read_then_revoke(execution_id):
+            nonlocal revoked
+            captured = await original_get(execution_id)
+            if revoked is None:
+                assert await service.revoke_privileged_for_device("device:owner") == 1
+                revoked = await original_get(execution_id)
+            return captured
+    
+        monkeypatch.setattr(service, "get_execution", read_then_revoke)
+        if transition == "submitted":
+            result = await service.mark_submitted("execution", correlation={"operation": "late-result"}, evidence_pointer="late-evidence")
+        elif transition == "verifying":
+>           result = await service.mark_verifying("execution")
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+backend/tests/test_authority_execution_identity.py:130: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+backend/van_gateway/action/service.py:244: in mark_verifying
+    current = await self.get_execution(execution_id)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+execution_id = 'execution'
+
+    async def read_then_revoke(execution_id):
+        nonlocal revoked
+        captured = await original_get(execution_id)
+        if revoked is None:
+>           assert await service.revoke_privileged_for_device("device:owner") == 1
+E           assert 0 == 1
+
+backend/tests/test_authority_execution_identity.py:122: AssertionError
+__ test_post_effect_transition_cannot_overwrite_committed_revocation[failed] ___
+
+ledger = <van_gateway.storage.db.Store object at 0x7ff687efe990>
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7ff687effc20>
+transition = 'failed'
+
+    @pytest.mark.parametrize("transition", ["submitted", "verifying", "failed"])
+    async def test_post_effect_transition_cannot_overwrite_committed_revocation(ledger, monkeypatch, transition):
+        service = await runtime(ledger)
+        await service.begin(**begin_args())
+        await service.mark_executing("execution")
+        if transition == "verifying":
+            await service.mark_submitted("execution", correlation={"operation": "original"}, evidence_pointer="original-evidence")
+    
+        original_get = service.get_execution
+        revoked = None
+    
+        async def read_then_revoke(execution_id):
+            nonlocal revoked
+            captured = await original_get(execution_id)
+            if revoked is None:
+                assert await service.revoke_privileged_for_device("device:owner") == 1
+                revoked = await original_get(execution_id)
+            return captured
+    
+        monkeypatch.setattr(service, "get_execution", read_then_revoke)
+        if transition == "submitted":
+            result = await service.mark_submitted("execution", correlation={"operation": "late-result"}, evidence_pointer="late-evidence")
+        elif transition == "verifying":
+            result = await service.mark_verifying("execution")
+        else:
+>           result = await service.fail_execution("execution", status=ExecutionStatus.EXECUTION_FAILED,
+                error_code="late-error", evidence_pointer="late-evidence")
+
+backend/tests/test_authority_execution_identity.py:132: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+backend/van_gateway/action/service.py:379: in fail_execution
+    current = await self.get_execution(execution_id)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+execution_id = 'execution'
+
+    async def read_then_revoke(execution_id):
+        nonlocal revoked
+        captured = await original_get(execution_id)
+        if revoked is None:
+>           assert await service.revoke_privileged_for_device("device:owner") == 1
+E           assert 0 == 1
+
+backend/tests/test_authority_execution_identity.py:122: AssertionError
+__________ test_every_table_in_the_live_schema_has_a_retention_class ___________
+
+tmp_path = PosixPath('/tmp/van-recovery-32d-backend-crossowner-before-r1-20261101/test_every_table_in_the_live_s0')
+
+    @pytest.mark.asyncio
+    async def test_every_table_in_the_live_schema_has_a_retention_class(tmp_path):
+        store = await make_store(tmp_path)
+        tables = await _tables(store)
+        unassigned = sorted(tables - set(BY_TABLE))
+>       assert not unassigned, (
+            f"{len(unassigned)} tables have no retention class: {unassigned}. "
+            "A new table must be assigned one; see van_gateway/ops/retention.py."
+        )
+E       AssertionError: 2 tables have no retention class: ['device_certificate_retirements', 'owner_device_reenrollments']. A new table must be assigned one; see van_gateway/ops/retention.py.
+E       assert not ['device_certificate_retirements', 'owner_device_reenrollments']
+
+backend/tests/test_ops_retention.py:40: AssertionError
+__________ test_the_two_vocabularies_are_written_down_and_still_agree __________
+
+    def test_the_two_vocabularies_are_written_down_and_still_agree():
+        """The audit labels that are not routing capabilities, named.
+    
+        Named rather than counted, so that adding one is a deliberate edit to this list and
+        not something that drifts in — and so that the next person to sweep for
+        `capability="..."` finds this file before concluding fourteen things are undeclared.
+        """
+        labels = _audit_labels()
+        declared = _declared()
+>       assert AUDIT_ONLY_LABELS <= labels, sorted(AUDIT_ONLY_LABELS - labels)
+E       AssertionError: ['device.rebind']
+E       assert frozenset({'b...ingest', ...}) <= {'browser.dow....ingest', ...}
+E         
+E         Extra items in the left set:
+E         'device.rebind'
+
+tests/contracts/test_capability_namespaces_are_distinct.py:100: AssertionError
+=========================== short test summary info ============================
+FAILED backend/tests/test_authority_execution_identity.py::test_post_effect_transition_cannot_overwrite_committed_revocation[submitted]
+FAILED backend/tests/test_authority_execution_identity.py::test_post_effect_transition_cannot_overwrite_committed_revocation[verifying]
+FAILED backend/tests/test_authority_execution_identity.py::test_post_effect_transition_cannot_overwrite_committed_revocation[failed]
+FAILED backend/tests/test_ops_retention.py::test_every_table_in_the_live_schema_has_a_retention_class
+FAILED tests/contracts/test_capability_namespaces_are_distinct.py::test_the_two_vocabularies_are_written_down_and_still_agree
+5 failed in 1.79s

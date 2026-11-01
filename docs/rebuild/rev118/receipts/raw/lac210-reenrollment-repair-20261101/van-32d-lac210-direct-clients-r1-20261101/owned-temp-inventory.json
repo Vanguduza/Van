@@ -1,0 +1,1651 @@
+{
+  "directory": "/tmp/van-recovery-32d-lac210-direct-clients-r1-20261101",
+  "at_utc": "2026-11-01T07:30:43.180630+00:00",
+  "files": [
+    {
+      "path": "test_agent_cannot_revoke_owner0/native-owner.json",
+      "bytes": 281,
+      "sha256": "4e1ba0d1c129f58684fddb44a0f58e33067678ba4b8638dc58b8d9c2c432c306"
+    },
+    {
+      "path": "test_agent_cannot_revoke_owner0/native-owner.json.lock",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "test_agent_cannot_revoke_owner0/native.sqlite.runtime-lease.paper_lease.lock",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "test_agent_cannot_revoke_owner0/native.sqlite",
+      "bytes": 49152,
+      "sha256": "f805ef5a7b649f2fb4586208e45d58a11b173957878ddbae073319a8c973083d"
+    },
+    {
+      "path": "test_agent_cannot_revoke_owner0/policy-keys.json",
+      "bytes": 212,
+      "sha256": "e462f7fcb65b415497d06a6822f3f8da07d5501895b3538ed24c01527bbe3e16"
+    },
+    {
+      "path": "test_agent_cannot_revoke_owner0/accounts.json",
+      "bytes": 496,
+      "sha256": "fecfa8badb050c508a4cb876e63191a30465e4c668febf341ca7c9222b5c76fa"
+    },
+    {
+      "path": "test_agent_cannot_revoke_owner0/accounts.json.lock",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "test_agent_cannot_revoke_owner0/accounts.json.operation.paper_lease.lock",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "test_agent_cannot_revoke_owner0/gw.sqlite3",
+      "bytes": 2052096,
+      "sha256": "dece4283a2f32d1fd79732bf718d6c6545fab60aee23984480256a80c5388f2a"
+    },
+    {
+      "path": "test_revocation_read_requires_0/gw.sqlite3",
+      "bytes": 2052096,
+      "sha256": "b0470a4b0c97b8b9cc11d779f63e569b31aaaa9c8a63e9344f369b3c2ca4f88b"
+    },
+    {
+      "path": "test_original_revocation_get_r1/native-owner.json",
+      "bytes": 365,
+      "sha256": "da512cd94a123f631405398109d947a16bfc40edfd9b6aa41a22a575a2d2fdfe"
+    },
+    {
+      "path": "test_original_revocation_get_r1/native-owner.json.lock",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "test_original_revocation_get_r1/native.sqlite.runtime-lease.paper_lease.lock",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "test_original_revocation_get_r1/native.sqlite",
+      "bytes": 57344,
+      "sha256": "a829b42923753a7e68189e31c3bc7ef1f2d7fd95d05923df57491d7ea698024d"
+    },
+    {
+      "path": "test_original_revocation_get_r1/policy-keys.json",
+      "bytes": 212,
+      "sha256": "e462f7fcb65b415497d06a6822f3f8da07d5501895b3538ed24c01527bbe3e16"
+    },
+    {
+      "path": "test_original_revocation_get_r1/accounts.json",
+      "bytes": 496,
+      "sha256": "fecfa8badb050c508a4cb876e63191a30465e4c668febf341ca7c9222b5c76fa"
+    },
+    {
+      "path": "test_original_revocation_get_r1/accounts.json.lock",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "test_original_revocation_get_r1/accounts.json.operation.paper_lease.lock",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "test_original_revocation_get_r1/gw.sqlite3",
+      "bytes": 2052096,
+      "sha256": "108450042b26541402ad8c7015fdf4dc67cccc35f7403cafabf13a31a004ebbc"
+    },
+    {
+      "path": "test_original_revocation_get_r0/gw.sqlite3",
+      "bytes": 2052096,
+      "sha256": "49c3558885d90c575b27956574bd9c8a4320daf579b029547854bc999ff510af"
+    },
+    {
+      "path": "test_original_revocation_get_o0/native-owner.json",
+      "bytes": 365,
+      "sha256": "da512cd94a123f631405398109d947a16bfc40edfd9b6aa41a22a575a2d2fdfe"
+    },
+    {
+      "path": "test_original_revocation_get_o0/native-owner.json.lock",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "test_original_revocation_get_o0/native.sqlite.runtime-lease.paper_lease.lock",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "test_original_revocation_get_o0/native.sqlite",
+      "bytes": 57344,
+      "sha256": "e707eecb8eedaf2bb8b949f61a7c882f3af126ed8c970b529320fcf101d51617"
+    },
+    {
+      "path": "test_original_revocation_get_o0/policy-keys.json",
+      "bytes": 212,
+      "sha256": "e462f7fcb65b415497d06a6822f3f8da07d5501895b3538ed24c01527bbe3e16"
+    },
+    {
+      "path": "test_original_revocation_get_o0/accounts.json",
+      "bytes": 496,
+      "sha256": "fecfa8badb050c508a4cb876e63191a30465e4c668febf341ca7c9222b5c76fa"
+    },
+    {
+      "path": "test_original_revocation_get_o0/accounts.json.lock",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "test_original_revocation_get_o0/accounts.json.operation.paper_lease.lock",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "test_original_revocation_get_o0/gw.sqlite3",
+      "bytes": 2052096,
+      "sha256": "92bb0153ee847ada8cdcb6b298d0f79032eaf841a640c6e8c916ac75398bd9e2"
+    },
+    {
+      "path": "test_known_native_success_surv0/native-owner.json",
+      "bytes": 365,
+      "sha256": "da512cd94a123f631405398109d947a16bfc40edfd9b6aa41a22a575a2d2fdfe"
+    },
+    {
+      "path": "test_known_native_success_surv0/native-owner.json.lock",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "test_known_native_success_surv0/native.sqlite.runtime-lease.paper_lease.lock",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "test_known_native_success_surv0/native.sqlite",
+      "bytes": 57344,
+      "sha256": "3f0eeb503b6891d8a704d859ae69ebba9aea1a97eefe3e33f1b4673dd480b410"
+    },
+    {
+      "path": "test_known_native_success_surv0/policy-keys.json",
+      "bytes": 212,
+      "sha256": "e462f7fcb65b415497d06a6822f3f8da07d5501895b3538ed24c01527bbe3e16"
+    },
+    {
+      "path": "test_known_native_success_surv0/accounts.json",
+      "bytes": 496,
+      "sha256": "fecfa8badb050c508a4cb876e63191a30465e4c668febf341ca7c9222b5c76fa"
+    },
+    {
+      "path": "test_known_native_success_surv0/accounts.json.lock",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "test_known_native_success_surv0/accounts.json.operation.paper_lease.lock",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "test_known_native_success_surv0/gw.sqlite3",
+      "bytes": 2052096,
+      "sha256": "03562ab7bdc87e7435e13272e88f204aafb00e8db48a61c44527ba6d8908d912"
+    },
+    {
+      "path": "test_unrelated_corrupt_heartbe2/native.sqlite.runtime-lease.paper_lease.lock",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "test_unrelated_corrupt_heartbe2/native.sqlite",
+      "bytes": 49152,
+      "sha256": "bcc7181852c2632d9948aab2113e2861c5749393a977f20381368ead07a5707b"
+    },
+    {
+      "path": "test_unrelated_corrupt_heartbe2/policy-keys.json",
+      "bytes": 212,
+      "sha256": "e462f7fcb65b415497d06a6822f3f8da07d5501895b3538ed24c01527bbe3e16"
+    },
+    {
+      "path": "test_unrelated_corrupt_heartbe2/accounts.json",
+      "bytes": 496,
+      "sha256": "fecfa8badb050c508a4cb876e63191a30465e4c668febf341ca7c9222b5c76fa"
+    },
+    {
+      "path": "test_unrelated_corrupt_heartbe2/accounts.json.lock",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "test_unrelated_corrupt_heartbe2/accounts.json.operation.paper_lease.lock",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "test_unrelated_corrupt_heartbe2/gw.sqlite3",
+      "bytes": 2052096,
+      "sha256": "86a0dc6b0803bbe4ac98edcc4fc891b43349508f18bd7ace5ef0fa0fb934e6a2"
+    },
+    {
+      "path": "test_unrelated_corrupt_heartbe1/native.sqlite.runtime-lease.paper_lease.lock",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "test_unrelated_corrupt_heartbe1/native.sqlite",
+      "bytes": 49152,
+      "sha256": "136c089af0fcbf35ede911ebd37da7267f33387bdc243f741c890c81b4c8b6c0"
+    },
+    {
+      "path": "test_unrelated_corrupt_heartbe1/policy-keys.json",
+      "bytes": 212,
+      "sha256": "e462f7fcb65b415497d06a6822f3f8da07d5501895b3538ed24c01527bbe3e16"
+    },
+    {
+      "path": "test_unrelated_corrupt_heartbe1/accounts.json",
+      "bytes": 496,
+      "sha256": "fecfa8badb050c508a4cb876e63191a30465e4c668febf341ca7c9222b5c76fa"
+    },
+    {
+      "path": "test_unrelated_corrupt_heartbe1/accounts.json.lock",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "test_unrelated_corrupt_heartbe1/accounts.json.operation.paper_lease.lock",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "test_unrelated_corrupt_heartbe1/gw.sqlite3",
+      "bytes": 2052096,
+      "sha256": "346d79502d9fc6b2718c4dd0ffd871fdd19a205c4af6dd42c932c46922122321"
+    },
+    {
+      "path": "test_unrelated_corrupt_heartbe0/native.sqlite.runtime-lease.paper_lease.lock",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "test_unrelated_corrupt_heartbe0/native.sqlite",
+      "bytes": 49152,
+      "sha256": "adb0e9e3dc1018810a07a7ea09943db3621a7533ac5845d15a7a058ebddfdd52"
+    },
+    {
+      "path": "test_unrelated_corrupt_heartbe0/policy-keys.json",
+      "bytes": 212,
+      "sha256": "e462f7fcb65b415497d06a6822f3f8da07d5501895b3538ed24c01527bbe3e16"
+    },
+    {
+      "path": "test_unrelated_corrupt_heartbe0/accounts.json",
+      "bytes": 496,
+      "sha256": "fecfa8badb050c508a4cb876e63191a30465e4c668febf341ca7c9222b5c76fa"
+    },
+    {
+      "path": "test_unrelated_corrupt_heartbe0/accounts.json.lock",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "test_unrelated_corrupt_heartbe0/accounts.json.operation.paper_lease.lock",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "test_unrelated_corrupt_heartbe0/gw.sqlite3",
+      "bytes": 2052096,
+      "sha256": "44d05f846c25ae701029db7df923210b88ae42dc04e6015668abd46b41642c2b"
+    },
+    {
+      "path": "test_private_revocation_refuse4/native-owner.json",
+      "bytes": 281,
+      "sha256": "4e1ba0d1c129f58684fddb44a0f58e33067678ba4b8638dc58b8d9c2c432c306"
+    },
+    {
+      "path": "test_private_revocation_refuse4/native-owner.json.lock",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "test_private_revocation_refuse4/native.sqlite.runtime-lease.paper_lease.lock",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "test_private_revocation_refuse4/native.sqlite",
+      "bytes": 49152,
+      "sha256": "5dae54f08810d7478464a665431b83e9734d38f951e80f4374492ede1d35dfe8"
+    },
+    {
+      "path": "test_private_revocation_refuse4/policy-keys.json",
+      "bytes": 212,
+      "sha256": "e462f7fcb65b415497d06a6822f3f8da07d5501895b3538ed24c01527bbe3e16"
+    },
+    {
+      "path": "test_private_revocation_refuse4/accounts.json",
+      "bytes": 496,
+      "sha256": "fecfa8badb050c508a4cb876e63191a30465e4c668febf341ca7c9222b5c76fa"
+    },
+    {
+      "path": "test_private_revocation_refuse4/accounts.json.lock",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "test_private_revocation_refuse4/accounts.json.operation.paper_lease.lock",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "test_private_revocation_refuse4/gw.sqlite3",
+      "bytes": 2052096,
+      "sha256": "407fe91fc147b16c1306de78aa706d11ea0c04b37d93b6b581ead2c36f6d5cbd"
+    },
+    {
+      "path": "test_private_revocation_refuse3/native-owner.json",
+      "bytes": 281,
+      "sha256": "4e1ba0d1c129f58684fddb44a0f58e33067678ba4b8638dc58b8d9c2c432c306"
+    },
+    {
+      "path": "test_private_revocation_refuse3/native-owner.json.lock",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "test_private_revocation_refuse3/native.sqlite.runtime-lease.paper_lease.lock",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "test_private_revocation_refuse3/native.sqlite",
+      "bytes": 49152,
+      "sha256": "a61c0f49a14bd6a5291c02e30c2adb096fd1d3162aede3562cc3d3473f3b9ecc"
+    },
+    {
+      "path": "test_private_revocation_refuse3/policy-keys.json",
+      "bytes": 212,
+      "sha256": "e462f7fcb65b415497d06a6822f3f8da07d5501895b3538ed24c01527bbe3e16"
+    },
+    {
+      "path": "test_private_revocation_refuse3/accounts.json",
+      "bytes": 496,
+      "sha256": "fecfa8badb050c508a4cb876e63191a30465e4c668febf341ca7c9222b5c76fa"
+    },
+    {
+      "path": "test_private_revocation_refuse3/accounts.json.lock",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "test_private_revocation_refuse3/accounts.json.operation.paper_lease.lock",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "test_private_revocation_refuse3/gw.sqlite3",
+      "bytes": 2052096,
+      "sha256": "afc636950258144acf79789a69684e03f04e600b42848f259bf669884d36aaec"
+    },
+    {
+      "path": "test_private_revocation_refuse2/native-owner.json",
+      "bytes": 281,
+      "sha256": "4e1ba0d1c129f58684fddb44a0f58e33067678ba4b8638dc58b8d9c2c432c306"
+    },
+    {
+      "path": "test_private_revocation_refuse2/native-owner.json.lock",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "test_private_revocation_refuse2/native.sqlite.runtime-lease.paper_lease.lock",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "test_private_revocation_refuse2/native.sqlite",
+      "bytes": 49152,
+      "sha256": "144c79e531ea2b1cd90bfd982c0e2f55a89b60e07ddc4ed606eb75ce907fd21d"
+    },
+    {
+      "path": "test_private_revocation_refuse2/policy-keys.json",
+      "bytes": 212,
+      "sha256": "e462f7fcb65b415497d06a6822f3f8da07d5501895b3538ed24c01527bbe3e16"
+    },
+    {
+      "path": "test_private_revocation_refuse2/accounts.json",
+      "bytes": 496,
+      "sha256": "fecfa8badb050c508a4cb876e63191a30465e4c668febf341ca7c9222b5c76fa"
+    },
+    {
+      "path": "test_private_revocation_refuse2/accounts.json.lock",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "test_private_revocation_refuse2/accounts.json.operation.paper_lease.lock",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "test_private_revocation_refuse2/gw.sqlite3",
+      "bytes": 2052096,
+      "sha256": "1ca484cd3a70830d6721e4cf4d5bae3c22325122a977d4bbcf8a2d5e33ef1811"
+    },
+    {
+      "path": "test_private_revocation_refuse1/native-owner.json",
+      "bytes": 281,
+      "sha256": "4e1ba0d1c129f58684fddb44a0f58e33067678ba4b8638dc58b8d9c2c432c306"
+    },
+    {
+      "path": "test_private_revocation_refuse1/native-owner.json.lock",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "test_private_revocation_refuse1/native.sqlite.runtime-lease.paper_lease.lock",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "test_private_revocation_refuse1/native.sqlite",
+      "bytes": 49152,
+      "sha256": "6048fd297af75bbde22f36fe89e7815aa92ff783f2edf4740b7bfa868f689b92"
+    },
+    {
+      "path": "test_private_revocation_refuse1/policy-keys.json",
+      "bytes": 212,
+      "sha256": "e462f7fcb65b415497d06a6822f3f8da07d5501895b3538ed24c01527bbe3e16"
+    },
+    {
+      "path": "test_private_revocation_refuse1/accounts.json",
+      "bytes": 496,
+      "sha256": "fecfa8badb050c508a4cb876e63191a30465e4c668febf341ca7c9222b5c76fa"
+    },
+    {
+      "path": "test_private_revocation_refuse1/accounts.json.lock",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "test_private_revocation_refuse1/accounts.json.operation.paper_lease.lock",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "test_private_revocation_refuse1/gw.sqlite3",
+      "bytes": 2052096,
+      "sha256": "dc15d3a4aea8d978810d5c0a18896c0d215a621b2ec7e94829f9e9792a886f45"
+    },
+    {
+      "path": "test_private_revocation_refuse0/native-owner.json",
+      "bytes": 281,
+      "sha256": "4e1ba0d1c129f58684fddb44a0f58e33067678ba4b8638dc58b8d9c2c432c306"
+    },
+    {
+      "path": "test_private_revocation_refuse0/native-owner.json.lock",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "test_private_revocation_refuse0/native.sqlite.runtime-lease.paper_lease.lock",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "test_private_revocation_refuse0/native.sqlite",
+      "bytes": 49152,
+      "sha256": "823ea0b4d2211b4662b07907a3a9d8f17375d19605f3c4c94e13c5d9d31f8443"
+    },
+    {
+      "path": "test_private_revocation_refuse0/policy-keys.json",
+      "bytes": 212,
+      "sha256": "e462f7fcb65b415497d06a6822f3f8da07d5501895b3538ed24c01527bbe3e16"
+    },
+    {
+      "path": "test_private_revocation_refuse0/accounts.json",
+      "bytes": 496,
+      "sha256": "fecfa8badb050c508a4cb876e63191a30465e4c668febf341ca7c9222b5c76fa"
+    },
+    {
+      "path": "test_private_revocation_refuse0/accounts.json.lock",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "test_private_revocation_refuse0/accounts.json.operation.paper_lease.lock",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "test_private_revocation_refuse0/gw.sqlite3",
+      "bytes": 2052096,
+      "sha256": "8d76eed0920720cb9eefff9294e42e10a162f3b4a55b11621fd53706a246ae2c"
+    },
+    {
+      "path": "test_mismatched_commander_and_0/different-native-owner.json",
+      "bytes": 281,
+      "sha256": "4e1ba0d1c129f58684fddb44a0f58e33067678ba4b8638dc58b8d9c2c432c306"
+    },
+    {
+      "path": "test_mismatched_commander_and_0/native-owner.json",
+      "bytes": 281,
+      "sha256": "4e1ba0d1c129f58684fddb44a0f58e33067678ba4b8638dc58b8d9c2c432c306"
+    },
+    {
+      "path": "test_mismatched_commander_and_0/native-owner.json.lock",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "test_mismatched_commander_and_0/native.sqlite.runtime-lease.paper_lease.lock",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "test_mismatched_commander_and_0/native.sqlite",
+      "bytes": 49152,
+      "sha256": "b7879336cce9907753474a162a8b4adfc5695ef8fe78c6e6ab62ef8e2d6b1c2b"
+    },
+    {
+      "path": "test_mismatched_commander_and_0/policy-keys.json",
+      "bytes": 212,
+      "sha256": "e462f7fcb65b415497d06a6822f3f8da07d5501895b3538ed24c01527bbe3e16"
+    },
+    {
+      "path": "test_mismatched_commander_and_0/accounts.json",
+      "bytes": 496,
+      "sha256": "fecfa8badb050c508a4cb876e63191a30465e4c668febf341ca7c9222b5c76fa"
+    },
+    {
+      "path": "test_mismatched_commander_and_0/accounts.json.lock",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "test_mismatched_commander_and_0/accounts.json.operation.paper_lease.lock",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "test_mismatched_commander_and_0/gw.sqlite3",
+      "bytes": 2052096,
+      "sha256": "4f6d35386047d28779f67e2d38a812c293257d539bcf10c88b99bf69524537b8"
+    },
+    {
+      "path": "test_switching_actor_to_a_diff0/different-native-owner.json.lock",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "test_switching_actor_to_a_diff0/native-owner.json",
+      "bytes": 365,
+      "sha256": "da512cd94a123f631405398109d947a16bfc40edfd9b6aa41a22a575a2d2fdfe"
+    },
+    {
+      "path": "test_switching_actor_to_a_diff0/different-native-owner.json",
+      "bytes": 281,
+      "sha256": "4e1ba0d1c129f58684fddb44a0f58e33067678ba4b8638dc58b8d9c2c432c306"
+    },
+    {
+      "path": "test_switching_actor_to_a_diff0/native-owner.json.lock",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "test_switching_actor_to_a_diff0/native.sqlite.runtime-lease.paper_lease.lock",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "test_switching_actor_to_a_diff0/native.sqlite",
+      "bytes": 65536,
+      "sha256": "29edfcae790ae753c12d88d8939137d6784d48c7e158ca7e72a8d168200a77e2"
+    },
+    {
+      "path": "test_switching_actor_to_a_diff0/policy-keys.json",
+      "bytes": 212,
+      "sha256": "e462f7fcb65b415497d06a6822f3f8da07d5501895b3538ed24c01527bbe3e16"
+    },
+    {
+      "path": "test_switching_actor_to_a_diff0/accounts.json",
+      "bytes": 496,
+      "sha256": "fecfa8badb050c508a4cb876e63191a30465e4c668febf341ca7c9222b5c76fa"
+    },
+    {
+      "path": "test_switching_actor_to_a_diff0/accounts.json.lock",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "test_switching_actor_to_a_diff0/accounts.json.operation.paper_lease.lock",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "test_switching_actor_to_a_diff0/gw.sqlite3",
+      "bytes": 2052096,
+      "sha256": "0cff34b2922b96617e23f4be2d58243232b5b8b7dab7790659c133356cf05730"
+    },
+    {
+      "path": "test_local_action_revocation_p0/native-owner.json",
+      "bytes": 365,
+      "sha256": "da512cd94a123f631405398109d947a16bfc40edfd9b6aa41a22a575a2d2fdfe"
+    },
+    {
+      "path": "test_local_action_revocation_p0/native-owner.json.lock",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "test_local_action_revocation_p0/native.sqlite.runtime-lease.paper_lease.lock",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "test_local_action_revocation_p0/native.sqlite",
+      "bytes": 57344,
+      "sha256": "f80df9b9befd7888f59974172da944f8f6a3531a0511c9010956aec838c90f18"
+    },
+    {
+      "path": "test_local_action_revocation_p0/policy-keys.json",
+      "bytes": 212,
+      "sha256": "e462f7fcb65b415497d06a6822f3f8da07d5501895b3538ed24c01527bbe3e16"
+    },
+    {
+      "path": "test_local_action_revocation_p0/accounts.json",
+      "bytes": 496,
+      "sha256": "fecfa8badb050c508a4cb876e63191a30465e4c668febf341ca7c9222b5c76fa"
+    },
+    {
+      "path": "test_local_action_revocation_p0/accounts.json.lock",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "test_local_action_revocation_p0/accounts.json.operation.paper_lease.lock",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "test_local_action_revocation_p0/gw.sqlite3",
+      "bytes": 2052096,
+      "sha256": "35cc7e56dcb19b4c02335d79d18113265a003680d8e55f42e1b6aece29f7cc0d"
+    },
+    {
+      "path": "test_one_bad_pending_record_ca0/native-owner.json",
+      "bytes": 365,
+      "sha256": "da512cd94a123f631405398109d947a16bfc40edfd9b6aa41a22a575a2d2fdfe"
+    },
+    {
+      "path": "test_one_bad_pending_record_ca0/native-owner.json.lock",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "test_one_bad_pending_record_ca0/native.sqlite.runtime-lease.paper_lease.lock",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "test_one_bad_pending_record_ca0/native.sqlite",
+      "bytes": 57344,
+      "sha256": "257940618f4486f63b637823fac6cd6928a1090e86f45f230eddb2baf39c7bbd"
+    },
+    {
+      "path": "test_one_bad_pending_record_ca0/policy-keys.json",
+      "bytes": 212,
+      "sha256": "e462f7fcb65b415497d06a6822f3f8da07d5501895b3538ed24c01527bbe3e16"
+    },
+    {
+      "path": "test_one_bad_pending_record_ca0/accounts.json",
+      "bytes": 496,
+      "sha256": "fecfa8badb050c508a4cb876e63191a30465e4c668febf341ca7c9222b5c76fa"
+    },
+    {
+      "path": "test_one_bad_pending_record_ca0/accounts.json.lock",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "test_one_bad_pending_record_ca0/accounts.json.operation.paper_lease.lock",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "test_one_bad_pending_record_ca0/gw.sqlite3",
+      "bytes": 2052096,
+      "sha256": "2808d8c32fb2d705ddb28e6fb3b5d14761fdcf416419986817662208ed484099"
+    },
+    {
+      "path": "test_native_revocation_backgro0/gw.sqlite3",
+      "bytes": 2052096,
+      "sha256": "d6165d81fa5f7dc7229269f15f95b7e35687fcd2a31cd5359966efb008f892d4"
+    },
+    {
+      "path": "test_device_revocation_and_nat0/gw.sqlite3",
+      "bytes": 2052096,
+      "sha256": "2a06260a8a6567685b0bfc0ae13e57589f0b8888376e6cb7d2c1bd5b32654618"
+    },
+    {
+      "path": "test_cached_native_revocation_0/native-owner.json",
+      "bytes": 365,
+      "sha256": "da512cd94a123f631405398109d947a16bfc40edfd9b6aa41a22a575a2d2fdfe"
+    },
+    {
+      "path": "test_cached_native_revocation_0/native-owner.json.lock",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "test_cached_native_revocation_0/native.sqlite.runtime-lease.paper_lease.lock",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "test_cached_native_revocation_0/native.sqlite",
+      "bytes": 57344,
+      "sha256": "76bcf48b2da98c841a1e609b8f7847bd4b9abdb74f357f2819101f7391540703"
+    },
+    {
+      "path": "test_cached_native_revocation_0/policy-keys.json",
+      "bytes": 212,
+      "sha256": "e462f7fcb65b415497d06a6822f3f8da07d5501895b3538ed24c01527bbe3e16"
+    },
+    {
+      "path": "test_cached_native_revocation_0/accounts.json",
+      "bytes": 496,
+      "sha256": "fecfa8badb050c508a4cb876e63191a30465e4c668febf341ca7c9222b5c76fa"
+    },
+    {
+      "path": "test_cached_native_revocation_0/accounts.json.lock",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "test_cached_native_revocation_0/accounts.json.operation.paper_lease.lock",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "test_cached_native_revocation_0/gw.sqlite3",
+      "bytes": 2052096,
+      "sha256": "ba825ca595fb36f3916f74649b122d00b37f463b810179050aacd1caa13c753a"
+    },
+    {
+      "path": "test_native_acknowledgement_mu4/native-owner.json",
+      "bytes": 365,
+      "sha256": "da512cd94a123f631405398109d947a16bfc40edfd9b6aa41a22a575a2d2fdfe"
+    },
+    {
+      "path": "test_native_acknowledgement_mu4/native-owner.json.lock",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "test_native_acknowledgement_mu4/native.sqlite.runtime-lease.paper_lease.lock",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "test_native_acknowledgement_mu4/native.sqlite",
+      "bytes": 57344,
+      "sha256": "bb81fcf6c540ed3be6e9194b7af9b2b6da3de7498708027633ec6d92652fd9c4"
+    },
+    {
+      "path": "test_native_acknowledgement_mu4/policy-keys.json",
+      "bytes": 212,
+      "sha256": "e462f7fcb65b415497d06a6822f3f8da07d5501895b3538ed24c01527bbe3e16"
+    },
+    {
+      "path": "test_native_acknowledgement_mu4/accounts.json",
+      "bytes": 496,
+      "sha256": "fecfa8badb050c508a4cb876e63191a30465e4c668febf341ca7c9222b5c76fa"
+    },
+    {
+      "path": "test_native_acknowledgement_mu4/accounts.json.lock",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "test_native_acknowledgement_mu4/accounts.json.operation.paper_lease.lock",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "test_native_acknowledgement_mu4/gw.sqlite3",
+      "bytes": 2052096,
+      "sha256": "11545890f76ad5dcabfc429d345ad4dbc8b8e18fb6b0319815ad841c32623e03"
+    },
+    {
+      "path": "test_native_acknowledgement_mu3/native-owner.json",
+      "bytes": 365,
+      "sha256": "da512cd94a123f631405398109d947a16bfc40edfd9b6aa41a22a575a2d2fdfe"
+    },
+    {
+      "path": "test_native_acknowledgement_mu3/native-owner.json.lock",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "test_native_acknowledgement_mu3/native.sqlite.runtime-lease.paper_lease.lock",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "test_native_acknowledgement_mu3/native.sqlite",
+      "bytes": 57344,
+      "sha256": "e48cbdb38267fe55cba8342db1b9bff8f35c74d70d4589e038b2fcb9f975611a"
+    },
+    {
+      "path": "test_native_acknowledgement_mu3/policy-keys.json",
+      "bytes": 212,
+      "sha256": "e462f7fcb65b415497d06a6822f3f8da07d5501895b3538ed24c01527bbe3e16"
+    },
+    {
+      "path": "test_native_acknowledgement_mu3/accounts.json",
+      "bytes": 496,
+      "sha256": "fecfa8badb050c508a4cb876e63191a30465e4c668febf341ca7c9222b5c76fa"
+    },
+    {
+      "path": "test_native_acknowledgement_mu3/accounts.json.lock",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "test_native_acknowledgement_mu3/accounts.json.operation.paper_lease.lock",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "test_native_acknowledgement_mu3/gw.sqlite3",
+      "bytes": 2052096,
+      "sha256": "dcd2246be9945c3f3f53d2efbe0273214355a382d7e9d8a77c817e62f83d8365"
+    },
+    {
+      "path": "test_native_acknowledgement_mu2/native-owner.json",
+      "bytes": 365,
+      "sha256": "da512cd94a123f631405398109d947a16bfc40edfd9b6aa41a22a575a2d2fdfe"
+    },
+    {
+      "path": "test_native_acknowledgement_mu2/gw.sqlite3-shm",
+      "bytes": 32768,
+      "sha256": "7497a7ccc946f1b64c1334dbdda5f3b9009c4f1613583c6c921cd988be13e9bc"
+    },
+    {
+      "path": "test_native_acknowledgement_mu2/gw.sqlite3-wal",
+      "bytes": 16512,
+      "sha256": "fe77aad4385a26b34ccb2c1fca749f06ce9ad5d4c46f16374d43495d855d96de"
+    },
+    {
+      "path": "test_native_acknowledgement_mu2/native-owner.json.lock",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "test_native_acknowledgement_mu2/native.sqlite.runtime-lease.paper_lease.lock",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "test_native_acknowledgement_mu2/native.sqlite",
+      "bytes": 57344,
+      "sha256": "5dfb4d2af972edd17fffb3af045531a7f7d87007744e7c6e46240bdae8f025c2"
+    },
+    {
+      "path": "test_native_acknowledgement_mu2/policy-keys.json",
+      "bytes": 212,
+      "sha256": "e462f7fcb65b415497d06a6822f3f8da07d5501895b3538ed24c01527bbe3e16"
+    },
+    {
+      "path": "test_native_acknowledgement_mu2/accounts.json",
+      "bytes": 496,
+      "sha256": "fecfa8badb050c508a4cb876e63191a30465e4c668febf341ca7c9222b5c76fa"
+    },
+    {
+      "path": "test_native_acknowledgement_mu2/accounts.json.lock",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "test_native_acknowledgement_mu2/accounts.json.operation.paper_lease.lock",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "test_native_acknowledgement_mu2/gw.sqlite3",
+      "bytes": 2052096,
+      "sha256": "5dde2a104c40a82788edf9d0dcf28aa35b57ea3f06495bf2a399231503e44ec0"
+    },
+    {
+      "path": "test_native_acknowledgement_mu1/native-owner.json",
+      "bytes": 365,
+      "sha256": "da512cd94a123f631405398109d947a16bfc40edfd9b6aa41a22a575a2d2fdfe"
+    },
+    {
+      "path": "test_native_acknowledgement_mu1/native-owner.json.lock",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "test_native_acknowledgement_mu1/native.sqlite.runtime-lease.paper_lease.lock",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "test_native_acknowledgement_mu1/native.sqlite",
+      "bytes": 57344,
+      "sha256": "a0a900035f9f74d83054796ddff0950391966c370e62800ab414f45df692fa74"
+    },
+    {
+      "path": "test_native_acknowledgement_mu1/policy-keys.json",
+      "bytes": 212,
+      "sha256": "e462f7fcb65b415497d06a6822f3f8da07d5501895b3538ed24c01527bbe3e16"
+    },
+    {
+      "path": "test_native_acknowledgement_mu1/accounts.json",
+      "bytes": 496,
+      "sha256": "fecfa8badb050c508a4cb876e63191a30465e4c668febf341ca7c9222b5c76fa"
+    },
+    {
+      "path": "test_native_acknowledgement_mu1/accounts.json.lock",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "test_native_acknowledgement_mu1/accounts.json.operation.paper_lease.lock",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "test_native_acknowledgement_mu1/gw.sqlite3",
+      "bytes": 2052096,
+      "sha256": "9aeeda4da0c2dbac9608802d05421e9c7db8d9bb5a682f2aa6a7c05200ddf0a0"
+    },
+    {
+      "path": "test_native_acknowledgement_mu0/native-owner.json",
+      "bytes": 365,
+      "sha256": "da512cd94a123f631405398109d947a16bfc40edfd9b6aa41a22a575a2d2fdfe"
+    },
+    {
+      "path": "test_native_acknowledgement_mu0/native-owner.json.lock",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "test_native_acknowledgement_mu0/native.sqlite.runtime-lease.paper_lease.lock",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "test_native_acknowledgement_mu0/native.sqlite",
+      "bytes": 57344,
+      "sha256": "795b90940eb7b1e393ca392079df0f3f0444a56b0c0dfac807f70eb564a7df76"
+    },
+    {
+      "path": "test_native_acknowledgement_mu0/policy-keys.json",
+      "bytes": 212,
+      "sha256": "e462f7fcb65b415497d06a6822f3f8da07d5501895b3538ed24c01527bbe3e16"
+    },
+    {
+      "path": "test_native_acknowledgement_mu0/accounts.json",
+      "bytes": 496,
+      "sha256": "fecfa8badb050c508a4cb876e63191a30465e4c668febf341ca7c9222b5c76fa"
+    },
+    {
+      "path": "test_native_acknowledgement_mu0/accounts.json.lock",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "test_native_acknowledgement_mu0/accounts.json.operation.paper_lease.lock",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "test_native_acknowledgement_mu0/gw.sqlite3",
+      "bytes": 2052096,
+      "sha256": "75cf7a5cd5d216546e83bd3d3bdad3f7d233796679a1b184043c9b05ad2e29c1"
+    },
+    {
+      "path": "test_native_commit_ack_loss_re0/native-owner.json",
+      "bytes": 365,
+      "sha256": "da512cd94a123f631405398109d947a16bfc40edfd9b6aa41a22a575a2d2fdfe"
+    },
+    {
+      "path": "test_native_commit_ack_loss_re0/native-owner.json.lock",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "test_native_commit_ack_loss_re0/native.sqlite.runtime-lease.paper_lease.lock",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "test_native_commit_ack_loss_re0/native.sqlite",
+      "bytes": 57344,
+      "sha256": "77ff5ffe99976fbde3c6a1213400833e8979dd78fe8225b923e49884137e8ba2"
+    },
+    {
+      "path": "test_native_commit_ack_loss_re0/policy-keys.json",
+      "bytes": 212,
+      "sha256": "e462f7fcb65b415497d06a6822f3f8da07d5501895b3538ed24c01527bbe3e16"
+    },
+    {
+      "path": "test_native_commit_ack_loss_re0/accounts.json",
+      "bytes": 496,
+      "sha256": "fecfa8badb050c508a4cb876e63191a30465e4c668febf341ca7c9222b5c76fa"
+    },
+    {
+      "path": "test_native_commit_ack_loss_re0/accounts.json.lock",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "test_native_commit_ack_loss_re0/accounts.json.operation.paper_lease.lock",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "test_native_commit_ack_loss_re0/gw.sqlite3",
+      "bytes": 2052096,
+      "sha256": "051bb0eb66aec642bba4735962083665fba37e08f8dc375b4c43b21f4de54f57"
+    },
+    {
+      "path": "test_native_key_cache_cannot_o0/native-owner.json",
+      "bytes": 365,
+      "sha256": "da512cd94a123f631405398109d947a16bfc40edfd9b6aa41a22a575a2d2fdfe"
+    },
+    {
+      "path": "test_native_key_cache_cannot_o0/native-owner.json.lock",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "test_native_key_cache_cannot_o0/native.sqlite.runtime-lease.paper_lease.lock",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "test_native_key_cache_cannot_o0/native.sqlite",
+      "bytes": 57344,
+      "sha256": "05106819f95faf207c7cd59c43e12e41e08486aa231e105761f9a18e9902f470"
+    },
+    {
+      "path": "test_native_key_cache_cannot_o0/policy-keys.json",
+      "bytes": 212,
+      "sha256": "e462f7fcb65b415497d06a6822f3f8da07d5501895b3538ed24c01527bbe3e16"
+    },
+    {
+      "path": "test_native_key_cache_cannot_o0/accounts.json",
+      "bytes": 496,
+      "sha256": "fecfa8badb050c508a4cb876e63191a30465e4c668febf341ca7c9222b5c76fa"
+    },
+    {
+      "path": "test_native_key_cache_cannot_o0/accounts.json.lock",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "test_native_key_cache_cannot_o0/accounts.json.operation.paper_lease.lock",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "test_native_key_cache_cannot_o0/gw.sqlite3",
+      "bytes": 2052096,
+      "sha256": "06aaf01def917208b0f02c5e9d793c6254f42dcb639b4b2c45e04337893c7680"
+    },
+    {
+      "path": "test_revoked_native_key_cannot0/native-owner.json",
+      "bytes": 365,
+      "sha256": "da512cd94a123f631405398109d947a16bfc40edfd9b6aa41a22a575a2d2fdfe"
+    },
+    {
+      "path": "test_revoked_native_key_cannot0/native-owner.json.lock",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "test_revoked_native_key_cannot0/native.sqlite.runtime-lease.paper_lease.lock",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "test_revoked_native_key_cannot0/native.sqlite",
+      "bytes": 57344,
+      "sha256": "c8c7f335f6d79d0abf8252c746d95f4aa15069d9799e2ff2aaafa9365adb7162"
+    },
+    {
+      "path": "test_revoked_native_key_cannot0/policy-keys.json",
+      "bytes": 212,
+      "sha256": "e462f7fcb65b415497d06a6822f3f8da07d5501895b3538ed24c01527bbe3e16"
+    },
+    {
+      "path": "test_revoked_native_key_cannot0/accounts.json",
+      "bytes": 496,
+      "sha256": "fecfa8badb050c508a4cb876e63191a30465e4c668febf341ca7c9222b5c76fa"
+    },
+    {
+      "path": "test_revoked_native_key_cannot0/accounts.json.lock",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "test_revoked_native_key_cannot0/accounts.json.operation.paper_lease.lock",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "test_revoked_native_key_cannot0/gw.sqlite3",
+      "bytes": 2052096,
+      "sha256": "75d87f6455fc0c3549b28ec15d7afe0ec4fa62bbd79f2a093525c40db7e83daa"
+    },
+    {
+      "path": "test_native_outage_keeps_local0/native-owner.json",
+      "bytes": 365,
+      "sha256": "da512cd94a123f631405398109d947a16bfc40edfd9b6aa41a22a575a2d2fdfe"
+    },
+    {
+      "path": "test_native_outage_keeps_local0/native-owner.json.lock",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "test_native_outage_keeps_local0/native.sqlite.runtime-lease.paper_lease.lock",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "test_native_outage_keeps_local0/native.sqlite",
+      "bytes": 65536,
+      "sha256": "1848886bc164111fc6d699f5affb0aaa41deb2c5029ff9741d3d1d71130f4361"
+    },
+    {
+      "path": "test_native_outage_keeps_local0/policy-keys.json",
+      "bytes": 212,
+      "sha256": "e462f7fcb65b415497d06a6822f3f8da07d5501895b3538ed24c01527bbe3e16"
+    },
+    {
+      "path": "test_native_outage_keeps_local0/accounts.json",
+      "bytes": 496,
+      "sha256": "fecfa8badb050c508a4cb876e63191a30465e4c668febf341ca7c9222b5c76fa"
+    },
+    {
+      "path": "test_native_outage_keeps_local0/accounts.json.lock",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "test_native_outage_keeps_local0/accounts.json.operation.paper_lease.lock",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "test_native_outage_keeps_local0/gw.sqlite3",
+      "bytes": 2052096,
+      "sha256": "2b116b071ace7c392d2508421a9783b4c27cfff0e61f2910dd1b938b5f1909ea"
+    },
+    {
+      "path": "test_revoking_phone_key_preven0/native-owner.json",
+      "bytes": 365,
+      "sha256": "da512cd94a123f631405398109d947a16bfc40edfd9b6aa41a22a575a2d2fdfe"
+    },
+    {
+      "path": "test_revoking_phone_key_preven0/native-owner.json.lock",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "test_revoking_phone_key_preven0/native.sqlite.runtime-lease.paper_lease.lock",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "test_revoking_phone_key_preven0/native.sqlite",
+      "bytes": 65536,
+      "sha256": "2cf832eabec87654d658f32dd902c4c0bc4c6e9cfaa6a1800aba512203a7b31f"
+    },
+    {
+      "path": "test_revoking_phone_key_preven0/policy-keys.json",
+      "bytes": 212,
+      "sha256": "e462f7fcb65b415497d06a6822f3f8da07d5501895b3538ed24c01527bbe3e16"
+    },
+    {
+      "path": "test_revoking_phone_key_preven0/accounts.json",
+      "bytes": 496,
+      "sha256": "fecfa8badb050c508a4cb876e63191a30465e4c668febf341ca7c9222b5c76fa"
+    },
+    {
+      "path": "test_revoking_phone_key_preven0/accounts.json.lock",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "test_revoking_phone_key_preven0/accounts.json.operation.paper_lease.lock",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "test_revoking_phone_key_preven0/gw.sqlite3",
+      "bytes": 2052096,
+      "sha256": "51c4245220e15e3cbb7c8e2125883d0816aba745836a3089a72d49c84ad5d289"
+    },
+    {
+      "path": "test_normal_revoke_attempts_na0/proof.sqlite3",
+      "bytes": 2052096,
+      "sha256": "3e79caae86341069f80035c1901490dbba8dba910fc7a5ecd1e7e2dc3112282e"
+    },
+    {
+      "path": "test_normal_revoke_attempts_na0/stream-signing.pem",
+      "bytes": 241,
+      "sha256": "f7f190873bf8bb2c643bf63d3d568afe6497b6d822a2fc8af882cfc17b1aab18"
+    },
+    {
+      "path": "test_missing_or_stale_original2/proof.sqlite3",
+      "bytes": 2052096,
+      "sha256": "8b61fc928b4c6c2879b1703b3d25ec83cd37b0295a779185330cbe89f94b84d5"
+    },
+    {
+      "path": "test_missing_or_stale_original2/stream-signing.pem",
+      "bytes": 241,
+      "sha256": "e7efac77ee1a69dc061cac80edaa2002f41204da372c94dfda41f3a4bdb044c5"
+    },
+    {
+      "path": "test_missing_or_stale_original1/proof.sqlite3",
+      "bytes": 2052096,
+      "sha256": "c50386c6994a033992a07d00fc47c82095c5e658671d62b5dfd6f25dac98fa33"
+    },
+    {
+      "path": "test_missing_or_stale_original1/stream-signing.pem",
+      "bytes": 241,
+      "sha256": "62595c43a7aa106f14133cd8ab293624a18649180fd73eca92bce6b3fca5f354"
+    },
+    {
+      "path": "test_missing_or_stale_original0/proof.sqlite3",
+      "bytes": 2052096,
+      "sha256": "0f89d3d042fdc445ac2e2d00ecff51277bcb20ddc479b559c8ae062c159cf1f4"
+    },
+    {
+      "path": "test_missing_or_stale_original0/stream-signing.pem",
+      "bytes": 241,
+      "sha256": "a87824931b88af1ea1f8b1bac903b9b129bd21041fbfa7aa1ca2ba4f4b713b8a"
+    },
+    {
+      "path": "test_scoped_original_http_reco0/proof.sqlite3",
+      "bytes": 2052096,
+      "sha256": "ad2f0f55fe76e2aaa1cf00512a2a567d530551ba55bca647de567a94cb7326df"
+    },
+    {
+      "path": "test_scoped_original_http_reco0/stream-signing.pem",
+      "bytes": 241,
+      "sha256": "77f0859565348f2305c4c053cfd06bac6f89c31a3ca4e3d20e068534688a1613"
+    },
+    {
+      "path": "test_agent_cannot_revoke_owner0/logs/commander-audit.jsonl",
+      "bytes": 490,
+      "sha256": "47dbeef9899b7401be1de14682e0118ecfdc9d116b8e917e7ea1cf6559027f23"
+    },
+    {
+      "path": "test_agent_cannot_revoke_owner0/heartbeats/current.json",
+      "bytes": 2378,
+      "sha256": "4e84d36ac0da1b166f172bd2fa411b8220cdfedd9c0f69064e610ae67ae42a84"
+    },
+    {
+      "path": "test_original_revocation_get_r1/logs/commander-audit.jsonl",
+      "bytes": 2151,
+      "sha256": "e349e444f260ac4e1f7d966282d64587d74810b962d1d8a3a9ce4307283fc088"
+    },
+    {
+      "path": "test_original_revocation_get_r1/heartbeats/current.json",
+      "bytes": 2378,
+      "sha256": "7f12126d0d6e97e281ceca6605988042290c0a5a207f294994cdd1bab6a16d3e"
+    },
+    {
+      "path": "test_original_revocation_get_o0/logs/commander-audit.jsonl",
+      "bytes": 2151,
+      "sha256": "c2f96f1a6fba2baba8fcf0c527f51b7ad8a67f71fd02519d237e0f98dd3c0258"
+    },
+    {
+      "path": "test_original_revocation_get_o0/heartbeats/current.json",
+      "bytes": 2378,
+      "sha256": "ba078655f6f1ec7610ea7752c01dccedefd4d52b83cbb5fd984b5a9717740cf0"
+    },
+    {
+      "path": "test_known_native_success_surv0/logs/commander-audit.jsonl",
+      "bytes": 2611,
+      "sha256": "82a22f6ac3382af9f4c1aef5b86a0ad0c0ac7a1c43df03cd00bc6b5a56ef903b"
+    },
+    {
+      "path": "test_known_native_success_surv0/heartbeats/current.json",
+      "bytes": 2378,
+      "sha256": "a4a9e8f108139b94cddc6dbcf3833ce756a2f93479d0a56598ca8ef86cc1816a"
+    },
+    {
+      "path": "test_unrelated_corrupt_heartbe2/logs/commander-audit.jsonl",
+      "bytes": 182,
+      "sha256": "2e30e7858e784b8c6515570842ed1cb53f5542b5fffc9d278b5a2c5bd8077741"
+    },
+    {
+      "path": "test_unrelated_corrupt_heartbe2/heartbeats/unrelated-malformed.json",
+      "bytes": 35,
+      "sha256": "4a0a06fcb02d56e2c43e1b2222224c8f3f42c9b21d5c2a3dade178ca5e488919"
+    },
+    {
+      "path": "test_unrelated_corrupt_heartbe2/heartbeats/current.json",
+      "bytes": 2378,
+      "sha256": "04feda3125fe5e2b6275a4da7ad19ba9e95f3eaa38afd43b31e2016b062304f4"
+    },
+    {
+      "path": "test_unrelated_corrupt_heartbe1/logs/commander-audit.jsonl",
+      "bytes": 182,
+      "sha256": "91a5d17eeba715a7c989620e4a1445ed9d79321416f580d223d06ae0492676c1"
+    },
+    {
+      "path": "test_unrelated_corrupt_heartbe1/heartbeats/unrelated-malformed.json",
+      "bytes": 24,
+      "sha256": "4f73ae74782dbaf99deada742444b372c92a12374f82e7449f86996b79a2502f"
+    },
+    {
+      "path": "test_unrelated_corrupt_heartbe1/heartbeats/current.json",
+      "bytes": 2378,
+      "sha256": "a86419b386c9a5faac2476bd8ef6b69e10ce4eba9700fc74f7c360b7bca47dbe"
+    },
+    {
+      "path": "test_unrelated_corrupt_heartbe0/logs/commander-audit.jsonl",
+      "bytes": 182,
+      "sha256": "04d22baa5c20be141e3e7cee39e1f2492514713dc932176b42a6b228a00632ce"
+    },
+    {
+      "path": "test_unrelated_corrupt_heartbe0/heartbeats/unrelated-malformed.json",
+      "bytes": 2,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "path": "test_unrelated_corrupt_heartbe0/heartbeats/current.json",
+      "bytes": 2378,
+      "sha256": "04dc692e0e0d0b503ab2ea7fd8ba047462f77f930c831d5d46405cb49ed553ff"
+    },
+    {
+      "path": "test_private_revocation_refuse4/logs/commander-audit.jsonl",
+      "bytes": 910,
+      "sha256": "d68ea3bf561d1066bfd74ce2179fa2e42afea07fbd2b5c284715460436faea9c"
+    },
+    {
+      "path": "test_private_revocation_refuse4/heartbeats/current.json",
+      "bytes": 2378,
+      "sha256": "40660229b94a80a551428edc2c64bdcc936b0f9ba0e40dd00f9ba2816d9719c4"
+    },
+    {
+      "path": "test_private_revocation_refuse3/logs/commander-audit.jsonl",
+      "bytes": 891,
+      "sha256": "941002c26b8872858fe820dba1ef2f494019537cc6f55d76c820dc6dc1034f71"
+    },
+    {
+      "path": "test_private_revocation_refuse3/heartbeats/current.json",
+      "bytes": 2378,
+      "sha256": "3efaf91b7d73a6af04b28ab660fafb49d41fca5b9142df5f10ce515aacd3f3df"
+    },
+    {
+      "path": "test_private_revocation_refuse2/logs/commander-audit.jsonl",
+      "bytes": 898,
+      "sha256": "783780aca1da8dac16285faa15d84af3810d34f59c2954b6303adab5bbb7890d"
+    },
+    {
+      "path": "test_private_revocation_refuse2/heartbeats/current.json",
+      "bytes": 2378,
+      "sha256": "59bdd58f15e9c86d9bc6d8afe1d994c6ee917efa4669c17e876910c97d970c1a"
+    },
+    {
+      "path": "test_private_revocation_refuse1/logs/commander-audit.jsonl",
+      "bytes": 701,
+      "sha256": "f8df14aee92fdc9353dd4c7d629708edfa8ac6942a689fd1d847591cba4b17a7"
+    },
+    {
+      "path": "test_private_revocation_refuse1/heartbeats/current.json",
+      "bytes": 2378,
+      "sha256": "7d79a9b7bad83019e5a9258cd320613a97a715f297900a0ac89a389d92848063"
+    },
+    {
+      "path": "test_private_revocation_refuse0/logs/commander-audit.jsonl",
+      "bytes": 877,
+      "sha256": "389496cb38fea197699681e8c281dee215b4b6eb054488182119b031951e4684"
+    },
+    {
+      "path": "test_private_revocation_refuse0/heartbeats/current.json",
+      "bytes": 2378,
+      "sha256": "71f42bda59a28c5f458e30760a578d40ab80f817eed346606c0a03e5dd8fb96b"
+    },
+    {
+      "path": "test_mismatched_commander_and_0/logs/commander-audit.jsonl",
+      "bytes": 616,
+      "sha256": "24c06111a76635c861784c0c2b209a3d98b98cd90c783cd88faa2c2bb44f0155"
+    },
+    {
+      "path": "test_mismatched_commander_and_0/heartbeats/current.json",
+      "bytes": 2378,
+      "sha256": "7e9f94aa1aef379d8265d6618d61914ccd106726b71fa0280ca12d34e78f7360"
+    },
+    {
+      "path": "test_switching_actor_to_a_diff0/logs/commander-audit.jsonl",
+      "bytes": 2151,
+      "sha256": "ec61c1a075a65a81c3281400a7723dc11538a29473765e8a3ef050a288281b3d"
+    },
+    {
+      "path": "test_switching_actor_to_a_diff0/heartbeats/current.json",
+      "bytes": 2378,
+      "sha256": "9eb62375cc268be783f4cbbd304ca95b9f1d63f6e097d60996d48f7dc6169620"
+    },
+    {
+      "path": "test_local_action_revocation_p0/logs/commander-audit.jsonl",
+      "bytes": 2151,
+      "sha256": "a039678cea1fc05d08890562e9f1c26170c2b12a38942e23b855d6fd385cdf62"
+    },
+    {
+      "path": "test_local_action_revocation_p0/heartbeats/current.json",
+      "bytes": 2378,
+      "sha256": "88ffb8585c97a91d2fbcfa7629ee40ce2e567d260ed09c5d80840414fdd54298"
+    },
+    {
+      "path": "test_one_bad_pending_record_ca0/logs/commander-audit.jsonl",
+      "bytes": 2151,
+      "sha256": "2dafb733fac2c66fbc8d619338cc62059ca4001779d02da6598dae03e97c9e6d"
+    },
+    {
+      "path": "test_one_bad_pending_record_ca0/heartbeats/current.json",
+      "bytes": 2378,
+      "sha256": "397eb441bba30cf6766f35d3b5613705a180956fea72e873a1170647c9c8eb25"
+    },
+    {
+      "path": "test_cached_native_revocation_0/logs/commander-audit.jsonl",
+      "bytes": 2151,
+      "sha256": "71ac517b658e3d1ef0628c2e3d4b27c0e7abb318cacdc41107d967e75e905ddf"
+    },
+    {
+      "path": "test_cached_native_revocation_0/heartbeats/current.json",
+      "bytes": 2378,
+      "sha256": "8557f15e23a27d1bc723fa9bcde6fc01fc2f227c1555a722ef799489ce52d54f"
+    },
+    {
+      "path": "test_native_acknowledgement_mu4/logs/commander-audit.jsonl",
+      "bytes": 2611,
+      "sha256": "875b302c317d072fad485e39dbffe98b51c336578a137fd5cfce5d4d4387e8e5"
+    },
+    {
+      "path": "test_native_acknowledgement_mu4/heartbeats/current.json",
+      "bytes": 2378,
+      "sha256": "1094b6813fab31cbe8408451dde8ab298ef5ddfee503d2a5bc7125b0c9d87779"
+    },
+    {
+      "path": "test_native_acknowledgement_mu3/logs/commander-audit.jsonl",
+      "bytes": 2611,
+      "sha256": "51b20a566d3143f69731e74828d23dd2b55774639e9b9fbe57c81cc73d029d43"
+    },
+    {
+      "path": "test_native_acknowledgement_mu3/heartbeats/current.json",
+      "bytes": 2378,
+      "sha256": "21950816b0837e9d10a4e42fa9f4d6eb57d4da86e67753a30ba392b6a9bc0676"
+    },
+    {
+      "path": "test_native_acknowledgement_mu2/logs/commander-audit.jsonl",
+      "bytes": 2611,
+      "sha256": "1dad4f6b10726f74fcc7b28d22d1c366299693b2d76265390f80d74408331501"
+    },
+    {
+      "path": "test_native_acknowledgement_mu2/heartbeats/current.json",
+      "bytes": 2378,
+      "sha256": "093b321db420cef57906ddc8206db4842fd35116b0a928b2e2daf93a6b3575f1"
+    },
+    {
+      "path": "test_native_acknowledgement_mu1/logs/commander-audit.jsonl",
+      "bytes": 2611,
+      "sha256": "30ad2d6d2505a594fa83a216d0be01db83a70658394db66747f4172527d8ba89"
+    },
+    {
+      "path": "test_native_acknowledgement_mu1/heartbeats/current.json",
+      "bytes": 2378,
+      "sha256": "0422874de6c489d75bdcdbfbe4aa9bc247b7b1578bca603e9ef76173c5731820"
+    },
+    {
+      "path": "test_native_acknowledgement_mu0/logs/commander-audit.jsonl",
+      "bytes": 2611,
+      "sha256": "e641ba5f27b20611123c84ffe823b665e5d5bf6537ecba3d85d429f8e2363b2e"
+    },
+    {
+      "path": "test_native_acknowledgement_mu0/heartbeats/current.json",
+      "bytes": 2378,
+      "sha256": "ea8cfa25003ba8d2e5308aaed8695c6a2ffff383d5ad04377af120e1af5cdd06"
+    },
+    {
+      "path": "test_native_commit_ack_loss_re0/logs/commander-audit.jsonl",
+      "bytes": 2151,
+      "sha256": "aac751b1985f9c37471dc10bb8310dd2cd8e2dd2f23bd0cfff303372c77d052d"
+    },
+    {
+      "path": "test_native_commit_ack_loss_re0/heartbeats/current.json",
+      "bytes": 2378,
+      "sha256": "cc16e82ee0f381ab7a80d3ac13ffccb825665b87e9d4d151f548995d9a47e2a6"
+    },
+    {
+      "path": "test_native_key_cache_cannot_o0/logs/commander-audit.jsonl",
+      "bytes": 2151,
+      "sha256": "c331eed67550b8c1d8496764560dbdf10125e7edb22884b1564259354e874fcc"
+    },
+    {
+      "path": "test_native_key_cache_cannot_o0/heartbeats/current.json",
+      "bytes": 2378,
+      "sha256": "601c4fcccadc8e286eef4323f4180e6de9eb49979b70e67aa114513f9200452d"
+    },
+    {
+      "path": "test_revoked_native_key_cannot0/logs/commander-audit.jsonl",
+      "bytes": 2601,
+      "sha256": "d6d92273d950f79deed59226b5f55ad4532d0cee0a07e5e698443190f805990c"
+    },
+    {
+      "path": "test_revoked_native_key_cannot0/heartbeats/current.json",
+      "bytes": 2378,
+      "sha256": "d8dc73c02807e9ff12db31b46923ac98e7f9fe4eb17c40b856c71dd200b7fa2f"
+    },
+    {
+      "path": "test_native_outage_keeps_local0/logs/commander-audit.jsonl",
+      "bytes": 2151,
+      "sha256": "9ea4470f795d97b0fe8e6dfd1e89f43c49b0e0779b43c321f7ec0ffea9104cc3"
+    },
+    {
+      "path": "test_native_outage_keeps_local0/heartbeats/current.json",
+      "bytes": 2378,
+      "sha256": "914d8cdd204136ee43c689edc1db910c6d552216fd5402b01630e6f5e7387f8e"
+    },
+    {
+      "path": "test_revoking_phone_key_preven0/logs/commander-audit.jsonl",
+      "bytes": 2151,
+      "sha256": "8a5d33728ac43751d6d720fc38310453fa3ef5c07ddd1ce7cc46a1c45691f0a7"
+    },
+    {
+      "path": "test_revoking_phone_key_preven0/heartbeats/current.json",
+      "bytes": 2378,
+      "sha256": "bb8ad80dccac0a2c3ecc82f4036ac35e2f732af1d307eb37b085bf964ce8ca38"
+    },
+    {
+      "path": "test_normal_revoke_attempts_na0/reenrollment-ca/issued.json",
+      "bytes": 21,
+      "sha256": "31ca59c7d59989f4fa38e15d999fbe9ed030f40ef58b4b34b5f8d2fc73526f75"
+    },
+    {
+      "path": "test_normal_revoke_attempts_na0/reenrollment-ca/ca.crt",
+      "bytes": 607,
+      "sha256": "631e375bcb1e705b8745267de921ba09c9956574ce4a58c529d3c6ebe94b00b8"
+    },
+    {
+      "path": "test_normal_revoke_attempts_na0/reenrollment-ca/ca.key",
+      "bytes": 241,
+      "sha256": "18ac98d487f672b2abbbb1340a5fa6589265b459ef7a0b5ac87dcc577c881933"
+    },
+    {
+      "path": "test_missing_or_stale_original2/reenrollment-ca/issued.json",
+      "bytes": 21,
+      "sha256": "31ca59c7d59989f4fa38e15d999fbe9ed030f40ef58b4b34b5f8d2fc73526f75"
+    },
+    {
+      "path": "test_missing_or_stale_original2/reenrollment-ca/ca.crt",
+      "bytes": 607,
+      "sha256": "581e3f4c7c5040f4c1394c3e00b0f529f91a51136ca0265db423af8ec609ed4e"
+    },
+    {
+      "path": "test_missing_or_stale_original2/reenrollment-ca/ca.key",
+      "bytes": 241,
+      "sha256": "6b7cf8170302ed0cee4d88defbb935c57b9193ddba849c16a627b04ecc6b00b4"
+    },
+    {
+      "path": "test_missing_or_stale_original1/reenrollment-ca/issued.json",
+      "bytes": 21,
+      "sha256": "31ca59c7d59989f4fa38e15d999fbe9ed030f40ef58b4b34b5f8d2fc73526f75"
+    },
+    {
+      "path": "test_missing_or_stale_original1/reenrollment-ca/ca.crt",
+      "bytes": 607,
+      "sha256": "7885c0a7a78fee4a6b94580adf8833c629187413b6130513c2ea2abec755aa58"
+    },
+    {
+      "path": "test_missing_or_stale_original1/reenrollment-ca/ca.key",
+      "bytes": 241,
+      "sha256": "67ee52c3ce442da664a47b3a39ec9a6cfc56430033236233a0322e6a3c2378d5"
+    },
+    {
+      "path": "test_missing_or_stale_original0/reenrollment-ca/issued.json",
+      "bytes": 21,
+      "sha256": "31ca59c7d59989f4fa38e15d999fbe9ed030f40ef58b4b34b5f8d2fc73526f75"
+    },
+    {
+      "path": "test_missing_or_stale_original0/reenrollment-ca/ca.crt",
+      "bytes": 607,
+      "sha256": "dbab1cf9cf53459fbc0f3c558e91c44ace9a63d072e855e826d1511460463962"
+    },
+    {
+      "path": "test_missing_or_stale_original0/reenrollment-ca/ca.key",
+      "bytes": 241,
+      "sha256": "f66adbfceae62cd1a00abc9f0670191b4a41db5069c52d625c960b2d95ca26f3"
+    },
+    {
+      "path": "test_scoped_original_http_reco0/reenrollment-ca/issued.json",
+      "bytes": 195,
+      "sha256": "7b60eda0b807ba19d30657fe4539c06c4e45871611ff1f80d8278184dc258d42"
+    },
+    {
+      "path": "test_scoped_original_http_reco0/reenrollment-ca/issued.lock",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "test_scoped_original_http_reco0/reenrollment-ca/ca.crt",
+      "bytes": 607,
+      "sha256": "87224a51f1dd560aa5ca56a7e95d6c3ac9b9f7db0a4fff0289dbe9d34abcb045"
+    },
+    {
+      "path": "test_scoped_original_http_reco0/reenrollment-ca/ca.key",
+      "bytes": 241,
+      "sha256": "03ff98109f0ed251c15ac7c305fe08d80600d66086259742bd854c9af42e525d"
+    }
+  ]
+}

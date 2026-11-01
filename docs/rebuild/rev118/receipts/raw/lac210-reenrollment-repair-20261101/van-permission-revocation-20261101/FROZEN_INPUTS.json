@@ -1,0 +1,20 @@
+{
+  "base": "32d519332ecd251d932e841db84ca0a25712b255",
+  "worktree": "/workspace/van-lanes-20261101/permission-revocation",
+  "files": {
+    "android/app/src/main/java/com/dial/van/command/settings/OwnerPermissionGrantSection.kt": "06895fce77e4af2fdb723796a3ccf924be8bd7a46d21087da31c24566428cfb5",
+    "android/app/src/main/java/com/dial/van/command/settings/PermissionsRoute.kt": "a5a4f749ae9fbe614e3b44309675be0f507a5d779a4ed5c2b02ce8a589484eeb",
+    "android/app/src/main/java/com/dial/van/gateway/PermissionRevocationOperations.kt": "5d557b6843ad7db516f655392a2807cf57423bb81afee2421cc2fcb0e6e6d6b6",
+    "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt": "04f333a5d8312831f31c04546e14277106da44622e8eec4293673de42de1778e",
+    "android/verification/build.gradle.kts": "398ab4b703fb52d71dd8db8faf7c939de7a86b781f0b26cc0199d2edf4745152",
+    "android/verification/src/test/kotlin/com/dial/van/gateway/PermissionRevocationOperationsTest.kt": "c9aca6ae9c4b3b51d85f91da6529e2bc9298755d264bbb81ab1ba512a78779af",
+    "backend/tests/test_owner_permission_revocation_recovery.py": "006aeee872ee6d6560cae6bc8d6bcae2784e7b95d3c2dd2f91a13035b9595862",
+    "backend/van_gateway/capability/owner_permissions.py": "d0c63a67da49f6a030877472b1c3b9d5c54a51d16f6a46d21af088ed4ba04d91",
+    "backend/van_gateway/capability/permissions.py": "f4e97e617f9b0cb45d2e560384d7dbe119b515e7c5f475cc7f52c55957b21415",
+    "backend/van_gateway/understanding/api.py": "a5462a5ee1872cea822f410a77205117dfec55f99d61c84b66db7aee45f0cdd3"
+  },
+  "frozen_at_utc": "2026-11-01T07:02:36.440208+00:00",
+  "source_only": "LAC210 candidate; no native/unit acceptance",
+  "prior51_reuse": "All production source identical to FINAL_CORE_01; only appended required post-auth writer test added; no repeat of passed consent/integrity selections",
+  "read_only_generated_contracts": "Integration owner retains generated writes"
+}

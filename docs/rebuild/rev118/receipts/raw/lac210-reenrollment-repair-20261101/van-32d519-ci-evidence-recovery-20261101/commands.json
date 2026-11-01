@@ -1,0 +1,56 @@
+{
+  "at_utc": "2026-11-01T07:04:28.603918+00:00",
+  "results": [
+    {
+      "name": "job-log-cli",
+      "command": [
+        "gh",
+        "run",
+        "view",
+        "41281187766",
+        "--repo",
+        "Vanguduza/Van",
+        "--job",
+        "124773374035",
+        "--log"
+      ],
+      "exit": 0,
+      "stdout_bytes": 0,
+      "stderr_bytes": 0
+    },
+    {
+      "name": "current-jobs",
+      "command": [
+        "gh",
+        "api",
+        "--method",
+        "GET",
+        "repos/Vanguduza/Van/actions/runs/41281187766/jobs",
+        "-f",
+        "filter=latest",
+        "-f",
+        "per_page=100",
+        "--paginate"
+      ],
+      "exit": 0,
+      "stdout_bytes": 68481,
+      "stderr_bytes": 0
+    },
+    {
+      "name": "artifacts",
+      "command": [
+        "gh",
+        "api",
+        "--method",
+        "GET",
+        "repos/Vanguduza/Van/actions/runs/41281187766/artifacts",
+        "-f",
+        "per_page=100",
+        "--paginate"
+      ],
+      "exit": 0,
+      "stdout_bytes": 13934,
+      "stderr_bytes": 0
+    }
+  ]
+}

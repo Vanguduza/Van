@@ -146,6 +146,7 @@ sourceSets {
             "com/dial/van/onboarding/OnboardingPlan.kt",
             "com/dial/van/gateway/GatewayRetry.kt",
             "com/dial/van/gateway/GatewayMutationRetry.kt",
+            "com/dial/van/gateway/PermissionRevocationOperations.kt",
             "com/dial/van/gateway/ReplayTrigger.kt",
             "com/dial/van/telemetry/DeviceTelemetry.kt",
             "com/dial/van/telemetry/BrowserStreamTelemetry.kt",

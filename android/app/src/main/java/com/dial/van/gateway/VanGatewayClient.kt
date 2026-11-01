@@ -1621,8 +1621,38 @@ class VanGatewayClient(context: Context) {
         getJson("/v1/permissions/grants/${encodeSegment(grantId)}")
     }
 
-    suspend fun revokePermission(grantId: String): JSONObject = withContext(Dispatchers.IO) {
-        postJson("/v1/permissions/${encodeSegment(grantId)}/revoke", JSONObject())
+    private val permissionRevocations = PermissionRevocationOperations(object : PermissionRevocationStore {
+        override fun load(): String? = prefs.getString("permission_revocation_originals_v1", null)
+        override fun save(value: String): Boolean = prefs.edit().putString("permission_revocation_originals_v1", value).commit()
+    })
+
+    fun permissionProfileIdentity(): String = java.security.MessageDigest.getInstance("SHA-256")
+        .digest(baseUrl.toByteArray(Charsets.UTF_8)).joinToString("") { "%02x".format(it) }
+
+    suspend fun revokePermission(grantId: String, reviewed: JSONObject, reviewedProfile: String): JSONObject = withContext(Dispatchers.IO) {
+        val owner = deviceId ?: error("The active owner changed. Review the permission again.")
+        try {
+            permissionRevocations.revoke(reviewedProfile, owner, grantId, reviewed,
+                currentProfile = { permissionProfileIdentity() }, currentDevice = { deviceId },
+                detail = { getJson("/v1/permissions/grants/${encodeSegment(grantId)}") },
+                originalResult = { original ->
+                    try { getJson("/v1/permissions/${encodeSegment(grantId)}/revocations/${encodeSegment(original.operationId)}") }
+                    catch (failure: GatewayHttpException) { if (failure.code == 404) null else throw failure }
+                },
+                submit = { original -> postProved("/v1/permissions/${encodeSegment(grantId)}/revoke", JSONObject(original.requestBody)) },
+            )
+        } catch (failure: IllegalStateException) {
+            val message = when (failure.message) {
+                "permission_revocation_request_expired" -> "This permission review expired. Review the current details and confirm again."
+                "permission_caller_changed", "permission_revocation_caller_changed" -> "The active owner or connection changed. Review the permission again."
+                "permission_revocation_stale_revision", "permission_revocation_original_changed" -> "Permission changed. Review its current details before confirming again."
+                else -> "The original permission change cannot be confirmed yet. Its recovery record has been kept."
+            }
+            throw IllegalStateException(message, failure)
+        } catch (failure: GatewayHttpException) {
+            if (failure.code == 409) throw IllegalStateException("Permission changed. Review its current details before confirming again.", failure)
+            throw failure
+        }
     }
 
     suspend fun autonomy(): JSONObject = withContext(Dispatchers.IO) { getJson("/v1/autonomy") }

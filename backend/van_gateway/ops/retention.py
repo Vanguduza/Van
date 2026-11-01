@@ -251,6 +251,14 @@ POLICIES: tuple[TablePolicy, ...] = (
        note="§0D.3 — the cryptographic identity of the owner's handset. A timer must never "
             "delete the only record of which device is allowed to be VAN; revocation and "
             "rebinding are explicit, audited acts."),
+    _p("owner_device_reenrollments", _OWNER,
+       note="Original device replacement identity/expiry and protected receipt. Age pruning "
+            "must not remint an old operation or remove a pending retirement barrier; "
+            "classification changes no existing explicit owner erasure/lifecycle control."),
+    _p("device_certificate_retirements", _OWNER,
+       note="Original security retirement and independent CA/native reconciliation fence. "
+            "No age sweep may convert an unknown effect into absent authority; "
+            "existing owner identity lifecycle and minimal security tombstones still apply."),
     _p("device_attestation_events", _EV, "occurred_at_ms",
        note="Why a device was accepted or refused. The refusals matter most, and are "
             "exactly what an attacker would want aged out."),

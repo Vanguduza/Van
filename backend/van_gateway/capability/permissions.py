@@ -157,6 +157,10 @@ class PermissionRegistry:
             await db.commit()
             return cur.rowcount == 1
 
+    async def revoke_original(self, **kwargs):
+        from van_gateway.capability.owner_permissions import revoke_permission_grant
+        return await revoke_permission_grant(self.store,**kwargs)
+
     async def get(self, grant_id: str) -> PermissionGrant | None:
         row = await self.store.fetchone(
             "SELECT * FROM permission_grants WHERE grant_id = ?", (grant_id,)

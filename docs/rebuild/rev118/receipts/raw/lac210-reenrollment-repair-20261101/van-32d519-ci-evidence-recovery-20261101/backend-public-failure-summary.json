@@ -1,0 +1,23 @@
+{
+  "job_id": 124773373901,
+  "head": "32d519332ecd251d932e841db84ca0a25712b255",
+  "terminal_status": "failure",
+  "pytest": {
+    "passed": 5919,
+    "failed": 5,
+    "declared_skipped": 7,
+    "warnings": 7,
+    "duration_seconds": 1807.07
+  },
+  "followup_contract_cases_passed": 198,
+  "required_coverage_verification": "FAILED ValueError source cases missing, failed or errored",
+  "failed_nodes": [
+    "2026-11-01T07:03:06.2345737Z FAILED backend/tests/test_authority_execution_identity.py::test_post_effect_transition_cannot_overwrite_committed_revocation[submitted] - assert 0 == 1",
+    "2026-11-01T07:03:06.2346628Z FAILED backend/tests/test_authority_execution_identity.py::test_post_effect_transition_cannot_overwrite_committed_revocation[verifying] - assert 0 == 1",
+    "2026-11-01T07:03:06.2347241Z FAILED backend/tests/test_authority_execution_identity.py::test_post_effect_transition_cannot_overwrite_committed_revocation[failed] - assert 0 == 1",
+    "2026-11-01T07:03:06.2348165Z FAILED backend/tests/test_ops_retention.py::test_every_table_in_the_live_schema_has_a_retention_class - AssertionError: 2 tables have no retention class: ['device_certificate_retirements', 'owner_device_reenrollments']. A new table must be assigned one; see van_gateway/ops/retention.py.",
+    "2026-11-01T07:03:06.2349598Z FAILED tests/contracts/test_capability_namespaces_are_distinct.py::test_the_two_vocabularies_are_written_down_and_still_agree - AssertionError: ['device.rebind']"
+  ],
+  "log_file": "/workspace/van-32d519-ci-evidence-recovery-20261101/job-124773373901-connector.log",
+  "log_sha256": "a6b56db5f6f08f91f630505da7bc42fac06009177d9c10aec34f40ef6452ae77"
+}

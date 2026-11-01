@@ -137,6 +137,16 @@ class OwnerDeviceReenrollment:
                      encrypted,hashlib.sha256(token.encode()).hexdigest(),
                      hashlib.sha256(pairing.encode()).hexdigest() if envelope else None,challenge,gateway_url,reason),
                 )
+                # Audit the original accepted intent in the same writer. Exact
+                # retries/readback never create a second rebind event, and a
+                # crash cannot commit retirement without its original audit.
+                from van_gateway.audit.service import AuditService
+                await AuditService(self.store).record_in_transaction(db,
+                    result="accepted", device_id=binding["device_id"],
+                    capability="device.rebind",
+                    after={"operation_id":operation_id,"original_binding_id":binding["binding_id"],
+                        "original_bound_at_ms":binding["bound_at_ms"],
+                        "native_operation_id":native["operation_id"],"phase":"RETIRING"})
                 await db.commit()
                 self.auth._device_secrets.pop(binding["device_id"], None)
         return await self.recover(operation_id=operation_id, operator_id=operator_id, now_ms=now_ms)

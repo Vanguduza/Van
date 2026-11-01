@@ -1636,7 +1636,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/understanding/api.py:534",
+      "source": "backend/van_gateway/understanding/api.py:570",
       "summary": "Autonomy",
       "tags": [
         "understanding"
@@ -3439,7 +3439,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/understanding/api.py:210",
+      "source": "backend/van_gateway/understanding/api.py:220",
       "summary": "Memory Records",
       "tags": [
         "understanding"
@@ -3515,7 +3515,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/understanding/api.py:215",
+      "source": "backend/van_gateway/understanding/api.py:225",
       "summary": "Memory Record Detail",
       "tags": [
         "understanding"
@@ -3574,7 +3574,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/understanding/api.py:223",
+      "source": "backend/van_gateway/understanding/api.py:233",
       "summary": "Memory Record Erasure Plan",
       "tags": [
         "understanding"
@@ -3633,7 +3633,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/understanding/api.py:219",
+      "source": "backend/van_gateway/understanding/api.py:229",
       "summary": "Memory Record Export",
       "tags": [
         "understanding"
@@ -5366,7 +5366,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/understanding/api.py:645",
+      "source": "backend/van_gateway/understanding/api.py:681",
       "summary": "Run Eval",
       "tags": [
         "understanding"
@@ -5450,7 +5450,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/understanding/api.py:615",
+      "source": "backend/van_gateway/understanding/api.py:651",
       "summary": "External Reality",
       "tags": [
         "understanding"
@@ -8142,7 +8142,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/understanding/api.py:516",
+      "source": "backend/van_gateway/understanding/api.py:526",
       "summary": "Permissions",
       "tags": [
         "understanding"
@@ -8170,7 +8170,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/capability/owner_permissions.py:299",
+      "source": "backend/van_gateway/capability/owner_permissions.py:300",
       "summary": "Contracts",
       "tags": [],
       "parameters": [],
@@ -8196,7 +8196,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/capability/owner_permissions.py:301",
+      "source": "backend/van_gateway/capability/owner_permissions.py:302",
       "summary": "Detail",
       "tags": [],
       "parameters": [
@@ -8207,6 +8207,63 @@
           "schema": {
             "type": "string",
             "title": "Grant Id"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json": {
+              "schema": {}
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "openapi_components": "owner_endpoint_schemas.json",
+      "readiness": "REPOSITORY_DECLARATION_ONLY"
+    },
+    {
+      "endpoint_id": "VE-a7dd7e2f8c76",
+      "method": "GET",
+      "path": "/v1/permissions/{grant_id}/revocations/{operation_id}",
+      "authentication": "INGRESS_BEARER_AND_PAIRED_DEVICE",
+      "device_proof_required_when_bound": false,
+      "registration": "DEFAULT",
+      "condition": null,
+      "source": "backend/van_gateway/understanding/api.py:548",
+      "summary": "Original Permission Revoke",
+      "tags": [
+        "understanding"
+      ],
+      "parameters": [
+        {
+          "name": "grant_id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "title": "Grant Id"
+          }
+        },
+        {
+          "name": "operation_id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "title": "Operation Id"
           }
         }
       ],
@@ -8268,7 +8325,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/understanding/api.py:377",
+      "source": "backend/van_gateway/understanding/api.py:387",
       "summary": "Strategic Memory",
       "tags": [
         "understanding"
@@ -9719,7 +9776,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/understanding/api.py:561",
+      "source": "backend/van_gateway/understanding/api.py:597",
       "summary": "Strategies",
       "tags": [
         "understanding"
@@ -9862,7 +9919,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/understanding/api.py:527",
+      "source": "backend/van_gateway/understanding/api.py:563",
       "summary": "Technology Radar",
       "tags": [
         "understanding"
@@ -12719,7 +12776,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/understanding/api.py:288",
+      "source": "backend/van_gateway/understanding/api.py:298",
       "summary": "Understanding",
       "tags": [
         "understanding"
@@ -12768,7 +12825,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/understanding/api.py:271",
+      "source": "backend/van_gateway/understanding/api.py:281",
       "summary": "Complement Preference Read",
       "tags": [
         "understanding"
@@ -12825,7 +12882,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/understanding/api.py:356",
+      "source": "backend/van_gateway/understanding/api.py:366",
       "summary": "Decision Fingerprints",
       "tags": [
         "understanding"
@@ -12853,7 +12910,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/understanding/api.py:304",
+      "source": "backend/van_gateway/understanding/api.py:314",
       "summary": "Standing Intents",
       "tags": [
         "understanding"
@@ -12881,7 +12938,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/understanding/api.py:227",
+      "source": "backend/van_gateway/understanding/api.py:237",
       "summary": "Learning Producers",
       "tags": [
         "understanding"
@@ -12911,7 +12968,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/understanding/api.py:495",
+      "source": "backend/van_gateway/understanding/api.py:505",
       "summary": "Personal Context",
       "tags": [
         "understanding"
@@ -13010,7 +13067,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/understanding/api.py:490",
+      "source": "backend/van_gateway/understanding/api.py:500",
       "summary": "Owner Model Revision",
       "tags": [
         "understanding"
@@ -13059,7 +13116,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/understanding/api.py:247",
+      "source": "backend/van_gateway/understanding/api.py:257",
       "summary": "Vocabulary Read",
       "tags": [
         "understanding"
@@ -22528,7 +22585,7 @@
       "device_proof_required_when_bound": true,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/understanding/api.py:521",
+      "source": "backend/van_gateway/understanding/api.py:531",
       "summary": "Revoke Permission",
       "tags": [
         "understanding"
@@ -22544,7 +22601,23 @@
           }
         }
       ],
-      "request_body": null,
+      "request_body": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/PermissionRevocationBody"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Body"
+            }
+          }
+        }
+      },
       "responses": {
         "200": {
           "description": "Successful Response",
@@ -22576,7 +22649,7 @@
       "device_proof_required_when_bound": true,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/understanding/api.py:390",
+      "source": "backend/van_gateway/understanding/api.py:400",
       "summary": "Record Strategic Memory",
       "tags": [
         "understanding"
@@ -26746,7 +26819,7 @@
       "device_proof_required_when_bound": true,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/understanding/api.py:455",
+      "source": "backend/van_gateway/understanding/api.py:465",
       "summary": "Confirm Adaptation",
       "tags": [
         "understanding"
@@ -26794,7 +26867,7 @@
       "device_proof_required_when_bound": true,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/understanding/api.py:463",
+      "source": "backend/van_gateway/understanding/api.py:473",
       "summary": "Revert Adaptation",
       "tags": [
         "understanding"
@@ -26842,7 +26915,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/understanding/api.py:474",
+      "source": "backend/van_gateway/understanding/api.py:484",
       "summary": "Observe",
       "tags": [
         "understanding"
@@ -26906,7 +26979,7 @@
       "device_proof_required_when_bound": true,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/understanding/api.py:416",
+      "source": "backend/van_gateway/understanding/api.py:426",
       "summary": "Confirm",
       "tags": [
         "understanding"
@@ -26954,7 +27027,7 @@
       "device_proof_required_when_bound": true,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/understanding/api.py:427",
+      "source": "backend/van_gateway/understanding/api.py:437",
       "summary": "Correct",
       "tags": [
         "understanding"
@@ -27011,7 +27084,7 @@
       "device_proof_required_when_bound": true,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/understanding/api.py:444",
+      "source": "backend/van_gateway/understanding/api.py:454",
       "summary": "Reject",
       "tags": [
         "understanding"
@@ -27924,7 +27997,7 @@
       "device_proof_required_when_bound": true,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/understanding/api.py:284",
+      "source": "backend/van_gateway/understanding/api.py:294",
       "summary": "Complement Preference Write",
       "tags": [
         "understanding"
@@ -27971,7 +28044,7 @@
       "device_proof_required_when_bound": true,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/understanding/api.py:265",
+      "source": "backend/van_gateway/understanding/api.py:275",
       "summary": "Vocabulary Write",
       "tags": [
         "understanding"

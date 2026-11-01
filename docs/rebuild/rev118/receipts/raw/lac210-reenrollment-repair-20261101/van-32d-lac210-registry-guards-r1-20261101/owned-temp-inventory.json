@@ -1,0 +1,66 @@
+{
+  "directory": "/tmp/van-recovery-32d-lac210-registry-guards-r1-20261101",
+  "at_utc": "2026-11-01T07:30:20.466970+00:00",
+  "files": [
+    {
+      "path": "test_main_uses_supplied_object2/registries/owner_screens.json",
+      "bytes": 39,
+      "sha256": "049fa29c55511ffedae5585d315391a47fae0974a635fc7c3b4d1467c8499b0c"
+    },
+    {
+      "path": "test_main_uses_supplied_object2/registries/owner_endpoint_schemas.json",
+      "bytes": 48,
+      "sha256": "4270adbba9f5bced311f0a1351b6167d475f3508bd648ecc0a2bd9d6f12f8b90"
+    },
+    {
+      "path": "test_main_uses_supplied_object2/registries/owner_features.json",
+      "bytes": 40,
+      "sha256": "5f95304ededc389d40d77ab0310844600571f468b0ba258207dad114201b33f7"
+    },
+    {
+      "path": "test_main_uses_supplied_object2/registries/owner_endpoints.json",
+      "bytes": 41,
+      "sha256": "8735384ef96de32c82ce40acaac8788f654c9d0e00bc9166c9b9372e81541323"
+    },
+    {
+      "path": "test_main_uses_supplied_object1/registries/owner_screens.json",
+      "bytes": 49,
+      "sha256": "534ac00e277f4006a0556409206742a8d627ce2e34c0d2b11ddba787d282b670"
+    },
+    {
+      "path": "test_main_uses_supplied_object1/registries/owner_endpoint_schemas.json",
+      "bytes": 48,
+      "sha256": "4270adbba9f5bced311f0a1351b6167d475f3508bd648ecc0a2bd9d6f12f8b90"
+    },
+    {
+      "path": "test_main_uses_supplied_object1/registries/owner_features.json",
+      "bytes": 40,
+      "sha256": "5f95304ededc389d40d77ab0310844600571f468b0ba258207dad114201b33f7"
+    },
+    {
+      "path": "test_main_uses_supplied_object1/registries/owner_endpoints.json",
+      "bytes": 41,
+      "sha256": "8735384ef96de32c82ce40acaac8788f654c9d0e00bc9166c9b9372e81541323"
+    },
+    {
+      "path": "test_main_uses_supplied_object0/registries/owner_screens.json",
+      "bytes": 47,
+      "sha256": "02355c5a333585bbfdc959dfc3949c09f63ea29e9b5d45c7f2ef872a454c274f"
+    },
+    {
+      "path": "test_main_uses_supplied_object0/registries/owner_endpoint_schemas.json",
+      "bytes": 56,
+      "sha256": "1ee7e884fab8f9723c5c29f30eefe54d4602a96fb8bb7559fb575fff142898f6"
+    },
+    {
+      "path": "test_main_uses_supplied_object0/registries/owner_features.json",
+      "bytes": 48,
+      "sha256": "714334ce3e8c262e27836e497d796d19307579b1a58b3e5b4f3e6d1e9717a305"
+    },
+    {
+      "path": "test_main_uses_supplied_object0/registries/owner_endpoints.json",
+      "bytes": 49,
+      "sha256": "461d46e6aa8c1dbac9ea48606fb6c42059afb7e84dc8c961bd66a7a5c107bb78"
+    }
+  ]
+}

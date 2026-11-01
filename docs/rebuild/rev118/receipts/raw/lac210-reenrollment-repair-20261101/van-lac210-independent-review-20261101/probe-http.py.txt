@@ -1,0 +1,39 @@
+import asyncio,hashlib,json,tempfile
+from pathlib import Path
+import pytest
+from tests.test_local_typed_actions import client,_settings
+from test_owner_permission_revocation_recovery import test_current_owner_may_inspect_revoke_historical_other_device_grant,test_corrupt_target_source_remains_inspectable_and_defensively_revocable,test_admission_wins_then_same_generation_owner_revoke_preserves_budget_and_blocks_next_use,test_caller_retirement_after_http_authentication_is_rechecked_before_writer_effect,grant,explicit_request
+import van_gateway.capability.owner_permissions as source
+import van_gateway.capability.permissions as registry
+OUT=Path('/workspace/van-lac210-independent-review-20261101');ROOT=Path('/workspace/van-lanes-20261101/permission-revocation')
+before=json.loads((OUT/'before.json').read_text());assert {p:hashlib.sha256((ROOT/p).read_bytes()).hexdigest() for p in before}==before
+async def completed_new_token(world):
+ ac,app,_=world;gid,_=await grant(ac,app);request=await explicit_request(ac,gid)
+ applied=await ac.post('/v1/permissions/'+gid+'/revoke',json=request);assert applied.status_code==200,applied.text
+ renewed='current-lawful-same-owner-new-token-0123456789'
+ await app.state.store.execute('UPDATE devices SET access_token_hash=? WHERE device_id=?',(hashlib.sha256(renewed.encode()).hexdigest(),'dev-erasure'))
+ ac.headers['X-Van-Device-Token']=renewed
+ original=await ac.get('/v1/permissions/'+gid+'/revocations/'+request['operation_id'])
+ replay=await ac.post('/v1/permissions/'+gid+'/revoke',json=request)
+ assert original.status_code==replay.status_code==200,(original.text,replay.text)
+ assert original.json()==replay.json()==applied.json()
+ return {'same_original_receipt_after_newtoken':True,'operation_id':request['operation_id']}
+async def main():
+ results=[]
+ probes=[('cross-device historical revoked issuer defensive cleanup',test_current_owner_may_inspect_revoke_historical_other_device_grant,False),('corrupt target inspectable effective0 actual guard refuses but cleanup allowed',test_corrupt_target_source_remains_inspectable_and_defensively_revocable,False),('same-generation admission increment cannot starve revocation; future use blocked',test_admission_wins_then_same_generation_owner_revoke_preserves_budget_and_blocks_next_use,False),('HTTP authentication then caller retirement writer race refuses',test_caller_retirement_after_http_authentication_is_rechecked_before_writer_effect,True),('completed exact original recovery after lawful same-owner token renewal',completed_new_token,False)]
+ for name,fn,with_mp in probes:
+  with tempfile.TemporaryDirectory(prefix='van-lac210-http-review-',dir='/tmp') as temp:
+   with pytest.MonkeyPatch.context() as mp:
+    settings=_settings.__wrapped__(Path(temp),mp);next(settings)
+    fixture=client.__wrapped__(mp);world=await anext(fixture)
+    try:
+     extra=await fn(world,mp) if with_mp else await fn(world)
+     results.append({'case':name,'result':'PASS','extra':extra})
+    finally:
+     try:await anext(fixture)
+     except StopAsyncIteration:pass
+     try:next(settings)
+     except StopIteration:pass
+ return results
+results=asyncio.run(main());after={p:hashlib.sha256((ROOT/p).read_bytes()).hexdigest() for p in before};assert after==before
+(OUT/'after-http.json').write_text(json.dumps(after,indent=2));x={'imports':{'owner_permissions':source.__file__,'registry':registry.__file__},'results':results,'source_pins_unchanged':True,'owned_tmp_cleanup':True};(OUT/'http-probe-results.json').write_text(json.dumps(x,indent=2));print(json.dumps(x))

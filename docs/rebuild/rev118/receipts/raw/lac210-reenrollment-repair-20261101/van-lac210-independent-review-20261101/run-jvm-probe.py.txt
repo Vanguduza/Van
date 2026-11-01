@@ -1,0 +1,20 @@
+import hashlib,json,subprocess,tempfile,zipfile
+from pathlib import Path
+OUT=Path('/workspace/van-lac210-independent-review-20261101');ROOT=Path('/workspace/van-lanes-20261101/permission-revocation');E=Path('/workspace/van-permission-revocation-20261101')
+h=json.loads((E/'HANDOFF.json').read_text());before={p:hashlib.sha256((ROOT/p).read_bytes()).hexdigest() for p in h['source_files']};assert before==h['source_files'];(OUT/'before.json').write_text(json.dumps(before,indent=2))
+assert hashlib.sha256(Path(h['patch']).read_bytes()).hexdigest()==h['patch_sha256'];assert hashlib.sha256(Path(h['archive']).read_bytes()).hexdigest()==h['archive_sha256']
+with zipfile.ZipFile(h['archive']) as z:
+ for p,want in before.items():
+  names=[n for n in z.namelist() if n==p or n.endswith('/'+p)];assert len(names)==1;assert hashlib.sha256(z.read(names[0])).hexdigest()==want
+cache=Path('/tmp/van-permission-revocation-gradle/caches/modules-2/files-2.1')
+def jar(part):return next(cache.glob(part))
+stdlib=jar('org.jetbrains.kotlin/kotlin-stdlib/2.0.21/*/*.jar');jsonjar=jar('org.json/json/20240303/*/*.jar');annotations=jar('org.jetbrains/annotations/13.0/*/*.jar')
+compiler=[jar(p) for p in ['org.jetbrains.kotlin/kotlin-compiler-embeddable/2.0.21/*/*.jar','org.jetbrains.kotlin/kotlin-script-runtime/2.0.21/*/*.jar','org.jetbrains.kotlin/kotlin-reflect/1.6.10/*/*.jar','org.jetbrains.intellij.deps/trove4j/1.0.20200330/*/*.jar','org.jetbrains.kotlinx/kotlinx-coroutines-core-jvm/1.6.4/*/*.jar']]+[stdlib,annotations]
+java='/tmp/van-permission-revocation-jdk/jdk-21.0.13+9/bin/java'
+with tempfile.TemporaryDirectory(prefix='van-lac210-jvm-review-',dir='/tmp') as temp:
+ command=[java,'-cp',':'.join(map(str,compiler)),'org.jetbrains.kotlin.cli.jvm.K2JVMCompiler','-no-stdlib','-no-reflect','-classpath',':'.join(map(str,[stdlib,jsonjar,annotations])),'-d',temp,str(ROOT/'android/app/src/main/java/com/dial/van/gateway/PermissionRevocationOperations.kt'),str(OUT/'ProfileSwitchProbe.kt')]
+ build=subprocess.run(command,text=True,capture_output=True);(OUT/'jvm-compile.log').write_text(build.stdout+build.stderr);assert build.returncode==0
+ run=subprocess.run([java,'-cp',':'.join(map(str,[temp,stdlib,jsonjar])),'ProfileSwitchProbeKt'],text=True,capture_output=True);(OUT/'jvm-probe.log').write_text(run.stdout+run.stderr);assert run.returncode==0
+ result=json.loads(run.stdout.strip());(OUT/'jvm-probe-results.json').write_text(json.dumps(result,indent=2));print(json.dumps(result))
+after={p:hashlib.sha256((ROOT/p).read_bytes()).hexdigest() for p in before};assert after==before;(OUT/'after-jvm.json').write_text(json.dumps(after,indent=2))
+(OUT/'jvm-import-pins.json').write_text(json.dumps({'source':str(ROOT/'android/app/src/main/java/com/dial/van/gateway/PermissionRevocationOperations.kt'),'source_sha256':before['android/app/src/main/java/com/dial/van/gateway/PermissionRevocationOperations.kt'],'compiler_dependency_hashes':{str(p):hashlib.sha256(p.read_bytes()).hexdigest() for p in compiler+[jsonjar]},'owned_tmp_cleanup':True},indent=2))
