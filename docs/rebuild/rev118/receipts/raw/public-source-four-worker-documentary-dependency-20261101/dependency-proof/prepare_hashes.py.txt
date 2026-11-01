@@ -1,0 +1,38 @@
+from pathlib import Path
+import json,hashlib,urllib.request,datetime,subprocess,os
+from packaging.utils import parse_wheel_filename,canonicalize_name
+out=Path(__file__).parent
+artifacts={}
+for path in sorted((out/'wheels').glob('*.whl')):
+ name,version,_,_=parse_wheel_filename(path.name)
+ api='https://pypi.org/pypi/'+str(name)+'/'+str(version)+'/json'
+ with urllib.request.urlopen(api,timeout=30) as response:
+  metadata=json.load(response)
+ matches=[u for u in metadata['urls'] if u['filename']==path.name]
+ digest=hashlib.sha256(path.read_bytes()).hexdigest()
+ assert len(matches)==1 and matches[0]['digests']['sha256']==digest
+ artifacts[canonicalize_name(name)]={'version':str(version),'filename':path.name,'bytes':path.stat().st_size,
+  'sha256':digest,'official_release_metadata':api,'metadata_digest_match':True}
+for label in ('ORIGINAL','PROPOSED'):
+ rows=[]
+ for line in (out/(label+'_PINS.lock')).read_text().splitlines():
+  if not line.strip() or line.startswith('#'):continue
+  name,version=line.split('==');artifact=artifacts[canonicalize_name(name)]
+  assert artifact['version']==version
+  rows.append(line+' --hash=sha256:'+artifact['sha256'])
+ (out/(label+'_HASHED.lock')).write_text('\n'.join(rows)+'\n')
+(out/'OFFICIAL_ARTIFACT_DIGESTS.json').write_text(json.dumps({'at_utc':datetime.datetime.now(datetime.timezone.utc).isoformat(),
+ 'source':'Official PyPI TLS release metadata and pip-downloaded public wheels; every actual wheel SHA256 matched metadata',
+ 'artifacts':artifacts},indent=2)+'\n')
+for label in ('original','fixed'):
+ venv=out/(label+'-venv')
+ subprocess.run(['/workspace/van-backend-venv-20261025/bin/python','-m','venv',str(venv)],check=True)
+ lock=out/('ORIGINAL_HASHED.lock' if label=='original' else 'PROPOSED_HASHED.lock')
+ command=[str(venv/'bin/python'),'-m','pip','install','--disable-pip-version-check','--no-cache-dir','--no-index',
+  '--find-links',str(out/'wheels'),'--require-hashes','-r',str(lock)]
+ with (out/(label+'-install.log')).open('w') as log:
+  result=subprocess.run(command,stdout=log,stderr=subprocess.STDOUT,check=True,timeout=180,
+   env={**os.environ,'TMPDIR':str(out/'tmp')})
+ (out/(label+'-install-receipt.json')).write_text(json.dumps({'command':command,'exit':result.returncode,
+  'lock_sha256':hashlib.sha256(lock.read_bytes()).hexdigest(),'fresh_venv':str(venv)},indent=2)+'\n')
+print('All14 official wheel digests verified; original and fixed fresh --require-hashes installs terminal0.')

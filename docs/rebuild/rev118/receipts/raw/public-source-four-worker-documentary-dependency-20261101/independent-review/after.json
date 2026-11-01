@@ -1,0 +1,11 @@
+{
+  ".github/workflows/van-ci.yml": "d01072bb9580f97191c42887f66edb0bc4b67e52790c971e548987f079e54292",
+  "tools/ci/github-actions-ci.yml": "d01072bb9580f97191c42887f66edb0bc4b67e52790c971e548987f079e54292",
+  "tools/rebuild/backend_public_source.py": "36d743ea8489c39b67cda800b0b1016cb32b0b3df779a5714d6d5288b06cac0b",
+  "tools/rebuild/public_source_shards.py": "cbab1119dfbe47c7d7a27b45590c009559d60d719a6483c761f37b48ed8b4973",
+  "tools/rebuild/backend_public_source_costs.json": "87bea238bd0bbd85bc75bf5a3f1271284d2da7d8833a60ef2805e5f9220f1779",
+  "tests/rebuild/test_public_source_shards.py": "ae895b4887587e8df0a4ed9d687b7b9139ec3b6975b107af2933cd8cb4cf75fc",
+  "tests/contracts/test_ci_public_source_shards.py": "5d80f268b9af8b9827e025af3c9fd2f37edbd110301be6257568190fcb5eb87a",
+  "docs/rebuild/rev118/ci/PUBLIC_SOURCE_SHARDS_20261101.md": "9f81c330dff73bf9124f8808ea46c0b9191ba6de7fc083cc57908e8ce3331177",
+  "tools/rebuild/requirements.lock": "95504e01ef04029f410b2b23dc7fff3e02d7e7327513388a3b065f1a87ce9941"
+}

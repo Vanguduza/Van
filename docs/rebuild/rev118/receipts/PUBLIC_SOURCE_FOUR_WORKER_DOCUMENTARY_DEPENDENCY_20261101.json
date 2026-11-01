@@ -1,0 +1,263 @@
+{
+  "schema": "van.public-source-four-worker-documentary-dependency-source/1",
+  "at_utc": "2026-11-01T11:25:39.040072+00:00",
+  "source_parent": "34466d65da8bcce6ba7ee092edcda7f5fa025a79",
+  "published_parent": "fd33b0759b9ae170f8bdfdf27f9afe7082da7830",
+  "authorization": "auth-20261022-owner-autonomous-candidate-build",
+  "actual_dependency_delta": {
+    "schema": "van.public-source-shard-documentary-dependency-supplement/1",
+    "at_utc": "2026-11-01T11:18:21.817005+00:00",
+    "state": "DEPENDENCY_ONLY_FROZEN_FOR_INDEPENDENT_REVIEW_UNCOMMITTED_UNPUSHED",
+    "base": "34466d65da8bcce6ba7ee092edcda7f5fa025a79",
+    "published_base": "fd33b0759b9ae170f8bdfdf27f9afe7082da7830",
+    "paths": {
+      "tools/rebuild/requirements.lock": "95504e01ef04029f410b2b23dc7fff3e02d7e7327513388a3b065f1a87ce9941"
+    },
+    "before_sha256": {
+      "tools/rebuild/requirements.lock": "506ccce6748b4ecfdfd4059b047c17a2783b34745607f86b888119c632056594"
+    },
+    "original_reviewed8_source_pins": {
+      ".github/workflows/van-ci.yml": "d01072bb9580f97191c42887f66edb0bc4b67e52790c971e548987f079e54292",
+      "tools/ci/github-actions-ci.yml": "d01072bb9580f97191c42887f66edb0bc4b67e52790c971e548987f079e54292",
+      "tools/rebuild/backend_public_source.py": "36d743ea8489c39b67cda800b0b1016cb32b0b3df779a5714d6d5288b06cac0b",
+      "tools/rebuild/public_source_shards.py": "cbab1119dfbe47c7d7a27b45590c009559d60d719a6483c761f37b48ed8b4973",
+      "tools/rebuild/backend_public_source_costs.json": "87bea238bd0bbd85bc75bf5a3f1271284d2da7d8833a60ef2805e5f9220f1779",
+      "tests/rebuild/test_public_source_shards.py": "ae895b4887587e8df0a4ed9d687b7b9139ec3b6975b107af2933cd8cb4cf75fc",
+      "tests/contracts/test_ci_public_source_shards.py": "5d80f268b9af8b9827e025af3c9fd2f37edbd110301be6257568190fcb5eb87a",
+      "docs/rebuild/rev118/ci/PUBLIC_SOURCE_SHARDS_20261101.md": "9f81c330dff73bf9124f8808ea46c0b9191ba6de7fc083cc57908e8ce3331177"
+    },
+    "original_reviewed8_unchanged": true,
+    "patch_sha256": "0598f0c8c7f7d79b5be7dc428f1043ff27df3725a2cd01817ab662864f21aa5e",
+    "source_archive_sha256": "992cec923169b6d3172980d58f59e6181db8e1fedd7f3deff2dc64850539165a",
+    "archive_readback_and_cached_applycheck": "PASS no index mutation",
+    "scope": "Existing tools/rebuild verification dependency owner; every original pin retained exactly, adds anyio4.15.1+idna3.20 for the real gateway-instrument subprocess fixtures. No source/test/skip/plugin-semantic fallback, workflow body change or application effect.",
+    "actual_original_failure": {
+      "cases": 75,
+      "passed": 73,
+      "failed": 2,
+      "errors": 0,
+      "skipped": 0,
+      "cause": "The two real gateway instrument subprocess tests cannot import original native gateway plugin anyio.pytest_plugin in the documentary-only original lock. This is actual fresh-lock execution failure, not an application/source-gate acceptance.",
+      "receipt": "original-instrument/receipt.json",
+      "raw_log": "original-instrument/tests.log",
+      "junit": "original-instrument/tests.xml"
+    },
+    "actual_corrected_run": {
+      "cases": 75,
+      "passed": 75,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 15.03,
+      "receipt": "fixed-instrument/receipt.json",
+      "raw_log": "fixed-instrument/tests.log",
+      "junit": "fixed-instrument/tests.xml",
+      "source_inputs_before_after_unchanged": true,
+      "original8_reviewed_source_unchanged": true
+    },
+    "dependency_integrity": {
+      "original_install": "original-install-receipt.json",
+      "fixed_install": "fixed-install-receipt.json",
+      "both_fresh_require_hashes_offline_installs": "terminal0",
+      "official_artifacts": "OFFICIAL_ARTIFACT_DIGESTS.json",
+      "artifacts_verified": 14,
+      "actual_all_wheel_hashes_match_official_TLS_release_metadata": true,
+      "source_lock_projection": "PROPOSED_HASHED.lock preserves EXACT source name/version specs, adds official verified wheel SHA256 for proof install; source lock retains its existing pin-only format.",
+      "installed_package_versions_exactly_source_specs_except_pip_bootstrap": true
+    },
+    "genuine_commit_and_manifest": {
+      "local_commit": "34466d65da8bcce6ba7ee092edcda7f5fa025a79",
+      "normal_push": "NOT_ATTEMPTED",
+      "final_original_manifest": "terminal0/12766files0mismatch before lock supplement; must refresh after supplement review",
+      "premature_receipt_read": "INITIAL_STATE.json preserves JSONDecodeError caused by reading live writer; later writer reaped terminal0. No current final-manifest or committed-baseline success inferred.",
+      "required_baseline": "4fd466dec3910ed5de614bfbf95887ad619df5ca",
+      "committed_baseline_verification": "PENDING_FINAL_SUPPLEMENT_REVIEW_AND_COMMIT"
+    },
+    "raw_sha256": {
+      "PROPOSED_PINS.lock": "449961403d22e29b1b4c9e181d0a4d0417c05a81f756533a74dc6cc1c75aa12a",
+      "wheel-download.log": "65f3be9cc7c58752287830eabc1ef22056da3288ec3fd21f91d32166756b77fd",
+      "OFFICIAL_ARTIFACT_DIGESTS.json": "cd1ca73c689a3ab1c7e036276ed2c78d79181bec349b10527ae34d3d79fe22bf",
+      "original-install-receipt.json": "4e66f666ef4ccd982ce289ce49378b3bd57d8d7c2b87d625d2d86a8bb4bb2d4a",
+      "INITIAL_STATE.json": "3d3c7f0af4309c8c618ecd2865475c058022442119e4f636e966c6cfd6f57ca9",
+      "run_instrument.py": "f50756980f70af178b87c27304fb92f138e3fe57cb217d19227e8a23b6b4ea93",
+      "hash-provisioning.log": "0c6d2c4b05679282f2f52adda407c0df9c0e79c701a27d43dfdd591fd128e638",
+      "DEPENDENCY_SUPPLEMENT.patch": "0598f0c8c7f7d79b5be7dc428f1043ff27df3725a2cd01817ab662864f21aa5e",
+      "ORIGINAL_HASHED.lock": "64a3c5932fc188de0316e615d90a44f84c4a9d8e752df19ec5963d90b4779c82",
+      "fixed-install-receipt.json": "4cea6c3287236c43b4ee89fd80bf2a56a65927ecf3d385699f23da713d1ee527",
+      "SOURCE_SUPPLEMENT.zip": "992cec923169b6d3172980d58f59e6181db8e1fedd7f3deff2dc64850539165a",
+      "original-install.log": "98081f3a62b63fdd1816358319117963dc7b4e87bef1336026a96a0a5339f56f",
+      "PROPOSED_HASHED.lock": "6afd4e890b9ca3f522b2b3e096609f538d61bc7223e55f883d9bb6dcc8e1c3ae",
+      "ORIGINAL_PINS.lock": "506ccce6748b4ecfdfd4059b047c17a2783b34745607f86b888119c632056594",
+      "fixed-install.log": "b46b92d27c7cb5e446c220e0909261f008db1e594fa055d3f65139e4e768658a",
+      "prepare_hashes.py": "58ff86f3d2aa31141d99e235c19700a6e7191e047c85fd98d5400d696a9b82a4",
+      "fixed-instrument/owned-temp-inventory.json": "ec86286507484baeb00a75d4530d1717f5d60e213378409961e3577c9405ddaa",
+      "fixed-instrument/tests.xml": "dad61f8af020d1beed3efba8d7c6aef86f40023a1cbddcc121dda9142026570a",
+      "fixed-instrument/storage-audit.json": "03b5b2afac2978cda8a845c9a6eec9e8d20b13abe2960e09fcc8f1fccbcc2cb7",
+      "fixed-instrument/receipt.json": "f4b990b7e6b6594ea35228925bb3ebd80bf9c4d2eea99cc0b15918c9a320d931",
+      "fixed-instrument/tests.log": "477030f3f062ee0d12704cbe79e31a4ac47acd6e8a1a68c80eaf4184e82ea043",
+      "original-instrument/owned-temp-inventory.json": "758fa7d50146f20e7bd07b64ba90aa7154c34c852bb98e8e0bb3e34c0bf58f25",
+      "original-instrument/tests.xml": "8102b499d81411e55d9d8d705c7fc92d4837e1ffc4a7839fd9e9480063bbc93b",
+      "original-instrument/storage-audit.json": "03b5b2afac2978cda8a845c9a6eec9e8d20b13abe2960e09fcc8f1fccbcc2cb7",
+      "original-instrument/receipt.json": "b6712a33cdfd14e93a73a5b5533238a0784b8193e3048779dfd01e09ad62b549",
+      "original-instrument/tests.log": "8dc629348e104966f4883563efe3bf5f96c133c3d1c65ad4f760221390d6865e"
+    },
+    "owned_jobs": "All provisioning/instrument controllers terminal/reaped; both test basetemps inventoried and removed; installed proof venvs and official wheels retained for review. SDK/JDK/shared Gradle and queue owner files untouched.",
+    "remaining": [
+      "Independent dependency-only review before any publication",
+      "After review: archive truthful supplement evidence, refresh final manifest, genuine normal corrective commit (no rewriting34466), required committed4fd baseline terminal0",
+      "Fresh remote check, normal push/readback, actual future exact-head4-worker execution/union/timing; no source/native speed qualification until observed"
+    ],
+    "qualifications_issued": []
+  },
+  "bounded_independent_review": {
+    "schema": "van.independent-ci-documentary-dependency-review/1",
+    "state": "DEPENDENCY_ONLY_SUPPLEMENT_REVIEW_COMPLETE_NO_BLOCKING_FINDING",
+    "base": "34466d65da8bcce6ba7ee092edcda7f5fa025a79",
+    "reviewer": "Sol medium independent bounded read-only source/dependency review; root decisions only",
+    "source_identity": {
+      "supplement_owned_path": "tools/rebuild/requirements.lock",
+      "supplement_sha256": "95504e01ef04029f410b2b23dc7fff3e02d7e7327513388a3b065f1a87ce9941",
+      "source_archive_sha256": "992cec923169b6d3172980d58f59e6181db8e1fedd7f3deff2dc64850539165a",
+      "patch_sha256": "0598f0c8c7f7d79b5be7dc428f1043ff27df3725a2cd01817ab662864f21aa5e",
+      "archive_patch_current_pins_verified": true,
+      "all8_reviewed_ci_paths_unchanged": true,
+      "before": "before.json",
+      "after": [
+        "after.json",
+        "final-source-pins.json"
+      ],
+      "patch_has_only_one_owned_path": true
+    },
+    "blocking_findings": [],
+    "dependency_assessment": {
+      "only_new_pins": {
+        "anyio": "4.15.1",
+        "idna": "3.20"
+      },
+      "old_source_lines": "Every old source pin retained exactly as original byte prefix. Additions only one comment+two exact pins.",
+      "minimal_active_closure": "Actual anyio4.15.1 wheel METADATA requires idna>=2.8 plus typing_extensions>=4.16 for current Python; typing_extensions4.16 was already pinned. exceptiongroup applies onlyPython<3.11 and trio is optional extra, so neither added. Bothnew versions exactly match existing backendlock.",
+      "hash_integrity": "All14 actual official wheel files rehashed and matched preserved official PyPI TLS metadata digest records and exact wheel Name/Version. Every old ORIGINAL_HASHED lock line remains identical in PROPOSED_HASHED proof projection. No live network metadata fetch repeated; original proof metadata/provisioning script/receipts retained.",
+      "source_lock_format": "Existing source remains pin-only format; fresh proof installs used separately generated --require-hashes projections of the identical package specs. Source/projection comments differ benignly; no hash-format weakening or semantic pin difference.",
+      "installed_envs": "Existing original and fixed fresh proof venvs independently queried with isolated Python: exact source packages/versions apart from bootstrap pip. Narrow pip check exits0 both; no suite/install repeated."
+    },
+    "failure_to_pass_evidence": {
+      "artifact": "verified-evidence.json",
+      "source_and_cases": "Actual XML/receipts/log hashes verified; exact75 ordered testcase identities same in original and corrected run, all8 source/tests unchanged.",
+      "original": {
+        "terminal_exit": 1,
+        "tests": 75,
+        "passed": 73,
+        "failed": 2,
+        "errors": 0,
+        "skipped": 0,
+        "cause": "Actual real gateway fixture subprocess tests missing anyio.pytest_plugin under original documentary lock; both failure XML contain anyio import failure. Original failed logs/XML preserved."
+      },
+      "corrected": {
+        "terminal_exit": 0,
+        "tests": 75,
+        "passed": 75,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "isolated_installs": "Both original/corrected offline --no-index --require-hashes installs terminal0 with exact lock SHA receipts; artifactbytes and versions verified."
+    },
+    "no_weakening": "Previously reviewed CLI/helper/workflow/mirror/tests/doc8 SHA values unchanged. No assertion, skip, plugin guard, gate, trustedchecker, credential, authrecord or mutationcorpus change; only documentary dependency capability for existing real subprocess checks.",
+    "review_operations": {
+      "read_only": "No candidate source edit/commit/push/CI dispatch or native4worker execution. Existing proofenv metadata queries+pipcheck only; no full suites or installs repeated.",
+      "own_artifacts": "/workspace/van-ci-dependency-independent-review-20261101",
+      "reviewer_projection_correction": "Initial external assertion compared source and proofprojection commentbytes; corrected to exact package spec projection after confirming comment-only difference. Original externalscript and correctionmemo preserved; not a source finding."
+    },
+    "remaining": [
+      "Truthful final manifest refresh and genuine normal corrective commit without rewriting34466; required committed4fd baseline terminal0 still required.",
+      "Fresh remote check/normal push/readback and future exact published-head fourworker execution/full union/skips/timing evidence remain required.",
+      "No native4worker qualification, measured speedup, unit/gate/provider/device/release acceptance or waiver issued by dependency review."
+    ]
+  },
+  "raw_sha256": {
+    "docs/rebuild/rev118/receipts/raw/public-source-four-worker-documentary-dependency-20261101/dependency-proof/DEPENDENCY_SUPPLEMENT.patch": "0598f0c8c7f7d79b5be7dc428f1043ff27df3725a2cd01817ab662864f21aa5e",
+    "docs/rebuild/rev118/receipts/raw/public-source-four-worker-documentary-dependency-20261101/dependency-proof/HANDOFF.json": "6223b6a6b33522088e0e075d8f6b71a4e49a970ab42a3825c475846d4647ae67",
+    "docs/rebuild/rev118/receipts/raw/public-source-four-worker-documentary-dependency-20261101/dependency-proof/INITIAL_STATE.json": "3d3c7f0af4309c8c618ecd2865475c058022442119e4f636e966c6cfd6f57ca9",
+    "docs/rebuild/rev118/receipts/raw/public-source-four-worker-documentary-dependency-20261101/dependency-proof/OFFICIAL_ARTIFACT_DIGESTS.json": "cd1ca73c689a3ab1c7e036276ed2c78d79181bec349b10527ae34d3d79fe22bf",
+    "docs/rebuild/rev118/receipts/raw/public-source-four-worker-documentary-dependency-20261101/dependency-proof/ORIGINAL_HASHED.lock": "64a3c5932fc188de0316e615d90a44f84c4a9d8e752df19ec5963d90b4779c82",
+    "docs/rebuild/rev118/receipts/raw/public-source-four-worker-documentary-dependency-20261101/dependency-proof/ORIGINAL_PINS.lock": "506ccce6748b4ecfdfd4059b047c17a2783b34745607f86b888119c632056594",
+    "docs/rebuild/rev118/receipts/raw/public-source-four-worker-documentary-dependency-20261101/dependency-proof/PROPOSED_HASHED.lock": "6afd4e890b9ca3f522b2b3e096609f538d61bc7223e55f883d9bb6dcc8e1c3ae",
+    "docs/rebuild/rev118/receipts/raw/public-source-four-worker-documentary-dependency-20261101/dependency-proof/PROPOSED_PINS.lock": "449961403d22e29b1b4c9e181d0a4d0417c05a81f756533a74dc6cc1c75aa12a",
+    "docs/rebuild/rev118/receipts/raw/public-source-four-worker-documentary-dependency-20261101/dependency-proof/SOURCE_SUPPLEMENT.zip": "992cec923169b6d3172980d58f59e6181db8e1fedd7f3deff2dc64850539165a",
+    "docs/rebuild/rev118/receipts/raw/public-source-four-worker-documentary-dependency-20261101/dependency-proof/fixed-install-receipt.json": "4cea6c3287236c43b4ee89fd80bf2a56a65927ecf3d385699f23da713d1ee527",
+    "docs/rebuild/rev118/receipts/raw/public-source-four-worker-documentary-dependency-20261101/dependency-proof/fixed-install.log": "b46b92d27c7cb5e446c220e0909261f008db1e594fa055d3f65139e4e768658a",
+    "docs/rebuild/rev118/receipts/raw/public-source-four-worker-documentary-dependency-20261101/dependency-proof/fixed-instrument/owned-temp-inventory.json": "ec86286507484baeb00a75d4530d1717f5d60e213378409961e3577c9405ddaa",
+    "docs/rebuild/rev118/receipts/raw/public-source-four-worker-documentary-dependency-20261101/dependency-proof/fixed-instrument/receipt.json": "f4b990b7e6b6594ea35228925bb3ebd80bf9c4d2eea99cc0b15918c9a320d931",
+    "docs/rebuild/rev118/receipts/raw/public-source-four-worker-documentary-dependency-20261101/dependency-proof/fixed-instrument/storage-audit.json": "03b5b2afac2978cda8a845c9a6eec9e8d20b13abe2960e09fcc8f1fccbcc2cb7",
+    "docs/rebuild/rev118/receipts/raw/public-source-four-worker-documentary-dependency-20261101/dependency-proof/fixed-instrument/tests.log": "477030f3f062ee0d12704cbe79e31a4ac47acd6e8a1a68c80eaf4184e82ea043",
+    "docs/rebuild/rev118/receipts/raw/public-source-four-worker-documentary-dependency-20261101/dependency-proof/fixed-instrument/tests.xml": "dad61f8af020d1beed3efba8d7c6aef86f40023a1cbddcc121dda9142026570a",
+    "docs/rebuild/rev118/receipts/raw/public-source-four-worker-documentary-dependency-20261101/dependency-proof/hash-provisioning.log": "0c6d2c4b05679282f2f52adda407c0df9c0e79c701a27d43dfdd591fd128e638",
+    "docs/rebuild/rev118/receipts/raw/public-source-four-worker-documentary-dependency-20261101/dependency-proof/original-install-receipt.json": "4e66f666ef4ccd982ce289ce49378b3bd57d8d7c2b87d625d2d86a8bb4bb2d4a",
+    "docs/rebuild/rev118/receipts/raw/public-source-four-worker-documentary-dependency-20261101/dependency-proof/original-install.log": "98081f3a62b63fdd1816358319117963dc7b4e87bef1336026a96a0a5339f56f",
+    "docs/rebuild/rev118/receipts/raw/public-source-four-worker-documentary-dependency-20261101/dependency-proof/original-instrument/owned-temp-inventory.json": "758fa7d50146f20e7bd07b64ba90aa7154c34c852bb98e8e0bb3e34c0bf58f25",
+    "docs/rebuild/rev118/receipts/raw/public-source-four-worker-documentary-dependency-20261101/dependency-proof/original-instrument/receipt.json": "b6712a33cdfd14e93a73a5b5533238a0784b8193e3048779dfd01e09ad62b549",
+    "docs/rebuild/rev118/receipts/raw/public-source-four-worker-documentary-dependency-20261101/dependency-proof/original-instrument/storage-audit.json": "03b5b2afac2978cda8a845c9a6eec9e8d20b13abe2960e09fcc8f1fccbcc2cb7",
+    "docs/rebuild/rev118/receipts/raw/public-source-four-worker-documentary-dependency-20261101/dependency-proof/original-instrument/tests.log": "8dc629348e104966f4883563efe3bf5f96c133c3d1c65ad4f760221390d6865e",
+    "docs/rebuild/rev118/receipts/raw/public-source-four-worker-documentary-dependency-20261101/dependency-proof/original-instrument/tests.xml": "8102b499d81411e55d9d8d705c7fc92d4837e1ffc4a7839fd9e9480063bbc93b",
+    "docs/rebuild/rev118/receipts/raw/public-source-four-worker-documentary-dependency-20261101/dependency-proof/prepare_hashes.py.txt": "58ff86f3d2aa31141d99e235c19700a6e7191e047c85fd98d5400d696a9b82a4",
+    "docs/rebuild/rev118/receipts/raw/public-source-four-worker-documentary-dependency-20261101/dependency-proof/run_instrument.py.txt": "f50756980f70af178b87c27304fb92f138e3fe57cb217d19227e8a23b6b4ea93",
+    "docs/rebuild/rev118/receipts/raw/public-source-four-worker-documentary-dependency-20261101/dependency-proof/wheel-download.log": "65f3be9cc7c58752287830eabc1ef22056da3288ec3fd21f91d32166756b77fd",
+    "docs/rebuild/rev118/receipts/raw/public-source-four-worker-documentary-dependency-20261101/independent-review/after.json": "d8c27f207c2ae13a691b703bbcd7ffe19b4faf04ab7da4245432ff12c256ea55",
+    "docs/rebuild/rev118/receipts/raw/public-source-four-worker-documentary-dependency-20261101/independent-review/before.json": "d8c27f207c2ae13a691b703bbcd7ffe19b4faf04ab7da4245432ff12c256ea55",
+    "docs/rebuild/rev118/receipts/raw/public-source-four-worker-documentary-dependency-20261101/independent-review/final-source-pins.json": "d8c27f207c2ae13a691b703bbcd7ffe19b4faf04ab7da4245432ff12c256ea55",
+    "docs/rebuild/rev118/receipts/raw/public-source-four-worker-documentary-dependency-20261101/independent-review/fixed-pip-check.log": "9261363b733079a641c2e4cc9bc46ffa1d8336945a87f807b6cf68847dbc9b09",
+    "docs/rebuild/rev118/receipts/raw/public-source-four-worker-documentary-dependency-20261101/independent-review/original-pip-check.log": "9261363b733079a641c2e4cc9bc46ffa1d8336945a87f807b6cf68847dbc9b09",
+    "docs/rebuild/rev118/receipts/raw/public-source-four-worker-documentary-dependency-20261101/independent-review/probe-correction.json": "781fc983116eba29c55324e49a236a4c3e2a297f714add953e449172fc9c901c",
+    "docs/rebuild/rev118/receipts/raw/public-source-four-worker-documentary-dependency-20261101/independent-review/review-evidence-before-comment-projection-correction.py.txt": "eab0652916530f002dbe3c45777c756b4ebf432235fbf39130840fc9dc10c9a4",
+    "docs/rebuild/rev118/receipts/raw/public-source-four-worker-documentary-dependency-20261101/independent-review/review-evidence.log": "270d79b8d5a91f899127406d65ca35b0d72ff9c74e78c9c348487aafd19c65b2",
+    "docs/rebuild/rev118/receipts/raw/public-source-four-worker-documentary-dependency-20261101/independent-review/review-evidence.py.txt": "384a2f1462747a5850e4344d4469005a1c4a6e068ff0378598fdcb941c9feff7",
+    "docs/rebuild/rev118/receipts/raw/public-source-four-worker-documentary-dependency-20261101/independent-review/review.json": "82429e739145fdc8eb531bdc77be72c26b7338ca6e78ed1be4bbc9e82cb2c421",
+    "docs/rebuild/rev118/receipts/raw/public-source-four-worker-documentary-dependency-20261101/independent-review/verified-evidence.json": "26799f0a06176c6fd8cba6409fb023f6803a41cfca3d40ad23710d52d93eb935",
+    "docs/rebuild/rev118/receipts/raw/public-source-four-worker-documentary-dependency-20261101/final-guards/tests.xml": "a90bf8573fad1af329e6150c91ff5c134de76cc87b78023282d7cf50155b8af7",
+    "docs/rebuild/rev118/receipts/raw/public-source-four-worker-documentary-dependency-20261101/final-guards/storage-audit.json": "03b5b2afac2978cda8a845c9a6eec9e8d20b13abe2960e09fcc8f1fccbcc2cb7",
+    "docs/rebuild/rev118/receipts/raw/public-source-four-worker-documentary-dependency-20261101/final-guards/receipt.json": "bb8be3a147aefb495f286a8e1439b56a281864ed595b9dbd141475edb4f729b8",
+    "docs/rebuild/rev118/receipts/raw/public-source-four-worker-documentary-dependency-20261101/final-guards/tests.log": "3a75ee8aa2044d17cb7d7092a9647d36a431ab8f0a255b66da696f0a2bac5565",
+    "docs/rebuild/rev118/receipts/raw/public-source-four-worker-documentary-dependency-20261101/final-guards/workmap.log": "6e20f8f2172ee5c1d1fce0a0c754de3b77fe5a107aa568cdf51b6c0797a54037",
+    "docs/rebuild/rev118/receipts/raw/public-source-four-worker-documentary-dependency-20261101/final-guards/mutation.log": "131959a4576e7b5a8ebd678f508cca5c1107c9e4cc15c27d3c22121e5ac1b299",
+    "docs/rebuild/rev118/receipts/raw/public-source-four-worker-documentary-dependency-20261101/final-guards/consolidation.log": "d87b8fe5f7b2b4ca7312b9ba93c4e1aa24ae2301f775aa6f915d81572aec7870"
+  },
+  "historical_executable_path_mapping": [
+    {
+      "historical_path": "/workspace/van-ci-shards-documentary-dependency-20261101/prepare_hashes.py",
+      "archived_path": "docs/rebuild/rev118/receipts/raw/public-source-four-worker-documentary-dependency-20261101/dependency-proof/prepare_hashes.py.txt",
+      "reason": "Historical executable proof stored non-importably; commands retained as executed."
+    },
+    {
+      "historical_path": "/workspace/van-ci-shards-documentary-dependency-20261101/run_instrument.py",
+      "archived_path": "docs/rebuild/rev118/receipts/raw/public-source-four-worker-documentary-dependency-20261101/dependency-proof/run_instrument.py.txt",
+      "reason": "Historical executable proof stored non-importably; commands retained as executed."
+    },
+    {
+      "historical_path": "/workspace/van-ci-dependency-independent-review-20261101/review-evidence-before-comment-projection-correction.py",
+      "archived_path": "docs/rebuild/rev118/receipts/raw/public-source-four-worker-documentary-dependency-20261101/independent-review/review-evidence-before-comment-projection-correction.py.txt",
+      "reason": "Historical executable proof stored non-importably; commands retained as executed."
+    },
+    {
+      "historical_path": "/workspace/van-ci-dependency-independent-review-20261101/review-evidence.py",
+      "archived_path": "docs/rebuild/rev118/receipts/raw/public-source-four-worker-documentary-dependency-20261101/independent-review/review-evidence.py.txt",
+      "reason": "Historical executable proof stored non-importably; commands retained as executed."
+    }
+  ],
+  "source_effect": "Only original verification lock extends by exact anyio4.15.1/idna3.20 closure. Application/tests/workflows and original8 reviewed source pins unchanged.",
+  "failure_history": "Actual original hashed fresh runtime75cases=73pass2missing-anyiofail; fixed identical ordered75cases=75pass0fail/error/skip. Original failures remain failed; no skip/plugin fallback. Both offline require-hashes proof installs used official verified14wheel hashes; source retains original pin-only lock format.",
+  "orchestration_history": "34466 genuine hook commit completed before final manifest receipt was read correctly; premature JSON parse is preserved. That manifest later completed terminal0/12766files0mismatch; this supplement needs newly refreshed manifest and committed4fd baseline verification before push. Future dependent stages execute sequentially/check=True.",
+  "remaining": "Native exact-head four-worker actual execution/phase/collection union and measured runtime still unqualified. Genuine new normal corrective commit, terminal4fd baseline verification, fresh remote and normal push/readback remain required. Two native trustedchecker/DDS-key prerequisites unwaived; no native/unit/production/device/signing acceptance.",
+  "final_narrow_guards": {
+    "owned_audited_cases": 18,
+    "failed": 0,
+    "errors": 0,
+    "skipped": 0,
+    "scope": "Exact historical private-core topology plus existing CI workflow/mirror/DDS contracts and new required-gate scope contract; original9 reviewed inputs unchanged",
+    "canonical_checks": {
+      "workmap": 0,
+      "consolidation": 0,
+      "mutation_registry": 0
+    },
+    "mutation_note": "374 identities/383 edits/0 findings is consistency only; no new mutation execution inferred."
+  }
+}

@@ -1,0 +1,220 @@
+{
+  "only_added_pins": {
+    "idna": "3.20",
+    "anyio": "4.15.1"
+  },
+  "all_original_pin_and_proofhash_lines_retained": true,
+  "all14local_wheels_match_preserved_official_tls_metadata_digest_records": true,
+  "wheel_details": {
+    "anyio": {
+      "version": "4.15.1",
+      "sha256": "6152fdbbf9a77fdec97731721bebf7c4c44f7c29b424b0065826173efc7ed101",
+      "requires_dist": [
+        "exceptiongroup>=1.0.2; python_version < \"3.11\"",
+        "idna>=2.8",
+        "typing_extensions>=4.16.0; python_version < \"3.15\"",
+        "trio>=0.32.0; extra == \"trio\""
+      ]
+    },
+    "attrs": {
+      "version": "26.1.0",
+      "sha256": "c647aa4a12dfbad9333ca4e71fe62ddc36f4e63b2d260a37a8b83d2f043ac309",
+      "requires_dist": []
+    },
+    "idna": {
+      "version": "3.20",
+      "sha256": "ab7ae7122974553370f0bdb919e1a960b2cd1bc1ef0276416d896db81c14582c",
+      "requires_dist": [
+        "ruff >= 0.16.0 ; extra == \"all\"",
+        "mypy >= 1.11.2 ; extra == \"all\"",
+        "ty >= 0.0.37 ; extra == \"all\"",
+        "pytest >= 8.3.2 ; extra == \"all\"",
+        "hypothesis >= 6.141.1 ; extra == \"all\"",
+        "coverage >= 7.10.0 ; extra == \"all\""
+      ]
+    },
+    "iniconfig": {
+      "version": "2.3.0",
+      "sha256": "f631c04d2c48c52b84d0d0549c99ff3859c98df65b3101406327ecc7d53fbf12",
+      "requires_dist": []
+    },
+    "jsonschema": {
+      "version": "4.26.0",
+      "sha256": "d489f15263b8d200f8387e64b4c3a75f06629559fb73deb8fdfb525f2dab50ce",
+      "requires_dist": [
+        "attrs>=22.2.0",
+        "jsonschema-specifications>=2023.03.6",
+        "referencing>=0.28.4",
+        "rpds-py>=0.25.0",
+        "fqdn; extra == 'format'",
+        "idna; extra == 'format'",
+        "isoduration; extra == 'format'",
+        "jsonpointer>1.13; extra == 'format'",
+        "rfc3339-validator; extra == 'format'",
+        "rfc3987; extra == 'format'",
+        "uri-template; extra == 'format'",
+        "webcolors>=1.11; extra == 'format'",
+        "fqdn; extra == 'format-nongpl'",
+        "idna; extra == 'format-nongpl'",
+        "isoduration; extra == 'format-nongpl'",
+        "jsonpointer>1.13; extra == 'format-nongpl'",
+        "rfc3339-validator; extra == 'format-nongpl'",
+        "rfc3986-validator>0.1.0; extra == 'format-nongpl'",
+        "rfc3987-syntax>=1.1.0; extra == 'format-nongpl'",
+        "uri-template; extra == 'format-nongpl'",
+        "webcolors>=24.6.0; extra == 'format-nongpl'"
+      ]
+    },
+    "jsonschema-specifications": {
+      "version": "2025.9.1",
+      "sha256": "98802fee3a11ee76ecaca44429fda8a41bff98b00a0f2838151b113f210cc6fe",
+      "requires_dist": [
+        "referencing>=0.31.0"
+      ]
+    },
+    "packaging": {
+      "version": "26.3",
+      "sha256": "d7193f7c8e4e93f444fde0262bf90af30e16fa0ad0ad44cb553c87339b23cd1c",
+      "requires_dist": []
+    },
+    "pluggy": {
+      "version": "1.6.0",
+      "sha256": "e920276dd6813095e9377c0bc5566d94c932c33b27a3e3945d8389c374dd4746",
+      "requires_dist": [
+        "pre-commit; extra == \"dev\"",
+        "tox; extra == \"dev\"",
+        "pytest; extra == \"testing\"",
+        "pytest-benchmark; extra == \"testing\"",
+        "coverage; extra == \"testing\""
+      ]
+    },
+    "pygments": {
+      "version": "2.21.0",
+      "sha256": "2363c69b61c4a97c838da3b130dcd6468f4848992b21a82f2a63ec34377137d9",
+      "requires_dist": [
+        "colorama>=0.4.6; extra == 'windows-terminal'"
+      ]
+    },
+    "pytest": {
+      "version": "9.1.1",
+      "sha256": "37a86b45efb9a47a61a36449063e8e18d0cab3161329fc099eb21783169c4f0c",
+      "requires_dist": [
+        "colorama>=0.4; sys_platform == \"win32\"",
+        "exceptiongroup>=1; python_version < \"3.11\"",
+        "iniconfig>=1.0.1",
+        "packaging>=22",
+        "pluggy<2,>=1.5",
+        "pygments>=2.7.2",
+        "tomli>=1; python_version < \"3.11\"",
+        "argcomplete; extra == \"dev\"",
+        "attrs>=19.2; extra == \"dev\"",
+        "hypothesis>=3.56; extra == \"dev\"",
+        "mock; extra == \"dev\"",
+        "requests; extra == \"dev\"",
+        "setuptools; extra == \"dev\"",
+        "xmlschema; extra == \"dev\""
+      ]
+    },
+    "pytest-asyncio": {
+      "version": "1.4.0",
+      "sha256": "933ca923a23075a87fb7070c0ec272a6848489824d887c85c812670932835aa1",
+      "requires_dist": [
+        "backports-asyncio-runner<2,>=1.1; python_version < \"3.11\"",
+        "pytest<10,>=8.4",
+        "typing-extensions>=4.12; python_version < \"3.13\"",
+        "sphinx>=5.3; extra == \"docs\"",
+        "sphinx-rtd-theme>=1; extra == \"docs\"",
+        "sphinx-tabs>=3.5; extra == \"docs\"",
+        "coverage>=6.2; extra == \"testing\"",
+        "hypothesis>=5.7.1; extra == \"testing\""
+      ]
+    },
+    "referencing": {
+      "version": "0.37.0",
+      "sha256": "381329a9f99628c9069361716891d34ad94af76e461dcb0335825aecc7692231",
+      "requires_dist": [
+        "attrs>=22.2.0",
+        "rpds-py>=0.7.0",
+        "typing-extensions>=4.4.0; python_version < '3.13'"
+      ]
+    },
+    "rpds-py": {
+      "version": "2026.6.3",
+      "sha256": "ecabd69db66de867690f9797f2f8fa27ba501bbc24540cbdbdc649cd15888ba6",
+      "requires_dist": []
+    },
+    "typing-extensions": {
+      "version": "4.16.0",
+      "sha256": "481caa481374e813c1b176ada14e97f1f67a4539ce9cfeb3f350d78d6370c2e8",
+      "requires_dist": []
+    }
+  },
+  "runtime": {
+    "original": {
+      "installed_exact_lock_except_bootstrap_pip": true,
+      "pip_check_exit": 0,
+      "packages": {
+        "pytest-asyncio": "1.4.0",
+        "jsonschema-specifications": "2025.9.1",
+        "typing-extensions": "4.16.0",
+        "rpds-py": "2026.6.3",
+        "pygments": "2.21.0",
+        "attrs": "26.1.0",
+        "pluggy": "1.6.0",
+        "referencing": "0.37.0",
+        "iniconfig": "2.3.0",
+        "packaging": "26.3",
+        "jsonschema": "4.26.0",
+        "pytest": "9.1.1"
+      }
+    },
+    "fixed": {
+      "installed_exact_lock_except_bootstrap_pip": true,
+      "pip_check_exit": 0,
+      "packages": {
+        "pytest-asyncio": "1.4.0",
+        "jsonschema-specifications": "2025.9.1",
+        "typing-extensions": "4.16.0",
+        "rpds-py": "2026.6.3",
+        "pygments": "2.21.0",
+        "idna": "3.20",
+        "attrs": "26.1.0",
+        "anyio": "4.15.1",
+        "pluggy": "1.6.0",
+        "referencing": "0.37.0",
+        "iniconfig": "2.3.0",
+        "packaging": "26.3",
+        "jsonschema": "4.26.0",
+        "pytest": "9.1.1"
+      }
+    }
+  },
+  "actual_failure_to_pass": {
+    "original": {
+      "total": 75,
+      "passed": 73,
+      "failed": 2,
+      "errors": 0,
+      "skipped": 0,
+      "terminal_exit": 1,
+      "failure_ids": [
+        "tests.rebuild.test_public_source_shards::test_actual_pytest_plugin_records_full_collection_disjoint_execution_and_teardown_error",
+        "tests.rebuild.test_public_source_shards::test_actual_collect_refuses_untracked_and_ignored_inputs_but_accepts_inert_outputs"
+      ],
+      "source8pins_unchanged": true
+    },
+    "fixed": {
+      "total": 75,
+      "passed": 75,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "terminal_exit": 0,
+      "failure_ids": [],
+      "source8pins_unchanged": true
+    }
+  },
+  "identical75ordered_case_ids": true,
+  "all8ci_sourcepins_plus_lock_unchanged_during_review": true,
+  "no_fullsuite_or_install_repeated": true
+}

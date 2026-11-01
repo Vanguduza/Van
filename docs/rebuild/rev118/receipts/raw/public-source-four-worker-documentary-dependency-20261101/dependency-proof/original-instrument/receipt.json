@@ -1,0 +1,126 @@
+{
+  "started_at_utc": "2026-11-01T11:15:53.205466+00:00",
+  "mode": "original",
+  "preflight": {
+    "path": "/tmp/van-recovery-ci-shards-documentary-original-20261101",
+    "free_bytes_before": 4703125504,
+    "free_inodes_before": 2239948,
+    "minimum_free_bytes": 4294967296,
+    "no_preexisting_directory": true
+  },
+  "source_parent": "34466d65da8bcce6ba7ee092edcda7f5fa025a79",
+  "before_sha256": {
+    ".github/workflows/van-ci.yml": "d01072bb9580f97191c42887f66edb0bc4b67e52790c971e548987f079e54292",
+    "tools/ci/github-actions-ci.yml": "d01072bb9580f97191c42887f66edb0bc4b67e52790c971e548987f079e54292",
+    "tools/rebuild/backend_public_source.py": "36d743ea8489c39b67cda800b0b1016cb32b0b3df779a5714d6d5288b06cac0b",
+    "tools/rebuild/public_source_shards.py": "cbab1119dfbe47c7d7a27b45590c009559d60d719a6483c761f37b48ed8b4973",
+    "tools/rebuild/backend_public_source_costs.json": "87bea238bd0bbd85bc75bf5a3f1271284d2da7d8833a60ef2805e5f9220f1779",
+    "tests/rebuild/test_public_source_shards.py": "ae895b4887587e8df0a4ed9d687b7b9139ec3b6975b107af2933cd8cb4cf75fc",
+    "tests/contracts/test_ci_public_source_shards.py": "5d80f268b9af8b9827e025af3c9fd2f37edbd110301be6257568190fcb5eb87a",
+    "docs/rebuild/rev118/ci/PUBLIC_SOURCE_SHARDS_20261101.md": "9f81c330dff73bf9124f8808ea46c0b9191ba6de7fc083cc57908e8ce3331177",
+    "tools/rebuild/requirements.lock": "506ccce6748b4ecfdfd4059b047c17a2783b34745607f86b888119c632056594"
+  },
+  "runtime": {
+    "packages": [
+      [
+        "Pygments",
+        "2.21.0"
+      ],
+      [
+        "attrs",
+        "26.1.0"
+      ],
+      [
+        "iniconfig",
+        "2.3.0"
+      ],
+      [
+        "jsonschema",
+        "4.26.0"
+      ],
+      [
+        "jsonschema-specifications",
+        "2025.9.1"
+      ],
+      [
+        "packaging",
+        "26.3"
+      ],
+      [
+        "pip",
+        "25.0.1"
+      ],
+      [
+        "pluggy",
+        "1.6.0"
+      ],
+      [
+        "pytest",
+        "9.1.1"
+      ],
+      [
+        "pytest-asyncio",
+        "1.4.0"
+      ],
+      [
+        "referencing",
+        "0.37.0"
+      ],
+      [
+        "rpds-py",
+        "2026.6.3"
+      ],
+      [
+        "typing_extensions",
+        "4.16.0"
+      ]
+    ],
+    "pytest_entrypoints": [
+      "pytest_asyncio.plugin"
+    ]
+  },
+  "command": [
+    "/workspace/van-ci-shards-documentary-dependency-20261101/original-venv/bin/python",
+    "tools/rebuild/source_storage_audit.py",
+    "--report",
+    "/workspace/van-ci-shards-documentary-dependency-20261101/original-instrument/storage-audit.json",
+    "tests/rebuild/test_public_source_shards.py",
+    "tests/rebuild/test_backend_public_source.py",
+    "tests/rebuild/test_source_storage_audit.py",
+    "--basetemp=/tmp/van-recovery-ci-shards-documentary-original-20261101",
+    "--junitxml=/workspace/van-ci-shards-documentary-dependency-20261101/original-instrument/tests.xml",
+    "-q"
+  ],
+  "exit": 1,
+  "cases": 75,
+  "failures": [
+    "tests.rebuild.test_public_source_shards::test_actual_pytest_plugin_records_full_collection_disjoint_execution_and_teardown_error",
+    "tests.rebuild.test_public_source_shards::test_actual_collect_refuses_untracked_and_ignored_inputs_but_accepts_inert_outputs"
+  ],
+  "errors": [],
+  "skips": [],
+  "passed": 73,
+  "after_sha256": {
+    ".github/workflows/van-ci.yml": "d01072bb9580f97191c42887f66edb0bc4b67e52790c971e548987f079e54292",
+    "tools/ci/github-actions-ci.yml": "d01072bb9580f97191c42887f66edb0bc4b67e52790c971e548987f079e54292",
+    "tools/rebuild/backend_public_source.py": "36d743ea8489c39b67cda800b0b1016cb32b0b3df779a5714d6d5288b06cac0b",
+    "tools/rebuild/public_source_shards.py": "cbab1119dfbe47c7d7a27b45590c009559d60d719a6483c761f37b48ed8b4973",
+    "tools/rebuild/backend_public_source_costs.json": "87bea238bd0bbd85bc75bf5a3f1271284d2da7d8833a60ef2805e5f9220f1779",
+    "tests/rebuild/test_public_source_shards.py": "ae895b4887587e8df0a4ed9d687b7b9139ec3b6975b107af2933cd8cb4cf75fc",
+    "tests/contracts/test_ci_public_source_shards.py": "5d80f268b9af8b9827e025af3c9fd2f37edbd110301be6257568190fcb5eb87a",
+    "docs/rebuild/rev118/ci/PUBLIC_SOURCE_SHARDS_20261101.md": "9f81c330dff73bf9124f8808ea46c0b9191ba6de7fc083cc57908e8ce3331177",
+    "tools/rebuild/requirements.lock": "506ccce6748b4ecfdfd4059b047c17a2783b34745607f86b888119c632056594"
+  },
+  "source_inputs_unchanged": true,
+  "cleanup": {
+    "path": "/tmp/van-recovery-ci-shards-documentary-original-20261101",
+    "files": 2226,
+    "inventory": "/workspace/van-ci-shards-documentary-dependency-20261101/original-instrument/owned-temp-inventory.json",
+    "inventory_sha256": "758fa7d50146f20e7bd07b64ba90aa7154c34c852bb98e8e0bb3e34c0bf58f25",
+    "free_bytes_before_cleanup": 4599631872,
+    "free_bytes_after_cleanup": 4703125504,
+    "free_inodes_after": 2239948,
+    "independently_absent": true
+  },
+  "completed_at_utc": "2026-11-01T11:16:02.086041+00:00"
+}

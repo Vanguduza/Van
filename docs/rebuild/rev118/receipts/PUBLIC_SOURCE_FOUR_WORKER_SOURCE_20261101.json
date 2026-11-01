@@ -377,5 +377,7 @@
     "skipped": 0,
     "audit_events": 0,
     "scope": "New historical source snapshots remain non-importable evidence; no active protected-store implementation changed."
-  }
+  },
+  "documentary_dependency_supplement": "docs/rebuild/rev118/receipts/PUBLIC_SOURCE_FOUR_WORKER_DOCUMENTARY_DEPENDENCY_20261101.json",
+  "documentary_dependency_note": "Original92 focused source/workflow proof used backend lock; independent review then exposed documentary-only runtime missing anyio. Actual fresh original73pass2fail retained; independent reviewed exactanyio/idna closure fixed identical75 cases under hashed fresh runtime. Original92 evidence not falsely relabelled documentary qualification."
 }

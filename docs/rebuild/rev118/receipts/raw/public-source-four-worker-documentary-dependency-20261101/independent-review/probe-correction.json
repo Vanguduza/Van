@@ -1,0 +1,1 @@
+{"first_probe":"ASSERTION_REFUSED comparing proof projection comments byte-for-byte","cause":"Source and proposed proof pin projection differ only in comments/blank line, while all package name/version specs agree. Corrected reviewer comparison to exact spec projection; source unchanged.","production_finding":false}

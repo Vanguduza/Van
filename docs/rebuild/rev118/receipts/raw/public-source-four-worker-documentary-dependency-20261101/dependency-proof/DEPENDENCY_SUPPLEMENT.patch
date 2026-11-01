@@ -1,0 +1,11 @@
+diff --git a/tools/rebuild/requirements.lock b/tools/rebuild/requirements.lock
+index aba097b5..691c0cfa 100644
+--- a/tools/rebuild/requirements.lock
++++ b/tools/rebuild/requirements.lock
+@@ -11,3 +11,6 @@ jsonschema-specifications==2025.9.1
+ referencing==0.37.0
+ rpds-py==2026.6.3
+ typing-extensions==4.16.0
++# Native gateway-plugin parity for real source-instrument subprocess fixtures.
++anyio==4.15.1
++idna==3.20

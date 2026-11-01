@@ -1,0 +1,65 @@
+{
+  "schema": "van.independent-ci-documentary-dependency-review/1",
+  "state": "DEPENDENCY_ONLY_SUPPLEMENT_REVIEW_COMPLETE_NO_BLOCKING_FINDING",
+  "base": "34466d65da8bcce6ba7ee092edcda7f5fa025a79",
+  "reviewer": "Sol medium independent bounded read-only source/dependency review; root decisions only",
+  "source_identity": {
+    "supplement_owned_path": "tools/rebuild/requirements.lock",
+    "supplement_sha256": "95504e01ef04029f410b2b23dc7fff3e02d7e7327513388a3b065f1a87ce9941",
+    "source_archive_sha256": "992cec923169b6d3172980d58f59e6181db8e1fedd7f3deff2dc64850539165a",
+    "patch_sha256": "0598f0c8c7f7d79b5be7dc428f1043ff27df3725a2cd01817ab662864f21aa5e",
+    "archive_patch_current_pins_verified": true,
+    "all8_reviewed_ci_paths_unchanged": true,
+    "before": "before.json",
+    "after": [
+      "after.json",
+      "final-source-pins.json"
+    ],
+    "patch_has_only_one_owned_path": true
+  },
+  "blocking_findings": [],
+  "dependency_assessment": {
+    "only_new_pins": {
+      "anyio": "4.15.1",
+      "idna": "3.20"
+    },
+    "old_source_lines": "Every old source pin retained exactly as original byte prefix. Additions only one comment+two exact pins.",
+    "minimal_active_closure": "Actual anyio4.15.1 wheel METADATA requires idna>=2.8 plus typing_extensions>=4.16 for current Python; typing_extensions4.16 was already pinned. exceptiongroup applies onlyPython<3.11 and trio is optional extra, so neither added. Bothnew versions exactly match existing backendlock.",
+    "hash_integrity": "All14 actual official wheel files rehashed and matched preserved official PyPI TLS metadata digest records and exact wheel Name/Version. Every old ORIGINAL_HASHED lock line remains identical in PROPOSED_HASHED proof projection. No live network metadata fetch repeated; original proof metadata/provisioning script/receipts retained.",
+    "source_lock_format": "Existing source remains pin-only format; fresh proof installs used separately generated --require-hashes projections of the identical package specs. Source/projection comments differ benignly; no hash-format weakening or semantic pin difference.",
+    "installed_envs": "Existing original and fixed fresh proof venvs independently queried with isolated Python: exact source packages/versions apart from bootstrap pip. Narrow pip check exits0 both; no suite/install repeated."
+  },
+  "failure_to_pass_evidence": {
+    "artifact": "verified-evidence.json",
+    "source_and_cases": "Actual XML/receipts/log hashes verified; exact75 ordered testcase identities same in original and corrected run, all8 source/tests unchanged.",
+    "original": {
+      "terminal_exit": 1,
+      "tests": 75,
+      "passed": 73,
+      "failed": 2,
+      "errors": 0,
+      "skipped": 0,
+      "cause": "Actual real gateway fixture subprocess tests missing anyio.pytest_plugin under original documentary lock; both failure XML contain anyio import failure. Original failed logs/XML preserved."
+    },
+    "corrected": {
+      "terminal_exit": 0,
+      "tests": 75,
+      "passed": 75,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "isolated_installs": "Both original/corrected offline --no-index --require-hashes installs terminal0 with exact lock SHA receipts; artifactbytes and versions verified."
+  },
+  "no_weakening": "Previously reviewed CLI/helper/workflow/mirror/tests/doc8 SHA values unchanged. No assertion, skip, plugin guard, gate, trustedchecker, credential, authrecord or mutationcorpus change; only documentary dependency capability for existing real subprocess checks.",
+  "review_operations": {
+    "read_only": "No candidate source edit/commit/push/CI dispatch or native4worker execution. Existing proofenv metadata queries+pipcheck only; no full suites or installs repeated.",
+    "own_artifacts": "/workspace/van-ci-dependency-independent-review-20261101",
+    "reviewer_projection_correction": "Initial external assertion compared source and proofprojection commentbytes; corrected to exact package spec projection after confirming comment-only difference. Original externalscript and correctionmemo preserved; not a source finding."
+  },
+  "remaining": [
+    "Truthful final manifest refresh and genuine normal corrective commit without rewriting34466; required committed4fd baseline terminal0 still required.",
+    "Fresh remote check/normal push/readback and future exact published-head fourworker execution/full union/skips/timing evidence remain required.",
+    "No native4worker qualification, measured speedup, unit/gate/provider/device/release acceptance or waiver issued by dependency review."
+  ]
+}

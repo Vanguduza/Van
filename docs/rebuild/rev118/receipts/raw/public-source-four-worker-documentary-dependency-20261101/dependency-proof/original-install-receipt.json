@@ -1,0 +1,19 @@
+{
+  "command": [
+    "/workspace/van-ci-shards-documentary-dependency-20261101/original-venv/bin/python",
+    "-m",
+    "pip",
+    "install",
+    "--disable-pip-version-check",
+    "--no-cache-dir",
+    "--no-index",
+    "--find-links",
+    "/workspace/van-ci-shards-documentary-dependency-20261101/wheels",
+    "--require-hashes",
+    "-r",
+    "/workspace/van-ci-shards-documentary-dependency-20261101/ORIGINAL_HASHED.lock"
+  ],
+  "exit": 0,
+  "lock_sha256": "64a3c5932fc188de0316e615d90a44f84c4a9d8e752df19ec5963d90b4779c82",
+  "fresh_venv": "/workspace/van-ci-shards-documentary-dependency-20261101/original-venv"
+}
