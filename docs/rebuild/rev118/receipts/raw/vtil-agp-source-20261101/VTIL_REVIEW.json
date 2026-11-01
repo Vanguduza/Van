@@ -1,0 +1,75 @@
+{
+  "disposition": "NO_BLOCKING_FINDING_IN_BOUNDED_VTIL_R2_RECHECK",
+  "resolved": "VTIL-SOURCE-REVIEW01",
+  "pins_before": {
+    "tools/rebuild/canonical_source_audit.py": "a4ae760343de72e5f4b1147c2a76a83970ff5584605affc8725ef0bf71e84551",
+    "tests/rebuild/test_canonical_source_audit.py": "9a9a067a3419a91302968b0870b5145b1f04487378bce39565aacd35be333bd1",
+    ".github/workflows/van-ci.yml": "c2522db0b7889fcab76d190c9236604596cbc323aed61605ebc3302cbc72eece",
+    "tools/ci/github-actions-ci.yml": "c2522db0b7889fcab76d190c9236604596cbc323aed61605ebc3302cbc72eece"
+  },
+  "pins_after": {
+    "tools/rebuild/canonical_source_audit.py": "a4ae760343de72e5f4b1147c2a76a83970ff5584605affc8725ef0bf71e84551",
+    "tests/rebuild/test_canonical_source_audit.py": "9a9a067a3419a91302968b0870b5145b1f04487378bce39565aacd35be333bd1",
+    ".github/workflows/van-ci.yml": "c2522db0b7889fcab76d190c9236604596cbc323aed61605ebc3302cbc72eece",
+    "tools/ci/github-actions-ci.yml": "c2522db0b7889fcab76d190c9236604596cbc323aed61605ebc3302cbc72eece"
+  },
+  "full_patch_sha256": "dc5e1e4a5ed6bfd32aebe295c243d6645184da67d1de804b9e9dab9feec1fba9",
+  "r2_delta_sha256": "745a556cdb8eb4169a1114728a4d7596bdffb687ee3296e6626a1ea130cc89a5",
+  "archive_sha256": "a904b2aabc3d9fbf77f703de78e0d1b0c89ad6eb873586ab0fca5be7c2851cf7",
+  "actual_preload_recheck": {
+    "same_prior_payload": true,
+    "refused": "unqualified Node executable/search/cache inputs",
+    "Node_invocations": [],
+    "original_test_not_invoked": true,
+    "inherited_preload_retained_not_sanitized": true
+  },
+  "actual_controlled_baseline": "Actual producer on pinnedreadonlyDDS+Node24.19 records exactexplicit4inputs and currentfive-source SHA/pinned64d6 blobs; controlled SOURCE fixture, not inheritedplatform/hostedqualification.",
+  "archived_foreign_reader": "Safeproducer accepted while actualreader has hostileOPTIONS/PATH/cache/enabledcache values, with allNode subprocesscalls forbidden; producerrecordunchanged and readerenvuntouched.",
+  "tampered_producer_refused": [
+    "policy",
+    "options",
+    "cache",
+    "missing-key"
+  ],
+  "original_resolver_tests": [
+    {
+      "cwd": "/workspace/van-lanes-20261101/vtil-source-owner",
+      "original_cases": 2,
+      "exit": 0,
+      "controlled_fixture_inputs": {
+        "NODE_OPTIONS": "",
+        "NODE_PATH": "",
+        "NODE_COMPILE_CACHE": "",
+        "NODE_DISABLE_COMPILE_CACHE": "1"
+      }
+    },
+    {
+      "cwd": "/workspace/van-lanes-20261101/vtil-source-owner/backend",
+      "original_cases": 2,
+      "exit": 0,
+      "controlled_fixture_inputs": {
+        "NODE_OPTIONS": "",
+        "NODE_PATH": "",
+        "NODE_COMPILE_CACHE": "",
+        "NODE_DISABLE_COMPILE_CACHE": "1"
+      }
+    }
+  ],
+  "author124terminal_verified": true,
+  "scope_preservation": "Published055 perfilepreimages verified. Only privateDDS DIAL_REPO+disabledcache env declarations; alloldjobs/topfields/gates/mirror/oldspecialnode skips/staticVanowner preserved. Original VTIL tests and DDS product/runtimefiles unchanged. No override clearing or auth mutation.",
+  "actual_DDS_five_bytes_before_after": {
+    "agent-system/orchestration/engineering-resource-resolver.mjs": "6d20c98daf2f3390de99bb6200b4eacf2a8493b7e85992cf80cde7f4a103e36e",
+    "agent-system/orchestration/engineering-resource-registry.mjs": "fd89fe548a1e072edb85ce260a7495224304eed1cf592280b7488e3a8b8a5d72",
+    "agent-system/orchestration/skill-resolver.mjs": "020f0270249d0b8197c9c22817c00743f2aaf2b8af45944c975bee5904b4fdce",
+    "agent-system/orchestration/skill-registry.mjs": "0608f6944bac4257318e9060633fd3a4fb2f87199232668520b59129bd5a8da0",
+    "agent-system/orchestration/state-store.mjs": "73f972e1749c30905d0c9c707ada5055bda3bd0ec960bf341df60f88d0741f18"
+  },
+  "cleanup": "Allcreatedownedtinypytest+resolvermirrortrees removed; no actualDDS writes.",
+  "limits": [
+    "No NODE_PATH exploit claimed; inheritedlocalNODE_PATH remainsBLOCKED, no platformqualification.",
+    "Explicit per-child cleanfourvalue fixtures prove SOURCE only, not sourceunit/native/hostedfullmatrix qualification.",
+    "Allcurrent055publishedGREEN225/run/watch and PR106 untouched. Soleintegrator exactpreimagecheck required before successorapply.",
+    "No source/mainedits/commits/network/credentials/provider/native/SDK/Gradle/CI/newagents."
+  ],
+  "archive_and_patch_before_after_verified": true
+}

@@ -1,0 +1,80 @@
+[
+  {
+    "artifact_id": 13100011814,
+    "official_sha256": "ac6d294e49d3f62f136fb522a20347dca2ca0388e94588f79647c90f6aba0985",
+    "bytes": 318126,
+    "states": [
+      {
+        "member": "collect/receipt.json",
+        "state": "TERMINAL",
+        "profile": "android_guards",
+        "cwd": "backend",
+        "collect_only": true,
+        "exit": 0,
+        "reason_type": null,
+        "reason": null,
+        "cleanup_error": null
+      },
+      {
+        "member": "execute/receipt.json",
+        "state": "BLOCKED",
+        "profile": "android_guards",
+        "cwd": "backend",
+        "collect_only": false,
+        "exit": 1,
+        "reason_type": "ValueError",
+        "reason": "uncommitted executable/config/fixture inputs outside explicit inert outputs: android/buildSrc/build/classes/java/main/com/dial/van/buildconfig/VanProductionTarget$Connection.class, android/buildSrc/build/classes/java/main/com/dial/van/buildconfig/VanProductionTarget.class, android/buildSrc/build/libs/buildSrc.jar, android/buildSrc/build/tmp/compileJava/previous-compilation-data.bin, android/buildSrc/build/tmp/jar/MANIFEST.MF",
+        "cleanup_error": null
+      }
+    ],
+    "junit": [
+      {
+        "member": "execute/report.xml",
+        "cases": 2,
+        "failures": 0,
+        "errors": 0,
+        "skips": 0,
+        "bad": []
+      }
+    ]
+  },
+  {
+    "artifact_id": 13100330370,
+    "official_sha256": "21d5c76b42d58a88b49db98350853375783770fd6a2c45313103ce0fb717aae9",
+    "bytes": 318135,
+    "states": [
+      {
+        "member": "collect/receipt.json",
+        "state": "TERMINAL",
+        "profile": "android_guards",
+        "cwd": "checkout",
+        "collect_only": true,
+        "exit": 0,
+        "reason_type": null,
+        "reason": null,
+        "cleanup_error": null
+      },
+      {
+        "member": "execute/receipt.json",
+        "state": "BLOCKED",
+        "profile": "android_guards",
+        "cwd": "checkout",
+        "collect_only": false,
+        "exit": 1,
+        "reason_type": "ValueError",
+        "reason": "uncommitted executable/config/fixture inputs outside explicit inert outputs: android/buildSrc/build/classes/java/main/com/dial/van/buildconfig/VanProductionTarget$Connection.class, android/buildSrc/build/classes/java/main/com/dial/van/buildconfig/VanProductionTarget.class, android/buildSrc/build/libs/buildSrc.jar, android/buildSrc/build/tmp/compileJava/previous-compilation-data.bin, android/buildSrc/build/tmp/jar/MANIFEST.MF",
+        "cleanup_error": null
+      }
+    ],
+    "junit": [
+      {
+        "member": "execute/report.xml",
+        "cases": 2,
+        "failures": 0,
+        "errors": 0,
+        "skips": 0,
+        "bad": []
+      }
+    ]
+  }
+]

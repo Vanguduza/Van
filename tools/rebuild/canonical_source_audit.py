@@ -36,7 +36,14 @@ SCHEMA = 'van.canonical-cwd-audit/1'
 ROOTS = ('backend/tests', 'tests', 'services', 'hermes/policy/tests', 'trading/tests')
 UID_NODE = 'backend/tests/test_browser_egress_proxy_i8.py::test_only_the_configured_client_uid_may_use_a_listener'
 FORECAST = {'trading/tests/test_forecast_source_partitions.py', 'trading/tests/test_ml_runtime_boundary.py'}
+VTIL_RESOLVER_NODE = 'trading/tests/test_vtil_borrow.py::test_dial_resolver_selects_trading_knowledge_from_van_registry'
+DDS_COMMIT = '64d6b7158c723b7700e5b53175ea8048d4e92d00'
+DDS_NODE_VERSION = 'v24.19.0'
+DDS_NODE_INPUT_POLICY = 'van.vtil-node-inputs/1'
+DDS_NODE_INPUT_KEYS = ('NODE_OPTIONS','NODE_PATH','NODE_COMPILE_CACHE','NODE_DISABLE_COMPILE_CACHE')
+DDS_RESOLVER_SOURCES = {'agent-system/orchestration/engineering-resource-resolver.mjs': '6d20c98daf2f3390de99bb6200b4eacf2a8493b7e85992cf80cde7f4a103e36e', 'agent-system/orchestration/engineering-resource-registry.mjs': 'fd89fe548a1e072edb85ce260a7495224304eed1cf592280b7488e3a8b8a5d72', 'agent-system/orchestration/skill-resolver.mjs': '020f0270249d0b8197c9c22817c00743f2aaf2b8af45944c975bee5904b4fdce', 'agent-system/orchestration/skill-registry.mjs': '0608f6944bac4257318e9060633fd3a4fb2f87199232668520b59129bd5a8da0', 'agent-system/orchestration/state-store.mjs': '73f972e1749c30905d0c9c707ada5055bda3bd0ec960bf341df60f88d0741f18'}
 SPECIAL_NODES = {
+    VTIL_RESOLVER_NODE: ('private_dds', 'dial-new checkout not available (set DIAL_REPO)'),
     'backend/tests/test_jev_browser_eligibility.py::test_vendored_dds_files_are_the_audited_blobs': ('private_dds', 'DDS checkout not present; blob hashes pinned above'),
     'tests/contracts/test_ci_dds_contract_pin.py::test_recorded_blobs_are_the_pinned_dds_blobs_when_dds_is_present': ('private_dds', 'no DDS git clone beside this checkout; the CI step verifies the same table itself'),
     'tests/contracts/test_android_instrumentation_abi.py::test_actual_agp_direct_package_release_refuses_missing_core_deployment_profile': ('android_guards', 'opt-in actual AGP release guard check'),
@@ -173,6 +180,16 @@ def selectors(manifest, profile, root):
     files=[str(Path(root)/r['path']) for r in manifest['files'] if r['owner']==profile]
     return files+[str(Path(root)/node) for node,(owner,_) in SPECIAL_NODES.items() if owner==profile]
 
+def qualified_node_inputs(value):
+    # This policy covers only the exact ESM resolver fixture's executable
+    # overrides/search/compile-cache inputs. Refuse, never sanitize, incoming
+    # values. Archived callers supply the producer record, not their own env.
+    require(isinstance(value,dict) and set(value)==set(DDS_NODE_INPUT_KEYS),'missing or malformed original Node inputs')
+    require(all(value[k] is None or value[k]=='' for k in DDS_NODE_INPUT_KEYS[:-1])
+        and value['NODE_DISABLE_COMPILE_CACHE']=='1','unqualified Node executable/search/cache inputs')
+    return dict(value)
+
+
 def environment(profile, root):
     """Bind the actual fixture owner, versions/locks/plugins; never record DSNs."""
     spec=PROFILES[profile];versions={d.metadata['Name'].lower().replace('_','-'):d.version for d in importlib.metadata.distributions()}
@@ -211,10 +228,25 @@ def environment(profile, root):
         result['java_version']=java.stderr.strip();result['pyyaml']=versions.get('pyyaml')
         require(result['pyyaml']==spec['pyyaml'],'additive backend-locked AGP Python overlay mismatch')
     if spec.get('dds'):
+        node_inputs=qualified_node_inputs({k:os.environ.get(k) for k in DDS_NODE_INPUT_KEYS})
         sibling=Path(root).parent/'dial-development-system'
         require(sibling.is_dir(),'pinned private DDS prerequisite unavailable')
         result['dds_commit']=subprocess.check_output(['git','rev-parse','HEAD'],cwd=sibling,text=True).strip()
-        require(result['dds_commit']=='64d6b7158c723b7700e5b53175ea8048d4e92d00','wrong private DDS pin')
+        require(result['dds_commit']==DDS_COMMIT,'wrong private DDS pin')
+        configured=os.environ.get('DIAL_REPO')
+        require(configured and Path(configured).resolve()==sibling.resolve(),'explicit pinned sibling DIAL_REPO prerequisite unavailable')
+        result['dial_repo']=str(sibling.resolve())
+        result['dds_resolver_sources']={}
+        for path,expected in DDS_RESOLVER_SOURCES.items():
+            pinned=subprocess.check_output(['git','show',DDS_COMMIT+':'+path],cwd=sibling)
+            require(hashlib.sha256(pinned).hexdigest()==expected,'pinned DDS resolver blob identity mismatch')
+            result['dds_resolver_sources'][path]=sha(sibling/path)
+        require(result['dds_resolver_sources']==DDS_RESOLVER_SOURCES,'private DDS resolver source drift')
+        node=shutil.which('node');require(node,'private DDS Node prerequisite unavailable')
+        observed=subprocess.run([node,'--version'],capture_output=True,text=True,timeout=10)
+        require(observed.returncode==0 and observed.stdout.strip()==DDS_NODE_VERSION,'wrong private DDS Node runtime')
+        result['node']={'version':observed.stdout.strip(),'executable':str(Path(node).resolve()),'sha256':sha(Path(node).resolve()),
+            'input_policy':DDS_NODE_INPUT_POLICY,'inputs':node_inputs}
     return result
 
 def verify_environment(profile, value, root):
@@ -234,7 +266,16 @@ def verify_environment(profile, value, root):
     if spec.get('nft'):require(value.get('nft_version'),'missing actual namespace fixture')
     if spec.get('agp'):
         require(value.get('agp_wrapper_sha256')==sha(Path(root)/'android/gradlew') and re.search(r'version \"17[.\"]',value.get('java_version','')) and value.get('pyyaml')==spec['pyyaml'],'missing additive backend-locked AGP runtime')
-    if spec.get('dds'):require(value.get('dds_commit')=='64d6b7158c723b7700e5b53175ea8048d4e92d00','missing exact private DDS prerequisite')
+    if spec.get('dds'):
+        require(value.get('dds_commit')==DDS_COMMIT,'missing exact private DDS prerequisite')
+        require(value.get('dial_repo')==str((Path(root).parent/'dial-development-system').resolve())
+            and value.get('dds_resolver_sources')==DDS_RESOLVER_SOURCES,'missing original pinned resolver source binding')
+        node=value.get('node',{})
+        require(isinstance(node,dict) and node.get('input_policy')==DDS_NODE_INPUT_POLICY,'missing original Node input policy')
+        qualified_node_inputs(node.get('inputs'))
+        require(node.get('version')==DDS_NODE_VERSION and Path(node.get('executable','')).is_absolute()
+            and isinstance(node.get('sha256'),str) and re.fullmatch(r'[0-9a-f]{64}',node['sha256']),
+            'missing original pinned Node runtime identity')
 
 
 def pytest_addoption(parser):

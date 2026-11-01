@@ -1,6 +1,7 @@
 """The CI emulator and explicitly selected test native ABI must agree."""
 
 from pathlib import Path
+import json
 import os
 import shlex
 import subprocess
@@ -95,9 +96,19 @@ def test_actual_agp_direct_package_release_refuses_missing_core_deployment_profi
     """Opt in with the prepared SDK/JDK/proxy environment; no signing key is read."""
     if (ROOT / "android/keystore.properties").exists():
         pytest.skip("requires an unconfigured production signing environment")
+    output_root = tmp_path / "gradle-build-outputs"
+    init_script = tmp_path / "owned-build-dir.init.gradle"
+    init_script.write_text(
+        "gradle.beforeProject { project ->\n"
+        "    project.layout.buildDirectory.set(new File(new java.net.URI("
+        + json.dumps(output_root.as_uri())
+        + "), project.rootProject.name + project.path.replace(':', '_')))\n}\n",
+        encoding="utf-8",
+    )
     result = subprocess.run(
         [os.environ["VAN_ANDROID_GRADLE_BIN"], "--no-daemon", "--console=plain",
          "--max-workers=2", "--project-cache-dir", str(tmp_path / "gradle-project-cache"),
+         "--init-script", str(init_script),
          ":app:packageRelease", "--dry-run"],
         cwd=ROOT / "android", capture_output=True, text=True, timeout=180,
     )

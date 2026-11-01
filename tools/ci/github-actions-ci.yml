@@ -1668,6 +1668,8 @@ jobs:
         github.workspace }}/trading/tests:${{ github.workspace }}
       PYTHONDONTWRITEBYTECODE: '1'
       DDS_CONTRACT_KEY_AVAILABLE: ${{ secrets.DDS_CONTRACT_READ_DEPLOY_KEY != '' }}
+      DIAL_REPO: ${{ github.workspace }}/../dial-development-system
+      NODE_DISABLE_COMPILE_CACHE: '1'
     steps:
     - uses: actions/checkout@v4
       with:

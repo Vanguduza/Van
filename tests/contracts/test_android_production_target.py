@@ -6,6 +6,7 @@ from __future__ import annotations
 
 import base64
 from datetime import datetime, timedelta, timezone
+import json
 import os
 from pathlib import Path
 import shutil
@@ -230,9 +231,19 @@ def test_actual_validator_is_called_by_every_release_task_graph():
 def test_actual_agp_valid_target_still_refuses_missing_production_signing(profile, tmp_path):
     if (ROOT / "android/keystore.properties").exists():
         pytest.skip("requires an unconfigured production signing environment")
+    output_root = tmp_path / "gradle-build-outputs"
+    init_script = tmp_path / "owned-build-dir.init.gradle"
+    init_script.write_text(
+        "gradle.beforeProject { project ->\n"
+        "    project.layout.buildDirectory.set(new File(new java.net.URI("
+        + json.dumps(output_root.as_uri())
+        + "), project.rootProject.name + project.path.replace(':', '_')))\n}\n",
+        encoding="utf-8",
+    )
     result = subprocess.run(
         [os.environ["VAN_ANDROID_GRADLE_BIN"], "--no-daemon", "--console=plain", "--max-workers=2",
          "--project-cache-dir", str(tmp_path / "gradle-project-cache"),
+         "--init-script", str(init_script),
          ":app:packageRelease", "--dry-run", f"-PVAN_DEPLOYMENT_PROFILE_FILE={profile()}"],
         cwd=ROOT / "android", capture_output=True, text=True, timeout=180,
     )

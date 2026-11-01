@@ -1,0 +1,8 @@
+{
+  "tools/rebuild/canonical_source_audit.py": "a4ae760343de72e5f4b1147c2a76a83970ff5584605affc8725ef0bf71e84551",
+  "tests/rebuild/test_canonical_source_audit.py": "14e200c2aa91e4db0b1735a51f7ea4a39f47c67452e54a42524fa6920d7330ac",
+  ".github/workflows/van-ci.yml": "c2522db0b7889fcab76d190c9236604596cbc323aed61605ebc3302cbc72eece",
+  "tools/ci/github-actions-ci.yml": "c2522db0b7889fcab76d190c9236604596cbc323aed61605ebc3302cbc72eece",
+  "tests/contracts/test_android_instrumentation_abi.py": "00cebc810c199a29184436b0989637600f9350fa65506167e57651a84358ddef",
+  "tests/contracts/test_android_production_target.py": "abdb4ac40fbf90334d075f81ea626ace6803a392cdadc94d231a65c3db00b95c"
+}

@@ -1,0 +1,37 @@
+{
+  "state": "FROZEN_COMBINED_SIX_WITH_NEW_AGP_DELTA_FOR_INDEPENDENT_REVIEW",
+  "base": "05560dd68663d724ca755fb05a7119b9f227b95b",
+  "source_pins": {
+    "tools/rebuild/canonical_source_audit.py": "a4ae760343de72e5f4b1147c2a76a83970ff5584605affc8725ef0bf71e84551",
+    "tests/rebuild/test_canonical_source_audit.py": "14e200c2aa91e4db0b1735a51f7ea4a39f47c67452e54a42524fa6920d7330ac",
+    ".github/workflows/van-ci.yml": "c2522db0b7889fcab76d190c9236604596cbc323aed61605ebc3302cbc72eece",
+    "tools/ci/github-actions-ci.yml": "c2522db0b7889fcab76d190c9236604596cbc323aed61605ebc3302cbc72eece",
+    "tests/contracts/test_android_instrumentation_abi.py": "00cebc810c199a29184436b0989637600f9350fa65506167e57651a84358ddef",
+    "tests/contracts/test_android_production_target.py": "abdb4ac40fbf90334d075f81ea626ace6803a392cdadc94d231a65c3db00b95c"
+  },
+  "archive_sha256": "8f984eba92a9d0a5ef0c50a01101325a8dc9c14ce3ba43210404a7c6001182de",
+  "patch_sha256": "4ef6f40a5963374ab7f8cb22c4d2ef3c8e33ba525ea679e9b9ec6521b93c5e5c",
+  "agp_delta_sha256": "1d27e7ab01503cbcc517d09403682187b9fec0c1a1ab6c95f9ade2daffceffb3",
+  "reviewed_VTIL4_before": {
+    "tools/rebuild/canonical_source_audit.py": "a4ae760343de72e5f4b1147c2a76a83970ff5584605affc8725ef0bf71e84551",
+    "tests/rebuild/test_canonical_source_audit.py": "9a9a067a3419a91302968b0870b5145b1f04487378bce39565aacd35be333bd1",
+    ".github/workflows/van-ci.yml": "c2522db0b7889fcab76d190c9236604596cbc323aed61605ebc3302cbc72eece",
+    "tools/ci/github-actions-ci.yml": "c2522db0b7889fcab76d190c9236604596cbc323aed61605ebc3302cbc72eece"
+  },
+  "VTIL_testfile_hash_changed": true,
+  "VTIL_semantics": "VTIL_AST_PRESERVATION.json proves all other top-level AST/functions/controls unchanged; productioncanonical helper andworkflow/mirror byteidentical reviewedVTILR2. Earlier35747actual136run belongsprior4pins, preserved.",
+  "new_AGP_delta": "Two original realrefusal owners add only trackedliteral ownedoutput init setup and --init-script in addition toexistingexternalprojectcache. gradle.beforeProject setsall root/buildSrc/subproject buildDirectory under per-test URIencodedexternalroot, disambiguatedbyrootprojectname+projectpath. Actualinputproject/wrapper/cwd/release/signing/dryrun/oldasserts unchanged. No copiedproject/ignoredartifacts/provenancewaiver/productionGradle change.",
+  "oracle": "Exact approved3-statement setup+two addedargpairs removed structurally, immutableba817 entireoriginalfunction AST stillmustmatch; evaluatedoriginalfunction recorderchecks init/cacherouting, quoted/$/apostrophepaths encoded, threeprojectoutputnames unique/owned/external. Not actualnewAGPexecution.",
+  "actual_controls": "/tmp/van-recovery-vtil-agp-output-integrated-controls-20261101/RECEIPT.json:136PASS0skip/exit0/audit0, sixpinsbefore=after,5,682,604B ownedpeak, allchildrenwaited/nochildren andowntempcleaned; modeledNodeinputs scopedpertest, parentambientunchanged/unqualified.",
+  "prior_real_pattern": "PROVEN_PRIOR_OUTPUT_PATTERN.json binds originalrealSDK/Google compiler outputpattern and2actualVanProductionTarget classmembers, fulloldarchiveSHA+perfileSHA checked. ReuseonlysupportedGradlehook knowledge; no newAGP/nativequalification. No localGradle/SDK/download/globalcache writes.",
+  "native_before": "/tmp/van-recovery-055-qualification-diagnosis-20261101/AGP_CLASSIFICATION.json binds2officialartifacts:eachreal2casesPASS0skip; parentBLOCKED on5buildSrc/build outputs. Original055sourceattemptFAILED/unqualified, not assertionfailures. Gatewayrepresentative249decoded2pendingentry67FAIL1893PASS; no auth/evidence changes.",
+  "workflow_preservation": {
+    "only_changed_job": "obl004-private-dds",
+    "all_other_jobs_and_global_fields": "Exactlyunchanged from055; original12 included",
+    "mirror": "byteidentical",
+    "VTIL_node": "Only exactresolver goesprivate_dds; staticVanregistrynode unchanged;5DDSGitblobs/Node24.19/producerinputpolicy strict; inheritedNODE_PATHnotqualified/privatekeymissingBLOCKED."
+  },
+  "remaining": "IndependentnewAGPdelta review beforecommit/push; oldwatch41555/run41347330145 running atlastactualread, no restart/reap/cancel/newwatch. ConcreteAGPsourcequalificationfailure supportscorrectivecandidate onlyafterreview/genuinehooks/4fdcommittedverify/normalpush/readbacks. OAuthisolated/unmixed; fullmatrix/newDTO/native/unit/S24/intake/prereq gatesunwaived.",
+  "resources": "2GiBtmp/128MiBownedrun;32MiBworkspacehard/64MiBadmission, no broad/privateprofile fakepass or ambientenv sanitizer. Raw/evidence/venv/compilerarchives volatiletmp; smallsourcepack shouldbe persistedcanonically afterreview.",
+  "at_utc": "2026-11-01T21:09:30.130636+00:00"
+}

@@ -1,0 +1,73 @@
+{
+  "disposition": "NO_BLOCKING_FINDING_IN_BOUNDED_AGP_OUTPUT_DELTA_REVIEW",
+  "pins_before": {
+    "tools/rebuild/canonical_source_audit.py": "a4ae760343de72e5f4b1147c2a76a83970ff5584605affc8725ef0bf71e84551",
+    "tests/rebuild/test_canonical_source_audit.py": "14e200c2aa91e4db0b1735a51f7ea4a39f47c67452e54a42524fa6920d7330ac",
+    ".github/workflows/van-ci.yml": "c2522db0b7889fcab76d190c9236604596cbc323aed61605ebc3302cbc72eece",
+    "tools/ci/github-actions-ci.yml": "c2522db0b7889fcab76d190c9236604596cbc323aed61605ebc3302cbc72eece",
+    "tests/contracts/test_android_instrumentation_abi.py": "00cebc810c199a29184436b0989637600f9350fa65506167e57651a84358ddef",
+    "tests/contracts/test_android_production_target.py": "abdb4ac40fbf90334d075f81ea626ace6803a392cdadc94d231a65c3db00b95c"
+  },
+  "pins_after": {
+    "tools/rebuild/canonical_source_audit.py": "a4ae760343de72e5f4b1147c2a76a83970ff5584605affc8725ef0bf71e84551",
+    "tests/rebuild/test_canonical_source_audit.py": "14e200c2aa91e4db0b1735a51f7ea4a39f47c67452e54a42524fa6920d7330ac",
+    ".github/workflows/van-ci.yml": "c2522db0b7889fcab76d190c9236604596cbc323aed61605ebc3302cbc72eece",
+    "tools/ci/github-actions-ci.yml": "c2522db0b7889fcab76d190c9236604596cbc323aed61605ebc3302cbc72eece",
+    "tests/contracts/test_android_instrumentation_abi.py": "00cebc810c199a29184436b0989637600f9350fa65506167e57651a84358ddef",
+    "tests/contracts/test_android_production_target.py": "abdb4ac40fbf90334d075f81ea626ace6803a392cdadc94d231a65c3db00b95c"
+  },
+  "archive_sha256": "8f984eba92a9d0a5ef0c50a01101325a8dc9c14ce3ba43210404a7c6001182de",
+  "full_patch_sha256": "4ef6f40a5963374ab7f8cb22c4d2ef3c8e33ba525ea679e9b9ec6521b93c5e5c",
+  "AGP_delta_sha256": "1d27e7ab01503cbcc517d09403682187b9fec0c1a1ab6c95f9ade2daffceffb3",
+  "VTIL_preserved": "Exact clearedR2 helper/workflow/mirror bytes and allfocusedtest top-level AST except authorizedAGPoracle function verified independently against reviewedR2 ZIP.",
+  "semantic_review": [
+    "Only existing2refusal owners add exactowned3statement init and officialinit-script argv; originalbusiness inputproject/wrapper/cwd/release/dryrun/signing/profile/skip/timeout/assertions remain exact immutableba817 AST after removingapprovedcache/init setup.",
+    "gradle.beforeProject sets project.layout.buildDirectory before eachproject configuration. Current rootnameVan, buildSrcdefaultname and projectpaths produce distinctexternaldirectory labels; app referenceslayout.buildDirectory lazily, no conflictingexplicit sourceoverride found. No copiedproject, gradleignore/sourceprovenance waiver or productionGradle change.",
+    "Owned tmp_path supplies uniquepertestcache/init/outputroot; absolute fileURI percent-encoding+JSONliteral prevents dollar/quote/apostrophe interpolation. Projectroot/buildSrc/app remain distinct; currentvisual-preview path also distinct bysameformula. Actual Gradlebehavior remainsfuturequalification."
+  ],
+  "independent_source_controls": [
+    {
+      "owner": "test_actual_agp_direct_package_release_refuses_missing_core_deployment_profile",
+      "positive_exact_core_argv_quoted_uri_unique_owned_paths": true
+    },
+    {
+      "owner": "test_actual_agp_direct_package_release_refuses_missing_core_deployment_profile",
+      "oracle_rejected": "core-assert"
+    },
+    {
+      "owner": "test_actual_agp_direct_package_release_refuses_missing_core_deployment_profile",
+      "oracle_rejected": "init-hook"
+    },
+    {
+      "owner": "test_actual_agp_valid_target_still_refuses_missing_production_signing",
+      "positive_exact_core_argv_quoted_uri_unique_owned_paths": true
+    },
+    {
+      "owner": "test_actual_agp_valid_target_still_refuses_missing_production_signing",
+      "oracle_rejected": "core-assert"
+    },
+    {
+      "owner": "test_actual_agp_valid_target_still_refuses_missing_production_signing",
+      "oracle_rejected": "init-hook"
+    }
+  ],
+  "author_current_terminal_verified": {
+    "cases": 136,
+    "fail": 0,
+    "error": 0,
+    "skip": 0,
+    "exit": 0,
+    "audit0": true,
+    "sixpinsbefore_after_equal": true,
+    "childrenwaited_emptygroup": true,
+    "owned_peak_bytes": 5682604
+  },
+  "prior_real_pattern_scope": "Earlier realcompiler hook/class-output proof supports GradlebeforeProject knowledge; it is not new currentinit/AGP/native qualification. No localGradle/SDK run inreview.",
+  "cleanup": "All own tiny recorder/oracle mutation fixturetrees automaticallyremoved;8MiBcap, noarchives or peer cleanup. Originalfailedsource/parentprovenance evidence retained.",
+  "limits": [
+    "Actual exacthead hosted twoAGP refusal assertions AND parent sourceprovenance must pass with new buildSrc/root/app routing. Prior2assertionPASS+parentBLOCKED remainsfailure/unqualified.",
+    "InheritedNODE_PATH/privatekeymissing policies remainstrictBLOCKED; sourcecontrols do not qualify localplatform/hostedprivate/native/fullmatrix.",
+    "Original055watch41555/run untouched; no newCI/Gradle/SDK/network/provider/auth/source/mainwrites/commits/subagents.",
+    "Soleintegrator mustapplyexactfrozenpreimages, genuinehooks/committedverification/push/readbacks; fullmatrix/unit/native/BG001/S24/snapshot/backup remain separate."
+  ]
+}

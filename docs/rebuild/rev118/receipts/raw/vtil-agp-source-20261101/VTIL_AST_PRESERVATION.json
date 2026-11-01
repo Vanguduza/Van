@@ -1,0 +1,11 @@
+{
+  "reviewed_testfile_sha256": "9a9a067a3419a91302968b0870b5145b1f04487378bce39565aacd35be333bd1",
+  "new_testfile_sha256": "14e200c2aa91e4db0b1735a51f7ea4a39f47c67452e54a42524fa6920d7330ac",
+  "only_changed_top_level_definition": "test_original_agp_invocations_route_only_project_cache_to_owned_external_fixture",
+  "all_other_module_AST_including_all_VTIL_functions_controls_unchanged": true,
+  "unchanged_reviewed_VTIL_files": {
+    "tools/rebuild/canonical_source_audit.py": "a4ae760343de72e5f4b1147c2a76a83970ff5584605affc8725ef0bf71e84551",
+    ".github/workflows/van-ci.yml": "c2522db0b7889fcab76d190c9236604596cbc323aed61605ebc3302cbc72eece",
+    "tools/ci/github-actions-ci.yml": "c2522db0b7889fcab76d190c9236604596cbc323aed61605ebc3302cbc72eece"
+  }
+}
