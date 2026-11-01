@@ -1,0 +1,83 @@
+Compiled from "AccountOperationRecoveryTest.kt"
+public final class com.dial.van.trading.AccountOperationRecoveryTest {
+  public com.dial.van.trading.AccountOperationRecoveryTest();
+    descriptor: ()V
+
+  public final void preparedReadinessIsNotCompletionAndResumeIsExplicitUnderFreshOwnerFlow();
+    descriptor: ()V
+
+  public final java.lang.IllegalStateException durablePossibleSendMarkerPrecedesConnectionAndItsUncertainAckCannotAuthorizeResume();
+    descriptor: ()Ljava/lang/IllegalStateException;
+
+  public final void legacyV4PreparedHasNoOriginalVersionProofAndCannotAdoptCurrentGeneration();
+    descriptor: ()V
+
+  public final void legacyV3LinkHasNoNeverSentProofAndReadinessCannotCompleteIt();
+    descriptor: ()V
+
+  public final void scopedV2HistoryRetainsOriginalBindingDuringOAuthStateMigration();
+    descriptor: ()V
+
+  public final void oauthLinkPersistsOriginalStateBeforeSendAndReadsOnlyThatStateAfterRestart();
+    descriptor: ()V
+
+  public final void oauthLinkFailedPersistenceAndChangedActorCannotDispatchOrClearOriginal();
+    descriptor: ()V
+
+  public final void demoCreationPersistsBeforeDispatchAndColdRecoveryNeverAuthorizesResend();
+    descriptor: ()V
+
+  public final void demoOriginalClearsOnlyFromItsBoundNativeDemoReceipt();
+    descriptor: ()V
+
+  static java.lang.String response$default(com.dial.van.trading.AccountOperationRecoveryTest, java.lang.String, java.lang.String, java.lang.String, boolean, int, java.lang.Object);
+    descriptor: (Lcom/dial/van/trading/AccountOperationRecoveryTest;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ZILjava/lang/Object;)Ljava/lang/String;
+
+  public final void coldReaderRetainsOriginalIdentityAndNeverStoresArgumentsProofOrCredentials();
+    descriptor: ()V
+
+  public final void failedDurableWritePreventsDispatchAndPreservesEarlierIdentities();
+    descriptor: ()V
+
+  public final void rememberingAnOriginalOrNewApprovalForItsAliasCannotBecomeASendRetry();
+    descriptor: ()V
+
+  public final void onlyBoundConfirmedOutcomeClearsTheOriginal();
+    descriptor: ()V
+
+  public final void refusalCanClearButAnUnreadableOrMissingHistoryCannotBeReplaced();
+    descriptor: ()V
+
+  public final void failureToSaveAConfirmedReadbackStillKeepsTheOriginalIdentity();
+    descriptor: ()V
+
+  public final void recoveryDoesNotInventAnotherCredentialExportOrTreatUnknownAsAnOrdinaryFailure();
+    descriptor: ()V
+
+  public final void actualDispatchStateMachineFencesActorChangesAtEveryEffectBoundary();
+    descriptor: ()V
+
+  public final void cancelledJobNeverSendsAfterPersistenceOrClearsAfterAnEffect();
+    descriptor: ()V
+
+  public final void originalReadRequiresLawfulOriginalScopeAndRechecksAfterReply();
+    descriptor: ()V
+
+  public final void legacyUnboundRecordsAreRetainedAndNeverGuessedIntoCurrentProfile();
+    descriptor: ()V
+
+  public final void authenticatedIndependentDomainsCoexistButProfileLabelsDoNotEstablishIndependence();
+    descriptor: ()V
+
+  public final void completedOriginalFromIndependentDomainCannotClearOrRetargetAnotherOriginal();
+    descriptor: ()V
+
+  public static final com.dial.van.trading.PendingAccountOperation access$preparedLink(com.dial.van.trading.AccountOperationRecoveryTest);
+    descriptor: (Lcom/dial/van/trading/AccountOperationRecoveryTest;)Lcom/dial/van/trading/PendingAccountOperation;
+
+  public static final com.dial.van.trading.AccountOperationScope access$getScope$p(com.dial.van.trading.AccountOperationRecoveryTest);
+    descriptor: (Lcom/dial/van/trading/AccountOperationRecoveryTest;)Lcom/dial/van/trading/AccountOperationScope;
+
+  public static final com.dial.van.trading.PendingAccountOperation access$getOriginal$p(com.dial.van.trading.AccountOperationRecoveryTest);
+    descriptor: (Lcom/dial/van/trading/AccountOperationRecoveryTest;)Lcom/dial/van/trading/PendingAccountOperation;
+}

@@ -1,0 +1,69 @@
+{
+  "disposition": "NO_BLOCKING_FINDING_ONE_TEST_UNIT_HEADER_REPAIR",
+  "source_pin_before_after": {
+    "android/app/src/test/java/com/dial/van/trading/AccountOperationRecoveryTest.kt": "2f9271c7d29d42775c8c63511f22d9fb156ed72dd9e9101c45172cdcd914f7f5"
+  },
+  "literal_only_change": ": Unit inserted; entire body/allotherbytes exact against7306169",
+  "patch_sha256": "15f1681387c13c992b8686a681839f9bd9ea46083424e3d2f502caa3a1e26dc9",
+  "archive_sha256": "25015122c927d7baf6181115a5122d72916d1a947f4c080732fca12adab1c0eb",
+  "preserved_LAC4_and_LINK14_exact": true,
+  "actual16_source_closure_verified": {
+    "android/app/src/main/java/com/dial/van/trading/FundingObservation.kt": "c15af09b6e649aca9e26fbedc8f7e55c965ae0ce762034aaf3a2585b4cc1763c",
+    "android/app/src/main/java/com/dial/van/trading/AccountMargin.kt": "b2d5f4312f1773435efb6575d8d6d99cbed3763d97cd590d5dd143ee7f909f7a",
+    "android/app/src/main/java/com/dial/van/trading/NativeAccountObservation.kt": "c6da23e70724022d1f813bb779b0e31661142565a8729949ca6a016ddf06927d",
+    "android/app/src/main/java/com/dial/van/trading/TradeBook.kt": "f00726b356062348cab0071ee1e81a26c522fd41b4662718c38ab0a0bc951afd",
+    "android/app/src/main/java/com/dial/van/trading/NativeBalancePeriod.kt": "f82881e4167cafb280b213983d9e33cfe9fe6f04eb57cb553afde4dd4e294fa9",
+    "android/app/src/main/java/com/dial/van/trading/TradingFormat.kt": "c5826fab1a35e90b682d86ea3e43adee3a4455f5a26ca57fa2cc5c41ef99f0ec",
+    "android/app/src/main/java/com/dial/van/trading/CurrentAccountRisk.kt": "f6373eb3112756ab9337b1242ba1ce9a0380d22f0869aae4e5f7f80b8985cd6d",
+    "android/app/src/main/java/com/dial/van/visual/RiveContract.kt": "01d6926f4e5fa1950ad9145aed25cee41bd51cda3428cbcd7185ed7ed6384621",
+    "android/app/src/main/java/com/dial/van/visual/VanAuraSpec.kt": "ccf978e09a45cf81662f43b2dacf56aae5d0b1900be837f40e59865b2631b18f",
+    "android/app/src/main/java/com/dial/van/visual/VanGlassTokens.kt": "223a573ffdefa3e61006d6c92be0b006d85b136fe39015246ead8d74643bcd06",
+    "android/app/src/main/java/com/dial/van/visual/VanEffectBudget.kt": "69814f8805705481bc783811cc28e62a6b693d5e73657fd66708af7f223883bf",
+    "android/app/src/main/java/com/dial/van/trading/AccountOnboarding.kt": "eef746dc23d52040c27961a3984f1607567a85f3057a343cb71f569bf1fad3c7",
+    "android/app/src/main/java/com/dial/van/trading/AccountOperationRecovery.kt": "aa3be96fae6124a3a1713528bc4e80458962d7f18ad8df9492065ebf22b67afc",
+    "android/app/src/main/java/com/dial/van/trading/TradingModels.kt": "880ddda71469a417d4ff27c8aeaa327db623b36bdd64b5056dc7c3e639fba1a9",
+    "android/app/src/main/java/com/dial/van/visual/VanTradeSemantic.kt": "d6f661c002f92a342c4dafb1750234062df8b376ae801b1d8604b57a9ffae45b",
+    "android/app/src/test/java/com/dial/van/trading/AccountOperationRecoveryTest.kt": "2f9271c7d29d42775c8c63511f22d9fb156ed72dd9e9101c45172cdcd914f7f5"
+  },
+  "same_compiler_runtime_JARs_verified": {
+    "/tmp/van-permission-revocation-gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-reflect/1.6.10/1cbe9c92c12a94eea200d23c2bbaedaf3daf5132/kotlin-reflect-1.6.10.jar": "3277ac102ae17aad10a55abec75ff5696c8d109790396434b496e75087854203",
+    "/tmp/van-permission-revocation-gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-script-runtime/2.0.21/c9b044380ad41f89aa89aa896c2d32a8c0b2129d/kotlin-script-runtime-2.0.21.jar": "9c111f8d08ade455566272d561921adc2b2cb6b7a4ccee38d9829c5e3a1ca6a3",
+    "/tmp/van-permission-revocation-gradle/caches/modules-2/files-2.1/org.jetbrains/annotations/13.0/919f0dfe192fb4e063e7dacadee7f8bb9a2672a9/annotations-13.0.jar": "ace2a10dc8e2d5fd34925ecac03e4988b2c0f851650c94b8cef49ba1bd111478",
+    "/tmp/van-permission-revocation-gradle/caches/modules-2/files-2.1/org.jetbrains.kotlinx/kotlinx-coroutines-core-jvm/1.8.1/bb0e192bd7c2b6b8217440d36e9758e377e450/kotlinx-coroutines-core-jvm-1.8.1.jar": "f3d4f5de1c391bbcc20f3b3435ccbac013521e76b6902d7d59635ec15c1f797e",
+    "/tmp/van-permission-revocation-gradle/caches/modules-2/files-2.1/junit/junit/4.13.2/8ac9e16d933b6fb43bc7f576336b8f4d7eb5ba12/junit-4.13.2.jar": "8e495b634469d64fb8acfa3495a065cbacc8a0fff55ce1e31007be4c16dc57d3",
+    "/tmp/van-permission-revocation-gradle/caches/modules-2/files-2.1/org.jetbrains.kotlinx/kotlinx-serialization-core-jvm/1.7.3/1f226780b845ff9206474c05159245d861556249/kotlinx-serialization-core-jvm-1.7.3.jar": "f0adde45864144475385cf4aa7e0b7feb27f61fcf9472665ed98cc971b06b1eb",
+    "/tmp/van-permission-revocation-gradle/caches/modules-2/files-2.1/org.hamcrest/hamcrest-core/1.3/42a25dc3219429f0e5d060061f71acb49bf010a0/hamcrest-core-1.3.jar": "66fdef91e9739348df7a096aa384a5685f4e875584cce89386a7a47251c4d8e9",
+    "/tmp/van-permission-revocation-gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-stdlib/2.0.21/618b539767b4899b4660a83006e052b63f1db551/kotlin-stdlib-2.0.21.jar": "f31cc53f105a7e48c093683bbd5437561d1233920513774b470805641bedbc09",
+    "/tmp/van-permission-revocation-gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-compiler-embeddable/2.0.21/79346ed53db48b18312a472602eb5c057070c54d/kotlin-compiler-embeddable-2.0.21.jar": "9fa8cdd1de0dccffe154c997d423ec6b5f53cd6d9177e3a77a9b0de03fb1bc81",
+    "/tmp/van-permission-revocation-gradle/caches/modules-2/files-2.1/org.jetbrains.intellij.deps/trove4j/1.0.20200330/3afb14d5f9ceb459d724e907a21145e8ff394f02/trove4j-1.0.20200330.jar": "c5fd725bffab51846bf3c77db1383c60aaaebfe1b7fe2f00d23fe1b7df0a439d",
+    "/tmp/van-permission-revocation-gradle/caches/modules-2/files-2.1/org.jetbrains.kotlinx/kotlinx-serialization-json-jvm/1.7.3/6701e8c68d9e82387ce72ee96e8ddf058208d58f/kotlinx-serialization-json-jvm-1.7.3.jar": "b1e9138499ed8d20375edda3f2b1c95f3103a258eff6af9edc5ea07100f2b29c"
+  },
+  "author_actual_before": "Kotlin compile0; JUnit initialization should be void failure; descriptor IllegalStateException; no body-pass claim",
+  "author_actual_after": "compile0;22voidmethods;22PASS0ignore JUnit actual class; corrected16-file scope in handoff",
+  "independent": {
+    "command": [
+      "/tmp/van-permission-revocation-jdk/jdk-21.0.13+9/bin/java",
+      "-Xmx128m",
+      "-cp",
+      "/tmp/van-recovery-account-junit-signature-20261101/after-explicit-unit/classes:/tmp/van-permission-revocation-gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-stdlib/2.0.21/618b539767b4899b4660a83006e052b63f1db551/kotlin-stdlib-2.0.21.jar:/tmp/van-permission-revocation-gradle/caches/modules-2/files-2.1/org.jetbrains/annotations/13.0/919f0dfe192fb4e063e7dacadee7f8bb9a2672a9/annotations-13.0.jar:/tmp/van-permission-revocation-gradle/caches/modules-2/files-2.1/junit/junit/4.13.2/8ac9e16d933b6fb43bc7f576336b8f4d7eb5ba12/junit-4.13.2.jar:/tmp/van-permission-revocation-gradle/caches/modules-2/files-2.1/org.hamcrest/hamcrest-core/1.3/42a25dc3219429f0e5d060061f71acb49bf010a0/hamcrest-core-1.3.jar:/tmp/van-permission-revocation-gradle/caches/modules-2/files-2.1/org.jetbrains.kotlinx/kotlinx-coroutines-core-jvm/1.8.1/bb0e192bd7c2b6b8217440d36e9758e377e450/kotlinx-coroutines-core-jvm-1.8.1.jar:/tmp/van-permission-revocation-gradle/caches/modules-2/files-2.1/org.jetbrains.kotlinx/kotlinx-serialization-core-jvm/1.7.3/1f226780b845ff9206474c05159245d861556249/kotlinx-serialization-core-jvm-1.7.3.jar:/tmp/van-permission-revocation-gradle/caches/modules-2/files-2.1/org.jetbrains.kotlinx/kotlinx-serialization-json-jvm/1.7.3/6701e8c68d9e82387ce72ee96e8ddf058208d58f/kotlinx-serialization-json-jvm-1.7.3.jar",
+      "org.junit.runner.JUnitCore",
+      "com.dial.van.trading.AccountOperationRecoveryTest"
+    ],
+    "exit": 0,
+    "seconds": 1.2356030941009521,
+    "result": "OK (22 tests)",
+    "descriptor": "()V",
+    "root": "/tmp/van-account-junit-independent-74rsaio1",
+    "files": {
+      "/tmp/van-account-junit-independent-74rsaio1/JAVAP.txt": "c1443ef313920fb7028c59d6d7b7cd6c57b5534fda734ca7d9ea8cc32b1c8f8c",
+      "/tmp/van-account-junit-independent-74rsaio1/JUnit.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "/tmp/van-account-junit-independent-74rsaio1/JUnit.stdout": "cd10f6f1347cc00da812b74ae74f5ad8d361778ce1dfc3fa3b598284898c8909"
+    },
+    "reaped": true
+  },
+  "limits": [
+    "Pure production/test JVM closure, no stubs; no full Android/SDK/Gradle/appbuild/lint/native claim.",
+    "Published6a Android failed/remaining downstream skipped staysfailed. Fresh exact hosted fullapp proof remains required.",
+    "No candidate/main writes/commit/network/provider/native effects or subagents."
+  ]
+}

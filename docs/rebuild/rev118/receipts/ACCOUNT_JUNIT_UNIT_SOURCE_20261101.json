@@ -1,0 +1,36 @@
+{
+  "state": "REVIEWED_ONE_HEADER_JUNIT4_RETURN_SOURCE_FIX",
+  "local_base": "7306169316118aaa03529c9c6e3fb989e5e371be",
+  "published_base": "6a0196a951dfb62413f76d3d91ceb855b16f6030",
+  "source_pins": {
+    "android/app/src/test/java/com/dial/van/trading/AccountOperationRecoveryTest.kt": "2f9271c7d29d42775c8c63511f22d9fb156ed72dd9e9101c45172cdcd914f7f5"
+  },
+  "change": "Only literal : Unit added to durablePossibleSendMarkerPrecedesConnectionAndItsUncertainAckCannotAuthorizeResume; entirebody/assertions/allotherbytes exact730",
+  "actual_proof": {
+    "before": "Actual completeAccountOperationRecoveryTest source andactual16filepureproduction/testclosure cachedKotlin2.0.21 compile0;reflectiontargetIllegalStateException,others21void;JUnit4actualclass initializationError shouldbevoid,1initfailure/no testbodyacceptance",
+    "before_descriptor": "()Ljava/lang/IllegalStateException;",
+    "after": "Exactsame actualsourceclosure excepttestUnit header compile0;all22methodsvoid;actualJUnitCore22tests0fail0ignore/exit0",
+    "after_descriptor": "()V",
+    "limits": "Actualpureapp-testclass execution against cachedJVM libs, not minimalpattern; no Gradle/Androidruntime/SDK/fullapp/nativequalification. Exacthostedclass execution stillrequired; original6a261completed1initializationfailure staysfailed/main+testcompilepositive/wholechainfailed.",
+    "setup_failures": "Three initial incompleteproductiondependencyclosurecompile failures kept raw; not applicationfailures or passes."
+  },
+  "clarification": "The raw proof script/receipt scope label retained its initial four-source wording during dependency-closure setup; actualcommands/sourcepins bind16total actualfiles (15production+1test), no stubs. This handoff reports the executed closure explicitly; raw receipts are unchanged.",
+  "independent": "Exactonefile/pins/patchZIP/body+4LAC135+14LINKpreservationverified; owncachedJUnitCore22PASS0fail andjavap()V",
+  "preservation": "Local730genuinecommit/GREEN229 retained unchanged; fourLAC135pins and14otherLINKpaths exact; no production/native/provider/authority edit",
+  "hosted_before": "Exact6a run41361167161 Androidjob125011652063 actual261testscompleted1initializationfailure; main+testKotlincompileSUCCESS/AGPrefusalSUCCESS, wholeappunit/build/lintchainFAILED. No downstream/nativeacceptance inferred.",
+  "required_hosted": "Futureexactcandidate fullunfiltered appunit/build/lint and actual AccountOperationRecoveryTest execution stillrequired; cachedJDK21/Kotlin2.0.21/JUnit4pureclass proof is not Android/Gradle/SDK/fullapp/nativequalification.",
+  "scope_limits": "Original6a failures/missingprivateDDS/trustedbase/intakeentry67/PG/native/provider/fullunit/BG001/S24/Androiddraftproducer/fullmatrixgatesopen; unreviewedupsertnative6source isolated/unmixed. Rawlargecompiledclasses/setupfailures/tmpvolatile.",
+  "evidence": {
+    "HANDOFF.json": "610aae58bbbc64ff9b42f82eb21864ba8c71b1ecbf311741c1a3360d4549e79e",
+    "AFTER_JAVAP.txt": "aa3843d3f456b7000a86ca0f467a0bd8ae57fe3ffc02411888cb0bb86e85237e",
+    "AFTER_RECEIPT.json": "bb947c5d26c3b11dccf45650613e6155b728742161cef95b5be3caa2c2095f3c",
+    "TEST_ONLY_DELTA.json": "60e45a8a3ffea5a0b08aa01002f431c62a880dd8d6b8b547d390155431c0d83e",
+    "INDEPENDENT_REVIEW.json": "9e103d70aea6f2bc44653ad0fb81a201e9b6e6d9a6df197a0098dd7bb6e2d6e4",
+    "SOURCE_PINS.json": "d6174b7c66a62fe12bb3b4455d4dbef507eac0cace216d5cb5dcc758949ad672",
+    "BEFORE_RECEIPT.json": "de46f6e1a36a422bb9b4e262b6808111180f5124787c5f988f25a8c69c1e3316",
+    "BEFORE_JAVAP.txt": "9862cf1a2f1bd6a7e935edd8a5e2dee17c9e5eb11a6e85a6b4cac2f76641b8b7",
+    "ACTUAL_CLASS_PROOF.py.txt": "c00d5a5535b224bbc57582750f551e2992bb45570be2916406af558a347e2ce8",
+    "SOURCE.patch": "15f1681387c13c992b8686a681839f9bd9ea46083424e3d2f502caa3a1e26dc9"
+  },
+  "at": "2026-11-01T23:42:37.482314+00:00"
+}

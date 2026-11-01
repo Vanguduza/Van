@@ -566,23 +566,25 @@
         }
       ]
     },
-    "updated_utc": "2026-11-01T23:25:36.056523+00:00",
+    "updated_utc": "2026-11-01T23:42:37.482314+00:00",
     "branch": "ccr-9e07e1af-8mgz1p",
-    "head": "6a0196a951dfb62413f76d3d91ceb855b16f6030",
+    "head": "7306169316118aaa03529c9c6e3fb989e5e371be",
     "published_head": "6a0196a951dfb62413f76d3d91ceb855b16f6030",
-    "committed_ledger_verification": "GREEN228 terminal0 on published6a; reviewedLAC135candidate final4fd pending",
-    "current_packet": "LAC135_BACKEND_LIVE_DRAFT_R2",
-    "active_packet": "Exact4reviewedsourcepaths+genuineadditivecontracts;54authorunique+101integratedSOURCEpasses separatelyoverlapping;Android/providerOPEN",
+    "committed_ledger_verification": "GREEN229terminal0onlocal730/GREEN228published6a; finalcandidate4fdpendingafterseparateJUnitfixcommit",
+    "current_packet": "LAC135_R2_PLUS_EXACT_JUNIT_UNIT_RETURN",
+    "active_packet": "Localgenuine730retained+exactoneheadertestfix;4reviewedLAC135pins/14otherLINKpaths preserved; no newnative/SDKacceptance",
     "current_background_jobs": [
       {
-        "run_id": 41341233137,
-        "watch_session": 56665,
-        "receipt": "/workspace/van-account-runtime-ci-watch-20261101.json",
-        "state": "Originalreadonlywatch; actualterminalreconciliationrequired, neverduplicate/cancel"
+        "kind": "original_readonly_CI_watch",
+        "session": 21319,
+        "run_id": 41361167161,
+        "head": "6a0196a951dfb62413f76d3d91ceb855b16f6030",
+        "receipt": "/workspace/van-oauth-link-ci-watch-20261101.json",
+        "state": "RUNNING_AT_LAST_BOUNDED_OBSERVATION; confirmed Android source failure authorizes corrective candidate; no cancel/restart/reap inferred"
       }
     ],
     "agent_assignments_ref": "delegation.active_assignments",
-    "next_action": "Finish8semanticconsumers/canonicalguards/manifest,genuinecommit/4fdverify/normalpush onlyaftercurrent6a SOURCEbarrier, exactreadbacks/onenewheadwatch. Original21319 remainsowneduntilactualterminal.",
+    "next_action": "GenuineseparateJUnitfixcommit;finalrequired4fdverify;one normalpushboth/exactgit+PRreadbacks/onenewheadwatch. Confirmed6aAndroidinitializationfailureauthorizescorrectionwhileotheroldsourcejobsfinish;old21319watchuntoucheduntilactualterminal. Upsertnative6isolated/unreviewedexcluded.",
     "acceptance_issued": false,
     "continuation_history": [
       {
@@ -654,7 +656,7 @@
         "captured_at_utc": "2026-11-01T02:38:52.492703+00:00"
       }
     ],
-    "current_source_receipt": "receipts/ACCOUNT_LIVE_DRAFT_SOURCE_20261101.json",
+    "current_source_receipt": "receipts/ACCOUNT_JUNIT_UNIT_SOURCE_20261101.json",
     "history_20261101": [
       {
         "updated_utc": "2026-11-01T02:38:52.492703+00:00",
@@ -1553,11 +1555,28 @@
         "publication_note": "Dated prepublication checkpoint names actual last verified published base; exact containing commit is resolved with git rev-parse. External continuation records subsequent publication, without self-referential commit hashes.",
         "source_ci_receipt": "receipts/raw/oauth-link-source-20261101/INTEGRATED_RECEIPT.json",
         "intake_PR106": "OPEN_READY_UNMERGED_PROPOSAL_NOT_USED"
+      },
+      {
+        "updated_utc": "2026-11-01T23:25:36.056523+00:00",
+        "branch": "ccr-9e07e1af-8mgz1p",
+        "head": "6a0196a951dfb62413f76d3d91ceb855b16f6030",
+        "published_head": "6a0196a951dfb62413f76d3d91ceb855b16f6030",
+        "committed_ledger_verification": "GREEN228 terminal0 on published6a; reviewedLAC135candidate final4fd pending",
+        "current_packet": "LAC135_BACKEND_LIVE_DRAFT_R2",
+        "active_packet": "Exact4reviewedsourcepaths+genuineadditivecontracts;54authorunique+101integratedSOURCEpasses separatelyoverlapping;Android/providerOPEN",
+        "agent_assignments_ref": "delegation.active_assignments",
+        "next_action": "Finish8semanticconsumers/canonicalguards/manifest,genuinecommit/4fdverify/normalpush onlyaftercurrent6a SOURCEbarrier, exactreadbacks/onenewheadwatch. Original21319 remainsowneduntilactualterminal.",
+        "acceptance_issued": false,
+        "current_source_receipt": "receipts/ACCOUNT_LIVE_DRAFT_SOURCE_20261101.json",
+        "last_verified_published_base": "6a0196a951dfb62413f76d3d91ceb855b16f6030",
+        "publication_note": "Dated prepublication checkpoint names actual last verified published base; exact containing commit is resolved with git rev-parse. External continuation records subsequent publication, without self-referential commit hashes.",
+        "source_ci_receipt": "receipts/raw/account-live-draft-source-20261101/INTEGRATED_RECEIPT.json",
+        "intake_PR106": "OPEN_READY_UNMERGED_PROPOSAL_NOT_USED"
       }
     ],
     "last_verified_published_base": "6a0196a951dfb62413f76d3d91ceb855b16f6030",
     "publication_note": "Dated prepublication checkpoint names actual last verified published base; exact containing commit is resolved with git rev-parse. External continuation records subsequent publication, without self-referential commit hashes.",
-    "source_ci_receipt": "receipts/raw/account-live-draft-source-20261101/INTEGRATED_RECEIPT.json",
+    "source_ci_receipt": "receipts/raw/account-junit-unit-source-20261101/HANDOFF.json",
     "intake_PR106": "OPEN_READY_UNMERGED_PROPOSAL_NOT_USED"
   },
   "observations": [
@@ -1811,8 +1830,8 @@
       "evidence": "ci/MUTATION_CORPUS_c2a27848.json"
     }
   ],
-  "current_action": "Finish8semanticconsumers/canonicalguards/manifest,genuinecommit/4fdverify/normalpush onlyaftercurrent6a SOURCEbarrier, exactreadbacks/onenewheadwatch. Original21319 remainsowneduntilactualterminal.",
-  "updated_at_utc": "2026-11-01T23:25:36.056523+00:00",
+  "current_action": "GenuineseparateJUnitfixcommit;finalrequired4fdverify;one normalpushboth/exactgit+PRreadbacks/onenewheadwatch. Confirmed6aAndroidinitializationfailureauthorizescorrectionwhileotheroldsourcejobsfinish;old21319watchuntoucheduntilactualterminal. Upsertnative6isolated/unreviewedexcluded.",
+  "updated_at_utc": "2026-11-01T23:42:37.482314+00:00",
   "execution_method": {
     "path": "BUILD_EXECUTION_PLAN.md",
     "scope_index": "SOURCE_WORKMAP.json",

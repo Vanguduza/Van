@@ -1,0 +1,48 @@
+{
+  "state": "FROZEN_ONE_TEST_EXPLICIT_UNIT_RETURN_FOR_INDEPENDENT_RECHECK",
+  "local_base": "7306169316118aaa03529c9c6e3fb989e5e371be",
+  "local_base_verification": "GREEN229 required4fd terminal0, notpushed",
+  "published_base": "6a0196a951dfb62413f76d3d91ceb855b16f6030",
+  "source_pins": {
+    "android/app/src/test/java/com/dial/van/trading/AccountOperationRecoveryTest.kt": "2f9271c7d29d42775c8c63511f22d9fb156ed72dd9e9101c45172cdcd914f7f5"
+  },
+  "patch_sha256": "15f1681387c13c992b8686a681839f9bd9ea46083424e3d2f502caa3a1e26dc9",
+  "archive_sha256": "25015122c927d7baf6181115a5122d72916d1a947f4c080732fca12adab1c0eb",
+  "scope": "Exactly : Unit added to the one newlyadded runBlocking testmethod; whole assertion/body/allotherbytes exact. Productioncode4LAC135pins and14otherpreviousLINKpacketpaths unchanged. No otherJUnitmethodhasnonvoidsignature.",
+  "actual_proof": {
+    "before": "Actual completeAccountOperationRecoveryTest source andactual16filepureproduction/testclosure cachedKotlin2.0.21 compile0;reflectiontargetIllegalStateException,others21void;JUnit4actualclass initializationError shouldbevoid,1initfailure/no testbodyacceptance",
+    "before_descriptor": "()Ljava/lang/IllegalStateException;",
+    "after": "Exactsame actualsourceclosure excepttestUnit header compile0;all22methodsvoid;actualJUnitCore22tests0fail0ignore/exit0",
+    "after_descriptor": "()V",
+    "limits": "Actualpureapp-testclass execution against cachedJVM libs, not minimalpattern; no Gradle/Androidruntime/SDK/fullapp/nativequalification. Exacthostedclass execution stillrequired; original6a261completed1initializationfailure staysfailed/main+testcompilepositive/wholechainfailed.",
+    "setup_failures": "Three initial incompleteproductiondependencyclosurecompile failures kept raw; not applicationfailures or passes."
+  },
+  "preserved_LAC135_pins": {
+    "backend/van_gateway/trading/account_application_drafts.py": "4ba0fd716762156346180fa327b7373bad4a470cddb12e2946355efa15ae5ccd",
+    "backend/tests/test_account_application_drafts.py": "a9a01817ddab26970e8f8eed54249e213091e28209a503b2549acc5bfdd06ff2",
+    "backend/van_gateway/app.py": "5dd80495c8a2627bfa2ddc7cf3477b3f5e129a0113e18b2370a23e99e0438140",
+    "backend/van_gateway/context/forget.py": "6fed25f2f105938d6e5be3ebbd98f3ac1bb8b36aee3fbf1b1dc19cbeb87a2625"
+  },
+  "preserved_other_LINK_pins": {
+    "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt": "b36f12dbfee022ecefbabc2c527327536900a4eae5f9701e85551b211b0f162c",
+    "android/app/src/main/java/com/dial/van/trading/AccountOnboarding.kt": "eef746dc23d52040c27961a3984f1607567a85f3057a343cb71f569bf1fad3c7",
+    "android/app/src/main/java/com/dial/van/trading/AccountOperationRecovery.kt": "aa3be96fae6124a3a1713528bc4e80458962d7f18ad8df9492065ebf22b67afc",
+    "android/app/src/main/java/com/dial/van/trading/ui/AccountOnboardingScreen.kt": "db0b0939e3844a1e2eb9591962a83b53c7080bd673efaeb11506f49caaaab974",
+    "android/app/src/test/java/com/dial/van/trading/AccountOnboardingTest.kt": "f6aba55c2002d6084958b119e8b4a46bea8fc8e0ea504557087b6f372af1f7b8",
+    "backend/tests/test_owner_approval_original_binding.py": "bd6e6febc8254bb5190681117f634587c4e7e01967a1ae172e8f1ad3ba0f76b6",
+    "backend/tests/test_stateful_link_binding.py": "36df9402f2eb1703bf5b4827d9d002f1f109371aa38cdf2b9a79f83402876c62",
+    "backend/tests/test_trading_oauth_effects.py": "f032a701cea8f2a1b874b994451094f4d049e7a227f5387188b9ac6ccdd1ae14",
+    "backend/van_gateway/approval/service.py": "c5a1bdb43145ed99e05e3613aa4a3c3b6a9c93a6cf6caf22d5e5b8b080a299b5",
+    "backend/van_gateway/trading/accounts.py": "b67e898aa85844ecbd88094acac7a4ba116d555387139a22ea03e0d4dd7cba61",
+    "backend/van_gateway/trading/oauth_effects.py": "fcefbf2e640c301fd97c9bd2e4dccd9bc1640b9f7bdbeb065dd88d92c642e39e",
+    "trading/commander/accounts.py": "641d924886c388391dbc09631cf774a8f741b12e9c1ded9f70fc18f19807103d",
+    "trading/commander/app.py": "aded70458e7e2c0a8b7cd015518318ea7eb056602e02c628558ca5175c91120c",
+    "trading/tests/test_oauth_link_currentness.py": "b8283e2c8e319aa94d1dda46c8f19c63358322c39732a8b8817f567c591694e8"
+  },
+  "raw_volatile": "/tmp/van-recovery-account-junit-signature-20261101",
+  "before_after_compiler_JAR_identity": "Exact versions/SHA/commands in two savedreceipts;cachedJDK21.0.13+9;no SDK/Gradle/download/network/sharedcachewrites",
+  "actual_owned_bytes": 1808118,
+  "remaining": "Independent narrowreview thennew genuinefixcommit atop730,no rewrite;final4fdverify/normalpushboth/exactreadbacks;old21319watchuntouched/sourcebarriertruthful, newexactheadwatchonlyafterpublication. Allnative/provider/intake/privateDDS/trustedbase/BG001/S24/fullmatrix/unitgatesopen.",
+  "at": "2026-11-01T23:39:14.550164+00:00",
+  "receipt_wording_note": "The raw proof script/receipt scope label retained its initial four-source wording during dependency-closure setup; actualcommands/sourcepins bind16total actualfiles (15production+1test), no stubs. This handoff reports the executed closure explicitly; raw receipts are unchanged."
+}

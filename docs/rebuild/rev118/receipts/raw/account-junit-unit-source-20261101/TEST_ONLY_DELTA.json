@@ -1,0 +1,7 @@
+{
+  "path": "/workspace/van-review-2026-10-18/publish/android/app/src/test/java/com/dial/van/trading/AccountOperationRecoveryTest.kt",
+  "before_sha256": "af44d5a8b161e2e80b9cea4fc2f60a7474f78c77d312335f8211ed638ce27b32",
+  "after_sha256": "2f9271c7d29d42775c8c63511f22d9fb156ed72dd9e9101c45172cdcd914f7f5",
+  "only_bytes_inserted": ": Unit",
+  "entire_assertion_body_and_other_methods_byte_identical": true
+}

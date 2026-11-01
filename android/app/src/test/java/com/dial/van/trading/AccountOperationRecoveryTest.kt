@@ -47,7 +47,7 @@ class AccountOperationRecoveryTest {
         assertEquals(1, links); assertEquals(listOf(sent), history.pending(value.deviceId))
     }
 
-    @Test fun durablePossibleSendMarkerPrecedesConnectionAndItsUncertainAckCannotAuthorizeResume() = runBlocking {
+    @Test fun durablePossibleSendMarkerPrecedesConnectionAndItsUncertainAckCannotAuthorizeResume(): Unit = runBlocking {
         var text: String? = null; var writes = 0
         val store = object : AccountOperationStore {
             override fun load() = text
