@@ -1,0 +1,8 @@
+{
+  "mapping": "docs/rebuild/rev118/receipts/EVIDENCE_SOURCE_PATH_MAPPING_20261101.json",
+  "old_path_absent": true,
+  "new_path_sha256": "7ba9ea1135da9068c388ae0901fb846854847f803a690bd82ce7c9ac83a61de5",
+  "original_raw_entries_verified": 356,
+  "application_and_test_source_pins_unchanged": 50,
+  "original_receipt_bytes_unchanged": true
+}
