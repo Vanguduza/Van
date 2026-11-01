@@ -59,11 +59,11 @@ ALL = [
  '            return RoutedResult(False, envelope.kind, refusal=REJECT_UNKNOWN_KIND)\n'
  '\n'
  '        try:\n'
- '            admission, existing = await self.sessions.admit(envelope, now_ms=now)\n'
+ '            admission, existing = await self.sessions.admit(envelope, now_ms=now_ms)\n'
  '        except SessionError as exc:\n'
  '            return RoutedResult(False, envelope.kind, refusal=exc.reason)',
  '        try:\n'
- '            admission, existing = await self.sessions.admit(envelope, now_ms=now)\n'
+ '            admission, existing = await self.sessions.admit(envelope, now_ms=now_ms)\n'
  '        except SessionError as exc:\n'
  '            return RoutedResult(False, envelope.kind, refusal=exc.reason)\n'
  '        delegate = self._delegate_for(envelope.kind)\n'
@@ -540,10 +540,13 @@ ALL = [
       "        delegate = self._delegate_for(envelope.kind)",
       "        delegate = self._delegate_for(envelope.kind) or self.delegates.submit_command")],
     "C26 an unknown kind is routed rather than refused"),
-   ("van_gateway/session/router.py",
-    "        if envelope.expires_at_ms is not None and envelope.expires_at_ms <= now:",
-    "        if False:",
-    "C26 an expired command executes late"),
+   ('van_gateway/session/router.py',
+ '        now = int(time.time() * 1000) if now_ms is None else now_ms\n'
+ '        if envelope.direction is not Direction.UPSTREAM:',
+ '        now = int(time.time() * 1000) if now_ms is None else now_ms\n'
+ '        envelope = envelope.model_copy(update={"expires_at_ms": None})\n'
+ '        if envelope.direction is not Direction.UPSTREAM:',
+ 'C26 an expired command executes late'),
    ("van_gateway/session/router.py",
     "        if admission is CommandAdmission.ALREADY_KNOWN:",
     "        if False:",

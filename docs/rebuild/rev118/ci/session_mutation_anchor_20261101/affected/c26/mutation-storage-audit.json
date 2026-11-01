@@ -1,0 +1,5 @@
+{
+  "root": "/workspace/van-lanes-20261101/mutation-ci-fix",
+  "forbidden_events": [],
+  "pytest_exit": 1
+}

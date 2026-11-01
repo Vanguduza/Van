@@ -1,0 +1,32 @@
+{
+  "command": [
+    "/workspace/van-backend-venv-20261025/bin/python",
+    "tools/rebuild/source_storage_audit.py",
+    "--report",
+    "/workspace/van-mutation-registry-controls-20261101/storage-audit.json",
+    "tests/rebuild/test_mutation_controls.py",
+    "tests/rebuild/test_mutation_reconciliation.py",
+    "--basetemp=/tmp/van-recovery-mutation-registry-controls-20261101",
+    "--junitxml=/workspace/van-mutation-registry-controls-20261101/controls.xml",
+    "-q"
+  ],
+  "exit": 0,
+  "at_utc": "2026-11-01T02:35:25.505027+00:00",
+  "owned_temp_preflight": {
+    "path": "/tmp/van-recovery-mutation-registry-controls-20261101",
+    "free_bytes_before": 8923205632,
+    "free_inodes_before": 2304131,
+    "minimum_free_bytes": 4294967296,
+    "no_preexisting_directory": true
+  },
+  "owned_temp_cleanup": {
+    "path": "/tmp/van-recovery-mutation-registry-controls-20261101",
+    "files": 20,
+    "inventory": "/workspace/van-mutation-registry-controls-20261101/owned-temp-inventory.json",
+    "inventory_sha256": "20266cdd37d2d6c652c062eb614827103200d2bae03a1bf461806bf182e6c0c1",
+    "free_bytes_before_cleanup": 8923123712,
+    "free_bytes_after_cleanup": 8923205632,
+    "free_inodes_after": 2304131,
+    "independently_absent": true
+  }
+}

@@ -438,10 +438,10 @@
         "model": "gpt-6.1-sol",
         "effort": "medium",
         "worktree": "/workspace/van-review-2026-10-18/publish",
-        "base": "d15283c55c843d1b961592dabc60f9665e5a7c11",
-        "state": "FAMILY_SESSION_EXACT_SOURCE_INTEGRATED_PUBLICATION_EXECUTION",
+        "base": "f8758db746582439819c1c1129ca64a8cf9fca7d",
+        "state": "CURRENT_SCOPE_MUTATION_REGISTRY_RECONCILED_PUBLICATION_EXECUTION",
         "write_scope": "Designated integration source/docs, actual evidence and normal hook/verify/publication; root retains architecture/scope decisions.",
-        "next": "Genuine successorpublication/readback/exactCI and authorized draftPR105 metadata update; root decides nextfullworkflow."
+        "next": "PublishverifiedregistryCIrepair, readcomplete exactheadhostedmutationexecution and updatePR105 metadata; deliver rootdecisionbrief before nextfinancialpolicy implementation."
       }
     ],
     "integration_owner": "root",
@@ -566,24 +566,24 @@
         }
       ]
     },
-    "updated_utc": "2026-11-01T02:18:07.793161+00:00",
+    "updated_utc": "2026-11-01T02:38:52.492703+00:00",
     "branch": "ccr-9e07e1af-8mgz1p",
-    "head": "d15283c55c843d1b961592dabc60f9665e5a7c11",
-    "published_head": "d15283c55c843d1b961592dabc60f9665e5a7c11",
-    "committed_ledger_verification": "Auth required4fd466baseline committed GREEN206 terminal0 before normalpush; gitlsremote and connectedPR105 exacthead match.",
-    "current_packet": "FAMILY_SESSION_RECOVERY_SOURCE",
-    "active_packet": "Auth d15283c5 published with5943exact composite identities:5783pass/160declaredskips. Family11/session5 now integrated at the exact tested pins:boundary441 and composite5775pass/0skip; original14sourcefailures and50storage failures remainfailed, exact50recoverypassed. Genuine successorhook/verify/push pending; no native/fullunit acceptance.",
+    "head": "f8758db746582439819c1c1129ca64a8cf9fca7d",
+    "published_head": "f8758db746582439819c1c1129ca64a8cf9fca7d",
+    "committed_ledger_verification": "Family/session required4fd466baseline committed GREEN207 terminal0 before normalpush; independent gitlsremote and connectedPR105 exactheadmatch.",
+    "current_packet": "SESSION_MUTATION_ANCHOR_RECONCILIATION",
+    "active_packet": "Currentf875 production source unchanged. Hostedmutationpreflight failed NOT_RUN for2stale sessionanchors; all5inspected Python/browser jobs retain failedconclusions. Registryretarget preserves374identities/383edits; affectedC36control47pass+expectedsemanticfailure, C26control31pass+expectedsemanticfailure,0survivors;22registry/verdictcontrols pass. GenuineCIrepairpublication pending; fullhostedmutationexecution notclaimed.",
     "current_background_jobs": [
       {
         "kind": "hosted-source-ci",
-        "run_id": 41264446462,
-        "head": "d15283c55c843d1b961592dabc60f9665e5a7c11",
-        "observed_state": "QUEUED_AT_AUTH_READBACK",
-        "meaning": "Exactoriginal authrun; not final successorqualification."
+        "run_id": 41264944814,
+        "head": "f8758db746582439819c1c1129ca64a8cf9fca7d",
+        "observed_state": "IN_PROGRESS_WITH_MANDATORY_PREREQUISITE_AND_REGISTRY_PREFLIGHT_FAILURES",
+        "meaning": "Originalfailedjob conclusions retained; mutationregistry failure is NOT_RUN, not caughtmutants."
       }
     ],
     "agent_assignments_ref": "delegation.active_assignments",
-    "next_action": "Genuine successorhook commit, required-baseline committed verification before normalpush, independentremote readback and exactheadCI; update existing draftPR105 to final combinedbehavior. Root retains nextworkflow architecture decision; fullhedged multi-position effects and all canonical obligations remainopen.",
+    "next_action": "GenuineCIrepairhook/required-baselinecommittedverify/normalpush, independentexactremote and completehostedmutationexecutionreadback; updateauthorizedexistingdraftPR105 metadata to finalcombinedsource. Then rootdecides nextfamilyworkflow; no unchosenfinancialpolicy implementation.",
     "acceptance_issued": false,
     "continuation_history": [
       {
@@ -629,9 +629,33 @@
         "current_source_receipt": "receipts/AUTH_COMMIT_EXPIRY_SOURCE_20261101.json",
         "current_action": "Corrected pairing/renewal authority through writer/await boundaries is source-qualified by exact5943case composite coverage:5783passed and160declaredskips, with every failed/error/unexecuted case accounted for and exact13actualPostgreSQLvariants executed. Original timedout and failed runs remain such; the inherited10second positive erasure case retains actualexpired denial and unchanged5.337second isolatedpass, without a performance guarantee. All663inheritedtestfiles remain byte-identical. Auth genuinehook/required-baseline committedverification/normalpush/readback/exactCI is nowexecuting. Frozen family11/session5 successor has441boundary and5775composite passes/0skip; integrate/publish it afterauth. Wholeunits and native/provider/production/S24acceptance remainunissued. Complete the original native economic owner for per-deal/correction/bust/late charge identity, signed fees/rebates, carry/FX/principal and cash/finality; retain scalar ambiguity as unknown until that owner supplies evidence. Continue atomic amend versus cancel-replace, governed parent/child lifetime budgets, all-origin shared financial reservations/outbox/effect consumers, manual/payment/transfer/handover/provider reconciliation and nonduplicated release. Preserve immutable V1 missing-obligation receipts and native policy/runtime admission. Retain the intermittent Android deep-link instrumentation failure and inspect exact-head CI; unchanged parent replay passed18 cases with4 declared skips, without S24 acceptance. All82backend units,12 verification packets,38forecast/research backend units and every market/chart/voice/assistant/crypto/operations contract retain full scope. Android follows the actual BG-001 gate and uses the provisioned production profile on Van trading core; genuine signing and actual Artemis/S24 acceptance remain required. Profitability is evaluated with evidence, never guaranteed.",
         "captured_at_utc": "2026-11-01T02:18:07.793161+00:00"
+      },
+      {
+        "updated_utc": "2026-11-01T02:18:07.793161+00:00",
+        "branch": "ccr-9e07e1af-8mgz1p",
+        "head": "d15283c55c843d1b961592dabc60f9665e5a7c11",
+        "published_head": "d15283c55c843d1b961592dabc60f9665e5a7c11",
+        "committed_ledger_verification": "Auth required4fd466baseline committed GREEN206 terminal0 before normalpush; gitlsremote and connectedPR105 exacthead match.",
+        "current_packet": "FAMILY_SESSION_RECOVERY_SOURCE",
+        "active_packet": "Auth d15283c5 published with5943exact composite identities:5783pass/160declaredskips. Family11/session5 now integrated at the exact tested pins:boundary441 and composite5775pass/0skip; original14sourcefailures and50storage failures remainfailed, exact50recoverypassed. Genuine successorhook/verify/push pending; no native/fullunit acceptance.",
+        "current_background_jobs": [
+          {
+            "kind": "hosted-source-ci",
+            "run_id": 41264446462,
+            "head": "d15283c55c843d1b961592dabc60f9665e5a7c11",
+            "observed_state": "QUEUED_AT_AUTH_READBACK",
+            "meaning": "Exactoriginal authrun; not final successorqualification."
+          }
+        ],
+        "agent_assignments_ref": "delegation.active_assignments",
+        "next_action": "Genuine successorhook commit, required-baseline committed verification before normalpush, independentremote readback and exactheadCI; update existing draftPR105 to final combinedbehavior. Root retains nextworkflow architecture decision; fullhedged multi-position effects and all canonical obligations remainopen.",
+        "acceptance_issued": false,
+        "current_source_receipt": "receipts/FAMILY_SESSION_RECOVERY_SOURCE_20261101.json",
+        "current_action": "Auth d15283c55c843d1b961592dabc60f9665e5a7c11 is published through genuinehook/GREEN206/normalpush and independentremote equality. Its5943identity composite has5783passes/160declaredskips with all originalfailed/interrupted records retained, including actual10second erasure timing sensitivity and unchanged5.337second isolatedpass. Family11/session5 exacttestedsource nowintegrates family remainingbasis/lifetime recovery/actual riskconsumers, independent committed PostgreSQL reader and originalsessionexpiry/read-onlyoriginalresultrecovery. Boundary441 and exactaffected5775casecomposite have0failure/error/skip/auditviolations; original14sourcefailures and50storage failures remainfailed, exact50freshPGrecoverypassed. All663inheritedtests remain byte-identical. Genuine successorhook/required-baselinecommittedverify/normalpush/readback/exactCI and finaldraftPR105 update areexecuting. Fullhedged multi-position execution/protection/review, wholeunits and native/provider/production/S24acceptance remainunissued. Complete the original native economic owner for per-deal/correction/bust/late charge identity, signed fees/rebates, carry/FX/principal and cash/finality; retain scalar ambiguity as unknown until that owner supplies evidence. Continue atomic amend versus cancel-replace, governed parent/child lifetime budgets, all-origin shared financial reservations/outbox/effect consumers, manual/payment/transfer/handover/provider reconciliation and nonduplicated release. Preserve immutable V1 missing-obligation receipts and native policy/runtime admission. Retain the intermittent Android deep-link instrumentation failure and inspect exact-head CI; unchanged parent replay passed18 cases with4 declared skips, without S24 acceptance. All82backend units,12 verification packets,38forecast/research backend units and every market/chart/voice/assistant/crypto/operations contract retain full scope. Android follows the actual BG-001 gate and uses the provisioned production profile on Van trading core; genuine signing and actual Artemis/S24 acceptance remain required. Profitability is evaluated with evidence, never guaranteed.",
+        "captured_at_utc": "2026-11-01T02:38:52.492703+00:00"
       }
     ],
-    "current_source_receipt": "receipts/FAMILY_SESSION_RECOVERY_SOURCE_20261101.json"
+    "current_source_receipt": "receipts/SESSION_MUTATION_ANCHOR_RECONCILIATION_20261101.json"
   },
   "observations": [
     "OBS-001 BE-002 debug cleartext",
@@ -761,8 +785,8 @@
       "evidence": "ci/MUTATION_CORPUS_c2a27848.json"
     }
   ],
-  "current_action": "Auth d15283c55c843d1b961592dabc60f9665e5a7c11 is published through genuinehook/GREEN206/normalpush and independentremote equality. Its5943identity composite has5783passes/160declaredskips with all originalfailed/interrupted records retained, including actual10second erasure timing sensitivity and unchanged5.337second isolatedpass. Family11/session5 exacttestedsource nowintegrates family remainingbasis/lifetime recovery/actual riskconsumers, independent committed PostgreSQL reader and originalsessionexpiry/read-onlyoriginalresultrecovery. Boundary441 and exactaffected5775casecomposite have0failure/error/skip/auditviolations; original14sourcefailures and50storage failures remainfailed, exact50freshPGrecoverypassed. All663inheritedtests remain byte-identical. Genuine successorhook/required-baselinecommittedverify/normalpush/readback/exactCI and finaldraftPR105 update areexecuting. Fullhedged multi-position execution/protection/review, wholeunits and native/provider/production/S24acceptance remainunissued. Complete the original native economic owner for per-deal/correction/bust/late charge identity, signed fees/rebates, carry/FX/principal and cash/finality; retain scalar ambiguity as unknown until that owner supplies evidence. Continue atomic amend versus cancel-replace, governed parent/child lifetime budgets, all-origin shared financial reservations/outbox/effect consumers, manual/payment/transfer/handover/provider reconciliation and nonduplicated release. Preserve immutable V1 missing-obligation receipts and native policy/runtime admission. Retain the intermittent Android deep-link instrumentation failure and inspect exact-head CI; unchanged parent replay passed18 cases with4 declared skips, without S24 acceptance. All82backend units,12 verification packets,38forecast/research backend units and every market/chart/voice/assistant/crypto/operations contract retain full scope. Android follows the actual BG-001 gate and uses the provisioned production profile on Van trading core; genuine signing and actual Artemis/S24 acceptance remain required. Profitability is evaluated with evidence, never guaranteed.",
-  "updated_at_utc": "2026-11-01T02:18:07.793161+00:00",
+  "current_action": "Publishedauth d15283c5/GREEN206 andfamily/session f8758db7/GREEN207 are independentlyremoteverified. Candidateapplicationcodeandallinheritedassertionsremain unchanged duringcurrentCIrepair. Five inspected f875hostedmutationjobs stopped INVALID_REGISTRY/NOT_RUN because2sessionanchorsmoved; originalfailuresremainfailed. Retargeted C36/C26 cases preserveall374mutationidentities/383edits. Exactunmodifiedcontrols47/31pass andeachactualmutant fails onlyitsoriginalsemanticassertion;22existingregistry/verdictcontrolspass;isolatedsource/journal/temp restorationandnormalworktreecleanupverified. Globalpreflight0findings is notfullcorpusexecution. Genuinehook/committedverify/normalpush, completeexactheadhostedmutationreadback and finaldraftPR105metadata updateareexecuting. KnownDDScredential/trustedcheckerprerequisitesremainmandatory/unmet. No newfinancialpolicy ischosen orimplemented. Complete the original native economic owner for per-deal/correction/bust/late charge identity, signed fees/rebates, carry/FX/principal and cash/finality; retain scalar ambiguity as unknown until that owner supplies evidence. Continue atomic amend versus cancel-replace, governed parent/child lifetime budgets, all-origin shared financial reservations/outbox/effect consumers, manual/payment/transfer/handover/provider reconciliation and nonduplicated release. Preserve immutable V1 missing-obligation receipts and native policy/runtime admission. Retain the intermittent Android deep-link instrumentation failure and inspect exact-head CI; unchanged parent replay passed18 cases with4 declared skips, without S24 acceptance. All82backend units,12 verification packets,38forecast/research backend units and every market/chart/voice/assistant/crypto/operations contract retain full scope. Android follows the actual BG-001 gate and uses the provisioned production profile on Van trading core; genuine signing and actual Artemis/S24 acceptance remain required. Profitability is evaluated with evidence, never guaranteed.",
+  "updated_at_utc": "2026-11-01T02:38:52.492703+00:00",
   "execution_method": {
     "path": "BUILD_EXECUTION_PLAN.md",
     "scope_index": "SOURCE_WORKMAP.json",

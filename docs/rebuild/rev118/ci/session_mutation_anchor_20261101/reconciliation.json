@@ -1,0 +1,41 @@
+{
+  "at_utc": "2026-11-01T02:30:31.868035+00:00",
+  "parent": "f8758db746582439819c1c1129ca64a8cf9fca7d",
+  "authorization": "auth-20261022-owner-mutation-registry-reconciliation",
+  "registry_before_sha256": "35d10c7b0f2b8319b7f7305828262c972b2a6451139d75b9e83c7d0062282955",
+  "registry_after_sha256": "cbf114a3374538eeb1403d3f066ee4f22d2405b32e6a7f6b752fa9fe0d9a99df",
+  "changes": [
+    {
+      "identity": "C36 an envelope nobody can carry out is written into the admission table first",
+      "before": [
+        "van_gateway/session/router.py",
+        "        delegate = self._delegate_for(envelope.kind)\n        if delegate is None:\n            return RoutedResult(False, envelope.kind, refusal=REJECT_UNKNOWN_KIND)\n\n        try:\n            admission, existing = await self.sessions.admit(envelope, now_ms=now)\n        except SessionError as exc:\n            return RoutedResult(False, envelope.kind, refusal=exc.reason)",
+        "        try:\n            admission, existing = await self.sessions.admit(envelope, now_ms=now)\n        except SessionError as exc:\n            return RoutedResult(False, envelope.kind, refusal=exc.reason)\n        delegate = self._delegate_for(envelope.kind)\n        if delegate is None:\n            return RoutedResult(False, envelope.kind, refusal=REJECT_UNKNOWN_KIND)",
+        "C36 an envelope nobody can carry out is written into the admission table first"
+      ],
+      "after": [
+        "van_gateway/session/router.py",
+        "        delegate = self._delegate_for(envelope.kind)\n        if delegate is None:\n            return RoutedResult(False, envelope.kind, refusal=REJECT_UNKNOWN_KIND)\n\n        try:\n            admission, existing = await self.sessions.admit(envelope, now_ms=now_ms)\n        except SessionError as exc:\n            return RoutedResult(False, envelope.kind, refusal=exc.reason)",
+        "        try:\n            admission, existing = await self.sessions.admit(envelope, now_ms=now_ms)\n        except SessionError as exc:\n            return RoutedResult(False, envelope.kind, refusal=exc.reason)\n        delegate = self._delegate_for(envelope.kind)\n        if delegate is None:\n            return RoutedResult(False, envelope.kind, refusal=REJECT_UNKNOWN_KIND)",
+        "C36 an envelope nobody can carry out is written into the admission table first"
+      ]
+    },
+    {
+      "identity": "C26 an expired command executes late",
+      "before": [
+        "van_gateway/session/router.py",
+        "        if envelope.expires_at_ms is not None and envelope.expires_at_ms <= now:",
+        "        if False:",
+        "C26 an expired command executes late"
+      ],
+      "after": [
+        "van_gateway/session/router.py",
+        "        now = int(time.time() * 1000) if now_ms is None else now_ms\n        if envelope.direction is not Direction.UPSTREAM:",
+        "        now = int(time.time() * 1000) if now_ms is None else now_ms\n        envelope = envelope.model_copy(update={\"expires_at_ms\": None})\n        if envelope.direction is not Direction.UPSTREAM:",
+        "C26 an expired command executes late"
+      ]
+    }
+  ],
+  "production_and_inherited_tests_changed": false,
+  "original_hosted_state": "INVALID_REGISTRY_NOT_RUN"
+}

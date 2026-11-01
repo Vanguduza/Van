@@ -1,0 +1,9 @@
+CAUGHT             C36 an envelope nobody can carry out is written into the admission table first
+
+1/1 caught
+c36 CONTROL_PASS_SEMANTIC_MUTANT_CAUGHT
+CAUGHT             C26 an expired command executes late
+
+1/1 caught
+c26 CONTROL_PASS_SEMANTIC_MUTANT_CAUGHT
+MUTATION_AFFECTED_TERMINAL0

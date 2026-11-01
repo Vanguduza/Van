@@ -1,0 +1,142 @@
+{
+  "schema": "van.current-session-mutation-reconciliation/1",
+  "completed_at_utc": "2026-11-01T02:33:54.123272+00:00",
+  "source_parent": "f8758db746582439819c1c1129ca64a8cf9fca7d",
+  "source_worktree": "/workspace/van-lanes-20261101/mutation-ci-fix",
+  "source_sha256": {
+    "backend/van_gateway/session/router.py": "a4ac504cbfd6e885b285c8959aeae4543600c26f362e1ae85e36989660972c55",
+    "backend/van_gateway/session/service.py": "2a6c0a1d064a22d3945f84883088bca9174f040b18cf7f1cdd5ae244944f8eac",
+    "backend/tests/test_van_hermes_session.py": "fa39711dd0d961559f2a1456cb33a7acc5aa770874b54d5c61055b7fed14cb2e",
+    "backend/tests/test_session_transport_api.py": "f8603b46ab346a07b8e22c186729a8dbcc7cebe3618aca540b46d55587cdfe9f",
+    "tools/audit/mutation.py": "48a7a5d0573c796c1042b400dce7501e88e36196466b810d22ae4b07ac9e8e6a",
+    "tools/audit/mutation_suite.py": "cbf114a3374538eeb1403d3f066ee4f22d2405b32e6a7f6b752fa9fe0d9a99df"
+  },
+  "registry_sha256": "cbf114a3374538eeb1403d3f066ee4f22d2405b32e6a7f6b752fa9fe0d9a99df",
+  "diagnostic_plugin_sha256": "385ae93838b84913edbf9c74e72fef3656c8b5a74e9b26531a758225e4c0d189",
+  "results": [
+    {
+      "identity": "C36 an envelope nobody can carry out is written into the admission table first",
+      "unmodified_control": {
+        "kind": "baseline",
+        "reason": null,
+        "exit": 0,
+        "tests": 47,
+        "failed_assertions": [],
+        "errors": 0,
+        "skipped": 0,
+        "source_restored": true,
+        "cleanup": {
+          "path": "/tmp/van-recovery-mutation-c36-20261101",
+          "files": 47,
+          "inventory": "/workspace/van-mutation-affected-20261101/c36/baseline-temp/owned-temp-inventory.json",
+          "inventory_sha256": "b698e30553226551fd0490ffbec28bb4a713f32f414c9f8db798a129d4d3ee99",
+          "free_bytes_before_cleanup": 8832167936,
+          "free_bytes_after_cleanup": 8923205632,
+          "free_inodes_after": 2304131,
+          "independently_absent": true
+        },
+        "actual_command": [
+          "/workspace/van-backend-venv-20261025/bin/python",
+          "-m",
+          "pytest",
+          "tests/test_session_transport_api.py",
+          "tests/test_van_hermes_session.py",
+          "-q"
+        ]
+      },
+      "actual_semantic_mutant": {
+        "kind": "mutation",
+        "reason": "C36 an envelope nobody can carry out is written into the admission table first",
+        "exit": 1,
+        "tests": 47,
+        "failed_assertions": [
+          "test_a_kind_with_no_delegate_is_not_written_into_the_admission_table"
+        ],
+        "errors": 0,
+        "skipped": 0,
+        "source_restored": true,
+        "cleanup": {
+          "path": "/tmp/van-recovery-mutation-c36-20261101",
+          "files": 47,
+          "inventory": "/workspace/van-mutation-affected-20261101/c36/mutation-temp/owned-temp-inventory.json",
+          "inventory_sha256": "77956d58194a64f93bddaa7aeb46a6a90f4248e0886058aa041c9baac74b563c",
+          "free_bytes_before_cleanup": 8832167936,
+          "free_bytes_after_cleanup": 8923205632,
+          "free_inodes_after": 2304131,
+          "independently_absent": true
+        },
+        "actual_command": [
+          "/workspace/van-backend-venv-20261025/bin/python",
+          "-m",
+          "pytest",
+          "tests/test_session_transport_api.py",
+          "tests/test_van_hermes_session.py",
+          "-q"
+        ]
+      },
+      "survivors": []
+    },
+    {
+      "identity": "C26 an expired command executes late",
+      "unmodified_control": {
+        "kind": "baseline",
+        "reason": null,
+        "exit": 0,
+        "tests": 31,
+        "failed_assertions": [],
+        "errors": 0,
+        "skipped": 0,
+        "source_restored": true,
+        "cleanup": {
+          "path": "/tmp/van-recovery-mutation-c26-20261101",
+          "files": 31,
+          "inventory": "/workspace/van-mutation-affected-20261101/c26/baseline-temp/owned-temp-inventory.json",
+          "inventory_sha256": "63381145b1c6a5a38972703a67e0c27f7948dc5b8fb701e62c1f8a3189e5684f",
+          "free_bytes_before_cleanup": 8864542720,
+          "free_bytes_after_cleanup": 8923205632,
+          "free_inodes_after": 2304131,
+          "independently_absent": true
+        },
+        "actual_command": [
+          "/workspace/van-backend-venv-20261025/bin/python",
+          "-m",
+          "pytest",
+          "tests/test_van_hermes_session.py",
+          "-q"
+        ]
+      },
+      "actual_semantic_mutant": {
+        "kind": "mutation",
+        "reason": "C26 an expired command executes late",
+        "exit": 1,
+        "tests": 31,
+        "failed_assertions": [
+          "test_an_expired_envelope_is_not_executed_late"
+        ],
+        "errors": 0,
+        "skipped": 0,
+        "source_restored": true,
+        "cleanup": {
+          "path": "/tmp/van-recovery-mutation-c26-20261101",
+          "files": 31,
+          "inventory": "/workspace/van-mutation-affected-20261101/c26/mutation-temp/owned-temp-inventory.json",
+          "inventory_sha256": "ea1f2e44f804489217fdc8078db68310bf860b1fab5ebbb9e559d082841d018c",
+          "free_bytes_before_cleanup": 8864542720,
+          "free_bytes_after_cleanup": 8923205632,
+          "free_inodes_after": 2304131,
+          "independently_absent": true
+        },
+        "actual_command": [
+          "/workspace/van-backend-venv-20261025/bin/python",
+          "-m",
+          "pytest",
+          "tests/test_van_hermes_session.py",
+          "-q"
+        ]
+      },
+      "survivors": []
+    }
+  ],
+  "production_and_test_assertions_changed": false,
+  "scope": "Only2retargeted retainedmutationidentities executed; global374case consistency checked separately; no fullcorpus/nativeacceptance claim."
+}

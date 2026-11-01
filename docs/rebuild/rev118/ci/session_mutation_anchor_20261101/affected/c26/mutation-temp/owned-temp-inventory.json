@@ -1,0 +1,161 @@
+{
+  "directory": "/tmp/van-recovery-mutation-c26-20261101",
+  "at_utc": "2026-11-01T02:33:54.118108+00:00",
+  "files": [
+    {
+      "path": "test_a_stale_path_epoch_is_ref0/van.sqlite3",
+      "bytes": 1892352,
+      "sha256": "498778c795a0d619a4cb37e9240703992407cbb6c091abe77f529157d37fe361"
+    },
+    {
+      "path": "test_a_heartbeat_does_not_occu0/van.sqlite3",
+      "bytes": 1892352,
+      "sha256": "9d42ca905796a7c8b220d1472f7ecbf7e5bfde8d31d0f93af1f90f8e1111881a"
+    },
+    {
+      "path": "test_an_expired_envelope_is_no0/van.sqlite3",
+      "bytes": 1892352,
+      "sha256": "e07c8989cf81a67b661f54b2120b2e85163480694b539e5132e3d1fb42444d8a"
+    },
+    {
+      "path": "test_an_unknown_kind_does_not_0/van.sqlite3",
+      "bytes": 1892352,
+      "sha256": "2a961e4f5a6cd45fed051db43d9fde7ea5f5ebd8cf9314ae3250370d7d993ead"
+    },
+    {
+      "path": "test_an_unknown_kind_is_refuse0/van.sqlite3",
+      "bytes": 1892352,
+      "sha256": "c5477126378c9df15ad2fac59202bc8d2c54a55b253cea7c0f97b811e5b7c2c2"
+    },
+    {
+      "path": "test_a_conflicting_resubmissio0/van.sqlite3",
+      "bytes": 1892352,
+      "sha256": "a734ef65f803681590e7e3417582341c50401c08e9cc284319317e54bbeb8d26"
+    },
+    {
+      "path": "test_a_resubmission_does_not_e0/van.sqlite3",
+      "bytes": 1892352,
+      "sha256": "839f4317932c0d3ea68d9ee78fd4b301d5d3cc6fecef805f9ff789e39bbca9b3"
+    },
+    {
+      "path": "test_an_unexpected_failure_als0/van.sqlite3",
+      "bytes": 1892352,
+      "sha256": "87e264cbb63af2c9b37d3a3e31017c1c838bbedb82ff551ee41050d23036bd76"
+    },
+    {
+      "path": "test_a_delegate_refusal_releas0/van.sqlite3",
+      "bytes": 1892352,
+      "sha256": "dea978f0f9ac469443d99ee6ac55e3fbde7a2d74886c583cb69993edcef73814"
+    },
+    {
+      "path": "test_a_kind_with_no_delegate_i0/van.sqlite3",
+      "bytes": 1892352,
+      "sha256": "8889ef1dd55fa2dab86d4839051c5f47c55770a0d020cf78de1e6a20d8de9b7e"
+    },
+    {
+      "path": "test_a_command_is_delegated_to0/van.sqlite3",
+      "bytes": 1892352,
+      "sha256": "0c4fa3fba7d6d6d2b0afb8a984b69b1970ef3c3375caef9f47579391a2c11a2e"
+    },
+    {
+      "path": "test_no_usable_path_is_reporte0/van.sqlite3",
+      "bytes": 1892352,
+      "sha256": "8eeb71f4e8086a495271e182f3fbdf4660aff3404faff31b9d4ee2764eb82444"
+    },
+    {
+      "path": "test_a_failed_path_does_not_co0/van.sqlite3",
+      "bytes": 1892352,
+      "sha256": "4d28e47d3c848a91b87b1b8531cce7ee3ef1383afb8d78f1293af0d041cf2751"
+    },
+    {
+      "path": "test_two_independent_routes_ar0/van.sqlite3",
+      "bytes": 1892352,
+      "sha256": "f0c7609251dfd3a2d49983e38ae4b1a255e2a43d173937aeb32a66d35f44f72a"
+    },
+    {
+      "path": "test_two_carriers_on_one_route0/van.sqlite3",
+      "bytes": 1892352,
+      "sha256": "fdfdac593aa3d844fa30f81eec7b6fc8ec1b6d72153e2694d5775416a94cf65f"
+    },
+    {
+      "path": "test_a_matching_digest_from_th0/van.sqlite3",
+      "bytes": 1892352,
+      "sha256": "45c75725c985fc8ae285f509a799ecbf9dfaa926a2674be473482954bb28c77a"
+    },
+    {
+      "path": "test_a_payload_that_does_not_m0/van.sqlite3",
+      "bytes": 1892352,
+      "sha256": "a4b694aed5da12ff7999a4dc531423182d3271914d182fc1cf18b346d7a9bc45"
+    },
+    {
+      "path": "test_a_conflicting_payload_lea0/van.sqlite3",
+      "bytes": 1892352,
+      "sha256": "9a644e1ef1532c5f1e40de41c53935d8fd1804d24277a738eea02a82cc853621"
+    },
+    {
+      "path": "test_the_same_key_with_a_diffe0/van.sqlite3",
+      "bytes": 1892352,
+      "sha256": "f1cc01361083006211ec855ab462a61c9af41b94e43b921dd48694c377981842"
+    },
+    {
+      "path": "test_the_same_key_and_payload_0/van.sqlite3",
+      "bytes": 1892352,
+      "sha256": "806339e3dd84b444f06a13945e9c185bea1313c03b6a79013beb74ef571b9ee7"
+    },
+    {
+      "path": "test_a_new_key_is_admitted0/van.sqlite3",
+      "bytes": 1892352,
+      "sha256": "3b0ef200a679c71b9b6653c163ac3c0f624a1ac0b1ec1339560a63ab1b69b763"
+    },
+    {
+      "path": "test_a_protocol_version_mismat0/van.sqlite3",
+      "bytes": 1892352,
+      "sha256": "7f296310fc9074dc778d485f398fe2abfed3143941ad318e6eccc12c9fc6a5ed"
+    },
+    {
+      "path": "test_an_envelope_carrying_an_o0/van.sqlite3",
+      "bytes": 1892352,
+      "sha256": "6179abbf40351cfbb5de855f9f33e0e1eb72858bc154e26b6e31c9541538bea0"
+    },
+    {
+      "path": "test_a_downstream_envelope_is_0/van.sqlite3",
+      "bytes": 1892352,
+      "sha256": "c843cdd5c6b5b1c8a1839cb86696eb73eec4dd59c532eb5d8b168e4f143f4a23"
+    },
+    {
+      "path": "test_a_frame_from_a_retired_pa0/van.sqlite3",
+      "bytes": 1892352,
+      "sha256": "3d4a45b85516cd67d04fca77d6ce22423e03ef0c031f12682abf0101c0123aef"
+    },
+    {
+      "path": "test_the_current_path_may_do_w0/van.sqlite3",
+      "bytes": 1892352,
+      "sha256": "44bf70cf374b0d7b964b5bb3132aa495fed49a23c178dd2851f228f60eca4652"
+    },
+    {
+      "path": "test_a_closed_session_does_not0/van.sqlite3",
+      "bytes": 1892352,
+      "sha256": "eb59669678751190c932cb8a92ebd996b213bebf7ed4324eff92efc48c2c5f84"
+    },
+    {
+      "path": "test_an_older_session_epoch_ca0/van.sqlite3",
+      "bytes": 1892352,
+      "sha256": "6e31d694a9c5c2cc238c978230652b2a78b1069186bb814cc6dc9d3889223b10"
+    },
+    {
+      "path": "test_another_device_cannot_res0/van.sqlite3",
+      "bytes": 1892352,
+      "sha256": "2f2bd7726e03bddc1ff67b70bc4f6b081c6c32ee0a3052e459eb2c80f1c7c866"
+    },
+    {
+      "path": "test_the_client_replays_from_t0/van.sqlite3",
+      "bytes": 1892352,
+      "sha256": "750fdd908a7a8897bd49671eedccc960674ed8e86715451c3115d3dbbd20ddb1"
+    },
+    {
+      "path": "test_a_session_outlives_the_pa0/van.sqlite3",
+      "bytes": 1892352,
+      "sha256": "285e3df6d70bfff4c45d31f402cab0cef559529b8c76cfaa55238ef9e58fd5b6"
+    }
+  ]
+}
