@@ -3,7 +3,7 @@ import time
 
 import pytest
 
-from test_trading_api import client, _env, _approval_proof, DEVICE_PEM, HDR
+from backend.tests.test_trading_api import client, _env, _approval_proof, DEVICE_PEM, HDR
 from van_gateway.trading.accounts import canonical_action, requires_owner_approval
 
 

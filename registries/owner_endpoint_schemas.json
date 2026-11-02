@@ -8443,6 +8443,85 @@
         ],
         "title": "KnowledgeOperation"
       },
+      "LabelInput": {
+        "properties": {
+          "operation_id": {
+            "type": "string",
+            "pattern": "^[a-zA-Z0-9_-]{16,80}$",
+            "title": "Operation Id"
+          },
+          "scope_hash": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$",
+            "title": "Scope Hash"
+          },
+          "native_id": {
+            "type": "integer",
+            "maximum": 1.8446744073709552e+19,
+            "minimum": 1.0,
+            "title": "Native Id"
+          },
+          "statement_ref": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$",
+            "title": "Statement Ref"
+          },
+          "row_digest": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$",
+            "title": "Row Digest"
+          },
+          "expected_revision": {
+            "type": "integer",
+            "exclusiveMaximum": 2147483648.0,
+            "minimum": 0.0,
+            "title": "Expected Revision"
+          },
+          "action": {
+            "type": "string",
+            "enum": [
+              "SET",
+              "WITHDRAW"
+            ],
+            "title": "Action"
+          },
+          "label": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "DEPOSIT",
+                  "WITHDRAWAL",
+                  "INTERNAL_TRANSFER",
+                  "CREDIT",
+                  "BONUS",
+                  "FEE",
+                  "OTHER_INCOME",
+                  "OTHER_EXPENSE",
+                  "UNRESOLVED"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Label"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "operation_id",
+          "scope_hash",
+          "native_id",
+          "statement_ref",
+          "row_digest",
+          "expected_revision",
+          "action",
+          "label"
+        ],
+        "title": "LabelInput"
+      },
       "LearningProducerView": {
         "properties": {
           "id": {

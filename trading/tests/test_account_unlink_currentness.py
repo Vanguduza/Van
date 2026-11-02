@@ -6,7 +6,7 @@ from types import SimpleNamespace as NS
 from pathlib import Path
 import pytest
 from fastapi.testclient import TestClient
-from test_account_unlink_review import client,_env,isolate,paper,challenge
+from backend.tests.test_account_unlink_review import client,_env,isolate,paper,challenge
 from vati.accounts import AccountRegistry
 
 
@@ -198,7 +198,7 @@ async def test_held_retirement_lease_cannot_expire_during_final_validation(clien
 async def test_expiry_during_last_shred_identity_wait_preserves_credentials_as_partial_unknown(client,tmp_path,monkeypatch):
     import commander.accounts as native
     import commander.account_retirement as retirement
-    from test_account_unlink_review import native_funds
+    from backend.tests.test_account_unlink_review import native_funds
     ac,app=client;_,secret,account=native_funds(tmp_path,monkeypatch)
     body,issued=await challenge(ac,'account_remove',{'alias':account.alias})
     identity=body['approval_proof']['challenge_id'];before=secret.read_bytes();offset=[0];armed=[False];seen=[]

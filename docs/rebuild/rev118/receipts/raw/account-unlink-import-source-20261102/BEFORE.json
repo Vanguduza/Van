@@ -1,0 +1,33 @@
+{
+  "source_before": "4abd5642062e30f5e23fd953b3c30b5517eb12b5e8f39c27dc0497fa6097f00d",
+  "source_unchanged": true,
+  "actual_postgres_owner_PYTHONPATH": "backend:trading:. absolute equivalents",
+  "collection_command": [
+    "/workspace/van-backend-venv-20261025/bin/python",
+    "-B",
+    "-m",
+    "pytest",
+    "/workspace/van-review-2026-10-18/publish/trading/tests/test_account_unlink_currentness.py",
+    "--collect-only",
+    "-q",
+    "--rootdir=/workspace/van-review-2026-10-18/publish",
+    "-c",
+    "/workspace/van-review-2026-10-18/publish/pytest.ini",
+    "-p",
+    "pytest_asyncio.plugin",
+    "-p",
+    "anyio.pytest_plugin",
+    "--basetemp=/tmp/van-label-pg-import-portability-20261102/pytest-before"
+  ],
+  "cwd": "/workspace/van-review-2026-10-18/publish",
+  "exit": 2,
+  "qualified_closure_command": [
+    "/workspace/van-backend-venv-20261025/bin/python",
+    "-B",
+    "-c",
+    "import backend.tests.test_account_unlink_review"
+  ],
+  "qualified_closure_exit": 1,
+  "all_children_waited": true,
+  "at": "2026-11-02T01:45:39.156566+00:00"
+}

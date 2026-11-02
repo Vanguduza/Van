@@ -1,0 +1,11 @@
+{
+  "trading/vati/funding/classification_journal.py": "59c7f1b9b8a1b1dd4fb416319655d43fcc938fdcb7df006aad9ffa4258d75beb",
+  "backend/van_gateway/trading/funding_classification_api.py": "b306abaacc9bf625333e50bc80487bd9d02e4801b8e3bab976e28b8908b62f7f",
+  "trading/tests/test_funding_classification_journal.py": "3b25920ce903b021923f7030995d649b258f6d5a71d00784aaff7e58a170943d",
+  "backend/tests/test_funding_classification_api.py": "70daa49eaee117c8342d546bef0e531ae612f6e00f490519b461530ef1c87f38",
+  "backend/tests/test_funding_classification_authority.py": "b4787821b263b04feabaf44cc50553dfda714ee4d056578c8b5d1b8185b55d77",
+  "trading/vati/funding/runtime.py": "f12a4ba303b40cc77415ce5a3d760690a3bef737f665ff6ef4cc6ce14aec5efc",
+  "trading/vati/core/events.py": "31480e73e4f067b0e980e592e5527a6a943aea6f634775914fe880c485bafd3a",
+  "backend/van_gateway/app.py": "53ddf7e582e30feff0dd823ec57a7d725d686deeb2a0626759a64abf9db08328",
+  "backend/van_gateway/context/forget.py": "73ab8c429419ce1c5aae4911a602586d0cdc3427b1a2b6fa17d4b81d9cae2784"
+}

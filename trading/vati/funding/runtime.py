@@ -110,7 +110,8 @@ def _reported_funding(ledger,event,account_record):
     if not isinstance(mark,dict):return unknown|{'state':observation.get('state','UNMEASURED'),'reason':observation.get('reason','NO_NATIVE_FUNDING_OBSERVATION')}
     if mark.get('schema')=='mt5-account-mark/1':
         from vati.funding.mt5_report import reported_mt5
-        return reported_mt5(ledger,event,account_record,observation,mark,unknown)
+        result=reported_mt5(ledger,event,account_record,observation,mark,unknown)
+        return result|{'owner_classification':_owner_classification(ledger,mark.get('scope_hash'))}
     from vati.core.canonical import canonical_hash
     scope={k:mark.get(k) for k in ('provider','environment','native_account_id','deposit_asset_id','currency')}
     expected_environment='DEMO' if account_record.get('demo') is True else 'LIVE' if account_record.get('demo') is False else None
@@ -133,6 +134,7 @@ def _reported_funding(ledger,event,account_record):
         'scope_hash':mark['scope_hash'],'native_mark':mark,'snapshot_ref':event.hash,
         'statement_ref':observation.get('statement',{}).get('statement_ref'),
         'coverage_windows':facts['coverage_windows'],'conflicts':facts['conflicts'],
+        'owner_classification':_owner_classification(ledger,mark['scope_hash']),
         'movement_count':len(rows),'movements':rows[-100:],'movements_truncated':len(rows)>100,
         'collector_state':observation.get('collector_state','UNKNOWN'),
         'native_deals':{'state':deal_facts['state'],'deal_count':len(deal_facts['deals']),
@@ -141,3 +143,12 @@ def _reported_funding(ledger,event,account_record):
         'period':period_report(ledger,mark['scope_hash']),
         'financial_movements':_financial_projection(ledger,mark['scope_hash']),
         'catch_up_state':observation.get('catch_up_state','UNKNOWN')}
+
+
+def _owner_classification(ledger,scope_hash):
+    # Separate descriptive overlay. Native period/risk/posting callers never consume it.
+    from vati.funding.classification_journal import ClassificationBook,ClassificationError,FLAGS
+    from vati.core.ledger import LedgerError
+    try:return ClassificationBook(ledger).overlay(scope_hash)
+    except (ClassificationError,LedgerError,ValueError,TypeError,KeyError,ArithmeticError):
+        return {'state':'UNKNOWN','reason':'OWNER_CLASSIFICATION_HISTORY_UNAVAILABLE',**FLAGS}

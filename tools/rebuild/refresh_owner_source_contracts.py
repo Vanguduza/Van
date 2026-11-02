@@ -533,6 +533,21 @@ def build(read=None):
             'new_ui_implemented':False,'live_qualified':False,
         }
         for row in funding_rows:row.setdefault('backend_contract_extensions',[]).append(copy.deepcopy(extension))
+    for endpoint in endpoint_doc['endpoints']:
+        if not endpoint['path'].startswith('/v1/trading/funding/classifications'):
+            continue
+        extension={
+            'method':endpoint['method'],'path':endpoint['path'],'endpoint_id':endpoint['endpoint_id'],
+            'source_ref':endpoint['source'],'authentication':endpoint['authentication'],
+            'device_proof_required_when_bound':endpoint['device_proof_required_when_bound'],
+            'source_status':'CANDIDATE_OWNER_ASSERTION_ANDROID_PRODUCER_AND_CATALOG_BINDING_PENDING',
+            'authority':'NONFINANCIAL_OWNER_STATE_ASSERTION_ONLY_NO_NATIVE_MONEY_OR_RISK_AUTHORITY',
+            'canonical_units':['BE-006'],'planned_feature_refs':['VNX-F-ACCOUNTS-15'],
+            'scope':'Structured owner labels over exact original cash-movement facts. Set, correction and withdrawal append immutable owner assertions; original receipts remain distinct from current mutation permission. Actual device proof and the current Auth writer binding are required for a bound caller. Native facts, provider classification, settlement, capital qualification and execution authority remain unchanged. No frontend producer, new command action or financial approval is registered.',
+            'specification':'docs/rebuild/rev118/BE006_CLASSIFICATION_CATALOG_PROPOSAL_20261102.json',
+            'new_ui_implemented':False,'live_qualified':False,
+        }
+        for row in funding_rows:row.setdefault('backend_contract_extensions',[]).append(copy.deepcopy(extension))
     for endpoint in endpoint_doc["endpoints"]:
         if not endpoint["path"].startswith("/v1/trading/charts/"):
             continue

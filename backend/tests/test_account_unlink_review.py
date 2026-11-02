@@ -4,9 +4,9 @@ from decimal import Decimal as D
 from types import SimpleNamespace as NS
 
 import pytest
-from test_trading_api import client,_env
-from test_account_update_review import isolate,challenge
-from test_trading_oauth_scope import act
+from backend.tests.test_trading_api import client,_env
+from backend.tests.test_account_update_review import isolate,challenge
+from backend.tests.test_trading_oauth_scope import act
 from vati.accounts import Account,AccountRegistry,CredentialRef
 from vati.app.account_lease import AccountRuntimeLease
 from vati.app.sqlite_lease import SQLiteLeaseStore

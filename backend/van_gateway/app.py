@@ -1869,6 +1869,17 @@ def create_app() -> FastAPI:
         facts["eligible"] = True
         return facts, binding, 200
 
+    def verified_binding_identity(binding):
+        # Nonsecret facts from the ACTUAL successful validator result. Mutable
+        # proof-use timestamps are not key generations. No lookup can substitute
+        # a different key after that verification.
+        return hashlib.sha256(Store.dumps({
+            'binding_id': binding.binding_id, 'owner_id': binding.owner_principal_id,
+            'device_id': binding.device_id, 'bound_at_ms': binding.bound_at_ms,
+            'device_key_fingerprint': binding.device_key_fingerprint,
+            'public_key_sha256': hashlib.sha256(binding.public_key_pem.encode()).hexdigest(),
+        }).encode()).hexdigest()
+
     async def enforce_device_proof(request: Request, device_id: str) -> JSONResponse | None:
         """Refuse a privileged request from a bound device that did not sign it.
 
@@ -1921,7 +1932,7 @@ def create_app() -> FastAPI:
             signed_target += "?" + raw_query.decode("ascii")
 
         try:
-            await owner_device_bindings.require_proof(
+            verified_binding = await owner_device_bindings.require_proof(
                 device_id=device_id,
                 signature=signature,
                 method=request.method,
@@ -1944,6 +1955,7 @@ def create_app() -> FastAPI:
         except NonceReplay:
             return JSONResponse(status_code=401, content={"detail": "device_proof_replayed"})
         request.state.van_device_proved = True
+        request.state.van_device_proof_binding_identity = verified_binding_identity(verified_binding)
         return None
 
     def throttled_response(detail: str, locked: Throttled) -> JSONResponse:
@@ -3791,6 +3803,31 @@ def create_app() -> FastAPI:
     account_application_drafts = AccountApplicationDrafts(store, artifacts, authorize_account_draft)
     app.state.account_application_drafts = account_application_drafts
     app.include_router(build_account_application_draft_router(account_application_drafts))
+
+    # BE-006 §7.9.5: non-financial owner assertions; no payment/A4 power.
+    from van_gateway.trading.funding_classification_api import (
+        FundingClassifications, LabelError, build_funding_classification_router)
+
+    async def authorize_funding_classification(db, caller, mutating):
+        row = await (await db.execute(
+            'SELECT access_token_hash,revoked_at_unix FROM devices WHERE device_id=?',
+            (caller['device_id'],))).fetchone()
+        if (caller['owner_id'] != 'owner' or not row or row['revoked_at_unix'] is not None
+                or row['access_token_hash'] != caller['access_token_hash']):
+            raise LabelError('FUNDING_LABEL_CALLER_NOT_CURRENT',403)
+        if mutating:
+            policy, binding, _ = await current_device_mutation_policy(caller['device_id'], _db=db)
+            if not policy['eligible'] or policy['proof_required'] and not caller['proved']:
+                raise LabelError('FUNDING_LABEL_OWNER_POLICY_REFUSED',403)
+            verified_identity = caller.get('verified_binding_identity')
+            if policy['proof_required'] or verified_identity is not None:
+                if (binding is None or not isinstance(verified_identity,str)
+                        or re.fullmatch(r'[0-9a-f]{64}',verified_identity) is None
+                        or not hmac.compare_digest(verified_identity,verified_binding_identity(binding))):
+                    raise LabelError('FUNDING_LABEL_PROOF_BINDING_CHANGED',403)
+
+    app.state.funding_classifications = FundingClassifications(store, trading, authorize_funding_classification)
+    app.include_router(build_funding_classification_router(app.state.funding_classifications))
 
     @app.get('/v1/trading/accounts/catalog',response_model=AccountActionCatalog)
     async def trading_account_catalog(request: Request):

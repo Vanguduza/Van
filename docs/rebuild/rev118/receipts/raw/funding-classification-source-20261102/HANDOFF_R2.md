@@ -1,0 +1,9 @@
+# BE006 R2 — verified key/current binding join
+
+`FROZEN_R2.json` pins full nine-path candidate, exact 5c preimages/source equivalence to local c792, source9-r2.zip, candidate-r2.patch and the three-path delta-r1-r2.patch. Original R1 exports,63/1 terminal and reviewer failure remain unchanged.
+
+Only app.py, funding_classification_api.py and the new authority tests changed from R1. The existing validator already returns its immutable verified binding, so no Auth API or return-semantic extension was required. Middleware captures that exact returned key/binding identity after the normal nonce succeeds; the funding writer joins it to the current binding under the existing held Auth fence. A key switched before that writer now refuses without a label event. Newly current real proof succeeds, mutable proof-use timestamps do not invalidate authority, and a caller boolean alone is insufficient. Legacy unbound policy and lawful historical reads remain intact. No authority, financial effect, provider fact or new issuer was added.
+
+Exact unchanged review probe before:1FAIL/10PASS exit1. Final R2_FINAL08:78PASS/1PG capability skip,79 distinct IDs, exit0/72.681s, all9 source hashes unchanged, child reaped. Fresh full feature/report/import/owner controls plus targeted actual proof consumers (HTTP, binding, pairing, bootstrap, session) executed. Final07 collection exit4 is preserved separately; no source changed for selector correction. Original review cold13.749MB fixture untouched. Author final fixtures archived with all member hashes and no FD consumers before bounded cleanup.
+
+This is SOURCE current-key contract evidence using a trusted replacement fixture, not proof of a production rotation/reenrollment exploit or hardware/native admission. Actual PostgreSQL, provider effects, Android producer, canonical catalog mapping, integration derived checks and formal unit/native gates remain open. No generators, commits, pushes, SDK or peer-path edits.

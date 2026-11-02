@@ -1,0 +1,1090 @@
+diff --git a/trading/vati/funding/classification_journal.py b/trading/vati/funding/classification_journal.py
+new file mode 100644
+index 00000000..37887239
+--- /dev/null
++++ b/trading/vati/funding/classification_journal.py
+@@ -0,0 +1,211 @@
++"""BE-006 §7.9.5 owner assertions over original cash facts, never financial authority.
++
++Only structured classification codes are retained, under the existing append-only
++financial audit lifecycle. Withdrawal ends an assertion; it cannot erase history.
++"""
++from decimal import Decimal, localcontext
++import re
++import time
++
++from vati.core.canonical import canonical_hash
++from vati.core.decimal_context import native_decimal_context
++from vati.core.events import EventKind, make_event
++from vati.core.ledger import LedgerError
++from vati.funding.journal import FundingBook
++
++SCHEMA = 'funding-owner-classification/1'
++PRODUCER = 'vati-owner-funding-classification'
++LABELS = frozenset({'DEPOSIT','WITHDRAWAL','INTERNAL_TRANSFER','CREDIT','BONUS','FEE','OTHER_INCOME','OTHER_EXPENSE','UNRESOLVED'})
++HEX = re.compile(r'^[0-9a-f]{64}$')
++OP = re.compile(r'^[a-zA-Z0-9_-]{16,80}$')
++FIELDS = {'operation_id','scope_hash','native_id','statement_ref','row_digest','expected_revision','action','label'}
++FLAGS = {'provider_facts_changed':False,'settlement_qualified':False,'risk_capital_qualified':False,'execution_authority':False}
++
++
++class ClassificationError(ValueError):
++    def __init__(self,code,status=409):
++        self.code,self.status=code,status
++        super().__init__(code)
++
++
++def validate(body):
++    if not isinstance(body,dict) or set(body)!=FIELDS:
++        raise ClassificationError('FUNDING_LABEL_INPUT_INVALID',422)
++    if not isinstance(body['operation_id'],str) or not OP.fullmatch(body['operation_id']):
++        raise ClassificationError('FUNDING_LABEL_INPUT_INVALID',422)
++    for key in ('scope_hash','statement_ref','row_digest'):
++        if not isinstance(body[key],str) or not HEX.fullmatch(body[key]):
++            raise ClassificationError('FUNDING_LABEL_INPUT_INVALID',422)
++    if type(body['native_id']) is not int or not 1<=body['native_id']<=2**64-1 or type(body['expected_revision']) is not int or not 0<=body['expected_revision']<2**31:
++        raise ClassificationError('FUNDING_LABEL_INPUT_INVALID',422)
++    if not ((body['action']=='SET' and isinstance(body['label'],str) and body['label'] in LABELS)
++            or (body['action']=='WITHDRAW' and body['label'] is None)):
++        raise ClassificationError('FUNDING_LABEL_INPUT_INVALID',422)
++    return canonical_hash(body)
++
++
++class ClassificationBook:
++    def __init__(self,ledger,*,clock=None):
++        self.ledger=ledger
++        self.clock=clock or (lambda:int(time.time()*1000))
++
++    def _history(self):
++        if not self.ledger.verify_incremental()[0]:
++            raise ClassificationError('FUNDING_LABEL_HISTORY_UNKNOWN',503)
++        rows=[];heads={};operations=set()
++        for event in self.ledger.iter(EventKind.FUNDING_OWNER_CLASSIFICATION):
++            p=event.payload
++            try:
++                if (not isinstance(p,dict) or set(p)!={'schema','request','request_digest','owner_id','device_id','original','revision','previous_ref','created_at_ms','deadline_ms','provenance',*FLAGS}
++                        or event.producer!=PRODUCER or p['schema']!=SCHEMA or event.hash!=canonical_hash(event.body())
++                        or p['owner_id']!='owner' or not isinstance(p['device_id'],str) or not 1<=len(p['device_id'])<=256
++                        or p['provenance']!='OWNER_ASSERTION' or any(p[k] is not False for k in FLAGS)):
++                    raise ValueError()
++                request=p['request'];digest=validate(request)
++                key=(request['scope_hash'],request['native_id'])
++                old=heads.get(key)
++                if (digest!=p['request_digest'] or request['operation_id'] in operations
++                        or p['revision']!=request['expected_revision']+1 or type(p['revision']) is not int
++                        or request['expected_revision']!=(old.payload['revision'] if old else 0)
++                        or p['previous_ref']!=(old.hash if old else None)
++                        or type(p['created_at_ms']) is not int or type(p['deadline_ms']) is not int
++                        or p['deadline_ms']!=p['created_at_ms']+300_000
++                        or event.event_time_ms!=p['created_at_ms'] or event.received_time_ms!=p['created_at_ms']
++                        or event.correlation_id!='funding-label:'+request['scope_hash']):
++                    raise ValueError()
++                original=p['original']
++                if (not isinstance(original,dict) or set(original)!={'scope','movement','statement_ref','row_digest'}
++                        or original['statement_ref']!=request['statement_ref'] or original['row_digest']!=request['row_digest']
++                        or not isinstance(original['movement'],dict) or original['movement'].get('native_id')!=request['native_id']
++                        or canonical_hash(original['movement'])!=request['row_digest']
++                        or not isinstance(original['scope'],dict) or canonical_hash(original['scope'])!=request['scope_hash']):
++                    raise ValueError()
++                # An audit record must still resolve to its actual original source.
++                self._original(request,current=False,expected=original)
++                operations.add(request['operation_id']);heads[key]=event;rows.append(event)
++            except (KeyError,TypeError,ValueError,ArithmeticError,LedgerError) as exc:
++                raise ClassificationError('FUNDING_LABEL_HISTORY_UNKNOWN',503) from exc
++        return rows,heads
++
++    def _original(self,request,*,current,expected=None):
++        try:return self._resolve_original(request,current=current,expected=expected)
++        except ClassificationError:raise
++        except (KeyError,TypeError,ValueError,ArithmeticError,LedgerError) as exc:
++            raise ClassificationError('FUNDING_LABEL_SOURCE_UNKNOWN',503) from exc
++
++    def _resolve_original(self,request,*,current,expected=None):
++        """Resolve source through its existing typed original owner, never a caller body."""
++        event=next((e for e in self.ledger.iter() if e.hash==request['statement_ref']),None)
++        if event is None:raise ClassificationError('FUNDING_LABEL_SOURCE_UNKNOWN',503)
++        if event.kind is EventKind.FUNDING_STATEMENT:
++            book=FundingBook(self.ledger)
++            fields=('provider','environment','native_account_id','deposit_asset_id','currency')
++        elif event.kind is EventKind.FUNDING_MT5_STATEMENT:
++            from vati.funding.mt5_journal import Mt5FundingBook
++            book=Mt5FundingBook(self.ledger)
++            # Use the existing producer's canonical identity, not guessed MT5 aliases.
++            fields=None
++        else:raise ClassificationError('FUNDING_LABEL_SOURCE_UNKNOWN',503)
++        for source in self.ledger.iter(book.kind,correlation_id=book.correlation_prefix+request['scope_hash']):
++            if not isinstance(source.payload,dict) or not isinstance(source.payload.get('statement'),dict):
++                raise ClassificationError('FUNDING_LABEL_SOURCE_UNKNOWN',503)
++        originals=book._events(request['scope_hash'])
++        if not any(e.hash==event.hash and e.payload['state']=='OBSERVED' for e in originals):
++            raise ClassificationError('FUNDING_LABEL_SOURCE_UNKNOWN',503)
++        facts=book.observations(request['scope_hash'])
++        row=next((r for r in facts['movements'] if r['movement']['native_id']==request['native_id']),None)
++        if (row is None or row['original_statement_ref']!=event.hash
++                or canonical_hash(row['movement'])!=request['row_digest']):
++            raise ClassificationError('FUNDING_LABEL_SOURCE_UNKNOWN',503)
++        statement=book.statement_type.from_body(event.payload['statement'])
++        if fields is None:
++            # Mt5FundingFrame.scope_hash owns this exact shape.
++            scope={'provider':'MT5',**{k:getattr(statement,k) for k in ('login','server','currency','demo')}}
++        else:scope={k:event.payload['statement'][k] for k in fields}
++        original={'scope':scope,'movement':row['movement'],'statement_ref':event.hash,'row_digest':request['row_digest']}
++        if canonical_hash(scope)!=request['scope_hash'] or expected is not None and original!=expected:
++            raise ClassificationError('FUNDING_LABEL_SOURCE_UNKNOWN',503)
++        if current and facts['state']=='CONFLICT':
++            raise ClassificationError('FUNDING_LABEL_SOURCE_CONFLICT',409)
++        return original
++
++    @staticmethod
++    def receipt(event):
++        p=event.payload
++        return {'operation_id':p['request']['operation_id'],'receipt_ref':event.hash,'request_digest':p['request_digest'],
++                'revision':p['revision'],'previous_ref':p['previous_ref'],'state':'ASSERTED' if p['request']['action']=='SET' else 'WITHDRAWN',
++                'created_at_ms':p['created_at_ms'],'original_deadline_ms':p['deadline_ms'],'provenance':'OWNER_ASSERTION',**FLAGS}
++
++    def lookup(self,operation_id):
++        with self.ledger.read_snapshot():
++            rows,heads=self._history()
++            event=next((e for e in rows if e.payload['request']['operation_id']==operation_id),None)
++            if event is None:raise ClassificationError('FUNDING_LABEL_NOT_FOUND',404)
++            p=event.payload;r=p['request'];head=heads[(r['scope_hash'],r['native_id'])]
++            try:self._original(r,current=True);current='CURRENT' if head.hash==event.hash else 'SUPERSEDED'
++            except ClassificationError:current='UNKNOWN'
++            return {'receipt':self.receipt(event),'request':r,'original':p['original'],'actor_device_id':p['device_id'],
++                    'current_assertion_state':current,'current_revision':head.payload['revision'],**FLAGS}
++
++    def publish(self,body,*,device_id,received_at_ms,cancelled=lambda:False):
++        digest=validate(body)
++        if not isinstance(device_id,str) or not 1<=len(device_id)<=256:
++            raise ClassificationError('FUNDING_LABEL_OWNER_REFUSED',403)
++        if type(received_at_ms) is not int or received_at_ms<0:
++            raise ClassificationError('FUNDING_LABEL_INPUT_INVALID',422)
++        with self.ledger.atomic():
++            rows,heads=self._history()
++            existing=next((e for e in rows if e.payload['request']['operation_id']==body['operation_id']),None)
++            if existing:
++                if existing.payload['request_digest']!=digest or existing.payload['device_id']!=device_id:
++                    raise ClassificationError('FUNDING_LABEL_ORIGINAL_CONFLICT',409)
++                return self.receipt(existing)
++            old=heads.get((body['scope_hash'],body['native_id']))
++            if body['expected_revision']!=(old.payload['revision'] if old else 0):
++                raise ClassificationError('FUNDING_LABEL_REVISION_CONFLICT',409)
++            if body['action']=='WITHDRAW' and (old is None or old.payload['request']['action']=='WITHDRAW'):
++                raise ClassificationError('FUNDING_LABEL_NO_CURRENT_ASSERTION',409)
++            original=self._original(body,current=True)
++            if old and old.payload['original']!=original:
++                raise ClassificationError('FUNDING_LABEL_SOURCE_CONFLICT',409)
++            if cancelled():raise ClassificationError('FUNDING_LABEL_CANCELLED',409)
++            now=self.clock()
++            if type(now) is not int or now<received_at_ms or now>=received_at_ms+300_000:
++                raise ClassificationError('FUNDING_LABEL_REQUEST_EXPIRED',409)
++            event=make_event(EventKind.FUNDING_OWNER_CLASSIFICATION,PRODUCER,
++                {'schema':SCHEMA,'request':dict(body),'request_digest':digest,'owner_id':'owner','device_id':device_id,
++                 'original':original,'revision':body['expected_revision']+1,'previous_ref':old.hash if old else None,
++                 'created_at_ms':received_at_ms,'deadline_ms':received_at_ms+300_000,'provenance':'OWNER_ASSERTION',**FLAGS},
++                event_time_ms=received_at_ms,received_time_ms=received_at_ms,correlation_id='funding-label:'+body['scope_hash'])
++            self.ledger.append(event)
++        return self.receipt(event)
++
++    def overlay(self,scope_hash,*,as_of=None):
++        """Descriptive owner basis only. Never feeds native reconciliation/risk."""
++        with self.ledger.read_snapshot():
++            rows,_=self._history();heads={}
++            for event in rows:
++                if event.payload['request']['scope_hash']==scope_hash:
++                    heads[event.payload['request']['native_id']]=event
++                if as_of is not None and event.hash==as_of:break
++            if as_of is not None and not any(e.hash==as_of for e in rows):
++                raise ClassificationError('FUNDING_LABEL_HISTORY_UNKNOWN',503)
++            output=[];totals={};components={}
++            for event in heads.values():
++                p=event.payload;r=p['request']
++                self._original(r,current=as_of is None)
++                output.append({'native_id':r['native_id'],'label':r['label'],'receipt':self.receipt(event)})
++                if r['action']=='SET':
++                    key=(p['original']['scope']['currency'],r['label'])
++                    movement=p['original']['movement']
++                    with localcontext(native_decimal_context()):
++                        if p['original']['scope']['provider']=='MT5':
++                            # Preserve the actual MT5 owner's separate double-text
++                            # facts; no invented settled delta or unitization.
++                            for component in ('profit','commission','swap','fee'):
++                                ck=(*key,component)
++                                components[ck]=components.get(ck,Decimal(0))+Decimal(movement[component])
++                        else:totals[key]=totals.get(key,Decimal(0))+Decimal(movement['delta'])
++            return {'state':'AVAILABLE','assertions':output,'descriptive_totals':[{'currency':k[0],'label':k[1],'delta':str(v)} for k,v in sorted(totals.items())],
++                    'native_component_totals':[{'currency':k[0],'label':k[1],'component':k[2],'amount':str(v)} for k,v in sorted(components.items())],
++                    'basis':'OWNER_ASSERTION_NOT_PROVIDER_RECLASSIFICATION',**FLAGS}
+diff --git a/backend/van_gateway/trading/funding_classification_api.py b/backend/van_gateway/trading/funding_classification_api.py
+new file mode 100644
+index 00000000..055af9b3
+--- /dev/null
++++ b/backend/van_gateway/trading/funding_classification_api.py
+@@ -0,0 +1,159 @@
++"""BE-006 §7.9.5 paired-owner structured assertions, not payment authority.
++
++Lock order is Auth Store writer -> VATI Ledger writer. The Auth transaction is
++read-only but reserves the current device/binding writer until the worker ends.
++Only VATI commits annotation state: this is not a cross-store atomic commit.
++"""
++from __future__ import annotations
++import asyncio
++from contextlib import closing
++import hashlib
++import json
++import sqlite3
++import threading
++import time
++from typing import Literal
++
++import aiosqlite
++from fastapi import APIRouter,Request
++from fastapi.exceptions import RequestValidationError
++from fastapi.responses import JSONResponse
++from fastapi.routing import APIRoute
++from pydantic import BaseModel,ConfigDict,Field
++
++HEADERS={'Cache-Control':'no-store','X-Content-Type-Options':'nosniff'}
++HEX=r'^[0-9a-f]{64}$'
++
++
++class LabelError(ValueError):
++    def __init__(self,code,status=503):self.code,self.status=code,status;super().__init__(code)
++
++
++class LabelInput(BaseModel):
++    model_config=ConfigDict(extra='forbid',strict=True,frozen=True)
++    operation_id:str=Field(pattern=r'^[a-zA-Z0-9_-]{16,80}$')
++    scope_hash:str=Field(pattern=HEX)
++    native_id:int=Field(ge=1,le=2**64-1)
++    statement_ref:str=Field(pattern=HEX)
++    row_digest:str=Field(pattern=HEX)
++    expected_revision:int=Field(ge=0,lt=2**31)
++    action:Literal['SET','WITHDRAW']
++    label:Literal['DEPOSIT','WITHDRAWAL','INTERNAL_TRANSFER','CREDIT','BONUS','FEE','OTHER_INCOME','OTHER_EXPENSE','UNRESOLVED']|None
++
++
++class FundingClassifications:
++    def __init__(self,store,trading,authorize,*,clock=None):
++        self.store,self.trading,self.authorize=store,trading,authorize
++        self.clock=clock or (lambda:int(time.time()*1000))
++        self.tasks=set()
++        self.gate=asyncio.Semaphore(2)
++
++    def _worker(self,operation,caller,body,operation_id,received,cancelled):
++        # Keep trading/private-core imports lazy, inside the existing source owner.
++        if not self.trading.available() or self.trading.ledger_path==':memory:':
++            raise LabelError('FUNDING_LABEL_DURABLE_STORE_UNAVAILABLE')
++        from .service import _import_vati
++        _import_vati()
++        from vati.funding.classification_journal import ClassificationBook,ClassificationError
++        from vati.core.ledger import LedgerError
++        database_errors=(LedgerError,sqlite3.Error,OSError)
++        if self.trading.ledger_path.startswith(('postgres://','postgresql://')):
++            try:
++                import psycopg
++            except ImportError:raise LabelError('FUNDING_LABEL_STORE_IMPLEMENTATION_UNAVAILABLE') from None
++            database_errors=(*database_errors,psycopg.Error)
++        try:
++            _,_,ledger=self.trading._open()
++            with closing(ledger):
++                book=ClassificationBook(ledger,clock=self.clock)
++                if operation=='inspect':return book.lookup(operation_id)
++                return book.publish(body,device_id=caller['device_id'],received_at_ms=received,cancelled=cancelled.is_set)
++        except ClassificationError as error:raise LabelError(error.code,error.status) from None
++        except database_errors:
++            # A commit ACK may be lost. Only independently verified original state
++            # resolves it; never repeat the append or fabricate a failed outcome.
++            if operation=='publish':
++                try:
++                    _,_,ledger=self.trading._open()
++                    with closing(ledger):
++                        result=ClassificationBook(ledger,clock=self.clock).lookup(body['operation_id'])
++                        from vati.core.canonical import canonical_hash
++                        if (result['receipt']['request_digest']==canonical_hash(body)
++                                and result['actor_device_id']==caller['device_id']):return result['receipt']
++                except (ClassificationError,*database_errors):pass
++            raise LabelError('FUNDING_LABEL_OUTCOME_UNKNOWN') from None
++
++    async def _call(self,operation,caller,*,body=None,operation_id=None,received=None,cancelled):
++        async with self.gate:
++            async with self.store.connection() as db:
++                # Current AuthService device/binding writers use this same Store.
++                await db.execute('BEGIN IMMEDIATE')
++                try:
++                    await self.authorize(db,caller,operation=='publish')
++                    if cancelled.is_set():raise LabelError('FUNDING_LABEL_CANCELLED',409)
++                    result=await asyncio.to_thread(self._worker,operation,caller,body,operation_id,received,cancelled)
++                    return result
++                finally:
++                    await db.rollback()  # no auth-side label state exists to commit
++
++    async def call(self,operation,caller,*,body=None,operation_id=None):
++        received=self.clock();cancelled=threading.Event()
++        task=asyncio.create_task(self._call(operation,caller,body=body,operation_id=operation_id,received=received,cancelled=cancelled))
++        self.tasks.add(task);task.add_done_callback(self.tasks.discard)
++        try:return await asyncio.shield(task)
++        except asyncio.CancelledError:
++            cancelled.set()
++            # Do not release the Auth fence while an owned Ledger worker runs.
++            while not task.done():
++                try:await asyncio.shield(task)
++                except asyncio.CancelledError:continue
++                except Exception:break
++            if task.done() and not task.cancelled():task.exception()
++            raise
++
++
++def _distinct(pairs):
++    result={}
++    for key,value in pairs:
++        if key in result:raise ValueError()
++        result[key]=value
++    return result
++
++
++class PrivateLabelRoute(APIRoute):
++    def get_route_handler(self):
++        original=super().get_route_handler()
++        async def handle(request):
++            try:
++                if request.query_params:raise LabelError('FUNDING_LABEL_INPUT_INVALID',422)
++                if request.method=='POST':
++                    raw=await request.body()
++                    if len(raw)>2048:raise LabelError('FUNDING_LABEL_INPUT_CAPACITY',413)
++                    try:json.loads(raw,object_pairs_hook=_distinct,parse_constant=lambda _:(_ for _ in ()).throw(ValueError()))
++                    except (ValueError,RecursionError):raise LabelError('FUNDING_LABEL_INPUT_INVALID',422) from None
++                response=await original(request);response.headers.update(HEADERS);return response
++            except LabelError as error:
++                return JSONResponse(status_code=error.status,content={'detail':{'code':error.code}},headers=HEADERS)
++            except RequestValidationError:
++                return JSONResponse(status_code=422,content={'detail':{'code':'FUNDING_LABEL_INPUT_INVALID'}},headers=HEADERS)
++            except (sqlite3.Error,aiosqlite.Error,OSError):
++                return JSONResponse(status_code=503,content={'detail':{'code':'FUNDING_LABEL_OUTCOME_UNKNOWN'}},headers=HEADERS)
++        return handle
++
++
++def build_funding_classification_router(service):
++    router=APIRouter(prefix='/v1/trading/funding/classifications',tags=['funding-classifications'],route_class=PrivateLabelRoute)
++    def caller(request):
++        device=getattr(request.state,'van_device_id',None)
++        if not device:raise LabelError('FUNDING_LABEL_OWNER_REQUIRED',403)
++        return {'owner_id':'owner','device_id':device,'access_token_hash':hashlib.sha256(request.headers.get('X-Van-Device-Token','').encode()).hexdigest(),
++                'proved':bool(getattr(request.state,'van_device_proved',False)),
++                'verified_binding_identity':getattr(request.state,'van_device_proof_binding_identity',None)}
++    @router.post('')
++    async def publish(request:Request,body:LabelInput):
++        return await service.call('publish',caller(request),body=body.model_dump())
++    @router.get('/{operation_id}')
++    async def inspect(request:Request,operation_id:str):
++        if not 16<=len(operation_id)<=80:raise LabelError('FUNDING_LABEL_INPUT_INVALID',422)
++        return await service.call('inspect',caller(request),operation_id=operation_id)
++    return router
+diff --git a/trading/tests/test_funding_classification_journal.py b/trading/tests/test_funding_classification_journal.py
+new file mode 100644
+index 00000000..25091ec9
+--- /dev/null
++++ b/trading/tests/test_funding_classification_journal.py
+@@ -0,0 +1,217 @@
++"""BE-006 owner assertions with actual SQLite owners; SOURCE fixtures, no venue effects."""
++from contextlib import closing
++from dataclasses import replace
++from decimal import Decimal
++import threading
++
++import pytest
++from vati.core.canonical import canonical_hash
++from vati.core.events import EventKind
++from vati.core.ledger import Ledger
++from vati.funding.native import NativeCashMovement,NativeCashStatement
++from vati.funding.journal import FundingBook
++from vati.funding.classification import classify
++from vati.funding.classification_journal import ClassificationBook,ClassificationError
++
++
++def original(path):
++    with closing(Ledger(path)) as ledger:
++        row=NativeCashMovement(17,'FUTURE_NATIVE_CODE',Decimal('12.34567890'),Decimal('90.00000000'),None,None,100,8)
++        statement=NativeCashStatement('CTRADER','DEMO','fixture',33,9,'EUR',0,200,300,(row,))
++        receipt=FundingBook(ledger,clock=lambda:300).record_statement(statement)
++        body={'operation_id':'original_label_0001','scope_hash':statement.scope_hash,'native_id':17,
++              'statement_ref':receipt['statement_ref'],'row_digest':canonical_hash(row.body()),
++              'expected_revision':0,'action':'SET','label':'DEPOSIT'}
++    return statement,body
++
++
++def publish(book,body,**kw):
++    return book.publish(body,device_id='device-original',received_at_ms=1000,**kw)
++
++
++def test_actual_journal_create_correct_withdraw_original_replay_restart_and_native_invariance(tmp_path):
++    path=tmp_path/'ledger.sqlite';statement,body=original(path)
++    with closing(Ledger(path)) as ledger:
++        book=ClassificationBook(ledger,clock=lambda:1000)
++        native=FundingBook(ledger).observations(statement.scope_hash)
++        first=publish(book,body)
++        assert publish(book,body)==first
++        assert book.lookup(body['operation_id'])['original']['movement']==statement.movements[0].body()
++        corrected={**body,'operation_id':'corrected_label_0002','expected_revision':1,'label':'OTHER_INCOME'}
++        second=publish(book,corrected)
++        assert second['previous_ref']==first['receipt_ref']
++        assert book.lookup(body['operation_id'])['current_assertion_state']=='SUPERSEDED'
++        assert book.overlay(statement.scope_hash)['descriptive_totals']==[{'currency':'EUR','label':'OTHER_INCOME','delta':'12.34567890'}]
++        assert book.overlay(statement.scope_hash,as_of=first['receipt_ref'])['assertions'][0]['label']=='DEPOSIT'
++        third=publish(book,{**corrected,'operation_id':'withdraw_label_0003','action':'WITHDRAW','label':None,'expected_revision':2})
++        assert third['state']=='WITHDRAWN' and not book.overlay(statement.scope_hash)['descriptive_totals']
++        assert FundingBook(ledger).observations(statement.scope_hash)==native
++        assert classify(statement.movements[0].operation,statement.movements[0].delta)['category']=='UNRESOLVED'
++        assert ledger.count(EventKind.FINANCIAL_MOVEMENT)==0
++        assert all(first[k] is False for k in ('execution_authority','risk_capital_qualified','provider_facts_changed','settlement_qualified'))
++    with closing(Ledger(path)) as ledger:
++        book=ClassificationBook(ledger,clock=lambda:999999999)
++        assert publish(book,body)==first  # original expiry never refreshed
++        assert book.lookup(body['operation_id'])['receipt']==first
++        assert ledger.count(EventKind.FUNDING_OWNER_CLASSIFICATION)==3
++
++
++@pytest.mark.parametrize('change,code',[
++    ({'expected_revision':2},'REVISION_CONFLICT'),({'statement_ref':'0'*64},'SOURCE_UNKNOWN'),
++    ({'row_digest':'0'*64},'SOURCE_UNKNOWN'),({'scope_hash':'0'*64},'SOURCE_UNKNOWN'),
++    ({'native_id':18},'SOURCE_UNKNOWN'),({'action':'WITHDRAW','label':None},'NO_CURRENT_ASSERTION')])
++def test_exact_original_source_and_generation_negative(tmp_path,change,code):
++    path=tmp_path/'facts';_,body=original(path)
++    with closing(Ledger(path)) as ledger:
++        with pytest.raises(ClassificationError,match=code):publish(ClassificationBook(ledger,clock=lambda:1000),body|change)
++        assert ledger.count(EventKind.FUNDING_OWNER_CLASSIFICATION)==0
++
++
++def test_same_operation_changed_intent_or_actor_cannot_retarget(tmp_path):
++    path=tmp_path/'facts';_,body=original(path)
++    with closing(Ledger(path)) as ledger:
++        book=ClassificationBook(ledger,clock=lambda:1000);first=publish(book,body)
++        for changed in (body|{'label':'FEE'},body|{'expected_revision':1}):
++            with pytest.raises(ClassificationError,match='ORIGINAL_CONFLICT'):publish(book,changed)
++        with pytest.raises(ClassificationError,match='ORIGINAL_CONFLICT'):
++            book.publish(body,device_id='other-device',received_at_ms=1000)
++        assert book.lookup(body['operation_id'])['receipt']==first
++
++
++@pytest.mark.parametrize('now,cancelled,code',[(301000,False,'EXPIRED'),(999,False,'EXPIRED'),(1000,True,'CANCELLED')])
++def test_final_deadline_and_cancellation_no_append(tmp_path,now,cancelled,code):
++    path=tmp_path/'facts';_,body=original(path)
++    with closing(Ledger(path)) as ledger:
++        with pytest.raises(ClassificationError,match=code):publish(ClassificationBook(ledger,clock=lambda:now),body,cancelled=lambda:cancelled)
++        assert ledger.count(EventKind.FUNDING_OWNER_CLASSIFICATION)==0
++
++
++def test_source_conflict_blocks_new_assertion_but_original_history_remains(tmp_path):
++    path=tmp_path/'facts';statement,body=original(path)
++    with closing(Ledger(path)) as ledger:
++        book=ClassificationBook(ledger,clock=lambda:1000);receipt=publish(book,body)
++        conflict=replace(statement,movements=(replace(statement.movements[0],delta=Decimal('13.00000000')),))
++        assert FundingBook(ledger,clock=lambda:300).record_statement(conflict)['state']=='CONFLICT'
++        read=book.lookup(body['operation_id'])
++        assert read['receipt']==receipt and read['current_assertion_state']=='UNKNOWN'
++        with pytest.raises(ClassificationError,match='SOURCE_CONFLICT'):
++            publish(book,body|{'operation_id':'new_original_00002','expected_revision':1})
++        assert publish(book,body)==receipt
++        assert book.overlay(statement.scope_hash,as_of=receipt['receipt_ref'])['assertions'][0]['label']=='DEPOSIT'
++
++
++def test_two_real_ledger_writers_cas_and_exact_replay(tmp_path):
++    path=tmp_path/'facts';_,body=original(path);barrier=threading.Barrier(2);out=[]
++    def run(op):
++        with closing(Ledger(path)) as ledger:
++            barrier.wait()
++            try:out.append(publish(ClassificationBook(ledger,clock=lambda:1000),body|{'operation_id':op}))
++            except ClassificationError as e:out.append(e.code)
++    threads=[threading.Thread(target=run,args=(f'competing_label_000{i}',)) for i in range(2)]
++    for t in threads:t.start()
++    for t in threads:t.join(10);assert not t.is_alive()
++    assert sum(isinstance(v,dict) for v in out)==1 and 'FUNDING_LABEL_REVISION_CONFLICT' in out
++    with closing(Ledger(path)) as ledger:assert ledger.count(EventKind.FUNDING_OWNER_CLASSIFICATION)==1
++
++
++@pytest.mark.parametrize('field,value',[('revision',900),('original',[]),('request',[]),('owner_id','foreign'),('previous_ref','0'*64)])
++def test_tampered_label_history_holds_without_reconstruction(tmp_path,field,value):
++    import json
++    path=tmp_path/'facts';_,body=original(path)
++    with closing(Ledger(path)) as ledger:
++        book=ClassificationBook(ledger,clock=lambda:1000);publish(book,body)
++        row=ledger._conn.execute('SELECT seq,payload_json FROM events WHERE kind=?',(EventKind.FUNDING_OWNER_CLASSIFICATION.value,)).fetchone()
++        p=json.loads(row[1]);p[field]=value
++        ledger._conn.execute('UPDATE events SET payload_json=? WHERE seq=?',(json.dumps(p),row[0]));ledger._conn.commit()
++    with closing(Ledger(path)) as ledger:
++        with pytest.raises(ClassificationError,match='HISTORY_UNKNOWN'):ClassificationBook(ledger).lookup(body['operation_id'])
++        with pytest.raises(ClassificationError,match='HISTORY_UNKNOWN'):publish(ClassificationBook(ledger,clock=lambda:1000),body|{'operation_id':'no_replacement_0002'})
++
++
++def test_actual_native_capture_owner_report_overlay_never_changes_raw_economic_view(tmp_path):
++    from test_funding_runtime import setup
++    from test_funding_owner_reports import profile,snapshot
++    from vati.app.portfolio import account_states
++    from vati.funding.runtime import capture_funding
++    ledger,transport,adapter=setup(tmp_path)
++    with closing(ledger):
++        result=capture_funding(ledger,adapter,adapter.sync_account(),now_ms=3000)
++        snapshot(ledger,funding_observation=result)
++        before=account_states(ledger,[profile()],now_ms=3000)[0]
++        target=FundingBook(ledger).observations(before['funding']['scope_hash'])['movements'][0]
++        body={'operation_id':'report_overlay_0001','scope_hash':before['funding']['scope_hash'],
++              'native_id':target['movement']['native_id'],'statement_ref':target['original_statement_ref'],
++              'row_digest':canonical_hash(target['movement']),'expected_revision':0,'action':'SET','label':'FEE'}
++        receipt=publish(ClassificationBook(ledger,clock=lambda:1000),body)
++        after=account_states(ledger,[profile()],now_ms=3000)[0]
++        overlay=after['funding'].pop('owner_classification')
++        before['funding'].pop('owner_classification')
++        assert after==before
++        assert overlay['assertions'][0]['receipt']==receipt
++        assert overlay['descriptive_totals'][0]['label']=='FEE'
++        assert overlay['execution_authority'] is overlay['risk_capital_qualified'] is False
++        assert not any(name in {'ProtoOANewOrderReq','ProtoOAWithdrawReq'} for name,_ in transport.requests)
++
++
++@pytest.mark.parametrize('source_body',[[],{}, {'statement':[]}])
++def test_typed_original_source_corruption_is_explicit_unknown_not_reconstructed(tmp_path,source_body):
++    from vati.core.events import make_event
++    path=tmp_path/'facts';_,body=original(path)
++    with closing(Ledger(path)) as ledger:
++        # A modeled faulty producer with a valid chain still lacks original typed proof.
++        event=make_event(EventKind.FUNDING_STATEMENT,'vati-native-funding',source_body,
++                         event_time_ms=300,received_time_ms=300,correlation_id='funding:'+body['scope_hash'])
++        ledger.append(event)
++        with pytest.raises(ClassificationError,match='SOURCE_UNKNOWN'):
++            publish(ClassificationBook(ledger,clock=lambda:1000),body)
++        assert ledger.count(EventKind.FUNDING_OWNER_CLASSIFICATION)==0
++
++
++def test_supported_postgres_owner_roundtrip_when_actual_isolated_fixture_available():
++    import os,uuid
++    if os.environ.get('VATI_TEST_PG_ISOLATED_FIXTURE')!='1' or not os.environ.get('VATI_TEST_PG_DSN'):
++        pytest.skip('Actual owned PostgreSQL fixture unavailable; SQLite is not PostgreSQL qualification')
++    from vati.core.ledger_pg import PostgresLedger
++    name='owner-classification-'+uuid.uuid4().hex
++    with closing(PostgresLedger(os.environ['VATI_TEST_PG_DSN'],ledger_name=name)) as ledger:
++        row=NativeCashMovement(17,'FUTURE_NATIVE_CODE',Decimal('12.34567890'),Decimal('90.00000000'),None,None,100,8)
++        statement=NativeCashStatement('CTRADER','DEMO','fixture',33,9,'EUR',0,200,300,(row,))
++        ref=FundingBook(ledger,clock=lambda:300).record_statement(statement)['statement_ref']
++        body={'operation_id':'pg_classification_0001','scope_hash':statement.scope_hash,'native_id':17,'statement_ref':ref,
++              'row_digest':canonical_hash(row.body()),'expected_revision':0,'action':'SET','label':'FEE'}
++        receipt=publish(ClassificationBook(ledger,clock=lambda:1000),body)
++    with closing(PostgresLedger(os.environ['VATI_TEST_PG_DSN'],ledger_name=name)) as ledger:
++        book=ClassificationBook(ledger,clock=lambda:999999999)
++        assert publish(book,body)==receipt and book.lookup(body['operation_id'])['receipt']==receipt
++
++
++def test_original_receipt_fresh_interpreter_readback(tmp_path):
++    import os,json,subprocess,sys
++    path=tmp_path/'facts';_,body=original(path)
++    with closing(Ledger(path)) as ledger:receipt=publish(ClassificationBook(ledger,clock=lambda:1000),body)
++    command=[sys.executable,'-B','-c',
++        'import sys,json;from vati.core.ledger import Ledger;from vati.funding.classification_journal import ClassificationBook;l=Ledger(sys.argv[1]);print(json.dumps(ClassificationBook(l).lookup(sys.argv[2])["receipt"],sort_keys=True));l.close()',str(path),body['operation_id']]
++    result=subprocess.run(command,capture_output=True,text=True,timeout=15,env={**os.environ,'PYTHONDONTWRITEBYTECODE':'1'})
++    assert result.returncode==0,result.stderr
++    assert json.loads(result.stdout)==receipt
++
++
++def test_existing_mt5_owner_original_scope_and_separate_native_components(tmp_path):
++    from test_mt5_funding_contract import frame,cash
++    from vati.funding.mt5 import Mt5CashFact
++    from vati.funding.mt5_journal import Mt5FundingBook
++    from dataclasses import replace
++    f=replace(frame(),movements=(Mt5CashFact.from_body(cash()),))
++    with closing(Ledger(tmp_path/'mt5')) as ledger:
++        _,receipt=Mt5FundingBook(ledger,clock=lambda:10000).capture(f)
++        body={'operation_id':'mt5_owner_label_0001','scope_hash':f.scope_hash,'native_id':f.movements[0].native_id,
++              'statement_ref':receipt['statement_ref'],'row_digest':canonical_hash(f.movements[0].body()),
++              'expected_revision':0,'action':'SET','label':'DEPOSIT'}
++        book=ClassificationBook(ledger,clock=lambda:11000)
++        result=book.publish(body,device_id='device-original',received_at_ms=11000)
++        assert book.lookup(body['operation_id'])['receipt']==result
++        overlay=book.overlay(f.scope_hash)
++        assert overlay['descriptive_totals']==[]
++        components={r['component']:r['amount'] for r in overlay['native_component_totals']}
++        assert components=={'profit':'10000','commission':'0','swap':'0','fee':'-1.3E-7'}
++        assert overlay['execution_authority'] is overlay['settlement_qualified'] is False
+diff --git a/backend/tests/test_funding_classification_api.py b/backend/tests/test_funding_classification_api.py
+new file mode 100644
+index 00000000..276f531e
+--- /dev/null
++++ b/backend/tests/test_funding_classification_api.py
+@@ -0,0 +1,144 @@
++"""Actual paired HTTP -> Auth writer -> existing SQLite Ledger, no provider effects."""
++import asyncio
++from contextlib import closing,contextmanager
++import hashlib
++import json
++import threading
++
++import pytest
++import pytest_asyncio
++from httpx import ASGITransport,AsyncClient
++from test_device_proof_enforcement import _settings,_paired,_base_headers,_bind,_proof_headers
++from test_funding_classification_journal import original
++from van_gateway.app import create_app
++from van_gateway.context.forget import OwnerMemory
++from vati.core.ledger import Ledger
++from vati.core.events import EventKind
++
++PATH='/v1/trading/funding/classifications'
++
++@pytest_asyncio.fixture
++async def label_client(_settings,tmp_path):
++    path=tmp_path/'funding.sqlite';statement,body=original(path)
++    app=create_app();await app.state.store.migrate();device=await _paired(app)
++    app.state.trading.ledger_path=str(path)
++    async with AsyncClient(transport=ASGITransport(app=app),base_url='http://test') as ac:
++        yield ac,app,device,statement,body,path
++    assert not app.state.funding_classifications.tasks
++
++async def post(client,body=None,key=None):
++    ac,app,device,statement,default,path=client;body=body or default
++    headers=_base_headers(device)
++    if key:
++        raw=json.dumps(body).encode();headers.update(_proof_headers(key,method='POST',path=PATH,device_id=device.device.device_id,body=raw));headers['Content-Type']='application/json'
++        return await ac.post(PATH,content=raw,headers=headers)
++    return await ac.post(PATH,json=body,headers=headers)
++
++@pytest.mark.asyncio
++async def test_paired_http_complete_lifecycle_independent_readback_and_retention_disclosure(label_client):
++    ac,app,device,statement,body,path=label_client
++    result=await post(label_client);assert result.status_code==200,result.text
++    receipt=result.json();assert receipt['state']=='ASSERTED'
++    read=await ac.get(PATH+'/'+body['operation_id'],headers=_base_headers(device))
++    assert read.status_code==200 and read.json()['receipt']==receipt
++    assert read.headers['cache-control']=='no-store'
++    assert (await post(label_client)).json()==receipt
++    corrected=body|{'operation_id':'correct_http_00002','expected_revision':1,'label':'FEE'}
++    assert (await post(label_client,corrected)).status_code==200
++    withdrawal=body|{'operation_id':'withdraw_http_0003','expected_revision':2,'action':'WITHDRAW','label':None}
++    assert (await post(label_client,withdrawal)).json()['state']=='WITHDRAWN'
++    from vati.funding.classification_journal import ClassificationBook
++    with closing(Ledger(path)) as ledger:
++        assert ClassificationBook(ledger).lookup(body['operation_id'])['receipt']==receipt
++        assert ledger.count(EventKind.FUNDING_OWNER_CLASSIFICATION)==3
++        assert ledger.count(EventKind.FINANCIAL_MOVEMENT)==0
++    inventory=await OwnerMemory(app.state.store).inventory()
++    assert 'funding_owner_classifications' in inventory['kept_deliberately']
++    await OwnerMemory(app.state.store).forget_all()
++    assert (await ac.get(PATH+'/'+body['operation_id'],headers=_base_headers(device))).json()['receipt']==receipt
++    assert not await app.state.store.fetchall('SELECT * FROM missions')
++
++@pytest.mark.asyncio
++async def test_current_real_bound_proof_required_valid_and_single_use(label_client):
++    ac,app,device,statement,body,path=label_client
++    key=await _bind(app,device.device.device_id)
++    assert (await post(label_client)).status_code==401
++    raw=json.dumps(body).encode();headers={**_base_headers(device),**_proof_headers(key,method='POST',path=PATH,device_id=device.device.device_id,body=raw),'Content-Type':'application/json'}
++    result=await ac.post(PATH,content=raw,headers=headers);assert result.status_code==200,result.text
++    assert (await ac.post(PATH,content=raw,headers=headers)).status_code==401
++    assert (await ac.get(PATH+'/'+body['operation_id'],headers=_base_headers(device))).status_code==200
++
++@pytest.mark.asyncio
++@pytest.mark.parametrize('field,value',[('owner_id','foreign'),('password','secret-value'),('delta','9.0'),('profile_id','fake'),('expires_at_ms',999999999),('label','private-note')])
++async def test_unknown_secret_or_source_override_fields_not_retained(label_client,field,value):
++    result=await post(label_client,label_client[4]|{field:value})
++    assert result.status_code==422 and str(value) not in result.text
++    with closing(Ledger(label_client[5])) as ledger:assert ledger.count(EventKind.FUNDING_OWNER_CLASSIFICATION)==0
++
++@pytest.mark.asyncio
++async def test_duplicate_and_oversized_input_never_echoed(label_client):
++    ac,app,device,_,body,path=label_client
++    for raw,status in [(json.dumps(body)[:-1]+',"label":"FEE"}',422),('{"password":"'+'private-'*1000+'"}',413),('[]',422)]:
++        r=await ac.post(PATH,content=raw,headers={**_base_headers(device),'Content-Type':'application/json'})
++        assert r.status_code==status and 'private-' not in r.text
++
++@pytest.mark.asyncio
++async def test_same_id_parallel_http_exactly_one_event(label_client):
++    results=await asyncio.gather(post(label_client),post(label_client))
++    assert all(r.status_code==200 for r in results),[r.text for r in results]
++    assert results[0].json()==results[1].json()
++    with closing(Ledger(label_client[5])) as ledger:assert ledger.count(EventKind.FUNDING_OWNER_CLASSIFICATION)==1
++
++@pytest.mark.asyncio
++async def test_actual_commit_ack_loss_resolves_original_not_replacement(label_client,monkeypatch):
++    app=label_client[1];open_original=app.state.trading._open;lost=False
++    def opened():
++        nonlocal lost
++        kind,make,ledger=open_original();atomic=ledger.atomic
++        @contextmanager
++        def ack():
++            nonlocal lost
++            outer=not ledger._conn.in_transaction
++            with atomic() as tx:yield tx
++            if outer and not lost and ledger.count(EventKind.FUNDING_OWNER_CLASSIFICATION):
++                lost=True;raise OSError('fixture secret ACK')
++        ledger.atomic=ack;return kind,make,ledger
++    monkeypatch.setattr(app.state.trading,'_open',opened)
++    result=await post(label_client)
++    assert lost and result.status_code==200,result.text
++    assert (await post(label_client)).json()==result.json()
++    with closing(Ledger(label_client[5])) as ledger:assert ledger.count(EventKind.FUNDING_OWNER_CLASSIFICATION)==1
++
++
++@pytest.mark.asyncio
++async def test_real_original_http_accounts_read_selection_to_assertion_to_owner_report(label_client,tmp_path,monkeypatch):
++    from test_funding_runtime import setup
++    from test_funding_owner_reports import profile,snapshot
++    from vati.funding.runtime import capture_funding
++    from vati.core.canonical import canonical_hash
++    ac,app,device,_,_,_=label_client
++    source=tmp_path/'source';source.mkdir()
++    ledger,transport,adapter=setup(source)
++    with closing(ledger):
++        observation=capture_funding(ledger,adapter,adapter.sync_account(),now_ms=3000)
++        snapshot(ledger,funding_observation=observation)
++    registry=tmp_path/'accounts.json'
++    registry.write_text(json.dumps({'schema_version':1,'accounts':[profile()|{'credential_ref':{'env_var':'FIXTURE_NOT_RESOLVED'}}]}))
++    app.state.trading.accounts_registry=str(registry);app.state.trading.ledger_path=str(source/'facts.sqlite')
++    import van_gateway.trading.service as service_module
++    from types import SimpleNamespace
++    monkeypatch.setattr(service_module,'time',SimpleNamespace(time=lambda:3))  # fixed report as-of, not Auth clock
++    before=await ac.get('/v1/trading/accounts',headers=_base_headers(device))
++    assert before.status_code==200,before.text
++    funding=before.json()['accounts'][0]['funding'];row=funding['movements'][0]
++    body={'operation_id':'native_http_label_0001','scope_hash':funding['scope_hash'],'native_id':row['movement']['native_id'],
++          'statement_ref':row['original_statement_ref'],'row_digest':canonical_hash(row['movement']),
++          'expected_revision':0,'action':'SET','label':'FEE'}
++    receipt=await post(label_client,body);assert receipt.status_code==200,receipt.text
++    after=await ac.get('/v1/trading/accounts',headers=_base_headers(device));assert after.status_code==200
++    a=after.json()['accounts'][0];b=before.json()['accounts'][0]
++    overlay=a['funding'].pop('owner_classification');b['funding'].pop('owner_classification')
++    assert a==b
++    assert overlay['assertions'][0]['receipt']==receipt.json()
++    assert overlay['descriptive_totals'][0]['delta']==row['movement']['delta']
++    assert not any(name in {'ProtoOANewOrderReq','ProtoOAWithdrawReq'} for name,_ in transport.requests)
+diff --git a/backend/tests/test_funding_classification_authority.py b/backend/tests/test_funding_classification_authority.py
+new file mode 100644
+index 00000000..ab95a4d3
+--- /dev/null
++++ b/backend/tests/test_funding_classification_authority.py
+@@ -0,0 +1,193 @@
++"""Actual Auth writer ordering, cancellation and current-owner controls, SOURCE only."""
++import asyncio
++from contextlib import closing
++import hashlib
++import threading
++
++import pytest
++from test_funding_classification_api import label_client,post,PATH
++from test_device_proof_enforcement import _settings,_base_headers,_paired
++from van_gateway.trading.funding_classification_api import LabelError
++from vati.core.ledger import Ledger
++from vati.core.events import EventKind
++
++
++def caller(client):
++    device=client[2]
++    return {'owner_id':'owner','device_id':device.device.device_id,
++            'access_token_hash':hashlib.sha256(device.access_token.encode()).hexdigest(),'proved':False}
++
++
++@pytest.mark.asyncio
++async def test_revoked_token_changed_and_wrong_owner_refuse_under_actual_writer(label_client):
++    service=label_client[1].state.funding_classifications;who=caller(label_client)
++    for wrong in (who|{'owner_id':'foreign'},who|{'access_token_hash':'0'*64},who|{'device_id':'foreign-device'}):
++        with pytest.raises(LabelError,match='CALLER_NOT_CURRENT'):await service.call('publish',wrong,body=label_client[4])
++    async with label_client[1].state.store.connection() as db:
++        await db.execute('UPDATE devices SET revoked_at_unix=1 WHERE device_id=?',(who['device_id'],));await db.commit()
++    assert (await post(label_client)).status_code==401
++    with closing(Ledger(label_client[5])) as ledger:assert ledger.count(EventKind.FUNDING_OWNER_CLASSIFICATION)==0
++
++
++@pytest.mark.asyncio
++async def test_strict_absent_binding_refuses_without_narrowing_legacy(label_client,monkeypatch):
++    app=label_client[1]
++    # The app policy consumes the actual Settings object, not a fabricated grant.
++    from van_gateway.config import get_settings
++    monkeypatch.setattr(get_settings(),'require_device_binding',True)
++    r=await post(label_client);assert r.status_code in (401,403),r.text
++    with closing(Ledger(label_client[5])) as ledger:assert ledger.count(EventKind.FUNDING_OWNER_CLASSIFICATION)==0
++
++
++@pytest.mark.asyncio
++async def test_queued_revocation_wins_auth_writer_no_annotation(label_client):
++    app=label_client[1];service=app.state.funding_classifications;who=caller(label_client)
++    async with app.state.store.connection() as db:
++        await db.execute('BEGIN IMMEDIATE')
++        pending=asyncio.create_task(service.call('publish',who,body=label_client[4]))
++        await asyncio.sleep(.05)
++        await db.execute('UPDATE devices SET revoked_at_unix=1 WHERE device_id=?',(who['device_id'],));await db.commit()
++    with pytest.raises(LabelError,match='CALLER_NOT_CURRENT'):await pending
++    with closing(Ledger(label_client[5])) as ledger:assert ledger.count(EventKind.FUNDING_OWNER_CLASSIFICATION)==0
++
++
++@pytest.mark.asyncio
++async def test_auth_fence_stays_held_during_ledger_wait_then_revocation(label_client,monkeypatch):
++    app=label_client[1];service=app.state.funding_classifications;who=caller(label_client)
++    entered=threading.Event();worker=service._worker
++    def observed(*a,**k):entered.set();return worker(*a,**k)
++    monkeypatch.setattr(service,'_worker',observed)
++    with closing(Ledger(label_client[5])) as blocker:
++        with blocker.atomic():
++            pending=asyncio.create_task(service.call('publish',who,body=label_client[4]))
++            assert await asyncio.to_thread(entered.wait,5)
++            started=asyncio.Event()
++            async def revoke():
++                async with app.state.store.connection() as db:
++                    started.set();await db.execute('BEGIN IMMEDIATE')
++                    await db.execute('UPDATE devices SET revoked_at_unix=1 WHERE device_id=?',(who['device_id'],));await db.commit()
++            revoker=asyncio.create_task(revoke());await started.wait();await asyncio.sleep(.05)
++            assert not revoker.done()
++        receipt=await pending
++    await revoker
++    assert receipt['state']=='ASSERTED'
++    assert (await post(label_client)).status_code==401
++
++
++@pytest.mark.asyncio
++async def test_final_expiry_after_ledger_wait_never_uses_precomputed_clock(label_client,monkeypatch):
++    app=label_client[1];service=app.state.funding_classifications;now=[1000];service.clock=lambda:now[0]
++    entered=threading.Event();worker=service._worker
++    def observed(*a,**k):entered.set();return worker(*a,**k)
++    monkeypatch.setattr(service,'_worker',observed)
++    with closing(Ledger(label_client[5])) as blocker:
++        with blocker.atomic():
++            pending=asyncio.create_task(service.call('publish',caller(label_client),body=label_client[4]))
++            assert await asyncio.to_thread(entered.wait,5);now[0]=301000
++        with pytest.raises(LabelError,match='REQUEST_EXPIRED'):await pending
++    with closing(Ledger(label_client[5])) as ledger:assert ledger.count(EventKind.FUNDING_OWNER_CLASSIFICATION)==0
++
++
++@pytest.mark.asyncio
++async def test_pre_append_cancel_holds_auth_fence_until_thread_reaped(label_client,monkeypatch):
++    app=label_client[1];service=app.state.funding_classifications
++    entered=threading.Event();release=threading.Event();worker=service._worker
++    def delayed(*a,**k):entered.set();assert release.wait(5);return worker(*a,**k)
++    monkeypatch.setattr(service,'_worker',delayed)
++    pending=asyncio.create_task(service.call('publish',caller(label_client),body=label_client[4]))
++    assert await asyncio.to_thread(entered.wait,5);pending.cancel();await asyncio.sleep(.02)
++    assert not pending.done();release.set()
++    with pytest.raises(asyncio.CancelledError):await pending
++    assert not service.tasks
++    with closing(Ledger(label_client[5])) as ledger:assert ledger.count(EventKind.FUNDING_OWNER_CLASSIFICATION)==0
++
++
++@pytest.mark.asyncio
++async def test_cancel_after_commit_original_receipt_recovers_no_replacement(label_client,monkeypatch):
++    service=label_client[1].state.funding_classifications;worker=service._worker
++    committed=threading.Event();release=threading.Event()
++    def delayed(*a,**k):
++        result=worker(*a,**k);committed.set();assert release.wait(5);return result
++    monkeypatch.setattr(service,'_worker',delayed)
++    pending=asyncio.create_task(service.call('publish',caller(label_client),body=label_client[4]))
++    assert await asyncio.to_thread(committed.wait,5);pending.cancel();await asyncio.sleep(.02)
++    assert not pending.done();release.set()
++    with pytest.raises(asyncio.CancelledError):await pending
++    monkeypatch.setattr(service,'_worker',worker)
++    receipt=await service.call('publish',caller(label_client),body=label_client[4])
++    read=await service.call('inspect',caller(label_client),operation_id=label_client[4]['operation_id'])
++    assert read['receipt']==receipt
++    with closing(Ledger(label_client[5])) as ledger:assert ledger.count(EventKind.FUNDING_OWNER_CLASSIFICATION)==1
++
++
++@pytest.mark.asyncio
++async def test_actual_verified_old_key_fact_refuses_then_current_new_key_proof_succeeds(label_client,monkeypatch):
++    """Trusted key-replacement SOURCE model, no production rotation API claim."""
++    from test_device_proof_enforcement import _bind
++    from test_owner_device_binding import _keypair
++    from van_gateway.auth.device_binding import key_fingerprint
++    ac,app,device,_,body,path=label_client
++    old=await _bind(app,device.device.device_id);pem,new=_keypair()
++    service=app.state.funding_classifications;call=service.call;seen=[]
++    async def replaced(operation,who,**kwargs):
++        if operation=='publish' and not seen:
++            assert who['proved'] is True and len(who['verified_binding_identity'])==64
++            binding=await app.state.owner_device_bindings.active()
++            await app.state.store.execute('UPDATE owner_device_bindings SET public_key_pem=?,device_key_fingerprint=? WHERE binding_id=?',
++                (pem,key_fingerprint(pem),binding.binding_id));seen.append(who['verified_binding_identity'])
++        return await call(operation,who,**kwargs)
++    monkeypatch.setattr(service,'call',replaced)
++    refused=await post(label_client,key=old)
++    assert refused.status_code==403 and refused.json()['detail']['code']=='FUNDING_LABEL_PROOF_BINDING_CHANGED'
++    with closing(Ledger(path)) as ledger:assert ledger.count(EventKind.FUNDING_OWNER_CLASSIFICATION)==0
++    assert (await post(label_client,key=old)).status_code==401
++    current=await post(label_client,key=new);assert current.status_code==200,current.text
++    assert (await post(label_client,key=new)).json()==current.json()
++    assert (await ac.get(PATH+'/'+body['operation_id'],headers=_base_headers(device))).json()['receipt']==current.json()
++    nonces=await app.state.store.fetchall('SELECT nonce FROM command_nonces WHERE device_id=?',(device.device.device_id,))
++    assert len(nonces)==3  # old verified request + two distinct new-key requests, no second verifier pass
++    with closing(Ledger(path)) as ledger:assert ledger.count(EventKind.FUNDING_OWNER_CLASSIFICATION)==1
++
++
++@pytest.mark.asyncio
++async def test_capture_comes_from_actual_validator_result_not_later_lookup(label_client,monkeypatch):
++    from test_device_proof_enforcement import _bind
++    from test_owner_device_binding import _keypair
++    from van_gateway.auth.device_binding import key_fingerprint
++    app=label_client[1];device=label_client[2]
++    old=await _bind(app,device.device.device_id);pem,_=_keypair()
++    validator=app.state.owner_device_bindings.require_proof;seen=[]
++    async def verify_then_replace(**kwargs):
++        verified=await validator(**kwargs)  # real signature validation, once
++        if not seen:
++            await app.state.store.execute('UPDATE owner_device_bindings SET public_key_pem=?,device_key_fingerprint=? WHERE binding_id=?',
++                (pem,key_fingerprint(pem),verified.binding_id));seen.append(True)
++        return verified  # immutable original key, never the newly current key
++    monkeypatch.setattr(app.state.owner_device_bindings,'require_proof',verify_then_replace)
++    result=await post(label_client,key=old)
++    assert seen and result.status_code==403,result.text
++    with closing(Ledger(label_client[5])) as ledger:assert ledger.count(EventKind.FUNDING_OWNER_CLASSIFICATION)==0
++
++
++@pytest.mark.asyncio
++async def test_proof_use_timestamp_is_not_a_key_generation(label_client,monkeypatch):
++    from test_device_proof_enforcement import _bind
++    app=label_client[1];device=label_client[2]
++    key=await _bind(app,device.device.device_id);service=app.state.funding_classifications;call=service.call
++    async def used(operation,who,**kwargs):
++        if operation=='publish':
++            await app.state.store.execute('UPDATE owner_device_bindings SET last_proof_at_ms=last_proof_at_ms+1 WHERE device_id=?',(device.device.device_id,))
++        return await call(operation,who,**kwargs)
++    monkeypatch.setattr(service,'call',used)
++    result=await post(label_client,key=key)
++    assert result.status_code==200,result.text
++
++
++@pytest.mark.asyncio
++async def test_boolean_alone_cannot_replace_actual_proof_fact_for_bound_writer(label_client):
++    from test_device_proof_enforcement import _bind
++    app=label_client[1];device=label_client[2]
++    await _bind(app,device.device.device_id)
++    with pytest.raises(LabelError,match='PROOF_BINDING_CHANGED'):
++        await app.state.funding_classifications.call('publish',caller(label_client)|{'proved':True},body=label_client[4])
++    with closing(Ledger(label_client[5])) as ledger:assert ledger.count(EventKind.FUNDING_OWNER_CLASSIFICATION)==0
+diff --git a/trading/vati/funding/runtime.py b/trading/vati/funding/runtime.py
+index 56dff142..8a962e4e 100644
+--- a/trading/vati/funding/runtime.py
++++ b/trading/vati/funding/runtime.py
+@@ -110,7 +110,8 @@ def _reported_funding(ledger,event,account_record):
+     if not isinstance(mark,dict):return unknown|{'state':observation.get('state','UNMEASURED'),'reason':observation.get('reason','NO_NATIVE_FUNDING_OBSERVATION')}
+     if mark.get('schema')=='mt5-account-mark/1':
+         from vati.funding.mt5_report import reported_mt5
+-        return reported_mt5(ledger,event,account_record,observation,mark,unknown)
++        result=reported_mt5(ledger,event,account_record,observation,mark,unknown)
++        return result|{'owner_classification':_owner_classification(ledger,mark.get('scope_hash'))}
+     from vati.core.canonical import canonical_hash
+     scope={k:mark.get(k) for k in ('provider','environment','native_account_id','deposit_asset_id','currency')}
+     expected_environment='DEMO' if account_record.get('demo') is True else 'LIVE' if account_record.get('demo') is False else None
+@@ -133,6 +134,7 @@ def _reported_funding(ledger,event,account_record):
+         'scope_hash':mark['scope_hash'],'native_mark':mark,'snapshot_ref':event.hash,
+         'statement_ref':observation.get('statement',{}).get('statement_ref'),
+         'coverage_windows':facts['coverage_windows'],'conflicts':facts['conflicts'],
++        'owner_classification':_owner_classification(ledger,mark['scope_hash']),
+         'movement_count':len(rows),'movements':rows[-100:],'movements_truncated':len(rows)>100,
+         'collector_state':observation.get('collector_state','UNKNOWN'),
+         'native_deals':{'state':deal_facts['state'],'deal_count':len(deal_facts['deals']),
+@@ -141,3 +143,12 @@ def _reported_funding(ledger,event,account_record):
+         'period':period_report(ledger,mark['scope_hash']),
+         'financial_movements':_financial_projection(ledger,mark['scope_hash']),
+         'catch_up_state':observation.get('catch_up_state','UNKNOWN')}
++
++
++def _owner_classification(ledger,scope_hash):
++    # Separate descriptive overlay. Native period/risk/posting callers never consume it.
++    from vati.funding.classification_journal import ClassificationBook,ClassificationError,FLAGS
++    from vati.core.ledger import LedgerError
++    try:return ClassificationBook(ledger).overlay(scope_hash)
++    except (ClassificationError,LedgerError,ValueError,TypeError,KeyError,ArithmeticError):
++        return {'state':'UNKNOWN','reason':'OWNER_CLASSIFICATION_HISTORY_UNAVAILABLE',**FLAGS}
+diff --git a/trading/vati/core/events.py b/trading/vati/core/events.py
+index 01358fb8..e49e489e 100644
+--- a/trading/vati/core/events.py
++++ b/trading/vati/core/events.py
+@@ -53,6 +53,7 @@ class EventKind(str, Enum):
+     CAPSULE_STATE = "CAPSULE_STATE"
+     OWNER_TICKET = "OWNER_TICKET"
+     SESSION = "SESSION"
++    FUNDING_OWNER_CLASSIFICATION = "FUNDING_OWNER_CLASSIFICATION"  # structured owner assertion; no economic authority
+     FUNDING_STATEMENT = "FUNDING_STATEMENT"  # immutable native cash observations; never payment authority
+     FUNDING_DEAL_STATEMENT = "FUNDING_DEAL_STATEMENT"
+     FUNDING_MT5_STATEMENT = "FUNDING_MT5_STATEMENT"
+diff --git a/backend/van_gateway/app.py b/backend/van_gateway/app.py
+index ee6ea91b..b381e55d 100644
+--- a/backend/van_gateway/app.py
++++ b/backend/van_gateway/app.py
+@@ -1869,6 +1869,17 @@ def create_app() -> FastAPI:
+         facts["eligible"] = True
+         return facts, binding, 200
+ 
++    def verified_binding_identity(binding):
++        # Nonsecret facts from the ACTUAL successful validator result. Mutable
++        # proof-use timestamps are not key generations. No lookup can substitute
++        # a different key after that verification.
++        return hashlib.sha256(Store.dumps({
++            'binding_id': binding.binding_id, 'owner_id': binding.owner_principal_id,
++            'device_id': binding.device_id, 'bound_at_ms': binding.bound_at_ms,
++            'device_key_fingerprint': binding.device_key_fingerprint,
++            'public_key_sha256': hashlib.sha256(binding.public_key_pem.encode()).hexdigest(),
++        }).encode()).hexdigest()
++
+     async def enforce_device_proof(request: Request, device_id: str) -> JSONResponse | None:
+         """Refuse a privileged request from a bound device that did not sign it.
+ 
+@@ -1921,7 +1932,7 @@ def create_app() -> FastAPI:
+             signed_target += "?" + raw_query.decode("ascii")
+ 
+         try:
+-            await owner_device_bindings.require_proof(
++            verified_binding = await owner_device_bindings.require_proof(
+                 device_id=device_id,
+                 signature=signature,
+                 method=request.method,
+@@ -1944,6 +1955,7 @@ def create_app() -> FastAPI:
+         except NonceReplay:
+             return JSONResponse(status_code=401, content={"detail": "device_proof_replayed"})
+         request.state.van_device_proved = True
++        request.state.van_device_proof_binding_identity = verified_binding_identity(verified_binding)
+         return None
+ 
+     def throttled_response(detail: str, locked: Throttled) -> JSONResponse:
+@@ -3792,6 +3804,31 @@ def create_app() -> FastAPI:
+     app.state.account_application_drafts = account_application_drafts
+     app.include_router(build_account_application_draft_router(account_application_drafts))
+ 
++    # BE-006 §7.9.5: non-financial owner assertions; no payment/A4 power.
++    from van_gateway.trading.funding_classification_api import (
++        FundingClassifications, LabelError, build_funding_classification_router)
++
++    async def authorize_funding_classification(db, caller, mutating):
++        row = await (await db.execute(
++            'SELECT access_token_hash,revoked_at_unix FROM devices WHERE device_id=?',
++            (caller['device_id'],))).fetchone()
++        if (caller['owner_id'] != 'owner' or not row or row['revoked_at_unix'] is not None
++                or row['access_token_hash'] != caller['access_token_hash']):
++            raise LabelError('FUNDING_LABEL_CALLER_NOT_CURRENT',403)
++        if mutating:
++            policy, binding, _ = await current_device_mutation_policy(caller['device_id'], _db=db)
++            if not policy['eligible'] or policy['proof_required'] and not caller['proved']:
++                raise LabelError('FUNDING_LABEL_OWNER_POLICY_REFUSED',403)
++            verified_identity = caller.get('verified_binding_identity')
++            if policy['proof_required'] or verified_identity is not None:
++                if (binding is None or not isinstance(verified_identity,str)
++                        or re.fullmatch(r'[0-9a-f]{64}',verified_identity) is None
++                        or not hmac.compare_digest(verified_identity,verified_binding_identity(binding))):
++                    raise LabelError('FUNDING_LABEL_PROOF_BINDING_CHANGED',403)
++
++    app.state.funding_classifications = FundingClassifications(store, trading, authorize_funding_classification)
++    app.include_router(build_funding_classification_router(app.state.funding_classifications))
++
+     @app.get('/v1/trading/accounts/catalog',response_model=AccountActionCatalog)
+     async def trading_account_catalog(request: Request):
+         device_id=getattr(request.state,'van_device_id',None)
+diff --git a/backend/van_gateway/context/forget.py b/backend/van_gateway/context/forget.py
+index 290d68d4..66aa4d03 100644
+--- a/backend/van_gateway/context/forget.py
++++ b/backend/van_gateway/context/forget.py
+@@ -57,6 +57,13 @@ FORGETTABLE: tuple[ForgettableStore, ...] = (
+ #: Named, with the reason, rather than silently omitted. Someone auditing this list should
+ #: be able to see that the omission was decided rather than forgotten.
+ DELIBERATELY_KEPT: dict[str, str] = {
++    "funding_owner_classifications": (
++        "Structured owner classification assertions over original financial cash movements, "
++        "kept in the existing append-only financial audit ledger. No free-text notes or "
++        "credentials are accepted. Correction and withdrawal append an auditable version "
++        "through /v1/trading/funding/classifications; withdrawal ends the current assertion, "
++        "not the native movement or its history. Memory-only erasure does not delete these records."
++    ),
+     "account_application_drafts": (
+         "Explicitly owner-authored account intent previews, not inferred memory. "
+         "Original bodies and their artifact projections are removed together through "

@@ -53,6 +53,7 @@ class EventKind(str, Enum):
     CAPSULE_STATE = "CAPSULE_STATE"
     OWNER_TICKET = "OWNER_TICKET"
     SESSION = "SESSION"
+    FUNDING_OWNER_CLASSIFICATION = "FUNDING_OWNER_CLASSIFICATION"  # structured owner assertion; no economic authority
     FUNDING_STATEMENT = "FUNDING_STATEMENT"  # immutable native cash observations; never payment authority
     FUNDING_DEAL_STATEMENT = "FUNDING_DEAL_STATEMENT"
     FUNDING_MT5_STATEMENT = "FUNDING_MT5_STATEMENT"

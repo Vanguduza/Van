@@ -1,0 +1,88 @@
+{
+  "schema": "van.source-packet/1",
+  "packet": "BE006_STRUCTURED_OWNER_CLASSIFICATION_R2_AND_IMPORT_PORTABILITY",
+  "prepared_at_utc": "2026-11-02T02:14:11.672412+00:00",
+  "published_base": "c792a1e6e7e1e942b56d00a3929d7b54f6eac13f",
+  "source_pins": {
+    "trading/vati/funding/classification_journal.py": "59c7f1b9b8a1b1dd4fb416319655d43fcc938fdcb7df006aad9ffa4258d75beb",
+    "backend/van_gateway/trading/funding_classification_api.py": "b306abaacc9bf625333e50bc80487bd9d02e4801b8e3bab976e28b8908b62f7f",
+    "trading/tests/test_funding_classification_journal.py": "3b25920ce903b021923f7030995d649b258f6d5a71d00784aaff7e58a170943d",
+    "backend/tests/test_funding_classification_api.py": "70daa49eaee117c8342d546bef0e531ae612f6e00f490519b461530ef1c87f38",
+    "backend/tests/test_funding_classification_authority.py": "b4787821b263b04feabaf44cc50553dfda714ee4d056578c8b5d1b8185b55d77",
+    "trading/vati/funding/runtime.py": "f12a4ba303b40cc77415ce5a3d760690a3bef737f665ff6ef4cc6ce14aec5efc",
+    "trading/vati/core/events.py": "31480e73e4f067b0e980e592e5527a6a943aea6f634775914fe880c485bafd3a",
+    "backend/van_gateway/app.py": "53ddf7e582e30feff0dd823ec57a7d725d686deeb2a0626759a64abf9db08328",
+    "backend/van_gateway/context/forget.py": "73ab8c429419ce1c5aae4911a602586d0cdc3427b1a2b6fa17d4b81d9cae2784",
+    "trading/tests/test_account_unlink_currentness.py": "aae58de4d30a746c783fbb9d76b5675174501aff8ddb303829c4f6c52d585e0f",
+    "backend/tests/test_account_unlink_review.py": "8b0412a56980c1c5cbbc12af45217fb41e839ef698b06507837a067919d14fba",
+    "backend/tests/test_account_update_review.py": "eaa45b4b612213b74783d8e951fb02d42400f56037ae4b8c67bb2769a20c704f",
+    "backend/tests/test_trading_oauth_scope.py": "54267a0f3e82d51c10395defffeb579e4b094009449f42e3c0a3757b3d111920",
+    "tools/rebuild/refresh_owner_source_contracts.py": "0fbc3c6b8cec9526ec847451cf172a5c0102bea538004fba686c9e13a3dd0165"
+  },
+  "scope": "Candidate event and descriptive read overlay; structured nonfinancial owner assertion over exact original movements. Actual current paired device/proof and returned binding join under the Auth writer; no new financial or command authority.",
+  "current_source_owner": {
+    "feature": "OF-TRADING-003",
+    "screen": "van.trading.accounts",
+    "authority": "OWNER_STATE_ASSERTION_ONLY",
+    "source_status": "CURRENT_SOURCE",
+    "catalog_binding": "PROPOSED_UNADMITTED",
+    "Android_producer": false
+  },
+  "frozen_catalog_proposal": "docs/rebuild/rev118/BE006_CLASSIFICATION_CATALOG_PROPOSAL_20261102.json",
+  "frozen_package_unchanged": true,
+  "reviews": {
+    "label_R2": "raw/funding-classification-source-20261102/independent-review-r2.json",
+    "import4_and_derived": "raw/account-unlink-import-source-20261102/independent-review.json"
+  },
+  "source_evidence": {
+    "author_R2": "78PASS1PGcapabilityskip79unique; no old63 reuse; raw before1FAIL10PASS and collectionexit4 preserved",
+    "independent_label": "9PASS0skip, original binding model counterexample refused; not a production rotation exploit",
+    "merged_label": "16PASS0skip/audit0, separate overlapping selection",
+    "all_reference_derived_semantics": "8modules220PASS0skip/audit0, separate overlapping selection",
+    "import_before": "original ModuleNotFoundError exit2; real qualified transitive import before exit1",
+    "import_after": "Same5799ordered trading IDs collected per cwd, COLLECTION ONLY;6actualruntime cases per cwd/6unique/12executions0skip/audits0; all161assertions and nonimportAST exact",
+    "controller_failure": "Final import-controller exit1 cleanup inventory filename collision retained, all4childcommands0; separately verified own cleanup reconciled, no test repeat or fabricated pass",
+    "published8_reuse": "Two test import preimages intentionally changed: unlink_currentness and account_unlink_review. Other6 including all native product files and child-wait fix exact; label9 exact."
+  },
+  "contracts": {
+    "old_endpoints": 491,
+    "new_endpoints": 493,
+    "old_endpoints_semantics_exact": true,
+    "source_citation_only_changes": 134,
+    "new_endpoint_ids": [
+      "VE-9b38ea313baf",
+      "VE-fd569aea70b6"
+    ],
+    "old_schemas": 393,
+    "new_schemas": 394,
+    "old_schema_semantics_exact": true,
+    "added_schemas": [
+      "LabelInput"
+    ]
+  },
+  "retention": "Immutable structured financial-audit event; correction/withdrawal append versions. No free text or secret; memory erase disclosure retained. Native/economic/risk facts are unchanged.",
+  "runtime_locking": "Auth Store writer then existing Ledger writer, not a two-store atomic transaction; cancellation holds Auth fence until owned worker ends.",
+  "old_CI": "Exact c792/run41372270072 attempt1 is terminal:41jobs/30success/11failure. PG26PASS preceded trading collectionERROR; reviewed import4 fixes collection only. Kotlin0 pinned BOM configuration failure occurred before assertions/mutants (NOT_RUN). Both gateway2 workers fail only entry67 two tests; union and fullmatrix fail accordingly. PrivateDDS/trusted-checker failures remain unwaived. Original watch44541 exited1 at01:57:11Z; successor did not reap/restart/cancel it. No full CI/union qualification.",
+  "raw_volatile": [
+    "/tmp/van-be006-classification-evidence-20261102",
+    "/tmp/van-recovery-funding-label-merged-20261102",
+    "/tmp/van-recovery-funding-label-semantic-20261102",
+    "/tmp/van-label-pg-import-portability-20261102"
+  ],
+  "limits": [
+    "One PG capability skip remains unqualified",
+    "Android label producer and catalog amendment admission OPEN",
+    "No native/provider/settlement/risk/payment authority or effect qualification",
+    "No full BE006/unit/BG001/S24/formal acceptance",
+    "PR106 unmerged proposal unused; entry67 evidence unchanged",
+    "PrivateDDS/trustedbase/native/fullOBL004 matrix prerequisites remain",
+    "Pending-shred recovery/durable perstep facts and purpose-bound reauth/grace/OAuth strategy/funds closure remain implementation/contract-design obligations"
+  ],
+  "mutation_scope": "All374cases/383edit anchors must remain; consistency is not execution",
+  "integration_successor": {
+    "agent": "/root/accounts_workflow_sol",
+    "model": "gpt-6.1-sol medium",
+    "reason": "Prior sole writer hit usage limit; reviewed WIP preserved.",
+    "pending_cleanup_design_sha256": "6d0e3c4c78ac5d798b53b4f5cc20099f6a2e93bfbbaa5e5be27c3d15bee08b44"
+  }
+}

@@ -57,6 +57,13 @@ FORGETTABLE: tuple[ForgettableStore, ...] = (
 #: Named, with the reason, rather than silently omitted. Someone auditing this list should
 #: be able to see that the omission was decided rather than forgotten.
 DELIBERATELY_KEPT: dict[str, str] = {
+    "funding_owner_classifications": (
+        "Structured owner classification assertions over original financial cash movements, "
+        "kept in the existing append-only financial audit ledger. No free-text notes or "
+        "credentials are accepted. Correction and withdrawal append an auditable version "
+        "through /v1/trading/funding/classifications; withdrawal ends the current assertion, "
+        "not the native movement or its history. Memory-only erasure does not delete these records."
+    ),
     "account_application_drafts": (
         "Explicitly owner-authored account intent previews, not inferred memory. "
         "Original bodies and their artifact projections are removed together through "

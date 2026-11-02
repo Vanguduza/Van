@@ -1,0 +1,16 @@
+{
+  "old_endpoints": 491,
+  "new_endpoints": 493,
+  "old_endpoints_semantics_exact": true,
+  "source_citation_only_changes": 134,
+  "new_endpoint_ids": [
+    "VE-9b38ea313baf",
+    "VE-fd569aea70b6"
+  ],
+  "old_schemas": 393,
+  "new_schemas": 394,
+  "old_schema_semantics_exact": true,
+  "added_schemas": [
+    "LabelInput"
+  ]
+}

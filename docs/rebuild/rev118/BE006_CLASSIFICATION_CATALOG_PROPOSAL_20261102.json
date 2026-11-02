@@ -1,0 +1,44 @@
+{
+  "schema": "van.scope-catalog-proposal/1",
+  "status": "PROPOSED_NOT_ADMITTED",
+  "source_requirement": "REV1_9B_SOURCE_MASTER \u00a77.9.5 / VNX-F-ACCOUNTS-15: unclassified operations are flagged for the owner to label",
+  "source_unit": "BE-006",
+  "frozen_catalog_sha256": "0d32177791ef1dc33a914c5d605496279815a1182827bc5331ad0d7f88c1d85a",
+  "frozen_package_unchanged": true,
+  "proposed_binding": {
+    "source_operations": [
+      "POST /v1/trading/funding/classifications: SET original assertion or correction by exact revision",
+      "POST /v1/trading/funding/classifications: WITHDRAW current assertion by exact revision",
+      "GET /v1/trading/funding/classifications/{operation_id}: original receipt with current history state"
+    ],
+    "new_action_id": null,
+    "current_catalog_gap": "Existing LAC-132 read refresh and LAC-133 view filtering do not authorize structured owner-label mutation. No existing action is silently repurposed.",
+    "authority_boundary": "Owner-authored nonfinancial state assertion under current paired device and verified binding; no new issuer, A4, payment, risk, settlement, provider classification or execution authority.",
+    "frontend_producer": "OPEN_NOT_IMPLEMENTED"
+  },
+  "amendment_procedure": {
+    "source": "docs/review-inputs/van-rev115/package/plan/VAN_NEXT_DETERMINISTIC_PLAN_REV1_18.md rule6",
+    "requirement": "Changes to the lock require a new explicit owner-reviewed amendment; no default retirement.",
+    "next": "Owner review must bind an explicit complete operation/caller/recovery contract and catalog identity, regenerate affected contracts and refresh affected receipts. This proposal grants no scope or acceptance.",
+    "formal_acceptance": "NOT_ISSUED"
+  },
+  "retention": "Structured immutable financial-audit assertions; corrections and withdrawals append versions, memory erasure does not delete the financial evidence. No free-text notes or credentials.",
+  "native_facts_unchanged": [
+    "original movements",
+    "cash periods",
+    "provider facts",
+    "settlement",
+    "risk capital",
+    "source currentness",
+    "unresolved economic evidence"
+  ],
+  "prepared_utc": "2026-11-02T01:43:56.452042+00:00",
+  "current_source_owner": {
+    "feature": "OF-TRADING-003",
+    "screen": "van.trading.accounts",
+    "authority": "OWNER_STATE_ASSERTION_ONLY",
+    "source_status": "CURRENT_SOURCE",
+    "catalog_binding": "PROPOSED_UNADMITTED",
+    "Android_producer": false
+  }
+}
