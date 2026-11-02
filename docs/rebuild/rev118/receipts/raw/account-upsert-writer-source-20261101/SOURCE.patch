@@ -1,0 +1,409 @@
+diff --git a/backend/tests/test_account_update_review.py b/backend/tests/test_account_update_review.py
+index ead66c1a..75ac0886 100644
+--- a/backend/tests/test_account_update_review.py
++++ b/backend/tests/test_account_update_review.py
+@@ -134,3 +134,178 @@ async def test_private_locator_or_incomplete_native_review_never_reaches_owner_a
+     assert 'fixture-private-locator' not in response.text
+     count=await app.state.store.fetchone("SELECT count(*) AS n FROM runtime_meta WHERE key GLOB 'owner_approval:*'")
+     assert count['n']==0
++
++
++@pytest.mark.asyncio
++@pytest.mark.parametrize('seam',['resolution','queued_writer','fsync'])
++async def test_original_edit_expiry_is_checked_at_protected_writer_not_only_claim(client,tmp_path,monkeypatch,seam):
++    import commander.accounts as native
++    import commander.account_effects as effects
++    import vati.accounts.registry as storage
++    from types import SimpleNamespace
++    ac,app=client;registry,original=seed(tmp_path)
++    body,issued=await challenge(ac,'account_upsert',{'alias':original.alias,'label':'Expired edit'})
++    identity=body['approval_proof']['challenge_id'];expiry=issued['approval_expires_at_unix'];clock=[int(time.time())]
++    before=registry.path.read_bytes();version=app.state.onboarding.control.resource_version(original.alias)['resource_version']
++    monkeypatch.setattr(effects,'time',SimpleNamespace(time=lambda:clock[0]))
++    crossed=[]
++    def expire():
++        marker=effects._effect_started.get()
++        if marker is not None and not marker[0]:clock[0]=expiry;crossed.append(True)
++    if seam=='resolution':
++        resolve=native.resolve_account_config
++        def delayed(*a,**kw):
++            result=resolve(*a,**kw);expire();return result
++        monkeypatch.setattr(native,'resolve_account_config',delayed)
++    elif seam=='queued_writer':
++        from contextlib import contextmanager
++        lock=storage.AccountRegistry._mutation_lock
++        @contextmanager
++        def delayed(self):
++            with lock(self):
++                expire();yield
++        monkeypatch.setattr(storage.AccountRegistry,'_mutation_lock',delayed)
++    else:
++        fsync=storage.os.fsync
++        def delayed(fd):
++            fsync(fd);expire()
++        monkeypatch.setattr(storage.os,'fsync',delayed)
++    result=await ac.post('/v1/trading/accounts/action',json=body)
++    assert crossed and result.status_code==403,result.text
++    assert registry.path.read_bytes()==before
++    assert app.state.onboarding.control.resource_version(original.alias)['resource_version']==version
++    independent=await ac.get('/v1/trading/accounts/operations/'+identity)
++    assert independent.status_code==200 and independent.json()['effect_state']=='REFUSED'
++    assert not independent.json()['reconciliation_required']
++    assert not (tmp_path/'secrets/owner_account.env').exists()
++    assert list(tmp_path.glob('.accounts.json.*.tmp'))==[]
++
++
++@pytest.mark.asyncio
++@pytest.mark.parametrize('fault',['current_key','namespace','partial_credentials','empty_credential_expiry','healthy_cached'])
++async def test_actual_registered_writer_preserves_authority_partial_and_cached_history(client,tmp_path,monkeypatch,fault):
++    import io,os
++    from urllib.error import HTTPError
++    from urllib.parse import urlsplit
++    from fastapi.testclient import TestClient
++    from commander.app import CommanderSettings,create_app
++    from commander.accounts import AccountControlSettings
++    from commander.auth import sign_headers
++    import commander.account_effects as effects
++    import vati.accounts.registry as storage
++    from van_gateway.trading.accounts import CommanderAccountControl
++    from van_gateway.config import get_settings
++    from types import SimpleNamespace
++    ac,app=client
++    if fault not in {'partial_credentials','empty_credential_expiry'}:registry,original=seed(tmp_path)
++    alias='new_native' if fault in {'partial_credentials','empty_credential_expiry'} else original.alias
++    token='owned-native-current-key-'*3;replacement='owned-native-replacement-key-'*3
++    token_file=tmp_path/'native-token';token_file.write_text(token);token_file.chmod(0o600)
++    settings=CommanderSettings(tokens={'van-gateway':token},ledger=get_settings().vati_ledger_path,
++        log_dir=str(tmp_path/'native-log'),units=(),account_control=AccountControlSettings(str(tmp_path/'accounts.json'),str(tmp_path/'secrets')))
++    native=TestClient(create_app(settings));captured=[]
++    class Reply:
++        def __init__(self,data):self.data=data
++        def __enter__(self):return self
++        def __exit__(self,*a):pass
++        def read(self):return self.data
++    def controlled_http(request,**kw):
++        path=urlsplit(request.full_url).path
++        if path.endswith('/account_upsert'):captured.append(json.loads(request.data)['args'])
++        result=native.post(path,content=request.data,headers=dict(request.header_items()))
++        if result.status_code>=400:raise HTTPError(request.full_url,result.status_code,'owned refusal',{},io.BytesIO(result.content))
++        return Reply(result.content)
++    monkeypatch.setattr('van_gateway.trading.accounts.urlopen',controlled_http)
++    app.state.onboarding.control=CommanderAccountControl('https://native.fixture',str(token_file))
++    with native:
++        args={'alias':alias,'broker':'DERIV'} if fault in {'partial_credentials','empty_credential_expiry'} else {'alias':alias,'label':'Native reviewed label'}
++        body,issued=await challenge(ac,'account_upsert',args);identity=body['approval_proof']['challenge_id']
++        before=(tmp_path/'accounts.json').read_bytes() if (tmp_path/'accounts.json').exists() else None
++        expiry=issued['approval_expires_at_unix'];clock=[int(time.time())]
++        monkeypatch.setattr(effects,'time',SimpleNamespace(time=lambda:clock[0]))
++        fsync=storage.os.fsync;crossed=[]
++        def delayed(fd):
++            fsync(fd)
++            marker=effects._effect_started.get()
++            if marker is not None and ('.accounts.json.' in os.readlink('/proc/self/fd/'+str(fd)) or
++                fault=='empty_credential_expiry' and '.new_native.env.' in os.readlink('/proc/self/fd/'+str(fd))):
++                crossed.append(True)
++                if fault=='current_key':settings.tokens['van-gateway']=replacement
++                elif fault=='namespace':(tmp_path/'secrets/.account-control-domain.env').write_text('owned-malformed-current-namespace')
++                elif fault in {'partial_credentials','empty_credential_expiry'}:clock[0]=expiry
++        monkeypatch.setattr(storage.os,'fsync',delayed)
++        result=await ac.post('/v1/trading/accounts/action',json=body)
++        assert crossed
++        if fault in {'current_key','namespace'}:
++            assert result.status_code in {401,409},result.text
++            assert (tmp_path/'accounts.json').read_bytes()==before
++            from vati.core.ledger import Ledger
++            from commander.account_effects import AccountEffectJournal
++            led=Ledger(get_settings().vati_ledger_path)
++            try:state=AccountEffectJournal(led).status(identity,'test-device')
++            finally:led.close()
++            assert state.phase=='REFUSED'
++        elif fault=='empty_credential_expiry':
++            assert result.status_code==403,result.text
++            assert not (tmp_path/'accounts.json').exists() and not (tmp_path/'secrets/new_native.env').exists()
++            read=await ac.get('/v1/trading/accounts/operations/'+identity)
++            assert read.json()['effect_state']=='REFUSED' and not read.json()['reconciliation_required']
++        elif fault=='partial_credentials':
++            assert result.status_code==409 and result.json()['effect_state']=='UNKNOWN',result.text
++            assert not (tmp_path/'accounts.json').exists() and (tmp_path/'secrets/new_native.env').stat().st_size==0
++            read=await ac.get('/v1/trading/accounts/operations/'+identity)
++            assert read.json()['effect_state']=='UNKNOWN' and read.json()['operation_id']==identity
++            clock[0]=int(time.time())
++            retry=await act(ac,'account_upsert',args)
++            assert retry.status_code==409 and not (tmp_path/'accounts.json').exists()
++        else:
++            assert result.status_code==200 and result.json()['effect_state']=='APPLIED',result.text
++            clock[0]=expiry+1
++            original_args=captured[0];path='/v1/cmd/account_upsert';raw=json.dumps({'args':original_args}).encode()
++            replay=native.post(path,content=raw,headers={**sign_headers(token,'POST',path,raw),'content-type':'application/json'})
++            assert replay.status_code==200,replay.text
++            assert replay.json()['result']['account']==result.json()['account']
++            historical=await ac.get('/v1/trading/accounts/operations/'+identity)
++            assert historical.json()['effect_state']=='APPLIED' and historical.json()['operation_id']==identity
++            assert AccountRegistry(tmp_path/'accounts.json').get(alias).label=='Native reviewed label'
++
++
++@pytest.mark.asyncio
++async def test_real_queued_registry_writer_cannot_outwait_original_authority(client,tmp_path,monkeypatch):
++    from contextlib import contextmanager
++    from threading import Thread,Event
++    from types import SimpleNamespace
++    import commander.account_effects as effects
++    from vati.accounts.registry import AccountRegistry as Registry
++    ac,app=client;registry,original=seed(tmp_path)
++    body,issued=await challenge(ac,'account_upsert',{'alias':original.alias,'label':'Queued expired edit'})
++    expiry=issued['approval_expires_at_unix'];clock=[int(time.time())];before=registry.path.read_bytes()
++    monkeypatch.setattr(effects,'time',SimpleNamespace(time=lambda:clock[0]))
++    lock=Registry._mutation_lock;mutate=Registry._mutate;acquired=Event();attempted=Event();finished=Event();failures=[];workers=[]
++    def holder():
++        try:
++            with lock(Registry(registry.path)):
++                acquired.set()
++                assert attempted.wait(5),'owned writer never attempted held global lock'
++                clock[0]=expiry
++        except BaseException as error:failures.append(error)
++        finally:finished.set()
++    @contextmanager
++    def observed_lock(self):
++        if effects._effect_started.get() is not None and workers:attempted.set()
++        with lock(self):yield
++    def queued(self,*a,**kw):
++        if effects._effect_started.get() is not None and not workers:
++            worker=Thread(target=holder,name='owned-upsert-registry-holder');workers.append(worker);worker.start()
++            assert acquired.wait(5)
++        return mutate(self,*a,**kw)
++    monkeypatch.setattr(Registry,'_mutation_lock',observed_lock);monkeypatch.setattr(Registry,'_mutate',queued)
++    try:result=await ac.post('/v1/trading/accounts/action',json=body)
++    finally:
++        attempted.set()
++        for worker in workers:worker.join(timeout=6)
++    assert workers and all(not worker.is_alive() for worker in workers) and not failures
++    assert finished.is_set() and result.status_code==403,result.text
++    assert registry.path.read_bytes()==before
++    original_read=await ac.get('/v1/trading/accounts/operations/'+body['approval_proof']['challenge_id'])
++    assert original_read.json()['effect_state']=='REFUSED' and not original_read.json()['reconciliation_required']
+diff --git a/trading/commander/account_effects.py b/trading/commander/account_effects.py
+index 88d7999f..9743d489 100644
+--- a/trading/commander/account_effects.py
++++ b/trading/commander/account_effects.py
+@@ -23,15 +23,16 @@ JOURNALED_COMMANDS = frozenset({"account_upsert", "account_credentials", "accoun
+ _effect_started = ContextVar("native_account_effect_started", default=None)
+ 
+ 
+-def mark_account_effect():
++def mark_account_effect(*, require_current=False):
+     """Called immediately before native registry/credential effects, never after."""
+     marker = _effect_started.get()
+     if marker is not None:
++        if require_current:require_current_account_effect()
+         marker[0] = True
+ 
+ 
+ def require_current_account_effect():
+-    """Recheck the consumed authority immediately before the first remote send."""
++    """Recheck consumed authority at a protected account effect or provider send."""
+     marker = _effect_started.get()
+     if marker is None:
+         raise HTTPException(403, "Verified original account operation is required before provider dispatch")
+diff --git a/trading/commander/accounts.py b/trading/commander/accounts.py
+index 786254d6..ba6d43e7 100644
+--- a/trading/commander/accounts.py
++++ b/trading/commander/accounts.py
+@@ -72,7 +72,7 @@ def _secrets_path(st: AccountControlSettings, alias: str) -> Path:
+     return Path(st.secrets_dir) / f"{alias}.env"
+ 
+ 
+-def _write_secrets(path: Path, values: dict[str, str], *, merge: bool = True, before_replace=None) -> None:
++def _write_secrets(path: Path, values: dict[str, str], *, merge: bool = True, before_replace=None, before_effect=None) -> None:
+     from vati.core.file_lock import exclusive_state_lock
+     from vati.accounts.registry import load_secret_file
+ 
+@@ -97,6 +97,7 @@ def _write_secrets(path: Path, values: dict[str, str], *, merge: bool = True, be
+                 os.fsync(stream.fileno())
+             os.chmod(temporary, 0o600)
+             if before_replace is not None:before_replace()
++            if before_effect is not None:before_effect()
+             os.replace(temporary, path)
+         finally:
+             if os.path.exists(temporary):
+@@ -163,23 +164,19 @@ def build_account_handlers(st: AccountControlSettings) -> dict[str, Callable[[di
+         sec = _secrets_path(st, alias)
+         if broker in ("DERIV", "CTRADER", "MT5_EA", "MT5"):
+             if not sec.is_file():
+-                mark_account_effect()
+-                if before_write is None:_write_secrets(sec, {})
+-                else:_write_secrets(sec, {},before_replace=before_write)
++                _write_secrets(sec, {},before_replace=before_write,before_effect=mark_account_effect)
+             cref = CredentialRef(secrets_file=str(sec))
+         else:
+             cref = CredentialRef()
+         try:
+             candidate = Account(alias=alias, broker=broker, mode=mode, currency=currency, label=label or alias, server=server, login=login, bridge_url=bridge_url, credential_ref=cref, demo=demo, mandate_ref=mandate_ref)
+             candidate.validate()
+-            mark_account_effect()
+-            if before_write is None:
+-                acc = r.replace(candidate) if alias in r.accounts else r.add(candidate)
+-            else:
+-                with r._mutation_lock():
+-                    before_write()
+-                    acc = r.replace(candidate) if alias in r.accounts else r.add(candidate)
+-                    if after_write is not None:after_write(current_resource_version(alias))
++            def before_registry_replace():
++                if before_write is not None:before_write()
++                mark_account_effect()
++            with r._mutation_lock():
++                acc = r.replace(candidate,before_replace=before_registry_replace) if alias in r.accounts else r.add(candidate,before_replace=before_registry_replace)
++                if after_write is not None:after_write(current_resource_version(alias))
+         except AccountRegistryError as exc:
+             raise HTTPException(422, str(exc))
+         return acc.public()
+@@ -333,7 +330,7 @@ def build_account_handlers(st: AccountControlSettings) -> dict[str, Callable[[di
+         values=a['args']; alias=_alias(values)
+         with reg().operation_lock(alias):
+             registry=reg(); current=registry.accounts.get(alias)
+-            candidate=resolve_account_config({k:v for k,v in values.items() if k!='_expected_account_control_domain'},alias=alias,current=current,secret_path=_secrets_path(st,alias))
++            candidate=resolve_account_config({k:v for k,v in values.items() if k not in {'_expected_account_control_domain','_upsert_before_write','_account_dispatch_guard'}},alias=alias,current=current,secret_path=_secrets_path(st,alias))
+             before=current.public() if current else None; after=candidate.public()
+             public_args={key:value for key,value in values.items() if not key.startswith('_')}
+             body={'schema':'vati.account-review/1','action':'account_upsert','alias':alias,
+@@ -372,12 +369,17 @@ def build_account_handlers(st: AccountControlSettings) -> dict[str, Callable[[di
+                 raise HTTPException(409,'Resolved account settings changed since owner review; current connection retained')
+         alias = _alias(a)
+         registry=reg(); current=registry.accounts.get(alias)
+-        candidate=resolve_account_config({k:v for k,v in a.items() if k!='_expected_account_control_domain'},alias=alias,current=current,secret_path=_secrets_path(st,alias))
++        candidate=resolve_account_config({k:v for k,v in a.items() if k not in {'_expected_account_control_domain','_upsert_before_write','_account_dispatch_guard'}},alias=alias,current=current,secret_path=_secrets_path(st,alias))
++        def check_upsert_current():
++            guard=a.get('_upsert_before_write')
++            if callable(guard):guard()
++            if '_native_operation' in a:require_current_account_effect()
++        def before_upsert_replace():
++            check_upsert_current()
++            mark_account_effect(require_current=True)
+         if current is None and candidate.credential_ref.secrets_file:
+-            mark_account_effect()
+-            _write_secrets(Path(candidate.credential_ref.secrets_file),{})
+-        mark_account_effect()
+-        account=registry.replace(candidate) if current else registry.add(candidate)
++            _write_secrets(Path(candidate.credential_ref.secrets_file),{},before_replace=check_upsert_current,before_effect=before_upsert_replace)
++        account=registry.replace(candidate,before_replace=before_upsert_replace) if current else registry.add(candidate,before_replace=before_upsert_replace)
+         return {"account":account.public(),"secrets_file":candidate.credential_ref.secrets_file}
+ 
+     def cmd_account_credentials(a: dict) -> dict:
+@@ -632,6 +634,8 @@ def build_account_handlers(st: AccountControlSettings) -> dict[str, Callable[[di
+                             raise HTTPException(409, "account changed since owner approval; review the current account and approve again")
+                     check_current_scope()
+                 server_admitted = command=='deriv_create_demo' and '_native_operation' not in args and callable(args.get('_server_demo_admission'))
++                if command=='account_upsert':
++                    args={**args,'_upsert_before_write':check_version}
+                 if command in {'deriv_oauth_link','ctrader_link'}:
+                     args={**args,'_link_before_registry':check_version,'_link_before_credentials':check_current_scope}
+                 if server_admitted:
+@@ -714,7 +718,7 @@ def build_account_handlers(st: AccountControlSettings) -> dict[str, Callable[[di
+                     if existing is None:
+                         check_version()
+                     result = invoke_account_effect(journal, intent, lambda: handler(args),
+-                        dispatch_guard=check_version if command=='deriv_create_demo' else args.get('_account_dispatch_guard'))
++                        dispatch_guard=check_version if command=='deriv_create_demo' else check_current_scope if command=='account_upsert' else args.get('_account_dispatch_guard'))
+                     return legacy_result(journal.status(intent.operation_id,intent.device_id)) if server_admitted else result
+                 except AccountEffectError:
+                     raise AccountOperationUnconfirmed(args.get('_native_operation',{}).get('operation_id')) from None
+diff --git a/trading/commander/app.py b/trading/commander/app.py
+index a28ca404..d64df1d2 100644
+--- a/trading/commander/app.py
++++ b/trading/commander/app.py
+@@ -505,7 +505,7 @@ def create_app(settings: Optional[CommanderSettings] = None) -> FastAPI:
+                 # at actual dispatch without trying to consume that nonce again.
+                 current_account_authority()
+                 values = parsed.args
+-                if name in {'deriv_create_demo','deriv_oauth_link','ctrader_link'}:
++                if name in {'account_upsert','deriv_create_demo','deriv_oauth_link','ctrader_link'}:
+                     values = {**values, '_account_dispatch_guard': current_account_authority}
+                     if legacy_demo:
+                         def admit_legacy_demo():
+diff --git a/trading/tests/test_account_registry_atomic_rea.py b/trading/tests/test_account_registry_atomic_rea.py
+index 250ab98c..082c3c56 100644
+--- a/trading/tests/test_account_registry_atomic_rea.py
++++ b/trading/tests/test_account_registry_atomic_rea.py
+@@ -72,3 +72,26 @@ def test_upsert_alternative_is_explicit_replace_only(tmp_path):
+     with pytest.raises(AccountRegistryError, match="already registered"):
+         registry.add(paper(label="Should not overwrite"))
+     assert registry.get("paper_demo").label == "Paper demo"
++
++
++@pytest.mark.parametrize('operation',['add','replace'])
++def test_optional_trusted_guard_runs_after_fsync_and_refusal_preserves_bytes_revision_and_memory(tmp_path,monkeypatch,operation):
++    registry=AccountRegistry(tmp_path/'accounts.json')
++    if operation=='replace':registry.add(paper())
++    before=registry.path.read_bytes() if registry.path.exists() else None
++    revisions=dict(registry._resource_revisions);events=[];fsync=os.fsync;swap=os.replace
++    def synced(fd):fsync(fd);events.append('fsync')
++    def replaced(a,b):events.append('replace');return swap(a,b)
++    monkeypatch.setattr('vati.accounts.registry.os.fsync',synced)
++    monkeypatch.setattr('vati.accounts.registry.os.replace',replaced)
++    def refuse():
++        assert events==['fsync'];events.append('guard');raise RuntimeError('owned guard refusal')
++    with pytest.raises(RuntimeError,match='guard refusal'):
++        getattr(registry,operation)(paper(label='Cannot write'),before_replace=refuse)
++    assert events==['fsync','guard'] and registry._resource_revisions==revisions
++    assert (registry.path.read_bytes() if registry.path.exists() else None)==before
++    assert list(tmp_path.glob('.accounts.json.*.tmp'))==[]
++    assert registry.accounts==registry._loaded_accounts
++    events.clear()
++    getattr(registry,operation)(paper(label='Allowed'),before_replace=lambda:events.append('guard'))
++    assert events==['fsync','guard','replace'] and AccountRegistry(registry.path).get('paper_demo').label=='Allowed'
+diff --git a/trading/vati/accounts/registry.py b/trading/vati/accounts/registry.py
+index 35893e83..40ab9f8d 100644
+--- a/trading/vati/accounts/registry.py
++++ b/trading/vati/accounts/registry.py
+@@ -174,7 +174,7 @@ class AccountRegistry:
+             raise AccountRegistryError("account alias is invalid")
+         return exclusive_state_lock(self.path.with_name(self.path.name + ".operation." + alias))
+ 
+-    def _mutate(self, operation: str, alias: str, account: Account | None = None):
++    def _mutate(self, operation: str, alias: str, account: Account | None = None, *, before_replace=None):
+         if account is not None:
+             account.validate()
+         with self.operation_lock(alias), self._mutation_lock():
+@@ -198,7 +198,7 @@ class AccountRegistry:
+                 self.accounts[alias] = account
+             self._resource_revisions[alias] = self._resource_revisions.get(alias, 0) + 1
+             try:
+-                self._save_unlocked()
++                self._save_unlocked(before_replace=before_replace) if before_replace is not None else self._save_unlocked()
+             except BaseException:
+                 self.accounts = before
+                 self._resource_revisions = previous_revisions
+@@ -207,13 +207,13 @@ class AccountRegistry:
+             self._loaded_revisions = dict(self._resource_revisions)
+         return account
+ 
+-    def add(self, a: Account) -> Account:
++    def add(self, a: Account, *, before_replace=None) -> Account:
+         """Add against current persisted records without dropping other writers' edits."""
+-        return self._mutate("add", a.alias, a)
++        return self._mutate("add", a.alias, a, before_replace=before_replace)
+ 
+-    def replace(self, a: Account) -> Account:
++    def replace(self, a: Account, *, before_replace=None) -> Account:
+         """Replace one unchanged local record; stale exact-account edits refuse."""
+-        return self._mutate("replace", a.alias, a)
++        return self._mutate("replace", a.alias, a, before_replace=before_replace)
+ 
+     def remove(self, alias: str) -> None:
+         """Unlink an unchanged local record; broker/exposure authority belongs to its caller."""
+@@ -254,7 +254,7 @@ class AccountRegistry:
+             self._loaded_accounts = dict(self.accounts)
+             self._loaded_revisions = dict(self._resource_revisions)
+ 
+-    def _save_unlocked(self) -> None:
++    def _save_unlocked(self, *, before_replace=None) -> None:
+         """Write the complete registry through same-directory atomic replacement.
+ 
+         Direct write_text could truncate the only valid record on interruption.
+@@ -276,6 +276,7 @@ class AccountRegistry:
+                 os.fsync(stream.fileno())
+             mode = stat.S_IMODE(self.path.stat().st_mode) if self.path.exists() else 0o600
+             os.chmod(temp_name, mode)
++            if before_replace is not None:before_replace()
+             os.replace(temp_name, self.path)
+         finally:
+             if os.path.exists(temp_name):

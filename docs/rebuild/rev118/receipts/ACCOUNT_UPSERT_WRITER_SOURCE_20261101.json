@@ -1,0 +1,80 @@
+{
+  "state": "REVIEWED_ACCOUNT_UPSERT_LOCAL_WRITER_SOURCE_CANDIDATE",
+  "base": "4c410418bf8f809b1df0e3eb3edfb85422c77f5c",
+  "author_base": "6a0196a951dfb62413f76d3d91ceb855b16f6030",
+  "source_fingerprint": "f303441c2dacfadcb4fe8107f9bf218fc46d38699197f2d172e3a69971cea652",
+  "source_pins": {
+    "trading/commander/accounts.py": "6b20d5ae1ee01f00672287bb0d9183f41083c57874b5c53afa1ea339f648082a",
+    "trading/commander/account_effects.py": "8a842f27aa24bce106371cfb454c1feb224a494665e69645f6979f0c476487a2",
+    "trading/commander/app.py": "aa353acaa9ac8d74a51e6f2e500cae7ecdbc382e64413da4ccfae75fdbd85540",
+    "trading/vati/accounts/registry.py": "e7925dc1cacb1ce84af601fbbfb870220f43e6bd423fa52855d4900ce96f0be9",
+    "backend/tests/test_account_update_review.py": "c4fa99375516fd0c52833ff4dc941c7e68dc1d6e185418e4093c489606b25d0b",
+    "trading/tests/test_account_registry_atomic_rea.py": "0f371d8d35d609d585fd615b6e0393298749b839608bea3ac66f85a858a53674"
+  },
+  "behavior": "Original consumed expiry/currentkey/domain/version guard now runs under existing alias+global registrywriter locks after staging/fsync andimmediatelybefore finalreplace. Newaccountemptycredential finalswap uses same pureguard/marker separation. No firstswap atguardrefusal=>originalREFUSED/no accountbyte/revisionchange; earliercommitted localcredential=>UNKNOWN/partial withoriginalpending/noresend, no blindrollback/falsecancel. Completedoriginalcachedresult remains historical afterexpiry undercurrentnative transportauth.",
+  "generic_compatibility": "Trustedinternal optionalbefore_replace/before_effect callbacks defaultNone; no authorityimport/publiccallerflag/newservice. Default _save_unlocked() callform preserved for unrelatedclients. RegisteredCommander suppliescurrentconsumedcontext callback; no second A4/nonce consumption/issuer. Legacy/internal/Link/demo boundaries andownpost-registryversion distinctfromoriginalapprovedversion retained.",
+  "composition": "All6preimages equal6a\u2192actual4c. Wholegatewayapp differs because reviewedpreview/lifespan/_dbpath; account4routeAST exactmapping preserved. Fresh merged84SQLHTTP/A4/privatecore+3previewcases checks actual4ccomposition, not claimedoldlaneHTTPasexactmain.",
+  "proofs": {
+    "author": "Three serialfrozenruns260PASS2explicitPGskip262distinct;56backend+151nativeSOURCE+53scope. No onefullsuite terminal/nativeproviderqualification.",
+    "native_SOURCE_reuse": "9native-source selectedtestfiles and6candidateinputs exact;151PASS2isolatedPGskip kept with exactXML/reason. These modules exercisecontrolledcommander/registry/providerfixtures, notgatewayapp composition/newnativecertificate.",
+    "merged": "84PASS0skip/audit0/exit0,6sourcepinsunchanged/nochildren/ownedcleanup,37,519,015Bpeak; overlappingauthor evidence",
+    "shared_clients": "36PASS0skip/audit0/exit0,5,401,772Bpeak. Changedpublicmethodcallersearch selectsactualcredentialatomicity/retirement/resourceversion consumers beyondauthornative151; assertions unchanged.",
+    "independent": "9PASS0skip originalexactoracle/firstREFUSEDvsUNKNOWN/legacysharedregistryhealthy; no blockingfinding"
+  },
+  "contracts": "Mandatorygenuineownercontract/frontend/workmap checks unchanged;491endpoints393schemas/alloriginal105functions42groups78surfaces349actions234contexts intact. Internalwriterdelta needs no generatedcontractrewrite; mutation374383anchors valid NOT_RUN.",
+  "history": {
+    "before_after": {
+      "immutable_before_diagnosis": "/tmp/van-be004-post-link-diagnosis-20261101.json",
+      "immutable_before_sha256": "220ede66bf94af3250e297de476656c41e00b60c6c6d0bce2343b2003c34e0b8",
+      "before_actual_result": "Original standalone failing probe1FAIL/raw+JUnit/owned coldstore retained:200/APPLIED label change at exact original expiry, IN_FLIGHT->APPLIED at expiry, independent original200/APPLIED.",
+      "after_original_probe": "/tmp/van-be004-upsert-r1-after-observation-20261101.json",
+      "after_actual_result": "Unchanged original probe bytes nowPASS:403, account label unchanged, original durableREFUSED/current independent readREFUSED.",
+      "fixed_path_overwrite_disclosure": {
+        "fixed_path": "/tmp/van-be004-post-link-expiry-observation-20261101.json",
+        "status": "OVERWRITTEN_BY_UNCHANGED_PROBE_AFTER_FIX",
+        "before_logical_observation_preserved_in": "/tmp/van-be004-upsert-r1-extracted-before-observation-20261101.json",
+        "before_raw_JUnit_terminal_and_cold_SQLite_untouched": true,
+        "original_fixed_path_not_claimed_immutable": true,
+        "no_reconstruction_claimed_as_restoration": true
+      },
+      "logical_before_extraction": "/tmp/van-be004-upsert-r1-extracted-before-observation-20261101.json",
+      "extraction_is_not_restoration": true,
+      "before_raw_JUnit_and_owned_SQLite_untouched": true
+    },
+    "intermediate": {
+      "intermediate_dev20PASS": "/tmp/van-be004-upsert-r1-dev1-terminal.json; earlier candidate fingerprint, not counted as frozen proof; later secret preparation/final marker separation and queued test additions fully rerun.",
+      "prior_LINK_handoff": "/tmp/van-be004-link-r3-handoff-20261101.json",
+      "prior_LINK_review": "/workspace/van-be004-link-independent-recheck-r3-20261101/review.json",
+      "prior_evidence_and_disclosures_not_rewritten": true
+    },
+    "no_rewrite": "Originalbeforefailure rawJUnit/coldSQL retained; overwrittenfixedobservationpath explicitlynotimmutable, logicalbeforeextraction isNOTrestoration. PreviousLINK/JUnit/LAC135 failedhistories unchanged."
+  },
+  "limits": [
+    "SOURCE candidate, not whole BE004 acceptance:original11req/21acceptance/20contexts/6LAC and restrict/unlink/remoteclosure/full provider obligations remain open.",
+    "Injected/controlled HTTP/SQLite/sockets only; actual independent owner/provider-positive native capability,PG,BG001,unit,production,S24 remain unqualified.",
+    "Two declared PostgreSQL tests skipped; no fabricated PG green.",
+    "No Android product source changes by this packet and no local SDK/JVM/device execution; genuine integrated exact hosted Android qualification remains owner workflow gate.",
+    "Fresh exactheadhosted/sourcebarrier4c/run41364081278/watch97092 before normalpush; oldwatchnotcancelled/restarted. AllBG001/unit/native/provider/intakeentry67/privateDDSkey/trustedbase/S24/fullmatrix/AndroiddraftproducerLAC137 andotheroriginalBE004operations remainOPEN.",
+    "Rawlargelogs/fixtures/archives stayvolatiletmp; compactsource/proofmaps copiedhere under1MiB. No actual broker/account financial effect or newissuer/permission fromthislocalwriterfix."
+  ],
+  "at": "2026-11-02T00:00:30.965833+00:00",
+  "evidence": {
+    "FRONTEND_CHECK.json": "69dcc86a9d7aaffcadf4a70e58b379d8452c124dadc4347afbc9e57fbab7ae85",
+    "HANDOFF.json": "28535e3d990c6a1bb6e53e7635250ebefd7ce8796efa1d00c6d87015f75cd210",
+    "MERGED_RECEIPT.json": "ff17a2ddecd2719fab1006ffdcfd6e1f110548f8fe160dbd312e8167aefe0d04",
+    "SHARED_AUDIT.json": "f159c056ef876b2852e522cf92ac940143fb1b43cf2b480fbad507dc745049bc",
+    "INDEPENDENT_REVIEW.json": "97c5b90a9fcfca207e1ccb5dd89a3351ba2dfaa94ec152f08005fa89aa08f98a",
+    "SOURCE_PINS.json": "3e7fb131294858b2238b95b69b69f18c297beabb1ea0b51aedb106ddd19d23ff",
+    "OWNER_CHECK.json": "35a9b4641c85055b16c3a6458a7b1f99fb5df7ec0f5a6280ca45c3ab14cd7103",
+    "AUTHOR_FINAL_SCOPE_XML.xml": "d61b1ba84cb0fb76a862c1ef7d1b09516e59893f0a97f627991c8c25f486f8f8",
+    "AUTHOR_FINAL_BACKEND_XML.xml": "14934f280603e014277a3027717a2010bfa9f65f0199f9241ced59071d40c94c",
+    "AUTHOR_FINAL_NATIVE_XML.xml": "d60cbd29038e5d913d3463d11b222fab3505284df1a0cc3779ff22b56dc1f15d",
+    "SHARED_XML.xml": "182f0eb0bb09c0ebf47a6fd2568938ea8b57c0b7b40e5f2170c4a141d3c85b31",
+    "MERGED_XML.xml": "8e5c10ecf798c67bed12b40d48d1272d4366ab0dc2438f972f7deb270ab4d272",
+    "MERGED_AUDIT.json": "f159c056ef876b2852e522cf92ac940143fb1b43cf2b480fbad507dc745049bc",
+    "SOURCE.patch": "975a810bf7a56ffc5cecb35249429b43a433a822bcf27a59f674dc50bf38062f",
+    "NATIVE_SOURCE_REUSE.json": "46a105310fa06a2eb374460094a3c35d0e934486d86de92291ea50c4ec58caf6",
+    "APPLY_RECEIPT.json": "a08ecd146e85aaa1f148105fc7a1512716adaef127c8bd7c0d0e7b794f17fd96",
+    "SHARED_RECEIPT.json": "19e2332f469c9023f120d1d3a88463acfa730e26879fb07cde871362bcf73a5b"
+  }
+}

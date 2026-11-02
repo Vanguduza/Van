@@ -72,7 +72,7 @@ def _secrets_path(st: AccountControlSettings, alias: str) -> Path:
     return Path(st.secrets_dir) / f"{alias}.env"
 
 
-def _write_secrets(path: Path, values: dict[str, str], *, merge: bool = True, before_replace=None) -> None:
+def _write_secrets(path: Path, values: dict[str, str], *, merge: bool = True, before_replace=None, before_effect=None) -> None:
     from vati.core.file_lock import exclusive_state_lock
     from vati.accounts.registry import load_secret_file
 
@@ -97,6 +97,7 @@ def _write_secrets(path: Path, values: dict[str, str], *, merge: bool = True, be
                 os.fsync(stream.fileno())
             os.chmod(temporary, 0o600)
             if before_replace is not None:before_replace()
+            if before_effect is not None:before_effect()
             os.replace(temporary, path)
         finally:
             if os.path.exists(temporary):
@@ -163,23 +164,19 @@ def build_account_handlers(st: AccountControlSettings) -> dict[str, Callable[[di
         sec = _secrets_path(st, alias)
         if broker in ("DERIV", "CTRADER", "MT5_EA", "MT5"):
             if not sec.is_file():
-                mark_account_effect()
-                if before_write is None:_write_secrets(sec, {})
-                else:_write_secrets(sec, {},before_replace=before_write)
+                _write_secrets(sec, {},before_replace=before_write,before_effect=mark_account_effect)
             cref = CredentialRef(secrets_file=str(sec))
         else:
             cref = CredentialRef()
         try:
             candidate = Account(alias=alias, broker=broker, mode=mode, currency=currency, label=label or alias, server=server, login=login, bridge_url=bridge_url, credential_ref=cref, demo=demo, mandate_ref=mandate_ref)
             candidate.validate()
-            mark_account_effect()
-            if before_write is None:
-                acc = r.replace(candidate) if alias in r.accounts else r.add(candidate)
-            else:
-                with r._mutation_lock():
-                    before_write()
-                    acc = r.replace(candidate) if alias in r.accounts else r.add(candidate)
-                    if after_write is not None:after_write(current_resource_version(alias))
+            def before_registry_replace():
+                if before_write is not None:before_write()
+                mark_account_effect()
+            with r._mutation_lock():
+                acc = r.replace(candidate,before_replace=before_registry_replace) if alias in r.accounts else r.add(candidate,before_replace=before_registry_replace)
+                if after_write is not None:after_write(current_resource_version(alias))
         except AccountRegistryError as exc:
             raise HTTPException(422, str(exc))
         return acc.public()
@@ -333,7 +330,7 @@ def build_account_handlers(st: AccountControlSettings) -> dict[str, Callable[[di
         values=a['args']; alias=_alias(values)
         with reg().operation_lock(alias):
             registry=reg(); current=registry.accounts.get(alias)
-            candidate=resolve_account_config({k:v for k,v in values.items() if k!='_expected_account_control_domain'},alias=alias,current=current,secret_path=_secrets_path(st,alias))
+            candidate=resolve_account_config({k:v for k,v in values.items() if k not in {'_expected_account_control_domain','_upsert_before_write','_account_dispatch_guard'}},alias=alias,current=current,secret_path=_secrets_path(st,alias))
             before=current.public() if current else None; after=candidate.public()
             public_args={key:value for key,value in values.items() if not key.startswith('_')}
             body={'schema':'vati.account-review/1','action':'account_upsert','alias':alias,
@@ -372,12 +369,17 @@ def build_account_handlers(st: AccountControlSettings) -> dict[str, Callable[[di
                 raise HTTPException(409,'Resolved account settings changed since owner review; current connection retained')
         alias = _alias(a)
         registry=reg(); current=registry.accounts.get(alias)
-        candidate=resolve_account_config({k:v for k,v in a.items() if k!='_expected_account_control_domain'},alias=alias,current=current,secret_path=_secrets_path(st,alias))
+        candidate=resolve_account_config({k:v for k,v in a.items() if k not in {'_expected_account_control_domain','_upsert_before_write','_account_dispatch_guard'}},alias=alias,current=current,secret_path=_secrets_path(st,alias))
+        def check_upsert_current():
+            guard=a.get('_upsert_before_write')
+            if callable(guard):guard()
+            if '_native_operation' in a:require_current_account_effect()
+        def before_upsert_replace():
+            check_upsert_current()
+            mark_account_effect(require_current=True)
         if current is None and candidate.credential_ref.secrets_file:
-            mark_account_effect()
-            _write_secrets(Path(candidate.credential_ref.secrets_file),{})
-        mark_account_effect()
-        account=registry.replace(candidate) if current else registry.add(candidate)
+            _write_secrets(Path(candidate.credential_ref.secrets_file),{},before_replace=check_upsert_current,before_effect=before_upsert_replace)
+        account=registry.replace(candidate,before_replace=before_upsert_replace) if current else registry.add(candidate,before_replace=before_upsert_replace)
         return {"account":account.public(),"secrets_file":candidate.credential_ref.secrets_file}
 
     def cmd_account_credentials(a: dict) -> dict:
@@ -632,6 +634,8 @@ def build_account_handlers(st: AccountControlSettings) -> dict[str, Callable[[di
                             raise HTTPException(409, "account changed since owner approval; review the current account and approve again")
                     check_current_scope()
                 server_admitted = command=='deriv_create_demo' and '_native_operation' not in args and callable(args.get('_server_demo_admission'))
+                if command=='account_upsert':
+                    args={**args,'_upsert_before_write':check_version}
                 if command in {'deriv_oauth_link','ctrader_link'}:
                     args={**args,'_link_before_registry':check_version,'_link_before_credentials':check_current_scope}
                 if server_admitted:
@@ -714,7 +718,7 @@ def build_account_handlers(st: AccountControlSettings) -> dict[str, Callable[[di
                     if existing is None:
                         check_version()
                     result = invoke_account_effect(journal, intent, lambda: handler(args),
-                        dispatch_guard=check_version if command=='deriv_create_demo' else args.get('_account_dispatch_guard'))
+                        dispatch_guard=check_version if command=='deriv_create_demo' else check_current_scope if command=='account_upsert' else args.get('_account_dispatch_guard'))
                     return legacy_result(journal.status(intent.operation_id,intent.device_id)) if server_admitted else result
                 except AccountEffectError:
                     raise AccountOperationUnconfirmed(args.get('_native_operation',{}).get('operation_id')) from None

@@ -566,25 +566,24 @@
         }
       ]
     },
-    "updated_utc": "2026-11-01T23:42:37.482314+00:00",
+    "updated_utc": "2026-11-02T00:00:30.965833+00:00",
     "branch": "ccr-9e07e1af-8mgz1p",
-    "head": "7306169316118aaa03529c9c6e3fb989e5e371be",
-    "published_head": "6a0196a951dfb62413f76d3d91ceb855b16f6030",
-    "committed_ledger_verification": "GREEN229terminal0onlocal730/GREEN228published6a; finalcandidate4fdpendingafterseparateJUnitfixcommit",
-    "current_packet": "LAC135_R2_PLUS_EXACT_JUNIT_UNIT_RETURN",
-    "active_packet": "Localgenuine730retained+exactoneheadertestfix;4reviewedLAC135pins/14otherLINKpaths preserved; no newnative/SDKacceptance",
+    "head": "4c410418bf8f809b1df0e3eb3edfb85422c77f5c",
+    "published_head": "4c410418bf8f809b1df0e3eb3edfb85422c77f5c",
+    "committed_ledger_verification": "GREEN230terminal0onpublished4c; reviewedupsertcandidate final4fdpending",
+    "current_packet": "ACCOUNT_UPSERT_WRITER_SOURCE_R1",
+    "active_packet": "Exact6reviewedsourcepaths;260authorPASS2PGskip262distinct+84merged+36sharedSOURCEselections separatelyoverlapping; nofullunit/nativeacceptance",
     "current_background_jobs": [
       {
-        "kind": "original_readonly_CI_watch",
-        "session": 21319,
-        "run_id": 41361167161,
-        "head": "6a0196a951dfb62413f76d3d91ceb855b16f6030",
-        "receipt": "/workspace/van-oauth-link-ci-watch-20261101.json",
-        "state": "RUNNING_AT_LAST_BOUNDED_OBSERVATION; confirmed Android source failure authorizes corrective candidate; no cancel/restart/reap inferred"
+        "session": 97092,
+        "run_id": 41364081278,
+        "head": "4c410418bf8f809b1df0e3eb3edfb85422c77f5c",
+        "receipt": "/workspace/van-account-junit-ci-watch-20261101.json",
+        "state": "RUNNING_AT_LAST_ACTUAL_READ; sourcepublicationbarrierpending,no restart/cancel/reap"
       }
     ],
     "agent_assignments_ref": "delegation.active_assignments",
-    "next_action": "GenuineseparateJUnitfixcommit;finalrequired4fdverify;one normalpushboth/exactgit+PRreadbacks/onenewheadwatch. Confirmed6aAndroidinitializationfailureauthorizescorrectionwhileotheroldsourcejobsfinish;old21319watchuntoucheduntilactualterminal. Upsertnative6isolated/unreviewedexcluded.",
+    "next_action": "Genuineupsertcommit/finalrequired4fdverification;holdnormalpushuntilactual4cSOURCEjobs terminal or confirmedcorrectivefailure. Preserveoriginal97092watch;exactreadbacks+onenewheadwatchonlyafterrealpublication. No newnative/provider/intake/PG/fullunitqualification.",
     "acceptance_issued": false,
     "continuation_history": [
       {
@@ -656,7 +655,7 @@
         "captured_at_utc": "2026-11-01T02:38:52.492703+00:00"
       }
     ],
-    "current_source_receipt": "receipts/ACCOUNT_JUNIT_UNIT_SOURCE_20261101.json",
+    "current_source_receipt": "receipts/ACCOUNT_UPSERT_WRITER_SOURCE_20261101.json",
     "history_20261101": [
       {
         "updated_utc": "2026-11-01T02:38:52.492703+00:00",
@@ -1572,11 +1571,28 @@
         "publication_note": "Dated prepublication checkpoint names actual last verified published base; exact containing commit is resolved with git rev-parse. External continuation records subsequent publication, without self-referential commit hashes.",
         "source_ci_receipt": "receipts/raw/account-live-draft-source-20261101/INTEGRATED_RECEIPT.json",
         "intake_PR106": "OPEN_READY_UNMERGED_PROPOSAL_NOT_USED"
+      },
+      {
+        "updated_utc": "2026-11-01T23:42:37.482314+00:00",
+        "branch": "ccr-9e07e1af-8mgz1p",
+        "head": "7306169316118aaa03529c9c6e3fb989e5e371be",
+        "published_head": "6a0196a951dfb62413f76d3d91ceb855b16f6030",
+        "committed_ledger_verification": "GREEN229terminal0onlocal730/GREEN228published6a; finalcandidate4fdpendingafterseparateJUnitfixcommit",
+        "current_packet": "LAC135_R2_PLUS_EXACT_JUNIT_UNIT_RETURN",
+        "active_packet": "Localgenuine730retained+exactoneheadertestfix;4reviewedLAC135pins/14otherLINKpaths preserved; no newnative/SDKacceptance",
+        "agent_assignments_ref": "delegation.active_assignments",
+        "next_action": "GenuineseparateJUnitfixcommit;finalrequired4fdverify;one normalpushboth/exactgit+PRreadbacks/onenewheadwatch. Confirmed6aAndroidinitializationfailureauthorizescorrectionwhileotheroldsourcejobsfinish;old21319watchuntoucheduntilactualterminal. Upsertnative6isolated/unreviewedexcluded.",
+        "acceptance_issued": false,
+        "current_source_receipt": "receipts/ACCOUNT_JUNIT_UNIT_SOURCE_20261101.json",
+        "last_verified_published_base": "6a0196a951dfb62413f76d3d91ceb855b16f6030",
+        "publication_note": "Dated prepublication checkpoint names actual last verified published base; exact containing commit is resolved with git rev-parse. External continuation records subsequent publication, without self-referential commit hashes.",
+        "source_ci_receipt": "receipts/raw/account-junit-unit-source-20261101/HANDOFF.json",
+        "intake_PR106": "OPEN_READY_UNMERGED_PROPOSAL_NOT_USED"
       }
     ],
-    "last_verified_published_base": "6a0196a951dfb62413f76d3d91ceb855b16f6030",
+    "last_verified_published_base": "4c410418bf8f809b1df0e3eb3edfb85422c77f5c",
     "publication_note": "Dated prepublication checkpoint names actual last verified published base; exact containing commit is resolved with git rev-parse. External continuation records subsequent publication, without self-referential commit hashes.",
-    "source_ci_receipt": "receipts/raw/account-junit-unit-source-20261101/HANDOFF.json",
+    "source_ci_receipt": "receipts/raw/account-upsert-writer-source-20261101/MERGED_RECEIPT.json",
     "intake_PR106": "OPEN_READY_UNMERGED_PROPOSAL_NOT_USED"
   },
   "observations": [
@@ -1830,8 +1846,8 @@
       "evidence": "ci/MUTATION_CORPUS_c2a27848.json"
     }
   ],
-  "current_action": "GenuineseparateJUnitfixcommit;finalrequired4fdverify;one normalpushboth/exactgit+PRreadbacks/onenewheadwatch. Confirmed6aAndroidinitializationfailureauthorizescorrectionwhileotheroldsourcejobsfinish;old21319watchuntoucheduntilactualterminal. Upsertnative6isolated/unreviewedexcluded.",
-  "updated_at_utc": "2026-11-01T23:42:37.482314+00:00",
+  "current_action": "Genuineupsertcommit/finalrequired4fdverification;holdnormalpushuntilactual4cSOURCEjobs terminal or confirmedcorrectivefailure. Preserveoriginal97092watch;exactreadbacks+onenewheadwatchonlyafterrealpublication. No newnative/provider/intake/PG/fullunitqualification.",
+  "updated_at_utc": "2026-11-02T00:00:30.965833+00:00",
   "execution_method": {
     "path": "BUILD_EXECUTION_PLAN.md",
     "scope_index": "SOURCE_WORKMAP.json",

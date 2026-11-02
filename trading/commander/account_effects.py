@@ -23,15 +23,16 @@ JOURNALED_COMMANDS = frozenset({"account_upsert", "account_credentials", "accoun
 _effect_started = ContextVar("native_account_effect_started", default=None)
 
 
-def mark_account_effect():
+def mark_account_effect(*, require_current=False):
     """Called immediately before native registry/credential effects, never after."""
     marker = _effect_started.get()
     if marker is not None:
+        if require_current:require_current_account_effect()
         marker[0] = True
 
 
 def require_current_account_effect():
-    """Recheck the consumed authority immediately before the first remote send."""
+    """Recheck consumed authority at a protected account effect or provider send."""
     marker = _effect_started.get()
     if marker is None:
         raise HTTPException(403, "Verified original account operation is required before provider dispatch")

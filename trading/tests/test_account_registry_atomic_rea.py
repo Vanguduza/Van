@@ -72,3 +72,26 @@ def test_upsert_alternative_is_explicit_replace_only(tmp_path):
     with pytest.raises(AccountRegistryError, match="already registered"):
         registry.add(paper(label="Should not overwrite"))
     assert registry.get("paper_demo").label == "Paper demo"
+
+
+@pytest.mark.parametrize('operation',['add','replace'])
+def test_optional_trusted_guard_runs_after_fsync_and_refusal_preserves_bytes_revision_and_memory(tmp_path,monkeypatch,operation):
+    registry=AccountRegistry(tmp_path/'accounts.json')
+    if operation=='replace':registry.add(paper())
+    before=registry.path.read_bytes() if registry.path.exists() else None
+    revisions=dict(registry._resource_revisions);events=[];fsync=os.fsync;swap=os.replace
+    def synced(fd):fsync(fd);events.append('fsync')
+    def replaced(a,b):events.append('replace');return swap(a,b)
+    monkeypatch.setattr('vati.accounts.registry.os.fsync',synced)
+    monkeypatch.setattr('vati.accounts.registry.os.replace',replaced)
+    def refuse():
+        assert events==['fsync'];events.append('guard');raise RuntimeError('owned guard refusal')
+    with pytest.raises(RuntimeError,match='guard refusal'):
+        getattr(registry,operation)(paper(label='Cannot write'),before_replace=refuse)
+    assert events==['fsync','guard'] and registry._resource_revisions==revisions
+    assert (registry.path.read_bytes() if registry.path.exists() else None)==before
+    assert list(tmp_path.glob('.accounts.json.*.tmp'))==[]
+    assert registry.accounts==registry._loaded_accounts
+    events.clear()
+    getattr(registry,operation)(paper(label='Allowed'),before_replace=lambda:events.append('guard'))
+    assert events==['fsync','guard','replace'] and AccountRegistry(registry.path).get('paper_demo').label=='Allowed'

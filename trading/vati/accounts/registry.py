@@ -174,7 +174,7 @@ class AccountRegistry:
             raise AccountRegistryError("account alias is invalid")
         return exclusive_state_lock(self.path.with_name(self.path.name + ".operation." + alias))
 
-    def _mutate(self, operation: str, alias: str, account: Account | None = None):
+    def _mutate(self, operation: str, alias: str, account: Account | None = None, *, before_replace=None):
         if account is not None:
             account.validate()
         with self.operation_lock(alias), self._mutation_lock():
@@ -198,7 +198,7 @@ class AccountRegistry:
                 self.accounts[alias] = account
             self._resource_revisions[alias] = self._resource_revisions.get(alias, 0) + 1
             try:
-                self._save_unlocked()
+                self._save_unlocked(before_replace=before_replace) if before_replace is not None else self._save_unlocked()
             except BaseException:
                 self.accounts = before
                 self._resource_revisions = previous_revisions
@@ -207,13 +207,13 @@ class AccountRegistry:
             self._loaded_revisions = dict(self._resource_revisions)
         return account
 
-    def add(self, a: Account) -> Account:
+    def add(self, a: Account, *, before_replace=None) -> Account:
         """Add against current persisted records without dropping other writers' edits."""
-        return self._mutate("add", a.alias, a)
+        return self._mutate("add", a.alias, a, before_replace=before_replace)
 
-    def replace(self, a: Account) -> Account:
+    def replace(self, a: Account, *, before_replace=None) -> Account:
         """Replace one unchanged local record; stale exact-account edits refuse."""
-        return self._mutate("replace", a.alias, a)
+        return self._mutate("replace", a.alias, a, before_replace=before_replace)
 
     def remove(self, alias: str) -> None:
         """Unlink an unchanged local record; broker/exposure authority belongs to its caller."""
@@ -254,7 +254,7 @@ class AccountRegistry:
             self._loaded_accounts = dict(self.accounts)
             self._loaded_revisions = dict(self._resource_revisions)
 
-    def _save_unlocked(self) -> None:
+    def _save_unlocked(self, *, before_replace=None) -> None:
         """Write the complete registry through same-directory atomic replacement.
 
         Direct write_text could truncate the only valid record on interruption.
@@ -276,6 +276,7 @@ class AccountRegistry:
                 os.fsync(stream.fileno())
             mode = stat.S_IMODE(self.path.stat().st_mode) if self.path.exists() else 0o600
             os.chmod(temp_name, mode)
+            if before_replace is not None:before_replace()
             os.replace(temp_name, self.path)
         finally:
             if os.path.exists(temp_name):

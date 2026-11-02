@@ -1,0 +1,1938 @@
+{
+  "schema": "van.be004.local-edit-writer-r1.frozen-source-handoff/1",
+  "at_utc": "2026-11-01T23:49:30.437427+00:00",
+  "state": "FROZEN_CANDIDATE_SOURCE_READY_FOR_INDEPENDENT_REVIEW",
+  "accepted_gap": "BE004-LOCAL-EDIT-PREWRITE-EXPIRY-01",
+  "base": "6a0196a951dfb62413f76d3d91ceb855b16f6030",
+  "observed_main_preimage_equivalence": "4c410418bf8f809b1df0e3eb3edfb85422c77f5c",
+  "no_extra_publication_claim": true,
+  "current_main_composition_mapping": {
+    "lane_base": "6a0196a",
+    "observed_main_HEAD": "4c410418",
+    "gateway_app_whole_file_identical": false,
+    "account_route_AST_exactly_equal": [
+      "trading_account_catalog",
+      "trading_account_challenge",
+      "trading_account_operation",
+      "trading_account_action"
+    ],
+    "actual_changed_composition": "Live-preview router+lifespan drain added; current_device_mutation_policy adds optional_db path, defaultNone retains original owner-policy calls. No gateway app edits by this lane. Native6 preimages fully equal.",
+    "test_claim": "Focused paired HTTP runs used lane6a composition; no exact integrated4c gateway/full-hosted claim. Source equivalence of unchanged account route bodies independently computed."
+  },
+  "source_fingerprint": "f303441c2dacfadcb4fe8107f9bf218fc46d38699197f2d172e3a69971cea652",
+  "source_pins": "/tmp/van-be004-upsert-r1-final-pins.json",
+  "explicit6_paths_sha256": {
+    "trading/commander/accounts.py": "6b20d5ae1ee01f00672287bb0d9183f41083c57874b5c53afa1ea339f648082a",
+    "trading/commander/account_effects.py": "8a842f27aa24bce106371cfb454c1feb224a494665e69645f6979f0c476487a2",
+    "trading/commander/app.py": "aa353acaa9ac8d74a51e6f2e500cae7ecdbc382e64413da4ccfae75fdbd85540",
+    "trading/vati/accounts/registry.py": "e7925dc1cacb1ce84af601fbbfb870220f43e6bd423fa52855d4900ce96f0be9",
+    "backend/tests/test_account_update_review.py": "c4fa99375516fd0c52833ff4dc941c7e68dc1d6e185418e4093c489606b25d0b",
+    "trading/tests/test_account_registry_atomic_rea.py": "0f371d8d35d609d585fd615b6e0393298749b839608bea3ac66f85a858a53674"
+  },
+  "explicit_source_export": {
+    "schema": "van.be004.upsert-r1.exact-source-export/1",
+    "base": "6a0196a951dfb62413f76d3d91ceb855b16f6030",
+    "observed_main_HEAD": "4c410418bf8f809b1df0e3eb3edfb85422c77f5c",
+    "not_a_publication_claim_for_observed_HEAD": true,
+    "consumed_native_preimages_all_equivalent": true,
+    "equivalence": {
+      "trading/commander/accounts.py": {
+        "6a_preimage_sha256": "641d924886c388391dbc09631cf774a8f741b12e9c1ded9f70fc18f19807103d",
+        "observed_main_HEAD_preimage_sha256": "641d924886c388391dbc09631cf774a8f741b12e9c1ded9f70fc18f19807103d",
+        "equal": true,
+        "candidate_sha256": "6b20d5ae1ee01f00672287bb0d9183f41083c57874b5c53afa1ea339f648082a"
+      },
+      "trading/commander/account_effects.py": {
+        "6a_preimage_sha256": "d6be385b527a6ea180023208dadfc2b1f815bfa5ea4c0a9af0aa574457a028b6",
+        "observed_main_HEAD_preimage_sha256": "d6be385b527a6ea180023208dadfc2b1f815bfa5ea4c0a9af0aa574457a028b6",
+        "equal": true,
+        "candidate_sha256": "8a842f27aa24bce106371cfb454c1feb224a494665e69645f6979f0c476487a2"
+      },
+      "trading/commander/app.py": {
+        "6a_preimage_sha256": "aded70458e7e2c0a8b7cd015518318ea7eb056602e02c628558ca5175c91120c",
+        "observed_main_HEAD_preimage_sha256": "aded70458e7e2c0a8b7cd015518318ea7eb056602e02c628558ca5175c91120c",
+        "equal": true,
+        "candidate_sha256": "aa353acaa9ac8d74a51e6f2e500cae7ecdbc382e64413da4ccfae75fdbd85540"
+      },
+      "trading/vati/accounts/registry.py": {
+        "6a_preimage_sha256": "081300e109e82049d5fc7a068df22dce4f854b8e4cae873afb1dc6e66553ca39",
+        "observed_main_HEAD_preimage_sha256": "081300e109e82049d5fc7a068df22dce4f854b8e4cae873afb1dc6e66553ca39",
+        "equal": true,
+        "candidate_sha256": "e7925dc1cacb1ce84af601fbbfb870220f43e6bd423fa52855d4900ce96f0be9"
+      },
+      "backend/tests/test_account_update_review.py": {
+        "6a_preimage_sha256": "3011c269ee3ab22cdf8c17c1e4a21b1c186abdcb84d7ea776c8d6a3dbe84deff",
+        "observed_main_HEAD_preimage_sha256": "3011c269ee3ab22cdf8c17c1e4a21b1c186abdcb84d7ea776c8d6a3dbe84deff",
+        "equal": true,
+        "candidate_sha256": "c4fa99375516fd0c52833ff4dc941c7e68dc1d6e185418e4093c489606b25d0b"
+      },
+      "trading/tests/test_account_registry_atomic_rea.py": {
+        "6a_preimage_sha256": "c58e7c03f727a36bb5e9d943db5aa6b5a8d30a44f14ace73f04e9bfb3d489cff",
+        "observed_main_HEAD_preimage_sha256": "c58e7c03f727a36bb5e9d943db5aa6b5a8d30a44f14ace73f04e9bfb3d489cff",
+        "equal": true,
+        "candidate_sha256": "0f371d8d35d609d585fd615b6e0393298749b839608bea3ac66f85a858a53674"
+      }
+    },
+    "source_fingerprint": "f303441c2dacfadcb4fe8107f9bf218fc46d38699197f2d172e3a69971cea652",
+    "explicit6_paths": [
+      "trading/commander/accounts.py",
+      "trading/commander/account_effects.py",
+      "trading/commander/app.py",
+      "trading/vati/accounts/registry.py",
+      "backend/tests/test_account_update_review.py",
+      "trading/tests/test_account_registry_atomic_rea.py"
+    ],
+    "patch": "/tmp/van-be004-upsert-r1-source-20261101.patch",
+    "patch_sha256": "975a810bf7a56ffc5cecb35249429b43a433a822bcf27a59f674dc50bf38062f",
+    "patch_bytes": 25758,
+    "members": 6,
+    "baseline_applied_all6_hashes_verified": true,
+    "no_runtime_files": true,
+    "owned_verification_fixture_removed_after_check": "/tmp/van-upsert-r1-baseline-apply-gxyioizc"
+  },
+  "repair": {
+    "native_upsert": "account_upsert carries a trusted internal current-scope/version writer guard. At the registry callback, under alias/global registry writer locks after serialization/fsync, checks consumed original expiry/current registered key/time/domain/version, then marks possible effect immediately before os.replace. New-account empty credential replacement has the same final check/marker separation.",
+    "generic_registry": "Optional trusted before_replace callable on add/replace/_mutate/_save_unlocked, defaultNone. No Commander/authority import. Default unrelated calls unchanged. Refusal cleans staged file/restores memory/revision and preserves original bytes/generation.",
+    "protected_credentials": "Existing _write_secrets before_replace pure guard retains preparation and last-swap checks; new optional defaultNone before_effect is invoked only at final swap after guards. This prevents marking an uncommitted staging write as possible effect. No secret values journaled/exported.",
+    "context_guard": "mark_account_effect(require_current=True) checks consumed authority only inside existing native operation context; unrelated default marker behavior unchanged. Registered Commander passes existing pure current-key/time callback for upsert; no A4/nonce second consumption or issuer.",
+    "link_demo_compatibility": "Existing LINK registry callback now reaches actual registry final replace. Existing own post-registry revision capture and credential currentness scope remain separate from original approved version. Demo original-version guard stays only at remote-send boundary; never newly applied after its own local completion. Legacy/internal metadata policy preserved.",
+    "classification": "No first swap -> truthful durable REFUSED/no byte/revision change. Earlier committed empty credential -> registry expiry refusal leaves original UNKNOWN/partial, fences retry/no blind rollback. Completed original cached result remains historical after expiry, with fresh current native transport authentication."
+  },
+  "actual_final_evidence": {
+    "terminal_counts": {
+      "final-backend": {
+        "pass": 56,
+        "skip": 0
+      },
+      "final-native": {
+        "pass": 151,
+        "skip": 2
+      },
+      "final-scope": {
+        "pass": 53,
+        "skip": 0
+      }
+    },
+    "terminals": [
+      {
+        "schema": "van.be004.account-upsert-r1.source-proof-terminal/1",
+        "label": "final-backend",
+        "source_fingerprint": "f303441c2dacfadcb4fe8107f9bf218fc46d38699197f2d172e3a69971cea652",
+        "source_pins": "/tmp/van-be004-upsert-r1-final-pins.json",
+        "command": [
+          "/workspace/van-backend-venv-20261025/bin/python",
+          "-m",
+          "pytest",
+          "-v",
+          "-p",
+          "no:cacheprovider",
+          "-o",
+          "faulthandler_timeout=60",
+          "-o",
+          "asyncio_mode=auto",
+          "backend/tests/test_account_update_review.py",
+          "backend/tests/test_account_resource_binding.py",
+          "backend/tests/test_account_operation_recovery.py",
+          "backend/tests/test_account_unlink_review.py",
+          "backend/tests/test_account_approval_contract.py",
+          "/tmp/test_van_post_link_expiry_20261101.py",
+          "--basetemp=/tmp/van-be004-upsert-r1-final-backend-pytest",
+          "--junitxml=/tmp/van-be004-upsert-r1-final-backend.xml"
+        ],
+        "cwd": "/workspace/van-lanes-20261101/accounts-demo-recovery",
+        "exit_code": 0,
+        "guard_reason": null,
+        "wall_seconds": 129.79735343100037,
+        "owned_pid_and_pgid": 1162873,
+        "owned_process_terminal": true,
+        "raw_log": "/tmp/van-be004-upsert-r1-final-backend.log",
+        "raw_log_sha256": "51ed58527d0ef3b7c1c310b78e4cfae7af52012b4aa160503d66b0408e1ab297",
+        "raw_bytes": 9169,
+        "junit": "/tmp/van-be004-upsert-r1-final-backend.xml",
+        "junit_sha256": "14934f280603e014277a3027717a2010bfa9f65f0199f9241ced59071d40c94c",
+        "tmp_reserve_bytes": 2147483648,
+        "tmp_min_free_observed": 2556227584,
+        "admission_budget_bytes": 134217728,
+        "raw_cap_bytes": 8388608,
+        "selection_input_hashes": {
+          "backend/tests/test_account_update_review.py": "c4fa99375516fd0c52833ff4dc941c7e68dc1d6e185418e4093c489606b25d0b",
+          "backend/tests/test_account_resource_binding.py": "fc3fc4b8a094cc49f9cb96736f08131deb80f4fcd762bb1342c51c08d19b06ee",
+          "backend/tests/test_account_operation_recovery.py": "dab4bb9906c89d682afdb04221c6c586192ee86aeaed032eeb36f1a0caf2aa7d",
+          "backend/tests/test_account_unlink_review.py": "8b9d9e4111cfa17ed3ea2a27d7c6da79513aa5500c42d4a1750898d883caa253",
+          "backend/tests/test_account_approval_contract.py": "bee2039e3d776f77a703a7a34f9eae9cd299681348d2cf9ac2368c8322c60330",
+          "/tmp/test_van_post_link_expiry_20261101.py": "f43f9278826ea627841de23471902acba7da6d01e2d9479963b653d632892f6a"
+        }
+      },
+      {
+        "schema": "van.be004.account-upsert-r1.source-proof-terminal/1",
+        "label": "final-native",
+        "source_fingerprint": "f303441c2dacfadcb4fe8107f9bf218fc46d38699197f2d172e3a69971cea652",
+        "source_pins": "/tmp/van-be004-upsert-r1-final-pins.json",
+        "command": [
+          "/workspace/van-backend-venv-20261025/bin/python",
+          "-m",
+          "pytest",
+          "-v",
+          "-p",
+          "no:cacheprovider",
+          "-o",
+          "faulthandler_timeout=60",
+          "-o",
+          "asyncio_mode=auto",
+          "trading/tests/test_oauth_link_currentness.py",
+          "trading/tests/test_commander_accounts.py",
+          "trading/tests/test_deriv_credential_verification.py",
+          "trading/tests/test_native_account_effects.py",
+          "trading/tests/test_demo_creation_recovery.py",
+          "trading/tests/test_account_registry_atomic_rea.py",
+          "trading/tests/test_account_registry_concurrency.py",
+          "trading/tests/test_account_update_semantics.py",
+          "trading/tests/test_registry_entry_fence.py",
+          "--basetemp=/tmp/van-be004-upsert-r1-final-native-pytest",
+          "--junitxml=/tmp/van-be004-upsert-r1-final-native.xml"
+        ],
+        "cwd": "/workspace/van-lanes-20261101/accounts-demo-recovery",
+        "exit_code": 0,
+        "guard_reason": null,
+        "wall_seconds": 13.403581877006218,
+        "owned_pid_and_pgid": 1168253,
+        "owned_process_terminal": true,
+        "raw_log": "/tmp/van-be004-upsert-r1-final-native.log",
+        "raw_log_sha256": "4bd02e4462bd722f97c7e6956d6f43d8447c0f0a7d42c4f79dc5425841760a4b",
+        "raw_bytes": 22286,
+        "junit": "/tmp/van-be004-upsert-r1-final-native.xml",
+        "junit_sha256": "d60cbd29038e5d913d3463d11b222fab3505284df1a0cc3779ff22b56dc1f15d",
+        "tmp_reserve_bytes": 2147483648,
+        "tmp_min_free_observed": 2554662912,
+        "admission_budget_bytes": 134217728,
+        "raw_cap_bytes": 8388608,
+        "selection_input_hashes": {
+          "trading/tests/test_oauth_link_currentness.py": "b8283e2c8e319aa94d1dda46c8f19c63358322c39732a8b8817f567c591694e8",
+          "trading/tests/test_commander_accounts.py": "62cc77e75fbed8f6b8abd343c3897ac3b3ccb01f9ecb8366eb65f4a684ac4372",
+          "trading/tests/test_deriv_credential_verification.py": "dd077b622422e38cbeeb25e3dd80569c17965dd17b80462047ef0e6844669c7a",
+          "trading/tests/test_native_account_effects.py": "332a900ddc0207d9e9bc78a37e3d07a00571c5d7d2be91cc7c242ae3f6d05f8c",
+          "trading/tests/test_demo_creation_recovery.py": "1593fb9f62aeeb9f1a5fd3dc65b477e4abca8b70a2128d9f9a28524ed07431ad",
+          "trading/tests/test_account_registry_atomic_rea.py": "0f371d8d35d609d585fd615b6e0393298749b839608bea3ac66f85a858a53674",
+          "trading/tests/test_account_registry_concurrency.py": "b2785e1977836e4639eba3511f9a1ec37267d075fe5894e4bd93d22b1070ad14",
+          "trading/tests/test_account_update_semantics.py": "394c88eea36d654d12be8feb157323f3fc36ecd04f79a73af0612540926ff253",
+          "trading/tests/test_registry_entry_fence.py": "c1367d7884a9f0c33cdc9ea8183c79019229f1315b4dc53bd552fa80c2edd04d"
+        }
+      },
+      {
+        "schema": "van.be004.account-upsert-r1.source-proof-terminal/1",
+        "label": "final-scope",
+        "source_fingerprint": "f303441c2dacfadcb4fe8107f9bf218fc46d38699197f2d172e3a69971cea652",
+        "source_pins": "/tmp/van-be004-upsert-r1-final-pins.json",
+        "command": [
+          "/workspace/van-backend-venv-20261025/bin/python",
+          "-m",
+          "pytest",
+          "-v",
+          "-p",
+          "no:cacheprovider",
+          "-o",
+          "faulthandler_timeout=60",
+          "-o",
+          "asyncio_mode=auto",
+          "backend/tests/test_stateful_link_binding.py",
+          "backend/tests/test_trading_oauth_effects.py",
+          "backend/tests/test_trading_oauth_scope.py",
+          "backend/tests/test_owner_approval_original_binding.py",
+          "--basetemp=/tmp/van-be004-upsert-r1-final-scope-pytest",
+          "--junitxml=/tmp/van-be004-upsert-r1-final-scope.xml"
+        ],
+        "cwd": "/workspace/van-lanes-20261101/accounts-demo-recovery",
+        "exit_code": 0,
+        "guard_reason": null,
+        "wall_seconds": 249.02719517699734,
+        "owned_pid_and_pgid": 1169626,
+        "owned_process_terminal": true,
+        "raw_log": "/tmp/van-be004-upsert-r1-final-scope.log",
+        "raw_log_sha256": "b5256c8fd4c2ce79c529bd7aec8859c8df9c8a2dcb654b38bb36dbfd266a8873",
+        "raw_bytes": 8753,
+        "junit": "/tmp/van-be004-upsert-r1-final-scope.xml",
+        "junit_sha256": "d61b1ba84cb0fb76a862c1ef7d1b09516e59893f0a97f627991c8c25f486f8f8",
+        "tmp_reserve_bytes": 2147483648,
+        "tmp_min_free_observed": 2440347648,
+        "admission_budget_bytes": 134217728,
+        "raw_cap_bytes": 8388608,
+        "selection_input_hashes": {
+          "backend/tests/test_stateful_link_binding.py": "36df9402f2eb1703bf5b4827d9d002f1f109371aa38cdf2b9a79f83402876c62",
+          "backend/tests/test_trading_oauth_effects.py": "f032a701cea8f2a1b874b994451094f4d049e7a227f5387188b9ac6ccdd1ae14",
+          "backend/tests/test_trading_oauth_scope.py": "d14de3b0bba7d523beda7dbc3143bf83080c5a6ddb0be5670768b0d150636c00",
+          "backend/tests/test_owner_approval_original_binding.py": "bd6e6febc8254bb5190681117f634587c4e7e01967a1ae172e8f1ad3ba0f76b6"
+        }
+      }
+    ],
+    "fresh_frozen_composite_pass": 260,
+    "fresh_frozen_composite_declared_PG_skip": 2,
+    "fresh_frozen_unique": 262,
+    "no_case_overlap": true,
+    "all_three_serial_runs_same_frozen_bytes": true,
+    "NOT_one_full_suite_terminal": true,
+    "no_prior_native_input_reuse": true,
+    "case_input_mapping": [
+      {
+        "id": "tests.test_account_update_review::test_exact_native_before_after_is_signed_and_applied_without_losing_connection",
+        "status": "PASS",
+        "terminal": "final-backend",
+        "junit": "/tmp/van-be004-upsert-r1-final-backend.xml"
+      },
+      {
+        "id": "tests.test_account_update_review::test_enable_disable_is_an_actual_owner_control_and_keeps_other_fields",
+        "status": "PASS",
+        "terminal": "final-backend",
+        "junit": "/tmp/van-be004-upsert-r1-final-backend.xml"
+      },
+      {
+        "id": "tests.test_account_update_review::test_changed_resolved_semantics_cannot_reuse_an_approval_even_when_resource_is_unchanged",
+        "status": "PASS",
+        "terminal": "final-backend",
+        "junit": "/tmp/van-be004-upsert-r1-final-backend.xml"
+      },
+      {
+        "id": "tests.test_account_update_review::test_final_native_writer_refuses_interpretation_drift_after_gateway_verification",
+        "status": "PASS",
+        "terminal": "final-backend",
+        "junit": "/tmp/van-be004-upsert-r1-final-backend.xml"
+      },
+      {
+        "id": "tests.test_account_update_review::test_native_catalog_covers_exact_actions_and_exposes_enable_and_secret_input_contracts",
+        "status": "PASS",
+        "terminal": "final-backend",
+        "junit": "/tmp/van-be004-upsert-r1-final-backend.xml"
+      },
+      {
+        "id": "tests.test_account_update_review::test_private_locator_or_incomplete_native_review_never_reaches_owner_approval",
+        "status": "PASS",
+        "terminal": "final-backend",
+        "junit": "/tmp/van-be004-upsert-r1-final-backend.xml"
+      },
+      {
+        "id": "tests.test_account_update_review::test_original_edit_expiry_is_checked_at_protected_writer_not_only_claim[resolution]",
+        "status": "PASS",
+        "terminal": "final-backend",
+        "junit": "/tmp/van-be004-upsert-r1-final-backend.xml"
+      },
+      {
+        "id": "tests.test_account_update_review::test_original_edit_expiry_is_checked_at_protected_writer_not_only_claim[queued_writer]",
+        "status": "PASS",
+        "terminal": "final-backend",
+        "junit": "/tmp/van-be004-upsert-r1-final-backend.xml"
+      },
+      {
+        "id": "tests.test_account_update_review::test_original_edit_expiry_is_checked_at_protected_writer_not_only_claim[fsync]",
+        "status": "PASS",
+        "terminal": "final-backend",
+        "junit": "/tmp/van-be004-upsert-r1-final-backend.xml"
+      },
+      {
+        "id": "tests.test_account_update_review::test_actual_registered_writer_preserves_authority_partial_and_cached_history[current_key]",
+        "status": "PASS",
+        "terminal": "final-backend",
+        "junit": "/tmp/van-be004-upsert-r1-final-backend.xml"
+      },
+      {
+        "id": "tests.test_account_update_review::test_actual_registered_writer_preserves_authority_partial_and_cached_history[namespace]",
+        "status": "PASS",
+        "terminal": "final-backend",
+        "junit": "/tmp/van-be004-upsert-r1-final-backend.xml"
+      },
+      {
+        "id": "tests.test_account_update_review::test_actual_registered_writer_preserves_authority_partial_and_cached_history[partial_credentials]",
+        "status": "PASS",
+        "terminal": "final-backend",
+        "junit": "/tmp/van-be004-upsert-r1-final-backend.xml"
+      },
+      {
+        "id": "tests.test_account_update_review::test_actual_registered_writer_preserves_authority_partial_and_cached_history[empty_credential_expiry]",
+        "status": "PASS",
+        "terminal": "final-backend",
+        "junit": "/tmp/van-be004-upsert-r1-final-backend.xml"
+      },
+      {
+        "id": "tests.test_account_update_review::test_actual_registered_writer_preserves_authority_partial_and_cached_history[healthy_cached]",
+        "status": "PASS",
+        "terminal": "final-backend",
+        "junit": "/tmp/van-be004-upsert-r1-final-backend.xml"
+      },
+      {
+        "id": "tests.test_account_update_review::test_real_queued_registry_writer_cannot_outwait_original_authority",
+        "status": "PASS",
+        "terminal": "final-backend",
+        "junit": "/tmp/van-be004-upsert-r1-final-backend.xml"
+      },
+      {
+        "id": "tests.test_account_resource_binding::test_delayed_owner_approval_cannot_overwrite_a_newer_account[account_upsert]",
+        "status": "PASS",
+        "terminal": "final-backend",
+        "junit": "/tmp/van-be004-upsert-r1-final-backend.xml"
+      },
+      {
+        "id": "tests.test_account_resource_binding::test_delayed_owner_approval_cannot_overwrite_a_newer_account[account_remove]",
+        "status": "PASS",
+        "terminal": "final-backend",
+        "junit": "/tmp/van-be004-upsert-r1-final-backend.xml"
+      },
+      {
+        "id": "tests.test_account_resource_binding::test_approval_for_an_absent_alias_cannot_replace_a_later_registration",
+        "status": "PASS",
+        "terminal": "final-backend",
+        "junit": "/tmp/van-be004-upsert-r1-final-backend.xml"
+      },
+      {
+        "id": "tests.test_account_resource_binding::test_native_cas_still_checks_changes_after_gateway_proof_verification",
+        "status": "PASS",
+        "terminal": "final-backend",
+        "junit": "/tmp/van-be004-upsert-r1-final-backend.xml"
+      },
+      {
+        "id": "tests.test_account_resource_binding::test_credential_generation_change_invalidates_a_pending_local_edit",
+        "status": "PASS",
+        "terminal": "final-backend",
+        "junit": "/tmp/van-be004-upsert-r1-final-backend.xml"
+      },
+      {
+        "id": "tests.test_account_resource_binding::test_a_disjoint_owner_edit_does_not_invalidate_this_account_approval",
+        "status": "PASS",
+        "terminal": "final-backend",
+        "junit": "/tmp/van-be004-upsert-r1-final-backend.xml"
+      },
+      {
+        "id": "tests.test_account_resource_binding::test_restoring_old_metadata_does_not_restore_an_obsolete_approval",
+        "status": "PASS",
+        "terminal": "final-backend",
+        "junit": "/tmp/van-be004-upsert-r1-final-backend.xml"
+      },
+      {
+        "id": "tests.test_account_resource_binding::test_device_cannot_supply_the_gateways_internal_resource_binding",
+        "status": "PASS",
+        "terminal": "final-backend",
+        "junit": "/tmp/van-be004-upsert-r1-final-backend.xml"
+      },
+      {
+        "id": "tests.test_account_resource_binding::test_failed_native_readback_returns_refused_without_dispatching_a_change",
+        "status": "PASS",
+        "terminal": "final-backend",
+        "junit": "/tmp/van-be004-upsert-r1-final-backend.xml"
+      },
+      {
+        "id": "tests.test_account_operation_recovery::test_authenticated_namespace_is_bound_to_approval_native_intent_and_original_read",
+        "status": "PASS",
+        "terminal": "final-backend",
+        "junit": "/tmp/van-be004-upsert-r1-final-backend.xml"
+      },
+      {
+        "id": "tests.test_account_operation_recovery::test_native_writer_rechecks_descriptor_after_gateway_approval_consumption",
+        "status": "PASS",
+        "terminal": "final-backend",
+        "junit": "/tmp/van-be004-upsert-r1-final-backend.xml"
+      },
+      {
+        "id": "tests.test_account_operation_recovery::test_original_demo_creation_runs_through_paired_a4_signed_commander_and_readback[provider_reply]",
+        "status": "PASS",
+        "terminal": "final-backend",
+        "junit": "/tmp/van-be004-upsert-r1-final-backend.xml"
+      },
+      {
+        "id": "tests.test_account_operation_recovery::test_original_demo_creation_runs_through_paired_a4_signed_commander_and_readback[native_http_reply]",
+        "status": "PASS",
+        "terminal": "final-backend",
+        "junit": "/tmp/van-be004-upsert-r1-final-backend.xml"
+      },
+      {
+        "id": "tests.test_account_operation_recovery::test_original_demo_creation_runs_through_paired_a4_signed_commander_and_readback[none]",
+        "status": "PASS",
+        "terminal": "final-backend",
+        "junit": "/tmp/van-be004-upsert-r1-final-backend.xml"
+      },
+      {
+        "id": "tests.test_account_operation_recovery::test_lost_reply_is_unknown_then_native_readback_confirms_original_issue",
+        "status": "PASS",
+        "terminal": "final-backend",
+        "junit": "/tmp/van-be004-upsert-r1-final-backend.xml"
+      },
+      {
+        "id": "tests.test_account_operation_recovery::test_failed_native_completion_blocks_new_approval_but_disjoint_account_works",
+        "status": "PASS",
+        "terminal": "final-backend",
+        "junit": "/tmp/van-be004-upsert-r1-final-backend.xml"
+      },
+      {
+        "id": "tests.test_account_operation_recovery::test_absence_of_a_native_record_is_never_evidence_of_no_effect",
+        "status": "PASS",
+        "terminal": "final-backend",
+        "junit": "/tmp/van-be004-upsert-r1-final-backend.xml"
+      },
+      {
+        "id": "tests.test_account_operation_recovery::test_operation_readback_uses_current_authenticated_device_not_a_query_override",
+        "status": "PASS",
+        "terminal": "final-backend",
+        "junit": "/tmp/van-be004-upsert-r1-final-backend.xml"
+      },
+      {
+        "id": "tests.test_account_operation_recovery::test_device_cannot_inject_a_native_operation_context",
+        "status": "PASS",
+        "terminal": "final-backend",
+        "junit": "/tmp/van-be004-upsert-r1-final-backend.xml"
+      },
+      {
+        "id": "tests.test_account_operation_recovery::test_approval_response_preserves_original_timestamp_across_biometric_delay",
+        "status": "PASS",
+        "terminal": "final-backend",
+        "junit": "/tmp/van-be004-upsert-r1-final-backend.xml"
+      },
+      {
+        "id": "tests.test_account_operation_recovery::test_signed_remote_commander_lost_reply_is_recovered_by_original_native_identity[lost]",
+        "status": "PASS",
+        "terminal": "final-backend",
+        "junit": "/tmp/van-be004-upsert-r1-final-backend.xml"
+      },
+      {
+        "id": "tests.test_account_operation_recovery::test_signed_remote_commander_lost_reply_is_recovered_by_original_native_identity[wrong-command]",
+        "status": "PASS",
+        "terminal": "final-backend",
+        "junit": "/tmp/van-be004-upsert-r1-final-backend.xml"
+      },
+      {
+        "id": "tests.test_account_unlink_review::test_signed_unlink_keeps_native_history_and_never_reports_broker_closure",
+        "status": "PASS",
+        "terminal": "final-backend",
+        "junit": "/tmp/van-be004-upsert-r1-final-backend.xml"
+      },
+      {
+        "id": "tests.test_account_unlink_review::test_lost_native_reply_after_unlink_is_recovered_by_original_read_without_repetition",
+        "status": "PASS",
+        "terminal": "final-backend",
+        "junit": "/tmp/van-be004-upsert-r1-final-backend.xml"
+      },
+      {
+        "id": "tests.test_account_unlink_review::test_active_runtime_refuses_unlink_before_an_owner_challenge_is_issued",
+        "status": "PASS",
+        "terminal": "final-backend",
+        "junit": "/tmp/van-be004-upsert-r1-final-backend.xml"
+      },
+      {
+        "id": "tests.test_account_unlink_review::test_runtime_starting_after_proof_is_consumed_refuses_original_without_shredding",
+        "status": "PASS",
+        "terminal": "final-backend",
+        "junit": "/tmp/van-be004-upsert-r1-final-backend.xml"
+      },
+      {
+        "id": "tests.test_account_unlink_review::test_catalog_requires_the_same_native_review_for_local_unlink",
+        "status": "PASS",
+        "terminal": "final-backend",
+        "junit": "/tmp/van-be004-upsert-r1-final-backend.xml"
+      },
+      {
+        "id": "tests.test_account_unlink_review::test_exact_nonzero_native_funds_are_in_the_signed_owner_review",
+        "status": "PASS",
+        "terminal": "final-backend",
+        "junit": "/tmp/van-be004-upsert-r1-final-backend.xml"
+      },
+      {
+        "id": "tests.test_account_unlink_review::test_native_funds_changing_after_gateway_preflight_requires_fresh_review",
+        "status": "PASS",
+        "terminal": "final-backend",
+        "junit": "/tmp/van-be004-upsert-r1-final-backend.xml"
+      },
+      {
+        "id": "tests.test_account_unlink_review::test_incomplete_or_broker_closing_native_review_is_refused_before_signature[remote_account_closed-True]",
+        "status": "PASS",
+        "terminal": "final-backend",
+        "junit": "/tmp/van-be004-upsert-r1-final-backend.xml"
+      },
+      {
+        "id": "tests.test_account_unlink_review::test_incomplete_or_broker_closing_native_review_is_refused_before_signature[retained_remote_funds-None]",
+        "status": "PASS",
+        "terminal": "final-backend",
+        "junit": "/tmp/van-be004-upsert-r1-final-backend.xml"
+      },
+      {
+        "id": "tests.test_account_approval_contract::test_the_read_only_sets_agree",
+        "status": "PASS",
+        "terminal": "final-backend",
+        "junit": "/tmp/van-be004-upsert-r1-final-backend.xml"
+      },
+      {
+        "id": "tests.test_account_approval_contract::test_the_action_lists_agree",
+        "status": "PASS",
+        "terminal": "final-backend",
+        "junit": "/tmp/van-be004-upsert-r1-final-backend.xml"
+      },
+      {
+        "id": "tests.test_account_approval_contract::test_a_new_action_is_guarded_by_default",
+        "status": "PASS",
+        "terminal": "final-backend",
+        "junit": "/tmp/van-be004-upsert-r1-final-backend.xml"
+      },
+      {
+        "id": "tests.test_account_approval_contract::test_the_credential_bearing_actions_are_all_guarded",
+        "status": "PASS",
+        "terminal": "final-backend",
+        "junit": "/tmp/van-be004-upsert-r1-final-backend.xml"
+      },
+      {
+        "id": "tests.test_account_approval_contract::test_original_operation_recovery_sets_agree_at_native_and_android_boundaries",
+        "status": "PASS",
+        "terminal": "final-backend",
+        "junit": "/tmp/van-be004-upsert-r1-final-backend.xml"
+      },
+      {
+        "id": "tests.test_account_approval_contract::test_the_read_only_actions_really_are_read_only",
+        "status": "PASS",
+        "terminal": "final-backend",
+        "junit": "/tmp/van-be004-upsert-r1-final-backend.xml"
+      },
+      {
+        "id": "tests.test_account_approval_contract::test_the_weak_biometric_path_is_gone",
+        "status": "PASS",
+        "terminal": "final-backend",
+        "junit": "/tmp/van-be004-upsert-r1-final-backend.xml"
+      },
+      {
+        "id": "tests.test_account_approval_contract::test_nothing_in_the_app_calls_the_weak_path",
+        "status": "PASS",
+        "terminal": "final-backend",
+        "junit": "/tmp/van-be004-upsert-r1-final-backend.xml"
+      },
+      {
+        "id": "tests.test_account_approval_contract::test_the_device_sends_a_proof_for_a_guarded_action",
+        "status": "PASS",
+        "terminal": "final-backend",
+        "junit": "/tmp/van-be004-upsert-r1-final-backend.xml"
+      },
+      {
+        "id": "::test_actual_entitled_label_edit_cannot_write_after_consumed_owner_expiry",
+        "status": "PASS",
+        "terminal": "final-backend",
+        "junit": "/tmp/van-be004-upsert-r1-final-backend.xml"
+      },
+      {
+        "id": "trading.tests.test_oauth_link_currentness::test_slow_authorization_cannot_overtake_original_link_currentness[expired]",
+        "status": "PASS",
+        "terminal": "final-native",
+        "junit": "/tmp/van-be004-upsert-r1-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_oauth_link_currentness::test_slow_authorization_cannot_overtake_original_link_currentness[namespace]",
+        "status": "PASS",
+        "terminal": "final-native",
+        "junit": "/tmp/van-be004-upsert-r1-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_oauth_link_currentness::test_slow_authorization_cannot_overtake_original_link_currentness[version]",
+        "status": "PASS",
+        "terminal": "final-native",
+        "junit": "/tmp/van-be004-upsert-r1-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_oauth_link_currentness::test_slow_authorization_cannot_overtake_original_link_currentness[authority]",
+        "status": "PASS",
+        "terminal": "final-native",
+        "junit": "/tmp/van-be004-upsert-r1-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_oauth_link_currentness::test_expiry_before_protected_credentials_preserves_partial_history",
+        "status": "PASS",
+        "terminal": "final-native",
+        "junit": "/tmp/van-be004-upsert-r1-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_oauth_link_currentness::test_actual_registered_signed_owner_rechecked_after_authorize[key]",
+        "status": "PASS",
+        "terminal": "final-native",
+        "junit": "/tmp/van-be004-upsert-r1-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_oauth_link_currentness::test_actual_registered_signed_owner_rechecked_after_authorize[time]",
+        "status": "PASS",
+        "terminal": "final-native",
+        "junit": "/tmp/van-be004-upsert-r1-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_oauth_link_currentness::test_queued_profile_writer_keeps_original_link_and_refuses_stale_preimage",
+        "status": "PASS",
+        "terminal": "final-native",
+        "junit": "/tmp/van-be004-upsert-r1-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_commander_accounts::test_upsert_credentials_verify_remove_never_echo_secrets",
+        "status": "PASS",
+        "terminal": "final-native",
+        "junit": "/tmp/van-be004-upsert-r1-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_commander_accounts::test_deriv_demo_creation_and_oauth_link",
+        "status": "PASS",
+        "terminal": "final-native",
+        "junit": "/tmp/van-be004-upsert-r1-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_commander_accounts::test_demo_provider_error_is_original_unknown_not_permission_to_create_again",
+        "status": "PASS",
+        "terminal": "final-native",
+        "junit": "/tmp/van-be004-upsert-r1-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_commander_accounts::test_ctrader_discover_exchange_and_link",
+        "status": "PASS",
+        "terminal": "final-native",
+        "junit": "/tmp/van-be004-upsert-r1-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_commander_accounts::test_mt5_ea_key_issue_and_verify",
+        "status": "PASS",
+        "terminal": "final-native",
+        "junit": "/tmp/van-be004-upsert-r1-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_commander_accounts::test_account_mutations_refuse_ambiguous_environment_flags_before_writing[account_upsert-args0]",
+        "status": "PASS",
+        "terminal": "final-native",
+        "junit": "/tmp/van-be004-upsert-r1-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_commander_accounts::test_account_mutations_refuse_ambiguous_environment_flags_before_writing[ctrader_link-args1]",
+        "status": "PASS",
+        "terminal": "final-native",
+        "junit": "/tmp/van-be004-upsert-r1-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_commander_accounts::test_account_mutations_refuse_ambiguous_environment_flags_before_writing[mt5_ea_issue_key-args2]",
+        "status": "PASS",
+        "terminal": "final-native",
+        "junit": "/tmp/van-be004-upsert-r1-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_deriv_credential_verification::test_unverified_rotation_keeps_the_previous_private_credential[patch0]",
+        "status": "PASS",
+        "terminal": "final-native",
+        "junit": "/tmp/van-be004-upsert-r1-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_deriv_credential_verification::test_unverified_rotation_keeps_the_previous_private_credential[patch1]",
+        "status": "PASS",
+        "terminal": "final-native",
+        "junit": "/tmp/van-be004-upsert-r1-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_deriv_credential_verification::test_unverified_rotation_keeps_the_previous_private_credential[patch2]",
+        "status": "PASS",
+        "terminal": "final-native",
+        "junit": "/tmp/van-be004-upsert-r1-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_deriv_credential_verification::test_unverified_rotation_keeps_the_previous_private_credential[patch3]",
+        "status": "PASS",
+        "terminal": "final-native",
+        "junit": "/tmp/van-be004-upsert-r1-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_deriv_credential_verification::test_first_native_verified_credential_pins_an_unbound_account",
+        "status": "PASS",
+        "terminal": "final-native",
+        "junit": "/tmp/van-be004-upsert-r1-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_deriv_credential_verification::test_oauth_link_checks_native_identity_before_creating_files",
+        "status": "PASS",
+        "terminal": "final-native",
+        "junit": "/tmp/van-be004-upsert-r1-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_deriv_credential_verification::test_oauth_alias_collision_does_not_overwrite_a_different_registered_binding",
+        "status": "PASS",
+        "terminal": "final-native",
+        "junit": "/tmp/van-be004-upsert-r1-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_deriv_credential_verification::test_read_only_oauth_token_retains_a_real_observe_link",
+        "status": "PASS",
+        "terminal": "final-native",
+        "junit": "/tmp/van-be004-upsert-r1-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_deriv_credential_verification::test_demo_alias_collision_is_checked_before_the_remote_creation_request",
+        "status": "PASS",
+        "terminal": "final-native",
+        "junit": "/tmp/van-be004-upsert-r1-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_native_account_effects::test_completed_original_returns_its_original_result_without_reissuing_a_key",
+        "status": "PASS",
+        "terminal": "final-native",
+        "junit": "/tmp/van-be004-upsert-r1-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_native_account_effects::test_operation_identity_cannot_be_reassigned_after_completion[change0]",
+        "status": "PASS",
+        "terminal": "final-native",
+        "junit": "/tmp/van-be004-upsert-r1-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_native_account_effects::test_operation_identity_cannot_be_reassigned_after_completion[change1]",
+        "status": "PASS",
+        "terminal": "final-native",
+        "junit": "/tmp/van-be004-upsert-r1-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_native_account_effects::test_operation_identity_cannot_be_reassigned_after_completion[change2]",
+        "status": "PASS",
+        "terminal": "final-native",
+        "junit": "/tmp/van-be004-upsert-r1-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_native_account_effects::test_operation_identity_cannot_be_reassigned_after_completion[change3]",
+        "status": "PASS",
+        "terminal": "final-native",
+        "junit": "/tmp/van-be004-upsert-r1-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_native_account_effects::test_failure_after_a_registry_effect_fences_original_and_new_approvals",
+        "status": "PASS",
+        "terminal": "final-native",
+        "junit": "/tmp/van-be004-upsert-r1-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_native_account_effects::test_validation_refusal_before_effect_does_not_permanently_fence_the_target",
+        "status": "PASS",
+        "terminal": "final-native",
+        "junit": "/tmp/van-be004-upsert-r1-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_native_account_effects::test_actual_child_death_after_native_effect_cannot_reopen_the_original_attempt",
+        "status": "PASS",
+        "terminal": "final-native",
+        "junit": "/tmp/van-be004-upsert-r1-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_native_account_effects::test_postcommit_reply_failure_reads_confirmed_history_without_another_effect",
+        "status": "PASS",
+        "terminal": "final-native",
+        "junit": "/tmp/van-be004-upsert-r1-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_native_account_effects::test_well_sealed_but_invalid_operation_history_refuses_all_new_effects[producer]",
+        "status": "PASS",
+        "terminal": "final-native",
+        "junit": "/tmp/van-be004-upsert-r1-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_native_account_effects::test_well_sealed_but_invalid_operation_history_refuses_all_new_effects[intent]",
+        "status": "PASS",
+        "terminal": "final-native",
+        "junit": "/tmp/van-be004-upsert-r1-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_native_account_effects::test_well_sealed_but_invalid_operation_history_refuses_all_new_effects[predecessor]",
+        "status": "PASS",
+        "terminal": "final-native",
+        "junit": "/tmp/van-be004-upsert-r1-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_native_account_effects::test_well_sealed_but_invalid_operation_history_refuses_all_new_effects[phase]",
+        "status": "PASS",
+        "terminal": "final-native",
+        "junit": "/tmp/van-be004-upsert-r1-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_native_account_effects::test_well_sealed_but_invalid_operation_history_refuses_all_new_effects[secret]",
+        "status": "PASS",
+        "terminal": "final-native",
+        "junit": "/tmp/van-be004-upsert-r1-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_native_account_effects::test_in_flight_scope_survives_authority_expiry_and_cold_reader",
+        "status": "PASS",
+        "terminal": "final-native",
+        "junit": "/tmp/van-be004-upsert-r1-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_native_account_effects::test_missing_native_operation_is_unknown_and_a_foreign_device_cannot_read_result",
+        "status": "PASS",
+        "terminal": "final-native",
+        "junit": "/tmp/van-be004-upsert-r1-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_native_account_effects::test_provider_link_cannot_bypass_an_unconfirmed_account_target",
+        "status": "PASS",
+        "terminal": "final-native",
+        "junit": "/tmp/van-be004-upsert-r1-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_native_account_effects::test_expired_original_authority_is_refused_before_any_native_effect",
+        "status": "PASS",
+        "terminal": "final-native",
+        "junit": "/tmp/van-be004-upsert-r1-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_native_account_effects::test_postgres_original_operation_is_atomic_and_isolated_between_named_ledgers",
+        "status": "SKIP",
+        "terminal": "final-native",
+        "junit": "/tmp/van-be004-upsert-r1-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_native_account_effects::test_actual_concurrent_native_claim_writers_cannot_admit_two_effects_for_a_target[sqlite]",
+        "status": "PASS",
+        "terminal": "final-native",
+        "junit": "/tmp/van-be004-upsert-r1-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_native_account_effects::test_actual_concurrent_native_claim_writers_cannot_admit_two_effects_for_a_target[postgres]",
+        "status": "SKIP",
+        "terminal": "final-native",
+        "junit": "/tmp/van-be004-upsert-r1-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_demo_creation_recovery::test_healthy_original_is_independently_verified_and_never_creates_again",
+        "status": "PASS",
+        "terminal": "final-native",
+        "junit": "/tmp/van-be004-upsert-r1-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_demo_creation_recovery::test_uncertain_remote_or_local_completion_fences_original_and_new_approval[reply]",
+        "status": "PASS",
+        "terminal": "final-native",
+        "junit": "/tmp/van-be004-upsert-r1-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_demo_creation_recovery::test_uncertain_remote_or_local_completion_fences_original_and_new_approval[identity]",
+        "status": "PASS",
+        "terminal": "final-native",
+        "junit": "/tmp/van-be004-upsert-r1-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_demo_creation_recovery::test_uncertain_remote_or_local_completion_fences_original_and_new_approval[credentials]",
+        "status": "PASS",
+        "terminal": "final-native",
+        "junit": "/tmp/van-be004-upsert-r1-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_demo_creation_recovery::test_uncertain_remote_or_local_completion_fences_original_and_new_approval[registry]",
+        "status": "PASS",
+        "terminal": "final-native",
+        "junit": "/tmp/van-be004-upsert-r1-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_demo_creation_recovery::test_uncertain_remote_or_local_completion_fences_original_and_new_approval[completion]",
+        "status": "PASS",
+        "terminal": "final-native",
+        "junit": "/tmp/van-be004-upsert-r1-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_demo_creation_recovery::test_ambiguous_provider_subject_overlaps_unresolved_known_subject[None-owner@example.com]",
+        "status": "PASS",
+        "terminal": "final-native",
+        "junit": "/tmp/van-be004-upsert-r1-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_demo_creation_recovery::test_ambiguous_provider_subject_overlaps_unresolved_known_subject[owner@example.com-None]",
+        "status": "PASS",
+        "terminal": "final-native",
+        "junit": "/tmp/van-be004-upsert-r1-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_demo_creation_recovery::test_ambiguous_provider_subject_overlaps_unresolved_known_subject[owner@example.com-bad-email]",
+        "status": "PASS",
+        "terminal": "final-native",
+        "junit": "/tmp/van-be004-upsert-r1-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_demo_creation_recovery::test_unverified_different_email_cannot_escape_but_unrelated_account_stays_operable",
+        "status": "PASS",
+        "terminal": "final-native",
+        "junit": "/tmp/van-be004-upsert-r1-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_demo_creation_recovery::test_lost_or_changed_vault_cannot_rekey_unresolved_creation[missing]",
+        "status": "PASS",
+        "terminal": "final-native",
+        "junit": "/tmp/van-be004-upsert-r1-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_demo_creation_recovery::test_lost_or_changed_vault_cannot_rekey_unresolved_creation[malformed]",
+        "status": "PASS",
+        "terminal": "final-native",
+        "junit": "/tmp/van-be004-upsert-r1-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_demo_creation_recovery::test_lost_or_changed_vault_cannot_rekey_unresolved_creation[replaced]",
+        "status": "PASS",
+        "terminal": "final-native",
+        "junit": "/tmp/van-be004-upsert-r1-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_demo_creation_recovery::test_lost_or_changed_vault_cannot_rekey_unresolved_creation[permissions]",
+        "status": "PASS",
+        "terminal": "final-native",
+        "junit": "/tmp/van-be004-upsert-r1-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_demo_creation_recovery::test_completed_history_remains_readable_without_vault_key",
+        "status": "PASS",
+        "terminal": "final-native",
+        "junit": "/tmp/van-be004-upsert-r1-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_demo_creation_recovery::test_authenticated_namespace_is_current_state_data_without_business_effect_or_revision",
+        "status": "PASS",
+        "terminal": "final-native",
+        "junit": "/tmp/van-be004-upsert-r1-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_demo_creation_recovery::test_namespace_vault_continuity_never_mints_an_independent_replacement[missing]",
+        "status": "PASS",
+        "terminal": "final-native",
+        "junit": "/tmp/van-be004-upsert-r1-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_demo_creation_recovery::test_namespace_vault_continuity_never_mints_an_independent_replacement[malformed]",
+        "status": "PASS",
+        "terminal": "final-native",
+        "junit": "/tmp/van-be004-upsert-r1-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_demo_creation_recovery::test_namespace_vault_continuity_never_mints_an_independent_replacement[conflicting]",
+        "status": "PASS",
+        "terminal": "final-native",
+        "junit": "/tmp/van-be004-upsert-r1-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_demo_creation_recovery::test_namespace_vault_continuity_never_mints_an_independent_replacement[missing_hint]",
+        "status": "PASS",
+        "terminal": "final-native",
+        "junit": "/tmp/van-be004-upsert-r1-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_demo_creation_recovery::test_namespace_commit_or_vault_write_loss_recovers_only_same_immutable_hint[vault_write]",
+        "status": "PASS",
+        "terminal": "final-native",
+        "junit": "/tmp/van-be004-upsert-r1-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_demo_creation_recovery::test_namespace_commit_or_vault_write_loss_recovers_only_same_immutable_hint[commit_ack]",
+        "status": "PASS",
+        "terminal": "final-native",
+        "junit": "/tmp/van-be004-upsert-r1-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_demo_creation_recovery::test_legacy_original_is_never_retroactively_bound_and_its_provider_fence_remains",
+        "status": "PASS",
+        "terminal": "final-native",
+        "junit": "/tmp/van-be004-upsert-r1-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_demo_creation_recovery::test_backup_namespace_continuity_and_independent_authenticated_native_stores",
+        "status": "PASS",
+        "terminal": "final-native",
+        "junit": "/tmp/van-be004-upsert-r1-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_demo_creation_recovery::test_original_demo_result_cannot_be_read_or_reassigned_by_another_device",
+        "status": "PASS",
+        "terminal": "final-native",
+        "junit": "/tmp/van-be004-upsert-r1-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_demo_creation_recovery::test_missing_original_creation_identity_cannot_invent_a_completed_account[client_id]",
+        "status": "PASS",
+        "terminal": "final-native",
+        "junit": "/tmp/van-be004-upsert-r1-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_demo_creation_recovery::test_missing_original_creation_identity_cannot_invent_a_completed_account[currency]",
+        "status": "PASS",
+        "terminal": "final-native",
+        "junit": "/tmp/van-be004-upsert-r1-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_demo_creation_recovery::test_missing_original_creation_identity_cannot_invent_a_completed_account[oauth_token]",
+        "status": "PASS",
+        "terminal": "final-native",
+        "junit": "/tmp/van-be004-upsert-r1-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_demo_creation_recovery::test_registered_signed_owner_current_key_is_rechecked_after_native_claim",
+        "status": "PASS",
+        "terminal": "final-native",
+        "junit": "/tmp/van-be004-upsert-r1-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_demo_creation_recovery::test_last_wire_guard_rechecks_after_slow_provider_connect[expiry]",
+        "status": "PASS",
+        "terminal": "final-native",
+        "junit": "/tmp/van-be004-upsert-r1-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_demo_creation_recovery::test_last_wire_guard_rechecks_after_slow_provider_connect[namespace]",
+        "status": "PASS",
+        "terminal": "final-native",
+        "junit": "/tmp/van-be004-upsert-r1-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_demo_creation_recovery::test_last_wire_guard_rechecks_after_slow_provider_connect[version]",
+        "status": "PASS",
+        "terminal": "final-native",
+        "junit": "/tmp/van-be004-upsert-r1-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_demo_creation_recovery::test_signed_current_token_is_rechecked_at_wire_after_connect",
+        "status": "PASS",
+        "terminal": "final-native",
+        "junit": "/tmp/van-be004-upsert-r1-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_demo_creation_recovery::test_transport_hook_is_per_call_and_refusal_does_not_leak_into_default_read_path",
+        "status": "PASS",
+        "terminal": "final-native",
+        "junit": "/tmp/van-be004-upsert-r1-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_demo_creation_recovery::test_legacy_signed_current_owner_without_private_metadata_has_original_intent[none]",
+        "status": "PASS",
+        "terminal": "final-native",
+        "junit": "/tmp/van-be004-upsert-r1-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_demo_creation_recovery::test_legacy_signed_current_owner_without_private_metadata_has_original_intent[provider_reply]",
+        "status": "PASS",
+        "terminal": "final-native",
+        "junit": "/tmp/van-be004-upsert-r1-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_demo_creation_recovery::test_legacy_signed_current_owner_without_private_metadata_has_original_intent[completed_reply]",
+        "status": "PASS",
+        "terminal": "final-native",
+        "junit": "/tmp/van-be004-upsert-r1-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_demo_creation_recovery::test_refusal_and_currentness_checks_precede_first_provider_send[expired]",
+        "status": "PASS",
+        "terminal": "final-native",
+        "junit": "/tmp/van-be004-upsert-r1-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_demo_creation_recovery::test_refusal_and_currentness_checks_precede_first_provider_send[version]",
+        "status": "PASS",
+        "terminal": "final-native",
+        "junit": "/tmp/van-be004-upsert-r1-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_demo_creation_recovery::test_refusal_and_currentness_checks_precede_first_provider_send[digest]",
+        "status": "PASS",
+        "terminal": "final-native",
+        "junit": "/tmp/van-be004-upsert-r1-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_demo_creation_recovery::test_refusal_and_currentness_checks_precede_first_provider_send[dispatch-revoked]",
+        "status": "PASS",
+        "terminal": "final-native",
+        "junit": "/tmp/van-be004-upsert-r1-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_demo_creation_recovery::test_refusal_and_currentness_checks_precede_first_provider_send[late-expiry]",
+        "status": "PASS",
+        "terminal": "final-native",
+        "junit": "/tmp/van-be004-upsert-r1-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_demo_creation_recovery::test_refusal_and_currentness_checks_precede_first_provider_send[malformed]",
+        "status": "PASS",
+        "terminal": "final-native",
+        "junit": "/tmp/van-be004-upsert-r1-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_demo_creation_recovery::test_real_process_death_after_send_retains_original_claim_and_never_resends",
+        "status": "PASS",
+        "terminal": "final-native",
+        "junit": "/tmp/van-be004-upsert-r1-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_demo_creation_recovery::test_real_process_key_race_and_provider_subject_arbitration[True]",
+        "status": "PASS",
+        "terminal": "final-native",
+        "junit": "/tmp/van-be004-upsert-r1-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_demo_creation_recovery::test_real_process_key_race_and_provider_subject_arbitration[False]",
+        "status": "PASS",
+        "terminal": "final-native",
+        "junit": "/tmp/van-be004-upsert-r1-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_account_registry_atomic_rea::test_replace_validates_before_any_registry_mutation",
+        "status": "PASS",
+        "terminal": "final-native",
+        "junit": "/tmp/van-be004-upsert-r1-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_account_registry_atomic_rea::test_failed_atomic_swap_does_not_destroy_old_registry",
+        "status": "PASS",
+        "terminal": "final-native",
+        "junit": "/tmp/van-be004-upsert-r1-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_account_registry_atomic_rea::test_new_registry_file_is_owner_only_and_is_valid_json",
+        "status": "PASS",
+        "terminal": "final-native",
+        "junit": "/tmp/van-be004-upsert-r1-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_account_registry_atomic_rea::test_upsert_alternative_is_explicit_replace_only",
+        "status": "PASS",
+        "terminal": "final-native",
+        "junit": "/tmp/van-be004-upsert-r1-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_account_registry_atomic_rea::test_optional_trusted_guard_runs_after_fsync_and_refusal_preserves_bytes_revision_and_memory[add]",
+        "status": "PASS",
+        "terminal": "final-native",
+        "junit": "/tmp/van-be004-upsert-r1-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_account_registry_atomic_rea::test_optional_trusted_guard_runs_after_fsync_and_refusal_preserves_bytes_revision_and_memory[replace]",
+        "status": "PASS",
+        "terminal": "final-native",
+        "junit": "/tmp/van-be004-upsert-r1-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_account_registry_concurrency::test_two_real_processes_do_not_drop_disjoint_account_additions",
+        "status": "PASS",
+        "terminal": "final-native",
+        "junit": "/tmp/van-be004-upsert-r1-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_account_registry_concurrency::test_stale_instance_merges_a_disjoint_replace_and_add",
+        "status": "PASS",
+        "terminal": "final-native",
+        "junit": "/tmp/van-be004-upsert-r1-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_account_registry_concurrency::test_same_account_changed_since_read_refuses_instead_of_overwriting[replace]",
+        "status": "PASS",
+        "terminal": "final-native",
+        "junit": "/tmp/van-be004-upsert-r1-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_account_registry_concurrency::test_same_account_changed_since_read_refuses_instead_of_overwriting[remove]",
+        "status": "PASS",
+        "terminal": "final-native",
+        "junit": "/tmp/van-be004-upsert-r1-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_account_registry_concurrency::test_an_unrelated_account_cannot_be_lost_by_a_stale_removal",
+        "status": "PASS",
+        "terminal": "final-native",
+        "junit": "/tmp/van-be004-upsert-r1-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_account_registry_concurrency::test_an_account_created_after_read_is_not_silently_replaced_by_add",
+        "status": "PASS",
+        "terminal": "final-native",
+        "junit": "/tmp/van-be004-upsert-r1-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_account_registry_concurrency::test_direct_save_cannot_bypass_the_stale_registry_check",
+        "status": "PASS",
+        "terminal": "final-native",
+        "junit": "/tmp/van-be004-upsert-r1-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_account_registry_concurrency::test_corrupt_persisted_state_is_not_replaced_by_a_stale_writers_cache",
+        "status": "PASS",
+        "terminal": "final-native",
+        "junit": "/tmp/van-be004-upsert-r1-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_account_registry_concurrency::test_ambiguous_identity_flags_cannot_be_persisted[false-demo]",
+        "status": "PASS",
+        "terminal": "final-native",
+        "junit": "/tmp/van-be004-upsert-r1-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_account_registry_concurrency::test_ambiguous_identity_flags_cannot_be_persisted[false-enabled]",
+        "status": "PASS",
+        "terminal": "final-native",
+        "junit": "/tmp/van-be004-upsert-r1-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_account_registry_concurrency::test_ambiguous_identity_flags_cannot_be_persisted[true-demo]",
+        "status": "PASS",
+        "terminal": "final-native",
+        "junit": "/tmp/van-be004-upsert-r1-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_account_registry_concurrency::test_ambiguous_identity_flags_cannot_be_persisted[true-enabled]",
+        "status": "PASS",
+        "terminal": "final-native",
+        "junit": "/tmp/van-be004-upsert-r1-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_account_registry_concurrency::test_ambiguous_identity_flags_cannot_be_persisted[0-demo]",
+        "status": "PASS",
+        "terminal": "final-native",
+        "junit": "/tmp/van-be004-upsert-r1-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_account_registry_concurrency::test_ambiguous_identity_flags_cannot_be_persisted[0-enabled]",
+        "status": "PASS",
+        "terminal": "final-native",
+        "junit": "/tmp/van-be004-upsert-r1-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_account_registry_concurrency::test_ambiguous_identity_flags_cannot_be_persisted[1-demo]",
+        "status": "PASS",
+        "terminal": "final-native",
+        "junit": "/tmp/van-be004-upsert-r1-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_account_registry_concurrency::test_ambiguous_identity_flags_cannot_be_persisted[1-enabled]",
+        "status": "PASS",
+        "terminal": "final-native",
+        "junit": "/tmp/van-be004-upsert-r1-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_account_registry_concurrency::test_ambiguous_identity_flags_cannot_be_persisted[None-demo]",
+        "status": "PASS",
+        "terminal": "final-native",
+        "junit": "/tmp/van-be004-upsert-r1-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_account_registry_concurrency::test_ambiguous_identity_flags_cannot_be_persisted[None-enabled]",
+        "status": "PASS",
+        "terminal": "final-native",
+        "junit": "/tmp/van-be004-upsert-r1-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_account_update_semantics::test_an_approved_label_edit_cannot_reset_unsupplied_native_fields[mode]",
+        "status": "PASS",
+        "terminal": "final-native",
+        "junit": "/tmp/van-be004-upsert-r1-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_account_update_semantics::test_an_approved_label_edit_cannot_reset_unsupplied_native_fields[currency]",
+        "status": "PASS",
+        "terminal": "final-native",
+        "junit": "/tmp/van-be004-upsert-r1-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_account_update_semantics::test_an_approved_label_edit_cannot_reset_unsupplied_native_fields[server]",
+        "status": "PASS",
+        "terminal": "final-native",
+        "junit": "/tmp/van-be004-upsert-r1-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_account_update_semantics::test_an_approved_label_edit_cannot_reset_unsupplied_native_fields[login]",
+        "status": "PASS",
+        "terminal": "final-native",
+        "junit": "/tmp/van-be004-upsert-r1-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_account_update_semantics::test_an_approved_label_edit_cannot_reset_unsupplied_native_fields[venue]",
+        "status": "PASS",
+        "terminal": "final-native",
+        "junit": "/tmp/van-be004-upsert-r1-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_account_update_semantics::test_an_approved_label_edit_cannot_reset_unsupplied_native_fields[bridge_url]",
+        "status": "PASS",
+        "terminal": "final-native",
+        "junit": "/tmp/van-be004-upsert-r1-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_account_update_semantics::test_an_approved_label_edit_cannot_reset_unsupplied_native_fields[credential_ref]",
+        "status": "PASS",
+        "terminal": "final-native",
+        "junit": "/tmp/van-be004-upsert-r1-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_account_update_semantics::test_an_approved_label_edit_cannot_reset_unsupplied_native_fields[demo]",
+        "status": "PASS",
+        "terminal": "final-native",
+        "junit": "/tmp/van-be004-upsert-r1-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_account_update_semantics::test_an_approved_label_edit_cannot_reset_unsupplied_native_fields[enabled]",
+        "status": "PASS",
+        "terminal": "final-native",
+        "junit": "/tmp/van-be004-upsert-r1-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_account_update_semantics::test_an_approved_label_edit_cannot_reset_unsupplied_native_fields[mandate_ref]",
+        "status": "PASS",
+        "terminal": "final-native",
+        "junit": "/tmp/van-be004-upsert-r1-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_account_update_semantics::test_an_approved_label_edit_cannot_reset_unsupplied_native_fields[notes]",
+        "status": "PASS",
+        "terminal": "final-native",
+        "junit": "/tmp/van-be004-upsert-r1-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_account_update_semantics::test_metadata_edit_does_not_create_a_new_empty_vault_or_drop_existing_reference",
+        "status": "PASS",
+        "terminal": "final-native",
+        "junit": "/tmp/van-be004-upsert-r1-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_account_update_semantics::test_owner_can_disable_and_reenable_without_resupplying_or_rebinding_account_identity",
+        "status": "PASS",
+        "terminal": "final-native",
+        "junit": "/tmp/van-be004-upsert-r1-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_account_update_semantics::test_ambiguous_enabled_values_are_refused_before_any_native_write[false]",
+        "status": "PASS",
+        "terminal": "final-native",
+        "junit": "/tmp/van-be004-upsert-r1-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_account_update_semantics::test_ambiguous_enabled_values_are_refused_before_any_native_write[0]",
+        "status": "PASS",
+        "terminal": "final-native",
+        "junit": "/tmp/van-be004-upsert-r1-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_account_update_semantics::test_ambiguous_enabled_values_are_refused_before_any_native_write[None]",
+        "status": "PASS",
+        "terminal": "final-native",
+        "junit": "/tmp/van-be004-upsert-r1-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_account_update_semantics::test_unsupported_control_is_never_reported_as_applied",
+        "status": "PASS",
+        "terminal": "final-native",
+        "junit": "/tmp/van-be004-upsert-r1-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_account_update_semantics::test_registration_cannot_redirect_future_deriv_credentials_to_an_untrusted_endpoint[wss://ws.derivws.com.evil.invalid/websockets/v3]",
+        "status": "PASS",
+        "terminal": "final-native",
+        "junit": "/tmp/van-be004-upsert-r1-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_account_update_semantics::test_registration_cannot_redirect_future_deriv_credentials_to_an_untrusted_endpoint[wss://ws.derivws.com@evil.invalid/websockets/v3]",
+        "status": "PASS",
+        "terminal": "final-native",
+        "junit": "/tmp/van-be004-upsert-r1-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_account_update_semantics::test_registration_cannot_redirect_future_deriv_credentials_to_an_untrusted_endpoint[ws://ws.derivws.com/websockets/v3]",
+        "status": "PASS",
+        "terminal": "final-native",
+        "junit": "/tmp/van-be004-upsert-r1-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_account_update_semantics::test_existing_untrusted_connection_can_be_disabled_without_first_repairing_identity",
+        "status": "PASS",
+        "terminal": "final-native",
+        "junit": "/tmp/van-be004-upsert-r1-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_account_update_semantics::test_provider_link_cannot_rebind_an_existing_alias_or_replace_its_secret_reference",
+        "status": "PASS",
+        "terminal": "final-native",
+        "junit": "/tmp/van-be004-upsert-r1-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_registry_entry_fence::test_cached_adapter_cannot_ignore_a_changed_owner_entry_boundary[change0]",
+        "status": "PASS",
+        "terminal": "final-native",
+        "junit": "/tmp/van-be004-upsert-r1-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_registry_entry_fence::test_cached_adapter_cannot_ignore_a_changed_owner_entry_boundary[change1]",
+        "status": "PASS",
+        "terminal": "final-native",
+        "junit": "/tmp/van-be004-upsert-r1-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_registry_entry_fence::test_cached_adapter_cannot_ignore_a_changed_owner_entry_boundary[change2]",
+        "status": "PASS",
+        "terminal": "final-native",
+        "junit": "/tmp/van-be004-upsert-r1-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_registry_entry_fence::test_cached_adapter_cannot_ignore_a_changed_owner_entry_boundary[change3]",
+        "status": "PASS",
+        "terminal": "final-native",
+        "junit": "/tmp/van-be004-upsert-r1-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_registry_entry_fence::test_cached_adapter_cannot_ignore_a_changed_owner_entry_boundary[change4]",
+        "status": "PASS",
+        "terminal": "final-native",
+        "junit": "/tmp/van-be004-upsert-r1-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_registry_entry_fence::test_cached_adapter_cannot_ignore_a_changed_owner_entry_boundary[change5]",
+        "status": "PASS",
+        "terminal": "final-native",
+        "junit": "/tmp/van-be004-upsert-r1-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_registry_entry_fence::test_unlinked_cached_adapter_cannot_open_a_new_position",
+        "status": "PASS",
+        "terminal": "final-native",
+        "junit": "/tmp/van-be004-upsert-r1-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_registry_entry_fence::test_a_rejected_cached_entry_does_not_disable_protection_or_mutate_equity",
+        "status": "PASS",
+        "terminal": "final-native",
+        "junit": "/tmp/van-be004-upsert-r1-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_registry_entry_fence::test_valid_registry_entry_and_local_label_updates_remain_available",
+        "status": "PASS",
+        "terminal": "final-native",
+        "junit": "/tmp/van-be004-upsert-r1-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_registry_entry_fence::test_factory_binding_checks_the_native_command_scope[account_alias-wrong_alias]",
+        "status": "PASS",
+        "terminal": "final-native",
+        "junit": "/tmp/van-be004-upsert-r1-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_registry_entry_fence::test_factory_binding_checks_the_native_command_scope[venue-deriv]",
+        "status": "PASS",
+        "terminal": "final-native",
+        "junit": "/tmp/van-be004-upsert-r1-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_registry_entry_fence::test_a_replaced_mandate_reference_fences_the_cached_runtime",
+        "status": "PASS",
+        "terminal": "final-native",
+        "junit": "/tmp/van-be004-upsert-r1-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_registry_entry_fence::test_unreadable_registry_never_uses_the_last_successful_entry_setting",
+        "status": "PASS",
+        "terminal": "final-native",
+        "junit": "/tmp/van-be004-upsert-r1-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_registry_entry_fence::test_provider_failure_after_delegation_is_not_reclassified_as_a_presend_refusal",
+        "status": "PASS",
+        "terminal": "final-native",
+        "junit": "/tmp/van-be004-upsert-r1-final-native.xml"
+      },
+      {
+        "id": "trading.tests.test_registry_entry_fence::test_real_registry_mutation_waits_until_the_delegated_effect_finishes",
+        "status": "PASS",
+        "terminal": "final-native",
+        "junit": "/tmp/van-be004-upsert-r1-final-native.xml"
+      },
+      {
+        "id": "tests.test_stateful_link_binding::test_original_oauth_link_domain_cannot_retarget_another_native_state",
+        "status": "PASS",
+        "terminal": "final-scope",
+        "junit": "/tmp/van-be004-upsert-r1-final-scope.xml"
+      },
+      {
+        "id": "tests.test_stateful_link_binding::test_original_link_result_is_bound_durable_and_readable_after_ack_loss[deriv]",
+        "status": "PASS",
+        "terminal": "final-scope",
+        "junit": "/tmp/van-be004-upsert-r1-final-scope.xml"
+      },
+      {
+        "id": "tests.test_stateful_link_binding::test_original_link_result_is_bound_durable_and_readable_after_ack_loss[ctrader]",
+        "status": "PASS",
+        "terminal": "final-scope",
+        "junit": "/tmp/van-be004-upsert-r1-final-scope.xml"
+      },
+      {
+        "id": "tests.test_stateful_link_binding::test_legacy_unbound_link_is_never_adopted_into_current_namespace[UNKNOWN]",
+        "status": "PASS",
+        "terminal": "final-scope",
+        "junit": "/tmp/van-be004-upsert-r1-final-scope.xml"
+      },
+      {
+        "id": "tests.test_stateful_link_binding::test_legacy_unbound_link_is_never_adopted_into_current_namespace[APPLIED]",
+        "status": "PASS",
+        "terminal": "final-scope",
+        "junit": "/tmp/van-be004-upsert-r1-final-scope.xml"
+      },
+      {
+        "id": "tests.test_stateful_link_binding::test_partial_link_holds_original_and_only_proved_other_native_domain_is_independent",
+        "status": "PASS",
+        "terminal": "final-scope",
+        "junit": "/tmp/van-be004-upsert-r1-final-scope.xml"
+      },
+      {
+        "id": "tests.test_stateful_link_binding::test_cached_receipt_fields_cannot_change_original_bound_scope[native_resource_version]",
+        "status": "PASS",
+        "terminal": "final-scope",
+        "junit": "/tmp/van-be004-upsert-r1-final-scope.xml"
+      },
+      {
+        "id": "tests.test_stateful_link_binding::test_cached_receipt_fields_cannot_change_original_bound_scope[account_control_domain]",
+        "status": "PASS",
+        "terminal": "final-scope",
+        "junit": "/tmp/van-be004-upsert-r1-final-scope.xml"
+      },
+      {
+        "id": "tests.test_stateful_link_binding::test_cached_receipt_fields_cannot_change_original_bound_scope[oauth_state]",
+        "status": "PASS",
+        "terminal": "final-scope",
+        "junit": "/tmp/van-be004-upsert-r1-final-scope.xml"
+      },
+      {
+        "id": "tests.test_stateful_link_binding::test_real_link_process_death_keeps_bound_original_unknown_without_native_resend",
+        "status": "PASS",
+        "terminal": "final-scope",
+        "junit": "/tmp/van-be004-upsert-r1-final-scope.xml"
+      },
+      {
+        "id": "tests.test_stateful_link_binding::test_authorization_readiness_is_not_link_completion_and_expired_prepared_grant_can_be_reconfirmed",
+        "status": "PASS",
+        "terminal": "final-scope",
+        "junit": "/tmp/van-be004-upsert-r1-final-scope.xml"
+      },
+      {
+        "id": "tests.test_stateful_link_binding::test_delayed_original_and_explicit_resume_arbitrate_one_immutable_original[True]",
+        "status": "PASS",
+        "terminal": "final-scope",
+        "junit": "/tmp/van-be004-upsert-r1-final-scope.xml"
+      },
+      {
+        "id": "tests.test_stateful_link_binding::test_delayed_original_and_explicit_resume_arbitrate_one_immutable_original[False]",
+        "status": "PASS",
+        "terminal": "final-scope",
+        "junit": "/tmp/van-be004-upsert-r1-final-scope.xml"
+      },
+      {
+        "id": "tests.test_stateful_link_binding::test_resume_id_cannot_adopt_a_different_original_winning_before_sql_claim",
+        "status": "PASS",
+        "terminal": "final-scope",
+        "junit": "/tmp/van-be004-upsert-r1-final-scope.xml"
+      },
+      {
+        "id": "tests.test_stateful_link_binding::test_prepared_resume_joins_immutable_actual_a4_without_rebasing[generation]",
+        "status": "PASS",
+        "terminal": "final-scope",
+        "junit": "/tmp/van-be004-upsert-r1-final-scope.xml"
+      },
+      {
+        "id": "tests.test_stateful_link_binding::test_prepared_resume_joins_immutable_actual_a4_without_rebasing[forged_generation]",
+        "status": "PASS",
+        "terminal": "final-scope",
+        "junit": "/tmp/van-be004-upsert-r1-final-scope.xml"
+      },
+      {
+        "id": "tests.test_stateful_link_binding::test_prepared_resume_joins_immutable_actual_a4_without_rebasing[body]",
+        "status": "PASS",
+        "terminal": "final-scope",
+        "junit": "/tmp/van-be004-upsert-r1-final-scope.xml"
+      },
+      {
+        "id": "tests.test_stateful_link_binding::test_prepared_resume_joins_immutable_actual_a4_without_rebasing[issued]",
+        "status": "PASS",
+        "terminal": "final-scope",
+        "junit": "/tmp/van-be004-upsert-r1-final-scope.xml"
+      },
+      {
+        "id": "tests.test_stateful_link_binding::test_prepared_resume_joins_immutable_actual_a4_without_rebasing[domain]",
+        "status": "PASS",
+        "terminal": "final-scope",
+        "junit": "/tmp/van-be004-upsert-r1-final-scope.xml"
+      },
+      {
+        "id": "tests.test_stateful_link_binding::test_prepared_resume_joins_immutable_actual_a4_without_rebasing[missing]",
+        "status": "PASS",
+        "terminal": "final-scope",
+        "junit": "/tmp/van-be004-upsert-r1-final-scope.xml"
+      },
+      {
+        "id": "tests.test_stateful_link_binding::test_prepared_resume_joins_immutable_actual_a4_without_rebasing[canonical]",
+        "status": "PASS",
+        "terminal": "final-scope",
+        "junit": "/tmp/van-be004-upsert-r1-final-scope.xml"
+      },
+      {
+        "id": "tests.test_stateful_link_binding::test_prepared_resume_joins_immutable_actual_a4_without_rebasing[parameters]",
+        "status": "PASS",
+        "terminal": "final-scope",
+        "junit": "/tmp/van-be004-upsert-r1-final-scope.xml"
+      },
+      {
+        "id": "tests.test_stateful_link_binding::test_prepared_resume_joins_immutable_actual_a4_without_rebasing[device]",
+        "status": "PASS",
+        "terminal": "final-scope",
+        "junit": "/tmp/van-be004-upsert-r1-final-scope.xml"
+      },
+      {
+        "id": "tests.test_stateful_link_binding::test_prepared_resume_joins_immutable_actual_a4_without_rebasing[legacy]",
+        "status": "PASS",
+        "terminal": "final-scope",
+        "junit": "/tmp/van-be004-upsert-r1-final-scope.xml"
+      },
+      {
+        "id": "tests.test_trading_oauth_effects::test_exact_callback_retry_does_not_exchange_a_provider_code_twice",
+        "status": "PASS",
+        "terminal": "final-scope",
+        "junit": "/tmp/van-be004-upsert-r1-final-scope.xml"
+      },
+      {
+        "id": "tests.test_trading_oauth_effects::test_conflicting_callback_cannot_replace_the_first_accepted_credentials",
+        "status": "PASS",
+        "terminal": "final-scope",
+        "junit": "/tmp/van-be004-upsert-r1-final-scope.xml"
+      },
+      {
+        "id": "tests.test_trading_oauth_effects::test_link_retry_after_a_lost_reply_returns_receipt_without_repeating_the_local_effect",
+        "status": "PASS",
+        "terminal": "final-scope",
+        "junit": "/tmp/van-be004-upsert-r1-final-scope.xml"
+      },
+      {
+        "id": "tests.test_trading_oauth_effects::test_concurrent_callback_is_refused_while_owner_polling_and_event_loop_remain_responsive",
+        "status": "PASS",
+        "terminal": "final-scope",
+        "junit": "/tmp/van-be004-upsert-r1-final-scope.xml"
+      },
+      {
+        "id": "tests.test_trading_oauth_effects::test_cancelled_token_exchange_keeps_unknown_and_a_new_state_cannot_reuse_the_code",
+        "status": "PASS",
+        "terminal": "final-scope",
+        "junit": "/tmp/van-be004-upsert-r1-final-scope.xml"
+      },
+      {
+        "id": "tests.test_trading_oauth_effects::test_link_effect_without_a_committed_receipt_is_not_repeated_or_bypassed_by_new_state[after_material_before_receipt]",
+        "status": "PASS",
+        "terminal": "final-scope",
+        "junit": "/tmp/van-be004-upsert-r1-final-scope.xml"
+      },
+      {
+        "id": "tests.test_trading_oauth_effects::test_link_effect_without_a_committed_receipt_is_not_repeated_or_bypassed_by_new_state[after_receipt_before_commit]",
+        "status": "PASS",
+        "terminal": "final-scope",
+        "junit": "/tmp/van-be004-upsert-r1-final-scope.xml"
+      },
+      {
+        "id": "tests.test_trading_oauth_effects::test_committed_link_receipt_survives_a_lost_response_and_a_new_reader",
+        "status": "PASS",
+        "terminal": "final-scope",
+        "junit": "/tmp/van-be004-upsert-r1-final-scope.xml"
+      },
+      {
+        "id": "tests.test_trading_oauth_effects::test_real_process_death_after_claim_leaves_unconfirmed_work_without_reexchange",
+        "status": "PASS",
+        "terminal": "final-scope",
+        "junit": "/tmp/van-be004-upsert-r1-final-scope.xml"
+      },
+      {
+        "id": "tests.test_trading_oauth_effects::test_invalid_link_alias_is_refused_before_claim_and_can_be_corrected",
+        "status": "PASS",
+        "terminal": "final-scope",
+        "junit": "/tmp/van-be004-upsert-r1-final-scope.xml"
+      },
+      {
+        "id": "tests.test_trading_oauth_effects::test_incomplete_provider_token_response_stays_unknown_and_cannot_be_reexchanged",
+        "status": "PASS",
+        "terminal": "final-scope",
+        "junit": "/tmp/van-be004-upsert-r1-final-scope.xml"
+      },
+      {
+        "id": "tests.test_trading_oauth_effects::test_missing_native_authorization_material_cannot_create_a_ready_account[acct1]",
+        "status": "PASS",
+        "terminal": "final-scope",
+        "junit": "/tmp/van-be004-upsert-r1-final-scope.xml"
+      },
+      {
+        "id": "tests.test_trading_oauth_effects::test_missing_native_authorization_material_cannot_create_a_ready_account[token1]",
+        "status": "PASS",
+        "terminal": "final-scope",
+        "junit": "/tmp/van-be004-upsert-r1-final-scope.xml"
+      },
+      {
+        "id": "tests.test_trading_oauth_effects::test_missing_native_authorization_material_cannot_create_a_ready_account[cur1]",
+        "status": "PASS",
+        "terminal": "final-scope",
+        "junit": "/tmp/van-be004-upsert-r1-final-scope.xml"
+      },
+      {
+        "id": "tests.test_trading_oauth_effects::test_an_encrypted_receipt_cannot_be_transplanted_to_another_link",
+        "status": "PASS",
+        "terminal": "final-scope",
+        "junit": "/tmp/van-be004-upsert-r1-final-scope.xml"
+      },
+      {
+        "id": "tests.test_trading_oauth_effects::test_encrypted_authorization_material_cannot_move_to_a_different_state",
+        "status": "PASS",
+        "terminal": "final-scope",
+        "junit": "/tmp/van-be004-upsert-r1-final-scope.xml"
+      },
+      {
+        "id": "tests.test_trading_oauth_effects::test_mismatched_native_link_receipt_stays_unconfirmed[change0]",
+        "status": "PASS",
+        "terminal": "final-scope",
+        "junit": "/tmp/van-be004-upsert-r1-final-scope.xml"
+      },
+      {
+        "id": "tests.test_trading_oauth_effects::test_mismatched_native_link_receipt_stays_unconfirmed[change1]",
+        "status": "PASS",
+        "terminal": "final-scope",
+        "junit": "/tmp/van-be004-upsert-r1-final-scope.xml"
+      },
+      {
+        "id": "tests.test_trading_oauth_effects::test_mismatched_native_link_receipt_stays_unconfirmed[change2]",
+        "status": "PASS",
+        "terminal": "final-scope",
+        "junit": "/tmp/van-be004-upsert-r1-final-scope.xml"
+      },
+      {
+        "id": "tests.test_trading_oauth_effects::test_a_new_link_cannot_replace_a_registered_alias_without_an_original_unresolved_effect",
+        "status": "PASS",
+        "terminal": "final-scope",
+        "junit": "/tmp/van-be004-upsert-r1-final-scope.xml"
+      },
+      {
+        "id": "tests.test_trading_oauth_effects::test_original_unconfirmed_link_read_does_not_depend_on_current_native_inventory",
+        "status": "PASS",
+        "terminal": "final-scope",
+        "junit": "/tmp/van-be004-upsert-r1-final-scope.xml"
+      },
+      {
+        "id": "tests.test_trading_oauth_scope::test_missing_deriv_state_cannot_be_substituted_with_the_latest_owner_flow",
+        "status": "PASS",
+        "terminal": "final-scope",
+        "junit": "/tmp/van-be004-upsert-r1-final-scope.xml"
+      },
+      {
+        "id": "tests.test_trading_oauth_scope::test_one_brokers_callback_cannot_populate_another_brokers_state",
+        "status": "PASS",
+        "terminal": "final-scope",
+        "junit": "/tmp/van-be004-upsert-r1-final-scope.xml"
+      },
+      {
+        "id": "tests.test_trading_oauth_scope::test_pending_state_is_owned_by_the_device_that_started_it",
+        "status": "PASS",
+        "terminal": "final-scope",
+        "junit": "/tmp/van-be004-upsert-r1-final-scope.xml"
+      },
+      {
+        "id": "tests.test_trading_oauth_scope::test_legacy_unbound_state_is_not_adopted_by_the_current_device",
+        "status": "PASS",
+        "terminal": "final-scope",
+        "junit": "/tmp/van-be004-upsert-r1-final-scope.xml"
+      },
+      {
+        "id": "tests.test_trading_oauth_scope::test_a_restarted_pending_reader_preserves_the_original_device_owner",
+        "status": "PASS",
+        "terminal": "final-scope",
+        "junit": "/tmp/van-be004-upsert-r1-final-scope.xml"
+      },
+      {
+        "id": "tests.test_trading_oauth_scope::test_unreadable_encrypted_pending_state_is_an_explicit_error_not_an_empty_flow",
+        "status": "PASS",
+        "terminal": "final-scope",
+        "junit": "/tmp/van-be004-upsert-r1-final-scope.xml"
+      },
+      {
+        "id": "tests.test_trading_oauth_scope::test_expired_state_refuses_the_callback_and_releases_no_account_identifiers",
+        "status": "PASS",
+        "terminal": "final-scope",
+        "junit": "/tmp/van-be004-upsert-r1-final-scope.xml"
+      },
+      {
+        "id": "tests.test_owner_approval_original_binding::test_exact_expired_original_fact_is_read_only_and_cannot_be_used_as_permission",
+        "status": "PASS",
+        "terminal": "final-scope",
+        "junit": "/tmp/van-be004-upsert-r1-final-scope.xml"
+      }
+    ],
+    "new_writer_oracles": [
+      "Actual paired/sealed A4 original label edit at exact expiry during resolution, writer lock entry, registry fsync:403/durableREFUSED, byte+version unchanged, independent original read.",
+      "Real owned thread holds global registry writer lock after claim while operation attempts protected write; expiry crossed; originalREFUSED and originalbytes unchanged; own thread joined.",
+      "Actual registered signed Commander upsert retires current native key during registry fsync:401/REFUSED/no registry write; wrong native namespace:409/REFUSED/no write.",
+      "Actual registered empty-credential fsync expiry:403/REFUSED/no registry or credential swap; committed empty credential followed by registry fsync expiry:UNKNOWN/no registry, exact original readUNKNOWN, new request no resend.",
+      "Healthy signed native positive then fresh signed exact-original replay after original expiry returns cached account; original independent GET remains APPLIED/history.",
+      "Generic registry add/replace guard after fsync refuses without actual os.replace or in-memory/revision drift; subsequent authorized callback succeeds; no leaked temporary files.",
+      "Full selected native demo/LINK/credential/journal/restart/crash recovery, real registry concurrency, default registry/edit semantics/entry-fence controls rerun fresh; gateway paired CAS/review/domain/UNKNOWN/unlink and OAuth original-generation/readiness/cached-result regressions rerun fresh."
+    ]
+  },
+  "before_after": {
+    "immutable_before_diagnosis": "/tmp/van-be004-post-link-diagnosis-20261101.json",
+    "immutable_before_sha256": "220ede66bf94af3250e297de476656c41e00b60c6c6d0bce2343b2003c34e0b8",
+    "before_actual_result": "Original standalone failing probe1FAIL/raw+JUnit/owned coldstore retained:200/APPLIED label change at exact original expiry, IN_FLIGHT->APPLIED at expiry, independent original200/APPLIED.",
+    "after_original_probe": "/tmp/van-be004-upsert-r1-after-observation-20261101.json",
+    "after_actual_result": "Unchanged original probe bytes nowPASS:403, account label unchanged, original durableREFUSED/current independent readREFUSED.",
+    "fixed_path_overwrite_disclosure": {
+      "fixed_path": "/tmp/van-be004-post-link-expiry-observation-20261101.json",
+      "status": "OVERWRITTEN_BY_UNCHANGED_PROBE_AFTER_FIX",
+      "before_logical_observation_preserved_in": "/tmp/van-be004-upsert-r1-extracted-before-observation-20261101.json",
+      "before_raw_JUnit_terminal_and_cold_SQLite_untouched": true,
+      "original_fixed_path_not_claimed_immutable": true,
+      "no_reconstruction_claimed_as_restoration": true
+    },
+    "logical_before_extraction": "/tmp/van-be004-upsert-r1-extracted-before-observation-20261101.json",
+    "extraction_is_not_restoration": true,
+    "before_raw_JUnit_and_owned_SQLite_untouched": true
+  },
+  "history": {
+    "intermediate_dev20PASS": "/tmp/van-be004-upsert-r1-dev1-terminal.json; earlier candidate fingerprint, not counted as frozen proof; later secret preparation/final marker separation and queued test additions fully rerun.",
+    "prior_LINK_handoff": "/tmp/van-be004-link-r3-handoff-20261101.json",
+    "prior_LINK_review": "/workspace/van-be004-link-independent-recheck-r3-20261101/review.json",
+    "prior_evidence_and_disclosures_not_rewritten": true
+  },
+  "preservation": {
+    "unleased_LINK_paths_all_preserved": {
+      "android/app/src/main/java/com/dial/van/gateway/VanGatewayClient.kt": true,
+      "android/app/src/main/java/com/dial/van/trading/AccountOnboarding.kt": true,
+      "android/app/src/main/java/com/dial/van/trading/AccountOperationRecovery.kt": true,
+      "android/app/src/main/java/com/dial/van/trading/ui/AccountOnboardingScreen.kt": true,
+      "android/app/src/test/java/com/dial/van/trading/AccountOnboardingTest.kt": true,
+      "android/app/src/test/java/com/dial/van/trading/AccountOperationRecoveryTest.kt": true,
+      "backend/tests/test_owner_approval_original_binding.py": true,
+      "backend/tests/test_stateful_link_binding.py": true,
+      "backend/tests/test_trading_oauth_effects.py": true,
+      "backend/van_gateway/approval/service.py": true,
+      "backend/van_gateway/trading/accounts.py": true,
+      "backend/van_gateway/trading/oauth_effects.py": true,
+      "trading/tests/test_oauth_link_currentness.py": true
+    },
+    "unleased_LAC9_all_preserved": {
+      "trading/vati/app/portfolio.py": true,
+      "backend/van_gateway/trading/service.py": true,
+      "trading/tests/test_portfolio_views.py": true,
+      "trading/tests/test_account_snapshot_freshness.py": true,
+      "backend/tests/test_accounts_freshness_api.py": true,
+      "backend/tests/test_trading_api.py": true,
+      "android/app/src/main/java/com/dial/van/trading/TradingRepository.kt": true,
+      "android/app/src/main/java/com/dial/van/trading/TradingModels.kt": true,
+      "android/app/src/test/java/com/dial/van/trading/TradingModelsTest.kt": true
+    },
+    "no_gateway_app_client_preview_changes": true,
+    "no_runtime_vault_or_old_quarantined_export_read_or_promoted": true,
+    "no_new_store_schema_action_issuer_financial_policy": true,
+    "no_main_commit_push_CI_provider_effect": true
+  },
+  "limits": [
+    "SOURCE candidate, not whole BE004 acceptance:original11req/21acceptance/20contexts/6LAC and restrict/unlink/remoteclosure/full provider obligations remain open.",
+    "Injected/controlled HTTP/SQLite/sockets only; actual independent owner/provider-positive native capability,PG,BG001,unit,production,S24 remain unqualified.",
+    "Two declared PostgreSQL tests skipped; no fabricated PG green.",
+    "No Android product source changes by this packet and no local SDK/JVM/device execution; genuine integrated exact hosted Android qualification remains owner workflow gate."
+  ],
+  "execution": {
+    "owned_run_PGIDs": [
+      1162873,
+      1168253,
+      1169626,
+      1161276
+    ],
+    "all_owned_process_groups_terminal": true,
+    "active_owned_children": [],
+    "only_own_threads_children_waited_reaped_no_PID1_platform_actions": true,
+    "tmp_free_bytes": 2444066816,
+    "workspace_free_bytes": 96862208,
+    "tmp_reserve_bytes": 2147483648,
+    "run_cap_bytes": 134217728,
+    "raw_cap_bytes": 8388608,
+    "workspace_admission_bytes": 67108864,
+    "workspace_hard_floor_bytes": 33554432
+  }
+}
