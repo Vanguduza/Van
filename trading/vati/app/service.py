@@ -105,9 +105,14 @@ class ServiceConfig:
     paper_close_contracts: dict = field(default_factory=dict)
 
     @classmethod
+    def from_bytes(cls, raw: bytes) -> "ServiceConfig":
+        # The same production parser consumes the exact bytes whose source
+        # digest was observed. Never hash one read then parse a second read.
+        return cls(**json.loads(raw.decode("utf-8")))
+
+    @classmethod
     def load(cls, path: str | Path) -> "ServiceConfig":
-        d = json.loads(Path(path).read_text(encoding="utf-8"))
-        return cls(**d)
+        return cls.from_bytes(Path(path).read_bytes())
 
 
 #: P1-TRADE-008 — which learning environment a session's experience belongs to. Taken from
@@ -220,6 +225,8 @@ class SessionService:
         c = self.cfg
         registry = AccountRegistry(c.registry_path)
         account = registry.get(c.account_alias)
+        from vati.accounts.lifecycle import require_attached
+        require_attached(registry, account.alias)
         self._entry_registry,self._entry_account=registry,account
         if not account.enabled:
             raise RuntimeError(f"account {account.alias} is disabled")

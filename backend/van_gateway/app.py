@@ -976,11 +976,14 @@ def create_app() -> FastAPI:
         results = await retention.prune()
         audit_prune = await retention.prune_audit_prefix()
         transient_retired = await automation_worker.cleanup_transient_bytes()
+        # Only expired admitted local metadata, no deferred privileged effect.
+        lifecycle_archives = await app.state.account_lifecycle.archive_due()
         return {
             "deleted": sum(result.deleted for result in results),
             "tables": len(results),
             "audit_pruned": audit_prune["pruned"],
             "automation_transient_retired": transient_retired,
+            "account_metadata_archived": lifecycle_archives["archived"],
         }
 
     async def _scan_pki() -> dict:
@@ -3760,7 +3763,11 @@ def create_app() -> FastAPI:
             raise HTTPException(status_code=403, detail="device_identity_mismatch")
         if req.action not in ACCOUNT_ACTIONS:
             raise HTTPException(status_code=404, detail="unknown account action")
-        if {"_expected_resource_version", "_native_operation", "_expected_review_digest"}.intersection(req.args):
+        if req.action=='account_remove' and 'variant' in req.args:
+            variant=req.args['variant']
+            if not isinstance(variant,str) or variant not in {'PENDING_CLEANUP','DELETE_GRACE','CANCEL_DELETE'}:
+                raise HTTPException(422,'Unknown account retirement variant; no local effect')
+        if {"_expected_resource_version", "_native_operation", "_expected_review_digest", "_expected_lifecycle_context_digest", "_lifecycle_oauth"}.intersection(req.args):
             raise HTTPException(status_code=422, detail="native resource binding is supplied by the gateway")
         try:
             await auth.require_device(req.device_id)
@@ -3868,6 +3875,9 @@ def create_app() -> FastAPI:
     app.state.account_cleanup=AccountCleanup(store,onboarding,_authenticate_account_action,authorize_account_cleanup)
     app.include_router(build_account_cleanup_router(app.state.account_cleanup))
     app.include_router(build_cleanup_operation_router(app.state.account_cleanup))
+    from van_gateway.trading.account_lifecycle_api import AccountLifecycle,build_lifecycle_router
+    app.state.account_lifecycle=AccountLifecycle(store,onboarding,_authenticate_account_action,authorize_account_cleanup)
+    app.include_router(build_lifecycle_router(app.state.account_lifecycle))
 
     def cleanup_failure(error):
         return JSONResponse(status_code=error.status,content={'detail':{'code':error.code,
@@ -3898,10 +3908,19 @@ def create_app() -> FastAPI:
                 'required':['alias','state','loginid'] if name=='deriv_oauth_link' else ['alias','state','ctid_trader_account_id']}
             schemas[name]={'oneOf':[schemas[name],selection]}
         remove_schema=schemas['account_remove']
+        from van_gateway.trading.account_lifecycle_api import DeleteArgs,CancelArgs
+        pending_properties={k:v for k,v in remove_schema['properties'].items() if k in {
+            'alias','variant','parent_operation_id','plan_ref','retire_parent_safety_obligation','reauth_fact_id','reauth_fact_digest'}}
+        pending_properties['variant']={'enum':['PENDING_CLEANUP']}
+        lifecycle_schemas=[]
+        for model in (DeleteArgs,CancelArgs):
+            body=model.model_json_schema()
+            body['required']=list(dict.fromkeys(body.get('required',[])+['reauth_fact_id','reauth_fact_digest']))
+            lifecycle_schemas.append(body)
         schemas['account_remove']={'oneOf':[
             {'type':'object','properties':{'alias':remove_schema['properties']['alias']},'required':['alias'],'not':{'required':['variant']}},
-            {'type':'object','properties':remove_schema['properties'],'required':['alias','variant','parent_operation_id','plan_ref',
-                'retire_parent_safety_obligation','reauth_fact_id','reauth_fact_digest'],'additionalProperties':False}]}
+            {'type':'object','properties':pending_properties,'required':['alias','variant','parent_operation_id','plan_ref',
+                'retire_parent_safety_obligation','reauth_fact_id','reauth_fact_digest'],'additionalProperties':False},*lifecycle_schemas]}
         def mark_private_inputs(definition):
             for key,value in definition.get('properties',{}).items():
                 if re.search(r'secret|token|password|code',key,re.I): value['writeOnly']=True
@@ -3928,6 +3947,9 @@ def create_app() -> FastAPI:
         await _authenticate_account_action(request, req)
         if req.action=='account_remove' and req.args.get('variant')=='PENDING_CLEANUP':
             try:return await app.state.account_cleanup.challenge(request,req)
+            except ReauthError as error:return cleanup_failure(error)
+        if req.action=='account_remove' and req.args.get('variant') in {'DELETE_GRACE','CANCEL_DELETE'}:
+            try:return await app.state.account_lifecycle.challenge(request,req)
             except ReauthError as error:return cleanup_failure(error)
         if not requires_owner_approval(req.action):
             raise HTTPException(
@@ -3991,6 +4013,9 @@ def create_app() -> FastAPI:
         await _authenticate_account_action(request, req)
         if req.action=='account_remove' and req.args.get('variant')=='PENDING_CLEANUP':
             try:return await app.state.account_cleanup.action(request,req)
+            except ReauthError as error:return cleanup_failure(error)
+        if req.action=='account_remove' and req.args.get('variant') in {'DELETE_GRACE','CANCEL_DELETE'}:
+            try:return await app.state.account_lifecycle.action(request,req)
             except ReauthError as error:return cleanup_failure(error)
         from commander.account_effects import JOURNALED_COMMANDS
         expected_domain=request.headers.get('X-Van-Account-Control-Domain')

@@ -183,6 +183,53 @@ class OAuthEffects:
             raise OAuthTargetBlocked('Original link semantic arguments differ; use a new reviewed operation')
         return binding
 
+    async def lifecycle_plan(self,alias,device,domain,*,db=None):
+        """Exact immutable LINK producer relation; no broker/device-wide purge.
+
+        Unselected OAuth attempts have no alias and are not guessed into scope.
+        Any ambiguous/unknown original on this target holds deletion.
+        """
+        async def read(conn):
+            rows=await (await conn.execute("SELECT * FROM trading_oauth_effects WHERE operation='LINK' AND target_key=? ORDER BY state",('account:'+alias,))).fetchall()
+            facts=[]
+            for row in rows:
+                envelope=self._link_envelope(row);binding=envelope['native_binding']
+                if binding['account_control_domain']!=domain:continue
+                if row['owner_device_id']!=device:raise OAuthTargetBlocked('Another owner original link exists; HOLD')
+                if row['phase']!='APPLIED':raise OAuthEffectUnconfirmed('Original link requires reconciliation before account deletion')
+                self._link_result(envelope,row)
+                facts.append({'state':row['state'],'broker':row['broker'],'request_digest':row['request_digest'],
+                    'operation_id':binding['operation_id'],'resource_version':binding['resource_version']})
+            return {'schema':'van.account-oauth-discard-plan/1','alias':alias,'device_id':device,
+                'account_control_domain':domain,'links':facts,'unselected_attempts':'NOT_ACCOUNT_ASSOCIATED_NOT_DISCARDED'}
+        if db is not None:return await read(db)
+        async with self.store.connection() as conn:
+            await conn.execute('BEGIN')
+            try:return await read(conn)
+            finally:await conn.rollback()
+
+    async def lifecycle_discard(self,alias,device,domain,expected):
+        async with self.store.connection() as db:
+            await db.execute('BEGIN IMMEDIATE')
+            try:
+                plan=await self.lifecycle_plan(alias,device,domain,db=db)
+                if fingerprint(plan)!=expected:raise OAuthTargetBlocked('OAuth deletion scope changed since review')
+                for item in plan['links']:
+                    state=item['state']
+                    # Keep original journal and immutable native binding. This
+                    # tombstone fences a delayed callback/material completion.
+                    key='account_lifecycle_oauth_discard:'+state
+                    value={'schema':'van.account-oauth-discard/1','plan_digest':expected,**item,
+                        'alias':alias,'device_id':device,'account_control_domain':domain}
+                    old=await (await db.execute('SELECT value FROM runtime_meta WHERE key=?',(key,))).fetchone()
+                    if old is not None and json.loads(old['value'])!=value:raise OAuthTargetBlocked('Original discard binding changed')
+                    await db.execute('INSERT OR IGNORE INTO runtime_meta(key,value,updated_at_unix_ms) VALUES(?,?,?)',
+                        (key,json.dumps(value,sort_keys=True,separators=(',',':')),int(time.time()*1000)))
+                    await db.execute('DELETE FROM trading_oauth_pending WHERE state=?',(state,))
+                await db.commit()
+                return expected
+            except BaseException:await db.rollback();raise
+
     async def begin(self,state,operation,broker,payload,*,owner_device_id=None,validate=None,native_binding=None):
         if operation not in {'CALLBACK','LINK'} or broker not in {'deriv','ctrader'}:
             raise ValueError('invalid native OAuth operation')
@@ -192,6 +239,8 @@ class OAuthEffects:
         digest = fingerprint({'state':state,'operation':operation,'broker':broker,'payload':semantic_payload})
         async with self.store.connection() as db:
             await db.execute('BEGIN IMMEDIATE')
+            if await (await db.execute('SELECT key FROM runtime_meta WHERE key=?',('account_lifecycle_oauth_discard:'+state,))).fetchone():
+                raise OAuthTargetBlocked('Original authorization was discarded by account lifecycle')
             cursor = await db.execute('SELECT * FROM trading_oauth_effects WHERE state=? AND operation=?',(state,operation))
             existing = await cursor.fetchone()
             if existing is not None:
@@ -277,6 +326,8 @@ class OAuthEffects:
             row = await cursor.fetchone()
             if row is None or row['request_digest'] != digest or row['phase'] != 'IN_FLIGHT' or row['worker_id'] != self.worker:
                 raise HTTPException(409,'OAuth claim is no longer owned by this worker')
+            if await (await db.execute('SELECT key FROM runtime_meta WHERE key=?',('account_lifecycle_oauth_discard:'+state,))).fetchone():
+                raise OAuthTargetBlocked('Original authorization was discarded; material cannot return')
             if patch is not None:
                 if {'broker','_owner_device_id','_state','_broker','_created_at_unix'} & patch.keys():
                     raise ValueError('OAuth completion cannot change its owner or broker')

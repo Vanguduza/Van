@@ -46,7 +46,10 @@ def entry_fence(registry: AccountRegistry, bound: Account):
     path = registry.path
     with exclusive_state_lock(path.with_name(path.name + ".operation." + bound.alias)):
         with registry._mutation_lock():
-            current = AccountRegistry(path).get(bound.alias)
+            registry_current = AccountRegistry(path)
+            from vati.accounts.lifecycle import require_attached
+            require_attached(registry_current, bound.alias)
+            current = registry_current.get(bound.alias)
             if native_binding(current) != native_binding(bound):
                 raise AccountRegistryError("registered native account binding changed; rebuild the connection")
             if not current.enabled or current.mode not in SENDING_MODES or bound.mode not in SENDING_MODES:

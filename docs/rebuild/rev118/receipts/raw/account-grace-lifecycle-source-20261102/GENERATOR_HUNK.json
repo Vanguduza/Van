@@ -1,0 +1,8 @@
+{
+  "path": "tools/rebuild/refresh_owner_source_contracts.py",
+  "before_sha256": "1d10b8c00e7a187711730ba2b1a76b61d8a7fc5c33e97695d6283b2734eb4c64",
+  "after_sha256": "df005d0a7a48fe6b440db9dd6ee9e816ea3983404d4ed06ab3f09ed6f6e58b5d",
+  "patch": "/dev/shm/van-grace-main-integration-20261102/GENERATOR.patch",
+  "patch_sha256": "814cf78a2f5d3b63498f77831e710cc5061b4ef252ea3b9bb9f3b5823258ec5f",
+  "scope": "Exact5 new lifecycle method/path DATA binding to existingOF-TRADING-003/accounts;noauthority/UI/native claim"
+}

@@ -522,6 +522,8 @@ class RetentionService:
                     from van_gateway.approval.account_reauth import prune_ephemeral
                     cutoff=now_ms-int(RETENTION_DAYS[RetentionClass.EPHEMERAL])*DAY_MS
                     deleted=await prune_ephemeral(db,now_ms)
+                    from van_gateway.approval.account_lifecycle_reauth import prune_ephemeral as prune_lifecycle_ephemeral
+                    deleted+=await prune_lifecycle_ephemeral(db,now_ms)
                     if deleted:
                         results.append(PruneResult(table='runtime_meta',deleted=deleted,
                             cutoff=cutoff,retention=RetentionClass.EPHEMERAL))

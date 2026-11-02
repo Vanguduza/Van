@@ -138,13 +138,88 @@ class AccountCleanupReview(BaseModel):
     view:CleanupView
 
 
+class AccountLifecycleState(BaseModel):
+    model_config=ConfigDict(extra='forbid',strict=True)
+    schema_name:Literal['vati.account-lifecycle/1']=Field(alias='schema')
+    alias:str
+    operation_id:str
+    device_id:str
+    account_control_domain:str=Field(pattern='^[0-9a-f]{64}$')
+    incarnation:str=Field(pattern='^[0-9a-f]{64}$')
+    revision:int=Field(gt=0)
+    phase:Literal['DELETING','PENDING_ARCHIVE','RELINK_REQUIRED','ARCHIVED']
+    created_at_unix:int
+    archive_at_unix:int
+    grace_seconds:int=Field(gt=0)
+    strategies:list[str]
+    history_ref:str=Field(pattern='^[0-9a-f]{64}$')
+    credential_disposition:Literal['DELETE_MANAGED','NONE']
+    detached:Literal[True]
+    link_intent:Literal['RELINK_REQUIRED']
+    remote_account_closed:Literal[False]
+    record_digest:str=Field(pattern='^[0-9a-f]{64}$')
+    financial_history_retained:Literal[True]
+    execution_authority:Literal[False]
+    native_original_phase:Literal['IN_FLIGHT','APPLIED','REFUSED','UNKNOWN']|None=None
+    metadata_hold:Literal['ORIGINAL_OUTCOME_REQUIRES_RECONCILIATION']|None=None
+
+    @model_serializer(mode='wrap')
+    def preserve_native_data_body(self,handler):
+        data=handler(self)
+        for key in ('native_original_phase','metadata_hold'):
+            if getattr(self,key) is None:data.pop(key,None)
+        return data
+
+class LifecycleSessionSource(BaseModel):
+    model_config=ConfigDict(extra='forbid',strict=True)
+    source_ref:str=Field(pattern='^[0-9a-f]{64}$')
+    sha256:str=Field(pattern='^[0-9a-f]{64}$')
+    account_alias:str
+
+class LifecycleDeleteView(BaseModel):
+    model_config=ConfigDict(extra='forbid',strict=True)
+    variant:Literal['DELETE_GRACE']
+    grace_seconds:int=Field(gt=0)
+    strategies:list[str]
+    session_sources:list[LifecycleSessionSource]
+    unlink_review:AccountResolvedReview
+    incarnation:str=Field(pattern='^[0-9a-f]{64}$')
+    account_control_domain:str=Field(pattern='^[0-9a-f]{64}$')
+    owner_device_id:str
+    credential_disposition:Literal['DELETE_MANAGED','NONE']
+
+class LifecycleRemoteState(BaseModel):
+    model_config=ConfigDict(extra='forbid',strict=True)
+    state:Literal['NOT_APPLICABLE','OPEN']
+    source_ref:str=Field(pattern='^[0-9a-f]{64}$')
+
+class LifecycleCancelView(BaseModel):
+    model_config=ConfigDict(extra='forbid',strict=True)
+    variant:Literal['CANCEL_DELETE']
+    original:AccountLifecycleState
+    remote_state:LifecycleRemoteState
+    account_control_domain:str=Field(pattern='^[0-9a-f]{64}$')
+    owner_device_id:str
+
+class AccountLifecycleReview(BaseModel):
+    model_config=ConfigDict(extra='forbid',strict=True)
+    schema_name:Literal['vati.account-lifecycle-review/1']=Field(alias='schema')
+    action:Literal['account_remove']
+    alias:str
+    resource_version:str=Field(pattern='^[0-9a-f]{64}$')
+    semantic_digest:str=Field(pattern='^[0-9a-f]{64}$')
+    view:LifecycleDeleteView|LifecycleCancelView
+    context_digest:str=Field(pattern='^[0-9a-f]{64}$')
+    request_digest:str=Field(pattern='^[0-9a-f]{64}$')
+    review_digest:str=Field(pattern='^[0-9a-f]{64}$')
+
 class AccountChallengeResponse(BaseModel):
     approval_challenge_id: str
     approval_challenge: str
     issued_at_unix: int
     approval_expires_at_unix: int
     resolved_action_id: str
-    resolved_review: AccountResolvedReview | AccountCleanupReview | None=None
+    resolved_review: AccountResolvedReview | AccountCleanupReview | AccountLifecycleReview | None=None
     account_control_domain: str=Field(pattern='^[0-9a-f]{64}$')
 
 

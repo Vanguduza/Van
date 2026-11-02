@@ -1,0 +1,44 @@
+{
+  "base": "e0d6f2719b0f9bfbcd9cdb5e68b7f26c7606da3d",
+  "generator": {
+    "path": "tools/rebuild/refresh_owner_source_contracts.py",
+    "before_sha256": "1d10b8c00e7a187711730ba2b1a76b61d8a7fc5c33e97695d6283b2734eb4c64",
+    "after_sha256": "df005d0a7a48fe6b440db9dd6ee9e816ea3983404d4ed06ab3f09ed6f6e58b5d",
+    "patch": "/dev/shm/van-grace-main-integration-20261102/GENERATOR.patch",
+    "patch_sha256": "814cf78a2f5d3b63498f77831e710cc5061b4ef252ea3b9bb9f3b5823258ec5f",
+    "scope": "Exact5 new lifecycle method/path DATA binding to existingOF-TRADING-003/accounts;noauthority/UI/native claim"
+  },
+  "paths_sha256": {
+    "registries/owner_endpoints.json": "d435fe5141e7705824240e39fc792e35142393275c9f5735ac156263d0c4e2e9",
+    "registries/owner_endpoint_schemas.json": "a413ce33ccba27e6660fb1daae1462dddd6d4811eedab97976ad2036de95c08a",
+    "registries/owner_features.json": "5e4fcfc0a70b368ffd2873b73ce32ca664e42b97a215ff741cbe574bdfce6935",
+    "registries/owner_screens.json": "89be97f7b0a394e72b4cc3d65229eb241966babcf23b6b40ef33afff28156e41",
+    "docs/rebuild/rev118/backend/OWNER_REGISTRY_SOURCE_REFRESH_20261022.json": "13a751988750399dd647cab783298abf7379ac9ecd1c3b38934cfacffb15cf2c",
+    "docs/rebuild/rev118/backend/OWNER_REGISTRY_GENERATION.json": "14e4dfd792ccdbaee56411ac30d2e9f73c53e90a6b74268a0bddb49d8887320d",
+    "docs/rebuild/rev118/backend/OWNER_FRONTEND_SCREEN_REGISTRY.md": "83aae56b189161e941c214c690d2e94db49a7601839e22f6c7eee949564b85a1",
+    "docs/rebuild/rev118/SOURCE_WORKMAP.json": "1a2b746d47232a866ce8d0a7a161911bf8de048b0737e2c14c71191371e13e68"
+  },
+  "source21_sha256": {
+    "backend/van_gateway/app.py": "7f9bc5f4c5298ed4b0b3cd0f2556685572e87210fe91fcd7ec6c19e783752e58",
+    "backend/van_gateway/trading/accounts.py": "2436807d19d0af2ea36b86706c6a1a9975111964e4198485b6c8923581bf851f",
+    "backend/van_gateway/trading/account_contracts.py": "810200124f73f7a99b38c9629ac3ebee46876e3c1951625ffd065262c7e7aaff",
+    "backend/van_gateway/trading/account_operations.py": "710dfa0b88b3466f989b6b2da5f0b550bc0cfc9fb8ea8b4ec25ba2f698cb5693",
+    "backend/van_gateway/trading/oauth_effects.py": "b8aa064fb599eba11867be18e3c4905d4c252ace5ee57190b5853aa8b3297b3d",
+    "backend/van_gateway/ops/retention.py": "62a614a272d1057536118fd13a1b5f0dca57e5e80cb52c1edcd914fd818ddc2a",
+    "trading/commander/app.py": "d4e29d87f69d7d888757ae2f80c16f88257bc699aea8ea92ad27ba14233a3302",
+    "trading/commander/accounts.py": "2f29b1b84566f0eaafafd211eec70cddf4da522c3bd1fc3575034388ad06d35c",
+    "trading/commander/account_effects.py": "cada27c9eb568c019872c1545d60a5d4cc0085ccf61ac7450f6f4c8e4450d658",
+    "trading/commander/account_retirement.py": "5385a7f8959fa9c51e8f8e288f4d45f721a7555c88a51f1c69e1dd9359cb08a8",
+    "trading/vati/accounts/registry.py": "b97121f50a703dad2de9b077951827551418960aed41f87fc7728aac88d09330",
+    "trading/vati/accounts/access.py": "b47f7fe8def41769cefbbb01eb08230b174d1b02cb8f8447d033b7a7153ff58d",
+    "trading/vati/app/service.py": "3a2c74202d8bab8b50d0900cae05b4fb391ecbd060649588b70a51873f000d9b",
+    "trading/vati/app/account_service.py": "e2d725e83e87b19753d31fbef47d34083c8026a0917e7de013d125b4d4ae7b7c",
+    "trading/vati/accounts/lifecycle.py": "834b097268a2eb793b93cd4fe64a2a55691381a2a0f0130e4fa85124bc806f55",
+    "trading/commander/account_lifecycle.py": "c83e9c99d8f97e093d2549308741dfa0e1e5a5908dcf6165596deb9fcbd0ba8c",
+    "backend/van_gateway/trading/account_lifecycle_api.py": "ad47a9775deeaf87fa835a45a4a0e7b9703513c74ffcb7501944afd293eef983",
+    "backend/van_gateway/approval/account_lifecycle_reauth.py": "cf6b447526ef62e7a0986db2737c725b7ab933dda6db9a7779de4a9855444e80",
+    "backend/tests/test_account_deletion_lifecycle.py": "66b07bd28b9e8fd4b1b5f67ce2d83287d638d4fa7369f67950a3b074565edd09",
+    "trading/tests/test_account_strategy_detachment.py": "794a0f5037a9780a4999e3978923d09c118a32e067b620509cf8130b5eb851e7",
+    "trading/tests/test_native_account_deletion_lifecycle.py": "a1bbc6b7867e9e9a5b3163d55417d1a844c451b760451f8d98247d26f29d516c"
+  }
+}

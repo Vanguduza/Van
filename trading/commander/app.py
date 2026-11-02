@@ -93,6 +93,7 @@ class CommanderSettings:
         "/var/lib/van-trading/owner_authority_keys.json",
     )
     lifecycle_policy_qualification_keys: str = os.environ.get("VATI_LIFECYCLE_QUALIFICATION_KEYS", "")
+    lifecycle_session_sources: tuple | None = None
     account_control: Optional[AccountControlSettings] = None   # injected for tests; else derived
     units: tuple[str, ...] = tuple(filter(None, os.environ.get("VAN_COMMANDER_UNITS", ",".join(DEFAULT_UNITS)).split(",")))
     backtest_timeout_s: int = int(os.environ.get("VAN_COMMANDER_BACKTEST_TIMEOUT", "600"))
@@ -428,7 +429,7 @@ def create_app(settings: Optional[CommanderSettings] = None) -> FastAPI:
                 "vekl_resolve": cmd_vekl, "halt": cmd_halt, "doctor": cmd_doctor, "accounts": cmd_accounts,
                 "positions": cmd_positions, "assessment": cmd_assessment,
                 **build_account_handlers(replace(st.account_control, operation_ledger=st.ledger) if st.account_control else
-                    AccountControlSettings(registry_path=st.accounts_registry, secrets_dir=st.secrets_dir, operation_ledger=st.ledger)),
+                    AccountControlSettings(registry_path=st.accounts_registry, secrets_dir=st.secrets_dir, operation_ledger=st.ledger, lifecycle_session_sources=st.lifecycle_session_sources)),
                 **build_runtime_control_handlers(st),
                 **build_strategy_handlers(StrategyPromotionSettings(
                     capsule_dir=capsule_dir,

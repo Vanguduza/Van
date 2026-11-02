@@ -45,8 +45,8 @@ ACCOUNT_TOOL_SCHEMAS = {
     "account_revision": {"description": "Read the authenticated native account-control state namespace and, when alias is supplied, its exact configuration version. Namespace data confers no authority.", "properties": {"alias": {"type": "string"}}},
     "account_upsert": {"description": "Register a new account or edit specified public settings. Existing omitted settings and credentials are preserved. New accounts require broker; native identity changes require verified migration.", "properties": {"alias": {"type": "string"}, "broker": {"type": "string"}, "mode": {"type": "string"}, "currency": {"type": "string"}, "label": {"type": "string"}, "server": {"type": "string"}, "login": {"type": "string"}, "bridge_url": {"type": "string"}, "demo": {"type": "boolean"}, "enabled": {"type": "boolean"}, "notes": {"type": "string"}, "venue": {"type": "string"}, "mandate_ref": {"type": "string"}}, "required": ["alias"]},
     "account_credentials": {"description": "Store credential values for an alias in its 0600 secrets file (allowlisted keys per broker). Values are never echoed.", "properties": {"alias": {"type": "string"}, "secrets": {"type": "object"}}, "required": ["alias", "secrets"]},
-    "account_remove": {"description": "Unlink only the VAN-local account after exact owner review and current native safety facts. PENDING_CLEANUP is a separately reauthenticated and A4-approved original-device child bound to its genuine private plan; it never replays or completes the UNKNOWN parent. History/remote accounts/funds remain; no provider closure or money movement.", "properties": {"alias": {"type": "string"},
-        "variant":{"enum":["PENDING_CLEANUP"]},"parent_operation_id":{"type":"string","pattern":"^[A-Za-z0-9_-]{20,128}$"},
+    "account_remove": {"description": "Unlink only the VAN-local account after exact owner review and current native safety facts. PENDING_CLEANUP is a separately reauthenticated and A4-approved original-device child bound to its genuine private plan; it never replays or completes the UNKNOWN parent. History/remote accounts/funds remain; no provider closure or money movement. DELETE_GRACE and CANCEL_DELETE use distinct purpose-bound reauthentication DATA plus separate substantive permission, explicit owner-selected grace, and per-incarnation metadata/detachment; cancellation never restores credentials or strategy eligibility.", "properties": {"alias": {"type": "string"},
+        "variant":{"enum":["PENDING_CLEANUP","DELETE_GRACE","CANCEL_DELETE"]},"grace_seconds":{"type":"integer","minimum":1},"lifecycle_id":{"type":"string"},"expected_revision":{"type":"integer"},"expected_digest":{"type":"string"},"parent_operation_id":{"type":"string","pattern":"^[A-Za-z0-9_-]{20,128}$"},
         "plan_ref":{"type":"string","pattern":"^[0-9a-f]{64}$"},"retire_parent_safety_obligation":{"type":"boolean"},
         "reauth_fact_id":{"type":"string","pattern":"^[A-Za-z0-9_-]{20,128}$"},
         "reauth_fact_digest":{"type":"string","pattern":"^[0-9a-f]{64}$"}}, "required": ["alias"]},
@@ -70,6 +70,14 @@ class AccountControlSettings:
     ctrader_http: Optional[Callable[[str, dict], dict]] = None
     verify_timeout_s: float = 20.0
     operation_ledger: str = ""  # Actual constructors bind the existing native VATI ledger.
+    lifecycle_session_sources: tuple | None = None  # Exact native configured (path,SHA256) scope; missing HOLD.
+    lifecycle_remote_state_reader: Optional[Callable] = None  # Independent original-incarnation observation; no credential restoration.
+
+    def __post_init__(self):
+        if self.lifecycle_session_sources is None:
+            from commander.account_lifecycle import configured_session_scope
+            self.lifecycle_session_sources=configured_session_scope(
+                os.environ.get('VAN_ACCOUNT_LIFECYCLE_SESSION_SCOPE_FILE',''),self.registry_path)
 
 
 def _secrets_path(st: AccountControlSettings, alias: str) -> Path:
@@ -353,9 +361,30 @@ def build_account_handlers(st: AccountControlSettings) -> dict[str, Callable[[di
         finally:
             if native_ledger is None:ledger.close()
 
+    def lifecycle_call(method, args, device=None, guard=None):
+        from commander.account_lifecycle import NativeLifecycle
+        if method=="archive_due" and not reg()._lifecycles:return {"archived":0}
+        ledger=open_operation_ledger()
+        try:
+            service=NativeLifecycle(st,ledger,control_domain,retirement_review,current_resource_version)
+            if method=='review':return service.review(args,device,guard)
+            if method=='read':return service.read(args['alias'],device,guard)
+            if method=='archive_due':
+                # Only previously admitted local metadata; no credential or
+                # provider effect, filesystem scan, new permission or history.
+                return {'archived':sum(service.archive_due(alias) for alias in list(reg()._lifecycles))}
+            return service.execute(args,guard)
+        finally:ledger.close()
+
     def cmd_account_review(a: dict) -> dict:
         from vati.core.canonical import canonical_hash
+        if a.get("action") in {"account_lifecycle_read","account_lifecycle_archive_due"}:
+            return lifecycle_call("read" if a["action"]=="account_lifecycle_read" else "archive_due",a.get("args",{}),a.get("owner_device_id"),a.get("_account_dispatch_guard"))
         if a.get('action')=='account_remove' and isinstance(a.get('args'),dict):
+            if 'variant' in a['args'] and (not isinstance(a['args']['variant'],str) or a['args']['variant'] not in {'PENDING_CLEANUP','DELETE_GRACE','CANCEL_DELETE'}):
+                raise HTTPException(422,'Unknown native account retirement variant')
+            if a["args"].get("variant") in {"DELETE_GRACE","CANCEL_DELETE"}:
+                return lifecycle_call("review",a["args"],a.get("owner_device_id"),a.get("_account_dispatch_guard"))
             if a['args'].get('variant')=='PENDING_CLEANUP':
                 from commander.account_cleanup import NativeCleanup
                 ledger=open_operation_ledger()
@@ -846,6 +875,10 @@ def build_account_handlers(st: AccountControlSettings) -> dict[str, Callable[[di
         def invoke(args):
             from commander.account_retirement import retirement_scope
             alias=_alias(args)
+            if 'variant' in args and (not isinstance(args['variant'],str) or args['variant'] not in {'PENDING_CLEANUP','DELETE_GRACE','CANCEL_DELETE'}):
+                raise HTTPException(422,'Unknown native account retirement variant')
+            if args.get("variant") in {"DELETE_GRACE","CANCEL_DELETE"}:
+                return lifecycle_call("execute",args,guard=args.get("_account_dispatch_guard"))
             ledger=open_operation_ledger()
             try:
                 if args.get('variant')=='PENDING_CLEANUP':

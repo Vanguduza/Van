@@ -1,0 +1,245 @@
+{
+  "method": "Actual source AST guard functions with NON-SENSITIVE in-memory callbacks/state ONLY",
+  "source_sha256": "c83e9c99d8f97e093d2549308741dfa0e1e5a5908dcf6165596deb9fcbd0ba8c",
+  "historical_R4_source_sha256": "1eb7d6bcf8c53d18fff3ef36da02e1f09d8bb3a982cf47cf9b9b231ea09eaf28",
+  "script_sha256": "9e0696678c29e8000a352c120c9c5e317c645fb7d8b224e8015b2b28e3b8bcd5",
+  "checks": 15,
+  "passed": 15,
+  "cases": [
+    {
+      "case": "R4_later_epoch_callback_exposes_stale_sample",
+      "entry": "protected",
+      "version": "old",
+      "allowed_stub": true,
+      "refusal": null,
+      "trace": [
+        "guard",
+        "pure_time",
+        "source",
+        "guard",
+        "pure_time",
+        "epoch",
+        "guard",
+        "pure_time",
+        "effect_stub"
+      ]
+    },
+    {
+      "case": "R5_stable_source_all_guards_allow_stub",
+      "entry": "protected",
+      "version": "current",
+      "allowed_stub": true,
+      "refusal": null,
+      "trace": [
+        "guard",
+        "pure_time",
+        "source",
+        "guard",
+        "pure_time",
+        "epoch",
+        "guard",
+        "pure_time",
+        "source",
+        "pure_time",
+        "effect_stub"
+      ]
+    },
+    {
+      "case": "R5_later_epoch_changes_source_refuses_stub",
+      "entry": "protected",
+      "version": "current",
+      "allowed_stub": false,
+      "refusal": "(409, 'Strategy source changed at protected deletion boundary')",
+      "trace": [
+        "guard",
+        "pure_time",
+        "source",
+        "guard",
+        "pure_time",
+        "epoch",
+        "guard",
+        "pure_time",
+        "source"
+      ]
+    },
+    {
+      "case": "R5_last_owner_callback_changes_source_refuses_stub",
+      "entry": "protected",
+      "version": "current",
+      "allowed_stub": false,
+      "refusal": "(409, 'Strategy source changed at protected deletion boundary')",
+      "trace": [
+        "guard",
+        "pure_time",
+        "source",
+        "guard",
+        "pure_time",
+        "epoch",
+        "guard",
+        "pure_time",
+        "source"
+      ]
+    },
+    {
+      "case": "R5_owner_negative_still_refuses",
+      "entry": "protected",
+      "version": "current",
+      "allowed_stub": false,
+      "refusal": "owner_not_current",
+      "trace": [
+        "guard"
+      ]
+    },
+    {
+      "case": "R5_epoch_negative_still_refuses",
+      "entry": "protected",
+      "version": "current",
+      "allowed_stub": false,
+      "refusal": "epoch_changed",
+      "trace": [
+        "guard",
+        "pure_time",
+        "source",
+        "guard",
+        "pure_time",
+        "epoch"
+      ]
+    },
+    {
+      "case": "R5_lease_negative_still_refuses",
+      "entry": "protected",
+      "version": "current",
+      "allowed_stub": false,
+      "refusal": "lease_expired",
+      "trace": [
+        "guard",
+        "pure_time"
+      ]
+    },
+    {
+      "case": "R5_permission_negative_still_refuses",
+      "entry": "protected",
+      "version": "current",
+      "allowed_stub": false,
+      "refusal": "permission_expired",
+      "trace": [
+        "guard",
+        "pure_time"
+      ]
+    },
+    {
+      "case": "R5_readback_negative_still_refuses",
+      "entry": "protected",
+      "version": "current",
+      "allowed_stub": false,
+      "refusal": "readback_expired",
+      "trace": [
+        "guard",
+        "pure_time"
+      ]
+    },
+    {
+      "case": "R5_final_source_callback_advances_deadline_refuses",
+      "entry": "protected",
+      "version": "current",
+      "allowed_stub": false,
+      "refusal": "lease_expired",
+      "trace": [
+        "guard",
+        "pure_time",
+        "source",
+        "guard",
+        "pure_time",
+        "epoch",
+        "guard",
+        "pure_time",
+        "source",
+        "pure_time"
+      ]
+    },
+    {
+      "case": "R5_source_unavailable_refuses_stub",
+      "entry": "protected",
+      "version": "current",
+      "allowed_stub": false,
+      "refusal": "source_unavailable",
+      "trace": [
+        "guard",
+        "pure_time",
+        "source"
+      ]
+    },
+    {
+      "case": "R5_reservation_stable_source_allows_stub",
+      "entry": "reservation_before",
+      "version": "current",
+      "allowed_stub": true,
+      "refusal": null,
+      "trace": [
+        "resource",
+        "source",
+        "guard",
+        "pure_time",
+        "source",
+        "pure_time",
+        "pure_time",
+        "effect_mark_stub",
+        "effect_stub"
+      ]
+    },
+    {
+      "case": "R5_reservation_post_sample_callback_change_refuses",
+      "entry": "reservation_before",
+      "version": "current",
+      "allowed_stub": false,
+      "refusal": "(409, 'Strategy source changed at protected deletion boundary')",
+      "trace": [
+        "resource",
+        "source",
+        "guard",
+        "pure_time",
+        "source"
+      ]
+    },
+    {
+      "case": "R5_completion_stable_source_allows_stub",
+      "entry": "before",
+      "version": "current",
+      "allowed_stub": true,
+      "refusal": null,
+      "trace": [
+        "guard",
+        "pure_time",
+        "source",
+        "pure_time",
+        "pure_time",
+        "effect_mark_stub",
+        "effect_stub"
+      ]
+    },
+    {
+      "case": "R5_completion_post_sample_callback_change_refuses",
+      "entry": "before",
+      "version": "current",
+      "allowed_stub": false,
+      "refusal": "(409, 'Strategy source changed at protected deletion boundary')",
+      "trace": [
+        "guard",
+        "pure_time",
+        "source"
+      ]
+    }
+  ],
+  "static_unchanged_functions": [
+    "mark_pure",
+    "final_times",
+    "credential_guard",
+    "overwrite_before",
+    "overwrite_after",
+    "unlink_before",
+    "unlink_after"
+  ],
+  "physical_helper_call_ast_unchanged": true,
+  "no_product_imports_or_account_credential_key_lock_provider_network_operations": true,
+  "scope": "Ordering/control-flow only. No active native/credential probe or feature suite run; no production/native/provider/integration qualification."
+}

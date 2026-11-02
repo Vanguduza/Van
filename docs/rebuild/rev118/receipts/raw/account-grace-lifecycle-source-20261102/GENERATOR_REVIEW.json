@@ -1,0 +1,115 @@
+{
+  "state": "CLEARED_BOUNDED_GENERATOR_HUNK_AND_DERIVED_DECLARATIONS_FOR_SOURCE_CANDIDATE_PUBLICATION",
+  "at": "2026-11-02T14:07:34.151999+00:00",
+  "base": "e0d6f2719b0f9bfbcd9cdb5e68b7f26c7606da3d",
+  "hunk": {
+    "path": "tools/rebuild/refresh_owner_source_contracts.py",
+    "before_sha256": "1d10b8c00e7a187711730ba2b1a76b61d8a7fc5c33e97695d6283b2734eb4c64",
+    "after_sha256": "df005d0a7a48fe6b440db9dd6ee9e816ea3983404d4ed06ab3f09ed6f6e58b5d",
+    "patch": "/dev/shm/van-grace-main-integration-20261102/GENERATOR.patch",
+    "patch_sha256": "814cf78a2f5d3b63498f77831e710cc5061b4ef252ea3b9bb9f3b5823258ec5f",
+    "scope": "Exact5 new lifecycle method/path DATA binding to existingOF-TRADING-003/accounts;noauthority/UI/native claim"
+  },
+  "derived_pins_sha256": "754063b167585c3920a2965e981216812cc069bc166e32acf56b84546a84cf46",
+  "derived_files_verified": {
+    "registries/owner_endpoints.json": "d435fe5141e7705824240e39fc792e35142393275c9f5735ac156263d0c4e2e9",
+    "registries/owner_endpoint_schemas.json": "a413ce33ccba27e6660fb1daae1462dddd6d4811eedab97976ad2036de95c08a",
+    "registries/owner_features.json": "5e4fcfc0a70b368ffd2873b73ce32ca664e42b97a215ff741cbe574bdfce6935",
+    "registries/owner_screens.json": "89be97f7b0a394e72b4cc3d65229eb241966babcf23b6b40ef33afff28156e41",
+    "docs/rebuild/rev118/backend/OWNER_REGISTRY_SOURCE_REFRESH_20261022.json": "13a751988750399dd647cab783298abf7379ac9ecd1c3b38934cfacffb15cf2c",
+    "docs/rebuild/rev118/backend/OWNER_REGISTRY_GENERATION.json": "14e4dfd792ccdbaee56411ac30d2e9f73c53e90a6b74268a0bddb49d8887320d",
+    "docs/rebuild/rev118/backend/OWNER_FRONTEND_SCREEN_REGISTRY.md": "83aae56b189161e941c214c690d2e94db49a7601839e22f6c7eee949564b85a1",
+    "docs/rebuild/rev118/SOURCE_WORKMAP.json": "1a2b746d47232a866ce8d0a7a161911bf8de048b0737e2c14c71191371e13e68"
+  },
+  "frozen_source21_exact": true,
+  "counts": {
+    "endpoints": 502,
+    "old_endpoints_preserved": 497,
+    "new_exact_routes": 5,
+    "schemas": 407,
+    "old_schema_names_preserved": 401,
+    "new_schemas": [
+      "AccountLifecycleReview",
+      "AccountLifecycleState",
+      "LifecycleCancelView",
+      "LifecycleDeleteView",
+      "LifecycleRemoteState",
+      "LifecycleSessionSource"
+    ],
+    "only_old_schema_change": "AccountChallengeResponse.resolved_review additive AccountLifecycleReview union member; all old/null options, fields, required set retained"
+  },
+  "all_old_endpoint_semantics_security_errors_equal_except_actual_source_line_offsets": true,
+  "owner_rows": {
+    "registries/owner_features.json": {
+      "identities": 42,
+      "only_semantic_change": "OF-TRADING-003",
+      "exact_new_extensions": 5,
+      "all_old_fields_extensions_preserved": true,
+      "source_line_offsets_normalized_only": true
+    },
+    "registries/owner_screens.json": {
+      "identities": 78,
+      "only_semantic_change": "van.trading.accounts",
+      "exact_new_extensions": 5,
+      "all_old_fields_extensions_preserved": true,
+      "source_line_offsets_normalized_only": true
+    }
+  },
+  "workmap_all131_units_exact": true,
+  "frozen_programme_counts": {
+    "units": 131,
+    "backend_units": 82,
+    "backend_verification_units": 12,
+    "requirements": 324,
+    "acceptance": 1610,
+    "contexts": 234,
+    "actions": 349,
+    "planned_features": 93,
+    "source_features": 42,
+    "source_functions": 105,
+    "source_surfaces": 78
+  },
+  "identity_map_readback": {
+    "requirements": {
+      "ids": 324,
+      "changed_row_hashes": 0
+    },
+    "acceptance": {
+      "ids": 1610,
+      "changed_row_hashes": 0
+    },
+    "contexts": {
+      "ids": 234,
+      "changed_row_hashes": 0
+    },
+    "actions": {
+      "ids": 349,
+      "changed_row_hashes": 0
+    },
+    "planned_features": {
+      "ids": 93,
+      "changed_row_hashes": 0
+    },
+    "source_features": {
+      "ids": 42,
+      "changed_row_hashes": 32
+    },
+    "source_surfaces": {
+      "ids": 78,
+      "changed_row_hashes": 46
+    },
+    "source_functions": {
+      "ids": 105,
+      "changed_row_hashes": 0
+    }
+  },
+  "new_route_readiness": "REPOSITORY_DECLARATION_ONLY",
+  "source_status": "SOURCE_IMPLEMENTED_WITH_BOUNDED_STATIC_IN_MEMORY_VALIDATION",
+  "after_fix_feature_native_provider_integration": "UNEXECUTED_OPEN",
+  "specification_reference": "docs/rebuild/rev118/receipts/ACCOUNT_GRACE_LIFECYCLE_SOURCE_20261102.json",
+  "spec_reference_currently_exists": false,
+  "spec_reference_gate": "Writer explicitly confirms finalizer creates truthful R5 sourceproof before finalguards/manifest/stage and validates trackedrefs; clearance covers code/deriveddelta, does not waive that requirement.",
+  "no_tests_or_generators_or_main_mutations_by_reviewer": true,
+  "no_active_or_blocked_probe_executions": true,
+  "scope": "Read-only structural/data declaration review; no fullsource/native/owner/unit/feature/integration acceptance."
+}

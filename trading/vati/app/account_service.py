@@ -172,6 +172,8 @@ class AccountCoordinatorService:
         c = self.cfg
         registry = AccountRegistry(c.registry_path)
         account = registry.get(c.account_alias)
+        from vati.accounts.lifecycle import require_attached
+        require_attached(registry, account.alias)
         if not account.enabled:
             raise RuntimeError(f"account {account.alias} is disabled")
         mandate = TradingMandate.from_mapping(c.mandate)

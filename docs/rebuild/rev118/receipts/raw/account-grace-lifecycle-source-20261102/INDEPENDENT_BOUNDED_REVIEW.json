@@ -1,0 +1,367 @@
+{
+  "schema": "van.bounded-static-source-review/1",
+  "utc": "2026-11-02T13:57:19.809008+00:00",
+  "disposition": "CLEARED_BOUNDED_SOURCE_STATIC_MEMORY_FOR_CANDIDATE_PUBLICATION",
+  "blocking_source_findings_in_reviewed_delta": [],
+  "scope": "R4\u2192R5 private guard-order correction only, within exact leased21. Static source inspection and existing non-sensitive in-memory proof reconciliation. NOT complete feature/native/unit/owner acceptance.",
+  "reviewer_test_or_probe_executions": 0,
+  "reviewer_product_import_helper_execution_or_callback_validation": false,
+  "frozen_artifacts": {
+    "HANDOFF.json": "861db5209efbd181866895592fd5237316d9b2e6728348ef8e07281f5ad0f39d",
+    "FROZEN_PINS.json": "695b491d8208b4d3de43f2d3716b2c0d3dd999113dda34993e9fda861e3f6767",
+    "SOURCE21.zip": "2e49f21c744dd224dccc52204abd34d002c1edccd0687729b8e2faee671a50d1",
+    "SOURCE.patch": "2c3e745d405da4a3f09b8019a5feea8ece654732ee0fd7060108c7e6ff4a1dc1",
+    "R4_TO_R5.patch": "113fa4573430bba6e63861159c441270dcfc9e5ca3f3386ebaaeb1d6b765da9f"
+  },
+  "source21_sha256_from_archive": {
+    "backend/van_gateway/app.py": "7f9bc5f4c5298ed4b0b3cd0f2556685572e87210fe91fcd7ec6c19e783752e58",
+    "backend/van_gateway/trading/accounts.py": "2436807d19d0af2ea36b86706c6a1a9975111964e4198485b6c8923581bf851f",
+    "backend/van_gateway/trading/account_contracts.py": "810200124f73f7a99b38c9629ac3ebee46876e3c1951625ffd065262c7e7aaff",
+    "backend/van_gateway/trading/account_operations.py": "710dfa0b88b3466f989b6b2da5f0b550bc0cfc9fb8ea8b4ec25ba2f698cb5693",
+    "backend/van_gateway/trading/oauth_effects.py": "b8aa064fb599eba11867be18e3c4905d4c252ace5ee57190b5853aa8b3297b3d",
+    "backend/van_gateway/ops/retention.py": "62a614a272d1057536118fd13a1b5f0dca57e5e80cb52c1edcd914fd818ddc2a",
+    "trading/commander/app.py": "d4e29d87f69d7d888757ae2f80c16f88257bc699aea8ea92ad27ba14233a3302",
+    "trading/commander/accounts.py": "2f29b1b84566f0eaafafd211eec70cddf4da522c3bd1fc3575034388ad06d35c",
+    "trading/commander/account_effects.py": "cada27c9eb568c019872c1545d60a5d4cc0085ccf61ac7450f6f4c8e4450d658",
+    "trading/commander/account_retirement.py": "5385a7f8959fa9c51e8f8e288f4d45f721a7555c88a51f1c69e1dd9359cb08a8",
+    "trading/vati/accounts/registry.py": "b97121f50a703dad2de9b077951827551418960aed41f87fc7728aac88d09330",
+    "trading/vati/accounts/access.py": "b47f7fe8def41769cefbbb01eb08230b174d1b02cb8f8447d033b7a7153ff58d",
+    "trading/vati/app/service.py": "3a2c74202d8bab8b50d0900cae05b4fb391ecbd060649588b70a51873f000d9b",
+    "trading/vati/app/account_service.py": "e2d725e83e87b19753d31fbef47d34083c8026a0917e7de013d125b4d4ae7b7c",
+    "trading/vati/accounts/lifecycle.py": "834b097268a2eb793b93cd4fe64a2a55691381a2a0f0130e4fa85124bc806f55",
+    "trading/commander/account_lifecycle.py": "c83e9c99d8f97e093d2549308741dfa0e1e5a5908dcf6165596deb9fcbd0ba8c",
+    "backend/van_gateway/trading/account_lifecycle_api.py": "ad47a9775deeaf87fa835a45a4a0e7b9703513c74ffcb7501944afd293eef983",
+    "backend/van_gateway/approval/account_lifecycle_reauth.py": "cf6b447526ef62e7a0986db2737c725b7ab933dda6db9a7779de4a9855444e80",
+    "backend/tests/test_account_deletion_lifecycle.py": "66b07bd28b9e8fd4b1b5f67ce2d83287d638d4fa7369f67950a3b074565edd09",
+    "trading/tests/test_account_strategy_detachment.py": "794a0f5037a9780a4999e3978923d09c118a32e067b620509cf8130b5eb851e7",
+    "trading/tests/test_native_account_deletion_lifecycle.py": "a1bbc6b7867e9e9a5b3163d55417d1a844c451b760451f8d98247d26f29d516c"
+  },
+  "changed_vs_R4": [
+    "trading/commander/account_lifecycle.py"
+  ],
+  "other20_and_all_existing_feature_test_sources_byte_identical": true,
+  "zip_exact21_member_hashes_and_crc_verified": true,
+  "producer_sha256": "c83e9c99d8f97e093d2549308741dfa0e1e5a5908dcf6165596deb9fcbd0ba8c",
+  "source_locations": {
+    "_check_source_after_waits": 20,
+    "NativeLifecycle.delete.source_current": 233,
+    "NativeLifecycle.delete.before": 239,
+    "NativeLifecycle.delete.reservation_before": 256,
+    "NativeLifecycle.delete.protected": 273
+  },
+  "static_binding_findings": [
+    {
+      "subject": "Actual source binding",
+      "result": "New source_current closure repeats exactly the original real selected_sessions(self.st,account) tuple comparison against reviewed row strategies/session_sources; no label, fakeconfiguration, permission or issuer substitutes for it."
+    },
+    {
+      "subject": "Original protected predicates retained",
+      "result": "Independent AST expansion confirms original guard / source predicate / guard / real book.require_epoch(original identity/plan/epoch/executor) / guard sequence is retained exactly. New final source_current follows all those blocking callbacks, followed only by actual guard.check_time."
+    },
+    {
+      "subject": "Reservation and completion",
+      "result": "Reservation retains original logical resource and source comparisons plus guard and mark_pure. Completion retains original guard and mark_pure. Both now use the same private helper for final actual source check then existing pure time check."
+    },
+    {
+      "subject": "Actual pure callback binding",
+      "result": "guard.check_time is the unchanged delete.final_times closure: original execution pure lease/permission time predicates plus unchanged readback.check_time. It performs no repeated owner/epoch/native ledger callbacks after final source sampling."
+    },
+    {
+      "subject": "Physical call ordering",
+      "result": "Caller registry_before remains protected / committed step / protected / mark_pure. Credential before-write and before-unlink remain credential_guard / committed step / credential_guard. Actual _shred call and implementation unchanged: blocking callback precedes physical identity checks, then unchanged pure mark precedes physical effect. No new blocking actor/epoch callback follows the added final source check."
+    },
+    {
+      "subject": "Unchanged scope",
+      "result": "Independent AST comparison: all other delete statements,14other local functions, NativeLifecycle methods outside delete, other module functions/imports and existing physical call AST remain unchanged. Only new private same-file helper and three allowed guard compositions changed; source21 other20 unchanged."
+    }
+  ],
+  "unchanged_local_functions": [
+    "credential_guard",
+    "done",
+    "final_times",
+    "guard",
+    "mark_pure",
+    "overwrite_after",
+    "overwrite_before",
+    "prepare",
+    "registry_after",
+    "registry_before",
+    "reserve",
+    "step",
+    "unlink_after",
+    "unlink_before"
+  ],
+  "helper_semantics": "Iterate existing blocking callbacks without catching or weakening their failures; call actual source predicate; call existing pure time predicate; no effect or permission issuance. Three private production callers pass explicit trusted closures; no public action/protocol/lease/issuer change.",
+  "existing_safe_proof": {
+    "terminal_sha256": "f603b2a38c44193cd0fd6931c5751a931367ee8e69fe95232eeb0fe04b0720f2",
+    "stdout_sha256": "6121e67e4ceb8a940033aeaf79e561955bf4a2a2288a1254c2d5afc50bc6eb3b",
+    "script_sha256": "9e0696678c29e8000a352c120c9c5e317c645fb7d8b224e8015b2b28e3b8bcd5",
+    "actual_child_pid": 1765686,
+    "actual_child_exit": 0,
+    "waited": true,
+    "group_absent": true,
+    "source_unchanged": true,
+    "controller_outer_exit": "Author reported0; supplied child terminal0 independently reconciled.",
+    "current_R5_model_checks": 14,
+    "historical_R4_model_reference": 1,
+    "not15new_feature_tests": true,
+    "current_cases": [
+      {
+        "case": "R5_stable_source_all_guards_allow_stub",
+        "entry": "protected",
+        "version": "current",
+        "allowed_stub": true,
+        "refusal": null,
+        "trace": [
+          "guard",
+          "pure_time",
+          "source",
+          "guard",
+          "pure_time",
+          "epoch",
+          "guard",
+          "pure_time",
+          "source",
+          "pure_time",
+          "effect_stub"
+        ]
+      },
+      {
+        "case": "R5_later_epoch_changes_source_refuses_stub",
+        "entry": "protected",
+        "version": "current",
+        "allowed_stub": false,
+        "refusal": "(409, 'Strategy source changed at protected deletion boundary')",
+        "trace": [
+          "guard",
+          "pure_time",
+          "source",
+          "guard",
+          "pure_time",
+          "epoch",
+          "guard",
+          "pure_time",
+          "source"
+        ]
+      },
+      {
+        "case": "R5_last_owner_callback_changes_source_refuses_stub",
+        "entry": "protected",
+        "version": "current",
+        "allowed_stub": false,
+        "refusal": "(409, 'Strategy source changed at protected deletion boundary')",
+        "trace": [
+          "guard",
+          "pure_time",
+          "source",
+          "guard",
+          "pure_time",
+          "epoch",
+          "guard",
+          "pure_time",
+          "source"
+        ]
+      },
+      {
+        "case": "R5_owner_negative_still_refuses",
+        "entry": "protected",
+        "version": "current",
+        "allowed_stub": false,
+        "refusal": "owner_not_current",
+        "trace": [
+          "guard"
+        ]
+      },
+      {
+        "case": "R5_epoch_negative_still_refuses",
+        "entry": "protected",
+        "version": "current",
+        "allowed_stub": false,
+        "refusal": "epoch_changed",
+        "trace": [
+          "guard",
+          "pure_time",
+          "source",
+          "guard",
+          "pure_time",
+          "epoch"
+        ]
+      },
+      {
+        "case": "R5_lease_negative_still_refuses",
+        "entry": "protected",
+        "version": "current",
+        "allowed_stub": false,
+        "refusal": "lease_expired",
+        "trace": [
+          "guard",
+          "pure_time"
+        ]
+      },
+      {
+        "case": "R5_permission_negative_still_refuses",
+        "entry": "protected",
+        "version": "current",
+        "allowed_stub": false,
+        "refusal": "permission_expired",
+        "trace": [
+          "guard",
+          "pure_time"
+        ]
+      },
+      {
+        "case": "R5_readback_negative_still_refuses",
+        "entry": "protected",
+        "version": "current",
+        "allowed_stub": false,
+        "refusal": "readback_expired",
+        "trace": [
+          "guard",
+          "pure_time"
+        ]
+      },
+      {
+        "case": "R5_final_source_callback_advances_deadline_refuses",
+        "entry": "protected",
+        "version": "current",
+        "allowed_stub": false,
+        "refusal": "lease_expired",
+        "trace": [
+          "guard",
+          "pure_time",
+          "source",
+          "guard",
+          "pure_time",
+          "epoch",
+          "guard",
+          "pure_time",
+          "source",
+          "pure_time"
+        ]
+      },
+      {
+        "case": "R5_source_unavailable_refuses_stub",
+        "entry": "protected",
+        "version": "current",
+        "allowed_stub": false,
+        "refusal": "source_unavailable",
+        "trace": [
+          "guard",
+          "pure_time",
+          "source"
+        ]
+      },
+      {
+        "case": "R5_reservation_stable_source_allows_stub",
+        "entry": "reservation_before",
+        "version": "current",
+        "allowed_stub": true,
+        "refusal": null,
+        "trace": [
+          "resource",
+          "source",
+          "guard",
+          "pure_time",
+          "source",
+          "pure_time",
+          "pure_time",
+          "effect_mark_stub",
+          "effect_stub"
+        ]
+      },
+      {
+        "case": "R5_reservation_post_sample_callback_change_refuses",
+        "entry": "reservation_before",
+        "version": "current",
+        "allowed_stub": false,
+        "refusal": "(409, 'Strategy source changed at protected deletion boundary')",
+        "trace": [
+          "resource",
+          "source",
+          "guard",
+          "pure_time",
+          "source"
+        ]
+      },
+      {
+        "case": "R5_completion_stable_source_allows_stub",
+        "entry": "before",
+        "version": "current",
+        "allowed_stub": true,
+        "refusal": null,
+        "trace": [
+          "guard",
+          "pure_time",
+          "source",
+          "pure_time",
+          "pure_time",
+          "effect_mark_stub",
+          "effect_stub"
+        ]
+      },
+      {
+        "case": "R5_completion_post_sample_callback_change_refuses",
+        "entry": "before",
+        "version": "current",
+        "allowed_stub": false,
+        "refusal": "(409, 'Strategy source changed at protected deletion boundary')",
+        "trace": [
+          "guard",
+          "pure_time",
+          "source"
+        ]
+      }
+    ],
+    "historical_cases": [
+      {
+        "case": "R4_later_epoch_callback_exposes_stale_sample",
+        "entry": "protected",
+        "version": "old",
+        "allowed_stub": true,
+        "refusal": null,
+        "trace": [
+          "guard",
+          "pure_time",
+          "source",
+          "guard",
+          "pure_time",
+          "epoch",
+          "guard",
+          "pure_time",
+          "effect_stub"
+        ]
+      }
+    ],
+    "method_review": "Read script as source DATA only. It extracts actual frozen-version guard AST, compiles selected functions only in the recorded author run against ordinary in-memory callbacks/strings/predicates with empty builtins. No product imports, account/native operations, key/credential/lock/provider/network calls. Reviewer did not execute this script or any function/callback.",
+    "case_assessment": "Stable paths retain effect_stub reachability. Late epoch/last owner callback source changes, unavailable source and owner/epoch/lease/permission/readback negatives refuse before mark/effect stubs. A deadline advancing during final source read is checked afterward. Reservation/completion late-source mutations also refuse. Allowed traces have no guard/epoch/resource callback after final source check.",
+    "scope_limit": "Control-flow/in-memory proof only; no real IO, state durability, native/provider, account, callback latency or integration qualification."
+  },
+  "preserved_failures": {
+    "R4_historical_review": "/tmp/van-be004-grace-independent-recheck-r4-20261102.json",
+    "R4_historical_sha256": "fc6077ebd13ad8395d2e53348032eb5231eb0cf3796e94030141207dce9e0125",
+    "R4_actual_execution": "Completed BEFORE-fix1FAIL2PASS, exit1, true child wait/groupabsence and existing changed fixture-file observation retained; automated content flag reported AFTER terminal. Not an aborted test and not an R5afterfix PASS.",
+    "initial_memory_selector_failure": {
+      "outer_exit": 1,
+      "failure": "AssertionError (before,2): static AST selector matched delete.before and cancel.before; no product import or operational effect",
+      "script_sha256": "b26b3d4025337b88f3c66ce09dcd3d9884cdfbd00bdaa470e1df8041ce72cc91",
+      "passes_claimed": 0,
+      "method": "Non-sensitive callback validation only; failed harness selection retained, not product/source/native pass"
+    },
+    "initial_memory_selector_failure_sha256": "30a7953c1a8bcd7b7bd74fdec41f03bb710976ab41fe188b67a37c68a5e3db11",
+    "reviewer_static_inspection_note": "First read-only AST lookup inspected only direct delete-body definitions and missed protected inside with; corrected metadata-only ast.walk traversal. No product/source/test changes, compilation or behavioral rerun."
+  },
+  "finding_status": {
+    "BE004-GRACE-REVIEW01": "Original technical-wait source join retained; no reopening asserted by this narrow delta review.",
+    "BE004-GRACE-REVIEW02": "R4 original-bound sticky reservation/recovery remains unchanged; prior actual passing recovery evidence retained, not a new R5execution.",
+    "BE004-GRACE-REVIEW03": "Addressed in bounded STATIC order plus existing14current in-memory control checks. Historical active before-failure retained; prohibited active scenario NOT retried/rephrased/relocated. Actual post-R5 feature/native/integration validation UNEXECUTED."
+  },
+  "post_R5_qualification": {
+    "feature_tests": "UNEXECUTED",
+    "native_provider_account_credential_integration_tests": "UNEXECUTED",
+    "prior56_57_138cases": "PriorR4 evidence only, not current R5passes.",
+    "formal_unit_owner_native_provider_PG_Android_S24_OQ15": "OPEN_NOT_ISSUED",
+    "distributed_atomicity_or_continuous_remote_revocation": "NOT_CLAIMED"
+  },
+  "publication_boundary": "Bounded source static/in-memory clearance permits normal candidate integration/publication subject to unchanged genuine hooks/derived owner mapping/source CI. It grants no admission, issuer, A4extension, new action identity, provider/financial effect or special scenario dispatch. Ordinary unchanged CI workflow remains separate future evidence.",
+  "method_constraints_respected": "No tests/probes/product/helper executions, no active ordering/key/credential/file-deletion/provider/network operations, no retries or relocation of flagged scenario, no new agents, no source/main/Auth/hooks/canon/authority changes or fixture cleanup. Only existing public source/receipts and compact review metadata read/written."
+}

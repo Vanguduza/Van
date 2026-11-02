@@ -219,6 +219,9 @@
                 "$ref": "#/components/schemas/AccountCleanupReview"
               },
               {
+                "$ref": "#/components/schemas/AccountLifecycleReview"
+              },
+              {
                 "type": "null"
               }
             ],
@@ -410,6 +413,237 @@
           "execution_authority"
         ],
         "title": "AccountCleanupSummary"
+      },
+      "AccountLifecycleReview": {
+        "properties": {
+          "schema": {
+            "type": "string",
+            "const": "vati.account-lifecycle-review/1",
+            "title": "Schema"
+          },
+          "action": {
+            "type": "string",
+            "const": "account_remove",
+            "title": "Action"
+          },
+          "alias": {
+            "type": "string",
+            "title": "Alias"
+          },
+          "resource_version": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$",
+            "title": "Resource Version"
+          },
+          "semantic_digest": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$",
+            "title": "Semantic Digest"
+          },
+          "view": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/LifecycleDeleteView"
+              },
+              {
+                "$ref": "#/components/schemas/LifecycleCancelView"
+              }
+            ],
+            "title": "View"
+          },
+          "context_digest": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$",
+            "title": "Context Digest"
+          },
+          "request_digest": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$",
+            "title": "Request Digest"
+          },
+          "review_digest": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$",
+            "title": "Review Digest"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "schema",
+          "action",
+          "alias",
+          "resource_version",
+          "semantic_digest",
+          "view",
+          "context_digest",
+          "request_digest",
+          "review_digest"
+        ],
+        "title": "AccountLifecycleReview"
+      },
+      "AccountLifecycleState": {
+        "properties": {
+          "schema": {
+            "type": "string",
+            "const": "vati.account-lifecycle/1",
+            "title": "Schema"
+          },
+          "alias": {
+            "type": "string",
+            "title": "Alias"
+          },
+          "operation_id": {
+            "type": "string",
+            "title": "Operation Id"
+          },
+          "device_id": {
+            "type": "string",
+            "title": "Device Id"
+          },
+          "account_control_domain": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$",
+            "title": "Account Control Domain"
+          },
+          "incarnation": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$",
+            "title": "Incarnation"
+          },
+          "revision": {
+            "type": "integer",
+            "exclusiveMinimum": 0.0,
+            "title": "Revision"
+          },
+          "phase": {
+            "type": "string",
+            "enum": [
+              "DELETING",
+              "PENDING_ARCHIVE",
+              "RELINK_REQUIRED",
+              "ARCHIVED"
+            ],
+            "title": "Phase"
+          },
+          "created_at_unix": {
+            "type": "integer",
+            "title": "Created At Unix"
+          },
+          "archive_at_unix": {
+            "type": "integer",
+            "title": "Archive At Unix"
+          },
+          "grace_seconds": {
+            "type": "integer",
+            "exclusiveMinimum": 0.0,
+            "title": "Grace Seconds"
+          },
+          "strategies": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Strategies"
+          },
+          "history_ref": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$",
+            "title": "History Ref"
+          },
+          "credential_disposition": {
+            "type": "string",
+            "enum": [
+              "DELETE_MANAGED",
+              "NONE"
+            ],
+            "title": "Credential Disposition"
+          },
+          "detached": {
+            "type": "boolean",
+            "const": true,
+            "title": "Detached"
+          },
+          "link_intent": {
+            "type": "string",
+            "const": "RELINK_REQUIRED",
+            "title": "Link Intent"
+          },
+          "remote_account_closed": {
+            "type": "boolean",
+            "const": false,
+            "title": "Remote Account Closed"
+          },
+          "record_digest": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$",
+            "title": "Record Digest"
+          },
+          "financial_history_retained": {
+            "type": "boolean",
+            "const": true,
+            "title": "Financial History Retained"
+          },
+          "execution_authority": {
+            "type": "boolean",
+            "const": false,
+            "title": "Execution Authority"
+          },
+          "native_original_phase": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "IN_FLIGHT",
+                  "APPLIED",
+                  "REFUSED",
+                  "UNKNOWN"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Native Original Phase"
+          },
+          "metadata_hold": {
+            "anyOf": [
+              {
+                "type": "string",
+                "const": "ORIGINAL_OUTCOME_REQUIRES_RECONCILIATION"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Metadata Hold"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "schema",
+          "alias",
+          "operation_id",
+          "device_id",
+          "account_control_domain",
+          "incarnation",
+          "revision",
+          "phase",
+          "created_at_unix",
+          "archive_at_unix",
+          "grace_seconds",
+          "strategies",
+          "history_ref",
+          "credential_disposition",
+          "detached",
+          "link_intent",
+          "remote_account_closed",
+          "record_digest",
+          "financial_history_retained",
+          "execution_authority"
+        ],
+        "title": "AccountLifecycleState"
       },
       "AccountOperationResponse": {
         "properties": {
@@ -9075,6 +9309,157 @@
           "task_id"
         ],
         "title": "LeaseBody"
+      },
+      "LifecycleCancelView": {
+        "properties": {
+          "variant": {
+            "type": "string",
+            "const": "CANCEL_DELETE",
+            "title": "Variant"
+          },
+          "original": {
+            "$ref": "#/components/schemas/AccountLifecycleState"
+          },
+          "remote_state": {
+            "$ref": "#/components/schemas/LifecycleRemoteState"
+          },
+          "account_control_domain": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$",
+            "title": "Account Control Domain"
+          },
+          "owner_device_id": {
+            "type": "string",
+            "title": "Owner Device Id"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "variant",
+          "original",
+          "remote_state",
+          "account_control_domain",
+          "owner_device_id"
+        ],
+        "title": "LifecycleCancelView"
+      },
+      "LifecycleDeleteView": {
+        "properties": {
+          "variant": {
+            "type": "string",
+            "const": "DELETE_GRACE",
+            "title": "Variant"
+          },
+          "grace_seconds": {
+            "type": "integer",
+            "exclusiveMinimum": 0.0,
+            "title": "Grace Seconds"
+          },
+          "strategies": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Strategies"
+          },
+          "session_sources": {
+            "items": {
+              "$ref": "#/components/schemas/LifecycleSessionSource"
+            },
+            "type": "array",
+            "title": "Session Sources"
+          },
+          "unlink_review": {
+            "$ref": "#/components/schemas/AccountResolvedReview"
+          },
+          "incarnation": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$",
+            "title": "Incarnation"
+          },
+          "account_control_domain": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$",
+            "title": "Account Control Domain"
+          },
+          "owner_device_id": {
+            "type": "string",
+            "title": "Owner Device Id"
+          },
+          "credential_disposition": {
+            "type": "string",
+            "enum": [
+              "DELETE_MANAGED",
+              "NONE"
+            ],
+            "title": "Credential Disposition"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "variant",
+          "grace_seconds",
+          "strategies",
+          "session_sources",
+          "unlink_review",
+          "incarnation",
+          "account_control_domain",
+          "owner_device_id",
+          "credential_disposition"
+        ],
+        "title": "LifecycleDeleteView"
+      },
+      "LifecycleRemoteState": {
+        "properties": {
+          "state": {
+            "type": "string",
+            "enum": [
+              "NOT_APPLICABLE",
+              "OPEN"
+            ],
+            "title": "State"
+          },
+          "source_ref": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$",
+            "title": "Source Ref"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "state",
+          "source_ref"
+        ],
+        "title": "LifecycleRemoteState"
+      },
+      "LifecycleSessionSource": {
+        "properties": {
+          "source_ref": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$",
+            "title": "Source Ref"
+          },
+          "sha256": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$",
+            "title": "Sha256"
+          },
+          "account_alias": {
+            "type": "string",
+            "title": "Account Alias"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "source_ref",
+          "sha256",
+          "account_alias"
+        ],
+        "title": "LifecycleSessionSource"
       },
       "MacdIndicator": {
         "properties": {

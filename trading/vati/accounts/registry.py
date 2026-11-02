@@ -129,6 +129,8 @@ class AccountRegistry:
         # All aliases of one existing file share its mutation lock.
         self.path = Path(path).resolve()
         self._resource_revisions = {}
+        self._schema_version = 1
+        self._lifecycles = {}
         self.accounts = self._read_accounts()
         self._loaded_accounts = dict(self.accounts)
         self._loaded_revisions = dict(self._resource_revisions)
@@ -136,11 +138,18 @@ class AccountRegistry:
     def _read_accounts(self) -> dict[str, Account]:
         if not self.path.exists():
             self._resource_revisions = {}
+            self._schema_version = 1
+            self._lifecycles = {}
             return {}
         try:
             data = json.loads(self.path.read_text(encoding="utf-8"))
-            if not isinstance(data, dict) or data.get("schema_version", 1) != 1 or not isinstance(data.get("accounts"), list):
+            if not isinstance(data, dict) or not isinstance(data.get("accounts"), list):
                 raise AccountRegistryError("account registry schema is invalid")
+            version=data.get("schema_version",1)
+            if type(version) is not int or version not in (1,2):
+                raise AccountRegistryError("account registry schema is unsupported")
+            if version==1 and data.get("account_lifecycles") or version==2 and not data.get("account_lifecycles"):
+                raise AccountRegistryError("lifecycle registry version or persistent detachment is unavailable; HOLD")
             revisions = data.get("resource_revisions", {})
             if (not isinstance(revisions, dict) or any(
                 not isinstance(alias, str) or not re.fullmatch(r"[a-z0-9_]{3,32}", alias)
@@ -154,6 +163,9 @@ class AccountRegistry:
                 if account.alias in records:
                     raise AccountRegistryError("account registry contains duplicate identities")
                 records[account.alias] = account
+            from vati.accounts.lifecycle import validate_records
+            self._lifecycles = validate_records(data.get("account_lifecycles", {}))
+            self._schema_version = version
             self._resource_revisions = dict(revisions)
             return records
         except (OSError, ValueError, TypeError) as exc:
@@ -222,6 +234,45 @@ class AccountRegistry:
         """Unlink an unchanged local record; broker/exposure authority belongs to its caller."""
         self._mutate("remove", alias, before_replace=before_replace,after_replace=after_replace)
 
+    def lifecycle_update(self, alias, transform, *, before_replace=None, after_replace=None, advance_resource=True):
+        """One native registry writer; lifecycle data and record share a replacement.
+
+        transform receives a freshly loaded registry under the same alias/global
+        locks as entry/removal. It never grants account/strategy authority.
+        """
+        with self.operation_lock(alias), self._mutation_lock():
+            current = AccountRegistry(self.path)
+            import copy
+            original_lifecycles=copy.deepcopy(current._lifecycles)
+            original_accounts=dict(current.accounts)
+            result = transform(current)
+            from vati.accounts.lifecycle import validate_records
+            validate_records(current._lifecycles)
+            # A metadata prune/rollback is not account reassignment authority.
+            if not original_lifecycles.keys()<=current._lifecycles.keys():
+                raise AccountRegistryError("persistent account detachment cannot be erased")
+            if set(current._lifecycles)-set(original_lifecycles)-{alias}:
+                raise AccountRegistryError("lifecycle writer cannot widen its account scope")
+            immutable={'schema','alias','operation_id','device_id','account_control_domain','incarnation',
+                'created_at_unix','archive_at_unix','grace_seconds','strategies','history_ref',
+                'credential_disposition','unlink_ref','oauth_discard_ref','detached','link_intent',
+                'remote_account_closed','original_request'}
+            for subject,old in original_lifecycles.items():
+                now=current._lifecycles[subject]
+                if subject!=alias and now!=old or any(now[k]!=old[k] for k in immutable):
+                    raise AccountRegistryError("original account lifecycle binding is immutable")
+            if any(current.accounts.get(subject)!=account for subject,account in original_accounts.items() if subject!=alias) or set(current.accounts)-set(original_accounts)-{alias}:
+                raise AccountRegistryError("lifecycle writer cannot mutate another account")
+            if advance_resource:
+                current._resource_revisions[alias] = current._resource_revisions.get(alias, 0) + 1
+            current._save_unlocked(before_replace=before_replace,after_replace=after_replace or (lambda:None))
+            self.accounts, self._lifecycles = current.accounts, current._lifecycles
+            self._resource_revisions = current._resource_revisions
+            self._schema_version = current._schema_version
+            self._loaded_accounts = dict(self.accounts)
+            self._loaded_revisions = dict(self._resource_revisions)
+            return result
+
     def touch(self, alias: str) -> None:
         """Advance a native credential/resource generation without changing metadata."""
         self._mutate("touch", alias, self.get(alias))
@@ -266,9 +317,16 @@ class AccountRegistry:
         if any(type(epoch) is not int or not 0 < epoch < 2**63 for epoch in self._resource_revisions.values()):
             raise AccountRegistryError("account resource revision exhausted or invalid; reconcile before mutation")
         self.path.parent.mkdir(parents=True, exist_ok=True)
+        # Version2 is sticky once detachment has existed. The actual preceding
+        # reader/writer supports only1 and therefore refuses instead of silently
+        # dropping the new safety data. This is not a backup/rollback certificate.
+        self._schema_version = 2 if self._schema_version>=2 or self._lifecycles else 1
+        if self._schema_version==2 and not self._lifecycles:
+            raise AccountRegistryError("persistent lifecycle state cannot be pruned or downgraded")
         payload = json.dumps(
-            {"schema_version": 1, "accounts": [asdict(a) for a in sorted(self.accounts.values(), key=lambda x: x.alias)],
-             "resource_revisions": self._resource_revisions},
+            {"schema_version": self._schema_version, "accounts": [asdict(a) for a in sorted(self.accounts.values(), key=lambda x: x.alias)],
+             "resource_revisions": self._resource_revisions,
+             **({"account_lifecycles": self._lifecycles} if self._lifecycles else {})},
             indent=2,
         ) + "\n"
         fd, temp_name = tempfile.mkstemp(prefix=f".{self.path.name}.", suffix=".tmp", dir=str(self.path.parent))
