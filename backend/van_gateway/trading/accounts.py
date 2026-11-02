@@ -94,6 +94,10 @@ class LocalAccountControl:
     def review(self, action: str, args: dict) -> dict:
         return self.run('account_review',{'action':action,'args':args})
 
+    def cleanup_review(self,args,device_id,read_guard=None):
+        return self.run('account_review',{'action':'account_remove','args':args,'owner_device_id':device_id,
+            '_account_dispatch_guard':read_guard})
+
     def operation(self, operation_id: str, device_id: str, account_control_domain: str | None = None) -> dict:
         return self.run("account_operation", {"operation_id": operation_id, "device_id": device_id,
             **({'account_control_domain':account_control_domain} if account_control_domain else {})})
@@ -118,6 +122,11 @@ class CommanderAccountControl:
 
     def review(self, action: str, args: dict) -> dict:
         return self.run('account_review',{'action':action,'args':args})
+
+    def cleanup_review(self,args,device_id,read_guard=None):
+        # The native ingress injects its actual current signed-envelope guard;
+        # Python callbacks never cross the remote wire.
+        return self.run('account_review',{'action':'account_remove','args':args,'owner_device_id':device_id})
 
     def operation(self, operation_id: str, device_id: str, account_control_domain: str | None = None) -> dict:
         return self.run("account_operation", {"operation_id": operation_id, "device_id": device_id,

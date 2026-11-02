@@ -216,9 +216,13 @@
                 "$ref": "#/components/schemas/AccountResolvedReview"
               },
               {
+                "$ref": "#/components/schemas/AccountCleanupReview"
+              },
+              {
                 "type": "null"
               }
-            ]
+            ],
+            "title": "Resolved Review"
           },
           "account_control_domain": {
             "type": "string",
@@ -236,6 +240,176 @@
           "account_control_domain"
         ],
         "title": "AccountChallengeResponse"
+      },
+      "AccountCleanupReview": {
+        "properties": {
+          "schema": {
+            "type": "string",
+            "const": "vati.pending-account-cleanup-review/1",
+            "title": "Schema"
+          },
+          "action": {
+            "type": "string",
+            "const": "account_remove",
+            "title": "Action"
+          },
+          "variant": {
+            "type": "string",
+            "const": "PENDING_CLEANUP",
+            "title": "Variant"
+          },
+          "request_digest": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$",
+            "title": "Request Digest"
+          },
+          "resource_version": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$",
+            "title": "Resource Version"
+          },
+          "context_digest": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$",
+            "title": "Context Digest"
+          },
+          "review_digest": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$",
+            "title": "Review Digest"
+          },
+          "view": {
+            "$ref": "#/components/schemas/CleanupView"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "schema",
+          "action",
+          "variant",
+          "request_digest",
+          "resource_version",
+          "context_digest",
+          "review_digest",
+          "view"
+        ],
+        "title": "AccountCleanupReview"
+      },
+      "AccountCleanupSummary": {
+        "properties": {
+          "schema": {
+            "type": "string",
+            "const": "vati.pending-local-cleanup/1",
+            "title": "Schema"
+          },
+          "state": {
+            "type": "string",
+            "enum": [
+              "PROSPECTIVE_PLAN_RETAINED",
+              "QUALIFIED_SEPARATE_RESOLUTION"
+            ],
+            "title": "State"
+          },
+          "plan_ref": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$",
+            "title": "Plan Ref"
+          },
+          "epoch": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Epoch"
+          },
+          "parent_operation_id": {
+            "type": "string",
+            "title": "Parent Operation Id"
+          },
+          "parent_phase": {
+            "type": "string",
+            "enum": [
+              "IN_FLIGHT",
+              "APPLIED",
+              "REFUSED",
+              "UNKNOWN"
+            ],
+            "title": "Parent Phase"
+          },
+          "step_facts": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/CleanupStepFact"
+            },
+            "propertyNames": {
+              "enum": [
+                "REGISTRY_REMOVE",
+                "CREDENTIAL_OVERWRITE",
+                "CREDENTIAL_UNLINK"
+              ]
+            },
+            "type": "object",
+            "title": "Step Facts"
+          },
+          "linked_resolution_ref": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Linked Resolution Ref"
+          },
+          "linked_resolution_child_operation_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Linked Resolution Child Operation Id"
+          },
+          "linked_child_applied_ref": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Linked Child Applied Ref"
+          },
+          "parent_original_unchanged": {
+            "type": "boolean",
+            "const": true,
+            "title": "Parent Original Unchanged"
+          },
+          "execution_authority": {
+            "type": "boolean",
+            "const": false,
+            "title": "Execution Authority"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "schema",
+          "state",
+          "plan_ref",
+          "epoch",
+          "parent_operation_id",
+          "parent_phase",
+          "step_facts",
+          "linked_resolution_ref",
+          "linked_resolution_child_operation_id",
+          "linked_child_applied_ref",
+          "parent_original_unchanged",
+          "execution_authority"
+        ],
+        "title": "AccountCleanupSummary"
       },
       "AccountOperationResponse": {
         "properties": {
@@ -296,6 +470,16 @@
               }
             ],
             "title": "Account Control Domain"
+          },
+          "cleanup_recovery": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/AccountCleanupSummary"
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
         },
         "type": "object",
@@ -2749,6 +2933,211 @@
           "timeframe"
         ],
         "title": "ChartPanel"
+      },
+      "CleanupLocalState": {
+        "properties": {
+          "registry": {
+            "type": "string",
+            "enum": [
+              "ORIGINAL_PRESENT",
+              "ORIGINAL_LINK_ABSENT_NOT_ORIGINAL_COMPLETION"
+            ],
+            "title": "Registry"
+          },
+          "credential": {
+            "type": "string",
+            "enum": [
+              "NOT_MANAGED",
+              "ORIGINAL_MANAGED_FILE",
+              "ORIGINAL_OWN_OVERWRITE_UNUSABLE_FOR_NEW_NATIVE_OBSERVATION",
+              "ORIGINAL_UNLINK_FACT_AND_CURRENT_ABSENCE_NOT_PROVIDER_STATE"
+            ],
+            "title": "Credential"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "registry",
+          "credential"
+        ],
+        "title": "CleanupLocalState"
+      },
+      "CleanupOriginalAccount": {
+        "properties": {
+          "alias": {
+            "type": "string",
+            "title": "Alias"
+          },
+          "broker": {
+            "type": "string",
+            "title": "Broker"
+          },
+          "server": {
+            "type": "string",
+            "title": "Server"
+          },
+          "login": {
+            "type": "string",
+            "title": "Login"
+          },
+          "currency": {
+            "type": "string",
+            "title": "Currency"
+          },
+          "demo": {
+            "type": "boolean",
+            "title": "Demo"
+          },
+          "safety_identity": {
+            "type": "string",
+            "title": "Safety Identity"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "alias",
+          "broker",
+          "server",
+          "login",
+          "currency",
+          "demo",
+          "safety_identity"
+        ],
+        "title": "CleanupOriginalAccount"
+      },
+      "CleanupStepFact": {
+        "properties": {
+          "state": {
+            "type": "string",
+            "enum": [
+              "MAY_BEGIN",
+              "DONE",
+              "VERIFIED_ABSENT"
+            ],
+            "title": "State"
+          },
+          "epoch": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Epoch"
+          },
+          "executor_operation_id": {
+            "type": "string",
+            "title": "Executor Operation Id"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "state",
+          "epoch",
+          "executor_operation_id"
+        ],
+        "title": "CleanupStepFact"
+      },
+      "CleanupView": {
+        "properties": {
+          "parent_operation_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9_-]{20,128}$",
+            "title": "Parent Operation Id"
+          },
+          "plan_ref": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$",
+            "title": "Plan Ref"
+          },
+          "original_device_id": {
+            "type": "string",
+            "title": "Original Device Id"
+          },
+          "account_control_domain": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$",
+            "title": "Account Control Domain"
+          },
+          "alias": {
+            "type": "string",
+            "title": "Alias"
+          },
+          "original_epoch": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Original Epoch"
+          },
+          "original_account": {
+            "$ref": "#/components/schemas/CleanupOriginalAccount"
+          },
+          "current_local_state": {
+            "$ref": "#/components/schemas/CleanupLocalState"
+          },
+          "original_step_head_ref": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$",
+            "title": "Original Step Head Ref"
+          },
+          "target_state_digest": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$",
+            "title": "Target State Digest"
+          },
+          "remaining_steps": {
+            "items": {
+              "type": "string",
+              "enum": [
+                "REGISTRY_REMOVE",
+                "CREDENTIAL_OVERWRITE",
+                "CREDENTIAL_UNLINK"
+              ]
+            },
+            "type": "array",
+            "title": "Remaining Steps"
+          },
+          "retire_parent_safety_obligation": {
+            "type": "boolean",
+            "title": "Retire Parent Safety Obligation"
+          },
+          "retirement": {
+            "$ref": "#/components/schemas/AccountRetirementReview"
+          },
+          "parent_original_state": {
+            "type": "string",
+            "const": "UNKNOWN",
+            "title": "Parent Original State"
+          },
+          "parent_original_result": {
+            "type": "null",
+            "title": "Parent Original Result"
+          },
+          "provider_closure_authority": {
+            "type": "boolean",
+            "const": false,
+            "title": "Provider Closure Authority"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "parent_operation_id",
+          "plan_ref",
+          "original_device_id",
+          "account_control_domain",
+          "alias",
+          "original_epoch",
+          "original_account",
+          "current_local_state",
+          "original_step_head_ref",
+          "target_state_digest",
+          "remaining_steps",
+          "retire_parent_safety_obligation",
+          "retirement",
+          "parent_original_state",
+          "parent_original_result",
+          "provider_closure_authority"
+        ],
+        "title": "CleanupView"
       },
       "CognitiveCandidate": {
         "properties": {
@@ -12085,6 +12474,56 @@
           "signature"
         ],
         "title": "PublishHotBody"
+      },
+      "ReauthRequest": {
+        "properties": {
+          "device_id": {
+            "type": "string",
+            "maxLength": 256,
+            "minLength": 1,
+            "title": "Device Id"
+          },
+          "issued_at_unix": {
+            "type": "integer",
+            "title": "Issued At Unix"
+          },
+          "signature": {
+            "type": "string",
+            "maxLength": 256,
+            "minLength": 32,
+            "title": "Signature"
+          },
+          "action": {
+            "type": "string",
+            "const": "account_remove",
+            "title": "Action"
+          },
+          "args": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Args"
+          },
+          "approval_proof": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/OwnerApprovalProof"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "device_id",
+          "issued_at_unix",
+          "signature",
+          "action",
+          "args"
+        ],
+        "title": "ReauthRequest"
       },
       "RebindBody": {
         "properties": {

@@ -94,6 +94,10 @@ def retirement_scope(settings,alias):
                 # through to a later protected write.
                 require_lease_time()
             require_current_lease.check_time=require_lease_time
+            def scope_fact():
+                require_current_lease()
+                return {'lease_epoch':epoch,'expires_at_ms':lease.held.expires_at_ms}
+            require_current_lease.scope_fact=scope_fact
             yield require_current_lease
     finally:
         if lease is not None:lease.release()
@@ -138,18 +142,30 @@ def _history(ledger,account):
     return sorted(set(refs))
 
 
-def inspect_retirement(settings,registry,account,*,inside_removal=False,operation_id=None,native_ledger=None,readback_guards=None):
+def inspect_retirement(settings,registry,account,*,inside_removal=False,operation_id=None,native_ledger=None,readback_guards=None,cleanup_parent=None,cleanup_book=None,observation_view=None,observation_guard=None):
     """Fresh readonly facts, with no inferred zero for unsupported observation."""
-    ledger=native_ledger if native_ledger is not None else open_ledger(authority_path(settings));adapter=None;store=None
+    ledger=native_ledger if native_ledger is not None else open_ledger(authority_path(settings));adapter=None;store=None;native_adapter=None
     try:
         if not inside_removal:
             store=lease_store(settings);current=store.read(account.alias)
             if current is not None and current.live_at(int(time.time()*1000)):
                 raise HTTPException(409,'Account runtime is active; local unlink unavailable')
         from commander.account_effects import AccountEffectJournal
-        for state in AccountEffectJournal(ledger)._states().values():
+        journal=AccountEffectJournal(ledger,cleanup_secrets_root=settings.secrets_dir)
+        for state in journal._states().values():
             if ('account:'+account.alias in state.intent.targets and state.phase in {'IN_FLIGHT','UNKNOWN'}
                 and state.intent.operation_id!=operation_id):
+                # Only the independently sealed, exact original linked resolution
+                # retires that specific old safety fence. History is unchanged.
+                if journal._resolved_safety_obligation(state):continue
+                if cleanup_parent is not None and cleanup_book is not None:
+                    from commander.account_cleanup import QualifiedCleanupParent
+                    if isinstance(cleanup_parent,QualifiedCleanupParent):
+                        cleanup_book.require_qualified(cleanup_parent)
+                        from dataclasses import asdict
+                        if (state.intent.operation_id==cleanup_parent.operation_id
+                                and state.intent.device_id==cleanup_parent.device_id
+                                and canonical_hash(asdict(state.intent))==cleanup_parent.original_intent_hash):continue
                 raise HTTPException(409,'Original account operation is unresolved; local link retained')
         observed_started=int(time.time()*1000)
         refs=_history(ledger,account)
@@ -160,9 +176,12 @@ def inspect_retirement(settings,registry,account,*,inside_removal=False,operatio
             funds=None
         else:
             from vati.app.service import build_adapter
-            adapter=build_adapter(account,registry,deriv_connector=settings.deriv_connector)
+            adapter=build_adapter(account,observation_view if observation_view is not None else registry,deriv_connector=settings.deriv_connector)
             if settings.ctrader_transport_factory and account.broker=='CTRADER':
                 adapter.transport=settings.ctrader_transport_factory(not account.demo)
+            native_adapter=adapter
+            if observation_guard is not None:
+                adapter=readonly_observations(adapter,observation_guard)
             started=int(time.time()*1000)
             state=adapter.sync_account();positions=adapter.positions()
             orders_reader=getattr(adapter,'orders',None)
@@ -192,8 +211,11 @@ def inspect_retirement(settings,registry,account,*,inside_removal=False,operatio
                 # History validation can block; source age is checked AFTER it.
                 require_readback_time()
             require_current_readback.check_time=require_readback_time
+            require_current_readback.source_fact={
+                'observed_at_ms':observed_started,'valid_until_ms':oldest+30000,
+                'native_review_ref':canonical_hash({'account_alias':account.alias,'history_ref':expected_history,'funds':funds})}
             readback_guards.append(require_current_readback)
-        cleanup,_=credential_cleanup(settings,registry,account)
+        cleanup=(observation_view.cleanup_disposition() if observation_view is not None else credential_cleanup(settings,registry,account)[0])
         return {'schema':'vati.local-unlink-review/1','remote_account_closed':False,
                 'historical_data_retained':True,'retained_remote_funds':funds,
                 'trade_history_ref':canonical_hash(refs),'trade_history_count':len(refs),'credential_cleanup':cleanup}
@@ -202,10 +224,25 @@ def inspect_retirement(settings,registry,account,*,inside_removal=False,operatio
         raise HTTPException(409,'Native retirement facts unavailable; reconcile before local unlink') from None
     finally:
         if adapter is not None:
-            transport=getattr(adapter,'transport',None)
+            cleanup_adapter=native_adapter if native_adapter is not None else adapter
+            transport=getattr(cleanup_adapter,'transport',None)
             close=getattr(transport,'close',None)
             if callable(close):close()
-            queue=getattr(adapter,'queue',None)
+            queue=getattr(cleanup_adapter,'queue',None)
             if queue is not None and callable(getattr(queue,'close',None)):queue.close()
         if store is not None:store.close()
         if native_ledger is None:ledger.close()
+
+
+def readonly_observations(native,guard):
+    """Unshared narrow native read capability; effect methods are not exposed."""
+    class Observations:
+        __slots__=()
+        def sync_account(self):guard();return native.sync_account()
+        def positions(self):guard();return native.positions()
+        def orders(self):
+            guard();reader=getattr(native,'orders',None)
+            if not callable(reader):raise HTTPException(409,'Original native order readback unavailable; HOLD')
+            return reader()
+        def heartbeat(self,**kwargs):guard();return native.heartbeat(**kwargs)
+    return Observations()

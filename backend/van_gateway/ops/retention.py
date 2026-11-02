@@ -515,6 +515,16 @@ class RetentionService:
                         table=policy.table, deleted=int(cursor.rowcount or 0) + child_counts.get(policy.table, 0),
                         cutoff=0, retention=parent_key.retention,
                     ))
+                # New purpose-discriminated raw challenges/facts/counters use
+                # the EXISTING 7d EPHEMERAL horizon. Minimal used/admission and
+                # unresolved native references are outside this prefix.
+                if tables is None or 'runtime_meta' in tables:
+                    from van_gateway.approval.account_reauth import prune_ephemeral
+                    cutoff=now_ms-int(RETENTION_DAYS[RetentionClass.EPHEMERAL])*DAY_MS
+                    deleted=await prune_ephemeral(db,now_ms)
+                    if deleted:
+                        results.append(PruneResult(table='runtime_meta',deleted=deleted,
+                            cutoff=cutoff,retention=RetentionClass.EPHEMERAL))
             except BaseException:
                 await db.rollback()
                 raise

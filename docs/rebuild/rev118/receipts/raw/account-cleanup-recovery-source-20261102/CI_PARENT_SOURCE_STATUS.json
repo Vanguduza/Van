@@ -1,0 +1,18 @@
+{
+  "provenance": "Root-reported9cf currentCI snapshot in integrationassignment; notnewAPI observation/notterminalwholeCI",
+  "head": "9cfde69c38bc39a54875c2a9bf60c6269f363d64",
+  "run_id": 41415177910,
+  "jobs_at_snapshot": 40,
+  "success": 28,
+  "failure": 7,
+  "running": 5,
+  "root_gateway1": "two protectedentry67 only/1977PASS",
+  "watch54892": "terminal1HTTP401/ownedwaitedONCE; no restart/cancel/duplicate",
+  "gates_unwaived": [
+    "entry67/PR106",
+    "privateDDS",
+    "trustedmain",
+    "fullmatrix/native/formal"
+  ],
+  "newheadCI": null
+}

@@ -143,10 +143,11 @@ def readback(state):
                 if target.startswith('account-control-domain:')),None)}
 
 
-def invoke_account_effect(journal, intent, handler, *, dispatch_guard=None):
+def invoke_account_effect(journal, intent, handler, *, dispatch_guard=None,qualified_cleanup_parent=None):
     """Caller holds the alias fence; no ledger transaction spans the handler."""
     try:
-        claim = journal.claim(intent)
+        claim = (journal.claim(intent) if qualified_cleanup_parent is None
+                 else journal.claim_cleanup(intent,qualified_cleanup_parent))
     except AccountEffectConflict:
         raise AccountOperationBlocked() from None
     except AccountEffectUnknown:
@@ -220,8 +221,9 @@ class AccountEffectState:
 
 
 class AccountEffectJournal:
-    def __init__(self, ledger):
+    def __init__(self, ledger, *, cleanup_secrets_root=None):
         self.ledger = ledger
+        self.cleanup_secrets_root=cleanup_secrets_root
 
     @staticmethod
     def internal_namespace_metadata(event):
@@ -308,7 +310,20 @@ class AccountEffectJournal:
         self.ledger.append(event)
         return AccountEffectState(intent, phase, event.hash, result)
 
-    def claim(self, intent, *, now_unix=None):
+    def _resolved_safety_obligation(self,state):
+        if state.intent.command!='account_remove':return False
+        from commander.account_cleanup import UnlinkRecoveryBook
+        return UnlinkRecoveryBook(self.ledger,initialize=False,secrets_root=self.cleanup_secrets_root).resolved(state.intent.operation_id)
+
+    def claim_cleanup(self,intent,qualified_parent,*,now_unix=None):
+        from commander.account_cleanup import UnlinkRecoveryBook
+        UnlinkRecoveryBook(self.ledger,initialize=False,secrets_root=self.cleanup_secrets_root).require_qualified(qualified_parent)
+        return self._claim(intent,now_unix=now_unix,qualified_parent=qualified_parent)
+
+    def claim(self,intent,*,now_unix=None):
+        return self._claim(intent,now_unix=now_unix)
+
+    def _claim(self, intent, *, now_unix=None,qualified_parent=None):
         intent.validate()
         now = int(time.time()) if now_unix is None else now_unix
         with self.ledger.atomic():
@@ -324,6 +339,13 @@ class AccountEffectJournal:
                 raise AccountEffectAuthorityExpired("native operation authority expired before dispatch")
             for state in states.values():
                 if state.phase in {"IN_FLIGHT", "UNKNOWN"} and targets_overlap(intent.targets,state.intent.targets):
+                    if qualified_parent is not None and state.intent.operation_id==qualified_parent.operation_id:
+                        from commander.account_cleanup import UnlinkRecoveryBook
+                        UnlinkRecoveryBook(self.ledger,initialize=False,secrets_root=self.cleanup_secrets_root).require_qualified(qualified_parent)
+                        if (intent.command!='account_remove' or intent.device_id!=qualified_parent.device_id
+                                or intent.targets!=state.intent.targets):raise AccountEffectConflict("Cleanup child scope differs from original")
+                        continue
+                    if self._resolved_safety_obligation(state):continue
                     raise AccountEffectConflict("native target has an original effect requiring reconciliation")
             return self._append(intent, "IN_FLIGHT", "", now=now)
 
@@ -331,6 +353,7 @@ class AccountEffectJournal:
         with self.ledger.atomic():
             for state in self._states().values():
                 if state.phase in {"IN_FLIGHT", "UNKNOWN"} and targets_overlap(targets,state.intent.targets):
+                    if self._resolved_safety_obligation(state):continue
                     raise AccountEffectConflict("native target has an original effect requiring reconciliation")
 
     def refuse(self, claim, status_code, *, now_unix=None):

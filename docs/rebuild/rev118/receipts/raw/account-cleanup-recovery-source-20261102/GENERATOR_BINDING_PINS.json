@@ -1,0 +1,30 @@
+{
+  "state": "GENERATOR_DATA_ONLY_HUNK_FROZEN_PENDING_INDEPENDENT_REVIEW_NO_REGEN_YET",
+  "file": "tools/rebuild/refresh_owner_source_contracts.py",
+  "before_sha256": "0fbc3c6b8cec9526ec847451cf172a5c0102bea538004fba686c9e13a3dd0165",
+  "after_sha256": "1d10b8c00e7a187711730ba2b1a76b61d8a7fc5c33e97695d6283b2734eb4c64",
+  "patch": "/dev/shm/van-cleanup-main-integration-20261102/generator-hunk/GENERATOR.patch",
+  "patch_sha256": "0229ead1b7c192f4c9be5328d75a326b088a618b9674bff949b0bb2e21eafd7e",
+  "base": "9cfde69c38bc39a54875c2a9bf60c6269f363d64",
+  "auth_existing": "auth-20261022-owner-autonomous-candidate-build covers tools/rebuild/**; existingownerrefresh record covers registries only",
+  "product16_unchanged": true,
+  "derived_pre_binding_pins": {
+    "registries/owner_endpoints.json": "afb95fbcf431762bd0bf30e45f4a7b806f9f8d30088eebbc033c6959549843ee",
+    "registries/owner_endpoint_schemas.json": "b6dd330fa4a075c4745421a4363da5b624404f279a15c598e852d28f36f0dc3b",
+    "registries/owner_features.json": "a95532795cc1fc52418b48a9d74cc29d1de48801bd1d9a3484dae1b18c5091f0",
+    "registries/owner_screens.json": "1456a2ab346203a0bb316b4252f49d51e580776bd40f4f68205f70f7dd05093e",
+    "docs/rebuild/rev118/backend/OWNER_REGISTRY_SOURCE_REFRESH_20261022.json": "e01c36ad9c8acb214f582cb0fe311d6c2a62c7f6396f3e5e8767cef63c8d52ee",
+    "docs/rebuild/rev118/backend/OWNER_REGISTRY_GENERATION.json": "090fbf37f0ce5f8fa0b008bbc0e37364127966274c84d425cab6752fdbc44ab4",
+    "docs/rebuild/rev118/backend/OWNER_FRONTEND_SCREEN_REGISTRY.md": "534624f5afe8e9844fa2839ef99242edf39fb657603db341400db3a887a072cf"
+  },
+  "observed_counts_before_binding": {
+    "endpoint_before": 493,
+    "endpoint_after_autorefresh": 497,
+    "schema_before": 394,
+    "schema_after_autorefresh": 401,
+    "features": 42,
+    "functions": 105,
+    "screens": 78
+  },
+  "regeneration_note": "Strict exporter accepts only committed generation. Before finalregen, preserve firstauto-derived6outputs then restoreONLYexactowned6files to9cf bytes withSHAguard; no matcher/hook changes. Frontendrender refresh followsfinalmapping. No product16 edits."
+}

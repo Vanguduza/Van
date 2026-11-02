@@ -7,6 +7,7 @@ import re
 import secrets
 import time
 from dataclasses import dataclass
+from contextlib import asynccontextmanager
 from typing import Any
 
 from cryptography.exceptions import InvalidSignature
@@ -98,10 +99,18 @@ class OwnerApprovalService:
         parameters: dict[str, Any] | None = None,
         ttl_seconds: int = DEFAULT_TTL_SECONDS,
         now_unix: int | None = None,
+        _db=None,
+        _expiry_cap: int | None = None,
     ) -> ApprovalChallenge:
         now = int(time.time()) if now_unix is None else now_unix
         ttl = max(15, min(int(ttl_seconds), 120))
         expires = now + ttl
+        if _expiry_cap is not None:
+            if type(_expiry_cap) is not int or _expiry_cap <= now:
+                raise OwnerApprovalError("approval_challenge_expired")
+            expires = min(expires,_expiry_cap)
+        if _db is not None and not _db.in_transaction:
+            raise OwnerApprovalError("approval_writer_required")
         challenge_id = secrets.token_urlsafe(24)
         digest = self.intent_digest(
             device_id=device_id,
@@ -127,7 +136,7 @@ class OwnerApprovalService:
             "expires_at_unix": expires,
             "created_at_unix": now,
         }
-        await self.store.execute(
+        await (_db.execute if _db is not None else self.store.execute)(
             "INSERT INTO runtime_meta(key, value, updated_at_unix_ms) VALUES (?, ?, ?)",
             (
                 self.PREFIX + challenge_id,
@@ -137,13 +146,14 @@ class OwnerApprovalService:
         )
         return ApprovalChallenge(challenge_id, canonical, expires)
 
-    async def _require_unexpired(self, db, record, challenge_id, now_unix):
+    async def _require_unexpired(self, db, record, challenge_id, now_unix, *, owned=True):
         # One predicate owns both fresh checks. It is read after acquiring the
         # SQL writer and again after key/proof work; neither wait renews consent.
         now = int(time.time()) if now_unix is None else now_unix
         if int(record.get("expires_at_unix", 0)) <= now:
-            await db.execute("DELETE FROM runtime_meta WHERE key = ?", (self.PREFIX + challenge_id,))
-            await db.commit()
+            if owned:
+                await db.execute("DELETE FROM runtime_meta WHERE key = ?", (self.PREFIX + challenge_id,))
+                await db.commit()
             raise OwnerApprovalError("approval_challenge_expired")
         return now
 
@@ -185,6 +195,16 @@ class OwnerApprovalService:
             'expires_at_unix':record['expires_at_unix'],'created_at_unix':record['created_at_unix'],
             'historical_only':True,'execution_authority':False}
 
+    @asynccontextmanager
+    async def _verification_writer(self, supplied):
+        if supplied is not None:
+            if not supplied.in_transaction:raise OwnerApprovalError("approval_writer_required")
+            yield supplied,False
+        else:
+            async with self.store.connection() as db:
+                await db.execute("BEGIN IMMEDIATE")
+                yield db,True
+
     async def verify_and_consume(
         self,
         *,
@@ -199,12 +219,12 @@ class OwnerApprovalService:
         parameters: dict[str, Any] | None = None,
         now_unix: int | None = None,
         durable_receipt: dict[str, Any] | None = None,
+        _db=None,
     ) -> dict:
         if not challenge_id or not signature_b64:
             raise OwnerApprovalError("approval_proof_missing")
 
-        async with self.store.connection() as db:
-            await db.execute("BEGIN IMMEDIATE")
+        async with self._verification_writer(_db) as (db,owned):
             # The SQL writer may have waited behind another transaction. The
             # original owner deadline must not be extended by that queue.
             cur = await db.execute(
@@ -213,16 +233,16 @@ class OwnerApprovalService:
             )
             row = await cur.fetchone()
             if row is None:
-                await db.rollback()
+                if owned:await db.rollback()
                 raise OwnerApprovalError("approval_challenge_unknown_or_consumed")
 
             try:
                 record = json.loads(str(row["value"]))
             except json.JSONDecodeError as exc:
-                await db.rollback()
+                if owned:await db.rollback()
                 raise OwnerApprovalError("approval_challenge_corrupt") from exc
 
-            now = await self._require_unexpired(db, record, challenge_id, now_unix)
+            now = await self._require_unexpired(db, record, challenge_id, now_unix,owned=owned)
             if (
                 record.get("device_id") != device_id
                 or record.get("action_id") != action_id
@@ -232,17 +252,17 @@ class OwnerApprovalService:
                     and record.get("source_command_id") != source_command_id
                 )
             ):
-                await db.rollback()
+                if owned:await db.rollback()
                 raise OwnerApprovalError("approval_challenge_binding_mismatch")
 
             if (record.get("parameters_bound") and
                 record.get("parameters") != parameters):
-                await db.rollback()
+                if owned:await db.rollback()
                 raise OwnerApprovalError("approval_parameters_changed")
             schema = record.get("intent_digest_schema", "van-a4-intent-v1")
             if (not isinstance(schema, str) or schema not in {self.INTENT_SCHEMA, "van-a4-intent-v1"}
                     or type(record.get("parameters_bound", False)) is not bool):
-                await db.rollback()
+                if owned:await db.rollback()
                 raise OwnerApprovalError("approval_challenge_binding_corrupt")
             legacy_recovery = (
                 action_id in {"trading.runtime.clear_kill_switch", "trading.runtime.reset_loss_streak",
@@ -256,7 +276,7 @@ class OwnerApprovalService:
                     (device_id, action_id, project_id or "", text)):
                 # Old short-lived challenges keep their original encoding only
                 # when it is unambiguous. Request a fresh proof for other text.
-                await db.rollback()
+                if owned:await db.rollback()
                 raise OwnerApprovalError("approval_challenge_binding_corrupt")
             digest = self.intent_digest if schema == self.INTENT_SCHEMA else self._legacy_intent_digest
             expected_digest = digest(
@@ -267,10 +287,10 @@ class OwnerApprovalService:
                 parameters=parameters if record.get("parameters_bound") else None,
             )
             if parameters is not None and not record.get("parameters_bound"):
-                await db.rollback()
+                if owned:await db.rollback()
                 raise OwnerApprovalError("approval_parameters_not_bound")
             if record.get("intent_digest") != expected_digest:
-                await db.rollback()
+                if owned:await db.rollback()
                 raise OwnerApprovalError("approval_intent_mismatch")
 
             try:
@@ -281,7 +301,7 @@ class OwnerApprovalService:
                 if (record.get("challenge_id") != challenge_id or record.get("canonical") != expected_canonical):
                     raise OwnerApprovalError("approval_challenge_binding_corrupt")
             except OwnerApprovalError:
-                await db.rollback()
+                if owned:await db.rollback()
                 raise
 
             device_cur = await db.execute(
@@ -290,16 +310,16 @@ class OwnerApprovalService:
             )
             device = await device_cur.fetchone()
             if device is None or device["revoked_at_unix"] is not None:
-                await db.rollback()
+                if owned:await db.rollback()
                 raise OwnerApprovalError("approval_device_revoked")
 
             try:
                 public_key = serialization.load_pem_public_key(str(device["public_key_pem"]).encode("utf-8"))
             except (ValueError, TypeError) as exc:
-                await db.rollback()
+                if owned:await db.rollback()
                 raise OwnerApprovalError("approval_public_key_invalid") from exc
             if not isinstance(public_key, ec.EllipticCurvePublicKey):
-                await db.rollback()
+                if owned:await db.rollback()
                 raise OwnerApprovalError("approval_public_key_wrong_type")
 
             try:
@@ -310,20 +330,20 @@ class OwnerApprovalService:
                     ec.ECDSA(hashes.SHA256()),
                 )
             except (ValueError, InvalidSignature) as exc:
-                await db.rollback()
+                if owned:await db.rollback()
                 raise OwnerApprovalError("approval_signature_invalid") from exc
 
             # Reading the enrolled device and checking its proof can cross the
             # same deadline too. Consume only within the original half-open
             # window, including when a durable recovery receipt is requested.
-            now = await self._require_unexpired(db, record, challenge_id, now_unix)
+            now = await self._require_unexpired(db, record, challenge_id, now_unix,owned=owned)
 
             deleted = await db.execute(
                 "DELETE FROM runtime_meta WHERE key = ?",
                 (self.PREFIX + challenge_id,),
             )
             if deleted.rowcount != 1:
-                await db.rollback()
+                if owned:await db.rollback()
                 raise OwnerApprovalError("approval_challenge_unknown_or_consumed")
             if durable_receipt is not None:
                 # A verified recovery dispatch may lose its HTTP response, or
@@ -337,7 +357,7 @@ class OwnerApprovalService:
                     "INSERT INTO runtime_meta(key,value,updated_at_unix_ms) VALUES(?,?,?)",
                     ("owner_approval_receipt:" + challenge_id,
                      json.dumps(receipt, sort_keys=True, separators=(",", ":"), allow_nan=False), now*1000))
-            await db.commit()
+            if owned:await db.commit()
             # Non-secret attestation for the already verified, consumed act.
             # This return value never permits consuming the approval twice.
             return {"operation_id": challenge_id, "device_id": device_id,

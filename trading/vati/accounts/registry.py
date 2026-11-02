@@ -174,7 +174,7 @@ class AccountRegistry:
             raise AccountRegistryError("account alias is invalid")
         return exclusive_state_lock(self.path.with_name(self.path.name + ".operation." + alias))
 
-    def _mutate(self, operation: str, alias: str, account: Account | None = None, *, before_replace=None):
+    def _mutate(self, operation: str, alias: str, account: Account | None = None, *, before_replace=None, after_replace=None):
         if account is not None:
             account.validate()
         with self.operation_lock(alias), self._mutation_lock():
@@ -198,7 +198,10 @@ class AccountRegistry:
                 self.accounts[alias] = account
             self._resource_revisions[alias] = self._resource_revisions.get(alias, 0) + 1
             try:
-                self._save_unlocked(before_replace=before_replace) if before_replace is not None else self._save_unlocked()
+                if after_replace is not None:
+                    self._save_unlocked(before_replace=before_replace,after_replace=after_replace)
+                else:
+                    self._save_unlocked(before_replace=before_replace) if before_replace is not None else self._save_unlocked()
             except BaseException:
                 self.accounts = before
                 self._resource_revisions = previous_revisions
@@ -215,9 +218,9 @@ class AccountRegistry:
         """Replace one unchanged local record; stale exact-account edits refuse."""
         return self._mutate("replace", a.alias, a, before_replace=before_replace)
 
-    def remove(self, alias: str, *, before_replace=None) -> None:
+    def remove(self, alias: str, *, before_replace=None, after_replace=None) -> None:
         """Unlink an unchanged local record; broker/exposure authority belongs to its caller."""
-        self._mutate("remove", alias, before_replace=before_replace)
+        self._mutate("remove", alias, before_replace=before_replace,after_replace=after_replace)
 
     def touch(self, alias: str) -> None:
         """Advance a native credential/resource generation without changing metadata."""
@@ -254,7 +257,7 @@ class AccountRegistry:
             self._loaded_accounts = dict(self.accounts)
             self._loaded_revisions = dict(self._resource_revisions)
 
-    def _save_unlocked(self, *, before_replace=None) -> None:
+    def _save_unlocked(self, *, before_replace=None, after_replace=None) -> None:
         """Write the complete registry through same-directory atomic replacement.
 
         Direct write_text could truncate the only valid record on interruption.
@@ -278,6 +281,11 @@ class AccountRegistry:
             os.chmod(temp_name, mode)
             if before_replace is not None:before_replace()
             os.replace(temp_name, self.path)
+            if after_replace is not None:
+                directory=os.open(self.path.parent,os.O_RDONLY|os.O_DIRECTORY)
+                try:os.fsync(directory)
+                finally:os.close(directory)
+                after_replace()
         finally:
             if os.path.exists(temp_name):
                 os.unlink(temp_name)
@@ -294,6 +302,62 @@ class AccountRegistry:
         if ref.secrets_file:
             return load_secret_file(ref.secrets_file)
         return {}
+
+    def original_credential_read_view(self, *, alias, managed_root, target, expected_generation, qualify, validate_current):
+        """Unshared transport-only read view, never a restored registry account.
+
+        The native recovery owner supplies a genuine plan/current read guard.
+        Every secret resolution rechecks it under short canonical file locks;
+        no lock is retained across provider I/O. Ordinary methods stay unchanged.
+        """
+        from vati.core.canonical import canonical_hash
+        registry=self
+        target=Path(target);managed_root=Path(managed_root)
+        if (not callable(qualify) or not callable(validate_current) or managed_root.is_symlink()
+                or target.is_symlink() or target.resolve()!=(managed_root.resolve()/(alias+'.env'))):
+            raise AccountRegistryError("Original credential read qualification is unavailable")
+        def require_qualified():
+            fact=qualify()
+            if (not isinstance(fact,dict) or set(fact)!={'plan_ref','device_id','alias','managed_root_ref','file_generation'}
+                    or not isinstance(fact['plan_ref'],str) or re.fullmatch(r'[0-9a-f]{64}',fact['plan_ref']) is None
+                    or not isinstance(fact['device_id'],str) or not fact['device_id'] or fact['alias']!=alias
+                    or fact['managed_root_ref']!=canonical_hash(str(managed_root.resolve()))
+                    or fact['file_generation']!=list(expected_generation)):
+                raise AccountRegistryError("Original credential read qualification is unavailable")
+        require_qualified()
+        def file_generation(info):
+            return [info.st_dev,info.st_ino,info.st_mode,info.st_size,info.st_mtime_ns,info.st_ctime_ns]
+        class ReadView:
+            path=registry.path
+            def get(self,selected):return AccountRegistry(registry.path).get(selected)
+            def _mutation_lock(self):return registry._mutation_lock()
+            def operation_lock(self,selected):return registry.operation_lock(selected)
+            def cleanup_disposition(self):
+                from vati.core.file_lock import exclusive_state_lock
+                with registry._mutation_lock(),exclusive_state_lock(target):
+                    validate_current(AccountRegistry(registry.path));require_qualified()
+                return 'DELETE_MANAGED'
+            def credentials(self,selected):
+                if selected!=alias:raise AccountRegistryError("Original credential read scope differs")
+                require_qualified()
+                from vati.core.file_lock import exclusive_state_lock
+                with registry._mutation_lock(),exclusive_state_lock(target):
+                    current=AccountRegistry(registry.path)
+                    validate_current(current)
+                    require_qualified()
+                    if (target.is_symlink() or not target.is_file()
+                            or file_generation(target.stat())!=list(expected_generation)
+                            or target.stat().st_uid!=os.getuid() or target.stat().st_nlink!=1):
+                        raise AccountRegistryError("Original managed credential is unavailable or changed")
+                    if any(a.alias!=alias and a.credential_ref.secrets_file
+                            and Path(a.credential_ref.secrets_file).resolve()==target.resolve() for a in current.accounts.values()):
+                        raise AccountRegistryError("Original credential is now shared; read scope unavailable")
+                    values=load_secret_file(str(target))
+                    if target.is_symlink() or file_generation(target.stat())!=list(expected_generation):
+                        raise AccountRegistryError("Original managed credential changed during observation")
+                    require_qualified()  # Locks/file reads may wait; no carried authority clock.
+                    return values
+        return ReadView()
 
     def public(self) -> list[dict[str, Any]]:
         return [a.public() for a in sorted(self.accounts.values(), key=lambda x: x.alias)]

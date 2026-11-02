@@ -1,0 +1,282 @@
+{
+  "schema": "van.account-cleanup-recovery-source/1",
+  "state": "FROZEN16_AND_DATA_ONLY_GENERATOR_INTEGRATING",
+  "base": "9cfde69c38bc39a54875c2a9bf60c6269f363d64",
+  "source16_sha256": {
+    "backend/tests/test_account_cleanup.py": "344b5fa74c371a24a05deb1c78ebd075f41305a8ff31360189b60179b81a7064",
+    "backend/tests/test_account_cleanup_reauth.py": "a6cba619874aaa61dda4beee6db4256bdd502e69459b9bbdd9e72819c199d028",
+    "backend/van_gateway/app.py": "389d6a2c7bbe43c9a090b1f2da6df689448ab7bb8b0d02c2de4d1c54f7785203",
+    "backend/van_gateway/approval/account_reauth.py": "bea32e25d59289ac6f5faab091e9f2428684dbe3aab61b11686f5bcaad57741c",
+    "backend/van_gateway/approval/service.py": "51689e18b3842452906c3c02619217b8e7669061933aae22ef2c37638476adff",
+    "backend/van_gateway/ops/retention.py": "b6e09a03f81f2c5ed3151d39a0ad11f18372f0524a0f059f8086142dd2779b06",
+    "backend/van_gateway/trading/account_cleanup_api.py": "bf05b0c442521ce12c4d7176f5c53dda7393b02a9971a5308ff542dbb3942619",
+    "backend/van_gateway/trading/account_contracts.py": "1b0db162e4a8271adbd21d03d2a358237920983c6a1292ee08b3c9eccb9d83c3",
+    "backend/van_gateway/trading/accounts.py": "2436807d19d0af2ea36b86706c6a1a9975111964e4198485b6c8923581bf851f",
+    "trading/commander/account_cleanup.py": "eb5d1ce71c17ac657f6e42ca0f193a1e86e45aa58fcb81b3fb57b7dd140bf595",
+    "trading/commander/account_effects.py": "cada27c9eb568c019872c1545d60a5d4cc0085ccf61ac7450f6f4c8e4450d658",
+    "trading/commander/account_retirement.py": "5385a7f8959fa9c51e8f8e288f4d45f721a7555c88a51f1c69e1dd9359cb08a8",
+    "trading/commander/accounts.py": "21d0af5a2fab3c00d804d3f36bf8eb560d1164a4e24f281d3f615fe59f666cc3",
+    "trading/commander/app.py": "53a6bf9addacb357ad039f5740eece759f58423aeea026a3bdb2962d3ab0f034",
+    "trading/tests/test_account_cleanup_recovery.py": "5a75e4509b8566efc285979016bec52160ca933a02da769e7ef76bd5752d7d8f",
+    "trading/vati/accounts/registry.py": "860b3e19327bc073cbdab4040d8c69ae0db8660449663f59079870ecb2d7c76e"
+  },
+  "generator_sha256": "1d10b8c00e7a187711730ba2b1a76b61d8a7fc5c33e97695d6283b2734eb4c64",
+  "foundation13_preserved": {
+    "classification": "REVIEWED_PUBLISHED_FOUNDATION_ONLY_NOT_AUTHOR_DELTA",
+    "base": "23a570cf3f4f6e67fee69a2f8d845c7a8f03d244",
+    "published": "9cfde69c38bc39a54875c2a9bf60c6269f363d64",
+    "paths": [
+      {
+        "path": "backend/tests/test_account_operation_recovery.py",
+        "base_sha256": "dab4bb9906c89d682afdb04221c6c586192ee86aeaed032eeb36f1a0caf2aa7d",
+        "published_sha256": "f1046879664f961a43453e87e1abcb968029f1fd29dc7ca98f57d374c7cef3c8"
+      },
+      {
+        "path": "backend/tests/test_account_resource_binding.py",
+        "base_sha256": "fc3fc4b8a094cc49f9cb96736f08131deb80f4fcd762bb1342c51c08d19b06ee",
+        "published_sha256": "a4f3ee16f83ffea31a7d2cc2b0273022e00e49f7d892211c2c4a2dc09fa8ab19"
+      },
+      {
+        "path": "backend/tests/test_native_depth_history.py",
+        "base_sha256": "3925d399516cd3f8fca1430c655ba9b330d30285b138f8fd5e257df3423194c0",
+        "published_sha256": "2aca6ce56272061bdcec59fd58a48fcdfc372bff1f8ff5f14cacc9665b943ded"
+      },
+      {
+        "path": "backend/tests/test_stateful_link_binding.py",
+        "base_sha256": "63720c50d1ee5bba47bd6307a47a651ae96a778d0b32426e72b3ac5c7016a657",
+        "published_sha256": "3318a8063954c01d4e582ce47585412606981b77d172c46e36939c017c1d3e79"
+      },
+      {
+        "path": "backend/tests/test_trading_oauth_effects.py",
+        "base_sha256": "f032a701cea8f2a1b874b994451094f4d049e7a227f5387188b9ac6ccdd1ae14",
+        "published_sha256": "aeba2b7bf488983ca3090334c5581de7274de507cd936800bd29491f4e78a5dd"
+      },
+      {
+        "path": "trading/tests/test_native_depth_runtime.py",
+        "base_sha256": null,
+        "published_sha256": "68e3da5f304d3af7956710d2f93478af874510923b40529ce973743ccd143a54"
+      },
+      {
+        "path": "trading/tests/test_native_depth_worker.py",
+        "base_sha256": null,
+        "published_sha256": "2c176c46a5effa35726b45a2e2293e69952e736c15a1a1feae7e72de6af84c67"
+      },
+      {
+        "path": "trading/vati/app/account_service.py",
+        "base_sha256": "1469ca9a3fc419754999a9e9575f08b3f396cc429763906afb1d0c285c1abc45",
+        "published_sha256": "39b8c26e182e15648f3fab6043fc2c68bec3e07d3280548c892da1253cc7a269"
+      },
+      {
+        "path": "trading/vati/app/service.py",
+        "base_sha256": "1fbf30ce7b79620b759fa11c20f6daad48dd2bcccba2388174c13a1316fbe5e6",
+        "published_sha256": "6963646da556143ae23f6e9e464d85288a3d4630d3e585f15edf9fc189d9d582"
+      },
+      {
+        "path": "trading/vati/market_data/feeds/lake.py",
+        "base_sha256": "a7deb3f0aeb8508df01c47bdbac5ec34f13e1846f8f94f50f9024156809f6fba",
+        "published_sha256": "09572049f5aa06b50dd7795abee3a02bf220c74c768b7b49ce2a593c2897aa8e"
+      },
+      {
+        "path": "trading/vati/market_data/native_archive.py",
+        "base_sha256": "6551356e82cd61dfcbaec836098c861df93575c97cb61635331e75439bda9b3d",
+        "published_sha256": "86f4b63b242a07b1a6afde3bca5b78c067d16ee4997fbbaee3a2a9c27ba3e5fc"
+      },
+      {
+        "path": "trading/vati/market_data/native_depth.py",
+        "base_sha256": "0ee15738cfb7ff8705ee5feee1f0b08e9808d0ed0f6b7df06f4337805a447409",
+        "published_sha256": "3d4fde40bb27a82fa70cf41713a65e976400b462ba2ea1276a2766f19d8349fd"
+      },
+      {
+        "path": "trading/vati/market_data/native_depth_worker.py",
+        "base_sha256": null,
+        "published_sha256": "f817d207f66b6f432d0023a25dc392a540d8849551c7fba600b0ad9834db1534"
+      }
+    ],
+    "source_bytes": 285978,
+    "own16_unchanged": true,
+    "prior_attempt": "Conservative256KiB size assertion refused before any materialization; actual285978B admitted under384KiB+64KiB margin and48MiB source-copy limit."
+  },
+  "source_test_accounting": {
+    "root": {
+      "passed": 91,
+      "skipped": 2,
+      "distinct_node_ids": 93,
+      "union_exactly_matches_old44": true
+    },
+    "backend_cwd": {
+      "passed": 24,
+      "skipped": 0,
+      "distinct_node_ids": 24
+    },
+    "cross_cwd_overlapping_node_ids": [
+      "backend.tests.test_account_cleanup::test_actual_http_distinct_reauth_data_then_substantive_a4_new_child_original_readback",
+      "backend.tests.test_account_cleanup::test_current_paired_cleanup_and_published_fixture_consumers_share_canonical_signing_owner"
+    ],
+    "executions": 117,
+    "unique_classname_name_identities_including_skips": 115,
+    "unique_passed_identities": 113,
+    "explanation": "Two paired cleanup/signing-owner controls deliberately run in different actual CWD configurations; counts from XML sets, not inferred acceptance."
+  },
+  "source_terminal_evidence": {
+    "runs": [
+      {
+        "run": "FINAL_ROOT45A",
+        "cwd": "/tmp/van-be004-cleanup-lane-20261102",
+        "cases": 46,
+        "passed": 46,
+        "skipped": 0,
+        "exit": 0,
+        "elapsed_s": 139.475,
+        "receipt": "/dev/shm/van-be004-cleanup-test-20261102/FINAL_ROOT45A/receipt.json",
+        "receipt_sha256": "ed5f487b43916dcd7ab927725766473828c8d58607ef7db73cada925a9ed4afa",
+        "junit_sha256": "dcf908e7affeae3647a77f479085c78cf2b6ac547d9141b353f42adc558e108b",
+        "finally_wait_sha256": "3a4d82b30785d6c1e64d02cb9b9166b514f05b7c1d3dffe30f764888cb127956"
+      },
+      {
+        "run": "FINAL_ROOT45B",
+        "cwd": "/tmp/van-be004-cleanup-lane-20261102",
+        "cases": 47,
+        "passed": 45,
+        "skipped": 2,
+        "exit": 0,
+        "elapsed_s": 79.153,
+        "receipt": "/dev/shm/van-be004-cleanup-test-20261102/FINAL_ROOT45B/receipt.json",
+        "receipt_sha256": "ef23595a086ddab2902d891ab718060c0243150c0315024de978c31c38439050",
+        "junit_sha256": "bfd81317ff400b2403c97012cd206aef8524af22220b39e243e25da5641542b8",
+        "finally_wait_sha256": "f0701c2824efc5d3e7f951084903b7538bf9440786160d51f8a70207e516c68c"
+      },
+      {
+        "run": "FINAL_BACKEND46",
+        "cwd": "/tmp/van-be004-cleanup-lane-20261102/backend",
+        "cases": 24,
+        "passed": 24,
+        "skipped": 0,
+        "exit": 0,
+        "elapsed_s": 46.08,
+        "receipt": "/dev/shm/van-be004-cleanup-test-20261102/FINAL_BACKEND46/receipt.json",
+        "receipt_sha256": "95617238aa0cc6698403431a211098a07efbdefcb8455d3f88578ee0fa848724",
+        "junit_sha256": "77d0252213007f84c56b4bbbcc7f5001188cce45bc9f00826d5f3751f6cd621c",
+        "finally_wait_sha256": "904a64ef73985b05d776ce9a69aa63be4723da048a772867c6146930e89f13a3"
+      }
+    ],
+    "executions": 117,
+    "unique_test_identities": 115,
+    "configuration_distinct_duplicates": 2,
+    "skip_identities": [
+      "trading.tests.test_native_account_effects::test_postgres_original_operation_is_atomic_and_isolated_between_named_ledgers",
+      "trading.tests.test_native_account_effects::test_actual_concurrent_native_claim_writers_cannot_admit_two_effects_for_a_target[postgres]"
+    ],
+    "original44_exact_root_union_preserved": true,
+    "source16_unchanged": true,
+    "source_only_limits": "No PostgreSQL execution, hardware/native/provider/Android or power-loss qualification."
+  },
+  "independent_review": "raw/account-cleanup-recovery-source-20261102/INDEPENDENT_REVIEW.json",
+  "generator_independent_review": "raw/account-cleanup-recovery-source-20261102/GENERATOR_BINDING_REVIEW.json",
+  "related_semantics": 40,
+  "canonical_full_BE004_contract": {
+    "full_unit_contract_sha256": "b7fb19c27f8758a5500274a2cd5cae860111db8ff6f520298a67166db5754bc3",
+    "canonical_exit_text": "discover; create demo; request live application; link; edit local/profile where entitled; restrict; unlink; request remote closure. Complete real service integration, failure/recovery, migration, source-bound positive/negative and provider tests. Local unlink never reports remote closure; active exposure, unknown funds or stale readback blocks deletion. Rev1.14: every applicable self-optimization/crypto/lean contract and its real evidence must pass; automatic operation and policy evolution are separately qualified. Rev1.18: apply whole-product protocol and effective acceptance refinements for every owned feature/context/action; use actual native source/provider/consumer and independently observed postconditions. Document closure alone cannot satisfy runtime gates.",
+    "requirement_ids": [
+      "VAN-NX-048",
+      "VAN-NX-049",
+      "VAN-NX-050",
+      "VAN-NX-056",
+      "VAN-NX-057",
+      "VAN-NX-064",
+      "VAN-CX-016",
+      "VAN-CRYPTO-001",
+      "VAN-CRYPTO-002",
+      "VAN-CRYPTO-013",
+      "VAN-RV-008"
+    ],
+    "acceptance_ids": [
+      "T-BE-004-POS",
+      "T-BE-004-NEG",
+      "T-BE-004-REC",
+      "T-BE-004-SEC",
+      "T-BE-004-INT",
+      "T-VAN-CX-016-POS",
+      "T-VAN-CX-016-NEG",
+      "T-VAN-CX-016-REC",
+      "T-REV113-003",
+      "T-VAN-CRYPTO-001-POS",
+      "T-VAN-CRYPTO-001-NEG",
+      "T-VAN-CRYPTO-001-REC",
+      "T-VAN-CRYPTO-002-POS",
+      "T-VAN-CRYPTO-002-NEG",
+      "T-VAN-CRYPTO-002-REC",
+      "T-VAN-CRYPTO-013-POS",
+      "T-VAN-CRYPTO-013-NEG",
+      "T-VAN-CRYPTO-013-REC",
+      "T-VAN-RV-008-POS",
+      "T-VAN-RV-008-NEG",
+      "T-VAN-RV-008-REC"
+    ],
+    "context_ids": [
+      "VNX-S-ACCOUNTS-01",
+      "VNX-S-ACCOUNTS-02",
+      "VNX-S-ACCOUNTS-03",
+      "VNX-S-ACCOUNTS-04",
+      "VNX-S-ACCOUNTS-05",
+      "VNX-S-ACCOUNTS-06",
+      "VNX-S-ACCOUNTS-07",
+      "VNX-S-ACCOUNTS-08",
+      "VNX-S-ACCOUNTS-09",
+      "VNX-S-ACCOUNTS-10",
+      "VNX-S-ACCOUNTS-11",
+      "VNX-S-ACCOUNTS-12",
+      "VNX-S-ACCOUNTS-13",
+      "VNX-S-ACCOUNTS-14",
+      "VNX-S-ACCOUNTS-15",
+      "VNX-S-ACCOUNTS-16",
+      "VNX-S-ACCOUNTS-17",
+      "VNX-S-ACCOUNTS-18",
+      "van.trading.accounts",
+      "van.trading.accounts.add"
+    ],
+    "owner_action_ids": [
+      "LAC-134",
+      "LAC-135",
+      "LAC-137",
+      "LAC-138",
+      "LAC-139",
+      "LAC-140"
+    ]
+  },
+  "workflow": [
+    "Prospective exact full approved native resource/review capture before minimization; strict private same-DB technical schema2, independent durable PLAN/epoch/MAY_BEGIN/DONE and per-fact/head local-data HMAC. No business-row/count hiding or FS/SQL atomicity claim.",
+    "Separate enrolled-key reauth DATA plus distinct substantive A4 proof; one existing Gateway Store writer consumes both and records immutable child admission; hard new-purpose-only5/300/900 scoped counter; raw7day expiry/prune without deleting used/admission/original refs.",
+    "Existing account_remove explicit PENDING_CLEANUP child only for genuine original plan/device/domain/current target; exact managed original readonly observations outside registry/credential locks; fresh source/lease/time/current owner guards, immutable old UNKNOWN/null and old replay prohibition.",
+    "New child independently applied/read back, exact linked resolution after postconditions/quiescence and explicit substantive consequence approval; only named old safety fence retires. Other unknowns, current target changes, bad/corrupt/missing/legacy-unbound evidence HOLD.",
+    "Durable-before-native admission; cancellation/lost ACK/late exact concurrent replay recover original without new send/IDs/deadline; issued actor proof unchanged across mere public-key replacement, current explicit device/token/scope loss still refuses."
+  ],
+  "remaining": [
+    "PostgreSQL actual execution unavailable (two exact existing opted-in tests skipped, no skip waiver).",
+    "Remote native signed current-control envelope/bounded permission has no independent continuous Gateway actor-revocation readback: no distributed-currentness/2PC claim.",
+    "Native provider/hardware/BIOMETRIC_STRONG qualification and real effects unproved; fixture transports and software EC keys explicitly SOURCE.",
+    "Android exact persisted two-proof producer/confirmation/recovery compatibility mandatory next lease, not implemented in this packet.",
+    "Recovered-device native continuity adapter remains OPEN; original-device equality enforced.",
+    "Unsealed legacy/missing/corrupt/replaced key/source/target/shared or unusable overwritten credentials HOLD without restoration or guessed completion.",
+    "Grace DELETE/cancel/OAuth/strategy/funds/remote closure and every remaining original BE004 predicate/formal admission remain OPEN; all11req21accept20contexts6actions retained.",
+    "Sole integrator owns generated owner/catalog citations/mutation coupling/read-only preflight and exact combined hosted Source CI; no author generators/commit/push or unit/native acceptance."
+  ],
+  "controller_failure_history": {
+    "old44": "CONTROLLER_FAILED:91JUnitPASS2PGskip observed, childexitUNRECOVERED; no reap claim from absence. Final146298491B exceeded128MiB; all raw/fixtures retained.45A/B are justified disjoint exact93 rerun, genuine exits.",
+    "failure_receipt": "/tmp/van-be004-cleanup-evidence-20261102/FINAL_ROOT44_CONTROLLER_FAILURE.json",
+    "preflights": "/tmp/van-be004-cleanup-evidence-20261102/CONTROLLER_PREFLIGHT.json",
+    "preflights_verdict": "Rapid create/unlink child0 waited/groupabsent; injected monitor error sleepingchild terminated-15 waited/drained/groupabsent. Handles only ENOENT/ENOTDIR stat races; unexpectedIO fails; finally owns child wait.",
+    "reusable_external_helper": "/tmp/van-be004-cleanup-evidence-20261102/controller_lifecycle.py",
+    "runner": "/tmp/van-be004-cleanup-evidence-20261102/run_shm.py"
+  },
+  "runtime": {
+    "actual_lock_observation": "/tmp/van-be004-cleanup-evidence-20261102/RUNTIME_LOCK_OBSERVATION.json",
+    "lock_sha256": "808e30cb3359c908597bab5fc49797a23bf1748d12831b6200f9505a005b40da",
+    "packages": "38/38 exact versions matched",
+    "resource_route": "Prospective root-approved SHM scratch-only:2GiB SHM+declared cap,4GiB cgroup headroom,8MiBfile,128MiB final aggregate,shared0600flock,workspace read-only32MiBhard;64MiB for any workspace-growing batch. No retroqualification of prior resource failures.",
+    "storage_limit": "Both tmp andSHM tmpfs; Source processdeath/coldreopen, NOT powerloss/disk/native qualification."
+  },
+  "private_artifacts": "Runtimevault/key/DB/privateplans/forensicZIPs NOT promoted. PublicSOURCE16.zip exact16code/testmembers only; no foundationoverwrite.",
+  "owner_registry": "493oldroutes/394oldschemanames retained;497/401newtotals;only2oldresponsesadditive;42groups105functions78surfaces preserved. Exact4sourceDATAextensions toOF-TRADING-003/accounts; Androidpending/noauthority/nativequalification.",
+  "qualification": "SOURCE candidate only. ParentUNKNOWN/resultNone immutable; fresh childseparateA4+reauthDATA/currentwriter/postconditionreadback. No nativeprovider/hardware/PG/distributedcurrentrevocation/2PC/fullgrace/funds/remoteclosure/fullBE004 orunitacceptance.",
+  "genuine_publication": "Finalguards/manifest/genuinehooks/4fdFINALHEAD/normalpush/newCI stillrequired atthisdatedprepublicationrecord."
+}

@@ -45,7 +45,11 @@ ACCOUNT_TOOL_SCHEMAS = {
     "account_revision": {"description": "Read the authenticated native account-control state namespace and, when alias is supplied, its exact configuration version. Namespace data confers no authority.", "properties": {"alias": {"type": "string"}}},
     "account_upsert": {"description": "Register a new account or edit specified public settings. Existing omitted settings and credentials are preserved. New accounts require broker; native identity changes require verified migration.", "properties": {"alias": {"type": "string"}, "broker": {"type": "string"}, "mode": {"type": "string"}, "currency": {"type": "string"}, "label": {"type": "string"}, "server": {"type": "string"}, "login": {"type": "string"}, "bridge_url": {"type": "string"}, "demo": {"type": "boolean"}, "enabled": {"type": "boolean"}, "notes": {"type": "string"}, "venue": {"type": "string"}, "mandate_ref": {"type": "string"}}, "required": ["alias"]},
     "account_credentials": {"description": "Store credential values for an alias in its 0600 secrets file (allowlisted keys per broker). Values are never echoed.", "properties": {"alias": {"type": "string"}, "secrets": {"type": "object"}}, "required": ["alias", "secrets"]},
-    "account_remove": {"description": "Unlink the VAN-local account only after exact owner review, inactive runtime and fresh known funds, positions, pending orders and original outcomes. Keeps history and remote account/funds; no broker closure or money movement.", "properties": {"alias": {"type": "string"}}, "required": ["alias"]},
+    "account_remove": {"description": "Unlink only the VAN-local account after exact owner review and current native safety facts. PENDING_CLEANUP is a separately reauthenticated and A4-approved original-device child bound to its genuine private plan; it never replays or completes the UNKNOWN parent. History/remote accounts/funds remain; no provider closure or money movement.", "properties": {"alias": {"type": "string"},
+        "variant":{"enum":["PENDING_CLEANUP"]},"parent_operation_id":{"type":"string","pattern":"^[A-Za-z0-9_-]{20,128}$"},
+        "plan_ref":{"type":"string","pattern":"^[0-9a-f]{64}$"},"retire_parent_safety_obligation":{"type":"boolean"},
+        "reauth_fact_id":{"type":"string","pattern":"^[A-Za-z0-9_-]{20,128}$"},
+        "reauth_fact_digest":{"type":"string","pattern":"^[0-9a-f]{64}$"}}, "required": ["alias"]},
     "account_verify": {"description": "Connect to the venue with the stored credentials and report equity/currency/connectivity. No order is placed.", "properties": {"alias": {"type": "string"}}, "required": ["alias"]},
     "deriv_verify_email": {"description": "Start Deriv account opening: send the verification email.", "properties": {"email": {"type": "string"}, "app_id": {"type": "string"}}, "required": ["email"]},
     "deriv_create_demo": {"description": "Create a Deriv virtual (demo) account from the emailed code and register it under an alias.", "properties": {"alias": {"type": "string"}, "email": {"type": "string"}, "verification_code": {"type": "string"}, "client_password": {"type": "string"}, "residence": {"type": "string"}, "app_id": {"type": "string"}}, "required": ["alias", "verification_code", "client_password", "residence"]},
@@ -108,7 +112,7 @@ def _file_generation(stat):
     return (stat.st_dev,stat.st_ino,stat.st_mode,stat.st_size,stat.st_mtime_ns,stat.st_ctime_ns)
 
 
-def _shred(path: Path, *, before_write=None, before_unlink=None, expected_generation=None, before_effect=None) -> None:
+def _shred(path: Path, *, before_write=None, before_unlink=None, expected_generation=None, before_effect=None, after_write=None, after_unlink=None) -> None:
     from vati.core.file_lock import exclusive_state_lock
     with exclusive_state_lock(path):
         if path.is_symlink():
@@ -129,6 +133,7 @@ def _shred(path: Path, *, before_write=None, before_unlink=None, expected_genera
                 stream.flush()
                 os.fsync(stream.fileno())
                 own_overwrite=_file_generation(os.fstat(stream.fileno()))
+                if after_write is not None:after_write(own_overwrite)
             if path.is_symlink() or _file_generation(path.stat())!=own_overwrite:
                 raise HTTPException(409,'Managed credential changed after original overwrite; cleanup unconfirmed')
             if before_unlink is not None:before_unlink()
@@ -136,6 +141,11 @@ def _shred(path: Path, *, before_write=None, before_unlink=None, expected_genera
                 raise HTTPException(409,'Managed credential changed at original unlink boundary')
             if before_effect is not None:before_effect()
             path.unlink()
+            if after_unlink is not None:
+                directory=os.open(path.parent,os.O_RDONLY|os.O_DIRECTORY)
+                try:os.fsync(directory)
+                finally:os.close(directory)
+                after_unlink()
 
 
 
@@ -268,7 +278,7 @@ def build_account_handlers(st: AccountControlSettings) -> dict[str, Callable[[di
         try:
             with exclusive_state_lock(path):
                 with led.atomic():
-                    states=AccountEffectJournal(led)._states()
+                    states=AccountEffectJournal(led,cleanup_secrets_root=st.secrets_dir)._states()
                     hints={target.split(':',1)[1] for state in states.values() for target in state.intent.targets
                         if target.startswith('account-control-domain:')}
                     hints.update(event.payload['account_control_domain'] for event in led.iter(EventKind.ACCOUNT_OPERATION)
@@ -346,6 +356,13 @@ def build_account_handlers(st: AccountControlSettings) -> dict[str, Callable[[di
     def cmd_account_review(a: dict) -> dict:
         from vati.core.canonical import canonical_hash
         if a.get('action')=='account_remove' and isinstance(a.get('args'),dict):
+            if a['args'].get('variant')=='PENDING_CLEANUP':
+                from commander.account_cleanup import NativeCleanup
+                ledger=open_operation_ledger()
+                try:return NativeCleanup(st,ledger,reg,control_domain).review(a['args'],a.get('owner_device_id'),a.get('_account_dispatch_guard'))
+                except AccountEffectError:
+                    raise AccountOperationBlocked('Original local cleanup plan or current evidence is unavailable; HOLD') from None
+                finally:ledger.close()
             return retirement_review(a['args'])
         if a.get('action')!='account_upsert' or not isinstance(a.get('args'),dict):
             raise HTTPException(422,'Unsupported native account review action')
@@ -369,16 +386,27 @@ def build_account_handlers(st: AccountControlSettings) -> dict[str, Callable[[di
         return open_ledger(st.operation_ledger)
 
     def cmd_account_operation(a: dict) -> dict:
-        current=control_domain()
-        if a.get('account_control_domain') not in (None,current):
-            raise AccountOperationBlocked('Original account-control namespace is not selected')
         led = open_operation_ledger()
         try:
-            state = AccountEffectJournal(led).status(a.get("operation_id"), a.get("device_id"))
+            state = AccountEffectJournal(led,cleanup_secrets_root=st.secrets_dir).status(a.get("operation_id"), a.get("device_id"))
+            if state is not None and state.intent.command=='account_remove':
+                from commander.account_cleanup import UnlinkRecoveryBook,continuity,unknown
+                parent=(state.result or {}).get('cleanup_parent_operation_id',state.intent.operation_id)
+                original=UnlinkRecoveryBook(led,initialize=False,secrets_root=st.secrets_dir)._history(parent)['plan']
+                if original is not None and continuity(st,reg())!=original.payload['data']['continuity']:raise unknown()
+            current=control_domain(led)
+            if a.get('account_control_domain') not in (None,current):
+                raise AccountOperationBlocked('Original account-control namespace is not selected')
             if state is None:
                 # Absence does not prove a lost request can never arrive.
                 raise AccountOperationUnconfirmed(a.get("operation_id"))
-            return readback(state)
+            result=readback(state)
+            if state.intent.command=='account_remove':
+                from commander.account_cleanup import UnlinkRecoveryBook
+                parent=(state.result or {}).get('cleanup_parent_operation_id',state.intent.operation_id)
+                summary=UnlinkRecoveryBook(led,initialize=False,secrets_root=st.secrets_dir).summary(parent,state.intent.device_id)
+                if summary['plan_ref'] is not None:result['cleanup_recovery']=summary
+            return result
         except AccountEffectError:
             raise HTTPException(409, "native operation cannot be read for this owner device") from None
         finally:
@@ -459,6 +487,19 @@ def build_account_handlers(st: AccountControlSettings) -> dict[str, Callable[[di
             with exclusive_state_lock(target) if target is not None else nullcontext():
                 if current_resource_version(alias)!=review['resource_version']:
                     raise HTTPException(409,'Native credential generation changed; local connection retained')
+                recovery=None
+                if '_native_operation' in a:
+                    from commander.account_cleanup import UnlinkRecoveryBook,prepare_plan
+                    intent=operation_intent('account_remove',a)
+                    recovery=UnlinkRecoveryBook(native_ledger,secrets_root=st.secrets_dir)
+                    plan=prepare_plan(st,current,account,review,target)
+                    plan['account_control_domain']=a['_expected_account_control_domain']
+                    plan_ref,epoch=recovery.prepare(intent,plan)
+                def recovery_step(step,state,*,post_generation=None,resource_version=None):
+                    if recovery is not None:
+                        recovery.step(intent.operation_id,plan_ref,epoch,intent.operation_id,step,state,
+                            post_generation=list(post_generation) if post_generation is not None else None,
+                            resource_version=resource_version)
                 def require_final_times():
                     for check in readback_guards:check.check_time()
                     a['_retirement_time_guard']()
@@ -468,6 +509,7 @@ def build_account_handlers(st: AccountControlSettings) -> dict[str, Callable[[di
                     guard=a.get('_retirement_guard')
                     if callable(guard):guard()
                     if '_native_operation' in a:require_current_account_effect()
+                    if recovery is not None:recovery.require_epoch(intent.operation_id,plan_ref,epoch,intent.operation_id)
                     require_final_times()
                 def mark_final_effect():
                     # No blocking callback follows the final file-identity
@@ -480,16 +522,37 @@ def build_account_handlers(st: AccountControlSettings) -> dict[str, Callable[[di
                     if current_resource_version(alias)!=review['resource_version']:
                         raise HTTPException(409,'Native account changed before local unlink replacement')
                     current_scope()
+                    recovery_step('REGISTRY_REMOVE','MAY_BEGIN')
+                    # The journal writer may have waited; final guards follow it.
+                    current_scope()
                     mark_final_effect()
+                def after_remove():
+                    recovery_step('REGISTRY_REMOVE','DONE',resource_version=current_resource_version(alias))
                 generation=_file_generation(target.stat()) if target is not None else None
-                current.remove(alias,before_replace=before_remove)
+                if recovery is not None:
+                    current.remove(alias,before_replace=before_remove,after_replace=after_remove)
+                else:current.remove(alias,before_replace=before_remove)
                 own_removal_version=current_resource_version(alias)
                 def before_credential_effect():
                     if current_resource_version(alias)!=own_removal_version:
                         raise HTTPException(409,'Native account changed after original unlink; credential cleanup unconfirmed')
                     current_scope()
-                if target is not None:_shred(target,before_write=before_credential_effect,
-                    before_unlink=before_credential_effect,expected_generation=generation,before_effect=mark_final_effect)
+                def before_overwrite():
+                    before_credential_effect()
+                    recovery_step('CREDENTIAL_OVERWRITE','MAY_BEGIN')
+                    before_credential_effect()
+                def after_overwrite(own_generation):
+                    recovery_step('CREDENTIAL_OVERWRITE','DONE',post_generation=own_generation,
+                        resource_version=own_removal_version)
+                def before_unlink():
+                    before_credential_effect()
+                    recovery_step('CREDENTIAL_UNLINK','MAY_BEGIN')
+                    before_credential_effect()
+                def after_unlink():
+                    recovery_step('CREDENTIAL_UNLINK','DONE',resource_version=own_removal_version)
+                if target is not None:_shred(target,before_write=before_overwrite,
+                    before_unlink=before_unlink,expected_generation=generation,before_effect=mark_final_effect,
+                    **({'after_write':after_overwrite,'after_unlink':after_unlink} if recovery is not None else {}))
         return {"alias": alias, "removed": True,**{k:review['retirement'][k] for k in (
             'remote_account_closed','historical_data_retained','retained_remote_funds','credential_cleanup')}}
 
@@ -701,7 +764,7 @@ def build_account_handlers(st: AccountControlSettings) -> dict[str, Callable[[di
                     if st.operation_ledger:
                         led = open_operation_ledger()
                         try:
-                            AccountEffectJournal(led).require_clear_targets(("account:"+alias,))
+                            AccountEffectJournal(led,cleanup_secrets_root=st.secrets_dir).require_clear_targets(("account:"+alias,))
                         except AccountEffectError:
                             raise AccountOperationBlocked() from None
                         finally:
@@ -710,7 +773,7 @@ def build_account_handlers(st: AccountControlSettings) -> dict[str, Callable[[di
                     return handler(args)
                 led = open_operation_ledger()
                 try:
-                    journal = AccountEffectJournal(led)
+                    journal = AccountEffectJournal(led,cleanup_secrets_root=st.secrets_dir)
                     domain=control_domain()
                     if args.get('_expected_account_control_domain') not in (None,domain):
                         raise AccountOperationBlocked('Account-control state namespace changed before native dispatch')
@@ -785,6 +848,11 @@ def build_account_handlers(st: AccountControlSettings) -> dict[str, Callable[[di
             alias=_alias(args)
             ledger=open_operation_ledger()
             try:
+                if args.get('variant')=='PENDING_CLEANUP':
+                    from commander.account_cleanup import UnlinkRecoveryBook,continuity,unknown
+                    original=UnlinkRecoveryBook(ledger,initialize=False,secrets_root=st.secrets_dir)._history(args.get('parent_operation_id'))['plan']
+                    if (original is None or original.hash!=args.get('plan_ref')
+                            or continuity(st,reg())!=original.payload['data']['continuity']):raise unknown()
                 domain=control_domain(ledger)
                 if args.get('_expected_account_control_domain') not in (None,domain):
                     raise AccountOperationBlocked('Account-control namespace changed before local unlink')
@@ -792,6 +860,17 @@ def build_account_handlers(st: AccountControlSettings) -> dict[str, Callable[[di
                 ledger.close()
                 raise
             args={**args,'_expected_account_control_domain':domain}
+            if args.get('variant')=='PENDING_CLEANUP':
+                from commander.account_cleanup import NativeCleanup
+                def current_cleanup_scope():
+                    guard=args.get('_account_dispatch_guard')
+                    if not callable(guard):raise HTTPException(403,'Current cleanup owner scope unavailable; HOLD')
+                    guard()
+                    if control_domain(ledger)!=domain:raise AccountOperationBlocked('Original cleanup namespace changed')
+                    guard()
+                try:return NativeCleanup(st,ledger,reg,control_domain).execute(args,operation_intent('account_remove',args),current_cleanup_scope)
+                except AccountEffectError:raise AccountOperationUnconfirmed(args.get('_native_operation',{}).get('operation_id')) from None
+                finally:ledger.close()
             final_clock_checks=[]
             def register_final_clock(check):
                 final_clock_checks[:]=[check]
@@ -823,14 +902,21 @@ def build_account_handlers(st: AccountControlSettings) -> dict[str, Callable[[di
                             raise AccountOperationBlocked('Account-control namespace changed before local unlink')
                         if args['_expected_resource_version']!=current_resource_version(alias):
                             raise HTTPException(409,'Account changed since owner approval; local connection retained')
-                    return handler({**args,'_retirement_guard':writer_scope,
-                        '_retirement_time_guard':require_lease.check_time,
-                        '_retirement_clock_register':register_final_clock,
-                        '_retirement_authority_time_guard':require_authority_time},native_ledger=ledger)
+                    try:
+                        return handler({**args,'_retirement_guard':writer_scope,
+                            '_retirement_time_guard':require_lease.check_time,
+                            '_retirement_clock_register':register_final_clock,
+                            '_retirement_authority_time_guard':require_authority_time},native_ledger=ledger)
+                    except AccountEffectError:
+                        from commander.account_effects import _effect_started
+                        marker=_effect_started.get()
+                        if marker is not None and marker[0] is False:
+                            raise HTTPException(409,'Original cleanup evidence is unavailable; no new local effect started') from None
+                        raise
             try:
                 if '_native_operation' not in args:return retire()
                 intent=operation_intent('account_remove',args)
-                return invoke_account_effect(AccountEffectJournal(ledger),intent,retire,dispatch_guard=current_scope)
+                return invoke_account_effect(AccountEffectJournal(ledger,cleanup_secrets_root=st.secrets_dir),intent,retire,dispatch_guard=current_scope)
             except AccountEffectError:
                 raise AccountOperationUnconfirmed(args.get('_native_operation',{}).get('operation_id')) from None
             finally:ledger.close()

@@ -1,0 +1,10 @@
+{
+  "reusable_external_helper": {
+    "path": "/tmp/van-be004-cleanup-evidence-20261102/controller_lifecycle.py",
+    "sha256": "7f9b7c78150209e7365851f8d7bc63b5c4ea6577b1e4dca1fc384ff8437db3b3"
+  },
+  "runner": {
+    "path": "/tmp/van-be004-cleanup-evidence-20261102/run_shm.py",
+    "sha256": "b227080c2c22dd105e2b3a3864c6d3f70bca776583f218c2afe5b442d5336968"
+  }
+}

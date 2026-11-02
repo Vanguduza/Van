@@ -125,7 +125,7 @@
       "device_proof_required_when_bound": true,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:2980",
+      "source": "backend/van_gateway/app.py:2987",
       "summary": "Forget Owner Fact",
       "tags": [],
       "parameters": [
@@ -190,7 +190,7 @@
       "device_proof_required_when_bound": true,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:2916",
+      "source": "backend/van_gateway/app.py:2923",
       "summary": "Owner Memory Forget",
       "tags": [],
       "parameters": [
@@ -802,7 +802,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:2187",
+      "source": "backend/van_gateway/app.py:2194",
       "summary": "Proxy Artemis Console Api",
       "tags": [],
       "parameters": [
@@ -848,7 +848,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:2108",
+      "source": "backend/van_gateway/app.py:2115",
       "summary": "Health",
       "tags": [],
       "parameters": [],
@@ -874,7 +874,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:2190",
+      "source": "backend/van_gateway/app.py:2197",
       "summary": "Proxy Artemis Console Images",
       "tags": [],
       "parameters": [
@@ -920,7 +920,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:2196",
+      "source": "backend/van_gateway/app.py:2203",
       "summary": "Proxy Artemis Console Local File",
       "tags": [],
       "parameters": [
@@ -1015,7 +1015,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:2184",
+      "source": "backend/van_gateway/app.py:2191",
       "summary": "Proxy Artemis Console",
       "tags": [],
       "parameters": [
@@ -1062,7 +1062,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:2184",
+      "source": "backend/van_gateway/app.py:2191",
       "summary": "Proxy Artemis Console",
       "tags": [],
       "parameters": [
@@ -1109,7 +1109,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:2173",
+      "source": "backend/van_gateway/app.py:2180",
       "summary": "Launch Artemis Console",
       "tags": [],
       "parameters": [
@@ -1155,7 +1155,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:2184",
+      "source": "backend/van_gateway/app.py:2191",
       "summary": "Proxy Artemis Console",
       "tags": [],
       "parameters": [
@@ -1348,7 +1348,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:3371",
+      "source": "backend/van_gateway/app.py:3378",
       "summary": "List Attention",
       "tags": [],
       "parameters": [],
@@ -1723,7 +1723,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:2776",
+      "source": "backend/van_gateway/app.py:2783",
       "summary": "Get Briefing",
       "tags": [],
       "parameters": [],
@@ -2024,7 +2024,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:1304",
+      "source": "backend/van_gateway/app.py:1311",
       "summary": "Interaction Router Status",
       "tags": [],
       "parameters": [],
@@ -3159,7 +3159,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:2772",
+      "source": "backend/van_gateway/app.py:2779",
       "summary": "Command Status",
       "tags": [],
       "parameters": [
@@ -3308,7 +3308,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:2761",
+      "source": "backend/van_gateway/app.py:2768",
       "summary": "Connectivity Manifest",
       "tags": [],
       "parameters": [
@@ -3355,7 +3355,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:2966",
+      "source": "backend/van_gateway/app.py:2973",
       "summary": "Owner Context Conflicts",
       "tags": [],
       "parameters": [],
@@ -3381,7 +3381,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:2926",
+      "source": "backend/van_gateway/app.py:2933",
       "summary": "Owner Context Export",
       "tags": [],
       "parameters": [],
@@ -3407,7 +3407,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:2949",
+      "source": "backend/van_gateway/app.py:2956",
       "summary": "Owner Context History",
       "tags": [],
       "parameters": [
@@ -3472,7 +3472,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:2908",
+      "source": "backend/van_gateway/app.py:2915",
       "summary": "Owner Memory Inventory",
       "tags": [],
       "parameters": [],
@@ -3982,7 +3982,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:2842",
+      "source": "backend/van_gateway/app.py:2849",
       "summary": "List Decisions",
       "tags": [],
       "parameters": [],
@@ -4058,7 +4058,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:3622",
+      "source": "backend/van_gateway/app.py:3629",
       "summary": "Get Degraded",
       "tags": [],
       "parameters": [],
@@ -4084,7 +4084,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:2665",
+      "source": "backend/van_gateway/app.py:2672",
       "summary": "Device Binding Status",
       "tags": [],
       "parameters": [],
@@ -4110,7 +4110,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:2749",
+      "source": "backend/van_gateway/app.py:2756",
       "summary": "Original Device Rebinding",
       "tags": [],
       "parameters": [
@@ -4172,7 +4172,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:2344",
+      "source": "backend/van_gateway/app.py:2351",
       "summary": "Device Revocation Original",
       "tags": [],
       "parameters": [
@@ -5453,7 +5453,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:3634",
+      "source": "backend/van_gateway/app.py:3641",
       "summary": "Get Events",
       "tags": [],
       "parameters": [
@@ -5687,7 +5687,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:3167",
+      "source": "backend/van_gateway/app.py:3174",
       "summary": "Calendar Agenda",
       "tags": [],
       "parameters": [
@@ -5740,7 +5740,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:3078",
+      "source": "backend/van_gateway/app.py:3085",
       "summary": "Calendar Review",
       "tags": [],
       "parameters": [
@@ -5802,7 +5802,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:3317",
+      "source": "backend/van_gateway/app.py:3324",
       "summary": "Google Capabilities",
       "tags": [],
       "parameters": [],
@@ -5828,7 +5828,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:3196",
+      "source": "backend/van_gateway/app.py:3203",
       "summary": "Contacts Resolve",
       "tags": [],
       "parameters": [
@@ -5890,7 +5890,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:3188",
+      "source": "backend/van_gateway/app.py:3195",
       "summary": "Drive Search",
       "tags": [],
       "parameters": [
@@ -5952,7 +5952,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:3119",
+      "source": "backend/van_gateway/app.py:3126",
       "summary": "Gmail Internal Draft Preview",
       "tags": [],
       "parameters": [
@@ -6014,7 +6014,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:3011",
+      "source": "backend/van_gateway/app.py:3018",
       "summary": "Gmail Search",
       "tags": [],
       "parameters": [
@@ -6076,7 +6076,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:3038",
+      "source": "backend/van_gateway/app.py:3045",
       "summary": "Gmail Thread",
       "tags": [],
       "parameters": [
@@ -6138,7 +6138,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:3327",
+      "source": "backend/van_gateway/app.py:3334",
       "summary": "Get Google Job",
       "tags": [],
       "parameters": [
@@ -6200,7 +6200,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:3313",
+      "source": "backend/van_gateway/app.py:3320",
       "summary": "Google Mesh",
       "tags": [],
       "parameters": [],
@@ -6226,7 +6226,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:3301",
+      "source": "backend/van_gateway/app.py:3308",
       "summary": "Original Google Owner Revoke",
       "tags": [],
       "parameters": [
@@ -6272,7 +6272,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:3224",
+      "source": "backend/van_gateway/app.py:3231",
       "summary": "Google Credential Planes",
       "tags": [],
       "parameters": [],
@@ -6298,7 +6298,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:3212",
+      "source": "backend/van_gateway/app.py:3219",
       "summary": "Google Status",
       "tags": [],
       "parameters": [],
@@ -6324,7 +6324,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:3204",
+      "source": "backend/van_gateway/app.py:3211",
       "summary": "Tasks List",
       "tags": [],
       "parameters": [
@@ -7506,7 +7506,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:3584",
+      "source": "backend/van_gateway/app.py:3591",
       "summary": "Observability Alert State",
       "tags": [],
       "parameters": [
@@ -7559,7 +7559,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:3599",
+      "source": "backend/van_gateway/app.py:3606",
       "summary": "Observability Health",
       "tags": [],
       "parameters": [
@@ -7612,7 +7612,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:3560",
+      "source": "backend/van_gateway/app.py:3567",
       "summary": "Metrics Scrape",
       "tags": [],
       "parameters": [
@@ -7665,7 +7665,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:3611",
+      "source": "backend/van_gateway/app.py:3618",
       "summary": "Observability Trace",
       "tags": [],
       "parameters": [
@@ -8095,7 +8095,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:3131",
+      "source": "backend/van_gateway/app.py:3138",
       "summary": "Gmail Owner Draft Preview",
       "tags": [],
       "parameters": [
@@ -8404,7 +8404,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:3626",
+      "source": "backend/van_gateway/app.py:3633",
       "summary": "List Projects",
       "tags": [],
       "parameters": [],
@@ -8478,7 +8478,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:3630",
+      "source": "backend/van_gateway/app.py:3637",
       "summary": "Project Truth",
       "tags": [],
       "parameters": [
@@ -8524,7 +8524,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:2799",
+      "source": "backend/van_gateway/app.py:2806",
       "summary": "List Reminders",
       "tags": [],
       "parameters": [],
@@ -10052,7 +10052,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:3707",
+      "source": "backend/van_gateway/app.py:3714",
       "summary": "Trading Accounts",
       "tags": [],
       "parameters": [],
@@ -10189,7 +10189,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:3832",
+      "source": "backend/van_gateway/app.py:3877",
       "summary": "Trading Account Catalog",
       "tags": [],
       "parameters": [],
@@ -10210,6 +10210,102 @@
       "readiness": "REPOSITORY_DECLARATION_ONLY"
     },
     {
+      "endpoint_id": "VE-47aaebbab4d8",
+      "method": "GET",
+      "path": "/v1/trading/accounts/cleanup/operations/{operation_id}",
+      "authentication": "INGRESS_BEARER_AND_PAIRED_DEVICE",
+      "device_proof_required_when_bound": false,
+      "registration": "DEFAULT",
+      "condition": null,
+      "source": "backend/van_gateway/trading/account_cleanup_api.py:370",
+      "summary": "Original",
+      "tags": [
+        "account-cleanup"
+      ],
+      "parameters": [
+        {
+          "name": "operation_id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "title": "Operation Id"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json": {
+              "schema": {}
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "openapi_components": "owner_endpoint_schemas.json",
+      "readiness": "REPOSITORY_DECLARATION_ONLY"
+    },
+    {
+      "endpoint_id": "VE-3685603aa437",
+      "method": "GET",
+      "path": "/v1/trading/accounts/cleanup/reauth/facts/{fact_id}",
+      "authentication": "INGRESS_BEARER_AND_PAIRED_DEVICE",
+      "device_proof_required_when_bound": false,
+      "registration": "DEFAULT",
+      "condition": null,
+      "source": "backend/van_gateway/trading/account_cleanup_api.py:361",
+      "summary": "Fact",
+      "tags": [
+        "account-cleanup"
+      ],
+      "parameters": [
+        {
+          "name": "fact_id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "title": "Fact Id"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json": {
+              "schema": {}
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "openapi_components": "owner_endpoint_schemas.json",
+      "readiness": "REPOSITORY_DECLARATION_ONLY"
+    },
+    {
       "endpoint_id": "VE-23d73eb21056",
       "method": "GET",
       "path": "/v1/trading/accounts/operations/{operation_id}",
@@ -10217,7 +10313,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:3908",
+      "source": "backend/van_gateway/app.py:3961",
       "summary": "Trading Account Operation",
       "tags": [],
       "parameters": [
@@ -10275,7 +10371,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:3703",
+      "source": "backend/van_gateway/app.py:3710",
       "summary": "Trading Assessment",
       "tags": [],
       "parameters": [],
@@ -10301,7 +10397,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:3742",
+      "source": "backend/van_gateway/app.py:3749",
       "summary": "Trading Bars",
       "tags": [],
       "parameters": [
@@ -10930,7 +11026,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:3730",
+      "source": "backend/van_gateway/app.py:3737",
       "summary": "Trading Cognition",
       "tags": [],
       "parameters": [],
@@ -10956,7 +11052,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:3719",
+      "source": "backend/van_gateway/app.py:3726",
       "summary": "Trading Cognitive Fabric",
       "tags": [],
       "parameters": [
@@ -11002,7 +11098,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:3691",
+      "source": "backend/van_gateway/app.py:3698",
       "summary": "Trading Events",
       "tags": [],
       "parameters": [
@@ -11297,7 +11393,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:3699",
+      "source": "backend/van_gateway/app.py:3706",
       "summary": "Trading History",
       "tags": [],
       "parameters": [
@@ -11344,7 +11440,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:3711",
+      "source": "backend/van_gateway/app.py:3718",
       "summary": "Trading Market State",
       "tags": [],
       "parameters": [
@@ -12541,7 +12637,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:4215",
+      "source": "backend/van_gateway/app.py:4271",
       "summary": "Trading Oauth Callback",
       "tags": [],
       "parameters": [
@@ -12587,7 +12683,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:3680",
+      "source": "backend/van_gateway/app.py:3687",
       "summary": "Trading Portfolio",
       "tags": [],
       "parameters": [],
@@ -12613,7 +12709,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:3687",
+      "source": "backend/van_gateway/app.py:3694",
       "summary": "Trading Positions",
       "tags": [],
       "parameters": [],
@@ -12639,7 +12735,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:3695",
+      "source": "backend/van_gateway/app.py:3702",
       "summary": "Trading Potential",
       "tags": [],
       "parameters": [],
@@ -12665,7 +12761,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:3715",
+      "source": "backend/van_gateway/app.py:3722",
       "summary": "Trading Risk",
       "tags": [],
       "parameters": [],
@@ -12832,7 +12928,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:3669",
+      "source": "backend/van_gateway/app.py:3676",
       "summary": "Trading Status",
       "tags": [],
       "parameters": [],
@@ -12858,7 +12954,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:4069",
+      "source": "backend/van_gateway/app.py:4125",
       "summary": "Trading Strategy Promotion Candidates",
       "tags": [],
       "parameters": [],
@@ -12884,7 +12980,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:4268",
+      "source": "backend/van_gateway/app.py:4324",
       "summary": "Trading Tickets",
       "tags": [],
       "parameters": [
@@ -12937,7 +13033,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:3673",
+      "source": "backend/van_gateway/app.py:3680",
       "summary": "Trading Trades",
       "tags": [],
       "parameters": [
@@ -12994,7 +13090,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:3735",
+      "source": "backend/van_gateway/app.py:3742",
       "summary": "Trading Trade Detail",
       "tags": [],
       "parameters": [
@@ -13455,7 +13551,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:4259",
+      "source": "backend/van_gateway/app.py:4315",
       "summary": "Latest Visual Acceptance",
       "tags": [],
       "parameters": [],
@@ -13650,7 +13746,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:2193",
+      "source": "backend/van_gateway/app.py:2200",
       "summary": "Proxy Artemis Console Videos",
       "tags": [],
       "parameters": [
@@ -13696,7 +13792,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:2187",
+      "source": "backend/van_gateway/app.py:2194",
       "summary": "Proxy Artemis Console Api",
       "tags": [],
       "parameters": [
@@ -13742,7 +13838,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:2190",
+      "source": "backend/van_gateway/app.py:2197",
       "summary": "Proxy Artemis Console Images",
       "tags": [],
       "parameters": [
@@ -13788,7 +13884,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:2196",
+      "source": "backend/van_gateway/app.py:2203",
       "summary": "Proxy Artemis Console Local File",
       "tags": [],
       "parameters": [
@@ -13834,7 +13930,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:2184",
+      "source": "backend/van_gateway/app.py:2191",
       "summary": "Proxy Artemis Console",
       "tags": [],
       "parameters": [
@@ -13881,7 +13977,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:2184",
+      "source": "backend/van_gateway/app.py:2191",
       "summary": "Proxy Artemis Console",
       "tags": [],
       "parameters": [
@@ -13928,7 +14024,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:2184",
+      "source": "backend/van_gateway/app.py:2191",
       "summary": "Proxy Artemis Console",
       "tags": [],
       "parameters": [
@@ -13974,7 +14070,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:2193",
+      "source": "backend/van_gateway/app.py:2200",
       "summary": "Proxy Artemis Console Videos",
       "tags": [],
       "parameters": [
@@ -14020,7 +14116,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:2187",
+      "source": "backend/van_gateway/app.py:2194",
       "summary": "Proxy Artemis Console Api",
       "tags": [],
       "parameters": [
@@ -14066,7 +14162,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:2190",
+      "source": "backend/van_gateway/app.py:2197",
       "summary": "Proxy Artemis Console Images",
       "tags": [],
       "parameters": [
@@ -14112,7 +14208,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:2196",
+      "source": "backend/van_gateway/app.py:2203",
       "summary": "Proxy Artemis Console Local File",
       "tags": [],
       "parameters": [
@@ -14158,7 +14254,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:2184",
+      "source": "backend/van_gateway/app.py:2191",
       "summary": "Proxy Artemis Console",
       "tags": [],
       "parameters": [
@@ -14205,7 +14301,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:2184",
+      "source": "backend/van_gateway/app.py:2191",
       "summary": "Proxy Artemis Console",
       "tags": [],
       "parameters": [
@@ -14252,7 +14348,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:2184",
+      "source": "backend/van_gateway/app.py:2191",
       "summary": "Proxy Artemis Console",
       "tags": [],
       "parameters": [
@@ -14298,7 +14394,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:2193",
+      "source": "backend/van_gateway/app.py:2200",
       "summary": "Proxy Artemis Console Videos",
       "tags": [],
       "parameters": [
@@ -14580,7 +14676,7 @@
       "device_proof_required_when_bound": true,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:2187",
+      "source": "backend/van_gateway/app.py:2194",
       "summary": "Proxy Artemis Console Api",
       "tags": [],
       "parameters": [
@@ -14626,7 +14722,7 @@
       "device_proof_required_when_bound": true,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:2184",
+      "source": "backend/van_gateway/app.py:2191",
       "summary": "Proxy Artemis Console",
       "tags": [],
       "parameters": [
@@ -14673,7 +14769,7 @@
       "device_proof_required_when_bound": true,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:2184",
+      "source": "backend/van_gateway/app.py:2191",
       "summary": "Proxy Artemis Console",
       "tags": [],
       "parameters": [
@@ -14720,7 +14816,7 @@
       "device_proof_required_when_bound": true,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:2160",
+      "source": "backend/van_gateway/app.py:2167",
       "summary": "Create Artemis Console Session",
       "tags": [],
       "parameters": [],
@@ -14746,7 +14842,7 @@
       "device_proof_required_when_bound": true,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:2184",
+      "source": "backend/van_gateway/app.py:2191",
       "summary": "Proxy Artemis Console",
       "tags": [],
       "parameters": [
@@ -14792,7 +14888,7 @@
       "device_proof_required_when_bound": true,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:3359",
+      "source": "backend/van_gateway/app.py:3366",
       "summary": "Upsert Attention",
       "tags": [],
       "parameters": [],
@@ -14837,7 +14933,7 @@
       "device_proof_required_when_bound": true,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:3375",
+      "source": "backend/van_gateway/app.py:3382",
       "summary": "Ack Attention",
       "tags": [],
       "parameters": [
@@ -14883,7 +14979,7 @@
       "device_proof_required_when_bound": true,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:3380",
+      "source": "backend/van_gateway/app.py:3387",
       "summary": "Snooze Attention",
       "tags": [],
       "parameters": [
@@ -19616,7 +19712,7 @@
       "device_proof_required_when_bound": true,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:2440",
+      "source": "backend/van_gateway/app.py:2447",
       "summary": "Commands",
       "tags": [],
       "parameters": [],
@@ -19708,7 +19804,7 @@
       "device_proof_required_when_bound": true,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:2881",
+      "source": "backend/van_gateway/app.py:2888",
       "summary": "State Owner Fact",
       "tags": [],
       "parameters": [],
@@ -19753,7 +19849,7 @@
       "device_proof_required_when_bound": true,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:3416",
+      "source": "backend/van_gateway/app.py:3423",
       "summary": "Ingest Captured Context",
       "tags": [],
       "parameters": [],
@@ -20035,7 +20131,7 @@
       "device_proof_required_when_bound": true,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:2836",
+      "source": "backend/van_gateway/app.py:2843",
       "summary": "Escalate Decision",
       "tags": [],
       "parameters": [],
@@ -20139,7 +20235,7 @@
       "device_proof_required_when_bound": true,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:2846",
+      "source": "backend/van_gateway/app.py:2853",
       "summary": "Resolve Decision",
       "tags": [],
       "parameters": [
@@ -20194,7 +20290,7 @@
       "device_proof_required_when_bound": true,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:2650",
+      "source": "backend/van_gateway/app.py:2657",
       "summary": "Certify Binding",
       "tags": [],
       "parameters": [],
@@ -20239,7 +20335,7 @@
       "device_proof_required_when_bound": true,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:2568",
+      "source": "backend/van_gateway/app.py:2575",
       "summary": "Bootstrap Attest",
       "tags": [],
       "parameters": [],
@@ -20284,7 +20380,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:2545",
+      "source": "backend/van_gateway/app.py:2552",
       "summary": "Bootstrap Challenge",
       "tags": [],
       "parameters": [],
@@ -20329,7 +20425,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:2472",
+      "source": "backend/van_gateway/app.py:2479",
       "summary": "Create Bootstrap",
       "tags": [],
       "parameters": [],
@@ -20374,7 +20470,7 @@
       "device_proof_required_when_bound": true,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:2628",
+      "source": "backend/van_gateway/app.py:2635",
       "summary": "Bootstrap Recover",
       "tags": [],
       "parameters": [],
@@ -20419,7 +20515,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:2332",
+      "source": "backend/van_gateway/app.py:2339",
       "summary": "Enroll",
       "tags": [],
       "parameters": [
@@ -20481,7 +20577,7 @@
       "device_proof_required_when_bound": true,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:2227",
+      "source": "backend/van_gateway/app.py:2234",
       "summary": "Pair Device",
       "tags": [],
       "parameters": [],
@@ -20526,7 +20622,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:2212",
+      "source": "backend/van_gateway/app.py:2219",
       "summary": "Create Pairing Ticket",
       "tags": [],
       "parameters": [
@@ -20588,7 +20684,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:2484",
+      "source": "backend/van_gateway/app.py:2491",
       "summary": "Create Provisioning Payload",
       "tags": [],
       "parameters": [
@@ -20650,7 +20746,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:2554",
+      "source": "backend/van_gateway/app.py:2561",
       "summary": "Owner Device Provisioning Status",
       "tags": [],
       "parameters": [
@@ -20712,7 +20808,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:2730",
+      "source": "backend/van_gateway/app.py:2737",
       "summary": "Rebind Owner Device",
       "tags": [],
       "parameters": [
@@ -20774,7 +20870,7 @@
       "device_proof_required_when_bound": true,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:2397",
+      "source": "backend/van_gateway/app.py:2404",
       "summary": "Issue Tls Client Certificate",
       "tags": [],
       "parameters": [],
@@ -20800,7 +20896,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:2359",
+      "source": "backend/van_gateway/app.py:2366",
       "summary": "Revoke",
       "tags": [],
       "parameters": [
@@ -21149,7 +21245,7 @@
       "device_proof_required_when_bound": true,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:4332",
+      "source": "backend/van_gateway/app.py:4388",
       "summary": "Reset Events",
       "tags": [],
       "parameters": [
@@ -21371,7 +21467,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:3092",
+      "source": "backend/van_gateway/app.py:3099",
       "summary": "Execute Google Action",
       "tags": [],
       "parameters": [
@@ -21433,7 +21529,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:3175",
+      "source": "backend/van_gateway/app.py:3182",
       "summary": "Calendar Reschedule",
       "tags": [],
       "parameters": [
@@ -21513,7 +21609,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:3252",
+      "source": "backend/van_gateway/app.py:3259",
       "summary": "Google Connect",
       "tags": [],
       "parameters": [
@@ -21575,7 +21671,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:3049",
+      "source": "backend/van_gateway/app.py:3056",
       "summary": "Gmail Attachment Import Pdf",
       "tags": [],
       "parameters": [
@@ -21720,7 +21816,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:3153",
+      "source": "backend/van_gateway/app.py:3160",
       "summary": "Gmail Draft",
       "tags": [],
       "parameters": [
@@ -21800,7 +21896,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:3106",
+      "source": "backend/van_gateway/app.py:3113",
       "summary": "Gmail Send",
       "tags": [],
       "parameters": [
@@ -21880,7 +21976,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:3322",
+      "source": "backend/van_gateway/app.py:3329",
       "summary": "Plan Google Job",
       "tags": [],
       "parameters": [
@@ -21942,7 +22038,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:3335",
+      "source": "backend/van_gateway/app.py:3342",
       "summary": "Record Google Artifact",
       "tags": [],
       "parameters": [
@@ -22013,7 +22109,7 @@
       "device_proof_required_when_bound": true,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:3275",
+      "source": "backend/van_gateway/app.py:3282",
       "summary": "Google Owner Revoke",
       "tags": [],
       "parameters": [],
@@ -22066,7 +22162,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:3261",
+      "source": "backend/van_gateway/app.py:3268",
       "summary": "Google Revoke",
       "tags": [],
       "parameters": [
@@ -22739,7 +22835,7 @@
       "device_proof_required_when_bound": true,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:3399",
+      "source": "backend/van_gateway/app.py:3406",
       "summary": "Ingest Notification",
       "tags": [],
       "parameters": [],
@@ -22784,7 +22880,7 @@
       "device_proof_required_when_bound": true,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:3534",
+      "source": "backend/van_gateway/app.py:3541",
       "summary": "Ingest Device Telemetry",
       "tags": [],
       "parameters": [],
@@ -22997,7 +23093,7 @@
       "device_proof_required_when_bound": true,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:2792",
+      "source": "backend/van_gateway/app.py:2799",
       "summary": "Create Reminder",
       "tags": [],
       "parameters": [],
@@ -23042,7 +23138,7 @@
       "device_proof_required_when_bound": true,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:2823",
+      "source": "backend/van_gateway/app.py:2830",
       "summary": "Parse Reminder",
       "tags": [],
       "parameters": [],
@@ -23087,7 +23183,7 @@
       "device_proof_required_when_bound": true,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:2813",
+      "source": "backend/van_gateway/app.py:2820",
       "summary": "Cancel Reminder",
       "tags": [],
       "parameters": [
@@ -23133,7 +23229,7 @@
       "device_proof_required_when_bound": true,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:2803",
+      "source": "backend/van_gateway/app.py:2810",
       "summary": "Resolve Reminder",
       "tags": [],
       "parameters": [
@@ -25476,7 +25572,7 @@
       "device_proof_required_when_bound": true,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:3936",
+      "source": "backend/van_gateway/app.py:3989",
       "summary": "Trading Account Action",
       "tags": [],
       "parameters": [],
@@ -25580,7 +25676,7 @@
       "device_proof_required_when_bound": true,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:3870",
+      "source": "backend/van_gateway/app.py:3920",
       "summary": "Trading Account Challenge",
       "tags": [],
       "parameters": [],
@@ -25602,6 +25698,100 @@
               "schema": {
                 "$ref": "#/components/schemas/AccountChallengeResponse"
               }
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "openapi_components": "owner_endpoint_schemas.json",
+      "readiness": "REPOSITORY_DECLARATION_ONLY"
+    },
+    {
+      "endpoint_id": "VE-f4440e03b938",
+      "method": "POST",
+      "path": "/v1/trading/accounts/cleanup/reauth/challenge",
+      "authentication": "INGRESS_BEARER_AND_PAIRED_DEVICE",
+      "device_proof_required_when_bound": true,
+      "registration": "DEFAULT",
+      "condition": null,
+      "source": "backend/van_gateway/trading/account_cleanup_api.py:357",
+      "summary": "Challenge",
+      "tags": [
+        "account-cleanup"
+      ],
+      "parameters": [],
+      "request_body": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ReauthRequest"
+            }
+          }
+        },
+        "required": true
+      },
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json": {
+              "schema": {}
+            }
+          }
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HTTPValidationError"
+              }
+            }
+          }
+        }
+      },
+      "openapi_components": "owner_endpoint_schemas.json",
+      "readiness": "REPOSITORY_DECLARATION_ONLY"
+    },
+    {
+      "endpoint_id": "VE-d18bcca95622",
+      "method": "POST",
+      "path": "/v1/trading/accounts/cleanup/reauth/verify",
+      "authentication": "INGRESS_BEARER_AND_PAIRED_DEVICE",
+      "device_proof_required_when_bound": true,
+      "registration": "DEFAULT",
+      "condition": null,
+      "source": "backend/van_gateway/trading/account_cleanup_api.py:359",
+      "summary": "Verify",
+      "tags": [
+        "account-cleanup"
+      ],
+      "parameters": [],
+      "request_body": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ReauthRequest"
+            }
+          }
+        },
+        "required": true
+      },
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": {
+            "application/json": {
+              "schema": {}
             }
           }
         },
@@ -25835,7 +26025,7 @@
       "device_proof_required_when_bound": true,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:3723",
+      "source": "backend/van_gateway/app.py:3730",
       "summary": "Trading Cognitive Candidate",
       "tags": [],
       "parameters": [
@@ -26047,7 +26237,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:4272",
+      "source": "backend/van_gateway/app.py:4328",
       "summary": "Trading Halt",
       "tags": [],
       "parameters": [
@@ -27045,7 +27235,7 @@
       "device_proof_required_when_bound": true,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:4104",
+      "source": "backend/van_gateway/app.py:4160",
       "summary": "Trading Strategy Promote",
       "tags": [],
       "parameters": [],
@@ -27090,7 +27280,7 @@
       "device_proof_required_when_bound": true,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:4082",
+      "source": "backend/van_gateway/app.py:4138",
       "summary": "Trading Strategy Promotion Challenge",
       "tags": [],
       "parameters": [],
@@ -27135,7 +27325,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:4296",
+      "source": "backend/van_gateway/app.py:4352",
       "summary": "Trading Confirm Ticket",
       "tags": [],
       "parameters": [
@@ -27519,7 +27709,7 @@
       "device_proof_required_when_bound": true,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:4244",
+      "source": "backend/van_gateway/app.py:4300",
       "summary": "Record Visual Acceptance",
       "tags": [],
       "parameters": [],
@@ -27877,7 +28067,7 @@
       "device_proof_required_when_bound": false,
       "registration": "DEFAULT",
       "condition": null,
-      "source": "backend/van_gateway/app.py:2855",
+      "source": "backend/van_gateway/app.py:2862",
       "summary": "Put Project Truth",
       "tags": [],
       "parameters": [

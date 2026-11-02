@@ -88,13 +88,63 @@ class AccountResolvedReview(BaseModel):
         return values
 
 
+class CleanupOriginalAccount(BaseModel):
+    model_config=ConfigDict(extra='forbid',strict=True)
+    alias:str
+    broker:str
+    server:str
+    login:str
+    currency:str
+    demo:bool
+    safety_identity:str
+
+
+class CleanupLocalState(BaseModel):
+    model_config=ConfigDict(extra='forbid',strict=True)
+    registry:Literal['ORIGINAL_PRESENT','ORIGINAL_LINK_ABSENT_NOT_ORIGINAL_COMPLETION']
+    credential:Literal['NOT_MANAGED','ORIGINAL_MANAGED_FILE','ORIGINAL_OWN_OVERWRITE_UNUSABLE_FOR_NEW_NATIVE_OBSERVATION',
+                       'ORIGINAL_UNLINK_FACT_AND_CURRENT_ABSENCE_NOT_PROVIDER_STATE']
+
+
+class CleanupView(BaseModel):
+    model_config=ConfigDict(extra='forbid',strict=True)
+    parent_operation_id:str=Field(pattern='^[A-Za-z0-9_-]{20,128}$')
+    plan_ref:str=Field(pattern='^[0-9a-f]{64}$')
+    original_device_id:str
+    account_control_domain:str=Field(pattern='^[0-9a-f]{64}$')
+    alias:str
+    original_epoch:int=Field(ge=1)
+    original_account:CleanupOriginalAccount
+    current_local_state:CleanupLocalState
+    original_step_head_ref:str=Field(pattern='^[0-9a-f]{64}$')
+    target_state_digest:str=Field(pattern='^[0-9a-f]{64}$')
+    remaining_steps:list[Literal['REGISTRY_REMOVE','CREDENTIAL_OVERWRITE','CREDENTIAL_UNLINK']]
+    retire_parent_safety_obligation:bool
+    retirement:AccountRetirementReview
+    parent_original_state:Literal['UNKNOWN']
+    parent_original_result:None
+    provider_closure_authority:Literal[False]
+
+
+class AccountCleanupReview(BaseModel):
+    model_config=ConfigDict(extra='forbid',strict=True)
+    schema_name:Literal['vati.pending-account-cleanup-review/1']=Field(alias='schema')
+    action:Literal['account_remove']
+    variant:Literal['PENDING_CLEANUP']
+    request_digest:str=Field(pattern='^[0-9a-f]{64}$')
+    resource_version:str=Field(pattern='^[0-9a-f]{64}$')
+    context_digest:str=Field(pattern='^[0-9a-f]{64}$')
+    review_digest:str=Field(pattern='^[0-9a-f]{64}$')
+    view:CleanupView
+
+
 class AccountChallengeResponse(BaseModel):
     approval_challenge_id: str
     approval_challenge: str
     issued_at_unix: int
     approval_expires_at_unix: int
     resolved_action_id: str
-    resolved_review: AccountResolvedReview | None=None
+    resolved_review: AccountResolvedReview | AccountCleanupReview | None=None
     account_control_domain: str=Field(pattern='^[0-9a-f]{64}$')
 
 
@@ -111,3 +161,26 @@ class AccountActionCatalog(BaseModel):
     actions: list[AccountActionDefinition]
     credential_keys_by_broker: dict[str,list[str]]
     account_control_domain: str=Field(pattern='^[0-9a-f]{64}$')
+
+
+class CleanupStepFact(BaseModel):
+    model_config=ConfigDict(extra='forbid',strict=True)
+    state:Literal['MAY_BEGIN','DONE','VERIFIED_ABSENT']
+    epoch:int=Field(ge=1)
+    executor_operation_id:str
+
+
+class AccountCleanupSummary(BaseModel):
+    model_config=ConfigDict(extra='forbid',strict=True)
+    schema_name:Literal['vati.pending-local-cleanup/1']=Field(alias='schema')
+    state:Literal['PROSPECTIVE_PLAN_RETAINED','QUALIFIED_SEPARATE_RESOLUTION']
+    plan_ref:str=Field(pattern='^[0-9a-f]{64}$')
+    epoch:int=Field(ge=1)
+    parent_operation_id:str
+    parent_phase:Literal['IN_FLIGHT','APPLIED','REFUSED','UNKNOWN']
+    step_facts:dict[Literal['REGISTRY_REMOVE','CREDENTIAL_OVERWRITE','CREDENTIAL_UNLINK'],CleanupStepFact]
+    linked_resolution_ref:str|None
+    linked_resolution_child_operation_id:str|None
+    linked_child_applied_ref:str|None
+    parent_original_unchanged:Literal[True]
+    execution_authority:Literal[False]

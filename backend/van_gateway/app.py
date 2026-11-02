@@ -17,7 +17,7 @@ from pathlib import Path
 
 from fastapi import FastAPI, Header, HTTPException, Request
 from fastapi.responses import JSONResponse, PlainTextResponse, RedirectResponse
-from pydantic import BaseModel, ConfigDict, Field, StrictBool, ValidationError
+from pydantic import model_serializer, BaseModel, ConfigDict, Field, StrictBool, ValidationError
 
 from van_gateway.action.service import ActionPolicyError
 from van_gateway.artemis.console import ArtemisConsoleProxy
@@ -182,7 +182,7 @@ from van_gateway.storage.db import Store
 from van_gateway.trading import TradingAuthorityError, TradingControlError, TradingService
 from van_gateway.visual.acceptance import VisualAcceptanceError, VisualAcceptanceService
 from van_gateway.trading.accounts import ACTIONS as ACCOUNT_ACTIONS, AccountOnboarding, CommanderAccountControl, LocalAccountControl, OAuthPending, canonical_action, account_approval_text, redact as redact_account_args, requires_owner_approval
-from van_gateway.trading.account_contracts import AccountChallengeResponse,AccountActionCatalog
+from van_gateway.trading.account_contracts import AccountChallengeResponse,AccountActionCatalog,AccountCleanupSummary
 from van_gateway.trading.strategies import StrategyPromotionGateway, canonical_strategy_promotion
 from van_gateway.trading.runtime_controls import register_runtime_control_routes
 from van_gateway.trading.runtime_recovery_dispatch import RuntimeRecoveryDispatcher
@@ -335,6 +335,13 @@ class AccountOperationResponse(BaseModel):
     result: dict | None = None
     native_event_ref: str
     account_control_domain: str | None = None
+    cleanup_recovery: AccountCleanupSummary | None = None
+
+    @model_serializer(mode='wrap')
+    def preserve_original_operation_wire(self,handler):
+        data=handler(self)
+        if self.cleanup_recovery is None:data.pop('cleanup_recovery',None)
+        return data
 
 
 class AccountChallengeRequest(BaseModel):
@@ -3829,6 +3836,44 @@ def create_app() -> FastAPI:
     app.state.funding_classifications = FundingClassifications(store, trading, authorize_funding_classification)
     app.include_router(build_funding_classification_router(app.state.funding_classifications))
 
+    from van_gateway.trading.account_cleanup_api import AccountCleanup,build_account_cleanup_router,build_cleanup_operation_router
+    from van_gateway.approval.account_reauth import ReauthError,digest as cleanup_digest
+
+    async def authorize_account_cleanup(db,caller,mutating=True):
+        row=await (await db.execute(
+            'SELECT access_token_hash,public_key_pem,revoked_at_unix FROM devices WHERE device_id=?',
+            (caller['device_id'],))).fetchone()
+        if (caller['owner_id']!='owner' or not row or row['revoked_at_unix'] is not None
+                or row['access_token_hash']!=caller['access_token_hash']):
+            raise ReauthError('CLEANUP_CURRENT_OWNER_REFUSED',403)
+        if not isinstance(row['public_key_pem'],str) or not row['public_key_pem']:
+            raise ReauthError('CLEANUP_CURRENT_APPROVAL_KEY_UNAVAILABLE',503)
+        if not mutating:
+            return cleanup_digest({'owner_id':'owner','device_id':caller['device_id'],
+                'approval_key_sha256':hashlib.sha256(row['public_key_pem'].encode()).hexdigest()})
+        policy,binding,_=await current_device_mutation_policy(caller['device_id'],_db=db)
+        if not policy['eligible'] or policy['proof_required'] and not caller['proved']:
+            raise ReauthError('CLEANUP_OWNER_POLICY_REFUSED',403)
+        verified=caller.get('verified_binding_identity')
+        if policy['proof_required'] or verified is not None:
+            if (binding is None or not isinstance(verified,str) or re.fullmatch(r'[0-9a-f]{64}',verified) is None
+                    or not hmac.compare_digest(verified,verified_binding_identity(binding))):
+                raise ReauthError('CLEANUP_PROOF_BINDING_CHANGED',403)
+        if int(time.time())>=caller['request_deadline']:
+            raise ReauthError('CLEANUP_CURRENT_REQUEST_EXPIRED',403)
+        return cleanup_digest({'owner_id':'owner','device_id':caller['device_id'],
+            'approval_key_sha256':hashlib.sha256(row['public_key_pem'].encode()).hexdigest(),
+            'device_binding_identity':verified_binding_identity(binding) if binding else None})
+
+    app.state.account_cleanup=AccountCleanup(store,onboarding,_authenticate_account_action,authorize_account_cleanup)
+    app.include_router(build_account_cleanup_router(app.state.account_cleanup))
+    app.include_router(build_cleanup_operation_router(app.state.account_cleanup))
+
+    def cleanup_failure(error):
+        return JSONResponse(status_code=error.status,content={'detail':{'code':error.code,
+            'locked_until':error.locked_until,'retry_after':error.retry_after}},headers={
+            'Cache-Control':'no-store',**({'Retry-After':str(error.retry_after)} if error.retry_after else {})})
+
     @app.get('/v1/trading/accounts/catalog',response_model=AccountActionCatalog)
     async def trading_account_catalog(request: Request):
         device_id=getattr(request.state,'van_device_id',None)
@@ -3852,6 +3897,11 @@ def create_app() -> FastAPI:
                    {'ctid_trader_account_id':{'type':'integer'},'is_live':{'type':'boolean'}})},
                 'required':['alias','state','loginid'] if name=='deriv_oauth_link' else ['alias','state','ctid_trader_account_id']}
             schemas[name]={'oneOf':[schemas[name],selection]}
+        remove_schema=schemas['account_remove']
+        schemas['account_remove']={'oneOf':[
+            {'type':'object','properties':{'alias':remove_schema['properties']['alias']},'required':['alias'],'not':{'required':['variant']}},
+            {'type':'object','properties':remove_schema['properties'],'required':['alias','variant','parent_operation_id','plan_ref',
+                'retire_parent_safety_obligation','reauth_fact_id','reauth_fact_digest'],'additionalProperties':False}]}
         def mark_private_inputs(definition):
             for key,value in definition.get('properties',{}).items():
                 if re.search(r'secret|token|password|code',key,re.I): value['writeOnly']=True
@@ -3876,6 +3926,9 @@ def create_app() -> FastAPI:
         key", and approving one set of credentials does not approve a different set.
         """
         await _authenticate_account_action(request, req)
+        if req.action=='account_remove' and req.args.get('variant')=='PENDING_CLEANUP':
+            try:return await app.state.account_cleanup.challenge(request,req)
+            except ReauthError as error:return cleanup_failure(error)
         if not requires_owner_approval(req.action):
             raise HTTPException(
                 status_code=400,
@@ -3936,6 +3989,9 @@ def create_app() -> FastAPI:
     @app.post("/v1/trading/accounts/action", responses={409:{"model":AccountActionConflictResponse}})
     async def trading_account_action(request: Request, req: AccountActionRequest):
         await _authenticate_account_action(request, req)
+        if req.action=='account_remove' and req.args.get('variant')=='PENDING_CLEANUP':
+            try:return await app.state.account_cleanup.action(request,req)
+            except ReauthError as error:return cleanup_failure(error)
         from commander.account_effects import JOURNALED_COMMANDS
         expected_domain=request.headers.get('X-Van-Account-Control-Domain')
         if expected_domain and expected_domain!=await asyncio.to_thread(onboarding.control.domain):

@@ -1,0 +1,238 @@
+{
+  "status": "FROZEN_SOURCE_CANDIDATE_READY_FOR_INDEPENDENT_REVIEW_NOT_NATIVE_ACCEPTED",
+  "lane": "/tmp/van-be004-cleanup-lane-20261102",
+  "source_base": "23a570cf3f4f6e67fee69a2f8d845c7a8f03d244",
+  "consumed_published_foundation": "9cfde69c38bc39a54875c2a9bf60c6269f363d64",
+  "foundation_only": "/tmp/van-be004-cleanup-evidence-20261102/PUBLISHED_FOUNDATION13.json",
+  "canonical_scope_unchanged": {
+    "unit_id": "BE-004",
+    "packet_id": "VAN-PKT-007",
+    "contract_hash": "b7fb19c27f8758a5500274a2cd5cae860111db8ff6f520298a67166db5754bc3",
+    "requirements": [
+      "VAN-NX-048",
+      "VAN-NX-049",
+      "VAN-NX-050",
+      "VAN-NX-056",
+      "VAN-NX-057",
+      "VAN-NX-064",
+      "VAN-CX-016",
+      "VAN-CRYPTO-001",
+      "VAN-CRYPTO-002",
+      "VAN-CRYPTO-013",
+      "VAN-RV-008"
+    ],
+    "acceptance_ids": [
+      "T-BE-004-POS",
+      "T-BE-004-NEG",
+      "T-BE-004-REC",
+      "T-BE-004-SEC",
+      "T-BE-004-INT",
+      "T-VAN-CX-016-POS",
+      "T-VAN-CX-016-NEG",
+      "T-VAN-CX-016-REC",
+      "T-REV113-003",
+      "T-VAN-CRYPTO-001-POS",
+      "T-VAN-CRYPTO-001-NEG",
+      "T-VAN-CRYPTO-001-REC",
+      "T-VAN-CRYPTO-002-POS",
+      "T-VAN-CRYPTO-002-NEG",
+      "T-VAN-CRYPTO-002-REC",
+      "T-VAN-CRYPTO-013-POS",
+      "T-VAN-CRYPTO-013-NEG",
+      "T-VAN-CRYPTO-013-REC",
+      "T-VAN-RV-008-POS",
+      "T-VAN-RV-008-NEG",
+      "T-VAN-RV-008-REC"
+    ],
+    "contexts": [
+      "VNX-S-ACCOUNTS-01",
+      "VNX-S-ACCOUNTS-02",
+      "VNX-S-ACCOUNTS-03",
+      "VNX-S-ACCOUNTS-04",
+      "VNX-S-ACCOUNTS-05",
+      "VNX-S-ACCOUNTS-06",
+      "VNX-S-ACCOUNTS-07",
+      "VNX-S-ACCOUNTS-08",
+      "VNX-S-ACCOUNTS-09",
+      "VNX-S-ACCOUNTS-10",
+      "VNX-S-ACCOUNTS-11",
+      "VNX-S-ACCOUNTS-12",
+      "VNX-S-ACCOUNTS-13",
+      "VNX-S-ACCOUNTS-14",
+      "VNX-S-ACCOUNTS-15",
+      "VNX-S-ACCOUNTS-16",
+      "VNX-S-ACCOUNTS-17",
+      "VNX-S-ACCOUNTS-18",
+      "van.trading.accounts",
+      "van.trading.accounts.add"
+    ],
+    "owner_actions": [
+      "LAC-134",
+      "LAC-135",
+      "LAC-137",
+      "LAC-138",
+      "LAC-139",
+      "LAC-140"
+    ]
+  },
+  "canonical_binding": {
+    "blueprint_sections": [
+      "7.9.1 local versus remote account lifecycle",
+      "7.9.4 disconnect/delete/cancel and credential/history disposition",
+      "7.9.10 full account acceptance",
+      "7.9.11 A3 fresh reauthentication plus signed approval and rate limiting"
+    ],
+    "recovery_actions": [
+      "LAC-134 independent exact-scope current read",
+      "LAC-137 separately typed effect and original recovery, partial/UNKNOWN retained",
+      "LAC-138 fresh subject/device/args/expiry bound challenge",
+      "LAC-139 native biometric exact proof; separate dispatch and independent result",
+      "LAC-135 changed target creates new draft",
+      "LAC-140 navigation never dispatches"
+    ],
+    "focused_acceptance": [
+      "T-BE-004-POS",
+      "T-BE-004-NEG",
+      "T-BE-004-REC",
+      "T-BE-004-SEC",
+      "T-BE-004-INT",
+      "T-VAN-CX-016-REC",
+      "T-REV113-003"
+    ],
+    "unchanged_obligations": "All 11 requirements, 21 acceptance contracts, 20 contexts and six LAC actions remain; candidate packet does not issue PRE-003/BE-004/native/BG001/provider/production acceptance."
+  },
+  "source16_pins": "/tmp/van-be004-cleanup-evidence-20261102/FINAL_SOURCE_PINS.json",
+  "public_safe_export": {
+    "zip": "/dev/shm/van-be004-cleanup-test-20261102/FINAL_SOURCE/SOURCE16.zip",
+    "zip_sha256": "c250732303d085a42c5ff80bb727ba957927ed50d51b83e258eb43065cdf0f4b",
+    "patch": "/dev/shm/van-be004-cleanup-test-20261102/FINAL_SOURCE/SOURCE16.patch",
+    "patch_sha256": "d41c99eb9ee14f52337b6b66fbd01f219277864aa9a3b1b20e04e823ac295c4d",
+    "scope": "Exactly16 source/test files,13 product+3 newtest; no runtime vault keys/DBs/fixtures.13 reviewed foundation files excluded;23a/9cf preimages equal for all16."
+  },
+  "terminal_evidence": {
+    "runs": [
+      {
+        "run": "FINAL_ROOT45A",
+        "cwd": "/tmp/van-be004-cleanup-lane-20261102",
+        "cases": 46,
+        "passed": 46,
+        "skipped": 0,
+        "exit": 0,
+        "elapsed_s": 139.475,
+        "receipt": "/dev/shm/van-be004-cleanup-test-20261102/FINAL_ROOT45A/receipt.json",
+        "receipt_sha256": "ed5f487b43916dcd7ab927725766473828c8d58607ef7db73cada925a9ed4afa",
+        "junit_sha256": "dcf908e7affeae3647a77f479085c78cf2b6ac547d9141b353f42adc558e108b",
+        "finally_wait_sha256": "3a4d82b30785d6c1e64d02cb9b9166b514f05b7c1d3dffe30f764888cb127956"
+      },
+      {
+        "run": "FINAL_ROOT45B",
+        "cwd": "/tmp/van-be004-cleanup-lane-20261102",
+        "cases": 47,
+        "passed": 45,
+        "skipped": 2,
+        "exit": 0,
+        "elapsed_s": 79.153,
+        "receipt": "/dev/shm/van-be004-cleanup-test-20261102/FINAL_ROOT45B/receipt.json",
+        "receipt_sha256": "ef23595a086ddab2902d891ab718060c0243150c0315024de978c31c38439050",
+        "junit_sha256": "bfd81317ff400b2403c97012cd206aef8524af22220b39e243e25da5641542b8",
+        "finally_wait_sha256": "f0701c2824efc5d3e7f951084903b7538bf9440786160d51f8a70207e516c68c"
+      },
+      {
+        "run": "FINAL_BACKEND46",
+        "cwd": "/tmp/van-be004-cleanup-lane-20261102/backend",
+        "cases": 24,
+        "passed": 24,
+        "skipped": 0,
+        "exit": 0,
+        "elapsed_s": 46.08,
+        "receipt": "/dev/shm/van-be004-cleanup-test-20261102/FINAL_BACKEND46/receipt.json",
+        "receipt_sha256": "95617238aa0cc6698403431a211098a07efbdefcb8455d3f88578ee0fa848724",
+        "junit_sha256": "77d0252213007f84c56b4bbbcc7f5001188cce45bc9f00826d5f3751f6cd621c",
+        "finally_wait_sha256": "904a64ef73985b05d776ce9a69aa63be4723da048a772867c6146930e89f13a3"
+      }
+    ],
+    "executions": 117,
+    "unique_test_identities": 115,
+    "configuration_distinct_duplicates": 2,
+    "skip_identities": [
+      "trading.tests.test_native_account_effects::test_postgres_original_operation_is_atomic_and_isolated_between_named_ledgers",
+      "trading.tests.test_native_account_effects::test_actual_concurrent_native_claim_writers_cannot_admit_two_effects_for_a_target[postgres]"
+    ],
+    "original44_exact_root_union_preserved": true,
+    "source16_unchanged": true,
+    "source_only_limits": "No PostgreSQL execution, hardware/native/provider/Android or power-loss qualification."
+  },
+  "exact_case_union": {
+    "root": {
+      "passed": 91,
+      "skipped": 2,
+      "distinct_node_ids": 93,
+      "union_exactly_matches_old44": true
+    },
+    "backend_cwd": {
+      "passed": 24,
+      "skipped": 0,
+      "distinct_node_ids": 24
+    },
+    "cross_cwd_overlapping_node_ids": [
+      "backend.tests.test_account_cleanup::test_actual_http_distinct_reauth_data_then_substantive_a4_new_child_original_readback",
+      "backend.tests.test_account_cleanup::test_current_paired_cleanup_and_published_fixture_consumers_share_canonical_signing_owner"
+    ],
+    "executions": 117,
+    "unique_classname_name_identities_including_skips": 115,
+    "unique_passed_identities": 113,
+    "explanation": "Two paired cleanup/signing-owner controls deliberately run in different actual CWD configurations; counts from XML sets, not inferred acceptance."
+  },
+  "workflow": [
+    "Prospective exact full approved native resource/review capture before minimization; strict private same-DB technical schema2, independent durable PLAN/epoch/MAY_BEGIN/DONE and per-fact/head local-data HMAC. No business-row/count hiding or FS/SQL atomicity claim.",
+    "Separate enrolled-key reauth DATA plus distinct substantive A4 proof; one existing Gateway Store writer consumes both and records immutable child admission; hard new-purpose-only5/300/900 scoped counter; raw7day expiry/prune without deleting used/admission/original refs.",
+    "Existing account_remove explicit PENDING_CLEANUP child only for genuine original plan/device/domain/current target; exact managed original readonly observations outside registry/credential locks; fresh source/lease/time/current owner guards, immutable old UNKNOWN/null and old replay prohibition.",
+    "New child independently applied/read back, exact linked resolution after postconditions/quiescence and explicit substantive consequence approval; only named old safety fence retires. Other unknowns, current target changes, bad/corrupt/missing/legacy-unbound evidence HOLD.",
+    "Durable-before-native admission; cancellation/lost ACK/late exact concurrent replay recover original without new send/IDs/deadline; issued actor proof unchanged across mere public-key replacement, current explicit device/token/scope loss still refuses."
+  ],
+  "material_controls": {
+    "integrity": "INTEGRITY11/13\u201320/29/30 receipts; original12 resource-cap abort retained",
+    "native_resolution": "RESOLUTION21",
+    "retention": "RETENTION23 PASS,22 incorrect-clock fixture failure retained",
+    "queued_owner": "QUEUED24\u201326",
+    "cancellation": "CANCEL27\u201328",
+    "actual_process_death": "PROCESS38/39 actual live-lease HOLD\u2192real30s expiry\u2192fresh child;42 completion after already-released lease;34/40 premature/unconditional lease fixture failures retained",
+    "issued_key_policy": "ACTOR_POLICY35\u201337 PASS;ACTOR_WAIT33 provisional REFUSED oracle+DB/raw retained and root continuity decision recorded, no production key-policy change",
+    "managed_read": "READVIEW43 three SOURCE real-adapter/fixture-transport outcomes; final45B healthy repeated only for new9cf build_adapter foundation",
+    "final_crosspin": "45B actual existing depth registry_removed after-fsync case + unchanged original private-core import assertions under scratch-only child resource environment"
+  },
+  "controller_history": {
+    "old44": "CONTROLLER_FAILED:91JUnitPASS2PGskip observed, childexitUNRECOVERED; no reap claim from absence. Final146298491B exceeded128MiB; all raw/fixtures retained.45A/B are justified disjoint exact93 rerun, genuine exits.",
+    "failure_receipt": "/tmp/van-be004-cleanup-evidence-20261102/FINAL_ROOT44_CONTROLLER_FAILURE.json",
+    "preflights": "/tmp/van-be004-cleanup-evidence-20261102/CONTROLLER_PREFLIGHT.json",
+    "preflights_verdict": "Rapid create/unlink child0 waited/groupabsent; injected monitor error sleepingchild terminated-15 waited/drained/groupabsent. Handles only ENOENT/ENOTDIR stat races; unexpectedIO fails; finally owns child wait.",
+    "reusable_external_helper": "/tmp/van-be004-cleanup-evidence-20261102/controller_lifecycle.py",
+    "runner": "/tmp/van-be004-cleanup-evidence-20261102/run_shm.py"
+  },
+  "runtime": {
+    "actual_lock_observation": "/tmp/van-be004-cleanup-evidence-20261102/RUNTIME_LOCK_OBSERVATION.json",
+    "lock_sha256": "808e30cb3359c908597bab5fc49797a23bf1748d12831b6200f9505a005b40da",
+    "packages": "38/38 exact versions matched",
+    "resource_route": "Prospective root-approved SHM scratch-only:2GiB SHM+declared cap,4GiB cgroup headroom,8MiBfile,128MiB final aggregate,shared0600flock,workspace read-only32MiBhard;64MiB for any workspace-growing batch. No retroqualification of prior resource failures.",
+    "storage_limit": "Both tmp andSHM tmpfs; Source processdeath/coldreopen, NOT powerloss/disk/native qualification."
+  },
+  "private_fixture_locations_not_public_exports": [
+    "/dev/shm/van-be004-cleanup-test-20261102",
+    "/tmp/van-be004-cleanup-evidence-20261102",
+    "/workspace/van-be004-cleanup-test-temp-20261102",
+    "/workspace/van-be004-cleanup-success-fixtures-20261102/RELOCATION.json",
+    "/workspace/van-be004-cleanup-success-fixtures-20261102/REBALANCE.json"
+  ],
+  "open_obligations": [
+    "PostgreSQL actual execution unavailable (two exact existing opted-in tests skipped, no skip waiver).",
+    "Remote native signed current-control envelope/bounded permission has no independent continuous Gateway actor-revocation readback: no distributed-currentness/2PC claim.",
+    "Native provider/hardware/BIOMETRIC_STRONG qualification and real effects unproved; fixture transports and software EC keys explicitly SOURCE.",
+    "Android exact persisted two-proof producer/confirmation/recovery compatibility mandatory next lease, not implemented in this packet.",
+    "Recovered-device native continuity adapter remains OPEN; original-device equality enforced.",
+    "Unsealed legacy/missing/corrupt/replaced key/source/target/shared or unusable overwritten credentials HOLD without restoration or guessed completion.",
+    "Grace DELETE/cancel/OAuth/strategy/funds/remote closure and every remaining original BE004 predicate/formal admission remain OPEN; all11req21accept20contexts6actions retained.",
+    "Sole integrator owns generated owner/catalog citations/mutation coupling/read-only preflight and exact combined hosted Source CI; no author generators/commit/push or unit/native acceptance."
+  ],
+  "active_owned_jobs": [],
+  "next": "Independent source review/recheck and sole integration owner application of exact16 patch onto current published foundation; preserve already-reviewed13 and all unrelated work."
+}

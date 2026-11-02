@@ -1,0 +1,11 @@
+{
+  "kind": "CONTROLLER_FAILED_NOT_TERMINAL_TEST_PROOF",
+  "error": "FileNotFoundError monitoring ephemeral SQLite journal",
+  "supervisor_exit": 1,
+  "child_exit": "UNRECOVERED",
+  "raw_observation": "91 passed,2 existingPGskipped,214.86s",
+  "source_unchanged": true,
+  "final_apparent_bytes": 146298491,
+  "no_active_owned_pytest_observed": true,
+  "original_fixture_retained": true
+}

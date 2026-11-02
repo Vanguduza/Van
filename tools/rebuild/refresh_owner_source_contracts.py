@@ -548,6 +548,27 @@ def build(read=None):
             'new_ui_implemented':False,'live_qualified':False,
         }
         for row in funding_rows:row.setdefault('backend_contract_extensions',[]).append(copy.deepcopy(extension))
+    cleanup_rows = [accounts, next(r for r in documents['owner_screens']['screens'] if r['id'] == 'van.trading.accounts')]
+    cleanup_routes = {('POST', '/v1/trading/accounts/cleanup/reauth/challenge'),
+                      ('POST', '/v1/trading/accounts/cleanup/reauth/verify'),
+                      ('GET', '/v1/trading/accounts/cleanup/reauth/facts/{fact_id}'),
+                      ('GET', '/v1/trading/accounts/cleanup/operations/{operation_id}')}
+    for endpoint in endpoint_doc['endpoints']:
+        if (endpoint['method'], endpoint['path']) not in cleanup_routes:
+            continue
+        extension = {
+            'method': endpoint['method'], 'path': endpoint['path'], 'endpoint_id': endpoint['endpoint_id'],
+            'source_ref': endpoint['source'], 'authentication': endpoint['authentication'],
+            'device_proof_required_when_bound': endpoint['device_proof_required_when_bound'],
+            'source_status': 'CANDIDATE_SOURCE_DATA_ANDROID_TWO_PROOF_CONSUMER_PENDING',
+            'authority': 'SOURCE_DATA_ONLY_SEPARATE_CURRENT_PERMISSION_REQUIRED_NO_NEW_ISSUER',
+            'canonical_units': ['BE-004'],
+            'scope': 'Purpose-bound reauthentication facts and original cleanup-child readback under the existing paired account owner. Fresh reauthentication data and a distinct substantive A4 permission remain separate. Historical parent UNKNOWN/null is preserved; exact original target/managed identity/current guards and independent child postconditions are required. Missing or unsealed evidence holds without guessed rebinding, credential restoration or effect resend. Android two-proof production/recovery, native hardware/provider qualification, full grace/delete/cancel and all other original account predicates remain pending.',
+            'specification': 'docs/rebuild/rev118/receipts/ACCOUNT_CLEANUP_RECOVERY_SOURCE_20261102.json',
+            'new_ui_implemented': False, 'live_qualified': False,
+        }
+        for row in cleanup_rows:
+            row.setdefault('backend_contract_extensions', []).append(copy.deepcopy(extension))
     for endpoint in endpoint_doc["endpoints"]:
         if not endpoint["path"].startswith("/v1/trading/charts/"):
             continue
