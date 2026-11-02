@@ -686,13 +686,38 @@ async def test_current_paired_cleanup_and_published_fixture_consumers_share_cano
     """Actual enrollment/proof provenance, including all four reviewed consumers."""
     import importlib,sys
     canonical=importlib.import_module('backend.tests.test_trading_api')
+    # Other self-consistent fixture cohorts may load this producer by its bare
+    # name. Prove coexistence while binding THIS caller to its actual owner.
+    from pathlib import Path
+    unrelated=importlib.import_module('test_trading_api')
+    assert unrelated is not canonical
+    assert Path(unrelated.__file__).resolve()==Path(canonical.__file__).resolve()
+    assert unrelated.DEVICE_KEY is not canonical.DEVICE_KEY
+    assert unrelated.DEVICE_PEM!=canonical.DEVICE_PEM
     for name in ('test_account_operation_recovery','test_account_resource_binding','test_stateful_link_binding','test_trading_oauth_effects'):
         consumer=importlib.import_module('backend.tests.'+name)
         assert consumer.client is canonical.client and consumer._env is canonical._env
         if hasattr(consumer,'_approval_proof'):assert consumer._approval_proof is canonical._approval_proof
     assert sign.__globals__['DEVICE_KEY'] is canonical.DEVICE_KEY
-    assert not any(name=='test_trading_api' and module is not canonical for name,module in sys.modules.items())
+    assert sys.modules['test_trading_api'] is unrelated
+    assert globals()['client'] is canonical.client and globals()['_env'] is canonical._env
     ac,app=client
     device=await app.state.store.fetchone("SELECT public_key_pem FROM devices WHERE device_id='test-device'")
     assert device['public_key_pem']==canonical.DEVICE_PEM
+    import base64
+    from cryptography.hazmat.primitives import hashes
+    from cryptography.hazmat.primitives.asymmetric import ec
+    from van_gateway.approval.service import OwnerApprovalService,OwnerApprovalError
+    approvals=OwnerApprovalService(app.state.store)
+    text='SOURCE scoped current-enrollment signing-owner verification only'
+    issued=await approvals.issue(device_id='test-device',source_command_id='account:account_remove',
+        turn_id=None,action_id=ACTION,text=text,project_id=None)
+    values=dict(challenge_id=issued.challenge_id,source_command_id='account:account_remove',
+        device_id='test-device',turn_id=None,action_id=ACTION,text=text,project_id=None)
+    foreign=base64.b64encode(unrelated.DEVICE_KEY.sign(issued.canonical.encode(),ec.ECDSA(hashes.SHA256()))).decode()
+    with pytest.raises(OwnerApprovalError,match='approval_signature_invalid'):
+        await approvals.verify_and_consume(**values,signature_b64=foreign)
+    accepted=await approvals.verify_and_consume(**values,signature_b64=sign(issued.canonical))
+    assert accepted['operation_id']==issued.challenge_id
+    assert sys.modules['test_trading_api'] is unrelated  # no alias cleanup
     assert (await ac.get('/v1/trading/accounts')).status_code==200

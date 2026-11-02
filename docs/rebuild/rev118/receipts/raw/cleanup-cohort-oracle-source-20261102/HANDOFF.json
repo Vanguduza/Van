@@ -1,0 +1,330 @@
+{
+  "schema": "van.cleanup-provenance-oracle-repair/1",
+  "state": "FROZEN_ONEFILE_FOR_INDEPENDENT_REVIEW_NO_MAIN_APPLY",
+  "utc": "2026-11-02T11:18:45.543073+00:00",
+  "base": "3854f116efa46bc2cd68cdb50eb42f73c53d603a",
+  "candidate_lane": "/dev/shm/van-cleanup-cohort-repair-20261102/source",
+  "path": "backend/tests/test_account_cleanup.py",
+  "before_sha256": "344b5fa74c371a24a05deb1c78ebd075f41305a8ff31360189b60179b81a7064",
+  "after_sha256": "dac7d23044599e97daa81ad2e050327585a3f5447eb72ce19444c2439280fa5e",
+  "patch_sha256": "3e02dad5356b1f8388bfd1bb748aa7a0ebbd41a0e94caaf8c1153e5d536a73b9",
+  "source_zip_sha256": "9ccd9348c16c388186b7b6ab5a639b73ee282a64134d36ad767ee1ce69525512",
+  "source_zip_members_sha256": {
+    "before/backend/tests/test_account_cleanup.py": "344b5fa74c371a24a05deb1c78ebd075f41305a8ff31360189b60179b81a7064",
+    "after/backend/tests/test_account_cleanup.py": "dac7d23044599e97daa81ad2e050327585a3f5447eb72ce19444c2439280fa5e",
+    "SOURCE.patch": "3e02dad5356b1f8388bfd1bb748aa7a0ebbd41a0e94caaf8c1153e5d536a73b9"
+  },
+  "public_proof_zip_sha256": "99b8a6718b3fb0b86baaa4deff62d7bd775d8be990b936547b624555062302c0",
+  "public_proof_members_sha256": {
+    "BEFORE_ROOT/raw.txt": "a53241304cb20875699c87b04397e011a8e19412a191fcb8671963c27edeac1a",
+    "BEFORE_ROOT/junit.xml": "b3aecbb2a0b059a06a744a7f89ad4805e62d9730524efd3cd0ac7cc38b5a65c4",
+    "BEFORE_ROOT/receipt.json": "5bf85b9cc1be0c7a184d11ea166761305922a11e4001966d3f5d410dfc154b7e",
+    "BEFORE_ROOT/FINALLY_WAIT.json": "179017e5cd2fec8d5e49fe6d96aef652675621e4190c37134774e475033d61c1",
+    "BEFORE_ROOT/MODULE_PROVENANCE_SUMMARY.json": "69042ad1473a1424456462055398f942d89dc38c215347815b6b9a498978b5b1",
+    "BEFORE_BACKEND/raw.txt": "bb59b6cdc12d8369ddf6e7bdc33af4546ae2815c23b3663e4bcf2b3b59e29685",
+    "BEFORE_BACKEND/junit.xml": "5fe225af17c06361fe68d2217e786839bbe6e804f422b78c24f2a7b2ed6e7a7f",
+    "BEFORE_BACKEND/receipt.json": "e288176b52772905ef33bf1aa096848c6c2db3b6651e70ab42934d34f960e41c",
+    "BEFORE_BACKEND/FINALLY_WAIT.json": "445afd244b2518db186cf9cd45a0118740093222c96c6128357c2438838f7d04",
+    "BEFORE_BACKEND/MODULE_PROVENANCE_SUMMARY.json": "d53f114e2f64ca6e335057deb39342ff09ac80814609be4eabdbb7523fac603b",
+    "AFTER_ROOT/raw.txt": "149c83fe977b8223fedabf8c062f1c811ddf89ecee27aa5679dba29bc6a97525",
+    "AFTER_ROOT/junit.xml": "74f8565100a8642882ae2a5c3e611b3b1e916064ac43276c8511e36e1649e881",
+    "AFTER_ROOT/receipt.json": "b3619397ea4aae35de7a719ead022b32b445df7b03440e444f134792256a49ed",
+    "AFTER_ROOT/FINALLY_WAIT.json": "63f05fd9c82c01f29ab8b3d3244cfa185538f817cde70444c3e07fedc58d685a",
+    "AFTER_ROOT/MODULE_PROVENANCE_SUMMARY.json": "8f72bc3dbce33abbee5c12c5f12ad5ad586aa086c00f9f6f93dac7c134365dc5",
+    "AFTER_BACKEND/raw.txt": "e913cfc14f8e110dcfef0bc9ab50b6f031331541d4bb234d111cfbdbe5ebf9e0",
+    "AFTER_BACKEND/junit.xml": "74a8a168677fb5c4df39f41259f505665c8a2891027778a02d65d57590158d01",
+    "AFTER_BACKEND/receipt.json": "fbfd3636824f8166657e09774021ad5db1c0bcf1154b9bddd3e5c8ad04a55b49",
+    "AFTER_BACKEND/FINALLY_WAIT.json": "4aaf2f70bbecf9979547d31914494d8ffeb0d0f796d3dca5a3c91b5db38020a4",
+    "AFTER_BACKEND/MODULE_PROVENANCE_SUMMARY.json": "9fb9cbcfb56a25d8c5e7b381aea43280ad6cc5f92f09e3893d2fd8326da4bac6",
+    "probes/test_original_coexistence.py": "feb309e678d7bd2228c7c6a4bfbf8aa325cc2592c6d999bd53614a895fa4dc83",
+    "controller/run.py": "965539a0ee2f771b68f55c5b3ef88c77cb5bc1aad2281927574abd41a4e28529",
+    "controller/controller_lifecycle.py": "7f9b7c78150209e7365851f8d7bc63b5c4ea6577b1e4dca1fc384ff8437db3b3"
+  },
+  "changed_source_paths": [
+    "backend/tests/test_account_cleanup.py"
+  ],
+  "outside_function_AST_identical": true,
+  "all_other_original_assertions_retained": true,
+  "original_unsupported_assertion_replaced": "Globalabsence ofseparatebaretest_trading_api module is not scopedcaller/keyprovenance. Actualnormalbare+canonicalcoexistence nowASSERTED withoutaliascleanup; exactsameproducerpath/distinctkey proven. Existing4canonicalclient/_env/proof bindings andsignDEVICE_KEY checks retained; actualenrolledSQLpubkey+GET200 retained.",
+  "substantive_controls": "Foreign barecohort ECDSA signature is rejected by the actual OwnerApprovalService (approval_signature_invalid); canonical signature on the SAME original challenge succeeds against the enrolled SQL public key. Owned negative probes temporarily cross ONLY the selected signer or existing consumer proof function and expect the real scoped assertion to fail; monkeypatch restores them. No production code/store/schema/enrolled key, fixture-key generation implementation, import mode, module aliases or sys.path mutation. The existing temporary Store issue/verify APIs intentionally create and consume challenge data as part of this real source test.",
+  "before_actual": "2executions/1pytestidentity, eachgenuineexpectedFAIL atpublishedglobalabsenceassert inroot/backendCWD. Raw/XML/coldSQLite/keys PRIVATE retained, notrelabeled.",
+  "after_actual": "4uniquepytestIDs acrossbothCWD/8executions PASS/zeroSKIP; 2positivecalls sameunderlyingrepairedfunction +2adversarialinvariantcontrols perCWD; not8independentbusinessworkflows.",
+  "runs": [
+    {
+      "tag": "BEFORE_ROOT",
+      "cwd": "/dev/shm/van-cleanup-cohort-repair-20261102/source",
+      "command": [
+        "/workspace/van-backend-venv-20261025/bin/python",
+        "-B",
+        "-m",
+        "pytest",
+        "-p",
+        "pytest_asyncio.plugin",
+        "-p",
+        "anyio.pytest_plugin",
+        "-p",
+        "no:cacheprovider",
+        "-o",
+        "asyncio_mode=auto",
+        "-q",
+        "--tb=short",
+        "-c",
+        "/dev/shm/van-cleanup-cohort-repair-20261102/source/pytest.ini",
+        "--basetemp=/dev/shm/van-cleanup-cohort-repair-20261102/evidence/BEFORE_ROOT/fixtures",
+        "--junitxml=/dev/shm/van-cleanup-cohort-repair-20261102/evidence/BEFORE_ROOT/junit.xml",
+        "/dev/shm/van-cleanup-cohort-repair-20261102/probes/test_original_coexistence.py"
+      ],
+      "exit": 1,
+      "reason": null,
+      "controller_error": null,
+      "seconds": 10.717,
+      "owned_peak_bytes": 5529772,
+      "final": {
+        "child_pid": 1652027,
+        "child_exit": 1,
+        "waited": true,
+        "group_absent": true
+      },
+      "source_before_sha256": "344b5fa74c371a24a05deb1c78ebd075f41305a8ff31360189b60179b81a7064",
+      "source_after_sha256": "344b5fa74c371a24a05deb1c78ebd075f41305a8ff31360189b60179b81a7064",
+      "cases": [
+        {
+          "id": "::test_published_provenance_with_unrelated_real_bare_cohort",
+          "outcome": "failed"
+        }
+      ],
+      "counts": {
+        "passed": 0,
+        "failed": 1,
+        "error": 0,
+        "skipped": 0
+      },
+      "resource_before": {
+        "workspace_free": 67858432,
+        "tmp_free": 2147913728,
+        "SHM_free": 9059631104,
+        "memory_current": 11249262592,
+        "memory_max": 17179869184,
+        "SHM_device": 26
+      },
+      "fixtures_retained": true,
+      "scope": "OwnedSOURCEsoftwareEC/SQLite/HTTP only; no native/hardware/provider/fullunit qualification."
+    },
+    {
+      "tag": "BEFORE_BACKEND",
+      "cwd": "/dev/shm/van-cleanup-cohort-repair-20261102/source/backend",
+      "command": [
+        "/workspace/van-backend-venv-20261025/bin/python",
+        "-B",
+        "-m",
+        "pytest",
+        "-p",
+        "pytest_asyncio.plugin",
+        "-p",
+        "anyio.pytest_plugin",
+        "-p",
+        "no:cacheprovider",
+        "-o",
+        "asyncio_mode=auto",
+        "-q",
+        "--tb=short",
+        "-c",
+        "/dev/shm/van-cleanup-cohort-repair-20261102/source/pytest.ini",
+        "--basetemp=/dev/shm/van-cleanup-cohort-repair-20261102/evidence/BEFORE_BACKEND/fixtures",
+        "--junitxml=/dev/shm/van-cleanup-cohort-repair-20261102/evidence/BEFORE_BACKEND/junit.xml",
+        "/dev/shm/van-cleanup-cohort-repair-20261102/probes/test_original_coexistence.py"
+      ],
+      "exit": 1,
+      "reason": null,
+      "controller_error": null,
+      "seconds": 9.764,
+      "owned_peak_bytes": 5673146,
+      "final": {
+        "child_pid": 1652110,
+        "child_exit": 1,
+        "waited": true,
+        "group_absent": true
+      },
+      "source_before_sha256": "344b5fa74c371a24a05deb1c78ebd075f41305a8ff31360189b60179b81a7064",
+      "source_after_sha256": "344b5fa74c371a24a05deb1c78ebd075f41305a8ff31360189b60179b81a7064",
+      "cases": [
+        {
+          "id": "::test_published_provenance_with_unrelated_real_bare_cohort",
+          "outcome": "failed"
+        }
+      ],
+      "counts": {
+        "passed": 0,
+        "failed": 1,
+        "error": 0,
+        "skipped": 0
+      },
+      "resource_before": {
+        "workspace_free": 67858432,
+        "tmp_free": 2147913728,
+        "SHM_free": 9057546240,
+        "memory_current": 11251208192,
+        "memory_max": 17179869184,
+        "SHM_device": 26
+      },
+      "fixtures_retained": true,
+      "scope": "OwnedSOURCEsoftwareEC/SQLite/HTTP only; no native/hardware/provider/fullunit qualification."
+    },
+    {
+      "tag": "AFTER_ROOT",
+      "cwd": "/dev/shm/van-cleanup-cohort-repair-20261102/source",
+      "command": [
+        "/workspace/van-backend-venv-20261025/bin/python",
+        "-B",
+        "-m",
+        "pytest",
+        "-p",
+        "pytest_asyncio.plugin",
+        "-p",
+        "anyio.pytest_plugin",
+        "-p",
+        "no:cacheprovider",
+        "-o",
+        "asyncio_mode=auto",
+        "-q",
+        "--tb=short",
+        "-c",
+        "/dev/shm/van-cleanup-cohort-repair-20261102/source/pytest.ini",
+        "--basetemp=/dev/shm/van-cleanup-cohort-repair-20261102/evidence/AFTER_ROOT/fixtures",
+        "--junitxml=/dev/shm/van-cleanup-cohort-repair-20261102/evidence/AFTER_ROOT/junit.xml",
+        "/dev/shm/van-cleanup-cohort-repair-20261102/probes/test_original_coexistence.py",
+        "/dev/shm/van-cleanup-cohort-repair-20261102/source/backend/tests/test_account_cleanup.py::test_current_paired_cleanup_and_published_fixture_consumers_share_canonical_signing_owner"
+      ],
+      "exit": 0,
+      "reason": null,
+      "controller_error": null,
+      "seconds": 12.235,
+      "owned_peak_bytes": 9915063,
+      "final": {
+        "child_pid": 1652232,
+        "child_exit": 0,
+        "waited": true,
+        "group_absent": true
+      },
+      "source_before_sha256": "dac7d23044599e97daa81ad2e050327585a3f5447eb72ce19444c2439280fa5e",
+      "source_after_sha256": "dac7d23044599e97daa81ad2e050327585a3f5447eb72ce19444c2439280fa5e",
+      "cases": [
+        {
+          "id": "::test_published_provenance_with_unrelated_real_bare_cohort",
+          "outcome": "passed"
+        },
+        {
+          "id": "::test_selected_cleanup_signer_with_foreign_cohort_is_rejected",
+          "outcome": "passed"
+        },
+        {
+          "id": "::test_selected_published_consumer_with_foreign_proof_is_rejected",
+          "outcome": "passed"
+        },
+        {
+          "id": "backend.tests.test_account_cleanup::test_current_paired_cleanup_and_published_fixture_consumers_share_canonical_signing_owner",
+          "outcome": "passed"
+        }
+      ],
+      "counts": {
+        "passed": 4,
+        "failed": 0,
+        "error": 0,
+        "skipped": 0
+      },
+      "resource_before": {
+        "workspace_free": 67858432,
+        "tmp_free": 2147913728,
+        "SHM_free": 9055461376,
+        "memory_current": 11252568064,
+        "memory_max": 17179869184,
+        "SHM_device": 26
+      },
+      "fixtures_retained": true,
+      "scope": "OwnedSOURCEsoftwareEC/SQLite/HTTP only; no native/hardware/provider/fullunit qualification."
+    },
+    {
+      "tag": "AFTER_BACKEND",
+      "cwd": "/dev/shm/van-cleanup-cohort-repair-20261102/source/backend",
+      "command": [
+        "/workspace/van-backend-venv-20261025/bin/python",
+        "-B",
+        "-m",
+        "pytest",
+        "-p",
+        "pytest_asyncio.plugin",
+        "-p",
+        "anyio.pytest_plugin",
+        "-p",
+        "no:cacheprovider",
+        "-o",
+        "asyncio_mode=auto",
+        "-q",
+        "--tb=short",
+        "-c",
+        "/dev/shm/van-cleanup-cohort-repair-20261102/source/pytest.ini",
+        "--basetemp=/dev/shm/van-cleanup-cohort-repair-20261102/evidence/AFTER_BACKEND/fixtures",
+        "--junitxml=/dev/shm/van-cleanup-cohort-repair-20261102/evidence/AFTER_BACKEND/junit.xml",
+        "/dev/shm/van-cleanup-cohort-repair-20261102/probes/test_original_coexistence.py",
+        "/dev/shm/van-cleanup-cohort-repair-20261102/source/backend/tests/test_account_cleanup.py::test_current_paired_cleanup_and_published_fixture_consumers_share_canonical_signing_owner"
+      ],
+      "exit": 0,
+      "reason": null,
+      "controller_error": null,
+      "seconds": 12.774,
+      "owned_peak_bytes": 9610197,
+      "final": {
+        "child_pid": 1652560,
+        "child_exit": 0,
+        "waited": true,
+        "group_absent": true
+      },
+      "source_before_sha256": "dac7d23044599e97daa81ad2e050327585a3f5447eb72ce19444c2439280fa5e",
+      "source_after_sha256": "dac7d23044599e97daa81ad2e050327585a3f5447eb72ce19444c2439280fa5e",
+      "cases": [
+        {
+          "id": "::test_published_provenance_with_unrelated_real_bare_cohort",
+          "outcome": "passed"
+        },
+        {
+          "id": "::test_selected_cleanup_signer_with_foreign_cohort_is_rejected",
+          "outcome": "passed"
+        },
+        {
+          "id": "::test_selected_published_consumer_with_foreign_proof_is_rejected",
+          "outcome": "passed"
+        },
+        {
+          "id": "backend.tests.test_account_cleanup::test_current_paired_cleanup_and_published_fixture_consumers_share_canonical_signing_owner",
+          "outcome": "passed"
+        }
+      ],
+      "counts": {
+        "passed": 4,
+        "failed": 0,
+        "error": 0,
+        "skipped": 0
+      },
+      "resource_before": {
+        "workspace_free": 67858432,
+        "tmp_free": 2147913728,
+        "SHM_free": 9047228416,
+        "memory_current": 11260968960,
+        "memory_max": 17179869184,
+        "SHM_device": 26
+      },
+      "fixtures_retained": true,
+      "scope": "OwnedSOURCEsoftwareEC/SQLite/HTTP only; no native/hardware/provider/fullunit qualification."
+    }
+  ],
+  "module_provenance": "PublicPEMhashes/modulefile/name/objectidentity metadataonly; NO privatekeybytes.",
+  "source_copy": "SOURCE_COPY_PINS.json1464committedfiles15,819,860B; onlyoneleasedfunctionchanged. Other1463sources unchanged.",
+  "controller_helper_reuse_sha256": "7f9b7c78150209e7365851f8d7bc63b5c4ea6577b1e4dca1fc384ff8437db3b3",
+  "resource": "Sharedverified0600flock;sourcecopy32MiB/run16MiB/file8MiB/ownedaggregate64MiB<ROOT160ceiling; SHM2GiB+cap/cgroup4GiB/workspaceRO32hard/tmp2GiB. Alltemp/cache/outputSHM/no bytecode/cacheprovider; allchildrenwaited/groupabsent; no fixturecleanup.",
+  "scope": "SOFTWARE_EC/SQLite/pairedHTTP SOURCEonly, no nativehardware/provider/fullunit acceptance. No source113/198/SDK suites orCIretries.",
+  "original_CI": "3854run41425480179 remainsFAILED41terminal32success9failure;3FAILpergatewayroot/cwd includeTHISnewtest+2protectedentry67, DDS/truth+propagation remainunwaived.",
+  "no_main_changes": true,
+  "no_commit_push_or_auth_change": true,
+  "ready": "Independentfocusedreviewbyexistingpolicy_review_sol afterauthorIDLE; no mainapply untilCLEARED. Peergrace21WIP untouched.",
+  "declared_PYTHONPATH": "source/backend:source/backend/tests:source:source/trading:source/trading/tests (normal declared CI source directories; no runtime sys.path/modulealias manipulation)"
+}

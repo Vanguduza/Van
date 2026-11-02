@@ -1,0 +1,33 @@
+{
+  "before": {
+    "executions": 2,
+    "failed": 2,
+    "unique_pytest_ids": 1
+  },
+  "after": {
+    "executions": 8,
+    "passed": 8,
+    "unique_pytest_ids": 4,
+    "healthy_calls_same_function": 2,
+    "adversarial_controls": 2
+  },
+  "independent": {
+    "executions": 4,
+    "unique_pytest_ids": 2,
+    "overlap_with_author": true
+  },
+  "old_CI": {
+    "head": "3854f116efa46bc2cd68cdb50eb42f73c53d603a",
+    "run": 41425480179,
+    "terminal_jobs": 41,
+    "success": 32,
+    "failure": 9,
+    "primary_unique_failures": 3,
+    "new_cohort_oracle": 1,
+    "protected_entry67": 2
+  },
+  "new_head_CI": null,
+  "unit_exit_established": false,
+  "model_cost": null,
+  "blocked_seconds": null
+}

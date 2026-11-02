@@ -1,0 +1,196 @@
+{
+  "summaries": [
+    {
+      "job_id": 125210932195,
+      "name": "obl004-private-dds (backend)",
+      "decoded_bytes": 64124,
+      "failed_test_lines": [],
+      "selected_lines": [
+        "2026-11-02T10:02:14.1411917Z   DDS_CONTRACT_KEY_AVAILABLE: false",
+        "2026-11-02T10:02:27.2487909Z   DDS_CONTRACT_KEY_AVAILABLE: false",
+        "2026-11-02T10:02:32.1576437Z   DDS_CONTRACT_KEY_AVAILABLE: false",
+        "2026-11-02T10:02:32.3264074Z   DDS_CONTRACT_KEY_AVAILABLE: false",
+        "2026-11-02T10:02:42.0678802Z   DDS_CONTRACT_KEY_AVAILABLE: false",
+        "2026-11-02T10:02:42.7376263Z ##[error]Process completed with exit code 1.",
+        "2026-11-02T10:02:42.7457365Z   DDS_CONTRACT_KEY_AVAILABLE: false",
+        "2026-11-02T10:02:43.4005985Z ##[error]Process completed with exit code 1.",
+        "2026-11-02T10:02:43.4085280Z   DDS_CONTRACT_KEY_AVAILABLE: false"
+      ]
+    },
+    {
+      "job_id": 125210932393,
+      "name": "project-truth-ledger",
+      "decoded_bytes": 54200,
+      "failed_test_lines": [],
+      "selected_lines": [
+        "2026-11-02T10:03:11.9289465Z python: can't open file '/home/runner/work/Van/Van/trusted/tools/ci/project_truth_ledger.py': [Errno 2] No such file or directory",
+        "2026-11-02T10:03:11.9347994Z ##[error]Process completed with exit code 2."
+      ]
+    },
+    {
+      "job_id": 125210932427,
+      "name": "obl004-private-dds (checkout)",
+      "decoded_bytes": 63182,
+      "failed_test_lines": [],
+      "selected_lines": [
+        "2026-11-02T10:02:14.1270547Z   DDS_CONTRACT_KEY_AVAILABLE: false",
+        "2026-11-02T10:02:27.9213635Z   DDS_CONTRACT_KEY_AVAILABLE: false",
+        "2026-11-02T10:02:32.6994691Z   DDS_CONTRACT_KEY_AVAILABLE: false",
+        "2026-11-02T10:02:32.8616492Z   DDS_CONTRACT_KEY_AVAILABLE: false",
+        "2026-11-02T10:02:40.1239153Z   DDS_CONTRACT_KEY_AVAILABLE: false",
+        "2026-11-02T10:02:41.5993572Z ##[error]Process completed with exit code 1.",
+        "2026-11-02T10:02:41.6063649Z   DDS_CONTRACT_KEY_AVAILABLE: false",
+        "2026-11-02T10:02:43.0876703Z ##[error]Process completed with exit code 1.",
+        "2026-11-02T10:02:43.0931153Z   DDS_CONTRACT_KEY_AVAILABLE: false"
+      ]
+    },
+    {
+      "job_id": 125210932522,
+      "name": "backend",
+      "decoded_bytes": 15573,
+      "failed_test_lines": [],
+      "selected_lines": [
+        "2026-11-02T10:03:05.5786940Z \u001b[36;1m  echo \"::error::secret DDS_CONTRACT_READ_DEPLOY_KEY is not provisioned: add a read-only deploy key on Vanguduza/dial-development-system and store its private half in this repository's Actions secrets\"\u001b[0m",
+        "2026-11-02T10:03:05.5919991Z ##[error]secret DDS_CONTRACT_READ_DEPLOY_KEY is not provisioned: add a read-only deploy key on Vanguduza/dial-development-system and store its private half in this repository's Actions secrets",
+        "2026-11-02T10:03:05.5931140Z ##[error]Process completed with exit code 1."
+      ]
+    },
+    {
+      "job_id": 125210932544,
+      "name": "backend-public-source-gateway (2)",
+      "decoded_bytes": 99640,
+      "failed_test_lines": [
+        "2026-11-02T10:16:44.9039844Z FAILED backend/tests/test_account_cleanup.py::test_current_paired_cleanup_and_published_fixture_consumers_share_canonical_signing_owner - assert not True",
+        "2026-11-02T10:16:44.9041648Z FAILED tests/contracts/test_red_team_register.py::test_the_repositorys_register_passes_its_own_checker - assert ['67 \"a recon...s not define'] == []",
+        "2026-11-02T10:16:44.9047173Z FAILED tests/contracts/test_red_team_register.py::test_the_same_citation_with_its_class_is_accepted - assert ['67 \"a recon...s not define'] == []"
+      ],
+      "selected_lines": [
+        "2026-11-02T10:16:44.9039844Z FAILED backend/tests/test_account_cleanup.py::test_current_paired_cleanup_and_published_fixture_consumers_share_canonical_signing_owner - assert not True",
+        "2026-11-02T10:16:44.9041648Z FAILED tests/contracts/test_red_team_register.py::test_the_repositorys_register_passes_its_own_checker - assert ['67 \"a recon...s not define'] == []",
+        "2026-11-02T10:16:44.9047173Z FAILED tests/contracts/test_red_team_register.py::test_the_same_citation_with_its_class_is_accepted - assert ['67 \"a recon...s not define'] == []",
+        "2026-11-02T10:16:44.9052976Z 3 failed, 1686 passed, 1 skipped, 4560 deselected, 2 warnings in 810.32s (0:13:30)",
+        "2026-11-02T10:16:47.3308718Z ##[error]Process completed with exit code 1."
+      ]
+    },
+    {
+      "job_id": 125210933019,
+      "name": "OBL004 backend-cwd gateway (2)",
+      "decoded_bytes": 100472,
+      "failed_test_lines": [
+        "2026-11-02T10:24:43.8889119Z FAILED tests/test_account_cleanup.py::test_current_paired_cleanup_and_published_fixture_consumers_share_canonical_signing_owner - assert not True",
+        "2026-11-02T10:24:43.8892238Z FAILED ../tests/contracts/test_red_team_register.py::test_the_repositorys_register_passes_its_own_checker - assert ['67 \"a recon...s not define'] == []",
+        "2026-11-02T10:24:43.8902234Z FAILED ../tests/contracts/test_red_team_register.py::test_the_same_citation_with_its_class_is_accepted - assert ['67 \"a recon...s not define'] == []"
+      ],
+      "selected_lines": [
+        "2026-11-02T10:24:43.8889119Z FAILED tests/test_account_cleanup.py::test_current_paired_cleanup_and_published_fixture_consumers_share_canonical_signing_owner - assert not True",
+        "2026-11-02T10:24:43.8892238Z FAILED ../tests/contracts/test_red_team_register.py::test_the_repositorys_register_passes_its_own_checker - assert ['67 \"a recon...s not define'] == []",
+        "2026-11-02T10:24:43.8902234Z FAILED ../tests/contracts/test_red_team_register.py::test_the_same_citation_with_its_class_is_accepted - assert ['67 \"a recon...s not define'] == []",
+        "2026-11-02T10:24:43.8910271Z 3 failed, 1686 passed, 1 skipped, 4560 deselected, 2 warnings in 817.67s (0:13:37)",
+        "2026-11-02T10:24:46.4059007Z ##[error]Process completed with exit code 1."
+      ]
+    },
+    {
+      "job_id": 125218498439,
+      "name": "backend-public-source",
+      "decoded_bytes": 1136088,
+      "failed_test_lines": [],
+      "selected_lines": [
+        "2026-11-02T10:21:18.1945656Z     require(shard_count == 4 and job_result == \"success\", \"all four execution workers must finish successfully\")",
+        "2026-11-02T10:21:18.1952837Z ValueError: all four execution workers must finish successfully",
+        "2026-11-02T10:21:18.2161416Z ##[error]Process completed with exit code 1."
+      ]
+    },
+    {
+      "job_id": 125221311987,
+      "name": "OBL004 backend-cwd public source",
+      "decoded_bytes": 1136956,
+      "failed_test_lines": [],
+      "selected_lines": [
+        "2026-11-02T10:27:00.2947909Z     require(shard_count == 4 and job_result == \"success\", \"all four execution workers must finish successfully\")",
+        "2026-11-02T10:27:00.2949860Z ValueError: all four execution workers must finish successfully",
+        "2026-11-02T10:27:00.3136742Z ##[error]Process completed with exit code 1."
+      ]
+    },
+    {
+      "job_id": 125228408492,
+      "name": "obl004-canonical-matrix",
+      "decoded_bytes": 86095,
+      "failed_test_lines": [],
+      "selected_lines": [
+        "2026-11-02T10:41:30.5687983Z \u001b[36;1m  --public-root-result \"failure\" \\\u001b[0m",
+        "2026-11-02T10:41:30.5688798Z \u001b[36;1m  --public-backend-result \"failure\" \\\u001b[0m",
+        "2026-11-02T10:41:42.6364720Z ##[error]Process completed with exit code 1."
+      ]
+    }
+  ],
+  "traces": [
+    {
+      "job_id": 125210932544,
+      "trace": [
+        "2026-11-02T10:16:44.8867203Z _ test_current_paired_cleanup_and_published_fixture_consumers_share_canonical_signing_owner _",
+        "2026-11-02T10:16:44.8868049Z ",
+        "2026-11-02T10:16:44.8868577Z client = (<httpx.AsyncClient object at 0x7ff56925bb00>, <fastapi.applications.FastAPI object at 0x7ff553d1cef0>)",
+        "2026-11-02T10:16:44.8868998Z ",
+        "2026-11-02T10:16:44.8869169Z     @pytest.mark.asyncio",
+        "2026-11-02T10:16:44.8869703Z     async def test_current_paired_cleanup_and_published_fixture_consumers_share_canonical_signing_owner(client):",
+        "2026-11-02T10:16:44.8870385Z         \"\"\"Actual enrollment/proof provenance, including all four reviewed consumers.\"\"\"",
+        "2026-11-02T10:16:44.8870849Z         import importlib,sys",
+        "2026-11-02T10:16:44.8871302Z         canonical=importlib.import_module('backend.tests.test_trading_api')",
+        "2026-11-02T10:16:44.8872347Z         for name in ('test_account_operation_recovery','test_account_resource_binding','test_stateful_link_binding','test_trading_oauth_effects'):",
+        "2026-11-02T10:16:44.8872981Z             consumer=importlib.import_module('backend.tests.'+name)",
+        "2026-11-02T10:16:44.8873497Z             assert consumer.client is canonical.client and consumer._env is canonical._env",
+        "2026-11-02T10:16:44.8874155Z             if hasattr(consumer,'_approval_proof'):assert consumer._approval_proof is canonical._approval_proof",
+        "2026-11-02T10:16:44.8874738Z         assert sign.__globals__['DEVICE_KEY'] is canonical.DEVICE_KEY",
+        "2026-11-02T10:16:44.8875388Z >       assert not any(name=='test_trading_api' and module is not canonical for name,module in sys.modules.items())",
+        "2026-11-02T10:16:44.8875871Z E       assert not True",
+        "2026-11-02T10:16:44.8876610Z E        +  where True = any(<generator object test_current_paired_cleanup_and_published_fixture_consumers_share_canonical_signing_owner.<locals>.<genexpr> at 0x7ff561f3d9a0>)",
+        "2026-11-02T10:16:44.8877196Z ",
+        "2026-11-02T10:16:44.8877441Z backend/tests/test_account_cleanup.py:694: AssertionError",
+        "2026-11-02T10:16:44.8878237Z ---------------------------- Captured stdout setup -----------------------------",
+        "2026-11-02T10:16:44.8879740Z {\"action_class\": null, \"command_id\": null, \"correlation_id\": null, \"degraded_code\": null, \"detail\": {\"duration_ms\": 820.38, \"method\": \"POST\", \"route\": \"/v1/devices/pairing-ticket\"}, \"device_id\": null, \"error_class\": null, \"level\": \"INFO\", \"logger\": \"van.request\", \"message\": \"request\", \"mission_id\": null, \"principal\": null, \"result\": \"200\", \"service\": \"van-gateway\", \"ts\": \"2026-11-02T10:05:50.114Z\"}",
+        "2026-11-02T10:16:44.8881889Z {\"action_class\": null, \"command_id\": null, \"correlation_id\": null, \"degraded_code\": null, \"detail\": {\"duration_ms\": 25.61, \"method\": \"POST\", \"route\": \"/v1/devices/pair\"}, \"device_id\": null, \"error_class\": null, \"level\": \"INFO\", \"logger\": \"van.request\", \"message\": \"request\", \"mission_id\": null, \"principal\": null, \"result\": \"200\", \"service\": \"van-gateway\", \"ts\": \"2026-11-02T10:05:50.142Z\"}",
+        "2026-11-02T10:16:44.8883077Z ------------------------------ Captured log setup ------------------------------",
+        "2026-11-02T10:16:44.8883526Z INFO     van.request:logging.py:112 request",
+        "2026-11-02T10:16:44.8883939Z INFO     van.request:logging.py:112 request",
+        "2026-11-02T10:16:44.8884407Z _____________ test_the_repositorys_register_passes_its_own_checker _____________",
+        "2026-11-02T10:16:44.8884672Z "
+      ]
+    },
+    {
+      "job_id": 125210933019,
+      "trace": [
+        "2026-11-02T10:24:43.8711280Z _ test_current_paired_cleanup_and_published_fixture_consumers_share_canonical_signing_owner _",
+        "2026-11-02T10:24:43.8711630Z ",
+        "2026-11-02T10:24:43.8712080Z client = (<httpx.AsyncClient object at 0x7f2b5cacd280>, <fastapi.applications.FastAPI object at 0x7f2b4ed63800>)",
+        "2026-11-02T10:24:43.8712544Z ",
+        "2026-11-02T10:24:43.8712664Z     @pytest.mark.asyncio",
+        "2026-11-02T10:24:43.8713301Z     async def test_current_paired_cleanup_and_published_fixture_consumers_share_canonical_signing_owner(client):",
+        "2026-11-02T10:24:43.8714002Z         \"\"\"Actual enrollment/proof provenance, including all four reviewed consumers.\"\"\"",
+        "2026-11-02T10:24:43.8714501Z         import importlib,sys",
+        "2026-11-02T10:24:43.8714950Z         canonical=importlib.import_module('backend.tests.test_trading_api')",
+        "2026-11-02T10:24:43.8715717Z         for name in ('test_account_operation_recovery','test_account_resource_binding','test_stateful_link_binding','test_trading_oauth_effects'):",
+        "2026-11-02T10:24:43.8716765Z             consumer=importlib.import_module('backend.tests.'+name)",
+        "2026-11-02T10:24:43.8717342Z             assert consumer.client is canonical.client and consumer._env is canonical._env",
+        "2026-11-02T10:24:43.8718043Z             if hasattr(consumer,'_approval_proof'):assert consumer._approval_proof is canonical._approval_proof",
+        "2026-11-02T10:24:43.8718667Z         assert sign.__globals__['DEVICE_KEY'] is canonical.DEVICE_KEY",
+        "2026-11-02T10:24:43.8719415Z >       assert not any(name=='test_trading_api' and module is not canonical for name,module in sys.modules.items())",
+        "2026-11-02T10:24:43.8719998Z E       assert not True",
+        "2026-11-02T10:24:43.8720810Z E        +  where True = any(<generator object test_current_paired_cleanup_and_published_fixture_consumers_share_canonical_signing_owner.<locals>.<genexpr> at 0x7f2b4f44c9e0>)",
+        "2026-11-02T10:24:43.8721397Z ",
+        "2026-11-02T10:24:43.8721622Z tests/test_account_cleanup.py:694: AssertionError",
+        "2026-11-02T10:24:43.8722215Z ---------------------------- Captured stdout setup -----------------------------",
+        "2026-11-02T10:24:43.8723858Z {\"action_class\": null, \"command_id\": null, \"correlation_id\": null, \"degraded_code\": null, \"detail\": {\"duration_ms\": 256.29, \"method\": \"POST\", \"route\": \"/v1/devices/pairing-ticket\"}, \"device_id\": null, \"error_class\": null, \"level\": \"INFO\", \"logger\": \"van.request\", \"message\": \"request\", \"mission_id\": null, \"principal\": null, \"result\": \"200\", \"service\": \"van-gateway\", \"ts\": \"2026-11-02T10:13:50.014Z\"}",
+        "2026-11-02T10:24:43.8726328Z {\"action_class\": null, \"command_id\": null, \"correlation_id\": null, \"degraded_code\": null, \"detail\": {\"duration_ms\": 28.71, \"method\": \"POST\", \"route\": \"/v1/devices/pair\"}, \"device_id\": null, \"error_class\": null, \"level\": \"INFO\", \"logger\": \"van.request\", \"message\": \"request\", \"mission_id\": null, \"principal\": null, \"result\": \"200\", \"service\": \"van-gateway\", \"ts\": \"2026-11-02T10:13:50.045Z\"}",
+        "2026-11-02T10:24:43.8727703Z ------------------------------ Captured log setup ------------------------------",
+        "2026-11-02T10:24:43.8728247Z INFO     van.request:logging.py:112 request",
+        "2026-11-02T10:24:43.8728687Z INFO     van.request:logging.py:112 request",
+        "2026-11-02T10:24:43.8729298Z _____________ test_the_repositorys_register_passes_its_own_checker _____________",
+        "2026-11-02T10:24:43.8729586Z "
+      ]
+    }
+  ],
+  "new_unique_source_test_failure": "backend/tests/test_account_cleanup.py:694 global sys.modules barehelperabsence; preceding actualcaller/signingowner identities passed",
+  "protected_unique": 2,
+  "source_test_failure_not_production_crypto_proof": true,
+  "failed_CI_preserved": true
+}

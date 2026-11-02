@@ -1,0 +1,44 @@
+{
+  "schema": "van.cleanup-cohort-oracle-source/1",
+  "base": "3854f116efa46bc2cd68cdb50eb42f73c53d603a",
+  "path": "backend/tests/test_account_cleanup.py",
+  "before_sha256": "344b5fa74c371a24a05deb1c78ebd075f41305a8ff31360189b60179b81a7064",
+  "after_sha256": "dac7d23044599e97daa81ad2e050327585a3f5447eb72ce19444c2439280fa5e",
+  "proof": "raw/cleanup-cohort-oracle-source-20261102/PUBLIC_SOURCE_PROOF.zip",
+  "review": "raw/cleanup-cohort-oracle-source-20261102/INDEPENDENT_REVIEW.json",
+  "metrics": {
+    "before": {
+      "executions": 2,
+      "failed": 2,
+      "unique_pytest_ids": 1
+    },
+    "after": {
+      "executions": 8,
+      "passed": 8,
+      "unique_pytest_ids": 4,
+      "healthy_calls_same_function": 2,
+      "adversarial_controls": 2
+    },
+    "independent": {
+      "executions": 4,
+      "unique_pytest_ids": 2,
+      "overlap_with_author": true
+    },
+    "old_CI": {
+      "head": "3854f116efa46bc2cd68cdb50eb42f73c53d603a",
+      "run": 41425480179,
+      "terminal_jobs": 41,
+      "success": 32,
+      "failure": 9,
+      "primary_unique_failures": 3,
+      "new_cohort_oracle": 1,
+      "protected_entry67": 2
+    },
+    "new_head_CI": null,
+    "unit_exit_established": false,
+    "model_cost": null,
+    "blocked_seconds": null
+  },
+  "scope": "Only one test function; all outside-function AST/other original assertions retained. Production verifier, enrollment, nonce and fixture producers unchanged. Ordinary unrelated bare helper coexistence is allowed; actual selected four consumer bindings and enrolled SQL key remain strict; foreign ECDSA refuses and canonical SAME challenge succeeds.",
+  "limits": "SOURCE software EC/SQLite/HTTP only; no hardware/native/provider/formal unit acceptance. Prior CI remains FAILED; entry67/privateDDS/trusted-main/propagation gates unwaived. No private fixture DB/key exported."
+}
