@@ -4,9 +4,9 @@ import secrets
 
 import pytest
 
-from test_trading_api import client, _env
-from test_trading_oauth_scope import act
-from test_account_resource_binding import approved
+from backend.tests.test_trading_api import client, _env
+from backend.tests.test_trading_oauth_scope import act
+from backend.tests.test_account_resource_binding import approved
 
 
 @pytest.mark.asyncio
@@ -230,7 +230,7 @@ async def test_device_cannot_inject_a_native_operation_context(client):
 @pytest.mark.asyncio
 async def test_approval_response_preserves_original_timestamp_across_biometric_delay(client):
     import hashlib,hmac,time
-    from test_trading_api import _approval_proof
+    from backend.tests.test_trading_api import _approval_proof
     from van_gateway.trading.accounts import canonical_action
     ac,_=client
     issued=int(time.time())-8

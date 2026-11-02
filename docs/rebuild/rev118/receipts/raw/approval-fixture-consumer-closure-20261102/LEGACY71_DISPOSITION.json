@@ -1,0 +1,15 @@
+{
+  "schema": "van.precommit-artifact-refusal-resolution/1",
+  "original_refusal": "PRECOMMIT_TRACKED_ARTIFACT_AUDIT_REFUSED_LEGACY_UNTRACKED_MANIFEST_FILES",
+  "refusal_receipt_sha256": "e1e42b1a72b888a85e20a219e00ca8456bf3da1ea657574b5608657f6db81d27",
+  "baseline": "23a570cf3f4f6e67fee69a2f8d845c7a8f03d244",
+  "retained_legacy_paths": 71,
+  "bytes": 2092423,
+  "independent_result": "SAFE71_HOLD0",
+  "root_authorized": "git add -f exact71enumerated reviewed paths only; genericignore override, normalhooks unchanged",
+  "public_review": "docs/rebuild/rev118/receipts/raw/approval-fixture-consumer-closure-20261102/LEGACY71_REVIEW.json",
+  "historical_content_changes": false,
+  "ignore_or_manifest_generator_changes": false,
+  "source_test_or_guard_reruns": "None; unchanged9guard/source80evidence retained, onlymanifestbuild/check for newreceipts.",
+  "qualification": "Publication safety/byteidentity only; historical failed/partial/source/native/unit/production states remain unchanged."
+}

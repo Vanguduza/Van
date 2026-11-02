@@ -1,0 +1,58 @@
+Collecting pytest==9.1.1 (from -r /workspace/van-ci-shards-documentary-dependency-20261101/PROPOSED_PINS.lock (line 2))
+  Downloading pytest-9.1.1-py3-none-any.whl.metadata (7.6 kB)
+Collecting pytest-asyncio==1.4.0 (from -r /workspace/van-ci-shards-documentary-dependency-20261101/PROPOSED_PINS.lock (line 3))
+  Downloading pytest_asyncio-1.4.0-py3-none-any.whl.metadata (4.1 kB)
+Collecting iniconfig==2.3.0 (from -r /workspace/van-ci-shards-documentary-dependency-20261101/PROPOSED_PINS.lock (line 4))
+  Downloading iniconfig-2.3.0-py3-none-any.whl.metadata (2.5 kB)
+Collecting packaging==26.3 (from -r /workspace/van-ci-shards-documentary-dependency-20261101/PROPOSED_PINS.lock (line 5))
+  Downloading packaging-26.3-py3-none-any.whl.metadata (3.5 kB)
+Collecting pluggy==1.6.0 (from -r /workspace/van-ci-shards-documentary-dependency-20261101/PROPOSED_PINS.lock (line 6))
+  Downloading pluggy-1.6.0-py3-none-any.whl.metadata (4.8 kB)
+Collecting Pygments==2.21.0 (from -r /workspace/van-ci-shards-documentary-dependency-20261101/PROPOSED_PINS.lock (line 7))
+  Downloading pygments-2.21.0-py3-none-any.whl.metadata (2.5 kB)
+Collecting jsonschema==4.26.0 (from -r /workspace/van-ci-shards-documentary-dependency-20261101/PROPOSED_PINS.lock (line 8))
+  Downloading jsonschema-4.26.0-py3-none-any.whl.metadata (7.6 kB)
+Collecting attrs==26.1.0 (from -r /workspace/van-ci-shards-documentary-dependency-20261101/PROPOSED_PINS.lock (line 9))
+  Downloading attrs-26.1.0-py3-none-any.whl.metadata (8.8 kB)
+Collecting jsonschema-specifications==2025.9.1 (from -r /workspace/van-ci-shards-documentary-dependency-20261101/PROPOSED_PINS.lock (line 10))
+  Downloading jsonschema_specifications-2025.9.1-py3-none-any.whl.metadata (2.9 kB)
+Collecting referencing==0.37.0 (from -r /workspace/van-ci-shards-documentary-dependency-20261101/PROPOSED_PINS.lock (line 11))
+  Downloading referencing-0.37.0-py3-none-any.whl.metadata (2.8 kB)
+Collecting rpds-py==2026.6.3 (from -r /workspace/van-ci-shards-documentary-dependency-20261101/PROPOSED_PINS.lock (line 12))
+  Downloading rpds_py-2026.6.3-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (4.1 kB)
+Collecting typing-extensions==4.16.0 (from -r /workspace/van-ci-shards-documentary-dependency-20261101/PROPOSED_PINS.lock (line 13))
+  Downloading typing_extensions-4.16.0-py3-none-any.whl.metadata (3.3 kB)
+Collecting anyio==4.15.1 (from -r /workspace/van-ci-shards-documentary-dependency-20261101/PROPOSED_PINS.lock (line 16))
+  Downloading anyio-4.15.1-py3-none-any.whl.metadata (4.7 kB)
+Collecting idna==3.20 (from -r /workspace/van-ci-shards-documentary-dependency-20261101/PROPOSED_PINS.lock (line 17))
+  Downloading idna-3.20-py3-none-any.whl.metadata (7.2 kB)
+Downloading pytest-9.1.1-py3-none-any.whl (386 kB)
+Downloading pytest_asyncio-1.4.0-py3-none-any.whl (16 kB)
+Downloading iniconfig-2.3.0-py3-none-any.whl (7.5 kB)
+Downloading packaging-26.3-py3-none-any.whl (129 kB)
+Downloading pluggy-1.6.0-py3-none-any.whl (20 kB)
+Downloading pygments-2.21.0-py3-none-any.whl (1.3 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 1.3/1.3 MB 9.6 MB/s eta 0:00:00
+Downloading jsonschema-4.26.0-py3-none-any.whl (90 kB)
+Downloading attrs-26.1.0-py3-none-any.whl (67 kB)
+Downloading jsonschema_specifications-2025.9.1-py3-none-any.whl (18 kB)
+Downloading referencing-0.37.0-py3-none-any.whl (26 kB)
+Downloading rpds_py-2026.6.3-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (366 kB)
+Downloading typing_extensions-4.16.0-py3-none-any.whl (45 kB)
+Downloading anyio-4.15.1-py3-none-any.whl (132 kB)
+Downloading idna-3.20-py3-none-any.whl (69 kB)
+Saved ./van-ci-shards-documentary-dependency-20261101/wheels/pytest-9.1.1-py3-none-any.whl
+Saved ./van-ci-shards-documentary-dependency-20261101/wheels/pytest_asyncio-1.4.0-py3-none-any.whl
+Saved ./van-ci-shards-documentary-dependency-20261101/wheels/iniconfig-2.3.0-py3-none-any.whl
+Saved ./van-ci-shards-documentary-dependency-20261101/wheels/packaging-26.3-py3-none-any.whl
+Saved ./van-ci-shards-documentary-dependency-20261101/wheels/pluggy-1.6.0-py3-none-any.whl
+Saved ./van-ci-shards-documentary-dependency-20261101/wheels/pygments-2.21.0-py3-none-any.whl
+Saved ./van-ci-shards-documentary-dependency-20261101/wheels/jsonschema-4.26.0-py3-none-any.whl
+Saved ./van-ci-shards-documentary-dependency-20261101/wheels/attrs-26.1.0-py3-none-any.whl
+Saved ./van-ci-shards-documentary-dependency-20261101/wheels/jsonschema_specifications-2025.9.1-py3-none-any.whl
+Saved ./van-ci-shards-documentary-dependency-20261101/wheels/referencing-0.37.0-py3-none-any.whl
+Saved ./van-ci-shards-documentary-dependency-20261101/wheels/rpds_py-2026.6.3-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl
+Saved ./van-ci-shards-documentary-dependency-20261101/wheels/typing_extensions-4.16.0-py3-none-any.whl
+Saved ./van-ci-shards-documentary-dependency-20261101/wheels/anyio-4.15.1-py3-none-any.whl
+Saved ./van-ci-shards-documentary-dependency-20261101/wheels/idna-3.20-py3-none-any.whl
+Successfully downloaded pytest pytest-asyncio iniconfig packaging pluggy Pygments jsonschema attrs jsonschema-specifications referencing rpds-py typing-extensions anyio idna

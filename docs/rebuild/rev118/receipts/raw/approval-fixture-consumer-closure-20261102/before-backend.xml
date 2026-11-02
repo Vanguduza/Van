@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="2" skipped="0" tests="2" time="6.279" timestamp="2026-11-02T05:32:13.596572+00:00" hostname="07611d75dea7"><testcase classname="backend.tests.test_account_resource_binding" name="test_a_disjoint_owner_edit_does_not_invalidate_this_account_approval" time="1.834"><failure message="assert 403 == 200&#10; +  where 403 = &lt;Response [403 Forbidden]&gt;.status_code">client = (&lt;httpx.AsyncClient object at 0x7f75ac69d700&gt;, &lt;fastapi.applications.FastAPI object at 0x7f75ac4e9e20&gt;)
+tmp_path = PosixPath('/tmp/van-approval-fixture-proof-20261102/before-backend/fixtures/test_a_disjoint_owner_edit_doe0')
+
+    @pytest.mark.asyncio
+    async def test_a_disjoint_owner_edit_does_not_invalidate_this_account_approval(client,tmp_path):
+        ac,_=client
+&gt;       assert (await act(ac,'account_upsert',{'alias':'paper_lab','broker':'PAPER'})).status_code==200
+E       assert 403 == 200
+E        +  where 403 = &lt;Response [403 Forbidden]&gt;.status_code
+
+tests/test_account_resource_binding.py:91: AssertionError</failure></testcase><testcase classname="" name="test_paired_current_fixture_and_actual_act_share_one_approval_key" time="2.182"><failure message="AssertionError: {&quot;detail&quot;:&quot;approval_signature_invalid&quot;}&#10;assert 403 == 200&#10; +  where 403 = &lt;Response [403 Forbidden]&gt;.status_code">client = (&lt;httpx.AsyncClient object at 0x7f75abb2d400&gt;, &lt;fastapi.applications.FastAPI object at 0x7f75aba0cad0&gt;)
+tmp_path = PosixPath('/tmp/van-approval-fixture-proof-20261102/before-backend/fixtures/test_paired_current_fixture_an0')
+
+    @pytest.mark.asyncio
+    async def test_paired_current_fixture_and_actual_act_share_one_approval_key(client,tmp_path):
+        ac,app=client
+        bare=importlib.import_module('test_trading_api')
+        canonical=importlib.import_module('backend.tests.test_trading_api')
+        registered=await app.state.store.fetchone('SELECT public_key_pem FROM devices WHERE device_id=?',('test-device',))
+        enrolled=hashlib.sha256(registered['public_key_pem'].encode()).hexdigest()
+        result=await act(ac,'account_upsert',{'alias':'fixture_identity','broker':'PAPER'})
+        observation={'test':'actual paired fixture then unchanged scope.act real challenge/signature/action',
+            'bare_module':bare.__name__,'canonical_module':canonical.__name__,
+            'module_identity_equal':bare is canonical,
+            'bare_public_key_sha256':hashlib.sha256(bare.DEVICE_PEM.encode()).hexdigest(),
+            'canonical_public_key_sha256':hashlib.sha256(canonical.DEVICE_PEM.encode()).hexdigest(),
+            'enrolled_public_key_sha256':enrolled,
+            'client_fixture_module':getattr(client,'__module__','unknown'),
+            'act_module':act.__module__,
+            'act_proof_module':act.__globals__['_approval_proof'].__module__,
+            'HTTP_status':result.status_code,'detail':result.json().get('detail'),
+            'native_account_exists':(tmp_path/'accounts.json').exists()}
+        (tmp_path.parent/'PUBLIC_KEY_MODULE_OBSERVATION.json').write_text(json.dumps(observation,indent=2)+'\n')
+&gt;       assert result.status_code==200,result.text
+E       AssertionError: {"detail":"approval_signature_invalid"}
+E       assert 403 == 200
+E        +  where 403 = &lt;Response [403 Forbidden]&gt;.status_code
+
+/tmp/van-approval-fixture-identity-probe-20261102.py:29: AssertionError</failure></testcase></testsuite></testsuites>

@@ -1,0 +1,15 @@
+Traceback (most recent call last):
+  File "/tmp/van-ci-r2-provenance-review-lqduf8jk/source/tools/rebuild/backend_public_source.py", line 186, in <module>
+    if __name__=="__main__":raise SystemExit(main())
+                                             ^^^^^^
+  File "/tmp/van-ci-r2-provenance-review-lqduf8jk/source/tools/rebuild/backend_public_source.py", line 167, in main
+    return instrument_run(args)
+           ^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/van-ci-r2-provenance-review-lqduf8jk/source/tools/rebuild/backend_public_source.py", line 114, in instrument_run
+    source_before = evidence.source_identity(ROOT, args.expected_commit)
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/van-ci-r2-provenance-review-lqduf8jk/source/tools/rebuild/public_source_shards.py", line 79, in source_identity
+    require(not rejected, "uncommitted executable/config/fixture inputs outside explicit inert outputs: " + ", ".join(rejected[:10]))
+  File "/tmp/van-ci-r2-provenance-review-lqduf8jk/source/tools/rebuild/public_source_shards.py", line 54, in require
+    raise ValueError(message)
+ValueError: uncommitted executable/config/fixture inputs outside explicit inert outputs: artifacts/backend-public-source/conftest.py

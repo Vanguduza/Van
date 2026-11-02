@@ -3,9 +3,9 @@ import json
 from pathlib import Path
 import pytest
 from fastapi import HTTPException
-from test_trading_api import client,_env
-from test_trading_oauth_scope import act
-from test_account_resource_binding import approved
+from backend.tests.test_trading_api import client,_env
+from backend.tests.test_trading_oauth_scope import act
+from backend.tests.test_account_resource_binding import approved
 from test_commander_accounts import FakeDeriv
 from van_gateway.trading.accounts import LocalAccountControl
 from vati.accounts import AccountRegistry
@@ -198,7 +198,7 @@ async def test_partial_link_holds_original_and_only_proved_other_native_domain_i
 @pytest.mark.asyncio
 @pytest.mark.parametrize('field',['native_resource_version','account_control_domain','oauth_state'])
 async def test_cached_receipt_fields_cannot_change_original_bound_scope(client,tmp_path,field):
-    from test_trading_api import HDR,DEVICE_PEM
+    from backend.tests.test_trading_api import HDR,DEVICE_PEM
     ac,app=client;peer=FakeDeriv()
     ctl=LocalAccountControl(str(tmp_path/'accounts.json'),str(tmp_path/'secrets'),
         operation_ledger=str(tmp_path/'native.sqlite'),deriv_connector=peer.connector)

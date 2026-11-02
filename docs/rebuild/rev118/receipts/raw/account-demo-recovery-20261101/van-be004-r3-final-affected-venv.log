@@ -1,0 +1,97 @@
+============================= test session starts ==============================
+platform linux -- Python 3.12.14, pytest-9.1.1, pluggy-1.6.0 -- /workspace/van-backend-venv-20261025/bin/python
+rootdir: /workspace/van-lanes-20261101/accounts-demo-recovery
+configfile: pytest.ini
+plugins: asyncio-1.4.0, anyio-4.15.1
+asyncio: mode=Mode.AUTO, debug=False, asyncio_default_fixture_loop_scope=function, asyncio_default_test_loop_scope=function
+collecting ... collected 76 items
+
+trading/tests/test_demo_creation_recovery.py::test_healthy_original_is_independently_verified_and_never_creates_again PASSED [  1%]
+trading/tests/test_demo_creation_recovery.py::test_uncertain_remote_or_local_completion_fences_original_and_new_approval[reply] PASSED [  2%]
+trading/tests/test_demo_creation_recovery.py::test_uncertain_remote_or_local_completion_fences_original_and_new_approval[identity] PASSED [  3%]
+trading/tests/test_demo_creation_recovery.py::test_uncertain_remote_or_local_completion_fences_original_and_new_approval[credentials] PASSED [  5%]
+trading/tests/test_demo_creation_recovery.py::test_uncertain_remote_or_local_completion_fences_original_and_new_approval[registry] PASSED [  6%]
+trading/tests/test_demo_creation_recovery.py::test_uncertain_remote_or_local_completion_fences_original_and_new_approval[completion] PASSED [  7%]
+trading/tests/test_demo_creation_recovery.py::test_ambiguous_provider_subject_overlaps_unresolved_known_subject[None-owner@example.com] PASSED [  9%]
+trading/tests/test_demo_creation_recovery.py::test_ambiguous_provider_subject_overlaps_unresolved_known_subject[owner@example.com-None] PASSED [ 10%]
+trading/tests/test_demo_creation_recovery.py::test_ambiguous_provider_subject_overlaps_unresolved_known_subject[owner@example.com-bad-email] PASSED [ 11%]
+trading/tests/test_demo_creation_recovery.py::test_unverified_different_email_cannot_escape_but_unrelated_account_stays_operable PASSED [ 13%]
+trading/tests/test_demo_creation_recovery.py::test_lost_or_changed_vault_cannot_rekey_unresolved_creation[missing] PASSED [ 14%]
+trading/tests/test_demo_creation_recovery.py::test_lost_or_changed_vault_cannot_rekey_unresolved_creation[malformed] PASSED [ 15%]
+trading/tests/test_demo_creation_recovery.py::test_lost_or_changed_vault_cannot_rekey_unresolved_creation[replaced] PASSED [ 17%]
+trading/tests/test_demo_creation_recovery.py::test_lost_or_changed_vault_cannot_rekey_unresolved_creation[permissions] PASSED [ 18%]
+trading/tests/test_demo_creation_recovery.py::test_completed_history_remains_readable_without_vault_key PASSED [ 19%]
+trading/tests/test_demo_creation_recovery.py::test_authenticated_namespace_is_current_state_data_without_business_effect_or_revision PASSED [ 21%]
+trading/tests/test_demo_creation_recovery.py::test_namespace_vault_continuity_never_mints_an_independent_replacement[missing] PASSED [ 22%]
+trading/tests/test_demo_creation_recovery.py::test_namespace_vault_continuity_never_mints_an_independent_replacement[malformed] PASSED [ 23%]
+trading/tests/test_demo_creation_recovery.py::test_namespace_vault_continuity_never_mints_an_independent_replacement[conflicting] PASSED [ 25%]
+trading/tests/test_demo_creation_recovery.py::test_namespace_vault_continuity_never_mints_an_independent_replacement[missing_hint] PASSED [ 26%]
+trading/tests/test_demo_creation_recovery.py::test_namespace_commit_or_vault_write_loss_recovers_only_same_immutable_hint[vault_write] PASSED [ 27%]
+trading/tests/test_demo_creation_recovery.py::test_namespace_commit_or_vault_write_loss_recovers_only_same_immutable_hint[commit_ack] PASSED [ 28%]
+trading/tests/test_demo_creation_recovery.py::test_legacy_original_is_never_retroactively_bound_and_its_provider_fence_remains PASSED [ 30%]
+trading/tests/test_demo_creation_recovery.py::test_backup_namespace_continuity_and_independent_authenticated_native_stores PASSED [ 31%]
+trading/tests/test_demo_creation_recovery.py::test_original_demo_result_cannot_be_read_or_reassigned_by_another_device PASSED [ 32%]
+trading/tests/test_demo_creation_recovery.py::test_missing_original_creation_identity_cannot_invent_a_completed_account[client_id] PASSED [ 34%]
+trading/tests/test_demo_creation_recovery.py::test_missing_original_creation_identity_cannot_invent_a_completed_account[currency] PASSED [ 35%]
+trading/tests/test_demo_creation_recovery.py::test_missing_original_creation_identity_cannot_invent_a_completed_account[oauth_token] PASSED [ 36%]
+trading/tests/test_demo_creation_recovery.py::test_registered_signed_owner_current_key_is_rechecked_after_native_claim PASSED [ 38%]
+trading/tests/test_demo_creation_recovery.py::test_last_wire_guard_rechecks_after_slow_provider_connect[expiry] PASSED [ 39%]
+trading/tests/test_demo_creation_recovery.py::test_last_wire_guard_rechecks_after_slow_provider_connect[namespace] PASSED [ 40%]
+trading/tests/test_demo_creation_recovery.py::test_last_wire_guard_rechecks_after_slow_provider_connect[version] PASSED [ 42%]
+trading/tests/test_demo_creation_recovery.py::test_signed_current_token_is_rechecked_at_wire_after_connect PASSED [ 43%]
+trading/tests/test_demo_creation_recovery.py::test_transport_hook_is_per_call_and_refusal_does_not_leak_into_default_read_path PASSED [ 44%]
+trading/tests/test_demo_creation_recovery.py::test_legacy_signed_current_owner_without_private_metadata_has_original_intent[none] PASSED [ 46%]
+trading/tests/test_demo_creation_recovery.py::test_legacy_signed_current_owner_without_private_metadata_has_original_intent[provider_reply] PASSED [ 47%]
+trading/tests/test_demo_creation_recovery.py::test_legacy_signed_current_owner_without_private_metadata_has_original_intent[completed_reply] PASSED [ 48%]
+trading/tests/test_demo_creation_recovery.py::test_refusal_and_currentness_checks_precede_first_provider_send[expired] PASSED [ 50%]
+trading/tests/test_demo_creation_recovery.py::test_refusal_and_currentness_checks_precede_first_provider_send[version] PASSED [ 51%]
+trading/tests/test_demo_creation_recovery.py::test_refusal_and_currentness_checks_precede_first_provider_send[digest] PASSED [ 52%]
+trading/tests/test_demo_creation_recovery.py::test_refusal_and_currentness_checks_precede_first_provider_send[dispatch-revoked] PASSED [ 53%]
+trading/tests/test_demo_creation_recovery.py::test_refusal_and_currentness_checks_precede_first_provider_send[late-expiry] PASSED [ 55%]
+trading/tests/test_demo_creation_recovery.py::test_refusal_and_currentness_checks_precede_first_provider_send[malformed] PASSED [ 56%]
+trading/tests/test_demo_creation_recovery.py::test_real_process_death_after_send_retains_original_claim_and_never_resends PASSED [ 57%]
+trading/tests/test_demo_creation_recovery.py::test_real_process_key_race_and_provider_subject_arbitration[True] PASSED [ 59%]
+trading/tests/test_demo_creation_recovery.py::test_real_process_key_race_and_provider_subject_arbitration[False] PASSED [ 60%]
+trading/tests/test_commander_accounts.py::test_upsert_credentials_verify_remove_never_echo_secrets PASSED [ 61%]
+trading/tests/test_commander_accounts.py::test_deriv_demo_creation_and_oauth_link PASSED [ 63%]
+trading/tests/test_commander_accounts.py::test_demo_provider_error_is_original_unknown_not_permission_to_create_again PASSED [ 64%]
+trading/tests/test_commander_accounts.py::test_ctrader_discover_exchange_and_link PASSED [ 65%]
+trading/tests/test_commander_accounts.py::test_mt5_ea_key_issue_and_verify PASSED [ 67%]
+trading/tests/test_commander_accounts.py::test_account_mutations_refuse_ambiguous_environment_flags_before_writing[account_upsert-args0] PASSED [ 68%]
+trading/tests/test_commander_accounts.py::test_account_mutations_refuse_ambiguous_environment_flags_before_writing[ctrader_link-args1] PASSED [ 69%]
+trading/tests/test_commander_accounts.py::test_account_mutations_refuse_ambiguous_environment_flags_before_writing[mt5_ea_issue_key-args2] PASSED [ 71%]
+trading/tests/test_native_account_effects.py::test_completed_original_returns_its_original_result_without_reissuing_a_key PASSED [ 72%]
+trading/tests/test_native_account_effects.py::test_operation_identity_cannot_be_reassigned_after_completion[change0] PASSED [ 73%]
+trading/tests/test_native_account_effects.py::test_operation_identity_cannot_be_reassigned_after_completion[change1] PASSED [ 75%]
+trading/tests/test_native_account_effects.py::test_operation_identity_cannot_be_reassigned_after_completion[change2] PASSED [ 76%]
+trading/tests/test_native_account_effects.py::test_operation_identity_cannot_be_reassigned_after_completion[change3] PASSED [ 77%]
+trading/tests/test_native_account_effects.py::test_failure_after_a_registry_effect_fences_original_and_new_approvals PASSED [ 78%]
+trading/tests/test_native_account_effects.py::test_validation_refusal_before_effect_does_not_permanently_fence_the_target PASSED [ 80%]
+trading/tests/test_native_account_effects.py::test_actual_child_death_after_native_effect_cannot_reopen_the_original_attempt PASSED [ 81%]
+trading/tests/test_native_account_effects.py::test_postcommit_reply_failure_reads_confirmed_history_without_another_effect PASSED [ 82%]
+trading/tests/test_native_account_effects.py::test_well_sealed_but_invalid_operation_history_refuses_all_new_effects[producer] PASSED [ 84%]
+trading/tests/test_native_account_effects.py::test_well_sealed_but_invalid_operation_history_refuses_all_new_effects[intent] PASSED [ 85%]
+trading/tests/test_native_account_effects.py::test_well_sealed_but_invalid_operation_history_refuses_all_new_effects[predecessor] PASSED [ 86%]
+trading/tests/test_native_account_effects.py::test_well_sealed_but_invalid_operation_history_refuses_all_new_effects[phase] PASSED [ 88%]
+trading/tests/test_native_account_effects.py::test_well_sealed_but_invalid_operation_history_refuses_all_new_effects[secret] PASSED [ 89%]
+trading/tests/test_native_account_effects.py::test_in_flight_scope_survives_authority_expiry_and_cold_reader PASSED [ 90%]
+trading/tests/test_native_account_effects.py::test_missing_native_operation_is_unknown_and_a_foreign_device_cannot_read_result PASSED [ 92%]
+trading/tests/test_native_account_effects.py::test_provider_link_cannot_bypass_an_unconfirmed_account_target PASSED [ 93%]
+trading/tests/test_native_account_effects.py::test_expired_original_authority_is_refused_before_any_native_effect PASSED [ 94%]
+trading/tests/test_native_account_effects.py::test_postgres_original_operation_is_atomic_and_isolated_between_named_ledgers SKIPPED [ 96%]
+trading/tests/test_native_account_effects.py::test_actual_concurrent_native_claim_writers_cannot_admit_two_effects_for_a_target[sqlite] PASSED [ 97%]
+trading/tests/test_native_account_effects.py::test_actual_concurrent_native_claim_writers_cannot_admit_two_effects_for_a_target[postgres] SKIPPED [ 98%]
+::test_completed_legacy_lost_ack_same_original_args_recovers_without_rebase PASSED [100%]
+
+=============================== warnings summary ===============================
+../../van-backend-venv-20261025/lib/python3.12/site-packages/fastapi/testclient.py:1
+  /workspace/van-backend-venv-20261025/lib/python3.12/site-packages/fastapi/testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+    from starlette.testclient import TestClient as TestClient  # noqa
+
+../../van-backend-venv-20261025/lib/python3.12/site-packages/starlette/testclient.py:53
+  /workspace/van-backend-venv-20261025/lib/python3.12/site-packages/starlette/testclient.py:53: DeprecationWarning: The anyio.abc.BlockingPortal alias is deprecated, use anyio.from_thread.BlockingPortal instead.
+    _PortalFactoryType = Callable[[], AbstractContextManager[anyio.abc.BlockingPortal]]
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+-------- generated xml file: /tmp/van-be004-r3-final-affected-venv.xml ---------
+================== 74 passed, 2 skipped, 2 warnings in 8.41s ===================

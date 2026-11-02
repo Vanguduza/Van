@@ -1,0 +1,321 @@
+{
+  "head": "23a570cf3f4f6e67fee69a2f8d845c7a8f03d244",
+  "run": 41388834052,
+  "jobs": [
+    {
+      "id": 125095551785,
+      "name": "market-monitor-source",
+      "status": "completed",
+      "conclusion": "success",
+      "failed_steps": []
+    },
+    {
+      "id": 125095551942,
+      "name": "mutation (kotlin-3, kotlin, 3/4)",
+      "status": "completed",
+      "conclusion": "success",
+      "failed_steps": []
+    },
+    {
+      "id": 125095551970,
+      "name": "android-and-visual-evidence",
+      "status": "completed",
+      "conclusion": "success",
+      "failed_steps": []
+    },
+    {
+      "id": 125095552008,
+      "name": "obl004-private-dds (checkout)",
+      "status": "completed",
+      "conclusion": "failure",
+      "failed_steps": [
+        "Collect original private_dds source inventory in actual cwd",
+        "Execute exact assigned private_dds source phases in actual cwd"
+      ]
+    },
+    {
+      "id": 125095552014,
+      "name": "obl004-forecast-source (backend)",
+      "status": "completed",
+      "conclusion": "success",
+      "failed_steps": []
+    },
+    {
+      "id": 125095552018,
+      "name": "project-truth-ledger",
+      "status": "completed",
+      "conclusion": "failure",
+      "failed_steps": [
+        "Project Truth ledger (trusted checker, every new commit has an authorized row)"
+      ]
+    },
+    {
+      "id": 125095552043,
+      "name": "backend-public-source-gateway (1)",
+      "status": "completed",
+      "conclusion": "failure",
+      "failed_steps": [
+        "Execute exact assigned gateway nodes on this isolated worker"
+      ]
+    },
+    {
+      "id": 125095552054,
+      "name": "backend",
+      "status": "completed",
+      "conclusion": "failure",
+      "failed_steps": [
+        "Require the DDS contract read key"
+      ]
+    },
+    {
+      "id": 125095552074,
+      "name": "backend-public-source-gateway (3)",
+      "status": "completed",
+      "conclusion": "failure",
+      "failed_steps": [
+        "Execute exact assigned gateway nodes on this isolated worker"
+      ]
+    },
+    {
+      "id": 125095552080,
+      "name": "backend-public-source-gateway (0)",
+      "status": "completed",
+      "conclusion": "success",
+      "failed_steps": []
+    },
+    {
+      "id": 125095552084,
+      "name": "rebuild-documentary",
+      "status": "completed",
+      "conclusion": "success",
+      "failed_steps": []
+    },
+    {
+      "id": 125095552094,
+      "name": "obl004-documentary (backend)",
+      "status": "completed",
+      "conclusion": "success",
+      "failed_steps": []
+    },
+    {
+      "id": 125095552099,
+      "name": "OBL004 backend-cwd gateway (2)",
+      "status": "completed",
+      "conclusion": "failure",
+      "failed_steps": [
+        "Execute exact assigned gateway nodes on this isolated worker"
+      ]
+    },
+    {
+      "id": 125095552110,
+      "name": "obl004-private-dds (backend)",
+      "status": "completed",
+      "conclusion": "failure",
+      "failed_steps": [
+        "Collect original private_dds source inventory in actual cwd",
+        "Execute exact assigned private_dds source phases in actual cwd"
+      ]
+    },
+    {
+      "id": 125095552116,
+      "name": "obl004-trading-pg (backend)",
+      "status": "completed",
+      "conclusion": "success",
+      "failed_steps": []
+    },
+    {
+      "id": 125095552125,
+      "name": "obl004-trading-pg (checkout)",
+      "status": "completed",
+      "conclusion": "success",
+      "failed_steps": []
+    },
+    {
+      "id": 125095552138,
+      "name": "postgres-ledger",
+      "status": "completed",
+      "conclusion": "success",
+      "failed_steps": []
+    },
+    {
+      "id": 125095552143,
+      "name": "obl004-browser-namespace (backend)",
+      "status": "completed",
+      "conclusion": "success",
+      "failed_steps": []
+    },
+    {
+      "id": 125095552152,
+      "name": "obl004-forecast-source (checkout)",
+      "status": "completed",
+      "conclusion": "success",
+      "failed_steps": []
+    },
+    {
+      "id": 125095552160,
+      "name": "browser-guard-source",
+      "status": "completed",
+      "conclusion": "success",
+      "failed_steps": []
+    },
+    {
+      "id": 125095552168,
+      "name": "OBL004 backend-cwd gateway (3)",
+      "status": "completed",
+      "conclusion": "failure",
+      "failed_steps": [
+        "Execute exact assigned gateway nodes on this isolated worker"
+      ]
+    },
+    {
+      "id": 125095552175,
+      "name": "obl004-scenarios (checkout)",
+      "status": "completed",
+      "conclusion": "success",
+      "failed_steps": []
+    },
+    {
+      "id": 125095552181,
+      "name": "mutation (kotlin-1, kotlin, 1/4)",
+      "status": "completed",
+      "conclusion": "success",
+      "failed_steps": []
+    },
+    {
+      "id": 125095552200,
+      "name": "obl004-browser-namespace (checkout)",
+      "status": "completed",
+      "conclusion": "success",
+      "failed_steps": []
+    },
+    {
+      "id": 125095552221,
+      "name": "obl004-scenarios (backend)",
+      "status": "completed",
+      "conclusion": "success",
+      "failed_steps": []
+    },
+    {
+      "id": 125095552229,
+      "name": "obl004-documentary (checkout)",
+      "status": "completed",
+      "conclusion": "success",
+      "failed_steps": []
+    },
+    {
+      "id": 125095552242,
+      "name": "OBL004 backend-cwd gateway (1)",
+      "status": "completed",
+      "conclusion": "failure",
+      "failed_steps": [
+        "Execute exact assigned gateway nodes on this isolated worker"
+      ]
+    },
+    {
+      "id": 125095552269,
+      "name": "backend-public-source-gateway (2)",
+      "status": "completed",
+      "conclusion": "failure",
+      "failed_steps": [
+        "Execute exact assigned gateway nodes on this isolated worker"
+      ]
+    },
+    {
+      "id": 125095552273,
+      "name": "android-instrumentation",
+      "status": "completed",
+      "conclusion": "success",
+      "failed_steps": []
+    },
+    {
+      "id": 125095552281,
+      "name": "mutation (python-3, python, 3/4)",
+      "status": "completed",
+      "conclusion": "success",
+      "failed_steps": []
+    },
+    {
+      "id": 125095552321,
+      "name": "mutation (browser-agent, browser-agent, 0/1)",
+      "status": "completed",
+      "conclusion": "success",
+      "failed_steps": []
+    },
+    {
+      "id": 125095552331,
+      "name": "mutation (python-0, python, 0/4)",
+      "status": "completed",
+      "conclusion": "success",
+      "failed_steps": []
+    },
+    {
+      "id": 125095552346,
+      "name": "mutation (kotlin-0, kotlin, 0/4)",
+      "status": "completed",
+      "conclusion": "success",
+      "failed_steps": []
+    },
+    {
+      "id": 125095552351,
+      "name": "OBL004 backend-cwd gateway (0)",
+      "status": "completed",
+      "conclusion": "success",
+      "failed_steps": []
+    },
+    {
+      "id": 125095552357,
+      "name": "mutation (python-1, python, 1/4)",
+      "status": "completed",
+      "conclusion": "success",
+      "failed_steps": []
+    },
+    {
+      "id": 125095552364,
+      "name": "mutation (python-2, python, 2/4)",
+      "status": "completed",
+      "conclusion": "success",
+      "failed_steps": []
+    },
+    {
+      "id": 125095552447,
+      "name": "mutation (kotlin-2, kotlin, 2/4)",
+      "status": "completed",
+      "conclusion": "success",
+      "failed_steps": []
+    },
+    {
+      "id": 125100385657,
+      "name": "OBL004 backend-cwd public source",
+      "status": "completed",
+      "conclusion": "failure",
+      "failed_steps": [
+        "Require exact full collection and terminal execution union with declared skips"
+      ]
+    },
+    {
+      "id": 125102322599,
+      "name": "backend-public-source",
+      "status": "completed",
+      "conclusion": "failure",
+      "failed_steps": [
+        "Require exact full collection and terminal execution union with declared skips"
+      ]
+    },
+    {
+      "id": 125102381523,
+      "name": "character-forge-gate",
+      "status": "completed",
+      "conclusion": "success",
+      "failed_steps": []
+    },
+    {
+      "id": 125104118764,
+      "name": "obl004-canonical-matrix",
+      "status": "completed",
+      "conclusion": "failure",
+      "failed_steps": [
+        "Join every canonical root, actual cwd, exact node/phase/runtime/storage snapshot"
+      ]
+    }
+  ]
+}

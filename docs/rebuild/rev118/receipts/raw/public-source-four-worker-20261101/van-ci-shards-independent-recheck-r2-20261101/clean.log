@@ -1,0 +1,10 @@
+backend/tests/test_case_0.py::test_case[1]
+backend/tests/test_case_0.py::test_case[2]
+backend/tests/test_case_1.py::test_case[1]
+backend/tests/test_case_1.py::test_case[2]
+backend/tests/test_case_2.py::test_case[1]
+backend/tests/test_case_2.py::test_case[2]
+backend/tests/test_case_3.py::test_case[1]
+backend/tests/test_case_3.py::test_case[2]
+
+8 tests collected in 0.19s

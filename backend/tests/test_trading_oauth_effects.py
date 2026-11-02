@@ -2,8 +2,8 @@
 import asyncio
 import pytest
 
-from test_trading_api import client, _env
-from test_trading_oauth_scope import act
+from backend.tests.test_trading_api import client, _env
+from backend.tests.test_trading_oauth_scope import act
 
 
 @pytest.fixture(autouse=True)

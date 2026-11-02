@@ -1,0 +1,71 @@
+FF                                                                       [100%]
+=================================== FAILURES ===================================
+_____ test_a_disjoint_owner_edit_does_not_invalidate_this_account_approval _____
+
+client = (<httpx.AsyncClient object at 0x7f75ac69d700>, <fastapi.applications.FastAPI object at 0x7f75ac4e9e20>)
+tmp_path = PosixPath('/tmp/van-approval-fixture-proof-20261102/before-backend/fixtures/test_a_disjoint_owner_edit_doe0')
+
+    @pytest.mark.asyncio
+    async def test_a_disjoint_owner_edit_does_not_invalidate_this_account_approval(client,tmp_path):
+        ac,_=client
+>       assert (await act(ac,'account_upsert',{'alias':'paper_lab','broker':'PAPER'})).status_code==200
+E       assert 403 == 200
+E        +  where 403 = <Response [403 Forbidden]>.status_code
+
+tests/test_account_resource_binding.py:91: AssertionError
+---------------------------- Captured stdout setup -----------------------------
+{"action_class": null, "command_id": null, "correlation_id": null, "degraded_code": null, "detail": {"duration_ms": 328.14, "method": "POST", "route": "/v1/devices/pairing-ticket"}, "device_id": null, "error_class": null, "level": "INFO", "logger": "van.request", "message": "request", "mission_id": null, "principal": null, "result": "200", "service": "van-gateway", "ts": "2026-11-02T05:32:17.493Z"}
+{"action_class": null, "command_id": null, "correlation_id": null, "degraded_code": null, "detail": {"duration_ms": 25.6, "method": "POST", "route": "/v1/devices/pair"}, "device_id": null, "error_class": null, "level": "INFO", "logger": "van.request", "message": "request", "mission_id": null, "principal": null, "result": "200", "service": "van-gateway", "ts": "2026-11-02T05:32:17.520Z"}
+----------------------------- Captured stdout call -----------------------------
+{"action_class": null, "command_id": null, "correlation_id": null, "degraded_code": null, "detail": {"duration_ms": 48.06, "method": "POST", "route": "/v1/trading/accounts/challenge"}, "device_id": null, "error_class": null, "level": "INFO", "logger": "van.request", "message": "request", "mission_id": null, "principal": null, "result": "200", "service": "van-gateway", "ts": "2026-11-02T05:32:17.584Z"}
+{"action_class": null, "command_id": null, "correlation_id": null, "degraded_code": null, "detail": {"duration_ms": 38.86, "method": "POST", "route": "/v1/trading/accounts/action"}, "device_id": null, "error_class": null, "level": "INFO", "logger": "van.request", "message": "request", "mission_id": null, "principal": null, "result": "403", "service": "van-gateway", "ts": "2026-11-02T05:32:17.636Z"}
+------------------------------ Captured log call -------------------------------
+INFO     van.request:logging.py:112 request
+INFO     van.request:logging.py:112 request
+______ test_paired_current_fixture_and_actual_act_share_one_approval_key _______
+
+client = (<httpx.AsyncClient object at 0x7f75abb2d400>, <fastapi.applications.FastAPI object at 0x7f75aba0cad0>)
+tmp_path = PosixPath('/tmp/van-approval-fixture-proof-20261102/before-backend/fixtures/test_paired_current_fixture_an0')
+
+    @pytest.mark.asyncio
+    async def test_paired_current_fixture_and_actual_act_share_one_approval_key(client,tmp_path):
+        ac,app=client
+        bare=importlib.import_module('test_trading_api')
+        canonical=importlib.import_module('backend.tests.test_trading_api')
+        registered=await app.state.store.fetchone('SELECT public_key_pem FROM devices WHERE device_id=?',('test-device',))
+        enrolled=hashlib.sha256(registered['public_key_pem'].encode()).hexdigest()
+        result=await act(ac,'account_upsert',{'alias':'fixture_identity','broker':'PAPER'})
+        observation={'test':'actual paired fixture then unchanged scope.act real challenge/signature/action',
+            'bare_module':bare.__name__,'canonical_module':canonical.__name__,
+            'module_identity_equal':bare is canonical,
+            'bare_public_key_sha256':hashlib.sha256(bare.DEVICE_PEM.encode()).hexdigest(),
+            'canonical_public_key_sha256':hashlib.sha256(canonical.DEVICE_PEM.encode()).hexdigest(),
+            'enrolled_public_key_sha256':enrolled,
+            'client_fixture_module':getattr(client,'__module__','unknown'),
+            'act_module':act.__module__,
+            'act_proof_module':act.__globals__['_approval_proof'].__module__,
+            'HTTP_status':result.status_code,'detail':result.json().get('detail'),
+            'native_account_exists':(tmp_path/'accounts.json').exists()}
+        (tmp_path.parent/'PUBLIC_KEY_MODULE_OBSERVATION.json').write_text(json.dumps(observation,indent=2)+'\n')
+>       assert result.status_code==200,result.text
+E       AssertionError: {"detail":"approval_signature_invalid"}
+E       assert 403 == 200
+E        +  where 403 = <Response [403 Forbidden]>.status_code
+
+/tmp/van-approval-fixture-identity-probe-20261102.py:29: AssertionError
+---------------------------- Captured stdout setup -----------------------------
+{"action_class": null, "command_id": null, "correlation_id": null, "degraded_code": null, "detail": {"duration_ms": 591.27, "method": "POST", "route": "/v1/devices/pairing-ticket"}, "device_id": null, "error_class": null, "level": "INFO", "logger": "van.request", "message": "request", "mission_id": null, "principal": null, "result": "200", "service": "van-gateway", "ts": "2026-11-02T05:32:19.729Z"}
+{"action_class": null, "command_id": null, "correlation_id": null, "degraded_code": null, "detail": {"duration_ms": 29.28, "method": "POST", "route": "/v1/devices/pair"}, "device_id": null, "error_class": null, "level": "INFO", "logger": "van.request", "message": "request", "mission_id": null, "principal": null, "result": "200", "service": "van-gateway", "ts": "2026-11-02T05:32:19.763Z"}
+------------------------------ Captured log setup ------------------------------
+INFO     van.request:logging.py:112 request
+INFO     van.request:logging.py:112 request
+----------------------------- Captured stdout call -----------------------------
+{"action_class": null, "command_id": null, "correlation_id": null, "degraded_code": null, "detail": {"duration_ms": 34.39, "method": "POST", "route": "/v1/trading/accounts/challenge"}, "device_id": null, "error_class": null, "level": "INFO", "logger": "van.request", "message": "request", "mission_id": null, "principal": null, "result": "200", "service": "van-gateway", "ts": "2026-11-02T05:32:19.821Z"}
+{"action_class": null, "command_id": null, "correlation_id": null, "degraded_code": null, "detail": {"duration_ms": 35.36, "method": "POST", "route": "/v1/trading/accounts/action"}, "device_id": null, "error_class": null, "level": "INFO", "logger": "van.request", "message": "request", "mission_id": null, "principal": null, "result": "403", "service": "van-gateway", "ts": "2026-11-02T05:32:19.865Z"}
+------------------------------ Captured log call -------------------------------
+INFO     van.request:logging.py:112 request
+INFO     van.request:logging.py:112 request
+=========================== short test summary info ============================
+FAILED tests/test_account_resource_binding.py::test_a_disjoint_owner_edit_does_not_invalidate_this_account_approval
+FAILED ..::test_paired_current_fixture_and_actual_act_share_one_approval_key
+2 failed in 6.28s

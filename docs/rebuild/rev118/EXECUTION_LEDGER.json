@@ -438,13 +438,13 @@
         "model": "gpt-6.1-sol",
         "effort": "medium",
         "worktree": "/workspace/van-review-2026-10-18/publish",
-        "base": "c792a1e6e7e1e942b56d00a3929d7b54f6eac13f",
-        "state": "REVIEWED_LABEL_R2_IMPORT4_DERIVED_FINAL_GUARDS_AND_PUBLICATION",
-        "write_scope": "Existing cleared nine label sources, four import-only test owners, reviewed data-only generator extension/derived contracts, compact evidence and genuine hook/verification/normal publication only. No new cleanup or Android implementation.",
-        "next": "One genuine commit, required4fd committed verification, exact remote/readbacks and one owned new-head CI watch."
+        "base": "23a570cf3f4f6e67fee69a2f8d845c7a8f03d244",
+        "state": "FINAL_INTEGRATION_REVIEWED_FIXTURE4_AND_APPROVED_STRATEGY2",
+        "write_scope": "Existing cleared4testimports+approved2strategy docs/owned compact evidence and genuine normal publication only. Root decisions; cleanup and depth remain disjoint.",
+        "next": "One genuine related batchcommit after finalguards/manifest/stagedblob+trackedartifactaudit; required4fdcommitted0 then normalpush from freshremote23a/exactGitPR/newheadCI+onewatch. Original53fixtureCIescapes+2protected cases/gates remain historicalFAILED; no waiver or native/unit acceptance."
       }
     ],
-    "integration_owner": "/root/accounts_workflow_sol; /root architecture/scope decisions",
+    "integration_owner": "/root/accounts_workflow_sol; root architecture/scope decisions only",
     "note": "Agents return patch/files and actual receipts. No independent review identity or native acceptance is inferred.",
     "model_worker_concurrency_default": 2,
     "model_policy": "MODEL_ROUTING_POLICY_20261101.json",
@@ -1871,19 +1871,19 @@
     "latest_checkpoint_report": "docs/rebuild/rev118/CHECKPOINT_20261028_PHYSICAL_RISK.md",
     "previous_verified_source": "3c6969ebbec39f2ad9f2836a6bd8acdb487adc34 published; exact CI40228254162 all17public jobs pass, two unchanged prerequisite failures",
     "qualification_scope": "Physical-account baseline/streak runtime source now joins both native producers to original same-account history; own-origin basis references prevent aggregate peak feedback after alias-scoped resets. Original native direct/journal controls retain positive behavior, signature/source lineage, replay, issuer and queued-expiry checks without widening scope. Final444 actual SQLite/PostgreSQL/HTTP/namespace/owner/restart cases pass0skip/audit0;444unique call IDs once, all1196Python hashes and both original legacy fixtures match; ownedPG independently absent. 215rebuild/private-topology passes before final chronology refinement overlap; final444 cover it. Retained two actual chronology failures are fixed, and original fixture/schema failures remain recorded. Scope/owner/frontend/consolidation checks pass unchanged; mutationpreflight374/383 is consistency, not corpus execution. Exact publishedf74 main40517467959 remainsFAILED2mandatoryprerequisites/all17publicSUCCESS; original selected archive independently verifies4495trading/1DDSskip,26PG,117voice. Flow adjustment/collateral/all-origin reservations, native finality/reconciliation and all remaining programme requirements stay open. No whole unit/native/production/S24 acceptance.",
-    "updated_utc": "2026-11-02T04:20:06.368382+00:00",
+    "updated_utc": "2026-11-02T06:43:22.886983+00:00",
     "current_background_jobs": [],
     "old_CI_terminal": {
-      "head": "c792a1e6e7e1e942b56d00a3929d7b54f6eac13f",
-      "run_id": 41372270072,
-      "attempt": 1,
+      "head": "23a570cf3f4f6e67fee69a2f8d845c7a8f03d244",
+      "run_id": 41388834052,
       "all_jobs": 41,
-      "success": 30,
-      "failure": 11,
-      "original_watch": 44541,
+      "success": 28,
+      "failure": 13,
+      "primary_fixture_unique_cases": 53,
+      "protected_entry67_unique": 2,
+      "watch": 88283,
       "watch_exit": 1,
-      "watch_completed_at_utc": "2026-11-02T01:57:11.879575+00:00",
-      "meaning": "All jobs terminal; failures retained/unwaived. PG26passed then trading collectionERROR fixed by reviewed import4. Kotlin0 pinned BOM configuration failed before assertions/mutants. Both gateway2 workers have entry67 two-failure controls; public unions/matrix fail accordingly. PrivateDDS/trusted checker remain failed. No full CI qualification; old handle not reaped or restarted by successor."
+      "watch_waited_once_by_owner": true
     },
     "pending_cleanup_design": {
       "path": "/tmp/van-be004-pending-cleanup-source-design-20261102.json",
@@ -1891,7 +1891,15 @@
       "state": "READ_ONLY_DESIGN_NO_SOURCE_LEASE",
       "limits": "Prospective original-target plan/per-step facts, separately purpose-bound enrolled-key reauth and durable lockout remain unimplemented. Parent UNKNOWN immutable; legacy target proof cannot be guessed. Full grace/reauth/OAuth/strategy/funds/native gates remain open."
     },
-    "next_action": "Finalize cleared BE006labelR2/import4/derived candidate: mandatory guards/manifest, one genuine hooked commit, required4fd committed verify, freshremote c792 normalpush, exactGit/PR105 readbacks and one newhead CI watch. Oldc79241terminal30success11failure remains unqualified/unwaived; no native/unit/intake acceptance."
+    "next_action": "One genuine related batchcommit after finalguards/manifest/stagedblob+trackedartifactaudit; required4fdcommitted0 then normalpush from freshremote23a/exactGitPR/newheadCI+onewatch. Original53fixtureCIescapes+2protected cases/gates remain historicalFAILED; no waiver or native/unit acceptance.",
+    "head": "23a570cf3f4f6e67fee69a2f8d845c7a8f03d244",
+    "published_head": "23a570cf3f4f6e67fee69a2f8d845c7a8f03d244",
+    "last_verified_published_base": "23a570cf3f4f6e67fee69a2f8d845c7a8f03d244",
+    "current_packet": "APPROVAL_FIXTURE_CLOSURE_AND_STRATEGY_GAINS",
+    "active_packet": "Reviewed4importowners12qualifications249assertsexact;80PASSeachcwd160exec/82unique168probecomposite separate; approved2strategy docs preserve fullunits and unverified exits.",
+    "current_source_receipt": "receipts/APPROVAL_FIXTURE_CLOSURE_SOURCE_20261102.json",
+    "source_ci_receipt": "receipts/raw/approval-fixture-consumer-closure-20261102/CI_23A_COMPLETE_FAILURE_CLASSIFICATION.json",
+    "committed_ledger_verification": "Published23aGREEN234; current related source/docs/evidence batch required4fdverify pending"
   },
   "provenance_correction": {
     "finding": "90 forecast hashes previously reported unverifiable",
@@ -1909,8 +1917,8 @@
       "evidence": "ci/MUTATION_CORPUS_c2a27848.json"
     }
   ],
-  "current_action": "Finalize cleared BE006labelR2/import4/derived candidate: mandatory guards/manifest, one genuine hooked commit, required4fd committed verify, freshremote c792 normalpush, exactGit/PR105 readbacks and one newhead CI watch. Oldc79241terminal30success11failure remains unqualified/unwaived; no native/unit/intake acceptance.",
-  "updated_at_utc": "2026-11-02T04:20:06.368382+00:00",
+  "current_action": "One genuine related batchcommit after finalguards/manifest/stagedblob+trackedartifactaudit; required4fdcommitted0 then normalpush from freshremote23a/exactGitPR/newheadCI+onewatch. Original53fixtureCIescapes+2protected cases/gates remain historicalFAILED; no waiver or native/unit acceptance.",
+  "updated_at_utc": "2026-11-02T06:43:22.886983+00:00",
   "execution_method": {
     "path": "BUILD_EXECUTION_PLAN.md",
     "scope_index": "SOURCE_WORKMAP.json",
@@ -1929,5 +1937,1035 @@
       }
     ],
     "model_policy": "MODEL_ROUTING_POLICY_20261101.json"
+  },
+  "strategy_gains_20261102": {
+    "recorded_at_utc": "2026-11-02T06:22:50Z",
+    "status": "ADOPTED_PROCESS_CONTROLS_NOT_ACCEPTANCE",
+    "plan_reference": "BUILD_EXECUTION_PLAN.md#enforced-unit-exits-packet-freeze-and-finalization",
+    "adopted_controls": [
+      "Canonical full-unit exit matrices, seeded only for BE004 and BE008, with evidence states and no milestone/endpoint/test-count completion inference.",
+      "Whole affected producer-owner-store-caller plus fixture/cryptographic provenance review from repository root and backend CWD; complete exact-head primary-source failure inventory with propagation and mandatory gates separate.",
+      "One validated environment/bootstrap per component lock; pin separate environments when declared dependency locks are incompatible, and prohibit system-Python or undeclared competing setups. Record shared-lock/resource admission and owned cleanup; broad suites use fresh hosted workers.",
+      "Fail-closed command checks and staged-blob/tracked-artifact verification before genuine hooks and required committed-baseline verification.",
+      "Two concurrent Sol workers by default, one author plus integration/review as queue allows; one integration writer and at most one completed successor; short source-bound failure handoffs. Astra decisions only; Luna bounded metadata.",
+      "Source-bound evidence reuse, one final guard pass/related batch, no unjustified broad reruns, reconcile unknown operations before overlapping work.",
+      "Prepare real native/provider/intake/signing/device prerequisites alongside code; do not fabricate authority, credentials or acceptance; hold only dependent operations."
+    ],
+    "active_unit_exit_checklists": {
+      "BE-004": {
+        "unit_id": "BE-004",
+        "title": "Accounts, broker/exchange directory and operation capabilities",
+        "dependencies": [
+          "BE-002",
+          "BE-003",
+          "PRE-003"
+        ],
+        "full_unit_contract_sha256": "b7fb19c27f8758a5500274a2cd5cae860111db8ff6f520298a67166db5754bc3",
+        "source_workmap_sha256": "f501f242756843319ffc0be030f10151d6634323f1a910a0383d69c19f15646c",
+        "canonical_package_tree": "ac0226a22a95f51642cfeb37b3709b40f7cacf10",
+        "canonical_exit_text": "discover; create demo; request live application; link; edit local/profile where entitled; restrict; unlink; request remote closure. Complete real service integration, failure/recovery, migration, source-bound positive/negative and provider tests. Local unlink never reports remote closure; active exposure, unknown funds or stale readback blocks deletion. Rev1.14: every applicable self-optimization/crypto/lean contract and its real evidence must pass; automatic operation and policy evolution are separately qualified. Rev1.18: apply whole-product protocol and effective acceptance refinements for every owned feature/context/action; use actual native source/provider/consumer and independently observed postconditions. Document closure alone cannot satisfy runtime gates.",
+        "requirement_ids": [
+          "VAN-NX-048",
+          "VAN-NX-049",
+          "VAN-NX-050",
+          "VAN-NX-056",
+          "VAN-NX-057",
+          "VAN-NX-064",
+          "VAN-CX-016",
+          "VAN-CRYPTO-001",
+          "VAN-CRYPTO-002",
+          "VAN-CRYPTO-013",
+          "VAN-RV-008"
+        ],
+        "acceptance_ids": [
+          "T-BE-004-POS",
+          "T-BE-004-NEG",
+          "T-BE-004-REC",
+          "T-BE-004-SEC",
+          "T-BE-004-INT",
+          "T-VAN-CX-016-POS",
+          "T-VAN-CX-016-NEG",
+          "T-VAN-CX-016-REC",
+          "T-REV113-003",
+          "T-VAN-CRYPTO-001-POS",
+          "T-VAN-CRYPTO-001-NEG",
+          "T-VAN-CRYPTO-001-REC",
+          "T-VAN-CRYPTO-002-POS",
+          "T-VAN-CRYPTO-002-NEG",
+          "T-VAN-CRYPTO-002-REC",
+          "T-VAN-CRYPTO-013-POS",
+          "T-VAN-CRYPTO-013-NEG",
+          "T-VAN-CRYPTO-013-REC",
+          "T-VAN-RV-008-POS",
+          "T-VAN-RV-008-NEG",
+          "T-VAN-RV-008-REC"
+        ],
+        "owner_action_ids": [
+          "LAC-134",
+          "LAC-135",
+          "LAC-137",
+          "LAC-138",
+          "LAC-139",
+          "LAC-140"
+        ],
+        "context_ids": [
+          "VNX-S-ACCOUNTS-01",
+          "VNX-S-ACCOUNTS-02",
+          "VNX-S-ACCOUNTS-03",
+          "VNX-S-ACCOUNTS-04",
+          "VNX-S-ACCOUNTS-05",
+          "VNX-S-ACCOUNTS-06",
+          "VNX-S-ACCOUNTS-07",
+          "VNX-S-ACCOUNTS-08",
+          "VNX-S-ACCOUNTS-09",
+          "VNX-S-ACCOUNTS-10",
+          "VNX-S-ACCOUNTS-11",
+          "VNX-S-ACCOUNTS-12",
+          "VNX-S-ACCOUNTS-13",
+          "VNX-S-ACCOUNTS-14",
+          "VNX-S-ACCOUNTS-15",
+          "VNX-S-ACCOUNTS-16",
+          "VNX-S-ACCOUNTS-17",
+          "VNX-S-ACCOUNTS-18",
+          "van.trading.accounts",
+          "van.trading.accounts.add"
+        ],
+        "operation_matrix": [
+          {
+            "operation": "discover",
+            "dimensions": {
+              "positive": {
+                "status": "unverified",
+                "evidence": []
+              },
+              "error_or_refusal": {
+                "status": "unverified",
+                "evidence": []
+              },
+              "unknown_or_reconciliation": {
+                "status": "unverified",
+                "evidence": []
+              },
+              "owner_control": {
+                "status": "unverified",
+                "evidence": []
+              },
+              "authority_security": {
+                "status": "unverified",
+                "evidence": []
+              },
+              "service_client_integration": {
+                "status": "unverified",
+                "evidence": []
+              },
+              "migration_restore": {
+                "status": "unverified",
+                "evidence": []
+              },
+              "privacy_retention": {
+                "status": "unverified",
+                "evidence": []
+              },
+              "recovery": {
+                "status": "unverified",
+                "evidence": []
+              },
+              "independent_readback": {
+                "status": "unverified",
+                "evidence": []
+              },
+              "canonical_suboperations_and_owned_predicates": {
+                "status": "unverified",
+                "evidence": []
+              }
+            }
+          },
+          {
+            "operation": "create demo",
+            "dimensions": {
+              "positive": {
+                "status": "unverified",
+                "evidence": []
+              },
+              "error_or_refusal": {
+                "status": "unverified",
+                "evidence": []
+              },
+              "unknown_or_reconciliation": {
+                "status": "unverified",
+                "evidence": []
+              },
+              "owner_control": {
+                "status": "unverified",
+                "evidence": []
+              },
+              "authority_security": {
+                "status": "unverified",
+                "evidence": []
+              },
+              "service_client_integration": {
+                "status": "unverified",
+                "evidence": []
+              },
+              "migration_restore": {
+                "status": "unverified",
+                "evidence": []
+              },
+              "privacy_retention": {
+                "status": "unverified",
+                "evidence": []
+              },
+              "recovery": {
+                "status": "unverified",
+                "evidence": []
+              },
+              "independent_readback": {
+                "status": "unverified",
+                "evidence": []
+              },
+              "canonical_suboperations_and_owned_predicates": {
+                "status": "unverified",
+                "evidence": []
+              }
+            }
+          },
+          {
+            "operation": "request live application",
+            "dimensions": {
+              "positive": {
+                "status": "unverified",
+                "evidence": []
+              },
+              "error_or_refusal": {
+                "status": "unverified",
+                "evidence": []
+              },
+              "unknown_or_reconciliation": {
+                "status": "unverified",
+                "evidence": []
+              },
+              "owner_control": {
+                "status": "unverified",
+                "evidence": []
+              },
+              "authority_security": {
+                "status": "unverified",
+                "evidence": []
+              },
+              "service_client_integration": {
+                "status": "unverified",
+                "evidence": []
+              },
+              "migration_restore": {
+                "status": "unverified",
+                "evidence": []
+              },
+              "privacy_retention": {
+                "status": "unverified",
+                "evidence": []
+              },
+              "recovery": {
+                "status": "unverified",
+                "evidence": []
+              },
+              "independent_readback": {
+                "status": "unverified",
+                "evidence": []
+              },
+              "canonical_suboperations_and_owned_predicates": {
+                "status": "unverified",
+                "evidence": []
+              }
+            }
+          },
+          {
+            "operation": "link",
+            "dimensions": {
+              "positive": {
+                "status": "unverified",
+                "evidence": []
+              },
+              "error_or_refusal": {
+                "status": "unverified",
+                "evidence": []
+              },
+              "unknown_or_reconciliation": {
+                "status": "unverified",
+                "evidence": []
+              },
+              "owner_control": {
+                "status": "unverified",
+                "evidence": []
+              },
+              "authority_security": {
+                "status": "unverified",
+                "evidence": []
+              },
+              "service_client_integration": {
+                "status": "unverified",
+                "evidence": []
+              },
+              "migration_restore": {
+                "status": "unverified",
+                "evidence": []
+              },
+              "privacy_retention": {
+                "status": "unverified",
+                "evidence": []
+              },
+              "recovery": {
+                "status": "unverified",
+                "evidence": []
+              },
+              "independent_readback": {
+                "status": "unverified",
+                "evidence": []
+              },
+              "canonical_suboperations_and_owned_predicates": {
+                "status": "unverified",
+                "evidence": []
+              }
+            }
+          },
+          {
+            "operation": "edit local/profile where entitled",
+            "dimensions": {
+              "positive": {
+                "status": "unverified",
+                "evidence": []
+              },
+              "error_or_refusal": {
+                "status": "unverified",
+                "evidence": []
+              },
+              "unknown_or_reconciliation": {
+                "status": "unverified",
+                "evidence": []
+              },
+              "owner_control": {
+                "status": "unverified",
+                "evidence": []
+              },
+              "authority_security": {
+                "status": "unverified",
+                "evidence": []
+              },
+              "service_client_integration": {
+                "status": "unverified",
+                "evidence": []
+              },
+              "migration_restore": {
+                "status": "unverified",
+                "evidence": []
+              },
+              "privacy_retention": {
+                "status": "unverified",
+                "evidence": []
+              },
+              "recovery": {
+                "status": "unverified",
+                "evidence": []
+              },
+              "independent_readback": {
+                "status": "unverified",
+                "evidence": []
+              },
+              "canonical_suboperations_and_owned_predicates": {
+                "status": "unverified",
+                "evidence": []
+              }
+            }
+          },
+          {
+            "operation": "restrict",
+            "dimensions": {
+              "positive": {
+                "status": "unverified",
+                "evidence": []
+              },
+              "error_or_refusal": {
+                "status": "unverified",
+                "evidence": []
+              },
+              "unknown_or_reconciliation": {
+                "status": "unverified",
+                "evidence": []
+              },
+              "owner_control": {
+                "status": "unverified",
+                "evidence": []
+              },
+              "authority_security": {
+                "status": "unverified",
+                "evidence": []
+              },
+              "service_client_integration": {
+                "status": "unverified",
+                "evidence": []
+              },
+              "migration_restore": {
+                "status": "unverified",
+                "evidence": []
+              },
+              "privacy_retention": {
+                "status": "unverified",
+                "evidence": []
+              },
+              "recovery": {
+                "status": "unverified",
+                "evidence": []
+              },
+              "independent_readback": {
+                "status": "unverified",
+                "evidence": []
+              },
+              "canonical_suboperations_and_owned_predicates": {
+                "status": "unverified",
+                "evidence": []
+              }
+            }
+          },
+          {
+            "operation": "unlink",
+            "dimensions": {
+              "positive": {
+                "status": "unverified",
+                "evidence": []
+              },
+              "error_or_refusal": {
+                "status": "unverified",
+                "evidence": []
+              },
+              "unknown_or_reconciliation": {
+                "status": "unverified",
+                "evidence": []
+              },
+              "owner_control": {
+                "status": "unverified",
+                "evidence": []
+              },
+              "authority_security": {
+                "status": "unverified",
+                "evidence": []
+              },
+              "service_client_integration": {
+                "status": "unverified",
+                "evidence": []
+              },
+              "migration_restore": {
+                "status": "unverified",
+                "evidence": []
+              },
+              "privacy_retention": {
+                "status": "unverified",
+                "evidence": []
+              },
+              "recovery": {
+                "status": "unverified",
+                "evidence": []
+              },
+              "independent_readback": {
+                "status": "unverified",
+                "evidence": []
+              },
+              "canonical_suboperations_and_owned_predicates": {
+                "status": "unverified",
+                "evidence": []
+              }
+            }
+          },
+          {
+            "operation": "request remote closure",
+            "dimensions": {
+              "positive": {
+                "status": "unverified",
+                "evidence": []
+              },
+              "error_or_refusal": {
+                "status": "unverified",
+                "evidence": []
+              },
+              "unknown_or_reconciliation": {
+                "status": "unverified",
+                "evidence": []
+              },
+              "owner_control": {
+                "status": "unverified",
+                "evidence": []
+              },
+              "authority_security": {
+                "status": "unverified",
+                "evidence": []
+              },
+              "service_client_integration": {
+                "status": "unverified",
+                "evidence": []
+              },
+              "migration_restore": {
+                "status": "unverified",
+                "evidence": []
+              },
+              "privacy_retention": {
+                "status": "unverified",
+                "evidence": []
+              },
+              "recovery": {
+                "status": "unverified",
+                "evidence": []
+              },
+              "independent_readback": {
+                "status": "unverified",
+                "evidence": []
+              },
+              "canonical_suboperations_and_owned_predicates": {
+                "status": "unverified",
+                "evidence": []
+              }
+            }
+          }
+        ],
+        "verification_rule": "Before any operation dimension is marked verified, enumerate and assess every canonical sub-operation and every owned predicate under the original text; a compound operation cannot be verified from a single subverb. Preserve original operation wording and IDs. Service/client integration, authority/security, migration/restore, privacy/retention and all failure, owner, recovery and readback states are separate required evidence dimensions.",
+        "note": "Seeded from the original canonical workmap/exit criteria. These unverified slots mean this strategy record has not adjudicated operation evidence; they do not assert code absence, waive criteria, or issue source/native/formal acceptance."
+      },
+      "BE-008": {
+        "unit_id": "BE-008",
+        "title": "Instrument identity, conventional/crypto market feeds, bars and depth",
+        "dependencies": [
+          "BE-003",
+          "BE-005",
+          "PRE-003"
+        ],
+        "full_unit_contract_sha256": "da865a31c3bbb8c740c744733462e890d34f7d0d8a08c19b8cc10f785fe0ce51",
+        "source_workmap_sha256": "f501f242756843319ffc0be030f10151d6634323f1a910a0383d69c19f15646c",
+        "canonical_package_tree": "ac0226a22a95f51642cfeb37b3709b40f7cacf10",
+        "canonical_exit_text": "resolve aliases; discover tradable instruments; subscribe once; aggregate bars; revision snapshots; recover gaps; publish genuine depth. Complete real service integration, failure/recovery, migration, source-bound positive/negative and provider tests. Identical ticker with different contracts cannot collide; stale feed never returns synthetic LIVE; bad sequence triggers snapshot recovery. Rev1.14: every applicable self-optimization/crypto/lean contract and its real evidence must pass; automatic operation and policy evolution are separately qualified. Rev1.18: apply whole-product protocol and effective acceptance refinements for every owned feature/context/action; use actual native source/provider/consumer and independently observed postconditions. Document closure alone cannot satisfy runtime gates.",
+        "requirement_ids": [
+          "VAN-NX-008",
+          "VAN-NX-009",
+          "VAN-NX-011",
+          "VAN-NX-040",
+          "VAN-NX-041",
+          "VAN-NX-042",
+          "VAN-NX-074",
+          "VAN-NX-075",
+          "VAN-CX-004",
+          "VAN-CX-007",
+          "VAN-CX-012",
+          "VAN-SO-009",
+          "VAN-CRYPTO-002",
+          "VAN-CRYPTO-003",
+          "VAN-CRYPTO-006",
+          "VAN-CRYPTO-008"
+        ],
+        "acceptance_ids": [
+          "T-BE-008-POS",
+          "T-BE-008-NEG",
+          "T-BE-008-REC",
+          "T-BE-008-SEC",
+          "T-BE-008-INT",
+          "T-NX-074",
+          "T-NX-075",
+          "T-VAN-CX-004-POS",
+          "T-VAN-CX-004-NEG",
+          "T-VAN-CX-004-REC",
+          "T-VAN-CX-007-POS",
+          "T-VAN-CX-007-NEG",
+          "T-VAN-CX-007-REC",
+          "T-VAN-CX-012-POS",
+          "T-VAN-CX-012-NEG",
+          "T-VAN-CX-012-REC",
+          "T-REV113-007",
+          "T-VAN-SO-009-POS",
+          "T-VAN-SO-009-NEG",
+          "T-VAN-SO-009-REC",
+          "T-VAN-CRYPTO-002-POS",
+          "T-VAN-CRYPTO-002-NEG",
+          "T-VAN-CRYPTO-002-REC",
+          "T-VAN-CRYPTO-003-POS",
+          "T-VAN-CRYPTO-003-NEG",
+          "T-VAN-CRYPTO-003-REC",
+          "T-VAN-CRYPTO-006-POS",
+          "T-VAN-CRYPTO-006-NEG",
+          "T-VAN-CRYPTO-006-REC",
+          "T-VAN-CRYPTO-008-POS",
+          "T-VAN-CRYPTO-008-NEG",
+          "T-VAN-CRYPTO-008-REC"
+        ],
+        "owner_action_ids": [],
+        "context_ids": [
+          "VNX-S-CHART-01",
+          "VNX-S-CHART-02",
+          "VNX-S-CHART-03",
+          "VNX-S-CHART-04",
+          "VNX-S-CHART-05",
+          "VNX-S-CHART-06",
+          "VNX-S-CHART-07",
+          "VNX-S-CHART-08",
+          "VNX-S-CHART-09",
+          "VNX-S-CHART-10",
+          "VNX-S-CHART-11",
+          "VNX-S-CHART-12",
+          "VNX-S-CHART-13",
+          "VNX-S-CHART-14",
+          "VNX-S-CHART-15",
+          "VNX-S-CHART-16",
+          "VNX-S-CHART-17",
+          "VNX-S-CHART-18",
+          "VNX-S-CHART-19",
+          "VNX-S-CHART-20",
+          "van.next.trading.chart",
+          "van.next.trading.markets"
+        ],
+        "operation_matrix": [
+          {
+            "operation": "resolve aliases",
+            "dimensions": {
+              "positive": {
+                "status": "unverified",
+                "evidence": []
+              },
+              "error_or_refusal": {
+                "status": "unverified",
+                "evidence": []
+              },
+              "unknown_or_reconciliation": {
+                "status": "unverified",
+                "evidence": []
+              },
+              "owner_control": {
+                "status": "unverified",
+                "evidence": []
+              },
+              "authority_security": {
+                "status": "unverified",
+                "evidence": []
+              },
+              "service_client_integration": {
+                "status": "unverified",
+                "evidence": []
+              },
+              "migration_restore": {
+                "status": "unverified",
+                "evidence": []
+              },
+              "privacy_retention": {
+                "status": "unverified",
+                "evidence": []
+              },
+              "recovery": {
+                "status": "unverified",
+                "evidence": []
+              },
+              "independent_readback": {
+                "status": "unverified",
+                "evidence": []
+              },
+              "canonical_suboperations_and_owned_predicates": {
+                "status": "unverified",
+                "evidence": []
+              }
+            }
+          },
+          {
+            "operation": "discover tradable instruments",
+            "dimensions": {
+              "positive": {
+                "status": "unverified",
+                "evidence": []
+              },
+              "error_or_refusal": {
+                "status": "unverified",
+                "evidence": []
+              },
+              "unknown_or_reconciliation": {
+                "status": "unverified",
+                "evidence": []
+              },
+              "owner_control": {
+                "status": "unverified",
+                "evidence": []
+              },
+              "authority_security": {
+                "status": "unverified",
+                "evidence": []
+              },
+              "service_client_integration": {
+                "status": "unverified",
+                "evidence": []
+              },
+              "migration_restore": {
+                "status": "unverified",
+                "evidence": []
+              },
+              "privacy_retention": {
+                "status": "unverified",
+                "evidence": []
+              },
+              "recovery": {
+                "status": "unverified",
+                "evidence": []
+              },
+              "independent_readback": {
+                "status": "unverified",
+                "evidence": []
+              },
+              "canonical_suboperations_and_owned_predicates": {
+                "status": "unverified",
+                "evidence": []
+              }
+            }
+          },
+          {
+            "operation": "subscribe once",
+            "dimensions": {
+              "positive": {
+                "status": "unverified",
+                "evidence": []
+              },
+              "error_or_refusal": {
+                "status": "unverified",
+                "evidence": []
+              },
+              "unknown_or_reconciliation": {
+                "status": "unverified",
+                "evidence": []
+              },
+              "owner_control": {
+                "status": "unverified",
+                "evidence": []
+              },
+              "authority_security": {
+                "status": "unverified",
+                "evidence": []
+              },
+              "service_client_integration": {
+                "status": "unverified",
+                "evidence": []
+              },
+              "migration_restore": {
+                "status": "unverified",
+                "evidence": []
+              },
+              "privacy_retention": {
+                "status": "unverified",
+                "evidence": []
+              },
+              "recovery": {
+                "status": "unverified",
+                "evidence": []
+              },
+              "independent_readback": {
+                "status": "unverified",
+                "evidence": []
+              },
+              "canonical_suboperations_and_owned_predicates": {
+                "status": "unverified",
+                "evidence": []
+              }
+            }
+          },
+          {
+            "operation": "aggregate bars",
+            "dimensions": {
+              "positive": {
+                "status": "unverified",
+                "evidence": []
+              },
+              "error_or_refusal": {
+                "status": "unverified",
+                "evidence": []
+              },
+              "unknown_or_reconciliation": {
+                "status": "unverified",
+                "evidence": []
+              },
+              "owner_control": {
+                "status": "unverified",
+                "evidence": []
+              },
+              "authority_security": {
+                "status": "unverified",
+                "evidence": []
+              },
+              "service_client_integration": {
+                "status": "unverified",
+                "evidence": []
+              },
+              "migration_restore": {
+                "status": "unverified",
+                "evidence": []
+              },
+              "privacy_retention": {
+                "status": "unverified",
+                "evidence": []
+              },
+              "recovery": {
+                "status": "unverified",
+                "evidence": []
+              },
+              "independent_readback": {
+                "status": "unverified",
+                "evidence": []
+              },
+              "canonical_suboperations_and_owned_predicates": {
+                "status": "unverified",
+                "evidence": []
+              }
+            }
+          },
+          {
+            "operation": "revision snapshots",
+            "dimensions": {
+              "positive": {
+                "status": "unverified",
+                "evidence": []
+              },
+              "error_or_refusal": {
+                "status": "unverified",
+                "evidence": []
+              },
+              "unknown_or_reconciliation": {
+                "status": "unverified",
+                "evidence": []
+              },
+              "owner_control": {
+                "status": "unverified",
+                "evidence": []
+              },
+              "authority_security": {
+                "status": "unverified",
+                "evidence": []
+              },
+              "service_client_integration": {
+                "status": "unverified",
+                "evidence": []
+              },
+              "migration_restore": {
+                "status": "unverified",
+                "evidence": []
+              },
+              "privacy_retention": {
+                "status": "unverified",
+                "evidence": []
+              },
+              "recovery": {
+                "status": "unverified",
+                "evidence": []
+              },
+              "independent_readback": {
+                "status": "unverified",
+                "evidence": []
+              },
+              "canonical_suboperations_and_owned_predicates": {
+                "status": "unverified",
+                "evidence": []
+              }
+            }
+          },
+          {
+            "operation": "recover gaps",
+            "dimensions": {
+              "positive": {
+                "status": "unverified",
+                "evidence": []
+              },
+              "error_or_refusal": {
+                "status": "unverified",
+                "evidence": []
+              },
+              "unknown_or_reconciliation": {
+                "status": "unverified",
+                "evidence": []
+              },
+              "owner_control": {
+                "status": "unverified",
+                "evidence": []
+              },
+              "authority_security": {
+                "status": "unverified",
+                "evidence": []
+              },
+              "service_client_integration": {
+                "status": "unverified",
+                "evidence": []
+              },
+              "migration_restore": {
+                "status": "unverified",
+                "evidence": []
+              },
+              "privacy_retention": {
+                "status": "unverified",
+                "evidence": []
+              },
+              "recovery": {
+                "status": "unverified",
+                "evidence": []
+              },
+              "independent_readback": {
+                "status": "unverified",
+                "evidence": []
+              },
+              "canonical_suboperations_and_owned_predicates": {
+                "status": "unverified",
+                "evidence": []
+              }
+            }
+          },
+          {
+            "operation": "publish genuine depth",
+            "dimensions": {
+              "positive": {
+                "status": "unverified",
+                "evidence": []
+              },
+              "error_or_refusal": {
+                "status": "unverified",
+                "evidence": []
+              },
+              "unknown_or_reconciliation": {
+                "status": "unverified",
+                "evidence": []
+              },
+              "owner_control": {
+                "status": "unverified",
+                "evidence": []
+              },
+              "authority_security": {
+                "status": "unverified",
+                "evidence": []
+              },
+              "service_client_integration": {
+                "status": "unverified",
+                "evidence": []
+              },
+              "migration_restore": {
+                "status": "unverified",
+                "evidence": []
+              },
+              "privacy_retention": {
+                "status": "unverified",
+                "evidence": []
+              },
+              "recovery": {
+                "status": "unverified",
+                "evidence": []
+              },
+              "independent_readback": {
+                "status": "unverified",
+                "evidence": []
+              },
+              "canonical_suboperations_and_owned_predicates": {
+                "status": "unverified",
+                "evidence": []
+              }
+            }
+          }
+        ],
+        "verification_rule": "Before any operation dimension is marked verified, enumerate and assess every canonical sub-operation and every owned predicate under the original text; a compound operation cannot be verified from a single subverb. Preserve original operation wording and IDs. Service/client integration, authority/security, migration/restore, privacy/retention and all failure, owner, recovery and readback states are separate required evidence dimensions.",
+        "note": "Seeded from the original canonical workmap/exit criteria. These unverified slots mean this strategy record has not adjudicated operation evidence; they do not assert code absence, waive criteria, or issue source/native/formal acceptance."
+      }
+    },
+    "operational_snapshot": {
+      "input_head": "23a570cf3f4f6e67fee69a2f8d845c7a8f03d244",
+      "source_checkout_observation": {
+        "status": "HEAD_UNCHANGED_WITH_FOUR_TEST_WIP_PATHS_PRESERVED",
+        "paths": [
+          "backend/tests/test_account_operation_recovery.py",
+          "backend/tests/test_account_resource_binding.py",
+          "backend/tests/test_stateful_link_binding.py",
+          "backend/tests/test_trading_oauth_effects.py"
+        ],
+        "source_code_acceptance": "NOT_CLAIMED"
+      },
+      "ci_repair_work": {
+        "status": "INDEPENDENTLY_REVIEWED_SOURCE_INTEGRATING_PENDING_GENUINE_PUBLICATION",
+        "reference": "/workspace/van-approval-fixture-identity-integration-20261102/FROZEN_HANDOFF.json",
+        "reference_sha256": "f16fa111feb5a4159b4c5fecb964727d0fd105ed1b73f77daa2969cfc182f4b8",
+        "four_file_source_case_set": {
+          "unique_cases_per_cwd": 80,
+          "root_executions": 80,
+          "backend_cwd_executions": 80
+        },
+        "diagnostics_composite": {
+          "unique_cases": 82,
+          "executions": 168,
+          "overlap_with_source_case_set": "EXPLICIT_OVERLAP_RETAINED"
+        },
+        "root_backend_cwd_source_equivalence": "AUTHOR_VERIFIED_AND_INDEPENDENT_REVIEW_CONFIRMED",
+        "source_acceptance": "NOT_CLAIMED",
+        "independent_review": {
+          "path": "docs/rebuild/rev118/receipts/raw/approval-fixture-consumer-closure-20261102/INDEPENDENT_REVIEW.json",
+          "sha256": "bae1056cd7689bda778fcbb67e2152f0b526944eeb034a025ed98ff259867315",
+          "runtime_PASS_executions": 8,
+          "runtime_unique": 6,
+          "not_added_to_author_count": true
+        }
+      },
+      "published_ci_handoff": {
+        "head": "23a570cf3f4f6e67fee69a2f8d845c7a8f03d244",
+        "main_run_id": "41388834052",
+        "terminal_readback": {
+          "status": "COMPLETED",
+          "conclusion": "FAILURE",
+          "workflow_jobs": {
+            "total": 41,
+            "success": 28,
+            "failure": 13
+          },
+          "primary_source_workers": {
+            "count": 6,
+            "inventory": "decoded by root/CI writer"
+          },
+          "primary_fixture_cases": {
+            "unique_case_count": 53
+          },
+          "entry67_protected_gates": {
+            "count": 2,
+            "status": "REMAIN_PROTECTED"
+          },
+          "observation_source": "root/CI-writer decoded exact-run readback relayed by root; not independently read by this strategy record"
+        },
+        "historical_queued_handoff": {
+          "status": "QUEUED",
+          "watch_id": "88283",
+          "date": "2026-11-02; earlier handoff, exact time not retained"
+        },
+        "current_liveness": "TERMINAL_FAILED",
+        "qualification": "FAILED; no acceptance inferred"
+      },
+      "preserved_work_and_gates": {
+        "native_cleanup": "16 WIP, paused",
+        "depth7": "untested, paused",
+        "23a_exact_run_41388834052": "TERMINAL_FAILED; 41 jobs, 28 success and 13 failed; source-worker inventory and protected entry67 gates are separately recorded above",
+        "PR106": "OPEN_UNMERGED; authorization proposal not used",
+        "native_dial": "last recorded tool error; no restored-success claim",
+        "formal_unit_or_native_acceptance": "NONE_ISSUED_BY_THIS_RECORD"
+      },
+      "actual_batch_metrics_ref": "docs/rebuild/rev118/receipts/raw/approval-fixture-consumer-closure-20261102/METRICS.json"
+    },
+    "measurement_rule": {
+      "baseline": "First three integrated batches with complete source-bound receipts",
+      "review_after": "Next three batches using unchanged definitions",
+      "metrics": [
+        "closed original workflows and unit exits",
+        "first-pass functional CI",
+        "escaped source defects",
+        "rework",
+        "implementation time",
+        "verification time",
+        "review time",
+        "exact-head CI wait",
+        "blocked time",
+        "model usage when actual data is available"
+      ],
+      "unknown_values": "null, never inferred as zero",
+      "reporting": "source and native/owner acceptance separately; no commit/test completion percentages"
+    },
+    "scope_guard": {
+      "existing_scope_counts_preserved": true,
+      "no_scope_or_acceptance_change": true,
+      "no_model_policy_history_rewrite": true,
+      "no_native_authority_or_hook_change": true
+    }
   }
 }

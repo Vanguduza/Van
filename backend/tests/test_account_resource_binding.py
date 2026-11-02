@@ -6,8 +6,8 @@ from dataclasses import replace
 
 import pytest
 
-from test_trading_api import client, _env, _approval_proof
-from test_trading_oauth_scope import act
+from backend.tests.test_trading_api import client, _env, _approval_proof
+from backend.tests.test_trading_oauth_scope import act
 from van_gateway.trading.accounts import canonical_action
 from vati.accounts import AccountRegistry
 

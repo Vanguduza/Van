@@ -1,0 +1,91 @@
+{
+  "paths": {
+    "backend/tests/test_account_resource_binding.py": {
+      "before_sha256": "fc3fc4b8a094cc49f9cb96736f08131deb80f4fcd762bb1342c51c08d19b06ee",
+      "after_sha256": "a4f3ee16f83ffea31a7d2cc2b0273022e00e49f7d892211c2c4a2dc09fa8ab19",
+      "import_changes": [
+        [
+          "test_trading_api",
+          "backend.tests.test_trading_api"
+        ],
+        [
+          "test_trading_oauth_scope",
+          "backend.tests.test_trading_oauth_scope"
+        ]
+      ],
+      "all_other_AST_exact": true,
+      "assertions": 30
+    },
+    "backend/tests/test_account_operation_recovery.py": {
+      "before_sha256": "dab4bb9906c89d682afdb04221c6c586192ee86aeaed032eeb36f1a0caf2aa7d",
+      "after_sha256": "f1046879664f961a43453e87e1abcb968029f1fd29dc7ca98f57d374c7cef3c8",
+      "import_changes": [
+        [
+          "test_trading_api",
+          "backend.tests.test_trading_api"
+        ],
+        [
+          "test_trading_oauth_scope",
+          "backend.tests.test_trading_oauth_scope"
+        ],
+        [
+          "test_account_resource_binding",
+          "backend.tests.test_account_resource_binding"
+        ],
+        [
+          "test_trading_api",
+          "backend.tests.test_trading_api"
+        ]
+      ],
+      "all_other_AST_exact": true,
+      "assertions": 52
+    },
+    "backend/tests/test_trading_oauth_effects.py": {
+      "before_sha256": "f032a701cea8f2a1b874b994451094f4d049e7a227f5387188b9ac6ccdd1ae14",
+      "after_sha256": "aeba2b7bf488983ca3090334c5581de7274de507cd936800bd29491f4e78a5dd",
+      "import_changes": [
+        [
+          "test_trading_api",
+          "backend.tests.test_trading_api"
+        ],
+        [
+          "test_trading_oauth_scope",
+          "backend.tests.test_trading_oauth_scope"
+        ]
+      ],
+      "all_other_AST_exact": true,
+      "assertions": 74
+    },
+    "backend/tests/test_stateful_link_binding.py": {
+      "before_sha256": "63720c50d1ee5bba47bd6307a47a651ae96a778d0b32426e72b3ac5c7016a657",
+      "after_sha256": "3318a8063954c01d4e582ce47585412606981b77d172c46e36939c017c1d3e79",
+      "import_changes": [
+        [
+          6,
+          "test_trading_api",
+          "backend.tests.test_trading_api"
+        ],
+        [
+          7,
+          "test_trading_oauth_scope",
+          "backend.tests.test_trading_oauth_scope"
+        ],
+        [
+          8,
+          "test_account_resource_binding",
+          "backend.tests.test_account_resource_binding"
+        ],
+        [
+          201,
+          "test_trading_api",
+          "backend.tests.test_trading_api"
+        ]
+      ],
+      "all_other_AST_exact": true,
+      "assertions": 93
+    }
+  },
+  "assertions_preserved": 249,
+  "only_ImportFrom_modules_change": true,
+  "child_script_wait_drain_exit73_timeout_exact": true
+}

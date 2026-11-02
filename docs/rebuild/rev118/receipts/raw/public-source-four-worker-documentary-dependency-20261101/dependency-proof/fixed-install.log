@@ -1,0 +1,17 @@
+Looking in links: /workspace/van-ci-shards-documentary-dependency-20261101/wheels
+Processing ./van-ci-shards-documentary-dependency-20261101/wheels/pytest-9.1.1-py3-none-any.whl (from -r /workspace/van-ci-shards-documentary-dependency-20261101/PROPOSED_HASHED.lock (line 1))
+Processing ./van-ci-shards-documentary-dependency-20261101/wheels/pytest_asyncio-1.4.0-py3-none-any.whl (from -r /workspace/van-ci-shards-documentary-dependency-20261101/PROPOSED_HASHED.lock (line 2))
+Processing ./van-ci-shards-documentary-dependency-20261101/wheels/iniconfig-2.3.0-py3-none-any.whl (from -r /workspace/van-ci-shards-documentary-dependency-20261101/PROPOSED_HASHED.lock (line 3))
+Processing ./van-ci-shards-documentary-dependency-20261101/wheels/packaging-26.3-py3-none-any.whl (from -r /workspace/van-ci-shards-documentary-dependency-20261101/PROPOSED_HASHED.lock (line 4))
+Processing ./van-ci-shards-documentary-dependency-20261101/wheels/pluggy-1.6.0-py3-none-any.whl (from -r /workspace/van-ci-shards-documentary-dependency-20261101/PROPOSED_HASHED.lock (line 5))
+Processing ./van-ci-shards-documentary-dependency-20261101/wheels/pygments-2.21.0-py3-none-any.whl (from -r /workspace/van-ci-shards-documentary-dependency-20261101/PROPOSED_HASHED.lock (line 6))
+Processing ./van-ci-shards-documentary-dependency-20261101/wheels/jsonschema-4.26.0-py3-none-any.whl (from -r /workspace/van-ci-shards-documentary-dependency-20261101/PROPOSED_HASHED.lock (line 7))
+Processing ./van-ci-shards-documentary-dependency-20261101/wheels/attrs-26.1.0-py3-none-any.whl (from -r /workspace/van-ci-shards-documentary-dependency-20261101/PROPOSED_HASHED.lock (line 8))
+Processing ./van-ci-shards-documentary-dependency-20261101/wheels/jsonschema_specifications-2025.9.1-py3-none-any.whl (from -r /workspace/van-ci-shards-documentary-dependency-20261101/PROPOSED_HASHED.lock (line 9))
+Processing ./van-ci-shards-documentary-dependency-20261101/wheels/referencing-0.37.0-py3-none-any.whl (from -r /workspace/van-ci-shards-documentary-dependency-20261101/PROPOSED_HASHED.lock (line 10))
+Processing ./van-ci-shards-documentary-dependency-20261101/wheels/rpds_py-2026.6.3-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (from -r /workspace/van-ci-shards-documentary-dependency-20261101/PROPOSED_HASHED.lock (line 11))
+Processing ./van-ci-shards-documentary-dependency-20261101/wheels/typing_extensions-4.16.0-py3-none-any.whl (from -r /workspace/van-ci-shards-documentary-dependency-20261101/PROPOSED_HASHED.lock (line 12))
+Processing ./van-ci-shards-documentary-dependency-20261101/wheels/anyio-4.15.1-py3-none-any.whl (from -r /workspace/van-ci-shards-documentary-dependency-20261101/PROPOSED_HASHED.lock (line 13))
+Processing ./van-ci-shards-documentary-dependency-20261101/wheels/idna-3.20-py3-none-any.whl (from -r /workspace/van-ci-shards-documentary-dependency-20261101/PROPOSED_HASHED.lock (line 14))
+Installing collected packages: typing-extensions, rpds-py, Pygments, pluggy, packaging, iniconfig, idna, attrs, referencing, pytest, anyio, pytest-asyncio, jsonschema-specifications, jsonschema
+Successfully installed Pygments-2.21.0 anyio-4.15.1 attrs-26.1.0 idna-3.20 iniconfig-2.3.0 jsonschema-4.26.0 jsonschema-specifications-2025.9.1 packaging-26.3 pluggy-1.6.0 pytest-9.1.1 pytest-asyncio-1.4.0 referencing-0.37.0 rpds-py-2026.6.3 typing-extensions-4.16.0

@@ -1,0 +1,391 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+________ test_actual_original_process_death_with_parent_writer_release _________
+
+client = (<httpx.AsyncClient object at 0x7fbbbccb4410>, <fastapi.applications.FastAPI object at 0x7fbbbc694770>)
+tmp_path = PosixPath('/tmp/van-recovery-pytest-link-child-before-20261102/test_actual_original_process_d0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7fbbbcca7950>
+
+    @pytest.mark.asyncio
+    async def test_actual_original_process_death_with_parent_writer_release(client,tmp_path,monkeypatch):
+        _,app=client;original_approved=owner.approved;events=[];releases=[];children=[]
+        real_popen=subprocess.Popen
+        def capture(*args,**kwargs):
+            child=real_popen(*args,**kwargs)
+            command=args[0] if args else kwargs.get('args',[])
+            if isinstance(command,list) and len(command)>2 and command[1]=='-c' and 'exit_after_claim' in command[2]:
+                assert kwargs['start_new_session'] is True
+                children.append(child)
+            return child
+        monkeypatch.setattr(subprocess,'Popen',capture)
+        async def hold_after_real_approval(*args,**kwargs):
+            body=await original_approved(*args,**kwargs)
+            db=await aiosqlite.connect(app.state.store.path)
+            await db.execute('BEGIN IMMEDIATE')
+            events.append({'event':'parent_actual_sqlite_writer_held','at':time.monotonic()})
+            async def release():
+                try:
+                    await asyncio.sleep(.25)
+                    events.append({'event':'parent_event_loop_release_ran','at':time.monotonic()})
+                    await db.commit()
+                    events.append({'event':'parent_actual_sqlite_writer_released','at':time.monotonic()})
+                finally:await db.close()
+            releases.append(asyncio.create_task(release()))
+            return body
+        monkeypatch.setattr(owner,'approved',hold_after_real_approval)
+        try:
+>           await owner.test_real_link_process_death_keeps_bound_original_unknown_without_native_resend(client,tmp_path,monkeypatch)
+
+/tmp/test_van_link_child_wait_sqlite_20261102.py:37: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+client = (<httpx.AsyncClient object at 0x7fbbbccb4410>, <fastapi.applications.FastAPI object at 0x7fbbbc694770>)
+tmp_path = PosixPath('/tmp/van-recovery-pytest-link-child-before-20261102/test_actual_original_process_d0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7fbbbcca7950>
+
+    @pytest.mark.asyncio
+    async def test_real_link_process_death_keeps_bound_original_unknown_without_native_resend(client,tmp_path,monkeypatch):
+        import os,sys,subprocess,signal
+        ac,app=client
+        ctl=LocalAccountControl(str(tmp_path/'accounts.json'),str(tmp_path/'secrets'),operation_ledger=str(tmp_path/'native.sqlite'))
+        app.state.onboarding.control=ctl
+        state=await owned_ready_deriv(ac);args={'state':state,'alias':'process_link','loginid':'VRTC900'}
+        body=await approved(ac,'deriv_oauth_link',args);original=body['approval_proof']['challenge_id'];domain=ctl.domain()
+        script='''import os,json
+    from fastapi.testclient import TestClient
+    from van_gateway.app import create_app
+    from van_gateway.trading.accounts import LocalAccountControl
+    app=create_app()
+    control=LocalAccountControl(os.environ['LINK_REGISTRY'],os.environ['LINK_SECRETS'],operation_ledger=os.environ['LINK_LEDGER'])
+    run=control.run
+    def exit_after_claim(command,args):
+     if command=='deriv_oauth_link':os._exit(73)
+     return run(command,args)
+    control.run=exit_after_claim
+    app.state.onboarding.control=control
+    with TestClient(app) as client:
+     response=client.post('/v1/trading/accounts/action',json=json.loads(os.environ['LINK_BODY']),headers=json.loads(os.environ['LINK_HEADERS']))
+     raise SystemExit(74)
+    '''
+        env=dict(os.environ,LINK_REGISTRY=str(tmp_path/'accounts.json'),LINK_SECRETS=str(tmp_path/'secrets'),
+            LINK_LEDGER=str(tmp_path/'native.sqlite'),LINK_BODY=json.dumps(body),
+            LINK_HEADERS=json.dumps({key:value for key,value in ac.headers.items() if key.lower().startswith('x-van-')}))
+        child=subprocess.Popen([sys.executable,'-c',script],env=env,stdout=subprocess.DEVNULL,stderr=subprocess.PIPE,start_new_session=True)
+        try:
+            try:_,error=child.communicate(timeout=30)
+            except subprocess.TimeoutExpired:
+                os.killpg(child.pid,signal.SIGKILL);child.communicate();raise
+>           assert len(error)<65536 and child.returncode==73,error.decode()
+E           AssertionError: /workspace/van-backend-venv-20261025/lib/python3.12/site-packages/fastapi/testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+E               from starlette.testclient import TestClient as TestClient  # noqa
+E             Traceback (most recent call last):
+E               File "<string>", line 13, in <module>
+E               File "/workspace/van-backend-venv-20261025/lib/python3.12/site-packages/starlette/testclient.py", line 698, in __enter__
+E                 portal.call(self.wait_startup)
+E               File "/workspace/van-backend-venv-20261025/lib/python3.12/site-packages/anyio/from_thread.py", line 340, in call
+E                 return cast(T_Retval, self.start_task_soon(func, *args).result())
+E                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E               File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/concurrent/futures/_base.py", line 456, in result
+E                 return self.__get_result()
+E                        ^^^^^^^^^^^^^^^^^^^
+E               File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/concurrent/futures/_base.py", line 401, in __get_result
+E                 raise self._exception
+E               File "/workspace/van-backend-venv-20261025/lib/python3.12/site-packages/anyio/from_thread.py", line 265, in _call_func
+E                 retval = await retval_or_awaitable
+E                          ^^^^^^^^^^^^^^^^^^^^^^^^^
+E               File "/workspace/van-backend-venv-20261025/lib/python3.12/site-packages/starlette/testclient.py", line 733, in wait_startup
+E                 await receive()
+E               File "/workspace/van-backend-venv-20261025/lib/python3.12/site-packages/starlette/testclient.py", line 724, in receive
+E                 self.task.result()
+E               File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/concurrent/futures/_base.py", line 449, in result
+E                 return self.__get_result()
+E                        ^^^^^^^^^^^^^^^^^^^
+E               File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/concurrent/futures/_base.py", line 401, in __get_result
+E                 raise self._exception
+E               File "/workspace/van-backend-venv-20261025/lib/python3.12/site-packages/anyio/from_thread.py", line 265, in _call_func
+E                 retval = await retval_or_awaitable
+E                          ^^^^^^^^^^^^^^^^^^^^^^^^^
+E               File "/workspace/van-backend-venv-20261025/lib/python3.12/site-packages/starlette/testclient.py", line 714, in lifespan
+E                 await self.app(scope, self.stream_receive.receive, self.stream_send.send)
+E               File "/workspace/van-backend-venv-20261025/lib/python3.12/site-packages/fastapi/applications.py", line 1163, in __call__
+E                 await super().__call__(scope, receive, send)
+E               File "/workspace/van-backend-venv-20261025/lib/python3.12/site-packages/starlette/applications.py", line 96, in __call__
+E                 await self.middleware_stack(scope, receive, send)
+E               File "/workspace/van-backend-venv-20261025/lib/python3.12/site-packages/starlette/middleware/errors.py", line 151, in __call__
+E                 await self.app(scope, receive, send)
+E               File "/workspace/van-backend-venv-20261025/lib/python3.12/site-packages/starlette/middleware/base.py", line 103, in __call__
+E                 await self.app(scope, receive, send)
+E               File "/workspace/van-review-2026-10-18/publish/backend/van_gateway/observability/middleware.py", line 55, in __call__
+E                 await self.app(scope, receive, send)
+E               File "/workspace/van-backend-venv-20261025/lib/python3.12/site-packages/starlette/middleware/exceptions.py", line 49, in __call__
+E                 await self.app(scope, receive, send)
+E               File "/workspace/van-backend-venv-20261025/lib/python3.12/site-packages/fastapi/middleware/asyncexitstack.py", line 18, in __call__
+E                 await self.app(scope, receive, send)
+E               File "/workspace/van-backend-venv-20261025/lib/python3.12/site-packages/starlette/routing.py", line 670, in __call__
+E                 await self.middleware_stack(scope, receive, send)
+E               File "/workspace/van-backend-venv-20261025/lib/python3.12/site-packages/fastapi/routing.py", line 2726, in app
+E                 await self.lifespan(scope, receive, send)
+E               File "/workspace/van-backend-venv-20261025/lib/python3.12/site-packages/starlette/routing.py", line 648, in lifespan
+E                 async with self.lifespan_context(app) as maybe_state:
+E                            ^^^^^^^^^^^^^^^^^^^^^^^^^^
+E               File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/contextlib.py", line 210, in __aenter__
+E                 return await anext(self.gen)
+E                        ^^^^^^^^^^^^^^^^^^^^^
+E               File "/workspace/van-backend-venv-20261025/lib/python3.12/site-packages/fastapi/routing.py", line 240, in merged_lifespan
+E                 async with original_context(app) as maybe_original_state:
+E                            ^^^^^^^^^^^^^^^^^^^^^
+E               File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/contextlib.py", line 210, in __aenter__
+E                 return await anext(self.gen)
+E                        ^^^^^^^^^^^^^^^^^^^^^
+E               File "/workspace/van-backend-venv-20261025/lib/python3.12/site-packages/fastapi/routing.py", line 240, in merged_lifespan
+E                 async with original_context(app) as maybe_original_state:
+E                            ^^^^^^^^^^^^^^^^^^^^^
+E               File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/contextlib.py", line 210, in __aenter__
+E                 return await anext(self.gen)
+E                        ^^^^^^^^^^^^^^^^^^^^^
+E               File "/workspace/van-backend-venv-20261025/lib/python3.12/site-packages/fastapi/routing.py", line 240, in merged_lifespan
+E                 async with original_context(app) as maybe_original_state:
+E                            ^^^^^^^^^^^^^^^^^^^^^
+E               File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/contextlib.py", line 210, in __aenter__
+E                 return await anext(self.gen)
+E                        ^^^^^^^^^^^^^^^^^^^^^
+E               File "/workspace/van-backend-venv-20261025/lib/python3.12/site-packages/fastapi/routing.py", line 240, in merged_lifespan
+E                 async with original_context(app) as maybe_original_state:
+E                            ^^^^^^^^^^^^^^^^^^^^^
+E               File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/contextlib.py", line 210, in __aenter__
+E                 return await anext(self.gen)
+E                        ^^^^^^^^^^^^^^^^^^^^^
+E               File "/workspace/van-backend-venv-20261025/lib/python3.12/site-packages/fastapi/routing.py", line 240, in merged_lifespan
+E                 async with original_context(app) as maybe_original_state:
+E                            ^^^^^^^^^^^^^^^^^^^^^
+E               File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/contextlib.py", line 210, in __aenter__
+E                 return await anext(self.gen)
+E                        ^^^^^^^^^^^^^^^^^^^^^
+E               File "/workspace/van-backend-venv-20261025/lib/python3.12/site-packages/fastapi/routing.py", line 240, in merged_lifespan
+E                 async with original_context(app) as maybe_original_state:
+E                            ^^^^^^^^^^^^^^^^^^^^^
+E               File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/contextlib.py", line 210, in __aenter__
+E                 return await anext(self.gen)
+E                        ^^^^^^^^^^^^^^^^^^^^^
+E               File "/workspace/van-backend-venv-20261025/lib/python3.12/site-packages/fastapi/routing.py", line 240, in merged_lifespan
+E                 async with original_context(app) as maybe_original_state:
+E                            ^^^^^^^^^^^^^^^^^^^^^
+E               File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/contextlib.py", line 210, in __aenter__
+E                 return await anext(self.gen)
+E                        ^^^^^^^^^^^^^^^^^^^^^
+E               File "/workspace/van-backend-venv-20261025/lib/python3.12/site-packages/fastapi/routing.py", line 240, in merged_lifespan
+E                 async with original_context(app) as maybe_original_state:
+E                            ^^^^^^^^^^^^^^^^^^^^^
+E               File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/contextlib.py", line 210, in __aenter__
+E                 return await anext(self.gen)
+E                        ^^^^^^^^^^^^^^^^^^^^^
+E               File "/workspace/van-backend-venv-20261025/lib/python3.12/site-packages/fastapi/routing.py", line 240, in merged_lifespan
+E                 async with original_context(app) as maybe_original_state:
+E                            ^^^^^^^^^^^^^^^^^^^^^
+E               File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/contextlib.py", line 210, in __aenter__
+E                 return await anext(self.gen)
+E                        ^^^^^^^^^^^^^^^^^^^^^
+E               File "/workspace/van-backend-venv-20261025/lib/python3.12/site-packages/fastapi/routing.py", line 240, in merged_lifespan
+E                 async with original_context(app) as maybe_original_state:
+E                            ^^^^^^^^^^^^^^^^^^^^^
+E               File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/contextlib.py", line 210, in __aenter__
+E                 return await anext(self.gen)
+E                        ^^^^^^^^^^^^^^^^^^^^^
+E               File "/workspace/van-backend-venv-20261025/lib/python3.12/site-packages/fastapi/routing.py", line 240, in merged_lifespan
+E                 async with original_context(app) as maybe_original_state:
+E                            ^^^^^^^^^^^^^^^^^^^^^
+E               File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/contextlib.py", line 210, in __aenter__
+E                 return await anext(self.gen)
+E                        ^^^^^^^^^^^^^^^^^^^^^
+E               File "/workspace/van-backend-venv-20261025/lib/python3.12/site-packages/fastapi/routing.py", line 240, in merged_lifespan
+E                 async with original_context(app) as maybe_original_state:
+E                            ^^^^^^^^^^^^^^^^^^^^^
+E               File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/contextlib.py", line 210, in __aenter__
+E                 return await anext(self.gen)
+E                        ^^^^^^^^^^^^^^^^^^^^^
+E               File "/workspace/van-backend-venv-20261025/lib/python3.12/site-packages/fastapi/routing.py", line 240, in merged_lifespan
+E                 async with original_context(app) as maybe_original_state:
+E                            ^^^^^^^^^^^^^^^^^^^^^
+E               File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/contextlib.py", line 210, in __aenter__
+E                 return await anext(self.gen)
+E                        ^^^^^^^^^^^^^^^^^^^^^
+E               File "/workspace/van-backend-venv-20261025/lib/python3.12/site-packages/fastapi/routing.py", line 240, in merged_lifespan
+E                 async with original_context(app) as maybe_original_state:
+E                            ^^^^^^^^^^^^^^^^^^^^^
+E               File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/contextlib.py", line 210, in __aenter__
+E                 return await anext(self.gen)
+E                        ^^^^^^^^^^^^^^^^^^^^^
+E               File "/workspace/van-backend-venv-20261025/lib/python3.12/site-packages/fastapi/routing.py", line 240, in merged_lifespan
+E                 async with original_context(app) as maybe_original_state:
+E                            ^^^^^^^^^^^^^^^^^^^^^
+E               File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/contextlib.py", line 210, in __aenter__
+E                 return await anext(self.gen)
+E                        ^^^^^^^^^^^^^^^^^^^^^
+E               File "/workspace/van-backend-venv-20261025/lib/python3.12/site-packages/fastapi/routing.py", line 240, in merged_lifespan
+E                 async with original_context(app) as maybe_original_state:
+E                            ^^^^^^^^^^^^^^^^^^^^^
+E               File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/contextlib.py", line 210, in __aenter__
+E                 return await anext(self.gen)
+E                        ^^^^^^^^^^^^^^^^^^^^^
+E               File "/workspace/van-backend-venv-20261025/lib/python3.12/site-packages/fastapi/routing.py", line 240, in merged_lifespan
+E                 async with original_context(app) as maybe_original_state:
+E                            ^^^^^^^^^^^^^^^^^^^^^
+E               File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/contextlib.py", line 210, in __aenter__
+E                 return await anext(self.gen)
+E                        ^^^^^^^^^^^^^^^^^^^^^
+E               File "/workspace/van-backend-venv-20261025/lib/python3.12/site-packages/fastapi/routing.py", line 240, in merged_lifespan
+E                 async with original_context(app) as maybe_original_state:
+E                            ^^^^^^^^^^^^^^^^^^^^^
+E               File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/contextlib.py", line 210, in __aenter__
+E                 return await anext(self.gen)
+E                        ^^^^^^^^^^^^^^^^^^^^^
+E               File "/workspace/van-backend-venv-20261025/lib/python3.12/site-packages/fastapi/routing.py", line 240, in merged_lifespan
+E                 async with original_context(app) as maybe_original_state:
+E                            ^^^^^^^^^^^^^^^^^^^^^
+E               File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/contextlib.py", line 210, in __aenter__
+E                 return await anext(self.gen)
+E                        ^^^^^^^^^^^^^^^^^^^^^
+E               File "/workspace/van-backend-venv-20261025/lib/python3.12/site-packages/fastapi/routing.py", line 240, in merged_lifespan
+E                 async with original_context(app) as maybe_original_state:
+E                            ^^^^^^^^^^^^^^^^^^^^^
+E               File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/contextlib.py", line 210, in __aenter__
+E                 return await anext(self.gen)
+E                        ^^^^^^^^^^^^^^^^^^^^^
+E               File "/workspace/van-backend-venv-20261025/lib/python3.12/site-packages/fastapi/routing.py", line 240, in merged_lifespan
+E                 async with original_context(app) as maybe_original_state:
+E                            ^^^^^^^^^^^^^^^^^^^^^
+E               File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/contextlib.py", line 210, in __aenter__
+E                 return await anext(self.gen)
+E                        ^^^^^^^^^^^^^^^^^^^^^
+E               File "/workspace/van-backend-venv-20261025/lib/python3.12/site-packages/fastapi/routing.py", line 240, in merged_lifespan
+E                 async with original_context(app) as maybe_original_state:
+E                            ^^^^^^^^^^^^^^^^^^^^^
+E               File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/contextlib.py", line 210, in __aenter__
+E                 return await anext(self.gen)
+E                        ^^^^^^^^^^^^^^^^^^^^^
+E               File "/workspace/van-backend-venv-20261025/lib/python3.12/site-packages/fastapi/routing.py", line 240, in merged_lifespan
+E                 async with original_context(app) as maybe_original_state:
+E                            ^^^^^^^^^^^^^^^^^^^^^
+E               File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/contextlib.py", line 210, in __aenter__
+E                 return await anext(self.gen)
+E                        ^^^^^^^^^^^^^^^^^^^^^
+E               File "/workspace/van-backend-venv-20261025/lib/python3.12/site-packages/fastapi/routing.py", line 240, in merged_lifespan
+E                 async with original_context(app) as maybe_original_state:
+E                            ^^^^^^^^^^^^^^^^^^^^^
+E               File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/contextlib.py", line 210, in __aenter__
+E                 return await anext(self.gen)
+E                        ^^^^^^^^^^^^^^^^^^^^^
+E               File "/workspace/van-backend-venv-20261025/lib/python3.12/site-packages/fastapi/routing.py", line 240, in merged_lifespan
+E                 async with original_context(app) as maybe_original_state:
+E                            ^^^^^^^^^^^^^^^^^^^^^
+E               File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/contextlib.py", line 210, in __aenter__
+E                 return await anext(self.gen)
+E                        ^^^^^^^^^^^^^^^^^^^^^
+E               File "/workspace/van-backend-venv-20261025/lib/python3.12/site-packages/fastapi/routing.py", line 240, in merged_lifespan
+E                 async with original_context(app) as maybe_original_state:
+E                            ^^^^^^^^^^^^^^^^^^^^^
+E               File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/contextlib.py", line 210, in __aenter__
+E                 return await anext(self.gen)
+E                        ^^^^^^^^^^^^^^^^^^^^^
+E               File "/workspace/van-backend-venv-20261025/lib/python3.12/site-packages/fastapi/routing.py", line 240, in merged_lifespan
+E                 async with original_context(app) as maybe_original_state:
+E                            ^^^^^^^^^^^^^^^^^^^^^
+E               File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/contextlib.py", line 210, in __aenter__
+E                 return await anext(self.gen)
+E                        ^^^^^^^^^^^^^^^^^^^^^
+E               File "/workspace/van-backend-venv-20261025/lib/python3.12/site-packages/fastapi/routing.py", line 240, in merged_lifespan
+E                 async with original_context(app) as maybe_original_state:
+E                            ^^^^^^^^^^^^^^^^^^^^^
+E               File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/contextlib.py", line 210, in __aenter__
+E                 return await anext(self.gen)
+E                        ^^^^^^^^^^^^^^^^^^^^^
+E               File "/workspace/van-backend-venv-20261025/lib/python3.12/site-packages/fastapi/routing.py", line 240, in merged_lifespan
+E                 async with original_context(app) as maybe_original_state:
+E                            ^^^^^^^^^^^^^^^^^^^^^
+E               File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/contextlib.py", line 210, in __aenter__
+E                 return await anext(self.gen)
+E                        ^^^^^^^^^^^^^^^^^^^^^
+E               File "/workspace/van-backend-venv-20261025/lib/python3.12/site-packages/fastapi/routing.py", line 240, in merged_lifespan
+E                 async with original_context(app) as maybe_original_state:
+E                            ^^^^^^^^^^^^^^^^^^^^^
+E               File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/contextlib.py", line 210, in __aenter__
+E                 return await anext(self.gen)
+E                        ^^^^^^^^^^^^^^^^^^^^^
+E               File "/workspace/van-backend-venv-20261025/lib/python3.12/site-packages/fastapi/routing.py", line 240, in merged_lifespan
+E                 async with original_context(app) as maybe_original_state:
+E                            ^^^^^^^^^^^^^^^^^^^^^
+E               File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/contextlib.py", line 210, in __aenter__
+E                 return await anext(self.gen)
+E                        ^^^^^^^^^^^^^^^^^^^^^
+E               File "/workspace/van-backend-venv-20261025/lib/python3.12/site-packages/fastapi/routing.py", line 240, in merged_lifespan
+E                 async with original_context(app) as maybe_original_state:
+E                            ^^^^^^^^^^^^^^^^^^^^^
+E               File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/contextlib.py", line 210, in __aenter__
+E                 return await anext(self.gen)
+E                        ^^^^^^^^^^^^^^^^^^^^^
+E               File "/workspace/van-backend-venv-20261025/lib/python3.12/site-packages/fastapi/routing.py", line 240, in merged_lifespan
+E                 async with original_context(app) as maybe_original_state:
+E                            ^^^^^^^^^^^^^^^^^^^^^
+E               File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/contextlib.py", line 210, in __aenter__
+E                 return await anext(self.gen)
+E                        ^^^^^^^^^^^^^^^^^^^^^
+E               File "/workspace/van-review-2026-10-18/publish/backend/van_gateway/app.py", line 1146, in lifespan
+E                 await owner_runtime.startup()
+E               File "/workspace/van-review-2026-10-18/publish/backend/van_gateway/runtime_api.py", line 359, in startup
+E                 await install_builtin_actions(self.actions)
+E               File "/workspace/van-review-2026-10-18/publish/backend/van_gateway/action/registry.py", line 345, in install_builtin_actions
+E                 await runtime.register(definition)
+E               File "/workspace/van-review-2026-10-18/publish/backend/van_gateway/action/service.py", line 59, in register
+E                 await self.store.execute(
+E               File "/workspace/van-review-2026-10-18/publish/backend/van_gateway/storage/db.py", line 2695, in execute
+E                 await db.execute(sql, params)
+E               File "/workspace/van-backend-venv-20261025/lib/python3.12/site-packages/aiosqlite/core.py", line 223, in execute
+E                 cursor = await self._execute(self._conn.execute, sql, parameters)
+E                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E               File "/workspace/van-backend-venv-20261025/lib/python3.12/site-packages/aiosqlite/core.py", line 160, in _execute
+E                 return await future
+E                        ^^^^^^^^^^^^
+E               File "/workspace/van-backend-venv-20261025/lib/python3.12/site-packages/aiosqlite/core.py", line 63, in _connection_worker_thread
+E                 result = function()
+E                          ^^^^^^^^^^
+E             sqlite3.OperationalError: database is locked
+E             
+E           assert (19355 < 65536 and 1 == 73)
+E            +  where 19355 = len(b'/workspace/van-backend-venv-20261025/lib/python3.12/site-packages/fastapi/testclient.py:1: StarletteDeprecationWarni...ection_worker_thread\n    result = function()\n             ^^^^^^^^^^\nsqlite3.OperationalError: database is locked\n')
+E            +  and   1 = <Popen: returncode: 1 args: ['/workspace/van-backend-venv-20261025/bin/pytho...>.returncode
+
+backend/tests/test_stateful_link_binding.py:263: AssertionError
+---------------------------- Captured stdout setup -----------------------------
+{"action_class": null, "command_id": null, "correlation_id": null, "degraded_code": null, "detail": {"duration_ms": 324.89, "method": "POST", "route": "/v1/devices/pairing-ticket"}, "device_id": null, "error_class": null, "level": "INFO", "logger": "van.request", "message": "request", "mission_id": null, "principal": null, "result": "200", "service": "van-gateway", "ts": "2026-11-02T00:36:19.150Z"}
+{"action_class": null, "command_id": null, "correlation_id": null, "degraded_code": null, "detail": {"duration_ms": 41.25, "method": "POST", "route": "/v1/devices/pair"}, "device_id": null, "error_class": null, "level": "INFO", "logger": "van.request", "message": "request", "mission_id": null, "principal": null, "result": "200", "service": "van-gateway", "ts": "2026-11-02T00:36:19.194Z"}
+----------------------------- Captured stdout call -----------------------------
+{"action_class": null, "command_id": null, "correlation_id": null, "degraded_code": null, "detail": {"duration_ms": 43.27, "method": "POST", "route": "/v1/trading/accounts/challenge"}, "device_id": null, "error_class": null, "level": "INFO", "logger": "van.request", "message": "request", "mission_id": null, "principal": null, "result": "200", "service": "van-gateway", "ts": "2026-11-02T00:36:19.252Z"}
+{"action_class": null, "command_id": null, "correlation_id": null, "degraded_code": null, "detail": {"duration_ms": 56.9, "method": "POST", "route": "/v1/trading/accounts/action"}, "device_id": null, "error_class": null, "level": "INFO", "logger": "van.request", "message": "request", "mission_id": null, "principal": null, "result": "200", "service": "van-gateway", "ts": "2026-11-02T00:36:19.328Z"}
+{"action_class": null, "command_id": null, "correlation_id": null, "degraded_code": null, "detail": {"duration_ms": 27, "fired": 0, "job": "reminders.fire_due", "published": 0}, "device_id": null, "error_class": null, "level": "INFO", "logger": "van.scheduler", "message": "scheduled job completed", "mission_id": null, "principal": null, "result": "OK", "service": "van-gateway", "ts": "2026-11-02T00:36:19.333Z"}
+{"action_class": null, "command_id": null, "correlation_id": null, "degraded_code": null, "detail": {"duration_ms": 21.51, "method": "GET", "route": "/v1/trading/oauth/{broker}/callback"}, "device_id": null, "error_class": null, "level": "INFO", "logger": "van.request", "message": "request", "mission_id": null, "principal": null, "result": "200", "service": "van-gateway", "ts": "2026-11-02T00:36:19.351Z"}
+{"action_class": null, "command_id": null, "correlation_id": null, "degraded_code": null, "detail": {"duration_ms": 20, "expired": 0, "job": "missions.expire_overdue"}, "device_id": null, "error_class": null, "level": "INFO", "logger": "van.scheduler", "message": "scheduled job completed", "mission_id": null, "principal": null, "result": "OK", "service": "van-gateway", "ts": "2026-11-02T00:36:19.369Z"}
+{"action_class": null, "command_id": null, "correlation_id": null, "degraded_code": null, "detail": {"duration_ms": 10, "job": "missions.publish_terminal", "published": 0}, "device_id": null, "error_class": null, "level": "INFO", "logger": "van.scheduler", "message": "scheduled job completed", "mission_id": null, "principal": null, "result": "OK", "service": "van-gateway", "ts": "2026-11-02T00:36:19.387Z"}
+{"action_class": null, "command_id": null, "correlation_id": null, "degraded_code": null, "detail": {"duration_ms": 19, "job": "learning.repair_missions", "pending": 0, "repaired": 0, "retry_pending": 0}, "device_id": null, "error_class": null, "level": "INFO", "logger": "van.scheduler", "message": "scheduled job completed", "mission_id": null, "principal": null, "result": "OK", "service": "van-gateway", "ts": "2026-11-02T00:36:19.416Z"}
+{"action_class": null, "command_id": null, "correlation_id": null, "degraded_code": null, "detail": {"duration_ms": 122.62, "method": "POST", "route": "/v1/trading/accounts/challenge"}, "device_id": null, "error_class": null, "level": "INFO", "logger": "van.request", "message": "request", "mission_id": null, "principal": null, "result": "200", "service": "van-gateway", "ts": "2026-11-02T00:36:19.485Z"}
+------------------------------ Captured log call -------------------------------
+INFO     van.request:logging.py:112 request
+INFO     van.request:logging.py:112 request
+INFO     van.scheduler:logging.py:112 scheduled job completed
+INFO     van.request:logging.py:112 request
+INFO     van.scheduler:logging.py:112 scheduled job completed
+INFO     van.scheduler:logging.py:112 scheduled job completed
+INFO     van.scheduler:logging.py:112 scheduled job completed
+INFO     van.request:logging.py:112 request
+=============================== warnings summary ===============================
+../../van-backend-venv-20261025/lib/python3.12/site-packages/fastapi/testclient.py:1
+  /workspace/van-backend-venv-20261025/lib/python3.12/site-packages/fastapi/testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+    from starlette.testclient import TestClient as TestClient  # noqa
+
+../../van-backend-venv-20261025/lib/python3.12/site-packages/starlette/testclient.py:53
+  /workspace/van-backend-venv-20261025/lib/python3.12/site-packages/starlette/testclient.py:53: DeprecationWarning: The anyio.abc.BlockingPortal alias is deprecated, use anyio.from_thread.BlockingPortal instead.
+    _PortalFactoryType = Callable[[], AbstractContextManager[anyio.abc.BlockingPortal]]
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED ::test_actual_original_process_death_with_parent_writer_release - Asse...
+1 failed, 2 warnings in 23.05s
