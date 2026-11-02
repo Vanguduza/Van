@@ -1,0 +1,41 @@
+{
+  "directory": "/tmp/van-recovery-pytest-link-child-after-20261102",
+  "at_utc": "2026-11-02T00:38:17.474629+00:00",
+  "files": [
+    {
+      "path": "test_actual_original_process_d0/writer-loop-diagnostic.json",
+      "bytes": 687,
+      "sha256": "8f8e32e8089ce01c14ac23d3e7b9767e6228626e5097960d8307ee3afaabbff8"
+    },
+    {
+      "path": "test_actual_original_process_d0/accounts.json.lock",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "test_actual_original_process_d0/accounts.json.operation.process_link.lock",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "test_actual_original_process_d0/native.sqlite",
+      "bytes": 24576,
+      "sha256": "f5fb4331056dd89f9105f6db94b9ca73035e1ad582765580a1740da87dbe6d50"
+    },
+    {
+      "path": "test_actual_original_process_d0/gw.sqlite3",
+      "bytes": 2052096,
+      "sha256": "df5e5b0ad403d7c02ac5b65ad60edaa301a0c69b6d1753c0d08fb98a5deebfe2"
+    },
+    {
+      "path": "test_actual_original_process_d0/secrets/.account-control-domain.env",
+      "bytes": 88,
+      "sha256": "32f5acba385a8f7a685349dc3be1a2eec3728d95181eaac16f4c26549d8af96a"
+    },
+    {
+      "path": "test_actual_original_process_d0/secrets/.account-control-domain.env.lock",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ]
+}

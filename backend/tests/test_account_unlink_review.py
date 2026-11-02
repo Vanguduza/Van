@@ -153,3 +153,118 @@ async def test_incomplete_or_broker_closing_native_review_is_refused_before_sign
     monkeypatch.setattr(app.state.onboarding.control,'review',broken)
     response=await act(ac,'account_remove',{'alias':'fx_primary'},expected_challenge_status=409)
     assert response.status_code==409
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize('fault',['resolution','fsync','namespace','version','readback_age','future_clock','lease'])
+async def test_final_unlink_writer_rechecks_original_scope_and_fresh_native_facts(client,tmp_path,monkeypatch,fault):
+    import os
+    from dataclasses import replace
+    import commander.accounts as native
+    import commander.account_effects as effects
+    import commander.account_retirement as retirement
+    import vati.accounts.registry as storage
+    ac,app=client;view,secret,account=native_funds(tmp_path,monkeypatch)
+    body,issued=await challenge(ac,'account_remove',{'alias':account.alias})
+    identity=body['approval_proof']['challenge_id'];expiry=issued['approval_expires_at_unix']
+    path=tmp_path/'accounts.json';before=path.read_bytes();secret_before=secret.read_bytes();version=app.state.onboarding.control.resource_version(account.alias)['resource_version']
+    clock=[int(time.time())];offset=[0];seen=[]
+    monkeypatch.setattr(effects,'time',NS(time=lambda:clock[0]))
+    monkeypatch.setattr(retirement,'time',NS(time=lambda:time.time()+offset[0]))
+    if fault=='readback_age':
+        adapter=NS(sync_account=lambda:AccountState(account.alias,view['balance'],view['balance'],'USD',True,server_time_unix_ms=int(time.time()*1000)),
+            positions=lambda:[],orders=lambda:[],heartbeat=lambda **kw:Health(True,0,kw['now_ms']-29999))
+        monkeypatch.setattr('vati.app.service.build_adapter',lambda *a,**k:adapter)
+    if fault=='resolution':
+        inspect=retirement.inspect_retirement
+        def delayed(*a,**kw):
+            value=inspect(*a,**kw)
+            if effects._effect_started.get() is not None:clock[0]=expiry;seen.append(True)
+            return value
+        monkeypatch.setattr(retirement,'inspect_retirement',delayed)
+    fsync=storage.os.fsync
+    def delayed_fsync(fd):
+        fsync(fd);marker=effects._effect_started.get()
+        if marker is None or marker[1].command!='account_remove' or '.accounts.json.' not in os.readlink('/proc/self/fd/'+str(fd)):return
+        if seen:return
+        seen.append(True);assert marker[0] is False
+        if fault=='fsync':clock[0]=expiry
+        elif fault=='namespace':(tmp_path/'secrets/.account-control-domain.env').write_text('owned-current-namespace-malformed')
+        elif fault=='version':
+            writer=AccountRegistry(path);writer.replace(replace(writer.get(account.alias),label='Concurrent owner edit'))
+        elif fault=='readback_age':offset[0]=.01
+        elif fault=='future_clock':offset[0]=-60
+        elif fault=='lease':
+            store=SQLiteLeaseStore(tmp_path/'vati.sqlite')
+            try:
+                held=store.read(account.alias);assert held is not None
+                assert store.write_if(held,replace(held,expires_at_ms=int(time.time()*1000)-1))
+            finally:store.close()
+    monkeypatch.setattr(storage.os,'fsync',delayed_fsync)
+    result=await ac.post('/v1/trading/accounts/action',json=body)
+    assert seen and result.status_code==(403 if fault in {'resolution','fsync'} else 409),result.text
+    assert secret.read_bytes()==secret_before
+    if fault=='version':assert AccountRegistry(path).get(account.alias).label=='Concurrent owner edit'
+    else:
+        assert path.read_bytes()==before
+        # Corrupt namespace is a deliberate test fault; the registry generation
+        # itself is unchanged and must not be inferred through that bad scope.
+        if fault!='namespace':assert app.state.onboarding.control.resource_version(account.alias)['resource_version']==version
+    ledger=Ledger(tmp_path/'vati.sqlite')
+    from commander.account_effects import AccountEffectJournal
+    try:state=AccountEffectJournal(ledger).status(identity,'test-device')
+    finally:ledger.close()
+    assert state.phase=='REFUSED'
+    if fault!='namespace':
+        original=await ac.get('/v1/trading/accounts/operations/'+identity)
+        assert original.json()['effect_state']=='REFUSED' and not original.json()['reconciliation_required']
+    assert list(tmp_path.glob('.accounts.json.*.tmp'))==[]
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize('fault',['before_shred','before_shred_missing','after_overwrite_expiry','after_overwrite_io'])
+async def test_partial_unlink_stays_original_unknown_without_cleanup_or_resend_authority(client,tmp_path,monkeypatch,fault):
+    import os
+    import commander.accounts as native
+    import commander.account_effects as effects
+    ac,app=client;_,secret,account=native_funds(tmp_path,monkeypatch)
+    body,issued=await challenge(ac,'account_remove',{'alias':account.alias});identity=body['approval_proof']['challenge_id']
+    before=secret.read_bytes();clock=[int(time.time())];calls=[];shred=native._shred
+    monkeypatch.setattr(effects,'time',NS(time=lambda:clock[0]))
+    def observed(path,**kw):
+        calls.append(True)
+        if fault=='before_shred':clock[0]=issued['approval_expires_at_unix']
+        elif fault=='before_shred_missing':path.unlink()
+        return shred(path,**kw)
+    monkeypatch.setattr(native,'_shred',observed);fsync=os.fsync
+    def delayed(fd):
+        fsync(fd);marker=effects._effect_started.get()
+        if marker is not None and marker[1].command=='account_remove' and os.readlink('/proc/self/fd/'+str(fd))==str(secret):
+            if fault=='after_overwrite_expiry':clock[0]=issued['approval_expires_at_unix']
+            elif fault=='after_overwrite_io':raise OSError('owned interrupted credential flush')
+    monkeypatch.setattr(native.os,'fsync',delayed)
+    result=await ac.post('/v1/trading/accounts/action',json=body)
+    assert result.status_code==409 and result.json()['effect_state']=='UNKNOWN',result.text
+    assert len(calls)==1 and account.alias not in AccountRegistry(tmp_path/'accounts.json').accounts
+    if fault=='before_shred_missing':assert not secret.exists()
+    else:
+        assert secret.exists()
+        assert (secret.read_bytes()==before)==(fault=='before_shred')
+    for _ in range(2):
+        original=await ac.get('/v1/trading/accounts/operations/'+identity)
+        assert original.status_code==200 and original.json()['effect_state']=='UNKNOWN'
+        assert original.json()['operation_id']==identity and original.json()['result'] is None
+    assert len(calls)==1
+    clock[0]=int(time.time())
+    blocked=await act(ac,'account_upsert',{'alias':account.alias,'broker':'MT5','server':'Broker-Demo','login':'12345678'})
+    assert blocked.status_code==409 and len(calls)==1
+    assert (await act(ac,'account_upsert',{'alias':'disjoint_owner','broker':'PAPER'})).status_code==200
+    # SOURCE observations are separate from the original UNKNOWN receipt and
+    # confer no authority to finish the still-pending shred after restart.
+    from pathlib import Path
+    import json
+    Path('/tmp/van-be004-unlink-r1-partial-'+fault+'-'+tmp_path.parent.name+'-observation-20261101.json').write_text(json.dumps({
+        'kind':'CURRENT_SOURCE_OBSERVATION_NOT_ORIGINAL_COMPLETION_OR_AUTHORITY','observed_at_unix':int(time.time()),
+        'operation_id':identity,'registry_alias_absent':True,'managed_file_present':secret.exists(),
+        'file_unchanged':secret.read_bytes()==before if secret.exists() else None,'original_phase':'UNKNOWN','original_result':None,
+        'cleanup_authority_or_resend':False,'cold_fixture':str(tmp_path)},indent=2))

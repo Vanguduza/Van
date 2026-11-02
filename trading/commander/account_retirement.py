@@ -82,7 +82,19 @@ def retirement_scope(settings,alias):
             raise HTTPException(409,'Account runtime is active; stop and reconcile before local unlink')
         with lease.submission_guard(lease.epoch) as held:
             if not held:raise HTTPException(409,'Native runtime fence changed; local link retained')
-            yield
+            epoch=lease.epoch
+            def require_lease_time():
+                held=lease.held
+                if held is None or held.lease_epoch!=epoch or not held.live_at(int(time.time()*1000)):
+                    raise HTTPException(409,'Native retirement lease expired before local effect')
+            def require_current_lease():
+                if not lease.fence(epoch,now_ms=int(time.time()*1000),min_validity_ms=0):
+                    raise HTTPException(409,'Native retirement lease expired or changed before local write')
+                # The store read may have waited. Never carry its early clock
+                # through to a later protected write.
+                require_lease_time()
+            require_current_lease.check_time=require_lease_time
+            yield require_current_lease
     finally:
         if lease is not None:lease.release()
         if store is not None:store.close()
@@ -126,7 +138,7 @@ def _history(ledger,account):
     return sorted(set(refs))
 
 
-def inspect_retirement(settings,registry,account,*,inside_removal=False,operation_id=None,native_ledger=None):
+def inspect_retirement(settings,registry,account,*,inside_removal=False,operation_id=None,native_ledger=None,readback_guards=None):
     """Fresh readonly facts, with no inferred zero for unsupported observation."""
     ledger=native_ledger if native_ledger is not None else open_ledger(authority_path(settings));adapter=None;store=None
     try:
@@ -139,7 +151,9 @@ def inspect_retirement(settings,registry,account,*,inside_removal=False,operatio
             if ('account:'+account.alias in state.intent.targets and state.phase in {'IN_FLIGHT','UNKNOWN'}
                 and state.intent.operation_id!=operation_id):
                 raise HTTPException(409,'Original account operation is unresolved; local link retained')
+        observed_started=int(time.time()*1000)
         refs=_history(ledger,account)
+        oldest=observed_started
         if account.broker=='PAPER':
             # This has no broker funds. Simulated history is retained; never
             # construct a fresh PaperAdapter and mistake it for runtime state.
@@ -163,7 +177,22 @@ def inspect_retirement(settings,registry,account,*,inside_removal=False,operatio
                 or not isinstance(state.balance,Decimal) or not state.balance.is_finite()
                 or not isinstance(state.equity,Decimal) or not state.equity.is_finite()):
                 raise HTTPException(409,'Native funds, identity or freshness is unknown; local link retained')
+            oldest=min(started,heartbeat.last_heartbeat_ms,*([state.server_time_unix_ms] if account.broker!='DERIV' else []))
             funds={'balance':str(state.balance),'equity':str(state.equity),'currency':state.currency}
+        observed_completed=int(time.time()*1000)
+        if readback_guards is not None:
+            expected_history=canonical_hash(refs)
+            def require_readback_time():
+                now=int(time.time()*1000)
+                if not observed_completed<=now<=oldest+30000:
+                    raise HTTPException(409,'Native retirement readback expired or clock changed before local write')
+            def require_current_readback():
+                if canonical_hash(_history(ledger,account))!=expected_history:
+                    raise HTTPException(409,'Native retirement history changed before local write')
+                # History validation can block; source age is checked AFTER it.
+                require_readback_time()
+            require_current_readback.check_time=require_readback_time
+            readback_guards.append(require_current_readback)
         cleanup,_=credential_cleanup(settings,registry,account)
         return {'schema':'vati.local-unlink-review/1','remote_account_closed':False,
                 'historical_data_retained':True,'retained_remote_funds':funds,

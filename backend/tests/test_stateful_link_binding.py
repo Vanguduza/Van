@@ -230,7 +230,7 @@ async def test_cached_receipt_fields_cannot_change_original_bound_scope(client,t
 
 @pytest.mark.asyncio
 async def test_real_link_process_death_keeps_bound_original_unknown_without_native_resend(client,tmp_path,monkeypatch):
-    import os,sys,subprocess,signal
+    import os,sys,subprocess,signal,asyncio
     ac,app=client
     ctl=LocalAccountControl(str(tmp_path/'accounts.json'),str(tmp_path/'secrets'),operation_ledger=str(tmp_path/'native.sqlite'))
     app.state.onboarding.control=ctl
@@ -256,13 +256,16 @@ with TestClient(app) as client:
         LINK_LEDGER=str(tmp_path/'native.sqlite'),LINK_BODY=json.dumps(body),
         LINK_HEADERS=json.dumps({key:value for key,value in ac.headers.items() if key.lower().startswith('x-van-')}))
     child=subprocess.Popen([sys.executable,'-c',script],env=env,stdout=subprocess.DEVNULL,stderr=subprocess.PIPE,start_new_session=True)
+    waiting=asyncio.create_task(asyncio.to_thread(child.communicate,timeout=30))
     try:
-        try:_,error=child.communicate(timeout=30)
-        except subprocess.TimeoutExpired:
-            os.killpg(child.pid,signal.SIGKILL);child.communicate();raise
+        _,error=await asyncio.shield(waiting)
         assert len(error)<65536 and child.returncode==73,error.decode()
     finally:
-        if child.poll() is None:os.killpg(child.pid,signal.SIGKILL);child.wait(timeout=5)
+        if child.poll() is None:
+            os.killpg(child.pid,signal.SIGKILL)
+            await asyncio.to_thread(child.wait,timeout=5)
+        try:await asyncio.shield(waiting)
+        except subprocess.TimeoutExpired:await asyncio.to_thread(child.communicate)
     row=await app.state.store.fetchone("SELECT * FROM trading_oauth_effects WHERE state=? AND operation='LINK'",(state,))
     assert row['phase']=='IN_FLIGHT'
     intent=app.state.onboarding.pending.effects._link_envelope(row)

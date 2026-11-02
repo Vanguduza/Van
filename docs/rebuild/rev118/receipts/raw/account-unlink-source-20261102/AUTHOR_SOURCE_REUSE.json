@@ -1,0 +1,43 @@
+[
+  {
+    "label": "final-backend",
+    "selected_testfiles_exact": 6,
+    "cases": 40,
+    "pass": 40,
+    "skip": [],
+    "xml_sha256": "953bb6432c19ea10d157ab592ce8aa39ab6da4778bdd135c380af77b6051ace0",
+    "source7_current_matches_reviewed": true,
+    "scope": "AuthorfrozenSOURCE evidence;notwholemergedgatewayclaim. Exactsource7/reusedselectedtestfiles/currentconditions. Changedwaittestoutsidebothauthorselections, mergedcriticalnodecoversactualnewcomposition."
+  },
+  {
+    "label": "final-native",
+    "selected_testfiles_exact": 7,
+    "cases": 120,
+    "pass": 115,
+    "skip": [
+      {
+        "id": "trading.tests.test_account_retirement_pg::test_actual_pg_live_runtime_prevents_destructive_unlink",
+        "reason": "actual isolated PostgreSQL fixture must be explicitly bound"
+      },
+      {
+        "id": "trading.tests.test_account_retirement_pg::test_actual_pg_first_retirement_owns_the_previously_absent_lease_row",
+        "reason": "actual isolated PostgreSQL fixture must be explicitly bound"
+      },
+      {
+        "id": "trading.tests.test_account_retirement_pg::test_actual_pg_row_guard_fences_a_competing_actor_even_beyond_lease_ttl",
+        "reason": "actual isolated PostgreSQL fixture must be explicitly bound"
+      },
+      {
+        "id": "trading.tests.test_native_account_effects::test_postgres_original_operation_is_atomic_and_isolated_between_named_ledgers",
+        "reason": "requires explicitly isolated native PostgreSQL fixture"
+      },
+      {
+        "id": "trading.tests.test_native_account_effects::test_actual_concurrent_native_claim_writers_cannot_admit_two_effects_for_a_target[postgres]",
+        "reason": "requires explicitly isolated native PostgreSQL fixture"
+      }
+    ],
+    "xml_sha256": "7061d305e87c0542d015ad7c9596ccb04b9b452205b9d7e5bbbc1b90643585e4",
+    "source7_current_matches_reviewed": true,
+    "scope": "AuthorfrozenSOURCE evidence;notwholemergedgatewayclaim. Exactsource7/reusedselectedtestfiles/currentconditions. Changedwaittestoutsidebothauthorselections, mergedcriticalnodecoversactualnewcomposition."
+  }
+]

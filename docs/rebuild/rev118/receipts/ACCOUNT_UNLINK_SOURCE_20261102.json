@@ -1,0 +1,125 @@
+{
+  "state": "REVIEWED_UNLINK_R2_AND_RESPONSIVE_LINK_CHILD_WAIT_MERGED_SOURCE_CANDIDATE",
+  "base": "5c80526ddb6effe9f61c4761645f7377314260f5",
+  "published_base": "4c410418bf8f809b1df0e3eb3edfb85422c77f5c",
+  "source_pins": {
+    "trading/commander/accounts.py": "f12b42dfcf26c34a8328e34f95c70d964343a3909484ebf0b89a7a65d087ccc6",
+    "trading/commander/account_retirement.py": "b1894ad6407e17736241479794ebec494a03c039198de47ea94c2b4d5455c7dc",
+    "trading/commander/app.py": "1d0d614fbe867838abb01baefd4534fb65cb02724770354d15cfec807717ee98",
+    "trading/vati/accounts/registry.py": "6178715463eb89b33827d4dbd6cfe427ad9e65c2c00049caef0ec50633c74803",
+    "backend/tests/test_account_unlink_review.py": "b57fd1b21f979f18d06f22c0bc2833bb3febcd4135ccf830c9412867751d7cf2",
+    "trading/tests/test_account_registry_atomic_rea.py": "be80eb54cab1adb6869b572eaccf31e92dc3710b7ad421310da72d9cc89ced73",
+    "trading/tests/test_account_unlink_currentness.py": "4abd5642062e30f5e23fd953b3c30b5517eb12b5e8f39c27dc0497fa6097f00d",
+    "backend/tests/test_stateful_link_binding.py": "63720c50d1ee5bba47bd6307a47a651ae96a778d0b32426e72b3ac5c7016a657"
+  },
+  "unlink7_fingerprint": "c742984eec212ce67d7ff6a235883811cd432bed989db240b683b4ebc054f4fe",
+  "scope": "Sevennativeunlinksource/testpaths plusindependentlyclearedone-testawaitfix;genuine5cpreserved/noamend. Unreviewedfundinglabel9notapplied. No schema/issuer/action/policy/frontend/CIamendment.",
+  "behavior": "Firstlocalunlink/credentialeffects recheckoriginalscope/A4/version/sourceage/currentlease/key/domain/identity atfinalwriter afterblockinghistory/lease/identityreads. Immutable30s sourceobservation notrefreshed; finalclockpredicates runafterwaits. No firsteffect=>truthfuloriginalREFUSED/no mutation; priorcommittedeffect=>UNKNOWN.resultNone, no reopen/resend/cleanupauthority. Historicaloriginalreadback retained undercurrentauth. Sharedregistry defaultNone path preserved.",
+  "R2_counterexample": {
+    "unchanged_probe": "/tmp/van-be004-unlink-independent-review-20261102/test_readback_after_history.py",
+    "probe_sha256": "bb0ee2151a62e47ba82f7b6c99716b04258e22a6d96fa3917ae11e22607d6c66",
+    "before_failed_root": "/tmp/van-be004-unlink-timing-84xb08nj",
+    "before_failed_terminal": {
+      "receipt": "/tmp/van-be004-unlink-timing-84xb08nj/terminal.json",
+      "receipt_sha256": "fe8676c3ceaf295d2178788ac695c2e55ee4546d3418c05bd73df31c1de71d71",
+      "root": "/tmp/van-be004-unlink-timing-84xb08nj",
+      "raw": "/tmp/van-be004-unlink-timing-84xb08nj/raw.log",
+      "raw_sha256": "bb871c640ebd59f98ea892890b9a4a828ac05b8e3371907bba3591379c816b67",
+      "JUnit": "/tmp/van-be004-unlink-timing-84xb08nj/junit.xml",
+      "JUnit_sha256": "674988a8285bc55dfd286c6d8d4f6387553b79316db11171ac724567493ca134",
+      "exit": 1,
+      "cases": 1,
+      "PASS": 0,
+      "intended_failures": 1,
+      "seconds": 25.807745933532715,
+      "child_reaped": true,
+      "process_group_absent": true,
+      "fixture_bytes": 2107162,
+      "test_ids": [
+        "test_readback_after_history::test_blocking_final_history_read_cannot_outwait_native_observation_window"
+      ]
+    },
+    "before_observation_path": "/tmp/van-be004-unlink-timing-84xb08nj/fixtures/test_blocking_final_history_re0/timing_observation.json",
+    "before_observation": {
+      "HTTP": 200,
+      "wire_effect_state": "APPLIED",
+      "original_state": "APPLIED",
+      "registry_unchanged": false,
+      "alias_present": false,
+      "native_retirement_clock_advance_seconds": 31,
+      "history_boundary": [
+        {
+          "same_original": true,
+          "authority_unexpired": true,
+          "marker_before_first_swap": false
+        }
+      ],
+      "original_id_preserved": true
+    },
+    "before_selected_file_hash_checkpoint": {
+      "/tmp/van-be004-unlink-timing-84xb08nj/terminal.json": "fe8676c3ceaf295d2178788ac695c2e55ee4546d3418c05bd73df31c1de71d71",
+      "/tmp/van-be004-unlink-timing-84xb08nj/junit.xml": "674988a8285bc55dfd286c6d8d4f6387553b79316db11171ac724567493ca134",
+      "/tmp/van-be004-unlink-timing-84xb08nj/raw.log": "bb871c640ebd59f98ea892890b9a4a828ac05b8e3371907bba3591379c816b67",
+      "/tmp/van-be004-unlink-timing-84xb08nj/fixtures/test_blocking_final_history_re0/timing_observation.json": "2e9620bfca5015e516271bf7d93414e8f0611ab55f9e002b163a241b8e3a746f",
+      "/tmp/van-be004-unlink-timing-84xb08nj/fixtures/test_blocking_final_history_re0/accounts.json": "ff292d2ac04956cc8dd7be94163bbe0eb6be43968c02e8733335ed1772564a72",
+      "/tmp/van-be004-unlink-timing-84xb08nj/fixtures/test_blocking_final_history_re0/vati.sqlite": "3221215b213b07df22fa4a763cfa22dacfd7422874274557a210343d2b889384",
+      "/tmp/van-be004-unlink-timing-84xb08nj/fixtures/test_blocking_final_history_re0/gw.sqlite3": "104537dfa4d641fd373133eaab865b9d3c07e2bf3fa25f4483d853d760f4810d"
+    },
+    "before_raw_JUnit_terminal_hashes_match_independent_review": true,
+    "after_path": "/tmp/van-be004-unlink-r2-final-backend-pytest/test_blocking_final_history_re0/timing_observation.json",
+    "after_sha256": "b94e3846ddb1024f5dc47564822a4861bb4b5f083cea2ec9a08cdf9a9c4ea5ee",
+    "after_observation": {
+      "HTTP": 409,
+      "wire_effect_state": "REFUSED",
+      "original_state": "REFUSED",
+      "registry_unchanged": true,
+      "alias_present": true,
+      "native_retirement_clock_advance_seconds": 31,
+      "history_boundary": [
+        {
+          "same_original": true,
+          "authority_unexpired": true,
+          "marker_before_first_swap": false
+        }
+      ],
+      "original_id_preserved": true
+    },
+    "after_result": "409/authoritative originalREFUSED, original A4 still unexpired/same ID, markerFalse, registry bytes/generation untouched. Fresh distinct owned destination; no overwrite/restoration/reconstruction.",
+    "original_R1_5c_before_manifest_still_unchanged": true
+  },
+  "proofs": {
+    "author": "Freshserial40backendPASS+115nativeSOURCEPASS5declaredPGskip=160unique(155PASS5SKIP); noold302reuse/nofullsuite/nativequalification. Exact7source/testinputs verified;authorlaneHTTPnotclaimedasexactmergedapp.",
+    "independent_unlink": "10PASS0skip, originalUNCHANGED31s_historyprobe409/originalREFUSED/A4valid/markerFalse/no mutation;lease/key/identity/partial/cached/defaultremove verified. R1failedreview preserved.",
+    "wait_fix": "Independent3actualPASS plusauthorbeforefail/afterpass/cancel+original30stimeout controls. All93assertAST/childscript/args/exit73/30/5/cap unchanged;reviewedonefileexact. NotproductionDBtimeout/retrychange. See LINK_CHILD_WAIT_SOURCE receipt for rawcontrollerlabel/positivefixturecleanup disclosures.",
+    "merged": "18actualPASS0skip/audit0/exit0 onall8pinsbefore=after,31,161,331Bpeak/nochildren/verifiedowntempcleanup;7finalscopefaults+4partialUNKNOWN/signed/lostreply/criticalrealchilddeath/preview/defaultregistry. Distinctoverlapwithauthor/independentproofs,notadditiveunique.",
+    "PG": "FiveisolatedPGskips retainedwith exactIDs/reasons inAUTHOR_SOURCE_REUSE;nofabricatedgreen.",
+    "contracts": "Owner/frontend/workmapchecksunchanged;491endpoints393schemas/349actions234contexts105functions42groups78surfaces preserved. Mutation374383anchorsvalidNOT_RUN;noactualmutantpassclaim."
+  },
+  "source_implementation_gaps": [
+    "Safe owner pending-shred reconciliation and durable per-step facts remain UNIMPLEMENTED original BE004 recovery. Strict UNKNOWN.resultNone/no reopen/no resend retained; current file/registry observations are Source projection facts, never completion or cleanup authority.",
+    "Independent fresh reauth/lockout is implementation/contract design missing; existing actual per-use biometric key may support a separately purpose-bound challenge if its existing owner contract permits. No new issuer or externalpermission need inferred from absence; not implemented or assumed here; genuine hardware/native admission separate.",
+    "Grace delete/cancel/OQ15 owner-selected duration, retention/anonymization, OAuth/strategy/funds dispositions and provider-closure/settlement remain OPEN, no seven-day/default/remoteclosed inference.",
+    "Full11requirements/21acceptance/20contexts/6LAC, other entitled edits, unit/formal/PRE003/BG001/PG/provider/native/SDK/S24/production acceptance remain OPEN."
+  ],
+  "future_BE006_root_binding": "Separateunreviewed9sourcecandidate underoriginal\u00a77.9.5:Auth.owner_state ownerassertion/data-onlybinding, notprovidertruth/money/executionpermission. AnyactualnewLAC/actionmappinggap remainsseparateproposed/unadmitted;no frozenamendment/selfauthority and no source9apply.",
+  "history": "4cactualcompletedFAILED41terminal:rootgatewaySQLchildfailure+entry67;backendcwdonlyentry67;aggregatesfailclosed/nofullunion. Old97092implementerreapedONCEcontroller0/CI1,rootearlierUnknownretained. R1unlink200APPLIED31s defect andraworiginalfixtures remainunaltered;sourceafterdoesnotmakeoldrunsgreen.",
+  "limits": "Hardware/provider/native/accountclosure/reauthpurposeprotocol/pending-shredper-steprecovery/grace/OQ15duration/retentionanonymization/OAuthstrategyfundsdispositions/fullBE004/unit/formal/BG001/S24/intake/privateDDS/trustedbase/fullmatrixqualificationOPEN. Pending-shred/reauth areIMPLEMENTATION/CONTRACTDESIGNgaps, notdefault externalpermission blockers. Root4cactualSDKunit/build/lint/AGPsuccesssourceonly/no testcasecounts/nativeS24;noAndroiddraftproducer here.",
+  "raw_volatility": "Largeoriginalrawlogs/SQLfixtures/archive stayownedtmp paths+digests inHANDOFF; no persistenceguarantee. Compactpatch/pins/reviews/proofmaps here below1MiB combined withwaitfixpack.",
+  "at": "2026-11-02T01:17:59.321742+00:00",
+  "files": {
+    "FRONTEND_CHECK.json": "69dcc86a9d7aaffcadf4a70e58b379d8452c124dadc4347afbc9e57fbab7ae85",
+    "HANDOFF.json": "8800029c4badf2889ac34db82ebd4ccc0f68234bf2a607e0f52ffd6bf89f54f4",
+    "INDEPENDENT_R2_REVIEW.json": "a1258d22913dbbc3bc8349e1202f488072150fcbfd40eaa968c12b4af1793048",
+    "MERGED_RECEIPT.json": "359e4625d992c8cde344b04f7e8a656ff1aa9d0fc43c8de1603a892ec85702a5",
+    "SOURCE_PINS.json": "a848d4e69e980b3c7c8d2584f294c276c1328f32ee9c22c2ed12c89144941c24",
+    "OWNER_CHECK.json": "35a9b4641c85055b16c3a6458a7b1f99fb5df7ec0f5a6280ca45c3ab14cd7103",
+    "AUTHOR_FINAL_BACKEND_XML.xml": "953bb6432c19ea10d157ab592ce8aa39ab6da4778bdd135c380af77b6051ace0",
+    "AUTHOR_FINAL_NATIVE_XML.xml": "7061d305e87c0542d015ad7c9596ccb04b9b452205b9d7e5bbbc1b90643585e4",
+    "AUTHOR_SOURCE_REUSE.json": "0346abbd4838d6ead52a42e59e0fd1ba3ecfc37809bd7a705c5b42e9f6ab6102",
+    "FAILED_R1_REVIEW.json": "38961496a6f039d4afcd207e4dfa5ff8b1242d6b55771dda8aaecbce01cbfb24",
+    "MERGED_XML.xml": "a6ebceb0b8b913d81c465756618793191a0f98b0e2bad6e93cc6a6be789a5126",
+    "MERGED_AUDIT.json": "f159c056ef876b2852e522cf92ac940143fb1b43cf2b480fbad507dc745049bc",
+    "SOURCE.patch": "859a634e68569262aac6dec6929548a7fb730dac8c26afb3e714c4a501f3b572",
+    "APPLY_RECEIPT.json": "e55989f976e28ba8bdba2cf75c82c1b2628db153f2af4475e5bc45a24f73a9d7"
+  }
+}

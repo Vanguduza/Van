@@ -1,0 +1,174 @@
+{
+  "disposition": "REQUIRES_REPAIR_ROOT_ACCEPTED",
+  "finding_id": "BE004-UNLINK-REVIEW01",
+  "source_fingerprint": "0dd786e0245158360066cb3ed627fba8bf0b03f09abd89c226dbc70cb05da951",
+  "source7_before_after_all_runs": {
+    "trading/commander/accounts.py": "3adefc8f489826cec13103a17f104122b0bc9a40fa72b9463111f73688a14e56",
+    "trading/commander/account_retirement.py": "4f254398a7dc7c209520d5d18467657bad997cf075deb4a128c38b48fb9a47bb",
+    "trading/commander/app.py": "1d0d614fbe867838abb01baefd4534fb65cb02724770354d15cfec807717ee98",
+    "trading/vati/accounts/registry.py": "6178715463eb89b33827d4dbd6cfe427ad9e65c2c00049caef0ec50633c74803",
+    "backend/tests/test_account_unlink_review.py": "b57fd1b21f979f18d06f22c0bc2833bb3febcd4135ccf830c9412867751d7cf2",
+    "trading/tests/test_account_registry_atomic_rea.py": "be80eb54cab1adb6869b572eaccf31e92dc3710b7ad421310da72d9cc89ced73",
+    "trading/tests/test_account_unlink_currentness.py": "79b72a274d656ce98b5a8b5f44fa81009f9036704fd80943f4b85765c533afab"
+  },
+  "patch_sha256": "c229cdd6dd470531c871ef037627b090701adfc73132fee8ad36fbebff23077d",
+  "exact7_export_baseline_applied_hashes_verified": true,
+  "blocking_finding": {
+    "source": [
+      "trading/commander/account_retirement.py:177",
+      "trading/commander/account_retirement.py:178",
+      "trading/commander/account_retirement.py:181",
+      "trading/commander/accounts.py:460",
+      "trading/commander/accounts.py:469"
+    ],
+    "cause": "require_current_readback validates its captured time BEFORE potentially blocking _history. Current held lease is checked before that readback. Neither final readback clock nor held lease is checked after history returns before the actual registry effect; final mark require_current rechecks consumed authority/current signed key/domain, not this native readback/lease.",
+    "actual_probe": "Actual paired sealed A4 PAPER unlink. At staged registry fsync, marker False arms only final guard. Actual _history returns unchanged refs while SOURCE retirement clock advances31s during that final read. Original A4 remains unexpired/sameID. Candidate swaps registry and returns200/APPLIED; independent originalGET200/APPLIED and alias absent. No adapter/provider/network or financial effect.",
+    "observation": {
+      "HTTP": 200,
+      "wire_effect_state": "APPLIED",
+      "original_state": "APPLIED",
+      "registry_unchanged": false,
+      "alias_present": false,
+      "native_retirement_clock_advance_seconds": 31,
+      "history_boundary": [
+        {
+          "same_original": true,
+          "authority_unexpired": true,
+          "marker_before_first_swap": false
+        }
+      ],
+      "original_id_preserved": true
+    },
+    "root_required_boundary": "Recheck captured original native source clock/unchanged30s window AFTER blocking history, and current actual held lease/freshness at final effect marker under existing writer. No deadline/threshold weakening, new authority or guessed completion. Before first effect must durableREFUSED/retain bytes+generation; later possible effect remains UNKNOWN/resultNone/no resend. Root leases existing7 only.",
+    "minimal_repeat_probe": "/tmp/van-be004-unlink-independent-review-20261102/test_readback_after_history.py",
+    "repeat_contract": "Repeat exact unchanged probe after repair using new uniquely owned root; all observation paths already derive tmp_path. Preserve this failed root/raw/XML/SQLite and original before evidence; after evidence separate, no overwrite/restoration."
+  },
+  "independent_actual_runs": [
+    {
+      "receipt": "/tmp/van-be004-unlink-review-gnnptm6o/terminal.json",
+      "receipt_sha256": "8215146084226f28a20c0fb90795e0871bd70d491cfce1117679fd029ff4c03d",
+      "root": "/tmp/van-be004-unlink-review-gnnptm6o",
+      "raw": "/tmp/van-be004-unlink-review-gnnptm6o/raw.log",
+      "raw_sha256": "e90f4a316afb72cc19f1d8145d337c746b867a0b76a09269f1ab6e24650b651c",
+      "JUnit": "/tmp/van-be004-unlink-review-gnnptm6o/junit.xml",
+      "JUnit_sha256": "34223d718e140bf474a48257e3f2fa0e114482c78b695f6a15b823098d1757cc",
+      "exit": 0,
+      "cases": 12,
+      "PASS": 12,
+      "intended_failures": 0,
+      "seconds": 55.98075294494629,
+      "child_reaped": true,
+      "process_group_absent": true,
+      "fixture_bytes": 18826590,
+      "test_ids": [
+        "::test_original_unlink_expiry_before_actual_registry_swap_refuses",
+        "::test_guard_delayed_symlink_substitution_cannot_touch_external_or_unlink_replacement[overwrite]",
+        "::test_guard_delayed_symlink_substitution_cannot_touch_external_or_unlink_replacement[unlink]",
+        "trading.tests.test_account_unlink_currentness::test_real_queued_unlink_writer_refuses_expiry_without_original_mutation",
+        "trading.tests.test_account_registry_atomic_rea::test_optional_trusted_guard_runs_after_fsync_and_refusal_preserves_bytes_revision_and_memory[remove]",
+        "backend.tests.test_account_unlink_review::test_final_unlink_writer_rechecks_original_scope_and_fresh_native_facts[readback_age]",
+        "backend.tests.test_account_unlink_review::test_final_unlink_writer_rechecks_original_scope_and_fresh_native_facts[future_clock]",
+        "backend.tests.test_account_unlink_review::test_final_unlink_writer_rechecks_original_scope_and_fresh_native_facts[lease]",
+        "trading.tests.test_account_unlink_currentness::test_actual_registered_unlink_rechecks_current_envelope_at_writer_and_retains_original_history[key]",
+        "trading.tests.test_account_unlink_currentness::test_actual_registered_unlink_rechecks_current_envelope_at_writer_and_retains_original_history[healthy_cached]",
+        "backend.tests.test_account_unlink_review::test_partial_unlink_stays_original_unknown_without_cleanup_or_resend_authority[before_shred_missing]",
+        "backend.tests.test_account_unlink_review::test_partial_unlink_stays_original_unknown_without_cleanup_or_resend_authority[after_overwrite_expiry]"
+      ]
+    },
+    {
+      "receipt": "/tmp/van-be004-unlink-timing-84xb08nj/terminal.json",
+      "receipt_sha256": "fe8676c3ceaf295d2178788ac695c2e55ee4546d3418c05bd73df31c1de71d71",
+      "root": "/tmp/van-be004-unlink-timing-84xb08nj",
+      "raw": "/tmp/van-be004-unlink-timing-84xb08nj/raw.log",
+      "raw_sha256": "bb871c640ebd59f98ea892890b9a4a828ac05b8e3371907bba3591379c816b67",
+      "JUnit": "/tmp/van-be004-unlink-timing-84xb08nj/junit.xml",
+      "JUnit_sha256": "674988a8285bc55dfd286c6d8d4f6387553b79316db11171ac724567493ca134",
+      "exit": 1,
+      "cases": 1,
+      "PASS": 0,
+      "intended_failures": 1,
+      "seconds": 25.807745933532715,
+      "child_reaped": true,
+      "process_group_absent": true,
+      "fixture_bytes": 2107162,
+      "test_ids": [
+        "test_readback_after_history::test_blocking_final_history_read_cannot_outwait_native_observation_window"
+      ]
+    }
+  ],
+  "independent_total": "12PASS plus1intendedFAIL, two separate bounded terminal runs",
+  "positive_review_scope": [
+    "Original registry-fsync expiry now typed403/detail-only/no fabricated effect_state; original independentREFUSED/bytes unchanged/markerFalse.",
+    "Real queued global registry writer expiry refuses; default generic remove guard afterfsync restores bytes/revisions/inmemory/temp cleanup and healthycallback succeeds.",
+    "Existing readback-age/future-clock/held-lease failures before guard refuse.",
+    "Actual signed registered key rotation refuses; healthy originalcached read afterexpiry no secondwrite.",
+    "Missing expected file and expiry after overwrite stay UNKNOWN/resultNone and fence new same-target requests; disjoint target progresses.",
+    "Own direct tiny real-file probes substitute symlink after blocking before_write/before_unlink callbacks; postguard identity checks prevent touching external bytes or deleting replacement."
+  ],
+  "scope_assessment": {
+    "defaults": "Generic remove optional callback defaultNone, no reverse authority import. Existing originals assertions retained; backend unlink oldtestprefix exact; registry add/replace assertions preserved with added remove branch.",
+    "partial": "Own confirmed removal version and owned file overwrite generation are distinct from original approved version. Guard/marker ordering and afterguard identity checks substantiate partial UNKNOWN behavior. Current source partial observations remain facts, not cleanup authority.",
+    "remaining_implementation": "Safe owner pending-shred reconciliation and durable per-step facts UNIMPLEMENTED original recovery; fresh reauth/grace/cancel/provider/funds dispositions remain OPEN."
+  },
+  "author_frozen_evidence": {
+    "groups": [
+      {
+        "label": "final-backend",
+        "PASS": 26,
+        "PGskip": 0,
+        "raw_sha256": "8481f1dc8e15c18df3ceb150a60a8bb13298d058ab3bfda5de8c618f315d2f59",
+        "junit_sha256": "63b0ee476296272c2a0cb4d5c29b4710365de3aa534b962f81bc4005ff4523f2"
+      },
+      {
+        "label": "final-native",
+        "PASS": 172,
+        "PGskip": 5,
+        "raw_sha256": "80296854841b3bad7e791b0d60c1d7e3b3d6c0b71ffbc3ceb311267f98dcdd20",
+        "junit_sha256": "d3651d668d63a08efb06c48192ce6a212976402289e8018bfdadf02b3a3d9a64"
+      },
+      {
+        "label": "final-callers",
+        "PASS": 51,
+        "PGskip": 0,
+        "raw_sha256": "ed1ebc7eac51e093e5ddc6a5da0eae016ef6454f10e451e2e51257250fe4c27b",
+        "junit_sha256": "fdca187575be0e3d0f19a06c956438da80815bf88a40dfd6be6bee88cac7c64b"
+      },
+      {
+        "label": "final-scope",
+        "PASS": 53,
+        "PGskip": 0,
+        "raw_sha256": "fa6f71b34e4263924f747bdd894d15bd64d9b2e0c889f4764d740a23b9e70cfe",
+        "junit_sha256": "84b6e669fca5b0bc9ba35069fbb8a982000b10f333ea244e2998227b7796dfd4"
+      }
+    ],
+    "PASS": 302,
+    "declaredPGskip": 5,
+    "unique_actual_XML_ids": 307,
+    "case_mapping_verified": true,
+    "four_serial_fresh_not_one_fullsuite": true,
+    "known_hosted_peer_issue": "Old local LINK child-death input passing is not current hosted qualification. Root separate deterministic async-wait repair remains disjoint; no review or acceptance of future peer input."
+  },
+  "before_history": {
+    "manifest": "/tmp/van-be004-unlink-r1-before-preservation-20261101.json",
+    "manifest_sha256": "a8cfa33b52718fb79ec65fa839b3021d7fda6d96c939aaa056571d76ee49fdb1",
+    "all_selected_before_JSON_raw_XML_SQLite_hashes_unchanged": true,
+    "cold_fixture": "/tmp/van-be004-unlink-r1-before-pytest/test_original_unlink_expiry_be0",
+    "no_overwrite": true
+  },
+  "retention": {
+    "all_positive_and_failed_cold_fixtures_preserved": true,
+    "per_member_inventory": "Both terminal receipts list exact path/UID/GID/mode/SHA256/CRC32 for files incl cold SQLite; no prefix deletion/cleanup.",
+    "external_probe_sources": {
+      "/tmp/van-be004-unlink-independent-review-20261102/test_original_expiry.py": "43dd315501417f76d18afc1ae47e7e40ba17ed16666e9361bee02dbf0a353c97",
+      "/tmp/van-be004-unlink-independent-review-20261102/test_shred_identity.py": "74695f57b836df4d042a3d991ffdf6ec2b294aa9e830a9d4c081a6de397d79f8",
+      "/tmp/van-be004-unlink-independent-review-20261102/test_readback_after_history.py": "bb0ee2151a62e47ba82f7b6c99716b04258e22a6d96fa3917ae11e22607d6c66",
+      "/tmp/van-be004-unlink-independent-review-20261102/run.py": "8dfde1ed8e182e99a0a51332d3c2797715fd24eb4cc943e3327ca0c737be5c85",
+      "/tmp/van-be004-unlink-independent-review-20261102/run_timing.py": "4a9596747e0be0bf4fa8338f1b8e31fb17eaf1f353563efead46a1db08322a3e"
+    }
+  },
+  "limits": [
+    "Fix/recheck accepted blocker before integration. No source edits or candidate/main/auth/hooks/canon/protected-evidence changes by reviewer.",
+    "FullBE004/unit/native/provider/PG/S24/formal acceptance remains OPEN; controlled local SOURCE tests do not qualify those.",
+    "No SDK/Gradle/network/provider effects/CI/commits/push/subagents; only owned SOURCE fixtures."
+  ]
+}

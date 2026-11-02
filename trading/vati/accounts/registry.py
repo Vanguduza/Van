@@ -215,9 +215,9 @@ class AccountRegistry:
         """Replace one unchanged local record; stale exact-account edits refuse."""
         return self._mutate("replace", a.alias, a, before_replace=before_replace)
 
-    def remove(self, alias: str) -> None:
+    def remove(self, alias: str, *, before_replace=None) -> None:
         """Unlink an unchanged local record; broker/exposure authority belongs to its caller."""
-        self._mutate("remove", alias)
+        self._mutate("remove", alias, before_replace=before_replace)
 
     def touch(self, alias: str) -> None:
         """Advance a native credential/resource generation without changing metadata."""

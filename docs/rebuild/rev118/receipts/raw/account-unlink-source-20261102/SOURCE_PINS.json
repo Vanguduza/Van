@@ -1,0 +1,12 @@
+{
+  "paths_sha256": {
+    "trading/commander/accounts.py": "f12b42dfcf26c34a8328e34f95c70d964343a3909484ebf0b89a7a65d087ccc6",
+    "trading/commander/account_retirement.py": "b1894ad6407e17736241479794ebec494a03c039198de47ea94c2b4d5455c7dc",
+    "trading/commander/app.py": "1d0d614fbe867838abb01baefd4534fb65cb02724770354d15cfec807717ee98",
+    "trading/vati/accounts/registry.py": "6178715463eb89b33827d4dbd6cfe427ad9e65c2c00049caef0ec50633c74803",
+    "backend/tests/test_account_unlink_review.py": "b57fd1b21f979f18d06f22c0bc2833bb3febcd4135ccf830c9412867751d7cf2",
+    "trading/tests/test_account_registry_atomic_rea.py": "be80eb54cab1adb6869b572eaccf31e92dc3710b7ad421310da72d9cc89ced73",
+    "trading/tests/test_account_unlink_currentness.py": "4abd5642062e30f5e23fd953b3c30b5517eb12b5e8f39c27dc0497fa6097f00d"
+  },
+  "source_fingerprint": "c742984eec212ce67d7ff6a235883811cd432bed989db240b683b4ebc054f4fe"
+}

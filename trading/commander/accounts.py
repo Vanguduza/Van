@@ -104,18 +104,39 @@ def _write_secrets(path: Path, values: dict[str, str], *, merge: bool = True, be
                 os.unlink(temporary)
 
 
-def _shred(path: Path) -> None:
+def _file_generation(stat):
+    return (stat.st_dev,stat.st_ino,stat.st_mode,stat.st_size,stat.st_mtime_ns,stat.st_ctime_ns)
+
+
+def _shred(path: Path, *, before_write=None, before_unlink=None, expected_generation=None, before_effect=None) -> None:
     from vati.core.file_lock import exclusive_state_lock
     with exclusive_state_lock(path):
         if path.is_symlink():
             raise ValueError("credential destination must not be a symbolic link")
+        if expected_generation is not None and not path.is_file():
+            raise HTTPException(409,'Original managed credential is missing; cleanup unconfirmed')
         if path.is_file():
-            size = path.stat().st_size
             with open(path, "r+b") as stream:
-                stream.write(os.urandom(size))
+                before=_file_generation(os.fstat(stream.fileno()))
+                if (expected_generation is not None and before!=expected_generation
+                    or _file_generation(path.stat())!=before):
+                    raise HTTPException(409,'Managed credential generation changed before destruction')
+                if before_write is not None:before_write()
+                if path.is_symlink() or _file_generation(path.stat())!=before:
+                    raise HTTPException(409,'Managed credential changed at original overwrite boundary')
+                if before_effect is not None:before_effect()
+                stream.write(os.urandom(before[3]))
                 stream.flush()
                 os.fsync(stream.fileno())
+                own_overwrite=_file_generation(os.fstat(stream.fileno()))
+            if path.is_symlink() or _file_generation(path.stat())!=own_overwrite:
+                raise HTTPException(409,'Managed credential changed after original overwrite; cleanup unconfirmed')
+            if before_unlink is not None:before_unlink()
+            if path.is_symlink() or _file_generation(path.stat())!=own_overwrite:
+                raise HTTPException(409,'Managed credential changed at original unlink boundary')
+            if before_effect is not None:before_effect()
             path.unlink()
+
 
 
 def _alias(a: dict) -> str:
@@ -295,7 +316,7 @@ def build_account_handlers(st: AccountControlSettings) -> dict[str, Callable[[di
         snapshot=resource_snapshot(reg(), _alias(a))
         return {**snapshot,'account_control_domain':domain}
 
-    def retirement_review(values,*,inside_removal=False,native_ledger=None):
+    def retirement_review(values,*,inside_removal=False,native_ledger=None,readback_guards=None):
         from commander.account_retirement import inspect_retirement,require_idle_runtime,authority_path
         from vati.core.ledger_pg import open_ledger
         from vati.core.canonical import canonical_hash
@@ -312,7 +333,8 @@ def build_account_handlers(st: AccountControlSettings) -> dict[str, Callable[[di
                 try:current=registry.get(alias)
                 except Exception:raise HTTPException(404,'Unknown native account alias') from None
                 facts=inspect_retirement(st,registry,current,inside_removal=True,native_ledger=ledger,
-                    operation_id=(values.get('_native_operation') or {}).get('operation_id'))
+                    operation_id=(values.get('_native_operation') or {}).get('operation_id'),
+                    **({'readback_guards':readback_guards} if readback_guards is not None else {}))
                 body={'schema':'vati.account-review/1','action':'account_remove','alias':alias,
                     'request_digest':canonical_hash({k:v for k,v in values.items() if not k.startswith('_')}),
                     'resource_version':current_resource_version(alias),
@@ -423,7 +445,9 @@ def build_account_handlers(st: AccountControlSettings) -> dict[str, Callable[[di
         r = reg()
         if alias not in r.accounts:
             raise HTTPException(404, f"unknown alias {alias}")
-        review=retirement_review(a,inside_removal=True,native_ledger=native_ledger)
+        readback_guards=[]
+        review=retirement_review(a,inside_removal=True,native_ledger=native_ledger,readback_guards=readback_guards)
+        if len(readback_guards)!=1:raise HTTPException(409,'Current native retirement observation is unavailable')
         if ('_native_operation' in a or '_expected_review_digest' in a) and a.get('_expected_review_digest')!=review['review_digest']:
             raise HTTPException(409,'Native unlink facts changed or owner review missing; local connection retained')
         # Freeze all credential-reference writers through the final plan check
@@ -435,9 +459,37 @@ def build_account_handlers(st: AccountControlSettings) -> dict[str, Callable[[di
             with exclusive_state_lock(target) if target is not None else nullcontext():
                 if current_resource_version(alias)!=review['resource_version']:
                     raise HTTPException(409,'Native credential generation changed; local connection retained')
-                mark_account_effect()
-                current.remove(alias)
-                if target is not None:_shred(target)
+                def require_final_times():
+                    for check in readback_guards:check.check_time()
+                    a['_retirement_time_guard']()
+                a['_retirement_clock_register'](require_final_times)
+                def current_scope():
+                    for check in readback_guards:check()
+                    guard=a.get('_retirement_guard')
+                    if callable(guard):guard()
+                    if '_native_operation' in a:require_current_account_effect()
+                    require_final_times()
+                def mark_final_effect():
+                    # No blocking callback follows the final file-identity
+                    # check. These predicates only sample current clocks from
+                    # the already verified, continuously held native scope.
+                    require_final_times()
+                    a['_retirement_authority_time_guard']()
+                    mark_account_effect()
+                def before_remove():
+                    if current_resource_version(alias)!=review['resource_version']:
+                        raise HTTPException(409,'Native account changed before local unlink replacement')
+                    current_scope()
+                    mark_final_effect()
+                generation=_file_generation(target.stat()) if target is not None else None
+                current.remove(alias,before_replace=before_remove)
+                own_removal_version=current_resource_version(alias)
+                def before_credential_effect():
+                    if current_resource_version(alias)!=own_removal_version:
+                        raise HTTPException(409,'Native account changed after original unlink; credential cleanup unconfirmed')
+                    current_scope()
+                if target is not None:_shred(target,before_write=before_credential_effect,
+                    before_unlink=before_credential_effect,expected_generation=generation,before_effect=mark_final_effect)
         return {"alias": alias, "removed": True,**{k:review['retirement'][k] for k in (
             'remote_account_closed','historical_data_retained','retained_remote_funds','credential_cleanup')}}
 
@@ -740,20 +792,45 @@ def build_account_handlers(st: AccountControlSettings) -> dict[str, Callable[[di
                 ledger.close()
                 raise
             args={**args,'_expected_account_control_domain':domain}
+            final_clock_checks=[]
+            def register_final_clock(check):
+                final_clock_checks[:]=[check]
+            def require_authority_time():
+                if '_native_operation' in args:
+                    from commander import account_effects as effect_context
+                    # intent is the immutable validated original used by the
+                    # actual journal claim, never caller timing labels.
+                    if int(effect_context.time.time())>=intent.expires_at_unix:
+                        raise HTTPException(403,'Original owner authority expired before native local effect')
+            def current_scope():
+                guard=args.get('_account_dispatch_guard')
+                if callable(guard):guard()
+                if args['_expected_account_control_domain']!=control_domain(ledger):
+                    raise AccountOperationBlocked('Account-control namespace changed before local unlink write')
+                if callable(guard):guard()
+                # Pure clock predicates run after all potentially blocking
+                # owner/key/domain checks, immediately before the effect mark.
+                for check in final_clock_checks:check()
             def retire():
                 # The unique original journal claim is durable before taking
                 # lease -> alias locks. No ledger transaction spans venue IO.
-                with retirement_scope(st,alias),reg().operation_lock(alias):
+                with retirement_scope(st,alias) as require_lease,reg().operation_lock(alias):
+                    def writer_scope():
+                        require_lease()
+                        current_scope()
                     if '_expected_resource_version' in args:
                         if args['_expected_account_control_domain']!=control_domain(ledger):
                             raise AccountOperationBlocked('Account-control namespace changed before local unlink')
                         if args['_expected_resource_version']!=current_resource_version(alias):
                             raise HTTPException(409,'Account changed since owner approval; local connection retained')
-                    return handler(args,native_ledger=ledger)
+                    return handler({**args,'_retirement_guard':writer_scope,
+                        '_retirement_time_guard':require_lease.check_time,
+                        '_retirement_clock_register':register_final_clock,
+                        '_retirement_authority_time_guard':require_authority_time},native_ledger=ledger)
             try:
                 if '_native_operation' not in args:return retire()
                 intent=operation_intent('account_remove',args)
-                return invoke_account_effect(AccountEffectJournal(ledger),intent,retire)
+                return invoke_account_effect(AccountEffectJournal(ledger),intent,retire,dispatch_guard=current_scope)
             except AccountEffectError:
                 raise AccountOperationUnconfirmed(args.get('_native_operation',{}).get('operation_id')) from None
             finally:ledger.close()

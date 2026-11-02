@@ -1,0 +1,95 @@
+{
+  "state": "INDEPENDENTLY_REVIEWED_WAIT_FIX_IN_MERGED_CANDIDATE",
+  "local_base": "5c80526ddb6effe9f61c4761645f7377314260f5",
+  "published_base": "4c410418bf8f809b1df0e3eb3edfb85422c77f5c",
+  "source_pins": {
+    "backend/tests/test_stateful_link_binding.py": "63720c50d1ee5bba47bd6307a47a651ae96a778d0b32426e72b3ac5c7016a657"
+  },
+  "change": "Onlyrealprocessdeathtestlocalasyncioimport/shieldedthreadwait/finallyownchilddrain; all93assertASTs,wholechildscript/args/env/exit73/30stimeout/5swait/65536stderr cap andoutsidefunctionbytes exact5c. No DBtimeout/retry/scheduler/productionauthoritychange.",
+  "evidence": {
+    "author": "OriginalcontrolledrealSQLprobeexpectedFAILchild1/databasebusy/parentloopstarved; unchangedprobeafterPASSchild73/alloriginalIN_FLIGHT/UNKNOWN/noresendasserts.2actualownedchildSIGSTOPcleanupcasescancel/ORIGINAL30stimeoutPASS/reaped/noleakedwaittask/loopprogress, audits0. No fullmodule/repeat.",
+    "independent": "Fresh3PASS0skip: forcedwriterlooprelease\u2192child73/originalassertions;actualoriginalnode;actualownedchildcancel/reaped/noleak. Samefrozenpin/originalassertions verified.",
+    "raw_controller_scope_label": "RawreusedcontrollerreceiptsretainunrelatedAGP/combined6 scope text; doNOTreadthatlabelasexecutedwork. Actualcommands/selectors/JUnit/sourcepin1/audit arethebindingfacts for theseSQL/childtests. Rawreceiptsunchanged.",
+    "positive_fixture_limits": "AuthorafterdiagnosticJSONbytes cleanedwithpassedownedfixtures; inventoryhashes/passassertions preserved, no restoredafterPID/timestamps. Independentownafterfixture/PID/SQL evidence isseparateretainedproof, not restoration.",
+    "scope": "ControlledrealpairedHTTP/A4/ownedSQLite/actualchild SOURCEmechanism; no provider/hardware/nativecertificate/fullsuite qualification."
+  },
+  "old_failure": {
+    "run": 41364081278,
+    "head": "4c410418bf8f809b1df0e3eb3edfb85422c77f5c",
+    "status": "completed/failure41of41terminal",
+    "root2": "3FAIL1726PASS2SKIP (newprocessdeath+2entry67)",
+    "backendcwd2": "2entry67FAIL1727PASS2SKIP;processdeathpassed",
+    "aggregates": "Both publicaggregatesfailclosed allfourworkersmustsucceed; canonicalmatrixfailed, no fullunionclaim. Knownintake/trustedbase/privateDDSprereqgatesunwaived.",
+    "decoded_logs": {
+      "JOB_125028349188_DECODED.log": {
+        "path": "/tmp/van-recovery-4c-terminal-diagnosis-20261102/JOB_125028349188_DECODED.log",
+        "bytes": 86419,
+        "sha256": "8e28cdd9c970b47b0fdb8c444de5bb9a647758f09a03067b47d1142f6cca05fe"
+      },
+      "JOB_125027132444_DECODED.log": {
+        "path": "/tmp/van-recovery-4c-terminal-diagnosis-20261102/JOB_125027132444_DECODED.log",
+        "bytes": 1125057,
+        "sha256": "fcf440d58b60991a88f38312e110cce97decadae32debf0f17bca5b04cd26181"
+      },
+      "JOB_125026523473_DECODED.log": {
+        "path": "/tmp/van-recovery-4c-terminal-diagnosis-20261102/JOB_125026523473_DECODED.log",
+        "bytes": 1127004,
+        "sha256": "b6a461f7d8760bd67360a8f2d002a1fd74f07eae01e1330df3d5c3cf92102fb6"
+      },
+      "JOB_125020433298_DECODED.log": {
+        "path": "/tmp/van-recovery-4c-terminal-diagnosis-20261102/JOB_125020433298_DECODED.log",
+        "bytes": 100462,
+        "sha256": "bf5f386f07dd69c656f6d511470d8a789235a8984971192988d4a742ac48b168"
+      },
+      "JOB_125020433325_DECODED.log": {
+        "path": "/tmp/van-recovery-4c-terminal-diagnosis-20261102/JOB_125020433325_DECODED.log",
+        "bytes": 167901,
+        "sha256": "f1b8c73dd8acc28230028623931686fe2a2a78e6b6ea892d00e74c677454ab62"
+      }
+    }
+  },
+  "watch_reconciliation": "Original97092terminalreceiptCIexit1; root earlierUnknownhandle retained; implementeroriginalhandlelaterreapedonce/controller0. No restart/cancel/replacement.",
+  "independent_review": {
+    "path": "/workspace/van-review-2026-10-18/publish/docs/rebuild/rev118/receipts/raw/link-child-wait-source-20261102/INDEPENDENT_REVIEW.json",
+    "sha256": "03b167f2ee449fc3c5f9f0583d466a3f5b0ed66dbfe2b658055669770763f5ca"
+  },
+  "batch_hold": "Bothindependentreviewscleared; exactunlink7+waitfix8pins merged,18actualPASS0skip/audit0. Pendingfinalcanonicalmanifest/genuinecombinedcommit/final4fdverify/ONEpush5c+combined. R2intendednativeoverlapwith5cf303isexplicit,notclaimalloldproductionbytesunchangedafterunlinkmerge.",
+  "source_contract_frontier": "Pending-shred recovery/action/durablestepfacts andreauthprotocol remain IMPLEMENTATION/CONTRACTDESIGNgaps; hardware/provideradmissiondistinct. Androiddraftproducer/BG001/native/provider/PG/ownerintake/fullunit/S24/fullmatrixgatesOPEN.",
+  "raw_volatility": "Largeroriginaldecodedlogs/rawSQL/fixtures stayownedtmp paths+digests inHANDOFF; no environmentpersistenceguarantee. Compactsourcepatch/pins/review/proofs retainedhere below1MiB.",
+  "at": "2026-11-02T00:52:53.974879+00:00",
+  "files": {
+    "AFTER_SQL_owned-temp-inventory.json": "9ef2c740bd4009e848af5782dddd3b25c58a3e6477a03060ad44bb4d36d489af",
+    "HANDOFF.json": "9e5314395d029aa2c6d0ffb4b5bcbabc2fca902634de0498fb7297810eface21",
+    "FINAL_4C_RUN.json": "c102c734de8f402bbc6149cf806ffa30d17344e092ccad0e28e26206c8f6517e",
+    "AFTER_SQL_RECEIPT.json": "22b42cf8f74b471e387435c378ea89a8137af77d2798e9b2eff06eda88ee284d",
+    "AFTER_LIFECYCLE_tests.xml": "fc33fe5dc47fdb05b35c7dce83ea4146b8e564d0954541c0048b84341dce2302",
+    "AFTER_LIFECYCLE_tests.log": "d5c0d0e2b5f52236651c65fe41db27e08c9f7abff1088c5b691678f659ed2874",
+    "AFTER_LIFECYCLE_owned-temp-inventory.json": "6ee28fb562249cf93b430ae9fa6062f9a3f51d8aefbe7d247d3b419249a772fc",
+    "BEFORE_SQL_tests.log": "04faac267d317ed8edbf4109ed47afbcad17b8a9c6d4691d0adf534ec857a7b2",
+    "AFTER_LIFECYCLE_RECEIPT.json": "0ca94f38a2085fcb899b568e92fb5980176a3e3749f40e3330ae802b99af4fe3",
+    "BEFORE_SQL_tests.xml": "e3b858e2d8f9654acc3485bd5b6667e894504c9cc141b8274c412e523c6f2e98",
+    "INDEPENDENT_REVIEW.json": "03b167f2ee449fc3c5f9f0583d466a3f5b0ed66dbfe2b658055669770763f5ca",
+    "SOURCE_PINS.json": "e2033c930e3abcddc6ff0e32648bb6ab4a39e5bbae39f64f268453faeb4de0db",
+    "BEFORE_SQL_RECEIPT.json": "0a906e536dc146078a0e749bdfe19c9e055478bd0cab0d4f770e5fb8041e8fd6",
+    "AFTER_SQL_tests.log": "2db306126480ca632f5221e36ab59c77501fcb1f6f2d13436efd603a12cefca9",
+    "AFTER_LIFECYCLE_audit.json": "f159c056ef876b2852e522cf92ac940143fb1b43cf2b480fbad507dc745049bc",
+    "BEFORE_PINS.json": "ba44f4a26379289e8e48790874743e77d2d4ca5d85526c3c7a0e2ae0dedcddf4",
+    "BEFORE_SQL_audit.json": "f159c056ef876b2852e522cf92ac940143fb1b43cf2b480fbad507dc745049bc",
+    "SQL_PROBE.py.txt": "c796a16aa212796b41bea7db3b6ad77b3b4c70e5d00dcb3559cab1d179625bfb",
+    "AFTER_SQL_audit.json": "f159c056ef876b2852e522cf92ac940143fb1b43cf2b480fbad507dc745049bc",
+    "BEFORE_SQL_DIAGNOSTIC.json": "0b6e8313cd339e9c0a65e0bca4ad30bc63534d72860ed9c861dd53bf0a2e69bd",
+    "AFTER_SQL_tests.xml": "b2d9014d99f86b0fea344e12184a0d563632c4e42ad7286772efb891225b9e7a",
+    "FINAL_4C_JOBS.json": "fb609e2afc19a1d99e88677dc477ec2e1bc94ce78d795429a27fb1d4f0620fe6",
+    "LIFECYCLE_PROBE.py.txt": "dbedc94597a17fdbc15088e34962700d76051bd634b50324ad559193324b01c1",
+    "SOURCE.patch": "2e31298e0c75909295944e7789d41e281773d88ba40a6cb77272efd2ef0457ee"
+  },
+  "upsert6_preserved_in_test_only_review_before_unlink_merge": {
+    "trading/commander/accounts.py": "6b20d5ae1ee01f00672287bb0d9183f41083c57874b5c53afa1ea339f648082a",
+    "trading/commander/account_effects.py": "8a842f27aa24bce106371cfb454c1feb224a494665e69645f6979f0c476487a2",
+    "trading/commander/app.py": "aa353acaa9ac8d74a51e6f2e500cae7ecdbc382e64413da4ccfae75fdbd85540",
+    "trading/vati/accounts/registry.py": "e7925dc1cacb1ce84af601fbbfb870220f43e6bd423fa52855d4900ce96f0be9",
+    "backend/tests/test_account_update_review.py": "c4fa99375516fd0c52833ff4dc941c7e68dc1d6e185418e4093c489606b25d0b",
+    "trading/tests/test_account_registry_atomic_rea.py": "0f371d8d35d609d585fd615b6e0393298749b839608bea3ac66f85a858a53674"
+  },
+  "current_merged_receipt": "receipts/ACCOUNT_UNLINK_SOURCE_20261102.json"
+}
