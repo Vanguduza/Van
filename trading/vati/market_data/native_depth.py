@@ -118,6 +118,97 @@ class NativeDepthArchive(NativeMarketArchive):
     contract_types=(NativeSymbolContract,)
     _validate_capture=staticmethod(_validate_capture)
 
+    def _request_file(self, scope, request_id, *, create=False):
+        if not isinstance(request_id, str) or REQUEST_ID.fullmatch(request_id) is None:
+            raise NativeArchiveError('native depth request identity invalid')
+        part = self._partition(scope, 'DEPTH', create=create)
+        directory = part / 'depth-requests'
+        if directory.is_symlink():
+            raise NativeArchiveError('native depth request directory invalid')
+        if create:
+            directory.mkdir(exist_ok=True)
+        return directory / (canonical_hash(request_id) + '.json')
+
+    def request_state(self, scope, request_id, *, max_bytes):
+        """Original task DATA, separate from immutable capture/index schemas."""
+        path = self._request_file(scope, request_id)
+        if not path.exists() and not path.is_symlink():
+            return None
+        try:
+            body, _ = self._read(path, max_bytes=max_bytes)
+            if (set(body) != {'schema', 'request_id', 'scope', 'intent', 'intent_sha256', 'history'}
+                    or body['schema'] != 'vati.native-depth-request/1'
+                    or body['request_id'] != request_id or body['scope'] != scope
+                    or type(body['intent']) is not dict
+                    or body['intent_sha256'] != canonical_hash(body['intent'])):
+                raise ValueError('native depth original request corrupt')
+            history = body['history']
+            if type(history) is not list or not 1 <= len(history) <= 4:
+                raise ValueError('native depth request history invalid')
+            allowed = {None: {'PREPARED'}, 'PREPARED': {'READ_MAY_HAVE_OCCURRED', 'REFUSED'},
+                       'READ_MAY_HAVE_OCCURRED': {'CAPTURED', 'UNCERTAIN'},
+                       'UNCERTAIN': {'CAPTURED'}, 'REFUSED': set(), 'CAPTURED': set()}
+            previous = None
+            for entry in history:
+                if (type(entry) is not dict or set(entry) != {'state', 'at_ms'}
+                        or entry['state'] not in allowed[previous]):
+                    raise ValueError('native depth request transition invalid')
+                native_integer(entry['at_ms'], maximum=MAX_TIME)
+                previous = entry['state']
+            return body
+        except (OSError, ValueError, KeyError, TypeError) as error:
+            raise NativeArchiveError('native depth original request unavailable') from error
+
+    def prepare_request(self, scope, request_id, intent, *, max_bytes, max_requests):
+        part = self._partition(scope, "DEPTH", create=True)
+        with exclusive_state_lock(part / "depth-request-family"):
+            return self._prepare_request(scope, request_id, intent, max_bytes=max_bytes, max_requests=max_requests)
+
+    def _prepare_request(self, scope, request_id, intent, *, max_bytes, max_requests):
+        """Caller holds the existing per-original collection lock."""
+        original = self.request_state(scope, request_id, max_bytes=max_bytes)
+        if original is not None:
+            if original['intent'] != intent:
+                raise NativeArchiveError('native depth original request conflict')
+            return original
+        path = self._request_file(scope, request_id, create=True)
+        paths = list(path.parent.iterdir())
+        if len(paths) >= max_requests or any(not p.is_file() or p.is_symlink() or re.fullmatch(r'[0-9a-f]{64}\.json', p.name) is None for p in paths):
+            raise NativeArchiveError('native depth request capacity or path invalid')
+        body = {'schema': 'vati.native-depth-request/1', 'request_id': request_id,
+                'scope': scope, 'intent': intent, 'intent_sha256': canonical_hash(intent),
+                'history': [{'state': 'PREPARED', 'at_ms': native_integer(self.clock(), maximum=MAX_TIME)}]}
+        self._write_request(path, body, max_bytes)
+        return self.request_state(scope, request_id, max_bytes=max_bytes)
+
+    @staticmethod
+    def _write_request(path, body, max_bytes):
+        from vati.market_data.feeds.lake import BarLake
+        blob = canonical_json(body).encode()
+        if len(blob) > max_bytes:
+            raise NativeArchiveError('native depth request byte capacity exhausted')
+        BarLake._atomic_write(path, blob)
+
+    def advance_request(self, scope, request_id, intent, state, *, max_bytes):
+        part = self._partition(scope, "DEPTH", create=True)
+        with exclusive_state_lock(part / "depth-request-family"):
+            return self._advance_request(scope, request_id, intent, state, max_bytes=max_bytes)
+
+    def _advance_request(self, scope, request_id, intent, state, *, max_bytes):
+        original = self.request_state(scope, request_id, max_bytes=max_bytes)
+        if original is None or original['intent'] != intent:
+            raise NativeArchiveError('native depth original request unavailable or conflicting')
+        previous = original['history'][-1]['state']
+        allowed = {'PREPARED': {'READ_MAY_HAVE_OCCURRED', 'REFUSED'},
+                   'READ_MAY_HAVE_OCCURRED': {'CAPTURED', 'UNCERTAIN'}, 'UNCERTAIN': {'CAPTURED'}}
+        if state == previous:
+            return original
+        if state not in allowed.get(previous, set()):
+            raise NativeArchiveError('native depth original request cannot reopen')
+        original['history'].append({'state': state, 'at_ms': native_integer(self.clock(), maximum=MAX_TIME)})
+        self._write_request(self._request_file(scope, request_id), original, max_bytes)
+        return self.request_state(scope, request_id, max_bytes=max_bytes)
+
     @staticmethod
     def _validate_timeframe(timeframe):
         if timeframe!='DEPTH':raise ValueError('native depth archive requires DEPTH partition')

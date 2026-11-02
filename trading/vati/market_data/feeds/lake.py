@@ -113,7 +113,7 @@ class BarLake:
                 raise ValueError("bar market values are inconsistent")
 
     @staticmethod
-    def _atomic_write(path: Path, payload: bytes) -> None:
+    def _atomic_write(path: Path, payload: bytes, *, before_replace=None) -> None:
         temporary = None
         try:
             with tempfile.NamedTemporaryFile(dir=path.parent, prefix=".lake-", delete=False) as stream:
@@ -121,6 +121,8 @@ class BarLake:
                 stream.write(payload)
                 stream.flush()
                 os.fsync(stream.fileno())
+            if before_replace is not None:
+                before_replace()
             os.replace(temporary, path)
             if os.name != "nt":
                 fd = os.open(path.parent, os.O_RDONLY | getattr(os, "O_DIRECTORY", 0))

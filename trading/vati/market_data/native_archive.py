@@ -271,7 +271,7 @@ class NativeMarketArchive:
         self._require_history_capacity(rows,blob)
         BarLake._atomic_write(part/'head.json',blob)
 
-    def record(self, request_id, contract, observation):
+    def record(self, request_id, contract, observation, *, before_replace=None):
         try:
             if not isinstance(request_id, str) or not REQUEST_ID.fullmatch(request_id):
                 raise ValueError('native market request identity invalid')
@@ -307,7 +307,10 @@ class NativeMarketArchive:
                 if self.max_history_bytes is not None:
                     prospective=rows+[(body,digest)]
                     self._require_history_capacity(prospective,self._head_blob(scope,timeframe,prospective))
-                BarLake._atomic_write(path, blob)
+                if before_replace is None:
+                    BarLake._atomic_write(path, blob)
+                else:
+                    BarLake._atomic_write(path, blob, before_replace=before_replace)
                 rows.append((body, digest))
                 self._write_head(part, scope, timeframe, rows)
                 # Independently parse/hash the durable original before reporting it.

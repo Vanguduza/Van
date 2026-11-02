@@ -1,0 +1,18 @@
+{
+  "observed_utc": "2026-11-02T07:52:10.589114+00:00",
+  "head": "56dec626ffa0f6a9f52545e890344ebf0c737c24",
+  "run_id": 41405437330,
+  "attempt": 1,
+  "watch_session": 73187,
+  "original_watch_terminal_exit": 1,
+  "owned_handle_waited_once": true,
+  "job_inventory": "/tmp/van-depth-ci41405437330-terminal-jobs-20261102.json",
+  "actual_jobs": 41,
+  "success": 32,
+  "failure": 9,
+  "primary_source": "All eight root/backend gateway shards completed: sixSUCCESS; bothshard3 only2protected entry67 failures each; prior53approvalfixturefailcases absent from all8 shard outcomes. Nofullgreen/waiver.",
+  "propagation": "Two publicsource aggregators require all4workerssuccess; canonicalmatrix alsoFAILED.",
+  "prerequisites": "backend/privateDDS key missing; trustedmain verifier absent.",
+  "artifact_content": "wrapper artifacts remain UNINSPECTED, no downloads",
+  "scope": "Actual hosted Android build/unit/lint+instrumentation and tradingPG+allmutations SUCCESS; no provider/hardware/native acceptance implied."
+}

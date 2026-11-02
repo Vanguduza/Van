@@ -1249,6 +1249,8 @@ class AccountCoordinatorService:
             correlation_id=self.cfg.account_alias,
         ))
         self._account_snapshot(now)
+        from vati.market_data.native_depth_worker import poll_depth_capture
+        poll_depth_capture(self)
         self._heartbeat("STARTED", {
             "lease_outcome": result.outcome.value,
             "recovered_trade_intents": list(restored),
@@ -1256,6 +1258,8 @@ class AccountCoordinatorService:
             "reconciliation": report.counts(),
         })
     def step_once(self):
+        from vati.market_data.native_depth_worker import poll_depth_capture
+        poll_depth_capture(self)
         assert self.coordinator is not None and self.lifecycle is not None
         now = self.clock()
         if self.lease is not None:
@@ -1451,6 +1455,21 @@ class AccountCoordinatorService:
         self._packet_worker = threading.Thread(target=produce, name='vati-advisory-packets', daemon=True)
         self._packet_worker.start()
 
+    def close(self) -> None:
+        """Join owned source work before the existing runtime-owner cleanup."""
+        from vati.market_data.native_depth_worker import stop_depth_capture
+        stop_depth_capture(self)
+        from vati.funding.worker import stop_funding
+        stop_funding(self)
+        if self._packet_worker_stop is not None:
+            self._packet_worker_stop.set()
+        if self._packet_worker is not None:
+            self._packet_worker.join(timeout=16)
+        if self.lease is not None:
+            self.lease.release(now_ms=self.clock())
+        if self._lease_store is not None:
+            self._lease_store.close()
+
     def run_forever(self) -> int:
         def stop(*_args):
             self.stop_requested = True
@@ -1474,16 +1493,7 @@ class AccountCoordinatorService:
                     self._heartbeat("FAULT", {"error": str(exc)[:200]})
                 time.sleep(self.cfg.poll_seconds)
         finally:
-            from vati.funding.worker import stop_funding
-            stop_funding(self)
-            if self._packet_worker_stop is not None:
-                self._packet_worker_stop.set()
-            if self._packet_worker is not None:
-                self._packet_worker.join(timeout=16)
-            if self.lease is not None:
-                self.lease.release(now_ms=self.clock())
-            if self._lease_store is not None:
-                self._lease_store.close()
+            self.close()
         now = self.clock()
         self._ledger.append(make_event(
             EventKind.SESSION, "vati-account-service",

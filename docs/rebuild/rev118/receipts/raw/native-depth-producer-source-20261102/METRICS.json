@@ -1,0 +1,32 @@
+{
+  "schema": "van.source-packet-metrics/1",
+  "base": "56dec626ffa0f6a9f52545e890344ebf0c737c24",
+  "original_workflow_ids_closed": null,
+  "unit_exit_established": false,
+  "author_final_unique_pass": 198,
+  "author_final_exec": 198,
+  "skipped": 0,
+  "author_final_group_seconds": [
+    12.859,
+    6.654
+  ],
+  "sum_measured_final_child_seconds": 19.513,
+  "independent_unique": 8,
+  "independent_exec": 10,
+  "independent_initial_controller_error": true,
+  "prior_fixture_escape_cases": 53,
+  "published56_CI": {
+    "jobs": 41,
+    "success": 32,
+    "failure": 9,
+    "approval_fixture_failures_absent_across8shards": true,
+    "overall_green": false
+  },
+  "new_head_CI": null,
+  "implementation_elapsed_seconds": null,
+  "blocked_seconds": null,
+  "model_usage": null,
+  "model_cost": null,
+  "resource_deviation": "Author198 genuinefunctionalPASS didNOTmeet originalglobal64workspaceadmission; no retroclaim; prospectiveSHM amendment separate.",
+  "finalization_started": "2026-11-02T08:36:53.468811+00:00"
+}

@@ -179,3 +179,45 @@ async def test_cancelled_call_keeps_its_original_worker_slot_until_the_read_fini
                 await asyncio.sleep(.01)
             assert state['active']==0
         assert (await ac.get(PATH,params=QUERY)).json()['detail']['code']=='NATIVE_DEPTH_SOURCE_UNCONFIGURED'
+
+
+from test_native_depth_worker import depth_service
+
+
+@pytest.mark.asyncio
+async def test_configured_runtime_original_is_independently_read_by_paired_history_without_capture(client,depth_service,monkeypatch):
+    from vati.market_data.native_depth_worker import poll_depth_capture,stop_depth_capture
+    s=depth_service;ac,app=client
+    assert not s.test.peers
+    poll_depth_capture(s);w=s._depth_capture_worker
+    try:
+        assert w.wait_idle(3)
+        outcome=w.snapshot()['requests']['original']
+        assert outcome['state']=='CAPTURED' and len(s.test.peers)==1
+        root=Path(s.cfg.depth_capture['archive_root'])
+        # The configured producer and existing reader share this SAME archive
+        # owner root; no request URL/path selector or alternate store is used.
+        app.state.trading.native_source_root=str(root)
+        scope=s.test.contract.native_scope
+        query={key:str(scope[key]) for key in ('environment','native_account_id','native_symbol_id')}
+        before=files(root)
+        def forbidden(*args,**kwargs):raise AssertionError('GET attempted native depth read')
+        monkeypatch.setattr(s.adapter,'market_reader',forbidden)
+        monkeypatch.setattr(NativeDepthCollector,'collect',forbidden)
+        byrevision=await ac.get(PATH,params={**query,'revision':'1'})
+        assert byrevision.status_code==200,byrevision.text
+        body=byrevision.json()
+        assert body['snapshot']['receipt']==outcome['receipt']
+        assert body['scope']==scope and body['authority_effect']=='NONE'
+        assert body['provider_qualified'] is body['normalized_prices_available'] is False
+        captured_at=body['snapshot']['receipt']['available_at_ms']
+        asof=await ac.get(PATH,params={**query,'as_of_ms':str(captured_at)})
+        assert asof.status_code==200 and asof.json()['snapshot']==body['snapshot']
+        assert files(root)==before and len(s.test.peers)==1
+        wrong=await ac.get(PATH,params={**query,'native_account_id':str(scope['native_account_id']+1)})
+        assert wrong.status_code==200 and wrong.json()['snapshot'] is None
+        ac.headers.pop('X-Van-Device-Token')
+        assert (await ac.get(PATH,params=query)).status_code==401
+        assert files(root)==before
+        assert NativeDepthArchive(root).lookup(scope,'DEPTH','original')==outcome['receipt']
+    finally:stop_depth_capture(s)

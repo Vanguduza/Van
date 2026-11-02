@@ -79,6 +79,8 @@ class ServiceConfig:
     #: did: an explicit MODEL_UNAVAILABLE abstention and an untouched
     #: deterministic decision.
     cognition: dict = field(default_factory=dict)
+    #: Explicit one-shot raw native depth requests; None preserves legacy behavior.
+    depth_capture: Optional[dict] = None
     # Operator-admitted provider/model qualifications; packets cannot set these.
     cognitive_fabric: dict = field(default_factory=dict)
     #: Where `secretref://` credential handles resolve. Mirrors the gateway's
@@ -389,8 +391,12 @@ class SessionService:
         self._observe_owner_halt(now)
         self._account_snapshot(now)
         self._heartbeat("STARTED", {"reconciliation": rep.counts()})
+        from vati.market_data.native_depth_worker import poll_depth_capture
+        poll_depth_capture(self)
 
     def close(self) -> None:
+        from vati.market_data.native_depth_worker import stop_depth_capture
+        stop_depth_capture(self)
         from vati.funding.worker import stop_funding
         stop_funding(self)
         self._lease_allows_entry = False
@@ -466,6 +472,8 @@ class SessionService:
         reconcile_inflight_entries(self.runner.cycle,now_ms=now)
         from vati.app.runtime_control_actor import process_recovery_requests
         process_recovery_requests(self)
+        from vati.market_data.native_depth_worker import poll_depth_capture
+        poll_depth_capture(self)
         bars = self.bar_source(now)
         if not bars:
             self.runner.cycle.ledger.append(make_event(EventKind.MARKET_DATA_HEALTH, "vati-service", {"symbol": self.cfg.symbol, "state": "NO_DATA"}, event_time_ms=now, received_time_ms=now, correlation_id=self.cfg.symbol))

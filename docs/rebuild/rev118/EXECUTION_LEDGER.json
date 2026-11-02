@@ -438,10 +438,15 @@
         "model": "gpt-6.1-sol",
         "effort": "medium",
         "worktree": "/workspace/van-review-2026-10-18/publish",
-        "base": "23a570cf3f4f6e67fee69a2f8d845c7a8f03d244",
-        "state": "FINAL_INTEGRATION_REVIEWED_FIXTURE4_AND_APPROVED_STRATEGY2",
-        "write_scope": "Existing cleared4testimports+approved2strategy docs/owned compact evidence and genuine normal publication only. Root decisions; cleanup and depth remain disjoint.",
-        "next": "One genuine related batchcommit after finalguards/manifest/stagedblob+trackedartifactaudit; required4fdcommitted0 then normalpush from freshremote23a/exactGitPR/newheadCI+onewatch. Original53fixtureCIescapes+2protected cases/gates remain historicalFAILED; no waiver or native/unit acceptance."
+        "state": "SOLE_INTEGRATION_WRITER_BE008_REVIEWED9",
+        "base": "56dec626ffa0f6a9f52545e890344ebf0c737c24"
+      },
+      {
+        "agent": "/root/backend_continuation_sol",
+        "model": "gpt-6.1-sol",
+        "effort": "medium",
+        "worktree": "/tmp/van-be004-cleanup-lane-20261102",
+        "state": "ISOLATED_BE004_CLEANUP_AUTHOR_NOT_INTEGRATED"
       }
     ],
     "integration_owner": "/root/accounts_workflow_sol; root architecture/scope decisions only",
@@ -582,16 +587,16 @@
         }
       ]
     },
-    "updated_utc": "2026-11-02T02:14:11.672412+00:00",
+    "updated_utc": "2026-11-02T08:36:53.468811+00:00",
     "branch": "ccr-9e07e1af-8mgz1p",
-    "head": "c792a1e6e7e1e942b56d00a3929d7b54f6eac13f",
-    "published_head": "c792a1e6e7e1e942b56d00a3929d7b54f6eac13f",
-    "committed_ledger_verification": "Publishedc792GREEN232;currentuncommittedlabel/import/derived candidate final4fdpending",
-    "current_packet": "BE006_OWNER_LABEL_R2_AND_CANONICAL_TEST_IMPORTS",
-    "active_packet": "Exact9reviewedlabel+4clearedimporttestowners+15linecurrent003sourceextension;493/394additive,old491/393semantics exact; no financial authority/catalog admission",
+    "head": "56dec626ffa0f6a9f52545e890344ebf0c737c24",
+    "published_head": "56dec626ffa0f6a9f52545e890344ebf0c737c24",
+    "committed_ledger_verification": "Published56decGREEN235. Currentrelatedcandidate requires genuinecommit+final4fdterminal0 thennormalpush/exactreadbacks/newheadCI.",
+    "current_packet": "BE008_CONFIGURED_NATIVE_DEPTH_PRODUCER_SOURCE",
+    "active_packet": "Reviewed9byteexact;198distinctfunctionalPASS/resource-admissiondeviation explicit; independent8unique/10exec with firstcontrollererror preserved. Native/rawpartial/unqualified; no fullunit/native acceptance.",
     "current_background_jobs": [],
     "agent_assignments_ref": "delegation.active_assignments",
-    "next_action": "Complete one genuine BE006labelR2/import4/derived source commit; required4fd committed verify; reconcile originalc792CI/watch44541 once terminal and actual failure summaries; normalpush/freshremote/exactGitPRreadbacks/newheadCI+onewatch. No source/native/unit/intake gate waiver.",
+    "next_action": "Complete one genuine related source/resource-route batch; required4fd verify FINALHEAD; normalpush from freshremote56dec/exactGitPR105; exactnewheadCI+ONEownedwatch. Cleanupcandidate remainsisolated/unreviewed here; no gatewaiver.",
     "acceptance_issued": false,
     "continuation_history": [
       {
@@ -678,9 +683,19 @@
         "publication_note": "Dated prepublication checkpoint names actual last verified published base; exact containing commit is resolved with git rev-parse. External continuation records subsequent publication, without self-referential commit hashes.",
         "source_ci_receipt": "receipts/raw/account-unlink-source-20261102/MERGED_RECEIPT.json",
         "intake_PR106": "OPEN_READY_UNMERGED_PROPOSAL_NOT_USED"
+      },
+      {
+        "updated_utc": "2026-11-02T02:14:11.672412+00:00",
+        "head": "c792a1e6e7e1e942b56d00a3929d7b54f6eac13f",
+        "published_head": "c792a1e6e7e1e942b56d00a3929d7b54f6eac13f",
+        "committed_ledger_verification": "Publishedc792GREEN232;currentuncommittedlabel/import/derived candidate final4fdpending",
+        "current_packet": "BE006_OWNER_LABEL_R2_AND_CANONICAL_TEST_IMPORTS",
+        "active_packet": "Exact9reviewedlabel+4clearedimporttestowners+15linecurrent003sourceextension;493/394additive,old491/393semantics exact; no financial authority/catalog admission",
+        "current_source_receipt": "receipts/BE006_CLASSIFICATION_SOURCE_20261102.json",
+        "source_ci_receipt": "receipts/raw/funding-classification-source-20261102/MERGED_RECEIPT.json"
       }
     ],
-    "current_source_receipt": "receipts/BE006_CLASSIFICATION_SOURCE_20261102.json",
+    "current_source_receipt": "receipts/NATIVE_DEPTH_PRODUCER_SOURCE_20261102.json",
     "history_20261101": [
       {
         "updated_utc": "2026-11-01T02:38:52.492703+00:00",
@@ -1632,9 +1647,9 @@
         "intake_PR106": "OPEN_READY_UNMERGED_PROPOSAL_NOT_USED"
       }
     ],
-    "last_verified_published_base": "c792a1e6e7e1e942b56d00a3929d7b54f6eac13f",
+    "last_verified_published_base": "56dec626ffa0f6a9f52545e890344ebf0c737c24",
     "publication_note": "Dated prepublication checkpoint names actual last verified published base; exact containing commit is resolved with git rev-parse. External continuation records subsequent publication, without self-referential commit hashes.",
-    "source_ci_receipt": "receipts/raw/funding-classification-source-20261102/MERGED_RECEIPT.json",
+    "source_ci_receipt": "receipts/raw/native-depth-producer-source-20261102/CI_SUMMARY.json",
     "intake_PR106": "OPEN_READY_UNMERGED_PROPOSAL_NOT_USED"
   },
   "observations": [
@@ -1835,6 +1850,13 @@
       "scope": "LAC134 accountcurrentness SOURCE",
       "status": "INDEPENDENT_REVIEW_PASSED_INTEGRATED_SHARED_CONSUMERS_TESTED_NEW_DTO_SDK_PENDING",
       "evidence": "receipts/ACCOUNT_SNAPSHOT_CURRENTNESS_SOURCE_20261101.json"
+    },
+    {
+      "at_utc": "2026-11-02T08:36:53.468811+00:00",
+      "scope": "BE008 configuredpartialdepth SOURCE",
+      "status": "INDEPENDENT_REVIEW_CLEARED_FROZEN9_INTEGRATING_RESOURCE_DEVIATION_RETAINED",
+      "evidence": "receipts/NATIVE_DEPTH_PRODUCER_SOURCE_20261102.json",
+      "acceptance_issued": false
     }
   ],
   "obligations": "obligations/OBLIGATIONS.json: preserved observations with source implementation evidence and explicit remaining native/unit obligations.",
@@ -1871,7 +1893,7 @@
     "latest_checkpoint_report": "docs/rebuild/rev118/CHECKPOINT_20261028_PHYSICAL_RISK.md",
     "previous_verified_source": "3c6969ebbec39f2ad9f2836a6bd8acdb487adc34 published; exact CI40228254162 all17public jobs pass, two unchanged prerequisite failures",
     "qualification_scope": "Physical-account baseline/streak runtime source now joins both native producers to original same-account history; own-origin basis references prevent aggregate peak feedback after alias-scoped resets. Original native direct/journal controls retain positive behavior, signature/source lineage, replay, issuer and queued-expiry checks without widening scope. Final444 actual SQLite/PostgreSQL/HTTP/namespace/owner/restart cases pass0skip/audit0;444unique call IDs once, all1196Python hashes and both original legacy fixtures match; ownedPG independently absent. 215rebuild/private-topology passes before final chronology refinement overlap; final444 cover it. Retained two actual chronology failures are fixed, and original fixture/schema failures remain recorded. Scope/owner/frontend/consolidation checks pass unchanged; mutationpreflight374/383 is consistency, not corpus execution. Exact publishedf74 main40517467959 remainsFAILED2mandatoryprerequisites/all17publicSUCCESS; original selected archive independently verifies4495trading/1DDSskip,26PG,117voice. Flow adjustment/collateral/all-origin reservations, native finality/reconciliation and all remaining programme requirements stay open. No whole unit/native/production/S24 acceptance.",
-    "updated_utc": "2026-11-02T06:43:22.886983+00:00",
+    "updated_utc": "2026-11-02T08:36:53.468811+00:00",
     "current_background_jobs": [],
     "old_CI_terminal": {
       "head": "23a570cf3f4f6e67fee69a2f8d845c7a8f03d244",
@@ -1891,15 +1913,25 @@
       "state": "READ_ONLY_DESIGN_NO_SOURCE_LEASE",
       "limits": "Prospective original-target plan/per-step facts, separately purpose-bound enrolled-key reauth and durable lockout remain unimplemented. Parent UNKNOWN immutable; legacy target proof cannot be guessed. Full grace/reauth/OAuth/strategy/funds/native gates remain open."
     },
-    "next_action": "One genuine related batchcommit after finalguards/manifest/stagedblob+trackedartifactaudit; required4fdcommitted0 then normalpush from freshremote23a/exactGitPR/newheadCI+onewatch. Original53fixtureCIescapes+2protected cases/gates remain historicalFAILED; no waiver or native/unit acceptance.",
-    "head": "23a570cf3f4f6e67fee69a2f8d845c7a8f03d244",
-    "published_head": "23a570cf3f4f6e67fee69a2f8d845c7a8f03d244",
-    "last_verified_published_base": "23a570cf3f4f6e67fee69a2f8d845c7a8f03d244",
-    "current_packet": "APPROVAL_FIXTURE_CLOSURE_AND_STRATEGY_GAINS",
-    "active_packet": "Reviewed4importowners12qualifications249assertsexact;80PASSeachcwd160exec/82unique168probecomposite separate; approved2strategy docs preserve fullunits and unverified exits.",
-    "current_source_receipt": "receipts/APPROVAL_FIXTURE_CLOSURE_SOURCE_20261102.json",
-    "source_ci_receipt": "receipts/raw/approval-fixture-consumer-closure-20261102/CI_23A_COMPLETE_FAILURE_CLASSIFICATION.json",
-    "committed_ledger_verification": "Published23aGREEN234; current related source/docs/evidence batch required4fdverify pending"
+    "next_action": "Complete one genuine related source/resource-route batch; required4fd verify FINALHEAD; normalpush from freshremote56dec/exactGitPR105; exactnewheadCI+ONEownedwatch. Cleanupcandidate remainsisolated/unreviewed here; no gatewaiver.",
+    "head": "56dec626ffa0f6a9f52545e890344ebf0c737c24",
+    "published_head": "56dec626ffa0f6a9f52545e890344ebf0c737c24",
+    "last_verified_published_base": "56dec626ffa0f6a9f52545e890344ebf0c737c24",
+    "current_packet": "BE008_CONFIGURED_NATIVE_DEPTH_PRODUCER_SOURCE",
+    "active_packet": "Reviewed9byteexact;198distinctfunctionalPASS/resource-admissiondeviation explicit; independent8unique/10exec with firstcontrollererror preserved. Native/rawpartial/unqualified; no fullunit/native acceptance.",
+    "current_source_receipt": "receipts/NATIVE_DEPTH_PRODUCER_SOURCE_20261102.json",
+    "source_ci_receipt": "receipts/raw/native-depth-producer-source-20261102/CI_SUMMARY.json",
+    "committed_ledger_verification": "Published56decGREEN235. Currentrelatedcandidate requires genuinecommit+final4fdterminal0 thennormalpush/exactreadbacks/newheadCI.",
+    "published56_CI_terminal": {
+      "head": "56dec626ffa0f6a9f52545e890344ebf0c737c24",
+      "run_id": 41405437330,
+      "jobs": 41,
+      "success": 32,
+      "failure": 9,
+      "eight_gateway_shards": "sixSUCCESS+twoonlyprotectedentry67; previous53fixturedefectsabsent",
+      "watch73187": "terminal1/ownedwaitedONCE; no newwatch",
+      "gates_unwaived": true
+    }
   },
   "provenance_correction": {
     "finding": "90 forecast hashes previously reported unverifiable",
@@ -1917,8 +1949,8 @@
       "evidence": "ci/MUTATION_CORPUS_c2a27848.json"
     }
   ],
-  "current_action": "One genuine related batchcommit after finalguards/manifest/stagedblob+trackedartifactaudit; required4fdcommitted0 then normalpush from freshremote23a/exactGitPR/newheadCI+onewatch. Original53fixtureCIescapes+2protected cases/gates remain historicalFAILED; no waiver or native/unit acceptance.",
-  "updated_at_utc": "2026-11-02T06:43:22.886983+00:00",
+  "current_action": "Complete one genuine related source/resource-route batch; required4fd verify FINALHEAD; normalpush from freshremote56dec/exactGitPR105; exactnewheadCI+ONEownedwatch. Cleanupcandidate remainsisolated/unreviewed here; no gatewaiver.",
+  "updated_at_utc": "2026-11-02T08:36:53.468811+00:00",
   "execution_method": {
     "path": "BUILD_EXECUTION_PLAN.md",
     "scope_index": "SOURCE_WORKMAP.json",
@@ -2966,6 +2998,20 @@
       "no_scope_or_acceptance_change": true,
       "no_model_policy_history_rewrite": true,
       "no_native_authority_or_hook_change": true
+    },
+    "scratch_only_runtime_route_20261102": {
+      "prospective_only": true,
+      "workspace_inputs_readonly": true,
+      "all_test_temp_cache_output": "ownedSHM; PYTHONDONTWRITEBYTECODE=1; pytestcache disabled/routed; TMPDIR/XDG_CACHE_HOME scopedSHM",
+      "workspace_hardfloor_bytes": 33554432,
+      "workspace_growing_batch_admission_bytes": 67108864,
+      "SHM_reserve_bytes": 2147483648,
+      "SHM_admission": "free>=reserve+declaredcap",
+      "memory_headroom_bytes": 4294967296,
+      "shared_resource_flock": true,
+      "tmp_checkpoint_floor_bytes": 2147483648,
+      "author198_global64_deviation_retained": true,
+      "meaning": "Root operational resource amendment only; not canon/authority/native admission."
     }
   }
 }
